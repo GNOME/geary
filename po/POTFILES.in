@@ -31,6 +31,7 @@ src/client/components/status-bar.vala
 src/client/components/stock.vala
 src/client/composer/composer-container.vala
 src/client/composer/composer-embed.vala
+src/client/composer/composer-headerbar.vala
 src/client/composer/composer-widget.vala
 src/client/composer/composer-toolbar.vala
 src/client/composer/composer-window.vala

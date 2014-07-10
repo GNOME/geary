@@ -49,6 +49,10 @@ public class ComposerWidget : Gtk.EventBox {
     public const string ACTION_INSERT_LINK = "insertlink";
     public const string ACTION_COMPOSE_AS_HTML = "compose as html";
     public const string ACTION_CLOSE = "close";
+    public const string ACTION_DETACH = "detach";
+    public const string ACTION_SEND = "send";
+    public const string ACTION_ADD_ATTACHMENT = "add attachment";
+    public const string ACTION_ADD_ORIGINAL_ATTACHMENTS = "add original attachments";
     
     private const string DRAFT_SAVED_TEXT = _("Saved");
     private const string DRAFT_SAVING_TEXT = _("Saving");
@@ -154,6 +158,10 @@ public class ComposerWidget : Gtk.EventBox {
         }
     }
     
+    public ComposerHeaderbar header { get; private set; }
+    
+    public string draft_save_text { get; private set; }
+    
     private ContactListStore? contact_list_store = null;
     
     private string? body_html = null;
@@ -168,21 +176,13 @@ public class ComposerWidget : Gtk.EventBox {
     private EmailEntry cc_entry;
     private EmailEntry bcc_entry;
     public Gtk.Entry subject_entry;
-    private Gtk.Button close_button;
-    private Gtk.Button send_button;
-    private Gtk.Button detach_button;
     private Gtk.Label message_overlay_label;
     private WebKit.DOM.Element? prev_selected_link = null;
-    private Gtk.Separator attachments_separator;
     private Gtk.Box attachments_box;
-    private Gtk.Button add_attachment_button;
-    private Gtk.Button pending_attachments_button;
     private Gtk.Alignment hidden_on_attachment_drag_over;
     private Gtk.Alignment visible_on_attachment_drag_over;
     private Gtk.Widget hidden_on_attachment_drag_over_child;
     private Gtk.Widget visible_on_attachment_drag_over_child;
-    private Gtk.Label compact_header_label;
-    private Gtk.Label draft_save_label;
     
     private Gtk.Menu menu = new Gtk.Menu();
     private Gtk.RadioMenuItem font_small;
@@ -238,27 +238,7 @@ public class ComposerWidget : Gtk.EventBox {
         add_events(Gdk.EventMask.KEY_PRESS_MASK | Gdk.EventMask.KEY_RELEASE_MASK);
         builder = GearyApplication.instance.create_builder("composer.glade");
         
-        // Add the content-view style class for the elementary GTK theme.
-        Gtk.Box button_area = (Gtk.Box) builder.get_object("button_area");
-        button_area.get_style_context().add_class("content-view");
-        
         Gtk.Box box = builder.get_object("composer") as Gtk.Box;
-        close_button = builder.get_object("Close") as Gtk.Button;
-        close_button.clicked.connect(on_close);
-        send_button = builder.get_object("Send") as Gtk.Button;
-        send_button.clicked.connect(on_send);
-        detach_button = builder.get_object("Detach") as Gtk.Button;
-        detach_button.clicked.connect(on_detach);
-        bind_property("state", detach_button, "visible", BindingFlags.SYNC_CREATE,
-            (binding, source_value, ref target_value) => {
-                target_value = (state != ComposerState.DETACHED);
-                return true;
-            });
-        add_attachment_button  = builder.get_object("add_attachment_button") as Gtk.Button;
-        add_attachment_button.clicked.connect(on_add_attachment_button_clicked);
-        pending_attachments_button = builder.get_object("add_pending_attachments") as Gtk.Button;
-        pending_attachments_button.clicked.connect(on_pending_attachments_button_clicked);
-        attachments_separator = builder.get_object("separator") as Gtk.Separator;
         attachments_box = builder.get_object("attachments_box") as Gtk.Box;
         hidden_on_attachment_drag_over = (Gtk.Alignment) builder.get_object("hidden_on_attachment_drag_over");
         hidden_on_attachment_drag_over_child = (Gtk.Widget) builder.get_object("hidden_on_attachment_drag_over_child");
@@ -272,12 +252,6 @@ public class ComposerWidget : Gtk.EventBox {
                 target_value = (state != ComposerState.INLINE_COMPACT);
                 return true;
             });
-        Gtk.Widget compact_header = builder.get_object("compact_recipients") as Gtk.Widget;
-        bind_property("state", compact_header, "visible", BindingFlags.SYNC_CREATE,
-            (binding, source_value, ref target_value) => {
-                target_value = (state == ComposerState.INLINE_COMPACT);
-                return true;
-            });
         string[] subject_elements = {"subject label", "subject"};
         foreach (string name in subject_elements) {
             Gtk.Widget widget = builder.get_object(name) as Gtk.Widget;
@@ -288,9 +262,6 @@ public class ComposerWidget : Gtk.EventBox {
                 });
         }
         notify["state"].connect((s, p) => { update_from_field(); });
-        compact_header_label = builder.get_object("compact_recipients_label") as Gtk.Label;
-        Gtk.Button expand_button = builder.get_object("expand_button") as Gtk.Button;
-        expand_button.clicked.connect(() => { state = ComposerState.INLINE; });
         // Set the visibilities later, after show_all is called on the widget.
         Idle.add(() => {
             state = state;  // Triggers visibilities
@@ -320,11 +291,14 @@ public class ComposerWidget : Gtk.EventBox {
         set_entry_completions();
         subject_entry = builder.get_object("subject") as Gtk.Entry;
         Gtk.Alignment message_area = builder.get_object("message area") as Gtk.Alignment;
-        draft_save_label = (Gtk.Label) builder.get_object("draft_save_label");
-        draft_save_label.get_style_context().add_class("dim-label");
         actions = builder.get_object("compose actions") as Gtk.ActionGroup;
         // Can only happen after actions exits
         compose_as_html = GearyApplication.instance.config.compose_as_html;
+        
+        header = new ComposerHeaderbar(actions);
+        Gtk.Alignment header_area = (Gtk.Alignment) builder.get_object("header_area");
+        header_area.add(header);
+        bind_property("state", header, "state", BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
         
         // Listen to account signals to update from menu.
         Geary.Engine.instance.account_available.connect(update_from_field);
@@ -360,6 +334,7 @@ public class ComposerWidget : Gtk.EventBox {
         ComposerToolbar composer_toolbar = new ComposerToolbar(actions, menu);
         Gtk.Alignment toolbar_area = (Gtk.Alignment) builder.get_object("toolbar area");
         toolbar_area.add(composer_toolbar);
+        bind_property("draft-save-text", composer_toolbar, "draft-save-text", BindingFlags.SYNC_CREATE);
         
         actions.get_action(ACTION_UNDO).activate.connect(on_action);
         actions.get_action(ACTION_REDO).activate.connect(on_action);
@@ -390,6 +365,11 @@ public class ComposerWidget : Gtk.EventBox {
         actions.get_action(ACTION_INSERT_LINK).activate.connect(on_insert_link);
         
         actions.get_action(ACTION_CLOSE).activate.connect(on_close);
+        
+        actions.get_action(ACTION_DETACH).activate.connect(on_detach);
+        actions.get_action(ACTION_SEND).activate.connect(on_send);
+        actions.get_action(ACTION_ADD_ATTACHMENT).activate.connect(on_add_attachment_button_clicked);
+        actions.get_action(ACTION_ADD_ORIGINAL_ATTACHMENTS).activate.connect(on_pending_attachments_button_clicked);
         
         ui = new Gtk.UIManager();
         ui.insert_action_group(actions, 0);
@@ -530,8 +510,6 @@ public class ComposerWidget : Gtk.EventBox {
         
         add(box);
         validate_send_button();
-        
-        check_pending_attachments();
 
         // Place the message area before the compose toolbar in the focus chain, so that
         // the user can tab directly from the Subject: field to the message area.
@@ -540,7 +518,6 @@ public class ComposerWidget : Gtk.EventBox {
         chain.append(message_area);
         chain.append(composer_toolbar);
         chain.append(attachments_box);
-        chain.append(button_area);
         box.set_focus_chain(chain);
         
         // If there's only one account, open the drafts folder.  If there's more than one account,
@@ -1030,7 +1007,7 @@ public class ComposerWidget : Gtk.EventBox {
         
         cancel_draft_timer();
         
-        draft_save_label.label = DRAFT_SAVING_TEXT;
+        draft_save_text = DRAFT_SAVING_TEXT;
         
         Geary.EmailFlags flags = new Geary.EmailFlags();
         flags.add(Geary.EmailFlags.DRAFT);
@@ -1041,10 +1018,10 @@ public class ComposerWidget : Gtk.EventBox {
             draft_id = yield drafts_folder.create_email_async(new Geary.RFC822.Message.from_composed_email(
                 get_composed_email(null, true), null), flags, null, draft_id, cancellable);
             
-            draft_save_label.label = DRAFT_SAVED_TEXT;
+            draft_save_text = DRAFT_SAVED_TEXT;
         } catch (Error e) {
             GLib.message("Error saving draft: %s", e.message);
-            draft_save_label.label = DRAFT_ERROR_TEXT;
+            draft_save_text = DRAFT_ERROR_TEXT;
         }
     }
     
@@ -1111,12 +1088,12 @@ public class ComposerWidget : Gtk.EventBox {
         if (pending_attachments != null) {
             foreach (Geary.Attachment attachment in pending_attachments) {
                 if (!attachment_files.contains(attachment.file)) {
-                    pending_attachments_button.show();
+                    header.show_pending_attachments = true;
                     return;
                 }
             }
         }
-        pending_attachments_button.hide();
+        header.show_pending_attachments = false;
     }
     
     private void attachment_failed(string msg) {
@@ -1188,8 +1165,6 @@ public class ComposerWidget : Gtk.EventBox {
         
         show_attachments();
         
-        check_pending_attachments();
-        
         return true;
     }
     
@@ -1210,18 +1185,15 @@ public class ComposerWidget : Gtk.EventBox {
         }
         
         show_attachments();
-        
-        check_pending_attachments();
     }
     
     private void show_attachments() {
         if (attachment_files.size > 0 ) {
             attachments_box.show_all();
-            attachments_separator.show();
         } else {
             attachments_box.hide();
-            attachments_separator.hide();
         }
+        check_pending_attachments();
     }
     
     private void on_subject_changed() {
@@ -1229,13 +1201,13 @@ public class ComposerWidget : Gtk.EventBox {
     }
     
     private void validate_send_button() {
-        send_button.sensitive =
+        header.send_enabled =
             to_entry.valid_or_empty && cc_entry.valid_or_empty && bcc_entry.valid_or_empty
             && (!to_entry.empty || !cc_entry.empty || !bcc_entry.empty);
-        bool tocc = !to_entry.empty && !cc_entry.empty,
-            ccbcc = !(to_entry.empty && cc_entry.empty) && !bcc_entry.empty;
         if (state == ComposerState.INLINE_COMPACT) {
-            compact_header_label.label = to_entry.buffer.text + (tocc ? ", " : "")
+            bool tocc = !to_entry.empty && !cc_entry.empty,
+                ccbcc = !(to_entry.empty && cc_entry.empty) && !bcc_entry.empty;
+            string label = to_entry.buffer.text + (tocc ? ", " : "")
                 + cc_entry.buffer.text + (ccbcc ? ", " : "") + bcc_entry.buffer.text;
             StringBuilder tooltip = new StringBuilder();
             if (to_entry.addresses != null)
@@ -1247,7 +1219,7 @@ public class ComposerWidget : Gtk.EventBox {
             if (bcc_entry.addresses != null)
                 foreach(Geary.RFC822.MailboxAddress addr in bcc_entry.addresses)
                     tooltip.append(_("Bcc: ") + addr.get_full_address() + "\n");
-            compact_header_label.tooltip_text = tooltip.str.slice(0, -1);  // Remove trailing \n
+            header.set_recipients(label, tooltip.str.slice(0, -1));  // Remove trailing \n
         }
         
         reset_draft_timer();
@@ -1645,7 +1617,7 @@ public class ComposerWidget : Gtk.EventBox {
                 // always trap Ctrl+Enter/Ctrl+KeypadEnter to prevent the Enter leaking through
                 // to the controls, but only send if send is available
                 if ((event.state & Gdk.ModifierType.CONTROL_MASK) != 0) {
-                    if (send_button.sensitive)
+                    if (header.send_enabled)
                         on_send();
                     
                     return true;
@@ -1798,7 +1770,7 @@ public class ComposerWidget : Gtk.EventBox {
         if (!can_save())
             return;
         
-        draft_save_label.label = "";
+        draft_save_text = "";
         cancel_draft_timer();
         
         if (drafts_folder != null)
