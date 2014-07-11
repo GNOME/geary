@@ -18,8 +18,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-07-01 14:51+0200\n"
-"PO-Revision-Date: 2014-07-01 14:52+0200\n"
+"POT-Creation-Date: 2014-07-11 14:24+0200\n"
+"PO-Revision-Date: 2014-07-11 14:25+0200\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <gnomepl@aviary.pl>\n"
 "Language: pl\n"
@@ -818,13 +818,25 @@ msgstr "Do wiadomości już załączono \"%s\"."
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: ../src/client/composer/composer-widget.vala:1454
+#: ../src/client/composer/composer-widget.vala:1243
+msgid "To: "
+msgstr "Do: "
+
+#: ../src/client/composer/composer-widget.vala:1246
+msgid "Cc: "
+msgstr "Do wiadomości: "
+
+#: ../src/client/composer/composer-widget.vala:1249
+msgid "Bcc: "
+msgstr "Ukryty do wiadomości: "
+
+#: ../src/client/composer/composer-widget.vala:1466
 msgid "Select Color"
 msgstr "Wybór koloru"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: ../src/client/composer/composer-widget.vala:1900
+#: ../src/client/composer/composer-widget.vala:1912
 msgid "_From:"
 msgstr "_Od:"
 
@@ -832,7 +844,7 @@ msgstr "_Od:"
 #. Composer label (without mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
 #. Geary account mail will be sent from
-#: ../src/client/composer/composer-widget.vala:1916
+#: ../src/client/composer/composer-widget.vala:1928
 #: ../src/client/conversation-viewer/conversation-viewer.vala:635
 #: ../ui/composer.glade.h:42
 msgid "From:"
