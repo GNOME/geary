@@ -175,8 +175,7 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
     }
     
     // This is used to ensure that certain special folders get prioritized over others, so folders
-    // important to the user (i.e. Inbox) and folders handy for pulling all mail (i.e. All Mail) go
-    // first while less-used folders (Trash, Spam) are fetched last
+    // important to the user (i.e. Inbox) go first while less-used folders (Spam) are fetched last
     private static int bg_queue_comparator(MinimalFolder a, MinimalFolder b) {
         if (a == b)
             return 0;
@@ -190,9 +189,24 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
     }
     
     // Lower the score, the higher the importance.
+    //
+    // Some explanation is due here.  It may seem odd to place TRASH, SENT, and DRAFTS so high, but
+    // there's a method to the madness.  In particular, because Geary can produce a lot of drafts
+    // during composition, it's important to synchronize with Trash so discarded drafts don't wind
+    // up included in conversations until, eventually, the Trash is synchronized.  (Recall that
+    // Spam and Trash are blacklisted in conversations and searching.)  Since Drafts is open while
+    // writing them, it's not vital to keep it absolutely high, but Trash is usually not open,
+    // so it should be.
+    //
+    // All Mail is important, but synchronizing with it can be hard on the system because of the
+    // sheer amount of messages, and so it's placed lower to put it off until the more active
+    // folders are finished.
     private static int score_folder(Folder a) {
         switch (a.special_folder_type) {
             case SpecialFolderType.INBOX:
+                return -70;
+            
+            case SpecialFolderType.TRASH:
                 return -60;
             
             case SpecialFolderType.SENT:
@@ -201,21 +215,18 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
             case SpecialFolderType.DRAFTS:
                 return -40;
             
-            case SpecialFolderType.ALL_MAIL:
-            case SpecialFolderType.ARCHIVE:
+            case SpecialFolderType.FLAGGED:
                 return -30;
             
-            case SpecialFolderType.FLAGGED:
+            case SpecialFolderType.IMPORTANT:
                 return -20;
             
-            case SpecialFolderType.IMPORTANT:
+            case SpecialFolderType.ALL_MAIL:
+            case SpecialFolderType.ARCHIVE:
                 return -10;
             
             case SpecialFolderType.SPAM:
                 return 10;
-            
-            case SpecialFolderType.TRASH:
-                return 20;
             
             default:
                 return 0;
