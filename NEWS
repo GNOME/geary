@@ -1,3 +1,16 @@
+Geary 0.7.0 - 18 July 2014
+--------------------------
+
+  * Major overhaul of email composer, now inline in main window and redesigned
+  * Composer will automatically add signature to emails
+  * Saving drafts to server can be disabled
+  * Improved main window interface, now using GtkHeaderBar
+  * Database speed optimizations to reduce lags and improve read times
+  * Improved connection retry
+  * Various bug fixes
+  * Updated translations
+
+
 Geary 0.6.1 - 1 July 2014
 -------------------------
 

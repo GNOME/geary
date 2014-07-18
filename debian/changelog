@@ -1,5 +1,18 @@
 geary (0.6.1-1~saucy1) saucy; urgency=low
 
+  * Major overhaul of email composer, now inline in main window and redesigned
+  * Composer will automatically add signature to emails
+  * Saving drafts to server can be disabled
+  * Improved main window interface, now using GtkHeaderBar
+  * Database speed optimizations to reduce lags and improve read times
+  * Improved connection retry
+  * Various bug fixes
+  * Updated translations
+
+ -- Jim Nelson <jim@yorba.org>  Fri, 18 Jul 2014 14:03:07 -0700
+
+geary (0.6.1-1~saucy1) saucy; urgency=low
+
   * Copy and move message bug fixes (esp. to prevent lost emails)
   * Prevent STARTTLS BAD_IDENTITY when connecting to server
   * Prevent failure when deleting Outbox message
