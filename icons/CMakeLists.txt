@@ -3,6 +3,7 @@ set(ICONS_DEST share/geary/icons)
 set(ICON_FILES
     archive-symbolic.svg
     close-symbolic.svg
+    detach-symbolic.svg
     document-symbolic.svg
     edit-symbolic.svg
     format-text-remove-symbolic.svg

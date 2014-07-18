@@ -187,7 +187,7 @@
         <property name="label" translatable="yes">Detach</property>
         <property name="short_label" translatable="yes">Detach</property>
         <property name="tooltip" translatable="yes">Detach</property>
-        <property name="icon_name">window-maximize-symbolic</property>
+        <property name="icon_name">detach-symbolic</property>
       </object>
     </child>
     <child>
