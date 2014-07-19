@@ -80,6 +80,7 @@ public class MainWindow : Gtk.ApplicationWindow {
         set_titlebar(main_toolbar);
 #endif
         
+        set_styling();
         create_layout();
     }
     
@@ -129,6 +130,20 @@ public class MainWindow : Gtk.ApplicationWindow {
             window_maximized = maximized;
 
         return base.window_state_event(event);
+    }
+    
+    private void set_styling() {
+        Gtk.CssProvider provider = new Gtk.CssProvider();
+        Gtk.StyleContext.add_provider_for_screen(Gdk.Display.get_default().get_default_screen(),
+            provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+        try {
+            provider.load_from_data("""
+                GtkBox GtkHeaderBar {
+                    border-radius: 0px;
+                }""", -1);
+        } catch (Error error) {
+            debug("Could not load styling from data: %s", error.message);
+        }
     }
     
     private void create_layout() {
