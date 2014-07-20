@@ -18,8 +18,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-07-11 14:24+0200\n"
-"PO-Revision-Date: 2014-07-11 14:25+0200\n"
+"POT-Creation-Date: 2014-07-20 16:33+0200\n"
+"PO-Revision-Date: 2014-07-20 16:34+0200\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <gnomepl@aviary.pl>\n"
 "Language: pl\n"
@@ -738,105 +738,105 @@ msgstr "Zaznacz _wszystko"
 msgid "_Keep"
 msgstr "_Zachowaj"
 
-#: ../src/client/composer/composer-widget.vala:53
+#: ../src/client/composer/composer-widget.vala:57
 msgid "Saved"
 msgstr "Zapisano"
 
-#: ../src/client/composer/composer-widget.vala:54
+#: ../src/client/composer/composer-widget.vala:58
 msgid "Saving"
 msgstr "Zapisywanie"
 
-#: ../src/client/composer/composer-widget.vala:55
+#: ../src/client/composer/composer-widget.vala:59
 msgid "Error saving"
 msgstr "Błąd podczas zapisywania"
 
 #. / A list of keywords, separated by pipe ("|") characters, that suggest an attachment
-#: ../src/client/composer/composer-widget.vala:102
+#: ../src/client/composer/composer-widget.vala:106
 msgid "attach|enclosed|enclosing|cover letter"
 msgstr ""
 "attachment|attaching|attached|enclosed|załącznik|załączam|załączyłem|"
 "załączyłam|załączono|dołączyłem|dołączyłam|dołączono|zalacznik|zalaczam|"
 "zalaczylem|zalaczylam|zalaczono|dolaczylem|dolaczylam|dolaczono"
 
-#: ../src/client/composer/composer-widget.vala:846
+#: ../src/client/composer/composer-widget.vala:823
 msgid "Do you want to discard the unsaved message?"
 msgstr "Porzucić niezapisaną wiadomość?"
 
-#: ../src/client/composer/composer-widget.vala:849
-#: ../src/client/composer/composer-widget.vala:853
+#: ../src/client/composer/composer-widget.vala:826
+#: ../src/client/composer/composer-widget.vala:830
 msgid "Do you want to discard this message?"
 msgstr "Porzucić tą wiadomość?"
 
-#: ../src/client/composer/composer-widget.vala:934
+#: ../src/client/composer/composer-widget.vala:911
 msgid "Send message with an empty subject and body?"
 msgstr "Wysłać wiadomość niezawierającą tematu i treści?"
 
-#: ../src/client/composer/composer-widget.vala:936
+#: ../src/client/composer/composer-widget.vala:913
 msgid "Send message with an empty subject?"
 msgstr "Wysłać wiadomość niezawierającą tematu?"
 
-#: ../src/client/composer/composer-widget.vala:938
+#: ../src/client/composer/composer-widget.vala:915
 msgid "Send message with an empty body?"
 msgstr "Wysłać wiadomość niezawierającą treści?"
 
-#: ../src/client/composer/composer-widget.vala:940
+#: ../src/client/composer/composer-widget.vala:917
 msgid "Send message without an attachment?"
 msgstr "Wysłać wiadomość niezawierającą załączników?"
 
-#: ../src/client/composer/composer-widget.vala:1123
+#: ../src/client/composer/composer-widget.vala:1100
 msgid "Cannot add attachment"
 msgstr "Nie można dodać załącznika"
 
-#: ../src/client/composer/composer-widget.vala:1134
+#: ../src/client/composer/composer-widget.vala:1111
 #, c-format
 msgid "\"%s\" could not be found."
 msgstr "Nie można odnaleźć \"%s\"."
 
-#: ../src/client/composer/composer-widget.vala:1141
+#: ../src/client/composer/composer-widget.vala:1118
 #, c-format
 msgid "\"%s\" is a folder."
 msgstr "\"%s\" jest katalogiem."
 
-#: ../src/client/composer/composer-widget.vala:1148
+#: ../src/client/composer/composer-widget.vala:1125
 #, c-format
 msgid "\"%s\" is an empty file."
 msgstr "\"%s\" jest pustym plikiem."
 
-#: ../src/client/composer/composer-widget.vala:1162
+#: ../src/client/composer/composer-widget.vala:1139
 #, c-format
 msgid "\"%s\" could not be opened for reading."
 msgstr "Nie można otworzyć \"%s\" do odczytania."
 
-#: ../src/client/composer/composer-widget.vala:1169
+#: ../src/client/composer/composer-widget.vala:1146
 #, c-format
 msgid "\"%s\" already attached for delivery."
 msgstr "Do wiadomości już załączono \"%s\"."
 
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
-#: ../src/client/composer/composer-widget.vala:1178
+#: ../src/client/composer/composer-widget.vala:1155
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: ../src/client/composer/composer-widget.vala:1243
+#: ../src/client/composer/composer-widget.vala:1215
 msgid "To: "
 msgstr "Do: "
 
-#: ../src/client/composer/composer-widget.vala:1246
+#: ../src/client/composer/composer-widget.vala:1218
 msgid "Cc: "
 msgstr "Do wiadomości: "
 
-#: ../src/client/composer/composer-widget.vala:1249
+#: ../src/client/composer/composer-widget.vala:1221
 msgid "Bcc: "
 msgstr "Ukryty do wiadomości: "
 
-#: ../src/client/composer/composer-widget.vala:1466
+#: ../src/client/composer/composer-widget.vala:1438
 msgid "Select Color"
 msgstr "Wybór koloru"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: ../src/client/composer/composer-widget.vala:1912
+#: ../src/client/composer/composer-widget.vala:1884
 msgid "_From:"
 msgstr "_Od:"
 
@@ -844,9 +844,9 @@ msgstr "_Od:"
 #. Composer label (without mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
 #. Geary account mail will be sent from
-#: ../src/client/composer/composer-widget.vala:1928
+#: ../src/client/composer/composer-widget.vala:1900
 #: ../src/client/conversation-viewer/conversation-viewer.vala:635
-#: ../ui/composer.glade.h:42
+#: ../ui/composer.glade.h:48
 msgid "From:"
 msgstr "Od:"
 
@@ -1604,53 +1604,57 @@ msgid "Fixed Width"
 msgstr "Stała szerokość"
 
 #: ../ui/composer.glade.h:35
-msgid "Edit recipients"
-msgstr "Modyfikuj odbiorców"
-
-#. Address(es) e-mail is to be sent to
-#: ../ui/composer.glade.h:37
-msgid "_To:"
-msgstr "_Do:"
-
-#: ../ui/composer.glade.h:38
-msgid "_Cc:"
-msgstr "Do _wiadomości:"
-
-#: ../ui/composer.glade.h:39
-msgid "_Subject:"
-msgstr "_Temat:"
-
-#: ../ui/composer.glade.h:40
-msgid "_Bcc:"
-msgstr "_Ukryty do wiadomości:"
-
-#: ../ui/composer.glade.h:43
-msgid "Drop files here"
-msgstr "Tutaj można upuścić pliki,"
-
-#: ../ui/composer.glade.h:44
-msgid "To add them as attachments"
-msgstr "aby dodać je jako załączniki."
-
-#: ../ui/composer.glade.h:45
-msgid "_Attach File"
-msgstr "Z_ałącz plik"
-
-#: ../ui/composer.glade.h:46
-msgid "_Include Original Attachments"
-msgstr "Załącz _oryginalne załączniki"
-
-#: ../ui/composer.glade.h:47
-msgid "C_lose"
-msgstr "Za_mknij"
-
-#: ../ui/composer.glade.h:48
 msgid "Detach"
 msgstr "Odłącz"
 
-#: ../ui/composer.glade.h:49
+#: ../ui/composer.glade.h:36
 msgid "_Send"
 msgstr "_Wyślij"
+
+#: ../ui/composer.glade.h:37
+msgid "Send"
+msgstr "Wyślij"
+
+#: ../ui/composer.glade.h:38
+msgid "_Attach File"
+msgstr "Z_ałącz plik"
+
+#: ../ui/composer.glade.h:39
+msgid "Attach File"
+msgstr "Załącz plik"
+
+#: ../ui/composer.glade.h:40
+msgid "_Include Original Attachments"
+msgstr "Załącz _oryginalne załączniki"
+
+#: ../ui/composer.glade.h:41
+msgid "Include Original Attachments"
+msgstr "Załącz oryginalne załączniki"
+
+#. Address(es) e-mail is to be sent to
+#: ../ui/composer.glade.h:43
+msgid "_To:"
+msgstr "_Do:"
+
+#: ../ui/composer.glade.h:44
+msgid "_Cc:"
+msgstr "Do _wiadomości:"
+
+#: ../ui/composer.glade.h:45
+msgid "_Subject:"
+msgstr "_Temat:"
+
+#: ../ui/composer.glade.h:46
+msgid "_Bcc:"
+msgstr "_Ukryty do wiadomości:"
+
+#: ../ui/composer.glade.h:49
+msgid "Drop files here"
+msgstr "Tutaj można upuścić pliki,"
+
+#: ../ui/composer.glade.h:50
+msgid "To add them as attachments"
+msgstr "aby dodać je jako załączniki."
 
 #: ../ui/find_bar.glade.h:1
 msgid "Find:"
