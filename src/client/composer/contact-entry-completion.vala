@@ -24,8 +24,8 @@ public class ContactEntryCompletion : Gtk.EntryCompletion {
     }
     
     private bool on_match_selected(Gtk.EntryCompletion sender, Gtk.TreeModel model, Gtk.TreeIter iter) {
-        string full_address = list_store.get_full_address(iter);
-            
+        string full_address = list_store.get_rfc822_string(iter);
+        
         Gtk.Entry? entry = sender.get_entry() as Gtk.Entry;
         if (entry == null)
             return false;

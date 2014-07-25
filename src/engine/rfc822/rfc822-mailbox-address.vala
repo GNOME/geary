@@ -67,7 +67,9 @@ public class Geary.RFC822.MailboxAddress : Geary.MessageData.SearchableMessageDa
 
     /**
      * Returns a human-readable formatted address, showing the name (if available) and the email 
-     * address in angled brackets.
+     * address in angled brackets.  No RFC822 quoting is performed.
+     *
+     * @see to_rfc822_string
      */
     public string get_full_address() {
         return String.is_empty(name) ? address : "%s <%s>".printf(name, address);
@@ -120,6 +122,12 @@ public class Geary.RFC822.MailboxAddress : Geary.MessageData.SearchableMessageDa
         return address.normalize().casefold();
     }
     
+    /**
+     * Returns the address suitable for insertion into an RFC822 message.  RFC822 quoting is
+     * performed if required.
+     *
+     * @see get_full_address
+     */
     public string to_rfc822_string() {
         return String.is_empty(name)
             ? address

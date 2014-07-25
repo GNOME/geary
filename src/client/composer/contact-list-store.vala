@@ -52,8 +52,8 @@ public class ContactListStore : Gtk.ListStore {
         return (Geary.Contact) contact_value.get_object();
     }
     
-    public string get_full_address(Gtk.TreeIter iter) {
-        return get_contact(iter).get_rfc822_address().get_full_address();
+    public string get_rfc822_string(Gtk.TreeIter iter) {
+        return get_contact(iter).get_rfc822_address().to_rfc822_string();
     }
     
     // Highlighted result should be Markup.escaped for presentation to the user
@@ -78,7 +78,7 @@ public class ContactListStore : Gtk.ListStore {
         if (contact.highest_importance < CONTACT_VISIBILITY_THRESHOLD)
             return;
         
-        string full_address = contact.get_rfc822_address().get_full_address();
+        string full_address = contact.get_rfc822_address().to_rfc822_string();
         Gtk.TreeIter iter;
         append(out iter);
         set(iter,
