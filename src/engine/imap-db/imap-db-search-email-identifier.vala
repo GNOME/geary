@@ -53,11 +53,18 @@ private class Geary.ImapDB.SearchEmailIdentifier : ImapDB.EmailIdentifier,
     }
     
     public virtual int compare_to(SearchEmailIdentifier other) {
-        if (date_received != null && other.date_received != null)
-            return date_received.compare(other.date_received);
+        // if both have date received, compare on that, using stable sort if the same
+        if (date_received != null && other.date_received != null) {
+            int compare = date_received.compare(other.date_received);
+            
+            return (compare != 0) ? compare : stable_sort_comparator(other);
+        }
+        
+        // if neither have date received, fall back on stable sort
         if (date_received == null && other.date_received == null)
             return stable_sort_comparator(other);
         
+        // put identifiers with no date ahead of those with
         return (date_received == null ? -1 : 1);
     }
     
