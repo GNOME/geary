@@ -1011,6 +1011,11 @@ public class Geary.Imap.ClientSession : BaseObject {
             
             case Status.BYE:
                 debug("[%s] Received BYE from server: %s", to_string(), status_response.to_string());
+                
+                // nothing more we can do; drop connection and report disconnect to user
+                cx.disconnect_async.begin(null, on_bye_disconnect_completed);
+                
+                state = State.DISCONNECTING;
             break;
             
             default:
@@ -1019,6 +1024,10 @@ public class Geary.Imap.ClientSession : BaseObject {
         }
         
         return state;
+    }
+    
+    private void on_bye_disconnect_completed(Object? source, AsyncResult result) {
+        dispatch_send_recv_results(DisconnectReason.REMOTE_CLOSE, result);
     }
     
     //
