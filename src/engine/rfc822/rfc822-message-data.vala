@@ -45,29 +45,31 @@ public class Geary.RFC822.MessageIDList : Geary.MessageData.AbstractMessageData,
     public MessageIDList.from_rfc822_string(string value) {
         this ();
         
-        // Have seen some mailers use commas between Message-IDs, meaning that the standard
-        // whitespace tokenizer is not sufficient; however, can't add the comma (or every other
-        // delimiter that mailers dream up) because it may be used within a Message-ID.  The
-        // only guarantee made of a Message-ID is that it's surrounded by angle brackets, so
-        // mark anything not an angle bracket as a space and strip
+        // Have seen some mailers use commas between Message-IDs and whitespace inside Message-IDs,
+        // meaning that the standard whitespace tokenizer is not sufficient.  The only guarantee
+        // made of a Message-ID is that it's surrounded by angle brackets, so save anything inside
+        // angle brackets
         //
         // NOTE: Seen at least one spamfilter mailer that imaginatively uses parens instead of
-        // angle brackets for its Message-IDs; accounting for that as well here.
+        // angle brackets for its Message-IDs; accounting for that as well here.  The addt'l logic
+        // is to allow open-parens inside a Message-ID and not treat it as a delimiter; if a
+        // close-parens is found, that's a problem (but isn't expected)
         StringBuilder canonicalized = new StringBuilder();
         int index = 0;
         unichar ch;
         bool in_message_id = false;
         while (value.get_next_char(ref index, out ch)) {
+            bool add_char = false;
             switch (ch) {
                 case '<':
                     in_message_id = true;
                 break;
                 
                 case '(':
-                    if (!in_message_id) {
-                        ch = '<';
+                    if (!in_message_id)
                         in_message_id = true;
-                    }
+                    else
+                        add_char = true;
                 break;
                 
                 case '>':
@@ -75,50 +77,26 @@ public class Geary.RFC822.MessageIDList : Geary.MessageData.AbstractMessageData,
                 break;
                 
                 case ')':
-                    if (in_message_id) {
-                        ch = '>';
+                    if (in_message_id)
                         in_message_id = false;
-                    }
+                    else
+                        add_char = true;
                 break;
                 
-                // anything not inside the message-id brackets is turned into spaces
                 default:
-                    if (!in_message_id)
-                        ch = ' ';
+                    // only add characters inside the brackets
+                    add_char = in_message_id;
                 break;
             }
             
-            canonicalized.append_unichar(ch);
-        }
-        
-        if (value != canonicalized.str)
-            debug("Message-ID list corrected: \"%s\" -> \"%s\"", value, canonicalized.str);
-        
-        // there's some additional paranoia here with getting the Message-ID sliced out of the
-        // strings, but it's worth it to get a valid Message-ID or none at all vs. a bogus one
-        string[] ids = canonicalized.str.split(" ");
-        foreach (string id in ids) {
-            if (String.is_empty(id))
-                continue;
+            if (add_char)
+                canonicalized.append_unichar(ch);
             
-            int start = id.index_of_char('<');
-            int end = id.last_index_of_char('>');
-            
-            // if either end not found or the end comes before the beginning, invalid Message-ID
-            if (start < 0 || end < 0 || (start >= end)) {
-                debug("Invalid Message-ID found: \"%s\"", id);
+            if (!in_message_id && !String.is_empty(canonicalized.str)) {
+                list.add(new MessageID(canonicalized.str));
                 
-                continue;
+                canonicalized = new StringBuilder();
             }
-            
-            // take out the valid slice of the string
-            string valid = id.slice(start, end + 1);
-            assert(!String.is_empty(valid));
-            
-            if (id != valid)
-                debug("Corrected Message-ID: \"%s\" -> \"%s\"", id, valid);
-            
-            list.add(new MessageID(valid));
         }
     }
     
