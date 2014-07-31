@@ -173,7 +173,7 @@ namespace GMime {
 		[CCode (cname = "g_mime_content_type_set_params")]
 		public void set_params (GMime.Param @params);
 		[CCode (cname = "g_mime_content_type_to_string")]
-		public unowned string to_string ();
+		public string to_string ();
 	}
 	[CCode (cheader_filename = "gmime/gmime.h")]
 	public class CryptoContext : GLib.Object {
@@ -546,7 +546,7 @@ namespace GMime {
 		[CCode (cname = "g_mime_message_get_date")]
 		public void get_date (out ulong date, out int tz_offset);
 		[CCode (cname = "g_mime_message_get_date_as_string")]
-		public unowned string get_date_as_string ();
+		public string get_date_as_string ();
 		[CCode (cname = "g_mime_message_get_message_id")]
 		public unowned string get_message_id ();
 		[CCode (cname = "g_mime_message_get_mime_part")]
@@ -639,9 +639,9 @@ namespace GMime {
 		[CCode (cname = "g_mime_multipart_remove")]
 		public virtual bool remove (GMime.Object part);
 		[CCode (cname = "g_mime_multipart_remove_at")]
-		public virtual unowned GMime.Object remove_at (int index);
+		public virtual GMime.Object remove_at (int index);
 		[CCode (cname = "g_mime_multipart_replace")]
-		public unowned GMime.Object replace (int index, GMime.Object replacement);
+		public GMime.Object replace (int index, GMime.Object replacement);
 		[CCode (cname = "g_mime_multipart_set_boundary")]
 		public virtual void set_boundary (string boundary);
 		[CCode (cname = "g_mime_multipart_set_postface")]
@@ -698,7 +698,7 @@ namespace GMime {
 		[CCode (cname = "g_mime_object_get_header_list")]
 		public unowned GMime.HeaderList get_header_list ();
 		[CCode (cname = "g_mime_object_get_headers")]
-		public virtual unowned string get_headers ();
+		public virtual string get_headers ();
 		[CCode (cname = "g_mime_object_prepend_header")]
 		public virtual void prepend_header (string header, string value);
 		[CCode (cname = "g_mime_object_register_type")]
@@ -758,9 +758,9 @@ namespace GMime {
 		[CCode (cname = "g_mime_parser_new", has_construct_function = false)]
 		public Parser ();
 		[CCode (cname = "g_mime_parser_construct_message")]
-		public unowned GMime.Message? construct_message ();
+		public GMime.Message? construct_message ();
 		[CCode (cname = "g_mime_parser_construct_part")]
-		public unowned GMime.Object construct_part ();
+		public GMime.Object? construct_part ();
 		[CCode (cname = "g_mime_parser_eos")]
 		public bool eos ();
 		[CCode (cname = "g_mime_parser_get_from")]
@@ -1016,6 +1016,8 @@ namespace GMime {
 		public bool owner;
 		[CCode (cname = "g_mime_stream_file_new", has_construct_function = false, type = "GMimeStream*")]
 		public StreamFile (GLib.FileStream fp);
+		[CCode (cname = "g_mime_stream_file_new_for_path", has_construct_function = false, type = "GMimeStream*")]
+		public StreamFile.for_path (string path, string mode);
 		[CCode (cname = "g_mime_stream_file_get_owner")]
 		public bool get_owner ();
 		[CCode (cname = "g_mime_stream_file_set_owner")]
@@ -1040,6 +1042,8 @@ namespace GMime {
 		public bool owner;
 		[CCode (cname = "g_mime_stream_fs_new", has_construct_function = false, type = "GMimeStream*")]
 		public StreamFs (int fd);
+		[CCode (cname = "g_mime_stream_fs_new_for_path", has_construct_function = false, type = "GMimeStream*")]
+		public StreamFs.for_path (string path, int flags, int mode);
 		[CCode (cname = "g_mime_stream_fs_get_owner")]
 		public bool get_owner ();
 		[CCode (cname = "g_mime_stream_fs_set_owner")]
