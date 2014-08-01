@@ -730,7 +730,7 @@ public class ConversationViewer : Gtk.Box {
     }
     
     private static string? inline_image_replacer(string filename, Geary.Mime.ContentType? content_type,
-        Geary.Mime.ContentDisposition? disposition, Geary.Memory.Buffer buffer) {
+        Geary.Mime.ContentDisposition? disposition, string? content_id, Geary.Memory.Buffer buffer) {
         if (content_type == null || !is_content_type_supported_inline(content_type)) {
             debug("Not displaying %s inline: unsupported Content-Type", content_type.to_string());
             
@@ -772,9 +772,10 @@ public class ConversationViewer : Gtk.Box {
             debug("Unable to load and rotate image %s for display: %s", filename, err.message);
         }
         
-        return "<img alt=\"%s\" class=\"%s %s\" src=\"%s\" />".printf(
+        return "<img alt=\"%s\" class=\"%s %s\" src=\"%s\" %s />".printf(
             filename, DATA_IMAGE_CLASS, REPLACED_IMAGE_CLASS,
-            assemble_data_uri(content_type.get_mime_type(), rotated_image));
+            assemble_data_uri(content_type.get_mime_type(), rotated_image),
+            content_id != null ? @"cid=\"$content_id\"" : "");
     }
     
     // Called by Gdk.PixbufLoader when the image's size has been determined but not loaded yet ...
@@ -1736,6 +1737,16 @@ public class ConversationViewer : Gtk.Box {
                     inlined_content_ids.add(mime_id);
                 } else if (!src.has_prefix("data:")) {
                     remote_images = true;
+                }
+            }
+            
+            // Remove any inline images that were referenced through Content-ID
+            foreach (string cid in inlined_content_ids) {
+                try {
+                    WebKit.DOM.Element img = container.query_selector(@"[cid='$cid']");
+                    img.parent_element.remove_child(img);
+                } catch (Error error) {
+                    // expected if no such element
                 }
             }
 

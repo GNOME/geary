@@ -10,7 +10,7 @@ public class Geary.RFC822.Message : BaseObject {
      * to process arbitrary non-text, inline MIME parts.
      */
     public delegate string? InlinePartReplacer(string filename, Mime.ContentType? content_type,
-        Mime.ContentDisposition? disposition, Geary.Memory.Buffer buffer);
+        Mime.ContentDisposition? disposition, string? content_id, Geary.Memory.Buffer buffer);
     
     private const string DEFAULT_ENCODING = "UTF8";
     
@@ -512,7 +512,7 @@ public class Geary.RFC822.Message : BaseObject {
         
         // Hand off to the replacer for processing
         string? replaced_part = replacer(RFC822.Utils.get_clean_attachment_filename(part), content_type,
-            disposition, mime_part_to_memory_buffer(part));
+            disposition, part.get_content_id(), mime_part_to_memory_buffer(part));
         if (replaced_part != null)
             body = replaced_part;
         
