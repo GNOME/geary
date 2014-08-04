@@ -772,10 +772,12 @@ public class ConversationViewer : Gtk.Box {
             debug("Unable to load and rotate image %s for display: %s", filename, err.message);
         }
         
+        string? escaped_content_id = (content_id != null) ? Geary.HTML.escape_markup(content_id) : null;
+        
         return "<img alt=\"%s\" class=\"%s %s\" src=\"%s\" %s />".printf(
             filename, DATA_IMAGE_CLASS, REPLACED_IMAGE_CLASS,
             assemble_data_uri(content_type.get_mime_type(), rotated_image),
-            content_id != null ? @"cid=\"$content_id\"" : "");
+            escaped_content_id != null ? @"cid=\"$escaped_content_id\"" : "");
     }
     
     // Called by Gdk.PixbufLoader when the image's size has been determined but not loaded yet ...
@@ -1743,8 +1745,9 @@ public class ConversationViewer : Gtk.Box {
             // Remove any inline images that were referenced through Content-ID
             foreach (string cid in inlined_content_ids) {
                 try {
-                    WebKit.DOM.Element img = container.query_selector(@"[cid='$cid']");
-                    img.parent_element.remove_child(img);
+                    WebKit.DOM.Element? img = container.query_selector(@"[cid='$cid']");
+                    if (img != null)
+                        img.parent_element.remove_child(img);
                 } catch (Error error) {
                     // expected if no such element
                 }
