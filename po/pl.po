@@ -18,8 +18,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-07-20 16:33+0200\n"
-"PO-Revision-Date: 2014-07-20 16:34+0200\n"
+"POT-Creation-Date: 2014-08-05 21:47+0200\n"
+"PO-Revision-Date: 2014-08-05 21:48+0200\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <gnomepl@aviary.pl>\n"
 "Language: pl\n"
@@ -688,7 +688,7 @@ msgstr "Indeksowanie konta %s"
 msgid "Search %s account"
 msgstr "Przeszukiwanie konta %s"
 
-#: ../src/client/components/main-window.vala:305
+#: ../src/client/components/main-window.vala:320
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -843,10 +843,8 @@ msgstr "_Od:"
 #. For other types of messages, just show the from account.
 #. Composer label (without mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#. Geary account mail will be sent from
 #: ../src/client/composer/composer-widget.vala:1900
 #: ../src/client/conversation-viewer/conversation-viewer.vala:635
-#: ../ui/composer.glade.h:48
 msgid "From:"
 msgstr "Od:"
 
@@ -1633,20 +1631,25 @@ msgstr "Załącz oryginalne załączniki"
 
 #. Address(es) e-mail is to be sent to
 #: ../ui/composer.glade.h:43
-msgid "_To:"
-msgstr "_Do:"
+msgid "_To"
+msgstr "_Do"
 
 #: ../ui/composer.glade.h:44
-msgid "_Cc:"
-msgstr "Do _wiadomości:"
+msgid "_Cc"
+msgstr "Do _wiadomości"
 
 #: ../ui/composer.glade.h:45
-msgid "_Subject:"
-msgstr "_Temat:"
+msgid "_Subject"
+msgstr "_Temat"
 
 #: ../ui/composer.glade.h:46
-msgid "_Bcc:"
-msgstr "_Ukryty do wiadomości:"
+msgid "_Bcc"
+msgstr "_Ukryty do wiadomości"
+
+#. Geary account mail will be sent from
+#: ../ui/composer.glade.h:48
+msgid "From"
+msgstr "Od"
 
 #: ../ui/composer.glade.h:49
 msgid "Drop files here"
