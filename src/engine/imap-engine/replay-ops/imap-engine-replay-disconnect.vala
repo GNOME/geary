@@ -34,8 +34,11 @@ private class Geary.ImapEngine.ReplayDisconnect : Geary.ImapEngine.ReplayOperati
         // that means a ReplayOperation is scheduling a ReplayOperation, which isn't something
         // we want to encourage, so use the Idle queue to schedule close_internal_async
         Idle.add(() => {
+            // ReplayDisconnect is only used when remote disconnects, so never flush pending, the
+            // connection is down or going down, but always force reestablish connection, since
+            // it wasn't our idea
             owner.close_internal_async.begin(Geary.Folder.CloseReason.LOCAL_CLOSE, remote_reason,
-                false, null);
+                true, false, null);
             
             return false;
         });

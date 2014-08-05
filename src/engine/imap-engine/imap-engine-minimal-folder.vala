@@ -590,7 +590,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.AbstractFolder, Geary.Folde
                 
                 // schedule immediate close
                 close_internal_async.begin(CloseReason.LOCAL_CLOSE, CloseReason.REMOTE_CLOSE, false,
-                    cancellable);
+                    false, cancellable);
                 
                 return;
             }
@@ -648,7 +648,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.AbstractFolder, Geary.Folde
             
             // schedule immediate close and force reestablishment
             close_internal_async.begin(CloseReason.LOCAL_CLOSE, remote_reason, force_reestablishment,
-                null);
+                false, null);
             
             return;
         }
@@ -685,7 +685,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.AbstractFolder, Geary.Folde
             
             // schedule immediate close
             close_internal_async.begin(CloseReason.LOCAL_CLOSE, CloseReason.REMOTE_CLOSE, false,
-                cancellable);
+                false, cancellable);
             
             return;
         }
@@ -705,18 +705,19 @@ private class Geary.ImapEngine.MinimalFolder : Geary.AbstractFolder, Geary.Folde
         if (remote_folder != null)
             _properties.remove(remote_folder.properties);
         
-        yield close_internal_async(CloseReason.LOCAL_CLOSE, CloseReason.REMOTE_CLOSE, false,
+        yield close_internal_async(CloseReason.LOCAL_CLOSE, CloseReason.REMOTE_CLOSE, false, true,
             cancellable);
     }
     
     // NOTE: This bypasses open_count and forces the Folder closed.
     internal async void close_internal_async(Folder.CloseReason local_reason, Folder.CloseReason remote_reason,
-        bool force_reestablish, Cancellable? cancellable) {
+        bool force_reestablish, bool flush_pending, Cancellable? cancellable) {
         cancel_remote_open_timer();
         
         // only flushing pending ReplayOperations if this is a "clean" close, not forced due to
-        // error
-        bool flush_pending = !remote_reason.is_error();
+        // error and if specified by caller (could be a non-error close on the server, i.e. "BYE",
+        // but the connection is dropping, so don't flush pending)
+        flush_pending = flush_pending && !remote_reason.is_error();
         
         // If closing due to error, notify all operations waiting for the remote that it's not
         // coming available ... this wakes up any ReplayOperation blocking on wait_for_open_async(),
