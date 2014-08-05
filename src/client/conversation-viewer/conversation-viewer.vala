@@ -1745,11 +1745,12 @@ public class ConversationViewer : Gtk.Box {
             // Remove any inline images that were referenced through Content-ID
             foreach (string cid in inlined_content_ids) {
                 try {
-                    WebKit.DOM.Element? img = container.query_selector(@"[cid='$cid']");
+                    string escaped_cid = Geary.HTML.escape_markup(cid);
+                    WebKit.DOM.Element? img = container.query_selector(@"[cid='$escaped_cid']");
                     if (img != null)
                         img.parent_element.remove_child(img);
                 } catch (Error error) {
-                    // expected if no such element
+                    debug("Error removing inlined image: %s", error.message);
                 }
             }
 
