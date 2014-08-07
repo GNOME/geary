@@ -42,6 +42,10 @@ public class Geary.Imap.ClientSession : BaseObject {
         public bool is_error() {
             return (this == LOCAL_ERROR) || (this == REMOTE_ERROR);
         }
+        
+        public bool is_remote() {
+            return (this == REMOTE_CLOSE) || (this == REMOTE_ERROR);
+        }
     }
     
     // Many of the async commands go through the FSM, and this is used to pass state in and out of
@@ -102,7 +106,6 @@ public class Geary.Imap.ClientSession : BaseObject {
         SELECTING,
         CLOSING_MAILBOX,
         LOGGING_OUT,
-        DISCONNECTING,
         
         // terminal state
         BROKEN,
@@ -337,7 +340,7 @@ public class Geary.Imap.ClientSession : BaseObject {
             new Geary.State.Mapping(State.LOGGING_OUT, Event.DISCONNECT, on_disconnect),
             new Geary.State.Mapping(State.LOGGING_OUT, Event.RECV_STATUS, on_dropped_response),
             new Geary.State.Mapping(State.LOGGING_OUT, Event.RECV_COMPLETION, on_logging_out_recv_completion),
-            new Geary.State.Mapping(State.LOGGING_OUT, Event.RECV_ERROR, on_disconnected),
+            new Geary.State.Mapping(State.LOGGING_OUT, Event.RECV_ERROR, on_recv_error),
             new Geary.State.Mapping(State.LOGGING_OUT, Event.SEND_ERROR, on_send_error),
             
             new Geary.State.Mapping(State.LOGGED_OUT, Event.CONNECT, on_already_connected),
@@ -349,21 +352,8 @@ public class Geary.Imap.ClientSession : BaseObject {
             new Geary.State.Mapping(State.LOGGED_OUT, Event.DISCONNECT, on_disconnect),
             new Geary.State.Mapping(State.LOGGED_OUT, Event.RECV_STATUS, on_dropped_response),
             new Geary.State.Mapping(State.LOGGED_OUT, Event.RECV_COMPLETION, on_dropped_response),
-            new Geary.State.Mapping(State.LOGGED_OUT, Event.RECV_ERROR, on_disconnected),
+            new Geary.State.Mapping(State.LOGGED_OUT, Event.RECV_ERROR, on_recv_error),
             new Geary.State.Mapping(State.LOGGED_OUT, Event.SEND_ERROR, on_send_error),
-            
-            new Geary.State.Mapping(State.DISCONNECTING, Event.CONNECT, on_late_command),
-            new Geary.State.Mapping(State.DISCONNECTING, Event.LOGIN, on_late_command),
-            new Geary.State.Mapping(State.DISCONNECTING, Event.SEND_CMD, on_late_command),
-            new Geary.State.Mapping(State.DISCONNECTING, Event.SELECT, on_late_command),
-            new Geary.State.Mapping(State.DISCONNECTING, Event.CLOSE_MAILBOX, on_late_command),
-            new Geary.State.Mapping(State.DISCONNECTING, Event.LOGOUT, on_late_command),
-            new Geary.State.Mapping(State.DISCONNECTING, Event.DISCONNECT, Geary.State.nop),
-            new Geary.State.Mapping(State.DISCONNECTING, Event.DISCONNECTED, on_disconnected),
-            new Geary.State.Mapping(State.DISCONNECTING, Event.RECV_STATUS, on_dropped_response),
-            new Geary.State.Mapping(State.DISCONNECTING, Event.RECV_COMPLETION, on_dropped_response),
-            new Geary.State.Mapping(State.DISCONNECTING, Event.SEND_ERROR, on_disconnected),
-            new Geary.State.Mapping(State.DISCONNECTING, Event.RECV_ERROR, on_disconnected),
             
             new Geary.State.Mapping(State.BROKEN, Event.CONNECT, on_late_command),
             new Geary.State.Mapping(State.BROKEN, Event.LOGIN, on_late_command),
@@ -374,7 +364,9 @@ public class Geary.Imap.ClientSession : BaseObject {
             new Geary.State.Mapping(State.BROKEN, Event.DISCONNECT, Geary.State.nop),
             new Geary.State.Mapping(State.BROKEN, Event.DISCONNECTED, Geary.State.nop),
             new Geary.State.Mapping(State.BROKEN, Event.RECV_STATUS, on_dropped_response),
-            new Geary.State.Mapping(State.BROKEN, Event.RECV_COMPLETION, on_dropped_response)
+            new Geary.State.Mapping(State.BROKEN, Event.RECV_COMPLETION, on_dropped_response),
+            new Geary.State.Mapping(State.BROKEN, Event.SEND_ERROR, Geary.State.nop),
+            new Geary.State.Mapping(State.BROKEN, Event.RECV_ERROR, Geary.State.nop),
         };
         
         fsm = new Geary.State.Machine(machine_desc, mappings, on_ignored_transition);
@@ -410,7 +402,6 @@ public class Geary.Imap.ClientSession : BaseObject {
             case State.UNCONNECTED:
             case State.LOGGED_OUT:
             case State.LOGGING_OUT:
-            case State.DISCONNECTING:
             case State.BROKEN:
                 return Context.UNCONNECTED;
             
@@ -1011,6 +1002,11 @@ public class Geary.Imap.ClientSession : BaseObject {
             
             case Status.BYE:
                 debug("[%s] Received BYE from server: %s", to_string(), status_response.to_string());
+                
+                // nothing more we can do; drop connection and report disconnect to user
+                cx.disconnect_async.begin(null, on_bye_disconnect_completed);
+                
+                state = State.BROKEN;
             break;
             
             default:
@@ -1019,6 +1015,10 @@ public class Geary.Imap.ClientSession : BaseObject {
         }
         
         return state;
+    }
+    
+    private void on_bye_disconnect_completed(Object? source, AsyncResult result) {
+        dispatch_disconnect_results(DisconnectReason.REMOTE_CLOSE, result);
     }
     
     //
@@ -1229,30 +1229,27 @@ public class Geary.Imap.ClientSession : BaseObject {
         if (params.err != null)
             throw params.err;
         
-        if (params.proceed)
+        if (!params.proceed)
+            return;
+        
+        Error? disconnect_err = null;
+        try {
             yield cx.disconnect_async(cancellable);
+        } catch (Error err) {
+            disconnect_err = err;
+        }
+        
+        drop_connection();
+        disconnected(DisconnectReason.LOCAL_CLOSE);
+        
+        if (disconnect_err != null)
+            throw disconnect_err;
     }
     
     private uint on_disconnect(uint state, uint event, void *user, Object? object) {
         MachineParams params = (MachineParams) object;
         
         params.proceed = true;
-        
-        return State.DISCONNECTING;
-    }
-    
-    private uint on_disconnected(uint state, uint event) {
-        // don't do inside signal handler -- although today drop_connection() doesn't fire signals or call
-        // callbacks, it could in the future
-        fsm.do_post_transition(() => {
-            drop_connection();
-            disconnected(DisconnectReason.LOCAL_CLOSE);
-        });
-        
-        // although we could go to the UNCONNECTED state, that implies the object can be reused ...
-        // while possible, that requires all state (not just the FSM) be reset at this point, and
-        // it just seems simpler and less buggy to require the user to discard this object and
-        // instantiate a new one
         
         return State.BROKEN;
     }
@@ -1288,7 +1285,7 @@ public class Geary.Imap.ClientSession : BaseObject {
     }
     
     private void on_fire_send_error_signal(Object? object, AsyncResult result) {
-        dispatch_send_recv_results(DisconnectReason.LOCAL_ERROR, result);
+        dispatch_disconnect_results(DisconnectReason.LOCAL_ERROR, result);
     }
     
     private uint on_recv_error(uint state, uint event, void *user, Object? object, Error? err) {
@@ -1301,10 +1298,10 @@ public class Geary.Imap.ClientSession : BaseObject {
     }
     
     private void on_fire_recv_error_signal(Object? object, AsyncResult result) {
-        dispatch_send_recv_results(DisconnectReason.REMOTE_ERROR, result);
+        dispatch_disconnect_results(DisconnectReason.REMOTE_ERROR, result);
     }
     
-    private void dispatch_send_recv_results(DisconnectReason reason, AsyncResult result) {
+    private void dispatch_disconnect_results(DisconnectReason reason, AsyncResult result) {
         debug("[%s] Disconnected due to %s", to_string(), reason.to_string());
         
         try {
