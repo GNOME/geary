@@ -105,6 +105,10 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
             case 19:
                 post_upgrade_validate_contacts();
             break;
+            
+            case 22:
+                post_rebuild_attachments();
+            break;
         }
     }
     
@@ -399,6 +403,71 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
             });
         } catch (Error e) {
             debug("Error fixing up contacts table: %s", e.message);
+        }
+    }
+    
+    // Version 22
+    private void post_rebuild_attachments() {
+        try {
+            exec_transaction(Db.TransactionType.RW, (cx) => {
+                Db.Statement stmt = cx.prepare("""
+                    SELECT id, header, body
+                    FROM MessageTable
+                    WHERE (fields & ?) = ?
+                    """);
+                stmt.bind_int(0, Geary.Email.REQUIRED_FOR_MESSAGE);
+                stmt.bind_int(1, Geary.Email.REQUIRED_FOR_MESSAGE);
+                
+                Db.Result results = stmt.exec();
+                if (results.finished)
+                    return Db.TransactionOutcome.ROLLBACK;
+                
+                do {
+                    int64 message_id = results.rowid_at(0);
+                    Geary.Memory.Buffer header = results.string_buffer_at(1);
+                    Geary.Memory.Buffer body = results.string_buffer_at(2);
+                    
+                    Geary.RFC822.Message message;
+                    try {
+                        message = new Geary.RFC822.Message.from_parts(
+                            new RFC822.Header(header), new RFC822.Text(body));
+                    } catch (Error err) {
+                        debug("Error decoding message: %s", err.message);
+                        
+                        continue;
+                    }
+                    
+                    // build a list of attachments in the message itself
+                    Gee.List<GMime.Part> msg_attachments = message.get_attachments();
+                    
+                    // delete all attachments for this message
+                    try {
+                        Geary.ImapDB.Folder.do_delete_attachments(cx, message_id);
+                    } catch (Error err) {
+                        debug("Error deleting existing attachments: %s", err.message);
+                        
+                        continue;
+                    }
+                    
+                    // rebuild all
+                    try {
+                        Geary.ImapDB.Folder.do_save_attachments_db(cx, message_id, msg_attachments,
+                            this, null);
+                    } catch (Error err) {
+                        debug("Error saving attachments: %s", err.message);
+                        
+                        // fallthrough
+                    }
+                } while (results.next());
+                
+                // rebuild search table due to potentially new attachments
+                cx.exec("DELETE FROM MessageSearchTable");
+                
+                return Db.TransactionOutcome.COMMIT;
+            });
+        } catch (Error e) {
+            debug("Error populating old inline attachments during upgrade to database schema 13: %s",
+                e.message);
         }
     }
     

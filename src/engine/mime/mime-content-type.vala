@@ -19,6 +19,11 @@ public class Geary.Mime.ContentType : Geary.BaseObject {
     public const string WILDCARD = "*";
     
     /**
+     * Default Content-Type for unknown or unmarked content.
+     */
+    public const string DEFAULT_CONTENT_TYPE = "application/octet-stream";
+    
+    /**
      * The type (discrete or concrete) portion of the Content-Type field.
      *
      * It's highly recommended the caller use the various ''has'' and ''is'' methods when performing

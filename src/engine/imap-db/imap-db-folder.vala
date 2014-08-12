@@ -1874,7 +1874,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     private static Gee.List<Geary.Attachment>? do_list_attachments(Db.Connection cx, int64 message_id,
         Cancellable? cancellable) throws Error {
         Db.Statement stmt = cx.prepare("""
-            SELECT id, filename, mime_type, filesize, disposition
+            SELECT id, filename, mime_type, filesize, disposition, content_id, description
             FROM MessageAttachmentTable
             WHERE message_id = ?
             ORDER BY id
@@ -1891,7 +1891,8 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                 Mime.DispositionType.from_int(results.int_at(4)));
             list.add(new ImapDB.Attachment(cx.database.db_file.get_parent(), results.string_at(1),
                 Mime.ContentType.deserialize(results.nonnull_string_at(2)), results.int64_at(3),
-                message_id, results.rowid_at(0), disposition));
+                message_id, results.rowid_at(0), disposition, results.string_at(5),
+                results.string_at(6)));
         } while (results.next(cancellable));
         
         return list;
@@ -1909,12 +1910,17 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             return;
         
         foreach (GMime.Part attachment in attachments) {
-            string mime_type = attachment.get_content_type().to_string();
-            string disposition = attachment.get_disposition();
+            GMime.ContentType? content_type = attachment.get_content_type();
+            string mime_type = (content_type != null)
+                ? content_type.to_string()
+                : Mime.ContentType.DEFAULT_CONTENT_TYPE;
+            string? disposition = attachment.get_disposition();
+            string? content_id = attachment.get_content_id();
+            string? description = attachment.get_content_description();
             string filename = RFC822.Utils.get_clean_attachment_filename(attachment);
             
             // Convert the attachment content into a usable ByteArray.
-            GMime.DataWrapper attachment_data = attachment.get_content_object();
+            GMime.DataWrapper? attachment_data = attachment.get_content_object();
             ByteArray byte_array = new ByteArray();
             GMime.StreamMem stream = new GMime.StreamMem.with_byte_array(byte_array);
             stream.set_owner(false);
@@ -1932,14 +1938,16 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             
             // Insert it into the database.
             Db.Statement stmt = cx.prepare("""
-                INSERT INTO MessageAttachmentTable (message_id, filename, mime_type, filesize, disposition)
-                VALUES (?, ?, ?, ?, ?)
+                INSERT INTO MessageAttachmentTable (message_id, filename, mime_type, filesize, disposition, content_id, description)
+                VALUES (?, ?, ?, ?, ?, ?, ?)
                 """);
             stmt.bind_rowid(0, message_id);
             stmt.bind_string(1, filename);
             stmt.bind_string(2, mime_type);
             stmt.bind_uint(3, filesize);
             stmt.bind_int(4, disposition_type);
+            stmt.bind_string(5, content_id);
+            stmt.bind_string(6, description);
             
             int64 attachment_id = stmt.exec_insert(cancellable);
             
@@ -1999,6 +2007,30 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                 throw error;
             }
         }
+    }
+    
+    public static void do_delete_attachments(Db.Connection cx, int64 message_id)
+        throws Error {
+        Gee.List<Geary.Attachment>? attachments = do_list_attachments(cx, message_id, null);
+        if (attachments == null || attachments.size == 0)
+            return;
+        
+        // delete all files
+        foreach (Geary.Attachment attachment in attachments) {
+            try {
+                attachment.file.delete(null);
+            } catch (Error err) {
+                debug("Unable to delete file %s: %s", attachment.file.get_path(), err.message);
+            }
+        }
+        
+        // remove all from attachment table
+        Db.Statement stmt = new Db.Statement(cx, """
+            DELETE FROM MessageAttachmentTable WHERE message_id = ?
+        """);
+        stmt.bind_rowid(0, message_id);
+        
+        stmt.exec();
     }
     
     /**

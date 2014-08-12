@@ -151,6 +151,7 @@ public class ConversationViewer : Gtk.Box {
     private Geary.State.Machine fsm;
     private DisplayMode display_mode = DisplayMode.NONE;
     private uint select_conversation_timeout_id = 0;
+    private Gee.HashSet<string> inlined_content_ids = new Gee.HashSet<string>();
     
     public ConversationViewer() {
         Object(orientation: Gtk.Orientation.VERTICAL, spacing: 0);
@@ -223,6 +224,7 @@ public class ConversationViewer : Gtk.Box {
         }
         email_to_element.clear();
         messages.clear();
+        inlined_content_ids.clear();
         
         current_account_information = account_information;
     }
@@ -1728,6 +1730,10 @@ public class ConversationViewer : Gtk.Box {
                     img.set_attribute("class", DATA_IMAGE_CLASS);
                     if (!Geary.String.is_empty(filename))
                         img.set_attribute("alt", filename);
+                    
+                    // stash here so inlined image isn't listed as attachment (esp. if it has no
+                    // Content-Disposition)
+                    inlined_content_ids.add(mime_id);
                 } else if (!src.has_prefix("data:")) {
                     remote_images = true;
                 }
@@ -1854,7 +1860,11 @@ public class ConversationViewer : Gtk.Box {
         header_text += create_header_row(Geary.HTML.escape_markup(title), value, important);
     }
     
-    private static bool should_show_attachment(Geary.Attachment attachment) {
+    private bool should_show_attachment(Geary.Attachment attachment) {
+        // if displayed inline, don't include in attachment list
+        if (attachment.content_id in inlined_content_ids)
+            return false;
+        
         switch (attachment.content_disposition.disposition_type) {
             case Geary.Mime.DispositionType.ATTACHMENT:
                 return true;
@@ -1867,7 +1877,7 @@ public class ConversationViewer : Gtk.Box {
         }
     }
     
-    private static int displayed_attachments(Geary.Email email) {
+    private int displayed_attachments(Geary.Email email) {
         int ret = 0;
         foreach (Geary.Attachment attachment in email.attachments) {
             if (should_show_attachment(attachment)) {

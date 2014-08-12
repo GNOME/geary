@@ -49,14 +49,31 @@ public abstract class Geary.Attachment : BaseObject {
      */
     public Mime.ContentDisposition content_disposition { get; private set; }
     
+    /**
+     * The Content-ID of the attachment.
+     *
+     * See [[https://tools.ietf.org/html/rfc2111]]
+     */
+    public string? content_id { get; private set; }
+    
+    /**
+     * The Content-Description of the attachment.
+     *
+     * See [[https://tools.ietf.org/html/rfc2045#section-8]]
+     */
+    public string? content_description { get; private set; }
+    
     protected Attachment(string id, File file, bool has_supplied_filename, Mime.ContentType content_type,
-        int64 filesize, Mime.ContentDisposition content_disposition) {
+        int64 filesize, Mime.ContentDisposition content_disposition, string? content_id,
+        string? content_description) {
         this.id = id;
         this.file = file;
         this.has_supplied_filename = has_supplied_filename;
         this.content_type = content_type;
         this.filesize = filesize;
         this.content_disposition = content_disposition;
+        this.content_id = content_id;
+        this.content_description = content_description;
     }
 }
 

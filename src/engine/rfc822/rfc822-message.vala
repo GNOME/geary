@@ -753,24 +753,24 @@ public class Geary.RFC822.Message : BaseObject {
             return;
         }
         
+        // If requested disposition is not UNSPECIFIED, check if this part matches the requested deposition
         Mime.DispositionType part_disposition = Mime.DispositionType.deserialize(part.get_disposition(),
             null);
-        if (part_disposition == Mime.DispositionType.UNSPECIFIED)
+        if (requested_disposition != Mime.DispositionType.UNSPECIFIED && requested_disposition != part_disposition)
             return;
         
+        // skip text/plain and text/html parts that are INLINE or UNSPECIFIED, as they will be used
+        // as part of the body
         if (part.get_content_type() != null) {
             Mime.ContentType content_type = new Mime.ContentType.from_gmime(part.get_content_type());
-            if (part_disposition == Mime.DispositionType.INLINE
+            if ((part_disposition == Mime.DispositionType.INLINE || part_disposition == Mime.DispositionType.UNSPECIFIED)
                 && content_type.has_media_type("text")
                 && (content_type.has_media_subtype("html") || content_type.has_media_subtype("plain"))) {
-                // these are part of the body
                 return;
             }
         }
         
-        // Catch remaining disposition-type matches
-        if (requested_disposition == Mime.DispositionType.UNSPECIFIED || part_disposition == requested_disposition)
-            attachments.add(part);
+        attachments.add(part);
     }
     
     public Gee.List<Geary.RFC822.Message> get_sub_messages() {
