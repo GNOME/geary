@@ -109,11 +109,19 @@ public class FolderList.Tree : Sidebar.Tree {
         
         // If this is the current folder, unselect it.
         Sidebar.Entry? entry = account_branch.get_entry_for_path(folder.path);
-        if (has_branch(inboxes_branch) && (entry == null || !is_selected(entry)))
-            entry = inboxes_branch.get_entry_for_account(folder.account);
+        
+        // if not found or found but not selected, see if the folder is in the Inboxes branch
+        if (has_branch(inboxes_branch) && (entry == null || !is_selected(entry))) {
+            InboxFolderEntry? inbox_entry = inboxes_branch.get_entry_for_account(folder.account);
+            if (inbox_entry != null && inbox_entry.folder == folder)
+                entry = inbox_entry;
+        }
+        
+        // if found and selected, report nothing is selected in preparation for its removal
         if (entry != null && is_selected(entry))
             folder_selected(null);
         
+        // if Inbox, remove from inboxes branch, selected or not
         if (folder.special_folder_type == Geary.SpecialFolderType.INBOX)
             inboxes_branch.remove_inbox(folder.account);
         
