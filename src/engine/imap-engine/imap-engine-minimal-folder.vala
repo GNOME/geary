@@ -65,7 +65,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.AbstractFolder, Geary.Folde
         local_folder.email_complete.connect(on_email_complete);
     }
     
-    ~EngineFolder() {
+    ~MinimalFolder() {
         if (open_count > 0)
             warning("Folder %s destroyed without closing", to_string());
         
@@ -75,7 +75,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.AbstractFolder, Geary.Folde
     public void set_special_folder_type(SpecialFolderType new_type) {
         SpecialFolderType old_type = _special_folder_type;
         _special_folder_type = new_type;
-        if(old_type != new_type)
+        if (old_type != new_type)
             notify_special_folder_type_changed(old_type, new_type);
     }
     
