@@ -557,16 +557,19 @@ public class Geary.Imap.ClientConnection : BaseObject {
     public async void send_async(Command cmd, Cancellable? cancellable = null) throws Error {
         check_for_connection();
         
+        // need to run this in critical section because Serializer requires it (don't want to be
+        // pushing data while a flush_async() is occurring)
+        int token = yield send_mutex.claim_async(cancellable);
+        
+        // This needs to happen inside mutex because flush async also manipulates FSM
         if (!issue_conditional_event(Event.SEND)) {
             debug("[%s] Send async not allowed", to_string());
+            
+            send_mutex.release(ref token);
             
             throw new ImapError.NOT_CONNECTED("Send not allowed: connection in %s state",
                 fsm.get_state_string(fsm.get_state()));
         }
-        
-        // need to run this in critical section because Serializer requires it (don't want to be
-        // pushing data while a flush_async() is occurring)
-        int token = yield send_mutex.claim_async(cancellable);
         
         // Always assign a new tag; Commands with pre-assigned Tags should not be re-sent.
         // (Do this inside the critical section to ensure commands go out in Tag order; this is not
