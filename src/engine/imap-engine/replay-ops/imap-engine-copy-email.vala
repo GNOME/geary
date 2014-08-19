@@ -45,8 +45,9 @@ private class Geary.ImapEngine.CopyEmail : Geary.ImapEngine.SendReplayOperation 
             ImapDB.Folder.ListFlags.NONE, cancellable);
         
         if (uids != null && uids.size > 0) {
-            yield engine.remote_folder.copy_email_async(
-                new Imap.MessageSet.uid_sparse(uids.to_array()), destination, cancellable);
+            Gee.List<Imap.MessageSet> msg_sets = Imap.MessageSet.uid_sparse(uids);
+            foreach (Imap.MessageSet msg_set in msg_sets)
+                yield engine.remote_folder.copy_email_async(msg_set, destination, cancellable);
         }
         
         return ReplayOperation.Status.COMPLETED;

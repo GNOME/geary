@@ -139,10 +139,12 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
             if (unfulfilled_uids.size == 0)
                 continue;
             
-            RemoteBatchOperation remote_op = new RemoteBatchOperation(owner,
-                new Imap.MessageSet.uid_sparse(unfulfilled_uids.to_array()), unfulfilled_fields,
-                required_fields);
-            batch.add(remote_op);
+            Gee.List<Imap.MessageSet> msg_sets = Imap.MessageSet.uid_sparse(unfulfilled_uids);
+            foreach (Imap.MessageSet msg_set in msg_sets) {
+                RemoteBatchOperation remote_op = new RemoteBatchOperation(owner, msg_set,
+                    unfulfilled_fields, required_fields);
+                batch.add(remote_op);
+            }
         }
         
         yield batch.execute_all_async(cancellable);

@@ -16,6 +16,12 @@ extern void qsort(void *base, size_t num, size_t size, CompareFunc compare_func)
  */
 
 public class Geary.Imap.MessageSet : BaseObject {
+    // 2^32 in base 10 requires ten bytes (characters) on the wire plus a separator between each
+    // one, i.e. ~11 bytes per seqnum or UID ... to keep lists below server maximums, this value
+    // is set to keep max. command length somewhere under 1K (including tag, command, parameters,
+    // etc.)
+    private const int MAX_SPARSE_VALUES_PER_SET = 50;
+    
     /**
      * True if the {@link MessageSet} was created with a UID or a UID range.
      *
@@ -67,7 +73,7 @@ public class Geary.Imap.MessageSet : BaseObject {
         assert(low.value > 0);
         assert(high.value > 0);
         
-        // corrent ordering
+        // correct ordering
         if (low.value > high.value) {
             UID swap = low;
             low = high;
@@ -95,47 +101,6 @@ public class Geary.Imap.MessageSet : BaseObject {
         is_uid = true;
     }
     
-    public MessageSet.sparse(SequenceNumber[] seq_nums) {
-        value = build_sparse_range(seq_array_to_int64(seq_nums));
-    }
-    
-    public MessageSet.uid_sparse(UID[] msg_uids) {
-        value = build_sparse_range(uid_array_to_int64(msg_uids));
-        is_uid = true;
-    }
-    
-    public MessageSet.sparse_to_highest(SequenceNumber[] seq_nums) {
-        value = "%s:*".printf(build_sparse_range(seq_array_to_int64(seq_nums)));
-    }
-    
-    public MessageSet.multirange(MessageSet[] msg_sets) {
-        StringBuilder builder = new StringBuilder();
-        for (int ctr = 0; ctr < msg_sets.length; ctr++) {
-            unowned MessageSet msg_set = msg_sets[ctr];
-            
-            if (ctr < (msg_sets.length - 1))
-                builder.append_printf("%s:", msg_set.value);
-            else
-                builder.append(msg_set.value);
-        }
-        
-        value = builder.str;
-    }
-    
-    public MessageSet.multisparse(MessageSet[] msg_sets) {
-        StringBuilder builder = new StringBuilder();
-        for (int ctr = 0; ctr < msg_sets.length; ctr++) {
-            unowned MessageSet msg_set = msg_sets[ctr];
-            
-            if (ctr < (msg_sets.length - 1))
-                builder.append_printf("%s,", msg_set.value);
-            else
-                builder.append(msg_set.value);
-        }
-        
-        value = builder.str;
-    }
-    
     public MessageSet.custom(string custom) {
         value = custom;
     }
@@ -145,14 +110,52 @@ public class Geary.Imap.MessageSet : BaseObject {
         is_uid = true;
     }
     
-    // Builds sparse range of either UID values or message numbers.
-    // NOTE: This method assumes the supplied array is internally allocated, and so an in-place sort
-    // is allowable
+    /**
+     * Convert a collection of {@link SequenceNumber}s into a list of {@link MessageSet}s.
+     *
+     * Although this could return a single MessageSet, large collections could create an IMAP
+     * command beyond the server maximum, and so they will be broken up into multiple sets.
+     */
+    public static Gee.List<MessageSet> sparse(Gee.Collection<SequenceNumber> seq_nums) {
+        return build_sparse_sets(seq_array_to_int64(seq_nums), false);
+    }
+    
+    /**
+     * Convert a collection of {@link UID}s into a list of {@link MessageSet}s.
+     *
+     * Although this could return a single MessageSet, large collections could create an IMAP
+     * command beyond the server maximum, and so they will be broken up into multiple sets.
+     */
+    public static Gee.List<MessageSet> uid_sparse(Gee.Collection<UID> msg_uids) {
+        return build_sparse_sets(uid_array_to_int64(msg_uids), true);
+    }
+    
+    // create zero or more MessageSets of no more than MAX_SPARSE_VALUES_PER_SET UIDs/sequence
+    // numbers
+    private static Gee.List<MessageSet> build_sparse_sets(int64[] sorted, bool is_uid) {
+        Gee.List<MessageSet> list = new Gee.ArrayList<MessageSet>();
+        
+        int start = 0;
+        for (;;) {
+            if (start >= sorted.length)
+                break;
+            
+            int end = (start + MAX_SPARSE_VALUES_PER_SET).clamp(0, sorted.length);
+            unowned int64[] slice = sorted[start:end];
+            
+            string sparse_range = build_sparse_range(slice);
+            list.add(is_uid ? new MessageSet.uid_custom(sparse_range) : new MessageSet.custom(sparse_range));
+            
+            start = end;
+        }
+        
+        return list;
+    }
+    
+    // Builds sparse range of either UID values or sequence numbers.  Values should be sorted before
+    // calling to maximum finding runs.
     private static string build_sparse_range(int64[] seq_nums) {
         assert(seq_nums.length > 0);
-        
-        // sort array to search for spans
-        qsort(seq_nums, seq_nums.length, sizeof(int64), Numeric.int64_compare);
         
         int64 start_of_span = -1;
         int64 last_seq_num = -1;
@@ -208,18 +211,30 @@ public class Geary.Imap.MessageSet : BaseObject {
         return builder.str;
     }
     
-    private static int64[] seq_array_to_int64(SequenceNumber[] seq_nums) {
-        int64[] ret = new int64[0];
-        foreach (SequenceNumber seq_num in seq_nums)
-            ret += (int64) seq_num.value;
+    private static int64[] seq_array_to_int64(Gee.Collection<SequenceNumber> seq_nums) {
+        // guarantee sorted (to maximum finding runs in build_sparse_range())
+        Gee.TreeSet<SequenceNumber> sorted = new Gee.TreeSet<SequenceNumber>();
+        sorted.add_all(seq_nums);
+        
+        // build sorted array
+        int64[] ret = new int64[sorted.size];
+        int index = 0;
+        foreach (SequenceNumber seq_num in sorted)
+            ret[index++] = (int64) seq_num.value;
         
         return ret;
     }
     
-    private static int64[] uid_array_to_int64(UID[] msg_uids) {
-        int64[] ret = new int64[0];
-        foreach (UID uid in msg_uids)
-            ret += uid.value;
+    private static int64[] uid_array_to_int64(Gee.Collection<UID> msg_uids) {
+        // guarantee sorted (to maximize finding runs in build_sparse_range())
+        Gee.TreeSet<UID> sorted = new Gee.TreeSet<UID>();
+        sorted.add_all(msg_uids);
+        
+        // build sorted array
+        int64[] ret = new int64[sorted.size];
+        int index = 0;
+        foreach (UID uid in sorted)
+            ret[index++] = uid.value;
         
         return ret;
     }

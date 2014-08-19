@@ -63,9 +63,12 @@ private class Geary.ImapEngine.MarkEmail : Geary.ImapEngine.SendReplayOperation 
         if (original_flags.size == 0)
             return ReplayOperation.Status.COMPLETED;
         
-        yield engine.remote_folder.mark_email_async(
-            new Imap.MessageSet.uid_sparse(ImapDB.EmailIdentifier.to_uids(original_flags.keys).to_array()),
-            flags_to_add, flags_to_remove, cancellable);
+        Gee.List<Imap.MessageSet> msg_sets = Imap.MessageSet.uid_sparse(
+            ImapDB.EmailIdentifier.to_uids(original_flags.keys));
+        foreach (Imap.MessageSet msg_set in msg_sets) {
+            yield engine.remote_folder.mark_email_async(msg_set, flags_to_add, flags_to_remove,
+                cancellable);
+        }
         
         return ReplayOperation.Status.COMPLETED;
     }

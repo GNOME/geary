@@ -316,13 +316,17 @@ private class Geary.ImapEngine.MinimalFolder : Geary.AbstractFolder, Geary.Folde
         
         // fetch from the server the local store's required flags for all appended/inserted messages
         // (which is simply equal to all remaining remote UIDs)
-        Gee.List<Geary.Email>? to_create = null;
+        Gee.List<Geary.Email> to_create = new Gee.ArrayList<Geary.Email>();
         if (remote_uids.size > 0) {
             // for new messages, get the local store's required fields (which provide duplicate
             // detection)
-            to_create = yield remote_folder.list_email_async(
-                new Imap.MessageSet.uid_sparse(remote_uids.to_array()), ImapDB.Folder.REQUIRED_FIELDS,
-                cancellable);
+            Gee.List<Imap.MessageSet> msg_sets = Imap.MessageSet.uid_sparse(remote_uids);
+            foreach (Imap.MessageSet msg_set in msg_sets) {
+                Gee.List<Geary.Email>? list = yield remote_folder.list_email_async(msg_set,
+                    ImapDB.Folder.REQUIRED_FIELDS, cancellable);
+                if (list != null && list.size > 0)
+                    to_create.add_all(list);
+            }
         }
         
         check_open("normalize_folders (list remote appended/inserted required fields)");
@@ -332,7 +336,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.AbstractFolder, Geary.Folde
         Gee.Set<ImapDB.EmailIdentifier> locally_appended_ids = new Gee.HashSet<ImapDB.EmailIdentifier>();
         Gee.Set<ImapDB.EmailIdentifier> inserted_ids = new Gee.HashSet<ImapDB.EmailIdentifier>();
         Gee.Set<ImapDB.EmailIdentifier> locally_inserted_ids = new Gee.HashSet<ImapDB.EmailIdentifier>();
-        if (to_create != null && to_create.size > 0) {
+        if (to_create.size > 0) {
             Gee.Map<Email, bool>? created_or_merged = yield local_folder.create_or_merge_email_async(
                 to_create, cancellable);
             assert(created_or_merged != null);
@@ -931,34 +935,36 @@ private class Geary.ImapEngine.MinimalFolder : Geary.AbstractFolder, Geary.Folde
         Gee.HashSet<Geary.EmailIdentifier> created = new Gee.HashSet<Geary.EmailIdentifier>();
         Gee.HashSet<Geary.EmailIdentifier> appended = new Gee.HashSet<Geary.EmailIdentifier>();
         try {
-            Imap.MessageSet msg_set = new Imap.MessageSet.sparse(remote_positions.to_array());
-            Gee.List<Geary.Email>? list = yield remote_folder.list_email_async(msg_set,
-                ImapDB.Folder.REQUIRED_FIELDS, null);
-            if (list != null && list.size > 0) {
-                debug("%s do_replay_appended_message: %d new messages in %s", to_string(),
-                    list.size, msg_set.to_string());
-                
-                // need to report both if it was created (not known before) and appended (which
-                // could mean created or simply a known email associated with this folder)
-                Gee.Map<Geary.Email, bool> created_or_merged =
-                    yield local_folder.create_or_merge_email_async(list, null);
-                foreach (Geary.Email email in created_or_merged.keys) {
-                    // true means created
-                    if (created_or_merged.get(email)) {
-                        debug("%s do_replay_appended_message: appended email ID %s added",
-                            to_string(), email.id.to_string());
-                        
-                        created.add(email.id);
-                    } else {
-                        debug("%s do_replay_appended_message: appended email ID %s associated",
-                            to_string(), email.id.to_string());
-                    }
+            Gee.List<Imap.MessageSet> msg_sets = Imap.MessageSet.sparse(remote_positions);
+            foreach (Imap.MessageSet msg_set in msg_sets) {
+                Gee.List<Geary.Email>? list = yield remote_folder.list_email_async(msg_set,
+                    ImapDB.Folder.REQUIRED_FIELDS, null);
+                if (list != null && list.size > 0) {
+                    debug("%s do_replay_appended_message: %d new messages in %s", to_string(),
+                        list.size, msg_set.to_string());
                     
-                    appended.add(email.id);
+                    // need to report both if it was created (not known before) and appended (which
+                    // could mean created or simply a known email associated with this folder)
+                    Gee.Map<Geary.Email, bool> created_or_merged =
+                        yield local_folder.create_or_merge_email_async(list, null);
+                    foreach (Geary.Email email in created_or_merged.keys) {
+                        // true means created
+                        if (created_or_merged.get(email)) {
+                            debug("%s do_replay_appended_message: appended email ID %s added",
+                                to_string(), email.id.to_string());
+                            
+                            created.add(email.id);
+                        } else {
+                            debug("%s do_replay_appended_message: appended email ID %s associated",
+                                to_string(), email.id.to_string());
+                        }
+                        
+                        appended.add(email.id);
+                    }
+                } else {
+                    debug("%s do_replay_appended_message: no new messages in %s", to_string(),
+                        msg_set.to_string());
                 }
-            } else {
-                debug("%s do_replay_appended_message: no new messages in %s", to_string(),
-                    msg_set.to_string());
             }
         } catch (Error err) {
             debug("%s do_replay_appended_message: Unable to process: %s",

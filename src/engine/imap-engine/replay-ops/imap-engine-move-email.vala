@@ -67,10 +67,12 @@ private class Geary.ImapEngine.MoveEmail : Geary.ImapEngine.SendReplayOperation 
         if (cancellable != null && cancellable.is_cancelled())
             throw new IOError.CANCELLED("Move email to %s cancelled", engine.remote_folder.to_string());
         
-        Imap.MessageSet msg_set = new Imap.MessageSet.uid_sparse(ImapDB.EmailIdentifier.to_uids(moved_ids).to_array());
-        
-        yield engine.remote_folder.copy_email_async(msg_set, destination, null);
-        yield engine.remote_folder.remove_email_async(msg_set, null);
+        Gee.List<Imap.MessageSet> msg_sets = Imap.MessageSet.uid_sparse(
+            ImapDB.EmailIdentifier.to_uids(moved_ids));
+        foreach (Imap.MessageSet msg_set in msg_sets) {
+            yield engine.remote_folder.copy_email_async(msg_set, destination, null);
+            yield engine.remote_folder.remove_email_async(msg_set, null);
+        }
         
         return ReplayOperation.Status.COMPLETED;
     }
