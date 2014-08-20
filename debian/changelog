@@ -1,4 +1,4 @@
-geary (0.6.1-1~saucy1) saucy; urgency=low
+geary (0.7.0-1~saucy1) saucy; urgency=low
 
   * Major overhaul of email composer, now inline in main window and redesigned
   * Composer will automatically add signature to emails
