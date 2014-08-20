@@ -1,3 +1,16 @@
+geary (0.7.1-1~saucy1) saucy; urgency=low
+
+  * Show attachments lacking a Content-Disposition
+  * Prevent Inbox from being cleared at startup (Dovecot, Zimbra, more)
+  * Major memory leak (due to GMime bindings) fixes
+  * Improved IMAP disconnect/reconnect logic
+  * Autocomplete properly quotes RFC822 strings
+  * Stabilize search results to prevent lost or dropped results
+  * Inline composer polish
+  * Updated translations
+
+ -- Jim Nelson <jim@yorba.org>  Wed, 20 Aug 2014 12:50:08 -0700
+
 geary (0.7.0-1~saucy1) saucy; urgency=low
 
   * Major overhaul of email composer, now inline in main window and redesigned
