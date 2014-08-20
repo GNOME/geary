@@ -1,3 +1,12 @@
+geary (0.6.2-1~saucy1) saucy; urgency=low
+
+  * Patch major memory leak due to GMime bindings
+  * Prevent Vala 0.26 compiler error
+  * Stabilize search sorting to prevent dropped search results
+  * Prevent Inbox from being cleared on startup w/ Dovecot, Zimbra, and more.
+
+ -- Jim Nelson <jim@yorba.org>  Wed, 20 Aug 2014 12:27:20 -0700
+
 geary (0.6.1-1~saucy1) saucy; urgency=low
 
   * Copy and move message bug fixes (esp. to prevent lost emails)
