@@ -20,45 +20,88 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
                 assert_not_reached();
         }
     }
-    
-    public virtual async string? get_password_async(
-        Geary.CredentialsMediator.Service service, string username, Cancellable? cancellable = null)
+
+    private Geary.Credentials get_credentials(Geary.CredentialsMediator.Service service, Geary.AccountInformation account_information) {
+        switch (service) {
+            case Service.IMAP:
+                return account_information.imap_credentials;
+
+            case Service.SMTP:
+                return account_information.smtp_credentials;
+
+            default:
+                assert_not_reached();
+        }
+    }
+
+    private async string? migrate_old_password(string old_key, string new_key, Cancellable? cancellable)
         throws Error {
         string? password = yield Secret.password_lookup(Secret.SCHEMA_COMPAT_NETWORK, cancellable,
-            "user", get_key_name(service, username));
+            "user", old_key);
+        if (password != null) {
+            bool result = yield Secret.password_store(Secret.SCHEMA_COMPAT_NETWORK,
+                null, new_key, password, cancellable, "user", new_key);
+            if (result)
+                yield Secret.password_clear(Secret.SCHEMA_COMPAT_NETWORK, cancellable, "user", old_key);
+        }
         
+        return password;
+    }
+    
+    public virtual async string? get_password_async(
+        Geary.CredentialsMediator.Service service, Geary.AccountInformation account_information, Cancellable? cancellable = null)
+        throws Error {
+        string key_name = get_key_name(service, account_information.email);
+        string? password = yield Secret.password_lookup(Secret.SCHEMA_COMPAT_NETWORK, cancellable,
+            "user", key_name);
+        
+        // fallback to the old keyring key string for upgrading users
         if (password == null) {
-            // fallback to the old keyring key string for upgrading users
-            password = yield Secret.password_lookup(Secret.SCHEMA_COMPAT_NETWORK, cancellable,
-                "user", OLD_GEARY_USERNAME_PREFIX + username);
+            Geary.Credentials creds = get_credentials(service, account_information);
+            
+            // <= 0.6
+            password = yield migrate_old_password(get_key_name(service, creds.user),
+                key_name, cancellable);
+            
+            // 0.1
+            if (password == null) {
+                password = yield migrate_old_password(OLD_GEARY_USERNAME_PREFIX + creds.user,
+                    key_name, cancellable);
+            }
         }
         
         if (password == null)
-            debug("Unable to fetch password in libsecret keyring for user: %s", username);
+            debug("Unable to fetch password in libsecret keyring for %s", account_information.email);
         
         return password;
     }
     
     public virtual async void set_password_async(
-        Geary.CredentialsMediator.Service service, Geary.Credentials credentials,
+        Geary.CredentialsMediator.Service service, Geary.AccountInformation account_information,
         Cancellable? cancellable = null) throws Error {
-        string key_name = get_key_name(service, credentials.user);
+        string key_name = get_key_name(service, account_information.email);
+        Geary.Credentials credentials = get_credentials(service, account_information);
         
         bool result = yield Secret.password_store(Secret.SCHEMA_COMPAT_NETWORK,
             null, key_name, credentials.pass, cancellable, "user", key_name);
-        
         if (!result)
-            debug("Unable to store password in libsecret keyring: %s", result.to_string());
+            debug("Unable to store password for \"%s\" in libsecret keyring", key_name);
     }
     
     public virtual async void clear_password_async(
-        Geary.CredentialsMediator.Service service, string username, Cancellable? cancellable = null)
+        Geary.CredentialsMediator.Service service, Geary.AccountInformation account_information, Cancellable? cancellable = null)
         throws Error {
         // delete new-style and old-style locations
+        Geary.Credentials credentials = get_credentials(service, account_information);
+        // new-style
         yield Secret.password_clear(Secret.SCHEMA_COMPAT_NETWORK, cancellable, "user",
-            get_key_name(service, username));
+            get_key_name(service, account_information.email));
+        // <= 0.6
         yield Secret.password_clear(Secret.SCHEMA_COMPAT_NETWORK, cancellable, "user",
-            OLD_GEARY_USERNAME_PREFIX + username);
+            get_key_name(service, credentials.user));
+        // 0.1
+        yield Secret.password_clear(Secret.SCHEMA_COMPAT_NETWORK, cancellable, "user",
+            OLD_GEARY_USERNAME_PREFIX + credentials.user);
     }
     
     public virtual async bool prompt_passwords_async(Geary.CredentialsMediator.ServiceFlag services,

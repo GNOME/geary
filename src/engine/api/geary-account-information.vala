@@ -293,13 +293,13 @@ public class Geary.AccountInformation : BaseObject {
             // Delete the current password(s).
             if (services.has_imap()) {
                 yield Geary.Engine.instance.authentication_mediator.clear_password_async(
-                    CredentialsMediator.Service.IMAP, email);
+                    CredentialsMediator.Service.IMAP, this);
                 
                 if (imap_credentials != null)
                     imap_credentials.pass = null;
             } else if (services.has_smtp()) {
                 yield Geary.Engine.instance.authentication_mediator.clear_password_async(
-                    CredentialsMediator.Service.SMTP, email);
+                    CredentialsMediator.Service.SMTP, this);
                 
                 if (smtp_credentials != null)
                     smtp_credentials.pass = null;
@@ -361,7 +361,7 @@ public class Geary.AccountInformation : BaseObject {
         
         if (services.has_imap()) {
             string? imap_password = yield mediator.get_password_async(
-                CredentialsMediator.Service.IMAP, imap_credentials.user);
+                CredentialsMediator.Service.IMAP, this);
             
             if (imap_password != null)
                 set_imap_password(imap_password);
@@ -371,7 +371,7 @@ public class Geary.AccountInformation : BaseObject {
         
         if (services.has_smtp() && smtp_credentials != null) {
             string? smtp_password = yield mediator.get_password_async(
-                CredentialsMediator.Service.SMTP, smtp_credentials.user);
+                CredentialsMediator.Service.SMTP, this);
             
             if (smtp_password != null)
                 set_smtp_password(smtp_password);
@@ -433,20 +433,20 @@ public class Geary.AccountInformation : BaseObject {
         if (services.has_imap()) {
             if (imap_remember_password) {
                 yield mediator.set_password_async(
-                    CredentialsMediator.Service.IMAP, imap_credentials);
+                    CredentialsMediator.Service.IMAP, this);
             } else {
                 yield mediator.clear_password_async(
-                    CredentialsMediator.Service.IMAP, imap_credentials.user);
+                    CredentialsMediator.Service.IMAP, this);
             }
         }
         
         if (services.has_smtp() && smtp_credentials != null) {
             if (smtp_remember_password) {
                 yield mediator.set_password_async(
-                    CredentialsMediator.Service.SMTP, smtp_credentials);
+                    CredentialsMediator.Service.SMTP, this);
             } else {
                 yield mediator.clear_password_async(
-                    CredentialsMediator.Service.SMTP, smtp_credentials.user);
+                    CredentialsMediator.Service.SMTP, this);
             }
         }
     }
@@ -655,7 +655,7 @@ public class Geary.AccountInformation : BaseObject {
         try {
             if (services.has_imap()) {
                 yield mediator.clear_password_async(
-                    CredentialsMediator.Service.IMAP, imap_credentials.user);
+                    CredentialsMediator.Service.IMAP, this);
             }
         } catch (Error e) {
             return_error = e;
@@ -664,7 +664,7 @@ public class Geary.AccountInformation : BaseObject {
         try {
             if (services.has_smtp() && smtp_credentials != null) {
                 yield mediator.clear_password_async(
-                    CredentialsMediator.Service.SMTP, smtp_credentials.user);
+                    CredentialsMediator.Service.SMTP, this);
             }
         } catch (Error e) {
             return_error = e;

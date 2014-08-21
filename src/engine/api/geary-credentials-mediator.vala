@@ -29,7 +29,8 @@ public interface Geary.CredentialsMediator : Object {
      * service.  Return null if the password wasn't in the key store, or the
      * password if it was.
      */
-    public abstract async string? get_password_async(Service service, string username,
+    public abstract async string? get_password_async(Service service,
+        AccountInformation account_information,
         Cancellable? cancellable = null) throws Error;
     
     /**
@@ -37,14 +38,16 @@ public interface Geary.CredentialsMediator : Object {
      * for the given service.
      */
     public abstract async void set_password_async(Service service,
-        Geary.Credentials credentials, Cancellable? cancellable = null) throws Error;
+        AccountInformation account_information,
+        Cancellable? cancellable = null) throws Error;
     
     /**
      * Deletes the key store's password entry for the given credentials for the
      * given service.  Do nothing (and do *not* throw an error) if the
      * credentials weren't in the key store.
      */
-    public abstract async void clear_password_async(Service service, string username,
+    public abstract async void clear_password_async(Service service,
+        AccountInformation account_information,
         Cancellable? cancellable = null) throws Error;
     
     /**
