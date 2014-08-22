@@ -2081,20 +2081,41 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         if (locations == null || locations.size == 0)
             return;
         
-        StringBuilder sql = new StringBuilder("""
-            SELECT id FROM MessageTable WHERE fields <> ?
-        """);
-        
-        Db.Statement stmt = cx.prepare(sql.str);
-        stmt.bind_int(0, Geary.Email.Field.ALL);
-        
-        Db.Result results = stmt.exec(cancellable);
-        
+        // fetch incomplete locations in chunks
         Gee.HashSet<int64?> incomplete_locations = new Gee.HashSet<int64?>(Collection.int64_hash_func,
             Collection.int64_equal_func);
-        while (!results.finished) {
-            incomplete_locations.add(results.int64_at(0));
-            results.next(cancellable);
+        int start = 0;
+        for (;;) {
+            if (start >= locations.size)
+                break;
+            
+            int end = (start + LIST_EMAIL_FIELDS_CHUNK_COUNT).clamp(0, locations.size);
+            Gee.List<LocationIdentifier> slice = locations.slice(start, end);
+            
+            StringBuilder sql = new StringBuilder("""
+                SELECT id FROM MessageTable WHERE id IN (
+            """);
+            bool first = true;
+            foreach (LocationIdentifier location_id in slice) {
+                if (!first)
+                    sql.append(",");
+                
+                sql.append(location_id.message_id.to_string());
+                first = false;
+            }
+            sql.append(") AND fields <> ?");
+            
+            Db.Statement stmt = cx.prepare(sql.str);
+            stmt.bind_int(0, Geary.Email.Field.ALL);
+            
+            Db.Result results = stmt.exec(cancellable);
+            
+            while (!results.finished) {
+                incomplete_locations.add(results.int64_at(0));
+                results.next(cancellable);
+            }
+            
+            start = end;
         }
         
         if (incomplete_locations.size == 0) {
