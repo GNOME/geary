@@ -3,7 +3,7 @@ Section: gnome
 Priority: optional
 Maintainer: Jim Nelson <jim@yorba.org>
 Build-Depends: debhelper (>= 8),
- libgee-0.8-dev (>= 0.8.5),
+ libgee-0.8-dev,
  libglib2.0-dev (>= 2.32.0),
  libgtk-3-dev (>= 3.10.0),
  libnotify-dev (>=0.7.5),
@@ -12,7 +12,7 @@ Build-Depends: debhelper (>= 8),
  libxml2-dev (>= 2.7.8),
  libsecret-1-dev (>= 0.11),
  libgmime-2.6-dev (>= 2.6.0),
- valac-0.22 (>= 0.21.1),
+ valac,
  cmake (>= 2.8.0),
  libsqlite3-dev (>= 3.7.4),
  libmessaging-menu-dev (>= 12.10.2),
@@ -27,7 +27,7 @@ Homepage: http://www.yorba.org
 Package: geary
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends},
- libgee-0.8-2 (>= 0.8.5),
+ libgee-0.8-2,
  libglib2.0-0 (>= 2.32.0),
  libgtk-3-0 (>= 3.10.0),
  libnotify4 (>= 0.7.5),
