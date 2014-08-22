@@ -390,15 +390,6 @@ set(MAILER_SRC
 mailer/main.vala
 )
 
-set(DBUSSERVICE_SRC
-dbusservice/controller.vala
-dbusservice/database.vala
-dbusservice/dbus-conversation.vala
-dbusservice/dbus-conversations.vala
-dbusservice/dbus-email.vala
-dbusservice/main.vala
-)
-
 # Vala
 find_package(Vala REQUIRED)
 include(ValaVersion)
@@ -554,10 +545,6 @@ set(CLIENT_PACKAGES
 
 set(CONSOLE_PACKAGES
     gtk+-3.0
-)
-
-set(DBUSSERVICE_PACKAGES
-    gee-0.8 glib-2.0
 )
 
 set(GSETTINGS_DIR ${CMAKE_SOURCE_DIR}/desktop)
