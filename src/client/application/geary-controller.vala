@@ -1356,7 +1356,7 @@ public class GearyController : Geary.BaseObject {
     private void on_libnotify_invoked(Geary.Folder? folder, Geary.Email? email) {
         new_messages_monitor.clear_all_new_messages();
         
-        if (folder == null || email == null)
+        if (folder == null || email == null || !can_switch_conversation_view())
             return;
         
         main_window.folder_list.select_folder(folder);
