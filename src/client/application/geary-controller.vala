@@ -2265,6 +2265,9 @@ public class GearyController : Geary.BaseObject {
     
     private async void archive_or_delete_selection_async(bool archive, bool trash,
         Cancellable? cancellable) throws Error {
+        if (!can_switch_conversation_view())
+            return;
+        
         if (main_window.conversation_viewer.current_conversation != null
             && main_window.conversation_viewer.current_conversation == last_deleted_conversation) {
             debug("Not archiving/trashing/deleting; viewed conversation is last deleted conversation");
