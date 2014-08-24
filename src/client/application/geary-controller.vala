@@ -2195,7 +2195,7 @@ public class GearyController : Geary.BaseObject {
     }
     
     private void on_reply_to_message_action() {
-        Geary.Email? message = main_window.conversation_viewer.get_last_message();
+        Geary.Email? message = main_window.conversation_viewer.get_selected_message();
         if (message != null)
             on_reply_to_message(message);
     }
@@ -2205,7 +2205,7 @@ public class GearyController : Geary.BaseObject {
     }
     
     private void on_reply_all_message_action() {
-        Geary.Email? message = main_window.conversation_viewer.get_last_message();
+        Geary.Email? message = main_window.conversation_viewer.get_selected_message();
         if (message != null)
             on_reply_all_message(message);
     }
@@ -2215,7 +2215,7 @@ public class GearyController : Geary.BaseObject {
     }
     
     private void on_forward_message_action() {
-        Geary.Email? message = main_window.conversation_viewer.get_last_message();
+        Geary.Email? message = main_window.conversation_viewer.get_selected_message();
         if (message != null)
             on_forward_message(message);
     }

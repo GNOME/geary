@@ -211,6 +211,31 @@ public class ConversationViewer : Gtk.Box {
         return messages.is_empty ? null : messages.last();
     }
     
+    public Geary.Email? get_selected_message() {
+        WebKit.DOM.DOMSelection selection = web_view.get_dom_document().default_view.get_selection();
+        if (selection.is_collapsed)
+            return get_last_message();
+        
+        WebKit.DOM.Element? anchor_element = selection.anchor_node as WebKit.DOM.Element;
+        Geary.Email? anchor_email = null;
+        if (anchor_element == null)
+            anchor_element = selection.anchor_node.parent_element;
+        if (anchor_element != null)
+            anchor_email = get_email_from_element(anchor_element);
+        
+        WebKit.DOM.Element? focus_element = selection.focus_node as WebKit.DOM.Element;
+        Geary.Email? focus_email = null;
+        if (focus_element == null)
+            focus_element = selection.focus_node.parent_element;
+        if (focus_element != null)
+            focus_email = get_email_from_element(focus_element);
+        
+        if (anchor_email != null && anchor_email == focus_email)
+            return anchor_email;
+        
+        return get_last_message();
+    }
+    
     // Removes all displayed e-mails from the view.
     private void clear(Geary.Folder? new_folder, Geary.AccountInformation? account_information) {
         // Remove all messages from DOM.
