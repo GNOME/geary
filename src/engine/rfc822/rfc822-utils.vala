@@ -148,14 +148,14 @@ public string email_addresses_for_reply(Geary.RFC822.MailboxAddresses? addresses
 /**
  * Returns a quoted text string needed for a reply.
  *
- * If there's no message body in the supplied email, this function will
- * return the empty string.
+ * If there's no message body in the supplied email or quote text, this
+ * function will return the empty string.
  * 
  * If html_format is true, the message will be quoted in HTML format.
  * Otherwise it will be in plain text.
  */
-public string quote_email_for_reply(Geary.Email email, bool html_format) {
-    if (email.body == null)
+public string quote_email_for_reply(Geary.Email email, string? quote, bool html_format) {
+    if (email.body == null && quote == null)
         return "";
     
     string quoted = "<br /><br />";
@@ -187,8 +187,7 @@ public string quote_email_for_reply(Geary.Email email, bool html_format) {
     
     quoted += "<br />";
     
-    if (email.body != null)
-        quoted += "\n" + quote_body(email, true, html_format);
+    quoted += "\n" + quote_body(email, quote, true, html_format);
     
     return quoted;
 }
@@ -196,14 +195,14 @@ public string quote_email_for_reply(Geary.Email email, bool html_format) {
 /**
  * Returns a quoted text string needed for a forward.
  *
- * If there's no message body in the supplied email, this function will
- * return the empty string.
+ * If there's no message body in the supplied email or quote text, this
+ * function will return the empty string.
  *
  * If html_format is true, the message will be quoted in HTML format.
  * Otherwise it will be in plain text.
  */
-public string quote_email_for_forward(Geary.Email email, bool html_format) {
-    if (email.body == null)
+public string quote_email_for_forward(Geary.Email email, string? quote, bool html_format) {
+    if (email.body == null && quote == null)
         return "";
     
     string quoted = "\n\n";
@@ -225,17 +224,16 @@ public string quote_email_for_forward(Geary.Email email, bool html_format) {
     
     quoted = quoted.replace("\n", "<br />");
     
-    if (email.body != null)
-        quoted += quote_body(email, false, html_format);
+    quoted += quote_body(email, quote, false, html_format);
     
     return quoted;
 }
 
-private string quote_body(Geary.Email email, bool use_quotes, bool html_format) {
+private string quote_body(Geary.Email email, string? quote, bool use_quotes, bool html_format) {
     string? body_text = "";
     
     try {
-        body_text = email.get_message().get_body(html_format);
+        body_text = quote ?? email.get_message().get_body(html_format);
     } catch (Error error) {
         debug("Could not get message text. %s", error.message);
     }

@@ -211,8 +211,10 @@ public class ConversationViewer : Gtk.Box {
         return messages.is_empty ? null : messages.last();
     }
     
-    public Geary.Email? get_selected_message() {
-        WebKit.DOM.DOMSelection selection = web_view.get_dom_document().default_view.get_selection();
+    public Geary.Email? get_selected_message(out string? quote) {
+        quote = null;
+        WebKit.DOM.Document document = web_view.get_dom_document();
+        WebKit.DOM.DOMSelection selection = document.default_view.get_selection();
         if (selection.is_collapsed)
             return get_last_message();
         
@@ -230,8 +232,16 @@ public class ConversationViewer : Gtk.Box {
         if (focus_element != null)
             focus_email = get_email_from_element(focus_element);
         
-        if (anchor_email != null && anchor_email == focus_email)
-            return anchor_email;
+        if (anchor_email != null && anchor_email == focus_email) {
+            try {
+                WebKit.DOM.HTMLElement dummy = (WebKit.DOM.HTMLElement) document.create_element("div");
+                dummy.append_child(selection.get_range_at(0).clone_contents());
+                quote = dummy.get_inner_html();
+                return anchor_email;
+            } catch (Error error) {
+                debug("Problem getting selected text: %s", error.message);
+            }
+        }
         
         return get_last_message();
     }

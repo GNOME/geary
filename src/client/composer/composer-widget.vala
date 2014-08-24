@@ -233,7 +233,7 @@ public class ComposerWidget : Gtk.EventBox {
     }
     
     public ComposerWidget(Geary.Account account, ComposeType compose_type,
-        Geary.Email? referred = null, bool is_referred_draft = false) {
+        Geary.Email? referred = null, string? quote = null, bool is_referred_draft = false) {
         this.account = account;
         this.compose_type = compose_type;
         if (compose_type == ComposeType.NEW_MESSAGE)
@@ -428,13 +428,13 @@ public class ComposerWidget : Gtk.EventBox {
                     subject = reply_subject;
                     in_reply_to = reply_message_id;
                     references = Geary.RFC822.Utils.reply_references(referred);
-                    body_html = "\n\n" + Geary.RFC822.Utils.quote_email_for_reply(referred, true);
+                    body_html = "\n\n" + Geary.RFC822.Utils.quote_email_for_reply(referred, quote, true);
                     pending_attachments = referred.attachments;
                 break;
                 
                 case ComposeType.FORWARD:
                     subject = forward_subject;
-                    body_html = "\n\n" + Geary.RFC822.Utils.quote_email_for_forward(referred, true);
+                    body_html = "\n\n" + Geary.RFC822.Utils.quote_email_for_forward(referred, quote, true);
                     add_attachments(referred.attachments);
                     pending_attachments = referred.attachments;
                 break;
