@@ -158,7 +158,7 @@ public string quote_email_for_reply(Geary.Email email, string? quote, bool html_
     if (email.body == null && quote == null)
         return "";
     
-    string quoted = "<br /><br />";
+    string quoted = (quote == null) ? "<br /><br />" : "";
     
     /// Format for the datetime that a message being replied to was received
     /// See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
@@ -188,6 +188,9 @@ public string quote_email_for_reply(Geary.Email email, string? quote, bool html_
     quoted += "<br />";
     
     quoted += "\n" + quote_body(email, quote, true, html_format);
+    
+    if (quote != null)
+        quoted += "<br /><br />\n";
     
     return quoted;
 }
