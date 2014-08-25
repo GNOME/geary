@@ -757,7 +757,8 @@ public class ComposerWidget : Gtk.EventBox {
         show_attachments();
     }
     
-    public void change_compose_type(ComposeType new_type) {
+    public void change_compose_type(ComposeType new_type, Geary.Email? referred = null,
+        string? quote = null) {
         if (new_type != compose_type) {
             bool recipients_modified = to_entry.modified || cc_entry.modified || bcc_entry.modified;
             switch (new_type) {
@@ -791,6 +792,11 @@ public class ComposerWidget : Gtk.EventBox {
                     assert_not_reached();
             }
             compose_type = new_type;
+        } else if (referred != null && quote != null) {
+            WebKit.DOM.Document document = editor.get_dom_document();
+            // Always use reply styling, since forward styling doesn't work for inline quotes
+            document.exec_command("insertHTML", false,
+                Geary.RFC822.Utils.quote_email_for_reply(referred, quote, true));
         }
         
         container.present();
