@@ -2074,7 +2074,7 @@ public class GearyController : Geary.BaseObject {
             return;
         
         bool inline;
-        if (!should_create_new_composer(compose_type, referred, out inline))
+        if (!should_create_new_composer(compose_type, referred, quote, out inline))
             return;
         
         ComposerWidget widget;
@@ -2111,7 +2111,7 @@ public class GearyController : Geary.BaseObject {
     }
     
     private bool should_create_new_composer(ComposerWidget.ComposeType? compose_type,
-        Geary.Email? referred, out bool inline) {
+        Geary.Email? referred, string? quote, out bool inline) {
         inline = true;
         
         // In we're replying, see whether we already have a reply for that message.
@@ -2119,7 +2119,7 @@ public class GearyController : Geary.BaseObject {
             foreach (ComposerWidget cw in composer_widgets) {
                 if (cw.state != ComposerWidget.ComposerState.DETACHED &&
                     referred != null && referred.id.equal_to(cw.referred_id)) {
-                    cw.change_compose_type(compose_type);
+                    cw.change_compose_type(compose_type, referred, quote);
                     return false;
                 }
             }
@@ -2166,7 +2166,7 @@ public class GearyController : Geary.BaseObject {
     
     public bool can_switch_conversation_view() {
         bool inline;
-        return should_create_new_composer(null, null, out inline);
+        return should_create_new_composer(null, null, null, out inline);
     }
     
     public bool any_inline_composers() {
