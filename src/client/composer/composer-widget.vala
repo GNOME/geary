@@ -215,6 +215,7 @@ public class ComposerWidget : Gtk.EventBox {
     private string reply_subject = "";
     private string forward_subject = "";
     private string reply_message_id = "";
+    private bool top_posting = true;
     
     private Geary.FolderSupport.Create? drafts_folder = null;
     private Geary.EmailIdentifier? draft_id = null;
@@ -430,6 +431,8 @@ public class ComposerWidget : Gtk.EventBox {
                     references = Geary.RFC822.Utils.reply_references(referred);
                     body_html = "\n\n" + Geary.RFC822.Utils.quote_email_for_reply(referred, quote, true);
                     pending_attachments = referred.attachments;
+                    if (quote != null)
+                        top_posting = false;
                 break;
                 
                 case ComposeType.FORWARD:
@@ -587,8 +590,8 @@ public class ComposerWidget : Gtk.EventBox {
     }
     
     private void on_load_finished(WebKit.WebFrame frame) {
-        WebKit.DOM.HTMLElement? body = editor.get_dom_document().get_element_by_id(
-            BODY_ID) as WebKit.DOM.HTMLElement;
+        WebKit.DOM.Document document = editor.get_dom_document();
+        WebKit.DOM.HTMLElement? body = document.get_element_by_id(BODY_ID) as WebKit.DOM.HTMLElement;
         assert(body != null);
 
         if (!Geary.String.is_empty(body_html)) {
@@ -599,6 +602,19 @@ public class ComposerWidget : Gtk.EventBox {
             }
         }
         body.focus();  // Focus within the HTML document
+
+        if (!top_posting) {
+            try {
+                WebKit.DOM.Range range = document.create_range();
+                range.select_node_contents(body);
+                range.collapse(false);
+                WebKit.DOM.DOMSelection selection = document.default_view.get_selection();
+                selection.remove_all_ranges();
+                selection.add_range(range);
+            } catch (Error error) {
+                debug("Error setting cursor at end of text: %s", error.message);
+            }
+        }
 
         protect_blockquote_styles();
         
