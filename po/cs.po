@@ -1231,7 +1231,7 @@ msgstr "Outlook.com"
 
 #: ../src/engine/api/geary-service-provider.vala:61
 msgid "Other"
-msgstr "Jiný"
+msgstr "Jiná"
 
 #: ../src/engine/api/geary-special-folder-type.vala:24
 msgid "Inbox"
