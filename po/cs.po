@@ -1529,7 +1529,7 @@ msgstr "Přeškrtnuté (Ctrl+K)"
 
 #: ../ui/composer.glade.h:22
 msgid "_Rich Text"
-msgstr "_Rich Text"
+msgstr "Fo_rmátovaný text"
 
 #: ../ui/composer.glade.h:23
 msgid "Lar_ge"
