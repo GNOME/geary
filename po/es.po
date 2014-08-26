@@ -17,8 +17,8 @@ msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2014-07-22 05:04+0000\n"
-"PO-Revision-Date: 2014-07-22 12:23+0200\n"
+"POT-Creation-Date: 2014-08-26 05:03+0000\n"
+"PO-Revision-Date: 2014-08-26 18:21+0200\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: Español; Castellano <gnome-es-list@gnome.org>\n"
 "Language: es\n"
@@ -385,7 +385,7 @@ msgstr "Redactar un mensaje nuevo (Ctrl+N, N)"
 
 #. Reply to a message.
 #: ../src/client/application/geary-controller.vala:330
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1574
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1579
 msgid "_Reply"
 msgstr "_Responder"
 
@@ -403,7 +403,7 @@ msgstr "Responder a todos (Ctrl+Mayús+R, Mayús+R)"
 
 #. Forward a message.
 #: ../src/client/application/geary-controller.vala:341
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1584
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1589
 msgid "_Forward"
 msgstr "_Reenviar"
 
@@ -675,7 +675,7 @@ msgstr "Indexando la cuenta %s"
 msgid "Search %s account"
 msgstr "Buscar la cuenta %s"
 
-#: ../src/client/components/main-window.vala:305
+#: ../src/client/components/main-window.vala:323
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -717,7 +717,7 @@ msgstr "_Eliminar"
 
 #. Select all.
 #: ../src/client/components/stock.vala:32
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1042
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1047
 msgid "Select _All"
 msgstr "Seleccionar _todo"
 
@@ -803,17 +803,14 @@ msgid "%s (%s)"
 msgstr "%s (%s)"
 
 #: ../src/client/composer/composer-widget.vala:1215
-#| msgid "To: %s\n"
 msgid "To: "
 msgstr "Para: "
 
 #: ../src/client/composer/composer-widget.vala:1218
-#| msgid "Cc: %s\n"
 msgid "Cc: "
 msgstr "Cc: "
 
 #: ../src/client/composer/composer-widget.vala:1221
-#| msgid "Bcc:"
 msgid "Bcc: "
 msgstr "Cco: "
 
@@ -830,10 +827,8 @@ msgstr "_De:"
 #. For other types of messages, just show the from account.
 #. Composer label (without mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#. Geary account mail will be sent from
 #: ../src/client/composer/composer-widget.vala:1900
-#: ../src/client/conversation-viewer/conversation-viewer.vala:635
-#: ../ui/composer.glade.h:48
+#: ../src/client/conversation-viewer/conversation-viewer.vala:637
 msgid "From:"
 msgstr "De:"
 
@@ -851,163 +846,163 @@ msgstr "Mensaje nuevo"
 msgid "Me"
 msgstr "Yo"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:260
+#: ../src/client/conversation-viewer/conversation-viewer.vala:262
 msgid "No conversations selected."
 msgstr "No hay ninguna conversación seleccionada."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:262
+#: ../src/client/conversation-viewer/conversation-viewer.vala:264
 #, c-format
 msgid "%u conversation selected."
 msgid_plural "%u conversations selected."
 msgstr[0] "%u conversación seleccionada."
 msgstr[1] "%u conversaciones seleccionadas."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:291
+#: ../src/client/conversation-viewer/conversation-viewer.vala:293
 msgid "No search results found."
 msgstr "La búsqueda no devolvió ningún resultado."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:293
+#: ../src/client/conversation-viewer/conversation-viewer.vala:295
 msgid "No conversations in folder."
 msgstr "No hay conversaciones en la carpeta."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:534
+#: ../src/client/conversation-viewer/conversation-viewer.vala:536
 msgid "This message contains remote images."
 msgstr "Este mensaje contiene imágenes remotas."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:534
+#: ../src/client/conversation-viewer/conversation-viewer.vala:536
 msgid "Show Images"
 msgstr "Mostrar imágenes"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:535
+#: ../src/client/conversation-viewer/conversation-viewer.vala:537
 msgid "Always Show From Sender"
 msgstr "Mostrar siempre el remitente"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:559
+#: ../src/client/conversation-viewer/conversation-viewer.vala:561
 msgid "Edit Draft"
 msgstr "Editar borrador"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:638
+#: ../src/client/conversation-viewer/conversation-viewer.vala:640
 msgid "To:"
 msgstr "Para:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:641
+#: ../src/client/conversation-viewer/conversation-viewer.vala:643
 msgid "Cc:"
 msgstr "Cc:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:644
+#: ../src/client/conversation-viewer/conversation-viewer.vala:646
 msgid "Bcc:"
 msgstr "Cco:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:647
+#: ../src/client/conversation-viewer/conversation-viewer.vala:649
 msgid "Subject:"
 msgstr "Asunto:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:650
+#: ../src/client/conversation-viewer/conversation-viewer.vala:652
 msgid "Date:"
 msgstr "Fecha:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:857
+#: ../src/client/conversation-viewer/conversation-viewer.vala:862
 #, c-format
 msgid "%u read message"
 msgid_plural "%u read messages"
 msgstr[0] "%u mensaje leído"
 msgstr[1] "%u mensajes leídos"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:989
+#: ../src/client/conversation-viewer/conversation-viewer.vala:994
 #, c-format
 msgid "This message was sent successfully, but could not be saved to %s."
 msgstr "Este mensaje se envió correctamente pero no se pudo guardar en %s."
 
 #. Add a menu item for copying the current selection.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1015
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1020
 #: ../ui/composer.glade.h:4
 msgid "_Copy"
 msgstr "_Copiar"
 
 #. Add a menu item for copying the address.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1023
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1028
 msgid "Copy _Email Address"
 msgstr "Copiar dirección de _correo"
 
 #. Add a menu item for copying the link.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1028
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1033
 #: ../ui/composer.glade.h:17
 msgid "Copy _Link"
 msgstr "Copiar en_lace"
 
 #. Select message.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1036
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1041
 msgid "Select _Message"
 msgstr "Seleccionar _mensaje"
 
 #. Inspect.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1048
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1053
 msgid "_Inspect"
 msgstr "_Inspeccionar"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1274
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1279
 msgid "This link appears to go to"
 msgstr "Parece que este enlace apunta a"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1275
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1280
 msgid "but actually goes to"
 msgstr "pero en realidad apunta a"
 
 #. If href doesn't look like a URL, something is fishy, so warn the user
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1330
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1335
 msgid " (Invalid?)"
 msgstr "(¿No válido?)"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1522
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1527
 msgid "_Save As..."
 msgstr "_Guardar como…"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1527
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1532
 msgid "Save All A_ttachments..."
 msgstr "Guardar todos los a_djuntos…"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1541
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1546
 msgid "_Save Image As..."
 msgstr "_Guardar imagen como…"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1564
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1569
 msgid "Save A_ttachment..."
 msgid_plural "Save All A_ttachments..."
 msgstr[0] "Guardar ad_junto…"
 msgstr[1] "Guardar todos los ad_juntos…"
 
 #. Reply to all on a message.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1579
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1584
 msgid "Reply to _All"
 msgstr "Responder a _todos"
 
 #. Mark as read/unread.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1596
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1601
 msgid "_Mark as Read"
 msgstr "_Marcar como leído"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1600
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1605
 msgid "_Mark as Unread"
 msgstr "_Marcar como no leído"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1606
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1611
 msgid "Mark Unread From _Here"
 msgstr "Marcar como no leído desde _aquí"
 
 #. Separator.
 #. View original message source.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1621
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1626
 msgid "_View Source"
 msgstr "_Ver código fuente"
 
 #. Generate the attachment table.
 #. / Placeholder filename for attachments with no filename.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1915
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1940
 #: ../src/engine/rfc822/rfc822-utils.vala:327
 msgid "none"
 msgstr "sin nombre"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:2045
+#: ../src/client/conversation-viewer/conversation-viewer.vala:2070
 msgid "Failed to open default text editor."
 msgstr "Falló al abrir el editor de textos predeterminado."
 
@@ -1585,7 +1580,6 @@ msgid "_Send"
 msgstr "_Enviar"
 
 #: ../ui/composer.glade.h:37
-#| msgid "_Send"
 msgid "Send"
 msgstr "Enviar"
 
@@ -1594,7 +1588,6 @@ msgid "_Attach File"
 msgstr "_Adjuntar archivo"
 
 #: ../ui/composer.glade.h:39
-#| msgid "_Attach File"
 msgid "Attach File"
 msgstr "Adjuntar archivo"
 
@@ -1603,26 +1596,35 @@ msgid "_Include Original Attachments"
 msgstr "_Incluir adjuntos originales"
 
 #: ../ui/composer.glade.h:41
-#| msgid "_Include Original Attachments"
 msgid "Include Original Attachments"
 msgstr "Incluir adjuntos originales"
 
 #. Address(es) e-mail is to be sent to
 #: ../ui/composer.glade.h:43
-msgid "_To:"
-msgstr "_Para:"
+#| msgid "_To:"
+msgid "_To"
+msgstr "_Para"
 
 #: ../ui/composer.glade.h:44
-msgid "_Cc:"
-msgstr "_Cc:"
+#| msgid "_Cc:"
+msgid "_Cc"
+msgstr "_Cc"
 
 #: ../ui/composer.glade.h:45
-msgid "_Subject:"
-msgstr "A_sunto:"
+#| msgid "_Subject:"
+msgid "_Subject"
+msgstr "A_sunto"
 
 #: ../ui/composer.glade.h:46
-msgid "_Bcc:"
-msgstr "Cc_o:"
+#| msgid "_Bcc:"
+msgid "_Bcc"
+msgstr "Cc_o"
+
+#. Geary account mail will be sent from
+#: ../ui/composer.glade.h:48
+#| msgid "From:"
+msgid "From"
+msgstr "De"
 
 #: ../ui/composer.glade.h:49
 msgid "Drop files here"
