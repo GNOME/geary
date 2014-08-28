@@ -32,6 +32,11 @@ public class LoginDialog : Gtk.Dialog {
         set_default_response(Gtk.ResponseType.OK);
         get_action_area().show_all();
         
+        destroy.connect(() => {
+            debug("User closed login dialog, exiting...");
+            GearyApplication.instance.exit(1);
+        });
+        
         on_info_changed();
     }
     
