@@ -48,6 +48,7 @@ src/client/conversation-viewer/conversation-viewer.vala
 src/client/conversation-viewer/conversation-web-view.vala
 src/client/dialogs/alert-dialog.vala
 src/client/dialogs/attachment-dialog.vala
+src/client/dialogs/certificate-warning-dialog.vala
 src/client/dialogs/password-dialog.vala
 src/client/dialogs/preferences-dialog.vala
 src/client/dialogs/upgrade-dialog.vala
@@ -114,6 +115,7 @@ src/engine/api/geary-named-flag.vala
 src/engine/api/geary-progress-monitor.vala
 src/engine/api/geary-search-folder.vala
 src/engine/api/geary-search-query.vala
+src/engine/api/geary-service.vala
 src/engine/api/geary-service-provider.vala
 src/engine/api/geary-special-folder-type.vala
 src/engine/app/app-conversation-monitor.vala
@@ -352,6 +354,7 @@ src/engine/util/util-trillian.vala
 [type: gettext/glade]ui/account_list.glade
 [type: gettext/glade]ui/account_spinner.glade
 [type: gettext/glade]ui/app_menu.interface
+[type: gettext/glade]ui/certificate_warning_dialog.glade
 [type: gettext/glade]ui/composer_accelerators.ui
 [type: gettext/glade]ui/composer.glade
 [type: gettext/glade]ui/find_bar.glade

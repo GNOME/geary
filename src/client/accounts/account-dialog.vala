@@ -92,8 +92,7 @@ public class AccountDialog : Gtk.Dialog {
             return;
         
         try {
-            yield account.get_passwords_async(Geary.CredentialsMediator.ServiceFlag.IMAP |
-                Geary.CredentialsMediator.ServiceFlag.SMTP);
+            yield account.get_passwords_async(Geary.ServiceFlag.IMAP | Geary.ServiceFlag.SMTP);
         } catch (Error err) {
             debug("Unable to fetch password(s) for account: %s", err.message);
         }
@@ -166,22 +165,34 @@ public class AccountDialog : Gtk.Dialog {
             options |= Geary.Engine.ValidationOption.CHECK_CONNECTIONS;
         
         // Validate account.
-        GearyApplication.instance.controller.validate_async.begin(info, options, null,
-            on_save_add_or_edit_completed);
+        do_save_or_edit_async.begin(info, options);
     }
     
-    private void on_save_add_or_edit_completed(Object? source, AsyncResult result) {
-        Geary.Engine.ValidationResult validation_result =
-            GearyApplication.instance.controller.validate_async.end(result);
-        
-        // If account was successfully added return to the account list. Otherwise, go back to the
-        // account add page so the user can try again.
-        if (validation_result == Geary.Engine.ValidationResult.OK) {
-            account_list_pane.present();
-        } else {
-            add_edit_pane.set_validation_result(validation_result);
-            add_edit_pane.present();
+    private async void do_save_or_edit_async(Geary.AccountInformation account_information,
+        Geary.Engine.ValidationOption options) {
+        Geary.Engine.ValidationResult validation_result = Geary.Engine.ValidationResult.OK;
+        for (;;) {
+            validation_result = yield GearyApplication.instance.controller.validate_async(
+                account_information, options);
+            
+            // If account was successfully added return to the account list.
+            if (validation_result == Geary.Engine.ValidationResult.OK) {
+                account_list_pane.present();
+                
+                return;
+            }
+            
+            // check for TLS warnings
+            bool retry_required;
+            validation_result = yield GearyApplication.instance.controller.validation_check_for_tls_warnings_async(
+                account_information, validation_result, out retry_required);
+            if (!retry_required)
+                break;
         }
+        
+        // Otherwise, go back to the account add page so the user can try again.
+        add_edit_pane.set_validation_result(validation_result);
+        add_edit_pane.present();
     }
     
     private void on_cancel_back_to_list() {

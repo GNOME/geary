@@ -9,7 +9,7 @@ public class Geary.Smtp.ClientConnection {
     public const uint16 DEFAULT_PORT_SSL = 465;
     public const uint16 DEFAULT_PORT_STARTTLS = 587;
     
-    public const uint DEFAULT_TIMEOUT_SEC = 60;
+    public const uint DEFAULT_TIMEOUT_SEC = 20;
     
     public Geary.Smtp.Capabilities? capabilities { get; private set; default = null; }
     
@@ -48,8 +48,17 @@ public class Geary.Smtp.ClientConnection {
         if (cx == null)
             return false;
         
-        yield cx.close_async(Priority.DEFAULT, cancellable);
+        Error? disconnect_error = null;
+        try {
+            yield cx.close_async(Priority.DEFAULT, cancellable);
+        } catch (Error err) {
+            disconnect_error = err;
+        }
+        
         cx = null;
+        
+        if (disconnect_error != null)
+            throw disconnect_error;
         
         return true;
     }

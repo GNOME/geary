@@ -8,12 +8,12 @@
 public class SecretMediator : Geary.CredentialsMediator, Object {
     private const string OLD_GEARY_USERNAME_PREFIX = "org.yorba.geary username:";
     
-    private string get_key_name(Geary.CredentialsMediator.Service service, string user) {
+    private string get_key_name(Geary.Service service, string user) {
         switch (service) {
-            case Service.IMAP:
+            case Geary.Service.IMAP:
                 return "org.yorba.geary imap_username:" + user;
             
-            case Service.SMTP:
+            case Geary.Service.SMTP:
                 return "org.yorba.geary smtp_username:" + user;
             
             default:
@@ -21,12 +21,12 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
         }
     }
 
-    private Geary.Credentials get_credentials(Geary.CredentialsMediator.Service service, Geary.AccountInformation account_information) {
+    private Geary.Credentials get_credentials(Geary.Service service, Geary.AccountInformation account_information) {
         switch (service) {
-            case Service.IMAP:
+            case Geary.Service.IMAP:
                 return account_information.imap_credentials;
 
-            case Service.SMTP:
+            case Geary.Service.SMTP:
                 return account_information.smtp_credentials;
 
             default:
@@ -49,7 +49,7 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
     }
     
     public virtual async string? get_password_async(
-        Geary.CredentialsMediator.Service service, Geary.AccountInformation account_information, Cancellable? cancellable = null)
+        Geary.Service service, Geary.AccountInformation account_information, Cancellable? cancellable = null)
         throws Error {
         string key_name = get_key_name(service, account_information.email);
         string? password = yield Secret.password_lookup(Secret.SCHEMA_COMPAT_NETWORK, cancellable,
@@ -77,7 +77,7 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
     }
     
     public virtual async void set_password_async(
-        Geary.CredentialsMediator.Service service, Geary.AccountInformation account_information,
+        Geary.Service service, Geary.AccountInformation account_information,
         Cancellable? cancellable = null) throws Error {
         string key_name = get_key_name(service, account_information.email);
         Geary.Credentials credentials = get_credentials(service, account_information);
@@ -89,7 +89,7 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
     }
     
     public virtual async void clear_password_async(
-        Geary.CredentialsMediator.Service service, Geary.AccountInformation account_information, Cancellable? cancellable = null)
+        Geary.Service service, Geary.AccountInformation account_information, Cancellable? cancellable = null)
         throws Error {
         // delete new-style and old-style locations
         Geary.Credentials credentials = get_credentials(service, account_information);
@@ -104,7 +104,7 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
             OLD_GEARY_USERNAME_PREFIX + credentials.user);
     }
     
-    public virtual async bool prompt_passwords_async(Geary.CredentialsMediator.ServiceFlag services,
+    public virtual async bool prompt_passwords_async(Geary.ServiceFlag services,
         Geary.AccountInformation account_information,
         out string? imap_password, out string? smtp_password,
         out bool imap_remember_password, out bool smtp_remember_password) throws Error {

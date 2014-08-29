@@ -53,7 +53,7 @@ async void main_async() throws Error {
         stdout.printf("Sent email #%d\n", ctr);
     }
     
-    Geary.Smtp.Response? logout = yield session.logout_async();
+    Geary.Smtp.Response? logout = yield session.logout_async(false);
     stdout.printf("%s\n", logout.to_string());
 }
 

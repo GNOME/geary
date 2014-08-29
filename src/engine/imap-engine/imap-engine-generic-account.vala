@@ -122,7 +122,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         // IMAP password before attempting a connection.  This might have to be
         // reworked when we allow passwordless logins.
         if (!information.imap_credentials.is_complete())
-            yield information.fetch_passwords_async(Geary.CredentialsMediator.ServiceFlag.IMAP);
+            yield information.fetch_passwords_async(ServiceFlag.IMAP);
         
         try {
             yield local.open_async(information.settings_dir, Engine.instance.resource_dir.get_child("sql"),
@@ -853,7 +853,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
     
     private async void do_login_failed_async(Geary.Credentials? credentials) {
         try {
-            if (yield information.fetch_passwords_async(CredentialsMediator.ServiceFlag.IMAP, true))
+            if (yield information.fetch_passwords_async(ServiceFlag.IMAP, true))
                 return;
         } catch (Error e) {
             debug("Error prompting for IMAP password: %s", e.message);

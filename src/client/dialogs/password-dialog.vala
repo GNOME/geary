@@ -24,7 +24,7 @@ public class PasswordDialog {
     public bool remember_password { get; private set; }
     
     public PasswordDialog(bool smtp, Geary.AccountInformation account_information,
-        Geary.CredentialsMediator.ServiceFlag password_flags) {
+        Geary.ServiceFlag password_flags) {
         Gtk.Builder builder = GearyApplication.instance.create_builder("password-dialog.glade");
         
         dialog = (Gtk.Dialog) builder.get_object("PasswordDialog");

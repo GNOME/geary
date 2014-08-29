@@ -40,6 +40,7 @@ engine/api/geary-named-flags.vala
 engine/api/geary-progress-monitor.vala
 engine/api/geary-search-folder.vala
 engine/api/geary-search-query.vala
+engine/api/geary-service.vala
 engine/api/geary-service-provider.vala
 engine/api/geary-special-folder-type.vala
 
@@ -346,6 +347,7 @@ client/conversation-viewer/conversation-web-view.vala
 
 client/dialogs/alert-dialog.vala
 client/dialogs/attachment-dialog.vala
+client/dialogs/certificate-warning-dialog.vala
 client/dialogs/password-dialog.vala
 client/dialogs/preferences-dialog.vala
 client/dialogs/upgrade-dialog.vala
@@ -530,6 +532,7 @@ pkg_check_modules(DEPS REQUIRED
     gmime-2.6>=2.6.0
     libsecret-1>=0.11
     libxml-2.0>=2.7.8
+    gcr-3
     ${EXTRA_CLIENT_PKG_CONFIG}
 )
 
@@ -540,7 +543,7 @@ set(ENGINE_PACKAGES
 # webkitgtk-3.0 is listed as a custom VAPI (below) to ensure it's treated as a dependency and
 # built before compilation
 set(CLIENT_PACKAGES
-    gtk+-3.0 libsecret-1 libsoup-2.4 libnotify libcanberra ${EXTRA_CLIENT_PACKAGES}
+    gtk+-3.0 libsecret-1 libsoup-2.4 libnotify libcanberra gcr-3 ${EXTRA_CLIENT_PACKAGES}
 )
 
 set(CONSOLE_PACKAGES
@@ -558,6 +561,7 @@ set(CFLAGS
     -D_GSETTINGS_DIR=\"${CMAKE_BINARY_DIR}/gsettings\"
     -DGETTEXT_PACKAGE=\"${GETTEXT_PACKAGE}\"
     -DLANGUAGE_SUPPORT_DIRECTORY=\"${LANGUAGE_SUPPORT_DIRECTORY}\"
+    -DGCR_API_SUBJECT_TO_CHANGE
     -g
 )
 

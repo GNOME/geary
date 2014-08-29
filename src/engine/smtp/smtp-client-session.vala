@@ -109,10 +109,11 @@ public class Geary.Smtp.ClientSession {
         throw new SmtpError.AUTHENTICATION_FAILED("Unable to authenticate with %s", to_string());
     }
     
-    public async Response? logout_async(Cancellable? cancellable = null) throws Error {
+    public async Response? logout_async(bool force, Cancellable? cancellable = null) throws Error {
         Response? response = null;
         try {
-            response = yield cx.quit_async(cancellable);
+            if (!force)
+                response = yield cx.quit_async(cancellable);
         } catch (Error err) {
             // catch because although error occurred, still attempt to close the connection
             message("Unable to QUIT: %s", err.message);
