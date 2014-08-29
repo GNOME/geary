@@ -889,8 +889,8 @@ public class GearyController : Geary.BaseObject {
                 // TODO
             break;
             
-            case Geary.Account.Problem.RECV_EMAIL_LOGIN_FAILED:
-            case Geary.Account.Problem.SEND_EMAIL_LOGIN_FAILED:
+            case Geary.Account.Problem.RECV_EMAIL_LOGIN_DENIED:
+            case Geary.Account.Problem.SEND_EMAIL_LOGIN_DENIED:
                 // At this point, we've prompted them for the password and
                 // they've hit cancel, so there's not much for us to do here.
                 close_account(account);

@@ -190,6 +190,8 @@ public class Geary.Imap.ClientSession : BaseObject {
     
     public signal void logged_out();
     
+    public signal void login_denied();
+    
     public signal void login_failed();
     
     public signal void disconnected(DisconnectReason reason);
@@ -652,9 +654,13 @@ public class Geary.Imap.ClientSession : BaseObject {
     public async StatusResponse login_async(Geary.Credentials credentials, Cancellable? cancellable = null)
         throws Error {
         if (!credentials.is_complete()) {
-            login_failed();
+            login_denied();
+            
             throw new ImapError.UNAUTHENTICATED("No credentials provided for account: %s", credentials.to_string());
         }
+        
+        if (capabilities.has_capability(Capabilities.LOGIN_DISABLED))
+            throw new ImapError.UNAVAILABLE("LOGIN not allowed with %s", to_string());
         
         LoginCommand cmd = new LoginCommand(credentials.user, credentials.pass);
         
@@ -726,9 +732,17 @@ public class Geary.Imap.ClientSession : BaseObject {
         
         // Login after STARTTLS
         StatusResponse login_resp = yield login_async(credentials, cancellable);
-        if (login_resp.status != Status.OK) {
-            throw new ImapError.UNAUTHENTICATED("Unable to login to %s with supplied credentials",
-                to_string());
+        switch (login_resp.status) {
+            case Status.OK:
+                // fallthrough
+            break;
+            
+            case Status.NO:
+                throw new ImapError.UNAUTHENTICATED("Login denied to %s with supplied credentials",
+                    to_string());
+            
+            default:
+                throw new ImapError.SERVER_ERROR("Login to %s failed", to_string());
         }
         
         // if new capabilities not offered after login, get them now
@@ -785,8 +799,14 @@ public class Geary.Imap.ClientSession : BaseObject {
                 
                 return State.AUTHORIZED;
             
+            case Status.NO:
+                debug("[%s] LOGIN denied: %s", to_string(), completion_response.to_string());
+                fsm.do_post_transition(() => { login_denied(); });
+                
+                return State.NOAUTH;
+            
             default:
-                debug("[%s] Unable to LOGIN: %s", to_string(), completion_response.to_string());
+                debug("[%s] LOGIN failed: %s", to_string(), completion_response.to_string());
                 fsm.do_post_transition(() => { login_failed(); });
                 
                 return State.NOAUTH;

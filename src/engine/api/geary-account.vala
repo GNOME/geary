@@ -6,8 +6,8 @@
 
 public interface Geary.Account : BaseObject {
     public enum Problem {
-        RECV_EMAIL_LOGIN_FAILED,
-        SEND_EMAIL_LOGIN_FAILED,
+        RECV_EMAIL_LOGIN_DENIED,
+        SEND_EMAIL_LOGIN_DENIED,
         HOST_UNREACHABLE,
         NETWORK_UNAVAILABLE,
         DATABASE_FAILURE,

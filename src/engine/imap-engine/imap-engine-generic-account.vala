@@ -32,7 +32,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         this.remote = remote;
         this.local = local;
         
-        this.remote.login_failed.connect(on_login_failed);
+        this.remote.login_denied.connect(on_login_denied);
         this.local.email_sent.connect(on_email_sent);
         
         search_upgrade_monitor = local.search_index_monitor;
@@ -843,15 +843,15 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         return yield local.get_containing_folders_async(ids, cancellable);
     }
     
-    private void on_login_failed(Geary.Credentials? credentials) {
+    private void on_login_denied(Geary.Credentials? credentials) {
         if (awaiting_credentials)
             return; // We're already asking for the password.
         
         awaiting_credentials = true;
-        do_login_failed_async.begin(credentials, () => { awaiting_credentials = false; });
+        do_login_denied_async.begin(credentials, () => { awaiting_credentials = false; });
     }
     
-    private async void do_login_failed_async(Geary.Credentials? credentials) {
+    private async void do_login_denied_async(Geary.Credentials? credentials) {
         try {
             if (yield information.fetch_passwords_async(ServiceFlag.IMAP, true))
                 return;
@@ -859,7 +859,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
             debug("Error prompting for IMAP password: %s", e.message);
         }
         
-        notify_report_problem(Geary.Account.Problem.RECV_EMAIL_LOGIN_FAILED, null);
+        notify_report_problem(Geary.Account.Problem.RECV_EMAIL_LOGIN_DENIED, null);
     }
 }
 

@@ -35,14 +35,14 @@ private class Geary.Imap.Account : BaseObject {
     private Gee.List<ServerData>? server_data_collector = null;
     private Imap.MailboxSpecifier? inbox_specifier = null;
     
-    public signal void login_failed(Geary.Credentials cred);
+    public signal void login_denied(Geary.Credentials cred);
     
     public Account(Geary.AccountInformation account_information) {
         name = "IMAP Account for %s".printf(account_information.imap_credentials.to_string());
         this.account_information = account_information;
         this.session_mgr = new ClientSessionManager(account_information);
         
-        session_mgr.login_failed.connect(on_login_failed);
+        session_mgr.login_denied.connect(on_login_denied);
     }
     
     private void check_open() throws Error {
@@ -506,8 +506,8 @@ private class Geary.Imap.Account : BaseObject {
             (path != null) ? path.to_string() : "root", session_mgr.to_string());
     }
     
-    private void on_login_failed() {
-        login_failed(account_information.imap_credentials);
+    private void on_login_denied() {
+        login_denied(account_information.imap_credentials);
     }
     
     public string to_string() {

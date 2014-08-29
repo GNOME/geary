@@ -252,7 +252,7 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
                     }
                     
                     if (report)
-                        report_problem(Geary.Account.Problem.SEND_EMAIL_LOGIN_FAILED, send_err);
+                        report_problem(Geary.Account.Problem.SEND_EMAIL_LOGIN_DENIED, send_err);
                 } else if (send_err is TlsError) {
                     // up to application to be aware of problem via Geary.Engine, but do nap and
                     // try later

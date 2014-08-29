@@ -53,7 +53,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
     private bool untrusted_host = false;
     private uint authorized_session_error_retry_timeout_id = 0;
     
-    public signal void login_failed();
+    public signal void login_denied();
     
     public ClientSessionManager(AccountInformation account_information) {
         this.account_information = account_information;
@@ -396,9 +396,13 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
     }
     
     private void on_login_failed(ClientSession session) {
+        session.disconnect_async.begin();
+    }
+    
+    private void on_login_denied(ClientSession session) {
         authentication_failed = true;
         
-        login_failed();
+        login_denied();
         
         session.disconnect_async.begin();
     }
@@ -409,6 +413,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         
         // See create_new_authorized_session() for why the "disconnected" signal is not subscribed
         // to here (but *is* unsubscribed to in remove_session())
+        session.login_denied.connect(on_login_denied);
         session.login_failed.connect(on_login_failed);
     }
     
@@ -423,6 +428,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         bool removed = sessions.remove(session);
         if (removed) {
             session.disconnected.disconnect(on_disconnected);
+            session.login_denied.disconnect(on_login_denied);
             session.login_failed.disconnect(on_login_failed);
         }
         
