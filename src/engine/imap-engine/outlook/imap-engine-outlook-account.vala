@@ -5,31 +5,21 @@
  */
 
 private class Geary.ImapEngine.OutlookAccount : Geary.ImapEngine.GenericAccount {
-    private static Geary.Endpoint? _imap_endpoint = null;
-    public static Geary.Endpoint IMAP_ENDPOINT { get {
-        if (_imap_endpoint == null) {
-            _imap_endpoint = new Geary.Endpoint(
-                "imap-mail.outlook.com",
-                Imap.ClientConnection.DEFAULT_PORT_SSL,
-                Geary.Endpoint.Flags.SSL | Geary.Endpoint.Flags.GRACEFUL_DISCONNECT,
-                Imap.ClientConnection.RECOMMENDED_TIMEOUT_SEC);
-        }
-        
-        return _imap_endpoint;
-    } }
+    public static Geary.Endpoint generate_imap_endpoint() {
+        return new Geary.Endpoint(
+            "imap-mail.outlook.com",
+            Imap.ClientConnection.DEFAULT_PORT_SSL,
+            Geary.Endpoint.Flags.SSL | Geary.Endpoint.Flags.GRACEFUL_DISCONNECT,
+            Imap.ClientConnection.RECOMMENDED_TIMEOUT_SEC);
+    }
     
-    private static Geary.Endpoint? _smtp_endpoint = null;
-    public static Geary.Endpoint SMTP_ENDPOINT { get {
-        if (_smtp_endpoint == null) {
-            _smtp_endpoint = new Geary.Endpoint(
-                "smtp-mail.outlook.com",
-                Smtp.ClientConnection.DEFAULT_PORT_STARTTLS,
-                Geary.Endpoint.Flags.STARTTLS | Geary.Endpoint.Flags.GRACEFUL_DISCONNECT,
-                Smtp.ClientConnection.DEFAULT_TIMEOUT_SEC);
-        }
-        
-        return _smtp_endpoint;
-    } }
+    public static Geary.Endpoint generate_smtp_endpoint() {
+        return new Geary.Endpoint(
+            "smtp-mail.outlook.com",
+            Smtp.ClientConnection.DEFAULT_PORT_STARTTLS,
+            Geary.Endpoint.Flags.STARTTLS | Geary.Endpoint.Flags.GRACEFUL_DISCONNECT,
+            Smtp.ClientConnection.DEFAULT_TIMEOUT_SEC);
+    }
     
     public OutlookAccount(string name, AccountInformation account_information, Imap.Account remote,
         ImapDB.Account local) {

@@ -5,25 +5,6 @@
  */
 
 public interface Geary.CredentialsMediator : Object {
-    public enum Service {
-        IMAP,
-        SMTP;
-    }
-    
-    [Flags]
-    public enum ServiceFlag {
-        IMAP,
-        SMTP;
-        
-        public bool has_imap() {
-            return (this & IMAP) == IMAP;
-        }
-        
-        public bool has_smtp() {
-            return (this & SMTP) == SMTP;
-        }
-    }
-    
     /**
      * Query the key store for the password of the given username for the given
      * service.  Return null if the password wasn't in the key store, or the

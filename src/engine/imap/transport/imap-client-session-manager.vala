@@ -50,6 +50,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
     private Nonblocking.Mutex sessions_mutex = new Nonblocking.Mutex();
     private Gee.HashSet<ClientSession> reserved_sessions = new Gee.HashSet<ClientSession>();
     private bool authentication_failed = false;
+    private bool untrusted_host = false;
     private uint authorized_session_error_retry_timeout_id = 0;
     
     public signal void login_failed();
@@ -58,11 +59,19 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         this.account_information = account_information;
         
         account_information.notify["imap-credentials"].connect(on_imap_credentials_notified);
+        account_information.get_imap_endpoint().untrusted_host.connect(on_imap_untrusted_host);
+        account_information.get_imap_endpoint().notify[Endpoint.PROP_TRUST_UNTRUSTED_HOST].connect(
+            on_imap_trust_untrusted_host);
     }
     
     ~ClientSessionManager() {
         if (is_open)
             warning("Destroying opened ClientSessionManager");
+        
+        account_information.notify["imap-credentials"].disconnect(on_imap_credentials_notified);
+        account_information.get_imap_endpoint().untrusted_host.disconnect(on_imap_untrusted_host);
+        account_information.get_imap_endpoint().notify[Endpoint.PROP_TRUST_UNTRUSTED_HOST].disconnect(
+            on_imap_trust_untrusted_host);
     }
     
     public async void open_async(Cancellable? cancellable) throws Error {
@@ -136,7 +145,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
             return;
         }
         
-        while ((sessions.size + pending_sessions) < min_pool_size && !authentication_failed && is_open)
+        while ((sessions.size + pending_sessions) < min_pool_size && !authentication_failed && is_open && !untrusted_host)
             schedule_new_authorized_session();
         
         try {
@@ -183,6 +192,9 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         throws Error {
         if (authentication_failed)
             throw new ImapError.UNAUTHENTICATED("Invalid ClientSessionManager credentials");
+        
+        if (untrusted_host)
+            throw new ImapError.UNAUTHENTICATED("Untrusted host %s", account_information.get_imap_endpoint().to_string());
         
         ClientSession new_session = new ClientSession(account_information.get_imap_endpoint());
         
@@ -425,6 +437,23 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         sessions_mutex.release(ref token);
         
         return removed;
+    }
+    
+    private void on_imap_untrusted_host() {
+        // this is called any time trust issues are detected, so immediately clutch in to stop
+        // retries
+        untrusted_host = true;
+    }
+    
+    private void on_imap_trust_untrusted_host() {
+        // fired when the trust_untrusted_host property changes, indicating if the user has agreed
+        // to ignore the trust problems and continue connecting
+        if (untrusted_host && account_information.get_imap_endpoint().trust_untrusted_host == Trillian.TRUE) {
+            untrusted_host = false;
+            
+            if (is_open)
+                adjust_session_pool.begin();
+        }
     }
     
     /**

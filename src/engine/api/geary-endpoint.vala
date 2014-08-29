@@ -10,6 +10,8 @@
  */
 
 public class Geary.Endpoint : BaseObject {
+    public const string PROP_TRUST_UNTRUSTED_HOST = "trust-untrusted-host";
+    
     [Flags]
     public enum Flags {
         NONE = 0,
@@ -26,6 +28,12 @@ public class Geary.Endpoint : BaseObject {
         }
     }
     
+    public enum SecurityType {
+        NONE,
+        SSL,
+        STARTTLS
+    }
+    
     public enum AttemptStarttls {
         YES,
         NO,
@@ -38,6 +46,52 @@ public class Geary.Endpoint : BaseObject {
     public TlsCertificateFlags tls_validation_flags { get; set; default = TlsCertificateFlags.VALIDATE_ALL; }
     public bool force_ssl3 { get; set; default = false; }
     
+    /**
+     * When set, TLS has reported certificate issues.
+     *
+     * @see trust_untrusted_host
+     * @see untrusted_host
+     */
+    public TlsCertificateFlags tls_validation_warnings { get; private set; default = 0; }
+    
+    /**
+     * The TLS certificate for an invalid or untrusted connection.
+     */
+    public TlsCertificate? untrusted_certificate { get; private set; default = null; }
+    
+    /**
+     * When set, indicates the user has acceded to trusting the host even though TLS has reported
+     * certificate issues.
+     *
+     * Initialized to {@link Trillian.UNKNOWN}, meaning the user must decide when warnings are
+     * detected.
+     *
+     * @see untrusted_host
+     * @see tls_validation_warnings
+     */
+    public Trillian trust_untrusted_host { get; set; default = Trillian.UNKNOWN; }
+    
+    /**
+     * Returns true if (a) no TLS warnings have been detected or (b) user has explicitly acceded
+     * to ignoring them and continuing the connection.
+     *
+     * This returns true if no connection has been attempted or connected and STARTTLS has not
+     * been issued.  It's only when a connection is attempted can the certificate be examined
+     * and this can accurately return false.  This behavior allows for a single code path to
+     * first attempt a connection and thereafter only attempt connections when TLS issues have
+     * been resolved by the user.
+     *
+     * @see tls_validation_warnings
+     * @see trust_untrusted_host
+     */
+    public bool is_trusted_or_never_connected {
+        get {
+            return (tls_validation_warnings != 0)
+                ? trust_untrusted_host.is_certain()
+                : trust_untrusted_host.is_possible();
+        }
+    }
+    
     public bool is_ssl { get {
         return flags.is_all_set(Flags.SSL);
     } }
@@ -48,36 +102,48 @@ public class Geary.Endpoint : BaseObject {
     
     private SocketClient? socket_client = null;
     
+    /**
+     * Fired when TLS certificate warnings are detected and the caller has not marked this
+     * {@link Endpoint} as trusted via {@link trust_untrusted_host}.
+     *
+     * The connection will be closed when this is fired.  The caller should query the user about
+     * how to deal with the situation.  If user wants to proceed, set {@link trust_untrusted_host}
+     * to {@link Trillian.TRUE} and retry connection.
+     *
+     * @see tls_validation_warnings
+     */
+    public signal void untrusted_host(SecurityType security, TlsConnection cx);
+    
     public Endpoint(string host_specifier, uint16 default_port, Flags flags, uint timeout_sec) {
         this.remote_address = new NetworkAddress(host_specifier, default_port);
         this.flags = flags;
         this.timeout_sec = timeout_sec;
     }
     
-    public SocketClient get_socket_client() {
+    private SocketClient get_socket_client() {
         if (socket_client != null)
             return socket_client;
-
+        
         socket_client = new SocketClient();
-
+        
         if (is_ssl) {
             socket_client.set_tls(true);
             socket_client.set_tls_validation_flags(tls_validation_flags);
             socket_client.event.connect(on_socket_client_event);
         }
-
+        
         socket_client.set_timeout(timeout_sec);
-
+        
         return socket_client;
     }
 
     public async SocketConnection connect_async(Cancellable? cancellable = null) throws Error {
         SocketConnection cx = yield get_socket_client().connect_async(remote_address, cancellable);
-
+        
         TcpConnection? tcp = cx as TcpConnection;
         if (tcp != null)
             tcp.set_graceful_disconnect(flags.is_all_set(Flags.GRACEFUL_DISCONNECT));
-
+        
         return cx;
     }
     
@@ -110,20 +176,31 @@ public class Geary.Endpoint : BaseObject {
     }
     
     private bool on_accept_starttls_certificate(TlsConnection cx, TlsCertificate cert, TlsCertificateFlags flags) {
-        return report_tls_warnings("STARTTLS", flags);
+        return report_tls_warnings(SecurityType.STARTTLS, cx, cert, flags);
     }
     
     private bool on_accept_ssl_certificate(TlsConnection cx, TlsCertificate cert, TlsCertificateFlags flags) {
-        return report_tls_warnings("SSL", flags);
+        return report_tls_warnings(SecurityType.SSL, cx, cert, flags);
     }
     
-    private bool report_tls_warnings(string cx_type, TlsCertificateFlags warnings) {
+    private bool report_tls_warnings(SecurityType security, TlsConnection cx, TlsCertificate cert,
+        TlsCertificateFlags warnings) {
         // TODO: Report or verify flags with user, but for now merely log for informational/debugging
         // reasons and accede
-        message("%s TLS warnings connecting to %s: %Xh (%s)", cx_type, to_string(), warnings,
+        message("%s TLS warnings connecting to %s: %Xh (%s)", security.to_string(), to_string(), warnings,
             tls_flags_to_string(warnings));
         
-        return true;
+        tls_validation_warnings = warnings;
+        untrusted_certificate = cert;
+        
+        // if user has marked this untrusted host as trusted already, accept warnings and move on
+        if (trust_untrusted_host == Trillian.TRUE)
+            return true;
+        
+        // signal an issue has been detected and return false to deny the connection
+        untrusted_host(security, cx);
+        
+        return false;
     }
     
     private string tls_flags_to_string(TlsCertificateFlags flags) {
