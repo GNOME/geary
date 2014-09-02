@@ -972,18 +972,10 @@ public class Geary.Imap.ClientConnection : BaseObject {
         return do_proceed(State.DEIDLING, user);
     }
     
-    private void idle_status_response_post_transition(void *user, Object? object, Error? err) {
-        received_status_response((StatusResponse) object);
-        
-        // non-null use means "leaving idle"
-        if (user != null)
-            in_idle(false);
-    }
-    
     private uint on_idle_status_response(uint state, uint event, void *user, Object? object) {
         StatusResponse status_response = (StatusResponse) object;
         
-        // if not a post IDLE tag, then treat as external status response
+        // if not a posted IDLE tag, then treat as external status response
         if (!posted_idle_tags.remove(status_response.tag)) {
             fsm.do_post_transition(signal_status_response, user, object);
             
@@ -1003,13 +995,13 @@ public class Geary.Imap.ClientConnection : BaseObject {
         // if leaving IDLE state for another)
         uint next = (posted_idle_tags.size == 0) ? State.CONNECTED : state;
         
-        // need to always signal the StatusResponse, don't always signal about changing IDLE (this
-        // may've been signalled already when the DONE was transmitted)
-        //
-        // user pointer indicates if leaving idle.  playing with fire here...
-        fsm.do_post_transition(idle_status_response_post_transition,
-            (state == State.IDLE && next != State.IDLE) ? (void *) 1 : null,
-            status_response, null);
+        // don't signal about the StatusResponse, it's in response to a Command generated
+        // internally (IDLE) and will confuse watchers who receive StatusResponse for a Command
+        // they didn't issue
+        
+        // However, need to signal about leaving idle
+        if (state == State.IDLE && next != State.IDLE)
+            fsm.do_post_transition(signal_left_idle);
         
         // If leaving IDLE for CONNECTED but user has asked to stay in IDLE whenever quiet, reschedule
         // flush (which will automatically send IDLE command)
