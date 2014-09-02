@@ -316,8 +316,11 @@ private class Geary.Imap.Account : BaseObject {
         check_open();
         
         Gee.List<MailboxInformation>? child_info = yield list_children_async(parent, cancellable);
-        if (child_info == null || child_info.size == 0)
+        if (child_info == null || child_info.size == 0) {
+            debug("No children found listing %s", (parent != null) ? parent.to_string() : "root");
+            
             return null;
+        }
         
         Gee.List<Imap.Folder> child_folders = new Gee.ArrayList<Imap.Folder>();
         
@@ -358,6 +361,7 @@ private class Geary.Imap.Account : BaseObject {
             
             if (response.status != Status.OK) {
                 message("Unable to get STATUS of %s: %s", mailbox.to_string(), response.to_string());
+                message("STATUS command: %s", cmd.to_string());
                 
                 continue;
             }
@@ -430,8 +434,10 @@ private class Geary.Imap.Account : BaseObject {
         Gee.List<MailboxInformation> list_results = new Gee.ArrayList<MailboxInformation>();
         StatusResponse response = yield send_command_async(cmd, list_results, null, cancellable);
         
-        if (response.status != Status.OK)
-            throw_not_found(parent);
+        if (response.status != Status.OK) {
+            throw new ImapError.SERVER_ERROR("Unable to list children of %s: %s",
+                (parent != null) ? parent.to_string() : "root", response.to_string());
+        }
         
         // See note at ListCommand about some servers returning the parent's name alongside their
         // children ... this filters this out
