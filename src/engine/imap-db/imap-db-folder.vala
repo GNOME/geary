@@ -21,6 +21,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     private const int LIST_EMAIL_WITH_MESSAGE_CHUNK_COUNT = 10;
     private const int LIST_EMAIL_METADATA_COUNT = 100;
     private const int LIST_EMAIL_FIELDS_CHUNK_COUNT = 500;
+    private const int REMOVE_COMPLETE_LOCATIONS_CHUNK_COUNT = 500;
     private const int CREATE_MERGE_EMAIL_CHUNK_COUNT = 25;
     
     [Flags]
@@ -308,13 +309,8 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         }, cancellable);
         
         // remove complete locations (emails with all fields downloaded)
-        if (only_incomplete && locations.size > 0) {
-            yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
-                do_remove_complete_locations(cx, locations, cancellable);
-                
-                return Db.TransactionOutcome.SUCCESS;
-            }, cancellable);
-        }
+        if (only_incomplete)
+            locations = yield remove_complete_locations_in_chunks_async(locations, cancellable);
         
         // Next, read in email in chunks
         return yield list_email_in_chunks_async(locations, required_fields, flags, cancellable);
@@ -411,11 +407,12 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             
             locations = do_results_to_locations(stmt.exec(cancellable), flags, cancellable);
             
-            if (only_incomplete)
-                do_remove_complete_locations(cx, locations, cancellable);
-            
             return Db.TransactionOutcome.SUCCESS;
         }, cancellable);
+        
+        // remove complete locations (emails with all fields downloaded)
+        if (only_incomplete)
+            locations = yield remove_complete_locations_in_chunks_async(locations, cancellable);
         
         // Next, read in email in chunks
         return yield list_email_in_chunks_async(locations, required_fields, flags, cancellable);
@@ -465,14 +462,46 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             
             locations = do_results_to_locations(stmt.exec(cancellable), flags, cancellable);
             
-            if (only_incomplete)
-                do_remove_complete_locations(cx, locations, cancellable);
-            
             return Db.TransactionOutcome.SUCCESS;
         }, cancellable);
         
+        // remove complete locations (emails with all fields downloaded)
+        if (only_incomplete)
+            locations = yield remove_complete_locations_in_chunks_async(locations, cancellable);
+        
         // Next, read in email in chunks
         return yield list_email_in_chunks_async(locations, required_fields, flags, cancellable);
+    }
+    
+    private async Gee.List<LocationIdentifier>? remove_complete_locations_in_chunks_async(
+        Gee.List<LocationIdentifier>? locations, Cancellable? cancellable) throws Error {
+        if (locations == null || locations.size == 0)
+            return locations;
+        
+        Gee.List<LocationIdentifier> incomplete_locations = new Gee.ArrayList<LocationIdentifier>();
+        
+        // remove complete locations in chunks to avoid locking the database for long periods of
+        // time
+        int start = 0;
+        for (;;) {
+            if (start >= locations.size)
+                break;
+            
+            int end = (start + REMOVE_COMPLETE_LOCATIONS_CHUNK_COUNT).clamp(0, locations.size);
+            Gee.List<LocationIdentifier> slice = locations.slice(start, end);
+            
+            yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
+                do_remove_complete_locations(cx, slice, cancellable);
+                
+                return Db.TransactionOutcome.SUCCESS;
+            }, cancellable);
+            
+            incomplete_locations.add_all(slice);
+            
+            start = end;
+        }
+        
+        return (incomplete_locations.size > 0) ? incomplete_locations : null;
     }
     
     private async Gee.List<Geary.Email>? list_email_in_chunks_async(Gee.List<LocationIdentifier>? ids,
@@ -2081,41 +2110,29 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         if (locations == null || locations.size == 0)
             return;
         
-        // fetch incomplete locations in chunks
+        StringBuilder sql = new StringBuilder("""
+            SELECT id FROM MessageTable WHERE id IN (
+        """);
+        bool first = true;
+        foreach (LocationIdentifier location_id in locations) {
+            if (!first)
+                sql.append(",");
+            
+            sql.append(location_id.message_id.to_string());
+            first = false;
+        }
+        sql.append(") AND fields <> ?");
+        
+        Db.Statement stmt = cx.prepare(sql.str);
+        stmt.bind_int(0, Geary.Email.Field.ALL);
+        
+        Db.Result results = stmt.exec(cancellable);
+        
         Gee.HashSet<int64?> incomplete_locations = new Gee.HashSet<int64?>(Collection.int64_hash_func,
             Collection.int64_equal_func);
-        int start = 0;
-        for (;;) {
-            if (start >= locations.size)
-                break;
-            
-            int end = (start + LIST_EMAIL_FIELDS_CHUNK_COUNT).clamp(0, locations.size);
-            Gee.List<LocationIdentifier> slice = locations.slice(start, end);
-            
-            StringBuilder sql = new StringBuilder("""
-                SELECT id FROM MessageTable WHERE id IN (
-            """);
-            bool first = true;
-            foreach (LocationIdentifier location_id in slice) {
-                if (!first)
-                    sql.append(",");
-                
-                sql.append(location_id.message_id.to_string());
-                first = false;
-            }
-            sql.append(") AND fields <> ?");
-            
-            Db.Statement stmt = cx.prepare(sql.str);
-            stmt.bind_int(0, Geary.Email.Field.ALL);
-            
-            Db.Result results = stmt.exec(cancellable);
-            
-            while (!results.finished) {
-                incomplete_locations.add(results.int64_at(0));
-                results.next(cancellable);
-            }
-            
-            start = end;
+        while (!results.finished) {
+            incomplete_locations.add(results.int64_at(0));
+            results.next(cancellable);
         }
         
         if (incomplete_locations.size == 0) {
