@@ -1,3 +1,11 @@
+Geary 0.6.3 - 2 September 2014
+------------------------------
+
+  * Warn user of TLS certificate issues when connecting (#713247)
+  * Fix wrong timestamp in composed email Date: header (#714376)
+  * Compile with Vala 0.25 and better
+
+
 Geary 0.6.2 - 20 August 2014
 ----------------------------
 
