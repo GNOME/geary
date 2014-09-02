@@ -1,3 +1,14 @@
+geary (0.7.2-1~trusty1) trusty; urgency=low
+
+  * Warn user of TLS certificate issues when connecting (#713247)
+  * Better scrolling system for inline composer
+  * Improved database performance and reduced lags
+  * IMAP stack fix (old IDLEs causing command completion)
+  * Compile with Vala 0.25 and better
+  * Updated translations
+
+ -- Jim Nelson <jim@yorba.org>  Tue, 02 Sep 2014 16:36:51 -0700
+
 geary (0.7.1-1~saucy1) saucy; urgency=low
 
   * Show attachments lacking a Content-Disposition

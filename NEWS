@@ -1,3 +1,14 @@
+Geary 0.7.2 - 2 September 2014
+------------------------------
+
+  * Warn user of TLS certificate issues when connecting (#713247)
+  * Better scrolling system for inline composer
+  * Improved database performance and reduced lags
+  * IMAP stack fix (old IDLEs causing command completion)
+  * Compile with Vala 0.25 and better
+  * Updated translations
+
+
 Geary 0.7.1 - 20 August 2014
 ----------------------------
 
