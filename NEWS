@@ -24,6 +24,23 @@ Geary 0.7.0 - 18 July 2014
   * Updated translations
 
 
+Geary 0.6.3 - 2 September 2014
+------------------------------
+
+  * Warn user of TLS certificate issues when connecting (#713247)
+  * Fix wrong timestamp in composed email Date: header (#714376)
+  * Compile with Vala 0.25 and better
+
+
+Geary 0.6.2 - 20 August 2014
+----------------------------
+
+  * Patch major memory leak due to GMime bindings
+  * Prevent Vala 0.26 compiler error
+  * Stabilize search sorting to prevent dropped search results
+  * Prevent Inbox from being cleared on startup w/ Dovecot, Zimbra, and more.
+
+
 Geary 0.6.1 - 1 July 2014
 -------------------------
 
