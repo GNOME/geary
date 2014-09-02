@@ -697,6 +697,20 @@ public class ConversationViewer : Gtk.Box {
         } catch (Error html_error) {
             warning("Error setting HTML for message: %s", html_error.message);
         }
+        
+        // Scope <style> tags
+        try {
+            WebKit.DOM.StyleSheetList style_sheets = web_view.get_dom_document().style_sheets;
+            string div_id = div_message.get_attribute("id");
+            for (int i = 0; i < style_sheets.length; i++) {
+                WebKit.DOM.StyleSheet style_sheet = style_sheets.item(i);
+                WebKit.DOM.Element style_element = (WebKit.DOM.Element) style_sheet.owner_node;
+                if (closest_ancestor(style_element, ".email") == div_message)
+                    style_element.set_text_content(scope_style_sheet(style_sheet, div_id));
+            }
+        } catch (Error error) {
+            warning("Error scoping style nodes: %s", error.message);
+        }
 
         // Look for any attached emails
         Gee.List<Geary.RFC822.Message> sub_messages = message.get_sub_messages();
@@ -808,6 +822,48 @@ public class ConversationViewer : Gtk.Box {
         }
         
         loader.set_size(adj_width, adj_height);
+    }
+    
+    /*
+     * Go through a style sheet and modify the selectors of style rules so that
+     * they only apply to elements in the email identified by div_id.  Certain
+     * other rules (font faces, for example) are passed through unaltered, while
+     * the rest (like @media rules) are removed, since WebKitGTK doesn't implement
+     * the API we'd need to parse them.  WebKitGTK is also missing the API to
+     * alter the style sheet in place, so we return a string that will replace the
+     * contents of the style sheet in question.
+     */
+    private string scope_style_sheet(WebKit.DOM.StyleSheet style_sheet, string div_id) {
+        string scope = @"div[id='$div_id'] > .email_container > .body ";
+        StringBuilder new_style = new StringBuilder();
+        WebKit.DOM.CSSRuleList rules = ((WebKit.DOM.CSSStyleSheet) style_sheet).rules;
+        try {
+            // Remove "html", "body", "html body", and "html > body" from the start of selectors
+            GLib.Regex body_html = new Regex("^(\\s*html(\\s*>)?)?(\\s*body)?");
+            for (int i = 0; i < rules.length; i++) {
+                WebKit.DOM.CSSRule rule = rules.item(i);
+                switch (rule.type) {
+                    // See https://developer.mozilla.org/en-US/docs/Web/API/CSSRule
+                    case 1:   // Style rule
+                        new_style.append(body_html.replace_literal(rule.css_text, -1, 0, scope) + "\n");
+                    break;
+                    
+                    case 5:   // Font face rule
+                    case 7:   // Keyframes rule
+                    case 8:   // Keyframe rule
+                    case 10:  // Namespace rule
+                    case 11:  // Counter style rule
+                    case 14:  // Font feature values rule
+                        new_style.append(rule.css_text + "\n");
+                    break;
+                    
+                    // All other rules are omitted.
+                }
+            }
+        } catch (Error error) {
+            warning("Regex error in CSS scoping: %s", error.message);
+        }
+        return new_style.str;
     }
     
     private void unhide_last_email() {
