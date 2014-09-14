@@ -500,7 +500,7 @@ public class ConversationViewer : Gtk.Box {
             if (email.is_unread() == Geary.Trillian.FALSE) {
                 div_message.get_class_list().add("hide");
             }
-            if (email.from.contains_normalized(current_account_information.email)) {
+            if (email.from != null && email.from.contains_normalized(current_account_information.email)) {
                 div_message.get_class_list().add("sent");
             }
         } catch (Error setup_error) {
