@@ -188,7 +188,6 @@ public class ComposerWidget : Gtk.EventBox {
     private EmailEntry bcc_entry;
     public Gtk.Entry subject_entry;
     private Gtk.Label message_overlay_label;
-    private WebKit.DOM.Element? prev_selected_link = null;
     private Gtk.Box attachments_box;
     private Gtk.Alignment hidden_on_attachment_drag_over;
     private Gtk.Alignment visible_on_attachment_drag_over;
@@ -1497,19 +1496,23 @@ public class ComposerWidget : Gtk.EventBox {
         } catch (Error e) {
             debug("Error selecting link: %s", e.message);
         }
-        
-        composer.prev_selected_link = element;
     }
     
     private void link_dialog(string link) {
         Gtk.Dialog dialog = new Gtk.Dialog();
         bool existing_link = false;
         
+        // Save information needed to re-establish selection
+        WebKit.DOM.DOMSelection selection = editor.get_dom_document().get_default_view().
+            get_selection();
+        WebKit.DOM.Node anchor_node = selection.anchor_node;
+        long anchor_offset = selection.anchor_offset;
+        WebKit.DOM.Node focus_node = selection.focus_node;
+        long focus_offset = selection.focus_offset;
+        
         // Allow user to remove link if they're editing an existing one.
-        WebKit.DOM.Node selected = editor.get_dom_document().get_default_view().
-            get_selection().focus_node;
-        if (selected != null && (selected is WebKit.DOM.HTMLAnchorElement ||
-            selected.get_parent_element() is WebKit.DOM.HTMLAnchorElement)) {
+        if (focus_node != null && (focus_node is WebKit.DOM.HTMLAnchorElement ||
+            focus_node.get_parent_element() is WebKit.DOM.HTMLAnchorElement)) {
             existing_link = true;
             dialog.add_buttons(Stock._REMOVE, Gtk.ResponseType.REJECT);
         }
@@ -1539,15 +1542,12 @@ public class ComposerWidget : Gtk.EventBox {
         
         int response = dialog.run();
         
-        // If it's an existing link, re-select it.  This is necessary because selecting
-        // text in the Gtk.Entry will de-select all in the WebView.
-        if (existing_link) {
-            try {
-                editor.get_dom_document().get_default_view().get_selection().
-                    select_all_children(prev_selected_link);
-            } catch (Error e) {
-                debug("Error selecting link: %s", e.message);
-            }
+        // Re-establish selection, since selecting text in the Entry will de-select all
+        // in the WebView.
+        try {
+            selection.set_base_and_extent(anchor_node, anchor_offset, focus_node, focus_offset);
+        } catch (Error e) {
+            debug("Error re-establishing selection: %s", e.message);
         }
         
         if (response == Gtk.ResponseType.OK)
