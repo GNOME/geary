@@ -234,9 +234,22 @@ public class ConversationViewer : Gtk.Box {
         
         if (anchor_email != null && anchor_email == focus_email) {
             try {
+                WebKit.DOM.Range range = selection.get_range_at(0);
                 WebKit.DOM.HTMLElement dummy = (WebKit.DOM.HTMLElement) document.create_element("div");
-                dummy.append_child(selection.get_range_at(0).clone_contents());
-                quote = dummy.get_inner_html();
+                bool include_dummy = false;
+                WebKit.DOM.Node ancestor_node = range.get_common_ancestor_container();
+                WebKit.DOM.Element? ancestor = ancestor_node as WebKit.DOM.Element;
+                if (ancestor == null)
+                    ancestor = ancestor_node.get_parent_element();
+                // If the selection is part of a plain text message, we have to stick it in
+                // an appropriately styled div, so that new lines are preserved.
+                if (is_descendant_of(ancestor, ".plaintext")) {
+                    dummy.get_class_list().add("plaintext");
+                    dummy.set_attribute("style", "white-space: pre-wrap;");
+                    include_dummy = true;
+                }
+                dummy.append_child(range.clone_contents());
+                quote = include_dummy ? dummy.get_outer_html() : dummy.get_inner_html();
                 return anchor_email;
             } catch (Error error) {
                 debug("Problem getting selected text: %s", error.message);

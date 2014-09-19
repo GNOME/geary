@@ -259,6 +259,19 @@ public WebKit.DOM.HTMLElement? closest_ancestor(WebKit.DOM.Element element, stri
     }
 }
 
+public bool is_descendant_of(WebKit.DOM.Element? element, string selector) {
+    try {
+        while (element != null) {
+            if (element.webkit_matches_selector(selector))
+                return true;
+            element = element.get_parent_element();
+        }
+    } catch (Error error) {
+        warning("Problem traversing DOM: %s", error.message);
+    }
+    return false;
+}
+
 public string decorate_quotes(string text) throws Error {
     int level = 0;
     string outtext = "";
