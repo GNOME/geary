@@ -109,6 +109,7 @@ public class ComposerWidget : Gtk.EventBox {
         </head><body>
         <div id="message-body" contenteditable="true"></div>
         </body></html>""";
+    private const string CURSOR = "<span id=\"cursormarker\"></span>";
     
     private const int DRAFT_TIMEOUT_MSEC = 2000; // 2 seconds
     
@@ -446,7 +447,9 @@ public class ComposerWidget : Gtk.EventBox {
         
         // only add signature if the option is actually set and if this is not a draft
         if (account.information.use_email_signature && !is_referred_draft)
-            add_signature();
+            add_signature_and_cursor();
+        else
+            set_cursor();
         
         editor = new StylishWebView();
         edit_fixer = new WebViewEditFixer(editor);
@@ -603,17 +606,20 @@ public class ComposerWidget : Gtk.EventBox {
         }
         body.focus();  // Focus within the HTML document
 
-        if (!top_posting) {
-            try {
+        // Set cursor at appropriate position
+        try {
+            WebKit.DOM.Element? cursor = document.get_element_by_id("cursormarker");
+            if (cursor != null) {
                 WebKit.DOM.Range range = document.create_range();
-                range.select_node_contents(body);
+                range.select_node_contents(cursor);
                 range.collapse(false);
                 WebKit.DOM.DOMSelection selection = document.default_view.get_selection();
                 selection.remove_all_ranges();
                 selection.add_range(range);
-            } catch (Error error) {
-                debug("Error setting cursor at end of text: %s", error.message);
+                cursor.parent_element.remove_child(cursor);
             }
+        } catch (Error error) {
+            debug("Error setting cursor at end of text: %s", error.message);
         }
 
         protect_blockquote_styles();
@@ -803,36 +809,52 @@ public class ComposerWidget : Gtk.EventBox {
         set_focus();
     }
     
-    private void add_signature() {
+    private void add_signature_and_cursor() {
         string? signature = null;
         
         // If use signature is enabled but no contents are on settings then we'll use ~/.signature, if any
         // otherwise use whatever the user has input in settings dialog
         if (account.information.use_email_signature && Geary.String.is_empty_or_whitespace(account.information.email_signature)) {
             File signature_file = File.new_for_path(Environment.get_home_dir()).get_child(".signature");
-            if (!signature_file.query_exists())
+            if (!signature_file.query_exists()) {
+                set_cursor();
                 return;
+            }
             
             try {
                 FileUtils.get_contents(signature_file.get_path(), out signature);
-                if (Geary.String.is_empty_or_whitespace(signature))
+                if (Geary.String.is_empty_or_whitespace(signature)) {
+                    set_cursor();
                     return;
+                }
             } catch (Error error) {
                 debug("Error reading signature file %s: %s", signature_file.get_path(), error.message);
+                set_cursor();
                 return;
             }
         } else {
             signature = account.information.email_signature;
-            if(Geary.String.is_empty_or_whitespace(signature))
+            if(Geary.String.is_empty_or_whitespace(signature)) {
+                set_cursor();
                 return;
+            }
         }
         
         signature = Geary.HTML.escape_markup(signature);
         
         if (body_html == null)
-            body_html = Geary.HTML.preserve_whitespace("\n\n" + signature);
+            body_html = CURSOR + Geary.HTML.preserve_whitespace("\n\n" + signature);
+        else if (top_posting)
+            body_html = CURSOR + Geary.HTML.preserve_whitespace("\n\n" + signature) + body_html;
         else
-            body_html = Geary.HTML.preserve_whitespace("\n\n" + signature) + body_html;
+            body_html = body_html + CURSOR + Geary.HTML.preserve_whitespace("\n\n" + signature);
+    }
+    
+    private void set_cursor() {
+        if (top_posting)
+            body_html = CURSOR + body_html;
+        else
+            body_html = body_html + CURSOR;
     }
     
     private bool can_save() {
