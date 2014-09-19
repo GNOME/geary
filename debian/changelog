@@ -1,3 +1,11 @@
+geary (0.8.0-1~trusty1) trusty; urgency=low
+
+  * Enforce CSS scope style rules when viewing emails
+  * Bug fixes
+  * Updated translations
+
+ -- Jim Nelson <jim@yorba.org>  Fri, 19 Sep 2014 12:53:00 -0700
+
 geary (0.7.2-1~trusty1) trusty; urgency=low
 
   * Warn user of TLS certificate issues when connecting (#713247)
