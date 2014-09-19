@@ -43,14 +43,15 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
     }
     
     ~ListParameter() {
-        // Although every attempt is made to make sure the parent-child relationship is maintained,
-        // be lenient here and only drop it if coherent ... this is done because, although it's
-        // a weak ref, sometimes ListParameters are temporarily made and current Vala doesn't
-        // reset weak refs
+        // Drop back links because, although it's a weak ref, sometimes ListParameters are temporarily
+        // made and current Vala doesn't reset weak refs
         foreach (Parameter param in list) {
             ListParameter? listp = param as ListParameter;
-            if (listp != null && listp.parent == this)
+            if (listp != null) {
+                assert(listp.parent == this);
+                
                 listp.parent = null;
+            }
         }
     }
     
@@ -68,8 +69,12 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
     public bool add(Parameter param) {
         // if adding a ListParameter, set its parent
         ListParameter? listp = param as ListParameter;
-        if (listp != null)
+        if (listp != null) {
+            if (listp.parent != null)
+                listp.parent.list.remove(listp);
+            
             listp.parent = this;
+        }
         
         return list.add(param);
     }
@@ -129,6 +134,8 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
     
     /**
      * Clears the {@link ListParameter} of all its children.
+     *
+     * This also clears (sets to null) the parents of all {@link ListParamater} children.
      */
     public void clear() {
         // sever ties to ListParameter children
@@ -448,8 +455,12 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
         
         // add parent to new Parameter if a list
         ListParameter? listp = parameter as ListParameter;
-        if (listp != null)
+        if (listp != null) {
+            if (listp.parent != null)
+                listp.parent.list.remove(listp);
+            
             listp.parent = this;
+        }
         
         // clear parent of old Parameter if a list
         listp = old as ListParameter;
@@ -468,15 +479,11 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
     public void adopt_children(ListParameter src) {
         clear();
         
-        foreach (Parameter param in src.list) {
-            ListParameter? listp = param as ListParameter;
-            if (listp != null)
-                listp.parent = this;
-            
-            list.add(param);
-        }
-        
+        Gee.List<Parameter> src_children = new Gee.ArrayList<Parameter>();
+        src_children.add_all(src.list);
         src.clear();
+        
+        add_all(src_children);
     }
     
     protected string stringize_list() {
