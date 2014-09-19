@@ -249,6 +249,15 @@ public class ConversationViewer : Gtk.Box {
                     include_dummy = true;
                 }
                 dummy.append_child(range.clone_contents());
+                
+                // Remove the chrome we put around quotes, leaving only the blockquote element.
+                WebKit.DOM.NodeList quotes = dummy.query_selector_all(".quote_container");
+                for (int i = 0; i < quotes.length; i++) {
+                    WebKit.DOM.Element div = (WebKit.DOM.Element) quotes.item(i);
+                    WebKit.DOM.Element blockquote = div.query_selector("blockquote");
+                    div.get_parent_element().replace_child(blockquote, div);
+                }
+                
                 quote = include_dummy ? dummy.get_outer_html() : dummy.get_inner_html();
                 return anchor_email;
             } catch (Error error) {
