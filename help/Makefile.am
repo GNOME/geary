@@ -16,4 +16,4 @@ DOC_PAGES = \
 	star.page \
 	write.page
 
-DOC_LINGUAS = el es fr it
+DOC_LINGUAS = cs el es fr it
