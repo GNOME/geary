@@ -7,16 +7,16 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: geary master\n"
-"POT-Creation-Date: 2014-03-28 18:21+0000\n"
-"PO-Revision-Date: 2014-03-05 14:14+0100\n"
+"POT-Creation-Date: 2014-09-16 17:03+0000\n"
+"PO-Revision-Date: 2014-09-22 13:46+0200\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
-"Language-Team: Español <gnome-es-list@gnome.org>\n"
+"Language-Team: Español; Castellano <gnome-es-list@gnome.org>\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n!=1);\n"
-"X-Generator: Gtranslator 2.91.5\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"X-Generator: Gtranslator 2.91.6\n"
 
 #: C/write.page:9(title)
 msgid "Write a message"
@@ -515,7 +515,7 @@ msgstr ""
 
 #: C/preferences.page:17(title)
 msgid "Reading"
-msgstr ""
+msgstr "Lectura"
 
 #: C/preferences.page:20(gui)
 msgid "Automatically select next message"
@@ -864,7 +864,7 @@ msgstr ""
 
 #: C/accounts.page:28(title)
 msgid "Editing existing accounts"
-msgstr ""
+msgstr "Edición de cuentas existentes"
 
 #: C/accounts.page:30(p)
 msgid ""
@@ -873,16 +873,24 @@ msgid ""
 "settings on an existing account. If you need to change your IMAP or SMTP "
 "server, you will need to delete the account and re-add it."
 msgstr ""
+"En el cuadro de diálogo Cuentas, seleccione una cuenta y pulse en el icono "
+"del lápiz para modificar varias opciones. Tenga en cuenta que Geary no puede "
+"cambiar la configuración del servidor de una cuenta existente. Si necesita "
+"cambiar el servidor IMAP o SMTP, tendrá que eliminar la cuenta y añadirla de "
+"nuevo."
 
 #: C/accounts.page:34(p)
 msgid ""
 "To change the order that accounts are displayed in the folder list, drag the "
 "accounts in the Accounts dialog to the desired order."
 msgstr ""
+"Para cambiar el orden en que se muestran las cuentas en la lista de "
+"carpetas, arrastre las cuentas en el cuadro de diálogo Cuentas para "
+"colocarlas en el orden que prefiera."
 
 #: C/accounts.page:37(p)
 msgid "There are some advanced options available when editing accounts:"
-msgstr ""
+msgstr "Existen algunas opciones avanzadas en la edición de cuentas:"
 
 #: C/accounts.page:39(p)
 msgid ""
@@ -893,6 +901,12 @@ msgid ""
 "accounts, if you disable this setting, you may be unable to view messages "
 "you've sent."
 msgstr ""
+"La casilla <gui>Guardar el correo enviado</gui> establece si Geary guardará "
+"los mensajes enviados correctamente en la carpeta <gui>Correo enviado</gui> "
+"de la cuenta. Para las cuentas de Gmail, esto sucede automáticamente. Se "
+"pueden configurar las cuentas de Yahoo y otros proveedores para que también "
+"realicen este proceso automáticamente. Para otras cuentas, si desactiva esta "
+"opción, es posible que no pueda ver los mensajes que haya enviado."
 
 #: C/accounts.page:45(p)
 msgid ""
@@ -900,10 +914,13 @@ msgid ""
 "Geary will keep locally. Geary can only use locally available mail when "
 "searching and forming conversations."
 msgstr ""
+"El cuadro desplegable <gui>Descargar correo</gui> permite configurar cuántos "
+"mensajes se conservarán localmente en Geary. Geary puede utilizar únicamente "
+"el correo disponible localmente para buscar y formar conversaciones."
 
 #: C/accounts.page:53(title)
 msgid "Removing accounts"
-msgstr ""
+msgstr "Eliminar cuentas"
 
 #: C/accounts.page:55(p)
 msgid ""
@@ -911,11 +928,13 @@ msgid ""
 "press the - button. Geary will delete all information associated with the "
 "account."
 msgstr ""
+"Para eliminar una cuenta, abra el cuadro de diálogo Cuentas, seleccione la "
+"cuenta y pulse en el botón «−». Geary eliminará toda la información asociada "
+"con la cuenta."
 
 #. Put one translator per line, in the form of NAME <EMAIL>, YEAR1, YEAR2
 #: C/accounts.page:0(None)
-#, fuzzy
-#| msgctxt "_"
-#| msgid "translator-credits"
 msgid "translator-credits"
-msgstr "Daniel Mustieles <daniel.mustieles@gmail.com>, 2014"
+msgstr ""
+"Adolfo Jayme Barrientos <fitojb@ubuntu.com>, 2014\n"
+"Daniel Mustieles <daniel.mustieles@gmail.com>, 2014"
