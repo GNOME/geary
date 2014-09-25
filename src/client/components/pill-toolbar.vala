@@ -38,8 +38,14 @@ public interface PillBar : Gtk.Container {
         b.related_action = action_group.get_action(action_name);
         b.tooltip_text = b.related_action.tooltip;
         b.related_action.notify["tooltip"].connect(() => { b.tooltip_text = b.related_action.tooltip; });
-        b.image = new Gtk.Image.from_icon_name(icon_name != null ? icon_name :
+        
+        // set pixel size to force GTK+ to load our images from our installed directory, not the theme
+        // directory
+        Gtk.Image image = new Gtk.Image.from_icon_name(icon_name != null ? icon_name :
             b.related_action.icon_name, Gtk.IconSize.MENU);
+        image.set_pixel_size(16);
+        b.image = image;
+        
         // Unity buttons are a bit tight
 #if ENABLE_UNITY
         b.image.margin = b.image.margin + 4;
