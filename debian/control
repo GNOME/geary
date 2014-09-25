@@ -21,7 +21,7 @@ Build-Depends: debhelper (>= 8),
  libgirepository1.0-dev (>= 1.32.0),
  desktop-file-utils,
  gnome-doc-utils,
- libgcr-3-dev
+ libgcr-3-dev (>= 3.10.1)
 Standards-Version: 3.8.3
 Homepage: http://www.yorba.org
 
