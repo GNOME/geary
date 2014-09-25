@@ -532,7 +532,7 @@ pkg_check_modules(DEPS REQUIRED
     gmime-2.6>=2.6.0
     libsecret-1>=0.11
     libxml-2.0>=2.7.8
-    gcr-3
+    gcr-3>=3.10.1
     ${EXTRA_CLIENT_PKG_CONFIG}
 )
 
