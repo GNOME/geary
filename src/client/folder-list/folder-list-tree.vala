@@ -31,7 +31,7 @@ public class FolderList.Tree : Sidebar.Tree {
             TARGET_ENTRY_LIST, Gdk.DragAction.COPY | Gdk.DragAction.MOVE);
     }
     
-    ~FolderList() {
+    ~Tree() {
         set_new_messages_monitor(null);
     }
     

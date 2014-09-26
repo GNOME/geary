@@ -37,7 +37,7 @@ private class Geary.ImapEngine.EmailFlagWatcher : BaseObject {
         folder.closed.connect(on_closed);
     }
     
-    ~FlagWatcher() {
+    ~EmailFlagWatcher() {
         if (watch_id != 0)
             message("Warning: Geary.FlagWatcher destroyed before folder closed");
         

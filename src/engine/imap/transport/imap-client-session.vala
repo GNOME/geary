@@ -1193,7 +1193,7 @@ public class Geary.Imap.ClientSession : BaseObject {
         if (params.err != null)
             throw params.err;
         
-        if(params.proceed);
+        if(params.proceed)
             yield command_transaction_async(cmd, cancellable);
     }
     
