@@ -123,6 +123,26 @@ public class IconFactory {
             icon_theme.lookup_icon("document-symbolic", size, flags);
     }
     
+    // GTK+ 3.14 no longer scales icons via the IconInfo, so perform manually until we
+    // properly install the icons as per 3.14's expectations.
+    private Gdk.Pixbuf aspect_scale_down_pixbuf(Gdk.Pixbuf pixbuf, int size) {
+        if (pixbuf.width <= size && pixbuf.height <= size)
+            return pixbuf;
+        
+        int scaled_width, scaled_height;
+        if (pixbuf.width >= pixbuf.height) {
+            double aspect = (double) size / (double) pixbuf.width;
+            scaled_width = size;
+            scaled_height = (int) Math.round((double) pixbuf.height * aspect);
+        } else {
+            double aspect = (double) size / (double) pixbuf.height;
+            scaled_width = (int) Math.round((double) pixbuf.width * aspect);
+            scaled_height = size;
+        }
+        
+        return pixbuf.scale_simple(scaled_width, scaled_height, Gdk.InterpType.BILINEAR);
+    }
+    
     public Gdk.Pixbuf? load_symbolic(string icon_name, int size, Gtk.StyleContext style,
         Gtk.IconLookupFlags flags = 0) {
         Gtk.IconInfo? icon_info = icon_theme.lookup_icon(icon_name, size, flags);
@@ -130,7 +150,7 @@ public class IconFactory {
         // Attempt to load as a symbolic icon.
         if (icon_info != null) {
             try {
-                return icon_info.load_symbolic_for_context(style);
+                return aspect_scale_down_pixbuf(icon_info.load_symbolic_for_context(style), size);
             } catch (Error e) {
                 message("Couldn't load icon: %s", e.message);
             }
@@ -151,7 +171,7 @@ public class IconFactory {
         // Attempt to load as a symbolic icon.
         if (icon_info != null) {
             try {
-                return icon_info.load_symbolic(color);
+                return aspect_scale_down_pixbuf(icon_info.load_symbolic(color), size);
             } catch (Error e) {
                 warning("Couldn't load icon: %s", e.message);
             }

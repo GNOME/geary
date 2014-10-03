@@ -39,16 +39,26 @@ public interface PillBar : Gtk.Container {
         b.tooltip_text = b.related_action.tooltip;
         b.related_action.notify["tooltip"].connect(() => { b.tooltip_text = b.related_action.tooltip; });
         
+        // Load icon by name with this fallback order: specified icon name, the action's icon name,
+        // the action's stock ID ... although stock IDs are being deprecated, that's how we specify
+        // the icon in the GtkActionEntry (also being deprecated) and GTK+ 3.14 doesn't support that
+        // any longer
+        string? icon_to_load = icon_name ?? b.related_action.icon_name;
+        if (icon_to_load == null)
+            icon_to_load = b.related_action.stock_id;
+        
         // set pixel size to force GTK+ to load our images from our installed directory, not the theme
         // directory
-        Gtk.Image image = new Gtk.Image.from_icon_name(icon_name != null ? icon_name :
-            b.related_action.icon_name, Gtk.IconSize.MENU);
-        image.set_pixel_size(16);
-        b.image = image;
+        if (icon_to_load != null) {
+            Gtk.Image image = new Gtk.Image.from_icon_name(icon_to_load, Gtk.IconSize.MENU);
+            image.set_pixel_size(16);
+            b.image = image;
+        }
         
         // Unity buttons are a bit tight
 #if ENABLE_UNITY
-        b.image.margin = b.image.margin + 4;
+        if (b.image != null)
+            b.image.margin = b.image.margin + 4;
 #endif
         b.always_show_image = true;
         
