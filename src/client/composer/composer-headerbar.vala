@@ -95,6 +95,7 @@ public class ComposerHeaderbar : PillHeaderbar {
         add_end(send_button);
 #endif
         get_style_context().changed.connect(set_win_buttons_side);
+        realize.connect(set_win_buttons_side);
     }
     
     public void set_recipients(string label, string tooltip) {
