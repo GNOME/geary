@@ -1,3 +1,15 @@
+Geary 0.8.1 - 7 October 2014
+----------------------------
+
+  * Display properly-scaled icons under GTK+ 3.14
+  * Don't show composer close/detach buttons twice under GTK+ 3.14
+  * Fix code analysis errors reported by newest Vala
+  * gcr-3 minimum version requirement not specified
+  * Properly install French online help
+  * Czech online help added
+  * Updated Spanish, German translations
+
+
 Geary 0.8.0 - 19 September 2014
 -------------------------------
 
