@@ -2176,6 +2176,11 @@ public class ConversationViewer : Gtk.Box {
                 out temporary_filename);
             FileUtils.set_contents(temporary_filename, source);
             FileUtils.close(temporary_handle);
+            
+            // ensure this file is only readable by the user ... this needs to be done after the
+            // file is closed
+            FileUtils.chmod(temporary_filename, (int) (Posix.S_IRUSR | Posix.S_IWUSR));
+            
             string temporary_uri = Filename.to_uri(temporary_filename, null);
             Gtk.show_uri(web_view.get_screen(), temporary_uri, Gdk.CURRENT_TIME);
         } catch (Error error) {
