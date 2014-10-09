@@ -2217,6 +2217,10 @@ public class ConversationViewer : Gtk.Box {
                             body.offset_top + body.offset_height > scroll_top &&
                             body.offset_top + 28 < scroll_top + scroll_height) {  // 28 = 15 padding + 13 first line of text
                         emails.add(message.id);
+                        
+                        // since it can take some time for the new flags to round-trip back to
+                        // ConversationViewer's signal handlers, mark as manually read here
+                        mark_manual_read(message.id);
                     }
                 }
             } catch (Error error) {
