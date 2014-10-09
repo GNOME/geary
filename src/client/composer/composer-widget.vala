@@ -113,9 +113,13 @@ public class ComposerWidget : Gtk.EventBox {
     
     private const int DRAFT_TIMEOUT_MSEC = 2000; // 2 seconds
     
-    public const string ATTACHMENT_KEYWORDS_GENERIC = ".doc|.pdf|.xls|.ppt|.rtf|.pps";
-    /// A list of keywords, separated by pipe ("|") characters, that suggest an attachment
-    public const string ATTACHMENT_KEYWORDS_LOCALIZED = _("attach|enclosed|enclosing|cover letter");
+    public const string ATTACHMENT_KEYWORDS_SUFFIX = ".doc|.pdf|.xls|.ppt|.rtf|.pps";
+    
+    // A list of keywords, separated by pipe ("|") characters, that suggest an attachment; since
+    // this is full-word checking, include all variants of each word.  No spaces are allowed.
+    public const string ATTACHMENT_KEYWORDS_LOCALIZED = _("attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|enclosing|encloses|enclosure|enclosures");
+    
+    private delegate bool CompareStringFunc(string key, string token);
     
     public Geary.Account account { get; private set; }
     
@@ -907,6 +911,27 @@ public class ComposerWidget : Gtk.EventBox {
             ((ComposerEmbed) parent).on_detach();
     }
     
+    // compares all keys to all tokens according to user-supplied comparison function
+    // Returns true if found
+    private bool search_tokens(string[] keys, string[] tokens, CompareStringFunc cmp_func,
+        out string? found_key, out string? found_token) {
+        foreach (string key in keys) {
+            foreach (string token in tokens) {
+                if (cmp_func(key, token)) {
+                    found_key = key;
+                    found_token = token;
+                    
+                    return true;
+                }
+            }
+        }
+        
+        found_key = null;
+        found_token = null;
+        
+        return false;
+    }
+    
     private bool email_contains_attachment_keywords() {
         // Filter out all content contained in block quotes
         string filtered = @"$subject\n";
@@ -920,30 +945,41 @@ public class ComposerWidget : Gtk.EventBox {
             debug("Error building regex in keyword checker: %s", error.message);
         }
         
-        string[] keys = ATTACHMENT_KEYWORDS_GENERIC.casefold().split("|");
-        foreach (string key in ATTACHMENT_KEYWORDS_LOCALIZED.casefold().split("|")) {
-            keys += key;
-        }
+        string[] suffix_keys = ATTACHMENT_KEYWORDS_SUFFIX.casefold().split("|");
+        string[] full_word_keys = ATTACHMENT_KEYWORDS_LOCALIZED.casefold().split("|");
         
-        string folded;
         foreach (string line in filtered.split("\n")) {
             // Stop looking once we hit forwarded content
             if (line.has_prefix("--")) {
                 break;
             }
             
-            folded = line.casefold();
-            foreach (string key in keys) {
-                if (key in folded) {
-                    try {
-                        // Make sure the match isn't coming from a url
-                        if (key in url_regex.replace(folded, -1, 0, "")) {
-                            return true;
-                        }
-                    } catch (Error error) {
-                        debug("Regex replacement error in keyword checker: %s", error.message);
+            // casefold line, strip start and ending whitespace, then tokenize by whitespace
+            string folded = line.casefold().strip();
+            string[] tokens = folded.split_set(" \t");
+            
+            // search for full-word matches
+            string? found_key, found_token;
+            bool found = search_tokens(full_word_keys, tokens, (key, token) => {
+                return key == token;
+            }, out found_key, out found_token);
+            
+            // if not found, search for suffix matches
+            if (!found) {
+                found = search_tokens(suffix_keys, tokens, (key, token) => {
+                    return token.has_suffix(key);
+                }, out found_key, out found_token);
+            }
+            
+            if (found) {
+                try {
+                    // Make sure the match isn't coming from a url
+                    if (found_key in url_regex.replace(folded, -1, 0, "")) {
                         return true;
                     }
+                } catch (Error error) {
+                    debug("Regex replacement error in keyword checker: %s", error.message);
+                    return true;
                 }
             }
         }
