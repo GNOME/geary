@@ -125,10 +125,21 @@ public class FolderList.FolderEntry : FolderList.AbstractFolderEntry, Sidebar.In
     }
     
     public override int get_count() {
-        if (folder.special_folder_type == Geary.SpecialFolderType.DRAFTS ||
-            folder.special_folder_type == Geary.SpecialFolderType.OUTBOX)
-            return folder.properties.email_total;
-        else
-            return folder.properties.email_unread;
+        switch (folder.special_folder_type) {
+            // for Drafts and Outbox, interested in showing total count, not unread count
+            case Geary.SpecialFolderType.DRAFTS:
+            case Geary.SpecialFolderType.OUTBOX:
+                return folder.properties.email_total;
+            
+            // only show counts for Inbox, Spam, and user folders
+            case Geary.SpecialFolderType.INBOX:
+            case Geary.SpecialFolderType.SPAM:
+            case Geary.SpecialFolderType.NONE:
+                return folder.properties.email_unread;
+            
+            // otherwise, to avoid clutter, no counts displayed (but are available in tooltip)
+            default:
+                return 0;
+        }
     }
 }
