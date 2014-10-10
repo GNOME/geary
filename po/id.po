@@ -12,8 +12,8 @@ msgstr ""
 "Project-Id-Version: geary master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2014-08-29 00:32+0000\n"
-"PO-Revision-Date: 2014-09-06 10:53+0700\n"
+"POT-Creation-Date: 2014-10-09 22:25+0000\n"
+"PO-Revision-Date: 2014-10-10 13:22+0700\n"
 "Last-Translator: Andika Triwidada <andika@gmail.com>\n"
 "Language-Team: Indonesian (http://www.transifex.com/projects/p/geary/"
 "language/id/)\n"
@@ -22,7 +22,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Poedit 1.6.9\n"
+"X-Generator: Poedit 1.5.7\n"
 
 #: ../desktop/geary.desktop.in.h:1 ../desktop/geary-autostart.desktop.in.h:1
 msgid "Geary"
@@ -43,7 +43,7 @@ msgstr "Kirim dan terima surel"
 
 #: ../desktop/geary.desktop.in.h:5 ../desktop/geary-autostart.desktop.in.h:5
 msgid "Email;E-mail;Mail;"
-msgstr "Surel;Surat;Email;E-mail;"
+msgstr "Surel;Surat;Email;E-mail;Mail;"
 
 #: ../desktop/geary.desktop.in.h:6
 msgid "Compose Message"
@@ -387,7 +387,7 @@ msgstr "Susun pesan baru (Ctrl+N, N)"
 
 #. Reply to a message.
 #: ../src/client/application/geary-controller.vala:343
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1579
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1692
 msgid "_Reply"
 msgstr "B_alas"
 
@@ -405,7 +405,7 @@ msgstr "Balas semua (Ctrl+Shift+R, Shift+R)"
 
 #. Forward a message.
 #: ../src/client/application/geary-controller.vala:354
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1589
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1702
 msgid "_Forward"
 msgstr "_Teruskan"
 
@@ -625,16 +625,16 @@ msgstr "Timp_a"
 
 #. Find out what to do with the inline composers.
 #. TODO: Remove this in favor of automatically saving drafts
-#: ../src/client/application/geary-controller.vala:2150
+#: ../src/client/application/geary-controller.vala:2152
 msgid "Close open draft messages?"
 msgstr "Tutup draf pesan yang terbuka?"
 
-#: ../src/client/application/geary-controller.vala:2259
+#: ../src/client/application/geary-controller.vala:2264
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Anda mau membuang pesan ini secara permanen?"
 
-#: ../src/client/application/geary-controller.vala:2261
+#: ../src/client/application/geary-controller.vala:2266
 msgid "Delete"
 msgstr "Hapus"
 
@@ -718,7 +718,7 @@ msgstr "Singki_rkan"
 
 #. Select all.
 #: ../src/client/components/stock.vala:32
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1047
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1160
 msgid "Select _All"
 msgstr "Pilih Semu_a"
 
@@ -738,98 +738,104 @@ msgstr "Menyimpan"
 msgid "Error saving"
 msgstr "Galat saat menyimpan"
 
-#. / A list of keywords, separated by pipe ("|") characters, that suggest an attachment
-#: ../src/client/composer/composer-widget.vala:106
-msgid "attach|enclosed|enclosing|cover letter"
-msgstr "lampiran|terlampir"
+#. A list of keywords, separated by pipe ("|") characters, that suggest an attachment; since
+#. this is full-word checking, include all variants of each word.  No spaces are allowed.
+#: ../src/client/composer/composer-widget.vala:120
+msgid ""
+"attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|"
+"enclosing|encloses|enclosure|enclosures"
+msgstr ""
+"lampiran|melampirkan|dilampirkan|terlampir|attach|attaching|attaches|"
+"attachment|attachments|attached|enclose|enclosed|enclosing|encloses|"
+"enclosure|enclosures"
 
-#: ../src/client/composer/composer-widget.vala:823
+#: ../src/client/composer/composer-widget.vala:878
 msgid "Do you want to discard the unsaved message?"
 msgstr "Anda ingin membuang pesan yang belum disimpan?"
 
-#: ../src/client/composer/composer-widget.vala:826
-#: ../src/client/composer/composer-widget.vala:830
+#: ../src/client/composer/composer-widget.vala:881
+#: ../src/client/composer/composer-widget.vala:885
 msgid "Do you want to discard this message?"
 msgstr "Anda mau membuang pesan ini?"
 
-#: ../src/client/composer/composer-widget.vala:911
+#: ../src/client/composer/composer-widget.vala:998
 msgid "Send message with an empty subject and body?"
 msgstr "Kirim pesan dengan subjek dan isi kosong?"
 
-#: ../src/client/composer/composer-widget.vala:913
+#: ../src/client/composer/composer-widget.vala:1000
 msgid "Send message with an empty subject?"
 msgstr "Kirim pesan dengan subjek kosong?"
 
-#: ../src/client/composer/composer-widget.vala:915
+#: ../src/client/composer/composer-widget.vala:1002
 msgid "Send message with an empty body?"
 msgstr "Kirim pesan tanpa isi?"
 
-#: ../src/client/composer/composer-widget.vala:917
+#: ../src/client/composer/composer-widget.vala:1004
 msgid "Send message without an attachment?"
 msgstr "Kirim pesan tanpa lampiran?"
 
-#: ../src/client/composer/composer-widget.vala:1100
+#: ../src/client/composer/composer-widget.vala:1187
 msgid "Cannot add attachment"
 msgstr "Tak bisa menambah lampiran"
 
-#: ../src/client/composer/composer-widget.vala:1111
+#: ../src/client/composer/composer-widget.vala:1198
 #, c-format
 msgid "\"%s\" could not be found."
 msgstr "\"%s\" tidak ditemukan."
 
-#: ../src/client/composer/composer-widget.vala:1118
+#: ../src/client/composer/composer-widget.vala:1205
 #, c-format
 msgid "\"%s\" is a folder."
 msgstr "\"%s\" adalah map."
 
-#: ../src/client/composer/composer-widget.vala:1125
+#: ../src/client/composer/composer-widget.vala:1212
 #, c-format
 msgid "\"%s\" is an empty file."
 msgstr "\"%s\" adalah berkas kosong."
 
-#: ../src/client/composer/composer-widget.vala:1139
+#: ../src/client/composer/composer-widget.vala:1226
 #, c-format
 msgid "\"%s\" could not be opened for reading."
 msgstr "\"%s\" tak bisa dibuka untuk dibaca."
 
-#: ../src/client/composer/composer-widget.vala:1146
+#: ../src/client/composer/composer-widget.vala:1233
 #, c-format
 msgid "\"%s\" already attached for delivery."
 msgstr "\"%s\" sudah dilampirkan untuk pengiriman."
 
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
-#: ../src/client/composer/composer-widget.vala:1155
+#: ../src/client/composer/composer-widget.vala:1242
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: ../src/client/composer/composer-widget.vala:1215
+#: ../src/client/composer/composer-widget.vala:1302
 msgid "To: "
 msgstr "Kepada:"
 
-#: ../src/client/composer/composer-widget.vala:1218
+#: ../src/client/composer/composer-widget.vala:1305
 msgid "Cc: "
 msgstr "Cc: "
 
-#: ../src/client/composer/composer-widget.vala:1221
+#: ../src/client/composer/composer-widget.vala:1308
 msgid "Bcc: "
 msgstr "Bcc: "
 
-#: ../src/client/composer/composer-widget.vala:1438
+#: ../src/client/composer/composer-widget.vala:1525
 msgid "Select Color"
 msgstr "Pilih Warna"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: ../src/client/composer/composer-widget.vala:1884
+#: ../src/client/composer/composer-widget.vala:1974
 msgid "_From:"
 msgstr "_Dari:"
 
 #. For other types of messages, just show the from account.
 #. Composer label (without mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: ../src/client/composer/composer-widget.vala:1900
-#: ../src/client/conversation-viewer/conversation-viewer.vala:637
+#: ../src/client/composer/composer-widget.vala:1990
+#: ../src/client/conversation-viewer/conversation-viewer.vala:694
 msgid "From:"
 msgstr "Dari:"
 
@@ -847,164 +853,164 @@ msgstr "Pesan Baru"
 msgid "Me"
 msgstr "Aku"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:262
+#: ../src/client/conversation-viewer/conversation-viewer.vala:319
 msgid "No conversations selected."
 msgstr "Tidak ada percakapan yang dipilih."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:264
+#: ../src/client/conversation-viewer/conversation-viewer.vala:321
 #, c-format
 msgid "%u conversation selected."
 msgid_plural "%u conversations selected."
 msgstr[0] "%u percakapan dipilih."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:293
+#: ../src/client/conversation-viewer/conversation-viewer.vala:350
 msgid "No search results found."
 msgstr "Tak ada hasil pencarian."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:295
+#: ../src/client/conversation-viewer/conversation-viewer.vala:352
 msgid "No conversations in folder."
 msgstr "Tak ada percakapan dalam map."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:536
+#: ../src/client/conversation-viewer/conversation-viewer.vala:593
 msgid "This message contains remote images."
 msgstr "Pesan ini memuat gambar remote."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:536
+#: ../src/client/conversation-viewer/conversation-viewer.vala:593
 msgid "Show Images"
 msgstr "Tampilkan Gambar"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:537
+#: ../src/client/conversation-viewer/conversation-viewer.vala:594
 msgid "Always Show From Sender"
 msgstr "Selalu Tampilkan Dari Pengirim"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:561
+#: ../src/client/conversation-viewer/conversation-viewer.vala:618
 msgid "Edit Draft"
 msgstr "Sunting Draf"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:640
+#: ../src/client/conversation-viewer/conversation-viewer.vala:697
 msgid "To:"
 msgstr "Ke:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:643
+#: ../src/client/conversation-viewer/conversation-viewer.vala:700
 msgid "Cc:"
 msgstr "Cc:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:646
+#: ../src/client/conversation-viewer/conversation-viewer.vala:703
 msgid "Bcc:"
 msgstr "Bcc:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:649
+#: ../src/client/conversation-viewer/conversation-viewer.vala:706
 msgid "Subject:"
 msgstr "Perihal:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:652
+#: ../src/client/conversation-viewer/conversation-viewer.vala:709
 msgid "Date:"
 msgstr "Tanggal:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:862
+#: ../src/client/conversation-viewer/conversation-viewer.vala:975
 #, c-format
 msgid "%u read message"
 msgid_plural "%u read messages"
 msgstr[0] "%u pesan terbaca"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:994
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1107
 #, c-format
 msgid "This message was sent successfully, but could not be saved to %s."
 msgstr "Pesan ini sukses dikirim, tapi tak bisa disimpan ke %s."
 
 #. Add a menu item for copying the current selection.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1020
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1133
 #: ../ui/composer.glade.h:4
 msgid "_Copy"
 msgstr "Sali_n"
 
 #. Add a menu item for copying the address.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1028
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1141
 msgid "Copy _Email Address"
 msgstr "Salin Alamat Sur_el"
 
 #. Add a menu item for copying the link.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1033
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1146
 #: ../ui/composer.glade.h:17
 msgid "Copy _Link"
 msgstr "Sa_lin Tautan"
 
 #. Select message.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1041
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1154
 msgid "Select _Message"
 msgstr "Pilih _Pesan"
 
 #. Inspect.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1053
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1166
 msgid "_Inspect"
 msgstr "Per_iksa"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1279
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1392
 msgid "This link appears to go to"
 msgstr "Tautan ini nampaknya menuju ke"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1280
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1393
 msgid "but actually goes to"
 msgstr "tapi sebenarnya ke"
 
 #. If href doesn't look like a URL, something is fishy, so warn the user
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1335
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1448
 msgid " (Invalid?)"
 msgstr "(Tak valid?)"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1527
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1640
 msgid "_Save As..."
 msgstr "_Simpan Sebagai..."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1532
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1645
 msgid "Save All A_ttachments..."
 msgstr "Simpan Semua _Lampiran..."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1546
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1659
 msgid "_Save Image As..."
 msgstr "_Simpan Gambar Sebagai..."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1569
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1682
 msgid "Save A_ttachment..."
 msgid_plural "Save All A_ttachments..."
 msgstr[0] "Simpan Semua _Lampiran..."
 
 #. Reply to all on a message.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1584
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1697
 msgid "Reply to _All"
 msgstr "Balas ke Semu_a"
 
 #. Mark as read/unread.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1601
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1714
 msgid "_Mark as Read"
 msgstr "Tan_dai sudah Dibaca"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1605
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1718
 msgid "_Mark as Unread"
 msgstr "Tan_dai belum Dibaca"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1611
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1724
 msgid "Mark Unread From _Here"
 msgstr "Tandai Belum Dibaca Dari _Sini"
 
 #. Separator.
 #. View original message source.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1626
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1739
 msgid "_View Source"
 msgstr "Lihat Su_mber"
 
 #. Generate the attachment table.
 #. / Placeholder filename for attachments with no filename.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1940
-#: ../src/engine/rfc822/rfc822-utils.vala:327
+#: ../src/client/conversation-viewer/conversation-viewer.vala:2053
+#: ../src/engine/rfc822/rfc822-utils.vala:328
 msgid "none"
 msgstr "nihil"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:2070
+#: ../src/client/conversation-viewer/conversation-viewer.vala:2188
 msgid "Failed to open default text editor."
 msgstr "Gagal membuka penyunting teks utama."
 
-#: ../src/client/conversation-viewer/conversation-web-view.vala:321
+#: ../src/client/conversation-viewer/conversation-web-view.vala:322
 #, c-format
 msgid "%s - Conversation Inspector"
 msgstr "%s - Penyidik Percakapan"
@@ -1456,31 +1462,31 @@ msgstr "%s menulis:"
 msgid "On %s:"
 msgstr "Pada %s:"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:211
+#: ../src/engine/rfc822/rfc822-utils.vala:213
 msgid "---------- Forwarded message ----------"
 msgstr "---------- Pesan yang diteruskan --------"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:215
+#: ../src/engine/rfc822/rfc822-utils.vala:217
 #, c-format
 msgid "From: %s\n"
 msgstr "Dari: %s\n"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:216
+#: ../src/engine/rfc822/rfc822-utils.vala:218
 #, c-format
 msgid "Subject: %s\n"
 msgstr "Perihal: %s\n"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:217
+#: ../src/engine/rfc822/rfc822-utils.vala:219
 #, c-format
 msgid "Date: %s\n"
 msgstr "Tanggal: %s\n"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:220
+#: ../src/engine/rfc822/rfc822-utils.vala:222
 #, c-format
 msgid "To: %s\n"
 msgstr "Kepada: %s\n"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:223
+#: ../src/engine/rfc822/rfc822-utils.vala:225
 #, c-format
 msgid "Cc: %s\n"
 msgstr "Cc: %s\n"
@@ -1943,3 +1949,6 @@ msgstr "Alamat surel:"
 #: ../ui/upgrade_dialog.glade.h:1
 msgid "Geary upgrade in progress."
 msgstr "Peningkatan Geary sedang berlangsung."
+
+#~ msgid "attach|enclosed|enclosing|cover letter"
+#~ msgstr "lampiran|terlampir"
