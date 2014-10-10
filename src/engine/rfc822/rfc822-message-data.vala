@@ -13,9 +13,26 @@
 public interface Geary.RFC822.MessageData : Geary.MessageData.AbstractMessageData {
 }
 
+/**
+ * An RFC822 Message-ID.
+ *
+ * MessageID will normalize all strings so that they begin and end with the proper brackets ("<" and
+ * ">").
+ */
 public class Geary.RFC822.MessageID : Geary.MessageData.StringMessageData, Geary.RFC822.MessageData {
     public MessageID(string value) {
-        base (value);
+        string? normalized = normalize(value);
+        base (normalized ?? value);
+    }
+    
+    // Adds brackets if required, null if no change required
+    private static string? normalize(string value) {
+        bool needs_prefix = !value.has_prefix("<");
+        bool needs_suffix = !value.has_suffix(">");
+        if (!needs_prefix && !needs_suffix)
+            return null;
+        
+        return "%s%s%s".printf(needs_prefix ? "<" : "", value, needs_suffix ? ">" : "");
     }
 }
 
@@ -54,22 +71,30 @@ public class Geary.RFC822.MessageIDList : Geary.MessageData.AbstractMessageData,
         // angle brackets for its Message-IDs; accounting for that as well here.  The addt'l logic
         // is to allow open-parens inside a Message-ID and not treat it as a delimiter; if a
         // close-parens is found, that's a problem (but isn't expected)
+        //
+        // Also note that this parser will attempt to parse Message-IDs lacking brackets.  If one
+        // is found, then it will assume all remaining Message-IDs in the list are bracketed and
+        // be a little less liberal in its parsing.
         StringBuilder canonicalized = new StringBuilder();
         int index = 0;
         unichar ch;
         bool in_message_id = false;
+        bool bracketed = false;
         while (value.get_next_char(ref index, out ch)) {
             bool add_char = false;
             switch (ch) {
                 case '<':
                     in_message_id = true;
+                    bracketed = true;
                 break;
                 
                 case '(':
-                    if (!in_message_id)
+                    if (!in_message_id) {
                         in_message_id = true;
-                    else
+                        bracketed = true;
+                    } else {
                         add_char = true;
+                    }
                 break;
                 
                 case '>':
@@ -84,7 +109,18 @@ public class Geary.RFC822.MessageIDList : Geary.MessageData.AbstractMessageData,
                 break;
                 
                 default:
-                    // only add characters inside the brackets
+                    // deal with Message-IDs without brackets ... bracketed is set to true the
+                    // moment the first one is found, so this doesn't deal with combinations of
+                    // bracketed and unbracketed text ... MessageID's ctor will deal with adding
+                    // brackets to unbracketed id's
+                    if (!bracketed) {
+                        if (!in_message_id && !ch.isspace())
+                            in_message_id = true;
+                        else if (in_message_id && ch.isspace())
+                            in_message_id = false;
+                    }
+                    
+                    // only add characters inside the brackets or, if not bracketed, work around
                     add_char = in_message_id;
                 break;
             }
@@ -98,6 +134,13 @@ public class Geary.RFC822.MessageIDList : Geary.MessageData.AbstractMessageData,
                 canonicalized = new StringBuilder();
             }
         }
+        
+        // pick up anything that doesn't end with brackets
+        if (!String.is_empty(canonicalized.str))
+            list.add(new MessageID(canonicalized.str));
+        
+        if (!String.is_empty(value))
+            assert(list.size > 0);
     }
     
     public override string to_string() {
