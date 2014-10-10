@@ -74,6 +74,12 @@ public class ConversationListView : Gtk.TreeView {
         // Watch for mouse events.
         motion_notify_event.connect(on_motion_notify_event);
         leave_notify_event.connect(on_leave_notify_event);
+        
+        // GtkTreeView binds Ctrl+N to "move cursor to next".  Not so interested in that, so we'll
+        // remove it.
+        unowned Gtk.BindingSet? binding_set = Gtk.BindingSet.find("GtkTreeView");
+        assert(binding_set != null);
+        Gtk.BindingEntry.remove(binding_set, Gdk.Key.N, Gdk.ModifierType.CONTROL_MASK);
     }
     
     private void on_conversation_monitor_changed() {

@@ -29,6 +29,12 @@ public class FolderList.Tree : Sidebar.Tree {
         // Set self as a drag destination.
         Gtk.drag_dest_set(this, Gtk.DestDefaults.MOTION | Gtk.DestDefaults.HIGHLIGHT,
             TARGET_ENTRY_LIST, Gdk.DragAction.COPY | Gdk.DragAction.MOVE);
+        
+        // GtkTreeView binds Ctrl+N to "move cursor to next".  Not so interested in that, so we'll
+        // remove it.
+        unowned Gtk.BindingSet? binding_set = Gtk.BindingSet.find("GtkTreeView");
+        assert(binding_set != null);
+        Gtk.BindingEntry.remove(binding_set, Gdk.Key.N, Gdk.ModifierType.CONTROL_MASK);
     }
     
     ~Tree() {
