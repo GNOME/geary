@@ -1,0 +1,6 @@
+[Contractor Entry]
+_Name=Send by email
+Icon=mail-send
+_Description=Send files using Geary
+MimeType=!inode;
+Exec=geary-attach %F

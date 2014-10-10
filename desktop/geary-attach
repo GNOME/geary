@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# This is a wrapper script to attach several files to an email in Geary.
+# Written by Viko Adi Rahmawan <vikoadi@gmail.com>
+# License: 3-clause BSD
+
+#TODO: define a Gettext domain
+
+# Disable history substitution on "!" symbols so we can have them in strings
+set +H
+
+if [ -z "$1" ] || [ "$1" = '-h' ] || [ "$1" = '--help' ]; then
+    echo $"Usage: $0 /path/to/file [/path/to/another/file...]
+Relative paths are also supported."
+    exit 1 # so that calling without parameters is counted as a failure
+fi
+
+#we dont do file checking as geary is clever enough
+ARG="mailto:?attachment=$1" #add first file
+shift
+while [ -n "$1" ]; do
+    ARG="$ARG&attachment=$1" #add more file if 
+    shift
+done
+
+if [ -n "$ARG" ]; then
+    # Finally execute geary
+    geary "${ARG}"
+else
+    exit 1
+fi
