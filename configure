@@ -38,6 +38,8 @@ configure_help() {
 	                        Disable icon cache update.
 	  --disable-documentation
 	                        Disable generating and installing translated help documentation.
+	  --disable-contractor
+	                        Disable installing Contractor files.
 
 	Some influential environment variables:
 	  PKG_CONFIG_PATH       Adds directories to pkg-config's search path.
@@ -115,6 +117,10 @@ do
 
         --disable-documentation)
                             CMDLINE="${CMDLINE} -DTRANSLATE_HELP=OFF"
+                            ;;
+        
+        --disable-contractor)
+                            CMDLINE="${CMDLINE} -DDISABLE_CONTRACT=ON"
                             ;;
         
         VALAC)              [ ! $value ] && abort $1
