@@ -124,7 +124,7 @@ public class Geary.Email : BaseObject {
     
     // REFERENCES
     public Geary.RFC822.MessageID? message_id { get; private set; default = null; }
-    public Geary.RFC822.MessageID? in_reply_to { get; private set; default = null; }
+    public Geary.RFC822.MessageIDList? in_reply_to { get; private set; default = null; }
     public Geary.RFC822.MessageIDList? references { get; private set; default = null; }
     
     // SUBJECT
@@ -191,7 +191,7 @@ public class Geary.Email : BaseObject {
         fields |= Field.RECEIVERS;
     }
     
-    public void set_full_references(Geary.RFC822.MessageID? message_id, Geary.RFC822.MessageID? in_reply_to,
+    public void set_full_references(Geary.RFC822.MessageID? message_id, Geary.RFC822.MessageIDList? in_reply_to,
         Geary.RFC822.MessageIDList? references) {
         this.message_id = message_id;
         this.in_reply_to = in_reply_to;
@@ -305,13 +305,13 @@ public class Geary.Email : BaseObject {
             ancestors.add(message_id);
         
         // References list the email trail back to its source
-        if (references != null && references.list != null)
+        if (references != null)
             ancestors.add_all(references.list);
         
         // RFC822 requires the In-Reply-To Message-ID be prepended to the References list, but
         // this ensures that's the case
         if (in_reply_to != null)
-           ancestors.add(in_reply_to);
+           ancestors.add_all(in_reply_to.list);
        
        return (ancestors.size > 0) ? ancestors : null;
     }

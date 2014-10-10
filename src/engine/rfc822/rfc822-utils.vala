@@ -119,10 +119,13 @@ public string reply_references(Geary.Email source) {
     if (source.references != null && source.references.list.size > 0)
         list.add_all(source.references.list);
     
-    // 2. If there's an In-Reply-To Message-ID and it's not the last Message-ID on the 
-    //    References list, append it
-    if (source.in_reply_to != null && list.size > 0 && !list.last().equal_to(source.in_reply_to))
-        list.add(source.in_reply_to);
+    // 2. If there are In-Reply-To Message-IDs and they're not in the References list, append them
+    if (source.in_reply_to != null) {
+        foreach (RFC822.MessageID reply_id in source.in_reply_to.list) {
+            if (!list.contains(reply_id))
+                list.add(reply_id);
+        }
+    }
     
     // 3. Append the source's Message-ID, if available.
     if (source.message_id != null)

@@ -25,7 +25,7 @@ public class Geary.RFC822.Message : BaseObject {
     public RFC822.MailboxAddresses? to { get; private set; default = null; }
     public RFC822.MailboxAddresses? cc { get; private set; default = null; }
     public RFC822.MailboxAddresses? bcc { get; private set; default = null; }
-    public RFC822.MessageID? in_reply_to { get; private set; default = null; }
+    public RFC822.MessageIDList? in_reply_to { get; private set; default = null; }
     public RFC822.MessageIDList? references { get; private set; default = null; }
     public RFC822.Subject? subject { get; private set; default = null; }
     public string? mailer { get; private set; default = null; }
@@ -120,7 +120,7 @@ public class Geary.RFC822.Message : BaseObject {
         }
 
         if (email.in_reply_to != null) {
-            in_reply_to = new Geary.RFC822.MessageID(email.in_reply_to);
+            in_reply_to = new Geary.RFC822.MessageIDList.from_rfc822_string(email.in_reply_to);
             message.set_header(HEADER_IN_REPLY_TO, email.in_reply_to);
         }
         
@@ -335,7 +335,7 @@ public class Geary.RFC822.Message : BaseObject {
             bcc = new RFC822.MailboxAddresses(converted);
         
         if (!String.is_empty(message.get_header(HEADER_IN_REPLY_TO)))
-            in_reply_to = new RFC822.MessageID(message.get_header(HEADER_IN_REPLY_TO));
+            in_reply_to = new RFC822.MessageIDList.from_rfc822_string(message.get_header(HEADER_IN_REPLY_TO));
         
         if (!String.is_empty(message.get_header(HEADER_REFERENCES)))
             references = new RFC822.MessageIDList.from_rfc822_string(message.get_header(HEADER_REFERENCES));

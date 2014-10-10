@@ -19,14 +19,14 @@ public class Geary.Imap.Envelope : Geary.MessageData.AbstractMessageData, Geary.
     public Geary.RFC822.MailboxAddresses? to { get; private set; }
     public Geary.RFC822.MailboxAddresses? cc { get; private set; }
     public Geary.RFC822.MailboxAddresses? bcc { get; private set; }
-    public Geary.RFC822.MessageID? in_reply_to { get; private set; }
+    public Geary.RFC822.MessageIDList? in_reply_to { get; private set; }
     public Geary.RFC822.MessageID? message_id { get; private set; }
     
     public Envelope(Geary.RFC822.Date? sent, Geary.RFC822.Subject subject,
         Geary.RFC822.MailboxAddresses from, Geary.RFC822.MailboxAddresses sender,
         Geary.RFC822.MailboxAddresses? reply_to, Geary.RFC822.MailboxAddresses? to,
         Geary.RFC822.MailboxAddresses? cc, Geary.RFC822.MailboxAddresses? bcc,
-        Geary.RFC822.MessageID? in_reply_to, Geary.RFC822.MessageID? message_id) {
+        Geary.RFC822.MessageIDList? in_reply_to, Geary.RFC822.MessageID? message_id) {
         this.sent = sent;
         this.subject = subject;
         this.from = from;

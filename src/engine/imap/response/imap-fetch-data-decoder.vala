@@ -151,7 +151,7 @@ public class Geary.Imap.EnvelopeDecoder : Geary.Imap.FetchDataDecoder {
             (to != null) ? parse_addresses(to) : null, 
             (cc != null) ? parse_addresses(cc) : null,
             (bcc != null) ? parse_addresses(bcc) : null,
-            (in_reply_to != null) ? new Geary.RFC822.MessageID(in_reply_to.value) : null,
+            (in_reply_to != null) ? new Geary.RFC822.MessageIDList.from_rfc822_string(in_reply_to.value) : null,
             (message_id != null) ? new Geary.RFC822.MessageID(message_id.value) : null);
     }
     

@@ -781,7 +781,7 @@ private class Geary.Imap.Folder : BaseObject {
         
         // accumulate these to submit References all at once
         RFC822.MessageID? message_id = null;
-        RFC822.MessageID? in_reply_to = null;
+        RFC822.MessageIDList? in_reply_to = null;
         RFC822.MessageIDList? references = null;
         
         // loop through all available FetchDataTypes and gather converted data
@@ -907,7 +907,7 @@ private class Geary.Imap.Folder : BaseObject {
             if (in_reply_to == null) {
                 string? value = headers.get_header("In-Reply-To");
                 if (!String.is_empty(value))
-                    in_reply_to = new RFC822.MessageID(value);
+                    in_reply_to = new RFC822.MessageIDList.from_rfc822_string(value);
             }
             
             if (references == null) {

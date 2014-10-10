@@ -408,7 +408,7 @@ public class ComposerWidget : Gtk.EventBox {
                     if (referred.bcc != null)
                         bcc = referred.bcc.to_rfc822_string();
                     if (referred.in_reply_to != null)
-                        in_reply_to = referred.in_reply_to.value;
+                        in_reply_to = referred.in_reply_to.to_rfc822_string();
                     if (referred.references != null)
                         references = referred.references.to_rfc822_string();
                     if (referred.subject != null)

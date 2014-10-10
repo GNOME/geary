@@ -119,7 +119,7 @@ private class Geary.ImapDB.MessageRow {
         if (fields.is_all_set(Geary.Email.Field.REFERENCES)) {
             email.set_full_references(
                 (message_id != null) ? new RFC822.MessageID(message_id) : null,
-                (in_reply_to != null) ? new RFC822.MessageID(in_reply_to) : null,
+                (in_reply_to != null) ? new RFC822.MessageIDList.from_rfc822_string(in_reply_to) : null,
                 (references != null) ? new RFC822.MessageIDList.from_rfc822_string(references) : null);
         }
         
@@ -204,7 +204,7 @@ private class Geary.ImapDB.MessageRow {
         
         if (email.fields.is_all_set(Geary.Email.Field.REFERENCES)) {
             message_id = (email.message_id != null) ? email.message_id.value : null;
-            in_reply_to = (email.in_reply_to != null) ? email.in_reply_to.value : null;
+            in_reply_to = (email.in_reply_to != null) ? email.in_reply_to.to_rfc822_string() : null;
             references = (email.references != null) ? email.references.to_rfc822_string() : null;
             
             fields = fields.set(Geary.Email.Field.REFERENCES);
