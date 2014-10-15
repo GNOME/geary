@@ -529,7 +529,7 @@ pkg_check_modules(DEPS REQUIRED
     libnotify>=0.7.5
     libcanberra>=0.28
     sqlite3>=3.7.4
-    gmime-2.6>=2.6.0
+    gmime-2.6>=2.6.14
     libsecret-1>=0.11
     libxml-2.0>=2.7.8
     gcr-3>=3.10.1
