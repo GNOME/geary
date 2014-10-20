@@ -2062,6 +2062,19 @@ public class GearyController : Geary.BaseObject {
         return true;
     }
     
+    // message is the email from whose menu this reply or forward was triggered.  If null,
+    // this was triggered from the headerbar or shortcut.
+    private void create_reply_forward_widget(ComposerWidget.ComposeType compose_type,
+        Geary.Email? message) {
+        string? quote;
+        Geary.Email? quote_message = main_window.conversation_viewer.get_selected_message(out quote);
+        if (message == null)
+            message = quote_message;
+        if (quote_message != message)
+            quote = null;
+        create_compose_widget(compose_type, message, quote);
+    }
+    
     private void create_compose_widget(ComposerWidget.ComposeType compose_type,
         Geary.Email? referred = null, string? quote = null, string? mailto = null,
         bool is_draft = false) {
@@ -2194,36 +2207,27 @@ public class GearyController : Geary.BaseObject {
     }
     
     private void on_reply_to_message(Geary.Email message) {
-        create_compose_widget(ComposerWidget.ComposeType.REPLY, message);
+        create_reply_forward_widget(ComposerWidget.ComposeType.REPLY, message);
     }
     
     private void on_reply_to_message_action() {
-        string? quote;
-        Geary.Email? message = main_window.conversation_viewer.get_selected_message(out quote);
-        if (message != null)
-            create_compose_widget(ComposerWidget.ComposeType.REPLY, message, quote);
+        create_reply_forward_widget(ComposerWidget.ComposeType.REPLY, null);
     }
     
     private void on_reply_all_message(Geary.Email message) {
-        create_compose_widget(ComposerWidget.ComposeType.REPLY_ALL, message);
+        create_reply_forward_widget(ComposerWidget.ComposeType.REPLY_ALL, message);
     }
     
     private void on_reply_all_message_action() {
-        string? quote;
-        Geary.Email? message = main_window.conversation_viewer.get_selected_message(out quote);
-        if (message != null)
-            create_compose_widget(ComposerWidget.ComposeType.REPLY_ALL, message, quote);
+        create_reply_forward_widget(ComposerWidget.ComposeType.REPLY_ALL, null);
     }
     
     private void on_forward_message(Geary.Email message) {
-        create_compose_widget(ComposerWidget.ComposeType.FORWARD, message);
+        create_reply_forward_widget(ComposerWidget.ComposeType.FORWARD, message);
     }
     
     private void on_forward_message_action() {
-        string? quote;
-        Geary.Email? message = main_window.conversation_viewer.get_selected_message(out quote);
-        if (message != null)
-            create_compose_widget(ComposerWidget.ComposeType.FORWARD, message, quote);
+        create_reply_forward_widget(ComposerWidget.ComposeType.FORWARD, null);
     }
     
     private void on_find_in_conversation_action() {
