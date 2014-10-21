@@ -90,7 +90,9 @@ public class GearyController : Geary.BaseObject {
     public Geary.App.ConversationMonitor? current_conversations { get; private set; default = null; }
     
     public AutostartManager? autostart_manager { get; private set; default = null; }
-
+    
+    public LoginDialog? login_dialog { get; private set; default = null; }
+    
     private Geary.Account? current_account = null;
     private Gee.HashMap<Geary.Account, Geary.App.EmailStore> email_stores
         = new Gee.HashMap<Geary.Account, Geary.App.EmailStore>();
@@ -118,7 +120,6 @@ public class GearyController : Geary.BaseObject {
     private Geary.Account? account_to_select = null;
     private Geary.Folder? previous_non_search_folder = null;
     private uint search_timeout_id = 0;
-    private LoginDialog? login_dialog = null;
     private UpgradeDialog upgrade_dialog;
     private Gee.List<string> pending_mailtos = new Gee.ArrayList<string>();
     private Geary.Nonblocking.Mutex untrusted_host_prompt_mutex = new Geary.Nonblocking.Mutex();
