@@ -82,6 +82,20 @@ public class ConversationViewer : Gtk.Box {
         }
     }
     
+    // Internal class to associate inline image buffers (replaced by rotated scaled versions of
+    // them) so they can be saved intact if the user requires it
+    private class ReplacedImage : Geary.BaseObject {
+        public string id;
+        public string filename;
+        public Geary.Memory.Buffer buffer;
+        
+        public ReplacedImage(int replaced_number, string filename, Geary.Memory.Buffer buffer) {
+            id = "%X".printf(replaced_number);
+            this.filename = filename;
+            this.buffer = buffer;
+        }
+    }
+    
     // Fired when the user clicks a link.
     public signal void link_selected(string link);
     
@@ -152,6 +166,8 @@ public class ConversationViewer : Gtk.Box {
     private DisplayMode display_mode = DisplayMode.NONE;
     private uint select_conversation_timeout_id = 0;
     private Gee.HashSet<string> inlined_content_ids = new Gee.HashSet<string>();
+    private int next_replaced_buffer_number = 0;
+    private Gee.HashMap<string, ReplacedImage> replaced_images = new Gee.HashMap<string, ReplacedImage>();
     
     public ConversationViewer() {
         Object(orientation: Gtk.Orientation.VERTICAL, spacing: 0);
@@ -282,6 +298,7 @@ public class ConversationViewer : Gtk.Box {
         email_to_element.clear();
         messages.clear();
         inlined_content_ids.clear();
+        replaced_images.clear();
         
         current_account_information = account_information;
     }
@@ -647,7 +664,7 @@ public class ConversationViewer : Gtk.Box {
         bind_event(web_view, ".email .compressed_note", "click", (Callback) on_body_toggle_clicked, this);
         bind_event(web_view, ".attachment_container .attachment", "click", (Callback) on_attachment_clicked, this);
         bind_event(web_view, ".attachment_container .attachment", "contextmenu", (Callback) on_attachment_menu, this);
-        bind_event(web_view, "." + DATA_IMAGE_CLASS, "contextmenu", (Callback) on_data_image_menu, this);
+        bind_event(web_view, "." + DATA_IMAGE_CLASS, "contextmenu", (Callback) on_data_image_menu_handler, this);
         bind_event(web_view, ".remote_images .show_images", "click", (Callback) on_show_images, this);
         bind_event(web_view, ".remote_images .show_from", "click", (Callback) on_show_images_from, this);
         bind_event(web_view, ".remote_images .close_show_images", "click", (Callback) on_close_show_images, this);
@@ -800,7 +817,7 @@ public class ConversationViewer : Gtk.Box {
         return false;
     }
     
-    private static string? inline_image_replacer(string filename, Geary.Mime.ContentType? content_type,
+    private string? inline_image_replacer(string filename, Geary.Mime.ContentType? content_type,
         Geary.Mime.ContentDisposition? disposition, string? content_id, Geary.Memory.Buffer buffer) {
         if (content_type == null || !is_content_type_supported_inline(content_type)) {
             debug("Not displaying %s inline: unsupported Content-Type", content_type.to_string());
@@ -814,6 +831,7 @@ public class ConversationViewer : Gtk.Box {
         // have the doucment set up to reduce the size of the image to fit in the viewport, and a
         // scaled load-and-deode is always faster than load followed by scale.
         Geary.Memory.Buffer rotated_image = buffer;
+        string mime_type = content_type.get_mime_type();
         try {
             Gdk.PixbufLoader loader = new Gdk.PixbufLoader();
             loader.size_prepared.connect(on_inline_image_size_prepared);
@@ -838,6 +856,7 @@ public class ConversationViewer : Gtk.Box {
                 // Save length before transferring ownership (which frees the array)
                 int image_length = image_data.length;
                 rotated_image = new Geary.Memory.ByteBuffer.take((owned) image_data, image_length);
+                mime_type = "image/png";
             }
         } catch (Error err) {
             debug("Unable to load and rotate image %s for display: %s", filename, err.message);
@@ -845,9 +864,19 @@ public class ConversationViewer : Gtk.Box {
         
         string? escaped_content_id = (content_id != null) ? Geary.HTML.escape_markup(content_id) : null;
         
-        return "<img alt=\"%s\" class=\"%s %s\" src=\"%s\" %s />".printf(
-            filename, DATA_IMAGE_CLASS, REPLACED_IMAGE_CLASS,
-            assemble_data_uri(content_type.get_mime_type(), rotated_image),
+        // Store the original buffer and its filename in a local map so they can be recalled later
+        // (if the user wants to save it) ... note that Content-ID is optional and there's no
+        // guarantee that filename will be unique, even in the same message, so need to generate
+        // a unique identifier for each object
+        ReplacedImage replaced_image = new ReplacedImage(next_replaced_buffer_number++, filename,
+            buffer);
+        replaced_images.set(replaced_image.id, replaced_image);
+        
+        return "<img alt=\"%s\" class=\"%s %s\" src=\"%s\" replaced-id=\"%s\" %s />".printf(
+            Geary.HTML.escape_markup(filename),
+            DATA_IMAGE_CLASS, REPLACED_IMAGE_CLASS,
+            assemble_data_uri(mime_type, rotated_image),
+            Geary.HTML.escape_markup(replaced_image.id),
             escaped_content_id != null ? @"cid=\"$escaped_content_id\"" : "");
     }
     
@@ -1530,18 +1559,36 @@ public class ConversationViewer : Gtk.Box {
             conversation_viewer.show_attachment_menu(email, attachment);
     }
     
-    private static void on_data_image_menu(WebKit.DOM.Element element, WebKit.DOM.Event event,
+    private static void on_data_image_menu_handler(WebKit.DOM.Element element, WebKit.DOM.Event event,
         ConversationViewer conversation_viewer) {
+        conversation_viewer.on_data_image_menu(element, event);
+    }
+    
+    private void on_data_image_menu(WebKit.DOM.Element element, WebKit.DOM.Event event) {
         event.stop_propagation();
         
-        Geary.Memory.Buffer? buffer;
-        if (!dissasemble_data_uri(element.get_attribute("src"), out buffer))
+        string? replaced_id = element.get_attribute("replaced-id");
+        if (Geary.String.is_empty(replaced_id))
             return;
         
-        string? filename = element.get_attribute("alt");
+        ReplacedImage? replaced_image = replaced_images.get(replaced_id);
+        if (replaced_image == null)
+            return;
         
-        if (buffer != null && buffer.size > 0)
-            conversation_viewer.show_replaced_image_menu(filename, buffer);
+        image_menu = new Gtk.Menu();
+        image_menu.selection_done.connect(() => {
+            image_menu = null;
+         });
+        
+        Gtk.MenuItem save_image_item = new Gtk.MenuItem.with_mnemonic(_("_Save Image As..."));
+        save_image_item.activate.connect(() => {
+            save_buffer_to_file(replaced_image.filename, replaced_image.buffer);
+        });
+        image_menu.append(save_image_item);
+        
+        image_menu.show_all();
+        
+        image_menu.popup(null, null, null, 0, Gtk.get_current_event_time());
     }
     
     private void on_message_menu_selection_done() {
@@ -1648,23 +1695,6 @@ public class ConversationViewer : Gtk.Box {
         }
         
         return menu;
-    }
-    
-    private void show_replaced_image_menu(string? filename, Geary.Memory.Buffer buffer) {
-        image_menu = new Gtk.Menu();
-        image_menu.selection_done.connect(() => {
-            image_menu = null;
-         });
-        
-        Gtk.MenuItem save_image_item = new Gtk.MenuItem.with_mnemonic(_("_Save Image As..."));
-        save_image_item.activate.connect(() => {
-            save_buffer_to_file(filename, buffer);
-        });
-        image_menu.append(save_image_item);
-        
-        image_menu.show_all();
-        
-        image_menu.popup(null, null, null, 0, Gtk.get_current_event_time());
     }
     
     private void show_message_menu(Geary.Email email) {
