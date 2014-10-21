@@ -168,6 +168,7 @@ public class ConversationViewer : Gtk.Box {
     private Gee.HashSet<string> inlined_content_ids = new Gee.HashSet<string>();
     private int next_replaced_buffer_number = 0;
     private Gee.HashMap<string, ReplacedImage> replaced_images = new Gee.HashMap<string, ReplacedImage>();
+    private Gee.HashSet<string> replaced_content_ids = new Gee.HashSet<string>();
     
     public ConversationViewer() {
         Object(orientation: Gtk.Orientation.VERTICAL, spacing: 0);
@@ -299,6 +300,7 @@ public class ConversationViewer : Gtk.Box {
         messages.clear();
         inlined_content_ids.clear();
         replaced_images.clear();
+        replaced_content_ids.clear();
         
         current_account_information = account_information;
     }
@@ -862,7 +864,13 @@ public class ConversationViewer : Gtk.Box {
             debug("Unable to load and rotate image %s for display: %s", filename, err.message);
         }
         
-        string? escaped_content_id = (content_id != null) ? Geary.HTML.escape_markup(content_id) : null;
+        // store so later processing of the message doesn't replace this element with the original
+        // MIME part
+        string? escaped_content_id = null;
+        if (!Geary.String.is_empty(content_id)) {
+            replaced_content_ids.add(content_id);
+            escaped_content_id = Geary.HTML.escape_markup(content_id);
+        }
         
         // Store the original buffer and its filename in a local map so they can be recalled later
         // (if the user wants to save it) ... note that Content-ID is optional and there's no
@@ -1851,13 +1859,23 @@ public class ConversationViewer : Gtk.Box {
                 // Get the MIME content for the image.
                 WebKit.DOM.HTMLImageElement img = (WebKit.DOM.HTMLImageElement) inline_list.item(i);
                 string? src = img.get_attribute("src");
-                if (Geary.String.is_empty(src)) {
+                if (Geary.String.is_empty(src))
                     continue;
-                } else if (src.has_prefix("cid:")) {
-                    string mime_id = src.substring(4);
+                
+                // if no Content-ID, then leave as-is, but note if a data: URI is being used for
+                // purposes of detecting remote images
+                string? content_id = src.has_prefix("cid:") ? src.substring(4) : null;
+                if (Geary.String.is_empty(content_id)) {
+                    remote_images = remote_images || !src.has_prefix("data:");
                     
-                    string? filename = message.get_content_filename_by_mime_id(mime_id);
-                    Geary.Memory.Buffer image_content = message.get_content_by_mime_id(mime_id);
+                    continue;
+                }
+                
+                // if image has a Content-ID and it's already been replaced by the image replacer,
+                // drop this tag, otherwise fix up this one with the Base-64 data URI of the image
+                if (!replaced_content_ids.contains(content_id)) {
+                    string? filename = message.get_content_filename_by_mime_id(content_id);
+                    Geary.Memory.Buffer image_content = message.get_content_by_mime_id(content_id);
                     Geary.Memory.UnownedBytesBuffer? unowned_buffer =
                         image_content as Geary.Memory.UnownedBytesBuffer;
                     
@@ -1879,9 +1897,9 @@ public class ConversationViewer : Gtk.Box {
                     
                     // stash here so inlined image isn't listed as attachment (esp. if it has no
                     // Content-Disposition)
-                    inlined_content_ids.add(mime_id);
-                } else if (!src.has_prefix("data:")) {
-                    remote_images = true;
+                    inlined_content_ids.add(content_id);
+                } else {
+                    img.parent_element.remove_child(img);
                 }
             }
             
