@@ -339,7 +339,7 @@ public class GearyController : Geary.BaseObject {
         move_menu.label = _("_Move");
         entries += move_menu;
         
-        Gtk.ActionEntry filter_menu = { ACTION_FILTER_MENU, null, TRANSLATABLE, null, _("Filter messages"),
+        Gtk.ActionEntry filter_menu = { ACTION_FILTER_MENU, null, TRANSLATABLE, null, _("Filter conversations"),
             null };
         filter_menu.label = _("_Filter");
         entries += filter_menu;
@@ -430,17 +430,17 @@ public class GearyController : Geary.BaseObject {
         
         Gtk.ToggleActionEntry filter_show_all = { ACTION_FILTER_SHOW_ALL, "filter-show-all", TRANSLATABLE, null,
             null, on_filter_show_all, true };
-        filter_show_all.label = _("Show _All Messages");
+        filter_show_all.label = _("Show _All Conversations");
         entries += filter_show_all;
         
         Gtk.ToggleActionEntry filter_show_unread = { ACTION_FILTER_SHOW_UNREAD, "filter-show-unread",
             TRANSLATABLE, null, null, on_filter_show_unread, false };
-        filter_show_unread.label = _("Only _Unread Messages");
+        filter_show_unread.label = _("Only _Unread Conversations");
         entries += filter_show_unread;
         
         Gtk.ToggleActionEntry filter_show_starred = { ACTION_FILTER_SHOW_STARRED, "filter-show-starred",
             TRANSLATABLE, null, null, on_filter_show_starred, false };
-        filter_show_starred.label = _("Only _Starred Messages");
+        filter_show_starred.label = _("Only _Starred Conversations");
         entries += filter_show_starred;
         
         return entries;
