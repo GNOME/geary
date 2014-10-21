@@ -1,0 +1,9 @@
+<ui>
+    <popup name="ToolbarFilterMenu">
+        <menuitem name="ShowAll" action="GearyFilterShowAll" />
+        <separator />
+        <menuitem name="ShowUnread" action="GearyFilterShowUnread" />
+        <menuitem name="ShowStarred" action="GearyFilterShowStarred" />
+    </popup>
+</ui>
+

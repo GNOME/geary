@@ -14,6 +14,7 @@ public class MainWindow : Gtk.ApplicationWindow {
     
     public FolderList.Tree folder_list { get; private set; default = new FolderList.Tree(); }
     public ConversationListStore conversation_list_store { get; private set; default = new ConversationListStore(); }
+    public ConversationFilter conversation_filter { get; private set; }
     public MainToolbar main_toolbar { get; private set; }
     public ConversationListView conversation_list_view  { get; private set; }
     public ConversationViewer conversation_viewer { get; private set; default = new ConversationViewer(); }
@@ -38,7 +39,9 @@ public class MainWindow : Gtk.ApplicationWindow {
         
         title = GearyApplication.NAME;
         
-        conversation_list_view = new ConversationListView(conversation_list_store);
+        conversation_filter = new ConversationFilter(conversation_list_store);
+        
+        conversation_list_view = new ConversationListView(conversation_filter);
         
         add_events(Gdk.EventMask.KEY_PRESS_MASK | Gdk.EventMask.KEY_RELEASE_MASK
             | Gdk.EventMask.FOCUS_CHANGE_MASK);

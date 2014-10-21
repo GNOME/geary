@@ -35,6 +35,11 @@ public class MainToolbar : PillHeaderbar {
         Gtk.Menu mark_menu = (Gtk.Menu) GearyApplication.instance.ui_manager.get_widget("/ui/ToolbarMarkMenu");
         mark_menu.foreach(GtkUtil.show_menuitem_accel_labels);
         
+        // Assemble filter menu.
+        GearyApplication.instance.load_ui_file("toolbar_filter_menu.ui");
+        Gtk.Menu filter_menu = (Gtk.Menu) GearyApplication.instance.ui_manager.get_widget("/ui/ToolbarFilterMenu");
+        filter_menu.foreach(GtkUtil.show_menuitem_accel_labels);
+        
         // Setup the application menu.
         GearyApplication.instance.load_ui_file("toolbar_menu.ui");
         Gtk.Menu application_menu = (Gtk.Menu) GearyApplication.instance.ui_manager.get_widget("/ui/ToolbarMenu");
@@ -59,6 +64,11 @@ public class MainToolbar : PillHeaderbar {
         insert.add(create_menu_button("marker-symbolic", mark_menu, GearyController.ACTION_MARK_AS_MENU));
         insert.add(create_menu_button(rtl ? "tag-rtl-symbolic" : "tag-symbolic", copy_folder_menu, GearyController.ACTION_COPY_MENU));
         insert.add(create_menu_button("folder-symbolic", move_folder_menu, GearyController.ACTION_MOVE_MENU));
+        add_start(create_pill_buttons(insert));
+        
+        // Filter.
+        insert.clear();
+        insert.add(create_menu_button("folder-saved-search-symbolic", filter_menu, GearyController.ACTION_FILTER_MENU));
         add_start(create_pill_buttons(insert));
         
         // The toolbar looks bad when you hide one of a pair of pill buttons.

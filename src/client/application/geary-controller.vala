@@ -46,6 +46,10 @@ public class GearyController : Geary.BaseObject {
     public const string ACTION_MARK_AS_SPAM = "GearyMarkAsSpam";
     public const string ACTION_COPY_MENU = "GearyCopyMenuButton";
     public const string ACTION_MOVE_MENU = "GearyMoveMenuButton";
+    public const string ACTION_FILTER_MENU = "GearyFilterMenuButton";
+    public const string ACTION_FILTER_SHOW_ALL = "GearyFilterShowAll";
+    public const string ACTION_FILTER_SHOW_UNREAD = "GearyFilterShowUnread";
+    public const string ACTION_FILTER_SHOW_STARRED = "GearyFilterShowStarred";
     public const string ACTION_GEAR_MENU = "GearyGearMenuButton";
     public const string ACTION_SEARCH = "GearySearch";
     
@@ -334,6 +338,11 @@ public class GearyController : Geary.BaseObject {
         Gtk.ActionEntry move_menu = { ACTION_MOVE_MENU, null, TRANSLATABLE, "M", _("Move conversation"), null };
         move_menu.label = _("_Move");
         entries += move_menu;
+        
+        Gtk.ActionEntry filter_menu = { ACTION_FILTER_MENU, null, TRANSLATABLE, null, _("Filter messages"),
+            null };
+        filter_menu.label = _("_Filter");
+        entries += filter_menu;
 
         Gtk.ActionEntry new_message = { ACTION_NEW_MESSAGE, null, null, "<Ctrl>N", 
             _("Compose new message (Ctrl+N, N)"), on_new_message };
@@ -418,6 +427,21 @@ public class GearyController : Geary.BaseObject {
         Gtk.ToggleActionEntry gear_menu = { ACTION_GEAR_MENU, null, null, "F10",
             null, null, false };
         entries += gear_menu;
+        
+        Gtk.ToggleActionEntry filter_show_all = { ACTION_FILTER_SHOW_ALL, "filter-show-all", TRANSLATABLE, null,
+            null, on_filter_show_all, true };
+        filter_show_all.label = _("Show _All Messages");
+        entries += filter_show_all;
+        
+        Gtk.ToggleActionEntry filter_show_unread = { ACTION_FILTER_SHOW_UNREAD, "filter-show-unread",
+            TRANSLATABLE, null, null, on_filter_show_unread, false };
+        filter_show_unread.label = _("Only _Unread Messages");
+        entries += filter_show_unread;
+        
+        Gtk.ToggleActionEntry filter_show_starred = { ACTION_FILTER_SHOW_STARRED, "filter-show-starred",
+            TRANSLATABLE, null, null, on_filter_show_starred, false };
+        filter_show_starred.label = _("Only _Starred Messages");
+        entries += filter_show_starred;
         
         return entries;
     }
@@ -1332,6 +1356,10 @@ public class GearyController : Geary.BaseObject {
         
         select_folder_mutex.release(ref mutex_token);
         
+        Gtk.ActionGroup actions = GearyApplication.instance.actions;
+        Gtk.ToggleAction show_all_action = actions.get_action(ACTION_FILTER_SHOW_ALL) as Gtk.ToggleAction;
+        show_all_action.set_active(true);
+        
         debug("Switched to %s", folder.to_string());
     }
     
@@ -1822,6 +1850,53 @@ public class GearyController : Geary.BaseObject {
     
     private void on_mark_as_spam() {
         mark_as_spam_async.begin(null);
+    }
+    
+    private void on_filter_show_all() {
+        Gtk.ActionGroup actions = GearyApplication.instance.actions;
+        
+        Gtk.ToggleAction show_all_action = actions.get_action(ACTION_FILTER_SHOW_ALL) as Gtk.ToggleAction;
+        Gtk.ToggleAction show_unread_action = actions.get_action(ACTION_FILTER_SHOW_UNREAD) as Gtk.ToggleAction;
+        Gtk.ToggleAction show_starred_action = actions.get_action(ACTION_FILTER_SHOW_STARRED) as Gtk.ToggleAction;
+        
+        if (show_unread_action.active || show_starred_action.active) {
+            if (show_all_action.active) {
+                show_unread_action.active = false;
+                show_starred_action.active = false;
+            }
+        } else {
+            show_all_action.active = true;
+        }
+    }
+    
+    private void on_filter_show_unread() {
+        Gtk.ActionGroup actions = GearyApplication.instance.actions;
+        
+        Gtk.ToggleAction show_all_action = actions.get_action(ACTION_FILTER_SHOW_ALL) as Gtk.ToggleAction;
+        Gtk.ToggleAction show_unread_action = actions.get_action(ACTION_FILTER_SHOW_UNREAD) as Gtk.ToggleAction;
+        Gtk.ToggleAction show_starred_action = actions.get_action(ACTION_FILTER_SHOW_STARRED) as Gtk.ToggleAction;
+        
+        if (show_unread_action.active)
+            show_all_action.active = false;
+        else if (!show_starred_action.active)
+            show_all_action.active = true;
+        
+        main_window.conversation_filter.set_unread_filter(show_unread_action.active);
+    }
+    
+    private void on_filter_show_starred() {
+        Gtk.ActionGroup actions = GearyApplication.instance.actions;
+        
+        Gtk.ToggleAction show_all_action = actions.get_action(ACTION_FILTER_SHOW_ALL) as Gtk.ToggleAction;
+        Gtk.ToggleAction show_unread_action = actions.get_action(ACTION_FILTER_SHOW_UNREAD) as Gtk.ToggleAction;
+        Gtk.ToggleAction show_starred_action = actions.get_action(ACTION_FILTER_SHOW_STARRED) as Gtk.ToggleAction;
+        
+        if (show_starred_action.active)
+            show_all_action.active = false;
+        else if (!show_unread_action.active)
+            show_all_action.active = true;
+        
+        main_window.conversation_filter.set_starred_filter(show_starred_action.active);
     }
     
     private void copy_email(Gee.Collection<Geary.EmailIdentifier> ids,

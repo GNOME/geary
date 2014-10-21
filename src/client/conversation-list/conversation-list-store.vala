@@ -101,22 +101,6 @@ public class ConversationListStore : Gtk.ListStore {
         email_store = (current_folder == null ? null : new Geary.App.EmailStore(current_folder.account));
     }
     
-    public Geary.App.Conversation? get_conversation_at_path(Gtk.TreePath path) {
-        Gtk.TreeIter iter;
-        if (!get_iter(out iter, path))
-            return null;
-        
-        return get_conversation_at_iter(iter);
-    }
-    
-    public Gtk.TreePath? get_path_for_conversation(Geary.App.Conversation conversation) {
-        Gtk.TreeIter iter;
-        if (!get_iter_for_conversation(conversation, out iter))
-            return null;
-        
-        return get_path(iter);
-    }
-    
     private async void refresh_previews_async(Geary.App.ConversationMonitor conversation_monitor) {
         // Use a mutex because it's possible for the conversation monitor to fire multiple
         // "scan-started" signals as messages come in fast and furious, but only want to process

@@ -337,6 +337,7 @@ client/composer/email-entry.vala
 client/composer/scrollable-overlay.vala
 client/composer/webview-edit-fixer.vala
 
+client/conversation-list/conversation-filter.vala
 client/conversation-list/conversation-list-cell-renderer.vala
 client/conversation-list/conversation-list-store.vala
 client/conversation-list/conversation-list-view.vala
