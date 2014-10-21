@@ -151,13 +151,25 @@ public class GearyApplication : Gtk.Application {
     }
     
     public bool present() {
-        if (controller == null || controller.main_window == null)
+        if (controller == null)
+            return false;
+        
+        // if LoginDialog (i.e. the opening dialog for creating the initial account) is present
+        // and visible, bring that to top (to prevent opening the hidden main window, which is
+        // empty)
+        if (controller.login_dialog != null && controller.login_dialog.visible) {
+            controller.login_dialog.present_with_time(Gdk.CURRENT_TIME);
+            
+            return true;
+        }
+        
+        if (controller.main_window == null)
             return false;
         
         if (!controller.main_window.get_realized())
             controller.main_window.show_all();
         else
-            controller.main_window.present();
+            controller.main_window.present_with_time(Gdk.CURRENT_TIME);
         
         return true;
     }
