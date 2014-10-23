@@ -5,7 +5,7 @@
  */
 
 private class Geary.ImapDB.Account : BaseObject {
-    private const int POPULATE_SEARCH_TABLE_DELAY_SEC = 30;
+    private const int POPULATE_SEARCH_TABLE_DELAY_SEC = 5;
     
     private class FolderReference : Geary.SmartReference {
         public Geary.FolderPath path;
@@ -135,8 +135,10 @@ private class Geary.ImapDB.Account : BaseObject {
         background_cancellable = new Cancellable();
         
         // Kick off a background update of the search table, but since the database is getting
-        // hammered at startup, wait a bit before starting the update
-        Timeout.add_seconds(POPULATE_SEARCH_TABLE_DELAY_SEC, () => {
+        // hammered at startup, wait a bit before starting the update ... use the ordinal to
+        // stagger these being fired off (important for users with many accounts registered)
+        int account_sec = account_information.ordinal.clamp(0, 10);
+        Timeout.add_seconds(POPULATE_SEARCH_TABLE_DELAY_SEC + account_sec, () => {
             populate_search_table_async.begin(background_cancellable);
             
             return false;
@@ -1112,7 +1114,7 @@ private class Geary.ImapDB.Account : BaseObject {
                 // the main thread to slow to a crawl.  This delay means the
                 // update takes more time, but leaves the main thread nice and
                 // snappy the whole time.
-                yield Geary.Scheduler.sleep_ms_async(250);
+                yield Geary.Scheduler.sleep_ms_async(50);
             }
         } catch (Error e) {
             debug("Error populating %s search table: %s", account_information.email, e.message);
@@ -1124,27 +1126,58 @@ private class Geary.ImapDB.Account : BaseObject {
         debug("%s: Done populating search table", account_information.email);
     }
     
-    private async bool populate_search_table_batch_async(int limit = 100,
-        Cancellable? cancellable) throws Error {
-        debug("%s: Searching for missing indexed messages...", account_information.email);
+    private static Gee.HashSet<int64?> do_build_rowid_set(Db.Result result, Cancellable? cancellable)
+        throws Error {
+        Gee.HashSet<int64?> rowid_set = new Gee.HashSet<int64?>(Collection.int64_hash_func,
+            Collection.int64_equal_func);
+        while (!result.finished) {
+            rowid_set.add(result.rowid_at(0));
+            result.next(cancellable);
+        }
+        
+        return rowid_set;
+    }
+    
+    private async bool populate_search_table_batch_async(int limit, Cancellable? cancellable)
+        throws Error {
+        debug("%s: Searching for up to %d missing indexed messages...", account_information.email,
+            limit);
         
         int count = 0;
         yield db.exec_transaction_async(Db.TransactionType.RW, (cx, cancellable) => {
+            // Embedding a SELECT within a SELECT is painfully slow with SQLite, so manually
+            // perform the operation
+            //
+            // Get all rowids for the MessageSearchTable and turn it into a HashSet
             Db.Statement stmt = cx.prepare("""
+                SELECT docid
+                FROM MessageSearchTable
+            """);
+            Gee.HashSet<int64?> search_ids = do_build_rowid_set(stmt.exec(cancellable), cancellable);
+            
+            // Do the same for the MessageTable
+            stmt = cx.prepare("""
                 SELECT id
                 FROM MessageTable
-                WHERE id NOT IN (
-                    SELECT docid
-                    FROM MessageSearchTable
-                )
-                LIMIT ?
             """);
-            stmt.bind_int(0, limit);
+            Gee.HashSet<int64?> message_ids = do_build_rowid_set(stmt.exec(cancellable), cancellable);
             
-            Db.Result result = stmt.exec(cancellable);
-            while (!result.finished) {
-                int64 id = result.rowid_at(0);
+            // chaff out any MessageTable entries not present in the MessageSearchTable ... since
+            // we're given a limit, stuff messages req'ing search into separate set and stop when limit
+            // reached
+            Gee.HashSet<int64?> unindexed_message_ids = new Gee.HashSet<int64?>(Collection.int64_hash_func,
+                Collection.int64_equal_func);
+            foreach (int64 message_id in message_ids) {
+                if (search_ids.contains(message_id))
+                    continue;
                 
+                unindexed_message_ids.add(message_id);
+                if (unindexed_message_ids.size >= limit)
+                    break;
+            }
+            
+            // For all remaining MessageTable rowid's, generate search table entry
+            foreach (int64 message_id in unindexed_message_ids) {
                 try {
                     Geary.Email.Field search_fields = Geary.Email.REQUIRED_FOR_MESSAGE |
                         Geary.Email.Field.ORIGINATORS | Geary.Email.Field.RECEIVERS |
@@ -1152,21 +1185,20 @@ private class Geary.ImapDB.Account : BaseObject {
                     
                     Geary.Email.Field db_fields;
                     MessageRow row = Geary.ImapDB.Folder.do_fetch_message_row(
-                        cx, id, search_fields, out db_fields, cancellable);
-                    Geary.Email email = row.to_email(new Geary.ImapDB.EmailIdentifier(id, null));
-                    Geary.ImapDB.Folder.do_add_attachments(cx, email, id, cancellable);
+                        cx, message_id, search_fields, out db_fields, cancellable);
+                    Geary.Email email = row.to_email(new Geary.ImapDB.EmailIdentifier(message_id, null));
+                    Geary.ImapDB.Folder.do_add_attachments(cx, email, message_id, cancellable);
                     
-                    Geary.ImapDB.Folder.do_add_email_to_search_table(cx, id, email, cancellable);
+                    Geary.ImapDB.Folder.do_add_email_to_search_table(cx, message_id, email, cancellable);
                 } catch (Error e) {
                     // This is a somewhat serious issue since we rely on
                     // there always being a row in the search table for
                     // every message.
-                    warning("Error adding message %lld to the search table: %s", id, e.message);
+                    warning("Error adding message %s to the search table: %s", message_id.to_string(),
+                        e.message);
                 }
                 
                 ++count;
-                
-                result.next(cancellable);
             }
             
             return Db.TransactionOutcome.DONE;
