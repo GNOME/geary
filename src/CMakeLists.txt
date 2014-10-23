@@ -592,6 +592,16 @@ else ()
     message(STATUS "Unity interface changes: OFF")
 endif ()
 
+if (DISABLE_POODLE)
+    message(STATUS "POODLE SSLv3 fix: OFF")
+    set(EXTRA_VALA_OPTIONS
+        ${EXTRA_VALA_OPTIONS}
+        --define=DISABLE_POODLE
+    )
+else ()
+    message(STATUS "POODLE SSLv3 fix: ON")
+endif ()
+
 set(LIB_PATHS ${DEPS_LIBRARY_DIRS})
 link_directories(${LIB_PATHS})
 add_definitions(${CFLAGS})
