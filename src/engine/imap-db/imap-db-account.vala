@@ -658,25 +658,32 @@ private class Geary.ImapDB.Account : BaseObject {
         // Map of user-supplied search field names to column names.
         Gee.HashMap<string, string> field_names = new Gee.HashMap<string, string>();
         /// Can be typed in the search box like attachment:file.txt to find
-        /// messages with attachments with a particular name.
+        /// messages with attachments with a particular name.  The translated
+        /// string must match the string in Geary's help documentation.
         field_names.set(_("attachment"), "attachment");
         /// Can be typed in the search box like bcc:johndoe@example.com to find
-        /// messages bcc'd to a particular person.
+        /// messages bcc'd to a particular person.  The translated
+        /// string must match the string in Geary's help documentation.
         field_names.set(_("bcc"), "bcc");
         /// Can be typed in the search box like body:word to find the word only
-        /// if it occurs in the body of a message.
+        /// if it occurs in the body of a message.  The translated
+        /// string must match the string in Geary's help documentation.
         field_names.set(_("body"), "body");
         /// Can be typed in the search box like cc:johndoe@example.com to find
-        /// messages cc'd to a particular person.
+        /// messages cc'd to a particular person.  The translated
+        /// string must match the string in Geary's help documentation.
         field_names.set(_("cc"), "cc");
         /// Can be typed in the search box like from:johndoe@example.com to
-        /// find messages from a particular sender.
+        /// find messages from a particular sender.  The translated
+        /// string must match the string in Geary's help documentation.
         field_names.set(_("from"), "from_field");
         /// Can be typed in the search box like subject:word to find the word
-        /// only if it occurs in the subject of a message.
+        /// only if it occurs in the subject of a message.  The translated
+        /// string must match the string in Geary's help documentation.
         field_names.set(_("subject"), "subject");
         /// Can be typed in the search box like to:johndoe@example.com to find
-        /// messages received by a particular person.
+        /// messages received by a particular person.  The translated
+        /// string must match the string in Geary's help documentation.
         field_names.set(_("to"), "receivers");
         
         // Fields we allow the token to be "me" as in from:me.
@@ -695,7 +702,8 @@ private class Geary.ImapDB.Account : BaseObject {
             token = parts[1];
             if (key in addressable_fields) {
                 // "me" can be typed like from:me or cc:me, etc. as a shorthand
-                // to find mail to or from yourself in search.
+                // to find mail to or from yourself in search.  The translated
+                // string must match the string in Geary's help documentation.
                 if (token.down() == _("me"))
                     token = account_information.email;
             }
