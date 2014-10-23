@@ -40,6 +40,8 @@ configure_help() {
 	                        Disable generating and installing translated help documentation.
 	  --disable-contractor
 	                        Disable installing Contractor files.
+	  --disable-poodle-ssl3
+	                        Disable POODLE SSLv3 GnuTLS priority fix. (Not recommended.)
 
 	Some influential environment variables:
 	  PKG_CONFIG_PATH       Adds directories to pkg-config's search path.
@@ -121,6 +123,10 @@ do
         
         --disable-contractor)
                             CMDLINE="${CMDLINE} -DDISABLE_CONTRACT=ON"
+                            ;;
+        
+        --disable-poodle-ssl3)
+                            CMDLINE="${CMDLINE} -DDISABLE_POODLE=ON"
                             ;;
         
         VALAC)              [ ! $value ] && abort $1
