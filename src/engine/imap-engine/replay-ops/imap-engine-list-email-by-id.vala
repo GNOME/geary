@@ -11,9 +11,8 @@ private class Geary.ImapEngine.ListEmailByID : Geary.ImapEngine.AbstractListEmai
     private Imap.UID? initial_uid = null;
     
     public ListEmailByID(MinimalFolder owner, ImapDB.EmailIdentifier? initial_id, int count,
-        Geary.Email.Field required_fields, Folder.ListFlags flags, Gee.List<Geary.Email>? accumulator,
-        EmailCallback? cb, Cancellable? cancellable) {
-        base ("ListEmailByID", owner, required_fields, flags, accumulator, cb, cancellable);
+        Geary.Email.Field required_fields, Folder.ListFlags flags, Cancellable? cancellable) {
+        base ("ListEmailByID", owner, required_fields, flags, cancellable);
         
         this.initial_id = initial_id;
         this.count = count;
@@ -61,13 +60,8 @@ private class Geary.ImapEngine.ListEmailByID : Geary.ImapEngine.AbstractListEmai
         
         // report fulfilled items
         fulfilled_count = fulfilled.size;
-        if (fulfilled_count > 0) {
-            if (accumulator != null)
-                accumulator.add_all(fulfilled);
-            
-            if (cb != null)
-                cb(fulfilled, null);
-        }
+        if (fulfilled_count > 0)
+            accumulator.add_all(fulfilled);
         
         // determine if everything was listed
         bool finished = false;
@@ -95,12 +89,8 @@ private class Geary.ImapEngine.ListEmailByID : Geary.ImapEngine.AbstractListEmai
         
         // local-only operations stop here; also, since the local store is normalized from the top
         // of the vector on down, if enough items came back fulfilled, then done
-        if (finished) {
-            if (cb != null)
-                cb(null, null);
-            
+        if (finished)
             return ReplayOperation.Status.COMPLETED;
-        }
         
         return ReplayOperation.Status.CONTINUE;
     }

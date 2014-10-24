@@ -14,10 +14,10 @@ private class Geary.ImapEngine.ServerSearchEmail : Geary.ImapEngine.AbstractList
     private Imap.SearchCriteria criteria;
     
     public ServerSearchEmail(MinimalFolder owner, Imap.SearchCriteria criteria, Geary.Email.Field required_fields,
-        Gee.List<Geary.Email>? accumulator, Cancellable? cancellable) {
+        Cancellable? cancellable) {
         // OLDEST_TO_NEWEST used for vector expansion, if necessary
         base ("ServerSearchEmail", owner, required_fields, Geary.Folder.ListFlags.OLDEST_TO_NEWEST,
-            accumulator, null, cancellable);
+            cancellable);
         
         this.criteria = criteria;
     }

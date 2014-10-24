@@ -53,24 +53,23 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
         }
     }
     
+    // The accumulated Email from the list operation.  Should only be accessed once the operation
+    // has completed.
+    public Gee.List<Geary.Email> accumulator = new Gee.ArrayList<Geary.Email>();
+    
     protected MinimalFolder owner;
     protected Geary.Email.Field required_fields;
-    protected Gee.List<Geary.Email>? accumulator = null;
-    protected weak EmailCallback? cb;
     protected Cancellable? cancellable;
     protected Folder.ListFlags flags;
     
     private Gee.HashMap<Imap.UID, Geary.Email.Field> unfulfilled = new Gee.HashMap<Imap.UID, Geary.Email.Field>();
     
     public AbstractListEmail(string name, MinimalFolder owner, Geary.Email.Field required_fields,
-        Folder.ListFlags flags, Gee.List<Geary.Email>? accumulator, EmailCallback? cb,
-        Cancellable? cancellable) {
+        Folder.ListFlags flags, Cancellable? cancellable) {
         base(name);
         
         this.owner = owner;
         this.required_fields = required_fields;
-        this.accumulator = accumulator;
-        this.cb = cb;
         this.cancellable = cancellable;
         this.flags = flags;
     }
@@ -100,11 +99,9 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
     public override void notify_remote_removed_ids(Gee.Collection<ImapDB.EmailIdentifier> ids) {
         // remove email already picked up from local store ... for email reported via the
         // callback, too late
-        if (accumulator != null) {
-            Collection.remove_if<Geary.Email>(accumulator, (email) => {
-                return ids.contains((ImapDB.EmailIdentifier) email.id);
-            });
-        }
+        Collection.remove_if<Geary.Email>(accumulator, (email) => {
+            return ids.contains((ImapDB.EmailIdentifier) email.id);
+        });
         
         // remove from unfulfilled list, as there's now nothing to fetch from the server
         // NOTE: Requires UID to work; this *should* always work, as the EmailIdentifier should
@@ -163,17 +160,8 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
         }
         
         // report merged emails
-        if (result_list.size > 0) {
-            if (accumulator != null)
-                accumulator.add_all(result_list);
-            
-            if (cb != null)
-                cb(result_list, null);
-        }
-        
-        // done
-        if (cb != null)
-            cb(null, null);
+        if (result_list.size > 0)
+            accumulator.add_all(result_list);
         
         // signal
         if (created_ids.size > 0) {

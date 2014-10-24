@@ -8,9 +8,8 @@ private class Geary.ImapEngine.ListEmailBySparseID : Geary.ImapEngine.AbstractLi
     private Gee.HashSet<ImapDB.EmailIdentifier> ids = new Gee.HashSet<ImapDB.EmailIdentifier>();
     
     public ListEmailBySparseID(MinimalFolder owner, Gee.Collection<ImapDB.EmailIdentifier> ids,
-        Geary.Email.Field required_fields, Folder.ListFlags flags, Gee.List<Geary.Email>? accumulator,
-        EmailCallback cb, Cancellable? cancellable) {
-        base ("ListEmailBySparseID", owner, required_fields, flags, accumulator, cb, cancellable);
+        Geary.Email.Field required_fields, Folder.ListFlags flags, Cancellable? cancellable) {
+        base ("ListEmailBySparseID", owner, required_fields, flags, cancellable);
         
         this.ids.add_all(ids);
     }
@@ -62,20 +61,11 @@ private class Geary.ImapEngine.ListEmailBySparseID : Geary.ImapEngine.AbstractLi
             }
         }
         
-        if (fulfilled.size > 0) {
-            if (accumulator != null)
-                accumulator.add_all(fulfilled);
-            
-            if (cb != null)
-                cb(fulfilled, null);
-        }
+        if (fulfilled.size > 0)
+            accumulator.add_all(fulfilled);
         
-        if (flags.is_local_only() || get_unfulfilled_count() == 0) {
-            if (cb != null)
-                cb(null, null);
-            
+        if (flags.is_local_only() || get_unfulfilled_count() == 0)
             return ReplayOperation.Status.COMPLETED;
-        }
         
         return ReplayOperation.Status.CONTINUE;
     }

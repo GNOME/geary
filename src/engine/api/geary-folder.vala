@@ -4,8 +4,6 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public delegate void Geary.EmailCallback(Gee.List<Geary.Email>? emails, Error? err);
-
 public interface Geary.Folder : BaseObject {
     public enum OpenState {
         CLOSED,
@@ -100,8 +98,7 @@ public interface Geary.Folder : BaseObject {
          */
         FORCE_UPDATE,
         /**
-         * Include the provided EmailIdentifier (only respected by {@link list_email_by_id_async} and
-         * {@link lazy_list_email_by_id}).
+         * Include the provided EmailIdentifier (only respected by {@link list_email_by_id_async}.
          */
         INCLUDING_ID,
         /**
@@ -431,45 +428,18 @@ public interface Geary.Folder : BaseObject {
         throws Error;
     
     /**
-     * Similar in contract to lazy_list_email_async(), but uses Geary.EmailIdentifier rather than
-     * positional addressing, much like list_email_by_id_async().  See that method for more
-     * information on its contract and how the count and flags parameters work.
-     *
-     * Like the other "lazy" methods, this method will call EmailCallback while the operation is
-     * processing.  This method does not block.
-     *
-     * The Folder must be opened prior to attempting this operation.
-     */
-    public abstract void lazy_list_email_by_id(Geary.EmailIdentifier? initial_id, int count,
-        Geary.Email.Field required_fields, ListFlags flags, EmailCallback cb, Cancellable? cancellable = null);
-    
-    /**
      * Similar in contract to {@link list_email_by_id_async}, but uses a list of
      * {@link Geary.EmailIdentifier}s rather than a range.
      *
      * Any Gee.Collection is accepted for EmailIdentifiers, but the returned list will only contain
      * one email for each requested; duplicates are ignored.  ListFlags.INCLUDING_ID is ignored
-     * for this call and {@link lazy_list_email_by_sparse_id}.
+     * for this call.
      *
      * The Folder must be opened prior to attempting this operation.
      */
     public abstract async Gee.List<Geary.Email>? list_email_by_sparse_id_async(
         Gee.Collection<Geary.EmailIdentifier> ids, Geary.Email.Field required_fields, ListFlags flags,
         Cancellable? cancellable = null) throws Error;
-    
-    /**
-     * See {@link list_email_by_id_async} and {@link list_email_by_sparse_id_async}
-     * for more information on {@link EmailIdentifier}s and how the flags and callback parameter
-     * works.
-     *
-     * Like the other "lazy" method, this method will call EmailCallback while the operation is
-     * processing.  This method does not block.
-     *
-     * The Folder must be opened prior to attempting this operation.
-     */
-    public abstract void lazy_list_email_by_sparse_id(Gee.Collection<Geary.EmailIdentifier> ids,
-        Geary.Email.Field required_fields, ListFlags flags, EmailCallback cb,
-        Cancellable? cancellable = null);
     
     /**
      * Returns the locally available Geary.Email.Field fields for the specified emails.  If a
