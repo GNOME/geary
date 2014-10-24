@@ -1303,8 +1303,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.AbstractFolder, Geary.Folde
         
         replay_queue.schedule(op);
         
-        if (!yield op.wait_for_ready_async(cancellable))
-            return null;
+        yield op.wait_for_ready_async(cancellable);
         
         // find earliest ID; because all Email comes from Folder, UID should always be present
         ImapDB.EmailIdentifier? earliest_id = null;

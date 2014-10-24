@@ -26,7 +26,6 @@ private abstract class Geary.ImapEngine.ReplayOperation : Geary.BaseObject {
     
     public enum Status {
         COMPLETED,
-        FAILED,
         CONTINUE
     }
     
@@ -36,7 +35,6 @@ private abstract class Geary.ImapEngine.ReplayOperation : Geary.BaseObject {
     public int opnum { get; private set; }
     public Scope scope { get; private set; }
     public Error? err { get; private set; default = null; }
-    public bool failed { get; private set; default = false; }
     public bool notified { get; private set; default = false; }
     
     private Nonblocking.Semaphore semaphore = new Nonblocking.Semaphore();
@@ -97,10 +95,11 @@ private abstract class Geary.ImapEngine.ReplayOperation : Geary.BaseObject {
      *
      * Returns:
      *   COMPLETED: the operation has completed and no further calls should be made.
-     *   FAILED: the operation has failed.  (An exception may be thrown for similar effect.)
-     *     backout_local_async() will *not* be executed.
      *   CONTINUE: The local operation has completed and the remote portion must be executed as
      *      well.  This is treated as COMPLETED if get_scope() returns LOCAL_ONLY.
+     *
+     * If Error thrown:
+     *   backout_local_async() will *not* be executed.
      */
     public abstract async Status replay_local_async() throws Error;
     
@@ -109,9 +108,10 @@ private abstract class Geary.ImapEngine.ReplayOperation : Geary.BaseObject {
      *
      * Returns:
      *   COMPLETED: the operation has completed and no further calls should be made.
-     *   FAILED: the operation has failed.  (An exception may be thrown for similar effect.)
-     *     backout_local_async() will be executed only if scope is LOCAL_AND_REMOTE.
      *   CONTINUE: Treated as COMPLETED.
+     *
+     * If Error thrown:
+     *   backout_local_async() will be executed only if scope is LOCAL_AND_REMOTE.
      */
     public abstract async Status replay_remote_async() throws Error;
     
@@ -123,23 +123,20 @@ private abstract class Geary.ImapEngine.ReplayOperation : Geary.BaseObject {
     
     /**
      * Completes when the operation has completed execution.  If the operation threw an error
-     * during execution, it will be thrown here.  If the operation failed, this returns false.
+     * during execution, it will be thrown here.
      */
-    public async bool wait_for_ready_async(Cancellable? cancellable = null) throws Error {
+    public async void wait_for_ready_async(Cancellable? cancellable = null) throws Error {
         yield semaphore.wait_async(cancellable);
         
         if (err != null)
             throw err;
-        
-        return failed;
     }
     
-    internal void notify_ready(bool failed, Error? err) {
+    internal void notify_ready(Error? err) {
         assert(!notified);
         
         notified = true;
         
-        this.failed = failed;
         this.err = err;
         
         try {

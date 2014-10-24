@@ -50,9 +50,6 @@ private class Geary.ImapEngine.CreateEmail : Geary.ImapEngine.SendReplayOperatio
         // use IMAP APPEND command on remote folders, which doesn't require opening a folder
         created_id = yield engine.remote_folder.create_email_async(rfc822, flags, date_received);
         
-        if (created_id == null)
-            return ReplayOperation.Status.FAILED;
-        
         // If the user cancelled the operation, we need to wipe the new message to keep this
         // operation atomic.
         if (cancellable.is_cancelled()) {

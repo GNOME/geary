@@ -84,14 +84,14 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
             op.to_string());
     }
     
-    public virtual signal void backing_out(ReplayOperation op, bool failed, Error? err) {
-        Logging.debug(Logging.Flag.REPLAY, "[%s] ReplayQueue::backout-out: %s failed=%s err=%s",
-            to_string(), op.to_string(), failed.to_string(), (err != null) ? err.message : "(null)");
+    public virtual signal void backing_out(ReplayOperation op, Error? err) {
+        Logging.debug(Logging.Flag.REPLAY, "[%s] ReplayQueue::backout-out: %s err=%s",
+            to_string(), op.to_string(), (err != null) ? err.message : "(null)");
     }
     
-    public virtual signal void backed_out(ReplayOperation op, bool failed, Error? err) {
-        Logging.debug(Logging.Flag.REPLAY, "[%s] ReplayQueue::backed-out: %s failed=%s err=%s",
-            to_string(), op.to_string(), failed.to_string(), (err != null) ? err.message : "(null)");
+    public virtual signal void backed_out(ReplayOperation op, Error? err) {
+        Logging.debug(Logging.Flag.REPLAY, "[%s] ReplayQueue::backed-out: %s err=%s",
+            to_string(), op.to_string(), (err != null) ? err.message : "(null)");
     }
     
     public virtual signal void backout_failed(ReplayOperation op, Error? backout_err) {
@@ -393,20 +393,14 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
                         case ReplayOperation.Status.COMPLETED:
                             // done
                             remote_enqueue = false;
-                            op.notify_ready(false, null);
+                            op.notify_ready(null);
                         break;
                         
                         case ReplayOperation.Status.CONTINUE:
                             // don't touch remote_enqueue; if already false, CONTINUE is treated as
                             // COMPLETED.
                             if (!remote_enqueue)
-                                op.notify_ready(false, null);
-                        break;
-                        
-                        case ReplayOperation.Status.FAILED:
-                            // done
-                            remote_enqueue = false;
-                            op.notify_ready(true, null);
+                                op.notify_ready(null);
                         break;
                         
                         default:
@@ -416,7 +410,7 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
                     debug("Replay local error for %s on %s: %s", op.to_string(), to_string(),
                         replay_err.message);
                     
-                    op.notify_ready(false, replay_err);
+                    op.notify_ready(replay_err);
                     remote_enqueue = false;
                 }
             }
@@ -436,7 +430,7 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
                 locally_executed(op, remote_enqueue);
             
             if (!remote_enqueue) {
-                if (!op.failed && op.err == null)
+                if (op.err == null)
                     completed(op);
                 else
                     failed(op);
@@ -487,11 +481,10 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
             
             remotely_executing(op);
             
-            ReplayOperation.Status status = ReplayOperation.Status.FAILED;
             Error? remote_err = null;
             if (folder_opened || is_close_op) {
                 try {
-                    status = yield op.replay_remote_async();
+                    yield op.replay_remote_async();
                 } catch (Error replay_err) {
                     debug("Replay remote error for %s on %s: %s", op.to_string(), to_string(),
                         replay_err.message);
@@ -502,16 +495,14 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
                 remote_err = new EngineError.SERVER_UNAVAILABLE("Folder %s not available", owner.to_string());
             }
             
-            bool has_failed = !is_close_op && (status == ReplayOperation.Status.FAILED);
-            
-            // COMPLETED == CONTINUE, only FAILED or exception of interest here
-            if (remote_err != null || has_failed) {
+            // COMPLETED == CONTINUE, only exception of interest here if not closing
+            if (remote_err != null && !is_close_op) {
                 try {
-                    backing_out(op, has_failed, remote_err);
+                    backing_out(op, remote_err);
                     
                     yield op.backout_local_async();
                     
-                    backed_out(op, has_failed, remote_err);
+                    backed_out(op, remote_err);
                 } catch (Error backout_err) {
                     backout_failed(op, backout_err);
                 }
@@ -519,11 +510,11 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
             
             // use the remote error (not the backout error) for the operation's completion
             // state
-            op.notify_ready(has_failed, remote_err);
+            op.notify_ready(remote_err);
             
             remotely_executed(op);
             
-            if (!op.failed && op.err == null)
+            if (op.err == null)
                 completed(op);
             else
                 failed(op);
