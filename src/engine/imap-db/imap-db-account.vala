@@ -1104,10 +1104,6 @@ private class Geary.ImapDB.Account : BaseObject {
     private async void populate_search_table_async(Cancellable? cancellable) {
         debug("%s: Populating search table", account_information.email);
         try {
-            int total = yield get_email_count_async(cancellable);
-            search_index_monitor.set_interval(0, total);
-            search_index_monitor.notify_start();
-            
             while (!yield populate_search_table_batch_async(50, cancellable)) {
                 // With multiple accounts, meaning multiple background threads
                 // doing such CPU- and disk-heavy work, this process can cause
@@ -1143,7 +1139,7 @@ private class Geary.ImapDB.Account : BaseObject {
         debug("%s: Searching for up to %d missing indexed messages...", account_information.email,
             limit);
         
-        int count = 0;
+        int count = 0, total_unindexed = 0;
         yield db.exec_transaction_async(Db.TransactionType.RW, (cx, cancellable) => {
             // Embedding a SELECT within a SELECT is painfully slow with SQLite, so manually
             // perform the operation
@@ -1161,6 +1157,11 @@ private class Geary.ImapDB.Account : BaseObject {
                 FROM MessageTable
             """);
             Gee.HashSet<int64?> message_ids = do_build_rowid_set(stmt.exec(cancellable), cancellable);
+            
+            // guesstimate at the number that need to be indexed ... technically if this is zero then
+            // we're done, but for safety allow the chaffing to go through, in case there are search
+            // rows that do not correspond to message rows (which is bad but not fatal)
+            total_unindexed = (message_ids.size - search_ids.size).clamp(0, int.MAX);
             
             // chaff out any MessageTable entries not present in the MessageSearchTable ... since
             // we're given a limit, stuff messages req'ing search into separate set and stop when limit
@@ -1204,10 +1205,17 @@ private class Geary.ImapDB.Account : BaseObject {
             return Db.TransactionOutcome.DONE;
         }, cancellable);
         
-        search_index_monitor.increment(count);
-        
-        if (count > 0)
-            debug("%s: Found %d/%d missing indexed messages...", account_information.email, count, limit);
+        if (count > 0) {
+            debug("%s: Found %d/%d missing indexed messages, %d remaining...",
+                account_information.email, count, limit, total_unindexed);
+            
+            if (!search_index_monitor.is_in_progress) {
+                search_index_monitor.set_interval(0, total_unindexed);
+                search_index_monitor.notify_start();
+            }
+            
+            search_index_monitor.increment(count);
+        }
         
         return (count < limit);
     }
