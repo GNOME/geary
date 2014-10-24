@@ -13,3 +13,4 @@ bindings/vapi/gmime-2.6/gmime-2.6.gi
 /po/untitled.pot
 /help/*/*.page
 !/help/C/*.page
+src/sqlite3-unicodesn/unicodesn.sqlext
