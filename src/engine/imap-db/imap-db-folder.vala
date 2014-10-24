@@ -1546,7 +1546,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             fetch_stmt.bind_rowid(0, location.message_id);
             
             Db.Result results = fetch_stmt.exec(cancellable);
-            if (results.finished)
+            if (results.finished || results.is_null_at(0))
                 continue;
             
             map.set(location.email_id,
