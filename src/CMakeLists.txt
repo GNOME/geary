@@ -518,7 +518,7 @@ else ()
     )
 endif ()
 
-set(TARGET_GLIB 2.32)
+set(TARGET_GLIB 2.34)
 
 pkg_check_modules(DEPS REQUIRED
     gthread-2.0

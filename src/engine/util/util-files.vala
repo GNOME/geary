@@ -59,9 +59,7 @@ public async void recursive_delete_async(File folder, Cancellable? cancellable =
     
     // Children have been deleted, it's now safe to delete this file/folder.
     try {
-        // TODO: Use File.delete_async() when GLib 2.34 is minimum requirement:
-        // http://redmine.yorba.org/issues/6323
-        folder.delete(cancellable);
+        yield folder.delete_async(Priority.DEFAULT, cancellable);
     } catch (Error e) {
         debug("Error removing file: %s", e.message);
     }
