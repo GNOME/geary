@@ -13,7 +13,7 @@ public class PasswordDialog {
     // strings, and Glade doesn't support the "larger" size attribute. See this bug report for
     // details: https://bugzilla.gnome.org/show_bug.cgi?id=679006
     private const string PRIMARY_TEXT_MARKUP = "<span weight=\"bold\" size=\"larger\">%s</span>";
-    private const string PRIMARY_TEXT_FIRST_TRY = _("Please enter your password");
+    private const string PRIMARY_TEXT_FIRST_TRY = _("Geary requires your email password to continue");
     
     private Gtk.Dialog dialog;
     private Gtk.Entry entry_password;
