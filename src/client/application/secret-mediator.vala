@@ -8,6 +8,8 @@
 public class SecretMediator : Geary.CredentialsMediator, Object {
     private const string OLD_GEARY_USERNAME_PREFIX = "org.yorba.geary username:";
     
+    private Geary.Nonblocking.Mutex dialog_mutex = new Geary.Nonblocking.Mutex();
+    
     private string get_key_name(Geary.Service service, string user) {
         switch (service) {
             case Geary.Service.IMAP:
@@ -112,6 +114,10 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
         // API would indicate it does.  We need to revamp the API.
         assert(!services.has_imap() || !services.has_smtp());
         
+        // to prevent multiple dialogs from popping up at the same time, use a nonblocking mutex
+        // to serialize the code
+        int token = yield dialog_mutex.claim_async(null);
+        
         // If the main window is hidden, make it visible now and present to user as transient parent
         Gtk.Window? main_window = GearyApplication.instance.controller.main_window;
         if (main_window != null && !main_window.visible) {
@@ -121,8 +127,12 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
         
         PasswordDialog password_dialog = new PasswordDialog(main_window, services.has_smtp(),
             account_information, services);
+        bool result = password_dialog.run();
         
-        if (!password_dialog.run()) {
+        dialog_mutex.release(ref token);
+        
+        if (!result) {
+            // user cancelled the dialog
             imap_password = null;
             smtp_password = null;
             imap_remember_password = false;
