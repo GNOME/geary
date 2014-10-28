@@ -1,4 +1,4 @@
-set(ICONS_DEST share/geary/icons)
+set(ICONS_DEST share/icons/hicolor/scalable/actions)
 
 set(ICON_FILES
     mail-archive-symbolic.svg
