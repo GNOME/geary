@@ -49,9 +49,9 @@ public class MainToolbar : PillHeaderbar {
         
         // Reply buttons
         insert.clear();
-        insert.add(create_toolbar_button(rtl ? "reply-rtl-symbolic" : "reply-symbolic", GearyController.ACTION_REPLY_TO_MESSAGE));
-        insert.add(create_toolbar_button(rtl ? "reply-all-rtl-symbolic" : "reply-all-symbolic", GearyController.ACTION_REPLY_ALL_MESSAGE));
-        insert.add(create_toolbar_button(rtl ? "forward-rtl-symbolic" : "forward-symbolic", GearyController.ACTION_FORWARD_MESSAGE));
+        insert.add(create_toolbar_button(rtl ? "mail-reply-sender-rtl-symbolic" : "mail-reply-sender-symbolic", GearyController.ACTION_REPLY_TO_MESSAGE));
+        insert.add(create_toolbar_button(rtl ? "mail-reply-all-rtl-symbolic" : "mail-reply-all-symbolic", GearyController.ACTION_REPLY_ALL_MESSAGE));
+        insert.add(create_toolbar_button(rtl ? "mail-forward-rtl-symbolic" : "mail-forward-symbolic", GearyController.ACTION_FORWARD_MESSAGE));
         add_start(create_pill_buttons(insert));
         
         // Mark, copy, move.

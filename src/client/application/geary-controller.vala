@@ -68,7 +68,7 @@ public class GearyController : Geary.BaseObject {
     private const string ARCHIVE_MESSAGE_LABEL = _("_Archive");
     private const string ARCHIVE_MESSAGE_TOOLTIP_SINGLE = _("Archive conversation (A)");
     private const string ARCHIVE_MESSAGE_TOOLTIP_MULTIPLE = _("Archive conversations (A)");
-    private const string ARCHIVE_MESSAGE_ICON_NAME = "archive-symbolic";
+    private const string ARCHIVE_MESSAGE_ICON_NAME = "mail-archive-symbolic";
     
     private const string MARK_AS_SPAM_LABEL = _("Mark as S_pam");
     private const string MARK_AS_NOT_SPAM_LABEL = _("Mark as not S_pam");

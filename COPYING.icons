@@ -7,9 +7,9 @@ unstarred-symbolic.svg
     http://thenounproject.com/noun/star/#icon-No15362
     http://thenounproject.com/noun/star/#icon-No15361
 
-reply-symbolic.svg
-reply-all-symbolic.svg (derivative)
-forward-symbolic.svg (derivative)
+mail-reply-sender-symbolic.svg
+mail-reply-all-symbolic.svg (derivative)
+mail-forward-symbolic.svg (derivative)
     Back designed by Anisha Varghese from The Noun Project
     http://thenounproject.com/noun/back/#icon-No14792
 
@@ -17,16 +17,16 @@ marker-symbolic.svg
     Marker designed by factor[e] design initiative from The Noun Project
     http://thenounproject.com/noun/marker/#icon-No18908
 
-inbox-symbolic.svg
-outbox-symbolic.svg (derivative)
+mail-inbox-symbolic.svg
+mail-outbox-symbolic.svg (derivative)
     Inbox designed by Edward Boatman from The Noun Project
     http://thenounproject.com/noun/inbox/#icon-No406
 
-document-symbolic.svg
+text-x-generic-symbolic.svg
     Document designed by Edward Boatman from The Noun Project
     http://thenounproject.com/noun/document/#icon-No453
 
-spam-symbolic.svg
+mail-spam-symbolic.svg
     Pig designed by aLf from The Noun Project
     http://thenounproject.com/noun/pig/#icon-No5271
 
@@ -34,9 +34,9 @@ close-symbolic.svg
     Close designed by Icomatic from The Noun Project
     http://thenounproject.com/noun/close/#icon-No18932
 
-archive-symbolic.svg
+mail-archive-symbolic.svg
 format-text-remove-symbolic.svg
-sent-symbolic.svg
+mail-sent-symbolic.svg
     Designed for Geary by Sam Hewitt, 2013
 
 

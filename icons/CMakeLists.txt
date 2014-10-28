@@ -1,25 +1,25 @@
 set(ICONS_DEST share/geary/icons)
 
 set(ICON_FILES
-    archive-symbolic.svg
+    mail-archive-symbolic.svg
     close-symbolic.svg
     detach-symbolic.svg
-    document-symbolic.svg
+    text-x-generic-symbolic.svg
     edit-symbolic.svg
     format-text-remove-symbolic.svg
-    forward-symbolic.svg
-    forward-rtl-symbolic.svg
-    inbox-symbolic.svg
+    mail-forward-symbolic.svg
+    mail-forward-rtl-symbolic.svg
+    mail-inbox-symbolic.svg
     marker-symbolic.svg
-    outbox-symbolic.svg
-    reply-all-symbolic.svg
-    reply-all-rtl-symbolic.svg
-    reply-symbolic.svg
-    reply-rtl-symbolic.svg
-    sent-symbolic.svg
-    sent-rtl-symbolic.svg
-    spam-symbolic.svg
-    spam-rtl-symbolic.svg
+    mail-outbox-symbolic.svg
+    mail-reply-all-symbolic.svg
+    mail-reply-all-rtl-symbolic.svg
+    mail-reply-sender-symbolic.svg
+    mail-reply-sender-rtl-symbolic.svg
+    mail-sent-symbolic.svg
+    mail-sent-rtl-symbolic.svg
+    mail-spam-symbolic.svg
+    mail-spam-rtl-symbolic.svg
     tag-symbolic.svg
     tag-rtl-symbolic.svg
 )

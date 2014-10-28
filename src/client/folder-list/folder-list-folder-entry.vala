@@ -53,13 +53,13 @@ public class FolderList.FolderEntry : FolderList.AbstractFolderEntry, Sidebar.In
                 return rtl ? "tag-rtl-symbolic" : "tag-symbolic";
             
             case Geary.SpecialFolderType.INBOX:
-                return "inbox-symbolic";
+                return "mail-inbox-symbolic";
             
             case Geary.SpecialFolderType.DRAFTS:
                 return "accessories-text-editor-symbolic";
             
             case Geary.SpecialFolderType.SENT:
-                return rtl ? "sent-rtl-symbolic" : "sent-symbolic";
+                return rtl ? "mail-sent-rtl-symbolic" : "mail-sent-symbolic";
             
             case Geary.SpecialFolderType.FLAGGED:
                 return "starred-symbolic";
@@ -68,16 +68,16 @@ public class FolderList.FolderEntry : FolderList.AbstractFolderEntry, Sidebar.In
                 return "task-due-symbolic";
             
             case Geary.SpecialFolderType.ALL_MAIL:
-                return "archive-symbolic";
+                return "mail-archive-symbolic";
             
             case Geary.SpecialFolderType.SPAM:
-                return rtl ? "spam-rtl-symbolic" : "spam-symbolic";
+                return rtl ? "mail-spam-rtl-symbolic" : "mail-spam-symbolic";
             
             case Geary.SpecialFolderType.TRASH:
                 return "user-trash-symbolic";
             
             case Geary.SpecialFolderType.OUTBOX:
-                return "outbox-symbolic";
+                return "mail-outbox-symbolic";
             
             default:
                 assert_not_reached();
