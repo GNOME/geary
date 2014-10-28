@@ -45,7 +45,7 @@ public class Libmessagingmenu : NewMessagesIndicator {
     private void on_activate_source(string source_id) {
         foreach (Geary.Folder folder in monitor.get_folders()) {
             if (source_id == get_source_id(folder)) {
-                inbox_activated(folder, now());
+                inbox_activated(folder, Gdk.CURRENT_TIME);
                 break;
             }
         }

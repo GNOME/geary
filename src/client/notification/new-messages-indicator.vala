@@ -38,10 +38,5 @@ public abstract class NewMessagesIndicator : Geary.BaseObject {
         
         return indicator;
     }
-    
-    // Returns time as a uint32 (suitable for signals if event doesn't supply it)
-    protected uint32 now() {
-        return (uint32) TimeVal().tv_sec;
-    }
 }
 
