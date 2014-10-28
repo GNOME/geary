@@ -118,12 +118,6 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
     }
     
     private async void internal_open_async(Cancellable? cancellable) throws Error {
-        // To prevent spurious connection failures, we make sure we have the
-        // IMAP password before attempting a connection.  This might have to be
-        // reworked when we allow passwordless logins.
-        if (!information.imap_credentials.is_complete())
-            yield information.fetch_passwords_async(ServiceFlag.IMAP);
-        
         try {
             yield local.open_async(information.settings_dir, Engine.instance.resource_dir.get_child("sql"),
                 cancellable);
@@ -145,6 +139,12 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         
         // Search folder.
         local_only.set(search_path, local.search_folder);
+        
+        // To prevent spurious connection failures, we make sure we have the
+        // IMAP password before attempting a connection.  This might have to be
+        // reworked when we allow passwordless logins.
+        if (!information.imap_credentials.is_complete())
+            yield information.fetch_passwords_async(ServiceFlag.IMAP);
         
         // need to back out local.open_async() if remote fails
         try {

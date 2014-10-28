@@ -112,7 +112,14 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
         // API would indicate it does.  We need to revamp the API.
         assert(!services.has_imap() || !services.has_smtp());
         
-        PasswordDialog password_dialog = new PasswordDialog(services.has_smtp(),
+        // If the main window is hidden, make it visible now and present to user as transient parent
+        Gtk.Window? main_window = GearyApplication.instance.controller.main_window;
+        if (main_window != null && !main_window.visible) {
+            main_window.show_all();
+            main_window.present_with_time(Gdk.CURRENT_TIME);
+        }
+        
+        PasswordDialog password_dialog = new PasswordDialog(main_window, services.has_smtp(),
             account_information, services);
         
         if (!password_dialog.run()) {

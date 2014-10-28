@@ -23,11 +23,12 @@ public class PasswordDialog {
     public string password { get; private set; default = ""; }
     public bool remember_password { get; private set; }
     
-    public PasswordDialog(bool smtp, Geary.AccountInformation account_information,
+    public PasswordDialog(Gtk.Window? parent, bool smtp, Geary.AccountInformation account_information,
         Geary.ServiceFlag password_flags) {
         Gtk.Builder builder = GearyApplication.instance.create_builder("password-dialog.glade");
         
         dialog = (Gtk.Dialog) builder.get_object("PasswordDialog");
+        dialog.transient_for = parent;
         dialog.set_type_hint(Gdk.WindowTypeHint.DIALOG);
         dialog.set_default_response(Gtk.ResponseType.OK);
         
