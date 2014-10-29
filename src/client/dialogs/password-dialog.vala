@@ -54,12 +54,7 @@ public class PasswordDialog {
         if (smtp)
             label_smtp.show();
         
-        Gtk.Button cancel_button = new Gtk.Button.from_stock(Stock._CANCEL);
-        ok_button = new Gtk.Button.from_stock(Stock._OK);
-        ok_button.can_default = true;
-        dialog.add_action_widget(cancel_button, Gtk.ResponseType.CANCEL);
-        dialog.add_action_widget(ok_button, Gtk.ResponseType.OK);
-        dialog.set_default_response(Gtk.ResponseType.OK);
+        ok_button = (Gtk.Button) builder.get_object("authenticate_button");
         
         refresh_ok_button_sensitivity();
         entry_password.changed.connect(refresh_ok_button_sensitivity);
