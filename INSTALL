@@ -34,6 +34,7 @@
       * notify
       * sqlite3
       * webkitgtk-3.0
+      * gcr-3
       * messaging-menu (optional; enables support for Ubuntu Unity messaging
         menu)
       * unity (optional; enables support for Ubuntu Unity launcher)
@@ -64,7 +65,7 @@
             desktop-file-utils gnome-doc-utils libcanberra-devel libgee-devel \
             glib2-devel gmime-devel gtk3-devel libnotify-devel sqlite-devel \
             unique3-devel webkitgtk3-devel libsecret-devel libxml2-devel \
-            vala-tools
+            vala-tools gcr-devel
 
 
   * Installing dependencies on Ubuntu
@@ -83,7 +84,7 @@
             libgee-0.8-dev libglib2.0-dev libgmime-2.6-dev libgtk-3-dev \
             libsecret-1-dev libxml2-dev libnotify-dev libsqlite3-dev \
             libunique-3.0-dev libwebkitgtk-3.0-dev libmessaging-menu-dev \
-            libunity-dev
+            libunity-dev libgcr-3-dev
 
     You should check that you are using the right version of valac by running:
 
