@@ -12,10 +12,10 @@ msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2014-09-10 05:03+0000\n"
-"PO-Revision-Date: 2014-09-10 07:09+0200\n"
+"POT-Creation-Date: 2014-10-29 05:52+0000\n"
+"PO-Revision-Date: 2014-10-29 07:51+0100\n"
 "Last-Translator: Marek Černocký <marek@manet.cz>\n"
-"Language-Team: Czech <gnome-cs-list@gnome.org>\n"
+"Language-Team: čeština <gnome-cs-list@gnome.org>\n"
 "Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -47,6 +47,14 @@ msgstr "email;e-mail;mail;pošta;e-pošta;"
 #: ../desktop/geary.desktop.in.h:6
 msgid "Compose Message"
 msgstr "Napsat zprávu"
+
+#: ../desktop/geary-attach.contract.in.h:1
+msgid "Send by email"
+msgstr "Odeslat e-mailem"
+
+#: ../desktop/geary-attach.contract.in.h:2
+msgid "Send files using Geary"
+msgstr "Odeslat soubory pomocí aplikace Geary"
 
 #: ../src/client/accounts/account-dialog-add-edit-pane.vala:48
 #: ../src/client/components/stock.vala:31
@@ -293,7 +301,7 @@ msgid "Mark as not S_pam"
 msgstr "Označit, že není nevyžá_dané"
 
 #: ../src/client/application/geary-controller.vala:76
-#: ../src/client/application/geary-controller.vala:295
+#: ../src/client/application/geary-controller.vala:296
 msgid "Mark conversation"
 msgstr "Označit konverzaci"
 
@@ -310,7 +318,7 @@ msgid "Add label to conversations"
 msgstr "Přiřadit konverzacím štítek"
 
 #: ../src/client/application/geary-controller.vala:80
-#: ../src/client/application/geary-controller.vala:334
+#: ../src/client/application/geary-controller.vala:335
 msgid "Move conversation"
 msgstr "Přesunout konverzaci"
 
@@ -318,107 +326,107 @@ msgstr "Přesunout konverzaci"
 msgid "Move conversations"
 msgstr "Přesunout konverzace"
 
-#: ../src/client/application/geary-controller.vala:271
+#: ../src/client/application/geary-controller.vala:272
 msgid "A_ccounts"
 msgstr "Úč_ty"
 
-#: ../src/client/application/geary-controller.vala:276
+#: ../src/client/application/geary-controller.vala:277
 #: ../src/client/components/stock.vala:27
 msgid "_Preferences"
 msgstr "_Předvolby"
 
-#: ../src/client/application/geary-controller.vala:280
+#: ../src/client/application/geary-controller.vala:281
 #: ../src/client/components/stock.vala:25
 msgid "_Help"
 msgstr "Nápo_věda"
 
-#: ../src/client/application/geary-controller.vala:284
+#: ../src/client/application/geary-controller.vala:285
 #: ../src/client/components/stock.vala:21
 msgid "_About"
 msgstr "O _aplikaci"
 
-#: ../src/client/application/geary-controller.vala:288
+#: ../src/client/application/geary-controller.vala:289
 msgid "_Donate"
 msgstr "_Darovat"
 
-#: ../src/client/application/geary-controller.vala:292
+#: ../src/client/application/geary-controller.vala:293
 #: ../src/client/components/stock.vala:29
 msgid "_Quit"
 msgstr "U_končit"
 
-#: ../src/client/application/geary-controller.vala:297
+#: ../src/client/application/geary-controller.vala:298
 msgid "_Mark as..."
 msgstr "Oz_načit jako…"
 
-#: ../src/client/application/geary-controller.vala:303
+#: ../src/client/application/geary-controller.vala:304
 msgid "Mark as _Read"
 msgstr "Označit jako _přečtené"
 
-#: ../src/client/application/geary-controller.vala:309
+#: ../src/client/application/geary-controller.vala:310
 msgid "Mark as _Unread"
 msgstr "Označit jako _nepřečtené"
 
-#: ../src/client/application/geary-controller.vala:315
+#: ../src/client/application/geary-controller.vala:316
 msgid "_Star"
 msgstr "_Hvězdička"
 
-#: ../src/client/application/geary-controller.vala:320
+#: ../src/client/application/geary-controller.vala:321
 msgid "U_nstar"
 msgstr "O_debrat hvězdičku"
 
-#: ../src/client/application/geary-controller.vala:330
+#: ../src/client/application/geary-controller.vala:331
 msgid "Add label"
 msgstr "Přidat štítek"
 
-#: ../src/client/application/geary-controller.vala:331
+#: ../src/client/application/geary-controller.vala:332
 msgid "_Label"
 msgstr "Štít_ek"
 
-#: ../src/client/application/geary-controller.vala:335
+#: ../src/client/application/geary-controller.vala:336
 msgid "_Move"
 msgstr "_Přesunout"
 
-#: ../src/client/application/geary-controller.vala:339
+#: ../src/client/application/geary-controller.vala:340
 msgid "Compose new message (Ctrl+N, N)"
 msgstr "Napsat novou zprávu (Ctrl+N, N)"
 
 #. Reply to a message.
-#: ../src/client/application/geary-controller.vala:343
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1635
+#: ../src/client/application/geary-controller.vala:344
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1730
 msgid "_Reply"
 msgstr "_Odpovědět"
 
-#: ../src/client/application/geary-controller.vala:344
+#: ../src/client/application/geary-controller.vala:345
 msgid "Reply (Ctrl+R, R)"
 msgstr "Odpovědět (Ctrl+R, R)"
 
-#: ../src/client/application/geary-controller.vala:348
+#: ../src/client/application/geary-controller.vala:349
 msgid "R_eply All"
 msgstr "O_dpovědět všem"
 
-#: ../src/client/application/geary-controller.vala:349
+#: ../src/client/application/geary-controller.vala:350
 msgid "Reply all (Ctrl+Shift+R, Shift+R)"
 msgstr "Odpovědět všem (Ctrl+Shift+R, Shift+R)"
 
 #. Forward a message.
-#: ../src/client/application/geary-controller.vala:354
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1645
+#: ../src/client/application/geary-controller.vala:355
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1740
 msgid "_Forward"
 msgstr "_Přeposlat"
 
-#: ../src/client/application/geary-controller.vala:355
+#: ../src/client/application/geary-controller.vala:356
 msgid "Forward (Ctrl+L, F)"
 msgstr "Přeposlat (Ctrl+L, F)"
 
-#: ../src/client/application/geary-controller.vala:623
+#: ../src/client/application/geary-controller.vala:624
 msgid "Unable to store server trust exception"
 msgstr "Nelze uložit výjimku důvěry k serveru"
 
-#: ../src/client/application/geary-controller.vala:860
+#: ../src/client/application/geary-controller.vala:861
 msgid "Your settings are insecure"
 msgstr "Vaše nastavení není bezpečené"
 
-#: ../src/client/application/geary-controller.vala:861
+#: ../src/client/application/geary-controller.vala:862
 msgid ""
 "Your IMAP and/or SMTP settings do not specify SSL or TLS.  This means your "
 "username and password could be read by another person on the network.  Are "
@@ -428,17 +436,17 @@ msgstr ""
 "vaše uživatelské jméno a heslo může číst jiná osoba na síti. Opravdu to tak "
 "chcete?"
 
-#: ../src/client/application/geary-controller.vala:862
+#: ../src/client/application/geary-controller.vala:863
 msgid "Co_ntinue"
 msgstr "Po_kračovat"
 
 #. / Displayed in the space-limited status bar when a message fails to be sent due to error.
-#: ../src/client/application/geary-controller.vala:940
+#: ../src/client/application/geary-controller.vala:941
 #: ../src/client/components/status-bar.vala:29
 msgid "Error sending email"
 msgstr "Chyba při odesílání e-mailu"
 
-#: ../src/client/application/geary-controller.vala:941
+#: ../src/client/application/geary-controller.vala:942
 msgid ""
 "Geary encountered an error sending an email.  If the problem persists, "
 "please manually delete the email from your Outbox folder."
@@ -448,12 +456,12 @@ msgstr ""
 
 #. Displayed in the space-limited status bar when a message fails to be uploaded
 #. to Sent Mail after being sent.
-#: ../src/client/application/geary-controller.vala:945
+#: ../src/client/application/geary-controller.vala:946
 #: ../src/client/components/status-bar.vala:33
 msgid "Error saving sent mail"
 msgstr "Chyba při ukládání odeslané pošty"
 
-#: ../src/client/application/geary-controller.vala:946
+#: ../src/client/application/geary-controller.vala:947
 msgid ""
 "Geary encountered an error saving a sent message to Sent Mail.  The message "
 "will stay in your Outbox folder until you delete it."
@@ -461,19 +469,19 @@ msgstr ""
 "V Geary došlo k chybě při ukládání odeslané zprávy. Zpráva zůstane ve vaší "
 "složce Pošta k odeslání, dokud ji nesmažete."
 
-#: ../src/client/application/geary-controller.vala:1015
+#: ../src/client/application/geary-controller.vala:1016
 msgid "Labels"
 msgstr "Štítky"
 
 #. give the user two options: reset the Account local store, or exit Geary.  A third
 #. could be done to leave the Account in an unopened state, but we don't currently
 #. have provisions for that.
-#: ../src/client/application/geary-controller.vala:1027
+#: ../src/client/application/geary-controller.vala:1028
 #, c-format
 msgid "Unable to open the database for %s"
 msgstr "Nelze otevřít databázi pro %s"
 
-#: ../src/client/application/geary-controller.vala:1028
+#: ../src/client/application/geary-controller.vala:1029
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -497,20 +505,20 @@ msgstr ""
 "Opětovné sestavení databáze zničí všechny místně uložené e-maily a jejich "
 "přílohy <b>Na e-maily na vašem serveru to nebude mít vliv.</b>"
 
-#: ../src/client/application/geary-controller.vala:1030
+#: ../src/client/application/geary-controller.vala:1031
 msgid "_Rebuild"
 msgstr "Znovu _sestavit"
 
-#: ../src/client/application/geary-controller.vala:1030
+#: ../src/client/application/geary-controller.vala:1031
 msgid "E_xit"
 msgstr "S_končit"
 
-#: ../src/client/application/geary-controller.vala:1039
+#: ../src/client/application/geary-controller.vala:1040
 #, c-format
 msgid "Unable to rebuild database for \"%s\""
 msgstr "Nelze znovu sestavit databázi pro „%s“"
 
-#: ../src/client/application/geary-controller.vala:1040
+#: ../src/client/application/geary-controller.vala:1041
 #, c-format
 msgid ""
 "Error during rebuild:\n"
@@ -523,14 +531,14 @@ msgstr ""
 
 #. some other problem opening the account ... as with other flow path, can't run
 #. Geary today with an account in unopened state, so have to exit
-#: ../src/client/application/geary-controller.vala:1062
-#: ../src/client/application/geary-controller.vala:1072
-#: ../src/client/application/geary-controller.vala:1083
+#: ../src/client/application/geary-controller.vala:1063
+#: ../src/client/application/geary-controller.vala:1073
+#: ../src/client/application/geary-controller.vala:1084
 #, c-format
 msgid "Unable to open local mailbox for %s"
 msgstr "Nelze otevřít místní poštovní schránku pro %s"
 
-#: ../src/client/application/geary-controller.vala:1063
+#: ../src/client/application/geary-controller.vala:1064
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -549,7 +557,7 @@ msgstr ""
 "\n"
 "%s"
 
-#: ../src/client/application/geary-controller.vala:1073
+#: ../src/client/application/geary-controller.vala:1074
 msgid ""
 "The version number of the local mail database is formatted for a newer "
 "version of Geary. Unfortunately, the database cannot be \"rolled back\" to "
@@ -562,7 +570,7 @@ msgstr ""
 "\n"
 "Nainstalujte prosím nejnovější verzi Geary a zkuste to znovu."
 
-#: ../src/client/application/geary-controller.vala:1084
+#: ../src/client/application/geary-controller.vala:1085
 msgid ""
 "There was an error opening the local account. This is probably due to "
 "connectivity issues.\n"
@@ -575,25 +583,25 @@ msgstr ""
 "\n"
 "Zkontrolujte prosím připojení k síti a restartujte Geary."
 
-#: ../src/client/application/geary-controller.vala:1591
+#: ../src/client/application/geary-controller.vala:1592
 #, c-format
 msgid "About %s"
 msgstr "O aplikaci %s"
 
 #. / Translators: add your name and email address to receive credit in the About dialog
 #. / For example: Yamada Taro <yamada.taro@example.com>
-#: ../src/client/application/geary-controller.vala:1594
+#: ../src/client/application/geary-controller.vala:1595
 msgid "translator-credits"
 msgstr ""
 "Petr Šimáček <petr.simacek@gmail.com>\n"
 "Marek Černocký <marek@manet.cz>"
 
-#: ../src/client/application/geary-controller.vala:1858
+#: ../src/client/application/geary-controller.vala:1859
 #, c-format
 msgid "Are you sure you want to open \"%s\"?"
 msgstr "Opravdu chcete otevřít „%s“?"
 
-#: ../src/client/application/geary-controller.vala:1859
+#: ../src/client/application/geary-controller.vala:1860
 msgid ""
 "Attachments may cause damage to your system if opened.  Only open files from "
 "trusted sources."
@@ -601,39 +609,39 @@ msgstr ""
 "Příloha by po otevření mohla poškodit váš počítač. Otevírejte pouze soubory "
 "z důvěryhodných zdrojů. "
 
-#: ../src/client/application/geary-controller.vala:1860
+#: ../src/client/application/geary-controller.vala:1861
 msgid "Don't _ask me again"
 msgstr "Příště se nept_at"
 
-#: ../src/client/application/geary-controller.vala:1878
+#: ../src/client/application/geary-controller.vala:1879
 #, c-format
 msgid "A file named \"%s\" already exists.  Do you want to replace it?"
 msgstr "Soubor s názvem „%s“ již existuje. Chcete ho nahradit?"
 
-#: ../src/client/application/geary-controller.vala:1880
+#: ../src/client/application/geary-controller.vala:1881
 #, c-format
 msgid ""
 "The file already exists in \"%s\".  Replacing it will overwrite its contents."
 msgstr "Soubor již existuje v „%s“. Nahrazením přepíšete jeho obsah."
 
-#: ../src/client/application/geary-controller.vala:1883
+#: ../src/client/application/geary-controller.vala:1884
 msgid "_Replace"
 msgstr "Nah_radit"
 
 #. Find out what to do with the inline composers.
 #. TODO: Remove this in favor of automatically saving drafts
-#: ../src/client/application/geary-controller.vala:2150
+#: ../src/client/application/geary-controller.vala:2166
 msgid "Close open draft messages?"
 msgstr "Zavřít otevřený koncept zprávy?"
 
-#: ../src/client/application/geary-controller.vala:2259
+#: ../src/client/application/geary-controller.vala:2269
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Chcete trvale smazat tuto zprávu?"
 msgstr[1] "Chcete trvale smazat tyto zprávy?"
 msgstr[2] "Chcete trvale smazat tyto zprávy?"
 
-#: ../src/client/application/geary-controller.vala:2261
+#: ../src/client/application/geary-controller.vala:2271
 msgid "Delete"
 msgstr "Smazat"
 
@@ -668,12 +676,12 @@ msgstr "Hledat"
 msgid "Search all mail in account for keywords (Ctrl+S)"
 msgstr "Prohledat všechny e-maily v účtu podle klíčového slova (Ctrl+S)"
 
-#: ../src/client/components/main-toolbar.vala:212
+#: ../src/client/components/main-toolbar.vala:210
 #, c-format
 msgid "Indexing %s account"
 msgstr "Indexuje se účet %s"
 
-#: ../src/client/components/main-toolbar.vala:223
+#: ../src/client/components/main-toolbar.vala:221
 #: ../src/client/folder-list/folder-list-search-branch.vala:39
 #, c-format
 msgid "Search %s account"
@@ -694,7 +702,8 @@ msgstr "Odesílá se…"
 msgid "_OK"
 msgstr "_Budiž"
 
-#: ../src/client/components/stock.vala:19 ../ui/remove_confirm.glade.h:5
+#: ../src/client/components/stock.vala:19 ../ui/password-dialog.glade.h:5
+#: ../ui/remove_confirm.glade.h:5
 msgid "_Cancel"
 msgstr "_Zrušit"
 
@@ -721,7 +730,7 @@ msgstr "_Odstranit"
 
 #. Select all.
 #: ../src/client/components/stock.vala:32
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1103
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1197
 msgid "Select _All"
 msgstr "Vybrat _vše"
 
@@ -741,98 +750,104 @@ msgstr "Ukládá se"
 msgid "Error saving"
 msgstr "Chyba při ukládání"
 
-#. / A list of keywords, separated by pipe ("|") characters, that suggest an attachment
-#: ../src/client/composer/composer-widget.vala:117
-msgid "attach|enclosed|enclosing|cover letter"
-msgstr "přiložit|přiložený|přikládá|průvodní dopis"
+#. A list of keywords, separated by pipe ("|") characters, that suggest an attachment; since
+#. this is full-word checking, include all variants of each word.  No spaces are allowed.
+#: ../src/client/composer/composer-widget.vala:120
+msgid ""
+"attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|"
+"enclosing|encloses|enclosure|enclosures"
+msgstr ""
+"příloha|přílohy|příloze|přílohu|přílohou|přiložený|přiložená|přiložené|"
+"přiloženým|přiloženou|přiložit|přikládám|přiložil|přikládá|přikládáme|"
+"přiložili|přiložily"
 
-#: ../src/client/composer/composer-widget.vala:831
+#: ../src/client/composer/composer-widget.vala:878
 msgid "Do you want to discard the unsaved message?"
 msgstr "Chcete zahodit neuloženou zprávu?"
 
-#: ../src/client/composer/composer-widget.vala:834
-#: ../src/client/composer/composer-widget.vala:838
+#: ../src/client/composer/composer-widget.vala:881
+#: ../src/client/composer/composer-widget.vala:885
 msgid "Do you want to discard this message?"
 msgstr "Chcete zahodit tuto zprávu?"
 
-#: ../src/client/composer/composer-widget.vala:919
+#: ../src/client/composer/composer-widget.vala:998
 msgid "Send message with an empty subject and body?"
 msgstr "Poslat zprávu s prázdným předmětem a tělem?"
 
-#: ../src/client/composer/composer-widget.vala:921
+#: ../src/client/composer/composer-widget.vala:1000
 msgid "Send message with an empty subject?"
 msgstr "Poslat zprávu s prázdným předmětem?"
 
-#: ../src/client/composer/composer-widget.vala:923
+#: ../src/client/composer/composer-widget.vala:1002
 msgid "Send message with an empty body?"
 msgstr "Poslat zprávu s prázdným tělem?"
 
-#: ../src/client/composer/composer-widget.vala:925
+#: ../src/client/composer/composer-widget.vala:1004
 msgid "Send message without an attachment?"
 msgstr "Poslat zprávu bez přílohy?"
 
-#: ../src/client/composer/composer-widget.vala:1108
+#: ../src/client/composer/composer-widget.vala:1187
 msgid "Cannot add attachment"
 msgstr "Nelze připojit přílohu"
 
-#: ../src/client/composer/composer-widget.vala:1119
+#: ../src/client/composer/composer-widget.vala:1198
 #, c-format
 msgid "\"%s\" could not be found."
 msgstr "Soubor „%s“ nebyl nalezen."
 
-#: ../src/client/composer/composer-widget.vala:1126
+#: ../src/client/composer/composer-widget.vala:1205
 #, c-format
 msgid "\"%s\" is a folder."
 msgstr "„%s“ je složka."
 
-#: ../src/client/composer/composer-widget.vala:1133
+#: ../src/client/composer/composer-widget.vala:1212
 #, c-format
 msgid "\"%s\" is an empty file."
 msgstr "Soubor „%s“ je prázdný."
 
-#: ../src/client/composer/composer-widget.vala:1147
+#: ../src/client/composer/composer-widget.vala:1226
 #, c-format
 msgid "\"%s\" could not be opened for reading."
 msgstr "Soubor „%s“ nemohl být otevřen pro čtení."
 
-#: ../src/client/composer/composer-widget.vala:1154
+#: ../src/client/composer/composer-widget.vala:1233
 #, c-format
 msgid "\"%s\" already attached for delivery."
 msgstr "Soubor „%s“ už byl pro doručení přiložen."
 
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
-#: ../src/client/composer/composer-widget.vala:1163
+#: ../src/client/composer/composer-widget.vala:1242
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: ../src/client/composer/composer-widget.vala:1223
+#: ../src/client/composer/composer-widget.vala:1302
 msgid "To: "
 msgstr "Komu: "
 
-#: ../src/client/composer/composer-widget.vala:1226
+#: ../src/client/composer/composer-widget.vala:1305
 msgid "Cc: "
 msgstr "Kopie: "
 
-#: ../src/client/composer/composer-widget.vala:1229
+#: ../src/client/composer/composer-widget.vala:1308
 msgid "Bcc: "
 msgstr "Skrytá kopie: "
 
-#: ../src/client/composer/composer-widget.vala:1446
+#: ../src/client/composer/composer-widget.vala:1525
 msgid "Select Color"
 msgstr "Vybrat barvu"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: ../src/client/composer/composer-widget.vala:1894
+#: ../src/client/composer/composer-widget.vala:1974
 msgid "_From:"
 msgstr "_Od:"
 
 #. For other types of messages, just show the from account.
 #. Composer label (without mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: ../src/client/composer/composer-widget.vala:1910
-#: ../src/client/conversation-viewer/conversation-viewer.vala:637
+#: ../src/client/composer/composer-widget.vala:1990
+#: ../src/client/conversation-viewer/conversation-viewer.vala:713
 msgid "From:"
 msgstr "Od:"
 
@@ -850,11 +865,11 @@ msgstr "Nová zpráva"
 msgid "Me"
 msgstr "Já"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:262
+#: ../src/client/conversation-viewer/conversation-viewer.vala:338
 msgid "No conversations selected."
 msgstr "Nebyla vybrána žádná konverzace."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:264
+#: ../src/client/conversation-viewer/conversation-viewer.vala:340
 #, c-format
 msgid "%u conversation selected."
 msgid_plural "%u conversations selected."
@@ -862,51 +877,51 @@ msgstr[0] "%u vybraná konverzace."
 msgstr[1] "%u vybrané konverzace."
 msgstr[2] "%u vybraných konverzací."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:293
+#: ../src/client/conversation-viewer/conversation-viewer.vala:369
 msgid "No search results found."
 msgstr "Žádné výsledky vyhledávání."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:295
+#: ../src/client/conversation-viewer/conversation-viewer.vala:371
 msgid "No conversations in folder."
 msgstr "Žádná konverzace ve složce."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:536
+#: ../src/client/conversation-viewer/conversation-viewer.vala:612
 msgid "This message contains remote images."
 msgstr "Tato zpráva obsahuje vzdálené obrázky. "
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:536
+#: ../src/client/conversation-viewer/conversation-viewer.vala:612
 msgid "Show Images"
 msgstr "Zobrazit obrázky"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:537
+#: ../src/client/conversation-viewer/conversation-viewer.vala:613
 msgid "Always Show From Sender"
 msgstr "Vždy zobrazovat Od odesílatele"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:561
+#: ../src/client/conversation-viewer/conversation-viewer.vala:637
 msgid "Edit Draft"
 msgstr "Upravit koncept"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:640
+#: ../src/client/conversation-viewer/conversation-viewer.vala:716
 msgid "To:"
 msgstr "Komu:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:643
+#: ../src/client/conversation-viewer/conversation-viewer.vala:719
 msgid "Cc:"
 msgstr "Kopie:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:646
+#: ../src/client/conversation-viewer/conversation-viewer.vala:722
 msgid "Bcc:"
 msgstr "Skrytá kopie:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:649
+#: ../src/client/conversation-viewer/conversation-viewer.vala:725
 msgid "Subject:"
 msgstr "Předmět:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:652
+#: ../src/client/conversation-viewer/conversation-viewer.vala:728
 msgid "Date:"
 msgstr "Datum:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:918
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1012
 #, c-format
 msgid "%u read message"
 msgid_plural "%u read messages"
@@ -914,64 +929,64 @@ msgstr[0] "%u přečtená zpráva"
 msgstr[1] "%u přečtené zprávy"
 msgstr[2] "%u přečtených zpráv"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1050
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1144
 #, c-format
 msgid "This message was sent successfully, but could not be saved to %s."
 msgstr "Tato zpráva byla úspěšně odeslána, ale nelze ji uložit do %s"
 
 #. Add a menu item for copying the current selection.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1076
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1170
 #: ../ui/composer.glade.h:4
 msgid "_Copy"
 msgstr "_Kopírovat"
 
 #. Add a menu item for copying the address.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1084
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1178
 msgid "Copy _Email Address"
 msgstr "Kopírovat _e-mailovou adresu"
 
 #. Add a menu item for copying the link.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1089
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1183
 #: ../ui/composer.glade.h:17
 msgid "Copy _Link"
 msgstr "Kopírovat _odkaz"
 
 #. Select message.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1097
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1191
 msgid "Select _Message"
 msgstr "Vybrat _zprávu"
 
 #. Inspect.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1109
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1203
 msgid "_Inspect"
 msgstr "_Kontrolovat"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1335
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1429
 msgid "This link appears to go to"
 msgstr "Tento odkaz vypadá, že míří na"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1336
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1430
 msgid "but actually goes to"
 msgstr "ale ve skutečnosti jde na"
 
 #. If href doesn't look like a URL, something is fishy, so warn the user
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1391
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1485
 msgid " (Invalid?)"
 msgstr " (neplatný?)"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1583
-msgid "_Save As..."
-msgstr "_Uložit jako…"
-
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1588
-msgid "Save All A_ttachments..."
-msgstr "Uložit všechny pří_lohy…"
-
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1602
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1591
 msgid "_Save Image As..."
 msgstr "_Uložit obrázek jako…"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1625
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1695
+msgid "_Save As..."
+msgstr "_Uložit jako…"
+
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1700
+msgid "Save All A_ttachments..."
+msgstr "Uložit všechny pří_lohy…"
+
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1720
 msgid "Save A_ttachment..."
 msgid_plural "Save All A_ttachments..."
 msgstr[0] "Uložit pří_lohu…"
@@ -979,37 +994,37 @@ msgstr[1] "Uložit pří_lohy…"
 msgstr[2] "Uložit pří_lohy…"
 
 #. Reply to all on a message.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1640
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1735
 msgid "Reply to _All"
 msgstr "Odpovědět _všem"
 
 #. Mark as read/unread.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1657
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1752
 msgid "_Mark as Read"
 msgstr "_Označit jako přečtené"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1661
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1756
 msgid "_Mark as Unread"
 msgstr "_Označit jako nepřečtené"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1667
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1762
 msgid "Mark Unread From _Here"
 msgstr "Označit jako nepřečtené z_de"
 
 #. Separator.
 #. View original message source.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1682
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1777
 msgid "_View Source"
 msgstr "_Zobrazit zdroj"
 
 #. Generate the attachment table.
 #. / Placeholder filename for attachments with no filename.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1996
-#: ../src/engine/rfc822/rfc822-utils.vala:327
+#: ../src/client/conversation-viewer/conversation-viewer.vala:2101
+#: ../src/engine/rfc822/rfc822-utils.vala:331
 msgid "none"
 msgstr "žádný"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:2126
+#: ../src/client/conversation-viewer/conversation-viewer.vala:2236
 msgid "Failed to open default text editor."
 msgstr "Nepodařilo se otevřít výchozí textový editor."
 
@@ -1109,8 +1124,8 @@ msgstr "Při zpracování certifikátu serveru nastala chyba"
 #. strings, and Glade doesn't support the "larger" size attribute. See this bug report for
 #. details: https://bugzilla.gnome.org/show_bug.cgi?id=679006
 #: ../src/client/dialogs/password-dialog.vala:16
-msgid "Please enter your password"
-msgstr "Zadejte prosím své heslo"
+msgid "Geary requires your email password to continue"
+msgstr "Aby se mohlo pokračovat, potřebuje Geary heslo k vašemu e-mailu"
 
 #. Label displaying total number of email messages in a folder
 #: ../src/client/folder-list/folder-list-folder-entry.vala:32
@@ -1374,55 +1389,63 @@ msgstr "Žádný"
 
 #. Map of user-supplied search field names to column names.
 #. / Can be typed in the search box like attachment:file.txt to find
-#. / messages with attachments with a particular name.
-#: ../src/engine/imap-db/imap-db-account.vala:662
+#. / messages with attachments with a particular name.  The translated
+#. / string must match the string in Geary's help documentation.
+#: ../src/engine/imap-db/imap-db-account.vala:665
 msgid "attachment"
 msgstr "příloha"
 
 #. / Can be typed in the search box like bcc:johndoe@example.com to find
-#. / messages bcc'd to a particular person.
+#. / messages bcc'd to a particular person.  The translated
+#. / string must match the string in Geary's help documentation.
 #. Fields we allow the token to be "me" as in from:me.
-#: ../src/engine/imap-db/imap-db-account.vala:665
-#: ../src/engine/imap-db/imap-db-account.vala:684
+#: ../src/engine/imap-db/imap-db-account.vala:669
+#: ../src/engine/imap-db/imap-db-account.vala:693
 msgid "bcc"
 msgstr "skrytá kopie"
 
 #. / Can be typed in the search box like body:word to find the word only
-#. / if it occurs in the body of a message.
-#: ../src/engine/imap-db/imap-db-account.vala:668
+#. / if it occurs in the body of a message.  The translated
+#. / string must match the string in Geary's help documentation.
+#: ../src/engine/imap-db/imap-db-account.vala:673
 msgid "body"
 msgstr "tělo"
 
 #. / Can be typed in the search box like cc:johndoe@example.com to find
-#. / messages cc'd to a particular person.
-#: ../src/engine/imap-db/imap-db-account.vala:671
-#: ../src/engine/imap-db/imap-db-account.vala:684
+#. / messages cc'd to a particular person.  The translated
+#. / string must match the string in Geary's help documentation.
+#: ../src/engine/imap-db/imap-db-account.vala:677
+#: ../src/engine/imap-db/imap-db-account.vala:693
 msgid "cc"
 msgstr "kopie"
 
 #. / Can be typed in the search box like from:johndoe@example.com to
-#. / find messages from a particular sender.
-#: ../src/engine/imap-db/imap-db-account.vala:674
-#: ../src/engine/imap-db/imap-db-account.vala:684
+#. / find messages from a particular sender.  The translated
+#. / string must match the string in Geary's help documentation.
+#: ../src/engine/imap-db/imap-db-account.vala:681
+#: ../src/engine/imap-db/imap-db-account.vala:693
 msgid "from"
 msgstr "od"
 
 #. / Can be typed in the search box like subject:word to find the word
-#. / only if it occurs in the subject of a message.
-#: ../src/engine/imap-db/imap-db-account.vala:677
+#. / only if it occurs in the subject of a message.  The translated
+#. / string must match the string in Geary's help documentation.
+#: ../src/engine/imap-db/imap-db-account.vala:685
 msgid "subject"
 msgstr "předmět"
 
 #. / Can be typed in the search box like to:johndoe@example.com to find
-#. / messages received by a particular person.
-#: ../src/engine/imap-db/imap-db-account.vala:680
-#: ../src/engine/imap-db/imap-db-account.vala:684
+#. / messages received by a particular person.  The translated
+#. / string must match the string in Geary's help documentation.
+#: ../src/engine/imap-db/imap-db-account.vala:689
+#: ../src/engine/imap-db/imap-db-account.vala:693
 msgid "to"
 msgstr "komu"
 
 #. "me" can be typed like from:me or cc:me, etc. as a shorthand
-#. to find mail to or from yourself in search.
-#: ../src/engine/imap-db/imap-db-account.vala:699
+#. to find mail to or from yourself in search.  The translated
+#. string must match the string in Geary's help documentation.
+#: ../src/engine/imap-db/imap-db-account.vala:709
 msgid "me"
 msgstr "já"
 
@@ -1462,57 +1485,57 @@ msgstr "Trash | Koš | Smazané | Smazané zprávy | Smazaná pošta"
 
 #. / Format for the datetime that a message being replied to was received
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: ../src/engine/rfc822/rfc822-utils.vala:165
+#: ../src/engine/rfc822/rfc822-utils.vala:168
 msgid "%a, %b %-e, %Y at %-l:%M %p"
 msgstr "%a, %b %-e, %Y v %-l∶%M %p"
 
 #. / The quoted header for a message being replied to.
 #. / %1$s will be substituted for the date, and %2$s will be substituted for
 #. / the original sender.
-#: ../src/engine/rfc822/rfc822-utils.vala:171
+#: ../src/engine/rfc822/rfc822-utils.vala:174
 #, c-format
 msgid "On %1$s, %2$s wrote:"
 msgstr "%2$s napsal %1$s:"
 
 #. / The quoted header for a message being replied to (in case the date is not known).
 #. / %s will be replaced by the original sender.
-#: ../src/engine/rfc822/rfc822-utils.vala:178
+#: ../src/engine/rfc822/rfc822-utils.vala:181
 #, c-format
 msgid "%s wrote:"
 msgstr "%s napsal:"
 
 #. / The quoted header for a message being replied to (in case the sender is not known).
 #. / %s will be replaced by the original date
-#: ../src/engine/rfc822/rfc822-utils.vala:184
+#: ../src/engine/rfc822/rfc822-utils.vala:187
 #, c-format
 msgid "On %s:"
 msgstr "%s:"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:211
+#: ../src/engine/rfc822/rfc822-utils.vala:216
 msgid "---------- Forwarded message ----------"
 msgstr "---------- Přeposlaná zpráva ----------"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:215
+#: ../src/engine/rfc822/rfc822-utils.vala:220
 #, c-format
 msgid "From: %s\n"
 msgstr "Od: %s\n"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:216
+#: ../src/engine/rfc822/rfc822-utils.vala:221
 #, c-format
 msgid "Subject: %s\n"
 msgstr "Předmět: %s\n"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:217
+#: ../src/engine/rfc822/rfc822-utils.vala:222
 #, c-format
 msgid "Date: %s\n"
 msgstr "Datum: %s\n"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:220
+#: ../src/engine/rfc822/rfc822-utils.vala:225
 #, c-format
 msgid "To: %s\n"
 msgstr "Komu: %s\n"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:223
+#: ../src/engine/rfc822/rfc822-utils.vala:228
 #, c-format
 msgid "Cc: %s\n"
 msgstr "Kopie: %s\n"
@@ -1768,7 +1791,7 @@ msgstr "_Rozlišovat velikost písmen"
 msgid "label"
 msgstr "štítek"
 
-#: ../ui/login.glade.h:1
+#: ../ui/login.glade.h:1 ../ui/password-dialog.glade.h:3
 msgid "Password"
 msgstr "Heslo"
 
@@ -1901,16 +1924,16 @@ msgid "SMTP Credentials"
 msgstr "Přihlašovací údaje SMTP"
 
 #: ../ui/password-dialog.glade.h:2
-msgid "Username:"
-msgstr "Uživatelské jméno:"
-
-#: ../ui/password-dialog.glade.h:3
-msgid "Password:"
-msgstr "Heslo:"
+msgid "Username"
+msgstr "Uživatelské jméno"
 
 #: ../ui/password-dialog.glade.h:4
 msgid "_Remember password"
 msgstr "_Pamatovat si heslo"
+
+#: ../ui/password-dialog.glade.h:6
+msgid "_Authenticate"
+msgstr "_Ověřit"
 
 #: ../ui/preferences.glade.h:1
 msgid "Preferences"
