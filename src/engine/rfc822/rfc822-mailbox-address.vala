@@ -19,7 +19,7 @@ public class Geary.RFC822.MailboxAddress : Geary.MessageData.SearchableMessageDa
         
         source_route = null;
         
-        int atsign = address.index_of_char('@');
+        int atsign = Ascii.index_of(address, '@');
         if (atsign > 0) {
             mailbox = address.slice(0, atsign);
             domain = address.slice(atsign + 1, address.length);

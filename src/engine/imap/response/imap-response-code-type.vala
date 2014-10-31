@@ -71,11 +71,11 @@ public class Geary.Imap.ResponseCodeType : BaseObject, Gee.Hashable<ResponseCode
         
         // store lowercased so it's easily compared with const strings above
         original = str;
-        value = str.down();
+        value = Ascii.strdown(str);
     }
     
     public bool is_value(string str) {
-        return String.stri_equal(value, str);
+        return Ascii.stri_equal(value, str);
     }
     
     public StringParameter to_parameter() {
@@ -83,11 +83,11 @@ public class Geary.Imap.ResponseCodeType : BaseObject, Gee.Hashable<ResponseCode
     }
     
     public bool equal_to(ResponseCodeType other) {
-        return (this == other) ? true : String.stri_equal(value, other.value);
+        return (this == other) ? true : Ascii.stri_equal(value, other.value);
     }
     
     public uint hash() {
-        return String.stri_hash(value);
+        return Ascii.stri_hash(value);
     }
     
     public string to_string() {

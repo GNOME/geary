@@ -35,7 +35,7 @@ public enum Geary.Mime.DispositionType {
         if (String.is_empty_or_whitespace(str))
             return UNSPECIFIED;
         
-        switch (str.down()) {
+        switch (Ascii.strdown(str)) {
             case "inline":
                 return INLINE;
             

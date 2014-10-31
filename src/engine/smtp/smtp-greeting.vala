@@ -27,7 +27,7 @@ public class Geary.Smtp.Greeting : Response {
         }
         
         public static ServerFlavor deserialize(string str) {
-            switch (str.up()) {
+            switch (Ascii.strup(str)) {
                 case "SMTP":
                     return SMTP;
                 

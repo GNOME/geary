@@ -6,6 +6,8 @@
 
 namespace Geary.Collection {
 
+public delegate uint8 ByteTransformer(uint8 b);
+
 // A substitute for ArrayList<G>.wrap() for compatibility with older versions of Gee.
 public Gee.ArrayList<G> array_list_wrap<G>(G[] a, owned Gee.EqualDataFunc<G>? equal_func = null) {
     Gee.ArrayList<G> list = new Gee.ArrayList<G>(equal_func);
@@ -145,7 +147,7 @@ public bool int64_equal_func(int64? a, int64? b) {
 /**
  * A rotating-XOR hash that can be used to hash memory buffers of any size.
  */
-public static uint hash_memory(void *ptr, size_t bytes) {
+public uint hash_memory(void *ptr, size_t bytes) {
     if (bytes == 0)
         return 0;
     
@@ -155,6 +157,32 @@ public static uint hash_memory(void *ptr, size_t bytes) {
     uint hash = *u8;
     for (int ctr = 1; ctr < bytes; ctr++)
         hash = (hash << 4) ^ (hash >> 28) ^ (*u8++);
+    
+    return hash;
+}
+
+/**
+ * A rotating-XOR hash that can be used to hash memory buffers of any size until a terminator byte
+ * is found.
+ *
+ * A {@link ByteTransformer} may be supplied to convert bytes before they are hashed.
+ *
+ * Returns zero if the initial byte is the terminator.
+ */
+public uint hash_memory_stream(void *ptr, uint8 terminator, ByteTransformer? cb) {
+    uint8 *u8 = (uint8 *) ptr;
+    
+    uint hash = 0;
+    for (;;) {
+        uint8 b = *u8++;
+        if (b == terminator)
+            break;
+        
+        if (cb != null)
+            b = cb(b);
+        
+        hash = (hash << 4) ^ (hash >> 28) ^ b;
+    }
     
     return hash;
 }

@@ -78,7 +78,7 @@ public class Geary.Imap.FetchBodyDataSpecifier : BaseObject, Gee.Hashable<FetchB
             if (String.is_empty(value))
                 return NONE;
             
-            switch (value.down()) {
+            switch (Ascii.strdown(value)) {
                 case "header":
                     return HEADER;
                 
@@ -180,9 +180,9 @@ public class Geary.Imap.FetchBodyDataSpecifier : BaseObject, Gee.Hashable<FetchB
         this.is_peek = is_peek;
         
         if (field_names != null && field_names.length > 0) {
-            this.field_names = new Gee.TreeSet<string>();
+            this.field_names = new Gee.TreeSet<string>(Ascii.strcmp);
             foreach (string field_name in field_names) {
-                string converted = field_name.strip().down();
+                string converted = Ascii.strdown(field_name.strip());
                 
                 if (!String.is_empty(converted))
                     this.field_names.add(converted);
@@ -288,7 +288,7 @@ public class Geary.Imap.FetchBodyDataSpecifier : BaseObject, Gee.Hashable<FetchB
      * @see deserialize_response
      */
     public static bool is_fetch_body_data_specifier(StringParameter stringp) {
-        string strd = stringp.value.down().strip();
+        string strd = stringp.as_lower().strip();
         
         return strd.has_prefix("body[") || strd.has_prefix("body.peek[");
     }
@@ -308,7 +308,7 @@ public class Geary.Imap.FetchBodyDataSpecifier : BaseObject, Gee.Hashable<FetchB
         // * leading/trailing whitespace stripped
         // * Remove quoting (some servers return field names quoted, some don't, Geary never uses them
         //   when requesting)
-        string strd = stringp.value.down().replace("\"", "").strip();
+        string strd = stringp.as_lower().replace("\"", "").strip();
         
         // Convert full form into two sections: "body[SECTION_STRING]<OCTET_STRING>"
         //                                                           ^^^^^^^^^^^^^^ optional
@@ -365,7 +365,7 @@ public class Geary.Imap.FetchBodyDataSpecifier : BaseObject, Gee.Hashable<FetchB
                 
                 // stop treating as numbers when non-digit found (SectionParts contain periods
                 // too and must be preserved);
-                if (!no_more && String.is_numeric(token)) {
+                if (!no_more && Ascii.is_numeric(token)) {
                     if (part_number == null)
                         part_number = new int[0];
                     

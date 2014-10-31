@@ -71,7 +71,7 @@ public abstract class Geary.Imap.Flags : Geary.MessageData.AbstractMessageData, 
     }
     
     public uint hash() {
-        return to_string().down().hash();
+        return Ascii.stri_hash(to_string());
     }
 }
 

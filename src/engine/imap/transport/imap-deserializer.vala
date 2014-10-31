@@ -421,7 +421,7 @@ public class Geary.Imap.Deserializer : BaseObject {
         if (current_string == null || String.is_empty(current_string.str))
             return false;
         
-        return String.stri_equal(current_string.str, cmp);
+        return Ascii.stri_equal(current_string.str, cmp);
     }
     
     private void append_to_string(char ch) {
@@ -432,7 +432,7 @@ public class Geary.Imap.Deserializer : BaseObject {
     }
     
     private void save_string_parameter(bool quoted) {
-        // deal with empty quoted strings
+        // deal with empty strings
         if (!quoted && is_current_string_empty())
             return;
         

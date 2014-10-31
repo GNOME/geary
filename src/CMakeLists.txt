@@ -272,6 +272,7 @@ engine/state/state-machine-descriptor.vala
 engine/state/state-machine.vala
 engine/state/state-mapping.vala
 
+engine/util/util-ascii.vala
 engine/util/util-collection.vala
 engine/util/util-converter.vala
 engine/util/util-files.vala

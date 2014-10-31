@@ -46,7 +46,7 @@ public class Geary.Smtp.ResponseCode {
     }
     
     public Status get_status() {
-        int i = String.digit_to_int(str[0]);
+        int i = Ascii.digit_to_int(str[0]);
         
         // This works because of the checks in the constructor; Condition can't be checked so
         // easily
@@ -54,7 +54,7 @@ public class Geary.Smtp.ResponseCode {
     }
     
     public Condition get_condition() {
-        switch (String.digit_to_int(str[1])) {
+        switch (Ascii.digit_to_int(str[1])) {
             case Condition.SYNTAX:
                 return Condition.SYNTAX;
             

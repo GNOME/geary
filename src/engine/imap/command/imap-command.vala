@@ -107,7 +107,7 @@ public class Geary.Imap.Command : RootParameters {
     }
     
     public bool has_name(string name) {
-        return this.name.down() == name.down();
+        return Ascii.stri_equal(this.name, name);
     }
     
     public override void serialize(Serializer ser, Tag tag) throws Error {

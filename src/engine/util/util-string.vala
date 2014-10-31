@@ -27,79 +27,12 @@ public int count_char(string s, unichar c) {
     return count;
 }
 
-public int ascii_cmp(string a, string b) {
-    return strcmp(a, b);
-}
-
-public int ascii_cmpi(string a, string b) {
-    char *aptr = a;
-    char *bptr = b;
-    for (;;) {
-        int diff = (int) (*aptr).tolower() - (int) (*bptr).tolower();
-        if (diff != 0)
-            return diff;
-        
-        if (*aptr == EOS)
-            return 0;
-        
-        aptr++;
-        bptr++;
-    }
-}
-
-public inline bool ascii_equal(string a, string b) {
-    return ascii_cmp(a, b) == 0;
-}
-
-public inline bool ascii_equali(string a, string b) {
-    return ascii_cmpi(a, b) == 0;
-}
-
 public uint stri_hash(string str) {
     return str_hash(str.down());
 }
 
-public uint nullable_stri_hash(string? str) {
-    return (str != null) ? stri_hash(str) : 0;
-}
-
 public bool stri_equal(string a, string b) {
     return str_equal(a.down(), b.down());
-}
-
-public bool nullable_stri_equal(string? a, string? b) {
-    if (a == null)
-        return (b == null);
-    
-    // a != null, so always false
-    if (b == null)
-        return false;
-    
-    return stri_equal(a, b);
-}
-
-/**
- * Returns true if the string contains only whitespace and at least one numeric character.
- */
-public bool is_numeric(string str) {
-    bool numeric_found = false;
-    unichar ch;
-    int index = 0;
-    while (str.get_next_char(ref index, out ch)) {
-        if (ch.isdigit())
-            numeric_found = true;
-        else if (!ch.isspace())
-            return false;
-    }
-    
-    return numeric_found;
-}
-
-/**
- * Returns char from 0 to 9 converted to an int.  If a non-numeric value, -1 is returned.
- */
-public inline int digit_to_int(char ch) {
-    return ch.isdigit() ? (ch - '0') : -1;
 }
 
 public string uint8_to_hex(uint8[] buffer) {

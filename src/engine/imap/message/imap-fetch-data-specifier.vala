@@ -83,7 +83,7 @@ public enum Geary.Imap.FetchDataSpecifier {
      * @throws ImapError.PARSE_ERROR if not a recognized value.
      */
     public static FetchDataSpecifier decode(string value) throws ImapError {
-        switch (value.down()) {
+        switch (Ascii.strdown(value)) {
             case "uid":
                 return UID;
             

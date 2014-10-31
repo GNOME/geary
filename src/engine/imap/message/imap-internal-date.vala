@@ -70,7 +70,7 @@ public class Geary.Imap.InternalDate : Geary.MessageData.AbstractMessageData, Ge
         
         // check month (this catches localization problems)
         int month = -1;
-        string mon_down = ((string) mon).down();
+        string mon_down = Ascii.strdown(((string) mon));
         for (int ctr = 0; ctr < EN_US_MON_DOWN.length; ctr++) {
             if (mon_down == EN_US_MON_DOWN[ctr]) {
                 month = ctr;
