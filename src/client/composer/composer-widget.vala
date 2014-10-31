@@ -1998,27 +1998,45 @@ public class ComposerWidget : Gtk.EventBox {
         if (compose_type != ComposeType.NEW_MESSAGE)
             return;
         
+        bool changed = false;
+        try {
+            changed = update_from_account();
+        } catch (Error err) {
+            debug("Unable to update From: Account in composer: %s", err.message);
+        }
+        
+        // if the Geary.Account didn't change and the drafts folder is open(ing), do nothing more;
+        // need to check for the drafts folder because opening it in the case of multiple From:
+        // is handled here alone, so need to open it if not already
+        if (!changed && drafts_folder != null)
+            return;
+        
+        open_drafts_folder_async.begin(cancellable_drafts);
+        reset_draft_timer();
+    }
+    
+    private bool update_from_account() throws Error {
         // Since we've set the combo box ID to the email addresses, we can
         // fetch that and use it to grab the account from the engine.
         string? id = from_multiple.get_active_id();
-        Geary.AccountInformation? new_account_info = null;
+        if (id == null)
+            return false;
         
-        if (id != null) {
-            try {
-                new_account_info = Geary.Engine.instance.get_accounts().get(id);
-                if (new_account_info != null) {
-                    account = Geary.Engine.instance.get_account_instance(new_account_info);
-                    from = new_account_info.get_from().to_rfc822_string();
-                    set_entry_completions();
-                    
-                    open_drafts_folder_async.begin(cancellable_drafts);
-                }
-            } catch (Error e) {
-                debug("Error updating account in Composer: %s", e.message);
-            }
-        }
+        // it's possible for changed signals to fire even though nothing has changed; catch that
+        // here when possible to avoid a lot of extra work
+        Geary.AccountInformation? new_account_info = Geary.Engine.instance.get_accounts().get(id);
+        if (new_account_info == null)
+            return false;
         
-        reset_draft_timer();
+        Geary.Account new_account = Geary.Engine.instance.get_account_instance(new_account_info);
+        if (new_account == account)
+            return false;
+        
+        account = new_account;
+        from = new_account_info.get_from().to_rfc822_string();
+        set_entry_completions();
+        
+        return true;
     }
     
     private void set_entry_completions() {
