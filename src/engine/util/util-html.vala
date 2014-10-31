@@ -67,7 +67,7 @@ private void init_breaking_elements() {
         // [3]: Can be used as either block or inline; we go for broke
     };
     
-    breaking_elements = new Gee.HashSet<string>(String.stri_hash, String.stri_equal);
+    breaking_elements = new Gee.HashSet<string>(Ascii.stri_hash, Ascii.stri_equal);
     foreach (string element in elements)
         breaking_elements.add(element);
 }

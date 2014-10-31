@@ -25,7 +25,7 @@ public abstract class Geary.Imap.Flag : BaseObject, Gee.Hashable<Geary.Imap.Flag
     }
     
     public bool equals_string(string value) {
-        return this.value.down() == value.down();
+        return Ascii.stri_equal(this.value, value);
     }
     
     public bool equal_to(Geary.Imap.Flag flag) {
@@ -40,7 +40,7 @@ public abstract class Geary.Imap.Flag : BaseObject, Gee.Hashable<Geary.Imap.Flag
     }
     
     public uint hash() {
-        return str_hash(value.down());
+        return Ascii.stri_hash(value);
     }
     
     public string to_string() {

@@ -96,14 +96,28 @@ public abstract class Geary.Imap.StringParameter : Geary.Imap.Parameter {
      * Case-sensitive comparison.
      */
     public bool equals_cs(string value) {
-        return this.value == value;
+        return Ascii.str_equal(this.value, value);
     }
     
     /**
      * Case-insensitive comparison.
      */
     public bool equals_ci(string value) {
-        return this.value.down() == value.down();
+        return Ascii.stri_equal(this.value, value);
+    }
+    
+    /**
+     * Returns the string lowercased.
+     */
+    public string as_lower() {
+        return Ascii.strdown(value);
+    }
+    
+    /**
+     * Returns the string uppercased.
+     */
+    public string as_upper() {
+        return Ascii.strup(value);
     }
     
     /**

@@ -40,7 +40,7 @@ public enum Geary.Imap.Status {
     }
     
     public static Status decode(string value) throws ImapError {
-        switch (value.down()) {
+        switch (Ascii.strdown(value)) {
             case "ok":
                 return OK;
             

@@ -64,7 +64,7 @@ public enum Geary.Imap.ServerDataType {
     }
     
     public static ServerDataType decode(string value) throws ImapError {
-        switch (value.down()) {
+        switch (Ascii.strdown(value)) {
             case "capability":
                 return CAPABILITY;
             
@@ -128,7 +128,7 @@ public enum Geary.Imap.ServerDataType {
     public static ServerDataType from_response(RootParameters root) throws ImapError {
         StringParameter? firstparam = root.get_if_string(1);
         if (firstparam != null) {
-            switch (firstparam.value.down()) {
+            switch (firstparam.as_lower()) {
                 case "capability":
                     return CAPABILITY;
                 
@@ -158,7 +158,7 @@ public enum Geary.Imap.ServerDataType {
         
         StringParameter? secondparam = root.get_if_string(2);
         if (secondparam != null) {
-            switch (secondparam.value.down()) {
+            switch (secondparam.as_lower()) {
                 case "exists":
                     return EXISTS;
                 

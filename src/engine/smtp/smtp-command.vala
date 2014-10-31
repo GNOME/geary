@@ -58,7 +58,7 @@ public enum Geary.Smtp.Command {
     }
     
     public static Command deserialize(string str) throws SmtpError {
-        switch (str.down()) {
+        switch (Ascii.strdown(str)) {
             case "helo":
                 return HELO;
             

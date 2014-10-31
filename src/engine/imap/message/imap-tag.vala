@@ -99,7 +99,7 @@ public class Geary.Imap.Tag : AtomParameter, Gee.Hashable<Geary.Imap.Tag> {
     }
     
     public uint hash() {
-        return str_hash(value);
+        return Ascii.str_hash(value);
     }
     
     public bool equal_to(Geary.Imap.Tag tag) {

@@ -974,13 +974,12 @@ public class Geary.Imap.ClientSession : BaseObject {
         // machine
         //
         // TODO: Convert commands into proper calls to avoid throwing an exception
-        switch (cmd.name) {
-            case LoginCommand.NAME:
-            case LogoutCommand.NAME:
-            case SelectCommand.NAME:
-            case ExamineCommand.NAME:
-            case CloseCommand.NAME:
-                throw new ImapError.NOT_SUPPORTED("Use direct calls rather than commands for %s", cmd.name);
+        if (cmd.has_name(LoginCommand.NAME)
+            || cmd.has_name(LogoutCommand.NAME)
+            || cmd.has_name(SelectCommand.NAME)
+            || cmd.has_name(ExamineCommand.NAME)
+            || cmd.has_name(CloseCommand.NAME)) {
+            throw new ImapError.NOT_SUPPORTED("Use direct calls rather than commands for %s", cmd.name);
         }
     }
     

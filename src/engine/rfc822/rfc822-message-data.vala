@@ -56,9 +56,9 @@ public class Geary.RFC822.MessageIDList : Geary.MessageData.AbstractMessageData,
         // close-parens is found, that's a problem (but isn't expected)
         StringBuilder canonicalized = new StringBuilder();
         int index = 0;
-        unichar ch;
+        char ch;
         bool in_message_id = false;
-        while (value.get_next_char(ref index, out ch)) {
+        while (Ascii.get_next_char(value, ref index, out ch)) {
             bool add_char = false;
             switch (ch) {
                 case '<':
@@ -90,7 +90,7 @@ public class Geary.RFC822.MessageIDList : Geary.MessageData.AbstractMessageData,
             }
             
             if (add_char)
-                canonicalized.append_unichar(ch);
+                canonicalized.append_c(ch);
             
             if (!in_message_id && !String.is_empty(canonicalized.str)) {
                 list.add(new MessageID(canonicalized.str));

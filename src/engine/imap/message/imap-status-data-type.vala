@@ -46,7 +46,7 @@ public enum Geary.Imap.StatusDataType {
     }
     
     public static StatusDataType decode(string value) throws ImapError {
-        switch (value.down()) {
+        switch (Ascii.strdown(value)) {
             case "messages":
                 return MESSAGES;
             
