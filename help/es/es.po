@@ -7,16 +7,16 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: geary master\n"
-"POT-Creation-Date: 2014-09-16 17:03+0000\n"
-"PO-Revision-Date: 2014-09-22 13:46+0200\n"
-"Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
+"POT-Creation-Date: 2014-10-25 16:52+0000\n"
+"PO-Revision-Date: 2014-10-25 21:28-0600\n"
+"Last-Translator: Adolfo Jayme Barrientos <fitojb@ubuntu.com>\n"
 "Language-Team: Español; Castellano <gnome-es-list@gnome.org>\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Gtranslator 2.91.6\n"
+"X-Generator: Poedit 1.6.10\n"
 
 #: C/write.page:9(title)
 msgid "Write a message"
@@ -402,12 +402,20 @@ msgid ""
 "the search box in the toolbar (or press <keyseq><key>Ctrl</key><key>S</key></"
 "keyseq>) and start typing. Results will appear after a brief delay."
 msgstr ""
+"Geary puede realizar búsquedas de texto completo por cada cuenta. Para "
+"comenzar una búsqueda, seleccione una carpeta asociada con la cuenta que "
+"quiera buscar. Luego, pulse en el cuadro de búsqueda ubicado en la barra de "
+"herramientas (o bien, presione <keyseq><key>Ctrl</key><key>S</key></keyseq>) "
+"y comience a escribir. Los resultados aparecerán tras una breve pausa."
 
 #: C/search.page:16(p)
 msgid ""
 "The full text search includes email text, email addresses (to, from, and "
 "cc), subject lines and attachment filenames."
 msgstr ""
+"La búsqueda de texto completo incluye texto del correo electrónico, "
+"direcciones (remitente, destinatario y CC), asuntos y nombres de archivos "
+"adjuntos."
 
 #: C/search.page:19(p)
 msgid ""
@@ -578,7 +586,7 @@ msgstr ""
 
 #: C/overview.page:8(title)
 msgid "Overview"
-msgstr ""
+msgstr "Información general"
 
 #: C/overview.page:10(p)
 msgid ""
@@ -587,6 +595,10 @@ msgid ""
 "protocol, including popular services such as Gmail, Yahoo Mail, and Outlook."
 "com."
 msgstr ""
+"Geary es un lector de correo electrónico ligero para el escritorio <link "
+"href=\"http://gnome.org\">GNOME</link>. Funciona con cualquier servidor de "
+"correo electrónico que admita el protocolo IMAP, incluyendo servicios "
+"populares como Gmail, Yahoo Mail y Outlook.com."
 
 #: C/overview.page:14(p)
 msgid ""
@@ -674,6 +686,9 @@ msgid ""
 "Any attachments in a message appear at the bottom of the message. You can "
 "click an attachment to open it or right-click to save it."
 msgstr ""
+"Los archivos adjuntos de un mensaje aparecerán en la parte inferior de este. "
+"Pulse en un archivo adjunto para abrirlo o use el botón secundario del ratón "
+"para guardarlo."
 
 #: C/overview.page:52(p)
 msgid ""
@@ -715,34 +730,46 @@ msgid ""
 "labels correspond to labels in Gmail, or ordinary folders in other mail "
 "services."
 msgstr ""
+"Geary le permite aplicar una o más <em>etiquetas</em> a cada conversación. "
+"Las etiquetas de Geary corresponden a las etiquetas de Gmail o a las "
+"carpetas en otros servicios de correo electrónico."
 
 #: C/label.page:15(p)
 msgid ""
 "To label one or more conversations, first select the conversation(s), then "
 "do either of the following:"
 msgstr ""
+"Para etiquetar una o más conversaciones, selecciónelas y siga uno de los "
+"procedimientos descritos a continuación:"
 
 #: C/label.page:18(p)
 msgid ""
 "Click the <gui>Label</gui> button on the toolbar and select a label from the "
 "resulting drop-down menu."
 msgstr ""
+"Pulse en el botón <gui>Etiquetar</gui> de la barra de herramientas y "
+"seleccione una de las etiquetas disponibles en el menú que aparecerá."
 
 #: C/label.page:20(p)
 msgid ""
 "Hold down the <key>Ctrl</key> key and drag the conversation(s) from the "
 "conversation list to the label in the sidebar."
 msgstr ""
+"Mantenga presionada la tecla <key>Ctrl</key> y arrastre las conversaciones "
+"de la lista de conversaciones hasta la etiqueta de la barra lateral que "
+"prefiera."
 
 #: C/label.page:25(title)
 msgid "Move a conversation to a folder or label"
-msgstr ""
+msgstr "Mover una conversación a una carpeta o etiqueta"
 
 #: C/label.page:26(p)
 msgid ""
 "To move one or more conversations to a folder or label, first select the "
 "conversation(s), then do either of the following:"
 msgstr ""
+"Para mover una o más conversaciones a una carpeta o etiqueta, selecciónelas "
+"y siga uno de los procedimientos descritos a continuación:"
 
 #: C/label.page:29(p)
 msgid ""
@@ -764,7 +791,7 @@ msgstr ""
 
 #: C/index.page:5(title)
 msgid "<media type=\"image\" src=\"figures/geary.svg\"/> Geary"
-msgstr ""
+msgstr "<media type=\"image\" src=\"figures/geary.svg\"/> Geary"
 
 #: C/index.page:9(title)
 msgid "Introduction"
