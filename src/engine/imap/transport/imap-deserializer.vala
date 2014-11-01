@@ -295,7 +295,7 @@ public class Geary.Imap.Deserializer : BaseObject {
             
             bytes_received(bytes_read);
             
-            push_line(line);
+            push_line(line, bytes_read);
         } catch (Error err) {
             push_error(err);
             
@@ -335,15 +335,20 @@ public class Geary.Imap.Deserializer : BaseObject {
         next_deserialize_step();
     }
     
-    // Push a line (without the CRLF!).
-    private Mode push_line(string line) {
+    // Push a line (without the CRLF!).  Because DataInputStream reads to EOL but accepts all other
+    // characters, it's possible for NULs to be embedded in the string, so the count must be passed
+    // as well (and shouldn't be -1!)
+    private Mode push_line(string line, size_t count) {
         assert(get_mode() == Mode.LINE);
         
-        int index = 0;
-        for (;;) {
-            char ch = line[index++];
-            if (ch == String.EOS)
-                break;
+        for (long ctr = 0; ctr < count; ctr++) {
+            char ch = line[ctr];
+            if (ch == String.EOS) {
+                // drop on the floor; IMAP spec does not allow NUL in lines at all, see
+                // http://tools.ietf.org/html/rfc3501#section-9 note 3.
+                // This also catches the terminating NUL.
+                continue;
+            }
             
             if (fsm.issue(Event.CHAR, &ch) == State.FAILED) {
                 deserialize_failure();
