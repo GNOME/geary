@@ -4,8 +4,6 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-extern void qsort(void *base, size_t num, size_t size, CompareFunc compare_func);
-
 /**
  * A represenation of an IMAP message range specifier.
  *

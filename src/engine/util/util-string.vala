@@ -35,29 +35,6 @@ public bool stri_equal(string a, string b) {
     return str_equal(a.down(), b.down());
 }
 
-public string uint8_to_hex(uint8[] buffer) {
-    StringBuilder builder = new StringBuilder();
-    
-    bool first = true;
-    foreach (uint8 byte in buffer) {
-        if (!first)
-            builder.append_c(' ');
-        
-        builder.append_printf("%X", byte);
-        first = false;
-    }
-    
-    return builder.str;
-}
-
-public string uint8_to_string(uint8[] buffer) {
-    StringBuilder builder = new StringBuilder();
-    foreach (uint8 byte in buffer)
-        builder.append_printf("%c", (char) byte);
-    
-    return builder.str;
-}
-
 // Removes redundant spaces, tabs, and newlines.
 public string reduce_whitespace(string _s) {
     string s = _s;
