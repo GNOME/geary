@@ -4,6 +4,11 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
+// These calls are bound to the string class in Vala 0.26.  When that version of Vala is the
+// minimum, these can be dropped and Ascii.strup and Ascii.strdown can use the string methods.
+extern string g_ascii_strup(string str, ssize_t len = -1);
+extern string g_ascii_strdown(string str, ssize_t len = -1);
+
 namespace Geary.Ascii {
 
 public int index_of(string str, char ch) {
@@ -82,11 +87,11 @@ public uint nullable_stri_hash(string? str) {
 }
 
 public string strdown(string str) {
-    return str.ascii_down();
+    return g_ascii_strdown(str);
 }
 
 public string strup(string str) {
-    return str.ascii_up();
+    return g_ascii_strup(str);
 }
 
 /**
