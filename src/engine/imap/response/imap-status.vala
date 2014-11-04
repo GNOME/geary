@@ -39,8 +39,8 @@ public enum Geary.Imap.Status {
         }
     }
     
-    public static Status decode(string value) throws ImapError {
-        switch (Ascii.strdown(value)) {
+    public static Status from_parameter(StringParameter strparam) throws ImapError {
+        switch (strparam.as_lower()) {
             case "ok":
                 return OK;
             
@@ -57,12 +57,8 @@ public enum Geary.Imap.Status {
                 return BYE;
             
             default:
-                throw new ImapError.PARSE_ERROR("Unrecognized status response \"%s\"", value);
+                throw new ImapError.PARSE_ERROR("Unrecognized status response \"%s\"", strparam.to_string());
         }
-    }
-    
-    public static Status from_parameter(StringParameter strparam) throws ImapError {
-        return decode(strparam.value);
     }
     
     public Parameter to_parameter() {

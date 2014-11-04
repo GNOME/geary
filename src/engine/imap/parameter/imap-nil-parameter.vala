@@ -41,7 +41,7 @@ public class Geary.Imap.NilParameter : Geary.Imap.Parameter {
      * list.
      */
     public static bool is_nil(StringParameter stringp) {
-        return Ascii.stri_equal(VALUE, stringp.value);
+        return stringp.equals_ci(VALUE);
     }
     
     /**

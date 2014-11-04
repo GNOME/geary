@@ -24,12 +24,12 @@ public class Geary.Imap.Tag : AtomParameter, Gee.Hashable<Geary.Imap.Tag> {
     private static Tag? unassigned = null;
     private static Tag? continuation = null;
     
-    public Tag(string value) {
-        base (value);
+    public Tag(string ascii) {
+        base (ascii);
     }
     
     public Tag.from_parameter(StringParameter strparam) {
-        base (strparam.value);
+        base (strparam.ascii);
     }
     
     internal static void init() {
@@ -67,15 +67,15 @@ public class Geary.Imap.Tag : AtomParameter, Gee.Hashable<Geary.Imap.Tag> {
         if (stringp is QuotedStringParameter)
             return false;
         
-        if (String.is_empty(stringp.value))
+        if (stringp.is_empty())
             return false;
         
-        if (stringp.value == UNTAGGED_VALUE || stringp.value == CONTINUATION_VALUE)
+        if (stringp.equals_cs(UNTAGGED_VALUE) || stringp.equals_cs(CONTINUATION_VALUE))
             return true;
         
         int index = 0;
         for (;;) {
-            char ch = stringp.value[index++];
+            char ch = stringp.ascii[index++];
             if (ch == String.EOS)
                 break;
             
@@ -87,26 +87,26 @@ public class Geary.Imap.Tag : AtomParameter, Gee.Hashable<Geary.Imap.Tag> {
     }
     
     public bool is_tagged() {
-        return (value != UNTAGGED_VALUE) && (value != CONTINUATION_VALUE) && (value != UNASSIGNED_VALUE);
+        return !equals_cs(UNTAGGED_VALUE) && !equals_cs(CONTINUATION_VALUE) && !equals_cs(UNASSIGNED_VALUE);
     }
     
     public bool is_continuation() {
-        return value == CONTINUATION_VALUE;
+        return equals_cs(CONTINUATION_VALUE);
     }
     
     public bool is_assigned() {
-        return (value != UNASSIGNED_VALUE) && (value != CONTINUATION_VALUE);
+        return !equals_cs(UNASSIGNED_VALUE) && !equals_cs(CONTINUATION_VALUE);
     }
     
     public uint hash() {
-        return Ascii.str_hash(value);
+        return Ascii.str_hash(ascii);
     }
     
     public bool equal_to(Geary.Imap.Tag tag) {
         if (this == tag)
             return true;
         
-        return equals_cs(tag.value);
+        return equals_cs(tag.ascii);
     }
 }
 

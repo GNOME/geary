@@ -78,12 +78,12 @@ public enum Geary.Imap.FetchDataSpecifier {
     }
     
     /**
-     * Converts a plain string into a {@link FetchDataType}.
+     * Decoders a {@link StringParameter} into a {@link FetchDataType} using {@link decode}.
      *
-     * @throws ImapError.PARSE_ERROR if not a recognized value.
+     * @see decode
      */
-    public static FetchDataSpecifier decode(string value) throws ImapError {
-        switch (Ascii.strdown(value)) {
+    public static FetchDataSpecifier from_parameter(StringParameter strparam) throws ImapError {
+        switch (strparam.as_lower()) {
             case "uid":
                 return UID;
             
@@ -124,7 +124,8 @@ public enum Geary.Imap.FetchDataSpecifier {
                 return FULL;
             
             default:
-                throw new ImapError.PARSE_ERROR("\"%s\" is not a valid fetch-command data item", value);
+                throw new ImapError.PARSE_ERROR("\"%s\" is not a valid fetch-command data item",
+                    strparam.to_string());
         }
     }
     
@@ -133,15 +134,6 @@ public enum Geary.Imap.FetchDataSpecifier {
      */
     public StringParameter to_parameter() {
         return new AtomParameter(to_string());
-    }
-    
-    /**
-     * Decoders a {@link StringParameter} into a {@link FetchDataType} using {@link decode}.
-     *
-     * @see decode
-     */
-    public static FetchDataSpecifier from_parameter(StringParameter strparam) throws ImapError {
-        return decode(strparam.value);
     }
     
     /**

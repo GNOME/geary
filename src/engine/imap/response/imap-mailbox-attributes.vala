@@ -33,7 +33,7 @@ public class Geary.Imap.MailboxAttributes : Geary.Imap.Flags {
     public static MailboxAttributes from_list(ListParameter listp) throws ImapError {
         Gee.Collection<MailboxAttribute> list = new Gee.ArrayList<MailboxAttribute>();
         for (int ctr = 0; ctr < listp.size; ctr++)
-            list.add(new MailboxAttribute(listp.get_as_string(ctr).value));
+            list.add(new MailboxAttribute(listp.get_as_string(ctr).ascii));
         
         return new MailboxAttributes(list);
     }

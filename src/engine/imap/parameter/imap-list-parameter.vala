@@ -420,7 +420,7 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
         
         StringParameter? stringp = get_if_string(index);
         if (stringp != null)
-            return new Memory.StringBuffer(stringp.value);
+            return stringp.as_buffer();
         
         return null;
     }

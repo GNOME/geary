@@ -97,7 +97,7 @@ public class Geary.Imap.MessageFlagsDecoder : Geary.Imap.FetchDataDecoder {
     protected override MessageData decode_list(ListParameter listp) throws ImapError {
         Gee.List<Flag> flags = new Gee.ArrayList<Flag>();
         for (int ctr = 0; ctr < listp.size; ctr++)
-            flags.add(new MessageFlag(listp.get_as_string(ctr).value));
+            flags.add(new MessageFlag(listp.get_as_string(ctr).ascii));
         
         return new MessageFlags(flags);
     }
@@ -109,7 +109,7 @@ public class Geary.Imap.InternalDateDecoder : Geary.Imap.FetchDataDecoder {
     }
     
     protected override MessageData decode_string(StringParameter stringp) throws ImapError {
-        return InternalDate.decode(stringp.value);
+        return InternalDate.decode(stringp.ascii);
     }
 }
 
@@ -142,17 +142,17 @@ public class Geary.Imap.EnvelopeDecoder : Geary.Imap.FetchDataDecoder {
         
         // Although Message-ID is required to be returned by IMAP, it may be blank if the email
         // does not supply it (optional according to RFC822); deal with this cognitive dissonance
-        if (message_id != null && String.is_empty(message_id.value))
+        if (message_id != null && message_id.is_empty())
             message_id = null;
         
-        return new Envelope((sent != null) ? new Geary.RFC822.Date(sent.value) : null,
-            new Geary.RFC822.Subject.decode(subject.value),
+        return new Envelope((sent != null) ? new Geary.RFC822.Date(sent.ascii) : null,
+            new Geary.RFC822.Subject.decode(subject.ascii),
             parse_addresses(from), parse_addresses(sender), parse_addresses(reply_to),
             (to != null) ? parse_addresses(to) : null, 
             (cc != null) ? parse_addresses(cc) : null,
             (bcc != null) ? parse_addresses(bcc) : null,
-            (in_reply_to != null) ? new Geary.RFC822.MessageIDList.from_rfc822_string(in_reply_to.value) : null,
-            (message_id != null) ? new Geary.RFC822.MessageID(message_id.value) : null);
+            (in_reply_to != null) ? new Geary.RFC822.MessageIDList.from_rfc822_string(in_reply_to.ascii) : null,
+            (message_id != null) ? new Geary.RFC822.MessageID(message_id.ascii) : null);
     }
     
     // TODO: This doesn't handle group lists (see Johnson, p.268) -- this will throw an
@@ -167,10 +167,10 @@ public class Geary.Imap.EnvelopeDecoder : Geary.Imap.FetchDataDecoder {
             StringParameter domain = fields.get_as_empty_string(3);
             
             Geary.RFC822.MailboxAddress addr = new Geary.RFC822.MailboxAddress.imap(
-                (name != null) ? name.nullable_value : null,
-                (source_route != null) ? source_route.nullable_value : null,
-                mailbox.value,
-                domain.value);
+                (name != null) ? name.nullable_ascii : null,
+                (source_route != null) ? source_route.nullable_ascii : null,
+                mailbox.ascii,
+                domain.ascii);
             list.add(addr);
         }
         

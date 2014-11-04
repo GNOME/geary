@@ -94,6 +94,9 @@ public class Geary.Imap.Deserializer : BaseObject {
      * {@link UnquotedStringParameter}s, {@link ResponseCode}, and {@link ListParameter}s.
      * Deserializer does not produce any other kind of Parameter due to its inability to deduce
      * them from syntax alone.  ResponseCode, however, can be.
+     *
+     * All strings are ASCII (7-bit) with control characters stripped (with the exception of
+     * {@link QuotedStringParameter} which allows for some control characters).
      */
     public signal void parameters_ready(RootParameters root);
     

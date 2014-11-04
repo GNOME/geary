@@ -45,8 +45,8 @@ public enum Geary.Imap.StatusDataType {
         }
     }
     
-    public static StatusDataType decode(string value) throws ImapError {
-        switch (Ascii.strdown(value)) {
+    public static StatusDataType from_parameter(StringParameter stringp) throws ImapError {
+        switch (stringp.as_lower()) {
             case "messages":
                 return MESSAGES;
             
@@ -63,16 +63,12 @@ public enum Geary.Imap.StatusDataType {
                 return UNSEEN;
             
             default:
-                throw new ImapError.PARSE_ERROR("Unknown status data type \"%s\"", value);
+                throw new ImapError.PARSE_ERROR("Unknown status data type \"%s\"", stringp.to_string());
         }
     }
     
     public StringParameter to_parameter() {
         return new AtomParameter(to_string());
-    }
-    
-    public static StatusDataType from_parameter(StringParameter stringp) throws ImapError {
-        return decode(stringp.value);
     }
 }
 

@@ -42,8 +42,14 @@ public abstract class Geary.Imap.Flags : Geary.MessageData.AbstractMessageData, 
      */
     public virtual Parameter to_parameter() {
         ListParameter listp = new ListParameter();
-        foreach (Flag flag in list)
-            listp.add(flag.to_parameter());
+        foreach (Flag flag in list) {
+            try {
+                listp.add(flag.to_parameter());
+            } catch (ImapError ierr) {
+                // drop on floor with warning
+                message("Unable to parameterize flag \"%s\": %s", flag.to_string(), ierr.message);
+            }
+        }
         
         return listp;
     }

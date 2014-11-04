@@ -71,7 +71,7 @@ public class Geary.Imap.FetchedData : Object {
                 else
                     fetched_data.body_data_map.set(specifier, Memory.EmptyBuffer.instance);
             } else {
-                FetchDataSpecifier data_item = FetchDataSpecifier.decode(data_item_param.value);
+                FetchDataSpecifier data_item = FetchDataSpecifier.from_parameter(data_item_param);
                 FetchDataDecoder? decoder = data_item.get_decoder();
                 if (decoder == null) {
                     debug("Unable to decode fetch response for \"%s\": No decoder available",

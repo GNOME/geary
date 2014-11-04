@@ -35,7 +35,7 @@ public abstract class Geary.Imap.Flag : BaseObject, Gee.Hashable<Geary.Imap.Flag
     /**
      * Returns the {@link Flag} as an appropriate {@link Parameter}.
      */
-    public Parameter to_parameter() {
+    public StringParameter to_parameter() throws ImapError {
         return StringParameter.get_best_for(value);
     }
     

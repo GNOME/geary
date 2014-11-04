@@ -30,7 +30,7 @@ public class Geary.Imap.Capabilities : Geary.GenericCapabilities {
     }
 
     public bool add_parameter(StringParameter stringp) {
-        return parse_and_add_capability(stringp.value);
+        return parse_and_add_capability(stringp.ascii);
     }
 
     public override string to_string() {

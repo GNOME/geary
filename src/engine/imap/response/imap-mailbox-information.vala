@@ -65,7 +65,7 @@ public class Geary.Imap.MailboxInformation : Object {
                 continue;
             }
             
-            attrlist.add(new MailboxAttribute(stringp.value));
+            attrlist.add(new MailboxAttribute(stringp.ascii));
         }
         
         // decode everything
@@ -77,10 +77,10 @@ public class Geary.Imap.MailboxInformation : Object {
         // Set \Inbox to standard path
         if (canonical_inbox && Geary.Imap.MailboxAttribute.SPECIAL_FOLDER_INBOX in attributes) {
             return new MailboxInformation(MailboxSpecifier.inbox,
-                (delim != null) ? delim.nullable_value : null, attributes);
+                (delim != null) ? delim.nullable_ascii : null, attributes);
         } else {
             return new MailboxInformation(new MailboxSpecifier.from_parameter(mailbox),
-                (delim != null) ? delim.nullable_value : null, attributes);
+                (delim != null) ? delim.nullable_ascii : null, attributes);
         }
     }
     

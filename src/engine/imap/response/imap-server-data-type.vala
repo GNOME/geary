@@ -63,8 +63,13 @@ public enum Geary.Imap.ServerDataType {
         }
     }
     
-    public static ServerDataType decode(string value) throws ImapError {
-        switch (Ascii.strdown(value)) {
+    /**
+     * Convert a {@link StringParameter} into a ServerDataType.
+     *
+     * @throws ImapError.PARSE_ERROR if the StringParameter is not recognized as a ServerDataType.
+     */
+    public static ServerDataType from_parameter(StringParameter param) throws ImapError {
+        switch (param.as_lower()) {
             case "capability":
                 return CAPABILITY;
             
@@ -100,21 +105,12 @@ public enum Geary.Imap.ServerDataType {
                 return XLIST;
             
             default:
-                throw new ImapError.PARSE_ERROR("\"%s\" is not a valid server data type", value);
+                throw new ImapError.PARSE_ERROR("\"%s\" is not a valid server data type", param.to_string());
         }
     }
     
     public StringParameter to_parameter() {
         return new AtomParameter(to_string());
-    }
-    
-    /**
-     * Convert a {@link StringParameter} into a ServerDataType.
-     *
-     * @throws ImapError.PARSE_ERROR if the StringParameter is not recognized as a ServerDataType.
-     */
-    public static ServerDataType from_parameter(StringParameter param) throws ImapError {
-        return decode(param.value);
     }
     
     /**

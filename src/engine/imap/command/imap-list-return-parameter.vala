@@ -30,7 +30,7 @@ public class Geary.Imap.ListReturnParameter : ListParameter {
     }
     
     public void add_special_use() {
-        add(StringParameter.get_best_for(SPECIAL_USE));
+        add(StringParameter.get_best_for_unchecked(SPECIAL_USE));
     }
 }
 

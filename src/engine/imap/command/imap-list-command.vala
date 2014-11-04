@@ -52,7 +52,7 @@ public class Geary.Imap.ListCommand : Command {
         if (return_param == null || return_param.size == 0)
             return;
         
-        add(StringParameter.get_best_for("return"));
+        add(StringParameter.get_best_for_unchecked("return"));
         add(return_param);
     }
 }

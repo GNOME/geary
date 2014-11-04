@@ -115,7 +115,7 @@ public class Geary.Imap.StatusData : Object {
                     break;
                     
                     default:
-                        message("Bad STATUS data type %s", typep.value);
+                        message("Bad STATUS data type %s", typep.to_string());
                     break;
                 }
             } catch (ImapError ierr) {

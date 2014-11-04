@@ -331,7 +331,8 @@ public class Geary.Imap.FetchBodyDataSpecifier : BaseObject, Gee.Hashable<FetchB
             break;
             
             default:
-                throw new ImapError.PARSE_ERROR("%s is not a FETCH body data type %d", stringp.value, count);
+                throw new ImapError.PARSE_ERROR("%s is not a FETCH body data type %d", stringp.to_string(),
+                    count);
         }
         
         // convert section string into its parts:
@@ -343,7 +344,7 @@ public class Geary.Imap.FetchBodyDataSpecifier : BaseObject, Gee.Hashable<FetchB
         unowned string? fields_string;
         if (section_string.contains("(")) {
             if (section_string.scanf("%[^(](%[^)])", part_chars, fields_chars) != 2)
-                throw new ImapError.PARSE_ERROR("%s: malformed part/header names", stringp.value);
+                throw new ImapError.PARSE_ERROR("%s: malformed part/header names", stringp.to_string());
             
             part_string = (string) part_chars;
             fields_string = (string?) fields_chars;
@@ -398,12 +399,12 @@ public class Geary.Imap.FetchBodyDataSpecifier : BaseObject, Gee.Hashable<FetchB
         if (!String.is_empty(octet_string)) {
             if (octet_string.scanf("<%d>", out subset_start) != 1) {
                 throw new ImapError.PARSE_ERROR("Improperly formed octet \"%s\" in %s", octet_string,
-                    stringp.value);
+                    stringp.to_string());
             }
             
             if (subset_start < 0) {
                 throw new ImapError.PARSE_ERROR("Invalid octet count %d in %s", subset_start,
-                    stringp.value);
+                    stringp.to_string());
             }
         }
         

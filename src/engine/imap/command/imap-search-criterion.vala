@@ -44,16 +44,12 @@ public class Geary.Imap.SearchCriterion : BaseObject {
      * Create a single criterion with a simple name and custom value.
      */
     public SearchCriterion.string_value(string name, string value) {
-        Parameter? valuep = StringParameter.get_best_for(value);
-        if (valuep == null)
-            valuep = new LiteralParameter(new Memory.StringBuffer(value));
-        
         parameters.add(prep_name(name));
-        parameters.add(valuep);
+        parameters.add(Parameter.get_for_string(value));
     }
     
     private static Parameter prep_name(string name) {
-        Parameter? namep = StringParameter.get_best_for(name);
+        Parameter? namep = StringParameter.try_get_best_for(name);
         if (namep == null) {
             warning("Using a search name that requires a literal parameter: %s", name);
             namep = new LiteralParameter(new Memory.StringBuffer(name));
@@ -106,7 +102,7 @@ public class Geary.Imap.SearchCriterion : BaseObject {
     /**
      * The IMAP SEARCH KEYWORD criterion, or if the {@link MessageFlag} has a macro, that value.
      */
-    public static SearchCriterion has_flag(MessageFlag flag) {
+    public static SearchCriterion has_flag(MessageFlag flag) throws ImapError {
         string? keyword = flag.get_search_keyword(true);
         if (keyword != null)
             return new SearchCriterion.simple(keyword);
@@ -117,7 +113,7 @@ public class Geary.Imap.SearchCriterion : BaseObject {
     /**
      * The IMAP SEARCH UNKEYWORD criterion, or if the {@link MessageFlag} has a macro, that value.
      */
-    public static SearchCriterion has_not_flag(MessageFlag flag) {
+    public static SearchCriterion has_not_flag(MessageFlag flag) throws ImapError {
         string? keyword = flag.get_search_keyword(false);
         if (keyword != null)
             return new SearchCriterion.simple(keyword);

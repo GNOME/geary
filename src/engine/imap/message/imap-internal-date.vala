@@ -98,7 +98,7 @@ public class Geary.Imap.InternalDate : Geary.MessageData.AbstractMessageData, Ge
      * Returns the {@link InternalDate} as a {@link Parameter}.
      */
     public Parameter to_parameter() {
-        return StringParameter.get_best_for(serialize());
+        return Parameter.get_for_string(serialize());
     }
     
     /**
@@ -107,7 +107,7 @@ public class Geary.Imap.InternalDate : Geary.MessageData.AbstractMessageData, Ge
      * @see serialize_for_search
      */
     public Parameter to_search_parameter() {
-        return StringParameter.get_best_for(serialize_for_search());
+        return Parameter.get_for_string(serialize());
     }
     
     /**

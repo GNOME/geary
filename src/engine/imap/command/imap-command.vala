@@ -74,13 +74,8 @@ public class Geary.Imap.Command : RootParameters {
         add(tag);
         add(new AtomParameter(name));
         if (args != null) {
-            foreach (string arg in args) {
-                StringParameter? stringp = StringParameter.get_best_for(arg);
-                if (stringp != null)
-                    add(stringp);
-                else
-                    add(new LiteralParameter(new Memory.StringBuffer(arg)));
-            }
+            foreach (string arg in args)
+                add(Parameter.get_for_string(arg));
         }
     }
     

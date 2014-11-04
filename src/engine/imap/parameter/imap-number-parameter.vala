@@ -41,12 +41,12 @@ public class Geary.Imap.NumberParameter : UnquotedStringParameter {
      * No checking is performed to verify that the string is only composed of numeric characters.
      * Use {@link is_numeric}.
      */
-    public NumberParameter.from_string(string str) {
-        base (str);
+    public NumberParameter.from_ascii(string ascii) {
+        base (ascii);
     }
     
     /**
-     * Returns true if the string is composed of numeric characters.
+     * Returns true if the string is composed of numeric 7-bit characters.
      *
      * The only non-numeric character allowed is a dash ('-') at the beginning of the string to
      * indicate a negative value.  However, note that almost every IMAP use of a number is for a

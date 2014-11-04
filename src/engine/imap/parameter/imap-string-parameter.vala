@@ -21,21 +21,21 @@
 
 public abstract class Geary.Imap.StringParameter : Geary.Imap.Parameter {
     /**
-     * The unquoted, decoded string.
+     * The unquoted, decoded string as 7-bit ASCII.
      */
-    public string value { get; private set; }
+    public string ascii { get; private set; }
     
     /**
      * Returns {@link value} or null if value is empty (zero-length).
      */
-    public string? nullable_value {
+    public string? nullable_ascii {
         get {
-            return String.is_empty(value) ? null : value;
+            return String.is_empty(ascii) ? null : ascii;
         }
     }
     
-    protected StringParameter(string value) {
-        this.value = value;
+    protected StringParameter(string ascii) {
+        this.ascii = ascii;
     }
     
     /**
@@ -48,11 +48,12 @@ public abstract class Geary.Imap.StringParameter : Geary.Imap.Parameter {
      * Because of these restrictions, should only be used when the context or syntax of the
      * Parameter is unknown or uncertain.
      *
-     * @return null if the string must be represented with a {@link LiteralParameter}.
+     * @throws ImapError.NOT_SUPPORTED if the string must be represented as a {@link LiteralParameter}.
+     * @see Parameter.get_for_string
      */
-    public static StringParameter? get_best_for(string value) {
+    public static StringParameter get_best_for(string value) throws ImapError {
         if (NumberParameter.is_numeric(value, null))
-            return new NumberParameter.from_string(value);
+            return new NumberParameter.from_ascii(value);
         
         switch (DataFormat.is_quoting_required(value)) {
             case DataFormat.Quoting.REQUIRED:
@@ -62,10 +63,38 @@ public abstract class Geary.Imap.StringParameter : Geary.Imap.Parameter {
                 return new UnquotedStringParameter(value);
             
             case DataFormat.Quoting.UNALLOWED:
-                return null;
+                throw new ImapError.NOT_SUPPORTED("String must be a literal parameter");
             
             default:
                 assert_not_reached();
+        }
+    }
+    
+    /**
+     * Like {@link get_best_for} but the library will panic if the value cannot be turned into
+     * a {@link StringParameter}.
+     *
+     * This should ''only'' be used with string constants that are guaranteed 7-bit ASCII.
+     */
+    public static StringParameter get_best_for_unchecked(string value) {
+        try {
+            return get_best_for(value);
+        } catch (ImapError ierr) {
+            error("Unable to create StringParameter for \"%s\": %s", value, ierr.message);
+        }
+    }
+    
+    /**
+     * Like {@link get_best_for} but returns null if the value cannot be stored as a
+     * {@link StringParameter}.
+     *
+     * @see Parameter.get_for_string
+     */
+    public static StringParameter? try_get_best_for(string value) {
+        try {
+            return get_best_for(value);
+        } catch (ImapError ierr) {
+            return null;
         }
     }
     
@@ -75,13 +104,13 @@ public abstract class Geary.Imap.StringParameter : Geary.Imap.Parameter {
      * NOTE: Literal data is not currently supported.
      */
     protected void serialize_string(Serializer ser) throws Error {
-        switch (DataFormat.is_quoting_required(value)) {
+        switch (DataFormat.is_quoting_required(ascii)) {
             case DataFormat.Quoting.REQUIRED:
-                ser.push_quoted_string(value);
+                ser.push_quoted_string(ascii);
             break;
             
             case DataFormat.Quoting.OPTIONAL:
-                ser.push_unquoted_string(value);
+                ser.push_unquoted_string(ascii);
             break;
             
             case DataFormat.Quoting.UNALLOWED:
@@ -93,31 +122,45 @@ public abstract class Geary.Imap.StringParameter : Geary.Imap.Parameter {
     }
     
     /**
+     * Returns the string as a {@link Memory.Buffer}.
+     */
+    public Memory.Buffer as_buffer() {
+        return new Memory.StringBuffer(ascii);
+    }
+    
+    /**
+     * Returns true if the string is empty (zero-length).
+     */
+    public bool is_empty() {
+        return String.is_empty(ascii);
+    }
+    
+    /**
      * Case-sensitive comparison.
      */
     public bool equals_cs(string value) {
-        return Ascii.str_equal(this.value, value);
+        return Ascii.str_equal(ascii, value);
     }
     
     /**
      * Case-insensitive comparison.
      */
     public bool equals_ci(string value) {
-        return Ascii.stri_equal(this.value, value);
+        return Ascii.stri_equal(ascii, value);
     }
     
     /**
      * Returns the string lowercased.
      */
     public string as_lower() {
-        return Ascii.strdown(value);
+        return Ascii.strdown(ascii);
     }
     
     /**
      * Returns the string uppercased.
      */
     public string as_upper() {
-        return Ascii.strup(value);
+        return Ascii.strup(ascii);
     }
     
     /**
@@ -127,7 +170,7 @@ public abstract class Geary.Imap.StringParameter : Geary.Imap.Parameter {
      *. added later.
      */
     public int as_int(int clamp_min = int.MIN, int clamp_max = int.MAX) throws ImapError {
-        return int.parse(value).clamp(clamp_min, clamp_max);
+        return int.parse(ascii).clamp(clamp_min, clamp_max);
     }
     
     /**
@@ -137,7 +180,7 @@ public abstract class Geary.Imap.StringParameter : Geary.Imap.Parameter {
      *. added later.
      */
     public long as_long(int clamp_min = int.MIN, int clamp_max = int.MAX) throws ImapError {
-        return long.parse(value).clamp(clamp_min, clamp_max);
+        return long.parse(ascii).clamp(clamp_min, clamp_max);
     }
     
     /**
@@ -147,7 +190,7 @@ public abstract class Geary.Imap.StringParameter : Geary.Imap.Parameter {
      *. added later.
      */
     public int64 as_int64(int64 clamp_min = int64.MIN, int64 clamp_max = int64.MAX) throws ImapError {
-        return int64.parse(value).clamp(clamp_min, clamp_max);
+        return int64.parse(ascii).clamp(clamp_min, clamp_max);
     }
 }
 

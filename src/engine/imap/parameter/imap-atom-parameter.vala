@@ -26,7 +26,7 @@ public class Geary.Imap.AtomParameter : Geary.Imap.UnquotedStringParameter {
      * {@inheritDoc}
      */
     public override void serialize(Serializer ser, Tag tag) throws Error {
-        ser.push_unquoted_string(value);
+        ser.push_unquoted_string(ascii);
     }
 }
 

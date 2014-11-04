@@ -18,22 +18,22 @@
  */
 
 public class Geary.Imap.UnquotedStringParameter : Geary.Imap.StringParameter {
-    public UnquotedStringParameter(string value) {
-        base (value);
+    public UnquotedStringParameter(string ascii) {
+        base (ascii);
     }
     
     /**
      * {@inheritDoc}
      */
     public override void serialize(Serializer ser, Tag tag) throws Error {
-        ser.push_unquoted_string(value);
+        ser.push_unquoted_string(ascii);
     }
     
     /**
      * {@inheritDoc}
      */
     public override string to_string() {
-        return value;
+        return ascii;
     }
 }
 

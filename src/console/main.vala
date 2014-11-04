@@ -483,7 +483,8 @@ class ImapConsole : Gtk.Window {
         
         Gee.ArrayList<Geary.Imap.FetchDataSpecifier> data_items = new Gee.ArrayList<Geary.Imap.FetchDataSpecifier>();
         for (int ctr = 1; ctr < args.length; ctr++) {
-            Geary.Imap.FetchDataSpecifier data_type = Geary.Imap.FetchDataSpecifier.decode(args[ctr]);
+            Geary.Imap.StringParameter stringp = Geary.Imap.StringParameter.get_best_for(args[ctr]);
+            Geary.Imap.FetchDataSpecifier data_type = Geary.Imap.FetchDataSpecifier.from_parameter(stringp);
             data_items.add(data_type);
         }
         
@@ -578,8 +579,10 @@ class ImapConsole : Gtk.Window {
         status("Status %s".printf(args[0]));
         
         Geary.Imap.StatusDataType[] data_items = new Geary.Imap.StatusDataType[0];
-        for (int ctr = 1; ctr < args.length; ctr++)
-            data_items += Geary.Imap.StatusDataType.decode(args[ctr]);
+        for (int ctr = 1; ctr < args.length; ctr++) {
+            Geary.Imap.StringParameter stringp = Geary.Imap.StringParameter.get_best_for(args[ctr]);
+            data_items += Geary.Imap.StatusDataType.from_parameter(stringp);
+        }
         
         cx.send_async.begin(new Geary.Imap.StatusCommand(new Geary.Imap.MailboxSpecifier(args[0]),
             data_items), null, on_get_status);
