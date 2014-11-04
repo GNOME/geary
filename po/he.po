@@ -17,7 +17,7 @@ msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2014-11-04 23:23+0200\n"
-"PO-Revision-Date: 2014-11-04 23:24+0200\n"
+"PO-Revision-Date: 2014-11-04 23:25+0200\n"
 "Last-Translator: Yosef Or Boczko <yoseforb@gmail.com>\n"
 "Language-Team: עברית <>\n"
 "Language: he\n"
@@ -53,7 +53,6 @@ msgid "Compose Message"
 msgstr "יצירת הודעה"
 
 #: ../desktop/geary-attach.contract.in.h:1
-#, fuzzy
 msgid "Send by email"
 msgstr "שליחה על ידי דוא״ל"
 
