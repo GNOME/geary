@@ -1,3 +1,15 @@
+Geary 0.8.2 - 4 November 2014
+-----------------------------
+
+  * "View Source" creates temp files only readable by user (#724436)
+  * elementary Contractor support (#734717)
+  * Prevent displaying blank window when Geary first starts (#720360, #737811)
+  * Disable SSLv3 (POODLE attack) (#739019)
+  * Fix IMAP problems when running under Turkish locale (#714892)
+  * Don't crash when closing composer (#739141)
+  * Updated translations
+
+
 Geary 0.8.1 - 7 October 2014
 ----------------------------
 
