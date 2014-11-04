@@ -1,3 +1,15 @@
+geary (0.8.2-1~utopic1) utopic; urgency=low
+
+  * "View Source" creates temp files only readable by user (#724436)
+  * elementary Contractor support (#734717)
+  * Prevent displaying blank window when Geary first starts (#720360, #737811)
+  * Disable SSLv3 (POODLE attack) (#739019)
+  * Fix IMAP problems when running under Turkish locale (#714892)
+  * Don't crash when closing composer (#739141)
+  * Updated translations
+
+ -- Jim Nelson <jim@yorba.org>  Tue, 04 Nov 2014 13:38:23 -0800
+
 geary (0.8.1-1~trusty1) trusty; urgency=low
 
   * Display properly-scaled icons under GTK+ 3.14
