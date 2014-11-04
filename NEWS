@@ -52,6 +52,12 @@ Geary 0.7.0 - 18 July 2014
   * Database speed optimizations to reduce lags and improve read times
   * Improved connection retry
   * Various bug fixes
+
+
+Geary 0.6.4 - 4 November 2014
+-----------------------------
+
+  * French documentation added
   * Updated translations
 
 
