@@ -53,6 +53,11 @@ Geary 0.7.0 - 18 July 2014
   * Improved connection retry
   * Various bug fixes
 
+Geary 0.6.5 - 4 November 2014
+-----------------------------
+
+  * Fixed help documentation installation of translated pages
+
 
 Geary 0.6.4 - 4 November 2014
 -----------------------------
