@@ -25,6 +25,7 @@ public class Geary.RFC822.Message : BaseObject {
     public RFC822.MailboxAddresses? to { get; private set; default = null; }
     public RFC822.MailboxAddresses? cc { get; private set; default = null; }
     public RFC822.MailboxAddresses? bcc { get; private set; default = null; }
+    public RFC822.MailboxAddresses? reply_to { get; private set; default = null; }
     public RFC822.MessageIDList? in_reply_to { get; private set; default = null; }
     public RFC822.MessageIDList? references { get; private set; default = null; }
     public RFC822.Subject? subject { get; private set; default = null; }
@@ -117,6 +118,11 @@ public class Geary.RFC822.Message : BaseObject {
             bcc = email.bcc;
             foreach (RFC822.MailboxAddress mailbox in email.bcc)
                 message.add_recipient(GMime.RecipientType.BCC, mailbox.name, mailbox.address);
+        }
+
+        if (email.reply_to != null) {
+            reply_to = email.reply_to;
+            message.set_reply_to(email.reply_to.to_rfc822_string());
         }
 
         if (email.in_reply_to != null) {

@@ -21,6 +21,7 @@ public class Geary.ComposedEmail : BaseObject {
     public RFC822.MailboxAddresses? to { get; set; default = null; }
     public RFC822.MailboxAddresses? cc { get; set; default = null; }
     public RFC822.MailboxAddresses? bcc { get; set; default = null; }
+    public RFC822.MailboxAddresses? reply_to { get; set; default = null; }
     public string? in_reply_to { get; set; default = null; }
     public Geary.Email? reply_to_email { get; set; default = null; }
     public string? references { get; set; default = null; }

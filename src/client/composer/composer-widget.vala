@@ -48,6 +48,7 @@ public class ComposerWidget : Gtk.EventBox {
     public const string ACTION_COLOR = "color";
     public const string ACTION_INSERT_LINK = "insertlink";
     public const string ACTION_COMPOSE_AS_HTML = "compose as html";
+    public const string ACTION_SHOW_EXTENDED = "show extended";
     public const string ACTION_CLOSE = "close";
     public const string ACTION_DETACH = "detach";
     public const string ACTION_SEND = "send";
@@ -139,6 +140,11 @@ public class ComposerWidget : Gtk.EventBox {
         get { return bcc_entry.get_text(); }
         set { bcc_entry.set_text(value); }
     }
+
+    public string reply_to {
+        get { return reply_to_entry.get_text(); }
+        set { reply_to_entry.set_text(value); }
+    }
     
     public string in_reply_to { get; set; }
     public string references { get; set; }
@@ -160,6 +166,11 @@ public class ComposerWidget : Gtk.EventBox {
         get { return ((Gtk.ToggleAction) actions.get_action(ACTION_COMPOSE_AS_HTML)).active; }
         set { ((Gtk.ToggleAction) actions.get_action(ACTION_COMPOSE_AS_HTML)).active = value; }
     }
+
+    public bool show_extended {
+        get { return ((Gtk.ToggleAction) actions.get_action(ACTION_SHOW_EXTENDED)).active; }
+        set { ((Gtk.ToggleAction) actions.get_action(ACTION_SHOW_EXTENDED)).active = value; }
+    }
     
     public ComposerState state { get; set; }
     
@@ -169,7 +180,7 @@ public class ComposerWidget : Gtk.EventBox {
     
     public bool blank {
         get {
-            return to_entry.empty && cc_entry.empty && bcc_entry.empty &&
+            return to_entry.empty && cc_entry.empty && bcc_entry.empty && reply_to_entry.empty &&
                 subject_entry.buffer.length == 0 && !editor.can_undo() && attachment_files.size == 0;
         }
     }
@@ -190,7 +201,10 @@ public class ComposerWidget : Gtk.EventBox {
     private Gtk.ComboBoxText from_multiple = new Gtk.ComboBoxText();
     private EmailEntry to_entry;
     private EmailEntry cc_entry;
+    private Gtk.Label bcc_label;
     private EmailEntry bcc_entry;
+    private Gtk.Label reply_to_label;
+    private EmailEntry reply_to_entry;
     public Gtk.Entry subject_entry;
     private Gtk.Label message_overlay_label;
     private Gtk.Box attachments_box;
@@ -209,6 +223,7 @@ public class ComposerWidget : Gtk.EventBox {
     private Gtk.MenuItem color_item;
     private Gtk.MenuItem html_item;
     private Gtk.MenuItem html_item2;
+    private Gtk.MenuItem extended_item;
     
     private Gtk.ActionGroup actions;
     private string? hover_url = null;
@@ -288,13 +303,19 @@ public class ComposerWidget : Gtk.EventBox {
         (builder.get_object("cc") as Gtk.EventBox).add(cc_entry);
         bcc_entry = new EmailEntry(this);
         (builder.get_object("bcc") as Gtk.EventBox).add(bcc_entry);
+        reply_to_entry = new EmailEntry(this);
+        (builder.get_object("reply to") as Gtk.EventBox).add(reply_to_entry);
         
         Gtk.Label to_label = (Gtk.Label) builder.get_object("to label");
         Gtk.Label cc_label = (Gtk.Label) builder.get_object("cc label");
-        Gtk.Label bcc_label = (Gtk.Label) builder.get_object("bcc label");
+        bcc_label = (Gtk.Label) builder.get_object("bcc label");
+        reply_to_label = (Gtk.Label) builder.get_object("reply to label");
         to_label.set_mnemonic_widget(to_entry);
         cc_label.set_mnemonic_widget(cc_entry);
         bcc_label.set_mnemonic_widget(bcc_entry);
+        reply_to_label.set_mnemonic_widget(reply_to_entry);
+
+        to_entry.margin_top = cc_entry.margin_top = bcc_entry.margin_top = reply_to_entry.margin_top = 6;
         
         // TODO: It would be nicer to set the completions inside the EmailEntry constructor. But in
         // testing, this can cause non-deterministic segfaults. Investigate why, and fix if possible.
@@ -332,6 +353,7 @@ public class ComposerWidget : Gtk.EventBox {
         to_entry.changed.connect(validate_send_button);
         cc_entry.changed.connect(validate_send_button);
         bcc_entry.changed.connect(validate_send_button);
+        reply_to_entry.changed.connect(validate_send_button);
         
         if (get_direction () == Gtk.TextDirection.RTL) {
             actions.get_action(ACTION_INDENT).icon_name = "format-indent-more-rtl-symbolic";
@@ -362,6 +384,7 @@ public class ComposerWidget : Gtk.EventBox {
         
         actions.get_action(ACTION_REMOVE_FORMAT).activate.connect(on_remove_format);
         actions.get_action(ACTION_COMPOSE_AS_HTML).activate.connect(on_compose_as_html);
+        actions.get_action(ACTION_SHOW_EXTENDED).activate.connect(on_show_extended);
         
         actions.get_action(ACTION_INDENT).activate.connect(on_indent);
         actions.get_action(ACTION_OUTDENT).activate.connect(on_action);
@@ -506,6 +529,8 @@ public class ComposerWidget : Gtk.EventBox {
         color_item.related_action = ui.get_action("ui/color");
         html_item = new Gtk.CheckMenuItem();
         html_item.related_action = ui.get_action("ui/htmlcompose");
+        extended_item = new Gtk.CheckMenuItem();
+        extended_item.related_action = ui.get_action("ui/extended");
         
         html_item2 = new Gtk.CheckMenuItem();
         html_item2.related_action = ui.get_action("ui/htmlcompose");
@@ -635,6 +660,7 @@ public class ComposerWidget : Gtk.EventBox {
 
         bind_event(editor,"a", "click", (Callback) on_link_clicked, this);
         update_actions();
+        on_show_extended();
     }
     
     // Glade only allows one accelerator per-action. This method adds extra accelerators not defined
@@ -736,6 +762,9 @@ public class ComposerWidget : Gtk.EventBox {
         
         if (bcc_entry.addresses != null)
             email.bcc = bcc_entry.addresses;
+
+        if (reply_to_entry.addresses != null)
+            email.reply_to = reply_to_entry.addresses;
         
         if (!Geary.String.is_empty(in_reply_to))
             email.in_reply_to = in_reply_to;
@@ -1306,6 +1335,9 @@ public class ComposerWidget : Gtk.EventBox {
             if (bcc_entry.addresses != null)
                 foreach(Geary.RFC822.MailboxAddress addr in bcc_entry.addresses)
                     tooltip.append(_("Bcc: ") + addr.get_full_address() + "\n");
+            if (reply_to_entry.addresses != null)
+                foreach(Geary.RFC822.MailboxAddress addr in reply_to_entry.addresses)
+                    tooltip.append(_("Reply-To: ") + addr.get_full_address() + "\n");
             header.set_recipients(label, tooltip.str.slice(0, -1));  // Remove trailing \n
         }
         
@@ -1453,6 +1485,16 @@ public class ComposerWidget : Gtk.EventBox {
         }
         GearyApplication.instance.config.compose_as_html = compose_as_html;
     }
+
+    private void on_show_extended() {
+        if (!show_extended) {
+            bcc_label.visible = bcc_entry.visible = reply_to_label.visible = reply_to_entry.visible = false;
+        } else {
+            if (state == ComposerState.INLINE_COMPACT)
+                state = ComposerState.INLINE;
+            bcc_label.visible = bcc_entry.visible = reply_to_label.visible = reply_to_entry.visible = true;
+        }
+    }
     
     private void toggle_toolbar_buttons(bool show) {
         actions.get_action(ACTION_BOLD).visible =
@@ -1467,6 +1509,9 @@ public class ComposerWidget : Gtk.EventBox {
         GtkUtil.clear_menu(menu);
         
         menu.append(html_item2);
+
+        menu.append(new Gtk.SeparatorMenuItem());
+        menu.append(extended_item);
         menu.show_all();
     }
     
@@ -1487,6 +1532,9 @@ public class ComposerWidget : Gtk.EventBox {
         menu.append(new Gtk.SeparatorMenuItem());
         
         menu.append(html_item);
+
+        menu.append(new Gtk.SeparatorMenuItem());
+        menu.append(extended_item);
         menu.show_all(); // Call this or only menu items associated with actions will be displayed.
     }
     
@@ -2048,6 +2096,7 @@ public class ComposerWidget : Gtk.EventBox {
         to_entry.completion = new ContactEntryCompletion(contact_list_store);
         cc_entry.completion = new ContactEntryCompletion(contact_list_store);
         bcc_entry.completion = new ContactEntryCompletion(contact_list_store);
+        reply_to_entry.completion = new ContactEntryCompletion(contact_list_store);
     }
     
 }
