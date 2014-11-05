@@ -14,7 +14,7 @@
  * @see ListCommand
  */
 
-public class Geary.Imap.MailboxInformation : Object {
+public class Geary.Imap.MailboxInformation : BaseObject {
     /**
      * Name of the mailbox.
      */
@@ -93,6 +93,10 @@ public class Geary.Imap.MailboxInformation : Object {
      */
     public Geary.FolderPath get_path(MailboxSpecifier? inbox_specifier) {
         return mailbox.to_folder_path(delim, inbox_specifier);
+    }
+    
+    public string to_string() {
+        return "%s/%s".printf(mailbox.to_string(), attrs.to_string());
     }
 }
 

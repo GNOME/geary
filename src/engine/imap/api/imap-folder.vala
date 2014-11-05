@@ -72,7 +72,14 @@ private class Geary.Imap.Folder : BaseObject {
     public signal void disconnected(ClientSession.DisconnectReason reason);
     
     internal Folder(FolderPath path, ClientSessionManager session_mgr, StatusData status, MailboxInformation info) {
-        assert(status.mailbox.equal_to(info.mailbox));
+        // Used to assert() here, but that meant that any issue with internationalization/encoding
+        // made Geary unusable for a subset of servers accessed/configured in a non-English language...
+        // this is not the end of the world, but it does suggest an I18N issue, potentially with
+        // how XLIST returns folder names on different servers.
+        if (!status.mailbox.equal_to(info.mailbox)) {
+            message("%s: IMAP folder created with differing mailbox names (STATUS=%s LIST=%s)",
+                path.to_string(), status.to_string(), info.to_string());
+        }
         
         this.session_mgr = session_mgr;
         this.info = info;
