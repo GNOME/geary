@@ -8,13 +8,13 @@ public class Geary.Imap.ClientSession : BaseObject {
     // 30 min keepalive required to maintain session
     public const uint MIN_KEEPALIVE_SEC = 30 * 60;
     
-    // 5 minutes is more realistic, as underlying sockets will not necessarily report errors if
+    // 10 minutes is more realistic, as underlying sockets will not necessarily report errors if
     // physical connection is lost
-    public const uint RECOMMENDED_KEEPALIVE_SEC = 5 * 60;
+    public const uint RECOMMENDED_KEEPALIVE_SEC = 10 * 60;
     
     // A more aggressive keepalive will detect when a connection has died, thereby giving the client
     // a chance to reestablish a connection without long lags.
-    public const uint AGGRESSIVE_KEEPALIVE_SEC = 30;
+    public const uint AGGRESSIVE_KEEPALIVE_SEC = 5 * 60;
     
     // NOOP is only sent after this amount of time has passed since the last received
     // message on the connection dependent on connection state (selected/examined vs. authorized)
@@ -22,7 +22,7 @@ public class Geary.Imap.ClientSession : BaseObject {
     public const uint DEFAULT_UNSELECTED_KEEPALIVE_SEC = RECOMMENDED_KEEPALIVE_SEC;
     public const uint DEFAULT_SELECTED_WITH_IDLE_KEEPALIVE_SEC = AGGRESSIVE_KEEPALIVE_SEC;
     
-    private const int GREETING_TIMEOUT_SEC = 30;
+    private const uint GREETING_TIMEOUT_SEC = ClientConnection.DEFAULT_COMMAND_TIMEOUT_SEC;
     
     public enum Context {
         UNCONNECTED,
@@ -634,7 +634,7 @@ public class Geary.Imap.ClientSession : BaseObject {
         
         debug("[%s] Connect timed-out", to_string());
         
-        connect_err = new IOError.TIMED_OUT("Session greeting not seen in %d seconds",
+        connect_err = new IOError.TIMED_OUT("Session greeting not seen in %u seconds",
             GREETING_TIMEOUT_SEC);
         
         return State.LOGGED_OUT;

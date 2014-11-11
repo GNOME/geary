@@ -28,7 +28,7 @@ public class Geary.Imap.ClientConnection : BaseObject {
      *
      * @see command_timeout_sec
      */
-    public const uint DEFAULT_COMMAND_TIMEOUT_SEC = 15;
+    public const uint DEFAULT_COMMAND_TIMEOUT_SEC = 30;
     
     private const int FLUSH_TIMEOUT_MSEC = 10;
     
