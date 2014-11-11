@@ -112,7 +112,7 @@ public class ComposerWidget : Gtk.EventBox {
         </body></html>""";
     private const string CURSOR = "<span id=\"cursormarker\"></span>";
     
-    private const int DRAFT_TIMEOUT_MSEC = 2000; // 2 seconds
+    private const int DRAFT_TIMEOUT_SEC = 10;
     
     public const string ATTACHMENT_KEYWORDS_SUFFIX = ".doc|.pdf|.xls|.ppt|.rtf|.pps";
     
@@ -1912,7 +1912,7 @@ public class ComposerWidget : Gtk.EventBox {
         cancel_draft_timer();
         
         if (drafts_folder != null)
-            draft_save_timeout_id = Timeout.add(DRAFT_TIMEOUT_MSEC, on_save_draft_timeout);
+            draft_save_timeout_id = Timeout.add_seconds(DRAFT_TIMEOUT_SEC, on_save_draft_timeout);
     }
     
     // Cancels the draft save timeout
