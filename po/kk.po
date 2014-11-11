@@ -9,7 +9,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=general\n"
 "POT-Creation-Date: 2014-11-10 19:20+0000\n"
-"PO-Revision-Date: 2014-11-11 12:16+0600\n"
+"PO-Revision-Date: 2014-11-11 14:38+0600\n"
 "Last-Translator: Baurzhan Muftakhidinov <baurthefirst@gmail.com>\n"
 "Language-Team: Kazakh <kk_KZ@googlegroups.com>\n"
 "MIME-Version: 1.0\n"
@@ -186,7 +186,7 @@ msgstr "Сөйлесулерді бақылауды журналдау"
 
 #: ../src/client/application/geary-args.vala:13
 msgid "Log network deserialization"
-msgstr ""
+msgstr "Желілік десериализациясын журналдау"
 
 #: ../src/client/application/geary-args.vala:14
 msgid "Log network activity"
@@ -197,18 +197,18 @@ msgstr "Желілік белсенділікті журналдау"
 #. / It could also be called the IMAP events queue.
 #: ../src/client/application/geary-args.vala:17
 msgid "Log IMAP replay queue"
-msgstr ""
+msgstr "IMAP қайта ойнату тізбегін журналдау"
 
 #. / Serialization is how commands and responses are converted into a stream
 #. of bytes for
 #. / network transmission
 #: ../src/client/application/geary-args.vala:20
 msgid "Log network serialization"
-msgstr ""
+msgstr "Желілік сериализациясын журналдау"
 
 #: ../src/client/application/geary-args.vala:21
 msgid "Log periodic activity"
-msgstr ""
+msgstr "Мезгіл-мезгіл белсенділікті журналдау"
 
 #: ../src/client/application/geary-args.vala:22
 msgid "Log database queries (generates lots of messages)"
@@ -470,7 +470,7 @@ msgid ""
 "will stay in your Outbox folder until you delete it."
 msgstr ""
 "Geary жіберілген хатты Жіберілген хаттар бумасына сақтау кезінде қате орын "
-"алды. Бұл хат сіз оны қолмен өшірілгенге дейін Шығыс бумасыда қала береді."
+"алды. Бұл хат сіз оны қолмен өшірілгенге дейін Шығыс бумасында қала береді."
 
 #: ../src/client/application/geary-controller.vala:1016
 msgid "Labels"
@@ -499,6 +499,16 @@ msgid ""
 "Rebuilding the database will destroy all local email and its attachments. "
 "<b>The mail on the your server will not be affected.</b>"
 msgstr ""
+"Бұл тіркелгі үшін жергілікті пошта дерекқорын ашқанда қате орын алды. Бұл "
+"осы бумадағы дерекқор файлының зақымдалуынан болуы мүмкін:\n"
+"\n"
+"%s\n"
+"\n"
+"Geary дерекқорды қайта құрастырып, сервермен синхрондай алады, немесе өз "
+"жұмысын аяқтай алады.\n"
+"\n"
+"Дерекқорды қайта құрастыру барлық жергілікті пошта хаттар және салынымдарын "
+"жояды. <b>Сервердегі поштаға әсері болмайды.</b>"
 
 #: ../src/client/application/geary-controller.vala:1031
 msgid "_Rebuild"
@@ -545,6 +555,13 @@ msgid ""
 "\n"
 "%s"
 msgstr ""
+"Бұл тіркелгі үшін жергілікті пошта дерекқорын ашқанда қате орын алды. Бұл "
+"файлға қатынау рұқсаттары мәселесінен болуы мүмкін.\n"
+"\n"
+"Келесі бумадағы барлық файлдарға сізде оқу/жазу рұқсаттардың барлығы бар "
+"екенін тексеріңіз:\n"
+"\n"
+"%s"
 
 #: ../src/client/application/geary-controller.vala:1074
 msgid ""
@@ -554,6 +571,12 @@ msgid ""
 "\n"
 "Please install the latest version of Geary and try again."
 msgstr ""
+"Жергілікті пошта дерекқоры нұсқасының нөмірі оның Geary қолданбасының "
+"жаңалау нұсқасы үшін пішімделгенін көрсетеді. Өкінішке орай, дерекқорды "
+"Geary-дың бұл нұсқасымен жұмыс істейтіндей етіп нұсқасын \"кері айналдыру\" "
+"мүмкін емес.\n"
+"\n"
+"Geary қолданбасының соңғы нұсқасын орнатып, қайталап көріңіз."
 
 #: ../src/client/application/geary-controller.vala:1085
 msgid ""
@@ -562,6 +585,10 @@ msgid ""
 "\n"
 "Please check your network connection and restart Geary."
 msgstr ""
+"Жергілікті тіркелгіні ашу кезінде қате орын алды. Бұл байланысу мәселелері "
+"салдарынан болуы мүмкін.\n"
+"\n"
+"Желілік байланысыңызды тексеріп, Geary қолданбасын қайта іске қосыңыз."
 
 #: ../src/client/application/geary-controller.vala:1592
 #, c-format
@@ -1148,7 +1175,7 @@ msgstr "%s - жаңа хаттар"
 #, c-format
 msgid "%d new message"
 msgid_plural "%d new messages"
-msgstr[0] "%d жаңа хабарлама"
+msgstr[0] "%d жаңа хат"
 
 #: ../src/client/notification/libnotify.vala:75
 #, c-format
@@ -1166,7 +1193,7 @@ msgid_plural ""
 "(%d other new messages for %s)"
 msgstr[0] ""
 "%s\n"
-"(%d басқа жаңа хабарлама %s үшін)"
+"(%d басқа жаңа хат, %s үшін)"
 
 #: ../src/client/notification/libnotify.vala:160
 msgid "Open"
@@ -1177,7 +1204,7 @@ msgstr "Ашу"
 #. format
 #: ../src/client/util/util-date.vala:68
 msgid "%l:%M %P"
-msgstr "%l:%M %P"
+msgstr "%H:%M"
 
 #. / Datetime format for 24-hour time, i.e. 16:35
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
@@ -1192,7 +1219,7 @@ msgstr "%H:%M"
 #: ../src/client/util/util-date.vala:74
 msgctxt "Default clock format"
 msgid "%l:%M %P"
-msgstr "%l:%M %P"
+msgstr "%H:%M"
 
 #. / Date format for dates within the current year, i.e. Nov 8
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
@@ -1214,7 +1241,7 @@ msgstr "%x"
 #. format
 #: ../src/client/util/util-date.vala:88
 msgid "%B %-e, %Y %-l:%M %P"
-msgstr "%B %-e, %Y %-l:%M %P"
+msgstr "%B %-e, %Y %H:%M"
 
 #. / Verbose datetime format for 24-hour time, i.e. November 8, 2010 16:35
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-
@@ -1229,7 +1256,7 @@ msgstr "%B %-e, %Y %-H:%M"
 #: ../src/client/util/util-date.vala:94
 msgctxt "Default full date"
 msgid "%B %-e, %Y %-l:%M %P"
-msgstr "%B %-e, %Y %-l:%M %P"
+msgstr "%B %-e, %Y %H:%M"
 
 #: ../src/client/util/util-date.vala:164
 msgid "Now"
@@ -1468,7 +1495,7 @@ msgstr "Қоқыс | Қоқыс шелегі | Корзина | Trash | Rubbish 
 #. format
 #: ../src/engine/rfc822/rfc822-utils.vala:168
 msgid "%a, %b %-e, %Y at %-l:%M %p"
-msgstr "%a, %b %-e, %Y at %-l:%M %p"
+msgstr "%a, %b %-e, %Y күні, уақыты %H:%M"
 
 #. / The quoted header for a message being replied to.
 #. / %1$s will be substituted for the date, and %2$s will be substituted for
@@ -1476,7 +1503,7 @@ msgstr "%a, %b %-e, %Y at %-l:%M %p"
 #: ../src/engine/rfc822/rfc822-utils.vala:174
 #, c-format
 msgid "On %1$s, %2$s wrote:"
-msgstr "%1$s күні, %2$s жазған:"
+msgstr "%1$s, %2$s жазған:"
 
 #. / The quoted header for a message being replied to (in case the date is not
 #. known).
@@ -1492,7 +1519,7 @@ msgstr "%s жазған:"
 #: ../src/engine/rfc822/rfc822-utils.vala:187
 #, c-format
 msgid "On %s:"
-msgstr "%s күні:"
+msgstr "%s:"
 
 #: ../src/engine/rfc822/rfc822-utils.vala:216
 msgid "---------- Forwarded message ----------"
@@ -1873,7 +1900,7 @@ msgstr "_Шифрлеу"
 
 #: ../ui/login.glade.h:24
 msgid "Encrypt_ion"
-msgstr "_Шифрлеу"
+msgstr "Ш_ифрлеу"
 
 #: ../ui/login.glade.h:26
 msgid "SSL/TLS"
