@@ -139,11 +139,33 @@ public class MainWindow : Gtk.ApplicationWindow {
         Gtk.CssProvider provider = new Gtk.CssProvider();
         Gtk.StyleContext.add_provider_for_screen(Gdk.Display.get_default().get_default_screen(),
             provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
+        string css = """
+            .folder_frame {
+                border-left-width: 0px;
+                border-top-width: 0px;
+            }
+            .conversation_frame {
+                border-top-width: 0px;
+                border-bottom-width: 0px;
+            }
+            GtkBox GtkHeaderBar {
+                  border-radius: 0px;
+              }
+        """;
+        
+        if(Gtk.MAJOR_VERSION >= 3 && Gtk.MINOR_VERSION >= 14) {
+            css += """
+                  .folder_frame {
+                      border-right-width: 0px;
+                  }
+                  .conversation_frame {
+                      border-width: 0px;
+                  }
+            """;
+        }
+
         try {
-            provider.load_from_data("""
-                GtkBox GtkHeaderBar {
-                    border-radius: 0px;
-                }""", -1);
+            provider.load_from_data(css, -1);
         } catch (Error error) {
             debug("Could not load styling from data: %s", error.message);
         }
@@ -159,6 +181,7 @@ public class MainWindow : Gtk.ApplicationWindow {
         folder_list_scrolled.add(folder_list);
         Gtk.Frame folder_frame = new Gtk.Frame(null);
         folder_frame.shadow_type = Gtk.ShadowType.IN;
+        folder_frame.get_style_context ().add_class ("folder_frame");
         folder_frame.add(folder_list_scrolled);
         
         // message list
@@ -168,6 +191,7 @@ public class MainWindow : Gtk.ApplicationWindow {
         conversation_list_scrolled.add(conversation_list_view);
         Gtk.Frame conversation_frame = new Gtk.Frame(null);
         conversation_frame.shadow_type = Gtk.ShadowType.IN;
+        conversation_frame.get_style_context ().add_class ("conversation_frame");
         conversation_frame.add(conversation_list_scrolled);
         
         // Three-pane display.
