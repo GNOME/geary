@@ -633,9 +633,6 @@ public class Geary.Imap.ClientConnection : BaseObject {
     }
     
     private async void do_flush_async() {
-        // need to signal when the IDLE command is sent, for completeness
-        IdleCommand? idle_cmd = null;
-        
         // Like send_async(), need to use mutex when flushing as Serializer must be accessed in
         // serialized fashion
         //
@@ -714,7 +711,7 @@ public class Geary.Imap.ClientConnection : BaseObject {
             // as connection is "quiet" (haven't seen new command in n msec), go into IDLE state
             // if (a) allowed by owner, (b) allowed by state machine, and (c) no commands outstanding
             if (ser != null && idle_when_quiet && outstanding_cmds == 0 && issue_conditional_event(Event.SEND_IDLE)) {
-                idle_cmd = new IdleCommand();
+                IdleCommand idle_cmd = new IdleCommand();
                 idle_cmd.assign_tag(generate_tag());
                 
                 // store IDLE tag to watch for response later (many responses could arrive before it)
@@ -733,7 +730,6 @@ public class Geary.Imap.ClientConnection : BaseObject {
                 assert(synchronize_tag == null);
             }
         } catch (Error err) {
-            idle_cmd = null;
             send_failure(err);
         } finally {
             if (token != Nonblocking.Mutex.INVALID_TOKEN) {
@@ -744,9 +740,6 @@ public class Geary.Imap.ClientConnection : BaseObject {
                 }
             }
         }
-        
-        if (idle_cmd != null)
-            sent_command(idle_cmd);
     }
     
     private void check_for_connection() throws Error {
