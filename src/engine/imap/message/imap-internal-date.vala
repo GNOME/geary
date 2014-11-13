@@ -107,7 +107,7 @@ public class Geary.Imap.InternalDate : Geary.MessageData.AbstractMessageData, Ge
      * @see serialize_for_search
      */
     public Parameter to_search_parameter() {
-        return Parameter.get_for_string(serialize());
+        return Parameter.get_for_string(serialize_for_search());
     }
     
     /**
