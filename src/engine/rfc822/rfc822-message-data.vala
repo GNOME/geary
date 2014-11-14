@@ -139,8 +139,8 @@ public class Geary.RFC822.MessageIDList : Geary.MessageData.AbstractMessageData,
         if (!String.is_empty(canonicalized.str))
             list.add(new MessageID(canonicalized.str));
         
-        if (!String.is_empty(value))
-            assert(list.size > 0);
+        // don't assert that list.size > 0; even though this method should generated a decoded ID
+        // from any non-empty string, an empty Message-ID (i.e. "<>") won't.
     }
     
     public override string to_string() {
