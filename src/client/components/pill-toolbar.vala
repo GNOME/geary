@@ -56,10 +56,9 @@ public interface PillBar : Gtk.Container {
         }
         
         // Unity buttons are a bit tight
-#if ENABLE_UNITY
-        if (b.image != null)
+        if (GearyApplication.instance.is_running_unity && b.image != null)
             b.image.margin = b.image.margin + 4;
-#endif
+        
         b.always_show_image = true;
         
         if (!show_label)

@@ -16,21 +16,20 @@ public class ComposerWindow : Gtk.Window, ComposerContainer {
         
         add(composer);
         composer.subject_entry.changed.connect(() => {
-#if ENABLE_UNITY
-            title
-#else
-            composer.header.title
-#endif
-                = Geary.String.is_empty(composer.subject_entry.text.strip()) ? DEFAULT_TITLE :
-                composer.subject_entry.text.strip();
+            string new_title = Geary.String.is_empty_or_whitespace(composer.subject_entry.text)
+                ? DEFAULT_TITLE : composer.subject_entry.text.strip();
+            if (GearyApplication.instance.is_running_unity)
+                title = new_title;
+            else
+                composer.header.title = new_title;
         });
         composer.subject_entry.changed();
         
-#if !ENABLE_UNITY
-        composer.header.show_close_button = true;
-        composer.header.parent.remove(composer.header);
-        set_titlebar(composer.header);
-#endif
+        if (!GearyApplication.instance.is_running_unity) {
+            composer.header.show_close_button = true;
+            composer.header.parent.remove(composer.header);
+            set_titlebar(composer.header);
+        }
         
         add_accel_group(composer.ui.get_accel_group());
         show();

@@ -80,6 +80,11 @@ public class GearyApplication : Gtk.Application {
     
     public Configuration config { get; private set; }
     
+    /**
+     * Indicates application is running under Ubuntu's Unity shell.
+     */
+    public bool is_running_unity { get; private set; }
+    
     private static GearyApplication _instance = null;
     
     private string bin;
@@ -92,6 +97,8 @@ public class GearyApplication : Gtk.Application {
         Object(application_id: APP_ID);
         
         _instance = this;
+        
+        is_running_unity = Geary.String.stri_equal(Environment.get_variable("XDG_CURRENT_DESKTOP"), "Unity");
     }
     
     // Application.run() calls this as an entry point.

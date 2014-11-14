@@ -13,7 +13,7 @@
 	dh $@ --parallel
 
 override_dh_auto_configure:
-	./configure --prefix=/usr --enable-unity
+	./configure --prefix=/usr
 
 override_dh_strip:
 	dh_strip --dbg-package=geary-dbg

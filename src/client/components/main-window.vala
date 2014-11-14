@@ -78,10 +78,10 @@ public class MainWindow : Gtk.ApplicationWindow {
         
         // Toolbar.
         main_toolbar = new MainToolbar();
-#if !ENABLE_UNITY
-        main_toolbar.show_close_button = true;
-        set_titlebar(main_toolbar);
-#endif
+        if (!GearyApplication.instance.is_running_unity) {
+            main_toolbar.show_close_button = true;
+            set_titlebar(main_toolbar);
+        }
         
         set_styling();
         create_layout();
@@ -218,9 +218,9 @@ public class MainWindow : Gtk.ApplicationWindow {
         folder_paned.pack1(status_bar_box, false, false);
         folder_paned.pack2(conversations_paned, true, false);
         
-#if ENABLE_UNITY
-        main_layout.pack_start(main_toolbar, false, true, 0);
-#endif
+        if (GearyApplication.instance.is_running_unity)
+            main_layout.pack_start(main_toolbar, false, true, 0);
+        
         main_layout.pack_end(folder_paned, true, true, 0);
         
         add(main_layout);
