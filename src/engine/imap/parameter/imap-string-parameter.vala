@@ -52,7 +52,7 @@ public abstract class Geary.Imap.StringParameter : Geary.Imap.Parameter {
      * @see Parameter.get_for_string
      */
     public static StringParameter get_best_for(string value) throws ImapError {
-        if (NumberParameter.is_numeric(value, null))
+        if (NumberParameter.is_ascii_numeric(value, null))
             return new NumberParameter.from_ascii(value);
         
         switch (DataFormat.is_quoting_required(value)) {
@@ -164,32 +164,28 @@ public abstract class Geary.Imap.StringParameter : Geary.Imap.Parameter {
     }
     
     /**
-     * Converts the {@link value} to an int, clamped between clamp_min and clamp_max.
+     * Converts the {@link value} to a signed 32-bit integer, clamped between clamp_min and clamp_max.
      *
-     * TODO: This does not check that the value is a properly-formed integer.  This should be
-     *. added later.
+     * ImapError.INVALID is thrown if the {@link StringParameter} contains non-numeric values.  No
+     * error is thrown if the numeric value is outside the clamped range.
      */
-    public int as_int(int clamp_min = int.MIN, int clamp_max = int.MAX) throws ImapError {
-        return int.parse(ascii).clamp(clamp_min, clamp_max);
+    public int32 as_int32(int32 clamp_min = int32.MIN, int32 clamp_max = int32.MAX) throws ImapError {
+        if (!NumberParameter.is_ascii_numeric(ascii, null))
+            throw new ImapError.INVALID("Cannot convert \"%s\" to int32: not numeric", ascii);
+        
+        return (int32) int64.parse(ascii).clamp(clamp_min, clamp_max);
     }
     
     /**
-     * Converts the {@link value} to a long integer, clamped between clamp_min and clamp_max.
+     * Converts the {@link value} to a signed 64-bit integer, clamped between clamp_min and clamp_max.
      *
-     * TODO: This does not check that the value is a properly-formed long integer.  This should be
-     *. added later.
-     */
-    public long as_long(int clamp_min = int.MIN, int clamp_max = int.MAX) throws ImapError {
-        return long.parse(ascii).clamp(clamp_min, clamp_max);
-    }
-    
-    /**
-     * Converts the {@link value} to a 64-bit integer, clamped between clamp_min and clamp_max.
-     *
-     * TODO: This does not check that the value is a properly-formed 64-bit integer.  This should be
-     *. added later.
+     * ImapError.INVALID is thrown if the {@link StringParameter} contains non-numeric values.  No
+     * error is thrown if the numeric value is outside the clamped range.
      */
     public int64 as_int64(int64 clamp_min = int64.MIN, int64 clamp_max = int64.MAX) throws ImapError {
+        if (!NumberParameter.is_ascii_numeric(ascii, null))
+            throw new ImapError.INVALID("Cannot convert \"%s\" to int64: not numeric", ascii);
+        
         return int64.parse(ascii).clamp(clamp_min, clamp_max);
     }
 }

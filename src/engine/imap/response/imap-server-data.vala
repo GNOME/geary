@@ -79,7 +79,7 @@ public class Geary.Imap.ServerData : ServerResponse {
         if (server_data_type != ServerDataType.EXISTS)
             throw new ImapError.INVALID("Not EXISTS data: %s", to_string());
         
-        return get_as_string(1).as_int(0);
+        return get_as_string(1).as_int32(0);
     }
     
     /**
@@ -91,7 +91,7 @@ public class Geary.Imap.ServerData : ServerResponse {
         if (server_data_type != ServerDataType.EXPUNGE)
             throw new ImapError.INVALID("Not EXPUNGE data: %s", to_string());
         
-        return new SequenceNumber(get_as_string(1).as_int());
+        return new SequenceNumber.checked(get_as_string(1).as_int64());
     }
     
     /**
@@ -139,24 +139,24 @@ public class Geary.Imap.ServerData : ServerResponse {
         if (server_data_type != ServerDataType.RECENT)
             throw new ImapError.INVALID("Not RECENT data: %s", to_string());
         
-        return get_as_string(1).as_int(0);
+        return get_as_string(1).as_int32(0);
     }
     
     /**
-     * Parses the {@link ServerData} into a {@link ServerDataType.RECENT} value, if possible.
+     * Parses the {@link ServerData} into a {@link ServerDataType.SEARCH} value, if possible.
      *
-     * @throws ImapError.INVALID if not a {@link ServerDataType.RECENT} value.
+     * @throws ImapError.INVALID if not a {@link ServerDataType.SEARCH} value.
      */
-    public Gee.List<int> get_search() throws ImapError {
+    public Gee.List<int64?> get_search() throws ImapError {
         if (server_data_type != ServerDataType.SEARCH)
             throw new ImapError.INVALID("Not SEARCH data: %s", to_string());
         
-        Gee.List<int> results = new Gee.ArrayList<int>();
+        Gee.List<int64?> results = new Gee.ArrayList<int64?>();
         for (int ctr = 2; ctr < size; ctr++) {
             // can't directly return the result from as_int() into results as a Vala bug causes a
             // build policy violation for uncast int -> pointer on 64-bit architectures:
             // https://bugzilla.gnome.org/show_bug.cgi?id=720437
-            int result = get_as_string(ctr).as_int(0);
+            int64 result = get_as_string(ctr).as_int64(0);
             results.add(result);
         }
         

@@ -1017,8 +1017,8 @@ private class Geary.ImapEngine.MinimalFolder : Geary.AbstractFolder, Geary.Folde
     
     // This MUST only be called from ReplayRemoval.
     internal async void do_replay_removed_message(int reported_remote_count, Imap.SequenceNumber remote_position) {
-        debug("%s do_replay_removed_message: current remote_count=%d remote_position=%d reported_remote_count=%d",
-            to_string(), remote_count, remote_position.value, reported_remote_count);
+        debug("%s do_replay_removed_message: current remote_count=%d remote_position=%s reported_remote_count=%d",
+            to_string(), remote_count, remote_position.value.to_string(), reported_remote_count);
         
         if (!remote_position.is_valid()) {
             debug("%s do_replay_removed_message: ignoring, invalid remote position or count",
@@ -1028,7 +1028,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.AbstractFolder, Geary.Folde
         }
         
         int local_count = -1;
-        int local_position = -1;
+        int64 local_position = -1;
         
         ImapDB.EmailIdentifier? owned_id = null;
         try {
@@ -1041,13 +1041,13 @@ private class Geary.ImapEngine.MinimalFolder : Geary.AbstractFolder, Geary.Folde
             // zero or negative means the message exists beyond the local vector's range, so
             // nothing to do there
             if (local_position > 0) {
-                debug("%s do_replay_removed_message: local_count=%d local_position=%d", to_string(),
-                    local_count, local_position);
+                debug("%s do_replay_removed_message: local_count=%d local_position=%s", to_string(),
+                    local_count, local_position.to_string());
                 
                 owned_id = yield local_folder.get_id_at_async(local_position, null);
             } else {
-                debug("%s do_replay_removed_message: message not stored locally (local_count=%d local_position=%d)",
-                    to_string(), local_count, local_position);
+                debug("%s do_replay_removed_message: message not stored locally (local_count=%d local_position=%s)",
+                    to_string(), local_count, local_position.to_string());
             }
         } catch (Error err) {
             debug("%s do_replay_removed_message: unable to determine ID of removed message %s: %s",

@@ -601,7 +601,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     }
     
     // pos is 1-based.  This method does not respect messages marked for removal.
-    public async ImapDB.EmailIdentifier? get_id_at_async(int pos, Cancellable? cancellable) throws Error {
+    public async ImapDB.EmailIdentifier? get_id_at_async(int64 pos, Cancellable? cancellable) throws Error {
         assert(pos >= 1);
         
         ImapDB.EmailIdentifier? id = null;
@@ -615,7 +615,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                 OFFSET ?
             """);
             stmt.bind_rowid(0, folder_id);
-            stmt.bind_int(1, pos - 1);
+            stmt.bind_int64(1, pos - 1);
             
             Db.Result results = stmt.exec(cancellable);
             if (!results.finished)
@@ -1180,7 +1180,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         Imap.EmailProperties? imap_properties = (Imap.EmailProperties) email.properties;
         string? internaldate = (imap_properties != null && imap_properties.internaldate != null)
             ? imap_properties.internaldate.serialize() : null;
-        long rfc822_size = (imap_properties != null) ? imap_properties.rfc822_size.value : -1;
+        int64 rfc822_size = (imap_properties != null) ? imap_properties.rfc822_size.value : -1;
         
         if (String.is_empty(internaldate) || rfc822_size < 0) {
             debug("Unable to detect duplicates for %s (%s available but invalid)", email.id.to_string(),
@@ -1202,8 +1202,8 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         
         int64 message_id = results.rowid_at(0);
         if (results.next(cancellable)) {
-            debug("Warning: multiple messages with the same internaldate (%s) and size (%lu) in %s",
-                internaldate, rfc822_size, to_string());
+            debug("Warning: multiple messages with the same internaldate (%s) and size (%s) in %s",
+                internaldate, rfc822_size.to_string(), to_string());
         }
         
         Db.Statement search_stmt = cx.prepare(
@@ -1323,7 +1323,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         stmt.bind_string(16, row.email_flags);
         stmt.bind_string(17, row.internaldate);
         stmt.bind_int64(18, row.internaldate_time_t);
-        stmt.bind_long(19, row.rfc822_size);
+        stmt.bind_int64(19, row.rfc822_size);
         
         int64 message_id = stmt.exec_insert(cancellable);
         
@@ -1732,7 +1732,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                 "UPDATE MessageTable SET internaldate=?, internaldate_time_t=?, rfc822_size=? WHERE id=?");
             stmt.bind_string(0, row.internaldate);
             stmt.bind_int64(1, row.internaldate_time_t);
-            stmt.bind_long(2, row.rfc822_size);
+            stmt.bind_int64(2, row.rfc822_size);
             stmt.bind_rowid(3, row.id);
             
             stmt.exec(cancellable);

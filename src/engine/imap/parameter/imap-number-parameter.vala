@@ -53,36 +53,41 @@ public class Geary.Imap.NumberParameter : UnquotedStringParameter {
      * positive value.  is_negative returns set to true if that's the case.  is_negative is only
      * a valid value if the method returns true itself.
      *
+     * is_negative is false for zero ("0") and negative zero ("-0").
+     *
      * Empty strings (null or zero-length) are considered non-numeric.  Leading and trailing
      * whitespace are stripped before evaluating the string.
      */
-    public static bool is_numeric(string s, out bool is_negative) {
+    public static bool is_ascii_numeric(string ascii, out bool is_negative) {
         is_negative = false;
         
-        string str = s.strip();
+        string str = ascii.strip();
         
         if (String.is_empty(str))
             return false;
         
-        bool first_char = true;
+        bool has_nonzero = false;
         int index = 0;
         for (;;) {
             char ch = str[index++];
             if (ch == String.EOS)
                 break;
             
-            if (first_char && ch == '-') {
+            if (index == 1 && ch == '-') {
                 is_negative = true;
-                first_char = false;
                 
                 continue;
             }
             
-            first_char = false;
-            
             if (!ch.isdigit())
                 return false;
+            
+            if (ch != '0')
+                has_nonzero = true;
         }
+        
+        if (is_negative && !has_nonzero)
+            is_negative = false;
         
         return true;
     }

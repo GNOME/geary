@@ -210,8 +210,8 @@ public class Geary.RFC822.Date : Geary.RFC822.MessageData, Geary.MessageData.Abs
     }
 }
 
-public class Geary.RFC822.Size : Geary.MessageData.LongMessageData, Geary.RFC822.MessageData {
-    public Size(long value) {
+public class Geary.RFC822.Size : Geary.MessageData.Int64MessageData, Geary.RFC822.MessageData {
+    public Size(int64 value) {
         base (value);
     }
 }

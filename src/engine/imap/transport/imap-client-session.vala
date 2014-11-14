@@ -221,7 +221,7 @@ public class Geary.Imap.ClientSession : BaseObject {
     
     public signal void recent(int count);
     
-    public signal void search(Gee.List<int> seq_or_uid);
+    public signal void search(Gee.List<int64?> seq_or_uid);
     
     public signal void status(StatusData status_data);
     

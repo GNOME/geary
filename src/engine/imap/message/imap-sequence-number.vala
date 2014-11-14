@@ -12,48 +12,58 @@
  * @see UID
  */
 
-public class Geary.Imap.SequenceNumber : Geary.MessageData.IntMessageData, Geary.Imap.MessageData,
+public class Geary.Imap.SequenceNumber : Geary.MessageData.Int64MessageData, Geary.Imap.MessageData,
     Gee.Comparable<SequenceNumber> {
     /**
      * Minimum value of a valid {@link SequenceNumber}.
      *
      * See [[http://tools.ietf.org/html/rfc3501#section-2.3.1.2]]
      */
-    public int MIN_VALUE = 1;
+    public const int64 MIN = 1;
+    
+    /**
+     * Upper limit of a valid {@link SequenceNumber}.
+     */
+    public const int64 MAX = 0xFFFFFFFF;
     
     /**
      * Create a new {@link SequenceNumber}.
      *
-     * This does not check if the value is valid, i.e. >= {@link MIN_VALUE}.
+     * This does not check if the value is valid.
+     *
+     * @see is_value_valid
+     * @see SequenceNumber.checked
      */
-    public SequenceNumber(int value) {
+    public SequenceNumber(int64 value) {
         base (value);
     }
     
     /**
-     * Converts an array of ints into an array of {@link SequenceNumber}s.
+     * Create a new {@link SequenceNumber}, throwing {@link ImapError.INVALID} if an invalid value
+     * is passed in.
+     *
+     * @see is_value_valid
+     * @see SequenceNumber
      */
-    public static SequenceNumber[] to_list(int[] value_array) {
-        SequenceNumber[] list = new SequenceNumber[0];
-        foreach (int value in value_array)
-            list += new SequenceNumber(value);
+    public SequenceNumber.checked(int64 value) throws ImapError {
+        if (!is_value_valid(value))
+            throw new ImapError.INVALID("Invalid sequence number %s", value.to_string());
         
-        return list;
+        base (value);
     }
     
     /**
-     * Defined as {@link value} >= {@link MIN_VALUE}.
+     * Defined as {@link value} >= {@link MIN} and <= {@link MAX}.
+     */
+    public static bool is_value_valid(int64 value) {
+        return value >= MIN && value <= MAX;
+    }
+    
+    /**
+     * Defined as {@link value} >= {@link MIN} and <= {@link MAX}.
      */
     public bool is_valid() {
-        return value >= MIN_VALUE;
-    }
-    
-    /**
-     * Returns a new {@link SequenceNumber} that is one higher than this value.
-     *
-     */
-    public SequenceNumber inc() {
-        return new SequenceNumber(value + 1);
+        return is_value_valid(value);
     }
     
     /**
@@ -62,16 +72,16 @@ public class Geary.Imap.SequenceNumber : Geary.MessageData.IntMessageData, Geary
      * Returns null if the decremented value is less than {@link MIN_VALUE}.
      */
     public SequenceNumber? dec() {
-        return (value > MIN_VALUE) ? new SequenceNumber(value - 1) : null;
+        return (value > MIN) ? new SequenceNumber(value - 1) : null;
     }
     
     /**
      * Returns a new {@link SequenceNumber} that is one lower than this value.
      *
-     * Returns a SequenceNumber of MIN_VALUE if the decremented value is less than it.
+     * Returns a SequenceNumber of MIN if the decremented value is less than it.
      */
     public SequenceNumber dec_clamped() {
-        return (value > MIN_VALUE) ? new SequenceNumber(value - 1) : new SequenceNumber(MIN_VALUE);
+        return (value > MIN) ? new SequenceNumber(value - 1) : new SequenceNumber(MIN);
     }
     
     /**
@@ -100,7 +110,7 @@ public class Geary.Imap.SequenceNumber : Geary.MessageData.IntMessageData, Geary
     }
     
     public virtual int compare_to(SequenceNumber other) {
-        return value - other.value;
+        return (int) (value - other.value).clamp(-1, 1);
     }
     
     public string serialize() {

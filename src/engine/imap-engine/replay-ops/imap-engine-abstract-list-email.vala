@@ -219,7 +219,7 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
         if (flags.is_oldest_to_newest()) {
             if (initial_uid == null) {
                 // if oldest to newest and initial-id is null, then start at the bottom
-                low_pos = new Imap.SequenceNumber(1);
+                low_pos = new Imap.SequenceNumber(Imap.SequenceNumber.MIN);
             } else {
                 Gee.Map<Imap.UID, Imap.SequenceNumber>? map = yield owner.remote_folder.uid_to_position_async(
                     new Imap.MessageSet.uid(initial_uid), cancellable);
@@ -252,7 +252,7 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
                 // server to determine the position number of a particular UID, this makes sense
                 assert(high_pos != null);
                 low_pos = new Imap.SequenceNumber(
-                    Numeric.int_floor((high_pos.value - count) + 1, 1));
+                    Numeric.int64_floor((high_pos.value - count) + 1, 1));
             }
         }
         
@@ -267,7 +267,7 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
         }
         
         Imap.MessageSet msg_set;
-        int actual_count = -1;
+        int64 actual_count = -1;
         if (high_pos != null) {
             msg_set = new Imap.MessageSet.range_by_first_last(low_pos, high_pos);
             actual_count = (high_pos.value - low_pos.value) + 1;
@@ -275,9 +275,9 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
             msg_set = new Imap.MessageSet.range_to_highest(low_pos);
         }
         
-        debug("%s: Performing vector expansion using %s for initial_uid=%s count=%d actual_count=%d local_count=%d remote_count=%d oldest_to_newest=%s",
+        debug("%s: Performing vector expansion using %s for initial_uid=%s count=%d actual_count=%s local_count=%d remote_count=%d oldest_to_newest=%s",
             owner.to_string(), msg_set.to_string(),
-            (initial_uid != null) ? initial_uid.to_string() : "(null)", count, actual_count,
+            (initial_uid != null) ? initial_uid.to_string() : "(null)", count, actual_count.to_string(),
             local_count, remote_count, flags.is_oldest_to_newest().to_string());
         
         Gee.List<Geary.Email>? list = yield owner.remote_folder.list_email_async(msg_set,

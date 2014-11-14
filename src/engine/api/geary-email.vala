@@ -397,15 +397,9 @@ public class Geary.Email : BaseObject {
         if (aprop == null || bprop == null)
             return compare_id_ascending(aemail, bemail);
         
-        long asize = aprop.total_bytes;
-        long bsize = bprop.total_bytes;
+        int cmp = (int) (aprop.total_bytes - bprop.total_bytes).clamp(-1, 1);
         
-        if (asize < bsize)
-            return -1;
-        else if (asize > bsize)
-            return 1;
-        else
-            return compare_id_ascending(aemail, bemail);
+        return (cmp != 0) ? cmp : compare_id_ascending(aemail, bemail);
     }
     
     /**

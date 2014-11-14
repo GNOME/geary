@@ -47,7 +47,7 @@ public class Geary.Imap.MessageSet : BaseObject {
         assert(count > 0);
         
         value = (count > 1)
-            ? "%d:%d".printf(low_seq_num.value, low_seq_num.value + count - 1)
+            ? "%s:%s".printf(low_seq_num.value.to_string(), (low_seq_num.value + count - 1).to_string())
             : low_seq_num.serialize();
     }
     

@@ -27,7 +27,7 @@ public class Geary.Imap.ResponseCode : Geary.Imap.ListParameter {
         if (!get_response_code_type().is_value(ResponseCodeType.UIDNEXT))
             throw new ImapError.INVALID("Not UIDNEXT: %s", to_string());
         
-        return new UID(get_as_string(1).as_int());
+        return new UID.checked(get_as_string(1).as_int64());
     }
     
     /**
@@ -39,7 +39,7 @@ public class Geary.Imap.ResponseCode : Geary.Imap.ListParameter {
         if (!get_response_code_type().is_value(ResponseCodeType.UIDVALIDITY))
             throw new ImapError.INVALID("Not UIDVALIDITY: %s", to_string());
         
-        return new UIDValidity(get_as_string(1).as_int());
+        return new UIDValidity.checked(get_as_string(1).as_int64());
     }
     
     /**
@@ -51,7 +51,7 @@ public class Geary.Imap.ResponseCode : Geary.Imap.ListParameter {
         if (!get_response_code_type().is_value(ResponseCodeType.UNSEEN))
             throw new ImapError.INVALID("Not UNSEEN: %s", to_string());
         
-        return get_as_string(1).as_int(0, int.MAX);
+        return get_as_string(1).as_int32(0, int.MAX);
     }
     
     /**

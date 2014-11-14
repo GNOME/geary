@@ -14,19 +14,54 @@
 
 public class Geary.Imap.UID : Geary.MessageData.Int64MessageData, Geary.Imap.MessageData,
     Gee.Comparable<Geary.Imap.UID> {
-    // Using statics because int32.MAX is static, not const (??)
-    public static int64 MIN = 1;
-    public static int64 MAX = int32.MAX;
-    public static int64 INVALID = -1;
+    /**
+     * Minimum valid value for a {@link UID}.
+     */
+    public const int64 MIN = 1;
     
+    /**
+     * Maximum valid value for a {@link UID}.
+     */
+    public const int64 MAX = 0xFFFFFFFF;
+    
+    /**
+     * Invalid (placeholder) {@link UID} value.
+     */
+    public const int64 INVALID = -1;
+    
+    /**
+     * Creates a new {@link UID} without checking for validity.
+     *
+     * @see UID.checked
+     * @see is_value_valid
+     */
     public UID(int64 value) {
         base (value);
     }
     
+    /**
+     * Creates a new {@link UID}, throwing an {@link ImapError.INVALID} if the supplied value is
+     * not a positive unsigned 32-bit integer.
+     *
+     * @see is_value_valid
+     */
+    public UID.checked(int64 value) throws ImapError {
+        if (!is_value_valid(value))
+            throw new ImapError.INVALID("Invalid UID %s", value.to_string());
+        
+        base (value);
+    }
+    
+    /**
+     * @see is_value_valid
+     */
     public bool is_valid() {
         return is_value_valid(value);
     }
     
+    /**
+     * Returns true if the supplied value is between {@link MIN} and {@link MAX}, inclusive.
+     */
     public static bool is_value_valid(int64 val) {
         return Numeric.int64_in_range_inclusive(val, MIN, MAX);
     }

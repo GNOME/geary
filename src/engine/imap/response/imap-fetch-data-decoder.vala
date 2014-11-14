@@ -85,7 +85,7 @@ public class Geary.Imap.UIDDecoder : Geary.Imap.FetchDataDecoder {
     }
     
     protected override MessageData decode_string(StringParameter stringp) throws ImapError {
-        return new UID(stringp.as_int());
+        return new UID.checked(stringp.as_int64());
     }
 }
 
@@ -119,7 +119,7 @@ public class Geary.Imap.RFC822SizeDecoder : Geary.Imap.FetchDataDecoder {
     }
     
     protected override MessageData decode_string(StringParameter stringp) throws ImapError {
-        return new RFC822Size(stringp.as_long());
+        return new RFC822Size(stringp.as_int64(0, int64.MAX));
     }
 }
 

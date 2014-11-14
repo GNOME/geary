@@ -235,11 +235,16 @@ private class Geary.Imap.Folder : BaseObject {
             recent(total);
     }
     
-    private void on_search(Gee.List<int> seq_or_uid) {
+    private void on_search(Gee.List<int64?> seq_or_uid) {
         // All SEARCH from this class are UID SEARCH, so can reliably convert and add to
         // accumulator
-        foreach (int uid in seq_or_uid)
-            search_accumulator.add(new UID(uid));
+        foreach (int64 uid in seq_or_uid) {
+            try {
+                search_accumulator.add(new UID.checked(uid));
+            } catch (ImapError imaperr) {
+                debug("%s Unable to process SEARCH UID result: %s", to_string(), imaperr.message);
+            }
+        }
     }
     
     private void on_status_response(StatusResponse status_response) {
@@ -1002,7 +1007,7 @@ private class Geary.Imap.Folder : BaseObject {
         StatusResponse response = responses.get(cmd);
         if (response.status == Status.OK && response.response_code != null &&
             response.response_code.get_response_code_type().is_value("appenduid")) {
-            UID new_id = new UID(response.response_code.get_as_string(2).as_int());
+            UID new_id = new UID.checked(response.response_code.get_as_string(2).as_int64());
             
             return new ImapDB.EmailIdentifier.no_message_id(new_id);
         }

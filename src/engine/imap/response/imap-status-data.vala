@@ -93,25 +93,25 @@ public class Geary.Imap.StatusData : Object {
                 switch (StatusDataType.from_parameter(typep)) {
                     case StatusDataType.MESSAGES:
                         // see note at UNSET
-                        messages = valuep.as_int(-1, int.MAX);
+                        messages = valuep.as_int32(-1, int.MAX);
                     break;
                     
                     case StatusDataType.RECENT:
                         // see note at UNSET
-                        recent = valuep.as_int(-1, int.MAX);
+                        recent = valuep.as_int32(-1, int.MAX);
                     break;
                     
                     case StatusDataType.UIDNEXT:
-                        uid_next = new UID(valuep.as_int());
+                        uid_next = new UID.checked(valuep.as_int64());
                     break;
                     
                     case StatusDataType.UIDVALIDITY:
-                        uid_validity = new UIDValidity(valuep.as_int());
+                        uid_validity = new UIDValidity.checked(valuep.as_int64());
                     break;
                     
                     case StatusDataType.UNSEEN:
                         // see note at UNSET
-                        unseen = valuep.as_int(-1, int.MAX);
+                        unseen = valuep.as_int32(-1, int.MAX);
                     break;
                     
                     default:

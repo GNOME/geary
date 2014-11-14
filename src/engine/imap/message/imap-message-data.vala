@@ -20,7 +20,7 @@ public interface Geary.Imap.MessageData : Geary.MessageData.AbstractMessageData 
 }
 
 public class Geary.Imap.RFC822Size : Geary.RFC822.Size, Geary.Imap.MessageData {
-    public RFC822Size(long value) {
+    public RFC822Size(int64 value) {
         base (value);
     }
 }
