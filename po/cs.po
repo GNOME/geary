@@ -12,10 +12,10 @@ msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2014-10-29 05:52+0000\n"
-"PO-Revision-Date: 2014-10-29 07:51+0100\n"
+"POT-Creation-Date: 2014-11-24 17:51+0000\n"
+"PO-Revision-Date: 2014-11-24 20:47+0100\n"
 "Last-Translator: Marek Černocký <marek@manet.cz>\n"
-"Language-Team: čeština <gnome-cs-list@gnome.org>\n"
+"Language-Team: Czech <gnome-cs-list@gnome.org>\n"
 "Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -687,7 +687,7 @@ msgstr "Indexuje se účet %s"
 msgid "Search %s account"
 msgstr "Prohledat účet %s"
 
-#: ../src/client/components/main-window.vala:323
+#: ../src/client/components/main-window.vala:347
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -738,21 +738,21 @@ msgstr "Vybrat _vše"
 msgid "_Keep"
 msgstr "_Zachovat"
 
-#: ../src/client/composer/composer-widget.vala:57
+#: ../src/client/composer/composer-widget.vala:58
 msgid "Saved"
 msgstr "Uloženo"
 
-#: ../src/client/composer/composer-widget.vala:58
+#: ../src/client/composer/composer-widget.vala:59
 msgid "Saving"
 msgstr "Ukládá se"
 
-#: ../src/client/composer/composer-widget.vala:59
+#: ../src/client/composer/composer-widget.vala:60
 msgid "Error saving"
 msgstr "Chyba při ukládání"
 
 #. A list of keywords, separated by pipe ("|") characters, that suggest an attachment; since
 #. this is full-word checking, include all variants of each word.  No spaces are allowed.
-#: ../src/client/composer/composer-widget.vala:120
+#: ../src/client/composer/composer-widget.vala:121
 msgid ""
 "attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|"
 "enclosing|encloses|enclosure|enclosures"
@@ -761,92 +761,96 @@ msgstr ""
 "přiloženým|přiloženou|přiložit|přikládám|přiložil|přikládá|přikládáme|"
 "přiložili|přiložily"
 
-#: ../src/client/composer/composer-widget.vala:878
+#: ../src/client/composer/composer-widget.vala:907
 msgid "Do you want to discard the unsaved message?"
 msgstr "Chcete zahodit neuloženou zprávu?"
 
-#: ../src/client/composer/composer-widget.vala:881
-#: ../src/client/composer/composer-widget.vala:885
+#: ../src/client/composer/composer-widget.vala:910
+#: ../src/client/composer/composer-widget.vala:914
 msgid "Do you want to discard this message?"
 msgstr "Chcete zahodit tuto zprávu?"
 
-#: ../src/client/composer/composer-widget.vala:998
+#: ../src/client/composer/composer-widget.vala:1027
 msgid "Send message with an empty subject and body?"
 msgstr "Poslat zprávu s prázdným předmětem a tělem?"
 
-#: ../src/client/composer/composer-widget.vala:1000
+#: ../src/client/composer/composer-widget.vala:1029
 msgid "Send message with an empty subject?"
 msgstr "Poslat zprávu s prázdným předmětem?"
 
-#: ../src/client/composer/composer-widget.vala:1002
+#: ../src/client/composer/composer-widget.vala:1031
 msgid "Send message with an empty body?"
 msgstr "Poslat zprávu s prázdným tělem?"
 
-#: ../src/client/composer/composer-widget.vala:1004
+#: ../src/client/composer/composer-widget.vala:1033
 msgid "Send message without an attachment?"
 msgstr "Poslat zprávu bez přílohy?"
 
-#: ../src/client/composer/composer-widget.vala:1187
+#: ../src/client/composer/composer-widget.vala:1216
 msgid "Cannot add attachment"
 msgstr "Nelze připojit přílohu"
 
-#: ../src/client/composer/composer-widget.vala:1198
+#: ../src/client/composer/composer-widget.vala:1227
 #, c-format
 msgid "\"%s\" could not be found."
 msgstr "Soubor „%s“ nebyl nalezen."
 
-#: ../src/client/composer/composer-widget.vala:1205
+#: ../src/client/composer/composer-widget.vala:1234
 #, c-format
 msgid "\"%s\" is a folder."
 msgstr "„%s“ je složka."
 
-#: ../src/client/composer/composer-widget.vala:1212
+#: ../src/client/composer/composer-widget.vala:1241
 #, c-format
 msgid "\"%s\" is an empty file."
 msgstr "Soubor „%s“ je prázdný."
 
-#: ../src/client/composer/composer-widget.vala:1226
+#: ../src/client/composer/composer-widget.vala:1255
 #, c-format
 msgid "\"%s\" could not be opened for reading."
 msgstr "Soubor „%s“ nemohl být otevřen pro čtení."
 
-#: ../src/client/composer/composer-widget.vala:1233
+#: ../src/client/composer/composer-widget.vala:1262
 #, c-format
 msgid "\"%s\" already attached for delivery."
 msgstr "Soubor „%s“ už byl pro doručení přiložen."
 
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
-#: ../src/client/composer/composer-widget.vala:1242
+#: ../src/client/composer/composer-widget.vala:1271
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: ../src/client/composer/composer-widget.vala:1302
+#: ../src/client/composer/composer-widget.vala:1331
 msgid "To: "
 msgstr "Komu: "
 
-#: ../src/client/composer/composer-widget.vala:1305
+#: ../src/client/composer/composer-widget.vala:1334
 msgid "Cc: "
 msgstr "Kopie: "
 
-#: ../src/client/composer/composer-widget.vala:1308
+#: ../src/client/composer/composer-widget.vala:1337
 msgid "Bcc: "
 msgstr "Skrytá kopie: "
 
-#: ../src/client/composer/composer-widget.vala:1525
+#: ../src/client/composer/composer-widget.vala:1340
+msgid "Reply-To: "
+msgstr "Odpověď:"
+
+#: ../src/client/composer/composer-widget.vala:1573
 msgid "Select Color"
 msgstr "Vybrat barvu"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: ../src/client/composer/composer-widget.vala:1974
+#: ../src/client/composer/composer-widget.vala:2022
 msgid "_From:"
 msgstr "_Od:"
 
 #. For other types of messages, just show the from account.
 #. Composer label (without mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: ../src/client/composer/composer-widget.vala:1990
+#: ../src/client/composer/composer-widget.vala:2038
 #: ../src/client/conversation-viewer/conversation-viewer.vala:713
 msgid "From:"
 msgstr "Od:"
@@ -1291,7 +1295,7 @@ msgid "%A"
 msgstr "%A"
 
 #: ../src/client/util/util-email.vala:30
-#: ../src/engine/rfc822/rfc822-message.vala:741
+#: ../src/engine/rfc822/rfc822-message.vala:747
 msgid "(no subject)"
 msgstr "(bez předmětu)"
 
@@ -1666,108 +1670,116 @@ msgid "_Rich Text"
 msgstr "Fo_rmátovaný text"
 
 #: ../ui/composer.glade.h:23
+msgid "Show Extended Fields"
+msgstr "Zobrazit rozšiřující pole"
+
+#: ../ui/composer.glade.h:24
 msgid "Lar_ge"
 msgstr "Vel_ké"
 
-#: ../ui/composer.glade.h:24
+#: ../ui/composer.glade.h:25
 msgid "Large"
 msgstr "Velké"
 
-#: ../ui/composer.glade.h:25
+#: ../ui/composer.glade.h:26
 msgid "_Medium"
 msgstr "_Střední"
 
-#: ../ui/composer.glade.h:26
+#: ../ui/composer.glade.h:27
 msgid "Medium"
 msgstr "Střední"
 
-#: ../ui/composer.glade.h:27
+#: ../ui/composer.glade.h:28
 msgid "_Small"
 msgstr "_Malé"
 
-#: ../ui/composer.glade.h:28
+#: ../ui/composer.glade.h:29
 msgid "Small"
 msgstr "Malé"
 
-#: ../ui/composer.glade.h:29
+#: ../ui/composer.glade.h:30
 msgid "S_ans Serif"
 msgstr "B_ezpatkové"
 
-#: ../ui/composer.glade.h:30
+#: ../ui/composer.glade.h:31
 msgid "Sans Serif"
 msgstr "Bezpatkové (sans serif)"
 
-#: ../ui/composer.glade.h:31
+#: ../ui/composer.glade.h:32
 msgid "S_erif"
 msgstr "P_atkové"
 
-#: ../ui/composer.glade.h:32
+#: ../ui/composer.glade.h:33
 msgid "Serif"
 msgstr "Patkové (serif)"
 
-#: ../ui/composer.glade.h:33
+#: ../ui/composer.glade.h:34
 msgid "_Fixed Width"
 msgstr "_Pevná šířka"
 
-#: ../ui/composer.glade.h:34
+#: ../ui/composer.glade.h:35
 msgid "Fixed Width"
 msgstr "Pevná šířka"
 
-#: ../ui/composer.glade.h:35
+#: ../ui/composer.glade.h:36
 msgid "Detach"
 msgstr "Odpojit"
 
-#: ../ui/composer.glade.h:36
+#: ../ui/composer.glade.h:37
 msgid "_Send"
 msgstr "_Odeslat"
 
-#: ../ui/composer.glade.h:37
+#: ../ui/composer.glade.h:38
 msgid "Send"
 msgstr "Odeslat"
 
-#: ../ui/composer.glade.h:38
+#: ../ui/composer.glade.h:39
 msgid "_Attach File"
 msgstr "_Přiložit soubor"
 
-#: ../ui/composer.glade.h:39
+#: ../ui/composer.glade.h:40
 msgid "Attach File"
 msgstr "Přiložit soubor"
 
-#: ../ui/composer.glade.h:40
+#: ../ui/composer.glade.h:41
 msgid "_Include Original Attachments"
 msgstr "Vlož_it původní přílohy"
 
-#: ../ui/composer.glade.h:41
+#: ../ui/composer.glade.h:42
 msgid "Include Original Attachments"
 msgstr "Vložit původní přílohy"
 
 #. Address(es) e-mail is to be sent to
-#: ../ui/composer.glade.h:43
+#: ../ui/composer.glade.h:44
 msgid "_To"
 msgstr "_Komu"
 
-#: ../ui/composer.glade.h:44
+#: ../ui/composer.glade.h:45
 msgid "_Cc"
 msgstr "Ko_pie"
 
-#: ../ui/composer.glade.h:45
+#: ../ui/composer.glade.h:46
 msgid "_Subject"
 msgstr "_Předmět"
 
-#: ../ui/composer.glade.h:46
+#: ../ui/composer.glade.h:47
 msgid "_Bcc"
 msgstr "_Skrytá kopie"
 
-#. Geary account mail will be sent from
 #: ../ui/composer.glade.h:48
+msgid "_Reply-To"
+msgstr "_Odpověď"
+
+#. Geary account mail will be sent from
+#: ../ui/composer.glade.h:50
 msgid "From"
 msgstr "Od"
 
-#: ../ui/composer.glade.h:49
+#: ../ui/composer.glade.h:51
 msgid "Drop files here"
 msgstr "upusťte soubory zde"
 
-#: ../ui/composer.glade.h:50
+#: ../ui/composer.glade.h:52
 msgid "To add them as attachments"
 msgstr "Chcete-li je přidat jako přílohy"
 
