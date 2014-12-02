@@ -64,10 +64,14 @@ public class SpinWaiter : BaseObject {
             int64 end_time = get_monotonic_time() + (actual_poll_msec * TimeSpan.MILLISECOND);
             if (!cond.wait_until(mutex, end_time)) {
                 // timeout passed, allow the callback to run
+                mutex.unlock();
                 if (!cb()) {
                     // PollService returned false, abort
+                    mutex.lock();
+                    
                     break;
                 }
+                mutex.lock();
             }
         }
         
