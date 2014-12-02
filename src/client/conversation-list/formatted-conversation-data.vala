@@ -299,10 +299,10 @@ public class FormattedConversationData : Geary.BaseObject {
         
         // Draw separator line.
         if (ctx != null && cell_area != null) {
-            ctx.set_line_width(1.0);
+            ctx.set_line_width(0.5);
             GtkUtil.set_source_color_from_string(ctx, CountBadge.UNREAD_BG_COLOR);
-            ctx.move_to(cell_area.x - 1, cell_area.y + cell_area.height);
-            ctx.line_to(cell_area.x + cell_area.width + 1, cell_area.y + cell_area.height);
+            ctx.move_to(cell_area.x - 2, cell_area.y + cell_area.height + 0.5);
+            ctx.line_to(cell_area.x + cell_area.width + 2, cell_area.y + cell_area.height + 0.5);
             ctx.stroke();
         }
         
