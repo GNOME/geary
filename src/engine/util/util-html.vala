@@ -88,6 +88,21 @@ public string preserve_whitespace(string? text) {
     return output;
 }
 
+public string smart_escape(string? text, bool preserve_whitespace_in_html) {
+    if (text == null)
+        return text;
+    
+    string res = text;
+    if (!Regex.match_simple("<([A-Z]*)[^>]*>.*</(\\1)>|<[^>]*/>", res,
+        RegexCompileFlags.CASELESS)) {
+        res = escape_markup(res);
+        preserve_whitespace_in_html = true;
+    }
+    if (preserve_whitespace_in_html)
+        res = @"<div style='white-space: pre;'>$res</div>";
+    return res;
+}
+
 // Removes any text between < and >.  Additionally, if input terminates in the middle of a tag, 
 // the tag will be removed.
 // If the HTML is invalid, the original string will be returned.

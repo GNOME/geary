@@ -173,7 +173,9 @@ public class AddEditPage : Gtk.Box {
     // Signature
     private Gtk.Box composer_container;
     private Gtk.CheckButton check_use_email_signature;
+    private Gtk.Stack signature_stack;
     private Gtk.TextView textview_email_signature;
+    private StylishWebView preview_webview;
     
     private Gtk.Alignment other_info;
     
@@ -257,7 +259,32 @@ public class AddEditPage : Gtk.Box {
         // composer options
         composer_container = (Gtk.Box) builder.get_object("composer container");
         check_use_email_signature = (Gtk.CheckButton) builder.get_object("check: use_email_signature");
-        textview_email_signature = (Gtk.TextView) builder.get_object("textview: email_signature");        
+        
+        Gtk.ScrolledWindow edit_window = new Gtk.ScrolledWindow(null, null);
+        edit_window.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC);
+        edit_window.set_shadow_type(Gtk.ShadowType.IN);
+        textview_email_signature = new Gtk.TextView();
+        edit_window.add(textview_email_signature);
+        
+        Gtk.ScrolledWindow preview_window = new Gtk.ScrolledWindow(null, null);
+        preview_window.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC);
+        preview_window.set_shadow_type(Gtk.ShadowType.IN);
+        preview_webview = new StylishWebView();
+        preview_window.add(preview_webview);
+        
+        signature_stack = new Gtk.Stack();
+        signature_stack.add_titled(edit_window, "edit_window", _("Edit"));
+        signature_stack.child_set_property(edit_window, "icon-name", "text-editor-symbolic");
+        signature_stack.add_titled(preview_window, "preview_window", _("Preview"));
+        signature_stack.child_set_property(preview_window, "icon-name", "text-x-generic-symbolic");
+        Gtk.StackSwitcher switcher = new Gtk.StackSwitcher();
+        switcher.set_stack(signature_stack);
+        
+        Gtk.Box signature_box = (Gtk.Box) builder.get_object("signature box");
+        signature_box.set_spacing(4);
+        signature_box.pack_start(signature_stack);
+        switcher.valign = Gtk.Align.START;
+        signature_box.pack_start(switcher, false, false);
         
         // IMAP info widgets.
         entry_imap_host = (Gtk.Entry) builder.get_object("entry: imap host");
@@ -316,7 +343,8 @@ public class AddEditPage : Gtk.Box {
         
         entry_nickname.insert_text.connect(on_nickname_insert_text);
 
-        check_use_email_signature.toggled.connect(() => on_use_signature_changed());
+        check_use_email_signature.bind_property("active", signature_box, "sensitive");
+        signature_stack.notify["visible-child-name"].connect(on_signature_stack_changed);
         
         // Reset the "first update" flag when the window is mapped.
         map.connect(() => { first_ui_update = true; });
@@ -394,6 +422,7 @@ public class AddEditPage : Gtk.Box {
         combo_smtp_encryption.active = Encryption.NONE;
         use_email_signature = initial_use_email_signature;
         email_signature = initial_email_signature;
+        signature_stack.set_visible_child_name("edit_window");
         
         // Set defaults for IMAP info
         imap_host = initial_default_imap_host ?? "";
@@ -550,12 +579,9 @@ public class AddEditPage : Gtk.Box {
         }
     }
     
-    private void on_use_signature_changed() {
-        if(check_use_email_signature.active == true) {
-            textview_email_signature.sensitive = true;
-        } else {
-            textview_email_signature.sensitive = false;
-        }
+    private void on_signature_stack_changed() {
+        if (signature_stack.visible_child_name == "preview_window")
+            preview_webview.load_html_string(Geary.HTML.smart_escape(email_signature, true), "");
     }
 
     private uint16 get_default_smtp_port() {

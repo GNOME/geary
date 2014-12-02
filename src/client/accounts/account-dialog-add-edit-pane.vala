@@ -38,7 +38,7 @@ public class AccountDialogAddEditPane : AccountDialogPane {
         add_edit_page.size_changed.connect(() => { size_changed(); } );
         
         pack_start(add_edit_page);
-        pack_start(button_box);
+        pack_start(button_box, false, false);
         
         // Default mode is Welcome.
         set_mode(AddEditPage.PageMode.WELCOME);

@@ -7,7 +7,6 @@
     <property name="step_increment">1</property>
     <property name="page_increment">10</property>
   </object>
-  <object class="GtkTextBuffer" id="buffer: email_signature"/>
   <object class="GtkBox" id="container">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -960,7 +959,7 @@
         </child>
         <child>
           <object class="GtkCheckButton" id="check: use_email_signature">
-            <property name="label" translatable="yes">Si_gn emails:</property>
+            <property name="label" translatable="yes">Si_gn emails (HTML allowed):</property>
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">False</property>
@@ -976,23 +975,20 @@
           </packing>
         </child>
         <child>
-          <object class="GtkScrolledWindow" id="scrolledwindow2">
+          <object class="GtkBox" id="signature box">
             <property name="visible">True</property>
-            <property name="can_focus">True</property>
+            <property name="sensitive">False</property>
+            <property name="can_focus">False</property>
             <property name="margin_left">12</property>
-            <property name="shadow_type">in</property>
             <child>
-              <object class="GtkTextView" id="textview: email_signature">
-                <property name="visible">True</property>
-                <property name="sensitive">False</property>
-                <property name="can_focus">True</property>
-                <property name="wrap_mode">word</property>
-                <property name="buffer">buffer: email_signature</property>
-              </object>
+              <placeholder/>
+            </child>
+            <child>
+              <placeholder/>
             </child>
           </object>
           <packing>
-            <property name="expand">False</property>
+            <property name="expand">True</property>
             <property name="fill">True</property>
             <property name="position">3</property>
           </packing>
@@ -1002,7 +998,7 @@
         </child>
       </object>
       <packing>
-        <property name="expand">False</property>
+        <property name="expand">True</property>
         <property name="fill">True</property>
         <property name="position">4</property>
       </packing>

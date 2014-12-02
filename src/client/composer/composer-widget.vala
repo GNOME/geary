@@ -993,6 +993,7 @@ public class ComposerWidget : Gtk.EventBox {
                     set_cursor();
                     return;
                 }
+                signature = Geary.HTML.smart_escape(signature, false);
             } catch (Error error) {
                 debug("Error reading signature file %s: %s", signature_file.get_path(), error.message);
                 set_cursor();
@@ -1004,16 +1005,15 @@ public class ComposerWidget : Gtk.EventBox {
                 set_cursor();
                 return;
             }
+            signature = Geary.HTML.smart_escape(signature, true);
         }
         
-        signature = Geary.HTML.escape_markup(signature);
-        
         if (body_html == null)
-            body_html = CURSOR + Geary.HTML.preserve_whitespace("\n\n" + signature);
+            body_html = CURSOR + "<br /><br />" + signature;
         else if (top_posting)
-            body_html = CURSOR + Geary.HTML.preserve_whitespace("\n\n" + signature) + body_html;
+            body_html = CURSOR + "<br /><br />" + signature + body_html;
         else
-            body_html = body_html + CURSOR + Geary.HTML.preserve_whitespace("\n\n" + signature);
+            body_html = body_html + CURSOR + "<br /><br />" + signature;
     }
     
     private void set_cursor() {
