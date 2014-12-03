@@ -33,7 +33,7 @@ public abstract class Geary.Db.Context : BaseObject {
         return Db.throw_on_error(this, method, result, raw);
     }
     
-    [PrintFormat]
+    [PrintfFormat]
     protected void log(string fmt, ...) {
         if (!Logging.are_all_flags_set(Logging.Flag.SQL))
             return;
