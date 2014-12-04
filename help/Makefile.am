@@ -17,4 +17,4 @@ DOC_PAGES = \
 	write.page
 
 # NOTE: If you add a language here it *must* also be added to help/CMakeLists.txt!
-DOC_LINGUAS = cs el es fr it
+DOC_LINGUAS = cs de el es fr it
