@@ -17,7 +17,7 @@ int main(string[] args) {
     //
     // Packages can disable this fix with the --disable-poodle-ssl3 configure option.
 #if !DISABLE_POODLE
-    Environment.set_variable("G_TLS_GNUTLS_PRIORITY", "NORMAL:%COMPAT:!VERS-SSL3.0", false);
+    Environment.set_variable("G_TLS_GNUTLS_PRIORITY", "NORMAL:%COMPAT:%LATEST_RECORD_VERSION:!VERS-SSL3.0", false);
 #endif
     
     GearyApplication app = new GearyApplication();
