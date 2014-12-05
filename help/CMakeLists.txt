@@ -16,6 +16,7 @@ set(HELP_FILES
 # FIXME: don't re-specify this here, instead read it from Makefile.am.
 set(TRANSLATED
     cs
+    de
     el
     es
     fr
