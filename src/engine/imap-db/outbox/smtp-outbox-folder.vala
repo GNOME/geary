@@ -146,7 +146,6 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
                 Db.Statement stmt = cx.prepare("""
                     SELECT id, ordering, message
                     FROM SmtpOutboxTable
-                    WHERE sent = 0
                     ORDER BY ordering
                 """);
                 
