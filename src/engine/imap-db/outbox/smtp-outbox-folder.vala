@@ -74,6 +74,7 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
         
         this.db = db;
         _account = account;
+        _account.opened.connect(() => { this.fill_outbox_queue.begin(); });
         this.sending_monitor = sending_monitor;
         
         smtp = new Geary.Smtp.ClientSession(_account.information.get_smtp_endpoint());
@@ -133,13 +134,11 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
         return (message.subject != null && !String.is_empty(message.subject.to_string()))
             ? message.subject.to_string() : "(no subject)";
     }
-    
-    // TODO: Use Cancellable to shut down outbox processor when closing account
-    private async void do_postman_async() {
-        debug("Starting outbox postman");
-        uint send_retry_seconds = MIN_SEND_RETRY_INTERVAL_SEC;
-        
-        // Fill the send queue with existing mail (if any)
+
+
+    // Fill the send queue with existing mail (if any)
+    private async void fill_outbox_queue() {
+        debug("Filling outbox queue");
         try {
             Gee.ArrayList<OutboxRow> list = new Gee.ArrayList<OutboxRow>();
             yield db.exec_transaction_async(Db.TransactionType.RO, (cx, cancellable) => {
@@ -171,6 +170,13 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
         } catch (Error prime_err) {
             warning("Error priming outbox: %s", prime_err.message);
         }
+    }
+
+
+    // TODO: Use Cancellable to shut down outbox processor when closing account
+    private async void do_postman_async() {
+        debug("Starting outbox postman");
+        uint send_retry_seconds = MIN_SEND_RETRY_INTERVAL_SEC;
         
         // Start the send queue.
         for (;;) {
