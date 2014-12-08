@@ -13,15 +13,19 @@ public class AccountDialog : Gtk.Dialog {
     private AccountDialogSpinnerPane spinner_pane;
     private AccountDialogRemoveConfirmPane remove_confirm_pane;
     private AccountDialogRemoveFailPane remove_fail_pane;
+    private Gtk.HeaderBar headerbar = new Gtk.HeaderBar();
     
     public AccountDialog(Gtk.Window parent) {
         set_size_request(450, -1); // Sets min size.
-        title = _("Accounts");
+        headerbar.title = _("Accounts");
+        headerbar.show_close_button = true;
         set_transient_for(parent);
         set_modal(true);
+        set_titlebar (headerbar);
         get_content_area().margin_top = MARGIN;
         get_content_area().margin_left = MARGIN;
         get_content_area().margin_right = MARGIN;
+        get_content_area().margin_bottom = MARGIN;
         
         // Add pages to stack.
         account_list_pane = new AccountDialogAccountListPane(stack);
@@ -31,7 +35,6 @@ public class AccountDialog : Gtk.Dialog {
         remove_fail_pane = new AccountDialogRemoveFailPane(stack);
         
         // Connect signals from pages.
-        account_list_pane.close.connect(on_close);
         account_list_pane.add_account.connect(on_add_account);
         account_list_pane.edit_account.connect(on_edit_account);
         account_list_pane.delete_account.connect(on_delete_account);
@@ -49,10 +52,6 @@ public class AccountDialog : Gtk.Dialog {
         
         set_default_response(Gtk.ResponseType.OK);
         
-    }
-    
-    private void on_close() {
-        response(Gtk.ResponseType.CLOSE);
     }
     
     private void on_add_account() {

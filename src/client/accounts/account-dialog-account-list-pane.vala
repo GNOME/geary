@@ -22,8 +22,6 @@ public class AccountDialogAccountListPane : AccountDialogPane {
     
     public signal void delete_account(string email_address);
     
-    public signal void close();
-    
     public AccountDialogAccountListPane(Gtk.Stack stack) {
         base(stack);
         Gtk.Builder builder = GearyApplication.instance.create_builder("account_list.glade");
@@ -58,7 +56,6 @@ public class AccountDialogAccountListPane : AccountDialogPane {
             on_account_added(account);
         
         // Hook up signals.
-        actions.get_action("close").activate.connect(() => { close(); });
         actions.get_action("add_account").activate.connect(() => { add_account(); });
         edit_action.activate.connect(notify_edit_account);
         delete_action.activate.connect(notify_delete_account);
