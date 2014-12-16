@@ -81,7 +81,7 @@ public class GearyController : Geary.BaseObject {
     private const string MOVE_MESSAGE_TOOLTIP_MULTIPLE = _("Move conversations");
     
     private const int SELECT_FOLDER_TIMEOUT_USEC = 100 * 1000;
-    private const int SEARCH_TIMEOUT_MSEC = 100;
+    private const int SEARCH_TIMEOUT_MSEC = 250;
     
     private const string PROP_ATTEMPT_OPEN_ACCOUNT = "attempt-open-account";
     
@@ -2512,7 +2512,8 @@ public class GearyController : Geary.BaseObject {
         
         cancel_search(); // Stop any search in progress.
         
-        folder.set_search_query(search_text, cancellable_search);
+        folder.search(search_text, GearyApplication.instance.config.get_search_strategy(),
+            cancellable_search);
         
         main_window.folder_list.set_search(folder);
         search_text_changed(main_window.main_toolbar.search_text);
@@ -2523,7 +2524,8 @@ public class GearyController : Geary.BaseObject {
         // search after a quick delay when they finish typing.
         if (search_timeout_id != 0)
             Source.remove(search_timeout_id);
-        search_timeout_id = Timeout.add(SEARCH_TIMEOUT_MSEC, on_search_timeout);
+        
+        search_timeout_id = Timeout.add(SEARCH_TIMEOUT_MSEC, on_search_timeout, Priority.LOW);
     }
     
     private bool on_search_timeout() {

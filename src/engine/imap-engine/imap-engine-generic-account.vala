@@ -824,6 +824,10 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         return yield local.fetch_email_async(check_id(email_id), required_fields, cancellable);
     }
     
+    public override Geary.SearchQuery open_search(string query, SearchQuery.Strategy strategy) {
+        return new ImapDB.SearchQuery(local, query, strategy);
+    }
+    
     public override async Gee.Collection<Geary.EmailIdentifier>? local_search_async(Geary.SearchQuery query,
         int limit = 100, int offset = 0, Gee.Collection<Geary.FolderPath?>? folder_blacklist = null,
         Gee.Collection<Geary.EmailIdentifier>? search_ids = null, Cancellable? cancellable = null) throws Error {
@@ -833,7 +837,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         return yield local.search_async(query, limit, offset, folder_blacklist, search_ids, cancellable);
     }
     
-    public override async Gee.Collection<string>? get_search_matches_async(Geary.SearchQuery query,
+    public override async Gee.Set<string>? get_search_matches_async(Geary.SearchQuery query,
         Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable = null) throws Error {
         return yield local.get_search_matches_async(query, check_ids(ids), cancellable);
     }

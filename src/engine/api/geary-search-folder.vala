@@ -49,6 +49,8 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder, Geary.FolderSupport
         }
     }
     
+    public Geary.SearchQuery? search_query { get; private set; default = null; }
+    
     private Gee.HashSet<Geary.FolderPath?> exclude_folders = new Gee.HashSet<Geary.FolderPath?>();
     private Geary.SpecialFolderType[] exclude_types = {
         Geary.SpecialFolderType.SPAM,
@@ -56,7 +58,6 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder, Geary.FolderSupport
         Geary.SpecialFolderType.DRAFTS,
         // Orphan emails (without a folder) are also excluded; see ctor.
     };
-    private Geary.SearchQuery? search_query = null;
     private Gee.TreeSet<ImapDB.SearchEmailIdentifier> search_results;
     private Geary.Nonblocking.Mutex result_mutex = new Geary.Nonblocking.Mutex();
     
@@ -64,7 +65,7 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder, Geary.FolderSupport
      * Fired when the search query has changed.  This signal is fired *after* the search
      * has completed.
      */
-    public signal void search_query_changed(string? query);
+    public signal void search_query_changed(Geary.SearchQuery? query);
     
     public SearchFolder(Account account) {
         base();
@@ -203,8 +204,8 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder, Geary.FolderSupport
     /**
      * Sets the keyword string for this search.
      */
-    public void set_search_query(string query, Cancellable? cancellable = null) {
-        set_search_query_async.begin(query, cancellable, on_set_search_query_complete);
+    public void search(string query, SearchQuery.Strategy strategy, Cancellable? cancellable = null) {
+        set_search_query_async.begin(query, strategy, cancellable, on_set_search_query_complete);
     }
     
     private void on_set_search_query_complete(Object? source, AsyncResult result) {
@@ -215,8 +216,9 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder, Geary.FolderSupport
         }
     }
     
-    private async void set_search_query_async(string query, Cancellable? cancellable = null) throws Error {
-        Geary.SearchQuery search_query = new Geary.SearchQuery(query);
+    private async void set_search_query_async(string query, SearchQuery.Strategy strategy,
+        Cancellable? cancellable) throws Error {
+        Geary.SearchQuery search_query = account.open_search(query, strategy);
         
         int result_mutex_token = yield result_mutex.claim_async();
         
@@ -230,7 +232,7 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder, Geary.FolderSupport
         result_mutex.release(ref result_mutex_token);
         
         this.search_query = search_query;
-        search_query_changed(search_query.raw);
+        search_query_changed(search_query);
         
         if (error != null)
             throw error;
@@ -425,13 +427,14 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder, Geary.FolderSupport
     }
     
     /**
-     * Given a list of mail IDs, returns a list of words that match for the current
+     * Given a list of mail IDs, returns a set of casefolded words that match for the current
      * search query.
      */
-    public async Gee.Collection<string>? get_search_matches_async(
+    public async Gee.Set<string>? get_search_matches_async(
         Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable = null) throws Error {
         if (search_query == null)
             return null;
+        
         return yield account.get_search_matches_async(search_query, ids, cancellable);
     }
     

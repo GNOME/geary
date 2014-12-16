@@ -457,9 +457,26 @@ public class ConversationViewer : Gtk.Box {
         }
     }
     
-    private void on_search_text_changed(string? query) {
+    private void on_search_text_changed(Geary.SearchQuery? query) {
         if (query != null)
             highlight_search_terms.begin();
+    }
+    
+    // This applies a fudge-factor set of matches when the database results
+    // aren't entirely satisfactory, such as when you search for an email
+    // address and the database tokenizes out the @ and ., etc.  It's not meant
+    // to be comprehensive, just a little extra highlighting applied to make
+    // the results look a little closer to what you typed.
+    private void add_literal_matches(string raw_query, Gee.Set<string>? search_matches) {
+        foreach (string word in raw_query.split(" ")) {
+            if (word.has_suffix("\""))
+                word = word.substring(0, word.length - 1);
+            if (word.has_prefix("\""))
+                word = word.substring(1);
+            
+            if (!Geary.String.is_empty_or_whitespace(word))
+                search_matches.add(word);
+        }
     }
     
     private async void highlight_search_terms() {
@@ -475,8 +492,13 @@ public class ConversationViewer : Gtk.Box {
             ids.add(email.id);
         
         try {
-            Gee.Collection<string>? search_matches = yield search_folder.get_search_matches_async(
+            Gee.Set<string>? search_matches = yield search_folder.get_search_matches_async(
                 ids, cancellable_fetch);
+            if (search_matches == null)
+                search_matches = new Gee.HashSet<string>();
+            
+            if (search_folder.search_query != null)
+                add_literal_matches(search_folder.search_query.raw, search_matches);
             
             // Webkit's highlighting is ... weird.  In order to actually see
             // all the highlighting you're applying, it seems necessary to
@@ -484,8 +506,7 @@ public class ConversationViewer : Gtk.Box {
             // seems that shorter strings will overwrite longer ones, and
             // you're left with incomplete highlighting.
             Gee.ArrayList<string> ordered_matches = new Gee.ArrayList<string>();
-            if (search_matches != null)
-                ordered_matches.add_all(search_matches);
+            ordered_matches.add_all(search_matches);
             ordered_matches.sort((a, b) => a.length - b.length);
             
             foreach(string match in ordered_matches)

@@ -107,7 +107,11 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
             break;
             
             case 22:
-                post_rebuild_attachments();
+                post_upgrade_rebuild_attachments();
+            break;
+            
+            case 23:
+                post_upgrade_add_tokenizer_table();
             break;
         }
     }
@@ -407,7 +411,7 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
     }
     
     // Version 22
-    private void post_rebuild_attachments() {
+    private void post_upgrade_rebuild_attachments() {
         try {
             exec_transaction(Db.TransactionType.RW, (cx) => {
                 Db.Statement stmt = cx.prepare("""
@@ -468,6 +472,25 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
         } catch (Error e) {
             debug("Error populating old inline attachments during upgrade to database schema 13: %s",
                 e.message);
+        }
+    }
+    
+    // Version 23
+    private void post_upgrade_add_tokenizer_table() {
+        try {
+            string stemmer = find_appropriate_search_stemmer();
+            debug("Creating tokenizer table using %s stemmer", stemmer);
+            
+            // These can't go in the .sql file because its schema (the stemmer
+            // algorithm) is determined at runtime.
+            exec("""
+                CREATE VIRTUAL TABLE TokenizerTable USING fts3tokenize(
+                    unicodesn,
+                    "stemmer=%s"
+                );
+            """.printf(stemmer));
+        } catch (Error e) {
+            error("Error creating tokenizer table: %s", e.message);
         }
     }
     

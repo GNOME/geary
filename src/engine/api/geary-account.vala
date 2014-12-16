@@ -323,6 +323,23 @@ public interface Geary.Account : BaseObject {
         Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error;
     
     /**
+     * Create a new {@link SearchQuery} for this {@link Account}.
+     *
+     * See {@link Geary.SearchQuery.Strategy} for more information about how its interpreted by the
+     * Engine.  In particular, note that it's an advisory parameter only and may have no effect,
+     * especially on server searches.  However, it may also have a dramatic effect on what search
+     * results are returned and so should be used with some caution.  Whether this parameter is
+     * user-configurable, available through GSettings or another configuration mechanism, or simply
+     * baked into the caller's code is up to the caller.  CONSERVATIVE is designed to be a good
+     * default.
+     *
+     * The SearchQuery object can only be used with calls into this Account.
+     *
+     * Dropping the last reference to the SearchQuery will close it.
+     */
+    public abstract Geary.SearchQuery open_search(string query, Geary.SearchQuery.Strategy strategy);
+    
+    /**
      * Performs a search with the given query.  Optionally, a list of folders not to search
      * can be passed as well as a list of email identifiers to restrict the search to only those messages.
      * Returns a list of EmailIdentifiers, or null if there are no results.
@@ -335,9 +352,9 @@ public interface Geary.Account : BaseObject {
         Gee.Collection<Geary.EmailIdentifier>? search_ids = null, Cancellable? cancellable = null) throws Error;
     
     /**
-     * Given a list of mail IDs, returns a list of words that match for the query.
+     * Given a list of mail IDs, returns a set of casefolded words that match for the query.
      */
-    public abstract async Gee.Collection<string>? get_search_matches_async(Geary.SearchQuery query,
+    public abstract async Gee.Set<string>? get_search_matches_async(Geary.SearchQuery query,
         Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable = null) throws Error;
     
     /**

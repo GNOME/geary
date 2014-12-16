@@ -135,5 +135,43 @@ public class Configuration {
         if (!settings.set_boolean(name, value))
             message("Unable to set configuration value %s = %s", name, value.to_string());
     }
+    
+    public Geary.SearchQuery.Strategy get_search_strategy() {
+        switch (settings.get_string("search-strategy").down()) {
+            case "exact":
+                return Geary.SearchQuery.Strategy.EXACT;
+            
+            case "aggressive":
+                return Geary.SearchQuery.Strategy.AGGRESSIVE;
+            
+            case "horizon":
+                return Geary.SearchQuery.Strategy.HORIZON;
+            
+            case "conservative":
+            default:
+                return Geary.SearchQuery.Strategy.CONSERVATIVE;
+        }
+    }
+    
+    public void set_search_strategy(Geary.SearchQuery.Strategy strategy) {
+        switch (strategy) {
+            case Geary.SearchQuery.Strategy.EXACT:
+                settings.set_string("search-strategy", "exact");
+            break;
+            
+            case Geary.SearchQuery.Strategy.AGGRESSIVE:
+                settings.set_string("search-strategy", "aggressive");
+            break;
+            
+            case Geary.SearchQuery.Strategy.HORIZON:
+                settings.set_string("search-strategy", "horizon");
+            break;
+            
+            case Geary.SearchQuery.Strategy.CONSERVATIVE:
+            default:
+                settings.set_string("search-strategy", "conservative");
+            break;
+        }
+    }
 }
 
