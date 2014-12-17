@@ -104,5 +104,57 @@
   		<td><p> <keyseq><key>Ctrl</key><key>Shift</key><key>G</key></keyseq> </p></td>
   	</tr>
      </table>
+    
+    <section id="composer">
+        <title>Composer shortcuts</title>
+        <p>These shortcuts are active whenever focus is in a composer.</p>
+        <table frame="all" rules="rows">
+            <tr>
+                <td><p>Quote text</p></td>
+                <td><p> <keyseq><key>Ctrl</key><key>]</key></keyseq> </p></td>
+            </tr>
+            <tr>
+                <td><p>Unquote text</p></td>
+                <td><p> <keyseq><key>Ctrl</key><key>[</key></keyseq> </p></td>
+            </tr>
+            <tr>
+                <td><p>Close composer</p></td>
+                <td><p> <keyseq><key>Ctrl</key><key>W</key></keyseq> or <key>Esc</key> </p></td>
+            </tr>
+            <tr>
+                <td><p>Detach composer</p></td>
+                <td><p> <keyseq><key>Ctrl</key><key>D</key></keyseq> </p></td>
+            </tr>
+        </table>
+        
+        <p>These shortcuts are only active in composers in rich text mode.</p>
+        <table frame="all" rules="rows">
+            <tr>
+                <td><p>Bold text</p></td>
+                <td><p> <keyseq><key>Ctrl</key><key>B</key></keyseq> </p></td>
+            </tr>
+            <tr>
+                <td><p>Italicize text</p></td>
+                <td><p> <keyseq><key>Ctrl</key><key>I</key></keyseq> </p></td>
+            </tr>
+            <tr>
+                <td><p>Underline text</p></td>
+                <td><p> <keyseq><key>Ctrl</key><key>U</key></keyseq> </p></td>
+            </tr>
+            <tr>
+                <td><p>Strike text</p></td>
+                <td><p> <keyseq><key>Ctrl</key><key>K</key></keyseq> </p></td>
+            </tr>
+            <tr>
+                <td><p>Insert a link</p></td>
+                <td><p> <keyseq><key>Ctrl</key><key>L</key></keyseq> </p></td>
+            </tr>
+            <tr>
+                <td><p>Remove formatting</p></td>
+                <td><p> <keyseq><key>Ctrl</key><key>Space</key></keyseq> </p></td>
+            </tr>
+        </table>
+    </section>
+
 </page>
 
