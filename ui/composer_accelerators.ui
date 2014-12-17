@@ -36,5 +36,6 @@
     <accelerator action="font_serif" />
     <accelerator action="font_monospace" />
     
+    <accelerator action="detach" />
     <accelerator action="close" />
 </ui>
