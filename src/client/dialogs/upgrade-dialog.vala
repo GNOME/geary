@@ -60,6 +60,7 @@ public class UpgradeDialog : Object {
      */
     public void add_account(Geary.Account account, Cancellable? cancellable = null) {
         monitor.add(account.db_upgrade_monitor);
+        monitor.add(account.db_vacuum_monitor);
         if (cancellable != null)
             cancellables.add(cancellable);
     }

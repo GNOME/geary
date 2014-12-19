@@ -11,7 +11,8 @@ public enum Geary.ProgressType {
     AGGREGATED,
     ACTIVITY,
     DB_UPGRADE,
-    SEARCH_INDEX
+    SEARCH_INDEX,
+    DB_VACUUM
 }
 
 /**

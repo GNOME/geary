@@ -37,6 +37,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         
         search_upgrade_monitor = local.search_index_monitor;
         db_upgrade_monitor = local.upgrade_monitor;
+        db_vacuum_monitor = local.vacuum_monitor;
         opening_monitor = new Geary.ReentrantProgressMonitor(Geary.ProgressType.ACTIVITY);
         sending_monitor = local.sending_monitor;
         

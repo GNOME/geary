@@ -27,6 +27,8 @@ private class Geary.ImapDB.Account : BaseObject {
         default = new IntervalProgressMonitor(ProgressType.SEARCH_INDEX, 0, 0); }
     public SimpleProgressMonitor upgrade_monitor { get; private set; default = new SimpleProgressMonitor(
         ProgressType.DB_UPGRADE); }
+    public SimpleProgressMonitor vacuum_monitor { get; private set; default = new SimpleProgressMonitor(
+        ProgressType.DB_VACUUM); }
     public SimpleProgressMonitor sending_monitor { get; private set;
         default = new SimpleProgressMonitor(ProgressType.ACTIVITY); }
     
@@ -68,16 +70,18 @@ private class Geary.ImapDB.Account : BaseObject {
         if (db != null)
             throw new EngineError.ALREADY_OPEN("IMAP database already open");
         
-        db = new ImapDB.Database(user_data_dir, schema_dir, upgrade_monitor, account_information.email);
+        db = new ImapDB.Database(user_data_dir, schema_dir, upgrade_monitor, vacuum_monitor,
+            account_information.email);
         
         try {
-            db.open(
+            yield db.open_async(
                 Db.DatabaseFlags.CREATE_DIRECTORY | Db.DatabaseFlags.CREATE_FILE | Db.DatabaseFlags.CHECK_CORRUPTION,
                 cancellable);
         } catch (Error err) {
             warning("Unable to open database: %s", err.message);
             
             // close database before exiting
+            db.close(null);
             db = null;
             
             throw err;

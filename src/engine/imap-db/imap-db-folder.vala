@@ -1983,6 +1983,15 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             File saved_file = ImapDB.Attachment.generate_file(db.db_file.get_parent(), message_id,
                 attachment_id, filename);
             
+            // On the off-chance this is marked for deletion, unmark it
+            stmt = cx.prepare("""
+                DELETE FROM DeleteAttachmentFileTable
+                WHERE filename = ?
+            """);
+            stmt.bind_string(0, saved_file.get_path());
+            
+            stmt.exec(cancellable);
+            
             debug("Saving attachment to %s", saved_file.get_path());
             
             try {

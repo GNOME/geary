@@ -11,14 +11,17 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
     private const int OPEN_PUMP_EVENT_LOOP_MSEC = 100;
     
     private ProgressMonitor upgrade_monitor;
+    private ProgressMonitor vacuum_monitor;
     private string account_owner_email;
     private bool new_db = false;
+    private Cancellable gc_cancellable = new Cancellable();
     
     public Database(File db_dir, File schema_dir, ProgressMonitor upgrade_monitor,
-        string account_owner_email) {
+        ProgressMonitor vacuum_monitor, string account_owner_email) {
         base (get_db_file(db_dir), schema_dir);
         
         this.upgrade_monitor = upgrade_monitor;
+        this.vacuum_monitor = vacuum_monitor;
         this.account_owner_email = account_owner_email;
     }
     
@@ -32,9 +35,67 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
      * This should only be done from the main thread, as it is designed to pump the event loop
      * while the database is being opened and updated.
      */
-    public new void open(Db.DatabaseFlags flags, Cancellable? cancellable) throws Error {
+    public async void open_async(Db.DatabaseFlags flags, Cancellable? cancellable) throws Error {
         open_background(flags, on_prepare_database_connection, pump_event_loop,
             OPEN_PUMP_EVENT_LOOP_MSEC, cancellable);
+        
+        // Tie user-supplied Cancellable to internal Cancellable, which is used when close() is
+        // called
+        if (cancellable != null)
+            cancellable.cancelled.connect(cancel_gc);
+        
+        // Create new garbage collection object for this database
+        GC gc = new GC(this, Priority.LOW);
+        
+        // Get recommendations on what GC operations should be executed
+        GC.RecommendedOperation recommended = yield gc.should_run_async(gc_cancellable);
+        
+        // VACUUM needs to execute in the foreground with the user given a busy prompt (and cannot
+        // be run at the same time as REAP)
+        if ((recommended & GC.RecommendedOperation.VACUUM) != 0) {
+            if (!vacuum_monitor.is_in_progress)
+                vacuum_monitor.notify_start();
+            
+            try {
+                yield gc.vacuum_async(gc_cancellable);
+            } catch (Error err) {
+                message("Vacuum of IMAP database %s failed: %s", db_file.get_path(), err.message);
+                
+                throw err;
+            } finally {
+                if (vacuum_monitor.is_in_progress)
+                    vacuum_monitor.notify_finish();
+            }
+        }
+        
+        // REAP can run in the background while the application is executing
+        if ((recommended & GC.RecommendedOperation.REAP) != 0) {
+            // run in the background and allow application to continue running
+            gc.reap_async.begin(gc_cancellable, on_reap_async_completed);
+        }
+        
+        if (cancellable != null)
+            cancellable.cancelled.disconnect(cancel_gc);
+    }
+    
+    private void on_reap_async_completed(Object? object, AsyncResult result) {
+        GC gc = (GC) object;
+        try {
+            gc.reap_async.end(result);
+        } catch (Error err) {
+            message("Garbage collection of IMAP database %s failed: %s", db_file.get_path(), err.message);
+        }
+    }
+    
+    private void cancel_gc() {
+        gc_cancellable.cancel();
+        gc_cancellable = new Cancellable();
+    }
+    
+    public override void close(Cancellable? cancellable) throws Error {
+        cancel_gc();
+        
+        base.close(cancellable);
     }
     
     private void pump_event_loop() {
