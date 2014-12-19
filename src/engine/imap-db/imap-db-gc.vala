@@ -54,7 +54,7 @@ private class Geary.ImapDB.GC {
     /**
      * Operation(s) recommended by {@link should_run_async}.
      */
-    [Flag]
+    [Flags]
     public enum RecommendedOperation {
         /**
          * Indicates no garbage collection is recommended at this time.
