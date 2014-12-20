@@ -1,3 +1,16 @@
+geary (0.9.0-1~utopic1) utopic; urgency=low
+
+  * Improved full-text search experience (#720361)
+  * Periodic database & attachments garbage collection (#714134)
+  * Remove minimum width for sidebar/folder list (#713882)
+  * Use GtkHeaderBar for dialogs (#741240)
+  * Can now specify Reply-To when composing (#714588)
+  * Fix signed int32 UID/UIDVALIDITY bug (#737642)
+  * Composer shortcuts now listed in online help (#741573)
+  * Updated translations
+
+ -- Jim Nelson <jim@yorba.org> Fri, 19 Dec 2014 17:11:02 -0800
+
 geary (0.8.3-1~utopic1) utopic; urgency=low
 
   * Prevent race condition causing Geary window not to open (#737811)
