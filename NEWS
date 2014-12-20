@@ -1,3 +1,15 @@
+Geary 0.8.3 - 19 December 2014
+------------------------------
+
+  * Prevent race condition causing Geary window not to open (#737811)
+  * Compile with Vala 0.28 (#741077)
+  * Updated SSLv3 POODLE fallback (#741132)
+  * Fixed connection state handler to return to IDLE
+  * Removed unnecessary assertion causing crashes for intl users (#739316)
+  * Updated German help translations
+  * Updated translations
+
+
 Geary 0.8.2 - 4 November 2014
 -----------------------------
 
