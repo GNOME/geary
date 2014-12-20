@@ -1,3 +1,15 @@
+geary (0.8.3-1~utopic1) utopic; urgency=low
+
+  * Prevent race condition causing Geary window not to open (#737811)
+  * Compile with Vala 0.28 (#741077)
+  * Updated SSLv3 POODLE fallback (#741132)
+  * Fixed connection state handler to return to IDLE
+  * Removed unnecessary assertion causing crashes for intl users (#739316)
+  * Updated German help translations
+  * Updated translations
+
+ -- Jim Nelson <jim@yorba.org>  Fri, 19 Dec 2014 16:50:32 -0800
+
 geary (0.8.2-1~utopic1) utopic; urgency=low
 
   * "View Source" creates temp files only readable by user (#724436)
