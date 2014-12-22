@@ -3,20 +3,21 @@
 # This file is distributed under the same license as the geary package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 # Daniel Mustieles <daniel.mustieles@gmail.com>, 2014.
+# Adolfo Jayme Barrientos <fitojb@ubuntu.com>, 2014.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: geary master\n"
-"POT-Creation-Date: 2014-10-25 16:52+0000\n"
-"PO-Revision-Date: 2014-10-25 21:28-0600\n"
+"POT-Creation-Date: 2014-12-21 05:55+0000\n"
+"PO-Revision-Date: 2014-12-21 04:06-0600\n"
 "Last-Translator: Adolfo Jayme Barrientos <fitojb@ubuntu.com>\n"
-"Language-Team: Español; Castellano <gnome-es-list@gnome.org>\n"
+"Language-Team: Español; Castellano <>\n"
 "Language: es\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 1.6.10\n"
+"X-Generator: Gtranslator 2.91.6\n"
 
 #: C/write.page:9(title)
 msgid "Write a message"
@@ -92,11 +93,19 @@ msgstr ""
 "del editor, y suéltelo en los campos de texto en la parte superior de la "
 "ventana o en la barra de herramientas inferior."
 
-#: C/write.page:37(title)
+#: C/write.page:35(p)
+msgid ""
+"A number of keyboard shortcuts are available in the composer; see <link xref="
+"\"shortcuts#composer\"/> for details."
+msgstr ""
+"Hay disponibles varios atajos de teclado en la ventana de redacción; "
+"consulte <link xref=\"shortcuts#composer\"/> para obtener más información."
+
+#: C/write.page:39(title)
 msgid "Drafts"
 msgstr "Borradores"
 
-#: C/write.page:39(p)
+#: C/write.page:41(p)
 msgid ""
 "For mail servers that support drafts, Geary will automatically save the "
 "message as you type. If you close the composer without sending, Geary will "
@@ -107,7 +116,7 @@ msgstr ""
 "editor sin enviarlo, Geary le preguntará si quiere mantener o descartar el "
 "borrador."
 
-#: C/write.page:42(p)
+#: C/write.page:44(p)
 msgid ""
 "To edit an existing draft, select the Drafts folder in the folder list, "
 "select the message, and click \"Edit Draft\" in the message viewer."
@@ -116,7 +125,7 @@ msgstr ""
 "lista de carpetas, elija el mensaje y pulse en «Editar el borrador» en el "
 "visor de mensajes."
 
-#: C/write.page:45(p)
+#: C/write.page:47(p)
 msgid "Geary deletes the draft when you send the message."
 msgstr "Geary eliminará el borrador cuando envíe el mensaje."
 
@@ -265,7 +274,7 @@ msgstr "S"
 msgid "Unstar"
 msgstr "Quitar el destaque"
 
-#: C/shortcuts.page:48(key)
+#: C/shortcuts.page:48(key) C/shortcuts.page:126(key)
 msgid "D"
 msgstr "D"
 
@@ -308,6 +317,11 @@ msgstr "Salir"
 #: C/shortcuts.page:64(key) C/shortcuts.page:80(key) C/shortcuts.page:84(key)
 #: C/shortcuts.page:88(key) C/shortcuts.page:92(key) C/shortcuts.page:96(key)
 #: C/shortcuts.page:100(key) C/shortcuts.page:104(key)
+#: C/shortcuts.page:114(key) C/shortcuts.page:118(key)
+#: C/shortcuts.page:126(key) C/shortcuts.page:134(key)
+#: C/shortcuts.page:138(key) C/shortcuts.page:142(key)
+#: C/shortcuts.page:146(key) C/shortcuts.page:150(key)
+#: C/shortcuts.page:154(key)
 msgid "Ctrl"
 msgstr "Ctrl"
 
@@ -391,6 +405,99 @@ msgstr "Buscar la ocurrencia anterior en la conversación"
 msgid "Shift"
 msgstr "Mayús"
 
+#: C/shortcuts.page:109(title)
+#| msgid "Keyboard shortcuts"
+msgid "Composer shortcuts"
+msgstr "Atajos de teclado de la ventana de redacción"
+
+#: C/shortcuts.page:110(p)
+msgid "These shortcuts are active whenever focus is in a composer."
+msgstr ""
+"Estas combinaciones de teclas se activan siempre que la ventana de redacción "
+"esté enfocada."
+
+#: C/shortcuts.page:113(p)
+msgid "Quote text"
+msgstr "Citar texto"
+
+#: C/shortcuts.page:114(key)
+msgid "]"
+msgstr "]"
+
+#: C/shortcuts.page:117(p)
+msgid "Unquote text"
+msgstr "Eliminar cita de texto"
+
+#: C/shortcuts.page:118(key)
+msgid "["
+msgstr "["
+
+#: C/shortcuts.page:121(p)
+#| msgid "Close composer window"
+msgid "Close composer"
+msgstr "Cerrar la ventana de redacción"
+
+#: C/shortcuts.page:122(p)
+#| msgid "<keyseq><key>Ctrl</key><key>N</key></keyseq> or <key>N</key>"
+msgid "<keyseq><key>Ctrl</key><key>W</key></keyseq> or <key>Esc</key>"
+msgstr "<keyseq><key>Ctrl</key><key>W</key></keyseq> o <key>Esc</key>"
+
+#: C/shortcuts.page:125(p)
+msgid "Detach composer"
+msgstr "Desacoplar la ventana de redacción"
+
+#: C/shortcuts.page:130(p)
+msgid "These shortcuts are only active in composers in rich text mode."
+msgstr ""
+
+#: C/shortcuts.page:133(p)
+msgid "Bold text"
+msgstr "Texto en negritas"
+
+#: C/shortcuts.page:134(key)
+msgid "B"
+msgstr "B"
+
+#: C/shortcuts.page:137(p)
+msgid "Italicize text"
+msgstr "Texto en cursiva"
+
+#: C/shortcuts.page:138(key)
+msgid "I"
+msgstr "I"
+
+#: C/shortcuts.page:141(p)
+msgid "Underline text"
+msgstr "Subrayar el texto"
+
+#: C/shortcuts.page:142(key)
+msgid "U"
+msgstr "U"
+
+#: C/shortcuts.page:145(p)
+msgid "Strike text"
+msgstr "Tachar el texto"
+
+#: C/shortcuts.page:146(key)
+msgid "K"
+msgstr "K"
+
+#: C/shortcuts.page:149(p)
+msgid "Insert a link"
+msgstr "Insertar un enlace"
+
+#: C/shortcuts.page:150(key)
+msgid "L"
+msgstr "L"
+
+#: C/shortcuts.page:153(p)
+msgid "Remove formatting"
+msgstr "Eliminar el formato"
+
+#: C/shortcuts.page:154(key)
+msgid "Space"
+msgstr "Espacio"
+
 #: C/search.page:10(title)
 msgid "Search"
 msgstr "Búsqueda"
@@ -434,7 +541,7 @@ msgstr "Geary admite los siguientes operadores para filtrar los resultados:"
 
 #: C/search.page:27(var)
 msgid "filename"
-msgstr ""
+msgstr "filename"
 
 #: C/search.page:27(input)
 msgid "attachment:<placeholder-1/>"
