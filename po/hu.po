@@ -10,20 +10,19 @@ msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2014-06-26 20:33+0000\n"
-"PO-Revision-Date: 2014-07-01 18:50+0200\n"
+"POT-Creation-Date: 2014-12-22 05:55+0000\n"
+"PO-Revision-Date: 2014-12-23 17:29+0100\n"
 "Last-Translator: Balázs Úr <urbalazs@gmail.com>\n"
-"Language-Team: Hungarian <kde-l10n-hu@kde.org>\n"
-"geary/language/hu_HU/)\n"
+"Language-Team: Hungarian <openscope at googlegroups dot com>\n"
 "Language: hu_HU\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"geary/language/hu_HU/)\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Lokalize 1.2\n"
 
 #: ../desktop/geary.desktop.in.h:1 ../desktop/geary-autostart.desktop.in.h:1
-#| msgid "Geary Mail"
 msgid "Geary"
 msgstr "Geary"
 
@@ -48,6 +47,14 @@ msgstr "Email;E-mail;Levél;"
 msgid "Compose Message"
 msgstr "Levél írása"
 
+#: ../desktop/geary-attach.contract.in.h:1
+msgid "Send by email"
+msgstr "Elküldés levélben"
+
+#: ../desktop/geary-attach.contract.in.h:2
+msgid "Send files using Geary"
+msgstr "Fájlok küldése a Geary használatával"
+
 #: ../src/client/accounts/account-dialog-add-edit-pane.vala:48
 #: ../src/client/components/stock.vala:31
 msgid "_Save"
@@ -59,7 +66,7 @@ msgid "_Add"
 msgstr "_Hozzáadás"
 
 #. Sets min size.
-#: ../src/client/accounts/account-dialog.vala:19
+#: ../src/client/accounts/account-dialog.vala:20
 msgid "Accounts"
 msgstr "Fiókok"
 
@@ -104,12 +111,10 @@ msgid "1 year back"
 msgstr "1 évre visszamenőleg"
 
 #: ../src/client/accounts/add-edit-page.vala:252
-#| msgid "1 year back"
 msgid "2 years back"
 msgstr "2 évre visszamenőleg"
 
 #: ../src/client/accounts/add-edit-page.vala:253
-#| msgid "1 year back"
 msgid "4 years back"
 msgstr "4 évre visszamenőleg"
 
@@ -164,7 +169,6 @@ msgid "        &#8226; Username or password incorrect.\n"
 msgstr "        &#8226; A felhasználónév vagy jelszó helytelen.\n"
 
 #: ../src/client/application/geary-application.vala:19
-#| msgid "Copyright 2011-2013 Yorba Foundation"
 msgid "Copyright 2011-2014 Yorba Foundation"
 msgstr "Copyright 2011-2014 Yorba Foundation"
 
@@ -222,206 +226,207 @@ msgid "Allow inspection of WebView"
 msgstr "A webes nézet megfigyelésének engedélyezése"
 
 #: ../src/client/application/geary-args.vala:26
+msgid "Revoke all server certificates with TLS warnings"
+msgstr "Minden kiszolgáló tanúsítvány visszavonása TLS figyelmeztetésekkel"
+
+#: ../src/client/application/geary-args.vala:27
 msgid "Display program version"
 msgstr "A program verziójának megjelenítése"
 
 #. This gives a command-line hint on how to open new composer windows with mailto:
-#: ../src/client/application/geary-args.vala:49
+#: ../src/client/application/geary-args.vala:51
 #, c-format
 msgid "Use %s to open a new composer window"
 msgstr "%s használata egy új levélíró ablak megnyitásához"
 
-#: ../src/client/application/geary-args.vala:50
+#: ../src/client/application/geary-args.vala:52
 msgid "Please report comments, suggestions and bugs to:"
 msgstr "Kérjük írja le véleményét, észrevételeit és a hibákat ide:"
 
 #. i18n: Command line arguments are invalid
-#: ../src/client/application/geary-args.vala:57
+#: ../src/client/application/geary-args.vala:59
 #, c-format
 msgid "Failed to parse command line options: %s\n"
 msgstr "A parancssori kapcsolók feldolgozása meghiúsult: %s\n"
 
-#: ../src/client/application/geary-args.vala:68
+#: ../src/client/application/geary-args.vala:70
 #, c-format
 msgid "Unrecognized command line option \"%s\"\n"
 msgstr "Ismeretlen parancssori kapcsoló: „%s”\n"
 
-#: ../src/client/application/geary-controller.vala:46
+#: ../src/client/application/geary-controller.vala:56
 msgid "_Delete"
 msgstr "_Törlés"
 
-#: ../src/client/application/geary-controller.vala:47
-#| msgid "Delete conversation (Delete, Backspace, A)"
+#: ../src/client/application/geary-controller.vala:57
 msgid "Delete conversation (Shift+Delete)"
 msgstr "Beszélgetés törlése (Shift+Delete)"
 
-#: ../src/client/application/geary-controller.vala:48
-#| msgid "Delete conversations (Delete, Backspace, A)"
+#: ../src/client/application/geary-controller.vala:58
 msgid "Delete conversations (Shift+Delete)"
 msgstr "Beszélgetések törlése (Shift+Delete)"
 
 #. This refers to the action ("move email to the trash"), not the Trash folder itself
-#: ../src/client/application/geary-controller.vala:52
-#| msgid "Trash"
+#: ../src/client/application/geary-controller.vala:62
 msgid "_Trash"
 msgstr "_Kuka"
 
-#: ../src/client/application/geary-controller.vala:53
-#| msgid "Archive conversations (Delete, Backspace, A)"
+#: ../src/client/application/geary-controller.vala:63
 msgid "Move conversation to trash (Delete, Backspace)"
 msgstr "Beszélgetés áthelyezése a kukába (Delete, Backspace)"
 
-#: ../src/client/application/geary-controller.vala:54
-#| msgid "Archive conversations (Delete, Backspace, A)"
+#: ../src/client/application/geary-controller.vala:64
 msgid "Move conversations to trash (Delete, Backspace)"
 msgstr "Beszélgetések áthelyezése a kukába (Delete, Backspace)"
 
 #. This refers to the action ("archive an email"), not the Archive folder itself
-#: ../src/client/application/geary-controller.vala:58
+#: ../src/client/application/geary-controller.vala:68
 msgid "_Archive"
 msgstr "_Archiválás"
 
-#: ../src/client/application/geary-controller.vala:59
-#| msgid "Move conversation"
+#: ../src/client/application/geary-controller.vala:69
 msgid "Archive conversation (A)"
 msgstr "Beszélgetés archiválása (A)"
 
-#: ../src/client/application/geary-controller.vala:60
-#| msgid "Move conversations"
+#: ../src/client/application/geary-controller.vala:70
 msgid "Archive conversations (A)"
 msgstr "Beszélgetések archiválása (A)"
 
-#: ../src/client/application/geary-controller.vala:63
+#: ../src/client/application/geary-controller.vala:73
 msgid "Mark as S_pam"
 msgstr "Megjelölés levél_szemétként"
 
-#: ../src/client/application/geary-controller.vala:64
+#: ../src/client/application/geary-controller.vala:74
 msgid "Mark as not S_pam"
 msgstr "Megjelölés nem levél_szemétként"
 
-#: ../src/client/application/geary-controller.vala:66
-#: ../src/client/application/geary-controller.vala:282
+#: ../src/client/application/geary-controller.vala:76
+#: ../src/client/application/geary-controller.vala:296
 msgid "Mark conversation"
 msgstr "Beszélgetés megjelölése"
 
-#: ../src/client/application/geary-controller.vala:67
+#: ../src/client/application/geary-controller.vala:77
 msgid "Mark conversations"
 msgstr "Beszélgetések megjelölése"
 
-#: ../src/client/application/geary-controller.vala:68
+#: ../src/client/application/geary-controller.vala:78
 msgid "Add label to conversation"
 msgstr "Címke hozzáadása a beszélgetéshez"
 
-#: ../src/client/application/geary-controller.vala:69
+#: ../src/client/application/geary-controller.vala:79
 msgid "Add label to conversations"
 msgstr "Címke hozzáadása a beszélgetésekhez"
 
-#: ../src/client/application/geary-controller.vala:70
-#: ../src/client/application/geary-controller.vala:321
+#: ../src/client/application/geary-controller.vala:80
+#: ../src/client/application/geary-controller.vala:335
 msgid "Move conversation"
 msgstr "Beszélgetés áthelyezése"
 
-#: ../src/client/application/geary-controller.vala:71
+#: ../src/client/application/geary-controller.vala:81
 msgid "Move conversations"
 msgstr "Beszélgetések áthelyezése"
 
-#: ../src/client/application/geary-controller.vala:258
+#: ../src/client/application/geary-controller.vala:272
 msgid "A_ccounts"
 msgstr "F_iókok"
 
-#: ../src/client/application/geary-controller.vala:263
+#: ../src/client/application/geary-controller.vala:277
 #: ../src/client/components/stock.vala:27
 msgid "_Preferences"
 msgstr "_Beállítások"
 
-#: ../src/client/application/geary-controller.vala:267
+#: ../src/client/application/geary-controller.vala:281
 #: ../src/client/components/stock.vala:25
 msgid "_Help"
 msgstr "_Súgó"
 
-#: ../src/client/application/geary-controller.vala:271
+#: ../src/client/application/geary-controller.vala:285
 #: ../src/client/components/stock.vala:21
 msgid "_About"
 msgstr "_Névjegy"
 
-#: ../src/client/application/geary-controller.vala:275
+#: ../src/client/application/geary-controller.vala:289
 msgid "_Donate"
 msgstr "_Adományozás"
 
-#: ../src/client/application/geary-controller.vala:279
+#: ../src/client/application/geary-controller.vala:293
 #: ../src/client/components/stock.vala:29
 msgid "_Quit"
 msgstr "_Kilépés"
 
-#: ../src/client/application/geary-controller.vala:284
+#: ../src/client/application/geary-controller.vala:298
 msgid "_Mark as..."
 msgstr "_Megjelölés mint…"
 
-#: ../src/client/application/geary-controller.vala:290
+#: ../src/client/application/geary-controller.vala:304
 msgid "Mark as _Read"
 msgstr "Megjelölés _olvasottként"
 
-#: ../src/client/application/geary-controller.vala:296
+#: ../src/client/application/geary-controller.vala:310
 msgid "Mark as _Unread"
 msgstr "Megjelölés ol_vasatlanként"
 
-#: ../src/client/application/geary-controller.vala:302
+#: ../src/client/application/geary-controller.vala:316
 msgid "_Star"
 msgstr "_Csillagozás"
 
-#: ../src/client/application/geary-controller.vala:307
+#: ../src/client/application/geary-controller.vala:321
 msgid "U_nstar"
 msgstr "C_sillagozás megszüntetése"
 
-#: ../src/client/application/geary-controller.vala:317
+#: ../src/client/application/geary-controller.vala:331
 msgid "Add label"
 msgstr "Címke hozzáadása"
 
-#: ../src/client/application/geary-controller.vala:318
+#: ../src/client/application/geary-controller.vala:332
 msgid "_Label"
 msgstr "_Címke"
 
-#: ../src/client/application/geary-controller.vala:322
+#: ../src/client/application/geary-controller.vala:336
 msgid "_Move"
 msgstr "Át_helyezés"
 
-#: ../src/client/application/geary-controller.vala:326
+#: ../src/client/application/geary-controller.vala:340
 msgid "Compose new message (Ctrl+N, N)"
 msgstr "Új levél írása (Ctrl+N, N)"
 
 #. Reply to a message.
-#: ../src/client/application/geary-controller.vala:330
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1574
+#: ../src/client/application/geary-controller.vala:344
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1751
 msgid "_Reply"
 msgstr "_Válasz"
 
-#: ../src/client/application/geary-controller.vala:331
+#: ../src/client/application/geary-controller.vala:345
 msgid "Reply (Ctrl+R, R)"
 msgstr "Válasz (Ctrl+R, R)"
 
-#: ../src/client/application/geary-controller.vala:335
+#: ../src/client/application/geary-controller.vala:349
 msgid "R_eply All"
 msgstr "Válasz _mindenkinek"
 
-#: ../src/client/application/geary-controller.vala:336
+#: ../src/client/application/geary-controller.vala:350
 msgid "Reply all (Ctrl+Shift+R, Shift+R)"
 msgstr "Válasz mindenkinek (Ctrl+Shift+R, Shift+R)"
 
 #. Forward a message.
-#: ../src/client/application/geary-controller.vala:341
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1584
+#: ../src/client/application/geary-controller.vala:355
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1761
 msgid "_Forward"
 msgstr "_Előre"
 
-#: ../src/client/application/geary-controller.vala:342
+#: ../src/client/application/geary-controller.vala:356
 msgid "Forward (Ctrl+L, F)"
 msgstr "Előre (Ctrl+L, F)"
 
-#: ../src/client/application/geary-controller.vala:625
+#: ../src/client/application/geary-controller.vala:624
+msgid "Unable to store server trust exception"
+msgstr "Nem lehet eltárolni a kiszolgáló megbízhatósági kivételét"
+
+#: ../src/client/application/geary-controller.vala:861
 msgid "Your settings are insecure"
 msgstr "A beállításai nem biztonságosak"
 
-#: ../src/client/application/geary-controller.vala:626
+#: ../src/client/application/geary-controller.vala:862
 msgid ""
 "Your IMAP and/or SMTP settings do not specify SSL or TLS.  This means your "
 "username and password could be read by another person on the network.  Are "
@@ -431,17 +436,17 @@ msgstr ""
 "Ez azt jelenti, hogy a felhasználónevét és a jelszavát mások elolvashatják a "
 "hálózaton. Biztos benne, hogy ezt szeretné tenni?"
 
-#: ../src/client/application/geary-controller.vala:627
+#: ../src/client/application/geary-controller.vala:863
 msgid "Co_ntinue"
 msgstr "Fo_lytatás"
 
 #. / Displayed in the space-limited status bar when a message fails to be sent due to error.
-#: ../src/client/application/geary-controller.vala:705
+#: ../src/client/application/geary-controller.vala:941
 #: ../src/client/components/status-bar.vala:29
 msgid "Error sending email"
 msgstr "Hiba a levél küldésekor"
 
-#: ../src/client/application/geary-controller.vala:706
+#: ../src/client/application/geary-controller.vala:942
 msgid ""
 "Geary encountered an error sending an email.  If the problem persists, "
 "please manually delete the email from your Outbox folder."
@@ -451,33 +456,33 @@ msgstr ""
 
 #. Displayed in the space-limited status bar when a message fails to be uploaded
 #. to Sent Mail after being sent.
-#: ../src/client/application/geary-controller.vala:710
+#: ../src/client/application/geary-controller.vala:946
 #: ../src/client/components/status-bar.vala:33
 msgid "Error saving sent mail"
 msgstr "Hiba az elküldött levél mentésekor"
 
-#: ../src/client/application/geary-controller.vala:711
+#: ../src/client/application/geary-controller.vala:947
 msgid ""
 "Geary encountered an error saving a sent message to Sent Mail.  The message "
 "will stay in your Outbox folder until you delete it."
 msgstr ""
 "A Geary hibára futott az elküldött levél mentésekor az Elküldött levelek "
-"mappába. Az üzenet a Kimenő levelek mappájában fog maradni, amíg ki nem törli "
-"azt."
+"mappába. Az üzenet a Kimenő levelek mappájában fog maradni, amíg ki nem "
+"törli azt."
 
-#: ../src/client/application/geary-controller.vala:780
+#: ../src/client/application/geary-controller.vala:1016
 msgid "Labels"
 msgstr "Címkék"
 
 #. give the user two options: reset the Account local store, or exit Geary.  A third
 #. could be done to leave the Account in an unopened state, but we don't currently
 #. have provisions for that.
-#: ../src/client/application/geary-controller.vala:792
+#: ../src/client/application/geary-controller.vala:1028
 #, c-format
 msgid "Unable to open the database for %s"
 msgstr "Nem sikerült megnyitni az adatbázist ehhez: %s"
 
-#: ../src/client/application/geary-controller.vala:793
+#: ../src/client/application/geary-controller.vala:1029
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -490,8 +495,8 @@ msgid ""
 "Rebuilding the database will destroy all local email and its attachments. "
 "<b>The mail on the your server will not be affected.</b>"
 msgstr ""
-"Hiba történt a fiók helyi levéladatbázisának megnyitásakor. Ez valószínűleg a "
-"könyvtárban lévő adatbázisfájl sérülése miatt történt:\n"
+"Hiba történt a fiók helyi levéladatbázisának megnyitásakor. Ez valószínűleg "
+"a könyvtárban lévő adatbázisfájl sérülése miatt történt:\n"
 "\n"
 "%s\n"
 "\n"
@@ -501,20 +506,20 @@ msgstr ""
 "Az adatbázis újjáépítése törölni fogja az összes helyi levelet és azok "
 "mellékleteit. <b>A kiszolgálón lévő levelek nem érintettek.</b>"
 
-#: ../src/client/application/geary-controller.vala:795
+#: ../src/client/application/geary-controller.vala:1031
 msgid "_Rebuild"
 msgstr "Ú_jjáépítés"
 
-#: ../src/client/application/geary-controller.vala:795
+#: ../src/client/application/geary-controller.vala:1031
 msgid "E_xit"
 msgstr "_Kilépés"
 
-#: ../src/client/application/geary-controller.vala:804
+#: ../src/client/application/geary-controller.vala:1040
 #, c-format
 msgid "Unable to rebuild database for \"%s\""
 msgstr "Nem sikerült újjáépíteni az adatbázist ehhez: „%s”"
 
-#: ../src/client/application/geary-controller.vala:805
+#: ../src/client/application/geary-controller.vala:1041
 #, c-format
 msgid ""
 "Error during rebuild:\n"
@@ -527,14 +532,14 @@ msgstr ""
 
 #. some other problem opening the account ... as with other flow path, can't run
 #. Geary today with an account in unopened state, so have to exit
-#: ../src/client/application/geary-controller.vala:827
-#: ../src/client/application/geary-controller.vala:837
-#: ../src/client/application/geary-controller.vala:848
+#: ../src/client/application/geary-controller.vala:1063
+#: ../src/client/application/geary-controller.vala:1073
+#: ../src/client/application/geary-controller.vala:1084
 #, c-format
 msgid "Unable to open local mailbox for %s"
 msgstr "Nem sikerült megnyitni a helyi postafiókot ehhez: %s"
 
-#: ../src/client/application/geary-controller.vala:828
+#: ../src/client/application/geary-controller.vala:1064
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -545,15 +550,15 @@ msgid ""
 "\n"
 "%s"
 msgstr ""
-"Hiba történt a fiók helyi levéladatbázisának megnyitásakor. Ez valószínűleg a "
-"fájl jogosultsági problémája miatt volt.\n"
+"Hiba történt a fiók helyi levéladatbázisának megnyitásakor. Ez valószínűleg "
+"a fájl jogosultsági problémája miatt volt.\n"
 "\n"
 "Ellenőrizze, hogy minden fájlra van-e olvasási/írási jogosultsága ebben a "
 "könyvtárban:\n"
 "\n"
 "%s"
 
-#: ../src/client/application/geary-controller.vala:838
+#: ../src/client/application/geary-controller.vala:1074
 msgid ""
 "The version number of the local mail database is formatted for a newer "
 "version of Geary. Unfortunately, the database cannot be \"rolled back\" to "
@@ -567,7 +572,7 @@ msgstr ""
 "\n"
 "Telepítse a Geary legújabb verzióját és próbálja újra."
 
-#: ../src/client/application/geary-controller.vala:849
+#: ../src/client/application/geary-controller.vala:1085
 msgid ""
 "There was an error opening the local account. This is probably due to "
 "connectivity issues.\n"
@@ -579,26 +584,25 @@ msgstr ""
 "\n"
 "Ellenőrizze a hálózati kapcsolatot és indítsa újra a Geary programot."
 
-#: ../src/client/application/geary-controller.vala:1356
+#: ../src/client/application/geary-controller.vala:1592
 #, c-format
 msgid "About %s"
 msgstr "%s névjegye"
 
 #. / Translators: add your name and email address to receive credit in the About dialog
 #. / For example: Yamada Taro <yamada.taro@example.com>
-#: ../src/client/application/geary-controller.vala:1359
+#: ../src/client/application/geary-controller.vala:1595
 msgid "translator-credits"
 msgstr ""
-"Kelemen Gábor <kelemeng at gnome dot hu> "
-"Lukács Bence <lukacs.bence1 at gmail dot com> "
-"Úr Balázs <urbalazs at gmail dot com>"
+"Kelemen Gábor <kelemeng at gnome dot hu> Lukács Bence <lukacs.bence1 at "
+"gmail dot com> Úr Balázs <urbalazs at gmail dot com>"
 
-#: ../src/client/application/geary-controller.vala:1623
+#: ../src/client/application/geary-controller.vala:1859
 #, c-format
 msgid "Are you sure you want to open \"%s\"?"
 msgstr "Biztosan meg szeretné nyitni: „%s”?"
 
-#: ../src/client/application/geary-controller.vala:1624
+#: ../src/client/application/geary-controller.vala:1860
 msgid ""
 "Attachments may cause damage to your system if opened.  Only open files from "
 "trusted sources."
@@ -606,16 +610,16 @@ msgstr ""
 "A mellékletek kárt okozhatnak a rendszerében, ha meg vannak nyitva. Csak "
 "megbízható forrásokból nyisson meg fájlokat."
 
-#: ../src/client/application/geary-controller.vala:1625
+#: ../src/client/application/geary-controller.vala:1861
 msgid "Don't _ask me again"
 msgstr "Ne _kérdezze újra"
 
-#: ../src/client/application/geary-controller.vala:1643
+#: ../src/client/application/geary-controller.vala:1879
 #, c-format
 msgid "A file named \"%s\" already exists.  Do you want to replace it?"
 msgstr "A(z) „%s” nevű fájl már létezik. Le akarja cserélni?"
 
-#: ../src/client/application/geary-controller.vala:1645
+#: ../src/client/application/geary-controller.vala:1881
 #, c-format
 msgid ""
 "The file already exists in \"%s\".  Replacing it will overwrite its contents."
@@ -623,25 +627,23 @@ msgstr ""
 "A fájl már létezik a(z) „%s” helyen. Lecserélésével a tartalma felül lesz "
 "írva."
 
-#: ../src/client/application/geary-controller.vala:1648
+#: ../src/client/application/geary-controller.vala:1884
 msgid "_Replace"
 msgstr "_Csere"
 
 #. Find out what to do with the inline composers.
 #. TODO: Remove this in favor of automatically saving drafts
-#: ../src/client/application/geary-controller.vala:1915
+#: ../src/client/application/geary-controller.vala:2166
 msgid "Close open draft messages?"
 msgstr "Bezárja a megnyitott piszkozat leveleket?"
 
-#: ../src/client/application/geary-controller.vala:2024
-#| msgid "Do you want to discard the unsaved message?"
+#: ../src/client/application/geary-controller.vala:2269
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Véglegesen törölni szeretné ezt a levelet?"
 msgstr[1] "Véglegesen törölni szeretné ezeket a leveleket?"
 
-#: ../src/client/application/geary-controller.vala:2026
-#| msgid "_Delete"
+#: ../src/client/application/geary-controller.vala:2271
 msgid "Delete"
 msgstr "Törlés"
 
@@ -674,18 +676,18 @@ msgstr "Keresés"
 msgid "Search all mail in account for keywords (Ctrl+S)"
 msgstr "A fiók minden levélének keresése kulcsszavakra (Ctrl+S)"
 
-#: ../src/client/components/main-toolbar.vala:212
+#: ../src/client/components/main-toolbar.vala:210
 #, c-format
 msgid "Indexing %s account"
 msgstr "%s fiók indexelése"
 
-#: ../src/client/components/main-toolbar.vala:223
+#: ../src/client/components/main-toolbar.vala:221
 #: ../src/client/folder-list/folder-list-search-branch.vala:39
 #, c-format
 msgid "Search %s account"
 msgstr "%s fiók keresése"
 
-#: ../src/client/components/main-window.vala:305
+#: ../src/client/components/main-window.vala:347
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -700,12 +702,12 @@ msgstr "Küldés…"
 msgid "_OK"
 msgstr "_OK"
 
-#: ../src/client/components/stock.vala:19 ../ui/remove_confirm.glade.h:5
+#: ../src/client/components/stock.vala:19 ../ui/password-dialog.glade.h:5
+#: ../ui/remove_confirm.glade.h:5
 msgid "_Cancel"
 msgstr "Mé_gse"
 
-#: ../src/client/components/stock.vala:23 ../ui/account_list.glade.h:4
-#: ../ui/preferences.glade.h:2
+#: ../src/client/components/stock.vala:23
 msgid "_Close"
 msgstr "_Bezárás"
 
@@ -727,7 +729,7 @@ msgstr "_Eltávolítás"
 
 #. Select all.
 #: ../src/client/components/stock.vala:32
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1042
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1218
 msgid "Select _All"
 msgstr "Ö_sszes kijelölése"
 
@@ -735,101 +737,122 @@ msgstr "Ö_sszes kijelölése"
 msgid "_Keep"
 msgstr "_Megtartás"
 
-#: ../src/client/composer/composer-widget.vala:53
+#: ../src/client/composer/composer-widget.vala:58
 msgid "Saved"
 msgstr "Elmentve"
 
-#: ../src/client/composer/composer-widget.vala:54
+#: ../src/client/composer/composer-widget.vala:59
 msgid "Saving"
 msgstr "Mentés"
 
-#: ../src/client/composer/composer-widget.vala:55
+#: ../src/client/composer/composer-widget.vala:60
 msgid "Error saving"
 msgstr "Hiba a mentéskor"
 
-#. / A list of keywords, separated by pipe ("|") characters, that suggest an attachment
-#: ../src/client/composer/composer-widget.vala:102
-msgid "attach|enclosed|enclosing|cover letter"
-msgstr "csatolás|mellékelt|melléklet|levélborító"
+#. A list of keywords, separated by pipe ("|") characters, that suggest an attachment; since
+#. this is full-word checking, include all variants of each word.  No spaces are allowed.
+#: ../src/client/composer/composer-widget.vala:121
+msgid ""
+"attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|"
+"enclosing|encloses|enclosure|enclosures"
+msgstr ""
+"attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|"
+"enclosing|encloses|enclosure|enclosures|csatol|csatolás|csatolást|csatolmány|"
+"csatolmányt|csatolmányok|csatolmányokat|csatolva|csatolom|csatoltam|mellékel|"
+"melléklet|mellékletet|mellékletek|mellékleteket|mellékelve|mellékelem|"
+"mellékeltem|fájl|fájlt|fájlok|fájlokat"
 
-#: ../src/client/composer/composer-widget.vala:846
+#: ../src/client/composer/composer-widget.vala:907
 msgid "Do you want to discard the unsaved message?"
 msgstr "El szeretné dobni a nem mentett leveleket?"
 
-#: ../src/client/composer/composer-widget.vala:849
-#: ../src/client/composer/composer-widget.vala:853
+#: ../src/client/composer/composer-widget.vala:910
+#: ../src/client/composer/composer-widget.vala:914
 msgid "Do you want to discard this message?"
 msgstr "El szeretné dobni ezt a levelet?"
 
-#: ../src/client/composer/composer-widget.vala:934
+#: ../src/client/composer/composer-widget.vala:1027
 msgid "Send message with an empty subject and body?"
 msgstr "Elküldi a levelet üres tárggyal és törzzsel?"
 
-#: ../src/client/composer/composer-widget.vala:936
+#: ../src/client/composer/composer-widget.vala:1029
 msgid "Send message with an empty subject?"
 msgstr "Elküldi a levelet üres tárggyal?"
 
-#: ../src/client/composer/composer-widget.vala:938
+#: ../src/client/composer/composer-widget.vala:1031
 msgid "Send message with an empty body?"
 msgstr "Elküldi a levelet üres törzzsel?"
 
-#: ../src/client/composer/composer-widget.vala:940
+#: ../src/client/composer/composer-widget.vala:1033
 msgid "Send message without an attachment?"
 msgstr "Elküldi a levelet melléklet nélkül?"
 
-#: ../src/client/composer/composer-widget.vala:1123
+#: ../src/client/composer/composer-widget.vala:1216
 msgid "Cannot add attachment"
 msgstr "Nem sikerült mellékletet hozzáadni"
 
-#: ../src/client/composer/composer-widget.vala:1134
+#: ../src/client/composer/composer-widget.vala:1227
 #, c-format
 msgid "\"%s\" could not be found."
 msgstr "„%s” nem található."
 
-#: ../src/client/composer/composer-widget.vala:1141
+#: ../src/client/composer/composer-widget.vala:1234
 #, c-format
 msgid "\"%s\" is a folder."
 msgstr "„%s” egy mappa."
 
-#: ../src/client/composer/composer-widget.vala:1148
+#: ../src/client/composer/composer-widget.vala:1241
 #, c-format
 msgid "\"%s\" is an empty file."
 msgstr "„%s” egy üres fájl."
 
-#: ../src/client/composer/composer-widget.vala:1162
+#: ../src/client/composer/composer-widget.vala:1255
 #, c-format
 msgid "\"%s\" could not be opened for reading."
 msgstr "„%s” nem nyitható meg olvasásra."
 
-#: ../src/client/composer/composer-widget.vala:1169
+#: ../src/client/composer/composer-widget.vala:1262
 #, c-format
 msgid "\"%s\" already attached for delivery."
 msgstr "„%s” már csatolva van a küldeményhez."
 
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
-#: ../src/client/composer/composer-widget.vala:1178
+#: ../src/client/composer/composer-widget.vala:1271
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: ../src/client/composer/composer-widget.vala:1454
+#: ../src/client/composer/composer-widget.vala:1331
+msgid "To: "
+msgstr "Címzett: "
+
+#: ../src/client/composer/composer-widget.vala:1334
+msgid "Cc: "
+msgstr "Másolat: "
+
+#: ../src/client/composer/composer-widget.vala:1337
+msgid "Bcc: "
+msgstr "Titkos másolat: "
+
+#: ../src/client/composer/composer-widget.vala:1340
+msgid "Reply-To: "
+msgstr "Válaszcím: "
+
+#: ../src/client/composer/composer-widget.vala:1573
 msgid "Select Color"
 msgstr "Szín kiválasztása"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: ../src/client/composer/composer-widget.vala:1900
-#| msgid "From:"
+#: ../src/client/composer/composer-widget.vala:2022
 msgid "_From:"
 msgstr "_Feladó:"
 
 #. For other types of messages, just show the from account.
 #. Composer label (without mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#. Geary account mail will be sent from
-#: ../src/client/composer/composer-widget.vala:1916
-#: ../src/client/conversation-viewer/conversation-viewer.vala:635
-#: ../ui/composer.glade.h:42
+#: ../src/client/composer/composer-widget.vala:2038
+#: ../src/client/conversation-viewer/conversation-viewer.vala:734
 msgid "From:"
 msgstr "Feladó:"
 
@@ -847,170 +870,168 @@ msgstr "Új levél"
 msgid "Me"
 msgstr "Én"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:260
+#: ../src/client/conversation-viewer/conversation-viewer.vala:338
 msgid "No conversations selected."
 msgstr "Nincs beszélgetés kiválasztva."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:262
+#: ../src/client/conversation-viewer/conversation-viewer.vala:340
 #, c-format
-#| msgid "%u conversations selected."
 msgid "%u conversation selected."
 msgid_plural "%u conversations selected."
 msgstr[0] "%u beszélgetés kijelölve."
 msgstr[1] "%u beszélgetés kijelölve."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:291
+#: ../src/client/conversation-viewer/conversation-viewer.vala:369
 msgid "No search results found."
 msgstr "Nincsenek találatok."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:293
+#: ../src/client/conversation-viewer/conversation-viewer.vala:371
 msgid "No conversations in folder."
 msgstr "Nincsenek beszélgetések a mappában."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:534
+#: ../src/client/conversation-viewer/conversation-viewer.vala:633
 msgid "This message contains remote images."
 msgstr "Ez a levél távoli képeket tartalmaz."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:534
+#: ../src/client/conversation-viewer/conversation-viewer.vala:633
 msgid "Show Images"
 msgstr "Képek megjelenítése"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:535
+#: ../src/client/conversation-viewer/conversation-viewer.vala:634
 msgid "Always Show From Sender"
 msgstr "Mindig jelenítse meg a feladótól"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:559
+#: ../src/client/conversation-viewer/conversation-viewer.vala:658
 msgid "Edit Draft"
 msgstr "Piszkozat szerkesztése"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:638
+#: ../src/client/conversation-viewer/conversation-viewer.vala:737
 msgid "To:"
 msgstr "Címzett:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:641
+#: ../src/client/conversation-viewer/conversation-viewer.vala:740
 msgid "Cc:"
 msgstr "Másolat:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:644
+#: ../src/client/conversation-viewer/conversation-viewer.vala:743
 msgid "Bcc:"
 msgstr "Titkos másolat:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:647
+#: ../src/client/conversation-viewer/conversation-viewer.vala:746
 msgid "Subject:"
 msgstr "Tárgy:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:650
+#: ../src/client/conversation-viewer/conversation-viewer.vala:749
 msgid "Date:"
 msgstr "Dátum:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:857
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1033
 #, c-format
-#| msgid "%u read messages"
 msgid "%u read message"
 msgid_plural "%u read messages"
 msgstr[0] "%u olvasott levél"
 msgstr[1] "%u olvasott levél"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:989
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1165
 #, c-format
 msgid "This message was sent successfully, but could not be saved to %s."
 msgstr ""
 "Ez a levél sikeresen el lett küldve, de nem sikerült elmenteni ide: %s."
 
 #. Add a menu item for copying the current selection.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1015
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1191
 #: ../ui/composer.glade.h:4
 msgid "_Copy"
 msgstr "_Másolás"
 
 #. Add a menu item for copying the address.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1023
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1199
 msgid "Copy _Email Address"
 msgstr "_E-mail cím másolása"
 
 #. Add a menu item for copying the link.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1028
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1204
 #: ../ui/composer.glade.h:17
 msgid "Copy _Link"
 msgstr "_Hivatkozás másolása"
 
 #. Select message.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1036
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1212
 msgid "Select _Message"
 msgstr "_Levél kijelölése"
 
 #. Inspect.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1048
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1224
 msgid "_Inspect"
 msgstr "_Vizsgálat"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1274
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1450
 msgid "This link appears to go to"
 msgstr "Úgy tűnik, ez a hivatkozás ide mutat"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1275
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1451
 msgid "but actually goes to"
 msgstr "de valójában ide ugrik"
 
 #. If href doesn't look like a URL, something is fishy, so warn the user
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1330
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1506
 msgid " (Invalid?)"
 msgstr " (Érvénytelen?)"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1522
-msgid "_Save As..."
-msgstr "M_entés másként…"
-
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1527
-msgid "Save All A_ttachments..."
-msgstr "Minden _melléklet mentése…"
-
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1541
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1612
 msgid "_Save Image As..."
 msgstr "_Kép mentése másként…"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1564
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1716
+msgid "_Save As..."
+msgstr "M_entés másként…"
+
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1721
+msgid "Save All A_ttachments..."
+msgstr "Minden _melléklet mentése…"
+
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1741
 msgid "Save A_ttachment..."
 msgid_plural "Save All A_ttachments..."
 msgstr[0] "M_elléklet mentése…"
 msgstr[1] "Minden m_elléklet mentése…"
 
 #. Reply to all on a message.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1579
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1756
 msgid "Reply to _All"
 msgstr "_Válasz mindenkinek"
 
 #. Mark as read/unread.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1596
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1773
 msgid "_Mark as Read"
 msgstr "_Megjelölés olvasottként"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1600
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1777
 msgid "_Mark as Unread"
 msgstr "_Megjelölés olvasatlanként"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1606
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1783
 msgid "Mark Unread From _Here"
 msgstr "Megjelölés olvasatlanként _innentől"
 
 #. Separator.
 #. View original message source.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1621
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1798
 msgid "_View Source"
 msgstr "_Forrás megtekintése"
 
 #. Generate the attachment table.
 #. / Placeholder filename for attachments with no filename.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1915
-#: ../src/engine/rfc822/rfc822-utils.vala:327
+#: ../src/client/conversation-viewer/conversation-viewer.vala:2122
+#: ../src/engine/rfc822/rfc822-utils.vala:331
 msgid "none"
 msgstr "nincs"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:2045
+#: ../src/client/conversation-viewer/conversation-viewer.vala:2257
 msgid "Failed to open default text editor."
 msgstr "Nem sikerült megnyitni az alapértelmezett szövegszerkesztőt."
 
-#: ../src/client/conversation-viewer/conversation-web-view.vala:321
+#: ../src/client/conversation-viewer/conversation-web-view.vala:322
 #, c-format
 msgid "%s - Conversation Inspector"
 msgstr "%s - Beszélgetés felügyelő"
@@ -1023,13 +1044,94 @@ msgstr "Válasszon egy fájlt"
 msgid "_Attach"
 msgstr "C_satolás"
 
+#: ../src/client/dialogs/certificate-warning-dialog.vala:33
+#, c-format
+msgid "Untrusted Connection: %s"
+msgstr "Nem megbízható kapcsolat: %s"
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:36
+#, c-format
+msgid "The identity of the %s mail server at %s:%u could not be verified."
+msgstr ""
+"A(z) %s levelező kiszolgáló személyazonossága a(z) %s:%u címen nem "
+"ellenőrizhető."
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:44
+msgid ""
+"Selecting \"Trust This Server\" or \"Always Trust This Server\" may cause "
+"your username and password to be transmitted insecurely."
+msgstr ""
+"A „Megbízom a kiszolgálóban” és a „Mindig megbízom a kiszolgálóban” "
+"választása a felhasználónév és jelszó nem biztonságos átvitelét okozhatja."
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:52
+msgid ""
+"Selecting \"Don't Trust This Server\" will cause Geary not to access this "
+"server."
+msgstr ""
+"A „Nem bízom meg a kiszolgálóban” választása azt fogja okozni, hogy a Geary "
+"nem férhet hozzá ehhez a kiszolgálóhoz."
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:54
+msgid "Geary will not add or update this email account."
+msgstr "A Geary nem fogja hozzáadni vagy frissíteni ezt az e-mail fiókot."
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:59
+msgid ""
+"Selecting \"Don't Trust This Server\" will cause Geary to stop accessing "
+"this account."
+msgstr ""
+"A „Nem bízom meg a kiszolgálóban” választása azt fogja okozni, hogy a Geary "
+"leállítja a hozzáférést ehhez a fiókhoz."
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:61
+msgid "Geary will exit if you have no other open email accounts."
+msgstr "A Geary ki fog lépni, ha nincs más megnyitott e-mail fiókja."
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:66
+msgid ""
+"Contact your system administrator or email service provider if you have any "
+"question about these issues."
+msgstr ""
+"Lépjen kapcsolatba a rendszergazdával vagy az e-mail szolgáltatójával, ha "
+"bármilyen kérdése van ezzel a hibával kapcsolatban."
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:73
+msgid "The server's certificate is not signed by a known authority"
+msgstr "A kiszolgáló tanúsítványát nem ismert hitelesítésszolgáltató írta alá"
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:76
+msgid "The server's identity does not match the identity in the certificate"
+msgstr ""
+"A kiszolgáló személyazonossága nem egyezik a tanúsítványban lévő "
+"személyazonossággal"
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:79
+msgid "The server's certificate has expired"
+msgstr "A kiszolgáló tanúsítványa lejárt"
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:82
+msgid "The server's certificate has not been activated"
+msgstr "A kiszolgáló tanúsítványát még nem aktiválták"
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:85
+msgid "The server's certificate has been revoked and is now invalid"
+msgstr "A kiszolgáló tanúsítványát visszavonták és most érvénytelen"
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:88
+msgid "The server's certificate is considered insecure"
+msgstr "A kiszolgáló tanúsítványa nem tekinthető biztonságosnak"
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:91
+msgid "An error has occurred processing the server's certificate"
+msgstr "Hiba történt a kiszolgáló tanúsítványának feldolgozása során"
+
 #. We can't keep these in the glade file, because Gnome doesn't want markup in translatable
 #. strings, and Glade doesn't support the "larger" size attribute. See this bug report for
 #. details: https://bugzilla.gnome.org/show_bug.cgi?id=679006
 #: ../src/client/dialogs/password-dialog.vala:16
-#| msgid "Please enter your email password"
-msgid "Please enter your password"
-msgstr "Adja meg a jelszavát"
+msgid "Geary requires your email password to continue"
+msgstr "A Geary az e-mail jelszavát igényli a folytatáshoz"
 
 #. Label displaying total number of email messages in a folder
 #: ../src/client/folder-list/folder-list-folder-entry.vala:32
@@ -1185,7 +1287,7 @@ msgid "%A"
 msgstr "%A"
 
 #: ../src/client/util/util-email.vala:30
-#: ../src/engine/rfc822/rfc822-message.vala:741
+#: ../src/engine/rfc822/rfc822-message.vala:747
 msgid "(no subject)"
 msgstr "(nincs tárgy)"
 
@@ -1212,6 +1314,14 @@ msgstr "MB"
 msgctxt "Abbreviation for kilobyte"
 msgid "KB"
 msgstr "KB"
+
+#: ../src/engine/api/geary-service.vala:20
+msgid "IMAP"
+msgstr "IMAP"
+
+#: ../src/engine/api/geary-service.vala:23
+msgid "SMTP"
+msgstr "SMTP"
 
 #: ../src/engine/api/geary-service-provider.vala:52
 msgid "Gmail"
@@ -1275,81 +1385,84 @@ msgstr "Nincs"
 
 #. Map of user-supplied search field names to column names.
 #. / Can be typed in the search box like attachment:file.txt to find
-#. / messages with attachments with a particular name.
-#: ../src/engine/imap-db/imap-db-account.vala:662
-#| msgid "Save A_ttachment..."
-#| msgid_plural "Save All A_ttachments..."
+#. / messages with attachments with a particular name.  The translated
+#. / string must match the string in Geary's help documentation.
+#: ../src/engine/imap-db/imap-db-account.vala:665
 msgid "attachment"
 msgstr "melléklet"
 
 #. / Can be typed in the search box like bcc:johndoe@example.com to find
-#. / messages bcc'd to a particular person.
+#. / messages bcc'd to a particular person.  The translated
+#. / string must match the string in Geary's help documentation.
 #. Fields we allow the token to be "me" as in from:me.
-#: ../src/engine/imap-db/imap-db-account.vala:665
-#: ../src/engine/imap-db/imap-db-account.vala:684
+#: ../src/engine/imap-db/imap-db-account.vala:669
+#: ../src/engine/imap-db/imap-db-account.vala:693
 msgid "bcc"
 msgstr "titkos másolat"
 
 #. / Can be typed in the search box like body:word to find the word only
-#. / if it occurs in the body of a message.
-#: ../src/engine/imap-db/imap-db-account.vala:668
+#. / if it occurs in the body of a message.  The translated
+#. / string must match the string in Geary's help documentation.
+#: ../src/engine/imap-db/imap-db-account.vala:673
 msgid "body"
 msgstr "törzs"
 
 #. / Can be typed in the search box like cc:johndoe@example.com to find
-#. / messages cc'd to a particular person.
-#: ../src/engine/imap-db/imap-db-account.vala:671
-#: ../src/engine/imap-db/imap-db-account.vala:684
-#| msgid "Bcc:"
+#. / messages cc'd to a particular person.  The translated
+#. / string must match the string in Geary's help documentation.
+#: ../src/engine/imap-db/imap-db-account.vala:677
+#: ../src/engine/imap-db/imap-db-account.vala:693
 msgid "cc"
 msgstr "másolat"
 
 #. / Can be typed in the search box like from:johndoe@example.com to
-#. / find messages from a particular sender.
-#: ../src/engine/imap-db/imap-db-account.vala:674
-#: ../src/engine/imap-db/imap-db-account.vala:684
+#. / find messages from a particular sender.  The translated
+#. / string must match the string in Geary's help documentation.
+#: ../src/engine/imap-db/imap-db-account.vala:681
+#: ../src/engine/imap-db/imap-db-account.vala:693
 msgid "from"
 msgstr "feladó"
 
 #. / Can be typed in the search box like subject:word to find the word
-#. / only if it occurs in the subject of a message.
-#: ../src/engine/imap-db/imap-db-account.vala:677
-#| msgid "Subject:"
+#. / only if it occurs in the subject of a message.  The translated
+#. / string must match the string in Geary's help documentation.
+#: ../src/engine/imap-db/imap-db-account.vala:685
 msgid "subject"
 msgstr "tárgy"
 
 #. / Can be typed in the search box like to:johndoe@example.com to find
-#. / messages received by a particular person.
-#: ../src/engine/imap-db/imap-db-account.vala:680
-#: ../src/engine/imap-db/imap-db-account.vala:684
+#. / messages received by a particular person.  The translated
+#. / string must match the string in Geary's help documentation.
+#: ../src/engine/imap-db/imap-db-account.vala:689
+#: ../src/engine/imap-db/imap-db-account.vala:693
 msgid "to"
 msgstr "címzett"
 
 #. "me" can be typed like from:me or cc:me, etc. as a shorthand
-#. to find mail to or from yourself in search.
-#: ../src/engine/imap-db/imap-db-account.vala:699
+#. to find mail to or from yourself in search.  The translated
+#. string must match the string in Geary's help documentation.
+#: ../src/engine/imap-db/imap-db-account.vala:709
 msgid "me"
 msgstr "én"
 
 #. List of folder names to match for Drafts, separated by |.  Please add localized common
 #. names for the Drafts folder, leaving in the English names as well.  The first in the list
 #. will be the default, so please add the most common localized name to the front.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:535
-#| msgid "Drafts"
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:536
 msgid "Drafts | Draft"
 msgstr "Piszkozatok | Piszkozat"
 
 #. List of folder names to match for Sent Mail, separated by |.  Please add localized common
 #. names for the Sent Mail folder, leaving in the English names as well.  The first in the list
 #. will be the default, so please add the most common localized name to the front.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:540
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:541
 msgid "Sent | Sent Mail | Sent Email | Sent E-Mail"
 msgstr "Elküldött | Elküldött levelek | Elküldött üzenetek"
 
 #. List of folder names to match for Spam, separated by |.  Please add localized common
 #. names for the Spam folder, leaving in the English names as well.  The first in the list
 #. will be the default, so please add the most common localized name to the front.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:545
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:546
 msgid ""
 "Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email "
 "| Bulk E-Mail"
@@ -1358,63 +1471,63 @@ msgstr "Szemét | Spam | Levélszemét"
 #. List of folder names to match for Trash, separated by |.  Please add localized common
 #. names for the Trash folder, leaving in the English names as well.  The first in the list
 #. will be the default, so please add the most common localized name to the front.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:550
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:551
 msgid "Trash | Rubbish | Rubbish Bin"
 msgstr "Kuka | Szemét"
 
 #. / Format for the datetime that a message being replied to was received
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: ../src/engine/rfc822/rfc822-utils.vala:165
+#: ../src/engine/rfc822/rfc822-utils.vala:168
 msgid "%a, %b %-e, %Y at %-l:%M %p"
 msgstr "%Y. %b. %-e., %a %-k.%M-kor"
 
 #. / The quoted header for a message being replied to.
 #. / %1$s will be substituted for the date, and %2$s will be substituted for
 #. / the original sender.
-#: ../src/engine/rfc822/rfc822-utils.vala:171
+#: ../src/engine/rfc822/rfc822-utils.vala:174
 #, c-format
 msgid "On %1$s, %2$s wrote:"
 msgstr "%1$s-kor, %2$s írta:"
 
 #. / The quoted header for a message being replied to (in case the date is not known).
 #. / %s will be replaced by the original sender.
-#: ../src/engine/rfc822/rfc822-utils.vala:178
+#: ../src/engine/rfc822/rfc822-utils.vala:181
 #, c-format
 msgid "%s wrote:"
 msgstr "%s írta:"
 
 #. / The quoted header for a message being replied to (in case the sender is not known).
 #. / %s will be replaced by the original date
-#: ../src/engine/rfc822/rfc822-utils.vala:184
+#: ../src/engine/rfc822/rfc822-utils.vala:187
 #, c-format
 msgid "On %s:"
 msgstr "Ekkor: %s:"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:211
+#: ../src/engine/rfc822/rfc822-utils.vala:216
 msgid "---------- Forwarded message ----------"
 msgstr "---------- Továbbított levél -----------"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:215
+#: ../src/engine/rfc822/rfc822-utils.vala:220
 #, c-format
 msgid "From: %s\n"
 msgstr "Feladó: %s\n"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:216
+#: ../src/engine/rfc822/rfc822-utils.vala:221
 #, c-format
 msgid "Subject: %s\n"
 msgstr "Tárgy: %s\n"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:217
+#: ../src/engine/rfc822/rfc822-utils.vala:222
 #, c-format
 msgid "Date: %s\n"
 msgstr "Dátum: %s\n"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:220
+#: ../src/engine/rfc822/rfc822-utils.vala:225
 #, c-format
 msgid "To: %s\n"
 msgstr "Címzett: %s\n"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:223
+#: ../src/engine/rfc822/rfc822-utils.vala:228
 #, c-format
 msgid "Cc: %s\n"
 msgstr "Másolat: %s\n"
@@ -1422,8 +1535,8 @@ msgstr "Másolat: %s\n"
 #: ../ui/account_cannot_remove.glade.h:1
 msgid "<span weight=\"bold\" size=\"larger\">Cannot remove account</span> "
 msgstr ""
-"<span weight=\"bold\" size=\"larger\">Nem sikerült eltávolítani a fiókot<"
-"/span> "
+"<span weight=\"bold\" size=\"larger\">Nem sikerült eltávolítani a fiókot</"
+"span> "
 
 #: ../ui/account_cannot_remove.glade.h:2
 msgid ""
@@ -1448,6 +1561,22 @@ msgstr "Fiók eltávolítása"
 #: ../ui/account_spinner.glade.h:1
 msgid "Please wait while Geary validates your account."
 msgstr "Kérem várjon, amíg a Geary érvényesíti a fiókját."
+
+#: ../ui/certificate_warning_dialog.glade.h:1
+msgid "Untrusted Connection"
+msgstr "Nem megbízható kapcsolat"
+
+#: ../ui/certificate_warning_dialog.glade.h:2
+msgid "_Always Trust This Server"
+msgstr "Min_dig megbízom a kiszolgálóban"
+
+#: ../ui/certificate_warning_dialog.glade.h:3
+msgid "_Trust This Server"
+msgstr "_Megbízom a kiszolgálóban"
+
+#: ../ui/certificate_warning_dialog.glade.h:4
+msgid "_Don't Trust This Server"
+msgstr "_Nem bízom meg a kiszolgálóban"
 
 #: ../ui/composer.glade.h:1
 msgid "_Undo"
@@ -1531,104 +1660,118 @@ msgid "_Rich Text"
 msgstr "_Rich Text"
 
 #: ../ui/composer.glade.h:23
+msgid "Show Extended Fields"
+msgstr "Kiterjesztett mezők megjelenítése"
+
+#: ../ui/composer.glade.h:24
 msgid "Lar_ge"
 msgstr "_Nagy"
 
-#: ../ui/composer.glade.h:24
+#: ../ui/composer.glade.h:25
 msgid "Large"
 msgstr "Nagy"
 
-#: ../ui/composer.glade.h:25
+#: ../ui/composer.glade.h:26
 msgid "_Medium"
 msgstr "_Közepes"
 
-#: ../ui/composer.glade.h:26
+#: ../ui/composer.glade.h:27
 msgid "Medium"
 msgstr "Közepes"
 
-#: ../ui/composer.glade.h:27
+#: ../ui/composer.glade.h:28
 msgid "_Small"
 msgstr "Ki_csi"
 
-#: ../ui/composer.glade.h:28
+#: ../ui/composer.glade.h:29
 msgid "Small"
 msgstr "Kicsi"
 
-#: ../ui/composer.glade.h:29
+#: ../ui/composer.glade.h:30
 msgid "S_ans Serif"
 msgstr "T_alpatlan betűkészlet"
 
-#: ../ui/composer.glade.h:30
+#: ../ui/composer.glade.h:31
 msgid "Sans Serif"
 msgstr "Talpatlan betűkészlet"
 
-#: ../ui/composer.glade.h:31
+#: ../ui/composer.glade.h:32
 msgid "S_erif"
 msgstr "Talpas b_etűkészlet"
 
-#: ../ui/composer.glade.h:32
+#: ../ui/composer.glade.h:33
 msgid "Serif"
 msgstr "Talpas betűkészlet"
 
-#: ../ui/composer.glade.h:33
+#: ../ui/composer.glade.h:34
 msgid "_Fixed Width"
 msgstr "_Rögzített szélességű"
 
-#: ../ui/composer.glade.h:34
+#: ../ui/composer.glade.h:35
 msgid "Fixed Width"
 msgstr "Rögzített szélességű"
 
-#: ../ui/composer.glade.h:35
-msgid "Edit recipients"
-msgstr "Címzettek szerkesztése"
-
-#. Address(es) e-mail is to be sent to
-#: ../ui/composer.glade.h:37
-msgid "_To:"
-msgstr "_Címzett:"
-
-#: ../ui/composer.glade.h:38
-msgid "_Cc:"
-msgstr "_Másolat:"
-
-#: ../ui/composer.glade.h:39
-#| msgid "Subject:"
-msgid "_Subject:"
-msgstr "_Tárgy:"
-
-#: ../ui/composer.glade.h:40
-#| msgid "Bcc:"
-msgid "_Bcc:"
-msgstr "Titk_os másolat:"
-
-#: ../ui/composer.glade.h:43
-msgid "Drop files here"
-msgstr "Ejtse ide a fájlokat"
-
-#: ../ui/composer.glade.h:44
-msgid "To add them as attachments"
-msgstr "Mellékletként való hozzáadáshoz"
-
-#: ../ui/composer.glade.h:45
-msgid "_Attach File"
-msgstr "Fájl _csatolása"
-
-#: ../ui/composer.glade.h:46
-msgid "_Include Original Attachments"
-msgstr "_Eredeti mellékletek megtartása"
-
-#: ../ui/composer.glade.h:47
-msgid "C_lose"
-msgstr "_Bezárás"
-
-#: ../ui/composer.glade.h:48
-#| msgid "_Attach"
+#: ../ui/composer.glade.h:36
 msgid "Detach"
 msgstr "Leválasztás"
 
-#: ../ui/composer.glade.h:49
+#: ../ui/composer.glade.h:37
 msgid "_Send"
 msgstr "_Küldés"
+
+#: ../ui/composer.glade.h:38
+msgid "Send"
+msgstr "Küldés"
+
+#: ../ui/composer.glade.h:39
+msgid "_Attach File"
+msgstr "Fájl _csatolása"
+
+#: ../ui/composer.glade.h:40
+msgid "Attach File"
+msgstr "Fájl csatolása"
+
+#: ../ui/composer.glade.h:41
+msgid "_Include Original Attachments"
+msgstr "_Eredeti mellékletek megtartása"
+
+#: ../ui/composer.glade.h:42
+msgid "Include Original Attachments"
+msgstr "Eredeti mellékletek megtartása"
+
+#. Address(es) e-mail is to be sent to
+#: ../ui/composer.glade.h:44
+msgid "_To"
+msgstr "_Címzett"
+
+#: ../ui/composer.glade.h:45
+msgid "_Cc"
+msgstr "_Másolat"
+
+#: ../ui/composer.glade.h:46
+msgid "_Subject"
+msgstr "_Tárgy"
+
+#: ../ui/composer.glade.h:47
+msgid "_Bcc"
+msgstr "Titk_os másolat"
+
+#: ../ui/composer.glade.h:48
+msgid "_Reply-To"
+msgstr "_Válaszcím"
+
+#. Geary account mail will be sent from
+#: ../ui/composer.glade.h:50
+msgid "From"
+msgstr "Feladó"
+
+#: ../ui/composer.glade.h:51
+msgid "Drop files here"
+msgstr "Ejtse ide a fájlokat"
+
+#: ../ui/composer.glade.h:52
+msgid "To add them as attachments"
+msgstr "Mellékletként való hozzáadáshoz"
 
 #: ../ui/find_bar.glade.h:1
 msgid "Find:"
@@ -1647,36 +1790,30 @@ msgid "_Case sensitive"
 msgstr "K_is- és nagybetűk megkülönböztetése"
 
 #: ../ui/find_bar.glade.h:5
-#| msgid "Labels"
 msgid "label"
 msgstr "címke"
 
-#: ../ui/login.glade.h:1
+#: ../ui/login.glade.h:1 ../ui/password-dialog.glade.h:3
 msgid "Password"
 msgstr "Jelszó"
 
 #: ../ui/login.glade.h:2
-#| msgid "Email address:"
 msgid "E_mail address"
 msgstr "E-mail cím"
 
 #: ../ui/login.glade.h:3
-#| msgid "_Password:"
 msgid "_Password"
 msgstr "_Jelszó"
 
 #: ../ui/login.glade.h:4
-#| msgid "Service:"
 msgid "S_ervice"
 msgstr "_Szolgáltatás"
 
 #: ../ui/login.glade.h:5
-#| msgid "N_ame:"
 msgid "N_ame"
 msgstr "_Név"
 
 #: ../ui/login.glade.h:7
-#| msgid "N_ickname:"
 msgid "N_ickname"
 msgstr "_Becenév"
 
@@ -1685,7 +1822,6 @@ msgid "Work, Home, etc."
 msgstr "Munkahelyi, otthoni, stb."
 
 #: ../ui/login.glade.h:9
-#| msgid "Sent Mail"
 msgid "_Save sent mail"
 msgstr "Elküldött levél _mentése"
 
@@ -1694,22 +1830,18 @@ msgid "IMAP settings"
 msgstr "IMAP beállítások"
 
 #: ../ui/login.glade.h:11
-#| msgid "Se_rver:"
 msgid "Se_rver"
 msgstr "_Kiszolgáló"
 
 #: ../ui/login.glade.h:12
-#| msgid "P_ort:"
 msgid "P_ort"
 msgstr "_Port"
 
 #: ../ui/login.glade.h:13
-#| msgid "Ser_ver:"
 msgid "Ser_ver"
 msgstr "Ki_szolgáló"
 
 #: ../ui/login.glade.h:14
-#| msgid "Por_t:"
 msgid "Por_t"
 msgstr "Por_t"
 
@@ -1718,12 +1850,10 @@ msgid "SMTP settings"
 msgstr "SMTP beállítások"
 
 #: ../ui/login.glade.h:16
-#| msgid "User_name:"
 msgid "User_name"
 msgstr "_Felhasználónév"
 
 #: ../ui/login.glade.h:17
-#| msgid "Pass_word:"
 msgid "Pass_word"
 msgstr "_Jelszó"
 
@@ -1736,7 +1866,6 @@ msgid "SMTP password"
 msgstr "SMTP jelszó"
 
 #: ../ui/login.glade.h:20
-#| msgid "_Username:"
 msgid "_Username"
 msgstr "_Felhasználónév"
 
@@ -1749,12 +1878,10 @@ msgid "IMAP password"
 msgstr "IMAP jelszó"
 
 #: ../ui/login.glade.h:23
-#| msgid "Encr_yption:"
 msgid "Encr_yption"
 msgstr "_Titkosítás"
 
 #: ../ui/login.glade.h:24
-#| msgid "Encrypt_ion:"
 msgid "Encrypt_ion"
 msgstr "T_itkosítás"
 
@@ -1771,7 +1898,6 @@ msgid "No authentication re_quired"
 msgstr "Nincs szükség _hitelesítésre"
 
 #: ../ui/login.glade.h:29
-#| msgid "IMAP Credentials"
 msgid "Use IMAP cre_dentials"
 msgstr "IMAP hitelesítési _adatok használata"
 
@@ -1780,11 +1906,10 @@ msgid "Storage"
 msgstr "Tároló"
 
 #: ../ui/login.glade.h:31
-#| msgid "_Download mail:"
 msgid "_Download mail"
 msgstr "Levél l_etöltése"
 
-#: ../ui/login.glade.h:32 ../ui/preferences.glade.h:6
+#: ../ui/login.glade.h:32 ../ui/preferences.glade.h:4
 msgid "Composer"
 msgstr "Szerkesztő"
 
@@ -1801,52 +1926,46 @@ msgid "SMTP Credentials"
 msgstr "SMTP hitelesítési adatok"
 
 #: ../ui/password-dialog.glade.h:2
-msgid "Username:"
-msgstr "Felhasználónév:"
-
-#: ../ui/password-dialog.glade.h:3
-msgid "Password:"
-msgstr "Jelszó:"
+msgid "Username"
+msgstr "Felhasználónév"
 
 #: ../ui/password-dialog.glade.h:4
-#| msgid "_Remember passwords"
 msgid "_Remember password"
 msgstr "Jelszó _megjegyzése"
 
-#: ../ui/preferences.glade.h:1
-#| msgid "_Preferences"
-msgid "Preferences"
-msgstr "Beállítások"
+#: ../ui/password-dialog.glade.h:6
+msgid "_Authenticate"
+msgstr "_Hitelesítés"
 
-#: ../ui/preferences.glade.h:3
+#: ../ui/preferences.glade.h:1
 msgid "Reading"
 msgstr "Olvasás"
 
-#: ../ui/preferences.glade.h:4
+#: ../ui/preferences.glade.h:2
 msgid "_Automatically select next message"
 msgstr "Következő levél _automatikus kiválasztása"
 
-#: ../ui/preferences.glade.h:5
+#: ../ui/preferences.glade.h:3
 msgid "_Display conversation preview"
 msgstr "_Beszélgetés előnézetének megjelenítése"
 
-#: ../ui/preferences.glade.h:7
+#: ../ui/preferences.glade.h:5
 msgid "Enable _spell checking"
 msgstr "_Helyesírás-ellenőrzés bekapcsolása"
 
-#: ../ui/preferences.glade.h:8
+#: ../ui/preferences.glade.h:6
 msgid "Notifications"
 msgstr "Értesítések"
 
-#: ../ui/preferences.glade.h:9
+#: ../ui/preferences.glade.h:7
 msgid "_Play notification sounds"
 msgstr "Értesítő hangok ­_lejátszása"
 
-#: ../ui/preferences.glade.h:10
+#: ../ui/preferences.glade.h:8
 msgid "Show _notifications for new mail"
 msgstr "É_rtesítések megjelenítése új levél érkezésekor"
 
-#: ../ui/preferences.glade.h:11
+#: ../ui/preferences.glade.h:9
 msgid "Notify of new mail at start_up"
 msgstr "Értesítés új levélről in_dításkor"
 
@@ -1875,8 +1994,32 @@ msgid "Email address:"
 msgstr "E-mail cím:"
 
 #: ../ui/upgrade_dialog.glade.h:1
-msgid "Geary upgrade in progress."
-msgstr "Geary frissítés folyamatban."
+#| msgid "Geary upgrade in progress."
+msgid "Geary update in progress…"
+msgstr "Geary frissítés folyamatban…"
+
+#~ msgid "attach|enclosed|enclosing|cover letter"
+#~ msgstr "csatolás|mellékelt|melléklet|levélborító"
+
+#~| msgid "Please enter your email password"
+#~ msgid "Please enter your password"
+#~ msgstr "Adja meg a jelszavát"
+
+#~ msgid "Edit recipients"
+#~ msgstr "Címzettek szerkesztése"
+
+#~ msgid "C_lose"
+#~ msgstr "_Bezárás"
+
+#~ msgid "Username:"
+#~ msgstr "Felhasználónév:"
+
+#~ msgid "Password:"
+#~ msgstr "Jelszó:"
+
+#~| msgid "_Preferences"
+#~ msgid "Preferences"
+#~ msgstr "Beállítások"
 
 #~ msgid "Archive conversation (Delete, Backspace, A)"
 #~ msgstr "Beszélgetés archiválása (Delete, Backspace, A)"
