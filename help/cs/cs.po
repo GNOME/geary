@@ -6,10 +6,10 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: geary master\n"
-"POT-Creation-Date: 2014-08-26 05:03+0000\n"
-"PO-Revision-Date: 2014-07-08 15:49+0200\n"
+"POT-Creation-Date: 2014-12-26 05:52+0000\n"
+"PO-Revision-Date: 2014-12-26 10:26+0100\n"
 "Last-Translator: Marek Černocký <marek@manet.cz>\n"
-"Language-Team: čeština <gnome-cs-list@gnome.org>\n"
+"Language-Team: Czech <gnome-cs-list@gnome.org>\n"
 "Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -61,8 +61,8 @@ msgid ""
 "uncheck \"Rich Text\" to toggle between plain text and rich text mode."
 msgstr ""
 "Zprávy je možné posílat i jako čistě textové. V rozbalovací nabídce "
-"zaškrtněte nebo zrušte zaškrtnutí „Formátovaný text“, abyste se přepnuli mezi "
-"režimy prostého textu a formátovaného textu."
+"zaškrtněte nebo zrušte zaškrtnutí „Formátovaný text“, abyste se přepnuli "
+"mezi režimy prostého textu a formátovaného textu."
 
 #: C/write.page:27(p)
 msgid ""
@@ -86,21 +86,29 @@ msgstr ""
 "Přetáhněte soubor ze správce souborů Nautilus do okna editoru a upusťte jej "
 "buď na textových polích v horní části okna nebo na nástrojové liště dole."
 
-#: C/write.page:37(title)
+#: C/write.page:35(p)
+msgid ""
+"A number of keyboard shortcuts are available in the composer; see <link xref="
+"\"shortcuts#composer\"/> for details."
+msgstr ""
+"Řada klávesových zkratek je dostupná v editoru zpráv, podrobnosti viz <link "
+"xref=\"shortcuts#composer\"/>."
+
+#: C/write.page:39(title)
 msgid "Drafts"
 msgstr "Koncepty"
 
-#: C/write.page:39(p)
+#: C/write.page:41(p)
 msgid ""
 "For mail servers that support drafts, Geary will automatically save the "
 "message as you type. If you close the composer without sending, Geary will "
 "prompt you to keep the draft or to discard it."
 msgstr ""
 "Na serverech, které podporují koncepty, ukládá Gerary zprávy automaticky "
-"během psaní. Pokud zavřete okno editoru, aniž byste zprávu odeslali, Geary se "
-"vás dotáže, jestli má zprávu uchovat v konceptech nebo ji zahodit."
+"během psaní. Pokud zavřete okno editoru, aniž byste zprávu odeslali, Geary "
+"se vás dotáže, jestli má zprávu uchovat v konceptech nebo ji zahodit."
 
-#: C/write.page:42(p)
+#: C/write.page:44(p)
 msgid ""
 "To edit an existing draft, select the Drafts folder in the folder list, "
 "select the message, and click \"Edit Draft\" in the message viewer."
@@ -109,7 +117,7 @@ msgstr ""
 "složku Koncepty, vyberte zprávu a klikněte v prohlížeči zpráv na „Upravit "
 "koncept“ ."
 
-#: C/write.page:45(p)
+#: C/write.page:47(p)
 msgid "Geary deletes the draft when you send the message."
 msgstr "Po odeslání zprávy Geary koncept smaže."
 
@@ -257,7 +265,7 @@ msgstr "S"
 msgid "Unstar"
 msgstr "Odebrat hvězdičku"
 
-#: C/shortcuts.page:48(key)
+#: C/shortcuts.page:48(key) C/shortcuts.page:126(key)
 msgid "D"
 msgstr "D"
 
@@ -287,7 +295,7 @@ msgstr ""
 
 #: C/shortcuts.page:59(p)
 msgid "Toggle spam"
-msgstr "Označit jako spam/zrušit označení"
+msgstr "Označit jako spam/zrušit označení spamu"
 
 #: C/shortcuts.page:60(p)
 msgid "<keyseq><key>Ctrl</key><key>J</key></keyseq> or <key>!</key>"
@@ -300,6 +308,11 @@ msgstr "Ukončit"
 #: C/shortcuts.page:64(key) C/shortcuts.page:80(key) C/shortcuts.page:84(key)
 #: C/shortcuts.page:88(key) C/shortcuts.page:92(key) C/shortcuts.page:96(key)
 #: C/shortcuts.page:100(key) C/shortcuts.page:104(key)
+#: C/shortcuts.page:114(key) C/shortcuts.page:118(key)
+#: C/shortcuts.page:126(key) C/shortcuts.page:134(key)
+#: C/shortcuts.page:138(key) C/shortcuts.page:142(key)
+#: C/shortcuts.page:146(key) C/shortcuts.page:150(key)
+#: C/shortcuts.page:154(key)
 msgid "Ctrl"
 msgstr "Ctrl"
 
@@ -325,7 +338,7 @@ msgstr "<keyseq><key>Ctrl</key><key>-</key></keyseq> nebo <key>-</key>"
 
 #: C/shortcuts.page:75(p)
 msgid "Reset zoom"
-msgstr "Přiblížení na výchozí velikost"
+msgstr "Přiblížit na výchozí velikost"
 
 #: C/shortcuts.page:76(p)
 msgid "<keyseq><key>Ctrl</key><key>0</key></keyseq> or <key>0</key>"
@@ -383,6 +396,97 @@ msgstr "Najít předchozí v aktuální konverzaci"
 msgid "Shift"
 msgstr "Shift"
 
+#: C/shortcuts.page:109(title)
+msgid "Composer shortcuts"
+msgstr "Klávesové zkratky editoru"
+
+#: C/shortcuts.page:110(p)
+msgid "These shortcuts are active whenever focus is in a composer."
+msgstr ""
+"Následující klávesové zkratky jsou funkční, kdykoliv je aktivní editor zpráv."
+
+#: C/shortcuts.page:113(p)
+msgid "Quote text"
+msgstr "Citovat text"
+
+#: C/shortcuts.page:114(key)
+msgid "]"
+msgstr "]"
+
+#: C/shortcuts.page:117(p)
+msgid "Unquote text"
+msgstr "Ukončit citaci textu"
+
+#: C/shortcuts.page:118(key)
+msgid "["
+msgstr "["
+
+#: C/shortcuts.page:121(p)
+msgid "Close composer"
+msgstr "Zavřít okno editoru"
+
+#: C/shortcuts.page:122(p)
+msgid "<keyseq><key>Ctrl</key><key>W</key></keyseq> or <key>Esc</key>"
+msgstr "<keyseq><key>Ctrl</key><key>W</key></keyseq> nebo <key>Esc</key>"
+
+#: C/shortcuts.page:125(p)
+msgid "Detach composer"
+msgstr "Odpojit okno editor"
+
+#: C/shortcuts.page:130(p)
+msgid "These shortcuts are only active in composers in rich text mode."
+msgstr ""
+"Následující klávesové zkratky jsou funkční pouze když je editor v režimu "
+"formátovaného textu."
+
+#: C/shortcuts.page:133(p)
+msgid "Bold text"
+msgstr "Tučný text"
+
+#: C/shortcuts.page:134(key)
+msgid "B"
+msgstr "B"
+
+#: C/shortcuts.page:137(p)
+msgid "Italicize text"
+msgstr "Text kurzívou"
+
+#: C/shortcuts.page:138(key)
+msgid "I"
+msgstr "I"
+
+#: C/shortcuts.page:141(p)
+msgid "Underline text"
+msgstr "Podtržený text"
+
+#: C/shortcuts.page:142(key)
+msgid "U"
+msgstr "U"
+
+#: C/shortcuts.page:145(p)
+msgid "Strike text"
+msgstr "Přeškrtnutý text"
+
+#: C/shortcuts.page:146(key)
+msgid "K"
+msgstr "K"
+
+#: C/shortcuts.page:149(p)
+msgid "Insert a link"
+msgstr "Vložit odkaz"
+
+#: C/shortcuts.page:150(key)
+msgid "L"
+msgstr "L"
+
+#: C/shortcuts.page:153(p)
+msgid "Remove formatting"
+msgstr "Odstranit formátování"
+
+#: C/shortcuts.page:154(key)
+msgid "Space"
+msgstr "mezerník"
+
 #: C/search.page:10(title)
 msgid "Search"
 msgstr "Hledání"
@@ -394,8 +498,8 @@ msgid ""
 "the search box in the toolbar (or press <keyseq><key>Ctrl</key><key>S</key></"
 "keyseq>) and start typing. Results will appear after a brief delay."
 msgstr ""
-"Geary podporuje vyhledávání v úplně všech textech v jednotlivých účtech. Když "
-"chcete vyhledávat, vyberte složku patřící k účtu, ve kterém si přejete "
+"Geary podporuje vyhledávání v úplně všech textech v jednotlivých účtech. "
+"Když chcete vyhledávat, vyberte složku patřící k účtu, ve kterém si přejete "
 "hledat. Pak klikněte na vyhledávací pole na nástrojové liště (nebo zmáčkněte "
 "<keyseq><key>Ctrl</key><key>S</key></keyseq>) a začněte psát. Po chvilce se "
 "začnou objevovat výsledky."
@@ -414,9 +518,9 @@ msgid ""
 "will match different forms of the same word, for example searching for \"walk"
 "\" will also match \"walking\" and \"walked.\""
 msgstr ""
-"Klíčová slova, která vyhovují vašemu hledání, se v zobrazení zprávy zvýrazní. "
-"Geary umí rozpoznat i různé varianty téhož slova, například při hledání "
-"„oběd“ bude vyhovovat i „obědvat“ a „obědový“."
+"Klíčová slova, která vyhovují vašemu hledání, se v zobrazení zprávy "
+"zvýrazní. Geary umí rozpoznat i různé varianty téhož slova, například při "
+"hledání „oběd“ bude vyhovovat i „obědvat“ a „obědový“."
 
 #: C/search.page:23(title)
 msgid "Search operators"
@@ -487,7 +591,8 @@ msgstr "from:<placeholder-1/>"
 #: C/search.page:44(p)
 msgid "Finds messages where <var>sender</var> matches the From header."
 msgstr ""
-"Najít zprávy, ve kterých <var>odesilatel</var> odpovídá údaji „Od“ v hlavičce."
+"Najít zprávy, ve kterých <var>odesilatel</var> odpovídá údaji „Od“ v "
+"hlavičce."
 
 #: C/search.page:47(input)
 msgid "subject:<placeholder-1/>"
@@ -546,8 +651,8 @@ msgid ""
 "message, Geary automatically selects an adjacent message."
 msgstr ""
 "Když je tato volba zapnutá, Geary, po té co vstoupíte do složky, automaticky "
-"vybere nejnovější zprávu. Navíc po archivaci zprávy, vybere Geary automaticky "
-"sousední zprávu."
+"vybere nejnovější zprávu. Navíc po archivaci zprávy, vybere Geary "
+"automaticky sousední zprávu."
 
 #: C/preferences.page:26(gui)
 msgid "Display conversation preview"
@@ -574,8 +679,8 @@ msgid ""
 "When set, Geary automatically spell checks a message as you write it, "
 "underlying each misspelled word in red."
 msgstr ""
-"Když je zapnuto, Geary automaticky kontroluje pravopis ve zprávě, "
-"kterou píšete a chybná slova podtrhává červeně."
+"Když je zapnuto, Geary automaticky kontroluje pravopis ve zprávě, kterou "
+"píšete a chybná slova podtrhává červeně."
 
 #: C/preferences.page:45(title)
 msgid "Notifications"
@@ -790,8 +895,8 @@ msgid ""
 "services."
 msgstr ""
 "Geary umožňuje každé konverzaci přidělit jeden nebo i více <em>štítků</em>. "
-"Štítky jsou u Geary to stejné jako štítky u Gmailu nebo běžné složky u jiných "
-"poštovních služeb."
+"Štítky jsou u Geary to stejné jako štítky u Gmailu nebo běžné složky u "
+"jiných poštovních služeb."
 
 #: C/label.page:15(p)
 msgid ""
@@ -911,8 +1016,8 @@ msgid ""
 "For general inquiries, please join the <link href=\"https://mail.gnome.org/"
 "mailman/listinfo/geary-list\"> Geary mailing list</link>."
 msgstr ""
-"Ohledně obecných dotazů se prosím připojte do <link href=\"https://mail.gnome."
-"org/mailman/listinfo/geary-list\">poštovní konference Geary</link>."
+"Ohledně obecných dotazů se prosím připojte do <link href=\"https://mail."
+"gnome.org/mailman/listinfo/geary-list\">poštovní konference Geary</link>."
 
 #: C/archive.page:10(title)
 msgid "Delete or archive a message"
