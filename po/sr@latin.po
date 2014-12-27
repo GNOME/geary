@@ -9,8 +9,8 @@ msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=geary&k"
 "eywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2014-10-26 17:52+0000\n"
-"PO-Revision-Date: 2014-10-27 05:07+0200\n"
+"POT-Creation-Date: 2014-12-27 05:55+0000\n"
+"PO-Revision-Date: 2014-12-27 13:41+0200\n"
 "Last-Translator: Miroslav Nikolić <miroslavnikolic@rocketmail.com>\n"
 "Language-Team: Serbian <gnom@prevod.org>\n"
 "Language: sr\n"
@@ -47,7 +47,6 @@ msgid "Compose Message"
 msgstr "Sastavite poruku"
 
 #: ../desktop/geary-attach.contract.in.h:1
-#| msgid "Send and receive email"
 msgid "Send by email"
 msgstr "Pošaljite el. poštom"
 
@@ -66,7 +65,7 @@ msgid "_Add"
 msgstr "_Dodaj"
 
 #. Sets min size.
-#: ../src/client/accounts/account-dialog.vala:19
+#: ../src/client/accounts/account-dialog.vala:20
 msgid "Accounts"
 msgstr "Nalozi"
 
@@ -391,7 +390,7 @@ msgstr "Sastavite novu poruku (Ktrl+N, N)"
 
 #. Reply to a message.
 #: ../src/client/application/geary-controller.vala:344
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1730
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1751
 msgid "_Reply"
 msgstr "_Odgovori"
 
@@ -409,7 +408,7 @@ msgstr "Odgovorite svima (Ktrl+Pomak+R, Pomak+R)"
 
 #. Forward a message.
 #: ../src/client/application/geary-controller.vala:355
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1740
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1761
 msgid "_Forward"
 msgstr "_Prosledi"
 
@@ -692,9 +691,8 @@ msgstr "Popisujem nalog „%s“"
 msgid "Search %s account"
 msgstr "Tražim nalog „%s“"
 
-#: ../src/client/components/main-window.vala:323
+#: ../src/client/components/main-window.vala:347
 #, c-format
-#| msgid "%s (%s)"
 msgid "%s (%d)"
 msgstr "%s (%d)"
 
@@ -708,12 +706,12 @@ msgstr "Šaljem..."
 msgid "_OK"
 msgstr "U _redu"
 
-#: ../src/client/components/stock.vala:19 ../ui/remove_confirm.glade.h:5
+#: ../src/client/components/stock.vala:19 ../ui/password-dialog.glade.h:5
+#: ../ui/remove_confirm.glade.h:5
 msgid "_Cancel"
 msgstr "Ot_kaži"
 
-#: ../src/client/components/stock.vala:23 ../ui/account_list.glade.h:4
-#: ../ui/preferences.glade.h:2
+#: ../src/client/components/stock.vala:23
 msgid "_Close"
 msgstr "_Zatvori"
 
@@ -735,7 +733,7 @@ msgstr "_Ukloni"
 
 #. Select all.
 #: ../src/client/components/stock.vala:32
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1197
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1218
 msgid "Select _All"
 msgstr "Izaberi _sve"
 
@@ -743,116 +741,119 @@ msgstr "Izaberi _sve"
 msgid "_Keep"
 msgstr "_Zadrži"
 
-#: ../src/client/composer/composer-widget.vala:57
+#: ../src/client/composer/composer-widget.vala:58
 msgid "Saved"
 msgstr "Sačuvana"
 
-#: ../src/client/composer/composer-widget.vala:58
+#: ../src/client/composer/composer-widget.vala:59
 msgid "Saving"
 msgstr "Čuvam"
 
-#: ../src/client/composer/composer-widget.vala:59
+#: ../src/client/composer/composer-widget.vala:60
 msgid "Error saving"
 msgstr "Greška čuvanja"
 
 #. A list of keywords, separated by pipe ("|") characters, that suggest an attachment; since
 #. this is full-word checking, include all variants of each word.  No spaces are allowed.
-#: ../src/client/composer/composer-widget.vala:120
+#: ../src/client/composer/composer-widget.vala:121
 msgid ""
 "attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|"
 "enclosing|encloses|enclosure|enclosures"
-msgstr "priloži|prilaganje|prilog|prilozi|prilaganja|priložen|priložena|priloženo"
+msgstr ""
+"priloži|prilaganje|prilog|prilozi|prilaganja|priložen|priložena|priloženo"
 
-#: ../src/client/composer/composer-widget.vala:878
+#: ../src/client/composer/composer-widget.vala:907
 msgid "Do you want to discard the unsaved message?"
 msgstr "Da li želite da odbacite nesačuvanu poruku?"
 
-#: ../src/client/composer/composer-widget.vala:881
-#: ../src/client/composer/composer-widget.vala:885
+#: ../src/client/composer/composer-widget.vala:910
+#: ../src/client/composer/composer-widget.vala:914
 msgid "Do you want to discard this message?"
 msgstr "Da li želite da odbacite ovu poruku?"
 
-#: ../src/client/composer/composer-widget.vala:998
+#: ../src/client/composer/composer-widget.vala:1027
 msgid "Send message with an empty subject and body?"
 msgstr "Da pošaljem poruku sa praznim naslovom i razradom?"
 
-#: ../src/client/composer/composer-widget.vala:1000
+#: ../src/client/composer/composer-widget.vala:1029
 msgid "Send message with an empty subject?"
 msgstr "Da pošaljem poruku sa praznim naslovom?"
 
-#: ../src/client/composer/composer-widget.vala:1002
+#: ../src/client/composer/composer-widget.vala:1031
 msgid "Send message with an empty body?"
 msgstr "Da pošaljem poruku sa praznom razradom?"
 
-#: ../src/client/composer/composer-widget.vala:1004
+#: ../src/client/composer/composer-widget.vala:1033
 msgid "Send message without an attachment?"
 msgstr "Da pošaljem poruku bez priloga?"
 
-#: ../src/client/composer/composer-widget.vala:1187
+#: ../src/client/composer/composer-widget.vala:1216
 msgid "Cannot add attachment"
 msgstr "Ne mogu da dodam prilog"
 
-#: ../src/client/composer/composer-widget.vala:1198
+#: ../src/client/composer/composer-widget.vala:1227
 #, c-format
 msgid "\"%s\" could not be found."
 msgstr "Ne mogu da pronađem „%s“."
 
-#: ../src/client/composer/composer-widget.vala:1205
+#: ../src/client/composer/composer-widget.vala:1234
 #, c-format
 msgid "\"%s\" is a folder."
 msgstr "„%s“ je fascikla."
 
-#: ../src/client/composer/composer-widget.vala:1212
+#: ../src/client/composer/composer-widget.vala:1241
 #, c-format
 msgid "\"%s\" is an empty file."
 msgstr "„%s“ je prazna datoteka."
 
-#: ../src/client/composer/composer-widget.vala:1226
+#: ../src/client/composer/composer-widget.vala:1255
 #, c-format
 msgid "\"%s\" could not be opened for reading."
 msgstr "Ne mogu da otvorim „%s“ za čitanje."
 
-#: ../src/client/composer/composer-widget.vala:1233
+#: ../src/client/composer/composer-widget.vala:1262
 #, c-format
 msgid "\"%s\" already attached for delivery."
 msgstr "„%s“ je već priloženo za isporuku."
 
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
-#: ../src/client/composer/composer-widget.vala:1242
+#: ../src/client/composer/composer-widget.vala:1271
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: ../src/client/composer/composer-widget.vala:1302
-#| msgid "To: %s\n"
+#: ../src/client/composer/composer-widget.vala:1331
 msgid "To: "
 msgstr "Prima: "
 
-#: ../src/client/composer/composer-widget.vala:1305
-#| msgid "Cc: %s\n"
+#: ../src/client/composer/composer-widget.vala:1334
 msgid "Cc: "
 msgstr "Uu: "
 
-#: ../src/client/composer/composer-widget.vala:1308
-#| msgid "Bcc:"
+#: ../src/client/composer/composer-widget.vala:1337
 msgid "Bcc: "
 msgstr "Nuu: "
 
-#: ../src/client/composer/composer-widget.vala:1525
+#: ../src/client/composer/composer-widget.vala:1340
+#| msgid "_Reply"
+msgid "Reply-To: "
+msgstr "Odgovori: "
+
+#: ../src/client/composer/composer-widget.vala:1573
 msgid "Select Color"
 msgstr "Izaberite boju"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: ../src/client/composer/composer-widget.vala:1974
+#: ../src/client/composer/composer-widget.vala:2022
 msgid "_From:"
 msgstr "_Šalje:"
 
 #. For other types of messages, just show the from account.
 #. Composer label (without mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: ../src/client/composer/composer-widget.vala:1990
-#: ../src/client/conversation-viewer/conversation-viewer.vala:713
+#: ../src/client/composer/composer-widget.vala:2038
+#: ../src/client/conversation-viewer/conversation-viewer.vala:734
 msgid "From:"
 msgstr "Šalje:"
 
@@ -891,43 +892,43 @@ msgstr "Nema rezultata pretrage."
 msgid "No conversations in folder."
 msgstr "Nema razgovora u fascikli."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:612
+#: ../src/client/conversation-viewer/conversation-viewer.vala:633
 msgid "This message contains remote images."
 msgstr "Ova poruka sadrži udaljene slike."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:612
+#: ../src/client/conversation-viewer/conversation-viewer.vala:633
 msgid "Show Images"
 msgstr "Prikažite slike"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:613
+#: ../src/client/conversation-viewer/conversation-viewer.vala:634
 msgid "Always Show From Sender"
 msgstr "Uvek prikaži od pošiljaoca"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:637
+#: ../src/client/conversation-viewer/conversation-viewer.vala:658
 msgid "Edit Draft"
 msgstr "Uredite nacrt"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:716
+#: ../src/client/conversation-viewer/conversation-viewer.vala:737
 msgid "To:"
 msgstr "Prima:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:719
+#: ../src/client/conversation-viewer/conversation-viewer.vala:740
 msgid "Cc:"
 msgstr "Cc:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:722
+#: ../src/client/conversation-viewer/conversation-viewer.vala:743
 msgid "Bcc:"
 msgstr "Bcc:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:725
+#: ../src/client/conversation-viewer/conversation-viewer.vala:746
 msgid "Subject:"
 msgstr "Naslov:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:728
+#: ../src/client/conversation-viewer/conversation-viewer.vala:749
 msgid "Date:"
 msgstr "Datum:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1012
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1033
 #, c-format
 msgid "%u read message"
 msgid_plural "%u read messages"
@@ -936,64 +937,64 @@ msgstr[1] "%u nove poruke"
 msgstr[2] "%u novih poruka"
 msgstr[3] "%u nova poruka"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1144
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1165
 #, c-format
 msgid "This message was sent successfully, but could not be saved to %s."
 msgstr "Ova poruka je uspešno poslata, ali ne može biti sačuvana u „%s“."
 
 #. Add a menu item for copying the current selection.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1170
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1191
 #: ../ui/composer.glade.h:4
 msgid "_Copy"
 msgstr "_Umnoži"
 
 #. Add a menu item for copying the address.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1178
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1199
 msgid "Copy _Email Address"
 msgstr "Umnoži adresu _el. pošte"
 
 #. Add a menu item for copying the link.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1183
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1204
 #: ../ui/composer.glade.h:17
 msgid "Copy _Link"
 msgstr "Umnoži _vezu"
 
 #. Select message.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1191
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1212
 msgid "Select _Message"
 msgstr "Izaberi _poruku"
 
 #. Inspect.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1203
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1224
 msgid "_Inspect"
 msgstr "_Proveri"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1429
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1450
 msgid "This link appears to go to"
 msgstr "Ova veza izgleda kao da vodi do"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1430
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1451
 msgid "but actually goes to"
 msgstr "ali zapravo vodi do"
 
 #. If href doesn't look like a URL, something is fishy, so warn the user
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1485
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1506
 msgid " (Invalid?)"
 msgstr " (Neispravno?)"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1591
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1612
 msgid "_Save Image As..."
 msgstr "_Sačuvaj sliku kao..."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1695
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1716
 msgid "_Save As..."
 msgstr "_Sačuvaj kao..."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1700
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1721
 msgid "Save All A_ttachments..."
 msgstr "Sačuvaj sve _priloge..."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1720
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1741
 msgid "Save A_ttachment..."
 msgid_plural "Save All A_ttachments..."
 msgstr[0] "Sačuvaj _prilog..."
@@ -1002,37 +1003,37 @@ msgstr[2] "Sačuvaj _priloge..."
 msgstr[3] "Sačuvaj _prilog..."
 
 #. Reply to all on a message.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1735
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1756
 msgid "Reply to _All"
 msgstr "Odgovori _svima"
 
 #. Mark as read/unread.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1752
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1773
 msgid "_Mark as Read"
 msgstr "_Označi kao pročitano"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1756
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1777
 msgid "_Mark as Unread"
 msgstr "_Označi kao nepročitano"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1762
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1783
 msgid "Mark Unread From _Here"
 msgstr "Označi kao nepročitano _odavde"
 
 #. Separator.
 #. View original message source.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1777
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1798
 msgid "_View Source"
 msgstr "_Pogledaj izvor"
 
 #. Generate the attachment table.
 #. / Placeholder filename for attachments with no filename.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:2101
+#: ../src/client/conversation-viewer/conversation-viewer.vala:2122
 #: ../src/engine/rfc822/rfc822-utils.vala:331
 msgid "none"
 msgstr "ništa"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:2236
+#: ../src/client/conversation-viewer/conversation-viewer.vala:2257
 msgid "Failed to open default text editor."
 msgstr "Nisam uspeo da otvorim osnovnog uređivača teksta."
 
@@ -1131,8 +1132,8 @@ msgstr "Došlo je do greške prilikom obrade uverenja servera"
 #. strings, and Glade doesn't support the "larger" size attribute. See this bug report for
 #. details: https://bugzilla.gnome.org/show_bug.cgi?id=679006
 #: ../src/client/dialogs/password-dialog.vala:16
-msgid "Please enter your password"
-msgstr "Molim unesite vašu lizinku"
+msgid "Geary requires your email password to continue"
+msgstr "Zupčinko zahteva vašu lozinku el. pošte da bi nastavio"
 
 #. Label displaying total number of email messages in a folder
 #: ../src/client/folder-list/folder-list-folder-entry.vala:32
@@ -1308,7 +1309,7 @@ msgid "%A"
 msgstr "%A"
 
 #: ../src/client/util/util-email.vala:30
-#: ../src/engine/rfc822/rfc822-message.vala:741
+#: ../src/engine/rfc822/rfc822-message.vala:747
 msgid "(no subject)"
 msgstr "(bez naslova)"
 
@@ -1469,14 +1470,14 @@ msgstr "moja"
 #. List of folder names to match for Drafts, separated by |.  Please add localized common
 #. names for the Drafts folder, leaving in the English names as well.  The first in the list
 #. will be the default, so please add the most common localized name to the front.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:535
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:536
 msgid "Drafts | Draft"
 msgstr "Nacrti | Nacrt | Drafts | Draft"
 
 #. List of folder names to match for Sent Mail, separated by |.  Please add localized common
 #. names for the Sent Mail folder, leaving in the English names as well.  The first in the list
 #. will be the default, so please add the most common localized name to the front.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:540
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:541
 msgid "Sent | Sent Mail | Sent Email | Sent E-Mail"
 msgstr ""
 "Poslato | Poslata pošta | Poslata el. pošta | Sent | Sent Mail | Sent Email "
@@ -1485,7 +1486,7 @@ msgstr ""
 #. List of folder names to match for Spam, separated by |.  Please add localized common
 #. names for the Spam folder, leaving in the English names as well.  The first in the list
 #. will be the default, so please add the most common localized name to the front.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:545
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:546
 msgid ""
 "Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email "
 "| Bulk E-Mail"
@@ -1497,7 +1498,7 @@ msgstr ""
 #. List of folder names to match for Trash, separated by |.  Please add localized common
 #. names for the Trash folder, leaving in the English names as well.  The first in the list
 #. will be the default, so please add the most common localized name to the front.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:550
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:551
 msgid "Trash | Rubbish | Rubbish Bin"
 msgstr "Smeće | Korpa | Trash | Rubbish | Rubbish Bin"
 
@@ -1684,117 +1685,117 @@ msgid "_Rich Text"
 msgstr "_Obogati tekst"
 
 #: ../ui/composer.glade.h:23
+msgid "Show Extended Fields"
+msgstr "Prikaži proširena polja"
+
+#: ../ui/composer.glade.h:24
 msgid "Lar_ge"
 msgstr "_Veliki"
 
-#: ../ui/composer.glade.h:24
+#: ../ui/composer.glade.h:25
 msgid "Large"
 msgstr "Veliki"
 
-#: ../ui/composer.glade.h:25
+#: ../ui/composer.glade.h:26
 msgid "_Medium"
 msgstr "_Srednji"
 
-#: ../ui/composer.glade.h:26
+#: ../ui/composer.glade.h:27
 msgid "Medium"
 msgstr "Srednji"
 
-#: ../ui/composer.glade.h:27
+#: ../ui/composer.glade.h:28
 msgid "_Small"
 msgstr "_Mali"
 
-#: ../ui/composer.glade.h:28
+#: ../ui/composer.glade.h:29
 msgid "Small"
 msgstr "Mali"
 
-#: ../ui/composer.glade.h:29
+#: ../ui/composer.glade.h:30
 msgid "S_ans Serif"
 msgstr "_Bezserifni"
 
-#: ../ui/composer.glade.h:30
+#: ../ui/composer.glade.h:31
 msgid "Sans Serif"
 msgstr "Bezserifni"
 
-#: ../ui/composer.glade.h:31
+#: ../ui/composer.glade.h:32
 msgid "S_erif"
 msgstr "_Serifni"
 
-#: ../ui/composer.glade.h:32
+#: ../ui/composer.glade.h:33
 msgid "Serif"
 msgstr "Serifni"
 
-#: ../ui/composer.glade.h:33
+#: ../ui/composer.glade.h:34
 msgid "_Fixed Width"
 msgstr "_Stalna širina"
 
-#: ../ui/composer.glade.h:34
+#: ../ui/composer.glade.h:35
 msgid "Fixed Width"
 msgstr "Stalna širina"
 
-#: ../ui/composer.glade.h:35
-#| msgid "_Attach"
+#: ../ui/composer.glade.h:36
 msgid "Detach"
 msgstr "Otkači"
 
-#: ../ui/composer.glade.h:36
+#: ../ui/composer.glade.h:37
 msgid "_Send"
 msgstr "_Pošalji"
 
-#: ../ui/composer.glade.h:37
-#| msgid "_Send"
+#: ../ui/composer.glade.h:38
 msgid "Send"
 msgstr "Pošalji"
 
-#: ../ui/composer.glade.h:38
+#: ../ui/composer.glade.h:39
 msgid "_Attach File"
 msgstr "_Priloži datoteku"
 
-#: ../ui/composer.glade.h:39
-#| msgid "_Attach File"
+#: ../ui/composer.glade.h:40
 msgid "Attach File"
 msgstr "Priložite datoteku"
 
-#: ../ui/composer.glade.h:40
+#: ../ui/composer.glade.h:41
 msgid "_Include Original Attachments"
 msgstr "_Uključi izvorne priloge"
 
-#: ../ui/composer.glade.h:41
-#| msgid "_Include Original Attachments"
+#: ../ui/composer.glade.h:42
 msgid "Include Original Attachments"
 msgstr "Uključite izvorne priloge"
 
 #. Address(es) e-mail is to be sent to
-#: ../ui/composer.glade.h:43
-#| msgid "_To:"
+#: ../ui/composer.glade.h:44
 msgid "_To"
 msgstr "_Prima"
 
-#: ../ui/composer.glade.h:44
-#| msgid "_Cc:"
+#: ../ui/composer.glade.h:45
 msgid "_Cc"
 msgstr "_Uu"
 
-#: ../ui/composer.glade.h:45
-#| msgid "_Subject:"
+#: ../ui/composer.glade.h:46
 msgid "_Subject"
 msgstr "_Tema"
 
-#: ../ui/composer.glade.h:46
-#| msgid "_Bcc:"
+#: ../ui/composer.glade.h:47
 msgid "_Bcc"
 msgstr "_Nuu"
 
-#. Geary account mail will be sent from
 #: ../ui/composer.glade.h:48
-#| msgid "From:"
+#| msgid "_Reply"
+msgid "_Reply-To"
+msgstr "_Odgovori"
+
+#. Geary account mail will be sent from
+#: ../ui/composer.glade.h:50
 msgid "From"
 msgstr "Šalje"
 
-#: ../ui/composer.glade.h:49
+#: ../ui/composer.glade.h:51
 msgid "Drop files here"
 msgstr "Ovde ubacite datoteke"
 
-#: ../ui/composer.glade.h:50
+#: ../ui/composer.glade.h:52
 msgid "To add them as attachments"
 msgstr "Da ih dodate kao prilige"
 
@@ -1818,32 +1819,27 @@ msgstr "Razlikuj _veličinu slova"
 msgid "label"
 msgstr "natpis"
 
-#: ../ui/login.glade.h:1
+#: ../ui/login.glade.h:1 ../ui/password-dialog.glade.h:3
 msgid "Password"
 msgstr "Lozinka"
 
 #: ../ui/login.glade.h:2
-#| msgid "E_mail address:"
 msgid "E_mail address"
 msgstr "Adresa el. _pošte"
 
 #: ../ui/login.glade.h:3
-#| msgid "_Password:"
 msgid "_Password"
 msgstr "_Lozinka"
 
 #: ../ui/login.glade.h:4
-#| msgid "S_ervice:"
 msgid "S_ervice"
 msgstr "_Usluga"
 
 #: ../ui/login.glade.h:5
-#| msgid "N_ame:"
 msgid "N_ame"
 msgstr "_Ime"
 
 #: ../ui/login.glade.h:7
-#| msgid "N_ickname:"
 msgid "N_ickname"
 msgstr "_Nadimak"
 
@@ -1860,22 +1856,18 @@ msgid "IMAP settings"
 msgstr "Podešavanja IMAP-a"
 
 #: ../ui/login.glade.h:11
-#| msgid "Se_rver:"
 msgid "Se_rver"
 msgstr "Se_rver"
 
 #: ../ui/login.glade.h:12
-#| msgid "P_ort:"
 msgid "P_ort"
 msgstr "_Priključnik"
 
 #: ../ui/login.glade.h:13
-#| msgid "Ser_ver:"
 msgid "Ser_ver"
 msgstr "Ser_ver"
 
 #: ../ui/login.glade.h:14
-#| msgid "Por_t:"
 msgid "Por_t"
 msgstr "Pri_ključnik"
 
@@ -1884,12 +1876,10 @@ msgid "SMTP settings"
 msgstr "Podešavanja SMTP-a"
 
 #: ../ui/login.glade.h:16
-#| msgid "User_name:"
 msgid "User_name"
 msgstr "_Korisnik"
 
 #: ../ui/login.glade.h:17
-#| msgid "Pass_word:"
 msgid "Pass_word"
 msgstr "_Lozinka"
 
@@ -1902,7 +1892,6 @@ msgid "SMTP password"
 msgstr "SMTP lozinka"
 
 #: ../ui/login.glade.h:20
-#| msgid "_Username:"
 msgid "_Username"
 msgstr "_Korisnik"
 
@@ -1915,12 +1904,10 @@ msgid "IMAP password"
 msgstr "IMAP lozinka"
 
 #: ../ui/login.glade.h:23
-#| msgid "Encr_yption:"
 msgid "Encr_yption"
 msgstr "Ši_frovanje"
 
 #: ../ui/login.glade.h:24
-#| msgid "Encrypt_ion:"
 msgid "Encrypt_ion"
 msgstr "Šifro_vanje"
 
@@ -1945,11 +1932,10 @@ msgid "Storage"
 msgstr "Skladište"
 
 #: ../ui/login.glade.h:31
-#| msgid "_Download mail:"
 msgid "_Download mail"
 msgstr "_Preuzmi poštu"
 
-#: ../ui/login.glade.h:32 ../ui/preferences.glade.h:6
+#: ../ui/login.glade.h:32 ../ui/preferences.glade.h:4
 msgid "Composer"
 msgstr "Sastavljač"
 
@@ -1966,51 +1952,47 @@ msgid "SMTP Credentials"
 msgstr "SMTP uverenja"
 
 #: ../ui/password-dialog.glade.h:2
-msgid "Username:"
-msgstr "Korisnik:"
-
-#: ../ui/password-dialog.glade.h:3
-msgid "Password:"
-msgstr "Lozinka:"
+#| msgid "_Username"
+msgid "Username"
+msgstr "Korisnik"
 
 #: ../ui/password-dialog.glade.h:4
 msgid "_Remember password"
 msgstr "_Zapamti lozinku"
 
-#: ../ui/preferences.glade.h:1
-#| msgid "_Preferences"
-msgid "Preferences"
-msgstr "Postavke"
+#: ../ui/password-dialog.glade.h:6
+msgid "_Authenticate"
+msgstr "_Potvrdi identitet"
 
-#: ../ui/preferences.glade.h:3
+#: ../ui/preferences.glade.h:1
 msgid "Reading"
 msgstr "Čitanje"
 
-#: ../ui/preferences.glade.h:4
+#: ../ui/preferences.glade.h:2
 msgid "_Automatically select next message"
 msgstr "_Sam izaberi sledeću poruku"
 
-#: ../ui/preferences.glade.h:5
+#: ../ui/preferences.glade.h:3
 msgid "_Display conversation preview"
 msgstr "_Prikaži pregled razgovora"
 
-#: ../ui/preferences.glade.h:7
+#: ../ui/preferences.glade.h:5
 msgid "Enable _spell checking"
 msgstr "Uključi _proveru pisanja"
 
-#: ../ui/preferences.glade.h:8
+#: ../ui/preferences.glade.h:6
 msgid "Notifications"
 msgstr "Obaveštenja"
 
-#: ../ui/preferences.glade.h:9
+#: ../ui/preferences.glade.h:7
 msgid "_Play notification sounds"
 msgstr "_Pusti zvuke obaveštenja"
 
-#: ../ui/preferences.glade.h:10
+#: ../ui/preferences.glade.h:8
 msgid "Show _notifications for new mail"
 msgstr "Prikaži _obaveštenja za novu poštu"
 
-#: ../ui/preferences.glade.h:11
+#: ../ui/preferences.glade.h:9
 msgid "Notify of new mail at start_up"
 msgstr "Obavesti o _novoj pošti pri pokretanju"
 
@@ -2039,8 +2021,22 @@ msgid "Email address:"
 msgstr "Adresa el. pošte:"
 
 #: ../ui/upgrade_dialog.glade.h:1
-msgid "Geary upgrade in progress."
-msgstr "Nadogradnja Zupčinka je u toku."
+#| msgid "Geary upgrade in progress."
+msgid "Geary update in progress…"
+msgstr "Dogradnja Zupčinka je u toku…"
+
+#~ msgid "Please enter your password"
+#~ msgstr "Molim unesite vašu lizinku"
+
+#~ msgid "Username:"
+#~ msgstr "Korisnik:"
+
+#~ msgid "Password:"
+#~ msgstr "Lozinka:"
+
+#~| msgid "_Preferences"
+#~ msgid "Preferences"
+#~ msgstr "Postavke"
 
 #~ msgid "attach|enclosed|enclosing|cover letter"
 #~ msgstr "prilog|priloženo|prilažem|propratno pismo"
