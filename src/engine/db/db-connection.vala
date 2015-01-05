@@ -33,6 +33,9 @@ public class Geary.Db.Connection : Geary.Db.Context {
     private const string PRAGMA_SCHEMA_VERSION = "schema_version";
     private const string PRAGMA_SECURE_DELETE = "secure_delete";
     private const string PRAGMA_SYNCHRONOUS = "synchronous";
+    private const string PRAGMA_FREELIST_COUNT = "freelist_count";
+    private const string PRAGMA_PAGE_COUNT = "page_count";
+    private const string PRAGMA_PAGE_SIZE = "page_size";
     
     // this is used for logging purposes only; connection numbers mean nothing to SQLite
     private static int next_cx_number = 0;
@@ -218,6 +221,24 @@ public class Geary.Db.Connection : Geary.Db.Context {
     }
     
     /**
+     * Returns the result of a PRAGMA as a 64-bit integer. See [[http://www.sqlite.org/pragma.html]]
+     *
+     * Note that if the PRAGMA does not return an integer, the results are undefined.  Since a
+     * boolean in SQLite includes 1 and 0, it's possible for those values to be converted to an
+     * integer.
+     */
+    public int64 get_pragma_int64(string name) throws Error {
+        return query("PRAGMA %s".printf(name)).int64_at(0);
+    }
+    
+    /**
+     * Sets a 64-bit integer PRAGMA value.
+     */
+    public void set_pragma_int64(string name, int64 ld) throws Error {
+        exec("PRAGMA %s=%s".printf(name, ld.to_string()));
+    }
+    
+    /**
      * Returns the result of a PRAGMA as a string.  See [[http://www.sqlite.org/pragma.html]]
      */
     public string get_pragma_string(string name) throws Error {
@@ -316,6 +337,27 @@ public class Geary.Db.Connection : Geary.Db.Context {
      */
     public SynchronousMode get_synchronous() throws Error {
         return SynchronousMode.parse(get_pragma_string(PRAGMA_SYNCHRONOUS));
+    }
+    
+    /**
+     * See [[https://www.sqlite.org/pragma.html#pragma_freelist_count]]
+     */
+    public int64 get_free_page_count() throws Error {
+        return get_pragma_int64(PRAGMA_FREELIST_COUNT);
+    }
+    
+    /**
+     * See [[https://www.sqlite.org/pragma.html#pragma_page_count]]
+     */
+    public int64 get_total_page_count() throws Error {
+        return get_pragma_int64(PRAGMA_PAGE_COUNT);
+    }
+    
+    /**
+     * See [[https://www.sqlite.org/pragma.html#pragma_page_size]]
+     */
+    public int get_page_size() throws Error {
+        return get_pragma_int(PRAGMA_PAGE_SIZE);
     }
     
     /**

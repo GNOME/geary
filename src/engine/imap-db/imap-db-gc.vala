@@ -34,6 +34,9 @@ private class Geary.ImapDB.GC {
     // Number of reaped messages since last vacuum indicating another vacuum should occur
     private const int VACUUM_WHEN_REAPED_REACHES = 10000;
     
+    // Amount of disk space that must be saved to start a vacuum (500MB).
+    private const long VACUUM_WHEN_FREE_BYTES = 500 * 1024 * 1024;
+    
     // Days old from today an unlinked email message must be to be reaped by the garbage collector
     private const int UNLINKED_DAYS = 30;
     
@@ -95,8 +98,16 @@ private class Geary.ImapDB.GC {
     public async RecommendedOperation should_run_async(Cancellable? cancellable) throws Error {
         DateTime? last_reap_time, last_vacuum_time;
         int reaped_messages_since_last_vacuum;
+        int64 free_page_bytes;
         yield fetch_gc_info_async(out last_reap_time, out last_vacuum_time, out reaped_messages_since_last_vacuum,
-            cancellable);
+            out free_page_bytes, cancellable);
+        
+        debug("[%s] GC state: last_reap_time=%s last_vacuum_time=%s reaped_messages_since=%d free_page_bytes=%s",
+            to_string(),
+            (last_reap_time != null) ? last_reap_time.to_string() : "never",
+            (last_vacuum_time != null) ? last_vacuum_time.to_string() : "never",
+            reaped_messages_since_last_vacuum,
+            free_page_bytes.to_string());
         
         RecommendedOperation op = RecommendedOperation.NONE;
         DateTime now = new DateTime.now_local();
@@ -140,9 +151,15 @@ private class Geary.ImapDB.GC {
             vacuum_permitted = false;
         }
         
-        if (vacuum_permitted && reaped_messages_since_last_vacuum >= VACUUM_WHEN_REAPED_REACHES) {
-            debug("[%s] Recommending database vacuum: %d messages reaped since last vacuum %s days ago",
-                to_string(), reaped_messages_since_last_vacuum, days.to_string());
+        // VACUUM_DAYS_SPAN must have passed since last vacuum (unless no prior vacuum has occurred)
+        // *and* a certain number of messages have been reaped (indicating fragmentation is a
+        // possibility) or a certain amount of free space exists in the database (indicating they
+        // can be freed back to the filesystem)
+        bool fragmentation_exists = reaped_messages_since_last_vacuum >= VACUUM_WHEN_REAPED_REACHES;
+        bool too_much_free_space = free_page_bytes >= VACUUM_WHEN_FREE_BYTES;
+        if (vacuum_permitted && (fragmentation_exists || too_much_free_space)) {
+            debug("[%s] Recommending database vacuum: %d messages reaped since last vacuum %s days ago, %s free bytes in file",
+                to_string(), reaped_messages_since_last_vacuum, days.to_string(), free_page_bytes.to_string());
             
             op |= RecommendedOperation.VACUUM;
         }
@@ -613,10 +630,11 @@ private class Geary.ImapDB.GC {
     }
     
     private async void fetch_gc_info_async(out DateTime? last_reap_time, out DateTime? last_vacuum_time,
-        out int reaped_messages_since_last_vacuum, Cancellable? cancellable) throws Error {
+        out int reaped_messages_since_last_vacuum, out int64 free_page_bytes, Cancellable? cancellable)
+        throws Error {
         // dealing with out arguments for an async method inside a closure is asking for trouble
-        int64 last_reap_time_t = -1, last_vacuum_time_t = -1;
-        int reaped_count = -1;
+        int64 last_reap_time_t = -1, last_vacuum_time_t = -1, free_page_count = 0;
+        int reaped_count = -1, page_size = 0;
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
             Db.Result result = cx.query("""
                 SELECT last_reap_time_t, last_vacuum_time_t, reaped_messages_since_last_vacuum
@@ -632,12 +650,16 @@ private class Geary.ImapDB.GC {
             last_vacuum_time_t = !result.is_null_at(1) ? result.int64_at(1) : -1;
             reaped_count = result.int_at(2);
             
+            free_page_count = cx.get_free_page_count();
+            page_size = cx.get_page_size();
+            
             return Db.TransactionOutcome.SUCCESS;
         }, cancellable);
         
         last_reap_time = (last_reap_time_t >= 0) ? new DateTime.from_unix_local(last_reap_time_t) : null;
         last_vacuum_time = (last_vacuum_time_t >= 0) ? new DateTime.from_unix_local(last_vacuum_time_t) : null;
         reaped_messages_since_last_vacuum = reaped_count;
+        free_page_bytes = free_page_count * page_size;
     }
     
     public string to_string() {
