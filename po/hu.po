@@ -4,14 +4,14 @@
 #
 # lukibeni <lukacs.bence1@gmail.com>, 2012, 2013.
 # metalsasi <metalsasi@gmail.com>, 2012.
-# Balázs Úr <urbalazs@gmail.com>, 2014.
+# Balázs Úr <urbalazs@gmail.com>, 2014, 2015.
 msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.6\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2014-12-23 05:55+0000\n"
-"PO-Revision-Date: 2014-12-23 17:34+0100\n"
+"POT-Creation-Date: 2015-01-06 17:50+0000\n"
+"PO-Revision-Date: 2015-01-06 22:22+0100\n"
 "Last-Translator: Balázs Úr <urbalazs@gmail.com>\n"
 "Language-Team: Hungarian <kde-l10n-hu@kde.org>\n"
 "Language: hu_HU\n"
@@ -75,7 +75,7 @@ msgstr "Utónév Családnév"
 
 #: ../src/client/accounts/add-edit-page.vala:202
 msgid "Welcome to Geary."
-msgstr "Üdvözöli a Geary."
+msgstr "Üdvözli a Geary!"
 
 #: ../src/client/accounts/add-edit-page.vala:202
 msgid "Enter your account information to get started."
@@ -398,11 +398,11 @@ msgstr "Válasz mindenkinek (Ctrl+Shift+R, Shift+R)"
 #: ../src/client/application/geary-controller.vala:347
 #: ../src/client/conversation-viewer/conversation-viewer.vala:1577
 msgid "_Forward"
-msgstr "_Előre"
+msgstr "T_ovábbítás"
 
 #: ../src/client/application/geary-controller.vala:348
 msgid "Forward (Ctrl+L, F)"
-msgstr "Előre (Ctrl+L, F)"
+msgstr "Továbbítás (Ctrl+L, F)"
 
 #: ../src/client/application/geary-controller.vala:616
 msgid "Unable to store server trust exception"
@@ -733,7 +733,15 @@ msgstr "Hiba a mentéskor"
 #. / A list of keywords, separated by pipe ("|") characters, that suggest an attachment
 #: ../src/client/composer/composer-window.vala:90
 msgid "attach|enclosed|enclosing|cover letter"
-msgstr "csatolás|mellékelt|melléklet|levélborító"
+msgstr ""
+"attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|enc"
+"losing|encloses|enclosure|enclosures|CV|cover|letter|csatol|csatolás|csatolást"
+"|csatolásokat|csatolmány|csatolmányt|csatolmányok|csatolmányokat|csatolva|csat"
+"olom|csatoltam|mellékel|melléklet|mellékletet|mellékletek|mellékleteket|mellék"
+"elve|mellékelem|mellékeltem|küldöm|elküldöm|átküldöm|postázom|fájl|fájlt|fájlo"
+"k|fájlokat|állomány|állományt|állományok|állományokat|életrajz|életrajzot|élet"
+"rajzom|életrajzomat|önéletrajz|önéletrajzot|önéletrajzom|önéletrajzomat|.doc|."
+"docx|.pdf|.xls|.xlsx|.ppt|.pptx|.rtf|.pps|.odt|.ods|.odp|.odg|.odb"
 
 #: ../src/client/composer/composer-window.vala:683
 msgid "Do you want to discard the unsaved message?"
