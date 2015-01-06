@@ -4,16 +4,16 @@
 #
 # lukibeni <lukacs.bence1@gmail.com>, 2012, 2013.
 # metalsasi <metalsasi@gmail.com>, 2012.
-# Balázs Úr <urbalazs@gmail.com>, 2014.
+# Balázs Úr <urbalazs@gmail.com>, 2014, 2015.
 # Gabor Kelemen <kelemeng at gnome dot hu>, 2014.
 msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2014-12-23 16:31+0000\n"
-"PO-Revision-Date: 2014-12-23 18:22+0100\n"
-"Last-Translator: Gabor Kelemen <kelemeng at gnome dot hu>\n"
+"POT-Creation-Date: 2015-01-06 17:50+0000\n"
+"PO-Revision-Date: 2015-01-06 22:14+0100\n"
+"Last-Translator: Balázs Úr <urbalazs@gmail.com>\n"
 "Language-Team: Hungarian <openscope at googlegroups dot com>\n"
 "Language: hu_HU\n"
 "MIME-Version: 1.0\n"
@@ -21,7 +21,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "geary/language/hu_HU/)\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Lokalize 1.5\n"
+"X-Generator: Lokalize 1.2\n"
 
 #: ../desktop/geary.desktop.in.h:1 ../desktop/geary-autostart.desktop.in.h:1
 msgid "Geary"
@@ -84,7 +84,7 @@ msgstr "Utónév Családnév"
 
 #: ../src/client/accounts/add-edit-page.vala:228
 msgid "Welcome to Geary."
-msgstr "Üdvözöli a Geary."
+msgstr "Üdvözli a Geary!"
 
 #: ../src/client/accounts/add-edit-page.vala:228
 msgid "Enter your account information to get started."
@@ -595,8 +595,9 @@ msgstr "%s névjegye"
 #: ../src/client/application/geary-controller.vala:1595
 msgid "translator-credits"
 msgstr ""
-"Kelemen Gábor <kelemeng at gnome dot hu> Lukács Bence <lukacs.bence1 at "
-"gmail dot com> Úr Balázs <urbalazs at gmail dot com>"
+"Kelemen Gábor <kelemeng at gnome dot hu>\n"
+"Lukács Bence <lukacs.bence1 at gmail dot com>\n"
+"Úr Balázs <urbalazs at gmail dot com>"
 
 #: ../src/client/application/geary-controller.vala:1859
 #, c-format
@@ -757,11 +758,14 @@ msgid ""
 "attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|"
 "enclosing|encloses|enclosure|enclosures"
 msgstr ""
-"attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|"
-"enclosing|encloses|enclosure|enclosures|csatol|csatolás|csatolást|csatolmány|"
-"csatolmányt|csatolmányok|csatolmányokat|csatolva|csatolom|csatoltam|mellékel|"
-"melléklet|mellékletet|mellékletek|mellékleteket|mellékelve|mellékelem|"
-"mellékeltem|fájl|fájlt|fájlok|fájlokat"
+"attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|enc"
+"losing|encloses|enclosure|enclosures|CV|cover|letter|csatol|csatolás|csatolást"
+"|csatolásokat|csatolmány|csatolmányt|csatolmányok|csatolmányokat|csatolva|csat"
+"olom|csatoltam|mellékel|melléklet|mellékletet|mellékletek|mellékleteket|mellék"
+"elve|mellékelem|mellékeltem|küldöm|elküldöm|átküldöm|postázom|fájl|fájlt|fájlo"
+"k|fájlokat|állomány|állományt|állományok|állományokat|életrajz|életrajzot|élet"
+"rajzom|életrajzomat|önéletrajz|önéletrajzot|önéletrajzom|önéletrajzomat|.doc|."
+"docx|.pdf|.xls|.xlsx|.ppt|.pptx|.rtf|.pps|.odt|.ods|.odp|.odg|.odb"
 
 #: ../src/client/composer/composer-widget.vala:907
 msgid "Do you want to discard the unsaved message?"
