@@ -4,14 +4,14 @@
 #
 # lukibeni <lukacs.bence1@gmail.com>, 2012, 2013.
 # metalsasi <metalsasi@gmail.com>, 2012.
-# Balázs Úr <urbalazs@gmail.com>, 2014.
+# Balázs Úr <urbalazs@gmail.com>, 2014, 2015.
 msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2014-12-23 05:55+0000\n"
-"PO-Revision-Date: 2014-12-23 17:32+0100\n"
+"POT-Creation-Date: 2015-01-06 17:50+0000\n"
+"PO-Revision-Date: 2015-01-06 22:20+0100\n"
 "Last-Translator: Balázs Úr <urbalazs@gmail.com>\n"
 "Language-Team: Hungarian <kde-l10n-hu@kde.org>\n"
 "Language: hu_HU\n"
@@ -48,7 +48,6 @@ msgid "Compose Message"
 msgstr "Levél írása"
 
 #: ../desktop/geary-attach.contract.in.h:1
-#| msgid "Send and receive email"
 msgid "Send by email"
 msgstr "Elküldés levélben"
 
@@ -84,7 +83,7 @@ msgstr "Utónév Családnév"
 
 #: ../src/client/accounts/add-edit-page.vala:228
 msgid "Welcome to Geary."
-msgstr "Üdvözöli a Geary."
+msgstr "Üdvözli a Geary!"
 
 #: ../src/client/accounts/add-edit-page.vala:228
 msgid "Enter your account information to get started."
@@ -413,11 +412,11 @@ msgstr "Válasz mindenkinek (Ctrl+Shift+R, Shift+R)"
 #: ../src/client/application/geary-controller.vala:355
 #: ../src/client/conversation-viewer/conversation-viewer.vala:1645
 msgid "_Forward"
-msgstr "_Előre"
+msgstr "T_ovábbítás"
 
 #: ../src/client/application/geary-controller.vala:356
 msgid "Forward (Ctrl+L, F)"
-msgstr "Előre (Ctrl+L, F)"
+msgstr "Továbbítás (Ctrl+L, F)"
 
 #: ../src/client/application/geary-controller.vala:624
 msgid "Unable to store server trust exception"
@@ -595,8 +594,9 @@ msgstr "%s névjegye"
 #: ../src/client/application/geary-controller.vala:1595
 msgid "translator-credits"
 msgstr ""
-"Kelemen Gábor <kelemeng at gnome dot hu> Lukács Bence <lukacs.bence1 at "
-"gmail dot com> Úr Balázs <urbalazs at gmail dot com>"
+"Kelemen Gábor <kelemeng at gnome dot hu>\n"
+"Lukács Bence <lukacs.bence1 at gmail dot com>\n"
+"Úr Balázs <urbalazs at gmail dot com>"
 
 #: ../src/client/application/geary-controller.vala:1859
 #, c-format
@@ -753,7 +753,15 @@ msgstr "Hiba a mentéskor"
 #. / A list of keywords, separated by pipe ("|") characters, that suggest an attachment
 #: ../src/client/composer/composer-widget.vala:117
 msgid "attach|enclosed|enclosing|cover letter"
-msgstr "csatolás|mellékelt|melléklet|levélborító"
+msgstr ""
+"attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|enc"
+"losing|encloses|enclosure|enclosures|CV|cover|letter|csatol|csatolás|csatolást"
+"|csatolásokat|csatolmány|csatolmányt|csatolmányok|csatolmányokat|csatolva|csat"
+"olom|csatoltam|mellékel|melléklet|mellékletet|mellékletek|mellékleteket|mellék"
+"elve|mellékelem|mellékeltem|küldöm|elküldöm|átküldöm|postázom|fájl|fájlt|fájlo"
+"k|fájlokat|állomány|állományt|állományok|állományokat|életrajz|életrajzot|élet"
+"rajzom|életrajzomat|önéletrajz|önéletrajzot|önéletrajzom|önéletrajzomat|.doc|."
+"docx|.pdf|.xls|.xlsx|.ppt|.pptx|.rtf|.pps|.odt|.ods|.odp|.odg|.odb"
 
 #: ../src/client/composer/composer-widget.vala:830
 msgid "Do you want to discard the unsaved message?"
@@ -816,17 +824,14 @@ msgid "%s (%s)"
 msgstr "%s (%s)"
 
 #: ../src/client/composer/composer-widget.vala:1222
-#| msgid "To: %s\n"
 msgid "To: "
 msgstr "Címzett: "
 
 #: ../src/client/composer/composer-widget.vala:1225
-#| msgid "Cc: %s\n"
 msgid "Cc: "
 msgstr "Másolat: "
 
 #: ../src/client/composer/composer-widget.vala:1228
-#| msgid "Bcc:"
 msgid "Bcc: "
 msgstr "Titkos másolat: "
 
@@ -1700,7 +1705,6 @@ msgid "_Send"
 msgstr "_Küldés"
 
 #: ../ui/composer.glade.h:37
-#| msgid "_Send"
 msgid "Send"
 msgstr "Küldés"
 
@@ -1709,7 +1713,6 @@ msgid "_Attach File"
 msgstr "Fájl _csatolása"
 
 #: ../ui/composer.glade.h:39
-#| msgid "_Attach File"
 msgid "Attach File"
 msgstr "Fájl csatolása"
 
@@ -1718,34 +1721,28 @@ msgid "_Include Original Attachments"
 msgstr "_Eredeti mellékletek megtartása"
 
 #: ../ui/composer.glade.h:41
-#| msgid "_Include Original Attachments"
 msgid "Include Original Attachments"
 msgstr "Eredeti mellékletek megtartása"
 
 #. Address(es) e-mail is to be sent to
 #: ../ui/composer.glade.h:43
-#| msgid "_To:"
 msgid "_To"
 msgstr "_Címzett"
 
 #: ../ui/composer.glade.h:44
-#| msgid "_Cc:"
 msgid "_Cc"
 msgstr "_Másolat"
 
 #: ../ui/composer.glade.h:45
-#| msgid "_Subject:"
 msgid "_Subject"
 msgstr "_Tárgy"
 
 #: ../ui/composer.glade.h:46
-#| msgid "_Bcc:"
 msgid "_Bcc"
 msgstr "Titk_os másolat"
 
 #. Geary account mail will be sent from
 #: ../ui/composer.glade.h:48
-#| msgid "From:"
 msgid "From"
 msgstr "Feladó"
 
