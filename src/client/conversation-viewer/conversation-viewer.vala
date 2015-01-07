@@ -2039,17 +2039,15 @@ public class ConversationViewer : Gtk.Box {
         string value = "";
         Gee.List<Geary.RFC822.MailboxAddress> list = addresses.get_all();
         foreach (Geary.RFC822.MailboxAddress a in list) {
-            if (a.name != null) {
-                value += "<a href='mailto:%s'>".printf(
-                    Uri.escape_string("%s <%s>".printf(a.name, a.address)));
-                value += "<span class='address_name'>%s</span> ".printf(a.name);
-                value += "<span class='address_value'>%s</span>".printf(a.address);
+            value += "<a href='mailto:%s'>".printf(Uri.escape_string(a.to_rfc822_string()));
+            if (!Geary.String.is_empty(a.name)) {
+                value += "<span class='address_name'>%s</span> ".printf(Geary.HTML.escape_markup(a.name));
+                value += "<span class='address_value'>%s</span>".printf(Geary.HTML.escape_markup(a.address));
             } else {
-                value += "<a href='mailto:%s'>".printf(a.address);
-                value += "<span class='address_name'>%s</span>".printf(a.address);
+                value += "<span class='address_name'>%s</span>".printf(Geary.HTML.escape_markup(a.address));
             }
             value += "</a>";
-
+            
             if (++i < list.size)
                 value += ", ";
         }
