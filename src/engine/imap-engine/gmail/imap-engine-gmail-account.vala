@@ -36,13 +36,16 @@ private class Geary.ImapEngine.GmailAccount : Geary.ImapEngine.GenericAccount {
         
         switch (special_folder_type) {
             case SpecialFolderType.ALL_MAIL:
-                return new MinimalFolder(this, remote_account, local_account, local_folder,
+                return new GmailAllMailFolder(this, remote_account, local_account, local_folder,
                     special_folder_type);
             
             case SpecialFolderType.DRAFTS:
+                return new GmailDraftsFolder(this, remote_account, local_account, local_folder,
+                    special_folder_type);
+            
             case SpecialFolderType.SPAM:
             case SpecialFolderType.TRASH:
-                return new GenericFolder(this, remote_account, local_account, local_folder,
+                return new GmailSpamTrashFolder(this, remote_account, local_account, local_folder,
                     special_folder_type);
             
             default:

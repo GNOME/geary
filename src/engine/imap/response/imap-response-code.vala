@@ -89,6 +89,26 @@ public class Geary.Imap.ResponseCode : Geary.Imap.ListParameter {
         return capabilities;
     }
     
+    /**
+     * Parses the {@link ResponseCode} into UIDPLUS' COPYUID response, if possible.
+     *
+     * Note that the {@link UID}s are returned from the server in the order the messages
+     * were copied.
+     *
+     * See [[http://tools.ietf.org/html/rfc4315#section-3]]
+     *
+     * @throws ImapError.INVALID if not COPYUID.
+     */
+    public void get_copyuid(out UIDValidity uidvalidity, out Gee.List<UID>? source_uids,
+        out Gee.List<UID>? destination_uids) throws ImapError {
+        if (!get_response_code_type().is_value(ResponseCodeType.COPYUID))
+            throw new ImapError.INVALID("Not COPYUID response code: %s", to_string());
+        
+        uidvalidity = new UIDValidity.checked(get_as_number(1).as_int64());
+        source_uids = MessageSet.uid_parse(get_as_string(2).ascii);
+        destination_uids = MessageSet.uid_parse(get_as_string(3).ascii);
+    }
+    
     public override string to_string() {
         return "[%s]".printf(stringize_list());
     }

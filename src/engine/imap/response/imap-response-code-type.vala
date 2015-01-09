@@ -23,6 +23,7 @@ public class Geary.Imap.ResponseCodeType : BaseObject, Gee.Hashable<ResponseCode
     public const string BADCHARSET = "badcharset";
     public const string CAPABILITY = "capability";
     public const string CLIENTBUG = "clientbug";
+    public const string COPYUID = "copyuid";
     public const string MYRIGHTS = "myrights";
     public const string NEWNAME = "newname";
     public const string NONEXISTANT = "nonexistant";

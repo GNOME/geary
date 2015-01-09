@@ -8,6 +8,10 @@ namespace Geary.Collection {
 
 public delegate uint8 ByteTransformer(uint8 b);
 
+public inline bool is_empty(Gee.Collection? c) {
+    return c == null || c.size == 0;
+}
+
 // A substitute for ArrayList<G>.wrap() for compatibility with older versions of Gee.
 public Gee.ArrayList<G> array_list_wrap<G>(G[] a, owned Gee.EqualDataFunc<G>? equal_func = null) {
     Gee.ArrayList<G> list = new Gee.ArrayList<G>(equal_func);

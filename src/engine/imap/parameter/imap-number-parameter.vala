@@ -5,7 +5,8 @@
  */
 
 /**
- * A representation of a numerical {@link Parameter} in an IMAP {@link Command}.
+ * A representation of a numerical {@link Parameter} in an IMAP {@link Command} or
+ * {@link ServerResponse}.
  *
  * See [[http://tools.ietf.org/html/rfc3501#section-4.2]]
  */
@@ -86,6 +87,11 @@ public class Geary.Imap.NumberParameter : UnquotedStringParameter {
                 has_nonzero = true;
         }
         
+        // watch for negative but no numeric portion
+        if (is_negative && str.length == 1)
+            return false;
+        
+        // no such thing as negative zero
         if (is_negative && !has_nonzero)
             is_negative = false;
         

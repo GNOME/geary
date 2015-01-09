@@ -71,7 +71,7 @@ private class Geary.ImapEngine.MoveEmail : Geary.ImapEngine.SendReplayOperation 
             ImapDB.EmailIdentifier.to_uids(moved_ids));
         foreach (Imap.MessageSet msg_set in msg_sets) {
             yield engine.remote_folder.copy_email_async(msg_set, destination, null);
-            yield engine.remote_folder.remove_email_async(msg_set, null);
+            yield engine.remote_folder.remove_email_async(msg_set.to_list(), null);
         }
         
         return ReplayOperation.Status.COMPLETED;

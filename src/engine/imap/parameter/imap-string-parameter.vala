@@ -188,5 +188,23 @@ public abstract class Geary.Imap.StringParameter : Geary.Imap.Parameter {
         
         return int64.parse(ascii).clamp(clamp_min, clamp_max);
     }
+    
+    /**
+     * Attempts to coerce a {@link StringParameter} into a {@link NumberParameter}.
+     *
+     * Returns null if unsuitable for a NumberParameter.
+     *
+     * @see NumberParameter.is_ascii_number
+     */
+    public NumberParameter? coerce_to_number_parameter() {
+        NumberParameter? numberp = this as NumberParameter;
+        if (numberp != null)
+            return numberp;
+        
+        if (NumberParameter.is_ascii_numeric(ascii, null))
+            return new NumberParameter.from_ascii(ascii);
+        
+        return null;
+    }
 }
 

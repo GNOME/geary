@@ -526,6 +526,31 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.AbstractAccount {
         return build_folder((ImapDB.Folder) yield local.fetch_folder_async(path, cancellable));
     }
     
+    /**
+     * Returns an Imap.Folder that is not connected (is detached) to a MinimalFolder or any other
+     * ImapEngine container.
+     *
+     * This is useful for one-shot operations that need to bypass the heavyweight synchronization
+     * routines inside MinimalFolder.  This also means that operations performed on this Folder will
+     * not be reflected in the local database unless there's a separate connection to the server
+     * that is notified or detects these changes.
+     *
+     * It is not recommended this object be held open long-term, or that its status or notifications
+     * be directly written to the database unless you know exactly what you're doing.  ''Caveat
+     * implementor.''
+     */
+    public async Imap.Folder fetch_detached_folder_async(Geary.FolderPath path, Cancellable? cancellable)
+        throws Error {
+        check_open();
+        
+        if (local_only.has_key(path)) {
+            throw new EngineError.NOT_FOUND("%s: path %s points to local-only folder, not IMAP",
+                to_string(), path.to_string());
+        }
+        
+        return yield remote.fetch_unrecycled_folder_async(path, cancellable);
+    }
+    
     private Gee.HashMap<Geary.SpecialFolderType, Gee.ArrayList<string>> get_mailbox_search_names() {
         Gee.HashMap<Geary.SpecialFolderType, string> mailbox_search_names
             = new Gee.HashMap<Geary.SpecialFolderType, string>();

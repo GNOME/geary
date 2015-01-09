@@ -626,7 +626,8 @@ private class Geary.Imap.Folder : BaseObject {
         return map;
     }
     
-    public async void remove_email_async(MessageSet msg_set, Cancellable? cancellable) throws Error {
+    public async void remove_email_async(Gee.List<MessageSet> msg_sets, Cancellable? cancellable)
+        throws Error {
         check_open();
         
         Gee.List<MessageFlag> flags = new Gee.ArrayList<MessageFlag>();
@@ -634,8 +635,14 @@ private class Geary.Imap.Folder : BaseObject {
         
         Gee.List<Command> cmds = new Gee.ArrayList<Command>();
         
-        StoreCommand store_cmd = new StoreCommand(msg_set, flags, true, false);
-        cmds.add(store_cmd);
+        // Build STORE command for all MessageSets, see if all are UIDs so we can use UID EXPUNGE
+        bool all_uid = true;
+        foreach (MessageSet msg_set in msg_sets) {
+            if (!msg_set.is_uid)
+                all_uid = false;
+            
+            cmds.add(new StoreCommand(msg_set, flags, true, false));
+        }
         
         // TODO: Only use old-school EXPUNGE when closing folder (or rely on CLOSE to do that work
         // for us).  See:
@@ -644,10 +651,12 @@ private class Geary.Imap.Folder : BaseObject {
         // However, current client implementation doesn't properly close INBOX when application
         // shuts down, which means deleted messages return at application start.  See:
         // http://redmine.yorba.org/issues/6865
-        if (msg_set.is_uid && session.capabilities.supports_uidplus())
-            cmds.add(new ExpungeCommand.uid(msg_set));
-        else
+        if (all_uid && session.capabilities.supports_uidplus()) {
+            foreach (MessageSet msg_set in msg_sets)
+                cmds.add(new ExpungeCommand.uid(msg_set));
+        } else {
             cmds.add(new ExpungeCommand());
+        }
         
         yield exec_commands_async(cmds, null, null, cancellable);
     }
@@ -675,15 +684,52 @@ private class Geary.Imap.Folder : BaseObject {
         yield exec_commands_async(cmds, null, null, cancellable);
     }
     
-    public async void copy_email_async(MessageSet msg_set, Geary.FolderPath destination,
+    // Returns a mapping of the source UID to the destination UID.  If the MessageSet is not for
+    // UIDs, then null is returned.  If the server doesn't support COPYUID, null is returned.
+    public async Gee.Map<UID, UID>? copy_email_async(MessageSet msg_set, FolderPath destination,
         Cancellable? cancellable) throws Error {
         check_open();
         
         CopyCommand cmd = new CopyCommand(msg_set,
             new MailboxSpecifier.from_folder_path(destination, null));
         
-        yield exec_commands_async(Geary.iterate<Command>(cmd).to_array_list(), null,
-            null, cancellable);
+        Gee.Map<Command, StatusResponse>? responses = yield exec_commands_async(
+            Geary.iterate<Command>(cmd).to_array_list(), null, null, cancellable);
+        
+        if (!responses.has_key(cmd))
+            return null;
+        
+        StatusResponse response = responses.get(cmd);
+        if (response.response_code != null && msg_set.is_uid) {
+            Gee.List<UID>? src_uids = null;
+            Gee.List<UID>? dst_uids = null;
+            try {
+                response.response_code.get_copyuid(null, out src_uids, out dst_uids);
+            } catch (ImapError ierr) {
+                debug("Unable to retrieve COPYUID UIDs: %s", ierr.message);
+            }
+            
+            if (!Collection.is_empty(src_uids) && !Collection.is_empty(dst_uids)) {
+                Gee.Map<UID, UID> copyuids = new Gee.HashMap<UID, UID>();
+                int ctr = 0;
+                for (;;) {
+                    UID? src_uid = (ctr < src_uids.size) ? src_uids[ctr] : null;
+                    UID? dst_uid = (ctr < dst_uids.size) ? dst_uids[ctr] : null;
+                    
+                    if (src_uid != null && dst_uid != null)
+                        copyuids.set(src_uid, dst_uid);
+                    else
+                        break;
+                    
+                    ctr++;
+                }
+                
+                if (copyuids.size > 0)
+                    return copyuids;
+            }
+        }
+        
+        return null;
     }
     
     public async Gee.SortedSet<Imap.UID>? search_async(SearchCriteria criteria, Cancellable? cancellable)

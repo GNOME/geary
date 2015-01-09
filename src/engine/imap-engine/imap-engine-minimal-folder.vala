@@ -1236,19 +1236,30 @@ private class Geary.ImapEngine.MinimalFolder : Geary.AbstractFolder, Geary.Folde
         replay_queue.schedule(mark);
         yield mark.wait_for_ready_async(cancellable);
     }
-
+    
     public virtual async void copy_email_async(Gee.List<Geary.EmailIdentifier> to_copy,
         Geary.FolderPath destination, Cancellable? cancellable = null) throws Error {
-        check_open("copy_email_async");
-        check_ids("copy_email_async", to_copy);
+        yield copy_email_uids_async(to_copy, destination, cancellable);
+    }
+    
+    /**
+     * Returns the destination folder's UIDs for the copied messages.
+     */
+    public async Gee.Set<Imap.UID>? copy_email_uids_async(Gee.List<Geary.EmailIdentifier> to_copy,
+        Geary.FolderPath destination, Cancellable? cancellable = null) throws Error {
+        check_open("copy_email_uids_async");
+        check_ids("copy_email_uids_async", to_copy);
         
         // watch for copying to this folder, which is treated as a no-op
         if (destination.equal_to(path))
-            return;
+            return null;
         
         CopyEmail copy = new CopyEmail(this, (Gee.List<ImapDB.EmailIdentifier>) to_copy, destination);
         replay_queue.schedule(copy);
+        
         yield copy.wait_for_ready_async(cancellable);
+        
+        return copy.destination_uids.size > 0 ? copy.destination_uids : null;
     }
 
     public virtual async void move_email_async(Gee.List<Geary.EmailIdentifier> to_move,

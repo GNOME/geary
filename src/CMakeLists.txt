@@ -193,8 +193,11 @@ engine/imap-engine/imap-engine-replay-operation.vala
 engine/imap-engine/imap-engine-replay-queue.vala
 engine/imap-engine/imap-engine-send-replay-operation.vala
 engine/imap-engine/gmail/imap-engine-gmail-account.vala
+engine/imap-engine/gmail/imap-engine-gmail-all-mail-folder.vala
+engine/imap-engine/gmail/imap-engine-gmail-drafts-folder.vala
 engine/imap-engine/gmail/imap-engine-gmail-folder.vala
 engine/imap-engine/gmail/imap-engine-gmail-search-folder.vala
+engine/imap-engine/gmail/imap-engine-gmail-spam-trash-folder.vala
 engine/imap-engine/other/imap-engine-other-account.vala
 engine/imap-engine/other/imap-engine-other-folder.vala
 engine/imap-engine/outlook/imap-engine-outlook-account.vala

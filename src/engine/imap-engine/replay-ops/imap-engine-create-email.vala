@@ -54,7 +54,7 @@ private class Geary.ImapEngine.CreateEmail : Geary.ImapEngine.SendReplayOperatio
         // operation atomic.
         if (cancellable.is_cancelled()) {
             yield engine.remote_folder.remove_email_async(
-                new Imap.MessageSet.uid(((ImapDB.EmailIdentifier) created_id).uid), null);
+                new Imap.MessageSet.uid(((ImapDB.EmailIdentifier) created_id).uid).to_list(), null);
             
             throw new IOError.CANCELLED("CreateEmail op cancelled after create");
         }

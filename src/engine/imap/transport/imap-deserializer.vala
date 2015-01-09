@@ -449,6 +449,8 @@ public class Geary.Imap.Deserializer : BaseObject {
         
         if (quoted)
             save_parameter(new QuotedStringParameter(str));
+        else if (NumberParameter.is_ascii_numeric(str, null))
+            save_parameter(new NumberParameter.from_ascii(str));
         else
             save_parameter(new UnquotedStringParameter(str));
         

@@ -245,7 +245,7 @@ private class Geary.Imap.Account : BaseObject {
         
         Imap.Folder folder;
         if (!mailbox_info.attrs.is_no_select) {
-            StatusData status = yield fetch_status_async(path, StatusDataType.all(), cancellable);
+            StatusData status = yield fetch_status_async(folder_path, StatusDataType.all(), cancellable);
             
             folder = new Imap.Folder(folder_path, session_mgr, status, mailbox_info);
         } else {
@@ -253,6 +253,35 @@ private class Geary.Imap.Account : BaseObject {
         }
         
         folders.set(path, folder);
+        
+        return folder;
+    }
+    
+    /**
+     * Returns an Imap.Folder that is not stored long-term in the Imap.Account object.
+     *
+     * This means the Imap.Folder is not re-used or used by multiple users or containers.  This is
+     * useful for one-shot operations on the server.
+     */
+    public async Imap.Folder fetch_unrecycled_folder_async(FolderPath path, Cancellable? cancellable)
+        throws Error {
+        check_open();
+        
+        MailboxInformation? mailbox_info = path_to_mailbox.get(path);
+        if (mailbox_info == null)
+            throw_not_found(path);
+        
+        // construct canonical folder path
+        FolderPath folder_path = mailbox_info.get_path(inbox_specifier);
+        
+        Imap.Folder folder;
+        if (!mailbox_info.attrs.is_no_select) {
+            StatusData status = yield fetch_status_async(folder_path, StatusDataType.all(), cancellable);
+            
+            folder = new Imap.Folder(folder_path, session_mgr, status, mailbox_info);
+        } else {
+            folder = new Imap.Folder.unselectable(folder_path, session_mgr, mailbox_info);
+        }
         
         return folder;
     }

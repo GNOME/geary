@@ -62,8 +62,7 @@ private class Geary.ImapEngine.RemoveEmail : Geary.ImapEngine.SendReplayOperatio
         // that the signal has already been fired.
         Gee.List<Imap.MessageSet> msg_sets = Imap.MessageSet.uid_sparse(
             ImapDB.EmailIdentifier.to_uids(removed_ids));
-        foreach (Imap.MessageSet msg_set in msg_sets)
-            yield engine.remote_folder.remove_email_async(msg_set, cancellable);
+        yield engine.remote_folder.remove_email_async(msg_sets, cancellable);
         
         return ReplayOperation.Status.COMPLETED;
     }

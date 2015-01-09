@@ -325,6 +325,44 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
     }
     
     //
+    // Number retrieval
+    //
+    
+    /**
+     * Returns a {@link NumberParameter} at index, null if not of that type.
+     *
+     * @see get_if
+     */
+    public NumberParameter? get_if_number(int index) {
+        return (NumberParameter?) get_if(index, typeof(NumberParameter));
+    }
+    
+    /**
+     * Returns a {@link NumberParameter} at index.
+     *
+     * Like {@link get_as_string}, this method will attempt some coercion.  In this case,
+     * {@link QuotedStringParameter} and {@link UnquotedStringParameter}s will be converted to
+     * NumberParameter, if appropriate.
+     */
+    public NumberParameter get_as_number(int index) throws ImapError {
+        Parameter param = get_required(index);
+        
+        NumberParameter? numberp = param as NumberParameter;
+        if (numberp != null)
+            return numberp;
+        
+        StringParameter? stringp = param as StringParameter;
+        if (stringp != null) {
+            numberp = stringp.coerce_to_number_parameter();
+            if (numberp != null)
+                return numberp;
+        }
+        
+        throw new ImapError.TYPE_ERROR("Parameter %d not of type number or string (is %s)", index,
+            param.get_type().name());
+    }
+    
+    //
     // List retrieval
     //
     

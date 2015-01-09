@@ -20,6 +20,8 @@ public class Geary.Imap.MessageSet : BaseObject {
     // etc.)
     private const int MAX_SPARSE_VALUES_PER_SET = 50;
     
+    private delegate void ParserCallback(int64 value) throws ImapError;
+    
     /**
      * True if the {@link MessageSet} was created with a UID or a UID range.
      *
@@ -106,6 +108,121 @@ public class Geary.Imap.MessageSet : BaseObject {
     public MessageSet.uid_custom(string custom) {
         value = custom;
         is_uid = true;
+    }
+    
+    /**
+     * Parses a string representing a {@link MessageSet} into a List of {@link SequenceNumber}s.
+     *
+     * See the note at {@link parse_uid} about limitations of this method.
+     *
+     * Returns null if the string or parsed set is empty.
+     *
+     * @see uid_parse
+     */
+    public static Gee.List<SequenceNumber>? parse(string str) throws ImapError {
+        Gee.List<SequenceNumber> seq_nums = new Gee.ArrayList<SequenceNumber>();
+        parse_string(str, (value) => { seq_nums.add(new SequenceNumber.checked(value)); });
+        
+        return seq_nums.size > 0 ? seq_nums : null;
+    }
+    
+    /**
+     * Parses a string representing a {@link MessageSet} into a List of {@link UID}s.
+     *
+     * Note that this is currently designed for parsing message set responses from the server,
+     * specifically for COPYUID, which has some limitations in what may be returned.  Notably, the
+     * asterisk ("*") symbol may not be returned.  Thus, this method does not properly parse
+     * the full range of message set notation and can't even be trusted to reverse-parse the output
+     * of this class.  A full implementation might be considered later.
+     *
+     * Because COPYUID returns values in the order copied, this method returns a List, not a Set,
+     * of values.  They are in the order received (and properly deal with ranges in backwards
+     * order, i.e. "12:10").  This means duplicates may be encountered multiple times if the server
+     * returns those values.
+     *
+     * Returns null if the string or parsed set is empty.
+     */
+    public static Gee.List<UID>? uid_parse(string str) throws ImapError {
+        Gee.List<UID> uids = new Gee.ArrayList<UID>();
+        parse_string(str, (value) => { uids.add(new UID.checked(value)); });
+        
+        return uids.size > 0 ? uids : null;
+    }
+    
+    private static void parse_string(string str, ParserCallback cb) throws ImapError {
+        StringBuilder acc = new StringBuilder();
+        int64 start_range = -1;
+        bool in_range = false;
+        
+        unichar ch;
+        int index = 0;
+        while (str.get_next_char(ref index, out ch)) {
+            // if number, add to accumulator
+            if (ch.isdigit()) {
+                acc.append_unichar(ch);
+                
+                continue;
+            }
+            
+            // look for special characters and deal with them
+            switch (ch) {
+                case ':':
+                    // range separator
+                    if (in_range)
+                        throw new ImapError.INVALID("Bad range specifier in message set \"%s\"", str);
+                    
+                    in_range = true;
+                    
+                    // store current accumulated value as start of range
+                    start_range = int64.parse(acc.str);
+                    acc = new StringBuilder();
+                break;
+                
+                case ',':
+                    // number separator
+                    
+                    // if in range, treat as end-of-range
+                    if (in_range) {
+                        // don't be forgiving here
+                        if (String.is_empty(acc.str))
+                            throw new ImapError.INVALID("Bad range specifier in message set \"%s\"", str);
+                        
+                        process_range(start_range, int64.parse(acc.str), cb);
+                        in_range = false;
+                    } else {
+                        // Be forgiving here
+                        if (String.is_empty(acc.str))
+                            continue;
+                        
+                        cb(int64.parse(acc.str));
+                    }
+                    
+                    // reset accumulator
+                    acc = new StringBuilder();
+                break;
+                
+                default:
+                    // unknown character, treat with great violence
+                    throw new ImapError.INVALID("Bad character '%s' in message set \"%s\"",
+                        ch.to_string(), str);
+            }
+        }
+        
+        // report last bit remaining in accumulator
+        if (!String.is_empty(acc.str)) {
+            if (in_range)
+                process_range(start_range, int64.parse(acc.str), cb);
+            else
+                cb(int64.parse(acc.str));
+        } else if (in_range) {
+            throw new ImapError.INVALID("Incomplete range specifier in message set \"%s\"", str);
+        }
+    }
+    
+    private static void process_range(int64 start, int64 end, ParserCallback cb) throws ImapError {
+        int64 count_by = (start <= end) ? 1 : -1;
+        for (int64 ctr = start; ctr != end + count_by; ctr += count_by)
+            cb(ctr);
     }
     
     /**
@@ -245,6 +362,13 @@ public class Geary.Imap.MessageSet : BaseObject {
         // Message sets are not quoted, even if they use an atom-special character (this *might*
         // be a Gmailism...)
         return new UnquotedStringParameter(value);
+    }
+    
+    /**
+     * Returns the {@link MessageSet} in a Gee.List.
+     */
+    public Gee.List<MessageSet> to_list() {
+        return iterate<MessageSet>(this).to_array_list();
     }
     
     public string to_string() {
