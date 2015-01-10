@@ -8,11 +8,11 @@
 # Gabor Kelemen <kelemeng at gnome dot hu>, 2014.
 msgid ""
 msgstr ""
-"Project-Id-Version: geary-0.4.1\n"
+"Project-Id-Version: geary-master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2015-01-06 17:50+0000\n"
-"PO-Revision-Date: 2015-01-06 22:14+0100\n"
+"POT-Creation-Date: 2015-01-09 23:12+0000\n"
+"PO-Revision-Date: 2015-01-10 11:39+0100\n"
 "Last-Translator: Balázs Úr <urbalazs@gmail.com>\n"
 "Language-Team: Hungarian <openscope at googlegroups dot com>\n"
 "Language: hu_HU\n"
@@ -34,7 +34,7 @@ msgstr "Levelezőkliens"
 
 #: ../desktop/geary.desktop.in.h:3 ../desktop/geary-autostart.desktop.in.h:3
 msgid "Geary Mail"
-msgstr "Geary levél"
+msgstr "Geary levelező"
 
 #: ../desktop/geary.desktop.in.h:4 ../desktop/geary-autostart.desktop.in.h:4
 msgid "Send and receive email"
@@ -80,7 +80,7 @@ msgstr "Fiókok"
 #. / Placeholder text indicating that the user should type their first name and last name
 #: ../src/client/accounts/add-edit-page.vala:10
 msgid "First Last"
-msgstr "Utónév Családnév"
+msgstr "Last First"
 
 #: ../src/client/accounts/add-edit-page.vala:228
 msgid "Welcome to Geary."
@@ -758,14 +758,15 @@ msgid ""
 "attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|"
 "enclosing|encloses|enclosure|enclosures"
 msgstr ""
-"attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|enc"
-"losing|encloses|enclosure|enclosures|CV|cover|letter|csatol|csatolás|csatolást"
-"|csatolásokat|csatolmány|csatolmányt|csatolmányok|csatolmányokat|csatolva|csat"
-"olom|csatoltam|mellékel|melléklet|mellékletet|mellékletek|mellékleteket|mellék"
-"elve|mellékelem|mellékeltem|küldöm|elküldöm|átküldöm|postázom|fájl|fájlt|fájlo"
-"k|fájlokat|állomány|állományt|állományok|állományokat|életrajz|életrajzot|élet"
-"rajzom|életrajzomat|önéletrajz|önéletrajzot|önéletrajzom|önéletrajzomat|.doc|."
-"docx|.pdf|.xls|.xlsx|.ppt|.pptx|.rtf|.pps|.odt|.ods|.odp|.odg|.odb"
+"attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|"
+"enclosing|encloses|enclosure|enclosures|CV|cover|letter|csatol|csatolás|"
+"csatolást|csatolásokat|csatolmány|csatolmányt|csatolmányok|csatolmányokat|"
+"csatolva|csatolom|csatoltam|mellékel|melléklet|mellékletet|mellékletek|"
+"mellékleteket|mellékelve|mellékelem|mellékeltem|küldöm|elküldöm|átküldöm|"
+"postázom|fájl|fájlt|fájlok|fájlokat|állomány|állományt|állományok|"
+"állományokat|életrajz|életrajzot|életrajzom|életrajzomat|önéletrajz|"
+"önéletrajzot|önéletrajzom|önéletrajzomat|.doc|.docx|.pdf|.xls|.xlsx|.ppt|."
+"pptx|.rtf|.pps|.odt|.ods|.odp|.odg|.odb"
 
 #: ../src/client/composer/composer-widget.vala:907
 msgid "Do you want to discard the unsaved message?"
@@ -1027,12 +1028,12 @@ msgstr "_Forrás megtekintése"
 
 #. Generate the attachment table.
 #. / Placeholder filename for attachments with no filename.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:2122
+#: ../src/client/conversation-viewer/conversation-viewer.vala:2120
 #: ../src/engine/rfc822/rfc822-utils.vala:331
 msgid "none"
 msgstr "nincs"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:2257
+#: ../src/client/conversation-viewer/conversation-viewer.vala:2255
 msgid "Failed to open default text editor."
 msgstr "Nem sikerült megnyitni az alapértelmezett szövegszerkesztőt."
 
@@ -1453,21 +1454,21 @@ msgstr "én"
 #. List of folder names to match for Drafts, separated by |.  Please add localized common
 #. names for the Drafts folder, leaving in the English names as well.  The first in the list
 #. will be the default, so please add the most common localized name to the front.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:536
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:561
 msgid "Drafts | Draft"
 msgstr "Piszkozatok | Piszkozat"
 
 #. List of folder names to match for Sent Mail, separated by |.  Please add localized common
 #. names for the Sent Mail folder, leaving in the English names as well.  The first in the list
 #. will be the default, so please add the most common localized name to the front.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:541
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:566
 msgid "Sent | Sent Mail | Sent Email | Sent E-Mail"
 msgstr "Elküldött | Elküldött levelek | Elküldött üzenetek"
 
 #. List of folder names to match for Spam, separated by |.  Please add localized common
 #. names for the Spam folder, leaving in the English names as well.  The first in the list
 #. will be the default, so please add the most common localized name to the front.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:546
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:571
 msgid ""
 "Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email "
 "| Bulk E-Mail"
@@ -1476,7 +1477,7 @@ msgstr "Szemét | Spam | Levélszemét"
 #. List of folder names to match for Trash, separated by |.  Please add localized common
 #. names for the Trash folder, leaving in the English names as well.  The first in the list
 #. will be the default, so please add the most common localized name to the front.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:551
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:576
 msgid "Trash | Rubbish | Rubbish Bin"
 msgstr "Kuka | Szemét"
 
@@ -1987,8 +1988,8 @@ msgid ""
 "All email associated with this account will be removed from your computer. "
 "This will not affect email on the server."
 msgstr ""
-"Az összes fiókkal kapcsolatos e-mail el lesz távolítva a számítógépről. Ez "
-"nem fogja befolyásolni a szerveren lévő e-maileket."
+"A fiókhoz tartozó összes e-mail el lesz távolítva a számítógépről. Ez nem "
+"fogja érinteni a kiszolgálón lévő e-maileket."
 
 #: ../ui/remove_confirm.glade.h:3
 msgid "Nickname:"
