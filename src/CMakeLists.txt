@@ -2,10 +2,8 @@
 # Copyright 2011-2014 Yorba Foundation
 
 set(ENGINE_SRC
-engine/abstract/geary-abstract-account.vala
-engine/abstract/geary-abstract-folder.vala
-engine/abstract/geary-abstract-local-folder.vala
 
+engine/api/geary-abstract-local-folder.vala
 engine/api/geary-account.vala
 engine/api/geary-account-information.vala
 engine/api/geary-aggregated-folder-properties.vala

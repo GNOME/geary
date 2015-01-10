@@ -109,8 +109,8 @@ private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation
         if (created_or_merged.get(email)) {
             Gee.Collection<Geary.EmailIdentifier> ids
                 = Geary.iterate<Geary.EmailIdentifier>(email.id).to_array_list();
-            engine.notify_email_inserted(ids);
-            engine.notify_email_locally_inserted(ids);
+            engine.replay_notify_email_inserted(ids);
+            engine.replay_notify_email_locally_inserted(ids);
         }
         
         // if remote_email doesn't fulfill all required, pull from local database, which should now

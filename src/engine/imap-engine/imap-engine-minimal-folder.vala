@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-private class Geary.ImapEngine.MinimalFolder : Geary.AbstractFolder, Geary.FolderSupport.Copy,
+private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport.Copy,
     Geary.FolderSupport.Mark, Geary.FolderSupport.Move {
     private const int FORCE_OPEN_REMOTE_TIMEOUT_SEC = 10;
     private const int DEFAULT_REESTABLISH_DELAY_MSEC = 10;
@@ -26,6 +26,9 @@ private class Geary.ImapEngine.MinimalFolder : Geary.AbstractFolder, Geary.Folde
             return _special_folder_type;
         }
     }
+    
+    private ProgressMonitor _opening_monitor = new Geary.ReentrantProgressMonitor(Geary.ProgressType.ACTIVITY);
+    public override Geary.ProgressMonitor opening_monitor { get { return _opening_monitor; } }
     
     internal ImapDB.Folder local_folder  { get; protected set; }
     internal Imap.Folder? remote_folder { get; protected set; default = null; }
@@ -55,8 +58,6 @@ private class Geary.ImapEngine.MinimalFolder : Geary.AbstractFolder, Geary.Folde
         _special_folder_type = special_folder_type;
         _properties.add(local_folder.get_properties());
         
-        opening_monitor = new Geary.ReentrantProgressMonitor(Geary.ProgressType.ACTIVITY);
-        
         email_flag_watcher = new EmailFlagWatcher(this);
         email_flag_watcher.email_flags_changed.connect(on_email_flags_changed);
         
@@ -70,6 +71,31 @@ private class Geary.ImapEngine.MinimalFolder : Geary.AbstractFolder, Geary.Folde
             warning("Folder %s destroyed without closing", to_string());
         
         local_folder.email_complete.disconnect(on_email_complete);
+    }
+    
+    /*
+     * These signal notifiers are marked public (note this is a private class) so the various
+     * ReplayOperations can directly fire the associated signals while within the queue.
+     */
+    
+    public void replay_notify_email_inserted(Gee.Collection<Geary.EmailIdentifier> ids) {
+        notify_email_inserted(ids);
+    }
+    
+    public void replay_notify_email_locally_inserted(Gee.Collection<Geary.EmailIdentifier> ids) {
+        notify_email_locally_inserted(ids);
+    }
+    
+    public void replay_notify_email_removed(Gee.Collection<Geary.EmailIdentifier> ids) {
+        notify_email_removed(ids);
+    }
+    
+    public void replay_notify_email_count_changed(int new_count, Folder.CountChangeReason reason) {
+        notify_email_count_changed(new_count, reason);
+    }
+    
+    public void replay_notify_email_flags_changed(Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> flag_map) {
+        notify_email_flags_changed(flag_map);
     }
     
     public void set_special_folder_type(SpecialFolderType new_type) {

@@ -4,7 +4,27 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public interface Geary.Folder : BaseObject {
+/**
+ * Folder represents the basic unit of organization for email.
+ *
+ * Each {@link Account} offers a hierarcichal listing of Folders.  Folders must be opened (with
+ * {@link open_async} before using most of its methods and should be closed with
+ * {@link close_async} when completed, even if a method has failed with an IOError.
+ *
+ * Folder offers various open states indicating when its "local" (disk or database) connection and
+ * "remote" (network) connections are ready.  Generally the local connection opens first and the
+ * remote connection takes time to establish.  When in this state, Folder's methods still operate,
+ * but will only return locally stored information.
+ *
+ * Folder only offers a small selection of guaranteed functionality (in particular, the ability
+ * to list its {@link Email}).  Additional functionality for Folders is indicated by the presence
+ * of {@link FolderSupport} interfaces, include {@link FolderSupport.Remove},
+ * {@link FolderSupport.Copy}, and so forth.
+ *
+ * @see Geary.SpecialFolderType
+ */
+
+public abstract class Geary.Folder : BaseObject {
     public enum OpenState {
         CLOSED,
         OPENING,
@@ -143,7 +163,7 @@ public interface Geary.Folder : BaseObject {
     
     public abstract Geary.SpecialFolderType special_folder_type { get; }
     
-    public abstract Geary.ProgressMonitor opening_monitor { get; protected set; }
+    public abstract Geary.ProgressMonitor opening_monitor { get; }
     
     /**
      * Fired when the folder is successfully opened by a caller.
@@ -286,38 +306,82 @@ public interface Geary.Folder : BaseObject {
      */
     public signal void display_name_changed();
     
-    protected abstract void notify_opened(OpenState state, int count);
+    protected Folder() {
+    }
     
-    protected abstract void notify_open_failed(OpenFailed failure, Error? err);
+    protected virtual void notify_opened(Geary.Folder.OpenState state, int count) {
+        opened(state, count);
+    }
     
-    protected abstract void notify_closed(CloseReason reason);
+    protected virtual void notify_open_failed(Geary.Folder.OpenFailed failure, Error? err) {
+        open_failed(failure, err);
+    }
     
-    protected abstract void notify_email_appended(Gee.Collection<Geary.EmailIdentifier> ids);
+    protected virtual void notify_closed(Geary.Folder.CloseReason reason) {
+        closed(reason);
+    }
     
-    protected abstract void notify_email_locally_appended(Gee.Collection<Geary.EmailIdentifier> ids);
+    protected virtual void notify_email_appended(Gee.Collection<Geary.EmailIdentifier> ids) {
+        email_appended(ids);
+    }
     
-    protected abstract void notify_email_inserted(Gee.Collection<Geary.EmailIdentifier> ids);
+    protected virtual void notify_email_locally_appended(Gee.Collection<Geary.EmailIdentifier> ids) {
+        email_locally_appended(ids);
+    }
     
-    protected abstract void notify_email_locally_inserted(Gee.Collection<Geary.EmailIdentifier> ids);
+    protected virtual void notify_email_inserted(Gee.Collection<Geary.EmailIdentifier> ids) {
+        email_inserted(ids);
+    }
     
-    protected abstract void notify_email_removed(Gee.Collection<Geary.EmailIdentifier> ids);
+    protected virtual void notify_email_locally_inserted(Gee.Collection<Geary.EmailIdentifier> ids) {
+        email_locally_inserted(ids);
+    }
     
-    protected abstract void notify_email_count_changed(int new_count, CountChangeReason reason);
+    protected virtual void notify_email_removed(Gee.Collection<Geary.EmailIdentifier> ids) {
+        email_removed(ids);
+    }
     
-    protected abstract void notify_email_flags_changed(Gee.Map<Geary.EmailIdentifier,
-        Geary.EmailFlags> flag_map);
+    protected virtual void notify_email_count_changed(int new_count, Folder.CountChangeReason reason) {
+        email_count_changed(new_count, reason);
+    }
     
-    protected abstract void notify_email_locally_complete(Gee.Collection<Geary.EmailIdentifier> ids);
+    protected virtual void notify_email_flags_changed(Gee.Map<Geary.EmailIdentifier,
+        Geary.EmailFlags> flag_map) {
+        email_flags_changed(flag_map);
+    }
     
-    protected abstract void notify_special_folder_type_changed(Geary.SpecialFolderType old_type,
-        Geary.SpecialFolderType new_type);
+    protected virtual void notify_email_locally_complete(Gee.Collection<Geary.EmailIdentifier> ids) {
+        email_locally_complete(ids);
+    }
     
-    protected abstract void notify_display_name_changed();
+    /**
+     * In its default implementation, this will also call {@link notify_display_name_changed} since
+     * that's often the case; if not, subclasses should override.
+     */
+    protected virtual void notify_special_folder_type_changed(Geary.SpecialFolderType old_type,
+        Geary.SpecialFolderType new_type) {
+        special_folder_type_changed(old_type, new_type);
+        
+        // in default implementation, this may also mean the display name changed; subclasses may
+        // override this behavior, but no way to detect this, so notify
+        if (special_folder_type != Geary.SpecialFolderType.NONE)
+            notify_display_name_changed();
+    }
+    
+    protected virtual void notify_display_name_changed() {
+        display_name_changed();
+    }
     
     /**
      * Returns a name suitable for displaying to the user.
+     *
+     * Default is to display the basename of the Folder's path, unless it's a special folder,
+     * in which case {@link SpecialFolderType.get_display_name} is returned.
      */
-    public abstract string get_display_name();
+    public virtual string get_display_name() {
+        return (special_folder_type == Geary.SpecialFolderType.NONE)
+            ? path.basename : special_folder_type.get_display_name();
+    }
     
     /**
      * Returns the state of the Folder's connections to the local and remote stores.
@@ -477,6 +541,8 @@ public interface Geary.Folder : BaseObject {
     /**
      * Used for debugging.  Should not be used for user-visible labels.
      */
-    public abstract string to_string();
+    public virtual string to_string() {
+        return "%s:%s".printf(account.to_string(), path.to_string());
+    }
 }
 

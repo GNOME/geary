@@ -53,7 +53,7 @@ private class Geary.ImapEngine.MarkEmail : Geary.ImapEngine.SendReplayOperation 
         Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags>? map = yield engine.local_folder.get_email_flags_async(
             original_flags.keys, cancellable);
         if (map != null && map.size > 0)
-            engine.notify_email_flags_changed(map);
+            engine.replay_notify_email_flags_changed(map);
         
         return ReplayOperation.Status.CONTINUE;
     }

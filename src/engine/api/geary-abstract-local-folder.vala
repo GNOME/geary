@@ -7,11 +7,13 @@
 /**
  * Handles open/close for local folders.
  */
-public abstract class Geary.AbstractLocalFolder : Geary.AbstractFolder {
+public abstract class Geary.AbstractLocalFolder : Geary.Folder {
     private int open_count = 0;
     
-    public AbstractLocalFolder() {
-        opening_monitor = new Geary.SimpleProgressMonitor(Geary.ProgressType.ACTIVITY);
+    private ProgressMonitor _opening_monitor = new Geary.ReentrantProgressMonitor(Geary.ProgressType.ACTIVITY);
+    public override Geary.ProgressMonitor opening_monitor { get { return _opening_monitor; } }
+    
+    protected AbstractLocalFolder() {
     }
     
     public override Geary.Folder.OpenState get_open_state() {

@@ -45,9 +45,9 @@ private class Geary.ImapEngine.MoveEmail : Geary.ImapEngine.SendReplayOperation 
         if (moved_ids == null || moved_ids.size == 0)
             return ReplayOperation.Status.COMPLETED;
         
-        engine.notify_email_removed(moved_ids);
+        engine.replay_notify_email_removed(moved_ids);
         
-        engine.notify_email_count_changed(Numeric.int_floor(original_count - to_move.size, 0),
+        engine.replay_notify_email_count_changed(Numeric.int_floor(original_count - to_move.size, 0),
             Geary.Folder.CountChangeReason.REMOVED);
         
         return ReplayOperation.Status.CONTINUE;
@@ -80,8 +80,8 @@ private class Geary.ImapEngine.MoveEmail : Geary.ImapEngine.SendReplayOperation 
     public override async void backout_local_async() throws Error {
         yield engine.local_folder.mark_removed_async(moved_ids, false, cancellable);
         
-        engine.notify_email_inserted(moved_ids);
-        engine.notify_email_count_changed(original_count, Geary.Folder.CountChangeReason.INSERTED);
+        engine.replay_notify_email_inserted(moved_ids);
+        engine.replay_notify_email_count_changed(original_count, Geary.Folder.CountChangeReason.INSERTED);
     }
 
     public override string describe_state() {

@@ -4,6 +4,17 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
+/**
+ * The Geary email engine initial entry points.
+ *
+ * Engine represents and contains interfaces into the rest of the email library.  It's a singleton
+ * class (see {@link instance}) with various signals for event notification.  Engine is initialized
+ * by calling {@link open_async} and closed with {@link close_async}.
+ *
+ * Engine can list existing {@link Account} objects and create/delete them.  It can also validate
+ * changes to Accounts prior to saving those changes.
+ */
+
 public class Geary.Engine : BaseObject {
     [Flags]
     public enum ValidationOption {
