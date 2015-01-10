@@ -7,13 +7,13 @@
 # Balázs Úr <urbalazs@gmail.com>, 2014, 2015.
 msgid ""
 msgstr ""
-"Project-Id-Version: geary-0.4.1\n"
+"Project-Id-Version: geary-0.8\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2015-01-06 17:50+0000\n"
-"PO-Revision-Date: 2015-01-06 22:20+0100\n"
+"POT-Creation-Date: 2015-01-10 05:51+0000\n"
+"PO-Revision-Date: 2015-01-10 11:40+0100\n"
 "Last-Translator: Balázs Úr <urbalazs@gmail.com>\n"
-"Language-Team: Hungarian <kde-l10n-hu@kde.org>\n"
+"Language-Team: Hungarian <openscope at googlegroups dot com>\n"
 "Language: hu_HU\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -33,7 +33,7 @@ msgstr "Levelezőkliens"
 
 #: ../desktop/geary.desktop.in.h:3 ../desktop/geary-autostart.desktop.in.h:3
 msgid "Geary Mail"
-msgstr "Geary levél"
+msgstr "Geary levelező"
 
 #: ../desktop/geary.desktop.in.h:4 ../desktop/geary-autostart.desktop.in.h:4
 msgid "Send and receive email"
@@ -79,7 +79,7 @@ msgstr "Fiókok"
 #. / Placeholder text indicating that the user should type their first name and last name
 #: ../src/client/accounts/add-edit-page.vala:10
 msgid "First Last"
-msgstr "Utónév Családnév"
+msgstr "Last First"
 
 #: ../src/client/accounts/add-edit-page.vala:228
 msgid "Welcome to Geary."
@@ -754,14 +754,15 @@ msgstr "Hiba a mentéskor"
 #: ../src/client/composer/composer-widget.vala:117
 msgid "attach|enclosed|enclosing|cover letter"
 msgstr ""
-"attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|enc"
-"losing|encloses|enclosure|enclosures|CV|cover|letter|csatol|csatolás|csatolást"
-"|csatolásokat|csatolmány|csatolmányt|csatolmányok|csatolmányokat|csatolva|csat"
-"olom|csatoltam|mellékel|melléklet|mellékletet|mellékletek|mellékleteket|mellék"
-"elve|mellékelem|mellékeltem|küldöm|elküldöm|átküldöm|postázom|fájl|fájlt|fájlo"
-"k|fájlokat|állomány|állományt|állományok|állományokat|életrajz|életrajzot|élet"
-"rajzom|életrajzomat|önéletrajz|önéletrajzot|önéletrajzom|önéletrajzomat|.doc|."
-"docx|.pdf|.xls|.xlsx|.ppt|.pptx|.rtf|.pps|.odt|.ods|.odp|.odg|.odb"
+"attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|"
+"enclosing|encloses|enclosure|enclosures|CV|cover|letter|csatol|csatolás|"
+"csatolást|csatolásokat|csatolmány|csatolmányt|csatolmányok|csatolmányokat|"
+"csatolva|csatolom|csatoltam|mellékel|melléklet|mellékletet|mellékletek|"
+"mellékleteket|mellékelve|mellékelem|mellékeltem|küldöm|elküldöm|átküldöm|"
+"postázom|fájl|fájlt|fájlok|fájlokat|állomány|állományt|állományok|"
+"állományokat|életrajz|életrajzot|életrajzom|életrajzomat|önéletrajz|"
+"önéletrajzot|önéletrajzom|önéletrajzomat|.doc|.docx|.pdf|.xls|.xlsx|.ppt|."
+"pptx|.rtf|.pps|.odt|.ods|.odp|.odg|.odb"
 
 #: ../src/client/composer/composer-widget.vala:830
 msgid "Do you want to discard the unsaved message?"
@@ -1967,8 +1968,8 @@ msgid ""
 "All email associated with this account will be removed from your computer. "
 "This will not affect email on the server."
 msgstr ""
-"Az összes fiókkal kapcsolatos e-mail el lesz távolítva a számítógépről. Ez "
-"nem fogja befolyásolni a szerveren lévő e-maileket."
+"A fiókhoz tartozó összes e-mail el lesz távolítva a számítógépről. Ez nem "
+"fogja érinteni a kiszolgálón lévő e-maileket."
 
 #: ../ui/remove_confirm.glade.h:3
 msgid "Nickname:"
