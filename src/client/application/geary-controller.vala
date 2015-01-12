@@ -2134,8 +2134,8 @@ public class GearyController : Geary.BaseObject {
         if (inline) {
             new ComposerEmbed(widget, main_window.conversation_viewer, referred);
         } else {
-            widget.state = ComposerWidget.ComposerState.DETACHED;
             new ComposerWindow(widget);
+            widget.state = ComposerWidget.ComposerState.DETACHED;
         }
     }
     
@@ -2152,6 +2152,7 @@ public class GearyController : Geary.BaseObject {
                     return false;
                 }
             }
+            inline = !any_inline_composers();
             return true;
         }
         
