@@ -236,6 +236,7 @@ public class ComposerWidget : Gtk.EventBox {
     private string forward_subject = "";
     private string reply_message_id = "";
     private bool top_posting = true;
+    private string? last_quote = null;
     
     private Geary.App.DraftManager? draft_manager = null;
     private Geary.EmailIdentifier? editing_draft_id = null;
@@ -420,6 +421,7 @@ public class ComposerWidget : Gtk.EventBox {
             reply_subject = Geary.RFC822.Utils.create_subject_for_reply(referred);
             forward_subject = Geary.RFC822.Utils.create_subject_for_forward(referred);
             reply_message_id = referred.message_id.value;
+            last_quote = quote;
             switch (compose_type) {
                 case ComposeType.NEW_MESSAGE:
                     if (referred.to != null)
@@ -796,7 +798,13 @@ public class ComposerWidget : Gtk.EventBox {
     
     public void change_compose_type(ComposeType new_type, Geary.Email? referred = null,
         string? quote = null) {
-        if (new_type != compose_type) {
+        if (referred != null && quote != null && quote != last_quote) {
+            last_quote = quote;
+            WebKit.DOM.Document document = editor.get_dom_document();
+            // Always use reply styling, since forward styling doesn't work for inline quotes
+            document.exec_command("insertHTML", false,
+                Geary.RFC822.Utils.quote_email_for_reply(referred, quote, true));
+        } else if (new_type != compose_type) {
             bool recipients_modified = to_entry.modified || cc_entry.modified || bcc_entry.modified;
             switch (new_type) {
                 case ComposeType.REPLY:
@@ -829,11 +837,6 @@ public class ComposerWidget : Gtk.EventBox {
                     assert_not_reached();
             }
             compose_type = new_type;
-        } else if (referred != null && quote != null) {
-            WebKit.DOM.Document document = editor.get_dom_document();
-            // Always use reply styling, since forward styling doesn't work for inline quotes
-            document.exec_command("insertHTML", false,
-                Geary.RFC822.Utils.quote_email_for_reply(referred, quote, true));
         }
         
         container.present();
