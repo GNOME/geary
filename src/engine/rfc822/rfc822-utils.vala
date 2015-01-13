@@ -111,6 +111,35 @@ public Geary.RFC822.MailboxAddresses create_cc_addresses_for_reply_all(Geary.Ema
     return new Geary.RFC822.MailboxAddresses(new_cc);
 }
 
+public Geary.RFC822.MailboxAddresses merge_addresses(Geary.RFC822.MailboxAddresses? first,
+    Geary.RFC822.MailboxAddresses? second) {
+    Gee.List<Geary.RFC822.MailboxAddress> result = new Gee.ArrayList<Geary.RFC822.MailboxAddress>();
+    if (first != null) {
+        result.add_all(first.get_all());
+        // Add addresses from second that aren't in first.
+        if (second != null)
+            foreach (Geary.RFC822.MailboxAddress address in second)
+                if (!first.contains_normalized(address.address))
+                    result.add(address);
+    } else if (second != null) {
+        result.add_all(second.get_all());
+    }
+    
+    return new Geary.RFC822.MailboxAddresses(result);
+}
+
+public Geary.RFC822.MailboxAddresses remove_addresses(Geary.RFC822.MailboxAddresses? from_addresses,
+    Geary.RFC822.MailboxAddresses? remove_addresses) {
+    Gee.List<Geary.RFC822.MailboxAddress> result = new Gee.ArrayList<Geary.RFC822.MailboxAddress>();
+    if (from_addresses != null) {
+        result.add_all(from_addresses.get_all());
+        if (remove_addresses != null)
+            foreach (Geary.RFC822.MailboxAddress address in remove_addresses)
+                remove_address(result, address.address, true);
+    }
+    return new Geary.RFC822.MailboxAddresses(result);
+}
+
 public string reply_references(Geary.Email source) {
     // generate list for References
     Gee.ArrayList<RFC822.MessageID> list = new Gee.ArrayList<RFC822.MessageID>();

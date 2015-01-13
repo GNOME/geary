@@ -2147,7 +2147,8 @@ public class GearyController : Geary.BaseObject {
         if (compose_type != null && compose_type != ComposerWidget.ComposeType.NEW_MESSAGE) {
             foreach (ComposerWidget cw in composer_widgets) {
                 if (cw.state != ComposerWidget.ComposerState.DETACHED &&
-                    referred != null && referred.id.equal_to(cw.referred_id)) {
+                    ((referred != null && cw.referred_ids.contains(referred.id)) ||
+                     quote != null)) {
                     cw.change_compose_type(compose_type, referred, quote);
                     return false;
                 }

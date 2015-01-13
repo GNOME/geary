@@ -46,10 +46,10 @@ public class Geary.RFC822.MessageIDList : Geary.MessageData.AbstractMessageData,
         list = new Gee.ArrayList<MessageID>();
     }
     
-    public MessageIDList.from_list(Gee.List<MessageID> list) {
+    public MessageIDList.from_collection(Gee.Collection<MessageID> collection) {
         this ();
         
-        foreach(MessageID msg_id in list)
+        foreach(MessageID msg_id in collection)
             this.list.add(msg_id);
     }
     

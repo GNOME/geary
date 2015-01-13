@@ -146,7 +146,7 @@ public class ComposerWidget : Gtk.EventBox {
         set { reply_to_entry.set_text(value); }
     }
     
-    public string in_reply_to { get; set; }
+    public Gee.Set<Geary.RFC822.MessageID> in_reply_to = new Gee.HashSet<Geary.RFC822.MessageID>();
     public string references { get; set; }
     
     public string subject {
@@ -176,7 +176,7 @@ public class ComposerWidget : Gtk.EventBox {
     
     public ComposeType compose_type { get; private set; default = ComposeType.NEW_MESSAGE; }
     
-    public Geary.EmailIdentifier? referred_id { get; private set; default = null; }
+    public Gee.Set<Geary.EmailIdentifier> referred_ids = new Gee.HashSet<Geary.EmailIdentifier>();
     
     public bool blank {
         get {
@@ -234,7 +234,6 @@ public class ComposerWidget : Gtk.EventBox {
     private Geary.RFC822.MailboxAddresses reply_cc_addresses;
     private string reply_subject = "";
     private string forward_subject = "";
-    private string reply_message_id = "";
     private bool top_posting = true;
     private string? last_quote = null;
     
@@ -414,13 +413,9 @@ public class ComposerWidget : Gtk.EventBox {
         from_multiple.changed.connect(on_from_changed);
         
         if (referred != null) {
-            this.referred_id = referred.id;
-            string? sender_address = account.information.get_mailbox_address().address;
-            reply_to_addresses = Geary.RFC822.Utils.create_to_addresses_for_reply(referred, sender_address);
-            reply_cc_addresses = Geary.RFC822.Utils.create_cc_addresses_for_reply_all(referred, sender_address);
+            add_recipients_and_ids(compose_type, referred);
             reply_subject = Geary.RFC822.Utils.create_subject_for_reply(referred);
             forward_subject = Geary.RFC822.Utils.create_subject_for_forward(referred);
-            reply_message_id = referred.message_id.value;
             last_quote = quote;
             switch (compose_type) {
                 case ComposeType.NEW_MESSAGE:
@@ -431,7 +426,7 @@ public class ComposerWidget : Gtk.EventBox {
                     if (referred.bcc != null)
                         bcc_entry.addresses = referred.bcc;
                     if (referred.in_reply_to != null)
-                        in_reply_to = referred.in_reply_to.to_rfc822_string();
+                        in_reply_to.add_all(referred.in_reply_to.list);
                     if (referred.references != null)
                         references = referred.references.to_rfc822_string();
                     if (referred.subject != null)
@@ -450,12 +445,7 @@ public class ComposerWidget : Gtk.EventBox {
                 
                 case ComposeType.REPLY:
                 case ComposeType.REPLY_ALL:
-                    to_entry.addresses = reply_to_addresses;
-                    if (compose_type == ComposeType.REPLY_ALL)
-                        cc_entry.addresses = reply_cc_addresses;
-                    to_entry.modified = cc_entry.modified = false;
                     subject = reply_subject;
-                    in_reply_to = reply_message_id;
                     references = Geary.RFC822.Utils.reply_references(referred);
                     body_html = "\n\n" + Geary.RFC822.Utils.quote_email_for_reply(referred, quote, true);
                     pending_attachments = referred.attachments;
@@ -766,8 +756,10 @@ public class ComposerWidget : Gtk.EventBox {
         if (reply_to_entry.addresses != null)
             email.reply_to = reply_to_entry.addresses;
         
-        if (!Geary.String.is_empty(in_reply_to))
-            email.in_reply_to = in_reply_to;
+        if ((compose_type == ComposeType.REPLY || compose_type == ComposeType.REPLY_ALL) &&
+            !in_reply_to.is_empty)
+            email.in_reply_to =
+                new Geary.RFC822.MessageIDList.from_collection(in_reply_to).to_rfc822_string();
         
         if (!Geary.String.is_empty(references))
             email.references = references;
@@ -804,6 +796,9 @@ public class ComposerWidget : Gtk.EventBox {
             // Always use reply styling, since forward styling doesn't work for inline quotes
             document.exec_command("insertHTML", false,
                 Geary.RFC822.Utils.quote_email_for_reply(referred, quote, true));
+            
+            if (!referred_ids.contains(referred.id))
+                add_recipients_and_ids(new_type, referred);
         } else if (new_type != compose_type) {
             bool recipients_modified = to_entry.modified || cc_entry.modified || bcc_entry.modified;
             switch (new_type) {
@@ -818,7 +813,6 @@ public class ComposerWidget : Gtk.EventBox {
                     } else {
                         to_entry.select_region(0, -1);
                     }
-                    in_reply_to = reply_message_id;
                 break;
                 
                 case ComposeType.FORWARD:
@@ -831,7 +825,6 @@ public class ComposerWidget : Gtk.EventBox {
                     } else {
                         to_entry.select_region(0, -1);
                     }
-                    in_reply_to = "";
                 break;
                 
                 default:
@@ -842,6 +835,36 @@ public class ComposerWidget : Gtk.EventBox {
         
         container.present();
         set_focus();
+    }
+    
+    private void add_recipients_and_ids(ComposeType type, Geary.Email referred) {
+        string? sender_address = account.information.get_mailbox_address().address;
+        Geary.RFC822.MailboxAddresses to_addresses =
+            Geary.RFC822.Utils.create_to_addresses_for_reply(referred, sender_address);
+        Geary.RFC822.MailboxAddresses cc_addresses =
+            Geary.RFC822.Utils.create_cc_addresses_for_reply_all(referred, sender_address);
+        reply_to_addresses = Geary.RFC822.Utils.merge_addresses(reply_to_addresses, to_addresses);
+        reply_cc_addresses = Geary.RFC822.Utils.remove_addresses(
+            Geary.RFC822.Utils.merge_addresses(reply_cc_addresses, cc_addresses),
+            reply_to_addresses);
+        
+        bool recipients_modified = to_entry.modified || cc_entry.modified || bcc_entry.modified;
+        if (!recipients_modified) {
+            if (type == ComposeType.REPLY || type == ComposeType.REPLY_ALL)
+                to_entry.addresses = Geary.RFC822.Utils.merge_addresses(to_entry.addresses,
+                    to_addresses);
+            if (type == ComposeType.REPLY_ALL)
+                cc_entry.addresses = Geary.RFC822.Utils.remove_addresses(
+                    Geary.RFC822.Utils.merge_addresses(cc_entry.addresses, cc_addresses),
+                    to_entry.addresses);
+            else
+                cc_entry.addresses = Geary.RFC822.Utils.remove_addresses(cc_entry.addresses,
+                    to_entry.addresses);
+            to_entry.modified = cc_entry.modified = false;
+        }
+        
+        in_reply_to.add(referred.message_id);
+        referred_ids.add(referred.id);
     }
     
     private void add_signature_and_cursor() {
