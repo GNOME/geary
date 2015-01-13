@@ -915,13 +915,13 @@ public class ComposerWidget : Gtk.EventBox {
             return CloseStatus.CANCEL_CLOSE; // Cancel
         } else if (response == Gtk.ResponseType.OK) {
             if (try_to_save) {
-                save_and_exit(); // Save
+                save_and_exit_async.begin(); // Save
                 return CloseStatus.PENDING_CLOSE;
             } else {
                 return CloseStatus.DO_CLOSE;
             }
         } else {
-            discard_and_exit(); // Discard
+            discard_and_exit_async.begin(); // Discard
             return CloseStatus.PENDING_CLOSE;
         }
     }
@@ -1217,20 +1217,30 @@ public class ComposerWidget : Gtk.EventBox {
         cancel_draft_timer();
     }
     
-    private void save_and_exit() {
+    private async void save_and_exit_async() {
         make_gui_insensitive();
         
         save_draft();
+        try {
+            yield close_draft_manager_async(null);
+        } catch (Error err) {
+            // ignored
+        }
         
         container.close_container();
     }
     
-    private void discard_and_exit() {
+    private async void discard_and_exit_async() {
         make_gui_insensitive();
         
         discard_draft();
         if (draft_manager != null)
             draft_manager.discard_on_close = true;
+        try {
+            yield close_draft_manager_async(null);
+        } catch (Error err) {
+            // ignored
+        }
         
         container.close_container();
     }
