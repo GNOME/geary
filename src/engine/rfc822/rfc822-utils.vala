@@ -69,7 +69,7 @@ private void remove_address(Gee.List<Geary.RFC822.MailboxAddress> addresses,
     }
 }
 
-public string create_to_addresses_for_reply(Geary.Email email,
+public Geary.RFC822.MailboxAddresses create_to_addresses_for_reply(Geary.Email email,
     string? sender_address = null) {
     Gee.List<Geary.RFC822.MailboxAddress> new_to =
         new Gee.ArrayList<Geary.RFC822.MailboxAddress>();
@@ -87,10 +87,10 @@ public string create_to_addresses_for_reply(Geary.Email email,
     if (!String.is_empty(sender_address))
         remove_address(new_to, sender_address);
     
-    return new_to.size > 0 ? new Geary.RFC822.MailboxAddresses(new_to).to_rfc822_string() : "";
+    return new Geary.RFC822.MailboxAddresses(new_to);
 }
 
-public string create_cc_addresses_for_reply_all(Geary.Email email,
+public Geary.RFC822.MailboxAddresses create_cc_addresses_for_reply_all(Geary.Email email,
     string? sender_address = null) {
     Gee.List<Geary.RFC822.MailboxAddress> new_cc = new Gee.ArrayList<Geary.RFC822.MailboxAddress>();
     
@@ -108,7 +108,7 @@ public string create_cc_addresses_for_reply_all(Geary.Email email,
     if (!String.is_empty(sender_address))
         remove_address(new_cc, sender_address, true);
     
-    return new_cc.size > 0 ? new Geary.RFC822.MailboxAddresses(new_cc).to_rfc822_string() : "";
+    return new Geary.RFC822.MailboxAddresses(new_cc);
 }
 
 public string reply_references(Geary.Email source) {

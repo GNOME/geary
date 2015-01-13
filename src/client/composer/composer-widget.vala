@@ -230,8 +230,8 @@ public class ComposerWidget : Gtk.EventBox {
     private bool action_flag = false;
     private bool is_attachment_overlay_visible = false;
     private Gee.List<Geary.Attachment>? pending_attachments = null;
-    private string reply_to_addresses = "";
-    private string reply_cc_addresses = "";
+    private Geary.RFC822.MailboxAddresses reply_to_addresses;
+    private Geary.RFC822.MailboxAddresses reply_cc_addresses;
     private string reply_subject = "";
     private string forward_subject = "";
     private string reply_message_id = "";
@@ -425,11 +425,11 @@ public class ComposerWidget : Gtk.EventBox {
             switch (compose_type) {
                 case ComposeType.NEW_MESSAGE:
                     if (referred.to != null)
-                        to = referred.to.to_rfc822_string();
+                        to_entry.addresses = referred.to;
                     if (referred.cc != null)
-                        cc = referred.cc.to_rfc822_string();
+                        cc_entry.addresses = referred.cc;
                     if (referred.bcc != null)
-                        bcc = referred.bcc.to_rfc822_string();
+                        bcc_entry.addresses = referred.bcc;
                     if (referred.in_reply_to != null)
                         in_reply_to = referred.in_reply_to.to_rfc822_string();
                     if (referred.references != null)
@@ -450,9 +450,9 @@ public class ComposerWidget : Gtk.EventBox {
                 
                 case ComposeType.REPLY:
                 case ComposeType.REPLY_ALL:
-                    to = reply_to_addresses;
+                    to_entry.addresses = reply_to_addresses;
                     if (compose_type == ComposeType.REPLY_ALL)
-                        cc = reply_cc_addresses;
+                        cc_entry.addresses = reply_cc_addresses;
                     to_entry.modified = cc_entry.modified = false;
                     subject = reply_subject;
                     in_reply_to = reply_message_id;
@@ -811,8 +811,9 @@ public class ComposerWidget : Gtk.EventBox {
                 case ComposeType.REPLY_ALL:
                     subject = reply_subject;
                     if (!recipients_modified) {
-                        to = reply_to_addresses;
-                        cc = (new_type == ComposeType.REPLY_ALL ? reply_cc_addresses : "");
+                        to_entry.addresses = reply_to_addresses;
+                        cc_entry.addresses = (new_type == ComposeType.REPLY_ALL) ?
+                            reply_cc_addresses : null;
                         to_entry.modified = cc_entry.modified = false;
                     } else {
                         to_entry.select_region(0, -1);
