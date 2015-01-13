@@ -59,7 +59,7 @@ private abstract class Geary.ImapEngine.ReplayOperation : Geary.BaseObject {
     public abstract void notify_remote_removed_position(Imap.SequenceNumber removed);
     
     /**
-     * Notify the operation that a message has been removed by position (SequenceNumber).
+     * Notify the operation that a message has been removed by UID (EmailIdentifier).
      *
      * This method is called only when the ReplayOperation is blocked waiting to execute and it's
      * discovered that the supplied email(s) are no longer on the server.

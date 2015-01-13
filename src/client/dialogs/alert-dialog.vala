@@ -35,7 +35,7 @@ class AlertDialog : Object {
     }
 
     public void set_focus_response(Gtk.ResponseType response) {
-        Gtk.Widget? to_focus = dialog.get_widget_for_response(Gtk.ResponseType.OK);
+        Gtk.Widget? to_focus = dialog.get_widget_for_response(response);
         if (to_focus != null)
             to_focus.grab_focus();
     }
