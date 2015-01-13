@@ -1990,13 +1990,19 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                 attachment_id, filename);
             
             // On the off-chance this is marked for deletion, unmark it
-            stmt = cx.prepare("""
-                DELETE FROM DeleteAttachmentFileTable
-                WHERE filename = ?
-            """);
-            stmt.bind_string(0, saved_file.get_path());
-            
-            stmt.exec(cancellable);
+            try {
+                stmt = cx.prepare("""
+                    DELETE FROM DeleteAttachmentFileTable
+                    WHERE filename = ?
+                """);
+                stmt.bind_string(0, saved_file.get_path());
+                
+                stmt.exec(cancellable);
+            } catch (Error err) {
+                debug("Unable to delete from DeleteAttachmentFileTable: %s", err.message);
+                
+                // not a deal-breaker, fall through
+            }
             
             debug("Saving attachment to %s", saved_file.get_path());
             
