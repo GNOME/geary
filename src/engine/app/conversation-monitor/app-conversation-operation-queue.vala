@@ -23,7 +23,7 @@ private class Geary.App.ConversationOperationQueue : BaseObject {
         FillWindowOperation? fill_op = op as FillWindowOperation;
         if (fill_op != null) {
             Gee.Collection<ConversationOperation> removed
-                = mailbox.remove_matching(o => o is FillWindowOperation);
+                = mailbox.revoke_matching(o => o is FillWindowOperation);
             
             // If there were any "insert" fill window ops, preserve that flag,
             // as otherwise we might miss some data.

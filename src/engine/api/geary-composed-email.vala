@@ -45,5 +45,9 @@ public class Geary.ComposedEmail : BaseObject {
         this.body_text = body_text;
         this.body_html = body_html;
     }
+    
+    public Geary.RFC822.Message to_rfc822_message(string? message_id = null) {
+        return new RFC822.Message.from_composed_email(this, message_id);
+    }
 }
 

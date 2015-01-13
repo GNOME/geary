@@ -73,7 +73,7 @@ public class Geary.Nonblocking.Mailbox<G> : BaseObject {
     /**
      * Remove messages matching the given predicate.  Return the removed messages.
      */
-    public Gee.Collection<G> remove_matching(owned Gee.Predicate<G> predicate) {
+    public Gee.Collection<G> revoke_matching(owned Gee.Predicate<G> predicate) {
         Gee.ArrayList<G> removed = new Gee.ArrayList<G>();
         // Iterate over a copy so we can modify the original.
         foreach (G msg in queue.to_array()) {

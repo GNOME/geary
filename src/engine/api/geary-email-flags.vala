@@ -41,6 +41,18 @@ public class Geary.EmailFlags : Geary.NamedFlags {
     public EmailFlags() {
     }
     
+    /**
+     * Create a new {@link EmailFlags} container initialized with one or more flags.
+     */
+    public EmailFlags.with(Geary.NamedFlag flag1, ...) {
+        va_list args = va_list();
+        NamedFlag? flag = flag1;
+        
+        do {
+            add(flag);
+        } while((flag = args.arg()) != null);
+    }
+    
     // Convenience method to check if the unread flag is set.
     public inline bool is_unread() {
         return contains(UNREAD);

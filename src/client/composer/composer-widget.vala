@@ -237,12 +237,10 @@ public class ComposerWidget : Gtk.EventBox {
     private string reply_message_id = "";
     private bool top_posting = true;
     
-    private Geary.FolderSupport.Create? drafts_folder = null;
-    private Geary.EmailIdentifier? draft_id = null;
+    private Geary.App.DraftManager? draft_manager = null;
+    private Geary.EmailIdentifier? editing_draft_id = null;
+    private Geary.EmailFlags draft_flags = new Geary.EmailFlags.with(Geary.EmailFlags.DRAFT);
     private uint draft_save_timeout_id = 0;
-    private Cancellable cancellable_drafts = new Cancellable();
-    private Cancellable cancellable_save_draft = new Cancellable();
-    private bool in_draft_save = false;
     
     public WebKit.WebView editor;
     // We need to keep a reference to the edit-fixer in composer-window, so it doesn't get
@@ -443,7 +441,7 @@ public class ComposerWidget : Gtk.EventBox {
                     }
                     
                     if (is_referred_draft)
-                        draft_id = referred.id;
+                        editing_draft_id = referred.id;
                     
                     add_attachments(referred.attachments);
                 break;
@@ -558,12 +556,12 @@ public class ComposerWidget : Gtk.EventBox {
         chain.append(attachments_box);
         box.set_focus_chain(chain);
         
-        // If there's only one account, open the drafts folder.  If there's more than one account,
-        // the drafts folder will be opened by on_from_changed().
+        // If there's only one account, open the drafts manager.  If there's more than one account,
+        // the drafts manager will be opened by on_from_changed().
         if (!from_multiple.visible)
-            open_drafts_folder_async.begin(cancellable_drafts);
+            open_draft_manager_async.begin(null);
         
-        destroy.connect(() => { close_drafts_folder_async.begin(); });
+        destroy.connect(() => { close_draft_manager_async.begin(null); });
     }
     
     public ComposerWidget.from_mailto(Geary.Account account, string mailto) {
@@ -891,9 +889,10 @@ public class ComposerWidget : Gtk.EventBox {
     }
     
     private bool can_save() {
-        return (drafts_folder != null && drafts_folder.get_open_state() == Geary.Folder.OpenState.BOTH
-            && !drafts_folder.properties.create_never_returns_id && editor.can_undo()
-            && account.information.save_drafts);
+        return draft_manager != null
+            && draft_manager.is_open
+            && editor.can_undo()
+            && account.information.save_drafts;
     }
 
     public CloseStatus should_close() {
@@ -902,10 +901,7 @@ public class ComposerWidget : Gtk.EventBox {
         container.present();
         AlertDialog dialog;
         
-        if (drafts_folder == null && try_to_save) {
-            dialog = new ConfirmationDialog(container.top_window,
-                _("Do you want to discard the unsaved message?"), null, Stock._DISCARD);
-        } else if (try_to_save) {
+        if (try_to_save) {
             dialog = new TernaryConfirmationDialog(container.top_window,
                 _("Do you want to discard this message?"), null, Stock._KEEP, Stock._DISCARD,
                 Gtk.ResponseType.CLOSE);
@@ -919,13 +915,13 @@ public class ComposerWidget : Gtk.EventBox {
             return CloseStatus.CANCEL_CLOSE; // Cancel
         } else if (response == Gtk.ResponseType.OK) {
             if (try_to_save) {
-                save_and_exit.begin(); // Save
+                save_and_exit(); // Save
                 return CloseStatus.PENDING_CLOSE;
             } else {
                 return CloseStatus.DO_CLOSE;
             }
         } else {
-            delete_and_exit.begin(); // Discard
+            discard_and_exit(); // Discard
             return CloseStatus.PENDING_CLOSE;
         }
     }
@@ -1049,8 +1045,6 @@ public class ComposerWidget : Gtk.EventBox {
     
     // Used internally by on_send()
     private async void on_send_async() {
-        cancellable_save_draft.cancel();
-        
         container.vanish();
         
         linkify_document(editor.get_dom_document());
@@ -1062,83 +1056,159 @@ public class ComposerWidget : Gtk.EventBox {
             GLib.message("Error sending email: %s", e.message);
         }
         
-        yield delete_draft_async();
-        container.close_container(); // Only close window after draft is deleted; this closes the drafts folder.
+        Geary.Nonblocking.Semaphore? semaphore = discard_draft();
+        if (semaphore != null) {
+            try {
+                yield semaphore.wait_async();
+            } catch (Error err) {
+                // ignored
+            }
+        }
+        
+        // Only close window after draft is deleted; this closes the drafts folder.
+        container.close_container();
     }
     
-    private void on_drafts_opened(Geary.Folder.OpenState open_state, int count) {
-        if (open_state == Geary.Folder.OpenState.BOTH)
-            reset_draft_timer();
+    private void on_draft_state_changed() {
+        switch (draft_manager.draft_state) {
+            case Geary.App.DraftManager.DraftState.STORED:
+                draft_save_text = DRAFT_SAVED_TEXT;
+            break;
+            
+            case Geary.App.DraftManager.DraftState.STORING:
+                draft_save_text = DRAFT_SAVING_TEXT;
+            break;
+            
+            case Geary.App.DraftManager.DraftState.NOT_STORED:
+                draft_save_text = "";
+            break;
+            
+            case Geary.App.DraftManager.DraftState.ERROR:
+                draft_save_text = DRAFT_ERROR_TEXT;
+            break;
+            
+            default:
+                assert_not_reached();
+        }
+    }
+    
+    private void on_draft_manager_fatal(Error err) {
+        draft_save_text = DRAFT_ERROR_TEXT;
+    }
+    
+    private void connect_to_draft_manager() {
+        draft_manager.notify[Geary.App.DraftManager.PROP_DRAFT_STATE].connect(on_draft_state_changed);
+        draft_manager.fatal.connect(on_draft_manager_fatal);
+    }
+    
+    // This code is in a separate method due to https://bugzilla.gnome.org/show_bug.cgi?id=742621
+    // connect_to_draft_manager() is simply for symmetry.  When above bug is fixed, this code can
+    // be moved back into open/close methods
+    private void disconnect_from_draft_manager() {
+        draft_manager.notify[Geary.App.DraftManager.PROP_DRAFT_STATE].disconnect(on_draft_state_changed);
+        draft_manager.fatal.disconnect(on_draft_manager_fatal);
     }
     
     // Returns the drafts folder for the current From account.
-    private async void open_drafts_folder_async(Cancellable cancellable) throws Error {
-        yield close_drafts_folder_async(cancellable);
+    private async void open_draft_manager_async(Cancellable? cancellable) throws Error {
+        yield close_draft_manager_async(cancellable);
         
         if (!account.information.save_drafts)
             return;
         
-        Geary.FolderSupport.Create? folder = (yield account.get_required_special_folder_async(
-            Geary.SpecialFolderType.DRAFTS, cancellable)) as Geary.FolderSupport.Create;
+        draft_manager = new Geary.App.DraftManager(account);
+        try {
+            yield draft_manager.open_async(editing_draft_id, cancellable);
+        } catch (Error err) {
+            debug("Unable to open draft manager %s: %s", draft_manager.to_string(), err.message);
+            
+            draft_manager = null;
+            
+            throw err;
+        }
         
-        if (folder == null)
-            return; // No drafts folder.
+        // clear now, as it was only needed to open draft manager
+        editing_draft_id = null;
         
-        yield folder.open_async(Geary.Folder.OpenFlags.FAST_OPEN | Geary.Folder.OpenFlags.NO_DELAY,
-            cancellable);
-        
-        drafts_folder = folder;
-        drafts_folder.opened.connect(on_drafts_opened);
+        connect_to_draft_manager();
     }
     
-    private async void close_drafts_folder_async(Cancellable? cancellable = null) throws Error {
-        if (drafts_folder == null)
+    private async void close_draft_manager_async(Cancellable? cancellable) throws Error {
+        // clear status text
+        draft_save_text = "";
+        
+        // only clear editing_draft_id if associated with prior draft_manager, not due to this
+        // widget being initialized with it
+        if (draft_manager == null)
             return;
         
-        // Close existing folder.
-        drafts_folder.opened.disconnect(on_drafts_opened);
-        yield drafts_folder.close_async(cancellable);
-        drafts_folder = null;
+        disconnect_from_draft_manager();
+        
+        // drop ref even if close failed
+        try {
+            yield draft_manager.close_async(cancellable);
+        } finally {
+            draft_manager = null;
+            editing_draft_id = null;
+        }
     }
     
-    // Save to the draft folder, if available.
-    // Note that drafts are NOT "linkified."
+    // Resets the draft save timeout.
+    private void reset_draft_timer() {
+        draft_save_text = "";
+        cancel_draft_timer();
+        
+        if (can_save())
+            draft_save_timeout_id = Timeout.add_seconds(DRAFT_TIMEOUT_SEC, on_save_draft_timeout);
+    }
+    
+    // Cancels the draft save timeout
+    private void cancel_draft_timer() {
+        if (draft_save_timeout_id == 0)
+            return;
+        
+        Source.remove(draft_save_timeout_id);
+        draft_save_timeout_id = 0;
+    }
+    
     private bool on_save_draft_timeout() {
-        // since all control paths return false, this is not rescheduled by the event loop, so
-        // kill the timeout id
+        // this is not rescheduled by the event loop, so kill the timeout id
         draft_save_timeout_id = 0;
         
-        if (in_draft_save)
-            return false;
-        
-        in_draft_save = true;
-        save_async.begin(cancellable_save_draft, () => { in_draft_save = false; });
+        save_draft();
         
         return false;
     }
     
-    private async void save_async(Cancellable? cancellable) {
-        if (drafts_folder == null || !can_save())
-            return;
-        
+    // Note that drafts are NOT "linkified."
+    private Geary.Nonblocking.Semaphore? save_draft() {
+        // cancel timer in favor of just doing it now
         cancel_draft_timer();
         
-        draft_save_text = DRAFT_SAVING_TEXT;
+        try {
+            if (draft_manager != null) {
+                return draft_manager.update(get_composed_email(null, true).to_rfc822_message(),
+                    draft_flags, null);
+            }
+        } catch (Error err) {
+            GLib.message("Unable to save draft: %s", err.message);
+        }
         
-        Geary.EmailFlags flags = new Geary.EmailFlags();
-        flags.add(Geary.EmailFlags.DRAFT);
+        return null;
+    }
+    
+    private Geary.Nonblocking.Semaphore? discard_draft() {
+        // cancel timer in favor of this operation
+        cancel_draft_timer();
         
         try {
-            // only save HTML drafts to avoid resetting the DOM (which happens when converting the
-            // HTML to flowed text)
-            draft_id = yield drafts_folder.create_email_async(new Geary.RFC822.Message.from_composed_email(
-                get_composed_email(null, true), null), flags, null, draft_id, cancellable);
-            
-            draft_save_text = DRAFT_SAVED_TEXT;
-        } catch (Error e) {
-            GLib.message("Error saving draft: %s", e.message);
-            draft_save_text = DRAFT_ERROR_TEXT;
+            if (draft_manager != null)
+                return draft_manager.discard();
+        } catch (Error err) {
+            GLib.message("Unable to discard draft: %s", err.message);
         }
+        
+        return null;
     }
     
     // Used while waiting for draft to save before closing widget.
@@ -1147,40 +1217,22 @@ public class ComposerWidget : Gtk.EventBox {
         cancel_draft_timer();
     }
     
-    private async void save_and_exit() {
+    private void save_and_exit() {
         make_gui_insensitive();
         
-        // Do the save.
-        yield save_async(null);
+        save_draft();
         
         container.close_container();
     }
     
-    private async void delete_and_exit() {
+    private void discard_and_exit() {
         make_gui_insensitive();
         
-        // Do the delete.
-        yield delete_draft_async();
+        discard_draft();
+        if (draft_manager != null)
+            draft_manager.discard_on_close = true;
         
         container.close_container();
-    }
-    
-    private async void delete_draft_async() {
-        if (drafts_folder == null || draft_id == null)
-            return;
-        
-        Geary.FolderSupport.Remove? removable_drafts = drafts_folder as Geary.FolderSupport.Remove;
-        if (removable_drafts == null) {
-            debug("Draft folder does not support remove.\n");
-            
-            return;
-        }
-        
-        try {
-            yield removable_drafts.remove_single_email_async(draft_id);
-        } catch (Error e) {
-            debug("Unable to delete draft: %s", e.message);
-        }
     }
     
     private void on_add_attachment_button_clicked() {
@@ -1903,27 +1955,6 @@ public class ComposerWidget : Gtk.EventBox {
         return false;
     }
     
-    // Resets the draft save timeout.
-    private void reset_draft_timer() {
-        if (!can_save())
-            return;
-        
-        draft_save_text = "";
-        cancel_draft_timer();
-        
-        if (drafts_folder != null)
-            draft_save_timeout_id = Timeout.add_seconds(DRAFT_TIMEOUT_SEC, on_save_draft_timeout);
-    }
-    
-    // Cancels the draft save timeout
-    private void cancel_draft_timer() {
-        if (draft_save_timeout_id == 0)
-            return;
-        
-        Source.remove(draft_save_timeout_id);
-        draft_save_timeout_id = 0;
-    }
-    
     private void update_actions() {
         // Undo/redo.
         actions.get_action(ACTION_UNDO).sensitive = editor.can_undo();
@@ -2056,10 +2087,10 @@ public class ComposerWidget : Gtk.EventBox {
         // if the Geary.Account didn't change and the drafts folder is open(ing), do nothing more;
         // need to check for the drafts folder because opening it in the case of multiple From:
         // is handled here alone, so need to open it if not already
-        if (!changed && drafts_folder != null)
+        if (!changed && draft_manager != null)
             return;
         
-        open_drafts_folder_async.begin(cancellable_drafts);
+        open_draft_manager_async.begin(null);
         reset_draft_timer();
     }
     
