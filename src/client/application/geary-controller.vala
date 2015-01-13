@@ -56,13 +56,11 @@ public class GearyController : Geary.BaseObject {
     
     public const int MIN_CONVERSATION_COUNT = 50;
     
-    private const string DELETE_MESSAGE_LABEL = _("_Delete");
     private const string DELETE_MESSAGE_TOOLTIP_SINGLE = _("Delete conversation (Shift+Delete)");
     private const string DELETE_MESSAGE_TOOLTIP_MULTIPLE = _("Delete conversations (Shift+Delete)");
     private const string DELETE_MESSAGE_ICON_NAME = "edit-delete-symbolic";
     
     // This refers to the action ("move email to the trash"), not the Trash folder itself
-    private const string TRASH_MESSAGE_LABEL = _("_Trash");
     private const string TRASH_MESSAGE_TOOLTIP_SINGLE = _("Move conversation to trash (Delete, Backspace)");
     private const string TRASH_MESSAGE_TOOLTIP_MULTIPLE = _("Move conversations to trash (Delete, Backspace)");
     private const string TRASH_MESSAGE_ICON_NAME = "user-trash-symbolic";
@@ -381,13 +379,13 @@ public class GearyController : Geary.BaseObject {
         // although this action changes according to the account's capabilities, set to Delete
         // until they're known so the "translatable" string doesn't first appear
         Gtk.ActionEntry trash_message = { ACTION_TRASH_MESSAGE, TRASH_MESSAGE_ICON_NAME,
-            TRASH_MESSAGE_LABEL, "Delete", null, on_trash_message };
+            null, "Delete", null, on_trash_message };
         trash_message.tooltip = TRASH_MESSAGE_TOOLTIP_SINGLE;
         entries += trash_message;
         add_accelerator("BackSpace", ACTION_TRASH_MESSAGE);
         
         Gtk.ActionEntry delete_message = { ACTION_DELETE_MESSAGE, DELETE_MESSAGE_ICON_NAME,
-            DELETE_MESSAGE_LABEL, "<Shift>Delete", null, on_delete_message };
+            null, "<Shift>Delete", null, on_delete_message };
         delete_message.tooltip = DELETE_MESSAGE_TOOLTIP_SINGLE;
         entries += delete_message;
         add_accelerator("<Shift>BackSpace", ACTION_DELETE_MESSAGE);
@@ -1208,7 +1206,7 @@ public class GearyController : Geary.BaseObject {
     // by other utility methods
     private void update_ui() {
         update_tooltips();
-        main_window.main_toolbar.update_trash_buttons(
+        main_window.main_toolbar.update_trash_archive_buttons(
             current_folder_supports_trash() || !(current_folder is Geary.FolderSupport.Remove),
             current_account.can_support_archive);
     }
@@ -1624,7 +1622,7 @@ public class GearyController : Geary.BaseObject {
     private void on_shift_key(bool pressed) {
         if (main_window != null && main_window.main_toolbar != null
             && current_account != null && current_folder != null) {
-            main_window.main_toolbar.update_trash_buttons(
+            main_window.main_toolbar.update_trash_archive_buttons(
                 (!pressed && current_folder_supports_trash()) || !(current_folder is Geary.FolderSupport.Remove),
                 current_account.can_support_archive);
         }

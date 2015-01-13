@@ -16,8 +16,7 @@ public class MainToolbar : PillHeaderbar {
     public bool search_entry_has_focus { get { return search_entry.has_focus; } }
     
     private Gtk.Button archive_button;
-    private Gtk.Button trash_buttons[2];
-    private Gtk.MenuButton empty_buttons[2];
+    private Gtk.Button trash_delete_button;
     private Gtk.SearchEntry search_entry = new Gtk.SearchEntry();
     private Geary.ProgressMonitor? search_upgrade_progress_monitor = null;
     private MonitoredProgressBar search_upgrade_progress_bar = new MonitoredProgressBar();
@@ -67,19 +66,11 @@ public class MainToolbar : PillHeaderbar {
         Gtk.Menu empty_menu = (Gtk.Menu) GearyApplication.instance.ui_manager.get_widget("/ui/ToolbarEmptyMenu");
         empty_menu.foreach(GtkUtil.show_menuitem_accel_labels);
         
-        // The toolbar looks bad when you hide one of a pair of pill buttons.
-        // Unfortunately, this means we have to have one pair for archive/trash
-        // and one single button for just trash, for when the archive button is
-        // hidden.
         insert.clear();
         insert.add(archive_button = create_toolbar_button(null, GearyController.ACTION_ARCHIVE_MESSAGE, true));
-        insert.add(trash_buttons[0] = create_toolbar_button(null, GearyController.ACTION_TRASH_MESSAGE, true));
-        insert.add(empty_buttons[0] = create_menu_button(null, empty_menu, GearyController.ACTION_EMPTY_MENU));
-        Gtk.Box trash_archive_empty = create_pill_buttons(insert);
-        insert.clear();
-        insert.add(trash_buttons[1] = create_toolbar_button(null, GearyController.ACTION_TRASH_MESSAGE, true));
-        insert.add(empty_buttons[1] = create_menu_button(null, empty_menu, GearyController.ACTION_EMPTY_MENU));
-        Gtk.Box trash_empty = create_pill_buttons(insert, false);
+        insert.add(trash_delete_button = create_toolbar_button(null, GearyController.ACTION_TRASH_MESSAGE, false));
+        insert.add(create_menu_button(null, empty_menu, GearyController.ACTION_EMPTY_MENU));
+        Gtk.Box archive_trash_delete_empty = create_pill_buttons(insert);
         
         // Search bar.
         search_entry.width_chars = 28;
@@ -96,8 +87,7 @@ public class MainToolbar : PillHeaderbar {
         
         // pack_end() ordering is reversed in GtkHeaderBar in 3.12 and above
 #if !GTK_3_12
-        add_end(trash_archive_empty);
-        add_end(trash_empty);
+        add_end(archive_trash_delete_empty);
         add_end(search_upgrade_progress_bar);
         add_end(search_entry);
 #endif
@@ -113,33 +103,19 @@ public class MainToolbar : PillHeaderbar {
 #if GTK_3_12
         add_end(search_entry);
         add_end(search_upgrade_progress_bar);
-        add_end(trash_empty);
-        add_end(trash_archive_empty);
+        add_end(archive_trash_delete_empty);
 #endif
         
         set_search_placeholder_text(DEFAULT_SEARCH_TEXT);
     }
     
-    private void show_archive_button(bool show) {
-        if (show) {
-            archive_button.show();
-            trash_buttons[0].visible = empty_buttons[0].visible = true;
-            trash_buttons[1].visible = empty_buttons[1].visible = false;
-        } else {
-            archive_button.hide();
-            trash_buttons[0].visible = empty_buttons[0].visible = false;
-            trash_buttons[1].visible = empty_buttons[1].visible = true;
-        }
-    }
-    
     /// Updates the trash button as trash or delete, and shows or hides the archive button.
-    public void update_trash_buttons(bool trash, bool archive) {
+    public void update_trash_archive_buttons(bool trash, bool archive) {
         string action_name = (trash ? GearyController.ACTION_TRASH_MESSAGE
             : GearyController.ACTION_DELETE_MESSAGE);
-        foreach (Gtk.Button b in trash_buttons)
-            setup_button(b, null, action_name, true);
+        setup_button(trash_delete_button, null, action_name, false);
         
-        show_archive_button(archive);
+        archive_button.visible = archive;
     }
     
     public void set_search_text(string text) {

@@ -94,9 +94,6 @@ public class MainWindow : Gtk.ApplicationWindow {
             maximize();
         
         base.show_all();
-        
-        // Some buttons need to be hidden, so we have to do this after we show everything.
-        main_toolbar.update_trash_buttons(true, true);
     }
     
     private bool on_delete_event() {
