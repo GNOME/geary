@@ -1231,6 +1231,15 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         yield remove.wait_for_ready_async(cancellable);
     }
     
+    protected async void expunge_all_async(Cancellable? cancellable = null) throws Error {
+        check_open("expunge_all_async");
+        
+        EmptyFolder empty_folder = new EmptyFolder(this, cancellable);
+        replay_queue.schedule(empty_folder);
+        
+        yield empty_folder.wait_for_ready_async(cancellable);
+    }
+    
     private void check_open(string method) throws EngineError {
         if (open_count == 0)
             throw new EngineError.OPEN_REQUIRED("%s failed: folder %s is not open", method, to_string());

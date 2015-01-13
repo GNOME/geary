@@ -30,6 +30,9 @@ public class GearyController : Geary.BaseObject {
     public const string ACTION_ARCHIVE_MESSAGE = "GearyArchiveMessage";
     public const string ACTION_TRASH_MESSAGE = "GearyTrashMessage";
     public const string ACTION_DELETE_MESSAGE = "GearyDeleteMessage";
+    public const string ACTION_EMPTY_MENU = "GearyEmptyMenu";
+    public const string ACTION_EMPTY_SPAM = "GearyEmptySpam";
+    public const string ACTION_EMPTY_TRASH = "GearyEmptyTrash";
     public const string ACTION_FIND_IN_CONVERSATION = "GearyFindInConversation";
     public const string ACTION_FIND_NEXT_IN_CONVERSATION = "GearyFindNextInConversation";
     public const string ACTION_FIND_PREVIOUS_IN_CONVERSATION = "GearyFindPreviousInConversation";
@@ -358,7 +361,7 @@ public class GearyController : Geary.BaseObject {
         add_accelerator("F", ACTION_FORWARD_MESSAGE);
         
         Gtk.ActionEntry find_in_conversation = { ACTION_FIND_IN_CONVERSATION, null, null, "<Ctrl>F",
-        null, on_find_in_conversation_action };
+            null, on_find_in_conversation_action };
         entries += find_in_conversation;
         add_accelerator("slash", ACTION_FIND_IN_CONVERSATION);
         
@@ -388,7 +391,21 @@ public class GearyController : Geary.BaseObject {
         delete_message.tooltip = DELETE_MESSAGE_TOOLTIP_SINGLE;
         entries += delete_message;
         add_accelerator("<Shift>BackSpace", ACTION_DELETE_MESSAGE);
-
+        
+        Gtk.ActionEntry empty_menu = { ACTION_EMPTY_MENU, "edit-clear-all-symbolic", null, null,
+            null, null };
+        empty_menu.label = _("Empty");
+        empty_menu.tooltip = _("Empty Spam or Trash folders");
+        entries += empty_menu;
+        
+        Gtk.ActionEntry empty_spam = { ACTION_EMPTY_SPAM, null, null, null, null, on_empty_spam };
+        empty_spam.label = _("Empty _Spam…");
+        entries += empty_spam;
+        
+        Gtk.ActionEntry empty_trash = { ACTION_EMPTY_TRASH, null, null, null, null, on_empty_trash };
+        empty_trash.label = _("Empty _Trash…");
+        entries += empty_trash;
+        
         Gtk.ActionEntry zoom_in = { ACTION_ZOOM_IN, null, null, "<Ctrl>equal",
             null, on_zoom_in };
         entries += zoom_in;
@@ -2255,6 +2272,83 @@ public class GearyController : Geary.BaseObject {
     private void on_delete_message() {
         archive_or_delete_selection_async.begin(false, false, cancellable_folder,
             on_archive_or_delete_selection_finished);
+    }
+    
+    private void on_empty_spam() {
+        on_empty_trash_or_spam(Geary.SpecialFolderType.SPAM);
+    }
+    
+    private void on_empty_trash() {
+        on_empty_trash_or_spam(Geary.SpecialFolderType.TRASH);
+    }
+    
+    private void on_empty_trash_or_spam(Geary.SpecialFolderType special_folder_type) {
+        // Account must be in place, must have the specified special folder type, and that folder
+        // must support Empty in order for this command to proceed
+        if (current_account == null)
+            return;
+        
+        Geary.Folder? folder = null;
+        try {
+            folder = current_account.get_special_folder(special_folder_type);
+        } catch (Error err) {
+            debug("%s: Unable to get special folder %s: %s", current_account.to_string(),
+                special_folder_type.to_string(), err.message);
+            
+            // fall through
+        }
+        
+        if (folder == null)
+            return;
+        
+        Geary.FolderSupport.Empty? emptyable = folder as Geary.FolderSupport.Empty;
+        if (emptyable == null) {
+            debug("%s: Special folder %s (%s) does not support emptying", current_account.to_string(),
+                folder.path.to_string(), special_folder_type.to_string());
+            
+            return;
+        }
+        
+        ConfirmationDialog dialog = new ConfirmationDialog(main_window,
+            _("Empty all email from your %s folder?").printf(special_folder_type.get_display_name()),
+            _("This removes the email from Geary and your email server.")
+                + "  <b>" + _("This cannot be undone.") + "</b>",
+            _("Empty %s").printf(special_folder_type.get_display_name()));
+        dialog.use_secondary_markup(true);
+        dialog.set_focus_response(Gtk.ResponseType.CANCEL);
+        
+        if (dialog.run() == Gtk.ResponseType.OK)
+            empty_folder_async.begin(emptyable, cancellable_folder);
+    }
+    
+    private async void empty_folder_async(Geary.FolderSupport.Empty emptyable, Cancellable? cancellable) {
+        try {
+            yield do_empty_folder_async(emptyable, cancellable);
+        } catch (Error err) {
+            // don't report to user if cancelled
+            if (cancellable is IOError.CANCELLED)
+                return;
+            
+            ErrorDialog dialog = new ErrorDialog(main_window,
+                _("Error emptying %s").printf(emptyable.get_display_name()), err.message);
+            dialog.run();
+        }
+    }
+    
+    private async void do_empty_folder_async(Geary.FolderSupport.Empty emptyable, Cancellable? cancellable)
+        throws Error {
+        yield emptyable.open_async(Geary.Folder.OpenFlags.NONE, cancellable);
+        
+        // be sure to close in all code paths
+        try {
+            yield emptyable.empty_folder_async(cancellable);
+        } finally {
+            try {
+                yield emptyable.close_async(null);
+            } catch (Error err) {
+                // ignored
+            }
+        }
     }
     
     private bool current_folder_supports_trash() {

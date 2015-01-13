@@ -9,7 +9,8 @@
  * IMAP STORE/EXPUNGE operation.
  */
 
-private class Geary.ImapEngine.GmailSpamTrashFolder : MinimalFolder, FolderSupport.Remove {
+private class Geary.ImapEngine.GmailSpamTrashFolder : MinimalFolder, FolderSupport.Remove,
+    FolderSupport.Empty {
     public GmailSpamTrashFolder(GmailAccount account, Imap.Account remote, ImapDB.Account local,
         ImapDB.Folder local_folder, SpecialFolderType special_folder_type) {
         base (account, remote, local, local_folder, special_folder_type);
@@ -18,6 +19,10 @@ private class Geary.ImapEngine.GmailSpamTrashFolder : MinimalFolder, FolderSuppo
     public async void remove_email_async(Gee.List<Geary.EmailIdentifier> email_ids,
         Cancellable? cancellable = null) throws Error {
         yield expunge_email_async(email_ids, cancellable);
+    }
+    
+    public async void empty_folder_async(Cancellable? cancellable = null) throws Error {
+        yield expunge_all_async(cancellable);
     }
 }
 

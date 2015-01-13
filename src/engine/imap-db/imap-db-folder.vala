@@ -935,16 +935,22 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     // on most operations unless ListFlags.INCLUDE_MARKED_REMOVED is true.  Use detach_email_async()
     // to formally remove the messages from the folder.
     //
+    // If ids is null, all messages are marked for removal.
+    //
     // Returns a collection of ImapDB.EmailIdentifiers *with the UIDs set* for this folder.
     // Supplied EmailIdentifiers not in this Folder will not be included.
     public async Gee.Set<ImapDB.EmailIdentifier>? mark_removed_async(
-        Gee.Collection<ImapDB.EmailIdentifier> ids, bool mark_removed, Cancellable? cancellable)
+        Gee.Collection<ImapDB.EmailIdentifier>? ids, bool mark_removed, Cancellable? cancellable)
         throws Error {
         int unread_count = 0;
         Gee.Set<ImapDB.EmailIdentifier> removed_ids = new Gee.HashSet<ImapDB.EmailIdentifier>();
         yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
-            Gee.List<LocationIdentifier?> locs = do_get_locations_for_ids(cx, ids,
-                ListFlags.INCLUDE_MARKED_FOR_REMOVE, cancellable);
+            Gee.List<LocationIdentifier?> locs;
+            if (ids != null)
+                locs = do_get_locations_for_ids(cx, ids, ListFlags.INCLUDE_MARKED_FOR_REMOVE, cancellable);
+            else
+                locs = do_get_all_locations(cx, ListFlags.INCLUDE_MARKED_FOR_REMOVE, cancellable);
+            
             if (locs == null || locs.size == 0)
                 return Db.TransactionOutcome.DONE;
             
@@ -2256,8 +2262,26 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         return (locs.size > 0) ? locs : null;
     }
     
+    private Gee.List<LocationIdentifier>? do_get_all_locations(Db.Connection cx, ListFlags flags,
+        Cancellable? cancellable) throws Error {
+        Db.Statement stmt = cx.prepare("""
+            SELECT message_id, ordering, remove_marker
+            FROM MessageLocationTable
+            WHERE folder_id = ?
+        """);
+        stmt.bind_rowid(0, folder_id);
+        
+        Gee.List<LocationIdentifier> locs = do_results_to_locations(stmt.exec(cancellable), flags,
+            cancellable);
+        
+        return (locs.size > 0) ? locs : null;
+    }
+    
     private int do_get_unread_count_for_ids(Db.Connection cx,
-        Gee.Collection<ImapDB.EmailIdentifier> ids, Cancellable? cancellable) throws Error {
+        Gee.Collection<ImapDB.EmailIdentifier>? ids, Cancellable? cancellable) throws Error {
+        if (ids == null || ids.size == 0)
+            return 0;
+        
         // Fetch flags for each email and update this folder's unread count.
         // (Note that this only flags for emails which have NOT been marked for removal
         // are included.)

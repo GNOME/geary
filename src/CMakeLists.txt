@@ -29,6 +29,7 @@ engine/api/geary-folder-properties.vala
 engine/api/geary-folder-supports-archive.vala
 engine/api/geary-folder-supports-copy.vala
 engine/api/geary-folder-supports-create.vala
+engine/api/geary-folder-supports-empty.vala
 engine/api/geary-folder-supports-mark.vala
 engine/api/geary-folder-supports-move.vala
 engine/api/geary-folder-supports-remove.vala
@@ -205,6 +206,7 @@ engine/imap-engine/outlook/imap-engine-outlook-drafts-folder.vala
 engine/imap-engine/replay-ops/imap-engine-abstract-list-email.vala
 engine/imap-engine/replay-ops/imap-engine-copy-email.vala
 engine/imap-engine/replay-ops/imap-engine-create-email.vala
+engine/imap-engine/replay-ops/imap-engine-empty-folder.vala
 engine/imap-engine/replay-ops/imap-engine-fetch-email.vala
 engine/imap-engine/replay-ops/imap-engine-list-email-by-id.vala
 engine/imap-engine/replay-ops/imap-engine-list-email-by-sparse-id.vala
