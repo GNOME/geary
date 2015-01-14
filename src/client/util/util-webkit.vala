@@ -326,7 +326,7 @@ public string html_to_flowed_text(WebKit.DOM.HTMLElement el) {
     for (int i = nbq - 1; i >= 0; i--) {
         WebKit.DOM.HTMLElement bq = (WebKit.DOM.HTMLElement) blockquotes.item(i);
         bqtexts[i] = bq.get_inner_text();
-        if (bqtexts[i].substring(-1, 1) == "\n")
+        if (bqtexts[i].length > 0 && bqtexts[i].substring(-1, 1) == "\n")
             bqtexts[i] = bqtexts[i].slice(0, -1);
         else
             debug("Did not find expected newline at end of quote.");
