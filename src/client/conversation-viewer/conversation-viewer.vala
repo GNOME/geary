@@ -143,6 +143,9 @@ public class ConversationViewer : Gtk.Box {
     // Overlay containing any inline composers.
     public ScrollableOverlay compose_overlay;
     
+    // Paned for holding any paned composers.
+    private Gtk.Box composer_boxes;
+    
     // Maps emails to their corresponding elements.
     private Gee.HashMap<Geary.EmailIdentifier, WebKit.DOM.HTMLElement> email_to_element = new
         Gee.HashMap<Geary.EmailIdentifier, WebKit.DOM.HTMLElement>();
@@ -215,13 +218,27 @@ public class ConversationViewer : Gtk.Box {
         
         message_overlay = new Gtk.Overlay();
         message_overlay.add(conversation_viewer_scrolled);
-        pack_start(message_overlay);
+        
+        Gtk.Paned composer_paned = new Gtk.Paned(Gtk.Orientation.VERTICAL);
+        composer_paned.pack1(message_overlay, true, false);
+        composer_boxes = new Gtk.Box(Gtk.Orientation.VERTICAL, 0);
+        composer_boxes.no_show_all = true;
+        composer_paned.pack2(composer_boxes, true, false);
+        Configuration config = GearyApplication.instance.config;
+        config.bind(Configuration.COMPOSER_PANE_POSITION_KEY, composer_paned, "position");
+        pack_start(composer_paned);
         
         conversation_find_bar = new ConversationFindBar(web_view);
         conversation_find_bar.no_show_all = true;
         conversation_find_bar.close.connect(() => { fsm.issue(SearchEvent.CLOSE_FIND_BAR); });
         
         pack_start(conversation_find_bar, false);
+    }
+    
+    public void set_paned_composer(ComposerWidget composer) {
+        ComposerBox container = new ComposerBox(composer);
+        composer_boxes.pack_start(container);
+        composer_boxes.show();
     }
     
     public Geary.Email? get_last_message() {

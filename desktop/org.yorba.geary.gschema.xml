@@ -32,6 +32,12 @@
         <description>Position of the message list Paned grabber.</description>
     </key>
     
+    <key name="composer-pane-position" type="i">
+        <default>350</default>
+        <summary>position of the composer pane</summary>
+        <description>Position of the composer Paned grabber, when open.</description>
+    </key>
+    
     <key name="autoselect" type="b">
         <default>true</default>
         <summary>autoselect next message</summary>
