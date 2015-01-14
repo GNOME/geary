@@ -21,6 +21,7 @@ public class ComposerWidget : Gtk.EventBox {
     
     public enum ComposerState {
         DETACHED,
+        PANED,
         INLINE_NEW,
         INLINE,
         INLINE_COMPACT
@@ -286,7 +287,7 @@ public class ComposerWidget : Gtk.EventBox {
             Gtk.Widget widget = builder.get_object(name) as Gtk.Widget;
             bind_property("state", widget, "visible", BindingFlags.SYNC_CREATE,
                 (binding, source_value, ref target_value) => {
-                    target_value = (state != ComposerState.INLINE);
+                    target_value = (state != ComposerState.INLINE && state != ComposerState.PANED);
                     return true;
                 });
         }
@@ -797,8 +798,10 @@ public class ComposerWidget : Gtk.EventBox {
             document.exec_command("insertHTML", false,
                 Geary.RFC822.Utils.quote_email_for_reply(referred, quote, true));
             
-            if (!referred_ids.contains(referred.id))
+            if (!referred_ids.contains(referred.id)) {
                 add_recipients_and_ids(new_type, referred);
+                ensure_paned();
+            }
         } else if (new_type != compose_type) {
             bool recipients_modified = to_entry.modified || cc_entry.modified || bcc_entry.modified;
             switch (new_type) {
@@ -816,7 +819,8 @@ public class ComposerWidget : Gtk.EventBox {
                 break;
                 
                 case ComposeType.FORWARD:
-                    state = ComposerState.INLINE;
+                    if (state == ComposerState.INLINE_COMPACT)
+                        state = ComposerState.INLINE;
                     subject = forward_subject;
                     if (!recipients_modified) {
                         to = "";
@@ -959,8 +963,25 @@ public class ComposerWidget : Gtk.EventBox {
     }
     
     private void on_detach() {
-        if (parent is ComposerEmbed)
-            ((ComposerEmbed) parent).on_detach();
+        Gtk.Widget? focus = container.remove_composer();
+        ComposerWindow window = new ComposerWindow(this);
+        if (focus != null) {
+            ComposerWindow focus_win = focus.get_toplevel() as ComposerWindow;
+            if (focus_win != null && focus_win == window)
+                focus.grab_focus();
+        } else {
+            set_focus();
+        }
+        state = ComposerWidget.ComposerState.DETACHED;
+    }
+    
+    private void ensure_paned() {
+        if (state == ComposerState.PANED)
+            return;
+        container.remove_composer();
+        GearyApplication.instance.controller.main_window.conversation_viewer
+            .set_paned_composer(this);
+        state = ComposerWidget.ComposerState.PANED;
     }
     
     // compares all keys to all tokens according to user-supplied comparison function
@@ -2071,8 +2092,9 @@ public class ComposerWidget : Gtk.EventBox {
             return;
         }
         
-        // Don't show in inline or compact modes.
-        if (state == ComposerState.INLINE || state == ComposerState.INLINE_COMPACT)
+        // Don't show in inline, compact, or paned modes.
+        if (state == ComposerState.INLINE || state == ComposerState.INLINE_COMPACT ||
+            state == ComposerState.PANED)
             return;
         
         // If there's only one account, show nothing. (From fields are hidden above.)

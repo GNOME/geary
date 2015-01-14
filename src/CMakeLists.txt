@@ -333,6 +333,7 @@ client/components/status-bar.vala
 client/components/stock.vala
 client/components/stylish-webview.vala
 
+client/composer/composer-box.vala
 client/composer/composer-container.vala
 client/composer/composer-embed.vala
 client/composer/composer-headerbar.vala

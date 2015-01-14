@@ -127,8 +127,7 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
         get_style_context().changed.connect(update_style);
     }
     
-    public void on_detach() {
-        composer.state = ComposerWidget.ComposerState.DETACHED;
+    public Gtk.Widget? remove_composer() {
         if (composer.editor.has_focus)
             on_focus_out();
         composer.editor.focus_in_event.disconnect(on_focus_in);
@@ -138,7 +137,7 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
         disable_scroll_reroute(this);
         Gtk.ScrolledWindow win = (Gtk.ScrolledWindow) composer.editor.parent;
         win.get_vscrollbar().show();
-        Gtk.Widget focus = top_window.get_focus();
+        Gtk.Widget? focus = top_window.get_focus();
         
         try {
             composer.editor.get_dom_document().body.get_class_list().remove("embedded");
@@ -147,15 +146,8 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
         }
         
         remove(composer);
-        ComposerWindow window = new ComposerWindow(composer);
-        if (focus != null) {
-            ComposerWindow focus_win = focus.get_toplevel() as ComposerWindow;
-            if (focus_win != null && focus_win == window)
-                focus.grab_focus();
-        } else {
-            composer.set_focus();
-        }
         close_container();
+        return focus;
     }
     
     public bool set_position(ref Gdk.Rectangle allocation, double hscroll, double vscroll,
