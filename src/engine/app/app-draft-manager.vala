@@ -28,6 +28,7 @@
 public class Geary.App.DraftManager : BaseObject {
     public const string PROP_IS_OPEN = "is-open";
     public const string PROP_DRAFT_STATE = "draft-state";
+    public const string PROP_CURRENT_DRAFT_ID = "current-draft-id";
     public const string PROP_VERSIONS_SAVED = "versions-saved";
     public const string PROP_VERSIONS_DROPPED = "versions-dropped";
     public const string PROP_DISCARD_ON_CLOSE = "discard-on-close";

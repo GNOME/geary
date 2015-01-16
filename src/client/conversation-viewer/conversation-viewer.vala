@@ -124,6 +124,9 @@ public class ConversationViewer : Gtk.Box {
     // Fired when the user clicks the edit draft button.
     public signal void edit_draft(Geary.Email message);
     
+    // Fired when the viewer has been cleared.
+    public signal void cleared();
+    
     // List of emails in this view.
     public Gee.TreeSet<Geary.Email> messages { get; private set; default = 
         new Gee.TreeSet<Geary.Email>(Geary.Email.compare_date_ascending); }
@@ -172,6 +175,7 @@ public class ConversationViewer : Gtk.Box {
     private int next_replaced_buffer_number = 0;
     private Gee.HashMap<string, ReplacedImage> replaced_images = new Gee.HashMap<string, ReplacedImage>();
     private Gee.HashSet<string> replaced_content_ids = new Gee.HashSet<string>();
+    private Gee.HashSet<string> blacklist_ids = new Gee.HashSet<string>();
     
     public ConversationViewer() {
         Object(orientation: Gtk.Orientation.VERTICAL, spacing: 0);
@@ -318,13 +322,54 @@ public class ConversationViewer : Gtk.Box {
         inlined_content_ids.clear();
         replaced_images.clear();
         replaced_content_ids.clear();
+        blacklist_ids.clear();
+        blacklist_css();
         
         current_account_information = account_information;
+        cleared();
     }
     
     // Converts an email ID into HTML ID used by the <div> for the email.
     public string get_div_id(Geary.EmailIdentifier id) {
         return "message_%s".printf(id.to_string());
+    }
+    
+    public void blacklist_by_id(Geary.EmailIdentifier? id) {
+        if (id == null)
+            return;
+        blacklist_ids.add(get_div_id(id));
+        blacklist_css();
+    }
+    
+    public void unblacklist_by_id(Geary.EmailIdentifier? id) {
+        if (id == null)
+            return;
+        blacklist_ids.remove(get_div_id(id));
+        blacklist_css();
+    }
+    
+    private void blacklist_css() {
+        GLib.StringBuilder rule = new GLib.StringBuilder();
+        bool first = true;
+        foreach (string id in blacklist_ids) {
+            if (!first)
+                rule.append(", ");
+            else
+                first = false;
+            rule.append("div[id=\"" + id + "\"]");
+        }
+        if (!first)
+            rule.append(" { display: none; }");
+        
+        WebKit.DOM.HTMLElement? style_element = web_view.get_dom_document()
+            .get_element_by_id("blacklist_ids") as WebKit.DOM.HTMLElement;
+        if (style_element != null) {
+            try {
+                style_element.set_inner_html(rule.str);
+            } catch (Error error) {
+                debug("Error setting blaklist CSS: %s", error.message);
+            }
+        }
     }
     
     private void show_special_message(string msg) {

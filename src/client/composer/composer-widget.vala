@@ -414,9 +414,11 @@ public class ComposerWidget : Gtk.EventBox {
         from_multiple.changed.connect(on_from_changed);
         
         if (referred != null) {
-            add_recipients_and_ids(compose_type, referred);
-            reply_subject = Geary.RFC822.Utils.create_subject_for_reply(referred);
-            forward_subject = Geary.RFC822.Utils.create_subject_for_forward(referred);
+            if (compose_type != ComposeType.NEW_MESSAGE) {
+                add_recipients_and_ids(compose_type, referred);
+                reply_subject = Geary.RFC822.Utils.create_subject_for_reply(referred);
+                forward_subject = Geary.RFC822.Utils.create_subject_for_forward(referred);
+            }
             last_quote = quote;
             switch (compose_type) {
                 case ComposeType.NEW_MESSAGE:
@@ -554,6 +556,14 @@ public class ComposerWidget : Gtk.EventBox {
         if (!from_multiple.visible)
             open_draft_manager_async.begin(null);
         
+        // Remind the conversation viewer of draft ids when it reloads
+        ConversationViewer conversation_viewer =
+            GearyApplication.instance.controller.main_window.conversation_viewer;
+        conversation_viewer.cleared.connect(() => {
+            if (draft_manager != null)
+                conversation_viewer.blacklist_by_id(draft_manager.current_draft_id);
+        });
+        
         destroy.connect(() => { close_draft_manager_async.begin(null); });
     }
     
@@ -602,6 +612,66 @@ public class ComposerWidget : Gtk.EventBox {
         }
     }
     
+    public async void restore_draft_state_async(Geary.Account account) {
+        bool first_email = true;
+        
+        foreach (Geary.RFC822.MessageID mid in in_reply_to) {
+            Gee.MultiMap<Geary.Email, Geary.FolderPath?>? email_map;
+            try {
+                email_map =
+                    yield account.local_search_message_id_async(mid, Geary.Email.Field.ENVELOPE,
+                    true, null, new Geary.EmailFlags.with(Geary.EmailFlags.DRAFT)); // TODO: Folder blacklist
+            } catch (Error error) {
+                continue;
+            }
+            if (email_map == null)
+                continue;
+            Gee.Set<Geary.Email> emails = email_map.get_keys();
+            Geary.Email? email = null;
+            foreach (Geary.Email candidate in emails) {
+                if (candidate.message_id.equal_to(mid)) {
+                    email = candidate;
+                    break;
+                }
+            }
+            if (email == null)
+                continue;
+            
+            add_recipients_and_ids(compose_type, email, false);
+            if (first_email) {
+                reply_subject = Geary.RFC822.Utils.create_subject_for_reply(email);
+                forward_subject = Geary.RFC822.Utils.create_subject_for_forward(email);
+                first_email = false;
+            }
+        }
+        if (first_email)  // Either no referenced emails, or we don't have them.  Treat as new.
+            return;
+        
+        if (cc == "")
+            compose_type = ComposeType.REPLY;
+        else
+            compose_type = ComposeType.REPLY_ALL;
+            
+        to_entry.modified = cc_entry.modified = bcc_entry.modified = false;
+        if (!Geary.RFC822.Utils.equal(to_entry.addresses, reply_to_addresses))
+            to_entry.modified = true;
+        if (cc != "" && !Geary.RFC822.Utils.equal(cc_entry.addresses, reply_cc_addresses))
+            cc_entry.modified = true;
+        if (bcc != "")
+            bcc_entry.modified = true;
+        
+        if (in_reply_to.size > 1) {
+            state = ComposerState.PANED;
+        } else if (compose_type == ComposeType.FORWARD || to_entry.modified || cc_entry.modified ||
+            bcc_entry.modified) {
+            state = ComposerState.INLINE;
+        } else {
+            state = ComposerState.INLINE_COMPACT;
+            // Set recipients in header
+            validate_send_button();
+        }
+    }
+    
     public void set_focus() {
         if (Geary.String.is_empty(to)) {
             to_entry.grab_focus();
@@ -613,6 +683,13 @@ public class ComposerWidget : Gtk.EventBox {
     }
     
     private void on_load_finished(WebKit.WebFrame frame) {
+        if (get_realized())
+            on_load_finished_and_realized();
+        else
+            realize.connect(on_load_finished_and_realized);
+    }
+    
+    private void on_load_finished_and_realized() {
         WebKit.DOM.Document document = editor.get_dom_document();
         WebKit.DOM.HTMLElement? body = document.get_element_by_id(BODY_ID) as WebKit.DOM.HTMLElement;
         assert(body != null);
@@ -841,7 +918,8 @@ public class ComposerWidget : Gtk.EventBox {
         set_focus();
     }
     
-    private void add_recipients_and_ids(ComposeType type, Geary.Email referred) {
+    private void add_recipients_and_ids(ComposeType type, Geary.Email referred,
+        bool modify_headers = true) {
         string? sender_address = account.information.get_mailbox_address().address;
         Geary.RFC822.MailboxAddresses to_addresses =
             Geary.RFC822.Utils.create_to_addresses_for_reply(referred, sender_address);
@@ -851,6 +929,9 @@ public class ComposerWidget : Gtk.EventBox {
         reply_cc_addresses = Geary.RFC822.Utils.remove_addresses(
             Geary.RFC822.Utils.merge_addresses(reply_cc_addresses, cc_addresses),
             reply_to_addresses);
+        
+        if (!modify_headers)
+            return;
         
         bool recipients_modified = to_entry.modified || cc_entry.modified || bcc_entry.modified;
         if (!recipients_modified) {
@@ -975,8 +1056,8 @@ public class ComposerWidget : Gtk.EventBox {
         state = ComposerWidget.ComposerState.DETACHED;
     }
     
-    private void ensure_paned() {
-        if (state == ComposerState.PANED)
+    public void ensure_paned() {
+        if (state == ComposerState.PANED || state == ComposerState.DETACHED)
             return;
         container.remove_composer();
         GearyApplication.instance.controller.main_window.conversation_viewer
@@ -1140,12 +1221,18 @@ public class ComposerWidget : Gtk.EventBox {
         }
     }
     
+    private void on_draft_id_changed() {
+        GearyApplication.instance.controller.main_window.conversation_viewer.blacklist_by_id(
+            draft_manager.current_draft_id);
+    }
+    
     private void on_draft_manager_fatal(Error err) {
         draft_save_text = DRAFT_ERROR_TEXT;
     }
     
     private void connect_to_draft_manager() {
         draft_manager.notify[Geary.App.DraftManager.PROP_DRAFT_STATE].connect(on_draft_state_changed);
+        draft_manager.notify[Geary.App.DraftManager.PROP_CURRENT_DRAFT_ID].connect(on_draft_id_changed);
         draft_manager.fatal.connect(on_draft_manager_fatal);
     }
     
@@ -1154,6 +1241,7 @@ public class ComposerWidget : Gtk.EventBox {
     // be moved back into open/close methods
     private void disconnect_from_draft_manager() {
         draft_manager.notify[Geary.App.DraftManager.PROP_DRAFT_STATE].disconnect(on_draft_state_changed);
+        draft_manager.notify[Geary.App.DraftManager.PROP_CURRENT_DRAFT_ID].disconnect(on_draft_id_changed);
         draft_manager.fatal.disconnect(on_draft_manager_fatal);
     }
     
@@ -1274,6 +1362,9 @@ public class ComposerWidget : Gtk.EventBox {
         } catch (Error err) {
             // ignored
         }
+        if (draft_manager != null)
+            GearyApplication.instance.controller.main_window.conversation_viewer
+                .unblacklist_by_id(draft_manager.current_draft_id);
         
         container.close_container();
     }

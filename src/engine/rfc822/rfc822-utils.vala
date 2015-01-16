@@ -140,6 +140,23 @@ public Geary.RFC822.MailboxAddresses remove_addresses(Geary.RFC822.MailboxAddres
     return new Geary.RFC822.MailboxAddresses(result);
 }
 
+public bool equal(Geary.RFC822.MailboxAddresses? first, Geary.RFC822.MailboxAddresses? second) {
+    bool first_empty = first == null || first.size == 0;
+    bool second_empty = second == null || second.size == 0;
+    if (first_empty && second_empty || first == second)
+        return true;
+    if (first_empty || second_empty || first.size != second.size)
+        return false;
+    
+    Gee.HashSet<string> first_addresses = new Gee.HashSet<string>();
+    Gee.HashSet<string> second_addresses = new Gee.HashSet<string>();
+    foreach (Geary.RFC822.MailboxAddress a in first)
+        first_addresses.add(a.as_key());
+    foreach (Geary.RFC822.MailboxAddress a in second)
+        second_addresses.add(a.as_key());
+    return Geary.Collection.are_sets_equal<string>(first_addresses, second_addresses);
+}
+
 public string reply_references(Geary.Email source) {
     // generate list for References
     Gee.ArrayList<RFC822.MessageID> list = new Gee.ArrayList<RFC822.MessageID>();
