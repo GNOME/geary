@@ -242,6 +242,7 @@ public class ComposerWidget : Gtk.EventBox {
     private Geary.EmailIdentifier? editing_draft_id = null;
     private Geary.EmailFlags draft_flags = new Geary.EmailFlags.with(Geary.EmailFlags.DRAFT);
     private uint draft_save_timeout_id = 0;
+    private bool is_closing = false;
     
     public WebKit.WebView editor;
     // We need to keep a reference to the edit-fixer in composer-window, so it doesn't get
@@ -1008,6 +1009,9 @@ public class ComposerWidget : Gtk.EventBox {
     }
 
     public CloseStatus should_close() {
+        if (is_closing)
+            return CloseStatus.PENDING_CLOSE;
+        
         bool try_to_save = can_save();
         
         container.present();
@@ -1175,6 +1179,7 @@ public class ComposerWidget : Gtk.EventBox {
     // Used internally by on_send()
     private async void on_send_async() {
         container.vanish();
+        is_closing = true;
         
         linkify_document(editor.get_dom_document());
         
@@ -1355,6 +1360,7 @@ public class ComposerWidget : Gtk.EventBox {
     
     private async void save_and_exit_async() {
         make_gui_insensitive();
+        is_closing = true;
         
         save_draft();
         try {
@@ -1371,6 +1377,7 @@ public class ComposerWidget : Gtk.EventBox {
     
     private async void discard_and_exit_async() {
         make_gui_insensitive();
+        is_closing = true;
         
         discard_draft();
         if (draft_manager != null)
