@@ -54,23 +54,23 @@ public class MainToolbar : PillHeaderbar {
         insert.add(create_toolbar_button(rtl ? "mail-forward-rtl-symbolic" : "mail-forward-symbolic", GearyController.ACTION_FORWARD_MESSAGE));
         add_start(create_pill_buttons(insert));
         
-        // Mark, copy, move.
-        insert.clear();
-        insert.add(create_menu_button("marker-symbolic", mark_menu, GearyController.ACTION_MARK_AS_MENU));
-        insert.add(create_menu_button(rtl ? "tag-rtl-symbolic" : "tag-symbolic", copy_folder_menu, GearyController.ACTION_COPY_MENU));
-        insert.add(create_menu_button("folder-symbolic", move_folder_menu, GearyController.ACTION_MOVE_MENU));
-        add_start(create_pill_buttons(insert));
-        
         // Assemble the empty menu
         GearyApplication.instance.load_ui_file("toolbar_empty_menu.ui");
         Gtk.Menu empty_menu = (Gtk.Menu) GearyApplication.instance.ui_manager.get_widget("/ui/ToolbarEmptyMenu");
         empty_menu.foreach(GtkUtil.show_menuitem_accel_labels);
         
+        // Mark, copy, move.
+        insert.clear();
+        insert.add(create_menu_button("marker-symbolic", mark_menu, GearyController.ACTION_MARK_AS_MENU));
+        insert.add(create_menu_button(rtl ? "tag-rtl-symbolic" : "tag-symbolic", copy_folder_menu, GearyController.ACTION_COPY_MENU));
+        insert.add(create_menu_button("folder-symbolic", move_folder_menu, GearyController.ACTION_MOVE_MENU));
+        insert.add(create_menu_button(null, empty_menu, GearyController.ACTION_EMPTY_MENU));
+        add_start(create_pill_buttons(insert));
+        
         insert.clear();
         insert.add(archive_button = create_toolbar_button(null, GearyController.ACTION_ARCHIVE_MESSAGE, true));
         insert.add(trash_delete_button = create_toolbar_button(null, GearyController.ACTION_TRASH_MESSAGE, false));
-        insert.add(create_menu_button(null, empty_menu, GearyController.ACTION_EMPTY_MENU));
-        Gtk.Box archive_trash_delete_empty = create_pill_buttons(insert);
+        Gtk.Box archive_trash_delete = create_pill_buttons(insert);
         
         // Search bar.
         search_entry.width_chars = 28;
@@ -87,7 +87,7 @@ public class MainToolbar : PillHeaderbar {
         
         // pack_end() ordering is reversed in GtkHeaderBar in 3.12 and above
 #if !GTK_3_12
-        add_end(archive_trash_delete_empty);
+        add_end(archive_trash_delete);
         add_end(search_upgrade_progress_bar);
         add_end(search_entry);
 #endif
@@ -103,7 +103,7 @@ public class MainToolbar : PillHeaderbar {
 #if GTK_3_12
         add_end(search_entry);
         add_end(search_upgrade_progress_bar);
-        add_end(archive_trash_delete_empty);
+        add_end(archive_trash_delete);
 #endif
         
         set_search_placeholder_text(DEFAULT_SEARCH_TEXT);
