@@ -38,6 +38,7 @@ public class ConversationListStore : Gtk.ListStore {
     public string? account_owner_email { get; set; default = null; }
     public Geary.ProgressMonitor preview_monitor { get; private set; default = 
         new Geary.SimpleProgressMonitor(Geary.ProgressType.ACTIVITY); }
+    public bool is_clearing { get; private set; default = false; }
     
     private Geary.App.ConversationMonitor conversation_monitor;
     private Geary.Folder? current_folder = null;
@@ -70,6 +71,8 @@ public class ConversationListStore : Gtk.ListStore {
     }
     
     private void on_conversation_monitor_changed() {
+        is_clearing = true;
+        
         if (conversation_monitor != null) {
             conversation_monitor.scan_completed.disconnect(on_scan_completed);
             conversation_monitor.conversations_added.disconnect(on_conversations_added);
@@ -93,6 +96,8 @@ public class ConversationListStore : Gtk.ListStore {
             conversation_monitor.conversation_trimmed.connect(on_conversation_trimmed);
             conversation_monitor.email_flags_changed.connect(on_email_flags_changed);
         }
+        
+        is_clearing = false;
     }
     
     public void set_current_folder(Geary.Folder? current_folder, Cancellable? cancellable_folder) {

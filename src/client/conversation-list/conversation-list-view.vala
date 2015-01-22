@@ -314,6 +314,19 @@ public class ConversationListView : Gtk.TreeView {
     // Gtk.TreeSelection can fire its "changed" signal even when nothing's changed, so look for that
     // and prevent to avoid subscribers from doing the same things multiple times
     private void on_selection_changed() {
+        // if the ConversationListStore is clearing, then this is called repeatedly as the elements
+        // are removed, causing signals to fire and a flurry of I/O that is immediately cancelled
+        // this prevents that, merely firing the signal once to indicate all selections are
+        // dropped while clearing
+        if (conversation_list_store.is_clearing) {
+            if (selected.size > 0) {
+                selected.clear();
+                conversations_selected(selected.read_only_view);
+            }
+            
+            return;
+        }
+        
         List<Gtk.TreePath> paths = get_all_selected_paths();
         if (paths.length() == 0) {
             // only notify if this is different than what was previously reported
