@@ -1275,13 +1275,10 @@ public class GearyController : Geary.BaseObject {
         Cancellable? conversation_cancellable = (current_is_inbox ?
             inbox_cancellables.get(folder.account) : cancellable_folder);
         
-        // stop monitoring for conversations and close the folder (but only if not an inbox,
-        // which we leave open for notifications)
+        // stop monitoring for conversations and close the folder
         if (current_conversations != null) {
-            yield current_conversations.stop_monitoring_async(!current_is_inbox, null);
+            yield current_conversations.stop_monitoring_async(null);
             current_conversations = null;
-        } else if (current_folder != null && !current_is_inbox) {
-            yield current_folder.close_async();
         }
         
         // re-enable copy/move to the last selected folder

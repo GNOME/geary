@@ -340,7 +340,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         
         bool folder_created;
         Imap.Folder remote_folder = yield remote.fetch_folder_async(folder.path,
-            out folder_created, cancellable);
+            out folder_created, null, cancellable);
         
         if (!folder_created) {
             int unseen_count = yield remote.fetch_unseen_count_async(folder.path, cancellable);
@@ -517,7 +517,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
                 continue;
             
             Imap.Folder remote_folder = (Imap.Folder) yield remote.fetch_folder_async(folder,
-                null, cancellable);
+                null, null, cancellable);
             
             yield local.clone_folder_async(remote_folder, cancellable);
         }

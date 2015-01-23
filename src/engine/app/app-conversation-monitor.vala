@@ -328,12 +328,11 @@ public class Geary.App.ConversationMonitor : BaseObject {
      * If null is supplied as the Cancellable, no cancellable is used; pass the original Cancellable
      * here to use that.
      */
-    public async void stop_monitoring_async(bool close_folder, Cancellable? cancellable) throws Error {
-        yield stop_monitoring_internal_async(close_folder, false, cancellable);
+    public async void stop_monitoring_async(Cancellable? cancellable) throws Error {
+        yield stop_monitoring_internal_async(false, cancellable);
     }
     
-    private async void stop_monitoring_internal_async(bool close_folder, bool retrying,
-        Cancellable? cancellable) throws Error {
+    private async void stop_monitoring_internal_async(bool retrying, Cancellable? cancellable) throws Error {
         if (!is_monitoring)
             return;
         
@@ -350,17 +349,15 @@ public class Geary.App.ConversationMonitor : BaseObject {
         folder.account.email_locally_complete.disconnect(on_account_email_locally_complete);
         
         Error? close_err = null;
-        if (close_folder) {
-            try {
-                yield folder.close_async(cancellable);
-            } catch (Error err) {
-                // throw, but only after cleaning up (which is to say, if close_async() fails,
-                // then the Folder is still treated as closed, which is the best that can be
-                // expected; it definitely shouldn't still be considered open).
-                debug("Unable to close monitored folder %s: %s", folder.to_string(), err.message);
-                
-                close_err = err;
-            }
+        try {
+            yield folder.close_async(cancellable);
+        } catch (Error err) {
+            // throw, but only after cleaning up (which is to say, if close_async() fails,
+            // then the Folder is still treated as closed, which is the best that can be
+            // expected; it definitely shouldn't still be considered open).
+            debug("Unable to close monitored folder %s: %s", folder.to_string(), err.message);
+            
+            close_err = err;
         }
         
         notify_monitoring_stopped(retrying);

@@ -7,6 +7,7 @@
 private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
     private const int FETCH_DATE_RECEIVED_CHUNK_COUNT = 25;
     private const int SYNC_DELAY_SEC = 10;
+    private const int RETRY_SYNC_DELAY_SEC = 60;
     
     public GenericAccount account { get; private set; }
     
@@ -80,7 +81,7 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
             // treat as an availability check (i.e. as if the account had just opened) because
             // just because this value has changed doesn't mean the contents in the folders
             // have changed
-            delayed_send_all(account.list_folders(), true);
+            delayed_send_all(account.list_folders(), true, SYNC_DELAY_SEC);
         } catch (Error err) {
             debug("Unable to schedule re-sync for %s due to prefetch time changing: %s",
                 account.to_string(), err.message);
@@ -96,7 +97,7 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
             foreach (Folder folder in available)
                 unavailable_paths.remove(folder.path);
             
-            delayed_send_all(available, true);
+            delayed_send_all(available, true, SYNC_DELAY_SEC);
         }
         
         if (unavailable != null) {
@@ -108,7 +109,7 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
     }
     
     private void on_folders_contents_altered(Gee.Collection<Folder> altered) {
-        delayed_send_all(altered, false);
+        delayed_send_all(altered, false, SYNC_DELAY_SEC);
     }
     
     private void on_email_sent() {
@@ -121,8 +122,8 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
         }
     }
     
-    private void delayed_send_all(Gee.Collection<Folder> folders, bool reason_available) {
-        Timeout.add_seconds(SYNC_DELAY_SEC, () => {
+    private void delayed_send_all(Gee.Collection<Folder> folders, bool reason_available, int sec) {
+        Timeout.add_seconds(sec, () => {
             // remove any unavailable folders
             Gee.ArrayList<Folder> trimmed_folders = new Gee.ArrayList<Folder>();
             foreach (Folder folder in folders) {
@@ -334,16 +335,24 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
             
             debug("Unable to open %s: %s", folder.to_string(), err.message);
             
+            // retry later
+            delayed_send_all(iterate<Folder>(folder).to_array_list(), false, RETRY_SYNC_DELAY_SEC);
+            
             return true;
         }
         
+        bool not_cancelled = true;
         try {
             yield sync_folder_async(folder, epoch, oldest_local, oldest_local_id);
         } catch (Error err) {
-            if (err is IOError.CANCELLED)
-                return false;
-            
-            debug("Error background syncing folder %s: %s", folder.to_string(), err.message);
+            if (err is IOError.CANCELLED) {
+                not_cancelled = false;
+            } else {
+                debug("Error background syncing folder %s: %s", folder.to_string(), err.message);
+                
+                // retry later
+                delayed_send_all(iterate<Folder>(folder).to_array_list(), false, RETRY_SYNC_DELAY_SEC);
+            }
             
             // fallthrough and close
         }
@@ -355,7 +364,7 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
             debug("Error closing %s: %s", folder.to_string(), err.message);
         }
         
-        return true;
+        return not_cancelled;
     }
     
     private async void sync_folder_async(MinimalFolder folder, DateTime epoch, DateTime? oldest_local,

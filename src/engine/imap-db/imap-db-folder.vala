@@ -173,6 +173,41 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         properties.set_select_examine_message_count(count);
     }
     
+    public async Imap.StatusData fetch_status_data(ListFlags flags, Cancellable? cancellable) throws Error {
+        Imap.StatusData? status_data = null;
+        yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
+            Db.Statement stmt = cx.prepare("""
+                SELECT uid_next, uid_validity, unread_count
+                FROM FolderTable
+                WHERE id = ?
+            """);
+            stmt.bind_rowid(0, folder_id);
+            
+            Db.Result result = stmt.exec(cancellable);
+            if (result.finished)
+                return Db.TransactionOutcome.DONE;
+            
+            int messages = do_get_email_count(cx, flags, cancellable);
+            Imap.UID? uid_next = !result.is_null_for("uid_next")
+                ? new Imap.UID(result.int64_for("uid_next"))
+                : null;
+            Imap.UIDValidity? uid_validity = !result.is_null_for("uid_validity")
+                ? new Imap.UIDValidity(result.int64_for("uid_validity"))
+                : null;
+            
+            // Note that recent is not stored
+            status_data = new Imap.StatusData(new Imap.MailboxSpecifier.from_folder_path(path, null),
+                messages, 0, uid_next, uid_validity, result.int_for("unread_count"));
+            
+            return Db.TransactionOutcome.DONE;
+        }, cancellable);
+        
+        if (status_data == null)
+            throw new EngineError.NOT_FOUND("%s STATUS not found in database", path.to_string());
+        
+        return status_data;
+    }
+    
     // Returns a Map with the created or merged email as the key and the result of the operation
     // (true if created, false if merged) as the value.  Note that every email
     // object passed in's EmailIdentifier will be fully filled out by this

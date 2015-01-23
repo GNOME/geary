@@ -219,8 +219,10 @@ private class Geary.Imap.Account : BaseObject {
         }
     }
     
+    // By supplying fallback STATUS, the Folder may be fetched if a network error occurs; if null,
+    // the network error is thrown
     public async Imap.Folder fetch_folder_async(FolderPath path, out bool created,
-        Cancellable? cancellable) throws Error {
+        StatusData? fallback_status_data, Cancellable? cancellable) throws Error {
         check_open();
         
         created = false;
@@ -245,7 +247,18 @@ private class Geary.Imap.Account : BaseObject {
         
         Imap.Folder folder;
         if (!mailbox_info.attrs.is_no_select) {
-            StatusData status = yield fetch_status_async(folder_path, StatusDataType.all(), cancellable);
+            StatusData status;
+            try {
+                status = yield fetch_status_async(folder_path, StatusDataType.all(), cancellable);
+            } catch (Error err) {
+                if (fallback_status_data == null)
+                    throw err;
+                
+                debug("Unable to fetch STATUS for %s, using fallback from local: %s", folder_path.to_string(),
+                    err.message);
+                
+                status = fallback_status_data;
+            }
             
             folder = new Imap.Folder(folder_path, session_mgr, status, mailbox_info);
         } else {

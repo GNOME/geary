@@ -35,10 +35,9 @@ private class Geary.ImapEngine.ReplayDisconnect : Geary.ImapEngine.ReplayOperati
         // we want to encourage, so use the Idle queue to schedule close_internal_async
         Idle.add(() => {
             // ReplayDisconnect is only used when remote disconnects, so never flush pending, the
-            // connection is down or going down, but always force reestablish connection, since
-            // it wasn't our idea
+            // connection is down or going down
             owner.close_internal_async.begin(Geary.Folder.CloseReason.LOCAL_CLOSE, remote_reason,
-                true, false, null);
+                false, null);
             
             return false;
         });

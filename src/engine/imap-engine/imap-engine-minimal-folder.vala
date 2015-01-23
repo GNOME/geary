@@ -7,8 +7,8 @@
 private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport.Copy,
     Geary.FolderSupport.Mark, Geary.FolderSupport.Move {
     private const int FORCE_OPEN_REMOTE_TIMEOUT_SEC = 10;
-    private const int DEFAULT_REESTABLISH_DELAY_MSEC = 10;
-    private const int MAX_REESTABLISH_DELAY_MSEC = 30000;
+    private const int DEFAULT_REESTABLISH_DELAY_MSEC = 500;
+    private const int MAX_REESTABLISH_DELAY_MSEC = 60 * 1000;
     
     public override Account account { get { return _account; } }
     
@@ -48,6 +48,8 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     private int remote_count = -1;
     private uint open_remote_timer_id = 0;
     private int reestablish_delay_msec = DEFAULT_REESTABLISH_DELAY_MSEC;
+    private Nonblocking.Mutex open_mutex = new Nonblocking.Mutex();
+    private Nonblocking.Mutex close_mutex = new Nonblocking.Mutex();
     
     public MinimalFolder(GenericAccount account, Imap.Account remote, ImapDB.Account local,
         ImapDB.Folder local_folder, SpecialFolderType special_folder_type) {
@@ -69,6 +71,8 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     ~MinimalFolder() {
         if (open_count > 0)
             warning("Folder %s destroyed without closing", to_string());
+        
+        cancel_remote_open_timer();
         
         local_folder.email_complete.disconnect(on_email_complete);
     }
@@ -144,8 +148,8 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         }
     }
     
-    private async bool normalize_folders(Geary.Imap.Folder remote_folder, Geary.Folder.OpenFlags open_flags,
-        Cancellable? cancellable) throws Error {
+    private async bool normalize_folders(Geary.Imap.Folder remote_folder, Cancellable? cancellable)
+        throws Error {
         debug("%s: Begin normalizing remote and local folders", to_string());
         
         Geary.Imap.FolderProperties local_properties = local_folder.get_properties();
@@ -488,8 +492,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         if (!remote_opened) {
             debug("wait_for_open_async %s: opening remote on demand...", to_string());
             
-            remote_opened = true;
-            open_remote_async.begin(open_flags, null);
+            start_remote_open_now();
         }
         
         if (!yield remote_semaphore.wait_for_result_async(cancellable))
@@ -499,25 +502,23 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     public override async bool open_async(Geary.Folder.OpenFlags open_flags, Cancellable? cancellable = null)
         throws Error {
         if (open_count++ > 0) {
-            // even if opened or opening, respect the NO_DELAY flag
+            // even if opened or opening, or if forcing a re-open, respect the NO_DELAY flag
             if (open_flags.is_all_set(OpenFlags.NO_DELAY)) {
-                cancel_remote_open_timer();
-                wait_for_open_async.begin();
+                // add NO_DELAY flag if it forces an open
+                if (!remote_opened)
+                    this.open_flags |= OpenFlags.NO_DELAY;
+                
+                start_remote_open_now();
             }
             
-            debug("Not opening %s: already open (open_count=%d)", to_string(), open_count);
+            debug("Not opening %s: already open", to_string());
             
             return false;
         }
         
+        // first open gets to name the flags, but see note above
         this.open_flags = open_flags;
         
-        open_internal(open_flags, cancellable);
-        
-        return true;
-    }
-    
-    private void open_internal(Folder.OpenFlags open_flags, Cancellable? cancellable) {
         remote_semaphore = new Geary.Nonblocking.ReportingSemaphore<bool>(false);
         
         // start the replay queue
@@ -535,16 +536,32 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         // meaning that folder normalization never happens and unsolicited notifications never
         // arrive
         if (open_flags.is_all_set(OpenFlags.NO_DELAY))
-            wait_for_open_async.begin();
+            start_remote_open_now();
         else
             start_remote_open_timer();
+        
+        return true;
     }
     
     private void start_remote_open_timer() {
         if (open_remote_timer_id != 0)
             Source.remove(open_remote_timer_id);
         
-        open_remote_timer_id = Timeout.add_seconds(FORCE_OPEN_REMOTE_TIMEOUT_SEC, on_open_remote_timeout);
+        open_remote_timer_id = Timeout.add_seconds(FORCE_OPEN_REMOTE_TIMEOUT_SEC, () => {
+            start_remote_open_now();
+            
+            return false;
+        });
+    }
+    
+    private void start_remote_open_now() {
+        if (remote_opened)
+            return;
+        
+        cancel_remote_open_timer();
+        remote_opened = true;
+        
+        open_remote_async.begin(null);
     }
     
     private void cancel_remote_open_timer() {
@@ -555,18 +572,29 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         open_remote_timer_id = 0;
     }
     
-    private bool on_open_remote_timeout() {
-        open_remote_timer_id = 0;
+    // Open the remote connection using a Mutex to prevent concurrency.
+    //
+    // start_remote_open_now() *should* prevent more than one open from occurring at the same time,
+    // but it's still wise to use a nonblocking primitive to prevent it if that does occur to at
+    // least keep Folder state cogent.
+    private async void open_remote_async(Cancellable? cancellable) {
+        int token;
+        try {
+            token = yield open_mutex.claim_async(cancellable);
+        } catch (Error err) {
+            return;
+        }
         
-        // remote was not forced open due to caller, so open now
-        wait_for_open_async.begin();
+        yield open_remote_locked_async(cancellable);
         
-        return false;
+        try {
+            open_mutex.release(ref token);
+        } catch (Error err) {
+        }
     }
     
-    private async void open_remote_async(Geary.Folder.OpenFlags open_flags, Cancellable? cancellable) {
-        cancel_remote_open_timer();
-        
+    // Should only be called when open_mutex is locked, i.e. use open_remote_async()
+    private async void open_remote_locked_async(Cancellable? cancellable) {
         // watch for folder closing before this call got a chance to execute
         if (open_count == 0)
             return;
@@ -580,16 +608,20 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         // carefully back out and possibly retry
         Imap.Folder? opening_folder = null;
         try {
+            debug("Fetching STATUS for remote %s from local", to_string());
+            Imap.StatusData local_status = yield local_folder.fetch_status_data(
+                ImapDB.Folder.ListFlags.NONE, cancellable);
+            
             debug("Fetching information for remote folder %s", to_string());
-            opening_folder = yield remote.fetch_folder_async(local_folder.get_path(),
-                null, cancellable);
+            opening_folder = yield remote.fetch_folder_async(local_folder.get_path(), null, local_status,
+                cancellable);
             
             debug("Opening remote folder %s", opening_folder.to_string());
             yield opening_folder.open_async(cancellable);
             
             // allow subclasses to examine the opened folder and resolve any vital
             // inconsistencies
-            if (yield normalize_folders(opening_folder, open_flags, cancellable)) {
+            if (yield normalize_folders(opening_folder, cancellable)) {
                 // update flags, properties, etc.
                 yield local.update_folder_select_examine_async(opening_folder, cancellable);
                 
@@ -612,15 +644,22 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
                 try {
                     yield opening_folder.close_async(null);
                 } catch (Error err) {
-                    debug("Error closing remote folder %s: %s", opening_folder.to_string(), err.message);
+                    debug("%s: Error closing remote folder %s: %s", to_string(), opening_folder.to_string(),
+                        err.message);
+                    
+                    // fall through
                 }
                 
                 // stop before starting the close
                 opening_monitor.notify_finish();
                 
+                // normalize_folders() returning false indicates a soft error, but hard in the sense
+                // that opening cannot proceed, even with a connection retry
+                open_count = 0;
+                
                 // schedule immediate close
                 close_internal_async.begin(CloseReason.LOCAL_CLOSE, CloseReason.REMOTE_CLOSE, false,
-                    false, cancellable);
+                    cancellable);
                 
                 return;
             }
@@ -645,24 +684,25 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
             }
             
             Folder.CloseReason remote_reason;
-            bool force_reestablishment;
             if (hard_failure) {
                 // hard failure, retry
                 debug("Hard failure opening or preparing remote folder %s, retrying: %s", to_string(),
                     open_err.message);
                 
                 remote_reason = CloseReason.REMOTE_ERROR;
-                force_reestablishment = true;
             } else {
                 // soft failure, treat as failure to open
-                debug("Soft failure opening or preparing remote folder %s: %s", to_string(),
+                debug("Soft failure opening or preparing remote folder %s, closing: %s", to_string(),
                     open_err.message);
                 notify_open_failed(
                     is_cancellation ? Folder.OpenFailed.CANCELLED : Folder.OpenFailed.REMOTE_FAILED,
                     open_err);
                 
                 remote_reason = CloseReason.REMOTE_CLOSE;
-                force_reestablishment = false;
+                
+                // clear open_count to ensure that close_internal_async() doesn't attempt to
+                // reestablish the connection
+                open_count = 0;
             }
             
             // be sure to close opening_folder if it was fetched or opened
@@ -670,15 +710,15 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
                 if (opening_folder != null)
                     yield opening_folder.close_async(null);
             } catch (Error err) {
-                debug("Error closing remote folder %s: %s", opening_folder.to_string(), err.message);
+                debug("%s: Error closing remote folder %s: %s", to_string(), opening_folder.to_string(),
+                    err.message);
             }
             
             // stop before starting the close
             opening_monitor.notify_finish();
             
-            // schedule immediate close and force reestablishment
-            close_internal_async.begin(CloseReason.LOCAL_CLOSE, remote_reason, force_reestablishment,
-                false, null);
+            // schedule immediate close (and possible connection reestablishment)
+            close_internal_async.begin(CloseReason.LOCAL_CLOSE, remote_reason, false, null);
             
             return;
         }
@@ -694,7 +734,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
                 ? remote_count
                 : yield local_folder.get_email_count_async(ImapDB.Folder.ListFlags.NONE, cancellable);
         } catch (Error count_err) {
-            debug("Unable to fetch count from local folder: %s", count_err.message);
+            debug("Unable to fetch count from local folder %s: %s", to_string(), count_err.message);
             
             count = 0;
         }
@@ -704,8 +744,8 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         try {
             remote_semaphore.notify_result(remote_folder != null, null);
         } catch (Error notify_err) {
-            debug("Unable to fire semaphore notifying remote folder ready/not ready: %s",
-                notify_err.message);
+            debug("%s: Unable to fire semaphore notifying remote folder ready/not ready: %s",
+                to_string(), notify_err.message);
             
             // do this now rather than wait for close_internal_async() to execute to ensure that
             // any replay operations already queued don't attempt to run
@@ -715,7 +755,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
             
             // schedule immediate close
             close_internal_async.begin(CloseReason.LOCAL_CLOSE, CloseReason.REMOTE_CLOSE, false,
-                false, cancellable);
+                cancellable);
             
             return;
         }
@@ -735,13 +775,35 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         if (remote_folder != null)
             _properties.remove(remote_folder.properties);
         
-        yield close_internal_async(CloseReason.LOCAL_CLOSE, CloseReason.REMOTE_CLOSE, false, true,
+        yield close_internal_async(CloseReason.LOCAL_CLOSE, CloseReason.REMOTE_CLOSE, true,
             cancellable);
     }
     
-    // NOTE: This bypasses open_count and forces the Folder closed.
+    // Close the remote connection and, if open_count is zero, the Folder itself.  A Mutex is used
+    // to prevent concurrency.
+    //
+    // NOTE: This bypasses open_count and forces the Folder closed, reestablishing a connection if
+    // open_count is greater than zero
     internal async void close_internal_async(Folder.CloseReason local_reason, Folder.CloseReason remote_reason,
-        bool force_reestablish, bool flush_pending, Cancellable? cancellable) {
+        bool flush_pending, Cancellable? cancellable) {
+        int token;
+        try {
+            token = yield close_mutex.claim_async(cancellable);
+        } catch (Error err) {
+            return;
+        }
+        
+        yield close_internal_locked_async(local_reason, remote_reason, flush_pending, cancellable);
+        
+        try {
+            close_mutex.release(ref token);
+        } catch (Error err) {
+        }
+    }
+    
+    // Should only be called when close_mutex is locked, i.e. use close_internal_async()
+    private async void close_internal_locked_async(Folder.CloseReason local_reason,
+        Folder.CloseReason remote_reason, bool flush_pending, Cancellable? cancellable) {
         cancel_remote_open_timer();
         
         // only flushing pending ReplayOperations if this is a "clean" close, not forced due to
@@ -780,7 +842,16 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         if (flush_pending)
             closing_remote_folder = clear_remote_folder();
         
-        if (closing_remote_folder != null || force_reestablish) {
+        // now treat remote as closed, i.e. a call to open_async() will reinitiate opening and not fall
+        // through (unless open_count is > 0) ... do this before close_remote_folder_async() since
+        // it's *possible* for it to loop back to open_async() before returning
+        remote_opened = false;
+        
+        // use background call to (a) close remote if necessary and/or (b) reestablish connection if
+        // necessary ... store reestablish condition now, before scheduling close_remote_folder_async(),
+        // as it touches open_count
+        bool reestablish = open_count > 0;
+        if (closing_remote_folder != null || reestablish) {
             // to avoid keeping the caller waiting while the remote end closes (i.e. drops the
             // connection or performs an IMAP CLOSE operation), close it in the background and
             // reestablish connection there, if necessary
@@ -793,19 +864,15 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
             // closed.  Also not a problem, as GenericAccount does that internally.  However, this
             // might be an issue if GenericAccount removes this folder due to a user command or
             // detection on the server, so this background op keeps a reference to the Folder
-            close_remote_folder_async.begin(this, closing_remote_folder, remote_reason,
-                force_reestablish);
+            close_remote_folder_async.begin(this, closing_remote_folder);
         }
         
-        remote_opened = false;
-        
-        // if remote reason is an error, then close_remote_folder_async() will be performing
-        // reestablishment, so go no further
-        if ((remote_reason.is_error() && closing_remote_folder != null) || force_reestablish)
+        // if reestablishing in close_remote_folder_async(), go no further
+        if (reestablish)
             return;
         
         // forced closed one way or another, so reset state
-        open_count = 0;
+        open_flags = OpenFlags.NONE;
         reestablish_delay_msec = DEFAULT_REESTABLISH_DELAY_MSEC;
         
         // use remote_reason even if remote_folder was null; it could be that the error occurred
@@ -847,7 +914,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     
     // See note in close_async() for why this method is static and uses an owned ref
     private static async void close_remote_folder_async(owned MinimalFolder folder,
-        owned Imap.Folder? remote_folder, Folder.CloseReason remote_reason, bool force_reestablish) {
+        owned Imap.Folder? remote_folder) {
         // force the remote closed; if due to a remote disconnect and plan on reopening, *still*
         // need to do this ... don't set remote_folder to null, as that will make some code paths
         // think the folder is closing or closed when in fact it will be re-opening in a moment
@@ -860,31 +927,37 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
             // fallthrough
         }
         
+        if (folder.open_count <= 0) {
+            debug("Not reestablishing connection to %s: closed", folder.to_string());
+            
+            return;
+        }
+        
         // reestablish connection (which requires renormalizing the remote with the local) if
         // close was in error
-        if (remote_reason.is_error() || force_reestablish) {
-            debug("Reestablishing broken connection to %s in %dms", folder.to_string(),
-                folder.reestablish_delay_msec);
+        debug("Reestablishing broken connection to %s in %dms", folder.to_string(),
+            folder.reestablish_delay_msec);
+        
+        yield Scheduler.sleep_ms_async(folder.reestablish_delay_msec);
+        
+        if (folder.open_count <= 0) {
+            debug("Not reestablishing connection to %s: closed after delay", folder.to_string());
             
-            yield Scheduler.sleep_ms_async(folder.reestablish_delay_msec);
+            return;
+        }
+        
+        try {
+            // double timer now, reset to init value when cleanly opened
+            folder.reestablish_delay_msec = (folder.reestablish_delay_msec * 2).clamp(
+                DEFAULT_REESTABLISH_DELAY_MSEC, MAX_REESTABLISH_DELAY_MSEC);
             
-            try {
-                if (folder.open_count > 0) {
-                    // double now, reset to init value when cleanly opened
-                    folder.reestablish_delay_msec = (folder.reestablish_delay_msec * 2).clamp(
-                        DEFAULT_REESTABLISH_DELAY_MSEC, MAX_REESTABLISH_DELAY_MSEC);
-                    
-                    // since open_async() increments open_count, artificially decrement here to
-                    // prevent driving the value up
-                    folder.open_count--;
-                    
-                    yield folder.open_async(OpenFlags.NO_DELAY, null);
-                } else {
-                    debug("%s: Not reestablishing broken connection, folder was closed", folder.to_string());
-                }
-            } catch (Error err) {
-                debug("Error reestablishing broken connection to %s: %s", folder.to_string(), err.message);
-            }
+            // since open_async() increments open_count, artificially decrement here to
+            // prevent driving the value up
+            folder.open_count = Numeric.int_floor(folder.open_count - 1, 0);
+            
+            yield folder.open_async(OpenFlags.NO_DELAY, null);
+        } catch (Error err) {
+            debug("Error reestablishing broken connection to %s: %s", folder.to_string(), err.message);
         }
     }
     
@@ -1404,6 +1477,11 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
             yield remove_folder.remove_single_email_async(ret, null);
         
         return ret;
+    }
+    
+    public override string to_string() {
+        return "%s (open_count=%d remote_opened=%s)".printf(base.to_string(), open_count,
+            remote_opened.to_string());
     }
 }
 

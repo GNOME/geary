@@ -5,8 +5,9 @@
  */
 
 public class Geary.Imap.ClientSessionManager : BaseObject {
-    public const int DEFAULT_MIN_POOL_SIZE = 1;
-    private const int AUTHORIZED_SESSION_ERROR_RETRY_TIMEOUT_MSEC = 1000;
+    private const int DEFAULT_MIN_POOL_SIZE = 1;
+    private const int AUTHORIZED_SESSION_ERROR_MIN_RETRY_TIMEOUT_SEC = 1;
+    private const int AUTHORIZED_SESSION_ERROR_MAX_RETRY_TIMEOUT_SEC = 10;
     
     public bool is_open { get; private set; default = false; }
     
@@ -44,7 +45,18 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
      */
     public int min_pool_size { get; set; default = DEFAULT_MIN_POOL_SIZE; }
     
+    /**
+     * Indicates if the {@link Endpoint} the {@link ClientSessionManager} connects to is reachable,
+     * according to the NetworkMonitor.
+     *
+     * By default, this is true, optimistic the network is reachable.  It is updated even if the
+     * {@link ClientSessionManager} is not open, maintained for the lifetime of the object.
+     */
+    public bool is_endpoint_reachable { get; private set; default = true; }
+    
     private AccountInformation account_information;
+    private Endpoint endpoint;
+    private NetworkMonitor network_monitor;
     private Gee.HashSet<ClientSession> sessions = new Gee.HashSet<ClientSession>();
     private int pending_sessions = 0;
     private Nonblocking.Mutex sessions_mutex = new Nonblocking.Mutex();
@@ -52,16 +64,28 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
     private bool authentication_failed = false;
     private bool untrusted_host = false;
     private uint authorized_session_error_retry_timeout_id = 0;
+    private int authorized_session_retry_sec = AUTHORIZED_SESSION_ERROR_MIN_RETRY_TIMEOUT_SEC;
+    private bool checking_reachable = false;
     
     public signal void login_failed();
     
     public ClientSessionManager(AccountInformation account_information) {
         this.account_information = account_information;
+        // NOTE: This works because AccountInformation guarantees the IMAP endpoint not to change
+        // for the lifetime of the AccountInformation object; if this ever changes, will need to
+        // refactor for that
+        endpoint = account_information.get_imap_endpoint();
+        network_monitor = NetworkMonitor.get_default();
         
         account_information.notify["imap-credentials"].connect(on_imap_credentials_notified);
-        account_information.get_imap_endpoint().untrusted_host.connect(on_imap_untrusted_host);
-        account_information.get_imap_endpoint().notify[Endpoint.PROP_TRUST_UNTRUSTED_HOST].connect(
-            on_imap_trust_untrusted_host);
+        endpoint.untrusted_host.connect(on_imap_untrusted_host);
+        endpoint.notify[Endpoint.PROP_TRUST_UNTRUSTED_HOST].connect(on_imap_trust_untrusted_host);
+        
+        network_monitor.network_changed.connect(on_network_changed);
+        network_monitor.notify["network-available"].connect(on_network_available_changed);
+        
+        // get this started now
+        check_endpoint_reachable(null);
     }
     
     ~ClientSessionManager() {
@@ -69,9 +93,11 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
             warning("Destroying opened ClientSessionManager");
         
         account_information.notify["imap-credentials"].disconnect(on_imap_credentials_notified);
-        account_information.get_imap_endpoint().untrusted_host.disconnect(on_imap_untrusted_host);
-        account_information.get_imap_endpoint().notify[Endpoint.PROP_TRUST_UNTRUSTED_HOST].disconnect(
-            on_imap_trust_untrusted_host);
+        endpoint.untrusted_host.disconnect(on_imap_untrusted_host);
+        endpoint.notify[Endpoint.PROP_TRUST_UNTRUSTED_HOST].disconnect(on_imap_trust_untrusted_host);
+        
+        network_monitor.network_changed.disconnect(on_network_changed);
+        network_monitor.notify["network-available"].disconnect(on_network_available_changed);
     }
     
     public async void open_async(Cancellable? cancellable) throws Error {
@@ -145,8 +171,13 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
             return;
         }
         
-        while ((sessions.size + pending_sessions) < min_pool_size && !authentication_failed && is_open && !untrusted_host)
+        while ((sessions.size + pending_sessions) < min_pool_size
+            && !authentication_failed
+            && is_open
+            && !untrusted_host
+            && is_endpoint_reachable) {
             schedule_new_authorized_session();
+        }
         
         try {
             sessions_mutex.release(ref token);
@@ -167,15 +198,17 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         try {
             create_new_authorized_session.end(result);
         } catch (Error err) {
-            debug("Unable to create authorized session to %s: %s",
-                account_information.get_imap_endpoint().to_string(), err.message);
+            debug("Unable to create authorized session to %s: %s", endpoint.to_string(), err.message);
             
-            // try again after a slight delay
+            // try again after a slight delay and bump up delay
             if (authorized_session_error_retry_timeout_id != 0)
                 Source.remove(authorized_session_error_retry_timeout_id);
-            authorized_session_error_retry_timeout_id
-                = Timeout.add(AUTHORIZED_SESSION_ERROR_RETRY_TIMEOUT_MSEC,
-                on_authorized_session_error_retry_timeout);
+            
+            authorized_session_error_retry_timeout_id = Timeout.add_seconds(
+                authorized_session_retry_sec, on_authorized_session_error_retry_timeout);
+            
+            authorized_session_retry_sec = (authorized_session_retry_sec * 2).clamp(
+                AUTHORIZED_SESSION_ERROR_MIN_RETRY_TIMEOUT_SEC, AUTHORIZED_SESSION_ERROR_MAX_RETRY_TIMEOUT_SEC);
         }
     }
     
@@ -194,9 +227,12 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
             throw new ImapError.UNAUTHENTICATED("Invalid ClientSessionManager credentials");
         
         if (untrusted_host)
-            throw new ImapError.UNAUTHENTICATED("Untrusted host %s", account_information.get_imap_endpoint().to_string());
+            throw new ImapError.UNAUTHENTICATED("Untrusted host %s", endpoint.to_string());
         
-        ClientSession new_session = new ClientSession(account_information.get_imap_endpoint());
+        if (!is_endpoint_reachable)
+            throw new ImapError.UNAVAILABLE("Host at %s is unreachable", endpoint.to_string());
+        
+        ClientSession new_session = new ClientSession(endpoint);
         
         // add session to pool before launching all the connect activity so error cases can properly
         // back it out
@@ -243,6 +279,9 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
             
             throw err;
         }
+        
+        // reset delay
+        authorized_session_retry_sec = AUTHORIZED_SESSION_ERROR_MIN_RETRY_TIMEOUT_SEC;
         
         // do this after logging in
         new_session.enable_keepalives(selected_keepalive_sec, unselected_keepalive_sec,
@@ -448,7 +487,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
     private void on_imap_trust_untrusted_host() {
         // fired when the trust_untrusted_host property changes, indicating if the user has agreed
         // to ignore the trust problems and continue connecting
-        if (untrusted_host && account_information.get_imap_endpoint().trust_untrusted_host == Trillian.TRUE) {
+        if (untrusted_host && endpoint.trust_untrusted_host == Trillian.TRUE) {
             untrusted_host = false;
             
             if (is_open)
@@ -456,11 +495,59 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         }
     }
     
+    private void on_network_changed() {
+        // Always check if reachable because IMAP server could be on localhost.  (This is a Linux
+        // program, after all...)
+        check_endpoint_reachable(null);
+    }
+    
+    private void on_network_available_changed() {
+        // If network is available and endpoint is reachable, do nothing more, all is good,
+        // otherwise check (see note in on_network_changed)
+        if (network_monitor.network_available && is_endpoint_reachable)
+            return;
+        
+        check_endpoint_reachable(null);
+    }
+    
+    private void check_endpoint_reachable(Cancellable? cancellable) {
+        if (checking_reachable)
+            return;
+        
+        debug("Checking if IMAP host %s reachable...", endpoint.to_string());
+        
+        checking_reachable = true;
+        check_endpoint_reachable_async.begin(cancellable);
+    }
+    
+    // Use check_endpoint_reachable to properly schedule
+    private async void check_endpoint_reachable_async(Cancellable? cancellable) {
+        try {
+            is_endpoint_reachable = yield network_monitor.can_reach_async(endpoint.remote_address,
+                cancellable);
+            message("IMAP host %s considered %s", endpoint.to_string(),
+                is_endpoint_reachable ? "reachable" : "unreachable");
+        } catch (Error err) {
+            // If cancelled, don't change anything
+            if (err is IOError.CANCELLED)
+                return;
+            
+            message("Error determining if IMAP host %s is reachable, treating as unreachable: %s",
+                endpoint.to_string(), err.message);
+            is_endpoint_reachable = false;
+        } finally {
+            checking_reachable = false;
+        }
+        
+        if (is_endpoint_reachable)
+            adjust_session_pool.begin();
+    }
+    
     /**
      * Use only for debugging and logging.
      */
     public string to_string() {
-        return account_information.get_imap_endpoint().to_string();
+        return endpoint.to_string();
     }
 }
 

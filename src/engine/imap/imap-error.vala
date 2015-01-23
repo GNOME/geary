@@ -52,5 +52,9 @@ public errordomain Geary.ImapError {
      * This indicates a local time out, not one reported by the server.
      */
     TIMED_OUT,
+    /**
+     * Network is unavailable.
+     */
+    UNAVAILABLE
 }
 
