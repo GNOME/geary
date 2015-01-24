@@ -101,7 +101,7 @@ private class Geary.ImapEngine.ListEmailByID : Geary.ImapEngine.AbstractListEmai
         if (is_fully_expanded == Trillian.FALSE) {
             if (flags.is_oldest_to_newest()) {
                 if (initial_id != null) {
-                    // expand vector if not initial_id not discovered
+                    // expand vector if initial uid is unknown
                     expansion_required = (initial_uid == null);
                 } else {
                     // initial_id == null, expansion required if not fully already
@@ -113,7 +113,7 @@ private class Geary.ImapEngine.ListEmailByID : Geary.ImapEngine.AbstractListEmai
                     // if infinite count, expansion required if not already
                     expansion_required = true;
                 } else if (initial_id != null) {
-                    // finite count, expansion required if initial not found *or* not enough
+                    // finite count, expansion required if initial UID not found *or* not enough
                     // items were pulled in
                     expansion_required = (initial_uid == null) || (fulfilled_count + get_unfulfilled_count() < count);
                 } else {

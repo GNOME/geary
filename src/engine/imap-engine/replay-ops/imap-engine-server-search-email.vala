@@ -39,22 +39,17 @@ private class Geary.ImapEngine.ServerSearchEmail : Geary.ImapEngine.AbstractList
             yield expand_vector_async(uids.first(), 1);
         
         // Convert UIDs into EmailIdentifiers for lookup
-        Gee.HashSet<ImapDB.EmailIdentifier> local_ids = new Gee.HashSet<ImapDB.EmailIdentifier>();
-        foreach (Imap.UID uid in uids) {
-            // if null, presumably was picked up in the vector expansion (but hasn't been assigned
-            // to the database yet)
-            //
-            // TODO: We need a sparse version of this to scoop them up all at once
-            ImapDB.EmailIdentifier? id = yield owner.local_folder.get_id_async(uid,
-                ImapDB.Folder.ListFlags.NONE, cancellable);
-            if (id != null)
-                local_ids.add(id);
+        Gee.Set<ImapDB.EmailIdentifier>? local_ids = yield owner.local_folder.get_ids_async(uids,
+            ImapDB.Folder.ListFlags.NONE, cancellable);
+        
+        // Fetch what is in local store currently for those UIDs
+        Gee.List<Geary.Email>? local_list = null;
+        if (local_ids != null) {
+            local_list = yield owner.local_folder.list_email_by_sparse_id_async(local_ids, required_fields,
+                ImapDB.Folder.ListFlags.PARTIAL_OK, cancellable);
         }
         
-        Gee.List<Geary.Email>? local_list = yield owner.local_folder.list_email_by_sparse_id_async(
-            local_ids, required_fields, ImapDB.Folder.ListFlags.PARTIAL_OK, cancellable);
-        
-        // Build list of local email
+        // Build map of local email
         Gee.Map<ImapDB.EmailIdentifier, Geary.Email> map = new Gee.HashMap<ImapDB.EmailIdentifier, Geary.Email>();
         if (local_list != null) {
             foreach (Geary.Email email in local_list)

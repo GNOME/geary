@@ -1388,8 +1388,8 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         notify_email_flags_changed(changed);
     }
     
-    // TODO: A proper public search mechanism; note that this always round-trips to the remote,
-    // doesn't go through the replay queue, and doesn't deal with messages marked for deletion
+    // TODO: A proper public search mechanism; note that this always round-trips to the remote
+    // and ignores messages marked for deletion
     internal async Geary.EmailIdentifier? find_earliest_email_async(DateTime datetime,
         Geary.EmailIdentifier? before_id, Cancellable? cancellable) throws Error {
         check_open("find_earliest_email_async");
