@@ -1048,6 +1048,8 @@ public class ComposerWidget : Gtk.EventBox {
     }
     
     private void on_detach() {
+        if (state == ComposerState.DETACHED)
+            return;
         Gtk.Widget? focus = container.remove_composer();
         ComposerWindow window = new ComposerWindow(this);
         if (focus != null) {
