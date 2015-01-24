@@ -474,6 +474,10 @@ public abstract class Geary.Folder : BaseObject {
      * from newest to oldest, with null being the newest email.  If set, the direction is reversed
      * and null indicates the oldest email.
      *
+     * Note that "oldest" and "newest" refer to their ''positional ordering'' in the Folder, which
+     * does not necessarily correspond to the Date: header field or their
+     * {@link EmailProperties.date_received}.
+     *
      * If not null, the EmailIdentifier ''must'' have originated from this Folder.
      *
      * To fetch all available messages in one call, use a count of int.MAX.
@@ -537,6 +541,26 @@ public abstract class Geary.Folder : BaseObject {
      */
     public abstract async Geary.Email fetch_email_async(Geary.EmailIdentifier email_id,
         Geary.Email.Field required_fields, ListFlags flags, Cancellable? cancellable = null) throws Error;
+    
+    /**
+     * Find the chronologically newest {@link EmailIdentifier} in the {@link Folder} according to
+     * its {@link EmailProperties.date_received}.
+     *
+     * Because the positional ordering of Email in a Folder is distinct from its Date: and
+     * date received, this offers a simple search mechanism for finding the chronological "start"
+     * of the email as sorted from newest to oldest..  Note that only the ''local'' store is
+     * searched; this does not query the remote store.
+     *
+     * offset_from_top is the zero-based email count from the top ("newest" in the terminology of
+     * the list methods).  Thus, list_email_by_id_async(null, offset_from_top) will return this
+     * email.
+     *
+     * Returns false if the local store is empty.
+     *
+     * The Folder must be opened prior to attempting this operation.
+     */
+    public abstract async bool fetch_local_newest_async(out Geary.EmailIdentifier? newest_id,
+        out DateTime? newest_date, out int offset_from_top, Cancellable? cancellable = null) throws Error;
     
     /**
      * Used for debugging.  Should not be used for user-visible labels.

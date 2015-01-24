@@ -134,6 +134,70 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         return count;
     }
     
+    // Returns newest email in database by its internaldate, not position or uid
+    public async bool get_newest_id_async(ListFlags flags, out ImapDB.EmailIdentifier? newest_id,
+        out DateTime? newest_date, out int offset_from_top, Cancellable? cancellable) throws Error {
+        int64 message_id = Db.INVALID_ROWID;
+        int64 internaldate_time_t = -1;
+        int offset = -1;
+        yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
+            Db.Statement stmt = cx.prepare("""
+                SELECT id, internaldate_time_t
+                FROM MessageTable
+                WHERE id IN (
+                    SELECT message_id
+                    FROM MessageLocationTable
+                    WHERE folder_id = ?
+                )
+                ORDER BY internaldate_time_t DESC
+                LIMIT 1
+            """);
+            stmt.bind_rowid(0, folder_id);
+            
+            Db.Result result = stmt.exec(cancellable);
+            if (result.finished)
+                return Db.TransactionOutcome.DONE;
+            
+            message_id = result.rowid_at(0);
+            internaldate_time_t = result.int64_at(1);
+            
+            stmt = cx.prepare("""
+                SELECT COUNT(*)
+                FROM MessageLocationTable
+                WHERE folder_id = ? AND ordering >= (
+                    SELECT ordering
+                    FROM MessageLocationTable
+                    WHERE message_id = ? AND folder_id = ?
+                )
+            """);
+            stmt.bind_rowid(0, folder_id);
+            stmt.bind_rowid(1, message_id);
+            stmt.bind_rowid(2, folder_id);
+            
+            result = stmt.exec(cancellable);
+            if (!result.finished)
+                offset = Numeric.int_floor(result.int_at(0) - 1, 0);
+            
+            return Db.TransactionOutcome.DONE;
+        }, cancellable);
+        
+        if (message_id == Db.INVALID_ROWID) {
+            newest_id = null;
+            newest_date = null;
+            offset_from_top = 0;
+            
+            return false;
+        }
+        
+        newest_id = new ImapDB.EmailIdentifier(message_id, null);
+        newest_date = (internaldate_time_t > -1) ? new DateTime.from_unix_utc(internaldate_time_t) : null;
+        offset_from_top = offset;
+        
+        debug("NEWEST: %s %s offset=%d", newest_id.to_string(), newest_date.to_string(), offset_from_top);
+        
+        return true;
+    }
+    
     // Updates both the FolderProperties and the value in the local store.
     public async void update_remote_status_message_count(int count, Cancellable? cancellable) throws Error {
         if (count < 0)

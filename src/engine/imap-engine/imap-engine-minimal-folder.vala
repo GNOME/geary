@@ -1290,6 +1290,14 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         return op.email;
     }
     
+    public override async bool fetch_local_newest_async(out Geary.EmailIdentifier? newest_id,
+        out DateTime? newest_date, out int offset_from_top, Cancellable? cancellable = null) throws Error {
+        check_open("fetch_local_newest_async");
+        
+        return yield local_folder.get_newest_id_async(ImapDB.Folder.ListFlags.NONE, out newest_id,
+            out newest_date, out offset_from_top, cancellable);
+    }
+    
     // Helper function for child classes dealing with the delete/archive question.  This method will
     // mark the message as deleted and expunge it.
     protected async void expunge_email_async(Gee.List<Geary.EmailIdentifier> email_ids,

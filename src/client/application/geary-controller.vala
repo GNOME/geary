@@ -1394,8 +1394,12 @@ public class GearyController : Geary.BaseObject {
     }
     
     private void on_load_more() {
-        debug("on_load_more");
-        current_conversations.min_window_count += MIN_CONVERSATION_COUNT;
+        if (!current_conversations.all_messages_loaded)
+            current_conversations.min_window_count += MIN_CONVERSATION_COUNT;
+        
+        debug("on_load_more: all_messages_loaded=%s min_window_count=%d",
+            current_conversations.all_messages_loaded.to_string(),
+            current_conversations.min_window_count);
     }
     
     private void on_select_folder_completed(Object? source, AsyncResult result) {

@@ -31,12 +31,21 @@ public class Geary.App.ConversationMonitor : BaseObject {
     public Geary.Folder folder { get; private set; }
     public bool reestablish_connections { get; set; default = true; }
     public bool is_monitoring { get; private set; default = false; }
+    
+    /**
+     * TODO: Only allow increasing window count if FillWindowOperation is not outstanding.
+     */
     public int min_window_count { get { return _min_window_count; }
         set {
             _min_window_count = value;
             operation_queue.add(new FillWindowOperation(this, false));
         }
     }
+    
+    /**
+     * Indicates no more messages can be loaded by increasing the min_window_count.
+     */
+    public bool all_messages_loaded { get; private set; default = false; }
     
     public Geary.ProgressMonitor progress_monitor { get { return operation_queue.progress_monitor; } }
     
@@ -314,8 +323,22 @@ public class Geary.App.ConversationMonitor : BaseObject {
     
     internal async void local_load_async() {
         debug("ConversationMonitor seeding with local email for %s", folder.to_string());
+        
+        int count = min_window_count;
         try {
-            yield load_by_id_async(null, min_window_count, Folder.ListFlags.LOCAL_ONLY, cancellable_monitor);
+            int offset_from_top;
+            bool found = yield folder.fetch_local_newest_async(null, null, out offset_from_top,
+                cancellable_monitor);
+            if (found && (offset_from_top + 1) > count) {
+                count = offset_from_top + 1;
+                debug("SEEDING %d TO GET NEWEST EMAIL", count);
+            }
+        } catch (Error err) {
+            debug("Error fetching local newest email: %s", err.message);
+        }
+        
+        try {
+            yield load_by_id_async(null, count, Folder.ListFlags.LOCAL_ONLY, cancellable_monitor);
         } catch (Error e) {
             debug("Error loading local messages: %s", e.message);
         }
@@ -728,8 +751,10 @@ public class Geary.App.ConversationMonitor : BaseObject {
     
     private void on_folder_opened(Geary.Folder.OpenState state, int count) {
         // once remote is open, reseed with messages from the earliest ID to the latest
-        if (state == Geary.Folder.OpenState.BOTH || state == Geary.Folder.OpenState.REMOTE)
+        if (state == Geary.Folder.OpenState.BOTH || state == Geary.Folder.OpenState.REMOTE) {
             operation_queue.add(new ReseedOperation(this, state.to_string()));
+            operation_queue.add(new FillWindowOperation(this, false));
+        }
     }
     
     /**
@@ -782,6 +807,8 @@ public class Geary.App.ConversationMonitor : BaseObject {
                 debug("Error filling conversation window: %s", e.message);
             }
         }
+        
+        all_messages_loaded = conversations.get_email_count() == initial_message_count;
         
         // Run again to make sure we're full unless we ran out of messages.
         if (conversations.get_email_count() != initial_message_count)

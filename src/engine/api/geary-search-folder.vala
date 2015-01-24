@@ -380,6 +380,24 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder, Geary.FolderSupport
         return yield account.local_fetch_email_async(id, required_fields, cancellable);
     }
     
+    public override async bool fetch_local_newest_async(out Geary.EmailIdentifier? newest_id,
+        out DateTime? newest_date, out int offset_from_top, Cancellable? cancellable = null) throws Error {
+        if (search_results == null || search_results.size == 0) {
+            newest_id = null;
+            newest_date = null;
+            offset_from_top = 0;
+            
+            return false;
+        }
+        
+        ImapDB.SearchEmailIdentifier search_id = search_results.first();
+        newest_id = search_id;
+        newest_date = search_id.date_received;
+        offset_from_top = 0;
+        
+        return true;
+    }
+    
     public virtual async void remove_email_async(Gee.List<Geary.EmailIdentifier> email_ids,
         Cancellable? cancellable = null) throws Error {
         Gee.MultiMap<Geary.EmailIdentifier, Geary.FolderPath>? ids_to_folders

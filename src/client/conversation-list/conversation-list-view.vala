@@ -103,11 +103,21 @@ public class ConversationListView : Gtk.TreeView {
     }
     
     private void on_scan_completed() {
+        debug("ON SCAN COMPLETED");
+        
         enable_load_more = true;
         
         // Select first conversation.
         if (GearyApplication.instance.config.autoselect)
             select_first_conversation();
+        
+        // if no scrollbars, load more ... need to do this until scrollbars show in order to allow
+        // the user a way to manually load more when they're ready
+        Gtk.Adjustment vadj = ((Gtk.Scrollable) this).get_vadjustment();
+        if (vadj.upper <= vadj.page_size) {
+            debug("NO SCROLLBAR, LOADING MORE");
+            load_more();
+        }
     }
     
     private void on_conversation_removed(Geary.App.Conversation conversation) {

@@ -535,6 +535,34 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
         return row_to_email(row);
     }
     
+    public override async bool fetch_local_newest_async(out Geary.EmailIdentifier? newest_id,
+        out DateTime? newest_date, out int offset_from_top, Cancellable? cancellable = null) throws Error {
+        check_open();
+        
+        SmtpOutboxEmailIdentifier? id = null;
+        yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
+            Db.Statement stmt = cx.prepare("""
+                SELECT id, ordering
+                FROM SmtpOutboxTable
+                ORDER BY ordering DESC
+                LIMIT 1
+            """);
+            
+            Db.Result result = stmt.exec(cancellable);
+            if (!result.finished)
+                id = new SmtpOutboxEmailIdentifier(result.rowid_at(0), result.int64_at(1));
+            
+            return Db.TransactionOutcome.DONE;
+        }, cancellable);
+        
+        // TODO: Store date in table
+        newest_id = id;
+        newest_date = null;
+        offset_from_top = 0;
+        
+        return id != null;
+    }
+    
     private async void mark_email_as_sent_async(SmtpOutboxEmailIdentifier outbox_id,
         Cancellable? cancellable = null) throws Error {
         yield db.exec_transaction_async(Db.TransactionType.WR, (cx) => {
