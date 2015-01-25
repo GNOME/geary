@@ -12,6 +12,7 @@ src/client/accounts/account-dialog.vala
 src/client/accounts/account-spinner-page.vala
 src/client/accounts/add-edit-page.vala
 src/client/accounts/login-dialog.vala
+src/client/application/autostart-manager.vala
 src/client/application/geary-action-adapter.vala
 src/client/application/geary-application.vala
 src/client/application/geary-args.vala
@@ -30,11 +31,13 @@ src/client/components/monitored-spinner.vala
 src/client/components/pill-toolbar.vala
 src/client/components/status-bar.vala
 src/client/components/stock.vala
+src/client/components/stylish-webview.vala
+src/client/composer/composer-box.vala
 src/client/composer/composer-container.vala
 src/client/composer/composer-embed.vala
 src/client/composer/composer-headerbar.vala
-src/client/composer/composer-widget.vala
 src/client/composer/composer-toolbar.vala
+src/client/composer/composer-widget.vala
 src/client/composer/composer-window.vala
 src/client/composer/contact-entry-completion.vala
 src/client/composer/contact-list-store.vala
@@ -78,10 +81,10 @@ src/client/util/util-files.vala
 src/client/util/util-gravatar.vala
 src/client/util/util-gtk.vala
 src/client/util/util-international.vala
+src/client/util/util-random.vala
 src/client/util/util-webkit.vala
-src/engine/abstract/geary-abstract-account.vala
-src/engine/abstract/geary-abstract-folder.vala
-src/engine/abstract/geary-abstract-local-folder.vala
+src/console/main.vala
+src/engine/api/geary-abstract-local-folder.vala
 src/engine/api/geary-account-information.vala
 src/engine/api/geary-account.vala
 src/engine/api/geary-aggregated-folder-properties.vala
@@ -106,6 +109,7 @@ src/engine/api/geary-folder-properties.vala
 src/engine/api/geary-folder-supports-archive.vala
 src/engine/api/geary-folder-supports-copy.vala
 src/engine/api/geary-folder-supports-create.vala
+src/engine/api/geary-folder-supports-empty.vala
 src/engine/api/geary-folder-supports-mark.vala
 src/engine/api/geary-folder-supports-move.vala
 src/engine/api/geary-folder-supports-remove.vala
@@ -116,11 +120,12 @@ src/engine/api/geary-named-flag.vala
 src/engine/api/geary-progress-monitor.vala
 src/engine/api/geary-search-folder.vala
 src/engine/api/geary-search-query.vala
-src/engine/api/geary-service.vala
 src/engine/api/geary-service-provider.vala
+src/engine/api/geary-service.vala
 src/engine/api/geary-special-folder-type.vala
 src/engine/app/app-conversation-monitor.vala
 src/engine/app/app-conversation.vala
+src/engine/app/app-draft-manager.vala
 src/engine/app/app-email-store.vala
 src/engine/app/conversation-monitor/app-append-operation.vala
 src/engine/app/conversation-monitor/app-conversation-operation-queue.vala
@@ -188,17 +193,23 @@ src/engine/imap-db/imap-db-contact.vala
 src/engine/imap-db/imap-db-database.vala
 src/engine/imap-db/imap-db-email-identifier.vala
 src/engine/imap-db/imap-db-folder.vala
+src/engine/imap-db/imap-db-gc.vala
 src/engine/imap-db/imap-db-message-addresses.vala
 src/engine/imap-db/imap-db-message-row.vala
 src/engine/imap-db/imap-db-search-email-identifier.vala
+src/engine/imap-db/imap-db-search-query.vala
+src/engine/imap-db/imap-db-search-term.vala
 src/engine/imap-db/outbox/smtp-outbox-email-identifier.vala
 src/engine/imap-db/outbox/smtp-outbox-email-properties.vala
 src/engine/imap-db/outbox/smtp-outbox-folder-properties.vala
 src/engine/imap-db/outbox/smtp-outbox-folder-root.vala
 src/engine/imap-db/outbox/smtp-outbox-folder.vala
 src/engine/imap-engine/gmail/imap-engine-gmail-account.vala
+src/engine/imap-engine/gmail/imap-engine-gmail-all-mail-folder.vala
+src/engine/imap-engine/gmail/imap-engine-gmail-drafts-folder.vala
 src/engine/imap-engine/gmail/imap-engine-gmail-folder.vala
 src/engine/imap-engine/gmail/imap-engine-gmail-search-folder.vala
+src/engine/imap-engine/gmail/imap-engine-gmail-spam-trash-folder.vala
 src/engine/imap-engine/imap-engine-account-synchronizer.vala
 src/engine/imap-engine/imap-engine-batch-operations.vala
 src/engine/imap-engine/imap-engine-contact-store.vala
@@ -214,11 +225,12 @@ src/engine/imap-engine/imap-engine.vala
 src/engine/imap-engine/other/imap-engine-other-account.vala
 src/engine/imap-engine/other/imap-engine-other-folder.vala
 src/engine/imap-engine/outlook/imap-engine-outlook-account.vala
-src/engine/imap-engine/outlook/imap-engine-outlook-folder.vala
 src/engine/imap-engine/outlook/imap-engine-outlook-drafts-folder.vala
+src/engine/imap-engine/outlook/imap-engine-outlook-folder.vala
 src/engine/imap-engine/replay-ops/imap-engine-abstract-list-email.vala
 src/engine/imap-engine/replay-ops/imap-engine-copy-email.vala
 src/engine/imap-engine/replay-ops/imap-engine-create-email.vala
+src/engine/imap-engine/replay-ops/imap-engine-empty-folder.vala
 src/engine/imap-engine/replay-ops/imap-engine-fetch-email.vala
 src/engine/imap-engine/replay-ops/imap-engine-list-email-by-id.vala
 src/engine/imap-engine/replay-ops/imap-engine-list-email-by-sparse-id.vala
@@ -333,6 +345,7 @@ src/engine/smtp/smtp-response.vala
 src/engine/state/state-machine-descriptor.vala
 src/engine/state/state-machine.vala
 src/engine/state/state-mapping.vala
+src/engine/util/util-ascii.vala
 src/engine/util/util-collection.vala
 src/engine/util/util-converter.vala
 src/engine/util/util-files.vala
@@ -350,6 +363,7 @@ src/engine/util/util-string.vala
 src/engine/util/util-synchronization.vala
 src/engine/util/util-time.vala
 src/engine/util/util-trillian.vala
+src/mailer/main.vala
 [type: gettext/glade]ui/accelerators.ui
 [type: gettext/glade]ui/account_cannot_remove.glade
 [type: gettext/glade]ui/account_list.glade
