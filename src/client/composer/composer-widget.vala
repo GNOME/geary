@@ -59,6 +59,7 @@ public class ComposerWidget : Gtk.EventBox {
     private const string DRAFT_SAVED_TEXT = _("Saved");
     private const string DRAFT_SAVING_TEXT = _("Saving");
     private const string DRAFT_ERROR_TEXT = _("Error saving");
+    private const string BACKSPACE_TEXT = _("Press Backspace to delete quote");
     
     private const string URI_LIST_MIME_TYPE = "text/uri-list";
     private const string FILE_URI_PREFIX = "file://";
@@ -190,6 +191,10 @@ public class ComposerWidget : Gtk.EventBox {
     
     public string draft_save_text { get; private set; }
     
+    public bool can_delete_quote { get; private set; default = false; }
+    
+    public string toolbar_text { get; set; }
+    
     private ContactListStore? contact_list_store = null;
     
     private string? body_html = null;
@@ -294,6 +299,18 @@ public class ComposerWidget : Gtk.EventBox {
         }
         notify["state"].connect((s, p) => { update_from_field(); });
         
+        BindingTransformFunc set_toolbar_text = (binding, source_value, ref target_value) => {
+                if (draft_save_text == "" && can_delete_quote)
+                    target_value = BACKSPACE_TEXT;
+                else
+                    target_value = draft_save_text;
+                return true;
+            };
+        bind_property("draft-save-text", this, "toolbar-text", BindingFlags.SYNC_CREATE,
+            set_toolbar_text);
+        bind_property("can-delete-quote", this, "toolbar-text", BindingFlags.SYNC_CREATE,
+            set_toolbar_text);
+        
         from_label = (Gtk.Label) builder.get_object("from label");
         from_single = (Gtk.Label) builder.get_object("from_single");
         from_multiple = (Gtk.ComboBoxText) builder.get_object("from_multiple");
@@ -366,7 +383,7 @@ public class ComposerWidget : Gtk.EventBox {
         ComposerToolbar composer_toolbar = new ComposerToolbar(actions, menu);
         Gtk.Alignment toolbar_area = (Gtk.Alignment) builder.get_object("toolbar area");
         toolbar_area.add(composer_toolbar);
-        bind_property("draft-save-text", composer_toolbar, "draft-save-text", BindingFlags.SYNC_CREATE);
+        bind_property("toolbar-text", composer_toolbar, "label-text", BindingFlags.SYNC_CREATE);
         
         actions.get_action(ACTION_UNDO).activate.connect(on_action);
         actions.get_action(ACTION_REDO).activate.connect(on_action);
@@ -455,6 +472,8 @@ public class ComposerWidget : Gtk.EventBox {
                     pending_attachments = referred.attachments;
                     if (quote != null)
                         top_posting = false;
+                    else
+                        can_delete_quote = true;
                 break;
                 
                 case ComposeType.FORWARD:
@@ -730,6 +749,9 @@ public class ComposerWidget : Gtk.EventBox {
         bind_event(editor,"a", "click", (Callback) on_link_clicked, this);
         update_actions();
         on_show_extended();
+        
+        if (can_delete_quote)
+            editor.selection_changed.connect(() => { can_delete_quote = false; });
     }
     
     // Glade only allows one accelerator per-action. This method adds extra accelerators not defined
@@ -2086,6 +2108,19 @@ public class ComposerWidget : Gtk.EventBox {
             return false;
         }
         
+        if (can_delete_quote) {
+            can_delete_quote = false;
+            if (event.keyval == Gdk.Key.BackSpace) {
+                body_html = null;
+                if (account.information.use_email_signature)
+                    add_signature_and_cursor();
+                else
+                    set_cursor();
+                editor.load_string(HTML_BODY, "text/html", "UTF8", "");
+                return true;
+            }
+        }
+        
         WebKit.DOM.Document document = editor.get_dom_document();
         if (event.keyval == Gdk.Key.Tab) {
             document.exec_command("inserthtml", false,
@@ -2127,11 +2162,15 @@ public class ComposerWidget : Gtk.EventBox {
         
         // Style toggle buttons.
         WebKit.DOM.DOMWindow window = editor.get_dom_document().get_default_view();
-        actions.get_action(ACTION_REMOVE_FORMAT).sensitive = !window.get_selection().is_collapsed;
+        WebKit.DOM.DOMSelection? selection = window.get_selection();
+        if (selection == null)
+            return;
         
-        WebKit.DOM.Element? active = window.get_selection().focus_node as WebKit.DOM.Element;
-        if (active == null && window.get_selection().focus_node != null)
-            active = window.get_selection().focus_node.get_parent_element();
+        actions.get_action(ACTION_REMOVE_FORMAT).sensitive = !selection.is_collapsed;
+        
+        WebKit.DOM.Element? active = selection.focus_node as WebKit.DOM.Element;
+        if (active == null && selection.focus_node != null)
+            active = selection.focus_node.get_parent_element();
         
         if (active != null && !action_flag) {
             action_flag = true;

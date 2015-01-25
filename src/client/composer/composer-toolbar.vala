@@ -6,7 +6,7 @@
 
 public class ComposerToolbar : PillToolbar {
     
-    public string draft_save_text { get; set; }
+    public string label_text { get; set; }
     
     public ComposerToolbar(Gtk.ActionGroup toolbar_action_group, Gtk.Menu menu) {
         base(toolbar_action_group);
@@ -41,10 +41,10 @@ public class ComposerToolbar : PillToolbar {
         insert.add(create_menu_button(null, menu, ComposerWidget.ACTION_MENU));
         add_end(create_pill_buttons(insert));
         
-        Gtk.Label draft_save_label = new Gtk.Label(null);
-        draft_save_label.get_style_context().add_class("dim-label");
-        bind_property("draft-save-text", draft_save_label, "label", BindingFlags.SYNC_CREATE);
-        add_end(draft_save_label);
+        Gtk.Label label = new Gtk.Label(null);
+        label.get_style_context().add_class("dim-label");
+        bind_property("label-text", label, "label", BindingFlags.SYNC_CREATE);
+        add_end(label);
     }
 }
 
