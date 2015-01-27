@@ -15,9 +15,25 @@ public class Geary.Imap.StoreCommand : Command {
     public const string NAME = "store";
     public const string UID_NAME = "uid store";
     
-    public StoreCommand(MessageSet message_set, Gee.List<MessageFlag> flag_list, bool add_flag, 
-        bool silent) {
+    /**
+     * Options indicating functionality of the {@link StoreCommand}.
+     *
+     * Note that {@link ADD_FLAGS} and {@link REMOVE_FLAGS} are mutally exclusive.  REMOVE_FLAGS
+     * actually does not set a bit, meaning that removing is the default operation and, if both
+     * add and remove are set, an add occurs.
+     */
+    [Flags]
+    public enum Option {
+        REMOVE_FLAGS = 0,
+        ADD_FLAGS,
+        SILENT
+    }
+    
+    public StoreCommand(MessageSet message_set, Gee.List<MessageFlag> flag_list, Option options) {
         base (message_set.is_uid ? UID_NAME : NAME);
+        
+        bool add_flag = (options & Option.ADD_FLAGS) != 0;
+        bool silent = (options & Option.SILENT) != 0;
         
         add(message_set.to_parameter());
         add(new AtomParameter("%sflags%s".printf(add_flag ? "+" : "-", silent ? ".silent" : "")));

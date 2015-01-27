@@ -641,7 +641,7 @@ private class Geary.Imap.Folder : BaseObject {
             if (!msg_set.is_uid)
                 all_uid = false;
             
-            cmds.add(new StoreCommand(msg_set, flags, true, false));
+            cmds.add(new StoreCommand(msg_set, flags, StoreCommand.Option.ADD_FLAGS));
         }
         
         // TODO: Only use old-school EXPUNGE when closing folder (or rely on CLOSE to do that work
@@ -661,7 +661,7 @@ private class Geary.Imap.Folder : BaseObject {
         yield exec_commands_async(cmds, null, null, cancellable);
     }
     
-    public async void mark_email_async(MessageSet msg_set, Geary.EmailFlags? flags_to_add,
+    public async void mark_email_async(Gee.List<MessageSet> msg_sets, Geary.EmailFlags? flags_to_add,
         Geary.EmailFlags? flags_to_remove, Cancellable? cancellable) throws Error {
         check_open();
         
@@ -674,12 +674,13 @@ private class Geary.Imap.Folder : BaseObject {
             return;
         
         Gee.Collection<Command> cmds = new Gee.ArrayList<Command>();
-        
-        if (msg_flags_add.size > 0)
-            cmds.add(new StoreCommand(msg_set, msg_flags_add, true, false));
-        
-        if (msg_flags_remove.size > 0)
-            cmds.add(new StoreCommand(msg_set, msg_flags_remove, false, false));
+        foreach (MessageSet msg_set in msg_sets) {
+            if (msg_flags_add.size > 0)
+                cmds.add(new StoreCommand(msg_set, msg_flags_add, StoreCommand.Option.ADD_FLAGS));
+            
+            if (msg_flags_remove.size > 0)
+                cmds.add(new StoreCommand(msg_set, msg_flags_remove, StoreCommand.Option.REMOVE_FLAGS));
+        }
         
         yield exec_commands_async(cmds, null, null, cancellable);
     }

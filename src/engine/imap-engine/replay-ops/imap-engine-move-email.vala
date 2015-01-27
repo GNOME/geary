@@ -11,10 +11,11 @@ private class Geary.ImapEngine.MoveEmail : Geary.ImapEngine.SendReplayOperation 
     private Cancellable? cancellable;
     private Gee.Set<ImapDB.EmailIdentifier>? moved_ids = null;
     private int original_count = 0;
+    private Gee.List<Imap.MessageSet>? remaining_msg_sets = null;
 
     public MoveEmail(MinimalFolder engine, Gee.List<ImapDB.EmailIdentifier> to_move, 
         Geary.FolderPath destination, Cancellable? cancellable = null) {
-        base("MoveEmail");
+        base("MoveEmail", OnError.RETRY);
 
         this.engine = engine;
 
@@ -62,16 +63,26 @@ private class Geary.ImapEngine.MoveEmail : Geary.ImapEngine.SendReplayOperation 
         if (moved_ids.size == 0)
             return ReplayOperation.Status.COMPLETED;
         
-        // don't use Cancellable throughout I/O operations in order to assure transaction completes
-        // fully
-        if (cancellable != null && cancellable.is_cancelled())
-            throw new IOError.CANCELLED("Move email to %s cancelled", engine.remote_folder.to_string());
+        // Remaining MessageSets are persisted in case of network retries
+        if (remaining_msg_sets == null)
+            remaining_msg_sets = Imap.MessageSet.uid_sparse(ImapDB.EmailIdentifier.to_uids(moved_ids));
         
-        Gee.List<Imap.MessageSet> msg_sets = Imap.MessageSet.uid_sparse(
-            ImapDB.EmailIdentifier.to_uids(moved_ids));
-        foreach (Imap.MessageSet msg_set in msg_sets) {
+        if (remaining_msg_sets == null || remaining_msg_sets.size == 0)
+            return ReplayOperation.Status.COMPLETED;
+        
+        Gee.Iterator<Imap.MessageSet> iter = remaining_msg_sets.iterator();
+        while (iter.next()) {
+            // don't use Cancellable throughout I/O operations in order to assure transaction completes
+            // fully
+            if (cancellable != null && cancellable.is_cancelled())
+                throw new IOError.CANCELLED("Move email to %s cancelled", engine.remote_folder.to_string());
+            
+            Imap.MessageSet msg_set = iter.get();
             yield engine.remote_folder.copy_email_async(msg_set, destination, null);
             yield engine.remote_folder.remove_email_async(msg_set.to_list(), null);
+            
+            // completed successfully, remove from list in case of retry
+            iter.remove();
         }
         
         return ReplayOperation.Status.COMPLETED;

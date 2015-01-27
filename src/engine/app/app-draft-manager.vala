@@ -424,7 +424,8 @@ public class Geary.App.DraftManager : BaseObject {
         if (current_draft_id != null && op.draft == null) {
             bool success = false;
             try {
-                yield remove_support.remove_single_email_async(current_draft_id);
+                yield remove_support.remove_email_async(
+                    iterate<EmailIdentifier>(current_draft_id).to_array_list());
                 success = true;
             } catch (Error err) {
                 debug("%s: Unable to remove existing draft %s: %s", to_string(), current_draft_id.to_string(),

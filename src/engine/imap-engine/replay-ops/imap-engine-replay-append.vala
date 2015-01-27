@@ -5,12 +5,14 @@
  */
 
 private class Geary.ImapEngine.ReplayAppend : Geary.ImapEngine.ReplayOperation {
-    public MinimalFolder owner;
-    public int remote_count;
-    public Gee.List<Imap.SequenceNumber> positions;
+    private MinimalFolder owner;
+    private int remote_count;
+    private Gee.List<Imap.SequenceNumber> positions;
     
     public ReplayAppend(MinimalFolder owner, int remote_count, Gee.List<Imap.SequenceNumber> positions) {
-        base ("Append", Scope.REMOTE_ONLY);
+        // IGNORE remote errors because the reconnect will re-normalize the folder, making this
+        // append moot
+        base ("Append", Scope.REMOTE_ONLY, OnError.IGNORE);
         
         this.owner = owner;
         this.remote_count = remote_count;

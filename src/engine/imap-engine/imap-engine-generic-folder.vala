@@ -20,9 +20,9 @@ private class Geary.ImapEngine.GenericFolder : MinimalFolder, Geary.FolderSuppor
         yield expunge_all_async(cancellable);
     }
     
-    public new async Geary.EmailIdentifier? create_email_async(
-        RFC822.Message rfc822, Geary.EmailFlags? flags, DateTime? date_received,
-        Geary.EmailIdentifier? id, Cancellable? cancellable = null) throws Error {
+    public new async Geary.EmailIdentifier? create_email_async(RFC822.Message rfc822,
+        Geary.EmailFlags? flags, DateTime? date_received, Geary.EmailIdentifier? id,
+        Cancellable? cancellable = null) throws Error {
         return yield base.create_email_async(rfc822, flags, date_received, id, cancellable);
     }
 }

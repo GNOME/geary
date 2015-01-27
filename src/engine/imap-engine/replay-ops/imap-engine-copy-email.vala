@@ -14,7 +14,7 @@ private class Geary.ImapEngine.CopyEmail : Geary.ImapEngine.SendReplayOperation 
 
     public CopyEmail(MinimalFolder engine, Gee.List<ImapDB.EmailIdentifier> to_copy, 
         Geary.FolderPath destination, Cancellable? cancellable = null) {
-        base("CopyEmail");
+        base("CopyEmail", OnError.RETRY);
         
         this.engine = engine;
         

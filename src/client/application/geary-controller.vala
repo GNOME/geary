@@ -1262,7 +1262,7 @@ public class GearyController : Geary.BaseObject {
         
         debug("Switching to %s...", folder.to_string());
         
-        cancel_folder();
+        closed_folder();
         
         // This function is not reentrant.  It should be, because it can be
         // called reentrant-ly if you select folders quickly enough.  This
@@ -1523,6 +1523,12 @@ public class GearyController : Geary.BaseObject {
         cancellable_folder = new Cancellable();
         
         old_cancellable.cancel();
+    }
+    
+    // Like cancel_folder() but doesn't cancel outstanding operations, allowing them to complete
+    // in the background
+    private void closed_folder() {
+        cancellable_folder = new Cancellable();
     }
     
     private void cancel_inbox(Geary.Account account) {

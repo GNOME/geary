@@ -28,8 +28,7 @@ public class Geary.Nonblocking.Mailbox<G> : BaseObject {
     private Nonblocking.Spinlock spinlock = new Nonblocking.Spinlock();
     
     public Mailbox(owned CompareDataFunc<G>? comparator = null) {
-        // can't use ternary here, Vala bug
-        if (comparator == null)
+        if (comparator == null && !typeof(G).is_a(typeof(Gee.Comparable)))
             queue = new Gee.LinkedList<G>();
         else
             queue = new Gee.PriorityQueue<G>((owned) comparator);

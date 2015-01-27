@@ -18,7 +18,8 @@ private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation
     
     public FetchEmail(MinimalFolder engine, ImapDB.EmailIdentifier id, Email.Field required_fields,
         Folder.ListFlags flags, Cancellable? cancellable) {
-        base ("FetchEmail");
+        // Unlike the list operations, fetch needs to retry remote
+        base ("FetchEmail", OnError.RETRY);
         
         this.engine = engine;
         this.id = id;

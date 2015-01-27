@@ -46,9 +46,6 @@ public abstract class Geary.Nonblocking.AbstractSemaphore : BaseObject {
     private bool passed = false;
     private Gee.List<Pending> pending_queue = new Gee.LinkedList<Pending>();
     
-    public virtual signal void at_reset() {
-    }
-    
     protected AbstractSemaphore(bool broadcast, bool autoreset, Cancellable? cancellable = null) {
         this.broadcast = broadcast;
         this.autoreset = autoreset;
@@ -68,10 +65,6 @@ public abstract class Geary.Nonblocking.AbstractSemaphore : BaseObject {
         
         if (cancellable != null)
             cancellable.cancelled.disconnect(on_cancelled);
-    }
-    
-    protected virtual void notify_at_reset() {
-        at_reset();
     }
     
     private void trigger(bool all) {
@@ -138,12 +131,7 @@ public abstract class Geary.Nonblocking.AbstractSemaphore : BaseObject {
     }
     
     public virtual void reset() {
-        if (!passed)
-            return;
-        
         passed = false;
-        
-        notify_at_reset();
     }
     
     public bool is_passed() {

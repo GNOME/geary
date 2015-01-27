@@ -12,7 +12,7 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
     private class CloseReplayQueue : ReplayOperation {
         public CloseReplayQueue() {
             // LOCAL_AND_REMOTE to make sure this operation is flushed all the way down the pipe
-            base ("CloseReplayQueue", ReplayOperation.Scope.LOCAL_AND_REMOTE);
+            base ("CloseReplayQueue", ReplayOperation.Scope.LOCAL_AND_REMOTE, OnError.IGNORE);
         }
         
         public override void notify_remote_removed_position(Imap.SequenceNumber removed) {
@@ -56,6 +56,7 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
     private ReplayOperation? remote_op_active = null;
     private Gee.ArrayList<ReplayOperation> notification_queue = new Gee.ArrayList<ReplayOperation>();
     private Scheduler.Scheduled? notification_timer = null;
+    private int64 next_submission_number = 0;
     
     private bool is_closed = false;
     
@@ -148,6 +149,10 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
             
             return false;
         }
+        
+        // assign a submission number to operation ... this *must* happen before it's submitted to
+        // any Mailbox
+        op.submission_number = next_submission_number++;
         
         // note that in order for this to work (i.e. for sent and received operations to be handled
         // in order), it's *vital* that even REMOTE_ONLY operations go through the local queue,
@@ -483,13 +488,36 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
             
             Error? remote_err = null;
             if (folder_opened || is_close_op) {
+                if (op.remote_retry_count > 0)
+                    debug("Retrying op %s on %s", op.to_string(), to_string());
+                
                 try {
                     yield op.replay_remote_async();
                 } catch (Error replay_err) {
-                    debug("Replay remote error for %s on %s: %s", op.to_string(), to_string(),
-                        replay_err.message);
+                    debug("Replay remote error for %s on %s: %s (%s)", op.to_string(), to_string(),
+                        replay_err.message, op.on_remote_error.to_string());
                     
-                    remote_err = replay_err;
+                    // If a hard failure and operation allows remote replay, schedule now
+                    if ((op.on_remote_error == ReplayOperation.OnError.RETRY) && is_hard_failure(replay_err)) {
+                        debug("Schedule op retry %s on %s", op.to_string(), to_string());
+                        
+                        // the Folder will disconnect and reconnect due to the hard error and
+                        // wait_for_open_async() will block this command until reconnected and
+                        // normalized
+                        op.remote_retry_count++;
+                        remote_queue.send(op);
+                        
+                        continue;
+                    } else if (op.on_remote_error == ReplayOperation.OnError.IGNORE) {
+                        // ignoring error, simply notify as completed and continue
+                        debug("Ignoring op %s on %s", op.to_string(), to_string());
+                    } else {
+                        debug("Throwing remote error for op %s on %s: %s", op.to_string(), to_string(),
+                            replay_err.message);
+                        
+                        // store for notification
+                        remote_err = replay_err;
+                    }
                 }
             } else if (!is_close_op) {
                 remote_err = new EngineError.SERVER_UNAVAILABLE("Folder %s not available", owner.to_string());

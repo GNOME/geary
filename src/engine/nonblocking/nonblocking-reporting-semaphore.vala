@@ -17,11 +17,11 @@ public class Geary.Nonblocking.ReportingSemaphore<G> : Geary.Nonblocking.Semapho
         result = default_result;
     }
     
-    protected override void notify_at_reset() {
+    public override void reset() {
         result = default_result;
         err = null;
         
-        base.notify_at_reset();
+        base.reset();
     }
     
     public void notify_result(G result, Error? err) throws Error {

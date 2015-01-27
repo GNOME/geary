@@ -13,7 +13,7 @@ private class Geary.ImapEngine.RemoveEmail : Geary.ImapEngine.SendReplayOperatio
     
     public RemoveEmail(MinimalFolder engine, Gee.List<ImapDB.EmailIdentifier> to_remove,
         Cancellable? cancellable = null) {
-        base("RemoveEmail");
+        base("RemoveEmail", OnError.RETRY);
         
         this.engine = engine;
         
@@ -57,6 +57,9 @@ private class Geary.ImapEngine.RemoveEmail : Geary.ImapEngine.SendReplayOperatio
     }
     
     public override async ReplayOperation.Status replay_remote_async() throws Error {
+        if (removed_ids.size == 0)
+            return ReplayOperation.Status.COMPLETED;
+        
         // Remove from server. Note that this causes the receive replay queue to kick into
         // action, removing the e-mail but *NOT* firing a signal; the "remove marker" indicates
         // that the signal has already been fired.

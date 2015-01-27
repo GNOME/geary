@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-private abstract class Geary.ImapEngine.ReplayOperation : Geary.BaseObject {
+private abstract class Geary.ImapEngine.ReplayOperation : Geary.BaseObject, Gee.Comparable<ReplayOperation> {
     /**
      * Scope specifies what type of operations (remote, local, or both) are needed by this operation.
      *
@@ -29,20 +29,26 @@ private abstract class Geary.ImapEngine.ReplayOperation : Geary.BaseObject {
         CONTINUE
     }
     
-    private static int next_opnum = 0;
+    public enum OnError {
+        THROW,
+        RETRY,
+        IGNORE
+    }
     
     public string name { get; set; }
-    public int opnum { get; private set; }
+    public int64 submission_number { get; set; default = -1; }
     public Scope scope { get; private set; }
+    public OnError on_remote_error { get; protected set; }
+    public int remote_retry_count { get; set; default = 0; }
     public Error? err { get; private set; default = null; }
-    public bool notified { get; private set; default = false; }
+    public bool notified { get { return semaphore.is_passed(); } }
     
     private Nonblocking.Semaphore semaphore = new Nonblocking.Semaphore();
     
-    public ReplayOperation(string name, Scope scope) {
+    public ReplayOperation(string name, Scope scope, OnError on_remote_error = OnError.THROW) {
         this.name = name;
-        opnum = next_opnum++;
         this.scope = scope;
+        this.on_remote_error = on_remote_error;
     }
     
     /**
@@ -132,10 +138,9 @@ private abstract class Geary.ImapEngine.ReplayOperation : Geary.BaseObject {
             throw err;
     }
     
+    // Can only be called once
     internal void notify_ready(Error? err) {
-        assert(!notified);
-        
-        notified = true;
+        assert(!semaphore.is_passed());
         
         this.err = err;
         
@@ -148,11 +153,22 @@ private abstract class Geary.ImapEngine.ReplayOperation : Geary.BaseObject {
     
     public abstract string describe_state();
     
+    // The Comparable interface is merely to ensure the ReplayQueue sorts operations by their
+    // submission order, ensuring that retry operations are retried in order of submissions
+    public int compare_to(ReplayOperation other) {
+        assert(submission_number >= 0);
+        assert(other.submission_number >= 0);
+        
+        return (int) (submission_number - other.submission_number).clamp(-1, 1);
+    }
+    
     public string to_string() {
         string state = describe_state();
         
-        return (String.is_empty(state)) ? "[%d] %s".printf(opnum, name)
-            : "[%d] %s: %s".printf(opnum, name, state);
+        return String.is_empty(state)
+            ? "[%s] %s remote_retry_count=%d".printf(submission_number.to_string(), name, remote_retry_count)
+            : "[%s] %s: %s remote_retry_count=%d".printf(submission_number.to_string(), name, state,
+                remote_retry_count);
     }
 }
 

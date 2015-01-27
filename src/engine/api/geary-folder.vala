@@ -483,6 +483,8 @@ public abstract class Geary.Folder : BaseObject {
      * EmailIdentifier implies that the top most email is included in the result (i.e.
      * ListFlags.INCLUDING_ID is not required);
      *
+     * If the remote connection fails, this call will return locally-available Email without error.
+     *
      * There's no guarantee of the returned messages' order.
      *
      * The Folder must be opened prior to attempting this operation.
@@ -498,6 +500,8 @@ public abstract class Geary.Folder : BaseObject {
      * Any Gee.Collection is accepted for EmailIdentifiers, but the returned list will only contain
      * one email for each requested; duplicates are ignored.  ListFlags.INCLUDING_ID is ignored
      * for this call.
+     *
+     * If the remote connection fails, this call will return locally-available Email without error.
      *
      * The Folder must be opened prior to attempting this operation.
      */

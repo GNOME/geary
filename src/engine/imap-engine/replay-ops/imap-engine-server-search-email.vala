@@ -19,6 +19,9 @@ private class Geary.ImapEngine.ServerSearchEmail : Geary.ImapEngine.AbstractList
         base ("ServerSearchEmail", owner, required_fields, Geary.Folder.ListFlags.OLDEST_TO_NEWEST,
             cancellable);
         
+        // unlike list, need to retry this as there's no local component to return
+        on_remote_error = OnError.RETRY;
+        
         this.criteria = criteria;
     }
     

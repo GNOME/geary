@@ -5,12 +5,12 @@
  */
 
 private abstract class Geary.ImapEngine.SendReplayOperation : Geary.ImapEngine.ReplayOperation {
-    public SendReplayOperation(string name) {
-        base (name, ReplayOperation.Scope.LOCAL_AND_REMOTE);
+    public SendReplayOperation(string name, ReplayOperation.OnError on_remote_error = OnError.THROW) {
+        base (name, ReplayOperation.Scope.LOCAL_AND_REMOTE, on_remote_error);
     }
     
-    public SendReplayOperation.only_remote(string name) {
-        base (name, ReplayOperation.Scope.REMOTE_ONLY);
+    public SendReplayOperation.only_remote(string name, ReplayOperation.OnError on_remote_error = OnError.THROW) {
+        base (name, ReplayOperation.Scope.REMOTE_ONLY, on_remote_error);
     }
     
     public override void notify_remote_removed_position(Imap.SequenceNumber removed) {

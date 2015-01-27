@@ -15,7 +15,7 @@ private class Geary.ImapEngine.MarkEmail : Geary.ImapEngine.SendReplayOperation 
     public MarkEmail(MinimalFolder engine, Gee.List<Geary.EmailIdentifier> to_mark, 
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove, 
         Cancellable? cancellable = null) {
-        base("MarkEmail");
+        base("MarkEmail", OnError.RETRY);
         
         this.engine = engine;
         
@@ -65,10 +65,8 @@ private class Geary.ImapEngine.MarkEmail : Geary.ImapEngine.SendReplayOperation 
         
         Gee.List<Imap.MessageSet> msg_sets = Imap.MessageSet.uid_sparse(
             ImapDB.EmailIdentifier.to_uids(original_flags.keys));
-        foreach (Imap.MessageSet msg_set in msg_sets) {
-            yield engine.remote_folder.mark_email_async(msg_set, flags_to_add, flags_to_remove,
-                cancellable);
-        }
+        yield engine.remote_folder.mark_email_async(msg_sets, flags_to_add, flags_to_remove,
+            cancellable);
         
         return ReplayOperation.Status.COMPLETED;
     }

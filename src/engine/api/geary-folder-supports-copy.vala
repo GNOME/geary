@@ -12,6 +12,7 @@
  *
  * Copy does not imply {@link Geary.FolderSupport.Move}, or vice-versa.
  */
+
 public interface Geary.FolderSupport.Copy : Geary.Folder {
     /**
      * Copies messages into another folder.

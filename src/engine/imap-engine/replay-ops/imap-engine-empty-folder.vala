@@ -16,7 +16,7 @@ private class Geary.ImapEngine.EmptyFolder : Geary.ImapEngine.SendReplayOperatio
     private int original_count = 0;
     
     public EmptyFolder(MinimalFolder engine, Cancellable? cancellable) {
-        base("EmptyFolder");
+        base("EmptyFolder", OnError.RETRY);
         
         this.engine = engine;
         this.cancellable = cancellable;

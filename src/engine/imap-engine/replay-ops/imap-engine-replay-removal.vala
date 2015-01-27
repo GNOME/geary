@@ -5,12 +5,13 @@
  */
 
 private class Geary.ImapEngine.ReplayRemoval : Geary.ImapEngine.ReplayOperation {
-    public MinimalFolder owner;
-    public int remote_count;
-    public Imap.SequenceNumber position;
+    private MinimalFolder owner;
+    private int remote_count;
+    private Imap.SequenceNumber position;
     
     public ReplayRemoval(MinimalFolder owner, int remote_count, Imap.SequenceNumber position) {
-        base ("Removal", Scope.LOCAL_AND_REMOTE);
+        // remote error will cause folder to reconnect and re-normalize, making this remove moot
+        base ("Removal", Scope.LOCAL_AND_REMOTE, OnError.IGNORE);
         
         this.owner = owner;
         this.remote_count = remote_count;

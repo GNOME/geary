@@ -5,14 +5,19 @@
  */
 
 private class Geary.ImapEngine.ReplayDisconnect : Geary.ImapEngine.ReplayOperation {
-    public MinimalFolder owner;
-    public Imap.ClientSession.DisconnectReason reason;
+    private MinimalFolder owner;
+    private Imap.ClientSession.DisconnectReason reason;
+    private bool flush_pending;
+    private Cancellable? cancellable;
     
-    public ReplayDisconnect(MinimalFolder owner, Imap.ClientSession.DisconnectReason reason) {
+    public ReplayDisconnect(MinimalFolder owner, Imap.ClientSession.DisconnectReason reason,
+        bool flush_pending, Cancellable? cancellable) {
         base ("Disconnect", Scope.LOCAL_ONLY);
         
         this.owner = owner;
         this.reason = reason;
+        this.flush_pending = flush_pending;
+        this.cancellable = cancellable;
     }
     
     public override void notify_remote_removed_position(Imap.SequenceNumber removed) {
@@ -37,7 +42,7 @@ private class Geary.ImapEngine.ReplayDisconnect : Geary.ImapEngine.ReplayOperati
             // ReplayDisconnect is only used when remote disconnects, so never flush pending, the
             // connection is down or going down
             owner.close_internal_async.begin(Geary.Folder.CloseReason.LOCAL_CLOSE, remote_reason,
-                false, null);
+                flush_pending, cancellable);
             
             return false;
         });
@@ -49,7 +54,7 @@ private class Geary.ImapEngine.ReplayDisconnect : Geary.ImapEngine.ReplayOperati
     }
     
     public override async ReplayOperation.Status replay_remote_async() throws Error {
-        // shot not be called
+        // should not be called
         return ReplayOperation.Status.COMPLETED;
     }
     

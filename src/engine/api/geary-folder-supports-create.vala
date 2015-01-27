@@ -13,6 +13,7 @@
  * Note that creating an email in the Outbox will queue it for sending.  Thus, it may be removed
  * without user interaction at some point in the future.
  */
+
 public interface Geary.FolderSupport.Create : Geary.Folder {
     /**
      *  Creates (appends) the message to this folder.
@@ -29,6 +30,6 @@ public interface Geary.FolderSupport.Create : Geary.Folder {
      * message is created.  The new message's ID is returned.
      */
     public abstract async Geary.EmailIdentifier? create_email_async(Geary.RFC822.Message rfc822, EmailFlags? flags,
-        DateTime? date_received, Geary.EmailIdentifier? id = null, Cancellable? cancellable = null) throws Error;
+        DateTime? date_received, Geary.EmailIdentifier? id, Cancellable? cancellable = null) throws Error;
 }
 
