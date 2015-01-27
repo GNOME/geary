@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Geary 0.5.1\n"
-"POT-Creation-Date: 2014-11-10 05:49+0000\n"
-"PO-Revision-Date: 2014-12-04 23:57+0100\n"
+"POT-Creation-Date: 2015-01-23 05:53+0000\n"
+"PO-Revision-Date: 2015-01-23 14:36+0100\n"
 "Last-Translator: Christian Kirbach <christian.kirbach@gmail.com>\n"
 "Language-Team: Andreas Wilhelm <info@avedo.net>\n"
 "Language: de\n"
@@ -81,15 +81,23 @@ msgid ""
 "drop it either on the text fields at the top of the window or on the toolbar "
 "at the bottom."
 msgstr ""
-"Ziehen Sie die Datei aus der Nautilus Dateiverwaltung in das Editor-Fenster "
+"Ziehen Sie die Datei aus der Nautilus-Dateiverwaltung in das Editor-Fenster "
 "und legen Sie diese entweder im Textfeld oben im Fenster oder in der "
 "Werkzeugleiste im unteren Teil des Fensters ab."
 
-#: C/write.page:37(title)
+#: C/write.page:35(p)
+msgid ""
+"A number of keyboard shortcuts are available in the composer; see <link xref="
+"\"shortcuts#composer\"/> for details."
+msgstr ""
+"Im Editor stehen eine große Zahl von Tastaturkürzel zur Verfügung; Details "
+"unter <link xref=\"shortcuts#composer\"/>."
+
+#: C/write.page:39(title)
 msgid "Drafts"
 msgstr "Entwürfe"
 
-#: C/write.page:39(p)
+#: C/write.page:41(p)
 msgid ""
 "For mail servers that support drafts, Geary will automatically save the "
 "message as you type. If you close the composer without sending, Geary will "
@@ -100,7 +108,7 @@ msgstr ""
 "ohne die Nachricht zu senden, fragt Geary, ob die Nachricht als Entwurf "
 "gespeichert oder verworfen werden soll. "
 
-#: C/write.page:42(p)
+#: C/write.page:44(p)
 msgid ""
 "To edit an existing draft, select the Drafts folder in the folder list, "
 "select the message, and click \"Edit Draft\" in the message viewer."
@@ -109,7 +117,7 @@ msgstr ""
 "Entwürfe-Ordner aus der Ordnerliste, wählen die Nachricht und wählen in der "
 "Nachrichten Ansicht \"Entwurf bearbeiten\"."
 
-#: C/write.page:45(p)
+#: C/write.page:47(p)
 msgid "Geary deletes the draft when you send the message."
 msgstr "Geary löscht den Entwurf, wenn die Nachricht gesendet wird."
 
@@ -259,7 +267,7 @@ msgstr "S"
 msgid "Unstar"
 msgstr "Sternchen-Markierung entfernen"
 
-#: C/shortcuts.page:48(key)
+#: C/shortcuts.page:48(key) C/shortcuts.page:126(key)
 msgid "D"
 msgstr "D"
 
@@ -302,6 +310,11 @@ msgstr "Beenden"
 #: C/shortcuts.page:64(key) C/shortcuts.page:80(key) C/shortcuts.page:84(key)
 #: C/shortcuts.page:88(key) C/shortcuts.page:92(key) C/shortcuts.page:96(key)
 #: C/shortcuts.page:100(key) C/shortcuts.page:104(key)
+#: C/shortcuts.page:114(key) C/shortcuts.page:118(key)
+#: C/shortcuts.page:126(key) C/shortcuts.page:134(key)
+#: C/shortcuts.page:138(key) C/shortcuts.page:142(key)
+#: C/shortcuts.page:146(key) C/shortcuts.page:150(key)
+#: C/shortcuts.page:154(key)
 msgid "Ctrl"
 msgstr "Strg"
 
@@ -384,6 +397,97 @@ msgstr "Vorheriges in aktueller Konversation finden"
 #: C/shortcuts.page:104(key)
 msgid "Shift"
 msgstr "Umschalttaste"
+
+#: C/shortcuts.page:109(title)
+msgid "Composer shortcuts"
+msgstr "Tastenkombinationen des Editors"
+
+#: C/shortcuts.page:110(p)
+msgid "These shortcuts are active whenever focus is in a composer."
+msgstr ""
+"Diese Tastenkombinationen stehen zur Verfügung, sobald der Editor aktiv ist."
+
+#: C/shortcuts.page:113(p)
+msgid "Quote text"
+msgstr "Text zitieren"
+
+#: C/shortcuts.page:114(key)
+msgid "]"
+msgstr "]"
+
+#: C/shortcuts.page:117(p)
+msgid "Unquote text"
+msgstr "Text nicht mehr zitieren"
+
+#: C/shortcuts.page:118(key)
+msgid "["
+msgstr "["
+
+#: C/shortcuts.page:121(p)
+msgid "Close composer"
+msgstr "Editor schließen"
+
+#: C/shortcuts.page:122(p)
+msgid "<keyseq><key>Ctrl</key><key>W</key></keyseq> or <key>Esc</key>"
+msgstr "<keyseq><key>Strg</key><key>W</key></keyseq> oder <key>Esc</key>"
+
+#: C/shortcuts.page:125(p)
+msgid "Detach composer"
+msgstr "Editor abtrennen"
+
+#: C/shortcuts.page:130(p)
+msgid "These shortcuts are only active in composers in rich text mode."
+msgstr ""
+"Diese Tastenkombinationen stehen nur in Editoren mit Rich-Text-Modus zur "
+"Verfügung."
+
+#: C/shortcuts.page:133(p)
+msgid "Bold text"
+msgstr "Fetter Text"
+
+#: C/shortcuts.page:134(key)
+msgid "B"
+msgstr "B"
+
+#: C/shortcuts.page:137(p)
+msgid "Italicize text"
+msgstr "Kursiver Text"
+
+#: C/shortcuts.page:138(key)
+msgid "I"
+msgstr "I"
+
+#: C/shortcuts.page:141(p)
+msgid "Underline text"
+msgstr "Text unterstreichen"
+
+#: C/shortcuts.page:142(key)
+msgid "U"
+msgstr "U"
+
+#: C/shortcuts.page:145(p)
+msgid "Strike text"
+msgstr "Text durchstreichen"
+
+#: C/shortcuts.page:146(key)
+msgid "K"
+msgstr "K"
+
+#: C/shortcuts.page:149(p)
+msgid "Insert a link"
+msgstr "Verweis einfügen"
+
+#: C/shortcuts.page:150(key)
+msgid "L"
+msgstr "L"
+
+#: C/shortcuts.page:153(p)
+msgid "Remove formatting"
+msgstr "Formatierung entfernen"
+
+#: C/shortcuts.page:154(key)
+msgid "Space"
+msgstr "Leerzeichen"
 
 #: C/search.page:10(title)
 msgid "Search"
