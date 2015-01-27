@@ -55,6 +55,7 @@ public class GearyController : Geary.BaseObject {
     public const string PROP_CURRENT_CONVERSATION ="current-conversations";
     
     public const int MIN_CONVERSATION_COUNT = 50;
+    public const int LOAD_MORE_CONVERSATION_COUNT = 50;
     
     private const string DELETE_MESSAGE_TOOLTIP_SINGLE = _("Delete conversation (Shift+Delete)");
     private const string DELETE_MESSAGE_TOOLTIP_MULTIPLE = _("Delete conversations (Shift+Delete)");
@@ -1394,12 +1395,11 @@ public class GearyController : Geary.BaseObject {
     }
     
     private void on_load_more() {
-        if (!current_conversations.all_messages_loaded)
-            current_conversations.min_window_count += MIN_CONVERSATION_COUNT;
-        
-        debug("on_load_more: all_messages_loaded=%s min_window_count=%d",
-            current_conversations.all_messages_loaded.to_string(),
-            current_conversations.min_window_count);
+        if (current_conversations.increase_window(LOAD_MORE_CONVERSATION_COUNT)) {
+            debug("Loading more messages for conversations: all_messages_loaded=%s window_count=%d",
+                current_conversations.all_messages_loaded.to_string(),
+                current_conversations.window_count);
+        }
     }
     
     private void on_select_folder_completed(Object? source, AsyncResult result) {

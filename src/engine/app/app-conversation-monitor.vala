@@ -22,9 +22,11 @@ public class Geary.App.ConversationMonitor : BaseObject {
             = new Gee.HashMap<Geary.EmailIdentifier, Geary.Email>();
         
         public bool inside_scan;
+        public Folder.ListFlags flags;
         
-        public ProcessJobContext(bool inside_scan) {
+        public ProcessJobContext(bool inside_scan, Folder.ListFlags flags) {
             this.inside_scan = inside_scan;
+            this.flags = flags;
         }
     }
     
@@ -32,15 +34,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
     public bool reestablish_connections { get; set; default = true; }
     public bool is_monitoring { get; private set; default = false; }
     
-    /**
-     * TODO: Only allow increasing window count if FillWindowOperation is not outstanding.
-     */
-    public int min_window_count { get { return _min_window_count; }
-        set {
-            _min_window_count = value;
-            operation_queue.add(new FillWindowOperation(this, false));
-        }
-    }
+    public int window_count { get; private set; }
     
     /**
      * Indicates no more messages can be loaded by increasing the min_window_count.
@@ -54,7 +48,6 @@ public class Geary.App.ConversationMonitor : BaseObject {
     private Geary.Folder.OpenFlags open_flags;
     private Cancellable? cancellable_monitor = null;
     private bool reseed_notified = false;
-    private int _min_window_count = 0;
     private ConversationOperationQueue operation_queue = new ConversationOperationQueue();
     
     /**
@@ -85,10 +78,15 @@ public class Geary.App.ConversationMonitor : BaseObject {
      * asynchronous.  "scan-started", "scan-error", and "scan-completed" will be fired (as
      * appropriate) for each individual load request; that is, there is no internal counter to ensure
      * only a single "scan-completed" is fired to indicate multiple loads have finished.
+     *
+     * local_only is true when the {@link ConversationMonitor}'s scan was of the local database
+     * only in order to quickly get conversations loaded while the {@link Folder} is opening.
+     * Another {@link scan_started} and {@link scan_completed} should execute once the Folder's
+     * remote is opened.
      */
-    public virtual signal void scan_started() {
-        Logging.debug(Logging.Flag.CONVERSATIONS, "[%s] ConversationMonitor::scan_started",
-            folder.to_string());
+    public virtual signal void scan_started(bool local_only) {
+        Logging.debug(Logging.Flag.CONVERSATIONS, "[%s] ConversationMonitor::scan_started local_only=%s",
+            folder.to_string(), local_only.to_string());
     }
     
     /**
@@ -102,10 +100,15 @@ public class Geary.App.ConversationMonitor : BaseObject {
     
     /**
      * "scan-completed" is fired when the scan of the email has finished.
+     *
+     * local_only is true when the {@link ConversationMonitor}'s scan was of the local database
+     * only in order to quickly get conversations loaded while the {@link Folder} is opening.
+     * Another {@link scan_started} and {@link scan_completed} should execute once the Folder's
+     * remote is opened.
      */
-    public virtual signal void scan_completed() {
-        Logging.debug(Logging.Flag.CONVERSATIONS, "[%s] ConversationMonitor::scan_completed",
-            folder.to_string());
+    public virtual signal void scan_completed(bool local_only) {
+        Logging.debug(Logging.Flag.CONVERSATIONS, "[%s] ConversationMonitor::scan_completed local_only=%s",
+            folder.to_string(), local_only.to_string());
     }
     
     /**
@@ -189,11 +192,11 @@ public class Geary.App.ConversationMonitor : BaseObject {
      * @param min_window_count Minimum number of conversations that will be loaded
      */
     public ConversationMonitor(Geary.Folder folder, Geary.Folder.OpenFlags open_flags,
-        Geary.Email.Field required_fields, int min_window_count) {
+        Geary.Email.Field required_fields, int initial_window_count) {
         this.folder = folder;
         this.open_flags = open_flags;
         this.required_fields = required_fields | REQUIRED_FIELDS;
-        _min_window_count = min_window_count;
+        window_count = initial_window_count;
     }
     
     ~ConversationMonitor() {
@@ -212,16 +215,16 @@ public class Geary.App.ConversationMonitor : BaseObject {
         monitoring_stopped(retrying);
     }
     
-    protected virtual void notify_scan_started() {
-        scan_started();
+    protected virtual void notify_scan_started(bool local_only) {
+        scan_started(local_only);
     }
     
     protected virtual void notify_scan_error(Error err) {
         scan_error(err);
     }
     
-    protected virtual void notify_scan_completed() {
-        scan_completed();
+    protected virtual void notify_scan_completed(bool local_only) {
+        scan_completed(local_only);
     }
     
     protected virtual void notify_seed_completed() {
@@ -324,15 +327,17 @@ public class Geary.App.ConversationMonitor : BaseObject {
     internal async void local_load_async() {
         debug("ConversationMonitor seeding with local email for %s", folder.to_string());
         
-        int count = min_window_count;
+        // Since it's possible the chronologically newest email in the Folder is not at the end of
+        // the vector, find the chronologically newest email's offset and load from it to the end
+        // of the vector; that ensures that all messages are loaded in the span of time, to avoid
+        // fragmented conversations
+        int count = window_count;
         try {
             int offset_from_top;
             bool found = yield folder.fetch_local_newest_async(null, null, out offset_from_top,
                 cancellable_monitor);
-            if (found && (offset_from_top + 1) > count) {
+            if (found && (offset_from_top + 1) > count)
                 count = offset_from_top + 1;
-                debug("SEEDING %d TO GET NEWEST EMAIL", count);
-            }
         } catch (Error err) {
             debug("Error fetching local newest email: %s", err.message);
         }
@@ -342,6 +347,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
         } catch (Error e) {
             debug("Error loading local messages: %s", e.message);
         }
+        
         debug("ConversationMonitor seeded for %s", folder.to_string());
     }
     
@@ -390,31 +396,48 @@ public class Geary.App.ConversationMonitor : BaseObject {
     }
     
     /**
+     * Instructs the {@link ConversationMonitor} to increase the {@link window_size} by the supplied
+     * value, in an attempt to generate more conversations by loading more messages.
+     *
+     * Returns false if the ConversationMonitor is in the process of increasing the window already
+     * or all messages in the {@link Folder} have been loaded.
+     */
+    public bool increase_window(int increase) {
+        if (operation_queue.has_fill_window || all_messages_loaded)
+            return false;
+        
+        window_count += increase;
+        operation_queue.add(new FillWindowOperation(this, false));
+        
+        return true;
+    }
+    
+    /**
      * See Geary.Folder.list_email_by_id_async() for details of how these parameters operate.  Instead
      * of returning emails, this method will load the Conversations object with them sorted into
      * Conversation objects.
      */
     private async void load_by_id_async(Geary.EmailIdentifier? initial_id, int count,
         Geary.Folder.ListFlags flags, Cancellable? cancellable) throws Error {
-        notify_scan_started();
+        notify_scan_started(flags.is_local_only());
         try {
             yield process_email_async(yield folder.list_email_by_id_async(initial_id,
-                count, required_fields, flags, cancellable), new ProcessJobContext(true));
+                count, required_fields, flags, cancellable), new ProcessJobContext(true, flags));
         } catch (Error err) {
-            list_error(err);
+            list_error(flags, err);
             throw err;
         }
     }
     
     private async void load_by_sparse_id(Gee.Collection<Geary.EmailIdentifier> ids,
         Geary.Folder.ListFlags flags, Cancellable? cancellable) {
-        notify_scan_started();
+        notify_scan_started(flags.is_local_only());
         
         try {
             yield process_email_async(yield folder.list_email_by_sparse_id_async(ids,
-                required_fields, flags, cancellable), new ProcessJobContext(true));
+                required_fields, flags, cancellable), new ProcessJobContext(true, flags));
         } catch (Error err) {
-            list_error(err);
+            list_error(flags, err);
         }
     }
     
@@ -465,7 +488,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
             
             debug("Fetched %d relevant emails locally", search_emails.size);
             
-            yield process_email_async(search_emails, new ProcessJobContext(false));
+            yield process_email_async(search_emails, new ProcessJobContext(false, flags));
         } catch (Error e) {
             debug("Error loading external emails: %s", e.message);
             if (opened) {
@@ -478,10 +501,10 @@ public class Geary.App.ConversationMonitor : BaseObject {
         }
     }
     
-    private void list_error(Error err) {
+    private void list_error(Folder.ListFlags flags, Error err) {
         debug("Error while assembling conversations in %s: %s", folder.to_string(), err.message);
         notify_scan_error(err);
-        notify_scan_completed();
+        notify_scan_completed(flags.is_local_only());
     }
     
     private async void process_email_async(Gee.Collection<Geary.Email>? emails, ProcessJobContext job) {
@@ -629,7 +652,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
         }
         
         if (job.inside_scan)
-            notify_scan_completed();
+            notify_scan_completed(job.flags.is_local_only());
     }
     
     private void on_folder_email_appended(Gee.Collection<Geary.EmailIdentifier> appended_ids) {
@@ -680,7 +703,8 @@ public class Geary.App.ConversationMonitor : BaseObject {
         Gee.HashSet<RFC822.MessageID> search_message_ids = new Gee.HashSet<RFC822.MessageID>();
         foreach (Conversation conversation in trimmed.get_keys())
             search_message_ids.add_all(conversation.get_message_ids());
-        yield expand_conversations_async(search_message_ids, new ProcessJobContext(false));
+        yield expand_conversations_async(search_message_ids,
+            new ProcessJobContext(false, Folder.ListFlags.NONE));
     }
     
     internal async void external_append_emails_async(Geary.Folder folder,
@@ -736,8 +760,8 @@ public class Geary.App.ConversationMonitor : BaseObject {
                     cancellable_monitor);
             } else {
                 debug("ConversationMonitor (%s) reseeding latest %d emails on opened %s", why,
-                    min_window_count, folder.to_string());
-                yield load_by_id_async(null, min_window_count, Geary.Folder.ListFlags.NONE, cancellable_monitor);
+                    window_count, folder.to_string());
+                yield load_by_id_async(null, window_count, Geary.Folder.ListFlags.NONE, cancellable_monitor);
             }
         } catch (Error e) {
             debug("Reseed error: %s", e.message);
@@ -761,7 +785,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
      * Attempts to load enough conversations to fill min_window_count.
      */
     internal async void fill_window_async(bool is_insert) {
-        if (!is_monitoring || min_window_count <= conversations.size)
+        if (!is_monitoring || window_count <= conversations.size)
             return;
         
         int initial_message_count = conversations.get_email_count();
@@ -789,7 +813,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
         Geary.EmailIdentifier? low_id = yield get_lowest_email_id_async(null);
         if (low_id != null && !is_insert) {
             // Load at least as many messages as remianing conversations.
-            int num_to_load = min_window_count - conversations.size;
+            int num_to_load = window_count - conversations.size;
             if (num_to_load < WINDOW_FILL_MESSAGE_COUNT)
                 num_to_load = WINDOW_FILL_MESSAGE_COUNT;
             
@@ -802,13 +826,13 @@ public class Geary.App.ConversationMonitor : BaseObject {
             // No existing messages or an insert invalidated our existing list,
             // need to start from scratch.
             try {
-                yield load_by_id_async(null, min_window_count, flags, cancellable_monitor);
+                yield load_by_id_async(null, window_count, flags, cancellable_monitor);
             } catch(Error e) {
                 debug("Error filling conversation window: %s", e.message);
             }
         }
         
-        all_messages_loaded = conversations.get_email_count() == initial_message_count;
+        all_messages_loaded = conversations.get_email_count() == folder.properties.email_total;
         
         // Run again to make sure we're full unless we ran out of messages.
         if (conversations.get_email_count() != initial_message_count)

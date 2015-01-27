@@ -6,6 +6,9 @@
 
 private class Geary.App.ConversationOperationQueue : BaseObject {
     public bool is_processing { get; private set; default = false; }
+    
+    public bool has_fill_window { get; private set; default = false; }
+    
     public Geary.SimpleProgressMonitor progress_monitor { get; private set; default = 
         new Geary.SimpleProgressMonitor(Geary.ProgressType.ACTIVITY); }
     
@@ -38,6 +41,8 @@ private class Geary.App.ConversationOperationQueue : BaseObject {
                     }
                 }
             }
+            
+            has_fill_window = true;
         }
         
         mailbox.send(op);
@@ -66,8 +71,12 @@ private class Geary.App.ConversationOperationQueue : BaseObject {
                 debug("Error processing in conversation operation mailbox: %s", e.message);
                 break;
             }
+            
             if (op is TerminateOperation)
                 break;
+            
+            if (op is FillWindowOperation)
+                has_fill_window = false;
             
             if (!progress_monitor.is_in_progress)
                 progress_monitor.notify_start();

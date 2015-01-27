@@ -141,6 +141,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         int64 internaldate_time_t = -1;
         int offset = -1;
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
+            // get newest id and INTERNALDATE from MessageTable for this folder
             Db.Statement stmt = cx.prepare("""
                 SELECT id, internaldate_time_t
                 FROM MessageTable
@@ -161,6 +162,8 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             message_id = result.rowid_at(0);
             internaldate_time_t = result.int64_at(1);
             
+            // Then turn around and sort MessageLocationTable by ordering (UID) and find the offset
+            // of that message
             stmt = cx.prepare("""
                 SELECT COUNT(*)
                 FROM MessageLocationTable
@@ -193,7 +196,10 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         newest_date = (internaldate_time_t > -1) ? new DateTime.from_unix_utc(internaldate_time_t) : null;
         offset_from_top = offset;
         
-        debug("NEWEST: %s %s offset=%d", newest_id.to_string(), newest_date.to_string(), offset_from_top);
+        if (offset_from_top != 0) {
+            debug("Newest local email in %s is not at end of vector: %s %s offset=%d", to_string(),
+                newest_id.to_string(), newest_date.to_string(), offset_from_top);
+        }
         
         return true;
     }
