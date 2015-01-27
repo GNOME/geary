@@ -225,9 +225,10 @@
       <object class="GtkAction" id="add attachment">
         <property name="label" translatable="yes">_Attach File</property>
         <property name="short_label" translatable="yes">Attach File</property>
-        <property name="tooltip" translatable="yes">Attach File</property>
+        <property name="tooltip" translatable="yes">Attach File (Ctrl+T)</property>
         <property name="icon_name">mail-attachment-symbolic</property>
       </object>
+      <accelerator key="t" modifiers="GDK_CONTROL_MASK"/>
     </child>
     <child>
       <object class="GtkAction" id="add original attachments">
