@@ -42,6 +42,16 @@
 	For other accounts, if you disable this setting, you may be unable to view messages you've
 	sent.</p></item>
 	
+	<item><p>The <gui>Sign emails</gui> checkbox indicates whether a signature will be automatically
+	inserted when a composer is opened.  You may enter the signature into the box immediately
+	below.  You may use HTML tags to style the text.  Switch to a preview of the signature using the
+	buttons to the right.</p>
+	
+	<p>If you leave the signature in the Accounts dialog blank, Geary will use the
+	<file>.signature</file> file in your home directory, if it exists.  This file may contain either
+	plain text or HTML markup.  In the latter case, the markup will be inserted directly into the
+	composer, without any escaping.</p></item>
+	
 	<item><p>The <gui>Download mail</gui> drop-down allows you to configure how much mail Geary will keep
 	locally.  Geary can only use locally available mail when searching and forming
 	conversations.</p></item>

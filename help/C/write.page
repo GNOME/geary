@@ -34,6 +34,9 @@
 	
 	<p>A number of keyboard shortcuts are available in the composer; see <link xref="shortcuts#composer"/> for details.</p>
 	
+	<p>You may specify a signature to be inserted into the composer in the <link xref="accounts" />
+	dialog.</p>
+	
 	</section>
 	<section>
 	<title>Drafts</title>
