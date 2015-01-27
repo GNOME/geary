@@ -191,7 +191,7 @@
       <object class="GtkAction" id="detach">
         <property name="label" translatable="yes">Detach</property>
         <property name="short_label" translatable="yes">Detach</property>
-        <property name="tooltip" translatable="yes">Detach</property>
+        <property name="tooltip" translatable="yes">Detach (Ctrl+D)</property>
         <property name="icon_name">detach-symbolic</property>
       </object>
       <accelerator key="d" modifiers="GDK_CONTROL_MASK"/>
@@ -200,7 +200,7 @@
       <object class="GtkAction" id="send">
         <property name="label" translatable="yes">_Send</property>
         <property name="short_label" translatable="yes">Send</property>
-        <property name="tooltip" translatable="yes">Send</property>
+        <property name="tooltip" translatable="yes">Send (Ctrl+Enter)</property>
         <property name="icon_name">mail-send-symbolic</property>
       </object>
     </child>
