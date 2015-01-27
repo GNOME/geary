@@ -499,8 +499,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
             Geary.SpecialFolderType.DRAFTS,
         };
         
-        Gee.ArrayList<Geary.FolderPath?> blacklist
-            = new Gee.ArrayList<Geary.FolderPath?>();
+        Gee.ArrayList<Geary.FolderPath?> blacklist = new Gee.ArrayList<Geary.FolderPath?>();
         foreach (Geary.SpecialFolderType type in blacklisted_folder_types) {
             try {
                 Geary.Folder? blacklist_folder = folder.account.get_special_folder(type);
@@ -512,10 +511,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
             }
         }
         
-        // Add the current folder so we omit search results we can find through
-        // folder monitoring.  Add "no folders" so we omit results that have
-        // been deleted permanently from the server.
-        blacklist.add(folder.path);
+        // Add "no folders" so we omit results that have been deleted permanently from the server.
         blacklist.add(null);
         
         return blacklist;
