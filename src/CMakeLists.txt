@@ -259,7 +259,6 @@ engine/rfc822/rfc822-message.vala
 engine/rfc822/rfc822-message-data.vala
 engine/rfc822/rfc822-utils.vala
 
-engine/smtp/smtp-abstract-authenticator.vala
 engine/smtp/smtp-authenticator.vala
 engine/smtp/smtp-capabilities.vala
 engine/smtp/smtp-client-connection.vala

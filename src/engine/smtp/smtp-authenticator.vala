@@ -4,8 +4,27 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public interface Geary.Smtp.Authenticator : Object {
-    public abstract string get_name();
+/**
+ * An abstract class describing a process for goind through an SASL authentication transaction.
+ *
+ * Authenticators expect to use complete {@link Credentials}, i.e. user and pass must not be null.
+ */
+
+public abstract class Geary.Smtp.Authenticator : BaseObject {
+    /**
+     * The user-visible name for this {@link Authenticator}.
+     */
+    public string name { get; private set; }
+    
+    public Credentials credentials { get; private set; }
+    
+    public Authenticator(string name, Credentials credentials) {
+        this.name = name;
+        this.credentials = credentials;
+        
+        if (!credentials.is_complete())
+            message("Incomplete credentials supplied to SMTP authenticator %s", name);
+    }
     
     /**
      * Returns a Request that is used to initiate the challenge-response.
@@ -28,7 +47,7 @@ public interface Geary.Smtp.Authenticator : Object {
     public abstract Memory.Buffer? challenge(int step, Response response) throws SmtpError;
     
     public virtual string to_string() {
-        return get_name();
+        return name;
     }
 }
 

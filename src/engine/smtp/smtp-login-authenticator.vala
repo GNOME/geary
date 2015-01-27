@@ -4,13 +4,17 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class Geary.Smtp.LoginAuthenticator : Geary.Smtp.AbstractAuthenticator {
+/**
+ * SASL's LOGIN authentication schema impemented as an {@link Authenticator}.
+ *
+ * LOGIN is obsolete but still widely in use and provided for backward compatibility.
+ *
+ * See [[https://tools.ietf.org/html/draft-murchison-sasl-login-00]]
+ */
+
+public class Geary.Smtp.LoginAuthenticator : Geary.Smtp.Authenticator {
     public LoginAuthenticator(Credentials credentials) {
-        base (credentials);
-    }
-    
-    public override string get_name() {
-        return "LOGIN";
+        base ("LOGIN", credentials);
     }
     
     public override Request initiate() {

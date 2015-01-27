@@ -17,15 +17,11 @@
  * application.  This is because network resources often have to be connected (or reconnected) to
  * in the background and asking the user to reauthenticate each time is deemed inconvenient.
  */
- 
+
 public class Geary.Credentials : BaseObject, Gee.Hashable<Geary.Credentials> {
     public string? user { get; set; }
     public string? pass { get; set; }
     
-    /**
-     * user and pass may be null here, but the properties will always be a non-null zero-length
-     * string.  See is_empty().
-     */
     public Credentials(string? user, string? pass) {
         this.user = user;
         this.pass = pass;
@@ -51,7 +47,7 @@ public class Geary.Credentials : BaseObject, Gee.Hashable<Geary.Credentials> {
     }
     
     public uint hash() {
-        return to_string().hash();
+        return "%s%s".printf(user ?? "", pass ?? "").hash();
     }
 }
 
