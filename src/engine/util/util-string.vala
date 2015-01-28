@@ -27,6 +27,17 @@ public int count_char(string s, unichar c) {
     return count;
 }
 
+public bool contains_any_char(string str, unichar[] chars) {
+    int index = 0;
+    unichar ch;
+    while (str.get_next_char(ref index, out ch)) {
+        if (ch in chars)
+            return true;
+    }
+    
+    return false;
+}
+
 public uint stri_hash(string str) {
     return str_hash(str.down());
 }

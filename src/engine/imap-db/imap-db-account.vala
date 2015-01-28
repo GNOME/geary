@@ -7,6 +7,12 @@
 private class Geary.ImapDB.Account : BaseObject {
     private const int POPULATE_SEARCH_TABLE_DELAY_SEC = 5;
     
+    // These characters are chosen for being commonly used to continue a single word (such as
+    // extended last names, i.e. "Lars-Eric") or in terms commonly searched for in an email client,
+    // i.e. unadorned mailbox addresses.  Note that characters commonly used for wildcards or that
+    // would be interpreted as wildcards by SQLite are not included here.
+    private const unichar[] SEARCH_TERM_CONTINUATION_CHARS = { '-', '_', '.', '@' };
+    
     private class FolderReference : Geary.SmartReference {
         public Geary.FolderPath path;
         
@@ -885,6 +891,11 @@ private class Geary.ImapDB.Account : BaseObject {
                     if (s.has_prefix(stemmed))
                         sql_s = null;
                 }
+                
+                // if term contains continuation characters, treat as exact search to reduce effects of
+                // tokenizer splitting terms w/ punctuation in them
+                if (String.contains_any_char(s, SEARCH_TERM_CONTINUATION_CHARS))
+                    s = "\"%s\"".printf(s);
                 
                 term = new SearchTerm(original, s, stemmed, sql_s, sql_stemmed);
             }
