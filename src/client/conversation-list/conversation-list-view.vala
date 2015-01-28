@@ -19,6 +19,7 @@ public class ConversationListView : Gtk.TreeView {
     private Gee.Set<Geary.App.Conversation>? current_visible_conversations = null;
     private Geary.Scheduler.Scheduled? scheduled_update_visible_conversations = null;
     private Gtk.Menu? context_menu = null;
+    private uint selection_changed_id = 0;
     
     public signal void conversations_selected(Gee.Set<Geary.App.Conversation> selected);
     
@@ -112,7 +113,7 @@ public class ConversationListView : Gtk.TreeView {
     
     private void on_conversation_removed(Geary.App.Conversation conversation) {
         if (!GearyApplication.instance.config.autoselect)
-            unselect_all();
+            get_selection().unselect_all();
     }
     
     private void on_conversations_added_began() {
@@ -311,9 +312,29 @@ public class ConversationListView : Gtk.TreeView {
         return get_all_selected_paths().nth_data(0);
     }
     
-    // Gtk.TreeSelection can fire its "changed" signal even when nothing's changed, so look for that
-    // and prevent to avoid subscribers from doing the same things multiple times
     private void on_selection_changed() {
+        if (selection_changed_id != 0)
+            Source.remove(selection_changed_id);
+        
+        // Schedule processing selection changes at low idle for two reasons: (a) if a lot of
+        // changes come in back-to-back, this allows for all that activity to settle before
+        // updating state and firing signals (which results in a lot of I/O), and (b) it means
+        // the ConversationMonitor's signals may be processed in any order by this class and the
+        // ConversationListView and not result in a lot of screen flashing and (again) unnecessary
+        // I/O as both classes update selection state.
+        selection_changed_id = Idle.add(() => {
+            // no longer scheduled
+            selection_changed_id = 0;
+            
+            do_selection_changed();
+            
+            return false;
+        }, Priority.LOW);
+    }
+    
+    // Gtk.TreeSelection can fire its "changed" signal even when nothing's changed, so look for that
+    // to avoid subscribers from doing the same things (in particular, I/O) multiple times
+    private void do_selection_changed() {
         // if the ConversationListStore is clearing, then this is called repeatedly as the elements
         // are removed, causing signals to fire and a flurry of I/O that is immediately cancelled
         // this prevents that, merely firing the signal once to indicate all selections are
