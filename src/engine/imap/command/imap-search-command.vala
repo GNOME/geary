@@ -14,8 +14,16 @@ public class Geary.Imap.SearchCommand : Command {
     public const string NAME = "search";
     public const string UID_NAME = "uid search";
     
-    public SearchCommand(SearchCriteria criteria, bool is_uid) {
-        base (is_uid ? UID_NAME : NAME);
+    public SearchCommand(SearchCriteria criteria) {
+        base (NAME);
+        
+        // append rather than add the criteria, so the top-level criterion appear in the top-level
+        // list and not as a child list
+        append(criteria);
+    }
+    
+    public SearchCommand.uid(SearchCriteria criteria) {
+        base (UID_NAME);
         
         // append rather than add the criteria, so the top-level criterion appear in the top-level
         // list and not as a child list

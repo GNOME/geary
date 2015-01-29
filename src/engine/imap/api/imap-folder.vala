@@ -33,7 +33,7 @@ private class Geary.Imap.Folder : BaseObject {
     private Nonblocking.Mutex cmd_mutex = new Nonblocking.Mutex();
     private Gee.HashMap<SequenceNumber, FetchedData> fetch_accumulator = new Gee.HashMap<
         SequenceNumber, FetchedData>();
-    private Gee.TreeSet<Imap.UID> search_accumulator = new Gee.TreeSet<Imap.UID>();
+    private Gee.Set<Imap.UID> search_accumulator = new Gee.HashSet<Imap.UID>();
     
     /**
      * A (potentially unsolicited) response from the server.
@@ -235,7 +235,7 @@ private class Geary.Imap.Folder : BaseObject {
             recent(total);
     }
     
-    private void on_search(Gee.List<int64?> seq_or_uid) {
+    private void on_search(int64[] seq_or_uid) {
         // All SEARCH from this class are UID SEARCH, so can reliably convert and add to
         // accumulator
         foreach (int64 uid in seq_or_uid) {
@@ -312,8 +312,8 @@ private class Geary.Imap.Folder : BaseObject {
     // FETCH commands can generate a FolderError.RETRY.  State will be updated to accomodate retry,
     // but all Commands must be regenerated to ensure new state is reflected in requests.
     private async Gee.Map<Command, StatusResponse>? exec_commands_async(Gee.Collection<Command> cmds,
-        out Gee.HashMap<SequenceNumber, FetchedData>? fetched,
-        out Gee.TreeSet<Imap.UID>? search_results, Cancellable? cancellable) throws Error {
+        out Gee.HashMap<SequenceNumber, FetchedData>? fetched, out Gee.Set<Imap.UID>? search_results,
+        Cancellable? cancellable) throws Error {
         int token = yield cmd_mutex.claim_async(cancellable);
         Gee.Map<Command, StatusResponse>? responses = null;
         // execute commands with mutex locked
@@ -338,7 +338,7 @@ private class Geary.Imap.Folder : BaseObject {
         
         if (search_accumulator.size > 0) {
             search_results = search_accumulator;
-            search_accumulator = new Gee.TreeSet<Imap.UID>();
+            search_accumulator = new Gee.HashSet<Imap.UID>();
         } else {
             search_results = null;
         }
@@ -420,33 +420,21 @@ private class Geary.Imap.Folder : BaseObject {
         }
     }
     
-    // Utility method for listing a UID range
-    // TODO: Offer parameter so a SortedSet could be returned (or, the caller must supply the Set)
+    // Utility method for listing UIDs on the remote within the supplied range
     public async Gee.Set<Imap.UID>? list_uids_async(MessageSet msg_set, Cancellable? cancellable)
         throws Error {
         check_open();
         
-        // TODO: exec_commands_async() can throw a RETRY error, but currently that doesn't affect
-        // this code path.  When it does, this will need to honor that error.
-        FetchCommand cmd = new FetchCommand.data_type(msg_set, FetchDataSpecifier.UID);
+        // Although FETCH could be used, SEARCH is more efficient in returning pure UID results,
+        // which is all we're interested in here
+        SearchCriteria criteria = new SearchCriteria(SearchCriterion.message_set(msg_set));
+        SearchCommand cmd = new SearchCommand.uid(criteria);
         
-        Gee.HashMap<SequenceNumber, FetchedData>? fetched;
-        yield exec_commands_async(Geary.iterate<Command>(cmd).to_array_list(), out fetched, null,
+        Gee.Set<Imap.UID>? search_results;
+        yield exec_commands_async(Geary.iterate<Command>(cmd).to_array_list(), null, out search_results,
             cancellable);
-        if (fetched == null || fetched.size == 0)
-            return null;
         
-        // Because the number of UIDs can be immense, do hashing in the background
-        Gee.Set<Imap.UID> uids = new Gee.HashSet<Imap.UID>();
-        yield Nonblocking.Concurrent.global.schedule_async(() => {
-            foreach (FetchedData fetched_data in fetched.values) {
-                Imap.UID? uid = fetched_data.data_map.get(FetchDataSpecifier.UID) as Imap.UID;
-                if (uid != null)
-                    uids.add(uid);
-            }
-        }, cancellable);
-        
-        return (uids.size > 0) ? uids : null;
+        return (search_results != null && search_results.size > 0) ? search_results : null;
     }
     
     private Gee.Collection<FetchCommand> assemble_list_commands(Imap.MessageSet msg_set,
@@ -739,12 +727,17 @@ private class Geary.Imap.Folder : BaseObject {
         
         // always perform a UID SEARCH
         Gee.Collection<Command> cmds = new Gee.ArrayList<Command>();
-        cmds.add(new SearchCommand(criteria, true));
+        cmds.add(new SearchCommand.uid(criteria));
         
-        Gee.TreeSet<Imap.UID>? search_results;
+        Gee.Set<Imap.UID>? search_results;
         yield exec_commands_async(cmds, null, out search_results, cancellable);
+        if (search_results == null || search_results.size == 0)
+            return null;
         
-        return (search_results != null && search_results.size > 0) ? search_results : null;
+        Gee.SortedSet<Imap.UID> tree = new Gee.TreeSet<Imap.UID>();
+        tree.add_all(search_results);
+        
+        return tree;
     }
     
     // NOTE: If fields are added or removed from this method, BASIC_FETCH_FIELDS *must* be updated

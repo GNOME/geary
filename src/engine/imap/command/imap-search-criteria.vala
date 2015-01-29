@@ -23,7 +23,9 @@
  */
 
 public class Geary.Imap.SearchCriteria : ListParameter {
-    public SearchCriteria() {
+    public SearchCriteria(SearchCriterion? first = null) {
+        if (first != null)
+            add_all(first.to_parameters());
     }
     
     /**

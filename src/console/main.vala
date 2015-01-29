@@ -543,8 +543,13 @@ class ImapConsole : Gtk.Window {
         foreach (string arg in args)
             criteria.and(new Geary.Imap.SearchCriterion.simple(arg));
         
-        cx.send_async.begin(new Geary.Imap.SearchCommand(criteria, cmd == "uid-search"),
-            null, on_searched);
+        Geary.Imap.SearchCommand search;
+        if (cmd == "uid-search")
+            search = new Geary.Imap.SearchCommand.uid(criteria);
+        else
+            search = new Geary.Imap.SearchCommand(criteria);
+        
+        cx.send_async.begin(search, null, on_searched);
     }
     
     private void on_searched(Object? source, AsyncResult result) {

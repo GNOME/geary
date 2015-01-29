@@ -127,14 +127,14 @@ public Gee.MultiMap<V, K> reverse_multi_map<K, V>(Gee.MultiMap<K, V> map) {
 /**
  * To be used by a Hashable's to_hash() method.
  */
-public inline static uint int64_hash(int64 value) {
+public inline uint int64_hash(int64 value) {
     return hash_memory(&value, sizeof(int64));
 }
 
 /**
  * To be used as hash_func for Gee collections.
  */
-public uint int64_hash_func(int64? n) {
+public inline uint int64_hash_func(int64? n) {
     return hash_memory((uint8 *) n, sizeof(int64));
 }
 
@@ -152,7 +152,7 @@ public bool int64_equal_func(int64? a, int64? b) {
  * A rotating-XOR hash that can be used to hash memory buffers of any size.
  */
 public uint hash_memory(void *ptr, size_t bytes) {
-    if (bytes == 0)
+    if (ptr == null || bytes == 0)
         return 0;
     
     uint8 *u8 = (uint8 *) ptr;

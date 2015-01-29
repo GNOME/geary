@@ -147,18 +147,16 @@ public class Geary.Imap.ServerData : ServerResponse {
      *
      * @throws ImapError.INVALID if not a {@link ServerDataType.SEARCH} value.
      */
-    public Gee.List<int64?> get_search() throws ImapError {
+    public int64[] get_search() throws ImapError {
         if (server_data_type != ServerDataType.SEARCH)
             throw new ImapError.INVALID("Not SEARCH data: %s", to_string());
         
-        Gee.List<int64?> results = new Gee.ArrayList<int64?>();
-        for (int ctr = 2; ctr < size; ctr++) {
-            // can't directly return the result from as_int() into results as a Vala bug causes a
-            // build policy violation for uncast int -> pointer on 64-bit architectures:
-            // https://bugzilla.gnome.org/show_bug.cgi?id=720437
-            int64 result = get_as_string(ctr).as_int64(0);
-            results.add(result);
-        }
+        if (size <= 2)
+            return new int64[0];
+        
+        int64[] results = new int64[size - 2];
+        for (int ctr = 2; ctr < size; ctr++)
+            results[ctr - 2] = get_as_string(ctr).as_int64(0);
         
         return results;
     }
