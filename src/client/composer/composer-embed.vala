@@ -10,7 +10,6 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
     
     private ComposerWidget composer;
     private ConversationViewer conversation_viewer;
-    private Gee.Set<Geary.App.Conversation>? prev_selection = null;
     private string embed_id;
     private bool setting_inner_scroll;
     private bool scrolled_to_bottom = false;
@@ -24,31 +23,23 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
     }
     
     public ComposerEmbed(ComposerWidget composer, ConversationViewer conversation_viewer,
-        Geary.Email? referred) {
+        Geary.Email referred) {
         this.composer = composer;
         this.conversation_viewer = conversation_viewer;
         halign = Gtk.Align.FILL;
         valign = Gtk.Align.FILL;
         
         WebKit.DOM.HTMLElement? email_element = null;
-        if (referred != null && composer.state != ComposerWidget.ComposerState.INLINE_NEW) {
-            email_element = conversation_viewer.web_view.get_dom_document().get_element_by_id(
-                conversation_viewer.get_div_id(referred.id)) as WebKit.DOM.HTMLElement;
-            embed_id = referred.id.to_string() + "_reply";
-        } else {
-            embed_id = random_string(10);
-        }
+        email_element = conversation_viewer.web_view.get_dom_document().get_element_by_id(
+            conversation_viewer.get_div_id(referred.id)) as WebKit.DOM.HTMLElement;
+        embed_id = referred.id.to_string() + "_reply";
         if (email_element == null) {
-            ConversationListView conversation_list_view = ((MainWindow) GearyApplication.
-                instance.controller.main_window).conversation_list_view;
-            prev_selection = conversation_list_view.get_selected_conversations();
-            conversation_list_view.get_selection().unselect_all();
+            warning("Embedded composer could not find email to follow.");
             email_element = conversation_viewer.web_view.get_dom_document().get_element_by_id(
                 "placeholder") as WebKit.DOM.HTMLElement;
         }
         
         try {
-            conversation_viewer.show_conversation_div();
             email_element.insert_adjacent_html("afterend",
                 @"<div id='$embed_id' class='composer_embed'></div>");
         } catch (Error error) {
@@ -69,31 +60,27 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
     private void on_realize() {
         update_style();
         
-        if (composer.state != ComposerWidget.ComposerState.INLINE_NEW) {
-            Gtk.ScrolledWindow win = (Gtk.ScrolledWindow) composer.editor.parent;
-            win.get_vscrollbar().hide();
-            
-            composer.editor.vadjustment.value_changed.connect(on_inner_scroll);
-            composer.editor.vadjustment.changed.connect(on_adjust_changed);
-            composer.editor.user_changed_contents.connect(on_inner_size_changed);
-            
-            reroute_scroll_handling(this);
-        }
+        Gtk.ScrolledWindow win = (Gtk.ScrolledWindow) composer.editor.parent;
+        win.get_vscrollbar().hide();
+        
+        composer.editor.vadjustment.value_changed.connect(on_inner_scroll);
+        composer.editor.vadjustment.changed.connect(on_adjust_changed);
+        composer.editor.user_changed_contents.connect(on_inner_size_changed);
+        
+        reroute_scroll_handling(this);
     }
     
     private void on_loaded() {
-        if (composer.state != ComposerWidget.ComposerState.INLINE_NEW) {
-            try {
-               composer.editor.get_dom_document().body.get_class_list().add("embedded");
-            } catch (Error error) {
-                debug("Error setting class of editor: %s", error.message);
-            }
-            Idle.add(() => {
-                recalc_height();
-                conversation_viewer.compose_overlay.queue_resize();
-                return false;
-            });
+        try {
+           composer.editor.get_dom_document().body.get_class_list().add("embedded");
+        } catch (Error error) {
+            debug("Error setting class of editor: %s", error.message);
         }
+        Idle.add(() => {
+            recalc_height();
+            conversation_viewer.compose_overlay.queue_resize();
+            return false;
+        });
     }
     
     private void reroute_scroll_handling(Gtk.Widget widget) {
@@ -161,8 +148,7 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
         int y_top = (int) (embed.offset_top + embed.client_top) - (int) vscroll;
         int available_height = int.min(y_top + div_height, view_height) - int.max(y_top, 0);
         
-        if (available_height < 0 || available_height == div_height ||
-            composer.state == ComposerWidget.ComposerState.INLINE_NEW) {
+        if (available_height < 0 || available_height == div_height) {
             // It fits in the available space, or it doesn't fit at all
             allocation.y = y_top;
             // When offscreen, make it very small to ensure scrolling during any edit
@@ -178,10 +164,6 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
         }
         allocation.x = (int) (embed.offset_left + embed.client_left) - (int) hscroll;
         allocation.width = (int) embed.client_width;
-        
-        // INLINE_NEW handles its own scrolling.
-        if (composer.state == ComposerWidget.ComposerState.INLINE_NEW)
-            return true;
         
         // Work out adjustment of composer web view
         setting_inner_scroll = true;
@@ -289,17 +271,6 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
             embed.parent_element.remove_child(embed);
         } catch (Error error) {
             warning("Could not remove embed from WebView: %s", error.message);
-        }
-        
-        if (prev_selection != null) {
-            ConversationListView conversation_list_view = ((MainWindow) GearyApplication.
-                instance.controller.main_window).conversation_list_view;
-            if (prev_selection.is_empty)
-                // Need to trigger "No messages selected"
-                conversation_list_view.conversations_selected(prev_selection);
-            else
-                conversation_list_view.select_conversations(prev_selection);
-            prev_selection = null;
         }
     }
     

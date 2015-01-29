@@ -231,6 +231,10 @@ public class ConversationViewer : Gtk.Box {
         Configuration config = GearyApplication.instance.config;
         config.bind(Configuration.COMPOSER_PANE_POSITION_KEY, composer_paned, "position");
         pack_start(composer_paned);
+        composer_boxes.notify["visible"].connect(() => {
+            if (!composer_boxes.visible && !message_overlay.visible)
+                message_overlay.show();
+            });
         
         conversation_find_bar = new ConversationFindBar(web_view);
         conversation_find_bar.no_show_all = true;
@@ -243,6 +247,8 @@ public class ConversationViewer : Gtk.Box {
         ComposerBox container = new ComposerBox(composer);
         composer_boxes.pack_start(container);
         composer_boxes.show();
+        if (composer.state == ComposerWidget.ComposerState.NEW)
+            message_overlay.hide();
     }
     
     public Geary.Email? get_last_message() {
@@ -2436,11 +2442,6 @@ public class ConversationViewer : Gtk.Box {
     private bool in_drafts_folder() {
         return current_folder != null && current_folder.special_folder_type
             == Geary.SpecialFolderType.DRAFTS;
-    }
-    
-    // The Composer may need to adjust the mode back to conversation
-    public void show_conversation_div() {
-        set_mode(DisplayMode.CONVERSATION);
     }
 }
 

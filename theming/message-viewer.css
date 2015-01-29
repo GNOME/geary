@@ -106,20 +106,6 @@ hr {
 }
 
 .composer_embed {
-    position: absolute;
-    top: 0px; /* margin-top has impact here, despite absolute positioning (!?) */
-    bottom: 16px;
-    left: 16px;
-    right: 16px;
-    width: auto;
-}
-.email + .composer_embed {
-    position: relative;
-    top: auto;
-    bottom: auto;
-    left: auto;
-    right: auto;
-    width: 100%;
     height: 300px;
 }
 

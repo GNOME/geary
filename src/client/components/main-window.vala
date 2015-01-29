@@ -145,9 +145,14 @@ public class MainWindow : Gtk.ApplicationWindow {
                 border-top-width: 0px;
                 border-bottom-width: 0px;
             }
+            ComposerBox {
+                border: 16px solid #ccc;
+                box-shadow: 0 0 0 1px rgba(0,0,0,0.4) inset;
+                padding: 1px;
+            }
             GtkBox GtkHeaderBar {
                   border-radius: 0px;
-              }
+            }
         """;
         
         if(Gtk.MAJOR_VERSION >= 3 && Gtk.MINOR_VERSION >= 14) {

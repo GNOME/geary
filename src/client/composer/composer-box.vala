@@ -4,9 +4,10 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class ComposerBox : Gtk.EventBox, ComposerContainer {
+public class ComposerBox : Gtk.Frame, ComposerContainer {
     
     private ComposerWidget composer;
+    private Gee.Set<Geary.App.Conversation>? prev_selection = null;
     private bool has_accel_group = false;
     
     public Gtk.Window top_window {
@@ -20,6 +21,13 @@ public class ComposerBox : Gtk.EventBox, ComposerContainer {
         composer.editor.focus_in_event.connect(on_focus_in);
         composer.editor.focus_out_event.connect(on_focus_out);
         show();
+        
+        if (composer.state == ComposerWidget.ComposerState.NEW) {
+            ConversationListView conversation_list_view = ((MainWindow) GearyApplication.
+                instance.controller.main_window).conversation_list_view;
+            prev_selection = conversation_list_view.get_selected_conversations();
+            conversation_list_view.get_selection().unselect_all();
+        }
     }
     
     public Gtk.Widget? remove_composer() {
@@ -63,6 +71,17 @@ public class ComposerBox : Gtk.EventBox, ComposerContainer {
         composer.state = ComposerWidget.ComposerState.DETACHED;
         composer.editor.focus_in_event.disconnect(on_focus_in);
         composer.editor.focus_out_event.disconnect(on_focus_out);
+        
+        if (prev_selection != null) {
+            ConversationListView conversation_list_view = ((MainWindow) GearyApplication.
+                instance.controller.main_window).conversation_list_view;
+            if (prev_selection.is_empty)
+                // Need to trigger "No messages selected"
+                conversation_list_view.conversations_selected(prev_selection);
+            else
+                conversation_list_view.select_conversations(prev_selection);
+            prev_selection = null;
+        }
     }
     
     public void close_container() {

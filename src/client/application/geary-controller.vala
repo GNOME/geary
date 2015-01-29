@@ -2139,7 +2139,8 @@ public class GearyController : Geary.BaseObject {
         widget.destroy.connect(on_composer_widget_destroy);
         
         if (inline) {
-            if (widget.state == ComposerWidget.ComposerState.PANED)
+            if (widget.state == ComposerWidget.ComposerState.NEW ||
+                widget.state == ComposerWidget.ComposerState.PANED)
                 main_window.conversation_viewer.set_paned_composer(widget);
             else
                 new ComposerEmbed(widget, main_window.conversation_viewer, referred); // is_draft
@@ -2181,7 +2182,7 @@ public class GearyController : Geary.BaseObject {
         // it if it hasn't been modified; otherwise open a new composer in a new window.
         if (compose_type == ComposerWidget.ComposeType.NEW_MESSAGE) {
             foreach (ComposerWidget cw in composer_widgets) {
-                if (cw.state == ComposerWidget.ComposerState.INLINE_NEW) {
+                if (cw.state == ComposerWidget.ComposerState.NEW) {
                     if (!cw.blank) {
                         inline = false;
                         return true;

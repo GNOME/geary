@@ -22,7 +22,7 @@ public class ComposerWidget : Gtk.EventBox {
     public enum ComposerState {
         DETACHED,
         PANED,
-        INLINE_NEW,
+        NEW,
         INLINE,
         INLINE_COMPACT
     }
@@ -263,7 +263,7 @@ public class ComposerWidget : Gtk.EventBox {
         this.account = account;
         this.compose_type = compose_type;
         if (compose_type == ComposeType.NEW_MESSAGE)
-            state = ComposerState.INLINE_NEW;
+            state = ComposerState.NEW;
         else if (compose_type == ComposeType.FORWARD)
             state = ComposerState.INLINE;
         else
