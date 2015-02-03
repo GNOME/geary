@@ -1,3 +1,20 @@
+geary (0.9.1-1~utopic1) utopic; urgency=low
+
+  * Support HTML signatures (#738895)
+  * Quote from multiple selections in reply (#738188)
+  * Restore reply/reply all/forward state of edited drafts (#743067)
+  * Quoted message portion may be easily removed in composer (#741609)
+  * True delete now supported in Gmail (#721790)
+  * Improved searching for terms w/ punctuation (#714863)
+  * Better management of draft messages to avoid orphans
+  * Empty Trash, Empty Spam (#714809, #725260)
+  * Better conversation construction (#714563)
+  * Improved IMAP connection reestablishment and retrying of remote operations
+  * Various bug fixes, optimizations, improvements
+  * Updated translations
+
+ -- Jim Nelson <jim@yorba.org>  Mon, 02 Feb 2015 18:12:49 -0800
+
 geary (0.9.0-1~utopic1) utopic; urgency=low
 
   * Improved full-text search experience (#720361)
