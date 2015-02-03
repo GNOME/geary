@@ -467,3 +467,20 @@ public bool dissasemble_data_uri(string uri, out Geary.Memory.Buffer? buffer) {
     return true;
 }
 
+// Escape reserved HTML entities if the string does not have HTML tags.  If there are no tags,
+// or if preserve_whitespace_in_html is true, wrap the string a div to preserve whitespace.
+public string smart_escape(string? text, bool preserve_whitespace_in_html) {
+    if (text == null)
+        return text;
+    
+    string res = text;
+    if (!Regex.match_simple("<([A-Z]*)(?: [^>]*)?>.*</(\\1)>|<[A-Z]*(?: [^>]*)?/>", res,
+        RegexCompileFlags.CASELESS)) {
+        res = Geary.HTML.escape_markup(res);
+        preserve_whitespace_in_html = true;
+    }
+    if (preserve_whitespace_in_html)
+        res = @"<div style='white-space: pre;'>$res</div>";
+    return res;
+}
+

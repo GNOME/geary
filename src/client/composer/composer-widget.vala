@@ -993,7 +993,7 @@ public class ComposerWidget : Gtk.EventBox {
                     set_cursor();
                     return;
                 }
-                signature = Geary.HTML.smart_escape(signature, false);
+                signature = smart_escape(signature, false);
             } catch (Error error) {
                 debug("Error reading signature file %s: %s", signature_file.get_path(), error.message);
                 set_cursor();
@@ -1005,7 +1005,7 @@ public class ComposerWidget : Gtk.EventBox {
                 set_cursor();
                 return;
             }
-            signature = Geary.HTML.smart_escape(signature, true);
+            signature = smart_escape(signature, true);
         }
         
         if (body_html == null)

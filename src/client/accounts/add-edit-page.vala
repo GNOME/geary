@@ -581,7 +581,7 @@ public class AddEditPage : Gtk.Box {
     
     private void on_signature_stack_changed() {
         if (signature_stack.visible_child_name == "preview_window")
-            preview_webview.load_html_string(Geary.HTML.smart_escape(email_signature, true), "");
+            preview_webview.load_html_string(smart_escape(email_signature, true), "");
     }
 
     private uint16 get_default_smtp_port() {
