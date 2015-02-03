@@ -4,6 +4,13 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
+/**
+ * A WebKit view displaying all the emails in a {@link Geary.App.Conversation}.
+ *
+ * Unlike ConversationListStore (which sorts by date received), ConversationViewer sorts by the
+ * {@link Geary.Email.date} field (the Date: header), as that's the date displayed to the user.
+ */
+
 public class ConversationViewer : Gtk.Box {
     public const Geary.Email.Field REQUIRED_FIELDS =
         Geary.Email.Field.HEADER
@@ -129,7 +136,7 @@ public class ConversationViewer : Gtk.Box {
     
     // List of emails in this view.
     public Gee.TreeSet<Geary.Email> messages { get; private set; default = 
-        new Gee.TreeSet<Geary.Email>(Geary.Email.compare_date_ascending); }
+        new Gee.TreeSet<Geary.Email>(Geary.Email.compare_sent_date_ascending); }
     
     // The HTML viewer to view the emails.
     public ConversationWebView web_view { get; private set; }
@@ -499,7 +506,7 @@ public class ConversationViewer : Gtk.Box {
         // Fetch full messages.
         Gee.Collection<Geary.Email>? messages_to_add
             = yield list_full_messages_async(conversation.get_emails(
-            Geary.App.Conversation.Ordering.DATE_ASCENDING), cancellable);
+            Geary.App.Conversation.Ordering.SENT_DATE_ASCENDING), cancellable);
         
         // Add messages.
         if (messages_to_add != null) {

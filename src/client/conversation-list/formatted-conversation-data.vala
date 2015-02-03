@@ -116,7 +116,7 @@ public class FormattedConversationData : Geary.BaseObject {
     
     public bool update_date_string() {
         // get latest email *in folder* for the conversation's date, fall back on out-of-folder
-        Geary.Email? latest = conversation.get_latest_email(Geary.App.Conversation.Location.IN_FOLDER_OUT_OF_FOLDER);
+        Geary.Email? latest = conversation.get_latest_recv_email(Geary.App.Conversation.Location.IN_FOLDER_OUT_OF_FOLDER);
         if (latest == null || latest.properties == null)
             return false;
         
@@ -181,7 +181,7 @@ public class FormattedConversationData : Geary.BaseObject {
         // Build chronological list of AuthorDisplay records, setting to unread if any message by
         // that author is unread
         Gee.ArrayList<ParticipantDisplay> list = new Gee.ArrayList<ParticipantDisplay>();
-        foreach (Geary.Email message in conversation.get_emails(Geary.App.Conversation.Ordering.DATE_ASCENDING)) {
+        foreach (Geary.Email message in conversation.get_emails(Geary.App.Conversation.Ordering.RECV_DATE_ASCENDING)) {
             // only display if something to display
             Geary.RFC822.MailboxAddresses? addresses = use_to ? message.to : message.from;
             if (addresses == null || addresses.size < 1)

@@ -5,8 +5,8 @@
  */
 
 public int compare_conversation_ascending(Geary.App.Conversation a, Geary.App.Conversation b) {
-    Geary.Email? a_latest = a.get_latest_email(Geary.App.Conversation.Location.IN_FOLDER_OUT_OF_FOLDER);
-    Geary.Email? b_latest = b.get_latest_email(Geary.App.Conversation.Location.IN_FOLDER_OUT_OF_FOLDER);
+    Geary.Email? a_latest = a.get_latest_recv_email(Geary.App.Conversation.Location.IN_FOLDER_OUT_OF_FOLDER);
+    Geary.Email? b_latest = b.get_latest_recv_email(Geary.App.Conversation.Location.IN_FOLDER_OUT_OF_FOLDER);
     
     if (a_latest == null)
         return (b_latest == null) ? 0 : -1;
@@ -15,7 +15,7 @@ public int compare_conversation_ascending(Geary.App.Conversation a, Geary.App.Co
     
     // use date-received so newly-arrived messages float to the top, even if they're send date
     // was earlier (think of mailing lists that batch up forwarded mail)
-    return a_latest.properties.date_received.compare(b_latest.properties.date_received);
+    return Geary.Email.compare_recv_date_ascending(a_latest, b_latest);
 }
 
 public int compare_conversation_descending(Geary.App.Conversation a, Geary.App.Conversation b) {

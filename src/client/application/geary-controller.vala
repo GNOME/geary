@@ -1117,8 +1117,6 @@ public class GearyController : Geary.BaseObject {
         account.sending_monitor.start.disconnect(on_sending_started);
         account.sending_monitor.finish.disconnect(on_sending_finished);
         
-        if (main_window.conversation_list_store.account_owner_email == account.information.email)
-            main_window.conversation_list_store.account_owner_email = null;
         main_window.folder_list.remove_account(account);
         
         if (inboxes.has_key(account)) {
@@ -1307,9 +1305,6 @@ public class GearyController : Geary.BaseObject {
         if (!(current_folder is Geary.SearchFolder))
             previous_non_search_folder = current_folder;
         
-        main_window.conversation_list_store.set_current_folder(current_folder, conversation_cancellable);
-        main_window.conversation_list_store.account_owner_email = current_account.information.email;
-        
         main_window.main_toolbar.copy_folder_menu.clear();
         main_window.main_toolbar.move_folder_menu.clear();
         foreach(Geary.Folder f in current_folder.account.list_folders()) {
@@ -1418,7 +1413,7 @@ public class GearyController : Geary.BaseObject {
             return;
         
         // TODO: Determine how to map between conversations and drafts correctly.
-        on_edit_draft(activated.get_latest_email(Geary.App.Conversation.Location.IN_FOLDER));
+        on_edit_draft(activated.get_latest_recv_email(Geary.App.Conversation.Location.IN_FOLDER));
     }
     
     private void on_edit_draft(Geary.Email draft) {
@@ -1649,11 +1644,13 @@ public class GearyController : Geary.BaseObject {
         dialog.run();
     }
     
+    // latest_sent_only uses Email's Date: field, which corresponds to how they're sorted in the
+    // ConversationViewer
     private Gee.ArrayList<Geary.EmailIdentifier> get_conversation_email_ids(
-        Geary.App.Conversation conversation, bool latest_only,
+        Geary.App.Conversation conversation, bool latest_sent_only,
         Gee.ArrayList<Geary.EmailIdentifier> add_to) {
-        if (latest_only) {
-            Geary.Email? latest = conversation.get_latest_email(
+        if (latest_sent_only) {
+            Geary.Email? latest = conversation.get_latest_sent_email(
                 Geary.App.Conversation.Location.IN_FOLDER_OUT_OF_FOLDER);
             if (latest != null)
                 add_to.add(latest.id);
@@ -1665,20 +1662,19 @@ public class GearyController : Geary.BaseObject {
     }
     
     private Gee.Collection<Geary.EmailIdentifier> get_conversation_collection_email_ids(
-        Gee.Collection<Geary.App.Conversation> conversations, bool latest_only = false) {
+        Gee.Collection<Geary.App.Conversation> conversations, bool latest_sent_only) {
         Gee.ArrayList<Geary.EmailIdentifier> ret = new Gee.ArrayList<Geary.EmailIdentifier>();
         
         foreach(Geary.App.Conversation c in conversations)
-            get_conversation_email_ids(c, latest_only, ret);
+            get_conversation_email_ids(c, latest_sent_only, ret);
         
         return ret;
     }
     
-    private Gee.ArrayList<Geary.EmailIdentifier> get_selected_email_ids(
-        bool latest_only) {
+    private Gee.ArrayList<Geary.EmailIdentifier> get_selected_email_ids(bool latest_sent_only) {
         Gee.ArrayList<Geary.EmailIdentifier> ids = new Gee.ArrayList<Geary.EmailIdentifier>();
         foreach (Geary.App.Conversation conversation in selected_conversations)
-            get_conversation_email_ids(conversation, latest_only, ids);
+            get_conversation_email_ids(conversation, latest_sent_only, ids);
         return ids;
     }
     
@@ -1701,7 +1697,9 @@ public class GearyController : Geary.BaseObject {
             
             // Only check the messages that "Mark as Unread" would mark, so we
             // don't add the menu option and have it not do anything.
-            Geary.Email? latest = conversation.get_latest_email(
+            //
+            // Sort by Date: field to correspond with ConversationViewer ordering
+            Geary.Email? latest = conversation.get_latest_sent_email(
                 Geary.App.Conversation.Location.IN_FOLDER_OUT_OF_FOLDER);
             if (latest != null && latest.email_flags != null
                 && !latest.email_flags.contains(Geary.EmailFlags.UNREAD))
