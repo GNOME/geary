@@ -1,13 +1,13 @@
 # Czech translation for geary.
 # Copyright (C) 2014 geary's COPYRIGHT HOLDER
 # This file is distributed under the same license as the geary package.
-# Marek Černocký <marek@manet.cz>, 2014.
+# Marek Černocký <marek@manet.cz>, 2014, 2015.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: geary master\n"
-"POT-Creation-Date: 2014-12-26 05:52+0000\n"
-"PO-Revision-Date: 2014-12-26 10:26+0100\n"
+"POT-Creation-Date: 2015-02-03 05:56+0000\n"
+"PO-Revision-Date: 2015-02-03 08:27+0100\n"
 "Last-Translator: Marek Černocký <marek@manet.cz>\n"
 "Language-Team: Czech <gnome-cs-list@gnome.org>\n"
 "Language: cs\n"
@@ -94,11 +94,19 @@ msgstr ""
 "Řada klávesových zkratek je dostupná v editoru zpráv, podrobnosti viz <link "
 "xref=\"shortcuts#composer\"/>."
 
-#: C/write.page:39(title)
+#: C/write.page:37(p)
+msgid ""
+"You may specify a signature to be inserted into the composer in the <link "
+"xref=\"accounts\"/> dialog."
+msgstr ""
+"V dialogovém okně <link xref=\"accounts\"/> můžete zadat patičku, která se "
+"bude vkládat do editoru."
+
+#: C/write.page:42(title)
 msgid "Drafts"
 msgstr "Koncepty"
 
-#: C/write.page:41(p)
+#: C/write.page:44(p)
 msgid ""
 "For mail servers that support drafts, Geary will automatically save the "
 "message as you type. If you close the composer without sending, Geary will "
@@ -108,7 +116,7 @@ msgstr ""
 "během psaní. Pokud zavřete okno editoru, aniž byste zprávu odeslali, Geary "
 "se vás dotáže, jestli má zprávu uchovat v konceptech nebo ji zahodit."
 
-#: C/write.page:44(p)
+#: C/write.page:47(p)
 msgid ""
 "To edit an existing draft, select the Drafts folder in the folder list, "
 "select the message, and click \"Edit Draft\" in the message viewer."
@@ -117,7 +125,7 @@ msgstr ""
 "složku Koncepty, vyberte zprávu a klikněte v prohlížeči zpráv na „Upravit "
 "koncept“ ."
 
-#: C/write.page:47(p)
+#: C/write.page:50(p)
 msgid "Geary deletes the draft when you send the message."
 msgstr "Po odeslání zprávy Geary koncept smaže."
 
@@ -1139,6 +1147,31 @@ msgstr ""
 
 #: C/accounts.page:45(p)
 msgid ""
+"The <gui>Sign emails</gui> checkbox indicates whether a signature will be "
+"automatically inserted when a composer is opened. You may enter the "
+"signature into the box immediately below. You may use HTML tags to style the "
+"text. Switch to a preview of the signature using the buttons to the right."
+msgstr ""
+"Zaškrtávací políčko <gui>Patička e-mailů</gui> říká, jestli se má při "
+"otevření editoru automaticky vložit patička s podpisem. Obsah patičky můžete "
+"zadat do pole níže. Můžete při tom určovat styl pomocí značek HTML. "
+"Tlačítkem napravo si můžete zobrazit náhled patičky."
+
+#: C/accounts.page:50(p)
+msgid ""
+"If you leave the signature in the Accounts dialog blank, Geary will use the "
+"<file>.signature</file> file in your home directory, if it exists. This file "
+"may contain either plain text or HTML markup. In the latter case, the markup "
+"will be inserted directly into the composer, without any escaping."
+msgstr ""
+"Pokud ponecháte patičku v dialogovém okně Účty prázdnou, bude Geary používat "
+"soubor <file>.signature</file> ve vaší domovské složce (za předpokladu, že "
+"soubor existuje). Může obsahovat buď prostý text nebo text formátovaný jako "
+"HTML. Ve druhém případě bude vložen do editoru tak, jak je, bez jakéhokoliv "
+"ošetření speciálních znaků."
+
+#: C/accounts.page:55(p)
+msgid ""
 "The <gui>Download mail</gui> drop-down allows you to configure how much mail "
 "Geary will keep locally. Geary can only use locally available mail when "
 "searching and forming conversations."
@@ -1147,11 +1180,11 @@ msgstr ""
 "zpráv bude Geary uchovávat místně. Jen v místně uložených zprávám může Geary "
 "vychledávat a sestavovat z nich konverzace."
 
-#: C/accounts.page:53(title)
+#: C/accounts.page:63(title)
 msgid "Removing accounts"
 msgstr "Odebírání účtů"
 
-#: C/accounts.page:55(p)
+#: C/accounts.page:65(p)
 msgid ""
 "To delete an account, open the Accounts dialog, select the account, and "
 "press the - button. Geary will delete all information associated with the "
