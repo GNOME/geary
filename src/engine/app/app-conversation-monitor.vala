@@ -631,7 +631,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
     }
     
     internal async void remove_emails_async(Gee.Collection<Geary.EmailIdentifier> removed_ids) {
-        debug("%d messages(s) removed to %s, trimming/removing conversations...", removed_ids.size,
+        debug("%d messages(s) removed from %s, trimming/removing conversations...", removed_ids.size,
             folder.to_string());
         
         Gee.Collection<Geary.App.Conversation> removed;
@@ -732,7 +732,10 @@ public class Geary.App.ConversationMonitor : BaseObject {
      * Attempts to load enough conversations to fill min_window_count.
      */
     internal async void fill_window_async(bool is_insert) {
-        if (!is_monitoring || min_window_count <= conversations.size)
+        if (!is_monitoring)
+            return;
+        
+        if (!is_insert && min_window_count <= conversations.size)
             return;
         
         int initial_message_count = conversations.get_email_count();

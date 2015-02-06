@@ -136,8 +136,7 @@ public class Geary.Engine : BaseObject {
      * when necessary.
      */
     public async void open_async(File user_data_dir, File resource_dir,
-                                 Geary.CredentialsMediator? authentication_mediator,
-                                 Cancellable? cancellable = null) throws Error {
+        Geary.CredentialsMediator? authentication_mediator, Cancellable? cancellable = null) throws Error {
         // initialize *before* opening the Engine ... all initialize code should assume the Engine
         // is closed
         initialize_library();
@@ -202,16 +201,19 @@ public class Geary.Engine : BaseObject {
     public async void close_async(Cancellable? cancellable = null) throws Error {
         if (!is_open)
             return;
-
-        foreach(AccountInformation account in accounts.values)
+        
+        Gee.Collection<AccountInformation> unavailable_accounts = accounts.values;
+        accounts.clear();
+        
+        foreach(AccountInformation account in unavailable_accounts)
             account_unavailable(account);
-
+        
         user_data_dir = null;
         resource_dir = null;
         authentication_mediator = null;
         accounts = null;
         account_instances = null;
-
+        
         is_open = false;
         closed();
     }

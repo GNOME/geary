@@ -8,10 +8,11 @@
  * Handles open/close for local folders.
  */
 public abstract class Geary.AbstractLocalFolder : Geary.Folder {
-    private int open_count = 0;
-    
     private ProgressMonitor _opening_monitor = new Geary.ReentrantProgressMonitor(Geary.ProgressType.ACTIVITY);
     public override Geary.ProgressMonitor opening_monitor { get { return _opening_monitor; } }
+    
+    private int open_count = 0;
+    private Nonblocking.Semaphore closed_semaphore = new Nonblocking.Semaphore();
     
     protected AbstractLocalFolder() {
     }
@@ -39,6 +40,8 @@ public abstract class Geary.AbstractLocalFolder : Geary.Folder {
         if (open_count++ > 0)
             return false;
         
+        closed_semaphore.reset();
+        
         notify_opened(Geary.Folder.OpenState.LOCAL, properties.email_total);
         
         return true;
@@ -48,8 +51,14 @@ public abstract class Geary.AbstractLocalFolder : Geary.Folder {
         if (open_count == 0 || --open_count > 0)
             return;
         
+        closed_semaphore.blind_notify();
+        
         notify_closed(Geary.Folder.CloseReason.LOCAL_CLOSE);
         notify_closed(Geary.Folder.CloseReason.FOLDER_CLOSED);
+    }
+    
+    public override async void wait_for_close_async(Cancellable? cancellable = null) throws Error {
+        yield closed_semaphore.wait_async(cancellable);
     }
 }
 

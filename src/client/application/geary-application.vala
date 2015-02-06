@@ -59,7 +59,6 @@ public class GearyApplication : Gtk.Application {
      * an exit, a callback should return true.
      */
     public virtual signal bool exiting(bool panicked) {
-        controller.close();
         Date.terminate();
         
         return true;
@@ -89,9 +88,9 @@ public class GearyApplication : Gtk.Application {
     
     private string bin;
     private File exec_dir;
-    
     private bool exiting_fired = false;
     private int exitcode = 0;
+    private bool is_destroyed = false;
     
     public GearyApplication() {
         Object(application_id: APP_ID);
@@ -197,6 +196,17 @@ public class GearyApplication : Gtk.Application {
         yield controller.open_async();
         
         release();
+    }
+    
+    private async void destroy_async() {
+        // see create_async() for reasoning hold/release is used
+        hold();
+        
+        yield controller.close_async();
+        
+        release();
+        
+        is_destroyed = true;
     }
     
     public bool compose(string mailto) {
@@ -326,6 +336,11 @@ public class GearyApplication : Gtk.Application {
             
             return;
         }
+        
+        // Give asynchronous destroy_async() a chance to complete
+        destroy_async.begin();
+        while (!is_destroyed || Gtk.events_pending())
+            Gtk.main_iteration();
         
         if (Gtk.main_level() > 0)
             Gtk.main_quit();

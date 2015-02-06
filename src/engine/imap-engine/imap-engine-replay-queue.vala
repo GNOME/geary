@@ -9,6 +9,12 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
     // see as high as 250ms
     private const int NOTIFICATION_QUEUE_WAIT_MSEC = 1000;
     
+    private enum State {
+        OPEN,
+        CLOSING,
+        CLOSED
+    }
+    
     private class CloseReplayQueue : ReplayOperation {
         public CloseReplayQueue() {
             // LOCAL_AND_REMOTE to make sure this operation is flushed all the way down the pipe
@@ -57,8 +63,7 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
     private Gee.ArrayList<ReplayOperation> notification_queue = new Gee.ArrayList<ReplayOperation>();
     private Scheduler.Scheduled? notification_timer = null;
     private int64 next_submission_number = 0;
-    
-    private bool is_closed = false;
+    private State state = State.OPEN;
     
     public virtual signal void scheduled(ReplayOperation op) {
         Logging.debug(Logging.Flag.REPLAY, "[%s] ReplayQueue::scheduled: %s %s", to_string(),
@@ -143,7 +148,7 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
      */
     public bool schedule(ReplayOperation op) {
         // ReplayClose is allowed past the velvet ropes even as the hoi palloi is turned away
-        if (is_closed && !(op is CloseReplayQueue)) {
+        if (state != State.OPEN && !(op is CloseReplayQueue)) {
             debug("Unable to schedule replay operation %s on %s: replay queue closed", op.to_string(),
                 to_string());
             
@@ -188,7 +193,7 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
      * Returns false if the operation was not schedule (queue already closed).
      */
     public bool schedule_server_notification(ReplayOperation op) {
-        if (is_closed) {
+        if (state != State.OPEN) {
             debug("Unable to schedule notification operation %s on %s: replay queue closed", op.to_string(),
                 to_string());
             
@@ -293,7 +298,7 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
      * A ReplayQueue cannot be re-opened.
      */
     public async void close_async(bool flush_pending, Cancellable? cancellable = null) throws Error {
-        if (is_closed)
+        if (state != State.OPEN)
             return;
         
         // cancel notification queue timeout
@@ -306,8 +311,7 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
         
         // mark as closed now to prevent further scheduling ... ReplayClose gets special
         // consideration in schedule()
-        is_closed = true;
-        
+        state = State.CLOSING;
         closing();
         
         // if not flushing pending, clear out all waiting operations, backing out any that need to
@@ -322,6 +326,7 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
         
         yield close_op.wait_for_ready_async(cancellable);
         
+        state = State.CLOSED;
         closed();
     }
     
@@ -472,7 +477,7 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
             
             // wait until the remote folder is opened (or throws an exception, in which case closed)
             try {
-                if (!is_close_op && folder_opened)
+                if (!is_close_op && folder_opened && state == State.OPEN)
                     yield owner.wait_for_open_async();
             } catch (Error remote_err) {
                 debug("Folder %s closed or failed to open, remote replay queue closing: %s",

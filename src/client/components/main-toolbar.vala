@@ -72,6 +72,10 @@ public class MainToolbar : PillHeaderbar {
         insert.add(trash_delete_button = create_toolbar_button(null, GearyController.ACTION_TRASH_MESSAGE, false));
         Gtk.Box archive_trash_delete = create_pill_buttons(insert);
         
+        insert.clear();
+        insert.add(create_toolbar_button(null, GearyController.ACTION_UNDO, false));
+        Gtk.Box undo = create_pill_buttons(insert);
+        
         // Search bar.
         search_entry.width_chars = 28;
         search_entry.tooltip_text = _("Search all mail in account for keywords (Ctrl+S)");
@@ -88,6 +92,7 @@ public class MainToolbar : PillHeaderbar {
         // pack_end() ordering is reversed in GtkHeaderBar in 3.12 and above
 #if !GTK_3_12
         add_end(archive_trash_delete);
+        add_end(undo);
         add_end(search_upgrade_progress_bar);
         add_end(search_entry);
 #endif
@@ -103,6 +108,7 @@ public class MainToolbar : PillHeaderbar {
 #if GTK_3_12
         add_end(search_entry);
         add_end(search_upgrade_progress_bar);
+        add_end(undo);
         add_end(archive_trash_delete);
 #endif
         

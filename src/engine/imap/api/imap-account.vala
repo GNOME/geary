@@ -308,8 +308,8 @@ private class Geary.Imap.Account : BaseObject {
         }
     }
     
-    public async int fetch_unseen_count_async(FolderPath path, Cancellable? cancellable)
-        throws Error {
+    public async void fetch_counts_async(FolderPath path, out int unseen, out int total,
+        Cancellable? cancellable) throws Error {
         check_open();
         
         MailboxInformation? mailbox_info = path_to_mailbox.get(path);
@@ -320,8 +320,10 @@ private class Geary.Imap.Account : BaseObject {
                 path.to_string());
         }
         
-        StatusData data = yield fetch_status_async(path, { StatusDataType.UNSEEN }, cancellable);
-        return data.unseen;
+        StatusData data = yield fetch_status_async(path, { StatusDataType.UNSEEN, StatusDataType.MESSAGES },
+            cancellable);
+        unseen = data.unseen;
+        total = data.messages;
     }
     
     private async StatusData fetch_status_async(FolderPath path, StatusDataType[] status_types,

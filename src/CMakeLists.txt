@@ -37,6 +37,7 @@ engine/api/geary-logging.vala
 engine/api/geary-named-flag.vala
 engine/api/geary-named-flags.vala
 engine/api/geary-progress-monitor.vala
+engine/api/geary-revokable.vala
 engine/api/geary-search-folder.vala
 engine/api/geary-search-query.vala
 engine/api/geary-service.vala
@@ -191,6 +192,8 @@ engine/imap-engine/imap-engine-generic-folder.vala
 engine/imap-engine/imap-engine-minimal-folder.vala
 engine/imap-engine/imap-engine-replay-operation.vala
 engine/imap-engine/imap-engine-replay-queue.vala
+engine/imap-engine/imap-engine-revokable-move.vala
+engine/imap-engine/imap-engine-revokable-committed-move.vala
 engine/imap-engine/imap-engine-send-replay-operation.vala
 engine/imap-engine/gmail/imap-engine-gmail-account.vala
 engine/imap-engine/gmail/imap-engine-gmail-all-mail-folder.vala
@@ -211,12 +214,15 @@ engine/imap-engine/replay-ops/imap-engine-fetch-email.vala
 engine/imap-engine/replay-ops/imap-engine-list-email-by-id.vala
 engine/imap-engine/replay-ops/imap-engine-list-email-by-sparse-id.vala
 engine/imap-engine/replay-ops/imap-engine-mark-email.vala
-engine/imap-engine/replay-ops/imap-engine-move-email.vala
+engine/imap-engine/replay-ops/imap-engine-move-email-commit.vala
+engine/imap-engine/replay-ops/imap-engine-move-email-prepare.vala
+engine/imap-engine/replay-ops/imap-engine-move-email-revoke.vala
 engine/imap-engine/replay-ops/imap-engine-remove-email.vala
 engine/imap-engine/replay-ops/imap-engine-replay-append.vala
 engine/imap-engine/replay-ops/imap-engine-replay-disconnect.vala
 engine/imap-engine/replay-ops/imap-engine-replay-removal.vala
 engine/imap-engine/replay-ops/imap-engine-server-search-email.vala
+engine/imap-engine/replay-ops/imap-engine-user-close.vala
 engine/imap-engine/yahoo/imap-engine-yahoo-account.vala
 engine/imap-engine/yahoo/imap-engine-yahoo-folder.vala
 

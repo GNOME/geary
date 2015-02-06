@@ -250,11 +250,16 @@ private class Geary.ImapDB.Account : BaseObject {
      * update_uid_info is true.
      */
     public async void update_folder_status_async(Geary.Imap.Folder imap_folder, bool update_uid_info,
-        Cancellable? cancellable) throws Error {
+        bool respect_marked_for_remove, Cancellable? cancellable) throws Error {
         check_open();
         
         Geary.Imap.FolderProperties properties = imap_folder.properties;
         Geary.FolderPath path = imap_folder.path;
+        
+        // adjust for marked remove, but don't write these adjustments to the database -- they're
+        // only reflected in memory via the properties
+        int adjust_unseen = 0;
+        int adjust_total = 0;
         
         yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
             int64 parent_id;
@@ -262,6 +267,36 @@ private class Geary.ImapDB.Account : BaseObject {
                 debug("Unable to find parent ID of %s to update properties", path.to_string());
                 
                 return Db.TransactionOutcome.ROLLBACK;
+            }
+            
+            int64 folder_id;
+            if (!do_fetch_folder_id(cx, path, false, out folder_id, cancellable))
+                folder_id = Db.INVALID_ROWID;
+            
+            if (respect_marked_for_remove && folder_id != Db.INVALID_ROWID) {
+                Db.Statement stmt = cx.prepare("""
+                    SELECT flags
+                    FROM MessageTable
+                    WHERE id IN (
+                        SELECT message_id
+                        FROM MessageLocationTable
+                        WHERE folder_id = ? AND remove_marker = ?
+                    )
+                """);
+                stmt.bind_rowid(0, folder_id);
+                stmt.bind_bool(1, true);
+                
+                Db.Result results = stmt.exec(cancellable);
+                while (!results.finished) {
+                    adjust_total++;
+                    
+                    Imap.EmailFlags flags = new Imap.EmailFlags(Imap.MessageFlags.deserialize(
+                        results.string_at(0)));
+                    if (flags.contains(EmailFlags.UNREAD))
+                        adjust_unseen++;
+                    
+                    results.next(cancellable);
+                }
             }
             
             Db.Statement stmt;
@@ -298,7 +333,7 @@ private class Geary.ImapDB.Account : BaseObject {
         if (db_folder != null) {
             Imap.FolderProperties local_properties = db_folder.get_properties();
             
-            local_properties.set_status_unseen(properties.unseen);
+            local_properties.set_status_unseen(Numeric.int_floor(properties.unseen - adjust_unseen, 0));
             local_properties.recent = properties.recent;
             local_properties.attrs = properties.attrs;
             
@@ -307,8 +342,12 @@ private class Geary.ImapDB.Account : BaseObject {
                 local_properties.uid_next = properties.uid_next;
             }
             
-            if (properties.status_messages >= 0)
-                local_properties.set_status_message_count(properties.status_messages, false);
+            // only update STATUS MESSAGES count if previously set, but use this count as the
+            // "authoritative" value until another SELECT/EXAMINE or MESSAGES response
+            if (properties.status_messages >= 0) {
+                local_properties.set_status_message_count(
+                    Numeric.int_floor(properties.status_messages - adjust_total, 0), true);
+            }
         }
     }
     
