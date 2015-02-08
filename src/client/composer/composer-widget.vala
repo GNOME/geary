@@ -1074,16 +1074,17 @@ public class ComposerWidget : Gtk.EventBox {
     private void on_detach() {
         if (state == ComposerState.DETACHED)
             return;
-        Gtk.Widget? focus = container.remove_composer();
+        Gtk.Widget? focus = container.top_window.get_focus();
+        container.remove_composer();
         ComposerWindow window = new ComposerWindow(this);
-        if (focus != null) {
+        state = ComposerWidget.ComposerState.DETACHED;
+        if (focus != null && focus.parent.visible) {
             ComposerWindow focus_win = focus.get_toplevel() as ComposerWindow;
             if (focus_win != null && focus_win == window)
                 focus.grab_focus();
         } else {
             set_focus();
         }
-        state = ComposerWidget.ComposerState.DETACHED;
     }
     
     public void ensure_paned() {

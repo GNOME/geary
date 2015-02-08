@@ -59,9 +59,8 @@ public class ComposerWindow : Gtk.Window, ComposerContainer {
         hide();
     }
     
-    public Gtk.Widget? remove_composer() {
-        warning(@"Detached composer received remove");
-        return null;
+    public void remove_composer() {
+        warning("Detached composer received remove");
     }
 }
 

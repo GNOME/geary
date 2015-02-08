@@ -30,16 +30,14 @@ public class ComposerBox : Gtk.Frame, ComposerContainer {
         }
     }
     
-    public Gtk.Widget? remove_composer() {
+    public void remove_composer() {
         if (composer.editor.has_focus)
             on_focus_out();
         composer.editor.focus_in_event.disconnect(on_focus_in);
         composer.editor.focus_out_event.disconnect(on_focus_out);
-        Gtk.Widget? focus = top_window.get_focus();
         
         remove(composer);
         close_container();
-        return focus;
     }
     
     
