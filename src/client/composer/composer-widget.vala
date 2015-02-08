@@ -710,6 +710,8 @@ public class ComposerWidget : Gtk.EventBox {
     }
     
     private void on_load_finished_and_realized() {
+        // This is safe to call even when this connection hasn't been made.
+        realize.disconnect(on_load_finished_and_realized);
         WebKit.DOM.Document document = editor.get_dom_document();
         WebKit.DOM.HTMLElement? body = document.get_element_by_id(BODY_ID) as WebKit.DOM.HTMLElement;
         assert(body != null);
