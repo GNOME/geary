@@ -170,6 +170,20 @@ public class MainToolbar : Gtk.Box {
         search_entry.placeholder_text = placeholder;
     }
     
+    public void set_conversation_header(Gtk.Widget header) {
+        conversation_header.hide();
+        header.get_style_context().add_class("titlebar");
+        header.get_style_context().add_class("geary-titlebar-right");
+        pack_start(header, true, true);
+    }
+    
+    public void remove_conversation_header(Gtk.Widget header) {
+        remove(header);
+        header.get_style_context().remove_class("titlebar");
+        header.get_style_context().remove_class("geary-titlebar-right");
+        conversation_header.show();
+    }
+    
     private void on_search_entry_changed() {
         search_text_changed(search_entry.text);
         // Enable/disable clear button.

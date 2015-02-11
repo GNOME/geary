@@ -159,9 +159,12 @@ public class MainWindow : Gtk.ApplicationWindow {
                 border-left-width: 0px;
             }
             ComposerBox {
-                border: 16px solid #ccc;
-                box-shadow: 0 0 0 1px rgba(0,0,0,0.4) inset;
-                padding: 1px;
+                border-left-width: 0px;
+                border-right-width: 0px;
+                border-bottom-width: 0px;
+            }
+            ComposerBox.full-pane {
+                border-top-width: 0px;
             }
             ComposerEmbed GtkHeaderBar,
             ComposerBox GtkHeaderBar {
