@@ -33,7 +33,7 @@ public interface PillBar : Gtk.Container {
         size.add_widget(widget);
     }
     
-    protected virtual void setup_button(Gtk.Button b, string? icon_name, string action_name,
+    public virtual void setup_button(Gtk.Button b, string? icon_name, string action_name,
         bool show_label = false) {
         b.related_action = action_group.get_action(action_name);
         b.tooltip_text = b.related_action.tooltip;
