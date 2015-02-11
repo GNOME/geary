@@ -7,29 +7,22 @@
 // Window for sending messages.
 public class ComposerWindow : Gtk.Window, ComposerContainer {
 
-    private const string DEFAULT_TITLE = _("New Message");
-    
     private bool closing = false;
     
     public ComposerWindow(ComposerWidget composer) {
         Object(type: Gtk.WindowType.TOPLEVEL);
         
         add(composer);
-        composer.subject_entry.changed.connect(() => {
-            string new_title = Geary.String.is_empty_or_whitespace(composer.subject_entry.text)
-                ? DEFAULT_TITLE : composer.subject_entry.text.strip();
-            if (GearyApplication.instance.is_running_unity)
-                title = new_title;
-            else
-                composer.header.title = new_title;
-        });
-        composer.subject_entry.changed();
         
         if (!GearyApplication.instance.is_running_unity) {
             composer.header.show_close_button = true;
             if (composer.header.parent != null)
                 composer.header.parent.remove(composer.header);
             set_titlebar(composer.header);
+            composer.bind_property("window-title", composer.header, "title",
+                BindingFlags.SYNC_CREATE);
+        } else {
+            composer.bind_property("window-title", this, "title", BindingFlags.SYNC_CREATE);
         }
         
         add_accel_group(composer.ui.get_accel_group());

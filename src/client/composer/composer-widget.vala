@@ -71,6 +71,7 @@ public class ComposerWidget : Gtk.EventBox {
     private const string DRAFT_SAVING_TEXT = _("Saving");
     private const string DRAFT_ERROR_TEXT = _("Error saving");
     private const string BACKSPACE_TEXT = _("Press Backspace to delete quote");
+    private const string DEFAULT_TITLE = _("New Message");
     
     private const string URI_LIST_MIME_TYPE = "text/uri-list";
     private const string FILE_URI_PREFIX = "file://";
@@ -208,6 +209,8 @@ public class ComposerWidget : Gtk.EventBox {
     
     public string toolbar_text { get; set; }
     
+    public string window_title { get; set; }
+    
     private ContactListStore? contact_list_store = null;
     
     private string? body_html = null;
@@ -225,7 +228,7 @@ public class ComposerWidget : Gtk.EventBox {
     private EmailEntry bcc_entry;
     private Gtk.Label reply_to_label;
     private EmailEntry reply_to_entry;
-    public Gtk.Entry subject_entry;
+    private Gtk.Entry subject_entry;
     private Gtk.Label message_overlay_label;
     private Gtk.Box attachments_box;
     private Gtk.Alignment hidden_on_attachment_drag_over;
@@ -352,6 +355,12 @@ public class ComposerWidget : Gtk.EventBox {
         // testing, this can cause non-deterministic segfaults. Investigate why, and fix if possible.
         set_entry_completions();
         subject_entry = builder.get_object("subject") as Gtk.Entry;
+        subject_entry.bind_property("text", this, "window-title", BindingFlags.SYNC_CREATE,
+            (binding, source_value, ref target_value) => {
+                target_value = Geary.String.is_empty_or_whitespace(subject_entry.text)
+                    ? DEFAULT_TITLE : subject_entry.text.strip();
+                return true;
+            });
         Gtk.Alignment message_area = builder.get_object("message area") as Gtk.Alignment;
         actions = builder.get_object("compose actions") as Gtk.ActionGroup;
         // Can only happen after actions exits
