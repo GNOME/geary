@@ -212,18 +212,18 @@ public class MainWindow : Gtk.ApplicationWindow {
         viewer_frame.shadow_type = Gtk.ShadowType.NONE;
         viewer_frame.add(conversation_viewer);
         
-         // Message list left of message viewer.
-        conversations_paned.pack1(conversation_frame, false, false);
-        conversations_paned.pack2(viewer_frame, true, true);
-        
         // Folder list to the left of everything.
         folder_paned.pack1(status_bar_box, false, false);
-        folder_paned.pack2(conversations_paned, true, false);
+        folder_paned.pack2(conversation_frame, true, false);
+        
+        // Message list left of message viewer.
+        conversations_paned.pack1(folder_paned, false, false);
+        conversations_paned.pack2(viewer_frame, true, true);
         
         if (GearyApplication.instance.is_running_unity)
             main_layout.pack_start(main_toolbar, false, true, 0);
         
-        main_layout.pack_end(folder_paned, true, true, 0);
+        main_layout.pack_end(conversations_paned, true, true, 0);
         
         add(main_layout);
     }
