@@ -9,6 +9,7 @@ public class ComposerBox : Gtk.Frame, ComposerContainer {
     private ComposerWidget composer;
     private Gee.Set<Geary.App.Conversation>? prev_selection = null;
     private bool has_accel_group = false;
+    private Binding? title_binding = null;
     
     public Gtk.Window top_window {
         get { return (Gtk.Window) get_toplevel(); }
@@ -28,6 +29,8 @@ public class ComposerBox : Gtk.Frame, ComposerContainer {
             prev_selection = conversation_list_view.get_selected_conversations();
             conversation_list_view.get_selection().unselect_all();
             
+            title_binding = composer.bind_property("window-title", composer.header, "title",
+                BindingFlags.SYNC_CREATE);
             composer.header.parent.remove(composer.header);
             GearyApplication.instance.controller.main_window.main_toolbar.set_conversation_header(
                 composer.header);
@@ -74,6 +77,8 @@ public class ComposerBox : Gtk.Frame, ComposerContainer {
         if (get_style_context().has_class("full-pane"))
             GearyApplication.instance.controller.main_window.main_toolbar.remove_conversation_header(
                 composer.header);
+        if (title_binding != null)
+            title_binding.unbind();
         
         composer.state = ComposerWidget.ComposerState.DETACHED;
         composer.editor.focus_in_event.disconnect(on_focus_in);
