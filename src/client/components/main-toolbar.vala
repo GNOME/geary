@@ -5,7 +5,7 @@
  */
 
 // Draws the main toolbar.
-public class MainToolbar : PillHeaderbar {
+public class MainToolbar : Gtk.Box {
     private const string ICON_CLEAR_NAME = "edit-clear-symbolic";
     private const string ICON_CLEAR_RTL_NAME = "edit-clear-rtl-symbolic";
     private const string DEFAULT_SEARCH_TEXT = _("Search");
@@ -14,7 +14,12 @@ public class MainToolbar : PillHeaderbar {
     public FolderMenu move_folder_menu { get; private set; default = new FolderMenu(); }
     public string search_text { get { return search_entry.text; } }
     public bool search_entry_has_focus { get { return search_entry.has_focus; } }
+    public string account { get; set; }
+    public string folder { get; set; }
+    public bool show_close_button { get; set; default = false; }
     
+    private PillHeaderbar folder_header;
+    private PillHeaderbar conversation_header;
     private Gtk.Button archive_button;
     private Gtk.Button trash_delete_button;
     private Gtk.SearchEntry search_entry = new Gtk.SearchEntry();
@@ -25,7 +30,22 @@ public class MainToolbar : PillHeaderbar {
     public signal void search_text_changed(string search_text);
     
     public MainToolbar() {
-        base(GearyApplication.instance.actions);
+        Object(orientation: Gtk.Orientation.HORIZONTAL, spacing: 0);
+        
+        folder_header = new PillHeaderbar(GearyApplication.instance.actions);
+        conversation_header = new PillHeaderbar(GearyApplication.instance.actions);
+        folder_header.get_style_context().add_class("titlebar");
+        folder_header.get_style_context().add_class("geary-titlebar-left");
+        conversation_header.get_style_context().add_class("titlebar");
+        conversation_header.get_style_context().add_class("geary-titlebar-right");
+        GearyApplication.instance.config.bind(Configuration.MESSAGES_PANE_POSITION_KEY,
+            folder_header, "width-request", SettingsBindFlags.GET);
+        
+        this.bind_property("account", conversation_header, "title", BindingFlags.SYNC_CREATE);
+        this.bind_property("folder", conversation_header, "subtitle", BindingFlags.SYNC_CREATE);
+        this.bind_property("show-close-button", conversation_header, "show-close-button",
+            BindingFlags.SYNC_CREATE);
+        
         GearyApplication.instance.controller.account_selected.connect(on_account_changed);
         
         bool rtl = get_direction() == Gtk.TextDirection.RTL;
@@ -44,15 +64,19 @@ public class MainToolbar : PillHeaderbar {
         Gee.List<Gtk.Button> insert = new Gee.ArrayList<Gtk.Button>();
         
         // Compose.
-        insert.add(create_toolbar_button("text-editor-symbolic", GearyController.ACTION_NEW_MESSAGE));
-        add_start(create_pill_buttons(insert, false));
+        insert.add(folder_header.create_toolbar_button("text-editor-symbolic",
+            GearyController.ACTION_NEW_MESSAGE));
+        folder_header.add_start(folder_header.create_pill_buttons(insert, false));
         
         // Reply buttons
         insert.clear();
-        insert.add(create_toolbar_button(rtl ? "mail-reply-sender-rtl-symbolic" : "mail-reply-sender-symbolic", GearyController.ACTION_REPLY_TO_MESSAGE));
-        insert.add(create_toolbar_button(rtl ? "mail-reply-all-rtl-symbolic" : "mail-reply-all-symbolic", GearyController.ACTION_REPLY_ALL_MESSAGE));
-        insert.add(create_toolbar_button(rtl ? "mail-forward-rtl-symbolic" : "mail-forward-symbolic", GearyController.ACTION_FORWARD_MESSAGE));
-        add_start(create_pill_buttons(insert));
+        insert.add(conversation_header.create_toolbar_button(rtl ? "mail-reply-sender-rtl-symbolic"
+            : "mail-reply-sender-symbolic", GearyController.ACTION_REPLY_TO_MESSAGE));
+        insert.add(conversation_header.create_toolbar_button(rtl ? "mail-reply-all-rtl-symbolic"
+            : "mail-reply-all-symbolic", GearyController.ACTION_REPLY_ALL_MESSAGE));
+        insert.add(conversation_header.create_toolbar_button(rtl ? "mail-forward-rtl-symbolic"
+            : "mail-forward-symbolic", GearyController.ACTION_FORWARD_MESSAGE));
+        conversation_header.add_start(conversation_header.create_pill_buttons(insert));
         
         // Assemble the empty menu
         GearyApplication.instance.load_ui_file("toolbar_empty_menu.ui");
@@ -61,20 +85,25 @@ public class MainToolbar : PillHeaderbar {
         
         // Mark, copy, move.
         insert.clear();
-        insert.add(create_menu_button("marker-symbolic", mark_menu, GearyController.ACTION_MARK_AS_MENU));
-        insert.add(create_menu_button(rtl ? "tag-rtl-symbolic" : "tag-symbolic", copy_folder_menu, GearyController.ACTION_COPY_MENU));
-        insert.add(create_menu_button("folder-symbolic", move_folder_menu, GearyController.ACTION_MOVE_MENU));
-        insert.add(create_menu_button(null, empty_menu, GearyController.ACTION_EMPTY_MENU));
-        add_start(create_pill_buttons(insert));
+        insert.add(conversation_header.create_menu_button("marker-symbolic", mark_menu,
+            GearyController.ACTION_MARK_AS_MENU));
+        insert.add(conversation_header.create_menu_button(rtl ? "tag-rtl-symbolic" : "tag-symbolic",
+            copy_folder_menu, GearyController.ACTION_COPY_MENU));
+        insert.add(conversation_header.create_menu_button("folder-symbolic", move_folder_menu,
+            GearyController.ACTION_MOVE_MENU));
+        insert.add(conversation_header.create_menu_button(null, empty_menu,
+            GearyController.ACTION_EMPTY_MENU));
+        conversation_header.add_start(conversation_header.create_pill_buttons(insert));
         
         insert.clear();
-        insert.add(archive_button = create_toolbar_button(null, GearyController.ACTION_ARCHIVE_MESSAGE, true));
-        insert.add(trash_delete_button = create_toolbar_button(null, GearyController.ACTION_TRASH_MESSAGE, false));
-        Gtk.Box archive_trash_delete = create_pill_buttons(insert);
+        insert.add(archive_button = conversation_header.create_toolbar_button(null, GearyController.ACTION_ARCHIVE_MESSAGE, true));
+        insert.add(trash_delete_button = conversation_header.create_toolbar_button(null, GearyController.ACTION_TRASH_MESSAGE, false));
+        Gtk.Box archive_trash_delete = conversation_header.create_pill_buttons(insert);
         
         insert.clear();
-        insert.add(create_toolbar_button(null, GearyController.ACTION_UNDO, false));
-        Gtk.Box undo = create_pill_buttons(insert);
+        insert.add(conversation_header.create_toolbar_button(null, GearyController.ACTION_UNDO,
+            false));
+        Gtk.Box undo = conversation_header.create_pill_buttons(insert);
         
         // Search bar.
         search_entry.width_chars = 28;
@@ -91,35 +120,40 @@ public class MainToolbar : PillHeaderbar {
         
         // pack_end() ordering is reversed in GtkHeaderBar in 3.12 and above
 #if !GTK_3_12
-        add_end(archive_trash_delete);
-        add_end(undo);
-        add_end(search_upgrade_progress_bar);
-        add_end(search_entry);
+        conversation_header.add_end(archive_trash_delete);
+        conversation_header.add_end(undo);
+        folder_header.add_end(search_upgrade_progress_bar);
+        folder_header.add_end(search_entry);
 #endif
         
         // Application button.  If we exported an app menu, we don't need this.
         if (!Gtk.Settings.get_default().gtk_shell_shows_app_menu) {
             insert.clear();
-            insert.add(create_menu_button("emblem-system-symbolic", application_menu, GearyController.ACTION_GEAR_MENU));
-            add_end(create_pill_buttons(insert));
+            insert.add(conversation_header.create_menu_button("emblem-system-symbolic",
+                application_menu, GearyController.ACTION_GEAR_MENU));
+            conversation_header.add_end(conversation_header.create_pill_buttons(insert));
         }
         
         // pack_end() ordering is reversed in GtkHeaderBar in 3.12 and above
 #if GTK_3_12
-        add_end(search_entry);
-        add_end(search_upgrade_progress_bar);
-        add_end(undo);
-        add_end(archive_trash_delete);
+        folder_header.add_end(search_entry);
+        folder_header.add_end(search_upgrade_progress_bar);
+        conversation_header.add_end(undo);
+        conversation_header.add_end(archive_trash_delete);
 #endif
         
         set_search_placeholder_text(DEFAULT_SEARCH_TEXT);
+        
+        pack_start(folder_header, false, false);
+        pack_start(new Gtk.Separator(Gtk.Orientation.VERTICAL), false, false);
+        pack_start(conversation_header, true, true);
     }
     
     /// Updates the trash button as trash or delete, and shows or hides the archive button.
     public void update_trash_archive_buttons(bool trash, bool archive) {
         string action_name = (trash ? GearyController.ACTION_TRASH_MESSAGE
             : GearyController.ACTION_DELETE_MESSAGE);
-        setup_button(trash_delete_button, null, action_name, false);
+        conversation_header.setup_button(trash_delete_button, null, action_name, false);
         
         archive_button.visible = archive;
     }
