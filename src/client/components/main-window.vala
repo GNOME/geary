@@ -163,8 +163,17 @@ public class MainWindow : Gtk.ApplicationWindow {
                 box-shadow: 0 0 0 1px rgba(0,0,0,0.4) inset;
                 padding: 1px;
             }
-            GtkBox GtkHeaderBar {
-                  border-radius: 0px;
+            ComposerEmbed GtkHeaderBar,
+            ComposerBox GtkHeaderBar {
+                border-radius: 0px;
+            }
+            .geary-titlebar-left:dir(ltr),
+            .geary-titlebar-right:dir(rtl) {
+                border-top-right-radius: 0px;
+            }
+            .geary-titlebar-right:dir(ltr),
+            .geary-titlebar-left:dir(rtl) {
+                border-top-left-radius: 0px;
             }
         """;
         
@@ -375,13 +384,13 @@ public class MainWindow : Gtk.ApplicationWindow {
     
     private void update_headerbar() {
         if (current_folder == null) {
-            main_toolbar.title = null;
-            main_toolbar.subtitle = null;
+            main_toolbar.account = null;
+            main_toolbar.folder = null;
             
             return;
         }
         
-        main_toolbar.title = current_folder.account.information.nickname;
+        main_toolbar.account = current_folder.account.information.nickname;
         
         /// Current folder's name followed by its unread count, i.e. "Inbox (42)"
         // except for Drafts and Outbox, where we show total count
@@ -398,9 +407,9 @@ public class MainWindow : Gtk.ApplicationWindow {
         }
         
         if (count > 0)
-            main_toolbar.subtitle = _("%s (%d)").printf(current_folder.get_display_name(), count);
+            main_toolbar.folder = _("%s (%d)").printf(current_folder.get_display_name(), count);
         else
-            main_toolbar.subtitle = current_folder.get_display_name();
+            main_toolbar.folder = current_folder.get_display_name();
     }
 }
 
