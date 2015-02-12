@@ -197,14 +197,10 @@ public class MainWindow : Gtk.ApplicationWindow {
         conversation_frame.add(conversation_list_scrolled);
         
         // Three-pane display.
-        Gtk.Box status_bar_box = new Gtk.Box(Gtk.Orientation.VERTICAL, 0);
         status_bar.set_size_request(-1, STATUS_BAR_HEIGHT);
         status_bar.set_border_width(2);
         spinner.set_size_request(STATUS_BAR_HEIGHT - 2, -1);
         status_bar.add(spinner);
-        status_bar_box.pack_start(folder_frame);
-        status_bar_box.pack_start(status_bar, false, false, 0);
-        status_bar_box.get_style_context().add_class(Gtk.STYLE_CLASS_SIDEBAR);
         
         folder_paned.get_style_context().add_class("sidebar-pane-separator");
         
@@ -213,11 +209,16 @@ public class MainWindow : Gtk.ApplicationWindow {
         viewer_frame.add(conversation_viewer);
         
         // Folder list to the left of everything.
-        folder_paned.pack1(status_bar_box, false, false);
+        folder_paned.pack1(folder_frame, false, false);
         folder_paned.pack2(conversation_frame, true, false);
         
+        Gtk.Box status_bar_box = new Gtk.Box(Gtk.Orientation.VERTICAL, 0);
+        status_bar_box.pack_start(folder_paned);
+        status_bar_box.pack_start(status_bar, false, false, 0);
+        status_bar_box.get_style_context().add_class(Gtk.STYLE_CLASS_SIDEBAR);
+        
         // Message list left of message viewer.
-        conversations_paned.pack1(folder_paned, false, false);
+        conversations_paned.pack1(status_bar_box, false, false);
         conversations_paned.pack2(viewer_frame, true, true);
         
         if (GearyApplication.instance.is_running_unity)
