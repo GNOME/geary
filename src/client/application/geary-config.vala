@@ -10,6 +10,8 @@ public class Configuration {
     public const string WINDOW_HEIGHT_KEY = "window-height";
     public const string WINDOW_MAXIMIZE_KEY = "window-maximize";
     public const string FOLDER_LIST_PANE_POSITION_KEY = "folder-list-pane-position";
+    public const string FOLDER_LIST_PANE_POSITION_VERTICAL_KEY = "folder-list-pane-position-vertical";
+    public const string FOLDER_LIST_PANE_ORIENTATION_KEY = "folder-list-pane-orientation";
     public const string MESSAGES_PANE_POSITION_KEY = "messages-pane-position";
     public const string COMPOSER_PANE_POSITION_KEY = "composer-pane-position";
     public const string AUTOSELECT_KEY = "autoselect";
@@ -40,6 +42,14 @@ public class Configuration {
     
     public int folder_list_pane_position {
         get { return settings.get_int(FOLDER_LIST_PANE_POSITION_KEY); }
+    }
+    
+    public int folder_list_pane_position_vertical {
+        get { return settings.get_int(FOLDER_LIST_PANE_POSITION_VERTICAL_KEY); }
+    }
+    
+    public Gtk.Orientation folder_list_pane_orientation {
+        get { return (Gtk.Orientation) settings.get_int(FOLDER_LIST_PANE_ORIENTATION_KEY); }
     }
     
     public int messages_pane_position {

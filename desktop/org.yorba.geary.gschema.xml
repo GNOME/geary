@@ -26,6 +26,18 @@
         <description>Position of the folder list Paned grabber.</description>
     </key>
     
+    <key name="folder-list-pane-position-vertical" type="i">
+        <default>200</default>
+        <summary>position of folder list pane when vertical</summary>
+        <description>Position of the folder list Paned grabber in the vertical orientation.</description>
+    </key>
+    
+    <key name="folder-list-pane-orientation" type="i">
+        <default>0</default>
+        <summary>orientation of the folder list pane</summary>
+        <description>Orientation of the folder list Paned.</description>
+    </key>
+    
     <key name="messages-pane-position" type="i">
         <default>250</default>
         <summary>position of message list pane</summary>
