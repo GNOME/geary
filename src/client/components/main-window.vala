@@ -48,11 +48,15 @@ public class MainWindow : Gtk.ApplicationWindow {
         // the value in dconf changes *immediately*, and stays saved
         // in the event of a crash.
         Configuration config = GearyApplication.instance.config;
-        config.bind(Configuration.FOLDER_LIST_PANE_POSITION_KEY, folder_paned, "position");
         config.bind(Configuration.MESSAGES_PANE_POSITION_KEY, conversations_paned, "position");
         config.bind(Configuration.WINDOW_WIDTH_KEY, this, "window-width");
         config.bind(Configuration.WINDOW_HEIGHT_KEY, this, "window-height");
         config.bind(Configuration.WINDOW_MAXIMIZE_KEY, this, "window-maximized");
+        // Update to layout
+        if (config.folder_list_pane_position_horizontal == -1) {
+            config.folder_list_pane_position_horizontal = config.folder_list_pane_position_old;
+            config.messages_pane_position += config.folder_list_pane_position_old;
+        }
         
         add_accel_group(GearyApplication.instance.ui_manager.get_accel_group());
         
@@ -70,6 +74,8 @@ public class MainWindow : Gtk.ApplicationWindow {
         key_press_event.connect(on_key_press_event);
         key_release_event.connect(on_key_release_event);
         focus_in_event.connect(on_focus_event);
+        GearyApplication.instance.config.settings.changed[
+            Configuration.FOLDER_LIST_PANE_HORIZONTAL_KEY].connect(on_change_orientation);
         GearyApplication.instance.controller.notify[GearyController.PROP_CURRENT_CONVERSATION].
             connect(on_conversation_monitor_changed);
         GearyApplication.instance.controller.folder_selected.connect(on_folder_selected);
@@ -83,6 +89,7 @@ public class MainWindow : Gtk.ApplicationWindow {
             set_titlebar(main_toolbar);
         }
         
+        on_change_orientation();
         set_styling();
         create_layout();
     }
@@ -319,6 +326,26 @@ public class MainWindow : Gtk.ApplicationWindow {
         } catch (Error e) {
             debug("Could not access account progress monitors: %s", e.message);
         }
+    }
+    
+    private void on_change_orientation() {
+        bool horizontal = GearyApplication.instance.config.folder_list_pane_horizontal;
+        
+        GLib.Settings.unbind(folder_paned, "position");
+        folder_paned.orientation = horizontal ? Gtk.Orientation.HORIZONTAL :
+            Gtk.Orientation.VERTICAL;
+        
+        int folder_list_width =
+            GearyApplication.instance.config.folder_list_pane_position_horizontal;
+        if (horizontal)
+            conversations_paned.position += folder_list_width;
+        else
+            conversations_paned.position -= folder_list_width;
+        
+        GearyApplication.instance.config.bind(
+            horizontal ? Configuration.FOLDER_LIST_PANE_POSITION_HORIZONTAL_KEY
+            : Configuration.FOLDER_LIST_PANE_POSITION_VERTICAL_KEY,
+            folder_paned, "position");
     }
     
     private void update_headerbar() {

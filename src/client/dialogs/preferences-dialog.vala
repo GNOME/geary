@@ -18,6 +18,8 @@ public class PreferencesDialog : Object {
         Configuration config = GearyApplication.instance.config;
         config.bind(Configuration.AUTOSELECT_KEY, builder.get_object("autoselect"), "active");
         config.bind(Configuration.DISPLAY_PREVIEW_KEY, builder.get_object("display_preview"), "active");
+        config.bind(Configuration.FOLDER_LIST_PANE_HORIZONTAL_KEY,
+            builder.get_object("three_pane_view"), "active");
         config.bind(Configuration.SPELL_CHECK_KEY, builder.get_object("spell_check"), "active");
         config.bind(Configuration.PLAY_SOUNDS_KEY, builder.get_object("play_sounds"), "active");
         config.bind(Configuration.SHOW_NOTIFICATIONS_KEY, builder.get_object("show_notifications"), "active");
