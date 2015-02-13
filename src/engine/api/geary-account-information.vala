@@ -52,7 +52,12 @@ public class Geary.AccountInformation : BaseObject {
     
     private static Gee.HashMap<string, Geary.Endpoint>? known_endpoints = null;
     
-    internal File? settings_dir = null;
+    /**
+     * Location account information is stored (as well as other data, including database and
+     * attachment files.
+     */
+    public File? settings_dir { get; private set; default = null; }
+    
     internal File? file = null;
     
     // IMPORTANT: When adding new properties, be sure to add them to the copy method.

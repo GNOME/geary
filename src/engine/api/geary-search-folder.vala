@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class Geary.SearchFolderRoot : Geary.FolderRoot {
+private class Geary.SearchFolderRoot : Geary.FolderRoot {
     public const string MAGIC_BASENAME = "$GearySearchFolder$";
     
     public SearchFolderRoot() {
@@ -12,7 +12,7 @@ public class Geary.SearchFolderRoot : Geary.FolderRoot {
     }
 }
 
-public class Geary.SearchFolderProperties : Geary.FolderProperties {
+private class Geary.SearchFolderProperties : Geary.FolderProperties {
     public SearchFolderProperties(int total, int unread) {
         base(total, unread, Trillian.FALSE, Trillian.FALSE, Trillian.TRUE, true, true, false);
     }

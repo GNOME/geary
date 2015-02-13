@@ -8,6 +8,6 @@
  * Errors related to {@link Geary.Mime}.
  */
 
-public errordomain MimeError {
+public errordomain Geary.MimeError {
     PARSE
 }

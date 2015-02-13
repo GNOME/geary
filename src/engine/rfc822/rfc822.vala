@@ -10,7 +10,7 @@ private int init_count = 0;
 
 internal Regex? invalid_filename_character_re = null;
 
-internal void init() {
+public void init() {
     if (init_count++ != 0)
         return;
     
