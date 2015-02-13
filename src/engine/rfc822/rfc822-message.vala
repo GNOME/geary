@@ -8,6 +8,10 @@ public class Geary.RFC822.Message : BaseObject {
     /**
      * This delegate is an optional parameter to the body constructers that allows callers
      * to process arbitrary non-text, inline MIME parts.
+     *
+     * This is only called for non-text MIME parts in mixed multipart sections.  Inline parts
+     * referred to by rich text in alternative or related documents must be located by the caller
+     * and appropriately presented.
      */
     public delegate string? InlinePartReplacer(string filename, Mime.ContentType? content_type,
         Mime.ContentDisposition? disposition, string? content_id, Geary.Memory.Buffer buffer);
@@ -306,7 +310,7 @@ public class Geary.RFC822.Message : BaseObject {
     public string get_preview() {
         string? preview = null;
         try {
-            preview = get_text_body(false, null);
+            preview = get_plain_body(false, null);
         } catch (Error e) {
             try {
                 preview = Geary.HTML.remove_html_tags(get_html_body(null));
@@ -442,40 +446,50 @@ public class Geary.RFC822.Message : BaseObject {
     }
     
     /**
-     * This method is the main utility method used by the other body constructors. It calls itself
-     * recursively via the last argument ("node").
-     * 
-     * The constructed body is stored in ref string? body. If the constructed body is null,
-     * ref string? body remains unmodified.
+     * This method is the main utility method used by the other body-generating constructors.
      *
-     * ref string? body is only modified if the constructed body is non-empty
-     * 
-     * Returns: a bool indicating whether a text part with the desired text_subtype was found
+     * Only text/* MIME parts of the specified subtype are added to body.  If a non-text part is
+     * within a multipart/mixed container, the {@link InlinePartReplacer} is invoked.
+     *
+     * If to_html is true, the text is run through a filter to HTML-ize it.  (Obviously, this
+     * should be false if text/html is being searched for.).
+     *
+     * The final constructed body is stored in the body string.
+     *
+     * The initial call should pass the root of this message and UNSPECIFIED as its container
+     * subtype.
+     *
+     * @returns Whether a text part with the desired text_subtype was found
      */
-    private bool construct_body_from_mime_parts(ref string? body, InlinePartReplacer? replacer,
-        string text_subtype, bool allow_only_replaced, bool to_html, GMime.Object? node)
-        throws RFC822Error {
-        if (node == null) {
-            node = message.get_mime_part();
-        }
+    private bool construct_body_from_mime_parts(GMime.Object node, Mime.MultipartSubtype container_subtype,
+        string text_subtype, bool to_html, InlinePartReplacer? replacer, ref string? body) throws RFC822Error {
+        Mime.ContentType? this_content_type = null;
+        if (node.get_content_type() != null)
+            this_content_type = new Mime.ContentType.from_gmime(node.get_content_type());
         
         // If this is a multipart, call ourselves recursively on the children
         GMime.Multipart? multipart = node as GMime.Multipart;
         if (multipart != null) {
+            Mime.MultipartSubtype this_subtype = Mime.MultipartSubtype.from_content_type(this_content_type,
+                null);
+            
             bool found_text_subtype = false;
+            
             StringBuilder builder = new StringBuilder();
             int count = multipart.get_count();
             for (int i = 0; i < count; ++i) {
                 GMime.Object child = multipart.get_part(i);
+                
                 string? child_body = null;
-                found_text_subtype |= construct_body_from_mime_parts(ref child_body, replacer,
-                    text_subtype, allow_only_replaced, to_html, child);
+                found_text_subtype |= construct_body_from_mime_parts(child, this_subtype, text_subtype,
+                    to_html, replacer, ref child_body);
                 if (child_body != null)
                     builder.append(child_body);
             }
             
-            if (!Geary.String.is_empty_or_whitespace(builder.str))
+            if (!String.is_empty(builder.str))
                 body = builder.str;
+            
             return found_text_subtype;
         }
         
@@ -492,53 +506,45 @@ public class Geary.RFC822.Message : BaseObject {
         if (disposition != null && disposition.disposition_type == Mime.DispositionType.ATTACHMENT)
             return false;
         
-        /* Handle text parts that are not attachments
-         * They may have inline disposition, or they may have no disposition specified
-         */
-        Mime.ContentType? content_type = null;
-        if (part.get_content_type() != null) {
-            content_type = new Mime.ContentType.from_gmime(part.get_content_type());
-            if (content_type.has_media_type("text")) {
-                if (content_type.has_media_subtype(text_subtype)) {
-                    body = mime_part_to_memory_buffer(part, true, to_html).to_string();
-                    return true;
-                }
+        // Assemble body from text parts that are not attachments
+        if (this_content_type != null && this_content_type.has_media_type("text")) {
+            if (this_content_type.has_media_subtype(text_subtype)) {
+                body = mime_part_to_memory_buffer(part, true, to_html).to_string();
                 
-                // We were the wrong kind of text part
-                return false;
+                return true;
             }
+            
+            // We were the wrong kind of text part
+            return false;
         }
         
         // If images have no disposition, they are handled elsewhere; see #7299
         if (disposition == null || disposition.disposition_type == Mime.DispositionType.UNSPECIFIED)
             return false;
         
-        if (replacer == null)
+        // Use inline part replacer *only* if in a mixed multipart where each element is to be
+        // presented to the user as structure dictates; for alternative and related, the inline
+        // part is referred to elsewhere in the document and it's the callers responsibility to
+        // locate them
+        if (replacer == null || container_subtype != Mime.MultipartSubtype.MIXED)
             return false;
         
         // Hand off to the replacer for processing
-        string? replaced_part = replacer(RFC822.Utils.get_clean_attachment_filename(part), content_type,
-            disposition, part.get_content_id(), mime_part_to_memory_buffer(part));
-        if (replaced_part != null)
-            body = replaced_part;
+        body = replacer(RFC822.Utils.get_clean_attachment_filename(part),
+            this_content_type, disposition, part.get_content_id(), mime_part_to_memory_buffer(part));
         
-        return allow_only_replaced && (replaced_part != null);
+        return body != null;
     }
     
     /**
      * A front-end to construct_body_from_mime_parts() that converts its output parameters into
      * something that front-facing methods want to return.
-     *
-     * The allow_only_replaced flag indicates if it's allowable for the method to return only the
-     * InlinePartReplacer's returned text.  In other words, if only an inline MIME section is found
-     * but no portion of text_subtype, allow_only_replaced indicates if the InlinePartReplacer's
-     * returned text constitutes a "body".
      */
-    private string? internal_get_body(bool allow_only_replaced, string text_subtype, bool to_html,
-        InlinePartReplacer? replacer) throws RFC822Error {
+    private string? internal_get_body(string text_subtype, bool to_html, InlinePartReplacer? replacer)
+        throws RFC822Error {
         string? body = null;
-        if (!construct_body_from_mime_parts(ref body, replacer, text_subtype, allow_only_replaced,
-            to_html, null)) {
+        if (!construct_body_from_mime_parts(message.get_mime_part(), Mime.MultipartSubtype.UNSPECIFIED,
+            text_subtype, to_html, replacer, ref body)) {
             throw new RFC822Error.NOT_FOUND("Could not find any \"text/%s\" parts", text_subtype);
         }
         
@@ -548,48 +554,73 @@ public class Geary.RFC822.Message : BaseObject {
     /**
      * Returns the HTML portion of the message body, if present.
      *
-     * Throws {@link RFC822Error.NOT_FOUND} if an HTML body is not present.
+     * See {@link get_body} for more details on how the body is assembled from the message's MIME
+     * structure and the role of the {@link InlinePartReplacer}.
+     *
+     * @throws {@link RFC822Error.NOT_FOUND} if an HTML body is not present.
      */
-    private string? get_html_body(InlinePartReplacer? replacer) throws RFC822Error {
-        return internal_get_body(true, "html", false, replacer);
+    public string? get_html_body(InlinePartReplacer? replacer) throws RFC822Error {
+        return internal_get_body("html", false, replacer);
     }
     
     /**
      * Returns the plaintext portion of the message body, if present.
      *
+     * See {@link get_body} for more details on how the body is assembled from the message's MIME
+     * structure and the role of the {@link InlinePartReplacer}.
+     *
      * The convert_to_html flag indicates if the plaintext body should be converted into HTML.
      * Note that the InlinePartReplacer's output is not converted; it's up to the caller to know
      * what format to return when invoked.
      *
-     * Throws {@link RFC822Error.NOT_FOUND} if a plaintext body is not present.
+     * @throws RFC822Error.NOT_FOUND if a plaintext body is not present.
      */
-    private string? get_text_body(bool convert_to_html, InlinePartReplacer? replacer) throws RFC822Error {
-        return internal_get_body(true, "plain", convert_to_html, replacer);
+    public string? get_plain_body(bool convert_to_html, InlinePartReplacer? replacer) throws RFC822Error {
+        return internal_get_body("plain", convert_to_html, replacer);
     }
     
     /**
-     * Returns a body of the email as HTML.
+     * Returns the complete email body as HTML.
      *
-     * The html_format flag indicates whether to use the HTML portion of the message body or to
+     * get_body() recursively walks the MIME structure (depth-first) serializing all text MIME
+     * parts of the specified type into a single UTF-8 string.  Non-text MIME parts inside of
+     * multipart/mixed containers are offered to the {@link InlinePartReplacer}, which can either
+     * return null or return a string that is inserted in lieu of the MIME part into the final
+     * document.  All other MIME parts are ignored.
+     *
+     * The format flag indicates whether to assemble the HTML portion of the message body or to
      * convert the plaintext portion into HTML.  If the requested portion is not present, the
      * method will fallback and attempt to return the other (converted to HTML, if necessary).
-     * It is possible for html_format to be false and this method to return HTML (if plaintext
-     * is unavailable).  Consider using {@link get_html_body} or {@link get_text_body} if finer
-     * control is desired.
+     * It is possible for format to be PLAIN and this method to return an HTML portion of the
+     * message (if plaintext is unavailable).
      *
      * Note that the InlinePartReplacer's output is never converted and should return HTML.
      *
-     * Throws {@link RFC822Error.NOT_FOUND if neither format is available.
+     * @throws RFC822Error.NOT_FOUND if neither format is available.
      */
-    public string? get_body(bool html_format, InlinePartReplacer? replacer = null) throws RFC822Error {
+    public string? get_body(TextFormat format, InlinePartReplacer? replacer) throws RFC822Error {
         try {
-            return html_format
-                ? internal_get_body(false, "html", false, replacer)
-                : internal_get_body(false, "plain", true, replacer);
+            switch (format) {
+                case TextFormat.HTML:
+                    return get_html_body(replacer);
+                
+                case TextFormat.PLAIN:
+                    return get_plain_body(true, replacer);
+                
+                default:
+                    return null;
+            }
         } catch (Error err) {
-            return html_format
-                ? internal_get_body(true, "plain", true, replacer)
-                : internal_get_body(true, "html", false, replacer);
+            switch (format) {
+                case TextFormat.HTML:
+                    return get_plain_body(true, replacer);
+                
+                case TextFormat.PLAIN:
+                    return get_html_body(replacer);
+                
+                default:
+                    assert_not_reached();
+            }
         }
     }
     
@@ -608,7 +639,7 @@ public class Geary.RFC822.Message : BaseObject {
             html = true;
         } catch (Error e) {
             try {
-                body = get_text_body(false, null);
+                body = get_plain_body(false, null);
             } catch (Error e) {
                 // Ignore.
             }

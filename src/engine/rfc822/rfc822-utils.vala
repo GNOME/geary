@@ -184,13 +184,20 @@ public string reply_references(Geary.Email source) {
     return (list.size > 0) ? string.joinv(" ", strings) : "";
 }
 
-public string email_addresses_for_reply(Geary.RFC822.MailboxAddresses? addresses,
-    bool html_format) {
-    
+public string email_addresses_for_reply(Geary.RFC822.MailboxAddresses? addresses, TextFormat format) {
     if (addresses == null)
         return "";
     
-    return html_format ? HTML.escape_markup(addresses.to_string()) : addresses.to_string();
+    switch (format) {
+        case TextFormat.HTML:
+            return HTML.escape_markup(addresses.to_string());
+        
+        case TextFormat.PLAIN:
+            return addresses.to_string();
+        
+        default:
+            assert_not_reached();
+    }
 }
 
 
@@ -203,7 +210,7 @@ public string email_addresses_for_reply(Geary.RFC822.MailboxAddresses? addresses
  * If html_format is true, the message will be quoted in HTML format.
  * Otherwise it will be in plain text.
  */
-public string quote_email_for_reply(Geary.Email email, string? quote, bool html_format) {
+public string quote_email_for_reply(Geary.Email email, string? quote, TextFormat format) {
     if (email.body == null && quote == null)
         return "";
     
@@ -219,13 +226,13 @@ public string quote_email_for_reply(Geary.Email email, string? quote, bool html_
         /// the original sender.
         string QUOTED_LABEL = _("On %1$s, %2$s wrote:");
         quoted += QUOTED_LABEL.printf(email.date.value.format(DATE_FORMAT),
-                                      email_addresses_for_reply(email.from, html_format));
+                                      email_addresses_for_reply(email.from, format));
 
     } else if (email.from != null) {
         /// The quoted header for a message being replied to (in case the date is not known).
         /// %s will be replaced by the original sender.
         string QUOTED_LABEL = _("%s wrote:");
-        quoted += QUOTED_LABEL.printf(email_addresses_for_reply(email.from, html_format));
+        quoted += QUOTED_LABEL.printf(email_addresses_for_reply(email.from, format));
 
     } else if (email.date != null) {
         /// The quoted header for a message being replied to (in case the sender is not known).
@@ -236,7 +243,7 @@ public string quote_email_for_reply(Geary.Email email, string? quote, bool html_
     
     quoted += "<br />";
     
-    quoted += "\n" + quote_body(email, quote, true, html_format);
+    quoted += "\n" + quote_body(email, quote, true, format);
     
     if (quote != null)
         quoted += "<br /><br />\n";
@@ -253,7 +260,7 @@ public string quote_email_for_reply(Geary.Email email, string? quote, bool html_
  * If html_format is true, the message will be quoted in HTML format.
  * Otherwise it will be in plain text.
  */
-public string quote_email_for_forward(Geary.Email email, string? quote, bool html_format) {
+public string quote_email_for_forward(Geary.Email email, string? quote, TextFormat format) {
     if (email.body == null && quote == null)
         return "";
     
@@ -261,31 +268,31 @@ public string quote_email_for_forward(Geary.Email email, string? quote, bool htm
     
     quoted += _("---------- Forwarded message ----------");
     quoted += "\n\n";
-    string from_line = email_addresses_for_reply(email.from, html_format);
+    string from_line = email_addresses_for_reply(email.from, format);
     if (!String.is_empty_or_whitespace(from_line))
         quoted += _("From: %s\n").printf(from_line);
     quoted += _("Subject: %s\n").printf(email.subject != null ? email.subject.to_string() : "");
     quoted += _("Date: %s\n").printf(email.date != null ? email.date.to_string() : "");
-    string to_line = email_addresses_for_reply(email.to, html_format);
+    string to_line = email_addresses_for_reply(email.to, format);
     if (!String.is_empty_or_whitespace(to_line))
         quoted += _("To: %s\n").printf(to_line);
-    string cc_line = email_addresses_for_reply(email.cc, html_format);
+    string cc_line = email_addresses_for_reply(email.cc, format);
     if (!String.is_empty_or_whitespace(cc_line))
         quoted += _("Cc: %s\n").printf(cc_line);
     quoted += "\n";  // A blank line between headers and body
     
     quoted = quoted.replace("\n", "<br />");
     
-    quoted += quote_body(email, quote, false, html_format);
+    quoted += quote_body(email, quote, false, format);
     
     return quoted;
 }
 
-private string quote_body(Geary.Email email, string? quote, bool use_quotes, bool html_format) {
+private string quote_body(Geary.Email email, string? quote, bool use_quotes, TextFormat format) {
     string? body_text = "";
     
     try {
-        body_text = quote ?? email.get_message().get_body(html_format);
+        body_text = quote ?? email.get_message().get_body(format, null);
     } catch (Error error) {
         debug("Could not get message text. %s", error.message);
     }

@@ -243,6 +243,7 @@ engine/mime/mime-content-type.vala
 engine/mime/mime-data-format.vala
 engine/mime/mime-disposition-type.vala
 engine/mime/mime-error.vala
+engine/mime/mime-multipart-subtype.vala
 
 engine/nonblocking/nonblocking-abstract-semaphore.vala
 engine/nonblocking/nonblocking-batch.vala

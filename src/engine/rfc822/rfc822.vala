@@ -6,6 +6,14 @@
 
 namespace Geary.RFC822 {
 
+/**
+ * Common text formats supported by {@link Geary.RFC822}.
+ */
+public enum TextFormat {
+    PLAIN,
+    HTML
+}
+
 private int init_count = 0;
 
 internal Regex? invalid_filename_character_re = null;

@@ -453,7 +453,7 @@ public class ComposerWidget : Gtk.EventBox {
                     if (referred.subject != null)
                         subject = referred.subject.value;
                     try {
-                        body_html = referred.get_message().get_body(true);
+                        body_html = referred.get_message().get_body(Geary.RFC822.TextFormat.HTML, null);
                     } catch (Error error) {
                         debug("Error getting message body: %s", error.message);
                     }
@@ -468,7 +468,8 @@ public class ComposerWidget : Gtk.EventBox {
                 case ComposeType.REPLY_ALL:
                     subject = reply_subject;
                     references = Geary.RFC822.Utils.reply_references(referred);
-                    body_html = "\n\n" + Geary.RFC822.Utils.quote_email_for_reply(referred, quote, true);
+                    body_html = "\n\n" + Geary.RFC822.Utils.quote_email_for_reply(referred, quote,
+                        Geary.RFC822.TextFormat.HTML);
                     pending_attachments = referred.attachments;
                     if (quote != null)
                         top_posting = false;
@@ -478,7 +479,8 @@ public class ComposerWidget : Gtk.EventBox {
                 
                 case ComposeType.FORWARD:
                     subject = forward_subject;
-                    body_html = "\n\n" + Geary.RFC822.Utils.quote_email_for_forward(referred, quote, true);
+                    body_html = "\n\n" + Geary.RFC822.Utils.quote_email_for_forward(referred, quote,
+                        Geary.RFC822.TextFormat.HTML);
                     add_attachments(referred.attachments);
                     pending_attachments = referred.attachments;
                 break;
@@ -898,7 +900,7 @@ public class ComposerWidget : Gtk.EventBox {
             WebKit.DOM.Document document = editor.get_dom_document();
             // Always use reply styling, since forward styling doesn't work for inline quotes
             document.exec_command("insertHTML", false,
-                Geary.RFC822.Utils.quote_email_for_reply(referred, quote, true));
+                Geary.RFC822.Utils.quote_email_for_reply(referred, quote, Geary.RFC822.TextFormat.HTML));
             
             if (!referred_ids.contains(referred.id)) {
                 add_recipients_and_ids(new_type, referred);

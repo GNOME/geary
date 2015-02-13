@@ -848,11 +848,31 @@ public class ConversationViewer : Gtk.Box {
         } catch (Error error) {
             debug("Failed to add preview text: %s", error.message);
         }
-
+        
+        //
+        // Build an HTML document from the email with two passes:
+        //
+        // * Geary.RFC822.Message.get_body() recursively walks the message's MIME structure looking
+        //   for text MIME parts and assembles them sequentially.  If non-text MIME parts are
+        //   discovered within a multipart/mixed container, it calls inline_image_replacer(), which
+        //   converts them to an IMG tag with a data: URI if they are a supported image type.
+        //   Otherwise, the MIME part is dropped.
+        //
+        // * insert_html_markup() then strips everything outside the BODY, turning the BODY tag
+        //   itself into a DIV, and performs other massaging of the HTML.  It also looks for IMG
+        //   tags that refer to other MIME parts via their Content-ID, converts them to data: URIs,
+        //   and inserts them into the document.
+        //
+        // Attachments are generated and added in add_message(), which calls this method before
+        // building the HTML for them.  The above two steps take steps to avoid inlining images
+        // that are actually attachments (in particular, get_body() considers their
+        // Content-Disposition)
+        //
+        
         string body_text = "";
         remote_images = false;
         try {
-            body_text = message.get_body(true, inline_image_replacer) ?? "";
+            body_text = message.get_body(Geary.RFC822.TextFormat.HTML, inline_image_replacer) ?? "";
             body_text = insert_html_markup(body_text, message, out remote_images);
         } catch (Error err) {
             debug("Could not get message text. %s", err.message);
@@ -915,9 +935,20 @@ public class ConversationViewer : Gtk.Box {
         return false;
     }
     
+    // This delegate is called from within Geary.RFC822.Message.get_body while assembling the plain
+    // or HTML document when a non-text MIME part is encountered within a multipart/mixed container.
+    // If this returns null, the MIME part is dropped from the final returned document; otherwise,
+    // this returns HTML that is placed into the document in the position where the MIME part was
+    // found
     private string? inline_image_replacer(string filename, Geary.Mime.ContentType? content_type,
         Geary.Mime.ContentDisposition? disposition, string? content_id, Geary.Memory.Buffer buffer) {
-        if (content_type == null || !is_content_type_supported_inline(content_type)) {
+        if (content_type == null) {
+            debug("Not displaying inline: no Content-Type");
+            
+            return null;
+        }
+        
+        if (!is_content_type_supported_inline(content_type)) {
             debug("Not displaying %s inline: unsupported Content-Type", content_type.to_string());
             
             return null;
@@ -1958,7 +1989,7 @@ public class ConversationViewer : Gtk.Box {
                 if (Geary.String.is_empty(src))
                     continue;
                 
-                // if no Content-ID, then leave as-is, but note if a data: URI is being used for
+                // if no Content-ID, then leave as-is, but note if a non-data: URI is being used for
                 // purposes of detecting remote images
                 string? content_id = src.has_prefix("cid:") ? src.substring(4) : null;
                 if (Geary.String.is_empty(content_id)) {
@@ -1981,10 +2012,10 @@ public class ConversationViewer : Gtk.Box {
                         guess = ContentType.guess(null, unowned_buffer.to_unowned_uint8_array(), null);
                     else
                         guess = ContentType.guess(null, image_content.get_uint8_array(), null);
-                        
+                    
                     string mimetype = ContentType.get_mime_type(guess);
                     
-                    // Replace the SRC to a data URIm the class to a known label for the popup menu,
+                    // Replace the SRC to a data URI, the class to a known label for the popup menu,
                     // and the ALT to its filename, if supplied
                     img.set_attribute("src", assemble_data_uri(mimetype, image_content));
                     img.set_attribute("class", DATA_IMAGE_CLASS);
@@ -1995,6 +2026,7 @@ public class ConversationViewer : Gtk.Box {
                     // Content-Disposition)
                     inlined_content_ids.add(content_id);
                 } else {
+                    // replaced by data: URI, remove this tag and let the inserted one shine through
                     img.parent_element.remove_child(img);
                 }
             }
@@ -2010,7 +2042,7 @@ public class ConversationViewer : Gtk.Box {
                     debug("Error removing inlined image: %s", error.message);
                 }
             }
-
+            
             // Now return the whole message.
             return container.get_inner_html();
         } catch (Error e) {

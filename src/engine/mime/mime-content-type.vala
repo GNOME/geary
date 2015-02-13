@@ -90,7 +90,7 @@ public class Geary.Mime.ContentType : Geary.BaseObject {
      * @see is_type
      */
     public bool has_media_type(string media_type) {
-        return (media_type != WILDCARD) ? String.stri_equal(this.media_type, media_type) : true;
+        return (media_type != WILDCARD) ? Ascii.stri_equal(this.media_type, media_type) : true;
     }
     
     /**
@@ -101,7 +101,7 @@ public class Geary.Mime.ContentType : Geary.BaseObject {
      * @see is_type
      */
     public bool has_media_subtype(string media_subtype) {
-        return (media_subtype != WILDCARD) ? String.stri_equal(this.media_subtype, media_subtype) : true;
+        return (media_subtype != WILDCARD) ? Ascii.stri_equal(this.media_subtype, media_subtype) : true;
     }
     
     /**
