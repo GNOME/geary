@@ -62,8 +62,8 @@ public class GearyController : Geary.BaseObject {
     private const string DELETE_MESSAGE_ICON_NAME = "edit-delete-symbolic";
     
     // This refers to the action ("move email to the trash"), not the Trash folder itself
-    private const string TRASH_MESSAGE_TOOLTIP_SINGLE = _("Move conversation to trash (Delete, Backspace)");
-    private const string TRASH_MESSAGE_TOOLTIP_MULTIPLE = _("Move conversations to trash (Delete, Backspace)");
+    private const string TRASH_MESSAGE_TOOLTIP_SINGLE = _("Move conversation to Trash (Delete, Backspace)");
+    private const string TRASH_MESSAGE_TOOLTIP_MULTIPLE = _("Move conversations to Trash (Delete, Backspace)");
     private const string TRASH_MESSAGE_ICON_NAME = "user-trash-symbolic";
     
     // This refers to the action ("archive an email"), not the Archive folder itself
