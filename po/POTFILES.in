@@ -314,6 +314,7 @@ src/engine/mime/mime-content-type.vala
 src/engine/mime/mime-data-format.vala
 src/engine/mime/mime-disposition-type.vala
 src/engine/mime/mime-error.vala
+src/engine/mime/mime-multipart-subtype.vala
 src/engine/nonblocking/nonblocking-abstract-semaphore.vala
 src/engine/nonblocking/nonblocking-batch.vala
 src/engine/nonblocking/nonblocking-concurrent.vala
