@@ -44,7 +44,7 @@ public class Sidebar.Tree : Gtk.TreeView {
         }
     }
     
-    private enum Columns {
+    public enum Columns {
         NAME,
         TOOLTIP,
         WRAPPER,
@@ -53,7 +53,7 @@ public class Sidebar.Tree : Gtk.TreeView {
         N_COLUMNS
     }
     
-    private Gtk.TreeStore store = new Gtk.TreeStore(Columns.N_COLUMNS,
+    public Gtk.TreeStore store = new Gtk.TreeStore(Columns.N_COLUMNS,
         typeof (string),            // NAME
         typeof (string?),           // TOOLTIP
         typeof (EntryWrapper),      // WRAPPER

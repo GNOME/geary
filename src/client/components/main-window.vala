@@ -6,7 +6,6 @@
 
 public class MainWindow : Gtk.ApplicationWindow {
     private const int MESSAGE_LIST_WIDTH = 250;
-    private const int FOLDER_LIST_WIDTH = 100;
     private const int STATUS_BAR_HEIGHT = 18;
     
     /// Fired when the shift key is pressed or released.
@@ -196,16 +195,6 @@ public class MainWindow : Gtk.ApplicationWindow {
     private void create_layout() {
         Gtk.Box main_layout = new Gtk.Box(Gtk.Orientation.VERTICAL, 0);
         
-        // folder list
-        Gtk.ScrolledWindow folder_list_scrolled = new Gtk.ScrolledWindow(null, null);
-        folder_list_scrolled.set_size_request(FOLDER_LIST_WIDTH, -1);
-        folder_list_scrolled.set_policy(Gtk.PolicyType.NEVER, Gtk.PolicyType.AUTOMATIC);
-        folder_list_scrolled.add(folder_list);
-        Gtk.Frame folder_frame = new Gtk.Frame(null);
-        folder_frame.shadow_type = Gtk.ShadowType.IN;
-        folder_frame.get_style_context ().add_class ("folder_frame");
-        folder_frame.add(folder_list_scrolled);
-        
         // message list
         conversation_list_scrolled = new Gtk.ScrolledWindow(null, null);
         conversation_list_scrolled.set_size_request(MESSAGE_LIST_WIDTH, -1);
@@ -232,7 +221,7 @@ public class MainWindow : Gtk.ApplicationWindow {
         viewer_frame.add(conversation_viewer);
         
         // Folder list to the left of everything.
-        folder_paned.pack1(folder_frame, false, false);
+        folder_paned.pack1(folder_list, false, false);
         folder_paned.pack2(conversation_frame, true, false);
         
         Gtk.Box status_bar_box = new Gtk.Box(Gtk.Orientation.VERTICAL, 0);
