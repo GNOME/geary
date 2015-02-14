@@ -178,10 +178,11 @@
             </child>
             <child>
               <object class="GtkCheckButton" id="startup_notifications">
-                <property name="label" translatable="yes">Notify of new mail at start_up</property>
+                <property name="label" translatable="yes">Always _watch for new mail</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">Geary will run in the background and notify of new mail</property>
                 <property name="margin_left">12</property>
                 <property name="margin_right">5</property>
                 <property name="margin_top">5</property>
