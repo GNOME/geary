@@ -294,7 +294,7 @@ public class Geary.RFC822.Message : BaseObject {
         email.set_message_header(new Geary.RFC822.Header(new Geary.Memory.StringBuffer(
             message.get_headers())));
         email.set_send_date(date);
-        email.set_originators(from, new Geary.RFC822.MailboxAddresses.single(sender), null);
+        email.set_originators(from, new Geary.RFC822.MailboxAddresses.single(sender), reply_to);
         email.set_receivers(to, cc, bcc);
         email.set_full_references(null, in_reply_to, references);
         email.set_message_subject(subject);
@@ -343,6 +343,9 @@ public class Geary.RFC822.Message : BaseObject {
         converted = convert_gmime_address_list(message.get_recipients(GMime.RecipientType.BCC));
         if (converted != null && converted.size > 0)
             bcc = new RFC822.MailboxAddresses(converted);
+        
+        if (!String.is_empty(message.get_reply_to()))
+            reply_to = new RFC822.MailboxAddresses.from_rfc822_string(message.get_reply_to());
         
         if (!String.is_empty(message.get_header(HEADER_IN_REPLY_TO)))
             in_reply_to = new RFC822.MessageIDList.from_rfc822_string(message.get_header(HEADER_IN_REPLY_TO));
