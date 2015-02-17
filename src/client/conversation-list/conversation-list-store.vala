@@ -63,12 +63,8 @@ public class ConversationListStore : Gtk.ListStore {
             return row.get_path();
         }
         
-        public Gtk.TreeIter get_iter() {
-            Gtk.TreeIter iter;
-            bool valid = row.get_model().get_iter(out iter, get_path());
-            assert(valid);
-            
-            return iter;
+        public bool get_iter(out Gtk.TreeIter iter) {
+            return row.get_model().get_iter(out iter, get_path());
         }
     }
     
@@ -356,15 +352,15 @@ public class ConversationListStore : Gtk.ListStore {
     }
     
     private bool get_iter_for_conversation(Geary.App.Conversation conversation, out Gtk.TreeIter iter) {
-        // use get_iter_first() because boxing Gtk.TreeIter with a nullable is problematic with
-        // current bindings
         RowWrapper? wrapper = row_map.get(conversation);
         if (wrapper != null)
-            iter = wrapper.get_iter();
-        else
-            get_iter_first(out iter);
+            return wrapper.get_iter(out iter);
         
-        return wrapper != null;
+        // use get_iter_first() because boxing Gtk.TreeIter with a nullable is problematic with
+        // current bindings
+        get_iter_first(out iter);
+        
+        return false;
     }
     
     private bool has_conversation(Geary.App.Conversation conversation) {
