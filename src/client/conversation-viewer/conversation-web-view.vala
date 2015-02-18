@@ -261,35 +261,35 @@ public class ConversationWebView : StylishWebView {
         
         try {
             // If the file is an image, use it. Otherwise get the icon for this mime_type.
-            uint8[] content;
             string gio_content_type = ContentType.from_mime_type(content_type.get_mime_type());
-            string icon_mime_type = content_type.get_mime_type();
+            
+            Gdk.Pixbuf pixbuf;
             if (content_type.has_media_type("image")) {
                 // Get a thumbnail for the image.
                 // TODO Generate and save the thumbnail when extracting the attachments rather than
                 // when showing them in the viewer.
                 img.get_class_list().add("thumbnail");
-                Gdk.Pixbuf image = new Gdk.Pixbuf.from_file_at_scale(filename, maxwidth, maxheight,
-                    true);
-                image = image.apply_embedded_orientation();
-                image.save_to_buffer(out content, "png");
-                icon_mime_type = "image/png";
+                pixbuf = new Gdk.Pixbuf.from_file_at_scale(filename, maxwidth, maxheight, true);
+                pixbuf = pixbuf.apply_embedded_orientation();
             } else {
                 // Load the icon for this mime type.
                 ThemedIcon icon = ContentType.get_icon(gio_content_type) as ThemedIcon;
                 string icon_filename = IconFactory.instance.lookup_icon(icon.names[0], maxwidth)
                     .get_filename();
-                FileUtils.get_data(icon_filename, out content);
-                icon_mime_type = ContentType.get_mime_type(ContentType.guess(icon_filename, content,
-                    null));
+                pixbuf = new Gdk.Pixbuf.from_file_at_scale(icon_filename, maxwidth, maxheight, true);
             }
+            
+            // convert to PNG and assemble IMG src as a data: URI
+            uint8[] content;
+            pixbuf.save_to_buffer(out content, "png");
             
             // Then set the source to a data url.
             // Save length before transferring ownership (which frees the array)
             int content_length = content.length;
             Geary.Memory.Buffer buffer = new Geary.Memory.ByteBuffer.take((owned) content,
                 content_length);
-            img.set_attribute("src", assemble_data_uri(icon_mime_type, buffer));
+            
+            img.set_attribute("src", assemble_data_uri("image/png", buffer));
         } catch (Error error) {
             warning("Failed to load image '%s': %s", filename, error.message);
         }
