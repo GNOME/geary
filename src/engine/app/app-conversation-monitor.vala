@@ -12,8 +12,6 @@ public class Geary.App.ConversationMonitor : BaseObject {
     public const Geary.Email.Field REQUIRED_FIELDS = Geary.Email.Field.REFERENCES |
         Geary.Email.Field.FLAGS | Geary.Email.Field.DATE;
     
-    private const int RETRY_CONNECTION_SEC = 15;
-    
     // # of messages to load at a time as we attempt to fill the min window.
     private const int WINDOW_FILL_MESSAGE_COUNT = 5;
     
@@ -29,7 +27,6 @@ public class Geary.App.ConversationMonitor : BaseObject {
     }
     
     public Geary.Folder folder { get; private set; }
-    public bool reestablish_connections { get; set; default = true; }
     public bool is_monitoring { get; private set; default = false; }
     public int min_window_count { get { return _min_window_count; }
         set {
@@ -50,7 +47,6 @@ public class Geary.App.ConversationMonitor : BaseObject {
     
     /**
      * "monitoring-started" is fired when the Conversations folder has been opened for monitoring.
-     * This may be called multiple times if a connection is being reestablished.
      */
     public virtual signal void monitoring_started() {
         Logging.debug(Logging.Flag.CONVERSATIONS, "[%s] ConversationMonitor::monitoring_started",
@@ -60,13 +56,10 @@ public class Geary.App.ConversationMonitor : BaseObject {
     /**
      * "monitoring-stopped" is fired when the Geary.Folder object has closed (either due to error
      * or user) and the Conversations object is therefore unable to continue monitoring.
-     *
-     * retrying is set to true if the Conversations object will, in the background, attempt to
-     * reestablish a connection to the Folder and continue operating.
      */
-    public virtual signal void monitoring_stopped(bool retrying) {
-        Logging.debug(Logging.Flag.CONVERSATIONS, "[%s] ConversationMonitor::monitoring_stopped retrying=%s",
-            folder.to_string(), retrying.to_string());
+    public virtual signal void monitoring_stopped() {
+        Logging.debug(Logging.Flag.CONVERSATIONS, "[%s] ConversationMonitor::monitoring_stopped",
+            folder.to_string());
     }
     
     /**
@@ -199,8 +192,8 @@ public class Geary.App.ConversationMonitor : BaseObject {
         monitoring_started();
     }
     
-    protected virtual void notify_monitoring_stopped(bool retrying) {
-        monitoring_stopped(retrying);
+    protected virtual void notify_monitoring_stopped() {
+        monitoring_stopped();
     }
     
     protected virtual void notify_scan_started() {
@@ -329,10 +322,6 @@ public class Geary.App.ConversationMonitor : BaseObject {
      * here to use that.
      */
     public async void stop_monitoring_async(Cancellable? cancellable) throws Error {
-        yield stop_monitoring_internal_async(false, cancellable);
-    }
-    
-    private async void stop_monitoring_internal_async(bool retrying, Cancellable? cancellable) throws Error {
         if (!is_monitoring)
             return;
         
@@ -360,7 +349,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
             close_err = err;
         }
         
-        notify_monitoring_stopped(retrying);
+        notify_monitoring_stopped();
         
         if (close_err != null)
             throw close_err;
