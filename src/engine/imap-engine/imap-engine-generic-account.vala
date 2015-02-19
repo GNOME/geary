@@ -859,6 +859,14 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             message_id, requested_fields, partial_ok, folder_blacklist, flag_blacklist, cancellable);
     }
     
+    public override async Gee.MultiMap<Geary.Email, Geary.FolderPath?>? local_list_conversation_async(
+        Geary.EmailIdentifier email_id, Geary.Email.Field requested_fields, bool partial_ok,
+        Gee.Collection<Geary.FolderPath?> folder_blacklist, Geary.EmailFlags? flag_blacklist,
+        Cancellable? cancellable = null) throws Error {
+        return yield local.list_conversation_async(email_id, requested_fields, partial_ok,
+            folder_blacklist, flag_blacklist, cancellable);
+    }
+    
     public override async Geary.Email local_fetch_email_async(Geary.EmailIdentifier email_id,
         Geary.Email.Field required_fields, Cancellable? cancellable = null) throws Error {
         return yield local.fetch_email_async(check_id(email_id), required_fields, cancellable);

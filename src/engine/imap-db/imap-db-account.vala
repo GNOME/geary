@@ -659,38 +659,8 @@ private class Geary.ImapDB.Account : BaseObject {
             
             Db.Result result = stmt.exec(cancellable);
             while (!result.finished) {
-                int64 id = result.int64_at(0);
-                Geary.Email.Field db_fields;
-                MessageRow row = Geary.ImapDB.Folder.do_fetch_message_row(
-                    cx, id, requested_fields, out db_fields, cancellable);
-                
-                // Ignore any messages that don't have the required fields.
-                if (partial_ok || row.fields.fulfills(requested_fields)) {
-                    Geary.Email email = row.to_email(new Geary.ImapDB.EmailIdentifier(id, null));
-                    Geary.ImapDB.Folder.do_add_attachments(cx, email, id, cancellable);
-                    
-                    Gee.Set<Geary.FolderPath>? folders = do_find_email_folders(cx, id, true, cancellable);
-                    if (folders == null) {
-                        if (folder_blacklist == null || !folder_blacklist.contains(null))
-                            messages.set(email, null);
-                    } else {
-                        foreach (Geary.FolderPath path in folders) {
-                            // If it's in a blacklisted folder, we don't report
-                            // it at all.
-                            if (folder_blacklist != null && folder_blacklist.contains(path)) {
-                                messages.remove_all(email);
-                                break;
-                            } else {
-                                messages.set(email, path);
-                            }
-                        }
-                    }
-                    
-                    // Check for blacklisted flags.
-                    if (flag_blacklist != null && email.email_flags != null &&
-                        email.email_flags.contains_any(flag_blacklist))
-                        messages.remove_all(email);
-                }
+                do_fetch_message(cx, result.int64_at(0), requested_fields, partial_ok, folder_blacklist,
+                    flag_blacklist, messages, cancellable);
                 
                 result.next(cancellable);
             }
@@ -699,6 +669,93 @@ private class Geary.ImapDB.Account : BaseObject {
         }, cancellable);
         
         return (messages.size == 0 ? null : messages);
+    }
+    
+    public async Gee.MultiMap<Geary.Email, Geary.FolderPath?>? list_conversation_async(
+        Geary.EmailIdentifier email_id, Email.Field requested_fields, bool partial_ok,
+        Gee.Collection<Geary.FolderPath?>? folder_blacklist, Geary.EmailFlags? flag_blacklist,
+        Cancellable? cancellable) throws Error {
+        check_open();
+        
+        ImapDB.EmailIdentifier? imapdb_id = email_id as ImapDB.EmailIdentifier;
+        if (imapdb_id == null)
+            throw new EngineError.BAD_PARAMETERS("Invalid identifier supplied to list conversation");
+        
+        Gee.HashMultiMap<Geary.Email, Geary.FolderPath?> messages
+            = new Gee.HashMultiMap<Geary.Email, Geary.FolderPath?>();
+        
+        if (flag_blacklist != null)
+            requested_fields = requested_fields | Geary.Email.Field.FLAGS;
+        
+        yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
+            Db.Statement stmt = cx.prepare("""
+                SELECT conversation_id
+                FROM MessageTable
+                WHERE id = ?
+            """);
+            stmt.bind_rowid(0, imapdb_id.message_id);
+            
+            Db.Result result = stmt.exec(cancellable);
+            if (result.finished || result.is_null_at(0))
+                return Db.TransactionOutcome.DONE;
+            
+            int64 conversation_id = result.rowid_at(0);
+            
+            stmt = cx.prepare("""
+                SELECT id
+                FROM MessageTable
+                WHERE conversation_id = ?
+            """);
+            stmt.bind_rowid(0, conversation_id);
+            
+            result = stmt.exec(cancellable);
+            while (!result.finished) {
+                do_fetch_message(cx, result.int64_at(0), requested_fields, partial_ok, folder_blacklist,
+                    flag_blacklist, messages, cancellable);
+                
+                result.next(cancellable);
+            }
+            
+            return Db.TransactionOutcome.DONE;
+        }, cancellable);
+        
+        return messages.size > 0 ? messages : null;
+    }
+    
+    private void do_fetch_message(Db.Connection cx, int64 message_id, Email.Field required_fields,
+        bool partial_ok, Gee.Collection<Geary.FolderPath?>? folder_blacklist, Geary.EmailFlags? flag_blacklist,
+        Gee.HashMultiMap<Geary.Email, Geary.FolderPath?> messages, Cancellable? cancellable) throws Error {
+        Email.Field actual_fields;
+        MessageRow row = ImapDB.Folder.do_fetch_message_row(cx, message_id, required_fields,
+            out actual_fields, cancellable);
+        
+        // Ignore any messages that don't have the required fields unless partial is ok
+        if (!partial_ok && !row.fields.fulfills(required_fields))
+            return;
+        
+        Email email = row.to_email(new Geary.ImapDB.EmailIdentifier(message_id, null));
+        ImapDB.Folder.do_add_attachments(cx, email, message_id, cancellable);
+        
+        // Add folders email is found in, respecting blacklist
+        Gee.Set<Geary.FolderPath>? folders = do_find_email_folders(cx, message_id, true, cancellable);
+        if (folders == null) {
+            if (folder_blacklist == null || !folder_blacklist.contains(null))
+                messages.set(email, null);
+        } else {
+            foreach (Geary.FolderPath path in folders) {
+                // If it's in a blacklisted folder, we don't report it at all.
+                if (folder_blacklist != null && folder_blacklist.contains(path)) {
+                    messages.remove_all(email);
+                    break;
+                } else {
+                    messages.set(email, path);
+                }
+            }
+        }
+        
+        // Check for blacklisted flags.
+        if (flag_blacklist != null && email.email_flags != null && email.email_flags.contains_any(flag_blacklist))
+            messages.remove_all(email);
     }
     
     private string? extract_field_from_token(string[] parts, ref string token) {

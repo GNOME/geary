@@ -332,6 +332,24 @@ public abstract class Geary.Account : BaseObject {
         Cancellable? cancellable = null) throws Error;
     
     /**
+     * Fetch all local messages associated with supplied {@link EmailIdentifier}.
+     *
+     * This is usually a better choice that {@link local_search_message_id_async) in the sense that
+     * the {@link Account} is tasked to maintain internal lookup tables that speed lookup of
+     * associated emails.  In particular, this call does ''not'' merely search for the
+     * {@link RFC822.MessageID}s listed in this particular {@link Email}.  Rather, these lookup
+     * tables are built to index all local messages, meaning a single lookup should return the
+     * entire conversation.
+     *
+     * The particulars of the folder_blacklist and flag_blacklist parameters are the same as in
+     * local_search_message_id_async.
+     */
+    public abstract async Gee.MultiMap<Geary.Email, Geary.FolderPath?>? local_list_conversation_async(
+        Geary.EmailIdentifier email_id, Geary.Email.Field requested_fields, bool partial_ok,
+        Gee.Collection<Geary.FolderPath?> folder_blacklist, Geary.EmailFlags? flag_blacklist,
+        Cancellable? cancellable = null) throws Error;
+    
+    /**
      * Return a single email fulfilling the required fields.  The email to pull
      * is identified by an EmailIdentifier from a previous call to
      * local_search_message_id_async() or local_search_async().  Throw
