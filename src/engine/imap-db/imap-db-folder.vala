@@ -1380,6 +1380,10 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         if (email.fields.fulfills(Attachment.REQUIRED_FIELDS))
             do_save_attachments(cx, message_id, email.get_message().get_attachments(), cancellable);
         
+        // add to conversation, if required fields available
+        if (email.fields.fulfills(Conversation.REQUIRED_FIELDS))
+            Conversation.do_add_message_to_conversation(cx, message_id, cancellable);
+        
         do_add_email_to_search_table(cx, message_id, email, cancellable);
         
         MessageAddresses message_addresses =
@@ -1930,6 +1934,12 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                 do_merge_email_in_search_table(cx, location.message_id, new_fields, combined_email, cancellable);
             else
                 do_add_email_to_search_table(cx, location.message_id, combined_email, cancellable);
+            
+            // add to conversation if ready for it
+            if (!fetched_fields.fulfills(Conversation.REQUIRED_FIELDS)
+                && combined_email.fields.fulfills(Conversation.REQUIRED_FIELDS)) {
+                Conversation.do_add_message_to_conversation(cx, location.message_id, cancellable);
+            }
         } else {
             // If the email is ready to go, we still may need to update the unread count.
             Geary.EmailFlags? combined_flags = do_get_email_flags_single(cx, location.message_id,

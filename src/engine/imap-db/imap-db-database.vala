@@ -174,6 +174,10 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
             case 23:
                 post_upgrade_add_tokenizer_table();
             break;
+            
+            case 25:
+                post_upgrade_build_conversation_tables();
+            break;
         }
     }
     
@@ -552,6 +556,30 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
             """.printf(stemmer));
         } catch (Error e) {
             error("Error creating tokenizer table: %s", e.message);
+        }
+    }
+    
+    // Version 25
+    private void post_upgrade_build_conversation_tables() {
+        try {
+            exec_transaction(Db.TransactionType.RW, (cx) => {
+                // Fetch every message that has the required fields for assigning a conversation
+                Db.Result result = query("""
+                    SELECT id, fields
+                    FROM MessageTable
+                """);
+                while (!result.finished) {
+                    Email.Field fields = (Email.Field) result.int_at(1);
+                    if (fields.fulfills(Conversation.REQUIRED_FIELDS))
+                        Conversation.do_add_message_to_conversation(cx, result.rowid_at(0), null);
+                    
+                    result.next();
+                }
+                
+                return Db.TransactionOutcome.COMMIT;
+            }, null);
+        } catch (Error err) {
+            error("Error upgrading conversation tables: %s", err.message);
         }
     }
     
