@@ -211,6 +211,7 @@ public class MainWindow : Gtk.ApplicationWindow {
         spinner.set_size_request(STATUS_BAR_HEIGHT - 2, -1);
         status_bar.add(spinner);
         
+        orientation_button.margin_right = 10;
         status_bar.pack_start(orientation_button, false, false, 0);
         status_bar.reorder_child(orientation_button, 0);
         
@@ -348,7 +349,11 @@ public class MainWindow : Gtk.ApplicationWindow {
     
     private void on_orientation_changed() {
         bool horizontal = (folder_paned.orientation == Gtk.Orientation.HORIZONTAL);
-        orientation_button.label = horizontal ? "H" : "I";
+        Gtk.Image image = new Gtk.Image.from_icon_name(
+            horizontal ? "layout-vertical-symbolic" : "layout-horizontal-symbolic",
+            Gtk.IconSize.MENU);
+        image.set_pixel_size(16);
+        orientation_button.image = image;
         // Cancels previous binding
         GearyApplication.instance.config.bind(
             horizontal ? Configuration.FOLDER_LIST_PANE_POSITION_KEY

@@ -60,6 +60,9 @@ public class StatusBar : Gtk.Statusbar {
     
     public StatusBar() {
         set_context_id(Context.OUTBOX);
+        margin_top = 0;
+        margin_bottom = 0;
+        margin_left = 0;
     }
     
     private void set_context_id(Context context) {
