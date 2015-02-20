@@ -7,6 +7,8 @@ set(ICON_FILES
     text-x-generic-symbolic.svg
     edit-symbolic.svg
     format-text-remove-symbolic.svg
+    layout-horizontal-symbolic.svg
+    layout-vertical-symbolic.svg
     mail-forward-symbolic.svg
     mail-forward-rtl-symbolic.svg
     mail-inbox-symbolic.svg
