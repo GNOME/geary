@@ -344,8 +344,8 @@ public abstract class Geary.Account : BaseObject {
      * The particulars of the folder_blacklist and flag_blacklist parameters are the same as in
      * local_search_message_id_async.
      */
-    public abstract async Gee.MultiMap<Geary.Email, Geary.FolderPath?>? local_list_conversation_async(
-        Geary.EmailIdentifier email_id, Geary.Email.Field requested_fields, bool partial_ok,
+    public abstract async Gee.Collection<Geary.AssociatedEmails>? local_search_associated_emails_async(
+        Gee.Set<Geary.EmailIdentifier> email_ids, Geary.Email.Field requested_fields, bool partial_ok,
         Gee.Collection<Geary.FolderPath?> folder_blacklist, Geary.EmailFlags? flag_blacklist,
         Cancellable? cancellable = null) throws Error;
     

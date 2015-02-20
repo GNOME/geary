@@ -7,6 +7,7 @@ engine/api/geary-abstract-local-folder.vala
 engine/api/geary-account.vala
 engine/api/geary-account-information.vala
 engine/api/geary-aggregated-folder-properties.vala
+engine/api/geary-associated-emails.vala
 engine/api/geary-attachment.vala
 engine/api/geary-base-object.vala
 engine/api/geary-composed-email.vala
