@@ -168,7 +168,7 @@ public class MainWindow : Gtk.ApplicationWindow {
             }
         """;
         
-        if(Gtk.MAJOR_VERSION >= 3 && Gtk.MINOR_VERSION >= 14) {
+        if(Gtk.MAJOR_VERSION > 3 || Gtk.MAJOR_VERSION == 3 && Gtk.MINOR_VERSION >= 14) {
             // Gtk >= 3.14: Borders only along status bar
             css += """
                   .folder-frame {
