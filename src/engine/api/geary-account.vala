@@ -31,6 +31,20 @@ public abstract class Geary.Account : BaseObject {
         SAVE_SENT_MAIL_FAILED,
     }
     
+    /**
+     * @see local_search_associated_emails_async
+     */
+    public const Geary.Email.Field ASSOCIATED_REQUIRED_FIELDS = Email.Field.REFERENCES;
+    
+    /**
+     * Predicate used for filtering results from various local search methods.
+     *
+     * It's possible (and likely) this will be called from the context of a background thread,
+     * so use appropriate locking.
+     */
+    public delegate bool EmailSearchPredicate(Geary.EmailIdentifier email_id, bool only_partial,
+        Gee.Collection<Geary.FolderPath?> known_paths, Geary.EmailFlags flags);
+    
     public Geary.AccountInformation information { get; protected set; }
     
     public Geary.ProgressMonitor search_upgrade_monitor { get; protected set; }
@@ -327,9 +341,8 @@ public abstract class Geary.Account : BaseObject {
      * it's in, which can be null if it's in no folders.
      */
     public abstract async Gee.MultiMap<Geary.Email, Geary.FolderPath?>? local_search_message_id_async(
-        Geary.RFC822.MessageID message_id, Geary.Email.Field requested_fields, bool partial_ok,
-        Gee.Collection<Geary.FolderPath?>? folder_blacklist, Geary.EmailFlags? flag_blacklist,
-        Cancellable? cancellable = null) throws Error;
+        Geary.RFC822.MessageID message_id, Geary.Email.Field requested_fields,
+        EmailSearchPredicate? search_predicate, Cancellable? cancellable = null) throws Error;
     
     /**
      * Fetch all local messages associated with supplied {@link EmailIdentifier}.
@@ -343,11 +356,15 @@ public abstract class Geary.Account : BaseObject {
      *
      * The particulars of the folder_blacklist and flag_blacklist parameters are the same as in
      * local_search_message_id_async.
+     *
+     * The Emails can only be searched for if they are stored locally with
+     * {@link ASSOCIATED_EMAILS_REQUIRED_FIELDS} {@link Email.Field}s.  Thus, when listing for
+     * EmailIdentifiers, add that field to the required fields to ensure they're available
+     * locally.
      */
     public abstract async Gee.Collection<Geary.AssociatedEmails>? local_search_associated_emails_async(
-        Gee.Set<Geary.EmailIdentifier> email_ids, Geary.Email.Field requested_fields, bool partial_ok,
-        Gee.Collection<Geary.FolderPath?> folder_blacklist, Geary.EmailFlags? flag_blacklist,
-        Cancellable? cancellable = null) throws Error;
+        Gee.Set<Geary.EmailIdentifier> email_ids, Geary.Email.Field requested_fields,
+        EmailSearchPredicate? search_predicate, Cancellable? cancellable = null) throws Error;
     
     /**
      * Return a single email fulfilling the required fields.  The email to pull

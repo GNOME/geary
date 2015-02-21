@@ -634,15 +634,20 @@ public class ComposerWidget : Gtk.EventBox {
         }
     }
     
+    // TODO: Folder blacklist
+    private bool local_search_predicate(Geary.EmailIdentifier email_id, bool only_partial,
+        Gee.Collection<Geary.FolderPath?> known_paths, Geary.EmailFlags flags) {
+        return !flags.contains(Geary.EmailFlags.DRAFT);
+    }
+    
     public async void restore_draft_state_async(Geary.Account account) {
         bool first_email = true;
         
         foreach (Geary.RFC822.MessageID mid in in_reply_to) {
             Gee.MultiMap<Geary.Email, Geary.FolderPath?>? email_map;
             try {
-                email_map =
-                    yield account.local_search_message_id_async(mid, Geary.Email.Field.ENVELOPE,
-                    true, null, new Geary.EmailFlags.with(Geary.EmailFlags.DRAFT)); // TODO: Folder blacklist
+                email_map = yield account.local_search_message_id_async(mid, Geary.Email.Field.ENVELOPE,
+                    local_search_predicate);
             } catch (Error error) {
                 continue;
             }

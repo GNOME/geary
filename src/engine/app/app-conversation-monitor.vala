@@ -15,6 +15,12 @@ public class Geary.App.ConversationMonitor : BaseObject {
     // # of messages to load at a time as we attempt to fill the min window.
     private const int WINDOW_FILL_MESSAGE_COUNT = 5;
     
+    private const Geary.SpecialFolderType[] BLACKLISTED_FOLDER_TYPES = {
+        Geary.SpecialFolderType.SPAM,
+        Geary.SpecialFolderType.TRASH,
+        Geary.SpecialFolderType.DRAFTS,
+    };
+    
     public Geary.Folder folder { get; private set; }
     public bool is_monitoring { get; private set; default = false; }
     public int min_window_count { get { return _min_window_count; }
@@ -28,6 +34,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
     
     private Geary.Email.Field required_fields;
     private Geary.Folder.OpenFlags open_flags;
+    private Gee.Collection<FolderPath?> search_path_blacklist;
     private Cancellable? cancellable_monitor = null;
     private bool reseed_notified = false;
     private int _min_window_count = 0;
@@ -38,6 +45,8 @@ public class Geary.App.ConversationMonitor : BaseObject {
     
     // A logical map of Message-ID to Conversation ... these Message-IDs are merely referenced by
     // emails and the email itself may not be present in the conversation
+    //
+    // TODO: Is this necessary any longer?
     private Gee.HashMap<RFC822.MessageID, Conversation> message_id_to_conversation =
         new Gee.HashMap<RFC822.MessageID, Conversation>();
     
@@ -177,13 +186,33 @@ public class Geary.App.ConversationMonitor : BaseObject {
         Geary.Email.Field required_fields, int min_window_count) {
         this.folder = folder;
         this.open_flags = open_flags;
-        this.required_fields = required_fields | REQUIRED_FIELDS;
+        this.required_fields = required_fields | REQUIRED_FIELDS | Account.ASSOCIATED_REQUIRED_FIELDS;
         _min_window_count = min_window_count;
+        
+        // generate FolderPaths for the blacklisted special folder types
+        // TODO: Update when Account notifies of change to special folders
+        search_path_blacklist = new Gee.HashSet<Geary.FolderPath?>();
+        foreach (Geary.SpecialFolderType type in BLACKLISTED_FOLDER_TYPES) {
+            try {
+                Geary.Folder? blacklist_folder = folder.account.get_special_folder(type);
+                if (blacklist_folder != null)
+                    search_path_blacklist.add(blacklist_folder.path);
+            } catch (Error e) {
+                debug("Error finding special folder %s on account %s: %s",
+                    type.to_string(), folder.account.to_string(), e.message);
+            }
+        }
+        
+        // Add "no folders" so we omit results that have been deleted permanently from the server.
+        search_path_blacklist.add(null);
     }
     
     ~ConversationMonitor() {
         if (is_monitoring)
             debug("Warning: Conversations object destroyed without stopping monitoring");
+        
+        foreach (Conversation conversation in conversations)
+            conversation.clear_owner();
     }
     
     protected virtual void notify_monitoring_started() {
@@ -360,8 +389,8 @@ public class Geary.App.ConversationMonitor : BaseObject {
         Geary.Folder.ListFlags flags, Cancellable? cancellable) throws Error {
         notify_scan_started();
         try {
-            yield process_email_async(yield folder.list_email_by_id_async(initial_id,
-                count, Email.Field.NONE, flags, cancellable));
+            yield process_email_async(yield folder.list_email_by_id_async(initial_id, count,
+                required_fields, flags, cancellable));
         } catch (Error err) {
             notify_scan_error(err);
             
@@ -375,8 +404,8 @@ public class Geary.App.ConversationMonitor : BaseObject {
         Geary.Folder.ListFlags flags, Cancellable? cancellable) {
         notify_scan_started();
         try {
-            yield process_email_async(yield folder.list_email_by_sparse_id_async(ids,
-                Email.Field.NONE, flags, cancellable));
+            yield process_email_async(yield folder.list_email_by_sparse_id_async(ids, required_fields,
+                flags, cancellable));
         } catch (Error err) {
             notify_scan_error(err);
         } finally {
@@ -445,8 +474,27 @@ public class Geary.App.ConversationMonitor : BaseObject {
         }
     }
     
-    // Emails for this call only require Email.Field.NONE, as the EmailIdentifier is then used to
-    // load the associations and the required_fields
+    
+    // NOTE: This is called from a background thread.
+    private bool search_associated_predicate(EmailIdentifier email_id, bool only_partial,
+        Gee.Collection<FolderPath?> known_paths, EmailFlags flags) {
+        if (only_partial)
+            return false;
+        
+        if (known_paths.contains(folder.path))
+            return true;
+        
+        foreach (FolderPath? blacklist_path in search_path_blacklist) {
+            if (known_paths.contains(blacklist_path))
+                return false;
+        }
+        
+        if (flags.contains(EmailFlags.DRAFT))
+            return false;
+        
+        return true;
+    }
+    
     private async void process_email_async(Gee.Collection<Geary.Email>? emails) {
         if (emails == null || emails.size == 0)
             return;
@@ -461,8 +509,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
         Gee.Collection<AssociatedEmails> associated;
         try {
             associated = yield folder.account.local_search_associated_emails_async(
-                email_ids, required_fields, false, get_search_blacklist(), get_search_flag_blacklist(),
-                null);
+                email_ids, required_fields, search_associated_predicate, null);
         } catch (Error err) {
             debug("Unable to search for associated emails: %s", err.message);
             
@@ -487,7 +534,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
                     existing.add(conversation);
             }
             
-            // Create or pick conversation and reporting collection for these emails
+            // Create or pick conversation for these emails
             Conversation conversation;
             switch (existing.size) {
                 case 0:
@@ -499,6 +546,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
                 break;
                 
                 default:
+                    // TODO
                     conversation = merge_conversations(existing);
                 break;
             }
@@ -515,9 +563,9 @@ public class Geary.App.ConversationMonitor : BaseObject {
             
             // if new, added, otherwise appended
             if (!conversations.contains(conversation)) {
-                added.add(conversation);
                 conversations.add(conversation);
-            } else {
+                added.add(conversation);
+            } else if (!added.contains(conversation)) {
                 foreach (Email email in association.emails)
                     appended.set(conversation, email);
             }
@@ -540,123 +588,6 @@ public class Geary.App.ConversationMonitor : BaseObject {
         breakpoint();
         return new Conversation(this);
     }
-    
-    private Gee.Collection<Geary.FolderPath> get_search_blacklist() {
-        Geary.SpecialFolderType[] blacklisted_folder_types = {
-            Geary.SpecialFolderType.SPAM,
-            Geary.SpecialFolderType.TRASH,
-            Geary.SpecialFolderType.DRAFTS,
-        };
-        
-        Gee.ArrayList<Geary.FolderPath?> blacklist = new Gee.ArrayList<Geary.FolderPath?>();
-        foreach (Geary.SpecialFolderType type in blacklisted_folder_types) {
-            try {
-                Geary.Folder? blacklist_folder = folder.account.get_special_folder(type);
-                if (blacklist_folder != null)
-                    blacklist.add(blacklist_folder.path);
-            } catch (Error e) {
-                debug("Error finding special folder %s on account %s: %s",
-                    type.to_string(), folder.account.to_string(), e.message);
-            }
-        }
-        
-        // Add "no folders" so we omit results that have been deleted permanently from the server.
-        blacklist.add(null);
-        
-        return blacklist;
-    }
-    
-    private Geary.EmailFlags get_search_flag_blacklist() {
-        Geary.EmailFlags flags = new Geary.EmailFlags();
-        flags.add(Geary.EmailFlags.DRAFT);
-        
-        return flags;
-    }
-    
-    /*
-    private async void expand_conversations_async(Gee.Set<RFC822.MessageID> needed_message_ids,
-        ProcessJobContext job) {
-        if (needed_message_ids.size == 0) {
-            yield process_email_complete_async(job);
-            return;
-        }
-        
-        Logging.debug(Logging.Flag.CONVERSATIONS,
-            "[%s] ConversationMonitor::expand_conversations: %d email ids",
-            folder.to_string(), needed_message_ids.size);
-        
-        Gee.Collection<Geary.FolderPath> folder_blacklist = get_search_blacklist();
-        Geary.EmailFlags flag_blacklist = get_search_flag_blacklist();
-        
-        // execute all the local search operations at once
-        Nonblocking.Batch batch = new Nonblocking.Batch();
-        foreach (RFC822.MessageID message_id in needed_message_ids) {
-            batch.add(new LocalSearchOperation(folder.account, message_id, required_fields,
-                folder_blacklist, flag_blacklist));
-        }
-        
-        try {
-            yield batch.execute_all_async();
-        } catch (Error err) {
-            debug("Unable to search local mail for conversations: %s", err.message);
-            
-            yield process_email_complete_async(job);
-            return;
-        }
-        
-        // collect their results into a single collection of addt'l emails
-        Gee.HashMap<Geary.EmailIdentifier, Geary.Email> needed_messages = new Gee.HashMap<
-            Geary.EmailIdentifier, Geary.Email>();
-        foreach (int id in batch.get_ids()) {
-            LocalSearchOperation op = (LocalSearchOperation) batch.get_operation(id);
-            if (op.emails != null) {
-                Geary.traverse<Geary.Email>(op.emails.get_keys())
-                    .filter(e => !needed_messages.has_key(e.id))
-                    .add_all_to_map<Geary.EmailIdentifier>(needed_messages, e => e.id);
-            }
-        }
-        
-        // process them as through they're been loaded from the folder; this, in turn, may
-        // require more local searching of email
-        yield process_email_async(needed_messages.values, job);
-        
-        Logging.debug(Logging.Flag.CONVERSATIONS,
-            "[%s] ConversationMonitor::expand_conversations completed: %d email ids (%d found)",
-            folder.to_string(), needed_message_ids.size, needed_messages.size);
-    }
-    */
-    
-    /*
-    private async void process_email_complete_async(ProcessJobContext job) {
-        Gee.Collection<Geary.App.Conversation>? added = null;
-        Gee.MultiMap<Geary.App.Conversation, Geary.Email>? appended = null;
-        Gee.Collection<Conversation>? removed_due_to_merge = null;
-        try {
-            yield conversations.add_all_emails_async(job.emails.values, this, folder.path, out added, out appended,
-                out removed_due_to_merge, null);
-        } catch (Error err) {
-            debug("Unable to add emails to conversation: %s", err.message);
-            
-            // fall-through
-        }
-        
-        if (removed_due_to_merge != null) {
-            foreach (Conversation conversation in removed_due_to_merge)
-                notify_conversation_removed(conversation);
-        }
-        
-        if (added != null && added.size > 0)
-            notify_conversations_added(added);
-        
-        if (appended != null) {
-            foreach (Geary.App.Conversation conversation in appended.get_keys())
-                notify_conversation_appended(conversation, appended.get(conversation));
-        }
-        
-        if (job.inside_scan)
-            notify_scan_completed();
-    }
-    */
     
     private void on_folder_email_appended(Gee.Collection<Geary.EmailIdentifier> appended_ids) {
         operation_queue.add(new AppendOperation(this, appended_ids));
@@ -687,35 +618,73 @@ public class Geary.App.ConversationMonitor : BaseObject {
         debug("%d messages(s) removed from %s, trimming/removing conversations...", removed_ids.size,
             folder.to_string());
         
-        /*
-        Gee.Collection<Geary.App.Conversation> removed;
-        Gee.MultiMap<Geary.App.Conversation, Geary.Email> trimmed;
-        yield conversations.remove_emails_and_check_in_folder_async(removed_ids, folder.account,
-            folder.path, out removed, out trimmed, null);
+        Gee.HashSet<Conversation> removed_conversations = new Gee.HashSet<Conversation>();
+        Gee.HashMultiMap<Conversation, Email> trimmed_conversations = new Gee.HashMultiMap<
+            Conversation, Email>();
         
-        foreach (Conversation conversation in trimmed.get_keys())
-            notify_conversation_trimmed(conversation, trimmed.get(conversation));
+        // remove the emails from internal state, noting which conversations are trimmed or flat-out
+        // removed (evaporated)
+        foreach (EmailIdentifier removed_id in removed_ids) {
+            Conversation conversation;
+            if (!email_id_to_conversation.unset(removed_id, out conversation))
+                continue;
+            
+            Geary.Email? removed_email = conversation.get_email_by_id(removed_id);
+            if (removed_email == null)
+                continue;
+            
+            Gee.Set<RFC822.MessageID>? removed_message_ids = conversation.remove(removed_email);
+            if (removed_message_ids != null) {
+                foreach (RFC822.MessageID removed_message_id in removed_message_ids)
+                    message_id_to_conversation.unset(removed_message_id);
+            }
+            
+            if (conversation.get_count() == 0) {
+                conversations.remove(conversation);
+                removed_conversations.add(conversation);
+            } else {
+                trimmed_conversations.set(conversation, removed_email);
+            }
+        }
         
-        foreach (Conversation conversation in removed)
+        // Look for trimmed conversations no longer holding messages in this folder;
+        // those are then evaporated themselves
+        int evaporated_count = 0;
+        foreach (Conversation conversation in trimmed_conversations.get_keys().to_array()) {
+            if (conversation.any_in_folder_path(folder.path))
+                continue;
+            
+            trimmed_conversations.remove_all(conversation);
+            
+            conversations.remove(conversation);
+            removed_conversations.add(conversation);
+            
+            evaporated_count++;
+        }
+        
+        if (evaporated_count > 0) {
+            debug("Evaporated %d conversations from %s due to no in-folder messages",
+                evaporated_count, folder.to_string());
+        }
+        
+        if (trimmed_conversations.size > 0) {
+            debug("Trimmed %d conversations of %d emails from %s", trimmed_conversations.get_keys().size,
+                trimmed_conversations.get_values().size, folder.to_string());
+        }
+        
+        foreach (Conversation conversation in trimmed_conversations.get_keys())
+            notify_conversation_trimmed(conversation, trimmed_conversations.get(conversation));
+        
+        if (removed_conversations.size > 0)
+            debug("Removed %d conversations from %s", removed_conversations.size, folder.to_string());
+        
+        foreach (Conversation conversation in removed_conversations)
             notify_conversation_removed(conversation);
-        */
-        
-        /*
-        // For any still-existing conversations that we've trimmed messages
-        // from, do a search for any messages that should still be there due to
-        // full conversations.  This way, some removed messages are instead
-        // "demoted" to out-of-folder emails.  This is kind of inefficient, but
-        // it doesn't seem like there's a way around it.
-        Gee.HashSet<RFC822.MessageID> search_message_ids = new Gee.HashSet<RFC822.MessageID>();
-        foreach (Conversation conversation in trimmed.get_keys())
-            search_message_ids.add_all(conversation.get_message_ids());
-        yield expand_conversations_async(search_message_ids, new ProcessJobContext(false));
-        */
     }
     
     internal async void external_append_emails_async(Geary.Folder folder,
         Gee.Collection<Geary.EmailIdentifier> appended_ids) {
-        if (get_search_blacklist().contains(folder.path))
+        if (search_path_blacklist.contains(folder.path))
             return;
         
         if (conversations.is_empty)

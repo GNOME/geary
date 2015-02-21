@@ -108,6 +108,8 @@ public class Geary.App.Conversation : BaseObject {
     
     /**
      * Returns the number of emails in the conversation in a particular folder.
+     *
+     * TODO: Remove?
      */
     public async int get_count_in_folder_async(Geary.Account account, Geary.FolderPath path,
         Cancellable? cancellable) throws Error {
@@ -123,6 +125,18 @@ public class Geary.App.Conversation : BaseObject {
         }
         
         return count;
+    }
+    
+    /**
+     * Returns the number of {@link Email}s in the conversation in the specified {@link FolderPath}.
+     */
+    public bool any_in_folder_path(Geary.FolderPath path) {
+        foreach (EmailIdentifier email_id in path_map.get_keys()) {
+            if (path_map.get(email_id).contains(path))
+                return true;
+        }
+        
+        return false;
     }
     
     /**

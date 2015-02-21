@@ -641,15 +641,14 @@ private class Geary.ImapDB.Account : BaseObject {
     }
     
     public async Gee.MultiMap<Geary.Email, Geary.FolderPath?>? search_message_id_async(
-        Geary.RFC822.MessageID message_id, Geary.Email.Field requested_fields, bool partial_ok,
-        Gee.Collection<Geary.FolderPath?>? folder_blacklist, Geary.EmailFlags? flag_blacklist,
-        Cancellable? cancellable = null) throws Error {
+        Geary.RFC822.MessageID message_id, Geary.Email.Field requested_fields,
+        Geary.Account.EmailSearchPredicate? search_predicate, Cancellable? cancellable) throws Error {
         check_open();
         
         Gee.HashMultiMap<Geary.Email, Geary.FolderPath?> messages
             = new Gee.HashMultiMap<Geary.Email, Geary.FolderPath?>();
         
-        if (flag_blacklist != null)
+        if (search_predicate != null)
             requested_fields = requested_fields | Geary.Email.Field.FLAGS;
         
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
@@ -661,8 +660,8 @@ private class Geary.ImapDB.Account : BaseObject {
             while (!result.finished) {
                 Email? email;
                 Gee.Collection<FolderPath?>? known_paths;
-                do_fetch_message(cx, result.int64_at(0), requested_fields, partial_ok, folder_blacklist,
-                    flag_blacklist, out email, out known_paths, cancellable);
+                do_fetch_message(cx, result.int64_at(0), requested_fields, search_predicate,
+                    out email, out known_paths, cancellable);
                 if (email != null) {
                     assert(known_paths != null);
                     
@@ -680,13 +679,11 @@ private class Geary.ImapDB.Account : BaseObject {
     }
     
     public async Gee.Collection<Geary.AssociatedEmails>? search_associated_emails_async(
-        Gee.Set<Geary.EmailIdentifier> email_ids, Email.Field requested_fields, bool partial_ok,
-        Gee.Collection<Geary.FolderPath?>? folder_blacklist, Geary.EmailFlags? flag_blacklist,
-        Cancellable? cancellable) throws Error {
+        Gee.Set<Geary.EmailIdentifier> email_ids, Email.Field requested_fields,
+        Geary.Account.EmailSearchPredicate? search_predicate, Cancellable? cancellable) throws Error {
         check_open();
         
-        // Store in a casted HashSet that can be modified internally, as associated identifiers
-        // will be weeded out as loaded with other identifiers
+        // Cast all at once and report error if invalid found
         Gee.HashSet<ImapDB.EmailIdentifier> db_ids = new Gee.HashSet<ImapDB.EmailIdentifier>();
         foreach (Geary.EmailIdentifier email_id in email_ids) {
             ImapDB.EmailIdentifier? db_id = email_id as ImapDB.EmailIdentifier;
@@ -699,10 +696,10 @@ private class Geary.ImapDB.Account : BaseObject {
         Gee.Collection<AssociatedEmails> associations = new Gee.ArrayList<AssociatedEmails>();
         Gee.HashSet<ImapDB.EmailIdentifier> found_ids = new Gee.HashSet<ImapDB.EmailIdentifier>();
         
-        if (flag_blacklist != null)
+        // Need flags for search predicate
+        if (search_predicate != null)
             requested_fields = requested_fields | Geary.Email.Field.FLAGS;
         
-        debug("Searching %d ids for associations...", email_ids.size);
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
             foreach (ImapDB.EmailIdentifier db_id in db_ids) {
                 if (found_ids.contains(db_id))
@@ -734,8 +731,8 @@ private class Geary.ImapDB.Account : BaseObject {
                 while (!result.finished) {
                     Email? email;
                     Gee.Collection<FolderPath?>? known_paths;
-                    do_fetch_message(cx, result.int64_at(0), requested_fields, partial_ok, folder_blacklist,
-                        flag_blacklist, out email, out known_paths, cancellable);
+                    do_fetch_message(cx, result.rowid_at(0), requested_fields, search_predicate,
+                        out email, out known_paths, cancellable);
                     if (email != null) {
                         association.add(email, known_paths);
                         found_ids.add((ImapDB.EmailIdentifier) email.id);
@@ -744,60 +741,39 @@ private class Geary.ImapDB.Account : BaseObject {
                     result.next(cancellable);
                 }
                 
-                associations.add(association);
+                if (association.emails.size > 0)
+                    associations.add(association);
             }
             
             return Db.TransactionOutcome.DONE;
         }, cancellable);
-        debug("Found %d associations from %d ids", associations.size, email_ids.size);
         
         return associations.size > 0 ? associations : null;
     }
     
     private void do_fetch_message(Db.Connection cx, int64 message_id, Email.Field required_fields,
-        bool partial_ok, Gee.Collection<Geary.FolderPath?>? folder_blacklist, Geary.EmailFlags? flag_blacklist,
-        out Email? email, out Gee.Collection<FolderPath?>? known_paths, Cancellable? cancellable) throws Error {
+        Geary.Account.EmailSearchPredicate? search_predicate, out Email? email,
+        out Gee.Collection<FolderPath?>? known_paths, Cancellable? cancellable) throws Error {
         Email.Field actual_fields;
         MessageRow row = ImapDB.Folder.do_fetch_message_row(cx, message_id, required_fields,
             out actual_fields, cancellable);
         
-        // prepare for the worst
-        email = null;
-        known_paths = null;
-        
-        // Ignore any messages that don't have the required fields unless partial is ok
-        if (!partial_ok && !row.fields.fulfills(required_fields))
-            return;
-        
         email = row.to_email(new Geary.ImapDB.EmailIdentifier(message_id, null));
         ImapDB.Folder.do_add_attachments(cx, email, message_id, cancellable);
         
-        // Check for blacklisted flags.
-        if (flag_blacklist != null && email.email_flags != null && email.email_flags.contains_any(flag_blacklist)) {
-            email = null;
-            
-            return;
-        }
+        Gee.Set<Geary.FolderPath>? folders = do_find_email_folders(cx, message_id, true, cancellable);
         
         known_paths = new Gee.HashSet<FolderPath?>();
+        if (folders == null)
+            known_paths.add(null);
+        else
+            known_paths.add_all(folders);
         
-        // Add folders email is found in, respecting blacklist
-        Gee.Set<Geary.FolderPath>? folders = do_find_email_folders(cx, message_id, true, cancellable);
-        if (folders == null) {
-            if (folder_blacklist == null || !folder_blacklist.contains(null))
-                known_paths.add(null);
-        } else {
-            foreach (Geary.FolderPath path in folders) {
-                // If it's in a blacklisted folder, we don't report it at all.
-                if (folder_blacklist != null && folder_blacklist.contains(path)) {
-                    email = null;
-                    known_paths = null;
-                    
-                    break;
-                } else {
-                    known_paths.add(path);
-                }
-            }
+        // Allow caller to filter results in callback
+        if (search_predicate != null
+            && !search_predicate(email.id, !row.fields.fulfills(required_fields), known_paths, email.email_flags)) {
+            email = null;
+            known_paths = null;
         }
     }
     

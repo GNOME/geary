@@ -12,7 +12,7 @@
  
 namespace Geary.ImapDB.Conversation {
 
-internal const Geary.Email.Field REQUIRED_FIELDS = Email.Field.REFERENCES;
+internal const Geary.Email.Field REQUIRED_FIELDS = Geary.Account.ASSOCIATED_REQUIRED_FIELDS;
 
 /**
  * Should only be called when an email message's {@link REQUIRED_FIELDS} are initially fulfilled.
@@ -20,13 +20,24 @@ internal const Geary.Email.Field REQUIRED_FIELDS = Email.Field.REFERENCES;
 internal void do_add_message_to_conversation(Db.Connection cx, int64 message_id, Cancellable? cancellable)
     throws Error {
     Db.Statement references_stmt = cx.prepare("""
-        SELECT message_id, in_reply_to, reference_ids
+        SELECT message_id, in_reply_to, reference_ids, conversation_id
         FROM MessageTable
         WHERE id = ?
     """);
     references_stmt.bind_rowid(0, message_id);
     
     Db.Result references_result = references_stmt.exec(cancellable);
+    if (references_result.finished) {
+        message("Unable to add message %s to conversation table: not found", message_id.to_string());
+        
+        return;
+    }
+    
+    // Check if part of an existing conversation; not an error to call this multiple times on same
+    // message, but not necessary either (since REFERENCES should be static)
+    int64 existing_conversation_id = Db.INVALID_ROWID;
+    if (!references_result.is_null_at(3))
+        existing_conversation_id = references_result.rowid_at(3);
     
     // Create a common set of ancestors from In-Reply-To and References
     Gee.HashSet<RFC822.MessageID> ancestors = new Gee.HashSet<RFC822.MessageID>();
@@ -45,7 +56,9 @@ internal void do_add_message_to_conversation(Db.Connection cx, int64 message_id,
         return;
     }
     
-    // search for existing conversation(s) for any of these Message-IDs that's not this message
+    // search for existing conversation(s) for any of these Message-IDs ... include this message
+    // to avoid a single-message conversation being processed multiple times and creating a new
+    // conversation each time
     StringBuilder sql = new StringBuilder("""
         SELECT conversation_id
         FROM MessageTable
@@ -53,13 +66,12 @@ internal void do_add_message_to_conversation(Db.Connection cx, int64 message_id,
     """);
     for (int ctr = 0; ctr < ancestors.size; ctr++)
         sql.append(ctr == 0 ? "?" : ",?");
-    sql.append(") AND id <> ?");
+    sql.append(")");
 
     Db.Statement search_stmt = cx.prepare(sql.str);
     int col = 0;
     foreach (RFC822.MessageID ancestor in ancestors)
         search_stmt.bind_string(col++, ancestor.value);
-    search_stmt.bind_rowid(col++, message_id);
     
     Gee.HashSet<int64?> conversation_ids = new Gee.HashSet<int64?>(Collection.int64_hash_func,
         Collection.int64_equal_func);
@@ -76,31 +88,41 @@ internal void do_add_message_to_conversation(Db.Connection cx, int64 message_id,
     
     // Select the message's conversation_id from the following three scenarios:
     int64 conversation_id;
-    if (conversation_ids.size > 1) {
-        // this indicates that two (or more) conversations were created due to emails arriving
-        // out of order and the complete(r) tree is only being available now; merge the
-        // conversations into one
-        conversation_id = do_merge_conversations(cx, conversation_ids, cancellable);
+    switch (conversation_ids.size) {
+        case 0:
+            // No conversation for this Message-ID, so generate a new one
+            cx.exec("""
+                INSERT INTO ConversationTable
+                DEFAULT VALUES
+            """);
+            conversation_id = cx.last_insert_rowid;
+            
+            debug("Created new conversation %s for message %s: %s", conversation_id.to_string(),
+                message_id.to_string(), rfc822_message_id_text);
+        break;
         
-        debug("Merged %d conversations to conversation %s", conversation_ids.size - 1,
-            conversation_id.to_string());
-    } else if (conversation_ids.size == 0) {
-        // No conversation for this Message-ID, so generate a new one
-        cx.exec("""
-            INSERT INTO ConversationTable
-            DEFAULT VALUES
-        """);
-        conversation_id = cx.last_insert_rowid;
+        case 1:
+            // one conversation found, so use that one
+            conversation_id = traverse<int64?>(conversation_ids).first();
+            
+            debug("Expanding existing conversation %s with message %s: %s", conversation_id.to_string(),
+                message_id.to_string(), rfc822_message_id_text);
+        break;
         
-        debug("Created new conversation %s for message %s: %s", conversation_id.to_string(),
-            message_id.to_string(), rfc822_message_id_text);
-    } else {
-        // one conversation found, so use that one
-        conversation_id = traverse<int64?>(conversation_ids).first();
-        
-        debug("Expanding existing conversation %s with message %s: %s", conversation_id.to_string(),
-            message_id.to_string(), rfc822_message_id_text);
+        default:
+            // this indicates that two (or more) conversations were created due to emails arriving
+            // out of order and the complete(r) tree is only being available now; merge the
+            // conversations into one
+            conversation_id = do_merge_conversations(cx, conversation_ids, cancellable);
+            
+            debug("Merged %d conversations to conversation %s", conversation_ids.size - 1,
+                conversation_id.to_string());
+        break;
     }
+    
+    // if already assigned this conversation, avoid a write
+    if (conversation_id == existing_conversation_id)
+        return;
     
     // Assign the message to this conversation
     Db.Statement insert = cx.prepare("""
@@ -127,8 +149,13 @@ private int64 do_merge_conversations(Db.Connection cx, Gee.Set<int64?> conversat
     // must be at least two in order to merge
     assert(conversation_ids.size > 1);
     
-    // doesn't really matter which; use the first one
-    int64 conversation_id = traverse<int64?>(conversation_ids).first();
+    // although multithreaded transactions aren't problem per se with database locking, it is
+    // possible for multiple threads to be processing mail on the same conversation at the same
+    // time and will therefore be reading the same list and choosing which to merge; by being
+    // preditable here, ensure that the same conversation is selected in both cases
+    int64 conversation_id = traverse<int64?>(conversation_ids)
+        .to_tree_set(Collection.int64_compare_func)
+        .first();
     
     //
     // TODO: Merge flags together

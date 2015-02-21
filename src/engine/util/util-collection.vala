@@ -149,6 +149,16 @@ public bool int64_equal_func(int64? a, int64? b) {
 }
 
 /**
+ * To be used as CompareDataFunc for Gee collections.
+ */
+public int int64_compare_func(int64? a, int64? b) {
+    int64 *bia = (int64 *) a;
+    int64 *bib = (int64 *) b;
+    
+    return (int) (*bia - *bib).clamp(-1, 1);
+}
+
+/**
  * A rotating-XOR hash that can be used to hash memory buffers of any size.
  */
 public uint hash_memory(void *ptr, size_t bytes) {
