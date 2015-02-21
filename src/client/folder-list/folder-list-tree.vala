@@ -61,7 +61,7 @@ public class FolderList.Tree : Gtk.Box {
         folder_list_scrolled.add(tree);
         Gtk.Frame folder_frame = new Gtk.Frame(null);
         folder_frame.shadow_type = Gtk.ShadowType.IN;
-        folder_frame.get_style_context().add_class("folder_frame");
+        folder_frame.get_style_context().add_class("folder-frame");
         folder_frame.add(folder_list_scrolled);
         
         Gtk.ComboBox combo = new Gtk.ComboBox.with_model(tree.store);
