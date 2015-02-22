@@ -15,6 +15,7 @@ public class MainWindow : Gtk.ApplicationWindow {
     public FolderList.Tree folder_list { get; private set; default = new FolderList.Tree(); }
     public ConversationListStore conversation_list_store { get; private set; default = new ConversationListStore(); }
     public MainToolbar main_toolbar { get; private set; }
+    public SearchBar search_bar { get; private set; default = new SearchBar(); }
     public ConversationListView conversation_list_view  { get; private set; }
     public ConversationViewer conversation_viewer { get; private set; default = new ConversationViewer(); }
     public StatusBar status_bar { get; private set; default = new StatusBar(); }
@@ -85,6 +86,8 @@ public class MainWindow : Gtk.ApplicationWindow {
         
         // Toolbar.
         main_toolbar = new MainToolbar();
+        main_toolbar.bind_property("search-open", search_bar, "search-mode-enabled",
+            BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
         if (!GearyApplication.instance.is_running_unity) {
             main_toolbar.show_close_button = true;
             set_titlebar(main_toolbar);
@@ -247,6 +250,7 @@ public class MainWindow : Gtk.ApplicationWindow {
         folder_paned.pack2(conversation_frame, true, false);
         
         Gtk.Box status_bar_box = new Gtk.Box(Gtk.Orientation.VERTICAL, 0);
+        status_bar_box.pack_start(search_bar, false, false, 0);
         status_bar_box.pack_start(folder_paned);
         status_bar_box.pack_start(status_bar, false, false, 0);
         status_bar_box.get_style_context().add_class(Gtk.STYLE_CLASS_SIDEBAR);
@@ -272,7 +276,7 @@ public class MainWindow : Gtk.ApplicationWindow {
     
     private bool on_key_press_event(Gdk.EventKey event) {
         if ((event.keyval == Gdk.Key.Shift_L || event.keyval == Gdk.Key.Shift_R)
-            && (event.state & Gdk.ModifierType.SHIFT_MASK) == 0 && !main_toolbar.search_entry_has_focus)
+            && (event.state & Gdk.ModifierType.SHIFT_MASK) == 0 && !search_bar.search_entry_has_focus)
             on_shift_key(true);
         
         // Check whether the focused widget wants to handle it, if not let the accelerators kick in
@@ -285,7 +289,7 @@ public class MainWindow : Gtk.ApplicationWindow {
         // the shift key to report as released when they release ALL of them.
         // There doesn't seem to be an easy way to do this in Gdk.
         if ((event.keyval == Gdk.Key.Shift_L || event.keyval == Gdk.Key.Shift_R)
-            && !main_toolbar.search_entry_has_focus)
+            && !search_bar.search_entry_has_focus)
             on_shift_key(false);
         
         return propagate_key_event(event);

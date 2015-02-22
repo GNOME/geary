@@ -52,6 +52,7 @@ public class GearyController : Geary.BaseObject {
     public const string ACTION_MOVE_MENU = "GearyMoveMenuButton";
     public const string ACTION_GEAR_MENU = "GearyGearMenuButton";
     public const string ACTION_SEARCH = "GearySearch";
+    public const string ACTION_TOGGLE_SEARCH = "GearyToggleSearch";
     
     public const string PROP_CURRENT_CONVERSATION ="current-conversations";
     
@@ -206,7 +207,7 @@ public class GearyController : Geary.BaseObject {
         main_window.folder_list.move_conversation.connect(on_move_conversation);
         main_window.main_toolbar.copy_folder_menu.folder_selected.connect(on_copy_conversation);
         main_window.main_toolbar.move_folder_menu.folder_selected.connect(on_move_conversation);
-        main_window.main_toolbar.search_text_changed.connect(on_search_text_changed);
+        main_window.search_bar.search_text_changed.connect(on_search_text_changed);
         main_window.conversation_viewer.link_selected.connect(on_link_selected);
         main_window.conversation_viewer.reply_to_message.connect(on_reply_to_message);
         main_window.conversation_viewer.reply_all_message.connect(on_reply_all_message);
@@ -478,6 +479,11 @@ public class GearyController : Geary.BaseObject {
         Gtk.ActionEntry search = { ACTION_SEARCH, null, null, null, null, on_search };
         entries += search;
         add_accelerator("<Ctrl>S", ACTION_SEARCH);
+        
+        // No callback is connected, since we bind the toggle button to the search bar visibility
+        Gtk.ActionEntry toggle_search = { ACTION_TOGGLE_SEARCH, null, null, null,
+            _("Toggle search bar"), null };
+        entries += toggle_search;
         
         return entries;
     }
@@ -1161,7 +1167,7 @@ public class GearyController : Geary.BaseObject {
         cancel_inbox(account);
         
         previous_non_search_folder = null;
-        main_window.main_toolbar.set_search_text(""); // Reset search.
+        main_window.search_bar.set_search_text(""); // Reset search.
         if (current_account == account) {
             cancel_folder();
             switch_to_first_inbox(); // Switch folder.
@@ -2599,7 +2605,7 @@ public class GearyController : Geary.BaseObject {
     }
     
     private void on_search() {
-        main_window.main_toolbar.give_search_focus();
+        main_window.search_bar.give_search_focus();
     }
     
     private void on_sent(Geary.RFC822.Message rfc822) {
@@ -2761,7 +2767,7 @@ public class GearyController : Geary.BaseObject {
             cancellable_search);
         
         main_window.folder_list.set_search(folder);
-        search_text_changed(main_window.main_toolbar.search_text);
+        search_text_changed(main_window.search_bar.search_text);
     }
     
     private void on_search_text_changed(string search_text) {
@@ -2776,7 +2782,7 @@ public class GearyController : Geary.BaseObject {
     private bool on_search_timeout() {
         search_timeout_id = 0;
         
-        do_search(main_window.main_toolbar.search_text);
+        do_search(main_window.search_bar.search_text);
         
         return false;
     }
