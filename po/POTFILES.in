@@ -30,6 +30,7 @@ src/client/components/main-window.vala
 src/client/components/monitored-progress-bar.vala
 src/client/components/monitored-spinner.vala
 src/client/components/pill-toolbar.vala
+src/client/components/search-bar.vala
 src/client/components/status-bar.vala
 src/client/components/stock.vala
 src/client/components/stylish-webview.vala

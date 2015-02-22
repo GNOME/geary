@@ -339,6 +339,7 @@ client/components/main-window.vala
 client/components/monitored-progress-bar.vala
 client/components/monitored-spinner.vala
 client/components/pill-toolbar.vala
+client/components/search-bar.vala
 client/components/status-bar.vala
 client/components/stock.vala
 client/components/stylish-webview.vala
