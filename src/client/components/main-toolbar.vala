@@ -33,8 +33,8 @@ public class MainToolbar : Gtk.Box {
         GearyApplication.instance.config.bind(Configuration.MESSAGES_PANE_POSITION_KEY,
             folder_header, "width-request", SettingsBindFlags.GET);
         
-        this.bind_property("account", conversation_header, "title", BindingFlags.SYNC_CREATE);
-        this.bind_property("folder", conversation_header, "subtitle", BindingFlags.SYNC_CREATE);
+        this.bind_property("account", folder_header, "title", BindingFlags.SYNC_CREATE);
+        this.bind_property("folder", folder_header, "subtitle", BindingFlags.SYNC_CREATE);
         this.bind_property("show-close-button-left", folder_header, "show-close-button",
             BindingFlags.SYNC_CREATE);
         this.bind_property("show-close-button-right", conversation_header, "show-close-button",
@@ -60,14 +60,31 @@ public class MainToolbar : Gtk.Box {
             GearyController.ACTION_NEW_MESSAGE));
         folder_header.add_start(folder_header.create_pill_buttons(insert, false));
         
+        // Assemble the empty menu
+        GearyApplication.instance.load_ui_file("toolbar_empty_menu.ui");
+        Gtk.Menu empty_menu = (Gtk.Menu) GearyApplication.instance.ui_manager.get_widget("/ui/ToolbarEmptyMenu");
+        empty_menu.foreach(GtkUtil.show_menuitem_accel_labels);
+        insert.clear();
+        insert.add(folder_header.create_menu_button(null, empty_menu,
+            GearyController.ACTION_EMPTY_MENU));
+        Gtk.Box empty = folder_header.create_pill_buttons(insert, false);
+        
         // Search
         insert.clear();
-        Gtk.Button search = folder_header.create_toggle_button(
+        Gtk.Button search_button = folder_header.create_toggle_button(
             "preferences-system-search-symbolic", GearyController.ACTION_TOGGLE_SEARCH);
-        this.bind_property("search-open", search, "active",
+        this.bind_property("search-open", search_button, "active",
             BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
-        insert.add(search);
-        folder_header.add_end(folder_header.create_pill_buttons(insert, false));
+        insert.add(search_button);
+        Gtk.Box search = folder_header.create_pill_buttons(insert, false);
+        
+#if !GTK_3_12
+        folder_header.add_end(empty);
+        folder_header.add_end(search);
+#else
+        folder_header.add_end(search);
+        folder_header.add_end(empty);
+#endif
         
         // Reply buttons
         insert.clear();
@@ -79,11 +96,6 @@ public class MainToolbar : Gtk.Box {
             : "mail-forward-symbolic", GearyController.ACTION_FORWARD_MESSAGE));
         conversation_header.add_start(conversation_header.create_pill_buttons(insert));
         
-        // Assemble the empty menu
-        GearyApplication.instance.load_ui_file("toolbar_empty_menu.ui");
-        Gtk.Menu empty_menu = (Gtk.Menu) GearyApplication.instance.ui_manager.get_widget("/ui/ToolbarEmptyMenu");
-        empty_menu.foreach(GtkUtil.show_menuitem_accel_labels);
-        
         // Mark, copy, move.
         insert.clear();
         insert.add(conversation_header.create_menu_button("marker-symbolic", mark_menu,
@@ -92,8 +104,6 @@ public class MainToolbar : Gtk.Box {
             copy_folder_menu, GearyController.ACTION_COPY_MENU));
         insert.add(conversation_header.create_menu_button("folder-symbolic", move_folder_menu,
             GearyController.ACTION_MOVE_MENU));
-        insert.add(conversation_header.create_menu_button(null, empty_menu,
-            GearyController.ACTION_EMPTY_MENU));
         conversation_header.add_start(conversation_header.create_pill_buttons(insert));
         
         insert.clear();
@@ -111,7 +121,6 @@ public class MainToolbar : Gtk.Box {
         conversation_header.add_end(archive_trash_delete);
         conversation_header.add_end(undo);
 #endif
-        
         // Application button.  If we exported an app menu, we don't need this.
         if (!Gtk.Settings.get_default().gtk_shell_shows_app_menu) {
             insert.clear();
@@ -119,8 +128,6 @@ public class MainToolbar : Gtk.Box {
                 application_menu, GearyController.ACTION_GEAR_MENU));
             conversation_header.add_end(conversation_header.create_pill_buttons(insert));
         }
-        
-        // pack_end() ordering is reversed in GtkHeaderBar in 3.12 and above
 #if GTK_3_12
         conversation_header.add_end(undo);
         conversation_header.add_end(archive_trash_delete);
