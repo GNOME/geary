@@ -11,12 +11,15 @@ public class MainToolbar : Gtk.Box {
     public string account { get; set; }
     public string folder { get; set; }
     public bool show_close_button { get; set; default = false; }
+    public bool show_close_button_left { get; private set; }
+    public bool show_close_button_right { get; private set; }
     public bool search_open { get; set; default = false; }
     
     private PillHeaderbar folder_header;
     private PillHeaderbar conversation_header;
     private Gtk.Button archive_button;
     private Gtk.Button trash_delete_button;
+    private Binding guest_header_binding;
     
     public MainToolbar() {
         Object(orientation: Gtk.Orientation.HORIZONTAL, spacing: 0);
@@ -32,7 +35,9 @@ public class MainToolbar : Gtk.Box {
         
         this.bind_property("account", conversation_header, "title", BindingFlags.SYNC_CREATE);
         this.bind_property("folder", conversation_header, "subtitle", BindingFlags.SYNC_CREATE);
-        this.bind_property("show-close-button", conversation_header, "show-close-button",
+        this.bind_property("show-close-button-left", folder_header, "show-close-button",
+            BindingFlags.SYNC_CREATE);
+        this.bind_property("show-close-button-right", conversation_header, "show-close-button",
             BindingFlags.SYNC_CREATE);
         
         bool rtl = get_direction() == Gtk.TextDirection.RTL;
@@ -124,6 +129,9 @@ public class MainToolbar : Gtk.Box {
         pack_start(folder_header, false, false);
         pack_start(new Gtk.Separator(Gtk.Orientation.VERTICAL), false, false);
         pack_start(conversation_header, true, true);
+        
+        get_style_context().changed.connect(set_close_buttons_side);
+        realize.connect(set_close_buttons_side);
     }
     
     /// Updates the trash button as trash or delete, and shows or hides the archive button.
@@ -139,7 +147,8 @@ public class MainToolbar : Gtk.Box {
         conversation_header.hide();
         header.get_style_context().add_class("titlebar");
         header.get_style_context().add_class("geary-titlebar-right");
-        header.show_close_button = show_close_button;
+        guest_header_binding = bind_property("show-close-button-right", header,
+            "show-close-button", BindingFlags.SYNC_CREATE);
         pack_start(header, true, true);
     }
     
@@ -147,8 +156,23 @@ public class MainToolbar : Gtk.Box {
         remove(header);
         header.get_style_context().remove_class("titlebar");
         header.get_style_context().remove_class("geary-titlebar-right");
+        guest_header_binding.unbind();
         header.show_close_button = false;
         conversation_header.show();
+    }
+    
+    private void set_close_buttons_side() {
+        string layout;
+        bool at_end = false;
+        get_toplevel().style_get("decoration-button-layout", out layout);
+        // Based on logic of close_button_at_end in gtkheaderbar.c: Close button appears
+        // at end iff "close" follows a colon in the layout string.
+        if (layout != null) {
+            int colon_ind = layout.index_of(":");
+            at_end = (colon_ind >= 0 && layout.index_of("close", colon_ind) >= 0);
+        }
+        show_close_button_left = show_close_button && !at_end;
+        show_close_button_right = show_close_button && at_end;
     }
 }
 
