@@ -10,6 +10,7 @@ public class MainToolbar : Gtk.Box {
     public FolderMenu move_folder_menu { get; private set; default = new FolderMenu(); }
     public string account { get; set; }
     public string folder { get; set; }
+    public string conversation_title { get; private set; }
     public bool show_close_button { get; set; default = false; }
     public bool show_close_button_left { get; private set; }
     public bool show_close_button_right { get; private set; }
@@ -36,6 +37,8 @@ public class MainToolbar : Gtk.Box {
         this.bind_property("account", folder_header, "title", BindingFlags.SYNC_CREATE);
         this.bind_property("folder", folder_header, "subtitle", BindingFlags.SYNC_CREATE);
         this.bind_property("show-close-button-left", folder_header, "show-close-button",
+            BindingFlags.SYNC_CREATE);
+        this.bind_property("conversation-title", conversation_header, "title",
             BindingFlags.SYNC_CREATE);
         this.bind_property("show-close-button-right", conversation_header, "show-close-button",
             BindingFlags.SYNC_CREATE);
@@ -139,6 +142,8 @@ public class MainToolbar : Gtk.Box {
         
         get_style_context().changed.connect(set_close_buttons_side);
         realize.connect(set_close_buttons_side);
+        
+        GearyApplication.instance.controller.conversations_selected.connect(on_conversations_selected);
     }
     
     /// Updates the trash button as trash or delete, and shows or hides the archive button.
@@ -180,6 +185,24 @@ public class MainToolbar : Gtk.Box {
         }
         show_close_button_left = show_close_button && !at_end;
         show_close_button_right = show_close_button && at_end;
+    }
+    
+    private void on_conversations_selected(Gee.Set<Geary.App.Conversation>? conversations,
+        Geary.Folder? current_folder) {
+        int selected_count = conversations.size;
+        if (selected_count == 0) {
+            conversation_title = _("No conversations selected");
+        } else if (selected_count == 1) {
+            Geary.Email? last_email = conversations.to_array()[0].get_latest_recv_email(
+                Geary.App.Conversation.Location.ANYWHERE);
+            if (last_email != null)
+                conversation_title = EmailUtil.strip_subject_prefixes(last_email);
+            else
+                conversation_title = "";
+        } else {
+            conversation_title = ngettext("%u conversation selected", "%u conversations selected",
+                selected_count).printf(selected_count);
+        }
     }
 }
 
