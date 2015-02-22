@@ -62,6 +62,8 @@ public class ComposerWidget : Gtk.EventBox {
     public const string ACTION_COMPOSE_AS_HTML = "compose as html";
     public const string ACTION_SHOW_EXTENDED = "show extended";
     public const string ACTION_CLOSE = "close";
+    public const string ACTION_CLOSE_SAVE = "close and save";
+    public const string ACTION_CLOSE_DISCARD = "close and discard";
     public const string ACTION_DETACH = "detach";
     public const string ACTION_SEND = "send";
     public const string ACTION_ADD_ATTACHMENT = "add attachment";
@@ -439,6 +441,8 @@ public class ComposerWidget : Gtk.EventBox {
         actions.get_action(ACTION_INSERT_LINK).activate.connect(on_insert_link);
         
         actions.get_action(ACTION_CLOSE).activate.connect(on_close);
+        actions.get_action(ACTION_CLOSE_SAVE).activate.connect(on_close_and_save);
+        actions.get_action(ACTION_CLOSE_DISCARD).activate.connect(on_close_and_discard);
         
         actions.get_action(ACTION_DETACH).activate.connect(on_detach);
         actions.get_action(ACTION_SEND).activate.connect(on_send);
@@ -1121,6 +1125,17 @@ public class ComposerWidget : Gtk.EventBox {
     private void on_close() {
         if (should_close() == CloseStatus.DO_CLOSE)
             container.close_container();
+    }
+    
+    private void on_close_and_save() {
+        if (can_save())
+            save_and_exit_async.begin();
+        else
+            container.close_container();
+    }
+    
+    private void on_close_and_discard() {
+        discard_and_exit_async.begin();
     }
     
     private void on_detach() {

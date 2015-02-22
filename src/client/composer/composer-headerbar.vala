@@ -12,48 +12,50 @@ public class ComposerHeaderbar : PillHeaderbar {
     
     private Gtk.Button recipients;
     private Gtk.Label recipients_label;
-    private Gtk.Box win_buttons_start;
-    private Gtk.Box win_buttons_end;
+    private Gtk.Box detach_start;
+    private Gtk.Box detach_end;
     
     public ComposerHeaderbar(Gtk.ActionGroup action_group) {
         base(action_group);
         
         show_close_button = false;
         
+        bool rtl = (get_direction() == Gtk.TextDirection.RTL);
+        
+        // Toolbar setup.
+        Gee.List<Gtk.Button> insert = new Gee.ArrayList<Gtk.Button>();
+        
+        // Window management.
+        detach_start = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 0);
+        Gtk.Button detach_button = create_toolbar_button(null, ComposerWidget.ACTION_DETACH);
+        detach_button.set_relief(Gtk.ReliefStyle.NONE);
+        if (rtl)
+            detach_button.set_margin_left(6);
+        else
+            detach_button.set_margin_right(6);
+        detach_start.pack_start(detach_button);
+        detach_start.pack_start(new Gtk.Separator(Gtk.Orientation.VERTICAL));
+        
+        detach_end = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 0);
+        detach_button = create_toolbar_button(null, ComposerWidget.ACTION_DETACH);
+        detach_button.set_relief(Gtk.ReliefStyle.NONE);
+        if (rtl)
+            detach_button.set_margin_right(6);
+        else
+            detach_button.set_margin_left(6);
+        detach_end.pack_end(detach_button);
+        detach_end.pack_end(new Gtk.Separator(Gtk.Orientation.VERTICAL));
+        
+        insert.add(create_toolbar_button(null, ComposerWidget.ACTION_CLOSE_DISCARD));
+        insert.add(create_toolbar_button(null, ComposerWidget.ACTION_CLOSE_SAVE));
+        Gtk.Box close_buttons = create_pill_buttons(insert, false);
+        insert.clear();
+        
         Gtk.Button send_button = create_toolbar_button(null, ComposerWidget.ACTION_SEND, true);
         send_button.get_style_context().add_class("suggested-action");
         
-        bool rtl = (get_direction() == Gtk.TextDirection.RTL);
-        
-        win_buttons_start = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 0);
-        Gtk.Button detach_button = create_toolbar_button(null, ComposerWidget.ACTION_DETACH);
-        Gtk.Button close_button = create_toolbar_button(null, ComposerWidget.ACTION_CLOSE);
-        detach_button.set_relief(Gtk.ReliefStyle.NONE);
-        close_button.set_relief(Gtk.ReliefStyle.NONE);
-        if (rtl)
-            detach_button.set_margin_left(6);
-        else
-            detach_button.set_margin_right(6);
-        win_buttons_start.pack_start(close_button);
-        win_buttons_start.pack_start(detach_button);
-        win_buttons_start.pack_start(new Gtk.Separator(Gtk.Orientation.VERTICAL));
-        
-        win_buttons_end = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 0);
-        detach_button = create_toolbar_button(null, ComposerWidget.ACTION_DETACH);
-        close_button = create_toolbar_button(null, ComposerWidget.ACTION_CLOSE);
-        detach_button.set_relief(Gtk.ReliefStyle.NONE);
-        close_button.set_relief(Gtk.ReliefStyle.NONE);
-        if (rtl)
-            detach_button.set_margin_right(6);
-        else
-            detach_button.set_margin_left(6);
-        win_buttons_end.pack_end(close_button);
-        win_buttons_end.pack_end(detach_button);
-        win_buttons_end.pack_end(new Gtk.Separator(Gtk.Orientation.VERTICAL));
-        
         Gtk.Box attach_buttons = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 0);
         Gtk.Button attach_only = create_toolbar_button(null, ComposerWidget.ACTION_ADD_ATTACHMENT);
-        Gee.List<Gtk.Button> insert = new Gee.ArrayList<Gtk.Button>();
         insert.add(create_toolbar_button(null, ComposerWidget.ACTION_ADD_ATTACHMENT));
         insert.add(create_toolbar_button(null, ComposerWidget.ACTION_ADD_ORIGINAL_ATTACHMENTS));
         Gtk.Box attach_pending = create_pill_buttons(insert, false);
@@ -67,12 +69,6 @@ public class ComposerHeaderbar : PillHeaderbar {
         recipients.add(recipients_label);
         recipients.clicked.connect(() => { state = ComposerWidget.ComposerState.INLINE; });
         
-        notify["state"].connect((s, p) => {
-            if (state == ComposerWidget.ComposerState.DETACHED) {
-                get_style_context().changed.disconnect(set_win_buttons_side);
-                win_buttons_start.visible = win_buttons_end.visible = false;
-            }
-        });
         bind_property("state", recipients, "visible", BindingFlags.SYNC_CREATE,
             (binding, source_value, ref target_value) => {
                 target_value = (state == ComposerWidget.ComposerState.INLINE_COMPACT);
@@ -84,18 +80,26 @@ public class ComposerHeaderbar : PillHeaderbar {
             BindingFlags.SYNC_CREATE);
         bind_property("send-enabled", send_button, "sensitive", BindingFlags.SYNC_CREATE);
         
-        add_start(win_buttons_start);
+        add_start(detach_start);
         add_start(attach_buttons);
         add_start(recipients);
 #if !GTK_3_12
         add_end(send_button);
+        add_end(close_buttons);
 #endif
-        add_end(win_buttons_end);
+        add_end(detach_end);
 #if GTK_3_12
+        add_end(close_buttons);
         add_end(send_button);
 #endif
-        get_style_context().changed.connect(set_win_buttons_side);
-        realize.connect(set_win_buttons_side);
+        get_style_context().changed.connect(set_detach_button_side);
+        realize.connect(set_detach_button_side);
+        notify["state"].connect((s, p) => {
+            if (state == ComposerWidget.ComposerState.DETACHED) {
+                get_style_context().changed.disconnect(set_detach_button_side);
+                detach_start.visible = detach_end.visible = false;
+            }
+        });
     }
     
     public void set_recipients(string label, string tooltip) {
@@ -103,7 +107,7 @@ public class ComposerHeaderbar : PillHeaderbar {
         recipients.tooltip_text = tooltip;
     }
     
-    private void set_win_buttons_side() {
+    private void set_detach_button_side() {
         string layout;
         bool at_end = false;
         get_toplevel().style_get("decoration-button-layout", out layout);
@@ -113,8 +117,8 @@ public class ComposerHeaderbar : PillHeaderbar {
             int colon_ind = layout.index_of(":");
             at_end = (colon_ind >= 0 && layout.index_of("close", colon_ind) >= 0);
         }
-        win_buttons_start.visible = !at_end;
-        win_buttons_end.visible = at_end;
+        detach_start.visible = !at_end;
+        detach_end.visible = at_end;
     }
 }
 

@@ -170,17 +170,19 @@ public class MainToolbar : Gtk.Box {
         search_entry.placeholder_text = placeholder;
     }
     
-    public void set_conversation_header(Gtk.Widget header) {
+    public void set_conversation_header(Gtk.HeaderBar header) {
         conversation_header.hide();
         header.get_style_context().add_class("titlebar");
         header.get_style_context().add_class("geary-titlebar-right");
+        header.show_close_button = show_close_button;
         pack_start(header, true, true);
     }
     
-    public void remove_conversation_header(Gtk.Widget header) {
+    public void remove_conversation_header(Gtk.HeaderBar header) {
         remove(header);
         header.get_style_context().remove_class("titlebar");
         header.get_style_context().remove_class("geary-titlebar-right");
+        header.show_close_button = false;
         conversation_header.show();
     }
     
