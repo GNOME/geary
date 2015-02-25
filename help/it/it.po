@@ -1,15 +1,15 @@
 # Italian translation for geary.
 # Copyright (C) 2014 geary's COPYRIGHT HOLDER
 # This file is distributed under the same license as the geary package.
-# Federico Bruni <fede@inventati.org>, 2014.
+# Federico Bruni <fede@inventati.org>, 2014, 2015.
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: geary master\n"
-"POT-Creation-Date: 2014-09-10 17:03+0000\n"
-"PO-Revision-Date: 2014-09-19 23:00+0200\n"
+"Project-Id-Version: geary help master\n"
+"POT-Creation-Date: 2015-02-24 05:56+0000\n"
+"PO-Revision-Date: 2015-02-25 16:53+0100\n"
 "Last-Translator: Federico Bruni <fede@inventati.org>\n"
-"Language-Team: Italiano < tp@lists.linux.it>\n"
+"Language-Team: Italiano <gnome-it-list@gnome.org>\n"
 "Language: it\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -89,11 +89,28 @@ msgstr ""
 "rilasciarlo sui campi testuali in cima alla finestra o sulla barra degli "
 "strumenti in basso."
 
-#: C/write.page:37(title)
+#: C/write.page:35(p)
+msgid ""
+"A number of keyboard shortcuts are available in the composer; see <link xref="
+"\"shortcuts#composer\"/> for details."
+msgstr ""
+"Sono disponibili varie scorciatoie da tastiera nella finestra di "
+"composizione, come è spiegato dettagliatamente in <link xref="
+"\"shortcuts#composer\"/>."
+
+#: C/write.page:37(p)
+msgid ""
+"You may specify a signature to be inserted into the composer in the <link "
+"xref=\"accounts\"/> dialog."
+msgstr ""
+"Si può indicare una firma da inserire nella finestra di composizione nelle "
+"opzioni <link xref=\"accounts\"/>."
+
+#: C/write.page:42(title)
 msgid "Drafts"
 msgstr "Bozze"
 
-#: C/write.page:39(p)
+#: C/write.page:44(p)
 msgid ""
 "For mail servers that support drafts, Geary will automatically save the "
 "message as you type. If you close the composer without sending, Geary will "
@@ -103,7 +120,7 @@ msgstr ""
 "automaticamente il messaggio mentre lo si scrive. Se si chiude il "
 "compositore senza inviare, Geary chiede se conservare la bozza o scartarla."
 
-#: C/write.page:42(p)
+#: C/write.page:47(p)
 msgid ""
 "To edit an existing draft, select the Drafts folder in the folder list, "
 "select the message, and click \"Edit Draft\" in the message viewer."
@@ -112,7 +129,7 @@ msgstr ""
 "delle cartelle, selezionare il messaggio e fare clic su \"Modifica bozza\" "
 "nel visualizzatore del messaggio."
 
-#: C/write.page:45(p)
+#: C/write.page:50(p)
 msgid "Geary deletes the draft when you send the message."
 msgstr "Geary elimina la bozza quando il messaggio viene inviato."
 
@@ -261,7 +278,7 @@ msgstr "S"
 msgid "Unstar"
 msgstr "Non speciale"
 
-#: C/shortcuts.page:48(key)
+#: C/shortcuts.page:48(key) C/shortcuts.page:126(key)
 msgid "D"
 msgstr "D"
 
@@ -304,6 +321,11 @@ msgstr "Esci"
 #: C/shortcuts.page:64(key) C/shortcuts.page:80(key) C/shortcuts.page:84(key)
 #: C/shortcuts.page:88(key) C/shortcuts.page:92(key) C/shortcuts.page:96(key)
 #: C/shortcuts.page:100(key) C/shortcuts.page:104(key)
+#: C/shortcuts.page:114(key) C/shortcuts.page:118(key)
+#: C/shortcuts.page:126(key) C/shortcuts.page:134(key)
+#: C/shortcuts.page:138(key) C/shortcuts.page:142(key)
+#: C/shortcuts.page:146(key) C/shortcuts.page:150(key)
+#: C/shortcuts.page:154(key)
 msgid "Ctrl"
 msgstr "Ctrl"
 
@@ -387,6 +409,103 @@ msgstr "Trova precedente nella conversazione corrente"
 msgid "Shift"
 msgstr "Maiusc"
 
+#: C/shortcuts.page:109(title)
+#| msgid "Keyboard shortcuts"
+msgid "Composer shortcuts"
+msgstr "Scorciatoie della finestra di composizione"
+
+#: C/shortcuts.page:110(p)
+msgid "These shortcuts are active whenever focus is in a composer."
+msgstr ""
+"Queste scorciatoie da tastiera sono attive quando si lavora nella finestra "
+"di composizione."
+
+#: C/shortcuts.page:113(p)
+msgid "Quote text"
+msgstr "Cita testo"
+
+#: C/shortcuts.page:114(key)
+msgid "]"
+msgstr "]"
+
+#: C/shortcuts.page:117(p)
+msgid "Unquote text"
+msgstr "Togli citazione"
+
+#: C/shortcuts.page:118(key)
+msgid "["
+msgstr "["
+
+#: C/shortcuts.page:121(p)
+#| msgid "Close composer window"
+msgid "Close composer"
+msgstr "Chiudi la finestra di composizione"
+
+#: C/shortcuts.page:122(p)
+#| msgid "<keyseq><key>Ctrl</key><key>N</key></keyseq> or <key>N</key>"
+msgid "<keyseq><key>Ctrl</key><key>W</key></keyseq> or <key>Esc</key>"
+msgstr "<keyseq><key>Ctrl</key><key>W</key></keyseq> o <key>Esc</key>"
+
+#: C/shortcuts.page:125(p)
+#| msgid "Composer"
+msgid "Detach composer"
+msgstr "Stacca la finestra di composizione"
+
+#: C/shortcuts.page:130(p)
+msgid "These shortcuts are only active in composers in rich text mode."
+msgstr ""
+"Queste scorciatoie sono attive solo se nella finestra di composizione è "
+"spuntata la modalità di testo formattato."
+
+#: C/shortcuts.page:133(p)
+#| msgid "text"
+msgid "Bold text"
+msgstr "Testo in grassetto"
+
+#: C/shortcuts.page:134(key)
+msgid "B"
+msgstr "B"
+
+#: C/shortcuts.page:137(p)
+msgid "Italicize text"
+msgstr "Testo in corsivo"
+
+#: C/shortcuts.page:138(key)
+msgid "I"
+msgstr "I"
+
+#: C/shortcuts.page:141(p)
+msgid "Underline text"
+msgstr "Testo sottolineato"
+
+#: C/shortcuts.page:142(key)
+msgid "U"
+msgstr "U"
+
+#: C/shortcuts.page:145(p)
+msgid "Strike text"
+msgstr "Testo barrato"
+
+#: C/shortcuts.page:146(key)
+msgid "K"
+msgstr "K"
+
+#: C/shortcuts.page:149(p)
+msgid "Insert a link"
+msgstr "Inserisci un collegamento"
+
+#: C/shortcuts.page:150(key)
+msgid "L"
+msgstr "L"
+
+#: C/shortcuts.page:153(p)
+msgid "Remove formatting"
+msgstr "Togli formattazione"
+
+#: C/shortcuts.page:154(key)
+msgid "Space"
+msgstr "Spazio"
+
 #: C/search.page:10(title)
 msgid "Search"
 msgstr "Ricerca"
@@ -439,7 +558,7 @@ msgstr "nomefile"
 
 #: C/search.page:27(input)
 msgid "attachment:<placeholder-1/>"
-msgstr "attachment:<placeholder-1/>"
+msgstr "allegato:<placeholder-1/>"
 
 #: C/search.page:28(p)
 msgid "Finds messages with attachments whose name matches <var>filename</var>."
@@ -452,13 +571,13 @@ msgstr "destinatario"
 
 #: C/search.page:31(input)
 msgid "bcc:<placeholder-1/>"
-msgstr "bcc:<placeholder-1/>"
+msgstr "ccn:<placeholder-1/>"
 
 #: C/search.page:32(p)
 msgid "Finds messages where <var>recipient</var> matches the BCC header."
 msgstr ""
 "Trova i messaggi in cui <var>destinatario</var> corrisponde "
-"nell'intestazione Ccn (Bcc in inglese)."
+"nell'intestazione Ccn."
 
 #: C/search.page:35(var) C/search.page:47(var)
 msgid "text"
@@ -466,7 +585,7 @@ msgstr "testo"
 
 #: C/search.page:35(input)
 msgid "body:<placeholder-1/>"
-msgstr "body:<placeholder-1/>"
+msgstr "corpo:<placeholder-1/>"
 
 #: C/search.page:36(p)
 msgid "Finds messages whose body contains <var>text</var>."
@@ -488,7 +607,7 @@ msgstr "mittente"
 
 #: C/search.page:43(input)
 msgid "from:<placeholder-1/>"
-msgstr "from:<placeholder-1/>"
+msgstr "da:<placeholder-1/>"
 
 #: C/search.page:44(p)
 msgid "Finds messages where <var>sender</var> matches the From header."
@@ -498,7 +617,7 @@ msgstr ""
 
 #: C/search.page:47(input)
 msgid "subject:<placeholder-1/>"
-msgstr "subject:<placeholder-1/>"
+msgstr "oggetto:<placeholder-1/>"
 
 #: C/search.page:48(p)
 msgid "Finds messages whose subject contains <var>text</var>."
@@ -506,7 +625,7 @@ msgstr "Trova i messaggi il cui oggetto contiene <var>testo</var>."
 
 #: C/search.page:51(input)
 msgid "to:<placeholder-1/>"
-msgstr "to:<placeholder-1/>"
+msgstr "a:<placeholder-1/>"
 
 #: C/search.page:52(p)
 msgid ""
@@ -987,11 +1106,6 @@ msgstr ""
 "impostazioni di login per IMAP e SMTP."
 
 #: C/accounts.page:19(p)
-#| msgid ""
-#| "Additional accounts can be added from the Accounts dialog. Click Accounts "
-#| "in the application menu or gear menu (or press <keyseq><key>Ctrl</"
-#| "key><key>M</key></keyseq>) to open the Accounts dialog. To add an "
-#| "account, click the + button."
 msgid ""
 "Additional accounts can be added from the Accounts dialog. The "
 "<gui>Accounts</gui> option is available in either Geary's application menu "
@@ -1058,6 +1172,32 @@ msgstr ""
 
 #: C/accounts.page:45(p)
 msgid ""
+"The <gui>Sign emails</gui> checkbox indicates whether a signature will be "
+"automatically inserted when a composer is opened. You may enter the "
+"signature into the box immediately below. You may use HTML tags to style the "
+"text. Switch to a preview of the signature using the buttons to the right."
+msgstr ""
+"La casella di spunta <gui>Firma email</gui> indica se una firma sarà "
+"inserita automaticamente quando si apre una finestra di composizione. Si può "
+"inserire la firma nel riquadro in basso. È consentito l'uso di tag HTML per "
+"formattare il testo. Usare i pulsanti a destra per passare a un'anteprima "
+"della firma."
+
+#: C/accounts.page:50(p)
+msgid ""
+"If you leave the signature in the Accounts dialog blank, Geary will use the "
+"<file>.signature</file> file in your home directory, if it exists. This file "
+"may contain either plain text or HTML markup. In the latter case, the markup "
+"will be inserted directly into the composer, without any escaping."
+msgstr ""
+"Se il campo della firma nelle opzioni account è lasciato vuoto, Geary userà "
+"il file <file>.signature</file> della directory home, se esiste. Questo file "
+"può contenere sia testo semplice che testo con marcatori HTML. Nel secondo "
+"caso i marcatori saranno inseriti direttamente nel compositore, senza alcun "
+"carattere di escape."
+
+#: C/accounts.page:55(p)
+msgid ""
 "The <gui>Download mail</gui> drop-down allows you to configure how much mail "
 "Geary will keep locally. Geary can only use locally available mail when "
 "searching and forming conversations."
@@ -1067,11 +1207,11 @@ msgstr ""
 "disponibile localmente quando si fa una ricerca o si formano le "
 "conversazioni."
 
-#: C/accounts.page:53(title)
+#: C/accounts.page:63(title)
 msgid "Removing accounts"
 msgstr "Eliminare account"
 
-#: C/accounts.page:55(p)
+#: C/accounts.page:65(p)
 msgid ""
 "To delete an account, open the Accounts dialog, select the account, and "
 "press the - button. Geary will delete all information associated with the "
