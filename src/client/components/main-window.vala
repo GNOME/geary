@@ -58,6 +58,11 @@ public class MainWindow : Gtk.ApplicationWindow {
         config.bind(Configuration.FOLDER_LIST_PANE_ORIENTATION_KEY, this, "orientation");
         bind_property("orientation", folder_paned, "orientation",
             BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
+        // Update to layout
+        if (config.folder_list_pane_position_horizontal == -1) {
+            config.folder_list_pane_position_horizontal = config.folder_list_pane_position_old;
+            config.messages_pane_position += config.folder_list_pane_position_old;
+        }
         
         add_accel_group(GearyApplication.instance.ui_manager.get_accel_group());
         
@@ -349,7 +354,8 @@ public class MainWindow : Gtk.ApplicationWindow {
         folder_paned.orientation = (folder_paned.orientation == Gtk.Orientation.HORIZONTAL)
             ? Gtk.Orientation.VERTICAL : Gtk.Orientation.HORIZONTAL;
         
-        int folder_list_width = GearyApplication.instance.config.folder_list_pane_position;
+        int folder_list_width =
+            GearyApplication.instance.config.folder_list_pane_position_horizontal;
         if (folder_paned.orientation == Gtk.Orientation.HORIZONTAL)
             conversations_paned.position += folder_list_width;
         else
@@ -365,7 +371,7 @@ public class MainWindow : Gtk.ApplicationWindow {
         orientation_button.image = image;
         // Cancels previous binding
         GearyApplication.instance.config.bind(
-            horizontal ? Configuration.FOLDER_LIST_PANE_POSITION_KEY
+            horizontal ? Configuration.FOLDER_LIST_PANE_POSITION_HORIZONTAL_KEY
             : Configuration.FOLDER_LIST_PANE_POSITION_VERTICAL_KEY,
             folder_paned, "position");
     }
