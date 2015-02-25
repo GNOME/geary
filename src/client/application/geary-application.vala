@@ -59,8 +59,6 @@ public class GearyApplication : Gtk.Application {
      * an exit, a callback should return true.
      */
     public virtual signal bool exiting(bool panicked) {
-        Date.terminate();
-        
         return true;
     }
     
@@ -346,6 +344,8 @@ public class GearyApplication : Gtk.Application {
             Gtk.main_quit();
         else
             Posix.exit(exitcode);
+        
+        Date.terminate();
     }
     
     /**
