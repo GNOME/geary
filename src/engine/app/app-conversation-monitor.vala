@@ -337,11 +337,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
     
     internal async void local_load_async() {
         debug("ConversationMonitor seeding with local email for %s", folder.to_string());
-        try {
-            yield load_by_id_async(null, min_window_count, Folder.ListFlags.LOCAL_ONLY, cancellable_monitor);
-        } catch (Error e) {
-            debug("Error loading local messages: %s", e.message);
-        }
+        yield load_by_id_async(null, min_window_count, Folder.ListFlags.LOCAL_ONLY, cancellable_monitor);
         debug("ConversationMonitor seeded for %s", folder.to_string());
     }
     
@@ -386,15 +382,13 @@ public class Geary.App.ConversationMonitor : BaseObject {
     }
     
     private async void load_by_id_async(Geary.EmailIdentifier? initial_id, int count,
-        Geary.Folder.ListFlags flags, Cancellable? cancellable) throws Error {
+        Geary.Folder.ListFlags flags, Cancellable? cancellable) {
         notify_scan_started();
         try {
             yield process_email_async(yield folder.list_email_by_id_async(initial_id, count,
                 required_fields, flags, cancellable));
         } catch (Error err) {
             notify_scan_error(err);
-            
-            throw err;
         } finally {
             notify_scan_completed();
         }
@@ -478,19 +472,24 @@ public class Geary.App.ConversationMonitor : BaseObject {
     // NOTE: This is called from a background thread.
     private bool search_associated_predicate(EmailIdentifier email_id, bool only_partial,
         Gee.Collection<FolderPath?> known_paths, EmailFlags flags) {
+        // don't want partial emails
         if (only_partial)
             return false;
         
+        // if email is in this path, it's not blacklisted (i.e. if viewing the Spam folder, don't
+        // blacklist because it's in the Spam folder)
         if (known_paths.contains(folder.path))
             return true;
         
+        // Don't add drafts (unless in Drafts folder, above)
+        if (flags.contains(EmailFlags.DRAFT))
+            return false;
+        
+        // If in a blacklisted path, don't add
         foreach (FolderPath? blacklist_path in search_path_blacklist) {
             if (known_paths.contains(blacklist_path))
                 return false;
         }
-        
-        if (flags.contains(EmailFlags.DRAFT))
-            return false;
         
         return true;
     }
@@ -633,22 +632,29 @@ public class Geary.App.ConversationMonitor : BaseObject {
             if (removed_email == null)
                 continue;
             
-            Gee.Set<RFC822.MessageID>? removed_message_ids = conversation.remove(removed_email);
+            // TODO: If removed message is still available in other paths, don't remove from
+            // conversation, simply remove from the path
+            bool removed = conversation.remove(removed_email, folder.path);
+            
+            if (conversation.get_count() == 0 || !conversation.any_in_folder_path(folder.path)) {
+                conversations.remove(conversation);
+                removed_conversations.add(conversation);
+            } else if (removed) {
+                trimmed_conversations.set(conversation, removed_email);
+            }
+            
+            // TODO: cleanup/remove message_id_to_conversation map
+            /*
             if (removed_message_ids != null) {
                 foreach (RFC822.MessageID removed_message_id in removed_message_ids)
                     message_id_to_conversation.unset(removed_message_id);
             }
-            
-            if (conversation.get_count() == 0) {
-                conversations.remove(conversation);
-                removed_conversations.add(conversation);
-            } else {
-                trimmed_conversations.set(conversation, removed_email);
-            }
+            */
         }
         
         // Look for trimmed conversations no longer holding messages in this folder;
         // those are then evaporated themselves
+        /*
         int evaporated_count = 0;
         foreach (Conversation conversation in trimmed_conversations.get_keys().to_array()) {
             if (conversation.any_in_folder_path(folder.path))
@@ -666,6 +672,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
             debug("Evaporated %d conversations from %s due to no in-folder messages",
                 evaporated_count, folder.to_string());
         }
+        */
         
         if (trimmed_conversations.size > 0) {
             debug("Trimmed %d conversations of %d emails from %s", trimmed_conversations.get_keys().size,
@@ -726,20 +733,16 @@ public class Geary.App.ConversationMonitor : BaseObject {
     
     internal async void reseed_async(string why) {
         Geary.EmailIdentifier? earliest_id = yield get_lowest_email_id_async(null);
-        try {
-            if (earliest_id != null) {
-                debug("ConversationMonitor (%s) reseeding starting from Email ID %s on opened %s", why,
-                    earliest_id.to_string(), folder.to_string());
-                yield load_by_id_async(earliest_id, int.MAX,
-                    Geary.Folder.ListFlags.OLDEST_TO_NEWEST | Geary.Folder.ListFlags.INCLUDING_ID,
-                    cancellable_monitor);
-            } else {
-                debug("ConversationMonitor (%s) reseeding latest %d emails on opened %s", why,
-                    min_window_count, folder.to_string());
-                yield load_by_id_async(null, min_window_count, Geary.Folder.ListFlags.NONE, cancellable_monitor);
-            }
-        } catch (Error e) {
-            debug("Reseed error: %s", e.message);
+        if (earliest_id != null) {
+            debug("ConversationMonitor (%s) reseeding starting from Email ID %s on opened %s", why,
+                earliest_id.to_string(), folder.to_string());
+            yield load_by_id_async(earliest_id, int.MAX,
+                Geary.Folder.ListFlags.OLDEST_TO_NEWEST | Geary.Folder.ListFlags.INCLUDING_ID,
+                cancellable_monitor);
+        } else {
+            debug("ConversationMonitor (%s) reseeding latest %d emails on opened %s", why,
+                min_window_count, folder.to_string());
+            yield load_by_id_async(null, min_window_count, Geary.Folder.ListFlags.NONE, cancellable_monitor);
         }
         
         if (!reseed_notified) {
@@ -793,19 +796,11 @@ public class Geary.App.ConversationMonitor : BaseObject {
             if (num_to_load < WINDOW_FILL_MESSAGE_COUNT)
                 num_to_load = WINDOW_FILL_MESSAGE_COUNT;
             
-            try {
-                yield load_by_id_async(low_id, num_to_load, flags, cancellable_monitor);
-            } catch(Error e) {
-                debug("Error filling conversation window: %s", e.message);
-            }
+            yield load_by_id_async(low_id, num_to_load, flags, cancellable_monitor);
         } else {
             // No existing messages or an insert invalidated our existing list,
             // need to start from scratch.
-            try {
-                yield load_by_id_async(null, min_window_count, flags, cancellable_monitor);
-            } catch(Error e) {
-                debug("Error filling conversation window: %s", e.message);
-            }
+            yield load_by_id_async(null, min_window_count, flags, cancellable_monitor);
         }
         
         // Run again to make sure we're full unless we ran out of messages.

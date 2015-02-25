@@ -266,6 +266,7 @@ private class Geary.App.ConversationSet : BaseObject {
         if (!email_id_map.unset(email.id))
             error("Email %s already removed from conversation set", email.id.to_string());
         
+        /*
         Gee.Set<Geary.RFC822.MessageID>? removed_message_ids = conversation.remove(email);
         if (removed_message_ids != null) {
             foreach (Geary.RFC822.MessageID removed_message_id in removed_message_ids) {
@@ -275,6 +276,7 @@ private class Geary.App.ConversationSet : BaseObject {
                 }
             }
         }
+        */
     }
     
     private void remove_conversation(Conversation conversation) {

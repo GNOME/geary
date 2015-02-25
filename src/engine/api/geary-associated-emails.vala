@@ -12,6 +12,8 @@
  * also not updated as new email arrives and email is removed.
  *
  * @see Account.local_search_associated_emails_async
+ *
+ * TODO: Necessary?
  */
 
 public class Geary.AssociatedEmails : BaseObject {

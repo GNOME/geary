@@ -260,30 +260,21 @@ public class Geary.App.Conversation : BaseObject {
         return true;
     }
     
-    // Returns the removed Message-IDs
-    internal Gee.Set<RFC822.MessageID>? remove(Email email) {
+    // Returns whether the email was completely removed from the conversation
+    internal bool remove(Email email, Geary.FolderPath path) {
+        path_map.remove(email.id, path);
+        if (path_map.get(email.id).size != 0)
+            return false;
+        
         emails.unset(email.id);
         sent_date_ascending.remove(email);
         sent_date_descending.remove(email);
         recv_date_ascending.remove(email);
         recv_date_descending.remove(email);
-        path_map.remove_all(email.id);
-        
-        Gee.Set<RFC822.MessageID> removed_message_ids = new Gee.HashSet<RFC822.MessageID>();
-        
-        Gee.Set<RFC822.MessageID>? ancestors = email.get_ancestors();
-        if (ancestors != null) {
-            foreach (RFC822.MessageID ancestor_id in ancestors) {
-                // if remove() changes set (i.e. it was present) but no longer present, that
-                // means the ancestor_id was the last one and is formally removed
-                if (message_ids.remove(ancestor_id) && !message_ids.contains(ancestor_id))
-                    removed_message_ids.add(ancestor_id);
-            }
-        }
         
         trimmed(email);
         
-        return (removed_message_ids.size > 0) ? removed_message_ids : null;
+        return true;
     }
     
     /**
