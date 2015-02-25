@@ -16,8 +16,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-02-17 02:12+0200\n"
-"PO-Revision-Date: 2015-02-17 02:12+0200\n"
+"POT-Creation-Date: 2015-02-25 00:49+0200\n"
+"PO-Revision-Date: 2015-02-25 00:49+0200\n"
 "Last-Translator: Yosef Or Boczko <yoseforb@gmail.com>\n"
 "Language-Team: עברית <>\n"
 "Language: he\n"
@@ -315,11 +315,11 @@ msgstr "סימון שיחות"
 
 #: ../src/client/application/geary-controller.vala:80
 msgid "Add label to conversation"
-msgstr "הוסף תווית לשיחה"
+msgstr "הוספת תווית לשיחה"
 
 #: ../src/client/application/geary-controller.vala:81
 msgid "Add label to conversations"
-msgstr "הוסף תווית לשיחות"
+msgstr "הוספת תווית לשיחות"
 
 #: ../src/client/application/geary-controller.vala:82
 #: ../src/client/application/geary-controller.vala:387
