@@ -679,7 +679,7 @@ private class Geary.ImapDB.Account : BaseObject {
     }
     
     public async Gee.Collection<Geary.AssociatedEmails>? search_associated_emails_async(
-        Gee.Set<Geary.EmailIdentifier> email_ids, Email.Field requested_fields,
+        Gee.Collection<Geary.EmailIdentifier> email_ids, Email.Field requested_fields,
         Geary.Account.EmailSearchPredicate? search_predicate, Cancellable? cancellable) throws Error {
         check_open();
         

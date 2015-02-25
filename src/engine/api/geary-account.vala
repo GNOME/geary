@@ -363,7 +363,7 @@ public abstract class Geary.Account : BaseObject {
      * locally.
      */
     public abstract async Gee.Collection<Geary.AssociatedEmails>? local_search_associated_emails_async(
-        Gee.Set<Geary.EmailIdentifier> email_ids, Geary.Email.Field requested_fields,
+        Gee.Collection<Geary.EmailIdentifier> email_ids, Geary.Email.Field requested_fields,
         EmailSearchPredicate? search_predicate, Cancellable? cancellable = null) throws Error;
     
     /**

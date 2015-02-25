@@ -859,7 +859,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     }
     
     public override async Gee.Collection<Geary.AssociatedEmails>? local_search_associated_emails_async(
-        Gee.Set<Geary.EmailIdentifier> email_ids, Geary.Email.Field requested_fields,
+        Gee.Collection<Geary.EmailIdentifier> email_ids, Geary.Email.Field requested_fields,
         Account.EmailSearchPredicate? search_predicate, Cancellable? cancellable = null) throws Error {
         return yield local.search_associated_emails_async(email_ids, requested_fields, search_predicate,
             cancellable);
