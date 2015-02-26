@@ -55,7 +55,7 @@ public class GearyController : Geary.BaseObject {
     
     public const string PROP_CURRENT_CONVERSATION ="current-conversations";
     
-    public const int MIN_CONVERSATION_COUNT = 50;
+    public const int MIN_CONVERSATION_COUNT = 25;
     
     private const string DELETE_MESSAGE_TOOLTIP_SINGLE = _("Delete conversation (Shift+Delete)");
     private const string DELETE_MESSAGE_TOOLTIP_MULTIPLE = _("Delete conversations (Shift+Delete)");
