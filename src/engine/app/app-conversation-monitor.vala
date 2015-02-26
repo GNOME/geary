@@ -451,7 +451,6 @@ public class Geary.App.ConversationMonitor : BaseObject {
             folder.to_string(), email_ids.size);
         
         // don't re-process existing emails
-        /*
         Gee.Collection<EmailIdentifier> trimmed_ids = traverse<EmailIdentifier>(email_ids)
             .filter(id => !all_email_id_to_conversation.has_key(id))
             .to_hash_set();
@@ -460,8 +459,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
         
         email_ids = trimmed_ids;
         if (email_ids.size == 0)
-            return false;
-        */
+            return;
         
         Gee.Collection<AssociatedEmails>? associations = null;
         try {
