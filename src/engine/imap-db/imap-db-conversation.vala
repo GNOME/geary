@@ -59,7 +59,7 @@ internal void do_add_message_to_conversation(Db.Connection cx, int64 message_id,
     StringBuilder sql = new StringBuilder("""
         SELECT conversation_id
         FROM MessageConversationTable
-        WHERE rfc822_message_id IN
+        WHERE rfc822_message_id IN (
     """);
     for (int ctr = 0; ctr < ancestors.size; ctr++)
         sql.append(ctr == 0 ? "?" : ",?");
