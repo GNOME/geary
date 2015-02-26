@@ -43,8 +43,14 @@ public class Geary.App.ConversationMonitor : BaseObject {
     // All generated Conversations
     private Gee.HashSet<Conversation> conversations = new Gee.HashSet<Conversation>();
     
-    // A map of EmailIdentifiers to Conversations
-    private Gee.HashMap<EmailIdentifier, Conversation> email_id_to_conversation =
+    // A map of all EmailIdentifiers to Conversations ... since emails from deep in the folder can
+    // be added to a conversation, use primary_email_id_to_conversation for finding boundaries
+    private Gee.HashMap<EmailIdentifier, Conversation> all_email_id_to_conversation =
+        new Gee.HashMap<EmailIdentifier, Conversation>();
+    
+    // A map of primary EmailIdentifiers to Conversations ... primary ids come from ranged listing
+    // and don't include ids found "deep" in the folder or from other folders
+    private Gee.HashMap<EmailIdentifier, Conversation> primary_email_id_to_conversation =
         new Gee.HashMap<EmailIdentifier, Conversation>();
     
     /**
@@ -258,7 +264,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
     }
     
     public int get_email_count() {
-        return email_id_to_conversation.size;
+        return all_email_id_to_conversation.size;
     }
     
     public Gee.Collection<Conversation> get_conversations() {
@@ -266,7 +272,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
     }
     
     public Geary.App.Conversation? get_conversation_for_email(Geary.EmailIdentifier email_id) {
-        return email_id_to_conversation[email_id];
+        return all_email_id_to_conversation[email_id];
     }
     
     public async bool start_monitoring_async(Cancellable? cancellable = null)
@@ -378,8 +384,8 @@ public class Geary.App.ConversationMonitor : BaseObject {
         notify_scan_started();
         try {
             // list by required_flags to ensure all are present in local store
-            yield process_email_async(yield folder.list_email_by_id_async(initial_id, count,
-                required_fields, flags, cancellable));
+            yield process_email_async(folder.path,
+                yield folder.list_email_by_id_async(initial_id, count, required_fields, flags, cancellable));
         } catch (Error err) {
             notify_scan_error(err);
         } finally {
@@ -392,8 +398,8 @@ public class Geary.App.ConversationMonitor : BaseObject {
         notify_scan_started();
         try {
             // list by required_flags to ensure all are present in local store
-            yield process_email_async(yield folder.list_email_by_sparse_id_async(ids, required_fields,
-                flags, cancellable));
+            yield process_email_async(folder.path,
+                yield folder.list_email_by_sparse_id_async(ids, required_fields, flags, cancellable));
         } catch (Error err) {
             notify_scan_error(err);
         } finally {
@@ -426,7 +432,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
         return true;
     }
     
-    private async void process_email_async(Gee.Collection<Geary.Email>? emails) {
+    private async void process_email_async(FolderPath path, Gee.Collection<Geary.Email>? emails) {
         if (emails == null || emails.size == 0)
             return;
         
@@ -434,15 +440,28 @@ public class Geary.App.ConversationMonitor : BaseObject {
             .map<EmailIdentifier>(email => email.id)
             .to_hash_set();
         
-        yield process_email_ids_async(ids);
+        yield process_email_ids_async(path, ids);
     }
     
-    private async void process_email_ids_async(Gee.Collection<Geary.EmailIdentifier>? email_ids) {
+    private async void process_email_ids_async(FolderPath path, Gee.Collection<Geary.EmailIdentifier>? email_ids) {
         if (email_ids == null || email_ids.size == 0)
             return;
         
         Logging.debug(Logging.Flag.CONVERSATIONS, "[%s] ConversationMonitor::process_email: %d emails",
             folder.to_string(), email_ids.size);
+        
+        // don't re-process existing emails
+        /*
+        Gee.Collection<EmailIdentifier> trimmed_ids = traverse<EmailIdentifier>(email_ids)
+            .filter(id => !all_email_id_to_conversation.has_key(id))
+            .to_hash_set();
+        
+        debug("Filtering existing identifiers: %d => %d", email_ids.size, trimmed_ids.size);
+        
+        email_ids = trimmed_ids;
+        if (email_ids.size == 0)
+            return false;
+        */
         
         Gee.Collection<AssociatedEmails>? associations = null;
         try {
@@ -470,38 +489,37 @@ public class Geary.App.ConversationMonitor : BaseObject {
             // started and then coalesce as new emails come in)
             Gee.HashSet<Conversation> existing = new Gee.HashSet<Conversation>();
             foreach (EmailIdentifier associated_id in associated_ids) {
-                Conversation? conversation = email_id_to_conversation[associated_id];
+                Conversation? conversation = all_email_id_to_conversation[associated_id];
                 if (conversation != null)
                     existing.add(conversation);
             }
             
             // Create or pick conversation for these emails
             Conversation conversation;
-            unowned string ctype;
             switch (existing.size) {
                 case 0:
-                    ctype = "NEW";
                     conversation = new Conversation(this);
                 break;
                 
                 case 1:
-                    ctype = "FOUND";
                     conversation = traverse<Conversation>(existing).first();
                 break;
                 
                 default:
                     // TODO
-                    ctype = "MERGED";
                     conversation = merge_conversations(existing);
                 break;
             }
             
             // add all emails and each known path(s) to the Conversation and EmailIdentifier mapping
             foreach (Email email in association.emails) {
-                if (email.subject.value.contains("714922"))
-                    debug("ADDING \"%s TO %s", email.subject.to_string(), ctype);
                 conversation.add(email, association.known_paths[email]);
-                email_id_to_conversation[email.id] = conversation;
+                all_email_id_to_conversation[email.id] = conversation;
+                
+                // only add to primary map if identifier is part of the original set of arguments
+                // and they're from this folder and not another one
+                if (email_ids.contains(email.id) && path.equal_to(folder.path))
+                    primary_email_id_to_conversation[email.id] = conversation;
             }
             
             // if new, added, otherwise appended (if not already added)
@@ -570,8 +588,10 @@ public class Geary.App.ConversationMonitor : BaseObject {
         // remove the emails from internal state, noting which conversations are trimmed or flat-out
         // removed (evaporated)
         foreach (EmailIdentifier removed_id in removed_ids) {
+            primary_email_id_to_conversation.unset(removed_id);
+            
             Conversation conversation;
-            if (!email_id_to_conversation.unset(removed_id, out conversation))
+            if (!all_email_id_to_conversation.unset(removed_id, out conversation))
                 continue;
             
             Geary.Email? removed_email = conversation.get_email_by_id(removed_id);
@@ -610,13 +630,13 @@ public class Geary.App.ConversationMonitor : BaseObject {
         debug("%d out of folder message(s) appended to %s, fetching to add to conversations...", appended_ids.size,
             folder.to_string());
         
-        yield process_email_ids_async(appended_ids);
+        yield process_email_ids_async(folder.path, appended_ids);
     }
     
     private void on_account_email_flags_changed(Geary.Folder folder,
         Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> map) {
         foreach (Geary.EmailIdentifier id in map.keys) {
-            Conversation? conversation = email_id_to_conversation[id];
+            Conversation? conversation = all_email_id_to_conversation[id];
             if (conversation == null)
                 continue;
             
@@ -632,7 +652,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
     private async Geary.EmailIdentifier? get_lowest_email_id_async(Cancellable? cancellable) {
         Geary.EmailIdentifier? earliest_id = null;
         try {
-            yield folder.find_boundaries_async(email_id_to_conversation.keys, out earliest_id, null,
+            yield folder.find_boundaries_async(primary_email_id_to_conversation.keys, out earliest_id, null,
                 cancellable);
         } catch (Error e) {
             debug("Error finding earliest email identifier: %s", e.message);

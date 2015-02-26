@@ -652,6 +652,7 @@ private class Geary.ImapDB.Account : BaseObject {
             requested_fields = requested_fields | Geary.Email.Field.FLAGS;
         
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
+            // BUG: in-reply-to can be an address list, not simply an address
             Db.Statement stmt = cx.prepare("SELECT id FROM MessageTable WHERE message_id = ? OR in_reply_to = ?");
             stmt.bind_string(0, message_id.value);
             stmt.bind_string(1, message_id.value);
@@ -702,13 +703,14 @@ private class Geary.ImapDB.Account : BaseObject {
         
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
             foreach (ImapDB.EmailIdentifier db_id in db_ids) {
+                // if message found in previous conversation search, don't re-fetch
                 if (found_ids.contains(db_id))
                     continue;
                 
                 Db.Statement stmt = cx.prepare("""
                     SELECT conversation_id
-                    FROM MessageTable
-                    WHERE id = ?
+                    FROM MessageConversationTable
+                    WHERE message_id = ?
                 """);
                 stmt.bind_rowid(0, db_id.message_id);
                 
@@ -719,16 +721,22 @@ private class Geary.ImapDB.Account : BaseObject {
                 int64 conversation_id = result.rowid_at(0);
                 
                 stmt = cx.prepare("""
-                    SELECT id
-                    FROM MessageTable
+                    SELECT message_id
+                    FROM MessageConversationTable
                     WHERE conversation_id = ?
                 """);
                 stmt.bind_rowid(0, conversation_id);
                 
-                AssociatedEmails association = new AssociatedEmails();
-                
                 result = stmt.exec(cancellable);
+                
+                AssociatedEmails association = new AssociatedEmails();
                 while (!result.finished) {
+                    if (result.is_null_at(0)) {
+                        result.next(cancellable);
+                        
+                        continue;
+                    }
+                    
                     Email? email;
                     Gee.Collection<FolderPath?>? known_paths;
                     do_fetch_message(cx, result.rowid_at(0), requested_fields, search_predicate,

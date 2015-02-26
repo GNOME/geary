@@ -20,7 +20,7 @@ internal const Geary.Email.Field REQUIRED_FIELDS = Geary.Account.ASSOCIATED_REQU
 internal void do_add_message_to_conversation(Db.Connection cx, int64 message_id, Cancellable? cancellable)
     throws Error {
     Db.Statement references_stmt = cx.prepare("""
-        SELECT message_id, in_reply_to, reference_ids, conversation_id
+        SELECT message_id, in_reply_to, reference_ids
         FROM MessageTable
         WHERE id = ?
     """);
@@ -33,25 +33,22 @@ internal void do_add_message_to_conversation(Db.Connection cx, int64 message_id,
         return;
     }
     
-    // Check if part of an existing conversation; not an error to call this multiple times on same
-    // message, but not necessary either (since REFERENCES should be static)
-    int64 existing_conversation_id = Db.INVALID_ROWID;
-    if (!references_result.is_null_at(3))
-        existing_conversation_id = references_result.rowid_at(3);
-    
     // Create a common set of ancestors from In-Reply-To and References
     Gee.HashSet<RFC822.MessageID> ancestors = new Gee.HashSet<RFC822.MessageID>();
     add_ancestors(references_result.string_at(1), ancestors);
     add_ancestors(references_result.string_at(2), ancestors);
     
-    // Add this message's Message-ID
+    // Add this message's Message-ID to the ancestors
     unowned string? rfc822_message_id_text = references_result.string_at(0);
-    if (!String.is_empty(rfc822_message_id_text))
-        ancestors.add(new RFC822.MessageID(rfc822_message_id_text));
+    RFC822.MessageID? this_rfc822_message_id = null;
+    if (!String.is_empty(rfc822_message_id_text)) {
+        this_rfc822_message_id = new RFC822.MessageID(rfc822_message_id_text);
+        ancestors.add(this_rfc822_message_id);
+    }
     
     // in reality, no ancestors indicates that REFERENCES was not complete, so log that and exit
     if (ancestors.size == 0) {
-        message("Unable to add message %s to conversation table: no ancestors", message_id.to_string());
+        message("Unable to add message %s to conversation table: no references", message_id.to_string());
         
         return;
     }
@@ -61,8 +58,8 @@ internal void do_add_message_to_conversation(Db.Connection cx, int64 message_id,
     // conversation each time
     StringBuilder sql = new StringBuilder("""
         SELECT conversation_id
-        FROM MessageTable
-        WHERE message_id IN (
+        FROM MessageConversationTable
+        WHERE rfc822_message_id IN
     """);
     for (int ctr = 0; ctr < ancestors.size; ctr++)
         sql.append(ctr == 0 ? "?" : ",?");
@@ -78,7 +75,7 @@ internal void do_add_message_to_conversation(Db.Connection cx, int64 message_id,
     
     Db.Result search_result = search_stmt.exec(cancellable);
     while (!search_result.finished) {
-        // watch for NULL, which is the default value when a row is added to the MessageTable
+        // watch for NULL, which is the default value when a row is added to the MessageConversationTable
         // without a conversation id (which is almost always for new rows)
         if (!search_result.is_null_at(0))
             conversation_ids.add(search_result.rowid_at(0));
@@ -120,20 +117,56 @@ internal void do_add_message_to_conversation(Db.Connection cx, int64 message_id,
         break;
     }
     
-    // if already assigned this conversation, avoid a write
-    if (conversation_id == existing_conversation_id)
-        return;
-    
-    // Assign the message to this conversation
-    Db.Statement insert = cx.prepare("""
-        UPDATE MessageTable
-        SET conversation_id = ?
-        WHERE id = ?
-    """);
-    insert.bind_rowid(0, conversation_id);
-    insert.bind_rowid(1, message_id);
-    
-    insert.exec(cancellable);
+    // If each Message-ID present in table, update its conversation_id, otherwise add Message-ID and
+    // index to the conversation
+    foreach (RFC822.MessageID ancestor in ancestors) {
+        bool ancestor_is_added_message =
+            this_rfc822_message_id != null && this_rfc822_message_id.equal_to(ancestor);
+        
+        Db.Statement select = cx.prepare("""
+            SELECT id, conversation_id, message_id
+            FROM MessageConversationTable
+            WHERE rfc822_message_id = ?
+        """);
+        select.bind_string(0, ancestor.value);
+        
+        Db.Result result = select.exec(cancellable);
+        if (result.finished) {
+            // not present, add new
+            Db.Statement insert = cx.prepare("""
+                INSERT INTO MessageConversationTable
+                (conversation_id, message_id, rfc822_message_id)
+                VALUES (?, ?, ?)
+            """);
+            insert.bind_rowid(0, conversation_id);
+            // if ancestor is the added message's Message-ID, connect them now
+            if (ancestor_is_added_message)
+                insert.bind_rowid(1, message_id);
+            else
+                insert.bind_null(1);
+            insert.bind_string(2, ancestor.value);
+            
+            insert.exec(cancellable);
+        } else if (ancestor_is_added_message || result.is_null_at(1) || result.rowid_at(1) != conversation_id) {
+            // already present but with different conversation id, or this message is the Message-ID,
+            // so connect them now
+            Db.Statement update = cx.prepare("""
+                UPDATE MessageConversationTable
+                SET conversation_id = ?, message_id = ?
+                WHERE id = ?
+            """);
+            update.bind_rowid(0, conversation_id);
+            if (ancestor_is_added_message)
+                update.bind_rowid(1, message_id);
+            else if (!result.is_null_at(2))
+                update.bind_rowid(1, result.rowid_at(2));
+            else
+                update.bind_null(1);
+            update.bind_rowid(2, result.rowid_at(0));
+            
+            update.exec(cancellable);
+        }
+    }
 }
 
 private void add_ancestors(string? text, Gee.Collection<RFC822.MessageID> ancestors) {
@@ -152,7 +185,7 @@ private int64 do_merge_conversations(Db.Connection cx, Gee.Set<int64?> conversat
     // although multithreaded transactions aren't problem per se with database locking, it is
     // possible for multiple threads to be processing mail on the same conversation at the same
     // time and will therefore be reading the same list and choosing which to merge; by being
-    // preditable here, ensure that the same conversation is selected in both cases
+    // predictable here, ensure that the same conversation is selected in both cases
     int64 conversation_id = traverse<int64?>(conversation_ids)
         .to_tree_set(Collection.int64_compare_func)
         .first();
@@ -178,7 +211,7 @@ private int64 do_merge_conversations(Db.Connection cx, Gee.Set<int64?> conversat
     
     // set other messages in the other conversations to the chosen one
     StringBuilder merge_sql = new StringBuilder("""
-        UPDATE MessageTable
+        UPDATE MessageConversationTable
         SET conversation_id = ?
         WHERE conversation_id IN
     """);
