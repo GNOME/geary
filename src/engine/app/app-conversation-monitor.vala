@@ -464,6 +464,8 @@ public class Geary.App.ConversationMonitor : BaseObject {
         Logging.debug(Logging.Flag.CONVERSATIONS, "[%s] ConversationMonitor::process_email: %d emails",
             folder.to_string(), email_ids.size);
         
+        // Convert EmailIdentifiers into associations (groupings) of EmailIdentifiers with all known
+        // paths
         Gee.Collection<AssociatedEmails>? associations = null;
         try {
             associations = yield folder.account.local_search_associated_emails_async(
@@ -479,71 +481,8 @@ public class Geary.App.ConversationMonitor : BaseObject {
         
         Gee.HashSet<Conversation> added = new Gee.HashSet<Conversation>();
         Gee.HashMultiMap<Conversation, Email> appended = new Gee.HashMultiMap<Conversation, Email>();
-        
-        foreach (AssociatedEmails association in associations) {
-            // get all conversations for these emails (possible for multiple conversations to be
-            // started and then coalesce as new emails come in)
-            Gee.HashSet<Conversation> existing = new Gee.HashSet<Conversation>();
-            foreach (EmailIdentifier associated_id in association.email_ids) {
-                Conversation? conversation = all_email_id_to_conversation[associated_id];
-                if (conversation != null)
-                    existing.add(conversation);
-                
-                // only add to primary map if identifier is part of the original set of arguments
-                // and they're from this folder and not another one
-                if (email_ids.contains(associated_id) && path.equal_to(folder.path))
-                    primary_email_id_to_conversation[associated_id] = conversation;
-            }
-            
-            // Create or pick conversation for these emails
-            Conversation conversation;
-            switch (existing.size) {
-                case 0:
-                    conversation = new Conversation(this);
-                break;
-                
-                case 1:
-                    conversation = traverse<Conversation>(existing).first();
-                break;
-                
-                default:
-                    // TODO
-                    conversation = merge_conversations(existing);
-                break;
-            }
-            
-            // trim down the email identifiers we already have emails for
-            Gee.HashSet<EmailIdentifier> trimmed_ids = traverse<EmailIdentifier>(association.email_ids)
-                .filter(id => !all_email_id_to_conversation.has_key(id))
-                .to_hash_set();
-            
-            // load remaining emails for the conversation objects
-            Gee.Collection<Email>? emails = null;
-            try {
-                emails = yield folder.account.local_list_email_async(trimmed_ids, required_fields,
-                    cancellable);
-            } catch (Error err) {
-                debug("Unable to list local account email: %s", err.message);
-            }
-            
-            if (emails == null || emails.size == 0)
-                continue;
-            
-            // add all emails and each known path(s) to the Conversation and EmailIdentifier mapping
-            foreach (Email email in emails) {
-                conversation.add(email, association.known_paths[email.id]);
-                all_email_id_to_conversation[email.id] = conversation;
-            }
-            
-            // if new, added, otherwise appended (if not already added)
-            if (!conversations.contains(conversation)) {
-                conversations.add(conversation);
-                added.add(conversation);
-            } else if (!added.contains(conversation)) {
-                foreach (Email email in emails)
-                    appended.set(conversation, email);
-            }
-        }
+        foreach (AssociatedEmails association in associations)
+            yield process_association_async(association, path, email_ids, added, appended, cancellable);
         
         debug("%d added conversations, %d appended", added.size, appended.size);
         
@@ -557,6 +496,84 @@ public class Geary.App.ConversationMonitor : BaseObject {
         
         Logging.debug(Logging.Flag.CONVERSATIONS, "[%s] ConversationMonitor::process_email completed: %d emails",
             folder.to_string(), email_ids.size);
+    }
+    
+    private async void process_association_async(AssociatedEmails association, FolderPath path,
+        Gee.Collection<EmailIdentifier> original_email_ids, Gee.Set<Conversation> added,
+        Gee.MultiMap<Conversation, Email> appended, Cancellable? cancellable) {
+        // get all conversations for these emails (possible for multiple conversations to be
+        // started and then coalesce as new emails come in) and see if any are known to be in this
+        // folder
+        bool any_in_folder = false;
+        Gee.HashSet<Conversation> existing = new Gee.HashSet<Conversation>();
+        foreach (EmailIdentifier associated_id in association.email_ids) {
+            Conversation? conversation = all_email_id_to_conversation[associated_id];
+            if (conversation != null)
+                existing.add(conversation);
+            
+            // track if any of the messages are known to be in this folder
+            if (association.known_paths[associated_id].contains(folder.path))
+                any_in_folder = true;
+            
+            // only add to primary map if identifier is part of the original set of arguments
+            // and they're from this folder and not another one
+            if (original_email_ids.contains(associated_id) && path.equal_to(folder.path))
+                primary_email_id_to_conversation[associated_id] = conversation;
+        }
+        
+        // if these are out-of-folder emails, only add to conversations if any email
+        // in them are associated with this folder and are not known to any other conversations
+        if (!path.equal_to(folder.path) && existing.size == 0 && !any_in_folder)
+            return;
+        
+        // Create or pick conversation for these emails
+        Conversation conversation;
+        switch (existing.size) {
+            case 0:
+                conversation = new Conversation(this);
+            break;
+            
+            case 1:
+                conversation = traverse<Conversation>(existing).first();
+            break;
+            
+            default:
+                // TODO
+                conversation = merge_conversations(existing);
+            break;
+        }
+        
+        // trim down the email identifiers we already have emails for
+        Gee.HashSet<EmailIdentifier> trimmed_ids = traverse<EmailIdentifier>(association.email_ids)
+            .filter(id => !all_email_id_to_conversation.has_key(id))
+            .to_hash_set();
+        
+        // load remaining emails for the conversation objects
+        Gee.Collection<Email>? emails = null;
+        try {
+            emails = yield folder.account.local_list_email_async(trimmed_ids, required_fields,
+                cancellable);
+        } catch (Error err) {
+            debug("Unable to list local account email: %s", err.message);
+        }
+        
+        if (emails == null || emails.size == 0)
+            return;
+        
+        // add all emails and each known path(s) to the Conversation and EmailIdentifier mapping
+        foreach (Email email in emails) {
+            conversation.add(email, association.known_paths[email.id]);
+            all_email_id_to_conversation[email.id] = conversation;
+        }
+        
+        // if new, added, otherwise appended (if not already added)
+        if (!conversations.contains(conversation)) {
+            conversations.add(conversation);
+            added.add(conversation);
+        } else if (!added.contains(conversation)) {
+            foreach (Email email in emails)
+                appended.set(conversation, email);
+        }
     }
     
     // TODO
@@ -728,9 +745,6 @@ public class Geary.App.ConversationMonitor : BaseObject {
         
         int initial_message_count = get_email_count();
         
-        debug("FILLWINDOW: min_window_count=%d conversations=%d message_count=%d", min_window_count,
-            conversations.size, initial_message_count);
-        
         // only do local-load if the Folder isn't completely opened, otherwise this operation
         // will block other (more important) operations while it waits for the folder to
         // remote-open
@@ -753,31 +767,19 @@ public class Geary.App.ConversationMonitor : BaseObject {
         
         Geary.EmailIdentifier? low_id = yield get_lowest_email_id_async(null);
         if (low_id != null && !is_insert) {
-            // Load at least as many messages as remianing conversations.
-            int num_to_load = min_window_count - conversations.size;
-            if (num_to_load < WINDOW_FILL_MESSAGE_COUNT)
-                num_to_load = WINDOW_FILL_MESSAGE_COUNT;
+            // Load at least as many messages as remaining conversations.
+            int num_to_load = Numeric.int_floor(min_window_count - conversations.size,
+                WINDOW_FILL_MESSAGE_COUNT);
             
-            debug("FILLWINDOW: low_id=%s num_to_load=%d", low_id.to_string(), num_to_load);
             yield load_by_id_async(low_id, num_to_load, Email.Field.NONE, flags, cancellable_monitor);
         } else {
             // No existing messages or an insert invalidated our existing list,
             // need to start from scratch.
-            debug("FILLWINDOW: low_id=%s is_insert=%s min_window_count=%d",
-                (low_id != null) ? low_id.to_string() : "(null)", is_insert.to_string(),
-                min_window_count);
             yield load_by_id_async(null, min_window_count, Email.Field.NONE, flags, cancellable_monitor);
         }
         
         // Run again to make sure we're full unless we ran out of messages.
-        int final_message_count = get_email_count();
-        if (final_message_count != initial_message_count) {
-            debug("FILLWINDOW: Schedule refill: final=%d initial=%d (%d in folder, %d found)",
-                final_message_count, initial_message_count,
-                folder.properties.email_total, primary_email_id_to_conversation.size);
+        if (get_email_count() != initial_message_count)
             operation_queue.add(new FillWindowOperation(this, false));
-        } else {
-            debug("FILLWINDOW: Completed");
-        }
     }
 }

@@ -317,9 +317,8 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             StringBuilder sql = new StringBuilder("""
                 SELECT MessageLocationTable.message_id, ordering, remove_marker
                 FROM MessageLocationTable
+                WHERE folder_id = ?
             """);
-            
-            sql.append("WHERE folder_id = ? ");
             
             if (oldest_to_newest)
                 sql.append("AND ordering >= ? ");
@@ -331,9 +330,14 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             else
                 sql.append("ORDER BY ordering DESC ");
             
+            if (count != int.MAX)
+                sql.append("LIMIT ? ");
+            
             Db.Statement stmt = cx.prepare(sql.str);
             stmt.bind_rowid(0, folder_id);
             stmt.bind_int64(1, start_uid.value);
+            if (count != int.MAX)
+                stmt.bind_int(2, count);
             
             locations = do_results_to_locations(stmt.exec(cancellable), count, flags, cancellable);
             
