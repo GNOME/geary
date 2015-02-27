@@ -204,6 +204,13 @@ public class Geary.App.Conversation : BaseObject {
     }
     
     /**
+     * Returns the known {@link FolderPath}s for the {@link EmailIdentifier}.
+     */
+    public Gee.Collection<Geary.FolderPath>? get_known_paths_for_id(Geary.EmailIdentifier id) {
+        return path_map.get(id);
+    }
+    
+    /**
      * Returns all EmailIdentifiers in the conversation, unsorted.
      */
     public Gee.Collection<Geary.EmailIdentifier> get_email_ids() {

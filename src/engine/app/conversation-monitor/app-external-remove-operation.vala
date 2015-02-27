@@ -17,6 +17,6 @@ private class Geary.App.ExternalRemoveOperation : ConversationOperation {
     }
     
     public override async void execute_async() {
-        yield monitor.remove_emails_async(path, removed_ids);
+        monitor.remove_emails(path, removed_ids);
     }
 }

@@ -538,7 +538,6 @@ public class Geary.App.ConversationMonitor : BaseObject {
             break;
             
             default:
-                // TODO
                 conversation = merge_conversations(existing);
             break;
         }
@@ -576,10 +575,42 @@ public class Geary.App.ConversationMonitor : BaseObject {
         }
     }
     
-    // TODO
+    // This happens when emails with partial histories (REFERENCES) arrive out-of-order and their
+    // relationship is not known until after conversations have been created ... although rare, it
+    // does happen and needs to be dealt with
     private Conversation merge_conversations(Gee.Set<Conversation> conversations) {
-        breakpoint();
-        return new Conversation(this);
+        assert(conversations.size > 1);
+        
+        // Find the largest conversation and merge the others into it
+        Conversation largest = traverse<Conversation>(conversations)
+            .to_tree_set((ca, cb) => ca.get_count() - cb.get_count())
+            .last();
+        
+        Gee.HashSet<EmailIdentifier> in_folder_ids = new Gee.HashSet<EmailIdentifier>();
+        foreach (Conversation conversation in conversations) {
+            // skip destination conversation
+            if (conversation == largest)
+                continue;
+            
+            foreach (EmailIdentifier id in conversation.get_email_ids()) {
+                Email? email = conversation.get_email_by_id(id);
+                if (email == null)
+                    continue;
+                
+                Gee.Collection<FolderPath>? paths = conversation.get_known_paths_for_id(id);
+                if (paths == null)
+                    paths = new Gee.ArrayList<FolderPath>();
+                
+                largest.add(email, paths);
+                
+                if (primary_email_id_to_conversation.has_key(id))
+                    in_folder_ids.add(id);
+            }
+        }
+        
+        remove_emails(folder.path, in_folder_ids);
+        
+        return largest;
     }
     
     private void on_folder_email_appended(Gee.Collection<Geary.EmailIdentifier> appended_ids) {
@@ -612,7 +643,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
         yield load_by_sparse_id(appended_ids, required_fields, Geary.Folder.ListFlags.NONE, null);
     }
     
-    internal async void remove_emails_async(FolderPath path, Gee.Collection<EmailIdentifier> removed_ids) {
+    internal void remove_emails(FolderPath path, Gee.Collection<EmailIdentifier> removed_ids) {
         debug("%d messages(s) removed from %s, trimming/removing conversations in %s...", removed_ids.size,
             path.to_string(), folder.to_string());
         

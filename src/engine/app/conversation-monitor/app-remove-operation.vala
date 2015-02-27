@@ -13,6 +13,6 @@ private class Geary.App.RemoveOperation : ConversationOperation {
     }
     
     public override async void execute_async() {
-        yield monitor.remove_emails_async(monitor.folder.path, removed_ids);
+        monitor.remove_emails(monitor.folder.path, removed_ids);
     }
 }

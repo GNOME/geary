@@ -53,7 +53,6 @@ engine/app/app-email-store.vala
 engine/app/conversation-monitor/app-append-operation.vala
 engine/app/conversation-monitor/app-conversation-operation-queue.vala
 engine/app/conversation-monitor/app-conversation-operation.vala
-engine/app/conversation-monitor/app-conversation-set.vala
 engine/app/conversation-monitor/app-external-append-operation.vala
 engine/app/conversation-monitor/app-external-remove-operation.vala
 engine/app/conversation-monitor/app-fill-window-operation.vala
