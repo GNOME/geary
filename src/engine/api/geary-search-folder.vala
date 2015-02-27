@@ -105,16 +105,36 @@ public class Geary.SearchFolder : Geary.AbstractLocalFolder, Geary.FolderSupport
         low = null;
         high = null;
         
-        // This shouldn't require a result_mutex lock since there's no yield.
-        Gee.TreeSet<ImapDB.SearchEmailIdentifier> in_folder = Geary.traverse<Geary.EmailIdentifier>(ids)
-            .cast_object<ImapDB.SearchEmailIdentifier>()
-            .filter(id => id in search_results)
-            .to_tree_set();
+        if (ids.size == 0)
+            return;
         
-        if (in_folder.size > 0) {
-            low = in_folder.first();
-            high = in_folder.last();
+        // This shouldn't require a result_mutex lock since there's no yield.
+        
+        // These must be ImapDB.EmailIdentifiers (which may also be SearchEmailIdentifiers) to
+        // xlat them into SearchEmailIdentifiers
+        Gee.HashSet<ImapDB.EmailIdentifier> db_ids = Geary.traverse<Geary.EmailIdentifier>(ids)
+            .cast_object<ImapDB.EmailIdentifier>()
+            .to_hash_set();
+        if (db_ids.size == 0)
+            return;
+        
+        // Translate all ImapDB.EmailIdentifiers to the SearchEmailIdentifiers in the search results
+        // ... must do this in order to get the SearchEmailIdentifier's ordering, which is different
+        // than other ImapDB.EmailIdentifiers
+        //
+        // TODO: A dictionary of message_id => SearchEmailIdentifier would be useful here
+        Gee.TreeSet<ImapDB.SearchEmailIdentifier> in_folder = new Gee.TreeSet<ImapDB.SearchEmailIdentifier>();
+        foreach (ImapDB.EmailIdentifier db_id in db_ids) {
+            foreach (ImapDB.SearchEmailIdentifier search_id in search_results) {
+                if (search_id.message_id == db_id.message_id)
+                    in_folder.add(search_id);
+            }
         }
+        if (in_folder.size == 0)
+            return;
+        
+        low = in_folder.first();
+        high = in_folder.last();
     }
     
     private async void append_new_email_async(Geary.SearchQuery query, Geary.Folder folder,
