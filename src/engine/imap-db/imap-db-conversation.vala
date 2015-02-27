@@ -234,5 +234,36 @@ private int64 do_merge_conversations(Db.Connection cx, Gee.Set<int64?> conversat
     return conversation_id;
 }
 
+private Gee.HashSet<ImapDB.EmailIdentifier>? do_fetch_associated_email_ids(Db.Connection cx,
+    int64 message_id, Cancellable? cancellable) throws Error {
+    Db.Statement stmt = cx.prepare("""
+        SELECT conversation_id
+        FROM MessageConversationTable
+        WHERE message_id = ?
+    """);
+    stmt.bind_rowid(0, message_id);
+    
+    Db.Result result = stmt.exec(cancellable);
+    if (result.finished || result.is_null_at(0))
+        return null;
+    
+    int64 conversation_id = result.rowid_at(0);
+    
+    stmt = cx.prepare("""
+        SELECT message_id
+        FROM MessageConversationTable
+        WHERE conversation_id = ?
+    """);
+    stmt.bind_rowid(0, conversation_id);
+    
+    Gee.HashSet<ImapDB.EmailIdentifier> associated_message_ids = new Gee.HashSet<ImapDB.EmailIdentifier>();
+    for (result = stmt.exec(cancellable); !result.finished; result.next(cancellable)) {
+        if (!result.is_null_at(0))
+            associated_message_ids.add(new ImapDB.EmailIdentifier(result.rowid_at(0), null));
+    }
+    
+    return associated_message_ids.size > 0 ? associated_message_ids : null;
+}
+
 }
 

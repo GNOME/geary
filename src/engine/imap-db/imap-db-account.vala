@@ -707,46 +707,23 @@ private class Geary.ImapDB.Account : BaseObject {
                 if (found_ids.contains(db_id))
                     continue;
                 
-                Db.Statement stmt = cx.prepare("""
-                    SELECT conversation_id
-                    FROM MessageConversationTable
-                    WHERE message_id = ?
-                """);
-                stmt.bind_rowid(0, db_id.message_id);
-                
-                Db.Result result = stmt.exec(cancellable);
-                if (result.finished || result.is_null_at(0))
+                Gee.HashSet<ImapDB.EmailIdentifier>? associated_ids =
+                    Conversation.do_fetch_associated_email_ids(cx, db_id.message_id, cancellable);
+                if (associated_ids == null || associated_ids.size == 0)
                     continue;
                 
-                int64 conversation_id = result.rowid_at(0);
-                
-                stmt = cx.prepare("""
-                    SELECT message_id
-                    FROM MessageConversationTable
-                    WHERE conversation_id = ?
-                """);
-                stmt.bind_rowid(0, conversation_id);
-                
-                result = stmt.exec(cancellable);
+                found_ids.add_all(associated_ids);
                 
                 AssociatedEmails association = new AssociatedEmails();
-                while (!result.finished) {
-                    if (result.is_null_at(0)) {
-                        result.next(cancellable);
-                        
-                        continue;
-                    }
-                    
+                foreach (ImapDB.EmailIdentifier associated_id in associated_ids) {
                     Email? email;
                     Gee.Collection<FolderPath?>? known_paths;
-                    do_fetch_message(cx, result.rowid_at(0), requested_fields, search_predicate,
+                    do_fetch_message(cx, associated_id.message_id, requested_fields, search_predicate,
                         out email, out known_paths, cancellable);
                     if (email != null) {
                         association.add(email, known_paths);
                         found_ids.add((ImapDB.EmailIdentifier) email.id);
                     }
-                    
-                    result.next(cancellable);
                 }
                 
                 if (association.emails.size > 0)
