@@ -680,26 +680,17 @@ private class Geary.ImapDB.Account : BaseObject {
     }
     
     public async Gee.Collection<Geary.AssociatedEmails>? search_associated_emails_async(
-        Gee.Collection<Geary.EmailIdentifier> email_ids, Email.Field requested_fields,
-        Geary.Account.EmailSearchPredicate? search_predicate, Cancellable? cancellable) throws Error {
+        Gee.Collection<ImapDB.EmailIdentifier> db_ids, Geary.Account.EmailSearchPredicate? search_predicate,
+        Cancellable? cancellable) throws Error {
         check_open();
-        
-        // Cast all at once and report error if invalid found
-        Gee.HashSet<ImapDB.EmailIdentifier> db_ids = new Gee.HashSet<ImapDB.EmailIdentifier>();
-        foreach (Geary.EmailIdentifier email_id in email_ids) {
-            ImapDB.EmailIdentifier? db_id = email_id as ImapDB.EmailIdentifier;
-            if (db_id == null)
-                throw new EngineError.BAD_PARAMETERS("Invalid identifier supplied to list conversation");
-            
-            db_ids.add(db_id);
-        }
         
         Gee.Collection<AssociatedEmails> associations = new Gee.ArrayList<AssociatedEmails>();
         Gee.HashSet<ImapDB.EmailIdentifier> found_ids = new Gee.HashSet<ImapDB.EmailIdentifier>();
         
         // Need flags for search predicate
+        Email.Field required_fields = Email.Field.NONE;
         if (search_predicate != null)
-            requested_fields = requested_fields | Geary.Email.Field.FLAGS;
+            required_fields = required_fields | Geary.Email.Field.FLAGS;
         
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
             foreach (ImapDB.EmailIdentifier db_id in db_ids) {
@@ -718,15 +709,15 @@ private class Geary.ImapDB.Account : BaseObject {
                 foreach (ImapDB.EmailIdentifier associated_id in associated_ids) {
                     Email? email;
                     Gee.Collection<FolderPath?>? known_paths;
-                    do_fetch_message(cx, associated_id.message_id, requested_fields, search_predicate,
+                    do_fetch_message(cx, associated_id.message_id, required_fields, search_predicate,
                         out email, out known_paths, cancellable);
                     if (email != null) {
-                        association.add(email, known_paths);
+                        association.add(email.id, known_paths);
                         found_ids.add((ImapDB.EmailIdentifier) email.id);
                     }
                 }
                 
-                if (association.emails.size > 0)
+                if (association.email_ids.size > 0)
                     associations.add(association);
             }
             
@@ -755,8 +746,7 @@ private class Geary.ImapDB.Account : BaseObject {
             known_paths.add_all(folders);
         
         // Allow caller to filter results in callback
-        if (search_predicate != null
-            && !search_predicate(email.id, !row.fields.fulfills(required_fields), known_paths, email.email_flags)) {
+        if (search_predicate != null && !search_predicate(email.id, actual_fields, known_paths, email.email_flags)) {
             email = null;
             known_paths = null;
         }
@@ -1297,6 +1287,43 @@ private class Geary.ImapDB.Account : BaseObject {
         }, cancellable);
         
         return search_matches;
+    }
+    
+    public async Gee.Collection<Email>? list_email_async(Gee.Collection<ImapDB.EmailIdentifier> email_ids,
+        Email.Field required_fields, Cancellable? cancellable) throws Error {
+        check_open();
+        
+        if (email_ids.size == 0)
+            return null;
+        
+        Gee.Collection<Email> emails = new Gee.ArrayList<Email>();
+        yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
+            foreach (ImapDB.EmailIdentifier email_id in email_ids) {
+                try {
+                    Email.Field fields;
+                    MessageRow row = ImapDB.Folder.do_fetch_message_row(cx, email_id.message_id,
+                        required_fields, out fields, cancellable);
+                    
+                    if (!row.fields.fulfills(required_fields))
+                        continue;
+                    
+                    Email email = row.to_email(email_id);
+                    ImapDB.Folder.do_add_attachments(cx, email, email_id.message_id, cancellable);
+                    
+                    emails.add(email);
+                } catch (Error err) {
+                    // ignore for list operation
+                    if (err is EngineError.NOT_FOUND)
+                        continue;
+                    
+                    throw err;
+                }
+            }
+            
+            return Db.TransactionOutcome.DONE;
+        }, cancellable);
+        
+        return emails.size > 0 ? emails : null;
     }
     
     public async Geary.Email fetch_email_async(ImapDB.EmailIdentifier email_id,

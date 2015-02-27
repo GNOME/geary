@@ -42,7 +42,7 @@ public abstract class Geary.Account : BaseObject {
      * It's possible (and likely) this will be called from the context of a background thread,
      * so use appropriate locking.
      */
-    public delegate bool EmailSearchPredicate(Geary.EmailIdentifier email_id, bool only_partial,
+    public delegate bool EmailSearchPredicate(Geary.EmailIdentifier email_id, Geary.Email.Field fields,
         Gee.Collection<Geary.FolderPath?> known_paths, Geary.EmailFlags flags);
     
     public Geary.AccountInformation information { get; protected set; }
@@ -363,8 +363,18 @@ public abstract class Geary.Account : BaseObject {
      * locally.
      */
     public abstract async Gee.Collection<Geary.AssociatedEmails>? local_search_associated_emails_async(
-        Gee.Collection<Geary.EmailIdentifier> email_ids, Geary.Email.Field requested_fields,
-        EmailSearchPredicate? search_predicate, Cancellable? cancellable = null) throws Error;
+        Gee.Collection<Geary.EmailIdentifier> email_ids, EmailSearchPredicate? search_predicate,
+        Cancellable? cancellable = null) throws Error;
+    
+    /**
+     * Return a listing of local {@link Email} fulfilling the required fields.
+     *
+     * This is akin to {@link Folder.list_email_by_id_async} in that it doesn't throw an Error for
+     * unknown {@link EmailIdentifiers}.
+     */
+    public abstract async Gee.Collection<Geary.Email>? local_list_email_async(
+        Gee.Collection<Geary.EmailIdentifier> email_ids, Geary.Email.Field required_fields,
+        Cancellable? cancellable = null) throws Error;
     
     /**
      * Return a single email fulfilling the required fields.  The email to pull

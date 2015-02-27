@@ -411,10 +411,10 @@ public class Geary.App.ConversationMonitor : BaseObject {
     }
     
     // NOTE: This is called from a background thread.
-    private bool search_associated_predicate(EmailIdentifier email_id, bool only_partial,
+    private bool search_associated_predicate(EmailIdentifier email_id, Email.Field fields,
         Gee.Collection<FolderPath?> known_paths, EmailFlags flags) {
         // don't want partial emails
-        if (only_partial)
+        if (!fields.fulfills(required_fields))
             return false;
         
         // if email is in this path, it's not blacklisted (i.e. if viewing the Spam folder, don't
@@ -456,7 +456,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
         Gee.Collection<AssociatedEmails>? associations = null;
         try {
             associations = yield folder.account.local_search_associated_emails_async(
-                email_ids, required_fields, search_associated_predicate, null);
+                email_ids, search_associated_predicate, null);
         } catch (Error err) {
             debug("Unable to search for associated emails: %s", err.message);
         }
@@ -470,18 +470,18 @@ public class Geary.App.ConversationMonitor : BaseObject {
         Gee.HashMultiMap<Conversation, Email> appended = new Gee.HashMultiMap<Conversation, Email>();
         
         foreach (AssociatedEmails association in associations) {
-            // Get all EmailIdentifiers in association
-            Gee.HashSet<EmailIdentifier> associated_ids = traverse<Email>(association.emails)
-                .map<EmailIdentifier>(email => email.id)
-                .to_hash_set();
-            
             // get all conversations for these emails (possible for multiple conversations to be
             // started and then coalesce as new emails come in)
             Gee.HashSet<Conversation> existing = new Gee.HashSet<Conversation>();
-            foreach (EmailIdentifier associated_id in associated_ids) {
+            foreach (EmailIdentifier associated_id in association.email_ids) {
                 Conversation? conversation = all_email_id_to_conversation[associated_id];
                 if (conversation != null)
                     existing.add(conversation);
+                
+                // only add to primary map if identifier is part of the original set of arguments
+                // and they're from this folder and not another one
+                if (email_ids.contains(associated_id) && path.equal_to(folder.path))
+                    primary_email_id_to_conversation[associated_id] = conversation;
             }
             
             // Create or pick conversation for these emails
@@ -501,15 +501,26 @@ public class Geary.App.ConversationMonitor : BaseObject {
                 break;
             }
             
+            // trim down the email identifiers we already have emails for
+            Gee.HashSet<EmailIdentifier> trimmed_ids = traverse<EmailIdentifier>(association.email_ids)
+                .filter(id => !all_email_id_to_conversation.has_key(id))
+                .to_hash_set();
+            
+            // load remaining emails for the conversation objects
+            Gee.Collection<Email>? emails = null;
+            try {
+                emails = yield folder.account.local_list_email_async(trimmed_ids, required_fields, null);
+            } catch (Error err) {
+                debug("Unable to list local account email: %s", err.message);
+            }
+            
+            if (emails == null || emails.size == 0)
+                continue;
+            
             // add all emails and each known path(s) to the Conversation and EmailIdentifier mapping
-            foreach (Email email in association.emails) {
-                conversation.add(email, association.known_paths[email]);
+            foreach (Email email in emails) {
+                conversation.add(email, association.known_paths[email.id]);
                 all_email_id_to_conversation[email.id] = conversation;
-                
-                // only add to primary map if identifier is part of the original set of arguments
-                // and they're from this folder and not another one
-                if (email_ids.contains(email.id) && path.equal_to(folder.path))
-                    primary_email_id_to_conversation[email.id] = conversation;
             }
             
             // if new, added, otherwise appended (if not already added)
@@ -517,7 +528,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
                 conversations.add(conversation);
                 added.add(conversation);
             } else if (!added.contains(conversation)) {
-                foreach (Email email in association.emails)
+                foreach (Email email in emails)
                     appended.set(conversation, email);
             }
         }
