@@ -338,7 +338,8 @@ public class Geary.App.ConversationMonitor : BaseObject {
     
     internal async void local_load_async() {
         debug("ConversationMonitor seeding with local email for %s", folder.to_string());
-        yield load_by_id_async(null, min_window_count, Folder.ListFlags.LOCAL_ONLY, cancellable_monitor);
+        yield load_by_id_async(null, min_window_count, required_fields, Folder.ListFlags.LOCAL_ONLY,
+            cancellable_monitor);
         debug("ConversationMonitor seeded for %s", folder.to_string());
     }
     
@@ -382,13 +383,17 @@ public class Geary.App.ConversationMonitor : BaseObject {
             throw close_err;
     }
     
-    private async void load_by_id_async(Geary.EmailIdentifier? initial_id, int count,
+    // By passing required_fields, this forces the email to be downloaded (if not already) at the
+    // potential expense of loading it twice; use Email.Field.NONE to only load the email identifiers
+    // and potentially not be able to load the email due to unavailability (but will be loaded
+    // later when locally-available)
+    private async void load_by_id_async(Geary.EmailIdentifier? initial_id, int count, Email.Field fields,
         Geary.Folder.ListFlags flags, Cancellable? cancellable) {
         notify_scan_started();
         try {
-            // list by required_flags to ensure all are present in local store
             yield process_email_async(folder.path,
-                yield folder.list_email_by_id_async(initial_id, count, required_fields, flags, cancellable));
+                yield folder.list_email_by_id_async(initial_id, count, fields, flags, cancellable),
+                cancellable);
         } catch (Error err) {
             notify_scan_error(err);
         } finally {
@@ -396,13 +401,14 @@ public class Geary.App.ConversationMonitor : BaseObject {
         }
     }
     
-    private async void load_by_sparse_id(Gee.Collection<Geary.EmailIdentifier> ids,
+    // See note at load_by_id_async for how Email.Field should be treated by caller
+    private async void load_by_sparse_id(Gee.Collection<Geary.EmailIdentifier> ids, Email.Field fields,
         Geary.Folder.ListFlags flags, Cancellable? cancellable) {
         notify_scan_started();
         try {
-            // list by required_flags to ensure all are present in local store
             yield process_email_async(folder.path,
-                yield folder.list_email_by_sparse_id_async(ids, required_fields, flags, cancellable));
+                yield folder.list_email_by_sparse_id_async(ids, fields, flags, cancellable),
+                cancellable);
         } catch (Error err) {
             notify_scan_error(err);
         } finally {
@@ -418,7 +424,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
             return false;
         
         // if email is in this path, it's not blacklisted (i.e. if viewing the Spam folder, don't
-        // blacklist because it's in the Spam folder)
+        // blacklist because it's in the Spam folder, if viewing Drafts folder, display drafts)
         if (known_paths.contains(folder.path))
             return true;
         
@@ -435,7 +441,8 @@ public class Geary.App.ConversationMonitor : BaseObject {
         return true;
     }
     
-    private async void process_email_async(FolderPath path, Gee.Collection<Geary.Email>? emails) {
+    private async void process_email_async(FolderPath path, Gee.Collection<Geary.Email>? emails,
+        Cancellable? cancellable) {
         if (emails == null || emails.size == 0)
             return;
         
@@ -443,10 +450,11 @@ public class Geary.App.ConversationMonitor : BaseObject {
             .map<EmailIdentifier>(email => email.id)
             .to_hash_set();
         
-        yield process_email_ids_async(path, ids);
+        yield process_email_ids_async(path, ids, cancellable);
     }
     
-    private async void process_email_ids_async(FolderPath path, Gee.Collection<Geary.EmailIdentifier>? email_ids) {
+    private async void process_email_ids_async(FolderPath path, Gee.Collection<Geary.EmailIdentifier>? email_ids,
+        Cancellable? cancellable) {
         if (email_ids == null || email_ids.size == 0)
             return;
         
@@ -456,7 +464,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
         Gee.Collection<AssociatedEmails>? associations = null;
         try {
             associations = yield folder.account.local_search_associated_emails_async(
-                email_ids, search_associated_predicate, null);
+                email_ids, search_associated_predicate, cancellable);
         } catch (Error err) {
             debug("Unable to search for associated emails: %s", err.message);
         }
@@ -509,7 +517,8 @@ public class Geary.App.ConversationMonitor : BaseObject {
             // load remaining emails for the conversation objects
             Gee.Collection<Email>? emails = null;
             try {
-                emails = yield folder.account.local_list_email_async(trimmed_ids, required_fields, null);
+                emails = yield folder.account.local_list_email_async(trimmed_ids, required_fields,
+                    cancellable);
             } catch (Error err) {
                 debug("Unable to list local account email: %s", err.message);
             }
@@ -575,7 +584,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
         debug("%d message(s) appended to %s, fetching to add to conversations...", appended_ids.size,
             folder.to_string());
         
-        yield load_by_sparse_id(appended_ids, Geary.Folder.ListFlags.NONE, null);
+        yield load_by_sparse_id(appended_ids, required_fields, Geary.Folder.ListFlags.NONE, null);
     }
     
     internal async void remove_emails_async(Gee.Collection<Geary.EmailIdentifier> removed_ids) {
@@ -631,7 +640,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
         debug("%d out of folder message(s) appended to %s, fetching to add to conversations...", appended_ids.size,
             folder.to_string());
         
-        yield process_email_ids_async(folder.path, appended_ids);
+        yield process_email_ids_async(folder.path, appended_ids, cancellable_monitor);
     }
     
     private void on_account_email_flags_changed(Geary.Folder folder,
@@ -667,13 +676,14 @@ public class Geary.App.ConversationMonitor : BaseObject {
         if (earliest_id != null) {
             debug("ConversationMonitor (%s) reseeding starting from Email ID %s on opened %s", why,
                 earliest_id.to_string(), folder.to_string());
-            yield load_by_id_async(earliest_id, int.MAX,
+            yield load_by_id_async(earliest_id, int.MAX, Email.Field.NONE,
                 Geary.Folder.ListFlags.OLDEST_TO_NEWEST | Geary.Folder.ListFlags.INCLUDING_ID,
                 cancellable_monitor);
         } else {
             debug("ConversationMonitor (%s) reseeding latest %d emails on opened %s", why,
                 min_window_count, folder.to_string());
-            yield load_by_id_async(null, min_window_count, Geary.Folder.ListFlags.NONE, cancellable_monitor);
+            yield load_by_id_async(null, min_window_count, Email.Field.NONE, Geary.Folder.ListFlags.NONE,
+                cancellable_monitor);
         }
         
         if (!reseed_notified) {
@@ -734,14 +744,14 @@ public class Geary.App.ConversationMonitor : BaseObject {
                 num_to_load = WINDOW_FILL_MESSAGE_COUNT;
             
             debug("FILLWINDOW: low_id=%s num_to_load=%d", low_id.to_string(), num_to_load);
-            yield load_by_id_async(low_id, num_to_load, flags, cancellable_monitor);
+            yield load_by_id_async(low_id, num_to_load, Email.Field.NONE, flags, cancellable_monitor);
         } else {
             // No existing messages or an insert invalidated our existing list,
             // need to start from scratch.
             debug("FILLWINDOW: low_id=%s is_insert=%s min_window_count=%d",
                 (low_id != null) ? low_id.to_string() : "(null)", is_insert.to_string(),
                 min_window_count);
-            yield load_by_id_async(null, min_window_count, flags, cancellable_monitor);
+            yield load_by_id_async(null, min_window_count, Email.Field.NONE, flags, cancellable_monitor);
         }
         
         // Run again to make sure we're full unless we ran out of messages.
