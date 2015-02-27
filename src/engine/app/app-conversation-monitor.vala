@@ -311,6 +311,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
         folder.opened.connect(on_folder_opened);
         folder.account.email_flags_changed.connect(on_account_email_flags_changed);
         folder.account.email_locally_complete.connect(on_account_email_locally_complete);
+        folder.account.email_removed.connect(on_account_email_removed);
         
         try {
             yield folder.open_async(open_flags, cancellable);
@@ -323,6 +324,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
             folder.opened.disconnect(on_folder_opened);
             folder.account.email_flags_changed.disconnect(on_account_email_flags_changed);
             folder.account.email_locally_complete.disconnect(on_account_email_locally_complete);
+            folder.account.email_removed.disconnect(on_account_email_removed);
             
             throw err;
         }
@@ -364,6 +366,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
         folder.opened.disconnect(on_folder_opened);
         folder.account.email_flags_changed.disconnect(on_account_email_flags_changed);
         folder.account.email_locally_complete.disconnect(on_account_email_locally_complete);
+        folder.account.email_removed.disconnect(on_account_email_removed);
         
         Error? close_err = null;
         try {
@@ -575,9 +578,14 @@ public class Geary.App.ConversationMonitor : BaseObject {
         operation_queue.add(new FillWindowOperation(this, false));
     }
     
-    private void on_account_email_locally_complete(Geary.Folder folder,
-        Gee.Collection<Geary.EmailIdentifier> complete_ids) {
-        operation_queue.add(new ExternalAppendOperation(this, folder, complete_ids));
+    private void on_account_email_locally_complete(Folder folder, Gee.Collection<EmailIdentifier> complete_ids) {
+        if (!folder.path.equal_to(this.folder.path))
+            operation_queue.add(new ExternalAppendOperation(this, folder, complete_ids));
+    }
+    
+    private void on_account_email_removed(Folder folder, Gee.Collection<EmailIdentifier> removed_ids) {
+        if (!folder.path.equal_to(this.folder.path))
+            operation_queue.add(new ExternalRemoveOperation(this, folder, removed_ids));
     }
     
     internal async void append_emails_async(Gee.Collection<Geary.EmailIdentifier> appended_ids) {
@@ -587,9 +595,9 @@ public class Geary.App.ConversationMonitor : BaseObject {
         yield load_by_sparse_id(appended_ids, required_fields, Geary.Folder.ListFlags.NONE, null);
     }
     
-    internal async void remove_emails_async(Gee.Collection<Geary.EmailIdentifier> removed_ids) {
-        debug("%d messages(s) removed from %s, trimming/removing conversations...", removed_ids.size,
-            folder.to_string());
+    internal async void remove_emails_async(FolderPath path, Gee.Collection<EmailIdentifier> removed_ids) {
+        debug("%d messages(s) removed from %s, trimming/removing conversations in %s...", removed_ids.size,
+            path.to_string(), folder.to_string());
         
         Gee.HashSet<Conversation> removed_conversations = new Gee.HashSet<Conversation>();
         Gee.HashMultiMap<Conversation, Email> trimmed_conversations = new Gee.HashMultiMap<
@@ -598,26 +606,33 @@ public class Geary.App.ConversationMonitor : BaseObject {
         // remove the emails from internal state, noting which conversations are trimmed or flat-out
         // removed (evaporated)
         foreach (EmailIdentifier removed_id in removed_ids) {
-            primary_email_id_to_conversation.unset(removed_id);
+            // If processing removes from the primary folder, remove immediately from this mapping
+            if (path.equal_to(folder.path))
+                primary_email_id_to_conversation.unset(removed_id);
             
-            Conversation conversation;
-            if (!all_email_id_to_conversation.unset(removed_id, out conversation))
+            Conversation? conversation = all_email_id_to_conversation[removed_id];
+            if (conversation == null)
                 continue;
             
-            Geary.Email? removed_email = conversation.get_email_by_id(removed_id);
-            if (removed_email == null)
+            Email? email = conversation.get_email_by_id(removed_id);
+            if (email == null)
                 continue;
             
-            bool removed = conversation.remove(removed_email, folder.path);
+            // Remove from conversation by *path*, which means it may not be fully removed if
+            // detected in other paths
+            bool fully_removed = conversation.remove(email, path);
             
+            // if conversation is empty or has no messages in primary folder path, remove it
+            // entirely
             if (conversation.get_count() == 0 || !conversation.any_in_folder_path(folder.path)) {
                 // could have been trimmed earlier in the loop
                 trimmed_conversations.remove_all(conversation);
                 
                 conversations.remove(conversation);
                 removed_conversations.add(conversation);
-            } else if (removed) {
-                trimmed_conversations.set(conversation, removed_email);
+            } else if (fully_removed) {
+                // since the email was fully removed from conversation, report as trimmed
+                trimmed_conversations.set(conversation, email);
             }
         }
         

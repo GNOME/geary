@@ -107,27 +107,6 @@ public class Geary.App.Conversation : BaseObject {
     }
     
     /**
-     * Returns the number of emails in the conversation in a particular folder.
-     *
-     * TODO: Remove?
-     */
-    public async int get_count_in_folder_async(Geary.Account account, Geary.FolderPath path,
-        Cancellable? cancellable) throws Error {
-        Gee.MultiMap<Geary.EmailIdentifier, Geary.FolderPath>? folder_map
-            = yield account.get_containing_folders_async(emails.keys, cancellable);
-        
-        int count = 0;
-        if (folder_map != null) {
-            foreach (Geary.EmailIdentifier id in folder_map.get_keys()) {
-                if (path in folder_map.get(id))
-                    ++count;
-            }
-        }
-        
-        return count;
-    }
-    
-    /**
      * Returns the number of {@link Email}s in the conversation in the specified {@link FolderPath}.
      */
     public bool any_in_folder_path(Geary.FolderPath path) {

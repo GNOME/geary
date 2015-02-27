@@ -355,6 +355,7 @@ private class Geary.App.ConversationSet : BaseObject {
      */
     public async bool check_conversation_in_folder_async(Conversation conversation, Geary.Account account,
         Geary.FolderPath required_folder_path, Cancellable? cancellable) throws Error {
+        /*
         if ((yield conversation.get_count_in_folder_async(account, required_folder_path, cancellable)) == 0) {
             debug("Evaporating conversation %s because it has no emails in %s",
                 conversation.to_string(), required_folder_path.to_string());
@@ -362,6 +363,7 @@ private class Geary.App.ConversationSet : BaseObject {
             
             return false;
         }
+        */
         
         return true;
     }
