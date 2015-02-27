@@ -317,9 +317,8 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             StringBuilder sql = new StringBuilder("""
                 SELECT MessageLocationTable.message_id, ordering, remove_marker
                 FROM MessageLocationTable
+                WHERE folder_id = ?
             """);
-            
-            sql.append("WHERE folder_id = ? ");
             
             if (oldest_to_newest)
                 sql.append("AND ordering >= ? ");
@@ -331,14 +330,16 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             else
                 sql.append("ORDER BY ordering DESC ");
             
+            if (count != int.MAX)
+                sql.append("LIMIT ? ");
+            
             Db.Statement stmt = cx.prepare(sql.str);
             stmt.bind_rowid(0, folder_id);
             stmt.bind_int64(1, start_uid.value);
+            if (count != int.MAX)
+                stmt.bind_int(2, count);
             
-            locations = do_results_to_locations(stmt.exec(cancellable), flags, cancellable);
-            
-            if (locations.size > count)
-                locations = locations.slice(0, count);
+            locations = do_results_to_locations(stmt.exec(cancellable), count, flags, cancellable);
             
             return Db.TransactionOutcome.SUCCESS;
         }, cancellable);
@@ -396,7 +397,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             stmt.bind_int64(1, start_uid.value);
             stmt.bind_int64(2, end_uid.value);
             
-            locations = do_results_to_locations(stmt.exec(cancellable), flags, cancellable);
+            locations = do_results_to_locations(stmt.exec(cancellable), int.MAX, flags, cancellable);
             
             return Db.TransactionOutcome.SUCCESS;
         }, cancellable);
@@ -440,7 +441,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             stmt.bind_int64(1, start_uid.value);
             stmt.bind_int64(2, end_uid.value);
             
-            locations = do_results_to_locations(stmt.exec(cancellable), flags, cancellable);
+            locations = do_results_to_locations(stmt.exec(cancellable), int.MAX, flags, cancellable);
             
             return Db.TransactionOutcome.SUCCESS;
         }, cancellable);
@@ -495,7 +496,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             Db.Statement stmt = cx.prepare(sql.str);
             stmt.bind_rowid(0, folder_id);
             
-            locations = do_results_to_locations(stmt.exec(cancellable), flags, cancellable);
+            locations = do_results_to_locations(stmt.exec(cancellable), int.MAX, flags, cancellable);
             
             return Db.TransactionOutcome.SUCCESS;
         }, cancellable);
@@ -2140,7 +2141,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     
     // Db.Result must include columns for "message_id", "ordering", and "remove_marker" from the
     // MessageLocationTable
-    private Gee.List<LocationIdentifier> do_results_to_locations(Db.Result results,
+    private Gee.List<LocationIdentifier> do_results_to_locations(Db.Result results, int count,
         ListFlags flags, Cancellable? cancellable) throws Error {
         Gee.List<LocationIdentifier> locations = new Gee.ArrayList<LocationIdentifier>();
         
@@ -2154,6 +2155,8 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                 continue;
             
             locations.add(location);
+            if (locations.size >= count)
+                break;
         } while (results.next(cancellable));
         
         return locations;
@@ -2248,8 +2251,8 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         Db.Statement stmt = cx.prepare(sql.str);
         stmt.bind_rowid(0, folder_id);
         
-        Gee.List<LocationIdentifier> locs = do_results_to_locations(stmt.exec(cancellable), flags,
-            cancellable);
+        Gee.List<LocationIdentifier> locs = do_results_to_locations(stmt.exec(cancellable), int.MAX,
+            flags, cancellable);
         
         return (locs.size > 0) ? locs : null;
     }
@@ -2297,8 +2300,8 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         Db.Statement stmt = cx.prepare(sql.str);
         stmt.bind_rowid(0, folder_id);
         
-        Gee.List<LocationIdentifier> locs = do_results_to_locations(stmt.exec(cancellable), flags,
-            cancellable);
+        Gee.List<LocationIdentifier> locs = do_results_to_locations(stmt.exec(cancellable), int.MAX,
+            flags, cancellable);
         
         return (locs.size > 0) ? locs : null;
     }
@@ -2312,8 +2315,8 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         """);
         stmt.bind_rowid(0, folder_id);
         
-        Gee.List<LocationIdentifier> locs = do_results_to_locations(stmt.exec(cancellable), flags,
-            cancellable);
+        Gee.List<LocationIdentifier> locs = do_results_to_locations(stmt.exec(cancellable), int.MAX,
+            flags, cancellable);
         
         return (locs.size > 0) ? locs : null;
     }
