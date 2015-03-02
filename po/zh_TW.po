@@ -10,8 +10,8 @@ msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2014-06-03 21:03+0000\n"
-"PO-Revision-Date: 2014-06-22 17:29+0800\n"
+"POT-Creation-Date: 2015-02-28 05:56+0000\n"
+"PO-Revision-Date: 2015-02-28 21:54+0800\n"
 "Last-Translator: Cheng-Chia Tseng <pswo10680@gmail.com>\n"
 "Language-Team: Chinese (Taiwan) (http://www.transifex.com/projects/p/geary/"
 "language/zh_TW/)\n"
@@ -20,33 +20,40 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Poedit 1.5.4\n"
+"X-Generator: Poedit 1.7.1\n"
 
-#: ../desktop/geary.desktop.in.h:1
-#| msgid "Geary Mail"
+#: ../desktop/geary.desktop.in.h:1 ../desktop/geary-autostart.desktop.in.h:1
 msgid "Geary"
 msgstr "Geary"
 
-#: ../desktop/geary.desktop.in.h:2
+#: ../desktop/geary.desktop.in.h:2 ../desktop/geary-autostart.desktop.in.h:2
 #: ../src/client/application/geary-application.vala:18
 msgid "Mail Client"
 msgstr "郵件客戶端"
 
-#: ../desktop/geary.desktop.in.h:3
+#: ../desktop/geary.desktop.in.h:3 ../desktop/geary-autostart.desktop.in.h:3
 msgid "Geary Mail"
 msgstr "Geary 郵件"
 
-#: ../desktop/geary.desktop.in.h:4
+#: ../desktop/geary.desktop.in.h:4 ../desktop/geary-autostart.desktop.in.h:4
 msgid "Send and receive email"
 msgstr "寄送與收受郵件"
 
-#: ../desktop/geary.desktop.in.h:5
+#: ../desktop/geary.desktop.in.h:5 ../desktop/geary-autostart.desktop.in.h:5
 msgid "Email;E-mail;Mail;"
 msgstr "Email;E-mail;Mail;電子郵件;電郵;郵件;信件;收信;寄信;"
 
 #: ../desktop/geary.desktop.in.h:6
 msgid "Compose Message"
 msgstr "編撰訊息"
+
+#: ../desktop/geary-attach.contract.in.h:1
+msgid "Send by email"
+msgstr "透過電子郵件寄送"
+
+#: ../desktop/geary-attach.contract.in.h:2
+msgid "Send files using Geary"
+msgstr "使用 Geary 傳送檔案"
 
 #: ../src/client/accounts/account-dialog-add-edit-pane.vala:48
 #: ../src/client/components/stock.vala:31
@@ -59,11 +66,11 @@ msgid "_Add"
 msgstr "加入(_A)"
 
 #. Sets min size.
-#: ../src/client/accounts/account-dialog.vala:19
+#: ../src/client/accounts/account-dialog.vala:20
 msgid "Accounts"
 msgstr "帳號"
 
-#. Copyright 2011-2014 Yorba Foundation
+#. Copyright 2011-2015 Yorba Foundation
 #. *
 #. * This software is licensed under the GNU Lesser General Public License
 #. * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -74,349 +81,367 @@ msgstr "帳號"
 msgid "First Last"
 msgstr "名 姓"
 
-#: ../src/client/accounts/add-edit-page.vala:228
+#: ../src/client/accounts/add-edit-page.vala:230
 msgid "Welcome to Geary."
 msgstr "歡迎使用 Geary。"
 
-#: ../src/client/accounts/add-edit-page.vala:228
+#: ../src/client/accounts/add-edit-page.vala:230
 msgid "Enter your account information to get started."
 msgstr "請輸入您的帳戶資訊以開始使用。"
 
-#: ../src/client/accounts/add-edit-page.vala:247
+#: ../src/client/accounts/add-edit-page.vala:249
 msgid "2 weeks back"
 msgstr "2 週前"
 
 #. IDs are # of days
-#: ../src/client/accounts/add-edit-page.vala:248
+#: ../src/client/accounts/add-edit-page.vala:250
 msgid "1 month back"
 msgstr "1 個月前"
 
-#: ../src/client/accounts/add-edit-page.vala:249
+#: ../src/client/accounts/add-edit-page.vala:251
 msgid "3 months back"
 msgstr "3 週前"
 
-#: ../src/client/accounts/add-edit-page.vala:250
+#: ../src/client/accounts/add-edit-page.vala:252
 msgid "6 months back"
 msgstr "6 週前"
 
-#: ../src/client/accounts/add-edit-page.vala:251
+#: ../src/client/accounts/add-edit-page.vala:253
 msgid "1 year back"
 msgstr "1 年前"
 
-#: ../src/client/accounts/add-edit-page.vala:252
-#| msgid "1 year back"
+#: ../src/client/accounts/add-edit-page.vala:254
 msgid "2 years back"
 msgstr "2 年前"
 
-#: ../src/client/accounts/add-edit-page.vala:253
-#| msgid "1 year back"
+#: ../src/client/accounts/add-edit-page.vala:255
 msgid "4 years back"
 msgstr "4 年前"
 
 #. Separator
-#: ../src/client/accounts/add-edit-page.vala:255
+#: ../src/client/accounts/add-edit-page.vala:257
 msgid "Everything"
 msgstr "每件"
 
-#: ../src/client/accounts/add-edit-page.vala:687
+#: ../src/client/accounts/add-edit-page.vala:276
+msgid "Edit"
+msgstr "編輯"
+
+#: ../src/client/accounts/add-edit-page.vala:278
+msgid "Preview"
+msgstr "預覽"
+
+#: ../src/client/accounts/add-edit-page.vala:712
 msgid "Remem_ber passwords"
 msgstr "記住密碼(_B)"
 
-#: ../src/client/accounts/add-edit-page.vala:694 ../ui/login.glade.h:6
+#: ../src/client/accounts/add-edit-page.vala:719 ../ui/login.glade.h:6
 msgid "Remem_ber password"
 msgstr "記住密碼(_B)"
 
-#: ../src/client/accounts/add-edit-page.vala:728
+#: ../src/client/accounts/add-edit-page.vala:753
 msgid "Unable to validate:\n"
 msgstr "無法成功驗證：\n"
 
-#: ../src/client/accounts/add-edit-page.vala:730
+#: ../src/client/accounts/add-edit-page.vala:755
 msgid "        &#8226; Invalid account nickname.\n"
 msgstr "        &#8226; 帳號暱稱無效。\n"
 
-#: ../src/client/accounts/add-edit-page.vala:733
+#: ../src/client/accounts/add-edit-page.vala:758
 msgid "        &#8226; Email address already added to Geary.\n"
 msgstr "        &#8226; 電子郵件位址已加入 Geary。\n"
 
-#: ../src/client/accounts/add-edit-page.vala:737
+#: ../src/client/accounts/add-edit-page.vala:762
 msgid "        &#8226; IMAP connection error.\n"
 msgstr "        &#8226; IMAP 連線錯誤。\n"
 
-#: ../src/client/accounts/add-edit-page.vala:740
+#: ../src/client/accounts/add-edit-page.vala:765
 msgid "        &#8226; IMAP username or password incorrect.\n"
 msgstr "        &#8226; IMAP 使用者名稱或密碼不正確。\n"
 
-#: ../src/client/accounts/add-edit-page.vala:743
+#: ../src/client/accounts/add-edit-page.vala:768
 msgid "        &#8226; SMTP connection error.\n"
 msgstr "        &#8226; SMTP 連線錯誤。\n"
 
-#: ../src/client/accounts/add-edit-page.vala:746
+#: ../src/client/accounts/add-edit-page.vala:771
 msgid "        &#8226; SMTP username or password incorrect.\n"
 msgstr "        &#8226; SMTP  使用者名稱或密碼不正確。\n"
 
-#: ../src/client/accounts/add-edit-page.vala:750
+#: ../src/client/accounts/add-edit-page.vala:775
 msgid "        &#8226; Connection error.\n"
 msgstr "        &#8226;連線錯誤 。\n"
 
-#: ../src/client/accounts/add-edit-page.vala:754
+#: ../src/client/accounts/add-edit-page.vala:779
 msgid "        &#8226; Username or password incorrect.\n"
 msgstr "        &#8226; 使用者名稱或密碼不正確。\n"
 
 #: ../src/client/application/geary-application.vala:19
-#| msgid "Copyright 2011-2013 Yorba Foundation"
-msgid "Copyright 2011-2014 Yorba Foundation"
-msgstr "著作權 2011-2014 Yorba Foundation"
+msgid "Copyright 2011-2015 Yorba Foundation"
+msgstr "著作權所有 2011-2015 Yorba Foundation"
 
 #: ../src/client/application/geary-application.vala:21
 msgid "Visit the Yorba web site"
 msgstr "造訪 Yorba 網站"
 
 #: ../src/client/application/geary-args.vala:10
+msgid "Start Geary with hidden main window"
+msgstr "啟動 Geary 並隱藏主視窗"
+
+#: ../src/client/application/geary-args.vala:11
 msgid "Output debugging information"
 msgstr "輸出除錯用資訊"
 
-#: ../src/client/application/geary-args.vala:11
+#: ../src/client/application/geary-args.vala:12
 msgid "Log conversation monitoring"
 msgstr "紀錄對話監視"
 
-#: ../src/client/application/geary-args.vala:12
+#: ../src/client/application/geary-args.vala:13
 msgid "Log network deserialization"
 msgstr "紀錄網路去序列化"
 
-#: ../src/client/application/geary-args.vala:13
+#: ../src/client/application/geary-args.vala:14
 msgid "Log network activity"
 msgstr "紀錄網路活動"
 
 #. / The IMAP replay queue is how changes on the server are replicated on the client.
 #. / It could also be called the IMAP events queue.
-#: ../src/client/application/geary-args.vala:16
+#: ../src/client/application/geary-args.vala:17
 msgid "Log IMAP replay queue"
 msgstr "紀錄 IMAP replay 佇列"
 
 #. / Serialization is how commands and responses are converted into a stream of bytes for
 #. / network transmission
-#: ../src/client/application/geary-args.vala:19
+#: ../src/client/application/geary-args.vala:20
 msgid "Log network serialization"
 msgstr "紀錄網路序列化"
 
-#: ../src/client/application/geary-args.vala:20
+#: ../src/client/application/geary-args.vala:21
 msgid "Log periodic activity"
 msgstr "紀錄週期性活動"
 
-#: ../src/client/application/geary-args.vala:21
+#: ../src/client/application/geary-args.vala:22
 msgid "Log database queries (generates lots of messages)"
 msgstr "紀錄資料庫查詢 (會產生大量訊息)"
 
 #. / "Normalization" can also be called "synchronization"
-#: ../src/client/application/geary-args.vala:23
+#: ../src/client/application/geary-args.vala:24
 msgid "Log folder normalization"
 msgstr "紀錄資料夾一般化"
 
-#: ../src/client/application/geary-args.vala:24
+#: ../src/client/application/geary-args.vala:25
 msgid "Allow inspection of WebView"
 msgstr "允許 WebView 的檢閱"
 
-#: ../src/client/application/geary-args.vala:25
+#: ../src/client/application/geary-args.vala:26
+msgid "Revoke all server certificates with TLS warnings"
+msgstr "撤銷所有具 TLS 警告的伺服器憑證"
+
+#: ../src/client/application/geary-args.vala:27
 msgid "Display program version"
 msgstr "顯示程式版本"
 
 #. This gives a command-line hint on how to open new composer windows with mailto:
-#: ../src/client/application/geary-args.vala:47
+#: ../src/client/application/geary-args.vala:51
 #, c-format
 msgid "Use %s to open a new composer window"
 msgstr "使用 %s 開啟新的編撰器視窗"
 
-#: ../src/client/application/geary-args.vala:48
+#: ../src/client/application/geary-args.vala:52
 msgid "Please report comments, suggestions and bugs to:"
 msgstr "請回報評註、建議與臭蟲至："
 
 #. i18n: Command line arguments are invalid
-#: ../src/client/application/geary-args.vala:55
+#: ../src/client/application/geary-args.vala:59
 #, c-format
 msgid "Failed to parse command line options: %s\n"
 msgstr "無法解析指令列選項：%s\n"
 
-#: ../src/client/application/geary-args.vala:66
+#: ../src/client/application/geary-args.vala:70
 #, c-format
 msgid "Unrecognized command line option \"%s\"\n"
 msgstr "無法辨識的指令列選項「%s」\n"
 
-#: ../src/client/application/geary-controller.vala:46
-msgid "_Delete"
-msgstr "刪除(_D)"
-
-#: ../src/client/application/geary-controller.vala:47
-#| msgid "Delete conversation (Delete, Backspace, A)"
+#: ../src/client/application/geary-controller.vala:60
 msgid "Delete conversation (Shift+Delete)"
 msgstr "刪除對話 (Shift+Delete)"
 
-#: ../src/client/application/geary-controller.vala:48
-#| msgid "Delete conversations (Delete, Backspace, A)"
+#: ../src/client/application/geary-controller.vala:61
 msgid "Delete conversations (Shift+Delete)"
 msgstr "刪除對話 (Shift+Delete)"
 
 #. This refers to the action ("move email to the trash"), not the Trash folder itself
-#: ../src/client/application/geary-controller.vala:52
-#| msgid "Trash"
-msgid "_Trash"
-msgstr "搬移到垃圾桶(_T)"
-
-#: ../src/client/application/geary-controller.vala:53
-#| msgid "Archive conversations (Delete, Backspace, A)"
-msgid "Move conversation to trash (Delete, Backspace)"
+#: ../src/client/application/geary-controller.vala:65
+msgid "Move conversation to Trash (Delete, Backspace)"
 msgstr "將對話搬移至垃圾桶 (Delete、Backspace)"
 
-#: ../src/client/application/geary-controller.vala:54
-#| msgid "Archive conversations (Delete, Backspace, A)"
-msgid "Move conversations to trash (Delete, Backspace)"
+#: ../src/client/application/geary-controller.vala:66
+msgid "Move conversations to Trash (Delete, Backspace)"
 msgstr "將對話搬移至垃圾桶 (Delete、Backspace)"
 
 #. This refers to the action ("archive an email"), not the Archive folder itself
-#: ../src/client/application/geary-controller.vala:58
+#: ../src/client/application/geary-controller.vala:70
 msgid "_Archive"
 msgstr "封存(_A)"
 
-#: ../src/client/application/geary-controller.vala:59
-#| msgid "Move conversation"
+#: ../src/client/application/geary-controller.vala:71
 msgid "Archive conversation (A)"
 msgstr "封存對話 (A)"
 
-#: ../src/client/application/geary-controller.vala:60
-#| msgid "Move conversations"
+#: ../src/client/application/geary-controller.vala:72
 msgid "Archive conversations (A)"
 msgstr "更多對話封存對話 (A)"
 
-#: ../src/client/application/geary-controller.vala:63
+#: ../src/client/application/geary-controller.vala:75
 msgid "Mark as S_pam"
 msgstr "標記為垃圾郵件(_P)"
 
-#: ../src/client/application/geary-controller.vala:64
+#: ../src/client/application/geary-controller.vala:76
 msgid "Mark as not S_pam"
 msgstr "標記為非垃圾郵件(_P)"
 
-#: ../src/client/application/geary-controller.vala:66
-#: ../src/client/application/geary-controller.vala:277
+#: ../src/client/application/geary-controller.vala:78
+#: ../src/client/application/geary-controller.vala:348
 msgid "Mark conversation"
 msgstr "標記對話"
 
-#: ../src/client/application/geary-controller.vala:67
+#: ../src/client/application/geary-controller.vala:79
 msgid "Mark conversations"
 msgstr "標記對話"
 
-#: ../src/client/application/geary-controller.vala:68
+#: ../src/client/application/geary-controller.vala:80
 msgid "Add label to conversation"
 msgstr "貼加標籤到對話"
 
-#: ../src/client/application/geary-controller.vala:69
+#: ../src/client/application/geary-controller.vala:81
 msgid "Add label to conversations"
 msgstr "貼加標籤到對話"
 
-#: ../src/client/application/geary-controller.vala:70
-#: ../src/client/application/geary-controller.vala:316
+#: ../src/client/application/geary-controller.vala:82
+#: ../src/client/application/geary-controller.vala:387
 msgid "Move conversation"
 msgstr "更多對話"
 
-#: ../src/client/application/geary-controller.vala:71
+#: ../src/client/application/geary-controller.vala:83
 msgid "Move conversations"
 msgstr "更多對話"
 
-#: ../src/client/application/geary-controller.vala:253
+#: ../src/client/application/geary-controller.vala:324
 msgid "A_ccounts"
 msgstr "帳號(_C)"
 
-#: ../src/client/application/geary-controller.vala:258
+#: ../src/client/application/geary-controller.vala:329
 #: ../src/client/components/stock.vala:27
 msgid "_Preferences"
 msgstr "偏好設定(_P)"
 
-#: ../src/client/application/geary-controller.vala:262
+#: ../src/client/application/geary-controller.vala:333
 #: ../src/client/components/stock.vala:25
 msgid "_Help"
 msgstr "幫助(_H)"
 
-#: ../src/client/application/geary-controller.vala:266
+#: ../src/client/application/geary-controller.vala:337
 #: ../src/client/components/stock.vala:21
 msgid "_About"
 msgstr "關於(_A)"
 
-#: ../src/client/application/geary-controller.vala:270
+#: ../src/client/application/geary-controller.vala:341
 msgid "_Donate"
 msgstr "捐款(_D)"
 
-#: ../src/client/application/geary-controller.vala:274
+#: ../src/client/application/geary-controller.vala:345
 #: ../src/client/components/stock.vala:29
 msgid "_Quit"
 msgstr "退出(_Q)"
 
-#: ../src/client/application/geary-controller.vala:279
+#: ../src/client/application/geary-controller.vala:350
 msgid "_Mark as..."
 msgstr "標記為(_M)..."
 
-#: ../src/client/application/geary-controller.vala:285
+#: ../src/client/application/geary-controller.vala:356
 msgid "Mark as _Read"
 msgstr "標記為已讀(_R)"
 
-#: ../src/client/application/geary-controller.vala:291
+#: ../src/client/application/geary-controller.vala:362
 msgid "Mark as _Unread"
 msgstr "標記為未讀(_U)"
 
-#: ../src/client/application/geary-controller.vala:297
+#: ../src/client/application/geary-controller.vala:368
 msgid "_Star"
 msgstr "標星(_S)"
 
-#: ../src/client/application/geary-controller.vala:302
+#: ../src/client/application/geary-controller.vala:373
 msgid "U_nstar"
 msgstr "取消標星(_N)"
 
-#: ../src/client/application/geary-controller.vala:312
+#: ../src/client/application/geary-controller.vala:383
 msgid "Add label"
 msgstr "加入標籤"
 
-#: ../src/client/application/geary-controller.vala:313
+#: ../src/client/application/geary-controller.vala:384
 msgid "_Label"
 msgstr "標籤(_L)"
 
-#: ../src/client/application/geary-controller.vala:317
+#: ../src/client/application/geary-controller.vala:388
 msgid "_Move"
 msgstr "移動(_M)"
 
-#: ../src/client/application/geary-controller.vala:321
+#: ../src/client/application/geary-controller.vala:392
 msgid "Compose new message (Ctrl+N, N)"
 msgstr "編撰新訊息 (Ctrl+N、N)"
 
 #. Reply to a message.
-#: ../src/client/application/geary-controller.vala:325
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1572
+#: ../src/client/application/geary-controller.vala:396
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1857
 msgid "_Reply"
 msgstr "回覆(_R)"
 
-#: ../src/client/application/geary-controller.vala:326
+#: ../src/client/application/geary-controller.vala:397
 msgid "Reply (Ctrl+R, R)"
 msgstr "回覆 (Ctrl+R、R)"
 
-#: ../src/client/application/geary-controller.vala:330
+#: ../src/client/application/geary-controller.vala:401
 msgid "R_eply All"
 msgstr "回覆所有人(_E)"
 
-#: ../src/client/application/geary-controller.vala:331
+#: ../src/client/application/geary-controller.vala:402
 msgid "Reply all (Ctrl+Shift+R, Shift+R)"
 msgstr "回覆所有人 (Ctrl+Shift+R、Shift+R)"
 
 #. Forward a message.
-#: ../src/client/application/geary-controller.vala:336
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1582
+#: ../src/client/application/geary-controller.vala:407
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1867
 msgid "_Forward"
 msgstr "轉寄(_F)"
 
-#: ../src/client/application/geary-controller.vala:337
+#: ../src/client/application/geary-controller.vala:408
 msgid "Forward (Ctrl+L, F)"
 msgstr "轉寄 (Ctrl+L、F)"
 
-#: ../src/client/application/geary-controller.vala:620
+#: ../src/client/application/geary-controller.vala:446
+msgid "Empty"
+msgstr "淨空"
+
+#: ../src/client/application/geary-controller.vala:447
+msgid "Empty Spam or Trash folders"
+msgstr "淨空垃圾信或垃圾桶資料夾"
+
+#: ../src/client/application/geary-controller.vala:451
+msgid "Empty _Spam…"
+msgstr "淨空垃圾信(_S)…"
+
+#: ../src/client/application/geary-controller.vala:455
+msgid "Empty _Trash…"
+msgstr "淨空垃圾桶(_T)…"
+
+#: ../src/client/application/geary-controller.vala:693
+msgid "Unable to store server trust exception"
+msgstr "無法儲存伺服器信任例外"
+
+#: ../src/client/application/geary-controller.vala:930
 msgid "Your settings are insecure"
 msgstr "您的設定並不安全"
 
-#: ../src/client/application/geary-controller.vala:621
+#: ../src/client/application/geary-controller.vala:931
 msgid ""
 "Your IMAP and/or SMTP settings do not specify SSL or TLS.  This means your "
 "username and password could be read by another person on the network.  Are "
@@ -425,17 +450,17 @@ msgstr ""
 "您的 IMAP 與/或 SMTP 設定中沒有指定 SSL 或 TLS。這代表您的使用者名稱與密碼可"
 "能被網路上的其他人讀取。您確定要這麼做？"
 
-#: ../src/client/application/geary-controller.vala:622
+#: ../src/client/application/geary-controller.vala:932
 msgid "Co_ntinue"
 msgstr "繼續(_N)"
 
 #. / Displayed in the space-limited status bar when a message fails to be sent due to error.
-#: ../src/client/application/geary-controller.vala:700
+#: ../src/client/application/geary-controller.vala:1010
 #: ../src/client/components/status-bar.vala:29
 msgid "Error sending email"
 msgstr "寄送電子郵件時發生錯誤"
 
-#: ../src/client/application/geary-controller.vala:701
+#: ../src/client/application/geary-controller.vala:1011
 msgid ""
 "Geary encountered an error sending an email.  If the problem persists, "
 "please manually delete the email from your Outbox folder."
@@ -445,16 +470,12 @@ msgstr ""
 
 #. Displayed in the space-limited status bar when a message fails to be uploaded
 #. to Sent Mail after being sent.
-#: ../src/client/application/geary-controller.vala:705
+#: ../src/client/application/geary-controller.vala:1015
 #: ../src/client/components/status-bar.vala:33
-#| msgid "Error sending email"
 msgid "Error saving sent mail"
 msgstr "儲存郵件時發生錯誤"
 
-#: ../src/client/application/geary-controller.vala:706
-#| msgid ""
-#| "Geary encountered an error sending an email.  If the problem persists, "
-#| "please manually delete the email from your Outbox folder."
+#: ../src/client/application/geary-controller.vala:1016
 msgid ""
 "Geary encountered an error saving a sent message to Sent Mail.  The message "
 "will stay in your Outbox folder until you delete it."
@@ -462,19 +483,19 @@ msgstr ""
 "Geary 將寄送的訊息儲存至已寄送郵件時遭遇錯誤。這封訊息會留在您的寄件匣資料夾"
 "中，直到您刪除該封電子郵件為止。"
 
-#: ../src/client/application/geary-controller.vala:775
+#: ../src/client/application/geary-controller.vala:1085
 msgid "Labels"
 msgstr "標籤"
 
 #. give the user two options: reset the Account local store, or exit Geary.  A third
 #. could be done to leave the Account in an unopened state, but we don't currently
 #. have provisions for that.
-#: ../src/client/application/geary-controller.vala:787
+#: ../src/client/application/geary-controller.vala:1097
 #, c-format
 msgid "Unable to open the database for %s"
 msgstr "無法為 %s 開啟資料庫"
 
-#: ../src/client/application/geary-controller.vala:788
+#: ../src/client/application/geary-controller.vala:1098
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -497,20 +518,20 @@ msgstr ""
 "重建資料庫會銷毀所有本地端的郵件與其相關附件。<b>您在伺服器上的郵件則不會受影"
 "響。</b>"
 
-#: ../src/client/application/geary-controller.vala:790
+#: ../src/client/application/geary-controller.vala:1100
 msgid "_Rebuild"
 msgstr "重建(_R)"
 
-#: ../src/client/application/geary-controller.vala:790
+#: ../src/client/application/geary-controller.vala:1100
 msgid "E_xit"
 msgstr "離開(_X)"
 
-#: ../src/client/application/geary-controller.vala:799
+#: ../src/client/application/geary-controller.vala:1109
 #, c-format
 msgid "Unable to rebuild database for \"%s\""
 msgstr "無法重建「%s」資料庫"
 
-#: ../src/client/application/geary-controller.vala:800
+#: ../src/client/application/geary-controller.vala:1110
 #, c-format
 msgid ""
 "Error during rebuild:\n"
@@ -523,14 +544,14 @@ msgstr ""
 
 #. some other problem opening the account ... as with other flow path, can't run
 #. Geary today with an account in unopened state, so have to exit
-#: ../src/client/application/geary-controller.vala:822
-#: ../src/client/application/geary-controller.vala:832
-#: ../src/client/application/geary-controller.vala:843
+#: ../src/client/application/geary-controller.vala:1132
+#: ../src/client/application/geary-controller.vala:1142
+#: ../src/client/application/geary-controller.vala:1153
 #, c-format
 msgid "Unable to open local mailbox for %s"
 msgstr "無法為 %s 開啟本地端收信匣"
 
-#: ../src/client/application/geary-controller.vala:823
+#: ../src/client/application/geary-controller.vala:1133
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -548,7 +569,7 @@ msgstr ""
 "\n"
 "%s"
 
-#: ../src/client/application/geary-controller.vala:833
+#: ../src/client/application/geary-controller.vala:1143
 msgid ""
 "The version number of the local mail database is formatted for a newer "
 "version of Geary. Unfortunately, the database cannot be \"rolled back\" to "
@@ -561,7 +582,7 @@ msgstr ""
 "\n"
 "請安裝最新版的 Geary 並重試。"
 
-#: ../src/client/application/geary-controller.vala:844
+#: ../src/client/application/geary-controller.vala:1154
 msgid ""
 "There was an error opening the local account. This is probably due to "
 "connectivity issues.\n"
@@ -572,74 +593,109 @@ msgstr ""
 "\n"
 "請檢查您的網路連線，並重新啟動 Geary。"
 
-#: ../src/client/application/geary-controller.vala:1338
+#: ../src/client/application/geary-controller.vala:1662
 #, c-format
 msgid "About %s"
 msgstr "關於 %s"
 
 #. / Translators: add your name and email address to receive credit in the About dialog
 #. / For example: Yamada Taro <yamada.taro@example.com>
-#: ../src/client/application/geary-controller.vala:1341
+#: ../src/client/application/geary-controller.vala:1665
 msgid "translator-credits"
-msgstr "Cheng-Chia Tseng <pswo10680@gmail.com>, 2012-2013."
+msgstr "Cheng-Chia Tseng <pswo10680@gmail.com>, 2012-2015."
 
-#: ../src/client/application/geary-controller.vala:1605
+#: ../src/client/application/geary-controller.vala:1931
+msgid "Undo move (Ctrl+Z)"
+msgstr "取消移動 (Ctrl+Z)"
+
+#: ../src/client/application/geary-controller.vala:1941
 #, c-format
 msgid "Are you sure you want to open \"%s\"?"
 msgstr "您確定您想要開啟「%s」嗎？"
 
-#: ../src/client/application/geary-controller.vala:1606
+#: ../src/client/application/geary-controller.vala:1942
 msgid ""
 "Attachments may cause damage to your system if opened.  Only open files from "
 "trusted sources."
 msgstr "開啟附件可能有機會損害您的系統。請只開啟源自受信任來源的檔案。"
 
-#: ../src/client/application/geary-controller.vala:1607
+#: ../src/client/application/geary-controller.vala:1943
 msgid "Don't _ask me again"
 msgstr "之後不要再問我(_A)"
 
-#: ../src/client/application/geary-controller.vala:1625
+#: ../src/client/application/geary-controller.vala:1961
 #, c-format
 msgid "A file named \"%s\" already exists.  Do you want to replace it?"
 msgstr "已經存在檔案名稱「%s」。您想要替換它嗎？"
 
-#: ../src/client/application/geary-controller.vala:1627
+#: ../src/client/application/geary-controller.vala:1963
 #, c-format
 msgid ""
 "The file already exists in \"%s\".  Replacing it will overwrite its contents."
 msgstr "「%s」中已經存在該檔案。替換它將覆寫其內容。"
 
-#: ../src/client/application/geary-controller.vala:1630
+#: ../src/client/application/geary-controller.vala:1966
 msgid "_Replace"
 msgstr "替換(_R)"
 
 #. Find out what to do with the inline composers.
 #. TODO: Remove this in favor of automatically saving drafts
-#: ../src/client/application/geary-controller.vala:1896
+#: ../src/client/application/geary-controller.vala:2264
 msgid "Close open draft messages?"
 msgstr "關閉開啟的草稿訊息？"
 
-#: ../src/client/application/geary-controller.vala:2003
-#| msgid "Do you want to discard this message?"
+#: ../src/client/application/geary-controller.vala:2394
+#, c-format
+msgid "Empty all email from your %s folder?"
+msgstr "是否要從您的 %s 資料夾中淨空所有的電子郵件？"
+
+#: ../src/client/application/geary-controller.vala:2395
+msgid "This removes the email from Geary and your email server."
+msgstr "這會從 Geary 與您的電子郵件伺服器移除電子郵件。"
+
+#: ../src/client/application/geary-controller.vala:2396
+msgid "This cannot be undone."
+msgstr "這個動作無法復原。"
+
+#: ../src/client/application/geary-controller.vala:2397
+#, c-format
+msgid "Empty %s"
+msgstr "淨空 %s"
+
+#: ../src/client/application/geary-controller.vala:2414
+#, c-format
+msgid "Error emptying %s"
+msgstr "淨空 %s 時發生錯誤"
+
+#: ../src/client/application/geary-controller.vala:2444
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
-msgstr[0] "您是否想永久丟棄這些訊息？"
+msgstr[0] "您是否想永久刪除這些訊息？"
 
-#: ../src/client/application/geary-controller.vala:2005
-#| msgid "_Delete"
+#: ../src/client/application/geary-controller.vala:2446
 msgid "Delete"
 msgstr "刪除"
 
+#: ../src/client/application/geary-controller.vala:2477
+msgid "Undo archive (Ctrl+Z)"
+msgstr "取消封存 (Ctrl+Z)"
+
+#: ../src/client/application/geary-controller.vala:2492
+msgid "Undo trash (Ctrl+Z)"
+msgstr "取消丟到垃圾桶 (Ctrl+Z)"
+
+#: ../src/client/application/geary-controller.vala:2545
+msgid "Undo (Ctrl+Z)"
+msgstr "取消 (Ctrl+Z)"
+
 #: ../src/client/components/conversation-find-bar.vala:214
 #, c-format
-#| msgid "%i matches"
 msgid "%i match"
 msgid_plural "%i matches"
 msgstr[0] "%i 項符合結果"
 
 #: ../src/client/components/conversation-find-bar.vala:216
 #, c-format
-#| msgid "%i matches (wrapped)"
 msgid "%i match (wrapped)"
 msgid_plural "%i matches (wrapped)"
 msgstr[0] "%i 項符合結果 (前後循環)"
@@ -655,24 +711,23 @@ msgid "Search"
 msgstr "搜尋"
 
 #. Search bar.
-#: ../src/client/components/main-toolbar.vala:78
+#: ../src/client/components/main-toolbar.vala:81
 msgid "Search all mail in account for keywords (Ctrl+S)"
 msgstr "以關鍵字搜尋帳號中的所有郵件 (Ctrl+S)"
 
-#: ../src/client/components/main-toolbar.vala:196
+#: ../src/client/components/main-toolbar.vala:200
 #, c-format
 msgid "Indexing %s account"
 msgstr "正為 %s 帳號製作索引"
 
-#: ../src/client/components/main-toolbar.vala:207
+#: ../src/client/components/main-toolbar.vala:211
 #: ../src/client/folder-list/folder-list-search-branch.vala:39
 #, c-format
 msgid "Search %s account"
 msgstr "搜尋 %s 帳號"
 
-#: ../src/client/components/main-window.vala:302
+#: ../src/client/components/main-window.vala:349
 #, c-format
-#| msgid "%s (%s)"
 msgid "%s (%d)"
 msgstr "%s (%d)"
 
@@ -686,12 +741,12 @@ msgstr "正寄送中..."
 msgid "_OK"
 msgstr "確定(_O)"
 
-#: ../src/client/components/stock.vala:19 ../ui/remove_confirm.glade.h:5
+#: ../src/client/components/stock.vala:19 ../ui/password-dialog.glade.h:5
+#: ../ui/remove_confirm.glade.h:5
 msgid "_Cancel"
 msgstr "取消(_C)"
 
-#: ../src/client/components/stock.vala:23 ../ui/account_list.glade.h:4
-#: ../ui/preferences.glade.h:2
+#: ../src/client/components/stock.vala:23
 msgid "_Close"
 msgstr "關閉(_C)"
 
@@ -713,7 +768,7 @@ msgstr "移除(_R)"
 
 #. Select all.
 #: ../src/client/components/stock.vala:32
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1040
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1324
 msgid "Select _All"
 msgstr "選取全部(_A)"
 
@@ -721,105 +776,123 @@ msgstr "選取全部(_A)"
 msgid "_Keep"
 msgstr "保留(_K)"
 
-#: ../src/client/composer/composer-widget.vala:53
+#: ../src/client/composer/composer-widget.vala:59
 msgid "Saved"
 msgstr "已儲存"
 
-#: ../src/client/composer/composer-widget.vala:54
+#: ../src/client/composer/composer-widget.vala:60
 msgid "Saving"
 msgstr "儲存中"
 
-#: ../src/client/composer/composer-widget.vala:55
+#: ../src/client/composer/composer-widget.vala:61
 msgid "Error saving"
 msgstr "儲存時發生錯誤"
 
-#. / A list of keywords, separated by pipe ("|") characters, that suggest an attachment
-#: ../src/client/composer/composer-widget.vala:102
-msgid "attach|enclosed|enclosing|cover letter"
-msgstr "attach|enclosed|enclosing|cover letter|附件|附加檔案|附檔"
+#: ../src/client/composer/composer-widget.vala:62
+msgid "Press Backspace to delete quote"
+msgstr "按下 Backspace 刪除引言"
 
-#: ../src/client/composer/composer-widget.vala:846
-msgid "Do you want to discard the unsaved message?"
-msgstr "您是否想丟棄尚未儲存的訊息？"
+#. A list of keywords, separated by pipe ("|") characters, that suggest an attachment; since
+#. this is full-word checking, include all variants of each word.  No spaces are allowed.
+#: ../src/client/composer/composer-widget.vala:123
+msgid ""
+"attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|"
+"enclosing|encloses|enclosure|enclosures"
+msgstr ""
+"attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|"
+"enclosing|encloses|enclosure|enclosures|附件|附上|附加"
 
-#: ../src/client/composer/composer-widget.vala:849
-#: ../src/client/composer/composer-widget.vala:853
+#: ../src/client/composer/composer-widget.vala:1048
+#: ../src/client/composer/composer-widget.vala:1052
 msgid "Do you want to discard this message?"
 msgstr "您是否想丟棄此封訊息？"
 
-#: ../src/client/composer/composer-widget.vala:934
+#: ../src/client/composer/composer-widget.vala:1185
 msgid "Send message with an empty subject and body?"
 msgstr "是否要寄送主旨與內文皆空白的訊息？"
 
-#: ../src/client/composer/composer-widget.vala:936
+#: ../src/client/composer/composer-widget.vala:1187
 msgid "Send message with an empty subject?"
 msgstr "是否要寄送主旨空白的訊息？"
 
-#: ../src/client/composer/composer-widget.vala:938
+#: ../src/client/composer/composer-widget.vala:1189
 msgid "Send message with an empty body?"
 msgstr "是否要寄送沒有內文的訊息？"
 
-#: ../src/client/composer/composer-widget.vala:940
+#: ../src/client/composer/composer-widget.vala:1191
 msgid "Send message without an attachment?"
 msgstr "是否要寄送沒有附件的訊息？"
 
-#: ../src/client/composer/composer-widget.vala:1123
+#: ../src/client/composer/composer-widget.vala:1453
 msgid "Cannot add attachment"
 msgstr "無法加入附件"
 
-#: ../src/client/composer/composer-widget.vala:1134
+#: ../src/client/composer/composer-widget.vala:1464
 #, c-format
 msgid "\"%s\" could not be found."
 msgstr "「%s」無法找到。"
 
-#: ../src/client/composer/composer-widget.vala:1141
+#: ../src/client/composer/composer-widget.vala:1471
 #, c-format
 msgid "\"%s\" is a folder."
 msgstr "「%s」是資料夾。"
 
-#: ../src/client/composer/composer-widget.vala:1148
+#: ../src/client/composer/composer-widget.vala:1478
 #, c-format
 msgid "\"%s\" is an empty file."
 msgstr "「%s」是空白檔案。"
 
-#: ../src/client/composer/composer-widget.vala:1162
+#: ../src/client/composer/composer-widget.vala:1492
 #, c-format
 msgid "\"%s\" could not be opened for reading."
 msgstr "「%s」無法開啟以供讀取。"
 
-#: ../src/client/composer/composer-widget.vala:1169
+#: ../src/client/composer/composer-widget.vala:1499
 #, c-format
 msgid "\"%s\" already attached for delivery."
 msgstr "「%s」已附上可供郵遞。"
 
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
-#: ../src/client/composer/composer-widget.vala:1178
+#: ../src/client/composer/composer-widget.vala:1508
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: ../src/client/composer/composer-widget.vala:1454
+#: ../src/client/composer/composer-widget.vala:1568
+msgid "To: "
+msgstr "收件者："
+
+#: ../src/client/composer/composer-widget.vala:1571
+msgid "Cc: "
+msgstr "副本："
+
+#: ../src/client/composer/composer-widget.vala:1574
+msgid "Bcc: "
+msgstr "密件副本："
+
+#: ../src/client/composer/composer-widget.vala:1577
+msgid "Reply-To: "
+msgstr "回覆："
+
+#: ../src/client/composer/composer-widget.vala:1810
 msgid "Select Color"
 msgstr "選取色彩"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: ../src/client/composer/composer-widget.vala:1900
-#| msgid "From:"
+#: ../src/client/composer/composer-widget.vala:2256
 msgid "_From:"
 msgstr "寄件者(_F)："
 
 #. For other types of messages, just show the from account.
 #. Composer label (without mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#. Geary account mail will be sent from
-#: ../src/client/composer/composer-widget.vala:1916
-#: ../src/client/conversation-viewer/conversation-viewer.vala:633
-#: ../ui/composer.glade.h:42
+#: ../src/client/composer/composer-widget.vala:2272
+#: ../src/client/conversation-viewer/conversation-viewer.vala:809
 msgid "From:"
 msgstr "寄件者："
 
-#. Copyright 2011-2014 Yorba Foundation
+#. Copyright 2011-2015 Yorba Foundation
 #. *
 #. * This software is licensed under the GNU Lesser General Public License
 #. * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -833,166 +906,164 @@ msgstr "新訊息"
 msgid "Me"
 msgstr "我"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:260
+#: ../src/client/conversation-viewer/conversation-viewer.vala:413
 msgid "No conversations selected."
 msgstr "未選取對話。"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:262
+#: ../src/client/conversation-viewer/conversation-viewer.vala:415
 #, c-format
-#| msgid "%u conversations selected."
 msgid "%u conversation selected."
 msgid_plural "%u conversations selected."
 msgstr[0] "%u 則對話已選取。"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:291
+#: ../src/client/conversation-viewer/conversation-viewer.vala:444
 msgid "No search results found."
 msgstr "找不到符合的搜尋結果。"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:293
+#: ../src/client/conversation-viewer/conversation-viewer.vala:446
 msgid "No conversations in folder."
 msgstr "資料夾中沒有對話。"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:532
+#: ../src/client/conversation-viewer/conversation-viewer.vala:708
 msgid "This message contains remote images."
 msgstr "此訊息包含遠端影像。"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:532
+#: ../src/client/conversation-viewer/conversation-viewer.vala:708
 msgid "Show Images"
 msgstr "顯示影像"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:533
+#: ../src/client/conversation-viewer/conversation-viewer.vala:709
 msgid "Always Show From Sender"
 msgstr "總是顯示寄件者"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:557
+#: ../src/client/conversation-viewer/conversation-viewer.vala:733
 msgid "Edit Draft"
 msgstr "編輯草稿"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:636
+#: ../src/client/conversation-viewer/conversation-viewer.vala:812
 msgid "To:"
 msgstr "收件者："
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:639
+#: ../src/client/conversation-viewer/conversation-viewer.vala:815
 msgid "Cc:"
 msgstr "副本："
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:642
+#: ../src/client/conversation-viewer/conversation-viewer.vala:818
 msgid "Bcc:"
 msgstr "密件副本："
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:645
+#: ../src/client/conversation-viewer/conversation-viewer.vala:821
 msgid "Subject:"
 msgstr "主旨："
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:648
+#: ../src/client/conversation-viewer/conversation-viewer.vala:824
 msgid "Date:"
 msgstr "日期："
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:855
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1139
 #, c-format
-#| msgid "%u read messages"
 msgid "%u read message"
 msgid_plural "%u read messages"
 msgstr[0] "%u 封已讀訊息"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:987
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1271
 #, c-format
 msgid "This message was sent successfully, but could not be saved to %s."
 msgstr "這封訊息已成功寄送，但無法到 %s。"
 
 #. Add a menu item for copying the current selection.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1013
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1297
 #: ../ui/composer.glade.h:4
 msgid "_Copy"
 msgstr "複製(_C)"
 
 #. Add a menu item for copying the address.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1021
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1305
 msgid "Copy _Email Address"
 msgstr "複製電子郵件位址(_E)"
 
 #. Add a menu item for copying the link.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1026
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1310
 #: ../ui/composer.glade.h:17
 msgid "Copy _Link"
 msgstr "複製連結(_L)"
 
 #. Select message.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1034
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1318
 msgid "Select _Message"
 msgstr "選取訊息(_M)"
 
 #. Inspect.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1046
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1330
 msgid "_Inspect"
 msgstr "檢閱(_I)"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1272
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1556
 msgid "This link appears to go to"
 msgstr "此連結似乎要前往"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1273
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1557
 msgid "but actually goes to"
 msgstr "但實際上卻連往"
 
 #. If href doesn't look like a URL, something is fishy, so warn the user
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1328
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1612
 msgid " (Invalid?)"
 msgstr " (無效？)"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1520
-msgid "_Save As..."
-msgstr "儲存為(_S)..."
-
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1525
-msgid "Save All A_ttachments..."
-msgstr "儲存所有附件(_T)..."
-
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1539
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1718
 msgid "_Save Image As..."
 msgstr "另存影像為(_S)..."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1562
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1822
+msgid "_Save As..."
+msgstr "儲存為(_S)..."
+
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1827
+msgid "Save All A_ttachments..."
+msgstr "儲存所有附件(_T)..."
+
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1847
 msgid "Save A_ttachment..."
 msgid_plural "Save All A_ttachments..."
 msgstr[0] "儲存所有附件(_T)..."
 
 #. Reply to all on a message.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1577
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1862
 msgid "Reply to _All"
 msgstr "回覆所有人(_A)"
 
 #. Mark as read/unread.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1594
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1879
 msgid "_Mark as Read"
 msgstr "標記為已讀(_M)"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1598
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1883
 msgid "_Mark as Unread"
 msgstr "標記為未讀(_M)"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1604
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1889
 msgid "Mark Unread From _Here"
 msgstr "從此處起標記為未讀(_H)"
 
 #. Separator.
 #. View original message source.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1619
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1904
 msgid "_View Source"
 msgstr "檢視來源(_V)"
 
 #. Generate the attachment table.
 #. / Placeholder filename for attachments with no filename.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1913
-#: ../src/engine/rfc822/rfc822-utils.vala:327
+#: ../src/client/conversation-viewer/conversation-viewer.vala:2227
+#: ../src/engine/rfc822/rfc822-utils.vala:384
 msgid "none"
 msgstr "無"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:2043
+#: ../src/client/conversation-viewer/conversation-viewer.vala:2362
 msgid "Failed to open default text editor."
 msgstr "無法開啟預設的文字編輯器。"
 
-#: ../src/client/conversation-viewer/conversation-web-view.vala:287
+#: ../src/client/conversation-viewer/conversation-web-view.vala:322
 #, c-format
 msgid "%s - Conversation Inspector"
 msgstr "%s - 對話檢閱器"
@@ -1005,13 +1076,84 @@ msgstr "選擇一個檔案"
 msgid "_Attach"
 msgstr "附加(_A)"
 
+#: ../src/client/dialogs/certificate-warning-dialog.vala:33
+#, c-format
+msgid "Untrusted Connection: %s"
+msgstr "未受信任的連線：%s"
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:36
+#, c-format
+msgid "The identity of the %s mail server at %s:%u could not be verified."
+msgstr "%s 郵件伺服器 (位於 %s:%u) 的辨識身份無法通過核驗。"
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:44
+msgid ""
+"Selecting \"Trust This Server\" or \"Always Trust This Server\" may cause "
+"your username and password to be transmitted insecurely."
+msgstr ""
+"選取「信任這臺伺服器」或「總是信任這臺伺服器」有可能導致您的使用者名稱與密碼"
+"以不安全的方式傳送。"
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:52
+msgid ""
+"Selecting \"Don't Trust This Server\" will cause Geary not to access this "
+"server."
+msgstr "選取「不要信任這臺伺服器」會導致 Geary 無法存取這臺伺服器。"
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:54
+msgid "Geary will not add or update this email account."
+msgstr "Geary 不會加入或更新這個電子信箱帳號。"
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:59
+msgid ""
+"Selecting \"Don't Trust This Server\" will cause Geary to stop accessing "
+"this account."
+msgstr "選取「不要信任這臺伺服器」會導致 Geary 停止這個帳號的存取。"
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:61
+msgid "Geary will exit if you have no other open email accounts."
+msgstr "如果您沒有其他開啟的電子郵件帳號，Geary 將離開。"
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:66
+msgid ""
+"Contact your system administrator or email service provider if you have any "
+"question about these issues."
+msgstr "若您對於這些問題有任何疑問，請聯絡您的系統管理員或電子郵件服務商。"
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:73
+msgid "The server's certificate is not signed by a known authority"
+msgstr "伺服器的憑證並非由已知的授權中心簽署"
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:76
+msgid "The server's identity does not match the identity in the certificate"
+msgstr "伺服器的辨識身份與憑證的辨識身份並不相同"
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:79
+msgid "The server's certificate has expired"
+msgstr "伺服器的憑證已經過期"
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:82
+msgid "The server's certificate has not been activated"
+msgstr "伺服器的憑證尚未啟用"
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:85
+msgid "The server's certificate has been revoked and is now invalid"
+msgstr "伺服器的憑證已經撤銷，目前無效"
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:88
+msgid "The server's certificate is considered insecure"
+msgstr "伺服器的憑證被視為不安全"
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:91
+msgid "An error has occurred processing the server's certificate"
+msgstr "處理伺服器的憑證時遭遇錯誤。"
+
 #. We can't keep these in the glade file, because Gnome doesn't want markup in translatable
 #. strings, and Glade doesn't support the "larger" size attribute. See this bug report for
 #. details: https://bugzilla.gnome.org/show_bug.cgi?id=679006
 #: ../src/client/dialogs/password-dialog.vala:16
-#| msgid "Please enter your email password"
-msgid "Please enter your password"
-msgstr "請輸入您的密碼"
+msgid "Geary requires your email password to continue"
+msgstr "Geary 需要您的電子郵件密碼才能繼續"
 
 #. Label displaying total number of email messages in a folder
 #: ../src/client/folder-list/folder-list-folder-entry.vala:32
@@ -1041,7 +1183,6 @@ msgstr "收信匣"
 
 #: ../src/client/folder-list/folder-list-search-branch.vala:44
 #, c-format
-#| msgid "%d results"
 msgid "%d result"
 msgid_plural "%d results"
 msgstr[0] "%d 項結果"
@@ -1136,14 +1277,12 @@ msgstr "現在"
 
 #: ../src/client/util/util-date.vala:167
 #, c-format
-#| msgid "%dm ago"
 msgid "%dm ago"
 msgid_plural "%dm ago"
 msgstr[0] "%d分鐘前"
 
 #: ../src/client/util/util-date.vala:171
 #, c-format
-#| msgid "%dh ago"
 msgid "%dh ago"
 msgid_plural "%dh ago"
 msgstr[0] "%d小時前"
@@ -1160,7 +1299,7 @@ msgid "%A"
 msgstr "%A"
 
 #: ../src/client/util/util-email.vala:30
-#: ../src/engine/rfc822/rfc822-message.vala:741
+#: ../src/engine/rfc822/rfc822-message.vala:781
 msgid "(no subject)"
 msgstr "(無主旨)"
 
@@ -1203,6 +1342,14 @@ msgstr "Outlook.com"
 #: ../src/engine/api/geary-service-provider.vala:61
 msgid "Other"
 msgstr "其他"
+
+#: ../src/engine/api/geary-service.vala:20
+msgid "IMAP"
+msgstr "IMAP"
+
+#: ../src/engine/api/geary-service.vala:23
+msgid "SMTP"
+msgstr "SMTP"
 
 #: ../src/engine/api/geary-special-folder-type.vala:24
 msgid "Inbox"
@@ -1250,74 +1397,77 @@ msgstr "無"
 
 #. Map of user-supplied search field names to column names.
 #. / Can be typed in the search box like attachment:file.txt to find
-#. / messages with attachments with a particular name.
-#: ../src/engine/imap-db/imap-db-account.vala:662
-#| msgid "Save A_ttachment..."
-#| msgid_plural "Save All A_ttachments..."
+#. / messages with attachments with a particular name.  The translated
+#. / string must match the string in Geary's help documentation.
+#: ../src/engine/imap-db/imap-db-account.vala:710
 msgid "attachment"
 msgstr "附件"
 
 #. / Can be typed in the search box like bcc:johndoe@example.com to find
-#. / messages bcc'd to a particular person.
+#. / messages bcc'd to a particular person.  The translated
+#. / string must match the string in Geary's help documentation.
 #. Fields we allow the token to be "me" as in from:me.
-#: ../src/engine/imap-db/imap-db-account.vala:665
-#: ../src/engine/imap-db/imap-db-account.vala:684
+#: ../src/engine/imap-db/imap-db-account.vala:714
+#: ../src/engine/imap-db/imap-db-account.vala:738
 msgid "bcc"
 msgstr "密件副本"
 
 #. / Can be typed in the search box like body:word to find the word only
-#. / if it occurs in the body of a message.
-#: ../src/engine/imap-db/imap-db-account.vala:668
+#. / if it occurs in the body of a message.  The translated
+#. / string must match the string in Geary's help documentation.
+#: ../src/engine/imap-db/imap-db-account.vala:718
 msgid "body"
 msgstr "正文"
 
 #. / Can be typed in the search box like cc:johndoe@example.com to find
-#. / messages cc'd to a particular person.
-#: ../src/engine/imap-db/imap-db-account.vala:671
-#: ../src/engine/imap-db/imap-db-account.vala:684
-#| msgid "Bcc:"
+#. / messages cc'd to a particular person.  The translated
+#. / string must match the string in Geary's help documentation.
+#: ../src/engine/imap-db/imap-db-account.vala:722
+#: ../src/engine/imap-db/imap-db-account.vala:738
 msgid "cc"
 msgstr "副本"
 
 #. / Can be typed in the search box like from:johndoe@example.com to
-#. / find messages from a particular sender.
-#: ../src/engine/imap-db/imap-db-account.vala:674
-#: ../src/engine/imap-db/imap-db-account.vala:684
+#. / find messages from a particular sender.  The translated
+#. / string must match the string in Geary's help documentation.
+#: ../src/engine/imap-db/imap-db-account.vala:726
+#: ../src/engine/imap-db/imap-db-account.vala:738
 msgid "from"
 msgstr "寄件者"
 
 #. / Can be typed in the search box like subject:word to find the word
-#. / only if it occurs in the subject of a message.
-#: ../src/engine/imap-db/imap-db-account.vala:677
-#| msgid "Subject:"
+#. / only if it occurs in the subject of a message.  The translated
+#. / string must match the string in Geary's help documentation.
+#: ../src/engine/imap-db/imap-db-account.vala:730
 msgid "subject"
 msgstr "主旨"
 
 #. / Can be typed in the search box like to:johndoe@example.com to find
-#. / messages received by a particular person.
-#: ../src/engine/imap-db/imap-db-account.vala:680
-#: ../src/engine/imap-db/imap-db-account.vala:684
+#. / messages received by a particular person.  The translated
+#. / string must match the string in Geary's help documentation.
+#: ../src/engine/imap-db/imap-db-account.vala:734
+#: ../src/engine/imap-db/imap-db-account.vala:738
 msgid "to"
 msgstr "收件者"
 
 #. "me" can be typed like from:me or cc:me, etc. as a shorthand
-#. to find mail to or from yourself in search.
-#: ../src/engine/imap-db/imap-db-account.vala:699
+#. to find mail to or from yourself in search.  The translated
+#. string must match the string in Geary's help documentation.
+#: ../src/engine/imap-db/imap-db-account.vala:754
 msgid "me"
 msgstr "我"
 
 #. List of folder names to match for Drafts, separated by |.  Please add localized common
 #. names for the Drafts folder, leaving in the English names as well.  The first in the list
 #. will be the default, so please add the most common localized name to the front.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:521
-#| msgid "Drafts"
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:575
 msgid "Drafts | Draft"
 msgstr "草稿 | Drafts | Draft"
 
 #. List of folder names to match for Sent Mail, separated by |.  Please add localized common
 #. names for the Sent Mail folder, leaving in the English names as well.  The first in the list
 #. will be the default, so please add the most common localized name to the front.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:526
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:580
 msgid "Sent | Sent Mail | Sent Email | Sent E-Mail"
 msgstr ""
 "已寄送 | 已送出 | 已寄送郵件 | 已寄送電子郵件 | Sent | Sent Mail | Sent "
@@ -1326,7 +1476,7 @@ msgstr ""
 #. List of folder names to match for Spam, separated by |.  Please add localized common
 #. names for the Spam folder, leaving in the English names as well.  The first in the list
 #. will be the default, so please add the most common localized name to the front.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:531
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:585
 msgid ""
 "Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email "
 "| Bulk E-Mail"
@@ -1337,63 +1487,63 @@ msgstr ""
 #. List of folder names to match for Trash, separated by |.  Please add localized common
 #. names for the Trash folder, leaving in the English names as well.  The first in the list
 #. will be the default, so please add the most common localized name to the front.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:536
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:590
 msgid "Trash | Rubbish | Rubbish Bin"
 msgstr "垃圾桶 | 垃圾筒 | 回收筒 | 垃圾 | Trash | Rubbish | Rubbish Bin"
 
 #. / Format for the datetime that a message being replied to was received
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: ../src/engine/rfc822/rfc822-utils.vala:165
+#: ../src/engine/rfc822/rfc822-utils.vala:221
 msgid "%a, %b %-e, %Y at %-l:%M %p"
 msgstr "%Y年%b%-e日 %a %p %-l:%M"
 
 #. / The quoted header for a message being replied to.
 #. / %1$s will be substituted for the date, and %2$s will be substituted for
 #. / the original sender.
-#: ../src/engine/rfc822/rfc822-utils.vala:171
+#: ../src/engine/rfc822/rfc822-utils.vala:227
 #, c-format
 msgid "On %1$s, %2$s wrote:"
 msgstr "%2$s 於 %1$s 寫下："
 
 #. / The quoted header for a message being replied to (in case the date is not known).
 #. / %s will be replaced by the original sender.
-#: ../src/engine/rfc822/rfc822-utils.vala:178
+#: ../src/engine/rfc822/rfc822-utils.vala:234
 #, c-format
 msgid "%s wrote:"
 msgstr "%s 寫到："
 
 #. / The quoted header for a message being replied to (in case the sender is not known).
 #. / %s will be replaced by the original date
-#: ../src/engine/rfc822/rfc822-utils.vala:184
+#: ../src/engine/rfc822/rfc822-utils.vala:240
 #, c-format
 msgid "On %s:"
 msgstr "於 %s："
 
-#: ../src/engine/rfc822/rfc822-utils.vala:211
+#: ../src/engine/rfc822/rfc822-utils.vala:269
 msgid "---------- Forwarded message ----------"
 msgstr "---------- 轉寄的訊息 ----------"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:215
+#: ../src/engine/rfc822/rfc822-utils.vala:273
 #, c-format
 msgid "From: %s\n"
 msgstr "寄件者：%s\n"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:216
+#: ../src/engine/rfc822/rfc822-utils.vala:274
 #, c-format
 msgid "Subject: %s\n"
 msgstr "主旨：%s\n"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:217
+#: ../src/engine/rfc822/rfc822-utils.vala:275
 #, c-format
 msgid "Date: %s\n"
 msgstr "日期：%s\n"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:220
+#: ../src/engine/rfc822/rfc822-utils.vala:278
 #, c-format
 msgid "To: %s\n"
 msgstr "收件者：%s\n"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:223
+#: ../src/engine/rfc822/rfc822-utils.vala:281
 #, c-format
 msgid "Cc: %s\n"
 msgstr "副本：%s\n"
@@ -1423,6 +1573,22 @@ msgstr "移除帳號"
 #: ../ui/account_spinner.glade.h:1
 msgid "Please wait while Geary validates your account."
 msgstr "請稍後，Geary 正在驗明您的帳號。"
+
+#: ../ui/certificate_warning_dialog.glade.h:1
+msgid "Untrusted Connection"
+msgstr "未受信任的連線"
+
+#: ../ui/certificate_warning_dialog.glade.h:2
+msgid "_Always Trust This Server"
+msgstr "永遠信任這臺伺服器(_A)"
+
+#: ../ui/certificate_warning_dialog.glade.h:3
+msgid "_Trust This Server"
+msgstr "信任這臺伺服器(_T)"
+
+#: ../ui/certificate_warning_dialog.glade.h:4
+msgid "_Don't Trust This Server"
+msgstr "不要信任這臺伺服器(_D)"
 
 #: ../ui/composer.glade.h:1
 msgid "_Undo"
@@ -1481,7 +1647,6 @@ msgid "Remove formatting (Ctrl+Space)"
 msgstr "移除格式化 (Ctrl+空白鍵)"
 
 #: ../ui/composer.glade.h:16
-#| msgid "Paste _With Formatting"
 msgctxt "Clipboard paste with rich text"
 msgid "Paste _With Formatting"
 msgstr "貼上格式化文字(_W)"
@@ -1507,105 +1672,126 @@ msgid "_Rich Text"
 msgstr "豐富文字(_R)"
 
 #: ../ui/composer.glade.h:23
+msgid "Show Extended Fields"
+msgstr "顯示擴展欄位"
+
+#: ../ui/composer.glade.h:24
 msgid "Lar_ge"
 msgstr "大型(_G)"
 
-#: ../ui/composer.glade.h:24
+#: ../ui/composer.glade.h:25
 msgid "Large"
 msgstr "大型"
 
-#: ../ui/composer.glade.h:25
+#: ../ui/composer.glade.h:26
 msgid "_Medium"
 msgstr "中型(_M)"
 
-#: ../ui/composer.glade.h:26
+#: ../ui/composer.glade.h:27
 msgid "Medium"
 msgstr "中型"
 
-#: ../ui/composer.glade.h:27
+#: ../ui/composer.glade.h:28
 msgid "_Small"
 msgstr "小型(_S)"
 
-#: ../ui/composer.glade.h:28
+#: ../ui/composer.glade.h:29
 msgid "Small"
 msgstr "小型"
 
-#: ../ui/composer.glade.h:29
+#: ../ui/composer.glade.h:30
 msgid "S_ans Serif"
 msgstr "無襯線(_A)"
 
-#: ../ui/composer.glade.h:30
+#: ../ui/composer.glade.h:31
 msgid "Sans Serif"
 msgstr "無襯線"
 
-#: ../ui/composer.glade.h:31
+#: ../ui/composer.glade.h:32
 msgid "S_erif"
 msgstr "有襯線(_E)"
 
-#: ../ui/composer.glade.h:32
+#: ../ui/composer.glade.h:33
 msgid "Serif"
 msgstr "有襯線"
 
-#: ../ui/composer.glade.h:33
+#: ../ui/composer.glade.h:34
 msgid "_Fixed Width"
 msgstr "等寬(_F)"
 
-#: ../ui/composer.glade.h:34
+#: ../ui/composer.glade.h:35
 msgid "Fixed Width"
 msgstr "等寬"
 
-#: ../ui/composer.glade.h:35
-msgid "Edit recipients"
-msgstr "編輯收件人"
-
-#. Address(es) e-mail is to be sent to
-#: ../ui/composer.glade.h:37
-msgid "_To:"
-msgstr "收件者(_T)："
-
-#: ../ui/composer.glade.h:38
-msgid "_Cc:"
-msgstr "副本(_C)："
-
-#: ../ui/composer.glade.h:39
-#| msgid "Subject:"
-msgid "_Subject:"
-msgstr "主旨(_S)："
-
-#: ../ui/composer.glade.h:40
-#| msgid "Bcc:"
-msgid "_Bcc:"
-msgstr "密件副本(_B)："
-
-#: ../ui/composer.glade.h:43
-msgid "Drop files here"
-msgstr "請將檔案拖曳至這裡"
-
-#: ../ui/composer.glade.h:44
-msgid "To add them as attachments"
-msgstr "以將它們添加為附件"
-
-#: ../ui/composer.glade.h:45
-msgid "_Attach File"
-msgstr "附加檔案(_A)"
-
-#: ../ui/composer.glade.h:46
-msgid "_Include Original Attachments"
-msgstr "包含原始附件(_I)"
-
-#: ../ui/composer.glade.h:47
-#| msgid "_Close"
-msgid "C_lose"
-msgstr "關閉(_C)"
-
-#: ../ui/composer.glade.h:48
-#| msgid "_Attach"
+#: ../ui/composer.glade.h:36
 msgid "Detach"
 msgstr "卸除"
 
-#: ../ui/composer.glade.h:49
+#: ../ui/composer.glade.h:37
+msgid "Detach (Ctrl+D)"
+msgstr "卸除 (Ctrl+D)"
+
+#: ../ui/composer.glade.h:38
 msgid "_Send"
 msgstr "寄送(_S)"
+
+#: ../ui/composer.glade.h:39
+msgid "Send"
+msgstr "寄送"
+
+#: ../ui/composer.glade.h:40
+msgid "Send (Ctrl+Enter)"
+msgstr "寄送 (Ctrl+Enter)"
+
+#: ../ui/composer.glade.h:41
+msgid "_Attach File"
+msgstr "附加檔案(_A)"
+
+#: ../ui/composer.glade.h:42
+msgid "Attach File"
+msgstr "附加檔案"
+
+#: ../ui/composer.glade.h:43
+msgid "_Include Original Attachments"
+msgstr "包含原始附件(_I)"
+
+#: ../ui/composer.glade.h:44
+msgid "Include Original Attachments"
+msgstr "包含原始附件"
+
+#. Address(es) e-mail is to be sent to
+#: ../ui/composer.glade.h:46
+msgid "_To"
+msgstr "收件者(_T)"
+
+#: ../ui/composer.glade.h:47
+msgid "_Cc"
+msgstr "副本(_C)"
+
+#: ../ui/composer.glade.h:48
+msgid "_Subject"
+msgstr "主旨(_S)"
+
+#: ../ui/composer.glade.h:49
+msgid "_Bcc"
+msgstr "密件副本(_B)"
+
+#: ../ui/composer.glade.h:50
+msgid "_Reply-To"
+msgstr "回覆(_R)"
+
+#. Geary account mail will be sent from
+#: ../ui/composer.glade.h:52
+msgid "From"
+msgstr "寄件者"
+
+#: ../ui/composer.glade.h:53
+msgid "Drop files here"
+msgstr "請將檔案拖曳至這裡"
+
+#: ../ui/composer.glade.h:54
+msgid "To add them as attachments"
+msgstr "以將它們添加為附件"
 
 #: ../ui/find_bar.glade.h:1
 msgid "Find:"
@@ -1624,36 +1810,30 @@ msgid "_Case sensitive"
 msgstr "區分字母大小寫(_C)"
 
 #: ../ui/find_bar.glade.h:5
-#| msgid "Labels"
 msgid "label"
 msgstr "標籤"
 
-#: ../ui/login.glade.h:1
+#: ../ui/login.glade.h:1 ../ui/password-dialog.glade.h:3
 msgid "Password"
 msgstr "密碼"
 
 #: ../ui/login.glade.h:2
-#| msgid "E_mail address:"
 msgid "E_mail address"
 msgstr "電子郵件位址(_M)"
 
 #: ../ui/login.glade.h:3
-#| msgid "_Password:"
 msgid "_Password"
 msgstr "密碼(_P)"
 
 #: ../ui/login.glade.h:4
-#| msgid "S_ervice:"
 msgid "S_ervice"
 msgstr "服務(_E)"
 
 #: ../ui/login.glade.h:5
-#| msgid "N_ame:"
 msgid "N_ame"
 msgstr "名稱(_A)"
 
 #: ../ui/login.glade.h:7
-#| msgid "N_ickname:"
 msgid "N_ickname"
 msgstr "暱稱(_I)"
 
@@ -1662,7 +1842,6 @@ msgid "Work, Home, etc."
 msgstr "辦公、住家...等。"
 
 #: ../ui/login.glade.h:9
-#| msgid "Sent Mail"
 msgid "_Save sent mail"
 msgstr "儲存已寄郵件(_S)"
 
@@ -1671,22 +1850,18 @@ msgid "IMAP settings"
 msgstr "IMAP 設定"
 
 #: ../ui/login.glade.h:11
-#| msgid "Se_rver:"
 msgid "Se_rver"
 msgstr "伺服器(_R)"
 
 #: ../ui/login.glade.h:12
-#| msgid "P_ort:"
 msgid "P_ort"
 msgstr "連接埠(_O)"
 
 #: ../ui/login.glade.h:13
-#| msgid "Ser_ver:"
 msgid "Ser_ver"
 msgstr "伺服器(_V)"
 
 #: ../ui/login.glade.h:14
-#| msgid "Por_t:"
 msgid "Por_t"
 msgstr "連接埠(_T)"
 
@@ -1695,12 +1870,10 @@ msgid "SMTP settings"
 msgstr "SMTP 設定值"
 
 #: ../ui/login.glade.h:16
-#| msgid "User_name:"
 msgid "User_name"
 msgstr "使用者名稱(_N)"
 
 #: ../ui/login.glade.h:17
-#| msgid "Pass_word:"
 msgid "Pass_word"
 msgstr "密碼(_W)"
 
@@ -1713,7 +1886,6 @@ msgid "SMTP password"
 msgstr "SMTP 密碼"
 
 #: ../ui/login.glade.h:20
-#| msgid "_Username:"
 msgid "_Username"
 msgstr "使用者名稱(_U)"
 
@@ -1726,12 +1898,10 @@ msgid "IMAP password"
 msgstr "IMAP 密碼"
 
 #: ../ui/login.glade.h:23
-#| msgid "Encr_yption:"
 msgid "Encr_yption"
 msgstr "加密(_Y)"
 
 #: ../ui/login.glade.h:24
-#| msgid "Encrypt_ion:"
 msgid "Encrypt_ion"
 msgstr "加密(_I)"
 
@@ -1748,7 +1918,6 @@ msgid "No authentication re_quired"
 msgstr "不需要認證(_Q)"
 
 #: ../ui/login.glade.h:29
-#| msgid "IMAP Credentials"
 msgid "Use IMAP cre_dentials"
 msgstr "使用 IMAP 憑證(_D)"
 
@@ -1757,11 +1926,10 @@ msgid "Storage"
 msgstr "貯藏"
 
 #: ../ui/login.glade.h:31
-#| msgid "_Download mail:"
 msgid "_Download mail"
 msgstr "下載郵件(_D)"
 
-#: ../ui/login.glade.h:32 ../ui/preferences.glade.h:6
+#: ../ui/login.glade.h:32 ../ui/preferences.glade.h:4
 msgid "Composer"
 msgstr "編撰器"
 
@@ -1770,58 +1938,60 @@ msgid "Save dra_fts on server"
 msgstr "儲存伺服氣上的草稿(_F)"
 
 #: ../ui/login.glade.h:34
-msgid "Si_gn emails:"
-msgstr "簽署電子郵件(_G)："
+msgid "Si_gn emails (HTML allowed):"
+msgstr "簽署電子郵件 (允許 HTML)(_G)："
 
 #: ../ui/password-dialog.glade.h:1
 msgid "SMTP Credentials"
 msgstr "SMTP 憑證"
 
 #: ../ui/password-dialog.glade.h:2
-msgid "Username:"
-msgstr "使用者名稱："
-
-#: ../ui/password-dialog.glade.h:3
-msgid "Password:"
-msgstr "密碼："
+msgid "Username"
+msgstr "使用者名稱"
 
 #: ../ui/password-dialog.glade.h:4
-#| msgid "_Remember passwords"
 msgid "_Remember password"
 msgstr "記住密碼(_R)"
 
-#: ../ui/preferences.glade.h:1
-#| msgid "_Preferences"
-msgid "Preferences"
-msgstr "偏好設定"
+#: ../ui/password-dialog.glade.h:6
+msgid "_Authenticate"
+msgstr "核對身份(_A)"
 
-#: ../ui/preferences.glade.h:3
+#: ../ui/preferences.glade.h:1
 msgid "Reading"
 msgstr "閱讀"
 
-#: ../ui/preferences.glade.h:4
+#: ../ui/preferences.glade.h:2
 msgid "_Automatically select next message"
 msgstr "自動選取下篇訊息(_A)"
 
-#: ../ui/preferences.glade.h:5
+#: ../ui/preferences.glade.h:3
 msgid "_Display conversation preview"
 msgstr "顯示對話預覽(_D)"
 
-#: ../ui/preferences.glade.h:7
+#: ../ui/preferences.glade.h:5
 msgid "Enable _spell checking"
 msgstr "啟用拼字檢查(_S)"
 
-#: ../ui/preferences.glade.h:8
+#: ../ui/preferences.glade.h:6
 msgid "Notifications"
 msgstr "通知"
 
-#: ../ui/preferences.glade.h:9
+#: ../ui/preferences.glade.h:7
 msgid "_Play notification sounds"
 msgstr "播放通知音效(_P)"
 
-#: ../ui/preferences.glade.h:10
+#: ../ui/preferences.glade.h:8
 msgid "Show _notifications for new mail"
 msgstr "若有新郵件時顯示通知(_N)"
+
+#: ../ui/preferences.glade.h:9
+msgid "Always _watch for new mail"
+msgstr "總是監視是否有新的郵件(_W)"
+
+#: ../ui/preferences.glade.h:10
+msgid "Geary will run in the background and notify of new mail"
+msgstr "Geary 將在背景執行並通知新郵件的到來"
 
 #: ../ui/remove_confirm.glade.h:1
 msgid ""
@@ -1847,8 +2017,42 @@ msgid "Email address:"
 msgstr "電子郵件位址："
 
 #: ../ui/upgrade_dialog.glade.h:1
-msgid "Geary upgrade in progress."
-msgstr "Geary 正在升級。"
+msgid "Geary update in progress…"
+msgstr "Geary 正在更新…"
+
+#~ msgid "_Delete"
+#~ msgstr "刪除(_D)"
+
+#~| msgid "Trash"
+#~ msgid "_Trash"
+#~ msgstr "搬移到垃圾桶(_T)"
+
+#~ msgid "attach|enclosed|enclosing|cover letter"
+#~ msgstr "attach|enclosed|enclosing|cover letter|附件|附加檔案|附檔"
+
+#~ msgid "Do you want to discard the unsaved message?"
+#~ msgstr "您是否想丟棄尚未儲存的訊息？"
+
+#~| msgid "Please enter your email password"
+#~ msgid "Please enter your password"
+#~ msgstr "請輸入您的密碼"
+
+#~ msgid "Edit recipients"
+#~ msgstr "編輯收件人"
+
+#~| msgid "_Close"
+#~ msgid "C_lose"
+#~ msgstr "關閉(_C)"
+
+#~ msgid "Username:"
+#~ msgstr "使用者名稱："
+
+#~ msgid "Password:"
+#~ msgstr "密碼："
+
+#~| msgid "_Preferences"
+#~ msgid "Preferences"
+#~ msgstr "偏好設定"
 
 #~ msgid "Archive conversation (Delete, Backspace, A)"
 #~ msgstr "封存對話 (Delete、Backspace、A)"
