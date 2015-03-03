@@ -1009,6 +1009,9 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         if (unread_count > 0)
             properties.set_status_unseen(properties.email_unread - unread_count);
         
+        properties.set_select_examine_message_count(Numeric.int_floor(
+            properties.select_examine_messages - removed_ids.size, 0));
+        
         return (removed_ids.size > 0) ? removed_ids : null;
     }
     

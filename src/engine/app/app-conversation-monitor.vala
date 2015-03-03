@@ -794,9 +794,9 @@ public class Geary.App.ConversationMonitor : BaseObject {
         
         int initial_message_count = get_email_count();
         
-        debug("fill_window_async: is_insert=%s min_window_count=%d conversations.size=%d primary_ids.size=%d initial_message_count=%d",
+        debug("fill_window_async: is_insert=%s min_window_count=%d conversations.size=%d primary_ids.size=%d folder emails=%d initial_message_count=%d",
             is_insert.to_string(), min_window_count, conversations.size, primary_email_id_to_conversation.size,
-            initial_message_count);
+            folder.properties.email_total, initial_message_count);
         
         // only do local-load if the Folder isn't completely opened, otherwise this operation
         // will block other (more important) operations while it waits for the folder to
@@ -839,8 +839,8 @@ public class Geary.App.ConversationMonitor : BaseObject {
             rescheduled = true;
         }
         
-        debug("fill_window_async: loaded from %s, email_count=%d primary_ids.size=%d conversations.size=%d rescheduled=%s",
+        debug("fill_window_async: loaded from %s, email_count=%d primary_ids.size=%d folder emails=%d conversations.size=%d rescheduled=%s",
             low_id != null ? low_id.to_string() : "(null)", get_email_count(), primary_email_id_to_conversation.size,
-            conversations.size, rescheduled.to_string());
+            folder.properties.email_total, conversations.size, rescheduled.to_string());
     }
 }
