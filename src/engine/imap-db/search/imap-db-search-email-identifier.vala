@@ -6,6 +6,14 @@
 
 private class Geary.ImapDB.SearchEmailIdentifier : ImapDB.EmailIdentifier,
     Gee.Comparable<SearchEmailIdentifier> {
+    public DateTime? date_received { get; private set; }
+    
+    public SearchEmailIdentifier(int64 message_id, DateTime? date_received) {
+        base(message_id, null);
+        
+        this.date_received = date_received;
+    }
+    
     public static int compare_descending(SearchEmailIdentifier a, SearchEmailIdentifier b) {
         return b.compare_to(a);
     }
@@ -34,14 +42,6 @@ private class Geary.ImapDB.SearchEmailIdentifier : ImapDB.EmailIdentifier,
                 return search_id;
         }
         return null;
-    }
-    
-    public DateTime? date_received { get; private set; }
-    
-    public SearchEmailIdentifier(int64 message_id, DateTime? date_received) {
-        base(message_id, null);
-        
-        this.date_received = date_received;
     }
     
     public override int natural_sort_comparator(Geary.EmailIdentifier o) {

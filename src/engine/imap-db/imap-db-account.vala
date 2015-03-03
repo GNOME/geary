@@ -27,7 +27,7 @@ private class Geary.ImapDB.Account : BaseObject {
     
     // Only available when the Account is opened
     public SmtpOutboxFolder? outbox { get; private set; default = null; }
-    public SearchFolder? search_folder { get; private set; default = null; }
+    public Geary.SearchFolder? search_folder { get; private set; default = null; }
     public ImapEngine.ContactStore contact_store { get; private set; }
     public IntervalProgressMonitor search_index_monitor { get; private set; 
         default = new IntervalProgressMonitor(ProgressType.SEARCH_INDEX, 0, 0); }
