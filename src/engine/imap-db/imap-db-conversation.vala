@@ -93,17 +93,11 @@ internal void do_add_message_to_conversation(Db.Connection cx, int64 message_id,
                 DEFAULT VALUES
             """);
             conversation_id = cx.last_insert_rowid;
-            
-            debug("Created new conversation %s for message %s: %s", conversation_id.to_string(),
-                message_id.to_string(), rfc822_message_id_text);
         break;
         
         case 1:
             // one conversation found, so use that one
             conversation_id = traverse<int64?>(conversation_ids).first();
-            
-            debug("Expanding existing conversation %s with message %s: %s", conversation_id.to_string(),
-                message_id.to_string(), rfc822_message_id_text);
         break;
         
         default:
@@ -111,9 +105,6 @@ internal void do_add_message_to_conversation(Db.Connection cx, int64 message_id,
             // out of order and the complete(r) tree is only being available now; merge the
             // conversations into one
             conversation_id = do_merge_conversations(cx, conversation_ids, cancellable);
-            
-            debug("Merged %d conversations to conversation %s", conversation_ids.size - 1,
-                conversation_id.to_string());
         break;
     }
     
