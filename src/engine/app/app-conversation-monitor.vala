@@ -21,6 +21,59 @@ public class Geary.App.ConversationMonitor : BaseObject {
         Geary.SpecialFolderType.DRAFTS,
     };
     
+    // Used when searching for associated emails ... this gets around threading / locking problems
+    // by holding and generating private copies of all data; it also generates the search blacklist
+    // at instance time, meaning if the paths change the most current set are always used
+    private class SearchPredicateInstance : BaseObject {
+        public FolderPath this_folder_path;
+        public Email.Field required_fields;
+        public Gee.HashSet<FolderPath?> path_blacklist = new Gee.HashSet<FolderPath?>();
+        
+        public SearchPredicateInstance(Folder folder, Email.Field required_fields) {
+            this_folder_path = folder.path;
+            this.required_fields = required_fields;
+            
+            // generate FolderPaths for the blacklisted special folder types
+            foreach (Geary.SpecialFolderType type in BLACKLISTED_FOLDER_TYPES) {
+                try {
+                    Geary.Folder? blacklist_folder = folder.account.get_special_folder(type);
+                    if (blacklist_folder != null)
+                        path_blacklist.add(blacklist_folder.path);
+                } catch (Error e) {
+                    debug("Error finding special folder %s on account %s: %s",
+                        type.to_string(), folder.account.to_string(), e.message);
+                }
+            }
+            
+            // Add "no folders" so we omit results that have been deleted permanently from the server.
+            path_blacklist.add(null);
+        }
+        // NOTE: This is called from a background thread.
+        public bool search_predicate(EmailIdentifier email_id, Email.Field fields,
+            Gee.Collection<FolderPath?> known_paths, EmailFlags flags) {
+            // don't want partial emails
+            if (!fields.fulfills(required_fields))
+                return false;
+            
+            // if email is in this path, it's not blacklisted (i.e. if viewing the Spam folder, don't
+            // blacklist because it's in the Spam folder, if viewing Drafts folder, display drafts)
+            if (known_paths.contains(this_folder_path))
+                return true;
+            
+            // Don't add drafts (unless in Drafts folder, above)
+            if (flags.contains(EmailFlags.DRAFT))
+                return false;
+            
+            // If in a blacklisted path, don't add
+            foreach (FolderPath? blacklisted_path in path_blacklist) {
+                if (known_paths.contains(blacklisted_path))
+                    return false;
+            }
+            
+            return true;
+        }
+    }
+    
     public Geary.Folder folder { get; private set; }
     public bool is_monitoring { get; private set; default = false; }
     public int min_window_count { get { return _min_window_count; }
@@ -37,7 +90,6 @@ public class Geary.App.ConversationMonitor : BaseObject {
     
     private Geary.Email.Field required_fields;
     private Geary.Folder.OpenFlags open_flags;
-    private Gee.Collection<FolderPath?> search_path_blacklist;
     private Cancellable? cancellable_monitor = null;
     private bool reseed_notified = false;
     private int _min_window_count = 0;
@@ -189,23 +241,6 @@ public class Geary.App.ConversationMonitor : BaseObject {
         this.open_flags = open_flags;
         this.required_fields = required_fields | REQUIRED_FIELDS | Account.ASSOCIATED_REQUIRED_FIELDS;
         _min_window_count = min_window_count;
-        
-        // generate FolderPaths for the blacklisted special folder types
-        // TODO: Update when Account notifies of change to special folders
-        search_path_blacklist = new Gee.HashSet<Geary.FolderPath?>();
-        foreach (Geary.SpecialFolderType type in BLACKLISTED_FOLDER_TYPES) {
-            try {
-                Geary.Folder? blacklist_folder = folder.account.get_special_folder(type);
-                if (blacklist_folder != null)
-                    search_path_blacklist.add(blacklist_folder.path);
-            } catch (Error e) {
-                debug("Error finding special folder %s on account %s: %s",
-                    type.to_string(), folder.account.to_string(), e.message);
-            }
-        }
-        
-        // Add "no folders" so we omit results that have been deleted permanently from the server.
-        search_path_blacklist.add(null);
     }
     
     ~ConversationMonitor() {
@@ -419,31 +454,6 @@ public class Geary.App.ConversationMonitor : BaseObject {
         }
     }
     
-    // NOTE: This is called from a background thread.
-    private bool search_associated_predicate(EmailIdentifier email_id, Email.Field fields,
-        Gee.Collection<FolderPath?> known_paths, EmailFlags flags) {
-        // don't want partial emails
-        if (!fields.fulfills(required_fields))
-            return false;
-        
-        // if email is in this path, it's not blacklisted (i.e. if viewing the Spam folder, don't
-        // blacklist because it's in the Spam folder, if viewing Drafts folder, display drafts)
-        if (known_paths.contains(folder.path))
-            return true;
-        
-        // Don't add drafts (unless in Drafts folder, above)
-        if (flags.contains(EmailFlags.DRAFT))
-            return false;
-        
-        // If in a blacklisted path, don't add
-        foreach (FolderPath? blacklist_path in search_path_blacklist) {
-            if (known_paths.contains(blacklist_path))
-                return false;
-        }
-        
-        return true;
-    }
-    
     private async void process_email_async(FolderPath path, Gee.Collection<Geary.Email>? emails,
         Cancellable? cancellable) {
         if (emails == null || emails.size == 0)
@@ -464,12 +474,14 @@ public class Geary.App.ConversationMonitor : BaseObject {
         Logging.debug(Logging.Flag.CONVERSATIONS, "[%s] ConversationMonitor::process_email: %d emails",
             folder.to_string(), email_ids.size);
         
+        SearchPredicateInstance predicate_instance = new SearchPredicateInstance(folder, required_fields);
+        
         // Convert EmailIdentifiers into associations (groupings) of EmailIdentifiers with all known
         // paths
         Gee.Collection<AssociatedEmails>? associations = null;
         try {
             associations = yield folder.account.local_search_associated_emails_async(
-                email_ids, search_associated_predicate, cancellable);
+                email_ids, predicate_instance.search_predicate, cancellable);
         } catch (Error err) {
             debug("Unable to search for associated emails: %s", err.message);
         }
@@ -477,14 +489,10 @@ public class Geary.App.ConversationMonitor : BaseObject {
         if (associations == null || associations.size == 0)
             return;
         
-        debug("%d email ids, %d associations", email_ids.size, associations.size);
-        
         Gee.HashSet<Conversation> added = new Gee.HashSet<Conversation>();
         Gee.HashMultiMap<Conversation, Email> appended = new Gee.HashMultiMap<Conversation, Email>();
         foreach (AssociatedEmails association in associations)
             yield process_association_async(association, path, email_ids, added, appended, cancellable);
-        
-        debug("%d added conversations, %d appended", added.size, appended.size);
         
         if (added.size > 0)
             notify_conversations_added(added);
