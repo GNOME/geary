@@ -4,8 +4,18 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
+/**
+ * The ConversationOperationQueue ensures that certain operations in the {@link ConversationMonitor}
+ * are serialized and performed in order, preventing reentrancy and state oddities due to its
+ * asynchronous (blocking) nature.
+ *
+ * ConversationOperationQueue also understands the unique nature of the {@link FillWindowOperation}
+ * and ensures only one is present in the queue at once.
+ */
+
 private class Geary.App.ConversationOperationQueue : BaseObject {
     public bool is_processing { get; private set; default = false; }
+    
     public Geary.SimpleProgressMonitor progress_monitor { get; private set; default = 
         new Geary.SimpleProgressMonitor(Geary.ProgressType.ACTIVITY); }
     
@@ -13,6 +23,9 @@ private class Geary.App.ConversationOperationQueue : BaseObject {
         = new Geary.Nonblocking.Mailbox<ConversationOperation>();
     private Geary.Nonblocking.Spinlock processing_done_spinlock
         = new Geary.Nonblocking.Spinlock();
+    
+    public ConversationOperationQueue() {
+    }
     
     public void clear() {
         mailbox.clear();

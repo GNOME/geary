@@ -7,7 +7,7 @@
 private abstract class Geary.App.ConversationOperation : BaseObject {
     protected weak ConversationMonitor? monitor = null;
     
-    public ConversationOperation(ConversationMonitor? monitor) {
+    protected ConversationOperation(ConversationMonitor? monitor) {
         this.monitor = monitor;
     }
     
