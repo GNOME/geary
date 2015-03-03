@@ -24,6 +24,8 @@ private const OptionEntry[] options = {
     { "log-folder-normalization", 0, 0, OptionArg.NONE, ref log_folder_normalization, N_("Log folder normalization"), null },
     { "inspector", 'i', 0, OptionArg.NONE, ref inspector, N_("Allow inspection of WebView"), null },
     { "revoke-certs", 0, 0, OptionArg.NONE, ref revoke_certs, N_("Revoke all server certificates with TLS warnings"), null },
+    { "force-cleanup", 0, OptionFlags.HIDDEN, OptionArg.NONE, ref force_cleanup, N_("Force a mail database cleanup (not recommended)"), null },
+    { "force-rebuild", 0, OptionFlags.HIDDEN, OptionArg.NONE, ref force_rebuild, N_("Force a mail database rebuild (not recommended)"), null },
     { "version", 'V', 0, OptionArg.NONE, ref version, N_("Display program version"), null },
     { null }
 };
@@ -40,6 +42,8 @@ public bool log_sql = false;
 public bool log_folder_normalization = false;
 public bool inspector = false;
 public bool revoke_certs = false;
+public bool force_cleanup = false;
+public bool force_rebuild = false;
 public bool version = false;
 
 public bool parse(string[] args) {

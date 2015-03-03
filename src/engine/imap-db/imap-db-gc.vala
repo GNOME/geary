@@ -316,7 +316,7 @@ private class Geary.ImapDB.GC {
         // at a time, deleting it from the message table and subsidiary tables.  Although slow, we
         // do want this to be a background task that doesn't interrupt the user.  This approach
         // also means gc can be interrupted at any time (i.e. the user exits the application)
-        // without leaving the database in an incoherent state.  gc can be resumed even if'
+        // without leaving the database in an incoherent state.  gc can be resumed even if
         // interrupted.
         //
         
@@ -340,7 +340,40 @@ private class Geary.ImapDB.GC {
                 debug("[%s] Reaped %d messages", to_string(), count);
         }
         
-        message("[%s] Reaped completed: %d messages", to_string(), count);
+        message("[%s] Reap completed: %d messages reaped", to_string(), count);
+        
+        //
+        // Delete orphaned conversations (which shouldn't happen, but it's a simple check to
+        // perform)
+        //
+        
+        count = 0;
+        yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
+            Db.Statement stmt = cx.prepare("""
+                SELECT id
+                FROM ConversationTable
+                WHERE NOT EXISTS (
+                    SELECT conversation_id
+                    FROM MessageConversationTable
+                    WHERE MessageConversationTable.conversation_id = ConversationTable.id
+                )
+            """);
+            
+            for (Db.Result result = stmt.exec(cancellable); !result.finished; result.next(cancellable)) {
+                stmt = cx.prepare("""
+                    DELETE FROM ConversationTable
+                    WHERE id = ?
+                """);
+                stmt.bind_rowid(0, result.rowid_at(0));
+                
+                stmt.exec(cancellable);
+                count++;
+            }
+            
+            return Db.TransactionOutcome.COMMIT;
+        }, cancellable);
+        
+        message("[%s] Reap orphan conversations completed: %d conversations reaped", to_string(), count);
         
         //
         // Now reap on-disk attachment files marked for deletion.  Since they're added to the
@@ -363,7 +396,8 @@ private class Geary.ImapDB.GC {
                 debug("[%s] Reaped %d attachment files", to_string(), count);
         }
         
-        message("[%s] Completed: Reaped %d attachment files", to_string(), count);
+        message("[%s] Reap orphan attachment files completed: Reaped %d attachment files", to_string(),
+            count);
         
         //
         // To be sure everything's clean, delete any empty directories in the attachment dir tree,
@@ -460,6 +494,71 @@ private class Geary.ImapDB.GC {
             stmt.bind_rowid(0, message_id);
             
             stmt.exec(cancellable);
+            
+            //
+            // See which conversation the message is linked to (if any)
+            //
+            
+            stmt = cx.prepare("""
+                SELECT conversation_id
+                FROM MessageConversationTable
+                WHERE message_id = ?
+            """);
+            stmt.bind_rowid(0, message_id);
+            
+            result = stmt.exec(cancellable);
+            int64 conversation_id = !result.finished ? result.rowid_at(0) : Db.INVALID_ROWID;
+            
+            //
+            // Unlink from message-conversation table
+            //
+            // Don't delete, as MessageConversationTable tracks *all* Message-IDs seen in emails'
+            // REFERENCES (Message-ID, In-Reply-To, References).  These rows are only deleted when
+            // the conversation itself is deleted, meaning all related emails are gone.
+            //
+            
+            stmt = cx.prepare("""
+                UPDATE MessageConversationTable
+                SET message_id = ?
+                WHERE message_id = ?
+            """);
+            stmt.bind_null(0);
+            stmt.bind_rowid(1, message_id);
+            
+            stmt.exec(cancellable);
+            
+            //
+            // Look for orphaned conversations, where all Message-IDs linked to it are no longer
+            // referenced in the MessageTable
+            //
+            
+            if (conversation_id != Db.INVALID_ROWID) {
+                stmt = cx.prepare("""
+                    SELECT COUNT(*)
+                    FROM MessageConversationTable
+                    WHERE conversation_id = ? AND message_id IS NOT NULL
+                """);
+                stmt.bind_rowid(0, conversation_id);
+                
+                result = stmt.exec(cancellable);
+                if (result.finished || result.int_at(0) == 0) {
+                    stmt = cx.prepare("""
+                        DELETE FROM MessageConversationTable
+                        WHERE conversation_id = ?
+                    """);
+                    stmt.bind_rowid(0, conversation_id);
+                    
+                    stmt.exec(cancellable);
+                    
+                    stmt = cx.prepare("""
+                        DELETE FROM ConversationTable
+                        WHERE id = ?
+                    """);
+                    stmt.bind_rowid(0, conversation_id);
+                    
+                    stmt.exec(cancellable);
+                }
+            }
             
             //
             // Delete from message table

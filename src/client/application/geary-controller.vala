@@ -100,6 +100,7 @@ public class GearyController : Geary.BaseObject {
         = new Gee.HashMap<Geary.Account, Geary.App.EmailStore>();
     private Gee.HashMap<Geary.Account, Geary.Folder> inboxes
         = new Gee.HashMap<Geary.Account, Geary.Folder>();
+    private Geary.Account.OpenFlag account_flags = Geary.Account.OpenFlag.NONE;
     private Geary.Folder? current_folder = null;
     private Cancellable cancellable_folder = new Cancellable();
     private Cancellable cancellable_search = new Cancellable();
@@ -231,6 +232,13 @@ public class GearyController : Geary.BaseObject {
         // libnotify
         libnotify = new Libnotify(new_messages_monitor);
         libnotify.invoked.connect(on_libnotify_invoked);
+        
+        // Geary.Account flags
+        if (Args.force_cleanup)
+            account_flags |= Geary.Account.OpenFlag.FORCE_DB_CLEANUP;
+        
+        if (Args.force_rebuild)
+            account_flags |= Geary.Account.OpenFlag.FORCE_DB_REBUILD;
         
         // This is fired after the accounts are ready.
         Geary.Engine.instance.opened.connect(on_engine_opened);
@@ -1058,7 +1066,7 @@ public class GearyController : Geary.BaseObject {
         do {
             try {
                 account.set_data(PROP_ATTEMPT_OPEN_ACCOUNT, true);
-                yield account.open_async(cancellable);
+                yield account.open_async(account_flags, cancellable);
                 retry = false;
             } catch (Error open_err) {
                 debug("Unable to open account %s: %s", account.to_string(), open_err.message);

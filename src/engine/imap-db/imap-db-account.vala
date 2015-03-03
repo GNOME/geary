@@ -71,8 +71,8 @@ private class Geary.ImapDB.Account : BaseObject {
         attachments_dir = ImapDB.Attachment.get_attachments_dir(user_data_dir);
     }
     
-    public async void open_async(File user_data_dir, File schema_dir, Cancellable? cancellable)
-        throws Error {
+    public async void open_async(Database.ImplFlag impl_flags, File user_data_dir, File schema_dir,
+        Cancellable? cancellable) throws Error {
         if (db != null)
             throw new EngineError.ALREADY_OPEN("IMAP database already open");
         
@@ -82,7 +82,7 @@ private class Geary.ImapDB.Account : BaseObject {
         try {
             yield db.open_async(
                 Db.DatabaseFlags.CREATE_DIRECTORY | Db.DatabaseFlags.CREATE_FILE | Db.DatabaseFlags.CHECK_CORRUPTION,
-                cancellable);
+                impl_flags, cancellable);
         } catch (Error err) {
             warning("Unable to open database: %s", err.message);
             

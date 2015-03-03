@@ -21,6 +21,31 @@
  */
 
 public abstract class Geary.Account : BaseObject {
+    /**
+     * Flags for specific options when opening an {@link Account}.
+     *
+     * @see open_async
+     */
+    [Flags]
+    public enum OpenFlag {
+        NONE = 0,
+        /**
+         * Tell the local database / disk store to rebuild.
+         *
+         * This should be used sparingly or only if directed by the user.  The local database
+         * should perform this automatically when it detects it's necessary.
+         */
+        FORCE_DB_REBUILD,
+        /**
+         * Tell the local database / disk store to cleanup.
+         *
+         *
+         * This should be used sparingly or only if directed by the user.  The local database
+         * should perform this automatically when it detects it's necessary.
+         */
+        FORCE_DB_CLEANUP
+    }
+    
     public enum Problem {
         RECV_EMAIL_LOGIN_FAILED,
         SEND_EMAIL_LOGIN_FAILED,
@@ -227,7 +252,7 @@ public abstract class Geary.Account : BaseObject {
      * @throws EngineError.VERSION if the local store was created or updated for a different
      *         version of Geary.
      */
-    public abstract async void open_async(Cancellable? cancellable = null) throws Error;
+    public abstract async void open_async(OpenFlag open_flags, Cancellable? cancellable = null) throws Error;
     
     /**
      * Closes the {@link Account}, which makes most its operations unavailable.

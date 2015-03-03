@@ -99,7 +99,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             throw new EngineError.OPEN_REQUIRED("Account %s not opened", to_string());
     }
     
-    public override async void open_async(Cancellable? cancellable = null) throws Error {
+    public override async void open_async(Account.OpenFlag open_flags, Cancellable? cancellable = null) throws Error {
         if (open)
             throw new EngineError.ALREADY_OPEN("Account %s already opened", to_string());
         
@@ -107,7 +107,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         
         Error? throw_err = null;
         try {
-            yield internal_open_async(cancellable);
+            yield internal_open_async(open_flags, cancellable);
         } catch (Error err) {
             throw_err = err;
         }
@@ -118,9 +118,16 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             throw throw_err;
     }
     
-    private async void internal_open_async(Cancellable? cancellable) throws Error {
+    private async void internal_open_async(Account.OpenFlag open_flags, Cancellable? cancellable) throws Error {
+        // Translate Account flags to ImapDB.Database flags
+        ImapDB.Database.ImplFlag db_flags = ImapDB.Database.ImplFlag.NONE;
+        if ((open_flags & Account.OpenFlag.FORCE_DB_REBUILD) != 0)
+            db_flags |= ImapDB.Database.ImplFlag.FORCE_VACUUM;
+        if ((open_flags & Account.OpenFlag.FORCE_DB_CLEANUP) != 0)
+            db_flags |= ImapDB.Database.ImplFlag.FORCE_REAP;
+        
         try {
-            yield local.open_async(information.settings_dir, Engine.instance.resource_dir.get_child("sql"),
+            yield local.open_async(db_flags, information.settings_dir, Engine.instance.resource_dir.get_child("sql"),
                 cancellable);
         } catch (Error err) {
             // convert database-open errors

@@ -10,6 +10,13 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
     private const string DB_FILENAME = "geary.db";
     private const int OPEN_PUMP_EVENT_LOOP_MSEC = 100;
     
+    [Flags]
+    public enum ImplFlag {
+        NONE = 0,
+        FORCE_REAP,
+        FORCE_VACUUM
+    }
+    
     private ProgressMonitor upgrade_monitor;
     private ProgressMonitor vacuum_monitor;
     private string account_owner_email;
@@ -35,7 +42,8 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
      * This should only be done from the main thread, as it is designed to pump the event loop
      * while the database is being opened and updated.
      */
-    public async void open_async(Db.DatabaseFlags flags, Cancellable? cancellable) throws Error {
+    public async void open_async(Db.DatabaseFlags flags, ImplFlag impl_flags, Cancellable? cancellable)
+        throws Error {
         open_background(flags, on_prepare_database_connection, pump_event_loop,
             OPEN_PUMP_EVENT_LOOP_MSEC, cancellable);
         
@@ -52,7 +60,7 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
         
         // VACUUM needs to execute in the foreground with the user given a busy prompt (and cannot
         // be run at the same time as REAP)
-        if ((recommended & GC.RecommendedOperation.VACUUM) != 0) {
+        if ((recommended & GC.RecommendedOperation.VACUUM) != 0 || (impl_flags & ImplFlag.FORCE_VACUUM) != 0) {
             if (!vacuum_monitor.is_in_progress)
                 vacuum_monitor.notify_start();
             
@@ -69,7 +77,7 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
         }
         
         // REAP can run in the background while the application is executing
-        if ((recommended & GC.RecommendedOperation.REAP) != 0) {
+        if ((recommended & GC.RecommendedOperation.REAP) != 0 || (impl_flags & ImplFlag.FORCE_REAP) != 0) {
             // run in the background and allow application to continue running
             gc.reap_async.begin(gc_cancellable, on_reap_async_completed);
         }
