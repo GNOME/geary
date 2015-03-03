@@ -13,7 +13,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
         Geary.Email.Field.FLAGS | Geary.Email.Field.DATE;
     
     // # of messages to load at a time as we attempt to fill the min window.
-    private const int WINDOW_FILL_MESSAGE_COUNT = 10;
+    private const int MIN_FILL_MESSAGE_COUNT = 5;
     
     private const Geary.SpecialFolderType[] BLACKLISTED_FOLDER_TYPES = {
         Geary.SpecialFolderType.SPAM,
@@ -247,8 +247,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
         if (is_monitoring)
             debug("Warning: Conversations object destroyed without stopping monitoring");
         
-        foreach (Conversation conversation in conversations)
-            conversation.clear_owner();
+        clear();
     }
     
     protected virtual void notify_monitoring_started() {
@@ -417,8 +416,19 @@ public class Geary.App.ConversationMonitor : BaseObject {
         
         notify_monitoring_stopped();
         
+        clear();
+        
         if (close_err != null)
             throw close_err;
+    }
+    
+    private void clear() {
+        foreach (Conversation conversation in conversations)
+            conversation.clear_owner();
+        
+        conversations.clear();
+        all_email_id_to_conversation.clear();
+        primary_email_id_to_conversation.clear();
     }
     
     // By passing required_fields, this forces the email to be downloaded (if not already) at the
@@ -784,6 +794,10 @@ public class Geary.App.ConversationMonitor : BaseObject {
         
         int initial_message_count = get_email_count();
         
+        debug("fill_window_async: is_insert=%s min_window_count=%d conversations.size=%d primary_ids.size=%d initial_message_count=%d",
+            is_insert.to_string(), min_window_count, conversations.size, primary_email_id_to_conversation.size,
+            initial_message_count);
+        
         // only do local-load if the Folder isn't completely opened, otherwise this operation
         // will block other (more important) operations while it waits for the folder to
         // remote-open
@@ -808,7 +822,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
         if (low_id != null && !is_insert) {
             // Load at least as many messages as remaining conversations.
             int num_to_load = Numeric.int_floor(min_window_count - conversations.size,
-                WINDOW_FILL_MESSAGE_COUNT);
+                MIN_FILL_MESSAGE_COUNT);
             
             yield load_by_id_async(low_id, num_to_load, Email.Field.NONE, flags, cancellable_monitor);
         } else {
@@ -817,8 +831,16 @@ public class Geary.App.ConversationMonitor : BaseObject {
             yield load_by_id_async(null, min_window_count, Email.Field.NONE, flags, cancellable_monitor);
         }
         
-        // Run again to make sure we're full unless we ran out of messages.
-        if (get_email_count() != initial_message_count)
+        // Run again to make sure we're full ... precondition checking is relied on to prevent
+        // continuous looping of FillWindowOperations
+        bool rescheduled = false;
+        if (conversations.size < min_window_count) {
             operation_queue.add(new FillWindowOperation(this, false));
+            rescheduled = true;
+        }
+        
+        debug("fill_window_async: loaded from %s, email_count=%d primary_ids.size=%d conversations.size=%d rescheduled=%s",
+            low_id != null ? low_id.to_string() : "(null)", get_email_count(), primary_email_id_to_conversation.size,
+            conversations.size, rescheduled.to_string());
     }
 }
