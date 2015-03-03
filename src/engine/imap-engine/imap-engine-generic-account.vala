@@ -46,7 +46,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         }
         
         if (search_path == null) {
-            search_path = new SearchFolderRoot();
+            search_path = new ImapDB.SearchFolderRoot();
         }
     }
     
@@ -247,7 +247,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     // Subclasses with specific SearchFolder implementations should override
     // this to return the correct subclass.
     internal virtual SearchFolder new_search_folder() {
-        return new SearchFolder(this);
+        return new ImapDB.SearchFolder(this);
     }
     
     private MinimalFolder build_folder(ImapDB.Folder local_folder) {

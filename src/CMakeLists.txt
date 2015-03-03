@@ -172,9 +172,12 @@ engine/imap-db/imap-db-folder.vala
 engine/imap-db/imap-db-gc.vala
 engine/imap-db/imap-db-message-addresses.vala
 engine/imap-db/imap-db-message-row.vala
-engine/imap-db/imap-db-search-query.vala
-engine/imap-db/imap-db-search-term.vala
-engine/imap-db/imap-db-search-email-identifier.vala
+engine/imap-db/search/imap-db-search-email-identifier.vala
+engine/imap-db/search/imap-db-search-folder.vala
+engine/imap-db/search/imap-db-search-folder-properties.vala
+engine/imap-db/search/imap-db-search-folder-root.vala
+engine/imap-db/search/imap-db-search-query.vala
+engine/imap-db/search/imap-db-search-term.vala
 engine/imap-db/outbox/smtp-outbox-email-identifier.vala
 engine/imap-db/outbox/smtp-outbox-email-properties.vala
 engine/imap-db/outbox/smtp-outbox-folder.vala
