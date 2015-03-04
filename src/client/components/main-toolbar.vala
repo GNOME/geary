@@ -11,6 +11,7 @@ public class MainToolbar : Gtk.Box {
     public string account { get; set; }
     public string folder { get; set; }
     public string conversation_title { get; private set; }
+    public string conversation_participants { get; private set; }
     public bool show_close_button { get; set; default = false; }
     public bool show_close_button_left { get; private set; }
     public bool show_close_button_right { get; private set; }
@@ -39,6 +40,8 @@ public class MainToolbar : Gtk.Box {
         this.bind_property("show-close-button-left", folder_header, "show-close-button",
             BindingFlags.SYNC_CREATE);
         this.bind_property("conversation-title", conversation_header, "title",
+            BindingFlags.SYNC_CREATE);
+        this.bind_property("conversation-participants", conversation_header, "subtitle",
             BindingFlags.SYNC_CREATE);
         this.bind_property("show-close-button-right", conversation_header, "show-close-button",
             BindingFlags.SYNC_CREATE);
@@ -136,6 +139,27 @@ public class MainToolbar : Gtk.Box {
         conversation_header.add_end(archive_trash_delete);
 #endif
         
+        Gtk.Label title_label = new Gtk.Label(null);
+        conversation_header.bind_property("title", title_label, "label", BindingFlags.SYNC_CREATE);
+        conversation_header.bind_property("title", title_label, "tooltip-text",
+            BindingFlags.SYNC_CREATE);
+        title_label.get_style_context().add_class("title");
+        title_label.ellipsize = Pango.EllipsizeMode.END;
+        Gtk.Label subtitle_label = new Gtk.Label(null);
+        conversation_header.bind_property("subtitle", subtitle_label, "label",
+            BindingFlags.SYNC_CREATE);
+        conversation_header.bind_property("subtitle", subtitle_label, "tooltip-text",
+            BindingFlags.SYNC_CREATE);
+        subtitle_label.get_style_context().add_class("subtitle");
+        subtitle_label.get_style_context().add_class("dim-label");
+        subtitle_label.ellipsize = Pango.EllipsizeMode.END;
+        Gtk.Box title_box = new Gtk.Box(Gtk.Orientation.VERTICAL, 0);
+        title_box.pack_start(title_label);
+        title_box.pack_start(subtitle_label);
+        title_box.set_margin_left(6);
+        title_box.set_margin_right(6);
+        conversation_header.set_custom_title(title_box);
+        
         pack_start(folder_header, false, false);
         pack_start(new Gtk.Separator(Gtk.Orientation.VERTICAL), false, false);
         pack_start(conversation_header, true, true);
@@ -192,16 +216,23 @@ public class MainToolbar : Gtk.Box {
         int selected_count = conversations.size;
         if (selected_count == 0) {
             conversation_title = _("No conversations selected");
+            conversation_participants = "";
         } else if (selected_count == 1) {
-            Geary.Email? last_email = conversations.to_array()[0].get_latest_recv_email(
+            Geary.App.Conversation conversation = conversations.to_array()[0];
+            Geary.Email? last_email = conversation.get_latest_recv_email(
                 Geary.App.Conversation.Location.ANYWHERE);
             if (last_email != null)
                 conversation_title = EmailUtil.strip_subject_prefixes(last_email);
             else
                 conversation_title = "";
+            
+            conversation_participants = EmailUtil.get_participants(conversation,
+                current_folder.account.information.get_all_mailboxes(),
+                current_folder.special_folder_type.is_outgoing(), false);
         } else {
             conversation_title = ngettext("%u conversation selected", "%u conversations selected",
                 selected_count).printf(selected_count);
+            conversation_participants = "";
         }
     }
 }
