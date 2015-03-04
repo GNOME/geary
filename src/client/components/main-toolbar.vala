@@ -84,15 +84,7 @@ public class MainToolbar : Gtk.Box {
 #if !GTK_3_12
         folder_header.add_end(empty);
         folder_header.add_end(search);
-#endif
-        // Application button.  If we exported an app menu, we don't need this.
-        if (!Gtk.Settings.get_default().gtk_shell_shows_app_menu) {
-            insert.clear();
-            insert.add(folder_header.create_menu_button("emblem-system-symbolic",
-                application_menu, GearyController.ACTION_GEAR_MENU));
-            folder_header.add_end(folder_header.create_pill_buttons(insert));
-        }
-#if GTK_3_12
+#else
         folder_header.add_end(search);
         folder_header.add_end(empty);
 #endif
@@ -131,7 +123,15 @@ public class MainToolbar : Gtk.Box {
 #if !GTK_3_12
         conversation_header.add_end(archive_trash_delete);
         conversation_header.add_end(undo);
-#else
+#endif
+        // Application button.  If we exported an app menu, we don't need this.
+        if (!Gtk.Settings.get_default().gtk_shell_shows_app_menu) {
+            insert.clear();
+            insert.add(conversation_header.create_menu_button("emblem-system-symbolic",
+                application_menu, GearyController.ACTION_GEAR_MENU));
+            conversation_header.add_end(conversation_header.create_pill_buttons(insert));
+        }
+#if GTK_3_12
         conversation_header.add_end(undo);
         conversation_header.add_end(archive_trash_delete);
 #endif
