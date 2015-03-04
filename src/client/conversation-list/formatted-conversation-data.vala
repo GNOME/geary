@@ -8,7 +8,6 @@
 public class FormattedConversationData : Geary.BaseObject {
     public const int LINE_SPACING = 6;
     
-    private const string ME = _("Me");
     private const string STYLE_EXAMPLE = "Gg"; // Use both upper and lower case to get max height.
     private const int TEXT_LEFT = LINE_SPACING * 2 + IconFactory.UNREAD_ICON_SIZE;
     private const double DIM_TEXT_AMOUNT = 0.05;
@@ -18,64 +17,6 @@ public class FormattedConversationData : Geary.BaseObject {
     private const int FONT_SIZE_SUBJECT = 9;
     private const int FONT_SIZE_FROM = 11;
     private const int FONT_SIZE_PREVIEW = 8;
-    
-    private class ParticipantDisplay : Geary.BaseObject, Gee.Hashable<ParticipantDisplay> {
-        public string key;
-        public Geary.RFC822.MailboxAddress address;
-        public bool is_unread;
-        
-        public ParticipantDisplay(Geary.RFC822.MailboxAddress address, bool is_unread) {
-            key = address.as_key();
-            this.address = address;
-            this.is_unread = is_unread;
-        }
-        
-        public string get_full_markup(string normalized_account_key) {
-            return get_as_markup((key == normalized_account_key) ? ME : address.get_short_address());
-        }
-        
-        public string get_short_markup(string normalized_account_key) {
-            if (key == normalized_account_key)
-                return get_as_markup(ME);
-            
-            string short_address = address.get_short_address().strip();
-            
-            if (", " in short_address) {
-                // assume address is in Last, First format
-                string[] tokens = short_address.split(", ", 2);
-                short_address = tokens[1].strip();
-                if (Geary.String.is_empty(short_address))
-                    return get_full_markup(normalized_account_key);
-            }
-            
-            // use first name as delimited by a space
-            string[] tokens = short_address.split(" ", 2);
-            if (tokens.length < 1)
-                return get_full_markup(normalized_account_key);
-            
-            string first_name = tokens[0].strip();
-            if (Geary.String.is_empty_or_whitespace(first_name))
-                return get_full_markup(normalized_account_key);
-            
-            return get_as_markup(first_name);
-        }
-        
-        private string get_as_markup(string participant) {
-            return "%s%s%s".printf(
-                is_unread ? "<b>" : "", Geary.HTML.escape_markup(participant), is_unread ? "</b>" : "");
-        }
-        
-        public bool equal_to(ParticipantDisplay other) {
-            if (this == other)
-                return true;
-            
-            return key == other.key;
-        }
-        
-        public uint hash() {
-            return key.hash();
-        }
-    }
     
     private static int cell_height = -1;
     private static int preview_height = -1;
@@ -176,54 +117,8 @@ public class FormattedConversationData : Geary.BaseObject {
         if (conversation == null || account_owner_email == null)
             return "";
         
-        string normalized_account_owner_email = account_owner_email.normalize().casefold();
-        
-        // Build chronological list of AuthorDisplay records, setting to unread if any message by
-        // that author is unread
-        Gee.ArrayList<ParticipantDisplay> list = new Gee.ArrayList<ParticipantDisplay>();
-        foreach (Geary.Email message in conversation.get_emails(Geary.App.Conversation.Ordering.RECV_DATE_ASCENDING)) {
-            // only display if something to display
-            Geary.RFC822.MailboxAddresses? addresses = use_to ? message.to : message.from;
-            if (addresses == null || addresses.size < 1)
-                continue;
-            
-            foreach (Geary.RFC822.MailboxAddress address in addresses) {
-                ParticipantDisplay participant_display = new ParticipantDisplay(address,
-                    message.email_flags.is_unread());
-
-                // if not present, add in chronological order
-                int existing_index = list.index_of(participant_display);
-                if (existing_index < 0) {
-                    list.add(participant_display);
-
-                    continue;
-                }
-                
-                // if present and this message is unread but the prior were read,
-                // this author is now unread
-                if (message.email_flags.is_unread() && !list[existing_index].is_unread)
-                    list[existing_index].is_unread = true;
-            }
-        }
-        
-        StringBuilder builder = new StringBuilder("<span foreground='%s'>".printf(
-            rgba_to_markup(get_foreground_rgba(widget, selected))));
-        if (list.size == 1) {
-            // if only one participant, use full name
-            builder.append(list[0].get_full_markup(normalized_account_owner_email));
-        } else {
-            bool first = true;
-            foreach (ParticipantDisplay participant in list) {
-                if (!first)
-                    builder.append(", ");
-                
-                builder.append(participant.get_short_markup(normalized_account_owner_email));
-                first = false;
-            }
-        }
-        builder.append("</span>");
-        
-        return builder.str;
+        return EmailUtil.get_participants(conversation, account_owner_email, use_to, true,
+            rgba_to_markup(get_foreground_rgba(widget, selected)));
     }
     
     public void render(Cairo.Context ctx, Gtk.Widget widget, Gdk.Rectangle background_area, 
