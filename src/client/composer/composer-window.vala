@@ -14,9 +14,8 @@ public class ComposerWindow : Gtk.Window, ComposerContainer {
         
         add(composer);
         
-        composer.header.show_detach_button = false;
-        
         if (!GearyApplication.instance.is_running_unity) {
+            composer.header.show_close_button = true;
             if (composer.header.parent != null)
                 composer.header.parent.remove(composer.header);
             set_titlebar(composer.header);
