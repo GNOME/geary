@@ -661,6 +661,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
         yield load_by_sparse_id(appended_ids, required_fields, Geary.Folder.ListFlags.NONE, null);
     }
     
+    // IMPORTANT: path must be the FolderPath the removed_ids originated from
     internal void remove_emails(FolderPath path, Gee.Collection<EmailIdentifier> removed_ids) {
         debug("%d messages(s) removed from %s, trimming/removing conversations in %s...", removed_ids.size,
             path.to_string(), folder.to_string());
@@ -676,17 +677,15 @@ public class Geary.App.ConversationMonitor : BaseObject {
             if (path.equal_to(folder.path))
                 primary_email_id_to_conversation.unset(removed_id);
             
-            Conversation? conversation = all_email_id_to_conversation[removed_id];
-            if (conversation == null)
+            Conversation conversation;
+            if (!all_email_id_to_conversation.unset(removed_id, out conversation))
                 continue;
             
             Email? email = conversation.get_email_by_id(removed_id);
-            if (email == null)
-                continue;
             
             // Remove from conversation by *path*, which means it may not be fully removed if
             // detected in other paths
-            bool fully_removed = conversation.remove(email, path);
+            bool fully_removed = email != null ? conversation.remove(email, path) : false;
             
             // if conversation is empty or has no messages in primary folder path, remove it
             // entirely
@@ -696,7 +695,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
                 
                 conversations.remove(conversation);
                 removed_conversations.add(conversation);
-            } else if (fully_removed) {
+            } else if (fully_removed && email != null) {
                 // since the email was fully removed from conversation, report as trimmed
                 trimmed_conversations.set(conversation, email);
             }
@@ -713,8 +712,10 @@ public class Geary.App.ConversationMonitor : BaseObject {
         if (removed_conversations.size > 0)
             debug("Removed %d conversations from %s", removed_conversations.size, folder.to_string());
         
-        foreach (Conversation conversation in removed_conversations)
+        foreach (Conversation conversation in removed_conversations) {
             notify_conversation_removed(conversation);
+            conversation.clear_owner();
+        }
     }
     
     internal async void external_append_emails_async(Folder folder, Gee.Collection<EmailIdentifier> appended_ids) {

@@ -287,6 +287,7 @@ public class GearyController : Geary.BaseObject {
         } catch (Error err) {
             message("Error closing conversation at shutdown: %s", err.message);
         } finally {
+            last_deleted_conversation = null;
             current_conversations = null;
         }
         
@@ -1342,6 +1343,7 @@ public class GearyController : Geary.BaseObject {
         // stop monitoring for conversations and close the folder
         if (current_conversations != null) {
             yield current_conversations.stop_monitoring_async(null);
+            last_deleted_conversation = null;
             current_conversations = null;
         }
         
@@ -1400,6 +1402,7 @@ public class GearyController : Geary.BaseObject {
         current_conversations.scan_completed.connect(on_conversation_count_changed);
         current_conversations.conversations_added.connect(on_conversation_count_changed);
         current_conversations.conversation_removed.connect(on_conversation_count_changed);
+        current_conversations.conversation_removed.connect(on_conversation_removed);
         
         if (!current_conversations.is_monitoring)
             yield current_conversations.start_monitoring_async(conversation_cancellable);
@@ -1425,6 +1428,11 @@ public class GearyController : Geary.BaseObject {
     private void on_conversation_count_changed() {
         if (current_conversations != null)
             conversation_count_changed(current_conversations.get_conversation_count());
+    }
+    
+    private void on_conversation_removed(Geary.App.Conversation conversation) {
+        if (conversation == last_deleted_conversation)
+            last_deleted_conversation = null;
     }
     
     private void on_libnotify_invoked(Geary.Folder? folder, Geary.Email? email) {
