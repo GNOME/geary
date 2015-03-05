@@ -320,10 +320,13 @@ public class Geary.App.ConversationMonitor : BaseObject {
      * supplied to start_monitoring_async() is used during monitoring but *not* for this method.
      * If null is supplied as the Cancellable, no cancellable is used; pass the original Cancellable
      * here to use that.
+     *
+     * Returns a result code that is semantically identical to the result of
+     * {@link Geary.Folder.close_async}.
      */
-    public async void stop_monitoring_async(Cancellable? cancellable) throws Error {
+    public async bool stop_monitoring_async(Cancellable? cancellable) throws Error {
         if (!is_monitoring)
-            return;
+            return false;
         
         yield operation_queue.stop_processing_async(cancellable);
         
@@ -337,9 +340,10 @@ public class Geary.App.ConversationMonitor : BaseObject {
         folder.account.email_flags_changed.disconnect(on_account_email_flags_changed);
         folder.account.email_locally_complete.disconnect(on_account_email_locally_complete);
         
+        bool closing = false;
         Error? close_err = null;
         try {
-            yield folder.close_async(cancellable);
+            closing = yield folder.close_async(cancellable);
         } catch (Error err) {
             // throw, but only after cleaning up (which is to say, if close_async() fails,
             // then the Folder is still treated as closed, which is the best that can be
@@ -353,6 +357,8 @@ public class Geary.App.ConversationMonitor : BaseObject {
         
         if (close_err != null)
             throw close_err;
+        
+        return closing;
     }
     
     /**

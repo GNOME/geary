@@ -47,14 +47,16 @@ public abstract class Geary.AbstractLocalFolder : Geary.Folder {
         return true;
     }
     
-    public override async void close_async(Cancellable? cancellable = null) throws Error {
+    public override async bool close_async(Cancellable? cancellable = null) throws Error {
         if (open_count == 0 || --open_count > 0)
-            return;
+            return false;
         
         closed_semaphore.blind_notify();
         
         notify_closed(Geary.Folder.CloseReason.LOCAL_CLOSE);
         notify_closed(Geary.Folder.CloseReason.FOLDER_CLOSED);
+        
+        return false;
     }
     
     public override async void wait_for_close_async(Cancellable? cancellable = null) throws Error {

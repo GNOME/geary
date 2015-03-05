@@ -5,6 +5,8 @@
  */
 
 private class Geary.ImapEngine.UserClose : Geary.ImapEngine.ReplayOperation {
+    public bool closing = false;
+    
     private MinimalFolder owner;
     private Cancellable? cancellable;
     
@@ -25,7 +27,7 @@ private class Geary.ImapEngine.UserClose : Geary.ImapEngine.ReplayOperation {
     }
     
     public override async ReplayOperation.Status replay_local_async() throws Error {
-        yield owner.user_close_async(cancellable);
+        closing = yield owner.user_close_async(cancellable);
         
         return ReplayOperation.Status.COMPLETED;
     }

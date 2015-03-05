@@ -269,14 +269,21 @@ public class GearyController : Geary.BaseObject {
         // close the ConversationMonitor
         try {
             if (current_conversations != null) {
-                yield current_conversations.stop_monitoring_async(null);
+                debug("Stopping conversation monitor for %s...", current_conversations.folder.to_string());
+                
+                bool closing = yield current_conversations.stop_monitoring_async(null);
                 
                 // If not an Inbox, wait for it to close so all pending operations are flushed
-                if (!inboxes.values.contains(current_conversations.folder))
+                if (closing) {
+                    debug("Waiting for %s to close...", current_conversations.folder.to_string());
                     yield current_conversations.folder.wait_for_close_async(null);
+                }
+                
+                debug("Stopped conversation monitor for %s", current_conversations.folder.to_string());
             }
         } catch (Error err) {
-            message("Error closing conversation at shutdown: %s", err.message);
+            message("Error closing conversation monitor %s at shutdown: %s",
+                current_conversations.folder.to_string(), err.message);
         } finally {
             current_conversations = null;
         }
@@ -284,9 +291,16 @@ public class GearyController : Geary.BaseObject {
         // close all Inboxes
         foreach (Geary.Folder inbox in inboxes.values) {
             try {
+                debug("Closing %s...", inbox.to_string());
+                
                 // close and wait for all pending operations to be flushed
                 yield inbox.close_async(null);
+                
+                debug("Waiting for %s to close completely...", inbox.to_string());
+                
                 yield inbox.wait_for_close_async(null);
+                
+                debug("Closed %s", inbox.to_string());
             } catch (Error err) {
                 message("Error closing Inbox %s at shutdown: %s", inbox.to_string(), err.message);
             }
@@ -295,7 +309,9 @@ public class GearyController : Geary.BaseObject {
         // close all Accounts
         foreach (Geary.Account account in email_stores.keys) {
             try {
+                debug("Closing account %s", account.to_string());
                 yield account.close_async(null);
+                debug("Closed account %s", account.to_string());
             } catch (Error err) {
                 message("Error closing account %s at shutdown: %s", account.to_string(), err.message);
             }
@@ -305,7 +321,9 @@ public class GearyController : Geary.BaseObject {
         
         // Turn off the lights and lock the door behind you
         try {
+            debug("Closing Engine...");
             yield Geary.Engine.instance.close_async(null);
+            debug("Closed Engine");
         } catch (Error err) {
             message("Error closing Geary Engine instance: %s", err.message);
         }
