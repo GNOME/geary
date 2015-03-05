@@ -5,7 +5,7 @@
  */
 
 public class Geary.RFC822.MailboxAddresses : Geary.MessageData.AbstractMessageData, 
-    Geary.MessageData.SearchableMessageData, Geary.RFC822.MessageData {
+    Geary.MessageData.SearchableMessageData, Geary.RFC822.MessageData, Gee.Hashable<MailboxAddresses> {
     
     public int size { get { return addrs.size; } }
     
@@ -74,9 +74,44 @@ public class Geary.RFC822.MailboxAddresses : Geary.MessageData.AbstractMessageDa
         return false;
     }
     
-    
+    /**
+     * Returns the addresses suitable for insertion into an RFC822 message.  RFC822 quoting is
+     * performed if required.
+     *
+     * @see RFC822.to_rfc822_string
+     */
     public string to_rfc822_string() {
         return MailboxAddress.list_to_string(addrs, "", (a) => a.to_rfc822_string());
+    }
+    
+    public uint hash() {
+        // create sorted set to ensure ordering no matter the list's order
+        Gee.TreeSet<string> sorted_addresses = traverse<RFC822.MailboxAddress>(addrs)
+            .map<string>(m => m.address)
+            .to_tree_set(String.stri_cmp);
+        
+        // xor all strings in sorted order
+        uint xor = 0;
+        foreach (string address in sorted_addresses)
+            xor ^= address.hash();
+        
+        return xor;
+    }
+    
+    public bool equal_to(MailboxAddresses other) {
+        if (this == other)
+            return true;
+        
+        if (addrs.size != other.addrs.size)
+            return false;
+        
+        Gee.HashSet<RFC822.MailboxAddress> first = new Gee.HashSet<RFC822.MailboxAddress>();
+        first.add_all(addrs);
+        
+        Gee.HashSet<RFC822.MailboxAddress> second = new Gee.HashSet<RFC822.MailboxAddress>();
+        second.add_all(other.addrs);
+        
+        return Collection.are_sets_equal<RFC822.MailboxAddress>(first, second);
     }
     
     /**

@@ -17,6 +17,8 @@ public class AccountDialogAddEditPane : AccountDialogPane {
     
     public signal void size_changed();
     
+    public signal void edit_alternate_emails(string email_address);
+    
     public AccountDialogAddEditPane(Gtk.Stack stack) {
         base(stack);
         
@@ -35,7 +37,8 @@ public class AccountDialogAddEditPane : AccountDialogPane {
         ok_button.clicked.connect(on_ok);
         cancel_button.clicked.connect(() => { cancel(); });
         
-        add_edit_page.size_changed.connect(() => { size_changed(); } );
+        add_edit_page.size_changed.connect(() => { size_changed(); });
+        add_edit_page.edit_alternate_emails.connect(() => { edit_alternate_emails(add_edit_page.email_address); });
         
         pack_start(add_edit_page);
         pack_start(button_box, false, false);

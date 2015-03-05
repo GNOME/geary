@@ -10,6 +10,7 @@ public class Geary.AccountInformation : BaseObject {
     private const string GROUP = "AccountInformation";
     private const string REAL_NAME_KEY = "real_name";
     private const string NICKNAME_KEY = "nickname";
+    private const string ALTERNATE_EMAILS_KEY = "alternate_emails";
     private const string SERVICE_PROVIDER_KEY = "service_provider";
     private const string ORDINAL_KEY = "ordinal";
     private const string PREFETCH_PERIOD_DAYS_KEY = "prefetch_period_days";
@@ -60,11 +61,41 @@ public class Geary.AccountInformation : BaseObject {
     
     internal File? file = null;
     
+    //
     // IMPORTANT: When adding new properties, be sure to add them to the copy method.
+    //
     
+    /**
+     * User's name for the {@link primary_mailbox}.
+     */
     public string real_name { get; set; }
+    
+    /**
+     * User label for primary account (not transmitted on wire or used in correspondence).
+     */
     public string nickname { get; set; }
+    
+    /**
+     * The primary email address for the account.
+     *
+     * This the RFC822 simple mailbox style, i.e. "jim@example.com".
+     *
+     * In general, it's better to use the result of {@link get_primary_mailbox_address}, as the
+     * {@link Geary.RFC822.MailboxAddress} object is better suited for comparisons, Gee collections,
+     * validation, composing quoted strings, and so forth.
+     */
     public string email { get; set; }
+    
+    /**
+     * A list of additional email addresses this account accepts.
+     *
+     * Use {@link add_alternate_mailbox} or {@link replace_alternate_mailboxes} rather than edit
+     * this collection directly.
+     *
+     * @see get_all_mailboxes
+     */
+    public Gee.List<Geary.RFC822.MailboxAddress>? alternate_mailboxes { get; private set; }
+    
     public Geary.ServiceProvider service_provider { get; set; }
     public int prefetch_period_days { get; set; }
     
@@ -148,6 +179,19 @@ public class Geary.AccountInformation : BaseObject {
         } finally {
             real_name = get_string_value(key_file, GROUP, REAL_NAME_KEY);
             nickname = get_string_value(key_file, GROUP, NICKNAME_KEY);
+            
+            // Store alternate emails in a list of case-insensitive strings
+            Gee.List<string> alt_email_list = get_string_list_value(key_file, GROUP, ALTERNATE_EMAILS_KEY);
+            if (alt_email_list.size == 0) {
+                alternate_mailboxes = null;
+            } else {
+                foreach (string alt_email in alt_email_list) {
+                    RFC822.MailboxAddresses mailboxes = new RFC822.MailboxAddresses.from_rfc822_string(alt_email);
+                    foreach (RFC822.MailboxAddress mailbox in mailboxes.get_all())
+                        add_alternate_mailbox(mailbox);
+                }
+            }
+            
             imap_credentials.user = get_string_value(key_file, GROUP, IMAP_USERNAME_KEY, email);
             imap_remember_password = get_bool_value(key_file, GROUP, IMAP_REMEMBER_PASSWORD_KEY, true);
             smtp_credentials.user = get_string_value(key_file, GROUP, SMTP_USERNAME_KEY, email);
@@ -231,6 +275,11 @@ public class Geary.AccountInformation : BaseObject {
         real_name = from.real_name;
         nickname = from.nickname;
         email = from.email;
+        alternate_mailboxes = null;
+        if (from.alternate_mailboxes != null) {
+            foreach (RFC822.MailboxAddress alternate_mailbox in from.alternate_mailboxes)
+                add_alternate_mailbox(alternate_mailbox);
+        }
         service_provider = from.service_provider;
         prefetch_period_days = from.prefetch_period_days;
         save_sent_mail = from.save_sent_mail;
@@ -256,6 +305,48 @@ public class Geary.AccountInformation : BaseObject {
         save_drafts = from.save_drafts;
         use_email_signature = from.use_email_signature;
         email_signature = from.email_signature;
+    }
+    
+    /**
+     * Return a list of the primary and all alternate email addresses.
+     */
+    public Gee.List<Geary.RFC822.MailboxAddress> get_all_mailboxes() {
+        Gee.ArrayList<RFC822.MailboxAddress> all = new Gee.ArrayList<RFC822.MailboxAddress>();
+        
+        all.add(get_primary_mailbox_address());
+        
+        if (alternate_mailboxes != null)
+            all.add_all(alternate_mailboxes);
+        
+        return all;
+    }
+    
+    /**
+     * Add an alternate email address to the account.
+     *
+     * Duplicates will be ignored.
+     */
+    public void add_alternate_mailbox(Geary.RFC822.MailboxAddress mailbox) {
+        if (alternate_mailboxes == null)
+            alternate_mailboxes = new Gee.ArrayList<RFC822.MailboxAddress>();
+        
+        if (!alternate_mailboxes.contains(mailbox))
+            alternate_mailboxes.add(mailbox);
+    }
+    
+    /**
+     * Replaces the list of alternate email addresses with the supplied collection.
+     *
+     * Duplicates will be ignored.
+     */
+    public void replace_alternate_mailboxes(Gee.Collection<Geary.RFC822.MailboxAddress>? mailboxes) {
+        alternate_mailboxes = null;
+        
+        if (mailboxes == null || mailboxes.size == 0)
+            return;
+        
+        foreach (RFC822.MailboxAddress mailbox in mailboxes)
+            add_alternate_mailbox(mailbox);
     }
     
     /**
@@ -712,6 +803,13 @@ public class Geary.AccountInformation : BaseObject {
         key_file.set_boolean(GROUP, SAVE_SENT_MAIL_KEY, save_sent_mail);
         key_file.set_boolean(GROUP, USE_EMAIL_SIGNATURE_KEY, use_email_signature);
         key_file.set_string(GROUP, EMAIL_SIGNATURE_KEY, email_signature);
+        if (alternate_mailboxes != null && alternate_mailboxes.size > 0) {
+            string[] list = new string[alternate_mailboxes.size];
+            for (int ctr = 0; ctr < alternate_mailboxes.size; ctr++)
+                list[ctr] = alternate_mailboxes[ctr].to_rfc822_string();
+            
+            key_file.set_string_list(GROUP, ALTERNATE_EMAILS_KEY, list);
+        }
         
         if (service_provider == ServiceProvider.OTHER) {
             key_file.set_value(GROUP, IMAP_HOST, default_imap_server_host);
@@ -797,15 +895,17 @@ public class Geary.AccountInformation : BaseObject {
     /**
      * Returns a MailboxAddress object for this account.
      */
-    public RFC822.MailboxAddress get_mailbox_address() {
+    public RFC822.MailboxAddress get_primary_mailbox_address() {
         return new RFC822.MailboxAddress(real_name, email);
     }
     
     /**
-     * Returns a MailboxAddresses object with this mailbox address.
+     * Returns MailboxAddresses with the primary mailbox address.
+     *
+     * @see get_primary_mailbox_address
      */
-    public RFC822.MailboxAddresses get_from() {
-        return new RFC822.MailboxAddresses.single(get_mailbox_address());
+    public RFC822.MailboxAddresses get_primary_from() {
+        return new RFC822.MailboxAddresses.single(get_primary_mailbox_address());
     }
     
     public static int compare_ascending(AccountInformation a, AccountInformation b) {

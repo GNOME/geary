@@ -46,6 +46,10 @@ public bool stri_equal(string a, string b) {
     return str_equal(a.down(), b.down());
 }
 
+public int stri_cmp(string a, string b) {
+    return strcmp(a.down(), b.down());
+}
+
 // Removes redundant spaces, tabs, and newlines.
 public string reduce_whitespace(string _s) {
     string s = _s;

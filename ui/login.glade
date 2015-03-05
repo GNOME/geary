@@ -298,7 +298,18 @@
           </packing>
         </child>
         <child>
-          <placeholder/>
+          <object class="GtkButton" id="button: edit_alternate_email">
+            <property name="label" translatable="yes">Addi_tional email addresses…</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="use_underline">True</property>
+          </object>
+          <packing>
+            <property name="left_attach">1</property>
+            <property name="top_attach">7</property>
+            <property name="width">1</property>
+            <property name="height">1</property>
+          </packing>
         </child>
         <child>
           <placeholder/>
@@ -843,80 +854,6 @@
       </packing>
     </child>
     <child>
-      <object class="GtkBox" id="storage container">
-        <property name="can_focus">False</property>
-        <property name="margin_bottom">10</property>
-        <property name="orientation">vertical</property>
-        <child>
-          <object class="GtkLabel" id="label: storage">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="margin_top">8</property>
-            <property name="xalign">0</property>
-            <property name="xpad">4</property>
-            <property name="ypad">6</property>
-            <property name="label" translatable="yes">Storage</property>
-            <attributes>
-              <attribute name="weight" value="bold"/>
-            </attributes>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkGrid" id="grid3">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <child>
-              <object class="GtkLabel" id="label: sync">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="xalign">0</property>
-                <property name="xpad">6</property>
-                <property name="label" translatable="yes">_Download mail</property>
-                <property name="use_underline">True</property>
-                <style>
-                  <class name="dim-label"/>
-                </style>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">0</property>
-                <property name="width">1</property>
-                <property name="height">1</property>
-              </packing>
-            </child>
-            <child>
-              <object class="GtkComboBoxText" id="combo: storage">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="active">0</property>
-              </object>
-              <packing>
-                <property name="left_attach">1</property>
-                <property name="top_attach">0</property>
-                <property name="width">1</property>
-                <property name="height">1</property>
-              </packing>
-            </child>
-          </object>
-          <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-      </object>
-      <packing>
-        <property name="expand">False</property>
-        <property name="fill">True</property>
-        <property name="position">4</property>
-      </packing>
-    </child>
-    <child>
       <object class="GtkBox" id="composer container">
         <property name="can_focus">False</property>
         <property name="margin_bottom">10</property>
@@ -999,6 +936,80 @@
       </object>
       <packing>
         <property name="expand">True</property>
+        <property name="fill">True</property>
+        <property name="position">4</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkBox" id="storage container">
+        <property name="can_focus">False</property>
+        <property name="margin_bottom">10</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <object class="GtkLabel" id="label: storage">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="margin_top">8</property>
+            <property name="xalign">0</property>
+            <property name="xpad">4</property>
+            <property name="ypad">6</property>
+            <property name="label" translatable="yes">Storage</property>
+            <attributes>
+              <attribute name="weight" value="bold"/>
+            </attributes>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkGrid" id="grid3">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <child>
+              <object class="GtkLabel" id="label: sync">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="xalign">0</property>
+                <property name="xpad">6</property>
+                <property name="label" translatable="yes">_Download mail</property>
+                <property name="use_underline">True</property>
+                <style>
+                  <class name="dim-label"/>
+                </style>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">0</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkComboBoxText" id="combo: storage">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="active">0</property>
+              </object>
+              <packing>
+                <property name="left_attach">1</property>
+                <property name="top_attach">0</property>
+                <property name="width">1</property>
+                <property name="height">1</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+      <packing>
+        <property name="expand">False</property>
         <property name="fill">True</property>
         <property name="position">4</property>
       </packing>
