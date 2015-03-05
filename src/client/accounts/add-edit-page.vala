@@ -169,6 +169,7 @@ public class AddEditPage : Gtk.Box {
     private Gtk.ComboBoxText combo_service;
     private Gtk.CheckButton check_remember_password;
     private Gtk.CheckButton check_save_sent_mail;
+    private Gtk.Button alternate_email_button;
 
     // Signature
     private Gtk.Box composer_container;
@@ -215,6 +216,8 @@ public class AddEditPage : Gtk.Box {
     
     public signal void size_changed();
     
+    public signal void edit_alternate_emails();
+    
     public AddEditPage() {
         Object(orientation: Gtk.Orientation.VERTICAL, spacing: 4);
         
@@ -239,6 +242,7 @@ public class AddEditPage : Gtk.Box {
         entry_password = (Gtk.Entry) builder.get_object("entry: password");
         check_remember_password = (Gtk.CheckButton) builder.get_object("check: remember_password");
         check_save_sent_mail = (Gtk.CheckButton) builder.get_object("check: save_sent_mail");
+        alternate_email_button = (Gtk.Button) builder.get_object("button: edit_alternate_email");
         label_error = (Gtk.Label) builder.get_object("label: error");
         other_info = (Gtk.Alignment) builder.get_object("container: other_info");
         
@@ -328,6 +332,7 @@ public class AddEditPage : Gtk.Box {
         check_smtp_use_imap_credentials.toggled.connect(on_changed);
         check_smtp_noauth.toggled.connect(on_changed);
         check_save_drafts.toggled.connect(on_changed);
+        alternate_email_button.clicked.connect(on_alternate_email_button_clicked);
         
         entry_email.changed.connect(on_email_changed);
         entry_password.changed.connect(on_password_changed);
@@ -494,6 +499,10 @@ public class AddEditPage : Gtk.Box {
     
     private void on_changed() {
         info_changed();
+    }
+    
+    private void on_alternate_email_button_clicked() {
+        edit_alternate_emails();
     }
     
     // Prevent non-printable characters in nickname field.
@@ -696,12 +705,14 @@ public class AddEditPage : Gtk.Box {
     // Updates UI based on various options.
     internal void update_ui() {
         base.show_all();
+        
         welcome_box.visible = mode == PageMode.WELCOME;
         entry_nickname.visible = label_nickname.visible = mode != PageMode.WELCOME;
         storage_container.visible = mode == PageMode.EDIT;
         check_save_sent_mail.visible = mode == PageMode.EDIT;
         check_save_drafts.visible = mode == PageMode.EDIT;
         composer_container.visible = mode == PageMode.EDIT;
+        alternate_email_button.visible = mode == PageMode.EDIT;
         
         if (get_service_provider() == Geary.ServiceProvider.OTHER) {
             // Display all options for custom providers.

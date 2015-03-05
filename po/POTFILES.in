@@ -4,6 +4,7 @@ desktop/geary-autostart.desktop.in
 [type: gettext/ini]desktop/geary-attach.contract.in
 src/client/accounts/account-dialog-account-list-pane.vala
 src/client/accounts/account-dialog-add-edit-pane.vala
+src/client/accounts/account-dialog-edit-alternate-emails-pane.vala
 src/client/accounts/account-dialog-pane.vala
 src/client/accounts/account-dialog-remove-confirm-pane.vala
 src/client/accounts/account-dialog-remove-fail-pane.vala
@@ -381,6 +382,7 @@ src/mailer/main.vala
 [type: gettext/glade]ui/certificate_warning_dialog.glade
 [type: gettext/glade]ui/composer_accelerators.ui
 [type: gettext/glade]ui/composer.glade
+[type: gettext/glade]ui/edit_alternate_emails.glade
 [type: gettext/glade]ui/find_bar.glade
 [type: gettext/glade]ui/login.glade
 [type: gettext/glade]ui/message.glade

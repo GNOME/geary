@@ -17,6 +17,8 @@ public class Geary.ComposedEmail : BaseObject {
         | Geary.Email.Field.DATE;
     
     public DateTime date { get; set; }
+    // TODO: sender goes here, but not beyond, as it's not properly supported by GMime yet.
+    public RFC822.MailboxAddress? sender { get; set; default = null; }
     public RFC822.MailboxAddresses from { get; set; }
     public RFC822.MailboxAddresses? to { get; set; default = null; }
     public RFC822.MailboxAddresses? cc { get; set; default = null; }

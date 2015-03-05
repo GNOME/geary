@@ -321,6 +321,7 @@ client/application/secret-mediator.vala
 client/accounts/account-dialog.vala
 client/accounts/account-dialog-account-list-pane.vala
 client/accounts/account-dialog-add-edit-pane.vala
+client/accounts/account-dialog-edit-alternate-emails-pane.vala
 client/accounts/account-dialog-pane.vala
 client/accounts/account-dialog-remove-confirm-pane.vala
 client/accounts/account-dialog-remove-fail-pane.vala

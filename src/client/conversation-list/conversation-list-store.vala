@@ -285,7 +285,8 @@ public class ConversationListStore : Gtk.ListStore {
     
     private void set_row(Gtk.TreeIter iter, Geary.App.Conversation conversation, Geary.Email preview) {
         FormattedConversationData conversation_data = new FormattedConversationData(conversation,
-            preview, conversation_monitor.folder, conversation_monitor.folder.account.information.email);
+            preview, conversation_monitor.folder,
+            conversation_monitor.folder.account.information.get_all_mailboxes());
         
         Gtk.TreePath? path = get_path(iter);
         assert(path != null);

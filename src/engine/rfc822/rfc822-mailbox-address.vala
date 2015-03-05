@@ -4,13 +4,47 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class Geary.RFC822.MailboxAddress : Geary.MessageData.SearchableMessageData, BaseObject {
+/**
+ * An immutable object containing a representation of an Internet email address.
+ *
+ * See [[https://tools.ietf.org/html/rfc2822#section-3.4]]
+ */
+
+public class Geary.RFC822.MailboxAddress : Geary.MessageData.SearchableMessageData,
+    Gee.Hashable<MailboxAddress>, BaseObject {
     internal delegate string ListToStringDelegate(MailboxAddress address);
     
+    /**
+     * The optional user-friendly name associated with the {@link MailboxAddress}.
+     *
+     * For "Dirk Gently <dirk@example.com>", this would be "Dirk Gently".
+     */
     public string? name { get; private set; }
+    
+    /**
+     * The routing of the message (optional, obsolete).
+     */
     public string? source_route { get; private set; }
+    
+    /**
+     * The mailbox (local-part) portion of the {@link MailboxAddress}.
+     *
+     * For "Dirk Gently <dirk@example.com>", this would be "dirk".
+     */
     public string mailbox { get; private set; }
+    
+    /**
+     * The domain portion of the {@link MailboxAddress}.
+     *
+     * For "Dirk Gently <dirk@example.com>", this would be "example.com".
+     */
     public string domain { get; private set; }
+    
+    /**
+     * The address specification of the {@link MailboxAddress}.
+     *
+     * For "Dirk Gently <dirk@example.com>", this would be "dirk@example.com".
+     */
     public string address { get; private set; }
     
     public MailboxAddress(string? name, string address) {
@@ -23,6 +57,9 @@ public class Geary.RFC822.MailboxAddress : Geary.MessageData.SearchableMessageDa
         if (atsign > 0) {
             mailbox = address.slice(0, atsign);
             domain = address.slice(atsign + 1, address.length);
+        } else {
+            mailbox = "";
+            domain = "";
         }
     }
     
@@ -116,13 +153,6 @@ public class Geary.RFC822.MailboxAddress : Geary.MessageData.SearchableMessageDa
     }
     
     /**
-     * Returns a normalized casefolded string of the address, suitable for comparison and hashing.
-     */
-    public string as_key() {
-        return address.normalize().casefold();
-    }
-    
-    /**
      * Returns the address suitable for insertion into an RFC822 message.  RFC822 quoting is
      * performed if required.
      *
@@ -139,6 +169,17 @@ public class Geary.RFC822.MailboxAddress : Geary.MessageData.SearchableMessageDa
      */
     public string to_searchable_string() {
         return get_full_address();
+    }
+    
+    public uint hash() {
+        return String.stri_hash(address);
+    }
+    
+    /**
+     * Equality is defined as a case-insensitive comparison of the {@link address}.
+     */
+    public bool equal_to(MailboxAddress other) {
+        return this != other ? String.stri_equal(address, other.address) : true;
     }
     
     public string to_string() {

@@ -26,6 +26,17 @@ public class ComposerWidget : Gtk.EventBox {
         INLINE,
         INLINE_COMPACT
     }
+
+    private class FromAddressMap {
+        public Geary.Account account;
+        public Geary.RFC822.MailboxAddress? sender;
+        public Geary.RFC822.MailboxAddresses from;
+        public FromAddressMap(Geary.Account a, Geary.RFC822.MailboxAddresses f, Geary.RFC822.MailboxAddress? s = null) {
+            account = a;
+            from = f;
+            sender = s;
+        }
+    }
     
     public const string ACTION_UNDO = "undo";
     public const string ACTION_REDO = "redo";
@@ -126,7 +137,9 @@ public class ComposerWidget : Gtk.EventBox {
     
     public Geary.Account account { get; private set; }
     
-    public string from { get; set; }
+    public Geary.RFC822.MailboxAddress sender { get; set; }
+    
+    public Geary.RFC822.MailboxAddresses from { get; set; }
     
     public string to {
         get { return to_entry.get_text(); }
@@ -205,6 +218,7 @@ public class ComposerWidget : Gtk.EventBox {
     private Gtk.Label from_label;
     private Gtk.Label from_single;
     private Gtk.ComboBoxText from_multiple = new Gtk.ComboBoxText();
+    private Gee.ArrayList<FromAddressMap> from_list = new Gee.ArrayList<FromAddressMap>();
     private EmailEntry to_entry;
     private EmailEntry cc_entry;
     private Gtk.Label bcc_label;
@@ -351,6 +365,7 @@ public class ComposerWidget : Gtk.EventBox {
         // Listen to account signals to update from menu.
         Geary.Engine.instance.account_available.connect(update_from_field);
         Geary.Engine.instance.account_unavailable.connect(update_from_field);
+        // TODO: also listen for account updates to allow adding identities while writing an email
         
         Gtk.ScrolledWindow scroll = new Gtk.ScrolledWindow(null, null);
         scroll.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC);
@@ -427,9 +442,8 @@ public class ComposerWidget : Gtk.EventBox {
         
         add_extra_accelerators();
         
-        from = account.information.get_from().to_rfc822_string();
+        from = account.information.get_primary_from();
         update_from_field();
-        from_multiple.changed.connect(on_from_changed);
         
         if (referred != null) {
             if (compose_type != ComposeType.NEW_MESSAGE) {
@@ -573,7 +587,7 @@ public class ComposerWidget : Gtk.EventBox {
         chain.append(attachments_box);
         box.set_focus_chain(chain);
         
-        // If there's only one account, open the drafts manager.  If there's more than one account,
+        // If there's only one From option, open the drafts manager.  If there's more than one,
         // the drafts manager will be opened by on_from_changed().
         if (!from_multiple.visible)
             open_draft_manager_async.begin(null);
@@ -675,9 +689,9 @@ public class ComposerWidget : Gtk.EventBox {
             compose_type = ComposeType.REPLY_ALL;
             
         to_entry.modified = cc_entry.modified = bcc_entry.modified = false;
-        if (!Geary.RFC822.Utils.equal(to_entry.addresses, reply_to_addresses))
+        if (!to_entry.addresses.equal_to(reply_to_addresses))
             to_entry.modified = true;
-        if (cc != "" && !Geary.RFC822.Utils.equal(cc_entry.addresses, reply_cc_addresses))
+        if (cc != "" && !cc_entry.addresses.equal_to(reply_cc_addresses))
             cc_entry.modified = true;
         if (bcc != "")
             bcc_entry.modified = true;
@@ -704,6 +718,33 @@ public class ComposerWidget : Gtk.EventBox {
         }
     }
     
+    private bool check_preferred_from_address(Gee.List<Geary.RFC822.MailboxAddress> account_addresses,
+        Geary.RFC822.MailboxAddresses? referred_addresses) {
+        if (referred_addresses != null) {
+            foreach (Geary.RFC822.MailboxAddress address in account_addresses) {
+                if (referred_addresses.get_all().contains(address)) {
+                    from = new Geary.RFC822.MailboxAddresses.single(address);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
+    private void set_preferred_from_address(Geary.Email referred, ComposeType compose_type) {
+        if (compose_type == ComposeType.NEW_MESSAGE) {
+            if (referred.from != null)
+                from = referred.from;
+        } else {
+            Gee.List<Geary.RFC822.MailboxAddress> account_addresses = account.information.get_all_mailboxes();
+            if (!check_preferred_from_address(account_addresses, referred.to)) {
+                if (!check_preferred_from_address(account_addresses, referred.cc))
+                    if (!check_preferred_from_address(account_addresses, referred.bcc))
+                        check_preferred_from_address(account_addresses, referred.from);
+            }
+        }
+    }
+
     private void on_load_finished(WebKit.WebFrame frame) {
         if (get_realized())
             on_load_finished_and_realized();
@@ -845,9 +886,8 @@ public class ComposerWidget : Gtk.EventBox {
     public Geary.ComposedEmail get_composed_email(DateTime? date_override = null,
         bool only_html = false) {
         Geary.ComposedEmail email = new Geary.ComposedEmail(
-            date_override ?? new DateTime.now_local(),
-            new Geary.RFC822.MailboxAddresses.from_rfc822_string(from)
-        );
+            date_override ?? new DateTime.now_local(), from);
+        email.sender = sender;
         
         if (to_entry.addresses != null)
             email.to = to_entry.addresses;
@@ -947,15 +987,16 @@ public class ComposerWidget : Gtk.EventBox {
     
     private void add_recipients_and_ids(ComposeType type, Geary.Email referred,
         bool modify_headers = true) {
-        string? sender_address = account.information.get_mailbox_address().address;
+        Gee.List<Geary.RFC822.MailboxAddress> sender_addresses = account.information.get_all_mailboxes();
         Geary.RFC822.MailboxAddresses to_addresses =
-            Geary.RFC822.Utils.create_to_addresses_for_reply(referred, sender_address);
+            Geary.RFC822.Utils.create_to_addresses_for_reply(referred, sender_addresses);
         Geary.RFC822.MailboxAddresses cc_addresses =
-            Geary.RFC822.Utils.create_cc_addresses_for_reply_all(referred, sender_address);
+            Geary.RFC822.Utils.create_cc_addresses_for_reply_all(referred, sender_addresses);
         reply_to_addresses = Geary.RFC822.Utils.merge_addresses(reply_to_addresses, to_addresses);
         reply_cc_addresses = Geary.RFC822.Utils.remove_addresses(
             Geary.RFC822.Utils.merge_addresses(reply_cc_addresses, cc_addresses),
             reply_to_addresses);
+        set_preferred_from_address(referred, type);
         
         if (!modify_headers)
             return;
@@ -2224,7 +2265,39 @@ public class ComposerWidget : Gtk.EventBox {
         }
     }
     
+    private bool add_account_emails_to_from_list(Geary.Account account, bool set_active = false) {
+        Geary.RFC822.MailboxAddresses primary_address = new Geary.RFC822.MailboxAddresses.single(
+            account.information.get_primary_mailbox_address());
+        from_multiple.append_text(primary_address.to_rfc822_string());
+        from_list.add(new FromAddressMap(account, primary_address));
+        if (!set_active && from.equal_to(primary_address)) {
+            from_multiple.set_active(from_list.size - 1);
+            set_active = true;
+        }
+        
+        if (account.information.alternate_mailboxes != null) {
+            foreach (Geary.RFC822.MailboxAddress alternate_mailbox in account.information.alternate_mailboxes) {
+                Geary.RFC822.MailboxAddresses addresses = new Geary.RFC822.MailboxAddresses.single(
+                    alternate_mailbox);
+                
+                // Displayed in the From dropdown to indicate an "alternate email address"
+                // for an account.  The first printf argument will be the alternate email
+                // address, and the second will be the account's primary email address.
+                string display = _("%1$s via %2$s").printf(addresses.to_rfc822_string(), account.information.email);
+                from_multiple.append_text(display);
+                from_list.add(new FromAddressMap(account, addresses));
+                
+                if (!set_active && from.equal_to(addresses)) {
+                    from_multiple.set_active(from_list.size - 1);
+                    set_active = true;
+                }
+            }
+        }
+        return set_active;
+    }
+    
     private void update_from_field() {
+        from_multiple.changed.disconnect(on_from_changed);
         from_single.visible = from_multiple.visible = from_label.visible = false;
         
         Gee.Map<string, Geary.AccountInformation> accounts;
@@ -2242,44 +2315,49 @@ public class ComposerWidget : Gtk.EventBox {
             return;
         
         // If there's only one account, show nothing. (From fields are hidden above.)
-        if (accounts.size <= 1)
+        if (accounts.size < 1 || (accounts.size == 1 && Geary.traverse<Geary.AccountInformation>(
+            accounts.values).first().alternate_mailboxes == null))
             return;
         
         from_label.visible = true;
         
+        from_label.set_use_underline(true);
+        from_label.set_mnemonic_widget(from_multiple);
+        // Composer label (with mnemonic underscore) for the account selector
+        // when choosing what address to send a message from.
+        from_label.set_text_with_mnemonic(_("_From:"));
+        
+        from_multiple.visible = true;
+        from_multiple.remove_all();
+        from_list = new Gee.ArrayList<FromAddressMap>();
+        
+        bool set_active = false;
         if (compose_type == ComposeType.NEW_MESSAGE) {
-            // For new messages, show the account combo-box.
-            from_label.set_use_underline(true);
-            from_label.set_mnemonic_widget(from_multiple);
-            // Composer label (with mnemonic underscore) for the account selector
-            // when choosing what address to send a message from.
-            from_label.set_text_with_mnemonic(_("_From:"));
-            
-            from_multiple.visible = true;
-            from_multiple.remove_all();
-            foreach (Geary.AccountInformation a in accounts.values)
-                from_multiple.append(a.email, a.get_mailbox_address().get_full_address());
-            
-            // Set the active account to the currently selected account, or failing that, set it
-            // to the first account in the list.
-            if (!from_multiple.set_active_id(account.information.email))
-                from_multiple.set_active(0);
+            set_active = add_account_emails_to_from_list(account);
+            foreach (Geary.AccountInformation info in accounts.values) {
+                try {
+                    Geary.Account a = Geary.Engine.instance.get_account_instance(info);
+                    if (a != account)
+                        set_active = add_account_emails_to_from_list(a, set_active);
+                } catch (Error e) {
+                    debug("Error getting account in composer: %s", e.message);
+                }
+            }
         } else {
-            // For other types of messages, just show the from account.
-            from_label.set_use_underline(false);
-            // Composer label (without mnemonic underscore) for the account selector
-            // when choosing what address to send a message from.
-            from_label.set_text(_("From:"));
-            
-            from_single.label = account.information.get_mailbox_address().get_full_address();
-            from_single.visible = true;
+            set_active = add_account_emails_to_from_list(account);
         }
+        
+        if (!set_active) {
+            // The identity or account that was active before has been removed
+            // use the best we can get now (primary address of the account or any other)
+            from_multiple.set_active(0);
+            on_from_changed();
+        }
+        
+        from_multiple.changed.connect(on_from_changed);
     }
     
     private void on_from_changed() {
-        if (compose_type != ComposeType.NEW_MESSAGE)
-            return;
-        
         bool changed = false;
         try {
             changed = update_from_account();
@@ -2298,24 +2376,19 @@ public class ComposerWidget : Gtk.EventBox {
     }
     
     private bool update_from_account() throws Error {
-        // Since we've set the combo box ID to the email addresses, we can
-        // fetch that and use it to grab the account from the engine.
-        string? id = from_multiple.get_active_id();
-        if (id == null)
+        int index = from_multiple.get_active();
+        if (index < 0)
             return false;
         
-        // it's possible for changed signals to fire even though nothing has changed; catch that
-        // here when possible to avoid a lot of extra work
-        Geary.AccountInformation? new_account_info = Geary.Engine.instance.get_accounts().get(id);
-        if (new_account_info == null)
-            return false;
+        assert(from_list.size > index);
         
-        Geary.Account new_account = Geary.Engine.instance.get_account_instance(new_account_info);
+        Geary.Account new_account = from_list.get(index).account;
+        from = from_list.get(index).from;
+        sender = from_list.get(index).sender;
         if (new_account == account)
             return false;
         
         account = new_account;
-        from = new_account_info.get_from().to_rfc822_string();
         set_entry_completions();
         
         return true;
