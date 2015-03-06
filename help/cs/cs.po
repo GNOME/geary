@@ -6,8 +6,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: geary master\n"
-"POT-Creation-Date: 2015-02-03 05:56+0000\n"
-"PO-Revision-Date: 2015-02-03 08:27+0100\n"
+"POT-Creation-Date: 2015-03-06 05:56+0000\n"
+"PO-Revision-Date: 2015-03-06 13:06+0100\n"
 "Last-Translator: Marek Černocký <marek@manet.cz>\n"
 "Language-Team: Czech <gnome-cs-list@gnome.org>\n"
 "Language: cs\n"
@@ -265,7 +265,7 @@ msgstr ""
 msgid "Star"
 msgstr "Přidělit hvězdičku"
 
-#: C/shortcuts.page:44(key) C/shortcuts.page:92(key)
+#: C/shortcuts.page:44(key) C/shortcuts.page:104(key)
 msgid "S"
 msgstr "S"
 
@@ -273,7 +273,7 @@ msgstr "S"
 msgid "Unstar"
 msgstr "Odebrat hvězdičku"
 
-#: C/shortcuts.page:48(key) C/shortcuts.page:126(key)
+#: C/shortcuts.page:48(key) C/shortcuts.page:138(key)
 msgid "D"
 msgstr "D"
 
@@ -302,196 +302,220 @@ msgstr ""
 "key><key>U</key></keyseq>"
 
 #: C/shortcuts.page:59(p)
-msgid "Toggle spam"
-msgstr "Označit jako spam/zrušit označení spamu"
+#| msgid "Conversation list"
+msgid "Move focus to conversation list"
+msgstr "Přesunout zaměření na seznam konverzací"
 
-#: C/shortcuts.page:60(p)
-msgid "<keyseq><key>Ctrl</key><key>J</key></keyseq> or <key>!</key>"
-msgstr "<keyseq><key>Ctrl</key><key>J</key></keyseq> nebo <key>!</key>"
-
-#: C/shortcuts.page:63(p)
-msgid "Quit"
-msgstr "Ukončit"
-
-#: C/shortcuts.page:64(key) C/shortcuts.page:80(key) C/shortcuts.page:84(key)
-#: C/shortcuts.page:88(key) C/shortcuts.page:92(key) C/shortcuts.page:96(key)
-#: C/shortcuts.page:100(key) C/shortcuts.page:104(key)
-#: C/shortcuts.page:114(key) C/shortcuts.page:118(key)
-#: C/shortcuts.page:126(key) C/shortcuts.page:134(key)
-#: C/shortcuts.page:138(key) C/shortcuts.page:142(key)
-#: C/shortcuts.page:146(key) C/shortcuts.page:150(key)
-#: C/shortcuts.page:154(key)
+#: C/shortcuts.page:60(key) C/shortcuts.page:76(key) C/shortcuts.page:92(key)
+#: C/shortcuts.page:96(key) C/shortcuts.page:100(key)
+#: C/shortcuts.page:104(key) C/shortcuts.page:108(key)
+#: C/shortcuts.page:112(key) C/shortcuts.page:116(key)
+#: C/shortcuts.page:126(key) C/shortcuts.page:130(key)
+#: C/shortcuts.page:138(key) C/shortcuts.page:146(key)
+#: C/shortcuts.page:150(key) C/shortcuts.page:154(key)
+#: C/shortcuts.page:158(key) C/shortcuts.page:162(key)
+#: C/shortcuts.page:166(key)
 msgid "Ctrl"
 msgstr "Ctrl"
 
+#: C/shortcuts.page:60(key) C/shortcuts.page:146(key)
+msgid "B"
+msgstr "B"
+
+#: C/shortcuts.page:63(p)
+#| msgid "Find next in current conversation"
+msgid "Jump to next (older) conversation"
+msgstr "Přejít na následující (starší) konverzaci"
+
 #: C/shortcuts.page:64(key)
+msgid "j"
+msgstr "j"
+
+#: C/shortcuts.page:67(p)
+#| msgid "Find previous in current conversation"
+msgid "Jump to previous (newer) conversation"
+msgstr "Přejít na předchozí (novější) konverzaci"
+
+#: C/shortcuts.page:68(key)
+msgid "k"
+msgstr "k"
+
+#: C/shortcuts.page:71(p)
+msgid "Toggle spam"
+msgstr "Označit jako spam/zrušit označení spamu"
+
+#: C/shortcuts.page:72(p)
+msgid "<keyseq><key>Ctrl</key><key>J</key></keyseq> or <key>!</key>"
+msgstr "<keyseq><key>Ctrl</key><key>J</key></keyseq> nebo <key>!</key>"
+
+#: C/shortcuts.page:75(p)
+msgid "Quit"
+msgstr "Ukončit"
+
+#: C/shortcuts.page:76(key)
 msgid "Q"
 msgstr "Q"
 
-#: C/shortcuts.page:67(p)
+#: C/shortcuts.page:79(p)
 msgid "Zoom in"
 msgstr "Přiblížit"
 
-#: C/shortcuts.page:68(p)
+#: C/shortcuts.page:80(p)
 msgid "<keyseq><key>Ctrl</key><key>=</key></keyseq> or <key>=</key>"
 msgstr "<keyseq><key>Ctrl</key><key>=</key></keyseq> nebo <key>=</key>"
 
-#: C/shortcuts.page:71(p)
+#: C/shortcuts.page:83(p)
 msgid "Zoom out"
 msgstr "Oddálit"
 
-#: C/shortcuts.page:72(p)
+#: C/shortcuts.page:84(p)
 msgid "<keyseq><key>Ctrl</key><key>-</key></keyseq> or <key>-</key>"
 msgstr "<keyseq><key>Ctrl</key><key>-</key></keyseq> nebo <key>-</key>"
 
-#: C/shortcuts.page:75(p)
+#: C/shortcuts.page:87(p)
 msgid "Reset zoom"
 msgstr "Přiblížit na výchozí velikost"
 
-#: C/shortcuts.page:76(p)
+#: C/shortcuts.page:88(p)
 msgid "<keyseq><key>Ctrl</key><key>0</key></keyseq> or <key>0</key>"
 msgstr "<keyseq><key>Ctrl</key><key>0</key></keyseq> nebo <key>0</key>"
 
-#: C/shortcuts.page:79(p) C/preferences.page:10(title)
+#: C/shortcuts.page:91(p) C/preferences.page:10(title)
 msgid "Preferences"
 msgstr "Předvolby"
 
-#: C/shortcuts.page:80(key)
+#: C/shortcuts.page:92(key)
 msgid "E"
 msgstr "E"
 
-#: C/shortcuts.page:83(p) C/accounts.page:10(title)
+#: C/shortcuts.page:95(p) C/accounts.page:10(title)
 msgid "Accounts"
 msgstr "Účty"
 
-#: C/shortcuts.page:84(key)
+#: C/shortcuts.page:96(key)
 msgid "M"
 msgstr "M"
 
-#: C/shortcuts.page:87(p)
+#: C/shortcuts.page:99(p)
 msgid "Close composer window"
 msgstr "Zavřít okno editoru"
 
-#: C/shortcuts.page:88(key)
+#: C/shortcuts.page:100(key)
 msgid "W"
 msgstr "W"
 
-#: C/shortcuts.page:91(p)
+#: C/shortcuts.page:103(p)
 msgid "Jump to search box"
 msgstr "Přejít do vyhledávacího pole"
 
-#: C/shortcuts.page:95(p)
+#: C/shortcuts.page:107(p)
 msgid "Find in current conversation"
 msgstr "Hledat v aktuální konverzaci"
 
-#: C/shortcuts.page:96(key)
+#: C/shortcuts.page:108(key)
 msgid "F"
 msgstr "F"
 
-#: C/shortcuts.page:99(p)
+#: C/shortcuts.page:111(p)
 msgid "Find next in current conversation"
 msgstr "Najít následující v aktuální konverzaci"
 
-#: C/shortcuts.page:100(key) C/shortcuts.page:104(key)
+#: C/shortcuts.page:112(key) C/shortcuts.page:116(key)
 msgid "G"
 msgstr "G"
 
-#: C/shortcuts.page:103(p)
+#: C/shortcuts.page:115(p)
 msgid "Find previous in current conversation"
 msgstr "Najít předchozí v aktuální konverzaci"
 
-#: C/shortcuts.page:104(key)
+#: C/shortcuts.page:116(key)
 msgid "Shift"
 msgstr "Shift"
 
-#: C/shortcuts.page:109(title)
+#: C/shortcuts.page:121(title)
 msgid "Composer shortcuts"
 msgstr "Klávesové zkratky editoru"
 
-#: C/shortcuts.page:110(p)
+#: C/shortcuts.page:122(p)
 msgid "These shortcuts are active whenever focus is in a composer."
 msgstr ""
 "Následující klávesové zkratky jsou funkční, kdykoliv je aktivní editor zpráv."
 
-#: C/shortcuts.page:113(p)
+#: C/shortcuts.page:125(p)
 msgid "Quote text"
 msgstr "Citovat text"
 
-#: C/shortcuts.page:114(key)
+#: C/shortcuts.page:126(key)
 msgid "]"
 msgstr "]"
 
-#: C/shortcuts.page:117(p)
+#: C/shortcuts.page:129(p)
 msgid "Unquote text"
 msgstr "Ukončit citaci textu"
 
-#: C/shortcuts.page:118(key)
+#: C/shortcuts.page:130(key)
 msgid "["
 msgstr "["
 
-#: C/shortcuts.page:121(p)
+#: C/shortcuts.page:133(p)
 msgid "Close composer"
 msgstr "Zavřít okno editoru"
 
-#: C/shortcuts.page:122(p)
+#: C/shortcuts.page:134(p)
 msgid "<keyseq><key>Ctrl</key><key>W</key></keyseq> or <key>Esc</key>"
 msgstr "<keyseq><key>Ctrl</key><key>W</key></keyseq> nebo <key>Esc</key>"
 
-#: C/shortcuts.page:125(p)
+#: C/shortcuts.page:137(p)
 msgid "Detach composer"
 msgstr "Odpojit okno editor"
 
-#: C/shortcuts.page:130(p)
+#: C/shortcuts.page:142(p)
 msgid "These shortcuts are only active in composers in rich text mode."
 msgstr ""
 "Následující klávesové zkratky jsou funkční pouze když je editor v režimu "
 "formátovaného textu."
 
-#: C/shortcuts.page:133(p)
+#: C/shortcuts.page:145(p)
 msgid "Bold text"
 msgstr "Tučný text"
 
-#: C/shortcuts.page:134(key)
-msgid "B"
-msgstr "B"
-
-#: C/shortcuts.page:137(p)
+#: C/shortcuts.page:149(p)
 msgid "Italicize text"
 msgstr "Text kurzívou"
 
-#: C/shortcuts.page:138(key)
+#: C/shortcuts.page:150(key)
 msgid "I"
 msgstr "I"
 
-#: C/shortcuts.page:141(p)
+#: C/shortcuts.page:153(p)
 msgid "Underline text"
 msgstr "Podtržený text"
 
-#: C/shortcuts.page:142(key)
+#: C/shortcuts.page:154(key)
 msgid "U"
 msgstr "U"
 
-#: C/shortcuts.page:145(p)
+#: C/shortcuts.page:157(p)
 msgid "Strike text"
 msgstr "Přeškrtnutý text"
 
-#: C/shortcuts.page:146(key)
+#: C/shortcuts.page:158(key)
 msgid "K"
 msgstr "K"
 
-#: C/shortcuts.page:149(p)
+#: C/shortcuts.page:161(p)
 msgid "Insert a link"
 msgstr "Vložit odkaz"
 
-#: C/shortcuts.page:150(key)
+#: C/shortcuts.page:162(key)
 msgid "L"
 msgstr "L"
 
-#: C/shortcuts.page:153(p)
+#: C/shortcuts.page:165(p)
 msgid "Remove formatting"
 msgstr "Odstranit formátování"
 
-#: C/shortcuts.page:154(key)
+#: C/shortcuts.page:166(key)
 msgid "Space"
 msgstr "mezerník"
 
