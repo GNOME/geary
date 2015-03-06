@@ -452,12 +452,15 @@ public abstract class Geary.Folder : BaseObject {
      * tearing down network connections, closing files, and so forth.  See "closed" for signals
      * indicating the closing states.
      *
-     * If the Folder is already closed, the method silently returns.
+     * Returns true if the open count decrements to zero and the folder is ''closing''.  Use
+     * {@link wait_for_close_async} to block until the folder is completely closed.  Otherwise,
+     * returns false.  Note that this semantic is slightly different than the result code for
+     * {@link open_async}.
      */
-    public abstract async void close_async(Cancellable? cancellable = null) throws Error;
+    public abstract async bool close_async(Cancellable? cancellable = null) throws Error;
     
     /**
-     * Wait for the Folder to fully close.
+     * Wait for the {@link Folder} to fully close.
      *
      * Unlike {@link wait_for_open_async}, this will ''always'' block until a {@link Folder} is
      * closed, even if it's not open.

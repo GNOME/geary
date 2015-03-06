@@ -56,6 +56,18 @@
   		<td><p> <keyseq><key>Ctrl</key><key>U</key></keyseq> or <keyseq><key>Shift</key><key>U</key></keyseq> </p></td>
   	</tr>
   	<tr>
+  	    <td><p>Move focus to conversation list</p></td>
+  		<td><p> <keyseq><key>Ctrl</key><key>B</key></keyseq> </p></td>
+  	</tr>
+  	<tr>
+  	    <td><p>Jump to next (older) conversation</p></td>
+  		<td><p> <keyseq><key>j</key></keyseq> </p></td>
+  	</tr>
+  	<tr>
+  	    <td><p>Jump to previous (newer) conversation</p></td>
+  		<td><p> <keyseq><key>k</key></keyseq> </p></td>
+  	</tr>
+  	<tr>
   	    <td><p>Toggle spam</p></td>
   		<td><p> <keyseq><key>Ctrl</key><key>J</key></keyseq> or <key>!</key> </p></td>
   	</tr>
