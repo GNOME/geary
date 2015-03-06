@@ -661,7 +661,7 @@ private class Geary.ImapDB.Account : BaseObject {
             while (!result.finished) {
                 Email? email;
                 Gee.Collection<FolderPath?>? known_paths;
-                do_fetch_message(cx, result.int64_at(0), requested_fields, search_predicate,
+                do_fetch_message(cx, result.int64_at(0), requested_fields, false, search_predicate,
                     out email, out known_paths, cancellable);
                 if (email != null) {
                     assert(known_paths != null);
@@ -710,8 +710,8 @@ private class Geary.ImapDB.Account : BaseObject {
                     Email? email;
                     Gee.Collection<FolderPath?>? known_paths;
                     try {
-                        do_fetch_message(cx, associated_id.message_id, required_fields, search_predicate,
-                            out email, out known_paths, cancellable);
+                        do_fetch_message(cx, associated_id.message_id, required_fields, false,
+                            search_predicate, out email, out known_paths, cancellable);
                     } catch (Error err) {
                         if (err is EngineError.NOT_FOUND)
                             continue;
@@ -736,7 +736,7 @@ private class Geary.ImapDB.Account : BaseObject {
     }
     
     private void do_fetch_message(Db.Connection cx, int64 message_id, Email.Field required_fields,
-        Geary.Account.EmailSearchPredicate? search_predicate, out Email? email,
+        bool include_removed, Geary.Account.EmailSearchPredicate? search_predicate, out Email? email,
         out Gee.Collection<FolderPath?>? known_paths, Cancellable? cancellable) throws Error {
         Email.Field actual_fields;
         MessageRow row = ImapDB.Folder.do_fetch_message_row(cx, message_id, required_fields,
@@ -745,7 +745,8 @@ private class Geary.ImapDB.Account : BaseObject {
         email = row.to_email(new Geary.ImapDB.EmailIdentifier(message_id, null));
         ImapDB.Folder.do_add_attachments(cx, email, message_id, cancellable);
         
-        Gee.Set<Geary.FolderPath>? folders = do_find_email_folders(cx, message_id, true, cancellable);
+        Gee.Set<Geary.FolderPath>? folders = do_find_email_folders(cx, message_id, include_removed,
+            cancellable);
         
         known_paths = new Gee.HashSet<FolderPath?>();
         if (folders == null)

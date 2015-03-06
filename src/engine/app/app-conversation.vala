@@ -40,8 +40,6 @@ public class Geary.App.Conversation : BaseObject {
     
     private static int next_convnum = 0;
     
-    private Gee.HashMultiSet<RFC822.MessageID> message_ids = new Gee.HashMultiSet<RFC822.MessageID>();
-    
     private int convnum;
     private weak Geary.App.ConversationMonitor? owner;
     private Gee.HashMap<EmailIdentifier, Email> emails = new Gee.HashMap<EmailIdentifier, Email>();
@@ -81,8 +79,6 @@ public class Geary.App.Conversation : BaseObject {
         this.owner = owner;
         
         owner.email_flags_changed.connect(on_email_flags_changed);
-        owner.folder.account.email_discovered.connect(on_email_discovered);
-        owner.folder.account.email_removed.connect(on_email_removed);
     }
     
     ~Conversation() {
@@ -90,11 +86,10 @@ public class Geary.App.Conversation : BaseObject {
     }
     
     internal void clear_owner() {
-        if (owner != null) {
-            owner.email_flags_changed.disconnect(on_email_flags_changed);
-            owner.folder.account.email_discovered.disconnect(on_email_discovered);
-            owner.folder.account.email_removed.disconnect(on_email_removed);
-        }
+        if (owner == null)
+            return;
+        
+        owner.email_flags_changed.disconnect(on_email_flags_changed);
         
         owner = null;
     }
@@ -107,7 +102,8 @@ public class Geary.App.Conversation : BaseObject {
     }
     
     /**
-     * Returns the number of {@link Email}s in the conversation in the specified {@link FolderPath}.
+     * Returns true if any {@link Email}s in the {@link Conversation} are known to be in the
+     * specified {@link FolderPath}.
      */
     public bool any_in_folder_path(Geary.FolderPath path) {
         foreach (EmailIdentifier email_id in path_map.get_keys()) {
@@ -187,16 +183,6 @@ public class Geary.App.Conversation : BaseObject {
     }
     
     /**
-     * Return all Message IDs associated with the conversation.
-     */
-    public Gee.Collection<RFC822.MessageID> get_message_ids() {
-        // Turn into a HashSet first, so we don't return duplicates.
-        Gee.HashSet<RFC822.MessageID> ids = new Gee.HashSet<RFC822.MessageID>();
-        ids.add_all(message_ids);
-        return ids;
-    }
-    
-    /**
      * Returns the email associated with the EmailIdentifier, if present in this conversation.
      */
     public Geary.Email? get_email_by_id(EmailIdentifier id) {
@@ -223,8 +209,13 @@ public class Geary.App.Conversation : BaseObject {
      *
      * known_paths should contain all the known FolderPaths this email is contained in.
      * Conversation will monitor Account for additions and removals as they occur.
+     *
+     * Paths are always added, whether or not the email was already present.
      */
     internal bool add(Email email, Gee.Collection<Geary.FolderPath> known_paths) {
+        foreach (Geary.FolderPath path in known_paths)
+            path_map.set(email.id, path);
+        
         if (emails.has_key(email.id))
             return false;
         
@@ -234,19 +225,16 @@ public class Geary.App.Conversation : BaseObject {
         recv_date_ascending.add(email);
         recv_date_descending.add(email);
         
-        Gee.Set<RFC822.MessageID>? ancestors = email.get_ancestors();
-        if (ancestors != null)
-            message_ids.add_all(ancestors);
-        
-        foreach (Geary.FolderPath path in known_paths)
-            path_map.set(email.id, path);
-        
         appended(email);
         
         return true;
     }
     
-    // Returns whether the email was completely removed from the conversation
+    /**
+     * Removes the paths from the email's known paths in the conversation.
+     *
+     * Returns true if the email is fully removed from the conversation.
+     */
     internal bool remove(Email email, Geary.FolderPath path) {
         path_map.remove(email.id, path);
         if (path_map.get(email.id).size != 0)
@@ -363,20 +351,6 @@ public class Geary.App.Conversation : BaseObject {
     private void on_email_flags_changed(Conversation conversation, Geary.Email email) {
         if (conversation == this)
             email_flags_changed(email);
-    }
-    
-    private void on_email_discovered(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
-        // only add to the internal map if a part of this Conversation
-        foreach (Geary.EmailIdentifier id in ids) {
-            if (emails.has_key(id))
-                path_map.set(id, folder.path);
-        }
-    }
-    
-    private void on_email_removed(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
-        // To be forgiving, simply remove id without checking if it's a part of this Conversation
-        foreach (Geary.EmailIdentifier id in ids)
-            path_map.remove(id, folder.path);
     }
     
     public string to_string() {

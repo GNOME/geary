@@ -339,26 +339,14 @@ public class Geary.App.ConversationMonitor : BaseObject {
             operation_queue.add(new ReseedOperation(this, "already opened"));
         operation_queue.add(new FillWindowOperation(this, false));
         
-        folder.email_appended.connect(on_folder_email_appended);
-        folder.email_inserted.connect(on_folder_email_inserted);
-        folder.email_removed.connect(on_folder_email_removed);
-        folder.opened.connect(on_folder_opened);
-        folder.account.email_flags_changed.connect(on_account_email_flags_changed);
-        folder.account.email_locally_complete.connect(on_account_email_locally_complete);
-        folder.account.email_removed.connect(on_account_email_removed);
+        connect_to_folder();
         
         try {
             yield folder.open_async(open_flags, cancellable);
         } catch (Error err) {
             is_monitoring = false;
             
-            folder.email_appended.disconnect(on_folder_email_appended);
-            folder.email_inserted.disconnect(on_folder_email_inserted);
-            folder.email_removed.disconnect(on_folder_email_removed);
-            folder.opened.disconnect(on_folder_opened);
-            folder.account.email_flags_changed.disconnect(on_account_email_flags_changed);
-            folder.account.email_locally_complete.disconnect(on_account_email_locally_complete);
-            folder.account.email_removed.disconnect(on_account_email_removed);
+            disconnect_from_folder();
             
             throw err;
         }
@@ -397,13 +385,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
         // set now to prevent reentrancy during yield or signal
         is_monitoring = false;
         
-        folder.email_appended.disconnect(on_folder_email_appended);
-        folder.email_inserted.disconnect(on_folder_email_inserted);
-        folder.email_removed.disconnect(on_folder_email_removed);
-        folder.opened.disconnect(on_folder_opened);
-        folder.account.email_flags_changed.disconnect(on_account_email_flags_changed);
-        folder.account.email_locally_complete.disconnect(on_account_email_locally_complete);
-        folder.account.email_removed.disconnect(on_account_email_removed);
+        disconnect_from_folder();
         
         bool closing = false;
         Error? close_err = null;
@@ -435,6 +417,32 @@ public class Geary.App.ConversationMonitor : BaseObject {
         conversations.clear();
         all_email_id_to_conversation.clear();
         primary_email_id_to_conversation.clear();
+    }
+    
+    private void connect_to_folder() {
+        folder.email_appended.connect(on_folder_email_appended);
+        folder.email_inserted.connect(on_folder_email_inserted);
+        folder.email_removed.connect(on_folder_email_removed);
+        folder.opened.connect(on_folder_opened);
+        folder.account.email_flags_changed.connect(on_account_email_flags_changed);
+        folder.account.email_locally_complete.connect(on_account_email_added);
+        folder.account.email_appended.connect(on_account_email_added);
+        folder.account.email_discovered.connect(on_account_email_added);
+        folder.account.email_inserted.connect(on_account_email_added);
+        folder.account.email_removed.connect(on_account_email_removed);
+    }
+    
+    private void disconnect_from_folder() {
+        folder.email_appended.disconnect(on_folder_email_appended);
+        folder.email_inserted.disconnect(on_folder_email_inserted);
+        folder.email_removed.disconnect(on_folder_email_removed);
+        folder.opened.disconnect(on_folder_opened);
+        folder.account.email_flags_changed.disconnect(on_account_email_flags_changed);
+        folder.account.email_locally_complete.disconnect(on_account_email_added);
+        folder.account.email_appended.disconnect(on_account_email_added);
+        folder.account.email_discovered.disconnect(on_account_email_added);
+        folder.account.email_inserted.disconnect(on_account_email_added);
+        folder.account.email_removed.disconnect(on_account_email_removed);
     }
     
     // By passing required_fields, this forces the email to be downloaded (if not already) at the
@@ -650,14 +658,17 @@ public class Geary.App.ConversationMonitor : BaseObject {
         operation_queue.add(new FillWindowOperation(this, false));
     }
     
-    private void on_account_email_locally_complete(Folder folder, Gee.Collection<EmailIdentifier> complete_ids) {
+    private void on_account_email_added(Folder folder, Gee.Collection<EmailIdentifier> added_ids) {
         if (!folder.path.equal_to(this.folder.path))
-            operation_queue.add(new ExternalAppendOperation(this, folder, complete_ids));
+            operation_queue.add(new ExternalAppendOperation(this, folder, added_ids));
     }
     
     private void on_account_email_removed(Folder folder, Gee.Collection<EmailIdentifier> removed_ids) {
-        if (!folder.path.equal_to(this.folder.path))
-            operation_queue.add(new ExternalRemoveOperation(this, folder, removed_ids));
+        if (folder.path.equal_to(this.folder.path))
+            return;
+        
+        operation_queue.add(new ExternalRemoveOperation(this, folder, removed_ids));
+        operation_queue.add(new FillWindowOperation(this, false));
     }
     
     internal async void append_emails_async(Gee.Collection<Geary.EmailIdentifier> appended_ids) {
@@ -699,7 +710,13 @@ public class Geary.App.ConversationMonitor : BaseObject {
                 // could have been trimmed earlier in the loop
                 trimmed_conversations.remove_all(conversation);
                 
+                // strip Conversation from local storage and lookup tables
                 conversations.remove(conversation);
+                foreach (EmailIdentifier id in conversation.get_email_ids()) {
+                    primary_email_id_to_conversation.unset(id);
+                    all_email_id_to_conversation.unset(id);
+                }
+                
                 removed_conversations.add(conversation);
             } else if (fully_removed && email != null) {
                 // since the email was fully removed from conversation, report as trimmed
