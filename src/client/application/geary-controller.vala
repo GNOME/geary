@@ -52,6 +52,7 @@ public class GearyController : Geary.BaseObject {
     public const string ACTION_MOVE_MENU = "GearyMoveMenuButton";
     public const string ACTION_GEAR_MENU = "GearyGearMenuButton";
     public const string ACTION_SEARCH = "GearySearch";
+    public const string ACTION_CONVERSATION_LIST = "GearyConversationList";
     
     public const string PROP_CURRENT_CONVERSATION ="current-conversations";
     
@@ -496,6 +497,10 @@ public class GearyController : Geary.BaseObject {
         Gtk.ActionEntry search = { ACTION_SEARCH, null, null, null, null, on_search };
         entries += search;
         add_accelerator("<Ctrl>S", ACTION_SEARCH);
+        
+        Gtk.ActionEntry conversation_list = { ACTION_CONVERSATION_LIST, null, null, null, null, on_conversation_list };
+        entries += conversation_list;
+        add_accelerator("<Ctrl>B", ACTION_CONVERSATION_LIST);
         
         return entries;
     }
@@ -2618,6 +2623,10 @@ public class GearyController : Geary.BaseObject {
     
     private void on_search() {
         main_window.main_toolbar.give_search_focus();
+    }
+    
+    private void on_conversation_list() {
+        main_window.conversation_list_view.grab_focus();
     }
     
     private void on_sent(Geary.RFC822.Message rfc822) {
