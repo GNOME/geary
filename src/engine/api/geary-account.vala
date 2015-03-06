@@ -128,9 +128,18 @@ public abstract class Geary.Account : BaseObject {
     public signal void folders_contents_altered(Gee.Collection<Geary.Folder> altered);
     
     /**
-     * Fired when emails are appended to a folder in this account.
+     * Fired when emails are appended to a {@link Folder} in this account.
+     *
+     * @see Geary.Folder.email_appended
      */
     public signal void email_appended(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids);
+    
+    /**
+     * Fired when emails are locally appended to a {@link Folder} in this account.
+     *
+     * @see Geary.Folder.email_locally_appended
+     */
+    public signal void email_locally_appended(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids);
     
     /**
      * Fired when emails are inserted to a folder in this account.
@@ -187,6 +196,10 @@ public abstract class Geary.Account : BaseObject {
     
     protected virtual void notify_email_appended(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
         email_appended(folder, ids);
+    }
+    
+    protected virtual void notify_email_locally_appended(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
+        email_locally_appended(folder, ids);
     }
     
     protected virtual void notify_email_inserted(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {

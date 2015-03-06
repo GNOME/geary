@@ -31,6 +31,7 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
         account.closed.connect(on_account_closed);
         account.folders_available_unavailable.connect(on_folders_available_unavailable);
         account.folders_contents_altered.connect(on_folders_contents_altered);
+        account.email_locally_appended.connect(on_new_account_email);
         account.email_sent.connect(on_email_sent);
     }
     
@@ -39,6 +40,7 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
         account.closed.disconnect(on_account_closed);
         account.folders_available_unavailable.disconnect(on_folders_available_unavailable);
         account.folders_contents_altered.disconnect(on_folders_contents_altered);
+        account.email_locally_appended.disconnect(on_new_account_email);
         account.email_sent.disconnect(on_email_sent);
     }
     
@@ -112,6 +114,33 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
         delayed_send_all(altered, false, SYNC_DELAY_SEC);
     }
     
+    // Called whenever a new email is added to the local store
+    private void on_new_account_email(Folder folder) {
+        // Since Drafts can come in fast-and-furious, don't adjust sync schedule when new mail is
+        // detected on that folder
+        if (folder.special_folder_type == SpecialFolderType.DRAFTS)
+            return;
+        
+        // schedule refresh of All Mail and/or Archive folder, unless this is that folder
+        if (folder.special_folder_type != SpecialFolderType.ALL_MAIL)
+            synchronize_special_folder(SpecialFolderType.ALL_MAIL);
+        
+        if (folder.special_folder_type != SpecialFolderType.ARCHIVE)
+            synchronize_special_folder(SpecialFolderType.ARCHIVE);
+    }
+    
+    private void synchronize_special_folder(SpecialFolderType special) {
+        MinimalFolder? folder = null;
+        try {
+            folder = account.get_special_folder(special) as MinimalFolder;
+        } catch (Error err) {
+            debug("Unable to get special folder type for %s: %s", account.to_string(), err.message);
+        }
+        
+        if (folder != null && !is_queued(folder))
+            delayed_send_all(iterate<Folder>(folder).to_array_list(), false, SYNC_DELAY_SEC);
+    }
+    
     private void on_email_sent() {
         try {
             Folder? sent_mail = account.get_special_folder(SpecialFolderType.SENT);
@@ -173,6 +202,10 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
                 made_available.remove(generic_folder);
             }
         }
+    }
+    
+    private bool is_queued(MinimalFolder folder) {
+        return bg_queue.get_all().contains(folder) || current_folder == folder;
     }
     
     // This is used to ensure that certain special folders get prioritized over others, so folders

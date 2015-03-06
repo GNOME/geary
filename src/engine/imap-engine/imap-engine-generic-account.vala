@@ -56,6 +56,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         if (available != null) {
             foreach (Geary.Folder folder in available) {
                 folder.email_appended.connect(notify_email_appended);
+                folder.email_locally_appended.connect(notify_email_locally_appended);
                 folder.email_inserted.connect(notify_email_inserted);
                 folder.email_removed.connect(notify_email_removed);
                 folder.email_locally_complete.connect(notify_email_locally_complete);
@@ -65,6 +66,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         if (unavailable != null) {
             foreach (Geary.Folder folder in unavailable) {
                 folder.email_appended.disconnect(notify_email_appended);
+                folder.email_locally_appended.disconnect(notify_email_locally_appended);
                 folder.email_inserted.disconnect(notify_email_inserted);
                 folder.email_removed.disconnect(notify_email_removed);
                 folder.email_locally_complete.disconnect(notify_email_locally_complete);
