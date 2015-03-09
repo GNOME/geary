@@ -22,11 +22,9 @@ public class MainWindow : Gtk.ApplicationWindow {
     public int window_width { get; set; }
     public int window_height { get; set; }
     public bool window_maximized { get; set; }
-    public int orientation { get; set; }
-
+    
     private Gtk.Paned folder_paned = new Gtk.Paned(Gtk.Orientation.HORIZONTAL);
     private Gtk.Paned conversations_paned = new Gtk.Paned(Gtk.Orientation.HORIZONTAL);
-    private Gtk.Button orientation_button = new Gtk.Button();
     
     private Gtk.ScrolledWindow conversation_list_scrolled;
     private MonitoredSpinner spinner = new MonitoredSpinner();
@@ -54,10 +52,7 @@ public class MainWindow : Gtk.ApplicationWindow {
         config.bind(Configuration.WINDOW_WIDTH_KEY, this, "window-width");
         config.bind(Configuration.WINDOW_HEIGHT_KEY, this, "window-height");
         config.bind(Configuration.WINDOW_MAXIMIZE_KEY, this, "window-maximized");
-        // Indirection needed since we can't bind enums to settings, apparently.
-        config.bind(Configuration.FOLDER_LIST_PANE_ORIENTATION_KEY, this, "orientation");
-        bind_property("orientation", folder_paned, "orientation",
-            BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
+        config.bind(Configuration.FOLDER_LIST_PANE_HORIZONTAL_KEY, this, "horizontal-orientation");
         // Update to layout
         if (config.folder_list_pane_position_horizontal == -1) {
             config.folder_list_pane_position_horizontal = config.folder_list_pane_position_old;
@@ -80,8 +75,8 @@ public class MainWindow : Gtk.ApplicationWindow {
         key_press_event.connect(on_key_press_event);
         key_release_event.connect(on_key_release_event);
         focus_in_event.connect(on_focus_event);
-        orientation_button.clicked.connect(change_orientation);
-        notify["orientation"].connect(on_orientation_changed);
+        GearyApplication.instance.config.settings.changed[
+            Configuration.FOLDER_LIST_PANE_HORIZONTAL_KEY].connect(on_change_orientation);
         GearyApplication.instance.controller.notify[GearyController.PROP_CURRENT_CONVERSATION].
             connect(on_conversation_monitor_changed);
         GearyApplication.instance.controller.folder_selected.connect(on_folder_selected);
@@ -95,7 +90,7 @@ public class MainWindow : Gtk.ApplicationWindow {
             set_titlebar(main_toolbar);
         }
         
-        on_orientation_changed();
+        on_change_orientation();
         set_styling();
         create_layout();
     }
@@ -224,9 +219,6 @@ public class MainWindow : Gtk.ApplicationWindow {
         spinner.set_size_request(STATUS_BAR_HEIGHT - 2, -1);
         status_bar.add(spinner);
         
-        status_bar.pack_start(orientation_button, false, false, 0);
-        status_bar.reorder_child(orientation_button, 0);
-        
         folder_paned.get_style_context().add_class("sidebar-pane-separator");
         
         Gtk.Frame viewer_frame = new Gtk.Frame(null);
@@ -347,23 +339,20 @@ public class MainWindow : Gtk.ApplicationWindow {
         }
     }
     
-    private void change_orientation() {
+    private void on_change_orientation() {
+        bool horizontal = GearyApplication.instance.config.folder_list_pane_horizontal;
+        
         GLib.Settings.unbind(folder_paned, "position");
-        folder_paned.orientation = (folder_paned.orientation == Gtk.Orientation.HORIZONTAL)
-            ? Gtk.Orientation.VERTICAL : Gtk.Orientation.HORIZONTAL;
+        folder_paned.orientation = horizontal ? Gtk.Orientation.HORIZONTAL :
+            Gtk.Orientation.VERTICAL;
         
         int folder_list_width =
             GearyApplication.instance.config.folder_list_pane_position_horizontal;
-        if (folder_paned.orientation == Gtk.Orientation.HORIZONTAL)
+        if (horizontal)
             conversations_paned.position += folder_list_width;
         else
             conversations_paned.position -= folder_list_width;
-    }
-    
-    private void on_orientation_changed() {
-        bool horizontal = (folder_paned.orientation == Gtk.Orientation.HORIZONTAL);
-        orientation_button.label = horizontal ? "H" : "I";
-        // Cancels previous binding
+        
         GearyApplication.instance.config.bind(
             horizontal ? Configuration.FOLDER_LIST_PANE_POSITION_HORIZONTAL_KEY
             : Configuration.FOLDER_LIST_PANE_POSITION_VERTICAL_KEY,

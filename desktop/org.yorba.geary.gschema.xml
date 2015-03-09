@@ -38,10 +38,10 @@
         <description>Position of the folder list Paned grabber in the vertical orientation.</description>
     </key>
     
-    <key name="folder-list-pane-orientation" type="i">
-        <default>0</default>
+    <key name="folder-list-pane-horizontal" type="b">
+        <default>true</default>
         <summary>orientation of the folder list pane</summary>
-        <description>Orientation of the folder list Paned.</description>
+        <description>True if the folder list Paned is in the horizontal orientation.</description>
     </key>
     
     <key name="messages-pane-position" type="i">

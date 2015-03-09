@@ -12,7 +12,7 @@ public class Configuration {
     public const string FOLDER_LIST_PANE_POSITION_KEY = "folder-list-pane-position";
     public const string FOLDER_LIST_PANE_POSITION_HORIZONTAL_KEY = "folder-list-pane-position-horizontal";
     public const string FOLDER_LIST_PANE_POSITION_VERTICAL_KEY = "folder-list-pane-position-vertical";
-    public const string FOLDER_LIST_PANE_ORIENTATION_KEY = "folder-list-pane-orientation";
+    public const string FOLDER_LIST_PANE_HORIZONTAL_KEY = "folder-list-pane-horizontal";
     public const string MESSAGES_PANE_POSITION_KEY = "messages-pane-position";
     public const string COMPOSER_PANE_POSITION_KEY = "composer-pane-position";
     public const string AUTOSELECT_KEY = "autoselect";
@@ -54,8 +54,8 @@ public class Configuration {
         get { return settings.get_int(FOLDER_LIST_PANE_POSITION_VERTICAL_KEY); }
     }
     
-    public Gtk.Orientation folder_list_pane_orientation {
-        get { return (Gtk.Orientation) settings.get_int(FOLDER_LIST_PANE_ORIENTATION_KEY); }
+    public bool folder_list_pane_horizontal {
+        get { return settings.get_boolean(FOLDER_LIST_PANE_HORIZONTAL_KEY); }
     }
     
     public int messages_pane_position {
