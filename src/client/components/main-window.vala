@@ -28,6 +28,8 @@ public class MainWindow : Gtk.ApplicationWindow {
     
     private Gtk.ScrolledWindow conversation_list_scrolled;
     private MonitoredSpinner spinner = new MonitoredSpinner();
+    private Gtk.Box folder_box;
+    private Gtk.Box conversation_box;
     private Geary.AggregateProgressMonitor progress_monitor = new Geary.AggregateProgressMonitor();
     private Geary.ProgressMonitor? conversation_monitor_progress = null;
     private Geary.ProgressMonitor? folder_progress = null;
@@ -90,9 +92,9 @@ public class MainWindow : Gtk.ApplicationWindow {
             set_titlebar(main_toolbar);
         }
         
-        on_change_orientation();
         set_styling();
         create_layout();
+        on_change_orientation();
     }
     
     public override void show_all() {
@@ -202,6 +204,8 @@ public class MainWindow : Gtk.ApplicationWindow {
         folder_frame.shadow_type = Gtk.ShadowType.IN;
         folder_frame.get_style_context ().add_class ("folder-frame");
         folder_frame.add(folder_list_scrolled);
+        folder_box = new Gtk.Box(Gtk.Orientation.VERTICAL, 0);
+        folder_box.pack_start(folder_frame, true, true);
         
         // message list
         conversation_list_scrolled = new Gtk.ScrolledWindow(null, null);
@@ -212,6 +216,8 @@ public class MainWindow : Gtk.ApplicationWindow {
         conversation_frame.shadow_type = Gtk.ShadowType.IN;
         conversation_frame.get_style_context ().add_class ("conversation-frame");
         conversation_frame.add(conversation_list_scrolled);
+        conversation_box = new Gtk.Box(Gtk.Orientation.VERTICAL, 0);
+        conversation_box.pack_start(conversation_frame, true, true);
         
         // Three-pane display.
         status_bar.set_size_request(-1, STATUS_BAR_HEIGHT);
@@ -226,16 +232,13 @@ public class MainWindow : Gtk.ApplicationWindow {
         viewer_frame.add(conversation_viewer);
         
         // Folder list to the left of everything.
-        folder_paned.pack1(folder_frame, false, false);
-        folder_paned.pack2(conversation_frame, true, false);
+        folder_paned.pack1(folder_box, false, false);
+        folder_paned.pack2(conversation_box, true, false);
         
-        Gtk.Box status_bar_box = new Gtk.Box(Gtk.Orientation.VERTICAL, 0);
-        status_bar_box.pack_start(folder_paned);
-        status_bar_box.pack_start(status_bar, false, false, 0);
-        status_bar_box.get_style_context().add_class(Gtk.STYLE_CLASS_SIDEBAR);
+        folder_paned.get_style_context().add_class(Gtk.STYLE_CLASS_SIDEBAR);
         
         // Message list left of message viewer.
-        conversations_paned.pack1(status_bar_box, false, false);
+        conversations_paned.pack1(folder_paned, false, false);
         conversations_paned.pack2(viewer_frame, true, true);
         
         if (GearyApplication.instance.is_running_unity)
@@ -342,16 +345,22 @@ public class MainWindow : Gtk.ApplicationWindow {
     private void on_change_orientation() {
         bool horizontal = GearyApplication.instance.config.folder_list_pane_horizontal;
         
+        if (status_bar.parent != null)
+            status_bar.parent.remove(status_bar);
+        
         GLib.Settings.unbind(folder_paned, "position");
         folder_paned.orientation = horizontal ? Gtk.Orientation.HORIZONTAL :
             Gtk.Orientation.VERTICAL;
         
         int folder_list_width =
             GearyApplication.instance.config.folder_list_pane_position_horizontal;
-        if (horizontal)
+        if (horizontal) {
             conversations_paned.position += folder_list_width;
-        else
+            folder_box.pack_start(status_bar, false, false);
+        } else {
             conversations_paned.position -= folder_list_width;
+            conversation_box.pack_start(status_bar, false, false);
+        }
         
         GearyApplication.instance.config.bind(
             horizontal ? Configuration.FOLDER_LIST_PANE_POSITION_HORIZONTAL_KEY
