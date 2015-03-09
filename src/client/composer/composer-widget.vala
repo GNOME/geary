@@ -651,8 +651,8 @@ public class ComposerWidget : Gtk.EventBox {
     // TODO: Folder blacklist
     // NOTE: This is called from a background thread.
     private bool local_search_predicate(Geary.EmailIdentifier email_id, Geary.Email.Field fields,
-        Gee.Collection<Geary.FolderPath?> known_paths, Geary.EmailFlags flags) {
-        return !flags.contains(Geary.EmailFlags.DRAFT);
+        Gee.Collection<Geary.FolderPath?> known_paths, Geary.EmailFlags? flags) {
+        return flags != null && !flags.contains(Geary.EmailFlags.DRAFT);
     }
     
     public async void restore_draft_state_async(Geary.Account account) {

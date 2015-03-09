@@ -68,7 +68,7 @@ public abstract class Geary.Account : BaseObject {
      * so use appropriate locking.
      */
     public delegate bool EmailSearchPredicate(Geary.EmailIdentifier email_id, Geary.Email.Field fields,
-        Gee.Collection<Geary.FolderPath?> known_paths, Geary.EmailFlags flags);
+        Gee.Collection<Geary.FolderPath?> known_paths, Geary.EmailFlags? flags);
     
     public Geary.AccountInformation information { get; protected set; }
     

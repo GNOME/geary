@@ -48,9 +48,10 @@ public class Geary.App.ConversationMonitor : BaseObject {
             // Add "no folders" so we omit results that have been deleted permanently from the server.
             path_blacklist.add(null);
         }
+        
         // NOTE: This is called from a background thread.
         public bool search_predicate(EmailIdentifier email_id, Email.Field fields,
-            Gee.Collection<FolderPath?> known_paths, EmailFlags flags) {
+            Gee.Collection<FolderPath?> known_paths, EmailFlags? flags) {
             // don't want partial emails
             if (!fields.fulfills(required_fields))
                 return false;
@@ -61,7 +62,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
                 return true;
             
             // Don't add drafts (unless in Drafts folder, above)
-            if (flags.contains(EmailFlags.DRAFT))
+            if (flags != null && flags.contains(EmailFlags.DRAFT))
                 return false;
             
             // If in a blacklisted path, don't add
@@ -658,13 +659,19 @@ public class Geary.App.ConversationMonitor : BaseObject {
         operation_queue.add(new FillWindowOperation(this, false));
     }
     
+    private bool is_folder_external_conversation_source(Folder folder) {
+        return !folder.path.equal_to(this.folder.path)
+            && !folder.properties.is_local_only
+            && !folder.properties.is_virtual;
+    }
+    
     private void on_account_email_added(Folder folder, Gee.Collection<EmailIdentifier> added_ids) {
-        if (!folder.path.equal_to(this.folder.path))
+        if (is_folder_external_conversation_source(folder))
             operation_queue.add(new ExternalAppendOperation(this, folder, added_ids));
     }
     
     private void on_account_email_removed(Folder folder, Gee.Collection<EmailIdentifier> removed_ids) {
-        if (folder.path.equal_to(this.folder.path))
+        if (!is_folder_external_conversation_source(folder))
             return;
         
         operation_queue.add(new ExternalRemoveOperation(this, folder, removed_ids));
