@@ -54,7 +54,6 @@ public class MainWindow : Gtk.ApplicationWindow {
         config.bind(Configuration.WINDOW_WIDTH_KEY, this, "window-width");
         config.bind(Configuration.WINDOW_HEIGHT_KEY, this, "window-height");
         config.bind(Configuration.WINDOW_MAXIMIZE_KEY, this, "window-maximized");
-        config.bind(Configuration.FOLDER_LIST_PANE_HORIZONTAL_KEY, this, "horizontal-orientation");
         // Update to layout
         if (config.folder_list_pane_position_horizontal == -1) {
             config.folder_list_pane_position_horizontal = config.folder_list_pane_position_old;
