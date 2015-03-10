@@ -1030,36 +1030,23 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         low = null;
         high = null;
         
-        // Get paths for all email identifiers
         Gee.MultiMap<Geary.EmailIdentifier, Geary.FolderPath>? map
             = yield account.get_containing_folders_async(ids, cancellable);
-        if (map == null || map.size == 0)
-            return;
         
-        // only deal with email identifiers in this folder
-        Gee.ArrayList<Geary.EmailIdentifier> in_folder = new Gee.ArrayList<Geary.EmailIdentifier>();
-        foreach (Geary.EmailIdentifier id in map.get_keys()) {
-            if (path in map.get(id))
-                in_folder.add(id);
+        if (map != null) {
+            Gee.ArrayList<Geary.EmailIdentifier> in_folder = new Gee.ArrayList<Geary.EmailIdentifier>();
+            foreach (Geary.EmailIdentifier id in map.get_keys()) {
+                if (path in map.get(id))
+                    in_folder.add(id);
+            }
+            
+            if (in_folder.size > 0) {
+                Gee.SortedSet<Geary.EmailIdentifier> sorted = Geary.EmailIdentifier.sort(in_folder);
+                
+                low = sorted.first();
+                high = sorted.last();
+            }
         }
-        
-        if (in_folder.size == 0)
-            return;
-        
-        // get new Emails for these; they will have their UIDs and can be sorted properly
-        Gee.List<Email>? list = yield local_folder.list_email_by_sparse_id_async(in_folder,
-            Email.Field.NONE, ImapDB.Folder.ListFlags.NONE, cancellable);
-        if (list == null || list.size == 0)
-            return;
-        
-        Gee.HashSet<EmailIdentifier> db_ids = traverse<Email>(list)
-            .map<EmailIdentifier>(email => email.id)
-            .to_hash_set();
-        
-        Gee.SortedSet<Geary.EmailIdentifier> sorted = Geary.EmailIdentifier.sort(db_ids);
-        
-        low = sorted.first();
-        high = sorted.last();
     }
     
     private void on_email_complete(Gee.Collection<Geary.EmailIdentifier> email_ids) {
