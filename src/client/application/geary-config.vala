@@ -79,7 +79,7 @@ public class Configuration {
     private const string TIME_FORMAT_KEY = "time-format";
     public Date.ClockFormat clock_format {
         get {
-            if (indicator_datetime != null) {
+            if (GearyApplication.instance.is_running_unity && indicator_datetime != null) {
                 string format = indicator_datetime.get_string(TIME_FORMAT_KEY);
                 if (format == "12-hour")
                     return Date.ClockFormat.TWELVE_HOURS;
