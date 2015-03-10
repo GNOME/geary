@@ -18,22 +18,6 @@ private class Geary.ImapDB.SearchEmailIdentifier : ImapDB.EmailIdentifier,
         return b.compare_to(a);
     }
     
-    public static Gee.ArrayList<SearchEmailIdentifier> array_list_from_results(
-        Gee.Collection<Geary.EmailIdentifier>? results) {
-        Gee.ArrayList<SearchEmailIdentifier> r = new Gee.ArrayList<SearchEmailIdentifier>();
-        
-        if (results != null) {
-            foreach (Geary.EmailIdentifier id in results) {
-                SearchEmailIdentifier? search_id = id as SearchEmailIdentifier;
-                
-                assert(search_id != null);
-                r.add(search_id);
-            }
-        }
-        
-        return r;
-    }
-    
     // Searches for a generic EmailIdentifier in a collection of SearchEmailIdentifiers.
     public static SearchEmailIdentifier? collection_get_email_identifier(
         Gee.Collection<SearchEmailIdentifier> collection, Geary.EmailIdentifier id) {

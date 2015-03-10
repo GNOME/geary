@@ -6,7 +6,7 @@
 
 private class Geary.ImapDB.SearchFolder : Geary.SearchFolder, Geary.FolderSupport.Remove {
     // Max number of emails that can ever be in the folder.
-    public const int MAX_RESULT_EMAILS = 1000;
+    public const int MAX_RESULT_EMAILS = 5000;
     
     private const Geary.SpecialFolderType[] exclude_types = {
         Geary.SpecialFolderType.SPAM,
@@ -17,6 +17,8 @@ private class Geary.ImapDB.SearchFolder : Geary.SearchFolder, Geary.FolderSuppor
     
     private Gee.HashSet<Geary.FolderPath?> exclude_folders = new Gee.HashSet<Geary.FolderPath?>();
     private Gee.TreeSet<ImapDB.SearchEmailIdentifier> search_results;
+    private Gee.HashMap<int64?, ImapDB.SearchEmailIdentifier> message_id_to_search_result =
+        new Gee.HashMap<int64?, ImapDB.SearchEmailIdentifier>(Collection.int64_hash_func, Collection.int64_equal_func);
     private Geary.Nonblocking.Mutex result_mutex = new Geary.Nonblocking.Mutex();
     
     public SearchFolder(Geary.Account account) {
@@ -71,14 +73,11 @@ private class Geary.ImapDB.SearchFolder : Geary.SearchFolder, Geary.FolderSuppor
         // Translate all ImapDB.EmailIdentifiers to the SearchEmailIdentifiers in the search results
         // ... must do this in order to get the SearchEmailIdentifier's ordering, which is different
         // than other ImapDB.EmailIdentifiers
-        //
-        // TODO: A dictionary of message_id => SearchEmailIdentifier would be useful here
         Gee.TreeSet<ImapDB.SearchEmailIdentifier> in_folder = new Gee.TreeSet<ImapDB.SearchEmailIdentifier>();
         foreach (ImapDB.EmailIdentifier db_id in db_ids) {
-            foreach (ImapDB.SearchEmailIdentifier search_id in search_results) {
-                if (search_id.message_id == db_id.message_id)
-                    in_folder.add(search_id);
-            }
+            ImapDB.SearchEmailIdentifier? search_id = message_id_to_search_result[db_id.message_id];
+            if (search_id != null)
+                in_folder.add(search_id);
          }
          
         if (in_folder.size == 0)
@@ -121,18 +120,26 @@ private class Geary.ImapDB.SearchFolder : Geary.SearchFolder, Geary.FolderSuppor
     
     private async void handle_removed_email_async(Geary.SearchQuery query, Geary.Folder folder,
         Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable) throws Error {
+        // build the list outside of the mutex, which is only required where there's a yield
+        Gee.ArrayList<ImapDB.SearchEmailIdentifier> relevant_ids = new Gee.ArrayList<ImapDB.SearchEmailIdentifier>();
+        foreach (Geary.EmailIdentifier id in ids) {
+            ImapDB.EmailIdentifier? db_id = id as ImapDB.EmailIdentifier;
+            if (db_id == null)
+                continue;
+            
+            ImapDB.SearchEmailIdentifier? search_id = message_id_to_search_result[db_id.message_id];
+            if (search_id != null)
+                relevant_ids.add(search_id);
+        }
+        
+        if (relevant_ids.size == 0)
+            return;
+        
         int result_mutex_token = yield result_mutex.claim_async();
         
         Error? error = null;
         try {
-            Gee.ArrayList<ImapDB.SearchEmailIdentifier> relevant_ids
-                = Geary.traverse<Geary.EmailIdentifier>(ids)
-                .map_nonnull<ImapDB.SearchEmailIdentifier>(
-                    id => ImapDB.SearchEmailIdentifier.collection_get_email_identifier(search_results, id))
-                .to_array_list();
-            
-            if (relevant_ids.size > 0)
-                yield do_search_async(query, null, relevant_ids, cancellable);
+            yield do_search_async(query, null, relevant_ids, cancellable);
         } catch(Error e) {
             error = e;
         }
@@ -227,28 +234,38 @@ private class Geary.ImapDB.SearchFolder : Geary.SearchFolder, Geary.FolderSuppor
         // smarter about only fetching the search results in list_email_async()
         // etc., but this leads to some more complications when redoing the
         // search.
-        Gee.ArrayList<ImapDB.SearchEmailIdentifier> results
-            = ImapDB.SearchEmailIdentifier.array_list_from_results(yield account.local_search_async(
-            query, MAX_RESULT_EMAILS, 0, exclude_folders, add_ids ?? remove_ids, cancellable));
+        Gee.Collection<Geary.EmailIdentifier>? full_results = yield account.local_search_async(
+            query, MAX_RESULT_EMAILS, 0, exclude_folders, add_ids ?? remove_ids, cancellable);
+        if (full_results == null || full_results.size == 0)
+            return;
         
-        Gee.List<ImapDB.SearchEmailIdentifier> added
-            = Gee.List.empty<ImapDB.SearchEmailIdentifier>();
-        Gee.List<ImapDB.SearchEmailIdentifier> removed
-            = Gee.List.empty<ImapDB.SearchEmailIdentifier>();
+        Gee.HashSet<ImapDB.SearchEmailIdentifier> results = Geary.traverse<Geary.EmailIdentifier>(full_results)
+            .map_nonnull<ImapDB.SearchEmailIdentifier>(id => id as ImapDB.SearchEmailIdentifier)
+            .to_hash_set();
         
+        Gee.List<ImapDB.SearchEmailIdentifier> added = Gee.List.empty<ImapDB.SearchEmailIdentifier>();
         if (remove_ids == null) {
             added = Geary.traverse<ImapDB.SearchEmailIdentifier>(results)
                 .filter(id => !(id in search_results))
                 .to_array_list();
+            
+            foreach (ImapDB.SearchEmailIdentifier sid in added)
+                message_id_to_search_result[sid.message_id] = sid;
+            
+            search_results.add_all(added);
         }
+        
+        Gee.List<ImapDB.SearchEmailIdentifier> removed = Gee.List.empty<ImapDB.SearchEmailIdentifier>();
         if (add_ids == null) {
             removed = Geary.traverse<ImapDB.SearchEmailIdentifier>(remove_ids ?? search_results)
                 .filter(id => !(id in results))
                 .to_array_list();
+            
+            foreach (ImapDB.SearchEmailIdentifier sid in removed)
+                message_id_to_search_result.unset(sid.message_id);
+            
+            search_results.remove_all(removed);
         }
-        
-        search_results.remove_all(removed);
-        search_results.add_all(added);
         
         ((ImapDB.SearchFolderProperties) properties).set_total(search_results.size);
         
@@ -420,6 +437,7 @@ private class Geary.ImapDB.SearchFolder : Geary.SearchFolder, Geary.FolderSuppor
     private void clear_search_results() {
         search_results = new Gee.TreeSet<ImapDB.SearchEmailIdentifier>(
             ImapDB.SearchEmailIdentifier.compare_descending);
+        message_id_to_search_result.clear();
     }
 }
 
