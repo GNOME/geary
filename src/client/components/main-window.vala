@@ -334,9 +334,12 @@ public class MainWindow : Gtk.ApplicationWindow {
     
     private void on_change_orientation() {
         bool horizontal = GearyApplication.instance.config.folder_list_pane_horizontal;
+        bool initial = true;
         
-        if (status_bar.parent != null)
+        if (status_bar.parent != null) {
             status_bar.parent.remove(status_bar);
+            initial = false;
+        }
         
         GLib.Settings.unbind(folder_paned, "position");
         folder_paned.orientation = horizontal ? Gtk.Orientation.HORIZONTAL :
@@ -345,10 +348,12 @@ public class MainWindow : Gtk.ApplicationWindow {
         int folder_list_width =
             GearyApplication.instance.config.folder_list_pane_position_horizontal;
         if (horizontal) {
-            conversations_paned.position += folder_list_width;
+            if (!initial)
+                conversations_paned.position += folder_list_width;
             folder_box.pack_start(status_bar, false, false);
         } else {
-            conversations_paned.position -= folder_list_width;
+            if (!initial)
+                conversations_paned.position -= folder_list_width;
             conversation_box.pack_start(status_bar, false, false);
         }
         
