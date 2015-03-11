@@ -865,7 +865,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
         // Run again to make sure we're full ... precondition checking is relied on to prevent
         // continuous looping of FillWindowOperations
         bool rescheduled = false;
-        if (conversations.size < min_window_count) {
+        if (conversations.size < min_window_count && folder.properties.email_total <= min_window_count) {
             operation_queue.add(new FillWindowOperation(this, false));
             rescheduled = true;
         }
