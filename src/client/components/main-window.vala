@@ -15,6 +15,7 @@ public class MainWindow : Gtk.ApplicationWindow {
     public FolderList.Tree folder_list { get; private set; default = new FolderList.Tree(); }
     public ConversationListStore conversation_list_store { get; private set; default = new ConversationListStore(); }
     public MainToolbar main_toolbar { get; private set; }
+    public SearchBar search_bar { get; private set; default = new SearchBar(); }
     public ConversationListView conversation_list_view  { get; private set; }
     public ConversationViewer conversation_viewer { get; private set; default = new ConversationViewer(); }
     public StatusBar status_bar { get; private set; default = new StatusBar(); }
@@ -86,6 +87,8 @@ public class MainWindow : Gtk.ApplicationWindow {
         
         // Toolbar.
         main_toolbar = new MainToolbar();
+        main_toolbar.bind_property("search-open", search_bar, "search-mode-enabled",
+            BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
         if (!GearyApplication.instance.is_running_unity) {
             main_toolbar.show_close_button = true;
             set_titlebar(main_toolbar);
@@ -159,12 +162,24 @@ public class MainWindow : Gtk.ApplicationWindow {
                 border-left-width: 0px;
             }
             ComposerBox {
-                border: 16px solid #ccc;
-                box-shadow: 0 0 0 1px rgba(0,0,0,0.4) inset;
-                padding: 1px;
+                border-left-width: 0px;
+                border-right-width: 0px;
+                border-bottom-width: 0px;
             }
-            GtkBox GtkHeaderBar {
-                  border-radius: 0px;
+            ComposerBox.full-pane {
+                border-top-width: 0px;
+            }
+            ComposerEmbed GtkHeaderBar,
+            ComposerBox GtkHeaderBar {
+                border-radius: 0px;
+            }
+            .geary-titlebar-left:dir(ltr),
+            .geary-titlebar-right:dir(rtl) {
+                border-top-right-radius: 0px;
+            }
+            .geary-titlebar-right:dir(ltr),
+            .geary-titlebar-left:dir(rtl) {
+                border-top-left-radius: 0px;
             }
         """;
         
@@ -235,10 +250,13 @@ public class MainWindow : Gtk.ApplicationWindow {
         folder_paned.pack1(folder_box, false, false);
         folder_paned.pack2(conversation_box, true, false);
         
-        folder_paned.get_style_context().add_class(Gtk.STYLE_CLASS_SIDEBAR);
+        Gtk.Box search_bar_box = new Gtk.Box(Gtk.Orientation.VERTICAL, 0);
+        search_bar_box.pack_start(search_bar, false, false, 0);
+        search_bar_box.pack_start(folder_paned);
+        search_bar_box.get_style_context().add_class(Gtk.STYLE_CLASS_SIDEBAR);
         
         // Message list left of message viewer.
-        conversations_paned.pack1(folder_paned, false, false);
+        conversations_paned.pack1(search_bar_box, false, false);
         conversations_paned.pack2(viewer_frame, true, true);
         
         if (GearyApplication.instance.is_running_unity)
@@ -258,7 +276,7 @@ public class MainWindow : Gtk.ApplicationWindow {
     
     private bool on_key_press_event(Gdk.EventKey event) {
         if ((event.keyval == Gdk.Key.Shift_L || event.keyval == Gdk.Key.Shift_R)
-            && (event.state & Gdk.ModifierType.SHIFT_MASK) == 0 && !main_toolbar.search_entry_has_focus)
+            && (event.state & Gdk.ModifierType.SHIFT_MASK) == 0 && !search_bar.search_entry_has_focus)
             on_shift_key(true);
         
         // Check whether the focused widget wants to handle it, if not let the accelerators kick in
@@ -271,7 +289,7 @@ public class MainWindow : Gtk.ApplicationWindow {
         // the shift key to report as released when they release ALL of them.
         // There doesn't seem to be an easy way to do this in Gdk.
         if ((event.keyval == Gdk.Key.Shift_L || event.keyval == Gdk.Key.Shift_R)
-            && !main_toolbar.search_entry_has_focus)
+            && !search_bar.search_entry_has_focus)
             on_shift_key(false);
         
         return propagate_key_event(event);
@@ -375,13 +393,13 @@ public class MainWindow : Gtk.ApplicationWindow {
     
     private void update_headerbar() {
         if (current_folder == null) {
-            main_toolbar.title = null;
-            main_toolbar.subtitle = null;
+            main_toolbar.account = null;
+            main_toolbar.folder = null;
             
             return;
         }
         
-        main_toolbar.title = current_folder.account.information.nickname;
+        main_toolbar.account = current_folder.account.information.nickname;
         
         /// Current folder's name followed by its unread count, i.e. "Inbox (42)"
         // except for Drafts and Outbox, where we show total count
@@ -398,9 +416,9 @@ public class MainWindow : Gtk.ApplicationWindow {
         }
         
         if (count > 0)
-            main_toolbar.subtitle = _("%s (%d)").printf(current_folder.get_display_name(), count);
+            main_toolbar.folder = _("%s (%d)").printf(current_folder.get_display_name(), count);
         else
-            main_toolbar.subtitle = current_folder.get_display_name();
+            main_toolbar.folder = current_folder.get_display_name();
     }
 }
 

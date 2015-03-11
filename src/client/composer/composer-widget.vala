@@ -62,6 +62,8 @@ public class ComposerWidget : Gtk.EventBox {
     public const string ACTION_COMPOSE_AS_HTML = "compose as html";
     public const string ACTION_SHOW_EXTENDED = "show extended";
     public const string ACTION_CLOSE = "close";
+    public const string ACTION_CLOSE_SAVE = "close and save";
+    public const string ACTION_CLOSE_DISCARD = "close and discard";
     public const string ACTION_DETACH = "detach";
     public const string ACTION_SEND = "send";
     public const string ACTION_ADD_ATTACHMENT = "add attachment";
@@ -71,6 +73,7 @@ public class ComposerWidget : Gtk.EventBox {
     private const string DRAFT_SAVING_TEXT = _("Saving");
     private const string DRAFT_ERROR_TEXT = _("Error saving");
     private const string BACKSPACE_TEXT = _("Press Backspace to delete quote");
+    private const string DEFAULT_TITLE = _("New Message");
     
     private const string URI_LIST_MIME_TYPE = "text/uri-list";
     private const string FILE_URI_PREFIX = "file://";
@@ -208,6 +211,8 @@ public class ComposerWidget : Gtk.EventBox {
     
     public string toolbar_text { get; set; }
     
+    public string window_title { get; set; }
+    
     private ContactListStore? contact_list_store = null;
     
     private string? body_html = null;
@@ -225,7 +230,7 @@ public class ComposerWidget : Gtk.EventBox {
     private EmailEntry bcc_entry;
     private Gtk.Label reply_to_label;
     private EmailEntry reply_to_entry;
-    public Gtk.Entry subject_entry;
+    private Gtk.Entry subject_entry;
     private Gtk.Label message_overlay_label;
     private Gtk.Box attachments_box;
     private Gtk.Alignment hidden_on_attachment_drag_over;
@@ -352,6 +357,12 @@ public class ComposerWidget : Gtk.EventBox {
         // testing, this can cause non-deterministic segfaults. Investigate why, and fix if possible.
         set_entry_completions();
         subject_entry = builder.get_object("subject") as Gtk.Entry;
+        subject_entry.bind_property("text", this, "window-title", BindingFlags.SYNC_CREATE,
+            (binding, source_value, ref target_value) => {
+                target_value = Geary.String.is_empty_or_whitespace(subject_entry.text)
+                    ? DEFAULT_TITLE : subject_entry.text.strip();
+                return true;
+            });
         Gtk.Alignment message_area = builder.get_object("message area") as Gtk.Alignment;
         actions = builder.get_object("compose actions") as Gtk.ActionGroup;
         // Can only happen after actions exits
@@ -430,6 +441,8 @@ public class ComposerWidget : Gtk.EventBox {
         actions.get_action(ACTION_INSERT_LINK).activate.connect(on_insert_link);
         
         actions.get_action(ACTION_CLOSE).activate.connect(on_close);
+        actions.get_action(ACTION_CLOSE_SAVE).activate.connect(on_close_and_save);
+        actions.get_action(ACTION_CLOSE_DISCARD).activate.connect(on_close_and_discard);
         
         actions.get_action(ACTION_DETACH).activate.connect(on_detach);
         actions.get_action(ACTION_SEND).activate.connect(on_send);
@@ -1118,6 +1131,17 @@ public class ComposerWidget : Gtk.EventBox {
     private void on_close() {
         if (should_close() == CloseStatus.DO_CLOSE)
             container.close_container();
+    }
+    
+    private void on_close_and_save() {
+        if (can_save())
+            save_and_exit_async.begin();
+        else
+            container.close_container();
+    }
+    
+    private void on_close_and_discard() {
+        discard_and_exit_async.begin();
     }
     
     private void on_detach() {
