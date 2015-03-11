@@ -16,7 +16,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-03-11 02:21+0200\n"
+"POT-Creation-Date: 2015-03-11 02:34+0200\n"
 "PO-Revision-Date: 2015-03-11 02:27+0200\n"
 "Last-Translator: Yosef Or Boczko <yoseforb@gmail.com>\n"
 "Language-Team: עברית <>\n"
@@ -1851,7 +1851,8 @@ msgstr "מחיקת כתובת דוא״ל"
 msgid ""
 "Some email services require additional addresses be configured on the "
 "server.  Contact your email provider for more information."
-msgstr "כמה שרתי דואר דורשים כתובות נוספות להגדרה על השרת. יש ליצור קשר עם\n"
+msgstr ""
+"כמה שרתי דואר דורשים כתובות נוספות להגדרה על השרת. יש ליצור קשר עם\n"
 "ספק הדוא״ל שלך למיד נוסף."
 
 #: ../ui/edit_alternate_emails.glade.h:4
@@ -2066,6 +2067,10 @@ msgstr "תמיד ל_צפות עבור הודעות חדשות"
 msgid "Geary will run in the background and notify of new mail"
 msgstr "‏Geary ירוץ ברקע ויודיע על הודעות חדשות"
 
+#: ../ui/preferences.glade.h:12
+msgid "Preferences"
+msgstr "העדפות"
+
 #: ../ui/remove_confirm.glade.h:1
 msgid ""
 "<span weight=\"bold\" size=\"larger\">Are you sure you want to remove this "
@@ -2105,9 +2110,6 @@ msgstr "‏Geary בתהליך שדרוג…"
 
 #~ msgid "Do you want to discard the unsaved message?"
 #~ msgstr "האם למחוק את ההודעה שלא נשמרה?"
-
-#~ msgid "Preferences"
-#~ msgstr "העדפות"
 
 #~ msgid "attach|enclosed|enclosing|cover letter"
 #~ msgstr "מצורף|מכתב נלווה"
