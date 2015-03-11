@@ -10,8 +10,8 @@ msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2015-03-11 00:35+0000\n"
-"PO-Revision-Date: 2015-03-11 15:49+0100\n"
+"POT-Creation-Date: 2015-03-11 14:50+0000\n"
+"PO-Revision-Date: 2015-03-11 16:14+0100\n"
 "Last-Translator: Dušan Kazik <prescott66@gmail.com>\n"
 "Language-Team: Slovak (http://www.transifex.com/projects/p/geary/language/"
 "sk/)\n"
@@ -23,7 +23,6 @@ msgstr ""
 "X-Generator: Poedit 1.7.4\n"
 
 #: ../desktop/geary.desktop.in.h:1 ../desktop/geary-autostart.desktop.in.h:1
-#| msgid "Geary Mail"
 msgid "Geary"
 msgstr "Geary"
 
@@ -274,12 +273,10 @@ msgid "Unrecognized command line option \"%s\"\n"
 msgstr "Nerozpoznaná voľba príkazového riadku „%s“\n"
 
 #: ../src/client/application/geary-controller.vala:61
-#| msgid "%u conversations selected."
 msgid "Delete conversation (Shift+Delete)"
 msgstr "Odstráni rozhovor (Shift+Delete)"
 
 #: ../src/client/application/geary-controller.vala:62
-#| msgid "%u conversations selected."
 msgid "Delete conversations (Shift+Delete)"
 msgstr "Odstráni rozhovory (Shift+Delete)"
 
@@ -289,7 +286,6 @@ msgid "Move conversation to Trash (Delete, Backspace)"
 msgstr "Presunie rozhovory do Koša (Delete, Backspace)"
 
 #: ../src/client/application/geary-controller.vala:67
-#| msgid "No conversations selected."
 msgid "Move conversations to Trash (Delete, Backspace)"
 msgstr "Presunie rozhovory do Koša (Delete, Backspace)"
 
@@ -896,7 +892,6 @@ msgid "Cc: "
 msgstr "Kópia: "
 
 #: ../src/client/composer/composer-widget.vala:1615
-#| msgid "Bcc:"
 msgid "Bcc: "
 msgstr "Skrytá kópia: "
 
@@ -919,7 +914,6 @@ msgstr "%1$s prostredníctvom účtu %2$s"
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
 #: ../src/client/composer/composer-widget.vala:2328
-#| msgid "From:"
 msgid "_From:"
 msgstr "Od:"
 
@@ -1451,7 +1445,7 @@ msgstr "Nevyžiadaná pošta"
 
 #: ../src/engine/api/geary-special-folder-type.vala:45
 msgid "Trash"
-msgstr "Odpadkový koš"
+msgstr "Kôš"
 
 #: ../src/engine/api/geary-special-folder-type.vala:48
 msgid "Outbox"
@@ -1531,7 +1525,6 @@ msgstr "ja"
 #. names for the Drafts folder, leaving in the English names as well.  The first in the list
 #. will be the default, so please add the most common localized name to the front.
 #: ../src/engine/imap-engine/imap-engine-generic-account.vala:575
-#| msgid "Drafts"
 msgid "Drafts | Draft"
 msgstr "Koncepty | Koncept"
 
