@@ -113,7 +113,7 @@ public class Geary.Imap.MessageSet : BaseObject {
     /**
      * Parses a string representing a {@link MessageSet} into a List of {@link SequenceNumber}s.
      *
-     * See the note at {@link parse_uid} about limitations of this method.
+     * See the note at {@link uid_parse} about limitations of this method.
      *
      * Returns null if the string or parsed set is empty.
      *

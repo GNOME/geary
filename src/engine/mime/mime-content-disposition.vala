@@ -47,7 +47,7 @@ public class Geary.Mime.ContentDisposition : Geary.BaseObject {
     public const string SIZE = "size";
     
     /**
-     * The {@link DispositionType}, which is {@link DispositionType.NONE} if not specified.
+     * The {@link DispositionType}, which is {@link DispositionType.UNSPECIFIED} if not specified.
      */
     public DispositionType disposition_type { get; private set; }
     

@@ -1,4 +1,4 @@
-/* Copyright 2011-2012 Yorba Foundation
+/* Copyright 2011-2015 Yorba Foundation
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution. 
@@ -95,10 +95,10 @@ public class Geary.Imap.FetchedData : Object {
     /**
      * Returns the merge of this {@link FetchedData} and the supplied one.
      *
-     * The results are undefined if both FetchData objects contain the same {@link FetchDataType}
-     * or {@link FetchBodyDataType}s.
+     * The results are undefined if both FetchData objects contain the same
+     * {@link FetchDataSpecifier} or {@link FetchBodyDataSpecifier}s.
      *
-     * See warnings at {@link body_data_map} for dealing with multiple FetchBodyDataTypes.
+     * See warnings at {@link body_data_map} for dealing with multiple FetchBodyDataSpecifiers.
      *
      * @return null if the FetchedData do not have the same {@link seq_num}.
      */

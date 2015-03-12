@@ -56,7 +56,7 @@ public class Geary.Imap.Capabilities : Geary.GenericCapabilities {
     }
     
     /**
-     * Indicates the {@link ClientSession{ reported support for SPECIAL-USE.
+     * Indicates the {@link ClientSession} reported support for SPECIAL-USE.
      *
      * See [[https://tools.ietf.org/html/rfc6154]]
      */

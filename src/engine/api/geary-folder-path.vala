@@ -364,7 +364,7 @@ public abstract class Geary.FolderRoot : Geary.FolderPath {
      * The default case sensitivity of each element in the {@link FolderPath}.
      *
      * @see FolderRoot.case_sensitive
-     * @see FolderRoot.get_child
+     * @see FolderPath.get_child
      */
     public bool default_case_sensitivity { get; private set; }
     

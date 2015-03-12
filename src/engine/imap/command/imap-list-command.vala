@@ -31,7 +31,7 @@ public class Geary.Imap.ListCommand : Command {
      * LIST "" % -> "Spam"
      * LIST "" "Spam" -> "~spam"
      *
-     * See http://redmine.yorba.org/issues/7624 for more information.
+     * See [[http://redmine.yorba.org/issues/7624]] for more information.
      */
     public ListCommand(MailboxSpecifier mailbox, bool use_xlist, ListReturnParameter? return_param) {
         base (use_xlist ? XLIST_NAME : NAME, { "" });

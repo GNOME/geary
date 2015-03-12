@@ -16,12 +16,12 @@ public class ComposerWindow : Gtk.Window, ComposerContainer {
         
         if (!GearyApplication.instance.is_running_unity) {
             composer.header.show_close_button = true;
-            if (composer.header.parent != null)
-                composer.header.parent.remove(composer.header);
+            composer.free_header();
             set_titlebar(composer.header);
             composer.bind_property("window-title", composer.header, "title",
                 BindingFlags.SYNC_CREATE);
         } else {
+            composer.embed_header();
             composer.bind_property("window-title", this, "title", BindingFlags.SYNC_CREATE);
         }
         

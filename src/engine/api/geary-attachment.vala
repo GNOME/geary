@@ -43,7 +43,7 @@ public abstract class Geary.Attachment : BaseObject {
     public int64 filesize { get; private set; }
     
     /**
-     * The {@link Disposition} of the attachment, as specified by the {@link Email}.
+     * The {@link Mime.ContentDisposition} of the attachment, as specified by the {@link Email}.
      *
      * See [[https://tools.ietf.org/html/rfc2183]]
      */

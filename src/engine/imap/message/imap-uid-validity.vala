@@ -31,7 +31,7 @@ public class Geary.Imap.UIDValidity : Geary.MessageData.Int64MessageData, Geary.
     /**
      * Creates a new {@link UIDValidity} without checking for valid values.
      *
-     * @see UIDValidity.checked
+     * @see UIDValidity.UIDValidity.checked
      */
     public UIDValidity(int64 value) {
         base (value);

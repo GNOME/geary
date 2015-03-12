@@ -40,7 +40,7 @@ public class Geary.Imap.NumberParameter : UnquotedStringParameter {
      * Creates a {@link NumberParameter} for a string representation of a number.
      *
      * No checking is performed to verify that the string is only composed of numeric characters.
-     * Use {@link is_numeric}.
+     * Use {@link is_ascii_numeric}.
      */
     public NumberParameter.from_ascii(string ascii) {
         base (ascii);

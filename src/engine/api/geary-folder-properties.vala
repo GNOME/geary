@@ -14,29 +14,32 @@ public abstract class Geary.FolderProperties : BaseObject {
     public const string PROP_NAME_IS_VIRTUAL = "is-virtual";
     
     /**
-     * The total count of email in the Folder.
+     * The total count of email in the {@link Folder}.
      */
     public int email_total { get; protected set; }
     
     /**
-     * The total count of unread email in the Folder.
+     * The total count of unread email in the {@link Folder}.
      */
     public int email_unread { get; protected set; }
     
     /**
-     * Returns a Trillian indicating if this Folder has children.  has_children == Trillian.TRUE
-     * implies supports_children == Trilian.TRUE.
+     * Returns a {@link Trillian} indicating if this {@link Folder} has children.
+     *
+     * has_children == {@link Trillian.TRUE} implies {@link supports_children} == Trilian.TRUE.
      */
     public Trillian has_children { get; protected set; }
     
     /**
-     * Returns a Trillian indicating if this Folder can parent new children Folders.  This does
-     * *not* mean creating a sub-folder is guaranteed to succeed.
+     * Returns a {@link Trillian} indicating if this {@link Folder} can parent new children
+     * {@link Folder}s.
+     *
+     * This does ''not'' mean creating a sub-folder is guaranteed to succeed.
      */
     public Trillian supports_children { get; protected set; }
     
     /**
-     * Returns a Trillian indicating if Folder.open_async() *can* succeed remotely.
+     * Returns a {@link Trillian} indicating if {@link Folder.open_async} can succeed remotely.
      */
     public Trillian is_openable { get; protected set; }
     
@@ -60,9 +63,12 @@ public abstract class Geary.FolderProperties : BaseObject {
     public bool is_virtual { get; private set; }
     
     /**
-     * True if APPEND on the folder will never return the created UID.  This is
-     * for servers that don't support UIDPLUS.  Most servers support UIDPLUS,
-     * so this will usually be false.
+     * True if the {@link Folder} offers the {@link FolderSupport.Create} interface but is
+     * guaranteed not to return a {@link EmailIdentifier}, even if
+     * {@link FolderSupport.Create.create_email_async} succeeds.
+     *
+     * This is for IMAP servers that don't support UIDPLUS.  Most servers support UIDPLUS, so this
+     * will usually be false.
      */
     public bool create_never_returns_id { get; protected set; }
     

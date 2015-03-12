@@ -120,4 +120,10 @@ void apply_style(Gtk.Widget widget, string style) {
     }
 }
 
+/**
+ * This is not bound in Vala < 0.26.
+ */
+[CCode(cname = "g_binding_unbind")]
+extern void unbind(Binding binding);
+
 }

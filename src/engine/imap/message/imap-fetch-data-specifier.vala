@@ -9,11 +9,11 @@
  *
  * Most FETCH requests can use this simple specifier to return various parts of the message.
  * More complicated requests (and requests for partial header or body sections) must use a
- * {@link FetchBodyDataType} specifier.
+ * {@link FetchBodyDataSpecifier} specifier.
  *
  * See [[http://tools.ietf.org/html/rfc3501#section-6.4.5]]
  *
- * @see FetchBodyDataType
+ * @see FetchBodyDataSpecifier
  */
 
 public enum Geary.Imap.FetchDataSpecifier {
@@ -78,9 +78,7 @@ public enum Geary.Imap.FetchDataSpecifier {
     }
     
     /**
-     * Decoders a {@link StringParameter} into a {@link FetchDataType} using {@link decode}.
-     *
-     * @see decode
+     * Decodes a {@link StringParameter} into a {@link FetchDataSpecifier}.
      */
     public static FetchDataSpecifier from_parameter(StringParameter strparam) throws ImapError {
         switch (strparam.as_lower()) {
@@ -130,14 +128,14 @@ public enum Geary.Imap.FetchDataSpecifier {
     }
     
     /**
-     * Turns this {@link FetchDataType} into a {@link StringParameter} for transmission.
+     * Turns this {@link FetchDataSpecifier} into a {@link StringParameter} for transmission.
      */
     public StringParameter to_parameter() {
         return new AtomParameter(to_string());
     }
     
     /**
-     * Returns the appropriate {@link FetchDataDecoder} for this {@link FetchDataType}.
+     * Returns the appropriate {@link FetchDataDecoder} for this {@link FetchDataSpecifier}.
      *
      * The FetchDataDecoder can then be used to convert the associated {@link Parameter}s into
      * {@link Imap.MessageData}.

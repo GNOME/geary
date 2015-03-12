@@ -31,7 +31,7 @@ public class ComposerBox : Gtk.Frame, ComposerContainer {
             
             title_binding = composer.bind_property("window-title", composer.header, "title",
                 BindingFlags.SYNC_CREATE);
-            composer.header.parent.remove(composer.header);
+            composer.free_header();
             GearyApplication.instance.controller.main_window.main_toolbar.set_conversation_header(
                 composer.header);
             get_style_context().add_class("full-pane");
@@ -78,7 +78,7 @@ public class ComposerBox : Gtk.Frame, ComposerContainer {
             GearyApplication.instance.controller.main_window.main_toolbar.remove_conversation_header(
                 composer.header);
         if (title_binding != null)
-            title_binding.unbind();
+            GtkUtil.unbind(title_binding);
         
         composer.state = ComposerWidget.ComposerState.DETACHED;
         composer.editor.focus_in_event.disconnect(on_focus_in);
