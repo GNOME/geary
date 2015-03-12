@@ -17,7 +17,7 @@
 
 public class Geary.Imap.ListReturnParameter : ListParameter {
     /**
-     * See https://tools.ietf.org/html/rfc6154
+     * See [[https://tools.ietf.org/html/rfc6154]]
      */
     public const string SPECIAL_USE = "special-use";
     

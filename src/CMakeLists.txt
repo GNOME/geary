@@ -746,7 +746,7 @@ add_custom_target(
     WORKING_DIRECTORY
         ${CMAKE_SOURCE_DIR}/src
     COMMAND
-        ${VALADOC_EXECUTABLE} --force --no-protected -b ${CMAKE_CURRENT_SOURCE_DIR} -o ${CMAKE_SOURCE_DIR}/valadoc --package-name=geary --package-version=${VERSION} ${ENGINE_SRC} ${valadoc_pkg_opts} --vapidir=${CMAKE_SOURCE_DIR}/bindings/vapi
+        ${VALADOC_EXECUTABLE} --force --no-protected --target-glib=${TARGET_GLIB} -b ${CMAKE_CURRENT_SOURCE_DIR} -o ${CMAKE_SOURCE_DIR}/valadoc --package-name=geary --package-version=${VERSION} ${ENGINE_SRC} ${valadoc_pkg_opts} --vapidir=${CMAKE_SOURCE_DIR}/bindings/vapi
 )
 
 ## Make clean: remove copied files

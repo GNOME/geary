@@ -8,7 +8,7 @@
  * A symbolic representation of IMAP FETCH's BODY section parameter.
  *
  * This is only used with {@link FetchCommand}.  Most IMAP FETCH calls can be achieved with
- * plain {@link FetchDataType} specifiers.  Some cannot, however, and this more complicated
+ * plain {@link FetchDataSpecifier}s.  Some cannot, however, and this more complicated
  * specifier must be used.
  *
  * A fully-qualified specifier looks something like this for requests:
@@ -34,7 +34,7 @@
  * BODY[<section>]<<partial>>, and [[http://tools.ietf.org/html/rfc3501#section-7.4.2]],
  * specifically section on BODY[<section>]<<origin octet>>.
  *
- * @see FetchDataType
+ * @see FetchDataSpecifier
  */
 
 public class Geary.Imap.FetchBodyDataSpecifier : BaseObject, Gee.Hashable<FetchBodyDataSpecifier> {
@@ -196,7 +196,7 @@ public class Geary.Imap.FetchBodyDataSpecifier : BaseObject, Gee.Hashable<FetchB
     }
     
     /**
-     * Returns the {@link FetchBodyDataType} in a string ready for a {@link Command}.
+     * Returns the {@link FetchBodyDataSpecifier} in a string ready for a {@link Command}.
      *
      * The serialized field names are returned in a case-insensitive casefolded order.
      * (Some servers return field names in arbitrary order.)
@@ -210,7 +210,7 @@ public class Geary.Imap.FetchBodyDataSpecifier : BaseObject, Gee.Hashable<FetchB
     }
     
     /**
-     * Returns the {@link FetchBodyDataType} in a string as it might appear in a
+     * Returns the {@link FetchBodyDataSpecifier} in a string as it might appear in a
      * {@link ServerResponse}.
      *
      * The FetchBodyDataType server response does not include the peek modifier or the span
@@ -280,10 +280,12 @@ public class Geary.Imap.FetchBodyDataSpecifier : BaseObject, Gee.Hashable<FetchB
     }
     
     /**
-     * Returns true if the {@link StringParameter} is formatted like a {@link FetchBodyDataType}.
+     * Returns true if the {@link StringParameter} is formatted like a
+     * {@link FetchBodyDataSpecifier}.
      *
-     * This method doesn't do a full test.  It's possible for {@link deserialize_response} to
-     * throw an exception if this method returns true.
+     * This method doesn't do a //full// test.  It's possible for {@link deserialize_response} to
+     * throw an exception if this method returns true.  This method should be used for simple
+     * identification when parsing and then catch the exception as the final word on validity.
      *
      * @see deserialize_response
      */

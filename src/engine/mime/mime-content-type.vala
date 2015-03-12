@@ -85,7 +85,7 @@ public class Geary.Mime.ContentType : Geary.BaseObject {
     /**
      * Compares the {@link media_type} with the supplied type.
      *
-     * An asterisk ("*") or {@link WILDCARD) are accepted, which will always return true.
+     * An asterisk ("*") or {@link WILDCARD} are accepted, which will always return true.
      *
      * @see is_type
      */
@@ -96,7 +96,7 @@ public class Geary.Mime.ContentType : Geary.BaseObject {
     /**
      * Compares the {@link media_subtype} with the supplied subtype.
      *
-     * An asterisk ("*") or {@link WILDCARD) are accepted, which will always return true.
+     * An asterisk ("*") or {@link WILDCARD} are accepted, which will always return true.
      *
      * @see is_type
      */

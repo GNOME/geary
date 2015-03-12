@@ -78,7 +78,7 @@ public class Geary.RFC822.MailboxAddresses : Geary.MessageData.AbstractMessageDa
      * Returns the addresses suitable for insertion into an RFC822 message.  RFC822 quoting is
      * performed if required.
      *
-     * @see RFC822.to_rfc822_string
+     * @see MailboxAddress.to_rfc822_string
      */
     public string to_rfc822_string() {
         return MailboxAddress.list_to_string(addrs, "", (a) => a.to_rfc822_string());

@@ -26,7 +26,7 @@ public abstract class Geary.Imap.StringParameter : Geary.Imap.Parameter {
     public string ascii { get; private set; }
     
     /**
-     * Returns {@link value} or null if value is empty (zero-length).
+     * Returns {@link ascii} or null if value is empty (zero-length).
      */
     public string? nullable_ascii {
         get {
@@ -164,9 +164,10 @@ public abstract class Geary.Imap.StringParameter : Geary.Imap.Parameter {
     }
     
     /**
-     * Converts the {@link value} to a signed 32-bit integer, clamped between clamp_min and clamp_max.
+     * Converts the {@link ascii} to a signed 32-bit integer, clamped between clamp_min and
+     * clamp_max.
      *
-     * ImapError.INVALID is thrown if the {@link StringParameter} contains non-numeric values.  No
+     * @throws ImapError.INVALID if the {@link StringParameter} contains non-numeric values.  No
      * error is thrown if the numeric value is outside the clamped range.
      */
     public int32 as_int32(int32 clamp_min = int32.MIN, int32 clamp_max = int32.MAX) throws ImapError {
@@ -177,9 +178,10 @@ public abstract class Geary.Imap.StringParameter : Geary.Imap.Parameter {
     }
     
     /**
-     * Converts the {@link value} to a signed 64-bit integer, clamped between clamp_min and clamp_max.
+     * Converts the {@link ascii} to a signed 64-bit integer, clamped between clamp_min and
+     * clamp_max.
      *
-     * ImapError.INVALID is thrown if the {@link StringParameter} contains non-numeric values.  No
+     * @throws ImapError.INVALID if the {@link StringParameter} contains non-numeric values.  No
      * error is thrown if the numeric value is outside the clamped range.
      */
     public int64 as_int64(int64 clamp_min = int64.MIN, int64 clamp_max = int64.MAX) throws ImapError {
@@ -194,7 +196,7 @@ public abstract class Geary.Imap.StringParameter : Geary.Imap.Parameter {
      *
      * Returns null if unsuitable for a NumberParameter.
      *
-     * @see NumberParameter.is_ascii_number
+     * @see NumberParameter.is_ascii_numeric
      */
     public NumberParameter? coerce_to_number_parameter() {
         NumberParameter? numberp = this as NumberParameter;

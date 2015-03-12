@@ -232,11 +232,14 @@ public abstract class Geary.Account : BaseObject {
     /**
      * Rebuild the local data stores for this {@link Account}.
      *
-     * This should only be used if {@link open_async} throws {@link EngineError.CORRUPTION},
-     * indicating that the local data store is corrupted and cannot be used.  ''rebuild_async()
-     * will delete all local data''.  If the Account is backed by a synchronized copy on the
-     * network, it will rebuild its local mail store.  If not, the data is forever deleted.
-     * Hence, it's best to query the user before calling this method.
+     * This should only be used if {@link open_async} throws {@link EngineError.CORRUPT},
+     * indicating that the local data store is corrupted and cannot be used.
+     *
+     * ''rebuild_async() will delete all local data''.
+     *
+     * If the Account is backed by a synchronized copy on the network, it will rebuild its local
+     * mail store.  If not, the data is forever deleted.  Hence, it's best to query the user before
+     * calling this method.
      *
      * Unlike most methods in Account, this should only be called when the Account is closed.
      */

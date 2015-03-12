@@ -21,7 +21,7 @@ public class Geary.App.Conversation : BaseObject {
     
     /**
      * Specify the location of the {@link Email} in relation to the {@link Folder} being monitored
-     * by the {@link Converation}'s {@link ConversationMonitor}.
+     * by the {@link Conversation}'s {@link ConversationMonitor}.
      *
      * IN_FOLDER represents Email that is found in the Folder the ConversationMonitor is
      * monitoring.  OUT_OF_FOLDER means the Email is located elsewhere in the {@link Account}.

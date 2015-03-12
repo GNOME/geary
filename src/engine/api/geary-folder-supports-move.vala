@@ -21,7 +21,7 @@ public interface Geary.FolderSupport.Move : Geary.Folder {
      *
      * The {@link Geary.Folder} must be opened prior to attempting this operation.
      *
-     * @returns A {@link Geary.Revokable} that may be used to revoke (undo) this operation later.
+     * @return A {@link Geary.Revokable} that may be used to revoke (undo) this operation later.
      */
     public abstract async Geary.Revokable? move_email_async(Gee.List<Geary.EmailIdentifier> to_move,
         Geary.FolderPath destination, Cancellable? cancellable = null) throws Error;

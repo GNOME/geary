@@ -135,7 +135,7 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
     /**
      * Clears the {@link ListParameter} of all its children.
      *
-     * This also clears (sets to null) the parents of all {@link ListParamater} children.
+     * This also clears (sets to null) the parents of all ListParameter's children.
      */
     public void clear() {
         // sever ties to ListParameter children

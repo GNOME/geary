@@ -38,7 +38,7 @@ public class SpinWaiter : BaseObject {
      * Spins waiting for a completion state to be reached.
      *
      * There's two ways the completion state can be reached: (1) PollService returns false,
-     * indicating an abort state, (2) {@link stop} is called, indicating a success state, or
+     * indicating an abort state, (2) {@link notify} is called, indicating a success state, or
      * (3) the Cancellable was cancelled, causing an IOError.CANCELLED exception to be thrown.
      *
      * {@link PollService} will be called from within the calling thread context.
@@ -46,8 +46,6 @@ public class SpinWaiter : BaseObject {
      * Although this is thread-safe, it's not designed to be invoked by multiple callers.  That
      * could cause the PollService callback to be called more often than specified in the
      * constructor.
-     *
-     * @see stop
      */
     public bool wait(Cancellable? cancellable = null) throws Error {
         // normalize poll_msec; negative values are zeroed
@@ -86,12 +84,10 @@ public class SpinWaiter : BaseObject {
     }
     
     /**
-     * Signals a completion state to a thread calling {@link spin}.
+     * Signals a completion state to a thread calling {@link wait}.
      *
      * This call is thread-safe.  However, once a {@link SpinWaiter} has been signalled to stop,
      * it cannot be restarted.
-     *
-     * @see spin
      */
     public new void notify() {
         mutex.lock();

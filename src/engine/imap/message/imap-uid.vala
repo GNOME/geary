@@ -32,7 +32,7 @@ public class Geary.Imap.UID : Geary.MessageData.Int64MessageData, Geary.Imap.Mes
     /**
      * Creates a new {@link UID} without checking for validity.
      *
-     * @see UID.checked
+     * @see UID.UID.checked
      * @see is_value_valid
      */
     public UID(int64 value) {

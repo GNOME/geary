@@ -66,7 +66,7 @@ public class Geary.AccountInformation : BaseObject {
     //
     
     /**
-     * User's name for the {@link primary_mailbox}.
+     * User's name for the {@link get_primary_mailbox_address}.
      */
     public string real_name { get; set; }
     

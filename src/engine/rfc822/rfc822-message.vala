@@ -560,7 +560,7 @@ public class Geary.RFC822.Message : BaseObject {
      * See {@link get_body} for more details on how the body is assembled from the message's MIME
      * structure and the role of the {@link InlinePartReplacer}.
      *
-     * @throws {@link RFC822Error.NOT_FOUND} if an HTML body is not present.
+     * @throws RFC822Error.NOT_FOUND if an HTML body is not present.
      */
     public string? get_html_body(InlinePartReplacer? replacer) throws RFC822Error {
         return internal_get_body("html", false, replacer);

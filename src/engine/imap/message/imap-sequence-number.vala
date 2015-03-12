@@ -32,7 +32,7 @@ public class Geary.Imap.SequenceNumber : Geary.MessageData.Int64MessageData, Gea
      * This does not check if the value is valid.
      *
      * @see is_value_valid
-     * @see SequenceNumber.checked
+     * @see SequenceNumber.SequenceNumber.checked
      */
     public SequenceNumber(int64 value) {
         base (value);
@@ -53,14 +53,14 @@ public class Geary.Imap.SequenceNumber : Geary.MessageData.Int64MessageData, Gea
     }
     
     /**
-     * Defined as {@link value} >= {@link MIN} and <= {@link MAX}.
+     * Defined as {@link MessageData.Int64MessageData.value} >= {@link MIN} and <= {@link MAX}.
      */
     public static bool is_value_valid(int64 value) {
         return value >= MIN && value <= MAX;
     }
     
     /**
-     * Defined as {@link value} >= {@link MIN} and <= {@link MAX}.
+     * Defined as {@link MessageData.Int64MessageData.value} >= {@link MIN} and <= {@link MAX}.
      */
     public bool is_valid() {
         return is_value_valid(value);
@@ -69,7 +69,7 @@ public class Geary.Imap.SequenceNumber : Geary.MessageData.Int64MessageData, Gea
     /**
      * Returns a new {@link SequenceNumber} that is one lower than this value.
      *
-     * Returns null if the decremented value is less than {@link MIN_VALUE}.
+     * Returns null if the decremented value is less than {@link MIN}.
      */
     public SequenceNumber? dec() {
         return (value > MIN) ? new SequenceNumber(value - 1) : null;

@@ -80,7 +80,7 @@ public class Geary.App.DraftManager : BaseObject {
     }
     
     /**
-     * Indicates the {@link DraftsManager} is open and ready for service.
+     * Indicates the {@link DraftManager} is open and ready for service.
      *
      * Although this property can be monitored, the object is considered "open" when
      * {@link open_async} completes, not when this property changes to true.
@@ -255,7 +255,7 @@ public class Geary.App.DraftManager : BaseObject {
     }
     
     /**
-     * Flush pending operations and close the {@link DraftsManager}.
+     * Flush pending operations and close the {@link DraftManager}.
      *
      * Once closed, the object cannot be opened again.  Create a new object in that case.
      *
@@ -316,8 +316,8 @@ public class Geary.App.DraftManager : BaseObject {
      * See {@link FolderSupport.Create.create_email_async} for more information on the flags and
      * date_received arguments.
      *
-     * @returns A {@link Semaphore} that is notified when the operation completes (with or without
-     * error)
+     * @return A {@link Nonblocking.Semaphore} that is notified when the operation completes (with
+     * or without error)
      */
     public Geary.Nonblocking.Semaphore? update(Geary.RFC822.Message draft, Geary.EmailFlags? flags,
         DateTime? date_received) throws Error {
@@ -335,8 +335,8 @@ public class Geary.App.DraftManager : BaseObject {
      * Note: Replaced drafts are deleted, but on some services (i.e. Gmail) those deleted messages
      * are actually moved to the Trash.  This call does not currently solve that problem.
      *
-     * @returns A {@link Semaphore} that is notified when the operation completes (with or without
-     * error)
+     * @return A {@link Nonblocking.Semaphore} that is notified when the operation completes (with
+     * or without error)
      */
     public Geary.Nonblocking.Semaphore? discard() throws Error {
         check_open();

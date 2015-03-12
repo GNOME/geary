@@ -95,10 +95,10 @@ public class Geary.Imap.FetchedData : Object {
     /**
      * Returns the merge of this {@link FetchedData} and the supplied one.
      *
-     * The results are undefined if both FetchData objects contain the same {@link FetchDataType}
-     * or {@link FetchBodyDataType}s.
+     * The results are undefined if both FetchData objects contain the same
+     * {@link FetchDataSpecifier} or {@link FetchBodyDataSpecifier}s.
      *
-     * See warnings at {@link body_data_map} for dealing with multiple FetchBodyDataTypes.
+     * See warnings at {@link body_data_map} for dealing with multiple FetchBodyDataSpecifiers.
      *
      * @return null if the FetchedData do not have the same {@link seq_num}.
      */

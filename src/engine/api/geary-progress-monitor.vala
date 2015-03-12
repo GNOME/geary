@@ -83,7 +83,7 @@ public class Geary.ReentrantProgressMonitor : Geary.ProgressMonitor {
     }
     
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      *
      * Unlike the base class implementation, this may be called multiple times successively without
      * a problem, but each must be matched by a {@link notify_finish} to completely stop the
@@ -97,7 +97,7 @@ public class Geary.ReentrantProgressMonitor : Geary.ProgressMonitor {
     }
     
     /**
-     * @inheritDoc
+     * {@inheritDoc}
      *
      * Unlike the base class implementation, this may be called multiple times successively as
      * long as they were matched by a prior {@link notify_start}.
