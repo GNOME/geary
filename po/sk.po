@@ -10,8 +10,8 @@ msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2015-03-12 09:00+0000\n"
-"PO-Revision-Date: 2015-03-12 11:34+0100\n"
+"POT-Creation-Date: 2015-03-12 18:55+0000\n"
+"PO-Revision-Date: 2015-03-12 20:03+0100\n"
 "Last-Translator: Dušan Kazik <prescott66@gmail.com>\n"
 "Language-Team: Slovak (http://www.transifex.com/projects/p/geary/language/"
 "sk/)\n"
@@ -1748,131 +1748,151 @@ msgstr "_Formátovaný text"
 msgid "Show Extended Fields"
 msgstr "Zobrazí rozšírené polia"
 
-# DK: https://bugzilla.gnome.org/show_bug.cgi?id=746076
 #: ../ui/composer.glade.h:24
+msgctxt "Label"
 msgid "Close and Save"
 msgstr "Zavrieť a uložiť"
 
-# DK: https://bugzilla.gnome.org/show_bug.cgi?id=746076
 #: ../ui/composer.glade.h:25
+msgctxt "Short Label"
+msgid "Close and Save"
+msgstr "Zavrieť a uložiť"
+
+#: ../ui/composer.glade.h:26
+msgctxt "Tooltip"
+msgid "Close and Save"
+msgstr "Zavrie a uloží"
+
+#: ../ui/composer.glade.h:27
+msgctxt "Label"
 msgid "Close and Discard"
 msgstr "Zavrieť a zahodiť"
 
-#: ../ui/composer.glade.h:26
+#: ../ui/composer.glade.h:28
+msgctxt "Short Label"
+msgid "Close and Discard"
+msgstr "Zavrieť a zahodiť"
+
+#: ../ui/composer.glade.h:29
+msgctxt "Tooltip"
+msgid "Close and Discard"
+msgstr "Zavrie a zahodí"
+
+#: ../ui/composer.glade.h:30
 msgid "Lar_ge"
 msgstr "_Veľké"
 
-#: ../ui/composer.glade.h:27
+#: ../ui/composer.glade.h:31
 msgid "Large"
 msgstr "Veľké"
 
-#: ../ui/composer.glade.h:28
+#: ../ui/composer.glade.h:32
 msgid "_Medium"
 msgstr "_Stredné"
 
-#: ../ui/composer.glade.h:29
+#: ../ui/composer.glade.h:33
 msgid "Medium"
 msgstr "Stredné"
 
-#: ../ui/composer.glade.h:30
+#: ../ui/composer.glade.h:34
 msgid "_Small"
 msgstr "_Malé"
 
-#: ../ui/composer.glade.h:31
+#: ../ui/composer.glade.h:35
 msgid "Small"
 msgstr "Malé"
 
-#: ../ui/composer.glade.h:32
+#: ../ui/composer.glade.h:36
 msgid "S_ans Serif"
 msgstr "S_ans Serif"
 
-#: ../ui/composer.glade.h:33
+#: ../ui/composer.glade.h:37
 msgid "Sans Serif"
 msgstr "Sans Serif"
 
-#: ../ui/composer.glade.h:34
+#: ../ui/composer.glade.h:38
 msgid "S_erif"
 msgstr "S_erif"
 
-#: ../ui/composer.glade.h:35
+#: ../ui/composer.glade.h:39
 msgid "Serif"
 msgstr "Serif"
 
-#: ../ui/composer.glade.h:36
+#: ../ui/composer.glade.h:40
 msgid "_Fixed Width"
 msgstr "_Pevná šírka"
 
-#: ../ui/composer.glade.h:37
+#: ../ui/composer.glade.h:41
 msgid "Fixed Width"
 msgstr "Pevná šírka"
 
-#: ../ui/composer.glade.h:38
+#: ../ui/composer.glade.h:42
 msgid "Detach"
 msgstr "Odpojí"
 
-#: ../ui/composer.glade.h:39
+#: ../ui/composer.glade.h:43
 msgid "Detach (Ctrl+D)"
 msgstr "Odpojí (Ctrl+D)"
 
-#: ../ui/composer.glade.h:40
+#: ../ui/composer.glade.h:44
 msgid "_Send"
 msgstr "_Odoslať"
 
-#: ../ui/composer.glade.h:41
+#: ../ui/composer.glade.h:45
 msgid "Send"
 msgstr "Odoslať"
 
-#: ../ui/composer.glade.h:42
+#: ../ui/composer.glade.h:46
 msgid "Send (Ctrl+Enter)"
 msgstr "Odošle (Ctrl+Enter)"
 
-#: ../ui/composer.glade.h:43
+#: ../ui/composer.glade.h:47
 msgid "_Attach File"
 msgstr "_Priložiť súbor"
 
-#: ../ui/composer.glade.h:44
+#: ../ui/composer.glade.h:48
 msgid "Attach File"
 msgstr "Priloží súbor"
 
-#: ../ui/composer.glade.h:45
+#: ../ui/composer.glade.h:49
 msgid "_Include Original Attachments"
 msgstr "Zahrnúť _pôvodné prílohy"
 
-#: ../ui/composer.glade.h:46
+#: ../ui/composer.glade.h:50
 msgid "Include Original Attachments"
 msgstr "zahrnie pôvodné prílohy"
 
 #. Address(es) e-mail is to be sent to
-#: ../ui/composer.glade.h:48
+#: ../ui/composer.glade.h:52
 msgid "_To"
 msgstr "_Pre"
 
-#: ../ui/composer.glade.h:49
+#: ../ui/composer.glade.h:53
 msgid "_Cc"
 msgstr "_Kópia"
 
-#: ../ui/composer.glade.h:50
+#: ../ui/composer.glade.h:54
 msgid "_Subject"
 msgstr "P_redmet"
 
-#: ../ui/composer.glade.h:51
+#: ../ui/composer.glade.h:55
 msgid "_Bcc"
 msgstr "_Skrytá kópia"
 
-#: ../ui/composer.glade.h:52
+#: ../ui/composer.glade.h:56
 msgid "_Reply-To"
 msgstr "_Komu odpovedať"
 
 #. Geary account mail will be sent from
-#: ../ui/composer.glade.h:54
+#: ../ui/composer.glade.h:58
 msgid "From"
 msgstr "Od"
 
-#: ../ui/composer.glade.h:55
+#: ../ui/composer.glade.h:59
 msgid "Drop files here"
 msgstr "Sem pustite súbory"
 
-#: ../ui/composer.glade.h:56
+#: ../ui/composer.glade.h:60
 msgid "To add them as attachments"
 msgstr "Na ich pridanie do prílohy"
 
