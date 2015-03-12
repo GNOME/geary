@@ -10,8 +10,8 @@ msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2015-03-12 05:57+0000\n"
-"PO-Revision-Date: 2015-03-12 10:00+0100\n"
+"POT-Creation-Date: 2015-03-12 09:00+0000\n"
+"PO-Revision-Date: 2015-03-12 11:34+0100\n"
 "Last-Translator: Dušan Kazik <prescott66@gmail.com>\n"
 "Language-Team: Slovak (http://www.transifex.com/projects/p/geary/language/"
 "sk/)\n"
@@ -370,11 +370,11 @@ msgstr "_Označiť ako…"
 
 #: ../src/client/application/geary-controller.vala:376
 msgid "Mark as _Read"
-msgstr "Označiť ako _prečítané"
+msgstr "Označiť ako _prečítanú"
 
 #: ../src/client/application/geary-controller.vala:382
 msgid "Mark as _Unread"
-msgstr "Označiť ako _neprečítané"
+msgstr "Označiť ako _neprečítanú"
 
 #: ../src/client/application/geary-controller.vala:388
 msgid "_Star"
@@ -464,7 +464,7 @@ msgid ""
 "you sure you want to do this?"
 msgstr ""
 "Vaše nastavenia servera IMAP a/alebo SMTP neurčujú šifrovanie SSL alebo "
-"TLS.  To znamená, že vaše meno používateľa a heslo može byť prečítané inou "
+"TLS.  To znamená, že vaše meno používateľa a heslo môže byť prečítané inou "
 "osobou v sieti.  Naozaj chcete toto vykonať?"
 
 #: ../src/client/application/geary-controller.vala:961
@@ -1080,11 +1080,11 @@ msgstr "Odpoved_ať všetkým"
 #. Mark as read/unread.
 #: ../src/client/conversation-viewer/conversation-viewer.vala:1879
 msgid "_Mark as Read"
-msgstr "_Označiť ako prečítané"
+msgstr "_Označiť ako prečítanú"
 
 #: ../src/client/conversation-viewer/conversation-viewer.vala:1883
 msgid "_Mark as Unread"
-msgstr "_Označiť ako neprečítané"
+msgstr "_Označiť ako neprečítanú"
 
 #: ../src/client/conversation-viewer/conversation-viewer.vala:1889
 msgid "Mark Unread From _Here"
