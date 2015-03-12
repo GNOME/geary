@@ -10,8 +10,8 @@ msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2015-03-12 05:57+0000\n"
-"PO-Revision-Date: 2015-03-12 11:38+0100\n"
+"POT-Creation-Date: 2015-03-12 10:39+0000\n"
+"PO-Revision-Date: 2015-03-12 11:43+0100\n"
 "Last-Translator: Dušan Kazik <prescott66@gmail.com>\n"
 "Language-Team: Slovak (http://www.transifex.com/projects/p/geary/language/"
 "sk/)\n"
@@ -171,7 +171,7 @@ msgstr "        &#8226; Používateľské meno alebo heslo je nesprávne.\n"
 
 #: ../src/client/application/geary-application.vala:19
 msgid "Copyright 2011-2014 Yorba Foundation"
-msgstr ""
+msgstr "Autorské práva 2011-2014 Nadácia Yorba"
 
 #: ../src/client/application/geary-application.vala:21
 msgid "Visit the Yorba web site"
@@ -260,7 +260,7 @@ msgstr "Nerozpoznaná voľba príkazového riadku „%s“\n"
 
 #: ../src/client/application/geary-controller.vala:56
 msgid "_Delete"
-msgstr ""
+msgstr "O_dstrániť"
 
 #: ../src/client/application/geary-controller.vala:57
 msgid "Delete conversation (Shift+Delete)"
@@ -273,15 +273,15 @@ msgstr "Odstráni rozhovory (Shift+Delete)"
 #. This refers to the action ("move email to the trash"), not the Trash folder itself
 #: ../src/client/application/geary-controller.vala:62
 msgid "_Trash"
-msgstr ""
+msgstr "_Kôš"
 
 #: ../src/client/application/geary-controller.vala:63
 msgid "Move conversation to trash (Delete, Backspace)"
-msgstr ""
+msgstr "Presunie rozhovor do Koša (Delete, Backspace)"
 
 #: ../src/client/application/geary-controller.vala:64
 msgid "Move conversations to trash (Delete, Backspace)"
-msgstr ""
+msgstr "Presunie rozhovory do Koša (Delete, Backspace)"
 
 #. This refers to the action ("archive an email"), not the Archive folder itself
 #: ../src/client/application/geary-controller.vala:68
@@ -752,11 +752,11 @@ msgstr "Chyba pri ukladaní"
 #. / A list of keywords, separated by pipe ("|") characters, that suggest an attachment
 #: ../src/client/composer/composer-widget.vala:117
 msgid "attach|enclosed|enclosing|cover letter"
-msgstr ""
+msgstr "príloha|priložený|prikladám|priložená|priložené|príloh|krycí list"
 
 #: ../src/client/composer/composer-widget.vala:830
 msgid "Do you want to discard the unsaved message?"
-msgstr ""
+msgstr "Chcete zahodiť neuloženú správu?"
 
 #: ../src/client/composer/composer-widget.vala:833
 #: ../src/client/composer/composer-widget.vala:837
@@ -1120,7 +1120,7 @@ msgstr "Vyskytla sa chyba počas spracovávania certifikátu servera"
 #. details: https://bugzilla.gnome.org/show_bug.cgi?id=679006
 #: ../src/client/dialogs/password-dialog.vala:16
 msgid "Please enter your password"
-msgstr ""
+msgstr "Prosím, zadajte vaše heslo"
 
 #. Label displaying total number of email messages in a folder
 #: ../src/client/folder-list/folder-list-folder-entry.vala:32
@@ -1900,7 +1900,7 @@ msgstr "Uložiť _koncepty na serveri"
 
 #: ../ui/login.glade.h:34
 msgid "Si_gn emails:"
-msgstr ""
+msgstr "_Podpísať emaily:"
 
 #: ../ui/password-dialog.glade.h:1
 msgid "SMTP Credentials"
@@ -1908,7 +1908,7 @@ msgstr "Poverenia pre SMTP"
 
 #: ../ui/password-dialog.glade.h:2
 msgid "Username:"
-msgstr ""
+msgstr "Používateľské meno:"
 
 #: ../ui/password-dialog.glade.h:3
 msgid "Password:"
@@ -1952,7 +1952,7 @@ msgstr "Zobraziť _upozornenia pre novú poštu"
 
 #: ../ui/preferences.glade.h:11
 msgid "Notify of new mail at start_up"
-msgstr ""
+msgstr "Oznámiť novú poštu po sp_ustení"
 
 #: ../ui/remove_confirm.glade.h:1
 msgid ""
@@ -1980,7 +1980,7 @@ msgstr "Emailová adresa:"
 
 #: ../ui/upgrade_dialog.glade.h:1
 msgid "Geary upgrade in progress."
-msgstr ""
+msgstr "Prebieha aktualizácia programu Geary."
 
 #~ msgid "Port:"
 #~ msgstr "Port:"
