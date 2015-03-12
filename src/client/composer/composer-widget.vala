@@ -369,8 +369,7 @@ public class ComposerWidget : Gtk.EventBox {
         compose_as_html = GearyApplication.instance.config.compose_as_html;
         
         header = new ComposerHeaderbar(actions);
-        Gtk.Alignment header_area = (Gtk.Alignment) builder.get_object("header_area");
-        header_area.add(header);
+        embed_header();
         bind_property("state", header, "state", BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
         
         // Listen to account signals to update from menu.
@@ -1161,6 +1160,18 @@ public class ComposerWidget : Gtk.EventBox {
         GearyApplication.instance.controller.main_window.conversation_viewer
             .set_paned_composer(this);
         state = ComposerWidget.ComposerState.PANED;
+    }
+    
+    public void embed_header() {
+        if (header.parent == null) {
+            Gtk.Alignment header_area = (Gtk.Alignment) builder.get_object("header_area");
+            header_area.add(header);
+        }
+    }
+    
+    public void free_header() {
+        if (header.parent != null)
+            header.parent.remove(header);
     }
     
     // compares all keys to all tokens according to user-supplied comparison function
