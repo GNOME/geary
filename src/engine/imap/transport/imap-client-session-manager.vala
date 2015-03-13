@@ -181,7 +181,8 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
             && is_open
             && !untrusted_host
             && is_endpoint_reachable) {
-            schedule_new_authorized_session();
+            pending_sessions++;
+            create_new_authorized_session.begin(null, on_created_new_authorized_session);
         }
         
         try {
@@ -189,12 +190,6 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         } catch (Error release_err) {
             debug("Unable to release session table mutex after adjusting pool: %s", release_err.message);
         }
-    }
-    
-    private void schedule_new_authorized_session() {
-        pending_sessions++;
-        
-        create_new_authorized_session.begin(false, null, on_created_new_authorized_session);
     }
     
     private void on_created_new_authorized_session(Object? source, AsyncResult result) {
@@ -225,9 +220,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         return false;
     }
     
-    // The locked parameter indicates if this is called while the sessions_mutex is locked
-    private async ClientSession create_new_authorized_session(bool locked, Cancellable? cancellable)
-        throws Error {
+    private async ClientSession create_new_authorized_session(Cancellable? cancellable) throws Error {
         if (authentication_failed)
             throw new ImapError.UNAUTHENTICATED("Invalid ClientSessionManager credentials");
         
@@ -241,7 +234,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         
         // add session to pool before launching all the connect activity so error cases can properly
         // back it out
-        if (locked)
+        if (sessions_mutex.is_locked())
             locked_add_session(new_session);
         else
             yield unlocked_add_session_async(new_session);
@@ -252,7 +245,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
             debug("[%s] Connect failure: %s", new_session.to_string(), err.message);
             
             bool removed;
-            if (locked)
+            if (sessions_mutex.is_locked())
                 removed = locked_remove_session(new_session);
             else
                 removed = yield unlocked_remove_session_async(new_session);
@@ -276,7 +269,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
             }
             
             bool removed;
-            if (locked)
+            if (sessions_mutex.is_locked())
                 removed = locked_remove_session(new_session);
             else
                 removed = yield unlocked_remove_session_async(new_session);
@@ -320,7 +313,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         Error? err = null;
         try {
             if (found_session == null)
-                found_session = yield create_new_authorized_session(true, cancellable);
+                found_session = yield create_new_authorized_session(cancellable);
         } catch (Error create_err) {
             debug("Error creating session: %s", create_err.message);
             err = create_err;
@@ -374,6 +367,8 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
             
             case ClientSession.ProtocolState.SELECTED:
             case ClientSession.ProtocolState.SELECTING:
+                debug("[%s] Closing mailbox for released session %s", to_string(), session.to_string());
+                
                 // always close mailbox to return to authorized state
                 try {
                     yield session.close_mailbox_async(cancellable);
@@ -400,6 +395,8 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         if (!is_open) {
             yield force_disconnect_async(session, true);
         } else {
+            debug("[%s] Unreserving session %s", to_string(), session.to_string());
+            
             try {
                 // don't respect Cancellable because this *must* happen; don't want this lingering
                 // on the reserved list forever
@@ -418,6 +415,9 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
     // It's possible this will be called more than once on the same session, especially in the case of a
     // remote close on reserved ClientSession, so this code is forgiving.
     private async void force_disconnect_async(ClientSession session, bool do_disconnect) {
+        debug("[%s] Dropping session %s (disconnecting=%s)", to_string(),
+            session.to_string(), do_disconnect.to_string());
+        
         int token;
         try {
             token = yield sessions_mutex.claim_async();
