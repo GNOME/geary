@@ -563,7 +563,8 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
      * Use only for debugging and logging.
      */
     public string to_string() {
-        return endpoint.to_string();
+        return "ClientSessionManager/%s %d sessions, %d reserved".printf(endpoint.to_string(),
+            sessions.size, reserved_sessions.size);
     }
 }
 
