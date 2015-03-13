@@ -310,7 +310,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         foreach (ClientSession session in sessions) {
             MailboxSpecifier? mailbox;
             if (!reserved_sessions.contains(session) &&
-                (session.get_context(out mailbox) == ClientSession.Context.AUTHORIZED)) {
+                (session.get_protocol_state(out mailbox) == ClientSession.ProtocolState.AUTHORIZED)) {
                 found_session = session;
                 
                 break;
@@ -350,26 +350,30 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         // during mop-up
         
         MailboxSpecifier? mailbox;
-        ClientSession.Context context = session.get_context(out mailbox);
+        ClientSession.ProtocolState context = session.get_protocol_state(out mailbox);
         
         bool unreserve = false;
         switch (context) {
-            case ClientSession.Context.AUTHORIZED:
+            case ClientSession.ProtocolState.AUTHORIZED:
+            case ClientSession.ProtocolState.CLOSING_MAILBOX:
                 // keep as-is, but remove from the reserved list
                 unreserve = true;
             break;
             
-            case ClientSession.Context.UNAUTHORIZED:
+            // ClientSessionManager is tasked with holding onto a pool of authorized connections,
+            // so if one is released outside that state, pessimistically drop it
+            case ClientSession.ProtocolState.CONNECTING:
+            case ClientSession.ProtocolState.AUTHORIZING:
+            case ClientSession.ProtocolState.UNAUTHORIZED:
                 yield force_disconnect_async(session, true);
             break;
             
-            case ClientSession.Context.UNCONNECTED:
+            case ClientSession.ProtocolState.UNCONNECTED:
                 yield force_disconnect_async(session, false);
             break;
             
-            case ClientSession.Context.IN_PROGRESS:
-            case ClientSession.Context.EXAMINED:
-            case ClientSession.Context.SELECTED:
+            case ClientSession.ProtocolState.SELECTED:
+            case ClientSession.ProtocolState.SELECTING:
                 // always close mailbox to return to authorized state
                 try {
                     yield session.close_mailbox_async(cancellable);
@@ -379,7 +383,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
                 }
                 
                 // if not in authorized state now, drop it, otherwise remove from reserved list
-                if (session.get_context(out mailbox) == ClientSession.Context.AUTHORIZED)
+                if (session.get_protocol_state(out mailbox) == ClientSession.ProtocolState.AUTHORIZED)
                     unreserve = true;
                 else
                     yield force_disconnect_async(session, true);
