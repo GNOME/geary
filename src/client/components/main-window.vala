@@ -170,7 +170,8 @@ public class MainWindow : Gtk.ApplicationWindow {
                 border-top-width: 0px;
             }
             ComposerEmbed GtkHeaderBar,
-            ComposerBox GtkHeaderBar {
+            ComposerBox GtkHeaderBar,
+            GtkBox.vertical GtkHeaderBar {
                 border-radius: 0px;
             }
             .geary-titlebar-left:dir(ltr),
