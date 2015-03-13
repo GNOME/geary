@@ -16,6 +16,7 @@ public class MainToolbar : Gtk.Box {
     public bool show_close_button_left { get; private set; }
     public bool show_close_button_right { get; private set; }
     public bool search_open { get; set; default = false; }
+    public int left_pane_width { get; set; }
     
     private PillHeaderbar folder_header;
     private PillHeaderbar conversation_header;
@@ -32,8 +33,19 @@ public class MainToolbar : Gtk.Box {
         folder_header.get_style_context().add_class("geary-titlebar-left");
         conversation_header.get_style_context().add_class("titlebar");
         conversation_header.get_style_context().add_class("geary-titlebar-right");
+        
+        // Instead of putting a separator between the two headerbars, as other applications do,
+        // we put a separator at the right end of the left headerbar.  This greatly improves
+        // the appearance under the Ambiance theme (see bug #746171).  To get this separator to
+        // line up with the handle of the pane, we need to extend the width of the left-hand
+        // headerbar a bit.  Six pixels is right both for Adwaita and Ambiance.
         GearyApplication.instance.config.bind(Configuration.MESSAGES_PANE_POSITION_KEY,
-            folder_header, "width-request", SettingsBindFlags.GET);
+            this, "left-pane-width", SettingsBindFlags.GET);
+        this.bind_property("left-pane-width", folder_header, "width-request",
+            BindingFlags.SYNC_CREATE, (binding, source_value, ref target_value) => {
+                target_value = left_pane_width + 6;
+                return true;
+            });
         
         this.bind_property("account", folder_header, "title", BindingFlags.SYNC_CREATE);
         this.bind_property("folder", folder_header, "subtitle", BindingFlags.SYNC_CREATE);
@@ -87,7 +99,9 @@ public class MainToolbar : Gtk.Box {
 #if !GTK_3_12
         folder_header.add_end(empty);
         folder_header.add_end(search);
+        folder_header.add_end(new Gtk.Separator(Gtk.Orientation.VERTICAL));
 #else
+        folder_header.add_end(new Gtk.Separator(Gtk.Orientation.VERTICAL));
         folder_header.add_end(search);
         folder_header.add_end(empty);
 #endif
@@ -161,7 +175,6 @@ public class MainToolbar : Gtk.Box {
         conversation_header.set_custom_title(title_box);
         
         pack_start(folder_header, false, false);
-        pack_start(new Gtk.Separator(Gtk.Orientation.VERTICAL), false, false);
         pack_start(conversation_header, true, true);
         
         get_style_context().changed.connect(set_close_buttons_side);
