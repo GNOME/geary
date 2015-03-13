@@ -92,7 +92,6 @@ public class Geary.App.ConversationMonitor : BaseObject {
     private Geary.Email.Field required_fields;
     private Geary.Folder.OpenFlags open_flags;
     private Cancellable? cancellable_monitor = null;
-    private bool reseed_notified = false;
     private int _min_window_count = 0;
     private ConversationOperationQueue operation_queue = new ConversationOperationQueue();
     
@@ -153,14 +152,6 @@ public class Geary.App.ConversationMonitor : BaseObject {
      */
     public virtual signal void scan_completed() {
         Logging.debug(Logging.Flag.CONVERSATIONS, "[%s] ConversationMonitor::scan_completed",
-            folder.to_string());
-    }
-    
-    /**
-     * "seed-completed" is fired when the folder has opened and email has been populated.
-     */
-    public virtual signal void seed_completed() {
-        Logging.debug(Logging.Flag.CONVERSATIONS, "[%s] ConversationMonitor::seed_completed",
             folder.to_string());
     }
     
@@ -271,10 +262,6 @@ public class Geary.App.ConversationMonitor : BaseObject {
         scan_completed();
     }
     
-    protected virtual void notify_seed_completed() {
-        seed_completed();
-    }
-    
     protected virtual void notify_conversations_added(Gee.Collection<Conversation> conversations) {
         conversations_added(conversations);
     }
@@ -329,15 +316,9 @@ public class Geary.App.ConversationMonitor : BaseObject {
             yield operation_queue.stop_processing_async(cancellable_monitor);
         operation_queue.clear();
         
-        bool reseed_now = (folder.get_open_state() != Geary.Folder.OpenState.CLOSED);
-        
-        // Add the necessary initial operations ahead of anything the folder
-        // might add as it opens.
+        // Add the necessary initial operations ahead of anything the Folder might notify us of
+        // (additions, removals, etc.)
         operation_queue.add(new LocalLoadOperation(this));
-        // if already opened, go ahead and do a full load now from remote and local; otherwise,
-        // the reseed has to wait until the folder's remote is opened (handled in on_folder_opened)
-        if (reseed_now)
-            operation_queue.add(new ReseedOperation(this, "already opened"));
         operation_queue.add(new FillWindowOperation(this, false));
         
         connect_to_folder();
@@ -353,7 +334,6 @@ public class Geary.App.ConversationMonitor : BaseObject {
         }
         
         notify_monitoring_started();
-        reseed_notified = false;
         
         // Process operations in the background.
         operation_queue.run_process_async.begin();
@@ -366,6 +346,8 @@ public class Geary.App.ConversationMonitor : BaseObject {
         yield load_by_id_async(null, min_window_count, required_fields, Folder.ListFlags.LOCAL_ONLY,
             cancellable_monitor);
         debug("ConversationMonitor seeded for %s", folder.to_string());
+        
+        operation_queue.add(new FillWindowOperation(this, false));
     }
     
     /**
@@ -660,18 +642,19 @@ public class Geary.App.ConversationMonitor : BaseObject {
     }
     
     private bool is_folder_external_conversation_source(Folder folder) {
-        return !folder.path.equal_to(this.folder.path)
-            && !folder.properties.is_local_only
-            && !folder.properties.is_virtual;
+        return !folder.properties.is_local_only && !folder.properties.is_virtual;
     }
     
     private void on_account_email_added(Folder folder, Gee.Collection<EmailIdentifier> added_ids) {
+        // ignore virtual/local-only folders but add new messages locally completed in this Folder
         if (is_folder_external_conversation_source(folder))
             operation_queue.add(new ExternalAppendOperation(this, folder, added_ids));
     }
     
     private void on_account_email_removed(Folder folder, Gee.Collection<EmailIdentifier> removed_ids) {
-        if (!is_folder_external_conversation_source(folder))
+        // ignore virtual/local-only Folders as well as removals from this Folder, which we're
+        // tracking
+        if (!is_folder_external_conversation_source(folder) || folder.path.equal_to(this.folder.path))
             return;
         
         operation_queue.add(new ExternalRemoveOperation(this, folder, removed_ids));
@@ -783,31 +766,10 @@ public class Geary.App.ConversationMonitor : BaseObject {
         return earliest_id;
     }
     
-    internal async void reseed_async(string why) {
-        Geary.EmailIdentifier? earliest_id = yield get_lowest_email_id_async(null);
-        if (earliest_id != null) {
-            debug("ConversationMonitor (%s) reseeding starting from Email ID %s on opened %s", why,
-                earliest_id.to_string(), folder.to_string());
-            yield load_by_id_async(earliest_id, int.MAX, Email.Field.NONE,
-                Geary.Folder.ListFlags.OLDEST_TO_NEWEST | Geary.Folder.ListFlags.INCLUDING_ID,
-                cancellable_monitor);
-        } else {
-            debug("ConversationMonitor (%s) reseeding latest %d emails on opened %s", why,
-                min_window_count, folder.to_string());
-            yield load_by_id_async(null, min_window_count, Email.Field.NONE, Geary.Folder.ListFlags.NONE,
-                cancellable_monitor);
-        }
-        
-        if (!reseed_notified) {
-            reseed_notified = true;
-            notify_seed_completed();
-        }
-    }
-    
     private void on_folder_opened(Geary.Folder.OpenState state, int count) {
         // once remote is open, reseed with messages from the earliest ID to the latest
         if (state == Geary.Folder.OpenState.BOTH || state == Geary.Folder.OpenState.REMOTE)
-            operation_queue.add(new ReseedOperation(this, state.to_string()));
+            operation_queue.add(new FillWindowOperation(this, false));
     }
     
     /**

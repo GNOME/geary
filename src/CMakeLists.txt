@@ -58,7 +58,6 @@ engine/app/conversation-monitor/app-external-remove-operation.vala
 engine/app/conversation-monitor/app-fill-window-operation.vala
 engine/app/conversation-monitor/app-local-load-operation.vala
 engine/app/conversation-monitor/app-remove-operation.vala
-engine/app/conversation-monitor/app-reseed-operation.vala
 engine/app/conversation-monitor/app-terminate-operation.vala
 
 engine/app/email-store/app-async-folder-operation.vala

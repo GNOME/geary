@@ -131,6 +131,7 @@ public class GearyController : Geary.BaseObject {
     private Geary.Nonblocking.Mutex untrusted_host_prompt_mutex = new Geary.Nonblocking.Mutex();
     private Gee.HashSet<Geary.Endpoint> validating_endpoints = new Gee.HashSet<Geary.Endpoint>();
     private Geary.Revokable? revokable = null;
+    private uint scrollbar_check_id = 0;
     
     // List of windows we're waiting to close before Geary closes.
     private Gee.List<ComposerWidget> waiting_to_close = new Gee.ArrayList<ComposerWidget>();
@@ -1452,8 +1453,7 @@ public class GearyController : Geary.BaseObject {
         }
         
         current_conversations.scan_error.connect(on_scan_error);
-        current_conversations.seed_completed.connect(on_seed_completed);
-        current_conversations.seed_completed.connect(on_conversation_count_changed);
+        current_conversations.scan_completed.connect(on_scan_completed);
         current_conversations.scan_completed.connect(on_conversation_count_changed);
         current_conversations.conversations_added.connect(on_conversation_count_changed);
         current_conversations.conversation_removed.connect(on_conversation_count_changed);
@@ -1471,13 +1471,30 @@ public class GearyController : Geary.BaseObject {
         debug("Scan error: %s", err.message);
     }
     
-    private void on_seed_completed() {
+    private void on_scan_completed() {
+        if (scrollbar_check_id != 0)
+            Source.remove(scrollbar_check_id);
+        
+        // Check for scrollbar after low idle, to give repaint and resize a chance to complete
+        scrollbar_check_id = Idle.add(check_for_enough_conversations, Priority.LOW);
+    }
+    
+    private bool check_for_enough_conversations() {
+        // all code paths lead to this SourceFunc being removed when completed
+        scrollbar_check_id = 0;
+        
         // Done scanning.  Check if we have enough messages to fill the conversation list; if not,
         // trigger a load_more();
-        if (!main_window.conversation_list_has_scrollbar()) {
-            debug("Not enough messages, loading more for folder %s", current_folder.to_string());
-            on_load_more();
-        }
+        if (main_window.conversation_list_has_scrollbar())
+            return false;
+        
+        debug("Not enough conversations (%d/%d) for scrollbars, loading more from folder %s",
+            current_conversations.get_conversation_count(), current_conversations.min_window_count,
+            current_folder.to_string());
+        
+        on_load_more();
+        
+        return false;
     }
     
     private void on_conversation_count_changed() {
