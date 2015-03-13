@@ -16,8 +16,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-03-12 15:57+0200\n"
-"PO-Revision-Date: 2015-03-12 15:59+0200\n"
+"POT-Creation-Date: 2015-03-13 02:17+0200\n"
+"PO-Revision-Date: 2015-03-13 02:18+0200\n"
 "Last-Translator: Yosef Or Boczko <yoseforb@gmail.com>\n"
 "Language-Team: עברית <>\n"
 "Language: he\n"
@@ -1737,128 +1737,150 @@ msgid "Show Extended Fields"
 msgstr "הצגת שדות מורחבים"
 
 #: ../ui/composer.glade.h:24
+msgctxt "Label"
 msgid "Close and Save"
 msgstr "סגירה ושמירה"
 
 #: ../ui/composer.glade.h:25
+msgctxt "Short Label"
+msgid "Close and Save"
+msgstr "סגירה ושמירה"
+
+#: ../ui/composer.glade.h:26
+msgctxt "Tooltip"
+msgid "Close and Save"
+msgstr "סגירה ושמירה"
+
+#: ../ui/composer.glade.h:27
+msgctxt "Label"
 msgid "Close and Discard"
 msgstr "סגירה והשלכה"
 
-#: ../ui/composer.glade.h:26
+#: ../ui/composer.glade.h:28
+msgctxt "Short Label"
+msgid "Close and Discard"
+msgstr "סגירה והשלכה"
+
+#: ../ui/composer.glade.h:29
+msgctxt "Tooltip"
+msgid "Close and Discard"
+msgstr "סגירה והשלכה"
+
+#: ../ui/composer.glade.h:30
 msgid "Lar_ge"
 msgstr "_גדול"
 
-#: ../ui/composer.glade.h:27
+#: ../ui/composer.glade.h:31
 msgid "Large"
 msgstr "גדול"
 
-#: ../ui/composer.glade.h:28
+#: ../ui/composer.glade.h:32
 msgid "_Medium"
 msgstr "_בינוני"
 
-#: ../ui/composer.glade.h:29
+#: ../ui/composer.glade.h:33
 msgid "Medium"
 msgstr "בינוני"
 
-#: ../ui/composer.glade.h:30
+#: ../ui/composer.glade.h:34
 msgid "_Small"
 msgstr "_קטן"
 
-#: ../ui/composer.glade.h:31
+#: ../ui/composer.glade.h:35
 msgid "Small"
 msgstr "קטן"
 
-#: ../ui/composer.glade.h:32
+#: ../ui/composer.glade.h:36
 msgid "S_ans Serif"
 msgstr "_בלתי מעוטר"
 
-#: ../ui/composer.glade.h:33
+#: ../ui/composer.glade.h:37
 msgid "Sans Serif"
 msgstr "בלתי מעוטר"
 
-#: ../ui/composer.glade.h:34
+#: ../ui/composer.glade.h:38
 msgid "S_erif"
 msgstr "_מעוטר"
 
-#: ../ui/composer.glade.h:35
+#: ../ui/composer.glade.h:39
 msgid "Serif"
 msgstr "מעוטר"
 
-#: ../ui/composer.glade.h:36
+#: ../ui/composer.glade.h:40
 msgid "_Fixed Width"
 msgstr "_רוחב קבוע"
 
-#: ../ui/composer.glade.h:37
+#: ../ui/composer.glade.h:41
 msgid "Fixed Width"
 msgstr "רוחב קבוע"
 
-#: ../ui/composer.glade.h:38
+#: ../ui/composer.glade.h:42
 msgid "Detach"
 msgstr "ניתוק"
 
-#: ../ui/composer.glade.h:39
+#: ../ui/composer.glade.h:43
 msgid "Detach (Ctrl+D)"
 msgstr "ניתוק (Ctrl+ג)"
 
-#: ../ui/composer.glade.h:40
+#: ../ui/composer.glade.h:44
 msgid "_Send"
 msgstr "_שליחה"
 
-#: ../ui/composer.glade.h:41
+#: ../ui/composer.glade.h:45
 msgid "Send"
 msgstr "שליחה"
 
-#: ../ui/composer.glade.h:42
+#: ../ui/composer.glade.h:46
 msgid "Send (Ctrl+Enter)"
 msgstr "שליחה (Ctrl+Enter)"
 
-#: ../ui/composer.glade.h:43
+#: ../ui/composer.glade.h:47
 msgid "_Attach File"
 msgstr "_צירוף קובץ"
 
-#: ../ui/composer.glade.h:44
+#: ../ui/composer.glade.h:48
 msgid "Attach File"
 msgstr "צירוף קובץ"
 
-#: ../ui/composer.glade.h:45
+#: ../ui/composer.glade.h:49
 msgid "_Include Original Attachments"
 msgstr "_לכלול את הקבצים המצורפים המקוריים"
 
-#: ../ui/composer.glade.h:46
+#: ../ui/composer.glade.h:50
 msgid "Include Original Attachments"
 msgstr "לכלול את הקבצים המצורפים המקוריים"
 
 #. Address(es) e-mail is to be sent to
-#: ../ui/composer.glade.h:48
+#: ../ui/composer.glade.h:52
 msgid "_To"
 msgstr "_אל"
 
-#: ../ui/composer.glade.h:49
+#: ../ui/composer.glade.h:53
 msgid "_Cc"
 msgstr "_עותק"
 
-#: ../ui/composer.glade.h:50
+#: ../ui/composer.glade.h:54
 msgid "_Subject"
 msgstr "_נושא"
 
-#: ../ui/composer.glade.h:51
+#: ../ui/composer.glade.h:55
 msgid "_Bcc"
 msgstr "עותק _מוסתר"
 
-#: ../ui/composer.glade.h:52
+#: ../ui/composer.glade.h:56
 msgid "_Reply-To"
 msgstr "לה_שיב אל"
 
 #. Geary account mail will be sent from
-#: ../ui/composer.glade.h:54
+#: ../ui/composer.glade.h:58
 msgid "From"
 msgstr "מאת"
 
-#: ../ui/composer.glade.h:55
+#: ../ui/composer.glade.h:59
 msgid "Drop files here"
 msgstr "יש לגרור קבצים לכאן"
 
-#: ../ui/composer.glade.h:56
+#: ../ui/composer.glade.h:60
 msgid "To add them as attachments"
 msgstr "כדי להוסיף אותם כקבצים מצורפים"
 
