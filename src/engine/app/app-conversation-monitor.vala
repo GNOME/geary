@@ -849,6 +849,8 @@ public class Geary.App.ConversationMonitor : BaseObject {
                 assert_not_reached();
         }
         
+        bool expected_more_email;
+        
         Geary.EmailIdentifier? low_id = yield get_lowest_email_id_async(null);
         if (low_id != null && !is_insert) {
             // Load at least as many messages as remaining conversations.
@@ -856,22 +858,42 @@ public class Geary.App.ConversationMonitor : BaseObject {
                 MIN_FILL_MESSAGE_COUNT);
             
             yield load_by_id_async(low_id, num_to_load, Email.Field.NONE, flags, cancellable_monitor);
+            
+            // in this case, more email is expected to be loaded
+            expected_more_email = true;
         } else {
             // No existing messages or an insert invalidated our existing list,
             // need to start from scratch.
             yield load_by_id_async(null, min_window_count, Email.Field.NONE, flags, cancellable_monitor);
+            
+            // in this case, it's possible no new email is loaded, but that shouldn't stop a
+            // reschedule
+            expected_more_email = false;
         }
         
-        // Run again to make sure we're full ... precondition checking is relied on to prevent
-        // continuous looping of FillWindowOperations
-        bool rescheduled = false;
-        if (conversations.size < min_window_count && folder.properties.email_total <= min_window_count) {
+        //
+        // Conditions that require a rescheduling of a FillWindowOperation:
+        //
+        // * Fewer conversations than the minimum window count, or
+        // * Total amount of email in Folder is less than the minimum window count, and
+        // * More email was expected and more was loaded.  (If no more was loaded, then reached
+        //   the end of the Folder's vector -- this can happen because the email_total is not
+        //   entirely reliable due to synchronization issues and local bugs)
+        //
+        // Note that these are not the only requirements for re-running a FillWindowOperation; the
+        // preconditions at the top of this method are also baked into this decision.
+        //
+        
+        bool reschedule =
+            (conversations.size < min_window_count || folder.properties.email_total < min_window_count);
+        if (reschedule && expected_more_email)
+            reschedule = initial_message_count != get_email_count();
+        
+        if (reschedule)
             operation_queue.add(new FillWindowOperation(this, false));
-            rescheduled = true;
-        }
         
         debug("fill_window_async: loaded from %s, email_count=%d primary_ids.size=%d folder emails=%d conversations.size=%d rescheduled=%s",
             low_id != null ? low_id.to_string() : "(null)", get_email_count(), primary_email_id_to_conversation.size,
-            folder.properties.email_total, conversations.size, rescheduled.to_string());
+            folder.properties.email_total, conversations.size, reschedule.to_string());
     }
 }
