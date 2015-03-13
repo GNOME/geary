@@ -79,8 +79,10 @@ private class Geary.Imap.Account : BaseObject {
     // possibly is long enough for ClientSessionManager to get a few ready).
     private async ClientSession claim_session_async(Cancellable? cancellable) throws Error {
         // check if available session is in good state
-        if (account_session != null && account_session.get_context(null) != ClientSession.Context.AUTHORIZED)
+        if (account_session != null
+            && account_session.get_protocol_state(null) != ClientSession.ProtocolState.AUTHORIZED) {
             yield drop_session_async(cancellable);
+        }
         
         int token = yield account_session_mutex.claim_async(cancellable);
         

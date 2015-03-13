@@ -280,7 +280,7 @@ public class Geary.Engine : BaseObject {
                 
                 // Connected and initiated, still need to be sure connection authorized
                 Imap.MailboxSpecifier current_mailbox;
-                if (imap_session.get_context(out current_mailbox) != Imap.ClientSession.Context.AUTHORIZED)
+                if (imap_session.get_protocol_state(out current_mailbox) != Imap.ClientSession.ProtocolState.AUTHORIZED)
                     error_code |= ValidationResult.IMAP_CREDENTIALS_INVALID;
             } catch (Error err) {
                 debug("Error validating IMAP account info: %s", err.message);

@@ -153,17 +153,17 @@
     </child>
     <child>
       <object class="GtkAction" id="close and save">
-        <property name="label" translatable="yes">Close and Save</property>
-        <property name="short_label" translatable="yes">Close and Save</property>
-        <property name="tooltip" translatable="yes">Close and Save</property>
+        <property name="label" translatable="yes" context="Label">Close and Save</property>
+        <property name="short_label" translatable="yes" context="Short Label">Close and Save</property>
+        <property name="tooltip" translatable="yes" context="Tooltip">Close and Save</property>
         <property name="icon_name">document-save-symbolic</property>
       </object>
     </child>
     <child>
       <object class="GtkAction" id="close and discard">
-        <property name="label" translatable="yes">Close and Discard</property>
-        <property name="short_label" translatable="yes">Close and Discard</property>
-        <property name="tooltip" translatable="yes">Close and Discard</property>
+        <property name="label" translatable="yes" context="Label">Close and Discard</property>
+        <property name="short_label" translatable="yes" context="Short Label">Close and Discard</property>
+        <property name="tooltip" translatable="yes" context="Tooltip">Close and Discard</property>
         <property name="icon_name">user-trash-symbolic</property>
       </object>
     </child>
