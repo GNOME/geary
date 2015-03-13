@@ -262,6 +262,32 @@ public class GearyController : Geary.BaseObject {
      * re-opened.
      */
     public async void close_async() {
+        Geary.Engine.instance.account_available.disconnect(on_account_available);
+        Geary.Engine.instance.account_unavailable.disconnect(on_account_unavailable);
+        Geary.Engine.instance.untrusted_host.disconnect(on_untrusted_host);
+        
+        // Connect to various UI signals.
+        main_window.conversation_list_view.conversations_selected.disconnect(on_conversations_selected);
+        main_window.conversation_list_view.conversation_activated.disconnect(on_conversation_activated);
+        main_window.conversation_list_view.load_more.disconnect(on_load_more);
+        main_window.conversation_list_view.mark_conversations.disconnect(on_mark_conversations);
+        main_window.conversation_list_view.visible_conversations_changed.disconnect(on_visible_conversations_changed);
+        main_window.folder_list.folder_selected.disconnect(on_folder_selected);
+        main_window.folder_list.copy_conversation.disconnect(on_copy_conversation);
+        main_window.folder_list.move_conversation.disconnect(on_move_conversation);
+        main_window.main_toolbar.copy_folder_menu.folder_selected.disconnect(on_copy_conversation);
+        main_window.main_toolbar.move_folder_menu.folder_selected.disconnect(on_move_conversation);
+        main_window.search_bar.search_text_changed.disconnect(on_search_text_changed);
+        main_window.conversation_viewer.link_selected.disconnect(on_link_selected);
+        main_window.conversation_viewer.reply_to_message.disconnect(on_reply_to_message);
+        main_window.conversation_viewer.reply_all_message.disconnect(on_reply_all_message);
+        main_window.conversation_viewer.forward_message.disconnect(on_forward_message);
+        main_window.conversation_viewer.mark_messages.disconnect(on_conversation_viewer_mark_messages);
+        main_window.conversation_viewer.open_attachment.disconnect(on_open_attachment);
+        main_window.conversation_viewer.save_attachments.disconnect(on_save_attachments);
+        main_window.conversation_viewer.save_buffer_to_file.disconnect(on_save_buffer_to_file);
+        main_window.conversation_viewer.edit_draft.disconnect(on_edit_draft);
+        
         // hide window while shutting down, as this can take a few seconds under certain conditions
         main_window.hide();
         
