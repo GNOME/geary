@@ -214,10 +214,7 @@ public class MainToolbar : Gtk.Box {
     private void on_conversations_selected(Gee.Set<Geary.App.Conversation>? conversations,
         Geary.Folder? current_folder) {
         int selected_count = conversations.size;
-        if (selected_count == 0) {
-            conversation_title = _("No conversations selected");
-            conversation_participants = "";
-        } else if (selected_count == 1) {
+        if (selected_count == 1) {
             Geary.App.Conversation conversation = conversations.to_array()[0];
             Geary.Email? last_email = conversation.get_latest_recv_email(
                 Geary.App.Conversation.Location.ANYWHERE);
@@ -230,8 +227,7 @@ public class MainToolbar : Gtk.Box {
                 current_folder.account.information.get_all_mailboxes(),
                 current_folder.special_folder_type.is_outgoing(), false);
         } else {
-            conversation_title = ngettext("%u conversation selected", "%u conversations selected",
-                selected_count).printf(selected_count);
+            conversation_title = "";
             conversation_participants = "";
         }
     }
