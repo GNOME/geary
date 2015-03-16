@@ -11,8 +11,8 @@ public class MainToolbar : Gtk.Box {
     public string account { get; set; }
     public string folder { get; set; }
     public bool show_close_button { get; set; default = false; }
-    public bool show_close_button_left { get; private set; }
-    public bool show_close_button_right { get; private set; }
+    public bool show_close_button_left { get; private set; default = true; }
+    public bool show_close_button_right { get; private set; default = true; }
     public bool search_open { get; set; default = false; }
     public int left_pane_width { get; set; }
     
@@ -150,8 +150,13 @@ public class MainToolbar : Gtk.Box {
         pack_start(folder_header, false, false);
         pack_start(conversation_header, true, true);
         
+#if GTK_3_12
+        Gtk.Settings.get_default().notify["gtk-decoration-layout"].connect(set_window_buttons);
+        realize.connect(set_window_buttons);
+#else
         get_style_context().changed.connect(set_close_buttons_side);
         realize.connect(set_close_buttons_side);
+#endif
     }
     
     /// Updates the trash button as trash or delete, and shows or hides the archive button.
@@ -170,6 +175,9 @@ public class MainToolbar : Gtk.Box {
         guest_header_binding = bind_property("show-close-button-right", header,
             "show-close-button", BindingFlags.SYNC_CREATE);
         pack_start(header, true, true);
+#if GTK_3_12
+        header.decoration_layout = conversation_header.decoration_layout;
+#endif
     }
     
     public void remove_conversation_header(Gtk.HeaderBar header) {
@@ -178,21 +186,30 @@ public class MainToolbar : Gtk.Box {
         header.get_style_context().remove_class("geary-titlebar-right");
         GtkUtil.unbind(guest_header_binding);
         header.show_close_button = false;
+#if GTK_3_12
+        header.decoration_layout = Gtk.Settings.get_default().gtk_decoration_layout;
+#endif
         conversation_header.show();
     }
     
-    private void set_close_buttons_side() {
-        string layout;
-        bool at_end = false;
-        get_toplevel().style_get("decoration-button-layout", out layout);
-        // Based on logic of close_button_at_end in gtkheaderbar.c: Close button appears
-        // at end iff "close" follows a colon in the layout string.
-        if (layout != null) {
-            int colon_ind = layout.index_of(":");
-            at_end = (colon_ind >= 0 && layout.index_of("close", colon_ind) >= 0);
+#if GTK_3_12
+    private void set_window_buttons() {
+        string[] buttons = Gtk.Settings.get_default().gtk_decoration_layout.split(":");
+        if (buttons.length != 2) {
+            warning("gtk_decoration_layout in unexpected format");
+            return;
         }
+        show_close_button_left = show_close_button;
+        show_close_button_right = show_close_button;
+        folder_header.decoration_layout = buttons[0] + ":";
+        conversation_header.decoration_layout = ":" + buttons[1];
+    }
+#else
+    private void set_close_buttons_side() {
+        bool at_end = folder_header.close_button_at_end();
         show_close_button_left = show_close_button && !at_end;
         show_close_button_right = show_close_button && at_end;
     }
+#endif
 }
 

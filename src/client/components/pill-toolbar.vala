@@ -129,6 +129,23 @@ public class PillHeaderbar : Gtk.HeaderBar, PillBar {
     public PillHeaderbar(Gtk.ActionGroup toolbar_action_group) {
         initialize(toolbar_action_group);
     }
+    
+    public bool close_button_at_end() {
+        string layout;
+        bool at_end = false;
+#if GTK_3_12
+        layout = decoration_layout;
+#else
+        get_toplevel().style_get("decoration-button-layout", out layout);
+#endif
+        // Based on logic of close_button_at_end in gtkheaderbar.c: Close button appears
+        // at end iff "close" follows a colon in the layout string.
+        if (layout != null) {
+            int colon_ind = layout.index_of(":");
+            at_end = (colon_ind >= 0 && layout.index_of("close", colon_ind) >= 0);
+        }
+        return at_end;
+    }
 }
 
 /**
