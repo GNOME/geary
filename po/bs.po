@@ -40,7 +40,7 @@ msgstr "Šaljite i primajte e-poštu"
 
 #: ../desktop/geary.desktop.in.h:5 ../desktop/geary-autostart.desktop.in.h:5
 msgid "Email;E-mail;Mail;"
-msgstr "Epošta;E-pošta;pošta"
+msgstr "Epošta;E-pošta;pošta;"
 
 #: ../desktop/geary.desktop.in.h:6
 msgid "Compose Message"
