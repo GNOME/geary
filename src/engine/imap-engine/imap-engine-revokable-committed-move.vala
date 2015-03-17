@@ -51,14 +51,14 @@ private class Geary.ImapEngine.RevokableCommittedMove : Revokable {
                 }
             }
             
-            valid = false;
+            set_invalid();
         }
     }
     
     protected override async void internal_commit_async(Cancellable? cancellable) throws Error {
         // pretty simple: already committed, so done
         notify_committed(null);
-        valid = false;
+        set_invalid();
     }
 }
 

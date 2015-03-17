@@ -23,8 +23,10 @@ public abstract class Geary.Revokable : BaseObject {
      *
      * Due to later operations or notifications, it's possible for the Revokable to go invalid
      * after being issued to the caller.
+     *
+     * @see set_invalid
      */
-    public bool valid { get; protected set; default = true; }
+    public bool valid { get; private set; default = true; }
     
     /**
      * Indicates a {@link revoke_async} or {@link commit_async} operation is underway.
@@ -72,7 +74,10 @@ public abstract class Geary.Revokable : BaseObject {
         // ref to this object within the event loop
         revoked.connect(cancel_timed_commit);
         committed.connect(cancel_timed_commit);
-        notify[PROP_VALID].connect(cancel_timed_commit);
+        notify[PROP_VALID].connect(() => {
+            if (!valid)
+                cancel_timed_commit();
+        });
     }
     
     ~Revokable() {
@@ -85,6 +90,17 @@ public abstract class Geary.Revokable : BaseObject {
     
     protected virtual void notify_committed(Geary.Revokable? commit_revokable) {
         committed(commit_revokable);
+    }
+    
+    /**
+     * Mark the {@link Revokable} as invalid.
+     *
+     * Once invalid, a Revokable may never transit back to a valid state.
+     *
+     * @see valid
+     */
+    protected void set_invalid() {
+        valid = false;
     }
     
     /**

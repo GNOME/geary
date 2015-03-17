@@ -53,6 +53,9 @@ private class Geary.ImapEngine.RevokableMove : Revokable {
                 debug("Move from %s to %s failed: %s", source.path.to_string(), destination.to_string(),
                     err.message);
             }
+        } else if (valid) {
+            debug("Not scheduling freed move revokable for %s, open_state=%s",
+                source.path.to_string(), source.get_open_state().to_string());
         }
     }
     
@@ -64,7 +67,7 @@ private class Geary.ImapEngine.RevokableMove : Revokable {
             // valid must still be true before firing
             notify_revoked();
         } finally {
-            valid = false;
+            set_invalid();
         }
     }
     
@@ -76,7 +79,7 @@ private class Geary.ImapEngine.RevokableMove : Revokable {
             // valid must still be true before firing
             notify_committed(new RevokableCommittedMove(account, source.path, destination, op.destination_uids));
         } finally {
-            valid = false;
+            set_invalid();
         }
     }
     
@@ -85,7 +88,7 @@ private class Geary.ImapEngine.RevokableMove : Revokable {
         if (unavailable != null) {
             foreach (Folder folder in unavailable) {
                 if (folder.path.equal_to(source.path) || folder.path.equal_to(destination)) {
-                    valid = false;
+                    set_invalid();
                     
                     break;
                 }
@@ -101,7 +104,8 @@ private class Geary.ImapEngine.RevokableMove : Revokable {
         foreach (EmailIdentifier id in ids)
             move_ids.remove((ImapDB.EmailIdentifier) id);
         
-        valid = move_ids.size > 0;
+        if (move_ids.size <= 0)
+            set_invalid();
     }
     
     private void on_source_closing(Gee.List<ReplayOperation> final_ops) {
@@ -109,7 +113,7 @@ private class Geary.ImapEngine.RevokableMove : Revokable {
             return;
         
         final_ops.add(new MoveEmailCommit(source, move_ids, destination, null));
-        valid = false;
+        set_invalid();
     }
 }
 
