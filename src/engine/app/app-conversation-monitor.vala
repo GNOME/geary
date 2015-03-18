@@ -869,11 +869,8 @@ public class Geary.App.ConversationMonitor : BaseObject {
         if (reschedule && expected_more_email)
             reschedule = initial_message_count != get_email_count();
         
-        // as stated in third condition, possible for email_total to be incorrect, so use both to
-        // check if all mail has been loaded
-        if (folder.properties.email_total <= primary_email_id_to_conversation.size)
-            all_mail_loaded = true;
-        else if (expected_more_email && initial_message_count == get_email_count())
+         // Although possible for email_total to be incorrect, be stricter for this flag
+       if (folder.properties.email_total <= primary_email_id_to_conversation.size)
             all_mail_loaded = true;
         
         if (reschedule)
