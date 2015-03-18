@@ -411,7 +411,7 @@ public class ConversationListStore : Gtk.ListStore {
         return true;
     }
     
-    private void on_scan_completed(Geary.App.ConversationMonitor sender) {
+    private void on_scan_completed(Geary.App.ConversationMonitor sender, bool conversations_added) {
         refresh_previews_async.begin(sender);
         loading_local_only = false;
     }

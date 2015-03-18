@@ -35,6 +35,10 @@ public class MainWindow : Gtk.ApplicationWindow {
     private Geary.ProgressMonitor? conversation_monitor_progress = null;
     private Geary.ProgressMonitor? folder_progress = null;
     private Geary.Folder? current_folder = null;
+    private int conversation_list_height = -1;
+    private int conversation_list_width = -1;
+    
+    public signal void conversation_list_height_changed();
     
     public MainWindow(GearyApplication application) {
         Object(application: application);
@@ -97,6 +101,17 @@ public class MainWindow : Gtk.ApplicationWindow {
         set_styling();
         create_layout();
         on_change_orientation();
+        
+        // can only set this up after create_layout
+        conversation_list_scrolled.size_allocate.connect((alloc) => {
+            if (conversation_list_width == alloc.width && conversation_list_height == alloc.height)
+                return;
+            
+            conversation_list_width = alloc.width;
+            conversation_list_height = alloc.height;
+            
+            conversation_list_height_changed();
+        });
     }
     
     public override void show_all() {
@@ -271,8 +286,9 @@ public class MainWindow : Gtk.ApplicationWindow {
     // Returns true when there's a conversation list scrollbar visible, i.e. the list is tall
     // enough to need one.  Otherwise returns false.
     public bool conversation_list_has_scrollbar() {
-        Gtk.Scrollbar? scrollbar = conversation_list_scrolled.get_vscrollbar() as Gtk.Scrollbar;
-        return scrollbar != null && scrollbar.get_visible();
+        Gtk.Adjustment vadj = conversation_list_scrolled.vadjustment;
+        
+        return (vadj.upper - vadj.lower) > vadj.page_size;
     }
     
     private bool on_key_press_event(Gdk.EventKey event) {

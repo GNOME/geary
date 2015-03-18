@@ -76,7 +76,9 @@ public class Geary.App.ConversationMonitor : BaseObject {
     }
     
     public Geary.Folder folder { get; private set; }
+    
     public bool is_monitoring { get; private set; default = false; }
+    
     public int min_window_count { get { return _min_window_count; }
         set {
             if (_min_window_count == value)
@@ -86,6 +88,11 @@ public class Geary.App.ConversationMonitor : BaseObject {
             operation_queue.add(new FillWindowOperation(this, false));
         }
     }
+    
+    /**
+     * Indicates that all mail in the primary {@link folder} has been loaded.
+     */
+    public bool all_mail_loaded { get; private set; default = false; }
     
     public Geary.ProgressMonitor progress_monitor { get { return operation_queue.progress_monitor; } }
     
@@ -150,9 +157,9 @@ public class Geary.App.ConversationMonitor : BaseObject {
     /**
      * "scan-completed" is fired when the scan of the email has finished.
      */
-    public virtual signal void scan_completed() {
-        Logging.debug(Logging.Flag.CONVERSATIONS, "[%s] ConversationMonitor::scan_completed",
-            folder.to_string());
+    public virtual signal void scan_completed(bool conversations_added) {
+        Logging.debug(Logging.Flag.CONVERSATIONS, "[%s] ConversationMonitor::scan_completed conversations_added=%s",
+            folder.to_string(), conversations_added.to_string());
     }
     
     /**
@@ -258,8 +265,8 @@ public class Geary.App.ConversationMonitor : BaseObject {
         scan_error(err);
     }
     
-    protected virtual void notify_scan_completed() {
-        scan_completed();
+    protected virtual void notify_scan_completed(bool conversations_added) {
+        scan_completed(conversations_added);
     }
     
     protected virtual void notify_conversations_added(Gee.Collection<Conversation> conversations) {
@@ -434,6 +441,8 @@ public class Geary.App.ConversationMonitor : BaseObject {
     // later when locally-available)
     private async void load_by_id_async(Geary.EmailIdentifier? initial_id, int count, Email.Field fields,
         Geary.Folder.ListFlags flags, Cancellable? cancellable) {
+        int start_conversations = get_conversation_count();
+        
         notify_scan_started();
         try {
             yield process_email_async(folder.path,
@@ -442,13 +451,15 @@ public class Geary.App.ConversationMonitor : BaseObject {
         } catch (Error err) {
             notify_scan_error(err);
         } finally {
-            notify_scan_completed();
+            notify_scan_completed(start_conversations < get_conversation_count());
         }
     }
     
     // See note at load_by_id_async for how Email.Field should be treated by caller
     private async void load_by_sparse_id(Gee.Collection<Geary.EmailIdentifier> ids, Email.Field fields,
         Geary.Folder.ListFlags flags, Cancellable? cancellable) {
+        int start_conversations = get_conversation_count();
+        
         notify_scan_started();
         try {
             yield process_email_async(folder.path,
@@ -457,7 +468,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
         } catch (Error err) {
             notify_scan_error(err);
         } finally {
-            notify_scan_completed();
+            notify_scan_completed(start_conversations < get_conversation_count());
         }
     }
     
@@ -629,10 +640,14 @@ public class Geary.App.ConversationMonitor : BaseObject {
     }
     
     private void on_folder_email_appended(Gee.Collection<Geary.EmailIdentifier> appended_ids) {
+        all_mail_loaded = false;
+        
         operation_queue.add(new AppendOperation(this, appended_ids));
     }
     
     private void on_folder_email_inserted(Gee.Collection<Geary.EmailIdentifier> inserted_ids) {
+        all_mail_loaded = false;
+        
         operation_queue.add(new FillWindowOperation(this, true));
     }
     
@@ -782,8 +797,11 @@ public class Geary.App.ConversationMonitor : BaseObject {
         if (!is_insert && min_window_count <= conversations.size)
             return;
         
-        if (primary_email_id_to_conversation.size >= folder.properties.email_total)
+        if (primary_email_id_to_conversation.size >= folder.properties.email_total) {
+            all_mail_loaded = true;
+            
             return;
+        }
         
         int initial_message_count = get_email_count();
         
@@ -851,11 +869,18 @@ public class Geary.App.ConversationMonitor : BaseObject {
         if (reschedule && expected_more_email)
             reschedule = initial_message_count != get_email_count();
         
+        // as stated in third condition, possible for email_total to be incorrect, so use both to
+        // check if all mail has been loaded
+        if (folder.properties.email_total <= primary_email_id_to_conversation.size)
+            all_mail_loaded = true;
+        else if (expected_more_email && initial_message_count == get_email_count())
+            all_mail_loaded = true;
+        
         if (reschedule)
             operation_queue.add(new FillWindowOperation(this, false));
         
-        debug("fill_window_async: loaded from %s, email_count=%d primary_ids.size=%d folder emails=%d conversations.size=%d rescheduled=%s",
-            low_id != null ? low_id.to_string() : "(null)", get_email_count(), primary_email_id_to_conversation.size,
+        debug("fill_window_async: loaded from %s, email_count=%d min_window_count=%d primary_ids.size=%d folder.email_total=%d conversations.size=%d rescheduled=%s",
+            low_id != null ? low_id.to_string() : "(null)", get_email_count(), min_window_count, primary_email_id_to_conversation.size,
             folder.properties.email_total, conversations.size, reschedule.to_string());
     }
 }
