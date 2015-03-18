@@ -57,8 +57,8 @@ public class GearyController : Geary.BaseObject {
     
     public const string PROP_CURRENT_CONVERSATION ="current-conversations";
     
-    public const int MIN_CONVERSATION_COUNT = 50;
-    public const int LOAD_MORE_CONVERSATION_COUNT = 10;
+    private const int INITIAL_CONVERSATION_COUNT = 0;
+    private const int LOAD_MORE_CONVERSATION_COUNT = 10;
     
     private const string DELETE_MESSAGE_TOOLTIP_SINGLE = _("Delete conversation (Shift+Delete)");
     private const string DELETE_MESSAGE_TOOLTIP_MULTIPLE = _("Delete conversations (Shift+Delete)");
@@ -97,6 +97,8 @@ public class GearyController : Geary.BaseObject {
     public AutostartManager? autostart_manager { get; private set; default = null; }
     
     public LoginDialog? login_dialog { get; private set; default = null; }
+    
+    public ConversationListCellDimensions cell_dimensions = new ConversationListCellDimensions();
     
     private Geary.Account? current_account = null;
     private Gee.HashMap<Geary.Account, Geary.App.EmailStore> email_stores
@@ -164,6 +166,11 @@ public class GearyController : Geary.BaseObject {
     public signal void search_text_changed(string keywords);
     
     public GearyController() {
+        // when the ConversationListStore cell dimensions are updated, ensure that the
+        // ConversationMonitor's window count is set to a number that will load just enough
+        // conversations to create scrollbars
+        cell_dimensions.notify[ConversationListCellDimensions.PROP_CELL_HEIGHT].connect(
+            update_min_window_count);
     }
     
     ~GearyController() {
@@ -206,7 +213,7 @@ public class GearyController : Geary.BaseObject {
         main_window.conversation_list_view.load_more.connect(on_load_more);
         main_window.conversation_list_view.mark_conversations.connect(on_mark_conversations);
         main_window.conversation_list_view.visible_conversations_changed.connect(on_visible_conversations_changed);
-        main_window.conversation_list_height_changed.connect(on_check_conversation_list_scrollbars);
+        main_window.conversation_list_height_changed.connect(on_conversation_list_view_height_changed);
         main_window.folder_list.folder_selected.connect(on_folder_selected);
         main_window.folder_list.copy_conversation.connect(on_copy_conversation);
         main_window.folder_list.move_conversation.connect(on_move_conversation);
@@ -283,7 +290,7 @@ public class GearyController : Geary.BaseObject {
         main_window.conversation_list_view.load_more.disconnect(on_load_more);
         main_window.conversation_list_view.mark_conversations.disconnect(on_mark_conversations);
         main_window.conversation_list_view.visible_conversations_changed.disconnect(on_visible_conversations_changed);
-        main_window.conversation_list_height_changed.disconnect(on_check_conversation_list_scrollbars);
+        main_window.conversation_list_height_changed.disconnect(on_conversation_list_view_height_changed);
         main_window.folder_list.folder_selected.disconnect(on_folder_selected);
         main_window.folder_list.copy_conversation.disconnect(on_copy_conversation);
         main_window.folder_list.move_conversation.disconnect(on_move_conversation);
@@ -1447,7 +1454,7 @@ public class GearyController : Geary.BaseObject {
         update_ui();
         
         current_conversations = new Geary.App.ConversationMonitor(current_folder, Geary.Folder.OpenFlags.NO_DELAY,
-            ConversationListStore.REQUIRED_FIELDS, MIN_CONVERSATION_COUNT);
+            ConversationListStore.REQUIRED_FIELDS, INITIAL_CONVERSATION_COUNT);
         
         if (inboxes.values.contains(current_folder)) {
             // Inbox selected, clear new messages if visible
@@ -1465,6 +1472,10 @@ public class GearyController : Geary.BaseObject {
         current_conversations.conversation_removed.connect(on_conversation_count_changed);
         current_conversations.conversation_removed.connect(on_conversation_removed);
         
+        // update current_conversations min_window_count for enough conversations to create
+        // scrollbars
+        update_min_window_count();
+        
         if (!current_conversations.is_monitoring)
             yield current_conversations.start_monitoring_async(conversation_cancellable);
         
@@ -1475,6 +1486,11 @@ public class GearyController : Geary.BaseObject {
     
     private void on_scan_error(Error err) {
         debug("Scan error: %s", err.message);
+    }
+    
+    private void on_conversation_list_view_height_changed() {
+        update_min_window_count();
+        on_check_conversation_list_scrollbars();
     }
     
     private void on_check_conversation_list_scrollbars() {
@@ -1495,6 +1511,11 @@ public class GearyController : Geary.BaseObject {
         // Done scanning.  Check if we have enough messages to fill the conversation list; if not,
         // trigger a load_more();
         if (main_window.conversation_list_has_scrollbar())
+            return false;
+        
+        // if conversation count is below min_window_count, give the conversation monitor a chance
+        // to keep filling until it reaches that level
+        if (current_conversations.get_conversation_count() < current_conversations.min_window_count)
             return false;
         
         debug("Not enough conversations (%d/%d) for scrollbars, loading more from folder %s",
@@ -1543,6 +1564,20 @@ public class GearyController : Geary.BaseObject {
         main_window.present_with_time(timestamp);
         
         main_window.folder_list.select_folder(folder);
+    }
+    
+    // Update the ConversationMonitor's min_window_count to be at least enough to create scrollbars
+    // when all conversations are loaded
+    private void update_min_window_count() {
+        if (!cell_dimensions.valid || current_conversations == null)
+            return;
+        
+        // determine the minimum (floor) of the window count that is enough to show a scrollbar
+        int list_height = main_window.conversation_list_view.get_allocated_height();
+        int cells = (list_height / cell_dimensions.cell_height) + 1;
+        
+        if (current_conversations.min_window_count < cells)
+            current_conversations.min_window_count = cells;
     }
     
     private void on_load_more() {

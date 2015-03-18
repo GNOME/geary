@@ -4,6 +4,16 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
+/**
+ * A helper class that automatically loads and sorts {@link Email} in a {@link Folder} into
+ * {@link Conversation}s ordered by date received (descending).
+ *
+ * Before starting, the application should subscribe to ConversationMonitor's various signals to
+ * be informed of conversations being added and removed from the folder.  The application can
+ * specify the minimum number of conversations to be held by ConversationMonitor by adjusting the
+ * {@link min_window_count} property.
+ */
+
 public class Geary.App.ConversationMonitor : BaseObject {
     /**
      * These are the fields Conversations require to thread emails together.  These fields will
@@ -12,8 +22,13 @@ public class Geary.App.ConversationMonitor : BaseObject {
     public const Geary.Email.Field REQUIRED_FIELDS = Geary.Email.Field.REFERENCES |
         Geary.Email.Field.FLAGS | Geary.Email.Field.DATE;
     
+    // An approximate multipler of messages-in-folder-to-conversation ... because the Engine doesn't
+    // offer a way to directly load conversations in a folder as a vector unto itself, this class
+    // loads a number of messages equal to the number of needed conversations times this multiplier
+    private const int MSG_CONV_MULTIPLIER = 2;
+    
     // # of messages to load at a time as we attempt to fill the min window.
-    private const int MIN_FILL_MESSAGE_COUNT = 5;
+    private const int MIN_FILL_MESSAGE_COUNT = 5 * MSG_CONV_MULTIPLIER;
     
     private const Geary.SpecialFolderType[] BLACKLISTED_FOLDER_TYPES = {
         Geary.SpecialFolderType.SPAM,
@@ -323,9 +338,8 @@ public class Geary.App.ConversationMonitor : BaseObject {
             yield operation_queue.stop_processing_async(cancellable_monitor);
         operation_queue.clear();
         
-        // Add the necessary initial operations ahead of anything the Folder might notify us of
-        // (additions, removals, etc.)
-        operation_queue.add(new LocalLoadOperation(this));
+        // Add the initial local load ahead of anything the Folder might notify us of
+        // (additions, removals, etc.) to prime the pump
         operation_queue.add(new FillWindowOperation(this, false));
         
         connect_to_folder();
@@ -346,15 +360,6 @@ public class Geary.App.ConversationMonitor : BaseObject {
         operation_queue.run_process_async.begin();
         
         return true;
-    }
-    
-    internal async void local_load_async() {
-        debug("ConversationMonitor seeding with local email for %s", folder.to_string());
-        yield load_by_id_async(null, min_window_count, required_fields, Folder.ListFlags.LOCAL_ONLY,
-            cancellable_monitor);
-        debug("ConversationMonitor seeded for %s", folder.to_string());
-        
-        operation_queue.add(new FillWindowOperation(this, false));
     }
     
     /**
@@ -834,7 +839,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
         Geary.EmailIdentifier? low_id = yield get_lowest_email_id_async(null);
         if (low_id != null && !is_insert) {
             // Load at least as many messages as remaining conversations.
-            int num_to_load = Numeric.int_floor(min_window_count - conversations.size,
+            int num_to_load = Numeric.int_floor((min_window_count - conversations.size) * MSG_CONV_MULTIPLIER,
                 MIN_FILL_MESSAGE_COUNT);
             
             yield load_by_id_async(low_id, num_to_load, Email.Field.NONE, flags, cancellable_monitor);
@@ -844,7 +849,8 @@ public class Geary.App.ConversationMonitor : BaseObject {
         } else {
             // No existing messages or an insert invalidated our existing list,
             // need to start from scratch.
-            yield load_by_id_async(null, min_window_count, Email.Field.NONE, flags, cancellable_monitor);
+            yield load_by_id_async(null, min_window_count * MSG_CONV_MULTIPLIER, Email.Field.NONE,
+                flags, cancellable_monitor);
             
             // in this case, it's possible no new email is loaded, but that shouldn't stop a
             // reschedule

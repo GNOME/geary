@@ -72,9 +72,6 @@ public class FormattedConversationData : Geary.BaseObject {
         }
     }
     
-    private static int cell_height = -1;
-    private static int preview_height = -1;
-    
     public bool is_unread { get; set; }
     public bool is_flagged { get; set; }
     public string date { get; private set; }
@@ -87,6 +84,7 @@ public class FormattedConversationData : Geary.BaseObject {
     private Gee.List<Geary.RFC822.MailboxAddress>? account_owner_emails = null;
     private bool use_to = true;
     private CountBadge count_badge = new CountBadge(2);
+    private ConversationListCellDimensions cell_dimensions;
     
     // Creates a formatted message data from an e-mail.
     public FormattedConversationData(Geary.App.Conversation conversation, Geary.Email preview,
@@ -96,6 +94,10 @@ public class FormattedConversationData : Geary.BaseObject {
         this.conversation = conversation;
         this.account_owner_emails = account_owner_emails;
         use_to = (folder != null) && folder.special_folder_type.is_outgoing();
+        
+        // take a reference to the global ConversationListCellDimensions object, which is held by
+        // the GearyController
+        cell_dimensions = GearyApplication.instance.controller.cell_dimensions;
         
         // Load preview-related data.
         update_date_string();
@@ -107,6 +109,20 @@ public class FormattedConversationData : Geary.BaseObject {
         this.is_unread = conversation.is_unread();
         this.is_flagged = conversation.is_flagged();
         this.num_emails = conversation.get_count();
+    }
+    
+    // Creates an example message (used interally for styling calculations.)
+    public FormattedConversationData.create_example() {
+        this.is_unread = false;
+        this.is_flagged = false;
+        this.date = STYLE_EXAMPLE;
+        this.subject = STYLE_EXAMPLE;
+        this.body = STYLE_EXAMPLE + "\n" + STYLE_EXAMPLE;
+        this.num_emails = 1;
+        
+        // take a reference to the global ConversationListCellDimensions object, which is held by
+        // the GearyController
+        cell_dimensions = GearyApplication.instance.controller.cell_dimensions;
     }
     
     public bool update_date_string() {
@@ -125,16 +141,6 @@ public class FormattedConversationData : Geary.BaseObject {
         date = new_date;
         
         return true;
-    }
-    
-    // Creates an example message (used interally for styling calculations.)
-    public FormattedConversationData.create_example() {
-        this.is_unread = false;
-        this.is_flagged = false;
-        this.date = STYLE_EXAMPLE;
-        this.subject = STYLE_EXAMPLE;
-        this.body = STYLE_EXAMPLE + "\n" + STYLE_EXAMPLE;
-        this.num_emails = 1;
     }
     
     private uint8 gdk_to_rgb(double gdk) {
@@ -232,7 +238,8 @@ public class FormattedConversationData : Geary.BaseObject {
     // Must call calculate_sizes() first.
     public void get_size(Gtk.Widget widget, Gdk.Rectangle? cell_area, out int x_offset, 
         out int y_offset, out int width, out int height) {
-        assert(cell_height != -1); // ensures calculate_sizes() was called.
+        // ensure calculate_sizes() was called
+        assert(cell_dimensions.valid);
         
         x_offset = 0;
         y_offset = 0;
@@ -240,7 +247,7 @@ public class FormattedConversationData : Geary.BaseObject {
         // conversation list to be shown as "squished":
         // https://bugzilla.gnome.org/show_bug.cgi?id=713954
         width = 1;
-        height = cell_height;
+        height = cell_dimensions.cell_height;
     }
     
     // Can be used for rendering or calculating height.
@@ -300,8 +307,7 @@ public class FormattedConversationData : Geary.BaseObject {
         }
         
         if (recalc_dims) {
-            FormattedConversationData.preview_height = preview_height;
-            FormattedConversationData.cell_height = y + preview_height;
+            cell_dimensions.update(y + preview_height, preview_height);
         } else {
             int unread_y = display_preview ? cell_area.y + LINE_SPACING * 2 : cell_area.y +
                 LINE_SPACING;
@@ -393,6 +399,9 @@ public class FormattedConversationData : Geary.BaseObject {
     
     private Pango.Rectangle render_preview(Gtk.Widget widget, Gdk.Rectangle? cell_area,
         Cairo.Context? ctx, int y, bool selected, int counter_width = 0) {
+        // the dimensions should have been calculated before calling this
+        assert(cell_dimensions.valid);
+        
         double dim = selected ? DIM_TEXT_AMOUNT : DIM_PREVIEW_TEXT_AMOUNT;
         string preview_markup = "<span foreground='%s'>%s</span>".printf(
             rgba_to_markup(dim_rgba(get_foreground_rgba(widget, selected), dim)),
@@ -409,7 +418,7 @@ public class FormattedConversationData : Geary.BaseObject {
         layout_preview.set_ellipsize(Pango.EllipsizeMode.END);
         if (ctx != null && cell_area != null) {
             layout_preview.set_width((cell_area.width - TEXT_LEFT - counter_width - LINE_SPACING) * Pango.SCALE);
-            layout_preview.set_height(preview_height * Pango.SCALE);
+            layout_preview.set_height(cell_dimensions.preview_height * Pango.SCALE);
             
             ctx.move_to(cell_area.x + TEXT_LEFT, y);
             Pango.cairo_show_layout(ctx, layout_preview);

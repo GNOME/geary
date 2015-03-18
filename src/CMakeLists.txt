@@ -56,7 +56,6 @@ engine/app/conversation-monitor/app-conversation-operation.vala
 engine/app/conversation-monitor/app-external-append-operation.vala
 engine/app/conversation-monitor/app-external-remove-operation.vala
 engine/app/conversation-monitor/app-fill-window-operation.vala
-engine/app/conversation-monitor/app-local-load-operation.vala
 engine/app/conversation-monitor/app-remove-operation.vala
 engine/app/conversation-monitor/app-terminate-operation.vala
 
@@ -357,6 +356,7 @@ client/composer/email-entry.vala
 client/composer/scrollable-overlay.vala
 client/composer/webview-edit-fixer.vala
 
+client/conversation-list/conversation-list-cell-dimensions.vala
 client/conversation-list/conversation-list-cell-renderer.vala
 client/conversation-list/conversation-list-store.vala
 client/conversation-list/conversation-list-view.vala
