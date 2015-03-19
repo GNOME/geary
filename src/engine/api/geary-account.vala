@@ -388,7 +388,7 @@ public abstract class Geary.Account : BaseObject {
     /**
      * Fetch all local messages associated with supplied {@link EmailIdentifier}.
      *
-     * This is usually a better choice that {@link local_search_message_id_async) in the sense that
+     * This is usually a better choice that {@link local_search_message_id_async} in the sense that
      * the {@link Account} is tasked to maintain internal lookup tables that speed lookup of
      * associated emails.  In particular, this call does ''not'' merely search for the
      * {@link RFC822.MessageID}s listed in this particular {@link Email}.  Rather, these lookup
@@ -399,7 +399,7 @@ public abstract class Geary.Account : BaseObject {
      * local_search_message_id_async.
      *
      * The Emails can only be searched for if they are stored locally with
-     * {@link ASSOCIATED_EMAILS_REQUIRED_FIELDS} {@link Email.Field}s.  Thus, when listing for
+     * {@link ASSOCIATED_REQUIRED_FIELDS} {@link Email.Field}s.  Thus, when listing for
      * EmailIdentifiers, add that field to the required fields to ensure they're available
      * locally.
      */
@@ -411,7 +411,7 @@ public abstract class Geary.Account : BaseObject {
      * Return a listing of local {@link Email} fulfilling the required fields.
      *
      * This is akin to {@link Folder.list_email_by_id_async} in that it doesn't throw an Error for
-     * unknown {@link EmailIdentifiers}.
+     * unknown {@link EmailIdentifier}s.
      */
     public abstract async Gee.Collection<Geary.Email>? local_list_email_async(
         Gee.Collection<Geary.EmailIdentifier> email_ids, Geary.Email.Field required_fields,

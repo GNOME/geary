@@ -5,7 +5,7 @@
  */
 
 private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport.Copy,
-    Geary.FolderSupport.Mark, Geary.FolderSupport.Move {
+    Geary.FolderSupport.Mark, Geary.FolderSupport.Move, Geary.FolderSupport.Associations {
     private const int FORCE_OPEN_REMOTE_TIMEOUT_SEC = 10;
     private const int DEFAULT_REESTABLISH_DELAY_MSEC = 500;
     private const int MAX_REESTABLISH_DELAY_MSEC = 60 * 1000;
@@ -1476,6 +1476,22 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
             return null;
         
         return new RevokableMove(_account, this, destination, prepare.prepared_for_move);
+    }
+    
+    public virtual async Gee.Collection<AssociatedEmails>? local_list_associated_emails_async(
+        EmailIdentifier? initial_id, int count, Account.EmailSearchPredicate? predicate,
+        Gee.Collection<EmailIdentifier>? primary_email_ids, Cancellable? cancellable = null) throws Error {
+        check_open("local_list_associated_emails_async");
+        if (initial_id != null)
+            check_id("local_list_associated_emails_async", initial_id);
+        
+        if (count == 0)
+            return null;
+        else if (count < 0)
+            throw new EngineError.BAD_PARAMETERS("count may not be negative");
+        
+        return yield local_folder.list_associated_emails_async((ImapDB.EmailIdentifier) initial_id,
+            count, predicate, primary_email_ids, cancellable);
     }
     
     public void schedule_op(ReplayOperation op) throws Error {

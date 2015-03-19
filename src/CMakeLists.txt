@@ -28,6 +28,7 @@ engine/api/geary-folder.vala
 engine/api/geary-folder-path.vala
 engine/api/geary-folder-properties.vala
 engine/api/geary-folder-supports-archive.vala
+engine/api/geary-folder-supports-associations.vala
 engine/api/geary-folder-supports-copy.vala
 engine/api/geary-folder-supports-create.vala
 engine/api/geary-folder-supports-empty.vala

@@ -597,6 +597,83 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         return email;
     }
     
+    public async Gee.Collection<Geary.AssociatedEmails>? list_associated_emails_async(
+        ImapDB.EmailIdentifier? start_id, int count, Geary.Account.EmailSearchPredicate? predicate,
+        Gee.Collection<Geary.EmailIdentifier>? primary_email_ids, Cancellable? cancellable) throws Error {
+        if (count == 0)
+            return null;
+        
+        Gee.Collection<Geary.AssociatedEmails> list = new Gee.ArrayList<Geary.AssociatedEmails>();
+        Gee.HashSet<ImapDB.EmailIdentifier> found_ids = new Gee.HashSet<ImapDB.EmailIdentifier>();
+        
+        yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
+            // find the starting UID to being a ranged search on this folder ... include marked for
+            // removed as this is a ranged search (and they will be removed later as appropriate)
+            Imap.UID start_uid;
+            if (start_id != null) {
+                LocationIdentifier? loc = do_get_location_for_id(cx, start_id, ListFlags.INCLUDE_MARKED_FOR_REMOVE,
+                    cancellable);
+                if (loc == null)
+                    return Db.TransactionOutcome.DONE;
+                
+                start_uid = loc.uid.previous(true);
+            } else {
+                start_uid = new Imap.UID(Imap.UID.MAX);
+            }
+            
+            Db.Statement stmt = cx.prepare("""
+                SELECT message_id, ordering, remove_marker
+                FROM MessageLocationTable
+                WHERE folder_id = ? AND ordering <= ?
+                ORDER BY ordering DESC
+            """);
+            stmt.bind_rowid(0, folder_id);
+            stmt.bind_int64(1, start_uid.value);
+            
+            for (Db.Result result = stmt.exec(cancellable); !result.finished; result.next(cancellable)) {
+                // drop messages marked for remove
+                if (result.bool_at(2))
+                    continue;
+                
+                // Don't need a UID to generate associations but include for primary_email_ids
+                ImapDB.EmailIdentifier id = new ImapDB.EmailIdentifier(result.int64_at(0),
+                    new Imap.UID(result.int64_at(1)));
+                
+                // add this one to the list of primary (vector) email identifiers associations are
+                // keying off of
+                if (primary_email_ids != null)
+                    primary_email_ids.add(id);
+                
+                // don't bother searching for id's already associated with prior email
+                if (found_ids.contains(id))
+                    continue;
+                
+                Gee.HashSet<ImapDB.EmailIdentifier>? associated_ids = Conversation.do_fetch_associated_email_ids(
+                    cx, id, cancellable);
+                if (associated_ids == null || associated_ids.size == 0)
+                    continue;
+                
+                found_ids.add_all(associated_ids);
+                
+                AssociatedEmails? association = Conversation.do_generate_associations(cx, associated_ids,
+                    predicate, cancellable);
+                if (association != null && association.email_ids.size > 0) {
+                    list.add(association);
+                    if (list.size >= count)
+                        break;
+                }
+            }
+            
+            return Db.TransactionOutcome.DONE;
+        }, cancellable);
+        
+        // clear if returning null
+        if (list.size == 0 && primary_email_ids != null)
+            primary_email_ids.clear();
+        
+        return list.size > 0 ? list : null;
+    }
+    
     // Note that this does INCLUDES messages marked for removal
     // TODO: Let the user request a SortedSet, or have them provide the Set to add to
     public async Gee.Set<Imap.UID>? list_uids_by_range_async(Imap.UID first_uid, Imap.UID last_uid,
