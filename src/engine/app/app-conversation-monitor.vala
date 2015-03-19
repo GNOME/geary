@@ -477,6 +477,33 @@ public class Geary.App.ConversationMonitor : BaseObject {
         }
     }
     
+    private async void load_associations_async(FolderSupport.Associations supports_associations,
+        Geary.EmailIdentifier? low_id, int count, Cancellable? cancellable) {
+        int start_conversations = get_conversation_count();
+        
+        notify_scan_started();
+        
+        SearchPredicateInstance predicate_instance = new SearchPredicateInstance(folder, required_fields);
+        
+        Gee.Collection<AssociatedEmails>? associations = null;
+        Gee.Collection<EmailIdentifier> primary_email_ids = new Gee.HashSet<EmailIdentifier>();
+        try {
+            associations = yield supports_associations.local_list_associated_emails_async(
+                low_id, count, predicate_instance.search_predicate, primary_email_ids, cancellable);
+        } catch (Error err) {
+            debug("Unable to load associated emails from %s: %s", supports_associations.to_string(),
+                err.message);
+            notify_scan_error(err);
+        }
+        
+        if (associations != null && associations.size > 0) {
+            yield process_associations_async(supports_associations.path, associations, primary_email_ids,
+                cancellable);
+        }
+        
+        notify_scan_completed(start_conversations < get_conversation_count());
+    }
+    
     private async void process_email_async(FolderPath path, Gee.Collection<Geary.Email>? emails,
         Cancellable? cancellable) {
         if (emails == null || emails.size == 0)
@@ -516,27 +543,6 @@ public class Geary.App.ConversationMonitor : BaseObject {
         
         Logging.debug(Logging.Flag.CONVERSATIONS, "[%s] ConversationMonitor::process_email completed: %d emails",
             folder.to_string(), email_ids.size);
-    }
-    
-    private async void load_associations_async(FolderSupport.Associations supports_associations,
-        Geary.EmailIdentifier? low_id, int count, Cancellable? cancellable) {
-        SearchPredicateInstance predicate_instance = new SearchPredicateInstance(folder, required_fields);
-        
-        Gee.Collection<AssociatedEmails>? associations = null;
-        Gee.Collection<EmailIdentifier> primary_email_ids = new Gee.HashSet<EmailIdentifier>();
-        try {
-            associations = yield supports_associations.local_list_associated_emails_async(
-                low_id, count, predicate_instance.search_predicate, primary_email_ids, cancellable);
-        } catch (Error err) {
-            debug("Unable to load associated emails from %s: %s", supports_associations.to_string(),
-                err.message);
-        }
-        
-        if (associations == null || associations.size == 0)
-            return;
-        
-        yield process_associations_async(supports_associations.path, associations, primary_email_ids,
-            cancellable);
     }
     
     private async void process_associations_async(FolderPath path, Gee.Collection<AssociatedEmails> associations,
@@ -869,7 +875,9 @@ public class Geary.App.ConversationMonitor : BaseObject {
         
         if (!is_insert && supports_associations != null) {
             // easy case: just load in the Associations straight from the folder; this is (almost)
-            // guaranteed to fill to the right amount every time
+            // guaranteed to fill to the right amount every time -- the exception is when it
+            // returns associations for existing conversations (i.e. the primary email id was
+            // loaded earlier as an association and is now being loaded as a primary)
             yield load_associations_async(supports_associations, low_id,
                 min_window_count - conversations.size, cancellable_monitor);
             

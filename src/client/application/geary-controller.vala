@@ -57,8 +57,7 @@ public class GearyController : Geary.BaseObject {
     
     public const string PROP_CURRENT_CONVERSATION ="current-conversations";
     
-    private const int INITIAL_CONVERSATION_COUNT = 0;
-    private const int LOAD_MORE_CONVERSATION_COUNT = 10;
+    private const double LOAD_MORE_PERCENTAGE = 0.40;
     
     private const string DELETE_MESSAGE_TOOLTIP_SINGLE = _("Delete conversation (Shift+Delete)");
     private const string DELETE_MESSAGE_TOOLTIP_MULTIPLE = _("Delete conversations (Shift+Delete)");
@@ -1454,7 +1453,7 @@ public class GearyController : Geary.BaseObject {
         update_ui();
         
         current_conversations = new Geary.App.ConversationMonitor(current_folder, Geary.Folder.OpenFlags.NO_DELAY,
-            ConversationListStore.REQUIRED_FIELDS, INITIAL_CONVERSATION_COUNT);
+            ConversationListStore.REQUIRED_FIELDS, 0);
         
         if (inboxes.values.contains(current_folder)) {
             // Inbox selected, clear new messages if visible
@@ -1581,17 +1580,23 @@ public class GearyController : Geary.BaseObject {
     }
     
     private void on_load_more() {
-        if (current_conversations == null || current_conversations.all_mail_loaded)
+        if (current_conversations == null || current_conversations.all_mail_loaded || !cell_dimensions.valid)
             return;
+        
+        // load in enough conversations to fill a fraction of the conversation list's height
+        double list_height = main_window.conversation_list_view.get_allocated_height();
+        double cell_height = cell_dimensions.cell_height;
+        double fraction = Math.round((list_height / cell_height) * LOAD_MORE_PERCENTAGE);
+        int load_more = Geary.Numeric.int_floor((int) fraction, 2);
         
         int orig = current_conversations.min_window_count;
         
         // It's possible for the conversation count to be any value above or below the min_window_count,
         // so ensure *some* increase happens to trigger loading more conversations
         current_conversations.min_window_count =
-            current_conversations.get_conversation_count() + LOAD_MORE_CONVERSATION_COUNT;
+            current_conversations.get_conversation_count() + load_more;
         if (current_conversations.min_window_count <= orig)
-            current_conversations.min_window_count = orig + LOAD_MORE_CONVERSATION_COUNT;
+            current_conversations.min_window_count = orig + load_more;
     }
     
     private void on_select_folder_completed(Object? source, AsyncResult result) {
