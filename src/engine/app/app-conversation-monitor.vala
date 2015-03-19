@@ -489,7 +489,8 @@ public class Geary.App.ConversationMonitor : BaseObject {
         Gee.Collection<EmailIdentifier> primary_email_ids = new Gee.HashSet<EmailIdentifier>();
         try {
             associations = yield supports_associations.local_list_associated_emails_async(
-                low_id, count, predicate_instance.search_predicate, primary_email_ids, cancellable);
+                low_id, count, predicate_instance.search_predicate, primary_email_ids,
+                all_email_id_to_conversation.keys, cancellable);
         } catch (Error err) {
             debug("Unable to load associated emails from %s: %s", supports_associations.to_string(),
                 err.message);

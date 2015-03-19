@@ -1480,7 +1480,9 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     
     public virtual async Gee.Collection<AssociatedEmails>? local_list_associated_emails_async(
         EmailIdentifier? initial_id, int count, Account.EmailSearchPredicate? predicate,
-        Gee.Collection<EmailIdentifier>? primary_email_ids, Cancellable? cancellable = null) throws Error {
+        Gee.Collection<EmailIdentifier>? primary_email_ids,
+        Gee.Collection<Geary.EmailIdentifier>? already_seen_ids, Cancellable? cancellable = null)
+        throws Error {
         check_open("local_list_associated_emails_async");
         if (initial_id != null)
             check_id("local_list_associated_emails_async", initial_id);
@@ -1491,7 +1493,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
             throw new EngineError.BAD_PARAMETERS("count may not be negative");
         
         return yield local_folder.list_associated_emails_async((ImapDB.EmailIdentifier) initial_id,
-            count, predicate, primary_email_ids, cancellable);
+            count, predicate, primary_email_ids, already_seen_ids, cancellable);
     }
     
     public void schedule_op(ReplayOperation op) throws Error {

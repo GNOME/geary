@@ -599,7 +599,8 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     
     public async Gee.Collection<Geary.AssociatedEmails>? list_associated_emails_async(
         ImapDB.EmailIdentifier? start_id, int count, Geary.Account.EmailSearchPredicate? predicate,
-        Gee.Collection<Geary.EmailIdentifier>? primary_email_ids, Cancellable? cancellable) throws Error {
+        Gee.Collection<Geary.EmailIdentifier>? primary_email_ids,
+        Gee.Collection<Geary.EmailIdentifier>? already_seen_ids, Cancellable? cancellable) throws Error {
         if (count == 0)
             return null;
         
@@ -638,6 +639,10 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                 // Don't need a UID to generate associations but include for primary_email_ids
                 ImapDB.EmailIdentifier id = new ImapDB.EmailIdentifier(result.int64_at(0),
                     new Imap.UID(result.int64_at(1)));
+                
+                // if caller loaded this previously, don't load again
+                if (already_seen_ids != null && already_seen_ids.contains(id))
+                    continue;
                 
                 // add this one to the list of primary (vector) email identifiers associations are
                 // keying off of

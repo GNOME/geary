@@ -42,13 +42,19 @@ public interface Geary.FolderSupport.Associations : Geary.Folder {
      * identifier of the returned collection can be used as the initial_id for the next call to
      * this method.
      *
+     * already_seen_ids allows for the caller to supply a collection of all previously loaded (seen)
+     * EmailIdentifiers from prior calls (either from this method or
+     * {@link Account.local_search_associated_emails_async}) indicating that if they are encountered
+     * while listing, don't load associations for that identifier.
+     *
      * This only lists Email stored in the local store.
      *
      * @see Geary.Folder.find_boundaries_async
      */
     public abstract async Gee.Collection<Geary.AssociatedEmails>? local_list_associated_emails_async(
         Geary.EmailIdentifier? initial_id, int count, Geary.Account.EmailSearchPredicate? predicate,
-        Gee.Collection<Geary.EmailIdentifier>? primary_email_ids, Cancellable? cancellable = null)
+        Gee.Collection<Geary.EmailIdentifier>? primary_loaded_ids,
+        Gee.Collection<Geary.EmailIdentifier>? already_seen_ids, Cancellable? cancellable = null)
         throws Error;
 }
 
