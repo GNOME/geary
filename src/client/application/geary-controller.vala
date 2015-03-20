@@ -59,6 +59,7 @@ public class GearyController : Geary.BaseObject {
     
     private const double LOAD_MORE_PERCENTAGE = 0.40;
     
+    private const string DELETE_MESSAGE_LABEL = _("Delete conversation");
     private const string DELETE_MESSAGE_TOOLTIP_SINGLE = _("Delete conversation (Shift+Delete)");
     private const string DELETE_MESSAGE_TOOLTIP_MULTIPLE = _("Delete conversations (Shift+Delete)");
     private const string DELETE_MESSAGE_ICON_NAME = "edit-delete-symbolic";
@@ -502,6 +503,7 @@ public class GearyController : Geary.BaseObject {
         
         Gtk.ActionEntry delete_message = { ACTION_DELETE_MESSAGE, DELETE_MESSAGE_ICON_NAME,
             null, "<Shift>Delete", null, on_delete_message };
+        delete_message.label = DELETE_MESSAGE_LABEL;
         delete_message.tooltip = DELETE_MESSAGE_TOOLTIP_SINGLE;
         entries += delete_message;
         add_accelerator("<Shift>BackSpace", ACTION_DELETE_MESSAGE);
