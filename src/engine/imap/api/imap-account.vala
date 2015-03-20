@@ -155,6 +155,8 @@ private class Geary.Imap.Account : BaseObject {
     }
     
     private async void drop_session_async(Cancellable? cancellable) {
+        debug("[%s] Dropping account session...", to_string());
+        
         int token;
         try {
             token = yield account_session_mutex.claim_async(cancellable);
@@ -164,17 +166,25 @@ private class Geary.Imap.Account : BaseObject {
             return;
         }
         
+        string desc = account_session != null ? account_session.to_string() : "(none)";
+        
         if (account_session != null) {
+            // disconnect signals before releasing (in particular, "disconnected" will in turn
+            // reenter this method, so avoid that)
+            account_session.list.disconnect(on_list_data);
+            account_session.status.disconnect(on_status_data);
+            account_session.server_data_received.disconnect(on_server_data_received);
+            account_session.disconnected.disconnect(on_disconnected);
+            
+            debug("[%s] Releasing account session %s", to_string(), desc);
+            
             try {
                 yield session_mgr.release_session_async(account_session, cancellable);
             } catch (Error err) {
                 // ignored
             }
             
-            account_session.list.disconnect(on_list_data);
-            account_session.status.disconnect(on_status_data);
-            account_session.server_data_received.disconnect(on_server_data_received);
-            account_session.disconnected.disconnect(on_disconnected);
+            debug("[%s] Released account session %s", to_string(), desc);
             
             account_session = null;
         }
@@ -184,6 +194,8 @@ private class Geary.Imap.Account : BaseObject {
         } catch (Error err) {
             // ignored
         }
+        
+        debug("[%s] Dropped account session (%s)", to_string(), desc);
     }
     
     private void on_list_data(MailboxInformation mailbox_info) {

@@ -115,25 +115,17 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         
         is_open = false;
         
-        int token;
-        try {
-            token = yield sessions_mutex.claim_async();
-        } catch (Error claim_err) {
-            debug("Unable to claim session table mutex for closing pool: %s", claim_err.message);
-            
-            return;
-        }
+        // to avoid locking down the sessions table while scheduling disconnects, make a copy
+        // and work off of that
+        ClientSession[]? sessions_copy = sessions.to_array();
         
         // disconnect all existing sessions at once; don't wait for each, since as they disconnect
         // they'll remove themselves from the sessions list and cause this foreach to explode
-        foreach (ClientSession session in sessions)
+        foreach (ClientSession session in sessions_copy)
             session.disconnect_async.begin();
         
-        try {
-            sessions_mutex.release(ref token);
-        } catch (Error release_err) {
-            debug("Unable to release session table mutex after closing pool: %s", release_err.message);
-        }
+        // free copy
+        sessions_copy = null;
         
         // TODO: This isn't the best (deterministic) way to deal with this, but it's easy and works
         // for now
