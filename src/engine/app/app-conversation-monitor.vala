@@ -662,14 +662,11 @@ public class Geary.App.ConversationMonitor : BaseObject {
         }
         
         // add all emails and each known path(s) to the Conversation and EmailIdentifier mapping
+        // ... don't worry if add() reports paths_changed, because we've already checked if the
+        // email was known, don't want to report "email-paths-changed" for a new add
         if (emails != null) {
-            foreach (Email email in emails) {
-                bool email_paths_changed;
-                conversation.add(email, association.known_paths[email.id], out email_paths_changed);
-                
-                if (email_paths_changed)
-                    paths_changed.set(conversation, email.id);
-            }
+            foreach (Email email in emails)
+                conversation.add(email, association.known_paths[email.id], null);
         }
         
         // if new, added, otherwise appended (if not already added)
