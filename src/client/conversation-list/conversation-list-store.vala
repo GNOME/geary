@@ -116,6 +116,7 @@ public class ConversationListStore : Gtk.ListStore {
             conversation_monitor.conversation_appended.disconnect(on_conversation_appended);
             conversation_monitor.conversation_trimmed.disconnect(on_conversation_trimmed);
             conversation_monitor.email_flags_changed.disconnect(on_email_flags_changed);
+            conversation_monitor.email_paths_changed.disconnect(on_email_paths_changed);
         }
         
         cancellable.cancel();
@@ -138,6 +139,7 @@ public class ConversationListStore : Gtk.ListStore {
             conversation_monitor.conversation_appended.connect(on_conversation_appended);
             conversation_monitor.conversation_trimmed.connect(on_conversation_trimmed);
             conversation_monitor.email_flags_changed.connect(on_email_flags_changed);
+            conversation_monitor.email_paths_changed.connect(on_email_paths_changed);
         }
         
         is_clearing = false;
@@ -462,6 +464,12 @@ public class ConversationListStore : Gtk.ListStore {
         // that's changed, need to change the preview
         // TODO: need support code to load preview for single conversation, not scan all
         refresh_previews_async.begin(conversation_monitor);
+    }
+    
+    private void on_email_paths_changed(Geary.App.Conversation conversation, Gee.Collection<Geary.EmailIdentifier> ids) {
+        // refresh the conversation because the change in paths can change the sort order (sorting
+        // depends on dates of email in this folder)
+        refresh_conversation(conversation);
     }
     
     private int sort_by_date(Gtk.TreeModel model, Gtk.TreeIter aiter, Gtk.TreeIter biter) {

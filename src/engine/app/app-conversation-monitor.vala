@@ -242,6 +242,13 @@ public class Geary.App.ConversationMonitor : BaseObject {
     }
     
     /**
+     * Fired when the known paths of {@link Email} have changed, either added or removed.
+     */
+    public virtual signal void email_paths_changed(Conversation conversation,
+        Gee.Collection<Geary.EmailIdentifier> ids) {
+    }
+    
+    /**
      * Creates a conversation monitor for the given folder.
      *
      * @param folder Folder to monitor
@@ -304,6 +311,11 @@ public class Geary.App.ConversationMonitor : BaseObject {
     
     protected virtual void notify_email_flags_changed(Conversation conversation, Geary.Email email) {
         email_flags_changed(conversation, email);
+    }
+    
+    protected virtual void notify_email_paths_changed(Conversation conversation,
+        Gee.Collection<Geary.EmailIdentifier> ids) {
+        email_paths_changed(conversation, ids);
     }
     
     public int get_conversation_count() {
@@ -420,10 +432,10 @@ public class Geary.App.ConversationMonitor : BaseObject {
         folder.email_removed.connect(on_folder_email_removed);
         folder.opened.connect(on_folder_opened);
         folder.account.email_flags_changed.connect(on_account_email_flags_changed);
-        folder.account.email_locally_complete.connect(on_account_email_added);
-        folder.account.email_appended.connect(on_account_email_added);
-        folder.account.email_discovered.connect(on_account_email_added);
-        folder.account.email_inserted.connect(on_account_email_added);
+        folder.account.email_locally_complete.connect(on_account_email_locally_complete);
+        folder.account.email_appended.connect(on_account_email_appended);
+        folder.account.email_discovered.connect(on_account_email_discovered);
+        folder.account.email_inserted.connect(on_account_email_inserted);
         folder.account.email_removed.connect(on_account_email_removed);
     }
     
@@ -433,10 +445,10 @@ public class Geary.App.ConversationMonitor : BaseObject {
         folder.email_removed.disconnect(on_folder_email_removed);
         folder.opened.disconnect(on_folder_opened);
         folder.account.email_flags_changed.disconnect(on_account_email_flags_changed);
-        folder.account.email_locally_complete.disconnect(on_account_email_added);
-        folder.account.email_appended.disconnect(on_account_email_added);
-        folder.account.email_discovered.disconnect(on_account_email_added);
-        folder.account.email_inserted.disconnect(on_account_email_added);
+        folder.account.email_locally_complete.disconnect(on_account_email_locally_complete);
+        folder.account.email_appended.disconnect(on_account_email_appended);
+        folder.account.email_discovered.disconnect(on_account_email_discovered);
+        folder.account.email_inserted.disconnect(on_account_email_inserted);
         folder.account.email_removed.disconnect(on_account_email_removed);
     }
     
@@ -550,23 +562,39 @@ public class Geary.App.ConversationMonitor : BaseObject {
         Gee.Collection<Geary.EmailIdentifier> original_email_ids, Cancellable? cancellable) {
         Gee.HashSet<Conversation> added = new Gee.HashSet<Conversation>();
         Gee.HashMultiMap<Conversation, Email> appended = new Gee.HashMultiMap<Conversation, Email>();
+        Gee.HashMultiMap<Conversation, EmailIdentifier> paths_changed = new Gee.HashMultiMap<Conversation, EmailIdentifier>();
         foreach (AssociatedEmails association in associations) {
             yield process_association_async(association, path, original_email_ids, added, appended,
-                cancellable);
+                paths_changed, cancellable);
         }
         
-        if (added.size > 0)
+        if (added.size > 0) {
+            debug("[%s] %d conversations added from %s", to_string(), added.size, path.to_string());
+            
             notify_conversations_added(added);
+        }
         
         if (appended.size > 0) {
-            foreach (Conversation conversation in appended.get_keys())
-                notify_conversation_appended(conversation, appended.get(conversation));
+            debug("[%s] %d conversations appended with %d emails", to_string(), appended.get_keys().size,
+                appended.get_values().size);
         }
+        
+        foreach (Conversation conversation in appended.get_keys())
+            notify_conversation_appended(conversation, appended.get(conversation));
+        
+        if (paths_changed.size > 0) {
+            debug("[%s] %d conversations paths changed for %d emails", to_string(), paths_changed.get_keys().size,
+                paths_changed.get_values().size);
+        }
+        
+        foreach (Conversation conversation in paths_changed.get_keys())
+            notify_email_paths_changed(conversation, paths_changed.get(conversation));
     }
     
     private async void process_association_async(AssociatedEmails association, FolderPath path,
         Gee.Collection<EmailIdentifier> original_email_ids, Gee.Set<Conversation> added,
-        Gee.MultiMap<Conversation, Email> appended, Cancellable? cancellable) {
+        Gee.MultiMap<Conversation, Email> appended, Gee.MultiMap<Conversation, EmailIdentifier> paths_changed,
+        Cancellable? cancellable) {
         // get all conversations for these emails (possible for multiple conversations to be
         // started and then coalesce as new emails come in) and see if any are known to be in this
         // folder
@@ -580,11 +608,6 @@ public class Geary.App.ConversationMonitor : BaseObject {
             // track if any of the messages are known to be in this folder
             if (association.known_paths[associated_id].contains(folder.path))
                 any_in_folder = true;
-            
-            // only add to primary map if identifier is part of the original set of arguments
-            // and they're from this folder and not another one
-            if (original_email_ids.contains(associated_id) && path.equal_to(folder.path))
-                primary_email_id_to_conversation[associated_id] = conversation;
         }
         
         // if these are out-of-folder emails, only add to conversations if any email
@@ -604,38 +627,56 @@ public class Geary.App.ConversationMonitor : BaseObject {
             break;
             
             default:
-                conversation = merge_conversations(existing);
+                conversation = merge_conversations(existing, paths_changed);
             break;
         }
         
-        // trim down the email identifiers we already have emails for
-        Gee.HashSet<EmailIdentifier> trimmed_ids = traverse<EmailIdentifier>(association.email_ids)
-            .filter(id => !all_email_id_to_conversation.has_key(id))
-            .to_hash_set();
+        // for all ids, add known paths and associate id to conversation in the various tables,
+        // since the paths and conversation may have changed
+        //
+        // if email is not loaded, add to list for loading
+        Gee.HashSet<EmailIdentifier> list_email_ids = new Gee.HashSet<EmailIdentifier>();
+        foreach (EmailIdentifier associated_id in association.email_ids) {
+            if (conversation.has_email(associated_id)) {
+                if (conversation.add_paths(associated_id, association.known_paths[associated_id]))
+                    paths_changed.set(conversation, associated_id);
+            } else {
+                list_email_ids.add(associated_id);
+            }
+            
+            all_email_id_to_conversation[associated_id] = conversation;
+            
+            // only add to primary map if identifier is part of the original set of arguments
+            // and they're from this folder and not another one
+            if (path.equal_to(folder.path) && original_email_ids.contains(associated_id))
+                primary_email_id_to_conversation[associated_id] = conversation;
+        }
         
         // load remaining emails for the conversation objects
         Gee.Collection<Email>? emails = null;
         try {
-            emails = yield folder.account.local_list_email_async(trimmed_ids, required_fields,
+            emails = yield folder.account.local_list_email_async(list_email_ids, required_fields,
                 cancellable);
         } catch (Error err) {
             debug("Unable to list local account email: %s", err.message);
         }
         
-        if (emails == null || emails.size == 0)
-            return;
-        
         // add all emails and each known path(s) to the Conversation and EmailIdentifier mapping
-        foreach (Email email in emails) {
-            conversation.add(email, association.known_paths[email.id]);
-            all_email_id_to_conversation[email.id] = conversation;
+        if (emails != null) {
+            foreach (Email email in emails) {
+                bool email_paths_changed;
+                conversation.add(email, association.known_paths[email.id], out email_paths_changed);
+                
+                if (email_paths_changed)
+                    paths_changed.set(conversation, email.id);
+            }
         }
         
         // if new, added, otherwise appended (if not already added)
         if (!conversations.contains(conversation)) {
             conversations.add(conversation);
             added.add(conversation);
-        } else if (!added.contains(conversation)) {
+        } else if (!added.contains(conversation) && emails != null) {
             foreach (Email email in emails)
                 appended.set(conversation, email);
         }
@@ -644,7 +685,8 @@ public class Geary.App.ConversationMonitor : BaseObject {
     // This happens when emails with partial histories (REFERENCES) arrive out-of-order and their
     // relationship is not known until after conversations have been created ... although rare, it
     // does happen and needs to be dealt with
-    private Conversation merge_conversations(Gee.Set<Conversation> conversations) {
+    private Conversation merge_conversations(Gee.Set<Conversation> conversations,
+        Gee.MultiMap<Conversation, EmailIdentifier> paths_changed) {
         assert(conversations.size > 1);
         
         // Find the largest conversation and merge the others into it
@@ -667,7 +709,11 @@ public class Geary.App.ConversationMonitor : BaseObject {
                 if (paths == null)
                     paths = new Gee.ArrayList<FolderPath>();
                 
-                largest.add(email, paths);
+                bool email_paths_changed;
+                largest.add(email, paths, out email_paths_changed);
+                
+                if (email_paths_changed)
+                    paths_changed.set(largest, email.id);
                 
                 if (primary_email_id_to_conversation.has_key(id))
                     in_folder_ids.add(id);
@@ -700,10 +746,34 @@ public class Geary.App.ConversationMonitor : BaseObject {
         return !folder.properties.is_local_only && !folder.properties.is_virtual;
     }
     
-    private void on_account_email_added(Folder folder, Gee.Collection<EmailIdentifier> added_ids) {
+    private void on_account_email_locally_complete(Folder folder, Gee.Collection<EmailIdentifier> ids) {
+        on_account_email_added("locally completed", folder, ids);
+    }
+    
+    private void on_account_email_appended(Folder folder, Gee.Collection<EmailIdentifier> ids) {
+        on_account_email_added("appended", folder, ids);
+    }
+    
+    private void on_account_email_discovered(Folder folder, Gee.Collection<EmailIdentifier> ids) {
+        on_account_email_added("discovered", folder, ids);
+    }
+    
+    private void on_account_email_inserted(Folder folder, Gee.Collection<EmailIdentifier> ids) {
+        on_account_email_added("inserted", folder, ids);
+    }
+    
+    private void on_account_email_added(string why, Folder folder, Gee.Collection<EmailIdentifier> added_ids) {
         // ignore virtual/local-only folders but add new messages locally completed in this Folder
         if (is_folder_external_conversation_source(folder))
-            operation_queue.add(new ExternalAppendOperation(this, folder, added_ids));
+            operation_queue.add(new ExternalAppendOperation(this, why, folder, added_ids));
+    }
+    
+    internal async void external_append_emails_async(string why, Folder folder,
+        Gee.Collection<EmailIdentifier> appended_ids) {
+        debug("%d out-of-folder message(s) %s in %s, fetching to add to conversations...", appended_ids.size,
+            why, folder.to_string());
+        
+        yield process_email_ids_async(folder.path, appended_ids, cancellable_monitor);
     }
     
     private void on_account_email_removed(Folder folder, Gee.Collection<EmailIdentifier> removed_ids) {
@@ -731,6 +801,8 @@ public class Geary.App.ConversationMonitor : BaseObject {
         Gee.HashSet<Conversation> removed_conversations = new Gee.HashSet<Conversation>();
         Gee.HashMultiMap<Conversation, Email> trimmed_conversations = new Gee.HashMultiMap<
             Conversation, Email>();
+        Gee.HashMultiMap<Conversation, EmailIdentifier> paths_changed = new Gee.HashMultiMap<
+            Conversation, EmailIdentifier>();
         
         // remove the emails from internal state, noting which conversations are trimmed or flat-out
         // removed (evaporated)
@@ -766,31 +838,37 @@ public class Geary.App.ConversationMonitor : BaseObject {
             } else if (fully_removed && email != null) {
                 // since the email was fully removed from conversation, report as trimmed
                 trimmed_conversations.set(conversation, email);
+            } else if (!fully_removed && email != null) {
+                paths_changed.set(conversation, email.id);
             }
         }
         
         if (trimmed_conversations.size > 0) {
-            debug("Trimmed %d conversations of %d emails from %s", trimmed_conversations.get_keys().size,
-                trimmed_conversations.get_values().size, folder.to_string());
+            debug("[%s] Trimmed %d conversations of %d emails from %s", to_string(),
+                trimmed_conversations.get_keys().size, trimmed_conversations.get_values().size,
+                path.to_string());
         }
         
         foreach (Conversation conversation in trimmed_conversations.get_keys())
             notify_conversation_trimmed(conversation, trimmed_conversations.get(conversation));
         
-        if (removed_conversations.size > 0)
-            debug("Removed %d conversations from %s", removed_conversations.size, folder.to_string());
+        if (removed_conversations.size > 0) {
+            debug("[%s] Removed %d conversations from %s", to_string(), removed_conversations.size,
+            path.to_string());
+        }
         
         foreach (Conversation conversation in removed_conversations) {
             notify_conversation_removed(conversation);
             conversation.clear_owner();
         }
-    }
-    
-    internal async void external_append_emails_async(Folder folder, Gee.Collection<EmailIdentifier> appended_ids) {
-        debug("%d out of folder message(s) appended to %s, fetching to add to conversations...", appended_ids.size,
-            folder.to_string());
         
-        yield process_email_ids_async(folder.path, appended_ids, cancellable_monitor);
+        if (paths_changed.size > 0) {
+            debug("[%s] Paths changed in %d conversations of %d emails from %s", to_string(),
+                paths_changed.get_keys().size, paths_changed.get_values().size, path.to_string());
+        }
+        
+        foreach (Conversation conversation in paths_changed.get_keys())
+            notify_email_paths_changed(conversation, paths_changed.get(conversation));
     }
     
     private void on_account_email_flags_changed(Geary.Folder folder,
@@ -931,5 +1009,10 @@ public class Geary.App.ConversationMonitor : BaseObject {
         debug("fill_window_async: loaded from %s, email_count=%d min_window_count=%d primary_ids.size=%d folder.email_total=%d conversations.size=%d rescheduled=%s",
             low_id != null ? low_id.to_string() : "(null)", get_email_count(), min_window_count, primary_email_id_to_conversation.size,
             folder.properties.email_total, conversations.size, reschedule.to_string());
+    }
+    
+    public string to_string() {
+        return "%s/%d convs/%d primary/%d total".printf(folder.to_string(), conversations.size,
+            primary_email_id_to_conversation.size, all_email_id_to_conversation.size);
     }
 }

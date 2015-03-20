@@ -183,6 +183,13 @@ public class Geary.App.Conversation : BaseObject {
     }
     
     /**
+     * Returns true if the {@link EmailIdentifier} is present in this {@link Conversation}.
+     */
+    public bool has_email(EmailIdentifier id) {
+        return emails.has_key(id);
+    }
+    
+    /**
      * Returns the email associated with the EmailIdentifier, if present in this conversation.
      */
     public Geary.Email? get_email_by_id(EmailIdentifier id) {
@@ -212,9 +219,8 @@ public class Geary.App.Conversation : BaseObject {
      *
      * Paths are always added, whether or not the email was already present.
      */
-    internal bool add(Email email, Gee.Collection<Geary.FolderPath> known_paths) {
-        foreach (Geary.FolderPath path in known_paths)
-            path_map.set(email.id, path);
+    internal bool add(Email email, Gee.Collection<Geary.FolderPath> known_paths, out bool paths_changed) {
+        paths_changed = add_paths(email.id, known_paths);
         
         if (emails.has_key(email.id))
             return false;
@@ -228,6 +234,22 @@ public class Geary.App.Conversation : BaseObject {
         appended(email);
         
         return true;
+    }
+    
+    /**
+     * Returns true if the paths changed for this email.
+     */
+    internal bool add_paths(EmailIdentifier id, Gee.Collection<Geary.FolderPath> known_paths) {
+        bool changed = false;
+        foreach (Geary.FolderPath path in known_paths) {
+            if (path_map.contains(id) && path_map.get(id).contains(path))
+                continue;
+            
+            path_map.set(id, path);
+            changed = true;
+        }
+        
+        return changed;
     }
     
     /**

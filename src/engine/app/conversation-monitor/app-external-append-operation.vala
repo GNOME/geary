@@ -5,17 +5,20 @@
  */
 
 private class Geary.App.ExternalAppendOperation : ConversationOperation {
+    private string why;
     private Geary.Folder folder;
     private Gee.Collection<Geary.EmailIdentifier> appended_ids;
     
-    public ExternalAppendOperation(ConversationMonitor monitor, Geary.Folder folder,
+    public ExternalAppendOperation(ConversationMonitor monitor, string why, Geary.Folder folder,
         Gee.Collection<Geary.EmailIdentifier> appended_ids) {
         base(monitor);
+        
+        this.why = why;
         this.folder = folder;
         this.appended_ids = appended_ids;
     }
     
     public override async void execute_async() {
-        yield monitor.external_append_emails_async(folder, appended_ids);
+        yield monitor.external_append_emails_async(why, folder, appended_ids);
     }
 }
