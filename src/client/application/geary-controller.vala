@@ -98,6 +98,8 @@ public class GearyController : Geary.BaseObject {
     
     public LoginDialog? login_dialog { get; private set; default = null; }
     
+    public MenuModel app_menu { get; private set; }
+    
     private Geary.Account? current_account = null;
     private Gee.HashMap<Geary.Account, Geary.App.EmailStore> email_stores
         = new Gee.HashMap<Geary.Account, Geary.App.EmailStore>();
@@ -597,7 +599,7 @@ public class GearyController : Geary.BaseObject {
         } catch (Error e) {
             error("Unable to parse app_menu.interface: %s", e.message);
         }
-        MenuModel menu = (MenuModel) builder.get_object("app-menu");
+        app_menu = (MenuModel) builder.get_object("app-menu");
         
         // We'd *like* to always export an app menu and just let the shell
         // decide whether to display it or not.  Unfortunately Mint (Cinnamon,
@@ -605,7 +607,7 @@ public class GearyController : Geary.BaseObject {
         // application, even if you didn't have one otherwise, if you export
         // the app menu.  So, we only export it if the shell claims to show it.
         if (Gtk.Settings.get_default().gtk_shell_shows_app_menu)
-            GearyApplication.instance.set_app_menu(menu);
+            GearyApplication.instance.set_app_menu(app_menu);
     }
     
     private void open_account(Geary.Account account) {

@@ -68,6 +68,7 @@ public class ComposerWidget : Gtk.EventBox {
     public const string ACTION_SEND = "send";
     public const string ACTION_ADD_ATTACHMENT = "add attachment";
     public const string ACTION_ADD_ORIGINAL_ATTACHMENTS = "add original attachments";
+    public const string ACTION_GEAR_MENU = "gear menu";
     
     private const string DRAFT_SAVED_TEXT = _("Saved");
     private const string DRAFT_SAVING_TEXT = _("Saving");

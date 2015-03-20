@@ -61,11 +61,6 @@ public class MainToolbar : Gtk.Box {
         Gtk.Menu mark_menu = (Gtk.Menu) GearyApplication.instance.ui_manager.get_widget("/ui/ToolbarMarkMenu");
         mark_menu.foreach(GtkUtil.show_menuitem_accel_labels);
         
-        // Setup the application menu.
-        GearyApplication.instance.load_ui_file("toolbar_menu.ui");
-        Gtk.Menu application_menu = (Gtk.Menu) GearyApplication.instance.ui_manager.get_widget("/ui/ToolbarMenu");
-        application_menu.foreach(GtkUtil.show_menuitem_accel_labels);
-        
         // Toolbar setup.
         Gee.List<Gtk.Button> insert = new Gee.ArrayList<Gtk.Button>();
         
@@ -140,6 +135,8 @@ public class MainToolbar : Gtk.Box {
         // Application button.  If we exported an app menu, we don't need this.
         if (!Gtk.Settings.get_default().gtk_shell_shows_app_menu) {
             insert.clear();
+            Gtk.Menu application_menu = new Gtk.Menu.from_model(
+                GearyApplication.instance.controller.app_menu);
             insert.add(conversation_header.create_menu_button("emblem-system-symbolic",
                 application_menu, GearyController.ACTION_GEAR_MENU));
             conversation_header.add_end(conversation_header.create_pill_buttons(insert));
