@@ -77,6 +77,7 @@ public class ComposerBox : Gtk.Frame, ComposerContainer {
         if (get_style_context().has_class("full-pane"))
             GearyApplication.instance.controller.main_window.main_toolbar.remove_conversation_header(
                 composer.header);
+        composer.header.title = "";
         if (title_binding != null)
             GtkUtil.unbind(title_binding);
         
