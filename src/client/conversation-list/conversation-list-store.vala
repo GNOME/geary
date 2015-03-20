@@ -113,8 +113,8 @@ public class ConversationListStore : Gtk.ListStore {
             conversation_monitor.scan_completed.disconnect(on_scan_completed);
             conversation_monitor.conversations_added.disconnect(on_conversations_added);
             conversation_monitor.conversation_removed.disconnect(on_conversation_removed);
-            conversation_monitor.conversation_appended.disconnect(on_conversation_appended);
-            conversation_monitor.conversation_trimmed.disconnect(on_conversation_trimmed);
+            conversation_monitor.conversation_appended.disconnect(on_refresh_conversation);
+            conversation_monitor.conversation_trimmed.disconnect(on_refresh_conversation);
             conversation_monitor.email_flags_changed.disconnect(on_email_flags_changed);
             conversation_monitor.email_paths_changed.disconnect(on_email_paths_changed);
         }
@@ -136,8 +136,8 @@ public class ConversationListStore : Gtk.ListStore {
             conversation_monitor.scan_completed.connect(on_scan_completed);
             conversation_monitor.conversations_added.connect(on_conversations_added);
             conversation_monitor.conversation_removed.connect(on_conversation_removed);
-            conversation_monitor.conversation_appended.connect(on_conversation_appended);
-            conversation_monitor.conversation_trimmed.connect(on_conversation_trimmed);
+            conversation_monitor.conversation_appended.connect(on_refresh_conversation);
+            conversation_monitor.conversation_trimmed.connect(on_refresh_conversation);
             conversation_monitor.email_flags_changed.connect(on_email_flags_changed);
             conversation_monitor.email_paths_changed.connect(on_email_paths_changed);
         }
@@ -197,7 +197,7 @@ public class ConversationListStore : Gtk.ListStore {
         foreach (Geary.Email email in emails) {
             Geary.App.Conversation? conversation = conversation_monitor.get_conversation_for_email(email.id);
             if (conversation != null)
-                set_preview_for_conversation(conversation, email);
+                refresh_conversation(conversation, email);
             else
                 debug("Couldn't find conversation for %s", email.id.to_string());
         }
@@ -277,14 +277,6 @@ public class ConversationListStore : Gtk.ListStore {
         return message_data == null ? null : message_data.preview;
     }
     
-    private void set_preview_for_conversation(Geary.App.Conversation conversation, Geary.Email preview) {
-        Gtk.TreeIter iter;
-        if (get_iter_for_conversation(conversation, out iter))
-            set_row(iter, conversation, preview);
-        else
-            debug("Unable to find preview for conversation");
-    }
-    
     private void set_row(Gtk.TreeIter iter, Geary.App.Conversation conversation, Geary.Email preview) {
         FormattedConversationData conversation_data = new FormattedConversationData(conversation,
             preview, conversation_monitor.folder,
@@ -303,29 +295,42 @@ public class ConversationListStore : Gtk.ListStore {
         row_map.set(conversation, wrapper);
     }
     
-    private void refresh_conversation(Geary.App.Conversation conversation) {
+    private void on_refresh_conversation(Geary.App.Conversation conversation) {
+        refresh_conversation(conversation, null);
+    }
+    
+    private void refresh_conversation(Geary.App.Conversation conversation, Geary.Email? preview) {
         Gtk.TreeIter iter;
         if (!get_iter_for_conversation(conversation, out iter)) {
-            // Unknown conversation, attempt to append it.
-            add_conversation(conversation);
-            return;
-        }
-        
-        Geary.Email? last_email = conversation.get_latest_recv_email(Geary.App.Conversation.Location.ANYWHERE);
-        if (last_email == null) {
-            debug("Cannot refresh conversation: last email is null");
+            debug("Can't refresh conversation: iter not found, adding...");
             
-            remove(iter);
+            add_conversation(conversation);
+            
             return;
         }
         
-        set_row(iter, conversation, last_email);
+        FormattedConversationData? cell = get_message_data_at_iter(iter);
+        if (cell == null) {
+            debug("Can't refresh conversation: no FormattedConversationData, adding...");
+            
+            add_conversation(conversation);
+            
+            return;
+        }
         
+        assert(cell.conversation == conversation);
+        
+        cell.update_conversation(preview);
+        
+        // mark row as changed (which queues a redraw)
         Gtk.TreePath? path = get_path(iter);
         if (path != null)
             row_changed(path, iter);
         else
-            debug("Cannot refresh conversation: no path for iterator");
+            debug("Error refreshing conversation: no path for iterator, can't report row changed");
+        
+        // force a re-sort of the list
+        set_default_sort_func(sort_by_date);
     }
     
     private void refresh_flags(Geary.App.Conversation conversation) {
@@ -441,18 +446,6 @@ public class ConversationListStore : Gtk.ListStore {
         remove_conversation(conversation);
     }
     
-    private void on_conversation_appended(Geary.App.Conversation conversation) {
-        if (has_conversation(conversation)) {
-            refresh_conversation(conversation);
-        } else {
-            debug("Unable to append conversation; conversation not present in list store");
-        }
-    }
-    
-    private void on_conversation_trimmed(Geary.App.Conversation conversation) {
-        refresh_conversation(conversation);
-    }
-    
     private void on_display_preview_changed() {
         refresh_previews_async.begin(conversation_monitor);
     }
@@ -469,7 +462,7 @@ public class ConversationListStore : Gtk.ListStore {
     private void on_email_paths_changed(Geary.App.Conversation conversation, Gee.Collection<Geary.EmailIdentifier> ids) {
         // refresh the conversation because the change in paths can change the sort order (sorting
         // depends on dates of email in this folder)
-        refresh_conversation(conversation);
+        refresh_conversation(conversation, null);
     }
     
     private int sort_by_date(Gtk.TreeModel model, Gtk.TreeIter aiter, Gtk.TreeIter biter) {

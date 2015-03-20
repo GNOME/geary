@@ -72,6 +72,8 @@ public class FormattedConversationData : Geary.BaseObject {
         }
     }
     
+    public Geary.App.Conversation? conversation { get; private set; }
+    
     public bool is_unread { get; set; }
     public bool is_flagged { get; set; }
     public string date { get; private set; }
@@ -80,17 +82,14 @@ public class FormattedConversationData : Geary.BaseObject {
     public int num_emails { get; set; }
     public Geary.Email? preview { get; private set; default = null; }
     
-    private Geary.App.Conversation? conversation = null;
     private Gee.List<Geary.RFC822.MailboxAddress>? account_owner_emails = null;
     private bool use_to = true;
     private CountBadge count_badge = new CountBadge(2);
     private ConversationListCellDimensions cell_dimensions;
     
     // Creates a formatted message data from an e-mail.
-    public FormattedConversationData(Geary.App.Conversation conversation, Geary.Email preview,
+    public FormattedConversationData(Geary.App.Conversation conversation, Geary.Email? preview,
         Geary.Folder folder, Gee.List<Geary.RFC822.MailboxAddress> account_owner_emails) {
-        assert(preview.fields.fulfills(ConversationListStore.REQUIRED_FIELDS));
-        
         this.conversation = conversation;
         this.account_owner_emails = account_owner_emails;
         use_to = (folder != null) && folder.special_folder_type.is_outgoing();
@@ -99,26 +98,18 @@ public class FormattedConversationData : Geary.BaseObject {
         // the GearyController
         cell_dimensions = GearyApplication.instance.controller.cell_dimensions;
         
-        // Load preview-related data.
-        update_date_string();
-        this.subject = EmailUtil.strip_subject_prefixes(preview);
-        this.body = Geary.String.reduce_whitespace(preview.get_preview_as_string());
-        this.preview = preview;
-        
-        // Load conversation-related data.
-        this.is_unread = conversation.is_unread();
-        this.is_flagged = conversation.is_flagged();
-        this.num_emails = conversation.get_count();
+        update_conversation(preview);
     }
     
     // Creates an example message (used interally for styling calculations.)
     public FormattedConversationData.create_example() {
-        this.is_unread = false;
-        this.is_flagged = false;
-        this.date = STYLE_EXAMPLE;
-        this.subject = STYLE_EXAMPLE;
-        this.body = STYLE_EXAMPLE + "\n" + STYLE_EXAMPLE;
-        this.num_emails = 1;
+        conversation = null;
+        is_unread = false;
+        is_flagged = false;
+        date = STYLE_EXAMPLE;
+        subject = STYLE_EXAMPLE;
+        body = STYLE_EXAMPLE + "\n" + STYLE_EXAMPLE;
+        num_emails = 1;
         
         // take a reference to the global ConversationListCellDimensions object, which is held by
         // the GearyController
@@ -141,6 +132,28 @@ public class FormattedConversationData : Geary.BaseObject {
         date = new_date;
         
         return true;
+    }
+    
+    public void update_conversation(Geary.Email? supplied_preview) {
+        update_date_string();
+        
+        // caller can override which preview is shown, otherwise use the latest email in conversation
+        if (supplied_preview != null)
+            preview = supplied_preview;
+        else if (preview == null)
+            preview = conversation.get_latest_recv_email(Geary.App.Conversation.Location.ANYWHERE);
+        
+        if (preview != null) {
+            if (preview.fields.fulfills(Geary.Email.Field.SUBJECT))
+                subject = EmailUtil.strip_subject_prefixes(preview);
+            
+            if (preview.fields.fulfills(Geary.Email.Field.PREVIEW))
+                body = Geary.String.reduce_whitespace(preview.get_preview_as_string());
+        }
+        
+        is_unread = conversation.is_unread();
+        is_flagged = conversation.is_flagged();
+        num_emails = conversation.get_count();
     }
     
     private uint8 gdk_to_rgb(double gdk) {

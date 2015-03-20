@@ -821,8 +821,9 @@ public class Geary.App.ConversationMonitor : BaseObject {
             // if conversation is empty or has no messages in primary folder path, remove it
             // entirely
             if (conversation.get_count() == 0 || !conversation.any_in_folder_path(folder.path)) {
-                // could have been trimmed earlier in the loop
+                // could have been trimmed/updated earlier in the loop
                 trimmed_conversations.remove_all(conversation);
+                paths_changed.remove_all(conversation);
                 
                 // strip Conversation from local storage and lookup tables
                 conversations.remove(conversation);
@@ -836,6 +837,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
                 // since the email was fully removed from conversation, report as trimmed
                 trimmed_conversations.set(conversation, email);
             } else if (!fully_removed && email != null) {
+                // the path was removed but the email remains
                 paths_changed.set(conversation, email.id);
             }
         }
@@ -849,6 +851,14 @@ public class Geary.App.ConversationMonitor : BaseObject {
         foreach (Conversation conversation in trimmed_conversations.get_keys())
             notify_conversation_trimmed(conversation, trimmed_conversations.get(conversation));
         
+        if (paths_changed.size > 0) {
+            debug("[%s] Paths changed in %d conversations of %d emails from %s", to_string(),
+                paths_changed.get_keys().size, paths_changed.get_values().size, path.to_string());
+        }
+        
+        foreach (Conversation conversation in paths_changed.get_keys())
+            notify_email_paths_changed(conversation, paths_changed.get(conversation));
+        
         if (removed_conversations.size > 0) {
             debug("[%s] Removed %d conversations from %s", to_string(), removed_conversations.size,
             path.to_string());
@@ -858,14 +868,6 @@ public class Geary.App.ConversationMonitor : BaseObject {
             notify_conversation_removed(conversation);
             conversation.clear_owner();
         }
-        
-        if (paths_changed.size > 0) {
-            debug("[%s] Paths changed in %d conversations of %d emails from %s", to_string(),
-                paths_changed.get_keys().size, paths_changed.get_values().size, path.to_string());
-        }
-        
-        foreach (Conversation conversation in paths_changed.get_keys())
-            notify_email_paths_changed(conversation, paths_changed.get(conversation));
     }
     
     private void on_account_email_flags_changed(Geary.Folder folder,
