@@ -236,6 +236,13 @@
         <property name="icon_name">edit-copy-symbolic</property>
       </object>
     </child>
+    <child>
+      <object class="GtkAction" id="gear menu">
+        <property name="label" translatable="yes">Application Menu</property>
+        <property name="icon_name">emblem-system-symbolic</property>
+      </object>
+      <accelerator key="F10"/>
+    </child>
   </object>
   <object class="GtkBox" id="composer">
     <property name="visible">True</property>

@@ -91,11 +91,10 @@ public class ComposerHeaderbar : PillHeaderbar {
         // Application button for when taking over main header bar.  If we exported an app menu,
         // we don't need this.
         if (!Gtk.Settings.get_default().gtk_shell_shows_app_menu) {
-            Gtk.Menu application_menu = (Gtk.Menu) GearyApplication.instance.ui_manager.get_widget(
-                "/ui/ToolbarMenu");
-            application_menu.foreach(GtkUtil.show_menuitem_accel_labels);
-            Gtk.Button menu_button = create_menu_button("emblem-system-symbolic", application_menu,
-                GearyController.ACTION_GEAR_MENU);
+            Gtk.Menu application_menu = new Gtk.Menu.from_model(
+                GearyApplication.instance.controller.app_menu);
+            Gtk.Button menu_button = create_menu_button(null, application_menu,
+                ComposerWidget.ACTION_GEAR_MENU);
             add_end(menu_button);
             bind_property("state", menu_button, "visible", BindingFlags.SYNC_CREATE,
                 (binding, source_value, ref target_value) => {
@@ -108,11 +107,20 @@ public class ComposerHeaderbar : PillHeaderbar {
         add_end(close_buttons);
         add_end(send_button);
 #endif
+
+#if GTK_3_12
+        notify["decoration-layout"].connect(set_detach_button_side);
+#else
         get_style_context().changed.connect(set_detach_button_side);
+#endif
         realize.connect(set_detach_button_side);
         notify["state"].connect((s, p) => {
             if (state == ComposerWidget.ComposerState.DETACHED) {
+#if GTK_3_12
+                notify["decoration-layout"].disconnect(set_detach_button_side);
+#else
                 get_style_context().changed.disconnect(set_detach_button_side);
+#endif
                 detach_start.visible = detach_end.visible = false;
             }
         });
@@ -124,15 +132,7 @@ public class ComposerHeaderbar : PillHeaderbar {
     }
     
     private void set_detach_button_side() {
-        string layout;
-        bool at_end = false;
-        get_toplevel().style_get("decoration-button-layout", out layout);
-        // Based on logic of close_button_at_end in gtkheaderbar.c: Close button appears
-        // at end iff "close" follows a colon in the layout string.
-        if (layout != null) {
-            int colon_ind = layout.index_of(":");
-            at_end = (colon_ind >= 0 && layout.index_of("close", colon_ind) >= 0);
-        }
+        bool at_end = close_button_at_end();
         detach_start.visible = !at_end;
         detach_end.visible = at_end;
     }
