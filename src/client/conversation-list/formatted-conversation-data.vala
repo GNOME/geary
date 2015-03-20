@@ -251,9 +251,8 @@ public class FormattedConversationData : Geary.BaseObject {
     }
     
     // Can be used for rendering or calculating height.
-    private void render_internal(Gtk.Widget widget, Gdk.Rectangle? cell_area, 
-        Cairo.Context? ctx, Gtk.CellRendererState flags, bool recalc_dims,
-        bool hover_select) {
+    private void render_internal(Gtk.Widget widget, Gdk.Rectangle? cell_area, Cairo.Context? ctx,
+        Gtk.CellRendererState flags, bool recalc_dims, bool hover_select) {
         bool display_preview = GearyApplication.instance.config.display_preview;
         int y = LINE_SPACING + (cell_area != null ? cell_area.y : 0);
         
@@ -399,8 +398,8 @@ public class FormattedConversationData : Geary.BaseObject {
     
     private Pango.Rectangle render_preview(Gtk.Widget widget, Gdk.Rectangle? cell_area,
         Cairo.Context? ctx, int y, bool selected, int counter_width = 0) {
-        // the dimensions should have been calculated before calling this
-        assert(cell_dimensions.valid);
+        // this can be called when trying to determine cell dimensions, so use zero in that case
+        int preview_height = cell_dimensions.valid ? cell_dimensions.preview_height : 0;
         
         double dim = selected ? DIM_TEXT_AMOUNT : DIM_PREVIEW_TEXT_AMOUNT;
         string preview_markup = "<span foreground='%s'>%s</span>".printf(
@@ -418,7 +417,7 @@ public class FormattedConversationData : Geary.BaseObject {
         layout_preview.set_ellipsize(Pango.EllipsizeMode.END);
         if (ctx != null && cell_area != null) {
             layout_preview.set_width((cell_area.width - TEXT_LEFT - counter_width - LINE_SPACING) * Pango.SCALE);
-            layout_preview.set_height(cell_dimensions.preview_height * Pango.SCALE);
+            layout_preview.set_height(preview_height * Pango.SCALE);
             
             ctx.move_to(cell_area.x + TEXT_LEFT, y);
             Pango.cairo_show_layout(ctx, layout_preview);
