@@ -39,8 +39,6 @@ public class MainWindow : Gtk.ApplicationWindow {
     public MainWindow(GearyApplication application) {
         Object(application: application);
         
-        title = GearyApplication.NAME;
-        
         conversation_list_view = new ConversationListView(conversation_list_store);
         
         add_events(Gdk.EventMask.KEY_PRESS_MASK | Gdk.EventMask.KEY_RELEASE_MASK
@@ -92,6 +90,16 @@ public class MainWindow : Gtk.ApplicationWindow {
         if (!GearyApplication.instance.is_running_unity) {
             main_toolbar.show_close_button = true;
             set_titlebar(main_toolbar);
+            title = GearyApplication.NAME;
+        } else {
+            BindingTransformFunc title_func = (binding, source, ref target) => {
+                target = @"$(GearyApplication.NAME) - $(main_toolbar.account) - $(main_toolbar.folder)";
+                return true;
+            };
+            main_toolbar.bind_property("folder", this, "title",
+                BindingFlags.SYNC_CREATE, title_func);
+            main_toolbar.bind_property("account", this, "title",
+                BindingFlags.SYNC_CREATE, title_func);
         }
         
         set_styling();

@@ -45,8 +45,10 @@ public class MainToolbar : Gtk.Box {
                 return true;
             });
         
-        this.bind_property("account", folder_header, "title", BindingFlags.SYNC_CREATE);
-        this.bind_property("folder", folder_header, "subtitle", BindingFlags.SYNC_CREATE);
+        if (!GearyApplication.instance.is_running_unity) {
+            this.bind_property("account", folder_header, "title", BindingFlags.SYNC_CREATE);
+            this.bind_property("folder", folder_header, "subtitle", BindingFlags.SYNC_CREATE);
+        }
         this.bind_property("show-close-button-left", folder_header, "show-close-button",
             BindingFlags.SYNC_CREATE);
         this.bind_property("show-close-button-right", conversation_header, "show-close-button",
