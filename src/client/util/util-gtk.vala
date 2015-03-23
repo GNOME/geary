@@ -126,4 +126,16 @@ void apply_style(Gtk.Widget widget, string style) {
 [CCode(cname = "g_binding_unbind")]
 extern void unbind(Binding binding);
 
+/**
+ * Set xalign property on Gtk.Label in a compatible way.
+ *
+ * GtkMisc is being deprecated in GTK+ 3 and the "xalign" property has been moved to GtkLabel.  This
+ * causes compatibility problems with newer versions of Vala generating code that won't link with
+ * older versions of GTK+.  This is a convenience method until Geary requires GTK+ 3.16 as its
+ * minimum GTK+ version.
+ */
+public void set_label_xalign(Gtk.Label label, float xalign) {
+    label.set("xalign", xalign);
+}
+
 }

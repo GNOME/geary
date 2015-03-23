@@ -14,7 +14,7 @@ public class AccountDialogEditAlternateEmailsPane : AccountDialogPane {
             label = "<b>%s</b>".printf(Geary.HTML.escape_markup(mailbox.get_full_address()));
             use_markup = true;
             ellipsize = Pango.EllipsizeMode.END;
-            xalign = 0.0f;
+            GtkUtil.set_label_xalign(this, 0.0f);
         }
     }
     
