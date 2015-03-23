@@ -346,11 +346,11 @@ msgid ""
 "This will not affect email on the server."
 msgstr ""
 "Tots els missatges associats a aquest compte s'eliminaran del vostre "
-"ordinador. Això no affectarà els missatges al servidor."
+"ordinador. Això no afectarà els missatges al servidor."
 
 #: ../../src/client/geary-args.vala:24
 msgid "Allow inspection of WebView"
-msgstr "Permet l'inspecció del WebView"
+msgstr "Permet la inspecció del WebView"
 
 #: ../../src/client/views/conversation-viewer.vala:509
 msgid "Always Show From Sender"
@@ -831,7 +831,7 @@ msgstr ""
 
 #: ../../src/client/geary-args.vala:10
 msgid "Output debugging information"
-msgstr "Sortida de l'informació de depuració"
+msgstr "Sortida de la informació de depuració"
 
 #: ../../ui/login.glade:337
 msgid "P_ort:"
@@ -1014,7 +1014,7 @@ msgstr ""
 
 #: ../../src/client/geary-application.vala:27
 msgid "Send and receive email"
-msgstr "Envieu y rebeu correus electrònics"
+msgstr "Envieu i rebeu correus electrònics"
 
 #: ../../src/client/composer/composer-window.vala:747
 msgid "Send message with an empty body?"
@@ -1486,7 +1486,7 @@ msgstr "Nom d'_usuari:"
 
 #: ../../src/client/views/conversation-viewer.vala:1494
 msgid "_View Source"
-msgstr "_Ves la font"
+msgstr "_Visualitza la font"
 
 #. / A list of keywords, separated by pipe ("|") characters, that suggest an attachment
 #: ../../src/client/composer/composer-window.vala:90
