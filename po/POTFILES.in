@@ -391,5 +391,4 @@ src/mailer/main.vala
 [type: gettext/glade]ui/preferences.glade
 [type: gettext/glade]ui/remove_confirm.glade
 [type: gettext/glade]ui/toolbar_mark_menu.ui
-[type: gettext/glade]ui/toolbar_menu.ui
 [type: gettext/glade]ui/upgrade_dialog.glade

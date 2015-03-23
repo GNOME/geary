@@ -1,15 +1,15 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Geary 0.5.1\n"
-"POT-Creation-Date: 2015-01-23 05:53+0000\n"
-"PO-Revision-Date: 2015-01-23 14:36+0100\n"
-"Last-Translator: Christian Kirbach <christian.kirbach@gmail.com>\n"
+"POT-Creation-Date: 2015-02-22 17:56+0000\n"
+"PO-Revision-Date: 2015-02-23 22:04+0100\n"
+"Last-Translator: Simon Linden <xhi2018@googlemail.com>\n"
 "Language-Team: Andreas Wilhelm <info@avedo.net>\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.5.4\n"
+"X-Generator: Poedit 1.7.4\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: C/write.page:9(title)
@@ -93,11 +93,19 @@ msgstr ""
 "Im Editor stehen eine große Zahl von Tastaturkürzel zur Verfügung; Details "
 "unter <link xref=\"shortcuts#composer\"/>."
 
-#: C/write.page:39(title)
+#: C/write.page:37(p)
+msgid ""
+"You may specify a signature to be inserted into the composer in the <link "
+"xref=\"accounts\"/> dialog."
+msgstr ""
+"Sie können im <link xref=\"accounts\"/>-Dialog eine Signatur angeben, welche "
+"dann im E-Mail-Editor eingefügt wird."
+
+#: C/write.page:42(title)
 msgid "Drafts"
 msgstr "Entwürfe"
 
-#: C/write.page:41(p)
+#: C/write.page:44(p)
 msgid ""
 "For mail servers that support drafts, Geary will automatically save the "
 "message as you type. If you close the composer without sending, Geary will "
@@ -108,7 +116,7 @@ msgstr ""
 "ohne die Nachricht zu senden, fragt Geary, ob die Nachricht als Entwurf "
 "gespeichert oder verworfen werden soll. "
 
-#: C/write.page:44(p)
+#: C/write.page:47(p)
 msgid ""
 "To edit an existing draft, select the Drafts folder in the folder list, "
 "select the message, and click \"Edit Draft\" in the message viewer."
@@ -117,7 +125,7 @@ msgstr ""
 "Entwürfe-Ordner aus der Ordnerliste, wählen die Nachricht und wählen in der "
 "Nachrichten Ansicht \"Entwurf bearbeiten\"."
 
-#: C/write.page:47(p)
+#: C/write.page:50(p)
 msgid "Geary deletes the draft when you send the message."
 msgstr "Geary löscht den Entwurf, wenn die Nachricht gesendet wird."
 
@@ -1144,7 +1152,7 @@ msgid ""
 "accounts, if you disable this setting, you may be unable to view messages "
 "you've sent."
 msgstr ""
-"Das Ankreuzfeld <gui>Gesendete E-Mail speichern</gui> bestimmt, ob Geary "
+"Das Ankreuzfeld <gui>Gesendete E-Mail speichern</gui> legt fest, ob Geary "
 "erfolgreich gesendete Nachrichten in den Ordner <gui>Gesendete E-Mails</gui> "
 "verschiebt. Für Gmail-Konten erfolgt das automatisch. Yahoo und einige "
 "andere können so eingestellt werden, dass sie gesendete E-Mails ebenfalls "
@@ -1153,6 +1161,32 @@ msgstr ""
 "aufrufen."
 
 #: C/accounts.page:45(p)
+msgid ""
+"The <gui>Sign emails</gui> checkbox indicates whether a signature will be "
+"automatically inserted when a composer is opened. You may enter the "
+"signature into the box immediately below. You may use HTML tags to style the "
+"text. Switch to a preview of the signature using the buttons to the right."
+msgstr ""
+"Das Ankreuzfeld <gui>E-Mails unterzeichnen</gui> zeigt an ob beim öffnen des "
+"E-Mail-Editors automatisch eine Signatur in die E-Mail eingefügt wird. In "
+"dem Eingabefeld direkt darunter können Sie die Signatur eingeben. Um den "
+"Text hervorzuheben können Sie auch HTML-Tags verwenden. Mit den Knöpfen auf "
+"der rechten Seite wechseln Sie zur Vorschau der Signatur."
+
+#: C/accounts.page:50(p)
+msgid ""
+"If you leave the signature in the Accounts dialog blank, Geary will use the "
+"<file>.signature</file> file in your home directory, if it exists. This file "
+"may contain either plain text or HTML markup. In the latter case, the markup "
+"will be inserted directly into the composer, without any escaping."
+msgstr ""
+"Wenn Sie im Konten-Dialog kein Signatur einstellen, wird Geary den Inhalt "
+"der Datei <file>.signature</file> aus Ihrem Persönlicher Ordner verwenden, "
+"sofern diese vorhanden ist. Diese Datei kann sowohl reinen Text als auch "
+"HTML-Textauszeichnungen enthalten. Im letzteren Fall, werden die "
+"Textauszeichnungen direkt und ohne Maskierung im E-Mail-Editor eingefügt."
+
+#: C/accounts.page:55(p)
 msgid ""
 "The <gui>Download mail</gui> drop-down allows you to configure how much mail "
 "Geary will keep locally. Geary can only use locally available mail when "
@@ -1163,11 +1197,11 @@ msgstr ""
 "berücksichtigen, wenn es um das Durchsuchen oder das Bündeln von Nachrichten "
 "in Konversationen geht.   "
 
-#: C/accounts.page:53(title)
+#: C/accounts.page:63(title)
 msgid "Removing accounts"
 msgstr "Konten löschen"
 
-#: C/accounts.page:55(p)
+#: C/accounts.page:65(p)
 msgid ""
 "To delete an account, open the Accounts dialog, select the account, and "
 "press the - button. Geary will delete all information associated with the "
