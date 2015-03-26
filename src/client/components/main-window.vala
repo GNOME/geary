@@ -19,6 +19,7 @@ public class MainWindow : Gtk.ApplicationWindow {
     public ConversationListView conversation_list_view  { get; private set; }
     public ConversationViewer conversation_viewer { get; private set; default = new ConversationViewer(); }
     public StatusBar status_bar { get; private set; default = new StatusBar(); }
+    public Geary.Folder? current_folder { get; private set; default = null; }
     
     public int window_width { get; set; }
     public int window_height { get; set; }
@@ -34,7 +35,6 @@ public class MainWindow : Gtk.ApplicationWindow {
     private Geary.AggregateProgressMonitor progress_monitor = new Geary.AggregateProgressMonitor();
     private Geary.ProgressMonitor? conversation_monitor_progress = null;
     private Geary.ProgressMonitor? folder_progress = null;
-    private Geary.Folder? current_folder = null;
     
     public MainWindow(GearyApplication application) {
         Object(application: application);
@@ -93,13 +93,15 @@ public class MainWindow : Gtk.ApplicationWindow {
             title = GearyApplication.NAME;
         } else {
             BindingTransformFunc title_func = (binding, source, ref target) => {
-                target = @"$(GearyApplication.NAME) - $(main_toolbar.account) - $(main_toolbar.folder)";
+                string folder = current_folder != null ? current_folder.get_display_name() + " " : "";
+                string account = main_toolbar.account != null ? "(%s)".printf(main_toolbar.account) : "";
+                
+                target = "%s%s - %s".printf(folder, account, GearyApplication.NAME);
+                
                 return true;
             };
-            main_toolbar.bind_property("folder", this, "title",
-                BindingFlags.SYNC_CREATE, title_func);
-            main_toolbar.bind_property("account", this, "title",
-                BindingFlags.SYNC_CREATE, title_func);
+            bind_property("current-folder", this, "title", BindingFlags.SYNC_CREATE, title_func);
+            main_toolbar.bind_property("account", this, "title", BindingFlags.SYNC_CREATE, title_func);
         }
         
         set_styling();
