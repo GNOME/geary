@@ -43,6 +43,9 @@ public class GearyApplication : Gtk.Application {
         {ACTION_ENTRY_COMPOSE, activate_compose, "s"},
     };
     
+    private const int64 USEC_PER_SEC = 1000000;
+    private const int64 FORCE_SHUTDOWN_USEC = 5 * USEC_PER_SEC;
+    
     public static GearyApplication instance {
         get { return _instance; }
         private set {
@@ -335,10 +338,21 @@ public class GearyApplication : Gtk.Application {
             return;
         }
         
-        // Give asynchronous destroy_async() a chance to complete
+        // Give asynchronous destroy_async() a chance to complete, but to avoid bug(s) where
+        // Geary hangs at exit, shut the whole thing down if destroy_async() takes too long to
+        // complete
+        int64 start_usec = get_monotonic_time();
         destroy_async.begin();
-        while (!is_destroyed || Gtk.events_pending())
+        while (!is_destroyed || Gtk.events_pending()) {
             Gtk.main_iteration();
+            
+            int64 delta_usec = get_monotonic_time() - start_usec;
+            if (delta_usec >= FORCE_SHUTDOWN_USEC) {
+                debug("Forcing shutdown of Geary, %ss passed...", (delta_usec / USEC_PER_SEC).to_string());
+                
+                break;
+            }
+        }
         
         if (Gtk.main_level() > 0)
             Gtk.main_quit();
