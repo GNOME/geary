@@ -261,15 +261,19 @@ private Gee.HashSet<ImapDB.EmailIdentifier>? do_fetch_associated_email_ids(Db.Co
 }
 
 internal AssociatedEmails? do_generate_associations(Db.Connection cx,
-    Gee.Collection<ImapDB.EmailIdentifier> associated_ids, Geary.Account.EmailSearchPredicate? predicate,
-    Cancellable? cancellable) throws Error {
-    AssociatedEmails association = new AssociatedEmails();
+    Gee.Collection<ImapDB.EmailIdentifier> associated_ids, Geary.Email.Field required_fields,
+    Geary.Account.EmailSearchPredicate? predicate, Cancellable? cancellable) throws Error {
+    AssociatedEmails association = new AssociatedEmails(required_fields);
+    
+    // need to pull flags for the predicate function
+    if (predicate != null)
+        required_fields |= Geary.Email.Field.FLAGS;
+    
     foreach (ImapDB.EmailIdentifier associated_id in associated_ids) {
         Email? email;
         Gee.Collection<FolderPath?>? known_paths;
         try {
-            Account.do_fetch_message(cx, associated_id.message_id,
-                predicate != null ? Geary.Email.Field.NONE : Geary.Email.Field.FLAGS,
+            Account.do_fetch_message(cx, associated_id.message_id, required_fields,
                 false, predicate, out email, out known_paths, cancellable);
         } catch (Error err) {
             if (err is EngineError.NOT_FOUND)
@@ -279,7 +283,7 @@ internal AssociatedEmails? do_generate_associations(Db.Connection cx,
         }
         
         if (email != null)
-            association.add(email.id, known_paths);
+            association.add(email, known_paths);
     }
     
     return association.email_ids.size > 0 ? association : null;

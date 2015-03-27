@@ -598,8 +598,8 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     }
     
     public async Gee.Collection<Geary.AssociatedEmails>? list_associated_emails_async(
-        ImapDB.EmailIdentifier? start_id, int count, Geary.Account.EmailSearchPredicate? predicate,
-        Gee.Collection<Geary.EmailIdentifier>? primary_email_ids,
+        ImapDB.EmailIdentifier? start_id, int count, Email.Field required_fields,
+        Geary.Account.EmailSearchPredicate? predicate, Gee.Collection<Geary.EmailIdentifier>? primary_email_ids,
         Gee.Collection<Geary.EmailIdentifier>? already_seen_ids, Cancellable? cancellable) throws Error {
         if (count == 0)
             return null;
@@ -661,7 +661,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                 found_ids.add_all(associated_ids);
                 
                 AssociatedEmails? association = Conversation.do_generate_associations(cx, associated_ids,
-                    predicate, cancellable);
+                    required_fields, predicate, cancellable);
                 if (association != null && association.email_ids.size > 0) {
                     list.add(association);
                     if (list.size >= count)

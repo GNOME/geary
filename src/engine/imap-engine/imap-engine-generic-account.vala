@@ -868,10 +868,10 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     }
     
     public override async Gee.Collection<Geary.AssociatedEmails>? local_search_associated_emails_async(
-        Gee.Collection<Geary.EmailIdentifier> email_ids, Account.EmailSearchPredicate? search_predicate,
-        Cancellable? cancellable = null) throws Error {
-        return yield local.search_associated_emails_async(check_ids(email_ids), search_predicate,
-            cancellable);
+        Gee.Collection<Geary.EmailIdentifier> email_ids, Email.Field required_fields,
+        Account.EmailSearchPredicate? search_predicate, Cancellable? cancellable = null) throws Error {
+        return yield local.search_associated_emails_async(check_ids(email_ids), required_fields,
+            search_predicate, cancellable);
     }
     
     public override async Gee.Collection<Geary.Email>? local_list_email_async(

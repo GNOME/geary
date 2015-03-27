@@ -404,8 +404,8 @@ public abstract class Geary.Account : BaseObject {
      * locally.
      */
     public abstract async Gee.Collection<Geary.AssociatedEmails>? local_search_associated_emails_async(
-        Gee.Collection<Geary.EmailIdentifier> email_ids, EmailSearchPredicate? search_predicate,
-        Cancellable? cancellable = null) throws Error;
+        Gee.Collection<Geary.EmailIdentifier> email_ids, Geary.Email.Field required_fields,
+        EmailSearchPredicate? search_predicate, Cancellable? cancellable = null) throws Error;
     
     /**
      * Return a listing of local {@link Email} fulfilling the required fields.

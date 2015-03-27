@@ -52,7 +52,8 @@ public interface Geary.FolderSupport.Associations : Geary.Folder {
      * @see Geary.Folder.find_boundaries_async
      */
     public abstract async Gee.Collection<Geary.AssociatedEmails>? local_list_associated_emails_async(
-        Geary.EmailIdentifier? initial_id, int count, Geary.Account.EmailSearchPredicate? predicate,
+        Geary.EmailIdentifier? initial_id, int count, Geary.Email.Field required_fields,
+        Geary.Account.EmailSearchPredicate? predicate,
         Gee.Collection<Geary.EmailIdentifier>? primary_loaded_ids,
         Gee.Collection<Geary.EmailIdentifier>? already_seen_ids, Cancellable? cancellable = null)
         throws Error;

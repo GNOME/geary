@@ -19,7 +19,14 @@ public class Geary.AssociatedEmails : BaseObject {
     /**
      * All associated {@link EmailIdentifier}s.
      */
-    public Gee.Collection<Geary.EmailIdentifier> email_ids { get; private set; }
+    public Gee.Set<Geary.EmailIdentifier> email_ids { get; private set; }
+    
+    /**
+     * All associated {@link Email}s with {@link required_fields} fulfilled, if possible.
+     *
+     * It's possible for the Email to have ''more'' than the required fields as well.
+     */
+    public Gee.Map<Geary.EmailIdentifier, Geary.Email> emails { get; private set; }
     
     /**
      * All known {@link FolderPath}s for each {@link EmailIdentifier}.
@@ -28,15 +35,30 @@ public class Geary.AssociatedEmails : BaseObject {
      */
     public Gee.MultiMap<Geary.EmailIdentifier, Geary.FolderPath?> known_paths { get; private set; }
     
-    public AssociatedEmails() {
-        email_ids = new Gee.ArrayList<EmailIdentifier>();
+    /**
+     * The required {@link Geary.Email.Field}s specified when the {@link AssociatedEmails} was
+     * generated.
+     */
+    public Geary.Email.Field required_fields { get; private set; }
+    
+    public AssociatedEmails(Geary.Email.Field required_fields) {
+        this.required_fields = required_fields;
+        
+        email_ids = new Gee.HashSet<EmailIdentifier>();
+        emails = new Gee.HashMap<EmailIdentifier, Email>();
         known_paths = new Gee.HashMultiMap<Email, FolderPath?>();
     }
     
-    public void add(Geary.EmailIdentifier email_id, Gee.Collection<Geary.FolderPath?> paths) {
-        email_ids.add(email_id);
+    /**
+     * Add the {@link Email} to the set of {@link AssociatedEmails}.
+     *
+     * No checking is performed to ensure the Email fulfills {@link required_fields}.
+     */
+    public void add(Geary.Email email, Gee.Collection<Geary.FolderPath?> paths) {
+        email_ids.add(email.id);
+        emails.set(email.id, email);
         foreach (FolderPath path in paths)
-            known_paths.set(email_id, path);
+            known_paths.set(email.id, path);
     }
 }
 

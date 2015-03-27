@@ -19,8 +19,8 @@ public class Geary.App.ConversationMonitor : BaseObject {
      * These are the fields Conversations require to thread emails together.  These fields will
      * be retrieved regardless of the Field parameter passed to the constructor.
      */
-    public const Geary.Email.Field REQUIRED_FIELDS = Geary.Email.Field.REFERENCES |
-        Geary.Email.Field.FLAGS | Geary.Email.Field.DATE;
+    public const Geary.Email.Field REQUIRED_FIELDS =
+        Geary.Email.Field.FLAGS | Geary.Email.Field.DATE | Geary.Email.Field.PROPERTIES;
     
     // An approximate multipler of messages-in-folder-to-conversation ... because the Engine doesn't
     // offer a way to directly load conversations in a folder as a vector unto itself, this class
@@ -501,7 +501,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
         Gee.Collection<EmailIdentifier> primary_email_ids = new Gee.HashSet<EmailIdentifier>();
         try {
             associations = yield supports_associations.local_list_associated_emails_async(
-                low_id, count, predicate_instance.search_predicate, primary_email_ids,
+                low_id, count, required_fields, predicate_instance.search_predicate, primary_email_ids,
                 all_email_id_to_conversation.keys, cancellable);
         } catch (Error err) {
             debug("Unable to load associated emails from %s: %s", supports_associations.to_string(),
@@ -510,7 +510,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
         }
         
         if (associations != null && associations.size > 0) {
-            yield process_associations_async(supports_associations.path, associations, primary_email_ids,
+            process_associations(supports_associations.path, associations, primary_email_ids,
                 cancellable);
         }
         
@@ -544,7 +544,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
         Gee.Collection<AssociatedEmails>? associations = null;
         try {
             associations = yield folder.account.local_search_associated_emails_async(
-                email_ids, predicate_instance.search_predicate, cancellable);
+                email_ids, required_fields, predicate_instance.search_predicate, cancellable);
         } catch (Error err) {
             debug("Unable to search for associated emails: %s", err.message);
         }
@@ -552,20 +552,20 @@ public class Geary.App.ConversationMonitor : BaseObject {
         if (associations == null || associations.size == 0)
             return;
         
-        yield process_associations_async(path, associations, email_ids, cancellable);
+        process_associations(path, associations, email_ids, cancellable);
         
         Logging.debug(Logging.Flag.CONVERSATIONS, "[%s] ConversationMonitor::process_email completed: %d emails",
             folder.to_string(), email_ids.size);
     }
     
-    private async void process_associations_async(FolderPath path, Gee.Collection<AssociatedEmails> associations,
+    private void process_associations(FolderPath path, Gee.Collection<AssociatedEmails> associations,
         Gee.Collection<Geary.EmailIdentifier> original_email_ids, Cancellable? cancellable) {
         Gee.HashSet<Conversation> added = new Gee.HashSet<Conversation>();
         Gee.HashMultiMap<Conversation, Email> appended = new Gee.HashMultiMap<Conversation, Email>();
         Gee.HashMultiMap<Conversation, EmailIdentifier> paths_changed = new Gee.HashMultiMap<Conversation, EmailIdentifier>();
         foreach (AssociatedEmails association in associations) {
-            yield process_association_async(association, path, original_email_ids, added, appended,
-                paths_changed, cancellable);
+            process_association(association, path, original_email_ids, added, appended, paths_changed,
+                cancellable);
         }
         
         if (added.size > 0) {
@@ -591,7 +591,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
             notify_email_paths_changed(conversation, paths_changed.get(conversation));
     }
     
-    private async void process_association_async(AssociatedEmails association, FolderPath path,
+    private void process_association(AssociatedEmails association, FolderPath path,
         Gee.Collection<EmailIdentifier> original_email_ids, Gee.Set<Conversation> added,
         Gee.MultiMap<Conversation, Email> appended, Gee.MultiMap<Conversation, EmailIdentifier> paths_changed,
         Cancellable? cancellable) {
@@ -633,15 +633,17 @@ public class Geary.App.ConversationMonitor : BaseObject {
         
         // for all ids, add known paths and associate id to conversation in the various tables,
         // since the paths and conversation may have changed
-        //
-        // if email is not loaded, add to list for loading
-        Gee.HashSet<EmailIdentifier> list_email_ids = new Gee.HashSet<EmailIdentifier>();
+        Gee.Collection<Email> emails_appended = new Gee.ArrayList<Email>();
         foreach (EmailIdentifier associated_id in association.email_ids) {
             if (conversation.has_email(associated_id)) {
                 if (conversation.add_paths(associated_id, association.known_paths[associated_id]))
                     paths_changed.set(conversation, associated_id);
             } else {
-                list_email_ids.add(associated_id);
+                // don't worry if add() reports paths_changed, because we've already checked if the
+                // email was known, don't want to report "email-paths-changed" for a new add
+                Geary.Email email = association.emails[associated_id];
+                conversation.add(email, association.known_paths[associated_id], null);
+                emails_appended.add(email);
             }
             
             all_email_id_to_conversation[associated_id] = conversation;
@@ -652,29 +654,12 @@ public class Geary.App.ConversationMonitor : BaseObject {
                 primary_email_id_to_conversation[associated_id] = conversation;
         }
         
-        // load remaining emails for the conversation objects
-        Gee.Collection<Email>? emails = null;
-        try {
-            emails = yield folder.account.local_list_email_async(list_email_ids, required_fields,
-                cancellable);
-        } catch (Error err) {
-            debug("Unable to list local account email: %s", err.message);
-        }
-        
-        // add all emails and each known path(s) to the Conversation and EmailIdentifier mapping
-        // ... don't worry if add() reports paths_changed, because we've already checked if the
-        // email was known, don't want to report "email-paths-changed" for a new add
-        if (emails != null) {
-            foreach (Email email in emails)
-                conversation.add(email, association.known_paths[email.id], null);
-        }
-        
         // if new, added, otherwise appended (if not already added)
         if (!conversations.contains(conversation)) {
             conversations.add(conversation);
             added.add(conversation);
-        } else if (!added.contains(conversation) && emails != null) {
-            foreach (Email email in emails)
+        } else if (!added.contains(conversation) && emails_appended.size > 0) {
+            foreach (Email email in emails_appended)
                 appended.set(conversation, email);
         }
     }

@@ -1579,6 +1579,9 @@ public class GearyController : Geary.BaseObject {
         int list_height = main_window.conversation_list_view.get_allocated_height();
         int cells = (list_height / cell_dimensions.cell_height) + 1;
         
+        // add one LOAD_MORE_PERCENTAGE, as though the user had requested one load more already
+        cells += (int) Math.round((double) cells * LOAD_MORE_PERCENTAGE);
+        
         if (current_conversations.min_window_count < cells)
             current_conversations.min_window_count = cells;
     }

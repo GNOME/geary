@@ -680,8 +680,8 @@ private class Geary.ImapDB.Account : BaseObject {
     }
     
     public async Gee.Collection<Geary.AssociatedEmails>? search_associated_emails_async(
-        Gee.Collection<ImapDB.EmailIdentifier> db_ids, Geary.Account.EmailSearchPredicate? search_predicate,
-        Cancellable? cancellable) throws Error {
+        Gee.Collection<ImapDB.EmailIdentifier> db_ids, Email.Field required_fields,
+        Geary.Account.EmailSearchPredicate? search_predicate, Cancellable? cancellable) throws Error {
         check_open();
         
         Gee.Collection<AssociatedEmails> associations = new Gee.ArrayList<AssociatedEmails>();
@@ -701,7 +701,7 @@ private class Geary.ImapDB.Account : BaseObject {
                 found_ids.add_all(associated_ids);
                 
                 AssociatedEmails? association = Conversation.do_generate_associations(cx, associated_ids,
-                    search_predicate, cancellable);
+                    required_fields, search_predicate, cancellable);
                 if (association != null && association.email_ids.size > 0)
                     associations.add(association);
             }
