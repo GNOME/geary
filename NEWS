@@ -1,3 +1,16 @@
+Geary 0.10.0 - 30 March 2015
+----------------------------
+
+  * Undo Archive/Trash/Move of email (#721828)
+  * New split headerbar layout with UI, composer improvements (#743960)
+  * Preference to switch between 2-column and 3-column layout (#714793)
+  * Support multiple ("alternate") email addresses per account (#714922)
+  * New shortcut keys to navigate next/previous conversation (#714434)
+  * Fix displaying inline images referenced by Content-ID (#743676)
+  * Numerous bug fixes, optimizations, improvements
+  * Updated translations
+
+
 Geary 0.9.1 - 2 February 2015
 -----------------------------
 
