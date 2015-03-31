@@ -12,6 +12,11 @@
 public class Geary.Endpoint : BaseObject {
     public const string PROP_TRUST_UNTRUSTED_HOST = "trust-untrusted-host";
     
+    /**
+     * Recommended {@link connect_timeout_sec}.
+     */
+    public const uint DEFAULT_CONNECT_TIMEOUT_SEC = 30;
+    
     [Flags]
     public enum Flags {
         NONE = 0,
@@ -42,7 +47,8 @@ public class Geary.Endpoint : BaseObject {
     
     public NetworkAddress remote_address { get; private set; }
     public Flags flags { get; private set; }
-    public uint timeout_sec { get; private set; }
+    public uint connect_timeout_sec { get; private set; default = DEFAULT_CONNECT_TIMEOUT_SEC; }
+    public uint activity_timeout_sec { get; private set; }
     public TlsCertificateFlags tls_validation_flags { get; set; default = TlsCertificateFlags.VALIDATE_ALL; }
     public bool force_ssl3 { get; set; default = false; }
     
@@ -114,10 +120,10 @@ public class Geary.Endpoint : BaseObject {
      */
     public signal void untrusted_host(SecurityType security, TlsConnection cx);
     
-    public Endpoint(string host_specifier, uint16 default_port, Flags flags, uint timeout_sec) {
+    public Endpoint(string host_specifier, uint16 default_port, Flags flags, uint activity_timeout_sec) {
         this.remote_address = new NetworkAddress(host_specifier, default_port);
         this.flags = flags;
-        this.timeout_sec = timeout_sec;
+        this.activity_timeout_sec = activity_timeout_sec;
     }
     
     private SocketClient get_socket_client() {
@@ -132,7 +138,9 @@ public class Geary.Endpoint : BaseObject {
             socket_client.event.connect(on_socket_client_event);
         }
         
-        socket_client.set_timeout(timeout_sec);
+        // Use the connect_timeout_sec for SocketClient, then set the activity timeout when the
+        // Socket is available
+        socket_client.set_timeout(connect_timeout_sec);
         
         return socket_client;
     }
@@ -143,6 +151,10 @@ public class Geary.Endpoint : BaseObject {
         TcpConnection? tcp = cx as TcpConnection;
         if (tcp != null)
             tcp.set_graceful_disconnect(flags.is_all_set(Flags.GRACEFUL_DISCONNECT));
+        
+        Socket? socket = cx.get_socket();
+        if (socket != null)
+            socket.set_timeout(activity_timeout_sec);
         
         return cx;
     }

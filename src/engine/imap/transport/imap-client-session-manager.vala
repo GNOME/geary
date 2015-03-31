@@ -58,7 +58,6 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
     private Endpoint endpoint;
     private NetworkMonitor network_monitor;
     private Gee.HashSet<ClientSession> sessions = new Gee.HashSet<ClientSession>();
-    private int pending_sessions = 0;
     private Nonblocking.Mutex sessions_mutex = new Nonblocking.Mutex();
     private Gee.HashSet<ClientSession> reserved_sessions = new Gee.HashSet<ClientSession>();
     private bool authentication_failed = false;
@@ -159,48 +158,48 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         if (!is_open)
             return;
         
-        int token;
-        try {
-            token = yield sessions_mutex.claim_async();
-        } catch (Error claim_err) {
-            debug("Unable to claim session table mutex for adjusting pool: %s", claim_err.message);
-            
-            return;
-        }
-        
-        while ((sessions.size + pending_sessions) < min_pool_size
+        bool try_again = true;
+        while (sessions.size < min_pool_size
             && !authentication_failed
             && is_open
             && !untrusted_host
-            && is_endpoint_reachable) {
-            pending_sessions++;
-            create_new_authorized_session.begin(null, on_created_new_authorized_session);
-        }
-        
-        try {
-            sessions_mutex.release(ref token);
-        } catch (Error release_err) {
-            debug("Unable to release session table mutex after adjusting pool: %s", release_err.message);
-        }
-    }
-    
-    private void on_created_new_authorized_session(Object? source, AsyncResult result) {
-        pending_sessions--;
-        
-        try {
-            create_new_authorized_session.end(result);
-        } catch (Error err) {
-            debug("Unable to create authorized session to %s: %s", endpoint.to_string(), err.message);
+            && is_endpoint_reachable
+            && try_again) {
+            // acquire sessions table lock for each session creation ... this means we can't launch
+            // several connects at startup, but it's also problematic to keep the session table
+            // locked in that situation, so need to serialize this
+            int token;
+            try {
+                token = yield sessions_mutex.claim_async();
+            } catch (Error claim_err) {
+                debug("Unable to claim session table mutex for adjusting pool: %s", claim_err.message);
+                
+                break;
+            }
             
-            // try again after a slight delay and bump up delay
-            if (authorized_session_error_retry_timeout_id != 0)
-                Source.remove(authorized_session_error_retry_timeout_id);
+            try {
+                yield create_new_authorized_session(null);
+            } catch (Error err) {
+                debug("Unable to create authorized session to %s: %s", endpoint.to_string(), err.message);
+                
+                // try again after a slight delay and bump up delay
+                if (authorized_session_error_retry_timeout_id != 0)
+                    Source.remove(authorized_session_error_retry_timeout_id);
+                
+                authorized_session_error_retry_timeout_id = Timeout.add_seconds(
+                    authorized_session_retry_sec, on_authorized_session_error_retry_timeout);
+                
+                authorized_session_retry_sec = (authorized_session_retry_sec * 2).clamp(
+                    AUTHORIZED_SESSION_ERROR_MIN_RETRY_TIMEOUT_SEC, AUTHORIZED_SESSION_ERROR_MAX_RETRY_TIMEOUT_SEC);
+                
+                try_again = false;
+            }
             
-            authorized_session_error_retry_timeout_id = Timeout.add_seconds(
-                authorized_session_retry_sec, on_authorized_session_error_retry_timeout);
-            
-            authorized_session_retry_sec = (authorized_session_retry_sec * 2).clamp(
-                AUTHORIZED_SESSION_ERROR_MIN_RETRY_TIMEOUT_SEC, AUTHORIZED_SESSION_ERROR_MAX_RETRY_TIMEOUT_SEC);
+            try {
+                sessions_mutex.release(ref token);
+            } catch (Error release_err) {
+                debug("Unable to release session table mutex after adjusting pool: %s", release_err.message);
+            }
         }
     }
     
@@ -212,7 +211,10 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         return false;
     }
     
+    // This *must* be called with the sessions_mutex locked
     private async ClientSession create_new_authorized_session(Cancellable? cancellable) throws Error {
+        assert(sessions_mutex.is_locked());
+        
         if (authentication_failed)
             throw new ImapError.UNAUTHENTICATED("Invalid ClientSessionManager credentials");
         
@@ -226,21 +228,14 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         
         // add session to pool before launching all the connect activity so error cases can properly
         // back it out
-        if (sessions_mutex.is_locked())
-            locked_add_session(new_session);
-        else
-            yield unlocked_add_session_async(new_session);
+        locked_add_session(new_session);
         
         try {
             yield new_session.connect_async(cancellable);
         } catch (Error err) {
             debug("[%s] Connect failure: %s", new_session.to_string(), err.message);
             
-            bool removed;
-            if (sessions_mutex.is_locked())
-                removed = locked_remove_session(new_session);
-            else
-                removed = yield unlocked_remove_session_async(new_session);
+            bool removed = locked_remove_session(new_session);
             assert(removed);
             
             throw err;
@@ -260,11 +255,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
                     new_session.to_string(), disconnect_err.message);
             }
             
-            bool removed;
-            if (sessions_mutex.is_locked())
-                removed = locked_remove_session(new_session);
-            else
-                removed = yield unlocked_remove_session_async(new_session);
+            bool removed = locked_remove_session(new_session);
             assert(removed);
             
             throw err;
@@ -459,12 +450,6 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         session.login_failed.connect(on_login_failed);
     }
     
-    private async void unlocked_add_session_async(ClientSession session) throws Error {
-        int token = yield sessions_mutex.claim_async();
-        locked_add_session(session);
-        sessions_mutex.release(ref token);
-    }
-    
     // Only call with sessions mutex locked
     private bool locked_remove_session(ClientSession session) {
         bool removed = sessions.remove(session);
@@ -474,14 +459,6 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         }
         
         reserved_sessions.remove(session);
-        
-        return removed;
-    }
-    
-    private async bool unlocked_remove_session_async(ClientSession session) throws Error {
-        int token = yield sessions_mutex.claim_async();
-        bool removed = locked_remove_session(session);
-        sessions_mutex.release(ref token);
         
         return removed;
     }
