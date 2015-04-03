@@ -18,8 +18,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-03-22 16:34+0100\n"
-"PO-Revision-Date: 2015-03-22 16:35+0100\n"
+"POT-Creation-Date: 2015-04-03 16:28+0200\n"
+"PO-Revision-Date: 2015-04-03 16:30+0200\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <gnomepl@aviary.pl>\n"
 "Language: pl\n"
@@ -751,7 +751,7 @@ msgstr[2] "%i dopasowań (od początku)"
 msgid "not found"
 msgstr "nie odnaleziono"
 
-#: ../src/client/components/main-window.vala:428
+#: ../src/client/components/main-window.vala:430
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -918,15 +918,15 @@ msgstr "Do: "
 
 #: ../src/client/composer/composer-widget.vala:1648
 msgid "Cc: "
-msgstr "Do wiadomości: "
+msgstr "Dw: "
 
 #: ../src/client/composer/composer-widget.vala:1651
 msgid "Bcc: "
-msgstr "Ukryty do wiadomości: "
+msgstr "Udw: "
 
 #: ../src/client/composer/composer-widget.vala:1654
 msgid "Reply-To: "
-msgstr "Odpowiedź do:"
+msgstr "Odpowiedź do: "
 
 #: ../src/client/composer/composer-widget.vala:1887
 msgid "Select Color"
@@ -996,11 +996,11 @@ msgstr "Do:"
 
 #: ../src/client/conversation-viewer/conversation-viewer.vala:815
 msgid "Cc:"
-msgstr "Do wiadomości:"
+msgstr "Dw:"
 
 #: ../src/client/conversation-viewer/conversation-viewer.vala:818
 msgid "Bcc:"
-msgstr "Ukryty do wiadomości:"
+msgstr "Udw:"
 
 #: ../src/client/conversation-viewer/conversation-viewer.vala:821
 msgid "Subject:"
@@ -1629,7 +1629,7 @@ msgstr "Do: %s\n"
 #: ../src/engine/rfc822/rfc822-utils.vala:275
 #, c-format
 msgid "Cc: %s\n"
-msgstr "Do wiadomości: %s\n"
+msgstr "Dw: %s\n"
 
 #: ../ui/account_cannot_remove.glade.h:1
 msgid "<span weight=\"bold\" size=\"larger\">Cannot remove account</span> "
