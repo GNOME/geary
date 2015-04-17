@@ -332,10 +332,6 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
             debug("Unable to fetch oldest local email for %s: %s", folder.to_string(), err.message);
         }
         
-        ImapDB.EmailIdentifier? imapdb_id = oldest_local_id as ImapDB.EmailIdentifier;
-        if (imapdb_id != null && imapdb_id.uid.value == Imap.UID.MIN)
-            return true;
-        
         if (availability_check) {
             // Compare the oldest mail in the local store and see if it is before the epoch; if so, no
             // need to synchronize simply because this Folder is available; wait for its contents to
@@ -344,7 +340,7 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
                 if (oldest_local.compare(epoch) < 0) {
                     // Oldest local email before epoch, don't sync from network
                     return true;
-                } else if (folder.properties.email_total <= local_count) {
+                } else if (folder.properties.email_total == local_count) {
                     // Local earliest email is after epoch, but there's nothing before it
                     return true;
                 } else if (!epoch.equal(max_epoch)) {
