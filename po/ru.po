@@ -16,8 +16,8 @@ msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2015-03-24 06:08+0000\n"
-"PO-Revision-Date: 2015-03-24 09:43+0300\n"
+"POT-Creation-Date: 2015-04-17 17:17+0000\n"
+"PO-Revision-Date: 2015-04-18 01:18+0300\n"
 "Last-Translator: Stas Solovey <whats_up@tut.by>\n"
 "Language-Team: Русский <gnome-cyr@gnome.org>\n"
 "Language: ru\n"
@@ -140,7 +140,6 @@ msgid "Edit"
 msgstr "Правка"
 
 #: ../src/client/accounts/add-edit-page.vala:282
-#| msgid "_Previous"
 msgid "Preview"
 msgstr "Предварительный просмотр"
 
@@ -191,7 +190,6 @@ msgid "        &#8226; Username or password incorrect.\n"
 msgstr "        &#8226; Неверные имя пользователя или пароль.\n"
 
 #: ../src/client/application/geary-application.vala:19
-#| msgid "Copyright 2011-2014 Yorba Foundation"
 msgid "Copyright 2011-2015 Yorba Foundation"
 msgstr "Авторское право © 2011-2015 Yorba Foundation"
 
@@ -251,7 +249,7 @@ msgstr "Разрешить проверку WebView"
 
 #: ../src/client/application/geary-args.vala:26
 msgid "Revoke all server certificates with TLS warnings"
-msgstr "Отозвать все сертификаты серверов с предупреждениями TLS "
+msgstr "Отозвать все сертификаты серверов с предупреждениями TLS"
 
 #: ../src/client/application/geary-args.vala:27
 msgid "Display program version"
@@ -279,7 +277,6 @@ msgid "Unrecognized command line option \"%s\"\n"
 msgstr "Неизвестный параметр командной строки «%s»\n"
 
 #: ../src/client/application/geary-controller.vala:62
-#| msgid "Move conversation"
 msgid "Delete conversation"
 msgstr "Удалить беседу"
 
@@ -637,7 +634,6 @@ msgid "translator-credits"
 msgstr "Stas Solovey <whats_up@tut.by>, 2015."
 
 #: ../src/client/application/geary-controller.vala:1990
-#| msgid "Underline (Ctrl+U)"
 msgid "Undo move (Ctrl+Z)"
 msgstr "Отменить перемещение (Ctrl+U)"
 
@@ -691,7 +687,6 @@ msgid "This removes the email from Geary and your email server."
 msgstr "Удаляет все письма из Geary и почтового сервера."
 
 #: ../src/client/application/geary-controller.vala:2455
-#| msgid "\"%s\" could not be found."
 msgid "This cannot be undone."
 msgstr "Это не может быть отменено."
 
@@ -702,7 +697,6 @@ msgstr "Очистить %s"
 
 #: ../src/client/application/geary-controller.vala:2473
 #, c-format
-#| msgid "Error saving"
 msgid "Error emptying %s"
 msgstr "Ошибка очистки %s"
 
@@ -718,17 +712,14 @@ msgid "Delete"
 msgstr "_Удалить"
 
 #: ../src/client/application/geary-controller.vala:2536
-#| msgid "Underline (Ctrl+U)"
 msgid "Undo archive (Ctrl+Z)"
 msgstr "Отменить архивирование (Ctrl+Z)"
 
 #: ../src/client/application/geary-controller.vala:2551
-#| msgid "Unquote text (Ctrl+[)"
 msgid "Undo trash (Ctrl+Z)"
 msgstr "Отменить перемещение в корзину (Ctrl+Z)"
 
 #: ../src/client/application/geary-controller.vala:2604
-#| msgid "Underline (Ctrl+U)"
 msgid "Undo (Ctrl+Z)"
 msgstr "Отменить (Ctrl+Z)"
 
@@ -752,7 +743,7 @@ msgstr[2] "%i совпадений (от начала)"
 msgid "not found"
 msgstr "не найдено"
 
-#: ../src/client/components/main-window.vala:428
+#: ../src/client/components/main-window.vala:430
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -924,7 +915,6 @@ msgid "Bcc: "
 msgstr "Скрытая копия:"
 
 #: ../src/client/composer/composer-widget.vala:1654
-#| msgid "_Reply"
 msgid "Reply-To: "
 msgstr "Ответить: "
 
@@ -1839,7 +1829,6 @@ msgid "Detach"
 msgstr "Открепить"
 
 #: ../ui/composer.glade.h:43
-#| msgid "Italic (Ctrl+I)"
 msgid "Detach (Ctrl+D)"
 msgstr "Открепить (Ctrl+D)"
 
@@ -1852,7 +1841,6 @@ msgid "Send"
 msgstr "Отправить"
 
 #: ../ui/composer.glade.h:46
-#| msgid "Bold (Ctrl+B)"
 msgid "Send (Ctrl+Enter)"
 msgstr "Отправить (Ctrl+Enter)"
 
@@ -1894,7 +1882,6 @@ msgid "_Bcc"
 msgstr "Скрытая копия"
 
 #: ../ui/composer.glade.h:57
-#| msgid "_Reply"
 msgid "_Reply-To"
 msgstr "_Ответить"
 
@@ -1912,7 +1899,6 @@ msgid "To add them as attachments"
 msgstr "чтобы добавить их как вложения"
 
 #: ../ui/edit_alternate_emails.glade.h:1
-#| msgid "E_mail address"
 msgid "Remove email address"
 msgstr "Удалить адрес эл. почты"
 
@@ -2070,7 +2056,6 @@ msgid "Save dra_fts on server"
 msgstr "Сохранять черновики на сервере"
 
 #: ../ui/login.glade.h:33
-#| msgid "Si_gn emails:"
 msgid "Si_gn emails (HTML allowed):"
 msgstr "Подписывать письма (доступно HTML):"
 
@@ -2087,7 +2072,6 @@ msgid "SMTP Credentials"
 msgstr "Учётные данные SMTP"
 
 #: ../ui/password-dialog.glade.h:2
-#| msgid "_Username"
 msgid "Username"
 msgstr "Имя пользователя"
 
@@ -2132,7 +2116,6 @@ msgid "Show _notifications for new mail"
 msgstr "_Показывать уведомления о новых сообщениях"
 
 #: ../ui/preferences.glade.h:10
-#| msgid "Show _notifications for new mail"
 msgid "Always _watch for new mail"
 msgstr "Всегда следить за поступлением новых писем"
 
@@ -2170,6 +2153,5 @@ msgid "Email address:"
 msgstr "Адрес эл. почты:"
 
 #: ../ui/upgrade_dialog.glade.h:1
-#| msgid "Geary upgrade in progress."
 msgid "Geary update in progress…"
 msgstr "Идёт обновление Geary…"
