@@ -553,6 +553,7 @@ pkg_check_modules(DEPS REQUIRED
     libsecret-1>=0.11
     libxml-2.0>=2.7.8
     gcr-3>=3.10.1
+    gobject-introspection-1.0
     ${EXTRA_CLIENT_PKG_CONFIG}
 )
 
