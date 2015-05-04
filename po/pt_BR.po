@@ -20,9 +20,9 @@ msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2015-04-27 17:10+0000\n"
-"PO-Revision-Date: 2015-05-04 15:52-0300\n"
-"Last-Translator: Gustavo Marques <gutodisse@gmail.com>\n"
+"POT-Creation-Date: 2015-05-04 19:00+0000\n"
+"PO-Revision-Date: 2015-05-04 16:07-0300\n"
+"Last-Translator: Enrico Nicoletto <liverig@gmail.com>\n"
 "Language-Team: Brazilian Portuguese <gnome-pt_br-list@gnome.org>\n"
 "Language: pt_BR\n"
 "MIME-Version: 1.0\n"
@@ -684,11 +684,11 @@ msgstr "Fechar mensagens de rascunhos abertas?"
 #: ../src/client/application/geary-controller.vala:2453
 #, c-format
 msgid "Empty all email from your %s folder?"
-msgstr ""
+msgstr "Esvaziar todos os e-mails da sua pasta %s?"
 
 #: ../src/client/application/geary-controller.vala:2454
 msgid "This removes the email from Geary and your email server."
-msgstr ""
+msgstr "Isto remove o e-mail do Geary e do seu servidor de e-mail."
 
 #: ../src/client/application/geary-controller.vala:2455
 msgid "This cannot be undone."
@@ -1896,6 +1896,9 @@ msgid ""
 "Some email services require additional addresses be configured on the "
 "server.  Contact your email provider for more information."
 msgstr ""
+"Alguns serviços de e-mail exigem que endereços adicionais sejam configurados "
+"no servidor.  Entre em contato com seu provedor de e-mail para mais "
+"informações."
 
 #: ../ui/edit_alternate_emails.glade.h:4
 msgid "_Update"
@@ -1955,7 +1958,7 @@ msgstr "_Salvar e-mails enviados"
 
 #: ../ui/login.glade.h:10
 msgid "Addi_tional email addresses…"
-msgstr ""
+msgstr "Endereços de e-mail adi_cionais…"
 
 #: ../ui/login.glade.h:11
 msgid "IMAP settings"
@@ -2083,7 +2086,7 @@ msgstr "_Exibir visualização de conversa"
 
 #: ../ui/preferences.glade.h:4
 msgid "Use _three pane view"
-msgstr ""
+msgstr "Usar visão de painel em ár_vore"
 
 #: ../ui/preferences.glade.h:6
 msgid "Enable _spell checking"
