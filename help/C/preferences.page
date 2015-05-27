@@ -27,6 +27,12 @@
 	<p>Enables message previews in the conversation list. Previews show
 	the first few lines of each message. </p>
 	</item>
+	<item>
+	<title><gui>Use three pane view</gui></title>
+	<p>Show the folder list, the conversation list, and the messages side-by-side-by-side in three
+	panes.  If not selected, the folder list and conversation list will be stacked vertically in a
+	single pane.</p>
+	</item>
 	</terms>
 	</section>
 	
@@ -52,8 +58,14 @@
 	<title><gui>Show notifications for new mail</gui></title>
 	<p>When set, Geary displays a <em>notification</em> each time a new message arrives.  Notifications
 	are displayed in a system-dependent manner.  On GNOME Shell, notifications appear at the
-	bottom of the display.  In Ubuntu Unity, notifications appear at the upper right
-	of the display.</p>
+	bottom of the display (older versions) or centered just below the top bar (newer versions).
+	In Ubuntu Unity, notifications appear at the upper right of the display.</p>
+	</item>
+	<item>
+	<title><gui>Always watch for new mail</gui></title>
+	<p>Geary will watch your accounts for new mail even when the main window is not open.  To do
+	this, it will silently start when you log in to your computer, and it will continue to run
+	after you close the main window.</p>
 	</item>
 	</terms>
 	</section>
