@@ -33,6 +33,7 @@ public class Geary.AccountInformation : BaseObject {
     private const string SENT_MAIL_FOLDER_KEY = "sent_mail_folder";
     private const string SPAM_FOLDER_KEY = "spam_folder";
     private const string TRASH_FOLDER_KEY = "trash_folder";
+    private const string ARCHIVE_FOLDER_KEY = "archive_folder";
     private const string SAVE_DRAFTS_KEY = "save_drafts";
     private const string USE_EMAIL_SIGNATURE_KEY = "use_email_signature";
     private const string EMAIL_SIGNATURE_KEY = "email_signature";
@@ -134,6 +135,7 @@ public class Geary.AccountInformation : BaseObject {
     public Geary.FolderPath? sent_mail_folder_path { get; set; default = null; }
     public Geary.FolderPath? spam_folder_path { get; set; default = null; }
     public Geary.FolderPath? trash_folder_path { get; set; default = null; }
+    public Geary.FolderPath? archive_folder_path { get; set; default = null; }
 
     public Geary.Credentials imap_credentials { get; set; default = new Geary.Credentials(null, null); }
     public bool imap_remember_password { get; set; default = true; }
@@ -239,6 +241,8 @@ public class Geary.AccountInformation : BaseObject {
                 key_file, GROUP, SPAM_FOLDER_KEY));
             trash_folder_path = build_folder_path(get_string_list_value(
                 key_file, GROUP, TRASH_FOLDER_KEY));
+            archive_folder_path = build_folder_path(get_string_list_value(
+                key_file, GROUP, ARCHIVE_FOLDER_KEY));
             
             save_drafts = get_bool_value(key_file, GROUP, SAVE_DRAFTS_KEY, true);
         }
@@ -302,6 +306,7 @@ public class Geary.AccountInformation : BaseObject {
         sent_mail_folder_path = from.sent_mail_folder_path;
         spam_folder_path = from.spam_folder_path;
         trash_folder_path = from.trash_folder_path;
+        archive_folder_path = from.archive_folder_path;
         save_drafts = from.save_drafts;
         use_email_signature = from.use_email_signature;
         email_signature = from.email_signature;
@@ -380,6 +385,9 @@ public class Geary.AccountInformation : BaseObject {
             
             case Geary.SpecialFolderType.TRASH:
                 return trash_folder_path;
+
+            case Geary.SpecialFolderType.ARCHIVE:
+                return archive_folder_path;
             
             default:
                 assert_not_reached();
@@ -408,6 +416,10 @@ public class Geary.AccountInformation : BaseObject {
             
             case Geary.SpecialFolderType.TRASH:
                 trash_folder_path = path;
+            break;
+
+            case Geary.SpecialFolderType.ARCHIVE:
+                archive_folder_path = path;
             break;
             
             default:
@@ -833,6 +845,8 @@ public class Geary.AccountInformation : BaseObject {
             ? spam_folder_path.as_list().to_array() : new string[] {}));
         key_file.set_string_list(GROUP, TRASH_FOLDER_KEY, (trash_folder_path != null
             ? trash_folder_path.as_list().to_array() : new string[] {}));
+        key_file.set_string_list(GROUP, ARCHIVE_FOLDER_KEY, (archive_folder_path != null
+            ? archive_folder_path.as_list().to_array() : new string[] {}));
         
         key_file.set_boolean(GROUP, SAVE_DRAFTS_KEY, save_drafts);
         

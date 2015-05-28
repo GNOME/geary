@@ -588,6 +588,11 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             // names for the Trash folder, leaving in the English names as well.  The first in the list
             // will be the default, so please add the most common localized name to the front.
             _("Trash | Rubbish | Rubbish Bin"));
+        mailbox_search_names.set(Geary.SpecialFolderType.ARCHIVE,
+            // List of folder names to match for Archive, separated by |.  Please add localized common
+            // names for the Trash folder, leaving in the English names as well.  The first in the list
+            // will be the default, so please add the most common localized name to the front.
+            _("Archive | Archives"));
         
         Gee.HashMap<Geary.SpecialFolderType, Gee.ArrayList<string>> compiled
             = new Gee.HashMap<Geary.SpecialFolderType, Gee.ArrayList<string>>();
@@ -671,6 +676,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             case Geary.SpecialFolderType.SENT:
             case Geary.SpecialFolderType.SPAM:
             case Geary.SpecialFolderType.TRASH:
+            case Geary.SpecialFolderType.ARCHIVE:
             break;
             
             default:
@@ -690,6 +696,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             Geary.SpecialFolderType.SENT,
             Geary.SpecialFolderType.SPAM,
             Geary.SpecialFolderType.TRASH,
+            Geary.SpecialFolderType.ARCHIVE,
         };
         foreach (Geary.SpecialFolderType special in required)
             yield ensure_special_folder_async(special, cancellable);

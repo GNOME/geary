@@ -86,9 +86,8 @@ public class Geary.Imap.MailboxAttributes : Geary.Imap.Flags {
         if (contains(MailboxAttribute.SPECIAL_FOLDER_ALL))
             return Geary.SpecialFolderType.ALL_MAIL;
         
-        // TODO: Convert into SpecialFolderType.ARCHIVE (to support services that have an Archive
-        // folder that isn't an All Mail folder, i.e. Outlook.com):
-        // http://redmine.yorba.org/issues/7492
+        if (contains(MailboxAttribute.SPECIAL_FOLDER_ARCHIVE))
+            return Geary.SpecialFolderType.ARCHIVE;
         
         if (contains(MailboxAttribute.SPECIAL_FOLDER_FLAGGED))
             return Geary.SpecialFolderType.FLAGGED;
