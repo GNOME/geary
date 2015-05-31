@@ -18,8 +18,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-04-03 16:28+0200\n"
-"PO-Revision-Date: 2015-04-03 16:30+0200\n"
+"POT-Creation-Date: 2015-05-31 18:18+0200\n"
+"PO-Revision-Date: 2015-05-31 18:19+0200\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <gnomepl@aviary.pl>\n"
 "Language: pl\n"
@@ -346,30 +346,32 @@ msgid "Move conversations"
 msgstr "Przenieś wątki"
 
 #: ../src/client/application/geary-controller.vala:373
+#: ../ui/app_menu.interface.h:1
 msgid "A_ccounts"
 msgstr "_Konta"
 
 #: ../src/client/application/geary-controller.vala:378
-#: ../src/client/components/stock.vala:27
+#: ../src/client/components/stock.vala:27 ../ui/app_menu.interface.h:2
 msgid "_Preferences"
 msgstr "P_referencje"
 
 #: ../src/client/application/geary-controller.vala:382
-#: ../src/client/components/stock.vala:25
+#: ../src/client/components/stock.vala:25 ../ui/app_menu.interface.h:4
 msgid "_Help"
 msgstr "Pomo_c"
 
 #: ../src/client/application/geary-controller.vala:386
-#: ../src/client/components/stock.vala:21
+#: ../src/client/components/stock.vala:21 ../ui/app_menu.interface.h:5
 msgid "_About"
 msgstr "_O programie"
 
 #: ../src/client/application/geary-controller.vala:390
+#: ../ui/app_menu.interface.h:3
 msgid "_Donate"
 msgstr "_Wspomóż"
 
 #: ../src/client/application/geary-controller.vala:394
-#: ../src/client/components/stock.vala:29
+#: ../src/client/components/stock.vala:29 ../ui/app_menu.interface.h:6
 msgid "_Quit"
 msgstr "Za_kończ"
 
@@ -1573,6 +1575,13 @@ msgid "Trash | Rubbish | Rubbish Bin"
 msgstr ""
 "Kosz | Śmietnik | Usunięta poczta | Usunięte wiadomości | Trash | Rubbish | "
 "Rubbish Bin"
+
+#. List of folder names to match for Archive, separated by |.  Please add localized common
+#. names for the Trash folder, leaving in the English names as well.  The first in the list
+#. will be the default, so please add the most common localized name to the front.
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:595
+msgid "Archive | Archives"
+msgstr "Archiwum | Archiwa | Archive | Archives"
 
 #. / Format for the datetime that a message being replied to was received
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
