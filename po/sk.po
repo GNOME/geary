@@ -4,14 +4,14 @@
 # This file is distributed under the GNU LGPL, version 2.1.
 #
 # Translators:
-# Dušan Kazik <prescott66@gmail.com>, 2013
+# Dušan Kazik <prescott66@gmail.com>, 2013, 2015
 msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2015-03-23 05:58+0000\n"
-"PO-Revision-Date: 2015-03-23 09:58+0100\n"
+"POT-Creation-Date: 2015-06-06 05:20+0000\n"
+"PO-Revision-Date: 2015-06-06 13:08+0100\n"
 "Last-Translator: Dušan Kazik <prescott66@gmail.com>\n"
 "Language-Team: Slovak (http://www.transifex.com/projects/p/geary/language/"
 "sk/)\n"
@@ -20,7 +20,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
-"X-Generator: Poedit 1.7.4\n"
+"X-Generator: Poedit 1.8.1\n"
 
 #: ../desktop/geary.desktop.in.h:1 ../desktop/geary-autostart.desktop.in.h:1
 msgid "Geary"
@@ -740,7 +740,7 @@ msgstr[2] "%i zhôd (zalomených)"
 msgid "not found"
 msgstr "nenájdené"
 
-#: ../src/client/components/main-window.vala:428
+#: ../src/client/components/main-window.vala:430
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -1557,6 +1557,13 @@ msgstr "Nevyžiadaná pošta | Spam | Nevyžiadané emaily"
 #: ../src/engine/imap-engine/imap-engine-generic-account.vala:590
 msgid "Trash | Rubbish | Rubbish Bin"
 msgstr "Kôš"
+
+#. List of folder names to match for Archive, separated by |.  Please add localized common
+#. names for the Trash folder, leaving in the English names as well.  The first in the list
+#. will be the default, so please add the most common localized name to the front.
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:595
+msgid "Archive | Archives"
+msgstr "Archív | Archívy | Archivované"
 
 #. / Format for the datetime that a message being replied to was received
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
