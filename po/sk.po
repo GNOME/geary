@@ -10,8 +10,8 @@ msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2015-06-06 05:20+0000\n"
-"PO-Revision-Date: 2015-06-06 13:08+0100\n"
+"POT-Creation-Date: 2015-06-26 05:12+0000\n"
+"PO-Revision-Date: 2015-06-26 17:27+0100\n"
 "Last-Translator: Dušan Kazik <prescott66@gmail.com>\n"
 "Language-Team: Slovak (http://www.transifex.com/projects/p/geary/language/"
 "sk/)\n"
@@ -2089,7 +2089,7 @@ msgstr "_Overiť totožnosť"
 
 #: ../ui/preferences.glade.h:1
 msgid "Reading"
-msgstr "Číta sa"
+msgstr "Čítanie"
 
 #: ../ui/preferences.glade.h:2
 msgid "_Automatically select next message"
