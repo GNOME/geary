@@ -10,8 +10,8 @@ msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2015-06-26 05:12+0000\n"
-"PO-Revision-Date: 2015-06-26 17:27+0100\n"
+"POT-Creation-Date: 2015-06-30 05:12+0000\n"
+"PO-Revision-Date: 2015-06-30 17:38+0100\n"
 "Last-Translator: Dušan Kazik <prescott66@gmail.com>\n"
 "Language-Team: Slovak (http://www.transifex.com/projects/p/geary/language/"
 "sk/)\n"
@@ -147,7 +147,7 @@ msgstr "Zapa_mätať heslo"
 
 #: ../src/client/accounts/add-edit-page.vala:764
 msgid "Unable to validate:\n"
-msgstr "Nepodarilo sa overiť:\n"
+msgstr "Nie je možné overiť:\n"
 
 #: ../src/client/accounts/add-edit-page.vala:766
 msgid "        &#8226; Invalid account nickname.\n"
@@ -451,11 +451,11 @@ msgstr "Vyprázdniť _Kôš…"
 #. No callback is connected, since we bind the toggle button to the search bar visibility
 #: ../src/client/application/geary-controller.vala:538
 msgid "Toggle search bar"
-msgstr "Prepnúť panel vyhľadávania"
+msgstr "Prepne panel vyhľadávania"
 
 #: ../src/client/application/geary-controller.vala:752
 msgid "Unable to store server trust exception"
-msgstr "Nepodarilo sa uložiť výnimku dôveryhodnosti servera"
+msgstr "Nie je možné uložiť výnimku dôveryhodnosti servera"
 
 #: ../src/client/application/geary-controller.vala:989
 msgid "Your settings are insecure"
@@ -516,7 +516,7 @@ msgstr "Menovky"
 #: ../src/client/application/geary-controller.vala:1156
 #, c-format
 msgid "Unable to open the database for %s"
-msgstr "Nepodarilo sa otvoriť databázu pre %s"
+msgstr "Nie je možné otvoriť databázu pre %s"
 
 #: ../src/client/application/geary-controller.vala:1157
 #, c-format
@@ -554,7 +554,7 @@ msgstr "_Ukončiť"
 #: ../src/client/application/geary-controller.vala:1168
 #, c-format
 msgid "Unable to rebuild database for \"%s\""
-msgstr "Nepodarilo sa znovu zostaviť databázu účtu „%s“"
+msgstr "Nie je možné znovu zostaviť databázu účtu „%s“"
 
 #: ../src/client/application/geary-controller.vala:1169
 #, c-format
@@ -574,7 +574,7 @@ msgstr ""
 #: ../src/client/application/geary-controller.vala:1212
 #, c-format
 msgid "Unable to open local mailbox for %s"
-msgstr "Nepodarilo sa otvoriť miestnu poštovú schránku účtu %s"
+msgstr "Nie je možné otvoriť miestnu poštovú schránku účtu %s"
 
 #: ../src/client/application/geary-controller.vala:1192
 #, c-format
@@ -940,15 +940,15 @@ msgstr "Ja"
 
 #: ../src/client/conversation-viewer/conversation-viewer.vala:413
 msgid "No conversations selected."
-msgstr "Žiadne vybrané rozhovory."
+msgstr "Žiadne vybraté rozhovory."
 
 #: ../src/client/conversation-viewer/conversation-viewer.vala:415
 #, c-format
 msgid "%u conversation selected."
 msgid_plural "%u conversations selected."
-msgstr[0] "%u vybraný rozhovor."
-msgstr[1] "%u vybrané rozhovory."
-msgstr[2] "%u vybraných rozhovorov."
+msgstr[0] "%u vybratý rozhovor."
+msgstr[1] "%u vybraté rozhovory."
+msgstr[2] "%u vybratých rozhovorov."
 
 #: ../src/client/conversation-viewer/conversation-viewer.vala:444
 msgid "No search results found."
@@ -988,7 +988,7 @@ msgstr "Kópia:"
 
 #: ../src/client/conversation-viewer/conversation-viewer.vala:818
 msgid "Bcc:"
-msgstr "Skeytý kópia:"
+msgstr "Skrytá kópia:"
 
 #: ../src/client/conversation-viewer/conversation-viewer.vala:821
 msgid "Subject:"
