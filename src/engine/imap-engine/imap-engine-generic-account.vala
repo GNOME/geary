@@ -870,8 +870,46 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     public override async Gee.Collection<Geary.AssociatedEmails>? local_search_associated_emails_async(
         Gee.Collection<Geary.EmailIdentifier> email_ids, Email.Field required_fields,
         Account.EmailSearchPredicate? search_predicate, Cancellable? cancellable = null) throws Error {
-        return yield local.search_associated_emails_async(check_ids(email_ids), required_fields,
-            search_predicate, cancellable);
+        // look for Outbox identifiers, don't search for them (check_ids will fail), make them
+        // associations of one
+        Gee.Collection<AssociatedEmails> outbox_associations = new Gee.ArrayList<AssociatedEmails>();
+        Gee.Collection<FolderPath?> outbox_paths = new Gee.ArrayList<FolderPath?>();
+        outbox_paths.add(outbox_path);
+        Gee.Collection<EmailIdentifier> other_ids = new Gee.ArrayList<EmailIdentifier>();
+        
+        foreach (EmailIdentifier email_id in email_ids) {
+            SmtpOutboxEmailIdentifier? outbox_id = email_id as SmtpOutboxEmailIdentifier;
+            if (outbox_id == null) {
+                other_ids.add(email_id);
+                
+                continue;
+            }
+            
+            Email email = yield local.outbox.fetch_email_async(outbox_id, required_fields,
+                Folder.ListFlags.NONE, cancellable);
+            
+            AssociatedEmails associated = new AssociatedEmails(required_fields);
+            associated.add(email, outbox_paths);
+            
+            outbox_associations.add(associated);
+        }
+        
+        // If any other ids found, do normal search for them
+        Gee.Collection<AssociatedEmails>? other_associations = null;
+        if (other_ids.size > 0) {
+            other_associations = yield local.search_associated_emails_async(check_ids(email_ids),
+                required_fields, search_predicate, cancellable);
+        }
+        
+        if (Collection.is_empty(outbox_associations) && Collection.is_empty(other_associations))
+            return null;
+        
+        Gee.Collection<AssociatedEmails> associations = new Gee.ArrayList<AssociatedEmails>();
+        associations.add_all(outbox_associations);
+        if (other_associations != null)
+            associations.add_all(other_associations);
+        
+        return associations;
     }
     
     public override async Gee.Collection<Geary.Email>? local_list_email_async(
