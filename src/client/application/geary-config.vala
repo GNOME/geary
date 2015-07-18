@@ -13,6 +13,8 @@ public class Configuration {
     public const string FOLDER_LIST_PANE_POSITION_HORIZONTAL_KEY = "folder-list-pane-position-horizontal";
     public const string FOLDER_LIST_PANE_POSITION_VERTICAL_KEY = "folder-list-pane-position-vertical";
     public const string FOLDER_LIST_PANE_HORIZONTAL_KEY = "folder-list-pane-horizontal";
+    public const string COMPRESS_CONVERSATION_KEY = "compress-conversation";
+    public const string HIDE_CONVERSATION_KEY = "hide-conversation";
     public const string MESSAGES_PANE_POSITION_KEY = "messages-pane-position";
     public const string COMPOSER_PANE_POSITION_KEY = "composer-pane-position";
     public const string AUTOSELECT_KEY = "autoselect";
@@ -56,6 +58,14 @@ public class Configuration {
 
     public bool folder_list_pane_horizontal {
         get { return settings.get_boolean(FOLDER_LIST_PANE_HORIZONTAL_KEY); }
+    }
+
+    public bool compress_conversation {
+        get { return settings.get_boolean(COMPRESS_CONVERSATION_KEY); }
+    }
+
+    public bool hide_conversation {
+        get { return settings.get_boolean(HIDE_CONVERSATION_KEY); }
     }
 
     public int messages_pane_position {

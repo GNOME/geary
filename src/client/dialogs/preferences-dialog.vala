@@ -20,6 +20,10 @@ public class PreferencesDialog : Object {
         config.bind(Configuration.DISPLAY_PREVIEW_KEY, builder.get_object("display_preview"), "active");
         config.bind(Configuration.FOLDER_LIST_PANE_HORIZONTAL_KEY,
             builder.get_object("three_pane_view"), "active");
+        config.bind(Configuration.COMPRESS_CONVERSATION_KEY,
+            builder.get_object("compress_conversation"), "active");
+        config.bind(Configuration.HIDE_CONVERSATION_KEY,
+            builder.get_object("hide_conversation"), "active");
         config.bind(Configuration.SPELL_CHECK_KEY, builder.get_object("spell_check"), "active");
         config.bind(Configuration.PLAY_SOUNDS_KEY, builder.get_object("play_sounds"), "active");
         config.bind(Configuration.SHOW_NOTIFICATIONS_KEY, builder.get_object("show_notifications"), "active");

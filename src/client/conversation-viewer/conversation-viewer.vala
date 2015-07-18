@@ -518,7 +518,8 @@ public class ConversationViewer : Gtk.Box {
             yield highlight_search_terms();
         } else {
             unhide_last_email();
-            compress_emails();
+            if (GearyApplication.instance.config.compress_conversation)
+                compress_emails();
         }
     }
 
@@ -669,7 +670,8 @@ public class ConversationViewer : Gtk.Box {
             div_message = make_email_div();
             div_message.set_attribute("id", message_id);
             web_view.container.insert_before(div_message, insert_before);
-            if (email.is_unread() == Geary.Trillian.FALSE) {
+            if (email.is_unread() == Geary.Trillian.FALSE &&
+                GearyApplication.instance.config.hide_conversation) {
                 div_message.get_class_list().add("hide");
             }
             if (email.from != null && email.from.contains_normalized(current_account_information.email)) {
