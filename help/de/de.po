@@ -1,15 +1,15 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Geary 0.5.1\n"
-"POT-Creation-Date: 2015-02-22 17:56+0000\n"
-"PO-Revision-Date: 2015-02-23 22:04+0100\n"
-"Last-Translator: Simon Linden <xhi2018@googlemail.com>\n"
+"POT-Creation-Date: 2015-07-28 17:12+0000\n"
+"PO-Revision-Date: 2015-07-30 19:59+0100\n"
+"Last-Translator: Christian Kirbach <christian.kirbach@gmail.com>\n"
 "Language-Team: Andreas Wilhelm <info@avedo.net>\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.7.4\n"
+"X-Generator: Poedit 1.7.5\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: C/write.page:9(title)
@@ -267,7 +267,7 @@ msgstr ""
 msgid "Star"
 msgstr "Mit Sternchen markieren"
 
-#: C/shortcuts.page:44(key) C/shortcuts.page:92(key)
+#: C/shortcuts.page:44(key) C/shortcuts.page:104(key)
 msgid "S"
 msgstr "S"
 
@@ -275,7 +275,7 @@ msgstr "S"
 msgid "Unstar"
 msgstr "Sternchen-Markierung entfernen"
 
-#: C/shortcuts.page:48(key) C/shortcuts.page:126(key)
+#: C/shortcuts.page:48(key) C/shortcuts.page:138(key)
 msgid "D"
 msgstr "D"
 
@@ -304,196 +304,217 @@ msgstr ""
 "key><key>U</key></keyseq>"
 
 #: C/shortcuts.page:59(p)
-msgid "Toggle spam"
-msgstr "Spam-Markierung umschalten"
+msgid "Move focus to conversation list"
+msgstr "Fokus auf Konversationsliste legen"
 
-#: C/shortcuts.page:60(p)
-msgid "<keyseq><key>Ctrl</key><key>J</key></keyseq> or <key>!</key>"
-msgstr "<keyseq><key>Strg</key><key>J</key></keyseq> oder <key>!</key>"
-
-#: C/shortcuts.page:63(p)
-msgid "Quit"
-msgstr "Beenden"
-
-#: C/shortcuts.page:64(key) C/shortcuts.page:80(key) C/shortcuts.page:84(key)
-#: C/shortcuts.page:88(key) C/shortcuts.page:92(key) C/shortcuts.page:96(key)
-#: C/shortcuts.page:100(key) C/shortcuts.page:104(key)
-#: C/shortcuts.page:114(key) C/shortcuts.page:118(key)
-#: C/shortcuts.page:126(key) C/shortcuts.page:134(key)
-#: C/shortcuts.page:138(key) C/shortcuts.page:142(key)
-#: C/shortcuts.page:146(key) C/shortcuts.page:150(key)
-#: C/shortcuts.page:154(key)
+#: C/shortcuts.page:60(key) C/shortcuts.page:76(key) C/shortcuts.page:92(key)
+#: C/shortcuts.page:96(key) C/shortcuts.page:100(key)
+#: C/shortcuts.page:104(key) C/shortcuts.page:108(key)
+#: C/shortcuts.page:112(key) C/shortcuts.page:116(key)
+#: C/shortcuts.page:126(key) C/shortcuts.page:130(key)
+#: C/shortcuts.page:138(key) C/shortcuts.page:146(key)
+#: C/shortcuts.page:150(key) C/shortcuts.page:154(key)
+#: C/shortcuts.page:158(key) C/shortcuts.page:162(key)
+#: C/shortcuts.page:166(key)
 msgid "Ctrl"
 msgstr "Strg"
 
+#: C/shortcuts.page:60(key) C/shortcuts.page:146(key)
+msgid "B"
+msgstr "B"
+
+#: C/shortcuts.page:63(p)
+msgid "Jump to next (older) conversation"
+msgstr "Zur nächsten (älteren) Konversation wechseln"
+
 #: C/shortcuts.page:64(key)
+msgid "j"
+msgstr "j"
+
+#: C/shortcuts.page:67(p)
+msgid "Jump to previous (newer) conversation"
+msgstr "Zur vorhergehenden (jüngeren) Konversation wechseln"
+
+#: C/shortcuts.page:68(key)
+msgid "k"
+msgstr "k"
+
+#: C/shortcuts.page:71(p)
+msgid "Toggle spam"
+msgstr "Spam-Markierung umschalten"
+
+#: C/shortcuts.page:72(p)
+msgid "<keyseq><key>Ctrl</key><key>J</key></keyseq> or <key>!</key>"
+msgstr "<keyseq><key>Strg</key><key>J</key></keyseq> oder <key>!</key>"
+
+#: C/shortcuts.page:75(p)
+msgid "Quit"
+msgstr "Beenden"
+
+#: C/shortcuts.page:76(key)
 msgid "Q"
 msgstr "Q"
 
-#: C/shortcuts.page:67(p)
+#: C/shortcuts.page:79(p)
 msgid "Zoom in"
 msgstr "Heran zoomen"
 
-#: C/shortcuts.page:68(p)
+#: C/shortcuts.page:80(p)
 msgid "<keyseq><key>Ctrl</key><key>=</key></keyseq> or <key>=</key>"
 msgstr "<keyseq><key>Strg</key><key>=</key></keyseq> oder <key>=</key>"
 
-#: C/shortcuts.page:71(p)
+#: C/shortcuts.page:83(p)
 msgid "Zoom out"
 msgstr "Heraus zoomen"
 
-#: C/shortcuts.page:72(p)
+#: C/shortcuts.page:84(p)
 msgid "<keyseq><key>Ctrl</key><key>-</key></keyseq> or <key>-</key>"
 msgstr "<keyseq><key>Strg</key><key>-</key></keyseq> oder <key>-</key>"
 
-#: C/shortcuts.page:75(p)
+#: C/shortcuts.page:87(p)
 msgid "Reset zoom"
 msgstr "Zoom zurücksetzen"
 
-#: C/shortcuts.page:76(p)
+#: C/shortcuts.page:88(p)
 msgid "<keyseq><key>Ctrl</key><key>0</key></keyseq> or <key>0</key>"
 msgstr "<keyseq><key>Strg</key><key>0</key></keyseq> oder <key>0</key>"
 
-#: C/shortcuts.page:79(p) C/preferences.page:10(title)
+#: C/shortcuts.page:91(p) C/preferences.page:10(title)
 msgid "Preferences"
 msgstr "Einstellungen"
 
-#: C/shortcuts.page:80(key)
+#: C/shortcuts.page:92(key)
 msgid "E"
 msgstr "E"
 
-#: C/shortcuts.page:83(p) C/accounts.page:10(title)
+#: C/shortcuts.page:95(p) C/accounts.page:10(title)
 msgid "Accounts"
 msgstr "Konten"
 
-#: C/shortcuts.page:84(key)
+#: C/shortcuts.page:96(key)
 msgid "M"
 msgstr "M"
 
-#: C/shortcuts.page:87(p)
+#: C/shortcuts.page:99(p)
 msgid "Close composer window"
 msgstr "Editor-Fenster schließen"
 
-#: C/shortcuts.page:88(key)
+#: C/shortcuts.page:100(key)
 msgid "W"
 msgstr "W"
 
-#: C/shortcuts.page:91(p)
+#: C/shortcuts.page:103(p)
 msgid "Jump to search box"
 msgstr "Zur Suche springen"
 
-#: C/shortcuts.page:95(p)
+#: C/shortcuts.page:107(p)
 msgid "Find in current conversation"
 msgstr "Aktuelle Konversation durchsuchen"
 
-#: C/shortcuts.page:96(key)
+#: C/shortcuts.page:108(key)
 msgid "F"
 msgstr "F"
 
-#: C/shortcuts.page:99(p)
+#: C/shortcuts.page:111(p)
 msgid "Find next in current conversation"
 msgstr "Nächstes in aktueller Konversation finden"
 
-#: C/shortcuts.page:100(key) C/shortcuts.page:104(key)
+#: C/shortcuts.page:112(key) C/shortcuts.page:116(key)
 msgid "G"
 msgstr "G"
 
-#: C/shortcuts.page:103(p)
+#: C/shortcuts.page:115(p)
 msgid "Find previous in current conversation"
 msgstr "Vorheriges in aktueller Konversation finden"
 
-#: C/shortcuts.page:104(key)
+#: C/shortcuts.page:116(key)
 msgid "Shift"
 msgstr "Umschalttaste"
 
-#: C/shortcuts.page:109(title)
+#: C/shortcuts.page:121(title)
 msgid "Composer shortcuts"
 msgstr "Tastenkombinationen des Editors"
 
-#: C/shortcuts.page:110(p)
+#: C/shortcuts.page:122(p)
 msgid "These shortcuts are active whenever focus is in a composer."
 msgstr ""
 "Diese Tastenkombinationen stehen zur Verfügung, sobald der Editor aktiv ist."
 
-#: C/shortcuts.page:113(p)
+#: C/shortcuts.page:125(p)
 msgid "Quote text"
 msgstr "Text zitieren"
 
-#: C/shortcuts.page:114(key)
+#: C/shortcuts.page:126(key)
 msgid "]"
 msgstr "]"
 
-#: C/shortcuts.page:117(p)
+#: C/shortcuts.page:129(p)
 msgid "Unquote text"
 msgstr "Text nicht mehr zitieren"
 
-#: C/shortcuts.page:118(key)
+#: C/shortcuts.page:130(key)
 msgid "["
 msgstr "["
 
-#: C/shortcuts.page:121(p)
+#: C/shortcuts.page:133(p)
 msgid "Close composer"
 msgstr "Editor schließen"
 
-#: C/shortcuts.page:122(p)
+#: C/shortcuts.page:134(p)
 msgid "<keyseq><key>Ctrl</key><key>W</key></keyseq> or <key>Esc</key>"
 msgstr "<keyseq><key>Strg</key><key>W</key></keyseq> oder <key>Esc</key>"
 
-#: C/shortcuts.page:125(p)
+#: C/shortcuts.page:137(p)
 msgid "Detach composer"
 msgstr "Editor abtrennen"
 
-#: C/shortcuts.page:130(p)
+#: C/shortcuts.page:142(p)
 msgid "These shortcuts are only active in composers in rich text mode."
 msgstr ""
 "Diese Tastenkombinationen stehen nur in Editoren mit Rich-Text-Modus zur "
 "Verfügung."
 
-#: C/shortcuts.page:133(p)
+#: C/shortcuts.page:145(p)
 msgid "Bold text"
 msgstr "Fetter Text"
 
-#: C/shortcuts.page:134(key)
-msgid "B"
-msgstr "B"
-
-#: C/shortcuts.page:137(p)
+#: C/shortcuts.page:149(p)
 msgid "Italicize text"
 msgstr "Kursiver Text"
 
-#: C/shortcuts.page:138(key)
+#: C/shortcuts.page:150(key)
 msgid "I"
 msgstr "I"
 
-#: C/shortcuts.page:141(p)
+#: C/shortcuts.page:153(p)
 msgid "Underline text"
 msgstr "Text unterstreichen"
 
-#: C/shortcuts.page:142(key)
+#: C/shortcuts.page:154(key)
 msgid "U"
 msgstr "U"
 
-#: C/shortcuts.page:145(p)
+#: C/shortcuts.page:157(p)
 msgid "Strike text"
 msgstr "Text durchstreichen"
 
-#: C/shortcuts.page:146(key)
+#: C/shortcuts.page:158(key)
 msgid "K"
 msgstr "K"
 
-#: C/shortcuts.page:149(p)
+#: C/shortcuts.page:161(p)
 msgid "Insert a link"
 msgstr "Verweis einfügen"
 
-#: C/shortcuts.page:150(key)
+#: C/shortcuts.page:162(key)
 msgid "L"
 msgstr "L"
 
-#: C/shortcuts.page:153(p)
+#: C/shortcuts.page:165(p)
 msgid "Remove formatting"
 msgstr "Formatierung entfernen"
 
-#: C/shortcuts.page:154(key)
+#: C/shortcuts.page:166(key)
 msgid "Space"
 msgstr "Leerzeichen"
 
