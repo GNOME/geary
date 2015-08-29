@@ -1,8 +1,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Geary 0.5.1\n"
-"POT-Creation-Date: 2015-07-25 05:12+0000\n"
-"PO-Revision-Date: 2015-07-25 14:31+0200\n"
+"POT-Creation-Date: 2015-08-05 05:12+0000\n"
+"PO-Revision-Date: 2015-08-06 21:06+0200\n"
 "Last-Translator: Simon Linden <xhi2018@googlemail.com>\n"
 "Language-Team: Andreas Wilhelm <info@avedo.net>\n"
 "Language: de\n"
@@ -305,7 +305,7 @@ msgstr ""
 
 #: C/shortcuts.page:59(p)
 msgid "Move focus to conversation list"
-msgstr "Konversationsliste fokusieren"
+msgstr "Fokus auf Konversationsliste wechseln"
 
 #: C/shortcuts.page:60(key) C/shortcuts.page:76(key) C/shortcuts.page:92(key)
 #: C/shortcuts.page:96(key) C/shortcuts.page:100(key)
@@ -325,7 +325,7 @@ msgstr "B"
 
 #: C/shortcuts.page:63(p)
 msgid "Jump to next (older) conversation"
-msgstr "Zur nächsten (älteren) Konversation springen"
+msgstr "Zur nächsten (älteren) Konversation wechseln"
 
 #: C/shortcuts.page:64(key)
 msgid "j"
@@ -333,7 +333,7 @@ msgstr "j"
 
 #: C/shortcuts.page:67(p)
 msgid "Jump to previous (newer) conversation"
-msgstr "Zur vorherigen (aktuelleren) Konversation springen"
+msgstr "Zur vorhergehenden (jüngeren) Konversation wechseln"
 
 #: C/shortcuts.page:68(key)
 msgid "k"
