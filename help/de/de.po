@@ -1,15 +1,15 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: Geary 0.5.1\n"
-"POT-Creation-Date: 2015-07-28 17:12+0000\n"
-"PO-Revision-Date: 2015-07-30 19:59+0100\n"
-"Last-Translator: Christian Kirbach <christian.kirbach@gmail.com>\n"
+"POT-Creation-Date: 2015-08-05 05:13+0000\n"
+"PO-Revision-Date: 2015-08-06 21:04+0200\n"
+"Last-Translator: Simon Linden <xhi2018@googlemail.com>\n"
 "Language-Team: Andreas Wilhelm <info@avedo.net>\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.7.5\n"
+"X-Generator: Poedit 1.8.2\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: C/write.page:9(title)
@@ -132,7 +132,7 @@ msgstr "Geary löscht den Entwurf, wenn die Nachricht gesendet wird."
 #: C/star.page:10(title)
 msgid "Star a message or mark it as read/unread"
 msgstr ""
-"Eine Nachricht mit Sternchen versehen oder als gelesen/ungelesen  markieren"
+"Eine Nachricht mit Sternchen versehen oder als gelesen/ungelesen markieren"
 
 #: C/star.page:12(title)
 msgid "Star messages"
@@ -224,8 +224,8 @@ msgid ""
 "<keyseq><key>Ctrl</key><key>Shift</key><key>R</key></keyseq> or "
 "<keyseq><key>Shift</key><key>R</key></keyseq>"
 msgstr ""
-"<keyseq><key>Strg</key><key>Umschalt</key><key>R</key></keyseq> oder "
-"<keyseq><key>Umschalt</key><key>R</key></keyseq>"
+"<keyseq><key>Strg</key><key>Umschalttaste</key><key>R</key></keyseq> oder "
+"<keyseq><key>Umschalttaste</key><key>R</key></keyseq>"
 
 #: C/shortcuts.page:27(p)
 msgid "Forward"
@@ -260,8 +260,8 @@ msgid ""
 "<keyseq><key>Shift</key><key>Delete</key></keyseq> or <keyseq><key>Shift</"
 "key><key>Backspace</key></keyseq>"
 msgstr ""
-"<keyseq><key>Umschalt</key><key>Entf</key></keyseq> oder "
-"<keyseq><key>umschalt</key><key>Rücktaste</key></keyseq>"
+"<keyseq><key>Umschalttaste</key><key>Entf</key></keyseq> oder "
+"<keyseq><key>Umschalttaste</key><key>Rücktaste</key></keyseq>"
 
 #: C/shortcuts.page:43(p)
 msgid "Star"
@@ -288,24 +288,24 @@ msgid ""
 "<keyseq><key>Ctrl</key><key>I</key></keyseq> or <keyseq><key>Shift</"
 "key><key>I</key></keyseq>"
 msgstr ""
-"<keyseq><key>Strg</key><key>I</key></keyseq> oder <keyseq><key>Umschalt</"
-"key><key>I</key></keyseq>"
+"<keyseq><key>Strg</key><key>I</key></keyseq> oder "
+"<keyseq><key>Umschalttaste</key><key>I</key></keyseq>"
 
 #: C/shortcuts.page:55(p)
 msgid "Mark unread"
-msgstr "Als unglesen markieren"
+msgstr "Als ungelesen markieren"
 
 #: C/shortcuts.page:56(p)
 msgid ""
 "<keyseq><key>Ctrl</key><key>U</key></keyseq> or <keyseq><key>Shift</"
 "key><key>U</key></keyseq>"
 msgstr ""
-"<keyseq><key>Strg</key><key>U</key></keyseq> oder <keyseq><key>Umschalt</"
-"key><key>U</key></keyseq>"
+"<keyseq><key>Strg</key><key>U</key></keyseq> oder "
+"<keyseq><key>Umschalttaste</key><key>U</key></keyseq>"
 
 #: C/shortcuts.page:59(p)
 msgid "Move focus to conversation list"
-msgstr "Fokus auf Konversationsliste legen"
+msgstr "Fokus auf Konversationsliste wechseln"
 
 #: C/shortcuts.page:60(key) C/shortcuts.page:76(key) C/shortcuts.page:92(key)
 #: C/shortcuts.page:96(key) C/shortcuts.page:100(key)
@@ -357,7 +357,7 @@ msgstr "Q"
 
 #: C/shortcuts.page:79(p)
 msgid "Zoom in"
-msgstr "Heran zoomen"
+msgstr "Ansicht vergrößern"
 
 #: C/shortcuts.page:80(p)
 msgid "<keyseq><key>Ctrl</key><key>=</key></keyseq> or <key>=</key>"
@@ -365,7 +365,7 @@ msgstr "<keyseq><key>Strg</key><key>=</key></keyseq> oder <key>=</key>"
 
 #: C/shortcuts.page:83(p)
 msgid "Zoom out"
-msgstr "Heraus zoomen"
+msgstr "Ansicht verkleinern"
 
 #: C/shortcuts.page:84(p)
 msgid "<keyseq><key>Ctrl</key><key>-</key></keyseq> or <key>-</key>"
@@ -373,7 +373,7 @@ msgstr "<keyseq><key>Strg</key><key>-</key></keyseq> oder <key>-</key>"
 
 #: C/shortcuts.page:87(p)
 msgid "Reset zoom"
-msgstr "Zoom zurücksetzen"
+msgstr "Ansicht zurücksetzen"
 
 #: C/shortcuts.page:88(p)
 msgid "<keyseq><key>Ctrl</key><key>0</key></keyseq> or <key>0</key>"
@@ -832,8 +832,8 @@ msgstr ""
 "werden. Um mehrere Konversationen auszuwählen, halten Sie die <key>Strg</"
 "key>-Taste gedrückt und wählen die Konversationen durch Anklicken einzeln in "
 "der Konversationsliste aus. Alternativ können Sie auch die erste "
-"Konversation einer Reihe anklicken und bei gedrückter <key>Umschalt</key>-"
-"Taste die letzte Konversation."
+"Konversation einer Reihe anklicken und bei gedrückter <key>Umschalttaste</"
+"key>-Taste die letzte Konversation."
 
 #: C/overview.page:44(title)
 msgid "Message area"
@@ -1084,9 +1084,9 @@ msgstr ""
 "verschieben oder löschen, nicht aber archivieren. Um eine oder mehrere "
 "Konversationen in den <gui>Papierkorb</gui> zu verschieben, wählen Sie diese "
 "aus und drücken den <gui>Papierkorb</gui> Knopf in der Werkzeugleiste. Um "
-"die Konversationen vollständig zu löschen, halten Sie die <key>Umschalt</"
-"key> Taste gedrückt und klicken auf den <gui>Löschen</gui> Knopf, der an "
-"Stelle von <gui>Papierkorb</gui> erscheint."
+"die Konversationen vollständig zu löschen, halten Sie die "
+"<key>Umschalttaste</key> Taste gedrückt und klicken auf den <gui>Löschen</"
+"gui> Knopf, der an Stelle von <gui>Papierkorb</gui> erscheint."
 
 #: C/archive.page:21(p)
 msgid ""
@@ -1216,7 +1216,7 @@ msgstr ""
 "Über das <gui>Mail herunterladen</gui> Dropdown-Menü können Sie festlegen, "
 "wieviel E-Mail Geary lokal behält. Geary kann nur lokal verfügbar E-Mails "
 "berücksichtigen, wenn es um das Durchsuchen oder das Bündeln von Nachrichten "
-"in Konversationen geht.   "
+"in Konversationen geht."
 
 #: C/accounts.page:63(title)
 msgid "Removing accounts"
