@@ -18,8 +18,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2015-05-31 18:18+0200\n"
-"PO-Revision-Date: 2015-05-31 18:19+0200\n"
+"POT-Creation-Date: 2015-09-02 19:19+0200\n"
+"PO-Revision-Date: 2015-09-02 19:20+0200\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <gnomepl@aviary.pl>\n"
 "Language: pl\n"
@@ -67,7 +67,7 @@ msgstr "Wysyłanie plików używając programu Geary"
 #: ../src/client/accounts/account-dialog-add-edit-pane.vala:51
 #: ../src/client/components/stock.vala:31
 msgid "_Save"
-msgstr "Zapi_sz"
+msgstr "_Zapisz"
 
 #: ../src/client/accounts/account-dialog-add-edit-pane.vala:51
 #: ../src/client/components/stock.vala:22
@@ -264,7 +264,8 @@ msgstr "Należy użyć %s, aby otworzyć nowe okno tworzenia wiadomości"
 
 #: ../src/client/application/geary-args.vala:52
 msgid "Please report comments, suggestions and bugs to:"
-msgstr "Komentarze, sugestie i błędy prosimy zgłaszać do:"
+msgstr ""
+"Komentarze, sugestie i błędy prosimy zgłaszać do (w języku angielskim):"
 
 #. i18n: Command line arguments are invalid
 #: ../src/client/application/geary-args.vala:59
@@ -275,7 +276,7 @@ msgstr "Przetworzenie opcji wiersza poleceń się nie powiodło: %s\n"
 #: ../src/client/application/geary-args.vala:70
 #, c-format
 msgid "Unrecognized command line option \"%s\"\n"
-msgstr "Nieznana opcja wiersza poleceń \"%s\"\n"
+msgstr "Nieznana opcja wiersza poleceń „%s”\n"
 
 #: ../src/client/application/geary-controller.vala:62
 msgid "Delete conversation"
@@ -377,7 +378,7 @@ msgstr "Za_kończ"
 
 #: ../src/client/application/geary-controller.vala:399
 msgid "_Mark as..."
-msgstr "_Oznacz jako..."
+msgstr "_Oznacz jako…"
 
 #: ../src/client/application/geary-controller.vala:405
 msgid "Mark as _Read"
@@ -559,7 +560,7 @@ msgstr "Za_kończ"
 #: ../src/client/application/geary-controller.vala:1168
 #, c-format
 msgid "Unable to rebuild database for \"%s\""
-msgstr "Nie można przebudować bazy danych dla \"%s\""
+msgstr "Nie można przebudować bazy danych dla „%s”"
 
 #: ../src/client/application/geary-controller.vala:1169
 #, c-format
@@ -652,7 +653,7 @@ msgstr "Cofnij przeniesienie (Ctrl+Z)"
 #: ../src/client/application/geary-controller.vala:2000
 #, c-format
 msgid "Are you sure you want to open \"%s\"?"
-msgstr "Na pewno otworzyć \"%s\"?"
+msgstr "Na pewno otworzyć „%s”?"
 
 #: ../src/client/application/geary-controller.vala:2001
 msgid ""
@@ -669,13 +670,13 @@ msgstr "_Bez pytania ponownie"
 #: ../src/client/application/geary-controller.vala:2020
 #, c-format
 msgid "A file named \"%s\" already exists.  Do you want to replace it?"
-msgstr "Plik o nazwie \"%s\" już istnieje. Zastąpić go?"
+msgstr "Plik o nazwie „%s” już istnieje. Zastąpić go?"
 
 #: ../src/client/application/geary-controller.vala:2022
 #, c-format
 msgid ""
 "The file already exists in \"%s\".  Replacing it will overwrite its contents."
-msgstr "Plik w \"%s\" już istnieje. Zastąpienie go nadpisze jego zawartość."
+msgstr "Plik w „%s” już istnieje. Zastąpienie go nadpisze jego zawartość."
 
 #: ../src/client/application/geary-controller.vala:2025
 msgid "_Replace"
@@ -784,7 +785,7 @@ msgstr "Przeszukiwanie konta %s"
 #. / Displayed in the space-limited status bar while a message is in the process of being sent.
 #: ../src/client/components/status-bar.vala:26
 msgid "Sending..."
-msgstr "Wysyłanie..."
+msgstr "Wysyłanie…"
 
 #: ../src/client/components/stock.vala:18
 #: ../ui/account_cannot_remove.glade.h:3
@@ -811,7 +812,7 @@ msgstr "_Otwórz"
 
 #: ../src/client/components/stock.vala:28
 msgid "_Print..."
-msgstr "Wy_drukuj..."
+msgstr "Wy_drukuj…"
 
 #: ../src/client/components/stock.vala:30 ../ui/remove_confirm.glade.h:6
 msgid "_Remove"
@@ -886,27 +887,27 @@ msgstr "Nie można dodać załącznika"
 #: ../src/client/composer/composer-widget.vala:1541
 #, c-format
 msgid "\"%s\" could not be found."
-msgstr "Nie można odnaleźć \"%s\"."
+msgstr "Nie można odnaleźć „%s”."
 
 #: ../src/client/composer/composer-widget.vala:1548
 #, c-format
 msgid "\"%s\" is a folder."
-msgstr "\"%s\" jest katalogiem."
+msgstr "„%s” jest katalogiem."
 
 #: ../src/client/composer/composer-widget.vala:1555
 #, c-format
 msgid "\"%s\" is an empty file."
-msgstr "\"%s\" jest pustym plikiem."
+msgstr "„%s” jest pustym plikiem."
 
 #: ../src/client/composer/composer-widget.vala:1569
 #, c-format
 msgid "\"%s\" could not be opened for reading."
-msgstr "Nie można otworzyć \"%s\" do odczytania."
+msgstr "Nie można otworzyć „%s” do odczytania."
 
 #: ../src/client/composer/composer-widget.vala:1576
 #, c-format
 msgid "\"%s\" already attached for delivery."
-msgstr "Do wiadomości już załączono \"%s\"."
+msgstr "Do wiadomości już załączono „%s”."
 
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
 #: ../src/client/composer/composer-widget.vala:1585
@@ -1067,22 +1068,22 @@ msgstr " (Nieprawidłowy?)"
 
 #: ../src/client/conversation-viewer/conversation-viewer.vala:1718
 msgid "_Save Image As..."
-msgstr "Zapisz _obraz jako..."
+msgstr "Zapisz _obraz jako…"
 
 #: ../src/client/conversation-viewer/conversation-viewer.vala:1822
 msgid "_Save As..."
-msgstr "Zapisz j_ako..."
+msgstr "Zapisz j_ako…"
 
 #: ../src/client/conversation-viewer/conversation-viewer.vala:1827
 msgid "Save All A_ttachments..."
-msgstr "Zapisz wszystkie _załączniki..."
+msgstr "Zapisz wszystkie _załączniki…"
 
 #: ../src/client/conversation-viewer/conversation-viewer.vala:1847
 msgid "Save A_ttachment..."
 msgid_plural "Save All A_ttachments..."
-msgstr[0] "Zapisz _załącznik..."
-msgstr[1] "Zapisz wszystkie _załączniki..."
-msgstr[2] "Zapisz wszystkie _załączniki..."
+msgstr[0] "Zapisz _załącznik…"
+msgstr[1] "Zapisz wszystkie _załączniki…"
+msgstr[2] "Zapisz wszystkie _załączniki…"
 
 #. Reply to all on a message.
 #: ../src/client/conversation-viewer/conversation-viewer.vala:1862
@@ -1122,7 +1123,7 @@ msgstr "Otwarcie domyślnego edytora tekstu się nie powiodło."
 #: ../src/client/conversation-viewer/conversation-web-view.vala:322
 #, c-format
 msgid "%s - Conversation Inspector"
-msgstr "%s - inspektor wątków"
+msgstr "%s — inspektor wątków"
 
 #: ../src/client/dialogs/attachment-dialog.vala:18
 msgid "Choose a file"
@@ -1147,7 +1148,7 @@ msgid ""
 "Selecting \"Trust This Server\" or \"Always Trust This Server\" may cause "
 "your username and password to be transmitted insecurely."
 msgstr ""
-"Wybranie \"Zaufaj temu serwerowi\" lub \"Zawsze ufaj temu serwerowi\" może "
+"Wybranie „Zaufaj temu serwerowi” lub „Zawsze ufaj temu serwerowi” może "
 "spowodować niezabezpieczone przesyłanie nazwy użytkownika i hasła."
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:52
@@ -1155,7 +1156,7 @@ msgid ""
 "Selecting \"Don't Trust This Server\" will cause Geary not to access this "
 "server."
 msgstr ""
-"Wybranie \"Nie ufaj temu serwerowi\" spowoduje, że program Geary nie będzie "
+"Wybranie „Nie ufaj temu serwerowi” spowoduje, że program Geary nie będzie "
 "miał dostępu do tego serwera."
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:54
@@ -1167,7 +1168,7 @@ msgid ""
 "Selecting \"Don't Trust This Server\" will cause Geary to stop accessing "
 "this account."
 msgstr ""
-"Wybranie \"Nie ufaj temu serwerowi\" spowoduje, że program Geary nie będzie "
+"Wybranie „Nie ufaj temu serwerowi” spowoduje, że program Geary nie będzie "
 "miał dostępu do tego konta."
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:61
@@ -1259,7 +1260,7 @@ msgstr[2] "%d wyników"
 #: ../src/client/notification/libmessagingmenu.vala:75
 #, c-format
 msgid "%s - New Messages"
-msgstr "%s - nowe wiadomości"
+msgstr "%s — nowe wiadomości"
 
 #: ../src/client/notification/libnotify.vala:72
 #, c-format
