@@ -130,6 +130,9 @@ public class ContactEntryCompletion : Gtk.EntryCompletion {
             }
             bytes_seen_so_far += token_bytes;
         }
+        for (int i = 0; i < addresses.size; i++) {
+            addresses[i] = addresses[i].strip();
+        }
         
         return addresses;
     }
