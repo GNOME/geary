@@ -602,7 +602,7 @@ add_custom_command(
     WORKING_DIRECTORY
         ${CMAKE_SOURCE_DIR}/bindings/metadata
     COMMAND
-        vapigen --pkg=gio-2.0 --pkg=gtk+-3.0 --pkg=libsoup-2.4 --metadatadir=. --metadatadir=${WEBKITGTK_METADATA_DIR} --library=webkitgtk-3.0 --directory=${CMAKE_BINARY_DIR}/src ${WEBKITGTK_CUSTOM_VALA} `pkg-config --variable=girdir gobject-introspection-1.0`/WebKit-3.0.gir
+        vapigen --pkg=gio-2.0 --pkg=gtk+-3.0 --pkg=libsoup-2.4 --metadatadir=. --metadatadir=${WEBKITGTK_METADATA_DIR} --library=webkitgtk-3.0 --directory=${CMAKE_BINARY_DIR}/src ${WEBKITGTK_CUSTOM_VALA} `${PKG_CONFIG_EXECUTABLE} --variable=girdir gobject-introspection-1.0`/WebKit-3.0.gir
 )
 
 # Geary client app

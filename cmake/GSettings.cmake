@@ -18,7 +18,7 @@ if (GSETTINGS_COMPILE_IN_PLACE)
 endif ()
 
 macro(add_schemas GSETTINGS_TARGET SCHEMA_DIRECTORY PREFIX)
-    set(PKG_CONFIG_EXECUTABLE pkg-config)
+    find_package(PkgConfig)
     
     # Locate all schema files.
     file(GLOB all_schema_files
