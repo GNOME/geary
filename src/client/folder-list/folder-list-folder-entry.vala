@@ -68,6 +68,7 @@ public class FolderList.FolderEntry : FolderList.AbstractFolderEntry, Sidebar.In
                 return "task-due-symbolic";
             
             case Geary.SpecialFolderType.ALL_MAIL:
+            case Geary.SpecialFolderType.ARCHIVE:
                 return "mail-archive-symbolic";
             
             case Geary.SpecialFolderType.SPAM:

@@ -4,14 +4,14 @@
 # This file is distributed under the GNU LGPL, version 2.1.
 #
 # Translators:
-# Dušan Kazik <prescott66@gmail.com>, 2013
+# Dušan Kazik <prescott66@gmail.com>, 2013, 2015
 msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2015-03-23 05:58+0000\n"
-"PO-Revision-Date: 2015-03-23 09:58+0100\n"
+"POT-Creation-Date: 2015-06-30 05:12+0000\n"
+"PO-Revision-Date: 2015-06-30 17:38+0100\n"
 "Last-Translator: Dušan Kazik <prescott66@gmail.com>\n"
 "Language-Team: Slovak (http://www.transifex.com/projects/p/geary/language/"
 "sk/)\n"
@@ -20,7 +20,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
-"X-Generator: Poedit 1.7.4\n"
+"X-Generator: Poedit 1.8.1\n"
 
 #: ../desktop/geary.desktop.in.h:1 ../desktop/geary-autostart.desktop.in.h:1
 msgid "Geary"
@@ -147,7 +147,7 @@ msgstr "Zapa_mätať heslo"
 
 #: ../src/client/accounts/add-edit-page.vala:764
 msgid "Unable to validate:\n"
-msgstr "Nepodarilo sa overiť:\n"
+msgstr "Nie je možné overiť:\n"
 
 #: ../src/client/accounts/add-edit-page.vala:766
 msgid "        &#8226; Invalid account nickname.\n"
@@ -451,11 +451,11 @@ msgstr "Vyprázdniť _Kôš…"
 #. No callback is connected, since we bind the toggle button to the search bar visibility
 #: ../src/client/application/geary-controller.vala:538
 msgid "Toggle search bar"
-msgstr "Prepnúť panel vyhľadávania"
+msgstr "Prepne panel vyhľadávania"
 
 #: ../src/client/application/geary-controller.vala:752
 msgid "Unable to store server trust exception"
-msgstr "Nepodarilo sa uložiť výnimku dôveryhodnosti servera"
+msgstr "Nie je možné uložiť výnimku dôveryhodnosti servera"
 
 #: ../src/client/application/geary-controller.vala:989
 msgid "Your settings are insecure"
@@ -516,7 +516,7 @@ msgstr "Menovky"
 #: ../src/client/application/geary-controller.vala:1156
 #, c-format
 msgid "Unable to open the database for %s"
-msgstr "Nepodarilo sa otvoriť databázu pre %s"
+msgstr "Nie je možné otvoriť databázu pre %s"
 
 #: ../src/client/application/geary-controller.vala:1157
 #, c-format
@@ -554,7 +554,7 @@ msgstr "_Ukončiť"
 #: ../src/client/application/geary-controller.vala:1168
 #, c-format
 msgid "Unable to rebuild database for \"%s\""
-msgstr "Nepodarilo sa znovu zostaviť databázu účtu „%s“"
+msgstr "Nie je možné znovu zostaviť databázu účtu „%s“"
 
 #: ../src/client/application/geary-controller.vala:1169
 #, c-format
@@ -574,7 +574,7 @@ msgstr ""
 #: ../src/client/application/geary-controller.vala:1212
 #, c-format
 msgid "Unable to open local mailbox for %s"
-msgstr "Nepodarilo sa otvoriť miestnu poštovú schránku účtu %s"
+msgstr "Nie je možné otvoriť miestnu poštovú schránku účtu %s"
 
 #: ../src/client/application/geary-controller.vala:1192
 #, c-format
@@ -740,7 +740,7 @@ msgstr[2] "%i zhôd (zalomených)"
 msgid "not found"
 msgstr "nenájdené"
 
-#: ../src/client/components/main-window.vala:428
+#: ../src/client/components/main-window.vala:430
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -940,15 +940,15 @@ msgstr "Ja"
 
 #: ../src/client/conversation-viewer/conversation-viewer.vala:413
 msgid "No conversations selected."
-msgstr "Žiadne vybrané rozhovory."
+msgstr "Žiadne vybraté rozhovory."
 
 #: ../src/client/conversation-viewer/conversation-viewer.vala:415
 #, c-format
 msgid "%u conversation selected."
 msgid_plural "%u conversations selected."
-msgstr[0] "%u vybraný rozhovor."
-msgstr[1] "%u vybrané rozhovory."
-msgstr[2] "%u vybraných rozhovorov."
+msgstr[0] "%u vybratý rozhovor."
+msgstr[1] "%u vybraté rozhovory."
+msgstr[2] "%u vybratých rozhovorov."
 
 #: ../src/client/conversation-viewer/conversation-viewer.vala:444
 msgid "No search results found."
@@ -988,7 +988,7 @@ msgstr "Kópia:"
 
 #: ../src/client/conversation-viewer/conversation-viewer.vala:818
 msgid "Bcc:"
-msgstr "Skeytý kópia:"
+msgstr "Skrytá kópia:"
 
 #: ../src/client/conversation-viewer/conversation-viewer.vala:821
 msgid "Subject:"
@@ -1558,6 +1558,13 @@ msgstr "Nevyžiadaná pošta | Spam | Nevyžiadané emaily"
 msgid "Trash | Rubbish | Rubbish Bin"
 msgstr "Kôš"
 
+#. List of folder names to match for Archive, separated by |.  Please add localized common
+#. names for the Trash folder, leaving in the English names as well.  The first in the list
+#. will be the default, so please add the most common localized name to the front.
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:595
+msgid "Archive | Archives"
+msgstr "Archív | Archívy | Archivované"
+
 #. / Format for the datetime that a message being replied to was received
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../src/engine/rfc822/rfc822-utils.vala:215
@@ -2082,7 +2089,7 @@ msgstr "_Overiť totožnosť"
 
 #: ../ui/preferences.glade.h:1
 msgid "Reading"
-msgstr "Číta sa"
+msgstr "Čítanie"
 
 #: ../ui/preferences.glade.h:2
 msgid "_Automatically select next message"
