@@ -9,6 +9,8 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
     private const int AUTHORIZED_SESSION_ERROR_MIN_RETRY_TIMEOUT_SEC = 1;
     private const int AUTHORIZED_SESSION_ERROR_MAX_RETRY_TIMEOUT_SEC = 10;
     
+    private const int CHECK_REACHABLE_TIMEOUT_SEC = 5;
+    
     public bool is_open { get; private set; default = false; }
     
     /**
@@ -65,7 +67,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
     private bool untrusted_host = false;
     private uint authorized_session_error_retry_timeout_id = 0;
     private int authorized_session_retry_sec = AUTHORIZED_SESSION_ERROR_MIN_RETRY_TIMEOUT_SEC;
-    private bool checking_reachable = false;
+    private uint checking_reachable_id = 0;
     
     public signal void login_failed();
     
@@ -519,13 +521,17 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
     }
     
     private void check_endpoint_reachable(Cancellable? cancellable) {
-        if (checking_reachable)
+        if (checking_reachable_id != 0)
             return;
         
-        debug("Checking if IMAP host %s reachable...", endpoint.to_string());
+        debug("Checking if IMAP host %s reachable in %d seconds...", endpoint.to_string(),
+            CHECK_REACHABLE_TIMEOUT_SEC);
         
-        checking_reachable = true;
-        check_endpoint_reachable_async.begin(cancellable);
+        checking_reachable_id = Timeout.add_seconds(CHECK_REACHABLE_TIMEOUT_SEC, () => {
+            check_endpoint_reachable_async.begin(cancellable);
+            
+            return false;
+        });
     }
     
     // Use check_endpoint_reachable to properly schedule
@@ -544,7 +550,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
                 endpoint.to_string(), err.message);
             is_endpoint_reachable = false;
         } finally {
-            checking_reachable = false;
+            checking_reachable_id = 0;
         }
         
         if (is_endpoint_reachable)
