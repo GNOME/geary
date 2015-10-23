@@ -16,7 +16,7 @@ msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2015-07-13 05:13+0000\n"
+"POT-Creation-Date: 2015-10-23 05:28+0000\n"
 "PO-Revision-Date: 2015-07-13 14:00+0300\n"
 "Last-Translator: Stas Solovey <whats_up@tut.by>\n"
 "Language-Team: Русский <gnome-cyr@gnome.org>\n"
@@ -99,7 +99,7 @@ msgstr "Добро пожаловать в Geary."
 
 #: ../src/client/accounts/add-edit-page.vala:233
 msgid "Enter your account information to get started."
-msgstr "Чтобы приступить к работе введите информацию об учётной записи."
+msgstr "Чтобы приступить к работе, введите информацию об учётной записи."
 
 #: ../src/client/accounts/add-edit-page.vala:253
 msgid "2 weeks back"
@@ -345,30 +345,32 @@ msgid "Move conversations"
 msgstr "Переместить беседы"
 
 #: ../src/client/application/geary-controller.vala:373
+#: ../ui/app_menu.interface.h:1
 msgid "A_ccounts"
 msgstr "_Учётные записи"
 
 #: ../src/client/application/geary-controller.vala:378
-#: ../src/client/components/stock.vala:27
+#: ../src/client/components/stock.vala:27 ../ui/app_menu.interface.h:2
 msgid "_Preferences"
 msgstr "_Параметры"
 
 #: ../src/client/application/geary-controller.vala:382
-#: ../src/client/components/stock.vala:25
+#: ../src/client/components/stock.vala:25 ../ui/app_menu.interface.h:4
 msgid "_Help"
 msgstr "_Справка"
 
 #: ../src/client/application/geary-controller.vala:386
-#: ../src/client/components/stock.vala:21
+#: ../src/client/components/stock.vala:21 ../ui/app_menu.interface.h:5
 msgid "_About"
 msgstr "_О приложении"
 
 #: ../src/client/application/geary-controller.vala:390
+#: ../ui/app_menu.interface.h:3
 msgid "_Donate"
 msgstr "Помочь _разработчикам"
 
 #: ../src/client/application/geary-controller.vala:394
-#: ../src/client/components/stock.vala:29
+#: ../src/client/components/stock.vala:29 ../ui/app_menu.interface.h:6
 msgid "_Quit"
 msgstr "_Завершить"
 
@@ -775,14 +777,12 @@ msgstr "Поиск учётной записи %s"
 msgid "Sending..."
 msgstr "Отправка…"
 
-#: ../src/client/components/stock.vala:18
-#: ../ui/account_cannot_remove.glade.h:3
+#: ../src/client/components/stock.vala:18 ../ui/account_cannot_remove.glade.h:3
 msgid "_OK"
 msgstr "_ОК"
 
-#: ../src/client/components/stock.vala:19
-#: ../ui/edit_alternate_emails.glade.h:3 ../ui/password-dialog.glade.h:5
-#: ../ui/remove_confirm.glade.h:5
+#: ../src/client/components/stock.vala:19 ../ui/edit_alternate_emails.glade.h:3
+#: ../ui/password-dialog.glade.h:5 ../ui/remove_confirm.glade.h:5
 msgid "_Cancel"
 msgstr "О_тмена"
 
