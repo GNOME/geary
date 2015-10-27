@@ -172,7 +172,7 @@ public class Geary.FolderPath : BaseObject, Gee.Hashable<Geary.FolderPath>,
      *
      * The separator is not appended to the fullpath.
      */
-    public string? get_fullpath(string separator) {
+    public string get_fullpath(string separator) {
         // use cached copy if the stars align
         if (fullpath != null && fullpath_separator == separator)
             return fullpath;

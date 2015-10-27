@@ -680,7 +680,7 @@ private class Geary.Imap.Folder : BaseObject {
         check_open();
         
         CopyCommand cmd = new CopyCommand(msg_set,
-            new MailboxSpecifier.from_folder_path(destination, null));
+            new MailboxSpecifier.from_folder_path(destination, info.delim));
         
         Gee.Map<Command, StatusResponse>? responses = yield exec_commands_async(
             Geary.iterate<Command>(cmd).to_array_list(), null, null, cancellable);
@@ -1037,7 +1037,7 @@ private class Geary.Imap.Folder : BaseObject {
         if (date_received != null)
             internaldate = new InternalDate.from_date_time(date_received);
         
-        AppendCommand cmd = new AppendCommand(new MailboxSpecifier.from_folder_path(path, null),
+        AppendCommand cmd = new AppendCommand(new MailboxSpecifier.from_folder_path(path, info.delim),
             msg_flags, internaldate, message.get_network_buffer(false));
         
         Gee.Map<Command, StatusResponse> responses = yield exec_commands_async(

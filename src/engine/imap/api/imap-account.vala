@@ -225,7 +225,7 @@ private class Geary.Imap.Account : BaseObject {
         check_open();
         
         StatusResponse response = yield send_command_async(new CreateCommand(
-            new MailboxSpecifier.from_folder_path(path, null)), null, null, cancellable);
+            new MailboxSpecifier.from_folder_path(path, hierarchy_delimiter)), null, null, cancellable);
         
         if (response.status != Status.OK) {
             throw new ImapError.SERVER_ERROR("Server reports error creating path %s: %s", path.to_string(),
@@ -346,7 +346,7 @@ private class Geary.Imap.Account : BaseObject {
         
         Gee.List<StatusData> status_results = new Gee.ArrayList<StatusData>();
         StatusResponse response = yield send_command_async(
-            new StatusCommand(new MailboxSpecifier.from_folder_path(path, null), status_types),
+            new StatusCommand(new MailboxSpecifier.from_folder_path(path, hierarchy_delimiter), status_types),
             null, status_results, cancellable);
         
         throw_fetch_error(response, path, status_results.size);
