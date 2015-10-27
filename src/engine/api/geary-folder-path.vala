@@ -310,7 +310,7 @@ public class Geary.FolderPath : BaseObject, Gee.Hashable<Geary.FolderPath>,
      * Use only for debugging and logging.
      */
     public string to_string() {
-        return get_fullpath("?");
+        return get_fullpath(">");
     }
 }
 

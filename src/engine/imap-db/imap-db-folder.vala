@@ -190,7 +190,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                 : null;
             
             // Note that recent is not stored
-            status_data = new Imap.StatusData(new Imap.MailboxSpecifier.from_folder_path(path, ">"),
+            status_data = new Imap.StatusData(new Imap.MailboxSpecifier.from_folder_path(path, "?"),
                 messages, 0, uid_next, uid_validity, result.int_for("unread_count"));
             
             return Db.TransactionOutcome.DONE;
