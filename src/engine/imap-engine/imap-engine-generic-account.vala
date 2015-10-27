@@ -621,7 +621,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             
             Gee.ArrayList<string> search_names = get_mailbox_search_names().get(special);
             foreach (string search_name in search_names) {
-                Geary.FolderPath search_path = new Imap.FolderRoot(search_name, null);
+                Geary.FolderPath search_path = new Imap.FolderRoot(search_name);
                 foreach (Geary.FolderPath test_path in folder_map.keys) {
                     if (test_path.compare_normalized_ci(search_path) == 0) {
                         path = search_path;
@@ -634,7 +634,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             if (path == null) {
                 foreach (string search_name in search_names) {
                     Geary.FolderPath search_path = new Imap.FolderRoot(
-                        Imap.MailboxSpecifier.CANONICAL_INBOX_NAME, null).get_child(search_name);
+                        Imap.MailboxSpecifier.CANONICAL_INBOX_NAME).get_child(search_name);
                     foreach (Geary.FolderPath test_path in folder_map.keys) {
                         if (test_path.compare_normalized_ci(search_path) == 0) {
                             path = search_path;
@@ -647,7 +647,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             }
             
             if (path == null)
-                path = new Imap.FolderRoot(search_names[0], null);
+                path = new Imap.FolderRoot(search_names[0]);
             
             information.set_special_folder_path(special, path);
             yield information.store_async(cancellable);

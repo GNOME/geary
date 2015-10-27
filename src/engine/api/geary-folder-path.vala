@@ -10,8 +10,6 @@
  * A FolderPath may have one parent and one child.  A FolderPath without a parent is called a
  * root folder can be be created with {@link FolderRoot}, which is a FolderPath.
  *
- * A FolderPath has a delimiter.  This delimiter is specified in the FolderRoot.
- *
  * @see FolderRoot
  */
 
@@ -150,20 +148,10 @@ public class Geary.FolderPath : BaseObject, Gee.Hashable<Geary.FolderPath>,
     }
     
     /**
-     * Returns true if this {@link FolderPath} has a default separator.
-     *
-     * It determines this by returning true if its {@link FolderRoot.default_separator} is
-     * non-null and non-empty.
-     */
-    public bool has_default_separator() {
-        return get_root().default_separator != null;
-    }
-    
-    /**
      * Returns true if the other {@link FolderPath} has the same parent as this one.
      *
-     * Like {@link equal_to} and {@link compare_to}, this comparison does not account for the
-     * {@link FolderRoot.default_separator}.  The comparison is lexiographic, not by reference.
+     * Like {@link equal_to} and {@link compare_to}, this comparison the comparison is
+     * lexiographic, not by reference.
      */
     public bool has_same_parent(FolderPath other) {
         FolderPath? parent = get_parent();
@@ -182,19 +170,9 @@ public class Geary.FolderPath : BaseObject, Gee.Hashable<Geary.FolderPath>,
      * Returns the {@link FolderPath} as a single string with the supplied separator used as a
      * delimiter.
      *
-     * If null is passed in, {@link FolderRoot.default_separator} is used.  If the default
-     * separator is null, no fullpath can be produced and this method will return null.
-     *
      * The separator is not appended to the fullpath.
-     *
-     * @see has_default_separator
      */
-    public string? get_fullpath(string? use_separator) {
-        string? separator = use_separator ?? get_root().default_separator;
-        
-        if (separator == null && !is_root())
-            return null;
-        
+    public string? get_fullpath(string separator) {
         // use cached copy if the stars align
         if (fullpath != null && fullpath_separator == separator)
             return fullpath;
@@ -273,8 +251,7 @@ public class Geary.FolderPath : BaseObject, Gee.Hashable<Geary.FolderPath>,
      * are less-than longer paths, assuming the path elements are equal up to the shorter path's
      * length.
      *
-     * Note that the {@link FolderRoot.default_separator} has no bearing on comparisons, although
-     * {@link FolderPath.case_sensitive} does.
+     * Note that {@link FolderRoot.case_sensitive} affects comparisons.
      *
      * Returns -1 if this path is lexiographically before the other, 1 if its after, and 0 if they
      * are equal.
@@ -286,8 +263,7 @@ public class Geary.FolderPath : BaseObject, Gee.Hashable<Geary.FolderPath>,
     /**
      * {@inheritDoc}
      *
-     * As with {@link compare_to}, the {@link FolderRoot.default_separator} has no bearing on the
-     * hash, although {@link FolderPath.case_sensitive} does.
+     * Note that {@link FolderRoot.case_sensitive} affects comparisons.
      */
     public uint hash() {
         if (stored_hash != uint.MAX)
@@ -334,8 +310,7 @@ public class Geary.FolderPath : BaseObject, Gee.Hashable<Geary.FolderPath>,
      * Use only for debugging and logging.
      */
     public string to_string() {
-        // use slash if no default separator available
-        return get_fullpath(has_default_separator() ? null : "/");
+        return get_fullpath("?");
     }
 }
 
@@ -351,16 +326,6 @@ public class Geary.FolderPath : BaseObject, Gee.Hashable<Geary.FolderPath>,
  */
 public abstract class Geary.FolderRoot : Geary.FolderPath {
     /**
-     * The default separator (delimiter) for this path.
-     *
-     * If null, the separator can be supplied later to {@link FolderPath.get_fullpath}.
-     *
-     * This value will never be empty (i.e. zero-length).  A zero-length separator passed to the
-     * constructor will result in this property being null.
-     */
-    public string? default_separator { get; private set; }
-    
-    /**
      * The default case sensitivity of each element in the {@link FolderPath}.
      *
      * @see FolderRoot.case_sensitive
@@ -368,11 +333,9 @@ public abstract class Geary.FolderRoot : Geary.FolderPath {
      */
     public bool default_case_sensitivity { get; private set; }
     
-    protected FolderRoot(string basename, string? default_separator, bool case_sensitive,
-        bool default_case_sensitivity) {
+    protected FolderRoot(string basename, bool case_sensitive, bool default_case_sensitivity) {
         base (basename, case_sensitive);
         
-        this.default_separator = !String.is_empty(default_separator) ? default_separator : null;
         this.default_case_sensitivity = default_case_sensitivity;
     }
 }

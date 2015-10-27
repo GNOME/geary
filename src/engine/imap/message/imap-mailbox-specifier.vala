@@ -148,9 +148,9 @@ public class Geary.Imap.MailboxSpecifier : BaseObject, Gee.Hashable<MailboxSpeci
         // keep
         FolderPath path;
         if (inbox_specifier != null && list[0] == inbox_specifier.name)
-            path = new Imap.FolderRoot(CANONICAL_INBOX_NAME, delim);
+            path = new Imap.FolderRoot(CANONICAL_INBOX_NAME);
         else
-            path = new Imap.FolderRoot(list[0], delim);
+            path = new Imap.FolderRoot(list[0]);
         
         // walk down rest of elements adding as we go
         for (int ctr = 1; ctr < list.size; ctr++)

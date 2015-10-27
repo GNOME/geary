@@ -8,7 +8,7 @@ private class Geary.ImapDB.SearchFolderRoot : Geary.FolderRoot {
     public const string MAGIC_BASENAME = "$GearySearchFolder$";
     
     public SearchFolderRoot() {
-        base(MAGIC_BASENAME, null, false, false);
+        base(MAGIC_BASENAME, false, false);
     }
 }
 

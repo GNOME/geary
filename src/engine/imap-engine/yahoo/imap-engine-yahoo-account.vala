@@ -31,10 +31,10 @@ private class Geary.ImapEngine.YahooAccount : Geary.ImapEngine.GenericAccount {
             special_map = new Gee.HashMap<Geary.FolderPath, Geary.SpecialFolderType>();
             
             special_map.set(Imap.MailboxSpecifier.inbox.to_folder_path(null, null), Geary.SpecialFolderType.INBOX);
-            special_map.set(new Imap.FolderRoot("Sent", null), Geary.SpecialFolderType.SENT);
-            special_map.set(new Imap.FolderRoot("Draft", null), Geary.SpecialFolderType.DRAFTS);
-            special_map.set(new Imap.FolderRoot("Bulk Mail", null), Geary.SpecialFolderType.SPAM);
-            special_map.set(new Imap.FolderRoot("Trash", null), Geary.SpecialFolderType.TRASH);
+            special_map.set(new Imap.FolderRoot("Sent"), Geary.SpecialFolderType.SENT);
+            special_map.set(new Imap.FolderRoot("Draft"), Geary.SpecialFolderType.DRAFTS);
+            special_map.set(new Imap.FolderRoot("Bulk Mail"), Geary.SpecialFolderType.SPAM);
+            special_map.set(new Imap.FolderRoot("Trash"), Geary.SpecialFolderType.TRASH);
         }
     }
     

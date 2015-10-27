@@ -477,14 +477,13 @@ private class Geary.Imap.Account : BaseObject {
         if (parent == null) {
             cmd = new ListCommand.wildcarded("", new MailboxSpecifier("%"), can_xlist, return_param);
         } else {
-            string? specifier = parent.get_fullpath(null);
-            string? delim = parent.get_root().default_separator;
-            if (specifier == null || delim == null) {
+            if (hierarchy_delimiter == null) {
                 throw new ImapError.INVALID("Unable to list children of %s: no delimiter specified",
                     parent.to_string());
             }
             
-            specifier += specifier.has_suffix(delim) ? "%" : (delim + "%");
+            string? specifier = parent.get_fullpath(hierarchy_delimiter);
+            specifier += specifier.has_suffix(hierarchy_delimiter) ? "%" : (hierarchy_delimiter + "%");
             
             cmd = new ListCommand(new MailboxSpecifier(specifier), can_xlist, return_param);
         }
@@ -502,7 +501,7 @@ private class Geary.Imap.Account : BaseObject {
         if (parent != null) {
             Gee.Iterator<MailboxInformation> iter = list_results.iterator();
             while (iter.next()) {
-                FolderPath list_path = iter.get().mailbox.to_folder_path(parent.get_root().default_separator,
+                FolderPath list_path = iter.get().mailbox.to_folder_path(hierarchy_delimiter,
                     inbox_specifier);
                 if (list_path.equal_to(parent)) {
                     debug("Removing parent from LIST results: %s", list_path.to_string());

@@ -477,7 +477,7 @@ private class Geary.ImapDB.Account : BaseObject {
                 
                 Geary.FolderPath path = (parent != null)
                     ? parent.get_child(basename)
-                    : new Imap.FolderRoot(basename, "/");
+                    : new Imap.FolderRoot(basename);
                 
                 Geary.Imap.FolderProperties properties = new Geary.Imap.FolderProperties(
                     result.int_for("last_seen_total"), result.int_for("unread_count"), 0,
@@ -597,11 +597,6 @@ private class Geary.ImapDB.Account : BaseObject {
         ImapDB.Folder? folder = (Geary.ImapDB.Folder?) folder_ref.get_reference();
         if (folder == null)
             return null;
-        
-        // use supplied FolderPath rather than one here; if it came from the server, it has
-        // a usable separator
-        if (path.get_root().default_separator != null)
-            folder.set_path(path);
         
         return folder;
     }
@@ -1663,7 +1658,7 @@ private class Geary.ImapDB.Account : BaseObject {
         }
         
         if (parent_id <= 0)
-            return new Imap.FolderRoot(name, null);
+            return new Imap.FolderRoot(name);
         
         Geary.FolderPath? parent_path = do_find_folder_path(cx, parent_id, cancellable);
         return (parent_path == null ? null : parent_path.get_child(name));

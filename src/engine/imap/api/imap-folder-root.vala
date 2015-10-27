@@ -15,11 +15,11 @@
 private class Geary.Imap.FolderRoot : Geary.FolderRoot {
     public bool is_inbox { get; private set; }
     
-    public FolderRoot(string basename, string? default_separator) {
+    public FolderRoot(string basename) {
         bool init_is_inbox;
         string normalized_basename = init(basename, out init_is_inbox);
         
-        base (normalized_basename, default_separator, !init_is_inbox, true);
+        base (normalized_basename, !init_is_inbox, true);
         
         is_inbox = init_is_inbox;
     }
