@@ -34,6 +34,8 @@ private class Geary.Imap.Account : BaseObject {
     private Gee.List<StatusData>? status_collector = null;
     private Gee.List<ServerData>? server_data_collector = null;
     private Imap.MailboxSpecifier? inbox_specifier = null;
+    private string hierarchy_delimiter = null;
+
     
     public signal void login_failed(Geary.Credentials cred);
     
@@ -95,12 +97,9 @@ private class Geary.Imap.Account : BaseObject {
                 account_session.status.connect(on_status_data);
                 account_session.server_data_received.connect(on_server_data_received);
                 account_session.disconnected.connect(on_disconnected);
-                
-                // Learn the magic XLIST <translated Inbox name> -> Inbox mapping
-                if (account_session.capabilities.has_capability(Imap.Capabilities.XLIST))
-                    yield determine_xlist_inbox(account_session, cancellable);
-                else
-                    inbox_specifier = MailboxSpecifier.inbox;
+
+                // Determine INBOX, hierarchy delimiter, special use flags, etc
+                yield list_inbox(account_session, cancellable);
             } catch (Error claim_err) {
                 err = claim_err;
             }
@@ -118,40 +117,41 @@ private class Geary.Imap.Account : BaseObject {
         return account_session;
     }
     
-    private async void determine_xlist_inbox(ClientSession session, Cancellable? cancellable) throws Error {
+    private async void list_inbox(ClientSession session, Cancellable? cancellable) throws Error {
         // can't use send_command_async() directly because this is called by claim_session_async(),
         // which is called by send_command_async()
         
         int token = yield cmd_mutex.claim_async(cancellable);
         
-        // clear for now
-        inbox_specifier = null;
-        
         // collect server data directly for direct decoding
         server_data_collector = new Gee.ArrayList<ServerData>();
-        
+
+		bool use_xlist = account_session.capabilities.has_capability(Imap.Capabilities.XLIST);
+        MailboxInformation inbox = null;
         Error? throw_err = null;
         try {
             Imap.StatusResponse response = yield session.send_command_async(
-                new ListCommand(MailboxSpecifier.inbox, true, null), cancellable);
-            if (response.status == Imap.Status.OK && server_data_collector.size > 0)
-                inbox_specifier = MailboxInformation.decode(server_data_collector[0], false).mailbox;
+                new ListCommand(MailboxSpecifier.inbox, use_xlist, null), cancellable);
+            if (response.status == Imap.Status.OK && server_data_collector.size > 0) {
+                inbox = MailboxInformation.decode(server_data_collector[0], false);
+            }
         } catch (Error err) {
             throw_err = err;
         }
-        
+
+        if (inbox != null) {
+            inbox_specifier = inbox.mailbox;
+            hierarchy_delimiter = inbox.delim;
+            debug("[%s] INBOX specifier: %s", to_string(), inbox_specifier.to_string());
+        }
+
+        // Cleanup after setting the inbox and delim so it is immediately available for other commands
         server_data_collector = null;
-        
-        // fall back on standard name
-        if (inbox_specifier == null)
-            inbox_specifier = MailboxSpecifier.inbox;
-        
-        debug("[%s] INBOX specifier: %s", to_string(), inbox_specifier.to_string());
-        
         cmd_mutex.release(ref token);
-        
-        if (throw_err != null)
-            throw throw_err;
+
+        if (inbox == null) {
+            new ImapError.INVALID("Unable to list INBOX");
+        }
     }
     
     private async void drop_session_async(Cancellable? cancellable) {
