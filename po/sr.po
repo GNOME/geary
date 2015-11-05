@@ -4,72 +4,82 @@
 # This file is distributed under the GNU LGPL, version 2.1.
 # igorpan <mazezamte@gmail.com>, 2012
 # Мирослав Николић <miroslavnikolic@rocketmail.com>, 2014.
+# Милош Поповић <gpopac@gmail.com>, 2015.
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: geary\n"
-"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=geary&k"
-"eywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2014-12-27 05:55+0000\n"
-"PO-Revision-Date: 2014-12-27 13:41+0200\n"
-"Last-Translator: Мирослав Николић <miroslavnikolic@rocketmail.com>\n"
-"Language-Team: Serbian <gnom@prevod.org>\n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
+"product=geary&keywords=I18N+L10N&component=general\n"
+"POT-Creation-Date: 2015-10-21 05:28+0000\n"
+"PO-Revision-Date: 2015-10-21 11:09+0200\n"
+"Last-Translator: Милош Поповић <gpopac@gmail.com>\n"
+"Language-Team: српски <gnome-sr@googlegroups.org>\n"
 "Language: sr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=4; plural=n==1? 3 : n%10==1 && n%100!=11 ? 0 : "
-"n%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
+"Plural-Forms: nplurals=4; plural=n==1? 3 : n%10==1 && n%100!=11 ? 0 : n"
+"%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
 "X-Project-Style: gnome\n"
+"X-Generator: Gtranslator 2.91.7\n"
 
 #: ../desktop/geary.desktop.in.h:1 ../desktop/geary-autostart.desktop.in.h:1
 msgid "Geary"
-msgstr "Зупчинко"
+msgstr "Гери"
 
 #: ../desktop/geary.desktop.in.h:2 ../desktop/geary-autostart.desktop.in.h:2
 #: ../src/client/application/geary-application.vala:18
 msgid "Mail Client"
-msgstr "Програм за ел. пошту"
+msgstr "Програм за е-пошту"
 
 #: ../desktop/geary.desktop.in.h:3 ../desktop/geary-autostart.desktop.in.h:3
 msgid "Geary Mail"
-msgstr "Зупчинкова пошта"
+msgstr "Геријева пошта"
 
 #: ../desktop/geary.desktop.in.h:4 ../desktop/geary-autostart.desktop.in.h:4
 msgid "Send and receive email"
-msgstr "Шаљите и примајте пошту"
+msgstr "Шаље и прима е-пошту"
 
 #: ../desktop/geary.desktop.in.h:5 ../desktop/geary-autostart.desktop.in.h:5
 msgid "Email;E-mail;Mail;"
-msgstr "пошта;електронска пошта;ел. пошта;"
+msgstr ""
+"пошта;електронска пошта;ел. пошта;е-пошта;pošta;elektronska pošta;el. pošta;"
 
 #: ../desktop/geary.desktop.in.h:6
 msgid "Compose Message"
-msgstr "Саставите поруку"
+msgstr "Нова порука"
 
 #: ../desktop/geary-attach.contract.in.h:1
 msgid "Send by email"
-msgstr "Пошаљите ел. поштом"
+msgstr "Пошаљи е-поштом"
 
 #: ../desktop/geary-attach.contract.in.h:2
 msgid "Send files using Geary"
-msgstr "Пошаљите датотеке користећи Зупчинка"
+msgstr "Пошаљите датотеке помоћу Герија"
 
-#: ../src/client/accounts/account-dialog-add-edit-pane.vala:48
+#: ../src/client/accounts/account-dialog-add-edit-pane.vala:51
 #: ../src/client/components/stock.vala:31
 msgid "_Save"
 msgstr "_Сачувај"
 
-#: ../src/client/accounts/account-dialog-add-edit-pane.vala:48
+#: ../src/client/accounts/account-dialog-add-edit-pane.vala:51
 #: ../src/client/components/stock.vala:22
 msgid "_Add"
 msgstr "_Додај"
 
+#. reset/clear widgets
+#: ../src/client/accounts/account-dialog-edit-alternate-emails-pane.vala:124
+#, c-format
+msgid "Additional addresses for %s"
+msgstr "Додатне адресе за %s"
+
 #. Sets min size.
-#: ../src/client/accounts/account-dialog.vala:20
+#: ../src/client/accounts/account-dialog.vala:21
 msgid "Accounts"
 msgstr "Налози"
 
-#. Copyright 2011-2014 Yorba Foundation
+#. Copyright 2011-2015 Yorba Foundation
 #. *
 #. * This software is licensed under the GNU Lesser General Public License
 #. * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -80,95 +90,105 @@ msgstr "Налози"
 msgid "First Last"
 msgstr "Име и презиме"
 
-#: ../src/client/accounts/add-edit-page.vala:228
+#: ../src/client/accounts/add-edit-page.vala:233
 msgid "Welcome to Geary."
-msgstr "Добро дошли у Зупчинка."
+msgstr "Добро дошли у Гери."
 
-#: ../src/client/accounts/add-edit-page.vala:228
+#: ../src/client/accounts/add-edit-page.vala:233
 msgid "Enter your account information to get started."
-msgstr "Унесите податке вашег налога да започнете."
-
-#: ../src/client/accounts/add-edit-page.vala:247
-msgid "2 weeks back"
-msgstr "2 недеље уназад"
-
-#. IDs are # of days
-#: ../src/client/accounts/add-edit-page.vala:248
-msgid "1 month back"
-msgstr "1 месец уназад"
-
-#: ../src/client/accounts/add-edit-page.vala:249
-msgid "3 months back"
-msgstr "3 месеца уназад"
-
-#: ../src/client/accounts/add-edit-page.vala:250
-msgid "6 months back"
-msgstr "6 месеци уназад"
-
-#: ../src/client/accounts/add-edit-page.vala:251
-msgid "1 year back"
-msgstr "1 годину уназад"
-
-#: ../src/client/accounts/add-edit-page.vala:252
-msgid "2 years back"
-msgstr "2 године уназад"
+msgstr "Унесите податке вашег налога за почетак."
 
 #: ../src/client/accounts/add-edit-page.vala:253
+msgid "2 weeks back"
+msgstr "од пре 2 недеље"
+
+#. IDs are # of days
+#: ../src/client/accounts/add-edit-page.vala:254
+msgid "1 month back"
+msgstr "од пре 1 месеца"
+
+#: ../src/client/accounts/add-edit-page.vala:255
+msgid "3 months back"
+msgstr "од пре 3 месеци"
+
+#: ../src/client/accounts/add-edit-page.vala:256
+msgid "6 months back"
+msgstr "од пре 6 месеци"
+
+#: ../src/client/accounts/add-edit-page.vala:257
+msgid "1 year back"
+msgstr "од пре 1 године"
+
+#: ../src/client/accounts/add-edit-page.vala:258
+msgid "2 years back"
+msgstr "од пре 2 године"
+
+#: ../src/client/accounts/add-edit-page.vala:259
 msgid "4 years back"
-msgstr "4 године уназад"
+msgstr "од пре 4 година"
 
 #. Separator
-#: ../src/client/accounts/add-edit-page.vala:255
+#: ../src/client/accounts/add-edit-page.vala:261
 msgid "Everything"
 msgstr "Све"
 
-#: ../src/client/accounts/add-edit-page.vala:686
+#: ../src/client/accounts/add-edit-page.vala:280
+msgid "Edit"
+msgstr "Уређивање"
+
+#: ../src/client/accounts/add-edit-page.vala:282
+#| msgid "_Previous"
+msgid "Preview"
+msgstr "Преглед"
+
+#: ../src/client/accounts/add-edit-page.vala:723
 msgid "Remem_ber passwords"
 msgstr "_Запамти лозинке"
 
-#: ../src/client/accounts/add-edit-page.vala:693 ../ui/login.glade.h:6
+#: ../src/client/accounts/add-edit-page.vala:730 ../ui/login.glade.h:6
 msgid "Remem_ber password"
 msgstr "_Запамти лозинку"
 
-#: ../src/client/accounts/add-edit-page.vala:727
+#: ../src/client/accounts/add-edit-page.vala:764
 msgid "Unable to validate:\n"
 msgstr "Не могу да потврдим:\n"
 
-#: ../src/client/accounts/add-edit-page.vala:729
+#: ../src/client/accounts/add-edit-page.vala:766
 msgid "        &#8226; Invalid account nickname.\n"
 msgstr "        &#8226; Неисправан надимак налога.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:732
+#: ../src/client/accounts/add-edit-page.vala:769
 msgid "        &#8226; Email address already added to Geary.\n"
-msgstr "        &#8226; Адреса ел. поште је већ додата Зупчинку.\n"
+msgstr "        &#8226; Адреса е-поште је већ додата у Гери.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:736
+#: ../src/client/accounts/add-edit-page.vala:773
 msgid "        &#8226; IMAP connection error.\n"
 msgstr "        &#8226; Грешка ИМАП везе.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:739
+#: ../src/client/accounts/add-edit-page.vala:776
 msgid "        &#8226; IMAP username or password incorrect.\n"
 msgstr "        &#8226; Нетачно корисничко име или лозинка ИМАП-а.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:742
+#: ../src/client/accounts/add-edit-page.vala:779
 msgid "        &#8226; SMTP connection error.\n"
 msgstr "        &#8226; Грешка СМТП везе.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:745
+#: ../src/client/accounts/add-edit-page.vala:782
 msgid "        &#8226; SMTP username or password incorrect.\n"
 msgstr "        &#8226; Нетачно корисничко име или лозинка СМТП-а.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:749
+#: ../src/client/accounts/add-edit-page.vala:786
 msgid "        &#8226; Connection error.\n"
 msgstr "        &#8226; Грешка везе.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:753
+#: ../src/client/accounts/add-edit-page.vala:790
 msgid "        &#8226; Username or password incorrect.\n"
 msgstr "        &#8226; Нетачно корисничко име или лозинка.\n"
 
 #: ../src/client/application/geary-application.vala:19
-msgid "Copyright 2011-2014 Yorba Foundation"
-msgstr "Ауторска права 2011-2014 Јорба Фондација"
+#| msgid "Copyright 2011-2014 Yorba Foundation"
+msgid "Copyright 2011-2015 Yorba Foundation"
+msgstr "Ауторска права 2011-2015 Јорба (Yorba) Фондација"
 
 #: ../src/client/application/geary-application.vala:21
 msgid "Visit the Yorba web site"
@@ -176,11 +196,11 @@ msgstr "Посетите веб страницу Јорбе"
 
 #: ../src/client/application/geary-args.vala:10
 msgid "Start Geary with hidden main window"
-msgstr "Покреће Зупчинка са скривеним главним прозором"
+msgstr "Покреће Герија са скривеним главним прозором"
 
 #: ../src/client/application/geary-args.vala:11
 msgid "Output debugging information"
-msgstr "Исписује податке прочишћавања"
+msgstr "Испиши податке за уклањање грешака"
 
 #: ../src/client/application/geary-args.vala:12
 msgid "Log conversation monitoring"
@@ -221,7 +241,7 @@ msgstr "Бележи нормализацију фасцикле"
 
 #: ../src/client/application/geary-args.vala:25
 msgid "Allow inspection of WebView"
-msgstr "Допушта прегледање Веб прегледа"
+msgstr "Допушта прегледање Веб прегледа (WebView)"
 
 #: ../src/client/application/geary-args.vala:26
 msgid "Revoke all server certificates with TLS warnings"
@@ -239,7 +259,7 @@ msgstr "Користите „%s“ за отварање новог прозо�
 
 #: ../src/client/application/geary-args.vala:52
 msgid "Please report comments, suggestions and bugs to:"
-msgstr "Молим пријативе напомене, предлоге и грешке на:"
+msgstr "Напомене, предлоге и грешке шаљите на:"
 
 #. i18n: Command line arguments are invalid
 #: ../src/client/application/geary-args.vala:59
@@ -252,234 +272,256 @@ msgstr "Не могу да обрадим опцију линије наредб
 msgid "Unrecognized command line option \"%s\"\n"
 msgstr "Непозната опција линије наредби: %s\n"
 
-#: ../src/client/application/geary-controller.vala:56
-msgid "_Delete"
-msgstr "_Обриши"
-
-#: ../src/client/application/geary-controller.vala:57
-msgid "Delete conversation (Shift+Delete)"
-msgstr "Обришите разговор (Помак+Обриши)"
-
-#: ../src/client/application/geary-controller.vala:58
-msgid "Delete conversations (Shift+Delete)"
-msgstr "Обришите разговоре (Помак+Обриши)"
-
-#. This refers to the action ("move email to the trash"), not the Trash folder itself
 #: ../src/client/application/geary-controller.vala:62
-msgid "_Trash"
-msgstr "_Смеће"
+#| msgid "Move conversation"
+msgid "Delete conversation"
+msgstr "Обриши разговор"
 
 #: ../src/client/application/geary-controller.vala:63
-msgid "Move conversation to trash (Delete, Backspace)"
-msgstr "Преместите разговор у смеће (Обриши, Повратница)"
+msgid "Delete conversation (Shift+Delete)"
+msgstr "Обриши разговор (Shift+Del)"
 
 #: ../src/client/application/geary-controller.vala:64
-msgid "Move conversations to trash (Delete, Backspace)"
-msgstr "Преместите разговоре у смеће (Обриши, Повратница)"
+msgid "Delete conversations (Shift+Delete)"
+msgstr "Обриши разговоре (Shift+Del)"
+
+#. This refers to the action ("move email to the trash"), not the Trash folder itself
+#: ../src/client/application/geary-controller.vala:68
+#| msgid "Move conversation to trash (Delete, Backspace)"
+msgid "Move conversation to Trash (Delete, Backspace)"
+msgstr "Премести разговор у смеће (Del, Backspace)"
+
+#: ../src/client/application/geary-controller.vala:69
+#| msgid "Move conversations to trash (Delete, Backspace)"
+msgid "Move conversations to Trash (Delete, Backspace)"
+msgstr "Премести разговоре у смеће (Del, Backspace)"
 
 #. This refers to the action ("archive an email"), not the Archive folder itself
-#: ../src/client/application/geary-controller.vala:68
+#: ../src/client/application/geary-controller.vala:73
 msgid "_Archive"
 msgstr "_Архивирај"
 
-#: ../src/client/application/geary-controller.vala:69
+#: ../src/client/application/geary-controller.vala:74
 msgid "Archive conversation (A)"
-msgstr "Архивирајте разговор (А)"
+msgstr "Архивирај разговор (А)"
 
-#: ../src/client/application/geary-controller.vala:70
+#: ../src/client/application/geary-controller.vala:75
 msgid "Archive conversations (A)"
-msgstr "Архивирајте разговоре (А)"
+msgstr "Архивирај разговоре (А)"
 
-#: ../src/client/application/geary-controller.vala:73
+#: ../src/client/application/geary-controller.vala:78
 msgid "Mark as S_pam"
 msgstr "Означи као _непожељно"
 
-#: ../src/client/application/geary-controller.vala:74
+#: ../src/client/application/geary-controller.vala:79
 msgid "Mark as not S_pam"
 msgstr "Означи да није _непожељно"
 
-#: ../src/client/application/geary-controller.vala:76
-#: ../src/client/application/geary-controller.vala:296
-msgid "Mark conversation"
-msgstr "Означите разговор"
-
-#: ../src/client/application/geary-controller.vala:77
-msgid "Mark conversations"
-msgstr "Означите разговоре"
-
-#: ../src/client/application/geary-controller.vala:78
-msgid "Add label to conversation"
-msgstr "Додајте натпис разговору"
-
-#: ../src/client/application/geary-controller.vala:79
-msgid "Add label to conversations"
-msgstr "Додајте натпис разговорима"
-
-#: ../src/client/application/geary-controller.vala:80
-#: ../src/client/application/geary-controller.vala:335
-msgid "Move conversation"
-msgstr "Преместите разговор"
-
 #: ../src/client/application/geary-controller.vala:81
-msgid "Move conversations"
-msgstr "Преместите разговоре"
+#: ../src/client/application/geary-controller.vala:397
+msgid "Mark conversation"
+msgstr "Означи разговор"
 
-#: ../src/client/application/geary-controller.vala:272
+#: ../src/client/application/geary-controller.vala:82
+msgid "Mark conversations"
+msgstr "Означи разговоре"
+
+#: ../src/client/application/geary-controller.vala:83
+msgid "Add label to conversation"
+msgstr "Додај натпис разговору"
+
+#: ../src/client/application/geary-controller.vala:84
+msgid "Add label to conversations"
+msgstr "Додај натпис разговорима"
+
+#: ../src/client/application/geary-controller.vala:85
+#: ../src/client/application/geary-controller.vala:436
+msgid "Move conversation"
+msgstr "Премести разговор"
+
+#: ../src/client/application/geary-controller.vala:86
+msgid "Move conversations"
+msgstr "Премести разговоре"
+
+#: ../src/client/application/geary-controller.vala:373
+#: ../ui/app_menu.interface.h:1
 msgid "A_ccounts"
 msgstr "_Налози"
 
-#: ../src/client/application/geary-controller.vala:277
-#: ../src/client/components/stock.vala:27
+#: ../src/client/application/geary-controller.vala:378
+#: ../src/client/components/stock.vala:27 ../ui/app_menu.interface.h:2
 msgid "_Preferences"
 msgstr "_Поставке"
 
-#: ../src/client/application/geary-controller.vala:281
-#: ../src/client/components/stock.vala:25
+#: ../src/client/application/geary-controller.vala:382
+#: ../src/client/components/stock.vala:25 ../ui/app_menu.interface.h:4
 msgid "_Help"
 msgstr "По_моћ"
 
-#: ../src/client/application/geary-controller.vala:285
-#: ../src/client/components/stock.vala:21
+#: ../src/client/application/geary-controller.vala:386
+#: ../src/client/components/stock.vala:21 ../ui/app_menu.interface.h:5
 msgid "_About"
 msgstr "_О програму"
 
-#: ../src/client/application/geary-controller.vala:289
+#: ../src/client/application/geary-controller.vala:390
+#: ../ui/app_menu.interface.h:3
 msgid "_Donate"
 msgstr "До_бровољан прилог"
 
-#: ../src/client/application/geary-controller.vala:293
-#: ../src/client/components/stock.vala:29
+#: ../src/client/application/geary-controller.vala:394
+#: ../src/client/components/stock.vala:29 ../ui/app_menu.interface.h:6
 msgid "_Quit"
 msgstr "_Изађи"
 
-#: ../src/client/application/geary-controller.vala:298
+#: ../src/client/application/geary-controller.vala:399
 msgid "_Mark as..."
 msgstr "_Означи као..."
 
-#: ../src/client/application/geary-controller.vala:304
+#: ../src/client/application/geary-controller.vala:405
 msgid "Mark as _Read"
 msgstr "Означи као _прочитано"
 
-#: ../src/client/application/geary-controller.vala:310
+#: ../src/client/application/geary-controller.vala:411
 msgid "Mark as _Unread"
 msgstr "Означи као _непрочитано"
 
-#: ../src/client/application/geary-controller.vala:316
+#: ../src/client/application/geary-controller.vala:417
 msgid "_Star"
 msgstr "_Додај звездицу"
 
-#: ../src/client/application/geary-controller.vala:321
+#: ../src/client/application/geary-controller.vala:422
 msgid "U_nstar"
 msgstr "_Уклони звездицу"
 
-#: ../src/client/application/geary-controller.vala:331
+#: ../src/client/application/geary-controller.vala:432
 msgid "Add label"
-msgstr "Додајте натпис"
+msgstr "Додај натпис"
 
-#: ../src/client/application/geary-controller.vala:332
+#: ../src/client/application/geary-controller.vala:433
 msgid "_Label"
 msgstr "_Натпис"
 
-#: ../src/client/application/geary-controller.vala:336
+#: ../src/client/application/geary-controller.vala:437
 msgid "_Move"
 msgstr "_Премести"
 
-#: ../src/client/application/geary-controller.vala:340
+#: ../src/client/application/geary-controller.vala:441
 msgid "Compose new message (Ctrl+N, N)"
-msgstr "Саставите нову поруку (Ктрл+Н, Н)"
+msgstr "Саставите нову поруку (Ctrl+N, N)"
 
 #. Reply to a message.
-#: ../src/client/application/geary-controller.vala:344
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1751
+#: ../src/client/application/geary-controller.vala:445
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1857
 msgid "_Reply"
 msgstr "_Одговори"
 
-#: ../src/client/application/geary-controller.vala:345
+#: ../src/client/application/geary-controller.vala:446
 msgid "Reply (Ctrl+R, R)"
-msgstr "Одговорите (Ктрл+Р, Р)"
+msgstr "Одговорите (Ctrl+R, R)"
 
-#: ../src/client/application/geary-controller.vala:349
+#: ../src/client/application/geary-controller.vala:450
 msgid "R_eply All"
 msgstr "Одговори _свима"
 
-#: ../src/client/application/geary-controller.vala:350
+#: ../src/client/application/geary-controller.vala:451
 msgid "Reply all (Ctrl+Shift+R, Shift+R)"
-msgstr "Одговорите свима (Ктрл+Помак+Р, Помак+Р)"
+msgstr "Одговорите свима (Ctrl+Shift+R, Shift+R)"
 
 #. Forward a message.
-#: ../src/client/application/geary-controller.vala:355
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1761
+#: ../src/client/application/geary-controller.vala:456
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1867
 msgid "_Forward"
 msgstr "_Проследи"
 
-#: ../src/client/application/geary-controller.vala:356
+#: ../src/client/application/geary-controller.vala:457
 msgid "Forward (Ctrl+L, F)"
-msgstr "Проследите (Ктрл+Л, Ф)"
+msgstr "Проследите (Ctrl+L, F)"
 
-#: ../src/client/application/geary-controller.vala:624
+#: ../src/client/application/geary-controller.vala:496
+msgid "Empty"
+msgstr "Испразни"
+
+#: ../src/client/application/geary-controller.vala:497
+msgid "Empty Spam or Trash folders"
+msgstr "Испразни фасцикле с непожељном поштом или отпад"
+
+#: ../src/client/application/geary-controller.vala:501
+msgid "Empty _Spam…"
+msgstr "Испразни _непожељно…"
+
+#: ../src/client/application/geary-controller.vala:505
+msgid "Empty _Trash…"
+msgstr "Испразни _отпад…"
+
+#. No callback is connected, since we bind the toggle button to the search bar visibility
+#: ../src/client/application/geary-controller.vala:538
+msgid "Toggle search bar"
+msgstr "Приказ траке за претрагу"
+
+#: ../src/client/application/geary-controller.vala:752
 msgid "Unable to store server trust exception"
-msgstr "Не могу да причувам изузетак поверења сервера"
+msgstr "Не могу да сачувам изузетак поверења сервера"
 
-#: ../src/client/application/geary-controller.vala:861
+#: ../src/client/application/geary-controller.vala:989
 msgid "Your settings are insecure"
 msgstr "Ваша подешавања нису безбедна"
 
-#: ../src/client/application/geary-controller.vala:862
+#: ../src/client/application/geary-controller.vala:990
 msgid ""
 "Your IMAP and/or SMTP settings do not specify SSL or TLS.  This means your "
 "username and password could be read by another person on the network.  Are "
 "you sure you want to do this?"
 msgstr ""
-"Ваша ИМАП и/или СМТП подешавања не наводе ССЛ или ТЛС.  Ово значи да ваше "
+"Подешавања ИМАП и/или СМТП налога не користе ССЛ или ТЛС.  То значи да ваше "
 "корисничко име и лозинку може да прочита неко други на мрежи.  Да ли сигурно "
-"желите да урадите то?"
+"желите да наставите?"
 
-#: ../src/client/application/geary-controller.vala:863
+#: ../src/client/application/geary-controller.vala:991
 msgid "Co_ntinue"
 msgstr "_Настави"
 
 #. / Displayed in the space-limited status bar when a message fails to be sent due to error.
-#: ../src/client/application/geary-controller.vala:941
+#: ../src/client/application/geary-controller.vala:1069
 #: ../src/client/components/status-bar.vala:29
 msgid "Error sending email"
-msgstr "Грешка слања ел. поште"
+msgstr "Грешка слања е-поште"
 
-#: ../src/client/application/geary-controller.vala:942
+#: ../src/client/application/geary-controller.vala:1070
 msgid ""
 "Geary encountered an error sending an email.  If the problem persists, "
 "please manually delete the email from your Outbox folder."
 msgstr ""
-"Зупчинко је наишао на грешку шаљући ел. пошту.  Ако се проблем понови, ручно "
-"избришите ел. пошту из ваше одлазне фасцикле."
+"Гери је наишао на грешку приликом слања е-поште.  Ако се проблем понови, "
+"ручно избришите е-пошту из фасцикле „За слање“."
 
 #. Displayed in the space-limited status bar when a message fails to be uploaded
 #. to Sent Mail after being sent.
-#: ../src/client/application/geary-controller.vala:946
+#: ../src/client/application/geary-controller.vala:1074
 #: ../src/client/components/status-bar.vala:33
 msgid "Error saving sent mail"
-msgstr "Грешка чувања послате поште"
+msgstr "Грешка приликом чувања послате поште"
 
-#: ../src/client/application/geary-controller.vala:947
+#: ../src/client/application/geary-controller.vala:1075
 msgid ""
 "Geary encountered an error saving a sent message to Sent Mail.  The message "
 "will stay in your Outbox folder until you delete it."
 msgstr ""
-"Зупчинко је наишао на грешку чувања послате поруке у „Послато“.  Порука ће "
-"остати у вашој фасцикли за слање све док је не избришете."
+"Гери је наишао на грешку приликом чувања поруке у „Послато“.  Порука ће "
+"остати у вашој фасцикли „За слање“ све док је не избришете."
 
-#: ../src/client/application/geary-controller.vala:1016
+#: ../src/client/application/geary-controller.vala:1144
 msgid "Labels"
 msgstr "Натписи"
 
 #. give the user two options: reset the Account local store, or exit Geary.  A third
 #. could be done to leave the Account in an unopened state, but we don't currently
 #. have provisions for that.
-#: ../src/client/application/geary-controller.vala:1028
+#: ../src/client/application/geary-controller.vala:1156
 #, c-format
 msgid "Unable to open the database for %s"
 msgstr "Не могу да отворим базу података за „%s“"
 
-#: ../src/client/application/geary-controller.vala:1029
+#: ../src/client/application/geary-controller.vala:1157
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -492,32 +534,31 @@ msgid ""
 "Rebuilding the database will destroy all local email and its attachments. "
 "<b>The mail on the your server will not be affected.</b>"
 msgstr ""
-"Дошло је до грешке отварања месне базе података поште за овај налог. "
-"Највероватније због оштећености датотеке базе података у овом "
-"директоријуму:\n"
+"Дошло је до грешке отварања локалне базе поште за овај налог. Највероватније "
+"је оштећена датотека са базом података у овом директоријуму:\n"
 "\n"
 "%s\n"
 "\n"
-"Зупчинко може поново да изгради базу података и да је поново усагласи са "
+"Гери може поново да изгради базу података и да је поново усагласи са "
 "сервером или да изађе.\n"
 "\n"
-"Поновна изградња базе података ће уништити сву месну ел. пошту и њене "
-"прилоге. <b>Пошта на вашем серверу ће остати нетакнута.</b>"
+"Поновна изградња базе података ће уништити е-пошту коју чувате на вашем "
+"рачунару и њене прилоге. <b>Пошта на вашем серверу ће остати нетакнута.</b>"
 
-#: ../src/client/application/geary-controller.vala:1031
+#: ../src/client/application/geary-controller.vala:1159
 msgid "_Rebuild"
 msgstr "Поново _изгради"
 
-#: ../src/client/application/geary-controller.vala:1031
+#: ../src/client/application/geary-controller.vala:1159
 msgid "E_xit"
 msgstr "_Изађи"
 
-#: ../src/client/application/geary-controller.vala:1040
+#: ../src/client/application/geary-controller.vala:1168
 #, c-format
 msgid "Unable to rebuild database for \"%s\""
-msgstr "Не могу поново да изградим базу података за „%s“"
+msgstr "Не могу да поново изградим базу података за „%s“"
 
-#: ../src/client/application/geary-controller.vala:1041
+#: ../src/client/application/geary-controller.vala:1169
 #, c-format
 msgid ""
 "Error during rebuild:\n"
@@ -530,14 +571,14 @@ msgstr ""
 
 #. some other problem opening the account ... as with other flow path, can't run
 #. Geary today with an account in unopened state, so have to exit
-#: ../src/client/application/geary-controller.vala:1063
-#: ../src/client/application/geary-controller.vala:1073
-#: ../src/client/application/geary-controller.vala:1084
+#: ../src/client/application/geary-controller.vala:1191
+#: ../src/client/application/geary-controller.vala:1201
+#: ../src/client/application/geary-controller.vala:1212
 #, c-format
 msgid "Unable to open local mailbox for %s"
-msgstr "Не могу да отворим месно сандуче за „%s“"
+msgstr "Не могу да отворим локално сандуче за „%s“"
 
-#: ../src/client/application/geary-controller.vala:1064
+#: ../src/client/application/geary-controller.vala:1192
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -548,15 +589,15 @@ msgid ""
 "\n"
 "%s"
 msgstr ""
-"Дошло је до грешке отварања месне базе података поште за овај налог. "
-"Вероватно због проблема са овлашћењима датотеке.\n"
+"Дошло је до грешке приликом отварања локалне базе поште за овај налог. "
+"Вероватно постоји проблем са овлашћењима за приступ датотеци.\n"
 "\n"
 "Проверите да ли имате дозволе читања/писања за све датотеке у овом "
 "директоријуму:\n"
 "\n"
 "%s"
 
-#: ../src/client/application/geary-controller.vala:1074
+#: ../src/client/application/geary-controller.vala:1202
 msgid ""
 "The version number of the local mail database is formatted for a newer "
 "version of Geary. Unfortunately, the database cannot be \"rolled back\" to "
@@ -564,44 +605,50 @@ msgid ""
 "\n"
 "Please install the latest version of Geary and try again."
 msgstr ""
-"Број издања месне базе података поште је обликован за новије издање "
-"Зупчинка. Нажалост, база података не може бити „враћена назад“ да би радила "
-"са овим издањем Зупчинка.\n"
+"Број издања локане базе поште је обликован за новије издање Герија. "
+"Нажалост, база података не може бити „враћена назад“ да би радила са овим "
+"издањем.\n"
 "\n"
-"Инсталирајте најновије издање Зупчинка и покушајте поново."
+"Инсталирајте најновије издање Герија и покушајте поново."
 
-#: ../src/client/application/geary-controller.vala:1085
+#: ../src/client/application/geary-controller.vala:1213
 msgid ""
 "There was an error opening the local account. This is probably due to "
 "connectivity issues.\n"
 "\n"
 "Please check your network connection and restart Geary."
 msgstr ""
-"Дошло је до грешке отварања месног налога. Вероватно због неприлика "
-"повезивања.\n"
+"Дошло је до грешке приликом отварања локалног налога. Вероватно постоји "
+"проблем са мрежном везом.\n"
 "\n"
-"Проверите вашу мрежну везу и поново покрените Зупчинка."
+"Проверите вашу мрежу и поново покрените Герија."
 
-#: ../src/client/application/geary-controller.vala:1592
+#: ../src/client/application/geary-controller.vala:1721
 #, c-format
 msgid "About %s"
 msgstr "О програму „%s“"
 
 #. / Translators: add your name and email address to receive credit in the About dialog
 #. / For example: Yamada Taro <yamada.taro@example.com>
-#: ../src/client/application/geary-controller.vala:1595
+#: ../src/client/application/geary-controller.vala:1724
 msgid "translator-credits"
 msgstr ""
 "Мирослав Николић <miroslavnikolic@rocketmail.com>\n"
+"Милош Поповић <gpopac@gmail.com>\n"
 "\n"
 "http://prevod.org — превод на српски језик"
 
-#: ../src/client/application/geary-controller.vala:1859
+#: ../src/client/application/geary-controller.vala:1990
+#| msgid "Underline (Ctrl+U)"
+msgid "Undo move (Ctrl+Z)"
+msgstr "Опозови (Ctrl+Z)"
+
+#: ../src/client/application/geary-controller.vala:2000
 #, c-format
 msgid "Are you sure you want to open \"%s\"?"
 msgstr "Да ли сте сигурни да желите да отворите „%s“?"
 
-#: ../src/client/application/geary-controller.vala:1860
+#: ../src/client/application/geary-controller.vala:2001
 msgid ""
 "Attachments may cause damage to your system if opened.  Only open files from "
 "trusted sources."
@@ -609,33 +656,58 @@ msgstr ""
 "Приложене датотеке могу да оштете систем ако се отворе. Отворите датотеке "
 "само са поверљивих извора."
 
-#: ../src/client/application/geary-controller.vala:1861
+#: ../src/client/application/geary-controller.vala:2002
 msgid "Don't _ask me again"
 msgstr "Не питај ме _поново"
 
-#: ../src/client/application/geary-controller.vala:1879
+#: ../src/client/application/geary-controller.vala:2020
 #, c-format
 msgid "A file named \"%s\" already exists.  Do you want to replace it?"
 msgstr "Датотека под називом „%s“ већ постоји.  Да ли желите да је замените?"
 
-#: ../src/client/application/geary-controller.vala:1881
+#: ../src/client/application/geary-controller.vala:2022
 #, c-format
 msgid ""
 "The file already exists in \"%s\".  Replacing it will overwrite its contents."
 msgstr ""
 "Датотека већ постоји у „%s“.  Уколико је замените преписаћете њен садржај."
 
-#: ../src/client/application/geary-controller.vala:1884
+#: ../src/client/application/geary-controller.vala:2025
 msgid "_Replace"
 msgstr "_Замени"
 
 #. Find out what to do with the inline composers.
 #. TODO: Remove this in favor of automatically saving drafts
-#: ../src/client/application/geary-controller.vala:2166
+#: ../src/client/application/geary-controller.vala:2323
 msgid "Close open draft messages?"
-msgstr "Да затворим отворене поруке нацрта?"
+msgstr "Да затворим отворене поруке с нацртима?"
 
-#: ../src/client/application/geary-controller.vala:2269
+#: ../src/client/application/geary-controller.vala:2453
+#, c-format
+msgid "Empty all email from your %s folder?"
+msgstr "Да испразним е-пошту из фасцикле „%s“?"
+
+#: ../src/client/application/geary-controller.vala:2454
+msgid "This removes the email from Geary and your email server."
+msgstr "Ово ће уклонити пошту из Герија и на серверима ваше е-поште."
+
+#: ../src/client/application/geary-controller.vala:2455
+#| msgid "\"%s\" could not be found."
+msgid "This cannot be undone."
+msgstr "Не можете да опозовете ову радњу."
+
+#: ../src/client/application/geary-controller.vala:2456
+#, c-format
+msgid "Empty %s"
+msgstr "Испразни „%s“"
+
+#: ../src/client/application/geary-controller.vala:2473
+#, c-format
+#| msgid "Error saving"
+msgid "Error emptying %s"
+msgstr "Грешка приликом пражњења „%s“"
+
+#: ../src/client/application/geary-controller.vala:2503
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Да ли желите трајно да обришете ову поруку?"
@@ -643,9 +715,24 @@ msgstr[1] "Да ли желите трајно да обришете ове по
 msgstr[2] "Да ли желите трајно да обришете ове поруке?"
 msgstr[3] "Да ли желите трајно да обришете ову поруку?"
 
-#: ../src/client/application/geary-controller.vala:2271
+#: ../src/client/application/geary-controller.vala:2505
 msgid "Delete"
 msgstr "Обриши"
+
+#: ../src/client/application/geary-controller.vala:2536
+#| msgid "Underline (Ctrl+U)"
+msgid "Undo archive (Ctrl+Z)"
+msgstr "Опозови архивирање (Ctrl+Z)"
+
+#: ../src/client/application/geary-controller.vala:2551
+#| msgid "Unquote text (Ctrl+[)"
+msgid "Undo trash (Ctrl+Z)"
+msgstr "Опозови брисање (Ctrl+Z)"
+
+#: ../src/client/application/geary-controller.vala:2604
+#| msgid "Underline (Ctrl+U)"
+msgid "Undo (Ctrl+Z)"
+msgstr "Опозови (Ctrl+Z)"
 
 #: ../src/client/components/conversation-find-bar.vala:214
 #, c-format
@@ -667,47 +754,46 @@ msgstr[3] "%i резултат (умотано)"
 
 #: ../src/client/components/conversation-find-bar.vala:218
 msgid "not found"
-msgstr "нисам нашао"
+msgstr "није нађено"
 
-#: ../src/client/components/main-toolbar.vala:11
+#: ../src/client/components/main-window.vala:430
+#, c-format
+msgid "%s (%d)"
+msgstr "%s (%d)"
+
+#: ../src/client/components/search-bar.vala:10
 #: ../src/client/folder-list/folder-list-search-branch.vala:38
 #: ../src/engine/api/geary-special-folder-type.vala:51
 msgid "Search"
 msgstr "Потражи"
 
-#. Search bar.
-#: ../src/client/components/main-toolbar.vala:78
+#. Search entry.
+#: ../src/client/components/search-bar.vala:25
 msgid "Search all mail in account for keywords (Ctrl+S)"
-msgstr "Потражите кључне речи у свим порукама у налогу (Ктрл+С)"
+msgstr "Потражите кључне речи у свим порукама у налогу (Ctrl+S)"
 
-#: ../src/client/components/main-toolbar.vala:210
+#: ../src/client/components/search-bar.vala:118
 #, c-format
 msgid "Indexing %s account"
 msgstr "Пописујем налог „%s“"
 
-#: ../src/client/components/main-toolbar.vala:221
+#: ../src/client/components/search-bar.vala:129
 #: ../src/client/folder-list/folder-list-search-branch.vala:39
 #, c-format
 msgid "Search %s account"
 msgstr "Тражим налог „%s“"
-
-#: ../src/client/components/main-window.vala:347
-#, c-format
-msgid "%s (%d)"
-msgstr "%s (%d)"
 
 #. / Displayed in the space-limited status bar while a message is in the process of being sent.
 #: ../src/client/components/status-bar.vala:26
 msgid "Sending..."
 msgstr "Шаљем..."
 
-#: ../src/client/components/stock.vala:18
-#: ../ui/account_cannot_remove.glade.h:3
+#: ../src/client/components/stock.vala:18 ../ui/account_cannot_remove.glade.h:3
 msgid "_OK"
 msgstr "У _реду"
 
-#: ../src/client/components/stock.vala:19 ../ui/password-dialog.glade.h:5
-#: ../ui/remove_confirm.glade.h:5
+#: ../src/client/components/stock.vala:19 ../ui/edit_alternate_emails.glade.h:3
+#: ../ui/password-dialog.glade.h:5 ../ui/remove_confirm.glade.h:5
 msgid "_Cancel"
 msgstr "От_кажи"
 
@@ -733,7 +819,7 @@ msgstr "_Уклони"
 
 #. Select all.
 #: ../src/client/components/stock.vala:32
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1218
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1324
 msgid "Select _All"
 msgstr "Изабери _све"
 
@@ -741,194 +827,193 @@ msgstr "Изабери _све"
 msgid "_Keep"
 msgstr "_Задржи"
 
-#: ../src/client/composer/composer-widget.vala:58
+#: ../src/client/composer/composer-widget.vala:73
 msgid "Saved"
 msgstr "Сачувана"
 
-#: ../src/client/composer/composer-widget.vala:59
+#: ../src/client/composer/composer-widget.vala:74
 msgid "Saving"
 msgstr "Чувам"
 
-#: ../src/client/composer/composer-widget.vala:60
+#: ../src/client/composer/composer-widget.vala:75
 msgid "Error saving"
-msgstr "Грешка чувања"
+msgstr "Грешка приликом чувања"
+
+#: ../src/client/composer/composer-widget.vala:76
+msgid "Press Backspace to delete quote"
+msgstr "Притисните Backspace за брисање наводника"
+
+#: ../src/client/composer/composer-widget.vala:77
+msgid "New Message"
+msgstr "Нова порука"
 
 #. A list of keywords, separated by pipe ("|") characters, that suggest an attachment; since
 #. this is full-word checking, include all variants of each word.  No spaces are allowed.
-#: ../src/client/composer/composer-widget.vala:121
+#: ../src/client/composer/composer-widget.vala:138
 msgid ""
 "attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|"
 "enclosing|encloses|enclosure|enclosures"
 msgstr ""
-"приложи|прилагање|прилог|прилози|прилагања|приложен|приложена|приложено"
+"прилог|прилогу|прилажем|атачмент|атачменту|attach|attaching|attaches|"
+"attachment|attachments|attached|enclose|enclosed|enclosing|encloses|"
+"enclosure|enclosures|prilog|prilogu|prilažem|atačment|atačmentu"
 
-#: ../src/client/composer/composer-widget.vala:907
-msgid "Do you want to discard the unsaved message?"
-msgstr "Да ли желите да одбаците несачувану поруку?"
-
-#: ../src/client/composer/composer-widget.vala:910
-#: ../src/client/composer/composer-widget.vala:914
+#: ../src/client/composer/composer-widget.vala:1102
+#: ../src/client/composer/composer-widget.vala:1106
 msgid "Do you want to discard this message?"
 msgstr "Да ли желите да одбаците ову поруку?"
 
-#: ../src/client/composer/composer-widget.vala:1027
+#: ../src/client/composer/composer-widget.vala:1262
 msgid "Send message with an empty subject and body?"
-msgstr "Да пошаљем поруку са празним насловом и разрадом?"
+msgstr "Да пошаљем поруку са празним насловом и текстом?"
 
-#: ../src/client/composer/composer-widget.vala:1029
+#: ../src/client/composer/composer-widget.vala:1264
 msgid "Send message with an empty subject?"
 msgstr "Да пошаљем поруку са празним насловом?"
 
-#: ../src/client/composer/composer-widget.vala:1031
+#: ../src/client/composer/composer-widget.vala:1266
 msgid "Send message with an empty body?"
-msgstr "Да пошаљем поруку са празном разрадом?"
+msgstr "Да пошаљем поруку без икаквог текста?"
 
-#: ../src/client/composer/composer-widget.vala:1033
+#: ../src/client/composer/composer-widget.vala:1268
 msgid "Send message without an attachment?"
 msgstr "Да пошаљем поруку без прилога?"
 
-#: ../src/client/composer/composer-widget.vala:1216
+#: ../src/client/composer/composer-widget.vala:1530
 msgid "Cannot add attachment"
 msgstr "Не могу да додам прилог"
 
-#: ../src/client/composer/composer-widget.vala:1227
+#: ../src/client/composer/composer-widget.vala:1541
 #, c-format
 msgid "\"%s\" could not be found."
 msgstr "Не могу да пронађем „%s“."
 
-#: ../src/client/composer/composer-widget.vala:1234
+#: ../src/client/composer/composer-widget.vala:1548
 #, c-format
 msgid "\"%s\" is a folder."
 msgstr "„%s“ је фасцикла."
 
-#: ../src/client/composer/composer-widget.vala:1241
+#: ../src/client/composer/composer-widget.vala:1555
 #, c-format
 msgid "\"%s\" is an empty file."
 msgstr "„%s“ је празна датотека."
 
-#: ../src/client/composer/composer-widget.vala:1255
+#: ../src/client/composer/composer-widget.vala:1569
 #, c-format
 msgid "\"%s\" could not be opened for reading."
 msgstr "Не могу да отворим „%s“ за читање."
 
-#: ../src/client/composer/composer-widget.vala:1262
+#: ../src/client/composer/composer-widget.vala:1576
 #, c-format
 msgid "\"%s\" already attached for delivery."
 msgstr "„%s“ је већ приложено за испоруку."
 
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
-#: ../src/client/composer/composer-widget.vala:1271
+#: ../src/client/composer/composer-widget.vala:1585
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: ../src/client/composer/composer-widget.vala:1331
+#: ../src/client/composer/composer-widget.vala:1645
 msgid "To: "
 msgstr "Прима: "
 
-#: ../src/client/composer/composer-widget.vala:1334
+#: ../src/client/composer/composer-widget.vala:1648
 msgid "Cc: "
-msgstr "Уу: "
+msgstr "Цц: "
 
-#: ../src/client/composer/composer-widget.vala:1337
+#: ../src/client/composer/composer-widget.vala:1651
 msgid "Bcc: "
-msgstr "Нуу: "
+msgstr "Бцц: "
 
-#: ../src/client/composer/composer-widget.vala:1340
-#| msgid "_Reply"
+#: ../src/client/composer/composer-widget.vala:1654
 msgid "Reply-To: "
-msgstr "Одговори: "
+msgstr "Одговор за: "
 
-#: ../src/client/composer/composer-widget.vala:1573
+#: ../src/client/composer/composer-widget.vala:1887
 msgid "Select Color"
 msgstr "Изаберите боју"
 
+#. Displayed in the From dropdown to indicate an "alternate email address"
+#. for an account.  The first printf argument will be the alternate email
+#. address, and the second will be the account's primary email address.
+#: ../src/client/composer/composer-widget.vala:2322
+#, c-format
+msgid "%1$s via %2$s"
+msgstr "%1$s преко %2$s"
+
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: ../src/client/composer/composer-widget.vala:2022
+#: ../src/client/composer/composer-widget.vala:2364
 msgid "_From:"
 msgstr "_Шаље:"
-
-#. For other types of messages, just show the from account.
-#. Composer label (without mnemonic underscore) for the account selector
-#. when choosing what address to send a message from.
-#: ../src/client/composer/composer-widget.vala:2038
-#: ../src/client/conversation-viewer/conversation-viewer.vala:734
-msgid "From:"
-msgstr "Шаље:"
-
-#. Copyright 2011-2014 Yorba Foundation
-#. *
-#. * This software is licensed under the GNU Lesser General Public License
-#. * (version 2.1 or later).  See the COPYING file in this distribution.
-#.
-#. Window for sending messages.
-#: ../src/client/composer/composer-window.vala:10
-msgid "New Message"
-msgstr "Нова порука"
 
 #: ../src/client/conversation-list/formatted-conversation-data.vala:11
 msgid "Me"
 msgstr "Ја"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:338
+#: ../src/client/conversation-viewer/conversation-viewer.vala:413
 msgid "No conversations selected."
-msgstr "Нема изабраних разговора."
+msgstr "Није изабран разговор."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:340
+#: ../src/client/conversation-viewer/conversation-viewer.vala:415
 #, c-format
 msgid "%u conversation selected."
 msgid_plural "%u conversations selected."
-msgstr[0] "%u разговор је изабран."
-msgstr[1] "%u разговора су изабрана."
-msgstr[2] "%u разговора је изабрано."
-msgstr[3] "%u разговор је изабран."
+msgstr[0] "Изабран је %u разговор."
+msgstr[1] "Изабрана су %u разговора."
+msgstr[2] "Изабрано је %u разговора."
+msgstr[3] "Изабран је %u разговор."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:369
+#: ../src/client/conversation-viewer/conversation-viewer.vala:444
 msgid "No search results found."
 msgstr "Нема резултата претраге."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:371
+#: ../src/client/conversation-viewer/conversation-viewer.vala:446
 msgid "No conversations in folder."
 msgstr "Нема разговора у фасцикли."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:633
+#: ../src/client/conversation-viewer/conversation-viewer.vala:708
 msgid "This message contains remote images."
-msgstr "Ова порука садржи удаљене слике."
+msgstr "Ова порука садржи непреузете слике."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:633
+#: ../src/client/conversation-viewer/conversation-viewer.vala:708
 msgid "Show Images"
-msgstr "Прикажите слике"
+msgstr "Прикажи слике"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:634
+#: ../src/client/conversation-viewer/conversation-viewer.vala:709
 msgid "Always Show From Sender"
-msgstr "Увек прикажи од пошиљаоца"
+msgstr "Увек прикажи од овог пошиљаоца"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:658
+#: ../src/client/conversation-viewer/conversation-viewer.vala:733
 msgid "Edit Draft"
-msgstr "Уредите нацрт"
+msgstr "Уреди нацрт"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:737
+#: ../src/client/conversation-viewer/conversation-viewer.vala:809
+msgid "From:"
+msgstr "Шаље:"
+
+#: ../src/client/conversation-viewer/conversation-viewer.vala:812
 msgid "To:"
 msgstr "Прима:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:740
+#: ../src/client/conversation-viewer/conversation-viewer.vala:815
 msgid "Cc:"
 msgstr "Цц:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:743
+#: ../src/client/conversation-viewer/conversation-viewer.vala:818
 msgid "Bcc:"
 msgstr "Бцц:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:746
+#: ../src/client/conversation-viewer/conversation-viewer.vala:821
 msgid "Subject:"
 msgstr "Наслов:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:749
+#: ../src/client/conversation-viewer/conversation-viewer.vala:824
 msgid "Date:"
 msgstr "Датум:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1033
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1139
 #, c-format
 msgid "%u read message"
 msgid_plural "%u read messages"
@@ -937,64 +1022,64 @@ msgstr[1] "%u нове поруке"
 msgstr[2] "%u нових порука"
 msgstr[3] "%u нова порука"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1165
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1271
 #, c-format
 msgid "This message was sent successfully, but could not be saved to %s."
 msgstr "Ова порука је успешно послата, али не може бити сачувана у „%s“."
 
 #. Add a menu item for copying the current selection.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1191
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1297
 #: ../ui/composer.glade.h:4
 msgid "_Copy"
 msgstr "_Умножи"
 
 #. Add a menu item for copying the address.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1199
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1305
 msgid "Copy _Email Address"
-msgstr "Умножи адресу _ел. поште"
+msgstr "Умножи адресу _е-поште"
 
 #. Add a menu item for copying the link.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1204
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1310
 #: ../ui/composer.glade.h:17
 msgid "Copy _Link"
 msgstr "Умножи _везу"
 
 #. Select message.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1212
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1318
 msgid "Select _Message"
 msgstr "Изабери _поруку"
 
 #. Inspect.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1224
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1330
 msgid "_Inspect"
 msgstr "_Провери"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1450
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1556
 msgid "This link appears to go to"
 msgstr "Ова веза изгледа као да води до"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1451
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1557
 msgid "but actually goes to"
 msgstr "али заправо води до"
 
 #. If href doesn't look like a URL, something is fishy, so warn the user
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1506
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1612
 msgid " (Invalid?)"
 msgstr " (Неисправно?)"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1612
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1718
 msgid "_Save Image As..."
 msgstr "_Сачувај слику као..."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1716
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1822
 msgid "_Save As..."
 msgstr "_Сачувај као..."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1721
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1827
 msgid "Save All A_ttachments..."
 msgstr "Сачувај све _прилоге..."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1741
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1847
 msgid "Save A_ttachment..."
 msgid_plural "Save All A_ttachments..."
 msgstr[0] "Сачувај _прилог..."
@@ -1003,39 +1088,39 @@ msgstr[2] "Сачувај _прилоге..."
 msgstr[3] "Сачувај _прилог..."
 
 #. Reply to all on a message.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1756
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1862
 msgid "Reply to _All"
 msgstr "Одговори _свима"
 
 #. Mark as read/unread.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1773
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1879
 msgid "_Mark as Read"
 msgstr "_Означи као прочитано"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1777
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1883
 msgid "_Mark as Unread"
 msgstr "_Означи као непрочитано"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1783
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1889
 msgid "Mark Unread From _Here"
 msgstr "Означи као непрочитано _одавде"
 
 #. Separator.
 #. View original message source.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1798
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1904
 msgid "_View Source"
 msgstr "_Погледај извор"
 
 #. Generate the attachment table.
 #. / Placeholder filename for attachments with no filename.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:2122
-#: ../src/engine/rfc822/rfc822-utils.vala:331
+#: ../src/client/conversation-viewer/conversation-viewer.vala:2227
+#: ../src/engine/rfc822/rfc822-utils.vala:378
 msgid "none"
 msgstr "ништа"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:2257
+#: ../src/client/conversation-viewer/conversation-viewer.vala:2362
 msgid "Failed to open default text editor."
-msgstr "Нисам успео да отворим основног уређивача текста."
+msgstr "Не могу да отворим подразумевани уредник текста."
 
 #: ../src/client/conversation-viewer/conversation-web-view.vala:322
 #, c-format
@@ -1073,31 +1158,30 @@ msgid ""
 "Selecting \"Don't Trust This Server\" will cause Geary not to access this "
 "server."
 msgstr ""
-"Ако изаберете „Не веруј овом серверу“ тада Зупчинко неће приступити овом "
-"серверу."
+"Ако изаберете „Не веруј овом серверу“ тада Гери неће приступити овом серверу."
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:54
 msgid "Geary will not add or update this email account."
-msgstr "Зупчинко неће додати или освежити овај налог ел. поште."
+msgstr "Гери неће додати или освежити овај налог е-поште."
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:59
 msgid ""
 "Selecting \"Don't Trust This Server\" will cause Geary to stop accessing "
 "this account."
 msgstr ""
-"Ако изаберете „Не веруј овом серверу“ тада ће Зупчинко зауставити приступање "
+"Ако изаберете „Не веруј овом серверу“ тада ће Гери зауставити приступање "
 "овом серверу."
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:61
 msgid "Geary will exit if you have no other open email accounts."
-msgstr "Зупчинко ће изаћи ако немате других отворених налога ел. поште."
+msgstr "Гери ће изаћи ако немате других отворених налога е-поште."
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:66
 msgid ""
 "Contact your system administrator or email service provider if you have any "
 "question about these issues."
 msgstr ""
-"Обратите се вашем администратору система или достављачу услуге ел. поште ако "
+"Обратите се вашем администратору система или достављачу услуге е-поште ако "
 "имате неко питање о овим проблемима."
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:73
@@ -1133,7 +1217,7 @@ msgstr "Дошло је до грешке приликом обраде увер
 #. details: https://bugzilla.gnome.org/show_bug.cgi?id=679006
 #: ../src/client/dialogs/password-dialog.vala:16
 msgid "Geary requires your email password to continue"
-msgstr "Зупчинко захтева вашу лозинку ел. поште да би наставио"
+msgstr "Гери захтева лозинку ваше е-поште да би наставио"
 
 #. Label displaying total number of email messages in a folder
 #: ../src/client/folder-list/folder-list-folder-entry.vala:32
@@ -1165,7 +1249,7 @@ msgstr "%s, %s"
 
 #: ../src/client/folder-list/folder-list-inboxes-branch.vala:14
 msgid "Inboxes"
-msgstr "Сандуче"
+msgstr "Пријемни сандучићи"
 
 #: ../src/client/folder-list/folder-list-search-branch.vala:44
 #, c-format
@@ -1309,7 +1393,7 @@ msgid "%A"
 msgstr "%A"
 
 #: ../src/client/util/util-email.vala:30
-#: ../src/engine/rfc822/rfc822-message.vala:747
+#: ../src/engine/rfc822/rfc822-message.vala:781
 msgid "(no subject)"
 msgstr "(без наслова)"
 
@@ -1337,17 +1421,9 @@ msgctxt "Abbreviation for kilobyte"
 msgid "KB"
 msgstr "KB"
 
-#: ../src/engine/api/geary-service.vala:20
-msgid "IMAP"
-msgstr "ИМАП"
-
-#: ../src/engine/api/geary-service.vala:23
-msgid "SMTP"
-msgstr "СМТП"
-
 #: ../src/engine/api/geary-service-provider.vala:52
 msgid "Gmail"
-msgstr "Г-пошта"
+msgstr "Гуглова пошта"
 
 #: ../src/engine/api/geary-service-provider.vala:55
 msgid "Yahoo! Mail"
@@ -1355,11 +1431,19 @@ msgstr "Јаху! пошта"
 
 #: ../src/engine/api/geary-service-provider.vala:58
 msgid "Outlook.com"
-msgstr "Аутлук.ком"
+msgstr "Outlook.com"
 
 #: ../src/engine/api/geary-service-provider.vala:61
 msgid "Other"
 msgstr "Друга"
+
+#: ../src/engine/api/geary-service.vala:20
+msgid "IMAP"
+msgstr "ИМАП"
+
+#: ../src/engine/api/geary-service.vala:23
+msgid "SMTP"
+msgstr "СМТП"
 
 #: ../src/engine/api/geary-special-folder-type.vala:24
 msgid "Inbox"
@@ -1401,7 +1485,7 @@ msgstr "Одлазна"
 msgid "Archive"
 msgstr "Архива"
 
-#: ../src/engine/api/geary-special-folder-type.vala:58 ../ui/login.glade.h:25
+#: ../src/engine/api/geary-special-folder-type.vala:58 ../ui/login.glade.h:26
 msgid "None"
 msgstr "Ништа"
 
@@ -1409,7 +1493,7 @@ msgstr "Ништа"
 #. / Can be typed in the search box like attachment:file.txt to find
 #. / messages with attachments with a particular name.  The translated
 #. / string must match the string in Geary's help documentation.
-#: ../src/engine/imap-db/imap-db-account.vala:665
+#: ../src/engine/imap-db/imap-db-account.vala:710
 msgid "attachment"
 msgstr "прилог"
 
@@ -1417,144 +1501,143 @@ msgstr "прилог"
 #. / messages bcc'd to a particular person.  The translated
 #. / string must match the string in Geary's help documentation.
 #. Fields we allow the token to be "me" as in from:me.
-#: ../src/engine/imap-db/imap-db-account.vala:669
-#: ../src/engine/imap-db/imap-db-account.vala:693
+#: ../src/engine/imap-db/imap-db-account.vala:714
+#: ../src/engine/imap-db/imap-db-account.vala:738
 msgid "bcc"
 msgstr "бцц"
 
 #. / Can be typed in the search box like body:word to find the word only
 #. / if it occurs in the body of a message.  The translated
 #. / string must match the string in Geary's help documentation.
-#: ../src/engine/imap-db/imap-db-account.vala:673
+#: ../src/engine/imap-db/imap-db-account.vala:718
 msgid "body"
-msgstr "разрада"
+msgstr "текст поруке"
 
 #. / Can be typed in the search box like cc:johndoe@example.com to find
 #. / messages cc'd to a particular person.  The translated
 #. / string must match the string in Geary's help documentation.
-#: ../src/engine/imap-db/imap-db-account.vala:677
-#: ../src/engine/imap-db/imap-db-account.vala:693
+#: ../src/engine/imap-db/imap-db-account.vala:722
+#: ../src/engine/imap-db/imap-db-account.vala:738
 msgid "cc"
 msgstr "цц"
 
 #. / Can be typed in the search box like from:johndoe@example.com to
 #. / find messages from a particular sender.  The translated
 #. / string must match the string in Geary's help documentation.
-#: ../src/engine/imap-db/imap-db-account.vala:681
-#: ../src/engine/imap-db/imap-db-account.vala:693
+#: ../src/engine/imap-db/imap-db-account.vala:726
+#: ../src/engine/imap-db/imap-db-account.vala:738
 msgid "from"
 msgstr "шаље"
 
 #. / Can be typed in the search box like subject:word to find the word
 #. / only if it occurs in the subject of a message.  The translated
 #. / string must match the string in Geary's help documentation.
-#: ../src/engine/imap-db/imap-db-account.vala:685
+#: ../src/engine/imap-db/imap-db-account.vala:730
 msgid "subject"
 msgstr "наслов"
 
 #. / Can be typed in the search box like to:johndoe@example.com to find
 #. / messages received by a particular person.  The translated
 #. / string must match the string in Geary's help documentation.
-#: ../src/engine/imap-db/imap-db-account.vala:689
-#: ../src/engine/imap-db/imap-db-account.vala:693
+#: ../src/engine/imap-db/imap-db-account.vala:734
+#: ../src/engine/imap-db/imap-db-account.vala:738
 msgid "to"
 msgstr "прима"
 
 #. "me" can be typed like from:me or cc:me, etc. as a shorthand
 #. to find mail to or from yourself in search.  The translated
 #. string must match the string in Geary's help documentation.
-#: ../src/engine/imap-db/imap-db-account.vala:709
+#: ../src/engine/imap-db/imap-db-account.vala:754
 msgid "me"
 msgstr "моја"
 
 #. List of folder names to match for Drafts, separated by |.  Please add localized common
 #. names for the Drafts folder, leaving in the English names as well.  The first in the list
 #. will be the default, so please add the most common localized name to the front.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:536
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:575
 msgid "Drafts | Draft"
 msgstr "Нацрти | Нацрт | Drafts | Draft"
 
 #. List of folder names to match for Sent Mail, separated by |.  Please add localized common
 #. names for the Sent Mail folder, leaving in the English names as well.  The first in the list
 #. will be the default, so please add the most common localized name to the front.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:541
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:580
 msgid "Sent | Sent Mail | Sent Email | Sent E-Mail"
 msgstr ""
-"Послато | Послата пошта | Послата ел. пошта | Sent | Sent Mail | Sent Email "
-"| Sent E-Mail"
+"Послато | Послата пошта | Послата е-пошта | Sent | Sent Mail | Sent Email | "
+"Sent E-Mail"
 
 #. List of folder names to match for Spam, separated by |.  Please add localized common
 #. names for the Spam folder, leaving in the English names as well.  The first in the list
 #. will be the default, so please add the most common localized name to the front.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:546
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:585
 msgid ""
 "Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email "
 "| Bulk E-Mail"
 msgstr ""
-"Ђубре | Спам | Непожељна | Непожељна пошта | Непожељна ел. пошта | Junk | "
-"Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email | Bulk "
-"E-Mail"
+"Ђубре | Спам | Непожељна | Непожељна пошта | Непожељна е-пошта | Junk | Spam "
+"| Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email | Bulk E-Mail"
 
 #. List of folder names to match for Trash, separated by |.  Please add localized common
 #. names for the Trash folder, leaving in the English names as well.  The first in the list
 #. will be the default, so please add the most common localized name to the front.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:551
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:590
 msgid "Trash | Rubbish | Rubbish Bin"
 msgstr "Смеће | Корпа | Trash | Rubbish | Rubbish Bin"
 
 #. / Format for the datetime that a message being replied to was received
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: ../src/engine/rfc822/rfc822-utils.vala:168
+#: ../src/engine/rfc822/rfc822-utils.vala:215
 msgid "%a, %b %-e, %Y at %-l:%M %p"
 msgstr "%a, %-e. %b, %Y. у %-l:%M %p"
 
 #. / The quoted header for a message being replied to.
 #. / %1$s will be substituted for the date, and %2$s will be substituted for
 #. / the original sender.
-#: ../src/engine/rfc822/rfc822-utils.vala:174
+#: ../src/engine/rfc822/rfc822-utils.vala:221
 #, c-format
 msgid "On %1$s, %2$s wrote:"
 msgstr "%1$s, %2$s пише:"
 
 #. / The quoted header for a message being replied to (in case the date is not known).
 #. / %s will be replaced by the original sender.
-#: ../src/engine/rfc822/rfc822-utils.vala:181
+#: ../src/engine/rfc822/rfc822-utils.vala:228
 #, c-format
 msgid "%s wrote:"
 msgstr "%s пише:"
 
 #. / The quoted header for a message being replied to (in case the sender is not known).
 #. / %s will be replaced by the original date
-#: ../src/engine/rfc822/rfc822-utils.vala:187
+#: ../src/engine/rfc822/rfc822-utils.vala:234
 #, c-format
 msgid "On %s:"
 msgstr "%s:"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:216
+#: ../src/engine/rfc822/rfc822-utils.vala:263
 msgid "---------- Forwarded message ----------"
 msgstr "---------- Прослеђена порука ----------"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:220
+#: ../src/engine/rfc822/rfc822-utils.vala:267
 #, c-format
 msgid "From: %s\n"
 msgstr "Шаље: %s\n"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:221
+#: ../src/engine/rfc822/rfc822-utils.vala:268
 #, c-format
 msgid "Subject: %s\n"
 msgstr "Наслов: %s\n"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:222
+#: ../src/engine/rfc822/rfc822-utils.vala:269
 #, c-format
 msgid "Date: %s\n"
 msgstr "Датум: %s\n"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:225
+#: ../src/engine/rfc822/rfc822-utils.vala:272
 #, c-format
 msgid "To: %s\n"
 msgstr "Прима: %s\n"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:228
+#: ../src/engine/rfc822/rfc822-utils.vala:275
 #, c-format
 msgid "Cc: %s\n"
 msgstr "Цц: %s\n"
@@ -1573,19 +1656,19 @@ msgstr ""
 
 #: ../ui/account_list.glade.h:1
 msgid "Add account"
-msgstr "Додајте налог"
+msgstr "Додај налог"
 
 #: ../ui/account_list.glade.h:2
 msgid "Edit account"
-msgstr "Уредите налог"
+msgstr "Уреди налог"
 
 #: ../ui/account_list.glade.h:3
 msgid "Remove account"
-msgstr "Уклоните налог"
+msgstr "Уклони налог"
 
 #: ../ui/account_spinner.glade.h:1
 msgid "Please wait while Geary validates your account."
-msgstr "Сачекајте док Зупчинко не потврди ваш налог."
+msgstr "Сачекајте док Гери не потврди ваш налог."
 
 #: ../ui/certificate_warning_dialog.glade.h:1
 msgid "Untrusted Connection"
@@ -1637,7 +1720,7 @@ msgstr "_Поравнај"
 
 #: ../ui/composer.glade.h:10
 msgid "Link (Ctrl+L)"
-msgstr "Веза (Ктрл+Л)"
+msgstr "Веза (Ctrl+L)"
 
 #: ../ui/composer.glade.h:11
 msgid "C_olor"
@@ -1649,155 +1732,215 @@ msgstr "Још могућности"
 
 #: ../ui/composer.glade.h:13
 msgid "Quote text  (Ctrl+])"
-msgstr "Цитирај текст  (Ктрл+])"
+msgstr "Цитирај текст  (Ctrl+])"
 
 #: ../ui/composer.glade.h:14
 msgid "Unquote text (Ctrl+[)"
-msgstr "Одцитирај текст (Ктрл+[)"
+msgstr "Не цитирај текст (Ctrl+[)"
 
 #: ../ui/composer.glade.h:15
 msgid "Remove formatting (Ctrl+Space)"
-msgstr "Уклони обликовање (Ктрл+Размак)"
+msgstr "Уклони форматирање (Ctrl+Размак)"
 
 #: ../ui/composer.glade.h:16
 msgctxt "Clipboard paste with rich text"
 msgid "Paste _With Formatting"
-msgstr "Убаци _са обликовањем"
+msgstr "Убаци _форматиран текст"
 
 #: ../ui/composer.glade.h:18
 msgid "Bold (Ctrl+B)"
-msgstr "Подебљај (Ктрл+Б)"
+msgstr "Подебљано (Ctrl+B)"
 
 #: ../ui/composer.glade.h:19
 msgid "Italic (Ctrl+I)"
-msgstr "Искоси (Ктрл+И)"
+msgstr "Искошено (Ctrl+I)"
 
 #: ../ui/composer.glade.h:20
 msgid "Underline (Ctrl+U)"
-msgstr "Подвуци (Ктрл+У)"
+msgstr "Подвучено (Ctrl+U)"
 
 #: ../ui/composer.glade.h:21
 msgid "Strikethrough (Ctrl+K)"
-msgstr "Прецртај (Ктрл+К)"
+msgstr "Прецртано (Ctrl+K)"
 
 #: ../ui/composer.glade.h:22
 msgid "_Rich Text"
-msgstr "_Обогати текст"
+msgstr "_Богат текст"
 
 #: ../ui/composer.glade.h:23
 msgid "Show Extended Fields"
 msgstr "Прикажи проширена поља"
 
 #: ../ui/composer.glade.h:24
+msgctxt "Label"
+msgid "Close and Save"
+msgstr "Затвори и сачувај"
+
+#: ../ui/composer.glade.h:25
+msgctxt "Short Label"
+msgid "Close and Save"
+msgstr "Затвори и сачувај"
+
+#: ../ui/composer.glade.h:26
+msgctxt "Tooltip"
+msgid "Close and Save"
+msgstr "Затвори и сачувај"
+
+#: ../ui/composer.glade.h:27
+msgctxt "Label"
+msgid "Close and Discard"
+msgstr "Затвори и одбаци"
+
+#: ../ui/composer.glade.h:28
+msgctxt "Short Label"
+msgid "Close and Discard"
+msgstr "Затвори и одбаци"
+
+#: ../ui/composer.glade.h:29
+msgctxt "Tooltip"
+msgid "Close and Discard"
+msgstr "Затвори и одбаци"
+
+#: ../ui/composer.glade.h:30
 msgid "Lar_ge"
 msgstr "_Велики"
 
-#: ../ui/composer.glade.h:25
+#: ../ui/composer.glade.h:31
 msgid "Large"
 msgstr "Велики"
 
-#: ../ui/composer.glade.h:26
+#: ../ui/composer.glade.h:32
 msgid "_Medium"
 msgstr "_Средњи"
 
-#: ../ui/composer.glade.h:27
+#: ../ui/composer.glade.h:33
 msgid "Medium"
 msgstr "Средњи"
 
-#: ../ui/composer.glade.h:28
+#: ../ui/composer.glade.h:34
 msgid "_Small"
 msgstr "_Мали"
 
-#: ../ui/composer.glade.h:29
+#: ../ui/composer.glade.h:35
 msgid "Small"
 msgstr "Мали"
 
-#: ../ui/composer.glade.h:30
+#: ../ui/composer.glade.h:36
 msgid "S_ans Serif"
 msgstr "_Безсерифни"
 
-#: ../ui/composer.glade.h:31
+#: ../ui/composer.glade.h:37
 msgid "Sans Serif"
 msgstr "Безсерифни"
 
-#: ../ui/composer.glade.h:32
+#: ../ui/composer.glade.h:38
 msgid "S_erif"
 msgstr "_Серифни"
 
-#: ../ui/composer.glade.h:33
+#: ../ui/composer.glade.h:39
 msgid "Serif"
 msgstr "Серифни"
 
-#: ../ui/composer.glade.h:34
+#: ../ui/composer.glade.h:40
 msgid "_Fixed Width"
 msgstr "_Стална ширина"
 
-#: ../ui/composer.glade.h:35
+#: ../ui/composer.glade.h:41
 msgid "Fixed Width"
 msgstr "Стална ширина"
 
-#: ../ui/composer.glade.h:36
+#: ../ui/composer.glade.h:42
 msgid "Detach"
 msgstr "Откачи"
 
-#: ../ui/composer.glade.h:37
+#: ../ui/composer.glade.h:43
+#| msgid "Italic (Ctrl+I)"
+msgid "Detach (Ctrl+D)"
+msgstr "Откачи (Ctrl+D)"
+
+#: ../ui/composer.glade.h:44
 msgid "_Send"
 msgstr "_Пошаљи"
 
-#: ../ui/composer.glade.h:38
+#: ../ui/composer.glade.h:45
 msgid "Send"
 msgstr "Пошаљи"
 
-#: ../ui/composer.glade.h:39
+#: ../ui/composer.glade.h:46
+#| msgid "Bold (Ctrl+B)"
+msgid "Send (Ctrl+Enter)"
+msgstr "Пошаљи (Ctrl+Enter)"
+
+#: ../ui/composer.glade.h:47
 msgid "_Attach File"
 msgstr "_Приложи датотеку"
 
-#: ../ui/composer.glade.h:40
+#: ../ui/composer.glade.h:48
 msgid "Attach File"
-msgstr "Приложите датотеку"
+msgstr "Прилаже датотеку"
 
-#: ../ui/composer.glade.h:41
+#: ../ui/composer.glade.h:49
 msgid "_Include Original Attachments"
 msgstr "_Укључи изворне прилоге"
 
-#: ../ui/composer.glade.h:42
+#: ../ui/composer.glade.h:50
 msgid "Include Original Attachments"
-msgstr "Укључите изворне прилоге"
+msgstr "Укључује изворне прилоге"
+
+#: ../ui/composer.glade.h:51
+msgid "Application Menu"
+msgstr "Мени програма"
 
 #. Address(es) e-mail is to be sent to
-#: ../ui/composer.glade.h:44
+#: ../ui/composer.glade.h:53
 msgid "_To"
 msgstr "_Прима"
 
-#: ../ui/composer.glade.h:45
+#: ../ui/composer.glade.h:54
 msgid "_Cc"
-msgstr "_Уу"
+msgstr "_Цц"
 
-#: ../ui/composer.glade.h:46
+#: ../ui/composer.glade.h:55
 msgid "_Subject"
-msgstr "_Тема"
+msgstr "_Наслов"
 
-#: ../ui/composer.glade.h:47
+#: ../ui/composer.glade.h:56
 msgid "_Bcc"
-msgstr "_Нуу"
+msgstr "_Бцц"
 
-#: ../ui/composer.glade.h:48
-#| msgid "_Reply"
+#: ../ui/composer.glade.h:57
 msgid "_Reply-To"
 msgstr "_Одговори"
 
 #. Geary account mail will be sent from
-#: ../ui/composer.glade.h:50
+#: ../ui/composer.glade.h:59
 msgid "From"
 msgstr "Шаље"
 
-#: ../ui/composer.glade.h:51
+#: ../ui/composer.glade.h:60
 msgid "Drop files here"
-msgstr "Овде убаците датотеке"
+msgstr "Овде превуците датотеке"
 
-#: ../ui/composer.glade.h:52
+#: ../ui/composer.glade.h:61
 msgid "To add them as attachments"
 msgstr "Да их додате као прилиге"
+
+#: ../ui/edit_alternate_emails.glade.h:1
+#| msgid "E_mail address"
+msgid "Remove email address"
+msgstr "Уклони адресе е-поште"
+
+#: ../ui/edit_alternate_emails.glade.h:2
+msgid ""
+"Some email services require additional addresses be configured on the "
+"server.  Contact your email provider for more information."
+msgstr ""
+"Неки сервиси за е-пошту захтевају подешавање додатне адресе на серверу.  "
+"Контактирајте издавача услуге за вашу е-пошту како би добили више података."
+
+#: ../ui/edit_alternate_emails.glade.h:4
+msgid "_Update"
+msgstr "_Ажурирај"
 
 #: ../ui/find_bar.glade.h:1
 msgid "Find:"
@@ -1813,7 +1956,7 @@ msgstr "_Наредна"
 
 #: ../ui/find_bar.glade.h:4
 msgid "_Case sensitive"
-msgstr "Разликуј _величину слова"
+msgstr "Разликуј _велика слова"
 
 #: ../ui/find_bar.glade.h:5
 msgid "label"
@@ -1825,7 +1968,7 @@ msgstr "Лозинка"
 
 #: ../ui/login.glade.h:2
 msgid "E_mail address"
-msgstr "Адреса ел. _поште"
+msgstr "Адресе _е-поште"
 
 #: ../ui/login.glade.h:3
 msgid "_Password"
@@ -1837,11 +1980,11 @@ msgstr "_Услуга"
 
 #: ../ui/login.glade.h:5
 msgid "N_ame"
-msgstr "_Име"
+msgstr "_Име и презиме"
 
 #: ../ui/login.glade.h:7
 msgid "N_ickname"
-msgstr "_Надимак"
+msgstr "_Назив налога"
 
 #: ../ui/login.glade.h:8
 msgid "Work, Home, etc."
@@ -1852,107 +1995,111 @@ msgid "_Save sent mail"
 msgstr "_Сачувај послату пошту"
 
 #: ../ui/login.glade.h:10
-msgid "IMAP settings"
-msgstr "Подешавања ИМАП-а"
+msgid "Addi_tional email addresses…"
+msgstr "_Додатне адресе за е-пошту…"
 
 #: ../ui/login.glade.h:11
+msgid "IMAP settings"
+msgstr "Подешавања за ИМАП"
+
+#: ../ui/login.glade.h:12
 msgid "Se_rver"
 msgstr "Се_рвер"
 
-#: ../ui/login.glade.h:12
-msgid "P_ort"
-msgstr "_Прикључник"
-
 #: ../ui/login.glade.h:13
+msgid "P_ort"
+msgstr "_Порт"
+
+#: ../ui/login.glade.h:14
 msgid "Ser_ver"
 msgstr "Сер_вер"
 
-#: ../ui/login.glade.h:14
+#: ../ui/login.glade.h:15
 msgid "Por_t"
 msgstr "При_кључник"
 
-#: ../ui/login.glade.h:15
-msgid "SMTP settings"
-msgstr "Подешавања СМТП-а"
-
 #: ../ui/login.glade.h:16
+msgid "SMTP settings"
+msgstr "Подешавања за СМТП"
+
+#: ../ui/login.glade.h:17
 msgid "User_name"
 msgstr "_Корисник"
 
-#: ../ui/login.glade.h:17
+#: ../ui/login.glade.h:18
 msgid "Pass_word"
 msgstr "_Лозинка"
 
-#: ../ui/login.glade.h:18
+#: ../ui/login.glade.h:19
 msgid "SMTP username"
 msgstr "СМТП корисничко име"
 
-#: ../ui/login.glade.h:19
+#: ../ui/login.glade.h:20
 msgid "SMTP password"
 msgstr "СМТП лозинка"
 
-#: ../ui/login.glade.h:20
+#: ../ui/login.glade.h:21
 msgid "_Username"
 msgstr "_Корисник"
 
-#: ../ui/login.glade.h:21
+#: ../ui/login.glade.h:22
 msgid "IMAP username"
 msgstr "ИМАП корисничко име"
 
-#: ../ui/login.glade.h:22
+#: ../ui/login.glade.h:23
 msgid "IMAP password"
 msgstr "ИМАП лозинка"
 
-#: ../ui/login.glade.h:23
+#: ../ui/login.glade.h:24
 msgid "Encr_yption"
 msgstr "Ши_фровање"
 
-#: ../ui/login.glade.h:24
+#: ../ui/login.glade.h:25
 msgid "Encrypt_ion"
 msgstr "Шифро_вање"
 
-#: ../ui/login.glade.h:26
+#: ../ui/login.glade.h:27
 msgid "SSL/TLS"
 msgstr "ССЛ/ТЛС"
 
-#: ../ui/login.glade.h:27
+#: ../ui/login.glade.h:28
 msgid "STARTTLS"
 msgstr "СТАРТТЛС"
 
-#: ../ui/login.glade.h:28
+#: ../ui/login.glade.h:29
 msgid "No authentication re_quired"
 msgstr "Није _потребно потврђивање идентитета"
 
-#: ../ui/login.glade.h:29
+#: ../ui/login.glade.h:30
 msgid "Use IMAP cre_dentials"
 msgstr "Користи ИМАП _уверења"
 
-#: ../ui/login.glade.h:30
-msgid "Storage"
-msgstr "Складиште"
-
-#: ../ui/login.glade.h:31
-msgid "_Download mail"
-msgstr "_Преузми пошту"
-
-#: ../ui/login.glade.h:32 ../ui/preferences.glade.h:4
+#: ../ui/login.glade.h:31 ../ui/preferences.glade.h:5
 msgid "Composer"
 msgstr "Састављач"
 
-#: ../ui/login.glade.h:33
+#: ../ui/login.glade.h:32
 msgid "Save dra_fts on server"
 msgstr "Сачувај _нацрте на серверу"
 
+#: ../ui/login.glade.h:33
+#| msgid "Si_gn emails:"
+msgid "Si_gn emails (HTML allowed):"
+msgstr "По_тпиши е-поруке (дозвољен је ХТМЛ):"
+
 #: ../ui/login.glade.h:34
-msgid "Si_gn emails:"
-msgstr "Потпиши ел. _пошту:"
+msgid "Storage"
+msgstr "Складиште"
+
+#: ../ui/login.glade.h:35
+msgid "_Download mail"
+msgstr "_Преузми пошту"
 
 #: ../ui/password-dialog.glade.h:1
 msgid "SMTP Credentials"
 msgstr "СМТП уверења"
 
 #: ../ui/password-dialog.glade.h:2
-#| msgid "_Username"
 msgid "Username"
 msgstr "Корисник"
 
@@ -1976,25 +2123,38 @@ msgstr "_Сам изабери следећу поруку"
 msgid "_Display conversation preview"
 msgstr "_Прикажи преглед разговора"
 
-#: ../ui/preferences.glade.h:5
+#: ../ui/preferences.glade.h:4
+msgid "Use _three pane view"
+msgstr "Приказ у _три површи"
+
+#: ../ui/preferences.glade.h:6
 msgid "Enable _spell checking"
 msgstr "Укључи _проверу писања"
 
-#: ../ui/preferences.glade.h:6
+#: ../ui/preferences.glade.h:7
 msgid "Notifications"
 msgstr "Обавештења"
 
-#: ../ui/preferences.glade.h:7
+#: ../ui/preferences.glade.h:8
 msgid "_Play notification sounds"
 msgstr "_Пусти звуке обавештења"
 
-#: ../ui/preferences.glade.h:8
+#: ../ui/preferences.glade.h:9
 msgid "Show _notifications for new mail"
 msgstr "Прикажи _обавештења за нову пошту"
 
-#: ../ui/preferences.glade.h:9
-msgid "Notify of new mail at start_up"
-msgstr "Обавести о _новој пошти при покретању"
+#: ../ui/preferences.glade.h:10
+#| msgid "Show _notifications for new mail"
+msgid "Always _watch for new mail"
+msgstr "Увек _ослушкуј за нове поруке"
+
+#: ../ui/preferences.glade.h:11
+msgid "Geary will run in the background and notify of new mail"
+msgstr "Гери ће радити у позадини и слати обавештења када дође нова е-порука"
+
+#: ../ui/preferences.glade.h:12
+msgid "Preferences"
+msgstr "Поставке"
 
 #: ../ui/remove_confirm.glade.h:1
 msgid ""
@@ -2009,7 +2169,7 @@ msgid ""
 "All email associated with this account will be removed from your computer. "
 "This will not affect email on the server."
 msgstr ""
-"Сва ел. пошта придружена овом налогу ће бити уклоњена са вашег рачунара. Ово "
+"Сва е-пошта придружена овом налогу ће бити уклоњена с вашег рачунара. Ово "
 "неће утицати на пошту која се налази на серверу."
 
 #: ../ui/remove_confirm.glade.h:3
@@ -2018,12 +2178,23 @@ msgstr "Надимак:"
 
 #: ../ui/remove_confirm.glade.h:4
 msgid "Email address:"
-msgstr "Адреса ел. поште:"
+msgstr "Адресе е-поште:"
 
 #: ../ui/upgrade_dialog.glade.h:1
-#| msgid "Geary upgrade in progress."
 msgid "Geary update in progress…"
-msgstr "Доградња Зупчинка је у току…"
+msgstr "Ажурирање Герија је у току…"
+
+#~ msgid "_Delete"
+#~ msgstr "_Обриши"
+
+#~ msgid "_Trash"
+#~ msgstr "_Смеће"
+
+#~ msgid "Do you want to discard the unsaved message?"
+#~ msgstr "Да ли желите да одбаците несачувану поруку?"
+
+#~ msgid "Notify of new mail at start_up"
+#~ msgstr "Обавести о _новој пошти при покретању"
 
 #~ msgid "Please enter your password"
 #~ msgstr "Молим унесите вашу лизинку"
@@ -2033,10 +2204,6 @@ msgstr "Доградња Зупчинка је у току…"
 
 #~ msgid "Password:"
 #~ msgstr "Лозинка:"
-
-#~| msgid "_Preferences"
-#~ msgid "Preferences"
-#~ msgstr "Поставке"
 
 #~ msgid "attach|enclosed|enclosing|cover letter"
 #~ msgstr "прилог|приложено|прилажем|пропратно писмо"
