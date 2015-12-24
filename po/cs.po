@@ -38,11 +38,11 @@ msgstr "Pošta Geary"
 
 #: ../desktop/geary.desktop.in.h:4 ../desktop/geary-autostart.desktop.in.h:4
 msgid "Send and receive email"
-msgstr "Odesílat a přijímat e-maily"
+msgstr "Odesílejte a přijímejte e-maily"
 
 #: ../desktop/geary.desktop.in.h:5 ../desktop/geary-autostart.desktop.in.h:5
 msgid "Email;E-mail;Mail;"
-msgstr "email;e-mail;mail;pošta;e-pošta;"
+msgstr "email;e-mail;mail;pošta;e-pošta;zpráva;zprávy;"
 
 #: ../desktop/geary.desktop.in.h:6
 msgid "Compose Message"
