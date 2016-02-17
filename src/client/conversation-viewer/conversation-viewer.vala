@@ -243,6 +243,8 @@ public class ConversationViewer : Gtk.Box {
                 message_overlay.show();
             });
         
+        config.settings.changed[Configuration.GENERALLY_SHOW_REMOTE_IMAGES_KEY].connect(on_show_images_change);
+        
         conversation_find_bar = new ConversationFindBar(web_view);
         conversation_find_bar.no_show_all = true;
         conversation_find_bar.close.connect(() => { fsm.issue(SearchEvent.CLOSE_FIND_BAR); });
@@ -692,10 +694,13 @@ public class ConversationViewer : Gtk.Box {
         if (remote_images) {
             Geary.Contact contact = current_folder.account.get_contact_store().get_by_rfc822(
                 email.get_primary_originator());
-            bool always_load = contact != null && contact.always_load_remote_images();
+            bool contact_related_load = contact != null && contact.always_load_remote_images();
+            bool always_load = GearyApplication.instance.config.generally_show_remote_images
+                || contact_related_load;
             
-            if (always_load || email.load_remote_images().is_certain()) {
-                show_images_email(div_message, false);
+            if (current_folder.special_folder_type != Geary.SpecialFolderType.SPAM &&
+                always_load || email.load_remote_images().is_certain()) {
+                    show_images_email(div_message, false);
             } else {
                 WebKit.DOM.HTMLElement remote_images_bar =
                     Util.DOM.select(div_message, ".remote_images");
@@ -2481,6 +2486,24 @@ public class ConversationViewer : Gtk.Box {
     private bool in_drafts_folder() {
         return current_folder != null && current_folder.special_folder_type
             == Geary.SpecialFolderType.DRAFTS;
+    }
+    
+    private void on_show_images_change() {
+        // When the setting is changed to 'show images', the currently selected message is updated.
+        // When the setting is changed to 'do not show images' the method returns, as there is no benefit
+        // in 'unloading' images (like saving bandwidth or relating to security concerns).
+        if (!GearyApplication.instance.config.generally_show_remote_images)
+            
+            return;
+            
+        string? quote;
+        Geary.Email? message = get_selected_message(out quote);
+        if (message == null || current_folder.special_folder_type == Geary.SpecialFolderType.SPAM)
+            
+            return;
+            
+        WebKit.DOM.HTMLElement element = email_to_element.get(message.id);
+        show_images_email(element, false);
     }
 }
 

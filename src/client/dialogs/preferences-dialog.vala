@@ -24,6 +24,8 @@ public class PreferencesDialog : Object {
         config.bind(Configuration.PLAY_SOUNDS_KEY, builder.get_object("play_sounds"), "active");
         config.bind(Configuration.SHOW_NOTIFICATIONS_KEY, builder.get_object("show_notifications"), "active");
         config.bind(Configuration.STARTUP_NOTIFICATIONS_KEY, builder.get_object("startup_notifications"), "active");
+        config.bind(Configuration.GENERALLY_SHOW_REMOTE_IMAGES_KEY,
+            builder.get_object("show_remote_images"), "active");
     }
     
     public void run() {

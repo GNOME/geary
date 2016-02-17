@@ -44,6 +44,12 @@
         <description>True if the folder list Paned is in the horizontal orientation.</description>
     </key>
     
+    <key name="show-images" type="b">
+        <default>false</default>
+        <summary>show remote images in all messages</summary>
+        <description>True if remote images are always shown in messages.</description>
+    </key>
+    
     <key name="messages-pane-position" type="i">
         <default>250</default>
         <summary>position of message list pane</summary>
