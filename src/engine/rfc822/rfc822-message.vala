@@ -451,8 +451,8 @@ public class Geary.RFC822.Message : BaseObject {
     /**
      * This method is the main utility method used by the other body-generating constructors.
      *
-     * Only text/* MIME parts of the specified subtype are added to body.  If a non-text part is
-     * within a multipart/mixed container, the {@link InlinePartReplacer} is invoked.
+     * Only text/* MIME parts of the specified subtype are added to body.  For non-text parts
+     * the {@link InlinePartReplacer} is invoked.
      *
      * If to_html is true, the text is run through a filter to HTML-ize it.  (Obviously, this
      * should be false if text/html is being searched for.).
@@ -525,18 +525,14 @@ public class Geary.RFC822.Message : BaseObject {
         if (disposition == null || disposition.disposition_type == Mime.DispositionType.UNSPECIFIED)
             return false;
         
-        // Use inline part replacer *only* if in a mixed multipart where each element is to be
-        // presented to the user as structure dictates; for alternative and related, the inline
-        // part is referred to elsewhere in the document and it's the callers responsibility to
-        // locate them
-        if (replacer == null || container_subtype != Mime.MultipartSubtype.MIXED)
+        if (replacer == null)
             return false;
         
         // Hand off to the replacer for processing
         body = replacer(RFC822.Utils.get_clean_attachment_filename(part),
             this_content_type, disposition, part.get_content_id(), mime_part_to_memory_buffer(part));
         
-        return body != null;
+        return false;
     }
     
     /**
@@ -586,8 +582,8 @@ public class Geary.RFC822.Message : BaseObject {
      * Returns the complete email body as HTML.
      *
      * get_body() recursively walks the MIME structure (depth-first) serializing all text MIME
-     * parts of the specified type into a single UTF-8 string.  Non-text MIME parts inside of
-     * multipart/mixed containers are offered to the {@link InlinePartReplacer}, which can either
+     * parts of the specified type into a single UTF-8 string.  Non-text MIME parts
+     * are offered to the {@link InlinePartReplacer}, which can either
      * return null or return a string that is inserted in lieu of the MIME part into the final
      * document.  All other MIME parts are ignored.
      *
