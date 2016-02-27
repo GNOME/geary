@@ -2032,7 +2032,16 @@ public class ConversationViewer : Gtk.Box {
                     img.set_attribute("class", DATA_IMAGE_CLASS);
                     if (!Geary.String.is_empty(filename))
                         img.set_attribute("alt", filename);
-                    img.set_attribute("replaced-id", replaced_images_index.get(content_id));
+                    
+                    // in case content_id has a trailing period it gets removed
+                    // this is necessary as g_mime_object_get_content_id removes it too
+                    if (content_id.has_suffix(".")) {
+                        string content_id_without_suffix;
+                        content_id_without_suffix = content_id.slice(0,content_id.length-1);
+                        img.set_attribute("replaced-id", replaced_images_index.get(content_id_without_suffix));
+                    } else {
+                        img.set_attribute("replaced-id", replaced_images_index.get(content_id));
+                    }
                     
                     // stash here so inlined image isn't listed as attachment (esp. if it has no
                     // Content-Disposition)

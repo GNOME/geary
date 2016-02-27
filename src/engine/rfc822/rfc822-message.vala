@@ -714,7 +714,12 @@ public class Geary.RFC822.Message : BaseObject {
         return part.get_filename();
     }
     
-    private GMime.Part? find_mime_part_by_mime_id(GMime.Object root, string mime_id) {
+    private GMime.Part? find_mime_part_by_mime_id(GMime.Object root, owned string mime_id) {
+        // in case mime_id has a trailing period it gets removed
+        // this is necessary as g_mime_object_get_content_id removes it too
+        if (mime_id.has_suffix("."))
+            mime_id =  mime_id.slice(0,mime_id.length-1);
+        
         // If this is a multipart container, check each of its children.
         if (root is GMime.Multipart) {
             GMime.Multipart multipart = root as GMime.Multipart;
