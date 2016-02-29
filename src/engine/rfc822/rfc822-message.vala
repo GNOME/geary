@@ -715,6 +715,7 @@ public class Geary.RFC822.Message : BaseObject {
     }
     
     private GMime.Part? find_mime_part_by_mime_id(GMime.Object root, owned string mime_id) {
+        // FIXME: bugzilla.gnome.org 762782
         // in case mime_id has a trailing period it gets removed
         // this is necessary as g_mime_object_get_content_id removes it too
         if (mime_id.has_suffix("."))
