@@ -11,9 +11,10 @@ msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2015-10-21 05:28+0000\n"
-"PO-Revision-Date: 2015-10-21 11:09+0200\n"
-"Last-Translator: Милош Поповић <gpopac@gmail.com>\n"
+"POT-Creation-Date: 2016-01-17 18:46+0000\n"
+"PO-Revision-Date: 2016-01-17 23:15+0100\n"
+"Last-Translator: Марко М. Костић (Marko M. Kostić) <marko.m.kostic@gmail."
+"com>\n"
 "Language-Team: српски <gnome-sr@googlegroups.org>\n"
 "Language: sr\n"
 "MIME-Version: 1.0\n"
@@ -22,7 +23,7 @@ msgstr ""
 "Plural-Forms: nplurals=4; plural=n==1? 3 : n%10==1 && n%100!=11 ? 0 : n"
 "%10>=2 && n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2;\n"
 "X-Project-Style: gnome\n"
-"X-Generator: Gtranslator 2.91.7\n"
+"X-Generator: Poedit 1.8.5\n"
 
 #: ../desktop/geary.desktop.in.h:1 ../desktop/geary-autostart.desktop.in.h:1
 msgid "Geary"
@@ -137,7 +138,6 @@ msgid "Edit"
 msgstr "Уређивање"
 
 #: ../src/client/accounts/add-edit-page.vala:282
-#| msgid "_Previous"
 msgid "Preview"
 msgstr "Преглед"
 
@@ -186,7 +186,6 @@ msgid "        &#8226; Username or password incorrect.\n"
 msgstr "        &#8226; Нетачно корисничко име или лозинка.\n"
 
 #: ../src/client/application/geary-application.vala:19
-#| msgid "Copyright 2011-2014 Yorba Foundation"
 msgid "Copyright 2011-2015 Yorba Foundation"
 msgstr "Ауторска права 2011-2015 Јорба (Yorba) Фондација"
 
@@ -273,7 +272,6 @@ msgid "Unrecognized command line option \"%s\"\n"
 msgstr "Непозната опција линије наредби: %s\n"
 
 #: ../src/client/application/geary-controller.vala:62
-#| msgid "Move conversation"
 msgid "Delete conversation"
 msgstr "Обриши разговор"
 
@@ -287,12 +285,10 @@ msgstr "Обриши разговоре (Shift+Del)"
 
 #. This refers to the action ("move email to the trash"), not the Trash folder itself
 #: ../src/client/application/geary-controller.vala:68
-#| msgid "Move conversation to trash (Delete, Backspace)"
 msgid "Move conversation to Trash (Delete, Backspace)"
 msgstr "Премести разговор у смеће (Del, Backspace)"
 
 #: ../src/client/application/geary-controller.vala:69
-#| msgid "Move conversations to trash (Delete, Backspace)"
 msgid "Move conversations to Trash (Delete, Backspace)"
 msgstr "Премести разговоре у смеће (Del, Backspace)"
 
@@ -635,11 +631,11 @@ msgid "translator-credits"
 msgstr ""
 "Мирослав Николић <miroslavnikolic@rocketmail.com>\n"
 "Милош Поповић <gpopac@gmail.com>\n"
+"Марко М. Костић <marko.m.kostic@gmail.com>\n"
 "\n"
 "http://prevod.org — превод на српски језик"
 
 #: ../src/client/application/geary-controller.vala:1990
-#| msgid "Underline (Ctrl+U)"
 msgid "Undo move (Ctrl+Z)"
 msgstr "Опозови (Ctrl+Z)"
 
@@ -692,7 +688,6 @@ msgid "This removes the email from Geary and your email server."
 msgstr "Ово ће уклонити пошту из Герија и на серверима ваше е-поште."
 
 #: ../src/client/application/geary-controller.vala:2455
-#| msgid "\"%s\" could not be found."
 msgid "This cannot be undone."
 msgstr "Не можете да опозовете ову радњу."
 
@@ -703,7 +698,6 @@ msgstr "Испразни „%s“"
 
 #: ../src/client/application/geary-controller.vala:2473
 #, c-format
-#| msgid "Error saving"
 msgid "Error emptying %s"
 msgstr "Грешка приликом пражњења „%s“"
 
@@ -720,17 +714,14 @@ msgid "Delete"
 msgstr "Обриши"
 
 #: ../src/client/application/geary-controller.vala:2536
-#| msgid "Underline (Ctrl+U)"
 msgid "Undo archive (Ctrl+Z)"
 msgstr "Опозови архивирање (Ctrl+Z)"
 
 #: ../src/client/application/geary-controller.vala:2551
-#| msgid "Unquote text (Ctrl+[)"
 msgid "Undo trash (Ctrl+Z)"
 msgstr "Опозови брисање (Ctrl+Z)"
 
 #: ../src/client/application/geary-controller.vala:2604
-#| msgid "Underline (Ctrl+U)"
 msgid "Undo (Ctrl+Z)"
 msgstr "Опозови (Ctrl+Z)"
 
@@ -1585,6 +1576,13 @@ msgstr ""
 msgid "Trash | Rubbish | Rubbish Bin"
 msgstr "Смеће | Корпа | Trash | Rubbish | Rubbish Bin"
 
+#. List of folder names to match for Archive, separated by |.  Please add localized common
+#. names for the Trash folder, leaving in the English names as well.  The first in the list
+#. will be the default, so please add the most common localized name to the front.
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:595
+msgid "Archive | Archives"
+msgstr "Архива | Архиве"
+
 #. / Format for the datetime that a message being replied to was received
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../src/engine/rfc822/rfc822-utils.vala:215
@@ -1854,7 +1852,6 @@ msgid "Detach"
 msgstr "Откачи"
 
 #: ../ui/composer.glade.h:43
-#| msgid "Italic (Ctrl+I)"
 msgid "Detach (Ctrl+D)"
 msgstr "Откачи (Ctrl+D)"
 
@@ -1867,7 +1864,6 @@ msgid "Send"
 msgstr "Пошаљи"
 
 #: ../ui/composer.glade.h:46
-#| msgid "Bold (Ctrl+B)"
 msgid "Send (Ctrl+Enter)"
 msgstr "Пошаљи (Ctrl+Enter)"
 
@@ -1926,7 +1922,6 @@ msgid "To add them as attachments"
 msgstr "Да их додате као прилиге"
 
 #: ../ui/edit_alternate_emails.glade.h:1
-#| msgid "E_mail address"
 msgid "Remove email address"
 msgstr "Уклони адресе е-поште"
 
@@ -2083,7 +2078,6 @@ msgid "Save dra_fts on server"
 msgstr "Сачувај _нацрте на серверу"
 
 #: ../ui/login.glade.h:33
-#| msgid "Si_gn emails:"
 msgid "Si_gn emails (HTML allowed):"
 msgstr "По_тпиши е-поруке (дозвољен је ХТМЛ):"
 
@@ -2144,7 +2138,6 @@ msgid "Show _notifications for new mail"
 msgstr "Прикажи _обавештења за нову пошту"
 
 #: ../ui/preferences.glade.h:10
-#| msgid "Show _notifications for new mail"
 msgid "Always _watch for new mail"
 msgstr "Увек _ослушкуј за нове поруке"
 
