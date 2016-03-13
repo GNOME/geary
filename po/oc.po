@@ -1,0 +1,2154 @@
+# po/geary.pot
+# PO message string template file for Geary email client
+# Copyright 2012-2014 Yorba Foundation
+# This file is distributed under the GNU LGPL, version 2.1.
+# Translators:
+# Cédric Valmary (totenoc.eu) <cvalmary@yahoo.fr>, 2016.
+msgid ""
+msgstr ""
+"Project-Id-Version: geary-0.4.1\n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=geary&k"
+"eywords=I18N+L10N&component=general\n"
+"POT-Creation-Date: 2016-03-05 18:47+0000\n"
+"PO-Revision-Date: 2016-03-13 14:42+0200\n"
+"Last-Translator: Cédric Valmary (totenoc.eu) <cvalmary@yahoo.fr>\n"
+"Language-Team: Tot En Òc\n"
+"Language: oc\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n > 1);\n"
+"X-Generator: Virtaal 0.7.1\n"
+"X-Project-Style: gnome\n"
+
+#: ../desktop/geary.desktop.in.h:1 ../desktop/geary-autostart.desktop.in.h:1
+msgid "Geary"
+msgstr "Geary"
+
+#: ../desktop/geary.desktop.in.h:2 ../desktop/geary-autostart.desktop.in.h:2
+#: ../src/client/application/geary-application.vala:18
+msgid "Mail Client"
+msgstr "Client de messatjariá"
+
+#: ../desktop/geary.desktop.in.h:3 ../desktop/geary-autostart.desktop.in.h:3
+msgid "Geary Mail"
+msgstr "Messatjariá Geary"
+
+#: ../desktop/geary.desktop.in.h:4 ../desktop/geary-autostart.desktop.in.h:4
+msgid "Send and receive email"
+msgstr "Mandar e recebre de corrièrs electronics"
+
+#: ../desktop/geary.desktop.in.h:5 ../desktop/geary-autostart.desktop.in.h:5
+msgid "Email;E-mail;Mail;"
+msgstr "Email;E-mail;Messatjariá;Corrièrs electronics;"
+
+#: ../desktop/geary.desktop.in.h:6
+msgid "Compose Message"
+msgstr "Escriure un messatge"
+
+#: ../desktop/geary-attach.contract.in.h:1
+msgid "Send by email"
+msgstr "Mandar per corrièr electronic"
+
+#: ../desktop/geary-attach.contract.in.h:2
+msgid "Send files using Geary"
+msgstr "Mandar de fichièrs amb Geary"
+
+#: ../src/client/accounts/account-dialog-add-edit-pane.vala:51
+#: ../src/client/components/stock.vala:31
+msgid "_Save"
+msgstr "_Enregistrar"
+
+#: ../src/client/accounts/account-dialog-add-edit-pane.vala:51
+#: ../src/client/components/stock.vala:22
+msgid "_Add"
+msgstr "_Apondre"
+
+#. reset/clear widgets
+#: ../src/client/accounts/account-dialog-edit-alternate-emails-pane.vala:124
+#, c-format
+msgid "Additional addresses for %s"
+msgstr "Adreças suplementàrias per %s"
+
+#. Sets min size.
+#: ../src/client/accounts/account-dialog.vala:21
+msgid "Accounts"
+msgstr "Comptes"
+
+#. Copyright 2011-2015 Yorba Foundation
+#. *
+#. * This software is licensed under the GNU Lesser General Public License
+#. * (version 2.1 or later).  See the COPYING file in this distribution.
+#.
+#. Page for adding or editing an account.
+#. / Placeholder text indicating that the user should type their first name and last name
+#: ../src/client/accounts/add-edit-page.vala:10
+msgid "First Last"
+msgstr "Prenom Nom"
+
+#: ../src/client/accounts/add-edit-page.vala:233
+msgid "Welcome to Geary."
+msgstr "Benvenguda dins Geary."
+
+#: ../src/client/accounts/add-edit-page.vala:233
+msgid "Enter your account information to get started."
+msgstr "Sasissètz vos informations de connexion per començar."
+
+#: ../src/client/accounts/add-edit-page.vala:253
+msgid "2 weeks back"
+msgstr "i a 2 setmanas"
+
+#. IDs are # of days
+#: ../src/client/accounts/add-edit-page.vala:254
+msgid "1 month back"
+msgstr "i a 1 mes"
+
+#: ../src/client/accounts/add-edit-page.vala:255
+msgid "3 months back"
+msgstr "i a 3 meses"
+
+#: ../src/client/accounts/add-edit-page.vala:256
+msgid "6 months back"
+msgstr "i a 6 meses"
+
+#: ../src/client/accounts/add-edit-page.vala:257
+msgid "1 year back"
+msgstr "i a 1 an"
+
+#: ../src/client/accounts/add-edit-page.vala:258
+msgid "2 years back"
+msgstr "i a 2 ans"
+
+#: ../src/client/accounts/add-edit-page.vala:259
+msgid "4 years back"
+msgstr "i a 4 ans"
+
+#. Separator
+#: ../src/client/accounts/add-edit-page.vala:261
+msgid "Everything"
+msgstr "Tot"
+
+#: ../src/client/accounts/add-edit-page.vala:280
+msgid "Edit"
+msgstr "Editar"
+
+#: ../src/client/accounts/add-edit-page.vala:282
+msgid "Preview"
+msgstr "Previsualizar"
+
+#: ../src/client/accounts/add-edit-page.vala:723
+msgid "Remem_ber passwords"
+msgstr "Se _remembrar dels senhals"
+
+#: ../src/client/accounts/add-edit-page.vala:730 ../ui/login.glade.h:6
+msgid "Remem_ber password"
+msgstr "Se _remembrar del senhal"
+
+#: ../src/client/accounts/add-edit-page.vala:764
+msgid "Unable to validate:\n"
+msgstr "Impossible de valider :\n"
+
+#: ../src/client/accounts/add-edit-page.vala:766
+msgid "        &#8226; Invalid account nickname.\n"
+msgstr "        &#8226; Nom d'utilizaire invalid.\n"
+
+#: ../src/client/accounts/add-edit-page.vala:769
+msgid "        &#8226; Email address already added to Geary.\n"
+msgstr "        &#8226; Adreça electronica ja aponduda a Geary.\n"
+
+#: ../src/client/accounts/add-edit-page.vala:773
+msgid "        &#8226; IMAP connection error.\n"
+msgstr "        &#8226; Error de connexion IMAP.\n"
+
+#: ../src/client/accounts/add-edit-page.vala:776
+msgid "        &#8226; IMAP username or password incorrècte.\n"
+msgstr "        &#8226; Senhal o nom d'utilizaire IMAP incorrècte.\n"
+
+#: ../src/client/accounts/add-edit-page.vala:779
+msgid "        &#8226; SMTP connection error.\n"
+msgstr "        &#8226; Error de connexion SMTP.\n"
+
+#: ../src/client/accounts/add-edit-page.vala:782
+msgid "        &#8226; SMTP username or password incorrècte.\n"
+msgstr "        &#8226; Senhal o nom d'utilizaire SMTP incorrècte.\n"
+
+#: ../src/client/accounts/add-edit-page.vala:786
+msgid "        &#8226; Connection error.\n"
+msgstr "        &#8226; Error de connexion.\n"
+
+#: ../src/client/accounts/add-edit-page.vala:790
+msgid "        &#8226; Username or password incorrècte.\n"
+msgstr "        &#8226; Senhal o nom d'utilizaire incorrècte.\n"
+
+#: ../src/client/application/geary-application.vala:19
+msgid "Copyright 2011-2015 Yorba Foundation"
+msgstr "Copyright 2011-2015 Fondation Yorba"
+
+#: ../src/client/application/geary-application.vala:21
+msgid "Visit the Yorba web site"
+msgstr "Visitar lo site Web de Yorba"
+
+#: ../src/client/application/geary-args.vala:10
+msgid "Start Geary with hidden main window"
+msgstr "Aviar Geary en mòde amagat"
+
+#: ../src/client/application/geary-args.vala:11
+msgid "Output debugging information"
+msgstr "Afichar las informacions de desbugatge"
+
+#: ../src/client/application/geary-args.vala:12
+msgid "Log conversation monitoring"
+msgstr "Jornalizar la susvelhança de las conversacions"
+
+#: ../src/client/application/geary-args.vala:13
+msgid "Log network deserialization"
+msgstr "Jornalizar la deserializacion de la ret"
+
+#: ../src/client/application/geary-args.vala:14
+msgid "Log network activity"
+msgstr "Jornalizar l'activitat de la ret"
+
+#. / The IMAP replay queue is how changes on the server are replicated on the client.
+#. / It could also be called the IMAP events queue.
+#: ../src/client/application/geary-args.vala:17
+msgid "Log IMAP replay queue"
+msgstr "Jornalizar la lista dels eveniments IMAP"
+
+#. / Serialization is how commands and responses are converted into a stream of bytes for
+#. / network transmission
+#: ../src/client/application/geary-args.vala:20
+msgid "Log network serialization"
+msgstr "Jornalizar la serializacion de la ret"
+
+#: ../src/client/application/geary-args.vala:21
+msgid "Log periodic activity"
+msgstr "Jornalizar l'activitat periodica"
+
+#: ../src/client/application/geary-args.vala:22
+msgid "Log database queries (generates lots of messages)"
+msgstr ""
+"Jornalizar las requèstas de la banca de donadas (genèra fòrça messatges)"
+
+#. / "Normalization" can also be called "synchronization"
+#: ../src/client/application/geary-args.vala:24
+msgid "Log folder normalization"
+msgstr "Jornalizar la normalizacion dels dorsièrs"
+
+#: ../src/client/application/geary-args.vala:25
+msgid "Allow inspection of WebView"
+msgstr "Autorizar l'inspection WebView"
+
+#: ../src/client/application/geary-args.vala:26
+msgid "Revoke all server certificates with TLS warnings"
+msgstr "Suprimir totes los certificats amb avertiments TLS."
+
+#: ../src/client/application/geary-args.vala:27
+msgid "Display program version"
+msgstr "Afichar la version del programa"
+
+#. This gives a command-line hint on how to open new composer windows with mailto:
+#: ../src/client/application/geary-args.vala:51
+#, c-format
+msgid "Use %s to open a new composer window"
+msgstr "Utilizatz %s per dobrir una novèla fenèstra d'edicion"
+
+#: ../src/client/application/geary-args.vala:52
+msgid "Please report comments, suggestions and bugs to:"
+msgstr ""
+"Trantalhetz pas de mandar vòstres comentaris, suggestions e rapòrts "
+"d'anomalias a :"
+
+#. i18n: Command line arguments are invalid
+#: ../src/client/application/geary-args.vala:59
+#, c-format
+msgid "Failed to parse command line options: %s\n"
+msgstr "Impossible d'analisar las opcions de linha de comanda : %s\n"
+
+#: ../src/client/application/geary-args.vala:70
+#, c-format
+msgid "Unrecognized command line option \"%s\"\n"
+msgstr "Opcion de linha de comanda « %s » desconeguda\n"
+
+#: ../src/client/application/geary-controller.vala:62
+msgid "Delete conversation"
+msgstr "Suprimir la conversacion"
+
+#: ../src/client/application/geary-controller.vala:63
+msgid "Delete conversation (Shift+Delete)"
+msgstr "Suprimir la conversacion (Maj+Supr)"
+
+#: ../src/client/application/geary-controller.vala:64
+msgid "Delete conversations (Shift+Delete)"
+msgstr "Suprimir las conversacions (Maj+Supr)"
+
+#. This refers to the action ("move email to the trash"), not the Trash folder itself
+#: ../src/client/application/geary-controller.vala:68
+msgid "Move conversation to Trash (Delete, Backspace)"
+msgstr "Metre la conversacion a l'escobilhièr (Supr, Retorn arrièr)"
+
+#: ../src/client/application/geary-controller.vala:69
+msgid "Move conversations to Trash (Delete, Backspace)"
+msgstr "Metre las conversacions a l'escobilhièr (Supr, Retorn arrièr)"
+
+#. This refers to the action ("archive an email"), not the Archive folder itself
+#: ../src/client/application/geary-controller.vala:73
+msgid "_Archive"
+msgstr "_Archivar"
+
+#: ../src/client/application/geary-controller.vala:74
+msgid "Archive conversation (A)"
+msgstr "Archivar la conversacion (A)"
+
+#: ../src/client/application/geary-controller.vala:75
+msgid "Archive conversations (A)"
+msgstr "Archivar las conversacions (A)"
+
+#: ../src/client/application/geary-controller.vala:78
+msgid "Mark as S_pam"
+msgstr "Marcar coma _corrièr indesirable"
+
+#: ../src/client/application/geary-controller.vala:79
+msgid "Mark as not S_pam"
+msgstr "Marcar coma non _corrièr indesirable"
+
+#: ../src/client/application/geary-controller.vala:81
+#: ../src/client/application/geary-controller.vala:397
+msgid "Mark conversation"
+msgstr "Marcar la conversacion"
+
+#: ../src/client/application/geary-controller.vala:82
+msgid "Mark conversations"
+msgstr "Marcar las conversacions"
+
+#: ../src/client/application/geary-controller.vala:83
+msgid "Add label to conversation"
+msgstr "Apondre una etiqueta a la conversacion"
+
+#: ../src/client/application/geary-controller.vala:84
+msgid "Add label to conversations"
+msgstr "Apondre una etiqueta a las conversacions"
+
+#: ../src/client/application/geary-controller.vala:85
+#: ../src/client/application/geary-controller.vala:436
+msgid "Move conversation"
+msgstr "Desplaçar la conversacion"
+
+#: ../src/client/application/geary-controller.vala:86
+msgid "Move conversations"
+msgstr "Desplaçar las conversacions"
+
+#: ../src/client/application/geary-controller.vala:373
+#: ../ui/app_menu.interface.h:1
+msgid "A_ccounts"
+msgstr "C_omptes"
+
+#: ../src/client/application/geary-controller.vala:378
+#: ../src/client/components/stock.vala:27 ../ui/app_menu.interface.h:2
+msgid "_Preferences"
+msgstr "_Preferéncias"
+
+#: ../src/client/application/geary-controller.vala:382
+#: ../src/client/components/stock.vala:25 ../ui/app_menu.interface.h:4
+msgid "_Help"
+msgstr "A_juda"
+
+#: ../src/client/application/geary-controller.vala:386
+#: ../src/client/components/stock.vala:21 ../ui/app_menu.interface.h:5
+msgid "_About"
+msgstr "A _prepaus"
+
+#: ../src/client/application/geary-controller.vala:390
+#: ../ui/app_menu.interface.h:3
+msgid "_Donate"
+msgstr "Far un _don"
+
+#: ../src/client/application/geary-controller.vala:394
+#: ../src/client/components/stock.vala:29 ../ui/app_menu.interface.h:6
+msgid "_Quit"
+msgstr "_Quitar"
+
+#: ../src/client/application/geary-controller.vala:399
+msgid "_Mark as..."
+msgstr "_Marcar coma..."
+
+#: ../src/client/application/geary-controller.vala:405
+msgid "Mark as _Read"
+msgstr "Marcar coma _lu"
+
+#: ../src/client/application/geary-controller.vala:411
+msgid "Mark as _Unread"
+msgstr "Marcar coma _non Lu"
+
+#: ../src/client/application/geary-controller.vala:417
+msgid "_Star"
+msgstr "Ma_rquer d'una estela"
+
+#: ../src/client/application/geary-controller.vala:422
+msgid "U_nstar"
+msgstr "_Suprimir l'estela"
+
+#: ../src/client/application/geary-controller.vala:432
+msgid "Add label"
+msgstr "Apondre una etiqueta"
+
+#: ../src/client/application/geary-controller.vala:433
+msgid "_Label"
+msgstr "E_tiquetar"
+
+#: ../src/client/application/geary-controller.vala:437
+msgid "_Move"
+msgstr "_Desplaçar"
+
+#: ../src/client/application/geary-controller.vala:441
+msgid "Compose new message (Ctrl+N, N)"
+msgstr "Compausar un messatge novèl (Ctrl+N, N)"
+
+#. Reply to a message.
+#: ../src/client/application/geary-controller.vala:445
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1857
+msgid "_Reply"
+msgstr "_Respondre"
+
+#: ../src/client/application/geary-controller.vala:446
+msgid "Reply (Ctrl+R, R)"
+msgstr "Respondre (Ctrl+R, R)"
+
+#: ../src/client/application/geary-controller.vala:450
+msgid "R_eply All"
+msgstr "R_espondre a tous"
+
+#: ../src/client/application/geary-controller.vala:451
+msgid "Reply all (Ctrl+Shift+R, Shift+R)"
+msgstr "Respondre a totes (Ctrl+Maj+R, Maj+R)"
+
+#. Forward a message.
+#: ../src/client/application/geary-controller.vala:456
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1867
+msgid "_Forward"
+msgstr "_Transferir"
+
+#: ../src/client/application/geary-controller.vala:457
+msgid "Forward (Ctrl+L, F)"
+msgstr "Transferir (Ctr+L, F)"
+
+#: ../src/client/application/geary-controller.vala:496
+msgid "Empty"
+msgstr "Voidar"
+
+#: ../src/client/application/geary-controller.vala:497
+msgid "Empty Spam or Trash folders"
+msgstr "Voidar los repertòris porrièrs electronics o corbeille"
+
+#: ../src/client/application/geary-controller.vala:501
+msgid "Empty _Spam…"
+msgstr "Voidar los corrièrs inde_sirables…"
+
+#: ../src/client/application/geary-controller.vala:505
+msgid "Empty _Trash…"
+msgstr "Voidar l'es_cobilhièr…"
+
+#. No callback is connected, since we bind the toggle button to the search bar visibility
+#: ../src/client/application/geary-controller.vala:538
+msgid "Toggle search bar"
+msgstr "Afichar la barra de recèrca"
+
+#: ../src/client/application/geary-controller.vala:752
+msgid "Unable to store server trust exception"
+msgstr "Impossible d'enregistrar l'excepcion de fisança pel servidor"
+
+#: ../src/client/application/geary-controller.vala:989
+msgid "Your settings are insecure"
+msgstr "Vòstres paramètres son pas securizats"
+
+#: ../src/client/application/geary-controller.vala:990
+msgid ""
+"Your IMAP and/or SMTP settings do not specify SSL or TLS.  This means your "
+"username and password could be read by another person on the network.  Are "
+"you sure you want to do this?"
+msgstr ""
+"Vòstra configuracion IMAP o SMTP ne definís aucun chiframent SSL o TLS. "
+"Aquò significa qu'una autra persona sus vòstra ret poirà aver accès a "
+"vòstres identificants. Sètz segur que volètz contunhar ?"
+
+#: ../src/client/application/geary-controller.vala:991
+msgid "Co_ntinue"
+msgstr "Co_ntinuer"
+
+#. / Displayed in the space-limited status bar when a message fails to be sent due to error.
+#: ../src/client/application/geary-controller.vala:1069
+#: ../src/client/components/status-bar.vala:29
+msgid "Error sending email"
+msgstr "Error pendent lo mandadís"
+
+#: ../src/client/application/geary-controller.vala:1070
+msgid ""
+"Geary encountered an error sending an email.  If the problem persists, "
+"please manually delete the email from your Outbox folder."
+msgstr ""
+"Una error s'es producha pendent lo mandadís d'un corrièr electronic. Se lo "
+"problèma contunha, suprimissètz manualament aqueste messatge de la bóstia de "
+"mandadís."
+
+#. Displayed in the space-limited status bar when a message fails to be uploaded
+#. to Sent Mail after being sent.
+#: ../src/client/application/geary-controller.vala:1074
+#: ../src/client/components/status-bar.vala:33
+msgid "Error saving sent mail"
+msgstr "Error d'enregistrament del messatge mandat"
+
+#: ../src/client/application/geary-controller.vala:1075
+msgid ""
+"Geary encountered an error saving a sent message to Sent Mail.  The message "
+"will stay in your Outbox folder until you delete it."
+msgstr ""
+"Una error es apparue pendent l'enregistrament d'un messatge mandat dins lo "
+"dorsièr dels messatges mandats. Lo messatge demorarà dins la bóstia de "
+"mandadís fins al moment que lo suprimiretz."
+
+#: ../src/client/application/geary-controller.vala:1144
+msgid "Labels"
+msgstr "Etiquetas"
+
+#. give the user two options: reset the Account local store, or exit Geary.  A third
+#. could be done to leave the Account in an unopened state, but we don't currently
+#. have provisions for that.
+#: ../src/client/application/geary-controller.vala:1156
+#, c-format
+msgid "Unable to open the database for %s"
+msgstr "Dobertura de la banca de donadas de %s impossibla"
+
+#: ../src/client/application/geary-controller.vala:1157
+#, c-format
+msgid ""
+"There was an error opening the local mail database for this account. This is "
+"possibly due to corruption of the database file in this directory:\n"
+"\n"
+"%s\n"
+"\n"
+"Geary can rebuild the database and re-synchronize with the server or exit.\n"
+"\n"
+"Rebuilding the database will destroy all local email and its attachments. "
+"<b>The mail on the your server will not be affected.</b>"
+msgstr ""
+"Una error s'es producha al moment de la dobertura de la banca de donadas locale "
+"pour aqueste compte. Il es possible que lo fichièr associat, situé dins lo "
+"repertòri seguent, siá corromput :\n"
+"\n"
+"%s\n"
+"\n"
+"Geary pòt siá recompilar la banca de donadas e la resincronizar amb lo "
+"servidor, siá se tampar.\n"
+"\n"
+"Reconstruire la banca de donadas détruira totes los messatges locals e pèças "
+"juntas associadas. <b>Los corrièrs electronics presents sul servidor seràn pas "
+"afectats.</b>"
+
+#: ../src/client/application/geary-controller.vala:1159
+msgid "_Rebuild"
+msgstr "_Reconstruire"
+
+#: ../src/client/application/geary-controller.vala:1159
+msgid "E_xit"
+msgstr "_Quitar"
+
+#: ../src/client/application/geary-controller.vala:1168
+#, c-format
+msgid "Unable to rebuild database for \"%s\""
+msgstr "Reconstruccion de la banca de donadas de « %s » impossibla"
+
+#: ../src/client/application/geary-controller.vala:1169
+#, c-format
+msgid ""
+"Error during rebuild:\n"
+"\n"
+"%s"
+msgstr ""
+"Error al moment de la reconstruccion :\n"
+"\n"
+"%s"
+
+#. some other problem opening the account ... as with other flow path, can't run
+#. Geary today with an account in unopened state, so have to exit
+#: ../src/client/application/geary-controller.vala:1191
+#: ../src/client/application/geary-controller.vala:1201
+#: ../src/client/application/geary-controller.vala:1212
+#, c-format
+msgid "Unable to open local mailbox for %s"
+msgstr "Dobertura de la bóstia de messatjariá locala de %s impossibla"
+
+#: ../src/client/application/geary-controller.vala:1192
+#, c-format
+msgid ""
+"There was an error opening the local mail database for this account. This is "
+"possibly due to a file permissions problem.\n"
+"\n"
+"Please check that you have read/write permissions for all files in this "
+"directory:\n"
+"\n"
+"%s"
+msgstr ""
+"Una error s'es producha al moment de la dobertura de la banca de donadas de "
+"messatjariá locala per aqueste compte, probablament due a un problèma de "
+"permissions.\n"
+"\n"
+"Verificatz las permissions en lectura/escritura per totes los fichièrs de ce "
+"repertòri :\n"
+"\n"
+"%s"
+
+#: ../src/client/application/geary-controller.vala:1202
+msgid ""
+"The version number of the local mail database is formatted for a newer "
+"version of Geary. Unfortunately, the database cannot be \"rolled back\" to "
+"work with this version of Geary.\n"
+"\n"
+"Please install the latest version of Geary and try again."
+msgstr ""
+"La version de la banca de donadas de messatjariá locala correspond a una "
+"version mai recenta de Geary e es pas retrocompatible amb la version "
+"installada.\n"
+"\n"
+"Veuillez installer la darrièra version de Geary e de réensajar."
+
+#: ../src/client/application/geary-controller.vala:1213
+msgid ""
+"There was an error opening the local account. This is probably due to "
+"connectivity issues.\n"
+"\n"
+"Please check your network connection and restart Geary."
+msgstr ""
+"Una error s'es producha al moment de la dobertura del compte local, probablament "
+"deguda a un problèma de connexion.\n"
+"\n"
+"Verificatz la connexion e redémarrez Geary."
+
+#: ../src/client/application/geary-controller.vala:1721
+#, c-format
+msgid "About %s"
+msgstr "A prepaus de %s"
+
+#. / Translators: add your name and email address to receive credit in the About dialog
+#. / For example: Yamada Taro <yamada.taro@example.com>
+#: ../src/client/application/geary-controller.vala:1724
+msgid "translator-credits"
+msgstr "Cédric Valmary <cvalmary@yahoo.fr>"
+
+#: ../src/client/application/geary-controller.vala:1990
+msgid "Undo move (Ctrl+Z)"
+msgstr "Anullar lo desplaçament (Ctrl+Z)"
+
+#: ../src/client/application/geary-controller.vala:2000
+#, c-format
+msgid "Are you sure you want to open \"%s\"?"
+msgstr "Sètz segur que volètz dobrir « %s » ?"
+
+#: ../src/client/application/geary-controller.vala:2001
+msgid ""
+"Attachments may cause damage to your system if opened.  Only open files from "
+"trusted sources."
+msgstr ""
+"L'obèrta de certanas pèças juntas pòt damatjar vòstre sistèma. Avisatz-vos "
+"de dobrir pas que los fichièrs que provenon de fonts fisablas."
+
+#: ../src/client/application/geary-controller.vala:2002
+msgid "Don't _ask me again"
+msgstr "Ne plus me _demander"
+
+#: ../src/client/application/geary-controller.vala:2020
+#, c-format
+msgid "A file named \"%s\" already exists.  Do you want to replace it?"
+msgstr "Un fichièr nomenat « %s » existís ja. Lo volètz remplaçar ?"
+
+#: ../src/client/application/geary-controller.vala:2022
+#, c-format
+msgid ""
+"The file already exists in \"%s\".  Replacing it will overwrite its contents."
+msgstr ""
+"Lo fichièr existís ja dins « %s ». En lo remplaçant, perdètz son "
+"contengut."
+
+#: ../src/client/application/geary-controller.vala:2025
+msgid "_Replace"
+msgstr "_Remplaçar"
+
+#. Find out what to do with the inline composers.
+#. TODO: Remove this in favor of automatically saving drafts
+#: ../src/client/application/geary-controller.vala:2323
+msgid "Close open draft messages?"
+msgstr "Tampar totes los borrolhons dobèrts ?"
+
+#: ../src/client/application/geary-controller.vala:2453
+#, c-format
+msgid "Empty all email from your %s folder?"
+msgstr "Suprimir totes los corrièrs electronics del dorsièr %s ?"
+
+#: ../src/client/application/geary-controller.vala:2454
+msgid "This removes the email from Geary and your email server."
+msgstr "Suprimís lo mail de Geary e del servidor de mail."
+
+#: ../src/client/application/geary-controller.vala:2455
+msgid "This cannot be undone."
+msgstr "L'accion pòt pas èsser anullada."
+
+#: ../src/client/application/geary-controller.vala:2456
+#, c-format
+msgid "Empty %s"
+msgstr "Voidar %s"
+
+#: ../src/client/application/geary-controller.vala:2473
+#, c-format
+msgid "Error emptying %s"
+msgstr "Error al netejatge de %s"
+
+#: ../src/client/application/geary-controller.vala:2503
+msgid "Do you want to permanently delete this message?"
+msgid_plural "Do you want to permanently delete these messages?"
+msgstr[0] "Volètz suprimir definitivament aqueste messatge ?"
+msgstr[1] "Volètz suprimir definitivament aquestes messatges ?"
+
+#: ../src/client/application/geary-controller.vala:2505
+msgid "Delete"
+msgstr "Suprimir"
+
+#: ../src/client/application/geary-controller.vala:2536
+msgid "Undo archive (Ctrl+Z)"
+msgstr "Anullar archivar (Ctrl+Z)"
+
+#: ../src/client/application/geary-controller.vala:2551
+msgid "Undo trash (Ctrl+Z)"
+msgstr "Anullar metre a l'escobilhièr (Ctrl+Z)"
+
+#: ../src/client/application/geary-controller.vala:2604
+msgid "Undo (Ctrl+Z)"
+msgstr "Anullar (Ctrl+Z)"
+
+#: ../src/client/components/conversation-find-bar.vala:214
+#, c-format
+msgid "%i match"
+msgid_plural "%i matches"
+msgstr[0] "%i correspondéncia"
+msgstr[1] "%i correspondéncias"
+
+#: ../src/client/components/conversation-find-bar.vala:216
+#, c-format
+msgid "%i match (wrapped)"
+msgid_plural "%i matches (wrapped)"
+msgstr[0] "%i correspondéncia"
+msgstr[1] "%i correspondéncias"
+
+#: ../src/client/components/conversation-find-bar.vala:218
+msgid "not found"
+msgstr "pas trobat"
+
+#: ../src/client/components/main-window.vala:430
+#, c-format
+msgid "%s (%d)"
+msgstr "%s (%d)"
+
+#: ../src/client/components/search-bar.vala:10
+#: ../src/client/folder-list/folder-list-search-branch.vala:38
+#: ../src/engine/api/geary-special-folder-type.vala:51
+msgid "Search"
+msgstr "Recèrca"
+
+#. Search entry.
+#: ../src/client/components/search-bar.vala:25
+msgid "Search all mail in account for keywords (Ctrl+S)"
+msgstr "Recercar per mots claus dins totes los messatges del compte (Ctrl+S)"
+
+#: ../src/client/components/search-bar.vala:118
+#, c-format
+msgid "Indexing %s account"
+msgstr "Indexacion del compte %s"
+
+#: ../src/client/components/search-bar.vala:129
+#: ../src/client/folder-list/folder-list-search-branch.vala:39
+#, c-format
+msgid "Search %s account"
+msgstr "Recèrca dins lo compte %s"
+
+#. / Displayed in the space-limited status bar while a message is in the process of being sent.
+#: ../src/client/components/status-bar.vala:26
+msgid "Sending..."
+msgstr "Mandadís en cors..."
+
+#: ../src/client/components/stock.vala:18 ../ui/account_cannot_remove.glade.h:3
+msgid "_OK"
+msgstr "_Validar"
+
+#: ../src/client/components/stock.vala:19 ../ui/edit_alternate_emails.glade.h:3
+#: ../ui/password-dialog.glade.h:5 ../ui/remove_confirm.glade.h:5
+msgid "_Cancel"
+msgstr "_Anullar"
+
+#: ../src/client/components/stock.vala:23
+msgid "_Close"
+msgstr "_Tampar"
+
+#: ../src/client/components/stock.vala:24
+msgid "_Discard"
+msgstr "A_bandonar"
+
+#: ../src/client/components/stock.vala:26
+msgid "_Open"
+msgstr "_Dobrir"
+
+#: ../src/client/components/stock.vala:28
+msgid "_Print..."
+msgstr "Im_primir..."
+
+#: ../src/client/components/stock.vala:30 ../ui/remove_confirm.glade.h:6
+msgid "_Remove"
+msgstr "_Suprimir"
+
+#. Select all.
+#: ../src/client/components/stock.vala:32
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1324
+msgid "Select _All"
+msgstr "T_ot seleccionar"
+
+#: ../src/client/components/stock.vala:33
+msgid "_Keep"
+msgstr "_Gardar"
+
+#: ../src/client/composer/composer-widget.vala:73
+msgid "Saved"
+msgstr "Enregistrat"
+
+#: ../src/client/composer/composer-widget.vala:74
+msgid "Saving"
+msgstr "Enregistrament"
+
+#: ../src/client/composer/composer-widget.vala:75
+msgid "Error saving"
+msgstr "Error d'enregistrament"
+
+#: ../src/client/composer/composer-widget.vala:76
+msgid "Press Backspace to delete quote"
+msgstr "Quichatz sus Retorn arrièr per suprimir la citation"
+
+#: ../src/client/composer/composer-widget.vala:77
+msgid "New Message"
+msgstr "Messatge novèl"
+
+#. A list of keywords, separated by pipe ("|") characters, that suggest an attachment; since
+#. this is full-word checking, include all variants of each word.  No spaces are allowed.
+#: ../src/client/composer/composer-widget.vala:138
+msgid ""
+"attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|"
+"enclosing|encloses|enclosure|enclosures"
+msgstr "pèça-junta|junt|jónher|jonch|jonches|estacat|estacament|fichièr-junt"
+
+#: ../src/client/composer/composer-widget.vala:1102
+#: ../src/client/composer/composer-widget.vala:1106
+msgid "Do you want to discard this message?"
+msgstr "Volètz abandonar aqueste messatge ?"
+
+#: ../src/client/composer/composer-widget.vala:1262
+msgid "Send message with an empty subject and body?"
+msgstr "Mandar lo messatge amb un objècte e un contengut void ?"
+
+#: ../src/client/composer/composer-widget.vala:1264
+msgid "Send message with an empty subject?"
+msgstr "Mandar lo messatge amb un objècte void ?"
+
+#: ../src/client/composer/composer-widget.vala:1266
+msgid "Send message with an empty body?"
+msgstr "Mandar lo messatge amb un contengut void ?"
+
+#: ../src/client/composer/composer-widget.vala:1268
+msgid "Send message without an attachment?"
+msgstr "Mandar lo messatge sens pèça junta ?"
+
+#: ../src/client/composer/composer-widget.vala:1530
+msgid "Cannot add attachment"
+msgstr "Impossible d'apondre la pèça junta"
+
+#: ../src/client/composer/composer-widget.vala:1541
+#, c-format
+msgid "\"%s\" could not be found."
+msgstr "« %s » es introbable."
+
+#: ../src/client/composer/composer-widget.vala:1548
+#, c-format
+msgid "\"%s\" is a folder."
+msgstr "« %s » es un dorsièr."
+
+#: ../src/client/composer/composer-widget.vala:1555
+#, c-format
+msgid "\"%s\" is an empty file."
+msgstr "« %s » es un fichièr void."
+
+#: ../src/client/composer/composer-widget.vala:1569
+#, c-format
+msgid "\"%s\" could not be opened for reading."
+msgstr "« %s » a pas pogut èsser legit."
+
+#: ../src/client/composer/composer-widget.vala:1576
+#, c-format
+msgid "\"%s\" already attached for delivery."
+msgstr "« %s » es ja estat junt al messatge."
+
+#. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
+#: ../src/client/composer/composer-widget.vala:1585
+#, c-format
+msgid "%s (%s)"
+msgstr "%s (%s)"
+
+#: ../src/client/composer/composer-widget.vala:1645
+msgid "To: "
+msgstr "A :"
+
+#: ../src/client/composer/composer-widget.vala:1648
+msgid "Cc: "
+msgstr "Cc :"
+
+#: ../src/client/composer/composer-widget.vala:1651
+msgid "Bcc: "
+msgstr "Cci :"
+
+#: ../src/client/composer/composer-widget.vala:1654
+msgid "Reply-To: "
+msgstr "Respondre a :"
+
+#: ../src/client/composer/composer-widget.vala:1887
+msgid "Select Color"
+msgstr "Seleccionar una color"
+
+#. Displayed in the From dropdown to indicate an "alternate email address"
+#. for an account.  The first printf argument will be the alternate email
+#. address, and the second will be the account's primary email address.
+#: ../src/client/composer/composer-widget.vala:2322
+#, c-format
+msgid "%1$s via %2$s"
+msgstr "%1$s via %2$s"
+
+#. Composer label (with mnemonic underscore) for the account selector
+#. when choosing what address to send a message from.
+#: ../src/client/composer/composer-widget.vala:2364
+msgid "_From:"
+msgstr "_De :"
+
+#: ../src/client/conversation-list/formatted-conversation-data.vala:11
+msgid "Me"
+msgstr "Ieu"
+
+#: ../src/client/conversation-viewer/conversation-viewer.vala:413
+msgid "No conversations selected."
+msgstr "Cap de conversacion pas seleccionada."
+
+#: ../src/client/conversation-viewer/conversation-viewer.vala:415
+#, c-format
+msgid "%u conversation selected."
+msgid_plural "%u conversations selected."
+msgstr[0] "%u conversacion seleccionada."
+msgstr[1] "%u conversacions seleccionadas."
+
+#: ../src/client/conversation-viewer/conversation-viewer.vala:444
+msgid "No search results found."
+msgstr "Aucun resultat."
+
+#: ../src/client/conversation-viewer/conversation-viewer.vala:446
+msgid "No conversations in folder."
+msgstr "Aucune conversation dins lo dorsièr."
+
+#: ../src/client/conversation-viewer/conversation-viewer.vala:708
+msgid "This message contains remote images."
+msgstr "Aqueste messatge conten d'images distantas."
+
+#: ../src/client/conversation-viewer/conversation-viewer.vala:708
+msgid "Show Images"
+msgstr "Afichar los imatges"
+
+#: ../src/client/conversation-viewer/conversation-viewer.vala:709
+msgid "Always Show From Sender"
+msgstr "Totjorn afichar per aqueste expeditor"
+
+#: ../src/client/conversation-viewer/conversation-viewer.vala:733
+msgid "Edit Draft"
+msgstr "Editar lo borrolhon"
+
+#: ../src/client/conversation-viewer/conversation-viewer.vala:809
+msgid "From:"
+msgstr "De :"
+
+#: ../src/client/conversation-viewer/conversation-viewer.vala:812
+msgid "To:"
+msgstr "A :"
+
+#: ../src/client/conversation-viewer/conversation-viewer.vala:815
+msgid "Cc:"
+msgstr "Cc :"
+
+#: ../src/client/conversation-viewer/conversation-viewer.vala:818
+msgid "Bcc:"
+msgstr "Cci :"
+
+#: ../src/client/conversation-viewer/conversation-viewer.vala:821
+msgid "Subject:"
+msgstr "Objècte :"
+
+#: ../src/client/conversation-viewer/conversation-viewer.vala:824
+msgid "Date:"
+msgstr "Data :"
+
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1139
+#, c-format
+msgid "%u read message"
+msgid_plural "%u read messages"
+msgstr[0] "%u messatge legit"
+msgstr[1] "%u messatges legits"
+
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1271
+#, c-format
+msgid "This message was sent successfully, but could not be saved to %s."
+msgstr ""
+"Aqueste messatge a été mandat amb succès, mas a pas pogut èsser enregistrat dins %s."
+
+#. Add a menu item for copying the current selection.
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1297
+#: ../ui/composer.glade.h:4
+msgid "_Copy"
+msgstr "_Copiar"
+
+#. Add a menu item for copying the address.
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1305
+msgid "Copy _Email Address"
+msgstr "Copiar l'_adreça electronica"
+
+#. Add a menu item for copying the link.
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1310
+#: ../ui/composer.glade.h:17
+msgid "Copy _Link"
+msgstr "Copiar lo _ligam"
+
+#. Select message.
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1318
+msgid "Select _Message"
+msgstr "Seleccionar lo _messatge"
+
+#. Inspect.
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1330
+msgid "_Inspect"
+msgstr "_Inspectar"
+
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1556
+msgid "This link appears to go to"
+msgstr "Aqueste ligam sembla puntar cap a"
+
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1557
+msgid "but actually goes to"
+msgstr "mas punta puslèu cap a"
+
+#. If href doesn't look like a URL, something is fishy, so warn the user
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1612
+msgid " (Invalid?)"
+msgstr " (Invalid ?)"
+
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1718
+msgid "_Save Image As..."
+msgstr "_Enregistrar l'imatge jos..."
+
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1822
+msgid "_Save As..."
+msgstr "Enregi_strar jos..."
+
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1827
+msgid "Save All A_ttachments..."
+msgstr "Enregistrar totas las pèças _juntas..."
+
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1847
+msgid "Save A_ttachment..."
+msgid_plural "Save All A_ttachments..."
+msgstr[0] "Enregistrar la pèça _junta..."
+msgstr[1] "Enregistrar totas las pèças _juntas..."
+
+#. Reply to all on a message.
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1862
+msgid "Reply to _All"
+msgstr "Respondre a _totes"
+
+#. Mark as read/unread.
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1879
+msgid "_Mark as Read"
+msgstr "Marcar coma l_u"
+
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1883
+msgid "_Mark as Unread"
+msgstr "Marcar coma pas l_egit"
+
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1889
+msgid "Mark Unread From _Here"
+msgstr "Marcar coma pas legit a partir d'a_icí"
+
+#. Separator.
+#. View original message source.
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1904
+msgid "_View Source"
+msgstr "Veire la _font"
+
+#. Generate the attachment table.
+#. / Placeholder filename for attachments with no filename.
+#: ../src/client/conversation-viewer/conversation-viewer.vala:2227
+#: ../src/engine/rfc822/rfc822-utils.vala:378
+msgid "none"
+msgstr "pas cap de nom"
+
+#: ../src/client/conversation-viewer/conversation-viewer.vala:2362
+msgid "Failed to open default text editor."
+msgstr "Error al moment de la dobertura de l'editor de tèxte per defaut."
+
+#: ../src/client/conversation-viewer/conversation-web-view.vala:322
+#, c-format
+msgid "%s - Conversation Inspector"
+msgstr "%s - Inspector de conversacion"
+
+#: ../src/client/dialogs/attachment-dialog.vala:18
+msgid "Choose a file"
+msgstr "Causir un fichièr"
+
+#: ../src/client/dialogs/attachment-dialog.vala:23
+msgid "_Attach"
+msgstr "_Jónher"
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:33
+#, c-format
+msgid "Untrusted Connection: %s"
+msgstr "Connexion non certificada : %s"
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:36
+#, c-format
+msgid "The identity of the %s mail server at %s:%u could not be verified."
+msgstr ""
+"L'identitat del servidor de corrièr electronic %s a %s:%u pòt pas èsser "
+"verificada."
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:44
+msgid ""
+"Selecting \"Trust This Server\" or \"Always Trust This Server\" may cause "
+"your username and password to be transmitted insecurely."
+msgstr ""
+"Seleccionar « Faire fisança a aqueste servidor » o « Totjorn far fisança "
+"à aqueste servidor » pòt conduire a la transmission de vos nom d'utilizaire e "
+"senhal de manière non securizada."
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:52
+msgid ""
+"Selecting \"Don't Trust This Server\" will cause Geary not to access this "
+"server."
+msgstr ""
+"Seleccionar « Ne pas far fisança a aqueste servidor » empacharà Geary "
+"d'accedir a aqueste servidor."
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:54
+msgid "Geary will not add or update this email account."
+msgstr "Geary apondrà pas ni ne mettra a jorn aqueste compte de messatjariá."
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:59
+msgid ""
+"Selecting \"Don't Trust This Server\" will cause Geary to stop accessing "
+"this account."
+msgstr ""
+"Seleccionar « Ne pas far fisança a aqueste servidor » va empachar l'accès de "
+"Geary a aqueste compte."
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:61
+msgid "Geary will exit if you have no other open email accounts."
+msgstr ""
+"Geary va se tampar se avètz pas d'autre compte de messatjariá dobèrt."
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:66
+msgid ""
+"Contact your system administrator or email service provider if you have any "
+"question about these issues."
+msgstr ""
+"Contactatz vòstre administrator sistèma o vòstre provesidor de messatjariá "
+"se avètz de questions a prepaus d'aquestes problèmas."
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:73
+msgid "The server's certificate is not signed by a known authority"
+msgstr "Lo certificat del servidor es pas signat per una autoritat reconeguda"
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:76
+msgid "The server's identity does not match the identity in the certificate"
+msgstr ""
+"L'identitat del servidor correspond pas a celle renseignée pel certificat."
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:79
+msgid "The server's certificate has expired"
+msgstr "Lo certificat del servidor a expirat"
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:82
+msgid "The server's certificate has not been activated"
+msgstr "Lo certificat del servidor es pas estat activat"
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:85
+msgid "The server's certificate has been revoked and is now invalid"
+msgstr "Lo certificat del servidor es estat revocat e es ara invalid"
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:88
+msgid "The server's certificate is considered insecure"
+msgstr "Lo certificat del servidor es considerat coma non securizat"
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:91
+msgid "An error has occurred processing the server's certificate"
+msgstr ""
+"Una error s'es producha pendent l'échange de certificat amb lo servidor"
+
+#. We can't keep these in the glade file, because Gnome doesn't want markup in translatable
+#. strings, and Glade doesn't support the "larger" size attribute. See this bug report for
+#. details: https://bugzilla.gnome.org/show_bug.cgi?id=679006
+#: ../src/client/dialogs/password-dialog.vala:16
+msgid "Geary requires your email password to continue"
+msgstr "Geary a besonh de vòstre senhal per contunhar"
+
+#. Label displaying total number of email messages in a folder
+#: ../src/client/folder-list/folder-list-folder-entry.vala:32
+#, c-format
+msgid "%d message"
+msgid_plural "%d messages"
+msgstr[0] "%d messatge"
+msgstr[1] "%d messatges"
+
+#. / Label displaying number of unread email messages in a folder
+#: ../src/client/folder-list/folder-list-folder-entry.vala:39
+#, c-format
+msgid "%d unread"
+msgid_plural "%d unread"
+msgstr[0] "%d non lu"
+msgstr[1] "%d non lus"
+
+#. / This string represents the divider between two messages: "n messages" and "n unread",
+#. / shown in the folder list as a tooltip.  Please use your languages conventions for
+#. / combining the two, i.e. a comma (",") for English; "6 messages, 3 unread"
+#: ../src/client/folder-list/folder-list-folder-entry.vala:45
+#, c-format
+msgid "%s, %s"
+msgstr "%s, %s"
+
+#: ../src/client/folder-list/folder-list-inboxes-branch.vala:14
+msgid "Inboxes"
+msgstr "Bóstias de recepcion"
+
+#: ../src/client/folder-list/folder-list-search-branch.vala:44
+#, c-format
+msgid "%d result"
+msgid_plural "%d results"
+msgstr[0] "%d resultat"
+msgstr[1] "%d resultats"
+
+#: ../src/client/notification/libmessagingmenu.vala:75
+#, c-format
+msgid "%s - New Messages"
+msgstr "%s - Messatges novèls"
+
+#: ../src/client/notification/libnotify.vala:72
+#, c-format
+msgid "%d new message"
+msgid_plural "%d new messages"
+msgstr[0] "%d messatge novèl"
+msgstr[1] "%d messatges novèls"
+
+#: ../src/client/notification/libnotify.vala:75
+#, c-format
+msgid "%s, %d new message total"
+msgid_plural "%s, %d new messages total"
+msgstr[0] "%s, %d messatge novèl al total"
+msgstr[1] "%s, %d messatges novèls al total"
+
+#: ../src/client/notification/libnotify.vala:107
+#, c-format
+msgid ""
+"%s\n"
+"(%d other new message for %s)"
+msgid_plural ""
+"%s\n"
+"(%d other new messages for %s)"
+msgstr[0] ""
+"%s\n"
+"(%d messatge novèl restant per %s)"
+msgstr[1] ""
+"%s\n"
+"(%d messatges novèls restants per %s)"
+
+#: ../src/client/notification/libnotify.vala:160
+msgid "Open"
+msgstr "Dobrir"
+
+#. / Datetime format for 12-hour time, i.e. 8:31 am
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+#: ../src/client/util/util-date.vala:68
+msgid "%l:%M %P"
+msgstr "%l:%M %P"
+
+#. / Datetime format for 24-hour time, i.e. 16:35
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+#: ../src/client/util/util-date.vala:71
+msgid "%H:%M"
+msgstr "%H:%M"
+
+#. / Datetime format for the locale default, i.e. 8:31 am or 16:35,
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+#: ../src/client/util/util-date.vala:74
+msgctxt "Default clock format"
+msgid "%l:%M %P"
+msgstr "%H:%M"
+
+#. / Date format for dates within the current year, i.e. Nov 8
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+#: ../src/client/util/util-date.vala:78
+msgid "%b %-e"
+msgstr "%-e %b"
+
+#. / Date format for dates within a different year, i.e. 02/04/10
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+#: ../src/client/util/util-date.vala:83
+#, no-c-format
+msgid "%x"
+msgstr "%x"
+
+#. / Verbose datetime format for 12-hour time, i.e. November 8, 2010 8:42 am
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+#: ../src/client/util/util-date.vala:88
+msgid "%B %-e, %Y %-l:%M %P"
+msgstr "%-e %B %Y %-l:%M %P"
+
+#. / Verbose datetime format for 24-hour time, i.e. November 8, 2010 16:35
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+#: ../src/client/util/util-date.vala:91
+msgid "%B %-e, %Y %-H:%M"
+msgstr "%-e %B %Y %-H:%M"
+
+#. / Verbose datetime format for the locale default (full month, day and time)
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+#: ../src/client/util/util-date.vala:94
+msgctxt "Default full date"
+msgid "%B %-e, %Y %-l:%M %P"
+msgstr "%-e %B %Y %-H:%M"
+
+#: ../src/client/util/util-date.vala:164
+msgid "Now"
+msgstr "Maintenant"
+
+#: ../src/client/util/util-date.vala:167
+#, c-format
+msgid "%dm ago"
+msgid_plural "%dm ago"
+msgstr[0] "i a %d min."
+msgstr[1] "i a %d min."
+
+#: ../src/client/util/util-date.vala:171
+#, c-format
+msgid "%dh ago"
+msgid_plural "%dh ago"
+msgstr[0] "i a %d h."
+msgstr[1] "i a %d h."
+
+#: ../src/client/util/util-date.vala:178
+msgid "Yesterday"
+msgstr "Hier"
+
+#. / Date format that shows the weekday (Monday, Tuesday, ...)
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+#: ../src/client/util/util-date.vala:183
+#, c-format
+msgid "%A"
+msgstr "%A"
+
+#: ../src/client/util/util-email.vala:30
+#: ../src/engine/rfc822/rfc822-message.vala:781
+msgid "(no subject)"
+msgstr "(pas d'objècte)"
+
+#: ../src/client/util/util-files.vala:16
+msgid "bytes"
+msgstr "octets"
+
+#: ../src/client/util/util-files.vala:19
+msgctxt "Abbreviation for terabyte"
+msgid "TB"
+msgstr "To"
+
+#: ../src/client/util/util-files.vala:22
+msgctxt "Abbreviation for gigabyte"
+msgid "GB"
+msgstr "Go"
+
+#: ../src/client/util/util-files.vala:25
+msgctxt "Abbreviation for megabyte"
+msgid "MB"
+msgstr "Mo"
+
+#: ../src/client/util/util-files.vala:28
+msgctxt "Abbreviation for kilobyte"
+msgid "KB"
+msgstr "Ko"
+
+#: ../src/engine/api/geary-service-provider.vala:52
+msgid "Gmail"
+msgstr "Gmail"
+
+#: ../src/engine/api/geary-service-provider.vala:55
+msgid "Yahoo! Mail"
+msgstr "Yahoo! Mail"
+
+#: ../src/engine/api/geary-service-provider.vala:58
+msgid "Outlook.com"
+msgstr "Outlook.com"
+
+#: ../src/engine/api/geary-service-provider.vala:61
+msgid "Other"
+msgstr "Autre"
+
+#: ../src/engine/api/geary-service.vala:20
+msgid "IMAP"
+msgstr "IMAP"
+
+#: ../src/engine/api/geary-service.vala:23
+msgid "SMTP"
+msgstr "SMTP"
+
+#: ../src/engine/api/geary-special-folder-type.vala:24
+msgid "Inbox"
+msgstr "Bóstia de recepcion"
+
+#: ../src/engine/api/geary-special-folder-type.vala:27
+msgid "Drafts"
+msgstr "Borrolhons"
+
+#: ../src/engine/api/geary-special-folder-type.vala:30
+msgid "Sent Mail"
+msgstr "Messatges mandats"
+
+#: ../src/engine/api/geary-special-folder-type.vala:33
+msgid "Starred"
+msgstr "Marqués d'una estela"
+
+#: ../src/engine/api/geary-special-folder-type.vala:36
+msgid "Important"
+msgstr "Importants"
+
+#: ../src/engine/api/geary-special-folder-type.vala:39
+msgid "All Mail"
+msgstr "Totes los messatges"
+
+#: ../src/engine/api/geary-special-folder-type.vala:42
+msgid "Spam"
+msgstr "Porrièr electronic"
+
+#: ../src/engine/api/geary-special-folder-type.vala:45
+msgid "Trash"
+msgstr "Corbeille"
+
+#: ../src/engine/api/geary-special-folder-type.vala:48
+msgid "Outbox"
+msgstr "Bóstia de mandadís"
+
+#: ../src/engine/api/geary-special-folder-type.vala:54
+msgid "Archive"
+msgstr "Archives"
+
+#: ../src/engine/api/geary-special-folder-type.vala:58 ../ui/login.glade.h:26
+msgid "None"
+msgstr "Pas cap"
+
+#. Map of user-supplied search field names to column names.
+#. / Can be typed in the search box like attachment:file.txt to find
+#. / messages with attachments with a particular name.  The translated
+#. / string must match the string in Geary's help documentation.
+#: ../src/engine/imap-db/imap-db-account.vala:710
+msgid "attachment"
+msgstr "estacament"
+
+#. / Can be typed in the search box like bcc:johndoe@example.com to find
+#. / messages bcc'd to a particular person.  The translated
+#. / string must match the string in Geary's help documentation.
+#. Fields we allow the token to be "me" as in from:me.
+#: ../src/engine/imap-db/imap-db-account.vala:714
+#: ../src/engine/imap-db/imap-db-account.vala:738
+msgid "bcc"
+msgstr "cci"
+
+#. / Can be typed in the search box like body:word to find the word only
+#. / if it occurs in the body of a message.  The translated
+#. / string must match the string in Geary's help documentation.
+#: ../src/engine/imap-db/imap-db-account.vala:718
+msgid "body"
+msgstr "còs"
+
+#. / Can be typed in the search box like cc:johndoe@example.com to find
+#. / messages cc'd to a particular person.  The translated
+#. / string must match the string in Geary's help documentation.
+#: ../src/engine/imap-db/imap-db-account.vala:722
+#: ../src/engine/imap-db/imap-db-account.vala:738
+msgid "cc"
+msgstr "cc"
+
+#. / Can be typed in the search box like from:johndoe@example.com to
+#. / find messages from a particular sender.  The translated
+#. / string must match the string in Geary's help documentation.
+#: ../src/engine/imap-db/imap-db-account.vala:726
+#: ../src/engine/imap-db/imap-db-account.vala:738
+msgid "from"
+msgstr "de"
+
+#. / Can be typed in the search box like subject:word to find the word
+#. / only if it occurs in the subject of a message.  The translated
+#. / string must match the string in Geary's help documentation.
+#: ../src/engine/imap-db/imap-db-account.vala:730
+msgid "subject"
+msgstr "objècte"
+
+#. / Can be typed in the search box like to:johndoe@example.com to find
+#. / messages received by a particular person.  The translated
+#. / string must match the string in Geary's help documentation.
+#: ../src/engine/imap-db/imap-db-account.vala:734
+#: ../src/engine/imap-db/imap-db-account.vala:738
+msgid "to"
+msgstr "a"
+
+#. "me" can be typed like from:me or cc:me, etc. as a shorthand
+#. to find mail to or from yourself in search.  The translated
+#. string must match the string in Geary's help documentation.
+#: ../src/engine/imap-db/imap-db-account.vala:754
+msgid "me"
+msgstr "ieu"
+
+#. List of folder names to match for Drafts, separated by |.  Please add localized common
+#. names for the Drafts folder, leaving in the English names as well.  The first in the list
+#. will be the default, so please add the most common localized name to the front.
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:575
+msgid "Drafts | Draft"
+msgstr "Borrolhons | Borrolhon | Drafts | Draft"
+
+#. List of folder names to match for Sent Mail, separated by |.  Please add localized common
+#. names for the Sent Mail folder, leaving in the English names as well.  The first in the list
+#. will be the default, so please add the most common localized name to the front.
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:580
+msgid "Sent | Sent Mail | Sent Email | Sent E-Mail"
+msgstr ""
+"Mandats | Messatges mandats | Sent | Sent Mail | Sent Email | Sent E-Mail"
+
+#. List of folder names to match for Spam, separated by |.  Please add localized common
+#. names for the Spam folder, leaving in the English names as well.  The first in the list
+#. will be the default, so please add the most common localized name to the front.
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:585
+msgid ""
+"Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email "
+"| Bulk E-Mail"
+msgstr ""
+"Porrièr electronic | Porrièrs electronics | Indesirables | Messatges "
+"indesirables | Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk "
+"Mail | Bulk Email | Bulk E-Mail"
+
+#. List of folder names to match for Trash, separated by |.  Please add localized common
+#. names for the Trash folder, leaving in the English names as well.  The first in the list
+#. will be the default, so please add the most common localized name to the front.
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:590
+msgid "Trash | Rubbish | Rubbish Bin"
+msgstr "Corbeille | Poubelle | Trash | Rubbish | Rubbish Bin"
+
+#. List of folder names to match for Archive, separated by |.  Please add localized common
+#. names for the Trash folder, leaving in the English names as well.  The first in the list
+#. will be the default, so please add the most common localized name to the front.
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:595
+msgid "Archive | Archives"
+msgstr ""
+
+#. / Format for the datetime that a message being replied to was received
+#. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
+#: ../src/engine/rfc822/rfc822-utils.vala:215
+msgid "%a, %b %-e, %Y at %-l:%M %p"
+msgstr "%a %-e %b %Y a %-H:%M"
+
+#. / The quoted header for a message being replied to.
+#. / %1$s will be substituted for the date, and %2$s will be substituted for
+#. / the original sender.
+#: ../src/engine/rfc822/rfc822-utils.vala:221
+#, c-format
+msgid "On %1$s, %2$s wrote:"
+msgstr "Lo %1$s, %2$s a escrich :"
+
+#. / The quoted header for a message being replied to (in case the date is not known).
+#. / %s will be replaced by the original sender.
+#: ../src/engine/rfc822/rfc822-utils.vala:228
+#, c-format
+msgid "%s wrote:"
+msgstr "%s a escrich :"
+
+#. / The quoted header for a message being replied to (in case the sender is not known).
+#. / %s will be replaced by the original date
+#: ../src/engine/rfc822/rfc822-utils.vala:234
+#, c-format
+msgid "On %s:"
+msgstr "Lo %s :"
+
+#: ../src/engine/rfc822/rfc822-utils.vala:263
+msgid "---------- Forwarded message ----------"
+msgstr "---------- Messatge transferit ----------"
+
+#: ../src/engine/rfc822/rfc822-utils.vala:267
+#, c-format
+msgid "From: %s\n"
+msgstr "De : %s\n"
+
+#: ../src/engine/rfc822/rfc822-utils.vala:268
+#, c-format
+msgid "Subject: %s\n"
+msgstr "Objècte : %s\n"
+
+#: ../src/engine/rfc822/rfc822-utils.vala:269
+#, c-format
+msgid "Date: %s\n"
+msgstr "Data : %s\n"
+
+#: ../src/engine/rfc822/rfc822-utils.vala:272
+#, c-format
+msgid "To: %s\n"
+msgstr "A : %s\n"
+
+#: ../src/engine/rfc822/rfc822-utils.vala:275
+#, c-format
+msgid "Cc: %s\n"
+msgstr "Cc : %s\n"
+
+#: ../ui/account_cannot_remove.glade.h:1
+msgid "<span weight=\"bold\" size=\"larger\">Cannot remove account</span> "
+msgstr ""
+"<span weight=\"bold\" size=\"larger\">Impossible de suprimir lo compte</"
+"span>"
+
+#: ../ui/account_cannot_remove.glade.h:2
+msgid ""
+"A composer window associated with this account is currently open. Send or "
+"discard the message and try again."
+msgstr ""
+"Una fenèstra d'edicion associada a aqueste compte es dobèrta. Mandatz o "
+"abandonatz lo messatge en cors e reensajatz."
+
+#: ../ui/account_list.glade.h:1
+msgid "Add account"
+msgstr "Apondre un compte"
+
+#: ../ui/account_list.glade.h:2
+msgid "Edit account"
+msgstr "Modificar lo compte"
+
+#: ../ui/account_list.glade.h:3
+msgid "Remove account"
+msgstr "Suprimir lo compte"
+
+#: ../ui/account_spinner.glade.h:1
+msgid "Please wait while Geary validates your account."
+msgstr "Pacientatz pendent que Geary valide vòstre compte."
+
+#: ../ui/certificate_warning_dialog.glade.h:1
+msgid "Untrusted Connection"
+msgstr "Connexion non certificada"
+
+#: ../ui/certificate_warning_dialog.glade.h:2
+msgid "_Always Trust This Server"
+msgstr "_Totjorn far fisança a aqueste servidor"
+
+#: ../ui/certificate_warning_dialog.glade.h:3
+msgid "_Trust This Server"
+msgstr "Far _fisança a aqueste servidor"
+
+#: ../ui/certificate_warning_dialog.glade.h:4
+msgid "_Don't Trust This Server"
+msgstr "Far _pas fisança a aqueste servidor"
+
+#: ../ui/composer.glade.h:1
+msgid "_Undo"
+msgstr "A_nullar"
+
+#: ../ui/composer.glade.h:2
+msgid "_Redo"
+msgstr "_Restablir"
+
+#: ../ui/composer.glade.h:3
+msgid "Cu_t"
+msgstr "_Talhar"
+
+#: ../ui/composer.glade.h:5
+msgid "_Paste"
+msgstr "_Pegar"
+
+#: ../ui/composer.glade.h:6
+msgid "_Left"
+msgstr "Alinhar a _esquèrra"
+
+#: ../ui/composer.glade.h:7
+msgid "_Right"
+msgstr "Alinhar a _drecha"
+
+#: ../ui/composer.glade.h:8
+msgid "_Center"
+msgstr "_Centrar"
+
+#: ../ui/composer.glade.h:9
+msgid "_Justify"
+msgstr "_Justificar"
+
+#: ../ui/composer.glade.h:10
+msgid "Link (Ctrl+L)"
+msgstr "Ligam (Ctrl+L)"
+
+#: ../ui/composer.glade.h:11
+msgid "C_olor"
+msgstr "C_olor"
+
+#: ../ui/composer.glade.h:12
+msgid "More options"
+msgstr "Mai d'opcions"
+
+#: ../ui/composer.glade.h:13
+msgid "Quote text  (Ctrl+])"
+msgstr "Indentar lo tèxte (Ctrl+])"
+
+#: ../ui/composer.glade.h:14
+msgid "Unquote text (Ctrl+[)"
+msgstr "Désindentar lo tèxte (Ctrl+[)"
+
+#: ../ui/composer.glade.h:15
+msgid "Remove formatting (Ctrl+Space)"
+msgstr "Escafar la mesa en forma (Ctrl+Espaci)"
+
+#: ../ui/composer.glade.h:16
+msgctxt "Clipboard paste with rich text"
+msgid "Paste _With Formatting"
+msgstr "Pegar amb la _mesa en forma"
+
+#: ../ui/composer.glade.h:18
+msgid "Bold (Ctrl+B)"
+msgstr "Gras (Ctrl+B)"
+
+#: ../ui/composer.glade.h:19
+msgid "Italic (Ctrl+I)"
+msgstr "Italica (Ctrl+I)"
+
+#: ../ui/composer.glade.h:20
+msgid "Underline (Ctrl+U)"
+msgstr "Solinhat (Ctrl+U)"
+
+#: ../ui/composer.glade.h:21
+msgid "Strikethrough (Ctrl+K)"
+msgstr "Raiat (Ctrl+K)"
+
+#: ../ui/composer.glade.h:22
+msgid "_Rich Text"
+msgstr "Tèxte _ric"
+
+#: ../ui/composer.glade.h:23
+msgid "Show Extended Fields"
+msgstr "Afichar plus de camps"
+
+#: ../ui/composer.glade.h:24
+msgctxt "Label"
+msgid "Close and Save"
+msgstr "Tampar e enregistrar"
+
+#: ../ui/composer.glade.h:25
+msgctxt "Short Label"
+msgid "Close and Save"
+msgstr "Tampar e enregistrar"
+
+#: ../ui/composer.glade.h:26
+msgctxt "Tooltip"
+msgid "Close and Save"
+msgstr "Tampar e enregistrar"
+
+#: ../ui/composer.glade.h:27
+msgctxt "Label"
+msgid "Close and Discard"
+msgstr "Tampar e abandonar"
+
+#: ../ui/composer.glade.h:28
+msgctxt "Short Label"
+msgid "Close and Discard"
+msgstr "Tampar e abandonar"
+
+#: ../ui/composer.glade.h:29
+msgctxt "Tooltip"
+msgid "Close and Discard"
+msgstr "Tampar e abandonar"
+
+#: ../ui/composer.glade.h:30
+msgid "Lar_ge"
+msgstr "_Grand"
+
+#: ../ui/composer.glade.h:31
+msgid "Large"
+msgstr "Grand"
+
+#: ../ui/composer.glade.h:32
+msgid "_Medium"
+msgstr "_Mejan"
+
+#: ../ui/composer.glade.h:33
+msgid "Medium"
+msgstr "Mejan"
+
+#: ../ui/composer.glade.h:34
+msgid "_Small"
+msgstr "_Pichon"
+
+#: ../ui/composer.glade.h:35
+msgid "Small"
+msgstr "Pichon"
+
+#: ../ui/composer.glade.h:36
+msgid "S_ans Serif"
+msgstr "S_ans Serif"
+
+#: ../ui/composer.glade.h:37
+msgid "Sans Serif"
+msgstr "Sans Serif"
+
+#: ../ui/composer.glade.h:38
+msgid "S_erif"
+msgstr "S_erif"
+
+#: ../ui/composer.glade.h:39
+msgid "Serif"
+msgstr "Serif"
+
+#: ../ui/composer.glade.h:40
+msgid "_Fixed Width"
+msgstr "_Largor fixa"
+
+#: ../ui/composer.glade.h:41
+msgid "Fixed Width"
+msgstr "Largor fixa"
+
+#: ../ui/composer.glade.h:42
+msgid "Detach"
+msgstr "Destacar"
+
+#: ../ui/composer.glade.h:43
+msgid "Detach (Ctrl+D)"
+msgstr "Destacar (Ctrl+D)"
+
+#: ../ui/composer.glade.h:44
+msgid "_Send"
+msgstr "_Mandar"
+
+#: ../ui/composer.glade.h:45
+msgid "Send"
+msgstr "_Mandar"
+
+#: ../ui/composer.glade.h:46
+msgid "Send (Ctrl+Enter)"
+msgstr "Mandar (Ctrl+Entrada)"
+
+#: ../ui/composer.glade.h:47
+msgid "_Attach File"
+msgstr "_Apondre una pèça junta"
+
+#: ../ui/composer.glade.h:48
+msgid "Attach File"
+msgstr "_Apondre una pèça junta"
+
+#: ../ui/composer.glade.h:49
+msgid "_Include Original Attachments"
+msgstr "_Inclure las pèças juntas d'origina"
+
+#: ../ui/composer.glade.h:50
+msgid "Include Original Attachments"
+msgstr "_Inclure las pèças juntas d'origina"
+
+#: ../ui/composer.glade.h:51
+msgid "Application Menu"
+msgstr "Menu de l'aplicacion"
+
+#. Address(es) e-mail is to be sent to
+#: ../ui/composer.glade.h:53
+msgid "_To"
+msgstr "_A :"
+
+#: ../ui/composer.glade.h:54
+msgid "_Cc"
+msgstr "_Cc :"
+
+#: ../ui/composer.glade.h:55
+msgid "_Subject"
+msgstr "_Objècte :"
+
+#: ../ui/composer.glade.h:56
+msgid "_Bcc"
+msgstr "_Cci :"
+
+#: ../ui/composer.glade.h:57
+msgid "_Reply-To"
+msgstr "_Respondre a"
+
+#. Geary account mail will be sent from
+#: ../ui/composer.glade.h:59
+msgid "From"
+msgstr "De :"
+
+#: ../ui/composer.glade.h:60
+msgid "Drop files here"
+msgstr "Depausar de fichièrs aicí"
+
+#: ../ui/composer.glade.h:61
+msgid "To add them as attachments"
+msgstr "Per los apondre en tant que pèças juntas"
+
+#: ../ui/edit_alternate_emails.glade.h:1
+msgid "Remove email address"
+msgstr "Suprimir l'adreça electronica"
+
+#: ../ui/edit_alternate_emails.glade.h:2
+msgid ""
+"Some email services require additional addresses be configured on the "
+"server.  Contact your email provider for more information."
+msgstr ""
+"Certans servicis de corrièr electronic necessitan qu'una adreça "
+"suplementària siá configurada sul servidor. Contactatz vòstre provesidor de "
+"corrièr electronic per mai d'informacions."
+
+#: ../ui/edit_alternate_emails.glade.h:4
+msgid "_Update"
+msgstr "Metre a jo_ur"
+
+#: ../ui/find_bar.glade.h:1
+msgid "Find:"
+msgstr "Cercar :"
+
+#: ../ui/find_bar.glade.h:2
+msgid "_Previous"
+msgstr "_Precedent"
+
+#: ../ui/find_bar.glade.h:3
+msgid "_Next"
+msgstr "_Seguent"
+
+#: ../ui/find_bar.glade.h:4
+msgid "_Case sensitive"
+msgstr "_Sensible a la cassa"
+
+#: ../ui/find_bar.glade.h:5
+msgid "label"
+msgstr "etiqueta"
+
+#: ../ui/login.glade.h:1 ../ui/password-dialog.glade.h:3
+msgid "Password"
+msgstr "Senhal"
+
+#: ../ui/login.glade.h:2
+msgid "E_mail address"
+msgstr "_Adreça electronica"
+
+#: ../ui/login.glade.h:3
+msgid "_Password"
+msgstr "Se_nhal"
+
+#: ../ui/login.glade.h:4
+msgid "S_ervice"
+msgstr "S_ervice"
+
+#: ../ui/login.glade.h:5
+msgid "N_ame"
+msgstr "_Nom"
+
+#: ../ui/login.glade.h:7
+msgid "N_ickname"
+msgstr "Nom d'ut_ilizaire"
+
+#: ../ui/login.glade.h:8
+msgid "Work, Home, etc."
+msgstr "Travail, Maison, etc."
+
+#: ../ui/login.glade.h:9
+msgid "_Save sent mail"
+msgstr "_Enregistrar los messatges mandats"
+
+#: ../ui/login.glade.h:10
+msgid "Addi_tional email addresses…"
+msgstr "Adreças de messatjariá supplémenta_ires"
+
+#: ../ui/login.glade.h:11
+msgid "IMAP settings"
+msgstr "Configuracion IMAP"
+
+#: ../ui/login.glade.h:12
+msgid "Se_rver"
+msgstr "Se_rvidor"
+
+#: ../ui/login.glade.h:13
+msgid "P_ort"
+msgstr "P_òrt"
+
+#: ../ui/login.glade.h:14
+msgid "Ser_ver"
+msgstr "Ser_vidor"
+
+#: ../ui/login.glade.h:15
+msgid "Por_t"
+msgstr "Pòr_t"
+
+#: ../ui/login.glade.h:16
+msgid "SMTP settings"
+msgstr "Configuracion SMTP"
+
+#: ../ui/login.glade.h:17
+msgid "User_name"
+msgstr "_Identificant"
+
+#: ../ui/login.glade.h:18
+msgid "Pass_word"
+msgstr "Mot de p_asse"
+
+#: ../ui/login.glade.h:19
+msgid "SMTP username"
+msgstr "Identificant SMTP"
+
+#: ../ui/login.glade.h:20
+msgid "SMTP password"
+msgstr "Senhal SMTP"
+
+#: ../ui/login.glade.h:21
+msgid "_Username"
+msgstr "_Identificant"
+
+#: ../ui/login.glade.h:22
+msgid "IMAP username"
+msgstr "Identificant IMAP"
+
+#: ../ui/login.glade.h:23
+msgid "IMAP password"
+msgstr "Senhal IMAP"
+
+#: ../ui/login.glade.h:24
+msgid "Encr_yption"
+msgstr "_Chiframent"
+
+#: ../ui/login.glade.h:25
+msgid "Encrypt_ion"
+msgstr "C_hiframent"
+
+#: ../ui/login.glade.h:27
+msgid "SSL/TLS"
+msgstr "SSL/TLS"
+
+#: ../ui/login.glade.h:28
+msgid "STARTTLS"
+msgstr "STARTTLS"
+
+#: ../ui/login.glade.h:29
+msgid "No authentication re_quired"
+msgstr "L'autentificacion es pas re_quesida"
+
+#: ../ui/login.glade.h:30
+msgid "Use IMAP cre_dentials"
+msgstr "Utilizar los i_dentificants IMAP"
+
+#: ../ui/login.glade.h:31 ../ui/preferences.glade.h:5
+msgid "Composer"
+msgstr "Editor"
+
+#: ../ui/login.glade.h:32
+msgid "Save dra_fts on server"
+msgstr "Salvar los _borrolhons sul servidor"
+
+#: ../ui/login.glade.h:33
+msgid "Si_gn emails (HTML allowed):"
+msgstr "_Signar los messatges (HTML autorizat) :"
+
+#: ../ui/login.glade.h:34
+msgid "Storage"
+msgstr "Emmagazinatge"
+
+#: ../ui/login.glade.h:35
+msgid "_Download mail"
+msgstr "_Telecargar los messatges"
+
+#: ../ui/password-dialog.glade.h:1
+msgid "SMTP Credentials"
+msgstr "Identificants SMTP"
+
+#: ../ui/password-dialog.glade.h:2
+msgid "Username"
+msgstr "Identificant"
+
+#: ../ui/password-dialog.glade.h:4
+msgid "_Remember password"
+msgstr "_Se remembrar del senhal"
+
+#: ../ui/password-dialog.glade.h:6
+msgid "_Authenticate"
+msgstr "_Autentificar"
+
+#: ../ui/preferences.glade.h:1
+msgid "Reading"
+msgstr "Lectura"
+
+#: ../ui/preferences.glade.h:2
+msgid "_Automatically select next message"
+msgstr "Seleccionar _automaticament lo messatge seguent"
+
+#: ../ui/preferences.glade.h:3
+msgid "_Display conversation preview"
+msgstr "A_fichar l'apercebut de la conversacion"
+
+#: ../ui/preferences.glade.h:4
+msgid "Use _three pane view"
+msgstr "Utilizar la vista a _trois panèls"
+
+#: ../ui/preferences.glade.h:6
+msgid "Enable _spell checking"
+msgstr "Activar la _verificacion ortografica"
+
+#: ../ui/preferences.glade.h:7
+msgid "Notifications"
+msgstr "Notificacions"
+
+#: ../ui/preferences.glade.h:8
+msgid "_Play notification sounds"
+msgstr "_Jogar los sons de notificacion"
+
+#: ../ui/preferences.glade.h:9
+msgid "Show _notifications for new mail"
+msgstr "Afichar las _notificacions de messatges novèls"
+
+#: ../ui/preferences.glade.h:10
+msgid "Always _watch for new mail"
+msgstr "Totjorn _verificar s'i a de messatges novèls"
+
+#: ../ui/preferences.glade.h:11
+msgid "Geary will run in the background and notify of new mail"
+msgstr ""
+"Geary va tornar en rèireplan e notificar l'arribada de messatges novèls"
+
+#: ../ui/preferences.glade.h:12
+msgid "Preferences"
+msgstr "Preferéncias"
+
+#: ../ui/remove_confirm.glade.h:1
+msgid ""
+"<span weight=\"bold\" size=\"larger\">Are you sure you want to remove this "
+"account?</span> "
+msgstr ""
+"<span weight=\"bold\" size=\"larger\">Sètz segur que volètz suprimir aqueste "
+"compte ?</span>"
+
+#: ../ui/remove_confirm.glade.h:2
+msgid ""
+"All email associated with this account will be removed from your computer. "
+"This will not affect email on the server."
+msgstr ""
+"Totes los corrièrs electronics associats a aqueste compte seràn suprimits de "
+"vòstre ordinator. Los que son presents sul servidor seràn pas afectats."
+
+#: ../ui/remove_confirm.glade.h:3
+msgid "Nickname:"
+msgstr "Nom d'utilizaire :"
+
+#: ../ui/remove_confirm.glade.h:4
+msgid "Email address:"
+msgstr "Adreça electronica :"
+
+#: ../ui/upgrade_dialog.glade.h:1
+msgid "Geary update in progress…"
+msgstr "Mesa a jorn de Geary en cors…"
