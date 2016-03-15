@@ -8,8 +8,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: geary master\n"
-"POT-Creation-Date: 2016-03-08 18:48+0000\n"
-"PO-Revision-Date: 2016-03-09 08:57+0100\n"
+"POT-Creation-Date: 2016-03-14 18:47+0000\n"
+"PO-Revision-Date: 2016-03-15 09:24+0100\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: Español; Castellano <gnome-es-list@gnome.org>\n"
 "Language: es\n"
@@ -315,13 +315,14 @@ msgid "Move focus to conversation list"
 msgstr "Mover el foco a lista de conversaciones"
 
 #: C/shortcuts.page:60(key) C/shortcuts.page:76(key) C/shortcuts.page:92(key)
-#: C/shortcuts.page:96(key) C/shortcuts.page:100(key) C/shortcuts.page:104(key)
-#: C/shortcuts.page:108(key) C/shortcuts.page:112(key)
-#: C/shortcuts.page:116(key) C/shortcuts.page:126(key)
-#: C/shortcuts.page:130(key) C/shortcuts.page:138(key)
-#: C/shortcuts.page:146(key) C/shortcuts.page:150(key)
-#: C/shortcuts.page:154(key) C/shortcuts.page:158(key)
-#: C/shortcuts.page:162(key) C/shortcuts.page:166(key)
+#: C/shortcuts.page:96(key) C/shortcuts.page:100(key)
+#: C/shortcuts.page:104(key) C/shortcuts.page:108(key)
+#: C/shortcuts.page:112(key) C/shortcuts.page:116(key)
+#: C/shortcuts.page:126(key) C/shortcuts.page:130(key)
+#: C/shortcuts.page:138(key) C/shortcuts.page:146(key)
+#: C/shortcuts.page:150(key) C/shortcuts.page:154(key)
+#: C/shortcuts.page:158(key) C/shortcuts.page:162(key)
+#: C/shortcuts.page:166(key)
 msgid "Ctrl"
 msgstr "Ctrl"
 
@@ -658,6 +659,10 @@ msgid ""
 "argument, which searches for the account's email address in the appropriate "
 "context."
 msgstr ""
+"Como caso especial, los operadores <input>ccc</input>, <input>cc</input>, "
+"<input>from</input>, y <input>to</input> soportan <input>me</input>, como "
+"argumento, que busca la cuenta de dirección de correo electrónico en el "
+"contexto apropiado."
 
 #: C/preferences.page:11(p)
 msgid ""
@@ -666,6 +671,11 @@ msgid ""
 "depends on the install desktop shell. For GNOME Shell and Unity, the "
 "application menu is available near the top-left corner of the screen.)"
 msgstr ""
+"La opción <gui>Preferencias</gui> está disponible en el menú aplicación de "
+"Geary o el menú de configuración en la parte superior derecha de la barra de "
+"herramientas. (La ubicación depende de la shell de instalación de "
+"escritorio. Para GNOME Shell y Unity, el menú aplicación esta disponible "
+"cerca de la esquina superior izquierda de la pantalla.)"
 
 #: C/preferences.page:17(title)
 msgid "Reading"
@@ -673,7 +683,7 @@ msgstr "Lectura"
 
 #: C/preferences.page:20(gui)
 msgid "Automatically select next message"
-msgstr ""
+msgstr "Seleccionar automáticamente el mensaje siguiente"
 
 #: C/preferences.page:21(p)
 msgid ""
@@ -681,20 +691,25 @@ msgid ""
 "in a folder when you enter the folder. In addition, after archiving a "
 "message, Geary automatically selects an adjacent message."
 msgstr ""
+"Cuando la opción está activada, Geary selecciona automáticamente el último "
+"mensaje en una carpeta cuando se accede a la carpeta. Además, después de "
+"archivar un mensaje, Geary selecciona automáticamente un mensaje contiguo."
 
 #: C/preferences.page:26(gui)
 msgid "Display conversation preview"
-msgstr ""
+msgstr "Mostrar la vista previa de la conversación"
 
 #: C/preferences.page:27(p)
 msgid ""
 "Enables message previews in the conversation list. Previews show the first "
 "few lines of each message."
 msgstr ""
+"Activa la vista previa del mensaje en la lista de conversación. La vista "
+"previa muestra las primeras líneas de cada mensaje."
 
 #: C/preferences.page:34(title)
 msgid "Composer"
-msgstr ""
+msgstr "Editor"
 
 #: C/preferences.page:37(gui)
 msgid "Enable spell checking"
@@ -705,6 +720,8 @@ msgid ""
 "When set, Geary automatically spell checks a message as you write it, "
 "underlying each misspelled word in red."
 msgstr ""
+"Cuando está configurado, Geary revisa automáticamente la ortografía de un "
+"mensaje mientras se redacta, subrayando en rojo cada palabra mal escrita."
 
 #: C/preferences.page:45(title)
 msgid "Notifications"
@@ -717,6 +734,8 @@ msgstr "Reproducir sonidos de notificación"
 #: C/preferences.page:49(p)
 msgid "When set, Geary plays a sound whenever a new message arrives."
 msgstr ""
+"Cuando está configurado, Geary reproduce un sonido cuando un mensaje nuevo "
+"llega."
 
 #: C/preferences.page:52(gui)
 msgid "Show notifications for new mail"
@@ -729,6 +748,11 @@ msgid ""
 "Shell, notifications appear at the bottom of the display. In Ubuntu Unity, "
 "notifications appear at the upper right of the display."
 msgstr ""
+"Cuando está configurado, Geary muestra una <em>notificación</em> cada vez "
+"que un mensaje nuevo llega. Las notificaciones se muestran de una manera "
+"dependiente del sistema. En GNOME Shell, las notificaciones se muestran en "
+"la parte inferior de la pantalla. En Ubuntu Unity, las notificaciones se "
+"muestran en la parte superior derecha de la pantalla."
 
 #: C/overview.page:8(title)
 msgid "Overview"
@@ -751,6 +775,9 @@ msgid ""
 "Geary groups mail messages into <em>conversations</em>. A conversation "
 "contains all messages in a single thread of discussion."
 msgstr ""
+"Geary agrupa los mensajes de correo electrónico de grupos dentro de "
+"<em>conversaciones</em>. Una conversación contiene todos los mensajes en un "
+"sólo hilo de discusión."
 
 #: C/overview.page:17(p)
 msgid "The main Geary window is divided into several areas:"
@@ -767,6 +794,11 @@ msgid ""
 "any folder that you have created to help organize your messages. (The Gmail "
 "web interface also uses this term; most other mail services do not.)"
 msgstr ""
+"La <em>lista de carpetas</em> de la izquierda muestra todas las "
+"<em>carpetas</em> y <em>etiquetas</em> en la cuenta de correo. Geary usa el "
+"término <em>etiqueta</em> para cualquier carpeta que se crea para organizar "
+"los mensajes. (La interfaz web de Gmail también usa éste término; la mayoría "
+"de otros servicios de correo no lo usan)."
 
 #: C/overview.page:28(title)
 msgid "Conversation list"
@@ -777,6 +809,8 @@ msgid ""
 "The <em>conversation list</em> displays a list of conversations in the "
 "selected folder. Newer conversations appear at the top."
 msgstr ""
+"La <em>lista de conversación</em> muestra una lista de conversaciones en la "
+"carpeta seleccionada. Las conversaciones más nuevas se muestran al comienzo."
 
 #: C/overview.page:31(p)
 msgid ""
@@ -784,6 +818,9 @@ msgid ""
 "sender. If a conversation has more than one message, Geary displays a count "
 "of messages in the conversation."
 msgstr ""
+"Cada nombre de remitente se muestra resaltado si hay mensajes sin leer del "
+"remitente. Si una conversación tiene más de un mensaje, Geary muestra el "
+"número de mensajes en la conversación."
 
 #: C/overview.page:34(p)
 msgid ""
@@ -793,6 +830,11 @@ msgid ""
 "simply scroll down the conversation list and Geary will fetch more messages "
 "automatically."
 msgstr ""
+"Geary no descarga automáticamente todos los mensajes en todas las carpetas "
+"de correo. Cuando se visualiza por primera vez la Bandeja de entrada o "
+"cualquier otra carpeta, Geary descarga los 50 mensajes más recientes. Para "
+"ver más mensajes, desplácese hacia abajo la lista de conversación y Geary "
+"recuperará más mensajes automáticamente."
 
 #: C/overview.page:36(p)
 msgid ""
