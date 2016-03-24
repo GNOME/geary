@@ -23,6 +23,7 @@ public class Configuration {
     public const string STARTUP_NOTIFICATIONS_KEY = "startup-notifications";
     public const string ASK_OPEN_ATTACHMENT_KEY = "ask-open-attachment";
     public const string COMPOSE_AS_HTML_KEY = "compose-as-html";
+    public const string GENERALLY_SHOW_REMOTE_IMAGES_KEY = "show-images";
     
     public Settings settings { get; private set; }
     
@@ -90,6 +91,10 @@ public class Configuration {
     public bool startup_notifications {
         get { return settings.get_boolean(STARTUP_NOTIFICATIONS_KEY); }
         set { set_boolean(STARTUP_NOTIFICATIONS_KEY, value); }
+    }
+    
+    public bool generally_show_remote_images {
+        get { return settings.get_boolean(GENERALLY_SHOW_REMOTE_IMAGES_KEY); }
     }
     
     private const string CLOCK_FORMAT_KEY = "clock-format";

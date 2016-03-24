@@ -182,6 +182,7 @@ public class ConversationViewer : Gtk.Box {
     private int next_replaced_buffer_number = 0;
     private Gee.HashMap<string, ReplacedImage> replaced_images = new Gee.HashMap<string, ReplacedImage>();
     private Gee.HashSet<string> replaced_content_ids = new Gee.HashSet<string>();
+    private Gee.HashMap<string, string> replaced_images_index = new Gee.HashMap<string, string>();
     private Gee.HashSet<string> blacklist_ids = new Gee.HashSet<string>();
     
     public ConversationViewer() {
@@ -242,6 +243,8 @@ public class ConversationViewer : Gtk.Box {
             if (!composer_boxes.visible && !message_overlay.visible)
                 message_overlay.show();
             });
+        
+        config.settings.changed[Configuration.GENERALLY_SHOW_REMOTE_IMAGES_KEY].connect(on_show_images_change);
         
         conversation_find_bar = new ConversationFindBar(web_view);
         conversation_find_bar.no_show_all = true;
@@ -692,10 +695,13 @@ public class ConversationViewer : Gtk.Box {
         if (remote_images) {
             Geary.Contact contact = current_folder.account.get_contact_store().get_by_rfc822(
                 email.get_primary_originator());
-            bool always_load = contact != null && contact.always_load_remote_images();
+            bool contact_related_load = contact != null && contact.always_load_remote_images();
+            bool always_load = GearyApplication.instance.config.generally_show_remote_images
+                || contact_related_load;
             
-            if (always_load || email.load_remote_images().is_certain()) {
-                show_images_email(div_message, false);
+            if (current_folder.special_folder_type != Geary.SpecialFolderType.SPAM &&
+                always_load || email.load_remote_images().is_certain()) {
+                    show_images_email(div_message, false);
             } else {
                 WebKit.DOM.HTMLElement remote_images_bar =
                     Util.DOM.select(div_message, ".remote_images");
@@ -854,7 +860,7 @@ public class ConversationViewer : Gtk.Box {
         //
         // * Geary.RFC822.Message.get_body() recursively walks the message's MIME structure looking
         //   for text MIME parts and assembles them sequentially.  If non-text MIME parts are
-        //   discovered within a multipart/mixed container, it calls inline_image_replacer(), which
+        //   discovered, it calls inline_image_replacer(), which
         //   converts them to an IMG tag with a data: URI if they are a supported image type.
         //   Otherwise, the MIME part is dropped.
         //
@@ -936,7 +942,7 @@ public class ConversationViewer : Gtk.Box {
     }
     
     // This delegate is called from within Geary.RFC822.Message.get_body while assembling the plain
-    // or HTML document when a non-text MIME part is encountered within a multipart/mixed container.
+    // or HTML document when a non-text MIME part is encountered.
     // If this returns null, the MIME part is dropped from the final returned document; otherwise,
     // this returns HTML that is placed into the document in the position where the MIME part was
     // found
@@ -1006,6 +1012,10 @@ public class ConversationViewer : Gtk.Box {
         ReplacedImage replaced_image = new ReplacedImage(next_replaced_buffer_number++, filename,
             buffer);
         replaced_images.set(replaced_image.id, replaced_image);
+        
+        if (!Geary.String.is_empty(content_id)) {
+            replaced_images_index.set(content_id, replaced_image.id);
+        }
         
         return "<img alt=\"%s\" class=\"%s %s\" src=\"%s\" replaced-id=\"%s\" %s />".printf(
             Geary.HTML.escape_markup(filename),
@@ -2003,7 +2013,8 @@ public class ConversationViewer : Gtk.Box {
                 
                 // if image has a Content-ID and it's already been replaced by the image replacer,
                 // drop this tag, otherwise fix up this one with the Base-64 data URI of the image
-                if (!replaced_content_ids.contains(content_id)) {
+                // and the replaced id
+                if (!src.has_prefix("data:")) {
                     string? filename = message.get_content_filename_by_mime_id(content_id);
                     Geary.Memory.Buffer image_content = message.get_content_by_mime_id(content_id);
                     Geary.Memory.UnownedBytesBuffer? unowned_buffer =
@@ -2019,11 +2030,22 @@ public class ConversationViewer : Gtk.Box {
                     string mimetype = ContentType.get_mime_type(guess);
                     
                     // Replace the SRC to a data URI, the class to a known label for the popup menu,
-                    // and the ALT to its filename, if supplied
+                    // the ALT to its filename, if supplied and add the replaced-id
                     img.set_attribute("src", assemble_data_uri(mimetype, image_content));
                     img.set_attribute("class", DATA_IMAGE_CLASS);
                     if (!Geary.String.is_empty(filename))
                         img.set_attribute("alt", filename);
+                    
+                    // FIXME: bugzilla.gnome.org 762782
+                    // in case content_id has a trailing period it gets removed
+                    // this is necessary as g_mime_object_get_content_id removes it too
+                    if (content_id.has_suffix(".")) {
+                        string content_id_without_suffix;
+                        content_id_without_suffix = content_id.slice(0,content_id.length-1);
+                        img.set_attribute("replaced-id", replaced_images_index.get(content_id_without_suffix));
+                    } else {
+                        img.set_attribute("replaced-id", replaced_images_index.get(content_id));
+                    }
                     
                     // stash here so inlined image isn't listed as attachment (esp. if it has no
                     // Content-Disposition)
@@ -2484,6 +2506,24 @@ public class ConversationViewer : Gtk.Box {
     private bool in_drafts_folder() {
         return current_folder != null && current_folder.special_folder_type
             == Geary.SpecialFolderType.DRAFTS;
+    }
+    
+    private void on_show_images_change() {
+        // When the setting is changed to 'show images', the currently selected message is updated.
+        // When the setting is changed to 'do not show images' the method returns, as there is no benefit
+        // in 'unloading' images (like saving bandwidth or relating to security concerns).
+        if (!GearyApplication.instance.config.generally_show_remote_images)
+            
+            return;
+            
+        string? quote;
+        Geary.Email? message = get_selected_message(out quote);
+        if (message == null || current_folder.special_folder_type == Geary.SpecialFolderType.SPAM)
+            
+            return;
+            
+        WebKit.DOM.HTMLElement element = email_to_element.get(message.id);
+        show_images_email(element, false);
     }
 }
 

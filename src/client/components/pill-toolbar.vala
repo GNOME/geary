@@ -134,7 +134,7 @@ public class PillHeaderbar : Gtk.HeaderBar, PillBar {
         string layout;
         bool at_end = false;
 #if GTK_3_12
-        layout = decoration_layout;
+        layout = Gtk.Settings.get_default().gtk_decoration_layout;
 #else
         get_toplevel().style_get("decoration-button-layout", out layout);
 #endif
