@@ -2020,6 +2020,7 @@ public class ConversationViewer : Gtk.Box {
                     
                     // Replace the SRC to a data URI, the class to a known label for the popup menu,
                     // and the ALT to its filename, if supplied
+                    img.remove_attribute("src");  // Work around a WebKitGTK+ crash. Bug 764152
                     img.set_attribute("src", assemble_data_uri(mimetype, image_content));
                     img.set_attribute("class", DATA_IMAGE_CLASS);
                     if (!Geary.String.is_empty(filename))
