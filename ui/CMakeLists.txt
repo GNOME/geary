@@ -1,19 +1,43 @@
-set(UI_DEST share/geary/ui)
 
-install(FILES accelerators.ui DESTINATION ${UI_DEST})
-install(FILES account_list.glade DESTINATION ${UI_DEST})
-install(FILES account_cannot_remove.glade DESTINATION ${UI_DEST})
-install(FILES account_spinner.glade DESTINATION ${UI_DEST})
-install(FILES app_menu.interface DESTINATION ${UI_DEST})
-install(FILES certificate_warning_dialog.glade DESTINATION ${UI_DEST})
-install(FILES composer.glade DESTINATION ${UI_DEST})
-install(FILES composer_accelerators.ui DESTINATION ${UI_DEST})
-install(FILES edit_alternate_emails.glade DESTINATION ${UI_DEST})
-install(FILES find_bar.glade DESTINATION ${UI_DEST})
-install(FILES login.glade DESTINATION ${UI_DEST})
-install(FILES password-dialog.glade DESTINATION ${UI_DEST})
-install(FILES preferences.glade DESTINATION ${UI_DEST})
-install(FILES remove_confirm.glade DESTINATION ${UI_DEST})
-install(FILES toolbar_empty_menu.ui DESTINATION ${UI_DEST})
-install(FILES toolbar_mark_menu.ui DESTINATION ${UI_DEST})
-install(FILES upgrade_dialog.glade DESTINATION ${UI_DEST})
+set(RESOURCE_LIST
+  STRIPBLANKS "accelerators.ui"
+  STRIPBLANKS "account_cannot_remove.glade"
+  STRIPBLANKS "account_list.glade"
+  STRIPBLANKS "account_spinner.glade"
+  STRIPBLANKS "app_menu.interface"
+  STRIPBLANKS "certificate_warning_dialog.glade"
+  STRIPBLANKS "composer.glade"
+  STRIPBLANKS "composer_accelerators.ui"
+  STRIPBLANKS "edit_alternate_emails.glade"
+  STRIPBLANKS "find_bar.glade"
+  STRIPBLANKS "login.glade"
+  STRIPBLANKS "password-dialog.glade"
+  STRIPBLANKS "preferences.glade"
+  STRIPBLANKS "remove_confirm.glade"
+  STRIPBLANKS "toolbar_empty_menu.ui"
+  STRIPBLANKS "toolbar_mark_menu.ui"
+  STRIPBLANKS "upgrade_dialog.glade"
+)
+
+compile_gresources(
+  RESOURCES_C
+  RESOURCES_XML
+  TYPE EMBED_C
+  SOURCE_DIR "${CMAKE_SOURCE_DIR}/ui"
+  PREFIX "/org/gnome/Geary"
+  RESOURCES ${RESOURCE_LIST}
+)
+
+compile_gresources(
+  RESOURCES_H
+  RESOURCES_XML
+  TYPE EMBED_H
+  SOURCE_DIR "${CMAKE_SOURCE_DIR}/ui"
+  PREFIX "/org/gnome/Geary"
+  RESOURCES ${RESOURCE_LIST}
+)
+
+add_custom_target(resource_h ALL DEPENDS ${RESOURCES_H})
+add_custom_target(resource_c ALL DEPENDS ${RESOURCES_C})
+
+set(RESOURCES_C ${RESOURCES_C} PARENT_SCOPE)

@@ -543,7 +543,7 @@ set(TARGET_GLIB 2.34)
 pkg_check_modules(DEPS REQUIRED
     gthread-2.0
     glib-2.0>=${TARGET_GLIB}.0
-    gio-2.0>=2.28.0
+    gio-2.0>=2.32.0
     gtk+-3.0>=3.10.0
     gee-0.8>=0.8.5
     libnotify>=0.7.5
@@ -671,7 +671,8 @@ OPTIONS
     --vapidir=${CMAKE_BINARY_DIR}/src
 )
 
-add_executable(geary ${GEARY_VALA_C})
+set_property(SOURCE ${RESOURCES_C} PROPERTY GENERATED TRUE)
+add_executable(geary ${GEARY_VALA_C} ${RESOURCES_C})
 target_link_libraries(geary m ${DEPS_LIBRARIES} gthread-2.0 geary-static)
 install(TARGETS geary RUNTIME DESTINATION bin)
 add_custom_command(

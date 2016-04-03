@@ -150,7 +150,6 @@ add_subdirectory(help)
 add_subdirectory(icons)
 add_subdirectory(po)
 add_subdirectory(sql)
+add_subdirectory(ui)
 add_subdirectory(src)
 add_subdirectory(theming)
-add_subdirectory(ui)
-
