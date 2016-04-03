@@ -451,7 +451,7 @@ public class ComposerWidget : Gtk.EventBox {
         
         ui = new Gtk.UIManager();
         ui.insert_action_group(actions, 0);
-        GearyApplication.instance.load_ui_file_for_manager(ui, "composer_accelerators.ui");
+        GearyApplication.instance.load_ui_resource_for_manager(ui, "composer_accelerators.ui");
         
         add_extra_accelerators();
         

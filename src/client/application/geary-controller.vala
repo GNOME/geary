@@ -180,7 +180,7 @@ public class GearyController : Geary.BaseObject {
         
         // Setup actions.
         setup_actions();
-        GearyApplication.instance.load_ui_file("accelerators.ui");
+        GearyApplication.instance.load_ui_resource("accelerators.ui");
         
         // Listen for attempts to close the application.
         GearyApplication.instance.exiting.connect(on_application_exiting);
@@ -592,13 +592,7 @@ public class GearyController : Geary.BaseObject {
         }
         GearyApplication.instance.ui_manager.insert_action_group(action_group, 0);
         
-        Gtk.Builder builder = new Gtk.Builder();
-        try {
-            builder.add_from_file(
-                GearyApplication.instance.get_ui_file("app_menu.interface").get_path());
-        } catch (Error e) {
-            error("Unable to parse app_menu.interface: %s", e.message);
-        }
+        Gtk.Builder builder = GearyApplication.instance.create_builder("app_menu.interface");
         app_menu = (MenuModel) builder.get_object("app-menu");
         
         // We'd *like* to always export an app menu and just let the shell

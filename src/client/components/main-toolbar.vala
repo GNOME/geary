@@ -57,7 +57,7 @@ public class MainToolbar : Gtk.Box {
         bool rtl = get_direction() == Gtk.TextDirection.RTL;
         
         // Assemble mark menu.
-        GearyApplication.instance.load_ui_file("toolbar_mark_menu.ui");
+        GearyApplication.instance.load_ui_resource("toolbar_mark_menu.ui");
         Gtk.Menu mark_menu = (Gtk.Menu) GearyApplication.instance.ui_manager.get_widget("/ui/ToolbarMarkMenu");
         mark_menu.foreach(GtkUtil.show_menuitem_accel_labels);
         
@@ -70,7 +70,7 @@ public class MainToolbar : Gtk.Box {
         folder_header.add_start(folder_header.create_pill_buttons(insert, false));
         
         // Assemble the empty menu
-        GearyApplication.instance.load_ui_file("toolbar_empty_menu.ui");
+        GearyApplication.instance.load_ui_resource("toolbar_empty_menu.ui");
         Gtk.Menu empty_menu = (Gtk.Menu) GearyApplication.instance.ui_manager.get_widget("/ui/ToolbarEmptyMenu");
         empty_menu.foreach(GtkUtil.show_menuitem_accel_labels);
         insert.clear();

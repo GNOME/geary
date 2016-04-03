@@ -279,12 +279,11 @@ public class GearyApplication : Gtk.Application {
         return exec_dir.has_prefix(prefix_dir) ? prefix_dir : null;
     }
     
-    // Creates a GTK builder given the filename of a UI file in the ui directory.
-    public Gtk.Builder create_builder(string ui_filename) {
+    // Creates a GTK builder given the name of a GResource.
+    public Gtk.Builder create_builder(string name) {
         Gtk.Builder builder = new Gtk.Builder();
         try {
-            builder.add_from_file(get_resource_directory().get_child("ui").get_child(
-                ui_filename).get_path());
+            builder.add_from_resource("/org/gnome/Geary/" + name);
         } catch(GLib.Error error) {
             warning("Unable to create Gtk.Builder: %s".printf(error.message));
         }
@@ -309,18 +308,18 @@ public class GearyApplication : Gtk.Application {
         return get_resource_directory().get_child("ui").get_child(filename);
     }
     
-    // Loads a UI file (in the ui directory) into the specified UI manager.
-    public void load_ui_file_for_manager(Gtk.UIManager ui, string ui_filename) {
+    // Loads a UI GResource into the specified UI manager.
+    public void load_ui_resource_for_manager(Gtk.UIManager ui, string name) {
         try {
-            ui.add_ui_from_file(get_ui_file(ui_filename).get_path());
+            ui.add_ui_from_resource("/org/gnome/Geary/" + name);
         } catch(GLib.Error error) {
             warning("Unable to create Gtk.UIManager: %s".printf(error.message));
         }
     }
     
-    // Loads a UI file (in the ui directory) into the UI manager.
-    public void load_ui_file(string ui_filename) {
-        load_ui_file_for_manager(ui_manager, ui_filename);
+    // Loads a UI GResource into the UI manager.
+    public void load_ui_resource(string name) {
+        load_ui_resource_for_manager(ui_manager, name);
     }
     
     // This call will fire "exiting" only if it's not already been fired.
