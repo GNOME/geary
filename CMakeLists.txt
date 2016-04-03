@@ -8,7 +8,11 @@ cmake_policy(VERSION 2.6)
 
 project(geary C)
 
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/cmake )
+list(APPEND
+  CMAKE_MODULE_PATH
+  ${CMAKE_SOURCE_DIR}/cmake
+  ${CMAKE_SOURCE_DIR}/cmake/GCR_CMake/macros
+  )
 
 #
 # Base bits
@@ -70,6 +74,9 @@ if (XGETTEXT_FOUND)
 else ()
     message(STATUS "xgettext not found")
 endif ()
+
+# GResources
+include(GlibCompileResourcesSupport)
 
 #
 # Uninstall target
