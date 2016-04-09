@@ -415,7 +415,7 @@ mailer/main.vala
 # Vala
 find_package(Vala REQUIRED)
 include(ValaVersion)
-ensure_vala_version("0.22.1" MINIMUM)
+ensure_vala_version("0.26.0" MINIMUM)
 include(ValaPrecompile)
 
 # Vapigen
@@ -538,13 +538,13 @@ else ()
     )
 endif ()
 
-set(TARGET_GLIB 2.38)
+set(TARGET_GLIB 2.42)
 
 pkg_check_modules(DEPS REQUIRED
     gthread-2.0
     glib-2.0>=${TARGET_GLIB}.0
-    gio-2.0>=2.32.0
-    gtk+-3.0>=3.10.0
+    gio-2.0>=${TARGET_GLIB}.0
+    gtk+-3.0>=3.14.0
     gee-0.8>=0.8.5
     libnotify>=0.7.5
     libcanberra>=0.28
