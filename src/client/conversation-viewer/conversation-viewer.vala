@@ -461,8 +461,9 @@ public class ConversationViewer : Gtk.Stack {
         ordered_matches.sort((a, b) => a.length - b.length);
 
         if (!cancellable.is_cancelled()) {
-            foreach(string match in ordered_matches)
+            foreach(string match in ordered_matches) {
                 //web_view.mark_text_matches(match, false, 0);
+            }
 
             //web_view.set_highlight_text_matches(true);
         }

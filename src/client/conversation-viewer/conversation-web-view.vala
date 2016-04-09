@@ -1,4 +1,6 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/* 
+ * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2016 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -13,10 +15,6 @@ public class ConversationWebView : StylishWebView {
     private const string USER_CSS = "user-message.css";
     private const string STYLE_NAME = "STYLE";
     private const string PREVENT_HIDE_STYLE = "nohide";
-    private Gdk.RGBA conversation_icon_color;
-    
-    // HTML element that contains message DIVs.
-    public WebKit.DOM.HTMLDivElement? container { get; private set; default = null; }
 
     public string allow_prefix { get; private set; default = ""; }
 
@@ -54,11 +52,6 @@ public class ConversationWebView : StylishWebView {
 
         GearyApplication.instance.config.bind(Configuration.CONVERSATION_VIEWER_ZOOM_KEY, this, "zoom_level_wrap");
         notify["zoom-level"].connect(() => { zoom_level_wrap = zoom_level; });
-
-        // Load the HTML into WebKit.
-        // Note: load_finished signal MUST be hooked up before this call.
-        string html_text = GearyApplication.instance.read_theme_file("message-viewer.html") ?? "";
-        load_string(html_text, "text/html", "UTF8", "");
     }
     
     public override bool query_tooltip(int x, int y, bool keyboard_tooltip, Gtk.Tooltip tooltip) {
@@ -94,12 +87,34 @@ public class ConversationWebView : StylishWebView {
     public void show_element_by_id(string element_id) throws Error {
         get_dom_document().get_element_by_id(element_id).set_attribute("style", "display:block");
     }
-    
-    // Scrolls back up to the top.
-    public void scroll_reset() {
-        get_dom_document().get_default_view().scroll(0, 0);
+
+    // Overridden to get the correct height from get_preferred_height.
+    public new void get_preferred_size(out Gtk.Requisition minimum_size,
+                                       out Gtk.Requisition natural_size) {
+        base.get_preferred_size(out minimum_size, out natural_size);
+
+        int minimum_height = 0;
+        int natural_height = 0;
+        get_preferred_height(out minimum_height, out natural_height);
+        
+        minimum_size.height = minimum_height;
+        natural_size.height = natural_height;
     }
-    
+
+    // Overridden since WebKitGTK+ 2.4.10 at least doesn't want to
+    // report a useful height. In combination with the rules from
+    // theming/message-viewer.css we can get an accurate idea of
+    // the actual height of the content from the BODY element, but
+    // only once loaded.
+    public override void get_preferred_height(out int minimum_height,
+                                              out int natural_height) {
+        int preferred_height = 0;
+        if (load_status == WebKit.LoadStatus.FINISHED) {
+            preferred_height = (int) get_dom_document().get_body().offset_height;
+        }
+        minimum_height = natural_height = preferred_height;
+    }
+
     private void on_resource_request_starting(WebKit.WebFrame web_frame,
         WebKit.WebResource web_resource, WebKit.NetworkRequest request,
         WebKit.NetworkResponse? response) {
@@ -144,21 +159,6 @@ public class ConversationWebView : StylishWebView {
         
         on_document_font_changed();
         load_user_style();
-        
-        // Grab the HTML container.
-        WebKit.DOM.Element? _container = get_dom_document().get_element_by_id("message_container");
-        assert(_container != null);
-        container = _container as WebKit.DOM.HTMLDivElement;
-        assert(container != null);
-        
-        conversation_icon_color.parse("#888888");
-        // Load the icons.
-        set_icon_src("#email_template .menu .icon", "go-down-symbolic");
-        set_icon_src("#email_template .starred .icon", "starred-symbolic");
-        set_icon_src("#email_template .unstarred .icon", "non-starred-symbolic");
-        set_icon_src("#email_template .attachment.icon", "mail-attachment-symbolic");
-        set_icon_src("#email_template .close_show_images", "close-symbolic");
-        set_icon_src("#link_warning_template .close_link_warning", "close-symbolic");
     }
     
     private void on_document_font_changed() {
@@ -231,74 +231,6 @@ public class ConversationWebView : StylishWebView {
             style_element.append_child(text_node);
         } catch (Error error) {
             // Expected if file was deleted.
-        }
-    }
-    
-    private void set_icon_src(string selector, string icon_name) {
-        try {
-            // Load icon.
-            uint8[]? icon_content = null;
-            Gdk.Pixbuf? pixbuf = IconFactory.instance.load_symbolic_colored(icon_name, 16, 
-                conversation_icon_color);
-            if (pixbuf != null)
-                pixbuf.save_to_buffer(out icon_content, "png"); // Load as PNG.
-            
-            if (icon_content == null || icon_content.length == 0)
-                return;
-            
-            // Save length before transferring ownership (which frees the array)
-            int icon_length = icon_content.length;
-            Geary.Memory.ByteBuffer buffer = new Geary.Memory.ByteBuffer.take((owned) icon_content,
-                icon_length);
-            
-            // Then set the source to a data url.
-            WebKit.DOM.HTMLImageElement img = Util.DOM.select(get_dom_document(), selector)
-                as WebKit.DOM.HTMLImageElement;
-            img.set_attribute("src", Util.DOM.assemble_data_uri("image/png", buffer));
-        } catch (Error error) {
-            warning("Failed to load icon '%s': %s", icon_name, error.message);
-        }
-    }
-    
-    public void set_attachment_src(WebKit.DOM.HTMLImageElement img, Geary.Mime.ContentType content_type,
-        string filename, int maxwidth, int maxheight = -1) {
-        if( maxheight == -1 ){
-            maxheight = maxwidth;
-        }
-        
-        try {
-            // If the file is an image, use it. Otherwise get the icon for this mime_type.
-            string gio_content_type = ContentType.from_mime_type(content_type.get_mime_type());
-            
-            Gdk.Pixbuf pixbuf;
-            if (content_type.has_media_type("image")) {
-                // Get a thumbnail for the image.
-                // TODO Generate and save the thumbnail when extracting the attachments rather than
-                // when showing them in the viewer.
-                img.get_class_list().add("thumbnail");
-                pixbuf = new Gdk.Pixbuf.from_file_at_scale(filename, maxwidth, maxheight, true);
-                pixbuf = pixbuf.apply_embedded_orientation();
-            } else {
-                // Load the icon for this mime type.
-                ThemedIcon icon = ContentType.get_icon(gio_content_type) as ThemedIcon;
-                string icon_filename = IconFactory.instance.lookup_icon(icon.names[0], maxwidth)
-                    .get_filename();
-                pixbuf = new Gdk.Pixbuf.from_file_at_scale(icon_filename, maxwidth, maxheight, true);
-            }
-            
-            // convert to PNG and assemble IMG src as a data: URI
-            uint8[] content;
-            pixbuf.save_to_buffer(out content, "png");
-            
-            // Then set the source to a data url.
-            // Save length before transferring ownership (which frees the array)
-            int content_length = content.length;
-            Geary.Memory.Buffer buffer = new Geary.Memory.ByteBuffer.take((owned) content,
-                content_length);
-            
-            img.set_attribute("src", Util.DOM.assemble_data_uri("image/png", buffer));
-        } catch (Error error) {
-            warning("Failed to load image '%s': %s", filename, error.message);
         }
     }
     
