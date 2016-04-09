@@ -538,7 +538,7 @@ else ()
     )
 endif ()
 
-set(TARGET_GLIB 2.34)
+set(TARGET_GLIB 2.38)
 
 pkg_check_modules(DEPS REQUIRED
     gthread-2.0
@@ -658,6 +658,9 @@ add_custom_command(
 
 # Geary client app
 #################################################
+set_property(SOURCE ${RESOURCES_C} PROPERTY GENERATED TRUE)
+set_property(SOURCE ${RESOURCES_XML} PROPERTY GENERATED TRUE)
+
 vala_precompile(GEARY_VALA_C geary
     ${CLIENT_SRC}
 PACKAGES
@@ -669,9 +672,9 @@ CUSTOM_VAPIS
 OPTIONS
     ${VALAC_OPTIONS}
     --vapidir=${CMAKE_BINARY_DIR}/src
+    --gresources=${RESOURCES_XML}
 )
 
-set_property(SOURCE ${RESOURCES_C} PROPERTY GENERATED TRUE)
 add_executable(geary ${GEARY_VALA_C} ${RESOURCES_C})
 target_link_libraries(geary m ${DEPS_LIBRARIES} gthread-2.0 geary-static)
 install(TARGETS geary RUNTIME DESTINATION bin)

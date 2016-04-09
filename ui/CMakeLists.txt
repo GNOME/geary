@@ -40,4 +40,17 @@ compile_gresources(
 add_custom_target(resource_h ALL DEPENDS ${RESOURCES_H})
 add_custom_target(resource_c ALL DEPENDS ${RESOURCES_C})
 
+# Work around valac wanting the resource files to be in the same
+# directory as the XML file.
+add_custom_target(resource_copy ALL
+    mkdir -p ${CMAKE_BINARY_DIR}/ui
+  COMMAND
+    cp ${RESOURCES_XML} ${CMAKE_BINARY_DIR}/ui
+  COMMAND
+    cp ${CMAKE_SOURCE_DIR}/ui/*.glade ${CMAKE_SOURCE_DIR}/ui/*.interface ${CMAKE_SOURCE_DIR}/ui/*.ui ${CMAKE_BINARY_DIR}/ui
+)
+add_dependencies(resource_copy resource_c)
+
+# Export the file names so they can be used in the source build
 set(RESOURCES_C ${RESOURCES_C} PARENT_SCOPE)
+set(RESOURCES_XML "${CMAKE_BINARY_DIR}/ui/.gresource.xml" PARENT_SCOPE)
