@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<interface>
+  <menu id="conversation_message_menu">
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">_Save Attachments</attribute>
+        <attribute name="action">msg.selected</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">_Reply</attribute>
+        <attribute name="action">msg.reply_sender</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Reply to _All</attribute>
+        <attribute name="action">msg.reply_all</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_Forward</attribute>
+        <attribute name="action">msg.forward</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">_Mark Read</attribute>
+        <attribute name="action">msg.mark_read</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_Mark Unread</attribute>
+        <attribute name="action">msg.mark_unread</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Mark Unread From _Here</attribute>
+        <attribute name="action">msg.mark_unread_down</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">_Print...</attribute>
+        <attribute name="action">msg.print</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_View Source</attribute>
+        <attribute name="action">msg.view_source</attribute>
+      </item>
+    </section>
+  </menu>
+</interface>
