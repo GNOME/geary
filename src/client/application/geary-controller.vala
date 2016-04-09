@@ -2560,15 +2560,15 @@ public class GearyController : Geary.BaseObject {
     }
     
     private void on_zoom_in() {
-        main_window.conversation_viewer.web_view.zoom_in();
+        //main_window.conversation_viewer.web_view.zoom_in();
     }
 
     private void on_zoom_out() {
-        main_window.conversation_viewer.web_view.zoom_out();
+        //main_window.conversation_viewer.web_view.zoom_out();
     }
 
     private void on_zoom_normal() {
-        main_window.conversation_viewer.web_view.zoom_level = 1.0f;
+        //main_window.conversation_viewer.web_view.zoom_level = 1.0f;
     }
     
     private void on_search() {

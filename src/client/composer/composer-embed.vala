@@ -18,7 +18,7 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
     private string embed_id;
     private bool setting_inner_scroll;
     private bool scrolled_to_bottom = false;
-    private double inner_scroll_adj_value;
+    //private double inner_scroll_adj_value;
     private int inner_view_height;
     private int min_height = MIN_EDITOR_HEIGHT;
 
@@ -38,14 +38,14 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
         this.valign = Gtk.Align.FILL;
 
         WebKit.DOM.HTMLElement? email_element = null;
-        email_element = conversation_viewer.web_view.get_dom_document().get_element_by_id(
-            conversation_viewer.get_div_id(referred.id)) as WebKit.DOM.HTMLElement;
-        this.embed_id = referred.id.to_string() + "_reply";
-        if (email_element == null) {
-            warning("Embedded composer could not find email to follow.");
-            email_element = conversation_viewer.web_view.get_dom_document().get_element_by_id(
-                "placeholder") as WebKit.DOM.HTMLElement;
-        }
+        // email_element = conversation_viewer.web_view.get_dom_document().get_element_by_id(
+        //     conversation_viewer.get_div_id(referred.id)) as WebKit.DOM.HTMLElement;
+        // embed_id = referred.id.to_string() + "_reply";
+        // if (email_element == null) {
+        //     warning("Embedded composer could not find email to follow.");
+        //     email_element = conversation_viewer.web_view.get_dom_document().get_element_by_id(
+        //         "placeholder") as WebKit.DOM.HTMLElement;
+        // }
 
         try {
             email_element.insert_adjacent_html("afterend",
@@ -148,54 +148,54 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
 
     public bool set_position(ref Gdk.Rectangle allocation, double hscroll, double vscroll,
         int view_height) {
-        WebKit.DOM.Element embed = this.conversation_viewer.web_view.get_dom_document()
-            .get_element_by_id(this.embed_id);
-        if (embed == null)
-            return false;
-        
-        int div_height = (int) embed.client_height;
-        int y_top = (int) (embed.offset_top + embed.client_top) - (int) vscroll;
-        int available_height = int.min(y_top + div_height, view_height) - int.max(y_top, 0);
-        
-        if (available_height < 0 || available_height == div_height) {
-            // It fits in the available space, or it doesn't fit at all
-            allocation.y = y_top;
-            // When offscreen, make it very small to ensure scrolling during any edit
-            allocation.height = (available_height < 0) ? 1 : div_height;
-        } else if (available_height > min_height) {
-            // There's enough room, so make sure we get the whole widget in
-            allocation.y = int.max(y_top, 0);
-            allocation.height = available_height;
-        } else {
-            // Minimum height widget, placed so as much as possible is visible
-            allocation.y = int.max(y_top, int.min(y_top + div_height - min_height, 0));
-            allocation.height = min_height;
-        }
-        allocation.x = (int) (embed.offset_left + embed.client_left) - (int) hscroll;
-        allocation.width = (int) embed.client_width;
+        // WebKit.DOM.Element embed = this.conversation_viewer.web_view.get_dom_document()
+        //     .get_element_by_id(this.embed_id);
+        // if (embed == null)
+        //     return false;
 
-        // Work out adjustment of composer web view
-        this.setting_inner_scroll = true;
-        this.composer.editor.vadjustment.set_value(allocation.y - y_top);
-        this.setting_inner_scroll = false;
-        // This sets the scroll before the widget gets resized.  Although the adjustment
-        // may be scrolled to the bottom right now, the current value may not do that
-        // once the widget is shrunk; for example, while scrolling down the page past
-        // the bottom of the editor.  So if we're at the bottom, record that fact.  When
-        // the limits of the adjustment are changed (watched by on_adjust_changed), we
-        // can keep it at the bottom.
-        this.scrolled_to_bottom = (y_top <= 0 && available_height < view_height);
+        // int div_height = (int) embed.client_height;
+        // int y_top = (int) (embed.offset_top + embed.client_top) - (int) vscroll;
+        // int available_height = int.min(y_top + div_height, view_height) - int.max(y_top, 0);
+
+        // if (available_height < 0 || available_height == div_height) {
+        //     // It fits in the available space, or it doesn't fit at all
+        //     allocation.y = y_top;
+        //     // When offscreen, make it very small to ensure scrolling during any edit
+        //     allocation.height = (available_height < 0) ? 1 : div_height;
+        // } else if (available_height > min_height) {
+        //     // There's enough room, so make sure we get the whole widget in
+        //     allocation.y = int.max(y_top, 0);
+        //     allocation.height = available_height;
+        // } else {
+        //     // Minimum height widget, placed so as much as possible is visible
+        //     allocation.y = int.max(y_top, int.min(y_top + div_height - min_height, 0));
+        //     allocation.height = min_height;
+        // }
+        // allocation.x = (int) (embed.offset_left + embed.client_left) - (int) hscroll;
+        // allocation.width = (int) embed.client_width;
+
+        // // Work out adjustment of composer web view
+        // this.setting_inner_scroll = true;
+        // this.composer.editor.vadjustment.set_value(allocation.y - y_top);
+        // this.setting_inner_scroll = false;
+        // // This sets the scroll before the widget gets resized.  Although the adjustment
+        // // may be scrolled to the bottom right now, the current value may not do that
+        // // once the widget is shrunk; for example, while scrolling down the page past
+        // // the bottom of the editor.  So if we're at the bottom, record that fact.  When
+        // // the limits of the adjustment are changed (watched by on_adjust_changed), we
+        // // can keep it at the bottom.
+        // this.scrolled_to_bottom = (y_top <= 0 && available_height < view_height);
 
         return true;
     }
 
     private void on_inner_scroll(Gtk.Adjustment adj) {
-        double delta = adj.value - this.inner_scroll_adj_value;
-        this.inner_scroll_adj_value = adj.value;
-        if (delta != 0 && !setting_inner_scroll) {
-            Gtk.Adjustment outer_adj = this.conversation_viewer.web_view.vadjustment;
-            outer_adj.set_value(outer_adj.value + delta);
-        }
+        // double delta = adj.value - this.inner_scroll_adj_value;
+        // this.inner_scroll_adj_value = adj.value;
+        // if (delta != 0 && !setting_inner_scroll) {
+        //     Gtk.Adjustment outer_adj = this.conversation_viewer.web_view.vadjustment;
+        //     outer_adj.set_value(outer_adj.value + delta);
+        // }
     }
 
     private void on_adjust_changed(Gtk.Adjustment adj) {
@@ -226,29 +226,29 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
             this.inner_view_height = view_height;
             this.min_height = base_height + MIN_EDITOR_HEIGHT;
             // Calculate height widget should be to avoid scrolling in editor
-            int widget_height = int.max(view_height + base_height - 2, min_height); //? about 2
-            WebKit.DOM.Element embed = this.conversation_viewer.web_view
-                .get_dom_document().get_element_by_id(this.embed_id);
-            if (embed != null) {
-                try {
-                    embed.style.set_property("height", @"$widget_height", "");
-                } catch (Error error) {
-                    debug("Error setting height of composer widget");
-                }
-            }
+            // int widget_height = int.max(view_height + base_height - 2, min_height); //? about 2
+            // WebKit.DOM.Element embed = this.conversation_viewer.web_view
+            //     .get_dom_document().get_element_by_id(this.embed_id);
+            // if (embed != null) {
+            //     try {
+            //         embed.style.set_property("height", @"$widget_height", "");
+            //     } catch (Error error) {
+            //         debug("Error setting height of composer widget");
+            //     }
+            // }
         }
         return false;
     }
 
     private bool on_inner_scroll_event(Gdk.EventScroll event) {
-        this.conversation_viewer.web_view.scroll_event(event);
+        //this.conversation_viewer.web_view.scroll_event(event);
         return true;
     }
 
     public void present() {
         this.top_window.present();
-        this.conversation_viewer.web_view.get_dom_document().get_element_by_id(this.embed_id)
-            .scroll_into_view_if_needed(false);
+        // this.conversation_viewer.web_view.get_dom_document().get_element_by_id(this.embed_id)
+        //     .scroll_into_view_if_needed(false);
     }
 
     public void vanish() {
@@ -257,13 +257,13 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
         this.composer.editor.focus_in_event.disconnect(on_focus_in);
         this.composer.editor.focus_out_event.disconnect(on_focus_out);
 
-        WebKit.DOM.Element embed = this.conversation_viewer.web_view.get_dom_document().
-            get_element_by_id(this.embed_id);
-        try{
-            embed.parent_element.remove_child(embed);
-        } catch (Error error) {
-            warning("Could not remove embed from WebView: %s", error.message);
-        }
+        // WebKit.DOM.Element embed = this.conversation_viewer.web_view.get_dom_document().
+        //     get_element_by_id(this.embed_id);
+        // try{
+        //     embed.parent_element.remove_child(embed);
+        // } catch (Error error) {
+        //     warning("Could not remove embed from WebView: %s", error.message);
+        // }
     }
 
     public void close_container() {
