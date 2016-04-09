@@ -10,6 +10,7 @@ set(RESOURCE_LIST
   STRIPBLANKS "composer-widget.ui"
   STRIPBLANKS "conversation-message.ui"
   STRIPBLANKS "conversation-message-menu.ui"
+  STRIPBLANKS "conversation-viewer.ui"
   STRIPBLANKS "edit_alternate_emails.glade"
   STRIPBLANKS "find_bar.glade"
   STRIPBLANKS "folder-popover.ui"

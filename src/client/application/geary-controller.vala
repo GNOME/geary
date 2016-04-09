@@ -138,8 +138,8 @@ public class GearyController : Geary.BaseObject {
     /**
      * Fired when the currently selected conversation(s) has/have changed.
      */
-    public signal void conversations_selected(Gee.Set<Geary.App.Conversation>? conversations,
-        Geary.Folder? current_folder);
+    public signal void conversations_selected(Gee.Set<Geary.App.Conversation> conversations,
+        Geary.Folder current_folder);
     
     /**
      * Fired when the number of conversations changes.
@@ -1480,7 +1480,9 @@ public class GearyController : Geary.BaseObject {
     
     private void on_conversations_selected(Gee.Set<Geary.App.Conversation> selected) {
         selected_conversations = selected;
-        conversations_selected(selected_conversations, current_folder);
+        if (current_folder != null) {
+            conversations_selected(selected_conversations, current_folder);
+        }
     }
     
     private void on_conversation_activated(Geary.App.Conversation activated) {

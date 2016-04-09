@@ -404,15 +404,19 @@ public class ConversationMessage : Gtk.Box {
 
     private void load_message_body() {
         bool remote_images = false;
-        string body_text = "";
+        string? body_text = null;
         try {
-            body_text = message.get_body(Geary.RFC822.TextFormat.HTML, inline_image_replacer) ?? "";
+            if (message.has_html_body()) {
+                body_text = message.get_html_body(inline_image_replacer);
+            } else {
+                body_text = message.get_plain_body(true, inline_image_replacer);
+            }
         } catch (Error err) {
             debug("Could not get message text. %s", err.message);
         }
 
         body_text = clean_html_markup(body_text, message, out remote_images);
-        web_view.load_string(body_text, "text/html", "UTF8", "");
+        web_view.load_string(body_text ?? "", "text/html", "UTF8", "");
 
         // XXX The following will probably need to happen after the
         // message has been loaded.

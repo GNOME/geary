@@ -1,5 +1,6 @@
 /*
  * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2016 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -54,4 +55,29 @@ row.geary-folder-popover-list-row {
 }
 row.geary-folder-popover-list-row > label {
   color: @theme_text_color;
+}
+
+#conversation_listbox {
+  padding: 18px 18px 0;
+}
+#conversation_listbox > row {
+  margin: 0;
+  border-width: 1px 1px 0;
+  padding: 0;
+  box-shadow: 0 4px 8px 1px rgba(0,0,0,0.4);
+  transition: margin 0.1s;
+}
+#conversation_listbox > row.show-message {
+  margin-bottom: 18px;
+  border-bottom-width: 1px;
+}
+
+#ConversationMessage {
+  padding: 12px;
+}
+#ConversationMessage .header-label {
+  margin-right: 6px;
+}
+#ConversationMessage separator {
+  margin: 12px 0;
 }
