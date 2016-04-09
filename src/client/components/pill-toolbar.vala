@@ -133,11 +133,7 @@ public class PillHeaderbar : Gtk.HeaderBar, PillBar {
     public bool close_button_at_end() {
         string layout;
         bool at_end = false;
-#if GTK_3_12
         layout = Gtk.Settings.get_default().gtk_decoration_layout;
-#else
-        get_toplevel().style_get("decoration-button-layout", out layout);
-#endif
         // Based on logic of close_button_at_end in gtkheaderbar.c: Close button appears
         // at end iff "close" follows a colon in the layout string.
         if (layout != null) {

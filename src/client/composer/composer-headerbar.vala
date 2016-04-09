@@ -83,29 +83,16 @@ public class ComposerHeaderbar : PillHeaderbar {
         add_start(detach_start);
         add_start(attach_buttons);
         add_start(recipients);
-#if !GTK_3_12
-        add_end(send_button);
-        add_end(close_buttons);
-        add_end(detach_end);
-#else
-        add_end(detach_end);
-        add_end(close_buttons);
-        add_end(send_button);
-#endif
 
-#if GTK_3_12
+        add_end(detach_end);
+        add_end(close_buttons);
+        add_end(send_button);
+
         notify["decoration-layout"].connect(set_detach_button_side);
-#else
-        get_style_context().changed.connect(set_detach_button_side);
-#endif
         realize.connect(set_detach_button_side);
         notify["state"].connect((s, p) => {
             if (state == ComposerWidget.ComposerState.DETACHED) {
-#if GTK_3_12
                 notify["decoration-layout"].disconnect(set_detach_button_side);
-#else
-                get_style_context().changed.disconnect(set_detach_button_side);
-#endif
                 detach_start.visible = detach_end.visible = false;
             }
         });

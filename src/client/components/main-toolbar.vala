@@ -87,15 +87,9 @@ public class MainToolbar : Gtk.Box {
         insert.add(search_button);
         Gtk.Box search = folder_header.create_pill_buttons(insert, false);
         
-#if !GTK_3_12
-        folder_header.add_end(empty);
-        folder_header.add_end(search);
-        folder_header.add_end(new Gtk.Separator(Gtk.Orientation.VERTICAL));
-#else
         folder_header.add_end(new Gtk.Separator(Gtk.Orientation.VERTICAL));
         folder_header.add_end(search);
         folder_header.add_end(empty);
-#endif
         
         // Reply buttons
         insert.clear();
@@ -127,25 +121,14 @@ public class MainToolbar : Gtk.Box {
             false));
         Gtk.Box undo = conversation_header.create_pill_buttons(insert);
         
-        // pack_end() ordering is reversed in GtkHeaderBar in 3.12 and above
-#if !GTK_3_12
-        conversation_header.add_end(archive_trash_delete);
-        conversation_header.add_end(undo);
-#else
         conversation_header.add_end(undo);
         conversation_header.add_end(archive_trash_delete);
-#endif
         
         pack_start(folder_header, false, false);
         pack_start(conversation_header, true, true);
         
-#if GTK_3_12
         Gtk.Settings.get_default().notify["gtk-decoration-layout"].connect(set_window_buttons);
         realize.connect(set_window_buttons);
-#else
-        get_style_context().changed.connect(set_close_buttons_side);
-        realize.connect(set_close_buttons_side);
-#endif
     }
     
     /// Updates the trash button as trash or delete, and shows or hides the archive button.
@@ -164,9 +147,7 @@ public class MainToolbar : Gtk.Box {
         guest_header_binding = bind_property("show-close-button-right", header,
             "show-close-button", BindingFlags.SYNC_CREATE);
         pack_start(header, true, true);
-#if GTK_3_12
         header.decoration_layout = conversation_header.decoration_layout;
-#endif
     }
     
     public void remove_conversation_header(Gtk.HeaderBar header) {
@@ -175,13 +156,10 @@ public class MainToolbar : Gtk.Box {
         header.get_style_context().remove_class("geary-titlebar-right");
         GtkUtil.unbind(guest_header_binding);
         header.show_close_button = false;
-#if GTK_3_12
         header.decoration_layout = Gtk.Settings.get_default().gtk_decoration_layout;
-#endif
         conversation_header.show();
     }
     
-#if GTK_3_12
     private void set_window_buttons() {
         string[] buttons = Gtk.Settings.get_default().gtk_decoration_layout.split(":");
         if (buttons.length != 2) {
@@ -193,12 +171,5 @@ public class MainToolbar : Gtk.Box {
         folder_header.decoration_layout = buttons[0] + ":";
         conversation_header.decoration_layout = ":" + buttons[1];
     }
-#else
-    private void set_close_buttons_side() {
-        bool at_end = folder_header.close_button_at_end();
-        show_close_button_left = show_close_button && !at_end;
-        show_close_button_right = show_close_button && at_end;
-    }
-#endif
-}
 
+}

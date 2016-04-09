@@ -65,8 +65,6 @@ pkg_check_modules(WEBKITGTK22X QUIET webkitgtk-3.0>=2.2.0 webkitgtk-3.0<=2.2.100
 pkg_check_modules(WEBKITGTK20X QUIET webkitgtk-3.0>=2.0.0 webkitgtk-3.0<=2.0.100)
 pkg_check_modules(WEBKITGTK110X QUIET webkitgtk-3.0>=1.10.0 webkitgtk-3.0<=1.10.2)
 
-pkg_check_modules(GTK312X QUIET gtk+-3.0>=3.12.0)
-
 pkg_check_modules(SQLITE311 QUIET sqlite3>=3.11.0)
 pkg_check_modules(SQLITE312 QUIET sqlite3>=3.12.0)
 if (SQLITE311_FOUND AND NOT SQLITE312_FOUND)
