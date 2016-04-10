@@ -44,6 +44,16 @@ public class ConversationMessage : Gtk.Box {
     private const int MAX_INLINE_IMAGE_MAJOR_DIM = 1024;
     private const int QUOTE_SIZE_THRESHOLD = 120;
     
+
+    // The email message being displayed
+    public Geary.Email email { get; private set; }
+
+    // The message being displayed
+    public Geary.RFC822.Message message { get; private set; }
+
+    // The HTML viewer to view the emails.
+    public ConversationWebView web_view { get; private set; }
+
     [GtkChild]
     private Gtk.Image avatar_image;
 
@@ -83,17 +93,10 @@ public class ConversationMessage : Gtk.Box {
     [GtkChild]
     private Gtk.Box body_box;
 
-    // The email message being displayed
-    public Geary.Email email { get; private set; }
 
-    // The message being displayed
-    public Geary.RFC822.Message message { get; private set; }
 
     // The folder containing the message
     private Geary.Folder containing_folder = null; // XXX weak??
-
-    // The HTML viewer to view the emails.
-    private ConversationWebView web_view { get; private set; }
 
     // Overlay consisting of a label in front of a webpage
     private Gtk.Overlay message_overlay;

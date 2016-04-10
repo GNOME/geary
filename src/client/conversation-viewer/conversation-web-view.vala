@@ -59,35 +59,6 @@ public class ConversationWebView : StylishWebView {
         return false;
     }
     
-    private bool on_scroll_event(Gdk.EventScroll event) {
-        if ((event.state & Gdk.ModifierType.CONTROL_MASK) != 0) {
-            double dir = 0;
-            if (event.direction == Gdk.ScrollDirection.UP)
-                dir = -1;
-            else if (event.direction == Gdk.ScrollDirection.DOWN)
-                dir = 1;
-            else if (event.direction == Gdk.ScrollDirection.SMOOTH)
-                dir = event.delta_y;
-            
-            if (dir < 0) {
-                zoom_in();
-                return true;
-            } else if (dir > 0) {
-                zoom_out();
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    public void hide_element_by_id(string element_id) throws Error {
-        get_dom_document().get_element_by_id(element_id).set_attribute("style", "display:none");
-    }
-    
-    public void show_element_by_id(string element_id) throws Error {
-        get_dom_document().get_element_by_id(element_id).set_attribute("style", "display:block");
-    }
-
     // Overridden to get the correct height from get_preferred_height.
     public new void get_preferred_size(out Gtk.Requisition minimum_size,
                                        out Gtk.Requisition natural_size) {
@@ -115,6 +86,19 @@ public class ConversationWebView : StylishWebView {
         minimum_height = natural_height = preferred_height;
     }
 
+    public WebKit.DOM.HTMLDivElement create_div() throws Error {
+        return get_dom_document().create_element("div") as WebKit.DOM.HTMLDivElement;
+    }
+
+    public bool is_always_loaded(string uri) {
+        foreach (string prefix in always_loaded_prefixes) {
+            if (uri.has_prefix(prefix))
+                return true;
+        }
+        
+        return false;
+    }
+    
     private void on_resource_request_starting(WebKit.WebFrame web_frame,
         WebKit.WebResource web_resource, WebKit.NetworkRequest request,
         WebKit.NetworkResponse? response) {
@@ -130,15 +114,6 @@ public class ConversationWebView : StylishWebView {
             else
                 request.set_uri("about:blank");
         }
-    }
-
-    public bool is_always_loaded(string uri) {
-        foreach (string prefix in always_loaded_prefixes) {
-            if (uri.has_prefix(prefix))
-                return true;
-        }
-        
-        return false;
     }
     
     private void on_load_finished(WebKit.WebFrame frame) {
@@ -183,6 +158,27 @@ public class ConversationWebView : StylishWebView {
         } catch (Error error) {
             debug("Error updating default font style: %s", error.message);
         }
+    }
+    
+    private bool on_scroll_event(Gdk.EventScroll event) {
+        if ((event.state & Gdk.ModifierType.CONTROL_MASK) != 0) {
+            double dir = 0;
+            if (event.direction == Gdk.ScrollDirection.UP)
+                dir = -1;
+            else if (event.direction == Gdk.ScrollDirection.DOWN)
+                dir = 1;
+            else if (event.direction == Gdk.ScrollDirection.SMOOTH)
+                dir = event.delta_y;
+            
+            if (dir < 0) {
+                zoom_in();
+                return true;
+            } else if (dir > 0) {
+                zoom_out();
+                return true;
+            }
+        }
+        return false;
     }
     
     private void load_user_style() {
@@ -242,17 +238,10 @@ public class ConversationWebView : StylishWebView {
         // Other policy-decisions may be requested for various reasons. The existence of an iframe,
         // for example, causes a policy-decision request with an "OTHER" reason. We don't want to
         // open a webpage in the browser just because an email contains an iframe.
-        if (navigation_action.reason == WebKit.WebNavigationReason.LINK_CLICKED)
+        if (navigation_action.reason == WebKit.WebNavigationReason.LINK_CLICKED) {
             link_selected(request.uri);
+        }
         return true;
-    }
-    
-    public WebKit.DOM.HTMLDivElement create_div() throws Error {
-        return get_dom_document().create_element("div") as WebKit.DOM.HTMLDivElement;
-    }
-
-    public void scroll_to_element(WebKit.DOM.HTMLElement element) {
-        get_dom_document().get_default_view().scroll(element.offset_left, element.offset_top);
     }
     
     private unowned WebKit.WebView activate_inspector(WebKit.WebInspector inspector, WebKit.WebView target_view) {
@@ -273,15 +262,5 @@ public class ConversationWebView : StylishWebView {
         return r;
     }
     
-    public void allow_collapsing(bool allow) {
-        try {
-            if (allow)
-                get_dom_document().get_body().get_class_list().remove("nohide");
-            else
-                get_dom_document().get_body().get_class_list().add("nohide");
-        } catch (Error error) {
-            debug("Error setting body class: %s", error.message);
-        }
-    }
 }
 
