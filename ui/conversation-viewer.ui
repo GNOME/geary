@@ -87,5 +87,19 @@
         <property name="position">3</property>
       </packing>
     </child>
+    <child>
+      <object class="GtkBox" id="composer_page">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <placeholder/>
+        </child>
+      </object>
+      <packing>
+        <property name="name">composer_page</property>
+        <property name="position">4</property>
+      </packing>
+    </child>
   </template>
 </interface>

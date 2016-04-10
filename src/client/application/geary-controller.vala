@@ -2167,7 +2167,7 @@ public class GearyController : Geary.BaseObject {
         if (inline) {
             if (widget.state == ComposerWidget.ComposerState.NEW ||
                 widget.state == ComposerWidget.ComposerState.PANED)
-                main_window.conversation_viewer.set_paned_composer(widget);
+                main_window.conversation_viewer.do_compose(widget);
             else
                 new ComposerEmbed(widget, main_window.conversation_viewer, referred); // is_draft
         } else {

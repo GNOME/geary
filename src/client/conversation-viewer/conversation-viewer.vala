@@ -27,6 +27,12 @@ public class ConversationViewer : Gtk.Stack {
     
     private const int SELECT_CONVERSATION_TIMEOUT_MSEC = 100;
 
+    private enum ViewState {
+        // Main view state
+        CONVERSATION,
+        COMPOSE;
+    }
+    
     private enum SearchState {
         // Search/find states.
         NONE,         // Not in search
@@ -92,6 +98,8 @@ public class ConversationViewer : Gtk.Stack {
     private Gtk.ScrolledWindow conversation_page;
     [GtkChild]
     private Gtk.Box user_message_page;
+    [GtkChild]
+    private Gtk.Box composer_page;
 
     // Conversation messages list
     [GtkChild]
@@ -101,9 +109,6 @@ public class ConversationViewer : Gtk.Stack {
     [GtkChild]
     private Gtk.Label user_message_label;
 
-    // Paned for holding any paned composers.
-    private Gtk.Box composer_boxes;
-    
     // List of emails in this view.
     private Gee.TreeSet<Geary.Email> messages { get; private set; default = 
         new Gee.TreeSet<Geary.Email>(Geary.Email.compare_sent_date_ascending); }
@@ -116,6 +121,7 @@ public class ConversationViewer : Gtk.Stack {
     private Geary.State.MachineDescriptor search_machine_desc = new Geary.State.MachineDescriptor(
         "ConversationViewer search", SearchState.NONE, SearchState.COUNT, SearchEvent.COUNT, null, null); 
    
+    private ViewState state = ViewState.CONVERSATION;
     private weak Geary.Folder? current_folder = null;
     private weak Geary.SearchFolder? search_folder = null;
     private Geary.App.EmailStore? email_store = null;
@@ -168,30 +174,12 @@ public class ConversationViewer : Gtk.Stack {
         //compose_overlay = new ScrollableOverlay(web_view);
         //conversation_viewer_scrolled.add(compose_overlay);
 
-        //Gtk.Paned composer_paned = new Gtk.Paned(Gtk.Orientation.VERTICAL);
-        //composer_boxes = new Gtk.Box(Gtk.Orientation.VERTICAL, 0);
-        //composer_boxes.no_show_all = true;
-        //composer_paned.pack2(composer_boxes, true, false);
-
-        //Configuration config = GearyApplication.instance.config;
-        //config.bind(Configuration.COMPOSER_PANE_POSITION_KEY, composer_paned, "position");
-
-        //composer_boxes.notify["visible"].connect(() => {
-        //    if (!composer_boxes.visible && !message_overlay.visible)
-        //        message_overlay.show();
-        //    });
-        //pack_start(composer_paned);
-        
         //conversation_find_bar = new ConversationFindBar(web_view);
         //conversation_find_bar.no_show_all = true;
         //conversation_find_bar.close.connect(() => { fsm.issue(SearchEvent.CLOSE_FIND_BAR); });
         //pack_start(conversation_find_bar, false);
-    }
-    
-    public void set_paned_composer(ComposerWidget composer) {
-        ComposerBox container = new ComposerBox(composer);
-        composer_boxes.pack_start(container);
-        composer_boxes.show();
+
+        do_conversation();
     }
     
     public Geary.Email? get_last_message() {
@@ -254,6 +242,33 @@ public class ConversationViewer : Gtk.Stack {
         }
         email_to_row.get(id).show();
     }
+
+    public void do_conversation() {
+        state = ViewState.CONVERSATION;
+        set_visible_child(loading_page);
+    }
+    
+    public void do_compose(ComposerWidget composer) {
+        state = ViewState.COMPOSE;
+        ComposerBox box = new ComposerBox(composer);
+
+        // XXX move the ConversationListView management code into
+        // GearyController or somewhere more appropriate
+        ConversationListView conversation_list_view = ((MainWindow) GearyApplication.instance.controller.main_window).conversation_list_view;
+        Gee.Set<Geary.App.Conversation>? prev_selection = conversation_list_view.get_selected_conversations();
+        conversation_list_view.get_selection().unselect_all();
+        box.vanished.connect((box) => {
+                do_conversation();
+                if (prev_selection.is_empty) {
+                    // Need to trigger "No messages selected"
+                    conversation_list_view.conversations_selected(prev_selection);
+                } else {
+                    conversation_list_view.select_conversations(prev_selection);
+                }
+            });
+        composer_page.pack_start(box);
+        set_visible_child(composer_page);
+    }
     
     // Removes all displayed e-mails from the view.
     private void clear() {
@@ -265,15 +280,7 @@ public class ConversationViewer : Gtk.Stack {
         current_conversation = null;
         cleared();
     }
-    
-    private void show_multiple_selected(uint selected_count) {
-        user_message_label.set_text(
-            ngettext("%u conversation selected.",
-                     "%u conversations selected.",
-                     selected_count).printf(selected_count));
-        set_visible_child(user_message_page);
-    }
-    
+
     private void on_folder_selected(Geary.Folder? folder) {
         cancel_load();
         current_folder = folder;
@@ -286,7 +293,9 @@ public class ConversationViewer : Gtk.Stack {
             current_account_information = null;
         }
 
-        set_visible_child(loading_page);
+        if (state == ViewState.CONVERSATION) {
+            set_visible_child(loading_page);
+        }
         
         if (current_folder is Geary.SearchFolder) {
             fsm.issue(SearchEvent.ENTER_SEARCH_FOLDER);
@@ -297,47 +306,51 @@ public class ConversationViewer : Gtk.Stack {
     }
     
     private void on_conversation_count_changed(int count) {
-        if (count != 0) {
-            have_conversations = true;
-            set_visible_child(conversation_page);
-        } else {
-            user_message_label.set_text((current_folder is Geary.SearchFolder)
-                                        ? _("No search results found.")
-                                        : _("No conversations in folder."));
-            set_visible_child(user_message_page);
+        if (state == ViewState.CONVERSATION) {
+            if (count > 0) {
+                have_conversations = true;
+                set_visible_child(conversation_page);
+            } else {
+                user_message_label.set_text(state == ViewState.CONVERSATION
+                                            ? _("No conversations in folder.")
+                                            : _("No search results found."));
+                set_visible_child(user_message_page);
+            }
         }
     }
     
     private void on_conversations_selected(Gee.Set<Geary.App.Conversation> conversations,
         Geary.Folder current_folder) {
-        cancel_load();
-
-        if (current_conversation != null) {
-            current_conversation.appended.disconnect(on_conversation_appended);
-            current_conversation.trimmed.disconnect(on_conversation_trimmed);
-            current_conversation.email_flags_changed.disconnect(update_flags);
-            current_conversation = null;
-        }
+        if (state == ViewState.CONVERSATION) {
         
-        // Disable message buttons until conversation loads.
-        GearyApplication.instance.controller.enable_message_buttons(false);
-        
-        if (!(current_folder is Geary.SearchFolder) &&
-            have_conversations &&
-            conversations.size == 0) {
-            set_visible_child(splash_page);
-            return;
-        }
+            cancel_load();
 
-        if (conversations.size == 1) {
-            clear();
-            //web_view.scroll_reset();
+            if (current_conversation != null) {
+                current_conversation.appended.disconnect(on_conversation_appended);
+                current_conversation.trimmed.disconnect(on_conversation_trimmed);
+                current_conversation.email_flags_changed.disconnect(update_flags);
+                current_conversation = null;
+            }
+        
+            // Disable message buttons until conversation loads.
+            GearyApplication.instance.controller.enable_message_buttons(false);
+
+            if (!(current_folder is Geary.SearchFolder) &&
+                have_conversations &&
+                conversations.size == 0) {
+                set_visible_child(splash_page);
+                return;
+            }
+
+            if (conversations.size == 1) {
+                clear();
+                //web_view.scroll_reset();
             
-            if (select_conversation_timeout_id != 0)
-                Source.remove(select_conversation_timeout_id);
+                if (select_conversation_timeout_id != 0)
+                    Source.remove(select_conversation_timeout_id);
             
-            // If the load is taking too long, display a spinner.
-            select_conversation_timeout_id =
+                // If the load is taking too long, display a spinner.
+                select_conversation_timeout_id =
                 Timeout.add(SELECT_CONVERSATION_TIMEOUT_MSEC, () => {
                         if (select_conversation_timeout_id != 0) {
                             set_visible_child(loading_page);
@@ -345,20 +358,20 @@ public class ConversationViewer : Gtk.Stack {
                         return false;
                     });
             
-            current_conversation = Geary.Collection.get_first(conversations);
+                current_conversation = Geary.Collection.get_first(conversations);
             
-            select_conversation_async.begin(current_conversation, current_folder,
-                on_select_conversation_completed);
+                select_conversation_async.begin(current_conversation, current_folder,
+                                                on_select_conversation_completed);
             
-            current_conversation.appended.connect(on_conversation_appended);
-            current_conversation.trimmed.connect(on_conversation_trimmed);
-            current_conversation.email_flags_changed.connect(update_flags);
-            
-            GearyApplication.instance.controller.enable_message_buttons(true);
-        } else if (conversations.size > 1) {
-            show_multiple_selected(conversations.size);
-            
-            GearyApplication.instance.controller.enable_multiple_message_buttons();
+                current_conversation.appended.connect(on_conversation_appended);
+                current_conversation.trimmed.connect(on_conversation_trimmed);
+                current_conversation.email_flags_changed.connect(update_flags);
+                
+                GearyApplication.instance.controller.enable_message_buttons(true);
+            } else if (conversations.size > 1) {
+                show_multiple_selected(conversations.size);
+                GearyApplication.instance.controller.enable_multiple_message_buttons();
+            }
         }
     }
     
@@ -402,6 +415,19 @@ public class ConversationViewer : Gtk.Stack {
         }
     }
 
+    private void show_multiple_selected(uint selected_count) {
+        user_message_label.set_text(
+            ngettext("%u conversation selected.",
+                     "%u conversations selected.",
+                     selected_count).printf(selected_count));
+        set_visible_child(user_message_page);
+    }
+    
+    private void on_search_text_changed(Geary.SearchQuery? query) {
+        if (query != null)
+            highlight_search_terms.begin();
+    }
+    
     private async void highlight_search_terms() {
         Geary.SearchQuery? query = (this.search_folder != null)
             ? search_folder.search_query
