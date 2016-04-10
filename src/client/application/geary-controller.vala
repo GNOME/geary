@@ -52,6 +52,7 @@ public class GearyController : Geary.BaseObject {
     public const string ACTION_MOVE_MENU = "GearyMoveMenuButton";
     public const string ACTION_GEAR_MENU = "GearyGearMenuButton";
     public const string ACTION_SEARCH = "GearySearch";
+    public const string ACTION_FOLDER_LIST = "GearyFolderList";
     public const string ACTION_CONVERSATION_LIST = "GearyConversationList";
     public const string ACTION_TOGGLE_SEARCH = "GearyToggleSearch";
     
@@ -528,6 +529,10 @@ public class GearyController : Geary.BaseObject {
         Gtk.ActionEntry search = { ACTION_SEARCH, null, null, null, null, on_search };
         entries += search;
         add_accelerator("<Ctrl>S", ACTION_SEARCH);
+
+        Gtk.ActionEntry folder_list = { ACTION_FOLDER_LIST, null, null, null, null, on_folder_list };
+        entries += folder_list;
+        add_accelerator("<Ctrl>H", ACTION_FOLDER_LIST);
         
         Gtk.ActionEntry conversation_list = { ACTION_CONVERSATION_LIST, null, null, null, null, on_conversation_list };
         entries += conversation_list;
@@ -1753,7 +1758,7 @@ public class GearyController : Geary.BaseObject {
         PreferencesDialog dialog = new PreferencesDialog(main_window);
         dialog.run();
     }
-    
+
     // latest_sent_only uses Email's Date: field, which corresponds to how they're sorted in the
     // ConversationViewer
     private Gee.ArrayList<Geary.EmailIdentifier> get_conversation_email_ids(
@@ -2653,6 +2658,10 @@ public class GearyController : Geary.BaseObject {
     
     private void on_search() {
         main_window.search_bar.give_search_focus();
+    }
+
+    private void on_folder_list() {
+        main_window.folder_list.grab_focus();
     }
     
     private void on_conversation_list() {
