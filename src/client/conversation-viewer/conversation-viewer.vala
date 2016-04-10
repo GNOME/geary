@@ -530,10 +530,19 @@ public class ConversationViewer : Gtk.Stack {
         if (messages.contains(email))
             return;
 
+        ConversationMessage message = new ConversationMessage(email, current_folder);
+        message.link_selected.connect((link) => { link_selected(link); });
+        message.web_view.button_release_event.connect_after((event) => {
+                // Consume all non-consumed clicks so the row is not
+                // inadvertently activated after clicking on the
+                // message body.
+                return true;
+            });
+
         Gtk.ListBoxRow row = new Gtk.ListBoxRow();
         row.get_style_context().add_class("frame");
         row.show();
-        row.add(new ConversationMessage(email, current_folder));
+        row.add(message);
         conversation_listbox.add(row);
 
         messages.add(email);

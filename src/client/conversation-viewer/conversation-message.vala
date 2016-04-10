@@ -93,7 +93,14 @@ public class ConversationMessage : Gtk.Box {
     [GtkChild]
     private Gtk.Box body_box;
 
+    [GtkChild]
+    private Gtk.Popover link_popover;
 
+    [GtkChild]
+    private Gtk.Label good_link_label;
+
+    [GtkChild]
+    private Gtk.Label bad_link_label;
 
     // The folder containing the message
     private Geary.Folder containing_folder = null; // XXX weak??
@@ -109,6 +116,11 @@ public class ConversationMessage : Gtk.Box {
     private int next_replaced_buffer_number = 0;
     private Gee.HashMap<string, ReplacedImage> replaced_images = new Gee.HashMap<string, ReplacedImage>();
     private Gee.HashSet<string> replaced_content_ids = new Gee.HashSet<string>();
+
+
+    // Fired when the user clicks a link.
+    public signal void link_selected(string link);
+
 
     public ConversationMessage(Geary.Email email, Geary.Folder containing_folder) {
         this.email = email;
@@ -179,7 +191,7 @@ public class ConversationMessage : Gtk.Box {
         web_view.realize.connect(() => { debug("web_view: realised"); });
         web_view.size_allocate.connect(() => { debug("web_view: allocated"); });
 
-        // web_view.link_selected.connect((link) => { link_selected(link); });
+        web_view.link_selected.connect((link) => { link_selected(link); });
         
         // if (email.from != null && email.from.contains_normalized(current_account_information.email)) {
         //  // XXX set a RO property?
@@ -418,8 +430,15 @@ public class ConversationMessage : Gtk.Box {
             debug("Could not get message text. %s", err.message);
         }
 
-        body_text = clean_html_markup(body_text, message, out remote_images);
-        web_view.load_string(body_text ?? "", "text/html", "UTF8", "");
+        body_text = clean_html_markup(body_text ?? "", message, out remote_images);
+
+        web_view.notify["load-status"].connect((source, param) => {
+                if (web_view.load_status == WebKit.LoadStatus.FINISHED) {
+                    bind_event(web_view, "body a", "click",
+                               (Callback) on_link_clicked, this);
+                }
+            });
+        web_view.load_string(body_text, "text/html", "UTF8", "");
 
         // XXX The following will probably need to happen after the
         // message has been loaded.
@@ -722,128 +741,6 @@ public class ConversationMessage : Gtk.Box {
     //             flags.add(Geary.EmailFlags.LOAD_REMOTE_IMAGES);
     //             get_viewer().mark_messages(Geary.iterate<Geary.EmailIdentifier>(email.id).to_array_list(), flags, null);
     //         }
-    //     }
-    // }
-    
-    // private bool on_link_clicked_self(WebKit.DOM.Element element) {
-    //     if (!Geary.String.is_empty(element.get_attribute("warning"))) {
-    //         // A warning is open, so ignore clicks.
-    //         return true;
-    //     }
-        
-    //     string? href = element.get_attribute("href");
-    //     if (Geary.String.is_empty(href))
-    //         return false;
-    //     string text = ((WebKit.DOM.HTMLElement) element).get_inner_text();
-    //     string href_short, text_short;
-    //     if (!deceptive_text(href, ref text, out href_short, out text_short))
-    //         return false;
-        
-    //     WebKit.DOM.HTMLElement div = Util.DOM.clone_select(web_view.get_dom_document(),
-    //         "#link_warning_template");
-    //     try {
-    //         div.set_inner_html("""%s %s <span><a href="%s">%s</a></span> %s
-    //             <span><a href="%s">%s</a></span>""".printf(div.get_inner_html(),
-    //             _("This link appears to go to"), text, text_short,
-    //             _("but actually goes to"), href, href_short));
-    //         div.remove_attribute("id");
-    //         element.parent_node.insert_before(div, element);
-    //         element.set_attribute("warning", "open");
-            
-    //         long overhang = div.get_offset_left() + div.get_offset_width() -
-    //             web_view.get_dom_document().get_body().get_offset_width();
-    //         if (overhang > 0)
-    //             div.set_attribute("style", @"margin-left: -$(overhang)px;");
-    //     } catch (Error error) {
-    //         warning("Error showing link warning dialog: %s", error.message);
-    //     }
-    //     bind_event(web_view, ".link_warning .close_link_warning, .link_warning a", "click",
-    //         (Callback) on_close_link_warning, this);
-    //     return true;
-    // }
-    
-    // private void on_close_link_warning(WebKit.DOM.Element element, WebKit.DOM.Event event,
-    //     ConversationMessage conversation_message) {
-    //     try {
-    //         WebKit.DOM.Element warning_div = closest_ancestor(element, ".link_warning");
-    //         WebKit.DOM.Element link = (WebKit.DOM.Element) warning_div.get_next_sibling();
-    //         link.remove_attribute("warning");
-    //         warning_div.parent_node.remove_child(warning_div);
-    //     } catch (Error error) {
-    //         warning("Error removing link warning dialog: %s", error.message);
-    //     }
-    // }
-
-    // private void on_draft_edit_menu() {
-    //     get_viewer().edit_draft(email);
-    // }
-    
-    // /*
-    //  * Test whether text looks like a URI that leads somewhere other than href.  The text
-    //  * will have a scheme prepended if it doesn't already have one, and the short versions
-    //  * have the scheme skipped and long paths truncated.
-    //  */
-    // private bool deceptive_text(string href, ref string text, out string href_short,
-    //     out string text_short) {
-    //     href_short = "";
-    //     text_short = "";
-    //     // mailto URLs have a different form, and the worst they can do is pop up a composer,
-    //     // so we don't trigger on them.
-    //     if (href.has_prefix("mailto:"))
-    //         return false;
-        
-    //     // First, does text look like a URI?  Right now, just test whether it has
-    //     // <string>.<string> in it.  More sophisticated tests are possible.
-    //     GLib.MatchInfo text_match, href_match;
-    //     try {
-    //         GLib.Regex domain = new GLib.Regex(
-    //             "([a-z]*://)?"                  // Optional scheme
-    //             + "([^\\s:/]+\\.[^\\s:/\\.]+)"  // Domain
-    //             + "(/[^\\s]*)?"                 // Optional path
-    //             );
-    //         if (!domain.match(text, 0, out text_match))
-    //             return false;
-    //         if (!domain.match(href, 0, out href_match)) {
-    //             // If href doesn't look like a URL, something is fishy, so warn the user
-    //             href_short = href + _(" (Invalid?)");
-    //             text_short = text;
-    //             return true;
-    //         }
-    //     } catch (Error error) {
-    //         warning("Error in Regex text for deceptive urls: %s", error.message);
-    //         return false;
-    //     }
-        
-    //     // Second, do the top levels of the two domains match?  We compare the top n levels,
-    //     // where n is the minimum of the number of levels of the two domains.
-    //     string[] href_parts = href_match.fetch_all();
-    //     string[] text_parts = text_match.fetch_all();
-    //     string[] text_domain = text_parts[2].down().reverse().split(".");
-    //     string[] href_domain = href_parts[2].down().reverse().split(".");
-    //     for (int i = 0; i < text_domain.length && i < href_domain.length; i++) {
-    //         if (text_domain[i] != href_domain[i]) {
-    //             if (href_parts[1] == "")
-    //                 href_parts[1] = "http://";
-    //             if (text_parts[1] == "")
-    //                 text_parts[1] = href_parts[1];
-    //             string temp;
-    //             assemble_uris(href_parts, out temp, out href_short);
-    //             assemble_uris(text_parts, out text, out text_short);
-    //             return true;
-    //         }
-    //     }
-    //     return false;
-    // }
-    
-    // private void assemble_uris(string[] parts, out string full, out string short_) {
-    //     full = parts[1] + parts[2];
-    //     short_ = parts[2];
-    //     if (parts.length == 4 && parts[3] != "/") {
-    //         full += parts[3];
-    //         if (parts[3].length > 20)
-    //             short_ += parts[3].substring(0, 20) + "…";
-    //         else
-    //             short_ += parts[3];
     //     }
     // }
     
@@ -1266,6 +1163,122 @@ public class ConversationMessage : Gtk.Box {
         }
         
         return false;
+    }
+    
+    /*
+     * Test whether text looks like a URI that leads somewhere other than href.  The text
+     * will have a scheme prepended if it doesn't already have one, and the short versions
+     * have the scheme skipped and long paths truncated.
+     */
+    private bool deceptive_text(string href, ref string text, out string href_short,
+        out string text_short) {
+        href_short = "";
+        text_short = "";
+        // mailto URLs have a different form, and the worst they can do is pop up a composer,
+        // so we don't trigger on them.
+        if (href.has_prefix("mailto:"))
+            return false;
+        
+        // First, does text look like a URI?  Right now, just test whether it has
+        // <string>.<string> in it.  More sophisticated tests are possible.
+        GLib.MatchInfo text_match, href_match;
+        try {
+            GLib.Regex domain = new GLib.Regex(
+                "([a-z]*://)?"                  // Optional scheme
+                + "([^\\s:/]+\\.[^\\s:/\\.]+)"  // Domain
+                + "(/[^\\s]*)?"                 // Optional path
+                );
+            if (!domain.match(text, 0, out text_match))
+                return false;
+            if (!domain.match(href, 0, out href_match)) {
+                // If href doesn't look like a URL, something is fishy, so warn the user
+                href_short = href + _(" (Invalid?)");
+                text_short = text;
+                return true;
+            }
+        } catch (Error error) {
+            warning("Error in Regex text for deceptive urls: %s", error.message);
+            return false;
+        }
+        
+        // Second, do the top levels of the two domains match?  We compare the top n levels,
+        // where n is the minimum of the number of levels of the two domains.
+        string[] href_parts = href_match.fetch_all();
+        string[] text_parts = text_match.fetch_all();
+        string[] text_domain = text_parts[2].down().reverse().split(".");
+        string[] href_domain = href_parts[2].down().reverse().split(".");
+        for (int i = 0; i < text_domain.length && i < href_domain.length; i++) {
+            if (text_domain[i] != href_domain[i]) {
+                if (href_parts[1] == "")
+                    href_parts[1] = "http://";
+                if (text_parts[1] == "")
+                    text_parts[1] = href_parts[1];
+                string temp;
+                assemble_uris(href_parts, out temp, out href_short);
+                assemble_uris(text_parts, out text, out text_short);
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    private void assemble_uris(string[] parts, out string full, out string short_) {
+        full = parts[1] + parts[2];
+        short_ = parts[2];
+        if (parts.length == 4 && parts[3] != "/") {
+            full += parts[3];
+            if (parts[3].length > 20)
+                short_ += parts[3].substring(0, 20) + "…";
+            else
+                short_ += parts[3];
+        }
+    }
+
+    private static void on_link_clicked(WebKit.DOM.Element element,
+                                        WebKit.DOM.Event event,
+                                        ConversationMessage message) {
+        if (message.on_link_clicked_self(element)) {
+            event.prevent_default();
+        }
+    }
+
+    // Check for possible phishing links, displays a popover if found.
+    // If not, lets it go through to the default handler.
+    private bool on_link_clicked_self(WebKit.DOM.Element element) {
+        string? href = element.get_attribute("href");
+        if (Geary.String.is_empty(href))
+            return false;
+        string text = ((WebKit.DOM.HTMLElement) element).get_inner_text();
+        string href_short, text_short;
+        if (!deceptive_text(href, ref text, out href_short, out text_short))
+            return false;
+
+        // Escape text and especially URLs since we got them from the
+        // HREF, and Gtk.Label.set_markup is a strict parser.
+        good_link_label.set_markup(
+            Markup.printf_escaped("<a href=\"%s\">%s</a>", text, text_short)
+        );
+        bad_link_label.set_markup(
+            Markup.printf_escaped("<a href=\"%s\">%s</a>", href, href_short)
+        );
+
+        // Work out the link's position, update the popover.
+        Gdk.Rectangle link_rect = Gdk.Rectangle();
+        web_view.get_allocation(out link_rect);
+        link_rect.x += (int) element.get_offset_left();
+        link_rect.y += (int) element.get_offset_top();
+        WebKit.DOM.Element? offset_parent = element.get_offset_parent();
+        while (offset_parent != null) {
+            link_rect.x += (int) offset_parent.get_offset_left();
+            link_rect.y += (int) offset_parent.get_offset_top();
+            offset_parent = offset_parent.get_offset_parent();
+        }
+        link_rect.width = (int) element.get_offset_width();
+        link_rect.height = (int) element.get_offset_height();
+        link_popover.set_pointing_to(link_rect);
+
+        link_popover.show();
+        return true;
     }
     
     // private void on_hovering_over_link(string? title, string? url) {

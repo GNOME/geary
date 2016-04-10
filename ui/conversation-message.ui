@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Generated with glade 3.20.0 -->
 <interface>
-  <requires lib="gtk+" version="3.10"/>
+  <requires lib="gtk+" version="3.12"/>
   <template class="ConversationMessage" parent="GtkBox">
     <property name="name">ConversationMessage</property>
     <property name="visible">True</property>
@@ -435,5 +435,75 @@
       <widget name="subject_label"/>
       <widget name="date_label"/>
     </widgets>
+  </object>
+  <object class="GtkPopover" id="link_popover">
+    <property name="can_focus">False</property>
+    <property name="relative_to">body_box</property>
+    <property name="position">bottom</property>
+    <child>
+      <object class="GtkBox">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="margin_left">6</property>
+        <property name="margin_right">6</property>
+        <property name="margin_top">6</property>
+        <property name="margin_bottom">6</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">6</property>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">This link appears to go to:</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="good_link_label">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label">&lt;a href="http://goodlink.com"&gt;http://goodlink.com&lt;/a&gt;</property>
+            <property name="use_markup">True</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">But actually goes to:</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel" id="bad_link_label">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label">&lt;a href="http://badlink.com"&gt;http://badlink.com&lt;/a&gt;</property>
+            <property name="use_markup">True</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">3</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+    <style>
+      <class name="tooltip"/>
+    </style>
   </object>
 </interface>
