@@ -55,8 +55,12 @@
   	    <td><p>Mark unread</p></td>
   		<td><p> <keyseq><key>Ctrl</key><key>U</key></keyseq> or <keyseq><key>Shift</key><key>U</key></keyseq> </p></td>
   	</tr>
+    <tr>
+      <td><p>Move focus to the folder list</p></td>
+      <td><p> <keyseq><key>Ctrl</key><key>H</key></keyseq> </p></td>
+    </tr>
   	<tr>
-  	    <td><p>Move focus to conversation list</p></td>
+  	    <td><p>Move focus to the conversation list</p></td>
   		<td><p> <keyseq><key>Ctrl</key><key>B</key></keyseq> </p></td>
   	</tr>
   	<tr>
