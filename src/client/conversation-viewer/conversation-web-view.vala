@@ -54,11 +54,6 @@ public class ConversationWebView : StylishWebView {
         notify["zoom-level"].connect(() => { zoom_level_wrap = zoom_level; });
     }
     
-    public override bool query_tooltip(int x, int y, bool keyboard_tooltip, Gtk.Tooltip tooltip) {
-        // Disable tooltips from within WebKit itself.
-        return false;
-    }
-    
     // Overridden to get the correct height from get_preferred_height.
     public new void get_preferred_size(out Gtk.Requisition minimum_size,
                                        out Gtk.Requisition natural_size) {

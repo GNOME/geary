@@ -105,13 +105,9 @@ public class ConversationMessage : Gtk.Box {
     // The folder containing the message
     private Geary.Folder containing_folder = null; // XXX weak??
 
-    // Overlay consisting of a label in front of a webpage
-    private Gtk.Overlay message_overlay;
+    // Contains the current mouse-over'ed link URL, if any
+    private string? hover_url = null;
     
-    // Label for displaying overlay messages.
-    //private Gtk.Label message_overlay_label;
-    
-    //private string? hover_url = null;
     private Gee.HashSet<string> inlined_content_ids = new Gee.HashSet<string>();
     private int next_replaced_buffer_number = 0;
     private Gee.HashMap<string, ReplacedImage> replaced_images = new Gee.HashMap<string, ReplacedImage>();
@@ -184,13 +180,14 @@ public class ConversationMessage : Gtk.Box {
         //web_scroller.add(web_view);
         //body_box.pack_end(web_scroller, true, true, 0);
 
-        // web_view.hovering_over_link.connect(on_hovering_over_link);
         // web_view.context_menu.connect(() => { return true; }); // Suppress default context menu.
         // web_view.realize.connect( () => { web_view.get_vadjustment().value_changed.connect(mark_read); });
         // web_view.size_allocate.connect(mark_read);
         web_view.realize.connect(() => { debug("web_view: realised"); });
         web_view.size_allocate.connect(() => { debug("web_view: allocated"); });
 
+        body_box.set_has_tooltip(true);
+        web_view.hovering_over_link.connect(on_hovering_over_link);
         web_view.link_selected.connect((link) => { link_selected(link); });
         
         // if (email.from != null && email.from.contains_normalized(current_account_information.email)) {
@@ -235,10 +232,6 @@ public class ConversationMessage : Gtk.Box {
         // }
 
         update_flags(email);
-
-        message_overlay = new Gtk.Overlay();
-        //message_overlay.add(conversation_viewer_scrolled);
-        // composer_paned.pack1(message_overlay, true, false);
     }
 
     public bool is_message_visible() {
@@ -407,15 +400,6 @@ public class ConversationMessage : Gtk.Box {
     public void mark_manual_read() {
         get_style_context().add_class("manual_read");
     }
-
-    // private void build_message_overlay_label(string? url) {
-    //     message_overlay_label = new Gtk.Label(url);
-    //     message_overlay_label.ellipsize = Pango.EllipsizeMode.MIDDLE;
-    //     message_overlay_label.halign = Gtk.Align.START;
-    //     message_overlay_label.valign = Gtk.Align.END;
-    //     //message_overlay_label.realize.connect(on_message_overlay_label_realize);
-    //     message_overlay.add_overlay(message_overlay_label);
-    // }
 
     private void load_message_body() {
         bool remote_images = false;
@@ -1281,27 +1265,13 @@ public class ConversationMessage : Gtk.Box {
         return true;
     }
     
-    // private void on_hovering_over_link(string? title, string? url) {
-    //     // Copy the link the user is hovering over.  Note that when the user mouses-out, 
-    //     // this signal is called again with null for both parameters.
-    //     hover_url = url != null ? Uri.unescape_string(url) : null;
-        
-    //     if (message_overlay_label == null) {
-    //         if (url == null)
-    //             return;
-    //         build_message_overlay_label(Uri.unescape_string(url));
-    //         message_overlay_label.show();
-    //         return;
-    //     }
-        
-    //     if (url == null) {
-    //         message_overlay_label.hide();
-    //         message_overlay_label.label = null;
-    //     } else {
-    //         message_overlay_label.show();
-    //         message_overlay_label.label = Uri.unescape_string(url);
-    //     }
-    // }
+    private void on_hovering_over_link(string? title, string? url) {
+        // Use tooltip on the containing box since the web_view
+        // doesn't want to pay ball.
+        hover_url = (url != null) ? Uri.unescape_string(url) : null;
+        body_box.set_tooltip_text(hover_url);
+        body_box.trigger_tooltip_query();
+    }
     
     // private void on_copy_text() {
     //     web_view.copy_clipboard();
