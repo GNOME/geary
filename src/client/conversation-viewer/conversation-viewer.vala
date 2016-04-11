@@ -1496,7 +1496,10 @@ public class ConversationViewer : Gtk.Box {
                     if (!web_view.is_always_loaded(src)) {
                         // Workaround a WebKitGTK+ 2.4.10 crash. See Bug 763933
                         element.remove_attribute("src");
-                        element.set_attribute("src", web_view.allow_prefix + src);
+                        if (!src.has_prefix(web_view.allow_prefix)) {
+                             src = web_view.allow_prefix + src;
+                        }
+                        element.set_attribute("src", src);
                     }
                 }
             }
