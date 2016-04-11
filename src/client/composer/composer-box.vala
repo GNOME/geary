@@ -18,11 +18,7 @@ public class ComposerBox : Gtk.Frame, ComposerContainer {
 
     public Gtk.ApplicationWindow top_window {
         get { return (Gtk.ApplicationWindow) get_toplevel(); }
-
-    public Gtk.Window top_window {
-        get { return (Gtk.Window) get_toplevel(); }
     }
-
 
     public signal void vanished();
 

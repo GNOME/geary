@@ -86,9 +86,6 @@ public class ConversationViewer : Gtk.Stack {
     // Current conversation, or null if none.
     public Geary.App.Conversation? current_conversation = null;
     
-    // Overlay containing any inline composers.
-    public ScrollableOverlay compose_overlay;
-
     // Stack pages
     [GtkChild]
     private Gtk.Image splash_page;
@@ -135,13 +132,23 @@ public class ConversationViewer : Gtk.Stack {
     public ConversationViewer() {
         // Setup the conversation list box
         conversation_listbox.set_sort_func((row1, row2) => {
-                return Geary.Email.compare_sent_date_ascending(
-                    ((ConversationMessage) row1.get_child()).email,
-                    ((ConversationMessage) row2.get_child()).email
-                );
+                // If not a ConversationMessage, will be an
+                // embedded composer and should always be last.
+                ConversationMessage? msg1 = row1.get_child() as ConversationMessage;
+                if (msg1 == null) {
+                    return 1;
+                }
+                ConversationMessage? msg2 = row2.get_child() as ConversationMessage;
+                if (msg2 == null) {
+                    return -1;
+                }
+                return Geary.Email.compare_sent_date_ascending(msg1.email, msg2.email);
             });
         conversation_listbox.row_activated.connect((box, row) => {
-                if (email_to_row.size > 1) {
+                // If not a ConversationMessage, will be an
+                // embedded composer and should not be activated.
+                ConversationMessage? msg = row.get_child() as ConversationMessage;
+                if (email_to_row.size > 1 && msg != null) {
                     toggle_show_message(row);
                 }
             });
@@ -171,9 +178,6 @@ public class ConversationViewer : Gtk.Stack {
         GearyApplication.instance.controller.folder_selected.connect(on_folder_selected);
         GearyApplication.instance.controller.conversation_count_changed.connect(on_conversation_count_changed);
         
-        //compose_overlay = new ScrollableOverlay(web_view);
-        //conversation_viewer_scrolled.add(compose_overlay);
-
         //conversation_find_bar = new ConversationFindBar(web_view);
         //conversation_find_bar.no_show_all = true;
         //conversation_find_bar.close.connect(() => { fsm.issue(SearchEvent.CLOSE_FIND_BAR); });
@@ -187,9 +191,10 @@ public class ConversationViewer : Gtk.Stack {
     }
     
     public Geary.Email? get_selected_message(out string? quote) {
-        // XXX
-        quote = "";
-        return null;
+        // XXX check to see if there is a message with selected text,
+        // if so return that
+        quote = null;
+        return messages.is_empty ? null : messages.last();
     }
     
     public void check_mark_read() {
@@ -268,6 +273,30 @@ public class ConversationViewer : Gtk.Stack {
             });
         composer_page.pack_start(box);
         set_visible_child(composer_page);
+    }
+    
+    public void do_embedded_composer(ComposerWidget composer, Geary.Email referred) {
+        state = ViewState.CONVERSATION;
+        
+        ComposerEmbed embed = new ComposerEmbed(
+            referred, composer, conversation_page
+        );
+        embed.set_property("name", "composer_embed"); // Bug 764622
+
+        Gtk.ListBoxRow row = new Gtk.ListBoxRow();
+        row.get_style_context().add_class("composer");
+        row.get_style_context().add_class("frame");
+        row.show();
+        row.add(embed);
+        conversation_listbox.add(row);
+
+        embed.loaded.connect((box) => {
+                row.grab_focus();
+            });
+        embed.vanished.connect((box) => {
+                conversation_listbox.remove(row);
+            });
+
     }
     
     // Removes all displayed e-mails from the view.
