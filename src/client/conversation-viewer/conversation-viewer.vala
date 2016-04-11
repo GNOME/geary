@@ -183,6 +183,10 @@ public class ConversationViewer : Gtk.Stack {
         //conversation_find_bar.close.connect(() => { fsm.issue(SearchEvent.CLOSE_FIND_BAR); });
         //pack_start(conversation_find_bar, false);
 
+        // Ensure the conversation_listbox scrolls with the focused message
+        Gtk.Adjustment adjustment = conversation_page.vadjustment;
+        conversation_listbox.set_focus_vadjustment(adjustment);
+        
         do_conversation();
     }
     
@@ -429,8 +433,9 @@ public class ConversationViewer : Gtk.Stack {
         } else {
             compress_emails();
             // Ensure the last message is always shown
-            show_message(conversation_listbox.get_row_at_index(messages.size - 1),
-                         false);
+            Gtk.ListBoxRow last_row = conversation_listbox.get_row_at_index(messages.size - 1);
+            show_message(last_row, false);
+            last_row.grab_focus();
         }
     }
     
