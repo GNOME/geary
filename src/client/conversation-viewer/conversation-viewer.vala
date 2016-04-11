@@ -106,11 +106,11 @@ public class ConversationViewer : Gtk.Stack {
     [GtkChild]
     private Gtk.Label user_message_label;
 
-    // List of emails in this view.
+    // Sorted set of emails being displayed
     private Gee.TreeSet<Geary.Email> messages { get; private set; default = 
         new Gee.TreeSet<Geary.Email>(Geary.Email.compare_sent_date_ascending); }
     
-    // Maps emails to their corresponding ListBoxRow.
+    // Maps displayed emails to their corresponding ListBoxRow.
     private Gee.HashMap<Geary.EmailIdentifier, Gtk.ListBoxRow> email_to_row = new
         Gee.HashMap<Geary.EmailIdentifier, Gtk.ListBoxRow>();
     
@@ -584,11 +584,10 @@ public class ConversationViewer : Gtk.Stack {
     }
     
     private void add_message(Geary.Email email, bool is_in_folder) {
-        // Ensure the message container is showing and the multi-message counter hidden.
-        set_visible_child(conversation_page);
-        
-        if (messages.contains(email))
+        if (messages.contains(email)) {
             return;
+        }
+        messages.add(email);
 
         ConversationMessage message = new ConversationMessage(email, current_folder);
         message.link_selected.connect((link) => { link_selected(link); });
@@ -603,9 +602,9 @@ public class ConversationViewer : Gtk.Stack {
         row.get_style_context().add_class("frame");
         row.show();
         row.add(message);
+
         conversation_listbox.add(row);
 
-        messages.add(email);
         email_to_row.set(email.id, row);
 
         if (email.is_unread() == Geary.Trillian.TRUE) {
