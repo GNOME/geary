@@ -100,10 +100,6 @@ blockquote {
     -webkit-user-select: auto;
     -webkit-user-drag: auto;
   }
-  .shower, .hider {
-    -webkit-user-select: none;
-    -webkit-user-drag: none;
-  }
 
   .replaced_inline_image {
     display: block;
@@ -136,6 +132,8 @@ blockquote {
     margin-right: -0.67em;
   }
 
+  /* Inline collapsable quote blocks */
+
   .quote_container {
     position: relative;
     margin: 5px 0;
@@ -144,27 +142,25 @@ blockquote {
     background-color: #e8e8e8;/* recv-quoted */
     border-radius: 4px;
   }
+  .sent .quote_container {
+    background-color: #e8e8e8;/* sent-quoted */
+  }
   .quote_container .quote {
     overflow: hidden;
     position: relative;
     z-index: 0;
   }
-  .quote_container.controllable .quote {
+  .quote_container.controllable.hide .quote {
     max-height: 6em;
-  }
-  .quote_container.controllable.show .quote {
-    max-height: none;
-  }
-
-  .sent .quote_container {
-    background-color: #e8e8e8;/* sent-quoted */
   }
 
   .quote_container > .shower,
   .quote_container > .hider {
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
     position: absolute;
     z-index: 1;
-    bottom: -7px;
+    bottom: -8px;
     left: 0;
     right: 0;
     display: none;
@@ -185,20 +181,22 @@ blockquote {
 
   .quote_container.controllable {
     margin-bottom: 7px;
-    padding-bottom: 0;
-  }
-  .quote_container.controllable.show {
     padding-bottom: 12px;
   }
-  .quote_container.controllable > .shower {
-    display: block;
+  .quote_container.controllable.hide {
+    padding-bottom: 0;
   }
-  .quote_container.controllable.show > .shower {
+
+  .quote_container.controllable > .shower,
+  .quote_container.controllable.hide > .hider {
     display: none;
   }
-  .quote_container.controllable.show > .hider {
+  .quote_container.controllable.hide > .shower,
+  .quote_container.controllable > .hider {
     display: block;
   }
+
+  /* Highlight search terms */
 
   .search_coloring *::selection {
     background-color: #00ddff;

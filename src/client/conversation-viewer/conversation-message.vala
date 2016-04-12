@@ -418,8 +418,24 @@ public class ConversationMessage : Gtk.Box {
 
         web_view.notify["load-status"].connect((source, param) => {
                 if (web_view.load_status == WebKit.LoadStatus.FINISHED) {
+                    WebKit.DOM.HTMLElement html = (
+                        web_view.get_dom_document().document_element as
+                        WebKit.DOM.HTMLElement
+                    );
+                    if (html != null) {
+                        try {
+                            unset_controllable_quotes(html);
+                        } catch (Error error) {
+                            warning("Error unsetting controllable_quotes: %s",
+                                    error.message);
+                        }
+                    }
                     bind_event(web_view, "body a", "click",
                                (Callback) on_link_clicked, this);
+                    bind_event(web_view, ".quote_container > .shower", "click",
+                               (Callback) on_show_quote_clicked, this);
+                    bind_event(web_view, ".quote_container > .hider", "click",
+                               (Callback) on_hide_quote_clicked, this);
                 }
             });
         web_view.load_string(body_text, "text/html", "UTF8", "");
@@ -606,24 +622,6 @@ public class ConversationMessage : Gtk.Box {
     //     }
         
     //     return menu;
-    // }
-
-    // private static void on_hide_quote_clicked(WebKit.DOM.Element element) {
-    //     try {
-    //         WebKit.DOM.Element parent = element.get_parent_element();
-    //         parent.set_attribute("class", "quote_container controllable hide");
-    //     } catch (Error error) {
-    //         warning("Error hiding quote: %s", error.message);
-    //     }
-    // }
-
-    // private static void on_show_quote_clicked(WebKit.DOM.Element element) {
-    //     try {
-    //         WebKit.DOM.Element parent = element.get_parent_element();
-    //         parent.set_attribute("class", "quote_container controllable show");
-    //     } catch (Error error) {
-    //         warning("Error hiding quote: %s", error.message);
-    //     }
     // }
 
     // private void on_unstar_clicked() {
@@ -855,28 +853,6 @@ public class ConversationMessage : Gtk.Box {
     //     return menu;
     // }
 
-    private WebKit.DOM.HTMLDivElement create_quote_container() throws Error {
-        WebKit.DOM.HTMLDivElement quote_container = web_view.create_div();
-        quote_container.set_attribute("class", "quote_container controllable hide");
-        quote_container.set_inner_html(
-            """<div class="shower"><input type="button" value="▼        ▼        ▼" /></div>""" +
-            """<div class="hider"><input type="button" value="▲        ▲        ▲" /></div>""" +
-            """<div class="quote"></div>""");
-        return quote_container;
-    }
-
-    // private void unset_controllable_quotes(WebKit.DOM.HTMLElement element) throws GLib.Error {
-    //     WebKit.DOM.NodeList quote_list = element.query_selector_all(".quote_container.controllable");
-    //     for (int i = 0; i < quote_list.length; ++i) {
-    //         WebKit.DOM.Element quote_container = quote_list.item(i) as WebKit.DOM.Element;
-    //         long scroll_height = quote_container.query_selector(".quote").scroll_height;
-    //         // If the message is hidden, scroll_height will be 0.
-    //         if (scroll_height > 0 && scroll_height < QUOTE_SIZE_THRESHOLD) {
-    //             quote_container.set_attribute("class", "quote_container");
-    //         }
-    //     }
-    // }
-    
     private string clean_html_markup(string text, Geary.RFC822.Message message, out bool remote_images) {
         remote_images = false;
         try {
@@ -999,6 +975,18 @@ public class ConversationMessage : Gtk.Box {
         }
     }
     
+    private WebKit.DOM.HTMLDivElement create_quote_container() throws Error {
+        WebKit.DOM.HTMLDivElement quote_container = web_view.create_div();
+        quote_container.set_attribute(
+            "class", "quote_container controllable hide"
+        );
+        quote_container.set_inner_html("""
+<div class="shower"><input type="button" value="▼        ▼        ▼" /></div>
+<div class="hider"><input type="button" value="▲        ▲        ▲" /></div>
+<div class="quote"></div>""");
+        return quote_container;
+    }
+
     private void wrap_html_signature(ref WebKit.DOM.HTMLElement container) throws Error {
         // Most HTML signatures fall into one of these designs which are handled by this method:
         //
@@ -1036,6 +1024,19 @@ public class ConversationMessage : Gtk.Box {
             elem = sibling;
         } while (elem != null);
         parent.append_child(signature_container);
+    }
+    
+    private void unset_controllable_quotes(WebKit.DOM.HTMLElement element) throws GLib.Error {
+        WebKit.DOM.NodeList quote_list = element.query_selector_all(".quote_container.controllable");
+        for (int i = 0; i < quote_list.length; ++i) {
+            WebKit.DOM.Element quote_container = quote_list.item(i) as WebKit.DOM.Element;
+            long scroll_height = quote_container.query_selector(".quote").scroll_height;
+            // If the message is hidden, scroll_height will be 0.
+            if (scroll_height > 0 && scroll_height < QUOTE_SIZE_THRESHOLD) {
+                quote_container.class_list.remove("controllable");
+                quote_container.class_list.remove("hide");
+            }
+        }
     }
     
     // private bool should_show_attachment(Geary.Attachment attachment) {
@@ -1215,6 +1216,26 @@ public class ConversationMessage : Gtk.Box {
                 short_ += parts[3].substring(0, 20) + "…";
             else
                 short_ += parts[3];
+        }
+    }
+
+    private static void on_show_quote_clicked(WebKit.DOM.Element element,
+                                              WebKit.DOM.Event event) {
+        try {
+            ((WebKit.DOM.HTMLElement) element.parent_node).class_list.remove("hide");
+        } catch (Error error) {
+            warning("Error showing quote: %s", error.message);
+        }
+    }
+
+    private static void on_hide_quote_clicked(WebKit.DOM.Element element,
+                                              WebKit.DOM.Event event,
+                                              ConversationMessage message) {
+        try {
+            ((WebKit.DOM.HTMLElement) element.parent_node).class_list.add("hide");
+            message.web_view.queue_resize();
+        } catch (Error error) {
+            warning("Error toggling quote: %s", error.message);
         }
     }
 
