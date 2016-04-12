@@ -78,6 +78,19 @@ public class ConversationWebView : StylishWebView {
         if (load_status == WebKit.LoadStatus.FINISHED) {
             preferred_height = (int) get_dom_document().get_body().offset_height;
         }
+
+        // XXX Currently, for some messages the WebView will report
+        // very large offset heights, causing GDK and X allocation
+        // failures/warnings. If we get one, log it and limit it.  A
+        // value of ~22000 was crashing my xserver with a WebView
+        // width of around 745.
+        const int MAX = 10000;
+        if (preferred_height > MAX) {
+            warning("WebView height reported as %i/%li, clamping",
+                    preferred_height,
+                    get_dom_document().get_body().offset_height);
+            preferred_height = MAX;
+        }
         minimum_height = natural_height = preferred_height;
     }
 
