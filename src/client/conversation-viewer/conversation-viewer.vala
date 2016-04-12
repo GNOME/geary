@@ -1480,12 +1480,10 @@ public class ConversationViewer : Gtk.Box {
     
     private void show_images_email(WebKit.DOM.Element email_element, bool remember) {
         try {
-            WebKit.DOM.NodeList body_nodes = email_element.query_selector_all(".body");
-            for (ulong j = 0; j < body_nodes.length; j++) {
-                WebKit.DOM.Element? body = body_nodes.item(j) as WebKit.DOM.Element;
-                if (body == null)
-                    continue;
-                
+            WebKit.DOM.Element body = Util.DOM.select(email_element, ".body");
+            if (body == null) {
+                warning("Could not find message body");
+            } else {
                 WebKit.DOM.NodeList nodes = body.query_selector_all("img");
                 for (ulong i = 0; i < nodes.length; i++) {
                     WebKit.DOM.Element? element = nodes.item(i) as WebKit.DOM.Element;
@@ -1501,7 +1499,7 @@ public class ConversationViewer : Gtk.Box {
                 }
             }
             
-            WebKit.DOM.Element? remote_images = email_element.query_selector(".remote_images");
+            WebKit.DOM.Element? remote_images = Util.DOM.select(email_element, ".remote_images");
             if (remote_images != null)
                 remote_images.get_class_list().remove("show");
         } catch (Error error) {
