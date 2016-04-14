@@ -3,11 +3,13 @@
 <interface>
   <requires lib="gtk+" version="3.10"/>
   <template class="ConversationViewer" parent="GtkStack">
+    <property name="name">conversation_viewer</property>
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="transition_type">crossfade</property>
     <child>
       <object class="GtkImage" id="splash_page">
+        <property name="name">splash_page</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="pixel_size">256</property>
@@ -64,16 +66,12 @@
         <property name="orientation">vertical</property>
         <child>
           <object class="GtkLabel" id="user_message_label">
-            <property name="name">100</property>
+            <property name="name">user_message</property>
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <property name="xpad">18</property>
             <property name="ypad">18</property>
             <property name="label">🎔</property>
-            <style>
-              <class name="frame"/>
-              <class name="view"/>
-            </style>
           </object>
           <packing>
             <property name="expand">True</property>
