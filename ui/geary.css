@@ -62,10 +62,17 @@ row.geary-folder-popover-list-row > label {
 }
 #conversation_listbox > row {
   margin: 0;
-  border-width: 1px 1px 0;
+  border: 1px solid @borders;
+  border-bottom-width: 0;
   padding: 0;
+  background: @theme_bg_color;
   box-shadow: 0 4px 8px 1px rgba(0,0,0,0.4);
-  transition: margin 0.1s;
+  transition: margin 0.1s, background 0.15s;
+}
+#conversation_listbox > row:hover,
+#conversation_listbox > row.show-message,
+#conversation_listbox > row.show-message:hover {
+  background: @theme_base_color;
 }
 #conversation_listbox > row.show-message,
 #conversation_listbox > row.composer {

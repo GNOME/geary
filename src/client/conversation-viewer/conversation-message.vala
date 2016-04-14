@@ -58,47 +58,41 @@ public class ConversationMessage : Gtk.Box {
     private Gtk.Image avatar_image;
 
     [GtkChild]
-    private Gtk.Revealer from_revealer;
+    private Gtk.Revealer preview_revealer;
+    [GtkChild]
+    private Gtk.Label from_preview;
+    [GtkChild]
+    private Gtk.Label body_preview;
 
+    [GtkChild]
+    private Gtk.Revealer header_revealer;
     [GtkChild]
     private Gtk.Box from_header;
-
     [GtkChild]
     private Gtk.Box to_header;
-
     [GtkChild]
     private Gtk.Box cc_header;
-
     [GtkChild]
     private Gtk.Box bcc_header;
-
     [GtkChild]
     private Gtk.Box subject_header;
-
     [GtkChild]
     private Gtk.Box date_header;
 
     [GtkChild]
-    private Gtk.Label preview_label;
-
-    [GtkChild]
     private Gtk.Button flag_button;
-
     [GtkChild]
     private Gtk.MenuButton message_menubutton;
 
     [GtkChild]
     private Gtk.Revealer body_revealer;
-
     [GtkChild]
-    private Gtk.Box body_box;
+    public Gtk.Box body_box;
 
     [GtkChild]
     private Gtk.Popover link_popover;
-
     [GtkChild]
     private Gtk.Label good_link_label;
-
     [GtkChild]
     private Gtk.Label bad_link_label;
 
@@ -132,28 +126,33 @@ public class ConversationMessage : Gtk.Box {
             return;
         }
 
-        set_header_text(from_header, format_addresses(message.from));
+        // Preview headers
 
+        from_preview.set_text(format_addresses(message.from));
+
+        string preview_str = message.get_preview();
+        preview_str = Geary.String.reduce_whitespace(preview_str);
+        body_preview.set_text(preview_str);
+
+        // Full headers
+
+        set_header_text(from_header, format_addresses(message.from));
         if (message.to != null) {
             set_header_text(to_header, format_addresses(message.to));
             to_header.get_style_context().remove_class("empty");
         }
-        
         if (message.cc != null) {
             set_header_text(cc_header, format_addresses(message.cc));
             cc_header.get_style_context().remove_class("empty");
         }
-        
         if (message.bcc != null) {
             set_header_text(bcc_header, format_addresses(message.bcc));
             bcc_header.get_style_context().remove_class("empty");
         }
-        
         if (message.subject != null) {
             set_header_text(subject_header, message.subject.value);
             subject_header.get_style_context().remove_class("empty");
         }
-
         if (message.date != null) {
             Date.ClockFormat clock_format =
                 GearyApplication.instance.config.clock_format;
@@ -163,10 +162,6 @@ public class ConversationMessage : Gtk.Box {
             );
             date_header.get_style_context().remove_class("empty");
         }
-
-        string preview_str = message.get_preview();
-        preview_str = Geary.String.reduce_whitespace(preview_str);
-        preview_label.set_text(preview_str);
 
         message_menubutton.set_menu_model(build_message_menu(email));
         message_menubutton.set_sensitive(false);
@@ -245,30 +240,20 @@ public class ConversationMessage : Gtk.Box {
         get_style_context().add_class("show-message");
         avatar_image.set_pixel_size(32); // XXX constant
 
-        // XXX this is pretty gross
-        Gtk.RevealerTransitionType revealer = from_revealer.get_transition_type();
+        Gtk.RevealerTransitionType revealer = preview_revealer.get_transition_type();
         if (!include_transitions) {
-            from_revealer.set_transition_type(Gtk.RevealerTransitionType.NONE);
+            preview_revealer.set_transition_type(Gtk.RevealerTransitionType.NONE);
         }
-        from_revealer.set_reveal_child(true);
-        from_revealer.set_transition_type(revealer);
+        preview_revealer.set_reveal_child(false);
+        preview_revealer.set_transition_type(revealer);
 
-        if (!to_header.get_style_context().has_class("empty")) {
-            to_header.show();
+        revealer = header_revealer.get_transition_type();
+        if (!include_transitions) {
+            header_revealer.set_transition_type(Gtk.RevealerTransitionType.NONE);
         }
-        if (!cc_header.get_style_context().has_class("empty")) {
-            cc_header.show();
-        }
-        if (!bcc_header.get_style_context().has_class("empty")) {
-            bcc_header.show();
-        }
-        if (!subject_header.get_style_context().has_class("empty")) {
-            subject_header.show();
-        }
-        if (!date_header.get_style_context().has_class("empty")) {
-            date_header.show();
-        }
-        preview_label.hide();
+        header_revealer.set_reveal_child(true);
+        header_revealer.set_transition_type(revealer);
+
         flag_button.set_sensitive(true);
         message_menubutton.set_sensitive(true);
 
@@ -284,13 +269,8 @@ public class ConversationMessage : Gtk.Box {
     public void hide_message() {
         get_style_context().remove_class("show-message");
         avatar_image.set_pixel_size(24); // XXX constant
-        from_revealer.set_reveal_child(false);
-        to_header.hide();
-        cc_header.hide();
-        bcc_header.hide();
-        subject_header.hide();
-        date_header.hide();
-        preview_label.show();
+        preview_revealer.set_reveal_child(true);
+        header_revealer.set_reveal_child(false);
         flag_button.set_sensitive(false);
         message_menubutton.set_sensitive(false);
         body_revealer.set_reveal_child(false);

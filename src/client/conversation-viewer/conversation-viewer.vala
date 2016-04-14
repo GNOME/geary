@@ -287,7 +287,6 @@ public class ConversationViewer : Gtk.Stack {
 
         Gtk.ListBoxRow row = new Gtk.ListBoxRow();
         row.get_style_context().add_class("composer");
-        row.get_style_context().add_class("frame");
         row.show();
         row.add(embed);
         conversation_listbox.add(row);
@@ -604,7 +603,6 @@ public class ConversationViewer : Gtk.Stack {
             });
 
         Gtk.ListBoxRow row = new Gtk.ListBoxRow();
-        row.get_style_context().add_class("frame");
         row.show();
         row.add(message);
 
