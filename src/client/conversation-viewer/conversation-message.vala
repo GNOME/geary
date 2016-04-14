@@ -80,6 +80,8 @@ public class ConversationMessage : Gtk.Box {
     private Gtk.Box date_header;
 
     [GtkChild]
+    private Gtk.Image attachment_icon;
+    [GtkChild]
     private Gtk.Button flag_button;
     [GtkChild]
     private Gtk.MenuButton message_menubutton;
@@ -193,9 +195,9 @@ public class ConversationMessage : Gtk.Box {
         //  get_style_context().add_class("sent");
         // }
 
-        // // Set attachment icon and add the attachments container if there are displayed attachments.
-        // int displayed = displayed_attachments(email);
-        // set_attachment_icon(div_message, displayed > 0);
+        // Set attachment icon and add the attachments container if there are displayed attachments.
+        int displayed = displayed_attachments(email);
+        attachment_icon.set_visible(displayed > 0);
         // if (displayed > 0) {
         //     insert_attachments(div_message, email.attachments);
         // }
@@ -987,32 +989,32 @@ public class ConversationMessage : Gtk.Box {
         // messages in he current convo for this sender
     }
     
-    // private bool should_show_attachment(Geary.Attachment attachment) {
-    //     // if displayed inline, don't include in attachment list
-    //     if (attachment.content_id in inlined_content_ids)
-    //         return false;
-        
-    //     switch (attachment.content_disposition.disposition_type) {
-    //         case Geary.Mime.DispositionType.ATTACHMENT:
-    //             return true;
-            
-    //         case Geary.Mime.DispositionType.INLINE:
-    //             return !is_content_type_supported_inline(attachment.content_type);
-            
-    //         default:
-    //             assert_not_reached();
-    //     }
-    // }
+    private int displayed_attachments(Geary.Email email) {
+        int ret = 0;
+        foreach (Geary.Attachment attachment in email.attachments) {
+            if (should_show_attachment(attachment)) {
+                ret++;
+            }
+        }
+        return ret;
+    }
     
-    // private int displayed_attachments(Geary.Email email) {
-    //     int ret = 0;
-    //     foreach (Geary.Attachment attachment in email.attachments) {
-    //         if (should_show_attachment(attachment)) {
-    //             ret++;
-    //         }
-    //     }
-    //     return ret;
-    // }
+    private bool should_show_attachment(Geary.Attachment attachment) {
+        // if displayed inline, don't include in attachment list
+        if (attachment.content_id in inlined_content_ids)
+            return false;
+        
+        switch (attachment.content_disposition.disposition_type) {
+            case Geary.Mime.DispositionType.ATTACHMENT:
+                return true;
+            
+            case Geary.Mime.DispositionType.INLINE:
+                return !is_content_type_supported_inline(attachment.content_type);
+            
+            default:
+                assert_not_reached();
+        }
+    }
     
     // private void insert_attachments(WebKit.DOM.HTMLElement email_container,
     //     Gee.List<Geary.Attachment> attachments) {

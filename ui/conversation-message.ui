@@ -398,6 +398,19 @@
             <property name="spacing">1</property>
             <property name="homogeneous">True</property>
             <child>
+              <object class="GtkImage" id="attachment_icon">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="tooltip_text" translatable="yes">This message has attachments</property>
+                <property name="icon_name">mail-attachment-symbolic</property>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
               <object class="GtkButton" id="flag_button">
                 <property name="visible">True</property>
                 <property name="sensitive">False</property>
