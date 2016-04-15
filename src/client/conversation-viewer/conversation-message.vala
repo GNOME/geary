@@ -141,19 +141,15 @@ public class ConversationMessage : Gtk.Box {
         set_header_text(from_header, format_addresses(message.from));
         if (message.to != null) {
             set_header_text(to_header, format_addresses(message.to));
-            to_header.get_style_context().remove_class("empty");
         }
         if (message.cc != null) {
             set_header_text(cc_header, format_addresses(message.cc));
-            cc_header.get_style_context().remove_class("empty");
         }
         if (message.bcc != null) {
             set_header_text(bcc_header, format_addresses(message.bcc));
-            bcc_header.get_style_context().remove_class("empty");
         }
         if (message.subject != null) {
             set_header_text(subject_header, message.subject.value);
-            subject_header.get_style_context().remove_class("empty");
         }
         if (message.date != null) {
             Date.ClockFormat clock_format =
@@ -162,7 +158,6 @@ public class ConversationMessage : Gtk.Box {
                 date_header,
                 Date.pretty_print_verbose(message.date.value, clock_format)
             );
-            date_header.get_style_context().remove_class("empty");
         }
 
         message_menubutton.set_menu_model(build_message_menu(email));
@@ -295,6 +290,7 @@ public class ConversationMessage : Gtk.Box {
 
     private static void set_header_text(Gtk.Box header, string text) {
         ((Gtk.Label) header.get_children().nth(1).data).set_text(text);
+        header.set_visible(true);
     }
     
     private MenuModel build_message_menu(Geary.Email email) {

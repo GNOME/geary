@@ -145,7 +145,6 @@
                     </child>
                     <child>
                       <object class="GtkBox" id="to_header">
-                        <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <child>
                           <object class="GtkLabel" id="to_label">
@@ -191,7 +190,6 @@
                     </child>
                     <child>
                       <object class="GtkBox" id="cc_header">
-                        <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <child>
                           <object class="GtkLabel" id="cc_label">
@@ -237,7 +235,6 @@
                     </child>
                     <child>
                       <object class="GtkBox" id="bcc_header">
-                        <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <child>
                           <object class="GtkLabel" id="bcc_label">
@@ -283,7 +280,6 @@
                     </child>
                     <child>
                       <object class="GtkBox" id="subject_header">
-                        <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <child>
                           <object class="GtkLabel" id="subject_label">
@@ -329,7 +325,6 @@
                     </child>
                     <child>
                       <object class="GtkBox" id="date_header">
-                        <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <child>
                           <object class="GtkLabel" id="date_label">
