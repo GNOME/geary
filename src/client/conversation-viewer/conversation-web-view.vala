@@ -74,6 +74,10 @@ public class ConversationWebView : StylishWebView {
     // only once loaded.
     public override void get_preferred_height(out int minimum_height,
                                               out int natural_height) {
+        // Silence the "How does the code know the size to allocate?"
+        // warning in GTK 3.20-ish.
+        base.get_preferred_height(out minimum_height, out natural_height);
+
         int preferred_height = 0;
         if (load_status == WebKit.LoadStatus.FINISHED) {
             preferred_height = (int) get_dom_document().get_body().offset_height;
