@@ -65,7 +65,7 @@ row.geary-folder-popover-list-row > label {
   border: 1px solid @borders;
   border-bottom-width: 0;
   padding: 0;
-  background: @theme_bg_color;
+  background: shade(@theme_base_color, 0.96);
   box-shadow: 0 4px 8px 1px rgba(0,0,0,0.4);
   transition: margin 0.1s, background 0.15s;
 }

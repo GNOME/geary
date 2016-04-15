@@ -90,7 +90,7 @@ public class MainWindow : Gtk.ApplicationWindow {
         GearyApplication.instance.controller.folder_selected.connect(on_folder_selected);
         Geary.Engine.instance.account_available.connect(on_account_available);
         Geary.Engine.instance.account_unavailable.connect(on_account_unavailable);
-        
+
         // Toolbar.
         main_toolbar = new MainToolbar();
         main_toolbar.bind_property("search-open", search_bar, "search-mode-enabled",
