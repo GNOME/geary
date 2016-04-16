@@ -2098,7 +2098,7 @@ msgstr "_Zobrazit náhled konverzace"
 
 #: ../ui/preferences.glade.h:4
 msgid "Use _three pane view"
-msgstr "Používat panel se s_tromovým zobrazením"
+msgstr "Používat _třípanelové zobrazení"
 
 #: ../ui/preferences.glade.h:6
 msgid "Enable _spell checking"
