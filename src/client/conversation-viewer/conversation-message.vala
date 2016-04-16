@@ -82,7 +82,9 @@ public class ConversationMessage : Gtk.Box {
     [GtkChild]
     private Gtk.Image attachment_icon;
     [GtkChild]
-    private Gtk.Button flag_button;
+    private Gtk.Button star_button;
+    [GtkChild]
+    private Gtk.Button unstar_button;
     [GtkChild]
     private Gtk.MenuButton message_menubutton;
 
@@ -251,7 +253,8 @@ public class ConversationMessage : Gtk.Box {
         header_revealer.set_reveal_child(true);
         header_revealer.set_transition_type(revealer);
 
-        flag_button.set_sensitive(true);
+        star_button.set_sensitive(true);
+        unstar_button.set_sensitive(true);
         message_menubutton.set_sensitive(true);
 
         // XXX this is pretty gross
@@ -268,7 +271,8 @@ public class ConversationMessage : Gtk.Box {
         avatar_image.set_pixel_size(24); // XXX constant
         preview_revealer.set_reveal_child(true);
         header_revealer.set_reveal_child(false);
-        flag_button.set_sensitive(false);
+        star_button.set_sensitive(false);
+        unstar_button.set_sensitive(false);
         message_menubutton.set_sensitive(false);
         body_revealer.set_reveal_child(false);
     }
@@ -369,8 +373,24 @@ public class ConversationMessage : Gtk.Box {
     }
 
     public void update_flags(Geary.Email email) {
-        toggle_class("read");
-        toggle_class("starred");
+        Geary.EmailFlags flags = email.email_flags;
+        Gtk.StyleContext style = get_style_context();
+        
+        if (flags.is_unread()) {
+            style.add_class("geary_unread");
+        } else {
+            style.remove_class("geary_unread");
+        }
+        
+        if (flags.is_flagged()) {
+            style.add_class("geary_starred");
+            star_button.hide();
+            unstar_button.show();
+        } else {
+            style.remove_class("geary_starred");
+            star_button.show();
+            unstar_button.hide();
+        }
         
         //if (email.email_flags.is_outbox_sent()) {
         //  email_warning.set_inner_html(
@@ -1072,16 +1092,6 @@ public class ConversationMessage : Gtk.Box {
     // private bool in_drafts_folder() {
     //     return containing_folder.special_folder_type == Geary.SpecialFolderType.DRAFTS;
     // }
-
-    private void toggle_class(string cls) {
-        Gtk.StyleContext context = get_style_context();
-        if (context.has_class(cls)) {
-            context.add_class(cls);
-        } else {
-            context.remove_class(cls);
-        }
-        
-    }
 
     private static bool is_content_type_supported_inline(Geary.Mime.ContentType content_type) {
         foreach (string mime_type in INLINE_MIME_TYPES) {
