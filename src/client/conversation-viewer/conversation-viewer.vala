@@ -151,6 +151,11 @@ public class ConversationViewer : Gtk.Stack {
                     toggle_show_message(row);
                 }
             });
+        conversation_listbox.realize.connect(() => {
+                conversation_page.get_vadjustment()
+                    .value_changed.connect(check_mark_read);
+            });
+        conversation_listbox.size_allocate.connect(check_mark_read);
 
         // Setup state machine for search/find states.
         Geary.State.Mapping[] mappings = {
@@ -201,26 +206,43 @@ public class ConversationViewer : Gtk.Stack {
     }
     
     public void check_mark_read() {
-        Gee.ArrayList<Geary.EmailIdentifier> emails = new Gee.ArrayList<Geary.EmailIdentifier>();
-        // foreach (Geary.Email message in messages) {
-        //  try {
-        //      if (message.email_flags.is_unread()) {
-        //          ConversationMessage row = conversation_message_for_id(message.id);
-        //          if (!row.is_manual_read() &&
-        //              body.offset_top + body.offset_height > scroll_top &&
-        //              body.offset_top + 28 < scroll_top + scroll_height) {  // 28 = 15 padding + 13 first line of text
-        //              emails.add(message.id);
-                        
-        //              // since it can take some time for the new flags
-        //              // to round-trip back to ConversationViewer's
-        //              // signal handlers, mark as manually read here
-        //              mark_manual_read(message.id);
-        //          }
-        //      }
-        //  } catch (Error error) {
-        //      debug("Problem checking email class: %s", error.message);
-        //  }
-        // }
+        Gee.ArrayList<Geary.EmailIdentifier> emails =
+            new Gee.ArrayList<Geary.EmailIdentifier>();
+
+        Gtk.Adjustment adj = conversation_page.vadjustment;
+        int top_bound = (int) adj.value;
+        int bottom_bound = top_bound + (int) adj.page_size;
+
+        const int TEXT_PADDING = 50;
+        foreach (Geary.Email message in messages) {
+            ConversationMessage row = conversation_message_for_id(message.id);
+            // Don't bother with not-yet-loaded messages since the
+            // size of the body will be off, affecting the visibility
+            // of messages further down the conversation.
+            if (message.email_flags.is_unread() &&
+                row.is_loading_complete &&
+                !row.is_manual_read()) {
+                 int body_top = 0;
+                 int body_left = 0;
+                 row.web_view.translate_coordinates(
+                     conversation_listbox,
+                     0, 0,
+                     out body_left, out body_top
+                 );
+                 int body_bottom = body_top + row.web_view_allocation.height;
+
+                 // Only mark the message as read if it's actually visible
+                 if (body_bottom > top_bound &&
+                     body_top + TEXT_PADDING < bottom_bound) {
+                     emails.add(message.id);
+
+                     // Since it can take some time for the new flags
+                     // to round-trip back to ConversationViewer's
+                     // signal handlers, mark as manually read here
+                     row.mark_manual_read();
+                 }
+             }
+        }
 
         if (emails.size > 0) {
             Geary.EmailFlags flags = new Geary.EmailFlags();
