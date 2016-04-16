@@ -58,26 +58,31 @@ row.geary-folder-popover-list-row > label {
 }
 
 #conversation_listbox {
-  padding: 18px 18px calc(18px/2);
+  padding: 18px;
 }
 #conversation_listbox > row {
   margin: 0;
   border: 1px solid @borders;
   border-bottom-width: 0;
   padding: 0;
-  background: shade(@theme_base_color, 0.96);
   box-shadow: 0 4px 8px 1px rgba(0,0,0,0.4);
   transition: margin 0.1s, background 0.15s;
 }
+#conversation_listbox > row > box {
+  background: shade(@theme_base_color, 0.96);
+}
 #conversation_listbox > row:hover,
-#conversation_listbox > row.show-message,
-#conversation_listbox > row.show-message:hover {
+#conversation_listbox > row > box.geary_show_body,
+#conversation_listbox > row:hover > box.geary_show_body {
   background: @theme_base_color;
 }
-#conversation_listbox > row.show-message,
-#conversation_listbox > row.composer {
-  margin-bottom: calc(18px/2);
+#conversation_listbox > row.geary_expand,
+#conversation_listbox > row.geary_composer {
+  margin-bottom: 18px;
   border-bottom-width: 1px;
+}
+#conversation_listbox > row.geary_last {
+  margin-bottom: 0;
 }
 
 #ConversationMessage {

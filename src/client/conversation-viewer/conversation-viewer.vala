@@ -101,6 +101,7 @@ public class ConversationViewer : Gtk.Stack {
     // Conversation messages list
     [GtkChild]
     private Gtk.ListBox conversation_listbox;
+    private Gtk.Widget? last_list_row;
 
     // Label for displaying messages in the main pane.
     [GtkChild]
@@ -148,7 +149,11 @@ public class ConversationViewer : Gtk.Stack {
                 // embedded composer and should not be activated.
                 ConversationMessage? msg = row.get_child() as ConversationMessage;
                 if (email_to_row.size > 1 && msg != null) {
-                    toggle_show_message(row);
+                    if (msg.is_message_body_visible) {
+                        hide_message(row);
+                    } else {
+                        show_message(row);
+                    }
                 }
             });
         conversation_listbox.realize.connect(() => {
@@ -156,6 +161,24 @@ public class ConversationViewer : Gtk.Stack {
                     .value_changed.connect(check_mark_read);
             });
         conversation_listbox.size_allocate.connect(check_mark_read);
+        conversation_listbox.add.connect((widget) => {
+                // Due to Bug 764710, we can only use the CSS
+                // :last-child selector for GTK themes after 3.20.3,
+                // so for now manually maintain a class on the last
+                // box in the convo listbox so we can emulate it.
+
+                Gtk.Widget current_last_row =
+                    conversation_listbox.get_children().last().data;;
+                if (last_list_row != current_last_row) {
+                    if (last_list_row != null) {
+                        last_list_row.get_style_context().remove_class("geary_last");
+                    }
+
+                    last_list_row = current_last_row;
+                    last_list_row.get_style_context().add_class("geary_last");
+                }
+            });
+
 
         // Setup state machine for search/find states.
         Geary.State.Mapping[] mappings = {
@@ -308,7 +331,7 @@ public class ConversationViewer : Gtk.Stack {
         embed.set_property("name", "composer_embed"); // Bug 764622
 
         Gtk.ListBoxRow row = new Gtk.ListBoxRow();
-        row.get_style_context().add_class("composer");
+        row.get_style_context().add_class("geary_composer");
         row.show();
         row.add(embed);
         conversation_listbox.add(row);
@@ -377,7 +400,7 @@ public class ConversationViewer : Gtk.Stack {
         if (current_conversation != null) {
             current_conversation.appended.disconnect(on_conversation_appended);
             current_conversation.trimmed.disconnect(on_conversation_trimmed);
-            current_conversation.email_flags_changed.disconnect(update_flags);
+            current_conversation.email_flags_changed.disconnect(on_update_flags);
             current_conversation = null;
         }
 
@@ -430,7 +453,7 @@ public class ConversationViewer : Gtk.Stack {
             
             current_conversation.appended.connect(on_conversation_appended);
             current_conversation.trimmed.connect(on_conversation_trimmed);
-            current_conversation.email_flags_changed.connect(update_flags);
+            current_conversation.email_flags_changed.connect(on_update_flags);
             
             GearyApplication.instance.controller.enable_message_buttons(true);
         }
@@ -617,7 +640,7 @@ public class ConversationViewer : Gtk.Stack {
 
         ConversationMessage message = new ConversationMessage(email, current_folder);
         message.link_selected.connect((link) => { link_selected(link); });
-        message.web_view.button_release_event.connect_after((event) => {
+        message.body_box.button_release_event.connect_after((event) => {
                 // Consume all non-consumed clicks so the row is not
                 // inadvertently activated after clicking on the
                 // message body.
@@ -627,10 +650,9 @@ public class ConversationViewer : Gtk.Stack {
         Gtk.ListBoxRow row = new Gtk.ListBoxRow();
         row.show();
         row.add(message);
+        email_to_row.set(email.id, row);
 
         conversation_listbox.add(row);
-
-        email_to_row.set(email.id, row);
 
         if (email.is_unread() == Geary.Trillian.TRUE) {
             show_message(row, false);
@@ -648,51 +670,22 @@ public class ConversationViewer : Gtk.Stack {
     }
 
     private void show_message(Gtk.ListBoxRow row, bool include_transitions=true) {
-        row.get_style_context().add_class("show-message");
-        ((ConversationMessage) row.get_child()).show_message(include_transitions);
+        row.get_style_context().add_class("geary_expand");
+        ((ConversationMessage) row.get_child()).show_message_body(include_transitions);
     }
 
     private void hide_message(Gtk.ListBoxRow row) {
-        row.get_style_context().remove_class("show-message");
-        ((ConversationMessage) row.get_child()).hide_message();
-    }
-
-    private void toggle_show_message(Gtk.ListBoxRow row) {
-        if (row.get_style_context().has_class("show-message")) {
-            hide_message(row);
-        } else {
-            show_message(row);
-        }
+        row.get_style_context().remove_class("geary_expand");
+        ((ConversationMessage) row.get_child()).hide_message_body();
     }
 
     private void compress_emails() {
-        conversation_listbox.get_style_context().add_class("compressed");
+        conversation_listbox.get_style_context().add_class("geary_compressed");
     }
     
     //private void decompress_emails() {
-    //  conversation_listbox.get_style_context().remove_class("compressed");
+    //  conversation_listbox.get_style_context().remove_class("geary_compressed");
     //}
-    
-    private void update_flags(Geary.Email email) {
-        // Nothing to do if we aren't displaying this email.
-        if (!email_to_row.has_key(email.id)) {
-            return;
-        }
-
-        Geary.EmailFlags flags = email.email_flags;
-        
-        // Update the flags in our message set.
-        foreach (Geary.Email message in messages) {
-            if (message.id.equal_to(email.id)) {
-                message.set_flags(flags);
-                break;
-            }
-        }
-
-        // Get the convo message and update its state.
-        Gtk.ListBoxRow row = email_to_row.get(email.id);
-        ((ConversationMessage) row.get_child()).update_flags(email);
-    }
     
     public void show_find_bar() {
         fsm.issue(SearchEvent.OPEN_FIND_BAR);
@@ -706,6 +699,17 @@ public class ConversationViewer : Gtk.Stack {
         conversation_find_bar.find(forward);
     }
     
+    private void on_update_flags(Geary.Email email) {
+        // Nothing to do if we aren't displaying this email.
+        if (!email_to_row.has_key(email.id)) {
+            return;
+        }
+
+        // Get the convo message and update its state.
+        Gtk.ListBoxRow row = email_to_row.get(email.id);
+        ((ConversationMessage) row.get_child()).update_flags(email);
+    }
+
     // State reset.
     private uint on_reset(uint state, uint event, void *user, Object? object) {
         //web_view.set_highlight_text_matches(false);

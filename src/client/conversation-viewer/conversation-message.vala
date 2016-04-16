@@ -57,6 +57,9 @@ public class ConversationMessage : Gtk.Box {
     // The allocation for the web view
     public Gdk.Rectangle web_view_allocation { get; private set; }
 
+    // Is the message body shown or not?
+    public bool is_message_body_visible = false;
+
     // Has the message body been been fully loaded?
     public bool is_loading_complete = false;
 
@@ -235,15 +238,12 @@ public class ConversationMessage : Gtk.Box {
         //     }
         // }
 
-        update_flags(email);
+        update_message_state(false);
     }
 
-    public bool is_message_visible() {
-        return get_style_context().has_class("show-message");
-    }
-
-    public void show_message(bool include_transitions=true) {
-        get_style_context().add_class("show-message");
+    public void show_message_body(bool include_transitions=true) {
+        is_message_body_visible = true;
+        get_style_context().add_class("geary_show_body");
         avatar_image.set_pixel_size(32); // XXX constant
 
         Gtk.RevealerTransitionType revealer = preview_revealer.get_transition_type();
@@ -264,7 +264,6 @@ public class ConversationMessage : Gtk.Box {
         unstar_button.set_sensitive(true);
         message_menubutton.set_sensitive(true);
 
-        // XXX this is pretty gross
         revealer = body_revealer.get_transition_type();
         if (!include_transitions) {
             body_revealer.set_transition_type(Gtk.RevealerTransitionType.NONE);
@@ -273,8 +272,9 @@ public class ConversationMessage : Gtk.Box {
         body_revealer.set_transition_type(revealer);
     }
 
-    public void hide_message() {
-        get_style_context().remove_class("show-message");
+    public void hide_message_body() {
+        is_message_body_visible = false;
+        get_style_context().remove_class("geary_show_body");
         avatar_image.set_pixel_size(24); // XXX constant
         preview_revealer.set_reveal_child(true);
         header_revealer.set_reveal_child(false);
@@ -379,11 +379,20 @@ public class ConversationMessage : Gtk.Box {
         return menu;
     }
 
+    public void update_flags(Geary.Email email) {
+        this.email.set_flags(email.email_flags);
+        update_message_state();
+    }
+
     public bool is_manual_read() {
         return get_style_context().has_class("geary_manual_read");
     }
 
-    public void update_flags(Geary.Email email) {
+    public void mark_manual_read() {
+        get_style_context().add_class("geary_manual_read");
+    }
+
+    private void update_message_state(bool include_transitions=true) {
         Geary.EmailFlags flags = email.email_flags;
         Gtk.StyleContext style = get_style_context();
         
@@ -407,10 +416,6 @@ public class ConversationMessage : Gtk.Box {
         //  email_warning.set_inner_html(
         //      _("This message was sent successfully, but could not be saved to %s.").printf(
         //            Geary.SpecialFolderType.SENT.get_display_name()));
-    }
-
-    public void mark_manual_read() {
-        get_style_context().add_class("manual_read");
     }
 
     private void load_message_body() {
