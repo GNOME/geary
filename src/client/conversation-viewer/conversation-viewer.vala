@@ -641,8 +641,11 @@ public class ConversationViewer : Gtk.Stack {
             is_in_folder
         );
 
-        ConversationMessage message =
-            new ConversationMessage(email, current_folder, is_draft);
+        ConversationMessage message = new ConversationMessage(
+            email,
+            current_folder.account.get_contact_store(),
+            is_draft
+        );
         message.body_box.button_release_event.connect_after((event) => {
                 // Consume all non-consumed clicks so the row is not
                 // inadvertently activated after clicking on the

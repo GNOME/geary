@@ -118,11 +118,11 @@ public class ConversationMessage : Gtk.Box {
     [GtkChild]
     private Gtk.InfoBar remote_images_infobar;
 
-    // The folder containing the message
-    private Geary.Folder containing_folder = null; // XXX weak??
-
     [GtkChild]
     private Gtk.InfoBar draft_infobar;
+
+    // The contacts for the message's account
+    private Geary.ContactStore contact_store;
 
     // Contains the current mouse-over'ed link URL, if any
     private string? hover_url = null;
@@ -144,10 +144,10 @@ public class ConversationMessage : Gtk.Box {
 
 
     public ConversationMessage(Geary.Email email,
-                               Geary.Folder containing_folder,
+                               Geary.ContactStore contact_store,
                                bool is_draft) {
         this.email = email;
-        this.containing_folder = containing_folder;
+        this.contact_store = contact_store;
 
         try {
             message = email.get_message();
@@ -439,9 +439,7 @@ public class ConversationMessage : Gtk.Box {
         body_text = clean_html_markup(body_text ?? "", message, out remote_images);
         if (remote_images) {
             Geary.Contact contact =
-                containing_folder.account.get_contact_store().get_by_rfc822(
-                    email.get_primary_originator()
-                );
+                contact_store.get_by_rfc822(email.get_primary_originator());
             bool always_load = contact != null && contact.always_load_remote_images();
             if (always_load || email.load_remote_images().is_certain()) {
                 load_images = true;
@@ -1014,10 +1012,8 @@ public class ConversationMessage : Gtk.Box {
             }
         }
     }
-    
+
     private void always_show_images() {
-        Geary.ContactStore contact_store =
-        containing_folder.account.get_contact_store();
         Geary.Contact? contact = contact_store.get_by_rfc822(
             email.get_primary_originator()
         );
