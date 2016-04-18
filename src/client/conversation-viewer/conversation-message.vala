@@ -176,26 +176,19 @@ public class ConversationMessage : Gtk.Box {
 
         web_view = new ConversationWebView();
         web_view.show();
-        body_box.pack_end(web_view, true, true, 0);
-
-        load_message_body();
-        
-        //Gtk.ScrolledWindow web_scroller = new Gtk.ScrolledWindow(null, null);
-        //web_scroller.show();
-        //web_scroller.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.NEVER);
-        //web_scroller.add(web_view);
-        //body_box.pack_end(web_scroller, true, true, 0);
-
         // web_view.context_menu.connect(() => { return true; }); // Suppress default context menu.
         // web_view.realize.connect( () => { web_view.get_vadjustment().value_changed.connect(mark_read); });
         // web_view.size_allocate.connect(mark_read);
         web_view.size_allocate.connect((widget, allocation) => {
                 web_view_allocation = allocation;
             });
-
-        body_box.set_has_tooltip(true);
         web_view.hovering_over_link.connect(on_hovering_over_link);
         web_view.link_selected.connect((link) => { link_activated(link); });
+
+        body_box.set_has_tooltip(true); // Used to show link URLs
+        body_box.pack_start(web_view, true, true, 0);
+
+        load_message_body();
 
         // if (email.from != null && email.from.contains_normalized(current_account_information.email)) {
         //  // XXX set a RO property?
@@ -303,14 +296,14 @@ public class ConversationMessage : Gtk.Box {
         ((Gtk.Label) header.get_children().nth(1).data).set_text(text);
         header.set_visible(true);
     }
-    
+
     private MenuModel build_message_menu(Geary.Email email) {
         Gtk.Builder builder = new Gtk.Builder.from_resource(
             "/org/gnome/Geary/conversation-message-menu.ui"
         );
 
         MenuModel menu = (MenuModel) builder.get_object("conversation_message_menu");
-        
+
         // menu.selection_done.connect(on_message_menu_selection_done);
         
         // int displayed = displayed_attachments(email);
