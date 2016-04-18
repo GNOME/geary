@@ -656,6 +656,7 @@ public class ConversationViewer : Gtk.Stack {
             show_message(row, false);
         }
 
+        message.start_loading.begin(cancellable_fetch);
         message_added(message);
         
         // Update the search results

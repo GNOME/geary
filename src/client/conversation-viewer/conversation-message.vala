@@ -38,7 +38,8 @@ public class ConversationMessage : Gtk.Box {
         "image/x-xbitmap",
         "image/x-xbm"
     };
-    private const int ATTACHMENT_PREVIEW_SIZE = 50;
+    private const int ATTACHMENT_ICON_SIZE = 32;
+    private const int ATTACHMENT_PREVIEW_SIZE = 64;
     private const string REPLACED_IMAGE_CLASS = "replaced_inline_image";
     private const string DATA_IMAGE_CLASS = "data_inline_image";
     private const int MAX_INLINE_IMAGE_MAJOR_DIM = 1024;
@@ -103,6 +104,11 @@ public class ConversationMessage : Gtk.Box {
     public Gtk.Box body_box;
 
     [GtkChild]
+    private Gtk.Box attachments_box;
+    [GtkChild]
+    private Gtk.ListStore attachments_model;
+
+    [GtkChild]
     private Gtk.Popover link_popover;
     [GtkChild]
     private Gtk.Label good_link_label;
@@ -126,6 +132,9 @@ public class ConversationMessage : Gtk.Box {
 
     // Fired on link activation in the web_view
     public signal void link_activated(string link);
+
+    // Fired on attachment activation
+    public signal void attachment_activated(Geary.Attachment attachment);
 
 
     public ConversationMessage(Geary.Email email, Geary.Folder containing_folder) {
@@ -195,13 +204,13 @@ public class ConversationMessage : Gtk.Box {
         //  get_style_context().add_class("sent");
         // }
 
-        // Set attachment icon and add the attachments container if there are displayed attachments.
+        // Add the attachments container if there are displayed attachments.
         int displayed = displayed_attachments(email);
-        attachment_icon.set_visible(displayed > 0);
-        // if (displayed > 0) {
-        //     insert_attachments(div_message, email.attachments);
-        // }
-        
+        if (displayed > 0) {
+            attachment_icon.set_visible(true);
+            body_box.pack_start(attachments_box, false, false, 0);
+        }
+
         // // Look for any attached emails
         // Gee.List<Geary.RFC822.Message> sub_messages = message.get_sub_messages();
         // foreach (Geary.RFC822.Message sub_message in sub_messages) {
@@ -232,6 +241,10 @@ public class ConversationMessage : Gtk.Box {
         // }
 
         update_message_state(false);
+    }
+
+    public async void start_loading(Cancellable load_cancelled) {
+        yield load_attachments(email.attachments, load_cancelled);
     }
 
     public void show_message_body(bool include_transitions=true) {
@@ -646,18 +659,25 @@ public class ConversationMessage : Gtk.Box {
     //     get_viewer().mark_read();
     // }
 
-    // private void on_attachment_clicked(string attachment_id) {
-    //     Geary.Attachment? attachment = null;
-    //     try {
-    //         attachment = email.get_attachment(attachment_id);
-    //     } catch (Error error) {
-    //         warning("Error opening attachment: %s", error.message);
-    //     }
-        
-    //     if (attachment != null) {
-    //         get_viewer().open_attachment(attachment);
-    //  }
-    // }
+    [GtkCallback]
+    private void on_attachments_view_activated(Gtk.IconView view, Gtk.TreePath path) {
+        Gtk.TreeIter iter;
+        Value attachment_id;
+
+        attachments_model.get_iter(out iter, path);
+        attachments_model.get_value(iter, 2, out attachment_id);
+
+        Geary.Attachment? attachment = null;
+        try {
+            attachment = email.get_attachment(attachment_id.get_string());
+        } catch (Error error) {
+            warning("Error getting attachment: %s", error.message);
+        }
+
+        if (attachment != null) {
+            attachment_activated(attachment);
+        }
+    }
 
     // private void on_data_image_menu(WebKit.DOM.Element element, WebKit.DOM.Event event) {
     //     event.stop_propagation();
@@ -1045,64 +1065,46 @@ public class ConversationMessage : Gtk.Box {
                 assert_not_reached();
         }
     }
-    
-    // private void insert_attachments(WebKit.DOM.HTMLElement email_container,
-    //     Gee.List<Geary.Attachment> attachments) {
 
-    //     // <div class="attachment_container">
-    //     //     <div class="top_border"></div>
-    //     //     <table class="attachment" data-attachment-id="">
-    //     //         <tr>
-    //     //             <td class="preview">
-    //     //                 <img src="" />
-    //     //             </td>
-    //     //             <td class="info">
-    //     //                 <div class="filename"></div>
-    //     //                 <div class="filesize"></div>
-    //     //             </td>
-    //     //         </tr>
-    //     //     </table>
-    //     // </div>
+    private async void load_attachments(Gee.List<Geary.Attachment> attachments,
+                                        Cancellable load_cancelled) {
+        foreach (Geary.Attachment attachment in attachments) {
+            if (should_show_attachment(attachment)) {
+                Gdk.Pixbuf? icon =
+                    yield load_attachment_icon(attachment, load_cancelled);
+                string file_name = null;
+                if (attachment.has_supplied_filename) {
+                    file_name = attachment.file.get_basename();
+                }
+                // XXX Geary.ImapDb.Attachment will use "none" when
+                // saving attachments with no filename to disk, this
+                // seems to be getting saved to be the filename and
+                // passed back, breaking the has_supplied_filename
+                // test - so check for it here.
+                if (file_name == null ||
+                    file_name == "" ||
+                    file_name == "none") {
+                    // XXX Check for unknown types here and try to guess
+                    // using attachment data.
+                    file_name = ContentType.get_description(
+                        attachment.content_type.get_mime_type()
+                    );
+                }
+                string file_size = Files.get_filesize_as_string(attachment.filesize);
 
-    //     try {
-    //         // Prepare the dom for our attachments.
-    //         WebKit.DOM.Document document = web_view.get_dom_document();
-    //         WebKit.DOM.HTMLElement attachment_container =
-    //             Util.DOM.clone_select(document, "#attachment_template");
-    //         WebKit.DOM.HTMLElement attachment_template =
-    //             Util.DOM.select(attachment_container, ".attachment");
-    //         attachment_container.remove_attribute("id");
-    //         attachment_container.remove_child(attachment_template);
+                Gtk.TreeIter iter;
+                attachments_model.append(out iter);
+                attachments_model.set(
+                    iter,
+                    0, icon,
+                    1, Markup.printf_escaped("%s\n%s", file_name, file_size),
+                    2, attachment.id,
+                    -1
+                );
+            }
+        }
+    }
 
-    //         // Create an attachment table for each attachment.
-    //         foreach (Geary.Attachment attachment in attachments) {
-    //             if (!should_show_attachment(attachment)) {
-    //                 continue;
-    //             }
-    //             // Generate the attachment table.
-    //             WebKit.DOM.HTMLElement attachment_table = Util.DOM.clone_node(attachment_template);
-    //             string filename = !attachment.has_supplied_filename ? _("none") : attachment.file.get_basename();
-    //             Util.DOM.select(attachment_table, ".info .filename")
-    //                 .set_inner_text(filename);
-    //             Util.DOM.select(attachment_table, ".info .filesize")
-    //                 .set_inner_text(Files.get_filesize_as_string(attachment.filesize));
-    //             attachment_table.set_attribute("data-attachment-id", attachment.id);
-
-    //             // Set the image preview and insert it into the container.
-    //             WebKit.DOM.HTMLImageElement img =
-    //                 Util.DOM.select(attachment_table, ".preview img") as WebKit.DOM.HTMLImageElement;
-    //             web_view.set_attachment_src(img, attachment.content_type, attachment.file.get_path(),
-    //                 ATTACHMENT_PREVIEW_SIZE);
-    //             attachment_container.append_child(attachment_table);
-    //         }
-
-    //         // Append the attachments to the email.
-    //         email_container.append_child(attachment_container);
-    //     } catch (Error error) {
-    //         debug("Failed to insert attachments: %s", error.message);
-    //     }
-    // }
-    
     // private bool in_drafts_folder() {
     //     return containing_folder.special_folder_type == Geary.SpecialFolderType.DRAFTS;
     // }
@@ -1119,7 +1121,89 @@ public class ConversationMessage : Gtk.Box {
         
         return false;
     }
-    
+
+    private async Gdk.Pixbuf? load_attachment_icon(Geary.Attachment attachment,
+                                                   Cancellable load_cancelled) {
+        Geary.Mime.ContentType content_type = attachment.content_type;
+        Gdk.Pixbuf? pixbuf = null;
+
+        // Due to Bug 65167, for retina/highdpi displays with
+        // window_scale == 2, GtkCellRendererPixbuf will draw the
+        // pixbuf twice as large and blurry, so clamp it to 1 for now
+        // - this at least gives is the correct size icons, but still
+        // blurry.
+        //int window_scale = get_window().get_scale_factor();
+        int window_scale = 1;
+        try {
+            // If the file is an image, use it. Otherwise get the icon
+            // for this mime_type.
+            if (content_type.has_media_type("image")) {
+                // Get a thumbnail for the image.
+                // TODO Generate and save the thumbnail when
+                // extracting the attachments rather than when showing
+                // them in the viewer.
+                int preview_size = ATTACHMENT_PREVIEW_SIZE * window_scale;
+                InputStream stream = yield attachment.file.read_async(
+                    Priority.DEFAULT,
+                    load_cancelled
+                );
+                pixbuf = yield new Gdk.Pixbuf.from_stream_at_scale_async(
+                    stream, preview_size, preview_size, true, load_cancelled
+                );
+                pixbuf = pixbuf.apply_embedded_orientation();
+            } else {
+                // Load the icon for this mime type.
+                string gio_content_type =
+                   ContentType.from_mime_type(content_type.get_mime_type());
+                Icon icon = ContentType.get_icon(gio_content_type);
+                Gtk.IconTheme theme = Gtk.IconTheme.get_default();
+
+                // XXX GTK 3.14 We should be able to replace the
+                // ThemedIcon/LoadableIcon/other cases below with
+                // simply this:
+                // Gtk.IconInfo? icon_info = theme.lookup_by_gicon_for_scale(
+                //     icon, ATTACHMENT_ICON_SIZE, window_scale
+                // );
+                // pixbuf = yield icon_info.load_icon_async(load_cancelled);
+
+                if (icon is ThemedIcon) {
+                    Gtk.IconInfo? icon_info = null;
+                    foreach (string name in ((ThemedIcon) icon).names) {
+                        icon_info = theme.lookup_icon_for_scale(
+                            name, ATTACHMENT_ICON_SIZE, window_scale, 0
+                        );
+                        if (icon_info != null) {
+                            break;
+                        }
+                    }
+                    if (icon_info == null) {
+                        icon_info = theme.lookup_icon_for_scale(
+                            "x-office-document", ATTACHMENT_ICON_SIZE, window_scale, 0
+                        );
+                    }
+                    pixbuf = yield icon_info.load_icon_async(load_cancelled);
+                } else if (icon is LoadableIcon) {
+                    InputStream stream = yield ((LoadableIcon) icon).load_async(
+                        ATTACHMENT_ICON_SIZE, load_cancelled
+                    );
+                    int icon_size = ATTACHMENT_ICON_SIZE * window_scale;
+                    pixbuf = yield new Gdk.Pixbuf.from_stream_at_scale_async(
+                        stream, icon_size, icon_size, true, load_cancelled
+                    );
+                } else {
+                    warning("Unsupported attachment icon type: %s\n",
+                            icon.get_type().name());
+                }
+            }
+        } catch (Error error) {
+            warning("Failed to load icon for attachment '%s': %s",
+                    attachment.id,
+                    error.message);
+        }
+
+        return pixbuf;
+    }
+
     /*
      * Test whether text looks like a URI that leads somewhere other than href.  The text
      * will have a scheme prepended if it doesn't already have one, and the short versions

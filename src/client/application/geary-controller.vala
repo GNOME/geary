@@ -211,7 +211,6 @@ public class GearyController : Geary.BaseObject {
         main_window.conversation_viewer.reply_all_message.connect(on_reply_all_message);
         main_window.conversation_viewer.forward_message.connect(on_forward_message);
         main_window.conversation_viewer.mark_messages.connect(on_conversation_viewer_mark_messages);
-        main_window.conversation_viewer.open_attachment.connect(on_open_attachment);
         main_window.conversation_viewer.save_attachments.connect(on_save_attachments);
         main_window.conversation_viewer.save_buffer_to_file.connect(on_save_buffer_to_file);
         main_window.conversation_viewer.edit_draft.connect(on_edit_draft);
@@ -293,7 +292,6 @@ public class GearyController : Geary.BaseObject {
         main_window.conversation_viewer.reply_all_message.disconnect(on_reply_all_message);
         main_window.conversation_viewer.forward_message.disconnect(on_forward_message);
         main_window.conversation_viewer.mark_messages.disconnect(on_conversation_viewer_mark_messages);
-        main_window.conversation_viewer.open_attachment.disconnect(on_open_attachment);
         main_window.conversation_viewer.save_attachments.disconnect(on_save_attachments);
         main_window.conversation_viewer.save_buffer_to_file.disconnect(on_save_buffer_to_file);
         main_window.conversation_viewer.edit_draft.disconnect(on_edit_draft);
@@ -1889,8 +1887,8 @@ public class GearyController : Geary.BaseObject {
                 err.message);
         }
     }
-    
-    private void on_open_attachment(Geary.Attachment attachment) {
+
+    private void on_attachment_activated(Geary.Attachment attachment) {
         if (GearyApplication.instance.config.ask_open_attachment) {
             QuestionDialog ask_to_open = new QuestionDialog.with_checkbox(main_window,
                 _("Are you sure you want to open \"%s\"?").printf(attachment.file.get_basename()),
@@ -1898,11 +1896,11 @@ public class GearyController : Geary.BaseObject {
                 Stock._OPEN_BUTTON, Stock._CANCEL, _("Don't _ask me again"), false);
             if (ask_to_open.run() != Gtk.ResponseType.OK)
                 return;
-            
+
             // only save checkbox state if OK was selected
             GearyApplication.instance.config.ask_open_attachment = !ask_to_open.is_checked;
         }
-        
+
         // Open the attachment if we know what to do with it.
         if (!open_uri(attachment.file.get_uri())) {
             // Failing that, trigger a save dialog.
@@ -2590,10 +2588,12 @@ public class GearyController : Geary.BaseObject {
 
     private void on_message_added(ConversationMessage message) {
         message.link_activated.connect(on_link_activated);
+        message.attachment_activated.connect(on_attachment_activated);
     }
 
     private void on_message_removed(ConversationMessage message) {
         message.link_activated.disconnect(on_link_activated);
+        message.attachment_activated.disconnect(on_attachment_activated);
     }
 
     private void on_link_activated(string link) {
