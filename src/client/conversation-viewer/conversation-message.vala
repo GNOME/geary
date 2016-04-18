@@ -121,6 +121,9 @@ public class ConversationMessage : Gtk.Box {
     // The folder containing the message
     private Geary.Folder containing_folder = null; // XXX weak??
 
+    [GtkChild]
+    private Gtk.InfoBar draft_infobar;
+
     // Contains the current mouse-over'ed link URL, if any
     private string? hover_url = null;
 
@@ -136,8 +139,13 @@ public class ConversationMessage : Gtk.Box {
     // Fired on attachment activation
     public signal void attachment_activated(Geary.Attachment attachment);
 
+    // Fired the edit draft button is clicked.
+    public signal void edit_draft(Geary.Email message);
 
-    public ConversationMessage(Geary.Email email, Geary.Folder containing_folder) {
+
+    public ConversationMessage(Geary.Email email,
+                               Geary.Folder containing_folder,
+                               bool is_draft) {
         this.email = email;
         this.containing_folder = containing_folder;
 
@@ -226,19 +234,10 @@ public class ConversationMessage : Gtk.Box {
         //         debug("Error adding attached message: %s", error.message);
         //     }
         // }
-        
-        // // Edit draft button for drafts folder.
-        // if (in_drafts_folder() && is_in_folder) {
-        //     WebKit.DOM.HTMLElement draft_edit_container = Util.DOM.select(div_message, ".draft_edit");
-        //     WebKit.DOM.HTMLElement draft_edit_button =
-        //         Util.DOM.select(div_message, ".draft_edit_button");
-        //     try {
-        //         draft_edit_container.set_attribute("style", "display:block");
-        //         draft_edit_button.set_inner_html(_("Edit Draft"));
-        //     } catch (Error e) {
-        //         warning("Error setting draft button: %s", e.message);
-        //     }
-        // }
+
+        if (is_draft) {
+            draft_infobar.show();
+        }
 
         update_message_state(false);
     }
@@ -1105,10 +1104,6 @@ public class ConversationMessage : Gtk.Box {
         }
     }
 
-    // private bool in_drafts_folder() {
-    //     return containing_folder.special_folder_type == Geary.SpecialFolderType.DRAFTS;
-    // }
-
     private static bool is_content_type_supported_inline(Geary.Mime.ContentType content_type) {
         foreach (string mime_type in INLINE_MIME_TYPES) {
             try {
@@ -1118,7 +1113,7 @@ public class ConversationMessage : Gtk.Box {
                 debug("Unable to compare MIME type %s: %s", mime_type, err.message);
             }
         }
-        
+
         return false;
     }
 
@@ -1348,10 +1343,9 @@ public class ConversationMessage : Gtk.Box {
         body_box.trigger_tooltip_query();
     }
 
-    
+
     [GtkCallback]
-    private void on_remote_images_response(Gtk.InfoBar info_bar,
-                                           int response_id) {
+    private void on_remote_images_response(Gtk.InfoBar info_bar, int response_id) {
         switch (response_id) {
         case 1:
             show_images(true);
@@ -1362,10 +1356,17 @@ public class ConversationMessage : Gtk.Box {
         default:
             break; // pass
         }
-        
+
         remote_images_infobar.hide();
     }
-    
+
+    [GtkCallback]
+    private void on_draft_response(Gtk.InfoBar info_bar, int response_id) {
+        if (response_id == 1) {
+            edit_draft(email);
+        }
+    }
+
     // private void on_copy_text() {
     //     web_view.copy_clipboard();
     // }

@@ -80,9 +80,6 @@ public class ConversationViewer : Gtk.Stack {
     // Fired when the user wants to save an image buffer to disk
     public signal void save_buffer_to_file(string? filename, Geary.Memory.Buffer buffer);
     
-    // Fired when the user clicks the edit draft button.
-    public signal void edit_draft(Geary.Email message);
-    
     // Fired when the viewer has been cleared.
     public signal void cleared();
     
@@ -636,8 +633,16 @@ public class ConversationViewer : Gtk.Stack {
         }
         messages.add(email);
 
+        // XXX Should be able to edit draft messages from any
+        // conversation. This test should be more like "is in drafts
+        // folder"
+        bool is_draft = (
+            current_folder.special_folder_type == Geary.SpecialFolderType.DRAFTS &&
+            is_in_folder
+        );
+
         ConversationMessage message =
-            new ConversationMessage(email, current_folder);
+            new ConversationMessage(email, current_folder, is_draft);
         message.body_box.button_release_event.connect_after((event) => {
                 // Consume all non-consumed clicks so the row is not
                 // inadvertently activated after clicking on the
