@@ -205,7 +205,8 @@ public class GearyController : Geary.BaseObject {
         main_window.main_toolbar.copy_folder_menu.folder_selected.connect(on_copy_conversation);
         main_window.main_toolbar.move_folder_menu.folder_selected.connect(on_move_conversation);
         main_window.search_bar.search_text_changed.connect(on_search_text_changed);
-        main_window.conversation_viewer.link_selected.connect(on_link_selected);
+        main_window.conversation_viewer.message_added.connect(on_message_added);
+        main_window.conversation_viewer.message_removed.connect(on_message_removed);
         main_window.conversation_viewer.reply_to_message.connect(on_reply_to_message);
         main_window.conversation_viewer.reply_all_message.connect(on_reply_all_message);
         main_window.conversation_viewer.forward_message.connect(on_forward_message);
@@ -286,7 +287,8 @@ public class GearyController : Geary.BaseObject {
         main_window.main_toolbar.copy_folder_menu.folder_selected.disconnect(on_copy_conversation);
         main_window.main_toolbar.move_folder_menu.folder_selected.disconnect(on_move_conversation);
         main_window.search_bar.search_text_changed.disconnect(on_search_text_changed);
-        main_window.conversation_viewer.link_selected.disconnect(on_link_selected);
+        main_window.conversation_viewer.message_added.disconnect(on_message_added);
+        main_window.conversation_viewer.message_removed.disconnect(on_message_removed);
         main_window.conversation_viewer.reply_to_message.disconnect(on_reply_to_message);
         main_window.conversation_viewer.reply_all_message.disconnect(on_reply_all_message);
         main_window.conversation_viewer.forward_message.disconnect(on_forward_message);
@@ -2585,8 +2587,16 @@ public class GearyController : Geary.BaseObject {
     private void on_sent(Geary.RFC822.Message rfc822) {
         Libnotify.play_sound("message-sent-email");
     }
-    
-    private void on_link_selected(string link) {
+
+    private void on_message_added(ConversationMessage message) {
+        message.link_activated.connect(on_link_activated);
+    }
+
+    private void on_message_removed(ConversationMessage message) {
+        message.link_activated.disconnect(on_link_activated);
+    }
+
+    private void on_link_activated(string link) {
         if (link.down().has_prefix(Geary.ComposedEmail.MAILTO_SCHEME)) {
             compose_mailto(link);
         } else {

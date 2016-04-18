@@ -117,15 +117,15 @@ public class ConversationMessage : Gtk.Box {
 
     // Contains the current mouse-over'ed link URL, if any
     private string? hover_url = null;
-    
+
     private Gee.HashSet<string> inlined_content_ids = new Gee.HashSet<string>();
     private int next_replaced_buffer_number = 0;
     private Gee.HashMap<string, ReplacedImage> replaced_images = new Gee.HashMap<string, ReplacedImage>();
     private Gee.HashSet<string> replaced_content_ids = new Gee.HashSet<string>();
 
 
-    // Fired when the user clicks a link.
-    public signal void link_selected(string link);
+    // Fired on link activation in the web_view
+    public signal void link_activated(string link);
 
 
     public ConversationMessage(Geary.Email email, Geary.Folder containing_folder) {
@@ -195,8 +195,8 @@ public class ConversationMessage : Gtk.Box {
 
         body_box.set_has_tooltip(true);
         web_view.hovering_over_link.connect(on_hovering_over_link);
-        web_view.link_selected.connect((link) => { link_selected(link); });
-        
+        web_view.link_selected.connect((link) => { link_activated(link); });
+
         // if (email.from != null && email.from.contains_normalized(current_account_information.email)) {
         //  // XXX set a RO property?
         //  get_style_context().add_class("sent");

@@ -52,8 +52,11 @@ public class ConversationViewer : Gtk.Stack {
         COUNT;
     }
  
-    // Fired when the user clicks a link.
-    public signal void link_selected(string link);
+    // Fired a message is added to the view
+    public signal void message_added(ConversationMessage message);
+    
+    // Fired a message is removed from the view
+    public signal void message_removed(ConversationMessage message);
     
     // Fired when the user clicks "reply" in the message menu.
     public signal void reply_to_message(Geary.Email message);
@@ -638,8 +641,8 @@ public class ConversationViewer : Gtk.Stack {
         }
         messages.add(email);
 
-        ConversationMessage message = new ConversationMessage(email, current_folder);
-        message.link_selected.connect((link) => { link_selected(link); });
+        ConversationMessage message =
+            new ConversationMessage(email, current_folder);
         message.body_box.button_release_event.connect_after((event) => {
                 // Consume all non-consumed clicks so the row is not
                 // inadvertently activated after clicking on the
@@ -657,6 +660,8 @@ public class ConversationViewer : Gtk.Stack {
         if (email.is_unread() == Geary.Trillian.TRUE) {
             show_message(row, false);
         }
+
+        message_added(message);
         
         // Update the search results
         //if (conversation_find_bar.visible)
@@ -664,7 +669,9 @@ public class ConversationViewer : Gtk.Stack {
     }
     
     private void remove_message(Geary.Email email) {
-        conversation_listbox.remove(email_to_row.get(email.id));
+        Gtk.ListBoxRow row = email_to_row.get(email.id);
+        message_removed((ConversationMessage) row.get_child());
+        conversation_listbox.remove(row);
         email_to_row.get(email.id);
         messages.remove(email);
     }
