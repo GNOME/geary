@@ -8,6 +8,7 @@ set(RESOURCE_LIST
   STRIPBLANKS "composer-headerbar.ui"
   STRIPBLANKS "composer-menus.ui"
   STRIPBLANKS "composer-widget.ui"
+  STRIPBLANKS "conversation-email.ui"
   STRIPBLANKS "conversation-message.ui"
   STRIPBLANKS "conversation-message-menu.ui"
   STRIPBLANKS "conversation-viewer.ui"

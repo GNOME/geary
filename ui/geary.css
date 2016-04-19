@@ -66,12 +66,13 @@ row.geary-folder-popover-list-row > label {
   border-bottom-width: 0;
   padding: 0;
   box-shadow: 0 4px 8px 1px rgba(0,0,0,0.4);
-  transition: margin 0.1s, background 0.15s;
+  transition: margin 0.1s;
 }
 #conversation_listbox > row > box {
   background: shade(@theme_base_color, 0.96);
+  transition: background 0.25s;
 }
-#conversation_listbox > row:hover,
+#conversation_listbox > row:hover > box,
 #conversation_listbox > row > box.geary_show_body,
 #conversation_listbox > row:hover > box.geary_show_body {
   background: @theme_base_color;

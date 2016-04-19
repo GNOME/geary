@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.20.0 -->
+<interface>
+  <requires lib="gtk+" version="3.12"/>
+  <template class="ConversationEmail" parent="GtkBox">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="orientation">vertical</property>
+    <child>
+      <placeholder/>
+    </child>
+    <child>
+      <placeholder/>
+    </child>
+    <style>
+      <class name="geary_email"/>
+    </style>
+  </template>
+  <object class="GtkBox" id="action_box">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="halign">end</property>
+    <property name="valign">start</property>
+    <property name="homogeneous">True</property>
+    <child>
+      <object class="GtkImage" id="attachment_icon">
+        <property name="can_focus">False</property>
+        <property name="tooltip_text" translatable="yes">This message has attachments</property>
+        <property name="icon_name">mail-attachment-symbolic</property>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">False</property>
+        <property name="position">0</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkButton" id="star_button">
+        <property name="visible">True</property>
+        <property name="sensitive">False</property>
+        <property name="can_focus">True</property>
+        <property name="receives_default">True</property>
+        <property name="tooltip_text" translatable="yes">Mark this message as starred</property>
+        <property name="valign">start</property>
+        <property name="action_name">win.message_star</property>
+        <property name="relief">none</property>
+        <child>
+          <object class="GtkImage">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="icon_name">non-starred-symbolic</property>
+          </object>
+        </child>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">False</property>
+        <property name="position">1</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkButton" id="unstar_button">
+        <property name="visible">True</property>
+        <property name="sensitive">False</property>
+        <property name="can_focus">True</property>
+        <property name="receives_default">True</property>
+        <property name="tooltip_text" translatable="yes">Mark this message as not starred</property>
+        <property name="valign">start</property>
+        <property name="action_name">win.message_unstar</property>
+        <property name="relief">none</property>
+        <child>
+          <object class="GtkImage">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="icon_name">starred-symbolic</property>
+          </object>
+        </child>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">False</property>
+        <property name="position">2</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkMenuButton" id="email_menubutton">
+        <property name="visible">True</property>
+        <property name="sensitive">False</property>
+        <property name="can_focus">True</property>
+        <property name="receives_default">True</property>
+        <property name="tooltip_text" translatable="yes">Display the message menu</property>
+        <property name="valign">start</property>
+        <property name="relief">none</property>
+        <child>
+          <object class="GtkImage">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="icon_name">open-menu-symbolic</property>
+          </object>
+        </child>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">False</property>
+        <property name="position">3</property>
+      </packing>
+    </child>
+  </object>
+  <object class="GtkListStore" id="attachments_model">
+    <columns>
+      <!-- column-name icon -->
+      <column type="GdkPixbuf"/>
+      <!-- column-name label -->
+      <column type="gchararray"/>
+      <!-- column-name attachment_id -->
+      <column type="gchararray"/>
+    </columns>
+  </object>
+  <object class="GtkBox" id="attachments_box">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="orientation">vertical</property>
+    <child>
+      <object class="GtkSeparator">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">False</property>
+        <property name="position">0</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkIconView" id="attachments_view">
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="margin">0</property>
+        <property name="selection_mode">multiple</property>
+        <property name="item_orientation">horizontal</property>
+        <property name="model">attachments_model</property>
+        <property name="spacing">6</property>
+        <signal name="item-activated" handler="on_attachments_view_activated" swapped="no"/>
+        <child>
+          <object class="GtkCellRendererPixbuf" id="icon"/>
+          <attributes>
+            <attribute name="pixbuf">0</attribute>
+          </attributes>
+        </child>
+        <child>
+          <object class="GtkCellRendererText" id="file_name">
+            <property name="xpad">6</property>
+          </object>
+          <attributes>
+            <attribute name="text">1</attribute>
+          </attributes>
+        </child>
+      </object>
+      <packing>
+        <property name="expand">True</property>
+        <property name="fill">True</property>
+        <property name="position">1</property>
+      </packing>
+    </child>
+  </object>
+  <object class="GtkBox" id="sub_messages_box">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="orientation">vertical</property>
+    <child>
+      <placeholder/>
+    </child>
+  </object>
+</interface>

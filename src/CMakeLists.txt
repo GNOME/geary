@@ -362,6 +362,7 @@ client/conversation-list/conversation-list-store.vala
 client/conversation-list/conversation-list-view.vala
 client/conversation-list/formatted-conversation-data.vala
 
+client/conversation-viewer/conversation-email.vala
 client/conversation-viewer/conversation-message.vala
 client/conversation-viewer/conversation-viewer.vala
 client/conversation-viewer/conversation-web-view.vala

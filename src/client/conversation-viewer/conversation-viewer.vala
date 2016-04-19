@@ -51,13 +51,13 @@ public class ConversationViewer : Gtk.Stack {
         
         COUNT;
     }
- 
-    // Fired a message is added to the view
-    public signal void message_added(ConversationMessage message);
-    
-    // Fired a message is removed from the view
-    public signal void message_removed(ConversationMessage message);
-    
+
+    // Fired when an email is added to the view
+    public signal void email_row_added(ConversationEmail email);
+
+    // Fired when an email is removed from the view
+    public signal void email_row_removed(ConversationEmail email);
+
     // Fired when the user clicks "reply" in the message menu.
     public signal void reply_to_message(Geary.Email message);
 
@@ -68,7 +68,7 @@ public class ConversationViewer : Gtk.Stack {
     public signal void forward_message(Geary.Email message);
 
     // Fired when the user mark messages.
-    public signal void mark_messages(Gee.Collection<Geary.EmailIdentifier> emails,
+    public signal void mark_emails(Gee.Collection<Geary.EmailIdentifier> emails,
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove);
 
     // Fired when the user opens an attachment.
@@ -98,7 +98,7 @@ public class ConversationViewer : Gtk.Stack {
     [GtkChild]
     private Gtk.Box composer_page;
 
-    // Conversation messages list
+    // Conversation emails list
     [GtkChild]
     private Gtk.ListBox conversation_listbox;
     private Gtk.Widget? last_list_row;
@@ -108,13 +108,13 @@ public class ConversationViewer : Gtk.Stack {
     private Gtk.Label user_message_label;
 
     // Sorted set of emails being displayed
-    private Gee.TreeSet<Geary.Email> messages { get; private set; default = 
+    private Gee.TreeSet<Geary.Email> emails { get; private set; default =
         new Gee.TreeSet<Geary.Email>(Geary.Email.compare_sent_date_ascending); }
-    
+
     // Maps displayed emails to their corresponding ListBoxRow.
     private Gee.HashMap<Geary.EmailIdentifier, Gtk.ListBoxRow> email_to_row = new
         Gee.HashMap<Geary.EmailIdentifier, Gtk.ListBoxRow>();
-    
+
     // State machine setup for search/find modes.
     private Geary.State.MachineDescriptor search_machine_desc = new Geary.State.MachineDescriptor(
         "ConversationViewer search", SearchState.NONE, SearchState.COUNT, SearchEvent.COUNT, null, null); 
@@ -132,27 +132,27 @@ public class ConversationViewer : Gtk.Stack {
     public ConversationViewer() {
         // Setup the conversation list box
         conversation_listbox.set_sort_func((row1, row2) => {
-                // If not a ConversationMessage, will be an
+                // If not a ConversationEmail, will be an
                 // embedded composer and should always be last.
-                ConversationMessage? msg1 = row1.get_child() as ConversationMessage;
+                ConversationEmail? msg1 = row1.get_child() as ConversationEmail;
                 if (msg1 == null) {
                     return 1;
                 }
-                ConversationMessage? msg2 = row2.get_child() as ConversationMessage;
+                ConversationEmail? msg2 = row2.get_child() as ConversationEmail;
                 if (msg2 == null) {
                     return -1;
                 }
                 return Geary.Email.compare_sent_date_ascending(msg1.email, msg2.email);
             });
         conversation_listbox.row_activated.connect((box, row) => {
-                // If not a ConversationMessage, will be an
+                // If not a ConversationEmail, will be an
                 // embedded composer and should not be activated.
-                ConversationMessage? msg = row.get_child() as ConversationMessage;
+                ConversationEmail? msg = row.get_child() as ConversationEmail;
                 if (email_to_row.size > 1 && msg != null) {
                     if (msg.is_message_body_visible) {
-                        hide_message(row);
+                        collapse_email(row);
                     } else {
-                        show_message(row);
+                        expand_email(row);
                     }
                 }
             });
@@ -213,19 +213,19 @@ public class ConversationViewer : Gtk.Stack {
         do_conversation();
     }
     
-    public Geary.Email? get_last_message() {
-        return messages.is_empty ? null : messages.last();
+    public Geary.Email? get_last_email() {
+        return emails.is_empty ? null : emails.last();
     }
     
-    public Geary.Email? get_selected_message(out string? quote) {
-        // XXX check to see if there is a message with selected text,
+    public Geary.Email? get_selected_email(out string? quote) {
+        // XXX check to see if there is a email with selected text,
         // if so return that
         quote = null;
-        return messages.is_empty ? null : messages.last();
+        return emails.is_empty ? null : emails.last();
     }
-    
+
     public void check_mark_read() {
-        Gee.ArrayList<Geary.EmailIdentifier> emails =
+        Gee.ArrayList<Geary.EmailIdentifier> email_ids =
             new Gee.ArrayList<Geary.EmailIdentifier>();
 
         Gtk.Adjustment adj = conversation_page.vadjustment;
@@ -233,46 +233,49 @@ public class ConversationViewer : Gtk.Stack {
         int bottom_bound = top_bound + (int) adj.page_size;
 
         const int TEXT_PADDING = 50;
-        foreach (Geary.Email message in messages) {
-            ConversationMessage row = conversation_message_for_id(message.id);
-            // Don't bother with not-yet-loaded messages since the
+        foreach (Geary.Email email in emails) {
+            ConversationEmail conversation_email = conversation_email_for_id(email.id);
+            ConversationMessage conversation_message =
+                conversation_email.primary_message;
+            // Don't bother with not-yet-loaded emails since the
             // size of the body will be off, affecting the visibility
-            // of messages further down the conversation.
-            if (message.email_flags.is_unread() &&
-                row.is_loading_complete &&
-                !row.is_manual_read()) {
+            // of emails further down the conversation.
+            if (email.email_flags.is_unread() &&
+                conversation_message.is_loading_complete &&
+                !conversation_email.is_manual_read()) {
                  int body_top = 0;
                  int body_left = 0;
-                 row.web_view.translate_coordinates(
+                 conversation_message.web_view.translate_coordinates(
                      conversation_listbox,
                      0, 0,
                      out body_left, out body_top
                  );
-                 int body_bottom = body_top + row.web_view_allocation.height;
+                 int body_bottom = body_top +
+                     conversation_message.web_view_allocation.height;
 
-                 // Only mark the message as read if it's actually visible
+                 // Only mark the email as read if it's actually visible
                  if (body_bottom > top_bound &&
                      body_top + TEXT_PADDING < bottom_bound) {
-                     emails.add(message.id);
+                     email_ids.add(email.id);
 
                      // Since it can take some time for the new flags
                      // to round-trip back to ConversationViewer's
                      // signal handlers, mark as manually read here
-                     row.mark_manual_read();
+                     conversation_email.mark_manual_read();
                  }
              }
         }
 
-        if (emails.size > 0) {
+        if (email_ids.size > 0) {
             Geary.EmailFlags flags = new Geary.EmailFlags();
             flags.add(Geary.EmailFlags.UNREAD);
-            mark_messages(emails, null, flags);
+            mark_emails(email_ids, null, flags);
         }
     }
 
     // Use this when an email has been marked read through manual (user) intervention
     public void mark_manual_read(Geary.EmailIdentifier id) {
-        ConversationMessage? row = conversation_message_for_id(id);
+        ConversationEmail? row = conversation_email_for_id(id);
         if (row != null) {
             row.mark_manual_read();
         }
@@ -352,7 +355,7 @@ public class ConversationViewer : Gtk.Stack {
             conversation_listbox.remove(child);
         }
         email_to_row.clear();
-        messages.clear();
+        emails.clear();
         current_conversation = null;
         cleared();
     }
@@ -460,33 +463,33 @@ public class ConversationViewer : Gtk.Stack {
         // Load this once, so if it's cancelled, we cancel the WHOLE load.
         Cancellable cancellable = cancellable_fetch;
 
-        // Fetch full messages.
-        Gee.Collection<Geary.Email>? messages_to_add
-            = yield list_full_messages_async(conversation.get_emails(
+        // Fetch full emails.
+        Gee.Collection<Geary.Email>? emails_to_add
+            = yield list_full_emails_async(conversation.get_emails(
             Geary.App.Conversation.Ordering.SENT_DATE_ASCENDING), cancellable);
 
         if (cancellable.is_cancelled()) {
             return;
         }
-        
-        // Add messages.
-        if (messages_to_add != null) {
-            foreach (Geary.Email email in messages_to_add)
-                add_message(email, conversation.is_in_current_folder(email.id));
+
+        // Add emails.
+        if (emails_to_add != null) {
+            foreach (Geary.Email email in emails_to_add)
+                add_email(email, conversation.is_in_current_folder(email.id));
         }
 
         if (current_folder is Geary.SearchFolder) {
             yield highlight_search_terms();
         } else {
             compress_emails();
-            // Ensure the last message is always shown
-            Gtk.ListBoxRow last_row = conversation_listbox.get_row_at_index(messages.size - 1);
-            show_message(last_row, false);
+            // Ensure the last email is always shown
+            Gtk.ListBoxRow last_row = conversation_listbox.get_row_at_index(emails.size - 1);
+            expand_email(last_row, false);
         }
 
         loading_conversations = false;
         if (state == ViewState.CONVERSATION) {
-            debug("Messages loaded\n");
+            debug("Emails loaded\n");
             set_visible_child(conversation_page);
         }
     }
@@ -518,7 +521,7 @@ public class ConversationViewer : Gtk.Stack {
 
         // List all IDs of emails we're viewing.
         Gee.Collection<Geary.EmailIdentifier> ids = new Gee.ArrayList<Geary.EmailIdentifier>();
-        foreach (Geary.Email email in messages)
+        foreach (Geary.Email email in emails)
             ids.add(email.id);
 
         // Using the fetch cancellable here is appropriate since each
@@ -574,7 +577,7 @@ public class ConversationViewer : Gtk.Stack {
     }
 
     // Given some emails, fetch the full versions with all required fields.
-    private async Gee.Collection<Geary.Email>? list_full_messages_async(
+    private async Gee.Collection<Geary.Email>? list_full_emails_async(
         Gee.Collection<Geary.Email> emails, Cancellable? cancellable) throws Error {
         Geary.Email.Field required_fields = ConversationViewer.REQUIRED_FIELDS |
             Geary.ComposedEmail.REQUIRED_REPLY_FIELDS;
@@ -588,7 +591,7 @@ public class ConversationViewer : Gtk.Stack {
     }
     
     // Given an email, fetch the full version with all required fields.
-    private async Geary.Email fetch_full_message_async(Geary.Email email,
+    private async Geary.Email fetch_full_email_async(Geary.Email email,
         Cancellable? cancellable) throws Error {
         Geary.Email.Field required_fields = ConversationViewer.REQUIRED_FIELDS |
             Geary.ComposedEmail.REQUIRED_REPLY_FIELDS;
@@ -597,7 +600,7 @@ public class ConversationViewer : Gtk.Stack {
             Geary.Folder.ListFlags.NONE, cancellable);
     }
     
-    // Cancels the current message load, if in progress.
+    // Cancels the current email load, if in progress.
     private void cancel_load() {
         Cancellable old_cancellable = cancellable_fetch;
         cancellable_fetch = new Cancellable();
@@ -611,7 +614,7 @@ public class ConversationViewer : Gtk.Stack {
     
     private async void on_conversation_appended_async(Geary.App.Conversation conversation,
         Geary.Email email) throws Error {
-        add_message(yield fetch_full_message_async(email, cancellable_fetch),
+        add_email(yield fetch_full_email_async(email, cancellable_fetch),
             conversation.is_in_current_folder(email.id));
     }
     
@@ -624,16 +627,16 @@ public class ConversationViewer : Gtk.Stack {
     }
     
     private void on_conversation_trimmed(Geary.Email email) {
-        remove_message(email);
+        remove_email(email);
     }
     
-    private void add_message(Geary.Email email, bool is_in_folder) {
-        if (messages.contains(email)) {
+    private void add_email(Geary.Email email, bool is_in_folder) {
+        if (emails.contains(email)) {
             return;
         }
-        messages.add(email);
+        emails.add(email);
 
-        // XXX Should be able to edit draft messages from any
+        // XXX Should be able to edit draft emails from any
         // conversation. This test should be more like "is in drafts
         // folder"
         bool is_draft = (
@@ -641,53 +644,55 @@ public class ConversationViewer : Gtk.Stack {
             is_in_folder
         );
 
-        ConversationMessage message = new ConversationMessage(
+        ConversationEmail conversation_email = new ConversationEmail(
             email,
             current_folder.account.get_contact_store(),
             is_draft
         );
-        message.body_box.button_release_event.connect_after((event) => {
+
+        ConversationMessage conversation_message = conversation_email.primary_message;
+        conversation_message.body_box.button_release_event.connect_after((event) => {
                 // Consume all non-consumed clicks so the row is not
                 // inadvertently activated after clicking on the
-                // message body.
+                // email body.
                 return true;
             });
 
         Gtk.ListBoxRow row = new Gtk.ListBoxRow();
         row.show();
-        row.add(message);
+        row.add(conversation_email);
         email_to_row.set(email.id, row);
 
         conversation_listbox.add(row);
 
         if (email.is_unread() == Geary.Trillian.TRUE) {
-            show_message(row, false);
+            expand_email(row, false);
         }
 
-        message.start_loading.begin(cancellable_fetch);
-        message_added(message);
-        
+        conversation_email.start_loading.begin(cancellable_fetch);
+        email_row_added(conversation_email);
+
         // Update the search results
         //if (conversation_find_bar.visible)
         //    conversation_find_bar.commence_search();
     }
-    
-    private void remove_message(Geary.Email email) {
+
+    private void remove_email(Geary.Email email) {
         Gtk.ListBoxRow row = email_to_row.get(email.id);
-        message_removed((ConversationMessage) row.get_child());
+        email_row_removed((ConversationEmail) row.get_child());
         conversation_listbox.remove(row);
         email_to_row.get(email.id);
-        messages.remove(email);
+        emails.remove(email);
     }
 
-    private void show_message(Gtk.ListBoxRow row, bool include_transitions=true) {
+    private void expand_email(Gtk.ListBoxRow row, bool include_transitions=true) {
         row.get_style_context().add_class("geary_expand");
-        ((ConversationMessage) row.get_child()).show_message_body(include_transitions);
+        ((ConversationEmail) row.get_child()).expand_email(include_transitions);
     }
 
-    private void hide_message(Gtk.ListBoxRow row) {
+    private void collapse_email(Gtk.ListBoxRow row) {
         row.get_style_context().remove_class("geary_expand");
-        ((ConversationMessage) row.get_child()).hide_message_body();
+        ((ConversationEmail) row.get_child()).collapse_email();
     }
 
     private void compress_emails() {
@@ -716,9 +721,9 @@ public class ConversationViewer : Gtk.Stack {
             return;
         }
 
-        // Get the convo message and update its state.
+        // Get the convo email and update its state.
         Gtk.ListBoxRow row = email_to_row.get(email.id);
-        ((ConversationMessage) row.get_child()).update_flags(email);
+        ((ConversationEmail) row.get_child()).update_flags(email);
     }
 
     // State reset.
@@ -771,8 +776,8 @@ public class ConversationViewer : Gtk.Stack {
         return SearchState.SEARCH_FOLDER;
     }
 
-    private ConversationMessage? conversation_message_for_id(Geary.EmailIdentifier id) {
-        return (ConversationMessage) email_to_row.get(id).get_child();
+    private ConversationEmail? conversation_email_for_id(Geary.EmailIdentifier id) {
+        return (ConversationEmail) email_to_row.get(id).get_child();
     }
 
 }

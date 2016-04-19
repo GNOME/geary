@@ -385,6 +385,7 @@ src/mailer/main.vala
 [type: gettext/glade]ui/composer-headerbar.ui
 [type: gettext/glade]ui/composer-menus.ui
 [type: gettext/glade]ui/composer-widget.ui
+[type: gettext/glade]ui/conversation-email.ui
 [type: gettext/glade]ui/conversation-message.ui
 [type: gettext/glade]ui/conversation-message-menu.ui
 [type: gettext/glade]ui/conversation-viewer.ui

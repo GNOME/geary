@@ -1,7 +1,9 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2016 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
 // Required because Gcr's VAPI is behind-the-times
@@ -205,12 +207,12 @@ public class GearyController : Geary.BaseObject {
         main_window.main_toolbar.copy_folder_menu.folder_selected.connect(on_copy_conversation);
         main_window.main_toolbar.move_folder_menu.folder_selected.connect(on_move_conversation);
         main_window.search_bar.search_text_changed.connect(on_search_text_changed);
-        main_window.conversation_viewer.message_added.connect(on_message_added);
-        main_window.conversation_viewer.message_removed.connect(on_message_removed);
+        main_window.conversation_viewer.email_row_added.connect(on_email_row_added);
+        main_window.conversation_viewer.email_row_removed.connect(on_email_row_removed);
         main_window.conversation_viewer.reply_to_message.connect(on_reply_to_message);
         main_window.conversation_viewer.reply_all_message.connect(on_reply_all_message);
         main_window.conversation_viewer.forward_message.connect(on_forward_message);
-        main_window.conversation_viewer.mark_messages.connect(on_conversation_viewer_mark_messages);
+        main_window.conversation_viewer.mark_emails.connect(on_conversation_viewer_mark_emails);
         main_window.conversation_viewer.save_attachments.connect(on_save_attachments);
         main_window.conversation_viewer.save_buffer_to_file.connect(on_save_buffer_to_file);
         new_messages_monitor = new NewMessagesMonitor(should_notify_new_messages);
@@ -284,12 +286,12 @@ public class GearyController : Geary.BaseObject {
         main_window.main_toolbar.copy_folder_menu.folder_selected.disconnect(on_copy_conversation);
         main_window.main_toolbar.move_folder_menu.folder_selected.disconnect(on_move_conversation);
         main_window.search_bar.search_text_changed.disconnect(on_search_text_changed);
-        main_window.conversation_viewer.message_added.disconnect(on_message_added);
-        main_window.conversation_viewer.message_removed.disconnect(on_message_removed);
+        main_window.conversation_viewer.email_row_added.disconnect(on_email_row_added);
+        main_window.conversation_viewer.email_row_removed.disconnect(on_email_row_removed);
         main_window.conversation_viewer.reply_to_message.disconnect(on_reply_to_message);
         main_window.conversation_viewer.reply_all_message.disconnect(on_reply_all_message);
         main_window.conversation_viewer.forward_message.disconnect(on_forward_message);
-        main_window.conversation_viewer.mark_messages.disconnect(on_conversation_viewer_mark_messages);
+        main_window.conversation_viewer.mark_emails.disconnect(on_conversation_viewer_mark_emails);
         main_window.conversation_viewer.save_attachments.disconnect(on_save_attachments);
         main_window.conversation_viewer.save_buffer_to_file.disconnect(on_save_buffer_to_file);
         // hide window while shutting down, as this can take a few seconds under certain conditions
@@ -1777,7 +1779,7 @@ public class GearyController : Geary.BaseObject {
             flags_to_add, flags_to_remove);
     }
     
-    private void on_conversation_viewer_mark_messages(Gee.Collection<Geary.EmailIdentifier> emails,
+    private void on_conversation_viewer_mark_emails(Gee.Collection<Geary.EmailIdentifier> emails,
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove) {
         mark_email(emails, flags_to_add, flags_to_remove);
     }
@@ -2094,7 +2096,7 @@ public class GearyController : Geary.BaseObject {
     private void create_reply_forward_widget(ComposerWidget.ComposeType compose_type,
         Geary.Email? message) {
         string? quote;
-        Geary.Email? quote_message = main_window.conversation_viewer.get_selected_message(out quote);
+        Geary.Email? quote_message = main_window.conversation_viewer.get_selected_email(out quote);
         if (message == null)
             message = quote_message;
         if (quote_message != message)
@@ -2578,13 +2580,13 @@ public class GearyController : Geary.BaseObject {
         Libnotify.play_sound("message-sent-email");
     }
 
-    private void on_message_added(ConversationMessage message) {
+    private void on_email_row_added(ConversationEmail message) {
         message.link_activated.connect(on_link_activated);
         message.attachment_activated.connect(on_attachment_activated);
         message.edit_draft.connect(on_edit_draft);
     }
 
-    private void on_message_removed(ConversationMessage message) {
+    private void on_email_row_removed(ConversationEmail message) {
         message.link_activated.disconnect(on_link_activated);
         message.attachment_activated.disconnect(on_attachment_activated);
         message.edit_draft.disconnect(on_edit_draft);
