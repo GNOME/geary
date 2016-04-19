@@ -482,10 +482,12 @@ public class ConversationViewer : Gtk.Stack {
             yield highlight_search_terms();
         } else {
             compress_emails();
-            // Ensure the last email is always shown
-            Gtk.ListBoxRow last_row = conversation_listbox.get_row_at_index(emails.size - 1);
-            expand_email(last_row, false);
         }
+
+        // Ensure the last email is always shown
+        Gtk.ListBoxRow last_row =
+            conversation_listbox.get_row_at_index(emails.size - 1);
+        expand_email(last_row, false);
 
         loading_conversations = false;
         if (state == ViewState.CONVERSATION) {
