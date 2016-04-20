@@ -405,8 +405,7 @@ public class Geary.Imap.ClientConnection : BaseObject {
         // To guard against reentrancy
         SocketConnection close_cx = cx;
         cx = null;
-        ios = null;
-        
+
         // unschedule before yielding to stop the Deserializer
         unschedule_flush_timeout();
         
@@ -421,12 +420,15 @@ public class Geary.Imap.ClientConnection : BaseObject {
         Error? close_err = null;
         try {
             debug("[%s] Disconnecting...", to_string());
+            yield ios.close_async(Priority.DEFAULT, cancellable);
             yield close_cx.close_async(Priority.DEFAULT, cancellable);
             debug("[%s] Disconnected", to_string());
         } catch (Error err) {
             debug("[%s] Error disconnecting: %s", to_string(), err.message);
             close_err = err;
         } finally {
+            ios = null;
+
             fsm.issue(Event.DISCONNECTED);
             
             if (close_err != null)
