@@ -16,8 +16,7 @@ public class Geary.Endpoint : BaseObject {
     public enum Flags {
         NONE = 0,
         SSL,
-        STARTTLS,
-        GRACEFUL_DISCONNECT;
+        STARTTLS;
         
         public inline bool is_all_set(Flags flags) {
             return (this & flags) == flags;
@@ -138,13 +137,7 @@ public class Geary.Endpoint : BaseObject {
     }
 
     public async SocketConnection connect_async(Cancellable? cancellable = null) throws Error {
-        SocketConnection cx = yield get_socket_client().connect_async(remote_address, cancellable);
-        
-        TcpConnection? tcp = cx as TcpConnection;
-        if (tcp != null)
-            tcp.set_graceful_disconnect(flags.is_all_set(Flags.GRACEFUL_DISCONNECT));
-        
-        return cx;
+        return yield get_socket_client().connect_async(remote_address, cancellable);
     }
     
     public async TlsClientConnection starttls_handshake_async(IOStream base_stream,

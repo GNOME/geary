@@ -615,7 +615,7 @@ public class Geary.AccountInformation : BaseObject {
             break;
             
             case ServiceProvider.OTHER:
-                Endpoint.Flags imap_flags = Endpoint.Flags.GRACEFUL_DISCONNECT;
+                Endpoint.Flags imap_flags = Endpoint.Flags.NONE;
                 if (default_imap_server_ssl)
                     imap_flags |= Endpoint.Flags.SSL;
                 if (default_imap_server_starttls)
@@ -669,7 +669,7 @@ public class Geary.AccountInformation : BaseObject {
             break;
             
             case ServiceProvider.OTHER:
-                Endpoint.Flags smtp_flags = Endpoint.Flags.GRACEFUL_DISCONNECT;
+                Endpoint.Flags smtp_flags = Endpoint.Flags.NONE;
                 if (default_smtp_server_ssl)
                     smtp_flags |= Endpoint.Flags.SSL;
                 if (default_smtp_server_starttls)

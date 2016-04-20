@@ -9,7 +9,7 @@ private class Geary.ImapEngine.OutlookAccount : Geary.ImapEngine.GenericAccount 
         return new Geary.Endpoint(
             "imap-mail.outlook.com",
             Imap.ClientConnection.DEFAULT_PORT_SSL,
-            Geary.Endpoint.Flags.SSL | Geary.Endpoint.Flags.GRACEFUL_DISCONNECT,
+            Geary.Endpoint.Flags.SSL,
             Imap.ClientConnection.RECOMMENDED_TIMEOUT_SEC);
     }
     
@@ -17,7 +17,7 @@ private class Geary.ImapEngine.OutlookAccount : Geary.ImapEngine.GenericAccount 
         return new Geary.Endpoint(
             "smtp-mail.outlook.com",
             Smtp.ClientConnection.DEFAULT_PORT_STARTTLS,
-            Geary.Endpoint.Flags.STARTTLS | Geary.Endpoint.Flags.GRACEFUL_DISCONNECT,
+            Geary.Endpoint.Flags.STARTTLS,
             Smtp.ClientConnection.DEFAULT_TIMEOUT_SEC);
     }
     

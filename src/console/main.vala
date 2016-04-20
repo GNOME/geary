@@ -306,7 +306,7 @@ class ImapConsole : Gtk.Window {
         
         check_args(cmd, args, 1, "hostname[:port]");
         
-        Geary.Endpoint.Flags flags = Geary.Endpoint.Flags.GRACEFUL_DISCONNECT;
+        Geary.Endpoint.Flags flags = Geary.Endpoint.Flags.NONE;
         if (cmd != "unsecure")
             flags |= Geary.Endpoint.Flags.SSL;
         

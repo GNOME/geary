@@ -138,10 +138,10 @@ int main(string[] args) {
     
     if (arg_gmail) {
         endpoint = new Geary.Endpoint("smtp.gmail.com", Geary.Smtp.ClientConnection.DEFAULT_PORT_STARTTLS,
-            Geary.Endpoint.Flags.STARTTLS | Geary.Endpoint.Flags.GRACEFUL_DISCONNECT,
+            Geary.Endpoint.Flags.STARTTLS,
             Geary.Smtp.ClientConnection.DEFAULT_TIMEOUT_SEC);
     } else {
-        Geary.Endpoint.Flags flags = Geary.Endpoint.Flags.GRACEFUL_DISCONNECT;
+        Geary.Endpoint.Flags flags = Geary.Endpoint.Flags.NONE;
         if (!arg_no_tls)
             flags |= Geary.Endpoint.Flags.SSL;
         
