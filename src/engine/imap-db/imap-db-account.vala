@@ -727,6 +727,10 @@ private class Geary.ImapDB.Account : BaseObject {
         /// messages received by a particular person.  The translated
         /// string must match the string in Geary's help documentation.
         field_names.set(_("to"), "receivers");
+        /// Can be typed in the search box like is:read, is:unread or is:starred
+        /// to find messages that are read, unread, or starred.  The translated
+        /// string must match the string in Geary's help documentation.
+        field_names.set(_("is"), "is");
         
         // Fields we allow the token to be "me" as in from:me.
         string[] addressable_fields = {
@@ -952,7 +956,7 @@ private class Geary.ImapDB.Account : BaseObject {
         Gee.HashMap<string, string> phrases = new Gee.HashMap<string, string>();
         foreach (string? field in query.get_fields()) {
             Gee.List<SearchTerm>? terms = query.get_search_terms(field);
-            if (terms == null || terms.size == 0)
+            if (terms == null || terms.size == 0 || field == "is")
                 continue;
             
             // Each SearchTerm is an AND but the SQL text within in are OR ... this allows for
@@ -1068,7 +1072,10 @@ private class Geary.ImapDB.Account : BaseObject {
         ImapDB.SearchQuery query = check_search_query(q);
         
         Gee.HashMap<string, string> query_phrases = get_query_phrases(query);
-        if (query_phrases.size == 0)
+        
+        Gee.Map<Geary.NamedFlag, bool> removal_conditions = get_removal_conditions(query);
+        
+        if (query_phrases.size == 0 && removal_conditions.is_empty)
             return null;
         
         // Do this outside of transaction to catch invalid search ids up-front
@@ -1111,13 +1118,18 @@ private class Geary.ImapDB.Account : BaseObject {
                 SELECT id, internaldate_time_t
                 FROM MessageTable
                 INDEXED BY MessageTableInternalDateTimeTIndex
-                WHERE id IN (
-                    SELECT docid
-                    FROM MessageSearchTable
-                    WHERE 1=1
             """);
-            sql_add_query_phrases(sql, query_phrases, "INTERSECT", "docid", "");
-            sql.append(")");
+            if (query_phrases.size != 0) {
+                sql.append("""
+                    WHERE id IN (
+                        SELECT docid
+                        FROM MessageSearchTable
+                        WHERE 1=1
+                """);
+                sql_add_query_phrases(sql, query_phrases, "INTERSECT", "docid", "");
+                sql.append(")");
+            } else
+                sql.append(" WHERE 1=1");
             
             if (blacklisted_ids_sql != "")
                 sql.append(" AND id NOT IN (%s)".printf(blacklisted_ids_sql));
@@ -1163,15 +1175,64 @@ private class Geary.ImapDB.Account : BaseObject {
         if (unstripped_ids == null || unstripped_ids.size == 0)
             return null;
         
+        // at this point, there should be some "full" search results to strip from
+        if (strip_results)
+            assert(search_results != null && search_results.size > 0);
+        
+        if (!removal_conditions.is_empty) {
+            if (!strip_results) {
+                search_results = new Gee.HashMap<ImapDB.EmailIdentifier, Gee.Set<string>>();
+                foreach (ImapDB.EmailIdentifier id in unstripped_ids)
+                    search_results.set(id, new Gee.HashSet<string>());
+            }
+            yield remove_results(query, search_results, removal_conditions, cancellable);
+            if (!strip_results)
+                return search_results.size == 0 ? null : search_results.keys;
+        }
+        
         if (!strip_results)
             return unstripped_ids;
-        
-        // at this point, there should be some "full" search results to strip from
-        assert(search_results != null && search_results.size > 0);
         
         strip_greedy_results(query, search_results);
         
         return search_results.size == 0 ? null : search_results.keys;
+    }
+    
+    private Gee.Map<Geary.NamedFlag, bool> get_removal_conditions(ImapDB.SearchQuery query) {
+        Gee.Map<Geary.NamedFlag, bool> removal_conditions = new Gee.HashMap<Geary.NamedFlag, bool>();
+        foreach (string? field in query.get_fields())
+            if (field == "is") {
+                Gee.List<SearchTerm>? terms = query.get_search_terms(field);
+                foreach (SearchTerm term in terms)
+                    if (term.parsed.down() == _("read"))
+                        removal_conditions.set(new NamedFlag("UNREAD"), true);
+                    else if (term.parsed.down() == _("unread"))
+                        removal_conditions.set(new NamedFlag("UNREAD"), false);
+                    else if (term.parsed.down() == _("starred"))
+                        removal_conditions.set(new NamedFlag("FLAGGED"), false);
+                return removal_conditions;
+            }
+        return removal_conditions;
+    }
+    
+    private async void remove_results(ImapDB.SearchQuery query,
+        Gee.Map<ImapDB.EmailIdentifier, Gee.Set<string>> search_results,
+        Gee.Map<Geary.NamedFlag, bool> removal_conditions, Cancellable? cancellable = null) {
+        Geary.Email.Field required_fields = Geary.Email.Field.FLAGS;
+        Gee.MapIterator<ImapDB.EmailIdentifier, Gee.Set<string>> iter = search_results.map_iterator();
+        while (iter.next()) {
+            try {
+                ImapDB.EmailIdentifier id = iter.get_key();
+                Geary.Email email = yield fetch_email_async(id, required_fields, cancellable);
+                foreach (Geary.NamedFlag flag in removal_conditions.keys)
+                    if (email.email_flags.contains(flag) == removal_conditions.get(flag)) {
+                        iter.unset();
+                        break;
+                    }
+            } catch (Error e) {
+                debug("Error fetching email: %s", e.message);
+            }
+        }
     }
     
     // Strip out search results that only contain a hit due to "greedy" matching of the stemmed
