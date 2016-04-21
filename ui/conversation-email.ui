@@ -237,6 +237,80 @@
       <action-widget response="1">button3</action-widget>
     </action-widgets>
   </object>
+  <object class="GtkInfoBar" id="not_saved_infobar">
+    <property name="app_paintable">True</property>
+    <property name="can_focus">False</property>
+    <property name="message_type">warning</property>
+    <child internal-child="action_area">
+      <object class="GtkButtonBox">
+        <property name="can_focus">False</property>
+        <property name="spacing">6</property>
+        <property name="layout_style">end</property>
+        <child>
+          <object class="GtkButton" id="button1">
+            <property name="label" translatable="yes">Try Again</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">False</property>
+        <property name="position">0</property>
+      </packing>
+    </child>
+    <child internal-child="content_area">
+      <object class="GtkBox">
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">16</property>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">Message not saved</property>
+            <property name="xalign">0</property>
+            <attributes>
+              <attribute name="weight" value="bold"/>
+            </attributes>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkLabel">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label" translatable="yes">This message was sent, but has not been saved your account.</property>
+            <property name="xalign">0</property>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">False</property>
+        <property name="position">0</property>
+      </packing>
+    </child>
+    <action-widgets>
+      <action-widget response="1">button1</action-widget>
+    </action-widgets>
+  </object>
   <object class="GtkBox" id="sub_messages_box">
     <property name="visible">True</property>
     <property name="can_focus">False</property>

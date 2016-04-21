@@ -60,6 +60,9 @@ public class ConversationEmail : Gtk.Box {
     private Gtk.InfoBar draft_infobar;
 
     [GtkChild]
+    private Gtk.InfoBar not_saved_infobar;
+
+    [GtkChild]
     private Gtk.Box sub_messages_box;
 
     [GtkChild]
@@ -117,6 +120,8 @@ public class ConversationEmail : Gtk.Box {
                     if (response_id == 1) { edit_draft(email); }
                 });
         }
+
+        primary_message.infobar_box.pack_start(not_saved_infobar, false, false, 0);
 
         // if (email.from != null && email.from.contains_normalized(current_account_information.email)) {
         //  // XXX set a RO property?
@@ -273,10 +278,9 @@ public class ConversationEmail : Gtk.Box {
             unstar_button.hide();
         }
 
-        //if (email.email_flags.is_outbox_sent()) {
-        //  email_warning.set_inner_html(
-        //      _("This message was sent successfully, but could not be saved to %s.").printf(
-        //            Geary.SpecialFolderType.SENT.get_display_name()));
+        if (flags.is_outbox_sent()) {
+            not_saved_infobar.show();
+        }
     }
 
     private void on_flag_remote_images(ConversationMessage view) {
