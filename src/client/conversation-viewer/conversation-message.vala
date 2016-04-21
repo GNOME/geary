@@ -64,7 +64,7 @@ public class ConversationMessage : Gtk.Box {
     public Gtk.Box summary_box; // not yet supported: { get; private set; }
 
     [GtkChild]
-    public Gtk.InfoBar draft_infobar; // not yet supported: { get; private set; }
+    public Gtk.Box infobar_box; // not yet supported: { get; private set; }
 
     [GtkChild]
     private Gtk.Image avatar_image;

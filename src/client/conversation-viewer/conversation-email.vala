@@ -57,6 +57,9 @@ public class ConversationEmail : Gtk.Box {
     private Gtk.MenuButton email_menubutton;
 
     [GtkChild]
+    private Gtk.InfoBar draft_infobar;
+
+    [GtkChild]
     private Gtk.Box sub_messages_box;
 
     [GtkChild]
@@ -102,16 +105,18 @@ public class ConversationEmail : Gtk.Box {
         primary_message.web_view.link_selected.connect((link) => {
                 link_activated(link);
             });
-        primary_message.draft_infobar.response.connect((infobar, response_id) => {
-                if (response_id == 1) { edit_draft(email); }
-            });
         primary_message.summary_box.pack_start(action_box, false, false, 0);
-        if (is_draft) {
-            primary_message.draft_infobar.show();
-        }
 
         email_menubutton.set_menu_model(build_message_menu(email));
         email_menubutton.set_sensitive(false);
+
+        primary_message.infobar_box.pack_start(draft_infobar, false, false, 0);
+        if (is_draft) {
+            draft_infobar.show();
+            draft_infobar.response.connect((infobar, response_id) => {
+                    if (response_id == 1) { edit_draft(email); }
+                });
+        }
 
         // if (email.from != null && email.from.contains_normalized(current_account_information.email)) {
         //  // XXX set a RO property?
