@@ -996,9 +996,23 @@ private class Geary.ImapDB.Account : BaseObject {
         return phrases;
     }
     
-    private void sql_add_query_phrases(StringBuilder sql, Gee.HashMap<string, string> query_phrases) {
-        foreach (string field in query_phrases.keys)
-            sql.append(" AND %s MATCH ?".printf(field));
+    private void sql_add_query_phrases(StringBuilder sql, Gee.HashMap<string, string> query_phrases,
+        string operator, string columns, string condition) {
+        bool is_first_field = true;
+        foreach (string field in query_phrases.keys) {
+            if (!is_first_field)
+                sql.append_printf("""
+                    %s
+                    SELECT %s
+                    FROM MessageSearchTable
+                    WHERE %s
+                    MATCH ?
+                    %s
+                """, operator, columns, field, condition);
+            else
+                sql.append_printf(" AND %s MATCH ?", field);
+            is_first_field = false;
+        }
     }
     
     private int sql_bind_query_phrases(Db.Statement stmt, int start_index,
@@ -1102,7 +1116,7 @@ private class Geary.ImapDB.Account : BaseObject {
                     FROM MessageSearchTable
                     WHERE 1=1
             """);
-            sql_add_query_phrases(sql, query_phrases);
+            sql_add_query_phrases(sql, query_phrases, "INTERSECT", "docid", "");
             sql.append(")");
             
             if (blacklisted_ids_sql != "")
@@ -1805,7 +1819,12 @@ private class Geary.ImapDB.Account : BaseObject {
         """);
         sql_append_ids(sql, id_map.keys);
         sql.append(")");
-        sql_add_query_phrases(sql, query_phrases);
+        
+        StringBuilder condition = new StringBuilder("AND docid IN (");
+        sql_append_ids(condition, id_map.keys);
+        condition.append(")");
+        sql_add_query_phrases(sql, query_phrases, "UNION", "docid, offsets(MessageSearchTable), *",
+            condition.str);
         
         Db.Statement stmt = cx.prepare(sql.str);
         sql_bind_query_phrases(stmt, 0, query_phrases);
@@ -1816,7 +1835,7 @@ private class Geary.ImapDB.Account : BaseObject {
         Db.Result result = stmt.exec(cancellable);
         while (!result.finished) {
             int64 docid = result.rowid_at(0);
-            assert(id_map.contains(docid));
+            assert(id_map.has_key(docid));
             ImapDB.EmailIdentifier id = id_map.get(docid);
             
             // offsets() function returns a list of 4 strings that are ints indicating position
@@ -1841,6 +1860,8 @@ private class Geary.ImapDB.Account : BaseObject {
                     break;
             }
             
+            if (search_matches.has_key(id))
+                matches.add_all(search_matches.get(id));
             search_matches.set(id, matches);
             
             result.next(cancellable);
