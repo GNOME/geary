@@ -145,8 +145,16 @@ public class ConversationEmail : Gtk.Box {
     }
 
     public async void start_loading(Cancellable load_cancelled) {
+        yield primary_message.load_avatar(
+            GearyApplication.instance.controller.avatar_session,
+            load_cancelled
+        );
         yield primary_message.load_message_body(load_cancelled);
         foreach (ConversationMessage message in conversation_messages) {
+            yield message.load_avatar(
+                GearyApplication.instance.controller.avatar_session,
+                load_cancelled
+            );
             yield message.load_message_body(load_cancelled);
         }
         yield load_attachments(load_cancelled);

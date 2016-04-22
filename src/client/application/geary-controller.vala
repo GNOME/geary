@@ -91,7 +91,10 @@ public class GearyController : Geary.BaseObject {
     public AutostartManager? autostart_manager { get; private set; default = null; }
     
     public LoginDialog? login_dialog { get; private set; default = null; }
-    
+
+    public Soup.Session? avatar_session { get; private set; default = null; }
+    private Soup.Cache? avatar_cache = null;
+
     private Geary.Account? current_account = null;
     private Gee.HashMap<Geary.Account, Geary.App.EmailStore> email_stores
         = new Gee.HashMap<Geary.Account, Geary.App.EmailStore>();
@@ -183,7 +186,22 @@ public class GearyController : Geary.BaseObject {
         // Create DB upgrade dialog.
         upgrade_dialog = new UpgradeDialog();
         upgrade_dialog.notify[UpgradeDialog.PROP_VISIBLE_NAME].connect(display_main_window_if_ready);
-        
+
+        // Use a global avatar session because a cache must be used
+        // per-session, and we don't want to have to load the cache
+        // for each conversation load.
+        File avatar_cache_dir = GearyApplication.instance.get_user_cache_directory()
+            .get_child("avatar_cache");
+        avatar_cache = new Soup.Cache(
+            avatar_cache_dir.get_path(),
+            Soup.CacheType.SINGLE_USER
+        );
+        avatar_cache.set_max_size(4 * 1024 * 1024); // 4MB
+        avatar_session = new Soup.Session.with_options(
+            Soup.SESSION_USER_AGENT, "Geary/" + GearyApplication.VERSION
+        );
+        avatar_session.add_feature(avatar_cache);
+
         // Create the main window (must be done after creating actions.)
         main_window = new MainWindow(GearyApplication.instance);
         main_window.on_shift_key.connect(on_shift_key);
@@ -352,7 +370,11 @@ public class GearyController : Geary.BaseObject {
         }
         
         main_window.destroy();
-        
+
+        debug("Flushing avatar cache...");
+        avatar_cache.flush();
+        avatar_cache.dump();
+
         // Turn off the lights and lock the door behind you
         try {
             debug("Closing Engine...");

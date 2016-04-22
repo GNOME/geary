@@ -348,9 +348,14 @@ public class ConversationViewer : Gtk.Stack {
         debug("Showing child: %s\n", widget.get_name());
         base.set_visible_child(widget);
     }
-    
+
     // Removes all displayed e-mails from the view.
     private void clear() {
+        // Cancel any pending avatar loads here, rather than in
+        // ConversationMessage using a Cancellable callback since we
+        // don't have per-message control of it when using
+        // Soup.Session.queue_message.
+        GearyApplication.instance.controller.avatar_session.flush_queue();
         foreach (Gtk.Widget child in conversation_listbox.get_children()) {
             conversation_listbox.remove(child);
         }

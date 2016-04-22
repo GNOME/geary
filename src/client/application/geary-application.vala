@@ -229,7 +229,11 @@ public class GearyApplication : Gtk.Application {
     public File get_user_data_directory() {
         return File.new_for_path(Environment.get_user_data_dir()).get_child("geary");
     }
-    
+
+    public File get_user_cache_directory() {
+        return File.new_for_path(Environment.get_user_cache_dir()).get_child("geary");
+    }
+
     public File get_user_config_directory() {
         return File.new_for_path(Environment.get_user_config_dir()).get_child("geary");
     }

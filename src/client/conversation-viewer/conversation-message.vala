@@ -67,10 +67,9 @@ public class ConversationMessage : Gtk.Box {
     public Gtk.Box infobar_box; // not yet supported: { get; private set; }
 
     [GtkChild]
-    private Gtk.Image avatar_image;
-
-    [GtkChild]
     private Gtk.Revealer preview_revealer;
+    [GtkChild]
+    private Gtk.Image preview_avatar;
     [GtkChild]
     private Gtk.Label from_preview;
     [GtkChild]
@@ -78,6 +77,8 @@ public class ConversationMessage : Gtk.Box {
 
     [GtkChild]
     private Gtk.Revealer header_revealer;
+    [GtkChild]
+    private Gtk.Image header_avatar;
     [GtkChild]
     private Gtk.Box from_header;
     [GtkChild]
@@ -183,8 +184,6 @@ public class ConversationMessage : Gtk.Box {
     }
 
     public void show_message_body(bool include_transitions=true) {
-        avatar_image.set_pixel_size(32); // XXX constant
-
         Gtk.RevealerTransitionType revealer = preview_revealer.get_transition_type();
         if (!include_transitions) {
             preview_revealer.set_transition_type(Gtk.RevealerTransitionType.NONE);
@@ -208,10 +207,32 @@ public class ConversationMessage : Gtk.Box {
     }
 
     public void hide_message_body() {
-        avatar_image.set_pixel_size(24); // XXX constant
         preview_revealer.set_reveal_child(true);
         header_revealer.set_reveal_child(false);
         body_revealer.set_reveal_child(false);
+    }
+
+    public async void load_avatar(Soup.Session session, Cancellable load_cancellable) {
+        // Queued messages are cancelled in ConversationViewer.clear()
+        // rather than here using a callback on load_cancellable since
+        // we don't have per-message control using
+        // Soup.Session.queue_message.
+        Geary.RFC822.MailboxAddress? primary = message.get_primary_originator();
+        if (primary != null) {
+            int window_scale = get_window().get_scale_factor();
+            int pixel_size = header_avatar.get_pixel_size();
+            Soup.Message message = new Soup.Message(
+                "GET",
+                Gravatar.get_image_uri(
+                    primary, Gravatar.Default.NOT_FOUND, pixel_size * window_scale
+                )
+            );
+            session.queue_message(message, (session, message) => {
+                    if (message.status_code == 200) {
+                        set_avatar(message.response_body.data);
+                    }
+                });
+        }
     }
 
     public async void load_message_body(Cancellable load_cancelled) {
@@ -293,6 +314,41 @@ public class ConversationMessage : Gtk.Box {
     private static void set_header_text(Gtk.Box header, string text) {
         ((Gtk.Label) header.get_children().nth(1).data).set_text(text);
         header.set_visible(true);
+    }
+
+    private void set_avatar(uint8[] image_data) {
+        Gdk.Pixbuf avatar = null;
+        Gdk.PixbufLoader loader = new Gdk.PixbufLoader();
+        try {
+            loader.write(image_data);
+            loader.close();
+            avatar = loader.get_pixbuf();
+        } catch (Error err) {
+            debug("Error loading Gravatar response: %s", err.message);
+        }
+
+        if (avatar != null) {
+            Gdk.Window window = get_window();
+            int window_scale = window.get_scale_factor();
+            int preview_size = preview_avatar.pixel_size * window_scale;
+            preview_avatar.set_from_surface(
+                Gdk.cairo_surface_create_from_pixbuf(
+                    avatar.scale_simple(
+                        preview_size, preview_size, Gdk.InterpType.BILINEAR
+                    ),
+                    window_scale,
+                    window)
+            );
+            int header_size = header_avatar.pixel_size * window_scale;
+            if (avatar.width != header_size) {
+                avatar = avatar.scale_simple(
+                    header_size, header_size, Gdk.InterpType.BILINEAR
+                );
+            }
+            header_avatar.set_from_surface(
+                Gdk.cairo_surface_create_from_pixbuf(avatar, window_scale, window)
+            );
+        }
     }
 
     // This delegate is called from within Geary.RFC822.Message.get_body while assembling the plain
