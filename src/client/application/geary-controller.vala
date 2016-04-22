@@ -196,6 +196,7 @@ public class GearyController : Geary.BaseObject {
             avatar_cache_dir.get_path(),
             Soup.CacheType.SINGLE_USER
         );
+        avatar_cache.load();
         avatar_cache.set_max_size(4 * 1024 * 1024); // 4MB
         avatar_session = new Soup.Session.with_options(
             Soup.SESSION_USER_AGENT, "Geary/" + GearyApplication.VERSION
