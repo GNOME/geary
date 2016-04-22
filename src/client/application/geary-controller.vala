@@ -16,7 +16,9 @@ extern bool gcr_trust_is_certificate_pinned(Gcr.Certificate cert, string purpose
 extern bool gcr_trust_remove_pinned_certificate(Gcr.Certificate cert, string purpose, string peer,
     Cancellable? cancellable) throws Error;
 
-// Primary controller object for Geary.
+/**
+ * Primary controller for a Geary application instance.
+ */
 public class GearyController : Geary.BaseObject {
     // Named actions.
     //
