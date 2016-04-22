@@ -219,7 +219,7 @@ public class ConversationMessage : Gtk.Box {
         // Soup.Session.queue_message.
         Geary.RFC822.MailboxAddress? primary = message.get_primary_originator();
         if (primary != null) {
-            int window_scale = get_window().get_scale_factor();
+            int window_scale = get_scale_factor();
             int pixel_size = header_avatar.get_pixel_size();
             Soup.Message message = new Soup.Message(
                 "GET",
@@ -329,7 +329,7 @@ public class ConversationMessage : Gtk.Box {
 
         if (avatar != null) {
             Gdk.Window window = get_window();
-            int window_scale = window.get_scale_factor();
+            int window_scale = get_scale_factor();
             int preview_size = preview_avatar.pixel_size * window_scale;
             preview_avatar.set_from_surface(
                 Gdk.cairo_surface_create_from_pixbuf(

@@ -498,7 +498,7 @@ public class ConversationEmail : Gtk.Box {
         // pixbuf twice as large and blurry, so clamp it to 1 for now
         // - this at least gives is the correct size icons, but still
         // blurry.
-        //int window_scale = get_window().get_scale_factor();
+        //int window_scale = get_scale_factor();
         int window_scale = 1;
         try {
             // If the file is an image, use it. Otherwise get the icon
