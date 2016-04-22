@@ -69,7 +69,7 @@ public class ConversationWebView : StylishWebView {
 
     // Overridden since WebKitGTK+ 2.4.10 at least doesn't want to
     // report a useful height. In combination with the rules from
-    // theming/message-viewer.css we can get an accurate idea of
+    // ui/conversation-web-view.css we can get an accurate idea of
     // the actual height of the content from the BODY element, but
     // only once loaded.
     public override void get_preferred_height(out int minimum_height,
@@ -134,14 +134,14 @@ public class ConversationWebView : StylishWebView {
             WebKit.DOM.Document document = get_dom_document();
             WebKit.DOM.Element style_element = document.create_element(STYLE_NAME);
             
-            string css_text = GearyApplication.instance.read_theme_file("message-viewer.css") ?? "";
+            string css_text = GearyApplication.instance.read_resource("conversation-web-view.css");
             WebKit.DOM.Text text_node = document.create_text_node(css_text);
             style_element.append_child(text_node);
             
             WebKit.DOM.HTMLHeadElement head_element = document.get_head();
             head_element.append_child(style_element);
         } catch (Error error) {
-            debug("Unable to load message-viewer document from files: %s", error.message);
+            debug("Error loading conversation-web-view.css: %s", error.message);
         }
         
         on_document_font_changed();

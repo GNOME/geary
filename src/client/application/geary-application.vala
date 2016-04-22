@@ -295,23 +295,16 @@ public class GearyApplication : Gtk.Application {
         return builder;
     }
 
-    public string? read_theme_file(string filename) {
-        try {
-            File file = get_resource_directory().get_child("theming").get_child(filename);
-            DataInputStream data_input_stream = new DataInputStream(file.read());
-            
-            size_t length;
-            return data_input_stream.read_upto("\0", 1, out length);
-        } catch(Error error) {
-            debug("Unable to load text from theme file: %s", error.message);
-            return null;
-        }
+    public string read_resource(string name) throws Error {
+        InputStream input_stream = resources_open_stream(
+            "/org/gnome/Geary/" + name,
+            ResourceLookupFlags.NONE
+        );
+        DataInputStream data_stream = new DataInputStream(input_stream);
+        size_t length;
+        return data_stream.read_upto("\0", 1, out length);
     }
-    
-    public File get_ui_file(string filename) {
-        return get_resource_directory().get_child("ui").get_child(filename);
-    }
-    
+
     // Loads a UI GResource into the specified UI manager.
     public void load_ui_resource_for_manager(Gtk.UIManager ui, string name) {
         try {
