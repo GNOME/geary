@@ -62,12 +62,6 @@ public class ConversationViewer : Gtk.Stack {
     public signal void mark_emails(Gee.Collection<Geary.EmailIdentifier> emails,
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove);
 
-    // Fired when the user opens an attachment.
-    public signal void open_attachment(Geary.Attachment attachment);
-
-    // Fired when the user wants to save one or more attachments.
-    public signal void save_attachments(Gee.List<Geary.Attachment> attachment);
-    
     // Fired when the user wants to save an image buffer to disk
     public signal void save_buffer_to_file(string? filename, Geary.Memory.Buffer buffer);
     

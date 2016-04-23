@@ -18,6 +18,24 @@
 [GtkTemplate (ui = "/org/gnome/Geary/conversation-email.ui")]
 public class ConversationEmail : Gtk.Box {
 
+
+    /**
+     * Information related to a specific attachment.
+     */
+    public class AttachmentInfo : GLib.Object {
+        // Extends GObject since we put it in a ListStore
+
+        public Geary.Attachment attachment { get; private set; }
+        public AppInfo? app { get; internal set; default = null; }
+
+
+        internal AttachmentInfo(Geary.Attachment attachment) {
+            this.attachment = attachment;
+        }
+
+    }
+
+
     private const int ATTACHMENT_ICON_SIZE = 32;
     private const int ATTACHMENT_PREVIEW_SIZE = 64;
 
@@ -25,9 +43,12 @@ public class ConversationEmail : Gtk.Box {
     private const string ACTION_MARK_READ = "mark_read";
     private const string ACTION_MARK_UNREAD = "mark_unread";
     private const string ACTION_MARK_UNREAD_DOWN = "mark_unread_down";
+    private const string ACTION_OPEN_ATTACHMENTS = "open_attachments";
     private const string ACTION_PRINT = "print";
     private const string ACTION_REPLY_SENDER = "reply_sender";
     private const string ACTION_REPLY_ALL = "reply_all";
+    private const string ACTION_SAVE_ATTACHMENTS = "save_attachments";
+    private const string ACTION_SAVE_ALL_ATTACHMENTS = "save_all_attachments";
     private const string ACTION_STAR = "star";
     private const string ACTION_UNSTAR = "unstar";
     private const string ACTION_VIEW_SOURCE = "view_source";
@@ -51,6 +72,15 @@ public class ConversationEmail : Gtk.Box {
 
     // Attachment ids that have been displayed inline
     private Gee.HashSet<string> inlined_content_ids = new Gee.HashSet<string>();
+
+    // A subset of the message's attachments that are displayed in the
+    // attachments view
+    Gee.List<AttachmentInfo> displayed_attachments =
+        new Gee.LinkedList<AttachmentInfo>();
+
+    // A subset of the message's attachments selected by the user
+    Gee.Set<AttachmentInfo> selected_attachments =
+        new Gee.HashSet<AttachmentInfo>();
 
     // Message-specific actions
     private SimpleActionGroup message_actions = new SimpleActionGroup();
@@ -83,7 +113,12 @@ public class ConversationEmail : Gtk.Box {
     private Gtk.Box attachments_box;
 
     [GtkChild]
+    private Gtk.IconView attachments_view;
+
+    [GtkChild]
     private Gtk.ListStore attachments_model;
+
+    private Gtk.Menu attachments_menu;
 
     // Fired when the user clicks "reply" in the message menu.
     public signal void reply_to_message(Geary.Email message);
@@ -104,11 +139,15 @@ public class ConversationEmail : Gtk.Box {
         Geary.Email email, Geary.NamedFlag? to_add, Geary.NamedFlag? to_remove
     );
 
+
     // Fired on link activation in the web_view
     public signal void link_activated(string link);
 
     // Fired on attachment activation
-    public signal void attachment_activated(Geary.Attachment attachment);
+    public signal void attachments_activated(Gee.Collection<AttachmentInfo> attachments);
+
+    // Fired when the save attachments action is activated
+    public signal void save_attachments(Gee.Collection<AttachmentInfo> attachments);
 
     // Fired the edit draft button is clicked.
     public signal void edit_draft(Geary.Email email);
@@ -138,11 +177,20 @@ public class ConversationEmail : Gtk.Box {
         add_action(ACTION_MARK_UNREAD_DOWN).activate.connect(() => {
                 mark_email_from(this.email, Geary.EmailFlags.UNREAD, null);
             });
+        add_action(ACTION_OPEN_ATTACHMENTS).activate.connect(() => {
+                attachments_activated(selected_attachments);
+            });
         add_action(ACTION_REPLY_ALL).activate.connect(() => {
                 reply_all_message(this.email);
             });
         add_action(ACTION_REPLY_SENDER).activate.connect(() => {
                 reply_to_message(this.email);
+            });
+        add_action(ACTION_SAVE_ATTACHMENTS).activate.connect(() => {
+                save_attachments(selected_attachments);
+            });
+        add_action(ACTION_SAVE_ALL_ATTACHMENTS).activate.connect(() => {
+                save_attachments(displayed_attachments);
             });
         add_action(ACTION_STAR).activate.connect(() => {
                 mark_email(this.email, Geary.EmailFlags.FLAGGED, null);
@@ -183,6 +231,11 @@ public class ConversationEmail : Gtk.Box {
         );
         email_menubutton.set_menu_model((MenuModel) builder.get_object("email_menu"));
         email_menubutton.set_sensitive(false);
+
+        attachments_menu = new Gtk.Menu.from_model(
+            (MenuModel) builder.get_object("attachments_menu")
+        );
+        attachments_menu.attach_to_widget(this, null);
 
         primary_message.infobar_box.pack_start(draft_infobar, false, false, 0);
         if (is_draft) {
@@ -341,78 +394,80 @@ public class ConversationEmail : Gtk.Box {
 
     [GtkCallback]
     private void on_attachments_view_activated(Gtk.IconView view, Gtk.TreePath path) {
-        Gtk.TreeIter iter;
-        Value attachment_id;
-
-        attachments_model.get_iter(out iter, path);
-        attachments_model.get_value(iter, 2, out attachment_id);
-
-        Geary.Attachment? attachment = null;
-        try {
-            attachment = email.get_attachment(attachment_id.get_string());
-        } catch (Error error) {
-            warning("Error getting attachment: %s", error.message);
-        }
-
-        if (attachment != null) {
-            attachment_activated(attachment);
-        }
+        AttachmentInfo attachment_info = attachment_info_for_view_path(path);
+        attachments_activated(
+            Geary.iterate<AttachmentInfo>(attachment_info).to_array_list()
+        );
     }
 
-    // private void save_attachment(Geary.Attachment attachment) {
-    //     Gee.List<Geary.Attachment> attachments = new Gee.ArrayList<Geary.Attachment>();
-    //     attachments.add(attachment);
-    //     get_viewer().save_attachments(attachments);
-    // }
+    [GtkCallback]
+    private void on_attachments_view_selection_changed() {
+        selected_attachments.clear();
+        List<Gtk.TreePath> selected = attachments_view.get_selected_items();
+        selected.foreach((path) => {
+                selected_attachments.add(attachment_info_for_view_path(path));
+            });
+    }
 
-    // private void show_attachment_menu(Geary.Email email, Geary.Attachment attachment) {
-    //     attachment_menu = build_attachment_menu(email, attachment);
-    //     attachment_menu.show_all();
-    //     attachment_menu.popup(null, null, null, 0, Gtk.get_current_event_time());
-    // }
+    [GtkCallback]
+    private bool on_attachments_view_button_press_event(Gdk.EventButton event) {
+        if (event.button != Gdk.BUTTON_SECONDARY) {
+            return false;
+        }
 
-    // private Gtk.Menu build_attachment_menu(Geary.Email email, Geary.Attachment attachment) {
-    //     Gtk.Menu menu = new Gtk.Menu();
-    //     menu.selection_done.connect(on_attachment_menu_selection_done);
+        Gtk.TreePath path = attachments_view.get_path_at_pos(
+            (int) event.x, (int) event.y
+            );
+        AttachmentInfo attachment = attachment_info_for_view_path(path);
+        if (!selected_attachments.contains(attachment)) {
+            attachments_view.unselect_all();
+            attachments_view.select_path(path);
+        }
+        attachments_menu.popup(null, null, null, event.button, event.time);
+        return false;
+    }
 
-    //     Gtk.MenuItem save_attachment_item = new Gtk.MenuItem.with_mnemonic(_("_Save As..."));
-    //     save_attachment_item.activate.connect(() => save_attachment(attachment));
-    //     menu.append(save_attachment_item);
-
-    //     if (displayed_attachments(email) > 1) {
-    //         Gtk.MenuItem save_all_item = new Gtk.MenuItem.with_mnemonic(_("Save All A_ttachments..."));
-    //         save_all_item.activate.connect(() => save_attachments(email.attachments));
-    //         menu.append(save_all_item);
-    //     }
-
-    //     return menu;
-    // }
+    private AttachmentInfo attachment_info_for_view_path(Gtk.TreePath path) {
+        Gtk.TreeIter iter;
+        attachments_model.get_iter(out iter, path);
+        Value info_value;
+        attachments_model.get_value(iter, 2, out info_value);
+        AttachmentInfo info = (AttachmentInfo) info_value.dup_object();
+        info_value.unset();
+        return info;
+    }
 
     private async void load_attachments(Cancellable load_cancelled) {
-        Gee.List<Geary.Attachment> displayed_attachments =
-            new Gee.LinkedList<Geary.Attachment>();
-
-        // Do we have any attachments to display?
+        // Do we have any attachments to be displayed?
         foreach (Geary.Attachment attachment in email.attachments) {
             if (!(attachment.content_id in inlined_content_ids) &&
                 attachment.content_disposition.disposition_type ==
                     Geary.Mime.DispositionType.ATTACHMENT) {
-                displayed_attachments.add(attachment);
+                displayed_attachments.add(new AttachmentInfo(attachment));
             }
         }
 
         if (displayed_attachments.is_empty) {
+            set_action_enabled(ACTION_OPEN_ATTACHMENTS, false);
+            set_action_enabled(ACTION_SAVE_ATTACHMENTS, false);
+            set_action_enabled(ACTION_SAVE_ALL_ATTACHMENTS, false);
             return;
         }
 
         // Show attachments container. Would like to do this in the
         // ctor but we don't know at that point if any attachments
-        // will be displayed inline
+        // will be displayed inline.
         attachment_icon.set_visible(true);
         primary_message.body_box.pack_start(attachments_box, false, false, 0);
 
         // Add each displayed attachment to the icon view
-        foreach (Geary.Attachment attachment in displayed_attachments) {
+        foreach (AttachmentInfo attachment_info in displayed_attachments) {
+            Geary.Attachment attachment = attachment_info.attachment;
+
+            attachment_info.app = AppInfo.get_default_for_type(
+                attachment.content_type.get_mime_type(), false
+            );
+
             Gdk.Pixbuf? icon =
                 yield load_attachment_icon(attachment, load_cancelled);
             string file_name = null;
@@ -441,7 +496,7 @@ public class ConversationEmail : Gtk.Box {
                 iter,
                 0, icon,
                 1, Markup.printf_escaped("%s\n%s", file_name, file_size),
-                2, attachment.id,
+                2, attachment_info,
                 -1
             );
         }

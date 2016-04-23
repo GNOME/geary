@@ -112,8 +112,8 @@
       <column type="GdkPixbuf"/>
       <!-- column-name label -->
       <column type="gchararray"/>
-      <!-- column-name attachment_id -->
-      <column type="gchararray"/>
+      <!-- column-name attachment_info -->
+      <column type="GObject"/>
     </columns>
   </object>
   <object class="GtkBox" id="attachments_box">
@@ -140,7 +140,9 @@
         <property name="item_orientation">horizontal</property>
         <property name="model">attachments_model</property>
         <property name="spacing">6</property>
+        <signal name="button-press-event" handler="on_attachments_view_button_press_event" swapped="no"/>
         <signal name="item-activated" handler="on_attachments_view_activated" swapped="no"/>
+        <signal name="selection-changed" handler="on_attachments_view_selection_changed" swapped="no"/>
         <child>
           <object class="GtkCellRendererPixbuf" id="icon"/>
           <attributes>
