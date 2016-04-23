@@ -227,7 +227,7 @@ public class ConversationEmail : Gtk.Box {
         primary_message.summary_box.pack_start(action_box, false, false, 0);
 
         Gtk.Builder builder = new Gtk.Builder.from_resource(
-            "/org/gnome/Geary/conversation-message-menu.ui"
+            "/org/gnome/Geary/conversation-email-menus.ui"
         );
         email_menubutton.set_menu_model((MenuModel) builder.get_object("email_menu"));
         email_menubutton.set_sensitive(false);
