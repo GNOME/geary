@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <interface>
-  <menu id="conversation_message_menu">
+  <menu id="email_menu">
     <section>
       <item>
         <attribute name="label" translatable="yes">_Save Attachments</attribute>

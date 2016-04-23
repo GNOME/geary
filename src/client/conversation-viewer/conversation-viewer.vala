@@ -58,16 +58,7 @@ public class ConversationViewer : Gtk.Stack {
     // Fired when an email is removed from the view
     public signal void email_row_removed(ConversationEmail email);
 
-    // Fired when the user clicks "reply" in the message menu.
-    public signal void reply_to_message(Geary.Email message);
-
-    // Fired when the user clicks "reply all" in the message menu.
-    public signal void reply_all_message(Geary.Email message);
-
-    // Fired when the user clicks "forward" in the message menu.
-    public signal void forward_message(Geary.Email message);
-
-    // Fired when the user mark messages.
+    // Fired when the user marks messages.
     public signal void mark_emails(Gee.Collection<Geary.EmailIdentifier> emails,
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove);
 
@@ -656,6 +647,8 @@ public class ConversationViewer : Gtk.Stack {
             current_folder.account.get_contact_store(),
             is_draft
         );
+        conversation_email.mark_email.connect(on_mark_email);
+        conversation_email.mark_email_from.connect(on_mark_email_from);
 
         ConversationMessage conversation_message = conversation_email.primary_message;
         conversation_message.body_box.button_release_event.connect_after((event) => {
@@ -749,7 +742,39 @@ public class ConversationViewer : Gtk.Stack {
         
         return SearchState.NONE;
     }
-    
+
+    private void on_mark_email(Geary.Email email,
+                               Geary.NamedFlag? to_add,
+                               Geary.NamedFlag? to_remove) {
+        Gee.Collection<Geary.EmailIdentifier> ids =
+            new Gee.LinkedList<Geary.EmailIdentifier>();
+        ids.add(email.id);
+        mark_emails(ids, flag_to_flags(to_add), flag_to_flags(to_remove));
+    }
+
+    private void on_mark_email_from(Geary.Email email,
+                                    Geary.NamedFlag? to_add,
+                                    Geary.NamedFlag? to_remove) {
+        Gee.Collection<Geary.EmailIdentifier> ids =
+            new Gee.LinkedList<Geary.EmailIdentifier>();
+        ids.add(email.id);
+        foreach (Geary.Email other in this.emails) {
+            if (Geary.Email.compare_sent_date_ascending(email, other) < 0) {
+                ids.add(other.id);
+            }
+        }
+        mark_emails(ids, flag_to_flags(to_add), flag_to_flags(to_remove));
+    }
+
+    private Geary.EmailFlags? flag_to_flags(Geary.NamedFlag? flag) {
+        Geary.EmailFlags flags = null;
+        if (flag != null) {
+            flags = new Geary.EmailFlags();
+            flags.add(flag);
+        }
+        return flags;
+    }
+
     // Find bar opened.
     private uint on_open_find_bar(uint state, uint event, void *user, Object? object) {
         if (!conversation_find_bar.visible)

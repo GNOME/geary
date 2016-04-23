@@ -21,6 +21,17 @@ public class ConversationEmail : Gtk.Box {
     private const int ATTACHMENT_ICON_SIZE = 32;
     private const int ATTACHMENT_PREVIEW_SIZE = 64;
 
+    private const string ACTION_FORWARD = "forward";
+    private const string ACTION_MARK_READ = "mark_read";
+    private const string ACTION_MARK_UNREAD = "mark_unread";
+    private const string ACTION_MARK_UNREAD_DOWN = "mark_unread_down";
+    private const string ACTION_PRINT = "print";
+    private const string ACTION_REPLY_SENDER = "reply_sender";
+    private const string ACTION_REPLY_ALL = "reply_all";
+    private const string ACTION_STAR = "star";
+    private const string ACTION_UNSTAR = "unstar";
+    private const string ACTION_VIEW_SOURCE = "view_source";
+
 
     // The email message being displayed
     public Geary.Email email { get; private set; }
@@ -40,6 +51,9 @@ public class ConversationEmail : Gtk.Box {
 
     // Attachment ids that have been displayed inline
     private Gee.HashSet<string> inlined_content_ids = new Gee.HashSet<string>();
+
+    // Message-specific actions
+    private SimpleActionGroup message_actions = new SimpleActionGroup();
 
     [GtkChild]
     private Gtk.Box action_box;
@@ -71,6 +85,25 @@ public class ConversationEmail : Gtk.Box {
     [GtkChild]
     private Gtk.ListStore attachments_model;
 
+    // Fired when the user clicks "reply" in the message menu.
+    public signal void reply_to_message(Geary.Email message);
+
+    // Fired when the user clicks "reply all" in the message menu.
+    public signal void reply_all_message(Geary.Email message);
+
+    // Fired when the user clicks "forward" in the message menu.
+    public signal void forward_message(Geary.Email message);
+
+    // Fired when the user updates the message's flags.
+    public signal void mark_email(
+        Geary.Email email, Geary.NamedFlag? to_add, Geary.NamedFlag? to_remove
+    );
+
+    // Fired when the user updates all message's flags from this down.
+    public signal void mark_email_from(
+        Geary.Email email, Geary.NamedFlag? to_add, Geary.NamedFlag? to_remove
+    );
+
     // Fired on link activation in the web_view
     public signal void link_activated(string link);
 
@@ -78,7 +111,10 @@ public class ConversationEmail : Gtk.Box {
     public signal void attachment_activated(Geary.Attachment attachment);
 
     // Fired the edit draft button is clicked.
-    public signal void edit_draft(Geary.Email message);
+    public signal void edit_draft(Geary.Email email);
+
+    // Fired when the view source action is activated
+    public signal void view_source(Geary.Email email);
 
 
     public ConversationEmail(Geary.Email email,
@@ -86,6 +122,38 @@ public class ConversationEmail : Gtk.Box {
                              bool is_draft) {
         this.email = email;
         this.contact_store = contact_store;
+
+        add_action(ACTION_FORWARD).activate.connect(() => {
+                forward_message(this.email);
+            });
+        add_action(ACTION_PRINT).activate.connect(() => {
+                print();
+            });
+        add_action(ACTION_MARK_READ).activate.connect(() => {
+                mark_email(this.email, null, Geary.EmailFlags.UNREAD);
+            });
+        add_action(ACTION_MARK_UNREAD).activate.connect(() => {
+                mark_email(this.email, Geary.EmailFlags.UNREAD, null);
+            });
+        add_action(ACTION_MARK_UNREAD_DOWN).activate.connect(() => {
+                mark_email_from(this.email, Geary.EmailFlags.UNREAD, null);
+            });
+        add_action(ACTION_REPLY_ALL).activate.connect(() => {
+                reply_all_message(this.email);
+            });
+        add_action(ACTION_REPLY_SENDER).activate.connect(() => {
+                reply_to_message(this.email);
+            });
+        add_action(ACTION_STAR).activate.connect(() => {
+                mark_email(this.email, Geary.EmailFlags.FLAGGED, null);
+            });
+        add_action(ACTION_UNSTAR).activate.connect(() => {
+                mark_email(this.email, null, Geary.EmailFlags.FLAGGED);
+            });
+        add_action(ACTION_VIEW_SOURCE).activate.connect(() => {
+                view_source(this.email);
+            });
+        insert_action_group("msg", message_actions);
 
         Geary.RFC822.Message message;
         try {
@@ -110,7 +178,10 @@ public class ConversationEmail : Gtk.Box {
             });
         primary_message.summary_box.pack_start(action_box, false, false, 0);
 
-        email_menubutton.set_menu_model(build_message_menu(email));
+        Gtk.Builder builder = new Gtk.Builder.from_resource(
+            "/org/gnome/Geary/conversation-message-menu.ui"
+        );
+        email_menubutton.set_menu_model((MenuModel) builder.get_object("email_menu"));
         email_menubutton.set_sensitive(false);
 
         primary_message.infobar_box.pack_start(draft_infobar, false, false, 0);
@@ -178,81 +249,6 @@ public class ConversationEmail : Gtk.Box {
         primary_message.hide_message_body();
     }
 
-    private MenuModel build_message_menu(Geary.Email email) {
-        Gtk.Builder builder = new Gtk.Builder.from_resource(
-            "/org/gnome/Geary/conversation-message-menu.ui"
-        );
-
-        MenuModel menu = (MenuModel) builder.get_object("conversation_message_menu");
-
-        // menu.selection_done.connect(on_message_menu_selection_done);
-
-        // int displayed = displayed_attachments(email);
-        // if (displayed > 0) {
-        //     string mnemonic = ngettext("Save A_ttachment...", "Save All A_ttachments...",
-        //         displayed);
-        //     Gtk.MenuItem save_all_item = new Gtk.MenuItem.with_mnemonic(mnemonic);
-        //     save_all_item.activate.connect(() => save_attachments(email.attachments));
-        //     menu.append(save_all_item);
-        //     menu.append(new Gtk.SeparatorMenuItem());
-        // }
-
-        // if (!in_drafts_folder()) {
-        //     // Reply to a message.
-        //     Gtk.MenuItem reply_item = new Gtk.MenuItem.with_mnemonic(_("_Reply"));
-        //     reply_item.activate.connect(() => reply_to_message(email));
-        //     menu.append(reply_item);
-
-        //     // Reply to all on a message.
-        //     Gtk.MenuItem reply_all_item = new Gtk.MenuItem.with_mnemonic(_("Reply to _All"));
-        //     reply_all_item.activate.connect(() => reply_all_message(email));
-        //     menu.append(reply_all_item);
-
-        //     // Forward a message.
-        //     Gtk.MenuItem forward_item = new Gtk.MenuItem.with_mnemonic(_("_Forward"));
-        //     forward_item.activate.connect(() => forward_message(email));
-        //     menu.append(forward_item);
-        // }
-
-        // if (menu.get_children().length() > 0) {
-        //     // Separator.
-        //     menu.append(new Gtk.SeparatorMenuItem());
-        // }
-
-        // // Mark as read/unread.
-        // if (email.is_unread().to_boolean(false)) {
-        //     Gtk.MenuItem mark_read_item = new Gtk.MenuItem.with_mnemonic(_("_Mark as Read"));
-        //     mark_read_item.activate.connect(() => on_mark_read_message(email));
-        //     menu.append(mark_read_item);
-        // } else {
-        //     Gtk.MenuItem mark_unread_item = new Gtk.MenuItem.with_mnemonic(_("_Mark as Unread"));
-        //     mark_unread_item.activate.connect(() => on_mark_unread_message(email));
-        //     menu.append(mark_unread_item);
-
-        //     if (messages.size > 1 && messages.last() != email) {
-        //         Gtk.MenuItem mark_unread_from_here_item = new Gtk.MenuItem.with_mnemonic(
-        //             _("Mark Unread From _Here"));
-        //         mark_unread_from_here_item.activate.connect(() => on_mark_unread_from_here(email));
-        //         menu.append(mark_unread_from_here_item);
-        //     }
-        // }
-
-        // // Print a message.
-        // Gtk.MenuItem print_item = new Gtk.MenuItem.with_mnemonic(Stock._PRINT_MENU);
-        // print_item.activate.connect(() => on_print_message(email));
-        // menu.append(print_item);
-
-        // // Separator.
-        // menu.append(new Gtk.SeparatorMenuItem());
-
-        // // View original message source.
-        // Gtk.MenuItem view_source_item = new Gtk.MenuItem.with_mnemonic(_("_View Source"));
-        // view_source_item.activate.connect(() => on_view_source(email));
-        // menu.append(view_source_item);
-
-        return menu;
-    }
-
     public void update_flags(Geary.Email email) {
         this.email.set_flags(email.email_flags);
         update_email_state();
@@ -266,13 +262,32 @@ public class ConversationEmail : Gtk.Box {
         get_style_context().add_class("geary_manual_read");
     }
 
+    private SimpleAction add_action(string name) {
+        SimpleAction action = new SimpleAction(name, null);
+        message_actions.add_action(action);
+        return action;
+    }
+
+    private void set_action_enabled(string name, bool enabled) {
+        SimpleAction? action = this.message_actions.lookup(name) as SimpleAction;
+        if (action != null) {
+            action.set_enabled(enabled);
+        }
+    }
+
     private void update_email_state(bool include_transitions=true) {
         Geary.EmailFlags flags = email.email_flags;
         Gtk.StyleContext style = get_style_context();
 
         if (flags.is_unread()) {
+            set_action_enabled(ACTION_MARK_READ, true);
+            set_action_enabled(ACTION_MARK_UNREAD, false);
+            set_action_enabled(ACTION_MARK_UNREAD_DOWN, false);
             style.add_class("geary_unread");
         } else {
+            set_action_enabled(ACTION_MARK_READ, false);
+            set_action_enabled(ACTION_MARK_UNREAD, true);
+            set_action_enabled(ACTION_MARK_UNREAD_DOWN, true);
             style.remove_class("geary_unread");
         }
 
@@ -291,12 +306,14 @@ public class ConversationEmail : Gtk.Box {
         }
     }
 
+    private void print() {
+        // XXX this isn't anywhere near good enough
+        primary_message.web_view.get_main_frame().print();
+    }
+
     private void on_flag_remote_images(ConversationMessage view) {
         // XXX check we aren't already auto loading the image
-        Geary.EmailFlags flags = new Geary.EmailFlags();
-        flags.add(Geary.EmailFlags.LOAD_REMOTE_IMAGES);
-        //get_viewer().mark_messages(Geary.iterate<Geary.EmailIdentifier>(email.id).to_array_list(),
-        //flags, null);
+        mark_email(email, Geary.EmailFlags.LOAD_REMOTE_IMAGES, null);
     }
 
 
@@ -346,64 +363,6 @@ public class ConversationEmail : Gtk.Box {
     //     Gee.List<Geary.Attachment> attachments = new Gee.ArrayList<Geary.Attachment>();
     //     attachments.add(attachment);
     //     get_viewer().save_attachments(attachments);
-    // }
-
-    // private void on_mark_read_message(Geary.Email message) {
-    //     Geary.EmailFlags flags = new Geary.EmailFlags();
-    //     flags.add(Geary.EmailFlags.UNREAD);
-    //     get_viewer().mark_messages(Geary.iterate<Geary.EmailIdentifier>(message.id).to_array_list(), null, flags);
-    //     mark_manual_read(message.id);
-    // }
-
-    // private void on_mark_unread_message(Geary.Email message) {
-    //     Geary.EmailFlags flags = new Geary.EmailFlags();
-    //     flags.add(Geary.EmailFlags.UNREAD);
-    //     get_viewer().mark_messages(Geary.iterate<Geary.EmailIdentifier>(message.id).to_array_list(), flags, null);
-    //     mark_manual_read(message.id);
-    // }
-
-    // private void on_mark_unread_from_here(Geary.Email message) {
-    //     Geary.EmailFlags flags = new Geary.EmailFlags();
-    //     flags.add(Geary.EmailFlags.UNREAD);
-
-    //     Gee.Iterator<Geary.Email>? iter = messages.iterator_at(message);
-    //     if (iter == null) {
-    //         warning("Email not found in message list");
-
-    //         return;
-    //     }
-
-    //     // Build a list of IDs to mark.
-    //     Gee.ArrayList<Geary.EmailIdentifier> to_mark = new Gee.ArrayList<Geary.EmailIdentifier>();
-    //     to_mark.add(message.id);
-    //     while (iter.next())
-    //         to_mark.add(iter.get().id);
-
-    //     get_viewer().mark_messages(to_mark, flags, null);
-    //     foreach(Geary.EmailIdentifier id in to_mark)
-    //         mark_manual_read(id);
-    // }
-
-    // private void on_print_message(Geary.Email message) {
-    //     try {
-    //         email_to_element.get(message.id).get_class_list().add("print");
-    //         web_view.get_main_frame().print();
-    //         email_to_element.get(message.id).get_class_list().remove("print");
-    //     } catch (GLib.Error error) {
-    //         debug("Hiding elements for printing failed: %s", error.message);
-    //     }
-    // }
-
-    // private void flag_message() {
-    //     Geary.EmailFlags flags = new Geary.EmailFlags();
-    //     flags.add(Geary.EmailFlags.FLAGGED);
-    //     get_viewer().mark_messages(Geary.iterate<Geary.EmailIdentifier>(email.id).to_array_list(), flags, null);
-    // }
-
-    // private void unflag_message() {
-    //     Geary.EmailFlags flags = new Geary.EmailFlags();
-    //     flags.add(Geary.EmailFlags.FLAGGED);
-    //     get_viewer().mark_messages(Geary.iterate<Geary.EmailIdentifier>(email.id).to_array_list(), null, flags);
     // }
 
     // private void show_attachment_menu(Geary.Email email, Geary.Attachment attachment) {
@@ -569,28 +528,5 @@ public class ConversationEmail : Gtk.Box {
 
         return pixbuf;
     }
-
-    // private void on_view_source(Geary.Email message) {
-    //     string source = message.header.buffer.to_string() + message.body.buffer.to_string();
-
-    //     try {
-    //         string temporary_filename;
-    //         int temporary_handle = FileUtils.open_tmp("geary-message-XXXXXX.txt",
-    //             out temporary_filename);
-    //         FileUtils.set_contents(temporary_filename, source);
-    //         FileUtils.close(temporary_handle);
-
-    //         // ensure this file is only readable by the user ... this needs to be done after the
-    //         // file is closed
-    //         FileUtils.chmod(temporary_filename, (int) (Posix.S_IRUSR | Posix.S_IWUSR));
-
-    //         string temporary_uri = Filename.to_uri(temporary_filename, null);
-    //         Gtk.show_uri(web_view.get_screen(), temporary_uri, Gdk.CURRENT_TIME);
-    //     } catch (Error error) {
-    //         ErrorDialog dialog = new ErrorDialog(GearyApplication.instance.controller.main_window,
-    //             _("Failed to open default text editor."), error.message);
-    //         dialog.run();
-    //     }
-    // }
 
 }

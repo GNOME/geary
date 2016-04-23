@@ -230,9 +230,6 @@ public class GearyController : Geary.BaseObject {
         main_window.search_bar.search_text_changed.connect(on_search_text_changed);
         main_window.conversation_viewer.email_row_added.connect(on_email_row_added);
         main_window.conversation_viewer.email_row_removed.connect(on_email_row_removed);
-        main_window.conversation_viewer.reply_to_message.connect(on_reply_to_message);
-        main_window.conversation_viewer.reply_all_message.connect(on_reply_all_message);
-        main_window.conversation_viewer.forward_message.connect(on_forward_message);
         main_window.conversation_viewer.mark_emails.connect(on_conversation_viewer_mark_emails);
         main_window.conversation_viewer.save_attachments.connect(on_save_attachments);
         main_window.conversation_viewer.save_buffer_to_file.connect(on_save_buffer_to_file);
@@ -309,9 +306,6 @@ public class GearyController : Geary.BaseObject {
         main_window.search_bar.search_text_changed.disconnect(on_search_text_changed);
         main_window.conversation_viewer.email_row_added.disconnect(on_email_row_added);
         main_window.conversation_viewer.email_row_removed.disconnect(on_email_row_removed);
-        main_window.conversation_viewer.reply_to_message.disconnect(on_reply_to_message);
-        main_window.conversation_viewer.reply_all_message.disconnect(on_reply_all_message);
-        main_window.conversation_viewer.forward_message.disconnect(on_forward_message);
         main_window.conversation_viewer.mark_emails.disconnect(on_conversation_viewer_mark_emails);
         main_window.conversation_viewer.save_attachments.disconnect(on_save_attachments);
         main_window.conversation_viewer.save_buffer_to_file.disconnect(on_save_buffer_to_file);
@@ -2606,15 +2600,23 @@ public class GearyController : Geary.BaseObject {
     }
 
     private void on_email_row_added(ConversationEmail message) {
+        message.reply_to_message.connect(on_reply_to_message);
+        message.reply_all_message.connect(on_reply_all_message);
+        message.forward_message.connect(on_forward_message);
         message.link_activated.connect(on_link_activated);
         message.attachment_activated.connect(on_attachment_activated);
         message.edit_draft.connect(on_edit_draft);
+        message.view_source.connect(on_view_source);
     }
 
     private void on_email_row_removed(ConversationEmail message) {
+        message.reply_to_message.disconnect(on_reply_to_message);
+        message.reply_all_message.disconnect(on_reply_all_message);
+        message.forward_message.disconnect(on_forward_message);
         message.link_activated.disconnect(on_link_activated);
         message.attachment_activated.disconnect(on_attachment_activated);
         message.edit_draft.disconnect(on_edit_draft);
+        message.view_source.disconnect(on_view_source);
     }
 
     private void on_link_activated(string link) {
@@ -2627,6 +2629,33 @@ public class GearyController : Geary.BaseObject {
 
     private void on_edit_draft(Geary.Email draft) {
         create_compose_widget(ComposerWidget.ComposeType.NEW_MESSAGE, draft, null, null, true);
+    }
+
+
+    private void on_view_source(Geary.Email message) {
+        string source = (message.header.buffer.to_string() +
+                         message.body.buffer.to_string());
+        string temporary_filename;
+        try {
+            int temporary_handle = FileUtils.open_tmp("geary-message-XXXXXX.txt",
+                                                      out temporary_filename);
+            FileUtils.set_contents(temporary_filename, source);
+            FileUtils.close(temporary_handle);
+
+            // ensure this file is only readable by the user ... this
+            // needs to be done after the file is closed
+            FileUtils.chmod(temporary_filename, (int) (Posix.S_IRUSR | Posix.S_IWUSR));
+
+            string temporary_uri = Filename.to_uri(temporary_filename, null);
+            Gtk.show_uri(main_window.get_screen(), temporary_uri, Gdk.CURRENT_TIME);
+        } catch (Error error) {
+            ErrorDialog dialog = new ErrorDialog(
+                main_window,
+                _("Failed to open default text editor."),
+                error.message
+            );
+            dialog.run();
+        }
     }
 
     // Disables all single-message buttons and enables all multi-message buttons.
