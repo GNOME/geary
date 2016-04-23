@@ -89,7 +89,7 @@ public class ConversationEmail : Gtk.Box {
     private Gtk.Box action_box;
 
     [GtkChild]
-    private Gtk.Image attachment_icon;
+    private Gtk.Button attachments_button;
 
     [GtkChild]
     private Gtk.Button star_button;
@@ -457,7 +457,7 @@ public class ConversationEmail : Gtk.Box {
         // Show attachments container. Would like to do this in the
         // ctor but we don't know at that point if any attachments
         // will be displayed inline.
-        attachment_icon.set_visible(true);
+        attachments_button.set_visible(true);
         primary_message.body_box.pack_start(attachments_box, false, false, 0);
 
         // Add each displayed attachment to the icon view

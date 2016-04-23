@@ -23,10 +23,21 @@
     <property name="valign">start</property>
     <property name="homogeneous">True</property>
     <child>
-      <object class="GtkImage" id="attachment_icon">
-        <property name="can_focus">False</property>
-        <property name="tooltip_text" translatable="yes">This message has attachments</property>
-        <property name="icon_name">mail-attachment-symbolic</property>
+      <object class="GtkButton" id="attachments_button">
+        <property name="sensitive">False</property>
+        <property name="can_focus">True</property>
+        <property name="receives_default">True</property>
+        <property name="tooltip_text" translatable="yes">Save all attachments</property>
+        <property name="valign">start</property>
+        <property name="action_name">msg.save_all_attachments</property>
+        <property name="relief">none</property>
+        <child>
+          <object class="GtkImage">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="icon_name">mail-attachment-symbolic</property>
+          </object>
+        </child>
       </object>
       <packing>
         <property name="expand">False</property>

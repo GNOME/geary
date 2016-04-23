@@ -4,12 +4,6 @@
   <menu id="email_menu">
     <section>
       <item>
-        <attribute name="label" translatable="yes">_Save Attachments</attribute>
-        <attribute name="action">msg.save_all_attachments</attribute>
-      </item>
-    </section>
-    <section>
-      <item>
         <attribute name="label" translatable="yes">_Reply</attribute>
         <attribute name="action">msg.reply_sender</attribute>
       </item>
