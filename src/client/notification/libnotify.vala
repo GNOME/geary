@@ -196,11 +196,10 @@ public class Libnotify : Geary.BaseObject {
         // but it means in the future, a more robust system will be needed.)
         if (error_notification != null)
             return;
-        
-        error_notification = issue_notification("email", summary, body,
-            IconFactory.instance.application_icon, null);
+
+        error_notification = issue_notification("email", summary, body, null, null);
     }
-    
+
     public void clear_error_notification() {
         if (error_notification != null) {
             try {

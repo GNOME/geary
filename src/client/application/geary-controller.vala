@@ -174,10 +174,14 @@ public class GearyController : Geary.BaseObject {
      * Starts the controller and brings up Geary.
      */
     public async void open_async() {
-        // This initializes the IconFactory, important to do before the actions are created (as they
-        // refer to some of Geary's custom icons)
+        // This initializes the IconFactory, important to do before
+        // the actions are created (as they refer to some of Geary's
+        // custom icons)
         IconFactory.instance.init();
-        
+
+        // Ensure all geary windows have an icon
+        Gtk.Window.set_default_icon_name("geary");
+
         // Setup actions.
         setup_actions();
         GearyApplication.instance.load_ui_resource("accelerators.ui");
@@ -1709,6 +1713,7 @@ public class GearyController : Geary.BaseObject {
             "authors", GearyApplication.AUTHORS,
             "copyright", GearyApplication.COPYRIGHT,
             "license-type", Gtk.License.LGPL_2_1,
+            "logo-icon-name", "geary",
             "version", GearyApplication.VERSION,
             "website", GearyApplication.WEBSITE,
             "website-label", GearyApplication.WEBSITE_LABEL,
@@ -1718,7 +1723,7 @@ public class GearyController : Geary.BaseObject {
             "translator-credits", _("translator-credits")
         );
     }
-    
+
     private void on_donate() {
         try {
             Gtk.show_uri(null, GearyApplication.DONATE, Gdk.CURRENT_TIME);

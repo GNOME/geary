@@ -63,14 +63,7 @@ public class MainWindow : Gtk.ApplicationWindow {
         
         spinner.set_progress_monitor(progress_monitor);
         progress_monitor.add(conversation_list_store.preview_monitor);
-        
-        GLib.List<Gdk.Pixbuf> pixbuf_list = new GLib.List<Gdk.Pixbuf>();
-        pixbuf_list.append(IconFactory.instance.application_icon);
-        // Use copy() because set_default_icon_list() actually accepts an owned reference
-        // If we didn't hold the pixbufs in memory, would need to use copy_deep()
-        // See https://mail.gnome.org/archives/vala-list/2014-August/msg00022.html
-        set_default_icon_list(pixbuf_list.copy());
-        
+
         delete_event.connect(on_delete_event);
         key_press_event.connect(on_key_press_event);
         key_release_event.connect(on_key_release_event);
