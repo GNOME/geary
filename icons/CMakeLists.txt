@@ -33,6 +33,7 @@ install(FILES "32x32/geary.png" DESTINATION share/icons/hicolor/32x32/apps)
 install(FILES "48x48/geary.png" DESTINATION share/icons/hicolor/48x48/apps)
 install(FILES "256x256/geary.png" DESTINATION share/icons/hicolor/256x256/apps)
 install(FILES "512x512/geary.png" DESTINATION share/icons/hicolor/512x512/apps)
+install(FILES "geary-symbolic.svg" DESTINATION share/icons/hicolor/symbolic/apps)
 
 # Optional: update icon cache at install time.
 if (ICON_UPDATE)
