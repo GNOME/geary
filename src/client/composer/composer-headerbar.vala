@@ -87,22 +87,7 @@ public class ComposerHeaderbar : PillHeaderbar {
         add_end(send_button);
         add_end(close_buttons);
         add_end(detach_end);
-#endif
-        // Application button for when taking over main header bar.  If we exported an app menu,
-        // we don't need this.
-        if (!Gtk.Settings.get_default().gtk_shell_shows_app_menu) {
-            Gtk.Menu application_menu = new Gtk.Menu.from_model(
-                GearyApplication.instance.controller.app_menu);
-            Gtk.Button menu_button = create_menu_button(null, application_menu,
-                ComposerWidget.ACTION_GEAR_MENU);
-            add_end(menu_button);
-            bind_property("state", menu_button, "visible", BindingFlags.SYNC_CREATE,
-                (binding, source_value, ref target_value) => {
-                    target_value = (state == ComposerWidget.ComposerState.NEW);
-                    return true;
-                });
-        }
-#if GTK_3_12
+#else
         add_end(detach_end);
         add_end(close_buttons);
         add_end(send_button);

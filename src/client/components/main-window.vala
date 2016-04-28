@@ -38,6 +38,7 @@ public class MainWindow : Gtk.ApplicationWindow {
     
     public MainWindow(GearyApplication application) {
         Object(application: application);
+        set_show_menubar(false);
         
         conversation_list_view = new ConversationListView(conversation_list_store);
         
