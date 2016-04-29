@@ -69,19 +69,11 @@ public class Geary.RFC822.Message : BaseObject {
     }
     
     public Message.from_parts(Header header, Text body) throws RFC822Error {
-        // Had some problems with GMime not parsing a message when using a StreamCat, so
-        // manually copy them into a single buffer and decode that way; see
-        // http://redmine.yorba.org/issues/7034
-        // and
-        // https://bugzilla.gnome.org/show_bug.cgi?id=701572
-        //
-        // TODO: When fixed in GMime, return to original behavior of streaming each buffer in
-        uint8[] buffer = new uint8[header.buffer.size + body.buffer.size];
-        uint8* ptr = buffer;
-        GLib.Memory.copy(ptr, header.buffer.get_bytes().get_data(), header.buffer.size);
-        GLib.Memory.copy(ptr + header.buffer.size, body.buffer.get_bytes().get_data(), body.buffer.size);
-        
-        GMime.Parser parser = new GMime.Parser.with_stream(new GMime.StreamMem.with_buffer(buffer));
+        GMime.StreamCat stream_cat = new GMime.StreamCat();
+        stream_cat.add_source(new GMime.StreamMem.with_buffer(header.buffer.get_bytes().get_data()));
+        stream_cat.add_source(new GMime.StreamMem.with_buffer(body.buffer.get_bytes().get_data()));
+
+        GMime.Parser parser = new GMime.Parser.with_stream(stream_cat);
         message = parser.construct_message();
         if (message == null)
             throw new RFC822Error.INVALID("Unable to parse RFC 822 message");
