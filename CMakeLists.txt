@@ -67,6 +67,12 @@ pkg_check_modules(WEBKITGTK110X QUIET webkitgtk-3.0>=1.10.0 webkitgtk-3.0<=1.10.
 
 pkg_check_modules(GTK312X QUIET gtk+-3.0>=3.12.0)
 
+pkg_check_modules(SQLITE311 QUIET sqlite3>=3.11.0)
+pkg_check_modules(SQLITE312 QUIET sqlite3>=3.12.0)
+if (SQLITE311_FOUND AND NOT SQLITE312_FOUND)
+    message(WARNING "SQLite 3.11.x found. Ensure it has been compiled with -DSQLITE_ENABLE_FTS3_TOKENIZER or upgrade to SQLite 3.12.x. See https://bugzilla.gnome.org/show_bug.cgi?id=763203 for details.")
+endif ()
+
 # intl
 include(Gettext)
 if (XGETTEXT_FOUND)

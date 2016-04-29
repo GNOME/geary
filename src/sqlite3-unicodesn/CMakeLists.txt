@@ -23,6 +23,11 @@ add_definitions(
     -DSQLITE_ENABLE_FTS4_UNICODE61
 )
 
+if (SQLITE312_FOUND)
+    message(STATUS "SQLite 3.12 support: ON")
+    add_definitions(-DSQLITE_3_12)
+endif ()
+
 include_directories(
     libstemmer_c/runtime
     libstemmer_c/src_c
