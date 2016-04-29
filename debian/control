@@ -23,7 +23,7 @@ Build-Depends: debhelper (>= 8),
  gnome-doc-utils,
  libgcr-3-dev (>= 3.10.1)
 Standards-Version: 3.8.3
-Homepage: http://www.yorba.org
+Homepage: https://wiki.gnome.org/Apps/Geary
 
 Package: geary
 Architecture: any
@@ -43,11 +43,15 @@ Depends: ${shlibs:Depends}, ${misc:Depends},
  libgcr-base-3-1 (>= 3.10.1),
  libgcr-ui-3-1 (>= 3.10.1)
 Description: Email client
- Geary is an email client built for the GNOME desktop environment.  It
- allows you to read and send email with a simple, modern interface.
+ Geary is an mail application for GNOME designed to let you manage
+ your email quickly and effortlessly.
  .
- Visit http://www.yorba.org to read about the current state of
- Geary's development.
+ Its interface is based on conversations, so you can read an entire
+ discussion without having to click from message to message.
+ .
+ Geary is still in development and has a limited but growing set of
+ features. It works with Gmail, Yahoo! Mail, Outlook.com
+ (experimental), and other popular IMAP servers.
 
 Package: geary-dbg
 Architecture: any
@@ -56,10 +60,13 @@ Priority: extra
 Depends: geary (= ${binary:Version}), ${misc:Depends}
 Enhances: geary
 Description: Email client (debugging symbols)
- Geary is an email client built for the GNOME desktop environment.  It
- allows you to read and send email with a simple, modern interface.
+ Geary is an mail application for GNOME designed to let you manage
+ your email quickly and effortlessly.
  .
- Visit http://www.yorba.org to read about the current state of
- Geary's development.
+ Its interface is based on conversations, so you can read an entire
+ discussion without having to click from message to message.
  .
- This package contains debugging symbols for geary.
+ Geary is still in development and has a limited but growing set of
+ features. It works with Gmail, Yahoo! Mail, Outlook.com
+ (experimental), and other popular IMAP servers.
+

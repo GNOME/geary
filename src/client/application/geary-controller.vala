@@ -21,7 +21,6 @@ public class GearyController : Geary.BaseObject {
     // NOTE: Some actions with accelerators need to also be added to ui/accelerators.ui
     public const string ACTION_HELP = "GearyHelp";
     public const string ACTION_ABOUT = "GearyAbout";
-    public const string ACTION_DONATE = "GearyDonate";
     public const string ACTION_QUIT = "GearyQuit";
     public const string ACTION_NEW_MESSAGE = "GearyNewMessage";
     public const string ACTION_REPLY_TO_MESSAGE = "GearyReplyToMessage";
@@ -390,10 +389,6 @@ public class GearyController : Geary.BaseObject {
         about.label = _("_About");
         entries += about;
         
-        Gtk.ActionEntry donate = { ACTION_DONATE, null, TRANSLATABLE, null, null, on_donate };
-        donate.label = _("_Donate");
-        entries += donate;
-        
         Gtk.ActionEntry quit = { ACTION_QUIT, Stock._QUIT, TRANSLATABLE, "<Ctrl>Q", null, on_quit };
         quit.label = _("_Quit");
         entries += quit;
@@ -568,7 +563,6 @@ public class GearyController : Geary.BaseObject {
         const string[] exported_actions = {
             ACTION_ACCOUNTS,
             ACTION_PREFERENCES,
-            ACTION_DONATE,
             ACTION_HELP,
             ACTION_ABOUT,
             ACTION_QUIT,
@@ -1724,14 +1718,6 @@ public class GearyController : Geary.BaseObject {
         );
     }
 
-    private void on_donate() {
-        try {
-            Gtk.show_uri(null, GearyApplication.DONATE, Gdk.CURRENT_TIME);
-        } catch (Error error) {
-            debug("Error opening donate page: %s", error.message);
-        }
-    }
-    
     private void on_shift_key(bool pressed) {
         if (main_window != null && main_window.main_toolbar != null
             && current_account != null && current_folder != null) {

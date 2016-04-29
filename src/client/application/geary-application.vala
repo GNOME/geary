@@ -17,10 +17,9 @@ public class GearyApplication : Gtk.Application {
     public const string APP_ID = "org.yorba.geary";
     public const string DESCRIPTION = _("Mail Client");
     public const string COPYRIGHT = _("Copyright 2011-2015 Yorba Foundation");
-    public const string WEBSITE = "http://www.yorba.org";
-    public const string WEBSITE_LABEL = _("Visit the Yorba web site");
+    public const string WEBSITE = "https://wiki.gnome.org/Apps/Geary";
+    public const string WEBSITE_LABEL = _("Visit the Geary web site");
     public const string BUGREPORT = "https://wiki.gnome.org/Apps/Geary/ReportingABug";
-    public const string DONATE = "http://www.yorba.org/about/donate";
     
     public const string VERSION = _VERSION;
     public const string INSTALL_PREFIX = _INSTALL_PREFIX;
