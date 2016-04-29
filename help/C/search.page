@@ -44,6 +44,18 @@
 		<td><p>Finds messages where <var>sender</var> matches the From header.</p></td>
 	</tr>
 	<tr>
+		<td><p><input>is:read</input></p></td>
+		<td><p>Finds messages that have been marked as read.</p></td>
+	</tr>
+	<tr>
+		<td><p><input>is:starred</input></p></td>
+		<td><p>Finds messages that have been marked as starred.</p></td>
+	</tr>
+	<tr>
+		<td><p><input>is:unread</input></p></td>
+		<td><p>Finds messages that have been marked as not read.</p></td>
+	</tr>
+	<tr>
 		<td><p><input>subject:<var>text</var></input></p></td>
 		<td><p>Finds messages whose subject contains <var>text</var>.</p></td>
 	</tr>
