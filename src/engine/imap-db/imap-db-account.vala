@@ -1838,6 +1838,15 @@ private class Geary.ImapDB.Account : BaseObject {
             assert(id_map.has_key(docid));
             ImapDB.EmailIdentifier id = id_map.get(docid);
             
+            // XXX Avoid a crash when "database disk image is
+            // malformed" error occurs. Remove this when the SQLite
+            // bug is fixed. See b.g.o #765515 for more info.
+            if (result.string_at(1) == null) {
+                debug("Avoiding a crash from 'database disk image is malformed' error\n");
+                result.next(cancellable);
+                continue;
+            }
+            
             // offsets() function returns a list of 4 strings that are ints indicating position
             // and length of match string in search table corpus
             string[] offset_array = result.nonnull_string_at(1).split(" ");
