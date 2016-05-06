@@ -432,7 +432,7 @@ msgid "Copy _Link"
 msgstr "Kopeeri _lingi aadress"
 
 #: ../../src/client/geary-application.vala:17
-msgid "Copyright 2016 Software Freedom Conservancy Inc."
+msgid "Copyright 2011-2013 Yorba Foundation"
 msgstr "Autoriõigused 2011-2013 Yorba Foundation"
 
 #: ../../ui/composer.glade:21

@@ -429,7 +429,7 @@ msgid "Copy _Link"
 msgstr "Salin _Pautan"
 
 #: ../../src/client/geary-application.vala:17
-msgid "Copyright 2016 Software Freedom Conservancy Inc."
+msgid "Copyright 2011-2013 Yorba Foundation"
 msgstr "Hakcipta 2011-2013 Yayasan Yorba"
 
 #: ../../ui/composer.glade:21

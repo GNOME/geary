@@ -77,7 +77,7 @@ msgstr "További címek a következőhöz: %s"
 msgid "Accounts"
 msgstr "Fiókok"
 
-#. Copyright 2016 Software Freedom Conservancy Inc.
+#. Copyright 2011-2015 Yorba Foundation
 #. *
 #. * This software is licensed under the GNU Lesser General Public License
 #. * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -184,8 +184,8 @@ msgid "        &#8226; Username or password incorrect.\n"
 msgstr "        &#8226; A felhasználónév vagy jelszó helytelen.\n"
 
 #: ../src/client/application/geary-application.vala:19
-msgid "Copyright 2016 Software Freedom Conservancy Inc."
-msgstr "Copyright 2016 Software Freedom Conservancy Inc."
+msgid "Copyright 2011-2015 Yorba Foundation"
+msgstr "Copyright 2011-2015 Yorba Foundation"
 
 #: ../src/client/application/geary-application.vala:21
 msgid "Visit the Yorba web site"

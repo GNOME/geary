@@ -423,7 +423,7 @@ msgid "Copy _Link"
 msgstr "Sao chép _đường liên kết"
 
 #: ../../src/client/geary-application.vala:17
-msgid "Copyright 2016 Software Freedom Conservancy Inc."
+msgid "Copyright 2011-2013 Yorba Foundation"
 msgstr ""
 
 #: ../../ui/composer.glade:21

@@ -70,7 +70,7 @@ msgstr "_Toevoegen"
 msgid "Accounts"
 msgstr "Accounts"
 
-#. Copyright 2016 Software Freedom Conservancy Inc.
+#. Copyright 2011-2014 Yorba Foundation
 #. *
 #. * This software is licensed under the GNU Lesser General Public License
 #. * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -170,9 +170,9 @@ msgid "        &#8226; Username or password incorrect.\n"
 msgstr "        &#8226; Gebruikersnaam of wachtwoord onjuist.\n"
 
 #: ../src/client/application/geary-application.vala:19
-#| msgid "Copyright 2016 Software Freedom Conservancy Inc."
-msgid "Copyright 2016 Software Freedom Conservancy Inc."
-msgstr "Copyright 2016 Software Freedom Conservancy Inc."
+#| msgid "Copyright 2011-2013 Yorba Foundation"
+msgid "Copyright 2011-2014 Yorba Foundation"
+msgstr "Copyright 2011-2014 Yorba Foundation"
 
 #: ../src/client/application/geary-application.vala:21
 msgid "Visit the Yorba web site"
@@ -857,7 +857,7 @@ msgstr "_Van:"
 msgid "From:"
 msgstr "Van:"
 
-#. Copyright 2016 Software Freedom Conservancy Inc.
+#. Copyright 2011-2014 Yorba Foundation
 #. *
 #. * This software is licensed under the GNU Lesser General Public License
 #. * (version 2.1 or later).  See the COPYING file in this distribution.

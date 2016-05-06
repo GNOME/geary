@@ -447,7 +447,7 @@ msgid "Copy _Link"
 msgstr "نسخ الرابط"
 
 #: ../../src/client/geary-application.vala:17
-msgid "Copyright 2016 Software Freedom Conservancy Inc."
+msgid "Copyright 2011-2013 Yorba Foundation"
 msgstr "جميع الحقوق محفوظة 2011-2013 Yorba Foundation."
 
 #: ../../ui/composer.glade:21

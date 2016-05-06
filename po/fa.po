@@ -430,7 +430,7 @@ msgid "Copy _Link"
 msgstr "کپی کردن پیوند"
 
 #: ../../src/client/geary-application.vala:17
-msgid "Copyright 2016 Software Freedom Conservancy Inc."
+msgid "Copyright 2011-2013 Yorba Foundation"
 msgstr "حق کپی از 2011 تا 2013 برای بنیاد Yorba محفوظ است"
 
 #: ../../ui/composer.glade:21
