@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Copyright 2013-2014 Yorba Foundation <geary@yorba.org> -->
+<!-- Copyright 2016 Software Freedom Conservancy Inc. -->
 <component type="desktop">
   <id>geary.desktop</id>
   <metadata_license>CC0-1.0</metadata_license>

@@ -1,6 +1,6 @@
 # po/geary.pot
 # PO message string template file for Geary email client
-# Copyright 2012-2013 Yorba Foundation
+# Copyright 2016 Software Freedom Conservancy Inc.
 # This file is distributed under the GNU LGPL, version 2.1.
 # Translators:
 # George Petsagourakis <petsagouris@gmail.com>, 2013.
@@ -79,7 +79,7 @@ msgstr "Πρόσθετες διευθύνσεις για %s"
 msgid "Accounts"
 msgstr "Λογαριασμοί"
 
-#. Copyright 2011-2015 Yorba Foundation
+#. Copyright 2016 Software Freedom Conservancy Inc.
 #. *
 #. * This software is licensed under the GNU Lesser General Public License
 #. * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -190,8 +190,8 @@ msgstr "        &#8226; Λάθος όνομα χρήστη ή κωδικός π�
 
 #: ../src/client/application/geary-application.vala:19
 #, fuzzy
-#| msgid "Copyright 2011-2014 Yorba Foundation"
-msgid "Copyright 2011-2015 Yorba Foundation"
+#| msgid "Copyright 2016 Software Freedom Conservancy Inc."
+msgid "Copyright 2016 Software Freedom Conservancy Inc."
 msgstr "Πνευματική ιδιοκτησία 2011-2014 Ίδρυμα Yorba"
 
 #: ../src/client/application/geary-application.vala:21

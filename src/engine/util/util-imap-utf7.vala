@@ -1,4 +1,4 @@
-/* Copyright 2013-2015 Yorba Foundation
+/* Copyright 2016 Software Freedom Conservancy Inc.
  * Copyright (c) 2008-2012 Dovecot authors
  *
  * This software is licensed under the GNU Lesser General Public License

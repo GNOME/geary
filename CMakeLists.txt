@@ -1,5 +1,5 @@
 # Geary build script
-# Copyright 2011-2015 Yorba Foundation
+# Copyright 2016 Software Freedom Conservancy Inc.
 #
 # Check http://webdev.elementaryos.org/docs/developer-guide/cmake for documentation
 

@@ -1,6 +1,6 @@
 # po/geary.pot
 # PO message string template file for Geary email client
-# Copyright 2012-2013 Yorba Foundation
+# Copyright 2016 Software Freedom Conservancy Inc.
 # This file is distributed under the GNU LGPL, version 2.1.
 #
 # Translators:
@@ -68,7 +68,7 @@ msgstr "添加(_A)"
 msgid "Accounts"
 msgstr "帐号"
 
-#. Copyright 2011-2014 Yorba Foundation
+#. Copyright 2016 Software Freedom Conservancy Inc.
 #. *
 #. * This software is licensed under the GNU Lesser General Public License
 #. * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -168,8 +168,8 @@ msgid "        &#8226; Username or password incorrect.\n"
 msgstr "        &#8226; 用户名或密码错误.\n"
 
 #: ../src/client/application/geary-application.vala:19
-#| msgid "Copyright 2011-2013 Yorba Foundation"
-msgid "Copyright 2011-2014 Yorba Foundation"
+#| msgid "Copyright 2016 Software Freedom Conservancy Inc."
+msgid "Copyright 2016 Software Freedom Conservancy Inc."
 msgstr "版权所有 2011-2014 Yorba Foundation"
 
 #: ../src/client/application/geary-application.vala:21

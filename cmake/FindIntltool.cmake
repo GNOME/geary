@@ -1,7 +1,7 @@
 # FindIntltool.cmake
 #
 # Jim Nelson <jim@yorba.org>
-# Copyright 2012-2015 Yorba Foundation
+# Copyright 2016 Software Freedom Conservancy Inc.
 
 find_program (INTLTOOL_MERGE_EXECUTABLE intltool-merge)
 

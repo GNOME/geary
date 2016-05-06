@@ -1,6 +1,6 @@
 # po/geary.pot
 # PO message string template file for Geary email client
-# Copyright 2012-2013 Yorba Foundation
+# Copyright 2016 Software Freedom Conservancy Inc.
 # This file is distributed under the GNU LGPL, version 2.1.
 #
 # Translators:
@@ -424,7 +424,7 @@ msgid "Copy _Link"
 msgstr "లంకెను నకలించు (_L)"
 
 #: ../../src/client/geary-application.vala:17
-msgid "Copyright 2011-2013 Yorba Foundation"
+msgid "Copyright 2016 Software Freedom Conservancy Inc."
 msgstr ""
 
 #: ../../ui/composer.glade:21

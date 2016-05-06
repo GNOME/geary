@@ -1,7 +1,7 @@
 # FindDesktopFileValidate.cmake
 #
 # Charles Lindsay <chaz@yorba.org>
-# Copyright 2013-2015 Yorba Foundation
+# Copyright 2016 Software Freedom Conservancy Inc.
 
 find_program (DESKTOP_FILE_VALIDATE_EXECUTABLE desktop-file-validate)
 
