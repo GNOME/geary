@@ -1,7 +1,7 @@
 Source: geary
 Section: gnome
 Priority: optional
-Maintainer: Jim Nelson <jim@yorba.org>
+Maintainer: Michael Gratton <mike@vee.net>
 Build-Depends: debhelper (>= 8),
  libgee-0.8-dev,
  libglib2.0-dev (>= 2.38.0),
