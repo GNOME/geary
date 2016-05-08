@@ -1482,17 +1482,19 @@ public class GearyController : Geary.BaseObject {
     }
     
     private void on_indicator_activated_application(uint32 timestamp) {
+        // When the app is started hidden, show_all() never gets
+        // called, do so here to prevent an empty window appearing.
+        main_window.show_all();
         main_window.present_with_time(timestamp);
     }
     
     private void on_indicator_activated_composer(uint32 timestamp) {
-        main_window.present_with_time(timestamp);
+        on_indicator_activated_application(timestamp);
         on_new_message();
     }
     
     private void on_indicator_activated_inbox(Geary.Folder folder, uint32 timestamp) {
-        main_window.present_with_time(timestamp);
-        
+        on_indicator_activated_application(timestamp);
         main_window.folder_list.select_folder(folder);
     }
     

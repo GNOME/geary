@@ -171,12 +171,12 @@ public class GearyApplication : Gtk.Application {
         
         if (controller.main_window == null)
             return false;
-        
-        if (!controller.main_window.get_realized())
-            controller.main_window.show_all();
-        else
-            controller.main_window.present_with_time(Gdk.CURRENT_TIME);
-        
+
+        // When the app is started hidden, show_all() never gets
+        // called, do so here to prevent an empty window appearing.
+        controller.main_window.show_all();
+        controller.main_window.present();
+
         return true;
     }
     
