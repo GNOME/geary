@@ -294,7 +294,7 @@ public class ConversationViewer : Gtk.Box {
                     ancestor = ancestor_node.get_parent_element();
                 // If the selection is part of a plain text message, we have to stick it in
                 // an appropriately styled div, so that new lines are preserved.
-                if (is_descendant_of(ancestor, ".plaintext")) {
+                if (Util.DOM.is_descendant_of(ancestor, ".plaintext")) {
                     dummy.get_class_list().add("plaintext");
                     dummy.set_attribute("style", "white-space: pre-wrap;");
                     include_dummy = true;
@@ -750,23 +750,40 @@ public class ConversationViewer : Gtk.Box {
         });
         
         // Attach to the click events for hiding/showing quotes, opening the menu, and so forth.
-        bind_event(web_view, ".email", "contextmenu", (Callback) on_context_menu, this);
-        bind_event(web_view, ".quote_container > .hider", "click", (Callback) on_hide_quote_clicked);
-        bind_event(web_view, ".quote_container > .shower", "click", (Callback) on_show_quote_clicked);
-        bind_event(web_view, ".email_container .menu", "click", (Callback) on_menu_clicked, this);
-        bind_event(web_view, ".email_container .starred", "click", (Callback) on_unstar_clicked, this);
-        bind_event(web_view, ".email_container .unstarred", "click", (Callback) on_star_clicked, this);
-        bind_event(web_view, ".email_container .draft_edit .button", "click", (Callback) on_draft_edit_menu, this);
-        bind_event(web_view, ".header .field .value", "click", (Callback) on_value_clicked, this);
-        bind_event(web_view, ".email:not(:only-of-type) .header_container, .email .email .header_container","click", (Callback) on_body_toggle_clicked, this);
-        bind_event(web_view, ".email .compressed_note", "click", (Callback) on_body_toggle_clicked, this);
-        bind_event(web_view, ".attachment_container .attachment", "click", (Callback) on_attachment_clicked, this);
-        bind_event(web_view, ".attachment_container .attachment", "contextmenu", (Callback) on_attachment_menu, this);
-        bind_event(web_view, "." + DATA_IMAGE_CLASS, "contextmenu", (Callback) on_data_image_menu_handler, this);
-        bind_event(web_view, ".remote_images .show_images", "click", (Callback) on_show_images, this);
-        bind_event(web_view, ".remote_images .show_from", "click", (Callback) on_show_images_from, this);
-        bind_event(web_view, ".remote_images .close_show_images", "click", (Callback) on_close_show_images, this);
-        bind_event(web_view, ".body a", "click", (Callback) on_link_clicked, this);
+        Util.DOM.bind_event(web_view, ".email", "contextmenu",
+                (Callback) on_context_menu, this);
+        Util.DOM.bind_event(web_view, ".quote_container > .hider", "click",
+                (Callback) on_hide_quote_clicked);
+        Util.DOM.bind_event(web_view, ".quote_container > .shower", "click",
+                (Callback) on_show_quote_clicked);
+        Util.DOM.bind_event(web_view, ".email_container .menu", "click",
+                (Callback) on_menu_clicked, this);
+        Util.DOM.bind_event(web_view, ".email_container .starred", "click",
+                (Callback) on_unstar_clicked, this);
+        Util.DOM.bind_event(web_view, ".email_container .unstarred", "click",
+                (Callback) on_star_clicked, this);
+        Util.DOM.bind_event(web_view, ".email_container .draft_edit .button", "click",
+                (Callback) on_draft_edit_menu, this);
+        Util.DOM.bind_event(web_view, ".header .field .value", "click",
+                (Callback) on_value_clicked, this);
+        Util.DOM.bind_event(web_view, ".email:not(:only-of-type) .header_container, .email .email .header_container","click",
+                (Callback) on_body_toggle_clicked, this);
+        Util.DOM.bind_event(web_view, ".email .compressed_note", "click",
+                (Callback) on_body_toggle_clicked, this);
+        Util.DOM.bind_event(web_view, ".attachment_container .attachment", "click",
+                (Callback) on_attachment_clicked, this);
+        Util.DOM.bind_event(web_view, ".attachment_container .attachment", "contextmenu",
+                (Callback) on_attachment_menu, this);
+        Util.DOM.bind_event(web_view, "." + DATA_IMAGE_CLASS, "contextmenu",
+                (Callback) on_data_image_menu_handler, this);
+        Util.DOM.bind_event(web_view, ".remote_images .show_images", "click",
+                (Callback) on_show_images, this);
+        Util.DOM.bind_event(web_view, ".remote_images .show_from", "click",
+                (Callback) on_show_images_from, this);
+        Util.DOM.bind_event(web_view, ".remote_images .close_show_images", "click",
+                (Callback) on_close_show_images, this);
+        Util.DOM.bind_event(web_view, ".body a", "click",
+                (Callback) on_link_clicked, this);
         
         // Update the search results
         if (conversation_find_bar.visible)
@@ -897,7 +914,7 @@ public class ConversationViewer : Gtk.Box {
             for (int i = 0; i < style_sheets.length; i++) {
                 WebKit.DOM.StyleSheet style_sheet = style_sheets.item(i);
                 WebKit.DOM.Element style_element = (WebKit.DOM.Element) style_sheet.owner_node;
-                if (closest_ancestor(style_element, ".email") == div_message)
+                if (Util.DOM.closest_ancestor(style_element, ".email") == div_message)
                     style_element.set_text_content(scope_style_sheet(style_sheet, div_id));
             }
         } catch (Error error) {
@@ -1010,7 +1027,7 @@ public class ConversationViewer : Gtk.Box {
         return "<img alt=\"%s\" class=\"%s %s\" src=\"%s\" replaced-id=\"%s\" %s />".printf(
             Geary.HTML.escape_markup(filename),
             DATA_IMAGE_CLASS, REPLACED_IMAGE_CLASS,
-            assemble_data_uri(mime_type, rotated_image),
+            Util.DOM.assemble_data_uri(mime_type, rotated_image),
             Geary.HTML.escape_markup(replaced_image.id),
             escaped_content_id != null ? @"cid=\"$escaped_content_id\"" : "");
     }
@@ -1185,7 +1202,7 @@ public class ConversationViewer : Gtk.Box {
             if (element.webkit_matches_selector(".email")) {
                 email_element = element;
             } else {
-                email_element = closest_ancestor(element, ".email");
+                email_element = Util.DOM.closest_ancestor(element, ".email");
             }
         } catch (Error error) {
             debug("Failed to find div.email from element: %s", error.message);
@@ -1385,7 +1402,7 @@ public class ConversationViewer : Gtk.Box {
 
     private bool is_hidden_email(WebKit.DOM.Element element) {
         try {
-            WebKit.DOM.HTMLElement? email_element = closest_ancestor(element, ".email");
+            WebKit.DOM.HTMLElement? email_element = Util.DOM.closest_ancestor(element, ".email");
             if (email_element == null)
                 return false;
             
@@ -1407,7 +1424,7 @@ public class ConversationViewer : Gtk.Box {
             if (web_view.get_dom_document().get_body().get_class_list().contains("nohide"))
                 return;
             
-            WebKit.DOM.HTMLElement? email_element = closest_ancestor(element, ".email");
+            WebKit.DOM.HTMLElement? email_element = Util.DOM.closest_ancestor(element, ".email");
             if (email_element == null)
                 return;
             
@@ -1429,7 +1446,7 @@ public class ConversationViewer : Gtk.Box {
 
     private static void on_show_images(WebKit.DOM.Element element, WebKit.DOM.Event event,
         ConversationViewer conversation_viewer) {
-        WebKit.DOM.HTMLElement? email_element = closest_ancestor(element, ".email");
+        WebKit.DOM.HTMLElement? email_element = Util.DOM.closest_ancestor(element, ".email");
         if (email_element != null)
             conversation_viewer.show_images_email(email_element, true);
     }
@@ -1519,7 +1536,7 @@ public class ConversationViewer : Gtk.Box {
     
     private static void on_close_show_images(WebKit.DOM.Element element, WebKit.DOM.Event event,
         ConversationViewer conversation_viewer) {
-        WebKit.DOM.HTMLElement? remote_images = closest_ancestor(element, ".remote_images");
+        WebKit.DOM.HTMLElement? remote_images = Util.DOM.closest_ancestor(element, ".remote_images");
         if (remote_images != null) {
             try {
                 remote_images.get_class_list().remove("show");
@@ -1567,7 +1584,7 @@ public class ConversationViewer : Gtk.Box {
         } catch (Error error) {
             warning("Error showing link warning dialog: %s", error.message);
         }
-        bind_event(web_view, ".link_warning .close_link_warning, .link_warning a", "click",
+        Util.DOM.bind_event(web_view, ".link_warning .close_link_warning, .link_warning a", "click",
             (Callback) on_close_link_warning, this);
         return true;
     }
@@ -1655,7 +1672,7 @@ public class ConversationViewer : Gtk.Box {
     private static void on_close_link_warning(WebKit.DOM.Element element, WebKit.DOM.Event event,
         ConversationViewer conversation_viewer) {
         try {
-            WebKit.DOM.Element warning_div = closest_ancestor(element, ".link_warning");
+            WebKit.DOM.Element warning_div = Util.DOM.closest_ancestor(element, ".link_warning");
             WebKit.DOM.Element link = (WebKit.DOM.Element) warning_div.get_next_sibling();
             link.remove_attribute("warning");
             warning_div.parent_node.remove_child(warning_div);
@@ -1960,7 +1977,7 @@ public class ConversationViewer : Gtk.Box {
                 WebKit.DOM.Node parent = blockquote_node.get_parent_node();
 
                 // Make sure this is a top level blockquote.
-                if (node_is_child_of(blockquote_node, "BLOCKQUOTE")) {
+                if (Util.DOM.node_is_child_of(blockquote_node, "BLOCKQUOTE")) {
                     continue;
                 }
 
@@ -2019,7 +2036,7 @@ public class ConversationViewer : Gtk.Box {
                     // Replace the SRC to a data URI, the class to a known label for the popup menu,
                     // and the ALT to its filename, if supplied
                     img.remove_attribute("src");  // Work around a WebKitGTK+ crash. Bug 764152
-                    img.set_attribute("src", assemble_data_uri(mimetype, image_content));
+                    img.set_attribute("src", Util.DOM.assemble_data_uri(mimetype, image_content));
                     img.set_attribute("class", DATA_IMAGE_CLASS);
                     if (!Geary.String.is_empty(filename))
                         img.set_attribute("alt", filename);
@@ -2069,7 +2086,7 @@ public class ConversationViewer : Gtk.Box {
             WebKit.DOM.HTMLElement div = div_list.item(i) as WebKit.DOM.HTMLElement;
             string inner_html = div.get_inner_html();
             if ((sig_regex.match(inner_html) || alternate_sig_regex.match(inner_html)) &&
-                !node_is_child_of(div, "BLOCKQUOTE")) {
+                !Util.DOM.node_is_child_of(div, "BLOCKQUOTE")) {
                 break;
             }
         }

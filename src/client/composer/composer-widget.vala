@@ -804,7 +804,7 @@ public class ComposerWidget : Gtk.EventBox {
         // Ensure the editor is in correct mode re HTML
         on_compose_as_html();
 
-        bind_event(editor,"a", "click", (Callback) on_link_clicked, this);
+        Util.DOM.bind_event(editor,"a", "click", (Callback) on_link_clicked, this);
         update_actions();
         on_show_extended();
         
@@ -1051,7 +1051,7 @@ public class ComposerWidget : Gtk.EventBox {
                     set_cursor();
                     return;
                 }
-                signature = smart_escape(signature, false);
+                signature = Util.DOM.smart_escape(signature, false);
             } catch (Error error) {
                 debug("Error reading signature file %s: %s", signature_file.get_path(), error.message);
                 set_cursor();
@@ -1063,7 +1063,7 @@ public class ComposerWidget : Gtk.EventBox {
                 set_cursor();
                 return;
             }
-            signature = smart_escape(signature, true);
+            signature = Util.DOM.smart_escape(signature, true);
         }
         
         if (body_html == null)
@@ -1287,7 +1287,7 @@ public class ComposerWidget : Gtk.EventBox {
         container.vanish();
         is_closing = true;
         
-        linkify_document(editor.get_dom_document());
+        Util.DOM.linkify_document(editor.get_dom_document());
         
         // Perform send.
         try {
@@ -2000,7 +2000,7 @@ public class ComposerWidget : Gtk.EventBox {
         dialog.destroy();
         
         // Re-bind to anchor links.  This must be done every time link have changed.
-        bind_event(editor,"a", "click", (Callback) on_link_clicked, this);
+        Util.DOM.bind_event(editor,"a", "click", (Callback) on_link_clicked, this);
     }
     
     private string get_html() {
@@ -2009,7 +2009,7 @@ public class ComposerWidget : Gtk.EventBox {
     }
     
     private string get_text() {
-        return html_to_flowed_text((WebKit.DOM.HTMLElement) editor.get_dom_document()
+        return Util.DOM.html_to_flowed_text((WebKit.DOM.HTMLElement) editor.get_dom_document()
             .get_element_by_id(BODY_ID));
     }
     

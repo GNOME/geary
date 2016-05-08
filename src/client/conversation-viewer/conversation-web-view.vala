@@ -247,7 +247,7 @@ public class ConversationWebView : StylishWebView {
             // Then set the source to a data url.
             WebKit.DOM.HTMLImageElement img = Util.DOM.select(get_dom_document(), selector)
                 as WebKit.DOM.HTMLImageElement;
-            img.set_attribute("src", assemble_data_uri("image/png", buffer));
+            img.set_attribute("src", Util.DOM.assemble_data_uri("image/png", buffer));
         } catch (Error error) {
             warning("Failed to load icon '%s': %s", icon_name, error.message);
         }
@@ -289,7 +289,7 @@ public class ConversationWebView : StylishWebView {
             Geary.Memory.Buffer buffer = new Geary.Memory.ByteBuffer.take((owned) content,
                 content_length);
             
-            img.set_attribute("src", assemble_data_uri("image/png", buffer));
+            img.set_attribute("src", Util.DOM.assemble_data_uri("image/png", buffer));
         } catch (Error error) {
             warning("Failed to load image '%s': %s", filename, error.message);
         }
