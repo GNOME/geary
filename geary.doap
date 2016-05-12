@@ -27,6 +27,7 @@
     <foaf:Person>
       <foaf:name>Michael Gratton</foaf:name>
       <foaf:mbox rdf:resource="mailto:mike@vee.net"/>
+      <gnome:userid>mjog</gnome:userid>
     </foaf:Person>
   </maintainer>
 
