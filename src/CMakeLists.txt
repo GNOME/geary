@@ -467,57 +467,6 @@ else ()
     message(STATUS "Unity launcher support: OFF")
 endif ()
 
-if (WEBKITGTK24X_FOUND)
-    message(STATUS "Targeting WebKitGTK 2.4")
-    SET(EXTRA_CLIENT_PKG_CONFIG
-        ${EXTRA_CLIENT_PKG_CONFIG}
-        webkitgtk-3.0>=2.3.0
-    )
-    
-    SET(WEBKITGTK_METADATA_DIR
-        webkitgtk-2.4
-    )
-	
-	SET(WEBKITGTK_CUSTOM_VALA
-		webkitgtk-2.4/WebKit-3.0-custom.vala
-	)
-elseif (WEBKITGTK22X_FOUND)
-    message(STATUS "Targeting WebKitGTK 2.2")
-    SET(EXTRA_CLIENT_PKG_CONFIG
-        ${EXTRA_CLIENT_PKG_CONFIG}
-        webkitgtk-3.0>=2.2.0
-        webkitgtk-3.0<=2.2.100
-    )
-    
-    SET(WEBKITGTK_METADATA_DIR
-        webkitgtk-2.2
-    )
-elseif (WEBKITGTK20X_FOUND)
-    message(STATUS "Targeting WebKitGTK 2.0")
-    SET(EXTRA_CLIENT_PKG_CONFIG
-        ${EXTRA_CLIENT_PKG_CONFIG}
-        webkitgtk-3.0>=2.0.0
-        webkitgtk-3.0<=2.0.4
-    )
-    
-    SET(WEBKITGTK_METADATA_DIR
-        webkitgtk-2.0
-    )
-elseif (WEBKITGTK110X_FOUND)
-    message(STATUS "Targeting WebKitGTK 1.10")
-    SET(EXTRA_CLIENT_PKG_CONFIG
-        ${EXTRA_CLIENT_PKG_CONFIG}
-        webkitgtk-3.0>=1.10.0
-        webkitgtk-3.0<=1.10.2
-    )
-    
-    SET(WEBKITGTK_METADATA_DIR
-        webkitgtk-1.10
-    )
-else ()
-    message(FATAL_ERROR "WebKitGTK not installed / unknown version detected")
-endif ()
-
 if (NO_FATAL_WARNINGS)
     message(STATUS "Vala fatal warnings: OFF")
 else ()
@@ -545,6 +494,7 @@ pkg_check_modules(DEPS REQUIRED
     libxml-2.0>=2.7.8
     gcr-3>=3.10.1
     gobject-introspection-1.0
+    webkitgtk-3.0>=2.4.0
     ${EXTRA_CLIENT_PKG_CONFIG}
 )
 
@@ -603,6 +553,9 @@ if (DISABLE_POODLE)
 else ()
     message(STATUS "POODLE SSLv3 fix: ON")
 endif ()
+
+set(WEBKITGTK_METADATA_DIR webkitgtk-2.4)
+set(WEBKITGTK_CUSTOM_VALA webkitgtk-2.4/WebKit-3.0-custom.vala)
 
 set(LIB_PATHS ${DEPS_LIBRARY_DIRS})
 link_directories(${LIB_PATHS})
