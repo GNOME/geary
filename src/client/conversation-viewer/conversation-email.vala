@@ -254,7 +254,7 @@ public class ConversationEmail : Gtk.Box {
 
         // if (email.from != null && email.from.contains_normalized(current_account_information.email)) {
         //  // XXX set a RO property?
-        //  get_style_context().add_class("sent");
+        //  get_style_context().add_class("geary_sent");
         // }
 
         // Add sub_messages container and message viewers if there are any
