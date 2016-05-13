@@ -576,12 +576,12 @@ public class ConversationEmail : Gtk.Box {
                         stream, icon_size, icon_size, true, load_cancelled
                     );
                 } else {
-                    warning("Unsupported attachment icon type: %s\n",
+                    debug("Unsupported attachment icon type: %s\n",
                             icon.get_type().name());
                 }
             }
         } catch (Error error) {
-            warning("Failed to load icon for attachment '%s': %s",
+            debug("Failed to load icon for attachment '%s': %s",
                     attachment.id,
                     error.message);
         }
