@@ -62,9 +62,6 @@ public class ConversationViewer : Gtk.Stack {
     public signal void mark_emails(Gee.Collection<Geary.EmailIdentifier> emails,
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove);
 
-    // Fired when the user wants to save an image buffer to disk
-    public signal void save_buffer_to_file(string? filename, Geary.Memory.Buffer buffer);
-    
     // Fired when the viewer has been cleared.
     public signal void cleared();
     

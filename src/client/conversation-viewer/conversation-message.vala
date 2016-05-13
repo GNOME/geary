@@ -47,6 +47,14 @@ public class ConversationMessage : Gtk.Box {
     private const int MAX_INLINE_IMAGE_MAJOR_DIM = 1024;
     private const int QUOTE_SIZE_THRESHOLD = 120;
 
+    private const string ACTION_COPY_EMAIL = "copy_email";
+    private const string ACTION_COPY_LINK = "copy_link";
+    private const string ACTION_COPY_SELECTION = "copy_selection";
+    private const string ACTION_OPEN_INSPECTOR = "open_inspector";
+    private const string ACTION_OPEN_LINK = "open_link";
+    private const string ACTION_SAVE_IMAGE = "save_image";
+    private const string ACTION_SELECT_ALL = "select_all";
+
 
     // The message being displayed
     public Geary.RFC822.Message message { get; private set; }
@@ -107,18 +115,35 @@ public class ConversationMessage : Gtk.Box {
     [GtkChild]
     private Gtk.InfoBar remote_images_infobar;
 
+    // The web_view's context menu
+    private Gtk.Menu? context_menu = null;
+
+    // Menu models for creating the context menu
+    private MenuModel context_menu_link;
+    private MenuModel context_menu_email;
+    private MenuModel context_menu_image;
+    private MenuModel context_menu_main;
+    private MenuModel? context_menu_inspector = null;
+
+    // Last known DOM element under the context menu
+    private WebKit.DOM.HTMLElement context_menu_element;
+
+    // Contains the current mouse-over'ed link URL, if any
+    private string? hover_url = null;
+
     // The contacts for the message's account
     private Geary.ContactStore contact_store;
 
     // Should any remote messages be always loaded and displayed?
     private bool always_load_remote_images;
 
-    // Contains the current mouse-over'ed link URL, if any
-    private string? hover_url = null;
-
     private int next_replaced_buffer_number = 0;
     private Gee.HashMap<string, ReplacedImage> replaced_images = new Gee.HashMap<string, ReplacedImage>();
     private Gee.HashSet<string> replaced_content_ids = new Gee.HashSet<string>();
+
+
+    // Message-specific actions
+    private SimpleActionGroup message_actions = new SimpleActionGroup();
 
     // Fired when an attachment is displayed inline
     public signal void attachment_displayed_inline(string id);
@@ -129,6 +154,9 @@ public class ConversationMessage : Gtk.Box {
     // Fired when remote image load requested for sender
     public signal void remember_remote_images();
 
+    // Fired on message image save action is activated
+    public signal void save_image(string? filename, Geary.Memory.Buffer buffer);
+
 
     public ConversationMessage(Geary.RFC822.Message message,
                                Geary.ContactStore contact_store,
@@ -136,6 +164,40 @@ public class ConversationMessage : Gtk.Box {
         this.message = message;
         this.contact_store = contact_store;
         this.always_load_remote_images = always_load_remote_images;
+
+        // Actions
+
+        add_action(ACTION_COPY_EMAIL, false).activate.connect(on_copy_email_address);
+        add_action(ACTION_COPY_LINK, false).activate.connect(on_copy_link);
+        add_action(ACTION_COPY_SELECTION, false).activate.connect(() => {
+                web_view.copy_clipboard();
+            });
+        add_action(ACTION_OPEN_INSPECTOR, Args.inspector).activate.connect(() => {
+                web_view.web_inspector.inspect_node(context_menu_element);
+            });
+        add_action(ACTION_OPEN_LINK, false).activate.connect(() => {
+                context_menu_element.click();
+            });
+        add_action(ACTION_SELECT_ALL, true).activate.connect(() => {
+                web_view.select_all();
+            });
+        add_action(ACTION_SAVE_IMAGE, false).activate.connect(on_save_image);
+
+        insert_action_group("msg", message_actions);
+
+        // Context menu
+
+        Gtk.Builder builder = new Gtk.Builder.from_resource(
+            "/org/gnome/Geary/conversation-message-menus.ui"
+        );
+        context_menu_link = (MenuModel) builder.get_object("context_menu_link");
+        context_menu_email = (MenuModel) builder.get_object("context_menu_email");
+        context_menu_image = (MenuModel) builder.get_object("context_menu_image");
+        context_menu_main = (MenuModel) builder.get_object("context_menu_main");
+        if (Args.inspector) {
+            context_menu_inspector =
+                (MenuModel) builder.get_object("context_menu_inspector");
+        }
 
         // Preview headers
 
@@ -169,15 +231,17 @@ public class ConversationMessage : Gtk.Box {
             );
         }
 
+        // Web view
+
         web_view = new ConversationWebView();
-        web_view.show();
-        // web_view.context_menu.connect(() => { return true; }); // Suppress default context menu.
-        // web_view.realize.connect( () => { web_view.get_vadjustment().value_changed.connect(mark_read); });
-        // web_view.size_allocate.connect(mark_read);
+        // Suppress default context menu.
+        web_view.context_menu.connect(() => { return true; });
         web_view.size_allocate.connect((widget, allocation) => {
                 web_view_allocation = allocation;
             });
         web_view.hovering_over_link.connect(on_hovering_over_link);
+        web_view.selection_changed.connect(on_selection_changed);
+        web_view.show();
 
         body_box.set_has_tooltip(true); // Used to show link URLs
         body_box.pack_start(web_view, true, true, 0);
@@ -279,6 +343,8 @@ public class ConversationMessage : Gtk.Box {
                                     error.message);
                         }
                     }
+                    bind_event(web_view, "html", "contextmenu",
+                               (Callback) on_context_menu, this);
                     bind_event(web_view, "body a", "click",
                                (Callback) on_link_clicked, this);
                     bind_event(web_view, ".quote_container > .shower", "click",
@@ -294,6 +360,20 @@ public class ConversationMessage : Gtk.Box {
 
         // Only load it after we've hooked up the signals above
         web_view.load_string(body_text, "text/html", "UTF8", "");
+    }
+
+    private SimpleAction add_action(string name, bool enabled) {
+        SimpleAction action = new SimpleAction(name, null);
+        action.set_enabled(enabled);
+        message_actions.add_action(action);
+        return action;
+    }
+
+    private void set_action_enabled(string name, bool enabled) {
+        SimpleAction? action = this.message_actions.lookup(name) as SimpleAction;
+        if (action != null) {
+            action.set_enabled(enabled);
+        }
     }
 
     // Appends email address fields to the header.
@@ -460,79 +540,6 @@ public class ConversationMessage : Gtk.Box {
         
         loader.set_size(adj_width, adj_height);
     }
-    
-    // private Gtk.Menu build_context_menu(Geary.Email email, WebKit.DOM.Element clicked_element) {
-    //     Gtk.Menu menu = new Gtk.Menu();
-        
-    //     if (web_view.can_copy_clipboard()) {
-    //         // Add a menu item for copying the current selection.
-    //         Gtk.MenuItem item = new Gtk.MenuItem.with_mnemonic(_("_Copy"));
-    //         item.activate.connect(on_copy_text);
-    //         menu.append(item);
-    //     }
-        
-    //     if (hover_url != null) {
-    //         if (hover_url.has_prefix(Geary.ComposedEmail.MAILTO_SCHEME)) {
-    //             // Add a menu item for copying the address.
-    //             Gtk.MenuItem item = new Gtk.MenuItem.with_mnemonic(_("Copy _Email Address"));
-    //             item.activate.connect(on_copy_email_address);
-    //             menu.append(item);
-    //         } else {
-    //             // Add a menu item for copying the link.
-    //             Gtk.MenuItem item = new Gtk.MenuItem.with_mnemonic(_("Copy _Link"));
-    //             item.activate.connect(on_copy_link);
-    //             menu.append(item);
-    //         }
-    //     }
-        
-    //     // Select message.
-    //     if (!is_hidden()) {
-    //         Gtk.MenuItem select_message_item = new Gtk.MenuItem.with_mnemonic(_("Select _Message"));
-    //         select_message_item.activate.connect(() => {on_select_message(clicked_element);});
-    //         menu.append(select_message_item);
-    //     }
-        
-    //     // Select all.
-    //     Gtk.MenuItem select_all_item = new Gtk.MenuItem.with_mnemonic(_("Select _All"));
-    //     select_all_item.activate.connect(on_select_all);
-    //     menu.append(select_all_item);
-        
-    //     // Inspect.
-    //     if (Args.inspector) {
-    //         Gtk.MenuItem inspect_item = new Gtk.MenuItem.with_mnemonic(_("_Inspect"));
-    //         inspect_item.activate.connect(() => {web_view.web_inspector.inspect_node(clicked_element);});
-    //         menu.append(inspect_item);
-    //     }
-
-    //     return menu;
-    // }
-
-    // private void on_data_image_menu(WebKit.DOM.Element element, WebKit.DOM.Event event) {
-    //     event.stop_propagation();
-        
-    //     string? replaced_id = element.get_attribute("replaced-id");
-    //     if (Geary.String.is_empty(replaced_id))
-    //         return;
-        
-    //     ReplacedImage? replaced_image = replaced_images.get(replaced_id);
-    //     if (replaced_image == null)
-    //         return;
-        
-    //     image_menu = new Gtk.Menu();
-    //     image_menu.selection_done.connect(() => {
-    //         image_menu = null;
-    //      });
-        
-    //     Gtk.MenuItem save_image_item = new Gtk.MenuItem.with_mnemonic(_("_Save Image As..."));
-    //     save_image_item.activate.connect(() => {
-    //         save_buffer_to_file(replaced_image.filename, replaced_image.buffer);
-    //     });
-    //     image_menu.append(save_image_item);
-
-    //     image_menu.show_all();
-
-    //     image_menu.popup(null, null, null, 0, Gtk.get_current_event_time());
-    // }
 
     private string clean_html_markup(string text, Geary.RFC822.Message message, out bool remote_images) {
         remote_images = false;
@@ -835,6 +842,15 @@ public class ConversationMessage : Gtk.Box {
         }
     }
 
+    private ReplacedImage? get_replaced_image() {
+        ReplacedImage? image = null;
+        string? replaced_id = context_menu_element.get_attribute("replaced-id");
+        if (!Geary.String.is_empty(replaced_id)) {
+            image = replaced_images.get(replaced_id);
+        }
+        return image;
+    }
+
     private static void on_show_quote_clicked(WebKit.DOM.Element element,
                                               WebKit.DOM.Event event) {
         try {
@@ -853,6 +869,49 @@ public class ConversationMessage : Gtk.Box {
         } catch (Error error) {
             warning("Error toggling quote: %s", error.message);
         }
+    }
+
+    private static void on_context_menu(WebKit.DOM.Element element,
+                                        WebKit.DOM.Event event,
+                                        ConversationMessage message) {
+        message.on_context_menu_self(element, event);
+        event.prevent_default();
+    }
+
+    private void on_context_menu_self(WebKit.DOM.Element element,
+                                      WebKit.DOM.Event event) {
+        context_menu_element = event.get_target() as WebKit.DOM.HTMLElement;
+
+        if (context_menu != null) {
+            context_menu.detach();
+        }
+
+        // Build a new context menu every time the user clicks because
+        // at the moment under GTK+3.20 it's far easier to selectively
+        // build a new menu model from pieces as we do here, then to
+        // have a single menu model and disable the parts we don't
+        // need.
+        Menu model = new Menu();
+        if (hover_url != null) {
+            if (hover_url.has_prefix(Geary.ComposedEmail.MAILTO_SCHEME)) {
+                model.append_section(null, context_menu_email);
+            } else {
+                model.append_section(null, context_menu_link);
+            }
+        }
+        if (context_menu_element.local_name.down() == "img") {
+            ReplacedImage image = get_replaced_image();
+            set_action_enabled(ACTION_SAVE_IMAGE, image != null);
+            model.append_section(null, context_menu_image);
+        }
+        model.append_section(null, context_menu_main);
+        if (context_menu_inspector != null) {
+            model.append_section(null, context_menu_inspector);
+        }
+
+        context_menu = new Gtk.Menu.from_model(model);
+        context_menu.attach_to_widget(this, null);
+        context_menu.popup(null, null, null, 0, Gtk.get_current_event_time());
     }
 
     private static void on_link_clicked(WebKit.DOM.Element element,
@@ -901,15 +960,35 @@ public class ConversationMessage : Gtk.Box {
         link_popover.show();
         return true;
     }
-    
+
     private void on_hovering_over_link(string? title, string? url) {
+        if (url != null) {
+            hover_url = Uri.unescape_string(url);
+            bool is_email = hover_url.has_prefix(Geary.ComposedEmail.MAILTO_SCHEME);
+            set_action_enabled(ACTION_OPEN_LINK, true);
+            set_action_enabled(ACTION_COPY_LINK, !is_email);
+            set_action_enabled(ACTION_COPY_EMAIL, is_email);
+        } else {
+            hover_url = null;
+            set_action_enabled(ACTION_OPEN_LINK, false);
+            set_action_enabled(ACTION_COPY_LINK, false);
+            set_action_enabled(ACTION_COPY_EMAIL, false);
+        }
+
         // Use tooltip on the containing box since the web_view
         // doesn't want to pay ball.
-        hover_url = (url != null) ? Uri.unescape_string(url) : null;
         body_box.set_tooltip_text(hover_url);
         body_box.trigger_tooltip_query();
     }
 
+    private void on_selection_changed() {
+        bool has_selection = false;
+        if (web_view.has_selection()) {
+            WebKit.DOM.Document document = web_view.get_dom_document();
+            has_selection = !document.default_view.get_selection().is_collapsed;
+        }
+        set_action_enabled(ACTION_COPY_SELECTION, has_selection);
+    }
 
     [GtkCallback]
     private void on_remote_images_response(Gtk.InfoBar info_bar, int response_id) {
@@ -931,37 +1010,25 @@ public class ConversationMessage : Gtk.Box {
         remote_images_infobar.hide();
     }
 
-    // private void on_copy_text() {
-    //     web_view.copy_clipboard();
-    // }
-    
-    // private void on_copy_link() {
-    //     // Put the current link in clipboard.
-    //     Gtk.Clipboard clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD);
-    //     clipboard.set_text(hover_url, -1);
-    //     clipboard.store();
-    // }
+    private void on_copy_link() {
+        // Put the current link in clipboard.
+        Gtk.Clipboard clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD);
+        clipboard.set_text(hover_url, -1);
+        clipboard.store();
+    }
 
-    // private void on_copy_email_address() {
-    //     // Put the current email address in clipboard.
-    //     Gtk.Clipboard clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD);
-    //     if (hover_url.has_prefix(Geary.ComposedEmail.MAILTO_SCHEME))
-    //         clipboard.set_text(hover_url.substring(Geary.ComposedEmail.MAILTO_SCHEME.length, -1), -1);
-    //     else
-    //         clipboard.set_text(hover_url, -1);
-    //     clipboard.store();
-    // }
-    
-    // private void on_select_all() {
-    //     web_view.select_all();
-    // }
-    
-    // private void on_select_message(WebKit.DOM.Element email_element) {
-    //     try {
-    //         web_view.get_dom_document().get_default_view().get_selection().select_all_children(email_element);
-    //     } catch (Error error) {
-    //         warning("Could not make selection: %s", error.message);
-    //     }
-    // }
+    private void on_copy_email_address() {
+        // Put the current email address in clipboard.
+        Gtk.Clipboard clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD);
+        if (hover_url.has_prefix(Geary.ComposedEmail.MAILTO_SCHEME)) {
+            clipboard.set_text(hover_url.substring(Geary.ComposedEmail.MAILTO_SCHEME.length, -1), -1);
+        }
+        clipboard.store();
+    }
+
+    private void on_save_image() {
+        ReplacedImage? replaced_image = get_replaced_image();
+        save_image(replaced_image.filename, replaced_image.buffer);
+    }
 
 }

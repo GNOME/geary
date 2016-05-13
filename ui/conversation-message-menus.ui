@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<interface>
+  <menu id="context_menu">
+    <section id="context_menu_link">
+      <item>
+        <attribute name="label" translatable="yes">_Open Link</attribute>
+        <attribute name="action">msg.open_link</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Copy Link _Address</attribute>
+        <attribute name="action">msg.copy_link</attribute>
+      </item>
+    </section>
+    <section id="context_menu_email">
+      <item>
+        <attribute name="label" translatable="yes">Send New _Message...</attribute>
+        <attribute name="action">msg.open_link</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Copy Email _Address</attribute>
+        <attribute name="action">msg.copy_email</attribute>
+      </item>
+    </section>
+    <section id="context_menu_image">
+      <item>
+        <attribute name="label" translatable="yes">Save _Image As...</attribute>
+        <attribute name="action">msg.save_image</attribute>
+      </item>
+    </section>
+    <section id="context_menu_main">
+      <item>
+        <attribute name="label" translatable="yes">_Select All</attribute>
+        <attribute name="action">msg.select_all</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_Copy</attribute>
+        <attribute name="action">msg.copy_selection</attribute>
+      </item>
+    </section>
+    <section id="context_menu_inspector">
+      <item>
+        <attribute name="label" translatable="yes">_Inspect...</attribute>
+        <attribute name="action">msg.open_inspector</attribute>
+      </item>
+    </section>
+  </menu>
+</interface>

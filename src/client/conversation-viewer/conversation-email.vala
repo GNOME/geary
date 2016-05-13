@@ -139,6 +139,8 @@ public class ConversationEmail : Gtk.Box {
         Geary.Email email, Geary.NamedFlag? to_add, Geary.NamedFlag? to_remove
     );
 
+    // Fired on message image save action is activated
+    public signal void save_image(string? filename, Geary.Memory.Buffer buffer);
 
     // Fired on link activation in the web_view
     public signal void link_activated(string link);
@@ -223,6 +225,9 @@ public class ConversationEmail : Gtk.Box {
             });
         primary_message.web_view.link_selected.connect((link) => {
                 link_activated(link);
+            });
+        primary_message.save_image.connect((filename, buffer) => {
+                save_image(filename, buffer);
             });
         primary_message.summary_box.pack_start(action_box, false, false, 0);
 

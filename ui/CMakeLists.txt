@@ -11,6 +11,7 @@ set(RESOURCE_LIST
   STRIPBLANKS "conversation-email.ui"
   STRIPBLANKS "conversation-email-menus.ui"
   STRIPBLANKS "conversation-message.ui"
+  STRIPBLANKS "conversation-message-menus.ui"
   STRIPBLANKS "conversation-viewer.ui"
               "conversation-web-view.css"
   STRIPBLANKS "edit_alternate_emails.glade"
