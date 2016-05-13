@@ -126,7 +126,7 @@ public class ConversationMessage : Gtk.Box {
     private MenuModel? context_menu_inspector = null;
 
     // Last known DOM element under the context menu
-    private WebKit.DOM.HTMLElement context_menu_element;
+    private WebKit.DOM.HTMLElement? context_menu_element = null;
 
     // Contains the current mouse-over'ed link URL, if any
     private string? hover_url = null;
