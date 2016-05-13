@@ -203,7 +203,7 @@ public class ConversationEmail : Gtk.Box {
         add_action(ACTION_VIEW_SOURCE).activate.connect(() => {
                 view_source(this.email);
             });
-        insert_action_group("msg", message_actions);
+        insert_action_group("eml", message_actions);
 
         Geary.RFC822.Message message;
         try {
