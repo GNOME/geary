@@ -3,9 +3,17 @@
 /Makefile
 /.stamp
 build/
+debian/*.debhelper.log
+debian/*.substvars
+debian/debhelper-build-stamp
+debian/files
+debian/geary
+debian/geary-dbg
 /geary
 /geary-mailer
 /geary-console
+*.diff
+*.patch
 *.xz
 *.swp
 bindings/vapi/gmime-2.6/gmime-2.6.gi
