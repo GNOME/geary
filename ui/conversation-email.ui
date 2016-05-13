@@ -29,7 +29,7 @@
         <property name="receives_default">True</property>
         <property name="tooltip_text" translatable="yes">Save all attachments</property>
         <property name="valign">start</property>
-        <property name="action_name">msg.save_all_attachments</property>
+        <property name="action_name">eml.save_all_attachments</property>
         <property name="relief">none</property>
         <child>
           <object class="GtkImage">
@@ -53,7 +53,7 @@
         <property name="receives_default">True</property>
         <property name="tooltip_text" translatable="yes">Mark this message as starred</property>
         <property name="valign">start</property>
-        <property name="action_name">msg.star</property>
+        <property name="action_name">eml.star</property>
         <property name="relief">none</property>
         <child>
           <object class="GtkImage">
@@ -77,7 +77,7 @@
         <property name="receives_default">True</property>
         <property name="tooltip_text" translatable="yes">Mark this message as not starred</property>
         <property name="valign">start</property>
-        <property name="action_name">msg.unstar</property>
+        <property name="action_name">eml.unstar</property>
         <property name="relief">none</property>
         <child>
           <object class="GtkImage">
