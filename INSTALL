@@ -46,6 +46,12 @@
     WebKitGTK-3 versions 2.1.1 to 2.1.90.0.  See
     <https://bugzilla.gnome.org/show_bug.cgi?id=713168> for details.
 
+    Geary requires SQLite to be built with the compiler flag
+    `-DSQLITE_ENABLE_FTS3`. Further, SQLite version 3.11.x specifically
+    must also be built with `-DSQLITE_ENABLE_FTS3_TOKENIZER`. Most
+    distribution's packages meet these requirements, however Fedora
+    24 users and others may be required to rebuild SQLite 3.11 with
+    the second flag.
 
   * Installing dependencies on Fedora
 
