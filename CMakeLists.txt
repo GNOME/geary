@@ -19,7 +19,7 @@ list(APPEND
 #
 set(GETTEXT_PACKAGE "geary")
 set(RELEASE_NAME "Lightweight email client for GNOME.")
-set(VERSION "0.10.0")
+set(VERSION "0.11.0")
 set(VERSION_INFO "Release")
 set(LANGUAGE_SUPPORT_DIRECTORY ${CMAKE_INSTALL_PREFIX}/share/locale)
 

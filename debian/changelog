@@ -1,3 +1,22 @@
+geary (0.11.0-1~xenial1) xenial; urgency=medium
+
+  * Add archive special folder support (#713986)
+  * Add is:read, is:unread: is:starred search operators (#726661)
+  * Fix using more than search operator - to:, from:, etc. (#749938)
+  * Work around crashes caused by WebKitGTK+ 2.4.10 (#764152, #763933)
+  * Fix a crash when searching (#765515)
+  * Fix images not being displayed in some HTML messages (#764919)
+  * Fix empty main window when opened from notification (#763961)
+  * Fix UI freezing when network connections are lost (#757088)
+  * Work better with Cyrus & other servers when network unreliable (#757166)
+  * Enable use of custom FTS3 tokeniser in SQLite 3.12 and later (#763203)
+  * Fix inconsistent Composer 'Detach' button placement (#757110)
+  * Documentation improvements (#764848, #749925)
+  * Update deb module dependencies (#749931, #748464)
+  * Updated UI & doc translations
+
+ -- Michael Gratton <mike@vee.net>  Sun, 15 May 2016 17:22:45 +1000
+
 geary (0.10.0-1~utopic1) utopic; urgency=low
 
   * Undo Archive/Trash/Move of email (#721828)

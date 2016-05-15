@@ -1,3 +1,62 @@
+Geary 0.11.0 - 15 May 2015
+--------------------------
+
+  * Add archive special folder support (#713986)
+      -- Emersion
+  * Add is:read, is:unread: is:starred search operators (#726661)
+      -- Matthew Wong
+  * Fix using more than search operator - to:, from:, etc. (#749938)
+      -- Matthew Wong
+  * Work around crashes caused by WebKitGTK+ 2.4.10 (#764152, #763933)
+      -- Adam Dingle, Michael Gratton
+  * Fix a crash when searching (#765515)
+  * Fix images not being displayed in some HTML messages (#764919)
+  * Fix empty main window when opened from notification (#763961)
+  * Fix UI freezing when network connections are lost (#757088)
+  * Work better with Cyrus & other servers when network unreliable (#757166)
+  * Enable use of custom FTS3 tokeniser in SQLite 3.12 and later (#763203)
+  * Fix inconsistent Composer 'Detach' button placement (#757110)
+      -- Ralph Plawetzki
+  * Documentation improvements (#764848, #749925)
+      -- Florin Lipan, Robert Schroll
+  * Update deb module dependencies (#749931, #748464)
+      -- Robert Schroll
+  * Updated UI translations:
+      Adolfo Jayme Barrientos (es)
+      Alexandre Franke (fr)
+      Anders Jonsson (sv)
+      Aurimas Černius (lt)
+      Balázs Úr (hu)
+      Cédric Bellegarde (fr)
+      Cédric Valmary (oc)
+      Daniel Șerbănescu (ro)
+      Dušan Kazik (sk)
+      Federico Bruni (it)
+      Gianvito Cavasoli (it)
+      Jiri Grönroos (fi)
+      Jordi Mas (ca)
+      Josef Andersson (sv)
+      Kjartan Maraas (nb)
+      Marek Černocký (cs)
+      Mattias Eriksson (sv)
+      Necdet Yücel (tr)
+      Pedro Albuquerque (pt)
+      Piotr Drąg (pl)
+      Rafael Fontenelle (pt_BR)
+      Simon Linden (de)
+      Stas Solovey (ru)
+      Yosef Or Boczko (he)
+      Γιάννης Κουτσούκος (el)
+      Марко Костић (sr)
+      Милош Поповић (sr)
+      Милош Поповић (sr@latin)
+  * Updated doc translations:
+      Christian Kirbach (de)
+      Federico Bruni (it)
+      Luis Enrique Ortega Rojas (es)
+      Marek Černocký (cs)
+      Simon Linden (de)
+
 Geary 0.10.0 - 30 March 2015
 ----------------------------
 
