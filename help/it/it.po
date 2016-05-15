@@ -1,13 +1,13 @@
 # Italian translation for geary.
 # Copyright (C) 2014 geary's COPYRIGHT HOLDER
 # This file is distributed under the same license as the geary package.
-# Federico Bruni <fede@inventati.org>, 2014, 2015.
+# Federico Bruni <fede@inventati.org>, 2014, 2015, 2016.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: geary help master\n"
-"POT-Creation-Date: 2015-04-01 05:10+0000\n"
-"PO-Revision-Date: 2015-04-01 09:21+0200\n"
+"POT-Creation-Date: 2016-05-15 05:59+0000\n"
+"PO-Revision-Date: 2016-05-15 10:23+0200\n"
 "Last-Translator: Federico Bruni <fede@inventati.org>\n"
 "Language-Team: Italiano <gnome-it-list@gnome.org>\n"
 "Language: it\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Gtranslator 2.91.6\n"
+"X-Generator: Gtranslator 2.91.7\n"
 
 #: C/write.page:9(title)
 msgid "Write a message"
@@ -270,7 +270,7 @@ msgstr ""
 msgid "Star"
 msgstr "Speciale"
 
-#: C/shortcuts.page:44(key) C/shortcuts.page:104(key)
+#: C/shortcuts.page:44(key) C/shortcuts.page:108(key)
 msgid "S"
 msgstr "S"
 
@@ -278,7 +278,7 @@ msgstr "S"
 msgid "Unstar"
 msgstr "Non speciale"
 
-#: C/shortcuts.page:48(key) C/shortcuts.page:138(key)
+#: C/shortcuts.page:48(key) C/shortcuts.page:142(key)
 msgid "D"
 msgstr "D"
 
@@ -307,221 +307,233 @@ msgstr ""
 "key><key>U</key></keyseq>"
 
 #: C/shortcuts.page:59(p)
-#| msgid "Conversation list"
+msgid "Move focus to the next/previous pane"
+msgstr "Sposta lo stato attivo al riquadro successivo/precedente"
+
+#: C/shortcuts.page:60(p)
+#| msgid ""
+#| "<keyseq><key>Ctrl</key><key>I</key></keyseq> or <keyseq><key>Shift</"
+#| "key><key>I</key></keyseq>"
+msgid ""
+"<keyseq><key>F6</key></keyseq> / <keyseq><key>Shift</key><key>F6</key></"
+"keyseq>"
+msgstr ""
+"<keyseq><key>F6</key></keyseq> / <keyseq><key>Maiusc</key><key>F6</key></"
+"keyseq>"
+
+#: C/shortcuts.page:63(p)
 msgid "Move focus to conversation list"
 msgstr "Sposta lo stato attivo sull'elenco delle conversazioni"
 
-#: C/shortcuts.page:60(key) C/shortcuts.page:76(key) C/shortcuts.page:92(key)
-#: C/shortcuts.page:96(key) C/shortcuts.page:100(key)
-#: C/shortcuts.page:104(key) C/shortcuts.page:108(key)
-#: C/shortcuts.page:112(key) C/shortcuts.page:116(key)
-#: C/shortcuts.page:126(key) C/shortcuts.page:130(key)
-#: C/shortcuts.page:138(key) C/shortcuts.page:146(key)
-#: C/shortcuts.page:150(key) C/shortcuts.page:154(key)
-#: C/shortcuts.page:158(key) C/shortcuts.page:162(key)
-#: C/shortcuts.page:166(key)
+#: C/shortcuts.page:64(key) C/shortcuts.page:80(key) C/shortcuts.page:96(key)
+#: C/shortcuts.page:100(key) C/shortcuts.page:104(key)
+#: C/shortcuts.page:108(key) C/shortcuts.page:112(key)
+#: C/shortcuts.page:116(key) C/shortcuts.page:120(key)
+#: C/shortcuts.page:130(key) C/shortcuts.page:134(key)
+#: C/shortcuts.page:142(key) C/shortcuts.page:150(key)
+#: C/shortcuts.page:154(key) C/shortcuts.page:158(key)
+#: C/shortcuts.page:162(key) C/shortcuts.page:166(key)
+#: C/shortcuts.page:170(key)
 msgid "Ctrl"
 msgstr "Ctrl"
 
-#: C/shortcuts.page:60(key) C/shortcuts.page:146(key)
+#: C/shortcuts.page:64(key) C/shortcuts.page:150(key)
 msgid "B"
 msgstr "B"
 
-#: C/shortcuts.page:63(p)
-#| msgid "Find next in current conversation"
+#: C/shortcuts.page:67(p)
 msgid "Jump to next (older) conversation"
 msgstr "Passa alla conversazione successiva (più vecchia)"
 
-#: C/shortcuts.page:64(key)
+#: C/shortcuts.page:68(key)
 msgid "j"
 msgstr "j"
 
-#: C/shortcuts.page:67(p)
-#| msgid "Find previous in current conversation"
+#: C/shortcuts.page:71(p)
 msgid "Jump to previous (newer) conversation"
 msgstr "Passa alla conversazione precedente (più recente)"
 
-#: C/shortcuts.page:68(key)
+#: C/shortcuts.page:72(key)
 msgid "k"
 msgstr "k"
 
-#: C/shortcuts.page:71(p)
+#: C/shortcuts.page:75(p)
 msgid "Toggle spam"
 msgstr "Segna come indesiderata"
 
-#: C/shortcuts.page:72(p)
+#: C/shortcuts.page:76(p)
 msgid "<keyseq><key>Ctrl</key><key>J</key></keyseq> or <key>!</key>"
 msgstr "<keyseq><key>Ctrl</key><key>J</key></keyseq> o <key>!</key>"
 
-#: C/shortcuts.page:75(p)
+#: C/shortcuts.page:79(p)
 msgid "Quit"
 msgstr "Esci"
 
-#: C/shortcuts.page:76(key)
+#: C/shortcuts.page:80(key)
 msgid "Q"
 msgstr "Q"
 
-#: C/shortcuts.page:79(p)
+#: C/shortcuts.page:83(p)
 msgid "Zoom in"
 msgstr "Aumenta ingrandimento"
 
-#: C/shortcuts.page:80(p)
+#: C/shortcuts.page:84(p)
 msgid "<keyseq><key>Ctrl</key><key>=</key></keyseq> or <key>=</key>"
 msgstr "<keyseq><key>Ctrl</key><key>=</key></keyseq> o <key>=</key>"
 
-#: C/shortcuts.page:83(p)
+#: C/shortcuts.page:87(p)
 msgid "Zoom out"
 msgstr "Diminuisci ingrandimento"
 
-#: C/shortcuts.page:84(p)
+#: C/shortcuts.page:88(p)
 msgid "<keyseq><key>Ctrl</key><key>-</key></keyseq> or <key>-</key>"
 msgstr "<keyseq><key>Ctrl</key><key>-</key></keyseq> o <key>-</key>"
 
-#: C/shortcuts.page:87(p)
+#: C/shortcuts.page:91(p)
 msgid "Reset zoom"
 msgstr "Ripristina ingrandimento"
 
-#: C/shortcuts.page:88(p)
+#: C/shortcuts.page:92(p)
 msgid "<keyseq><key>Ctrl</key><key>0</key></keyseq> or <key>0</key>"
 msgstr "<keyseq><key>Ctrl</key><key>0</key></keyseq> o <key>0</key>"
 
-#: C/shortcuts.page:91(p) C/preferences.page:10(title)
+#: C/shortcuts.page:95(p) C/preferences.page:10(title)
 msgid "Preferences"
 msgstr "Preferenze"
 
-#: C/shortcuts.page:92(key)
+#: C/shortcuts.page:96(key)
 msgid "E"
 msgstr "E"
 
-#: C/shortcuts.page:95(p) C/accounts.page:10(title)
+#: C/shortcuts.page:99(p) C/accounts.page:10(title)
 msgid "Accounts"
 msgstr "Account"
 
-#: C/shortcuts.page:96(key)
+#: C/shortcuts.page:100(key)
 msgid "M"
 msgstr "M"
 
-#: C/shortcuts.page:99(p)
+#: C/shortcuts.page:103(p)
 msgid "Close composer window"
 msgstr "Chiudi la finestra di composizione"
 
-#: C/shortcuts.page:100(key)
+#: C/shortcuts.page:104(key)
 msgid "W"
 msgstr "W"
 
-#: C/shortcuts.page:103(p)
+#: C/shortcuts.page:107(p)
 msgid "Jump to search box"
 msgstr "Passa alla casella di ricerca"
 
-#: C/shortcuts.page:107(p)
+#: C/shortcuts.page:111(p)
 msgid "Find in current conversation"
 msgstr "Trova nella conversazione corrente"
 
-#: C/shortcuts.page:108(key)
+#: C/shortcuts.page:112(key)
 msgid "F"
 msgstr "F"
 
-#: C/shortcuts.page:111(p)
+#: C/shortcuts.page:115(p)
 msgid "Find next in current conversation"
 msgstr "Trova successivo nella conversazione corrente"
 
-#: C/shortcuts.page:112(key) C/shortcuts.page:116(key)
+#: C/shortcuts.page:116(key) C/shortcuts.page:120(key)
 msgid "G"
 msgstr "G"
 
-#: C/shortcuts.page:115(p)
+#: C/shortcuts.page:119(p)
 msgid "Find previous in current conversation"
 msgstr "Trova precedente nella conversazione corrente"
 
-#: C/shortcuts.page:116(key)
+#: C/shortcuts.page:120(key)
 msgid "Shift"
 msgstr "Maiusc"
 
-#: C/shortcuts.page:121(title)
+#: C/shortcuts.page:125(title)
 msgid "Composer shortcuts"
 msgstr "Scorciatoie della finestra di composizione"
 
-#: C/shortcuts.page:122(p)
+#: C/shortcuts.page:126(p)
 msgid "These shortcuts are active whenever focus is in a composer."
 msgstr ""
 "Queste scorciatoie da tastiera sono attive quando si lavora nella finestra "
 "di composizione."
 
-#: C/shortcuts.page:125(p)
+#: C/shortcuts.page:129(p)
 msgid "Quote text"
 msgstr "Cita testo"
 
-#: C/shortcuts.page:126(key)
+#: C/shortcuts.page:130(key)
 msgid "]"
 msgstr "]"
 
-#: C/shortcuts.page:129(p)
+#: C/shortcuts.page:133(p)
 msgid "Unquote text"
 msgstr "Togli citazione"
 
-#: C/shortcuts.page:130(key)
+#: C/shortcuts.page:134(key)
 msgid "["
 msgstr "["
 
-#: C/shortcuts.page:133(p)
+#: C/shortcuts.page:137(p)
 msgid "Close composer"
 msgstr "Chiudi la finestra di composizione"
 
-#: C/shortcuts.page:134(p)
+#: C/shortcuts.page:138(p)
 msgid "<keyseq><key>Ctrl</key><key>W</key></keyseq> or <key>Esc</key>"
 msgstr "<keyseq><key>Ctrl</key><key>W</key></keyseq> o <key>Esc</key>"
 
-#: C/shortcuts.page:137(p)
+#: C/shortcuts.page:141(p)
 msgid "Detach composer"
 msgstr "Stacca la finestra di composizione"
 
-#: C/shortcuts.page:142(p)
+#: C/shortcuts.page:146(p)
 msgid "These shortcuts are only active in composers in rich text mode."
 msgstr ""
 "Queste scorciatoie sono attive solo se nella finestra di composizione è "
 "spuntata la modalità di testo formattato."
 
-#: C/shortcuts.page:145(p)
+#: C/shortcuts.page:149(p)
 msgid "Bold text"
 msgstr "Testo in grassetto"
 
-#: C/shortcuts.page:149(p)
+#: C/shortcuts.page:153(p)
 msgid "Italicize text"
 msgstr "Testo in corsivo"
 
-#: C/shortcuts.page:150(key)
+#: C/shortcuts.page:154(key)
 msgid "I"
 msgstr "I"
 
-#: C/shortcuts.page:153(p)
+#: C/shortcuts.page:157(p)
 msgid "Underline text"
 msgstr "Testo sottolineato"
 
-#: C/shortcuts.page:154(key)
+#: C/shortcuts.page:158(key)
 msgid "U"
 msgstr "U"
 
-#: C/shortcuts.page:157(p)
+#: C/shortcuts.page:161(p)
 msgid "Strike text"
 msgstr "Testo barrato"
 
-#: C/shortcuts.page:158(key)
+#: C/shortcuts.page:162(key)
 msgid "K"
 msgstr "K"
 
-#: C/shortcuts.page:161(p)
+#: C/shortcuts.page:165(p)
 msgid "Insert a link"
 msgstr "Inserisci un collegamento"
 
-#: C/shortcuts.page:162(key)
+#: C/shortcuts.page:166(key)
 msgid "L"
 msgstr "L"
 
-#: C/shortcuts.page:165(p)
+#: C/shortcuts.page:169(p)
 msgid "Remove formatting"
 msgstr "Togli formattazione"
 
-#: C/shortcuts.page:166(key)
+#: C/shortcuts.page:170(key)
 msgid "Space"
 msgstr "Spazio"
 
@@ -584,7 +596,7 @@ msgid "Finds messages with attachments whose name matches <var>filename</var>."
 msgstr ""
 "Trova i messaggi con allegati il cui nome corrisponda a <var>nomefile</var>."
 
-#: C/search.page:31(var) C/search.page:39(var) C/search.page:51(var)
+#: C/search.page:31(var) C/search.page:39(var) C/search.page:63(var)
 msgid "recipient"
 msgstr "destinatario"
 
@@ -598,7 +610,7 @@ msgstr ""
 "Trova i messaggi in cui <var>destinatario</var> corrisponde "
 "nell'intestazione Ccn."
 
-#: C/search.page:35(var) C/search.page:47(var)
+#: C/search.page:35(var) C/search.page:59(var)
 msgid "text"
 msgstr "testo"
 
@@ -635,33 +647,59 @@ msgstr ""
 "(From in inglese)."
 
 #: C/search.page:47(input)
+msgid "is:read"
+msgstr "è:letto"
+
+#: C/search.page:48(p)
+msgid "Finds messages that have been marked as read."
+msgstr "Trova i messaggi contrassegnati come letti."
+
+#: C/search.page:51(input)
+msgid "is:starred"
+msgstr "è:speciale"
+
+#: C/search.page:52(p)
+msgid "Finds messages that have been marked as starred."
+msgstr "Trova i messaggi contrassegnati come speciali."
+
+#: C/search.page:55(input)
+#| msgid "Mark unread"
+msgid "is:unread"
+msgstr "è:nonletto"
+
+#: C/search.page:56(p)
+#| msgid "Finds messages where <var>sender</var> matches the From header."
+msgid "Finds messages that have been marked as not read."
+msgstr "Trova i messaggi contrassegnati come non letti."
+
+#: C/search.page:59(input)
 msgid "subject:<placeholder-1/>"
 msgstr "oggetto:<placeholder-1/>"
 
-#: C/search.page:48(p)
+#: C/search.page:60(p)
 msgid "Finds messages whose subject contains <var>text</var>."
 msgstr "Trova i messaggi il cui oggetto contiene <var>testo</var>."
 
-#: C/search.page:51(input)
+#: C/search.page:63(input)
 msgid "to:<placeholder-1/>"
 msgstr "a:<placeholder-1/>"
 
-#: C/search.page:52(p)
+#: C/search.page:64(p)
 msgid ""
 "Finds messages where <var>sender</var> matches the To, CC, or BCC header."
 msgstr ""
 "Trova i messaggi in cui <var>mittente</var> corrisponde all'intestazione A, "
 "Cc o Ccn."
 
-#: C/search.page:56(p)
+#: C/search.page:68(p)
 msgid ""
 "As a special case, the <input>bcc</input>, <input>cc</input>, <input>from</"
 "input>, and <input>to</input> operators support <input>me</input> as their "
 "argument, which searches for the account's email address in the appropriate "
 "context."
 msgstr ""
-"Come caso speciale, gli operatori <input>bcc</input>, <input>cc</input>, "
-"<input>from</input> e <input>to</input> supportano <input>me</input> come "
+"Come caso speciale, gli operatori <input>ccn</input>, <input>cc</input>, "
+"<input>da</input> e <input>a</input> supportano <input>me</input> come "
 "argomento, abilitando la ricerca dell'indirizzo email del proprio account "
 "nel contesto appropriato."
 
@@ -709,15 +747,30 @@ msgstr ""
 "Abilita le anteprime dei messaggi nell'elenco delle conversazioni. Le "
 "anteprime mostrano le prime righe di ogni messaggio."
 
-#: C/preferences.page:34(title)
+#: C/preferences.page:31(gui)
+msgid "Use three pane view"
+msgstr "Usa la visuale a tre riquadri"
+
+#: C/preferences.page:32(p)
+msgid ""
+"Show the folder list, the conversation list, and the messages side-by-side-"
+"by-side in three panes. If not selected, the folder list and conversation "
+"list will be stacked vertically in a single pane."
+msgstr ""
+"Mostra l'elenco delle cartelle, quello delle conversazioni e i messaggi uno "
+"accanto all'altro in tre riquadri. Se non selezionato, l'elenco delle "
+"cartelle e quello delle conversazioni saranno impilati verticalmente in un "
+"unico riquadro."
+
+#: C/preferences.page:40(title)
 msgid "Composer"
 msgstr "Componitore"
 
-#: C/preferences.page:37(gui)
+#: C/preferences.page:43(gui)
 msgid "Enable spell checking"
 msgstr "Abilita controllo ortografico"
 
-#: C/preferences.page:38(p)
+#: C/preferences.page:44(p)
 msgid ""
 "When set, Geary automatically spell checks a message as you write it, "
 "underlying each misspelled word in red."
@@ -725,33 +778,55 @@ msgstr ""
 "Se impostato, Geary esegue automaticamente il controllo ortografico di un "
 "messaggio mentre lo si scrive, sottolineando le parole sbagliate in rosso."
 
-#: C/preferences.page:45(title)
+#: C/preferences.page:51(title)
 msgid "Notifications"
 msgstr "Notifiche"
 
-#: C/preferences.page:48(gui)
+#: C/preferences.page:54(gui)
 msgid "Play notification sounds"
 msgstr "Attiva avvisi sonori"
 
-#: C/preferences.page:49(p)
+#: C/preferences.page:55(p)
 msgid "When set, Geary plays a sound whenever a new message arrives."
 msgstr "Se impostato, Geary emette un suono quando arriva un nuovo messaggio."
 
-#: C/preferences.page:52(gui)
+#: C/preferences.page:58(gui)
 msgid "Show notifications for new mail"
 msgstr "Mostra notifiche per i nuovi messaggi"
 
-#: C/preferences.page:53(p)
+#: C/preferences.page:59(p)
+#| msgid ""
+#| "When set, Geary displays a <em>notification</em> each time a new message "
+#| "arrives. Notifications are displayed in a system-dependent manner. On "
+#| "GNOME Shell, notifications appear at the bottom of the display. In Ubuntu "
+#| "Unity, notifications appear at the upper right of the display."
 msgid ""
 "When set, Geary displays a <em>notification</em> each time a new message "
 "arrives. Notifications are displayed in a system-dependent manner. On GNOME "
-"Shell, notifications appear at the bottom of the display. In Ubuntu Unity, "
+"Shell, notifications appear at the bottom of the display (older versions) or "
+"centered just below the top bar (newer versions). In Ubuntu Unity, "
 "notifications appear at the upper right of the display."
 msgstr ""
 "Se impostato, Geary mostra una <em>notifica</em> ogni volta che arriva un "
 "nuovo messaggio. Il modo in cui le notifiche appaiono dipende dal sistema. "
-"In GNOME Shell le notifiche appaiono in fondo allo schermo. In Ubuntu Unity "
-"appaiono in alto a destra."
+"In GNOME Shell le notifiche appaiono in fondo allo schermo (nelle versioni "
+"più vecchie) o centrate proprio sotto la barra superiore (nelle versioni "
+"recenti). In Ubuntu Unity appaiono in alto a destra."
+
+#: C/preferences.page:65(gui)
+#| msgid "Show notifications for new mail"
+msgid "Always watch for new mail"
+msgstr "Controlla sempre la nuova posta"
+
+#: C/preferences.page:66(p)
+msgid ""
+"Geary will watch your accounts for new mail even when the main window is not "
+"open. To do this, it will silently start when you log in to your computer, "
+"and it will continue to run after you close the main window."
+msgstr ""
+"Geary controllerà la presenza di nuova posta anche quando la finestra "
+"principale non è aperta. Per far ciò, si avvierà silenziosamente al login e "
+"continuerà a girare dopo la chiusura della finestra principale."
 
 #: C/overview.page:8(title)
 msgid "Overview"
@@ -1243,12 +1318,5 @@ msgstr ""
 #. Put one translator per line, in the form of NAME <EMAIL>, YEAR1, YEAR2
 #: C/accounts.page:0(None)
 msgid "translator-credits"
-msgstr "Federico Bruni"
+msgstr "Federico Bruni <fede@inventati.org>, 2015, 2016"
 
-#~ msgid ""
-#~ "To set preferences in Geary, open the application menu or click the gear "
-#~ "menu at the upper right of the toolbar and choose <gui>Preferences</gui>."
-#~ msgstr ""
-#~ "Per impostare le preferenze in Geary, aprire il menù dell'applicazione o "
-#~ "cliccare l'icona della ruota dentata nell'angolo superiore destro della "
-#~ "barra degli strumenti e scegliere <gui>Preferenze</gui>."
