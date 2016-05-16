@@ -355,6 +355,7 @@ client/composer/contact-entry-completion.vala
 client/composer/contact-list-store.vala
 client/composer/email-entry.vala
 client/composer/scrollable-overlay.vala
+client/composer/spell-check-popover.vala
 client/composer/webview-edit-fixer.vala
 
 client/conversation-list/conversation-list-cell-renderer.vala
@@ -495,6 +496,7 @@ pkg_check_modules(DEPS REQUIRED
     gcr-3>=3.10.1
     gobject-introspection-1.0
     webkitgtk-3.0>=2.4.0
+    enchant>=1.6
     ${EXTRA_CLIENT_PKG_CONFIG}
 )
 
@@ -505,7 +507,7 @@ set(ENGINE_PACKAGES
 # webkitgtk-3.0 is listed as a custom VAPI (below) to ensure it's treated as a dependency and
 # built before compilation
 set(CLIENT_PACKAGES
-    gtk+-3.0 libsecret-1 libsoup-2.4 libnotify libcanberra gcr-3 ${EXTRA_CLIENT_PACKAGES}
+    gtk+-3.0 libsecret-1 libsoup-2.4 libnotify libcanberra gcr-3 enchant ${EXTRA_CLIENT_PACKAGES}
 )
 
 set(CONSOLE_PACKAGES
@@ -523,6 +525,8 @@ set(CFLAGS
     -D_GSETTINGS_DIR=\"${CMAKE_BINARY_DIR}/gsettings\"
     -DGETTEXT_PACKAGE=\"${GETTEXT_PACKAGE}\"
     -DLANGUAGE_SUPPORT_DIRECTORY=\"${LANGUAGE_SUPPORT_DIRECTORY}\"
+    -DISO_CODE_639_XML=\"${ISO_CODE_639_XML}\"
+    -DISO_CODE_3166_XML=\"${ISO_CODE_3166_XML}\"
     -DGCR_API_SUBJECT_TO_CHANGE
     -g
 )

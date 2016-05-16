@@ -238,6 +238,13 @@
         <property name="icon_name">edit-copy-symbolic</property>
       </object>
     </child>
+    <child>
+      <object class="GtkAction" id="select dictionary">
+        <property name="label" translatable="yes">Select spell checking language</property>
+        <property name="short_label" translatable="yes">Spelling language</property>
+        <property name="icon_name">accessories-dictionary-symbolic</property>
+      </object>
+    </child>
   </object>
   <object class="GtkBox" id="composer">
     <property name="visible">True</property>

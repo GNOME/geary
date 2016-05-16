@@ -7,6 +7,8 @@
 public class ComposerToolbar : PillToolbar {
     
     public string label_text { get; set; }
+
+    public Gtk.Button select_dictionary_button;
     
     public ComposerToolbar(Gtk.ActionGroup toolbar_action_group, Gtk.Menu menu) {
         base(toolbar_action_group);
@@ -36,6 +38,12 @@ public class ComposerToolbar : PillToolbar {
         insert.add(create_toolbar_button(null, ComposerWidget.ACTION_REMOVE_FORMAT));
         add_start(create_pill_buttons(insert));
         
+        // Select dictionary
+        insert.clear();
+        select_dictionary_button = create_toolbar_button(null, ComposerWidget.ACTION_SELECT_DICTIONARY);
+        insert.add(select_dictionary_button);
+        add_start(create_pill_buttons(insert));
+
         // Menu.
         insert.clear();
         insert.add(create_menu_button(null, menu, ComposerWidget.ACTION_MENU));
