@@ -125,7 +125,7 @@ public class ComposerWidget : Gtk.EventBox {
         }
         </style>
         </head><body>
-        <div id="message-body" contenteditable="true"></div>
+        <div id="message-body" contenteditable="true" dir="auto"></div>
         </body></html>""";
     private const string CURSOR = "<span id=\"cursormarker\"></span>";
     
