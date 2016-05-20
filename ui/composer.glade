@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.20.0 -->
 <interface>
-  <!-- interface-requires gtk+ 3.0 -->
+  <requires lib="gtk+" version="3.14"/>
   <object class="GtkActionGroup" id="compose actions">
     <child>
       <object class="GtkAction" id="undo">
@@ -594,7 +595,7 @@
       </packing>
     </child>
     <child>
-      <object class="GtkFrame" id="frame1">
+      <object class="GtkFrame">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="label_xalign">0</property>
@@ -611,6 +612,9 @@
         <child type="label_item">
           <placeholder/>
         </child>
+        <style>
+          <class name="geary-composer-body"/>
+        </style>
       </object>
       <packing>
         <property name="expand">True</property>

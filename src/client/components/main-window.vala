@@ -152,27 +152,34 @@ public class MainWindow : Gtk.ApplicationWindow {
         Gtk.CssProvider provider = new Gtk.CssProvider();
         Gtk.StyleContext.add_provider_for_screen(Gdk.Display.get_default().get_default_screen(),
             provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
-        // Gtk < 3.14: No borders along top or left side of window
         string css = """
-            .folder-frame {
-                border-left-width: 0px;
-                border-top-width: 0px;
+            .geary-folder-frame, /* GTK < 3.20 */
+            .geary-folder-frame > border {
+                border-left-width: 0;
+                border-top-width: 0;
+                border-right-width: 0;
             }
-            .sidebar-pane-separator.horizontal .conversation-frame {
-                border-top-width: 0px;
-                border-bottom-width: 0px;
+            .geary-conversation-frame, /* GTK < 3.20 */
+            .geary-conversation-frame > border {
+                border-left-width: 0;
+                border-top-width: 0;
+                border-right-width: 0;
             }
-            .sidebar-pane-separator.vertical .conversation-frame {
-                border-left-width: 0px;
+            /* For 3-pane mode only */
+            .geary-sidebar-pane-separator.vertical .conversation-frame, /* GTK < 3.20 */
+            .geary-sidebar-pane-separator.vertical .conversation-frame > border {
+                border-bottom-width: 0;
             }
-            ComposerBox {
-                border-left-width: 0px;
-                border-right-width: 0px;
-                border-bottom-width: 0px;
+
+            .geary-composer-box > border {
+                border-width: 0px;
             }
-            ComposerBox.full-pane {
-                border-top-width: 0px;
+            .geary-composer-body > border {
+                border-left-width: 0;
+                border-right-width: 0;
+                border-bottom-width: 0;
             }
+
             ComposerEmbed GtkHeaderBar,
             ComposerBox GtkHeaderBar,
             GtkBox.vertical GtkHeaderBar {
@@ -187,23 +194,6 @@ public class MainWindow : Gtk.ApplicationWindow {
                 border-top-left-radius: 0px;
             }
         """;
-        
-        if(Gtk.MAJOR_VERSION > 3 || Gtk.MAJOR_VERSION == 3 && Gtk.MINOR_VERSION >= 14) {
-            // Gtk >= 3.14: Borders only along status bar
-            css += """
-                  .folder-frame {
-                      border-right-width: 0px;
-                  }
-                  .sidebar-pane-separator.vertical .folder-frame {
-                      border-bottom-width: 0px;
-                  }
-                  .conversation-frame {
-                      border-top-width: 0px;
-                      border-left-width: 0px;
-                      border-right-width: 0px;
-                  }
-            """;
-        }
 
         try {
             provider.load_from_data(css, -1);
@@ -222,7 +212,7 @@ public class MainWindow : Gtk.ApplicationWindow {
         folder_list_scrolled.add(folder_list);
         Gtk.Frame folder_frame = new Gtk.Frame(null);
         folder_frame.shadow_type = Gtk.ShadowType.IN;
-        folder_frame.get_style_context ().add_class ("folder-frame");
+        folder_frame.get_style_context ().add_class("geary-folder-frame");
         folder_frame.add(folder_list_scrolled);
         folder_box = new Gtk.Box(Gtk.Orientation.VERTICAL, 0);
         folder_box.pack_start(folder_frame, true, true);
@@ -234,7 +224,7 @@ public class MainWindow : Gtk.ApplicationWindow {
         conversation_list_scrolled.add(conversation_list_view);
         Gtk.Frame conversation_frame = new Gtk.Frame(null);
         conversation_frame.shadow_type = Gtk.ShadowType.IN;
-        conversation_frame.get_style_context ().add_class ("conversation-frame");
+        conversation_frame.get_style_context ().add_class("geary-conversation-frame");
         conversation_frame.add(conversation_list_scrolled);
         conversation_box = new Gtk.Box(Gtk.Orientation.VERTICAL, 0);
         conversation_box.pack_start(conversation_frame, true, true);
@@ -245,7 +235,7 @@ public class MainWindow : Gtk.ApplicationWindow {
         spinner.set_size_request(STATUS_BAR_HEIGHT - 2, -1);
         status_bar.add(spinner);
         
-        folder_paned.get_style_context().add_class("sidebar-pane-separator");
+        folder_paned.get_style_context().add_class("geary-sidebar-pane-separator");
         
         Gtk.Frame viewer_frame = new Gtk.Frame(null);
         viewer_frame.shadow_type = Gtk.ShadowType.NONE;

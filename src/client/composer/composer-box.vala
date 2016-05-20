@@ -22,6 +22,8 @@ public class ComposerBox : Gtk.Frame, ComposerContainer {
         composer.editor.focus_out_event.connect(on_focus_out);
         show();
         
+        get_style_context().add_class("geary-composer-box");
+
         if (composer.state == ComposerWidget.ComposerState.NEW) {
             ConversationListView conversation_list_view = ((MainWindow) GearyApplication.
                 instance.controller.main_window).conversation_list_view;
@@ -31,7 +33,7 @@ public class ComposerBox : Gtk.Frame, ComposerContainer {
             composer.free_header();
             GearyApplication.instance.controller.main_window.main_toolbar.set_conversation_header(
                 composer.header);
-            get_style_context().add_class("full-pane");
+            get_style_context().add_class("geary-full-pane");
         }
     }
     
@@ -71,7 +73,7 @@ public class ComposerBox : Gtk.Frame, ComposerContainer {
     public void vanish() {
         hide();
         parent.hide();
-        if (get_style_context().has_class("full-pane"))
+        if (get_style_context().has_class("geary-full-pane"))
             GearyApplication.instance.controller.main_window.main_toolbar.remove_conversation_header(
                 composer.header);
         
