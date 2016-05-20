@@ -13,18 +13,13 @@ public class ComposerWindow : Gtk.Window, ComposerContainer {
         Object(type: Gtk.WindowType.TOPLEVEL);
         
         add(composer);
-        
-        if (!GearyApplication.instance.is_running_unity) {
-            composer.header.show_close_button = true;
-            composer.free_header();
-            set_titlebar(composer.header);
-            composer.bind_property("window-title", composer.header, "title",
-                BindingFlags.SYNC_CREATE);
-        } else {
-            composer.embed_header();
-            composer.bind_property("window-title", this, "title", BindingFlags.SYNC_CREATE);
-        }
-        
+
+        composer.header.show_close_button = true;
+        composer.free_header();
+        set_titlebar(composer.header);
+        composer.bind_property("window-title", composer.header, "title",
+                               BindingFlags.SYNC_CREATE);
+
         add_accel_group(composer.ui.get_accel_group());
         show();
         set_position(Gtk.WindowPosition.CENTER);

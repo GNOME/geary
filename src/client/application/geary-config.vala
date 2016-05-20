@@ -23,12 +23,10 @@ public class Configuration {
     public const string STARTUP_NOTIFICATIONS_KEY = "startup-notifications";
     public const string ASK_OPEN_ATTACHMENT_KEY = "ask-open-attachment";
     public const string COMPOSE_AS_HTML_KEY = "compose-as-html";
-    
+
     public Settings settings { get; private set; }
-    
     public Settings gnome_interface;
-    private Settings? indicator_datetime;
-    
+
     public int window_width {
         get { return settings.get_int(WINDOW_WIDTH_KEY); }
     }
@@ -93,20 +91,8 @@ public class Configuration {
     }
     
     private const string CLOCK_FORMAT_KEY = "clock-format";
-    private const string TIME_FORMAT_KEY = "time-format";
     public Date.ClockFormat clock_format {
         get {
-            if (GearyApplication.instance.is_running_unity && indicator_datetime != null) {
-                string format = indicator_datetime.get_string(TIME_FORMAT_KEY);
-                if (format == "12-hour")
-                    return Date.ClockFormat.TWELVE_HOURS;
-                else if (format == "24-hour")
-                    return Date.ClockFormat.TWENTY_FOUR_HOURS;
-                else {
-                    // locale-default or custom
-                    return Date.ClockFormat.LOCALE_DEFAULT;
-                }
-            }
             if (gnome_interface.get_string(CLOCK_FORMAT_KEY) == "12h")
                 return Date.ClockFormat.TWELVE_HOURS;
             else
@@ -123,20 +109,14 @@ public class Configuration {
         get { return settings.get_boolean(COMPOSE_AS_HTML_KEY); }
         set { set_boolean(COMPOSE_AS_HTML_KEY, value); }
     }
-    
+
     // Creates a configuration object.
     public Configuration(string schema_id) {
         // Start GSettings.
         settings = new Settings(schema_id);
         gnome_interface = new Settings("org.gnome.desktop.interface");
-        foreach(unowned string schema in GLib.Settings.list_schemas()) {
-            if (schema == "com.canonical.indicator.datetime") {
-                indicator_datetime = new Settings("com.canonical.indicator.datetime");
-                break;
-            }
-        }
     }
-    
+
     // is_installed: set to true if installed, else false.
     // schema_dir: MUST be set if not installed. Directory where GSettings schema is located.
     public static void init(bool is_installed, string? schema_dir = null) {

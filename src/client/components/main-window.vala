@@ -81,23 +81,9 @@ public class MainWindow : Gtk.ApplicationWindow {
         main_toolbar = new MainToolbar();
         main_toolbar.bind_property("search-open", search_bar, "search-mode-enabled",
             BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
-        if (!GearyApplication.instance.is_running_unity) {
-            main_toolbar.show_close_button = true;
-            set_titlebar(main_toolbar);
-            title = GearyApplication.NAME;
-        } else {
-            BindingTransformFunc title_func = (binding, source, ref target) => {
-                string folder = current_folder != null ? current_folder.get_display_name() + " " : "";
-                string account = main_toolbar.account != null ? "(%s)".printf(main_toolbar.account) : "";
-                
-                target = "%s%s - %s".printf(folder, account, GearyApplication.NAME);
-                
-                return true;
-            };
-            bind_property("current-folder", this, "title", BindingFlags.SYNC_CREATE, title_func);
-            main_toolbar.bind_property("account", this, "title", BindingFlags.SYNC_CREATE, title_func);
-        }
-        
+        main_toolbar.show_close_button = true;
+        set_titlebar(main_toolbar);
+
         set_styling();
         create_layout();
         on_change_orientation();
@@ -253,10 +239,7 @@ public class MainWindow : Gtk.ApplicationWindow {
         // Message list left of message viewer.
         conversations_paned.pack1(search_bar_box, false, false);
         conversations_paned.pack2(viewer_frame, true, true);
-        
-        if (GearyApplication.instance.is_running_unity)
-            main_layout.pack_start(main_toolbar, false, true, 0);
-        
+
         main_layout.pack_end(conversations_paned, true, true, 0);
         
         add(main_layout);
