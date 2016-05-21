@@ -85,8 +85,8 @@ public class ComposerHeaderbar : PillHeaderbar {
         add_start(recipients);
 
         add_end(detach_end);
-        add_end(close_buttons);
         add_end(send_button);
+        add_end(close_buttons);
 
         notify["decoration-layout"].connect(set_detach_button_side);
         realize.connect(set_detach_button_side);
