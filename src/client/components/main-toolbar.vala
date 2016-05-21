@@ -27,11 +27,11 @@ public class MainToolbar : Gtk.Box {
         
         folder_header = new PillHeaderbar(GearyApplication.instance.actions);
         conversation_header = new PillHeaderbar(GearyApplication.instance.actions);
-        folder_header.get_style_context().add_class("titlebar");
+        folder_header.get_style_context().add_class("geary-titlebar");
         folder_header.get_style_context().add_class("geary-titlebar-left");
-        conversation_header.get_style_context().add_class("titlebar");
+        conversation_header.get_style_context().add_class("geary-titlebar");
         conversation_header.get_style_context().add_class("geary-titlebar-right");
-        
+
         // Instead of putting a separator between the two headerbars, as other applications do,
         // we put a separator at the right end of the left headerbar.  This greatly improves
         // the appearance under the Ambiance theme (see bug #746171).  To get this separator to
@@ -137,27 +137,27 @@ public class MainToolbar : Gtk.Box {
         
         archive_button.visible = archive;
     }
-    
+
     public void set_conversation_header(Gtk.HeaderBar header) {
         conversation_header.hide();
-        header.get_style_context().add_class("titlebar");
+        header.get_style_context().add_class("geary-titlebar");
         header.get_style_context().add_class("geary-titlebar-right");
         guest_header_binding = bind_property("show-close-button-right", header,
             "show-close-button", BindingFlags.SYNC_CREATE);
         pack_start(header, true, true);
         header.decoration_layout = conversation_header.decoration_layout;
     }
-    
+
     public void remove_conversation_header(Gtk.HeaderBar header) {
         remove(header);
-        header.get_style_context().remove_class("titlebar");
+        header.get_style_context().remove_class("geary-titlebar");
         header.get_style_context().remove_class("geary-titlebar-right");
         GtkUtil.unbind(guest_header_binding);
         header.show_close_button = false;
         header.decoration_layout = Gtk.Settings.get_default().gtk_decoration_layout;
         conversation_header.show();
     }
-    
+
     private void set_window_buttons() {
         string[] buttons = Gtk.Settings.get_default().gtk_decoration_layout.split(":");
         if (buttons.length != 2) {
