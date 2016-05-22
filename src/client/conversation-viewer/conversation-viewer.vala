@@ -130,7 +130,7 @@ public class ConversationViewer : Gtk.Stack {
                 // If not a ConversationEmail, will be an
                 // embedded composer and should not be activated.
                 ConversationEmail? msg = row.get_child() as ConversationEmail;
-                if (email_to_row.size > 1 && msg != null) {
+                if (!row.get_style_context().has_class("geary_last") && msg != null) {
                     if (msg.is_message_body_visible) {
                         collapse_email(row);
                     } else {
