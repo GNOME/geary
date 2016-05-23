@@ -157,7 +157,7 @@ public class GearyController : Geary.BaseObject {
     private NewMessagesMonitor? new_messages_monitor = null;
     private NewMessagesIndicator? new_messages_indicator = null;
     private UnityLauncher? unity_launcher = null;
-    private Libnotify? libnotify = null;
+    private GLibNotification? gLibNotification = null;
     private uint select_folder_timeout_id = 0;
     private int64 next_folder_select_allowed_usec = 0;
     private Geary.Nonblocking.Mutex select_folder_mutex = new Geary.Nonblocking.Mutex();
@@ -328,8 +328,7 @@ public class GearyController : Geary.BaseObject {
 
         unity_launcher = new UnityLauncher(new_messages_monitor);
 
-        this.libnotify = new Libnotify(this.new_messages_monitor);
-        this.libnotify.invoked.connect(on_libnotify_invoked);
+        gLibNotification = new GLibNotification(new_messages_monitor);
 
         this.main_window.conversation_list_view.grab_focus();
 
@@ -443,7 +442,7 @@ public class GearyController : Geary.BaseObject {
         }
 
         // Release monitoring early so held resources can be freed up
-        this.libnotify = null;
+        this.gLibNotification = null;
         this.new_messages_indicator = null;
         this.unity_launcher = null;
         this.new_messages_monitor.clear_folders();
@@ -703,6 +702,15 @@ public class GearyController : Geary.BaseObject {
             info_bar.retry.connect(on_retry_problem);
             this.main_window.show_infobar(info_bar);
         }
+
+        Geary.ServiceProblemReport? service_report =
+            report as Geary.ServiceProblemReport;
+        if (service_report != null && service_report.service.protocol == SMTP) {
+            gLibNotification.set_error_notification(
+                _("Error sending email"),
+                _("Geary encountered an error sending an email.  If the problem persists, please manually delete the email from your Outbox folder.")
+            );
+        }
     }
 
     private void update_account_status() {
@@ -897,7 +905,7 @@ public class GearyController : Geary.BaseObject {
         if (folder.special_folder_type == Geary.SpecialFolderType.OUTBOX) {
             main_window.status_bar.deactivate_message(StatusBar.Message.OUTBOX_SEND_FAILURE);
             main_window.status_bar.deactivate_message(StatusBar.Message.OUTBOX_SAVE_SENT_MAIL_FAILED);
-            libnotify.clear_error_notification();
+            gLibNotification.clear_error_notification();
         }
     }
 
@@ -1264,18 +1272,6 @@ public class GearyController : Geary.BaseObject {
             }
             conversation_count_changed(count);
         }
-    }
-
-    private void on_libnotify_invoked(Geary.Folder? folder, Geary.Email? email) {
-        new_messages_monitor.clear_all_new_messages();
-
-        if (folder == null || email == null || !can_switch_conversation_view())
-            return;
-
-        main_window.folder_list.select_folder(folder);
-        Geary.App.Conversation? conversation = current_conversations.get_by_email_identifier(email.id);
-        if (conversation != null)
-            main_window.conversation_list_view.select_conversation(conversation);
     }
 
     private void on_indicator_activated_application(uint32 timestamp) {
@@ -2617,7 +2613,7 @@ public class GearyController : Geary.BaseObject {
         ).printf(Util.Email.to_short_recipient_display(rfc822.to));
         InAppNotification notification = new InAppNotification(message);
         this.main_window.add_notification(notification);
-        Libnotify.play_sound("message-sent-email");
+        GLibNotification.play_sound("message-sent-email");
     }
 
     private void on_conversation_view_added(ConversationListBox list) {
@@ -2949,6 +2945,7 @@ public class GearyController : Geary.BaseObject {
 
                 case Geary.Protocol.SMTP:
                     context.account.outgoing.restart.begin(context.cancellable);
+                    gLibNotification.clear_error_notification();
                     break;
                 }
             }

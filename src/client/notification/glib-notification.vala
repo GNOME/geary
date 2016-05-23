@@ -4,38 +4,30 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-// Displays a notification via libnotify
-public class Libnotify : Geary.BaseObject {
+// Displays a notification via GLibNotification
+public class GLibNotification : Geary.BaseObject {
     public const Geary.Email.Field REQUIRED_FIELDS =
         Geary.Email.Field.ORIGINATORS | Geary.Email.Field.SUBJECT;
 
     private static Canberra.Context? sound_context = null;
 
     private weak NewMessagesMonitor monitor;
-    private Notify.Notification? current_notification = null;
-    private Notify.Notification? error_notification = null;
+    private GLib.Notification? current_notification = null;
+    private GLib.Notification? error_notification = null;
     private Geary.Folder? folder = null;
     private Geary.Email? email = null;
-    private List<string>? caps = null;
 
-    public signal void invoked(Geary.Folder? folder, Geary.Email? email);
 
-    public Libnotify(NewMessagesMonitor monitor) {
+    public GLibNotification(NewMessagesMonitor monitor) {
         this.monitor = monitor;
-
-        monitor.add_required_fields(REQUIRED_FIELDS);
-
-        if (!Notify.is_initted()) {
-            if (!Notify.init(Environment.get_prgname()))
-                message("Failed to initialize libnotify.");
-        }
-
         init_sound();
 
-        // This will return null if no notification server is present
-        this.caps = Notify.get_server_caps();
+        this.monitor.add_required_fields(REQUIRED_FIELDS);
+        this.monitor.new_messages_arrived.connect(on_new_messages_arrived);
+    }
 
-        monitor.new_messages_arrived.connect(on_new_messages_arrived);
+    ~GLibNotification() {
+        this.monitor.new_messages_arrived.disconnect(on_new_messages_arrived);
     }
 
     private static void init_sound() {
@@ -54,11 +46,6 @@ public class Libnotify : Geary.BaseObject {
         } else if (added > 0) {
             notify_new_mail(folder, added);
         }
-    }
-
-    private void on_default_action(Notify.Notification notification, string action) {
-        invoked(folder, email);
-        GearyApplication.instance.activate();
     }
 
     private void notify_new_mail(Geary.Folder folder, int added) {
@@ -135,12 +122,7 @@ public class Libnotify : Geary.BaseObject {
     private void issue_current_notification(string summary, string body, Gdk.Pixbuf? icon) {
         // only one outstanding notification at a time
         if (current_notification != null) {
-            try {
-                current_notification.close();
-            } catch (Error err) {
-                debug("Unable to close current libnotify notification: %s", err.message);
-            }
-
+            GearyApplication.instance.withdraw_notification("email.arrived");
             current_notification = null;
         }
 
@@ -148,39 +130,20 @@ public class Libnotify : Geary.BaseObject {
 
     }
 
-    private Notify.Notification? issue_notification(string category, string summary,
-        string body, Gdk.Pixbuf? icon, string? sound) {
-        if (this.caps == null)
-            return null;
-
-        // Avoid constructor due to ABI change
-        Notify.Notification notification = (Notify.Notification) GLib.Object.new(
-            typeof (Notify.Notification),
-            "icon-name", "org.gnome.Geary",
-            "summary", GLib.Environment.get_application_name());
-        notification.set_hint_string("desktop-entry", "org.gnome.Geary");
-        if (caps.find_custom("actions", GLib.strcmp) != null)
-            notification.add_action("default", _("Open"), on_default_action);
-
-        notification.set_category(category);
-        notification.set("summary", summary);
-        notification.set("body", body);
+    private GLib.Notification issue_notification(string id, string summary, string body,
+        Gdk.Pixbuf? icon, string? sound) {
+        GLib.Notification notification = new GLib.Notification(summary);
+        notification.set_body(body);
+        //notification.set_default_action("app.activate");
 
         if (icon != null)
-            notification.set_image_from_pixbuf(icon);
+            notification.set_icon(icon);
 
         if (sound != null) {
-            if (caps.find("sound") != null)
-                notification.set_hint_string("sound-name", sound);
-            else
-                play_sound(sound);
+            play_sound(sound);
         }
 
-        try {
-            notification.show();
-        } catch (Error err) {
-            message("Unable to show notification: %s", err.message);
-        }
+        GearyApplication.instance.send_notification(id, notification);
 
         return notification;
     }
@@ -200,19 +163,11 @@ public class Libnotify : Geary.BaseObject {
         if (error_notification != null)
             return;
 
-        error_notification = issue_notification("email", summary, body, null, null);
+        error_notification = issue_notification("error", summary, body, null, null);
     }
 
     public void clear_error_notification() {
-        if (error_notification != null) {
-            try {
-                error_notification.close();
-            } catch (Error err) {
-                debug("Unable to close libnotify error notification: %s", err.message);
-            }
-
-            error_notification = null;
-        }
+        GearyApplication.instance.withdraw_notification("error");
+        error_notification = null;
     }
 }
-
