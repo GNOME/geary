@@ -9,7 +9,6 @@
     <accelerator action="GearyZoomIn" />
     <accelerator action="GearyZoomOut" />
     <accelerator action="GearyZoomNormal" />
-    <accelerator action="GearyGearMenuButton" />
     <accelerator action="GearyFindInConversation" />
     <accelerator action="GearyFindNextInConversation" />
     <accelerator action="GearyFindPreviousInConversation" />

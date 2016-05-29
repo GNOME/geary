@@ -49,7 +49,6 @@ public class GearyController : Geary.BaseObject {
     public const string ACTION_MARK_AS_SPAM = "GearyMarkAsSpam";
     public const string ACTION_COPY_MENU = "GearyCopyMenuButton";
     public const string ACTION_MOVE_MENU = "GearyMoveMenuButton";
-    public const string ACTION_GEAR_MENU = "GearyGearMenuButton";
     public const string ACTION_SEARCH = "GearySearch";
     public const string ACTION_CONVERSATION_LIST = "GearyConversationList";
     public const string ACTION_TOGGLE_SEARCH = "GearyToggleSearch";
@@ -542,10 +541,6 @@ public class GearyController : Geary.BaseObject {
     
     private Gtk.ToggleActionEntry[] create_toggle_actions() {
         Gtk.ToggleActionEntry[] entries = new Gtk.ToggleActionEntry[0];
-        
-        Gtk.ToggleActionEntry gear_menu = { ACTION_GEAR_MENU, null, null, "F10",
-            null, null, false };
-        entries += gear_menu;
         
         return entries;
     }
