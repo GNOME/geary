@@ -1,15 +1,15 @@
 <ui>
-    <accelerator action="GearyNewMessage" />
     <accelerator action="GearyArchiveMessage" />
-    <accelerator action="GearyTrashMessage" />
     <accelerator action="GearyDeleteMessage" />
-    <accelerator action="GearyReplyToMessage" />
-    <accelerator action="GearyReplyAllMessage" />
-    <accelerator action="GearyForwardMessage" />
-    <accelerator action="GearyZoomIn" />
-    <accelerator action="GearyZoomOut" />
-    <accelerator action="GearyZoomNormal" />
     <accelerator action="GearyFindInConversation" />
     <accelerator action="GearyFindNextInConversation" />
     <accelerator action="GearyFindPreviousInConversation" />
+    <accelerator action="GearyForwardMessage" />
+    <accelerator action="GearyNewMessage" />
+    <accelerator action="GearyReplyAllMessage" />
+    <accelerator action="GearyReplyToMessage" />
+    <accelerator action="GearyTrashMessage" />
+    <accelerator action="GearyZoomIn" />
+    <accelerator action="GearyZoomNormal" />
+    <accelerator action="GearyZoomOut" />
 </ui>
