@@ -429,10 +429,12 @@ public class GearyController : Geary.BaseObject {
             _("Add label"), null };
         copy_menu.label = _("_Label");
         entries += copy_menu;
+        add_accelerator("l", ACTION_COPY_MENU);
 
         Gtk.ActionEntry move_menu = { ACTION_MOVE_MENU, null, TRANSLATABLE, "M", _("Move conversation"), null };
         move_menu.label = _("_Move");
         entries += move_menu;
+        add_accelerator("m", ACTION_MOVE_MENU);
 
         Gtk.ActionEntry new_message = { ACTION_NEW_MESSAGE, null, null, "<Ctrl>N", 
             _("Compose new message (Ctrl+N, N)"), on_new_message };

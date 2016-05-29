@@ -35,9 +35,10 @@ public interface PillBar : Gtk.Container {
     
     public virtual void setup_button(Gtk.Button b, string? icon_name, string action_name,
         bool show_label = false) {
-        b.related_action = action_group.get_action(action_name);
-        b.tooltip_text = b.related_action.tooltip;
-        b.related_action.notify["tooltip"].connect(() => { b.tooltip_text = b.related_action.tooltip; });
+        Gtk.Action related_action = action_group.get_action(action_name);
+        b.tooltip_text = related_action.tooltip;
+        related_action.notify["tooltip"].connect(() => { b.tooltip_text = related_action.tooltip; });
+        b.related_action = related_action;
         
         // Load icon by name with this fallback order: specified icon name, the action's icon name,
         // the action's stock ID ... although stock IDs are being deprecated, that's how we specify
@@ -88,6 +89,15 @@ public interface PillBar : Gtk.Container {
         Gtk.MenuButton b = new Gtk.MenuButton();
         setup_button(b, icon_name, action_name);
         b.popup = menu;
+
+        if (b.related_action != null) {
+            b.related_action.activate.connect(() => {
+                    b.clicked();
+                });
+            // Null out the action since by connecting it to clicked
+            // above, invoking would cause an infinite loop otherwise.
+            b.related_action = null;
+        }
         
         return b;
     }

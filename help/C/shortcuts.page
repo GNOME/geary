@@ -55,6 +55,14 @@
   	    <td><p>Mark unread</p></td>
   		<td><p> <keyseq><key>Ctrl</key><key>U</key></keyseq> or <keyseq><key>Shift</key><key>U</key></keyseq> </p></td>
   	</tr>
+  	<tr>
+  	    <td><p>Open the Label Conversation menu</p></td>
+  		<td><p><key>L</key></p></td>
+  	</tr>
+  	<tr>
+  	    <td><p>Open the Move Conversation menu</p></td>
+  		<td><p><key>M</key></p></td>
+  	</tr>
     <tr>
         <td><p>Move focus to the next/previous pane</p></td>
       <td><p> <keyseq><key>F6</key></keyseq> / <keyseq><key>Shift</key><key>F6</key></keyseq> </p></td>
