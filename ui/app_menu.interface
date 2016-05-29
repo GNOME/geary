@@ -4,12 +4,10 @@
             <item>
                 <attribute name='label' translatable='yes'>A_ccounts</attribute>
                 <attribute name='action'>app.GearyAccounts</attribute>
-                <attribute name='accel'>&lt;Primary&gt;M</attribute>
             </item>
             <item>
                 <attribute name='label' translatable='yes'>_Preferences</attribute>
                 <attribute name='action'>app.GearyPreferences</attribute>
-                <attribute name='accel'>&lt;Primary&gt;E</attribute>
             </item>
         </section>
         <section>

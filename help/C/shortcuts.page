@@ -65,11 +65,11 @@
   	</tr>
   	<tr>
   	    <td><p>Jump to next (older) conversation</p></td>
-  		<td><p> <keyseq><key>j</key></keyseq> </p></td>
+  		<td><p><keyseq><key>J</key></keyseq></p></td>
   	</tr>
   	<tr>
   	    <td><p>Jump to previous (newer) conversation</p></td>
-  		<td><p> <keyseq><key>k</key></keyseq> </p></td>
+  		<td><p><keyseq><key>K</key></keyseq></p></td>
   	</tr>
   	<tr>
   	    <td><p>Toggle spam</p></td>
@@ -90,14 +90,6 @@
   	<tr>
   		<td><p>Reset zoom</p></td>
   		<td><p><keyseq><key>Ctrl</key><key>0</key></keyseq> or <key>0</key> </p></td>
-  	</tr>
-  	<tr>
-  		<td><p>Preferences</p></td>
-  		<td><p> <keyseq><key>Ctrl</key><key>E</key></keyseq> </p></td>
-  	</tr>
-  	<tr>
-  		<td><p>Accounts</p></td>
-  		<td><p> <keyseq><key>Ctrl</key><key>M</key></keyseq> </p></td>
   	</tr>
   	<tr>
   		<td><p>Close composer window</p></td>

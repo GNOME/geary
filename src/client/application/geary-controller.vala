@@ -369,12 +369,12 @@ public class GearyController : Geary.BaseObject {
     private Gtk.ActionEntry[] create_actions() {
         Gtk.ActionEntry[] entries = new Gtk.ActionEntry[0];
         
-        Gtk.ActionEntry accounts = { ACTION_ACCOUNTS, null, TRANSLATABLE, "<Ctrl>M",
+        Gtk.ActionEntry accounts = { ACTION_ACCOUNTS, null, TRANSLATABLE, null,
             null, on_accounts };
         accounts.label = _("A_ccounts");
         entries += accounts;
         
-        Gtk.ActionEntry prefs = { ACTION_PREFERENCES, Stock._PREFERENCES, TRANSLATABLE, "<Ctrl>E",
+        Gtk.ActionEntry prefs = { ACTION_PREFERENCES, Stock._PREFERENCES, TRANSLATABLE, null,
             null, on_preferences };
         prefs.label = _("_Preferences");
         entries += prefs;
