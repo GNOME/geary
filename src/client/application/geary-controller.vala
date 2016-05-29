@@ -428,12 +428,10 @@ public class GearyController : Geary.BaseObject {
             _("Add label"), null };
         copy_menu.label = _("_Label");
         entries += copy_menu;
-        add_accelerator("l", ACTION_COPY_MENU);
 
         Gtk.ActionEntry move_menu = { ACTION_MOVE_MENU, null, TRANSLATABLE, "M", _("Move conversation"), null };
         move_menu.label = _("_Move");
         entries += move_menu;
-        add_accelerator("m", ACTION_MOVE_MENU);
 
         Gtk.ActionEntry new_message = { ACTION_NEW_MESSAGE, null, null, "<Ctrl>N", 
             _("Compose new message (Ctrl+N, N)"), on_new_message };
@@ -520,25 +518,21 @@ public class GearyController : Geary.BaseObject {
             null, on_zoom_normal };
         entries += zoom_normal;
         add_accelerator("0", ACTION_ZOOM_NORMAL);
-        
-        // Can't use the Action's "natural" accelerator because this Action is not tied to any
-        // widget
-        Gtk.ActionEntry search = { ACTION_SEARCH, null, null, null, null, on_search };
+
+        Gtk.ActionEntry search = { ACTION_SEARCH, null, null, "<Ctrl>S", null, on_search };
         entries += search;
-        add_accelerator("<Ctrl>S", ACTION_SEARCH);
-        
-        Gtk.ActionEntry conversation_list = { ACTION_CONVERSATION_LIST, null, null, null, null, on_conversation_list };
+
+        Gtk.ActionEntry conversation_list = { ACTION_CONVERSATION_LIST, null, null, "<Ctrl>B", null, on_conversation_list };
         entries += conversation_list;
-        add_accelerator("<Ctrl>B", ACTION_CONVERSATION_LIST);
-        
+
         // No callback is connected, since we bind the toggle button to the search bar visibility
         Gtk.ActionEntry toggle_search = { ACTION_TOGGLE_SEARCH, null, null, null,
             _("Toggle search bar"), null };
         entries += toggle_search;
-        
+
         return entries;
     }
-    
+
     private Gtk.ToggleActionEntry[] create_toggle_actions() {
         Gtk.ToggleActionEntry[] entries = new Gtk.ToggleActionEntry[0];
         
