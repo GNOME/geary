@@ -12,7 +12,30 @@ private class Geary.ImapDB.Account : BaseObject {
     // i.e. unadorned mailbox addresses.  Note that characters commonly used for wildcards or that
     // would be interpreted as wildcards by SQLite are not included here.
     private const unichar[] SEARCH_TERM_CONTINUATION_CHARS = { '-', '_', '.', '@' };
-    
+
+    // Search operator field names, eg: "to:foo@example.com" or "is:unread"
+    private const string SEARCH_OP_ATTACHMENT = "attachment";
+    private const string SEARCH_OP_BCC = "bcc";
+    private const string SEARCH_OP_BODY = "body";
+    private const string SEARCH_OP_CC = "cc";
+    private const string SEARCH_OP_FROM = "from";
+    private const string SEARCH_OP_IS = "is";
+    private const string SEARCH_OP_SUBJECT = "subject";
+    private const string SEARCH_OP_TO = "to";
+
+    // Fields we allow the token to be "me" as in from:me.
+    private const string[] SEARCH_OP_ADDRESSABLE_FIELDS = {
+        SEARCH_OP_BCC,
+        SEARCH_OP_CC,
+        SEARCH_OP_FROM,
+        SEARCH_OP_TO,
+    };
+
+    // Search operator field values
+    private const string SEARCH_OP_VALUE_READ = "read";
+    private const string SEARCH_OP_VALUE_STARRED = "starred";
+    private const string SEARCH_OP_VALUE_UNREAD = "unread";
+
     private class FolderReference : Geary.SmartReference {
         public Geary.FolderPath path;
         
@@ -695,70 +718,108 @@ private class Geary.ImapDB.Account : BaseObject {
         
         return (messages.size == 0 ? null : messages);
     }
-    
+
     private string? extract_field_from_token(string[] parts, ref string token) {
         // Map of user-supplied search field names to column names.
         Gee.HashMap<string, string> field_names = new Gee.HashMap<string, string>();
-        /// Can be typed in the search box like attachment:file.txt to find
-        /// messages with attachments with a particular name.  The translated
-        /// string must match the string in Geary's help documentation.
-        field_names.set(_("attachment"), "attachment");
-        /// Can be typed in the search box like bcc:johndoe@example.com to find
-        /// messages bcc'd to a particular person.  The translated
-        /// string must match the string in Geary's help documentation.
-        field_names.set(_("bcc"), "bcc");
-        /// Can be typed in the search box like body:word to find the word only
-        /// if it occurs in the body of a message.  The translated
-        /// string must match the string in Geary's help documentation.
-        field_names.set(_("body"), "body");
-        /// Can be typed in the search box like cc:johndoe@example.com to find
-        /// messages cc'd to a particular person.  The translated
-        /// string must match the string in Geary's help documentation.
-        field_names.set(_("cc"), "cc");
-        /// Can be typed in the search box like from:johndoe@example.com to
-        /// find messages from a particular sender.  The translated
-        /// string must match the string in Geary's help documentation.
-        field_names.set(_("from"), "from_field");
-        /// Can be typed in the search box like subject:word to find the word
-        /// only if it occurs in the subject of a message.  The translated
-        /// string must match the string in Geary's help documentation.
-        field_names.set(_("subject"), "subject");
-        /// Can be typed in the search box like to:johndoe@example.com to find
-        /// messages received by a particular person.  The translated
-        /// string must match the string in Geary's help documentation.
-        field_names.set(_("to"), "receivers");
-        /// Can be typed in the search box like is:read, is:unread or is:starred
-        /// to find messages that are read, unread, or starred.  The translated
-        /// string must match the string in Geary's help documentation.
-        field_names.set(_("is"), "is");
-        
-        // Fields we allow the token to be "me" as in from:me.
-        string[] addressable_fields = {
-            _("bcc"), _("cc"), _("from"), _("to"),
-        };
-        
-        // If they stopped at "field:", treat it as if they hadn't typed the :
+        /// Can be typed in the search box like attachment:file.txt to
+        /// find messages with attachments with a particular name.
+        /// The translated string must match the string in
+        /// "search.page" of the Geary User Guide.
+        field_names.set(_("attachment"), SEARCH_OP_ATTACHMENT);
+        /// Can be typed in the search box like
+        /// bcc:johndoe@example.com to find messages bcc'd to a
+        /// particular person.  The translated string must match the
+        /// string in "search.page" of the Geary User Guide.
+        field_names.set(_("bcc"), SEARCH_OP_BCC);
+        /// Can be typed in the search box like body:word to find the
+        /// word only if it occurs in the body of a message.  The
+        /// translated string must match the string in "search.page"
+        /// of the Geary User Guide.
+        field_names.set(_("body"), SEARCH_OP_BODY);
+        /// Can be typed in the search box like cc:johndoe@example.com
+        /// to find messages cc'd to a particular person.  The
+        /// translated string must match the string in "search.page"
+        /// of the Geary User Guide.
+        field_names.set(_("cc"), SEARCH_OP_CC);
+        /// Can be typed in the search box like
+        /// from:johndoe@example.com to find messages from a
+        /// particular sender.  The translated string must match the
+        /// string in "search.page" of the Geary User Guide.
+        field_names.set(_("from"), SEARCH_OP_FROM);
+        /// Can be typed in the search box like is:read, is:unread or
+        /// is:starred to find messages that are read, unread, or
+        /// starred.  The translated string must match the string in
+        /// "search.page" of the Geary User Guide.
+        field_names.set(_("is"), SEARCH_OP_IS);
+        /// Can be typed in the search box like subject:word to find
+        /// the word only if it occurs in the subject of a message.
+        /// The translated string must match the string in
+        /// "search.page" of the Geary User Guide.
+        field_names.set(_("subject"), SEARCH_OP_SUBJECT);
+        /// Can be typed in the search box like to:johndoe@example.com
+        /// to find messages received by a particular person. The
+        /// translated string must match the string in "search.page"
+        /// of the Geary User Guide.
+        field_names.set(_("to"), SEARCH_OP_TO);
+
+        /// "me" can be typed like from:me or cc:me, etc. as a
+        /// shorthand to find mail to or from yourself in search.  The
+        /// translated string must match the string in "search.page"
+        /// of the Geary User Guide.
+        string search_op_value_me = _("me");
+
+        Gee.HashMap<string, string> is_field_values = new Gee.HashMap<string, string>();
+        /// Can be typed in the search box after "is:" i.e.:
+        /// "is:read". Matches conversations that are flagged as read.
+        /// This must be a single word, or multiple words connected
+        /// via a dash ('-') or underscore ('_'). The translated
+        /// string must also match the string in "search.page" of the
+        /// Geary User Guide.
+        is_field_values.set(_("read"), SEARCH_OP_VALUE_READ);
+        /// Can be typed in the search box after "is:" i.e.:
+        /// "is:starred". Matches conversations that are flagged as
+        /// starred. This must be a single word, or multiple words
+        /// connected via a dash ('-') or underscore ('_'). The
+        /// translated string must also match the string in
+        /// "search.page" of the Geary User Guide.
+        is_field_values.set(_("starred"), SEARCH_OP_VALUE_STARRED);
+        /// Can be typed in the search box after "is:" i.e.:
+        /// "is:unread". Matches conversations that are flagged
+        /// unread.  This must be a single word, or multiple words
+        /// connected via a dash ('-') or underscore ('_'). The
+        /// translated string must also match the string in
+        /// "search.page" of the Geary User Guide.
+        is_field_values.set(_("unread"), SEARCH_OP_VALUE_UNREAD);
+
+        string? field = null;
         if (Geary.String.is_empty_or_whitespace(parts[1])) {
+            // User stopped at "field:", treat it as if they hadn't
+            // typed the ':'
             token = parts[0];
-            return null;
-        }
-        
-        string key = parts[0].down();
-        if (key in field_names.keys) {
-            token = parts[1];
-            if (key in addressable_fields) {
-                // "me" can be typed like from:me or cc:me, etc. as a shorthand
-                // to find mail to or from yourself in search.  The translated
-                // string must match the string in Geary's help documentation.
-                if (token.down() == _("me"))
-                    token = account_information.email;
+        } else {
+            field = field_names.get(parts[0].down());
+            if (field == SEARCH_OP_IS) {
+                // An "is:..." search term
+                string? value = is_field_values.get(parts[1].down());
+                if (value != null) {
+                    token = value;
+                } else {
+                    // Unknown op value, pretend there is no search op
+                    field = null;
+                }
+            } else if (field in SEARCH_OP_ADDRESSABLE_FIELDS &&
+                       token.down() == search_op_value_me) {
+                // A "to:me", "cc:me", etc. term
+                token = account_information.email;
+            } else if (field != null) {
+                // Everything else
+                token = parts[1];
             }
-            return field_names.get(key);
         }
-        
-        return null;
+        return field;
     }
-    
+
     /**
      * This method is used to convert an unquoted user-entered search terms into a stemmed search
      * term.
@@ -1197,24 +1258,24 @@ private class Geary.ImapDB.Account : BaseObject {
         
         return search_results.size == 0 ? null : search_results.keys;
     }
-    
+
     private Gee.Map<Geary.NamedFlag, bool> get_removal_conditions(ImapDB.SearchQuery query) {
         Gee.Map<Geary.NamedFlag, bool> removal_conditions = new Gee.HashMap<Geary.NamedFlag, bool>();
         foreach (string? field in query.get_fields())
-            if (field == "is") {
+            if (field == SEARCH_OP_IS) {
                 Gee.List<SearchTerm>? terms = query.get_search_terms(field);
                 foreach (SearchTerm term in terms)
-                    if (term.parsed.down() == _("read"))
+                    if (term.parsed == SEARCH_OP_VALUE_READ)
                         removal_conditions.set(new NamedFlag("UNREAD"), true);
-                    else if (term.parsed.down() == _("unread"))
+                    else if (term.parsed == SEARCH_OP_VALUE_UNREAD)
                         removal_conditions.set(new NamedFlag("UNREAD"), false);
-                    else if (term.parsed.down() == _("starred"))
+                    else if (term.parsed == SEARCH_OP_VALUE_STARRED)
                         removal_conditions.set(new NamedFlag("FLAGGED"), false);
                 return removal_conditions;
             }
         return removal_conditions;
     }
-    
+
     private async void remove_results(ImapDB.SearchQuery query,
         Gee.Map<ImapDB.EmailIdentifier, Gee.Set<string>> search_results,
         Gee.Map<Geary.NamedFlag, bool> removal_conditions, Cancellable? cancellable = null) {
