@@ -1139,16 +1139,34 @@ private class Geary.ImapDB.Account : BaseObject {
         int limit = 100, int offset = 0, Gee.Collection<Geary.FolderPath?>? folder_blacklist = null,
         Gee.Collection<Geary.EmailIdentifier>? search_ids = null, Cancellable? cancellable = null)
         throws Error {
+
+        debug("Search: %s", q.to_string());
+
         check_open();
         ImapDB.SearchQuery query = check_search_query(q);
-        
+
         Gee.HashMap<string, string> query_phrases = get_query_phrases(query);
-        
         Gee.Map<Geary.NamedFlag, bool> removal_conditions = get_removal_conditions(query);
-        
         if (query_phrases.size == 0 && removal_conditions.is_empty)
             return null;
-        
+
+        foreach (string? field in query.get_fields()) {
+            debug(" - Field \"%s\" terms:", field);
+            foreach (SearchTerm? term in query.get_search_terms(field)) {
+                if (term != null) {
+                    debug("    - \"%s\": %s, %s",
+                          term.original,
+                          term.parsed,
+                          term.stemmed
+                    );
+                    debug("      SQL terms:");
+                    foreach (string sql in term.sql) {
+                        debug("       - \"%s\"", sql);
+                    }
+                }
+            }
+        }
+
         // Do this outside of transaction to catch invalid search ids up-front
         string? search_ids_sql = get_search_ids_sql(search_ids);
         
@@ -1167,7 +1185,9 @@ private class Geary.ImapDB.Account : BaseObject {
             strip_results = false;
         else if (traverse<SearchTerm>(query.get_all_terms()).any(term => term.stemmed == null || term.is_exact))
             strip_results = false;
-        
+
+        debug(strip_results ? "Stripping results..." : "Not stripping results...");
+
         Gee.Set<ImapDB.EmailIdentifier> unstripped_ids = new Gee.HashSet<ImapDB.EmailIdentifier>();
         Gee.Map<ImapDB.EmailIdentifier, Gee.Set<string>>? search_results = null;
         

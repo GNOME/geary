@@ -64,5 +64,9 @@ public abstract class Geary.SearchQuery : BaseObject {
         this.raw = raw;
         this.strategy = strategy;
     }
+
+    public string to_string() {
+        return "\"%s\" (%s)".printf(this.raw, this.strategy.to_string());
+    }
 }
 
