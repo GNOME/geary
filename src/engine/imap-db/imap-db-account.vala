@@ -946,9 +946,11 @@ private class Geary.ImapDB.Account : BaseObject {
                 term = new SearchTerm(s, s, null, s.replace(":", " "), null);
             } else {
                 string original = s;
-                
-                // some common search phrases we don't respect and therefore don't want to fall
-                // through to search results
+
+                // Some common search phrases we don't respect and
+                // therefore don't want to fall through to search
+                // results
+                // XXX translate these
                 string lower = s.down();
                 switch (lower) {
                     case "":

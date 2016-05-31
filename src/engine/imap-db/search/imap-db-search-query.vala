@@ -53,12 +53,17 @@ private class Geary.ImapDB.SearchQuery : Geary.SearchQuery {
      * Overridden by {@link allow_stemming}.  Determined by {@link strategy}.
      */
     public int max_difference_match_stem_lengths { get; private set; }
-    
-    // Not using a MultiMap because we (might) need a guarantee of order.
+
+    // Maps search operator field names such as "to", "cc", "is" to
+    // their search term values. Note that terms without an operator
+    // are stored with null as the key. Not using a MultiMap because
+    // we (might) need a guarantee of order.
     private Gee.HashMap<string?, Gee.ArrayList<SearchTerm>> field_map
         = new Gee.HashMap<string?, Gee.ArrayList<SearchTerm>>();
+
+    // A list of all search terms, regardless of search op field name
     private Gee.ArrayList<SearchTerm> all = new Gee.ArrayList<SearchTerm>();
-    
+
     public SearchQuery(ImapDB.Account account, string query, Geary.SearchQuery.Strategy strategy) {
         base (query, strategy);
         
