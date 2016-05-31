@@ -974,29 +974,37 @@ private class Geary.ImapDB.Account : BaseObject {
                 string[] parts = s.split(":", 2);
                 if (parts.length > 1)
                     field = extract_field_from_token(parts, ref s);
-                
-                // SQL MATCH syntax for parsed term
-                string? sql_s = "%s*".printf(s);
-                
-                // stem the word, but if stemmed and stem is simply shorter version of original
-                // term, only prefix-match search for it (i.e. avoid searching for
-                // [archive* OR archiv*] when that's the same as [archiv*]), otherwise search for
-                // both
-                string? stemmed = stem_search_term(query, s);
-                
-                string? sql_stemmed = null;
-                if (stemmed != null) {
-                    sql_stemmed = "%s*".printf(stemmed);
-                    if (s.has_prefix(stemmed))
-                        sql_s = null;
+
+                if (field == SEARCH_OP_IS) {
+                    // s will have been de-translated
+                    term = new SearchTerm(original, s, null, null, null);
+                } else {
+                    // SQL MATCH syntax for parsed term
+                    string? sql_s = "%s*".printf(s);
+
+                    // stem the word, but if stemmed and stem is
+                    // simply shorter version of original term, only
+                    // prefix-match search for it (i.e. avoid
+                    // searching for [archive* OR archiv*] when that's
+                    // the same as [archiv*]), otherwise search for
+                    // both
+                    string? stemmed = stem_search_term(query, s);
+
+                    string? sql_stemmed = null;
+                    if (stemmed != null) {
+                        sql_stemmed = "%s*".printf(stemmed);
+                        if (s.has_prefix(stemmed))
+                            sql_s = null;
+                    }
+
+                    // if term contains continuation characters, treat
+                    // as exact search to reduce effects of tokenizer
+                    // splitting terms w/ punctuation in them
+                    if (String.contains_any_char(s, SEARCH_TERM_CONTINUATION_CHARS))
+                        s = "\"%s\"".printf(s);
+
+                    term = new SearchTerm(original, s, stemmed, sql_s, sql_stemmed);
                 }
-                
-                // if term contains continuation characters, treat as exact search to reduce effects of
-                // tokenizer splitting terms w/ punctuation in them
-                if (String.contains_any_char(s, SEARCH_TERM_CONTINUATION_CHARS))
-                    s = "\"%s\"".printf(s);
-                
-                term = new SearchTerm(original, s, stemmed, sql_s, sql_stemmed);
             }
             
             if (in_quote && quotes % 2 != 0)
