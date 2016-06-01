@@ -88,45 +88,73 @@ private class Geary.ImapDB.Account : BaseObject {
         // translated the user manual, the English version in the
         // manual still works.
 
-        /// Can be typed in the search box like attachment:file.txt to
-        /// find messages with attachments with a particular name.
-        /// The translated string must match the string in
-        /// "search.page" of the Geary User Guide.
+        // Can be typed in the search box like "attachment:file.txt"
+        // to find messages with attachments with a particular name.
+        //
+        // The translated string must be a single word (use '-', '_'
+        // or similar to combine words into one), should be short, and
+        // also match the translation in "search.page" of the Geary User
+        // Guide.
         search_op_names.set(_("attachment"), SEARCH_OP_ATTACHMENT);
-        /// Can be typed in the search box like
-        /// bcc:johndoe@example.com to find messages bcc'd to a
-        /// particular person.  The translated string must match the
-        /// string in "search.page" of the Geary User Guide.
+        // Can be typed in the search box like
+        // "bcc:johndoe@example.com" to find messages bcc'd to a
+        // particular person.
+        //
+        // The translated string must be a single word (use '-', '_'
+        // or similar to combine words into one), should be short, and
+        // also match the translation in "search.page" of the Geary User
+        // Guide.
         search_op_names.set(_("bcc"), SEARCH_OP_BCC);
-        /// Can be typed in the search box like body:word to find the
-        /// word only if it occurs in the body of a message.  The
-        /// translated string must match the string in "search.page"
-        /// of the Geary User Guide.
+        // Can be typed in the search box like "body:word" to find
+        // "word" only if it occurs in the body of a message.
+        //
+        // The translated string must be a single word (use '-', '_'
+        // or similar to combine words into one), should be short, and
+        // also match the translation in "search.page" of the Geary User
+        // Guide.
         search_op_names.set(_("body"), SEARCH_OP_BODY);
-        /// Can be typed in the search box like cc:johndoe@example.com
-        /// to find messages cc'd to a particular person.  The
-        /// translated string must match the string in "search.page"
-        /// of the Geary User Guide.
+        // Can be typed in the search box like
+        // "cc:johndoe@example.com" to find messages cc'd to a
+        // particular person.
+        //
+        // The translated string must be a single word (use '-', '_'
+        // or similar to combine words into one), should be short, and
+        // also match the translation in "search.page" of the Geary User
+        // Guide.
         search_op_names.set(_("cc"), SEARCH_OP_CC);
-        /// Can be typed in the search box like
-        /// from:johndoe@example.com to find messages from a
-        /// particular sender.  The translated string must match the
-        /// string in "search.page" of the Geary User Guide.
+        // Can be typed in the search box like
+        // "from:johndoe@example.com" to find messages from a
+        // particular sender.
+        //
+        // The translated string must be a single word (use '-', '_'
+        // or similar to combine words into one), should be short, and
+        // also match the translation in "search.page" of the Geary User
+        // Guide.
         search_op_names.set(_("from"), SEARCH_OP_FROM);
-        /// Can be typed in the search box like is:read, is:unread or
-        /// is:starred to find messages that are read, unread, or
-        /// starred.  The translated string must match the string in
-        /// "search.page" of the Geary User Guide.
+        // Can be typed in the search box like "is:unread" to find
+        // messages that are read, unread, or starred.
+        //
+        // The translated string must be a single word (use '-', '_'
+        // or similar to combine words into one), should be short, and
+        // also match the translation in "search.page" of the Geary User
+        // Guide.
         search_op_names.set(_("is"), SEARCH_OP_IS);
-        /// Can be typed in the search box like subject:word to find
-        /// the word only if it occurs in the subject of a message.
-        /// The translated string must match the string in
-        /// "search.page" of the Geary User Guide.
+        // Can be typed in the search box like "subject:word" to find
+        // "word" only if it occurs in the subject of a message.
+        //
+        // The translated string must be a single word (use '-', '_'
+        // or similar to combine words into one), should be short, and
+        // also match the translation in "search.page" of the Geary
+        // User Guide.
         search_op_names.set(_("subject"), SEARCH_OP_SUBJECT);
-        /// Can be typed in the search box like to:johndoe@example.com
-        /// to find messages received by a particular person. The
-        /// translated string must match the string in "search.page"
-        /// of the Geary User Guide.
+        // Can be typed in the search box like
+        // "to:johndoe@example.com" to find messages received by a
+        // particular person.
+        //
+        // The translated string must be a single word (use '-', '_'
+        // or similar to combine words into one), should be short, and
+        // also match the translation in "search.page" of the Geary User
+        // Guide.
         search_op_names.set(_("to"), SEARCH_OP_TO);
 
         // And the English language versions
@@ -139,33 +167,40 @@ private class Geary.ImapDB.Account : BaseObject {
         search_op_names.set("subject", SEARCH_OP_SUBJECT);
         search_op_names.set("to", SEARCH_OP_TO);
 
-        /// "me" can be typed like from:me or cc:me, etc. as a
-        /// shorthand to find mail to or from yourself in search.  The
-        /// translated string must match the string in "search.page"
-        /// of the Geary User Guide.
+        // Can be typed like "from:me" or "cc:me", etc. as a shorthand
+        // to find mail to or from yourself in search.
+        //
+        // The translated string must be a single word (use '-', '_'
+        // or similar to combine words into one), should be short, and
+        // also match the translation in "search.page" of the Geary User
+        // Guide.
         search_op_addressable_me_values.add(_("me"));
         search_op_addressable_me_values.add(SEARCH_OP_ADDRESSABLE_VALUE_ME);
 
-        /// Can be typed in the search box after "is:" i.e.:
-        /// "is:read". Matches conversations that are flagged as read.
-        /// This must be a single word, or multiple words connected
-        /// via a dash ('-') or underscore ('_'). The translated
-        /// string must also match the string in "search.page" of the
-        /// Geary User Guide.
+        // Can be typed in the search box after "is:" i.e.:
+        // "is:read". Matches conversations that are flagged as read.
+        //
+        // The translated string must be a single word (use '-', '_'
+        // or similar to combine words into one), should be short, and
+        // also match the translation in "search.page" of the Geary User
+        // Guide.
         search_op_is_values.set(_("read"), SEARCH_OP_VALUE_READ);
-        /// Can be typed in the search box after "is:" i.e.:
-        /// "is:starred". Matches conversations that are flagged as
-        /// starred. This must be a single word, or multiple words
-        /// connected via a dash ('-') or underscore ('_'). The
-        /// translated string must also match the string in
-        /// "search.page" of the Geary User Guide.
+        // Can be typed in the search box after "is:" i.e.:
+        // "is:starred". Matches conversations that are flagged as
+        // starred.
+        //
+        // The translated string must be a single word (use '-', '_'
+        // or similar to combine words into one), should be short, and
+        // also match the translation in "search.page" of the Geary User
+        // Guide.
         search_op_is_values.set(_("starred"), SEARCH_OP_VALUE_STARRED);
-        /// Can be typed in the search box after "is:" i.e.:
-        /// "is:unread". Matches conversations that are flagged
-        /// unread.  This must be a single word, or multiple words
-        /// connected via a dash ('-') or underscore ('_'). The
-        /// translated string must also match the string in
-        /// "search.page" of the Geary User Guide.
+        // Can be typed in the search box after "is:" i.e.:
+        // "is:unread". Matches conversations that are flagged unread.
+        //
+        // The translated string must be a single word (use '-', '_'
+        // or similar to combine words into one), should be short, and
+        // also match the translation in "search.page" of the Geary User
+        // Guide.
         search_op_is_values.set(_("unread"), SEARCH_OP_VALUE_UNREAD);
         search_op_is_values.set(SEARCH_OP_VALUE_READ, SEARCH_OP_VALUE_READ);
         search_op_is_values.set(SEARCH_OP_VALUE_STARRED, SEARCH_OP_VALUE_STARRED);
