@@ -128,14 +128,11 @@ public class MainToolbar : Gtk.Box {
         Gtk.Settings.get_default().notify["gtk-decoration-layout"].connect(set_window_buttons);
         realize.connect(set_window_buttons);
     }
-    
-    /// Updates the trash button as trash or delete, and shows or hides the archive button.
-    public void update_trash_archive_buttons(bool trash, bool archive) {
-        string action_name = (trash ? GearyController.ACTION_TRASH_MESSAGE
+
+    public void update_trash_button(bool is_trash) {
+        string action_name = (is_trash ? GearyController.ACTION_TRASH_MESSAGE
             : GearyController.ACTION_DELETE_MESSAGE);
         conversation_header.setup_button(trash_delete_button, null, action_name, false);
-        
-        archive_button.visible = archive;
     }
 
     public void set_conversation_header(Gtk.HeaderBar header) {

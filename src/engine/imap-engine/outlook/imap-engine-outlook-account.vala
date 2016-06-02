@@ -20,12 +20,12 @@ private class Geary.ImapEngine.OutlookAccount : Geary.ImapEngine.GenericAccount 
             Geary.Endpoint.Flags.STARTTLS,
             Smtp.ClientConnection.DEFAULT_TIMEOUT_SEC);
     }
-    
+
     public OutlookAccount(string name, AccountInformation account_information, Imap.Account remote,
         ImapDB.Account local) {
-        base (name, account_information, false, remote, local);
+        base (name, account_information, remote, local);
     }
-    
+
     protected override MinimalFolder new_folder(Geary.FolderPath path, Imap.Account remote_account,
         ImapDB.Account local_account, ImapDB.Folder local_folder) {
         // use the Folder's attributes to determine if it's a special folder type, unless it's

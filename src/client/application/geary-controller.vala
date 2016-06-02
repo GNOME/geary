@@ -1285,16 +1285,17 @@ public class GearyController : Geary.BaseObject {
         
         return num;
     }
-    
+
     // Update widgets and such to match capabilities of the current folder ... sensitivity is handled
     // by other utility methods
     private void update_ui() {
         update_tooltips();
-        main_window.main_toolbar.update_trash_archive_buttons(
-            current_folder_supports_trash() || !(current_folder is Geary.FolderSupport.Remove),
-            current_account.can_support_archive);
+        main_window.main_toolbar.update_trash_button(
+            current_folder_supports_trash() ||
+            !(current_folder is Geary.FolderSupport.Remove)
+        );
     }
-    
+
     private void on_folder_selected(Geary.Folder? folder) {
         debug("Folder %s selected", folder != null ? folder.to_string() : "(null)");
         
@@ -1704,12 +1705,11 @@ public class GearyController : Geary.BaseObject {
     private void on_shift_key(bool pressed) {
         if (main_window != null && main_window.main_toolbar != null
             && current_account != null && current_folder != null) {
-            main_window.main_toolbar.update_trash_archive_buttons(
-                (!pressed && current_folder_supports_trash()) || !(current_folder is Geary.FolderSupport.Remove),
-                current_account.can_support_archive);
+            main_window.main_toolbar.update_trash_button(
+                (!pressed && current_folder_supports_trash()) || !(current_folder is Geary.FolderSupport.Remove));
         }
     }
-    
+
     // this signal does not necessarily indicate that the application previously didn't have
     // focus and now it does
     private void on_has_toplevel_focus() {

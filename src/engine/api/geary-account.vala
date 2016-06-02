@@ -38,15 +38,7 @@ public abstract class Geary.Account : BaseObject {
     public Geary.ProgressMonitor db_vacuum_monitor { get; protected set; }
     public Geary.ProgressMonitor opening_monitor { get; protected set; }
     public Geary.ProgressMonitor sending_monitor { get; protected set; }
-    
-    /**
-     * HACK: for now, only certain account types support folders with
-     * FolderSupport.Archive.  It's useful to know whether an account supports
-     * archive because the button is hidden for accounts that will never
-     * support it.
-     */
-    public bool can_support_archive { get; protected set; }
-    
+
     public signal void opened();
     
     public signal void closed();
@@ -89,6 +81,11 @@ public abstract class Geary.Account : BaseObject {
     public signal void folders_contents_altered(Gee.Collection<Geary.Folder> altered);
     
     /**
+     * Fired when a Folder's contents is detected having changed.
+     */
+    public signal void folders_special_type(Gee.Collection<Geary.Folder> altered);
+    
+    /**
      * Fired when emails are appended to a folder in this account.
      */
     public signal void email_appended(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids);
@@ -126,10 +123,9 @@ public abstract class Geary.Account : BaseObject {
     
     private string name;
     
-    protected Account(string name, AccountInformation information, bool can_support_archive) {
+    protected Account(string name, AccountInformation information) {
         this.name = name;
         this.information = information;
-        this.can_support_archive = can_support_archive;
     }
     
     protected virtual void notify_folders_available_unavailable(Gee.List<Geary.Folder>? available,

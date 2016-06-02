@@ -37,9 +37,9 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     private Cancellable refresh_cancellable = new Cancellable();
     private bool awaiting_credentials = false;
     
-    public GenericAccount(string name, Geary.AccountInformation information, bool can_support_archive,
+    public GenericAccount(string name, Geary.AccountInformation information,
         Imap.Account remote, ImapDB.Account local) {
-        base (name, information, can_support_archive);
+        base (name, information);
         
         this.remote = remote;
         this.local = local;

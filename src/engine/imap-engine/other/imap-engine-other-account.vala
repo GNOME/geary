@@ -7,9 +7,9 @@
 private class Geary.ImapEngine.OtherAccount : Geary.ImapEngine.GenericAccount {
     public OtherAccount(string name, AccountInformation account_information,
         Imap.Account remote, ImapDB.Account local) {
-        base (name, account_information, true, remote, local);
+        base (name, account_information, remote, local);
     }
-    
+
     protected override MinimalFolder new_folder(Geary.FolderPath path, Imap.Account remote_account,
         ImapDB.Account local_account, ImapDB.Folder local_folder) {
         SpecialFolderType type;
