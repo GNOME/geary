@@ -214,6 +214,19 @@ body:not(.nohide) .email.hide .header_container .avatar {
     background: #ffc;
 }
 
+.email .remote_images .show_images,
+.email .remote_images .show_from {
+    background: #e2e2b0;
+    color: black;
+    border: 1px solid #999;
+    border-radius: 3px;
+}
+
+.email .remote_images .show_images:hover,
+.email .remote_images .show_from:hover {
+    background: #eeeeba;
+}
+
 .email .remote_images .close_show_images {
     float: right;
     margin-top: -0.67em;
