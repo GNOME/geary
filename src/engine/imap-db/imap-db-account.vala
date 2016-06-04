@@ -95,7 +95,7 @@ private class Geary.ImapDB.Account : BaseObject {
         // or similar to combine words into one), should be short, and
         // also match the translation in "search.page" of the Geary User
         // Guide.
-        search_op_names.set(_("attachment"), SEARCH_OP_ATTACHMENT);
+        search_op_names.set(C_("Search operator", "attachment"), SEARCH_OP_ATTACHMENT);
         // Can be typed in the search box like
         // "bcc:johndoe@example.com" to find messages bcc'd to a
         // particular person.
@@ -104,7 +104,7 @@ private class Geary.ImapDB.Account : BaseObject {
         // or similar to combine words into one), should be short, and
         // also match the translation in "search.page" of the Geary User
         // Guide.
-        search_op_names.set(_("bcc"), SEARCH_OP_BCC);
+        search_op_names.set(C_("Search operator", "bcc"), SEARCH_OP_BCC);
         // Can be typed in the search box like "body:word" to find
         // "word" only if it occurs in the body of a message.
         //
@@ -112,7 +112,7 @@ private class Geary.ImapDB.Account : BaseObject {
         // or similar to combine words into one), should be short, and
         // also match the translation in "search.page" of the Geary User
         // Guide.
-        search_op_names.set(_("body"), SEARCH_OP_BODY);
+        search_op_names.set(C_("Search operator", "body"), SEARCH_OP_BODY);
         // Can be typed in the search box like
         // "cc:johndoe@example.com" to find messages cc'd to a
         // particular person.
@@ -121,7 +121,7 @@ private class Geary.ImapDB.Account : BaseObject {
         // or similar to combine words into one), should be short, and
         // also match the translation in "search.page" of the Geary User
         // Guide.
-        search_op_names.set(_("cc"), SEARCH_OP_CC);
+        search_op_names.set(C_("Search operator", "cc"), SEARCH_OP_CC);
         // Can be typed in the search box like
         // "from:johndoe@example.com" to find messages from a
         // particular sender.
@@ -130,7 +130,7 @@ private class Geary.ImapDB.Account : BaseObject {
         // or similar to combine words into one), should be short, and
         // also match the translation in "search.page" of the Geary User
         // Guide.
-        search_op_names.set(_("from"), SEARCH_OP_FROM);
+        search_op_names.set(C_("Search operator", "from"), SEARCH_OP_FROM);
         // Can be typed in the search box like "is:unread" to find
         // messages that are read, unread, or starred.
         //
@@ -138,7 +138,7 @@ private class Geary.ImapDB.Account : BaseObject {
         // or similar to combine words into one), should be short, and
         // also match the translation in "search.page" of the Geary User
         // Guide.
-        search_op_names.set(_("is"), SEARCH_OP_IS);
+        search_op_names.set(C_("Search operator", "is"), SEARCH_OP_IS);
         // Can be typed in the search box like "subject:word" to find
         // "word" only if it occurs in the subject of a message.
         //
@@ -146,7 +146,7 @@ private class Geary.ImapDB.Account : BaseObject {
         // or similar to combine words into one), should be short, and
         // also match the translation in "search.page" of the Geary
         // User Guide.
-        search_op_names.set(_("subject"), SEARCH_OP_SUBJECT);
+        search_op_names.set(C_("Search operator", "subject"), SEARCH_OP_SUBJECT);
         // Can be typed in the search box like
         // "to:johndoe@example.com" to find messages received by a
         // particular person.
@@ -155,7 +155,7 @@ private class Geary.ImapDB.Account : BaseObject {
         // or similar to combine words into one), should be short, and
         // also match the translation in "search.page" of the Geary User
         // Guide.
-        search_op_names.set(_("to"), SEARCH_OP_TO);
+        search_op_names.set(C_("Search operator", "to"), SEARCH_OP_TO);
 
         // And the English language versions
         search_op_names.set("attachment", SEARCH_OP_ATTACHMENT);
@@ -174,7 +174,9 @@ private class Geary.ImapDB.Account : BaseObject {
         // or similar to combine words into one), should be short, and
         // also match the translation in "search.page" of the Geary User
         // Guide.
-        search_op_addressable_me_values.add(_("me"));
+        search_op_addressable_me_values.add(
+            C_("Addressable search operator value", "me")
+        );
         search_op_addressable_me_values.add(SEARCH_OP_ADDRESSABLE_VALUE_ME);
 
         // Can be typed in the search box after "is:" i.e.:
@@ -184,7 +186,9 @@ private class Geary.ImapDB.Account : BaseObject {
         // or similar to combine words into one), should be short, and
         // also match the translation in "search.page" of the Geary User
         // Guide.
-        search_op_is_values.set(_("read"), SEARCH_OP_VALUE_READ);
+        search_op_is_values.set(
+            C_("'is:' search operator value", "read"), SEARCH_OP_VALUE_READ
+        );
         // Can be typed in the search box after "is:" i.e.:
         // "is:starred". Matches conversations that are flagged as
         // starred.
@@ -193,7 +197,9 @@ private class Geary.ImapDB.Account : BaseObject {
         // or similar to combine words into one), should be short, and
         // also match the translation in "search.page" of the Geary User
         // Guide.
-        search_op_is_values.set(_("starred"), SEARCH_OP_VALUE_STARRED);
+        search_op_is_values.set(
+            C_("'is:' search operator value", "starred"), SEARCH_OP_VALUE_STARRED
+        );
         // Can be typed in the search box after "is:" i.e.:
         // "is:unread". Matches conversations that are flagged unread.
         //
@@ -201,7 +207,9 @@ private class Geary.ImapDB.Account : BaseObject {
         // or similar to combine words into one), should be short, and
         // also match the translation in "search.page" of the Geary User
         // Guide.
-        search_op_is_values.set(_("unread"), SEARCH_OP_VALUE_UNREAD);
+        search_op_is_values.set(
+            C_("'is:' search operator value", "unread"), SEARCH_OP_VALUE_UNREAD
+        );
         search_op_is_values.set(SEARCH_OP_VALUE_READ, SEARCH_OP_VALUE_READ);
         search_op_is_values.set(SEARCH_OP_VALUE_STARRED, SEARCH_OP_VALUE_STARRED);
         search_op_is_values.set(SEARCH_OP_VALUE_UNREAD, SEARCH_OP_VALUE_UNREAD);
