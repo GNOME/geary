@@ -9,8 +9,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: geary-help\n"
-"POT-Creation-Date: 2016-06-04 11:17+0000\n"
-"PO-Revision-Date: 2016-06-04 14:02+0200\n"
+"POT-Creation-Date: 2016-06-04 12:06+0000\n"
+"PO-Revision-Date: 2016-06-04 14:10+0200\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <gnomepl@aviary.pl>\n"
 "Language: pl\n"
@@ -267,22 +267,37 @@ msgstr ""
 "key><key>U</key></keyseq>"
 
 #: C/shortcuts.page:59(p)
+msgid "Open the Label Conversation menu"
+msgstr "Otwarcie menu etykiet rozmowy"
+
+#: C/shortcuts.page:60(key) C/shortcuts.page:166(key)
+msgid "L"
+msgstr "L"
+
+#: C/shortcuts.page:63(p)
+msgid "Open the Move Conversation menu"
+msgstr "Otwarcie menu przenoszenia rozmowy"
+
+#: C/shortcuts.page:64(key)
+msgid "M"
+msgstr "M"
+
+#: C/shortcuts.page:67(p)
 msgid "Move focus to the next/previous pane"
 msgstr "Przejście do następnego/poprzedniego panelu"
 
-#: C/shortcuts.page:60(p)
+#: C/shortcuts.page:68(p)
 msgid ""
 "<keyseq><key>F6</key></keyseq> / <keyseq><key>Shift</key><key>F6</key></"
 "keyseq>"
 msgstr ""
 "<keyseq><key>F6</key></keyseq>/<keyseq><key>Shift</key><key>F6</key></keyseq>"
 
-#: C/shortcuts.page:63(p)
+#: C/shortcuts.page:71(p)
 msgid "Move focus to conversation list"
 msgstr "Przejście do listy rozmów"
 
-#: C/shortcuts.page:64(key) C/shortcuts.page:80(key) C/shortcuts.page:96(key)
-#: C/shortcuts.page:100(key) C/shortcuts.page:104(key)
+#: C/shortcuts.page:72(key) C/shortcuts.page:88(key) C/shortcuts.page:104(key)
 #: C/shortcuts.page:108(key) C/shortcuts.page:112(key)
 #: C/shortcuts.page:116(key) C/shortcuts.page:120(key)
 #: C/shortcuts.page:130(key) C/shortcuts.page:134(key)
@@ -293,81 +308,65 @@ msgstr "Przejście do listy rozmów"
 msgid "Ctrl"
 msgstr "Ctrl"
 
-#: C/shortcuts.page:64(key) C/shortcuts.page:150(key)
+#: C/shortcuts.page:72(key) C/shortcuts.page:150(key)
 msgid "B"
 msgstr "B"
 
-#: C/shortcuts.page:67(p)
+#: C/shortcuts.page:75(p)
 msgid "Jump to next (older) conversation"
 msgstr "Przejście do następnej (starszej) rozmowy"
 
-#: C/shortcuts.page:68(key)
-msgid "j"
-msgstr "j"
+#: C/shortcuts.page:76(key)
+msgid "J"
+msgstr "J"
 
-#: C/shortcuts.page:71(p)
+#: C/shortcuts.page:79(p)
 msgid "Jump to previous (newer) conversation"
 msgstr "Przejście do poprzedniej (nowszej) rozmowy"
 
-#: C/shortcuts.page:72(key)
-msgid "k"
-msgstr "k"
+#: C/shortcuts.page:80(key) C/shortcuts.page:162(key)
+msgid "K"
+msgstr "K"
 
-#: C/shortcuts.page:75(p)
+#: C/shortcuts.page:83(p)
 msgid "Toggle spam"
 msgstr "Oznaczenie jako niechciane"
 
-#: C/shortcuts.page:76(p)
+#: C/shortcuts.page:84(p)
 msgid "<keyseq><key>Ctrl</key><key>J</key></keyseq> or <key>!</key>"
 msgstr "<keyseq><key>Ctrl</key><key>J</key></keyseq> lub <key>!</key>"
 
-#: C/shortcuts.page:79(p)
+#: C/shortcuts.page:87(p)
 msgid "Quit"
 msgstr "Zakończenie działania"
 
-#: C/shortcuts.page:80(key)
+#: C/shortcuts.page:88(key)
 msgid "Q"
 msgstr "Q"
 
-#: C/shortcuts.page:83(p)
+#: C/shortcuts.page:91(p)
 msgid "Zoom in"
 msgstr "Przybliżenie"
 
-#: C/shortcuts.page:84(p)
+#: C/shortcuts.page:92(p)
 msgid "<keyseq><key>Ctrl</key><key>=</key></keyseq> or <key>=</key>"
 msgstr "<keyseq><key>Ctrl</key><key>=</key></keyseq> lub <key>=</key>"
 
-#: C/shortcuts.page:87(p)
+#: C/shortcuts.page:95(p)
 msgid "Zoom out"
 msgstr "Oddalenie"
 
-#: C/shortcuts.page:88(p)
+#: C/shortcuts.page:96(p)
 msgid "<keyseq><key>Ctrl</key><key>-</key></keyseq> or <key>-</key>"
 msgstr "<keyseq><key>Ctrl</key><key>-</key></keyseq> lub <key>-</key>"
 
-#: C/shortcuts.page:91(p)
+#: C/shortcuts.page:99(p)
 msgid "Reset zoom"
 msgstr "Przywrócenie domyślnego poziomu przybliżenia"
 
-#: C/shortcuts.page:92(p)
+#: C/shortcuts.page:100(p)
 msgid "<keyseq><key>Ctrl</key><key>0</key></keyseq> or <key>0</key>"
 msgstr "<keyseq><key>Ctrl</key><key>0</key></keyseq> lub <key>0</key>"
-
-#: C/shortcuts.page:95(p) C/preferences.page:10(title)
-msgid "Preferences"
-msgstr "Preferencje"
-
-#: C/shortcuts.page:96(key)
-msgid "E"
-msgstr "E"
-
-#: C/shortcuts.page:99(p) C/accounts.page:10(title)
-msgid "Accounts"
-msgstr "Konta"
-
-#: C/shortcuts.page:100(key)
-msgid "M"
-msgstr "M"
 
 #: C/shortcuts.page:103(p)
 msgid "Close composer window"
@@ -443,7 +442,9 @@ msgstr "Odłączenie okna pisania wiadomości"
 
 #: C/shortcuts.page:146(p)
 msgid "These shortcuts are only active in composers in rich text mode."
-msgstr "Poniższe skróty są aktywne tylko, gdy okno pisania wiadomości jest w trybie tekstu sformatowanego."
+msgstr ""
+"Poniższe skróty są aktywne tylko, gdy okno pisania wiadomości jest w trybie "
+"tekstu sformatowanego."
 
 #: C/shortcuts.page:149(p)
 msgid "Bold text"
@@ -469,17 +470,9 @@ msgstr "U"
 msgid "Strike text"
 msgstr "Przekreślenie tekstu"
 
-#: C/shortcuts.page:162(key)
-msgid "K"
-msgstr "K"
-
 #: C/shortcuts.page:165(p)
 msgid "Insert a link"
 msgstr "Wstawienie odnośnika"
-
-#: C/shortcuts.page:166(key)
-msgid "L"
-msgstr "L"
 
 #: C/shortcuts.page:169(p)
 msgid "Remove formatting"
@@ -648,6 +641,10 @@ msgstr ""
 "Operatory <input>udw</input>, <input>dw</input>, <input>od</input> i "
 "<input>do</input> obsługują specjalny parametr <input>ja</input>, który "
 "wyszukuje własny adres e-mail użytkownika w odpowiednim kontekście."
+
+#: C/preferences.page:10(title)
+msgid "Preferences"
+msgstr ""
 
 #: C/preferences.page:11(p)
 msgid ""
@@ -1004,6 +1001,10 @@ msgid ""
 "unavailable for Gmail. For Gmail, <gui>Trash</gui> will move messages to the "
 "Trash folder on the server, where the user can then manually delete them. "
 "The server will automatically remove trashed messages after 30 days."
+msgstr ""
+
+#: C/accounts.page:10(title)
+msgid "Accounts"
 msgstr ""
 
 #: C/accounts.page:13(title)
