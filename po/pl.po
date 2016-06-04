@@ -18,8 +18,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-05-07 00:29+0200\n"
-"PO-Revision-Date: 2016-05-07 00:30+0200\n"
+"POT-Creation-Date: 2016-06-04 13:14+0200\n"
+"PO-Revision-Date: 2016-06-04 13:15+0200\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <gnomepl@aviary.pl>\n"
 "Language: pl\n"
@@ -620,14 +620,14 @@ msgstr ""
 "\n"
 "Proszę sprawdzić połączenie internetowe i uruchomić ponownie program Geary."
 
-#: ../src/client/application/geary-controller.vala:1714
+#: ../src/client/application/geary-controller.vala:1716
 #, c-format
 msgid "About %s"
 msgstr "O programie %s"
 
 #. / Translators: add your name and email address to receive credit in the About dialog
 #. / For example: Yamada Taro <yamada.taro@example.com>
-#: ../src/client/application/geary-controller.vala:1717
+#: ../src/client/application/geary-controller.vala:1719
 msgid "translator-credits"
 msgstr ""
 "scrx <mattpiskorz@gmail.com>, 2012\n"
@@ -641,16 +641,16 @@ msgstr ""
 "Piotr Drąg <piotrdrag@gmail.com>, 2014-2016\n"
 "Aviary.pl <gnomepl@aviary.pl>, 2014-2016"
 
-#: ../src/client/application/geary-controller.vala:1975
+#: ../src/client/application/geary-controller.vala:1977
 msgid "Undo move (Ctrl+Z)"
 msgstr "Cofnij przeniesienie (Ctrl+Z)"
 
-#: ../src/client/application/geary-controller.vala:1985
+#: ../src/client/application/geary-controller.vala:1987
 #, c-format
 msgid "Are you sure you want to open \"%s\"?"
 msgstr "Na pewno otworzyć „%s”?"
 
-#: ../src/client/application/geary-controller.vala:1986
+#: ../src/client/application/geary-controller.vala:1988
 msgid ""
 "Attachments may cause damage to your system if opened.  Only open files from "
 "trusted sources."
@@ -658,74 +658,74 @@ msgstr ""
 "Załączniki po otwarciu mogą uszkodzić system. Należy otwierać załączniki "
 "pochodzące tylko z zaufanych źródeł."
 
-#: ../src/client/application/geary-controller.vala:1987
+#: ../src/client/application/geary-controller.vala:1989
 msgid "Don't _ask me again"
 msgstr "_Bez pytania ponownie"
 
-#: ../src/client/application/geary-controller.vala:2005
+#: ../src/client/application/geary-controller.vala:2007
 #, c-format
 msgid "A file named \"%s\" already exists.  Do you want to replace it?"
 msgstr "Plik o nazwie „%s” już istnieje. Zastąpić go?"
 
-#: ../src/client/application/geary-controller.vala:2007
+#: ../src/client/application/geary-controller.vala:2009
 #, c-format
 msgid ""
 "The file already exists in \"%s\".  Replacing it will overwrite its contents."
 msgstr "Plik w „%s” już istnieje. Zastąpienie go nadpisze jego zawartość."
 
-#: ../src/client/application/geary-controller.vala:2010
+#: ../src/client/application/geary-controller.vala:2012
 msgid "_Replace"
 msgstr "_Zastąp"
 
 #. Find out what to do with the inline composers.
 #. TODO: Remove this in favor of automatically saving drafts
-#: ../src/client/application/geary-controller.vala:2308
+#: ../src/client/application/geary-controller.vala:2310
 msgid "Close open draft messages?"
 msgstr "Zamknąć otwarte szkice?"
 
-#: ../src/client/application/geary-controller.vala:2438
+#: ../src/client/application/geary-controller.vala:2440
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Usunąć wszystkie wiadomości z katalogu %s?"
 
-#: ../src/client/application/geary-controller.vala:2439
+#: ../src/client/application/geary-controller.vala:2441
 msgid "This removes the email from Geary and your email server."
 msgstr "Spowoduje to usunięcie wiadomości z programu Geary i serwera poczty."
 
-#: ../src/client/application/geary-controller.vala:2440
+#: ../src/client/application/geary-controller.vala:2442
 msgid "This cannot be undone."
 msgstr "Tego nie można cofnąć."
 
-#: ../src/client/application/geary-controller.vala:2441
+#: ../src/client/application/geary-controller.vala:2443
 #, c-format
 msgid "Empty %s"
 msgstr "Opróżnij %s"
 
-#: ../src/client/application/geary-controller.vala:2458
+#: ../src/client/application/geary-controller.vala:2460
 #, c-format
 msgid "Error emptying %s"
 msgstr "Błąd podczas opróżniania %s"
 
-#: ../src/client/application/geary-controller.vala:2488
+#: ../src/client/application/geary-controller.vala:2490
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Trwale usunąć tą wiadomość?"
 msgstr[1] "Trwale usunąć te wiadomości?"
 msgstr[2] "Trwale usunąć te wiadomości?"
 
-#: ../src/client/application/geary-controller.vala:2490
+#: ../src/client/application/geary-controller.vala:2492
 msgid "Delete"
 msgstr "Usuń"
 
-#: ../src/client/application/geary-controller.vala:2521
+#: ../src/client/application/geary-controller.vala:2523
 msgid "Undo archive (Ctrl+Z)"
 msgstr "Cofnij archiwizację (Ctrl+Z)"
 
-#: ../src/client/application/geary-controller.vala:2536
+#: ../src/client/application/geary-controller.vala:2538
 msgid "Undo trash (Ctrl+Z)"
 msgstr "Cofnij przeniesienie do kosza (Ctrl+Z)"
 
-#: ../src/client/application/geary-controller.vala:2589
+#: ../src/client/application/geary-controller.vala:2591
 msgid "Undo (Ctrl+Z)"
 msgstr "Cofnij (Ctrl+Z)"
 
@@ -1472,86 +1472,160 @@ msgstr "Archiwum"
 msgid "None"
 msgstr "Brak"
 
-#. Map of user-supplied search field names to column names.
-#. / Can be typed in the search box like attachment:file.txt to find
-#. / messages with attachments with a particular name.  The translated
-#. / string must match the string in Geary's help documentation.
-#: ../src/engine/imap-db/imap-db-account.vala:705
+#. Map of possibly translated search operator names and values
+#. to English/internal names and values. We include the
+#. English version anyway so that when translations provide a
+#. localised version of the operator names but have not also
+#. translated the user manual, the English version in the
+#. manual still works.
+#. Can be typed in the search box like "attachment:file.txt"
+#. to find messages with attachments with a particular name.
+#.
+#. The translated string must be a single word (use '-', '_'
+#. or similar to combine words into one), should be short, and
+#. also match the translation in "search.page" of the Geary User
+#. Guide.
+#: ../src/engine/imap-db/imap-db-account.vala:98
+msgctxt "Search operator"
 msgid "attachment"
 msgstr "załącznik"
 
-#. / Can be typed in the search box like bcc:johndoe@example.com to find
-#. / messages bcc'd to a particular person.  The translated
-#. / string must match the string in Geary's help documentation.
-#. Fields we allow the token to be "me" as in from:me.
-#: ../src/engine/imap-db/imap-db-account.vala:709
-#: ../src/engine/imap-db/imap-db-account.vala:737
+#. Can be typed in the search box like
+#. "bcc:johndoe@example.com" to find messages bcc'd to a
+#. particular person.
+#.
+#. The translated string must be a single word (use '-', '_'
+#. or similar to combine words into one), should be short, and
+#. also match the translation in "search.page" of the Geary User
+#. Guide.
+#: ../src/engine/imap-db/imap-db-account.vala:107
+msgctxt "Search operator"
 msgid "bcc"
 msgstr "udw"
 
-#. / Can be typed in the search box like body:word to find the word only
-#. / if it occurs in the body of a message.  The translated
-#. / string must match the string in Geary's help documentation.
-#: ../src/engine/imap-db/imap-db-account.vala:713
+#. Can be typed in the search box like "body:word" to find
+#. "word" only if it occurs in the body of a message.
+#.
+#. The translated string must be a single word (use '-', '_'
+#. or similar to combine words into one), should be short, and
+#. also match the translation in "search.page" of the Geary User
+#. Guide.
+#: ../src/engine/imap-db/imap-db-account.vala:115
+msgctxt "Search operator"
 msgid "body"
 msgstr "treść"
 
-#. / Can be typed in the search box like cc:johndoe@example.com to find
-#. / messages cc'd to a particular person.  The translated
-#. / string must match the string in Geary's help documentation.
-#: ../src/engine/imap-db/imap-db-account.vala:717
-#: ../src/engine/imap-db/imap-db-account.vala:737
+#. Can be typed in the search box like
+#. "cc:johndoe@example.com" to find messages cc'd to a
+#. particular person.
+#.
+#. The translated string must be a single word (use '-', '_'
+#. or similar to combine words into one), should be short, and
+#. also match the translation in "search.page" of the Geary User
+#. Guide.
+#: ../src/engine/imap-db/imap-db-account.vala:124
+msgctxt "Search operator"
 msgid "cc"
 msgstr "dw"
 
-#. / Can be typed in the search box like from:johndoe@example.com to
-#. / find messages from a particular sender.  The translated
-#. / string must match the string in Geary's help documentation.
-#: ../src/engine/imap-db/imap-db-account.vala:721
-#: ../src/engine/imap-db/imap-db-account.vala:737
+#. Can be typed in the search box like
+#. "from:johndoe@example.com" to find messages from a
+#. particular sender.
+#.
+#. The translated string must be a single word (use '-', '_'
+#. or similar to combine words into one), should be short, and
+#. also match the translation in "search.page" of the Geary User
+#. Guide.
+#: ../src/engine/imap-db/imap-db-account.vala:133
+msgctxt "Search operator"
 msgid "from"
 msgstr "od"
 
-#. / Can be typed in the search box like subject:word to find the word
-#. / only if it occurs in the subject of a message.  The translated
-#. / string must match the string in Geary's help documentation.
-#: ../src/engine/imap-db/imap-db-account.vala:725
-msgid "subject"
-msgstr "temat"
-
-#. / Can be typed in the search box like to:johndoe@example.com to find
-#. / messages received by a particular person.  The translated
-#. / string must match the string in Geary's help documentation.
-#: ../src/engine/imap-db/imap-db-account.vala:729
-#: ../src/engine/imap-db/imap-db-account.vala:737
-msgid "to"
-msgstr "do"
-
-#. / Can be typed in the search box like is:read, is:unread or is:starred
-#. / to find messages that are read, unread, or starred.  The translated
-#. / string must match the string in Geary's help documentation.
-#: ../src/engine/imap-db/imap-db-account.vala:733
+#. Can be typed in the search box like "is:unread" to find
+#. messages that are read, unread, or starred.
+#.
+#. The translated string must be a single word (use '-', '_'
+#. or similar to combine words into one), should be short, and
+#. also match the translation in "search.page" of the Geary User
+#. Guide.
+#: ../src/engine/imap-db/imap-db-account.vala:141
+msgctxt "Search operator"
 msgid "is"
 msgstr "jest"
 
-#. "me" can be typed like from:me or cc:me, etc. as a shorthand
-#. to find mail to or from yourself in search.  The translated
-#. string must match the string in Geary's help documentation.
-#: ../src/engine/imap-db/imap-db-account.vala:753
+#. Can be typed in the search box like "subject:word" to find
+#. "word" only if it occurs in the subject of a message.
+#.
+#. The translated string must be a single word (use '-', '_'
+#. or similar to combine words into one), should be short, and
+#. also match the translation in "search.page" of the Geary
+#. User Guide.
+#: ../src/engine/imap-db/imap-db-account.vala:149
+msgctxt "Search operator"
+msgid "subject"
+msgstr "temat"
+
+#. Can be typed in the search box like
+#. "to:johndoe@example.com" to find messages received by a
+#. particular person.
+#.
+#. The translated string must be a single word (use '-', '_'
+#. or similar to combine words into one), should be short, and
+#. also match the translation in "search.page" of the Geary User
+#. Guide.
+#: ../src/engine/imap-db/imap-db-account.vala:158
+msgctxt "Search operator"
+msgid "to"
+msgstr "do"
+
+#. Can be typed like "from:me" or "cc:me", etc. as a shorthand
+#. to find mail to or from yourself in search.
+#.
+#. The translated string must be a single word (use '-', '_'
+#. or similar to combine words into one), should be short, and
+#. also match the translation in "search.page" of the Geary User
+#. Guide.
+#: ../src/engine/imap-db/imap-db-account.vala:178
+msgctxt "Addressable search operator value"
 msgid "me"
 msgstr "ja"
 
-#: ../src/engine/imap-db/imap-db-account.vala:1207
+#. Can be typed in the search box after "is:" i.e.:
+#. "is:read". Matches conversations that are flagged as read.
+#.
+#. The translated string must be a single word (use '-', '_'
+#. or similar to combine words into one), should be short, and
+#. also match the translation in "search.page" of the Geary User
+#. Guide.
+#: ../src/engine/imap-db/imap-db-account.vala:190
+msgctxt "'is:' search operator value"
 msgid "read"
 msgstr "przeczytane"
 
-#: ../src/engine/imap-db/imap-db-account.vala:1209
-msgid "unread"
-msgstr "nieprzeczytane"
-
-#: ../src/engine/imap-db/imap-db-account.vala:1211
+#. Can be typed in the search box after "is:" i.e.:
+#. "is:starred". Matches conversations that are flagged as
+#. starred.
+#.
+#. The translated string must be a single word (use '-', '_'
+#. or similar to combine words into one), should be short, and
+#. also match the translation in "search.page" of the Geary User
+#. Guide.
+#: ../src/engine/imap-db/imap-db-account.vala:201
+msgctxt "'is:' search operator value"
 msgid "starred"
 msgstr "wyróżnione"
+
+#. Can be typed in the search box after "is:" i.e.:
+#. "is:unread". Matches conversations that are flagged unread.
+#.
+#. The translated string must be a single word (use '-', '_'
+#. or similar to combine words into one), should be short, and
+#. also match the translation in "search.page" of the Geary User
+#. Guide.
+#: ../src/engine/imap-db/imap-db-account.vala:211
+msgctxt "'is:' search operator value"
+msgid "unread"
+msgstr "nieprzeczytane"
 
 #. List of folder names to match for Drafts, separated by |.  Please add localized common
 #. names for the Drafts folder, leaving in the English names as well.  The first in the list
