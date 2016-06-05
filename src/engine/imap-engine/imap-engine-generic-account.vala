@@ -5,12 +5,24 @@
  */
 
 private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
+
     private const int REFRESH_FOLDER_LIST_SEC = 2 * 60;
     private const int REFRESH_UNSEEN_SEC = 1;
-    
+    private const Geary.SpecialFolderType[] SUPPORTED_SPECIAL_FOLDERS = {
+        Geary.SpecialFolderType.DRAFTS,
+        Geary.SpecialFolderType.SENT,
+        Geary.SpecialFolderType.SPAM,
+        Geary.SpecialFolderType.TRASH,
+        Geary.SpecialFolderType.ARCHIVE,
+    };
+
     private static Geary.FolderPath? outbox_path = null;
     private static Geary.FolderPath? search_path = null;
-    
+
+    protected virtual Geary.SpecialFolderType[] supported_special_folders {
+        get { return SUPPORTED_SPECIAL_FOLDERS; }
+    }
+
     private Imap.Account remote;
     private ImapDB.Account local;
     private bool open = false;
@@ -671,37 +683,21 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     
     public override async Geary.Folder get_required_special_folder_async(Geary.SpecialFolderType special,
         Cancellable? cancellable) throws Error {
-        switch (special) {
-            case Geary.SpecialFolderType.DRAFTS:
-            case Geary.SpecialFolderType.SENT:
-            case Geary.SpecialFolderType.SPAM:
-            case Geary.SpecialFolderType.TRASH:
-            case Geary.SpecialFolderType.ARCHIVE:
-            break;
-            
-            default:
-                throw new EngineError.BAD_PARAMETERS(
-                    "Invalid special folder type %s passed to get_required_special_folder_async",
-                    special.to_string());
+        if (!(special in this.supported_special_folders)) {
+            throw new EngineError.BAD_PARAMETERS(
+                "Invalid special folder type %s passed to get_required_special_folder_async",
+                special.to_string());
         }
-        
         check_open();
-        
+
         return yield ensure_special_folder_async(special, cancellable);
     }
-    
+
     private async void ensure_special_folders_async(Cancellable? cancellable) throws Error {
-        Geary.SpecialFolderType[] required = {
-            Geary.SpecialFolderType.DRAFTS,
-            Geary.SpecialFolderType.SENT,
-            Geary.SpecialFolderType.SPAM,
-            Geary.SpecialFolderType.TRASH,
-            Geary.SpecialFolderType.ARCHIVE,
-        };
-        foreach (Geary.SpecialFolderType special in required)
+        foreach (Geary.SpecialFolderType special in this.supported_special_folders)
             yield ensure_special_folder_async(special, cancellable);
     }
-    
+
     private async void update_folders_async(Gee.Map<FolderPath, Geary.Folder> existing_folders,
         Gee.Map<FolderPath, Imap.Folder> remote_folders, bool remote_folders_suspect, Cancellable? cancellable) {
         // update all remote folders properties in the local store and active in the system
