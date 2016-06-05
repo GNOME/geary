@@ -5,6 +5,15 @@
  */
 
 private class Geary.ImapEngine.GmailAccount : Geary.ImapEngine.GenericAccount {
+
+    // Archive is handled specially, so don't require it
+    private const Geary.SpecialFolderType[] SUPPORTED_SPECIAL_FOLDERS = {
+        Geary.SpecialFolderType.DRAFTS,
+        Geary.SpecialFolderType.SENT,
+        Geary.SpecialFolderType.SPAM,
+        Geary.SpecialFolderType.TRASH,
+    };
+
     public static Geary.Endpoint generate_imap_endpoint() {
         return new Geary.Endpoint(
             "imap.gmail.com",
@@ -20,7 +29,11 @@ private class Geary.ImapEngine.GmailAccount : Geary.ImapEngine.GenericAccount {
             Geary.Endpoint.Flags.SSL,
             Smtp.ClientConnection.DEFAULT_TIMEOUT_SEC);
     }
-    
+
+    protected override Geary.SpecialFolderType[] supported_special_folders {
+        get { return SUPPORTED_SPECIAL_FOLDERS; }
+    }
+
     public GmailAccount(string name, Geary.AccountInformation account_information,
         Imap.Account remote, ImapDB.Account local) {
         base (name, account_information, true, remote, local);
@@ -52,7 +65,7 @@ private class Geary.ImapEngine.GmailAccount : Geary.ImapEngine.GenericAccount {
                 return new GmailFolder(this, remote_account, local_account, local_folder, special_folder_type);
         }
     }
-    
+
     protected override SearchFolder new_search_folder() {
         return new GmailSearchFolder(this);
     }
