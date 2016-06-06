@@ -6,10 +6,10 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: geary help master\n"
-"POT-Creation-Date: 2016-05-15 05:59+0000\n"
-"PO-Revision-Date: 2016-05-15 10:23+0200\n"
+"POT-Creation-Date: 2016-06-05 08:51+0000\n"
+"PO-Revision-Date: 2016-06-06 16:31+0200\n"
 "Last-Translator: Federico Bruni <fede@inventati.org>\n"
-"Language-Team: Italiano <gnome-it-list@gnome.org>\n"
+"Language-Team: Italiano <>\n"
 "Language: it\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -204,7 +204,7 @@ msgstr "Geary ha delle scorciatoie da tastiera per le operazioni più comuni."
 
 #: C/shortcuts.page:15(p)
 msgid "Compose a new message"
-msgstr "Comporre un nuovo messaggio"
+msgstr "Componi un nuovo messaggio"
 
 #: C/shortcuts.page:16(p)
 msgid "<keyseq><key>Ctrl</key><key>N</key></keyseq> or <key>N</key>"
@@ -307,13 +307,28 @@ msgstr ""
 "key><key>U</key></keyseq>"
 
 #: C/shortcuts.page:59(p)
+#| msgid "Label a conversation"
+msgid "Open the Label Conversation menu"
+msgstr "Apri il menu Aggiungi etichetta a una conversazione"
+
+#: C/shortcuts.page:60(key) C/shortcuts.page:166(key)
+msgid "L"
+msgstr "L"
+
+#: C/shortcuts.page:63(p)
+#| msgid "Label or move a conversation"
+msgid "Open the Move Conversation menu"
+msgstr "Apri il menu Sposta conversazione"
+
+#: C/shortcuts.page:64(key)
+msgid "M"
+msgstr "M"
+
+#: C/shortcuts.page:67(p)
 msgid "Move focus to the next/previous pane"
 msgstr "Sposta lo stato attivo al riquadro successivo/precedente"
 
-#: C/shortcuts.page:60(p)
-#| msgid ""
-#| "<keyseq><key>Ctrl</key><key>I</key></keyseq> or <keyseq><key>Shift</"
-#| "key><key>I</key></keyseq>"
+#: C/shortcuts.page:68(p)
 msgid ""
 "<keyseq><key>F6</key></keyseq> / <keyseq><key>Shift</key><key>F6</key></"
 "keyseq>"
@@ -321,12 +336,11 @@ msgstr ""
 "<keyseq><key>F6</key></keyseq> / <keyseq><key>Maiusc</key><key>F6</key></"
 "keyseq>"
 
-#: C/shortcuts.page:63(p)
+#: C/shortcuts.page:71(p)
 msgid "Move focus to conversation list"
 msgstr "Sposta lo stato attivo sull'elenco delle conversazioni"
 
-#: C/shortcuts.page:64(key) C/shortcuts.page:80(key) C/shortcuts.page:96(key)
-#: C/shortcuts.page:100(key) C/shortcuts.page:104(key)
+#: C/shortcuts.page:72(key) C/shortcuts.page:88(key) C/shortcuts.page:104(key)
 #: C/shortcuts.page:108(key) C/shortcuts.page:112(key)
 #: C/shortcuts.page:116(key) C/shortcuts.page:120(key)
 #: C/shortcuts.page:130(key) C/shortcuts.page:134(key)
@@ -337,81 +351,65 @@ msgstr "Sposta lo stato attivo sull'elenco delle conversazioni"
 msgid "Ctrl"
 msgstr "Ctrl"
 
-#: C/shortcuts.page:64(key) C/shortcuts.page:150(key)
+#: C/shortcuts.page:72(key) C/shortcuts.page:150(key)
 msgid "B"
 msgstr "B"
 
-#: C/shortcuts.page:67(p)
+#: C/shortcuts.page:75(p)
 msgid "Jump to next (older) conversation"
 msgstr "Passa alla conversazione successiva (più vecchia)"
 
-#: C/shortcuts.page:68(key)
-msgid "j"
-msgstr "j"
+#: C/shortcuts.page:76(key)
+msgid "J"
+msgstr "J"
 
-#: C/shortcuts.page:71(p)
+#: C/shortcuts.page:79(p)
 msgid "Jump to previous (newer) conversation"
 msgstr "Passa alla conversazione precedente (più recente)"
 
-#: C/shortcuts.page:72(key)
-msgid "k"
-msgstr "k"
+#: C/shortcuts.page:80(key) C/shortcuts.page:162(key)
+msgid "K"
+msgstr "K"
 
-#: C/shortcuts.page:75(p)
+#: C/shortcuts.page:83(p)
 msgid "Toggle spam"
 msgstr "Segna come indesiderata"
 
-#: C/shortcuts.page:76(p)
+#: C/shortcuts.page:84(p)
 msgid "<keyseq><key>Ctrl</key><key>J</key></keyseq> or <key>!</key>"
 msgstr "<keyseq><key>Ctrl</key><key>J</key></keyseq> o <key>!</key>"
 
-#: C/shortcuts.page:79(p)
+#: C/shortcuts.page:87(p)
 msgid "Quit"
 msgstr "Esci"
 
-#: C/shortcuts.page:80(key)
+#: C/shortcuts.page:88(key)
 msgid "Q"
 msgstr "Q"
 
-#: C/shortcuts.page:83(p)
+#: C/shortcuts.page:91(p)
 msgid "Zoom in"
 msgstr "Aumenta ingrandimento"
 
-#: C/shortcuts.page:84(p)
+#: C/shortcuts.page:92(p)
 msgid "<keyseq><key>Ctrl</key><key>=</key></keyseq> or <key>=</key>"
 msgstr "<keyseq><key>Ctrl</key><key>=</key></keyseq> o <key>=</key>"
 
-#: C/shortcuts.page:87(p)
+#: C/shortcuts.page:95(p)
 msgid "Zoom out"
 msgstr "Diminuisci ingrandimento"
 
-#: C/shortcuts.page:88(p)
+#: C/shortcuts.page:96(p)
 msgid "<keyseq><key>Ctrl</key><key>-</key></keyseq> or <key>-</key>"
 msgstr "<keyseq><key>Ctrl</key><key>-</key></keyseq> o <key>-</key>"
 
-#: C/shortcuts.page:91(p)
+#: C/shortcuts.page:99(p)
 msgid "Reset zoom"
 msgstr "Ripristina ingrandimento"
 
-#: C/shortcuts.page:92(p)
+#: C/shortcuts.page:100(p)
 msgid "<keyseq><key>Ctrl</key><key>0</key></keyseq> or <key>0</key>"
 msgstr "<keyseq><key>Ctrl</key><key>0</key></keyseq> o <key>0</key>"
-
-#: C/shortcuts.page:95(p) C/preferences.page:10(title)
-msgid "Preferences"
-msgstr "Preferenze"
-
-#: C/shortcuts.page:96(key)
-msgid "E"
-msgstr "E"
-
-#: C/shortcuts.page:99(p) C/accounts.page:10(title)
-msgid "Accounts"
-msgstr "Account"
-
-#: C/shortcuts.page:100(key)
-msgid "M"
-msgstr "M"
 
 #: C/shortcuts.page:103(p)
 msgid "Close composer window"
@@ -517,17 +515,9 @@ msgstr "U"
 msgid "Strike text"
 msgstr "Testo barrato"
 
-#: C/shortcuts.page:162(key)
-msgid "K"
-msgstr "K"
-
 #: C/shortcuts.page:165(p)
 msgid "Insert a link"
 msgstr "Inserisci un collegamento"
-
-#: C/shortcuts.page:166(key)
-msgid "L"
-msgstr "L"
 
 #: C/shortcuts.page:169(p)
 msgid "Remove formatting"
@@ -663,12 +653,10 @@ msgid "Finds messages that have been marked as starred."
 msgstr "Trova i messaggi contrassegnati come speciali."
 
 #: C/search.page:55(input)
-#| msgid "Mark unread"
 msgid "is:unread"
 msgstr "è:nonletto"
 
 #: C/search.page:56(p)
-#| msgid "Finds messages where <var>sender</var> matches the From header."
 msgid "Finds messages that have been marked as not read."
 msgstr "Trova i messaggi contrassegnati come non letti."
 
@@ -702,6 +690,10 @@ msgstr ""
 "<input>da</input> e <input>a</input> supportano <input>me</input> come "
 "argomento, abilitando la ricerca dell'indirizzo email del proprio account "
 "nel contesto appropriato."
+
+#: C/preferences.page:10(title)
+msgid "Preferences"
+msgstr "Preferenze"
 
 #: C/preferences.page:11(p)
 msgid ""
@@ -795,11 +787,6 @@ msgid "Show notifications for new mail"
 msgstr "Mostra notifiche per i nuovi messaggi"
 
 #: C/preferences.page:59(p)
-#| msgid ""
-#| "When set, Geary displays a <em>notification</em> each time a new message "
-#| "arrives. Notifications are displayed in a system-dependent manner. On "
-#| "GNOME Shell, notifications appear at the bottom of the display. In Ubuntu "
-#| "Unity, notifications appear at the upper right of the display."
 msgid ""
 "When set, Geary displays a <em>notification</em> each time a new message "
 "arrives. Notifications are displayed in a system-dependent manner. On GNOME "
@@ -814,7 +801,6 @@ msgstr ""
 "recenti). In Ubuntu Unity appaiono in alto a destra."
 
 #: C/preferences.page:65(gui)
-#| msgid "Show notifications for new mail"
 msgid "Always watch for new mail"
 msgstr "Controlla sempre la nuova posta"
 
@@ -1182,6 +1168,10 @@ msgstr ""
 "nella cartella Cestino sul server, dove l'utente può poi eliminarli "
 "manualmente. Il server eliminerà automaticamente i messaggi cestinati dopo "
 "30 giorni."
+
+#: C/accounts.page:10(title)
+msgid "Accounts"
+msgstr "Account"
 
 #: C/accounts.page:13(title)
 msgid "Adding accounts"
