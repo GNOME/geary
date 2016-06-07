@@ -6,13 +6,22 @@
 
 private class Geary.ImapEngine.OutlookAccount : Geary.ImapEngine.GenericAccount {
     public static Geary.Endpoint generate_imap_endpoint() {
-        return new Geary.Endpoint(
+        Geary.Endpoint endpoint = new Geary.Endpoint(
             "imap-mail.outlook.com",
             Imap.ClientConnection.DEFAULT_PORT_SSL,
             Geary.Endpoint.Flags.SSL,
             Imap.ClientConnection.RECOMMENDED_TIMEOUT_SEC);
+        // As of June 2016, outlook.com's IMAP servers have a bug
+        // where a large number (~50) of pipelined STATUS commands on
+        // mailboxes with many messages will eventually cause it to
+        // break command parsing and return a BAD response, causing us
+        // to drop the connection. Limit the number of pipelined
+        // commands per batch to work around this.  See b.g.o Bug
+        // 766552
+        endpoint.max_pipeline_batch_size = 25;
+        return endpoint;
     }
-    
+
     public static Geary.Endpoint generate_smtp_endpoint() {
         return new Geary.Endpoint(
             "smtp-mail.outlook.com",

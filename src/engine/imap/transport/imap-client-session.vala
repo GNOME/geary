@@ -196,7 +196,7 @@ public class Geary.Imap.ClientSession : BaseObject {
     private Command? state_change_cmd = null;
     private Nonblocking.Semaphore? connect_waiter = null;
     private Error? connect_err = null;
-    
+
     //
     // Connection state changes
     //
@@ -982,24 +982,39 @@ public class Geary.Imap.ClientSession : BaseObject {
             throw params.err;
         
         assert(params.proceed);
-        
-        // Issue all at once using a Nonblocking.Batch
-        Nonblocking.Batch batch = new Nonblocking.Batch();
-        foreach (Command cmd in cmds)
-            batch.add(new SendCommandOperation(this, cmd));
-        
-        yield batch.execute_all_async(cancellable);
-        batch.throw_first_exception();
-        
-        Gee.Map<Command, StatusResponse> map = new Gee.HashMap<Command, StatusResponse>();
-        foreach (int id in batch.get_ids()) {
-            SendCommandOperation op = (SendCommandOperation) batch.get_operation(id);
-            map.set(op.cmd, op.response);
+
+        // Issue all at once using a single Nonblocking.Batch unless
+        // the endpoint's max pipeline size is positive, if so use
+        // multiple batches with a maximum size of that.
+
+        uint max_batch_size = this.imap_endpoint.max_pipeline_batch_size;
+        if (max_batch_size < 1) {
+            max_batch_size = cmds.size;
         }
-        
-        return map;
+
+        Gee.Iterator<Command> cmd_remaining = cmds.iterator();
+        Nonblocking.Batch? batch = null;
+        Gee.Map<Command, StatusResponse> responses = new Gee.HashMap<Command, StatusResponse>();
+        while (cmd_remaining.has_next()) {
+            batch = new Nonblocking.Batch();
+            while (cmd_remaining.has_next() && batch.size < max_batch_size) {
+                cmd_remaining.next();
+                batch.add(new SendCommandOperation(this, cmd_remaining.get()));
+            }
+
+            debug("[%s] Sending batch of %u commands", to_string(), batch.size);
+            yield batch.execute_all_async(cancellable);
+            batch.throw_first_exception();
+
+            foreach (int id in batch.get_ids()) {
+                SendCommandOperation op = (SendCommandOperation) batch.get_operation(id);
+                responses.set(op.cmd, op.response);
+            }
+        }
+
+        return responses;
     }
-    
+
     private void check_unsupported_send_command(Command cmd) throws Error {
         // look for special commands that we wish to handle directly, as they affect the state
         // machine
