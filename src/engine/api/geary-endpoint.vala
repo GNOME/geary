@@ -44,7 +44,15 @@ public class Geary.Endpoint : BaseObject {
     public uint timeout_sec { get; private set; }
     public TlsCertificateFlags tls_validation_flags { get; set; default = TlsCertificateFlags.VALIDATE_ALL; }
     public bool force_ssl3 { get; set; default = false; }
-    
+
+    /**
+     * The maximum number of commands that will be pipelined at once.
+     *
+     * If 0 (the default), there is no limit on the number of
+     * pipelined commands sent to this endpoint.
+     */
+    public uint max_pipeline_batch_size = 0;
+
     /**
      * When set, TLS has reported certificate issues.
      *
