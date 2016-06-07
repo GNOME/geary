@@ -23,11 +23,10 @@ private class Geary.ImapDB.Account : BaseObject {
     private const string SEARCH_OP_SUBJECT = "subject";
     private const string SEARCH_OP_TO = "receivers";
 
-    // Operators we allow the token to be "me" as in from:me.
-    private const string[] SEARCH_OP_ADDRESSABLE_FIELDS = {
+    // Operators allowing finding mail addressed to "me"
+    private const string[] SEARCH_OP_TO_ME_FIELDS = {
         SEARCH_OP_BCC,
         SEARCH_OP_CC,
-        SEARCH_OP_FROM,
         SEARCH_OP_TO,
     };
 
@@ -53,7 +52,9 @@ private class Geary.ImapDB.Account : BaseObject {
     // internal forms
     private static Gee.HashMap<string, string> search_op_names =
         new Gee.HashMap<string, string>();
-    private static Gee.ArrayList<string> search_op_addressable_me_values =
+    private static Gee.ArrayList<string> search_op_to_me_values =
+        new Gee.ArrayList<string>();
+    private static Gee.ArrayList<string> search_op_from_me_values =
         new Gee.ArrayList<string>();
     private static Gee.HashMap<string, string> search_op_is_values =
         new Gee.HashMap<string, string>();
@@ -167,17 +168,30 @@ private class Geary.ImapDB.Account : BaseObject {
         search_op_names.set("subject", SEARCH_OP_SUBJECT);
         search_op_names.set("to", SEARCH_OP_TO);
 
-        // Can be typed like "from:me" or "cc:me", etc. as a shorthand
-        // to find mail to or from yourself in search.
+        // Can be typed in the search box after "to:", "cc:" and
+        // "bcc:" e.g.: "to:me". Matches conversations that are
+        // addressed to the user.
         //
         // The translated string must be a single word (use '-', '_'
         // or similar to combine words into one), should be short, and
         // also match the translation in "search.page" of the Geary User
         // Guide.
-        search_op_addressable_me_values.add(
-            C_("Addressable search operator value", "me")
+        search_op_to_me_values.add(
+            C_("Search operator value - mail addressed to the user", "me")
         );
-        search_op_addressable_me_values.add(SEARCH_OP_ADDRESSABLE_VALUE_ME);
+        search_op_to_me_values.add(SEARCH_OP_ADDRESSABLE_VALUE_ME);
+
+        // Can be typed in the search box after "from:" i.e.:
+        // "from:me". Matches conversations were sent by the user.
+        //
+        // The translated string must be a single word (use '-', '_'
+        // or similar to combine words into one), should be short, and
+        // also match the translation in "search.page" of the Geary User
+        // Guide.
+        search_op_from_me_values.add(
+            C_("Search operator value - mail sent by the user", "me")
+        );
+        search_op_from_me_values.add(SEARCH_OP_ADDRESSABLE_VALUE_ME);
 
         // Can be typed in the search box after "is:" i.e.:
         // "is:read". Matches conversations that are flagged as read.
@@ -875,7 +889,6 @@ private class Geary.ImapDB.Account : BaseObject {
         } else {
             field = search_op_names.get(parts[0].down());
             if (field == SEARCH_OP_IS) {
-                // An "is:..." search term
                 string? value = search_op_is_values.get(parts[1].down());
                 if (value != null) {
                     token = value;
@@ -883,12 +896,13 @@ private class Geary.ImapDB.Account : BaseObject {
                     // Unknown op value, pretend there is no search op
                     field = null;
                 }
-            } else if (field in SEARCH_OP_ADDRESSABLE_FIELDS &&
-                       parts[1].down() in search_op_addressable_me_values) {
-                // A "to:me", "cc:me", etc. term
+            } else if (field == SEARCH_OP_FROM &&
+                       parts[1].down() in search_op_from_me_values) {
+                token = account_information.email;
+            } else if (field in SEARCH_OP_TO_ME_FIELDS &&
+                       parts[1].down() in search_op_to_me_values) {
                 token = account_information.email;
             } else if (field != null) {
-                // Everything else
                 token = parts[1];
             }
         }
