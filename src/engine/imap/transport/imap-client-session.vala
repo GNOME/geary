@@ -1002,7 +1002,6 @@ public class Geary.Imap.ClientSession : BaseObject {
                 batch.add(new SendCommandOperation(this, cmd_remaining.get()));
             }
 
-            debug("[%s] Sending batch of %u commands", to_string(), batch.size);
             yield batch.execute_all_async(cancellable);
             batch.throw_first_exception();
 
