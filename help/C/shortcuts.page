@@ -120,11 +120,15 @@
   		<td><p> <keyseq><key>Ctrl</key><key>Shift</key><key>G</key></keyseq> </p></td>
   	</tr>
      </table>
-    
+
     <section id="composer">
         <title>Composer shortcuts</title>
         <p>These shortcuts are active whenever focus is in a composer.</p>
         <table frame="all" rules="rows">
+            <tr>
+                <td><p>Attach file</p></td>
+                <td><p><keyseq><key>Ctrl</key><key>T</key></keyseq></p></td>
+            </tr>
             <tr>
                 <td><p>Quote text</p></td>
                 <td><p> <keyseq><key>Ctrl</key><key>]</key></keyseq> </p></td>
@@ -142,7 +146,7 @@
                 <td><p> <keyseq><key>Ctrl</key><key>D</key></keyseq> </p></td>
             </tr>
         </table>
-        
+
         <p>These shortcuts are only active in composers in rich text mode.</p>
         <table frame="all" rules="rows">
             <tr>

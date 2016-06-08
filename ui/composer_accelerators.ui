@@ -1,7 +1,9 @@
 <ui>
     <accelerator action="undo" />
     <accelerator action="redo" />
-    
+
+    <accelerator action="add attachment" />
+
     <accelerator action="cut" />
     <accelerator action="copy" />
     <accelerator action="copy link" />
