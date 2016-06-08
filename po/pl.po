@@ -18,8 +18,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-06-04 13:14+0200\n"
-"PO-Revision-Date: 2016-06-04 13:15+0200\n"
+"POT-Creation-Date: 2016-06-08 14:58+0200\n"
+"PO-Revision-Date: 2016-06-08 14:59+0200\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <gnomepl@aviary.pl>\n"
 "Language: pl\n"
@@ -1485,7 +1485,7 @@ msgstr "Brak"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: ../src/engine/imap-db/imap-db-account.vala:98
+#: ../src/engine/imap-db/imap-db-account.vala:99
 msgctxt "Search operator"
 msgid "attachment"
 msgstr "załącznik"
@@ -1498,7 +1498,7 @@ msgstr "załącznik"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: ../src/engine/imap-db/imap-db-account.vala:107
+#: ../src/engine/imap-db/imap-db-account.vala:108
 msgctxt "Search operator"
 msgid "bcc"
 msgstr "udw"
@@ -1510,7 +1510,7 @@ msgstr "udw"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: ../src/engine/imap-db/imap-db-account.vala:115
+#: ../src/engine/imap-db/imap-db-account.vala:116
 msgctxt "Search operator"
 msgid "body"
 msgstr "treść"
@@ -1523,7 +1523,7 @@ msgstr "treść"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: ../src/engine/imap-db/imap-db-account.vala:124
+#: ../src/engine/imap-db/imap-db-account.vala:125
 msgctxt "Search operator"
 msgid "cc"
 msgstr "dw"
@@ -1536,7 +1536,7 @@ msgstr "dw"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: ../src/engine/imap-db/imap-db-account.vala:133
+#: ../src/engine/imap-db/imap-db-account.vala:134
 msgctxt "Search operator"
 msgid "from"
 msgstr "od"
@@ -1548,7 +1548,7 @@ msgstr "od"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: ../src/engine/imap-db/imap-db-account.vala:141
+#: ../src/engine/imap-db/imap-db-account.vala:142
 msgctxt "Search operator"
 msgid "is"
 msgstr "jest"
@@ -1560,7 +1560,7 @@ msgstr "jest"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary
 #. User Guide.
-#: ../src/engine/imap-db/imap-db-account.vala:149
+#: ../src/engine/imap-db/imap-db-account.vala:150
 msgctxt "Search operator"
 msgid "subject"
 msgstr "temat"
@@ -1573,20 +1573,33 @@ msgstr "temat"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: ../src/engine/imap-db/imap-db-account.vala:158
+#: ../src/engine/imap-db/imap-db-account.vala:159
 msgctxt "Search operator"
 msgid "to"
 msgstr "do"
 
-#. Can be typed like "from:me" or "cc:me", etc. as a shorthand
-#. to find mail to or from yourself in search.
+#. Can be typed in the search box after "to:", "cc:" and
+#. "bcc:" e.g.: "to:me". Matches conversations that are
+#. addressed to the user.
 #.
 #. The translated string must be a single word (use '-', '_'
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: ../src/engine/imap-db/imap-db-account.vala:178
-msgctxt "Addressable search operator value"
+#: ../src/engine/imap-db/imap-db-account.vala:180
+msgctxt "Search operator value - mail addressed to the user"
+msgid "me"
+msgstr "ja"
+
+#. Can be typed in the search box after "from:" i.e.:
+#. "from:me". Matches conversations were sent by the user.
+#.
+#. The translated string must be a single word (use '-', '_'
+#. or similar to combine words into one), should be short, and
+#. also match the translation in "search.page" of the Geary User
+#. Guide.
+#: ../src/engine/imap-db/imap-db-account.vala:192
+msgctxt "Search operator value - mail sent by the user"
 msgid "me"
 msgstr "ja"
 
@@ -1597,7 +1610,7 @@ msgstr "ja"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: ../src/engine/imap-db/imap-db-account.vala:190
+#: ../src/engine/imap-db/imap-db-account.vala:204
 msgctxt "'is:' search operator value"
 msgid "read"
 msgstr "przeczytane"
@@ -1610,7 +1623,7 @@ msgstr "przeczytane"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: ../src/engine/imap-db/imap-db-account.vala:201
+#: ../src/engine/imap-db/imap-db-account.vala:215
 msgctxt "'is:' search operator value"
 msgid "starred"
 msgstr "wyróżnione"
@@ -1622,7 +1635,7 @@ msgstr "wyróżnione"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: ../src/engine/imap-db/imap-db-account.vala:211
+#: ../src/engine/imap-db/imap-db-account.vala:225
 msgctxt "'is:' search operator value"
 msgid "unread"
 msgstr "nieprzeczytane"
@@ -1630,14 +1643,14 @@ msgstr "nieprzeczytane"
 #. List of folder names to match for Drafts, separated by |.  Please add localized common
 #. names for the Drafts folder, leaving in the English names as well.  The first in the list
 #. will be the default, so please add the most common localized name to the front.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:575
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:587
 msgid "Drafts | Draft"
 msgstr "Szkice | Szkic | Drafts | Draft"
 
 #. List of folder names to match for Sent Mail, separated by |.  Please add localized common
 #. names for the Sent Mail folder, leaving in the English names as well.  The first in the list
 #. will be the default, so please add the most common localized name to the front.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:580
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:592
 msgid "Sent | Sent Mail | Sent Email | Sent E-Mail"
 msgstr ""
 "Wysłane | Wysłana poczta | Wysłane wiadomości | Skrzynka nadawcza | Sent "
@@ -1646,7 +1659,7 @@ msgstr ""
 #. List of folder names to match for Spam, separated by |.  Please add localized common
 #. names for the Spam folder, leaving in the English names as well.  The first in the list
 #. will be the default, so please add the most common localized name to the front.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:585
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:597
 msgid ""
 "Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email "
 "| Bulk E-Mail"
@@ -1657,7 +1670,7 @@ msgstr ""
 #. List of folder names to match for Trash, separated by |.  Please add localized common
 #. names for the Trash folder, leaving in the English names as well.  The first in the list
 #. will be the default, so please add the most common localized name to the front.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:590
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:602
 msgid "Trash | Rubbish | Rubbish Bin"
 msgstr ""
 "Kosz | Śmietnik | Usunięta poczta | Usunięte wiadomości | Trash | Rubbish | "
@@ -1666,7 +1679,7 @@ msgstr ""
 #. List of folder names to match for Archive, separated by |.  Please add localized common
 #. names for the Trash folder, leaving in the English names as well.  The first in the list
 #. will be the default, so please add the most common localized name to the front.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:595
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:607
 msgid "Archive | Archives"
 msgstr "Archiwum | Archiwa | Archive | Archives"
 
