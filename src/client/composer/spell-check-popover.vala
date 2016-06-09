@@ -38,17 +38,17 @@ public class SpellCheckPopover {
          */
         public signal void toggled (string lang_code, bool status);
 
-		/**
-		 * @brief Signal when the visibility has changed.
-		 */
-		public signal void visibility_changed ();
+        /**
+         * @brief Signal when the visibility has changed.
+         */
+        public signal void visibility_changed ();
 
         private string lang_code;
         private string lang_name;
         private string country_name;
         private bool is_lang_visible;
         private Gtk.Image active_image;
-		private Gtk.Button remove_button;
+        private Gtk.Button remove_button;
         private SpellCheckStatus lang_active = SpellCheckStatus.INACTIVE;
 
         public SpellCheckLangRow (string lang_code) {
@@ -69,13 +69,13 @@ public class SpellCheckPopover {
 
             Gtk.IconSize sz = Gtk.IconSize.SMALL_TOOLBAR;
             active_image = new Gtk.Image.from_icon_name("object-select-symbolic", sz);
-			remove_button = new Gtk.Button();
-			remove_button.set_relief(Gtk.ReliefStyle.NONE);
+            remove_button = new Gtk.Button();
+            remove_button.set_relief(Gtk.ReliefStyle.NONE);
             box.pack_start(active_image, false, false, 6);
-			box.pack_start(remove_button, true, true);
-			remove_button.halign = Gtk.Align.END; // Make the button stay at the right end of the screen
+            box.pack_start(remove_button, true, true);
+            remove_button.halign = Gtk.Align.END; // Make the button stay at the right end of the screen
 
-			remove_button.clicked.connect(on_remove_clicked);
+            remove_button.clicked.connect(on_remove_clicked);
 
             is_lang_visible = false;
             foreach (string visible_lang in GearyApplication.instance.config.spell_check_visible_languages) {
@@ -97,54 +97,54 @@ public class SpellCheckPopover {
         }
 
         private void update_images() {
-			Gtk.IconSize sz = Gtk.IconSize.SMALL_TOOLBAR;
+            Gtk.IconSize sz = Gtk.IconSize.SMALL_TOOLBAR;
 
             switch (lang_active) {
             case SpellCheckStatus.ACTIVE:
                 active_image.set_from_icon_name("object-select-symbolic", sz);
                 break;
             case SpellCheckStatus.INACTIVE:
-				active_image.clear();
+                active_image.clear();
                 break;
             }
 
-			if (is_lang_visible) {
-				remove_button.set_image(new Gtk.Image.from_icon_name("list-remove-symbolic", sz));
-			}
-			else {
-				remove_button.set_image(new Gtk.Image.from_icon_name("list-add-symbolic", sz));
-			}
+            if (is_lang_visible) {
+                remove_button.set_image(new Gtk.Image.from_icon_name("list-remove-symbolic", sz));
+            }
+            else {
+                remove_button.set_image(new Gtk.Image.from_icon_name("list-add-symbolic", sz));
+            }
         }
 
-		private void on_remove_clicked() {
-			is_lang_visible = ! is_lang_visible;
+        private void on_remove_clicked() {
+            is_lang_visible = ! is_lang_visible;
 
-			update_images();
+            update_images();
 
-			if (!is_lang_visible && lang_active == SpellCheckStatus.ACTIVE)
-				set_lang_active(SpellCheckStatus.INACTIVE);
+            if (!is_lang_visible && lang_active == SpellCheckStatus.ACTIVE)
+                set_lang_active(SpellCheckStatus.INACTIVE);
 
-			if (is_lang_visible) {
-				string[] visible_langs = GearyApplication.instance.config.spell_check_visible_languages;
-				visible_langs += lang_code;
-				GearyApplication.instance.config.spell_check_visible_languages = visible_langs;
-			}
-			else {				
-				string[] visible_langs = {};
-				foreach (string lang in GearyApplication.instance.config.spell_check_visible_languages) {
-					if (lang != lang_code)
-						visible_langs += lang;
-				}
-				GearyApplication.instance.config.spell_check_visible_languages = visible_langs;
-			}
+            if (is_lang_visible) {
+                string[] visible_langs = GearyApplication.instance.config.spell_check_visible_languages;
+                visible_langs += lang_code;
+                GearyApplication.instance.config.spell_check_visible_languages = visible_langs;
+            }
+            else {
+                string[] visible_langs = {};
+                foreach (string lang in GearyApplication.instance.config.spell_check_visible_languages) {
+                    if (lang != lang_code)
+                        visible_langs += lang;
+                }
+                GearyApplication.instance.config.spell_check_visible_languages = visible_langs;
+            }
 
-			visibility_changed();
-		}
+            visibility_changed();
+        }
 
         public bool match_filter(string filter) {
             string filter_down = filter.down();
             return ((lang_name != null ? filter_down in lang_name.down() : false) ||
-					(country_name != null ? filter_down in country_name.down() : false));
+                    (country_name != null ? filter_down in country_name.down() : false));
         }
 
         private void set_lang_active(SpellCheckStatus active) {
@@ -152,16 +152,16 @@ public class SpellCheckPopover {
 
             switch (active) {
                 case SpellCheckStatus.ACTIVE:
-					// If the lang is not visible make it visible now
-					if (!is_lang_visible) {
-						string[] visible_langs = GearyApplication.instance.config.spell_check_visible_languages;
-						visible_langs += lang_code;
-						GearyApplication.instance.config.spell_check_visible_languages = visible_langs;
-						is_lang_visible = true;
-					}
-					break;
+                    // If the lang is not visible make it visible now
+                    if (!is_lang_visible) {
+                        string[] visible_langs = GearyApplication.instance.config.spell_check_visible_languages;
+                        visible_langs += lang_code;
+                        GearyApplication.instance.config.spell_check_visible_languages = visible_langs;
+                        is_lang_visible = true;
+                    }
+                    break;
                 case SpellCheckStatus.INACTIVE:
-					break;
+                    break;
             }
 
             update_images();
@@ -169,18 +169,18 @@ public class SpellCheckPopover {
         }
 
         public void handle_activation(SpellCheckPopover spell_check_popover) {
-			// Make sure that we do not enable the language when the user is just
-			// trying to remove it from the list.
-			if (!visible)
-				return;
+            // Make sure that we do not enable the language when the user is just
+            // trying to remove it from the list.
+            if (!visible)
+                return;
 
             switch (lang_active) {
                 case SpellCheckStatus.ACTIVE:
-					set_lang_active(SpellCheckStatus.INACTIVE);
-					break;
+                    set_lang_active(SpellCheckStatus.INACTIVE);
+                    break;
                 case SpellCheckStatus.INACTIVE:
                     set_lang_active(SpellCheckStatus.ACTIVE);
-					break;
+                    break;
             }
         }
 
@@ -226,7 +226,7 @@ public class SpellCheckPopover {
                 selected_rows.add(lang);
 
             row.toggled.connect(this.on_row_toggled);
-			row.visibility_changed.connect(this.on_visibility_changed);
+            row.visibility_changed.connect(this.on_visibility_changed);
         }
         langs_list.row_activated.connect(on_row_activated);
         view.add(langs_list);
@@ -302,8 +302,8 @@ public class SpellCheckPopover {
         this.selection_changed(active_langs);
     }
 
-	private void on_visibility_changed() {
-		langs_list.invalidate_filter();
-	}
+    private void on_visibility_changed() {
+        langs_list.invalidate_filter();
+    }
 
 }
