@@ -45,6 +45,7 @@ src/client/composer/contact-entry-completion.vala
 src/client/composer/contact-list-store.vala
 src/client/composer/email-entry.vala
 src/client/composer/scrollable-overlay.vala
+src/client/composer/spell-check-popover.vala
 src/client/composer/webview-edit-fixer.vala
 src/client/conversation-list/conversation-list-cell-renderer.vala
 src/client/conversation-list/conversation-list-store.vala
