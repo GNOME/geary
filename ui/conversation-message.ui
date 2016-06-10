@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Generated with glade 3.20.0 -->
 <interface>
-  <requires lib="gtk+" version="3.12"/>
+  <requires lib="gtk+" version="3.14"/>
   <template class="ConversationMessage" parent="GtkBox">
     <property name="name">ConversationMessage</property>
     <property name="visible">True</property>
@@ -45,20 +45,50 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkBox">
+                      <object class="GtkBox" id="preview_bod">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="orientation">vertical</property>
                         <child>
-                          <object class="GtkLabel" id="from_preview">
+                          <object class="GtkBox">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="halign">start</property>
-                            <property name="label" translatable="yes">From &lt;email&gt;</property>
-                            <property name="ellipsize">end</property>
-                            <style>
-                              <class name="header-value"/>
-                            </style>
+                            <child>
+                              <object class="GtkLabel" id="preview_from">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="halign">start</property>
+                                <property name="label" translatable="yes">From &lt;email&gt;</property>
+                                <property name="ellipsize">end</property>
+                                <property name="xalign">0</property>
+                                <style>
+                                  <class name="header-value"/>
+                                </style>
+                              </object>
+                              <packing>
+                                <property name="expand">True</property>
+                                <property name="fill">True</property>
+                                <property name="position">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkLabel" id="preview_date">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="halign">start</property>
+                                <property name="valign">baseline</property>
+                                <property name="margin_top">3</property>
+                                <property name="label" translatable="yes">1/1/1970	</property>
+                                <property name="selectable">True</property>
+                                <property name="ellipsize">end</property>
+                                <property name="xalign">1</property>
+                              </object>
+                              <packing>
+                                <property name="expand">False</property>
+                                <property name="fill">False</property>
+                                <property name="position">1</property>
+                              </packing>
+                            </child>
                           </object>
                           <packing>
                             <property name="expand">True</property>
@@ -67,12 +97,13 @@
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkLabel" id="body_preview">
+                          <object class="GtkLabel" id="preview_body">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="halign">start</property>
                             <property name="label" translatable="yes">Preview body text.</property>
                             <property name="ellipsize">end</property>
+                            <property name="xalign">0</property>
                             <style>
                               <class name="preview-value"/>
                             </style>
@@ -85,7 +116,7 @@
                         </child>
                       </object>
                       <packing>
-                        <property name="expand">False</property>
+                        <property name="expand">True</property>
                         <property name="fill">True</property>
                         <property name="position">1</property>
                       </packing>
@@ -126,7 +157,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkBox" id="header_box">
+                      <object class="GtkBox" id="headers">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="orientation">vertical</property>
@@ -134,121 +165,101 @@
                           <object class="GtkBox" id="from_header">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
+                            <property name="baseline_position">top</property>
                             <child>
-                              <object class="GtkLabel" id="from_label">
+                              <object class="GtkFlowBox" id="from">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">From:</property>
-                                <property name="xalign">1</property>
-                                <style>
-                                  <class name="header-label"/>
-                                  <class name="dim-label"/>
-                                </style>
+                                <property name="can_focus">True</property>
+                                <property name="valign">baseline</property>
+                                <property name="column_spacing">2</property>
+                                <property name="min_children_per_line">1</property>
+                                <property name="max_children_per_line">4</property>
+                                <property name="selection_mode">none</property>
                               </object>
                               <packing>
-                                <property name="expand">False</property>
+                                <property name="expand">True</property>
                                 <property name="fill">True</property>
                                 <property name="position">0</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkLabel" id="from_text">
+                              <object class="GtkLabel" id="date">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="halign">start</property>
-                                <property name="label" translatable="yes">From &lt;email&gt;</property>
+                                <property name="valign">baseline</property>
+                                <property name="label" translatable="yes">1/1/1970	</property>
                                 <property name="selectable">True</property>
                                 <property name="ellipsize">end</property>
+                                <property name="xalign">1</property>
                                 <style>
-                                  <class name="header-value"/>
+                                  <class name="geary-header-label"/>
                                 </style>
                               </object>
                               <packing>
-                                <property name="expand">True</property>
-                                <property name="fill">True</property>
+                                <property name="expand">False</property>
+                                <property name="fill">False</property>
                                 <property name="position">1</property>
                               </packing>
                             </child>
                           </object>
                           <packing>
-                            <property name="expand">False</property>
+                            <property name="expand">True</property>
                             <property name="fill">True</property>
                             <property name="position">0</property>
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkBox" id="to_header">
+                          <object class="GtkLabel" id="subject">
+                            <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <child>
-                              <object class="GtkLabel" id="to_label">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">To:</property>
-                                <property name="xalign">1</property>
-                                <style>
-                                  <class name="header-label"/>
-                                  <class name="dim-label"/>
-                                </style>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">0</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel" id="to_text">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="halign">start</property>
-                                <property name="label" translatable="yes">To &lt;email&gt;</property>
-                                <property name="selectable">True</property>
-                                <property name="ellipsize">end</property>
-                              </object>
-                              <packing>
-                                <property name="expand">True</property>
-                                <property name="fill">True</property>
-                                <property name="position">1</property>
-                              </packing>
-                            </child>
+                            <property name="halign">start</property>
+                            <property name="valign">baseline</property>
+                            <property name="label" translatable="yes">Subject</property>
+                            <property name="wrap">True</property>
+                            <property name="selectable">True</property>
+                            <property name="xalign">0</property>
                             <style>
-                              <class name="empty"/>
+                              <class name="geary-header-label"/>
                             </style>
                           </object>
                           <packing>
-                            <property name="expand">False</property>
+                            <property name="expand">True</property>
                             <property name="fill">True</property>
                             <property name="position">1</property>
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkBox" id="cc_header">
+                          <object class="GtkBox" id="to_header">
                             <property name="can_focus">False</property>
+                            <property name="baseline_position">top</property>
                             <child>
-                              <object class="GtkLabel" id="cc_label">
+                              <object class="GtkLabel" id="to_label">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">Cc:</property>
-                                <property name="xalign">1</property>
+                                <property name="label" translatable="yes">To:</property>
+                                <property name="yalign">0</property>
                                 <style>
-                                  <class name="header-label"/>
                                   <class name="dim-label"/>
+                                  <class name="geary-header-label"/>
                                 </style>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
-                                <property name="fill">True</property>
+                                <property name="fill">False</property>
                                 <property name="position">0</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkLabel" id="cc_text">
+                              <object class="GtkFlowBox" id="to">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="halign">start</property>
-                                <property name="label" translatable="yes">CC &lt;email&gt;</property>
-                                <property name="selectable">True</property>
-                                <property name="ellipsize">end</property>
+                                <property name="can_focus">True</property>
+                                <property name="valign">start</property>
+                                <property name="hexpand">False</property>
+                                <property name="column_spacing">2</property>
+                                <property name="min_children_per_line">1</property>
+                                <property name="max_children_per_line">4</property>
+                                <property name="selection_mode">none</property>
                               </object>
                               <packing>
                                 <property name="expand">True</property>
@@ -256,44 +267,44 @@
                                 <property name="position">1</property>
                               </packing>
                             </child>
-                            <style>
-                              <class name="empty"/>
-                            </style>
                           </object>
                           <packing>
-                            <property name="expand">False</property>
+                            <property name="expand">True</property>
                             <property name="fill">True</property>
                             <property name="position">2</property>
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkBox" id="bcc_header">
+                          <object class="GtkBox" id="cc_header">
                             <property name="can_focus">False</property>
+                            <property name="baseline_position">top</property>
                             <child>
-                              <object class="GtkLabel" id="bcc_label">
+                              <object class="GtkLabel" id="cc_label">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">Bcc:</property>
-                                <property name="xalign">1</property>
+                                <property name="label" translatable="yes">Cc:</property>
+                                <property name="yalign">0</property>
                                 <style>
-                                  <class name="header-label"/>
                                   <class name="dim-label"/>
+                                  <class name="geary-header-label"/>
                                 </style>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
-                                <property name="fill">True</property>
+                                <property name="fill">False</property>
                                 <property name="position">0</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkLabel" id="bcc_text">
+                              <object class="GtkFlowBox" id="cc">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="halign">start</property>
-                                <property name="label" translatable="yes">BCC &lt;email&gt;</property>
-                                <property name="selectable">True</property>
-                                <property name="ellipsize">end</property>
+                                <property name="can_focus">True</property>
+                                <property name="valign">start</property>
+                                <property name="hexpand">False</property>
+                                <property name="column_spacing">2</property>
+                                <property name="min_children_per_line">1</property>
+                                <property name="max_children_per_line">4</property>
+                                <property name="selection_mode">none</property>
                               </object>
                               <packing>
                                 <property name="expand">True</property>
@@ -301,44 +312,44 @@
                                 <property name="position">1</property>
                               </packing>
                             </child>
-                            <style>
-                              <class name="empty"/>
-                            </style>
                           </object>
                           <packing>
-                            <property name="expand">False</property>
+                            <property name="expand">True</property>
                             <property name="fill">True</property>
                             <property name="position">3</property>
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkBox" id="subject_header">
+                          <object class="GtkBox" id="bcc_header">
                             <property name="can_focus">False</property>
+                            <property name="baseline_position">top</property>
                             <child>
-                              <object class="GtkLabel" id="subject_label">
+                              <object class="GtkLabel" id="bcc_label">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">Subject:</property>
-                                <property name="xalign">1</property>
+                                <property name="label" translatable="yes">Bcc:</property>
+                                <property name="yalign">0</property>
                                 <style>
-                                  <class name="header-label"/>
                                   <class name="dim-label"/>
+                                  <class name="geary-header-label"/>
                                 </style>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
-                                <property name="fill">True</property>
+                                <property name="fill">False</property>
                                 <property name="position">0</property>
                               </packing>
                             </child>
                             <child>
-                              <object class="GtkLabel" id="subject_text">
+                              <object class="GtkFlowBox" id="bcc">
                                 <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="halign">start</property>
-                                <property name="label" translatable="yes">Subject</property>
-                                <property name="selectable">True</property>
-                                <property name="ellipsize">end</property>
+                                <property name="can_focus">True</property>
+                                <property name="valign">start</property>
+                                <property name="hexpand">False</property>
+                                <property name="column_spacing">2</property>
+                                <property name="min_children_per_line">2</property>
+                                <property name="max_children_per_line">4</property>
+                                <property name="selection_mode">none</property>
                               </object>
                               <packing>
                                 <property name="expand">True</property>
@@ -346,64 +357,19 @@
                                 <property name="position">1</property>
                               </packing>
                             </child>
-                            <style>
-                              <class name="empty"/>
-                            </style>
                           </object>
                           <packing>
-                            <property name="expand">False</property>
+                            <property name="expand">True</property>
                             <property name="fill">True</property>
                             <property name="position">4</property>
                           </packing>
                         </child>
-                        <child>
-                          <object class="GtkBox" id="date_header">
-                            <property name="can_focus">False</property>
-                            <child>
-                              <object class="GtkLabel" id="date_label">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="label" translatable="yes">Date:</property>
-                                <property name="xalign">1</property>
-                                <style>
-                                  <class name="header-label"/>
-                                  <class name="dim-label"/>
-                                </style>
-                              </object>
-                              <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">True</property>
-                                <property name="position">0</property>
-                              </packing>
-                            </child>
-                            <child>
-                              <object class="GtkLabel" id="date_text">
-                                <property name="visible">True</property>
-                                <property name="can_focus">False</property>
-                                <property name="halign">start</property>
-                                <property name="label" translatable="yes">1/1/1970	</property>
-                                <property name="selectable">True</property>
-                                <property name="ellipsize">end</property>
-                              </object>
-                              <packing>
-                                <property name="expand">True</property>
-                                <property name="fill">True</property>
-                                <property name="position">1</property>
-                              </packing>
-                            </child>
-                            <style>
-                              <class name="empty"/>
-                            </style>
-                          </object>
-                          <packing>
-                            <property name="expand">False</property>
-                            <property name="fill">True</property>
-                            <property name="position">5</property>
-                          </packing>
-                        </child>
+                        <style>
+                          <class name="geary-headers"/>
+                        </style>
                       </object>
                       <packing>
-                        <property name="expand">False</property>
+                        <property name="expand">True</property>
                         <property name="fill">True</property>
                         <property name="position">1</property>
                       </packing>
@@ -575,17 +541,6 @@
       </packing>
     </child>
   </template>
-  <object class="GtkSizeGroup" id="header_labels_sizegroup">
-    <property name="ignore_hidden">True</property>
-    <widgets>
-      <widget name="from_label"/>
-      <widget name="to_label"/>
-      <widget name="cc_label"/>
-      <widget name="bcc_label"/>
-      <widget name="subject_label"/>
-      <widget name="date_label"/>
-    </widgets>
-  </object>
   <object class="GtkPopover" id="link_popover">
     <property name="can_focus">False</property>
     <property name="relative_to">body_box</property>

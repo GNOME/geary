@@ -79,26 +79,28 @@ public class ConversationMessage : Gtk.Box {
     [GtkChild]
     private Gtk.Image preview_avatar;
     [GtkChild]
-    private Gtk.Label from_preview;
+    private Gtk.Label preview_from;
     [GtkChild]
-    private Gtk.Label body_preview;
+    private Gtk.Label preview_date;
+    [GtkChild]
+    private Gtk.Label preview_body;
 
     [GtkChild]
     private Gtk.Revealer header_revealer;
     [GtkChild]
     private Gtk.Image header_avatar;
     [GtkChild]
-    private Gtk.Box from_header;
+    private Gtk.FlowBox from;
+    [GtkChild]
+    private Gtk.Label subject;
+    [GtkChild]
+    private Gtk.Label date;
     [GtkChild]
     private Gtk.Box to_header;
     [GtkChild]
     private Gtk.Box cc_header;
     [GtkChild]
     private Gtk.Box bcc_header;
-    [GtkChild]
-    private Gtk.Box subject_header;
-    [GtkChild]
-    private Gtk.Box date_header;
 
     [GtkChild]
     private Gtk.Revealer body_revealer;
@@ -201,35 +203,30 @@ public class ConversationMessage : Gtk.Box {
 
         // Preview headers
 
-        from_preview.set_text(format_addresses(message.from));
-
-        string preview_str = message.get_preview();
-        preview_str = Geary.String.reduce_whitespace(preview_str);
-        body_preview.set_text(preview_str);
-
-        // Full headers
-
-        set_header_text(from_header, format_addresses(message.from));
-        if (message.to != null) {
-            set_header_text(to_header, format_addresses(message.to));
-        }
-        if (message.cc != null) {
-            set_header_text(cc_header, format_addresses(message.cc));
-        }
-        if (message.bcc != null) {
-            set_header_text(bcc_header, format_addresses(message.bcc));
-        }
-        if (message.subject != null) {
-            set_header_text(subject_header, message.subject.value);
-        }
+        string? message_date = null;
         if (message.date != null) {
             Date.ClockFormat clock_format =
                 GearyApplication.instance.config.clock_format;
-            set_header_text(
-                date_header,
-                Date.pretty_print_verbose(message.date.value, clock_format)
-            );
+            message_date = Date.pretty_print(message.date.value, clock_format);
         }
+
+        preview_from.set_markup(format_sender_preview(message.from));
+        preview_date.set_text(message_date ?? "");
+        string preview_str = message.get_preview();
+        preview_str = Geary.String.reduce_whitespace(preview_str);
+        preview_body.set_text(preview_str);
+
+        // Full headers
+
+        set_flowbox_addresses(from, message.from, "bold");
+        date.set_text(message_date ?? "");
+        if (message.subject != null) {
+            subject.set_text(message.subject.value);
+            subject.set_visible(true);
+        }
+        set_header_addresses(to_header, message.to);
+        set_header_addresses(cc_header, message.cc);
+        set_header_addresses(bcc_header, message.bcc);
 
         // Web view
 
@@ -376,24 +373,75 @@ public class ConversationMessage : Gtk.Box {
         }
     }
 
-    // Appends email address fields to the header.
-    private string format_addresses(Geary.RFC822.MailboxAddresses? addresses) {
+    private void set_header_addresses(Gtk.Box header,
+                                      Geary.RFC822.MailboxAddresses? addresses) {
+        if (addresses != null && addresses.size > 0) {
+            Gtk.FlowBox box = header.get_children().nth(1).data as Gtk.FlowBox;
+            if (box != null) {
+                set_flowbox_addresses(box, addresses);
+            }
+            header.set_visible(true);
+        }
+    }
+
+    private void set_flowbox_addresses(Gtk.FlowBox address_box,
+                                       Geary.RFC822.MailboxAddresses? addresses,
+                                       string weight = "normal") {
+        string dim_color = GtkUtil.pango_color_from_theme(
+            address_box.get_style_context(), "insensitive_fg_color"
+        );
+        foreach (Geary.RFC822.MailboxAddress addr in addresses) {
+            Gtk.Label label = new Gtk.Label(null);
+            //label.set_halign(Gtk.Align.START);
+            //label.set_valign(Gtk.Align.BASELINE);
+            //label.set_ellipsize(Pango.EllipsizeMode.END);
+            //label.set_xalign(0.0f);
+
+            string name = Geary.HTML.escape_markup(addr.name);
+            string address = Geary.HTML.escape_markup(addr.address);
+            if (!Geary.String.is_empty(addr.name) && name != address) {
+                label.set_markup(
+                    "<span weight=\"%s\">%s</span> <span color=\"%s\">%s</span>"
+                    .printf(weight, name, dim_color, address)
+                    );
+            } else {
+                label.set_markup(
+                    "<span weight=\"%s\">%s</span>".printf(weight, address)
+                    );
+            }
+
+            Gtk.FlowBoxChild child = new Gtk.FlowBoxChild();
+            child.add(label);
+            child.set_halign(Gtk.Align.START);
+            //child.set_valign(Gtk.Align.START);
+            child.show_all();
+
+            address_box.add(child);
+        }
+    }
+
+    private string format_sender_preview(Geary.RFC822.MailboxAddresses? addresses) {
+        string dim_color = GtkUtil.pango_color_from_theme(
+            get_style_context(), "insensitive_fg_color"
+        );
         int i = 0;
         string value = "";
         Gee.List<Geary.RFC822.MailboxAddress> list = addresses.get_all();
-        foreach (Geary.RFC822.MailboxAddress a in list) {
-            value += a.to_string();
+        foreach (Geary.RFC822.MailboxAddress addr in list) {
+            string address = Geary.HTML.escape_markup(addr.address);
+            if (!Geary.String.is_empty(addr.name)) {
+                string name = Geary.HTML.escape_markup(addr.name);
+                value += "<span weight=\"bold\">%s</span> <span color=\"%s\">%s</span>".printf(
+                    name, dim_color, address
+                );
+            } else {
+                value += "<span weight=\"bold\">%s</span>".printf(address);
+            }
 
             if (++i < list.size)
                 value += ", ";
         }
-
         return value;
-    }
-
-    private static void set_header_text(Gtk.Box header, string text) {
-        ((Gtk.Label) header.get_children().nth(1).data).set_text(text);
-        header.set_visible(true);
     }
 
     private void set_avatar(uint8[] image_data) {

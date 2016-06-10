@@ -89,8 +89,12 @@ row.geary-folder-popover-list-row > label {
 #ConversationMessage {
   padding: 12px;
 }
-#ConversationMessage .header-label {
+#ConversationMessage .geary-header-label {
   margin-right: 6px;
+}
+#ConversationMessage .geary-headers flowboxchild {
+  margin: 0;
+  padding: 0;
 }
 #ConversationMessage separator {
   margin: 12px 0;
