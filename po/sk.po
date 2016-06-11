@@ -10,8 +10,8 @@ msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2016-06-04 05:28+0000\n"
-"PO-Revision-Date: 2016-06-04 09:52+0200\n"
+"POT-Creation-Date: 2016-06-10 20:31+0000\n"
+"PO-Revision-Date: 2016-06-11 07:54+0200\n"
 "Last-Translator: Dušan Kazik <prescott66@gmail.com>\n"
 "Language-Team: Slovak (http://www.transifex.com/projects/p/geary/language/"
 "sk/)\n"
@@ -617,14 +617,14 @@ msgstr ""
 "\n"
 "Prosím, skontrolujte vaše sieťové pripojenie a znovu spustite program Geary."
 
-#: ../src/client/application/geary-controller.vala:1697
+#: ../src/client/application/geary-controller.vala:1698
 #, c-format
 msgid "About %s"
 msgstr "O %s"
 
 #. / Translators: add your name and email address to receive credit in the About dialog
 #. / For example: Yamada Taro <yamada.taro@example.com>
-#: ../src/client/application/geary-controller.vala:1700
+#: ../src/client/application/geary-controller.vala:1701
 msgid "translator-credits"
 msgstr "Dušan Kazik <prescott66@gmail.com>"
 
@@ -808,29 +808,29 @@ msgstr "Vybr_ať všetko"
 msgid "_Keep"
 msgstr "_Ponechať"
 
-#: ../src/client/composer/composer-widget.vala:72
+#: ../src/client/composer/composer-widget.vala:73
 msgid "Saved"
 msgstr "Uložené"
 
-#: ../src/client/composer/composer-widget.vala:73
+#: ../src/client/composer/composer-widget.vala:74
 msgid "Saving"
 msgstr "Ukladá sa"
 
-#: ../src/client/composer/composer-widget.vala:74
+#: ../src/client/composer/composer-widget.vala:75
 msgid "Error saving"
 msgstr "Chyba pri ukladaní"
 
-#: ../src/client/composer/composer-widget.vala:75
+#: ../src/client/composer/composer-widget.vala:76
 msgid "Press Backspace to delete quote"
 msgstr "Stlačte kláves Backspace na odstránenie citácie"
 
-#: ../src/client/composer/composer-widget.vala:76
+#: ../src/client/composer/composer-widget.vala:77
 msgid "New Message"
 msgstr "Nová správa"
 
 #. A list of keywords, separated by pipe ("|") characters, that suggest an attachment; since
 #. this is full-word checking, include all variants of each word.  No spaces are allowed.
-#: ../src/client/composer/composer-widget.vala:137
+#: ../src/client/composer/composer-widget.vala:138
 msgid ""
 "attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|"
 "enclosing|encloses|enclosure|enclosures"
@@ -839,95 +839,100 @@ msgstr ""
 "priloženým|priložených|priloženého|prikladám|prikladanú|prikladané|"
 "prikladaný|prikladaným|prikladanému"
 
-#: ../src/client/composer/composer-widget.vala:1101
-#: ../src/client/composer/composer-widget.vala:1105
+#: ../src/client/composer/composer-widget.vala:1109
+#: ../src/client/composer/composer-widget.vala:1113
 msgid "Do you want to discard this message?"
 msgstr "Chcete zahodiť túto správu?"
 
-#: ../src/client/composer/composer-widget.vala:1261
+#: ../src/client/composer/composer-widget.vala:1269
 msgid "Send message with an empty subject and body?"
 msgstr "Odoslať správu bez predmetu a s prázdnym telom?"
 
-#: ../src/client/composer/composer-widget.vala:1263
+#: ../src/client/composer/composer-widget.vala:1271
 msgid "Send message with an empty subject?"
 msgstr "Odoslať správu bez predmetu?"
 
-#: ../src/client/composer/composer-widget.vala:1265
+#: ../src/client/composer/composer-widget.vala:1273
 msgid "Send message with an empty body?"
 msgstr "Odoslať správu s prázdnym telom?"
 
-#: ../src/client/composer/composer-widget.vala:1267
+#: ../src/client/composer/composer-widget.vala:1275
 msgid "Send message without an attachment?"
 msgstr "Odoslať správu bez prílohy?"
 
-#: ../src/client/composer/composer-widget.vala:1529
+#: ../src/client/composer/composer-widget.vala:1537
 msgid "Cannot add attachment"
 msgstr "Nedá sa pridať príloha"
 
-#: ../src/client/composer/composer-widget.vala:1540
+#: ../src/client/composer/composer-widget.vala:1548
 #, c-format
 msgid "\"%s\" could not be found."
 msgstr "„%s“ sa nepodarilo nájsť."
 
-#: ../src/client/composer/composer-widget.vala:1547
+#: ../src/client/composer/composer-widget.vala:1555
 #, c-format
 msgid "\"%s\" is a folder."
 msgstr "„%s“ je priečinok."
 
-#: ../src/client/composer/composer-widget.vala:1554
+#: ../src/client/composer/composer-widget.vala:1562
 #, c-format
 msgid "\"%s\" is an empty file."
 msgstr "„%s“ je prázdny súbor."
 
-#: ../src/client/composer/composer-widget.vala:1568
+#: ../src/client/composer/composer-widget.vala:1576
 #, c-format
 msgid "\"%s\" could not be opened for reading."
 msgstr "„%s“ sa nepodarilo otvoriť na čítanie."
 
-#: ../src/client/composer/composer-widget.vala:1575
+#: ../src/client/composer/composer-widget.vala:1583
 #, c-format
 msgid "\"%s\" already attached for delivery."
 msgstr "„%s“ je už priložený na doručenie."
 
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
-#: ../src/client/composer/composer-widget.vala:1584
+#: ../src/client/composer/composer-widget.vala:1592
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: ../src/client/composer/composer-widget.vala:1645
+#: ../src/client/composer/composer-widget.vala:1653
 msgid "To: "
 msgstr "Pre: "
 
-#: ../src/client/composer/composer-widget.vala:1648
+#: ../src/client/composer/composer-widget.vala:1656
 msgid "Cc: "
 msgstr "Kópia: "
 
-#: ../src/client/composer/composer-widget.vala:1651
+#: ../src/client/composer/composer-widget.vala:1659
 msgid "Bcc: "
 msgstr "Skrytá kópia: "
 
-#: ../src/client/composer/composer-widget.vala:1654
+#: ../src/client/composer/composer-widget.vala:1662
 msgid "Reply-To: "
 msgstr "Komu odpovedať: "
 
-#: ../src/client/composer/composer-widget.vala:1887
+#: ../src/client/composer/composer-widget.vala:1895
 msgid "Select Color"
 msgstr "Výber farby"
 
 #. Displayed in the From dropdown to indicate an "alternate email address"
 #. for an account.  The first printf argument will be the alternate email
 #. address, and the second will be the account's primary email address.
-#: ../src/client/composer/composer-widget.vala:2322
+#: ../src/client/composer/composer-widget.vala:2342
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%1$s prostredníctvom účtu %2$s"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: ../src/client/composer/composer-widget.vala:2364
+#: ../src/client/composer/composer-widget.vala:2384
 msgid "_From:"
 msgstr "Od:"
+
+# placeholder
+#: ../src/client/composer/spell-check-popover.vala:210
+msgid "Search for more languages"
+msgstr "Vyhľadajte viac jazykov"
 
 #: ../src/client/conversation-list/formatted-conversation-data.vala:11
 msgid "Me"
@@ -1474,7 +1479,7 @@ msgstr "Nič"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: ../src/engine/imap-db/imap-db-account.vala:98
+#: ../src/engine/imap-db/imap-db-account.vala:99
 msgctxt "Search operator"
 msgid "attachment"
 msgstr "príloha"
@@ -1487,7 +1492,7 @@ msgstr "príloha"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: ../src/engine/imap-db/imap-db-account.vala:107
+#: ../src/engine/imap-db/imap-db-account.vala:108
 msgctxt "Search operator"
 msgid "bcc"
 msgstr "skrytá_kópia"
@@ -1499,7 +1504,7 @@ msgstr "skrytá_kópia"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: ../src/engine/imap-db/imap-db-account.vala:115
+#: ../src/engine/imap-db/imap-db-account.vala:116
 msgctxt "Search operator"
 msgid "body"
 msgstr "telo"
@@ -1512,7 +1517,7 @@ msgstr "telo"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: ../src/engine/imap-db/imap-db-account.vala:124
+#: ../src/engine/imap-db/imap-db-account.vala:125
 msgctxt "Search operator"
 msgid "cc"
 msgstr "kópia"
@@ -1525,7 +1530,7 @@ msgstr "kópia"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: ../src/engine/imap-db/imap-db-account.vala:133
+#: ../src/engine/imap-db/imap-db-account.vala:134
 msgctxt "Search operator"
 msgid "from"
 msgstr "od"
@@ -1537,7 +1542,7 @@ msgstr "od"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: ../src/engine/imap-db/imap-db-account.vala:141
+#: ../src/engine/imap-db/imap-db-account.vala:142
 msgctxt "Search operator"
 msgid "is"
 msgstr "je"
@@ -1549,7 +1554,7 @@ msgstr "je"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary
 #. User Guide.
-#: ../src/engine/imap-db/imap-db-account.vala:149
+#: ../src/engine/imap-db/imap-db-account.vala:150
 msgctxt "Search operator"
 msgid "subject"
 msgstr "predmet"
@@ -1562,20 +1567,33 @@ msgstr "predmet"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: ../src/engine/imap-db/imap-db-account.vala:158
+#: ../src/engine/imap-db/imap-db-account.vala:159
 msgctxt "Search operator"
 msgid "to"
 msgstr "pre"
 
-#. Can be typed like "from:me" or "cc:me", etc. as a shorthand
-#. to find mail to or from yourself in search.
+#. Can be typed in the search box after "to:", "cc:" and
+#. "bcc:" e.g.: "to:me". Matches conversations that are
+#. addressed to the user.
 #.
 #. The translated string must be a single word (use '-', '_'
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: ../src/engine/imap-db/imap-db-account.vala:178
-msgctxt "Addressable search operator value"
+#: ../src/engine/imap-db/imap-db-account.vala:180
+msgctxt "Search operator value - mail addressed to the user"
+msgid "me"
+msgstr "ja"
+
+#. Can be typed in the search box after "from:" i.e.:
+#. "from:me". Matches conversations were sent by the user.
+#.
+#. The translated string must be a single word (use '-', '_'
+#. or similar to combine words into one), should be short, and
+#. also match the translation in "search.page" of the Geary User
+#. Guide.
+#: ../src/engine/imap-db/imap-db-account.vala:192
+msgctxt "Search operator value - mail sent by the user"
 msgid "me"
 msgstr "ja"
 
@@ -1586,7 +1604,7 @@ msgstr "ja"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: ../src/engine/imap-db/imap-db-account.vala:190
+#: ../src/engine/imap-db/imap-db-account.vala:204
 msgctxt "'is:' search operator value"
 msgid "read"
 msgstr "prečítaná"
@@ -1599,7 +1617,7 @@ msgstr "prečítaná"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: ../src/engine/imap-db/imap-db-account.vala:201
+#: ../src/engine/imap-db/imap-db-account.vala:215
 msgctxt "'is:' search operator value"
 msgid "starred"
 msgstr "označená_hviezdičkou"
@@ -1611,7 +1629,7 @@ msgstr "označená_hviezdičkou"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: ../src/engine/imap-db/imap-db-account.vala:211
+#: ../src/engine/imap-db/imap-db-account.vala:225
 msgctxt "'is:' search operator value"
 msgid "unread"
 msgstr "neprečítaná"
@@ -1619,21 +1637,21 @@ msgstr "neprečítaná"
 #. List of folder names to match for Drafts, separated by |.  Please add localized common
 #. names for the Drafts folder, leaving in the English names as well.  The first in the list
 #. will be the default, so please add the most common localized name to the front.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:575
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:587
 msgid "Drafts | Draft"
 msgstr "Koncepty | Koncept"
 
 #. List of folder names to match for Sent Mail, separated by |.  Please add localized common
 #. names for the Sent Mail folder, leaving in the English names as well.  The first in the list
 #. will be the default, so please add the most common localized name to the front.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:580
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:592
 msgid "Sent | Sent Mail | Sent Email | Sent E-Mail"
 msgstr "Odoslané správy | Odoslaná poštal | Odoslané emaily | Odoslané E-Maily"
 
 #. List of folder names to match for Spam, separated by |.  Please add localized common
 #. names for the Spam folder, leaving in the English names as well.  The first in the list
 #. will be the default, so please add the most common localized name to the front.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:585
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:597
 msgid ""
 "Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email "
 "| Bulk E-Mail"
@@ -1642,14 +1660,14 @@ msgstr "Nevyžiadaná pošta | Spam | Nevyžiadané emaily"
 #. List of folder names to match for Trash, separated by |.  Please add localized common
 #. names for the Trash folder, leaving in the English names as well.  The first in the list
 #. will be the default, so please add the most common localized name to the front.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:590
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:602
 msgid "Trash | Rubbish | Rubbish Bin"
 msgstr "Kôš"
 
 #. List of folder names to match for Archive, separated by |.  Please add localized common
 #. names for the Trash folder, leaving in the English names as well.  The first in the list
 #. will be the default, so please add the most common localized name to the front.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:595
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:607
 msgid "Archive | Archives"
 msgstr "Archív | Archívy | Archivované"
 
@@ -1945,45 +1963,58 @@ msgstr "_Priložiť súbor"
 msgid "Attach File"
 msgstr "Priloží súbor"
 
+# tooltip
 #: ../ui/composer.glade.h:49
+msgid "Attach File (Ctrl+T)"
+msgstr "Priloží súbor (Ctrl+T)"
+
+#: ../ui/composer.glade.h:50
 msgid "_Include Original Attachments"
 msgstr "Zahrnúť _pôvodné prílohy"
 
-#: ../ui/composer.glade.h:50
+#: ../ui/composer.glade.h:51
 msgid "Include Original Attachments"
 msgstr "zahrnie pôvodné prílohy"
 
-#. Address(es) e-mail is to be sent to
 #: ../ui/composer.glade.h:52
+msgid "Select spell checking language"
+msgstr "Vybrať jazyk kontroly pravopisu"
+
+#: ../ui/composer.glade.h:53
+msgid "Spelling language"
+msgstr "Pravopis jazyka"
+
+#. Address(es) e-mail is to be sent to
+#: ../ui/composer.glade.h:55
 msgid "_To"
 msgstr "_Pre"
 
-#: ../ui/composer.glade.h:53
+#: ../ui/composer.glade.h:56
 msgid "_Cc"
 msgstr "_Kópia"
 
-#: ../ui/composer.glade.h:54
+#: ../ui/composer.glade.h:57
 msgid "_Subject"
 msgstr "P_redmet"
 
-#: ../ui/composer.glade.h:55
+#: ../ui/composer.glade.h:58
 msgid "_Bcc"
 msgstr "_Skrytá kópia"
 
-#: ../ui/composer.glade.h:56
+#: ../ui/composer.glade.h:59
 msgid "_Reply-To"
 msgstr "_Komu odpovedať"
 
 #. Geary account mail will be sent from
-#: ../ui/composer.glade.h:58
+#: ../ui/composer.glade.h:61
 msgid "From"
 msgstr "Od"
 
-#: ../ui/composer.glade.h:59
+#: ../ui/composer.glade.h:62
 msgid "Drop files here"
 msgstr "Sem pustite súbory"
 
-#: ../ui/composer.glade.h:60
+#: ../ui/composer.glade.h:63
 msgid "To add them as attachments"
 msgstr "Na ich pridanie do prílohy"
 
