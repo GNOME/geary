@@ -8,8 +8,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: geary master\n"
-"POT-Creation-Date: 2016-05-09 05:51+0000\n"
-"PO-Revision-Date: 2016-05-12 09:25+0200\n"
+"POT-Creation-Date: 2016-06-11 05:56+0000\n"
+"PO-Revision-Date: 2016-06-13 16:10+0200\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: Español; Castellano <gnome-es-list@gnome.org>\n"
 "Language: es\n"
@@ -654,28 +654,25 @@ msgstr "está:leído"
 
 #: C/search.page:48(p)
 msgid "Finds messages that have been marked as read."
-msgstr ""
+msgstr "Buscar mensajes marcados como leídos."
 
 #: C/search.page:51(input)
 msgid "is:starred"
-msgstr "está:destacado"
+msgstr "está:favorito"
 
 #: C/search.page:52(p)
 msgid "Finds messages that have been marked as starred."
-msgstr ""
+msgstr "Buscar mensajes marcados como favoritos."
 
 #: C/search.page:55(input)
 #| msgid "Mark unread"
 msgid "is:unread"
-msgstr "está:sin leer"
+msgstr "está:no leído"
 
 #: C/search.page:56(p)
-#, fuzzy
 #| msgid "Finds messages where <var>sender</var> matches the From header."
 msgid "Finds messages that have been marked as not read."
-msgstr ""
-"Encuentra mensajes donde <var>remitente</var> coincide el encabezado De "
-"parte de."
+msgstr "Buscar mensajes marcados como no leídos."
 
 #: C/search.page:59(input)
 msgid "subject:<placeholder-1/>"
@@ -753,7 +750,7 @@ msgstr ""
 
 #: C/preferences.page:31(gui)
 msgid "Use three pane view"
-msgstr ""
+msgstr "Usar la vista de tres paneles"
 
 #: C/preferences.page:32(p)
 msgid ""
@@ -797,7 +794,6 @@ msgid "Show notifications for new mail"
 msgstr "Mostrar notificaciones de mensajes nuevos"
 
 #: C/preferences.page:59(p)
-#, fuzzy
 #| msgid ""
 #| "When set, Geary displays a <em>notification</em> each time a new message "
 #| "arrives. Notifications are displayed in a system-dependent manner. On "
@@ -813,14 +809,13 @@ msgstr ""
 "Cuando está configurado, Geary muestra una <em>notificación</em> cada vez "
 "que un mensaje nuevo llega. Las notificaciones se muestran de una manera "
 "dependiente del sistema. En GNOME Shell, las notificaciones se muestran en "
-"la parte inferior de la pantalla. En Ubuntu Unity, las notificaciones se "
-"muestran en la parte superior derecha de la pantalla."
+"la parte inferior de la pantalla (versiones antiguas). En Ubuntu Unity, las "
+"notificaciones se muestran en la parte superior derecha de la pantalla."
 
 #: C/preferences.page:65(gui)
-#, fuzzy
 #| msgid "Show notifications for new mail"
 msgid "Always watch for new mail"
-msgstr "Mostrar notificaciones de mensajes nuevos"
+msgstr "Buscar siempre correo nuevo"
 
 #: C/preferences.page:66(p)
 msgid ""
@@ -919,6 +914,12 @@ msgid ""
 "first conversation in a range, then hold down <key>Shift</key> and click the "
 "last conversation."
 msgstr ""
+"Algunos comandos en Geary pueden ejecutarse sobre un grupo de "
+"conversaciones. Para seleccionar varias conversaciones, mantenga pulsada la "
+"tecla <key>Ctrl</key> y pulse cada conversación de una en una en la lista de "
+"conversaciones. Alternativamente, pulse la primera conversación en un rango, "
+"mantenga pulsada la tecla <key>Mayús</key> y luego pulse en la última "
+"conversación."
 
 #: C/overview.page:44(title)
 msgid "Message area"
@@ -929,6 +930,8 @@ msgid ""
 "The <em>message area</em> displays all messages in the selected "
 "conversation, with the oldest message at the top."
 msgstr ""
+"El <em>área de mensajes</em> muestra todos los mensajes en la conversación "
+"seleccionada, con el mensaje más antiguo en la parte superior."
 
 #: C/overview.page:47(p)
 msgid ""
@@ -936,6 +939,9 @@ msgid ""
 "lets you open the <em>message menu</em> with commands that operate on the "
 "message."
 msgstr ""
+"En la parte superior derecha de cada mensaje, Geary muestra una flecha "
+"desplegable que le permite abrir el <em>menú del mensaje</em>, con acciones "
+"para realizar sobre el mensaje."
 
 #: C/overview.page:49(p)
 msgid ""
@@ -971,6 +977,11 @@ msgid ""
 "servers. At this time Geary is still missing numerous features including "
 "offline mode."
 msgstr ""
+"Geary está todavía en su desarrollo inicial. Soporta IMAP y se ha probado "
+"con Gmail, Yahoo y el servidor de correo libre Dovecot. También se "
+"proporciona soporte experimental para Outlook.com. Geary puede que no "
+"funcione todavía del todo bien con algunos servidores IMAP. En este momento, "
+"a Geary le falta varias características, incluyendo el modo desconectado."
 
 #: C/limits.page:14(p)
 msgid ""
@@ -978,6 +989,9 @@ msgid ""
 "please visit Geary's <link href=\"https://wiki.gnome.org/Apps/Geary\">wiki "
 "page</link>."
 msgstr ""
+"Para aprender más sobre las características en las que se está trabajando o "
+"sobre el futuro de Geary, visite <link href=\"https://wiki.gnome.org/Apps/"
+"Geary\">página del wiki</link>."
 
 #: C/label.page:10(title)
 msgid "Label or move a conversation"
@@ -1039,12 +1053,16 @@ msgid ""
 "Click the <gui>Move</gui> button on the toolbar and select a folder or label "
 "from the resulting drop-down menu."
 msgstr ""
+"Pulse el botón <gui>Mover</gui> en la barra de herramientas y elija una "
+"carpeta o etiqueta en el menú desplegable que aparece."
 
 #: C/label.page:31(p)
 msgid ""
 "Drag the conversation(s) from the conversation list to the folder or label "
 "in the sidebar."
 msgstr ""
+"Arrastre las conversaciones desde la lista de conversaciones a la carpeta o "
+"etiqueta en la barra lateral."
 
 #. When image changes, this message will be marked fuzzy or untranslated for you.
 #. It doesn't matter what you translate it to: it's not used at all.
@@ -1076,6 +1094,8 @@ msgstr "¿Cree que ha encontrado un error?"
 msgid ""
 "If you suspect you've found a bug in Geary, follow these steps to report it:"
 msgstr ""
+"Si cree que ha encontrado un error en Geary, siga los siguientes pasos para "
+"informar sobre él:"
 
 #: C/bugs.page:11(p)
 msgid ""
@@ -1083,6 +1103,9 @@ msgid ""
 "product=geary\">bug database</link> to see if someone else has reported the "
 "bug."
 msgstr ""
+"Busque en la <link href=\"https://bugzilla.gnome.org/browse.cgi?product=geary"
+"\">base de datos de errores</link> de Geary para ver si alguien ha reportado "
+"el mismo error."
 
 #: C/bugs.page:13(p)
 msgid ""
@@ -1093,12 +1116,20 @@ msgid ""
 "Don't forget to include details about your operating system and what version "
 "of Geary you're running."
 msgstr ""
+"¿No encuentra su error en la lista? Enhorabuena, ha encontrado uno nuevo. "
+"Para crear un informe de error, cree una cuenta en el Bugzilla de GNOME y "
+"<link href=\"https://bugzilla.gnome.org/enter_bug.cgi?product=geary\">envíe "
+"un nuevo informe de error</link>. Sea tan específico como pueda y describa "
+"los pasos para reproducirlo. No olvide incluir detalles sobre su sistema "
+"operativo y sobre la versión de Geary que está usando."
 
 #: C/bugs.page:18(p)
 msgid ""
 "For general inquiries, please join the <link href=\"https://mail.gnome.org/"
 "mailman/listinfo/geary-list\"> Geary mailing list</link>."
 msgstr ""
+"Para consultas generales, suscríbase a la <link href=\"https://mail.gnome."
+"org/mailman/listinfo/geary-list\">lista de correo de Geary</link>."
 
 #: C/archive.page:10(title)
 msgid "Delete or archive a message"
@@ -1110,6 +1141,10 @@ msgid ""
 "messages. The <gui>Archive</gui> toolbar button archives the selected "
 "conversation(s). Archived messages appear in the <gui>All Mail</gui> folder."
 msgstr ""
+"Cuando usa Geary con una cuenta de Gmail, Geary le permite <em>archivar</em> "
+"los mensajes. El botón <gui>Archivar</gui> de la barra de herramientas "
+"archiva las conversaciones seleccionadas. Los mensajes archivados aparecen "
+"en la carpeta <gui>Todos los correos</gui>."
 
 #: C/archive.page:16(p)
 msgid ""
@@ -1128,6 +1163,11 @@ msgid ""
 "Trash folder on the server, where the user can then manually delete them. "
 "The server will automatically remove trashed messages after 30 days."
 msgstr ""
+"La eliminación no está disponible para todas la carpetas, como es el caso de "
+"Buscar. Tampoco está disponible para Gmail. En este caso, la <gui>Papelera</"
+"gui> moverá los mensajes a la carpeta Papelera en el servidor, donde el "
+"usuario puede eliminarlos manualmente. El servidor eliminará automáticamente "
+"los mensajes de esta carpeta pasados 30 días."
 
 #: C/accounts.page:13(title)
 msgid "Adding accounts"
