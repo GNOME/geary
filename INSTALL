@@ -16,9 +16,20 @@
 
   * Dependencies
 
-    Building Geary requires Vala 0.22.1 or higher with a full GObject
-    introspection repository, intltool, cmake, desktop-file-validate, and
-    xml2po.  Vala's vapigen must be installed as well.
+    Building Geary requires at least GTK+ version 3.14, WebKitGTK+ 2.4
+    and Vala 0.26, with a full GObject introspection repository,
+    intltool, cmake, desktop-file-validate, and xml2po.  Vala's
+    vapigen must be installed as well.
+
+    See the file `src/CMakeLists.txt` for the complete list of minimum
+    version requirements.
+
+    Geary also requires SQLite to be built with the compiler flag
+    `-DSQLITE_ENABLE_FTS3`. Further, SQLite 3.11.x specifically must
+    also be built with `-DSQLITE_ENABLE_FTS3_TOKENIZER`. Most
+    distribution's packages meet these requirements, however Fedora 24
+    users and others may be required to rebuild SQLite 3.11 with the
+    second flag, or install SQLite 3.12 and recompile Geary.
 
     The developer packages and headers for the following libraries are also
     required when building Geary:
@@ -42,69 +53,36 @@
     Most of these are standard libraries available from major distros' package
     repositories.
 
-    Geary requires WebKitGTK-3 1.10 or higher.  However, it will not build with
-    WebKitGTK-3 versions 2.1.1 to 2.1.90.0.  See
-    <https://bugzilla.gnome.org/show_bug.cgi?id=713168> for details.
-
-    Geary requires SQLite to be built with the compiler flag
-    `-DSQLITE_ENABLE_FTS3`. Further, SQLite version 3.11.x specifically
-    must also be built with `-DSQLITE_ENABLE_FTS3_TOKENIZER`. Most
-    distribution's packages meet these requirements, however Fedora
-    24 users and others may be required to rebuild SQLite 3.11 with
-    the second flag.
 
   * Installing dependencies on Fedora
 
-    Fedora 20 ships with the correct version of Vala.  Install it by running
-    this command:
+    Fedora 21 and later ships with the correct versions of the
+    required libraries. Install them by running this command:
 
-        $ sudo yum install vala
-
-    In Fedora versions prior to 20, you must install Vala from source.
-    Download and install the tarball from
-    <https://wiki.gnome.org/Projects/Vala/Release>.
-
-    You can install the rest of the build dependencies for Geary in any version
-    of Fedora by running this command:
-
-        $ sudo yum install gobject-introspection-devel intltool cmake \
+        $ sudo yum install vala gobject-introspection-devel intltool cmake \
             desktop-file-utils gnome-doc-utils libcanberra-devel libgee-devel \
             glib2-devel gmime-devel gtk3-devel libnotify-devel sqlite-devel \
             unique3-devel webkitgtk3-devel libsecret-devel libxml2-devel \
             vala-tools gcr-devel
 
 
-  * Installing dependencies on Ubuntu
+  * Installing dependencies on Ubuntu/Debian
 
-    Ubuntu 14.04 ships the correct version of Vala.  In Ubuntu versions prior
-    to 14.04, you must add the Vala PPA first by running these commands:
+    Ubuntu 15.10 (Wily) and Debian 8.5 (Jessie) and later ships with
+    the correct versions of the required libraries. Install them by
+    running this command:
 
-        $ sudo add-apt-repository ppa:vala-team/ppa
-        $ sudo apt-get update
-
-    You can install the build dependencies for Geary in Ubuntu by running this
-    command:
-
-        $ sudo apt-get install valac-0.20 libgirepository1.0-dev intltool \
+        $ sudo apt-get install valac libgirepository1.0-dev intltool \
             cmake desktop-file-utils gnome-doc-utils libcanberra-dev \
             libgee-0.8-dev libglib2.0-dev libgmime-2.6-dev libgtk-3-dev \
             libsecret-1-dev libxml2-dev libnotify-dev libsqlite3-dev \
             libunique-3.0-dev libwebkitgtk-3.0-dev libmessaging-menu-dev \
             libunity-dev libgcr-3-dev
 
-    You should check that you are using the right version of valac by running:
-
-        $ valac --version
-        Vala 0.22.1
-
-    If it reports anything less than 0.22.1, select the correct version when
-    running:
-
-        $ sudo update-alternatives --config valac
-
-    Note that Ubuntu 12.04 does not have all the dependencies to build Geary.
-    See <https://wiki.gnome.org/Apps/Geary/BuildingOnUbuntu12.04> for details
-    and instructions.
+    Ubuntu 14.04 (Trusty LTS) and 12.04 (Precise LTS) do not have all
+    the dependencies to build Geary.  See
+    <https://wiki.gnome.org/Apps/Geary/BuildingOnUbuntu12.04> for
+    details and instructions.
 
 
   * Running
