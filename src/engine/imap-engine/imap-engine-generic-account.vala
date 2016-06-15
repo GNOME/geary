@@ -36,7 +36,10 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     private bool in_refresh_enumerate = false;
     private Cancellable refresh_cancellable = new Cancellable();
     private bool awaiting_credentials = false;
-    
+
+    private Gee.Map<Geary.SpecialFolderType, Gee.List<string>> special_search_names =
+        new Gee.HashMap<Geary.SpecialFolderType, Gee.List<string>>();
+
     public GenericAccount(string name, Geary.AccountInformation information,
         Imap.Account remote, ImapDB.Account local) {
         base (name, information);
@@ -60,8 +63,10 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         if (search_path == null) {
             search_path = new ImapDB.SearchFolderRoot();
         }
+
+        compile_special_search_names();
     }
-    
+
     protected override void notify_folders_available_unavailable(Gee.List<Geary.Folder>? available,
         Gee.List<Geary.Folder>? unavailable) {
         base.notify_folders_available_unavailable(available, unavailable);
@@ -576,53 +581,113 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         
         return yield remote.fetch_unrecycled_folder_async(path, cancellable);
     }
-    
-    private Gee.HashMap<Geary.SpecialFolderType, Gee.ArrayList<string>> get_mailbox_search_names() {
-        Gee.HashMap<Geary.SpecialFolderType, string> mailbox_search_names
-            = new Gee.HashMap<Geary.SpecialFolderType, string>();
-        mailbox_search_names.set(Geary.SpecialFolderType.DRAFTS,
-            // List of folder names to match for Drafts, separated by |.  Please add localized common
-            // names for the Drafts folder, leaving in the English names as well.  The first in the list
-            // will be the default, so please add the most common localized name to the front.
-            _("Drafts | Draft"));
-        mailbox_search_names.set(Geary.SpecialFolderType.SENT,
-            // List of folder names to match for Sent Mail, separated by |.  Please add localized common
-            // names for the Sent Mail folder, leaving in the English names as well.  The first in the list
-            // will be the default, so please add the most common localized name to the front.
-            _("Sent | Sent Mail | Sent Email | Sent E-Mail"));
-        mailbox_search_names.set(Geary.SpecialFolderType.SPAM,
-            // List of folder names to match for Spam, separated by |.  Please add localized common
-            // names for the Spam folder, leaving in the English names as well.  The first in the list
-            // will be the default, so please add the most common localized name to the front.
-            _("Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email | Bulk E-Mail"));
-        mailbox_search_names.set(Geary.SpecialFolderType.TRASH,
-            // List of folder names to match for Trash, separated by |.  Please add localized common
-            // names for the Trash folder, leaving in the English names as well.  The first in the list
-            // will be the default, so please add the most common localized name to the front.
-            _("Trash | Rubbish | Rubbish Bin"));
-        mailbox_search_names.set(Geary.SpecialFolderType.ARCHIVE,
-            // List of folder names to match for Archive, separated by |.  Please add localized common
-            // names for the Trash folder, leaving in the English names as well.  The first in the list
-            // will be the default, so please add the most common localized name to the front.
-            _("Archive | Archives"));
-        
-        Gee.HashMap<Geary.SpecialFolderType, Gee.ArrayList<string>> compiled
-            = new Gee.HashMap<Geary.SpecialFolderType, Gee.ArrayList<string>>();
-        
-        foreach (Geary.SpecialFolderType t in mailbox_search_names.keys) {
-            compiled.set(t, Geary.iterate_array<string>(mailbox_search_names.get(t).split("|"))
-                .map<string>(n => n.strip()).to_array_list());
+
+    private void compile_special_search_names() {
+        /*
+         * Compiles the list of names used to search for special
+         * folders when they aren't known in advance and the server
+         * supports neither SPECIAL-USE not XLIST.
+         *
+         * Uses both translated and untranslated names in case the
+         * server has not localised the folders that match the login
+         * session's language. Also checks for lower-case versions of
+         * each.
+         */
+        foreach (Geary.SpecialFolderType type in this.supported_special_folders) {
+            Gee.List<string> compiled = new Gee.ArrayList<string>();
+            foreach (string names in get_special_search_names(type)) {
+                foreach (string name in names.split("|")) {
+                    name = name.strip();
+                    if (name.length != 0) {
+                        if (!(name in compiled)) {
+                            compiled.add(name);
+                        }
+
+                        name = name.down();
+                        if (!(name in compiled)) {
+                            compiled.add(name);
+                        }
+                    }
+                }
+            }
+            special_search_names.set(type, compiled);
         }
-        
-        return compiled;
     }
-    
+
+    private Gee.List<string> get_special_search_names(Geary.SpecialFolderType type) {
+        Gee.List<string> loc_names = new Gee.ArrayList<string>();
+        Gee.List<string> unloc_names = new Gee.ArrayList<string>();
+        switch (type) {
+        case Geary.SpecialFolderType.DRAFTS:
+            // List of general possible folder names to match for the
+            // Draft mailbox. Separate names using a vertical bar and
+            // put the most common localized name to the front for the
+            // default. English names do not need to be included.
+            loc_names.add(_("Drafts | Draft"));
+            unloc_names.add("Drafts | Draft");
+            break;
+
+        case Geary.SpecialFolderType.SENT:
+            // List of general possible folder names to match for the
+            // Sent mailbox. Separate names using a vertical bar and
+            // put the most common localized name to the front for the
+            // default. English names do not need to be included.
+            loc_names.add(_("Sent | Sent Mail | Sent Email | Sent E-Mail"));
+            unloc_names.add("Sent | Sent Mail | Sent Email | Sent E-Mail");
+
+            // The localised name(s) of the Sent folder name as used
+            // by MS Outlook/Exchange.
+            loc_names.add(NC_("Outlook localised name", "Sent Items"));
+            unloc_names.add("Sent Items");
+
+            break;
+
+        case Geary.SpecialFolderType.SPAM:
+            // List of general possible folder names to match for the
+            // Spam mailbox. Separate names using a vertical bar and
+            // put the most common localized name to the front for the
+            // default. English names do not need to be included.
+            loc_names.add(_("Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email | Bulk E-Mail"));
+            unloc_names.add("Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email | Bulk E-Mail");
+
+            break;
+
+        case Geary.SpecialFolderType.TRASH:
+            // List of general possible folder names to match for the
+            // Trash mailbox. Separate names using a vertical bar and
+            // put the most common localized name to the front for the
+            // default. English names do not need to be included.
+            loc_names.add(_("Trash | Rubbish | Rubbish Bin"));
+            unloc_names.add("Trash | Rubbish | Rubbish Bin");
+
+            // The localised name(s) of the Trash folder name as used
+            // by MS Outlook/Exchange.
+            loc_names.add(NC_("Outlook localised name", "Deleted Items"));
+            unloc_names.add("Deleted Items");
+
+            break;
+
+        case Geary.SpecialFolderType.ARCHIVE:
+            // List of general possible folder names to match for the
+            // Archive mailbox. Separate names using a vertical bar
+            // and put the most common localized name to the front for
+            // the default. English names do not need to be included.
+            loc_names.add(_("Archive | Archives"));
+            unloc_names.add("Archive | Archives");
+
+            break;
+        }
+
+        loc_names.add_all(unloc_names);
+        return loc_names;
+    }
+
     private async Geary.Folder ensure_special_folder_async(Geary.SpecialFolderType special,
         Cancellable? cancellable) throws Error {
         Geary.Folder? folder = get_special_folder(special);
         if (folder != null)
             return folder;
-        
+
         MinimalFolder? minimal_folder = null;
         Geary.FolderPath? path = information.get_special_folder_path(special);
         if (path != null) {
@@ -630,8 +695,8 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         } else {
             // This is the first time we're turning a non-special folder into a special one.
             // After we do this, we'll record which one we picked in the account info.
-            
-            Gee.ArrayList<string> search_names = get_mailbox_search_names().get(special);
+
+            Gee.List<string> search_names = special_search_names.get(special);
             foreach (string search_name in search_names) {
                 Geary.FolderPath search_path = new Imap.FolderRoot(search_name);
                 foreach (Geary.FolderPath test_path in folder_map.keys) {
