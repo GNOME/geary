@@ -73,15 +73,15 @@ public class Geary.Imap.FetchBodyDataSpecifier : BaseObject, Gee.Hashable<FetchB
                     assert_not_reached();
             }
         }
-        
+
         public static SectionPart deserialize(string value) throws ImapError {
             if (String.is_empty(value))
                 return NONE;
-            
-            switch (Ascii.strdown(value)) {
+
+            switch (value.down()) {
                 case "header":
                     return HEADER;
-                
+
                 case "header.fields":
                     return HEADER_FIELDS;
                 
@@ -178,23 +178,25 @@ public class Geary.Imap.FetchBodyDataSpecifier : BaseObject, Gee.Hashable<FetchB
         this.subset_start = subset_start;
         this.subset_count = subset_count;
         this.is_peek = is_peek;
-        
+
         if (field_names != null && field_names.length > 0) {
-            this.field_names = new Gee.TreeSet<string>(Ascii.strcmp);
+            this.field_names = new Gee.TreeSet<string>((s1, s2) => {
+                    return GLib.strcmp(s1, s2);
+                });
             foreach (string field_name in field_names) {
-                string converted = Ascii.strdown(field_name.strip());
-                
+                string converted = field_name.strip().down();
+
                 if (!String.is_empty(converted))
                     this.field_names.add(converted);
             }
         } else {
             this.field_names = null;
         }
-        
+
         // see equal_to() for why the response version is used
         hashable = serialize_response();
     }
-    
+
     /**
      * Returns the {@link FetchBodyDataSpecifier} in a string ready for a {@link Command}.
      *

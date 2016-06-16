@@ -23,10 +23,10 @@ public enum Quoting {
 private bool is_special_char(char ch, char[] ar, string? exceptions) {
     if (ch > 0x7F || ch.iscntrl())
         return true;
-    
+
     if (ch in ar)
-        return (exceptions != null) ? Ascii.index_of(exceptions, ch) < 0 : true;
-    
+        return (exceptions != null) ? exceptions.index_of_char(ch) < 0 : true;
+
     return false;
 }
 

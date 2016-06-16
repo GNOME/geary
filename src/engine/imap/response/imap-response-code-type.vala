@@ -64,17 +64,17 @@ public class Geary.Imap.ResponseCodeType : BaseObject, Gee.Hashable<ResponseCode
     public ResponseCodeType.from_parameter(StringParameter stringp) throws ImapError {
         init(stringp.ascii);
     }
-    
+
     private void init(string ascii) throws ImapError {
         // note that is_quoting_required() also catches empty strings (as they require quoting)
         if (DataFormat.is_quoting_required(ascii) != DataFormat.Quoting.OPTIONAL)
             throw new ImapError.INVALID("\"%s\" cannot be represented as a ResponseCodeType", ascii);
-        
+
         // store lowercased so it's easily compared with const strings above
         original = ascii;
-        value = Ascii.strdown(ascii);
+        value = ascii.down();
     }
-    
+
     public bool is_value(string str) {
         return Ascii.stri_equal(value, str);
     }

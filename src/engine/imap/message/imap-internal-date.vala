@@ -67,18 +67,18 @@ public class Geary.Imap.InternalDate : Geary.MessageData.AbstractMessageData, Ge
             || year < 1970) {
             throw new ImapError.PARSE_ERROR("Invalid INTERNALDATE \"%s\": bad numerical range", internaldate);
         }
-        
+
         // check month (this catches localization problems)
         int month = -1;
-        string mon_down = Ascii.strdown(((string) mon));
+        string mon_down = ((string) mon).down();
         for (int ctr = 0; ctr < EN_US_MON_DOWN.length; ctr++) {
             if (mon_down == EN_US_MON_DOWN[ctr]) {
                 month = ctr;
-                
+
                 break;
             }
         }
-        
+
         if (month < 0)
             throw new ImapError.PARSE_ERROR("Invalid INTERNALDATE \"%s\": bad month", internaldate);
         

@@ -46,14 +46,14 @@ public class Geary.RFC822.MailboxAddress : Geary.MessageData.SearchableMessageDa
      * For "Dirk Gently <dirk@example.com>", this would be "dirk@example.com".
      */
     public string address { get; private set; }
-    
+
     public MailboxAddress(string? name, string address) {
         this.name = name;
         this.address = address;
-        
+
         source_route = null;
-        
-        int atsign = Ascii.index_of(address, '@');
+
+        int atsign = address.index_of_char('@');
         if (atsign > 0) {
             mailbox = address.slice(0, atsign);
             domain = address.slice(atsign + 1, address.length);
@@ -62,7 +62,7 @@ public class Geary.RFC822.MailboxAddress : Geary.MessageData.SearchableMessageDa
             domain = "";
         }
     }
-    
+
     public MailboxAddress.imap(string? name, string? source_route, string mailbox, string domain) {
         this.name = (name != null) ? decode_name(name) : null;
         this.source_route = source_route;

@@ -31,24 +31,24 @@ public enum Geary.Mime.DispositionType {
      */
     public static DispositionType deserialize(string? str, out bool is_unknown) {
         is_unknown = false;
-        
+
         if (String.is_empty_or_whitespace(str))
             return UNSPECIFIED;
-        
-        switch (Ascii.strdown(str)) {
+
+        switch (str.down()) {
             case "inline":
                 return INLINE;
-            
+
             case "attachment":
                 return ATTACHMENT;
-            
+
             default:
                 is_unknown = true;
-                
+
                 return ATTACHMENT;
         }
     }
-    
+
     /**
      * Returns null if value is {@link UNSPECIFIED}
      */
