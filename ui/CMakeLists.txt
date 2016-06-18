@@ -17,6 +17,7 @@ set(RESOURCE_LIST
   STRIPBLANKS "toolbar_empty_menu.ui"
   STRIPBLANKS "toolbar_mark_menu.ui"
   STRIPBLANKS "upgrade_dialog.glade"
+  "geary.css"
 )
 
 compile_gresources(
@@ -48,6 +49,8 @@ add_custom_target(resource_copy ALL
     cp ${RESOURCES_XML} ${CMAKE_BINARY_DIR}/ui
   COMMAND
     cp ${CMAKE_SOURCE_DIR}/ui/*.glade ${CMAKE_SOURCE_DIR}/ui/*.interface ${CMAKE_SOURCE_DIR}/ui/*.ui ${CMAKE_BINARY_DIR}/ui
+  COMMAND
+    cp ${CMAKE_SOURCE_DIR}/ui/*.css ${CMAKE_BINARY_DIR}/ui
 )
 add_dependencies(resource_copy resource_c)
 

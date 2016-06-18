@@ -138,54 +138,16 @@ public class MainWindow : Gtk.ApplicationWindow {
         Gtk.CssProvider provider = new Gtk.CssProvider();
         Gtk.StyleContext.add_provider_for_screen(Gdk.Display.get_default().get_default_screen(),
             provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
-        string css = """
-            .geary-folder-frame, /* GTK < 3.20 */
-            .geary-folder-frame > border {
-                border-left-width: 0;
-                border-top-width: 0;
-                border-right-width: 0;
-            }
-            .geary-conversation-frame, /* GTK < 3.20 */
-            .geary-conversation-frame > border {
-                border-left-width: 0;
-                border-top-width: 0;
-                border-right-width: 0;
-            }
-            /* For 3-pane mode only */
-            .geary-sidebar-pane-separator.vertical .conversation-frame, /* GTK < 3.20 */
-            .geary-sidebar-pane-separator.vertical .conversation-frame > border {
-                border-bottom-width: 0;
-            }
 
-            .geary-composer-box > border {
-                border-width: 0px;
-            }
-            .geary-composer-body > border {
-                border-left-width: 0;
-                border-right-width: 0;
-                border-bottom-width: 0;
-            }
-
-            ComposerEmbed GtkHeaderBar,
-            ComposerBox GtkHeaderBar,
-            GtkBox.vertical GtkHeaderBar {
-                border-radius: 0px;
-            }
-            .geary-titlebar-left:dir(ltr),
-            .geary-titlebar-right:dir(rtl) {
-                border-top-right-radius: 0px;
-            }
-            .geary-titlebar-right:dir(ltr),
-            .geary-titlebar-left:dir(rtl) {
-                border-top-left-radius: 0px;
-            }
-        """;
-
-        try {
-            provider.load_from_data(css, -1);
-        } catch (Error error) {
-            debug("Could not load styling from data: %s", error.message);
-        }
+        provider.parsing_error.connect((section, error) => {
+            uint start = section.get_start_line();
+            uint end = section.get_end_line();
+            if (start == end)
+                debug("Error parsing css on line %u: %s", start, error.message);
+            else
+                debug("Error parsing css on lines %u-%u: %s", start, end, error.message);
+        });
+        provider.load_from_resource(@"/org/gnome/Geary/geary.css");
     }
     
     private void create_layout() {

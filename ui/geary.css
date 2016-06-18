@@ -1,0 +1,40 @@
+.geary-folder-frame, /* GTK < 3.20 */
+.geary-folder-frame > border {
+  border-left-width: 0;
+  border-top-width: 0;
+  border-right-width: 0;
+}
+.geary-conversation-frame, /* GTK < 3.20 */
+.geary-conversation-frame > border {
+  border-left-width: 0;
+  border-top-width: 0;
+  border-right-width: 0;
+}
+/* For 3-pane mode only */
+.geary-sidebar-pane-separator.vertical .conversation-frame, /* GTK < 3.20 */
+.geary-sidebar-pane-separator.vertical .conversation-frame > border {
+  border-bottom-width: 0;
+}
+
+.geary-composer-box > border {
+  border-width: 0px;
+}
+.geary-composer-body > border {
+  border-left-width: 0;
+  border-right-width: 0;
+  border-bottom-width: 0;
+}
+
+ComposerEmbed GtkHeaderBar,
+ComposerBox GtkHeaderBar,
+GtkBox.vertical GtkHeaderBar {
+  border-radius: 0px;
+}
+.geary-titlebar-left:dir(ltr),
+.geary-titlebar-right:dir(rtl) {
+  border-top-right-radius: 0px;
+}
+.geary-titlebar-right:dir(ltr),
+.geary-titlebar-left:dir(rtl) {
+  border-top-left-radius: 0px;
+}
