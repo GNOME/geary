@@ -480,7 +480,12 @@ public class ComposerWidget : Gtk.EventBox {
                     if (referred.subject != null)
                         subject = referred.subject.value;
                     try {
-                        body_html = referred.get_message().get_body(Geary.RFC822.TextFormat.HTML, null);
+                        Geary.RFC822.Message message = referred.get_message();
+                        if (message.has_html_body()) {
+                            body_html = message.get_html_body(null);
+                        } else {
+                            body_html = message.get_plain_body(true, null);
+                        }
                     } catch (Error error) {
                         debug("Error getting message body: %s", error.message);
                     }

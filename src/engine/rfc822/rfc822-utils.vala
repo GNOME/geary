@@ -283,18 +283,32 @@ public string quote_email_for_forward(Geary.Email email, string? quote, TextForm
 }
 
 private string quote_body(Geary.Email email, string? quote, bool use_quotes, TextFormat format) {
-    string? body_text = "";
-    
-    try {
-        body_text = quote ?? email.get_message().get_body(format, null);
-    } catch (Error error) {
-        debug("Could not get message text. %s", error.message);
+    string? body_text = quote ?? "";
+    if (quote == null) {
+        try {
+            Message message = email.get_message();
+            switch (format) {
+            case TextFormat.HTML:
+                body_text = message.has_html_body()
+                    ? message.get_html_body(null)
+                    : message.get_plain_body(true, null);
+                    break;
+
+            case TextFormat.PLAIN:
+                body_text = message.has_plain_body()
+                    ? message.get_plain_body(true, null)
+                    : message.get_html_body(null);
+                    break;
+            }
+        } catch (Error error) {
+            debug("Could not get message text for quoting: %s", error.message);
+        }
     }
-    
+
     // Wrap the whole thing in a blockquote.
     if (use_quotes && !String.is_empty(body_text))
         body_text = "<blockquote type=\"cite\">%s</blockquote>".printf(body_text);
-    
+
     return body_text;
 }
 
