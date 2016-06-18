@@ -292,6 +292,7 @@ public class ConversationEmail : Gtk.Box {
     public void expand_email(bool include_transitions=true) {
         is_message_body_visible = true;
         get_style_context().add_class("geary_show_body");
+        attachments_button.set_sensitive(true);
         star_button.set_sensitive(true);
         unstar_button.set_sensitive(true);
         email_menubutton.set_sensitive(true);
@@ -301,6 +302,7 @@ public class ConversationEmail : Gtk.Box {
     public void collapse_email() {
         is_message_body_visible = false;
         get_style_context().remove_class("geary_show_body");
+        attachments_button.set_sensitive(false);
         star_button.set_sensitive(false);
         unstar_button.set_sensitive(false);
         email_menubutton.set_sensitive(false);
@@ -463,6 +465,7 @@ public class ConversationEmail : Gtk.Box {
         // ctor but we don't know at that point if any attachments
         // will be displayed inline.
         attachments_button.set_visible(true);
+        attachments_button.set_sensitive(false);
         primary_message.body_box.pack_start(attachments_box, false, false, 0);
 
         // Add each displayed attachment to the icon view
