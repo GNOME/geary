@@ -439,7 +439,66 @@ public class Geary.RFC822.Message : BaseObject {
     public Memory.Buffer get_network_buffer(bool dotstuffed) throws RFC822Error {
         return message_to_memory_buffer(true, dotstuffed);
     }
-    
+
+    /**
+     * Determines if the message has one or display HTML parts.
+     */
+    public bool has_html_body() {
+        return has_body_parts(message.get_mime_part(), "html");
+    }
+
+    /**
+     * Determines if the message has one or plain text display parts.
+     */
+    public bool has_plain_body() {
+        return has_body_parts(message.get_mime_part(), "text");
+    }
+
+    /**
+     * Determines if the message has any body text/subtype MIME parts.
+     *
+     * A body part is one that would be displayed to the user,
+     * i.e. parts returned by {@link get_html_body} or {@link
+     * get_plain_body}.
+     *
+     * The logic for selecting text nodes here must match that in
+     * construct_body_from_mime_parts.
+     */
+    private bool has_body_parts(GMime.Object node, string text_subtype) {
+        bool has_part = false;
+        Mime.ContentType? this_content_type = null;
+        if (node.get_content_type() != null)
+            this_content_type =
+                new Mime.ContentType.from_gmime(node.get_content_type());
+
+        GMime.Multipart? multipart = node as GMime.Multipart;
+        if (multipart != null) {
+            int count = multipart.get_count();
+            for (int i = 0; i < count && !has_part; ++i) {
+                has_part = has_body_parts(multipart.get_part(i), text_subtype);
+            }
+        } else {
+            GMime.Part? part = node as GMime.Part;
+            if (part != null) {
+                Mime.ContentDisposition? disposition = null;
+                if (part.get_content_disposition() != null)
+                    disposition = new Mime.ContentDisposition.from_gmime(
+                        part.get_content_disposition()
+                    );
+
+                if (disposition == null ||
+                    disposition.disposition_type != Mime.DispositionType.ATTACHMENT) {
+                    if (this_content_type != null &&
+                        this_content_type.has_media_type("text") &&
+                        this_content_type.has_media_subtype(text_subtype)) {
+                        has_part = true;
+                    }
+                }
+            }
+        }
+        return has_part;
+    }
+
     /**
      * This method is the main utility method used by the other body-generating constructors.
      *
@@ -545,80 +604,46 @@ public class Geary.RFC822.Message : BaseObject {
         
         return body;
     }
-    
+
     /**
      * Returns the HTML portion of the message body, if present.
      *
-     * See {@link get_body} for more details on how the body is assembled from the message's MIME
-     * structure and the role of the {@link InlinePartReplacer}.
+     * Recursively walks the MIME structure (depth-first) serializing
+     * all text/html MIME parts of the specified type into a single
+     * UTF-8 string.  Non-text MIME parts inside of multipart/mixed
+     * containers are offered to the {@link InlinePartReplacer}, which
+     * can either return null or return a string that is inserted in
+     * lieu of the MIME part into the final document.  All other MIME
+     * parts are ignored.
      *
      * @throws RFC822Error.NOT_FOUND if an HTML body is not present.
      */
     public string? get_html_body(InlinePartReplacer? replacer) throws RFC822Error {
         return internal_get_body("html", false, replacer);
     }
-    
+
     /**
      * Returns the plaintext portion of the message body, if present.
      *
-     * See {@link get_body} for more details on how the body is assembled from the message's MIME
-     * structure and the role of the {@link InlinePartReplacer}.
+     * Recursively walks the MIME structure (depth-first) serializing
+     * all text/plain MIME parts of the specified type into a single
+     * UTF-8 string.  Non-text MIME parts inside of multipart/mixed
+     * containers are offered to the {@link InlinePartReplacer}, which
+     * can either return null or return a string that is inserted in
+     * lieu of the MIME part into the final document.  All other MIME
+     * parts are ignored.
      *
-     * The convert_to_html flag indicates if the plaintext body should be converted into HTML.
-     * Note that the InlinePartReplacer's output is not converted; it's up to the caller to know
-     * what format to return when invoked.
+     * The convert_to_html flag indicates if the plaintext body should
+     * be converted into HTML.  Note that the InlinePartReplacer's
+     * output is not converted; it's up to the caller to know what
+     * format to return when invoked.
      *
      * @throws RFC822Error.NOT_FOUND if a plaintext body is not present.
      */
     public string? get_plain_body(bool convert_to_html, InlinePartReplacer? replacer) throws RFC822Error {
         return internal_get_body("plain", convert_to_html, replacer);
     }
-    
-    /**
-     * Returns the complete email body as HTML.
-     *
-     * get_body() recursively walks the MIME structure (depth-first) serializing all text MIME
-     * parts of the specified type into a single UTF-8 string.  Non-text MIME parts inside of
-     * multipart/mixed containers are offered to the {@link InlinePartReplacer}, which can either
-     * return null or return a string that is inserted in lieu of the MIME part into the final
-     * document.  All other MIME parts are ignored.
-     *
-     * The format flag indicates whether to assemble the HTML portion of the message body or to
-     * convert the plaintext portion into HTML.  If the requested portion is not present, the
-     * method will fallback and attempt to return the other (converted to HTML, if necessary).
-     * It is possible for format to be PLAIN and this method to return an HTML portion of the
-     * message (if plaintext is unavailable).
-     *
-     * Note that the InlinePartReplacer's output is never converted and should return HTML.
-     *
-     * @throws RFC822Error.NOT_FOUND if neither format is available.
-     */
-    public string? get_body(TextFormat format, InlinePartReplacer? replacer) throws RFC822Error {
-        try {
-            switch (format) {
-                case TextFormat.HTML:
-                    return get_html_body(replacer);
-                
-                case TextFormat.PLAIN:
-                    return get_plain_body(true, replacer);
-                
-                default:
-                    return null;
-            }
-        } catch (Error err) {
-            switch (format) {
-                case TextFormat.HTML:
-                    return get_plain_body(true, replacer);
-                
-                case TextFormat.PLAIN:
-                    return get_html_body(replacer);
-                
-                default:
-                    assert_not_reached();
-            }
-        }
-    }
-    
+
     /**
      * Return the body as a searchable string.  The body in this case should
      * include everything visible in the message's body in the client, which
