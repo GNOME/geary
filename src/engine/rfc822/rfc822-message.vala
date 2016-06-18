@@ -35,9 +35,9 @@ public class Geary.RFC822.Message : BaseObject {
     public RFC822.Subject? subject { get; private set; default = null; }
     public string? mailer { get; private set; default = null; }
     public Geary.RFC822.Date? date { get; private set; default = null; }
-    
+
     private GMime.Message message;
-    
+
     // Since GMime.Message does a bad job of separating the headers and body (GMime.Message.get_body()
     // returns the full message, headers and all), we keep a buffer around that points to the body
     // part from the source.  This is only needed by get_email().  Unfortunately, we can't always
@@ -571,25 +571,23 @@ public class Geary.RFC822.Message : BaseObject {
             // We were the wrong kind of text part
             return false;
         }
-        
-        // If images have no disposition, they are handled elsewhere; see #7299
+
+        // If images have no disposition, they are handled elsewhere; See Bug 713546
         if (disposition == null || disposition.disposition_type == Mime.DispositionType.UNSPECIFIED)
             return false;
-        
+
         // Use inline part replacer *only* if in a mixed multipart where each element is to be
         // presented to the user as structure dictates; for alternative and related, the inline
         // part is referred to elsewhere in the document and it's the callers responsibility to
         // locate them
-        if (replacer == null || container_subtype != Mime.MultipartSubtype.MIXED)
-            return false;
-        
-        // Hand off to the replacer for processing
-        body = replacer(RFC822.Utils.get_clean_attachment_filename(part),
-            this_content_type, disposition, part.get_content_id(), mime_part_to_memory_buffer(part));
-        
+        if (replacer != null && container_subtype == Mime.MultipartSubtype.MIXED) {
+            body = replacer(RFC822.Utils.get_clean_attachment_filename(part),
+                            this_content_type, disposition, part.get_content_id(), mime_part_to_memory_buffer(part));
+        }
+
         return body != null;
     }
-    
+
     /**
      * A front-end to construct_body_from_mime_parts() that converts its output parameters into
      * something that front-facing methods want to return.
@@ -601,7 +599,7 @@ public class Geary.RFC822.Message : BaseObject {
             text_subtype, to_html, replacer, ref body)) {
             throw new RFC822Error.NOT_FOUND("Could not find any \"text/%s\" parts", text_subtype);
         }
-        
+
         return body;
     }
 
