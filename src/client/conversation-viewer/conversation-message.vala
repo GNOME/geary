@@ -359,6 +359,33 @@ public class ConversationMessage : Gtk.Box {
         web_view.load_string(body_text, "text/html", "UTF8", "");
     }
 
+    public void highlight_search_terms(Gee.Set<string> search_matches) {
+        // XXX Need to highlight subject, sender and recipient matches too
+
+        // Remove existing highlights.
+        web_view.unmark_text_matches();
+
+        // Webkit's highlighting is ... weird.  In order to actually see
+        // all the highlighting you're applying, it seems necessary to
+        // start with the shortest string and work up.  If you don't, it
+        // seems that shorter strings will overwrite longer ones, and
+        // you're left with incomplete highlighting.
+        Gee.ArrayList<string> ordered_matches = new Gee.ArrayList<string>();
+        ordered_matches.add_all(search_matches);
+        ordered_matches.sort((a, b) => a.length - b.length);
+
+        foreach(string match in ordered_matches) {
+            web_view.mark_text_matches(match, false, 0);
+        }
+
+        web_view.set_highlight_text_matches(true);
+    }
+
+    public void unmark_search_terms() {
+        web_view.set_highlight_text_matches(false);
+        web_view.unmark_text_matches();
+    }
+
     private SimpleAction add_action(string name, bool enabled) {
         SimpleAction action = new SimpleAction(name, null);
         action.set_enabled(enabled);

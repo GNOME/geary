@@ -500,9 +500,6 @@ public class ConversationViewer : Gtk.Stack {
         if (query == null)
             return;
 
-        // Remove existing highlights.
-        //web_view.unmark_text_matches();
-
         // List all IDs of emails we're viewing.
         Gee.Collection<Geary.EmailIdentifier> ids = new Gee.ArrayList<Geary.EmailIdentifier>();
         foreach (Geary.Email email in emails)
@@ -552,11 +549,14 @@ public class ConversationViewer : Gtk.Stack {
         ordered_matches.sort((a, b) => a.length - b.length);
 
         if (!cancellable.is_cancelled()) {
-            foreach(string match in ordered_matches) {
-                //web_view.mark_text_matches(match, false, 0);
+            foreach (Geary.Email email in emails) {
+                ConversationEmail email_view = conversation_email_for_id(email.id);
+                email_view.primary_message
+                    .highlight_search_terms(search_matches);
+                foreach (ConversationMessage message_view in email_view.attached_messages) {
+                    message_view.highlight_search_terms(search_matches);
+                }
             }
-
-            //web_view.set_highlight_text_matches(true);
         }
     }
 
@@ -714,9 +714,15 @@ public class ConversationViewer : Gtk.Stack {
 
     // State reset.
     private uint on_reset(uint state, uint event, void *user, Object? object) {
-        //web_view.set_highlight_text_matches(false);
         //web_view.allow_collapsing(true);
-        //web_view.unmark_text_matches();
+
+        foreach (Geary.Email email in emails) {
+            ConversationEmail email_view = conversation_email_for_id(email.id);
+            email_view.primary_message.unmark_search_terms();
+            foreach (ConversationMessage message_view in email_view.attached_messages) {
+                message_view.unmark_search_terms();
+            }
+        }
 
         if (search_folder != null) {
             search_folder = null;

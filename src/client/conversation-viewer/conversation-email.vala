@@ -60,15 +60,20 @@ public class ConversationEmail : Gtk.Box {
     // Is the message body shown or not?
     public bool is_message_body_visible = false;
 
-    // Widget displaying the email's primary message
+    // View displaying the email's primary message
     public ConversationMessage primary_message { get; private set; }
+
+    // Views for messages that are attachments
+    public Gee.List<ConversationMessage> attached_messages {
+        owned get { return this._attached_messages.read_only_view; }
+    }
+
+    // Backing for attached_messages
+    private Gee.List<ConversationMessage> _attached_messages =
+        new Gee.LinkedList<ConversationMessage>();
 
     // Contacts for the email's account
     private Geary.ContactStore contact_store;
-
-    // Messages that have been attached to this one
-    private Gee.List<ConversationMessage> conversation_messages =
-        new Gee.LinkedList<ConversationMessage>();
 
     // Attachment ids that have been displayed inline
     private Gee.HashSet<string> inlined_content_ids = new Gee.HashSet<string>();
@@ -266,7 +271,7 @@ public class ConversationEmail : Gtk.Box {
             ConversationMessage conversation_message =
                 new ConversationMessage(sub_message, contact_store, false);
             sub_messages_box.pack_start(conversation_message, false, false, 0);
-            this.conversation_messages.add(conversation_message);
+            this._attached_messages.add(conversation_message);
         }
 
         pack_start(primary_message, true, true, 0);
@@ -279,7 +284,7 @@ public class ConversationEmail : Gtk.Box {
             load_cancelled
         );
         yield primary_message.load_message_body(load_cancelled);
-        foreach (ConversationMessage message in conversation_messages) {
+        foreach (ConversationMessage message in this._attached_messages) {
             yield message.load_avatar(
                 GearyApplication.instance.controller.avatar_session,
                 load_cancelled
