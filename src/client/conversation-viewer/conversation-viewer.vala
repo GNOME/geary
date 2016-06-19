@@ -492,12 +492,7 @@ public class ConversationViewer : Gtk.Stack {
             debug("Unable to select conversation: %s", err.message);
         }
     }
-    
-    private void on_search_text_changed(Geary.SearchQuery? query) {
-        if (query != null)
-            highlight_search_terms.begin();
-    }
-    
+
     private async void highlight_search_terms() {
         Geary.SearchQuery? query = (this.search_folder != null)
             ? search_folder.search_query
@@ -722,15 +717,14 @@ public class ConversationViewer : Gtk.Stack {
         //web_view.set_highlight_text_matches(false);
         //web_view.allow_collapsing(true);
         //web_view.unmark_text_matches();
-        
+
         if (search_folder != null) {
-            search_folder.search_query_changed.disconnect(on_search_text_changed);
             search_folder = null;
         }
-        
+
         //if (conversation_find_bar.visible)
         //    fsm.do_post_transition(() => { conversation_find_bar.hide(); }, user, object);
-        
+
         return SearchState.NONE;
     }
 
@@ -789,13 +783,11 @@ public class ConversationViewer : Gtk.Stack {
             return SearchState.NONE;
         } 
     }
-    
+
     // Search folder entered.
     private uint on_enter_search_folder(uint state, uint event, void *user, Object? object) {
         search_folder = current_folder as Geary.SearchFolder;
         assert(search_folder != null);
-        search_folder.search_query_changed.connect(on_search_text_changed);
-        
         return SearchState.SEARCH_FOLDER;
     }
 
