@@ -531,63 +531,73 @@ public class ConversationViewer : Gtk.Box {
             debug("Unable to select conversation: %s", err.message);
         }
     }
-    
-    // This applies a fudge-factor set of matches when the database results
-    // aren't entirely satisfactory, such as when you search for an email
-    // address and the database tokenizes out the @ and ., etc.  It's not meant
-    // to be comprehensive, just a little extra highlighting applied to make
-    // the results look a little closer to what you typed.
-    private void add_literal_matches(string raw_query, Gee.Set<string>? search_matches) {
-        foreach (string word in raw_query.split(" ")) {
-            if (word.has_suffix("\""))
-                word = word.substring(0, word.length - 1);
-            if (word.has_prefix("\""))
-                word = word.substring(1);
-            
-            if (!Geary.String.is_empty_or_whitespace(word))
-                search_matches.add(word);
-        }
-    }
-    
+
     private async void highlight_search_terms() {
-        if (search_folder == null)
+        Geary.SearchQuery? query = (this.search_folder != null)
+            ? search_folder.search_query
+            : null;
+        if (query == null)
             return;
-        
+
         // Remove existing highlights.
         web_view.unmark_text_matches();
-        
+
         // List all IDs of emails we're viewing.
         Gee.Collection<Geary.EmailIdentifier> ids = new Gee.ArrayList<Geary.EmailIdentifier>();
         foreach (Geary.Email email in messages)
             ids.add(email.id);
-        
+
+        // Using the fetch cancellable here is appropriate since each
+        // time the search results change, the old fetch will be
+        // cancelled and we should also cancel the highlighting. Store
+        // it here for use later in the method.
+        Cancellable cancellable = this.cancellable_fetch;
+
+        Gee.Set<string>? search_matches = null;
         try {
-            Gee.Set<string>? search_matches = yield search_folder.get_search_matches_async(
-                ids, cancellable_fetch);
-            if (search_matches == null)
-                search_matches = new Gee.HashSet<string>();
-            
-            if (search_folder.search_query != null)
-                add_literal_matches(search_folder.search_query.raw, search_matches);
-            
-            // Webkit's highlighting is ... weird.  In order to actually see
-            // all the highlighting you're applying, it seems necessary to
-            // start with the shortest string and work up.  If you don't, it
-            // seems that shorter strings will overwrite longer ones, and
-            // you're left with incomplete highlighting.
-            Gee.ArrayList<string> ordered_matches = new Gee.ArrayList<string>();
-            ordered_matches.add_all(search_matches);
-            ordered_matches.sort((a, b) => a.length - b.length);
-            
-            foreach(string match in ordered_matches)
-                web_view.mark_text_matches(match, false, 0);
+            search_matches = yield search_folder.get_search_matches_async(
+                ids, cancellable);
         } catch (Error e) {
             debug("Error highlighting search results: %s", e.message);
+            // Continue on here since if nothing else we have the
+            // fudging to fall back on immediately below.
         }
-        
-        web_view.set_highlight_text_matches(true);
+
+        if (search_matches == null)
+            search_matches = new Gee.HashSet<string>();
+
+        // This applies a fudge-factor set of matches when the database results
+        // aren't entirely satisfactory, such as when you search for an email
+        // address and the database tokenizes out the @ and ., etc.  It's not meant
+        // to be comprehensive, just a little extra highlighting applied to make
+        // the results look a little closer to what you typed.
+        foreach (string word in query.raw.split(" ")) {
+            if (word.has_suffix("\""))
+                word = word.substring(0, word.length - 1);
+            if (word.has_prefix("\""))
+                word = word.substring(1);
+
+            if (!Geary.String.is_empty_or_whitespace(word))
+                search_matches.add(word);
+        }
+
+        // Webkit's highlighting is ... weird.  In order to actually
+        // see all the highlighting you're applying, it seems
+        // necessary to start with the shortest string and work up.
+        // If you don't, it seems that shorter strings will overwrite
+        // longer ones, and you're left with incomplete highlighting.
+        Gee.ArrayList<string> ordered_matches = new Gee.ArrayList<string>();
+        ordered_matches.add_all(search_matches);
+        ordered_matches.sort((a, b) => a.length - b.length);
+
+        if (!cancellable.is_cancelled()) {
+            foreach(string match in ordered_matches)
+                web_view.mark_text_matches(match, false, 0);
+
+            web_view.set_highlight_text_matches(true);
+        }
     }
-    
+
     // Given some emails, fetch the full versions with all required fields.
     private async Gee.Collection<Geary.Email>? list_full_messages_async(
         Gee.Collection<Geary.Email> emails, Cancellable? cancellable) throws Error {
