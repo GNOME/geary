@@ -532,11 +532,6 @@ public class ConversationViewer : Gtk.Box {
         }
     }
     
-    private void on_search_text_changed(Geary.SearchQuery? query) {
-        if (query != null)
-            highlight_search_terms.begin();
-    }
-    
     // This applies a fudge-factor set of matches when the database results
     // aren't entirely satisfactory, such as when you search for an email
     // address and the database tokenizes out the @ and ., etc.  It's not meant
@@ -2439,7 +2434,6 @@ public class ConversationViewer : Gtk.Box {
         web_view.unmark_text_matches();
         
         if (search_folder != null) {
-            search_folder.search_query_changed.disconnect(on_search_text_changed);
             search_folder = null;
         }
         
@@ -2477,7 +2471,6 @@ public class ConversationViewer : Gtk.Box {
     private uint on_enter_search_folder(uint state, uint event, void *user, Object? object) {
         search_folder = current_folder as Geary.SearchFolder;
         assert(search_folder != null);
-        search_folder.search_query_changed.connect(on_search_text_changed);
         
         return SearchState.SEARCH_FOLDER;
     }
