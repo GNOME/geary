@@ -1233,7 +1233,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
                 Geary.iterate<ImapDB.EmailIdentifier>(owned_id).to_array_list());
         } else {
             debug("%s do_replay_removed_message: remote_position=%d unknown in local store "
-                + "(reported_remote_count=%d local_position=%d local_count=%d)",
+                + "(reported_remote_count=%d local_position=%lld local_count=%d)",
                 to_string(), remote_position.value, reported_remote_count, local_position, local_count);
         }
         
@@ -1270,7 +1270,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
             notify_email_count_changed(reported_remote_count, CountChangeReason.REMOVED);
         
         debug("%s do_replay_remove_message: completed, current remote_count=%d "
-            + "(reported_remote_count=%d local_count=%d starting local_count=%d remote_position=%d local_position=%d marked=%s)",
+            + "(reported_remote_count=%d local_count=%d starting local_count=%d remote_position=%lld local_position=%lld marked=%s)",
             to_string(), remote_count, reported_remote_count, new_local_count, local_count, remote_position.value,
             local_position, marked.to_string());
     }
