@@ -22,6 +22,7 @@ set(TRANSLATED
     fr
     it
     pl
+    pt_BR
 )
 
 set(HELP_DEST share/gnome/help/geary)
