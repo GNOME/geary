@@ -103,6 +103,27 @@ public interface PillBar : Gtk.Container {
     }
     
     /**
+     * Given an icon, popover, and action, creates a button that triggers the popover and the action.
+     */
+    public virtual Gtk.MenuButton create_popover_button(string? icon_name, Gtk.Popover? popover, string action_name) {
+        Gtk.MenuButton b = new Gtk.MenuButton();
+        setup_button(b, icon_name, action_name);
+        b.set_popover(popover);
+        b.clicked.connect(() => popover.show_all());
+
+        if (b.related_action != null) {
+            b.related_action.activate.connect(() => {
+                    b.clicked();
+                });
+            // Null out the action since by connecting it to clicked
+            // above, invoking would cause an infinite loop otherwise.
+            b.related_action = null;
+        }
+
+        return b;
+    }
+
+    /**
      * Given a list of buttons, creates a "pill-style" tool item that can be appended to this
      * toolbar.  Optionally adds spacers "before" and "after" the buttons (those terms depending
      * on Gtk.TextDirection)

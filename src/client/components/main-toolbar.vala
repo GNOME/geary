@@ -6,8 +6,8 @@
 
 // Draws the main toolbar.
 public class MainToolbar : Gtk.Box {
-    public FolderMenu copy_folder_menu { get; private set; default = new FolderMenu(); }
-    public FolderMenu move_folder_menu { get; private set; default = new FolderMenu(); }
+    public FolderPopover copy_folder_menu { get; private set; default = new FolderPopover(); }
+    public FolderPopover move_folder_menu { get; private set; default = new FolderPopover(); }
     public string account { get; set; }
     public string folder { get; set; }
     public bool show_close_button { get; set; default = false; }
@@ -103,9 +103,9 @@ public class MainToolbar : Gtk.Box {
         insert.clear();
         insert.add(conversation_header.create_menu_button("marker-symbolic", mark_menu,
             GearyController.ACTION_MARK_AS_MENU));
-        insert.add(conversation_header.create_menu_button(rtl ? "tag-rtl-symbolic" : "tag-symbolic",
+        insert.add(conversation_header.create_popover_button(rtl ? "tag-rtl-symbolic" : "tag-symbolic",
             copy_folder_menu, GearyController.ACTION_COPY_MENU));
-        insert.add(conversation_header.create_menu_button("folder-symbolic", move_folder_menu,
+        insert.add(conversation_header.create_popover_button("folder-symbolic", move_folder_menu,
             GearyController.ACTION_MOVE_MENU));
         conversation_header.add_start(conversation_header.create_pill_buttons(insert));
         

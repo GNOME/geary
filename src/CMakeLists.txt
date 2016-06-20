@@ -332,7 +332,7 @@ client/accounts/login-dialog.vala
 
 client/components/conversation-find-bar.vala
 client/components/count-badge.vala
-client/components/folder-menu.vala
+client/components/folder-popover.vala
 client/components/icon-factory.vala
 client/components/main-toolbar.vala
 client/components/main-window.vala

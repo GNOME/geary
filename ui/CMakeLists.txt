@@ -10,6 +10,7 @@ set(RESOURCE_LIST
   STRIPBLANKS "composer_accelerators.ui"
   STRIPBLANKS "edit_alternate_emails.glade"
   STRIPBLANKS "find_bar.glade"
+  STRIPBLANKS "folder-popover.ui"
   STRIPBLANKS "login.glade"
   STRIPBLANKS "password-dialog.glade"
   STRIPBLANKS "preferences.glade"
