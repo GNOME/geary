@@ -8,8 +8,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: geary master\n"
-"POT-Creation-Date: 2016-06-18 14:06+0000\n"
-"PO-Revision-Date: 2016-06-20 15:08+0200\n"
+"POT-Creation-Date: 2016-06-20 13:12+0000\n"
+"PO-Revision-Date: 2016-06-20 15:12+0200\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: Español; Castellano <gnome-es-list@gnome.org>\n"
 "Language: es\n"
@@ -282,7 +282,7 @@ msgstr "S"
 msgid "Unstar"
 msgstr "Quitar el destaque"
 
-#: C/shortcuts.page:48(key) C/shortcuts.page:142(key)
+#: C/shortcuts.page:48(key) C/shortcuts.page:146(key)
 msgid "D"
 msgstr "D"
 
@@ -311,10 +311,28 @@ msgstr ""
 "key><key>U</key></keyseq>"
 
 #: C/shortcuts.page:59(p)
+#| msgid "Label a conversation"
+msgid "Open the Label Conversation menu"
+msgstr "Abrir el menú Etiquetar una conversación"
+
+#: C/shortcuts.page:60(key) C/shortcuts.page:170(key)
+msgid "L"
+msgstr "L"
+
+#: C/shortcuts.page:63(p)
+#| msgid "Label or move a conversation"
+msgid "Open the Move Conversation menu"
+msgstr "Abrir el menú Mover una conversación"
+
+#: C/shortcuts.page:64(key)
+msgid "M"
+msgstr "M"
+
+#: C/shortcuts.page:67(p)
 msgid "Move focus to the next/previous pane"
 msgstr "Mover el foco al panel siguiente/anterior"
 
-#: C/shortcuts.page:60(p)
+#: C/shortcuts.page:68(p)
 msgid ""
 "<keyseq><key>F6</key></keyseq> / <keyseq><key>Shift</key><key>F6</key></"
 "keyseq>"
@@ -322,97 +340,80 @@ msgstr ""
 "<keyseq><key>F6</key></keyseq> / <keyseq><key>Mayús</key><key>F6</key></"
 "keyseq>"
 
-#: C/shortcuts.page:63(p)
+#: C/shortcuts.page:71(p)
 msgid "Move focus to conversation list"
 msgstr "Mover el foco a lista de conversaciones"
 
-#: C/shortcuts.page:64(key) C/shortcuts.page:80(key) C/shortcuts.page:96(key)
-#: C/shortcuts.page:100(key) C/shortcuts.page:104(key)
+#: C/shortcuts.page:72(key) C/shortcuts.page:88(key) C/shortcuts.page:104(key)
 #: C/shortcuts.page:108(key) C/shortcuts.page:112(key)
 #: C/shortcuts.page:116(key) C/shortcuts.page:120(key)
 #: C/shortcuts.page:130(key) C/shortcuts.page:134(key)
-#: C/shortcuts.page:142(key) C/shortcuts.page:150(key)
+#: C/shortcuts.page:138(key) C/shortcuts.page:146(key)
 #: C/shortcuts.page:154(key) C/shortcuts.page:158(key)
 #: C/shortcuts.page:162(key) C/shortcuts.page:166(key)
-#: C/shortcuts.page:170(key)
+#: C/shortcuts.page:170(key) C/shortcuts.page:174(key)
 msgid "Ctrl"
 msgstr "Ctrl"
 
-#: C/shortcuts.page:64(key) C/shortcuts.page:150(key)
+#: C/shortcuts.page:72(key) C/shortcuts.page:154(key)
 msgid "B"
 msgstr "B"
 
-#: C/shortcuts.page:67(p)
+#: C/shortcuts.page:75(p)
 msgid "Jump to next (older) conversation"
 msgstr "Ir a la siguiente conversación (más antigua)"
 
-#: C/shortcuts.page:68(key)
-msgid "j"
-msgstr "j"
+#: C/shortcuts.page:76(key)
+msgid "J"
+msgstr "J"
 
-#: C/shortcuts.page:71(p)
+#: C/shortcuts.page:79(p)
 msgid "Jump to previous (newer) conversation"
 msgstr "Ir a la conversación anterior (más reciente)"
 
-#: C/shortcuts.page:72(key)
-msgid "k"
-msgstr "k"
+#: C/shortcuts.page:80(key) C/shortcuts.page:166(key)
+msgid "K"
+msgstr "K"
 
-#: C/shortcuts.page:75(p)
+#: C/shortcuts.page:83(p)
 msgid "Toggle spam"
 msgstr "Marcar o desmarcar como «spam»"
 
-#: C/shortcuts.page:76(p)
+#: C/shortcuts.page:84(p)
 msgid "<keyseq><key>Ctrl</key><key>J</key></keyseq> or <key>!</key>"
 msgstr "<keyseq><key>Ctrl</key><key>J</key></keyseq> o <key>!</key>"
 
-#: C/shortcuts.page:79(p)
+#: C/shortcuts.page:87(p)
 msgid "Quit"
 msgstr "Salir"
 
-#: C/shortcuts.page:80(key)
+#: C/shortcuts.page:88(key)
 msgid "Q"
 msgstr "Q"
 
-#: C/shortcuts.page:83(p)
+#: C/shortcuts.page:91(p)
 msgid "Zoom in"
 msgstr "Acercar"
 
-#: C/shortcuts.page:84(p)
+#: C/shortcuts.page:92(p)
 msgid "<keyseq><key>Ctrl</key><key>=</key></keyseq> or <key>=</key>"
 msgstr "<keyseq><key>Ctrl</key><key>=</key></keyseq> o <key>=</key>"
 
-#: C/shortcuts.page:87(p)
+#: C/shortcuts.page:95(p)
 msgid "Zoom out"
 msgstr "Alejar"
 
-#: C/shortcuts.page:88(p)
+#: C/shortcuts.page:96(p)
 msgid "<keyseq><key>Ctrl</key><key>-</key></keyseq> or <key>-</key>"
 msgstr "<keyseq><key>Ctrl</key><key>-</key></keyseq> o <key>-</key>"
 
-#: C/shortcuts.page:91(p)
+#: C/shortcuts.page:99(p)
 msgid "Reset zoom"
 msgstr "Restablecer la ampliación"
 
-#: C/shortcuts.page:92(p)
+#: C/shortcuts.page:100(p)
 msgid "<keyseq><key>Ctrl</key><key>0</key></keyseq> or <key>0</key>"
 msgstr "<keyseq><key>Ctrl</key><key>0</key></keyseq> o <key>0</key>"
-
-#: C/shortcuts.page:95(p) C/preferences.page:10(title)
-msgid "Preferences"
-msgstr "Preferencias"
-
-#: C/shortcuts.page:96(key)
-msgid "E"
-msgstr "E"
-
-#: C/shortcuts.page:99(p) C/accounts.page:10(title)
-msgid "Accounts"
-msgstr "Cuentas"
-
-#: C/shortcuts.page:100(key)
-msgid "M"
-msgstr "M"
 
 #: C/shortcuts.page:103(p)
 msgid "Close composer window"
@@ -461,80 +462,80 @@ msgstr ""
 "tenga el foco."
 
 #: C/shortcuts.page:129(p)
+msgid "Attach file"
+msgstr "Adjuntar archivo"
+
+#: C/shortcuts.page:130(key)
+msgid "T"
+msgstr "T"
+
+#: C/shortcuts.page:133(p)
 msgid "Quote text"
 msgstr "Citar texto"
 
-#: C/shortcuts.page:130(key)
+#: C/shortcuts.page:134(key)
 msgid "]"
 msgstr "]"
 
-#: C/shortcuts.page:133(p)
+#: C/shortcuts.page:137(p)
 msgid "Unquote text"
 msgstr "Eliminar cita de texto"
 
-#: C/shortcuts.page:134(key)
+#: C/shortcuts.page:138(key)
 msgid "["
 msgstr "["
 
-#: C/shortcuts.page:137(p)
+#: C/shortcuts.page:141(p)
 msgid "Close composer"
 msgstr "Cerrar la ventana del editor"
 
-#: C/shortcuts.page:138(p)
+#: C/shortcuts.page:142(p)
 msgid "<keyseq><key>Ctrl</key><key>W</key></keyseq> or <key>Esc</key>"
 msgstr "<keyseq><key>Ctrl</key><key>W</key></keyseq> o <key>Esc</key>"
 
-#: C/shortcuts.page:141(p)
+#: C/shortcuts.page:145(p)
 msgid "Detach composer"
 msgstr "Desacoplar la ventana del editor"
 
-#: C/shortcuts.page:146(p)
+#: C/shortcuts.page:150(p)
 msgid "These shortcuts are only active in composers in rich text mode."
 msgstr ""
 "Éstos atajos están activos sólo en ventanas de redacción en modo texto "
 "enriquecido."
 
-#: C/shortcuts.page:149(p)
+#: C/shortcuts.page:153(p)
 msgid "Bold text"
 msgstr "Texto en negritas"
 
-#: C/shortcuts.page:153(p)
+#: C/shortcuts.page:157(p)
 msgid "Italicize text"
 msgstr "Texto en cursiva"
 
-#: C/shortcuts.page:154(key)
+#: C/shortcuts.page:158(key)
 msgid "I"
 msgstr "I"
 
-#: C/shortcuts.page:157(p)
+#: C/shortcuts.page:161(p)
 msgid "Underline text"
 msgstr "Subrayar el texto"
 
-#: C/shortcuts.page:158(key)
+#: C/shortcuts.page:162(key)
 msgid "U"
 msgstr "U"
 
-#: C/shortcuts.page:161(p)
+#: C/shortcuts.page:165(p)
 msgid "Strike text"
 msgstr "Tachar el texto"
 
-#: C/shortcuts.page:162(key)
-msgid "K"
-msgstr "K"
-
-#: C/shortcuts.page:165(p)
+#: C/shortcuts.page:169(p)
 msgid "Insert a link"
 msgstr "Insertar un enlace"
 
-#: C/shortcuts.page:166(key)
-msgid "L"
-msgstr "L"
-
-#: C/shortcuts.page:169(p)
+#: C/shortcuts.page:173(p)
 msgid "Remove formatting"
 msgstr "Eliminar el formato"
 
-#: C/shortcuts.page:170(key)
+#: C/shortcuts.page:174(key)
 msgid "Space"
 msgstr "Espacio"
 
@@ -699,6 +700,10 @@ msgstr ""
 "<input>from</input>, y <input>to</input> soportan <input>me</input>, como "
 "argumento, que busca la cuenta de dirección de correo electrónico en el "
 "contexto apropiado."
+
+#: C/preferences.page:10(title)
+msgid "Preferences"
+msgstr "Preferencias"
 
 #: C/preferences.page:11(p)
 msgid ""
@@ -1176,6 +1181,10 @@ msgstr ""
 "usuario puede eliminarlos manualmente. El servidor eliminará automáticamente "
 "los mensajes de esta carpeta pasados 30 días."
 
+#: C/accounts.page:10(title)
+msgid "Accounts"
+msgstr "Cuentas"
+
 #: C/accounts.page:13(title)
 msgid "Adding accounts"
 msgstr "Añadir cuentas"
@@ -1312,3 +1321,12 @@ msgid "translator-credits"
 msgstr ""
 "Adolfo Jayme Barrientos <fitojb@ubuntu.com>, 2014\n"
 "Daniel Mustieles <daniel.mustieles@gmail.com>, 2014"
+
+#~ msgid "j"
+#~ msgstr "j"
+
+#~ msgid "k"
+#~ msgstr "k"
+
+#~ msgid "E"
+#~ msgstr "E"
