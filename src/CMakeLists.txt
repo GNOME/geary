@@ -574,6 +574,7 @@ set(VALAC_OPTIONS
     --enable-checking
     --debug
     --enable-deprecated
+    --fatal-warnings
     ${EXTRA_VALA_OPTIONS}
 )
 
