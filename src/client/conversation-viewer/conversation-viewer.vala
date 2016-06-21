@@ -695,7 +695,7 @@ public class ConversationViewer : Gtk.Stack {
             is_draft
         );
         conversation_email.mark_email.connect(on_mark_email);
-        conversation_email.mark_email_from.connect(on_mark_email_from);
+        conversation_email.mark_email_from_here.connect(on_mark_email_from_here);
 
         ConversationMessage conversation_message = conversation_email.primary_message;
         conversation_message.body_box.button_release_event.connect_after((event) => {
@@ -783,23 +783,23 @@ public class ConversationViewer : Gtk.Stack {
         return SearchState.NONE;
     }
 
-    private void on_mark_email(Geary.Email email,
+    private void on_mark_email(ConversationEmail view,
                                Geary.NamedFlag? to_add,
                                Geary.NamedFlag? to_remove) {
         Gee.Collection<Geary.EmailIdentifier> ids =
             new Gee.LinkedList<Geary.EmailIdentifier>();
-        ids.add(email.id);
+        ids.add(view.email.id);
         mark_emails(ids, flag_to_flags(to_add), flag_to_flags(to_remove));
     }
 
-    private void on_mark_email_from(Geary.Email email,
-                                    Geary.NamedFlag? to_add,
-                                    Geary.NamedFlag? to_remove) {
+    private void on_mark_email_from_here(ConversationEmail view,
+                                         Geary.NamedFlag? to_add,
+                                         Geary.NamedFlag? to_remove) {
         Gee.Collection<Geary.EmailIdentifier> ids =
             new Gee.LinkedList<Geary.EmailIdentifier>();
-        ids.add(email.id);
+        ids.add(view.email.id);
         foreach (Geary.Email other in this.emails) {
-            if (Geary.Email.compare_sent_date_ascending(email, other) < 0) {
+            if (Geary.Email.compare_sent_date_ascending(view.email, other) < 0) {
                 ids.add(other.id);
             }
         }

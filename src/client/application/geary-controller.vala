@@ -1498,17 +1498,22 @@ public class GearyController : Geary.BaseObject {
             conversations_selected(selected_conversations, current_folder);
         }
     }
-    
+
     private void on_conversation_activated(Geary.App.Conversation activated) {
         // Currently activating a conversation is only available for drafts folders.
         if (current_folder == null || current_folder.special_folder_type !=
             Geary.SpecialFolderType.DRAFTS)
             return;
-        
+
         // TODO: Determine how to map between conversations and drafts correctly.
-        on_edit_draft(activated.get_latest_recv_email(Geary.App.Conversation.Location.IN_FOLDER));
+        Geary.Email draft = activated.get_latest_recv_email(
+            Geary.App.Conversation.Location.IN_FOLDER
+        );
+        create_compose_widget(
+            ComposerWidget.ComposeType.NEW_MESSAGE, draft, null, null, true
+        );
     }
-    
+
     private void on_special_folder_type_changed(Geary.Folder folder, Geary.SpecialFolderType old_type,
         Geary.SpecialFolderType new_type) {
         main_window.folder_list.remove_folder(folder);
@@ -2132,11 +2137,11 @@ public class GearyController : Geary.BaseObject {
         // If we deleted all composer windows without the user cancelling, we can exit.
         return true;
     }
-    
-    // message is the email from whose menu this reply or forward was triggered.  If null,
-    // this was triggered from the headerbar or shortcut.
+
+    // View contains the email from whose menu this reply or forward
+    // was triggered.  If null, this was triggered from the headerbar
+    // or shortcut.
     private void create_reply_forward_widget(ComposerWidget.ComposeType compose_type,
-        Geary.Email? message) {
         string? quote;
         Geary.Email? quote_message = main_window.conversation_viewer.get_selected_email(out quote);
         if (message == null)
@@ -2144,8 +2149,10 @@ public class GearyController : Geary.BaseObject {
         if (quote_message != message)
             quote = null;
         create_compose_widget(compose_type, message, quote);
+                                             owned ConversationEmail? view) {
+        Geary.Email message = (view != null) ? view.email : null;
     }
-    
+
     private void create_compose_widget(ComposerWidget.ComposeType compose_type,
         Geary.Email? referred = null, string? quote = null, string? mailto = null,
         bool is_draft = false) {
@@ -2315,27 +2322,27 @@ public class GearyController : Geary.BaseObject {
     private void on_new_message() {
         create_compose_widget(ComposerWidget.ComposeType.NEW_MESSAGE);
     }
-    
-    private void on_reply_to_message(Geary.Email message) {
-        create_reply_forward_widget(ComposerWidget.ComposeType.REPLY, message);
+
+    private void on_reply_to_message(ConversationEmail target_view) {
+        create_reply_forward_widget(ComposerWidget.ComposeType.REPLY, target_view);
     }
-    
+
     private void on_reply_to_message_action() {
         create_reply_forward_widget(ComposerWidget.ComposeType.REPLY, null);
     }
-    
-    private void on_reply_all_message(Geary.Email message) {
-        create_reply_forward_widget(ComposerWidget.ComposeType.REPLY_ALL, message);
+
+    private void on_reply_all_message(ConversationEmail target_view) {
+        create_reply_forward_widget(ComposerWidget.ComposeType.REPLY_ALL, target_view);
     }
-    
+
     private void on_reply_all_message_action() {
         create_reply_forward_widget(ComposerWidget.ComposeType.REPLY_ALL, null);
     }
-    
-    private void on_forward_message(Geary.Email message) {
-        create_reply_forward_widget(ComposerWidget.ComposeType.FORWARD, message);
+
+    private void on_forward_message(ConversationEmail target_view) {
+        create_reply_forward_widget(ComposerWidget.ComposeType.FORWARD, target_view);
     }
-    
+
     private void on_forward_message_action() {
         create_reply_forward_widget(ComposerWidget.ComposeType.FORWARD, null);
     }
@@ -2654,14 +2661,16 @@ public class GearyController : Geary.BaseObject {
         }
     }
 
-    private void on_edit_draft(Geary.Email draft) {
-        create_compose_widget(ComposerWidget.ComposeType.NEW_MESSAGE, draft, null, null, true);
+    private void on_edit_draft(ConversationEmail draft_view) {
+        create_compose_widget(
+            ComposerWidget.ComposeType.NEW_MESSAGE, draft_view.email, null, null, true
+        );
     }
 
 
-    private void on_view_source(Geary.Email message) {
-        string source = (message.header.buffer.to_string() +
-                         message.body.buffer.to_string());
+    private void on_view_source(ConversationEmail email_view) {
+        string source = (email_view.email.header.buffer.to_string() +
+                         email_view.email.body.buffer.to_string());
         string temporary_filename;
         try {
             int temporary_handle = FileUtils.open_tmp("geary-message-XXXXXX.txt",

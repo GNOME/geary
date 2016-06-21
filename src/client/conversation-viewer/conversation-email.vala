@@ -126,22 +126,22 @@ public class ConversationEmail : Gtk.Box {
     private Gtk.Menu attachments_menu;
 
     /** Fired when the user clicks "reply" in the message menu. */
-    public signal void reply_to_message(Geary.Email message);
+    public signal void reply_to_message();
 
     /** Fired when the user clicks "reply all" in the message menu. */
-    public signal void reply_all_message(Geary.Email message);
+    public signal void reply_all_message();
 
     /** Fired when the user clicks "forward" in the message menu. */
-    public signal void forward_message(Geary.Email message);
+    public signal void forward_message();
 
     /** Fired when the user updates the email's flags. */
     public signal void mark_email(
-        Geary.Email email, Geary.NamedFlag? to_add, Geary.NamedFlag? to_remove
+        Geary.NamedFlag? to_add, Geary.NamedFlag? to_remove
     );
 
-    /** Fired when the user updates flags for this email and all emails down. */
-    public signal void mark_email_from(
-        Geary.Email email, Geary.NamedFlag? to_add, Geary.NamedFlag? to_remove
+    /** Fired when the user updates flags for this email and all others down. */
+    public signal void mark_email_from_here(
+        Geary.NamedFlag? to_add, Geary.NamedFlag? to_remove
     );
 
     /** Fired when the user saves an inline displayed image. */
@@ -157,10 +157,10 @@ public class ConversationEmail : Gtk.Box {
     public signal void save_attachments(Gee.Collection<AttachmentInfo> attachments);
 
     /** Fired the edit draft button is clicked. */
-    public signal void edit_draft(Geary.Email email);
+    public signal void edit_draft();
 
     /** Fired when the view source action is activated. */
-    public signal void view_source(Geary.Email email);
+    public signal void view_source();
 
 
     /**
@@ -177,28 +177,28 @@ public class ConversationEmail : Gtk.Box {
         this.contact_store = contact_store;
 
         add_action(ACTION_FORWARD).activate.connect(() => {
-                forward_message(this.email);
+                forward_message();
             });
         add_action(ACTION_PRINT).activate.connect(() => {
                 print();
             });
         add_action(ACTION_MARK_READ).activate.connect(() => {
-                mark_email(this.email, null, Geary.EmailFlags.UNREAD);
+                mark_email(null, Geary.EmailFlags.UNREAD);
             });
         add_action(ACTION_MARK_UNREAD).activate.connect(() => {
-                mark_email(this.email, Geary.EmailFlags.UNREAD, null);
+                mark_email(Geary.EmailFlags.UNREAD, null);
             });
         add_action(ACTION_MARK_UNREAD_DOWN).activate.connect(() => {
-                mark_email_from(this.email, Geary.EmailFlags.UNREAD, null);
+                mark_email_from_here(Geary.EmailFlags.UNREAD, null);
             });
         add_action(ACTION_OPEN_ATTACHMENTS).activate.connect(() => {
                 attachments_activated(selected_attachments);
             });
         add_action(ACTION_REPLY_ALL).activate.connect(() => {
-                reply_all_message(this.email);
+                reply_all_message();
             });
         add_action(ACTION_REPLY_SENDER).activate.connect(() => {
-                reply_to_message(this.email);
+                reply_to_message();
             });
         add_action(ACTION_SAVE_ATTACHMENTS).activate.connect(() => {
                 save_attachments(selected_attachments);
@@ -207,13 +207,13 @@ public class ConversationEmail : Gtk.Box {
                 save_attachments(displayed_attachments);
             });
         add_action(ACTION_STAR).activate.connect(() => {
-                mark_email(this.email, Geary.EmailFlags.FLAGGED, null);
+                mark_email(Geary.EmailFlags.FLAGGED, null);
             });
         add_action(ACTION_UNSTAR).activate.connect(() => {
-                mark_email(this.email, null, Geary.EmailFlags.FLAGGED);
+                mark_email(null, Geary.EmailFlags.FLAGGED);
             });
         add_action(ACTION_VIEW_SOURCE).activate.connect(() => {
-                view_source(this.email);
+                view_source();
             });
         insert_action_group("eml", message_actions);
 
@@ -258,7 +258,7 @@ public class ConversationEmail : Gtk.Box {
         if (is_draft) {
             draft_infobar.show();
             draft_infobar.response.connect((infobar, response_id) => {
-                    if (response_id == 1) { edit_draft(email); }
+                    if (response_id == 1) { edit_draft(); }
                 });
         }
 
@@ -407,7 +407,7 @@ public class ConversationEmail : Gtk.Box {
 
     private void on_flag_remote_images(ConversationMessage view) {
         // XXX check we aren't already auto loading the image
-        mark_email(email, Geary.EmailFlags.LOAD_REMOTE_IMAGES, null);
+        mark_email(Geary.EmailFlags.LOAD_REMOTE_IMAGES, null);
     }
 
 
