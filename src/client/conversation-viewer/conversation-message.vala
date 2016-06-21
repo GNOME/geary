@@ -9,22 +9,22 @@
 /**
  * A widget for displaying an {@link Geary.RFC822.Message}.
  *
- * This widget corresponds to {@link Geary.RFC822.Message}, displaying
+ * This view corresponds to {@link Geary.RFC822.Message}, displaying
  * both the message's headers and body. Any attachments and sub
  * messages are handled by {@link ConversationEmail}, which typically
  * embeds at least one instance of this class.
  */
 [GtkTemplate (ui = "/org/gnome/Geary/conversation-message.ui")]
 public class ConversationMessage : Gtk.Box {
-    
 
-    // Internal class to associate inline image buffers (replaced by rotated scaled versions of
-    // them) so they can be saved intact if the user requires it
+    // Internal class to associate inline image buffers (replaced by
+    // rotated scaled versions of them) so they can be saved intact if
+    // the user requires it
     private class ReplacedImage : Geary.BaseObject {
         public string id;
         public string filename;
         public Geary.Memory.Buffer buffer;
-        
+
         public ReplacedImage(int replaced_number, string filename, Geary.Memory.Buffer buffer) {
             id = "%X".printf(replaced_number);
             this.filename = filename;
@@ -56,23 +56,25 @@ public class ConversationMessage : Gtk.Box {
     private const string ACTION_SELECT_ALL = "select_all";
 
 
-    // The message being displayed
+    /** The specific RFC822 message displayed by this view. */
     public Geary.RFC822.Message message { get; private set; }
 
-    // The HTML viewer to view the emails.
-    public ConversationWebView web_view { get; private set; }
-
-    // The allocation for the web view
+    /** Current allocated size of the HTML body view. */
     public Gdk.Rectangle web_view_allocation { get; private set; }
 
-    // Has the message body been been fully loaded?
+    /** Specifies if the message body been been fully loaded. */
     public bool is_loading_complete = false;
 
+    /** Box containing the preview and full header widgets.  */
     [GtkChild]
-    public Gtk.Box summary_box; // not yet supported: { get; private set; }
+    internal Gtk.Box summary_box;
 
+    /** Box that InfoBar widgets should be added to. */
     [GtkChild]
-    public Gtk.Box infobar_box; // not yet supported: { get; private set; }
+    internal Gtk.Box infobar_box;
+
+    /** HTML view that displays the message body. */
+    internal ConversationWebView web_view { get; private set; }
 
     [GtkChild]
     private Gtk.Revealer preview_revealer;
@@ -147,19 +149,26 @@ public class ConversationMessage : Gtk.Box {
     // Message-specific actions
     private SimpleActionGroup message_actions = new SimpleActionGroup();
 
-    // Fired when an attachment is displayed inline
+    /** Fired when an attachment is added for inline display. */
     public signal void attachment_displayed_inline(string id);
 
-    // Fired when remote image load requested for sender
+    /** Fired when the user requests remote images be loaded. */
     public signal void flag_remote_images();
 
-    // Fired when remote image load requested for sender
+    /** Fired when the user requests remote images be always loaded. */
     public signal void remember_remote_images();
 
-    // Fired on message image save action is activated
+    /** Fired when the user saves an inline displayed image. */
     public signal void save_image(string? filename, Geary.Memory.Buffer buffer);
 
 
+    /**
+     * Constructs a new view to display an RFC 823 message headers and body.
+     *
+     * This method sets up most of the user interface for displaying
+     * the message, but does not attempt any possibly long-running
+     * loading processes.
+     */
     public ConversationMessage(Geary.RFC822.Message message,
                                Geary.ContactStore contact_store,
                                bool always_load_remote_images) {
@@ -244,6 +253,9 @@ public class ConversationMessage : Gtk.Box {
         body_box.pack_start(web_view, true, true, 0);
     }
 
+    /**
+     * Shows the complete message and hides the preview headers.
+     */
     public void show_message_body(bool include_transitions=true) {
         Gtk.RevealerTransitionType revealer = preview_revealer.get_transition_type();
         if (!include_transitions) {
@@ -267,12 +279,18 @@ public class ConversationMessage : Gtk.Box {
         body_revealer.set_transition_type(revealer);
     }
 
+    /**
+     * Hides the complete message and shows the preview headers.
+     */
     public void hide_message_body() {
         preview_revealer.set_reveal_child(true);
         header_revealer.set_reveal_child(false);
         body_revealer.set_reveal_child(false);
     }
 
+    /**
+     * Starts loading the avatar for the sender of the message.
+     */
     public async void load_avatar(Soup.Session session, Cancellable load_cancellable) {
         // Queued messages are cancelled in ConversationViewer.clear()
         // rather than here using a callback on load_cancellable since
@@ -296,6 +314,9 @@ public class ConversationMessage : Gtk.Box {
         }
     }
 
+    /**
+     * Starts loading the message body in the HTML view.
+     */
     public async void load_message_body(Cancellable load_cancelled) {
         bool remote_images = false;
         bool load_images = false;
@@ -359,6 +380,9 @@ public class ConversationMessage : Gtk.Box {
         web_view.load_string(body_text, "text/html", "UTF8", "");
     }
 
+    /**
+     * Highlights user search terms in the message view.
+     */
     public void highlight_search_terms(Gee.Set<string> search_matches) {
         // XXX Need to highlight subject, sender and recipient matches too
 
@@ -381,6 +405,9 @@ public class ConversationMessage : Gtk.Box {
         web_view.set_highlight_text_matches(true);
     }
 
+    /**
+     * Disables highlighting of any search terms in the message view.
+     */
     public void unmark_search_terms() {
         web_view.set_highlight_text_matches(false);
         web_view.unmark_text_matches();

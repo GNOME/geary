@@ -9,7 +9,7 @@
 /**
  * A widget for displaying an email in a conversation.
  *
- * This widget corresponds to {@link Geary.Email}, displaying the
+ * This view corresponds to {@link Geary.Email}, displaying the
  * email's primary message (a {@link Geary.RFC822.Message}), any
  * sub-messages (also instances of {@link Geary.RFC822.Message}) and
  * attachments. The RFC822 messages are themselves displayed by {@link
@@ -54,16 +54,16 @@ public class ConversationEmail : Gtk.Box {
     private const string ACTION_VIEW_SOURCE = "view_source";
 
 
-    // The email message being displayed
+    /** The specific email that is displayed by this view. */
     public Geary.Email email { get; private set; }
 
-    // Is the message body shown or not?
-    public bool is_message_body_visible = false;
+    /** Determines if the email is showing a preview or the full message. */
+    public bool is_collapsed = true;
 
-    // View displaying the email's primary message
+    /** The view displaying the email's primary message headers and body. */
     public ConversationMessage primary_message { get; private set; }
 
-    // Views for messages that are attachments
+    /** Views for attached messages. */
     public Gee.List<ConversationMessage> attached_messages {
         owned get { return this._attached_messages.read_only_view; }
     }
@@ -125,44 +125,51 @@ public class ConversationEmail : Gtk.Box {
 
     private Gtk.Menu attachments_menu;
 
-    // Fired when the user clicks "reply" in the message menu.
+    /** Fired when the user clicks "reply" in the message menu. */
     public signal void reply_to_message(Geary.Email message);
 
-    // Fired when the user clicks "reply all" in the message menu.
+    /** Fired when the user clicks "reply all" in the message menu. */
     public signal void reply_all_message(Geary.Email message);
 
-    // Fired when the user clicks "forward" in the message menu.
+    /** Fired when the user clicks "forward" in the message menu. */
     public signal void forward_message(Geary.Email message);
 
-    // Fired when the user updates the message's flags.
+    /** Fired when the user updates the email's flags. */
     public signal void mark_email(
         Geary.Email email, Geary.NamedFlag? to_add, Geary.NamedFlag? to_remove
     );
 
-    // Fired when the user updates all message's flags from this down.
+    /** Fired when the user updates flags for this email and all emails down. */
     public signal void mark_email_from(
         Geary.Email email, Geary.NamedFlag? to_add, Geary.NamedFlag? to_remove
     );
 
-    // Fired on message image save action is activated
+    /** Fired when the user saves an inline displayed image. */
     public signal void save_image(string? filename, Geary.Memory.Buffer buffer);
 
-    // Fired on link activation in the web_view
+    /** Fired when the user clicks a link in the email. */
     public signal void link_activated(string link);
 
-    // Fired on attachment activation
+    /** Fired when the user activates an attachment. */
     public signal void attachments_activated(Gee.Collection<AttachmentInfo> attachments);
 
-    // Fired when the save attachments action is activated
+    /** Fired when the user saves an attachment. */
     public signal void save_attachments(Gee.Collection<AttachmentInfo> attachments);
 
-    // Fired the edit draft button is clicked.
+    /** Fired the edit draft button is clicked. */
     public signal void edit_draft(Geary.Email email);
 
-    // Fired when the view source action is activated
+    /** Fired when the view source action is activated. */
     public signal void view_source(Geary.Email email);
 
 
+    /**
+     * Constructs a new view to display an email.
+     *
+     * This method sets up most of the user interface for displaying
+     * the complete email, but does not attempt any possibly
+     * long-running loading processes.
+     */
     public ConversationEmail(Geary.Email email,
                              Geary.ContactStore contact_store,
                              bool is_draft) {
@@ -278,6 +285,13 @@ public class ConversationEmail : Gtk.Box {
         update_email_state(false);
     }
 
+    /**
+     * Starts loading the complete email.
+     *
+     * This method will load the avatar and message body for the
+     * primary message and any attached messages, as well as
+     * attachment names, types and icons.
+     */
     public async void start_loading(Cancellable load_cancelled) {
         yield primary_message.load_avatar(
             GearyApplication.instance.controller.avatar_session,
@@ -294,8 +308,11 @@ public class ConversationEmail : Gtk.Box {
         yield load_attachments(load_cancelled);
     }
 
+    /**
+     * Shows the complete message: headers, body and attachments.
+     */
     public void expand_email(bool include_transitions=true) {
-        is_message_body_visible = true;
+        is_collapsed = false;
         get_style_context().add_class("geary_show_body");
         attachments_button.set_sensitive(true);
         star_button.set_sensitive(true);
@@ -304,8 +321,11 @@ public class ConversationEmail : Gtk.Box {
         primary_message.show_message_body(include_transitions);
     }
 
+    /**
+     * Hides the complete message, just showing the header preview.
+     */
     public void collapse_email() {
-        is_message_body_visible = false;
+        is_collapsed = true;
         get_style_context().remove_class("geary_show_body");
         attachments_button.set_sensitive(false);
         star_button.set_sensitive(false);
@@ -314,15 +334,24 @@ public class ConversationEmail : Gtk.Box {
         primary_message.hide_message_body();
     }
 
+    /**
+     * Updates the current email's flags and dependent UI state.
+     */
     public void update_flags(Geary.Email email) {
         this.email.set_flags(email.email_flags);
         update_email_state();
     }
 
+    /**
+     * Determines if the email is flagged as read on the client side only.
+     */
     public bool is_manual_read() {
         return get_style_context().has_class("geary_manual_read");
     }
 
+    /**
+     * Displays the message as read, even if not reflected in its flags.
+     */
     public void mark_manual_read() {
         get_style_context().add_class("geary_manual_read");
     }

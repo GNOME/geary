@@ -7,14 +7,25 @@
  */
 
 /**
- * A Stack for managing the conversation pane and a {@link Geary.App.Conversation}.
+ * A widget for displaying conversations as a list of emails.
  *
- * Unlike ConversationListStore (which sorts by date received), ConversationViewer sorts by the
- * {@link Geary.Email.date} field (the Date: header), as that's the date displayed to the user.
+ * The view displays the current selected {@link
+ * Geary.App.Conversation} from the conversation list. To do so, it
+ * listens to signals from both the list and the current conversation
+ * monitor, updating the email list as needed.
+ *
+ * Unlike ConversationListStore (which sorts by date received),
+ * ConversationViewer sorts by the {@link Geary.Email.date} field (the
+ * Date: header), as that's the date displayed to the user.
+ *
+ * In addition to the email list, docked composers, a progress spinner
+ * and user messages are also displayed, depending on its current
+ * state.
  */
-
 [GtkTemplate (ui = "/org/gnome/Geary/conversation-viewer.ui")]
 public class ConversationViewer : Gtk.Stack {
+
+    /** Fields that must be available for display as a conversation. */
     public const Geary.Email.Field REQUIRED_FIELDS =
         Geary.Email.Field.HEADER
         | Geary.Email.Field.BODY
@@ -24,7 +35,7 @@ public class ConversationViewer : Gtk.Stack {
         | Geary.Email.Field.DATE
         | Geary.Email.Field.FLAGS
         | Geary.Email.Field.PREVIEW;
-    
+
     private const int SELECT_CONVERSATION_TIMEOUT_MSEC = 100;
 
     private enum ViewState {
@@ -32,7 +43,7 @@ public class ConversationViewer : Gtk.Stack {
         CONVERSATION,
         COMPOSE;
     }
-    
+
     private enum SearchState {
         // Search/find states.
         NONE,         // Not in search
@@ -52,22 +63,22 @@ public class ConversationViewer : Gtk.Stack {
         COUNT;
     }
 
-    // Fired when an email is added to the view
+    /** Fired when an email view is added to the conversation list. */
     public signal void email_row_added(ConversationEmail email);
 
-    // Fired when an email is removed from the view
+    /** Fired when an email view is removed from the conversation list. */
     public signal void email_row_removed(ConversationEmail email);
 
-    // Fired when the user marks messages.
+    /** Fired when the user updates the flags for a set of emails. */
     public signal void mark_emails(Gee.Collection<Geary.EmailIdentifier> emails,
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove);
 
-    // Fired when the viewer has been cleared.
+    /** Fired when the email list has been cleared. */
     public signal void cleared();
-    
-    // Current conversation, or null if none.
+
+    /** Current conversation being displayed, or null if none. */
     public Geary.App.Conversation? current_conversation = null;
-    
+
     // Stack pages
     [GtkChild]
     private Gtk.Image splash_page;
@@ -110,7 +121,10 @@ public class ConversationViewer : Gtk.Stack {
     private Geary.State.Machine fsm;
     private uint select_conversation_timeout_id = 0;
     private bool loading_conversations = false;
-    
+
+    /**
+     * Constructs a new conversation view instance.
+     */
     public ConversationViewer() {
         // Setup the conversation list box
         conversation_listbox.set_sort_func((row1, row2) => {
@@ -131,10 +145,10 @@ public class ConversationViewer : Gtk.Stack {
                 // embedded composer and should not be activated.
                 ConversationEmail? msg = row.get_child() as ConversationEmail;
                 if (!row.get_style_context().has_class("geary_last") && msg != null) {
-                    if (msg.is_message_body_visible) {
-                        collapse_email(row);
-                    } else {
+                    if (msg.is_collapsed) {
                         expand_email(row);
+                    } else {
+                        collapse_email(row);
                     }
                 }
             });
@@ -194,11 +208,17 @@ public class ConversationViewer : Gtk.Stack {
 
         do_conversation();
     }
-    
+
+    /**
+     * Returns the last email in the list by sort order, if any.
+     */
     public Geary.Email? get_last_email() {
         return emails.is_empty ? null : emails.last();
     }
-    
+
+    /**
+     * Returns the email with text currently selected, if any.
+     */
     public Geary.Email? get_selected_email(out string? quote) {
         // XXX check to see if there is a email with selected text,
         // if so return that
@@ -206,7 +226,124 @@ public class ConversationViewer : Gtk.Stack {
         return emails.is_empty ? null : emails.last();
     }
 
-    public void check_mark_read() {
+    /**
+     * Displays an email as being read, regardless of its actual flags.
+     */
+    public void mark_manual_read(Geary.EmailIdentifier id) {
+        ConversationEmail? row = conversation_email_for_id(id);
+        if (row != null) {
+            row.mark_manual_read();
+        }
+    }
+
+    /**
+     * Hides a specific email in the conversation.
+     */
+    public void blacklist_by_id(Geary.EmailIdentifier? id) {
+        if (id == null) {
+            return;
+        }
+        email_to_row.get(id).hide();
+    }
+
+    /**
+     * Re-displays a previously blacklisted email.
+     */
+    public void unblacklist_by_id(Geary.EmailIdentifier? id) {
+        if (id == null) {
+            return;
+        }
+        email_to_row.get(id).show();
+    }
+
+    /**
+     * Puts the view into conversation mode, showing the email list.
+     */
+    public void do_conversation() {
+        state = ViewState.CONVERSATION;
+        set_visible_child(loading_page);
+    }
+
+    /**
+     * Puts the view into composer mode, showing a full-height composer.
+     */
+    public void do_compose(ComposerWidget composer) {
+        state = ViewState.COMPOSE;
+        ComposerBox box = new ComposerBox(composer);
+
+        // XXX move the ConversationListView management code into
+        // GearyController or somewhere more appropriate
+        ConversationListView conversation_list_view = ((MainWindow) GearyApplication.instance.controller.main_window).conversation_list_view;
+        Gee.Set<Geary.App.Conversation>? prev_selection = conversation_list_view.get_selected_conversations();
+        conversation_list_view.get_selection().unselect_all();
+        box.vanished.connect((box) => {
+                do_conversation();
+                if (prev_selection.is_empty) {
+                    conversation_list_view.conversations_selected(prev_selection);
+                } else {
+                    conversation_list_view.select_conversations(prev_selection);
+                }
+            });
+        composer_page.pack_start(box);
+        set_visible_child(composer_page);
+    }
+
+    /**
+     * Puts the view into conversation mode, but with an embedded composer.
+     */
+    public void do_embedded_composer(ComposerWidget composer, Geary.Email referred) {
+        state = ViewState.CONVERSATION;
+
+        ComposerEmbed embed = new ComposerEmbed(
+            referred, composer, conversation_page
+        );
+        embed.set_property("name", "composer_embed"); // Bug 764622
+
+        Gtk.ListBoxRow row = new Gtk.ListBoxRow();
+        row.get_style_context().add_class("geary_composer");
+        row.show();
+        row.add(embed);
+        conversation_listbox.add(row);
+
+        embed.loaded.connect((box) => {
+                row.grab_focus();
+            });
+        embed.vanished.connect((box) => {
+                conversation_listbox.remove(row);
+            });
+
+    }
+
+    /**
+     * Shows the in-conversation search UI.
+     */
+    public void show_find_bar() {
+        fsm.issue(SearchEvent.OPEN_FIND_BAR);
+        conversation_find_bar.focus_entry();
+    }
+
+    /**
+     * Displays the next/previous match for an in-conversation search.
+     */
+    public void find(bool forward) {
+        if (!conversation_find_bar.visible)
+            show_find_bar();
+
+        conversation_find_bar.find(forward);
+    }
+
+    /**
+     * Sets the currently visible page of the stack.
+     */
+    private new void set_visible_child(Gtk.Widget widget) {
+        debug("Showing child: %s\n", widget.get_name());
+        base.set_visible_child(widget);
+    }
+
+    /**
+     * Finds any currently visible messages, marks them as being read.
+     */
+    private void check_mark_read() {
         Gee.ArrayList<Geary.EmailIdentifier> email_ids =
             new Gee.ArrayList<Geary.EmailIdentifier>();
 
@@ -253,82 +390,6 @@ public class ConversationViewer : Gtk.Stack {
             flags.add(Geary.EmailFlags.UNREAD);
             mark_emails(email_ids, null, flags);
         }
-    }
-
-    // Use this when an email has been marked read through manual (user) intervention
-    public void mark_manual_read(Geary.EmailIdentifier id) {
-        ConversationEmail? row = conversation_email_for_id(id);
-        if (row != null) {
-            row.mark_manual_read();
-        }
-    }
-
-    public void blacklist_by_id(Geary.EmailIdentifier? id) {
-        if (id == null) {
-            return;
-        }
-        email_to_row.get(id).hide();
-    }
-    
-    public void unblacklist_by_id(Geary.EmailIdentifier? id) {
-        if (id == null) {
-            return;
-        }
-        email_to_row.get(id).show();
-    }
-
-    public void do_conversation() {
-        state = ViewState.CONVERSATION;
-        set_visible_child(loading_page);
-    }
-    
-    public void do_compose(ComposerWidget composer) {
-        state = ViewState.COMPOSE;
-        ComposerBox box = new ComposerBox(composer);
-
-        // XXX move the ConversationListView management code into
-        // GearyController or somewhere more appropriate
-        ConversationListView conversation_list_view = ((MainWindow) GearyApplication.instance.controller.main_window).conversation_list_view;
-        Gee.Set<Geary.App.Conversation>? prev_selection = conversation_list_view.get_selected_conversations();
-        conversation_list_view.get_selection().unselect_all();
-        box.vanished.connect((box) => {
-                do_conversation();
-                if (prev_selection.is_empty) {
-                    conversation_list_view.conversations_selected(prev_selection);
-                } else {
-                    conversation_list_view.select_conversations(prev_selection);
-                }
-            });
-        composer_page.pack_start(box);
-        set_visible_child(composer_page);
-    }
-    
-    public void do_embedded_composer(ComposerWidget composer, Geary.Email referred) {
-        state = ViewState.CONVERSATION;
-        
-        ComposerEmbed embed = new ComposerEmbed(
-            referred, composer, conversation_page
-        );
-        embed.set_property("name", "composer_embed"); // Bug 764622
-
-        Gtk.ListBoxRow row = new Gtk.ListBoxRow();
-        row.get_style_context().add_class("geary_composer");
-        row.show();
-        row.add(embed);
-        conversation_listbox.add(row);
-
-        embed.loaded.connect((box) => {
-                row.grab_focus();
-            });
-        embed.vanished.connect((box) => {
-                conversation_listbox.remove(row);
-            });
-
-    }
-
-    public new void set_visible_child(Gtk.Widget widget) {
-        debug("Showing child: %s\n", widget.get_name());
-        base.set_visible_child(widget);
     }
 
     // Removes all displayed e-mails from the view.
@@ -684,23 +745,11 @@ public class ConversationViewer : Gtk.Stack {
     private void compress_emails() {
         conversation_listbox.get_style_context().add_class("geary_compressed");
     }
-    
+
     //private void decompress_emails() {
     //  conversation_listbox.get_style_context().remove_class("geary_compressed");
     //}
-    
-    public void show_find_bar() {
-        fsm.issue(SearchEvent.OPEN_FIND_BAR);
-        conversation_find_bar.focus_entry();
-    }
-    
-    public void find(bool forward) {
-        if (!conversation_find_bar.visible)
-            show_find_bar();
-        
-        conversation_find_bar.find(forward);
-    }
-    
+
     private void on_update_flags(Geary.Email email) {
         // Nothing to do if we aren't displaying this email.
         if (!email_to_row.has_key(email.id)) {
