@@ -19,8 +19,8 @@ msgstr ""
 "Project-Id-Version: geary master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2016-06-05 08:51+0000\n"
-"PO-Revision-Date: 2016-06-06 16:02+0200\n"
+"POT-Creation-Date: 2016-06-24 16:34+0000\n"
+"PO-Revision-Date: 2016-06-26 08:57+0200\n"
 "Last-Translator: Federico Bruni <fede@inventati.org>\n"
 "Language-Team: Italiano <>\n"
 "Language: it\n"
@@ -406,7 +406,7 @@ msgstr "Compone un nuovo messaggio (Ctrl+N, N)"
 
 #. Reply to a message.
 #: ../src/client/application/geary-controller.vala:441
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1875
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1884
 msgid "_Reply"
 msgstr "_Rispondi"
 
@@ -424,7 +424,7 @@ msgstr "Risponde a tutti (Ctrl+Maiusc+R, Maiusc+R)"
 
 #. Forward a message.
 #: ../src/client/application/geary-controller.vala:452
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1885
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1894
 msgid "_Forward"
 msgstr "_Inoltra"
 
@@ -742,7 +742,7 @@ msgstr[1] "%i corrispondenze (ricomincia dall'inizio)"
 msgid "not found"
 msgstr "non trovato"
 
-#: ../src/client/components/main-window.vala:397
+#: ../src/client/components/main-window.vala:359
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -805,7 +805,7 @@ msgstr "_Rimuovi"
 
 #. Select all.
 #: ../src/client/components/stock.vala:32
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1341
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1350
 msgid "Select _All"
 msgstr "Seleziona _tutto"
 
@@ -813,29 +813,29 @@ msgstr "Seleziona _tutto"
 msgid "_Keep"
 msgstr "_Conserva"
 
-#: ../src/client/composer/composer-widget.vala:72
+#: ../src/client/composer/composer-widget.vala:73
 msgid "Saved"
 msgstr "Salvato"
 
-#: ../src/client/composer/composer-widget.vala:73
+#: ../src/client/composer/composer-widget.vala:74
 msgid "Saving"
 msgstr "Salvataggio"
 
-#: ../src/client/composer/composer-widget.vala:74
+#: ../src/client/composer/composer-widget.vala:75
 msgid "Error saving"
 msgstr "Errore durante il salvataggio"
 
-#: ../src/client/composer/composer-widget.vala:75
+#: ../src/client/composer/composer-widget.vala:76
 msgid "Press Backspace to delete quote"
 msgstr "Premere Backspace per eliminare la citazione"
 
-#: ../src/client/composer/composer-widget.vala:76
+#: ../src/client/composer/composer-widget.vala:77
 msgid "New Message"
 msgstr "Nuovo messaggio"
 
 #. A list of keywords, separated by pipe ("|") characters, that suggest an attachment; since
 #. this is full-word checking, include all variants of each word.  No spaces are allowed.
-#: ../src/client/composer/composer-widget.vala:137
+#: ../src/client/composer/composer-widget.vala:138
 msgid ""
 "attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|"
 "enclosing|encloses|enclosure|enclosures"
@@ -844,95 +844,99 @@ msgstr ""
 "enclosing|encloses|enclosure|enclosures|allegato|allegati|allego|allega|"
 "allegare|allegando|includo"
 
-#: ../src/client/composer/composer-widget.vala:1101
-#: ../src/client/composer/composer-widget.vala:1105
+#: ../src/client/composer/composer-widget.vala:1114
+#: ../src/client/composer/composer-widget.vala:1118
 msgid "Do you want to discard this message?"
 msgstr "Scartare questo messaggio?"
 
-#: ../src/client/composer/composer-widget.vala:1261
+#: ../src/client/composer/composer-widget.vala:1274
 msgid "Send message with an empty subject and body?"
 msgstr "Inviare il messaggio senza l'oggetto e il testo?"
 
-#: ../src/client/composer/composer-widget.vala:1263
+#: ../src/client/composer/composer-widget.vala:1276
 msgid "Send message with an empty subject?"
 msgstr "Inviare il messaggio senza un oggetto?"
 
-#: ../src/client/composer/composer-widget.vala:1265
+#: ../src/client/composer/composer-widget.vala:1278
 msgid "Send message with an empty body?"
 msgstr "Inviare il messaggio senza il testo?"
 
-#: ../src/client/composer/composer-widget.vala:1267
+#: ../src/client/composer/composer-widget.vala:1280
 msgid "Send message without an attachment?"
 msgstr "Inviare il messaggio senza un allegato?"
 
-#: ../src/client/composer/composer-widget.vala:1529
+#: ../src/client/composer/composer-widget.vala:1542
 msgid "Cannot add attachment"
 msgstr "Impossibile aggiungere l'allegato"
 
-#: ../src/client/composer/composer-widget.vala:1540
+#: ../src/client/composer/composer-widget.vala:1553
 #, c-format
 msgid "\"%s\" could not be found."
 msgstr "«%s» non può essere trovato."
 
-#: ../src/client/composer/composer-widget.vala:1547
+#: ../src/client/composer/composer-widget.vala:1560
 #, c-format
 msgid "\"%s\" is a folder."
 msgstr "«%s» è una cartella."
 
-#: ../src/client/composer/composer-widget.vala:1554
+#: ../src/client/composer/composer-widget.vala:1567
 #, c-format
 msgid "\"%s\" is an empty file."
 msgstr "«%s» è un file vuoto."
 
-#: ../src/client/composer/composer-widget.vala:1568
+#: ../src/client/composer/composer-widget.vala:1581
 #, c-format
 msgid "\"%s\" could not be opened for reading."
 msgstr "«%s» non può essere aperto per la lettura."
 
-#: ../src/client/composer/composer-widget.vala:1575
+#: ../src/client/composer/composer-widget.vala:1588
 #, c-format
 msgid "\"%s\" already attached for delivery."
 msgstr "«%s» è già allegato per l'invio."
 
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
-#: ../src/client/composer/composer-widget.vala:1584
+#: ../src/client/composer/composer-widget.vala:1597
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: ../src/client/composer/composer-widget.vala:1645
+#: ../src/client/composer/composer-widget.vala:1658
 msgid "To: "
 msgstr "A: "
 
-#: ../src/client/composer/composer-widget.vala:1648
+#: ../src/client/composer/composer-widget.vala:1661
 msgid "Cc: "
 msgstr "Cc: "
 
-#: ../src/client/composer/composer-widget.vala:1651
+#: ../src/client/composer/composer-widget.vala:1664
 msgid "Bcc: "
 msgstr "Ccn: "
 
-#: ../src/client/composer/composer-widget.vala:1654
+#: ../src/client/composer/composer-widget.vala:1667
 msgid "Reply-To: "
 msgstr "Rispondi a:"
 
-#: ../src/client/composer/composer-widget.vala:1887
+#: ../src/client/composer/composer-widget.vala:1900
 msgid "Select Color"
 msgstr "Seleziona colore"
 
 #. Displayed in the From dropdown to indicate an "alternate email address"
 #. for an account.  The first printf argument will be the alternate email
 #. address, and the second will be the account's primary email address.
-#: ../src/client/composer/composer-widget.vala:2322
+#: ../src/client/composer/composer-widget.vala:2347
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%1$s tramite %2$s"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: ../src/client/composer/composer-widget.vala:2364
+#: ../src/client/composer/composer-widget.vala:2389
 msgid "_From:"
 msgstr "_Da:"
+
+#: ../src/client/composer/spell-check-popover.vala:210
+msgid "Search for more languages"
+msgstr "Cerca altre lingue"
 
 #: ../src/client/conversation-list/formatted-conversation-data.vala:11
 msgid "Me"
@@ -957,54 +961,54 @@ msgstr "Nessun risultato trovato."
 msgid "No conversations in folder."
 msgstr "Nessuna conversazione nella cartella."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:708
+#: ../src/client/conversation-viewer/conversation-viewer.vala:713
 msgid "This message contains remote images."
 msgstr "Questo messaggio contiene immagini remote."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:708
+#: ../src/client/conversation-viewer/conversation-viewer.vala:713
 msgid "Show Images"
 msgstr "Mostra immagini"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:709
+#: ../src/client/conversation-viewer/conversation-viewer.vala:714
 msgid "Always Show From Sender"
 msgstr "Mostra sempre dal mittente"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:733
+#: ../src/client/conversation-viewer/conversation-viewer.vala:738
 msgid "Edit Draft"
 msgstr "Modifica bozza"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:826
+#: ../src/client/conversation-viewer/conversation-viewer.vala:831
 msgid "From:"
 msgstr "Da:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:829
+#: ../src/client/conversation-viewer/conversation-viewer.vala:834
 msgid "To:"
 msgstr "A:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:832
+#: ../src/client/conversation-viewer/conversation-viewer.vala:837
 msgid "Cc:"
 msgstr "Cc:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:835
+#: ../src/client/conversation-viewer/conversation-viewer.vala:840
 msgid "Bcc:"
 msgstr "Ccn:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:838
+#: ../src/client/conversation-viewer/conversation-viewer.vala:843
 msgid "Subject:"
 msgstr "Oggetto:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:841
+#: ../src/client/conversation-viewer/conversation-viewer.vala:846
 msgid "Date:"
 msgstr "Data:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1156
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1165
 #, c-format
 msgid "%u read message"
 msgid_plural "%u read messages"
 msgstr[0] "%u messaggio letto"
 msgstr[1] "%u messaggi letti"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1288
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1297
 #, c-format
 msgid "This message was sent successfully, but could not be saved to %s."
 msgstr ""
@@ -1012,95 +1016,95 @@ msgstr ""
 "salvarlo in %s."
 
 #. Add a menu item for copying the current selection.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1314
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1323
 #: ../ui/composer.glade.h:4
 msgid "_Copy"
 msgstr "_Copia"
 
 #. Add a menu item for copying the address.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1322
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1331
 msgid "Copy _Email Address"
 msgstr "Copia indirizzo _email"
 
 #. Add a menu item for copying the link.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1327
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1336
 #: ../ui/composer.glade.h:17
 msgid "Copy _Link"
 msgstr "Copia co_llegamento"
 
 #. Select message.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1335
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1344
 msgid "Select _Message"
 msgstr "Seleziona _messaggio"
 
 #. Inspect.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1347
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1356
 msgid "_Inspect"
 msgstr "_Ispeziona"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1574
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1583
 msgid "This link appears to go to"
 msgstr "Questo collegamento sembra portare a"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1575
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1584
 msgid "but actually goes to"
 msgstr "ma in realtà va in"
 
 #. If href doesn't look like a URL, something is fishy, so warn the user
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1630
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1639
 msgid " (Invalid?)"
 msgstr "(Non corretto?)"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1736
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1745
 msgid "_Save Image As..."
 msgstr "_Salva immagine come..."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1840
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1849
 msgid "_Save As..."
 msgstr "_Salva come..."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1845
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1854
 msgid "Save All A_ttachments..."
 msgstr "Salva tutti gli a_llegati..."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1865
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1874
 msgid "Save A_ttachment..."
 msgid_plural "Save All A_ttachments..."
 msgstr[0] "Salva a_llegato..."
 msgstr[1] "Salva a_llegati..."
 
 #. Reply to all on a message.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1880
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1889
 msgid "Reply to _All"
 msgstr "Rispondi a _tutti"
 
 #. Mark as read/unread.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1897
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1906
 msgid "_Mark as Read"
 msgstr "_Segna come letto"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1901
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1910
 msgid "_Mark as Unread"
 msgstr "_Segna come da leggere"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1907
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1916
 msgid "Mark Unread From _Here"
 msgstr "Segna come non letto da _qui"
 
 #. Separator.
 #. View original message source.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1922
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1931
 msgid "_View Source"
 msgstr "_Visualizza sorgente"
 
 #. Generate the attachment table.
 #. / Placeholder filename for attachments with no filename.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:2246
-#: ../src/engine/rfc822/rfc822-utils.vala:378
+#: ../src/client/conversation-viewer/conversation-viewer.vala:2255
+#: ../src/engine/rfc822/rfc822-utils.vala:392
 msgid "none"
 msgstr "nulla"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:2381
+#: ../src/client/conversation-viewer/conversation-viewer.vala:2390
 msgid "Failed to open default text editor."
 msgstr "Apertura dell'editor di testo predefinito non riuscita."
 
@@ -1357,7 +1361,7 @@ msgid "%A"
 msgstr "%A"
 
 #: ../src/client/util/util-email.vala:30
-#: ../src/engine/rfc822/rfc822-message.vala:773
+#: ../src/engine/rfc822/rfc822-message.vala:796
 msgid "(no subject)"
 msgstr "(nessun oggetto)"
 
@@ -1466,8 +1470,7 @@ msgstr "Nessuna"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: ../src/engine/imap-db/imap-db-account.vala:98
-#| msgid "attachment"
+#: ../src/engine/imap-db/imap-db-account.vala:99
 msgctxt "Search operator"
 msgid "attachment"
 msgstr "allegato"
@@ -1480,8 +1483,7 @@ msgstr "allegato"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: ../src/engine/imap-db/imap-db-account.vala:107
-#| msgid "bcc"
+#: ../src/engine/imap-db/imap-db-account.vala:108
 msgctxt "Search operator"
 msgid "bcc"
 msgstr "ccn"
@@ -1493,8 +1495,7 @@ msgstr "ccn"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: ../src/engine/imap-db/imap-db-account.vala:115
-#| msgid "body"
+#: ../src/engine/imap-db/imap-db-account.vala:116
 msgctxt "Search operator"
 msgid "body"
 msgstr "corpo"
@@ -1507,8 +1508,7 @@ msgstr "corpo"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: ../src/engine/imap-db/imap-db-account.vala:124
-#| msgid "cc"
+#: ../src/engine/imap-db/imap-db-account.vala:125
 msgctxt "Search operator"
 msgid "cc"
 msgstr "cc"
@@ -1521,8 +1521,7 @@ msgstr "cc"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: ../src/engine/imap-db/imap-db-account.vala:133
-#| msgid "from"
+#: ../src/engine/imap-db/imap-db-account.vala:134
 msgctxt "Search operator"
 msgid "from"
 msgstr "da"
@@ -1534,8 +1533,7 @@ msgstr "da"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: ../src/engine/imap-db/imap-db-account.vala:141
-#| msgid "is"
+#: ../src/engine/imap-db/imap-db-account.vala:142
 msgctxt "Search operator"
 msgid "is"
 msgstr "è"
@@ -1547,8 +1545,7 @@ msgstr "è"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary
 #. User Guide.
-#: ../src/engine/imap-db/imap-db-account.vala:149
-#| msgid "subject"
+#: ../src/engine/imap-db/imap-db-account.vala:150
 msgctxt "Search operator"
 msgid "subject"
 msgstr "oggetto"
@@ -1561,22 +1558,37 @@ msgstr "oggetto"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: ../src/engine/imap-db/imap-db-account.vala:158
-#| msgid "to"
+#: ../src/engine/imap-db/imap-db-account.vala:159
 msgctxt "Search operator"
 msgid "to"
 msgstr "a"
 
-#. Can be typed like "from:me" or "cc:me", etc. as a shorthand
-#. to find mail to or from yourself in search.
+#. Can be typed in the search box after "to:", "cc:" and
+#. "bcc:" e.g.: "to:me". Matches conversations that are
+#. addressed to the user.
 #.
 #. The translated string must be a single word (use '-', '_'
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: ../src/engine/imap-db/imap-db-account.vala:178
+#: ../src/engine/imap-db/imap-db-account.vala:180
+#| msgctxt "Addressable search operator value"
 #| msgid "me"
-msgctxt "Addressable search operator value"
+msgctxt "Search operator value - mail addressed to the user"
+msgid "me"
+msgstr "me"
+
+#. Can be typed in the search box after "from:" i.e.:
+#. "from:me". Matches conversations were sent by the user.
+#.
+#. The translated string must be a single word (use '-', '_'
+#. or similar to combine words into one), should be short, and
+#. also match the translation in "search.page" of the Geary User
+#. Guide.
+#: ../src/engine/imap-db/imap-db-account.vala:192
+#| msgctxt "Addressable search operator value"
+#| msgid "me"
+msgctxt "Search operator value - mail sent by the user"
 msgid "me"
 msgstr "me"
 
@@ -1587,8 +1599,7 @@ msgstr "me"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: ../src/engine/imap-db/imap-db-account.vala:190
-#| msgid "read"
+#: ../src/engine/imap-db/imap-db-account.vala:204
 msgctxt "'is:' search operator value"
 msgid "read"
 msgstr "letto"
@@ -1601,8 +1612,7 @@ msgstr "letto"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: ../src/engine/imap-db/imap-db-account.vala:201
-#| msgid "starred"
+#: ../src/engine/imap-db/imap-db-account.vala:215
 msgctxt "'is:' search operator value"
 msgid "starred"
 msgstr "speciale"
@@ -1614,32 +1624,41 @@ msgstr "speciale"
 #. or similar to combine words into one), should be short, and
 #. also match the translation in "search.page" of the Geary User
 #. Guide.
-#: ../src/engine/imap-db/imap-db-account.vala:211
-#| msgid "unread"
+#: ../src/engine/imap-db/imap-db-account.vala:225
 msgctxt "'is:' search operator value"
 msgid "unread"
 msgstr "nonletto"
 
-#. List of folder names to match for Drafts, separated by |.  Please add localized common
-#. names for the Drafts folder, leaving in the English names as well.  The first in the list
-#. will be the default, so please add the most common localized name to the front.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:587
+#. List of general possible folder names to match for the
+#. Draft mailbox. Separate names using a vertical bar and
+#. put the most common localized name to the front for the
+#. default. English names do not need to be included.
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:626
 msgid "Drafts | Draft"
 msgstr "Bozze | Bozza | Drafts | Draft"
 
-#. List of folder names to match for Sent Mail, separated by |.  Please add localized common
-#. names for the Sent Mail folder, leaving in the English names as well.  The first in the list
-#. will be the default, so please add the most common localized name to the front.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:592
+#. List of general possible folder names to match for the
+#. Sent mailbox. Separate names using a vertical bar and
+#. put the most common localized name to the front for the
+#. default. English names do not need to be included.
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:635
 msgid "Sent | Sent Mail | Sent Email | Sent E-Mail"
 msgstr ""
 "Inviata | Posta inviata | Email inviate | E-mail inviate | Sent | Sent Mail "
 "| Sent Email | Sent E-Mail"
 
-#. List of folder names to match for Spam, separated by |.  Please add localized common
-#. names for the Spam folder, leaving in the English names as well.  The first in the list
-#. will be the default, so please add the most common localized name to the front.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:597
+#. The localised name(s) of the Sent folder name as used
+#. by MS Outlook/Exchange.
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:640
+msgctxt "Outlook localised name"
+msgid "Sent Items"
+msgstr "Messaggi inviati"
+
+#. List of general possible folder names to match for the
+#. Spam mailbox. Separate names using a vertical bar and
+#. put the most common localized name to the front for the
+#. default. English names do not need to be included.
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:650
 msgid ""
 "Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email "
 "| Bulk E-Mail"
@@ -1647,17 +1666,27 @@ msgstr ""
 "Indesiderata | Posta indesiderata | Junk | Spam | Junk Mail | Junk Email | "
 "Junk E-Mail | Bulk Mail | Bulk Email | Bulk E-Mail"
 
-#. List of folder names to match for Trash, separated by |.  Please add localized common
-#. names for the Trash folder, leaving in the English names as well.  The first in the list
-#. will be the default, so please add the most common localized name to the front.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:602
+#. List of general possible folder names to match for the
+#. Trash mailbox. Separate names using a vertical bar and
+#. put the most common localized name to the front for the
+#. default. English names do not need to be included.
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:660
 msgid "Trash | Rubbish | Rubbish Bin"
 msgstr "Cestino | Trash | Rubbish | Rubbish Bin"
 
-#. List of folder names to match for Archive, separated by |.  Please add localized common
-#. names for the Trash folder, leaving in the English names as well.  The first in the list
-#. will be the default, so please add the most common localized name to the front.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:607
+#. The localised name(s) of the Trash folder name as used
+#. by MS Outlook/Exchange.
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:665
+#| msgid "Delete"
+msgctxt "Outlook localised name"
+msgid "Deleted Items"
+msgstr "Messaggi eliminati"
+
+#. List of general possible folder names to match for the
+#. Archive mailbox. Separate names using a vertical bar
+#. and put the most common localized name to the front for
+#. the default. English names do not need to be included.
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:675
 msgid "Archive | Archives"
 msgstr "Archivio | Archivi"
 
@@ -1955,44 +1984,58 @@ msgid "Attach File"
 msgstr "Allega file"
 
 #: ../ui/composer.glade.h:49
+#| msgid "Attach File"
+msgid "Attach File (Ctrl+T)"
+msgstr "Allega file (Ctrl+T)"
+
+#: ../ui/composer.glade.h:50
 msgid "_Include Original Attachments"
 msgstr "_Includi gli allegati originali"
 
-#: ../ui/composer.glade.h:50
+#: ../ui/composer.glade.h:51
 msgid "Include Original Attachments"
 msgstr "Include gli allegati originali"
 
-#. Address(es) e-mail is to be sent to
 #: ../ui/composer.glade.h:52
+#| msgid "Enable _spell checking"
+msgid "Select spell checking language"
+msgstr "Seleziona la lingua del controllo ortografico"
+
+#: ../ui/composer.glade.h:53
+msgid "Spelling language"
+msgstr "Lingua del controllo ortografico"
+
+#. Address(es) e-mail is to be sent to
+#: ../ui/composer.glade.h:55
 msgid "_To"
 msgstr "_A"
 
-#: ../ui/composer.glade.h:53
+#: ../ui/composer.glade.h:56
 msgid "_Cc"
 msgstr "_Cc"
 
-#: ../ui/composer.glade.h:54
+#: ../ui/composer.glade.h:57
 msgid "_Subject"
 msgstr "_Oggetto"
 
-#: ../ui/composer.glade.h:55
+#: ../ui/composer.glade.h:58
 msgid "_Bcc"
 msgstr "Cc_n"
 
-#: ../ui/composer.glade.h:56
+#: ../ui/composer.glade.h:59
 msgid "_Reply-To"
 msgstr "_Rispondi a"
 
 #. Geary account mail will be sent from
-#: ../ui/composer.glade.h:58
+#: ../ui/composer.glade.h:61
 msgid "From"
 msgstr "Da"
 
-#: ../ui/composer.glade.h:59
+#: ../ui/composer.glade.h:62
 msgid "Drop files here"
 msgstr "Trascina i file qui"
 
-#: ../ui/composer.glade.h:60
+#: ../ui/composer.glade.h:63
 msgid "To add them as attachments"
 msgstr "Per aggiungerli come allegati"
 
@@ -2252,4 +2295,3 @@ msgstr "Indirizzo email:"
 #: ../ui/upgrade_dialog.glade.h:1
 msgid "Geary update in progress…"
 msgstr "Aggiornamento dell'applicazione in corso…"
-
