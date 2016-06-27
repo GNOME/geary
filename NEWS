@@ -1,3 +1,40 @@
+Geary 0.11.1 - 27 June 2016
+---------------------------
+
+  * Fix frequent crashes on 32-bit/i686 OS installations (#758621)
+  * Fix error connecting to certain Outlook.com accounts (#766552)
+  * Find special folders with lower case names (#748183)
+  * Find Exchange Sent and Deleted special folders (#748183)
+  * Don't create Archive folders for GMail accounts (#767259)
+  * Use HTTPS for accessing Gravatar.com (#766595)
+    -- Ville Korhonen
+  * Fix text not show when only plain text and image parts (#767438)
+  * Fix crash when is:foo is not translated (#766837)
+  * Make English versions of search ops always work (#766837)
+  * Allow to:me and from:me to be translated separately (#767291)
+  * Fix date typo in NEWS
+    -- Ralph Plawetzki
+  * Updated UI translations:
+    Alexandre Franke (fr)
+    Anders Jonsson (sv)
+    Andika Triwidada (id)
+    Daniel Mustieles (es)
+    Dušan Kazik (sk)
+    Federico Bruni (it)
+    Freire de Almeida (pt_BR)
+    Marek Černocký (cs)
+    Mario Blättermann (de)
+    Muhammet Kara (tr)
+    Piotr Drąg (pl)
+    Rafael Fontenelle (pt_BR)
+    Stas Solovey (ru)
+    Wolfgang Stöggl (de)
+  * Updated Doc translations:
+    Daniel Mustieles (es)
+    Federico Bruni (it)
+    Piotr Drąg (pl)
+    Rafael Fontenelle (pt_BR)
+
 Geary 0.11.0 - 15 May 2016
 --------------------------
 

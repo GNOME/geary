@@ -1,3 +1,21 @@
+geary (0.11.1-1~xenial1) xenial; urgency=medium
+
+  * Fix frequent crashes on 32-bit/i686 OS installations (#758621)
+  * Fix error connecting to certain Outlook.com accounts (#766552)
+  * Find special folders with lower case names (#748183)
+  * Find Exchange Sent and Deleted special folders (#748183)
+  * Don't create Archive folders for GMail accounts (#767259)
+  * Use HTTPS for accessing Gravatar.com (#766595)
+  * Fix text not show when only plain text and image parts (#767438)
+  * Fix crash when is:foo is not translated (#766837)
+  * Make English versions of search ops always work (#766837)
+  * Allow to:me and from:me to be translated separately (#767291)
+  * Fix date typo in NEWS
+  * Updated UI translations
+  * Updated Doc translations
+
+ -- Michael Gratton <mike@vee.net>  Mon, 27 Jun 2016 21:49:01 +1000
+
 geary (0.11.0-1~xenial1) xenial; urgency=medium
 
   * Add archive special folder support (#713986)
