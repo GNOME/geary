@@ -1342,7 +1342,7 @@ namespace GMime {
 	[CCode (cheader_filename = "gmime/gmime.h", cname = "g_mime_locale_language")]
 	public static unowned string locale_language ();
 	[CCode (cheader_filename = "gmime/gmime.h", cname = "g_mime_set_user_charsets")]
-	public static void set_user_charsets (out unowned string charsets);
+	public static void set_user_charsets ([CCode (array_length = false)] string[] charsets);
 	[CCode (cheader_filename = "gmime/gmime.h", cname = "g_mime_shutdown")]
 	public static void shutdown ();
 	[CCode (cheader_filename = "gmime/gmime.h", cname = "g_mime_user_charsets")]

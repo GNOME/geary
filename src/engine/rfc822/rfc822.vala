@@ -14,6 +14,11 @@ public enum TextFormat {
     HTML
 }
 
+// This has the effect of ensuring all non US-ASCII and non-ISO-8859-1
+// headers are always encoded as UTF-8. This should be fine because
+// message bodies are also always sent as UTF-8.
+private const string[] USER_CHARSETS =  { "UTF-8" };
+
 private int init_count = 0;
 
 internal Regex? invalid_filename_character_re = null;
@@ -21,9 +26,10 @@ internal Regex? invalid_filename_character_re = null;
 public void init() {
     if (init_count++ != 0)
         return;
-    
+
     GMime.init(GMime.ENABLE_RFC2047_WORKAROUNDS);
-    
+    GMime.set_user_charsets(USER_CHARSETS);
+
     try {
         invalid_filename_character_re = new Regex("[/\\0]");
     } catch (RegexError e) {
