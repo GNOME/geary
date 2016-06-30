@@ -153,17 +153,27 @@ public class Geary.RFC822.Message : BaseObject {
         // Body: text format (optional)
         GMime.Part? body_text = null;
         if (email.body_text != null) {
-            GMime.StreamMem stream = new GMime.StreamMem.with_buffer(email.body_text.data);
-            GMime.DataWrapper content = new GMime.DataWrapper.with_stream(stream,
-                GMime.ContentEncoding.DEFAULT);
-            
+            GMime.Stream stream = new GMime.StreamMem.with_buffer(email.body_text.data);
+            GMime.ContentEncoding encoding = Geary.RFC822.Utils.get_best_content_encoding(
+                stream, GMime.EncodingConstraint.7BIT
+            );
+            if (encoding == GMime.ContentEncoding.BASE64) {
+                // Base64-encoded text needs to have CR's added after
+                // LF's before encoding, otherwise it breaks
+                // format=flowed. See bug 753528.
+                GMime.StreamFilter filter_stream = new GMime.StreamFilter(stream);
+                filter_stream.add(new GMime.FilterCRLF(true, false));
+                stream = filter_stream;
+            }
+            GMime.DataWrapper content = new GMime.DataWrapper.with_stream(
+                stream, GMime.ContentEncoding.DEFAULT
+            );
             body_text = new GMime.Part();
             body_text.set_content_type(new GMime.ContentType.from_string("text/plain; charset=utf-8; format=flowed"));
             body_text.set_content_object(content);
-            body_text.set_content_encoding(Geary.RFC822.Utils.get_best_content_encoding(stream,
-                GMime.EncodingConstraint.7BIT));
+            body_text.set_content_encoding(encoding);
         }
-        
+
         // Body: HTML format (also optional)
         GMime.Part? body_html = null;
         if (email.body_html != null) {
