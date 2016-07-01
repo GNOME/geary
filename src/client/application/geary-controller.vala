@@ -84,7 +84,6 @@ public class GearyController : Geary.BaseObject {
     private const string MOVE_MESSAGE_TOOLTIP_MULTIPLE = _("Move conversations");
     
     private const int SELECT_FOLDER_TIMEOUT_USEC = 100 * 1000;
-    private const int SEARCH_TIMEOUT_MSEC = 250;
     
     private const string PROP_ATTEMPT_OPEN_ACCOUNT = "attempt-open-account";
     
@@ -122,7 +121,6 @@ public class GearyController : Geary.BaseObject {
     private Geary.Nonblocking.Mutex select_folder_mutex = new Geary.Nonblocking.Mutex();
     private Geary.Account? account_to_select = null;
     private Geary.Folder? previous_non_search_folder = null;
-    private uint search_timeout_id = 0;
     private UpgradeDialog upgrade_dialog;
     private Gee.List<string> pending_mailtos = new Gee.ArrayList<string>();
     private Geary.Nonblocking.Mutex untrusted_host_prompt_mutex = new Geary.Nonblocking.Mutex();
@@ -2796,20 +2794,7 @@ public class GearyController : Geary.BaseObject {
     }
     
     private void on_search_text_changed(string search_text) {
-        // So we don't thrash the disk as the user types, we run the actual
-        // search after a quick delay when they finish typing.
-        if (search_timeout_id != 0)
-            Source.remove(search_timeout_id);
-        
-        search_timeout_id = Timeout.add(SEARCH_TIMEOUT_MSEC, on_search_timeout, Priority.LOW);
-    }
-    
-    private bool on_search_timeout() {
-        search_timeout_id = 0;
-        
-        do_search(main_window.search_bar.search_text);
-        
-        return false;
+        do_search(search_text);
     }
     
     /**

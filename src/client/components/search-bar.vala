@@ -5,8 +5,6 @@
  */
 
 public class SearchBar : Gtk.SearchBar {
-    private const string ICON_CLEAR_NAME = "edit-clear-symbolic";
-    private const string ICON_CLEAR_RTL_NAME = "edit-clear-rtl-symbolic";
     private const string DEFAULT_SEARCH_TEXT = _("Search");
     
     public string search_text { get { return search_entry.text; } }
@@ -23,9 +21,15 @@ public class SearchBar : Gtk.SearchBar {
         // Search entry.
         search_entry.width_chars = 28;
         search_entry.tooltip_text = _("Search all mail in account for keywords (Ctrl+S)");
-        search_entry.changed.connect(on_search_entry_changed);
-        search_entry.key_press_event.connect(on_search_key_press);
-        on_search_entry_changed(); // set initial state
+        search_entry.search_changed.connect(() => {
+            search_text_changed(search_entry.text);
+        });
+        search_entry.stop_search.connect(() => {
+            search_entry.text = "";
+        });
+        search_entry.activate.connect(() => {
+            search_text_changed(search_entry.text);
+        });
         search_entry.has_focus = true;
         
         // Search upgrade progress bar.
@@ -52,25 +56,6 @@ public class SearchBar : Gtk.SearchBar {
     
     public void set_search_placeholder_text(string placeholder) {
         search_entry.placeholder_text = placeholder;
-    }
-    
-    private void on_search_entry_changed() {
-        search_text_changed(search_entry.text);
-        // Enable/disable clear button.
-        search_entry.secondary_icon_name = search_entry.text != "" ?
-            (get_direction() == Gtk.TextDirection.RTL ? ICON_CLEAR_RTL_NAME : ICON_CLEAR_NAME) : null;
-    }
-    
-    private bool on_search_key_press(Gdk.EventKey event) {
-        // Clear box if user hits escape.
-        if (Gdk.keyval_name(event.keyval) == "Escape")
-            search_entry.text = "";
-        
-        // Force search if user hits enter.
-        if (Gdk.keyval_name(event.keyval) == "Return")
-            on_search_entry_changed();
-        
-        return false;
     }
     
     private void on_search_upgrade_start() {
