@@ -8,12 +8,12 @@
 # Mohamad Hasan Al Banna, 2013
 msgid ""
 msgstr ""
-"Project-Id-Version: geary master\n"
+"Project-Id-Version: geary geary-0.11\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2016-06-07 12:28+0000\n"
-"PO-Revision-Date: 2016-06-18 21:04+0700\n"
-"Last-Translator: Andika Triwidada <atriwidada@gnome.org>\n"
+"POT-Creation-Date: 2016-06-19 12:32+0000\n"
+"PO-Revision-Date: 2016-07-01 16:09+0700\n"
+"Last-Translator: Andika Triwidada <andika@gmail.com>\n"
 "Language-Team: Indonesian (http://www.transifex.com/projects/p/geary/"
 "language/id/)\n"
 "Language: id\n"
@@ -622,8 +622,7 @@ msgstr "Tentang %s"
 #: ../src/client/application/geary-controller.vala:1719
 msgid "translator-credits"
 msgstr ""
-"Andika Triwidada <andika@gmail.com>, 2012, 2013\n"
-"\n"
+"Andika Triwidada <andika@gmail.com>, 2012, 2013, 2016\n"
 "Dani Pratomo <elementaryindo@gmail.com>, 2012."
 
 #: ../src/client/application/geary-controller.vala:1977
@@ -1593,24 +1592,34 @@ msgctxt "'is:' search operator value"
 msgid "unread"
 msgstr "unread"
 
-#. List of folder names to match for Drafts, separated by |.  Please add localized common
-#. names for the Drafts folder, leaving in the English names as well.  The first in the list
-#. will be the default, so please add the most common localized name to the front.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:587
+#. List of general possible folder names to match for the
+#. Draft mailbox. Separate names using a vertical bar and
+#. put the most common localized name to the front for the
+#. default. English names do not need to be included.
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:625
 msgid "Drafts | Draft"
 msgstr "Draf"
 
-#. List of folder names to match for Sent Mail, separated by |.  Please add localized common
-#. names for the Sent Mail folder, leaving in the English names as well.  The first in the list
-#. will be the default, so please add the most common localized name to the front.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:592
+#. List of general possible folder names to match for the
+#. Sent mailbox. Separate names using a vertical bar and
+#. put the most common localized name to the front for the
+#. default. English names do not need to be included.
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:634
 msgid "Sent | Sent Mail | Sent Email | Sent E-Mail"
 msgstr "Sent | Sent Mail | Sent Email | Sent E-Mail | Surat Keluar | Terkirim"
 
-#. List of folder names to match for Spam, separated by |.  Please add localized common
-#. names for the Spam folder, leaving in the English names as well.  The first in the list
-#. will be the default, so please add the most common localized name to the front.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:597
+#. The localised name(s) of the Sent folder name as used
+#. by MS Outlook/Exchange.
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:639
+msgctxt "Outlook localised name"
+msgid "Sent Items"
+msgstr "Terkirim"
+
+#. List of general possible folder names to match for the
+#. Spam mailbox. Separate names using a vertical bar and
+#. put the most common localized name to the front for the
+#. default. English names do not need to be included.
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:649
 msgid ""
 "Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email "
 "| Bulk E-Mail"
@@ -1618,17 +1627,26 @@ msgstr ""
 "Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email "
 "| Bulk E-Mail"
 
-#. List of folder names to match for Trash, separated by |.  Please add localized common
-#. names for the Trash folder, leaving in the English names as well.  The first in the list
-#. will be the default, so please add the most common localized name to the front.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:602
+#. List of general possible folder names to match for the
+#. Trash mailbox. Separate names using a vertical bar and
+#. put the most common localized name to the front for the
+#. default. English names do not need to be included.
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:659
 msgid "Trash | Rubbish | Rubbish Bin"
 msgstr "Trash | Rubbish | Rubbish Bin | Sampah | Tong Sampah | Tempat Sampah"
 
-#. List of folder names to match for Archive, separated by |.  Please add localized common
-#. names for the Trash folder, leaving in the English names as well.  The first in the list
-#. will be the default, so please add the most common localized name to the front.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:607
+#. The localised name(s) of the Trash folder name as used
+#. by MS Outlook/Exchange.
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:664
+msgctxt "Outlook localised name"
+msgid "Deleted Items"
+msgstr "Dihapus"
+
+#. List of general possible folder names to match for the
+#. Archive mailbox. Separate names using a vertical bar
+#. and put the most common localized name to the front for
+#. the default. English names do not need to be included.
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:674
 msgid "Archive | Archives"
 msgstr "Arsip | Archive | Archives"
 
@@ -2225,30 +2243,3 @@ msgstr "Alamat surel:"
 #: ../ui/upgrade_dialog.glade.h:1
 msgid "Geary update in progress…"
 msgstr "Pemutakhiran Geary sedang berlangsung..."
-
-#~ msgid "Copyright 2011-2014 Yorba Foundation"
-#~ msgstr "Hak Cipta 2011-2014 Yorba Foundation"
-
-#~ msgid "_Delete"
-#~ msgstr "_Hapus"
-
-#~ msgid "_Trash"
-#~ msgstr "_Tong Sampah"
-
-#~ msgid "_Donate"
-#~ msgstr "_Sumbang"
-
-#~ msgid "Do you want to discard the unsaved message?"
-#~ msgstr "Anda ingin membuang pesan yang belum disimpan?"
-
-#~ msgid "Please enter your password"
-#~ msgstr "Harap masukkan sandi Anda"
-
-#~ msgid "Username:"
-#~ msgstr "Nama pengguna:"
-
-#~ msgid "Password:"
-#~ msgstr "Sandi:"
-
-#~ msgid "Notify of new mail at start_up"
-#~ msgstr "Beritahu adanya surel baru saat awal m_ula"
