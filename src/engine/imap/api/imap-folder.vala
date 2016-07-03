@@ -13,11 +13,12 @@ private class Geary.Imap.Folder : BaseObject {
     private const Geary.Email.Field BASIC_FETCH_FIELDS = Email.Field.ENVELOPE | Email.Field.DATE
         | Email.Field.ORIGINATORS | Email.Field.RECEIVERS | Email.Field.REFERENCES
         | Email.Field.SUBJECT | Email.Field.HEADER;
-    
+
     public bool is_open { get; private set; default = false; }
     public FolderPath path { get; private set; }
     public Imap.FolderProperties properties { get; private set; }
     public MailboxInformation info { get; private set; }
+    public string delim { get; private set; }
     public MessageFlags? permanent_flags { get; private set; default = null; }
     public Trillian readonly { get; private set; default = Trillian.UNKNOWN; }
     public Trillian accepts_user_flags { get; private set; default = Trillian.UNKNOWN; }
@@ -70,8 +71,8 @@ private class Geary.Imap.Folder : BaseObject {
      * Note that close_async() still needs to be called after this signal is fired.
      */
     public signal void disconnected(ClientSession.DisconnectReason reason);
-    
-    internal Folder(FolderPath path, ClientSessionManager session_mgr, StatusData status, MailboxInformation info) {
+
+    internal Folder(FolderPath path, ClientSessionManager session_mgr, StatusData status, MailboxInformation info, string delim) {
         // Used to assert() here, but that meant that any issue with internationalization/encoding
         // made Geary unusable for a subset of servers accessed/configured in a non-English language...
         // this is not the end of the world, but it does suggest an I18N issue, potentially with
@@ -80,22 +81,24 @@ private class Geary.Imap.Folder : BaseObject {
             message("%s: IMAP folder created with differing mailbox names (STATUS=%s LIST=%s)",
                 path.to_string(), status.to_string(), info.to_string());
         }
-        
+
         this.session_mgr = session_mgr;
         this.info = info;
+        this.delim = delim;
         this.path = path;
-        
+
         properties = new Imap.FolderProperties.status(status, info.attrs);
     }
-    
-    internal Folder.unselectable(FolderPath path, ClientSessionManager session_mgr, MailboxInformation info) {
+
+    internal Folder.unselectable(FolderPath path, ClientSessionManager session_mgr, MailboxInformation info, string delim) {
         this.session_mgr = session_mgr;
         this.info = info;
+        this.delim = delim;
         this.path = path;
-        
+
         properties = new Imap.FolderProperties(0, 0, 0, null, null, info.attrs);
     }
-    
+
     public async void open_async(Cancellable? cancellable) throws Error {
         if (is_open)
             throw new EngineError.ALREADY_OPEN("%s already open", to_string());
@@ -112,18 +115,18 @@ private class Geary.Imap.Folder : BaseObject {
         session.search.connect(on_search);
         session.status_response_received.connect(on_status_response);
         session.disconnected.connect(on_disconnected);
-        
+
         properties.set_from_session_capabilities(session.capabilities);
-        
+
         StatusResponse? response = null;
         Error? select_err = null;
         try {
             response = yield session.select_async(
-                new MailboxSpecifier.from_folder_path(path, info.delim), cancellable);
+                new MailboxSpecifier.from_folder_path(path, this.delim), cancellable);
         } catch (Error err) {
             select_err = err;
         }
-        
+
         // if select_err is null, then response can not be null
         if (select_err != null || response.status != Status.OK) {
             // don't use user-supplied cancellable; it may be cancelled, and even if not, do not want
@@ -678,10 +681,10 @@ private class Geary.Imap.Folder : BaseObject {
     public async Gee.Map<UID, UID>? copy_email_async(MessageSet msg_set, FolderPath destination,
         Cancellable? cancellable) throws Error {
         check_open();
-        
+
         CopyCommand cmd = new CopyCommand(msg_set,
-            new MailboxSpecifier.from_folder_path(destination, info.delim));
-        
+            new MailboxSpecifier.from_folder_path(destination, this.delim));
+
         Gee.Map<Command, StatusResponse>? responses = yield exec_commands_async(
             Geary.iterate<Command>(cmd).to_array_list(), null, null, cancellable);
         
@@ -1032,17 +1035,17 @@ private class Geary.Imap.Folder : BaseObject {
         } else {
             msg_flags = new MessageFlags(Geary.iterate<MessageFlag>(MessageFlag.SEEN).to_array_list());
         }
-        
+
         InternalDate? internaldate = null;
         if (date_received != null)
             internaldate = new InternalDate.from_date_time(date_received);
-        
-        AppendCommand cmd = new AppendCommand(new MailboxSpecifier.from_folder_path(path, info.delim),
+
+        AppendCommand cmd = new AppendCommand(new MailboxSpecifier.from_folder_path(path, this.delim),
             msg_flags, internaldate, message.get_network_buffer(false));
-        
+
         Gee.Map<Command, StatusResponse> responses = yield exec_commands_async(
             Geary.iterate<AppendCommand>(cmd).to_array_list(), null, null, null);
-        
+
         // Grab the response and parse out the UID, if available.
         StatusResponse response = responses.get(cmd);
         if (response.status == Status.OK && response.response_code != null &&

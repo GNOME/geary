@@ -116,44 +116,78 @@ private class Geary.Imap.Account : BaseObject {
         
         return account_session;
     }
-    
-    private async void list_inbox(ClientSession session, Cancellable? cancellable) throws Error {
-        // can't use send_command_async() directly because this is called by claim_session_async(),
-        // which is called by send_command_async()
-        
-        int token = yield cmd_mutex.claim_async(cancellable);
-        
-        // collect server data directly for direct decoding
-        server_data_collector = new Gee.ArrayList<ServerData>();
 
-		bool use_xlist = account_session.capabilities.has_capability(Imap.Capabilities.XLIST);
-        MailboxInformation inbox = null;
-        Error? throw_err = null;
+    private async void list_inbox(ClientSession session, Cancellable? cancellable)
+        throws Error {
+        // Can't use send_command_async() directly because this is
+        // called by claim_session_async(), which is called by
+        // send_command_async().
+        int token = yield this.cmd_mutex.claim_async(cancellable);
+        Error? release_error = null;
         try {
+            // collect server data directly for direct decoding
+            this.server_data_collector = new Gee.ArrayList<ServerData>();
+
+            MailboxInformation? info = null;
             Imap.StatusResponse response = yield session.send_command_async(
-                new ListCommand(MailboxSpecifier.inbox, use_xlist, null), cancellable);
-            if (response.status == Imap.Status.OK && server_data_collector.size > 0) {
-                inbox = MailboxInformation.decode(server_data_collector[0], false);
+                new ListCommand(MailboxSpecifier.inbox, false, null), cancellable);
+            if (response.status == Imap.Status.OK && !this.server_data_collector.is_empty) {
+                info = MailboxInformation.decode(this.server_data_collector[0], false);
             }
-        } catch (Error err) {
-            throw_err = err;
+
+            if (info != null) {
+                this.inbox_specifier = info.mailbox;
+                this.hierarchy_delimiter = info.delim;
+            }
+
+            if (this.hierarchy_delimiter == null) {
+                // LIST response didn't include a delim for the
+                // INBOX. Ideally we'd just use NAMESPACE instead (Bug
+                // 726866) but for now, just list folders alongside the
+                // INBOX.
+                this.server_data_collector = new Gee.ArrayList<ServerData>();
+                response = yield session.send_command_async(
+                    new ListCommand.wildcarded(
+                        "", new MailboxSpecifier("%"), false, null
+                    ),
+                    cancellable
+                );
+                if (response.status == Imap.Status.OK) {
+                    foreach (ServerData data in this.server_data_collector) {
+                        info = MailboxInformation.decode(data, false);
+                        this.hierarchy_delimiter = info.delim;
+                        if (this.hierarchy_delimiter != null) {
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (this.inbox_specifier == null) {
+                throw new ImapError.INVALID("Unable to find INBOX");
+            }
+            if (this.hierarchy_delimiter == null) {
+                throw new ImapError.INVALID("Unable to determine hierarchy delimiter");
+            }
+            debug("[%s] INBOX specifier: %s", to_string(),
+                  this.inbox_specifier.to_string());
+            debug("[%s] Hierarchy delimiter: %s", to_string(),
+                  this.hierarchy_delimiter);
+        } finally {
+            this.server_data_collector = new Gee.ArrayList<ServerData>();
+            try {
+                this.cmd_mutex.release(ref token);
+            } catch (Error e) {
+                // Vala 0.32.1 won't let you throw an exception from a
+                // finally block :(
+                release_error = e;
+            }
         }
-
-        if (inbox != null) {
-            inbox_specifier = inbox.mailbox;
-            hierarchy_delimiter = inbox.delim;
-            debug("[%s] INBOX specifier: %s", to_string(), inbox_specifier.to_string());
-        }
-
-        // Cleanup after setting the inbox and delim so it is immediately available for other commands
-        server_data_collector = null;
-        cmd_mutex.release(ref token);
-
-        if (inbox == null) {
-            new ImapError.INVALID("Unable to list INBOX");
+        if (release_error != null) {
+            throw release_error;
         }
     }
-    
+
     private async void drop_session_async(Cancellable? cancellable) {
         debug("[%s] Dropping account session...", to_string());
         
@@ -225,7 +259,7 @@ private class Geary.Imap.Account : BaseObject {
         check_open();
         
         StatusResponse response = yield send_command_async(new CreateCommand(
-            new MailboxSpecifier.from_folder_path(path, hierarchy_delimiter)), null, null, cancellable);
+            new MailboxSpecifier.from_folder_path(path, this.hierarchy_delimiter)), null, null, cancellable);
         
         if (response.status != Status.OK) {
             throw new ImapError.SERVER_ERROR("Server reports error creating path %s: %s", path.to_string(),
@@ -273,12 +307,12 @@ private class Geary.Imap.Account : BaseObject {
                 
                 status = fallback_status_data;
             }
-            
-            folder = new Imap.Folder(folder_path, session_mgr, status, mailbox_info);
+
+            folder = new Imap.Folder(folder_path, session_mgr, status, mailbox_info, this.hierarchy_delimiter);
         } else {
-            folder = new Imap.Folder.unselectable(folder_path, session_mgr, mailbox_info);
+            folder = new Imap.Folder.unselectable(folder_path, session_mgr, mailbox_info, this.hierarchy_delimiter);
         }
-        
+
         folders.set(path, folder);
         
         return folder;
@@ -304,12 +338,12 @@ private class Geary.Imap.Account : BaseObject {
         Imap.Folder folder;
         if (!mailbox_info.attrs.is_no_select) {
             StatusData status = yield fetch_status_async(folder_path, StatusDataType.all(), cancellable);
-            
-            folder = new Imap.Folder(folder_path, session_mgr, status, mailbox_info);
+
+            folder = new Imap.Folder(folder_path, session_mgr, status, mailbox_info, this.hierarchy_delimiter);
         } else {
-            folder = new Imap.Folder.unselectable(folder_path, session_mgr, mailbox_info);
+            folder = new Imap.Folder.unselectable(folder_path, session_mgr, mailbox_info, this.hierarchy_delimiter);
         }
-        
+
         return folder;
     }
     
@@ -346,7 +380,7 @@ private class Geary.Imap.Account : BaseObject {
         
         Gee.List<StatusData> status_results = new Gee.ArrayList<StatusData>();
         StatusResponse response = yield send_command_async(
-            new StatusCommand(new MailboxSpecifier.from_folder_path(path, hierarchy_delimiter), status_types),
+            new StatusCommand(new MailboxSpecifier.from_folder_path(path, this.hierarchy_delimiter), status_types),
             null, status_results, cancellable);
         
         throw_fetch_error(response, path, status_results.size);
@@ -390,10 +424,10 @@ private class Geary.Imap.Account : BaseObject {
             // if new mailbox is unselectable, don't bother doing a STATUS command
             if (mailbox_info.attrs.is_no_select) {
                 Imap.Folder folder = new Imap.Folder.unselectable(mailbox_info.get_path(inbox_specifier),
-                    session_mgr, mailbox_info);
+                    session_mgr, mailbox_info, this.hierarchy_delimiter);
                 folders.set(folder.path, folder);
                 child_folders.add(folder);
-                
+
                 continue;
             }
             
@@ -448,10 +482,10 @@ private class Geary.Imap.Account : BaseObject {
             if (folder != null) {
                 folder.properties.update_status(found_status);
             } else {
-                folder = new Imap.Folder(folder_path, session_mgr, found_status, mailbox_info);
+                folder = new Imap.Folder(folder_path, session_mgr, found_status, mailbox_info, this.hierarchy_delimiter);
                 folders.set(folder.path, folder);
             }
-            
+
             child_folders.add(folder);
         }
         
