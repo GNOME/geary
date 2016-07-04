@@ -137,7 +137,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     
     private async void internal_open_async(Cancellable? cancellable) throws Error {
         try {
-            yield local.open_async(information.settings_dir, Engine.instance.resource_dir.get_child("sql"),
+            yield local.open_async(information.data_dir, Engine.instance.resource_dir.get_child("sql"),
                 cancellable);
         } catch (Error err) {
             // convert database-open errors
@@ -237,7 +237,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         // get all the storage locations associated with this Account
         File db_file;
         File attachments_dir;
-        ImapDB.Account.get_imap_db_storage_locations(information.settings_dir, out db_file,
+        ImapDB.Account.get_imap_db_storage_locations(information.data_dir, out db_file,
             out attachments_dir);
         
         if (yield Files.query_exists_async(db_file, cancellable)) {

@@ -50,6 +50,7 @@ public class Geary.Engine : BaseObject {
     }
 
     public File? user_data_dir { get; private set; default = null; }
+    public File? user_config_dir { get; private set; default = null; }
     public File? resource_dir { get; private set; default = null; }
     public Geary.CredentialsMediator? authentication_mediator { get; private set; default = null; }
     
@@ -135,7 +136,7 @@ public class Geary.Engine : BaseObject {
      * given authentication mediator will be used to retrieve all passwords
      * when necessary.
      */
-    public async void open_async(File user_data_dir, File resource_dir,
+    public async void open_async(File user_config_dir, File user_data_dir, File resource_dir,
         Geary.CredentialsMediator? authentication_mediator, Cancellable? cancellable = null) throws Error {
         // initialize *before* opening the Engine ... all initialize code should assume the Engine
         // is closed
@@ -144,6 +145,7 @@ public class Geary.Engine : BaseObject {
         if (is_open)
             throw new EngineError.ALREADY_OPEN("Geary.Engine instance already open");
         
+        this.user_config_dir = user_config_dir;
         this.user_data_dir = user_data_dir;
         this.resource_dir = resource_dir;
         this.authentication_mediator = authentication_mediator;
@@ -167,7 +169,7 @@ public class Geary.Engine : BaseObject {
         }
 
         FileEnumerator enumerator
-            = yield user_data_dir.enumerate_children_async("standard::*",
+            = yield user_config_dir.enumerate_children_async("standard::*",
                 FileQueryInfoFlags.NONE, Priority.DEFAULT, cancellable);
         
         Gee.List<AccountInformation> account_list = new Gee.ArrayList<AccountInformation>();
@@ -187,10 +189,11 @@ public class Geary.Engine : BaseObject {
             FileInfo info = info_list.nth_data(0);
             if (info.get_file_type() == FileType.DIRECTORY) {
                 // TODO: check for geary.ini
-                account_list.add(new AccountInformation.from_file(user_data_dir.get_child(info.get_name())));
+                account_list.add(new AccountInformation.from_file(user_config_dir.get_child(info.get_name()),
+                    user_data_dir.get_child(info.get_name())));
             }
         }
-        
+
         foreach(AccountInformation info in account_list)
             add_account(info);
      }
@@ -236,7 +239,8 @@ public class Geary.Engine : BaseObject {
         if (accounts.has_key(email))
             throw new EngineError.ALREADY_EXISTS("Account %s already exists", email);
 
-        return new AccountInformation.from_file(user_data_dir.get_child(email));
+        return new AccountInformation.from_file(user_config_dir.get_child(email),
+            user_data_dir.get_child(email));
     }
     
     /**

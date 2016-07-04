@@ -58,10 +58,11 @@ public class Geary.AccountInformation : BaseObject {
      * Location account information is stored (as well as other data, including database and
      * attachment files.
      */
-    public File? settings_dir { get; private set; default = null; }
-    
+    public File? config_dir { get; private set; default = null; }
+    public File? data_dir { get; private set; default = null; }
+
     internal File? file = null;
-    
+
     //
     // IMPORTANT: When adding new properties, be sure to add them to the copy method.
     //
@@ -159,18 +160,19 @@ public class Geary.AccountInformation : BaseObject {
      */
     public signal void untrusted_host(Endpoint endpoint, Endpoint.SecurityType security,
         TlsConnection cx, Service service);
-    
+
     // Used to create temporary AccountInformation objects.  (Note that these cannot be saved.)
     public AccountInformation.temp_copy(AccountInformation copy) {
         copy_from(copy);
     }
-    
+
     // This constructor is used internally to load accounts from disk.
-    internal AccountInformation.from_file(File directory) {
-        this.email = directory.get_basename();
-        this.settings_dir = directory;
-        this.file = settings_dir.get_child(SETTINGS_FILENAME);
-        
+    internal AccountInformation.from_file(File config_directory, File data_directory) {
+        this.email = config_directory.get_basename();
+        this.config_dir = config_directory;
+        this.data_dir = data_directory;
+        this.file = config_dir.get_child(SETTINGS_FILENAME);
+
         KeyFile key_file = new KeyFile();
         try {
             key_file.load_from_file(file.get_path() ?? "", KeyFileFlags.NONE);
@@ -772,26 +774,35 @@ public class Geary.AccountInformation : BaseObject {
         
         return def;
     }
-    
+
     private uint16 get_uint16_value(KeyFile key_file, string group, string key, uint16 def = 0) {
         return (uint16) get_int_value(key_file, group, key);
     }
-    
+
     public async void store_async(Cancellable? cancellable = null) {
-        if (file == null || settings_dir == null) {
+        if (file == null || config_dir == null) {
             warning("Cannot save account, no file set.\n");
             return;
         }
-        
-        if (!settings_dir.query_exists(cancellable)) {
+
+        if (!config_dir.query_exists(cancellable)) {
             try {
-                settings_dir.make_directory_with_parents();
+                config_dir.make_directory_with_parents();
             } catch (Error err) {
-                error("Error creating settings directory for email '%s': %s", email,
+                error("Error creating configuration directory for email '%s': %s", email,
                     err.message);
             }
         }
-        
+
+        if (!data_dir.query_exists(cancellable)) {
+            try {
+                data_dir.make_directory_with_parents();
+            } catch (Error err) {
+                error("Error creating storage directory for email '%s': %s", email,
+                    err.message);
+            }
+        }
+
         if (!file.query_exists(cancellable)) {
             try {
                 yield file.create_async(FileCreateFlags.REPLACE_DESTINATION);
@@ -891,9 +902,16 @@ public class Geary.AccountInformation : BaseObject {
      * normally be invoked directly.
      */
     internal async void remove_async(Cancellable? cancellable = null) {
-        if (file == null || settings_dir == null) {
-            warning("Cannot remove account; nothing to remove\n");
-            return;
+        if (data_dir == null) {
+            warning("Cannot remove account storage directory; nothing to remove");
+        } else {
+            yield Files.recursive_delete_async(data_dir, cancellable);
+        }
+
+        if (config_dir == null) {
+            warning("Cannot remove account configuration directory; nothing to remove");
+        } else {
+            yield Files.recursive_delete_async(config_dir, cancellable);
         }
         
         try {
@@ -901,11 +919,8 @@ public class Geary.AccountInformation : BaseObject {
         } catch (Error e) {
             debug("Error clearing SMTP password: %s", e.message);
         }
-        
-        // Delete files.
-        yield Files.recursive_delete_async(settings_dir, cancellable);
     }
-    
+
     /**
      * Returns a MailboxAddress object for this account.
      */
