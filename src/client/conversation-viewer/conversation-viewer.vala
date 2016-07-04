@@ -94,7 +94,10 @@ public class ConversationViewer : Gtk.Stack {
     // Conversation emails list
     [GtkChild]
     private Gtk.ListBox conversation_listbox;
-    private Gtk.Widget? last_list_row;
+    private Gtk.Widget? last_list_row = null;
+
+    // Email view with selected text, if any
+    private ConversationEmail? body_selected_view = null;
 
     // Label for displaying messages in the main pane.
     [GtkChild]
@@ -210,20 +213,19 @@ public class ConversationViewer : Gtk.Stack {
     }
 
     /**
-     * Returns the last email in the list by sort order, if any.
+     * Returns the email view to be replied to, if any.
+     *
+     * If an email view has selected body text that view will be
+     * returned. Else the last message by sort order will be returned,
+     * if any.
      */
-    public Geary.Email? get_last_email() {
-        return emails.is_empty ? null : emails.last();
-    }
-
-    /**
-     * Returns the email with text currently selected, if any.
-     */
-    public Geary.Email? get_selected_email(out string? quote) {
-        // XXX check to see if there is a email with selected text,
-        // if so return that
-        quote = null;
-        return emails.is_empty ? null : emails.last();
+    public ConversationEmail get_reply_email_view() {
+        ConversationEmail view = this.body_selected_view;
+        if (view == null) {
+            Geary.Email last_email = emails.is_empty ? null : emails.last();
+            view = conversation_email_for_id(last_email.id);
+        }
+        return view;
     }
 
     /**
@@ -405,6 +407,7 @@ public class ConversationViewer : Gtk.Stack {
         email_to_row.clear();
         emails.clear();
         current_conversation = null;
+        body_selected_view = null;
         cleared();
     }
 
@@ -696,6 +699,9 @@ public class ConversationViewer : Gtk.Stack {
         );
         conversation_email.mark_email.connect(on_mark_email);
         conversation_email.mark_email_from_here.connect(on_mark_email_from_here);
+        conversation_email.body_selection_changed.connect((email, has_selection) => {
+                this.body_selected_view = has_selection ? email : null;
+            });
 
         ConversationMessage conversation_message = conversation_email.primary_message;
         conversation_message.body_box.button_release_event.connect_after((event) => {

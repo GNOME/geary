@@ -413,6 +413,48 @@ public class ConversationMessage : Gtk.Box {
         web_view.unmark_text_matches();
     }
 
+    internal string? get_selection_for_quoting() {
+        string? quote = null;
+        WebKit.DOM.Document document = this.web_view.get_dom_document();
+        WebKit.DOM.DOMSelection selection = document.default_view.get_selection();
+        if (!selection.is_collapsed) {
+            try {
+                WebKit.DOM.Range range = selection.get_range_at(0);
+                WebKit.DOM.HTMLElement dummy =
+                    (WebKit.DOM.HTMLElement) document.create_element("div");
+                bool include_dummy = false;
+                WebKit.DOM.Node ancestor_node = range.get_common_ancestor_container();
+                WebKit.DOM.Element? ancestor = ancestor_node as WebKit.DOM.Element;
+                if (ancestor == null)
+                    ancestor = ancestor_node.get_parent_element();
+                // If the selection is part of a plain text message,
+                // we have to stick it in an appropriately styled div,
+                // so that new lines are preserved.
+                if (Util.DOM.is_descendant_of(ancestor, ".plaintext")) {
+                    dummy.get_class_list().add("plaintext");
+                    dummy.set_attribute("style", "white-space: pre-wrap;");
+                    include_dummy = true;
+                }
+                dummy.append_child(range.clone_contents());
+
+                // Remove the chrome we put around quotes, leaving
+                // only the blockquote element.
+                WebKit.DOM.NodeList quotes =
+                    dummy.query_selector_all(".quote_container");
+                for (int i = 0; i < quotes.length; i++) {
+                    WebKit.DOM.Element div = (WebKit.DOM.Element) quotes.item(i);
+                    WebKit.DOM.Element blockquote = div.query_selector("blockquote");
+                    div.get_parent_element().replace_child(blockquote, div);
+                }
+
+                quote = include_dummy ? dummy.get_outer_html() : dummy.get_inner_html();
+            } catch (Error error) {
+                debug("Problem getting selected text: %s", error.message);
+            }
+        }
+        return quote;
+    }
+
     private SimpleAction add_action(string name, bool enabled) {
         SimpleAction action = new SimpleAction(name, null);
         action.set_enabled(enabled);

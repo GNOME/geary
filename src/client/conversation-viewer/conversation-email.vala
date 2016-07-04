@@ -75,6 +75,9 @@ public class ConversationEmail : Gtk.Box {
     // Contacts for the email's account
     private Geary.ContactStore contact_store;
 
+    // Message view with selected text, if any
+    private ConversationMessage? body_selection_message = null;
+
     // Attachment ids that have been displayed inline
     private Gee.HashSet<string> inlined_content_ids = new Gee.HashSet<string>();
 
@@ -162,6 +165,8 @@ public class ConversationEmail : Gtk.Box {
     /** Fired when the view source action is activated. */
     public signal void view_source();
 
+    /** Fired when the user selects text in a message. */
+    internal signal void body_selection_changed(bool has_selection);
 
     /**
      * Constructs a new view to display an email.
@@ -238,6 +243,9 @@ public class ConversationEmail : Gtk.Box {
         primary_message.web_view.link_selected.connect((link) => {
                 link_activated(link);
             });
+        primary_message.web_view.selection_changed.connect(() => {
+                on_message_selection_changed(primary_message);
+            });
         primary_message.save_image.connect((filename, buffer) => {
                 save_image(filename, buffer);
             });
@@ -275,10 +283,13 @@ public class ConversationEmail : Gtk.Box {
             primary_message.body_box.pack_start(sub_messages_box, false, false, 0);
         }
         foreach (Geary.RFC822.Message sub_message in sub_messages) {
-            ConversationMessage conversation_message =
+            ConversationMessage attached_message =
                 new ConversationMessage(sub_message, contact_store, false);
-            sub_messages_box.pack_start(conversation_message, false, false, 0);
-            this._attached_messages.add(conversation_message);
+                attached_message.web_view.selection_changed.connect(() => {
+                        on_message_selection_changed(attached_message);
+                    });
+            sub_messages_box.pack_start(attached_message, false, false, 0);
+            this._attached_messages.add(attached_message);
         }
 
         pack_start(primary_message, true, true, 0);
@@ -356,6 +367,15 @@ public class ConversationEmail : Gtk.Box {
         get_style_context().add_class("geary_manual_read");
     }
 
+    /**
+     * Returns user-selected body HTML from a message, if any.
+     */
+    public string? get_body_selection() {
+        return (this.body_selection_message != null)
+            ? this.body_selection_message.get_selection_for_quoting()
+            : null;
+    }
+
     private SimpleAction add_action(string name) {
         SimpleAction action = new SimpleAction(name, null);
         message_actions.add_action(action);
@@ -431,6 +451,18 @@ public class ConversationEmail : Gtk.Box {
         Gee.ArrayList<Geary.Contact> contact_list = new Gee.ArrayList<Geary.Contact>();
         contact_list.add(contact);
         contact_store.mark_contacts_async.begin(contact_list, flags, null);
+    }
+
+    private void on_message_selection_changed(ConversationMessage view) {
+        bool has_selection = false;
+        if (view.web_view.has_selection()) {
+            WebKit.DOM.Document document = view.web_view.get_dom_document();
+            has_selection = !document.default_view.get_selection().is_collapsed;
+            this.body_selection_message = view;
+        } else {
+            this.body_selection_message = null;
+        }
+        body_selection_changed(has_selection);
     }
 
     [GtkCallback]

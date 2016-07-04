@@ -2142,15 +2142,15 @@ public class GearyController : Geary.BaseObject {
     // was triggered.  If null, this was triggered from the headerbar
     // or shortcut.
     private void create_reply_forward_widget(ComposerWidget.ComposeType compose_type,
-        string? quote;
-        Geary.Email? quote_message = main_window.conversation_viewer.get_selected_email(out quote);
-        if (message == null)
-            message = quote_message;
-        if (quote_message != message)
-            quote = null;
-        create_compose_widget(compose_type, message, quote);
                                              owned ConversationEmail? view) {
-        Geary.Email message = (view != null) ? view.email : null;
+        if (view == null) {
+            view = main_window.conversation_viewer.get_reply_email_view();
+        }
+        string? quote = null;
+        if (view != null) {
+            quote = view.get_body_selection();
+        }
+        create_compose_widget(compose_type, view.email, quote);
     }
 
     private void create_compose_widget(ComposerWidget.ComposeType compose_type,
