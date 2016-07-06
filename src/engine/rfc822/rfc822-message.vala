@@ -17,7 +17,8 @@ public class Geary.RFC822.Message : BaseObject {
         Mime.ContentDisposition? disposition, string? content_id, Geary.Memory.Buffer buffer);
     
     private const string DEFAULT_ENCODING = "UTF8";
-    
+
+    private const string HEADER_SENDER = "Sender";
     private const string HEADER_IN_REPLY_TO = "In-Reply-To";
     private const string HEADER_REFERENCES = "References";
     private const string HEADER_MAILER = "X-Mailer";
@@ -85,61 +86,70 @@ public class Geary.RFC822.Message : BaseObject {
     }
 
     public Message.from_composed_email(Geary.ComposedEmail email, string? message_id) {
-        message = new GMime.Message(true);
-        
+        this.message = new GMime.Message(true);
+
         // Required headers
         assert(email.from.size > 0);
-        sender = email.from[0];
-        date = new RFC822.Date.from_date_time(email.date);
-        
-        message.set_sender(sender.to_rfc822_string());
-        message.set_date_as_string(date.serialize());
+        this.sender = email.sender;
+        this.from = email.from;
+        this.date = new RFC822.Date.from_date_time(email.date);
+
+        // GMimeMessage.set_sender actually sets the From header - and
+        // although the API docs make it sound otherwise, it also
+        // supports a list of addresses
+        message.set_sender(this.from.to_rfc822_string());
+        message.set_date_as_string(this.date.serialize());
         if (message_id != null)
             message.set_message_id(message_id);
-        
+
         // Optional headers
         if (email.to != null) {
-            to = email.to;
+            this.to = email.to;
             foreach (RFC822.MailboxAddress mailbox in email.to)
-                message.add_recipient(GMime.RecipientType.TO, mailbox.name, mailbox.address);
+                this.message.add_recipient(GMime.RecipientType.TO, mailbox.name, mailbox.address);
         }
-        
+
         if (email.cc != null) {
-            cc = email.cc;
+            this.cc = email.cc;
             foreach (RFC822.MailboxAddress mailbox in email.cc)
-                message.add_recipient(GMime.RecipientType.CC, mailbox.name, mailbox.address);
+                this.message.add_recipient(GMime.RecipientType.CC, mailbox.name, mailbox.address);
         }
 
         if (email.bcc != null) {
-            bcc = email.bcc;
+            this.bcc = email.bcc;
             foreach (RFC822.MailboxAddress mailbox in email.bcc)
-                message.add_recipient(GMime.RecipientType.BCC, mailbox.name, mailbox.address);
+                this.message.add_recipient(GMime.RecipientType.BCC, mailbox.name, mailbox.address);
+        }
+
+        if (email.sender != null) {
+            this.sender = email.sender;
+            this.message.set_header(HEADER_SENDER, email.sender.to_rfc822_string());
         }
 
         if (email.reply_to != null) {
-            reply_to = email.reply_to;
-            message.set_reply_to(email.reply_to.to_rfc822_string());
+            this.reply_to = email.reply_to;
+            this.message.set_reply_to(email.reply_to.to_rfc822_string());
         }
 
         if (email.in_reply_to != null) {
-            in_reply_to = new Geary.RFC822.MessageIDList.from_rfc822_string(email.in_reply_to);
-            message.set_header(HEADER_IN_REPLY_TO, email.in_reply_to);
+            this.in_reply_to = new Geary.RFC822.MessageIDList.from_rfc822_string(email.in_reply_to);
+            this.message.set_header(HEADER_IN_REPLY_TO, email.in_reply_to);
         }
-        
+
         if (email.references != null) {
-            references = new Geary.RFC822.MessageIDList.from_rfc822_string(email.references);
-            message.set_header(HEADER_REFERENCES, email.references);
+            this.references = new Geary.RFC822.MessageIDList.from_rfc822_string(email.references);
+            this.message.set_header(HEADER_REFERENCES, email.references);
         }
-        
+
         if (email.subject != null) {
-            subject = new Geary.RFC822.Subject(email.subject);
-            message.set_subject(email.subject);
+            this.subject = new Geary.RFC822.Subject(email.subject);
+            this.message.set_subject(email.subject);
         }
 
         // User-Agent
         if (!Geary.String.is_empty(email.mailer)) {
-            mailer = email.mailer;
-            message.set_header(HEADER_MAILER, email.mailer);
+            this.mailer = email.mailer;
+            this.message.set_header(HEADER_MAILER, email.mailer);
         }
 
         // Body: text format (optional)
@@ -201,11 +211,11 @@ public class Geary.RFC822.Message : BaseObject {
         GMime.Object? attachment_part = coalesce_parts(attachment_parts, "mixed");
         if (attachment_part != null)
             main_parts.add(attachment_part);
-            
+
         GMime.Object? main_part = coalesce_parts(main_parts, "mixed");
-        message.set_mime_part(main_part);
+        this.message.set_mime_part(main_part);
     }
-    
+
     // Makes a copy of the given message without the BCC fields. This is used for sending the email
     // without sending the BCC headers to all recipients.
     public Message.without_bcc(Message email) {
@@ -296,7 +306,7 @@ public class Geary.RFC822.Message : BaseObject {
         email.set_message_header(new Geary.RFC822.Header(new Geary.Memory.StringBuffer(
             message.get_headers())));
         email.set_send_date(date);
-        email.set_originators(from, new Geary.RFC822.MailboxAddresses.single(sender), reply_to);
+        email.set_originators(from, sender, reply_to);
         email.set_receivers(to, cc, bcc);
         email.set_full_references(null, in_reply_to, references);
         email.set_message_subject(subject);
@@ -326,13 +336,25 @@ public class Geary.RFC822.Message : BaseObject {
     }
     
     private void stock_from_gmime() {
+        // GMime calls the From address the "sender"
         string? message_sender = message.get_sender();
         if (message_sender != null) {
-            from = new RFC822.MailboxAddresses.from_rfc822_string(message_sender);
-            // sender is defined as first From address, from better or worse
-            sender = (from.size != 0) ? from[0] : null;
+            this.from = new RFC822.MailboxAddresses.from_rfc822_string(message_sender);
         }
-        
+
+        // And it doesn't provide a convenience method for Sender header
+        if (!String.is_empty(message.get_header(HEADER_SENDER))) {
+            string sender = GMime.utils_header_decode_text(message.get_header(HEADER_SENDER));
+            try {
+                this.sender = new RFC822.MailboxAddress.from_rfc822_string(sender);
+            } catch (RFC822Error e) {
+                debug("Invalid RDC822 Sender address: %s", sender);
+            }
+        }
+
+        if (!String.is_empty(message.get_reply_to()))
+            this.reply_to = new RFC822.MailboxAddresses.from_rfc822_string(message.get_reply_to());
+
         Gee.List<RFC822.MailboxAddress>? converted = convert_gmime_address_list(
             message.get_recipients(GMime.RecipientType.TO));
         if (converted != null && converted.size > 0)
@@ -345,9 +367,6 @@ public class Geary.RFC822.Message : BaseObject {
         converted = convert_gmime_address_list(message.get_recipients(GMime.RecipientType.BCC));
         if (converted != null && converted.size > 0)
             bcc = new RFC822.MailboxAddresses(converted);
-        
-        if (!String.is_empty(message.get_reply_to()))
-            reply_to = new RFC822.MailboxAddresses.from_rfc822_string(message.get_reply_to());
         
         if (!String.is_empty(message.get_header(HEADER_IN_REPLY_TO)))
             in_reply_to = new RFC822.MessageIDList.from_rfc822_string(message.get_header(HEADER_IN_REPLY_TO));

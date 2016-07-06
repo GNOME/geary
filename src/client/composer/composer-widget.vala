@@ -29,15 +29,13 @@ public class ComposerWidget : Gtk.EventBox {
 
     private class FromAddressMap {
         public Geary.Account account;
-        public Geary.RFC822.MailboxAddress? sender;
         public Geary.RFC822.MailboxAddresses from;
-        public FromAddressMap(Geary.Account a, Geary.RFC822.MailboxAddresses f, Geary.RFC822.MailboxAddress? s = null) {
+        public FromAddressMap(Geary.Account a, Geary.RFC822.MailboxAddresses f) {
             account = a;
             from = f;
-            sender = s;
         }
     }
-    
+
     public const string ACTION_UNDO = "undo";
     public const string ACTION_REDO = "redo";
     public const string ACTION_CUT = "cut";
@@ -140,11 +138,9 @@ public class ComposerWidget : Gtk.EventBox {
     private delegate bool CompareStringFunc(string key, string token);
     
     public Geary.Account account { get; private set; }
-    
-    public Geary.RFC822.MailboxAddress sender { get; set; }
-    
-    public Geary.RFC822.MailboxAddresses from { get; set; }
-    
+
+    public Geary.RFC822.MailboxAddresses from { get; private set; }
+
     public string to {
         get { return to_entry.get_text(); }
         set { to_entry.set_text(value); }
@@ -906,8 +902,7 @@ public class ComposerWidget : Gtk.EventBox {
         bool only_html = false) {
         Geary.ComposedEmail email = new Geary.ComposedEmail(
             date_override ?? new DateTime.now_local(), from);
-        email.sender = sender;
-        
+
         if (to_entry.addresses != null)
             email.to = to_entry.addresses;
         
@@ -2449,13 +2444,12 @@ public class ComposerWidget : Gtk.EventBox {
             return false;
         
         assert(from_list.size > index);
-        
+
         Geary.Account new_account = from_list.get(index).account;
         from = from_list.get(index).from;
-        sender = from_list.get(index).sender;
         if (new_account == account)
             return false;
-        
+
         account = new_account;
         set_entry_completions();
         

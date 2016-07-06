@@ -105,17 +105,19 @@ private class Geary.ImapDB.MessageRow {
         
         if (fields.is_all_set(Geary.Email.Field.DATE))
             email.set_send_date(!String.is_empty(date) ? new RFC822.Date(date) : null);
-        
+
         if (fields.is_all_set(Geary.Email.Field.ORIGINATORS)) {
-            email.set_originators(unflatten_addresses(from), unflatten_addresses(sender),
-                unflatten_addresses(reply_to));
+            email.set_originators(unflatten_addresses(from),
+                                  unflatten_address(sender),
+                                  unflatten_addresses(reply_to));
         }
-        
+
         if (fields.is_all_set(Geary.Email.Field.RECEIVERS)) {
-            email.set_receivers(unflatten_addresses(to), unflatten_addresses(cc),
-                unflatten_addresses(bcc));
+            email.set_receivers(unflatten_addresses(to),
+                                unflatten_addresses(cc),
+                                unflatten_addresses(bcc));
         }
-        
+
         if (fields.is_all_set(Geary.Email.Field.REFERENCES)) {
             email.set_full_references(
                 (message_id != null) ? new RFC822.MessageID(message_id) : null,
@@ -188,7 +190,7 @@ private class Geary.ImapDB.MessageRow {
         
         if (email.fields.is_all_set(Geary.Email.Field.ORIGINATORS)) {
             from = flatten_addresses(email.from);
-            sender = flatten_addresses(email.sender);
+            sender = flatten_address(email.sender);
             reply_to = flatten_addresses(email.reply_to);
             
             fields = fields.set(Geary.Email.Field.ORIGINATORS);
@@ -250,7 +252,15 @@ private class Geary.ImapDB.MessageRow {
             fields = fields.set(Geary.Email.Field.PROPERTIES);
         }
     }
-    
+
+    private static string? flatten_address(RFC822.MailboxAddress? addr) {
+        string? flat = null;
+        if (addr != null) {
+            flat = addr.to_rfc822_string();
+        }
+        return flat;
+    }
+
     private static string? flatten_addresses(RFC822.MailboxAddresses? addrs) {
         if (addrs == null)
             return null;
@@ -274,7 +284,19 @@ private class Geary.ImapDB.MessageRow {
                 return builder.str;
         }
     }
-    
+
+    private RFC822.MailboxAddress? unflatten_address(string? str) {
+        RFC822.MailboxAddress? addr = null;
+        if (str != null) {
+            try {
+                addr = new RFC822.MailboxAddress.from_rfc822_string(str);
+            } catch (RFC822Error e) {
+                // oh well
+            }
+        }
+        return addr;
+    }
+
     private RFC822.MailboxAddresses? unflatten_addresses(string? str) {
         return String.is_empty(str) ? null : new RFC822.MailboxAddresses.from_rfc822_string(str);
     }

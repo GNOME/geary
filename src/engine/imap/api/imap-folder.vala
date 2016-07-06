@@ -848,12 +848,16 @@ private class Geary.Imap.Folder : BaseObject {
             switch (data_type) {
                 case FetchDataSpecifier.ENVELOPE:
                     Envelope envelope = (Envelope) data;
-                    
+
                     email.set_send_date(envelope.sent);
                     email.set_message_subject(envelope.subject);
-                    email.set_originators(envelope.from, envelope.sender, envelope.reply_to);
+                    email.set_originators(
+                        envelope.from,
+                        envelope.sender.equal_to(envelope.from) ? null : envelope.sender[0],
+                        envelope.reply_to.equal_to(envelope.from) ? null : envelope.reply_to
+                    );
                     email.set_receivers(envelope.to, envelope.cc, envelope.bcc);
-                    
+
                     // store these to add to References all at once
                     message_id = envelope.message_id;
                     in_reply_to = envelope.in_reply_to;
@@ -915,20 +919,20 @@ private class Geary.Imap.Folder : BaseObject {
                 string? value = headers.get_header("From");
                 if (!String.is_empty(value))
                     from = new RFC822.MailboxAddresses.from_rfc822_string(value);
-                
-                RFC822.MailboxAddresses? sender = null;
+
+                RFC822.MailboxAddress? sender = null;
                 value = headers.get_header("Sender");
                 if (!String.is_empty(value))
-                    sender = new RFC822.MailboxAddresses.from_rfc822_string(value);
-                
+                    sender = new RFC822.MailboxAddress.from_rfc822_string(value);
+
                 RFC822.MailboxAddresses? reply_to = null;
                 value = headers.get_header("Reply-To");
                 if (!String.is_empty(value))
                     reply_to = new RFC822.MailboxAddresses.from_rfc822_string(value);
-                
+
                 email.set_originators(from, sender, reply_to);
             }
-            
+
             // RECEIVERS
             if (required_but_not_set(Geary.Email.Field.RECEIVERS, required_fields, email)) {
                 RFC822.MailboxAddresses? to = null;

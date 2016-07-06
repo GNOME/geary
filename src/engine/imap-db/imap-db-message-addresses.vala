@@ -8,7 +8,7 @@ private class Geary.ImapDB.MessageAddresses : BaseObject {
     // Read-only view.
     public Gee.Collection<Contact> contacts { get; private set; }
     
-    private RFC822.MailboxAddresses? sender_addresses;
+    private RFC822.MailboxAddress? sender_address;
     private RFC822.MailboxAddresses? from_addresses;
     private RFC822.MailboxAddresses? to_addresses;
     private RFC822.MailboxAddresses? cc_addresses;
@@ -17,11 +17,11 @@ private class Geary.ImapDB.MessageAddresses : BaseObject {
     private int from_importance;
     private int to_importance;
     private int cc_importance;
-    
-    private MessageAddresses(string account_owner_email, RFC822.MailboxAddresses? sender_addresses,
+
+    private MessageAddresses(string account_owner_email, RFC822.MailboxAddress? sender_address,
         RFC822.MailboxAddresses? from_addresses, RFC822.MailboxAddresses? to_addresses,
         RFC822.MailboxAddresses? cc_addresses, RFC822.MailboxAddresses? bcc_addresses) {
-        this.sender_addresses = sender_addresses;
+        this.sender_address = sender_address;
         this.from_addresses = from_addresses;
         this.to_addresses = to_addresses;
         this.cc_addresses = cc_addresses;
@@ -33,7 +33,7 @@ private class Geary.ImapDB.MessageAddresses : BaseObject {
     
     private MessageAddresses.from_strings(string account_owner_email, string? sender_field,
         string? from_field, string? to_field, string? cc_field, string? bcc_field) {
-        this(account_owner_email, get_addresses_from_string(sender_field),
+        this(account_owner_email, get_address_from_string(sender_field),
             get_addresses_from_string(from_field), get_addresses_from_string(to_field),
             get_addresses_from_string(cc_field), get_addresses_from_string(bcc_field));
     }
@@ -60,15 +60,27 @@ private class Geary.ImapDB.MessageAddresses : BaseObject {
             return null;
         }
     }
-    
+
+    private static RFC822.MailboxAddress? get_address_from_string(string? field) {
+        RFC822.MailboxAddress? addr = null;
+        if (field != null) {
+            try {
+                new RFC822.MailboxAddress.from_rfc822_string(field);
+            } catch (RFC822Error e) {
+                // oh well
+            }
+        }
+        return addr;
+    }
+
     private static RFC822.MailboxAddresses? get_addresses_from_string(string? field) {
         return field == null ? null : new RFC822.MailboxAddresses.from_rfc822_string(field);
     }
-    
+
     private void calculate_importance(string account_owner_email) {
         // "Sender" is different than "from", but we give it the same importance.
         bool account_owner_in_from =
-            (sender_addresses != null && sender_addresses.contains_normalized(account_owner_email)) ||
+            (sender_address != null && sender_address.equal_normalized(account_owner_email)) ||
             (from_addresses != null && from_addresses.contains_normalized(account_owner_email));
         bool account_owner_in_to = to_addresses != null &&
             to_addresses.contains_normalized(account_owner_email);
@@ -102,19 +114,21 @@ private class Geary.ImapDB.MessageAddresses : BaseObject {
             cc_importance = int.max(cc_importance, ContactImportance.CC_CC);
         }
     }
-    
+
     private Gee.Collection<Contact> build_contacts() {
         Gee.Map<string, Contact> contacts_map = new Gee.HashMap<string, Contact>();
-        
-        add_contacts(contacts_map, sender_addresses, from_importance);
-        add_contacts(contacts_map, from_addresses, from_importance);
-        add_contacts(contacts_map, to_addresses, to_importance);
-        add_contacts(contacts_map, cc_addresses, cc_importance);
-        add_contacts(contacts_map, bcc_addresses, cc_importance);
-        
+
+        if (this.sender_address != null) {
+            add_contact(contacts_map, this.sender_address, this.from_importance);
+        }
+        add_contacts(contacts_map, this.from_addresses, this.from_importance);
+        add_contacts(contacts_map, this.to_addresses, this.to_importance);
+        add_contacts(contacts_map, this.cc_addresses, this.cc_importance);
+        add_contacts(contacts_map, this.bcc_addresses, this.cc_importance);
+
         return contacts_map.values;
     }
-    
+
     private void add_contacts(Gee.Map<string, Contact> contacts_map, RFC822.MailboxAddresses? addresses,
         int importance) {
         if (addresses == null)

@@ -72,6 +72,25 @@ public class Geary.RFC822.MailboxAddress : Geary.MessageData.SearchableMessageDa
         address = "%s@%s".printf(mailbox, domain);
     }
 
+    public MailboxAddress.from_rfc822_string(string rfc822) throws RFC822Error {
+        InternetAddressList addrlist = InternetAddressList.parse_string(rfc822);
+        if (addrlist == null)
+            return;
+
+        int length = addrlist.length();
+        for (int ctr = 0; ctr < length; ctr++) {
+            InternetAddress? addr = addrlist.get_address(ctr);
+
+            // TODO: Handle group lists
+            InternetAddressMailbox? mbox_addr = addr as InternetAddressMailbox;
+            if (mbox_addr != null) {
+                this(mbox_addr.get_name(), mbox_addr.get_addr());
+                return;
+            }
+        }
+        throw new RFC822Error.INVALID("Could not parse RFC822 address: %s", rfc822);
+    }
+
     // Borrowed liberally from GMime's internal _internet_address_decode_name() function.
     private static string decode_name(string name) {
         // see if a broken mailer has sent raw 8-bit information
@@ -181,7 +200,11 @@ public class Geary.RFC822.MailboxAddress : Geary.MessageData.SearchableMessageDa
     public bool equal_to(MailboxAddress other) {
         return this != other ? String.stri_equal(address, other.address) : true;
     }
-    
+
+    public bool equal_normalized(string address) {
+        return this.address.normalize().casefold() == address.normalize().casefold();
+    }
+
     public string to_string() {
         return get_full_address();
     }

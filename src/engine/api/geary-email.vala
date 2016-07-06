@@ -111,12 +111,12 @@ public class Geary.Email : BaseObject {
     
     // DATE
     public Geary.RFC822.Date? date { get; private set; default = null; }
-    
+
     // ORIGINATORS
     public Geary.RFC822.MailboxAddresses? from { get; private set; default = null; }
-    public Geary.RFC822.MailboxAddresses? sender { get; private set; default = null; }
+    public Geary.RFC822.MailboxAddress? sender { get; private set; default = null; }
     public Geary.RFC822.MailboxAddresses? reply_to { get; private set; default = null; }
-    
+
     // RECEIVERS
     public Geary.RFC822.MailboxAddresses? to { get; private set; default = null; }
     public Geary.RFC822.MailboxAddresses? cc { get; private set; default = null; }
@@ -172,16 +172,27 @@ public class Geary.Email : BaseObject {
         
         fields |= Field.DATE;
     }
-    
-    public void set_originators(Geary.RFC822.MailboxAddresses? from,
-        Geary.RFC822.MailboxAddresses? sender, Geary.RFC822.MailboxAddresses? reply_to) {
+
+    /**
+     * Sets the RFC822 originators for the message.
+     *
+     * RFC 2822 requires at least one From address, that the Sender
+     * and From not be identical, and that both From and ReplyTo are
+     * optional.
+     */
+    public void set_originators(Geary.RFC822.MailboxAddresses from,
+                                Geary.RFC822.MailboxAddress? sender,
+                                Geary.RFC822.MailboxAddresses? reply_to)
+        throws RFC822Error {
+        // XXX Should be throwing an error here if from is empty or
+        // sender is same as from
         this.from = from;
         this.sender = sender;
         this.reply_to = reply_to;
-        
+
         fields |= Field.ORIGINATORS;
     }
-    
+
     public void set_receivers(Geary.RFC822.MailboxAddresses? to,
         Geary.RFC822.MailboxAddresses? cc, Geary.RFC822.MailboxAddresses? bcc) {
         this.to = to;
@@ -329,16 +340,16 @@ public class Geary.Email : BaseObject {
     public RFC822.MailboxAddress? get_primary_originator() {
         if (from != null && from.size > 0)
             return from[0];
-        
-        if (sender != null && sender.size > 0)
-            return sender[0];
-        
+
+        if (sender != null)
+            return sender;
+
         if (reply_to != null && reply_to.size > 0)
             return reply_to[0];
-        
+
         return null;
     }
-    
+
     public string to_string() {
         return "[%s] ".printf(id.to_string());
     }

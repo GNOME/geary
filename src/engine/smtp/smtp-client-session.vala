@@ -146,11 +146,8 @@ public class Geary.Smtp.ClientSession {
             
             rset_required = false;
         }
-        
+
         // MAIL
-        if (email.sender == null)
-            throw new SmtpError.REQUIRED_FIELD("No sender in message");
-        
         MailRequest mail_request = new MailRequest(from);
         Response response = yield cx.transaction_async(mail_request, cancellable);
         if (!response.code.is_success_completed())

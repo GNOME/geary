@@ -55,7 +55,7 @@ public class EmailEntry : Gtk.Entry {
     }
     
     private void validate_addresses() {
-        if (addresses.size == 0) {
+        if (addresses == null || addresses.size == 0) {
             valid_or_empty = true;
             empty = true;
             return;
