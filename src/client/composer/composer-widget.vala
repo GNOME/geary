@@ -454,10 +454,9 @@ public class ComposerWidget : Gtk.EventBox {
         GearyApplication.instance.load_ui_resource_for_manager(ui, "composer_accelerators.ui");
         
         add_extra_accelerators();
-        
+
         from = account.information.get_primary_from();
-        update_from_field();
-        
+
         if (referred != null) {
             if (compose_type != ComposeType.NEW_MESSAGE) {
                 add_recipients_and_ids(compose_type, referred);
@@ -467,6 +466,8 @@ public class ComposerWidget : Gtk.EventBox {
             last_quote = quote;
             switch (compose_type) {
                 case ComposeType.NEW_MESSAGE:
+                    if (referred.from != null)
+                        from = referred.from;
                     if (referred.to != null)
                         to_entry.addresses = referred.to;
                     if (referred.cc != null)
@@ -518,7 +519,9 @@ public class ComposerWidget : Gtk.EventBox {
                 break;
             }
         }
-        
+
+        update_from_field();
+
         // only add signature if the option is actually set and if this is not a draft
         if (account.information.use_email_signature && !is_referred_draft)
             add_signature_and_cursor();
@@ -690,8 +693,13 @@ public class ComposerWidget : Gtk.EventBox {
             }
             if (email == null)
                 continue;
-            
+
+            // XXX pretty sure we are calling this only to update the
+            // composer's internal set of ids - we really shouldn't be
+            // messing around with the draft's recipients since the
+            // user may have already updated them.
             add_recipients_and_ids(compose_type, email, false);
+
             if (first_email) {
                 reply_subject = Geary.RFC822.Utils.create_subject_for_reply(email);
                 forward_subject = Geary.RFC822.Utils.create_subject_for_forward(email);
@@ -747,20 +755,6 @@ public class ComposerWidget : Gtk.EventBox {
             }
         }
         return false;
-    }
-    
-    private void set_preferred_from_address(Geary.Email referred, ComposeType compose_type) {
-        if (compose_type == ComposeType.NEW_MESSAGE) {
-            if (referred.from != null)
-                from = referred.from;
-        } else {
-            Gee.List<Geary.RFC822.MailboxAddress> account_addresses = account.information.get_all_mailboxes();
-            if (!check_preferred_from_address(account_addresses, referred.to)) {
-                if (!check_preferred_from_address(account_addresses, referred.cc))
-                    if (!check_preferred_from_address(account_addresses, referred.bcc))
-                        check_preferred_from_address(account_addresses, referred.from);
-            }
-        }
     }
 
     private void on_load_finished(WebKit.WebFrame frame) {
@@ -1005,7 +999,21 @@ public class ComposerWidget : Gtk.EventBox {
     
     private void add_recipients_and_ids(ComposeType type, Geary.Email referred,
         bool modify_headers = true) {
-        Gee.List<Geary.RFC822.MailboxAddress> sender_addresses = account.information.get_all_mailboxes();
+        Gee.List<Geary.RFC822.MailboxAddress> sender_addresses =
+            account.information.get_all_mailboxes();
+
+        // Set the preferred from address. New messages should retain
+        // the account default and drafts should retain the draft's
+        // from addresses, so don't update them here
+        if (compose_type != ComposeType.NEW_MESSAGE) {
+            if (!check_preferred_from_address(sender_addresses, referred.to)) {
+                if (!check_preferred_from_address(sender_addresses, referred.cc))
+                    if (!check_preferred_from_address(sender_addresses, referred.bcc))
+                        check_preferred_from_address(sender_addresses, referred.from);
+            }
+        }
+
+        // Update the recipient addresses
         Geary.RFC822.MailboxAddresses to_addresses =
             Geary.RFC822.Utils.create_to_addresses_for_reply(referred, sender_addresses);
         Geary.RFC822.MailboxAddresses cc_addresses =
@@ -1014,8 +1022,7 @@ public class ComposerWidget : Gtk.EventBox {
         reply_cc_addresses = Geary.RFC822.Utils.remove_addresses(
             Geary.RFC822.Utils.merge_addresses(reply_cc_addresses, cc_addresses),
             reply_to_addresses);
-        set_preferred_from_address(referred, type);
-        
+
         if (!modify_headers)
             return;
         
