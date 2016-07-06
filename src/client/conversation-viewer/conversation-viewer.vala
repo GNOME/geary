@@ -890,8 +890,8 @@ public class ConversationViewer : Gtk.Box {
         // that are actually attachments (in particular, get_body() considers their
         // Content-Disposition)
         //
-        
-        string body_text = "";
+
+        string? body_text = null;
         remote_images = false;
         try {
             if (message.has_html_body()) {
@@ -899,7 +899,7 @@ public class ConversationViewer : Gtk.Box {
             } else {
                 body_text = message.get_plain_body(true, inline_image_replacer);
             }
-            body_text = insert_html_markup(body_text, message, out remote_images);
+            body_text = insert_html_markup(body_text ?? "", message, out remote_images);
         } catch (Error err) {
             debug("Could not get message text. %s", err.message);
         }
