@@ -88,6 +88,7 @@ class ImapConsole : Gtk.Window {
         "logout",
         "id",
         "bye",
+        "namespace",
         "list",
         "xlist",
         "examine",
@@ -166,7 +167,11 @@ class ImapConsole : Gtk.Window {
                     case "id":
                         id(cmd, args);
                     break;
-                    
+
+                    case "namespace":
+                        namespace(cmd, args);
+                    break;
+
                     case "list":
                     case "xlist":
                         list(cmd, args);
@@ -433,7 +438,23 @@ class ImapConsole : Gtk.Window {
             exception(err);
         }
     }
-    
+
+    private void namespace(string cmd, string[] args) throws Error {
+        check_connected(cmd, args, 0, null);
+
+        status("Retrieving NAMESPACE...");
+        cx.send_async.begin(new Geary.Imap.NamespaceCommand(), null, on_namespace);
+    }
+
+    private void on_namespace(Object? source, AsyncResult result) {
+        try {
+            cx.send_async.end(result);
+            status("Retrieved NAMESPACE");
+        } catch (Error err) {
+            exception(err);
+        }
+    }
+
     private void list(string cmd, string[] args) throws Error {
         check_connected(cmd, args, 2, "<reference> <mailbox>");
         
