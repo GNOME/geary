@@ -10,6 +10,7 @@ public class Geary.AccountInformation : BaseObject {
     private const string GROUP = "AccountInformation";
     private const string REAL_NAME_KEY = "real_name";
     private const string NICKNAME_KEY = "nickname";
+    private const string PRIMARY_EMAIL_KEY = "primary_email";
     private const string ALTERNATE_EMAILS_KEY = "alternate_emails";
     private const string SERVICE_PROVIDER_KEY = "service_provider";
     private const string ORDINAL_KEY = "ordinal";
@@ -168,7 +169,6 @@ public class Geary.AccountInformation : BaseObject {
 
     // This constructor is used internally to load accounts from disk.
     internal AccountInformation.from_file(File config_directory, File data_directory) {
-        this.email = config_directory.get_basename();
         this.config_dir = config_directory;
         this.data_dir = data_directory;
         this.file = config_dir.get_child(SETTINGS_FILENAME);
@@ -183,6 +183,7 @@ public class Geary.AccountInformation : BaseObject {
         } finally {
             real_name = get_string_value(key_file, GROUP, REAL_NAME_KEY);
             nickname = get_string_value(key_file, GROUP, NICKNAME_KEY);
+            email = get_string_value(key_file, GROUP, PRIMARY_EMAIL_KEY);
             
             // Store alternate emails in a list of case-insensitive strings
             Gee.List<string> alt_email_list = get_string_list_value(key_file, GROUP, ALTERNATE_EMAILS_KEY);
@@ -815,6 +816,7 @@ public class Geary.AccountInformation : BaseObject {
         
         key_file.set_value(GROUP, REAL_NAME_KEY, real_name);
         key_file.set_value(GROUP, NICKNAME_KEY, nickname);
+        key_file.set_value(GROUP, PRIMARY_EMAIL_KEY, email);
         key_file.set_value(GROUP, SERVICE_PROVIDER_KEY, service_provider.to_string());
         key_file.set_integer(GROUP, ORDINAL_KEY, ordinal);
         key_file.set_value(GROUP, IMAP_USERNAME_KEY, imap_credentials.user);
