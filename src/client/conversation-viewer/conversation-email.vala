@@ -329,6 +329,9 @@ public class ConversationEmail : Gtk.Box {
         unstar_button.set_sensitive(true);
         email_menubutton.set_sensitive(true);
         primary_message.show_message_body(include_transitions);
+        foreach (ConversationMessage attached in this._attached_messages) {
+            attached.show_message_body(include_transitions);
+        }
     }
 
     /**
@@ -341,6 +344,9 @@ public class ConversationEmail : Gtk.Box {
         unstar_button.set_sensitive(false);
         email_menubutton.set_sensitive(false);
         primary_message.hide_message_body();
+        foreach (ConversationMessage attached in this._attached_messages) {
+            attached.hide_message_body();
+        }
     }
 
     /**
