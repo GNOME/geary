@@ -299,21 +299,21 @@ public class ConversationViewer : Gtk.Stack {
         ComposerEmbed embed = new ComposerEmbed(
             referred, composer, conversation_page
         );
-        embed.set_property("name", "composer_embed"); // Bug 764622
+        embed.get_style_context().add_class("geary-composer-embed");
 
-        Gtk.ListBoxRow row = new Gtk.ListBoxRow();
-        row.get_style_context().add_class("geary_composer");
-        row.show();
-        row.add(embed);
-        conversation_listbox.add(row);
-
-        embed.loaded.connect((box) => {
-                row.grab_focus();
-            });
-        embed.vanished.connect((box) => {
-                conversation_listbox.remove(row);
-            });
-
+        ConversationEmail? email_view = conversation_email_for_id(referred.id);
+        if (email_view != null) {
+            email_view.attach_composer(embed);
+            embed.loaded.connect((box) => {
+                    embed.grab_focus();
+                });
+            embed.vanished.connect((box) => {
+                    email_view.remove_composer(embed);
+                });
+        } else {
+            error("Could not find referred email for embedded composer: %s",
+                  referred.id.to_string());
+        }
     }
 
     /**

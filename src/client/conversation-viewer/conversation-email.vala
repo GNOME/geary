@@ -380,6 +380,20 @@ public class ConversationEmail : Gtk.Box {
             : null;
     }
 
+    /**
+     * Attach an embedded composer to this email view.
+     */
+    public void attach_composer(ComposerEmbed embed) {
+        add(embed);
+    }
+
+    /**
+     * Detaches an embedded composer to this email view.
+     */
+    public void remove_composer(ComposerEmbed embed) {
+        remove(embed);
+    }
+
     private SimpleAction add_action(string name) {
         SimpleAction action = new SimpleAction(name, null);
         message_actions.add_action(action);

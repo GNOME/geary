@@ -33,11 +33,6 @@
   border-bottom-width: 0;
 }
 
-ComposerEmbed GtkHeaderBar,
-ComposerBox GtkHeaderBar,
-GtkBox.vertical GtkHeaderBar {
-  border-radius: 0px;
-}
 .geary-titlebar-left:dir(ltr),
 .geary-titlebar-right:dir(rtl) {
   border-top-right-radius: 0px;
@@ -75,9 +70,8 @@ row.geary-folder-popover-list-row > label {
 #conversation_listbox > row:hover > box {
   background: shade(@theme_base_color, 0.96);
 }
-#conversation_listbox > row.geary_expand,
-#conversation_listbox > row.geary_composer {
   margin-bottom: 18px;
+#conversation_listbox > row.geary_expand {
   border-bottom-width: 1px;
 }
 #conversation_listbox > row.geary_last {
@@ -98,7 +92,8 @@ row.geary-folder-popover-list-row > label {
   background-image: linear-gradient(rgba(0,0,0,0.2), @bg_color 6px);
 }
 
-#composer_embed headerbar {
+.geary-composer-embed headerbar {
+  border-top: 1px solid @borders;
   border-radius: 0px;
 }
 
