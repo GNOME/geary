@@ -317,7 +317,6 @@ public class ConversationMessage : Gtk.Box {
      * Starts loading the message body in the HTML view.
      */
     public async void load_message_body(Cancellable load_cancelled) {
-        bool remote_images = false;
         bool load_images = false;
         string? body_text = null;
         try {
