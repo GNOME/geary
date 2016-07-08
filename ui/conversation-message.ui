@@ -12,6 +12,22 @@
         <property name="can_focus">False</property>
         <property name="spacing">6</property>
         <child>
+          <object class="GtkImage" id="avatar">
+            <property name="width_request">18</property>
+            <property name="height_request">18</property>
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="valign">start</property>
+            <property name="pixel_size">32</property>
+            <property name="icon_name">avatar-default-symbolic</property>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
           <object class="GtkBox">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
@@ -27,22 +43,6 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="spacing">6</property>
-                    <child>
-                      <object class="GtkImage" id="preview_avatar">
-                        <property name="width_request">18</property>
-                        <property name="height_request">18</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="valign">start</property>
-                        <property name="pixel_size">32</property>
-                        <property name="icon_name">avatar-default-symbolic</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">False</property>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
                     <child>
                       <object class="GtkBox" id="preview_bod">
                         <property name="visible">True</property>
@@ -106,7 +106,7 @@
                       <packing>
                         <property name="expand">True</property>
                         <property name="fill">True</property>
-                        <property name="position">1</property>
+                        <property name="position">0</property>
                       </packing>
                     </child>
                   </object>
@@ -128,22 +128,6 @@
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="spacing">6</property>
-                    <child>
-                      <object class="GtkImage" id="header_avatar">
-                        <property name="width_request">18</property>
-                        <property name="height_request">18</property>
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="valign">start</property>
-                        <property name="pixel_size">48</property>
-                        <property name="icon_name">avatar-default-symbolic</property>
-                      </object>
-                      <packing>
-                        <property name="expand">False</property>
-                        <property name="fill">False</property>
-                        <property name="position">0</property>
-                      </packing>
-                    </child>
                     <child>
                       <object class="GtkBox" id="headers">
                         <property name="visible">True</property>
@@ -352,7 +336,7 @@
                       <packing>
                         <property name="expand">True</property>
                         <property name="fill">True</property>
-                        <property name="position">1</property>
+                        <property name="position">0</property>
                       </packing>
                     </child>
                   </object>
@@ -368,7 +352,7 @@
           <packing>
             <property name="expand">True</property>
             <property name="fill">True</property>
-            <property name="position">0</property>
+            <property name="position">1</property>
           </packing>
         </child>
         <style>

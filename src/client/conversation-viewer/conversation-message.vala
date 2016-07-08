@@ -77,9 +77,10 @@ public class ConversationMessage : Gtk.Box {
     internal ConversationWebView web_view { get; private set; }
 
     [GtkChild]
-    private Gtk.Revealer preview_revealer;
+    private Gtk.Image avatar;
+
     [GtkChild]
-    private Gtk.Image preview_avatar;
+    private Gtk.Revealer preview_revealer;
     [GtkChild]
     private Gtk.Label preview_from;
     [GtkChild]
@@ -89,8 +90,6 @@ public class ConversationMessage : Gtk.Box {
 
     [GtkChild]
     private Gtk.Revealer header_revealer;
-    [GtkChild]
-    private Gtk.Image header_avatar;
     [GtkChild]
     private Gtk.FlowBox from;
     [GtkChild]
@@ -289,7 +288,7 @@ public class ConversationMessage : Gtk.Box {
     }
 
     /**
-     * Starts loading the avatar for the sender of the message.
+     * Starts loading the avatar for the message's sender.
      */
     public async void load_avatar(Soup.Session session, Cancellable load_cancellable) {
         // Queued messages are cancelled in ConversationViewer.clear()
@@ -299,7 +298,7 @@ public class ConversationMessage : Gtk.Box {
         Geary.RFC822.MailboxAddress? primary = message.get_primary_originator();
         if (primary != null) {
             int window_scale = get_scale_factor();
-            int pixel_size = header_avatar.get_pixel_size();
+            int pixel_size = this.avatar.get_pixel_size();
             Soup.Message message = new Soup.Message(
                 "GET",
                 Gravatar.get_image_uri(
@@ -541,36 +540,28 @@ public class ConversationMessage : Gtk.Box {
     }
 
     private void set_avatar(uint8[] image_data) {
-        Gdk.Pixbuf avatar = null;
+        Gdk.Pixbuf avatar_buf = null;
         Gdk.PixbufLoader loader = new Gdk.PixbufLoader();
         try {
             loader.write(image_data);
             loader.close();
-            avatar = loader.get_pixbuf();
+            avatar_buf = loader.get_pixbuf();
         } catch (Error err) {
             debug("Error loading Gravatar response: %s", err.message);
         }
 
-        if (avatar != null) {
-            Gdk.Window window = get_window();
+        if (avatar_buf != null) {
             int window_scale = get_scale_factor();
-            int preview_size = preview_avatar.pixel_size * window_scale;
-            preview_avatar.set_from_surface(
-                Gdk.cairo_surface_create_from_pixbuf(
-                    avatar.scale_simple(
-                        preview_size, preview_size, Gdk.InterpType.BILINEAR
-                    ),
-                    window_scale,
-                    window)
-            );
-            int header_size = header_avatar.pixel_size * window_scale;
-            if (avatar.width != header_size) {
-                avatar = avatar.scale_simple(
-                    header_size, header_size, Gdk.InterpType.BILINEAR
+            int avatar_size = this.avatar.pixel_size * window_scale;
+            if (avatar_buf.width != avatar_size) {
+                avatar_buf = avatar_buf.scale_simple(
+                    avatar_size, avatar_size, Gdk.InterpType.BILINEAR
                 );
             }
-            header_avatar.set_from_surface(
-                Gdk.cairo_surface_create_from_pixbuf(avatar, window_scale, window)
+            this.avatar.set_from_surface(
+                Gdk.cairo_surface_create_from_pixbuf(
+                    avatar_buf, window_scale, get_window()
+                )
             );
         }
     }
