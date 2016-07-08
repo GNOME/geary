@@ -34,8 +34,10 @@
       <object class="GtkScrolledWindow" id="conversation_page">
         <property name="visible">True</property>
         <property name="can_focus">True</property>
+        <property name="events">GDK_KEY_PRESS_MASK | GDK_STRUCTURE_MASK</property>
         <property name="hscrollbar_policy">never</property>
         <property name="shadow_type">in</property>
+        <signal name="key-press-event" handler="on_conversation_key_press" swapped="no"/>
         <child>
           <object class="GtkViewport">
             <property name="visible">True</property>

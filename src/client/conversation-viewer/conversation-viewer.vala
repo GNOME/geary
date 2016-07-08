@@ -705,6 +705,13 @@ public class ConversationViewer : Gtk.Stack {
                 return true;
             });
 
+        // Capture key events on the email's web views to allow
+        // scrolling on Space, etc.
+        conversation_message.web_view.key_press_event.connect(on_conversation_key_press);
+        foreach (ConversationMessage attached in conversation_email.attached_messages) {
+            attached.web_view.key_press_event.connect(on_conversation_key_press);
+        }
+
         Gtk.ListBoxRow row = new Gtk.ListBoxRow();
         row.show();
         row.add(conversation_email);
@@ -844,6 +851,22 @@ public class ConversationViewer : Gtk.Stack {
         search_folder = current_folder as Geary.SearchFolder;
         assert(search_folder != null);
         return SearchState.SEARCH_FOLDER;
+    }
+
+    [GtkCallback]
+    private bool on_conversation_key_press(Gtk.Widget widget, Gdk.EventKey event) {
+        // Override some key bindings to get something that works more
+        // like a browser page.
+        if (event.keyval == Gdk.Key.space) {
+            Gtk.ScrollType dir = Gtk.ScrollType.PAGE_DOWN;
+            if ((event.state & Gdk.ModifierType.SHIFT_MASK) ==
+                Gdk.ModifierType.SHIFT_MASK) {
+                dir = Gtk.ScrollType.PAGE_UP;
+            }
+            conversation_page.scroll_child(dir, false);
+            return true;
+        }
+        return false;
     }
 
     private ConversationEmail? conversation_email_for_id(Geary.EmailIdentifier id) {
