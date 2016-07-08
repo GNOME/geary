@@ -47,7 +47,6 @@ public class ConversationWebView : StylishWebView {
         navigation_policy_decision_requested.connect(on_navigation_policy_decision_requested);
         new_window_policy_decision_requested.connect(on_navigation_policy_decision_requested);
         web_inspector.inspect_web_view.connect(activate_inspector);
-        document_font_changed.connect(on_document_font_changed);
         scroll_event.connect(on_scroll_event);
 
         GearyApplication.instance.config.bind(Configuration.CONVERSATION_VIEWER_ZOOM_KEY, this, "zoom_level_wrap");
@@ -143,35 +142,10 @@ public class ConversationWebView : StylishWebView {
         } catch (Error error) {
             debug("Error loading conversation-web-view.css: %s", error.message);
         }
-        
-        on_document_font_changed();
+
         load_user_style();
     }
-    
-    private void on_document_font_changed() {
-        string document_css = "";
-        if (document_font != null) {
-            string font_family = Pango.FontDescription.from_string(document_font).get_family();
-            document_css = @".email .body { font-family: $font_family; font-size: medium; }\n";
-        }
-        
-        WebKit.DOM.Document document = get_dom_document();
-        WebKit.DOM.Element style_element = document.get_element_by_id("default_fonts");
-        if (style_element == null)  // Not yet loaded
-            return;
-        
-        ulong n = style_element.child_nodes.length;
-        try {
-            for (int i = 0; i < n; i++)
-                style_element.remove_child(style_element.first_child);
-            
-            WebKit.DOM.Text text_node = document.create_text_node(document_css);
-            style_element.append_child(text_node);
-        } catch (Error error) {
-            debug("Error updating default font style: %s", error.message);
-        }
-    }
-    
+
     private bool on_scroll_event(Gdk.EventScroll event) {
         if ((event.state & Gdk.ModifierType.CONTROL_MASK) != 0) {
             double dir = 0;
