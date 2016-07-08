@@ -69,13 +69,11 @@ row.geary-folder-popover-list-row > label {
   transition: margin 0.1s;
 }
 #conversation_listbox > row > box {
-  background: shade(@theme_base_color, 0.96);
+  background: @theme_base_color;
   transition: background 0.25s;
 }
-#conversation_listbox > row:hover > box,
-#conversation_listbox > row > box.geary_show_body,
-#conversation_listbox > row:hover > box.geary_show_body {
-  background: @theme_base_color;
+#conversation_listbox > row:hover > box {
+  background: shade(@theme_base_color, 0.96);
 }
 #conversation_listbox > row.geary_expand,
 #conversation_listbox > row.geary_composer {
@@ -86,22 +84,18 @@ row.geary-folder-popover-list-row > label {
   margin-bottom: 0;
 }
 
-#ConversationMessage {
-  padding: 12px;
+.geary-message .geary-message-summary {
+  margin: 12px;
 }
-#ConversationMessage .geary-header-label {
+.geary-message .geary-header-label {
   margin-right: 6px;
 }
-#ConversationMessage .geary-headers flowboxchild {
+.geary-message .geary-headers flowboxchild {
   margin: 0;
   padding: 0;
 }
-#ConversationMessage separator {
-  margin: 12px 0;
-}
-#ConversationMessage infobar {
-  border-radius: 2px;
-  margin-bottom: 12px;
+.geary-submessages .geary-message {
+  background-image: linear-gradient(rgba(0,0,0,0.2), @bg_color 6px);
 }
 
 #composer_embed headerbar {

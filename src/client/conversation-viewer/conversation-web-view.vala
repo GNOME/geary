@@ -79,7 +79,9 @@ public class ConversationWebView : StylishWebView {
 
         int preferred_height = 0;
         if (load_status == WebKit.LoadStatus.FINISHED) {
-            preferred_height = (int) get_dom_document().get_body().offset_height;
+            // XXX We need this 12px padding since WK doesn't seem to
+            // report the bottom margin?
+            preferred_height = (int) get_dom_document().get_body().scroll_height + 12;
         }
 
         // XXX Currently, for some messages the WebView will report

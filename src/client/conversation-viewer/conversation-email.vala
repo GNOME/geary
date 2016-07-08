@@ -324,7 +324,6 @@ public class ConversationEmail : Gtk.Box {
      */
     public void expand_email(bool include_transitions=true) {
         is_collapsed = false;
-        get_style_context().add_class("geary_show_body");
         attachments_button.set_sensitive(true);
         star_button.set_sensitive(true);
         unstar_button.set_sensitive(true);
@@ -337,7 +336,6 @@ public class ConversationEmail : Gtk.Box {
      */
     public void collapse_email() {
         is_collapsed = true;
-        get_style_context().remove_class("geary_show_body");
         attachments_button.set_sensitive(false);
         star_button.set_sensitive(false);
         unstar_button.set_sensitive(false);

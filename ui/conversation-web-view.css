@@ -6,10 +6,17 @@
  * General HTML style.
  */
 
-html, body {
+html {
+  /* Disallow changes to HTML style using !important since this it is
+  needed for sizing the ConversationWebView. */
   left: 0 !important;
   width: 100% !important;
+  margin: 0 !important;
+  border: 0 !important;
+  padding: 0 !important;
+}
 
+html, body {
   /* Trigger CSS 2.1 § 10.6.7 to get a shrink-wrapped height.
      See also ConversationWebView.get_preferred_height */
   position: absolute !important;
@@ -22,13 +29,15 @@ html, body {
 }
 
 body {
-  margin: 0 !important;
-  border: 0 !important;
-  padding: 0 !important;
+  /* Allow email style to change the body however. */
+  left: 0;
+  right: 0;
+  margin: 12px;
+  border: 0;
+  padding: 0;
   color: black;
   background-color: white;
-  font: caption;
-  word-wrap: break-word;
+  overflow-wrap: break-word;
 }
 
 /* By default, tables reset the font properties to "normal" */
@@ -79,6 +88,10 @@ blockquote {
     padding-right: 5px;
     border: 0;
     border-left: 3px #aaa solid;
+}
+
+pre {
+  white-space: pre-wrap;
 }
 
 /**
