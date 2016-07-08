@@ -5,8 +5,8 @@
  */
 
 public class AttachmentDialog : Gtk.FileChooserDialog {
-    private static const int PREVIEW_SIZE = 180;
-    private static const int PREVIEW_PADDING = 3;
+    private const int PREVIEW_SIZE = 180;
+    private const int PREVIEW_PADDING = 3;
     
     private static string? current_folder = null;
     
