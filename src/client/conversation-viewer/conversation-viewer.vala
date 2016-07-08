@@ -130,31 +130,8 @@ public class ConversationViewer : Gtk.Stack {
      */
     public ConversationViewer() {
         // Setup the conversation list box
-        conversation_listbox.set_sort_func((row1, row2) => {
-                // If not a ConversationEmail, will be an
-                // embedded composer and should always be last.
-                ConversationEmail? msg1 = row1.get_child() as ConversationEmail;
-                if (msg1 == null) {
-                    return 1;
-                }
-                ConversationEmail? msg2 = row2.get_child() as ConversationEmail;
-                if (msg2 == null) {
-                    return -1;
-                }
-                return Geary.Email.compare_sent_date_ascending(msg1.email, msg2.email);
-            });
-        conversation_listbox.row_activated.connect((box, row) => {
-                // If not a ConversationEmail, will be an
-                // embedded composer and should not be activated.
-                ConversationEmail? msg = row.get_child() as ConversationEmail;
-                if (!row.get_style_context().has_class("geary_last") && msg != null) {
-                    if (msg.is_collapsed) {
-                        expand_email(row);
-                    } else {
-                        collapse_email(row);
-                    }
-                }
-            });
+        conversation_listbox.set_sort_func(on_conversation_listbox_sort);
+        conversation_listbox.row_activated.connect(on_conversation_listbox_row_actvated);
         conversation_listbox.realize.connect(() => {
                 conversation_page.get_vadjustment()
                     .value_changed.connect(check_mark_read);
@@ -546,7 +523,7 @@ public class ConversationViewer : Gtk.Stack {
             set_visible_child(conversation_page);
         }
     }
-    
+
     private void on_select_conversation_completed(Object? source, AsyncResult result) {
         select_conversation_timeout_id = 0;
         try {
@@ -554,6 +531,23 @@ public class ConversationViewer : Gtk.Stack {
             check_mark_read();
         } catch (Error err) {
             debug("Unable to select conversation: %s", err.message);
+        }
+    }
+
+    private int on_conversation_listbox_sort(Gtk.ListBoxRow row1, Gtk.ListBoxRow row2) {
+        ConversationEmail? msg1 = row1.get_child() as ConversationEmail;
+        ConversationEmail? msg2 = row2.get_child() as ConversationEmail;
+        return Geary.Email.compare_sent_date_ascending(msg1.email, msg2.email);
+    }
+
+    private void on_conversation_listbox_row_actvated(Gtk.ListBoxRow row) {
+        ConversationEmail? msg = row.get_child() as ConversationEmail;
+        if (msg != null && !row.get_style_context().has_class("geary_last")) {
+            if (msg.is_collapsed) {
+                expand_email(row);
+            } else {
+                collapse_email(row);
+            }
         }
     }
 
