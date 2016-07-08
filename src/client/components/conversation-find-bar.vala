@@ -5,7 +5,7 @@
  */
 
 public class ConversationFindBar : Gtk.Layout {
-    private static const string entry_not_found_style =
+    private const string entry_not_found_style =
 """
 .geary-not-found {
     color: white;

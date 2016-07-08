@@ -15,7 +15,7 @@ errordomain CommandException {
 class ImapConsole : Gtk.Window {
     public const string VERSION = _VERSION;
     
-    private static const int KEEPALIVE_SEC = 60 * 10;
+    private const int KEEPALIVE_SEC = 60 * 10;
     
     private Gtk.TextView console = new Gtk.TextView();
     private Gtk.Entry cmdline = new Gtk.Entry();

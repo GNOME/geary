@@ -36,9 +36,9 @@ public class GearyApplication : Gtk.Application {
         null
     };
     
-    private static const string ACTION_ENTRY_COMPOSE = "compose";
+    private const string ACTION_ENTRY_COMPOSE = "compose";
     
-    public static const ActionEntry[] action_entries = {
+    public const ActionEntry[] action_entries = {
         {ACTION_ENTRY_COMPOSE, activate_compose, "s"},
     };
     
