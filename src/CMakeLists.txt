@@ -403,6 +403,7 @@ client/util/util-gtk.vala
 client/util/util-international.vala
 client/util/util-random.vala
 client/util/util-webkit.vala
+client/util/util-migrate.vala
 )
 
 set(CONSOLE_SRC
