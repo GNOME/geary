@@ -293,7 +293,7 @@ public class ConversationEmail : Gtk.Box {
         }
 
         pack_start(primary_message, true, true, 0);
-        update_email_state(false);
+        update_email_state();
     }
 
     /**
@@ -324,9 +324,8 @@ public class ConversationEmail : Gtk.Box {
      */
     public void expand_email(bool include_transitions=true) {
         is_collapsed = false;
+        update_email_state();
         attachments_button.set_sensitive(true);
-        star_button.set_sensitive(true);
-        unstar_button.set_sensitive(true);
         email_menubutton.set_sensitive(true);
         primary_message.show_message_body(include_transitions);
         foreach (ConversationMessage attached in this._attached_messages) {
@@ -339,9 +338,8 @@ public class ConversationEmail : Gtk.Box {
      */
     public void collapse_email() {
         is_collapsed = true;
+        update_email_state();
         attachments_button.set_sensitive(false);
-        star_button.set_sensitive(false);
-        unstar_button.set_sensitive(false);
         email_menubutton.set_sensitive(false);
         primary_message.hide_message_body();
         foreach (ConversationMessage attached in this._attached_messages) {
@@ -407,23 +405,24 @@ public class ConversationEmail : Gtk.Box {
         }
     }
 
-    private void update_email_state(bool include_transitions=true) {
+    private void update_email_state() {
         Geary.EmailFlags flags = email.email_flags;
         Gtk.StyleContext style = get_style_context();
 
-        if (flags.is_unread()) {
-            set_action_enabled(ACTION_MARK_READ, true);
-            set_action_enabled(ACTION_MARK_UNREAD, false);
-            set_action_enabled(ACTION_MARK_UNREAD_DOWN, false);
+        bool is_unread = !flags.is_unread();
+        set_action_enabled(ACTION_MARK_READ, is_unread);
+        set_action_enabled(ACTION_MARK_UNREAD, !is_unread);
+        set_action_enabled(ACTION_MARK_UNREAD_DOWN, !is_unread);
+        if (is_unread) {
             style.add_class("geary_unread");
         } else {
-            set_action_enabled(ACTION_MARK_READ, false);
-            set_action_enabled(ACTION_MARK_UNREAD, true);
-            set_action_enabled(ACTION_MARK_UNREAD_DOWN, true);
             style.remove_class("geary_unread");
         }
 
-        if (flags.is_flagged()) {
+        bool is_flagged = flags.is_flagged();
+        set_action_enabled(ACTION_STAR, !this.is_collapsed && !is_flagged);
+        set_action_enabled(ACTION_UNSTAR, !this.is_collapsed && is_flagged);
+        if (is_flagged) {
             style.add_class("geary_starred");
             star_button.hide();
             unstar_button.show();
@@ -545,11 +544,11 @@ public class ConversationEmail : Gtk.Box {
             return;
         }
 
-        // Show attachments container. Would like to do this in the
+        // Show attachment widgets. Would like to do this in the
         // ctor but we don't know at that point if any attachments
         // will be displayed inline.
-        attachments_button.set_visible(true);
-        attachments_button.set_sensitive(false);
+        attachments_button.show();
+        attachments_button.set_sensitive(!this.is_collapsed);
         primary_message.body_box.pack_start(attachments_box, false, false, 0);
 
         // Add each displayed attachment to the icon view

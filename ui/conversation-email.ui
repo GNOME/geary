@@ -71,7 +71,6 @@
     </child>
     <child>
       <object class="GtkButton" id="unstar_button">
-        <property name="visible">True</property>
         <property name="sensitive">False</property>
         <property name="can_focus">True</property>
         <property name="receives_default">True</property>
