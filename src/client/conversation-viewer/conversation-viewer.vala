@@ -320,6 +320,26 @@ public class ConversationViewer : Gtk.Stack {
     }
 
     /**
+     * Returns an new Iterable over all email views in the viewer
+     */
+    private Gee.Iterator<ConversationEmail> email_view_iterator() {
+        return this.email_to_row.values.map<ConversationEmail>((row) => {
+                return (ConversationEmail) row.get_child();
+            });
+    }
+
+    /**
+     * Returns a new Iterable over all message views in the viewer
+     */
+    private Gee.Iterator<ConversationMessage> message_view_iterator() {
+        return Gee.Iterator.concat<ConversationMessage>(
+            email_view_iterator().map<Gee.Iterator<ConversationMessage>>(
+                (email_view) => { return email_view.message_view_iterator(); }
+            )
+        );
+    }
+
+    /**
      * Finds any currently visible messages, marks them as being read.
      */
     private void check_mark_read() {
@@ -330,17 +350,15 @@ public class ConversationViewer : Gtk.Stack {
         int top_bound = (int) adj.value;
         int bottom_bound = top_bound + (int) adj.page_size;
 
-        const int TEXT_PADDING = 50;
-        foreach (Geary.Email email in emails) {
-            ConversationEmail conversation_email = conversation_email_for_id(email.id);
-            ConversationMessage conversation_message =
-                conversation_email.primary_message;
+        email_view_iterator().foreach((email_view) => {
+            const int TEXT_PADDING = 50;
+            ConversationMessage conversation_message = email_view.primary_message;
             // Don't bother with not-yet-loaded emails since the
             // size of the body will be off, affecting the visibility
             // of emails further down the conversation.
-            if (email.email_flags.is_unread() &&
+            if (email_view.email.email_flags.is_unread() &&
                 conversation_message.is_loading_complete &&
-                !conversation_email.is_manual_read()) {
+                !email_view.is_manual_read()) {
                  int body_top = 0;
                  int body_left = 0;
                  conversation_message.web_view.translate_coordinates(
@@ -354,15 +372,16 @@ public class ConversationViewer : Gtk.Stack {
                  // Only mark the email as read if it's actually visible
                  if (body_bottom > top_bound &&
                      body_top + TEXT_PADDING < bottom_bound) {
-                     email_ids.add(email.id);
+                     email_ids.add(email_view.email.id);
 
                      // Since it can take some time for the new flags
                      // to round-trip back to ConversationViewer's
                      // signal handlers, mark as manually read here
-                     conversation_email.mark_manual_read();
+                     email_view.mark_manual_read();
                  }
              }
-        }
+            return true;
+        });
 
         if (email_ids.size > 0) {
             Geary.EmailFlags flags = new Geary.EmailFlags();
@@ -607,14 +626,10 @@ public class ConversationViewer : Gtk.Stack {
         ordered_matches.sort((a, b) => a.length - b.length);
 
         if (!cancellable.is_cancelled()) {
-            foreach (Geary.Email email in emails) {
-                ConversationEmail email_view = conversation_email_for_id(email.id);
-                email_view.primary_message
-                    .highlight_search_terms(search_matches);
-                foreach (ConversationMessage message_view in email_view.attached_messages) {
-                    message_view.highlight_search_terms(search_matches);
-                }
-            }
+            message_view_iterator().foreach((msg_view) => {
+                    msg_view.highlight_search_terms(search_matches);
+                    return true;
+                });
         }
     }
 
@@ -772,13 +787,10 @@ public class ConversationViewer : Gtk.Stack {
     private uint on_reset(uint state, uint event, void *user, Object? object) {
         //web_view.allow_collapsing(true);
 
-        foreach (Geary.Email email in emails) {
-            ConversationEmail email_view = conversation_email_for_id(email.id);
-            email_view.primary_message.unmark_search_terms();
-            foreach (ConversationMessage message_view in email_view.attached_messages) {
-                message_view.unmark_search_terms();
-            }
-        }
+        message_view_iterator().foreach((msg_view) => {
+                msg_view.unmark_search_terms();
+                return true;
+            });
 
         if (search_folder != null) {
             search_folder = null;

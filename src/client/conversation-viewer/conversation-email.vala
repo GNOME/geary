@@ -18,6 +18,72 @@
 [GtkTemplate (ui = "/org/gnome/Geary/conversation-email.ui")]
 public class ConversationEmail : Gtk.Box {
 
+    /**
+     * Iterator that returns all message views in an email view.
+     */
+    private class MessageViewIterator :
+        Gee.Traversable<ConversationMessage>, Gee.Iterator<ConversationMessage>, Object {
+
+        public bool read_only {
+            get { return true; }
+        }
+        public bool valid {
+            get { return this.pos == 0 || this.attached_views.valid; }
+        }
+
+        private ConversationEmail parent_view;
+        private int pos = -1;
+        private Gee.Iterator<ConversationMessage>? attached_views = null;
+
+        internal MessageViewIterator(ConversationEmail parent_view) {
+            this.parent_view = parent_view;
+            this.attached_views = parent_view._attached_messages.iterator();
+        }
+
+        public bool next() {
+            if (!has_next()) {
+                return false;
+            }
+            if (this.pos == -1) {
+                this.pos = 0;
+            } else {
+                this.attached_views.next();
+            }
+            return true;
+        }
+
+        public bool has_next() {
+            return this.pos == -1 || this.attached_views.next();
+        }
+
+        public new ConversationMessage get() {
+            switch (this.pos) {
+            case -1:
+                assert_not_reached();
+
+            case 0:
+                this.pos = 1;
+                return this.parent_view.primary_message;
+
+            default:
+                return this.attached_views.get();
+            }
+        }
+
+        public void remove() {
+            assert_not_reached();
+        }
+
+        public new bool foreach(Gee.ForallFunc<ConversationMessage> f) {
+            this.pos = 1;
+            bool ret = f(this.parent_view.primary_message);
+            if (ret) {
+                ret = this.attached_views.foreach(f);
+            }
+            return ret;
+        }
+
+    }
 
     /**
      * Information related to a specific attachment.
@@ -390,6 +456,13 @@ public class ConversationEmail : Gtk.Box {
      */
     public void remove_composer(ComposerEmbed embed) {
         remove(embed);
+    }
+
+    /**
+     * Returns a new Iterable over all message views in this email view
+     */
+    internal Gee.Iterator<ConversationMessage> message_view_iterator() {
+        return new MessageViewIterator(this);
     }
 
     private SimpleAction add_action(string name) {
