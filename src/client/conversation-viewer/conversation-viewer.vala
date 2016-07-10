@@ -312,6 +312,36 @@ public class ConversationViewer : Gtk.Stack {
     }
 
     /**
+     * Increases the magnification level used for displaying messages.
+     */
+    public void zoom_in() {
+        message_view_iterator().foreach((msg_view) => {
+                msg_view.web_view.zoom_in();
+                return true;
+            });
+    }
+
+    /**
+     * Decreases the magnification level used for displaying messages.
+     */
+    public void zoom_out() {
+        message_view_iterator().foreach((msg_view) => {
+                msg_view.web_view.zoom_out();
+                return true;
+            });
+    }
+
+    /**
+     * Resets magnification level used for displaying messages to the default.
+     */
+    public void zoom_reset() {
+        message_view_iterator().foreach((msg_view) => {
+                msg_view.web_view.zoom_level = 1.0f;
+                return true;
+            });
+    }
+
+    /**
      * Sets the currently visible page of the stack.
      */
     private new void set_visible_child(Gtk.Widget widget) {

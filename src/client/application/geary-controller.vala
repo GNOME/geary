@@ -2604,23 +2604,23 @@ public class GearyController : Geary.BaseObject {
             debug("Unable to revoke operation: %s", err.message);
         }
     }
-    
+
     private void on_zoom_in() {
-        //main_window.conversation_viewer.web_view.zoom_in();
+        this.main_window.conversation_viewer.zoom_in();
     }
 
     private void on_zoom_out() {
-        //main_window.conversation_viewer.web_view.zoom_out();
+        this.main_window.conversation_viewer.zoom_out();
     }
 
     private void on_zoom_normal() {
-        //main_window.conversation_viewer.web_view.zoom_level = 1.0f;
+        this.main_window.conversation_viewer.zoom_reset();
     }
-    
+
     private void on_search() {
         main_window.search_bar.give_search_focus();
     }
-    
+
     private void on_conversation_list() {
         main_window.conversation_list_view.grab_focus();
     }
