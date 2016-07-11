@@ -555,16 +555,16 @@ public class ConversationViewer : Gtk.Stack {
                 add_email(email, conversation.is_in_current_folder(email.id));
         }
 
+        // Ensure the last email is always shown
+        Gtk.ListBoxRow last_row =
+            conversation_listbox.get_row_at_index(emails.size - 1);
+        expand_email(last_row, false);
+
         if (current_folder is Geary.SearchFolder) {
             yield highlight_search_terms();
         } else {
             compress_emails();
         }
-
-        // Ensure the last email is always shown
-        Gtk.ListBoxRow last_row =
-            conversation_listbox.get_row_at_index(emails.size - 1);
-        expand_email(last_row, false);
 
         loading_conversations = false;
         if (state == ViewState.CONVERSATION) {
