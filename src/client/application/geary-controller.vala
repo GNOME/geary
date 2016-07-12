@@ -256,8 +256,12 @@ public class GearyController : Geary.BaseObject {
 
         // Start Geary.
         try {
-            yield Geary.Engine.instance.open_async(GearyApplication.instance.get_user_data_directory(), 
-                GearyApplication.instance.get_resource_directory(), new SecretMediator());
+            yield Geary.Engine.instance.open_async(
+                GearyApplication.instance.get_user_config_directory(),
+                GearyApplication.instance.get_user_data_directory(),
+                GearyApplication.instance.get_resource_directory(),
+                new SecretMediator()
+            );
             if (Geary.Engine.instance.get_accounts().size == 0) {
                 create_account();
             }
@@ -1134,7 +1138,7 @@ public class GearyController : Geary.BaseObject {
         AlertDialog dialog = new QuestionDialog(main_window,
             _("Unable to open the database for %s").printf(account.information.email),
             _("There was an error opening the local mail database for this account. This is possibly due to corruption of the database file in this directory:\n\n%s\n\nGeary can rebuild the database and re-synchronize with the server or exit.\n\nRebuilding the database will destroy all local email and its attachments. <b>The mail on the your server will not be affected.</b>")
-                .printf(account.information.settings_dir.get_path()),
+                .printf(account.information.data_dir.get_path()),
             _("_Rebuild"), _("E_xit"));
         dialog.use_secondary_markup(true);
         switch (dialog.run()) {
@@ -1169,7 +1173,7 @@ public class GearyController : Geary.BaseObject {
         ErrorDialog dialog = new ErrorDialog(main_window,
             _("Unable to open local mailbox for %s").printf(account.information.email),
             _("There was an error opening the local mail database for this account. This is possibly due to a file permissions problem.\n\nPlease check that you have read/write permissions for all files in this directory:\n\n%s")
-                .printf(account.information.settings_dir.get_path()));
+                .printf(account.information.data_dir.get_path()));
         dialog.run();
         
         GearyApplication.instance.exit(1);
