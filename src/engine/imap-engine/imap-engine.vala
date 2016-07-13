@@ -24,7 +24,7 @@ private GenericAccount? get_imap_account(AccountInformation account_info) {
     try {
         return Engine.instance.get_account_instance(account_info) as GenericAccount;
     } catch (Error err) {
-        debug("Unable to get account instance %s: %s", account_info.email, err.message);
+        debug("Unable to get account instance %s: %s", account_info.id, err.message);
     }
     
     return null;

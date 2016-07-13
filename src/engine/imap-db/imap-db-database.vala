@@ -22,6 +22,8 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
         
         this.upgrade_monitor = upgrade_monitor;
         this.vacuum_monitor = vacuum_monitor;
+
+        // Update to use all addresses on the account. Bug 768779
         this.account_owner_email = account_owner_email;
     }
     

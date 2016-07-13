@@ -100,6 +100,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         this.db = db;
         this.path = path;
         this.contact_store = contact_store;
+        // Update to use all addresses on the account. Bug 768779
         this.account_owner_email = account_owner_email;
         this.folder_id = folder_id;
         this.properties = properties;

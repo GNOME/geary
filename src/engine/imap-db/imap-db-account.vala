@@ -261,7 +261,7 @@ private class Geary.ImapDB.Account : BaseObject {
             throw new EngineError.ALREADY_OPEN("IMAP database already open");
         
         db = new ImapDB.Database(user_data_dir, schema_dir, upgrade_monitor, vacuum_monitor,
-            account_information.email);
+            account_information.primary_mailbox.address);
         
         try {
             yield db.open_async(
@@ -797,7 +797,7 @@ private class Geary.ImapDB.Account : BaseObject {
         }
         
         // create folder
-        folder = new Geary.ImapDB.Folder(db, path, contact_store, account_information.email, folder_id,
+        folder = new Geary.ImapDB.Folder(db, path, contact_store, account_information.primary_mailbox.address, folder_id,
             properties);
         
         // build a reference to it
@@ -898,10 +898,12 @@ private class Geary.ImapDB.Account : BaseObject {
                 }
             } else if (field == SEARCH_OP_FROM &&
                        parts[1].down() in search_op_from_me_values) {
-                token = account_information.email;
+                // Search for all addresses on the account. Bug 768779
+                token = account_information.primary_mailbox.address;
             } else if (field in SEARCH_OP_TO_ME_FIELDS &&
                        parts[1].down() in search_op_to_me_values) {
-                token = account_information.email;
+                // Search for all addresses on the account. Bug 768779
+                token = account_information.primary_mailbox.address;
             } else if (field != null) {
                 token = parts[1];
             }
@@ -1580,7 +1582,7 @@ private class Geary.ImapDB.Account : BaseObject {
     }
     
     private async void populate_search_table_async(Cancellable? cancellable) {
-        debug("%s: Populating search table", account_information.email);
+        debug("%s: Populating search table", account_information.id);
         try {
             while (!yield populate_search_table_batch_async(50, cancellable)) {
                 // With multiple accounts, meaning multiple background threads
@@ -1591,13 +1593,13 @@ private class Geary.ImapDB.Account : BaseObject {
                 yield Geary.Scheduler.sleep_ms_async(50);
             }
         } catch (Error e) {
-            debug("Error populating %s search table: %s", account_information.email, e.message);
+            debug("Error populating %s search table: %s", account_information.id, e.message);
         }
         
         if (search_index_monitor.is_in_progress)
             search_index_monitor.notify_finish();
         
-        debug("%s: Done populating search table", account_information.email);
+        debug("%s: Done populating search table", account_information.id);
     }
     
     private static Gee.HashSet<int64?> do_build_rowid_set(Db.Result result, Cancellable? cancellable)
@@ -1614,7 +1616,7 @@ private class Geary.ImapDB.Account : BaseObject {
     
     private async bool populate_search_table_batch_async(int limit, Cancellable? cancellable)
         throws Error {
-        debug("%s: Searching for up to %d missing indexed messages...", account_information.email,
+        debug("%s: Searching for up to %d missing indexed messages...", account_information.id,
             limit);
         
         int count = 0, total_unindexed = 0;
@@ -1685,7 +1687,7 @@ private class Geary.ImapDB.Account : BaseObject {
         
         if (count > 0) {
             debug("%s: Found %d/%d missing indexed messages, %d remaining...",
-                account_information.email, count, limit, total_unindexed);
+                account_information.id, count, limit, total_unindexed);
             
             if (!search_index_monitor.is_in_progress) {
                 search_index_monitor.set_interval(0, total_unindexed);

@@ -222,7 +222,25 @@ public class Geary.Engine : BaseObject {
     }
 
     /**
-     * Returns the current accounts list as a map keyed by email address.
+     * Returns a current account given its id.
+     *
+     * Throws an error if the engine has not been opened or if the
+     * requested account does not exist.
+     */
+    public AccountInformation get_account(string id) throws Error {
+        check_opened();
+
+        AccountInformation? info = accounts.get(id);
+        if (info == null) {
+            throw new EngineError.NOT_FOUND("No such account: %s", id);
+        }
+        return info;
+    }
+
+    /**
+     * Returns the current accounts list as a map keyed by account id.
+     *
+     * Throws an error if the engine has not been opened.
      */
     public Gee.Map<string, AccountInformation> get_accounts() throws Error {
         check_opened();
@@ -231,18 +249,18 @@ public class Geary.Engine : BaseObject {
     }
 
     /**
-     * Returns a new account for the given email address not yet stored on disk.
+     * Returns a new account for the given account id not yet stored on disk.
      */
-    public AccountInformation create_orphan_account(string email) throws Error {
+    public AccountInformation create_orphan_account(string id) throws Error {
         check_opened();
 
-        if (accounts.has_key(email))
-            throw new EngineError.ALREADY_EXISTS("Account %s already exists", email);
+        if (accounts.has_key(id))
+            throw new EngineError.ALREADY_EXISTS("Account %s already exists", id);
 
-        return new AccountInformation.from_file(user_config_dir.get_child(email),
-            user_data_dir.get_child(email));
+        return new AccountInformation.from_file(user_config_dir.get_child(id),
+            user_data_dir.get_child(id));
     }
-    
+
     /**
      * Returns whether the account information "validates."  If validate_connection is true,
      * we check if we can connect to the endpoints and authenticate using the supplied credentials.
@@ -255,11 +273,15 @@ public class Geary.Engine : BaseObject {
         
         // Make sure the account nickname and email is not in use.
         foreach (AccountInformation a in get_accounts().values) {
-            if (account.email != a.email && Geary.String.stri_equal(account.nickname, a.nickname))
+            // Don't need to check a's alternate_emails since they
+            // can't be set at account creation time
+            bool has_email = account.has_email_address(a.primary_mailbox);
+
+            if (!has_email && Geary.String.stri_equal(account.nickname, a.nickname))
                 error_code |= ValidationResult.INVALID_NICKNAME;
-            
+
             // if creating a new Account, don't allow an existing email address
-            if (!options.is_all_set(ValidationOption.UPDATING_EXISTING) && account.email == a.email)
+            if (!options.is_all_set(ValidationOption.UPDATING_EXISTING) && has_email)
                 error_code |= ValidationResult.EMAIL_EXISTS;
         }
         
@@ -335,43 +357,43 @@ public class Geary.Engine : BaseObject {
     public Geary.Account get_account_instance(AccountInformation account_information)
         throws Error {
         check_opened();
-        
-        if (account_instances.has_key(account_information.email))
-            return account_instances.get(account_information.email);
-        
+
+        if (account_instances.has_key(account_information.id))
+            return account_instances.get(account_information.id);
+
         ImapDB.Account local_account = new ImapDB.Account(account_information);
         Imap.Account remote_account = new Imap.Account(account_information);
-        
+
         Geary.Account account;
         switch (account_information.service_provider) {
             case ServiceProvider.GMAIL:
-                account = new ImapEngine.GmailAccount("Gmail:%s".printf(account_information.email),
+                account = new ImapEngine.GmailAccount("Gmail:%s".printf(account_information.id),
                     account_information, remote_account, local_account);
             break;
-            
+
             case ServiceProvider.YAHOO:
-                account = new ImapEngine.YahooAccount("Yahoo:%s".printf(account_information.email),
+                account = new ImapEngine.YahooAccount("Yahoo:%s".printf(account_information.id),
                     account_information, remote_account, local_account);
             break;
-            
+
             case ServiceProvider.OUTLOOK:
-                account = new ImapEngine.OutlookAccount("Outlook:%s".printf(account_information.email),
+                account = new ImapEngine.OutlookAccount("Outlook:%s".printf(account_information.id),
                     account_information, remote_account, local_account);
             break;
-            
+
             case ServiceProvider.OTHER:
-                account = new ImapEngine.OtherAccount("Other:%s".printf(account_information.email),
+                account = new ImapEngine.OtherAccount("Other:%s".printf(account_information.id),
                     account_information, remote_account, local_account);
             break;
-            
+
             default:
                 assert_not_reached();
         }
-        
-        account_instances.set(account_information.email, account);
+
+        account_instances.set(account_information.id, account);
         return account;
     }
-    
+
     /**
      * Adds the account to be tracked by the engine.  Should only be called from
      * AccountInformation.store_async() and this class.
@@ -379,9 +401,9 @@ public class Geary.Engine : BaseObject {
     internal void add_account(AccountInformation account, bool created = false) throws Error {
         check_opened();
 
-        bool already_added = accounts.has_key(account.email);
+        bool already_added = accounts.has_key(account.id);
 
-        accounts.set(account.email, account);
+        accounts.set(account.id, account);
 
         if (!already_added) {
             account.untrusted_host.connect(on_untrusted_host);
@@ -401,14 +423,14 @@ public class Geary.Engine : BaseObject {
         check_opened();
         
         // Ensure account is closed.
-        if (account_instances.has_key(account.email) && account_instances.get(account.email).is_open()) {
+        if (account_instances.has_key(account.id) && account_instances.get(account.id).is_open()) {
             throw new EngineError.CLOSE_REQUIRED("Account %s must be closed before removal",
-                account.email);
+                account.id);
         }
-        
-        if (accounts.unset(account.email)) {
+
+        if (accounts.unset(account.id)) {
             account.untrusted_host.disconnect(on_untrusted_host);
-            
+
             // Removal *MUST* be done in the following order:
             // 1. Send the account-unavailable signal.
             account_unavailable(account);
@@ -420,10 +442,10 @@ public class Geary.Engine : BaseObject {
             account_removed(account);
             
             // 4. Remove the account data from the engine.
-            account_instances.unset(account.email);
+            account_instances.unset(account.id);
         }
     }
-    
+
     private void on_untrusted_host(AccountInformation account_information, Endpoint endpoint,
         Endpoint.SecurityType security, TlsConnection cx, Service service) {
         untrusted_host(account_information, endpoint, security, cx, service);
