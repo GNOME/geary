@@ -27,11 +27,11 @@ public class AccountDialogRemoveConfirmPane : AccountDialogPane {
         actions.get_action("cancel_action").activate.connect(() => { cancel(); });
         actions.get_action("remove_action").activate.connect(() => { ok(account); });
     }
-    
+
     public void set_account(Geary.AccountInformation a) {
-        account = a;
-        account_nickname_label.label = account.nickname;
-        email_address_label.label = account.email;
+        this.account = a;
+        account_nickname_label.label = a.nickname;
+        email_address_label.label = a.primary_mailbox.address;
     }
 }
 

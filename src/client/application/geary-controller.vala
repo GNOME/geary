@@ -742,7 +742,7 @@ public class GearyController : Geary.BaseObject {
                 
                 // close the account; can't go any further w/o offline mode
                 try {
-                    if (Geary.Engine.instance.get_accounts().has_key(account_information.email)) {
+                    if (Geary.Engine.instance.get_accounts().has_key(account_information.id)) {
                         Geary.Account account = Geary.Engine.instance.get_account_instance(account_information);
                         close_account(account);
                     }
@@ -927,7 +927,7 @@ public class GearyController : Geary.BaseObject {
         Geary.AccountInformation account_information) {
         if (account_information.is_copy()) {
             try {
-                 return Geary.Engine.instance.get_accounts().get(account_information.email);
+                 return Geary.Engine.instance.get_accounts().get(account_information.id);
             } catch (Error e) {
                 error("Account information is out of sync: %s", e.message);
             }
@@ -1136,7 +1136,7 @@ public class GearyController : Geary.BaseObject {
         // could be done to leave the Account in an unopened state, but we don't currently
         // have provisions for that.
         AlertDialog dialog = new QuestionDialog(main_window,
-            _("Unable to open the database for %s").printf(account.information.email),
+            _("Unable to open the database for %s").printf(account.information.id),
             _("There was an error opening the local mail database for this account. This is possibly due to corruption of the database file in this directory:\n\n%s\n\nGeary can rebuild the database and re-synchronize with the server or exit.\n\nRebuilding the database will destroy all local email and its attachments. <b>The mail on the your server will not be affected.</b>")
                 .printf(account.information.data_dir.get_path()),
             _("_Rebuild"), _("E_xit"));
@@ -1148,7 +1148,7 @@ public class GearyController : Geary.BaseObject {
                     yield account.rebuild_async();
                 } catch (Error err) {
                     dialog = new ErrorDialog(main_window,
-                        _("Unable to rebuild database for \"%s\"").printf(account.information.email),
+                        _("Unable to rebuild database for \"%s\"").printf(account.information.id),
                         _("Error during rebuild:\n\n%s").printf(err.message));
                     dialog.run();
                     
@@ -1171,7 +1171,7 @@ public class GearyController : Geary.BaseObject {
         // some other problem opening the account ... as with other flow path, can't run
         // Geary today with an account in unopened state, so have to exit
         ErrorDialog dialog = new ErrorDialog(main_window,
-            _("Unable to open local mailbox for %s").printf(account.information.email),
+            _("Unable to open local mailbox for %s").printf(account.information.id),
             _("There was an error opening the local mail database for this account. This is possibly due to a file permissions problem.\n\nPlease check that you have read/write permissions for all files in this directory:\n\n%s")
                 .printf(account.information.data_dir.get_path()));
         dialog.run();
@@ -1181,7 +1181,7 @@ public class GearyController : Geary.BaseObject {
     
     private async void account_database_version_async(Geary.Account account) {
         ErrorDialog dialog = new ErrorDialog(main_window,
-            _("Unable to open local mailbox for %s").printf(account.information.email),
+            _("Unable to open local mailbox for %s").printf(account.information.id),
             _("The version number of the local mail database is formatted for a newer version of Geary. Unfortunately, the database cannot be \"rolled back\" to work with this version of Geary.\n\nPlease install the latest version of Geary and try again."));
         dialog.run();
         
@@ -1192,7 +1192,7 @@ public class GearyController : Geary.BaseObject {
         // some other problem opening the account ... as with other flow path, can't run
         // Geary today with an account in unopened state, so have to exit
         ErrorDialog dialog = new ErrorDialog(main_window,
-            _("Unable to open local mailbox for %s").printf(account.information.email),
+            _("Unable to open local mailbox for %s").printf(account.information.id),
             _("There was an error opening the local account. This is probably due to connectivity issues.\n\nPlease check your network connection and restart Geary."));
         dialog.run();
         

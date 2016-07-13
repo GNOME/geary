@@ -77,10 +77,10 @@ public class Libnotify : Geary.BaseObject {
             body = ngettext("%s, %d new message total", "%s, %d new messages total", total).printf(
                 body, total);
         }
-        
-        issue_current_notification(folder.account.information.email, body, null);
+
+        issue_current_notification(folder.account.information.display_name, body, null);
     }
-    
+
     private async void notify_one_message_async(Geary.Folder folder, Geary.Email email,
         GLib.Cancellable? cancellable) throws GLib.Error {
         assert(email.fields.fulfills(REQUIRED_FIELDS));
@@ -107,9 +107,9 @@ public class Libnotify : Geary.BaseObject {
             body = EmailUtil.strip_subject_prefixes(email);
         } else {
             body = ngettext("%s\n(%d other new message for %s)", "%s\n(%d other new messages for %s)", count - 1).printf(
-                EmailUtil.strip_subject_prefixes(email), count - 1, folder.account.information.email);
+                EmailUtil.strip_subject_prefixes(email), count - 1, folder.account.information.display_name);
         }
-        
+
         // get the avatar
         Gdk.Pixbuf? avatar = null;
         InputStream? ins = null;

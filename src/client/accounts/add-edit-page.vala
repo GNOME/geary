@@ -14,7 +14,9 @@ public class AddEditPage : Gtk.Box {
         ADD,
         EDIT
     }
-    
+
+    private string? id = null;
+
     public string real_name {
         get { return entry_real_name.text; }
         set { entry_real_name.text = value; }
@@ -357,9 +359,11 @@ public class AddEditPage : Gtk.Box {
     
     // Sets the account information to display on this page.
     public void set_account_information(Geary.AccountInformation info, Geary.Engine.ValidationResult result) {
-        set_all_info(info.real_name,
+        set_all_info(
+            info.id,
+            info.real_name,
             info.nickname,
-            info.email,
+            info.primary_mailbox.address,
             info.imap_credentials.user,
             info.imap_credentials.pass,
             info.imap_remember_password && info.smtp_remember_password,
@@ -387,6 +391,7 @@ public class AddEditPage : Gtk.Box {
     
     // Can use this instead of set_account_information(), both do the same thing.
     public void set_all_info(
+        string? initial_id = null,
         string? initial_real_name = null,
         string? initial_nickname = null,
         string? initial_email = null,
@@ -413,60 +418,61 @@ public class AddEditPage : Gtk.Box {
         bool initial_use_email_signature = false,
         string? initial_email_signature = null,
         Geary.Engine.ValidationResult result = Geary.Engine.ValidationResult.OK) {
-        
+
         // Set defaults
-        real_name = initial_real_name ?? "";
-        nickname = initial_nickname ?? "";
-        email_address = initial_email ?? "";
-        password = initial_imap_password != null ? initial_imap_password : "";
-        remember_password = initial_remember_password;
-        save_sent_mail = initial_save_sent_mail;
-        check_save_sent_mail.sensitive = allow_save_sent_mail;
-        set_service_provider((Geary.ServiceProvider) initial_service_provider);
-        combo_imap_encryption.active = Encryption.NONE; // Must be default; set to real value below.
-        combo_smtp_encryption.active = Encryption.NONE;
-        use_email_signature = initial_use_email_signature;
-        email_signature = initial_email_signature;
-        signature_stack.set_visible_child_name("edit_window");
-        
+        this.id = initial_id;
+        this.real_name = initial_real_name ?? "";
+        this.nickname = initial_nickname ?? "";
+        this.email_address = initial_email ?? "";
+        this.password = initial_imap_password != null ? initial_imap_password : "";
+        this.remember_password = initial_remember_password;
+        this.save_sent_mail = initial_save_sent_mail;
+        this.check_save_sent_mail.sensitive = allow_save_sent_mail;
+        this.set_service_provider((Geary.ServiceProvider) initial_service_provider);
+        this.combo_imap_encryption.active = Encryption.NONE; // Must be default; set to real value below.
+        this.combo_smtp_encryption.active = Encryption.NONE;
+        this.use_email_signature = initial_use_email_signature;
+        this.email_signature = initial_email_signature;
+        this.signature_stack.set_visible_child_name("edit_window");
+
         // Set defaults for IMAP info
-        imap_host = initial_default_imap_host ?? "";
-        imap_port = initial_default_imap_port;
-        imap_username = initial_imap_username ?? "";
-        imap_password = initial_imap_password ?? "";
-        imap_ssl = initial_default_imap_ssl;
-        imap_starttls = initial_default_imap_starttls;
-        
+        this.imap_host = initial_default_imap_host ?? "";
+        this.imap_port = initial_default_imap_port;
+        this.imap_username = initial_imap_username ?? "";
+        this.imap_password = initial_imap_password ?? "";
+        this.imap_ssl = initial_default_imap_ssl;
+        this.imap_starttls = initial_default_imap_starttls;
+
         // Set defaults for SMTP info
-        smtp_host = initial_default_smtp_host ?? "";
-        smtp_port = initial_default_smtp_port;
-        smtp_username = initial_smtp_username ?? "";
-        smtp_password = initial_smtp_password ?? "";
-        smtp_ssl = initial_default_smtp_ssl;
-        smtp_starttls = initial_default_smtp_starttls;
-        smtp_use_imap_credentials = initial_default_smtp_use_imap_credentials;
-        smtp_noauth = initial_default_smtp_noauth;
-        
-        save_drafts = initial_save_drafts;
-        
+        this.smtp_host = initial_default_smtp_host ?? "";
+        this.smtp_port = initial_default_smtp_port;
+        this.smtp_username = initial_smtp_username ?? "";
+        this.smtp_password = initial_smtp_password ?? "";
+        this.smtp_ssl = initial_default_smtp_ssl;
+        this.smtp_starttls = initial_default_smtp_starttls;
+        this.smtp_use_imap_credentials = initial_default_smtp_use_imap_credentials;
+        this.smtp_noauth = initial_default_smtp_noauth;
+
+        this.save_drafts = initial_save_drafts;
+
         set_validation_result(result);
-        
+
         set_storage_length(prefetch_period_days);
     }
-    
+
     public void set_validation_result(Geary.Engine.ValidationResult result) {
         last_validation_result = result;
     }
-    
+
     // Resets all fields to their defaults.
     public void reset_all() {
         // Take advantage of set_all_info()'s defaults.
-        set_all_info(get_default_real_name());
-        
+        set_all_info(null, get_default_real_name());
+
         edited_imap_port = false;
         edited_smtp_port = false;
     }
-    
+
     /** Puts this page into one of three different modes:
      *  WELCOME: The first screen when Geary is started.
      *      ADD: Add account screen is like the Welcome screen, but without the welcome message.
@@ -636,62 +642,71 @@ public class AddEditPage : Gtk.Box {
         
         return true;
     }
-    
+
     public Geary.AccountInformation? get_account_information() {
-        Geary.AccountInformation account_information;
         fix_credentials_for_supported_provider();
-        
-        Geary.Credentials imap_credentials = new Geary.Credentials(imap_username.strip(), imap_password.strip());
+
+        Geary.Credentials imap_credentials = new Geary.Credentials(
+            imap_username.strip(), imap_password.strip());
         Geary.Credentials smtp_credentials = new Geary.Credentials(
             (smtp_use_imap_credentials ? imap_username.strip() : smtp_username.strip()),
             (smtp_use_imap_credentials ? imap_password.strip() : smtp_password.strip()));
-        
-        try {
-            Geary.AccountInformation original_account = Geary.Engine.instance.get_accounts().get(email_address);
-            if (original_account == null) {
-                // New account.
-                account_information = Geary.Engine.instance.create_orphan_account(email_address);
-            } else {
-                // Existing account: create a copy so we don't mess up the original.
-                account_information = new Geary.AccountInformation.temp_copy(original_account);
+
+        Geary.AccountInformation? info = null;
+        if (this.id == null) {
+            // New account
+            try {
+                info = Geary.Engine.instance.create_orphan_account(this.email_address);
+            } catch (Error err) {
+                debug("Unable to create account %s for %s: %s",
+                      this.id, this.email_address, err.message);
             }
-        } catch (Error err) {
-            debug("Unable to open account information for %s: %s", email_address, err.message);
-            
-            return null;
+        } else {
+            // Existing account: create a copy so we don't mess up the original.
+            try {
+                info = new Geary.AccountInformation.temp_copy(
+                    Geary.Engine.instance.get_account(this.id)
+                );
+            } catch (Error err) {
+                debug("Unable get existing account %s: %s", this.id, err.message);
+            }
         }
-        
-        account_information.real_name = real_name.strip();
-        account_information.nickname = nickname.strip();
-        account_information.imap_credentials = imap_credentials;
-        account_information.smtp_credentials = smtp_credentials;
-        account_information.imap_remember_password = remember_password;
-        account_information.smtp_remember_password = remember_password;
-        account_information.service_provider = get_service_provider();
-        account_information.save_sent_mail = save_sent_mail;
-        account_information.default_imap_server_host = imap_host;
-        account_information.default_imap_server_port = imap_port;
-        account_information.default_imap_server_ssl = imap_ssl;
-        account_information.default_imap_server_starttls = imap_starttls;
-        account_information.default_smtp_server_host = smtp_host.strip();
-        account_information.default_smtp_server_port = smtp_port;
-        account_information.default_smtp_server_ssl = smtp_ssl;
-        account_information.default_smtp_server_starttls = smtp_starttls;
-        account_information.default_smtp_use_imap_credentials = smtp_use_imap_credentials;
-        account_information.default_smtp_server_noauth = smtp_noauth;
-        account_information.prefetch_period_days = get_storage_length();
-        account_information.save_drafts = save_drafts;
-        account_information.use_email_signature = use_email_signature;
-        account_information.email_signature = email_signature;
-        
-        if (smtp_noauth)
-            account_information.smtp_credentials = null;
-        
-        on_changed();
-        
-        return account_information;
+
+        if (info != null) {
+            info.primary_mailbox = new Geary.RFC822.MailboxAddress(
+                this.real_name.strip(), this.email_address.strip()
+            );
+            info.nickname = this.nickname.strip();
+            info.imap_credentials = imap_credentials;
+            info.smtp_credentials = smtp_credentials;
+            info.imap_remember_password = this.remember_password;
+            info.smtp_remember_password = this.remember_password;
+            info.service_provider = this.get_service_provider();
+            info.save_sent_mail = this.save_sent_mail;
+            info.default_imap_server_host = this.imap_host;
+            info.default_imap_server_port = this.imap_port;
+            info.default_imap_server_ssl = this.imap_ssl;
+            info.default_imap_server_starttls = this.imap_starttls;
+            info.default_smtp_server_host = this.smtp_host.strip();
+            info.default_smtp_server_port = this.smtp_port;
+            info.default_smtp_server_ssl = this.smtp_ssl;
+            info.default_smtp_server_starttls = this.smtp_starttls;
+            info.default_smtp_use_imap_credentials = this.smtp_use_imap_credentials;
+            info.default_smtp_server_noauth = this.smtp_noauth;
+            info.prefetch_period_days = get_storage_length();
+            info.save_drafts = this.save_drafts;
+            info.use_email_signature = this.use_email_signature;
+            info.email_signature = this.email_signature;
+
+            if (smtp_noauth)
+                info.smtp_credentials = null;
+
+            on_changed();
+        }
+
+        return info;
     }
-    
+
     // Assembles credentials for supported providers.
     private void fix_credentials_for_supported_provider() {
         if (get_service_provider() != Geary.ServiceProvider.OTHER) {

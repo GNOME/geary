@@ -7,21 +7,22 @@
 // List of accounts.  Used with AccountDialog.
 public class AccountDialogAccountListPane : AccountDialogPane {
     public enum Column {
-        ACCOUNT_NICKNAME = 0,
+        ACCOUNT_ID = 0,
+        ACCOUNT_NAME,
         ACCOUNT_ADDRESS;
     }
-    
+
     private Gtk.TreeView list_view;
-    private Gtk.ListStore list_model = new Gtk.ListStore(2, typeof (string), typeof (string));
+    private Gtk.ListStore list_model = new Gtk.ListStore(3, typeof(string), typeof(string), typeof(string));
     private Gtk.Action edit_action;
     private Gtk.Action delete_action;
     
     public signal void add_account();
-    
-    public signal void edit_account(string email_address);
-    
-    public signal void delete_account(string email_address);
-    
+
+    public signal void edit_account(string id);
+
+    public signal void delete_account(string id);
+
     public AccountDialogAccountListPane(Gtk.Stack stack) {
         base(stack);
         Gtk.Builder builder = GearyApplication.instance.create_builder("account_list.glade");
@@ -33,14 +34,14 @@ public class AccountDialogAccountListPane : AccountDialogPane {
         // Set up list.
         list_view = (Gtk.TreeView) builder.get_object("account_list");
         list_view.set_model(list_model);
-        list_view.insert_column_with_attributes(-1, "Nickname", new Gtk.CellRendererText(), "text",
-            Column.ACCOUNT_NICKNAME);
-        list_view.get_column(Column.ACCOUNT_NICKNAME).set_expand(true);
-        list_view.insert_column_with_attributes(-1, "Address", new Gtk.CellRendererText(), "text",
+        list_view.insert_column_with_attributes(-1, "Name", new Gtk.CellRendererText(), "text",
+            Column.ACCOUNT_NAME);
+        list_view.get_column(0).set_expand(true);
+        list_view.insert_column_with_attributes(-1, "Email", new Gtk.CellRendererText(), "text",
             Column.ACCOUNT_ADDRESS);
-        list_view.get_column(Column.ACCOUNT_ADDRESS).set_expand(true);
+        list_view.get_column(1).set_expand(true);
         list_view.reorderable = true;
-        
+
         // Get all accounts and add them to a list.
         Gee.LinkedList<Geary.AccountInformation> account_list =
             new Gee.LinkedList<Geary.AccountInformation>();
@@ -102,8 +103,8 @@ public class AccountDialogAccountListPane : AccountDialogPane {
         notify_edit_account();
         return true;
     }
-    
-    // Returns the email address of the selected account.  Returns null if no account is selected.
+
+    // Returns the id of the selected account.  Returns null if no account is selected.
     private string? get_selected_account() {
         if (list_view.get_selection().count_selected_rows() != 1)
             return null;
@@ -115,7 +116,7 @@ public class AccountDialogAccountListPane : AccountDialogPane {
             return null;
         
         string? account = null;
-        list_model.get(iter, Column.ACCOUNT_ADDRESS, out account);
+        list_model.get(iter, Column.ACCOUNT_ID, out account);
         return account;
     }
     
@@ -126,18 +127,18 @@ public class AccountDialogAccountListPane : AccountDialogPane {
     }
     
     private void on_account_added(Geary.AccountInformation account) {
-        Gtk.TreeIter? iter = list_contains(account.email);
+        Gtk.TreeIter? iter = list_contains(account.id);
         if (iter != null)
             return; // Already listed.
-        
-        add_account_to_list(account.nickname, account.email);
+
+        add_account_to_list(account);
         account.notify.connect(on_account_changed);
         update_buttons();
         update_ordinals();
     }
     
     private void on_account_removed(Geary.AccountInformation account) {
-        remove_account_from_list(account.email);
+        remove_account_from_list(account.id);
         account.notify.disconnect(on_account_changed);
         update_buttons();
         update_ordinals();
@@ -145,16 +146,17 @@ public class AccountDialogAccountListPane : AccountDialogPane {
     
     // Adds an account to the list.
     // Note: does NOT check if the account is already listed.
-    private void add_account_to_list(string nickname, string address) {
+    private void add_account_to_list(Geary.AccountInformation account) {
         Gtk.TreeIter iter;
         list_model.append(out iter);
-        list_model.set(iter, Column.ACCOUNT_NICKNAME, nickname);
-        list_model.set(iter, Column.ACCOUNT_ADDRESS, address);
+        list_model.set(iter, Column.ACCOUNT_ID, account.id);
+        list_model.set(iter, Column.ACCOUNT_NAME, account.display_name);
+        list_model.set(iter, Column.ACCOUNT_ADDRESS, account.primary_mailbox.address);
     }
     
     // Removes an account on the list.
-    private void remove_account_from_list(string address) {
-        Gtk.TreeIter? iter = list_contains(address);
+    private void remove_account_from_list(string id) {
+        Gtk.TreeIter? iter = list_contains(id);
         if (iter == null)
             return;
         
@@ -164,25 +166,25 @@ public class AccountDialogAccountListPane : AccountDialogPane {
     private void on_account_changed(Object object, ParamSpec p) {
         Geary.AccountInformation account = (Geary.AccountInformation) object;
         
-        Gtk.TreeIter? iter = list_contains(account.email);
+        Gtk.TreeIter? iter = list_contains(account.id);
         if (iter == null)
             return;
-        
-        // Since nickname is the only column that can change, just set it.
-        list_model.set_value(iter, Column.ACCOUNT_NICKNAME, account.nickname);
+
+        list_model.set_value(iter, Column.ACCOUNT_NAME, account.display_name);
+        list_model.set_value(iter, Column.ACCOUNT_ADDRESS, account.primary_mailbox.address);
     }
-    
-    // Returns TreeIter of the address in the account list, else null.
-    private Gtk.TreeIter? list_contains(string address) {
+
+    // Returns TreeIter of the id in the account list, else null.
+    private Gtk.TreeIter? list_contains(string id) {
         Gtk.TreeIter iter;
         
         if (!list_model.get_iter_first(out iter))
             return null;
         
         do {
-            string list_address = "";
-            list_model.get(iter, Column.ACCOUNT_ADDRESS, out list_address);
-            if (list_address == address)
+            string list_id = "";
+            list_model.get(iter, Column.ACCOUNT_ID, out list_id);
+            if (list_id == id)
                 return iter;
         } while (list_model.iter_next(ref iter));
         
@@ -206,11 +208,11 @@ public class AccountDialogAccountListPane : AccountDialogPane {
         
         int i = 0;
         do {
-            string? list_address = null;
-            list_model.get(iter, Column.ACCOUNT_ADDRESS, out list_address);
-            if (list_address != null) {
-                Geary.AccountInformation account = all_accounts.get(list_address);
-                
+            string? list_id = null;
+            list_model.get(iter, Column.ACCOUNT_ID, out list_id);
+            if (list_id != null) {
+                Geary.AccountInformation account = all_accounts.get(list_id);
+
                 // To prevent unnecessary work, only set ordinal if there's a change.
                 if (i != account.ordinal) {
                     account.ordinal = i;

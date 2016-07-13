@@ -37,11 +37,11 @@ public class Libmessagingmenu : NewMessagesIndicator {
             monitor.new_messages_retired.disconnect(on_new_messages_changed);
         }
     }
-    
+
     private string get_source_id(Geary.Folder folder) {
-        return "new-messages-id-%s-%s".printf(folder.account.information.email, folder.path.to_string());
+        return "new-messages-id-%s-%s".printf(folder.account.information.id, folder.path.to_string());
     }
-    
+
     private void on_activate_source(string source_id) {
         foreach (Geary.Folder folder in monitor.get_folders()) {
             if (source_id == get_source_id(folder)) {

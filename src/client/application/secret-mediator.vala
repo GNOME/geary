@@ -53,7 +53,7 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
     public virtual async string? get_password_async(
         Geary.Service service, Geary.AccountInformation account_information, Cancellable? cancellable = null)
         throws Error {
-        string key_name = get_key_name(service, account_information.email);
+        string key_name = get_key_name(service, account_information.id);
         string? password = yield Secret.password_lookup(Secret.SCHEMA_COMPAT_NETWORK, cancellable,
             "user", key_name);
         
@@ -73,15 +73,15 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
         }
         
         if (password == null)
-            debug("Unable to fetch password in libsecret keyring for %s", account_information.email);
-        
+            debug("Unable to fetch password in libsecret keyring for %s", account_information.id);
+
         return password;
     }
     
     public virtual async void set_password_async(
         Geary.Service service, Geary.AccountInformation account_information,
         Cancellable? cancellable = null) throws Error {
-        string key_name = get_key_name(service, account_information.email);
+        string key_name = get_key_name(service, account_information.id);
         Geary.Credentials credentials = get_credentials(service, account_information);
         
         bool result = yield Secret.password_store(Secret.SCHEMA_COMPAT_NETWORK,
@@ -97,7 +97,7 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
         Geary.Credentials credentials = get_credentials(service, account_information);
         // new-style
         yield Secret.password_clear(Secret.SCHEMA_COMPAT_NETWORK, cancellable, "user",
-            get_key_name(service, account_information.email));
+            get_key_name(service, account_information.id));
         // <= 0.6
         yield Secret.password_clear(Secret.SCHEMA_COMPAT_NETWORK, cancellable, "user",
             get_key_name(service, credentials.user));

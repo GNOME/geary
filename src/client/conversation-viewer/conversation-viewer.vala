@@ -677,7 +677,8 @@ public class ConversationViewer : Gtk.Box {
             if (email.is_unread() == Geary.Trillian.FALSE) {
                 div_message.get_class_list().add("hide");
             }
-            if (email.from != null && email.from.contains_normalized(current_account_information.email)) {
+            // Update to use all addresses on the account. Bug 768779
+            if (email.from != null && email.from.contains_normalized(current_account_information.primary_mailbox.address)) {
                 div_message.get_class_list().add("sent");
             }
         } catch (Error setup_error) {

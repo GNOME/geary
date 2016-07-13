@@ -69,14 +69,30 @@ public class Geary.AccountInformation : BaseObject {
     //
 
     /**
-     * Unique identifier for this account.
+     * A unique, immutable, machine-readable identifier for this account.
      *
      * This string's value should be treated as an opaque, private
      * implementation detail and not parsed at all. For older accounts
      * it will be an email address, for newer accounts it will be
-     * something else.
+     * something else. Once created, this string will never change.
      */
     public string id { get; private set; }
+
+    /**
+     * A unique human-readable display name for this account.
+     *
+     * Use this to display a string to the user that can uniquely
+     * identify this account. Note this value is mutable - it may
+     * change as a result of user action, so do not rely on it staying
+     * the same.
+     */
+    public string display_name {
+        get {
+            return (!String.is_empty_or_whitespace(this.nickname))
+                ? this.nickname
+                : this.primary_mailbox.address;
+        }
+    }
 
     /**
      * User's name for the {@link get_primary_mailbox_address}.
@@ -84,7 +100,10 @@ public class Geary.AccountInformation : BaseObject {
     public string real_name { get; set; }
     
     /**
-     * User label for primary account (not transmitted on wire or used in correspondence).
+     * User-provided label for the account.
+     *
+     * This is not to be used in the UI (use `display_name` instead)
+     * and not transmitted on the wire or used in correspondence.
      */
     public string nickname { get; set; }
 
@@ -949,11 +968,11 @@ public class Geary.AccountInformation : BaseObject {
         int diff = a.ordinal - b.ordinal;
         if (diff != 0)
             return diff;
-        
+
         // Stabilize on nickname, which should always be unique.
-        return a.nickname.collate(b.nickname);
+        return a.display_name.collate(b.display_name);
     }
-    
+
     // Returns true if this is a copy.
     public bool is_copy() {
         return file == null;

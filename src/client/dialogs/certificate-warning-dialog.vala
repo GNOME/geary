@@ -30,7 +30,7 @@ public class CertificateWarningDialog {
         Gtk.Label dont_trust_label = (Gtk.Label) builder.get_object("dont_trust_label");
         Gtk.Label contact_label = (Gtk.Label) builder.get_object("contact_label");
         
-        title_label.label = _("Untrusted Connection: %s").printf(account_information.email);
+        title_label.label = _("Untrusted Connection: %s").printf(account_information.display_name);
         
         Geary.Endpoint endpoint = account_information.get_endpoint_for_service(service);
         top_label.label = _("The identity of the %s mail server at %s:%u could not be verified.").printf(

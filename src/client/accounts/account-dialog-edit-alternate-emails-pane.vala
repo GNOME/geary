@@ -17,9 +17,7 @@ public class AccountDialogEditAlternateEmailsPane : AccountDialogPane {
             GtkUtil.set_label_xalign(this, 0.0f);
         }
     }
-    
-    public string? email { get; private set; default = null; }
-    
+
     public bool changed { get; private set; default = false; }
     
     private Gtk.Label title_label;
@@ -114,18 +112,16 @@ public class AccountDialogEditAlternateEmailsPane : AccountDialogPane {
     
     public void set_account(Geary.AccountInformation account_info) {
         this.account_info = account_info;
-        
-        email = account_info.email;
-        primary_mailbox = account_info.get_primary_mailbox_address();
-        mailboxes.clear();
-        changed = false;
-        
+        this.primary_mailbox = account_info.primary_mailbox;
+        this.mailboxes.clear();
+        this.changed = false;
+
         // reset/clear widgets
-        title_label.label = _("Additional addresses for %s").printf(account_info.email);
-        email_entry.text = "";
-        
+        this.title_label.label = _("Additional addresses for %s").printf(this.account_info.display_name);
+        this.email_entry.text = "";
+
         // clear listbox
-        foreach (Gtk.Widget widget in address_listbox.get_children())
+        foreach (Gtk.Widget widget in this.address_listbox.get_children())
             address_listbox.remove(widget);
         
         // Add all email addresses; add_email_address() silently drops the primary address
