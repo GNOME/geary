@@ -72,7 +72,7 @@ public class FolderList.FolderEntry : FolderList.AbstractFolderEntry, Sidebar.In
                 return "mail-archive-symbolic";
             
             case Geary.SpecialFolderType.SPAM:
-                return rtl ? "mail-spam-rtl-symbolic" : "mail-spam-symbolic";
+                return "dialog-warning-symbolic";
             
             case Geary.SpecialFolderType.TRASH:
                 return "user-trash-symbolic";
