@@ -56,8 +56,8 @@ public class FolderList.FolderEntry : FolderList.AbstractFolderEntry, Sidebar.In
                 return "mail-inbox-symbolic";
             
             case Geary.SpecialFolderType.DRAFTS:
-                return "accessories-text-editor-symbolic";
-            
+                return rtl ? "mail-drafts-rtl-symbolic" : "mail-drafts-symbolic";
+
             case Geary.SpecialFolderType.SENT:
                 return rtl ? "mail-sent-rtl-symbolic" : "mail-sent-symbolic";
             
