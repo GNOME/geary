@@ -7,10 +7,11 @@ set(ICON_FILES
     text-x-generic-symbolic.svg
     edit-symbolic.svg
     format-text-remove-symbolic.svg
+    mail-drafts-symbolic.svg
+    mail-drafts-rtl-symbolic.svg
     mail-forward-symbolic.svg
     mail-forward-rtl-symbolic.svg
     mail-inbox-symbolic.svg
-    marker-symbolic.svg
     mail-outbox-symbolic.svg
     mail-reply-all-symbolic.svg
     mail-reply-all-rtl-symbolic.svg
@@ -20,6 +21,7 @@ set(ICON_FILES
     mail-sent-rtl-symbolic.svg
     mail-spam-symbolic.svg
     mail-spam-rtl-symbolic.svg
+    marker-symbolic.svg
     tag-symbolic.svg
     tag-rtl-symbolic.svg
 )
