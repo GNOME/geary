@@ -19,8 +19,6 @@ set(ICON_FILES
     mail-reply-sender-rtl-symbolic.svg
     mail-sent-symbolic.svg
     mail-sent-rtl-symbolic.svg
-    mail-spam-symbolic.svg
-    mail-spam-rtl-symbolic.svg
     marker-symbolic.svg
     tag-symbolic.svg
     tag-rtl-symbolic.svg
