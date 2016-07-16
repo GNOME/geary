@@ -25,6 +25,10 @@ namespace Migrate {
         File new_config_file;
         File old_config_file;
 
+        // Return if Geary has never been run (~/.local/share/geary does not exist).
+        if (!user_data_dir.query_exists())
+            return;
+
         // Create ~/.config/geary
         try {
             user_config_dir.make_directory_with_parents();
