@@ -361,7 +361,7 @@ public class AddEditPage : Gtk.Box {
     public void set_account_information(Geary.AccountInformation info, Geary.Engine.ValidationResult result) {
         set_all_info(
             info.id,
-            info.real_name,
+            info.primary_mailbox.name,
             info.nickname,
             info.primary_mailbox.address,
             info.imap_credentials.user,

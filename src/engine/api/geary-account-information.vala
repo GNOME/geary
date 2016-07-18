@@ -95,11 +95,6 @@ public class Geary.AccountInformation : BaseObject {
     }
 
     /**
-     * User's name for the {@link get_primary_mailbox_address}.
-     */
-    public string real_name { get; set; }
-    
-    /**
      * User-provided label for the account.
      *
      * This is not to be used in the UI (use `display_name` instead)
@@ -205,11 +200,11 @@ public class Geary.AccountInformation : BaseObject {
         } catch (KeyFileError err) {
             // It's no big deal if we couldn't load the key file -- just means we give you the defaults.
         } finally {
-            this.real_name = get_string_value(key_file, GROUP, REAL_NAME_KEY);
-            this.nickname = get_string_value(key_file, GROUP, NICKNAME_KEY);
-
+            string real_name = get_string_value(key_file, GROUP, REAL_NAME_KEY);
             string primary_email = get_string_value(key_file, GROUP, PRIMARY_EMAIL_KEY);
-            this.primary_mailbox = new RFC822.MailboxAddress(this.real_name, primary_email);
+
+            this.primary_mailbox = new RFC822.MailboxAddress(real_name, primary_email);
+            this.nickname = get_string_value(key_file, GROUP, NICKNAME_KEY);
 
             // Store alternate emails in a list of case-insensitive strings
             Gee.List<string> alt_email_list = get_string_list_value(key_file, GROUP, ALTERNATE_EMAILS_KEY);
@@ -304,7 +299,6 @@ public class Geary.AccountInformation : BaseObject {
     // Copies all data from the "from" object into this one.
     public void copy_from(AccountInformation from) {
         this.id = from.id;
-        this.real_name = from.real_name;
         this.nickname = from.nickname;
         this.primary_mailbox = from.primary_mailbox;
         if (from.alternate_mailboxes != null) {
@@ -838,9 +832,9 @@ public class Geary.AccountInformation : BaseObject {
 
         KeyFile key_file = new KeyFile();
 
-        key_file.set_value(GROUP, REAL_NAME_KEY, this.real_name);
+        key_file.set_value(GROUP, REAL_NAME_KEY, this.primary_mailbox.name);
+        key_file.set_value(GROUP, PRIMARY_EMAIL_KEY, this.primary_mailbox.address);
         key_file.set_value(GROUP, NICKNAME_KEY, this.nickname);
-        key_file.set_value(GROUP, PRIMARY_EMAIL_KEY, this.primary_mailbox.to_rfc822_string());
         key_file.set_value(GROUP, SERVICE_PROVIDER_KEY, this.service_provider.to_string());
         key_file.set_integer(GROUP, ORDINAL_KEY, this.ordinal);
         key_file.set_value(GROUP, IMAP_USERNAME_KEY, this.imap_credentials.user);
