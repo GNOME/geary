@@ -16,7 +16,7 @@ public class Libnotify : Geary.BaseObject {
     private Notify.Notification? error_notification = null;
     private Geary.Folder? folder = null;
     private Geary.Email? email = null;
-    private List<string> caps;
+    private List<string>? caps = null;
 
     public signal void invoked(Geary.Folder? folder, Geary.Email? email);
     
@@ -31,8 +31,10 @@ public class Libnotify : Geary.BaseObject {
         }
         
         init_sound();
-        caps = Notify.get_server_caps();
         
+        // This will return null if no notification server is present
+        this.caps = Notify.get_server_caps();
+
         monitor.new_messages_arrived.connect(on_new_messages_arrived);
     }
     
@@ -148,8 +150,11 @@ public class Libnotify : Geary.BaseObject {
         
     }
     
-    private Notify.Notification issue_notification(string category, string summary,
+    private Notify.Notification? issue_notification(string category, string summary,
         string body, Gdk.Pixbuf? icon, string? sound) {
+        if (this.caps == null)
+            return null;
+
         // Avoid constructor due to ABI change
         Notify.Notification notification = (Notify.Notification) GLib.Object.new(
             typeof (Notify.Notification),
