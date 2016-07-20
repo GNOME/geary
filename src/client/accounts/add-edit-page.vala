@@ -656,7 +656,7 @@ public class AddEditPage : Gtk.Box {
         if (this.id == null) {
             // New account
             try {
-                info = Geary.Engine.instance.create_orphan_account(this.email_address);
+                info = Geary.Engine.instance.create_orphan_account();
             } catch (Error err) {
                 debug("Unable to create account %s for %s: %s",
                       this.id, this.email_address, err.message);
