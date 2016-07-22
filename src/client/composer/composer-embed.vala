@@ -180,7 +180,7 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
         this.inner_scroll_adj_value = adj.value;
         if (delta != 0 && !this.setting_inner_scroll) {
             Gtk.Adjustment outer_adj = outer_scroller.vadjustment;
-            this.outer_adj.set_value(outer_adj.value + delta);
+            outer_adj.set_value(outer_adj.value + delta);
         }
     }
 

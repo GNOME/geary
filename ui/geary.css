@@ -70,11 +70,11 @@ row.geary-folder-popover-list-row > label {
 #conversation_listbox > row:hover > box {
   background: shade(@theme_base_color, 0.96);
 }
-#conversation_listbox > row.geary_expand {
+#conversation_listbox > row.geary-expanded {
   margin-bottom: 6px;
   border-bottom-width: 1px;
 }
-#conversation_listbox > row.geary_last {
+#conversation_listbox > row.geary-last {
   margin-bottom: 0;
 }
 

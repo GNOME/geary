@@ -38,6 +38,14 @@ public class ConversationViewer : Gtk.Stack {
 
     private const int SELECT_CONVERSATION_TIMEOUT_MSEC = 100;
 
+    // Offset from the top of the list box which emails views will
+    // scrolled to, so the user can see there are additional messages
+    // above it. XXX This is currently approx 1.5 times the height of
+    // a collapsed ConversationEmail, it should probably calculated
+    // somehow so that differences user's font size are taken into
+    // account.
+    private const int EMAIL_TOP_OFFSET = 92;
+
     private enum ViewState {
         // Main view state
         CONVERSATION,
@@ -62,6 +70,76 @@ public class ConversationViewer : Gtk.Stack {
         
         COUNT;
     }
+
+    // Custom class used to display ConversationEmail views in the
+    // conversation listbox.
+    private class EmailRow : Gtk.ListBoxRow {
+
+        private const string EXPANDED_CLASS = "geary-expanded";
+        private const string LAST_CLASS = "geary-last";
+
+        // Is the row showing the email's message body?
+        public bool is_expanded {
+            get { return get_style_context().has_class(EXPANDED_CLASS); }
+        }
+
+        // Designate this row as the last visible row in the
+        // conversation listbox, or not. See Bug 764710 and
+        // on_conversation_listbox_email_row_added
+        public bool is_last {
+            get { return get_style_context().has_class(LAST_CLASS); }
+            set {
+                if (value) {
+                    get_style_context().add_class(LAST_CLASS);
+                } else {
+                    get_style_context().remove_class(LAST_CLASS);
+                }
+            }
+        }
+
+        // We can only scroll to a specific row once it has been
+        // allocated space in the conversation listbox. This signal
+        // allows the viewer to hook up to appropriate times to try to
+        // do that scroll.
+        public signal void should_scroll();
+
+        public ConversationEmail view {
+            get { return (ConversationEmail) get_child(); }
+        }
+
+        public EmailRow(ConversationEmail view) {
+            add(view);
+        }
+
+        public new void expand(bool include_transitions=true) {
+            get_style_context().add_class(EXPANDED_CLASS);
+            this.view.expand_email(include_transitions);
+        }
+
+        public void collapse() {
+            get_style_context().remove_class(EXPANDED_CLASS);
+            this.view.collapse_email();
+        }
+
+        public void enable_should_scroll() {
+            this.size_allocate.connect(on_size_allocate);
+        }
+
+        private void on_size_allocate() {
+            // Disable should_scroll after the message body has been
+            // loaded so we don't keep on scrolling later, like when
+            // the window has been resized.
+            ConversationWebView web_view = view.primary_message.web_view;
+            if (web_view.is_height_valid &&
+                web_view.load_status == WebKit.LoadStatus.FINISHED) {
+                this.size_allocate.disconnect(on_size_allocate);
+            }
+            
+            should_scroll();
+        }
+
+    }
+
 
     /** Fired when an email view is added to the conversation list. */
     public signal void email_row_added(ConversationEmail email);
@@ -94,7 +172,7 @@ public class ConversationViewer : Gtk.Stack {
     // Conversation emails list
     [GtkChild]
     private Gtk.ListBox conversation_listbox;
-    private Gtk.Widget? last_list_row = null;
+    private EmailRow? last_email_row = null;
 
     // Email view with selected text, if any
     private ConversationEmail? body_selected_view = null;
@@ -107,9 +185,9 @@ public class ConversationViewer : Gtk.Stack {
     private Gee.TreeSet<Geary.Email> emails { get; private set; default =
         new Gee.TreeSet<Geary.Email>(Geary.Email.compare_sent_date_ascending); }
 
-    // Maps displayed emails to their corresponding ListBoxRow.
-    private Gee.HashMap<Geary.EmailIdentifier, Gtk.ListBoxRow> email_to_row = new
-        Gee.HashMap<Geary.EmailIdentifier, Gtk.ListBoxRow>();
+    // Maps displayed emails to their corresponding EmailRow.
+    private Gee.HashMap<Geary.EmailIdentifier, EmailRow> email_to_row = new
+        Gee.HashMap<Geary.EmailIdentifier, EmailRow>();
 
     // State machine setup for search/find modes.
     private Geary.State.MachineDescriptor search_machine_desc = new Geary.State.MachineDescriptor(
@@ -130,31 +208,22 @@ public class ConversationViewer : Gtk.Stack {
      */
     public ConversationViewer() {
         // Setup the conversation list box
-        conversation_listbox.set_sort_func(on_conversation_listbox_sort);
-        conversation_listbox.row_activated.connect(on_conversation_listbox_row_actvated);
+        conversation_listbox.add.connect(() => {
+                update_last_row();
+            });
         conversation_listbox.realize.connect(() => {
                 conversation_page.get_vadjustment()
                     .value_changed.connect(check_mark_read);
             });
-        conversation_listbox.size_allocate.connect(check_mark_read);
-        conversation_listbox.add.connect((widget) => {
-                // Due to Bug 764710, we can only use the CSS
-                // :last-child selector for GTK themes after 3.20.3,
-                // so for now manually maintain a class on the last
-                // box in the convo listbox so we can emulate it.
-
-                Gtk.Widget current_last_row =
-                    conversation_listbox.get_children().last().data;;
-                if (last_list_row != current_last_row) {
-                    if (last_list_row != null) {
-                        last_list_row.get_style_context().remove_class("geary_last");
-                    }
-
-                    last_list_row = current_last_row;
-                    last_list_row.get_style_context().add_class("geary_last");
-                }
+        conversation_listbox.row_activated.connect(
+            on_conversation_listbox_row_activated
+            );
+        conversation_listbox.set_sort_func(
+            on_conversation_listbox_sort
+            );
+        conversation_listbox.size_allocate.connect(() => {
+                check_mark_read();
             });
-
 
         // Setup state machine for search/find states.
         Geary.State.Mapping[] mappings = {
@@ -196,11 +265,12 @@ public class ConversationViewer : Gtk.Stack {
      * returned. Else the last message by sort order will be returned,
      * if any.
      */
-    public ConversationEmail get_reply_email_view() {
-        ConversationEmail view = this.body_selected_view;
+    public ConversationEmail? get_reply_email_view() {
+        ConversationEmail? view = this.body_selected_view;
         if (view == null) {
-            Geary.Email last_email = emails.is_empty ? null : emails.last();
-            view = conversation_email_for_id(last_email.id);
+            if (this.last_email_row != null) {
+                view = this.last_email_row.view;
+            }
         }
         return view;
     }
@@ -223,6 +293,7 @@ public class ConversationViewer : Gtk.Stack {
             return;
         }
         email_to_row.get(id).hide();
+        update_last_row();
     }
 
     /**
@@ -233,6 +304,7 @@ public class ConversationViewer : Gtk.Stack {
             return;
         }
         email_to_row.get(id).show();
+        update_last_row();
     }
 
     /**
@@ -437,6 +509,46 @@ public class ConversationViewer : Gtk.Stack {
         cleared();
     }
 
+    private void scroll_to(EmailRow row) {
+        Gtk.Allocation? alloc = null;
+        row.get_allocation(out alloc);
+        int y = 0;
+        if (alloc.y > EMAIL_TOP_OFFSET) {
+            y = alloc.y - EMAIL_TOP_OFFSET;
+        }
+
+        // XXX This doesn't always quite work right, maybe since it's
+        // hard getting a reliable height out of WebKitGTK, or maybe
+        // because we stop calling this method when the email message
+        // body has finished loading, but attachments and sub-messages
+        // may still be loading. Or both?
+        this.conversation_page.get_vadjustment().clamp_page(
+            y, y + alloc.height
+        );
+    }
+
+    // Due to Bug 764710, we can only use the CSS :last-child selector
+    // for GTK themes after 3.20.3, so for now manually maintain a
+    // class on the last box in the convo listbox so we can emulate
+    // it.
+    private void update_last_row() {
+        EmailRow? last = null;
+        this.conversation_listbox.foreach((child) => {
+                if (child.is_visible()) {
+                    last = (EmailRow) child;
+                }
+            });
+
+        if (this.last_email_row != last) {
+            if (this.last_email_row != null) {
+                this.last_email_row.is_last = false;
+            }
+
+            this.last_email_row = last;
+            this.last_email_row.is_last = true;
+        }
+    }
+
     private void on_folder_selected(Geary.Folder? folder) {
         cancel_load();
         loading_conversations = true;
@@ -549,28 +661,62 @@ public class ConversationViewer : Gtk.Stack {
             return;
         }
 
-        // Add emails.
         if (emails_to_add != null) {
             foreach (Geary.Email email in emails_to_add)
                 add_email(email, conversation.is_in_current_folder(email.id));
         }
 
-        // Ensure the last email is always shown
-        Gtk.ListBoxRow last_row =
-            conversation_listbox.get_row_at_index(emails.size - 1);
-        expand_email(last_row, false);
+        // Work out what the first expanded row is. We can't do this
+        // in the foreach above since that is not adding messages in
+        // order.
+        EmailRow? first_expanded_row = null;
+        this.conversation_listbox.foreach((child) => {
+                if (first_expanded_row == null) {
+                    EmailRow row = (EmailRow) child;
+                    if (row.is_expanded) {
+                        first_expanded_row = row;
+                    }
+                }
+            });
 
+        if (this.last_email_row != null) {
+            // The last email should always be expanded so the user
+            // isn't presented with a list of collapsed headers when a
+            // conversation has no unread messages.
+            this.last_email_row.expand(false);
+
+            if (first_expanded_row == null) {
+                first_expanded_row = this.last_email_row;
+            }
+
+            // The first expanded row (i.e. first unread or simply the
+            // last message) is scrolled to the top of the visible
+            // area. We need to wait the web view to load first, so
+            // that the message has a non-trivial height, and then
+            // wait for it to be reallocated, so that it picks up the
+            // web_view's height.
+            first_expanded_row.should_scroll.connect((row) => {
+                    scroll_to(row);
+                });
+            first_expanded_row.enable_should_scroll();
+        }
+
+        if (state == ViewState.CONVERSATION) {
+            set_visible_child(conversation_page);
+        }
+
+        this.loading_conversations = false;
+        debug("Conversation loading complete");
+
+        // Only do search highlighting after all loading is complete
+        // since it's async, and hence things like the conversation
+        // changing could happen in the mean time
         if (current_folder is Geary.SearchFolder) {
             yield highlight_search_terms();
         } else {
             compress_emails();
         }
 
-        loading_conversations = false;
-        if (state == ViewState.CONVERSATION) {
-            debug("Emails loaded\n");
-            set_visible_child(conversation_page);
-        }
     }
 
     private void on_select_conversation_completed(Object? source, AsyncResult result) {
@@ -589,13 +735,13 @@ public class ConversationViewer : Gtk.Stack {
         return Geary.Email.compare_sent_date_ascending(msg1.email, msg2.email);
     }
 
-    private void on_conversation_listbox_row_actvated(Gtk.ListBoxRow row) {
-        ConversationEmail? msg = row.get_child() as ConversationEmail;
-        if (msg != null && !row.get_style_context().has_class("geary_last")) {
-            if (msg.is_collapsed) {
-                expand_email(row);
+    private void on_conversation_listbox_row_activated(Gtk.ListBoxRow widget) {
+        EmailRow row = (EmailRow) widget;
+        if (!row.is_last) {
+            if (row.is_expanded) {
+                row.collapse();
             } else {
-                collapse_email(row);
+                row.expand();
             }
         }
     }
@@ -757,15 +903,14 @@ public class ConversationViewer : Gtk.Stack {
             attached.web_view.key_press_event.connect(on_conversation_key_press);
         }
 
-        Gtk.ListBoxRow row = new Gtk.ListBoxRow();
+        EmailRow row = new EmailRow(conversation_email);
         row.show();
-        row.add(conversation_email);
         email_to_row.set(email.id, row);
 
         conversation_listbox.add(row);
 
         if (email.is_unread() == Geary.Trillian.TRUE) {
-            expand_email(row, false);
+            row.expand(false);
         }
 
         conversation_email.start_loading.begin(cancellable_fetch);
@@ -774,6 +919,8 @@ public class ConversationViewer : Gtk.Stack {
         // Update the search results
         //if (conversation_find_bar.visible)
         //    conversation_find_bar.commence_search();
+
+        return;
     }
 
     private void remove_email(Geary.Email email) {
@@ -782,16 +929,6 @@ public class ConversationViewer : Gtk.Stack {
         conversation_listbox.remove(row);
         email_to_row.get(email.id);
         emails.remove(email);
-    }
-
-    private void expand_email(Gtk.ListBoxRow row, bool include_transitions=true) {
-        row.get_style_context().add_class("geary_expand");
-        ((ConversationEmail) row.get_child()).expand_email(include_transitions);
-    }
-
-    private void collapse_email(Gtk.ListBoxRow row) {
-        row.get_style_context().remove_class("geary_expand");
-        ((ConversationEmail) row.get_child()).collapse_email();
     }
 
     private void compress_emails() {
@@ -912,7 +1049,7 @@ public class ConversationViewer : Gtk.Stack {
     }
 
     private ConversationEmail? conversation_email_for_id(Geary.EmailIdentifier id) {
-        return (ConversationEmail) email_to_row.get(id).get_child();
+        return email_to_row.get(id).view;
     }
 
 }

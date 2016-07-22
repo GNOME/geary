@@ -25,6 +25,8 @@ public class ConversationWebView : StylishWebView {
         set { if (zoom_level != (float)value) zoom_level = (float)value; }
     }
 
+    public bool is_height_valid = false;
+
     private FileMonitor? user_style_monitor = null;
 
     public signal void link_selected(string link);
@@ -89,8 +91,9 @@ public class ConversationWebView : StylishWebView {
         // failures/warnings. If we get one, log it and limit it.  A
         // value of ~22000 was crashing my xserver with a WebView
         // width of around 745.
-        const int MAX = 10000;
-        if (preferred_height > MAX) {
+        const int MAX = 15000;
+        this.is_height_valid = preferred_height > MAX;
+        if (this.is_height_valid) {
             warning("WebView height reported as %i/%li, clamping",
                     preferred_height,
                     get_dom_document().get_body().offset_height);

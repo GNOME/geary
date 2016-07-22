@@ -10,8 +10,6 @@
  */
 public class ComposerBox : Gtk.Frame, ComposerContainer {
 
-    private Gee.Set<Geary.App.Conversation>? prev_selection = null;
-
     protected ComposerWidget composer { get; set; }
 
     protected Gee.MultiMap<string, string>? old_accelerators { get; set; }
