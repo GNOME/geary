@@ -180,7 +180,7 @@ public class Geary.Email : BaseObject {
      * and From not be identical, and that both From and ReplyTo are
      * optional.
      */
-    public void set_originators(Geary.RFC822.MailboxAddresses from,
+    public void set_originators(Geary.RFC822.MailboxAddresses? from,
                                 Geary.RFC822.MailboxAddress? sender,
                                 Geary.RFC822.MailboxAddresses? reply_to)
         throws RFC822Error {
