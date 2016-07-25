@@ -100,12 +100,14 @@ public class Geary.AccountInformation : BaseObject {
      * This is not to be used in the UI (use `display_name` instead)
      * and not transmitted on the wire or used in correspondence.
      */
-    public string nickname { get; set; }
+    public string nickname { get; set; default = ""; }
 
     /**
      * The default email address for the account.
      */
-    public Geary.RFC822.MailboxAddress primary_mailbox  { get; set; }
+    public Geary.RFC822.MailboxAddress primary_mailbox {
+        get; set; default = new RFC822.MailboxAddress("", "");
+    }
 
     /**
      * A list of additional email addresses this account accepts.
@@ -117,9 +119,13 @@ public class Geary.AccountInformation : BaseObject {
      */
     public Gee.List<Geary.RFC822.MailboxAddress>? alternate_mailboxes { get; private set; default = null; }
 
-    public Geary.ServiceProvider service_provider { get; set; }
-    public int prefetch_period_days { get; set; }
-    
+    public Geary.ServiceProvider service_provider {
+        get; set; default = Geary.ServiceProvider.GMAIL;
+    }
+    public int prefetch_period_days {
+        get; set; default = DEFAULT_PREFETCH_PERIOD_DAYS;
+    }
+
     /**
      * Whether the user has requested that sent mail be saved.  Note that Geary
      * will only actively push sent mail when this AND allow_save_sent_mail()
@@ -132,25 +138,40 @@ public class Geary.AccountInformation : BaseObject {
         // being saved.
         get { return (allow_save_sent_mail() ? _save_sent_mail : true); }
         set { _save_sent_mail = value; }
+        default = true;
     }
-    
+
     // Order for display purposes.
-    public int ordinal { get; set; }
-    
-    // These properties are only used if the service provider's account type does not override them.
-    public string default_imap_server_host { get; set; }
-    public uint16 default_imap_server_port  { get; set; }
-    public bool default_imap_server_ssl  { get; set; }
-    public bool default_imap_server_starttls  { get; set; }
-    public string default_smtp_server_host  { get; set; }
-    public uint16 default_smtp_server_port  { get; set; }
-    public bool default_smtp_server_ssl  { get; set; }
-    public bool default_smtp_server_starttls { get; set; }
-    public bool default_smtp_use_imap_credentials { get; set; }
-    public bool default_smtp_server_noauth { get; set; }
-    public bool use_email_signature { get; set; }
-    public string email_signature {get; set; } 
-    
+    public int ordinal {
+        get; set; default = AccountInformation.default_ordinal++;
+    }
+
+    // These properties are only used if the service provider's
+    // account type does not override them.
+
+    public string default_imap_server_host {
+        get; set; default = "";
+    }
+    public uint16 default_imap_server_port {
+        get; set; default = Imap.ClientConnection.DEFAULT_PORT_SSL;
+    }
+    public bool default_imap_server_ssl { get; set; default = true; }
+    public bool default_imap_server_starttls { get; set; default = false; }
+
+    public string default_smtp_server_host {
+        get; set; default = "";
+    }
+    public uint16 default_smtp_server_port {
+        get; set; default = Geary.Smtp.ClientConnection.DEFAULT_PORT_SSL;
+    }
+    public bool default_smtp_server_ssl { get; set; default = true; }
+    public bool default_smtp_server_starttls { get; set; default = false; }
+    public bool default_smtp_use_imap_credentials { get; set; default = false; }
+    public bool default_smtp_server_noauth { get; set; default = false; }
+
+    public bool use_email_signature { get; set; default = false; }
+    public string email_signature { get; set; default = ""; }
+
     public Geary.FolderPath? drafts_folder_path { get; set; default = null; }
     public Geary.FolderPath? sent_mail_folder_path { get; set; default = null; }
     public Geary.FolderPath? spam_folder_path { get; set; default = null; }
@@ -185,89 +206,115 @@ public class Geary.AccountInformation : BaseObject {
         copy_from(copy);
     }
 
-    // This constructor is used internally to load accounts from disk.
-    internal AccountInformation.from_file(File config_directory, File data_directory) {
+    /**
+     * Creates a new, empty account info file.
+     */
+    internal AccountInformation(File config_directory, File data_directory) {
         this.id = config_directory.get_basename();
         this.config_dir = config_directory;
         this.data_dir = data_directory;
         this.file = config_dir.get_child(SETTINGS_FILENAME);
+    }
+
+    /**
+     * Loads an account info from a config directory.
+     *
+     * Throws an error if the config file was not found, could not be
+     * parsed, or doesn't have all required fields.
+     */
+    internal AccountInformation.from_file(File config_directory,
+                                          File data_directory)
+        throws Error {
+        this(config_directory, data_directory);
 
         KeyFile key_file = new KeyFile();
-        try {
-            key_file.load_from_file(file.get_path() ?? "", KeyFileFlags.NONE);
-        } catch (FileError err) {
-            // See comment in next catch block.
-        } catch (KeyFileError err) {
-            // It's no big deal if we couldn't load the key file -- just means we give you the defaults.
-        } finally {
-            string real_name = get_string_value(key_file, GROUP, REAL_NAME_KEY);
-            string primary_email = get_string_value(key_file, GROUP, PRIMARY_EMAIL_KEY);
+        key_file.load_from_file(file.get_path() ?? "", KeyFileFlags.NONE);
 
-            this.primary_mailbox = new RFC822.MailboxAddress(real_name, primary_email);
-            this.nickname = get_string_value(key_file, GROUP, NICKNAME_KEY);
+        // This is the only required value at the moment?
+        string primary_email = key_file.get_value(GROUP, PRIMARY_EMAIL_KEY);
+        string real_name = get_string_value(key_file, GROUP, REAL_NAME_KEY);
 
-            // Store alternate emails in a list of case-insensitive strings
-            Gee.List<string> alt_email_list = get_string_list_value(key_file, GROUP, ALTERNATE_EMAILS_KEY);
-            if (alt_email_list.size != 0) {
-                foreach (string alt_email in alt_email_list) {
-                    RFC822.MailboxAddresses mailboxes = new RFC822.MailboxAddresses.from_rfc822_string(alt_email);
-                    foreach (RFC822.MailboxAddress mailbox in mailboxes.get_all())
-                        add_alternate_mailbox(mailbox);
-                }
+        this.primary_mailbox = new RFC822.MailboxAddress(real_name, primary_email);
+        this.nickname = get_string_value(key_file, GROUP, NICKNAME_KEY);
+
+        // Store alternate emails in a list of case-insensitive strings
+        Gee.List<string> alt_email_list = get_string_list_value(key_file, GROUP, ALTERNATE_EMAILS_KEY);
+        if (alt_email_list.size != 0) {
+            foreach (string alt_email in alt_email_list) {
+                RFC822.MailboxAddresses mailboxes = new RFC822.MailboxAddresses.from_rfc822_string(alt_email);
+                foreach (RFC822.MailboxAddress mailbox in mailboxes.get_all())
+                add_alternate_mailbox(mailbox);
             }
-
-            this.imap_credentials.user = get_string_value(key_file, GROUP, IMAP_USERNAME_KEY, primary_email);
-            this.imap_remember_password = get_bool_value(key_file, GROUP, IMAP_REMEMBER_PASSWORD_KEY, true);
-            this.smtp_credentials.user = get_string_value(key_file, GROUP, SMTP_USERNAME_KEY, primary_email);
-            this.smtp_remember_password = get_bool_value(key_file, GROUP, SMTP_REMEMBER_PASSWORD_KEY, true);
-            this.service_provider = Geary.ServiceProvider.from_string(get_string_value(key_file, GROUP,
-                SERVICE_PROVIDER_KEY, Geary.ServiceProvider.GMAIL.to_string()));
-            this.prefetch_period_days = get_int_value(key_file, GROUP, PREFETCH_PERIOD_DAYS_KEY,
-                DEFAULT_PREFETCH_PERIOD_DAYS);
-            this.save_sent_mail = get_bool_value(key_file, GROUP, SAVE_SENT_MAIL_KEY, true);
-            this.ordinal = get_int_value(key_file, GROUP, ORDINAL_KEY, AccountInformation.default_ordinal++);
-            this.use_email_signature = get_bool_value(key_file, GROUP, USE_EMAIL_SIGNATURE_KEY);
-            this.email_signature = get_escaped_string(key_file, GROUP, EMAIL_SIGNATURE_KEY);
-
-            if (this.ordinal >= AccountInformation.default_ordinal)
-                AccountInformation.default_ordinal = this.ordinal + 1;
-
-            if (service_provider == ServiceProvider.OTHER) {
-                this.default_imap_server_host = get_string_value(key_file, GROUP, IMAP_HOST);
-                this.default_imap_server_port = get_uint16_value(key_file, GROUP, IMAP_PORT,
-                    Imap.ClientConnection.DEFAULT_PORT_SSL);
-                this.default_imap_server_ssl = get_bool_value(key_file, GROUP, IMAP_SSL, true);
-                this.default_imap_server_starttls = get_bool_value(key_file, GROUP, IMAP_STARTTLS, false);
-
-                this.default_smtp_server_host = get_string_value(key_file, GROUP, SMTP_HOST);
-                this.default_smtp_server_port = get_uint16_value(key_file, GROUP, SMTP_PORT,
-                    Geary.Smtp.ClientConnection.DEFAULT_PORT_SSL);
-                this.default_smtp_server_ssl = get_bool_value(key_file, GROUP, SMTP_SSL, true);
-                this.default_smtp_server_starttls = get_bool_value(key_file, GROUP, SMTP_STARTTLS, false);
-                this.default_smtp_use_imap_credentials = get_bool_value(key_file, GROUP, SMTP_USE_IMAP_CREDENTIALS, false);
-                this.default_smtp_server_noauth = get_bool_value(key_file, GROUP, SMTP_NOAUTH, false);
-
-                if (default_smtp_server_noauth) {
-                    this.smtp_credentials = null;
-                } else if (default_smtp_use_imap_credentials) {
-                    this.smtp_credentials.user = imap_credentials.user;
-                    this.smtp_credentials.pass = imap_credentials.pass;
-                }
-            }
-
-            this.drafts_folder_path = build_folder_path(get_string_list_value(
-                key_file, GROUP, DRAFTS_FOLDER_KEY));
-            this.sent_mail_folder_path = build_folder_path(get_string_list_value(
-                key_file, GROUP, SENT_MAIL_FOLDER_KEY));
-            this.spam_folder_path = build_folder_path(get_string_list_value(
-                key_file, GROUP, SPAM_FOLDER_KEY));
-            this.trash_folder_path = build_folder_path(get_string_list_value(
-                key_file, GROUP, TRASH_FOLDER_KEY));
-            this.archive_folder_path = build_folder_path(get_string_list_value(
-                key_file, GROUP, ARCHIVE_FOLDER_KEY));
-
-            this.save_drafts = get_bool_value(key_file, GROUP, SAVE_DRAFTS_KEY, true);
         }
+
+        this.imap_credentials.user = get_string_value(
+            key_file, GROUP, IMAP_USERNAME_KEY, primary_email);
+        this.imap_remember_password = get_bool_value(
+            key_file, GROUP, IMAP_REMEMBER_PASSWORD_KEY, this.imap_remember_password);
+        this.smtp_credentials.user = get_string_value(
+            key_file, GROUP, SMTP_USERNAME_KEY, primary_email);
+        this.smtp_remember_password = get_bool_value(
+            key_file, GROUP, SMTP_REMEMBER_PASSWORD_KEY, this.smtp_remember_password);
+        this.service_provider = Geary.ServiceProvider.from_string(
+            get_string_value(
+                key_file, GROUP, SERVICE_PROVIDER_KEY, Geary.ServiceProvider.GMAIL.to_string()));
+        this.prefetch_period_days = get_int_value(
+            key_file, GROUP, PREFETCH_PERIOD_DAYS_KEY, this.prefetch_period_days);
+        this.save_sent_mail = get_bool_value(
+            key_file, GROUP, SAVE_SENT_MAIL_KEY, this.save_sent_mail);
+        this.ordinal = get_int_value(
+            key_file, GROUP, ORDINAL_KEY, this.ordinal);
+        this.use_email_signature = get_bool_value(
+            key_file, GROUP, USE_EMAIL_SIGNATURE_KEY, this.use_email_signature);
+        this.email_signature = get_escaped_string(
+            key_file, GROUP, EMAIL_SIGNATURE_KEY, this.email_signature);
+
+        if (this.ordinal >= AccountInformation.default_ordinal)
+            AccountInformation.default_ordinal = this.ordinal + 1;
+
+        if (service_provider == ServiceProvider.OTHER) {
+            this.default_imap_server_host = get_string_value(
+                key_file, GROUP, this.default_imap_server_host);
+            this.default_imap_server_port = get_uint16_value(
+                key_file, GROUP, IMAP_PORT, this.default_imap_server_port);
+            this.default_imap_server_ssl = get_bool_value(
+                key_file, GROUP, IMAP_SSL, this.default_imap_server_ssl);
+            this.default_imap_server_starttls = get_bool_value(
+                key_file, GROUP, IMAP_STARTTLS, this.default_imap_server_starttls);
+
+            this.default_smtp_server_host = get_string_value(
+                key_file, GROUP, this.default_smtp_server_host);
+            this.default_smtp_server_port = get_uint16_value(
+                key_file, GROUP, SMTP_PORT, this.default_smtp_server_port);
+            this.default_smtp_server_ssl = get_bool_value(
+                key_file, GROUP, SMTP_SSL, this.default_smtp_server_ssl);
+            this.default_smtp_server_starttls = get_bool_value(
+                key_file, GROUP, SMTP_STARTTLS, this.default_smtp_server_starttls);
+            this.default_smtp_use_imap_credentials = get_bool_value(
+                key_file, GROUP, SMTP_USE_IMAP_CREDENTIALS, this.default_smtp_use_imap_credentials);
+            this.default_smtp_server_noauth = get_bool_value(
+                key_file, GROUP, SMTP_NOAUTH, this.default_smtp_server_noauth);
+
+            if (default_smtp_server_noauth) {
+                this.smtp_credentials = null;
+            } else if (default_smtp_use_imap_credentials) {
+                this.smtp_credentials.user = imap_credentials.user;
+                this.smtp_credentials.pass = imap_credentials.pass;
+            }
+        }
+
+        this.drafts_folder_path = build_folder_path(
+            get_string_list_value(key_file, GROUP, DRAFTS_FOLDER_KEY));
+        this.sent_mail_folder_path = build_folder_path(
+            get_string_list_value(key_file, GROUP, SENT_MAIL_FOLDER_KEY));
+        this.spam_folder_path = build_folder_path(
+            get_string_list_value(key_file, GROUP, SPAM_FOLDER_KEY));
+        this.trash_folder_path = build_folder_path(
+            get_string_list_value(key_file, GROUP, TRASH_FOLDER_KEY));
+        this.archive_folder_path = build_folder_path(
+            get_string_list_value(key_file, GROUP, ARCHIVE_FOLDER_KEY));
+
+        this.save_drafts = get_bool_value(key_file, GROUP, SAVE_DRAFTS_KEY, true);
     }
 
     ~AccountInformation() {

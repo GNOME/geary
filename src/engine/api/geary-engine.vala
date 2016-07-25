@@ -192,9 +192,17 @@ public class Geary.Engine : BaseObject {
 
             FileInfo info = info_list.nth_data(0);
             if (info.get_file_type() == FileType.DIRECTORY) {
-                // TODO: check for geary.ini
-                account_list.add(new AccountInformation.from_file(user_config_dir.get_child(info.get_name()),
-                    user_data_dir.get_child(info.get_name())));
+                try {
+                    account_list.add(
+                        new AccountInformation.from_file(
+                            user_config_dir.get_child(info.get_name()),
+                            user_data_dir.get_child(info.get_name())
+                        )
+                    );
+                } catch (Error err) {
+                    warning("Ignoring empty/bad config in %s: %s",
+                            info.get_name(), err.message);
+                }
             }
         }
 
@@ -280,11 +288,13 @@ public class Geary.Engine : BaseObject {
         }
         string id = ID_FORMAT.printf(next_id);
 
-        if (accounts.has_key(id))
+        if (this.accounts.has_key(id))
             throw new EngineError.ALREADY_EXISTS("Account %s already exists", id);
 
-        return new AccountInformation.from_file(user_config_dir.get_child(id),
-            user_data_dir.get_child(id));
+        return new AccountInformation(
+            user_config_dir.get_child(id),
+            user_data_dir.get_child(id)
+        );
     }
 
     /**
