@@ -70,9 +70,9 @@ private void remove_address(Gee.List<Geary.RFC822.MailboxAddress> addresses,
 }
 
 private bool email_is_from_sender(Geary.Email email, Gee.List<RFC822.MailboxAddress>? sender_addresses) {
-    if (sender_addresses == null)
+    if (sender_addresses == null || email.from == null)
         return false;
-    
+
     return Geary.traverse<RFC822.MailboxAddress>(sender_addresses)
         .any(a => email.from.get_all().contains(a));
 }
