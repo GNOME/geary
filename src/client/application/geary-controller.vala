@@ -143,12 +143,6 @@ public class GearyController : Geary.BaseObject {
     public signal void folder_selected(Geary.Folder? folder);
     
     /**
-     * Fired when the currently selected conversation(s) has/have changed.
-     */
-    public signal void conversations_selected(Gee.Set<Geary.App.Conversation> conversations,
-        Geary.Folder current_folder);
-    
-    /**
      * Fired when the number of conversations changes.
      */
     public signal void conversation_count_changed(int count);
@@ -228,12 +222,15 @@ public class GearyController : Geary.BaseObject {
         main_window.main_toolbar.copy_folder_menu.folder_selected.connect(on_copy_conversation);
         main_window.main_toolbar.move_folder_menu.folder_selected.connect(on_move_conversation);
         main_window.search_bar.search_text_changed.connect(on_search_text_changed);
-        main_window.conversation_viewer.email_row_added.connect(on_email_row_added);
-        main_window.conversation_viewer.email_row_removed.connect(on_email_row_removed);
-        main_window.conversation_viewer.mark_emails.connect(on_conversation_viewer_mark_emails);
+        main_window.conversation_viewer.conversation_added.connect(
+            on_conversation_view_added
+        );
+        main_window.conversation_viewer.conversation_removed.connect(
+            on_conversation_view_removed
+        );
         new_messages_monitor = new NewMessagesMonitor(should_notify_new_messages);
         main_window.folder_list.set_new_messages_monitor(new_messages_monitor);
-        
+
         // New messages indicator (Ubuntuism)
         new_messages_indicator = NewMessagesIndicator.create(new_messages_monitor);
         new_messages_indicator.application_activated.connect(on_indicator_activated_application);
@@ -289,8 +286,8 @@ public class GearyController : Geary.BaseObject {
         Geary.Engine.instance.account_available.disconnect(on_account_available);
         Geary.Engine.instance.account_unavailable.disconnect(on_account_unavailable);
         Geary.Engine.instance.untrusted_host.disconnect(on_untrusted_host);
-        
-        // Connect to various UI signals.
+
+        // Disconnect from various UI signals.
         main_window.conversation_list_view.conversations_selected.disconnect(on_conversations_selected);
         main_window.conversation_list_view.conversation_activated.disconnect(on_conversation_activated);
         main_window.conversation_list_view.load_more.disconnect(on_load_more);
@@ -302,9 +299,12 @@ public class GearyController : Geary.BaseObject {
         main_window.main_toolbar.copy_folder_menu.folder_selected.disconnect(on_copy_conversation);
         main_window.main_toolbar.move_folder_menu.folder_selected.disconnect(on_move_conversation);
         main_window.search_bar.search_text_changed.disconnect(on_search_text_changed);
-        main_window.conversation_viewer.email_row_added.disconnect(on_email_row_added);
-        main_window.conversation_viewer.email_row_removed.disconnect(on_email_row_removed);
-        main_window.conversation_viewer.mark_emails.disconnect(on_conversation_viewer_mark_emails);
+        main_window.conversation_viewer.conversation_added.disconnect(
+            on_conversation_view_added
+        );
+        main_window.conversation_viewer.conversation_removed.disconnect(
+            on_conversation_view_removed
+        );
 
         // hide window while shutting down, as this can take a few seconds under certain conditions
         main_window.hide();
@@ -1297,14 +1297,15 @@ public class GearyController : Geary.BaseObject {
 
     private void on_folder_selected(Geary.Folder? folder) {
         debug("Folder %s selected", folder != null ? folder.to_string() : "(null)");
-        
+        this.main_window.conversation_viewer.show_loading();
+
         // If the folder is being unset, clear the message list and exit here.
         if (folder == null) {
             current_folder = null;
             main_window.conversation_list_store.clear();
             main_window.main_toolbar.folder = null;
             folder_selected(null);
-            
+
             return;
         }
         
@@ -1444,12 +1445,22 @@ public class GearyController : Geary.BaseObject {
             on_load_more();
         }
     }
-    
+
     private void on_conversation_count_changed() {
-        if (current_conversations != null)
-            conversation_count_changed(current_conversations.get_conversation_count());
+        if (this.current_conversations != null) {
+            int count = this.current_conversations.get_conversation_count();
+            if (count == 0) {
+                // Let the user know if there's no available conversations
+                if (this.current_folder is Geary.SearchFolder) {
+                    this.main_window.conversation_viewer.show_empty_search();
+                } else {
+                    this.main_window.conversation_viewer.show_empty_folder();
+                }
+            }
+            conversation_count_changed(count);
+        }
     }
-    
+
     private void on_libnotify_invoked(Geary.Folder? folder, Geary.Email? email) {
         new_messages_monitor.clear_all_new_messages();
         
@@ -1491,11 +1502,13 @@ public class GearyController : Geary.BaseObject {
             debug("Unable to select folder: %s", err.message);
         }
     }
-    
+
     private void on_conversations_selected(Gee.Set<Geary.App.Conversation> selected) {
         selected_conversations = selected;
-        if (current_folder != null) {
-            conversations_selected(selected_conversations, current_folder);
+        if (this.current_folder != null) {
+            this.main_window.conversation_viewer.load_conversations.begin(
+                selected, this.current_folder
+            );
         }
     }
 
@@ -1811,9 +1824,13 @@ public class GearyController : Geary.BaseObject {
         
         Gee.ArrayList<Geary.EmailIdentifier> ids = get_selected_email_ids(false);
         mark_email(ids, null, flags);
-        
-        foreach (Geary.EmailIdentifier id in ids)
-            main_window.conversation_viewer.mark_manual_read(id);
+
+        ConversationListBox? list =
+            main_window.conversation_viewer.current_list;
+        if (list != null) {
+            foreach (Geary.EmailIdentifier id in ids)
+                list.mark_manual_read(id);
+        }
     }
 
     private void on_mark_as_unread() {
@@ -1822,9 +1839,13 @@ public class GearyController : Geary.BaseObject {
         
         Gee.ArrayList<Geary.EmailIdentifier> ids = get_selected_email_ids(true);
         mark_email(ids, flags, null);
-        
-        foreach (Geary.EmailIdentifier id in ids)
-            main_window.conversation_viewer.mark_manual_read(id);
+
+        ConversationListBox? list =
+            main_window.conversation_viewer.current_list;
+        if (list != null) {
+            foreach (Geary.EmailIdentifier id in ids)
+                list.mark_manual_unread(id);
+        }
     }
 
     private void on_mark_as_starred() {
@@ -2142,15 +2163,19 @@ public class GearyController : Geary.BaseObject {
     // was triggered.  If null, this was triggered from the headerbar
     // or shortcut.
     private void create_reply_forward_widget(ComposerWidget.ComposeType compose_type,
-                                             owned ConversationEmail? view) {
-        if (view == null) {
-            view = main_window.conversation_viewer.get_reply_email_view();
+                                             owned ConversationEmail? email_view) {
+        if (email_view == null) {
+            ConversationListBox? list_view =
+                main_window.conversation_viewer.current_list;
+            if (list_view != null) {
+                email_view = list_view.reply_target;
+            }
         }
         string? quote = null;
-        if (view != null) {
-            quote = view.get_body_selection();
+        if (email_view != null) {
+            quote = email_view.get_body_selection();
         }
-        create_compose_widget(compose_type, view.email, quote);
+        create_compose_widget(compose_type, email_view.email, quote);
     }
 
     private void create_compose_widget(ComposerWidget.ComposeType compose_type,
@@ -2177,7 +2202,10 @@ public class GearyController : Geary.BaseObject {
         bool inline;
         if (!should_create_new_composer(compose_type, referred, quote, is_draft, out inline))
             return;
-        
+
+        ConversationListBox? conversation_view =
+            main_window.conversation_viewer.current_list;
+
         ComposerWidget widget;
         if (mailto != null) {
             widget = new ComposerWidget.from_mailto(current_account, mailto);
@@ -2196,7 +2224,9 @@ public class GearyController : Geary.BaseObject {
             widget = new ComposerWidget(current_account, compose_type, full, quote, is_draft);
             if (is_draft) {
                 yield widget.restore_draft_state_async(current_account);
-                main_window.conversation_viewer.blacklist_by_id(referred.id);
+                if (conversation_view != null) {
+                    conversation_view.blacklist_by_id(referred.id);
+                }
             }
         }
         widget.show_all();
@@ -2212,7 +2242,14 @@ public class GearyController : Geary.BaseObject {
                 widget.state == ComposerWidget.ComposerState.PANED) {
                 main_window.conversation_viewer.do_compose(widget);
             } else {
-                main_window.conversation_viewer.do_embedded_composer(widget, referred);
+                ComposerEmbed embed = new ComposerEmbed(
+                    referred,
+                    widget,
+                    main_window.conversation_viewer.conversation_page
+                );
+                if (conversation_view != null) {
+                    conversation_view.add_embedded_composer(embed);
+                }
             }
         } else {
             new ComposerWindow(widget);
@@ -2471,13 +2508,15 @@ public class GearyController : Geary.BaseObject {
         Cancellable? cancellable) throws Error {
         if (!can_switch_conversation_view())
             return;
-        
-        if (main_window.conversation_viewer.current_conversation != null
-            && main_window.conversation_viewer.current_conversation == last_deleted_conversation) {
+
+        ConversationListBox list_view =
+            main_window.conversation_viewer.current_list;
+        if (list_view != null &&
+            list_view.conversation == last_deleted_conversation) {
             debug("Not archiving/trashing/deleting; viewed conversation is last deleted conversation");
             return;
         }
-        
+
         last_deleted_conversation = selected_conversations.size > 0
             ? Geary.traverse<Geary.App.Conversation>(selected_conversations).first() : null;
         
@@ -2606,15 +2645,27 @@ public class GearyController : Geary.BaseObject {
     }
 
     private void on_zoom_in() {
-        this.main_window.conversation_viewer.zoom_in();
+        ConversationListBox? view =
+            main_window.conversation_viewer.current_list;
+        if (view != null) {
+            view.zoom_in();
+        }
     }
 
     private void on_zoom_out() {
-        this.main_window.conversation_viewer.zoom_out();
+        ConversationListBox? view =
+            main_window.conversation_viewer.current_list;
+        if (view != null) {
+            view.zoom_out();
+        }
     }
 
     private void on_zoom_normal() {
-        this.main_window.conversation_viewer.zoom_reset();
+        ConversationListBox? view =
+            main_window.conversation_viewer.current_list;
+        if (view != null) {
+            view.zoom_reset();
+        }
     }
 
     private void on_search() {
@@ -2629,28 +2680,40 @@ public class GearyController : Geary.BaseObject {
         Libnotify.play_sound("message-sent-email");
     }
 
-    private void on_email_row_added(ConversationEmail message) {
-        message.reply_to_message.connect(on_reply_to_message);
-        message.reply_all_message.connect(on_reply_all_message);
-        message.forward_message.connect(on_forward_message);
-        message.link_activated.connect(on_link_activated);
-        message.attachments_activated.connect(on_attachments_activated);
-        message.save_attachments.connect(on_save_attachments);
-        message.edit_draft.connect(on_edit_draft);
-        message.view_source.connect(on_view_source);
-        message.save_image.connect(on_save_buffer_to_file);
+    private void on_conversation_view_added(ConversationListBox list) {
+        list.email_added.connect(on_conversation_viewer_email_added);
+        list.email_removed.connect(on_conversation_viewer_email_removed);
+        list.mark_emails.connect(on_conversation_viewer_mark_emails);
     }
 
-    private void on_email_row_removed(ConversationEmail message) {
-        message.reply_to_message.disconnect(on_reply_to_message);
-        message.reply_all_message.disconnect(on_reply_all_message);
-        message.forward_message.disconnect(on_forward_message);
-        message.link_activated.disconnect(on_link_activated);
-        message.attachments_activated.disconnect(on_attachments_activated);
-        message.save_attachments.disconnect(on_save_attachments);
-        message.edit_draft.disconnect(on_edit_draft);
-        message.view_source.disconnect(on_view_source);
-        message.save_image.disconnect(on_save_buffer_to_file);
+    private void on_conversation_view_removed(ConversationListBox list) {
+        list.email_added.disconnect(on_conversation_viewer_email_added);
+        list.email_removed.disconnect(on_conversation_viewer_email_removed);
+        list.mark_emails.disconnect(on_conversation_viewer_mark_emails);
+    }
+
+    private void on_conversation_viewer_email_added(ConversationEmail view) {
+        view.reply_to_message.connect(on_reply_to_message);
+        view.reply_all_message.connect(on_reply_all_message);
+        view.forward_message.connect(on_forward_message);
+        view.link_activated.connect(on_link_activated);
+        view.attachments_activated.connect(on_attachments_activated);
+        view.save_attachments.connect(on_save_attachments);
+        view.edit_draft.connect(on_edit_draft);
+        view.view_source.connect(on_view_source);
+        view.save_image.connect(on_save_buffer_to_file);
+    }
+
+    private void on_conversation_viewer_email_removed(ConversationEmail view) {
+        view.reply_to_message.disconnect(on_reply_to_message);
+        view.reply_all_message.disconnect(on_reply_all_message);
+        view.forward_message.disconnect(on_forward_message);
+        view.link_activated.disconnect(on_link_activated);
+        view.attachments_activated.disconnect(on_attachments_activated);
+        view.save_attachments.disconnect(on_save_attachments);
+        view.edit_draft.disconnect(on_edit_draft);
+        view.view_source.disconnect(on_view_source);
+        view.save_image.disconnect(on_save_buffer_to_file);
     }
 
     private void on_link_activated(string link) {

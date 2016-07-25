@@ -333,6 +333,7 @@ client/accounts/login-dialog.vala
 
 client/components/conversation-find-bar.vala
 client/components/count-badge.vala
+client/components/empty-placeholder.vala
 client/components/folder-popover.vala
 client/components/icon-factory.vala
 client/components/main-toolbar.vala
@@ -363,6 +364,7 @@ client/conversation-list/conversation-list-view.vala
 client/conversation-list/formatted-conversation-data.vala
 
 client/conversation-viewer/conversation-email.vala
+client/conversation-viewer/conversation-listbox.vala
 client/conversation-viewer/conversation-message.vala
 client/conversation-viewer/conversation-viewer.vala
 client/conversation-viewer/conversation-web-view.vala

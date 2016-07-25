@@ -8,18 +8,6 @@
     <property name="can_focus">False</property>
     <property name="transition_type">crossfade</property>
     <child>
-      <object class="GtkImage" id="splash_page">
-        <property name="name">splash_page</property>
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="pixel_size">256</property>
-        <property name="icon_name">mail-inbox-symbolic</property>
-      </object>
-      <packing>
-        <property name="name">splash_page</property>
-      </packing>
-    </child>
-    <child>
       <object class="GtkSpinner" id="loading_page">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
@@ -27,6 +15,19 @@
       </object>
       <packing>
         <property name="name">loading_page</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkBox" id="no_conversations_page">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <placeholder/>
+        </child>
+      </object>
+      <packing>
+        <property name="name">no_conversations_page</property>
         <property name="position">1</property>
       </packing>
     </child>
@@ -34,26 +35,10 @@
       <object class="GtkScrolledWindow" id="conversation_page">
         <property name="visible">True</property>
         <property name="can_focus">True</property>
-        <property name="events">GDK_KEY_PRESS_MASK | GDK_STRUCTURE_MASK</property>
         <property name="hscrollbar_policy">never</property>
         <property name="shadow_type">in</property>
-        <signal name="key-press-event" handler="on_conversation_key_press" swapped="no"/>
         <child>
-          <object class="GtkViewport">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <child>
-              <object class="GtkListBox" id="conversation_listbox">
-                <property name="name">conversation_listbox</property>
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="selection_mode">none</property>
-                <style>
-                  <class name="background"/>
-                </style>
-              </object>
-            </child>
-          </object>
+          <placeholder/>
         </child>
       </object>
       <packing>
@@ -62,29 +47,45 @@
       </packing>
     </child>
     <child>
-      <object class="GtkBox" id="user_message_page">
+      <object class="GtkBox" id="multiple_conversations_page">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
         <child>
-          <object class="GtkLabel" id="user_message_label">
-            <property name="name">user_message</property>
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="xpad">18</property>
-            <property name="ypad">18</property>
-            <property name="label">🎔</property>
-          </object>
-          <packing>
-            <property name="expand">True</property>
-            <property name="fill">False</property>
-            <property name="position">0</property>
-          </packing>
+          <placeholder/>
         </child>
       </object>
       <packing>
-        <property name="name">user_message_page</property>
+        <property name="name">multiple_conversations_page</property>
         <property name="position">3</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkBox" id="empty_folder_page">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <placeholder/>
+        </child>
+      </object>
+      <packing>
+        <property name="name">empty_folder_page</property>
+        <property name="position">4</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkBox" id="empty_search_page">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <child>
+          <placeholder/>
+        </child>
+      </object>
+      <packing>
+        <property name="name">empty_search_page</property>
+        <property name="position">5</property>
       </packing>
     </child>
     <child>
@@ -98,7 +99,7 @@
       </object>
       <packing>
         <property name="name">composer_page</property>
-        <property name="position">4</property>
+        <property name="position">6</property>
       </packing>
     </child>
   </template>

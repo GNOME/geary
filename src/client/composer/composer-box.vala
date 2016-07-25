@@ -10,13 +10,14 @@
  */
 public class ComposerBox : Gtk.Frame, ComposerContainer {
 
+    public Gtk.ApplicationWindow top_window {
+        get { return (Gtk.ApplicationWindow) get_toplevel(); }
+    }
+
     protected ComposerWidget composer { get; set; }
 
     protected Gee.MultiMap<string, string>? old_accelerators { get; set; }
 
-    public Gtk.ApplicationWindow top_window {
-        get { return (Gtk.ApplicationWindow) get_toplevel(); }
-    }
 
     public signal void vanished();
 

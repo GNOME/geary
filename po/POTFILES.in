@@ -24,6 +24,7 @@ src/client/application/main.vala
 src/client/application/secret-mediator.vala
 src/client/components/conversation-find-bar.vala
 src/client/components/count-badge.vala
+src/client/components/empty-placeholder.vala
 src/client/components/folder-popover.vala
 src/client/components/icon-factory.vala
 src/client/components/main-toolbar.vala
@@ -51,8 +52,10 @@ src/client/conversation-list/conversation-list-cell-renderer.vala
 src/client/conversation-list/conversation-list-store.vala
 src/client/conversation-list/conversation-list-view.vala
 src/client/conversation-list/formatted-conversation-data.vala
-src/client/conversation-viewer/conversation-viewer.vala
+src/client/conversation-viewer/conversation-email.vala
+src/client/conversation-viewer/conversation-listbox.vala
 src/client/conversation-viewer/conversation-message.vala
+src/client/conversation-viewer/conversation-viewer.vala
 src/client/conversation-viewer/conversation-web-view.vala
 src/client/dialogs/alert-dialog.vala
 src/client/dialogs/attachment-dialog.vala

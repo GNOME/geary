@@ -15,6 +15,7 @@ set(RESOURCE_LIST
   STRIPBLANKS "conversation-viewer.ui"
               "conversation-web-view.css"
   STRIPBLANKS "edit_alternate_emails.glade"
+  STRIPBLANKS "empty-placeholder.ui"
   STRIPBLANKS "find_bar.glade"
   STRIPBLANKS "folder-popover.ui"
   STRIPBLANKS "gtk/help-overlay.ui"

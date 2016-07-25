@@ -119,12 +119,25 @@ public class ConversationEmail : Gtk.Box {
     private const string ACTION_UNSTAR = "unstar";
     private const string ACTION_VIEW_SOURCE = "view_source";
 
+    private const string MANUAL_READ_CLASS = "geary-manual-read";
 
     /** The specific email that is displayed by this view. */
     public Geary.Email email { get; private set; }
 
     /** Determines if the email is showing a preview or the full message. */
     public bool is_collapsed = true;
+
+    /** Determines if the email has been manually marked as being read. */
+    public bool is_manually_read {
+        get { return get_style_context().has_class(MANUAL_READ_CLASS); }
+        set {
+            if (value) {
+                get_style_context().add_class(MANUAL_READ_CLASS);
+            } else {
+                get_style_context().remove_class(MANUAL_READ_CLASS);
+            }
+        }
+    }
 
     /** The view displaying the email's primary message headers and body. */
     public ConversationMessage primary_message { get; private set; }
@@ -419,20 +432,6 @@ public class ConversationEmail : Gtk.Box {
     public void update_flags(Geary.Email email) {
         this.email.set_flags(email.email_flags);
         update_email_state();
-    }
-
-    /**
-     * Determines if the email is flagged as read on the client side only.
-     */
-    public bool is_manual_read() {
-        return get_style_context().has_class("geary_manual_read");
-    }
-
-    /**
-     * Displays the message as read, even if not reflected in its flags.
-     */
-    public void mark_manual_read() {
-        get_style_context().add_class("geary_manual_read");
     }
 
     /**

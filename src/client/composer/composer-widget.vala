@@ -555,9 +555,10 @@ public class ComposerWidget : Gtk.EventBox {
         // from being finalised when closed.
         ConversationViewer conversation_viewer =
             GearyApplication.instance.controller.main_window.conversation_viewer;
-        conversation_viewer.cleared.connect((viewer) => {
-                if (this.draft_manager != null)
-                    viewer.blacklist_by_id(this.draft_manager.current_draft_id);
+        conversation_viewer.conversation_added.connect((list_view) => {
+                if (this.draft_manager != null) {
+                    list_view.blacklist_by_id(this.draft_manager.current_draft_id);
+                }
         });
 
         // Don't do this in an overridden version of the destroy
@@ -1413,8 +1414,11 @@ public class ComposerWidget : Gtk.EventBox {
     }
 
     private void on_draft_id_changed() {
-        GearyApplication.instance.controller.main_window.conversation_viewer.blacklist_by_id(
-            this.draft_manager.current_draft_id);
+        ConversationListBox? list_view =
+            GearyApplication.instance.controller.main_window.conversation_viewer.current_list;
+        if (list_view != null) {
+            list_view.blacklist_by_id(this.draft_manager.current_draft_id);
+        }
     }
 
     private void on_draft_manager_fatal(Error err) {
@@ -1514,11 +1518,12 @@ public class ComposerWidget : Gtk.EventBox {
         } catch (Error err) {
             // ignored
         }
-        if (this.draft_manager != null)
-            GearyApplication.instance.controller.main_window.conversation_viewer
-                .unblacklist_by_id(this.draft_manager.current_draft_id);
-        
-        this.container.close_container();
+        ConversationListBox? list_view =
+            GearyApplication.instance.controller.main_window.conversation_viewer.current_list;
+        if (this.draft_manager != null && list_view != null) {
+            list_view.unblacklist_by_id(this.draft_manager.current_draft_id);
+        }
+        container.close_container();
     }
 
     private async void discard_and_exit_async() {
