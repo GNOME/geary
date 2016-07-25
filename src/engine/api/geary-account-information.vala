@@ -274,7 +274,7 @@ public class Geary.AccountInformation : BaseObject {
 
         if (service_provider == ServiceProvider.OTHER) {
             this.default_imap_server_host = get_string_value(
-                key_file, GROUP, this.default_imap_server_host);
+                key_file, GROUP, IMAP_HOST, this.default_imap_server_host);
             this.default_imap_server_port = get_uint16_value(
                 key_file, GROUP, IMAP_PORT, this.default_imap_server_port);
             this.default_imap_server_ssl = get_bool_value(
@@ -283,7 +283,7 @@ public class Geary.AccountInformation : BaseObject {
                 key_file, GROUP, IMAP_STARTTLS, this.default_imap_server_starttls);
 
             this.default_smtp_server_host = get_string_value(
-                key_file, GROUP, this.default_smtp_server_host);
+                key_file, GROUP, SMTP_HOST, this.default_smtp_server_host);
             this.default_smtp_server_port = get_uint16_value(
                 key_file, GROUP, SMTP_PORT, this.default_smtp_server_port);
             this.default_smtp_server_ssl = get_bool_value(
