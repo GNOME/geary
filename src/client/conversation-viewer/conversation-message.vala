@@ -337,16 +337,17 @@ public class ConversationMessage : Gtk.Box {
         bool load_images = false;
         string? body_text = null;
         try {
-            if (message.has_html_body()) {
-                body_text = message.get_html_body(inline_image_replacer);
-            } else {
-                body_text = message.get_plain_body(true, inline_image_replacer);
-            }
+            body_text = (this.message.has_html_body())
+                ? this.message.get_html_body(inline_image_replacer)
+                : this.message.get_plain_body(true, inline_image_replacer);
         } catch (Error err) {
             debug("Could not get message text. %s", err.message);
         }
 
-        body_text = clean_html_markup(body_text ?? "", message, out load_images);
+        body_text = clean_html_markup(
+            body_text ?? "", this.message, out load_images
+        );
+
         if (load_images) {
             bool contact_load = false;
             Geary.Contact contact = this.contact_store.get_by_rfc822(
@@ -361,13 +362,13 @@ public class ConversationMessage : Gtk.Box {
         }
 
         load_cancelled.cancelled.connect(() => { web_view.stop_loading(); });
-        web_view.notify["load-status"].connect((source, param) => {
-                if (web_view.load_status == WebKit.LoadStatus.FINISHED) {
+        this.web_view.notify["load-status"].connect((source, param) => {
+                if (this.web_view.load_status == WebKit.LoadStatus.FINISHED) {
                     if (load_images) {
                         show_images(false);
                     }
                     WebKit.DOM.HTMLElement html = (
-                        web_view.get_dom_document().document_element as
+                        this.web_view.get_dom_document().document_element as
                         WebKit.DOM.HTMLElement
                     );
                     if (html != null) {
@@ -378,13 +379,13 @@ public class ConversationMessage : Gtk.Box {
                                     error.message);
                         }
                     }
-                    Util.DOM.bind_event(web_view, "html", "contextmenu",
+                    Util.DOM.bind_event(this.web_view, "html", "contextmenu",
                                (Callback) on_context_menu, this);
-                    Util.DOM.bind_event(web_view, "body a", "click",
+                    Util.DOM.bind_event(this.web_view, "body a", "click",
                                (Callback) on_link_clicked, this);
-                    Util.DOM.bind_event(web_view, ".quote_container > .shower", "click",
+                    Util.DOM.bind_event(this.web_view, ".quote_container > .shower", "click",
                                (Callback) on_show_quote_clicked, this);
-                    Util.DOM.bind_event(web_view, ".quote_container > .hider", "click",
+                    Util.DOM.bind_event(this.web_view, ".quote_container > .hider", "click",
                                (Callback) on_hide_quote_clicked, this);
 
                     // XXX Not actually true since remote images will
@@ -394,7 +395,7 @@ public class ConversationMessage : Gtk.Box {
             });
 
         // Only load it after we've hooked up the signals above
-        web_view.load_string(body_text, "text/html", "UTF8", "");
+        this.web_view.load_string(body_text, "text/html", "UTF8", "");
     }
 
     /**
