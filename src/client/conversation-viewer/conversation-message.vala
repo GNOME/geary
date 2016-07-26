@@ -226,7 +226,21 @@ public class ConversationMessage : Gtk.Box {
 
         // Full headers
 
-        set_flowbox_addresses(from, message.from, "bold");
+        if (message.from != null && message.from.size > 0) {
+            set_flowbox_addresses(this.from, message.from, "bold");
+        } else {
+            Gtk.Label label = new Gtk.Label(null);
+            label.set_markup(format_sender_preview(message.from));
+
+            // XXX This is copied from set_flowbox_addresses below
+            Gtk.FlowBoxChild child = new Gtk.FlowBoxChild();
+            child.add(label);
+            child.set_halign(Gtk.Align.START);
+            //child.set_valign(Gtk.Align.START);
+            child.show_all();
+
+            this.from.add(child);
+        }
         date.set_text(message_date ?? "");
         if (message.subject != null) {
             subject.set_text(message.subject.value);
@@ -518,22 +532,28 @@ public class ConversationMessage : Gtk.Box {
         string dim_color = GtkUtil.pango_color_from_theme(
             get_style_context(), "insensitive_fg_color"
         );
-        int i = 0;
         string value = "";
-        Gee.List<Geary.RFC822.MailboxAddress> list = addresses.get_all();
-        foreach (Geary.RFC822.MailboxAddress addr in list) {
-            string address = Geary.HTML.escape_markup(addr.address);
-            if (!Geary.String.is_empty(addr.name)) {
-                string name = Geary.HTML.escape_markup(addr.name);
-                value += "<span weight=\"bold\">%s</span> <span color=\"%s\">%s</span>".printf(
-                    name, dim_color, address
-                );
-            } else {
-                value += "<span weight=\"bold\">%s</span>".printf(address);
+        if (addresses != null && addresses.size > 0) {
+            int i = 0;
+            Gee.List<Geary.RFC822.MailboxAddress> list = addresses.get_all();
+            foreach (Geary.RFC822.MailboxAddress addr in list) {
+                string address = Geary.HTML.escape_markup(addr.address);
+                if (!Geary.String.is_empty(addr.name)) {
+                    string name = Geary.HTML.escape_markup(addr.name);
+                    value += "<span weight=\"bold\">%s</span> <span color=\"%s\">%s</span>".printf(
+                        name, dim_color, address
+                        );
+                } else {
+                    value += "<span weight=\"bold\">%s</span>".printf(address);
+                }
+                
+                if (++i < list.size)
+                    value += ", ";
             }
-
-            if (++i < list.size)
-                value += ", ";
+        } else {
+            value = "<span style=\"italic\">%s</span>".printf(
+                _("No sender")
+            );
         }
         return value;
     }
