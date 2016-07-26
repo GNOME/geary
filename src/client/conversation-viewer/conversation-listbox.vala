@@ -98,8 +98,7 @@ public class ConversationListBox : Gtk.ListBox {
             // message has a non-trivial height, and then wait for it
             // to be reallocated, so that it picks up the web_view's
             // height.
-            ConversationWebView web_view = view.primary_message.web_view;
-            if (web_view.load_status == WebKit.LoadStatus.FINISHED) {
+            if (view.primary_message.is_loading_complete) {
                 // Disable should_scroll after the message body has
                 // been loaded so we don't keep on scrolling later,
                 // like when the window has been resized.
@@ -311,13 +310,14 @@ public class ConversationListBox : Gtk.ListBox {
                 !email_view.is_manually_read) {
                  int body_top = 0;
                  int body_left = 0;
-                 conversation_message.web_view.translate_coordinates(
+                 ConversationWebView web_view = conversation_message.web_view;
+                 web_view.translate_coordinates(
                      this,
                      0, 0,
                      out body_left, out body_top
                  );
-                 int body_bottom = body_top +
-                     conversation_message.web_view_allocation.height;
+                 int body_bottom =
+                     body_top + web_view.get_allocated_height();
 
                  // Only mark the email as read if it's actually visible
                  if (body_bottom > top_bound &&

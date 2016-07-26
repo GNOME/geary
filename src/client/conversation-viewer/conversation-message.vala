@@ -59,9 +59,6 @@ public class ConversationMessage : Gtk.Box {
     /** The specific RFC822 message displayed by this view. */
     public Geary.RFC822.Message message { get; private set; }
 
-    /** Current allocated size of the HTML body view. */
-    public Gdk.Rectangle web_view_allocation { get; private set; }
-
     /** Specifies if the message body been been fully loaded. */
     public bool is_loading_complete = false;
 
@@ -264,9 +261,6 @@ public class ConversationMessage : Gtk.Box {
         this.web_view = new ConversationWebView();
         // Suppress default context menu.
         this.web_view.context_menu.connect(() => { return true; });
-        this.web_view.size_allocate.connect((widget, allocation) => {
-                web_view_allocation = allocation;
-            });
         this.web_view.hovering_over_link.connect(on_hovering_over_link);
         this.web_view.selection_changed.connect(on_selection_changed);
         this.web_view.show();
@@ -393,7 +387,7 @@ public class ConversationMessage : Gtk.Box {
 
                     // XXX Not actually true since remote images will
                     // still be loading.
-                    is_loading_complete = true;
+                    this.is_loading_complete = true;
                 }
             });
 
