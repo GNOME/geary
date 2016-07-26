@@ -348,13 +348,15 @@ public class ConversationMessage : Gtk.Box {
 
         body_text = clean_html_markup(body_text ?? "", message, out load_images);
         if (load_images) {
-            Geary.Contact contact =
-                contact_store.get_by_rfc822(message.get_primary_originator());
-            bool contact_load = contact != null && contact.always_load_remote_images();
-            if (contact_load || always_load_remote_images) {
-                load_images = true;
-            } else {
+            bool contact_load = false;
+            Geary.Contact contact = this.contact_store.get_by_rfc822(
+                message.get_primary_originator()
+            );
+            if (contact != null)
+                contact_load = contact.always_load_remote_images();
+            if (!contact_load && !this.always_load_remote_images) {
                 remote_images_infobar.show();
+                load_images = false;
             }
         }
 
