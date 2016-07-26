@@ -71,7 +71,6 @@
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="label" translatable="yes">1/1/1970	</property>
-                                <property name="selectable">True</property>
                                 <property name="ellipsize">end</property>
                               </object>
                               <packing>
@@ -159,7 +158,6 @@
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
                                 <property name="label" translatable="yes">1/1/1970	</property>
-                                <property name="selectable">True</property>
                                 <property name="ellipsize">end</property>
                               </object>
                               <packing>

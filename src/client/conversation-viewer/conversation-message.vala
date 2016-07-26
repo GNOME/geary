@@ -211,23 +211,31 @@ public class ConversationMessage : Gtk.Box {
 
         // Preview headers
 
-        string? message_date = null;
-        if (message.date != null) {
+        string date_text = "";
+        string date_tooltip = "";
+        if (this.message.date != null) {
             Date.ClockFormat clock_format =
                 GearyApplication.instance.config.clock_format;
-            message_date = Date.pretty_print(message.date.value, clock_format);
+            date_text = Date.pretty_print(
+                this.message.date.value, clock_format
+            );
+            date_tooltip = Date.pretty_print_verbose(
+                this.message.date.value, clock_format
+            );
         }
 
-        preview_from.set_markup(format_sender_preview(message.from));
-        preview_date.set_text(message_date ?? "");
-        string preview_str = message.get_preview();
+        string preview_str = this.message.get_preview();
         preview_str = Geary.String.reduce_whitespace(preview_str);
-        preview_body.set_text(preview_str);
+
+        this.preview_from.set_markup(format_sender_preview(this.message.from));
+        this.preview_date.set_text(date_text);
+        this.preview_date.set_tooltip_text(date_tooltip);
+        this.preview_body.set_text(preview_str);
 
         // Full headers
 
-        if (message.from != null && message.from.size > 0) {
-            set_flowbox_addresses(this.from, message.from, "bold");
+        if (this.message.from != null && this.message.from.size > 0) {
+            set_flowbox_addresses(this.from, this.message.from, "bold");
         } else {
             Gtk.Label label = new Gtk.Label(null);
             label.set_markup(format_sender_preview(message.from));
@@ -241,29 +249,30 @@ public class ConversationMessage : Gtk.Box {
 
             this.from.add(child);
         }
-        date.set_text(message_date ?? "");
-        if (message.subject != null) {
-            subject.set_text(message.subject.value);
-            subject.set_visible(true);
+        this.date.set_text(date_text);
+        this.date.set_tooltip_text(date_tooltip);
+        if (this.message.subject != null) {
+            this.subject.set_text(this.message.subject.value);
+            this.subject.set_visible(true);
         }
-        set_header_addresses(to_header, message.to);
-        set_header_addresses(cc_header, message.cc);
-        set_header_addresses(bcc_header, message.bcc);
+        set_header_addresses(this.to_header, this.message.to);
+        set_header_addresses(this.cc_header, this.message.cc);
+        set_header_addresses(this.bcc_header, this.message.bcc);
 
         // Web view
 
-        web_view = new ConversationWebView();
+        this.web_view = new ConversationWebView();
         // Suppress default context menu.
-        web_view.context_menu.connect(() => { return true; });
-        web_view.size_allocate.connect((widget, allocation) => {
+        this.web_view.context_menu.connect(() => { return true; });
+        this.web_view.size_allocate.connect((widget, allocation) => {
                 web_view_allocation = allocation;
             });
-        web_view.hovering_over_link.connect(on_hovering_over_link);
-        web_view.selection_changed.connect(on_selection_changed);
-        web_view.show();
+        this.web_view.hovering_over_link.connect(on_hovering_over_link);
+        this.web_view.selection_changed.connect(on_selection_changed);
+        this.web_view.show();
 
-        body_box.set_has_tooltip(true); // Used to show link URLs
-        body_box.pack_start(web_view, true, true, 0);
+        this.body_box.set_has_tooltip(true); // Used to show link URLs
+        this.body_box.pack_start(this.web_view, true, true, 0);
     }
 
     /**
