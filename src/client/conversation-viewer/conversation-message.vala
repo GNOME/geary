@@ -17,6 +17,42 @@
 [GtkTemplate (ui = "/org/gnome/Geary/conversation-message.ui")]
 public class ConversationMessage : Gtk.Box {
 
+    // Widget used to display sender/recipient email addresses in
+    // message header Gtk.FlowBox instances.
+    private class AddressFlowBoxChild : Gtk.FlowBoxChild {
+
+        public Geary.RFC822.MailboxAddress address { get; private set; }
+
+        public AddressFlowBoxChild(Geary.RFC822.MailboxAddress address,
+                                   string dim_color, string weight) {
+            this.address = address;
+
+            Gtk.Label label = new Gtk.Label(null);
+            //label.set_halign(Gtk.Align.START);
+            //label.set_valign(Gtk.Align.BASELINE);
+            //label.set_xalign(0.0f);
+
+            string name = Geary.HTML.escape_markup(address.name);
+            string addr = Geary.HTML.escape_markup(address.address);
+            if (!Geary.String.is_empty(address.name) && name != addr) {
+                label.set_markup(
+                    "<span weight=\"%s\">%s</span> <span color=\"%s\">%s</span>"
+                    .printf(weight, name, dim_color, addr)
+                    );
+            } else {
+                label.set_markup(
+                    "<span weight=\"%s\">%s</span>".printf(weight, addr)
+                    );
+            }
+
+            add(label);
+            set_halign(Gtk.Align.START);
+            //child.set_valign(Gtk.Align.START);
+            show_all();
+        }
+
+    }
+
     // Internal class to associate inline image buffers (replaced by
     // rotated scaled versions of them) so they can be saved intact if
     // the user requires it
@@ -151,6 +187,9 @@ public class ConversationMessage : Gtk.Box {
     /** Fired when the user requests remote images be loaded. */
     public signal void flag_remote_images();
 
+    /** Fired when the user clicks a link in the email. */
+    public signal void link_activated(string link);
+
     /** Fired when the user requests remote images be always loaded. */
     public signal void remember_remote_images();
 
@@ -174,21 +213,22 @@ public class ConversationMessage : Gtk.Box {
 
         // Actions
 
-        add_action(ACTION_COPY_EMAIL, false).activate.connect(on_copy_email_address);
-        add_action(ACTION_COPY_LINK, false).activate.connect(on_copy_link);
+        add_action(ACTION_COPY_EMAIL, true, VariantType.STRING)
+            .activate.connect(on_copy_email_address);
+        add_action(ACTION_COPY_LINK, true, VariantType.STRING)
+            .activate.connect(on_copy_link);
         add_action(ACTION_COPY_SELECTION, false).activate.connect(() => {
                 web_view.copy_clipboard();
             });
         add_action(ACTION_OPEN_INSPECTOR, Args.inspector).activate.connect(() => {
                 web_view.web_inspector.inspect_node(context_menu_element);
             });
-        add_action(ACTION_OPEN_LINK, false).activate.connect(() => {
-                context_menu_element.click();
-            });
+        add_action(ACTION_OPEN_LINK, true, VariantType.STRING)
+            .activate.connect(on_open_link);
         add_action(ACTION_SELECT_ALL, true).activate.connect(() => {
                 web_view.select_all();
             });
-        add_action(ACTION_SAVE_IMAGE, false).activate.connect(on_save_image);
+        add_action(ACTION_SAVE_IMAGE, true).activate.connect(on_save_image);
 
         insert_action_group("msg", message_actions);
 
@@ -235,13 +275,11 @@ public class ConversationMessage : Gtk.Box {
             set_flowbox_addresses(this.from, this.message.from, "bold");
         } else {
             Gtk.Label label = new Gtk.Label(null);
-            label.set_markup(format_sender_preview(message.from));
+            label.set_markup(format_sender_preview(null));
 
-            // XXX This is copied from set_flowbox_addresses below
             Gtk.FlowBoxChild child = new Gtk.FlowBoxChild();
             child.add(label);
             child.set_halign(Gtk.Align.START);
-            //child.set_valign(Gtk.Align.START);
             child.show_all();
 
             this.from.add(child);
@@ -262,6 +300,9 @@ public class ConversationMessage : Gtk.Box {
         // Suppress default context menu.
         this.web_view.context_menu.connect(() => { return true; });
         this.web_view.hovering_over_link.connect(on_hovering_over_link);
+        this.web_view.link_selected.connect((link) => {
+                link_activated(link);
+            });
         this.web_view.selection_changed.connect(on_selection_changed);
         this.web_view.show();
 
@@ -473,8 +514,8 @@ public class ConversationMessage : Gtk.Box {
         return quote;
     }
 
-    private SimpleAction add_action(string name, bool enabled) {
-        SimpleAction action = new SimpleAction(name, null);
+    private SimpleAction add_action(string name, bool enabled, VariantType? type = null) {
+        SimpleAction action = new SimpleAction(name, type);
         action.set_enabled(enabled);
         message_actions.add_action(action);
         return action;
@@ -485,6 +526,23 @@ public class ConversationMessage : Gtk.Box {
         if (action != null) {
             action.set_enabled(enabled);
         }
+    }
+
+    private Menu set_action_param_string(MenuModel existing, string value) {
+        Menu menu = new Menu();
+        for (int i = 0; i < existing.get_n_items(); i++) {
+            MenuItem item = new MenuItem.from_model(existing, i);
+            Variant action = item.get_attribute_value(
+                Menu.ATTRIBUTE_ACTION, VariantType.STRING
+            );
+            item.set_action_and_target(
+                action.get_string(),
+                VariantType.STRING.dup_string(),
+                value
+            );
+            menu.append_item(item);
+        }
+        return menu;
     }
 
     private void set_header_addresses(Gtk.Box header,
@@ -504,34 +562,23 @@ public class ConversationMessage : Gtk.Box {
         string dim_color = GtkUtil.pango_color_from_theme(
             address_box.get_style_context(), "insensitive_fg_color"
         );
-        foreach (Geary.RFC822.MailboxAddress addr in addresses) {
-            Gtk.Label label = new Gtk.Label(null);
-            //label.set_halign(Gtk.Align.START);
-            //label.set_valign(Gtk.Align.BASELINE);
-            //label.set_ellipsize(Pango.EllipsizeMode.END);
-            //label.set_xalign(0.0f);
-
-            string name = Geary.HTML.escape_markup(addr.name);
-            string address = Geary.HTML.escape_markup(addr.address);
-            if (!Geary.String.is_empty(addr.name) && name != address) {
-                label.set_markup(
-                    "<span weight=\"%s\">%s</span> <span color=\"%s\">%s</span>"
-                    .printf(weight, name, dim_color, address)
-                    );
-            } else {
-                label.set_markup(
-                    "<span weight=\"%s\">%s</span>".printf(weight, address)
-                    );
-            }
-
-            Gtk.FlowBoxChild child = new Gtk.FlowBoxChild();
-            child.add(label);
-            child.set_halign(Gtk.Align.START);
-            //child.set_valign(Gtk.Align.START);
-            child.show_all();
-
-            address_box.add(child);
+        foreach (Geary.RFC822.MailboxAddress address in addresses) {
+            address_box.add(new AddressFlowBoxChild(address, dim_color, weight));
         }
+
+        address_box.child_activated.connect((box, child) => {
+                AddressFlowBoxChild address_child = child as AddressFlowBoxChild;
+                if (address_child != null) {
+                    Menu menu = set_action_param_string(
+                        context_menu_email,
+                        "mailto:" + address_child.address.address
+                    );
+                    Gtk.Popover popover =
+                        new Gtk.Popover.from_model(child, menu);
+                    popover.set_position(Gtk.PositionType.BOTTOM);
+                    popover.show();
+                }
+            });
     }
 
     private string format_sender_preview(Geary.RFC822.MailboxAddresses? addresses) {
@@ -552,7 +599,7 @@ public class ConversationMessage : Gtk.Box {
                 } else {
                     value += "<span weight=\"bold\">%s</span>".printf(address);
                 }
-                
+
                 if (++i < list.size)
                     value += ", ";
             }
@@ -1052,12 +1099,14 @@ public class ConversationMessage : Gtk.Box {
         // have a single menu model and disable the parts we don't
         // need.
         Menu model = new Menu();
-        if (hover_url != null) {
-            if (hover_url.has_prefix(Geary.ComposedEmail.MAILTO_SCHEME)) {
-                model.append_section(null, context_menu_email);
-            } else {
-                model.append_section(null, context_menu_link);
-            }
+        if (this.hover_url != null) {
+            MenuModel link_menu =
+                this.hover_url.has_prefix(Geary.ComposedEmail.MAILTO_SCHEME)
+                ? context_menu_email
+                : context_menu_link;
+            model.append_section(
+                null, set_action_param_string(link_menu, this.hover_url)
+            );
         }
         if (context_menu_element.local_name.down() == "img") {
             ReplacedImage image = get_replaced_image();
@@ -1122,23 +1171,12 @@ public class ConversationMessage : Gtk.Box {
     }
 
     private void on_hovering_over_link(string? title, string? url) {
-        if (url != null) {
-            hover_url = Uri.unescape_string(url);
-            bool is_email = hover_url.has_prefix(Geary.ComposedEmail.MAILTO_SCHEME);
-            set_action_enabled(ACTION_OPEN_LINK, true);
-            set_action_enabled(ACTION_COPY_LINK, !is_email);
-            set_action_enabled(ACTION_COPY_EMAIL, is_email);
-        } else {
-            hover_url = null;
-            set_action_enabled(ACTION_OPEN_LINK, false);
-            set_action_enabled(ACTION_COPY_LINK, false);
-            set_action_enabled(ACTION_COPY_EMAIL, false);
-        }
+        this.hover_url = (url != null) ? Uri.unescape_string(url) : null;
 
         // Use tooltip on the containing box since the web_view
         // doesn't want to pay ball.
-        body_box.set_tooltip_text(hover_url);
-        body_box.trigger_tooltip_query();
+        this.body_box.set_tooltip_text(this.hover_url);
+        this.body_box.trigger_tooltip_query();
     }
 
     private void on_selection_changed() {
@@ -1170,20 +1208,23 @@ public class ConversationMessage : Gtk.Box {
         remote_images_infobar.hide();
     }
 
-    private void on_copy_link() {
-        // Put the current link in clipboard.
+    private void on_copy_link(Variant? param) {
         Gtk.Clipboard clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD);
-        clipboard.set_text(hover_url, -1);
+        clipboard.set_text(param.get_string(), -1);
         clipboard.store();
     }
 
-    private void on_copy_email_address() {
-        // Put the current email address in clipboard.
+    private void on_copy_email_address(Variant? param) {
+        string mailto = param.get_string().substring(
+            Geary.ComposedEmail.MAILTO_SCHEME.length, -1
+        );
         Gtk.Clipboard clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD);
-        if (hover_url.has_prefix(Geary.ComposedEmail.MAILTO_SCHEME)) {
-            clipboard.set_text(hover_url.substring(Geary.ComposedEmail.MAILTO_SCHEME.length, -1), -1);
-        }
+        clipboard.set_text(mailto, -1);
         clipboard.store();
+    }
+
+    private void on_open_link(Variant? param) {
+        link_activated(param.get_string());
     }
 
     private void on_save_image() {

@@ -312,47 +312,42 @@ public class ConversationEmail : Gtk.Box {
             return;
         }
 
-        primary_message = new ConversationMessage(
+        this.primary_message = new ConversationMessage(
             message,
             contact_store,
             email.load_remote_images().is_certain()
         );
-        primary_message.flag_remote_images.connect(on_flag_remote_images);
-        primary_message.remember_remote_images.connect(on_remember_remote_images);
-        primary_message.attachment_displayed_inline.connect((id) => {
-                inlined_content_ids.add(id);
-            });
-        primary_message.web_view.link_selected.connect((link) => {
-                link_activated(link);
-            });
-        primary_message.web_view.selection_changed.connect(() => {
-                on_message_selection_changed(primary_message);
-            });
-        primary_message.save_image.connect((filename, buffer) => {
-                save_image(filename, buffer);
-            });
-        primary_message.summary_box.pack_start(action_box, false, false, 0);
+        connect_message_view_signals(this.primary_message);
+        this.primary_message.summary_box.pack_start(
+            this.action_box, false, false, 0
+        );
 
         Gtk.Builder builder = new Gtk.Builder.from_resource(
             "/org/gnome/Geary/conversation-email-menus.ui"
         );
-        email_menubutton.set_menu_model((MenuModel) builder.get_object("email_menu"));
-        email_menubutton.set_sensitive(false);
+        this.email_menubutton.set_menu_model(
+            (MenuModel) builder.get_object("email_menu")
+        );
+        this.email_menubutton.set_sensitive(false);
 
-        attachments_menu = new Gtk.Menu.from_model(
+        this.attachments_menu = new Gtk.Menu.from_model(
             (MenuModel) builder.get_object("attachments_menu")
         );
-        attachments_menu.attach_to_widget(this, null);
+        this.attachments_menu.attach_to_widget(this, null);
 
-        primary_message.infobar_box.pack_start(draft_infobar, false, false, 0);
+        this.primary_message.infobar_box.pack_start(
+            this.draft_infobar, false, false, 0
+        );
         if (is_draft) {
-            draft_infobar.show();
-            draft_infobar.response.connect((infobar, response_id) => {
+            this.draft_infobar.show();
+            this.draft_infobar.response.connect((infobar, response_id) => {
                     if (response_id == 1) { edit_draft(); }
                 });
         }
 
-        primary_message.infobar_box.pack_start(not_saved_infobar, false, false, 0);
+        this.primary_message.infobar_box.pack_start(
+            this.not_saved_infobar, false, false, 0
+        );
 
         // if (email.from != null && email.from.contains_normalized(current_account_information.email)) {
         //  // XXX set a RO property?
@@ -362,15 +357,15 @@ public class ConversationEmail : Gtk.Box {
         // Add sub_messages container and message viewers if there are any
         Gee.List<Geary.RFC822.Message> sub_messages = message.get_sub_messages();
         if (sub_messages.size > 0) {
-            primary_message.body_box.pack_start(sub_messages_box, false, false, 0);
+            this.primary_message.body_box.pack_start(
+                this.sub_messages_box, false, false, 0
+            );
         }
         foreach (Geary.RFC822.Message sub_message in sub_messages) {
             ConversationMessage attached_message =
                 new ConversationMessage(sub_message, contact_store, false);
-                attached_message.web_view.selection_changed.connect(() => {
-                        on_message_selection_changed(attached_message);
-                    });
-            sub_messages_box.pack_start(attached_message, false, false, 0);
+            connect_message_view_signals(attached_message);
+            this.sub_messages_box.pack_start(attached_message, false, false, 0);
             this._attached_messages.add(attached_message);
         }
 
@@ -480,6 +475,23 @@ public class ConversationEmail : Gtk.Box {
         if (action != null) {
             action.set_enabled(enabled);
         }
+    }
+
+    private void connect_message_view_signals(ConversationMessage view) {
+        view.flag_remote_images.connect(on_flag_remote_images);
+        view.remember_remote_images.connect(on_remember_remote_images);
+        view.attachment_displayed_inline.connect((id) => {
+                inlined_content_ids.add(id);
+            });
+        view.link_activated.connect((link) => {
+                link_activated(link);
+            });
+        view.save_image.connect((filename, buffer) => {
+                save_image(filename, buffer);
+            });
+        view.web_view.selection_changed.connect(() => {
+                on_message_selection_changed(view);
+            });
     }
 
     private void update_email_state() {
