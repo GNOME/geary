@@ -147,6 +147,9 @@ public class ConversationEmail : Gtk.Box {
         owned get { return this._attached_messages.read_only_view; }
     }
 
+    /** The embedded composer for this email, if any. */
+    public ComposerEmbed composer { get; private set; default = null; }
+
     // Backing for attached_messages
     private Gee.List<ConversationMessage> _attached_messages =
         new Gee.LinkedList<ConversationMessage>();
@@ -447,6 +450,7 @@ public class ConversationEmail : Gtk.Box {
      * Attach an embedded composer to this email view.
      */
     public void attach_composer(ComposerEmbed embed) {
+        this.composer = embed;
         add(embed);
     }
 
@@ -455,6 +459,7 @@ public class ConversationEmail : Gtk.Box {
      */
     public void remove_composer(ComposerEmbed embed) {
         remove(embed);
+        this.composer = null;
     }
 
     /**
