@@ -42,6 +42,8 @@
   border-top-left-radius: 0px;
 }
 
+/* FolderPopover */
+
 row.geary-folder-popover-list-row {
   padding: 6px;
   border-color: @borders;
@@ -51,6 +53,8 @@ row.geary-folder-popover-list-row {
 row.geary-folder-popover-list-row > label {
   color: @theme_text_color;
 }
+
+/* ConversationListBox */
 
 .conversation-listbox {
   padding: 18px;
@@ -78,24 +82,40 @@ row.geary-folder-popover-list-row > label {
   margin-bottom: 0;
 }
 
-.geary-message .geary-message-summary {
+/* ConversationMessage */
+
+.geary-message-summary {
   margin: 12px;
 }
-.geary-message .geary-header-label {
-  margin-right: 6px;
+
+.geary-headers label {
+  margin: 0;
+  padding: 1px;
 }
-.geary-message .geary-headers flowboxchild {
+.geary-headers label.geary-header {
+  padding-right: 6px;
+}
+.geary-headers flowboxchild {
+  margin: 0;
+  padding: 1px;
+}
+.geary-headers flowboxchild label {
   margin: 0;
   padding: 0;
 }
+
 .geary-submessages .geary-message {
   background-image: linear-gradient(rgba(0,0,0,0.2), @bg_color 6px);
 }
+
+/* Composer */
 
 .geary-composer-embed headerbar {
   border-top: 1px solid @borders;
   border-radius: 0px;
 }
+
+/* EmptyPlaceholder */
 
 .geary-empty-placeholder > image {
   margin-bottom: 12px;

@@ -44,7 +44,7 @@
                     <property name="can_focus">False</property>
                     <property name="spacing">6</property>
                     <child>
-                      <object class="GtkBox" id="preview_bod">
+                      <object class="GtkBox" id="preview">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="orientation">vertical</property>
@@ -59,6 +59,9 @@
                                 <property name="label" translatable="yes">From &lt;email&gt;</property>
                                 <property name="ellipsize">end</property>
                                 <property name="xalign">0</property>
+                                <style>
+                                  <class name="geary-header"/>
+                                </style>
                               </object>
                               <packing>
                                 <property name="expand">True</property>
@@ -72,6 +75,9 @@
                                 <property name="can_focus">False</property>
                                 <property name="label" translatable="yes">1/1/1970	</property>
                                 <property name="ellipsize">end</property>
+                                <style>
+                                  <class name="geary-header-value"/>
+                                </style>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -94,6 +100,9 @@
                             <property name="label" translatable="yes">Preview body text.</property>
                             <property name="ellipsize">end</property>
                             <property name="xalign">0</property>
+                            <style>
+                              <class name="geary-header-value"/>
+                            </style>
                           </object>
                           <packing>
                             <property name="expand">True</property>
@@ -101,6 +110,9 @@
                             <property name="position">1</property>
                           </packing>
                         </child>
+                        <style>
+                          <class name="geary-headers"/>
+                        </style>
                       </object>
                       <packing>
                         <property name="expand">True</property>
@@ -146,6 +158,9 @@
                                 <property name="min_children_per_line">1</property>
                                 <property name="max_children_per_line">4</property>
                                 <property name="selection_mode">none</property>
+                                <style>
+                                  <class name="geary-header-value"/>
+                                </style>
                               </object>
                               <packing>
                                 <property name="expand">True</property>
@@ -159,6 +174,9 @@
                                 <property name="can_focus">False</property>
                                 <property name="label" translatable="yes">1/1/1970	</property>
                                 <property name="ellipsize">end</property>
+                                <style>
+                                  <class name="geary-header-value"/>
+                                </style>
                               </object>
                               <packing>
                                 <property name="expand">False</property>
@@ -183,7 +201,7 @@
                             <property name="selectable">True</property>
                             <property name="xalign">0</property>
                             <style>
-                              <class name="geary-header-label"/>
+                              <class name="geary-header-value"/>
                             </style>
                           </object>
                           <packing>
@@ -204,7 +222,7 @@
                                 <property name="yalign">0</property>
                                 <style>
                                   <class name="dim-label"/>
-                                  <class name="geary-header-label"/>
+                                  <class name="geary-header"/>
                                 </style>
                               </object>
                               <packing>
@@ -223,6 +241,9 @@
                                 <property name="min_children_per_line">1</property>
                                 <property name="max_children_per_line">4</property>
                                 <property name="selection_mode">none</property>
+                                <style>
+                                  <class name="geary-header-value"/>
+                                </style>
                               </object>
                               <packing>
                                 <property name="expand">True</property>
@@ -249,7 +270,7 @@
                                 <property name="yalign">0</property>
                                 <style>
                                   <class name="dim-label"/>
-                                  <class name="geary-header-label"/>
+                                  <class name="geary-header"/>
                                 </style>
                               </object>
                               <packing>
@@ -268,6 +289,9 @@
                                 <property name="min_children_per_line">1</property>
                                 <property name="max_children_per_line">4</property>
                                 <property name="selection_mode">none</property>
+                                <style>
+                                  <class name="geary-header-value"/>
+                                </style>
                               </object>
                               <packing>
                                 <property name="expand">True</property>
@@ -294,7 +318,7 @@
                                 <property name="yalign">0</property>
                                 <style>
                                   <class name="dim-label"/>
-                                  <class name="geary-header-label"/>
+                                  <class name="geary-header"/>
                                 </style>
                               </object>
                               <packing>
@@ -313,6 +337,9 @@
                                 <property name="min_children_per_line">2</property>
                                 <property name="max_children_per_line">4</property>
                                 <property name="selection_mode">none</property>
+                                <style>
+                                  <class name="geary-header-value"/>
+                                </style>
                               </object>
                               <packing>
                                 <property name="expand">True</property>
