@@ -495,10 +495,10 @@ public class ConversationEmail : Gtk.Box {
     }
 
     private void update_email_state() {
-        Geary.EmailFlags flags = email.email_flags;
+        Geary.EmailFlags? flags = this.email.email_flags;
         Gtk.StyleContext style = get_style_context();
 
-        bool is_unread = !flags.is_unread();
+        bool is_unread = (flags != null && flags.is_unread());
         set_action_enabled(ACTION_MARK_READ, is_unread);
         set_action_enabled(ACTION_MARK_UNREAD, !is_unread);
         set_action_enabled(ACTION_MARK_UNREAD_DOWN, !is_unread);
@@ -508,7 +508,7 @@ public class ConversationEmail : Gtk.Box {
             style.remove_class("geary_unread");
         }
 
-        bool is_flagged = flags.is_flagged();
+        bool is_flagged = (flags != null && flags.is_flagged());
         set_action_enabled(ACTION_STAR, !this.is_collapsed && !is_flagged);
         set_action_enabled(ACTION_UNSTAR, !this.is_collapsed && is_flagged);
         if (is_flagged) {
@@ -521,8 +521,8 @@ public class ConversationEmail : Gtk.Box {
             unstar_button.hide();
         }
 
-        if (flags.is_outbox_sent()) {
-            not_saved_infobar.show();
+        if (flags != null && flags.is_outbox_sent()) {
+            this.not_saved_infobar.show();
         }
     }
 

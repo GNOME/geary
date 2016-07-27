@@ -305,7 +305,7 @@ public class ConversationListBox : Gtk.ListBox {
             // Don't bother with not-yet-loaded emails since the
             // size of the body will be off, affecting the visibility
             // of emails further down the conversation.
-            if (email_view.email.email_flags.is_unread() &&
+            if (email_view.email.is_unread().is_certain() &&
                 conversation_message.is_loading_complete &&
                 !email_view.is_manually_read) {
                  int body_top = 0;
@@ -537,8 +537,8 @@ public class ConversationListBox : Gtk.ListBox {
         update_last_row();
         email_added(view);
 
-        if (email.is_unread() == Geary.Trillian.TRUE ||
-            email.is_flagged() == Geary.Trillian.TRUE) {
+        if (email.is_unread().is_certain() ||
+            email.is_flagged().is_certain()) {
             row.expand(false);
         }
         yield view.start_loading(this.cancellable);
