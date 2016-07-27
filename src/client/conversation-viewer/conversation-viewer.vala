@@ -274,21 +274,16 @@ public class ConversationViewer : Gtk.Stack {
 
     // Remove any existing conversation list, cancelling its loading
     private void remove_current_list() {
-        Gtk.Viewport? viewport =
-            this.conversation_page.get_child() as Gtk.Viewport;
-        if (viewport != null) {
-            ConversationListBox? previous_list =
-                viewport.get_child() as ConversationListBox;
-            if (previous_list != null) {
-                // Cancel any pending avatar loads here, rather than in
-                // ConversationListBox, sinece we don't have per-message
-                // control of it when using Soup.Session.queue_message.
-                GearyApplication.instance.controller.avatar_session.flush_queue();
-                previous_list.cancel_load();
-                this.conversation_removed(previous_list);
-            }
-            this.conversation_page.remove(viewport);
+        if (this.current_list != null) {
+            GearyApplication.instance.controller.avatar_session.flush_queue();
+            this.current_list.cancel_load();
+            this.conversation_removed(this.current_list);
+            this.current_list.destroy();
             this.current_list = null;
+        }
+        Gtk.Widget? scrolled_child = this.conversation_page.get_child();
+        if (scrolled_child != null) {
+            scrolled_child.destroy();
         }
     }
 
