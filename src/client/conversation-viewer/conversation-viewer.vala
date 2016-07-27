@@ -203,6 +203,12 @@ public class ConversationViewer : Gtk.Stack {
      */
     public async void load_conversations(Gee.Set<Geary.App.Conversation> conversations,
                                          Geary.Folder location) {
+        if (get_visible_child() == this.composer_page) {
+            // When first showing a composer, the conversation list
+            // will be cleared. In that case the composer should
+            // remain visible.
+            return;
+        }
         debug("Conversations selected in %s: %u", location.to_string(), conversations.size);
         if (conversations.size == 0) {
             set_visible_child(this.no_conversations_page);
