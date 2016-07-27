@@ -65,6 +65,7 @@ public class ComposerBox : Gtk.Frame, ComposerContainer {
     public void close_container() {
         if (visible)
             vanish();
+        destroy();
     }
 }
 

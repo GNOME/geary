@@ -239,6 +239,6 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
     public void close_container() {
         if (visible)
             vanish();
+        destroy();
     }
 }
-
