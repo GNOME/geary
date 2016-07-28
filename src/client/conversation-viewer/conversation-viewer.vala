@@ -273,9 +273,18 @@ public class ConversationViewer : Gtk.Stack {
 
     // Add a new conversation list to the UI
     private void add_new_list(ConversationListBox list) {
-        list.show();
-        this.conversation_page.add(list);
         this.current_list = list;
+        list.show();
+
+        // Manually create a Viewport rather than letting
+        // ScrolledWindow do it so Container.set_focus_{h,v}adjustment
+        // are not set on the list - it makes changing focus jumpy
+        // when a row or its web_view are larger than the viewport.
+        Gtk.Viewport viewport = new Gtk.Viewport(null, null);
+        viewport.show();
+        viewport.add(list);
+
+        this.conversation_page.add(viewport);
     }
 
     // Remove any existing conversation list, cancelling its loading
