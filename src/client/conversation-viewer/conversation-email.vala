@@ -304,6 +304,8 @@ public class ConversationEmail : Gtk.Box {
             });
         insert_action_group("eml", message_actions);
 
+        // Construct the view for the primary message, hook into it
+        
         Geary.RFC822.Message message;
         try {
             message = email.get_message();
@@ -318,10 +320,11 @@ public class ConversationEmail : Gtk.Box {
             email.load_remote_images().is_certain()
         );
         connect_message_view_signals(this.primary_message);
+
         this.primary_message.summary_box.pack_start(
             this.action_box, false, false, 0
         );
-
+        
         Gtk.Builder builder = new Gtk.Builder.from_resource(
             "/org/gnome/Geary/conversation-email-menus.ui"
         );
@@ -354,7 +357,11 @@ public class ConversationEmail : Gtk.Box {
         //  get_style_context().add_class("geary_sent");
         // }
 
-        // Add sub_messages container and message viewers if there are any
+        pack_start(primary_message, true, true, 0);
+        update_email_state();
+
+        // Add sub_messages container and message viewers if any
+        
         Gee.List<Geary.RFC822.Message> sub_messages = message.get_sub_messages();
         if (sub_messages.size > 0) {
             this.primary_message.body_box.pack_start(
@@ -368,9 +375,6 @@ public class ConversationEmail : Gtk.Box {
             this.sub_messages_box.pack_start(attached_message, false, false, 0);
             this._attached_messages.add(attached_message);
         }
-
-        pack_start(primary_message, true, true, 0);
-        update_email_state();
     }
 
     /**

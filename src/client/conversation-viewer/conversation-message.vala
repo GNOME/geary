@@ -1154,16 +1154,14 @@ public class ConversationMessage : Gtk.Box {
         // Work out the link's position, update the popover.
         Gdk.Rectangle link_rect = Gdk.Rectangle();
         web_view.get_allocation(out link_rect);
-        link_rect.x += (int) element.get_offset_left();
-        link_rect.y += (int) element.get_offset_top();
-        WebKit.DOM.Element? offset_parent = element.get_offset_parent();
+        WebKit.DOM.Element? offset_parent = element;
         while (offset_parent != null) {
-            link_rect.x += (int) offset_parent.get_offset_left();
-            link_rect.y += (int) offset_parent.get_offset_top();
-            offset_parent = offset_parent.get_offset_parent();
+            link_rect.x += (int) offset_parent.offset_left;
+            link_rect.y += (int) offset_parent.offset_top;
+            offset_parent = offset_parent.offset_parent;
         }
-        link_rect.width = (int) element.get_offset_width();
-        link_rect.height = (int) element.get_offset_height();
+        link_rect.width = (int) element.offset_width;
+        link_rect.height = (int) element.offset_height;
         link_popover.set_pointing_to(link_rect);
 
         link_popover.show();
