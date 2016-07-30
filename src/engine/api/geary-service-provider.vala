@@ -64,14 +64,16 @@ public enum Geary.ServiceProvider {
                 assert_not_reached();
         }
     }
-    
+
     /**
-     * Converts a string form of the service provider (returned by {@link to_string} to a
-     * {@link ServiceProvider} value.
+     * Converts a string form of the service provider (returned by
+     * {@link to_string} to a {@link ServiceProvider} value.
+     *
+     * Throws an error if the string is not valid.
      *
      * @see to_string
      */
-    public static ServiceProvider from_string(string str) {
+    public static ServiceProvider from_string(string str) throws Error {
         switch (str.up()) {
             case "GMAIL":
                 return GMAIL;
@@ -84,9 +86,14 @@ public enum Geary.ServiceProvider {
             
             case "OTHER":
                 return OTHER;
-            
+
             default:
-                assert_not_reached();
+                // Could use a better errordomain here, but for now
+                // this only gets used when parsing keyfiles in
+                // AccountInfo.
+                throw new KeyFileError.INVALID_VALUE(
+                    "Unknown service provider type: %s", str
+                );
         }
     }
 }
