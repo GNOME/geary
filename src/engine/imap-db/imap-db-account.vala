@@ -830,12 +830,15 @@ private class Geary.ImapDB.Account : BaseObject {
         
         if (flag_blacklist != null)
             requested_fields = requested_fields | Geary.Email.Field.FLAGS;
-        
+
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
-            Db.Statement stmt = cx.prepare("SELECT id FROM MessageTable WHERE message_id = ? OR in_reply_to = ?");
+            Db.Statement stmt = cx.prepare(
+                "SELECT id FROM MessageTable WHERE message_id = ? OR in_reply_to = ? or instr(reference_ids, ?) > 0"
+            );
             stmt.bind_string(0, message_id.value);
             stmt.bind_string(1, message_id.value);
-            
+            stmt.bind_string(2, message_id.value);
+
             Db.Result result = stmt.exec(cancellable);
             while (!result.finished) {
                 int64 id = result.int64_at(0);

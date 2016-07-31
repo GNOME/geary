@@ -511,6 +511,7 @@ public class ComposerWidget : Gtk.EventBox {
                 
                 case ComposeType.FORWARD:
                     subject = forward_subject;
+                    references = Geary.RFC822.Utils.reply_references(referred);
                     body_html = "\n\n" + Geary.RFC822.Utils.quote_email_for_forward(referred, quote,
                         Geary.RFC822.TextFormat.HTML);
                     add_attachments(referred.attachments);
