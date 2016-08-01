@@ -227,6 +227,7 @@ public class ConversationViewer : Gtk.Stack {
                             debug("Loading timed out\n");
                             show_loading();
                         }
+                        this.conversation_timeout_id = 0;
                         return false;
                     });
 

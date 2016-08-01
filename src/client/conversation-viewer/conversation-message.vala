@@ -221,7 +221,8 @@ public class ConversationMessage : Gtk.Box {
                 web_view.copy_clipboard();
             });
         add_action(ACTION_OPEN_INSPECTOR, Args.inspector).activate.connect(() => {
-                web_view.web_inspector.inspect_node(context_menu_element);
+                web_view.web_inspector.inspect_node(this.context_menu_element);
+                this.context_menu_element = null;
             });
         add_action(ACTION_OPEN_LINK, true, VariantType.STRING)
             .activate.connect(on_open_link);
@@ -1051,7 +1052,10 @@ public class ConversationMessage : Gtk.Box {
 
     private ReplacedImage? get_replaced_image() {
         ReplacedImage? image = null;
-        string? replaced_id = context_menu_element.get_attribute("replaced-id");
+        string? replaced_id = this.context_menu_element.get_attribute(
+            "replaced-id"
+        );
+        this.context_menu_element = null;
         if (!Geary.String.is_empty(replaced_id)) {
             image = replaced_images.get(replaced_id);
         }
@@ -1087,8 +1091,8 @@ public class ConversationMessage : Gtk.Box {
 
     private void on_context_menu_self(WebKit.DOM.Element element,
                                       WebKit.DOM.Event event) {
-        context_menu_element = event.get_target() as WebKit.DOM.HTMLElement;
-
+        this.context_menu_element =
+             event.get_target() as WebKit.DOM.HTMLElement;
         if (context_menu != null) {
             context_menu.detach();
         }
@@ -1108,7 +1112,7 @@ public class ConversationMessage : Gtk.Box {
                 null, set_action_param_string(link_menu, this.hover_url)
             );
         }
-        if (context_menu_element.local_name.down() == "img") {
+        if (this.context_menu_element.local_name.down() == "img") {
             ReplacedImage image = get_replaced_image();
             set_action_enabled(ACTION_SAVE_IMAGE, image != null);
             model.append_section(null, context_menu_image);
