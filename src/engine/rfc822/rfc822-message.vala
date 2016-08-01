@@ -153,12 +153,13 @@ public class Geary.RFC822.Message : BaseObject {
         }
 
         // Body: text format (optional)
+        string? charset = null;
+        GMime.ContentEncoding? encoding = null;
+
         GMime.Part? body_text = null;
         if (email.body_text != null) {
             GMime.Stream stream = new GMime.StreamMem.with_buffer(email.body_text.data);
-            GMime.ContentEncoding encoding = Geary.RFC822.Utils.get_best_content_encoding(
-                stream, GMime.EncodingConstraint.7BIT
-            );
+            Geary.RFC822.Utils.get_best(stream, out charset, out encoding);
             if (encoding == GMime.ContentEncoding.BASE64) {
                 // Base64-encoded text needs to have CR's added after
                 // LF's before encoding, otherwise it breaks
@@ -171,7 +172,11 @@ public class Geary.RFC822.Message : BaseObject {
                 stream, GMime.ContentEncoding.DEFAULT
             );
             body_text = new GMime.Part();
-            body_text.set_content_type(new GMime.ContentType.from_string("text/plain; charset=utf-8; format=flowed"));
+            body_text.set_content_type(
+                new GMime.ContentType.from_string(
+                    "text/plain; charset=%s; format=flowed".printf(charset)
+                )
+            );
             body_text.set_content_object(content);
             body_text.set_content_encoding(encoding);
         }
@@ -180,16 +185,22 @@ public class Geary.RFC822.Message : BaseObject {
         GMime.Part? body_html = null;
         if (email.body_html != null) {
             GMime.StreamMem stream = new GMime.StreamMem.with_buffer(email.body_html.data);
+            if (charset == null) {
+                Geary.RFC822.Utils.get_best(stream, out charset, out encoding);
+            }
             GMime.DataWrapper content = new GMime.DataWrapper.with_stream(stream,
                 GMime.ContentEncoding.DEFAULT);
-            
+
             body_html = new GMime.Part();
-            body_html.set_content_type(new GMime.ContentType.from_string("text/html; charset=utf-8"));
+            body_html.set_content_type(
+                new GMime.ContentType.from_string(
+                    "text/html; charset=%s".printf(charset)
+                )
+            );
             body_html.set_content_object(content);
-            body_html.set_content_encoding(Geary.RFC822.Utils.get_best_content_encoding(stream,
-                GMime.EncodingConstraint.7BIT));
+            body_html.set_content_encoding(encoding);
         }
-        
+
         // Build the message's mime part.
         Gee.List<GMime.Object> main_parts = new Gee.LinkedList<GMime.Object>();
         
@@ -283,11 +294,7 @@ public class Geary.RFC822.Message : BaseObject {
         GMime.StreamGIO stream = new GMime.StreamGIO(file);
         stream.set_owner(false);
         part.set_content_object(new GMime.DataWrapper.with_stream(stream, GMime.ContentEncoding.BINARY));
-        
-        // This encoding is the "Content-Transfer-Encoding", which GMime automatically converts to.
-        part.set_content_encoding(Geary.RFC822.Utils.get_best_content_encoding(stream,
-            GMime.EncodingConstraint.7BIT));
-        
+        part.set_content_encoding(Geary.RFC822.Utils.get_best_encoding(stream));
         return part;
     }
     
