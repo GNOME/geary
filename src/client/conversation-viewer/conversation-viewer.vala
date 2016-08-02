@@ -898,18 +898,19 @@ public class ConversationViewer : Gtk.Box {
         //
 
         string? body_text = null;
-        remote_images = false;
         try {
             if (message.has_html_body()) {
                 body_text = message.get_html_body(inline_image_replacer);
             } else {
                 body_text = message.get_plain_body(true, inline_image_replacer);
             }
-            body_text = insert_html_markup(body_text ?? "", message, out remote_images);
         } catch (Error err) {
             debug("Could not get message text. %s", err.message);
         }
 
+        remote_images = false;
+        body_text = insert_html_markup(body_text ?? "", message, out remote_images);
+        
         // Graft header and email body into the email container.
         try {
             WebKit.DOM.HTMLElement table_header =
