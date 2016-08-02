@@ -1584,8 +1584,8 @@ private class Geary.ImapDB.Account : BaseObject {
     
     private async bool populate_search_table_batch_async(int limit, Cancellable? cancellable)
         throws Error {
-        debug("%s: Searching for up to %d missing indexed messages...", account_information.email,
-            limit);
+        check_open();
+        debug("%s: Searching for up to %d missing indexed messages...", account_information.email, limit);
         
         int count = 0, total_unindexed = 0;
         yield db.exec_transaction_async(Db.TransactionType.RW, (cx, cancellable) => {
