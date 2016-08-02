@@ -419,6 +419,7 @@ public class ConversationViewer : Gtk.Box {
     
     private void on_folder_selected(Geary.Folder? folder) {
         hide_special_message();
+        cancel_load();
         
         current_folder = folder;
         email_store = (current_folder == null ? null : new Geary.App.EmailStore(current_folder.account));
