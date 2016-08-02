@@ -1616,6 +1616,7 @@ private class Geary.ImapDB.Account : BaseObject {
     
     private async bool populate_search_table_batch_async(int limit, Cancellable? cancellable)
         throws Error {
+        check_open();
         debug("%s: Searching for up to %d missing indexed messages...", account_information.id,
             limit);
         
