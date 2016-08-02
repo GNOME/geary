@@ -507,6 +507,10 @@ public class ConversationViewer : Gtk.Box {
         Gee.Collection<Geary.Email>? messages_to_add
             = yield list_full_messages_async(conversation.get_emails(
             Geary.App.Conversation.Ordering.SENT_DATE_ASCENDING), cancellable);
+
+        if (cancellable.is_cancelled()) {
+            return;
+        }
         
         // Add messages.
         if (messages_to_add != null) {
