@@ -572,18 +572,18 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         
         return true;
     }
-    
+
     private void start_remote_open_timer() {
-        if (open_remote_timer_id != 0)
-            Source.remove(open_remote_timer_id);
-        
-        open_remote_timer_id = Timeout.add_seconds(FORCE_OPEN_REMOTE_TIMEOUT_SEC, () => {
+        if (this.open_remote_timer_id != 0)
+            Source.remove(this.open_remote_timer_id);
+
+        this.open_remote_timer_id = Timeout.add_seconds(FORCE_OPEN_REMOTE_TIMEOUT_SEC, () => {
             start_remote_open_now();
-            
+            this.open_remote_timer_id = 0;
             return false;
         });
     }
-    
+
     private void start_remote_open_now() {
         if (remote_opened)
             return;
@@ -593,15 +593,15 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         
         open_remote_async.begin(null);
     }
-    
+
     private void cancel_remote_open_timer() {
-        if (open_remote_timer_id == 0)
+        if (this.open_remote_timer_id == 0)
             return;
-        
-        Source.remove(open_remote_timer_id);
-        open_remote_timer_id = 0;
+
+        Source.remove(this.open_remote_timer_id);
+        this.open_remote_timer_id = 0;
     }
-    
+
     // Open the remote connection using a Mutex to prevent concurrency.
     //
     // start_remote_open_now() *should* prevent more than one open from occurring at the same time,
