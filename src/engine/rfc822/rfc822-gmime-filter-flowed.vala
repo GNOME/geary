@@ -1,175 +1,152 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
-*
-* This software is licensed under the GNU Lesser General Public License
-* (version 2.1 or later).  See the COPYING file in this distribution. 
-*/
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2016 Michael James Gratton <mike@vee.net>
+ *
+ * This software is licensed under the GNU Lesser General Public License
+ * (version 2.1 or later). See the COPYING file in this distribution.
+ */
 
-// Filter to correctly handle flowed text as described in RFC 2646.
+/**
+ * Filter to correctly handle flowed text as described in RFC 3676.
+ *
+ * This class assumes that CRLF sequences have been replaced with a
+ * single LF character.
+ *
+ * The character `Geary.RFC822.Utils.QUOTE_MARKER` will be output as the
+ * quote character instead of `>` if the `to_html` constructor
+ * argument is set to `true`.
+ */
 private class Geary.RFC822.FilterFlowed : GMime.Filter {
+
     private char quote_marker;
     private bool delsp;
-    
-    // Invariant: True iff the last character seen was a space OR the penultimate character seen
-    // was a space and the last character seen was a \r.
-    private bool saw_space;
-    
-    // Invariant: True iff the last character seen was a \r.
-    private bool saw_cr;
-    
-    // Invariant: True iff the last \r\n encountered was preceded by a space.
-    private bool last_line_was_flowed;
-    
-    // Invariant: True iff we are in the prefix for the first line.
-    private bool in_first_prefix;
-    
-    // Invariant: True iff we are either at the beginning of a line, or all characters seen so far
-    // have been '>'s.
-    private bool in_prefix;
-    
-    // Invariant: The quote depth of the last complete line seen, or 0 if we have not yet seen a
-    // complete line.
-    private uint last_quote_level;
-    
-    // Invariant: The number of '>'s seen so far if we are parsing the prefix, or 0 if we are not
-    // parsing the prefix.
-    private uint current_quote_level;
-    
+
+    // Invariant: True iff the last character seen was a space.
+    private bool saw_space = false;
+
+    // Invariant: True iff we are either at the beginning of a line,
+    // or all characters seen so far have been '>'s.
+    private bool in_prefix = false;
+
+    // Invariant: The number of '>'s seen after parsing the prefix.
+    private uint quote_level = 0;
+
+    // Invariant: The number of consecutive '-'s seen.
+    private uint sig_level = 0;
+
     public FilterFlowed(bool to_html, bool delsp) {
-        quote_marker = to_html ? Geary.RFC822.Utils.QUOTE_MARKER : '>';
+        this.quote_marker = to_html ? Geary.RFC822.Utils.QUOTE_MARKER : '>';
         this.delsp = delsp;
-        reset();
     }
-    
+
     public override void reset() {
-        saw_space = false;
-        saw_cr = false;
-        last_line_was_flowed = false;
-        in_first_prefix = true;
-        in_prefix = true;
-        last_quote_level = 0;
-        current_quote_level = 0;
+        this.saw_space = false;
+        this.in_prefix = true;
+        this.quote_level = 0;
+        this.sig_level = 0;
     }
-    
+
     public override GMime.Filter copy() {
         FilterFlowed new_filter = new FilterFlowed(quote_marker == Geary.RFC822.Utils.QUOTE_MARKER, delsp);
-        
-        new_filter.saw_space = saw_space;
-        new_filter.saw_cr = saw_cr;
-        new_filter.last_line_was_flowed = last_line_was_flowed;
-        new_filter.in_first_prefix = in_first_prefix;
-        new_filter.in_prefix = in_prefix;
-        new_filter.last_quote_level = last_quote_level;
-        new_filter.current_quote_level = current_quote_level;
-        
+
+        new_filter.saw_space = this.saw_space;
+        new_filter.in_prefix = this.in_prefix;
+        new_filter.quote_level = this.quote_level;
+        new_filter.sig_level = this.sig_level;
+
         return new_filter;
     }
-    
+
     public override void filter(char[] inbuf, size_t prespace, out unowned char[] processed_buffer,
         out size_t outprespace) {
-        
-        // Worst-case scenario: We are about to leave the prefix, resulting in an extra
-        // (current_quote_level + 2) characters being written.
-        set_size(inbuf.length + current_quote_level + 2, false);
-        
+
+        // Worst-case scenario: We are about to leave the prefix,
+        // resulting in an extra (quote_level + 2) characters being
+        // written.
+        set_size(inbuf.length + this.quote_level + 2, false);
+
         uint out_index = 0;
         for (uint i = 0; i < inbuf.length; i++) {
             char c = inbuf[i];
-            
-            if (in_prefix) {
+
+            if (this.in_prefix) {
                 if (c == '>') {
-                    // Don't write the prefix right away, because we don't want to write it if the
-                    // last line was flowed.
-                    current_quote_level++;
+                    // Don't write the prefix right away, because we
+                    // don't want to write it if the last line was
+                    // flowed.
+                    this.quote_level++;
                     continue;
                 }
-                
-                if (in_first_prefix) {
-                    for (uint j = 0; j < current_quote_level; j++)
-                        outbuf[out_index++] = quote_marker;
-                } else if (!last_line_was_flowed || current_quote_level != last_quote_level ||
-                    (out_index > 3 && Geary.RFC822.Utils.comp_char_arr_slice(outbuf, out_index - 4, "\n-- "))) {
-                    // We encountered a non-flowed line-break, so insert a CRLF.
-                    outbuf[out_index++] = '\r';
-                    outbuf[out_index++] = '\n';
-                    
-                    // We haven't been writing the quote prefix as we've scanned it, so we need to
-                    // write it now.
-                    for (uint j = 0; j < current_quote_level; j++)
-                        outbuf[out_index++] = quote_marker;
-                }
-                
-                // We saw a character other than '>', so we're done scanning the prefix.
-                in_first_prefix = false;
-                in_prefix = false;
-                last_quote_level = current_quote_level;
-                current_quote_level = 0;
-                
+
+                // Found something other than a '>', so we are out of
+                // the prefix and need to write out an appropriate
+                // number of quote chars.
+
+                for (uint j = 0; j < this.quote_level; j++)
+                    outbuf[out_index++] = this.quote_marker;
+
+                this.in_prefix = false;
+
                 // A single space following the prefix is space stuffed
                 if (c == ' ')
                     continue;
             }
-            
+
             switch (c) {
                 case ' ':
-                    if (saw_space)
+                    if (this.saw_space) {
+                        // Two spaces in a row, so output the last
+                        // space and clear the signature test
                         outbuf[out_index++] = ' ';
-                    saw_space = true;
-                    saw_cr = false;
-                    // We can't write the space yet, since it might be removed if DelSp is true.
-                break;
-                
-                case '\r':
-                    if (saw_cr) {
-                        // The last 2 charcters were '\r\r', so we can't have '\r\n'.
-                        if (saw_space)
-                            outbuf[out_index++] = ' ';
-                        saw_space = false;
-                        // We didn't write the preceding CR when we saw it, so we write it now.
-                        outbuf[out_index++] = '\r';
+                        this.sig_level = 0;
                     }
-                    
-                    saw_cr = true;
-                    // We can't write the CR until we know it isn't part of a flowed line.
+                    // We can't write the space yet, since it might be
+                    // removed if DelSp is true. Don't clear the
+                    // signature test since we might be in one.
+                    this.saw_space = true;
                 break;
-                
+
                 case '\n':
-                    if (saw_cr) {
-                        // If the last 3 charcters were ' \r\n', the line was flowed.
-                        last_line_was_flowed = saw_space;
-                        if (saw_space && !delsp)
+                    if (this.saw_space && this.sig_level != 2) {
+                        // We have a SP+LF sequence that wasn't part
+                        // of a signature, so treat as a soft break
+                        // and flow line on to the next one.
+                        if (!this.delsp)
                             outbuf[out_index++] = ' ';
-                        
-                        // We are done with this line, so we are in the prefix of the next line
-                        // (and have not yet seen any '>' charcacters in the next line).
-                        in_prefix = true;
-                        current_quote_level = 0;
                     } else {
-                        // The LF wasn't part of a CRLF, so just write it.
-                        if (saw_space)
+                        // Else this is a hard break.
+                        if (this.saw_space) {
                             outbuf[out_index++] = ' ';
+                        }
                         outbuf[out_index++] = c;
                     }
-                    
-                    saw_space = false;
-                    saw_cr = false;
+
+                    // We are done with this line, so we are in the
+                    // prefix of the next line (and have not yet seen
+                    // any '>' characters in the next line).
+                    this.in_prefix = true;
+                    this.quote_level = 0;
+                    this.saw_space = false;
+                    this.sig_level = 0;
                 break;
-                
+
                 default:
-                    // We cannot be in a ' \r\n' sequence, so just write the character.
-                    if (saw_space)
+                    // We cannot be in a ' \n' sequence, so just write
+                    // the character.
+                    if (this.saw_space)
                         outbuf[out_index++] = ' ';
-                    saw_space = false;
-                    saw_cr = false;
                     outbuf[out_index++] = c;
+                    this.sig_level = (c == '-') ? this.sig_level + 1 : 0;
+                    this.saw_space = false;
                 break;
             }
         }
-        
+
         // Slicing the buffer is important, because the buffer is not null-terminated,
         processed_buffer = outbuf[0:out_index];
         outprespace = this.outpre;
     }
-    
+
     public override void complete(char[] inbuf, size_t prespace, out unowned char[] processed_buffer,
         out size_t outprespace) {
         filter(inbuf, prespace, out processed_buffer, out outprespace);

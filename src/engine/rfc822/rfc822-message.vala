@@ -932,14 +932,17 @@ public class Geary.RFC822.Message : BaseObject {
         
         bool flowed = (content_type != null) ? content_type.params.has_value_ci("format", "flowed") : false;
         bool delsp = (content_type != null) ? content_type.params.has_value_ci("DelSp", "yes") : false;
+
+        // Unconditionally remove the CR's in any CRLF sequence, since
+        // they are effectively a wire encoding.
+        stream_filter.add(new GMime.FilterCRLF(false, false));
+
         if (flowed)
             stream_filter.add(new Geary.RFC822.FilterFlowed(to_html, delsp));
-        
+
         if (to_html) {
             if (!flowed)
                 stream_filter.add(new Geary.RFC822.FilterPlain());
-            // HTML filter does stupid stuff to \r, so get rid of them.
-            stream_filter.add(new GMime.FilterCRLF(false, false));
             stream_filter.add(new GMime.FilterHTML(
                 GMime.FILTER_HTML_CONVERT_URLS | GMime.FILTER_HTML_CONVERT_ADDRESSES, 0));
             stream_filter.add(new Geary.RFC822.FilterBlockquotes());
