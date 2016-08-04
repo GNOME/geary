@@ -99,18 +99,15 @@ public class ConversationWebView : StylishWebView {
         }
 
         string? uri = request.get_uri();
-        if (!is_always_loaded(uri)) {
+        if (uri != null && !is_always_loaded(uri)) {
             if (uri.has_prefix(allow_prefix))
                 request.set_uri(uri.substring(allow_prefix.length));
             else
                 request.set_uri("about:blank");
         }
     }
-    
-    public bool is_always_loaded(string? uri) {
-        if (uri == null)
-            return true;
-        
+
+    public bool is_always_loaded(string uri) {
         foreach (string prefix in always_loaded_prefixes) {
             if (uri.has_prefix(prefix))
                 return true;
