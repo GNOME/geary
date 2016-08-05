@@ -46,20 +46,18 @@ public class FolderList.FolderEntry : FolderList.AbstractFolderEntry, Sidebar.In
     }
     
     public override string? get_sidebar_icon() {
-        bool rtl = Gtk.Widget.get_default_direction() == Gtk.TextDirection.RTL;
-        
         switch (folder.special_folder_type) {
             case Geary.SpecialFolderType.NONE:
-                return rtl ? "tag-rtl-symbolic" : "tag-symbolic";
+                return "tag-symbolic";
             
             case Geary.SpecialFolderType.INBOX:
                 return "mail-inbox-symbolic";
             
             case Geary.SpecialFolderType.DRAFTS:
-                return rtl ? "mail-drafts-rtl-symbolic" : "mail-drafts-symbolic";
+                return "mail-drafts-symbolic";
 
             case Geary.SpecialFolderType.SENT:
-                return rtl ? "mail-sent-rtl-symbolic" : "mail-sent-symbolic";
+                return "mail-sent-symbolic";
             
             case Geary.SpecialFolderType.FLAGGED:
                 return "starred-symbolic";

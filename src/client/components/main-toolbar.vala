@@ -52,8 +52,6 @@ public class MainToolbar : Gtk.Box {
         this.bind_property("show-close-button-right", conversation_header, "show-close-button",
             BindingFlags.SYNC_CREATE);
         
-        bool rtl = get_direction() == Gtk.TextDirection.RTL;
-        
         // Assemble mark menu.
         GearyApplication.instance.load_ui_resource("toolbar_mark_menu.ui");
         Gtk.Menu mark_menu = (Gtk.Menu) GearyApplication.instance.ui_manager.get_widget("/ui/ToolbarMarkMenu");
@@ -91,20 +89,20 @@ public class MainToolbar : Gtk.Box {
         
         // Reply buttons
         insert.clear();
-        insert.add(conversation_header.create_toolbar_button(rtl ? "mail-reply-sender-rtl-symbolic"
-            : "mail-reply-sender-symbolic", GearyController.ACTION_REPLY_TO_MESSAGE));
-        insert.add(conversation_header.create_toolbar_button(rtl ? "mail-reply-all-rtl-symbolic"
-            : "mail-reply-all-symbolic", GearyController.ACTION_REPLY_ALL_MESSAGE));
-        insert.add(conversation_header.create_toolbar_button(rtl ? "mail-forward-rtl-symbolic"
-            : "mail-forward-symbolic", GearyController.ACTION_FORWARD_MESSAGE));
+        insert.add(conversation_header.create_toolbar_button("mail-reply-sender-symbolic",
+            GearyController.ACTION_REPLY_TO_MESSAGE));
+        insert.add(conversation_header.create_toolbar_button("mail-reply-all-symbolic",
+            GearyController.ACTION_REPLY_ALL_MESSAGE));
+        insert.add(conversation_header.create_toolbar_button("mail-forward-symbolic",
+            GearyController.ACTION_FORWARD_MESSAGE));
         conversation_header.add_start(conversation_header.create_pill_buttons(insert));
         
         // Mark, copy, move.
         insert.clear();
         insert.add(conversation_header.create_menu_button("marker-symbolic", mark_menu,
             GearyController.ACTION_MARK_AS_MENU));
-        insert.add(conversation_header.create_popover_button(rtl ? "tag-rtl-symbolic" : "tag-symbolic",
-            copy_folder_menu, GearyController.ACTION_COPY_MENU));
+        insert.add(conversation_header.create_popover_button("tag-symbolic", copy_folder_menu,
+            GearyController.ACTION_COPY_MENU));
         insert.add(conversation_header.create_popover_button("folder-symbolic", move_folder_menu,
             GearyController.ACTION_MOVE_MENU));
         conversation_header.add_start(conversation_header.create_pill_buttons(insert));

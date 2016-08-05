@@ -8,20 +8,20 @@ set(ICON_FILES
     edit-symbolic.svg
     format-text-remove-symbolic.svg
     mail-drafts-symbolic.svg
-    mail-drafts-rtl-symbolic.svg
+    mail-drafts-symbolic-rtl.svg
     mail-forward-symbolic.svg
-    mail-forward-rtl-symbolic.svg
+    mail-forward-symbolic-rtl.svg
     mail-inbox-symbolic.svg
     mail-outbox-symbolic.svg
     mail-reply-all-symbolic.svg
-    mail-reply-all-rtl-symbolic.svg
+    mail-reply-all-symbolic-rtl.svg
     mail-reply-sender-symbolic.svg
-    mail-reply-sender-rtl-symbolic.svg
+    mail-reply-sender-symbolic-rtl.svg
     mail-sent-symbolic.svg
-    mail-sent-rtl-symbolic.svg
+    mail-sent-symbolic-rtl.svg
     marker-symbolic.svg
     tag-symbolic.svg
-    tag-rtl-symbolic.svg
+    tag-symbolic-rtl.svg
 )
 
 install(FILES ${ICON_FILES} DESTINATION ${ICONS_DEST})
