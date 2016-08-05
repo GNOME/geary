@@ -1690,7 +1690,7 @@ msgstr "_Slaganje redova"
 
 #: ../ui/composer.glade.h:10
 msgid "Link (Ctrl+L)"
-msgstr "Veza (Crtl+L)"
+msgstr "Veza (Ctrl+L)"
 
 #: ../ui/composer.glade.h:11
 msgid "C_olor"
@@ -1702,7 +1702,7 @@ msgstr "Više opcija"
 
 #: ../ui/composer.glade.h:13
 msgid "Quote text  (Ctrl+])"
-msgstr "Citiraj tekst (Ctrl+J)"
+msgstr "Citiraj tekst (Ctrl+])"
 
 #: ../ui/composer.glade.h:14
 msgid "Unquote text (Ctrl+[)"
