@@ -305,7 +305,11 @@ public string decorate_quotes(string text) throws Error {
     return outtext;
 }
 
-// This will modify/reset the DOM
+/**
+ * Convert a HTML DOM tree to RFC 3676 format=flowed text.
+ *
+ * This will modify/reset the DOM.
+ */
 public string html_to_flowed_text(WebKit.DOM.HTMLElement el) {
     string saved_doc = el.get_inner_html();
     WebKit.DOM.NodeList blockquotes;
@@ -364,15 +368,19 @@ public string html_to_flowed_text(WebKit.DOM.HTMLElement el) {
         int max_len = 72 - prefix.length;
         
         do {
-            if (quote_level == 0 && (line.has_prefix(">") || line.has_prefix("From")))
+            int start_ind = 0;
+            if (quote_level == 0 &&
+                (line.has_prefix(">") || line.has_prefix("From"))) {
                 line = " " + line;
+                start_ind = 1;
+            }
             
             int cut_ind = line.length;
             if (cut_ind > max_len) {
                 string beg = line[0:max_len];
-                cut_ind = beg.last_index_of(" ") + 1;
+                cut_ind = beg.last_index_of(" ", start_ind) + 1;
                 if (cut_ind == 0) {
-                    cut_ind = line.index_of(" ") + 1;
+                    cut_ind = line.index_of(" ", start_ind) + 1;
                     if (cut_ind == 0)
                         cut_ind = line.length;
                     if (cut_ind > 998 - prefix.length)
