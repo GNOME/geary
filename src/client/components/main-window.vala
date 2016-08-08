@@ -58,7 +58,19 @@ public class MainWindow : Gtk.ApplicationWindow {
             config.folder_list_pane_position_horizontal = config.folder_list_pane_position_old;
             config.messages_pane_position += config.folder_list_pane_position_old;
         }
-        
+
+        // Restore saved window state
+        Gdk.Screen? screen = get_screen();
+        if (screen != null &&
+            this.window_width <= screen.get_width() &&
+            this.window_height <= screen.get_height()) {
+            set_default_size(this.window_width, this.window_height);
+        }
+        if (this.window_maximized) {
+            maximize();
+        }
+        set_position(Gtk.WindowPosition.CENTER);
+
         add_accel_group(GearyApplication.instance.ui_manager.get_accel_group());
         
         spinner.set_progress_monitor(progress_monitor);
@@ -101,16 +113,7 @@ public class MainWindow : Gtk.ApplicationWindow {
         create_layout();
         on_change_orientation();
     }
-    
-    public override void show_all() {
-        set_default_size(GearyApplication.instance.config.window_width,
-            GearyApplication.instance.config.window_height);
-        if (GearyApplication.instance.config.window_maximize)
-            maximize();
-        
-        base.show_all();
-    }
-    
+
     private bool on_delete_event() {
         if (Args.hidden_startup || GearyApplication.instance.config.startup_notifications)
             return hide_on_delete();
@@ -120,33 +123,43 @@ public class MainWindow : Gtk.ApplicationWindow {
         return true;
     }
 
-    // Fired on window resize, window move and possibly other events
-    // We want to save the window size for the next start
-    public override bool configure_event(Gdk.EventConfigure event) {
-
-        // Writing the window_* variables triggers a dconf database update.
-        // Only write if the value has changed.
-        if(window_width != event.width)
-            window_width = event.width;
-        if(window_height != event.height)
-            window_height = event.height;
-
-        return base.configure_event(event);
-    }
-
-    // Fired on [un]maximize and possibly other events
-    // We want to save the maximized state for the next start
+    // Fired on [un]maximize and possibly others. Save maximized state
+    // for the next start.
     public override bool window_state_event(Gdk.EventWindowState event) {
-        bool maximized = ((event.new_window_state & Gdk.WindowState.MAXIMIZED) != 0);
-
-        // Writing the window_* variables triggers a dconf database update.
-        // Only write if the value has changed.
-        if(window_maximized != maximized)
-            window_maximized = maximized;
-
+        if ((event.new_window_state & Gdk.WindowState.WITHDRAWN) == 0) {
+            bool maximized = (
+                (event.new_window_state & Gdk.WindowState.MAXIMIZED) != 0
+            );
+            if (this.window_maximized != maximized) {
+                this.window_maximized = maximized;
+            }
+        }
         return base.window_state_event(event);
     }
-    
+
+    // Fired on window resize. Save window size for the next start.
+    public override void size_allocate(Gtk.Allocation allocation) {
+        base.size_allocate(allocation);
+
+        Gdk.Screen? screen = get_screen();
+        if (screen != null && !this.window_maximized) {
+            // Get the size via ::get_size instead of the allocation
+            // so that the window isn't ever-expanding.
+            int width = 0;
+            int height = 0;
+            get_size(out width, out height);
+
+            // Only store if the values have changed and are
+            // reasonable-looking.
+            if (this.window_width != width &&
+                width > 0 && width <= screen.get_width())
+                this.window_width = width;
+            if (this.window_height != height &&
+                height > 0 && height <= screen.get_height())
+                this.window_height = height;
+        }
+    }
+
     private void set_styling() {
         Gtk.CssProvider provider = new Gtk.CssProvider();
         Gtk.StyleContext.add_provider_for_screen(Gdk.Display.get_default().get_default_screen(),
