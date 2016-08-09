@@ -67,18 +67,23 @@ public class ConversationWebView : StylishWebView {
         GearyApplication.instance.config.bind(Configuration.CONVERSATION_VIEWER_ZOOM_KEY, this, "zoom_level_wrap");
         notify["zoom-level"].connect(() => { zoom_level_wrap = zoom_level; });
     }
-    
+
     // Overridden to get the correct height from get_preferred_height.
     public new void get_preferred_size(out Gtk.Requisition minimum_size,
                                        out Gtk.Requisition natural_size) {
         base.get_preferred_size(out minimum_size, out natural_size);
 
-        int minimum_height = 0;
-        int natural_height = 0;
-        get_preferred_height(out minimum_height, out natural_height);
-        
-        minimum_size.height = minimum_height;
-        natural_size.height = natural_height;
+        int minimum = 0;
+        int natural = 0;
+        get_preferred_height(out minimum, out natural);
+        minimum_size.height = minimum;
+        natural_size.height = natural;
+
+        minimum = 0;
+        natural = 0;
+        get_preferred_width(out minimum, out natural);
+        minimum_size.width = minimum;
+        natural_size.width = natural;
     }
 
     // Overridden since WebKitGTK+ 2.4.10 at least doesn't want to
@@ -99,24 +104,37 @@ public class ConversationWebView : StylishWebView {
             preferred_height = (int) html.offset_height;
         }
 
-        // XXX Currently, for some messages the WebView will report
-        // very large offset heights, causing GDK and X allocation
-        // failures/warnings. If we get one, log it and limit it.  A
-        // value of ~22000 was crashing my xserver with a WebView
-        // width of around 745.
-        const int MAX = 15000;
-        this.is_height_valid = preferred_height > MAX;
-        if (this.is_height_valid) {
-            warning("WebView height reported as %i/%li, clamping",
-                    preferred_height,
-                    get_dom_document().get_body().offset_height);
-            preferred_height = MAX;
+            // XXX Currently, for some messages the WebView will report
+            // very large offset heights, causing GDK and X allocation
+            // failures/warnings. If we get one, log it and limit it.  A
+            // value of ~22000 was crashing my xserver with a WebView
+            // width of around 745.
+            const int MAX = 15000;
+            this.is_height_valid = preferred_height > MAX;
+            if (this.is_height_valid) {
+                warning("WebView size reported as %lix%li, clamping height",
+                        html.offset_height,
+                        html.offset_width);
+                preferred_height = MAX;
+            }
         }
+
         minimum_height = natural_height = preferred_height;
     }
 
-    public WebKit.DOM.HTMLDivElement create_div() throws Error {
-        return get_dom_document().create_element("div") as WebKit.DOM.HTMLDivElement;
+    // Overridden since we always what the view to be sized according
+    // to the available space in the parent, not by the width of the
+    // web view.
+    public override void get_preferred_width(out int minimum_height,
+                                             out int natural_height) {
+        // Silence the "How does the code know the size to allocate?"
+        // warning in GTK 3.20-ish.
+        base.get_preferred_width(out minimum_height, out natural_height);
+        minimum_height = natural_height = 0;
+    }
+
+    public WebKit.DOM.HTMLElement create(string name) throws Error {
+        return get_dom_document().create_element(name) as WebKit.DOM.HTMLElement;
     }
 
     public bool is_always_loaded(string uri) {
