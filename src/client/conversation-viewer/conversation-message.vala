@@ -376,7 +376,6 @@ public class ConversationMessage : Gtk.Box {
      * Starts loading the message body in the HTML view.
      */
     public async void load_message_body(Cancellable load_cancelled) {
-        bool load_images = false;
         string? body_text = null;
         try {
             body_text = (this.message.has_html_body())
@@ -386,6 +385,7 @@ public class ConversationMessage : Gtk.Box {
             debug("Could not get message text. %s", err.message);
         }
 
+        bool load_images = false;
         body_text = clean_html_markup(
             body_text ?? "", this.message, out load_images
         );
