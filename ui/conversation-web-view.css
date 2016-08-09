@@ -7,37 +7,30 @@
  */
 
 html {
-  /* Disallow changes to HTML style using !important since this it is
-  needed for sizing the ConversationWebView. */
-  left: 0 !important;
-  width: 100% !important;
-  margin: 0 !important;
-  border: 0 !important;
-  padding: 0 !important;
-}
-
-html, body {
-  /* Trigger CSS 2.1 § 10.6.7 to get a shrink-wrapped height.
-     See also ConversationWebView.get_preferred_height */
+  /* Trigger CSS 2.1 § 10.6.7 to get a shrink-wrapped height. */
   position: absolute !important;
   top: 0 !important;
+  left: 0 !important;
   bottom: auto !important;
+  width: 100% !important;
   height: auto !important;
 
-  /* Disable viewport scrollbbars */
-  overflow: hidden !important;
+  /* Lock down the box enough so we don't get an incrementally
+     expanding web view */
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  border: 0 !important;
+  padding: 0;
+
+  /* Never show scroll bars */
+  overflow: hidden;
 }
 
 body {
-  /* Allow email style to change the body however. */
-  left: 0;
-  right: 0;
-  margin: 12px;
+  margin: 0;
   border: 0;
-  padding: 0;
-  color: black;
-  background-color: white;
-  overflow-wrap: break-word;
+  padding: 12px;
+  overflow-wrap: break-word !important;
 }
 
 /* By default, tables reset the font properties to "normal" */

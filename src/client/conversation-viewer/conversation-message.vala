@@ -752,25 +752,64 @@ public class ConversationMessage : Gtk.Box {
     private string clean_html_markup(string text, Geary.RFC822.Message message, out bool remote_images) {
         remote_images = false;
         try {
-            string inner_text = text;
-            
-            // If email HTML has a BODY, use only that
-            GLib.Regex body_regex = new GLib.Regex("<body([^>]*)>(.*)</body>",
+            WebKit.DOM.HTMLElement html = (WebKit.DOM.HTMLElement)
+                this.web_view.get_dom_document().document_element;
+
+            // If the message has a HTML element, get its inner
+            // markup. We can't just set this on a temp container div
+            // (the old approach) using set_inner_html() will refuse
+            // to parse any HTML, HEAD and BODY elements that are out
+            // of place in the structure. We can't use
+            // set_outer_html() on the document element since it
+            // throws an error.
+            GLib.Regex html_regex = new GLib.Regex("<html([^>]*)>(.*)</html>",
                 GLib.RegexCompileFlags.DOTALL);
             GLib.MatchInfo matches;
-            if (body_regex.match(text, 0, out matches)) {
-                inner_text = matches.fetch(2);
+            if (html_regex.match(text, 0, out matches)) {
+                // Set the existing HTML element's content. Here, HEAD
+                // and BODY elements will be parsed fine.
+                html.set_inner_html(matches.fetch(2));
+                // Copy email HTML element attrs across to the
+                // existing HTML element
                 string attrs = matches.fetch(1);
-                if (attrs != "")
-                    inner_text = @"<div$attrs>$inner_text</div>";
+                if (attrs != "") {
+                    WebKit.DOM.HTMLElement container =
+                        this.web_view.create("div");
+                    container.set_inner_html(@"<div$attrs></div>");
+                    WebKit.DOM.HTMLElement? attr_element =
+                        Util.DOM.select(container, "div");
+                    WebKit.DOM.NamedNodeMap html_attrs =
+                        attr_element.get_attributes();
+                    for (int i = 0; i < html_attrs.get_length(); i++) {
+                        WebKit.DOM.Node attr = html_attrs.item(i);
+                        html.set_attribute(attr.node_name, attr.text_content);
+                    }
+                }
+            } else {
+                html.set_inner_html(text);
             }
-            
-            // Create a workspace for manipulating the HTML.
-            WebKit.DOM.HTMLElement container = web_view.create_div();
-            container.set_inner_html(inner_text);
-            
+
+            // Set dir="auto" if not already set possibly get a
+            // slightly better RTL experience.
+            string? dir = html.get_dir();
+            if (dir == null || dir.length == 0) {
+                html.set_dir("auto");
+            }
+
+            // Add application CSS to the document
+            WebKit.DOM.HTMLElement? head = Util.DOM.select(html, "head");
+            if (head == null) {
+                head = this.web_view.create("head");
+                html.insert_before(head, html.get_first_child());
+            }
+            WebKit.DOM.HTMLElement style_element = this.web_view.create("style");
+            string css_text = GearyApplication.instance.read_resource("conversation-web-view.css");
+            WebKit.DOM.Text text_node = this.web_view.get_dom_document().create_text_node(css_text);
+            style_element.append_child(text_node);
+            head.insert_before(style_element, head.get_first_child());
+
             // Get all the top level block quotes and stick them into a hide/show controller.
-            WebKit.DOM.NodeList blockquote_list = container.query_selector_all("blockquote");
+            WebKit.DOM.NodeList blockquote_list = html.query_selector_all("blockquote");
             for (int i = 0; i < blockquote_list.length; ++i) {
                 // Get the nodes we need.
                 WebKit.DOM.Node blockquote_node = blockquote_list.item(i);
@@ -796,11 +835,11 @@ public class ConversationMessage : Gtk.Box {
             }
 
             // Now look for the signature.
-            wrap_html_signature(ref container);
+            wrap_html_signature(ref html);
 
             // Then look for all <img> tags. Inline images are replaced with
             // data URLs.
-            WebKit.DOM.NodeList inline_list = container.query_selector_all("img");
+            WebKit.DOM.NodeList inline_list = html.query_selector_all("img");
             Gee.HashSet<string> inlined_content_ids = new Gee.HashSet<string>();
             for (ulong i = 0; i < inline_list.length; ++i) {
                 // Get the MIME content for the image.
@@ -857,7 +896,7 @@ public class ConversationMessage : Gtk.Box {
             foreach (string cid in inlined_content_ids) {
                 try {
                     string escaped_cid = Geary.HTML.escape_markup(cid);
-                    WebKit.DOM.Element? img = container.query_selector(@"[cid='$escaped_cid']");
+                    WebKit.DOM.Element? img = html.query_selector(@"[cid='$escaped_cid']");
                     if (img != null)
                         img.parent_element.remove_child(img);
                 } catch (Error error) {
@@ -866,15 +905,15 @@ public class ConversationMessage : Gtk.Box {
             }
             
             // Now return the whole message.
-            return container.get_inner_html();
+            return html.get_outer_html();
         } catch (Error e) {
             debug("Error modifying HTML message: %s", e.message);
             return text;
         }
     }
     
-    private WebKit.DOM.HTMLDivElement create_quote_container() throws Error {
-        WebKit.DOM.HTMLDivElement quote_container = web_view.create_div();
+    private WebKit.DOM.HTMLElement create_quote_container() throws Error {
+        WebKit.DOM.HTMLElement quote_container = web_view.create("div");
         quote_container.set_attribute(
             "class", "quote_container controllable hide"
         );
@@ -913,7 +952,7 @@ public class ConversationMessage : Gtk.Box {
         }
         WebKit.DOM.Node elem = div_list.item(i) as WebKit.DOM.Node;
         WebKit.DOM.Element parent = elem.get_parent_element();
-        WebKit.DOM.HTMLElement signature_container = web_view.create_div();
+        WebKit.DOM.HTMLElement signature_container = web_view.create("div");
         signature_container.set_attribute("class", "signature");
         do {
             // Get its sibling _before_ we move it into the signature div.

@@ -7,14 +7,12 @@
  */
 
 public class ConversationWebView : StylishWebView {
+
     private const string[] always_loaded_prefixes = {
         "https://secure.gravatar.com/avatar/",
         "data:"
     };
-    
     private const string USER_CSS = "user-message.css";
-    private const string STYLE_NAME = "STYLE";
-    private const string PREVENT_HIDE_STYLE = "nohide";
 
     public string allow_prefix { get; private set; default = ""; }
 
@@ -27,24 +25,39 @@ public class ConversationWebView : StylishWebView {
 
     public bool is_height_valid = false;
 
-    private FileMonitor? user_style_monitor = null;
-
     public signal void link_selected(string link);
 
     public ConversationWebView() {
         // Set defaults.
         set_border_width(0);
         allow_prefix = random_string(10) + ":";
-        
+
+        File user_css = GearyApplication.instance.get_user_config_directory().get_child(USER_CSS);
+        // Print out a debug line here if the user CSS file exists, so
+        // we get warning about it when debugging visual issues.
+        user_css.query_info_async.begin(
+            FileAttribute.STANDARD_TYPE,
+            FileQueryInfoFlags.NONE,
+            Priority.DEFAULT_IDLE,
+            null,
+            (obj, res) => {
+                try {
+                    user_css.query_info_async.end(res);
+                    debug("User CSS file exists: %s", USER_CSS);
+                } catch (Error e) {
+                    // No problem, file does not exist
+                }
+            });
+
         WebKit.WebSettings config = settings;
         config.enable_scripts = false;
         config.enable_java_applet = false;
         config.enable_plugins = false;
         config.enable_developer_extras = Args.inspector;
+        config.user_stylesheet_uri = user_css.get_uri();
         settings = config;
-        
+
         // Hook up signals.
-        load_finished.connect(on_load_finished);
         resource_request_starting.connect(on_resource_request_starting);
         navigation_policy_decision_requested.connect(on_navigation_policy_decision_requested);
         new_window_policy_decision_requested.connect(on_navigation_policy_decision_requested);
@@ -81,9 +94,9 @@ public class ConversationWebView : StylishWebView {
 
         int preferred_height = 0;
         if (load_status == WebKit.LoadStatus.FINISHED) {
-            // XXX We need this 12px padding since WK doesn't seem to
-            // report the bottom margin?
-            preferred_height = (int) get_dom_document().get_body().scroll_height + 12;
+            WebKit.DOM.Element html =
+                get_dom_document().get_document_element();
+            preferred_height = (int) html.offset_height;
         }
 
         // XXX Currently, for some messages the WebView will report
@@ -131,25 +144,6 @@ public class ConversationWebView : StylishWebView {
                 request.set_uri("about:blank");
         }
     }
-    
-    private void on_load_finished(WebKit.WebFrame frame) {
-        // Load the style.
-        try {
-            WebKit.DOM.Document document = get_dom_document();
-            WebKit.DOM.Element style_element = document.create_element(STYLE_NAME);
-            
-            string css_text = GearyApplication.instance.read_resource("conversation-web-view.css");
-            WebKit.DOM.Text text_node = document.create_text_node(css_text);
-            style_element.append_child(text_node);
-            
-            WebKit.DOM.HTMLHeadElement head_element = document.get_head();
-            head_element.append_child(style_element);
-        } catch (Error error) {
-            debug("Error loading conversation-web-view.css: %s", error.message);
-        }
-
-        load_user_style();
-    }
 
     private bool on_scroll_event(Gdk.EventScroll event) {
         if ((event.state & Gdk.ModifierType.CONTROL_MASK) != 0) {
@@ -171,56 +165,7 @@ public class ConversationWebView : StylishWebView {
         }
         return false;
     }
-    
-    private void load_user_style() {
-        try {
-            WebKit.DOM.Document document = get_dom_document();
-            WebKit.DOM.Element style_element = document.create_element(STYLE_NAME);
-            style_element.set_attribute("id", "user_style");
-            WebKit.DOM.HTMLHeadElement head_element = document.get_head();
-            head_element.append_child(style_element);
-            
-            File user_style = GearyApplication.instance.get_user_config_directory().get_child(USER_CSS);
-            user_style_monitor = user_style.monitor_file(FileMonitorFlags.NONE, null);
-            user_style_monitor.changed.connect(on_user_style_changed);
-            
-            // And call it once to load the initial user style
-            on_user_style_changed(user_style, null, FileMonitorEvent.CREATED);
-        } catch (Error error) {
-            debug("Error setting up user style: %s", error.message);
-        }
-    }
-    
-    private void on_user_style_changed(File user_style, File? other_file, FileMonitorEvent event_type) {
-        // Changing a file produces 1 created signal, 3 changes done hints, and 0 changed
-        if (event_type != FileMonitorEvent.CHANGED && event_type != FileMonitorEvent.CREATED
-            && event_type != FileMonitorEvent.DELETED) {
-            return;
-        }
-        
-        debug("Loading new message viewer style from %s...", user_style.get_path());
-        
-        WebKit.DOM.Document document = get_dom_document();
-        WebKit.DOM.Element style_element = document.get_element_by_id("user_style");
-        ulong n = style_element.child_nodes.length;
-        try {
-            for (int i = 0; i < n; i++)
-                style_element.remove_child(style_element.first_child);
-        } catch (Error error) {
-            debug("Error removing old user style: %s", error.message);
-        }
-        
-        try {
-            DataInputStream data_input_stream = new DataInputStream(user_style.read());
-            size_t length;
-            string user_css = data_input_stream.read_upto("\0", 1, out length);
-            WebKit.DOM.Text text_node = document.create_text_node(user_css);
-            style_element.append_child(text_node);
-        } catch (Error error) {
-            // Expected if file was deleted.
-        }
-    }
-    
+
     private bool on_navigation_policy_decision_requested(WebKit.WebFrame frame,
         WebKit.NetworkRequest request, WebKit.WebNavigationAction navigation_action,
         WebKit.WebPolicyDecision policy_decision) {
