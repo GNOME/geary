@@ -324,6 +324,7 @@ public class ConversationViewer : Gtk.Box {
         // Remove all messages from DOM.
         try {
             foreach (WebKit.DOM.HTMLElement element in email_to_element.values) {
+                remove_tables_safely(element);
                 if (element.get_parent_element() != null)
                     element.get_parent_element().remove_child(element);
             }
@@ -2114,6 +2115,7 @@ public class ConversationViewer : Gtk.Box {
         email_to_element.unset(email.id);
         
         try {
+            remove_tables_safely(element);
             if (element.get_parent_element() != null)
                 element.get_parent_element().remove_child(element);
         } catch (Error err) {
@@ -2498,5 +2500,31 @@ public class ConversationViewer : Gtk.Box {
         return current_folder != null && current_folder.special_folder_type
             == Geary.SpecialFolderType.DRAFTS;
     }
-}
 
+    // Workaround for occasional WebKitGTK+ crash when removing a node
+    // from the document that has nested tables as descendants and the
+    // nested table's cells have borders. Removing the nested table's
+    // cell's children depth-first in reverse order will avoid
+    // triggering the bug. See Bug 769010.
+    private void remove_tables_safely(WebKit.DOM.Node element) throws Error {
+        WebKit.DOM.HTMLElement nested_table =
+            Util.DOM.select(element, "table table");
+        while (nested_table != null) {
+            remove_children_reversed(nested_table);
+            if (nested_table.parent_node != null) {
+                nested_table.parent_node.remove_child(nested_table);
+            }
+            nested_table = Util.DOM.select(element, "table table");
+        }
+    }
+
+    private inline void remove_children_reversed(WebKit.DOM.Node element)
+        throws Error {
+        WebKit.DOM.Node child = element.last_child;
+        while (child != null) {
+            remove_children_reversed(child);
+            element.remove_child(child);
+            child = element.last_child;
+        }
+    }
+}
