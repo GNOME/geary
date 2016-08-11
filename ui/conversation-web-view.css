@@ -88,42 +88,52 @@ pre {
 
   .quote_container {
     position: relative;
-    margin: 5px 0;
-    padding: 12px;
+    margin: 0.5em 0;
+    border-radius: 4px;
+    padding: 0;
     color: #303030;
     background-color: #e8e8e8;/* recv-quoted */
-    border-radius: 4px;
   }
   .sent .quote_container {
     background-color: #e8e8e8;/* sent-quoted */
   }
-  .quote_container .quote {
-    overflow: hidden;
+
+  .quote_container > .quote {
     position: relative;
+    margin: 0;
+    border: 0;
+    padding: 0;
+    overflow: hidden;
     z-index: 0;
   }
-  .quote_container.controllable.hide .quote {
-    max-height: 6em;
+  .quote_container.controllable.hide > .quote {
+    /* Use a fraction value to cut the last visible line off half way. */
+    max-height: 7.75em;
+  }
+
+  .quote_container.controllable > .quote > blockquote {
+    /* Add space between the quote and the hider button */
+    margin-bottom: 18px;
   }
 
   .quote_container > .shower,
   .quote_container > .hider {
-    -webkit-user-select: none;
-    -webkit-user-drag: none;
     position: absolute;
-    z-index: 1;
-    bottom: -8px;
+    display: none;
     left: 0;
     right: 0;
-    display: none;
+    bottom: -8px;
+    z-index: 1;
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
   }
 
   .quote_container > .shower > input,
   .quote_container > .hider > input {
     width: 100%;
-    height: 15px;
+    height: 16px;
     padding: 0;
-    font-size: 7px;  /* Absolute size in pixels for graphics */
+    font-size: 8px;  /* Absolute size in pixels for graphics */
     color: #888;
   }
   .quote_container > .shower:hover > input,
@@ -131,15 +141,6 @@ pre {
     color: #000;
   }
 
-  .quote_container.controllable {
-    margin-bottom: 7px;
-    padding-bottom: 12px;
-  }
-  .quote_container.controllable.hide {
-    padding-bottom: 0;
-  }
-
-  .quote_container.controllable > .shower,
   .quote_container.controllable.hide > .hider {
     display: none;
   }

@@ -81,7 +81,7 @@ public class ConversationMessage : Gtk.Box {
     private const string REPLACED_IMAGE_CLASS = "replaced_inline_image";
     private const string DATA_IMAGE_CLASS = "data_inline_image";
     private const int MAX_INLINE_IMAGE_MAJOR_DIM = 1024;
-    private const int QUOTE_SIZE_THRESHOLD = 120;
+    private const float QUOTE_SIZE_THRESHOLD = 2.0f;
 
     private const string ACTION_COPY_EMAIL = "copy_email";
     private const string ACTION_COPY_LINK = "copy_link";
@@ -917,10 +917,9 @@ public class ConversationMessage : Gtk.Box {
         quote_container.set_attribute(
             "class", "quote_container controllable hide"
         );
-        quote_container.set_inner_html("""
-<div class="shower"><input type="button" value="▼        ▼        ▼" /></div>
-<div class="hider"><input type="button" value="▲        ▲        ▲" /></div>
-<div class="quote"></div>""");
+        // New lines are preserved within blockquotes, so this string
+        // needs to be new-line free.
+        quote_container.set_inner_html("""<div class="shower"><input type="button" value="▼        ▼        ▼" /></div><div class="hider"><input type="button" value="▲        ▲        ▲" /></div><div class="quote"></div>""");
         return quote_container;
     }
 
@@ -962,20 +961,25 @@ public class ConversationMessage : Gtk.Box {
         } while (elem != null);
         parent.append_child(signature_container);
     }
-    
+
     private void unset_controllable_quotes(WebKit.DOM.HTMLElement element) throws GLib.Error {
-        WebKit.DOM.NodeList quote_list = element.query_selector_all(".quote_container.controllable");
+        WebKit.DOM.NodeList quote_list =
+            element.query_selector_all(".quote_container.controllable");
         for (int i = 0; i < quote_list.length; ++i) {
             WebKit.DOM.Element quote_container = quote_list.item(i) as WebKit.DOM.Element;
+            long outer_client_height = quote_container.client_height;
             long scroll_height = quote_container.query_selector(".quote").scroll_height;
-            // If the message is hidden, scroll_height will be 0.
-            if (scroll_height > 0 && scroll_height < QUOTE_SIZE_THRESHOLD) {
+            // If the message is hidden, scroll_height will be
+            // 0. Otherwise, unhide the full quote if there is not a
+            // substantial amount hidden.
+            if (scroll_height > 0 &&
+                scroll_height <= outer_client_height * QUOTE_SIZE_THRESHOLD) {
                 quote_container.class_list.remove("controllable");
                 quote_container.class_list.remove("hide");
             }
         }
     }
-    
+
     private void show_images(bool remember) {
         try {
             WebKit.DOM.Element body = Util.DOM.select(
