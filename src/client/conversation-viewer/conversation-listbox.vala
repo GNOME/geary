@@ -98,7 +98,7 @@ public class ConversationListBox : Gtk.ListBox {
             // message has a non-trivial height, and then wait for it
             // to be reallocated, so that it picks up the web_view's
             // height.
-            if (view.primary_message.is_loading_complete) {
+            if (view.primary_message.web_view.is_height_valid) {
                 // Disable should_scroll after the message body has
                 // been loaded so we don't keep on scrolling later,
                 // like when the window has been resized.
@@ -306,7 +306,7 @@ public class ConversationListBox : Gtk.ListBox {
             // size of the body will be off, affecting the visibility
             // of emails further down the conversation.
             if (email_view.email.is_unread().is_certain() &&
-                conversation_message.is_loading_complete &&
+                conversation_message.web_view.is_height_valid &&
                 !email_view.is_manually_read) {
                  int body_top = 0;
                  int body_left = 0;

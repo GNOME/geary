@@ -23,7 +23,7 @@ public class ConversationWebView : StylishWebView {
         set { if (zoom_level != (float)value) zoom_level = (float)value; }
     }
 
-    public bool is_height_valid = false;
+    public bool is_height_valid { get; private set; default = false; }
 
     public signal void link_selected(string link);
 
@@ -97,29 +97,24 @@ public class ConversationWebView : StylishWebView {
         // warning in GTK 3.20-ish.
         base.get_preferred_height(out minimum_height, out natural_height);
 
-        int preferred_height = 0;
-        if (load_status == WebKit.LoadStatus.FINISHED) {
-            WebKit.DOM.Element html =
-                get_dom_document().get_document_element();
-            preferred_height = (int) html.offset_height;
-        }
+        WebKit.DOM.Element html = get_dom_document().get_document_element();
+        int offset_height = (int) html.offset_height;
+        int offset_width = (int) html.offset_width;
 
-            // XXX Currently, for some messages the WebView will report
-            // very large offset heights, causing GDK and X allocation
-            // failures/warnings. If we get one, log it and limit it.  A
-            // value of ~22000 was crashing my xserver with a WebView
-            // width of around 745.
-            const int MAX = 15000;
-            this.is_height_valid = preferred_height > MAX;
-            if (this.is_height_valid) {
-                warning("WebView size reported as %lix%li, clamping height",
-                        html.offset_height,
-                        html.offset_width);
-                preferred_height = MAX;
+        // If the offset_width is very small, the offset_height will
+        // likely be bogus, so just pretend we have no height for the
+        // moment. WebKitGTK seems to report an offset width of 1 in
+        // these cases.
+        if (offset_width > 1) {
+            // Avoid multiple notify signals?
+            if (!this.is_height_valid) {
+                this.is_height_valid = true;
             }
+        } else {
+            offset_height = 0;
         }
 
-        minimum_height = natural_height = preferred_height;
+        minimum_height = natural_height = offset_height;
     }
 
     // Overridden since we always what the view to be sized according

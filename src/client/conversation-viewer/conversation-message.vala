@@ -97,9 +97,6 @@ public class ConversationMessage : Gtk.Box {
     /** The specific RFC822 message displayed by this view. */
     public Geary.RFC822.Message message { get; private set; }
 
-    /** Specifies if the message body been been fully loaded. */
-    public bool is_loading_complete = false;
-
     /** Box containing the preview and full header widgets.  */
     [GtkChild]
     internal Gtk.Box summary_box;
@@ -406,11 +403,19 @@ public class ConversationMessage : Gtk.Box {
         }
 
         load_cancelled.cancelled.connect(() => { web_view.stop_loading(); });
-        this.web_view.notify["load-status"].connect((source, param) => {
-                if (this.web_view.load_status == WebKit.LoadStatus.FINISHED) {
-                    if (load_images) {
-                        show_images(false);
-                    }
+        // XXX Hook up unset_controllable_quotes() to size_allocate
+        // and check is_height_valid since we need to accurately know
+        // what the sizes of the quote and its container is to
+        // determine if it should be unhidden. However this means that
+        // when the user expands a hidden quote, this handler gets
+        // executed again and since the expanded quote will meet the
+        // criteria for being unset as controllable, that will
+        // happen. That's actually okay for now though, because if the
+        // user could collapse the quote again the space wouldn't be
+        // reclaimed, which is worse than this.
+        this.web_view.size_allocate.connect(() => {
+                if (this.web_view.load_status == WebKit.LoadStatus.FINISHED &&
+                    this.web_view.is_height_valid) {
                     WebKit.DOM.HTMLElement html = (
                         this.web_view.get_dom_document().document_element as
                         WebKit.DOM.HTMLElement
@@ -422,6 +427,13 @@ public class ConversationMessage : Gtk.Box {
                             warning("Error unsetting controllable_quotes: %s",
                                     error.message);
                         }
+                    }
+                }
+            });
+        this.web_view.notify["load-status"].connect((source, param) => {
+                if (this.web_view.load_status == WebKit.LoadStatus.FINISHED) {
+                    if (load_images) {
+                        show_images(false);
                     }
                     Util.DOM.bind_event(
                         this.web_view, "html", "contextmenu",
@@ -439,10 +451,6 @@ public class ConversationMessage : Gtk.Box {
                         this.web_view, ".%s > .hider".printf(QUOTE_CONTAINER_CLASS),
                         "click",
                         (Callback) on_hide_quote_clicked, this);
-
-                    // XXX Not actually true since remote images will
-                    // still be loading.
-                    this.is_loading_complete = true;
                 }
             });
 
