@@ -198,6 +198,7 @@
                             <property name="halign">start</property>
                             <property name="label" translatable="yes">Subject</property>
                             <property name="wrap">True</property>
+                            <property name="wrap_mode">word-char</property>
                             <property name="selectable">True</property>
                             <property name="xalign">0</property>
                             <style>
@@ -238,7 +239,7 @@
                                 <property name="valign">start</property>
                                 <property name="hexpand">False</property>
                                 <property name="column_spacing">2</property>
-                                <property name="min_children_per_line">1</property>
+                                <property name="min_children_per_line">2</property>
                                 <property name="max_children_per_line">4</property>
                                 <property name="selection_mode">none</property>
                                 <style>
@@ -286,7 +287,7 @@
                                 <property name="valign">start</property>
                                 <property name="hexpand">False</property>
                                 <property name="column_spacing">2</property>
-                                <property name="min_children_per_line">1</property>
+                                <property name="min_children_per_line">2</property>
                                 <property name="max_children_per_line">4</property>
                                 <property name="selection_mode">none</property>
                                 <style>

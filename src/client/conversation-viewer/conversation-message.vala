@@ -28,9 +28,8 @@ public class ConversationMessage : Gtk.Box {
             this.address = address;
 
             Gtk.Label label = new Gtk.Label(null);
-            //label.set_halign(Gtk.Align.START);
-            //label.set_valign(Gtk.Align.BASELINE);
-            //label.set_xalign(0.0f);
+            label.ellipsize = Pango.EllipsizeMode.END;
+            label.set_xalign(0.0f);
 
             string name = Geary.HTML.escape_markup(address.name);
             string addr = Geary.HTML.escape_markup(address.address);
@@ -47,7 +46,6 @@ public class ConversationMessage : Gtk.Box {
 
             add(label);
             set_halign(Gtk.Align.START);
-            //child.set_valign(Gtk.Align.START);
             show_all();
         }
 
