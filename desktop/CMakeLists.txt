@@ -7,13 +7,13 @@ install(FILES geary.appdata.xml DESTINATION share/appdata)
 include (FindIntltool)
 include (FindDesktopFileValidate)
 if (INTLTOOL_MERGE_FOUND)
-    INTLTOOL_MERGE_DESKTOP (geary po)
-    INTLTOOL_MERGE_AUTOSTART_DESKTOP (geary-autostart po)
+    INTLTOOL_MERGE_DESKTOP (geary.desktop po)
+    INTLTOOL_MERGE_AUTOSTART_DESKTOP (geary-autostart.desktop po)
     
     if (DESKTOP_VALIDATE)
         if (DESKTOP_FILE_VALIDATE_FOUND)
-            VALIDATE_DESKTOP_FILE (geary)
-            VALIDATE_DESKTOP_FILE (geary-autostart)
+            VALIDATE_DESKTOP_FILE (geary.desktop)
+            VALIDATE_DESKTOP_FILE (geary-autostart.desktop)
         else (DESKTOP_FILE_VALIDATE_FOUND)
             message (FATAL_ERROR "desktop-file-validate must be installed to validate generated .desktop file")
         endif (DESKTOP_FILE_VALIDATE_FOUND)
@@ -50,15 +50,20 @@ if (DISABLE_CONTRACT)
 else (DISABLE_CONTRACT)
     message (STATUS "Install Contractor contract: ON")
     if (INTLTOOL_MERGE_FOUND)
-        INTLTOOL_MERGE_CONTRACT (geary-attach po)
-        
-        if (DESKTOP_VALIDATE)
-            if (DESKTOP_FILE_VALIDATE_FOUND)
-                VALIDATE_DESKTOP_FILE (geary-attach)
-            else (DESKTOP_FILE_VALIDATE_FOUND)
-                message (FATAL_ERROR "desktop-file-validate must be installed to validate generated .desktop file")
-            endif (DESKTOP_FILE_VALIDATE_FOUND)
-        endif (DESKTOP_VALIDATE)
+        INTLTOOL_MERGE_CONTRACT (geary-attach.contract po)
+
+# Can't validate Contractor file since it isn't a valid Desktop
+# file according to desktop-file-validate from desktop-file-utils 0.22:
+# - geary-attach.contract: error: first group is not "Desktop Entry"
+# - geary-attach.contract: error: file contains group "Contractor Entry",
+#       but groups extending the format should start with "X-"
+# - geary-attach.contract: error: filename does not have a .desktop extension
+#
+#        if (DESKTOP_VALIDATE)
+#            if (DESKTOP_FILE_VALIDATE_FOUND)
+#                VALIDATE_DESKTOP_FILE (geary-attach.contract)
+#            endif (DESKTOP_FILE_VALIDATE_FOUND)
+#        endif (DESKTOP_VALIDATE)
     endif (INTLTOOL_MERGE_FOUND)
     install (PROGRAMS geary-attach DESTINATION bin)
 endif (DISABLE_CONTRACT)

@@ -13,8 +13,8 @@ endif (DESKTOP_FILE_VALIDATE_EXECUTABLE)
 
 if (DESKTOP_FILE_VALIDATE_FOUND)
     macro (VALIDATE_DESKTOP_FILE desktop_id)
-        add_custom_command (TARGET ${desktop_id}.desktop POST_BUILD
-            COMMAND ${DESKTOP_FILE_VALIDATE_EXECUTABLE} ${desktop_id}.desktop
+        add_custom_command (TARGET ${desktop_id} POST_BUILD
+            COMMAND ${DESKTOP_FILE_VALIDATE_EXECUTABLE} ${desktop_id}
         )
     endmacro (VALIDATE_DESKTOP_FILE desktop_id)
 endif (DESKTOP_FILE_VALIDATE_FOUND)
