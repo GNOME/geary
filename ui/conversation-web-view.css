@@ -33,55 +33,30 @@ body {
   overflow-wrap: break-word !important;
 }
 
-/* By default, tables reset the font properties to "normal" */
 table {
-    font-size: inherit;
+  /* By default, tables reset the font properties to "normal" */
+  font-size: inherit;
 }
 
 a {
-    color: #08c;
+  color: #08c;
 }
 
-td, th {
-    vertical-align: top;
-}
 hr {
-    background-color: #999;
-    height: 1px;
-    border: 0;
-    margin-top: 15px;
-    margin-bottom: 15px;
-}
-
-.button {
-    border: 1px transparent solid;
-    border-radius: 2.5px;
-    cursor: pointer;
-    padding: 4px;
-    margin-top: 7px;
-    text-align: center;
-}
-.button * {
-    pointer-events: none;
-}
-.button:hover {
-    border-color: rgba(0,0,0,0.18);
-    box-shadow: inset 0px 0px 1px rgba(255,255,255,0.8);
-}
-.button:active {
-    border-color: rgba(0,0,0,0.20);
-    background-color: rgba(0,0,0,0.05);;
-    padding: 5px 3px 3px 5px;
-    box-shadow: inset 0px 0px 1px rgba(0,0,0,0.05);
+  background-color: #999;
+  height: 1px;
+  border: 0;
+  margin-top: 15px;
+  margin-bottom: 15px;
 }
 
 blockquote {
-    margin: 5px 10px 5px 10px;
-    padding-left: 5px;
-    padding-right: 5px;
-    border: 0;
-    border-left: 3px #aaa solid;
+  margin: 1em 16px;
+  border: 0;
+  border-left: 3px #aaa solid;
+  padding: 0 8px;
 }
+
 
 pre {
   white-space: pre-wrap;
@@ -102,40 +77,11 @@ pre {
 }
 
 @media screen {
-  #part_container, .preview {
-    -webkit-user-select: auto;
-    -webkit-user-drag: auto;
-  }
 
   .replaced_inline_image {
     display: block;
     max-width: 100%;
     margin-top: 1em;
-  }
-
-  .link_warning {
-    display: inline-block;
-    position: absolute;
-    margin-top: -1em;
-    border: 1px solid #999;
-    padding: 1em;
-    background: #ffc;
-    box-shadow: 0 3px 11px rgba(0,0,0,0.21);
-    /* Reset styles */
-    font: caption;
-    color: black;
-  }
-  .link_warning a {
-    color: #08c;
-  }
-  .link_warning span {
-    display: block;
-    padding-left: 1em;
-  }
-  .link_warning .close_link_warning {
-    float: right;
-    margin-top: -0.67em;
-    margin-right: -0.67em;
   }
 
   /* Inline collapsable quote blocks */
