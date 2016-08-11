@@ -332,14 +332,10 @@ public class ConversationListView : Gtk.TreeView {
             // not result in a lot of screen flashing and (again)
             // unnecessary I/O as both classes update selection state.
             this.selection_changed_id = Idle.add(() => {
-                    // no longer scheduled
+                    // De-schedule the callback
                     this.selection_changed_id = 0;
 
-                    // Pass the is_clearing flag through here so the value is
-                    // accurate later on, when the idle callback actually
-                    // happens.
                     do_selection_changed();
-
                     return false;
                 }, Priority.LOW);
         }

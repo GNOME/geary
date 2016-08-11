@@ -213,7 +213,7 @@ public class ConversationViewer : Gtk.Stack {
         if (conversations.size == 0) {
             set_visible_child(this.no_conversations_page);
             GearyApplication.instance.controller.enable_message_buttons(false);
-        } else if (conversations.size >1) {
+        } else if (conversations.size > 1) {
             set_visible_child(this.multiple_conversations_page);
             GearyApplication.instance.controller.enable_multiple_message_buttons();
         } else {

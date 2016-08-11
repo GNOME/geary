@@ -455,7 +455,7 @@ public class ConversationMessage : Gtk.Box {
             });
 
         // Only load it after we've hooked up the signals above
-        this.web_view.load_string(body_text, "text/html", "UTF8", "");
+        this.web_view.load_string(body_text, "text/html", "UTF-8", "");
     }
 
     /**
