@@ -66,19 +66,19 @@ pre {
  * Message chrome style.
  */
 
-.signature {
+.geary_signature {
     color: #777;
     display: inline;
 }
 
-.signature a,
-.quote_container a {
+.geary_signature a,
+.geary_quote_container a {
     color: #5fb2e7;
 }
 
 @media screen {
 
-  .replaced_inline_image {
+  .geary_replaced_inline_image {
     display: block;
     max-width: 100%;
     margin-top: 1em;
@@ -86,7 +86,7 @@ pre {
 
   /* Inline collapsable quote blocks */
 
-  .quote_container {
+  .geary_quote_container {
     position: relative;
     margin: 0.5em 0;
     border-radius: 4px;
@@ -94,11 +94,11 @@ pre {
     color: #303030;
     background-color: #e8e8e8;/* recv-quoted */
   }
-  .sent .quote_container {
+  .geary_sent .geary_quote_container {
     background-color: #e8e8e8;/* sent-quoted */
   }
 
-  .quote_container > .quote {
+  .geary_quote_container > .quote {
     position: relative;
     margin: 0;
     border: 0;
@@ -106,18 +106,18 @@ pre {
     overflow: hidden;
     z-index: 0;
   }
-  .quote_container.controllable.hide > .quote {
+  .geary_quote_container.controllable.hide > .quote {
     /* Use a fraction value to cut the last visible line off half way. */
     max-height: 7.75em;
   }
 
-  .quote_container.controllable > .quote > blockquote {
+  .geary_quote_container.controllable > .quote > blockquote {
     /* Add space between the quote and the hider button */
     margin-bottom: 18px;
   }
 
-  .quote_container > .shower,
-  .quote_container > .hider {
+  .geary_quote_container > .shower,
+  .geary_quote_container > .hider {
     position: absolute;
     display: none;
     left: 0;
@@ -128,30 +128,30 @@ pre {
     -webkit-user-drag: none;
   }
 
-  .quote_container > .shower > input,
-  .quote_container > .hider > input {
+  .geary_quote_container > .shower > input,
+  .geary_quote_container > .hider > input {
     width: 100%;
     height: 16px;
     padding: 0;
     font-size: 8px;  /* Absolute size in pixels for graphics */
     color: #888;
   }
-  .quote_container > .shower:hover > input,
-  .quote_container > .hider:hover > input {
+  .geary_quote_container > .shower:hover > input,
+  .geary_quote_container > .hider:hover > input {
     color: #000;
   }
 
-  .quote_container.controllable.hide > .hider {
+  .geary_quote_container.controllable.hide > .hider {
     display: none;
   }
-  .quote_container.controllable.hide > .shower,
-  .quote_container.controllable > .hider {
+  .geary_quote_container.controllable.hide > .shower,
+  .geary_quote_container.controllable > .hider {
     display: block;
   }
 
   /* Highlight search terms */
 
-  .search_coloring *::selection {
+  .geary_search_coloring *::selection {
     background-color: #00ddff;
   }
 }
@@ -161,14 +161,14 @@ pre {
     background-color: white !important;
   }
 
-  #part_container {
+  #geary_part_container {
     display: none !important;
   }
-  #print_container {
+  #geary_print_container {
     display: inline-block !important;
     background-color: white !important;
   }
-  #print_container .preview {
+  #geary_print_container .preview {
     display: none !important;
   }
 }

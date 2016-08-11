@@ -251,7 +251,7 @@ public class ConversationFindBar : Gtk.Layout {
     
     private void switch_to_search_selection_color() {
         try {
-            web_view.get_dom_document().get_body().get_class_list().add("search_coloring");
+            web_view.get_dom_document().get_body().get_class_list().add("geary_search_coloring");
         } catch (Error error) {
             warning("Error setting body class for search selection coloring: %s", error.message);
         }
@@ -259,7 +259,7 @@ public class ConversationFindBar : Gtk.Layout {
     
     private void switch_to_usual_selection_color() {
         try {
-            web_view.get_dom_document().get_body().get_class_list().remove("search_coloring");
+            web_view.get_dom_document().get_body().get_class_list().remove("geary_search_coloring");
         } catch (Error error) {
             warning("Error setting body class for search selection coloring: %s", error.message);
         }

@@ -78,8 +78,12 @@ public class ConversationMessage : Gtk.Box {
         "image/x-xbitmap",
         "image/x-xbm"
     };
-    private const string REPLACED_IMAGE_CLASS = "replaced_inline_image";
-    private const string DATA_IMAGE_CLASS = "data_inline_image";
+    private const string QUOTE_CONTAINER_CLASS = "geary_quote_container";
+    private const string QUOTE_CONTROLLABLE_CLASS = "controllable";
+    private const string QUOTE_HIDE_CLASS = "hide";
+    private const string SIGNATURE_CONTAINER_CLASS = "geary_signature";
+    private const string REPLACED_IMAGE_CLASS = "geary_replaced_inline_image";
+    private const string DATA_IMAGE_CLASS = "geary_data_inline_image";
     private const int MAX_INLINE_IMAGE_MAJOR_DIM = 1024;
     private const float QUOTE_SIZE_THRESHOLD = 2.0f;
 
@@ -421,14 +425,22 @@ public class ConversationMessage : Gtk.Box {
                                     error.message);
                         }
                     }
-                    Util.DOM.bind_event(this.web_view, "html", "contextmenu",
-                               (Callback) on_context_menu, this);
-                    Util.DOM.bind_event(this.web_view, "body a", "click",
-                               (Callback) on_link_clicked, this);
-                    Util.DOM.bind_event(this.web_view, ".quote_container > .shower", "click",
-                               (Callback) on_show_quote_clicked, this);
-                    Util.DOM.bind_event(this.web_view, ".quote_container > .hider", "click",
-                               (Callback) on_hide_quote_clicked, this);
+                    Util.DOM.bind_event(
+                        this.web_view, "html", "contextmenu",
+                        (Callback) on_context_menu, this
+                    );
+                    Util.DOM.bind_event(
+                        this.web_view, "body a", "click",
+                        (Callback) on_link_clicked, this
+                    );
+                    Util.DOM.bind_event(
+                        this.web_view, ".%s > .shower".printf(QUOTE_CONTAINER_CLASS),
+                        "click",
+                        (Callback) on_show_quote_clicked, this);
+                    Util.DOM.bind_event(
+                        this.web_view, ".%s > .hider".printf(QUOTE_CONTAINER_CLASS),
+                        "click",
+                        (Callback) on_hide_quote_clicked, this);
 
                     // XXX Not actually true since remote images will
                     // still be loading.
@@ -500,7 +512,7 @@ public class ConversationMessage : Gtk.Box {
                 // Remove the chrome we put around quotes, leaving
                 // only the blockquote element.
                 WebKit.DOM.NodeList quotes =
-                    dummy.query_selector_all(".quote_container");
+                    dummy.query_selector_all("." + QUOTE_CONTAINER_CLASS);
                 for (int i = 0; i < quotes.length; i++) {
                     WebKit.DOM.Element div = (WebKit.DOM.Element) quotes.item(i);
                     WebKit.DOM.Element blockquote = div.query_selector("blockquote");
@@ -821,10 +833,6 @@ public class ConversationMessage : Gtk.Box {
                     continue;
                 }
 
-                // parent
-                //     quote_container
-                //         blockquote
-                //     sibling
                 WebKit.DOM.Element quote_container = create_quote_container();
                 Util.DOM.select(quote_container, ".quote").append_child(blockquote_node);
                 if (next_sibling == null) {
@@ -878,7 +886,7 @@ public class ConversationMessage : Gtk.Box {
                     // and the ALT to its filename, if supplied
                     img.remove_attribute("src");  // Work around a WebKitGTK+ crash. Bug 764152
                     img.set_attribute("src", Util.DOM.assemble_data_uri(mimetype, image_content));
-                    img.set_attribute("class", DATA_IMAGE_CLASS);
+                    img.class_list.add(DATA_IMAGE_CLASS);
                     if (!Geary.String.is_empty(filename))
                         img.set_attribute("alt", filename);
                     
@@ -911,12 +919,12 @@ public class ConversationMessage : Gtk.Box {
             return text;
         }
     }
-    
+
     private WebKit.DOM.HTMLElement create_quote_container() throws Error {
         WebKit.DOM.HTMLElement quote_container = web_view.create("div");
-        quote_container.set_attribute(
-            "class", "quote_container controllable hide"
-        );
+        quote_container.class_list.add(QUOTE_CONTAINER_CLASS);
+        quote_container.class_list.add(QUOTE_CONTROLLABLE_CLASS);
+        quote_container.class_list.add(QUOTE_HIDE_CLASS);
         // New lines are preserved within blockquotes, so this string
         // needs to be new-line free.
         quote_container.set_inner_html("""<div class="shower"><input type="button" value="▼        ▼        ▼" /></div><div class="hider"><input type="button" value="▲        ▲        ▲" /></div><div class="quote"></div>""");
@@ -952,7 +960,7 @@ public class ConversationMessage : Gtk.Box {
         WebKit.DOM.Node elem = div_list.item(i) as WebKit.DOM.Node;
         WebKit.DOM.Element parent = elem.get_parent_element();
         WebKit.DOM.HTMLElement signature_container = web_view.create("div");
-        signature_container.set_attribute("class", "signature");
+        signature_container.class_list.add(SIGNATURE_CONTAINER_CLASS);
         do {
             // Get its sibling _before_ we move it into the signature div.
             WebKit.DOM.Node? sibling = elem.get_next_sibling();
@@ -963,8 +971,9 @@ public class ConversationMessage : Gtk.Box {
     }
 
     private void unset_controllable_quotes(WebKit.DOM.HTMLElement element) throws GLib.Error {
-        WebKit.DOM.NodeList quote_list =
-            element.query_selector_all(".quote_container.controllable");
+        WebKit.DOM.NodeList quote_list = element.query_selector_all(
+            ".%s.%s".printf(QUOTE_CONTAINER_CLASS, QUOTE_CONTROLLABLE_CLASS)
+        );
         for (int i = 0; i < quote_list.length; ++i) {
             WebKit.DOM.Element quote_container = quote_list.item(i) as WebKit.DOM.Element;
             long outer_client_height = quote_container.client_height;
@@ -974,8 +983,8 @@ public class ConversationMessage : Gtk.Box {
             // substantial amount hidden.
             if (scroll_height > 0 &&
                 scroll_height <= outer_client_height * QUOTE_SIZE_THRESHOLD) {
-                quote_container.class_list.remove("controllable");
-                quote_container.class_list.remove("hide");
+                quote_container.class_list.remove(QUOTE_CONTROLLABLE_CLASS);
+                quote_container.class_list.remove(QUOTE_HIDE_CLASS);
             }
         }
     }
@@ -1108,7 +1117,9 @@ public class ConversationMessage : Gtk.Box {
     private static void on_show_quote_clicked(WebKit.DOM.Element element,
                                               WebKit.DOM.Event event) {
         try {
-            ((WebKit.DOM.HTMLElement) element.parent_node).class_list.remove("hide");
+            ((WebKit.DOM.HTMLElement) element.parent_node).class_list.remove(
+                QUOTE_HIDE_CLASS
+            );
         } catch (Error error) {
             warning("Error showing quote: %s", error.message);
         }
@@ -1118,7 +1129,9 @@ public class ConversationMessage : Gtk.Box {
                                               WebKit.DOM.Event event,
                                               ConversationMessage message) {
         try {
-            ((WebKit.DOM.HTMLElement) element.parent_node).class_list.add("hide");
+            ((WebKit.DOM.HTMLElement) element.parent_node).class_list.add(
+                QUOTE_HIDE_CLASS
+            );
             message.web_view.queue_resize();
         } catch (Error error) {
             warning("Error toggling quote: %s", error.message);
