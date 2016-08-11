@@ -245,6 +245,10 @@ public class ConversationViewer : Gtk.Stack {
             // during loading.
             this.conversation_added(new_list);
 
+            // Cancel existing avatar loads this before loading new
+            // convo since that will start loading more avatars
+            GearyApplication.instance.controller.avatar_session.flush_queue();
+
             bool loaded = false;
             try {
                 yield new_list.load_conversation();
@@ -291,7 +295,6 @@ public class ConversationViewer : Gtk.Stack {
     // Remove any existing conversation list, cancelling its loading
     private void remove_current_list() {
         if (this.current_list != null) {
-            GearyApplication.instance.controller.avatar_session.flush_queue();
             this.current_list.cancel_load();
             this.conversation_removed(this.current_list);
             this.current_list.destroy();
