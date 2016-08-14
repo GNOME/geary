@@ -196,11 +196,19 @@ public class ConversationListBox : Gtk.ListBox {
     }
 
     ~ConversationListBox() {
+    public override void destroy() {
         this.cancellable.cancel();
         this.conversation.email_flags_changed.disconnect(on_update_flags);
         this.conversation.trimmed.disconnect(on_conversation_trimmed);
         this.conversation.appended.disconnect(on_conversation_appended);
-        get_adjustment().value_changed.disconnect(check_mark_read);
+        Gtk.Adjustment adjustment = get_adjustment();
+        if (adjustment != null) {
+            adjustment.value_changed.disconnect(check_mark_read);
+        }
+        this.body_selected_view = null;
+        this.last_email_row = null;
+        this.id_to_row.clear();
+        base.destroy();
     }
 
     public async void load_conversation()

@@ -287,15 +287,13 @@ public class ConversationViewer : Gtk.Stack {
 
     // Remove any existing conversation list, cancelling its loading
     private void remove_current_list() {
-        if (this.current_list != null) {
-            this.current_list.cancel_load();
-            this.conversation_removed(this.current_list);
-            this.current_list.destroy();
-            this.current_list = null;
-        }
         Gtk.Widget? scrolled_child = this.conversation_page.get_child();
         if (scrolled_child != null) {
             scrolled_child.destroy();
+        }
+        if (this.current_list != null) {
+            this.conversation_removed(this.current_list);
+            this.current_list = null;
         }
     }
 
