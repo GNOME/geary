@@ -1009,9 +1009,13 @@ public class ConversationMessage : Gtk.Grid {
                     WebKit.DOM.Element? element = nodes.item(i) as WebKit.DOM.Element;
                     if (element == null || !element.has_attribute("src"))
                         continue;
-                    
+
                     string src = element.get_attribute("src");
-                    if (!web_view.is_always_loaded(src)) {
+                    // Don't prefix empty src strings since it will
+                    // cause e.g. 0px images (commonly found in
+                    // commercial mailouts) to be rendered as broken
+                    // images instead of empty elements.
+                    if (src.length > 0 && !web_view.is_always_loaded(src)) {
                         // Workaround a WebKitGTK+ 2.4.10 crash. See Bug 763933
                         element.remove_attribute("src");
                         element.set_attribute("src", web_view.allow_prefix + src);
