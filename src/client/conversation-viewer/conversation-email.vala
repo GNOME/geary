@@ -623,10 +623,23 @@ public class ConversationEmail : Gtk.Box {
     private async void load_attachments(Cancellable load_cancelled) {
         // Do we have any attachments to be displayed?
         foreach (Geary.Attachment attachment in email.attachments) {
-            if (!(attachment.content_id in inlined_content_ids) &&
-                attachment.content_disposition.disposition_type ==
-                    Geary.Mime.DispositionType.ATTACHMENT) {
-                displayed_attachments.add(new AttachmentInfo(attachment));
+            if (!(attachment.content_id in inlined_content_ids)) {
+                Geary.Mime.DispositionType? disposition = null;
+                if (attachment.content_disposition != null) {
+                    disposition = attachment.content_disposition.disposition_type;
+                }
+                // Display both any attachment and inline parts that
+                // have already not been inlined. Although any inline
+                // parts should be referred to by other content in a
+                // multipart/related or multipart/alternative
+                // container, or inlined if in a multipart/mixed
+                // container, this cannot be not guaranteed. C.f. Bug
+                // 769868.
+                if (disposition != null &&
+                    disposition == Geary.Mime.DispositionType.ATTACHMENT ||
+                    disposition == Geary.Mime.DispositionType.INLINE) {
+                    displayed_attachments.add(new AttachmentInfo(attachment));
+                }
             }
         }
 

@@ -681,17 +681,19 @@ public class Geary.RFC822.Message : BaseObject {
             return false;
         }
 
-        // If images have no disposition, they are handled elsewhere; See Bug 713546
-        if (disposition == null || disposition.disposition_type == Mime.DispositionType.UNSPECIFIED)
-            return false;
-
-        // Use inline part replacer *only* if in a mixed multipart where each element is to be
-        // presented to the user as structure dictates; for alternative and related, the inline
-        // part is referred to elsewhere in the document and it's the callers responsibility to
-        // locate them
-        if (replacer != null && container_subtype == Mime.MultipartSubtype.MIXED) {
+        // Use inline part replacer *only* for inline parts and if in
+        // a mixed multipart where each element is to be presented to
+        // the user as structure dictates; For alternative and
+        // related, the inline part is referred to elsewhere in the
+        // document and it's the callers responsibility to locate them
+        if (replacer != null && disposition != null &&
+            disposition.disposition_type == Mime.DispositionType.INLINE &&
+            container_subtype == Mime.MultipartSubtype.MIXED) {
             body = replacer(RFC822.Utils.get_clean_attachment_filename(part),
-                            this_content_type, disposition, part.get_content_id(), mime_part_to_memory_buffer(part));
+                            this_content_type,
+                            disposition,
+                            part.get_content_id(),
+                            mime_part_to_memory_buffer(part));
         }
 
         return body != null;
