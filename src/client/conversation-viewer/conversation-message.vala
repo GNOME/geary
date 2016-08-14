@@ -15,7 +15,7 @@
  * embeds at least one instance of this class.
  */
 [GtkTemplate (ui = "/org/gnome/Geary/conversation-message.ui")]
-public class ConversationMessage : Gtk.Box {
+public class ConversationMessage : Gtk.Grid {
 
     // Widget used to display sender/recipient email addresses in
     // message header Gtk.FlowBox instances.
@@ -99,11 +99,11 @@ public class ConversationMessage : Gtk.Box {
 
     /** Box containing the preview and full header widgets.  */
     [GtkChild]
-    internal Gtk.Box summary_box;
+    internal Gtk.Grid summary;
 
     /** Box that InfoBar widgets should be added to. */
     [GtkChild]
-    internal Gtk.Box infobar_box;
+    internal Gtk.Grid infobars;
 
     /** HTML view that displays the message body. */
     internal ConversationWebView web_view { get; private set; }
@@ -129,16 +129,16 @@ public class ConversationMessage : Gtk.Box {
     [GtkChild]
     private Gtk.Label date;
     [GtkChild]
-    private Gtk.Box to_header;
+    private Gtk.Grid to_header;
     [GtkChild]
-    private Gtk.Box cc_header;
+    private Gtk.Grid cc_header;
     [GtkChild]
-    private Gtk.Box bcc_header;
+    private Gtk.Grid bcc_header;
 
     [GtkChild]
     private Gtk.Revealer body_revealer;
     [GtkChild]
-    public Gtk.Box body_box;
+    public Gtk.Box body; // WebKit.WebView crashes when added to a Grid
 
     [GtkChild]
     private Gtk.Popover link_popover;
@@ -306,8 +306,9 @@ public class ConversationMessage : Gtk.Box {
         this.web_view.selection_changed.connect(on_selection_changed);
         this.web_view.show();
 
-        this.body_box.set_has_tooltip(true); // Used to show link URLs
-        this.body_box.pack_start(this.web_view, true, true, 0);
+        this.body.set_has_tooltip(true); // Used to show link URLs
+        this.body.pack_start(this.web_view, true, true, 0);
+    }
     }
 
     /**
@@ -564,10 +565,10 @@ public class ConversationMessage : Gtk.Box {
         return menu;
     }
 
-    private void set_header_addresses(Gtk.Box header,
+    private void set_header_addresses(Gtk.Grid header,
                                       Geary.RFC822.MailboxAddresses? addresses) {
         if (addresses != null && addresses.size > 0) {
-            Gtk.FlowBox box = header.get_children().nth(1).data as Gtk.FlowBox;
+            Gtk.FlowBox box = header.get_children().nth(0).data as Gtk.FlowBox;
             if (box != null) {
                 set_flowbox_addresses(box, addresses);
             }
@@ -1239,8 +1240,8 @@ public class ConversationMessage : Gtk.Box {
 
         // Use tooltip on the containing box since the web_view
         // doesn't want to pay ball.
-        this.body_box.set_tooltip_text(this.hover_url);
-        this.body_box.trigger_tooltip_query();
+        this.body.set_tooltip_text(this.hover_url);
+        this.body.trigger_tooltip_query();
     }
 
     private void on_selection_changed() {

@@ -18,6 +18,9 @@
 [GtkTemplate (ui = "/org/gnome/Geary/conversation-email.ui")]
 public class ConversationEmail : Gtk.Box {
 
+    // This isn't a Gtk.Grid since when added to a Gtk.ListBoxRow the
+    // hover style isn't applied to it.
+
     /**
      * Iterator that returns all message views in an email view.
      */
@@ -176,7 +179,7 @@ public class ConversationEmail : Gtk.Box {
     private SimpleActionGroup message_actions = new SimpleActionGroup();
 
     [GtkChild]
-    private Gtk.Box action_box;
+    private Gtk.Grid actions;
 
     [GtkChild]
     private Gtk.Button attachments_button;
@@ -197,10 +200,10 @@ public class ConversationEmail : Gtk.Box {
     private Gtk.InfoBar not_saved_infobar;
 
     [GtkChild]
-    private Gtk.Box sub_messages_box;
+    private Gtk.Grid sub_messages;
 
     [GtkChild]
-    private Gtk.Box attachments_box;
+    private Gtk.Grid attachments;
 
     [GtkChild]
     private Gtk.IconView attachments_view;
@@ -321,10 +324,8 @@ public class ConversationEmail : Gtk.Box {
         );
         connect_message_view_signals(this.primary_message);
 
-        this.primary_message.summary_box.pack_start(
-            this.action_box, false, false, 0
-        );
-        
+        this.primary_message.summary.add(this.actions);
+
         Gtk.Builder builder = new Gtk.Builder.from_resource(
             "/org/gnome/Geary/conversation-email-menus.ui"
         );
@@ -338,9 +339,7 @@ public class ConversationEmail : Gtk.Box {
         );
         this.attachments_menu.attach_to_widget(this, null);
 
-        this.primary_message.infobar_box.pack_start(
-            this.draft_infobar, false, false, 0
-        );
+        this.primary_message.infobars.add(this.draft_infobar);
         if (is_draft) {
             this.draft_infobar.show();
             this.draft_infobar.response.connect((infobar, response_id) => {
@@ -348,31 +347,29 @@ public class ConversationEmail : Gtk.Box {
                 });
         }
 
-        this.primary_message.infobar_box.pack_start(
-            this.not_saved_infobar, false, false, 0
-        );
+        this.primary_message.infobars.add(this.not_saved_infobar);
 
         // if (email.from != null && email.from.contains_normalized(current_account_information.email)) {
         //  // XXX set a RO property?
         //  get_style_context().add_class("geary_sent");
         // }
 
-        pack_start(primary_message, true, true, 0);
+        pack_start(this.primary_message, true, true, 0);
         update_email_state();
 
         // Add sub_messages container and message viewers if any
         
         Gee.List<Geary.RFC822.Message> sub_messages = message.get_sub_messages();
         if (sub_messages.size > 0) {
-            this.primary_message.body_box.pack_start(
-                this.sub_messages_box, false, false, 0
+            this.primary_message.body.pack_start(
+                this.sub_messages, false, false, 0
             );
         }
         foreach (Geary.RFC822.Message sub_message in sub_messages) {
             ConversationMessage attached_message =
                 new ConversationMessage(sub_message, contact_store, false);
             connect_message_view_signals(attached_message);
-            this.sub_messages_box.pack_start(attached_message, false, false, 0);
+            this.sub_messages.add(attached_message);
             this._attached_messages.add(attached_message);
         }
     }
@@ -653,9 +650,9 @@ public class ConversationEmail : Gtk.Box {
         // Show attachment widgets. Would like to do this in the
         // ctor but we don't know at that point if any attachments
         // will be displayed inline.
-        attachments_button.show();
-        attachments_button.set_sensitive(!this.is_collapsed);
-        primary_message.body_box.pack_start(attachments_box, false, false, 0);
+        this.attachments_button.show();
+        this.attachments_button.set_sensitive(!this.is_collapsed);
+        this.primary_message.body.add(this.attachments);
 
         // Add each displayed attachment to the icon view
         foreach (AttachmentInfo attachment_info in displayed_attachments) {

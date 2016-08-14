@@ -51,17 +51,17 @@ public class ConversationViewer : Gtk.Stack {
     [GtkChild]
     private Gtk.Spinner loading_page;
     [GtkChild]
-    private Gtk.Box no_conversations_page;
+    private Gtk.Grid no_conversations_page;
     [GtkChild]
     internal Gtk.ScrolledWindow conversation_page;
     [GtkChild]
-    private Gtk.Box multiple_conversations_page;
+    private Gtk.Grid multiple_conversations_page;
     [GtkChild]
-    private Gtk.Box empty_folder_page;
+    private Gtk.Grid empty_folder_page;
     [GtkChild]
-    private Gtk.Box empty_search_page;
+    private Gtk.Grid empty_search_page;
     [GtkChild]
-    private Gtk.Box composer_page;
+    private Gtk.Grid composer_page;
 
     private ConversationFindBar conversation_find_bar;
 
@@ -87,36 +87,28 @@ public class ConversationViewer : Gtk.Stack {
         no_conversations.subtitle = _(
             "Selecting a conversation from the list will display it here"
         );
-        this.no_conversations_page.pack_start(
-            no_conversations, true, true, 0
-        );
+        this.no_conversations_page.add(no_conversations);
 
         EmptyPlaceholder multi_conversations = new EmptyPlaceholder();
         multi_conversations.title = _("Multiple conversations selected");
         multi_conversations.subtitle = _(
             "Choosing an action will apply to all selected conversations"
         );
-        this.multiple_conversations_page.pack_start(
-            multi_conversations, true, true, 0
-        );
+        this.multiple_conversations_page.add(multi_conversations);
 
         EmptyPlaceholder empty_folder = new EmptyPlaceholder();
         empty_folder.title = _("No conversations found");
         empty_folder.subtitle = _(
             "This folder does not contain any conversations"
         );
-        this.empty_folder_page.pack_start(
-            empty_folder, true, true, 0
-        );
+        this.empty_folder_page.add(empty_folder);
 
         EmptyPlaceholder empty_search = new EmptyPlaceholder();
         empty_search.title = _("No conversations found");
         empty_search.subtitle = _(
             "Your search returned no results, try refining your search terms"
         );
-        this.empty_search_page.pack_start(
-            empty_search, true, true, 0
-        );
+        this.empty_search_page.add(empty_search);
 
         // Setup state machine for search/find states.
         Geary.State.Mapping[] mappings = {
@@ -165,7 +157,7 @@ public class ConversationViewer : Gtk.Stack {
                     conversation_list_view.select_conversations(prev_selection);
                 }
             });
-        composer_page.pack_start(box);
+        this.composer_page.add(box);
         set_visible_child(composer_page);
     }
 

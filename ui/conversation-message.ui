@@ -2,15 +2,16 @@
 <!-- Generated with glade 3.20.0 -->
 <interface>
   <requires lib="gtk+" version="3.14"/>
-  <template class="ConversationMessage" parent="GtkBox">
+  <template class="ConversationMessage" parent="GtkGrid">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
+    <property name="hexpand">True</property>
     <property name="orientation">vertical</property>
     <child>
-      <object class="GtkBox" id="summary_box">
+      <object class="GtkGrid" id="summary">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="spacing">6</property>
+        <property name="hexpand">True</property>
         <child>
           <object class="GtkImage" id="avatar">
             <property name="width_request">18</property>
@@ -22,40 +23,44 @@
             <property name="icon_name">avatar-default-symbolic</property>
           </object>
           <packing>
-            <property name="expand">False</property>
-            <property name="fill">False</property>
-            <property name="position">0</property>
+            <property name="left_attach">0</property>
+            <property name="top_attach">0</property>
           </packing>
         </child>
         <child>
-          <object class="GtkBox">
+          <object class="GtkGrid">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="hexpand">True</property>
             <property name="orientation">vertical</property>
             <child>
               <object class="GtkRevealer" id="preview_revealer">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="hexpand">True</property>
                 <property name="transition_type">none</property>
                 <property name="reveal_child">True</property>
                 <child>
-                  <object class="GtkBox">
+                  <object class="GtkGrid">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="spacing">6</property>
+                    <property name="hexpand">True</property>
                     <child>
-                      <object class="GtkBox" id="preview">
+                      <object class="GtkGrid" id="preview">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="hexpand">True</property>
                         <property name="orientation">vertical</property>
                         <child>
-                          <object class="GtkBox">
+                          <object class="GtkGrid">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
+                            <property name="hexpand">True</property>
                             <child>
                               <object class="GtkLabel" id="preview_from">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
+                                <property name="hexpand">True</property>
                                 <property name="label" translatable="yes">From &lt;email&gt;</property>
                                 <property name="ellipsize">end</property>
                                 <property name="xalign">0</property>
@@ -64,9 +69,8 @@
                                 </style>
                               </object>
                               <packing>
-                                <property name="expand">True</property>
-                                <property name="fill">True</property>
-                                <property name="position">0</property>
+                                <property name="left_attach">0</property>
+                                <property name="top_attach">0</property>
                               </packing>
                             </child>
                             <child>
@@ -80,16 +84,14 @@
                                 </style>
                               </object>
                               <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">False</property>
-                                <property name="position">1</property>
+                                <property name="left_attach">1</property>
+                                <property name="top_attach">0</property>
                               </packing>
                             </child>
                           </object>
                           <packing>
-                            <property name="expand">True</property>
-                            <property name="fill">True</property>
-                            <property name="position">0</property>
+                            <property name="left_attach">0</property>
+                            <property name="top_attach">0</property>
                           </packing>
                         </child>
                         <child>
@@ -97,6 +99,7 @@
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="halign">start</property>
+                            <property name="hexpand">True</property>
                             <property name="label" translatable="yes">Preview body text.</property>
                             <property name="ellipsize">end</property>
                             <property name="xalign">0</property>
@@ -105,9 +108,8 @@
                             </style>
                           </object>
                           <packing>
-                            <property name="expand">True</property>
-                            <property name="fill">True</property>
-                            <property name="position">1</property>
+                            <property name="left_attach">0</property>
+                            <property name="top_attach">1</property>
                           </packing>
                         </child>
                         <style>
@@ -115,45 +117,46 @@
                         </style>
                       </object>
                       <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">0</property>
                       </packing>
                     </child>
                   </object>
                 </child>
               </object>
               <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
+                <property name="left_attach">0</property>
+                <property name="top_attach">0</property>
               </packing>
             </child>
             <child>
               <object class="GtkRevealer" id="header_revealer">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="hexpand">True</property>
                 <property name="transition_type">none</property>
                 <child>
-                  <object class="GtkBox">
+                  <object class="GtkGrid">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="spacing">6</property>
+                    <property name="hexpand">True</property>
                     <child>
-                      <object class="GtkBox" id="headers">
+                      <object class="GtkGrid" id="headers">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="hexpand">True</property>
                         <property name="orientation">vertical</property>
                         <child>
-                          <object class="GtkBox" id="from_header">
+                          <object class="GtkGrid" id="from_header">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="baseline_position">top</property>
+                            <property name="hexpand">True</property>
                             <child>
                               <object class="GtkFlowBox" id="from">
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="valign">baseline</property>
+                                <property name="hexpand">True</property>
                                 <property name="column_spacing">2</property>
                                 <property name="min_children_per_line">1</property>
                                 <property name="max_children_per_line">4</property>
@@ -163,15 +166,15 @@
                                 </style>
                               </object>
                               <packing>
-                                <property name="expand">True</property>
-                                <property name="fill">True</property>
-                                <property name="position">0</property>
+                                <property name="left_attach">0</property>
+                                <property name="top_attach">0</property>
                               </packing>
                             </child>
                             <child>
                               <object class="GtkLabel" id="date">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
+                                <property name="valign">baseline</property>
                                 <property name="label" translatable="yes">1/1/1970	</property>
                                 <property name="ellipsize">end</property>
                                 <style>
@@ -179,16 +182,14 @@
                                 </style>
                               </object>
                               <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">False</property>
-                                <property name="position">1</property>
+                                <property name="left_attach">1</property>
+                                <property name="top_attach">0</property>
                               </packing>
                             </child>
                           </object>
                           <packing>
-                            <property name="expand">True</property>
-                            <property name="fill">True</property>
-                            <property name="position">0</property>
+                            <property name="left_attach">0</property>
+                            <property name="top_attach">0</property>
                           </packing>
                         </child>
                         <child>
@@ -196,6 +197,7 @@
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
                             <property name="halign">start</property>
+                            <property name="hexpand">True</property>
                             <property name="label" translatable="yes">Subject</property>
                             <property name="wrap">True</property>
                             <property name="wrap_mode">word-char</property>
@@ -206,15 +208,13 @@
                             </style>
                           </object>
                           <packing>
-                            <property name="expand">True</property>
-                            <property name="fill">True</property>
-                            <property name="position">1</property>
+                            <property name="left_attach">0</property>
+                            <property name="top_attach">1</property>
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkBox" id="to_header">
+                          <object class="GtkGrid" id="to_header">
                             <property name="can_focus">False</property>
-                            <property name="baseline_position">top</property>
                             <child>
                               <object class="GtkLabel" id="to_label">
                                 <property name="visible">True</property>
@@ -227,9 +227,8 @@
                                 </style>
                               </object>
                               <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">False</property>
-                                <property name="position">0</property>
+                                <property name="left_attach">0</property>
+                                <property name="top_attach">0</property>
                               </packing>
                             </child>
                             <child>
@@ -237,7 +236,7 @@
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="valign">start</property>
-                                <property name="hexpand">False</property>
+                                <property name="hexpand">True</property>
                                 <property name="column_spacing">2</property>
                                 <property name="min_children_per_line">2</property>
                                 <property name="max_children_per_line">4</property>
@@ -247,22 +246,19 @@
                                 </style>
                               </object>
                               <packing>
-                                <property name="expand">True</property>
-                                <property name="fill">True</property>
-                                <property name="position">1</property>
+                                <property name="left_attach">1</property>
+                                <property name="top_attach">0</property>
                               </packing>
                             </child>
                           </object>
                           <packing>
-                            <property name="expand">True</property>
-                            <property name="fill">True</property>
-                            <property name="position">2</property>
+                            <property name="left_attach">0</property>
+                            <property name="top_attach">2</property>
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkBox" id="cc_header">
+                          <object class="GtkGrid" id="cc_header">
                             <property name="can_focus">False</property>
-                            <property name="baseline_position">top</property>
                             <child>
                               <object class="GtkLabel" id="cc_label">
                                 <property name="visible">True</property>
@@ -275,9 +271,8 @@
                                 </style>
                               </object>
                               <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">False</property>
-                                <property name="position">0</property>
+                                <property name="left_attach">0</property>
+                                <property name="top_attach">0</property>
                               </packing>
                             </child>
                             <child>
@@ -285,7 +280,7 @@
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="valign">start</property>
-                                <property name="hexpand">False</property>
+                                <property name="hexpand">True</property>
                                 <property name="column_spacing">2</property>
                                 <property name="min_children_per_line">2</property>
                                 <property name="max_children_per_line">4</property>
@@ -295,22 +290,19 @@
                                 </style>
                               </object>
                               <packing>
-                                <property name="expand">True</property>
-                                <property name="fill">True</property>
-                                <property name="position">1</property>
+                                <property name="left_attach">1</property>
+                                <property name="top_attach">0</property>
                               </packing>
                             </child>
                           </object>
                           <packing>
-                            <property name="expand">True</property>
-                            <property name="fill">True</property>
-                            <property name="position">3</property>
+                            <property name="left_attach">0</property>
+                            <property name="top_attach">3</property>
                           </packing>
                         </child>
                         <child>
-                          <object class="GtkBox" id="bcc_header">
+                          <object class="GtkGrid" id="bcc_header">
                             <property name="can_focus">False</property>
-                            <property name="baseline_position">top</property>
                             <child>
                               <object class="GtkLabel" id="bcc_label">
                                 <property name="visible">True</property>
@@ -323,9 +315,8 @@
                                 </style>
                               </object>
                               <packing>
-                                <property name="expand">False</property>
-                                <property name="fill">False</property>
-                                <property name="position">0</property>
+                                <property name="left_attach">0</property>
+                                <property name="top_attach">0</property>
                               </packing>
                             </child>
                             <child>
@@ -333,7 +324,7 @@
                                 <property name="visible">True</property>
                                 <property name="can_focus">True</property>
                                 <property name="valign">start</property>
-                                <property name="hexpand">False</property>
+                                <property name="hexpand">True</property>
                                 <property name="column_spacing">2</property>
                                 <property name="min_children_per_line">2</property>
                                 <property name="max_children_per_line">4</property>
@@ -343,16 +334,14 @@
                                 </style>
                               </object>
                               <packing>
-                                <property name="expand">True</property>
-                                <property name="fill">True</property>
-                                <property name="position">1</property>
+                                <property name="left_attach">1</property>
+                                <property name="top_attach">0</property>
                               </packing>
                             </child>
                           </object>
                           <packing>
-                            <property name="expand">True</property>
-                            <property name="fill">True</property>
-                            <property name="position">4</property>
+                            <property name="left_attach">0</property>
+                            <property name="top_attach">4</property>
                           </packing>
                         </child>
                         <style>
@@ -360,25 +349,22 @@
                         </style>
                       </object>
                       <packing>
-                        <property name="expand">True</property>
-                        <property name="fill">True</property>
-                        <property name="position">0</property>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">0</property>
                       </packing>
                     </child>
                   </object>
                 </child>
               </object>
               <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">1</property>
+                <property name="left_attach">0</property>
+                <property name="top_attach">1</property>
               </packing>
             </child>
           </object>
           <packing>
-            <property name="expand">True</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
+            <property name="left_attach">1</property>
+            <property name="top_attach">0</property>
           </packing>
         </child>
         <style>
@@ -386,24 +372,26 @@
         </style>
       </object>
       <packing>
-        <property name="expand">False</property>
-        <property name="fill">True</property>
-        <property name="position">0</property>
+        <property name="left_attach">0</property>
+        <property name="top_attach">0</property>
       </packing>
     </child>
     <child>
       <object class="GtkRevealer" id="body_revealer">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <property name="hexpand">True</property>
         <child>
-          <object class="GtkBox" id="body_box">
+          <object class="GtkBox" id="body">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="hexpand">True</property>
             <property name="orientation">vertical</property>
             <child>
-              <object class="GtkBox" id="infobar_box">
+              <object class="GtkGrid" id="infobars">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="hexpand">True</property>
                 <property name="orientation">vertical</property>
                 <child>
                   <object class="GtkInfoBar" id="remote_images_infobar">
@@ -501,25 +489,23 @@
                     </action-widgets>
                   </object>
                   <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
+                    <property name="left_attach">0</property>
+                    <property name="top_attach">0</property>
                   </packing>
                 </child>
               </object>
               <packing>
                 <property name="expand">False</property>
-                <property name="fill">False</property>
-                <property name="position">1</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
               </packing>
             </child>
           </object>
         </child>
       </object>
       <packing>
-        <property name="expand">False</property>
-        <property name="fill">True</property>
-        <property name="position">1</property>
+        <property name="left_attach">0</property>
+        <property name="top_attach">1</property>
       </packing>
     </child>
     <style>
@@ -528,10 +514,10 @@
   </template>
   <object class="GtkPopover" id="link_popover">
     <property name="can_focus">False</property>
-    <property name="relative_to">body_box</property>
+    <property name="relative_to">body</property>
     <property name="position">bottom</property>
     <child>
-      <object class="GtkBox">
+      <object class="GtkGrid">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="margin_left">6</property>
@@ -539,7 +525,6 @@
         <property name="margin_top">6</property>
         <property name="margin_bottom">6</property>
         <property name="orientation">vertical</property>
-        <property name="spacing">6</property>
         <child>
           <object class="GtkLabel">
             <property name="visible">True</property>
@@ -547,9 +532,8 @@
             <property name="label" translatable="yes">This link appears to go to:</property>
           </object>
           <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">0</property>
+            <property name="left_attach">0</property>
+            <property name="top_attach">0</property>
           </packing>
         </child>
         <child>
@@ -560,9 +544,8 @@
             <property name="use_markup">True</property>
           </object>
           <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">1</property>
+            <property name="left_attach">0</property>
+            <property name="top_attach">1</property>
           </packing>
         </child>
         <child>
@@ -572,9 +555,8 @@
             <property name="label" translatable="yes">But actually goes to:</property>
           </object>
           <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">2</property>
+            <property name="left_attach">0</property>
+            <property name="top_attach">2</property>
           </packing>
         </child>
         <child>
@@ -585,9 +567,8 @@
             <property name="use_markup">True</property>
           </object>
           <packing>
-            <property name="expand">False</property>
-            <property name="fill">True</property>
-            <property name="position">3</property>
+            <property name="left_attach">0</property>
+            <property name="top_attach">3</property>
           </packing>
         </child>
       </object>

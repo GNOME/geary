@@ -18,7 +18,7 @@
       </packing>
     </child>
     <child>
-      <object class="GtkBox" id="no_conversations_page">
+      <object class="GtkGrid" id="no_conversations_page">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
@@ -47,7 +47,7 @@
       </packing>
     </child>
     <child>
-      <object class="GtkBox" id="multiple_conversations_page">
+      <object class="GtkGrid" id="multiple_conversations_page">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
@@ -61,7 +61,7 @@
       </packing>
     </child>
     <child>
-      <object class="GtkBox" id="empty_folder_page">
+      <object class="GtkGrid" id="empty_folder_page">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
@@ -75,7 +75,7 @@
       </packing>
     </child>
     <child>
-      <object class="GtkBox" id="empty_search_page">
+      <object class="GtkGrid" id="empty_search_page">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
@@ -89,7 +89,7 @@
       </packing>
     </child>
     <child>
-      <object class="GtkBox" id="composer_page">
+      <object class="GtkGrid" id="composer_page">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>

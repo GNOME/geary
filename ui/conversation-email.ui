@@ -5,10 +5,8 @@
   <template class="ConversationEmail" parent="GtkBox">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
+    <property name="hexpand">True</property>
     <property name="orientation">vertical</property>
-    <child>
-      <placeholder/>
-    </child>
     <child>
       <placeholder/>
     </child>
@@ -16,12 +14,11 @@
       <class name="geary_email"/>
     </style>
   </template>
-  <object class="GtkBox" id="action_box">
+  <object class="GtkGrid" id="actions">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <property name="halign">end</property>
     <property name="valign">start</property>
-    <property name="homogeneous">True</property>
     <child>
       <object class="GtkButton" id="attachments_button">
         <property name="sensitive">False</property>
@@ -40,9 +37,8 @@
         </child>
       </object>
       <packing>
-        <property name="expand">False</property>
-        <property name="fill">False</property>
-        <property name="position">0</property>
+        <property name="left_attach">0</property>
+        <property name="top_attach">0</property>
       </packing>
     </child>
     <child>
@@ -64,9 +60,8 @@
         </child>
       </object>
       <packing>
-        <property name="expand">False</property>
-        <property name="fill">False</property>
-        <property name="position">1</property>
+        <property name="left_attach">1</property>
+        <property name="top_attach">0</property>
       </packing>
     </child>
     <child>
@@ -87,9 +82,8 @@
         </child>
       </object>
       <packing>
-        <property name="expand">False</property>
-        <property name="fill">False</property>
-        <property name="position">2</property>
+        <property name="left_attach">2</property>
+        <property name="top_attach">0</property>
       </packing>
     </child>
     <child>
@@ -110,9 +104,8 @@
         </child>
       </object>
       <packing>
-        <property name="expand">False</property>
-        <property name="fill">False</property>
-        <property name="position">3</property>
+        <property name="left_attach">3</property>
+        <property name="top_attach">0</property>
       </packing>
     </child>
   </object>
@@ -126,19 +119,20 @@
       <column type="GObject"/>
     </columns>
   </object>
-  <object class="GtkBox" id="attachments_box">
+  <object class="GtkGrid" id="attachments">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
+    <property name="hexpand">True</property>
     <property name="orientation">vertical</property>
     <child>
       <object class="GtkSeparator">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <property name="hexpand">True</property>
       </object>
       <packing>
-        <property name="expand">False</property>
-        <property name="fill">False</property>
-        <property name="position">0</property>
+        <property name="left_attach">0</property>
+        <property name="top_attach">0</property>
       </packing>
     </child>
     <child>
@@ -146,6 +140,7 @@
         <property name="visible">True</property>
         <property name="can_focus">True</property>
         <property name="margin">6</property>
+        <property name="hexpand">True</property>
         <property name="selection_mode">multiple</property>
         <property name="item_orientation">horizontal</property>
         <property name="model">attachments_model</property>
@@ -172,9 +167,8 @@
         </style>
       </object>
       <packing>
-        <property name="expand">True</property>
-        <property name="fill">True</property>
-        <property name="position">1</property>
+        <property name="left_attach">0</property>
+        <property name="top_attach">1</property>
       </packing>
     </child>
   </object>
@@ -327,10 +321,35 @@
       <action-widget response="1">button1</action-widget>
     </action-widgets>
   </object>
-  <object class="GtkBox" id="sub_messages_box">
+  <object class="GtkGrid" id="sub_messages">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
+    <property name="hexpand">True</property>
     <property name="orientation">vertical</property>
+    <child>
+      <placeholder/>
+    </child>
+    <child>
+      <placeholder/>
+    </child>
+    <child>
+      <placeholder/>
+    </child>
+    <child>
+      <placeholder/>
+    </child>
+    <child>
+      <placeholder/>
+    </child>
+    <child>
+      <placeholder/>
+    </child>
+    <child>
+      <placeholder/>
+    </child>
+    <child>
+      <placeholder/>
+    </child>
     <child>
       <placeholder/>
     </child>
