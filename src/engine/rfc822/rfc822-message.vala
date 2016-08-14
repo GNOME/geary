@@ -995,37 +995,42 @@ public class Geary.RFC822.Message : BaseObject {
         ByteArray byte_array = new ByteArray();
         GMime.StreamMem stream = new GMime.StreamMem.with_byte_array(byte_array);
         stream.set_owner(false);
-        
-        // Convert to UTF-8.
+
         GMime.StreamFilter stream_filter = new GMime.StreamFilter(stream);
         if (to_utf8) {
+            // Assume encoded text, convert to unencoded UTF-8
+            GMime.StreamFilter stream_filter = new GMime.StreamFilter(stream);
             string? charset = (content_type != null) ? content_type.params.get_value("charset") : null;
             if (String.is_empty(charset))
                 charset = DEFAULT_CHARSET;
             stream_filter.add(Geary.RFC822.Utils.create_utf8_filter_charset(charset));
+
+            bool flowed = (content_type != null) ? content_type.params.has_value_ci("format", "flowed") : false;
+            bool delsp = (content_type != null) ? content_type.params.has_value_ci("DelSp", "yes") : false;
+
+            // Unconditionally remove the CR's in any CRLF sequence, since
+            // they are effectively a wire encoding.
+            stream_filter.add(new GMime.FilterCRLF(false, false));
+
+            if (flowed)
+                stream_filter.add(new Geary.RFC822.FilterFlowed(to_html, delsp));
+
+            if (to_html) {
+                if (!flowed)
+                    stream_filter.add(new Geary.RFC822.FilterPlain());
+                stream_filter.add(new GMime.FilterHTML(
+                    GMime.FILTER_HTML_CONVERT_URLS | GMime.FILTER_HTML_CONVERT_ADDRESSES, 0));
+                stream_filter.add(new Geary.RFC822.FilterBlockquotes());
+            }
+
+            wrapper.write_to_stream(stream_filter);
+            stream_filter.flush();
+        } else {
+            // Keep as binary
+            wrapper.write_to_stream(stream);
+            stream.flush();
         }
-        
-        bool flowed = (content_type != null) ? content_type.params.has_value_ci("format", "flowed") : false;
-        bool delsp = (content_type != null) ? content_type.params.has_value_ci("DelSp", "yes") : false;
 
-        // Unconditionally remove the CR's in any CRLF sequence, since
-        // they are effectively a wire encoding.
-        stream_filter.add(new GMime.FilterCRLF(false, false));
-
-        if (flowed)
-            stream_filter.add(new Geary.RFC822.FilterFlowed(to_html, delsp));
-
-        if (to_html) {
-            if (!flowed)
-                stream_filter.add(new Geary.RFC822.FilterPlain());
-            stream_filter.add(new GMime.FilterHTML(
-                GMime.FILTER_HTML_CONVERT_URLS | GMime.FILTER_HTML_CONVERT_ADDRESSES, 0));
-            stream_filter.add(new Geary.RFC822.FilterBlockquotes());
-        }
-
-        wrapper.write_to_stream(stream_filter);
-        stream_filter.flush();
-        
         return new Geary.Memory.ByteBuffer.from_byte_array(byte_array);
     }
 
