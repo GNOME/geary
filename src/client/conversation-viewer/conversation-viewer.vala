@@ -33,8 +33,18 @@ public class ConversationViewer : Gtk.Stack {
         COUNT;
     }
 
+    /**
+     * The current conversation listbox, if any.
+     */
     public ConversationListBox? current_list {
         get; private set; default = null;
+    }
+
+    /**
+     * Specifies if a full-height composer is currently shown.
+     */
+    public bool is_composer_visible {
+        get { return (get_visible_child() == this.composer_page); }
     }
 
     // Stack pages
@@ -183,7 +193,21 @@ public class ConversationViewer : Gtk.Stack {
     public void show_loading() {
         set_visible_child(this.loading_page);
     }
- 
+
+    /**
+     * Shows the UI when no conversations have been selected
+     */
+    public void show_none_selected() {
+        set_visible_child(this.no_conversations_page);
+    }
+
+    /**
+     * Shows the UI when multiple conversations have been selected
+     */
+    public void show_multiple_selected() {
+        set_visible_child(this.multiple_conversations_page);
+    }
+
     /**
      * Shows the empty folder UI.
      */
@@ -199,72 +223,49 @@ public class ConversationViewer : Gtk.Stack {
     }
 
     /**
-     * Shows one or more conversations in the viewer.
+     * Shows a conversation in the viewer.
      */
-    public async void load_conversations(Gee.Set<Geary.App.Conversation> conversations,
-                                         Geary.Folder location) {
-        if (get_visible_child() == this.composer_page) {
-            // When first showing a composer, the conversation list
-            // will be cleared. In that case the composer should
-            // remain visible.
-            return;
+    public async void load_conversation(Geary.App.Conversation conversation,
+                                        Geary.Folder location)
+        throws Error {
+        // If the load is taking too long, display the spinner
+        if (this.conversation_timeout_id != 0) {
+            Source.remove(this.conversation_timeout_id);
         }
-        debug("Conversations selected in %s: %u", location.to_string(), conversations.size);
-        if (conversations.size == 0) {
-            set_visible_child(this.no_conversations_page);
-            GearyApplication.instance.controller.enable_message_buttons(false);
-        } else if (conversations.size > 1) {
-            set_visible_child(this.multiple_conversations_page);
-            GearyApplication.instance.controller.enable_multiple_message_buttons();
-        } else {
-            // If the load is taking too long, display the spinner
-            if (this.conversation_timeout_id != 0) {
-                Source.remove(this.conversation_timeout_id);
-            }
-            this.conversation_timeout_id =
-                Timeout.add(SELECT_CONVERSATION_TIMEOUT_MSEC, () => {
-                        if (this.conversation_timeout_id != 0) {
-                            debug("Loading timed out\n");
-                            show_loading();
-                        }
-                        this.conversation_timeout_id = 0;
-                        return false;
-                    });
-
-            Geary.Account account = location.account;
-            ConversationListBox new_list = new ConversationListBox(
-                Geary.Collection.get_first(conversations),
-                account.get_contact_store(),
-                new Geary.App.EmailStore(account),
-                location.special_folder_type == Geary.SpecialFolderType.DRAFTS,
-                conversation_page.get_vadjustment()
-            );
-
-            // Need to fire this signal early so the the controller
-            // can hook in to its signals to catch any emails added
-            // during loading.
-            this.conversation_added(new_list);
-
-            // Cancel existing avatar loads this before loading new
-            // convo since that will start loading more avatars
-            GearyApplication.instance.controller.avatar_session.flush_queue();
-
-            bool loaded = false;
-            try {
-                yield new_list.load_conversation();
-                loaded = true;
-                remove_current_list();
-                add_new_list(new_list);
+        this.conversation_timeout_id =
+            Timeout.add(SELECT_CONVERSATION_TIMEOUT_MSEC, () => {
+                if (this.conversation_timeout_id != 0) {
+                    debug("Loading timed out\n");
+                    // XXX should disable message buttons here, so
+                    // need to move this timer to the controller.
+                    show_loading();
+                }
                 this.conversation_timeout_id = 0;
-            } catch (Error err) {
-                debug("Unable to load conversation: %s", err.message);
-            }
-            set_visible_child(this.conversation_page);
-            GearyApplication.instance.controller.enable_message_buttons(true);
+                return false;
+            });
 
-            if (loaded && location is Geary.SearchFolder) {
-                yield new_list.load_search_terms((Geary.SearchFolder) location);
-            }
+        Geary.Account account = location.account;
+        ConversationListBox new_list = new ConversationListBox(
+            conversation,
+            account.get_contact_store(),
+            new Geary.App.EmailStore(account),
+            location.special_folder_type == Geary.SpecialFolderType.DRAFTS,
+            conversation_page.get_vadjustment()
+        );
+
+        // Need to fire this signal early so the the controller
+        // can hook in to its signals to catch any emails added
+        // during loading.
+        this.conversation_added(new_list);
+
+        yield new_list.load_conversation();
+
+        remove_current_list();
+        add_new_list(new_list);
+        set_visible_child(this.conversation_page);
+        this.conversation_timeout_id = 0;
+        if (location is Geary.SearchFolder) {
+            yield new_list.load_search_terms((Geary.SearchFolder) location);
         }
     }
 

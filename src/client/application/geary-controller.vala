@@ -1298,6 +1298,7 @@ public class GearyController : Geary.BaseObject {
     private void on_folder_selected(Geary.Folder? folder) {
         debug("Folder %s selected", folder != null ? folder.to_string() : "(null)");
         this.main_window.conversation_viewer.show_loading();
+        enable_message_buttons(false);
 
         // If the folder is being unset, clear the message list and exit here.
         if (folder == null) {
@@ -1456,6 +1457,7 @@ public class GearyController : Geary.BaseObject {
                 } else {
                     this.main_window.conversation_viewer.show_empty_folder();
                 }
+                enable_message_buttons(false);
             }
             conversation_count_changed(count);
         }
@@ -1504,11 +1506,40 @@ public class GearyController : Geary.BaseObject {
     }
 
     private void on_conversations_selected(Gee.Set<Geary.App.Conversation> selected) {
-        selected_conversations = selected;
-        if (this.current_folder != null) {
-            this.main_window.conversation_viewer.load_conversations.begin(
-                selected, this.current_folder
-            );
+        this.selected_conversations = selected;
+        ConversationViewer viewer = this.main_window.conversation_viewer;
+        if (this.current_folder != null && !viewer.is_composer_visible) {
+            switch(selected.size) {
+            case 0:
+                enable_message_buttons(false);
+                viewer.show_none_selected();
+                break;
+
+            case 1:
+                // Cancel existing avatar loads before loading new
+                // convo since that will start loading more avatars
+                avatar_session.flush_queue();
+                bool is_search = this.current_folder is Geary.SearchFolder;
+                viewer.load_conversation.begin(
+                    Geary.Collection.get_first(selected),
+                    this.current_folder,
+                    (obj, ret) => {
+                        try {
+                            viewer.load_conversation.end(ret);
+                            enable_message_buttons(!is_search);
+                        } catch (Error err) {
+                            debug("Unable to load conversation: %s",
+                                  err.message);
+                        }
+                    }
+                );
+                break;
+
+            default:
+                enable_multiple_message_buttons();
+                viewer.show_multiple_selected();
+                break;
+            }
         }
     }
 
