@@ -309,7 +309,6 @@ public class ConversationMessage : Gtk.Grid {
         this.body.set_has_tooltip(true); // Used to show link URLs
         this.body.pack_start(this.web_view, true, true, 0);
     }
-    }
 
     /**
      * Shows the complete message and hides the preview headers.

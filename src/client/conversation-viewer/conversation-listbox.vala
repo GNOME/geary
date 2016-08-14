@@ -195,7 +195,6 @@ public class ConversationListBox : Gtk.ListBox {
         this.conversation.email_flags_changed.connect(on_update_flags);
     }
 
-    ~ConversationListBox() {
     public override void destroy() {
         this.cancellable.cancel();
         this.conversation.email_flags_changed.disconnect(on_update_flags);
