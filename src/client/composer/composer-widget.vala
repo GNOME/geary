@@ -1346,66 +1346,60 @@ public class ComposerWidget : Gtk.EventBox {
     private void on_draft_manager_fatal(Error err) {
         draft_save_text = DRAFT_ERROR_TEXT;
     }
-    
-    private void connect_to_draft_manager() {
-        draft_manager.notify[Geary.App.DraftManager.PROP_DRAFT_STATE].connect(on_draft_state_changed);
-        draft_manager.notify[Geary.App.DraftManager.PROP_CURRENT_DRAFT_ID].connect(on_draft_id_changed);
-        draft_manager.fatal.connect(on_draft_manager_fatal);
-    }
-    
-    // This code is in a separate method due to https://bugzilla.gnome.org/show_bug.cgi?id=742621
-    // connect_to_draft_manager() is simply for symmetry.  When above bug is fixed, this code can
-    // be moved back into open/close methods
-    private void disconnect_from_draft_manager() {
-        draft_manager.notify[Geary.App.DraftManager.PROP_DRAFT_STATE].disconnect(on_draft_state_changed);
-        draft_manager.notify[Geary.App.DraftManager.PROP_CURRENT_DRAFT_ID].disconnect(on_draft_id_changed);
-        draft_manager.fatal.disconnect(on_draft_manager_fatal);
-    }
-    
+
     // Returns the drafts folder for the current From account.
     private async void open_draft_manager_async(Cancellable? cancellable) throws Error {
         yield close_draft_manager_async(cancellable);
-        
-        if (!account.information.save_drafts)
+
+        if (!this.account.information.save_drafts)
             return;
-        
-        draft_manager = new Geary.App.DraftManager(account);
+
+        this.draft_manager = new Geary.App.DraftManager(account);
         try {
-            yield draft_manager.open_async(editing_draft_id, cancellable);
+            yield this.draft_manager.open_async(this.editing_draft_id, cancellable);
         } catch (Error err) {
-            debug("Unable to open draft manager %s: %s", draft_manager.to_string(), err.message);
-            
-            draft_manager = null;
-            
+            debug("Unable to open draft manager %s: %s",
+                  this.draft_manager.to_string(), err.message);
+
+            this.draft_manager = null;
+
             throw err;
         }
-        
+
         // clear now, as it was only needed to open draft manager
-        editing_draft_id = null;
-        
-        connect_to_draft_manager();
+        this.editing_draft_id = null;
+
+        this.draft_manager.notify[Geary.App.DraftManager.PROP_DRAFT_STATE]
+            .connect(on_draft_state_changed);
+        this.draft_manager.notify[Geary.App.DraftManager.PROP_CURRENT_DRAFT_ID]
+            .connect(on_draft_id_changed);
+        this.draft_manager.fatal.connect(on_draft_manager_fatal);
     }
-    
+
     private async void close_draft_manager_async(Cancellable? cancellable) throws Error {
         // clear status text
-        draft_save_text = "";
-        
+        this.draft_save_text = "";
+
         // only clear editing_draft_id if associated with prior draft_manager, not due to this
         // widget being initialized with it
-        if (draft_manager == null)
+        if (this.draft_manager == null)
             return;
-        
-        disconnect_from_draft_manager();
-        
+
+        this.draft_manager.notify[Geary.App.DraftManager.PROP_DRAFT_STATE]
+            .disconnect(on_draft_state_changed);
+        this.draft_manager.notify[Geary.App.DraftManager.PROP_CURRENT_DRAFT_ID]
+            .disconnect(on_draft_id_changed);
+        this.draft_manager.fatal.disconnect(on_draft_manager_fatal);
+
         // drop ref even if close failed
         try {
-            yield draft_manager.close_async(cancellable);
+            yield this.draft_manager.close_async(cancellable);
         } finally {
-            draft_manager = null;
-            editing_draft_id = null;
+            this.draft_manager = null;
+            this.editing_draft_id = null;
         }
     }
-    
+
     // Resets the draft save timeout.
     private void reset_draft_timer() {
         draft_save_text = "";
