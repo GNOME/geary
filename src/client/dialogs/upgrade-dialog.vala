@@ -52,7 +52,7 @@ public class UpgradeDialog : Object {
         }
         
         if (dialog.visible)
-            dialog.destroy();
+            dialog.hide();
     }
     
     /**
