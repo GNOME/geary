@@ -1955,8 +1955,7 @@ public class GearyController : Geary.BaseObject {
         }
     }
 
-    private void on_attachments_activated(
-        Gee.Collection<ConversationEmail.AttachmentInfo> attachments) {
+    private void on_attachments_activated(Gee.Collection<Geary.Attachment> attachments) {
         if (GearyApplication.instance.config.ask_open_attachment) {
             QuestionDialog ask_to_open = new QuestionDialog.with_checkbox(main_window,
                 _("Are you sure you want to open these attachments?"),
@@ -1969,9 +1968,17 @@ public class GearyController : Geary.BaseObject {
             GearyApplication.instance.config.ask_open_attachment = !ask_to_open.is_checked;
         }
 
-        foreach (ConversationEmail.AttachmentInfo info in attachments) {
-            if (info.app == null) {
-                string content_type = info.attachment.content_type.get_mime_type();
+        foreach (Geary.Attachment attachment in attachments) {
+            string gio_content_type = ContentType.from_mime_type(
+                attachment.content_type.get_mime_type()
+            );
+            AppInfo? app = null;
+            if (!ContentType.can_be_executable(gio_content_type) &&
+                !ContentType.is_unknown(gio_content_type)) {
+                app = AppInfo.get_default_for_type(gio_content_type, false);
+            }
+            if (app == null) {
+                string content_type = attachment.content_type.get_mime_type();
                 Gtk.AppChooserDialog app_chooser =
                     new Gtk.AppChooserDialog.for_content_type(
                         this.main_window,
@@ -1979,21 +1986,18 @@ public class GearyController : Geary.BaseObject {
                         content_type
                     );
                 if (app_chooser.run() == Gtk.ResponseType.OK) {
-                    info.app = app_chooser.get_app_info();
+                    app = app_chooser.get_app_info();
                 }
                 app_chooser.hide();
             }
-            if (info.app != null) {
+            if (app != null) {
                 List<File> files = new List<File>();
-                files.append(info.attachment.file);
+                files.append(attachment.file);
                 try {
-                    info.app.launch(files, null);
+                    app.launch(files, null);
                 } catch (Error error) {
-                    warning(
-                        "Failed to launch %s: %s\n",
-                        info.app.get_name(),
-                        error.message
-                    );
+                    warning("Failed to launch %s: %s\n",
+                            app.get_name(), error.message);
                 }
             }
         }
@@ -2016,11 +2020,7 @@ public class GearyController : Geary.BaseObject {
             : Gtk.FileChooserConfirmation.SELECT_AGAIN;
     }
 
-    private void on_save_attachments(
-        Gee.Collection<ConversationEmail.AttachmentInfo> attachments) {
-        if (attachments.size == 0)
-            return;
-
+    private void on_save_attachments(Gee.Collection<Geary.Attachment> attachments) {
         Gtk.FileChooserAction action = (attachments.size == 1)
             ? Gtk.FileChooserAction.SAVE
             : Gtk.FileChooserAction.SELECT_FOLDER;
@@ -2029,10 +2029,10 @@ public class GearyController : Geary.BaseObject {
         if (last_save_directory != null)
             dialog.set_current_folder(last_save_directory.get_path());
         if (attachments.size == 1) {
-            Gee.Iterator<ConversationEmail.AttachmentInfo> it = attachments.iterator();
+            Gee.Iterator<Geary.Attachment> it = attachments.iterator();
             it.next();
-            ConversationEmail.AttachmentInfo info = it.get();
-            dialog.set_current_name(info.attachment.file.get_basename());
+            Geary.Attachment attachment = it.get();
+            dialog.set_current_name(attachment.file.get_basename());
             dialog.set_do_overwrite_confirmation(true);
             // use custom overwrite confirmation so it looks consistent whether one or many
             // attachments are being saved
@@ -2057,9 +2057,9 @@ public class GearyController : Geary.BaseObject {
         debug("Saving attachments to %s", destination.get_path());
         
         // Save each one, checking for overwrite only if multiple attachments are being written
-        foreach (ConversationEmail.AttachmentInfo info in attachments) {
-            File source_file = info.attachment.file;
-            File dest_file = (attachments.size == 1) ? destination : destination.get_child(info.attachment.file.get_basename());
+        foreach (Geary.Attachment attachment in attachments) {
+            File source_file = attachment.file;
+            File dest_file = (attachments.size == 1) ? destination : destination.get_child(attachment.file.get_basename());
             
             if (attachments.size > 1 && dest_file.query_exists() && !do_overwrite_confirmation(dest_file))
                 return;

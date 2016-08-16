@@ -9,6 +9,7 @@ set(RESOURCE_LIST
   STRIPBLANKS "composer-menus.ui"
   STRIPBLANKS "composer-widget.ui"
   STRIPBLANKS "conversation-email.ui"
+  STRIPBLANKS "conversation-email-attachment-view.ui"
   STRIPBLANKS "conversation-email-menus.ui"
   STRIPBLANKS "conversation-message.ui"
   STRIPBLANKS "conversation-message-menus.ui"

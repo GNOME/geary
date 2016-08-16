@@ -390,6 +390,7 @@ src/mailer/main.vala
 [type: gettext/glade]ui/composer-menus.ui
 [type: gettext/glade]ui/composer-widget.ui
 [type: gettext/glade]ui/conversation-email.ui
+[type: gettext/glade]ui/conversation-email-attachment-view.ui
 [type: gettext/glade]ui/conversation-email-menus.ui
 [type: gettext/glade]ui/conversation-message.ui
 [type: gettext/glade]ui/conversation-message-menus.ui
