@@ -17,5 +17,4 @@ Actions=Compose;
 [Desktop Action Compose]
 _Name=Compose Message
 Exec=geary mailto:
-OnlyShowIn=X-Messaging Menu;Unity;
 
