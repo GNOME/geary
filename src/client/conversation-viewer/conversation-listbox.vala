@@ -136,6 +136,9 @@ public class ConversationListBox : Gtk.ListBox {
 
     private Geary.App.EmailStore email_store;
 
+    // Contacts for the account this conversation exists in
+    private Geary.AccountInformation account_info;
+
     // Was this conversation loaded from the drafts folder?
     private bool is_draft_folder;
 
@@ -169,11 +172,13 @@ public class ConversationListBox : Gtk.ListBox {
     public ConversationListBox(Geary.App.Conversation conversation,
                                Geary.ContactStore contact_store,
                                Geary.App.EmailStore? email_store,
+                               Geary.AccountInformation account_info,
                                bool is_draft_folder,
                                Gtk.Adjustment adjustment) {
         this.conversation = conversation;
         this.contact_store = contact_store;
         this.email_store = email_store;
+        this.account_info = account_info;
         this.is_draft_folder = is_draft_folder;
 
         get_style_context().add_class("background");
@@ -509,9 +514,20 @@ public class ConversationListBox : Gtk.ListBox {
         // folder"
         bool is_draft = (this.is_draft_folder && is_in_folder);
 
+        bool is_sent = false;
+        if (email.from != null) {
+            foreach (Geary.RFC822.MailboxAddress from in email.from) {
+                if (this.account_info.has_email_address(from)) {
+                    is_sent = true;
+                    break;
+                }
+            }
+        }
+
         ConversationEmail view = new ConversationEmail(
             email,
             this.contact_store,
+            is_sent,
             is_draft
         );
         view.mark_email.connect(on_mark_email);

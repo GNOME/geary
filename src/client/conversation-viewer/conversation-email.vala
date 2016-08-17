@@ -223,6 +223,9 @@ public class ConversationEmail : Gtk.Box {
     private const string ACTION_VIEW_SOURCE = "view_source";
 
     private const string MANUAL_READ_CLASS = "geary-manual-read";
+    private const string SENT_CLASS = "geary-sent";
+    private const string STARRED_CLASS = "geary-starred";
+    private const string UNREAD_CLASS = "geary-unread";
 
     /** The specific email that is displayed by this view. */
     public Geary.Email email { get; private set; }
@@ -364,9 +367,14 @@ public class ConversationEmail : Gtk.Box {
      */
     public ConversationEmail(Geary.Email email,
                              Geary.ContactStore contact_store,
+                             bool is_sent,
                              bool is_draft) {
         this.email = email;
         this.contact_store = contact_store;
+
+        if (is_sent) {
+            get_style_context().add_class(SENT_CLASS);
+        }
 
         add_action(ACTION_FORWARD).activate.connect(() => {
                 forward_message();
@@ -454,16 +462,11 @@ public class ConversationEmail : Gtk.Box {
 
         this.primary_message.infobars.add(this.not_saved_infobar);
 
-        // if (email.from != null && email.from.contains_normalized(current_account_information.email)) {
-        //  // XXX set a RO property?
-        //  get_style_context().add_class("geary_sent");
-        // }
-
         pack_start(this.primary_message, true, true, 0);
         update_email_state();
 
         // Add sub_messages container and message viewers if any
-        
+
         Gee.List<Geary.RFC822.Message> sub_messages = message.get_sub_messages();
         if (sub_messages.size > 0) {
             this.primary_message.body.pack_start(
@@ -610,20 +613,20 @@ public class ConversationEmail : Gtk.Box {
         set_action_enabled(ACTION_MARK_UNREAD, !is_unread);
         set_action_enabled(ACTION_MARK_UNREAD_DOWN, !is_unread);
         if (is_unread) {
-            style.add_class("geary_unread");
+            style.add_class(UNREAD_CLASS);
         } else {
-            style.remove_class("geary_unread");
+            style.remove_class(UNREAD_CLASS);
         }
 
         bool is_flagged = (flags != null && flags.is_flagged());
         set_action_enabled(ACTION_STAR, !this.is_collapsed && !is_flagged);
         set_action_enabled(ACTION_UNSTAR, !this.is_collapsed && is_flagged);
         if (is_flagged) {
-            style.add_class("geary_starred");
+            style.add_class(STARRED_CLASS);
             star_button.hide();
             unstar_button.show();
         } else {
-            style.remove_class("geary_starred");
+            style.remove_class(STARRED_CLASS);
             star_button.show();
             unstar_button.hide();
         }

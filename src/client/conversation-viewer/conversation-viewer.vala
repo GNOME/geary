@@ -241,6 +241,7 @@ public class ConversationViewer : Gtk.Stack {
             conversation,
             account.get_contact_store(),
             new Geary.App.EmailStore(account),
+            account.information,
             location.special_folder_type == Geary.SpecialFolderType.DRAFTS,
             conversation_page.get_vadjustment()
         );
