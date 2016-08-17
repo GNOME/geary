@@ -98,14 +98,24 @@ public class ConversationWebView : StylishWebView {
         base.get_preferred_height(out minimum_height, out natural_height);
 
         WebKit.DOM.Element html = get_dom_document().get_document_element();
-        int offset_height = (int) html.offset_height;
-        int offset_width = (int) html.offset_width;
+        long offset_height = html.offset_height;
+        long offset_width = html.offset_width;
+        long px = offset_width * offset_height;
+
+        const long MAX_LEN = 15 * 1000;
+        const long MAX_PX = 10 * 1000 * 1000;
 
         // If the offset_width is very small, the offset_height will
         // likely be bogus, so just pretend we have no height for the
         // moment. WebKitGTK seems to report an offset width of 1 in
         // these cases.
         if (offset_width > 1) {
+            if (offset_height > MAX_LEN || px > MAX_PX) {
+                long new_height = long.min(MAX_LEN, MAX_PX / offset_width);
+                debug("Clamping window height to: %lu, current size: %lux%lu (%lupx)",
+                      new_height, offset_width, offset_height, px);
+                offset_height = new_height;
+            }
             // Avoid multiple notify signals?
             if (!this.is_height_valid) {
                 this.is_height_valid = true;
@@ -114,7 +124,7 @@ public class ConversationWebView : StylishWebView {
             offset_height = 0;
         }
 
-        minimum_height = natural_height = offset_height;
+        minimum_height = natural_height = (int) offset_height;
     }
 
     // Overridden since we always what the view to be sized according
