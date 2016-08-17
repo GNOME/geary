@@ -51,7 +51,7 @@ hr {
 }
 
 blockquote {
-  margin: 1em 16px;
+  margin: 0.5em 16px;
   border: 0;
   border-left: 3px #aaa solid;
   padding: 0 8px;
@@ -88,9 +88,13 @@ pre {
 
   .geary_quote_container {
     position: relative;
+    /* Split 1em of top/bottom margin between here and the default
+    blockquote style, so if a message specifies 0px margin and padding
+    (i.e. GMail) there will still be some space space between the
+    container's background and and the blockquote. */
     margin: 0.5em 0;
     border-radius: 4px;
-    padding: 0;
+    padding: 0.5em 0;
     color: #303030;
     background-color: #e8e8e8;/* recv-quoted */
   }
@@ -100,7 +104,7 @@ pre {
 
   .geary_quote_container > .quote {
     position: relative;
-    margin: 0;
+    padding: 0;
     border: 0;
     padding: 0;
     overflow: hidden;
