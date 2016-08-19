@@ -13,14 +13,13 @@ public class ConversationListView : Gtk.TreeView {
     // scroll adjustment seen at the call to load_more().
     private double last_upper = -1.0;
     private bool reset_adjustment = false;
-    private Gee.Set<Geary.App.Conversation> selected = new Gee.HashSet<Geary.App.Conversation>();
-    private ConversationListStore conversation_list_store;
     private Geary.App.ConversationMonitor? conversation_monitor;
     private Gee.Set<Geary.App.Conversation>? current_visible_conversations = null;
     private Geary.Scheduler.Scheduled? scheduled_update_visible_conversations = null;
     private Gtk.Menu? context_menu = null;
+    private Gee.Set<Geary.App.Conversation> selected = new Gee.HashSet<Geary.App.Conversation>();
     private uint selection_changed_id = 0;
-    
+
     public signal void conversations_selected(Gee.Set<Geary.App.Conversation> selected);
     
     // Signal for when a conversation has been double-clicked, or selected and enter is pressed.
@@ -34,33 +33,21 @@ public class ConversationListView : Gtk.TreeView {
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove, bool only_mark_preview);
     
     public signal void visible_conversations_changed(Gee.Set<Geary.App.Conversation> visible);
-    
-    public ConversationListView(ConversationListStore conversation_list_store) {
-        this.conversation_list_store = conversation_list_store;
-        set_model(conversation_list_store);
-        
+
+    public ConversationListView() {
         set_show_expanders(false);
         set_headers_visible(false);
-        
+
         append_column(create_column(ConversationListStore.Column.CONVERSATION_DATA,
             new ConversationListCellRenderer(), ConversationListStore.Column.CONVERSATION_DATA.to_string(),
             0));
-        
+
         Gtk.TreeSelection selection = get_selection();
-        selection.changed.connect(on_selection_changed);
         selection.set_mode(Gtk.SelectionMode.MULTIPLE);
         style_set.connect(on_style_changed);
         show.connect(on_show);
         row_activated.connect(on_row_activated);
-        
-        get_model().row_inserted.connect(on_rows_changed);
-        get_model().rows_reordered.connect(on_rows_changed);
-        get_model().row_changed.connect(on_rows_changed);
-        get_model().row_deleted.connect(on_rows_changed);
-        get_model().row_deleted.connect(on_row_deleted);
-        
-        conversation_list_store.conversations_added_began.connect(on_conversations_added_began);
-        conversation_list_store.conversations_added_finished.connect(on_conversations_added_finished);
+
         button_press_event.connect(on_button_press);
 
         // Set up drag and drop.
@@ -82,7 +69,50 @@ public class ConversationListView : Gtk.TreeView {
         assert(binding_set != null);
         Gtk.BindingEntry.remove(binding_set, Gdk.Key.N, Gdk.ModifierType.CONTROL_MASK);
     }
-    
+
+    public new ConversationListStore? get_model() {
+        return (this as Gtk.TreeView).get_model() as ConversationListStore;
+    }
+
+    public new void set_model(ConversationListStore? new_store) {
+        ConversationListStore? old_store = get_model();
+        if (old_store != null) {
+            old_store.conversations_added_finished.disconnect(
+                on_conversations_added_finished
+            );
+            old_store.conversations_added_began.disconnect(
+                on_conversations_added_began
+            );
+            old_store.row_inserted.disconnect(on_rows_changed);
+            old_store.rows_reordered.disconnect(on_rows_changed);
+            old_store.row_changed.disconnect(on_rows_changed);
+            old_store.row_deleted.disconnect(on_rows_changed);
+            old_store.row_deleted.disconnect(on_row_deleted);
+        }
+
+        if (new_store != null) {
+            new_store.row_inserted.connect(on_rows_changed);
+            new_store.rows_reordered.connect(on_rows_changed);
+            new_store.row_changed.connect(on_rows_changed);
+            new_store.row_deleted.connect(on_rows_changed);
+            new_store.row_deleted.connect(on_row_deleted);
+            new_store.conversations_added_began.connect(
+                on_conversations_added_began
+            );
+            new_store.conversations_added_finished.connect(
+                on_conversations_added_finished
+            );
+        }
+
+        // Disconnect the selection handler since we don't want to
+        // fire selection signals while changing the model.
+        Gtk.TreeSelection selection = get_selection();
+        selection.changed.disconnect(on_selection_changed);
+        (this as Gtk.TreeView).set_model(new_store);
+        this.selected.clear();
+        selection.changed.connect(on_selection_changed);
+    }
+
     private void on_conversation_monitor_changed() {
         if (conversation_monitor != null) {
             conversation_monitor.scan_started.disconnect(on_scan_started);
@@ -178,7 +208,7 @@ public class ConversationListView : Gtk.TreeView {
             
             // Get the current conversation.  If it's selected, we'll apply the mark operation to
             // all selected conversations; otherwise, it just applies to this one.
-            Geary.App.Conversation conversation = conversation_list_store.get_conversation_at_path(path);
+            Geary.App.Conversation conversation = get_model().get_conversation_at_path(path);
             Gee.Collection<Geary.App.Conversation> to_mark;
             if (GearyApplication.instance.controller.get_selected_conversations().contains(conversation))
                 to_mark = GearyApplication.instance.controller.get_selected_conversations();
@@ -215,7 +245,7 @@ public class ConversationListView : Gtk.TreeView {
             return true;
         
         if (event.button == 3 && event.type == Gdk.EventType.BUTTON_PRESS) {
-            Geary.App.Conversation conversation = conversation_list_store.get_conversation_at_path(path);
+            Geary.App.Conversation conversation = get_model().get_conversation_at_path(path);
             
             string?[] action_names = {};
             action_names += GearyController.ACTION_DELETE_MESSAGE;
@@ -316,29 +346,22 @@ public class ConversationListView : Gtk.TreeView {
         if (this.selection_changed_id != 0)
             Source.remove(this.selection_changed_id);
 
-        if (this.conversation_list_store.is_clearing) {
-            // The list store is clearing, so the folder has changed
-            // and we don't want to notify about the selection
-            // changing, so just clear it.
-            this.selected.clear();
-        } else {
-            // Schedule processing selection changes at low idle for
-            // two reasons: (a) if a lot of changes come in
-            // back-to-back, this allows for all that activity to
-            // settle before updating state and firing signals (which
-            // results in a lot of I/O), and (b) it means the
-            // ConversationMonitor's signals may be processed in any
-            // order by this class and the ConversationListView and
-            // not result in a lot of screen flashing and (again)
-            // unnecessary I/O as both classes update selection state.
-            this.selection_changed_id = Idle.add(() => {
-                    // De-schedule the callback
-                    this.selection_changed_id = 0;
+        // Schedule processing selection changes at low idle for
+        // two reasons: (a) if a lot of changes come in
+        // back-to-back, this allows for all that activity to
+        // settle before updating state and firing signals (which
+        // results in a lot of I/O), and (b) it means the
+        // ConversationMonitor's signals may be processed in any
+        // order by this class and the ConversationListView and
+        // not result in a lot of screen flashing and (again)
+        // unnecessary I/O as both classes update selection state.
+        this.selection_changed_id = Idle.add(() => {
+                // De-schedule the callback
+                this.selection_changed_id = 0;
 
-                    do_selection_changed();
-                    return false;
-                }, Priority.LOW);
-        }
+                do_selection_changed();
+                return Source.REMOVE;
+            }, Priority.LOW);
     }
 
     // Gtk.TreeSelection can fire its "changed" signal even when
@@ -353,7 +376,7 @@ public class ConversationListView : Gtk.TreeView {
             // signal if different
             foreach (Gtk.TreePath path in paths) {
                 Geary.App.Conversation? conversation =
-                this.conversation_list_store.get_conversation_at_path(path);
+                get_model().get_conversation_at_path(path);
                 if (conversation != null)
                     new_selection.add(conversation);
             }
@@ -376,7 +399,7 @@ public class ConversationListView : Gtk.TreeView {
             return visible_conversations;
         
         while (start_path.compare(end_path) <= 0) {
-            Geary.App.Conversation? conversation = conversation_list_store.get_conversation_at_path(start_path);
+            Geary.App.Conversation? conversation = get_model().get_conversation_at_path(start_path);
             if (conversation != null)
                 visible_conversations.add(conversation);
             
@@ -390,7 +413,7 @@ public class ConversationListView : Gtk.TreeView {
         Gee.HashSet<Geary.App.Conversation> selected_conversations = new Gee.HashSet<Geary.App.Conversation>();
         
         foreach (Gtk.TreePath path in get_all_selected_paths()) {
-            Geary.App.Conversation? conversation = conversation_list_store.get_conversation_at_path(path);
+            Geary.App.Conversation? conversation = get_model().get_conversation_at_path(path);
             if (path != null)
                 selected_conversations.add(conversation);
         }
@@ -427,7 +450,7 @@ public class ConversationListView : Gtk.TreeView {
     }
 
     public void select_conversation(Geary.App.Conversation conversation) {
-        Gtk.TreePath path = conversation_list_store.get_path_for_conversation(conversation);
+        Gtk.TreePath path = get_model().get_path_for_conversation(conversation);
         if (path != null)
             set_cursor(path, null, false);
     }
@@ -435,7 +458,7 @@ public class ConversationListView : Gtk.TreeView {
     public void select_conversations(Gee.Set<Geary.App.Conversation> conversations) {
         Gtk.TreeSelection selection = get_selection();
         foreach (Geary.App.Conversation conversation in conversations) {
-            Gtk.TreePath path = conversation_list_store.get_path_for_conversation(conversation);
+            Gtk.TreePath path = get_model().get_path_for_conversation(conversation);
             if (path != null)
                 selection.select_path(path);
         }
@@ -465,7 +488,7 @@ public class ConversationListView : Gtk.TreeView {
     }
     
     private void on_row_activated(Gtk.TreePath path) {
-        Geary.App.Conversation? c = conversation_list_store.get_conversation_at_path(path);
+        Geary.App.Conversation? c = get_model().get_conversation_at_path(path);
         if (c != null)
             conversation_activated(c);
     }

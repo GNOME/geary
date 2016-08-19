@@ -15,10 +15,9 @@ public class MainWindow : Gtk.ApplicationWindow {
     public signal void on_shift_key(bool pressed);
     
     public FolderList.Tree folder_list { get; private set; default = new FolderList.Tree(); }
-    public ConversationListStore conversation_list_store { get; private set; default = new ConversationListStore(); }
     public MainToolbar main_toolbar { get; private set; }
     public SearchBar search_bar { get; private set; default = new SearchBar(); }
-    public ConversationListView conversation_list_view  { get; private set; }
+    public ConversationListView conversation_list_view  { get; private set; default = new ConversationListView(); }
     public ConversationViewer conversation_viewer { get; private set; default = new ConversationViewer(); }
     public StatusBar status_bar { get; private set; default = new StatusBar(); }
     public Geary.Folder? current_folder { get; private set; default = null; }
@@ -35,14 +34,11 @@ public class MainWindow : Gtk.ApplicationWindow {
     private Gtk.Box folder_box;
     private Gtk.Box conversation_box;
     private Geary.AggregateProgressMonitor progress_monitor = new Geary.AggregateProgressMonitor();
-    private Geary.ProgressMonitor? conversation_monitor_progress = null;
     private Geary.ProgressMonitor? folder_progress = null;
     
     public MainWindow(GearyApplication application) {
         Object(application: application);
         set_show_menubar(false);
-        
-        conversation_list_view = new ConversationListView(conversation_list_store);
         
         add_events(Gdk.EventMask.KEY_PRESS_MASK | Gdk.EventMask.KEY_RELEASE_MASK
             | Gdk.EventMask.FOCUS_CHANGE_MASK);
@@ -77,7 +73,6 @@ public class MainWindow : Gtk.ApplicationWindow {
         add_accel_group(GearyApplication.instance.ui_manager.get_accel_group());
         
         spinner.set_progress_monitor(progress_monitor);
-        progress_monitor.add(conversation_list_store.preview_monitor);
 
         delete_event.connect(on_delete_event);
         key_press_event.connect(on_key_press_event);
@@ -249,24 +244,31 @@ public class MainWindow : Gtk.ApplicationWindow {
         on_shift_key(false);
         return false;
     }
-    
+
     private void on_conversation_monitor_changed() {
-        Geary.App.ConversationMonitor? conversation_monitor =
-            GearyApplication.instance.controller.current_conversations;
-        
-        // Remove existing progress monitor.
-        if (conversation_monitor_progress != null) {
-            progress_monitor.remove(conversation_monitor_progress);
-            conversation_monitor_progress = null;
+        ConversationListStore? old_model = this.conversation_list_view.get_model();
+        if (old_model != null) {
+            this.progress_monitor.remove(old_model.preview_monitor);
+            this.progress_monitor.remove(old_model.conversations.progress_monitor);
         }
-        
-        // Add new one.
-        if (conversation_monitor != null) {
-            conversation_monitor_progress = conversation_monitor.progress_monitor;
-            progress_monitor.add(conversation_monitor_progress);
+
+        Geary.App.ConversationMonitor? conversations =
+            GearyApplication.instance.controller.current_conversations;
+
+        if (conversations != null) {
+            ConversationListStore new_model =
+                new ConversationListStore(conversations);
+            this.progress_monitor.add(new_model.preview_monitor);
+            this.progress_monitor.add(conversations.progress_monitor);
+            this.conversation_list_view.set_model(new_model);
+        }
+
+        if (old_model != null) {
+            // Must be destroyed, but only after it has been replaced.
+            old_model.destroy();
         }
     }
-    
+
     private void on_folder_selected(Geary.Folder? folder) {
         if (folder_progress != null) {
             progress_monitor.remove(folder_progress);

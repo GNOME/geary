@@ -1303,7 +1303,7 @@ public class GearyController : Geary.BaseObject {
         // If the folder is being unset, clear the message list and exit here.
         if (folder == null) {
             current_folder = null;
-            main_window.conversation_list_store.clear();
+            main_window.conversation_list_view.set_model(null);
             main_window.main_toolbar.folder = null;
             folder_selected(null);
 
