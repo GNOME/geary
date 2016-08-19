@@ -82,10 +82,20 @@ row.geary-folder-popover-list-row > label {
   margin-bottom: 0;
 }
 
+/* ConversationEmail */
+
+.geary-unread .geary-message-summary {
+  border-color: @theme_selected_bg_color;
+  transition: border 0.25s;
+}
+
 /* ConversationMessage */
 
 .geary-message-summary {
-  margin: 12px;
+  border-top: 4px solid transparent;
+  padding: 12px;
+  padding-top: 8px;
+  transition: border 4s;
 }
 
 .geary-headers label {
