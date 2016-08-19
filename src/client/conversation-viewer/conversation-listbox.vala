@@ -110,6 +110,14 @@ public class ConversationListBox : Gtk.ListBox {
 
     }
 
+
+    private static int on_sort(Gtk.ListBoxRow row1, Gtk.ListBoxRow row2) {
+        ConversationEmail? msg1 = row1.get_child() as ConversationEmail;
+        ConversationEmail? msg2 = row2.get_child() as ConversationEmail;
+        return Geary.Email.compare_sent_date_ascending(msg1.email, msg2.email);
+    }
+
+
     /**
      * Returns the view for the email to be replied to, if any.
      *
@@ -186,13 +194,13 @@ public class ConversationListBox : Gtk.ListBox {
 
         set_adjustment(adjustment);
         set_selection_mode(Gtk.SelectionMode.NONE);
+        set_sort_func(ConversationListBox.on_sort);
 
         this.key_press_event.connect(on_key_press);
         this.realize.connect(() => {
                 adjustment.value_changed.connect(check_mark_read);
             });
         this.row_activated.connect(on_row_activated);
-        this.set_sort_func(on_sort);
         this.size_allocate.connect(() => { check_mark_read(); });
 
         this.conversation.appended.connect(on_conversation_appended);
@@ -202,15 +210,6 @@ public class ConversationListBox : Gtk.ListBox {
 
     public override void destroy() {
         this.cancellable.cancel();
-        this.conversation.email_flags_changed.disconnect(on_update_flags);
-        this.conversation.trimmed.disconnect(on_conversation_trimmed);
-        this.conversation.appended.disconnect(on_conversation_appended);
-        Gtk.Adjustment adjustment = get_adjustment();
-        if (adjustment != null) {
-            adjustment.value_changed.disconnect(check_mark_read);
-        }
-        this.body_selected_view = null;
-        this.last_email_row = null;
         this.id_to_row.clear();
         base.destroy();
     }
@@ -752,12 +751,6 @@ public class ConversationListBox : Gtk.ListBox {
         } else {
             row.expand();
         }
-    }
-
-    private int on_sort(Gtk.ListBoxRow row1, Gtk.ListBoxRow row2) {
-        ConversationEmail? msg1 = row1.get_child() as ConversationEmail;
-        ConversationEmail? msg2 = row2.get_child() as ConversationEmail;
-        return Geary.Email.compare_sent_date_ascending(msg1.email, msg2.email);
     }
 
 }
