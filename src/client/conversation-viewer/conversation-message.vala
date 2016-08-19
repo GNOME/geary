@@ -310,6 +310,11 @@ public class ConversationMessage : Gtk.Grid {
         this.body.pack_start(this.web_view, true, true, 0);
     }
 
+    public override void destroy() {
+        this.context_menu_element = null;
+        base.destroy();
+    }
+
     /**
      * Shows the complete message and hides the preview headers.
      */
