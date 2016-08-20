@@ -1,26 +1,22 @@
-# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
-# Aviary.pl
-# Jeśli masz jakiekolwiek uwagi odnoszące się do tłumaczenia lub chcesz
-# pomóc w jego rozwijaniu i pielęgnowaniu, napisz do nas:
-# gnomepl@aviary.pl
-# -=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-
+# Polish translation for geary help.
+# Copyright © 2016 the geary authors.
+# This file is distributed under the same license as the geary package.
 # Piotr Drąg <piotrdrag@gmail.com>, 2016.
-# Aviary.pl <gnomepl@aviary.pl>, 2016.
+# Aviary.pl <community-poland@mozilla.org>, 2016.
+#
 msgid ""
 msgstr ""
 "Project-Id-Version: geary-help\n"
-"POT-Creation-Date: 2016-06-04 11:17+0000\n"
-"PO-Revision-Date: 2016-06-04 14:02+0200\n"
+"POT-Creation-Date: 2016-08-19 12:51+0000\n"
+"PO-Revision-Date: 2016-08-20 09:20+0200\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
-"Language-Team: Polish <gnomepl@aviary.pl>\n"
+"Language-Team: Polish <community-poland@mozilla.org>\n"
 "Language: pl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
 "|| n%100>=20) ? 1 : 2);\n"
-"X-Poedit-Language: Polish\n"
-"X-Poedit-Country: Poland\n"
 
 #: C/write.page:9(title)
 msgid "Write a message"
@@ -383,7 +379,7 @@ msgstr "Przejście do wyszukiwania"
 
 #: C/shortcuts.page:111(p)
 msgid "Find in current conversation"
-msgstr "Wyszukiwanie w obecnej rozmowie"
+msgstr "Wyszukiwanie w obecnej rozmowie"
 
 #: C/shortcuts.page:112(key)
 msgid "F"
@@ -391,7 +387,7 @@ msgstr "F"
 
 #: C/shortcuts.page:115(p)
 msgid "Find next in current conversation"
-msgstr "Wyszukiwanie następnego wystąpienia w obecnej rozmowie"
+msgstr "Wyszukiwanie następnego wystąpienia w obecnej rozmowie"
 
 #: C/shortcuts.page:116(key) C/shortcuts.page:120(key)
 msgid "G"
@@ -399,7 +395,7 @@ msgstr "G"
 
 #: C/shortcuts.page:119(p)
 msgid "Find previous in current conversation"
-msgstr "Wyszukiwanie poprzedniego wystąpienia w obecnej rozmowie"
+msgstr "Wyszukiwanie poprzedniego wystąpienia w obecnej rozmowie"
 
 #: C/shortcuts.page:120(key)
 msgid "Shift"
@@ -411,7 +407,7 @@ msgstr "Skróty okna pisania wiadomości"
 
 #: C/shortcuts.page:126(p)
 msgid "These shortcuts are active whenever focus is in a composer."
-msgstr "Poniższe skróty są aktywne w oknie pisania wiadomości."
+msgstr "Poniższe skróty są aktywne w oknie pisania wiadomości."
 
 #: C/shortcuts.page:129(p)
 msgid "Quote text"
@@ -443,7 +439,9 @@ msgstr "Odłączenie okna pisania wiadomości"
 
 #: C/shortcuts.page:146(p)
 msgid "These shortcuts are only active in composers in rich text mode."
-msgstr "Poniższe skróty są aktywne tylko, gdy okno pisania wiadomości jest w trybie tekstu sformatowanego."
+msgstr ""
+"Poniższe skróty są aktywne tylko, gdy okno pisania wiadomości jest w trybie "
+"tekstu sformatowanego."
 
 #: C/shortcuts.page:149(p)
 msgid "Bold text"
@@ -500,10 +498,10 @@ msgid ""
 "the search box in the toolbar (or press <keyseq><key>Ctrl</key><key>S</key></"
 "keyseq>) and start typing. Results will appear after a brief delay."
 msgstr ""
-"Geary obsługuje wyszukiwanie w treści wiadomości. Aby zacząć, należy wybrać "
-"katalog powiązany z kontem, w którym wyszukiwać. Następnie należy kliknąć "
+"Geary obsługuje wyszukiwanie w treści wiadomości. Aby zacząć, należy wybrać "
+"katalog powiązany z kontem, w którym wyszukiwać. Następnie należy kliknąć "
 "pole wyszukiwania na pasku narzędziowym (lub nacisnąć klawisze "
-"<keyseq><key>Ctrl</key><key>S</key></keyseq>) i zacząć pisać. Wyniki pojawią "
+"<keyseq><key>Ctrl</key><key>S</key></keyseq>) i zacząć pisać. Wyniki pojawią "
 "się po krótkiej chwili."
 
 #: C/search.page:16(p)
@@ -511,7 +509,7 @@ msgid ""
 "The full text search includes email text, email addresses (to, from, and "
 "cc), subject lines and attachment filenames."
 msgstr ""
-"Wyszukiwanie obejmuje treść e-maila, adresy (do, z i DW), temat i nazwy "
+"Wyszukiwanie obejmuje treść e-maila, adresy (do, z i DW), temat i nazwy "
 "załączników."
 
 #: C/search.page:19(p)
@@ -520,9 +518,9 @@ msgid ""
 "will match different forms of the same word, for example searching for \"walk"
 "\" will also match \"walking\" and \"walked.\""
 msgstr ""
-"Słowa kluczowe pasujące do wyszukiwania są wyróżnione w widoku wiadomości. "
+"Słowa kluczowe pasujące do wyszukiwania są wyróżnione w widoku wiadomości. "
 "Geary dopasuje różne formy tego samego słowa, na przykład szukanie „spacer” "
-"znajdzie też „spaceruję” i „spacerowałam”."
+"znajdzie też „spaceruję” i „spacerowałam”."
 
 #: C/search.page:23(title)
 msgid "Search operators"
@@ -543,7 +541,7 @@ msgstr "załącznik:<placeholder-1/>"
 #: C/search.page:28(p)
 msgid "Finds messages with attachments whose name matches <var>filename</var>."
 msgstr ""
-"Odnajduje wiadomości z załącznikami, których nazwy pasują do <var>nazwa "
+"Odnajduje wiadomości z załącznikami, których nazwy pasują do <var>nazwa "
 "pliku</var>."
 
 #: C/search.page:31(var) C/search.page:39(var) C/search.page:63(var)
@@ -557,7 +555,7 @@ msgstr "udw:<placeholder-1/>"
 #: C/search.page:32(p)
 msgid "Finds messages where <var>recipient</var> matches the BCC header."
 msgstr ""
-"Odnajduje wiadomości, w których <var>odbiorca</var> pasuje do nagłówka "
+"Odnajduje wiadomości, w których <var>odbiorca</var> pasuje do nagłówka "
 "„Ukryty do wiadomości”."
 
 #: C/search.page:35(var) C/search.page:59(var)
@@ -579,7 +577,7 @@ msgstr "dw:<placeholder-1/>"
 #: C/search.page:40(p)
 msgid "Finds messages where <var>recipient</var> matches the CC header."
 msgstr ""
-"Odnajduje wiadomości, w których <var>odbiorca</var> pasuje do nagłówka „Do "
+"Odnajduje wiadomości, w których <var>odbiorca</var> pasuje do nagłówka „Do "
 "wiadomości”."
 
 #: C/search.page:43(var)
@@ -593,7 +591,7 @@ msgstr "od:<placeholder-1/>"
 #: C/search.page:44(p)
 msgid "Finds messages where <var>sender</var> matches the From header."
 msgstr ""
-"Odnajduje wiadomości, w których <var>nadawca</var> pasuje do nagłówka „Od”."
+"Odnajduje wiadomości, w których <var>nadawca</var> pasuje do nagłówka „Od”."
 
 #: C/search.page:47(input)
 msgid "is:read"
@@ -635,7 +633,7 @@ msgstr "do:<placeholder-1/>"
 msgid ""
 "Finds messages where <var>sender</var> matches the To, CC, or BCC header."
 msgstr ""
-"Odnajduje wiadomości, w których <var>nadawca</var> pasuje do nagłówka „Do”, "
+"Odnajduje wiadomości, w których <var>nadawca</var> pasuje do nagłówka „Do”, "
 "„Do wiadomości” lub „Ukryty do wiadomości”."
 
 #: C/search.page:68(p)
@@ -645,9 +643,9 @@ msgid ""
 "argument, which searches for the account's email address in the appropriate "
 "context."
 msgstr ""
-"Operatory <input>udw</input>, <input>dw</input>, <input>od</input> i "
+"Operatory <input>udw</input>, <input>dw</input>, <input>od</input> i "
 "<input>do</input> obsługują specjalny parametr <input>ja</input>, który "
-"wyszukuje własny adres e-mail użytkownika w odpowiednim kontekście."
+"wyszukuje własny adres e-mail użytkownika w odpowiednim kontekście."
 
 #: C/preferences.page:11(p)
 msgid ""
@@ -1100,4 +1098,4 @@ msgstr ""
 msgid "translator-credits"
 msgstr ""
 "Piotr Drąg <piotrdrag@gmail.com>, 2016\n"
-"Aviary.pl <gnomepl@aviary.pl>, 2016"
+"Aviary.pl <community-poland@mozilla.org>, 2016"
