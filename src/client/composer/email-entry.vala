@@ -4,10 +4,13 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-// Displays a dialog for collecting the user's login data.
+// A custom entry for e-mail addresses
 public class EmailEntry : Gtk.Entry {
-    public bool valid_or_empty { get; set; default = true; }
+    // Whether this entry contains a valid email address
+    public bool valid { get; set; default = false; }
+
     public bool empty { get; set; default = true; }
+
     public bool modified = false;
 
     // null or valid addresses
@@ -44,7 +47,7 @@ public class EmailEntry : Gtk.Entry {
             updating = true;
             addresses = null;
             updating = false;
-            valid_or_empty = true;
+            valid = false;
             empty = true;
             return;
         }
@@ -56,7 +59,7 @@ public class EmailEntry : Gtk.Entry {
     
     private void validate_addresses() {
         if (addresses == null || addresses.size == 0) {
-            valid_or_empty = true;
+            valid = false;
             empty = true;
             return;
         }
@@ -64,11 +67,11 @@ public class EmailEntry : Gtk.Entry {
         
         foreach (Geary.RFC822.MailboxAddress address in addresses) {
             if (!address.is_valid()) {
-                valid_or_empty = false;
+                valid = false;
                 return;
             }
         }
-        valid_or_empty = true;
+        valid = true;
     }
     
     private bool on_key_press(Gtk.Widget widget, Gdk.EventKey event) {

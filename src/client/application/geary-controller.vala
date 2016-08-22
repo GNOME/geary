@@ -2199,7 +2199,16 @@ public class GearyController : Geary.BaseObject {
         bool is_draft = false) {
         create_compose_widget_async.begin(compose_type, referred, quote, mailto, is_draft);
     }
-    
+
+    /**
+     * Creates a composer widget. Depending on the arguments, this can be inline in the
+     * conversation or as a new window.
+     * @param compose_type - Whether it's a new message, a reply, a forwarded mail, ...
+     * @param referred - The mail of which we should copy the from/to/... addresses
+     * @param quote - The quote after the mail body
+     * @param mailto - A "mailto:"-link
+     * @param is_draft - Whether we're starting from a draft (true) or a new mail (false)
+     */
     private async void create_compose_widget_async(ComposerWidget.ComposeType compose_type,
         Geary.Email? referred = null, string? quote = null, string? mailto = null,
         bool is_draft = false) {

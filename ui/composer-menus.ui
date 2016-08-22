@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<interface>
+  <menu id="html_menu_model">
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">S_ans Serif</attribute>
+        <attribute name="action">cmp.font-family</attribute>
+        <attribute name="target">sans</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">S_erif</attribute>
+        <attribute name="action">cmp.font-family</attribute>
+        <attribute name="target">serif</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_Fixed Width</attribute>
+        <attribute name="action">cmp.font-family</attribute>
+        <attribute name="target">monospace</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">_Small</attribute>
+        <attribute name="action">cmp.font-size</attribute>
+        <attribute name="target">small</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_Medium</attribute>
+        <attribute name="action">cmp.font-size</attribute>
+        <attribute name="target">medium</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Lar_ge</attribute>
+        <attribute name="action">cmp.font-size</attribute>
+        <attribute name="target">large</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">C_olor</attribute>
+        <attribute name="action">cmp.color</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">_Rich Text</attribute>
+        <attribute name="action">cmp.compose-as-html</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">Show Extended Fields</attribute>
+        <attribute name="action">cmp.show-extended</attribute>
+      </item>
+    </section>
+  </menu>
+
+  <menu id="plain_menu_model">
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">_Rich Text</attribute>
+        <attribute name="action">cmp.compose-as-html</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">Show Extended Fields</attribute>
+        <attribute name="action">cmp.show-extended</attribute>
+      </item>
+    </section>
+  </menu>
+
+  <menu id="context_menu_model">
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">_Undo</attribute>
+        <attribute name="action">undo</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_Redo</attribute>
+        <attribute name="action">redo</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">Cu_t</attribute>
+        <attribute name="action">cut</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_Copy</attribute>
+        <attribute name="action">copy</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Copy _Link</attribute>
+        <attribute name="action">copy-link</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_Paste</attribute>
+        <attribute name="action">paste</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Paste _With Formatting</attribute>
+        <attribute name="action">paste-with-formatting</attribute>
+      </item>
+    </section>
+  </menu>
+</interface>

@@ -1,0 +1,198 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk+" version="3.14"/>
+  <template class="ComposerHeaderbar" parent="GtkHeaderBar">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="show_close_button">False</property>
+    <child>
+      <object class="GtkBox" id="detach_start">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <child>
+          <object class="GtkButton" id="detach_start_button">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="margin_end">6</property>
+            <property name="relief">GTK_RELIEF_NONE</property>
+            <property name="action_name">cmh.detach</property>
+            <property name="always_show_image">True</property>
+            <property name="tooltip_text" translatable="yes">Detach (Ctrl+D)</property>
+            <child>
+              <object class="GtkImage" id="detach_start_image">
+                <property name="icon_name">detach-symbolic</property>
+                <property name="pixel-size">16</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkSeparator" id="detach_start_separator">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="orientation">vertical</property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="GtkButton" id="new_message_attach_button">
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="action_name">cmh.add-attachment</property>
+        <property name="always_show_image">True</property>
+        <property name="tooltip_text" translatable="yes">Attach File (Ctrl+T)</property>
+        <child>
+          <object class="GtkImage" id="new_message_attach_image">
+            <property name="icon_name">mail-attachment-symbolic</property>
+            <property name="pixel-size">16</property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="GtkBox" id="conversation_attach_buttons">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <style>
+          <class name="linked"/>
+        </style>
+        <child>
+          <object class="GtkButton" id="conversation_attach_new_button">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="action_name">cmh.add-attachment</property>
+            <property name="always_show_image">True</property>
+            <property name="tooltip_text" translatable="yes">Attach File (Ctrl+T)</property>
+            <child>
+              <object class="GtkImage" id="conversation_attach_new_image">
+                <property name="icon_name">mail-attachment-symbolic</property>
+                <property name="pixel-size">16</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="conversation_attach_original_button">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="action_name">cmh.add-original-attachments</property>
+            <property name="always_show_image">True</property>
+            <property name="tooltip_text" translatable="yes">Include Original Attachments</property>
+            <child>
+              <object class="GtkImage" id="conversation_attach_original_image">
+                <property name="icon_name">edit-copy-symbolic</property>
+                <property name="pixel-size">16</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="GtkButton" id="recipients_button">
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="relief">GTK_RELIEF_NONE</property>
+        <child>
+          <object class="GtkLabel" id="recipients_label">
+            <property name="visible">True</property>
+            <property name="ellipsize">end</property>
+          </object>
+        </child>
+      </object>
+    </child>
+    <child>
+      <object class="GtkBox" id="detach_end">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <child>
+          <object class="GtkSeparator" id="detach_end_separator">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="orientation">vertical</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="detach_end_button">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="margin_start">6</property>
+            <property name="relief">GTK_RELIEF_NONE</property>
+            <property name="action_name">cmh.detach</property>
+            <property name="always_show_image">True</property>
+            <property name="tooltip_text" translatable="yes">Detach (Ctrl+D)</property>
+            <child>
+              <object class="GtkImage" id="detach_end_image">
+                <property name="icon_name">detach-symbolic</property>
+                <property name="pixel-size">16</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+      <packing>
+        <property name="pack_type">end</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkButton" id="send_button">
+        <property name="visible">True</property>
+        <property name="can_focus">True</property>
+        <property name="action_name">cmh.send</property>
+        <property name="always_show_image">True</property>
+        <property name="use_underline">True</property>
+        <property name="tooltip_text" translatable="yes">Send (Ctrl+Enter)</property>
+        <property name="label" translatable="yes">_Send</property>
+        <style>
+          <class name="suggested-action"/>
+        </style>
+      </object>
+      <packing>
+        <property name="pack_type">end</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkBox" id="close_buttons">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <style>
+          <class name="linked"/>
+        </style>
+        <child>
+          <object class="GtkButton" id="discard_and_close_button">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="action_name">cmh.close-and-discard</property>
+            <property name="always_show_image">True</property>
+            <property name="tooltip_text" translatable="yes">Close and Discard</property>
+            <child>
+              <object class="GtkImage" id="discard_and_close_image">
+                <property name="icon_name">user-trash-symbolic</property>
+                <property name="pixel-size">16</property>
+              </object>
+            </child>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="save_and_close_button">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="action_name">cmh.close-and-save</property>
+            <property name="always_show_image">True</property>
+            <property name="tooltip_text" translatable="yes">Close and Save</property>
+            <child>
+              <object class="GtkImage" id="save_and_close_image">
+                <property name="icon_name">document-save-symbolic</property>
+                <property name="pixel-size">16</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+      <packing>
+        <property name="pack_type">end</property>
+      </packing>
+    </child>
+  </template>
+</interface>

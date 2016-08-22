@@ -1,0 +1,627 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk+" version="3.14"/>
+  <template class="ComposerWidget" parent="GtkEventBox">
+    <property name="visible">True</property>
+    <signal name="drag_data_received" handler="on_drag_data_received"/>
+    <signal name="drag_drop" handler="on_drag_drop"/>
+    <signal name="drag_motion" handler="on_drag_motion"/>
+    <signal name="drag_leave" handler="on_drag_leave"/>
+    <child>
+      <object class="GtkBox" id="composer_container">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+        <property name="spacing">2</property>
+        <child>
+          <object class="GtkBox" id="header_area">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox" id="hidden_on_attachment_drag_over">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <child>
+              <object class="GtkBox" id="hidden_on_attachment_drag_over_child">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="orientation">vertical</property>
+                <property name="spacing">6</property>
+                <child>
+                  <object class="GtkGrid" id="recipients">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="margin_start">6</property>
+                    <property name="margin_end">6</property>
+                    <property name="margin_top">6</property>
+                    <property name="row_spacing">0</property>
+                    <property name="column_spacing">6</property>
+                    <child>
+                      <object class="GtkLabel" id="to_label">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="halign">end</property>
+                        <property name="label" translatable="yes" comments="Address(es) e-mail is to be sent to">_To</property>
+                        <property name="use_underline">True</property>
+                        <property name="justify">right</property>
+                        <property name="mnemonic_widget">to_box</property>
+                        <property name="margin_top">6</property>
+                        <style>
+                          <class name="dim-label"/>
+                        </style>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">1</property>
+                        <property name="width">1</property>
+                        <property name="height">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="cc_label">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="halign">end</property>
+                        <property name="label" translatable="yes">_Cc</property>
+                        <property name="use_underline">True</property>
+                        <property name="justify">right</property>
+                        <property name="mnemonic_widget">to_box</property>
+                        <property name="margin_top">6</property>
+                        <style>
+                          <class name="dim-label"/>
+                        </style>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">2</property>
+                        <property name="width">1</property>
+                        <property name="height">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEventBox" id="to_box">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="hexpand">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">1</property>
+                        <property name="width">1</property>
+                        <property name="height">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEventBox" id="cc_box">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="hexpand">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">2</property>
+                        <property name="width">1</property>
+                        <property name="height">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEntry" id="subject_entry">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="hexpand">True</property>
+                        <property name="invisible_char">•</property>
+                        <property name="invisible_char_set">True</property>
+                        <property name="margin_top">6</property>
+                        <signal name="changed" handler="on_subject_changed" swapped="no"/>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">5</property>
+                        <property name="width">1</property>
+                        <property name="height">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="subject_label">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="halign">end</property>
+                        <property name="label" translatable="yes">_Subject</property>
+                        <property name="use_underline">True</property>
+                        <property name="justify">right</property>
+                        <property name="mnemonic_widget">subject_entry</property>
+                        <property name="margin_top">6</property>
+                        <style>
+                          <class name="dim-label"/>
+                        </style>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">5</property>
+                        <property name="width">1</property>
+                        <property name="height">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="bcc_label">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="halign">end</property>
+                        <property name="label" translatable="yes">_Bcc</property>
+                        <property name="use_underline">True</property>
+                        <property name="justify">right</property>
+                        <property name="mnemonic_widget">to_box</property>
+                        <property name="margin_top">6</property>
+                        <style>
+                          <class name="dim-label"/>
+                        </style>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">3</property>
+                        <property name="width">1</property>
+                        <property name="height">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEventBox" id="bcc_box">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="hexpand">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">3</property>
+                        <property name="width">1</property>
+                        <property name="height">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="reply_to_label">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="halign">end</property>
+                        <property name="label" translatable="yes">_Reply-To</property>
+                        <property name="use_underline">True</property>
+                        <property name="justify">right</property>
+                        <property name="mnemonic_widget">to_box</property>
+                        <property name="margin_top">6</property>
+                        <style>
+                          <class name="dim-label"/>
+                        </style>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">4</property>
+                        <property name="width">1</property>
+                        <property name="height">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkEventBox" id="reply_to_box">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="hexpand">True</property>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">4</property>
+                        <property name="width">1</property>
+                        <property name="height">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkLabel" id="from_label">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="halign">end</property>
+                        <property name="use_underline">True</property>
+                        <property name="label" translatable="yes" comments="Geary account mail will be sent from">From</property>
+                        <property name="justify">right</property>
+                        <property name="mnemonic_widget">to_box</property>
+                        <style>
+                          <class name="dim-label"/>
+                        </style>
+                      </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">0</property>
+                        <property name="width">1</property>
+                        <property name="height">1</property>
+                      </packing>
+                    </child>
+                    <child>
+                      <object class="GtkBox" id="from_container">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="orientation">vertical</property>
+                        <child>
+                          <object class="GtkLabel" id="from_single">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="halign">start</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">0</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkComboBoxText" id="from_multiple">
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="entry_text_column">0</property>
+                            <property name="id_column">1</property>
+                          </object>
+                          <packing>
+                            <property name="expand">False</property>
+                            <property name="fill">True</property>
+                            <property name="position">1</property>
+                          </packing>
+                        </child>
+                      </object>
+                      <packing>
+                        <property name="left_attach">1</property>
+                        <property name="top_attach">0</property>
+                        <property name="width">1</property>
+                        <property name="height">1</property>
+                      </packing>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox" id="visible_on_attachment_drag_over">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <child>
+              <object class="GtkBox" id="visible_on_attachment_drag_over_child">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="valign">center</property>
+                <property name="orientation">vertical</property>
+                <property name="spacing">6</property>
+                <child>
+                  <object class="GtkLabel" id="label1">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="valign">center</property>
+                    <property name="label" translatable="yes">Drop files here</property>
+                    <attributes>
+                      <attribute name="weight" value="bold"/>
+                    </attributes>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkLabel" id="label2">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="valign">center</property>
+                    <property name="label" translatable="yes">To add them as attachments</property>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">False</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">True</property>
+                <property name="fill">True</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox" id="composer_toolbar">
+            <property name="visible">True</property>
+            <property name="orientation">horizontal</property>
+            <property name="can_focus">False</property>
+            <property name="margin_start">6</property>
+            <property name="margin_end">6</property>
+            <property name="spacing">6</property>
+            <child>
+              <object class="GtkBox" id="font_style_buttons">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <style>
+                  <class name="linked"/>
+                </style>
+                <child>
+                  <object class="GtkToggleButton" id="bold_button">
+                    <property name="visible" bind-source="bold_button" bind-property="sensitive" />
+                    <property name="can_focus">False</property>
+                    <property name="always_show_image">True</property>
+                    <property name="action_name">cmp.bold</property>
+                    <property name="tooltip_text" translatable="yes">Bold (Ctrl+B)</property>
+                    <child>
+                      <object class="GtkImage" id="bold_image">
+                        <property name="icon_name">format-text-bold-symbolic</property>
+                        <property name="pixel-size">16</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkToggleButton" id="italics_button">
+                    <property name="visible" bind-source="italics_button" bind-property="sensitive" />
+                    <property name="can_focus">False</property>
+                    <property name="action_name">cmp.italic</property>
+                    <property name="always_show_image">True</property>
+                    <property name="tooltip_text" translatable="yes">Italic (Ctrl+I)</property>
+                    <child>
+                      <object class="GtkImage" id="italics_image">
+                        <property name="icon_name">format-text-italic-symbolic</property>
+                        <property name="pixel-size">16</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkToggleButton" id="underline_button">
+                    <property name="visible" bind-source="underline_button" bind-property="sensitive" />
+                    <property name="can_focus">False</property>
+                    <property name="action_name">cmp.underline</property>
+                    <property name="always_show_image">True</property>
+                    <property name="tooltip_text" translatable="yes">Underline (Ctrl+U)</property>
+                    <child>
+                      <object class="GtkImage" id="underline_image">
+                        <property name="icon_name">format-text-underline-symbolic</property>
+                        <property name="pixel-size">16</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkToggleButton" id="strikethrough_button">
+                    <property name="visible" bind-source="strikethrough_button" bind-property="sensitive" />
+                    <property name="can_focus">False</property>
+                    <property name="action_name">cmp.strikethrough</property>
+                    <property name="always_show_image">True</property>
+                    <property name="tooltip_text" translatable="yes">Strikethrough (Ctrl+K)</property>
+                    <child>
+                      <object class="GtkImage" id="strikethrough_image">
+                        <property name="icon_name">format-text-strikethrough-symbolic</property>
+                        <property name="pixel-size">16</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkBox" id="indentation_buttons">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <style>
+                  <class name="linked"/>
+                </style>
+                <child>
+                  <object class="GtkButton" id="indent_button">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="action_name">cmp.indent</property>
+                    <property name="always_show_image">True</property>
+                    <property name="tooltip_text" translatable="yes">Quote text  (Ctrl+])</property>
+                    <child>
+                      <object class="GtkImage" id="indent_image">
+                        <property name="icon_name">format-indent-more-symbolic</property>
+                        <property name="pixel-size">16</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+                <child>
+                  <object class="GtkButton" id="outdent_button">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="action_name">cmp.outdent</property>
+                    <property name="always_show_image">True</property>
+                    <property name="tooltip_text" translatable="yes">Unquote text  (Ctrl+[)</property>
+                    <child>
+                      <object class="GtkImage" id="outdent_image">
+                        <property name="icon_name">format-indent-less-symbolic</property>
+                        <property name="pixel-size">16</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkBox" id="link_buttons">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <style>
+                  <class name="linked"/>
+                </style>
+                <child>
+                  <object class="GtkButton" id="insert_link_button">
+                    <property name="visible" bind-source="insert_link_button" bind-property="sensitive" />
+                    <property name="can_focus">False</property>
+                    <property name="action_name">cmp.insert-link</property>
+                    <property name="always_show_image">True</property>
+                    <property name="tooltip_text" translatable="yes">Link (Ctrl+L)</property>
+                    <child>
+                      <object class="GtkImage" id="insert_link_image">
+                        <property name="icon_name">insert-link-symbolic</property>
+                        <property name="pixel-size">16</property>
+                      </object>
+                    </child>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="remove_format_button">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="always_show_image">True</property>
+                <property name="action_name">cmp.remove-format</property>
+                <property name="tooltip_text" translatable="yes">Remove formatting (Ctrl+Space)</property>
+                <child>
+                  <object class="GtkImage" id="remove_format_image">
+                    <property name="icon_name">format-text-remove-symbolic</property>
+                    <property name="pixel-size">16</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkButton" id="select_dictionary_button">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="action_name">cmp.select-dictionary</property>
+                <property name="always_show_image">True</property>
+                <property name="tooltip_text" translatable="yes">Select spell checking language</property>
+                <child>
+                  <object class="GtkImage" id="select_dictionary_image">
+                    <property name="icon_name">accessories-dictionary-symbolic</property>
+                    <property name="pixel-size">16</property>
+                  </object>
+                </child>
+              </object>
+            </child>
+            <child>
+              <object class="GtkMenuButton" id="menu_button">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+              </object>
+              <packing>
+                <property name="pack_type">end</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkLabel" id="info_label">
+                <property name="visible">True</property>
+                <property name="can_focus">True</property>
+                <style>
+                  <class name="dim-label"/>
+                </style>
+              </object>
+              <packing>
+                <property name="pack_type">end</property>
+              </packing>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">3</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkFrame">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="shadow_type">in</property>
+            <child>
+              <object class="GtkBox" id="message_area">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <child>
+                  <object class="GtkOverlay" id="message_overlay">
+                  <property name="visible">True</property>
+                  <property name="can_focus">False</property>
+                    <child>
+                      <object class="GtkScrolledWindow" id="editor_scrolled">
+                        <property name="visible">True</property>
+                        <property name="can_focus">True</property>
+                        <property name="hscrollbar_policy">automatic</property>
+                        <property name="vscrollbar_policy">automatic</property>
+                        <child>
+                          <placeholder />
+                        </child>
+                      </object>
+                    </child>
+                    <child type="overlay">
+                      <object class="GtkLabel" id="message_overlay_label">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="halign">start</property>
+                        <property name="valign">end</property>
+                        <property name="ellipsize">middle</property>
+                        <signal name="realize" handler="on_message_overlay_label_realize" swapped="no"/>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">True</property>
+                    <property name="fill">True</property>
+                  </packing>
+                </child>
+              </object>
+            </child>
+            <style>
+              <class name="geary-composer-body"/>
+            </style>
+          </object>
+          <packing>
+            <property name="expand">True</property>
+            <property name="fill">True</property>
+            <property name="position">4</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkBox" id="attachments_box">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="margin_start">6</property>
+            <property name="margin_end">6</property>
+            <property name="margin_top">6</property>
+            <property name="margin_bottom">6</property>
+            <property name="orientation">vertical</property>
+            <property name="spacing">6</property>
+            <child>
+              <placeholder/>
+            </child>
+          </object>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">True</property>
+            <property name="position">5</property>
+          </packing>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>
