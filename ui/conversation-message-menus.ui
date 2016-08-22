@@ -38,6 +38,12 @@
         <attribute name="action">msg.copy_selection</attribute>
       </item>
     </section>
+    <section id="context_menu_contact">
+      <item>
+        <attribute name="label" translatable="yes">Search for messages from</attribute>
+        <attribute name="action">msg.search_from</attribute>
+      </item>
+    </section>
     <section id="context_menu_inspector">
       <item>
         <attribute name="label" translatable="yes">_Inspect...</attribute>

@@ -91,6 +91,7 @@ public class ConversationMessage : Gtk.Grid {
     private const string ACTION_OPEN_INSPECTOR = "open_inspector";
     private const string ACTION_OPEN_LINK = "open_link";
     private const string ACTION_SAVE_IMAGE = "save_image";
+    private const string ACTION_SEARCH_FROM = "search_from";
     private const string ACTION_SELECT_ALL = "select_all";
 
 
@@ -158,6 +159,7 @@ public class ConversationMessage : Gtk.Grid {
     private MenuModel context_menu_email;
     private MenuModel context_menu_image;
     private MenuModel context_menu_main;
+    private MenuModel context_menu_contact;
     private MenuModel? context_menu_inspector = null;
 
     // Last known DOM element under the context menu
@@ -195,6 +197,9 @@ public class ConversationMessage : Gtk.Grid {
     /** Fired when the user saves an inline displayed image. */
     public signal void save_image(string? filename, Geary.Memory.Buffer buffer);
 
+    /** Fired when the user activates a specific search shortcut. */
+    public signal void search_activated(string operator, string value);
+
 
     /**
      * Constructs a new view to display an RFC 823 message headers and body.
@@ -231,6 +236,10 @@ public class ConversationMessage : Gtk.Grid {
                 ReplacedImage? replaced_image = get_replaced_image();
                 save_image(replaced_image.filename, replaced_image.buffer);
             });
+        add_action(ACTION_SEARCH_FROM, true, VariantType.STRING)
+            .activate.connect((param) => {
+                search_activated("from", param.get_string());
+            });
         add_action(ACTION_SELECT_ALL, true).activate.connect(() => {
                 web_view.select_all();
             });
@@ -246,6 +255,7 @@ public class ConversationMessage : Gtk.Grid {
         context_menu_email = (MenuModel) builder.get_object("context_menu_email");
         context_menu_image = (MenuModel) builder.get_object("context_menu_image");
         context_menu_main = (MenuModel) builder.get_object("context_menu_main");
+        context_menu_contact = (MenuModel) builder.get_object("context_menu_contact");
         if (Args.inspector) {
             context_menu_inspector =
                 (MenuModel) builder.get_object("context_menu_inspector");
@@ -624,12 +634,18 @@ public class ConversationMessage : Gtk.Grid {
         address_box.child_activated.connect((box, child) => {
                 AddressFlowBoxChild address_child = child as AddressFlowBoxChild;
                 if (address_child != null) {
-                    Menu menu = set_action_param_string(
-                        context_menu_email,
-                        "mailto:" + address_child.address.address
-                    );
+                    string address = address_child.address.address;
+                    Menu model = new Menu();
+                    model.append_section(
+                        null, set_action_param_string(
+                            this.context_menu_email, "mailto:" + address
+                    ));
+                    model.append_section(
+                        null, set_action_param_string(
+                            this.context_menu_contact, address
+                    ));
                     Gtk.Popover popover =
-                        new Gtk.Popover.from_model(child, menu);
+                        new Gtk.Popover.from_model(child, model);
                     popover.set_position(Gtk.PositionType.BOTTOM);
                     popover.show();
                 }

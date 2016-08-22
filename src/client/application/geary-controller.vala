@@ -2730,6 +2730,11 @@ public class GearyController : Geary.BaseObject {
                         }
                     });
                 mview.save_image.connect(on_save_buffer_to_file);
+                mview.search_activated.connect((op, value) => {
+                        string search = op + ":" + value;
+                        show_search_bar(search);
+                        do_search(search);
+                    });
                 return true;
             });
         view.save_attachments.connect(on_save_attachments);
