@@ -544,7 +544,7 @@ public class ConversationEmail : Gtk.Box {
     /**
      * Returns user-selected body HTML from a message, if any.
      */
-    public string? get_body_selection() {
+    public string? get_selection_for_quoting() {
         return (this.body_selection_message != null)
             ? this.body_selection_message.get_selection_for_quoting()
             : null;

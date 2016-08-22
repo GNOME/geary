@@ -118,24 +118,6 @@ public class ConversationListBox : Gtk.ListBox {
     }
 
 
-    /**
-     * Returns the view for the email to be replied to, if any.
-     *
-     * If an email view has selected body text that view will be
-     * returned. Else the last message by sort order will be returned,
-     * if any.
-     */
-    public ConversationEmail? reply_target {
-        get {
-            unowned ConversationEmail? view = this.body_selected_view;
-            if (view == null && this.last_email_row != null) {
-                view = this.last_email_row.view;
-            }
-            return view;
-        }
-    }
-
-
     /** Conversation being displayed. */
     public Geary.App.Conversation conversation { get; private set; }
 
@@ -278,6 +260,34 @@ public class ConversationListBox : Gtk.ListBox {
      */
     public void cancel_load() {
         this.cancellable.cancel();
+    }
+
+    /**
+     * Returns the email view to be replied to, if any.
+     *
+     * If an email view has a visible body and selected text, that
+     * view will be returned. Else the last message by sort order will
+     * be returned, if any.
+     */
+    public ConversationEmail? get_reply_target() {
+        ConversationEmail? view = get_selection_view();
+        if (view == null && this.last_email_row != null) {
+            view = this.last_email_row.view;
+        }
+        return view;
+    }
+
+    /**
+     * Returns the email view with a visible user selection, if any.
+     *
+     * If an email view has selected body text.
+     */
+    public ConversationEmail? get_selection_view() {
+        ConversationEmail? view = this.body_selected_view;
+        if (view != null) {
+            // XXX actually check the selected text is visible
+        }
+        return view;
     }
 
     /**

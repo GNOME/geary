@@ -2199,12 +2199,12 @@ public class GearyController : Geary.BaseObject {
             ConversationListBox? list_view =
                 main_window.conversation_viewer.current_list;
             if (list_view != null) {
-                email_view = list_view.reply_target;
+                email_view = list_view.get_reply_target();
             }
         }
         string? quote = null;
         if (email_view != null) {
-            quote = email_view.get_body_selection();
+            quote = email_view.get_selection_for_quoting();
         }
         create_compose_widget(compose_type, email_view.email, quote);
     }
