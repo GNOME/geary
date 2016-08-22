@@ -456,8 +456,10 @@ public class ConversationListBox : Gtk.ListBox {
 
     /**
      * Applies search term highlighting to all email views.
+     *
+     * Returns true if any were found, else returns false.
      */
-    public void highlight_search_terms(Gee.Set<string>? search_matches) {
+    public bool highlight_search_terms(Gee.Set<string> search_matches) {
         // Webkit's highlighting is ... weird.  In order to actually
         // see all the highlighting you're applying, it seems
         // necessary to start with the shortest string and work up.
@@ -467,10 +469,24 @@ public class ConversationListBox : Gtk.ListBox {
         ordered_matches.add_all(search_matches);
         ordered_matches.sort((a, b) => a.length - b.length);
 
-        message_view_iterator().foreach((msg_view) => {
-                msg_view.highlight_search_terms(search_matches);
-                return true;
+        bool any_found = false;
+        this.foreach((child) => {
+                EmailRow row = (EmailRow) child;
+                bool email_found = false;
+                row.view.message_view_iterator().foreach((msg_view) => {
+                        if (msg_view.highlight_search_terms(search_matches) > 0) {
+                            email_found = true;
+                        }
+                        return true;
+                    });
+                if (email_found) {
+                    row.expand();
+                    any_found = true;
+                } else {
+                    row.collapse();
+                }
             });
+        return any_found;
     }
 
     /**

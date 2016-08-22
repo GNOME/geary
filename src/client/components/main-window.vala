@@ -90,6 +90,8 @@ public class MainWindow : Gtk.ApplicationWindow {
         main_toolbar = new MainToolbar();
         main_toolbar.bind_property("search-open", search_bar, "search-mode-enabled",
             BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
+        main_toolbar.bind_property("find-open", conversation_viewer.conversation_find_bar, "search-mode-enabled",
+            BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
         main_toolbar.show_close_button = true;
         set_titlebar(main_toolbar);
 

@@ -53,7 +53,7 @@ public class ConversationViewer : Gtk.Stack {
     [GtkChild]
     private Gtk.Grid no_conversations_page;
     [GtkChild]
-    internal Gtk.ScrolledWindow conversation_page;
+    private Gtk.Grid conversation_page;
     [GtkChild]
     private Gtk.Grid multiple_conversations_page;
     [GtkChild]
@@ -63,7 +63,20 @@ public class ConversationViewer : Gtk.Stack {
     [GtkChild]
     private Gtk.Grid composer_page;
 
-    private ConversationFindBar conversation_find_bar;
+    [GtkChild]
+    internal Gtk.ScrolledWindow conversation_scroller;
+
+    [GtkChild]
+    internal Gtk.SearchBar conversation_find_bar;
+
+    [GtkChild]
+    internal Gtk.SearchEntry conversation_find_entry;
+
+    [GtkChild]
+    private Gtk.Button conversation_find_next;
+
+    [GtkChild]
+    private Gtk.Button conversation_find_prev;
 
     // State machine setup for search/find modes.
     private Geary.State.MachineDescriptor search_machine_desc = new Geary.State.MachineDescriptor(
@@ -131,6 +144,12 @@ public class ConversationViewer : Gtk.Stack {
         fsm = new Geary.State.Machine(search_machine_desc, mappings, null);
         fsm.set_logging(false);
 
+        this.conversation_find_bar.notify["search-mode-enabled"].connect(
+            on_find_search_started
+         );
+        // XXX Do this in Glade when possible.
+        this.conversation_find_bar.connect_entry(this.conversation_find_entry);
+
         //conversation_find_bar = new ConversationFindBar(web_view);
         //conversation_find_bar.no_show_all = true;
         //conversation_find_bar.close.connect(() => { fsm.issue(SearchEvent.CLOSE_FIND_BAR); });
@@ -158,25 +177,7 @@ public class ConversationViewer : Gtk.Stack {
                 }
             });
         this.composer_page.add(box);
-        set_visible_child(composer_page);
-    }
-
-    /**
-     * Shows the in-conversation search UI.
-     */
-    public void show_find_bar() {
-        fsm.issue(SearchEvent.OPEN_FIND_BAR);
-        conversation_find_bar.focus_entry();
-    }
-
-    /**
-     * Displays the next/previous match for an in-conversation search.
-     */
-    public void find(bool forward) {
-        if (!conversation_find_bar.visible)
-            show_find_bar();
-
-        conversation_find_bar.find(forward);
+        set_visible_child(this.composer_page);
     }
 
     /**
@@ -243,7 +244,7 @@ public class ConversationViewer : Gtk.Stack {
             new Geary.App.EmailStore(account),
             account.information,
             location.special_folder_type == Geary.SpecialFolderType.DRAFTS,
-            conversation_page.get_vadjustment()
+            conversation_scroller.get_vadjustment()
         );
 
         // Need to fire this signal early so the the controller
@@ -283,12 +284,12 @@ public class ConversationViewer : Gtk.Stack {
         viewport.show();
         viewport.add(list);
 
-        this.conversation_page.add(viewport);
+        this.conversation_scroller.add(viewport);
     }
 
     // Remove any existing conversation list, cancelling its loading
     private void remove_current_list() {
-        Gtk.Widget? scrolled_child = this.conversation_page.get_child();
+        Gtk.Widget? scrolled_child = this.conversation_scroller.get_child();
         if (scrolled_child != null) {
             scrolled_child.destroy();
         }
@@ -314,10 +315,10 @@ public class ConversationViewer : Gtk.Stack {
 
     // Find bar opened.
     private uint on_open_find_bar(uint state, uint event, void *user, Object? object) {
-        if (!conversation_find_bar.visible)
-            conversation_find_bar.show();
+        //if (!conversation_find_bar.visible)
+        //    conversation_find_bar.show();
         
-        conversation_find_bar.focus_entry();
+        //conversation_find_bar.focus_entry();
         //web_view.allow_collapsing(false);
         
         return SearchState.FIND;
@@ -336,4 +337,62 @@ public class ConversationViewer : Gtk.Stack {
         // } 
     }
 
+    private void on_find_search_started(Object obj, ParamSpec param) {
+        if (this.conversation_find_bar.get_search_mode()) {
+            if (this.current_list != null) {
+                ConversationEmail? email_view =
+                    this.current_list.get_selection_view();
+                if (email_view != null) {
+                    string text = email_view.get_selection_for_find();
+                    if (text != null) {
+                        this.conversation_find_entry.set_text(text);
+                        this.conversation_find_entry.select_region(0, -1);
+                    }
+                }
+            }
+        }
+    }
+
+    [GtkCallback]
+    private void on_find_search_changed(Gtk.SearchEntry entry) {
+        string search = entry.get_text().strip();
+        bool have_matches = false;
+        if (this.current_list != null) {
+            if (search.length > 0) {
+                // Have a search string
+                Gee.Set<string> search_matches = new Gee.HashSet<string>();
+                search_matches.add(search);
+                have_matches =
+                    this.current_list.highlight_search_terms(search_matches);
+            } else {
+                // Have no search string
+                // if (location is Geary.SearchFolder) {
+                //     // Re-display the search results
+                //     yield this.current_list.load_search_terms(
+                //         (Geary.SearchFolder) location
+                //     );
+                // } else {
+                    this.current_list.unmark_search_terms();
+                // }
+            }
+        }
+        this.conversation_find_next.set_sensitive(have_matches);
+        this.conversation_find_prev.set_sensitive(have_matches);
+    }
+
+    [GtkCallback]
+    private void on_find_next(Gtk.Widget entry) {
+        if (this.current_list != null) {
+            //this.current_list.show_prev_search_term();
+        }
+    }
+
+    [GtkCallback]
+    private void on_find_prev(Gtk.Widget entry) {
+        if (this.current_list != null) {
+            //this.current_list.show_next_search_term();
+        }
+    }
+
 }
+

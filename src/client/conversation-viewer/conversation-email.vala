@@ -551,6 +551,15 @@ public class ConversationEmail : Gtk.Box {
     }
 
     /**
+     * Returns user-selected body text from a message, if any.
+     */
+    public string? get_selection_for_find() {
+        return (this.body_selection_message != null)
+            ? this.body_selection_message.get_selection_for_find()
+            : null;
+    }
+
+    /**
      * Attach an embedded composer to this email view.
      */
     public void attach_composer(ComposerEmbed embed) {

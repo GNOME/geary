@@ -35,8 +35,6 @@ public class GearyController : Geary.BaseObject {
     public const string ACTION_EMPTY_TRASH = "GearyEmptyTrash";
     public const string ACTION_UNDO = "GearyUndo";
     public const string ACTION_FIND_IN_CONVERSATION = "GearyFindInConversation";
-    public const string ACTION_FIND_NEXT_IN_CONVERSATION = "GearyFindNextInConversation";
-    public const string ACTION_FIND_PREVIOUS_IN_CONVERSATION = "GearyFindPreviousInConversation";
     public const string ACTION_ZOOM_IN = "GearyZoomIn";
     public const string ACTION_ZOOM_OUT = "GearyZoomOut";
     public const string ACTION_ZOOM_NORMAL = "GearyZoomNormal";
@@ -51,7 +49,8 @@ public class GearyController : Geary.BaseObject {
     public const string ACTION_SEARCH = "GearySearch";
     public const string ACTION_CONVERSATION_LIST = "GearyConversationList";
     public const string ACTION_TOGGLE_SEARCH = "GearyToggleSearch";
-    
+    public const string ACTION_TOGGLE_FIND = "GearyToggleFind";
+
     public const string PROP_CURRENT_CONVERSATION ="current-conversations";
     
     public const int MIN_CONVERSATION_COUNT = 50;
@@ -474,15 +473,7 @@ public class GearyController : Geary.BaseObject {
             null, on_find_in_conversation_action };
         entries += find_in_conversation;
         add_accelerator("slash", ACTION_FIND_IN_CONVERSATION);
-        
-        Gtk.ActionEntry find_next_in_conversation = { ACTION_FIND_NEXT_IN_CONVERSATION, null, null,
-            "<Ctrl>G", null, on_find_next_in_conversation_action };
-        entries += find_next_in_conversation;
-        
-        Gtk.ActionEntry find_previous_in_conversation = { ACTION_FIND_PREVIOUS_IN_CONVERSATION,
-            null, null, "<Shift><Ctrl>G", null, on_find_previous_in_conversation_action };
-        entries += find_previous_in_conversation;
-        
+
         Gtk.ActionEntry archive_message = { ACTION_ARCHIVE_MESSAGE, ARCHIVE_MESSAGE_ICON_NAME,
             ARCHIVE_MESSAGE_LABEL, "A", null, on_archive_message };
         archive_message.tooltip = ARCHIVE_MESSAGE_TOOLTIP_SINGLE;
@@ -545,6 +536,11 @@ public class GearyController : Geary.BaseObject {
         Gtk.ActionEntry toggle_search = { ACTION_TOGGLE_SEARCH, null, null, null,
             _("Toggle search bar"), null };
         entries += toggle_search;
+
+        // No callback is connected, since we bind the toggle button to the find bar visibility
+        Gtk.ActionEntry toggle_find = { ACTION_TOGGLE_FIND, null, null, null,
+            _("Toggle find bar"), null };
+        entries += toggle_find;
 
         return entries;
     }
@@ -1298,6 +1294,9 @@ public class GearyController : Geary.BaseObject {
     private void on_folder_selected(Geary.Folder? folder) {
         debug("Folder %s selected", folder != null ? folder.to_string() : "(null)");
         this.main_window.conversation_viewer.show_loading();
+        GearyApplication.instance.get_action(
+            ACTION_FIND_IN_CONVERSATION
+        ).set_sensitive(false);
         enable_message_buttons(false);
 
         // If the folder is being unset, clear the message list and exit here.
@@ -1507,6 +1506,9 @@ public class GearyController : Geary.BaseObject {
 
     private void on_conversations_selected(Gee.Set<Geary.App.Conversation> selected) {
         this.selected_conversations = selected;
+        GearyApplication.instance.get_action(
+            ACTION_FIND_IN_CONVERSATION
+            ).set_sensitive(false);
         ConversationViewer viewer = this.main_window.conversation_viewer;
         if (this.current_folder != null && !viewer.is_composer_visible) {
             switch(selected.size) {
@@ -1527,6 +1529,9 @@ public class GearyController : Geary.BaseObject {
                         try {
                             viewer.load_conversation.end(ret);
                             enable_message_buttons(!is_search);
+                            GearyApplication.instance.get_action(
+                                ACTION_FIND_IN_CONVERSATION
+                            ).set_sensitive(true);
                         } catch (Error err) {
                             debug("Unable to load conversation: %s",
                                   err.message);
@@ -2272,11 +2277,14 @@ public class GearyController : Geary.BaseObject {
             if (widget.state == ComposerWidget.ComposerState.NEW ||
                 widget.state == ComposerWidget.ComposerState.PANED) {
                 main_window.conversation_viewer.do_compose(widget);
+                GearyApplication.instance.get_action(
+                    ACTION_FIND_IN_CONVERSATION
+                ).set_sensitive(false);
             } else {
                 ComposerEmbed embed = new ComposerEmbed(
                     referred,
                     widget,
-                    main_window.conversation_viewer.conversation_page
+                    main_window.conversation_viewer.conversation_scroller
                 );
                 if (conversation_view != null) {
                     conversation_view.add_embedded_composer(embed);
@@ -2414,19 +2422,11 @@ public class GearyController : Geary.BaseObject {
     private void on_forward_message_action() {
         create_reply_forward_widget(ComposerWidget.ComposeType.FORWARD, null);
     }
-    
+
     private void on_find_in_conversation_action() {
-        main_window.conversation_viewer.show_find_bar();
+        this.main_window.conversation_viewer.conversation_find_bar.set_search_mode(true);
     }
-    
-    private void on_find_next_in_conversation_action() {
-        main_window.conversation_viewer.find(true);
-    }
-    
-    private void on_find_previous_in_conversation_action() {
-        main_window.conversation_viewer.find(false);
-    }
-    
+
     private void on_archive_message() {
         archive_or_delete_selection_async.begin(true, false, cancellable_folder,
             on_archive_or_delete_selection_finished);

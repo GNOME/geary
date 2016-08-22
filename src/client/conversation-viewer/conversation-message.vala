@@ -465,8 +465,10 @@ public class ConversationMessage : Gtk.Grid {
 
     /**
      * Highlights user search terms in the message view.
+     &
+     * Returns the number of matching search terms.
      */
-    public void highlight_search_terms(Gee.Set<string> search_matches) {
+    public uint highlight_search_terms(Gee.Set<string> search_matches) {
         // XXX Need to highlight subject, sender and recipient matches too
 
         // Remove existing highlights.
@@ -481,11 +483,13 @@ public class ConversationMessage : Gtk.Grid {
         ordered_matches.add_all(search_matches);
         ordered_matches.sort((a, b) => a.length - b.length);
 
+        uint found = 0;
         foreach(string match in ordered_matches) {
-            web_view.mark_text_matches(match, false, 0);
+            found += web_view.mark_text_matches(match, false, 0);
         }
 
         web_view.set_highlight_text_matches(true);
+        return found;
     }
 
     /**
@@ -536,6 +540,28 @@ public class ConversationMessage : Gtk.Grid {
             }
         }
         return quote;
+    }
+
+    /**
+     * Returns the current selection as a string, suitable for find.
+     */
+    internal string? get_selection_for_find() {
+        string? value = null;
+        WebKit.DOM.Document document = web_view.get_dom_document();
+        WebKit.DOM.DOMWindow window = document.get_default_view();
+        WebKit.DOM.DOMSelection selection = window.get_selection();
+
+        if (selection.get_range_count() > 0) {
+            try {
+                WebKit.DOM.Range range = selection.get_range_at(0);
+                value = range.get_text().strip();
+                if (value.length <= 0)
+                    value = null;
+            } catch (Error e) {
+                warning("Could not get selected text from web view: %s", e.message);
+            }
+        }
+        return value;
     }
 
     private SimpleAction add_action(string name, bool enabled, VariantType? type = null) {
