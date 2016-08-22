@@ -224,11 +224,16 @@ public class ConversationMessage : Gtk.Grid {
                 this.context_menu_element = null;
             });
         add_action(ACTION_OPEN_LINK, true, VariantType.STRING)
-            .activate.connect(on_open_link);
+            .activate.connect((param) => {
+                link_activated(param.get_string());
+            });
+        add_action(ACTION_SAVE_IMAGE, true).activate.connect((param) => {
+                ReplacedImage? replaced_image = get_replaced_image();
+                save_image(replaced_image.filename, replaced_image.buffer);
+            });
         add_action(ACTION_SELECT_ALL, true).activate.connect(() => {
                 web_view.select_all();
             });
-        add_action(ACTION_SAVE_IMAGE, true).activate.connect(on_save_image);
 
         insert_action_group("msg", message_actions);
 
@@ -1320,15 +1325,6 @@ public class ConversationMessage : Gtk.Grid {
         Gtk.Clipboard clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD);
         clipboard.set_text(mailto, -1);
         clipboard.store();
-    }
-
-    private void on_open_link(Variant? param) {
-        link_activated(param.get_string());
-    }
-
-    private void on_save_image() {
-        ReplacedImage? replaced_image = get_replaced_image();
-        save_image(replaced_image.filename, replaced_image.buffer);
     }
 
 }

@@ -224,9 +224,6 @@ public class GearyController : Geary.BaseObject {
         main_window.conversation_viewer.conversation_added.connect(
             on_conversation_view_added
         );
-        main_window.conversation_viewer.conversation_removed.connect(
-            on_conversation_view_removed
-        );
         new_messages_monitor = new NewMessagesMonitor(should_notify_new_messages);
         main_window.folder_list.set_new_messages_monitor(new_messages_monitor);
 
@@ -300,9 +297,6 @@ public class GearyController : Geary.BaseObject {
         main_window.search_bar.search_text_changed.disconnect(on_search_text_changed);
         main_window.conversation_viewer.conversation_added.disconnect(
             on_conversation_view_added
-        );
-        main_window.conversation_viewer.conversation_removed.disconnect(
-            on_conversation_view_removed
         );
 
         // hide window while shutting down, as this can take a few seconds under certain conditions
@@ -526,7 +520,10 @@ public class GearyController : Geary.BaseObject {
         entries += zoom_normal;
         add_accelerator("0", ACTION_ZOOM_NORMAL);
 
-        Gtk.ActionEntry search = { ACTION_SEARCH, null, null, "<Ctrl>S", null, on_search };
+        Gtk.ActionEntry search = {
+            ACTION_SEARCH, null, null, "<Ctrl>S", null,
+            () => { show_search_bar(); }
+        };
         entries += search;
 
         Gtk.ActionEntry conversation_list = { ACTION_CONVERSATION_LIST, null, null, "<Ctrl>B", null, on_conversation_list };
@@ -2699,10 +2696,6 @@ public class GearyController : Geary.BaseObject {
         }
     }
 
-    private void on_search() {
-        main_window.search_bar.give_search_focus();
-    }
-
     private void on_conversation_list() {
         main_window.conversation_list_view.grab_focus();
     }
@@ -2713,54 +2706,35 @@ public class GearyController : Geary.BaseObject {
 
     private void on_conversation_view_added(ConversationListBox list) {
         list.email_added.connect(on_conversation_viewer_email_added);
-        list.email_removed.connect(on_conversation_viewer_email_removed);
         list.mark_emails.connect(on_conversation_viewer_mark_emails);
     }
 
-    private void on_conversation_view_removed(ConversationListBox list) {
-        list.email_added.disconnect(on_conversation_viewer_email_added);
-        list.email_removed.disconnect(on_conversation_viewer_email_removed);
-        list.mark_emails.disconnect(on_conversation_viewer_mark_emails);
-    }
-
     private void on_conversation_viewer_email_added(ConversationEmail view) {
+        view.attachments_activated.connect(on_attachments_activated);
         view.reply_to_message.connect(on_reply_to_message);
         view.reply_all_message.connect(on_reply_all_message);
         view.forward_message.connect(on_forward_message);
-        view.link_activated.connect(on_link_activated);
-        view.attachments_activated.connect(on_attachments_activated);
+        view.edit_draft.connect((draft_view) => {
+                create_compose_widget(
+                    ComposerWidget.ComposeType.NEW_MESSAGE,
+                    draft_view.email, null, null, true
+                );
+            });
+        view.message_view_iterator().foreach((mview) => {
+                mview.link_activated.connect((link) => {
+                        if (link.down().has_prefix(
+                                Geary.ComposedEmail.MAILTO_SCHEME)) {
+                            compose_mailto(link);
+                        } else {
+                            open_uri(link);
+                        }
+                    });
+                mview.save_image.connect(on_save_buffer_to_file);
+                return true;
+            });
         view.save_attachments.connect(on_save_attachments);
-        view.edit_draft.connect(on_edit_draft);
         view.view_source.connect(on_view_source);
-        view.save_image.connect(on_save_buffer_to_file);
     }
-
-    private void on_conversation_viewer_email_removed(ConversationEmail view) {
-        view.reply_to_message.disconnect(on_reply_to_message);
-        view.reply_all_message.disconnect(on_reply_all_message);
-        view.forward_message.disconnect(on_forward_message);
-        view.link_activated.disconnect(on_link_activated);
-        view.attachments_activated.disconnect(on_attachments_activated);
-        view.save_attachments.disconnect(on_save_attachments);
-        view.edit_draft.disconnect(on_edit_draft);
-        view.view_source.disconnect(on_view_source);
-        view.save_image.disconnect(on_save_buffer_to_file);
-    }
-
-    private void on_link_activated(string link) {
-        if (link.down().has_prefix(Geary.ComposedEmail.MAILTO_SCHEME)) {
-            compose_mailto(link);
-        } else {
-            open_uri(link);
-        }
-    }
-
-    private void on_edit_draft(ConversationEmail draft_view) {
-        create_compose_widget(
-            ComposerWidget.ComposeType.NEW_MESSAGE, draft_view.email, null, null, true
-        );
-    }
-
 
     private void on_view_source(ConversationEmail email_view) {
         string source = (email_view.email.header.buffer.to_string() +
@@ -2892,7 +2866,14 @@ public class GearyController : Geary.BaseObject {
         
         return ret.size >= 1 ? ret : null;
     }
-    
+
+    private void show_search_bar(string? text = null) {
+        main_window.search_bar.give_search_focus();
+        if (text != null) {
+            main_window.search_bar.set_search_text(text);
+        }
+    }
+
     private void do_search(string search_text) {
         Geary.SearchFolder? folder = null;
         try {

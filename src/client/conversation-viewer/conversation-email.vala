@@ -332,12 +332,6 @@ public class ConversationEmail : Gtk.Box {
         Geary.NamedFlag? to_add, Geary.NamedFlag? to_remove
     );
 
-    /** Fired when the user saves an inline displayed image. */
-    public signal void save_image(string? filename, Geary.Memory.Buffer buffer);
-
-    /** Fired when the user clicks a link in the email. */
-    public signal void link_activated(string link);
-
     /** Fired when the user activates an attachment. */
     public signal void attachments_activated(
         Gee.Collection<Geary.Attachment> attachments
@@ -601,12 +595,6 @@ public class ConversationEmail : Gtk.Box {
         view.remember_remote_images.connect(on_remember_remote_images);
         view.attachment_displayed_inline.connect((id) => {
                 inlined_content_ids.add(id);
-            });
-        view.link_activated.connect((link) => {
-                link_activated(link);
-            });
-        view.save_image.connect((filename, buffer) => {
-                save_image(filename, buffer);
             });
         view.web_view.selection_changed.connect(() => {
                 on_message_selection_changed(view);
