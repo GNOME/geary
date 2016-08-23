@@ -41,6 +41,7 @@
             <property name="app_paintable">True</property>
             <property name="can_focus">False</property>
             <property name="hexpand">True</property>
+            <signal name="notify::search-mode-enabled" handler="on_find_search_started" swapped="no"/>
             <child>
               <object class="GtkGrid">
                 <property name="visible">True</property>

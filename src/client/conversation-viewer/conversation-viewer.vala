@@ -14,25 +14,6 @@ public class ConversationViewer : Gtk.Stack {
 
     private const int SELECT_CONVERSATION_TIMEOUT_MSEC = 100;
 
-    private enum SearchState {
-        // Search/find states.
-        NONE,         // Not in search
-        FIND,         // Find toolbar
-        SEARCH_FOLDER, // Search folder
-        
-        COUNT;
-    }
-    
-    private enum SearchEvent {
-        // User-initated events.
-        RESET,
-        OPEN_FIND_BAR,
-        CLOSE_FIND_BAR,
-        ENTER_SEARCH_FOLDER,
-        
-        COUNT;
-    }
-
     /**
      * The current conversation listbox, if any.
      */
@@ -78,18 +59,15 @@ public class ConversationViewer : Gtk.Stack {
     [GtkChild]
     private Gtk.Button conversation_find_prev;
 
-    // State machine setup for search/find modes.
-    private Geary.State.MachineDescriptor search_machine_desc = new Geary.State.MachineDescriptor(
-        "ConversationViewer search", SearchState.NONE, SearchState.COUNT, SearchEvent.COUNT, null, null); 
-    private Geary.State.Machine fsm;
-
     private uint conversation_timeout_id = 0;
+
 
     /* Emitted when a new conversation list was added to this view. */
     public signal void conversation_added(ConversationListBox list);
 
     /* Emitted when a new conversation list was removed from this view. */
     public signal void conversation_removed(ConversationListBox list);
+
 
     /**
      * Constructs a new conversation view instance.
@@ -123,37 +101,8 @@ public class ConversationViewer : Gtk.Stack {
         );
         this.empty_search_page.add(empty_search);
 
-        // Setup state machine for search/find states.
-        Geary.State.Mapping[] mappings = {
-            new Geary.State.Mapping(SearchState.NONE, SearchEvent.RESET, on_reset),
-            new Geary.State.Mapping(SearchState.NONE, SearchEvent.OPEN_FIND_BAR, on_open_find_bar),
-            new Geary.State.Mapping(SearchState.NONE, SearchEvent.CLOSE_FIND_BAR, on_close_find_bar),
-            new Geary.State.Mapping(SearchState.NONE, SearchEvent.ENTER_SEARCH_FOLDER, on_enter_search_folder),
-            
-            new Geary.State.Mapping(SearchState.FIND, SearchEvent.RESET, on_reset),
-            new Geary.State.Mapping(SearchState.FIND, SearchEvent.OPEN_FIND_BAR, Geary.State.nop),
-            new Geary.State.Mapping(SearchState.FIND, SearchEvent.CLOSE_FIND_BAR, on_close_find_bar),
-            new Geary.State.Mapping(SearchState.FIND, SearchEvent.ENTER_SEARCH_FOLDER, Geary.State.nop),
-            
-            new Geary.State.Mapping(SearchState.SEARCH_FOLDER, SearchEvent.RESET, on_reset),
-            new Geary.State.Mapping(SearchState.SEARCH_FOLDER, SearchEvent.OPEN_FIND_BAR, on_open_find_bar),
-            new Geary.State.Mapping(SearchState.SEARCH_FOLDER, SearchEvent.CLOSE_FIND_BAR, on_close_find_bar),
-            new Geary.State.Mapping(SearchState.SEARCH_FOLDER, SearchEvent.ENTER_SEARCH_FOLDER, Geary.State.nop),
-        };
-        
-        fsm = new Geary.State.Machine(search_machine_desc, mappings, null);
-        fsm.set_logging(false);
-
-        this.conversation_find_bar.notify["search-mode-enabled"].connect(
-            on_find_search_started
-         );
         // XXX Do this in Glade when possible.
         this.conversation_find_bar.connect_entry(this.conversation_find_entry);
-
-        //conversation_find_bar = new ConversationFindBar(web_view);
-        //conversation_find_bar.no_show_all = true;
-        //conversation_find_bar.close.connect(() => { fsm.issue(SearchEvent.CLOSE_FIND_BAR); });
-        //pack_start(conversation_find_bar, false);
     }
 
     /**
@@ -299,44 +248,7 @@ public class ConversationViewer : Gtk.Stack {
         }
     }
 
-    // State reset.
-    private uint on_reset(uint state, uint event, void *user, Object? object) {
-        //if (conversation_find_bar.visible)
-        //    fsm.do_post_transition(() => { conversation_find_bar.hide(); }, user, object);
-        return SearchState.NONE;
-    }
-
-    // Search folder entered.
-    private uint on_enter_search_folder(uint state, uint event, void *user, Object? object) {
-        //search_folder = current_folder as Geary.SearchFolder;
-        //assert(search_folder != null);
-        return SearchState.SEARCH_FOLDER;
-    }
-
-    // Find bar opened.
-    private uint on_open_find_bar(uint state, uint event, void *user, Object? object) {
-        //if (!conversation_find_bar.visible)
-        //    conversation_find_bar.show();
-        
-        //conversation_find_bar.focus_entry();
-        //web_view.allow_collapsing(false);
-        
-        return SearchState.FIND;
-    }
-    
-    // Find bar closed.
-    private uint on_close_find_bar(uint state, uint event, void *user, Object? object) {
-        // if (current_folder is Geary.SearchFolder) {
-        //     highlight_search_terms.begin();
-            
-        //     return SearchState.SEARCH_FOLDER;
-        // } else {
-        //     //web_view.allow_collapsing(true);
-            
-             return SearchState.NONE;
-        // } 
-    }
-
+    [GtkCallback]
     private void on_find_search_started(Object obj, ParamSpec param) {
         if (this.conversation_find_bar.get_search_mode()) {
             if (this.current_list != null) {
