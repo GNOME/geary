@@ -334,26 +334,9 @@ public class ConversationMessage : Gtk.Grid {
      * Shows the complete message and hides the preview headers.
      */
     public void show_message_body(bool include_transitions=true) {
-        Gtk.RevealerTransitionType revealer = preview_revealer.get_transition_type();
-        if (!include_transitions) {
-            preview_revealer.set_transition_type(Gtk.RevealerTransitionType.NONE);
-        }
-        preview_revealer.set_reveal_child(false);
-        preview_revealer.set_transition_type(revealer);
-
-        revealer = header_revealer.get_transition_type();
-        if (!include_transitions) {
-            header_revealer.set_transition_type(Gtk.RevealerTransitionType.NONE);
-        }
-        header_revealer.set_reveal_child(true);
-        header_revealer.set_transition_type(revealer);
-
-        revealer = body_revealer.get_transition_type();
-        if (!include_transitions) {
-            body_revealer.set_transition_type(Gtk.RevealerTransitionType.NONE);
-        }
-        body_revealer.set_reveal_child(true);
-        body_revealer.set_transition_type(revealer);
+        set_revealer(this.preview_revealer, false, include_transitions);
+        set_revealer(this.header_revealer, true, include_transitions);
+        set_revealer(this.body_revealer, true, include_transitions);
     }
 
     /**
@@ -1151,7 +1134,7 @@ public class ConversationMessage : Gtk.Grid {
         }
         return false;
     }
-    
+
     private void assemble_uris(string[] parts, out string full, out string short_) {
         full = parts[1] + parts[2];
         short_ = parts[2];
@@ -1174,6 +1157,17 @@ public class ConversationMessage : Gtk.Grid {
             image = replaced_images.get(replaced_id);
         }
         return image;
+    }
+
+    private inline void set_revealer(Gtk.Revealer revealer,
+                                     bool expand,
+                                     bool use_transition) {
+        Gtk.RevealerTransitionType transition = revealer.get_transition_type();
+        if (!use_transition) {
+            revealer.set_transition_type(Gtk.RevealerTransitionType.NONE);
+        }
+        revealer.set_reveal_child(expand);
+        revealer.set_transition_type(transition);
     }
 
     private static void on_show_quote_clicked(WebKit.DOM.Element element,
