@@ -230,6 +230,7 @@
   <object class="GtkInfoBar" id="draft_infobar">
     <property name="app_paintable">True</property>
     <property name="can_focus">False</property>
+    <property name="no_show_all">True</property>
     <property name="message_type">warning</property>
     <child internal-child="action_area">
       <object class="GtkButtonBox">
@@ -304,6 +305,7 @@
   <object class="GtkInfoBar" id="not_saved_infobar">
     <property name="app_paintable">True</property>
     <property name="can_focus">False</property>
+    <property name="no_show_all">True</property>
     <property name="message_type">warning</property>
     <child internal-child="action_area">
       <object class="GtkButtonBox">
