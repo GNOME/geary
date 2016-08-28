@@ -1,3 +1,35 @@
+Geary 0.11.2 - 29 August 2016
+-----------------------------
+
+  * Improve showing RTL email with no direction set as RTL (#713062)
+  * Improve composer not showing RTL messages as RTL (#713607)
+  * Fix crash when archiving, deleting, etc. specific messages (#769010)
+  * Fix crash from invalid window sizes in settings (#730356)
+  * Fix crash connecting to tiscali.it/poste.it & other Dovecot (#66509)
+  * Fix maximised state not being saved (#755359)
+  * Fix unresponsive after sending long line starting with '>' (#768642)
+  * Fix warning/crash when unable to contact notification server (#768911)
+  * Fix using incorrect From address restoring from a draft (#768419)
+  * Fix format=flowed when sending non-Latin text (#753528)
+  * Fix encoding problems with non ASCII/Latin-1/UTF-8 headers (#753870)
+  * Don't double spaces after address autocomplete in composer (#755589)
+    -- Timo Kluck
+  * Add Language headers to po files
+    -- Piotr Drąg
+  * Don't rely on a the GEdit app icon for the draft folder (#753672)
+  * Fix a number of edge-case critical warnings/errors
+  * Updated UI translations:
+    Andika Triwidada (id)
+    Balázs Meskó (hu)
+    Jiri Grönroos (fi)
+    Marek Černocký (cs)
+    Piotr Drąg (hi) (hu) (ja) (km) (ms) (nl)(pl) (sl) (sr@latin)
+    Tiago Santos (pt)
+    Мирослав Николић (sr) (sr@latin)
+  * Updated User Guild translations:
+    Marek Černocký (cs)
+    Piotr Drąg (pl)
+
 Geary 0.11.1 - 27 June 2016
 ---------------------------
 
