@@ -1,4 +1,4 @@
-geary (0.11.2-1~xenial1) unstable; urgency=medium
+geary (0.11.2-1~xenial1) xenial; urgency=medium
 
   * Improve showing RTL email with no direction set as RTL (#713062)
   * Improve composer not showing RTL messages as RTL (#713607)
