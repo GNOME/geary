@@ -322,24 +322,21 @@ public bool comp_char_arr_slice(char[] array, uint start, string comp) {
 }
 
 /**
- * Uses a GMime.FilterBest to determine the best charset and encoding.
+ * Uses a GMime.FilterBest to determine the best charset.
  *
  * WARNING: This call does not perform async I/O, meaning it will loop on the
  * stream without relinquishing control to the event loop.  Use with
  * caution.
  */
-public void get_best(GMime.Stream in_stream,
-                     out string charset,
-                     out GMime.ContentEncoding encoding) {
+public string get_best_charset(GMime.Stream in_stream) {
     GMime.FilterBest filter = new GMime.FilterBest(
-        GMime.FilterBestFlags.CHARSET |
-        GMime.FilterBestFlags.ENCODING
+        GMime.FilterBestFlags.CHARSET
     );
     GMime.StreamFilter out_stream = new GMime.StreamFilter(new GMime.StreamNull());
     out_stream.add(filter);
     in_stream.write_to_stream(out_stream);
-    charset = filter.charset();
-    encoding = filter.encoding(GMime.EncodingConstraint.7BIT);
+    in_stream.reset();
+    return filter.charset();
 }
 
 /**
@@ -356,6 +353,7 @@ public GMime.ContentEncoding get_best_encoding(GMime.Stream in_stream) {
     GMime.StreamFilter out_stream = new GMime.StreamFilter(new GMime.StreamNull());
     out_stream.add(filter);
     in_stream.write_to_stream(out_stream);
+    in_stream.reset();
     return filter.encoding(GMime.EncodingConstraint.7BIT);
 }
 
