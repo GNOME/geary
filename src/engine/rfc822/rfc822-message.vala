@@ -996,7 +996,6 @@ public class Geary.RFC822.Message : BaseObject {
         GMime.StreamMem stream = new GMime.StreamMem.with_byte_array(byte_array);
         stream.set_owner(false);
 
-        GMime.StreamFilter stream_filter = new GMime.StreamFilter(stream);
         if (to_utf8) {
             // Assume encoded text, convert to unencoded UTF-8
             GMime.StreamFilter stream_filter = new GMime.StreamFilter(stream);
