@@ -17,7 +17,7 @@ msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2016-09-05 16:41+0200\n"
-"PO-Revision-Date: 2016-09-05 16:41+0200\n"
+"PO-Revision-Date: 2016-09-05 16:44+0200\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <community-poland@mozilla.org>\n"
 "Language: pl\n"
@@ -57,7 +57,7 @@ msgstr ""
 
 #: ../desktop/geary.appdata.xml.in.h:5
 msgid "Geary's features include:"
-msgstr "Funkcje program Geary:"
+msgstr "Funkcje programu Geary:"
 
 #: ../desktop/geary.appdata.xml.in.h:6
 msgid "Quick email account setup"
@@ -65,7 +65,7 @@ msgstr "Szybkie ustawianie konta poczty"
 
 #: ../desktop/geary.appdata.xml.in.h:7
 msgid "Shows related messages together in conversations"
-msgstr "Wyświetlanie powiązanych wiadomości w wątku"
+msgstr "Wyświetlanie powiązanych wiadomości w jednym wątku"
 
 #: ../desktop/geary.appdata.xml.in.h:8
 msgid "Fast, full text and keyword search"
