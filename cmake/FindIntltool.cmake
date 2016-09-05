@@ -12,6 +12,13 @@ else (INTLTOOL_MERGE_EXECUTABLE)
 endif (INTLTOOL_MERGE_EXECUTABLE)
 
 if (INTLTOOL_MERGE_FOUND)
+    macro (INTLTOOL_MERGE_APPDATA appstream_name po_dir)
+        add_custom_target (${appstream_name}.in ALL
+            ${INTLTOOL_MERGE_EXECUTABLE} --xml-style ${CMAKE_SOURCE_DIR}/${po_dir}
+                ${CMAKE_CURRENT_SOURCE_DIR}/${appstream_name}.in ${appstream_name}
+        )
+        install (FILES ${CMAKE_CURRENT_BINARY_DIR}/{$appstream_name} DESTINATION ${CMAKE_INSTALL_PREFIX}/share/appdata)
+    endmacro (INTLTOOL_MERGE_DESKTOP appstream_name po_dir)
     macro (INTLTOOL_MERGE_DESKTOP desktop_id po_dir)
         add_custom_target (geary.desktop ALL
             ${INTLTOOL_MERGE_EXECUTABLE} --desktop-style ${CMAKE_SOURCE_DIR}/${po_dir}

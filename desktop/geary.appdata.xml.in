@@ -5,26 +5,26 @@
   <id>geary.desktop</id>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>LGPL-2.1+</project_license>
-  <name>Geary</name>
-  <summary>Send and receive email</summary>
+  <_name>Geary</_name>
+  <_summary>Send and receive email</_summary>
   <description>
-    <p>
+    <_p>
       Geary is an email application built around conversations, for
       the GNOME 3 desktop. It allows you to read, find and send email
       with a straightforward, modern interface.
-    </p>
-    <p>
+    </_p>
+    <_p>
       Conversations allow you to read a complete discussion without
       having to find and click from message to message.
-    </p>
-    <p>Geary's features include:</p>
+    </_p>
+    <_p>Geary's features include:</_p>
     <ul>
-      <li>Quick email account setup</li>
-      <li>Shows related messages together in conversations</li>
-      <li>Fast, full text and keyword search</li>
-      <li>Full-featured HTML and plain text message composer</li>
-      <li>Desktop notification of new mail</li>
-      <li>Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers</li>
+      <_li>Quick email account setup</_li>
+      <_li>Shows related messages together in conversations</_li>
+      <_li>Fast, full text and keyword search</_li>
+      <_li>Full-featured HTML and plain text message composer</_li>
+      <_li>Desktop notification of new mail</_li>
+      <_li>Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers</_li>
     </ul>
   </description>
   <url type="homepage">https://wiki.gnome.org/Apps/Geary</url>

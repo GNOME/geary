@@ -2,14 +2,13 @@
 # Build and install geary.desktop
 #
 
-install(FILES geary.appdata.xml DESTINATION share/appdata)
-
 include (FindIntltool)
 include (FindDesktopFileValidate)
 if (INTLTOOL_MERGE_FOUND)
+    INTLTOOL_MERGE_APPDATA (geary.appdata.xml po)
     INTLTOOL_MERGE_DESKTOP (geary.desktop po)
     INTLTOOL_MERGE_AUTOSTART_DESKTOP (geary-autostart.desktop po)
-    
+
     if (DESKTOP_VALIDATE)
         if (DESKTOP_FILE_VALIDATE_FOUND)
             VALIDATE_DESKTOP_FILE (geary.desktop)
