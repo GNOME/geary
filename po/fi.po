@@ -11,8 +11,8 @@ msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=internationalization\n"
-"POT-Creation-Date: 2016-08-20 17:30+0000\n"
-"PO-Revision-Date: 2016-08-21 12:59+0300\n"
+"POT-Creation-Date: 2016-09-05 02:15+0000\n"
+"PO-Revision-Date: 2016-09-05 20:36+0300\n"
 "Last-Translator: Jiri Grönroos <jiri.gronroos+l10n@iki.fi>\n"
 "Language-Team: suomi <lokalisointi-lista@googlegroups.com>\n"
 "Language: fi\n"
@@ -22,30 +22,96 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Gtranslator 2.91.7\n"
 
-#: ../desktop/geary.desktop.in.h:1 ../desktop/geary-autostart.desktop.in.h:1
+#: ../desktop/geary.appdata.xml.in.h:1 ../desktop/geary.desktop.in.h:1
+#: ../desktop/geary-autostart.desktop.in.h:1
 msgid "Geary"
 msgstr "Geary"
 
-#: ../desktop/geary.desktop.in.h:2 ../desktop/geary-autostart.desktop.in.h:2
+#: ../desktop/geary.appdata.xml.in.h:2 ../desktop/geary.desktop.in.h:4
+#: ../desktop/geary-autostart.desktop.in.h:4
+msgid "Send and receive email"
+msgstr "Lähetä ja vastaanota sähköpostia"
+
+#: ../desktop/geary.appdata.xml.in.h:3
+msgid ""
+"Geary is an email application built around conversations, for the GNOME 3 "
+"desktop. It allows you to read, find and send email with a straightforward, "
+"modern interface."
+msgstr ""
+"Geary on sähköpostisovellus Gnome-työpöydälle, joka keskittyy "
+"keskusteluihin. Sen avulla voit lukea, etsiä ja lähettää sähköpostia "
+"modernin käyttöliittymän kautta."
+
+#: ../desktop/geary.appdata.xml.in.h:4
+msgid ""
+"Conversations allow you to read a complete discussion without having to find "
+"and click from message to message."
+msgstr ""
+"Keskusteluiden avulla voit lukea koko viestiketjun ilman, että joudut "
+"napsauttamaan viestistä toiseen itse."
+
+#: ../desktop/geary.appdata.xml.in.h:5
+msgid "Geary's features include:"
+msgstr "Gearyn ominaisuuksiin kuuluu muun muassa:"
+
+#: ../desktop/geary.appdata.xml.in.h:6
+msgid "Quick email account setup"
+msgstr "Nopea sähköpostitilin asetusten teko"
+
+#: ../desktop/geary.appdata.xml.in.h:7
+msgid "Shows related messages together in conversations"
+msgstr "Näyttää toisiinsa liittyvät viestit yhdessä keskustelumuodossa"
+
+#: ../desktop/geary.appdata.xml.in.h:8
+msgid "Fast, full text and keyword search"
+msgstr "Nopea haku koko tekstin ja avainsanojen tuella"
+
+#: ../desktop/geary.appdata.xml.in.h:9
+msgid "Full-featured HTML and plain text message composer"
+msgstr "Monipuolinen HTML- ja raakatekstilähetys"
+
+#: ../desktop/geary.appdata.xml.in.h:10
+#| msgid "Show _notifications for new mail"
+msgid "Desktop notification of new mail"
+msgstr "Työpöytäilmoitukset uusista viesteistä"
+
+#: ../desktop/geary.appdata.xml.in.h:11
+msgid "Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers"
+msgstr ""
+"Yhteensopiva GMailin, Yahoo! Mailin, Outlook.comin ja muiden IMAP-"
+"palvelinten kanssa"
+
+#: ../desktop/geary.desktop.in.h:2
+#| msgid "Gmail"
+msgid "Email"
+msgstr "Sähköposti"
+
+#: ../desktop/geary.desktop.in.h:3
+#| msgid "Geary Mail"
+msgid "Geary Email"
+msgstr "Geary-sähköposti"
+
+#. semicolons, end line with a semicolon.
+#: ../desktop/geary.desktop.in.h:6
+msgid "Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;"
+msgstr "Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;sähköposti;"
+
+#: ../desktop/geary.desktop.in.h:7
+msgid "Compose Message"
+msgstr "Lähetä viesti"
+
+#: ../desktop/geary-autostart.desktop.in.h:2
 #: ../src/client/application/geary-application.vala:18
 msgid "Mail Client"
 msgstr "Sähköpostisovellus"
 
-#: ../desktop/geary.desktop.in.h:3 ../desktop/geary-autostart.desktop.in.h:3
+#: ../desktop/geary-autostart.desktop.in.h:3
 msgid "Geary Mail"
 msgstr "Geary-sähköposti"
 
-#: ../desktop/geary.desktop.in.h:4 ../desktop/geary-autostart.desktop.in.h:4
-msgid "Send and receive email"
-msgstr "Lähetä ja vastaanota sähköpostia"
-
-#: ../desktop/geary.desktop.in.h:5 ../desktop/geary-autostart.desktop.in.h:5
+#: ../desktop/geary-autostart.desktop.in.h:5
 msgid "Email;E-mail;Mail;"
 msgstr "Email;E-mail;Mail;Sähköposti;Maili;posti;"
-
-#: ../desktop/geary.desktop.in.h:6
-msgid "Compose Message"
-msgstr "Lähetä viesti"
 
 #: ../desktop/geary-attach.contract.in.h:1
 msgid "Send by email"
@@ -1089,7 +1155,7 @@ msgstr "Näytä lä_hde"
 #. Generate the attachment table.
 #. / Placeholder filename for attachments with no filename.
 #: ../src/client/conversation-viewer/conversation-viewer.vala:2268
-#: ../src/engine/rfc822/rfc822-utils.vala:366
+#: ../src/engine/rfc822/rfc822-utils.vala:364
 msgid "none"
 msgstr "ei mitään"
 
@@ -1350,7 +1416,7 @@ msgid "%A"
 msgstr "%A"
 
 #: ../src/client/util/util-email.vala:30
-#: ../src/engine/rfc822/rfc822-message.vala:832
+#: ../src/engine/rfc822/rfc822-message.vala:808
 msgid "(no subject)"
 msgstr "(ei aihetta)"
 
@@ -1992,7 +2058,6 @@ msgid "Attach File"
 msgstr "Liitä tiedosto"
 
 #: ../ui/composer.glade.h:49
-#| msgid "Attach File"
 msgid "Attach File (Ctrl+T)"
 msgstr "Liitä tiedosto (Ctrl+T)"
 
@@ -2005,7 +2070,6 @@ msgid "Include Original Attachments"
 msgstr "Sisällytä alkuperäiset liitteet"
 
 #: ../ui/composer.glade.h:52
-#| msgid "Enable _spell checking"
 msgid "Select spell checking language"
 msgstr "Valitse oikoluvun kieli"
 
