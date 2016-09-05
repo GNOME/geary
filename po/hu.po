@@ -10,9 +10,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
-"product=geary&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2016-07-29 19:16+0000\n"
-"PO-Revision-Date: 2016-07-31 12:12+0200\n"
+"product=geary&keywords=I18N+L10N&component=internationalization\n"
+"POT-Creation-Date: 2016-09-05 02:15+0000\n"
+"PO-Revision-Date: 2016-09-05 09:22+0200\n"
 "Last-Translator: Meskó Balázs <meskobalazs@gmail.com>\n"
 "Language-Team: Hungarian <openscope at googlegroups dot com>\n"
 "Language: hu\n"
@@ -22,30 +22,93 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 1.8.8\n"
 
-#: ../desktop/geary.desktop.in.h:1 ../desktop/geary-autostart.desktop.in.h:1
+#: ../desktop/geary.appdata.xml.in.h:1 ../desktop/geary.desktop.in.h:1
+#: ../desktop/geary-autostart.desktop.in.h:1
 msgid "Geary"
 msgstr "Geary"
 
-#: ../desktop/geary.desktop.in.h:2 ../desktop/geary-autostart.desktop.in.h:2
+#: ../desktop/geary.appdata.xml.in.h:2 ../desktop/geary.desktop.in.h:4
+#: ../desktop/geary-autostart.desktop.in.h:4
+msgid "Send and receive email"
+msgstr "E-mailek küldése és fogadása"
+
+#: ../desktop/geary.appdata.xml.in.h:3
+msgid ""
+"Geary is an email application built around conversations, for the GNOME 3 "
+"desktop. It allows you to read, find and send email with a straightforward, "
+"modern interface."
+msgstr ""
+"A Geary egy e-mail alkalmazás, amely a társalgások köré szerveződik, és a "
+"GNOME 3 asztalhoz készült. Segítségével e-maileket olvashat, kereshet és "
+"küldhet egy lényegre törő és modern felületen."
+
+#: ../desktop/geary.appdata.xml.in.h:4
+msgid ""
+"Conversations allow you to read a complete discussion without having to find "
+"and click from message to message."
+msgstr ""
+"A társalgások segítségével teljes beszélgetéseket olvashat el anélkül, hogy "
+"egyesével végig kellene kattintania az üzeneteken."
+
+#: ../desktop/geary.appdata.xml.in.h:5
+msgid "Geary's features include:"
+msgstr "A Geary néhány funkciója:"
+
+#: ../desktop/geary.appdata.xml.in.h:6
+msgid "Quick email account setup"
+msgstr "Gyors e-mailfiók beállítás"
+
+#: ../desktop/geary.appdata.xml.in.h:7
+msgid "Shows related messages together in conversations"
+msgstr "A kapcsolódó üzeneteket együtt jeleníti meg a beszélgetésekben"
+
+#: ../desktop/geary.appdata.xml.in.h:8
+msgid "Fast, full text and keyword search"
+msgstr "Gyors, teljes szöveges és kulcsszavas keresés"
+
+#: ../desktop/geary.appdata.xml.in.h:9
+msgid "Full-featured HTML and plain text message composer"
+msgstr "Teljes funkcionalitású HTML és egyszerű szöveges üzenetszerkesztő"
+
+#: ../desktop/geary.appdata.xml.in.h:10
+msgid "Desktop notification of new mail"
+msgstr "Asztali értesítések új levél érkezésekor"
+
+#: ../desktop/geary.appdata.xml.in.h:11
+msgid "Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers"
+msgstr ""
+"Kompatibilis a GMaillel, a Yahoo! Maillel, az Outlook.commal és más IMAP "
+"kiszolgálókkal"
+
+#: ../desktop/geary.desktop.in.h:2
+msgid "Email"
+msgstr "E-mail"
+
+#: ../desktop/geary.desktop.in.h:3
+msgid "Geary Email"
+msgstr "Geary levelező"
+
+#. semicolons, end line with a semicolon.
+#: ../desktop/geary.desktop.in.h:6
+msgid "Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;"
+msgstr "Levél;Levelezés;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;"
+
+#: ../desktop/geary.desktop.in.h:7
+msgid "Compose Message"
+msgstr "Levél írása"
+
+#: ../desktop/geary-autostart.desktop.in.h:2
 #: ../src/client/application/geary-application.vala:18
 msgid "Mail Client"
 msgstr "Levelezőkliens"
 
-#: ../desktop/geary.desktop.in.h:3 ../desktop/geary-autostart.desktop.in.h:3
+#: ../desktop/geary-autostart.desktop.in.h:3
 msgid "Geary Mail"
 msgstr "Geary levelező"
 
-#: ../desktop/geary.desktop.in.h:4 ../desktop/geary-autostart.desktop.in.h:4
-msgid "Send and receive email"
-msgstr "E-mailek küldése és fogadása"
-
-#: ../desktop/geary.desktop.in.h:5 ../desktop/geary-autostart.desktop.in.h:5
+#: ../desktop/geary-autostart.desktop.in.h:5
 msgid "Email;E-mail;Mail;"
 msgstr "Email;E-mail;Levél;"
-
-#: ../desktop/geary.desktop.in.h:6
-msgid "Compose Message"
-msgstr "Levél írása"
 
 #: ../desktop/geary-attach.contract.in.h:1
 msgid "Send by email"
@@ -399,7 +462,7 @@ msgstr "Új levél írása (Ctrl+N, N)"
 
 #. Reply to a message.
 #: ../src/client/application/geary-controller.vala:451
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1885
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1896
 msgid "_Reply"
 msgstr "_Válasz"
 
@@ -417,7 +480,7 @@ msgstr "Válasz mindenkinek (Ctrl+Shift+R, Shift+R)"
 
 #. Forward a message.
 #: ../src/client/application/geary-controller.vala:462
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1895
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1906
 msgid "_Forward"
 msgstr "T_ovábbítás"
 
@@ -734,7 +797,7 @@ msgstr[1] "%i találat (körbeért)"
 msgid "not found"
 msgstr "nincs találat"
 
-#: ../src/client/components/main-window.vala:359
+#: ../src/client/components/main-window.vala:372
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -797,7 +860,7 @@ msgstr "_Eltávolítás"
 
 #. Select all.
 #: ../src/client/components/stock.vala:32
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1351
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1358
 msgid "Select _All"
 msgstr "Ö_sszes kijelölése"
 
@@ -842,93 +905,93 @@ msgstr ""
 "önéletrajzot|önéletrajzom|önéletrajzomat|.doc|.docx|.pdf|.xls|.xlsx|.ppt|."
 "pptx|.rtf|.pps|.odt|.ods|.odp|.odg|.odb"
 
-#: ../src/client/composer/composer-widget.vala:1116
-#: ../src/client/composer/composer-widget.vala:1120
+#: ../src/client/composer/composer-widget.vala:1108
+#: ../src/client/composer/composer-widget.vala:1112
 msgid "Do you want to discard this message?"
 msgstr "El szeretné dobni ezt a levelet?"
 
-#: ../src/client/composer/composer-widget.vala:1276
+#: ../src/client/composer/composer-widget.vala:1268
 msgid "Send message with an empty subject and body?"
 msgstr "Elküldi a levelet üres tárggyal és törzzsel?"
 
-#: ../src/client/composer/composer-widget.vala:1278
+#: ../src/client/composer/composer-widget.vala:1270
 msgid "Send message with an empty subject?"
 msgstr "Elküldi a levelet üres tárggyal?"
 
-#: ../src/client/composer/composer-widget.vala:1280
+#: ../src/client/composer/composer-widget.vala:1272
 msgid "Send message with an empty body?"
 msgstr "Elküldi a levelet üres törzzsel?"
 
-#: ../src/client/composer/composer-widget.vala:1282
+#: ../src/client/composer/composer-widget.vala:1274
 msgid "Send message without an attachment?"
 msgstr "Elküldi a levelet melléklet nélkül?"
 
-#: ../src/client/composer/composer-widget.vala:1544
+#: ../src/client/composer/composer-widget.vala:1530
 msgid "Cannot add attachment"
 msgstr "Nem sikerült mellékletet hozzáadni"
 
-#: ../src/client/composer/composer-widget.vala:1555
+#: ../src/client/composer/composer-widget.vala:1541
 #, c-format
 msgid "\"%s\" could not be found."
 msgstr "„%s” nem található."
 
-#: ../src/client/composer/composer-widget.vala:1562
+#: ../src/client/composer/composer-widget.vala:1548
 #, c-format
 msgid "\"%s\" is a folder."
 msgstr "„%s” egy mappa."
 
-#: ../src/client/composer/composer-widget.vala:1569
+#: ../src/client/composer/composer-widget.vala:1555
 #, c-format
 msgid "\"%s\" is an empty file."
 msgstr "„%s” egy üres fájl."
 
-#: ../src/client/composer/composer-widget.vala:1583
+#: ../src/client/composer/composer-widget.vala:1569
 #, c-format
 msgid "\"%s\" could not be opened for reading."
 msgstr "„%s” nem nyitható meg olvasásra."
 
-#: ../src/client/composer/composer-widget.vala:1590
+#: ../src/client/composer/composer-widget.vala:1576
 #, c-format
 msgid "\"%s\" already attached for delivery."
 msgstr "„%s” már csatolva van a küldeményhez."
 
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
-#: ../src/client/composer/composer-widget.vala:1599
+#: ../src/client/composer/composer-widget.vala:1585
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: ../src/client/composer/composer-widget.vala:1660
+#: ../src/client/composer/composer-widget.vala:1646
 msgid "To: "
 msgstr "Címzett: "
 
-#: ../src/client/composer/composer-widget.vala:1663
+#: ../src/client/composer/composer-widget.vala:1649
 msgid "Cc: "
 msgstr "Másolat: "
 
-#: ../src/client/composer/composer-widget.vala:1666
+#: ../src/client/composer/composer-widget.vala:1652
 msgid "Bcc: "
 msgstr "Titkos másolat: "
 
-#: ../src/client/composer/composer-widget.vala:1669
+#: ../src/client/composer/composer-widget.vala:1655
 msgid "Reply-To: "
 msgstr "Válaszcím: "
 
-#: ../src/client/composer/composer-widget.vala:1902
+#: ../src/client/composer/composer-widget.vala:1888
 msgid "Select Color"
 msgstr "Szín kiválasztása"
 
 #. Displayed in the From dropdown to indicate an "alternate email address"
 #. for an account.  The first printf argument will be the alternate email
 #. address, and the second will be the account's primary email address.
-#: ../src/client/composer/composer-widget.vala:2349
+#: ../src/client/composer/composer-widget.vala:2335
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%1$s ezen keresztül: %2$s"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: ../src/client/composer/composer-widget.vala:2391
+#: ../src/client/composer/composer-widget.vala:2377
 msgid "_From:"
 msgstr "_Feladó:"
 
@@ -940,172 +1003,172 @@ msgstr "Több nyelv keresése"
 msgid "Me"
 msgstr "Én"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:413
+#: ../src/client/conversation-viewer/conversation-viewer.vala:414
 msgid "No conversations selected."
 msgstr "Nincs beszélgetés kiválasztva."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:415
+#: ../src/client/conversation-viewer/conversation-viewer.vala:416
 #, c-format
 msgid "%u conversation selected."
 msgid_plural "%u conversations selected."
 msgstr[0] "%u beszélgetés kijelölve."
 msgstr[1] "%u beszélgetés kijelölve."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:444
+#: ../src/client/conversation-viewer/conversation-viewer.vala:446
 msgid "No search results found."
 msgstr "Nincsenek találatok."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:446
+#: ../src/client/conversation-viewer/conversation-viewer.vala:448
 msgid "No conversations in folder."
 msgstr "Nincsenek beszélgetések a mappában."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:714
+#: ../src/client/conversation-viewer/conversation-viewer.vala:720
 msgid "This message contains remote images."
 msgstr "Ez a levél távoli képeket tartalmaz."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:714
+#: ../src/client/conversation-viewer/conversation-viewer.vala:720
 msgid "Show Images"
 msgstr "Képek megjelenítése"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:715
+#: ../src/client/conversation-viewer/conversation-viewer.vala:721
 msgid "Always Show From Sender"
 msgstr "Mindig jelenítse meg a feladótól"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:739
+#: ../src/client/conversation-viewer/conversation-viewer.vala:745
 msgid "Edit Draft"
 msgstr "Piszkozat szerkesztése"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:832
+#: ../src/client/conversation-viewer/conversation-viewer.vala:838
 msgid "From:"
 msgstr "Feladó:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:835
+#: ../src/client/conversation-viewer/conversation-viewer.vala:841
 msgid "To:"
 msgstr "Címzett:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:838
+#: ../src/client/conversation-viewer/conversation-viewer.vala:844
 msgid "Cc:"
 msgstr "Másolat:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:841
+#: ../src/client/conversation-viewer/conversation-viewer.vala:847
 msgid "Bcc:"
 msgstr "Titkos másolat:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:844
+#: ../src/client/conversation-viewer/conversation-viewer.vala:850
 msgid "Subject:"
 msgstr "Tárgy:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:847
+#: ../src/client/conversation-viewer/conversation-viewer.vala:853
 msgid "Date:"
 msgstr "Dátum:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1166
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1173
 #, c-format
 msgid "%u read message"
 msgid_plural "%u read messages"
 msgstr[0] "%u olvasott levél"
 msgstr[1] "%u olvasott levél"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1298
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1305
 #, c-format
 msgid "This message was sent successfully, but could not be saved to %s."
 msgstr ""
 "Ez a levél sikeresen el lett küldve, de nem sikerült elmenteni ide: %s."
 
 #. Add a menu item for copying the current selection.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1324
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1331
 #: ../ui/composer.glade.h:4
 msgid "_Copy"
 msgstr "_Másolás"
 
 #. Add a menu item for copying the address.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1332
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1339
 msgid "Copy _Email Address"
 msgstr "_E-mail cím másolása"
 
 #. Add a menu item for copying the link.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1337
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1344
 #: ../ui/composer.glade.h:17
 msgid "Copy _Link"
 msgstr "_Hivatkozás másolása"
 
 #. Select message.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1345
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1352
 msgid "Select _Message"
 msgstr "_Levél kijelölése"
 
 #. Inspect.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1357
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1364
 msgid "_Inspect"
 msgstr "_Vizsgálat"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1584
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1595
 msgid "This link appears to go to"
 msgstr "Úgy tűnik, ez a hivatkozás ide mutat"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1585
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1596
 msgid "but actually goes to"
 msgstr "de valójában ide ugrik"
 
 #. If href doesn't look like a URL, something is fishy, so warn the user
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1640
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1651
 msgid " (Invalid?)"
 msgstr " (Érvénytelen?)"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1746
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1757
 msgid "_Save Image As..."
 msgstr "_Kép mentése másként…"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1850
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1861
 msgid "_Save As..."
 msgstr "M_entés másként…"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1855
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1866
 msgid "Save All A_ttachments..."
 msgstr "Minden _melléklet mentése…"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1875
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1886
 msgid "Save A_ttachment..."
 msgid_plural "Save All A_ttachments..."
 msgstr[0] "M_elléklet mentése…"
 msgstr[1] "Minden m_elléklet mentése…"
 
 #. Reply to all on a message.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1890
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1901
 msgid "Reply to _All"
 msgstr "_Válasz mindenkinek"
 
 #. Mark as read/unread.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1907
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1918
 msgid "_Mark as Read"
 msgstr "_Megjelölés olvasottként"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1911
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1922
 msgid "_Mark as Unread"
 msgstr "_Megjelölés olvasatlanként"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1917
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1928
 msgid "Mark Unread From _Here"
 msgstr "Megjelölés olvasatlanként _innentől"
 
 #. Separator.
 #. View original message source.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1932
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1943
 msgid "_View Source"
 msgstr "_Forrás megtekintése"
 
 #. Generate the attachment table.
 #. / Placeholder filename for attachments with no filename.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:2256
-#: ../src/engine/rfc822/rfc822-utils.vala:392
+#: ../src/client/conversation-viewer/conversation-viewer.vala:2268
+#: ../src/engine/rfc822/rfc822-utils.vala:364
 msgid "none"
 msgstr "nincs"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:2391
+#: ../src/client/conversation-viewer/conversation-viewer.vala:2403
 msgid "Failed to open default text editor."
 msgstr "Nem sikerült megnyitni az alapértelmezett szövegszerkesztőt."
 
-#: ../src/client/conversation-viewer/conversation-web-view.vala:322
+#: ../src/client/conversation-viewer/conversation-web-view.vala:319
 #, c-format
 msgid "%s - Conversation Inspector"
 msgstr "%s - Beszélgetés felügyelő"
@@ -1361,7 +1424,7 @@ msgid "%A"
 msgstr "%A"
 
 #: ../src/client/util/util-email.vala:30
-#: ../src/engine/rfc822/rfc822-message.vala:825
+#: ../src/engine/rfc822/rfc822-message.vala:808
 msgid "(no subject)"
 msgstr "(nincs tárgy)"
 
