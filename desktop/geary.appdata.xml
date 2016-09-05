@@ -1,33 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Copyright 2016 Software Freedom Conservancy Inc. -->
+<!-- Copyright 2016 Michael Gratton <mike@vee.net> -->
 <component type="desktop">
   <id>geary.desktop</id>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>LGPL-2.1+</project_license>
   <name>Geary</name>
-  <summary>Lightweight mail client</summary>
+  <summary>Send and receive email</summary>
   <description>
     <p>
-      Geary is a mail application for GNOME designed to let you manage your email
-      quickly and effortlessly.
-      Its interface is based on conversations, so you can read an entire
-      discussion without having to click from message to message.
-      Geary is still in development and has a limited but growing set of features.
+      Geary is an email application built around conversations, for
+      the GNOME 3 desktop. It allows you to read, find and send email
+      with a straightforward, modern interface.
     </p>
     <p>
-      Geary is designed to integrate with the GNOME desktop and is completely free.
+      Conversations allow you to read a complete discussion without
+      having to find and click from message to message.
     </p>
+    <p>Geary's features include:</p>
     <ul>
-      <li>Lightweight mail client with full IMAP support</li>
-      <li>Mail grouped into conversations, not a tree of threads</li>
-      <li>As-you-type searching</li>
-      <li>Desktop notifications</li>
-      <li>Multiple account support</li>
-      <li>Inline HTML composer that saves drafts to the server</li>
-      <li>Works with Gmail, Yahoo! Mail, Outlook.com (experimental), and other popular IMAP servers</li>
+      <li>Quick email account setup</li>
+      <li>Shows related messages together in conversations</li>
+      <li>Fast, full text and keyword search</li>
+      <li>Full-featured HTML and plain text message composer</li>
+      <li>Desktop notification of new mail</li>
+      <li>Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers</li>
     </ul>
   </description>
   <url type="homepage">https://wiki.gnome.org/Apps/Geary</url>
+  <url type="faq">https://wiki.gnome.org/Apps/Geary/FAQ</url>
   <url type="bugtracker">https://bugzilla.gnome.org/enter_bug.cgi?product=geary</url>
   <url type="donation">http://www.gnome.org/friends/</url>
   <screenshots>
@@ -35,10 +36,15 @@
       <image>http://yorba.org/geary/geary.png</image>
     </screenshot>
   </screenshots>
-  <update_contact>geary@yorba.org</update_contact>
+  <translation type="gettext">geary</translation>
+  <update_contact>geary-list@gnome.org</update_contact>
   <project_group>GNOME</project_group>
   <kudos>
     <kudo>AppMenu</kudo>
+    <kudo>HiDpiIcon</kudo>
+    <kudo>HighContrast</kudo>
     <kudo>ModernToolkit</kudo>
+    <kudo>Notifications</kudo>
+    <kudo>UserDocs</kudo>
   </kudos>
 </component>

@@ -5,14 +5,18 @@
          xmlns:gnome="http://api.gnome.org/doap-extensions#"
          xmlns="http://usefulinc.com/ns/doap#">
 
-  <name xml:lang="en">geary</name>
-  <shortdesc xml:lang="en">Email client</shortdesc>
-  <description>Geary is an IMAP email client built for the GNOME desktop environment.  It
-    allows you to read and send email with a simple, modern interface.</description>
+  <name>Geary</name>
+  <short-name>geary</short-name>
+  <shortdesc xml:lang="en">Send and receive email</shortdesc>
+  <description xml:lang="en">Geary is an email application built
+around conversations, for the GNOME 3 desktop. It allows you to
+read, find and send email with a straightforward, modern
+interface.</description>
 
   <homepage rdf:resource="https://wiki.gnome.org/Apps/Geary" />
   <mailing-list rdf:resource="https://mail.gnome.org/mailman/listinfo/geary-list" />
   <bug-database rdf:resource="https://bugzilla.gnome.org/browse.cgi?product=geary" />
+  <download-page rdf:resource="https://download.gnome.org/sources/geary/"/>
   <category rdf:resource="http://api.gnome.org/doap-extensions#apps" />
   <programming-language>Vala</programming-language>
 
