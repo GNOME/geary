@@ -16,8 +16,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-08-19 18:58+0200\n"
-"PO-Revision-Date: 2016-08-19 18:59+0200\n"
+"POT-Creation-Date: 2016-09-05 16:41+0200\n"
+"PO-Revision-Date: 2016-09-05 16:41+0200\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <community-poland@mozilla.org>\n"
 "Language: pl\n"
@@ -27,30 +27,94 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10 "
 "|| n%100>=20) ? 1 : 2);\n"
 
-#: ../desktop/geary.desktop.in.h:1 ../desktop/geary-autostart.desktop.in.h:1
+#: ../desktop/geary.appdata.xml.in.h:1 ../desktop/geary.desktop.in.h:1
+#: ../desktop/geary-autostart.desktop.in.h:1
 msgid "Geary"
 msgstr "Geary"
 
-#: ../desktop/geary.desktop.in.h:2 ../desktop/geary-autostart.desktop.in.h:2
+#: ../desktop/geary.appdata.xml.in.h:2 ../desktop/geary.desktop.in.h:4
+#: ../desktop/geary-autostart.desktop.in.h:4
+msgid "Send and receive email"
+msgstr "Wysyłanie i odbieranie poczty"
+
+#: ../desktop/geary.appdata.xml.in.h:3
+msgid ""
+"Geary is an email application built around conversations, for the GNOME 3 "
+"desktop. It allows you to read, find and send email with a straightforward, "
+"modern interface."
+msgstr ""
+"Geary to nowoczesny klient poczty dla środowiska GNOME 3 zbudowany wokół "
+"wątków. Umożliwia czytanie, wyszukiwanie i wysyłanie wiadomości za pomocą "
+"prostego, nowoczesnego interfejsu."
+
+#: ../desktop/geary.appdata.xml.in.h:4
+msgid ""
+"Conversations allow you to read a complete discussion without having to find "
+"and click from message to message."
+msgstr ""
+"Wątki umożliwiają czytanie pełnych dyskusji bez potrzeby wyszukiwania "
+"i klikania poszczególnych wiadomości."
+
+#: ../desktop/geary.appdata.xml.in.h:5
+msgid "Geary's features include:"
+msgstr "Funkcje program Geary:"
+
+#: ../desktop/geary.appdata.xml.in.h:6
+msgid "Quick email account setup"
+msgstr "Szybkie ustawianie konta poczty"
+
+#: ../desktop/geary.appdata.xml.in.h:7
+msgid "Shows related messages together in conversations"
+msgstr "Wyświetlanie powiązanych wiadomości w wątku"
+
+#: ../desktop/geary.appdata.xml.in.h:8
+msgid "Fast, full text and keyword search"
+msgstr "Szybkie wyszukiwanie w wiadomościach i słowach kluczowych"
+
+#: ../desktop/geary.appdata.xml.in.h:9
+msgid "Full-featured HTML and plain text message composer"
+msgstr "Wiele funkcji tworzenia wiadomości HTML i w zwykłym tekście"
+
+#: ../desktop/geary.appdata.xml.in.h:10
+msgid "Desktop notification of new mail"
+msgstr "Powiadomienia o nowych wiadomościach na pulpicie"
+
+#: ../desktop/geary.appdata.xml.in.h:11
+msgid "Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers"
+msgstr ""
+"Zgodność z serwisami Gmail, Yahoo! Mail, Outlook.com i innymi serwerami IMAP"
+
+#: ../desktop/geary.desktop.in.h:2
+msgid "Email"
+msgstr "Poczta"
+
+#: ../desktop/geary.desktop.in.h:3
+msgid "Geary Email"
+msgstr "Klient poczty Geary"
+
+#. Translators: These are desktop search terms. Do not translate semicolons, end line with a semicolon.
+#: ../desktop/geary.desktop.in.h:6
+msgid "Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;"
+msgstr ""
+"Poczta;Mail;E-mail;Email;Emajl;Emejl;Imail;Imejl;Imajl;Mejl;Majl;Wiadomości;"
+"IMAP;Gmail;Dżimejl;Dżimajl;Yahoo;Jahu;Hotmail;Hotmejl;Outlook;Ałtluk;"
+
+#: ../desktop/geary.desktop.in.h:7
+msgid "Compose Message"
+msgstr "Utwórz wiadomość"
+
+#: ../desktop/geary-autostart.desktop.in.h:2
 #: ../src/client/application/geary-application.vala:18
 msgid "Mail Client"
 msgstr "Klient poczty"
 
-#: ../desktop/geary.desktop.in.h:3 ../desktop/geary-autostart.desktop.in.h:3
+#: ../desktop/geary-autostart.desktop.in.h:3
 msgid "Geary Mail"
 msgstr "Klient poczty Geary"
 
-#: ../desktop/geary.desktop.in.h:4 ../desktop/geary-autostart.desktop.in.h:4
-msgid "Send and receive email"
-msgstr "Wysyłanie i odbieranie wiadomości e-mail"
-
-#: ../desktop/geary.desktop.in.h:5 ../desktop/geary-autostart.desktop.in.h:5
+#: ../desktop/geary-autostart.desktop.in.h:5
 msgid "Email;E-mail;Mail;"
 msgstr "Email;E-mail;Mail;Poczta;Skrzynka;Wiadomość;Wiadomości;mejl;majl;"
-
-#: ../desktop/geary.desktop.in.h:6
-msgid "Compose Message"
-msgstr "Utwórz wiadomość"
 
 #: ../desktop/geary-attach.contract.in.h:1
 msgid "Send by email"
@@ -1105,7 +1169,7 @@ msgstr "_Wyświetl źródło"
 #. Generate the attachment table.
 #. / Placeholder filename for attachments with no filename.
 #: ../src/client/conversation-viewer/conversation-viewer.vala:2268
-#: ../src/engine/rfc822/rfc822-utils.vala:366
+#: ../src/engine/rfc822/rfc822-utils.vala:364
 msgid "none"
 msgstr "brak"
 
@@ -1376,7 +1440,7 @@ msgid "%A"
 msgstr "%A"
 
 #: ../src/client/util/util-email.vala:30
-#: ../src/engine/rfc822/rfc822-message.vala:832
+#: ../src/engine/rfc822/rfc822-message.vala:808
 msgid "(no subject)"
 msgstr "(brak tematu)"
 
