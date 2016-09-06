@@ -212,14 +212,6 @@ public class ConversationViewer : Gtk.Stack {
         }
     }
 
-    /**
-     * Sets the currently visible page of the stack.
-     */
-    private new void set_visible_child(Gtk.Widget widget) {
-        debug("Showing: %s\n", widget.get_name());
-        base.set_visible_child(widget);
-    }
-
     // Add a new conversation list to the UI
     private void add_new_list(ConversationListBox list) {
         this.current_list = list;
@@ -246,6 +238,22 @@ public class ConversationViewer : Gtk.Stack {
             this.conversation_removed(this.current_list);
             this.current_list = null;
         }
+    }
+
+    /**
+     * Sets the currently visible page of the stack.
+     */
+    private new void set_visible_child(Gtk.Widget widget) {
+        debug("Showing: %s\n", widget.get_name());
+        if (widget != this.conversation_page &&
+            get_visible_child() == this.conversation_page) {
+            // By removing the current list, any load it is currently
+            // performing is also cancelled, which is important to
+            // avoid a possible crit warning when switching folders,
+            // etc.
+            remove_current_list();
+        }
+        base.set_visible_child(widget);
     }
 
     [GtkCallback]

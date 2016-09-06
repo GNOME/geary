@@ -256,13 +256,6 @@ public class ConversationListBox : Gtk.ListBox {
     }
 
     /**
-     * Cancel all loading activity for the conversation.
-     */
-    public void cancel_load() {
-        this.cancellable.cancel();
-    }
-
-    /**
      * Returns the email view to be replied to, if any.
      *
      * If an email view has a visible body and selected text, that
