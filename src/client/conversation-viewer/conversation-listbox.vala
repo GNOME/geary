@@ -278,7 +278,12 @@ public class ConversationListBox : Gtk.ListBox {
     public ConversationEmail? get_selection_view() {
         ConversationEmail? view = this.body_selected_view;
         if (view != null) {
-            // XXX actually check the selected text is visible
+            if (view.is_collapsed) {
+                // A collapsed email can't be visible
+                view = null;
+            } else {
+                // XXX check the selected text is actually on screen
+            }
         }
         return view;
     }
