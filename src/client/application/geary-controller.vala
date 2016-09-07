@@ -118,7 +118,6 @@ public class GearyController : Geary.BaseObject {
     private Libnotify? libnotify = null;
     private uint select_folder_timeout_id = 0;
     private int64 next_folder_select_allowed_usec = 0;
-    private Geary.Folder? folder_to_select = null;
     private Geary.Nonblocking.Mutex select_folder_mutex = new Geary.Nonblocking.Mutex();
     private Geary.Account? account_to_select = null;
     private Geary.Folder? previous_non_search_folder = null;
@@ -1290,58 +1289,51 @@ public class GearyController : Geary.BaseObject {
 
     private void on_folder_selected(Geary.Folder? folder) {
         debug("Folder %s selected", folder != null ? folder.to_string() : "(null)");
-        this.main_window.conversation_viewer.show_loading();
-        GearyApplication.instance.get_action(
-            ACTION_FIND_IN_CONVERSATION
-        ).set_sensitive(false);
-        enable_message_buttons(false);
-
-        // If the folder is being unset, clear the message list and exit here.
         if (folder == null) {
-            current_folder = null;
+            this.current_folder = null;
             main_window.conversation_list_view.set_model(null);
             main_window.main_toolbar.folder = null;
             folder_selected(null);
+        } else if (folder != this.current_folder) {
+            this.main_window.conversation_viewer.show_loading();
+            GearyApplication.instance.get_action(
+                ACTION_FIND_IN_CONVERSATION
+            ).set_sensitive(false);
+            enable_message_buttons(false);
 
-            return;
-        }
-        
-        folder_to_select = folder;
-        
-        // To prevent the user from selecting folders too quickly, we prevent additional selection
-        // changes to occur until after a timeout has expired from the last one
-        int64 now = get_monotonic_time();
-        int64 diff = now - next_folder_select_allowed_usec;
-        if (diff < SELECT_FOLDER_TIMEOUT_USEC) {
-            // only start timeout if another timeout is not running ... this means the user can
-            // click madly and will see the last clicked-on folder 100ms after the first one was
-            // clicked on
-            if (select_folder_timeout_id == 0)
-                select_folder_timeout_id = Timeout.add((uint) (diff / 1000), on_select_folder_timeout);
-        } else {
-            do_select_folder.begin(folder_to_select, on_select_folder_completed);
-            folder_to_select = null;
-            
-            next_folder_select_allowed_usec = now + SELECT_FOLDER_TIMEOUT_USEC;
+            // To prevent the user from selecting folders too quickly,
+            // we prevent additional selection changes to occur until
+            // after a timeout has expired from the last one
+            int64 now = get_monotonic_time();
+            int64 diff = now - this.next_folder_select_allowed_usec;
+            if (diff < SELECT_FOLDER_TIMEOUT_USEC) {
+                // only start timeout if another timeout is not
+                // running ... this means the user can click madly and
+                // will see the last clicked-on folder 100ms after the
+                // first one was clicked on
+                if (this.select_folder_timeout_id == 0) {
+                    this.select_folder_timeout_id = Timeout.add(
+                        (uint) (diff / 1000),
+                        () => {
+                            this.select_folder_timeout_id = 0;
+                            this.next_folder_select_allowed_usec = 0;
+                            if (folder != this.current_folder) {
+                                do_select_folder.begin(
+                                    folder, on_select_folder_completed
+                                );
+                            }
+                            return false;
+                        });
+                }
+            } else {
+                do_select_folder.begin(folder, on_select_folder_completed);
+                this.next_folder_select_allowed_usec =
+                    now + SELECT_FOLDER_TIMEOUT_USEC;
+            }
         }
     }
-    
-    private bool on_select_folder_timeout() {
-        select_folder_timeout_id = 0;
-        next_folder_select_allowed_usec = 0;
-        
-        if (folder_to_select != null)
-            do_select_folder.begin(folder_to_select, on_select_folder_completed);
-        
-        folder_to_select = null;
-        
-        return false;
-    }
-    
+
     private async void do_select_folder(Geary.Folder folder) throws Error {
-        if (folder == current_folder)
-            return;
-        
         debug("Switching to %s...", folder.to_string());
         
         closed_folder();
@@ -1429,7 +1421,7 @@ public class GearyController : Geary.BaseObject {
         
         debug("Switched to %s", folder.to_string());
     }
-    
+
     private void on_scan_error(Error err) {
         debug("Scan error: %s", err.message);
     }
