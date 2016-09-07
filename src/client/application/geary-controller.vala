@@ -1510,14 +1510,13 @@ public class GearyController : Geary.BaseObject {
                 // Cancel existing avatar loads before loading new
                 // convo since that will start loading more avatars
                 avatar_session.flush_queue();
-                bool is_search = this.current_folder is Geary.SearchFolder;
                 viewer.load_conversation.begin(
                     Geary.Collection.get_first(selected),
                     this.current_folder,
                     (obj, ret) => {
                         try {
                             viewer.load_conversation.end(ret);
-                            enable_message_buttons(!is_search);
+                            enable_message_buttons(true);
                             GearyApplication.instance.get_action(
                                 ACTION_FIND_IN_CONVERSATION
                             ).set_sensitive(true);
