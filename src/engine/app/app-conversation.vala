@@ -186,13 +186,15 @@ public class Geary.App.Conversation : BaseObject {
         
         return email;
     }
-    
+
     public bool is_in_current_folder(Geary.EmailIdentifier id) {
         Gee.Collection<Geary.FolderPath>? paths = path_map.get(id);
-        
-        return (paths != null && paths.contains(owner.folder.path));
+
+        return (paths != null &&
+                owner != null &&
+                paths.contains(owner.folder.path));
     }
-    
+
     /**
      * Return all Message IDs associated with the conversation.
      */
