@@ -501,6 +501,9 @@
                 <property name="position">0</property>
               </packing>
             </child>
+            <style>
+              <class name="geary-message-body"/>
+            </style>
           </object>
         </child>
       </object>

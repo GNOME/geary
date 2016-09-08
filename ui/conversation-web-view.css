@@ -6,6 +6,10 @@
  * General HTML style.
  */
 
+* {
+  transition: height 0.25s;
+}
+
 html {
   /* Trigger CSS 2.1 § 10.6.7 to get a shrink-wrapped height. */
   position: absolute !important;
