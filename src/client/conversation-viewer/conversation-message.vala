@@ -367,7 +367,8 @@ public class ConversationMessage : Gtk.Grid {
                 )
             );
             session.queue_message(message, (session, message) => {
-                    if (message.status_code == 200) {
+                    if (message.status_code == 200 &&
+                        !load_cancellable.is_cancelled()) {
                         set_avatar(message.response_body.data);
                     }
                 });
