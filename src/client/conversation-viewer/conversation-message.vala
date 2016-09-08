@@ -1293,6 +1293,12 @@ public class ConversationMessage : Gtk.Grid {
         this.body.trigger_tooltip_query();
     }
 
+    [GtkCallback]
+    private bool on_link_popover_activated() {
+        this.link_popover.hide();
+        return Gdk.EVENT_PROPAGATE;
+    }
+
     private void on_selection_changed() {
         bool has_selection = false;
         if (web_view.has_selection()) {
