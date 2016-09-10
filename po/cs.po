@@ -12,8 +12,8 @@ msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=internationalization\n"
-"POT-Creation-Date: 2016-08-17 13:01+0000\n"
-"PO-Revision-Date: 2016-08-19 14:49+0200\n"
+"POT-Creation-Date: 2016-09-05 02:15+0000\n"
+"PO-Revision-Date: 2016-09-10 09:09+0200\n"
 "Last-Translator: Marek Černocký <marek@manet.cz>\n"
 "Language-Team: čeština <gnome-cs-list@gnome.org>\n"
 "Language: cs\n"
@@ -23,30 +23,94 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 "X-Generator: Gtranslator 2.91.7\n"
 
-#: ../desktop/geary.desktop.in.h:1 ../desktop/geary-autostart.desktop.in.h:1
+#: ../desktop/geary.appdata.xml.in.h:1 ../desktop/geary.desktop.in.h:1
+#: ../desktop/geary-autostart.desktop.in.h:1
 msgid "Geary"
 msgstr "Geary"
 
-#: ../desktop/geary.desktop.in.h:2 ../desktop/geary-autostart.desktop.in.h:2
+#: ../desktop/geary.appdata.xml.in.h:2 ../desktop/geary.desktop.in.h:4
+#: ../desktop/geary-autostart.desktop.in.h:4
+msgid "Send and receive email"
+msgstr "Odesílejte a přijímejte e-maily"
+
+#: ../desktop/geary.appdata.xml.in.h:3
+msgid ""
+"Geary is an email application built around conversations, for the GNOME 3 "
+"desktop. It allows you to read, find and send email with a straightforward, "
+"modern interface."
+msgstr ""
+"Geary je poštovní aplikace pro uživatelské prostředí GNOME 3, která se "
+"soustředí na konverzace jako celek. Umožňuje číst, vyhledávat a odesílat e-"
+"maily v přímočarém a moderním prostředí."
+
+#: ../desktop/geary.appdata.xml.in.h:4
+msgid ""
+"Conversations allow you to read a complete discussion without having to find "
+"and click from message to message."
+msgstr ""
+"Díky zaměření na konverzace můžete číst ucelené diskuze bez nutnosti "
+"vyhledávat jednotlivé navazující zprávy a klikat na ně."
+
+#: ../desktop/geary.appdata.xml.in.h:5
+msgid "Geary's features include:"
+msgstr "Mezi funkcemi Geary najdete:"
+
+#: ../desktop/geary.appdata.xml.in.h:6
+msgid "Quick email account setup"
+msgstr "Rychlé nastavení poštovního účtu"
+
+#: ../desktop/geary.appdata.xml.in.h:7
+msgid "Shows related messages together in conversations"
+msgstr "Zobrazení souvisejících zprávy dohromady v podobě konverzace"
+
+#: ../desktop/geary.appdata.xml.in.h:8
+msgid "Fast, full text and keyword search"
+msgstr "Rychlé vyhledávání v celém textu a na základě klíčových slov"
+
+#: ../desktop/geary.appdata.xml.in.h:9
+msgid "Full-featured HTML and plain text message composer"
+msgstr "Plnohodnotný editor zpráv v HTML i prostém textu"
+
+#: ../desktop/geary.appdata.xml.in.h:10
+#| msgid "Show _notifications for new mail"
+msgid "Desktop notification of new mail"
+msgstr "Upozornění na nové zprávy přímo v uživatelském prostředí"
+
+#: ../desktop/geary.appdata.xml.in.h:11
+msgid "Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers"
+msgstr "Kompatibilitu s GMail, Yahoo! Mail, Outlook.com a dalšími servery IMAP"
+
+#: ../desktop/geary.desktop.in.h:2
+#| msgid "Gmail"
+msgid "Email"
+msgstr "E-mail"
+
+#: ../desktop/geary.desktop.in.h:3
+#| msgid "Geary Mail"
+msgid "Geary Email"
+msgstr "Pošta Geary"
+
+#. semicolons, end line with a semicolon.
+#: ../desktop/geary.desktop.in.h:6
+msgid "Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;"
+msgstr "pošta;mail;e-mail;elektronická pošta;imap;gmail;yahoo;hotmail;outlook;"
+
+#: ../desktop/geary.desktop.in.h:7
+msgid "Compose Message"
+msgstr "Napsat zprávu"
+
+#: ../desktop/geary-autostart.desktop.in.h:2
 #: ../src/client/application/geary-application.vala:18
 msgid "Mail Client"
 msgstr "Poštovní klient"
 
-#: ../desktop/geary.desktop.in.h:3 ../desktop/geary-autostart.desktop.in.h:3
+#: ../desktop/geary-autostart.desktop.in.h:3
 msgid "Geary Mail"
 msgstr "Pošta Geary"
 
-#: ../desktop/geary.desktop.in.h:4 ../desktop/geary-autostart.desktop.in.h:4
-msgid "Send and receive email"
-msgstr "Odesílejte a přijímejte e-maily"
-
-#: ../desktop/geary.desktop.in.h:5 ../desktop/geary-autostart.desktop.in.h:5
+#: ../desktop/geary-autostart.desktop.in.h:5
 msgid "Email;E-mail;Mail;"
 msgstr "email;e-mail;mail;pošta;e-pošta;zpráva;zprávy;"
-
-#: ../desktop/geary.desktop.in.h:6
-msgid "Compose Message"
-msgstr "Napsat zprávu"
 
 #: ../desktop/geary-attach.contract.in.h:1
 msgid "Send by email"
@@ -1091,7 +1155,7 @@ msgstr "_Zobrazit zdroj"
 #. Generate the attachment table.
 #. / Placeholder filename for attachments with no filename.
 #: ../src/client/conversation-viewer/conversation-viewer.vala:2268
-#: ../src/engine/rfc822/rfc822-utils.vala:366
+#: ../src/engine/rfc822/rfc822-utils.vala:364
 msgid "none"
 msgstr "žádný"
 
@@ -1362,7 +1426,7 @@ msgid "%A"
 msgstr "%A"
 
 #: ../src/client/util/util-email.vala:30
-#: ../src/engine/rfc822/rfc822-message.vala:832
+#: ../src/engine/rfc822/rfc822-message.vala:808
 msgid "(no subject)"
 msgstr "(bez předmětu)"
 
