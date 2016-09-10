@@ -21,7 +21,7 @@
 public class ConversationListBox : Gtk.ListBox {
 
     /** Fields that must be available for display as a conversation. */
-    public const Geary.Email.Field REQUIRED_FIELDS =
+    private const Geary.Email.Field REQUIRED_FIELDS =
         Geary.Email.Field.HEADER
         | Geary.Email.Field.BODY
         | Geary.Email.Field.ORIGINATORS
@@ -29,7 +29,8 @@ public class ConversationListBox : Gtk.ListBox {
         | Geary.Email.Field.SUBJECT
         | Geary.Email.Field.DATE
         | Geary.Email.Field.FLAGS
-        | Geary.Email.Field.PREVIEW;
+        | Geary.Email.Field.PREVIEW
+        | Geary.ComposedEmail.REQUIRED_REPLY_FIELDS;
 
     // Offset from the top of the list box which emails views will
     // scrolled to, so the user can see there are additional messages
@@ -198,61 +199,59 @@ public class ConversationListBox : Gtk.ListBox {
 
     public async void load_conversation()
         throws Error {
-        // Fetch full emails.
-        Gee.Collection<Geary.Email>? emails_to_add =
+        EmailRow? first_expanded_row = null;
+
+        // Fetch full emails from the conversation
+        Gee.Collection<Geary.Email> full_emails =
             yield list_full_emails_async(
                 this.conversation.get_emails(
                     Geary.App.Conversation.Ordering.SENT_DATE_ASCENDING
-                ),
-                this.cancellable
+                )
             );
 
-        if (emails_to_add != null) {
-            foreach (Geary.Email email in emails_to_add) {
-                if (this.cancellable.is_cancelled()) {
-                    return;
+        // Add them all
+        foreach (Geary.Email full_email in full_emails) {
+            if (this.cancellable.is_cancelled()) {
+                return;
+            }
+            if (!this.id_to_row.contains(full_email.id)) {
+                EmailRow row = add_email(full_email);
+                if (first_expanded_row == null && row.is_expanded) {
+                    first_expanded_row = row;
+                    yield first_expanded_row.view.start_loading(
+                        this.cancellable
+                    );
                 }
-                yield add_email(
-                    email, conversation.is_in_current_folder(email.id)
-                );
             }
         }
 
-        if (this.cancellable.is_cancelled()) {
-            return;
-        }
-
-        // Work out what the first expanded row is. We can't do this
-        // in the foreach above since that is not adding messages in
-        // order.
-        EmailRow? first_expanded_row = null;
-        this.foreach((child) => {
-                if (first_expanded_row == null) {
-                    EmailRow row = (EmailRow) child;
-                    row.should_scroll.connect(scroll_to);
-                    if (row.is_expanded) {
-                        first_expanded_row = row;
-                    }
-                }
-            });
-
-        if (this.last_email_row != null) {
-            // The last email should always be expanded so the user
-            // isn't presented with a list of collapsed headers when a
-            // conversation has no unread messages.
-            this.last_email_row.expand(true);
-
+        if (this.last_email_row != null && !this.cancellable.is_cancelled()) {
+            // The last row should always be expanded
+            this.last_email_row.expand();
             if (first_expanded_row == null) {
                 first_expanded_row = this.last_email_row;
+                yield this.last_email_row.view.start_loading(
+                    this.cancellable
+                );
             }
 
-            // The first expanded row (i.e. first unread or simply the
-            // last message) should always be scrolled to the top of
-            // the visible area.
+            // Ensure we scroll to the first expanded roll when it
+            // finishes loading
+            first_expanded_row.should_scroll.connect(scroll_to);
             first_expanded_row.enable_should_scroll();
-        }
 
-        debug("Conversation loading complete");
+            // Start everything else loading
+            this.foreach((child) => {
+                    if (!this.cancellable.is_cancelled()) {
+                        EmailRow row = (EmailRow) child;
+                        if (row != first_expanded_row) {
+                            row.view.start_loading.begin(this.cancellable);
+                        }
+                    }
+                });
+        
+            debug("Conversation loading complete");
+        }
     }
 
     /**
@@ -527,14 +526,11 @@ public class ConversationListBox : Gtk.ListBox {
             });
     }
 
-    private async void add_email(Geary.Email email, bool is_in_folder) {
-        if (this.id_to_row.contains(email.id)) {
-            return;
-        }
-
+    private EmailRow add_email(Geary.Email email) {
         // Should be able to edit draft emails from any
         // conversation. This test should be more like "is in drafts
         // folder"
+        bool is_in_folder = this.conversation.is_in_current_folder(email.id);
         bool is_draft = (this.is_draft_folder && is_in_folder);
 
         bool is_sent = false;
@@ -587,7 +583,7 @@ public class ConversationListBox : Gtk.ListBox {
             email.is_flagged().is_certain()) {
             row.expand(false);
         }
-        yield view.start_loading(this.cancellable);
+        return row;
     }
 
     private void remove_email(Geary.Email email) {
@@ -636,27 +632,27 @@ public class ConversationListBox : Gtk.ListBox {
     }
 
     // Given some emails, fetch the full versions with all required fields.
-    private async Gee.Collection<Geary.Email>? list_full_emails_async(
-        Gee.Collection<Geary.Email> emails, Cancellable? cancellable) throws Error {
-        Geary.Email.Field required_fields = ConversationListBox.REQUIRED_FIELDS |
-            Geary.ComposedEmail.REQUIRED_REPLY_FIELDS;
-
+    private async Gee.Collection<Geary.Email> list_full_emails_async(
+        Gee.Collection<Geary.Email> emails) throws Error {
         Gee.ArrayList<Geary.EmailIdentifier> ids = new Gee.ArrayList<Geary.EmailIdentifier>();
         foreach (Geary.Email email in emails)
             ids.add(email.id);
 
-        return yield this.email_store.list_email_by_sparse_id_async(ids, required_fields,
-            Geary.Folder.ListFlags.NONE, cancellable);
+        Gee.Collection<Geary.Email>? full_emails =
+            yield this.email_store.list_email_by_sparse_id_async(
+                ids,
+                REQUIRED_FIELDS,
+                Geary.Folder.ListFlags.NONE,
+                this.cancellable
+            );
+
+        if (full_emails == null) {
+            full_emails = Gee.Collection.empty<Geary.Email>();
+        }
+
+        return full_emails;
     }
 
-    // Given an email, fetch the full version with all required fields.
-    private async Geary.Email fetch_full_email_async(Geary.Email email,
-        Cancellable? cancellable) throws Error {
-        Geary.Email.Field required_fields = ConversationListBox.REQUIRED_FIELDS |
-            Geary.ComposedEmail.REQUIRED_REPLY_FIELDS;
-
-        return yield this.email_store.fetch_email_async(email.id, required_fields,
-            Geary.Folder.ListFlags.NONE, cancellable);
     }
 
     /**
@@ -680,18 +676,25 @@ public class ConversationListBox : Gtk.ListBox {
     }
 
     private void on_conversation_appended(Geary.App.Conversation conversation, Geary.Email email) {
-        on_conversation_appended_async.begin(conversation, email, on_conversation_appended_complete);
+        on_conversation_appended_async.begin(conversation, email);
     }
 
-    private async void on_conversation_appended_async(Geary.App.Conversation conversation,
-        Geary.Email email) throws Error {
-        yield add_email(yield fetch_full_email_async(email, this.cancellable),
-            conversation.is_in_current_folder(email.id));
-    }
-
-    private void on_conversation_appended_complete(Object? source, AsyncResult result) {
+    private async void on_conversation_appended_async(
+        Geary.App.Conversation conversation, Geary.Email part_email) {
         try {
-            on_conversation_appended_async.end(result);
+            if (!this.id_to_row.contains(part_email.id)) {
+                Geary.Email full_email = yield this.email_store.fetch_email_async(
+                    part_email.id,
+                    REQUIRED_FIELDS,
+                    Geary.Folder.ListFlags.NONE,
+                    this.cancellable
+                );
+
+                if (!this.cancellable.is_cancelled()) {
+                    EmailRow row = add_email(full_email);
+                    yield row.view.start_loading(this.cancellable);
+                }
+            }
         } catch (Error err) {
             debug("Unable to append email to conversation: %s", err.message);
         }
