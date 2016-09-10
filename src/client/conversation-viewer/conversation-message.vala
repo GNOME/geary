@@ -351,7 +351,7 @@ public class ConversationMessage : Gtk.Grid {
     /**
      * Starts loading the avatar for the message's sender.
      */
-    public async void load_avatar(Soup.Session session, Cancellable load_cancellable) {
+    public async void load_avatar(Soup.Session session, Cancellable load_cancelled) {
         // Queued messages are cancelled in ConversationViewer.clear()
         // rather than here using a callback on load_cancellable since
         // we don't have per-message control using
@@ -366,12 +366,16 @@ public class ConversationMessage : Gtk.Grid {
                     primary, Gravatar.Default.NOT_FOUND, pixel_size * window_scale
                 )
             );
-            session.queue_message(message, (session, message) => {
-                    if (message.status_code == 200 &&
-                        !load_cancellable.is_cancelled()) {
-                        set_avatar(message.response_body.data);
-                    }
-                });
+
+            try {
+                InputStream data =
+                    yield session.send_async(message, load_cancelled);
+                if (data != null) {
+                    yield set_avatar(data, load_cancelled);
+                }
+            } catch (Error err) {
+                debug("Unable to load avatar: %s", err.message);
+            }
         }
     }
 
@@ -666,13 +670,13 @@ public class ConversationMessage : Gtk.Grid {
         return value;
     }
 
-    private void set_avatar(uint8[] image_data) {
+    private async void set_avatar(InputStream data,
+                                  Cancellable load_cancelled) {
         Gdk.Pixbuf avatar_buf = null;
-        Gdk.PixbufLoader loader = new Gdk.PixbufLoader();
         try {
-            loader.write(image_data);
-            loader.close();
-            avatar_buf = loader.get_pixbuf();
+            avatar_buf = yield Gdk.Pixbuf.new_from_stream_async(
+                data, load_cancelled
+            );
         } catch (Error err) {
             debug("Error loading Gravatar response: %s", err.message);
         }

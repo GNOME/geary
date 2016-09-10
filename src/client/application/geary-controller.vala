@@ -186,16 +186,16 @@ public class GearyController : Geary.BaseObject {
         // for each conversation load.
         File avatar_cache_dir = GearyApplication.instance.get_user_cache_directory()
             .get_child("avatar_cache");
-        avatar_cache = new Soup.Cache(
+        this.avatar_cache = new Soup.Cache(
             avatar_cache_dir.get_path(),
             Soup.CacheType.SINGLE_USER
         );
-        avatar_cache.load();
-        avatar_cache.set_max_size(4 * 1024 * 1024); // 4MB
-        avatar_session = new Soup.Session.with_options(
+        this.avatar_cache.load();
+        this.avatar_cache.set_max_size(10 * 1024 * 1024); // 4MB
+        this.avatar_session = new Soup.Session.with_options(
             Soup.SESSION_USER_AGENT, "Geary/" + GearyApplication.VERSION
         );
-        avatar_session.add_feature(avatar_cache);
+        this.avatar_session.add_feature(avatar_cache);
 
         // Create the main window (must be done after creating actions.)
         main_window = new MainWindow(GearyApplication.instance);
@@ -1509,7 +1509,6 @@ public class GearyController : Geary.BaseObject {
             case 1:
                 // Cancel existing avatar loads before loading new
                 // convo since that will start loading more avatars
-                avatar_session.flush_queue();
                 viewer.load_conversation.begin(
                     Geary.Collection.get_first(selected),
                     this.current_folder,
