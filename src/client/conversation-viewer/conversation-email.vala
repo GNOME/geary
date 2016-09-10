@@ -149,6 +149,10 @@ public class ConversationEmail : Gtk.Box {
         }
 
         internal async void load_icon(Cancellable load_cancelled) {
+            if (load_cancelled.is_cancelled()) {
+                return;
+            }
+
             Gdk.Pixbuf? pixbuf = null;
 
             // XXX We need to hook up to GtkWidget::style-set and
