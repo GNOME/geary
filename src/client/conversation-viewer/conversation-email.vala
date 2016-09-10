@@ -484,19 +484,20 @@ public class ConversationEmail : Gtk.Box {
      * attachment names, types and icons.
      */
     public async void start_loading(Cancellable load_cancelled) {
-        yield primary_message.load_avatar(
-            GearyApplication.instance.controller.avatar_session,
-            load_cancelled
-        );
-        yield primary_message.load_message_body(load_cancelled);
-        foreach (ConversationMessage message in this._attached_messages) {
-            yield message.load_avatar(
-                GearyApplication.instance.controller.avatar_session,
-                load_cancelled
-            );
-            yield message.load_message_body(load_cancelled);
+        message_view_iterator().foreach((view) => {
+                if (!load_cancelled.is_cancelled()) {
+                    primary_message.load_message_body.begin(load_cancelled);
+                }
+                view.load_avatar.begin(
+                    GearyApplication.instance.controller.avatar_session,
+                    load_cancelled
+                );
+                return !load_cancelled.is_cancelled();
+            });
+
+        if (!load_cancelled.is_cancelled()) {
+            yield load_attachments(load_cancelled);
         }
-        yield load_attachments(load_cancelled);
     }
 
     /**
