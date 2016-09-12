@@ -282,9 +282,10 @@ public class ConversationViewer : Gtk.Stack {
     }
 
     [GtkCallback]
-    private void on_find_search_started(Object obj, ParamSpec param) {
-        if (this.conversation_find_bar.get_search_mode()) {
-            if (this.current_list != null) {
+    private void on_find_mode_changed(Object obj, ParamSpec param) {
+        if (this.current_list != null) {
+            if (this.conversation_find_bar.get_search_mode()) {
+                // Find was enabled
                 ConversationEmail? email_view =
                     this.current_list.get_selection_view();
                 if (email_view != null) {
@@ -294,12 +295,20 @@ public class ConversationViewer : Gtk.Stack {
                         this.conversation_find_entry.select_region(0, -1);
                     }
                 }
+            } else {
+                // Find was disabled
+                this.current_list.unmark_search_terms();
+                if (!(this.current_list.location is Geary.SearchFolder)) {
+                    //this.current_list.update_collapsed_state();
+                } else {
+                    this.current_list.load_search_terms.begin();
+                }
             }
         }
     }
 
     [GtkCallback]
-    private void on_find_search_changed(Gtk.SearchEntry entry) {
+    private void on_find_text_changed(Gtk.SearchEntry entry) {
         this.conversation_find_next.set_sensitive(false);
         this.conversation_find_prev.set_sensitive(false);
         if (this.current_list != null) {
@@ -308,16 +317,6 @@ public class ConversationViewer : Gtk.Stack {
                 // Have a search string
                 this.current_list.highlight_search_terms(terms);
                 // XXX scroll to first match
-            } else {
-                // Have no search string
-                // if (location is Geary.SearchFolder) {
-                //     // Re-display the search results
-                //     yield this.current_list.load_search_terms(
-                //         (Geary.SearchFolder) location
-                //     );
-                // } else {
-                    this.current_list.unmark_search_terms();
-                // }
             }
         }
     }

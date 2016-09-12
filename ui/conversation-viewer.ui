@@ -41,7 +41,7 @@
             <property name="app_paintable">True</property>
             <property name="can_focus">False</property>
             <property name="hexpand">True</property>
-            <signal name="notify::search-mode-enabled" handler="on_find_search_started" swapped="no"/>
+            <signal name="notify::search-mode-enabled" handler="on_find_mode_changed" swapped="no"/>
             <child>
               <object class="GtkGrid">
                 <property name="visible">True</property>
@@ -56,7 +56,7 @@
                     <property name="placeholder_text" translatable="yes">Find in conversation</property>
                     <signal name="next-match" handler="on_find_next" swapped="no"/>
                     <signal name="previous-match" handler="on_find_prev" swapped="no"/>
-                    <signal name="search-changed" handler="on_find_search_changed" swapped="no"/>
+                    <signal name="search-changed" handler="on_find_text_changed" swapped="no"/>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
