@@ -675,6 +675,9 @@ public class ConversationEmail : Gtk.Box {
             }
 
             foreach (Geary.Attachment attachment in this.displayed_attachments) {
+                if (load_cancelled.is_cancelled()) {
+                    return;
+                }
                 AttachmentView view = new AttachmentView(attachment);
                 this.attachments_view.add(view);
                 yield view.load_icon(load_cancelled);
