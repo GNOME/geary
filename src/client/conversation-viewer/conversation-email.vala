@@ -257,6 +257,9 @@ public class ConversationEmail : Gtk.Box {
         owned get { return this._attached_messages.read_only_view; }
     }
 
+    /** Determines if all message's web views have finished loading. */
+    public bool message_bodies_loaded { get; private set; default = false; }
+
     /** The embedded composer for this email, if any. */
     public ComposerEmbed composer { get; private set; default = null; }
 
@@ -596,10 +599,24 @@ public class ConversationEmail : Gtk.Box {
     }
 
     private void connect_message_view_signals(ConversationMessage view) {
-        view.flag_remote_images.connect(on_flag_remote_images);
-        view.remember_remote_images.connect(on_remember_remote_images);
         view.attachment_displayed_inline.connect((id) => {
                 inlined_content_ids.add(id);
+            });
+        view.flag_remote_images.connect(on_flag_remote_images);
+        view.remember_remote_images.connect(on_remember_remote_images);
+        view.web_view.notify["load-status"].connect(() => {
+                bool all_loaded = true;
+                message_view_iterator().foreach((view) => {
+                        if (view.web_view.load_status !=
+                                WebKit.LoadStatus.FINISHED) {
+                            all_loaded = false;
+                            return false;
+                        }
+                        return true;
+                    });
+                if (all_loaded == true) {
+                    this.message_bodies_loaded = true;
+                }
             });
         view.web_view.selection_changed.connect(() => {
                 on_message_selection_changed(view);
