@@ -21,11 +21,16 @@ public class ConversationMessage : Gtk.Grid {
     // message header Gtk.FlowBox instances.
     private class AddressFlowBoxChild : Gtk.FlowBoxChild {
 
+        private const string MATCH_CLASS = "geary-match";
+
         public Geary.RFC822.MailboxAddress address { get; private set; }
+
+        private string search_value;
 
         public AddressFlowBoxChild(Geary.RFC822.MailboxAddress address,
                                    string dim_color, string weight) {
             this.address = address;
+            this.search_value = address.address.casefold();
 
             Gtk.Label label = new Gtk.Label(null);
             label.ellipsize = Pango.EllipsizeMode.END;
@@ -38,6 +43,7 @@ public class ConversationMessage : Gtk.Grid {
                     "<span weight=\"%s\">%s</span> <span color=\"%s\">%s</span>"
                     .printf(weight, name, dim_color, addr)
                     );
+                this.search_value = address.name.casefold() + this.search_value;
             } else {
                 label.set_markup(
                     "<span weight=\"%s\">%s</span>".printf(weight, addr)
@@ -47,6 +53,20 @@ public class ConversationMessage : Gtk.Grid {
             add(label);
             set_halign(Gtk.Align.START);
             show_all();
+        }
+
+        public bool highlight_search_term(string term) {
+            bool found = this.search_value.contains(term);
+            if (found) {
+                get_style_context().add_class(MATCH_CLASS);
+            } else {
+                get_style_context().remove_class(MATCH_CLASS);
+            }
+            return found;
+        }
+
+        public void unmark_search_terms() {
+            get_style_context().remove_class(MATCH_CLASS);
         }
 
     }
@@ -170,6 +190,10 @@ public class ConversationMessage : Gtk.Grid {
 
     // The contacts for the message's account
     private Geary.ContactStore contact_store;
+
+    // Address fields that can be search through
+    private Gee.List<AddressFlowBoxChild> searchable_addresses =
+        new Gee.LinkedList<AddressFlowBoxChild>();
 
     // Should any remote messages be always loaded and displayed?
     private bool always_load_remote_images;
@@ -327,6 +351,7 @@ public class ConversationMessage : Gtk.Grid {
 
     public override void destroy() {
         this.context_menu_element = null;
+        this.searchable_addresses.clear();
         base.destroy();
     }
 
@@ -352,10 +377,6 @@ public class ConversationMessage : Gtk.Grid {
      * Starts loading the avatar for the message's sender.
      */
     public async void load_avatar(Soup.Session session, Cancellable load_cancelled) {
-        // Queued messages are cancelled in ConversationViewer.clear()
-        // rather than here using a callback on load_cancellable since
-        // we don't have per-message control using
-        // Soup.Session.queue_message.
         Geary.RFC822.MailboxAddress? primary = message.get_primary_originator();
         if (primary != null) {
             int window_scale = get_scale_factor();
@@ -472,33 +493,39 @@ public class ConversationMessage : Gtk.Grid {
      * Returns the number of matching search terms.
      */
     public uint highlight_search_terms(Gee.Set<string> search_matches) {
-        // XXX Need to highlight subject, sender and recipient matches too
+        // Remove existing highlights
+        this.web_view.unmark_text_matches();
 
-        // Remove existing highlights.
-        web_view.unmark_text_matches();
+        uint headers_found = 0;
+        uint webkit_found = 0;
+        foreach(string raw_match in search_matches) {
+            string match = raw_match.casefold();
 
-        // Webkit's highlighting is ... weird.  In order to actually see
-        // all the highlighting you're applying, it seems necessary to
-        // start with the shortest string and work up.  If you don't, it
-        // seems that shorter strings will overwrite longer ones, and
-        // you're left with incomplete highlighting.
-        Gee.ArrayList<string> ordered_matches = new Gee.ArrayList<string>();
-        ordered_matches.add_all(search_matches);
-        ordered_matches.sort((a, b) => a.length - b.length);
+            debug("Matching: %s", match);
 
-        uint found = 0;
-        foreach(string match in ordered_matches) {
-            found += web_view.mark_text_matches(match, false, 0);
+            foreach (AddressFlowBoxChild address in this.searchable_addresses) {
+                if (address.highlight_search_term(match)) {
+                    ++headers_found;
+                }
+            }
+
+            webkit_found += this.web_view.mark_text_matches(raw_match, false, 0);
         }
 
-        web_view.set_highlight_text_matches(true);
-        return found;
+        if (webkit_found > 0) {
+            this.web_view.set_highlight_text_matches(true);
+        }
+
+        return headers_found + webkit_found;
     }
 
     /**
      * Disables highlighting of any search terms in the message view.
      */
     public void unmark_search_terms() {
+        foreach (AddressFlowBoxChild address in this.searchable_addresses) {
+            address.unmark_search_terms();
+        }
         web_view.set_highlight_text_matches(false);
         web_view.unmark_text_matches();
     }
@@ -616,7 +643,11 @@ public class ConversationMessage : Gtk.Grid {
             address_box.get_style_context(), "insensitive_fg_color"
         );
         foreach (Geary.RFC822.MailboxAddress address in addresses) {
-            address_box.add(new AddressFlowBoxChild(address, dim_color, weight));
+            AddressFlowBoxChild child = new AddressFlowBoxChild(
+                address, dim_color, weight
+            );
+            this.searchable_addresses.add(child);
+            address_box.add(child);
         }
 
         address_box.child_activated.connect((box, child) => {
