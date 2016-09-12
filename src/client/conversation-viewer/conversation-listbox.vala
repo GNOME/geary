@@ -47,30 +47,38 @@ public class ConversationListBox : Gtk.ListBox {
 
         private const string EXPANDED_CLASS = "geary-expanded";
         private const string LAST_CLASS = "geary-last";
+        private const string MATCH_CLASS = "geary-match";
 
-        // Is the row showing the email's message body?
-        public bool is_expanded {
-            get { return get_style_context().has_class(EXPANDED_CLASS); }
+
+        // Is the row showing the email's message body or just headers?
+        public bool is_expanded { get; private set; default = false; }
+
+        // Has the row been temporarily expanded to show search matches?
+        public bool is_pinned { get; private set; default = false; }
+
+        // Does the row contain an email matching the current search?
+        public bool is_search_match {
+            get { return get_style_context().has_class(MATCH_CLASS); }
+            set {
+                set_style_context_class(MATCH_CLASS, value);
+                this.is_pinned = value;
+                update_row_expansion();
+            }
         }
 
         // Designate this row as the last visible row in the
         // conversation listbox, or not. See Bug 764710 and
         // ::update_last_row() below.
-        public bool is_last {
-            get { return get_style_context().has_class(LAST_CLASS); }
-            set {
-                if (value) {
-                    get_style_context().add_class(LAST_CLASS);
-                } else {
-                    get_style_context().remove_class(LAST_CLASS);
-                }
-            }
+        internal bool is_last {
+            set { set_style_context_class(LAST_CLASS, value); }
         }
+
 
         // We can only scroll to a specific row once it has been
         // allocated space. This signal allows the viewer to hook up
         // to appropriate times to try to do that scroll.
         public signal void should_scroll();
+
 
         public ConversationEmail view {
             get { return (ConversationEmail) get_child(); }
@@ -80,18 +88,37 @@ public class ConversationListBox : Gtk.ListBox {
             add(view);
         }
 
-        public new void expand(bool include_transitions=true) {
-            get_style_context().add_class(EXPANDED_CLASS);
-            this.view.expand_email(include_transitions);
+        public new void expand() {
+            this.is_expanded = true;
+            update_row_expansion();
         }
 
         public void collapse() {
-            get_style_context().remove_class(EXPANDED_CLASS);
-            this.view.collapse_email();
+            this.is_expanded = false;
+            this.is_pinned = false;
+            update_row_expansion();
         }
 
         public void enable_should_scroll() {
             this.size_allocate.connect(on_size_allocate);
+        }
+
+        private inline void update_row_expansion() {
+            if (this.is_expanded || this.is_pinned) {
+                get_style_context().add_class(EXPANDED_CLASS);
+                this.view.expand_email();
+            } else {
+                get_style_context().remove_class(EXPANDED_CLASS);
+                this.view.collapse_email();
+            }
+        }
+
+        private inline void set_style_context_class(string class_name, bool value) {
+            if (value) {
+                get_style_context().add_class(class_name);
+            } else {
+                get_style_context().remove_class(class_name);
+            }
         }
 
         private void on_size_allocate() {
@@ -480,11 +507,9 @@ public class ConversationListBox : Gtk.ListBox {
                         }
                         return true;
                     });
+                row.is_search_match = email_found;
                 if (email_found) {
-                    row.expand();
                     any_found = true;
-                } else {
-                    row.collapse();
                 }
             });
         return any_found;
@@ -494,9 +519,15 @@ public class ConversationListBox : Gtk.ListBox {
      * Removes search term highlighting from all messages.
      */
     public void unmark_search_terms() {
-        message_view_iterator().foreach((msg_view) => {
-                msg_view.unmark_search_terms();
-                return true;
+        this.foreach((child) => {
+                EmailRow row = (EmailRow) child;
+                if (row.is_search_match) {
+                    row.is_search_match = false;
+                    row.view.message_view_iterator().foreach((msg_view) => {
+                            msg_view.unmark_search_terms();
+                            return true;
+                        });
+                }
             });
     }
 
@@ -583,9 +614,10 @@ public class ConversationListBox : Gtk.ListBox {
         update_last_row();
         email_added(view);
 
+        // Expand interesting messages by default
         if (email.is_unread().is_certain() ||
             email.is_flagged().is_certain()) {
-            row.expand(false);
+            row.expand();
         }
         return row;
     }
@@ -776,7 +808,7 @@ public class ConversationListBox : Gtk.ListBox {
         // be appended last. Finally, don't let rows with active
         // composers be collapsed.
         if (row.is_expanded) {
-            if (!row.is_last && row.view.composer == null) {
+            if (this.last_email_row != row && row.view.composer == null) {
                 row.collapse();
             }
         } else {
