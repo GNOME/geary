@@ -226,13 +226,17 @@ public class ConversationListBox : Gtk.ListBox {
         }
 
         if (this.last_email_row != null && !this.cancellable.is_cancelled()) {
-            // The last row should always be expanded
+            // The last row should always be expanded, so expand it
+            // and start loading if needed.
             this.last_email_row.expand();
+            if (this.last_email_row != first_expanded_row) {
+                yield this.last_email_row.view.start_loading(this.cancellable);
+            }
+
+            // If no other row was expanded by default, use the last
+            // row.
             if (first_expanded_row == null) {
                 first_expanded_row = this.last_email_row;
-                yield this.last_email_row.view.start_loading(
-                    this.cancellable
-                );
             }
 
             // Ensure we scroll to the first expanded roll when it
