@@ -149,10 +149,14 @@ public class ConversationListBox : Gtk.ListBox {
     /** Conversation being displayed. */
     public Geary.App.Conversation conversation { get; private set; }
 
+    // Folder from which the conversation was loaded
+    internal Geary.Folder location { get; private set; }
+
+    // Used to load messages in conversation.
+    private Geary.App.EmailStore email_store;
+
     // Contacts for the account this conversation exists in
     private Geary.ContactStore contact_store;
-
-    private Geary.App.EmailStore email_store;
 
     // Contacts for the account this conversation exists in
     private Geary.AccountInformation account_info;
@@ -173,6 +177,9 @@ public class ConversationListBox : Gtk.ListBox {
     // Last visible row in the list, if any
     private EmailRow? last_email_row = null;
 
+    // Cached search terms to apply to new messages
+    private Gee.Set<string>? ordered_search_terms = null;
+
 
     /** Fired when an email view is added to the conversation list. */
     public signal void email_added(ConversationEmail email);
@@ -184,18 +191,24 @@ public class ConversationListBox : Gtk.ListBox {
     public signal void mark_emails(Gee.Collection<Geary.EmailIdentifier> emails,
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove);
 
+    /** Fired when an email that matches the current search terms is found. */
+    public signal void search_matches_found();
+
+
     /**
      * Constructs a new conversation list box instance.
      */
     public ConversationListBox(Geary.App.Conversation conversation,
-                               Geary.ContactStore contact_store,
+                               Geary.Folder location,
                                Geary.App.EmailStore? email_store,
+                               Geary.ContactStore contact_store,
                                Geary.AccountInformation account_info,
                                bool is_draft_folder,
                                Gtk.Adjustment adjustment) {
         this.conversation = conversation;
-        this.contact_store = contact_store;
+        this.location = location;
         this.email_store = email_store;
+        this.contact_store = contact_store;
         this.account_info = account_info;
         this.is_draft_folder = is_draft_folder;
 
@@ -434,7 +447,8 @@ public class ConversationListBox : Gtk.ListBox {
     /**
      * Loads search term matches for this list's emails.
      */
-    public async void load_search_terms(Geary.SearchFolder search) {
+    public async void load_search_terms() {
+        Geary.SearchFolder search = (Geary.SearchFolder) this.location;
         Geary.SearchQuery? query = search.search_query;
         if (query != null) {
 
@@ -487,38 +501,26 @@ public class ConversationListBox : Gtk.ListBox {
      *
      * Returns true if any were found, else returns false.
      */
-    public bool highlight_search_terms(Gee.Set<string> search_matches) {
+    public void highlight_search_terms(Gee.Set<string> search_matches) {
         // Webkit's highlighting is ... weird.  In order to actually
         // see all the highlighting you're applying, it seems
         // necessary to start with the shortest string and work up.
         // If you don't, it seems that shorter strings will overwrite
         // longer ones, and you're left with incomplete highlighting.
-        Gee.ArrayList<string> ordered_matches = new Gee.ArrayList<string>();
+        Gee.TreeSet<string> ordered_matches =
+            new Gee.TreeSet<string>((a, b) => a.length - b.length);
         ordered_matches.add_all(search_matches);
-        ordered_matches.sort((a, b) => a.length - b.length);
-
-        bool any_found = false;
+        this.ordered_search_terms = ordered_matches;
         this.foreach((child) => {
-                EmailRow row = (EmailRow) child;
-                bool email_found = false;
-                row.view.message_view_iterator().foreach((msg_view) => {
-                        if (msg_view.highlight_search_terms(search_matches) > 0) {
-                            email_found = true;
-                        }
-                        return true;
-                    });
-                row.is_search_match = email_found;
-                if (email_found) {
-                    any_found = true;
-                }
+                apply_search_terms((EmailRow) child);
             });
-        return any_found;
     }
 
     /**
      * Removes search term highlighting from all messages.
      */
     public void unmark_search_terms() {
+        this.ordered_search_terms = null;
         this.foreach((child) => {
                 EmailRow row = (EmailRow) child;
                 if (row.is_search_match) {
@@ -619,6 +621,12 @@ public class ConversationListBox : Gtk.ListBox {
             email.is_flagged().is_certain()) {
             row.expand();
         }
+
+        // Apply any existing search terms to the new row
+        if (this.ordered_search_terms != null) {
+            apply_search_terms(row);
+        }
+
         return row;
     }
 
@@ -688,7 +696,30 @@ public class ConversationListBox : Gtk.ListBox {
 
         return full_emails;
     }
+    
+    private void apply_search_terms(EmailRow row) {
+        if (row.view.message_bodies_loaded) {
+            apply_search_terms_impl(row);
+        } else {
+            row.view.notify["message-bodies-loaded"].connect(() => {
+                    apply_search_terms_impl(row);
+                });
+        }
+    }
 
+    private inline void apply_search_terms_impl(EmailRow row) {
+        bool found = false;
+        row.view.message_view_iterator().foreach((view) => {
+                if (view.highlight_search_terms(this.ordered_search_terms) > 0) {
+                    found = true;
+                    return false;
+                }
+                return true;
+            });
+        row.is_search_match = found;
+        if (found) {
+            search_matches_found();
+        }
     }
 
     /**

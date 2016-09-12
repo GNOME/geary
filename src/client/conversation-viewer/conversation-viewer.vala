@@ -189,8 +189,9 @@ public class ConversationViewer : Gtk.Stack {
         Geary.Account account = location.account;
         ConversationListBox new_list = new ConversationListBox(
             conversation,
-            account.get_contact_store(),
+            location,
             new Geary.App.EmailStore(account),
+            account.get_contact_store(),
             account.information,
             location.special_folder_type == Geary.SpecialFolderType.DRAFTS,
             conversation_scroller.get_vadjustment()
@@ -202,13 +203,27 @@ public class ConversationViewer : Gtk.Stack {
         this.conversation_added(new_list);
 
         yield new_list.load_conversation();
+        // Also set up find infrastructure early so matching emails
+        // are expanded and highlighted as they are added.
+        this.conversation_find_next.set_sensitive(false);
+        this.conversation_find_prev.set_sensitive(false);
+        new_list.search_matches_found.connect(() => {
+                this.conversation_find_next.set_sensitive(true);
+                this.conversation_find_prev.set_sensitive(true);
+            });
+        Gee.Set<string>? find_terms = get_find_search_terms();
+        if (find_terms != null) {
+            new_list.highlight_search_terms(find_terms);
+        }
 
         remove_current_list();
         add_new_list(new_list);
         set_visible_child(this.conversation_page);
         this.conversation_timeout_id = 0;
-        if (location is Geary.SearchFolder) {
-            yield new_list.load_search_terms((Geary.SearchFolder) location);
+        // Highlight matching terms from the search if it exists, but
+        // don't clobber any find terms.
+        if (find_terms == null && location is Geary.SearchFolder) {
+            yield new_list.load_search_terms();
         }
     }
 
@@ -255,6 +270,16 @@ public class ConversationViewer : Gtk.Stack {
         }
         base.set_visible_child(widget);
     }
+        
+    private Gee.Set<string>? get_find_search_terms() {
+        Gee.Set<string>? terms = null;
+        string search = this.conversation_find_entry.get_text().strip();
+        if (search.length > 0) {
+            terms = new Gee.HashSet<string>();
+            terms.add(search);
+        }
+        return terms;
+    }
 
     [GtkCallback]
     private void on_find_search_started(Object obj, ParamSpec param) {
@@ -275,15 +300,14 @@ public class ConversationViewer : Gtk.Stack {
 
     [GtkCallback]
     private void on_find_search_changed(Gtk.SearchEntry entry) {
-        string search = entry.get_text().strip();
-        bool have_matches = false;
+        this.conversation_find_next.set_sensitive(false);
+        this.conversation_find_prev.set_sensitive(false);
         if (this.current_list != null) {
-            if (search.length > 0) {
+            Gee.Set<string>? terms = get_find_search_terms();
+            if (terms != null) {
                 // Have a search string
-                Gee.Set<string> search_matches = new Gee.HashSet<string>();
-                search_matches.add(search);
-                have_matches =
-                    this.current_list.highlight_search_terms(search_matches);
+                this.current_list.highlight_search_terms(terms);
+                // XXX scroll to first match
             } else {
                 // Have no search string
                 // if (location is Geary.SearchFolder) {
@@ -296,8 +320,6 @@ public class ConversationViewer : Gtk.Stack {
                 // }
             }
         }
-        this.conversation_find_next.set_sensitive(have_matches);
-        this.conversation_find_prev.set_sensitive(have_matches);
     }
 
     [GtkCallback]
