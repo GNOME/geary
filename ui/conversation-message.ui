@@ -195,6 +195,96 @@
                           </packing>
                         </child>
                         <child>
+                          <object class="GtkGrid" id="sender_header">
+                            <property name="can_focus">False</property>
+                            <child>
+                              <object class="GtkLabel" id="sender_label">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="label" translatable="yes">Sent by:</property>
+                                <property name="yalign">0</property>
+                                <style>
+                                  <class name="dim-label"/>
+                                  <class name="geary-header"/>
+                                </style>
+                              </object>
+                              <packing>
+                                <property name="left_attach">0</property>
+                                <property name="top_attach">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkFlowBox" id="sender_address">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="valign">start</property>
+                                <property name="hexpand">True</property>
+                                <property name="column_spacing">2</property>
+                                <property name="min_children_per_line">2</property>
+                                <property name="max_children_per_line">4</property>
+                                <property name="selection_mode">none</property>
+                                <signal name="child-activated" handler="on_address_box_child_activated" swapped="no"/>
+                                <style>
+                                  <class name="geary-header-value"/>
+                                </style>
+                              </object>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="top_attach">0</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="left_attach">0</property>
+                            <property name="top_attach">1</property>
+                          </packing>
+                        </child>
+                        <child>
+                          <object class="GtkGrid" id="reply_to_header">
+                            <property name="can_focus">False</property>
+                            <child>
+                              <object class="GtkLabel" id="reply_to_label">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="label" translatable="yes">Reply to:</property>
+                                <property name="yalign">0</property>
+                                <style>
+                                  <class name="dim-label"/>
+                                  <class name="geary-header"/>
+                                </style>
+                              </object>
+                              <packing>
+                                <property name="left_attach">0</property>
+                                <property name="top_attach">0</property>
+                              </packing>
+                            </child>
+                            <child>
+                              <object class="GtkFlowBox" id="reply_to_addresses">
+                                <property name="visible">True</property>
+                                <property name="can_focus">False</property>
+                                <property name="valign">start</property>
+                                <property name="hexpand">True</property>
+                                <property name="column_spacing">2</property>
+                                <property name="min_children_per_line">2</property>
+                                <property name="max_children_per_line">4</property>
+                                <property name="selection_mode">none</property>
+                                <signal name="child-activated" handler="on_address_box_child_activated" swapped="no"/>
+                                <style>
+                                  <class name="geary-header-value"/>
+                                </style>
+                              </object>
+                              <packing>
+                                <property name="left_attach">1</property>
+                                <property name="top_attach">0</property>
+                              </packing>
+                            </child>
+                          </object>
+                          <packing>
+                            <property name="left_attach">0</property>
+                            <property name="top_attach">2</property>
+                          </packing>
+                        </child>
+                        <child>
                           <object class="GtkLabel" id="subject">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
@@ -211,7 +301,7 @@
                           </object>
                           <packing>
                             <property name="left_attach">0</property>
-                            <property name="top_attach">1</property>
+                            <property name="top_attach">3</property>
                           </packing>
                         </child>
                         <child>
@@ -236,7 +326,7 @@
                             <child>
                               <object class="GtkFlowBox" id="to">
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="valign">start</property>
                                 <property name="hexpand">True</property>
                                 <property name="column_spacing">2</property>
@@ -256,7 +346,7 @@
                           </object>
                           <packing>
                             <property name="left_attach">0</property>
-                            <property name="top_attach">2</property>
+                            <property name="top_attach">4</property>
                           </packing>
                         </child>
                         <child>
@@ -281,7 +371,7 @@
                             <child>
                               <object class="GtkFlowBox" id="cc">
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="valign">start</property>
                                 <property name="hexpand">True</property>
                                 <property name="column_spacing">2</property>
@@ -301,7 +391,7 @@
                           </object>
                           <packing>
                             <property name="left_attach">0</property>
-                            <property name="top_attach">3</property>
+                            <property name="top_attach">5</property>
                           </packing>
                         </child>
                         <child>
@@ -326,7 +416,7 @@
                             <child>
                               <object class="GtkFlowBox" id="bcc">
                                 <property name="visible">True</property>
-                                <property name="can_focus">True</property>
+                                <property name="can_focus">False</property>
                                 <property name="valign">start</property>
                                 <property name="hexpand">True</property>
                                 <property name="column_spacing">2</property>
@@ -346,7 +436,7 @@
                           </object>
                           <packing>
                             <property name="left_attach">0</property>
-                            <property name="top_attach">4</property>
+                            <property name="top_attach">6</property>
                           </packing>
                         </child>
                         <style>

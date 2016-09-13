@@ -17,6 +17,41 @@
 [GtkTemplate (ui = "/org/gnome/Geary/conversation-message.ui")]
 public class ConversationMessage : Gtk.Grid {
 
+
+    internal static string get_dim_label_colour(Gtk.Widget widget) {
+        return GtkUtil.pango_color_from_theme(
+            widget.get_style_context(), "insensitive_fg_color"
+        );
+    }
+
+    internal static string format_address(Geary.RFC822.MailboxAddress address,
+                                          string dim_colour,
+                                          string weight = "normal") {
+        string markup = "";
+        string name = Geary.HTML.escape_markup(address.name);
+        string addr = Geary.HTML.escape_markup(address.address);
+        if (has_distinct_name(address)) {
+            markup = (
+                "<span weight=\"%s\">%s</span> <span color=\"%s\">%s</span>"
+                .printf(weight, name, dim_colour, addr)
+            );
+        } else {
+            markup = (
+                "<span weight=\"%s\">%s</span>".printf(weight, addr)
+            );
+        }
+        return markup;
+    }
+
+    internal static inline bool has_distinct_name(
+        Geary.RFC822.MailboxAddress address) {
+        return (
+            !Geary.String.is_empty(address.name) &&
+            address.name != address.address
+        );
+    }
+
+
     // Widget used to display sender/recipient email addresses in
     // message header Gtk.FlowBox instances.
     private class AddressFlowBoxChild : Gtk.FlowBoxChild {
@@ -28,26 +63,16 @@ public class ConversationMessage : Gtk.Grid {
         private string search_value;
 
         public AddressFlowBoxChild(Geary.RFC822.MailboxAddress address,
-                                   string dim_color, string weight) {
+                                   string markup) {
             this.address = address;
             this.search_value = address.address.casefold();
 
             Gtk.Label label = new Gtk.Label(null);
             label.ellipsize = Pango.EllipsizeMode.END;
             label.set_xalign(0.0f);
-
-            string name = Geary.HTML.escape_markup(address.name);
-            string addr = Geary.HTML.escape_markup(address.address);
-            if (!Geary.String.is_empty(address.name) && name != addr) {
-                label.set_markup(
-                    "<span weight=\"%s\">%s</span> <span color=\"%s\">%s</span>"
-                    .printf(weight, name, dim_color, addr)
-                    );
+            label.set_markup(markup);
+            if (has_distinct_name(address)) {
                 this.search_value = address.name.casefold() + this.search_value;
-            } else {
-                label.set_markup(
-                    "<span weight=\"%s\">%s</span>".printf(weight, addr)
-                    );
             }
 
             add(label);
@@ -149,6 +174,17 @@ public class ConversationMessage : Gtk.Grid {
     private Gtk.Label subject;
     [GtkChild]
     private Gtk.Label date;
+
+    [GtkChild]
+    private Gtk.Grid sender_header;
+    [GtkChild]
+    private Gtk.FlowBox sender_address;
+
+    [GtkChild]
+    private Gtk.Grid reply_to_header;
+    [GtkChild]
+    private Gtk.FlowBox reply_to_addresses;
+
     [GtkChild]
     private Gtk.Grid to_header;
     [GtkChild]
@@ -287,6 +323,12 @@ public class ConversationMessage : Gtk.Grid {
 
         // Preview headers
 
+        // Translators: This is displayed in place of the from address
+        // when the message has no from address.
+        string empty_from = _("No sender");
+
+        this.preview_from.set_markup(format_originator_preview(empty_from));
+
         string date_text = "";
         string date_tooltip = "";
         if (this.message.date != null) {
@@ -299,39 +341,26 @@ public class ConversationMessage : Gtk.Grid {
                 this.message.date.value, clock_format
             );
         }
-
-        string preview_str = this.message.get_preview();
-        preview_str = Geary.String.reduce_whitespace(preview_str);
-
-        this.preview_from.set_markup(format_sender_preview(this.message.from));
         this.preview_date.set_text(date_text);
         this.preview_date.set_tooltip_text(date_tooltip);
-        this.preview_body.set_text(preview_str);
+
+        this.preview_body.set_text(
+            Geary.String.reduce_whitespace(this.message.get_preview())
+        );
 
         // Full headers
 
-        if (this.message.from != null && this.message.from.size > 0) {
-            set_flowbox_addresses(this.from, this.message.from, "bold");
-        } else {
-            Gtk.Label label = new Gtk.Label(null);
-            label.set_markup(format_sender_preview(null));
+        fill_originator_addresses(empty_from);
 
-            Gtk.FlowBoxChild child = new Gtk.FlowBoxChild();
-            child.add(label);
-            child.set_halign(Gtk.Align.START);
-            child.show_all();
-
-            this.from.add(child);
-        }
         this.date.set_text(date_text);
         this.date.set_tooltip_text(date_tooltip);
         if (this.message.subject != null) {
             this.subject.set_text(this.message.subject.value);
             this.subject.set_visible(true);
         }
-        set_header_addresses(this.to_header, this.message.to);
-        set_header_addresses(this.cc_header, this.message.cc);
-        set_header_addresses(this.bcc_header, this.message.bcc);
+        fill_header_addresses(this.to_header, this.message.to);
+        fill_header_addresses(this.cc_header, this.message.cc);
+        fill_header_addresses(this.bcc_header, this.message.bcc);
 
         // Web view
 
@@ -625,62 +654,100 @@ public class ConversationMessage : Gtk.Grid {
         return menu;
     }
 
-    private void set_header_addresses(Gtk.Grid header,
-                                      Geary.RFC822.MailboxAddresses? addresses) {
+    private string format_originator_preview(string empty_from_markup) {
+        string dim_colour = get_dim_label_colour(preview_from);
+        string markup = "";
+
+        // From addresses
+        if (this.message.from != null && this.message.from.size > 0) {
+            int i = 0;
+            Gee.List<Geary.RFC822.MailboxAddress> list =
+                this.message.from.get_all();
+            foreach (Geary.RFC822.MailboxAddress addr in list) {
+                markup += format_address(addr, dim_colour, "bold");
+
+                if (++i < list.size)
+                    // Translators: This separates multiple 'from'
+                    // addresses in the header preview for a message.
+                    markup += _(", ");
+            }
+        } else {
+            markup = empty_from_markup;
+        }
+
+        return markup;
+    }
+
+    private void fill_originator_addresses(string empty_from_markup)  {
+        string dim_colour = get_dim_label_colour(this.from);
+
+        // Show any From header addresses
+        if (this.message.from != null && this.message.from.size > 0) {
+            foreach (Geary.RFC822.MailboxAddress address in this.message.from) {
+                AddressFlowBoxChild child = new AddressFlowBoxChild(
+                    address, format_address(address, dim_colour, "bold")
+                );
+                this.searchable_addresses.add(child);
+                this.from.add(child);
+            }
+        } else {
+            Gtk.Label label = new Gtk.Label(null);
+            label.set_markup(empty_from_markup);
+
+            Gtk.FlowBoxChild child = new Gtk.FlowBoxChild();
+            child.add(label);
+            child.set_halign(Gtk.Align.START);
+            child.show_all();
+            this.from.add(child);
+        }
+
+        // Show the Sender header addresses if present, but only if
+        // not already in the From header.
+        if (this.message.sender != null &&
+            (this.message.from == null ||
+             !this.message.from.contains_normalized(this.message.sender.address))) {
+            AddressFlowBoxChild child = new AddressFlowBoxChild(
+                this.message.sender,
+                format_address(this.message.sender, dim_colour)
+            );
+            this.searchable_addresses.add(child);
+            this.sender_header.show();
+            this.sender_address.add(child);
+        }
+
+        // Show any Reply-To header addresses if present, but only if
+        // each is not already in the From header.
+        if (this.message.reply_to != null) {
+            foreach (Geary.RFC822.MailboxAddress address in this.message.reply_to) {
+                if (this.message.from == null ||
+                    !this.message.from.contains_normalized(address.address)) {
+                    AddressFlowBoxChild child = new AddressFlowBoxChild(
+                        address, format_address(address, dim_colour)
+                    );
+                    this.searchable_addresses.add(child);
+                    this.reply_to_addresses.add(child);
+                    this.reply_to_header.show();
+                }
+            }
+        }
+    }
+
+    private void fill_header_addresses(Gtk.Grid header,
+                                       Geary.RFC822.MailboxAddresses? addresses) {
         if (addresses != null && addresses.size > 0) {
             Gtk.FlowBox box = header.get_children().nth(0).data as Gtk.FlowBox;
             if (box != null) {
-                set_flowbox_addresses(box, addresses);
+                string dim_colour = get_dim_label_colour(this);
+                foreach (Geary.RFC822.MailboxAddress address in addresses) {
+                    AddressFlowBoxChild child = new AddressFlowBoxChild(
+                        address, format_address(address, dim_colour)
+                    );
+                    this.searchable_addresses.add(child);
+                    box.add(child);
+                }
             }
             header.set_visible(true);
         }
-    }
-
-    private void set_flowbox_addresses(Gtk.FlowBox address_box,
-                                       Geary.RFC822.MailboxAddresses? addresses,
-                                       string weight = "normal") {
-        string dim_color = GtkUtil.pango_color_from_theme(
-            address_box.get_style_context(), "insensitive_fg_color"
-        );
-        foreach (Geary.RFC822.MailboxAddress address in addresses) {
-            AddressFlowBoxChild child = new AddressFlowBoxChild(
-                address, dim_color, weight
-            );
-            this.searchable_addresses.add(child);
-            address_box.add(child);
-        }
-
-                }
-    }
-
-    private string format_sender_preview(Geary.RFC822.MailboxAddresses? addresses) {
-        string dim_color = GtkUtil.pango_color_from_theme(
-            get_style_context(), "insensitive_fg_color"
-        );
-        string value = "";
-        if (addresses != null && addresses.size > 0) {
-            int i = 0;
-            Gee.List<Geary.RFC822.MailboxAddress> list = addresses.get_all();
-            foreach (Geary.RFC822.MailboxAddress addr in list) {
-                string address = Geary.HTML.escape_markup(addr.address);
-                if (!Geary.String.is_empty(addr.name)) {
-                    string name = Geary.HTML.escape_markup(addr.name);
-                    value += "<span weight=\"bold\">%s</span> <span color=\"%s\">%s</span>".printf(
-                        name, dim_color, address
-                        );
-                } else {
-                    value += "<span weight=\"bold\">%s</span>".printf(address);
-                }
-
-                if (++i < list.size)
-                    value += ", ";
-            }
-        } else {
-            value = "<span style=\"italic\">%s</span>".printf(
-                _("No sender")
-            );
-        }
-        return value;
     }
 
     private async void set_avatar(InputStream data,
