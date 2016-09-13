@@ -650,25 +650,7 @@ public class ConversationMessage : Gtk.Grid {
             address_box.add(child);
         }
 
-        address_box.child_activated.connect((box, child) => {
-                AddressFlowBoxChild address_child = child as AddressFlowBoxChild;
-                if (address_child != null) {
-                    string address = address_child.address.address;
-                    Menu model = new Menu();
-                    model.append_section(
-                        null, set_action_param_string(
-                            this.context_menu_email, "mailto:" + address
-                    ));
-                    model.append_section(
-                        null, set_action_param_string(
-                            this.context_menu_contact, address
-                    ));
-                    Gtk.Popover popover =
-                        new Gtk.Popover.from_model(child, model);
-                    popover.set_position(Gtk.PositionType.BOTTOM);
-                    popover.show();
                 }
-            });
     }
 
     private string format_sender_preview(Geary.RFC822.MailboxAddresses? addresses) {
@@ -1204,6 +1186,28 @@ public class ConversationMessage : Gtk.Grid {
         }
         revealer.set_reveal_child(expand);
         revealer.set_transition_type(transition);
+    }
+
+    [GtkCallback]
+    private void on_address_box_child_activated(Gtk.FlowBox box,
+                                                Gtk.FlowBoxChild child) {
+        AddressFlowBoxChild address_child = child as AddressFlowBoxChild;
+        if (address_child != null) {
+            string address = address_child.address.address;
+            Menu model = new Menu();
+            model.append_section(
+                null, set_action_param_string(
+                    this.context_menu_email, "mailto:" + address
+                    ));
+            model.append_section(
+                null, set_action_param_string(
+                    this.context_menu_contact, address
+                    ));
+            Gtk.Popover popover =
+            new Gtk.Popover.from_model(child, model);
+            popover.set_position(Gtk.PositionType.BOTTOM);
+            popover.show();
+        }
     }
 
     private static void on_show_quote_clicked(WebKit.DOM.Element element,
