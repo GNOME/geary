@@ -116,7 +116,11 @@
         <summary>Advisory strategy for full-text searching</summary>
         <description>Acceptable values are EXACT, CONSERVATIVE, AGGRESSIVE, and HORIZON.</description>
     </key>
-    
+    <key name="conversation-viewer-zoom" type="d">
+        <default>1</default>
+        <summary>zoom of conversation viewer</summary>
+        <description>The zoom to apply on the conservation view.</description>
+    </key>
 </schema>
 
 </schemalist>

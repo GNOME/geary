@@ -17,8 +17,15 @@ public class ConversationWebView : StylishWebView {
     
     // HTML element that contains message DIVs.
     public WebKit.DOM.HTMLDivElement? container { get; private set; default = null; }
-    
+
     public string allow_prefix { get; private set; default = ""; }
+
+    // We need to wrap zoom_level (type float) because we cannot connect with float
+    // with double (cf https://bugzilla.gnome.org/show_bug.cgi?id=771534)
+    public double zoom_level_wrap {
+        get { return zoom_level; }
+        set { if (zoom_level != (float)value) zoom_level = (float)value; }
+    }
 
     private FileMonitor? user_style_monitor = null;
 
@@ -44,7 +51,10 @@ public class ConversationWebView : StylishWebView {
         web_inspector.inspect_web_view.connect(activate_inspector);
         document_font_changed.connect(on_document_font_changed);
         scroll_event.connect(on_scroll_event);
-        
+
+        GearyApplication.instance.config.bind(Configuration.CONVERSATION_VIEWER_ZOOM_KEY, this, "zoom_level_wrap");
+        notify["zoom-level"].connect(() => { zoom_level_wrap = zoom_level; });
+
         // Load the HTML into WebKit.
         // Note: load_finished signal MUST be hooked up before this call.
         string html_text = GearyApplication.instance.read_theme_file("message-viewer.html") ?? "";

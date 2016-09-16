@@ -25,6 +25,7 @@ public class Configuration {
     public const string COMPOSE_AS_HTML_KEY = "compose-as-html";
     public const string SPELL_CHECK_VISIBLE_LANGUAGES = "spell-check-visible-languages";
     public const string SPELL_CHECK_LANGUAGES = "spell-check-languages";
+    public const string CONVERSATION_VIEWER_ZOOM_KEY = "conversation-viewer-zoom";
 
     public Settings settings { get; private set; }
     public Settings gnome_interface;
@@ -129,6 +130,12 @@ public class Configuration {
         get { return settings.get_boolean(COMPOSE_AS_HTML_KEY); }
         set { set_boolean(COMPOSE_AS_HTML_KEY, value); }
     }
+
+    public double conversation_viewer_zoom {
+        get { return settings.get_double(CONVERSATION_VIEWER_ZOOM_KEY); }
+        set { settings.set_double(CONVERSATION_VIEWER_ZOOM_KEY, value); }
+    }
+
 
     // Creates a configuration object.
     public Configuration(string schema_id) {
