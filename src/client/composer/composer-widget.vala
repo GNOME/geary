@@ -2151,7 +2151,8 @@ public class ComposerWidget : Gtk.EventBox {
             && get_action(ACTION_COMPOSE_AS_HTML).state.get_boolean());
 
         // Style formatting actions.
-        WebKit.DOM.DOMWindow window = this.editor.get_dom_document().get_default_view();
+        WebKit.DOM.Document document = this.editor.get_dom_document();
+        WebKit.DOM.DOMWindow window = document.get_default_view();
         WebKit.DOM.DOMSelection? selection = window.get_selection();
         if (selection == null)
             return;
@@ -2166,14 +2167,13 @@ public class ComposerWidget : Gtk.EventBox {
         if (active != null) {
             WebKit.DOM.CSSStyleDeclaration styles = window.get_computed_style(active, "");
 
-            this.actions.change_action_state(ACTION_BOLD,
-                styles.get_property_value("font-weight") == "bold");
+            this.actions.change_action_state(ACTION_BOLD, document.query_command_state("bold"));
             this.actions.change_action_state(ACTION_ITALIC,
-                styles.get_property_value("font-style") == "italic");
+                document.query_command_state("italic"));
             this.actions.change_action_state(ACTION_UNDERLINE,
-                styles.get_property_value("text-decoration") == "underline");
+                document.query_command_state("underline"));
             this.actions.change_action_state(ACTION_STRIKETHROUGH,
-                styles.get_property_value("text-decoration") == "line-through");
+                document.query_command_state("strikethrough"));
 
             // Font family.
             string font_name = styles.get_property_value("font-family").down();
