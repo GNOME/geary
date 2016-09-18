@@ -40,6 +40,9 @@ public class ConversationListBox : Gtk.ListBox {
     // account.
     private const int EMAIL_TOP_OFFSET = 92;
 
+    // Loading spinner timeout
+    private const int LOADING_TIMEOUT_MSEC = 150;
+
 
     // Custom class used to display ConversationEmail views in the
     // conversation listbox.
@@ -180,6 +183,8 @@ public class ConversationListBox : Gtk.ListBox {
     // Cached search terms to apply to new messages
     private Gee.Set<string>? ordered_search_terms = null;
 
+    private uint loading_timeout_id = 0;
+
 
     /** Fired when an email view is added to the conversation list. */
     public signal void email_added(ConversationEmail email);
@@ -229,9 +234,23 @@ public class ConversationListBox : Gtk.ListBox {
         this.conversation.appended.connect(on_conversation_appended);
         this.conversation.trimmed.connect(on_conversation_trimmed);
         this.conversation.email_flags_changed.connect(on_update_flags);
+
+        // If the load is taking too long, display a spinner
+        this.loading_timeout_id =
+            Timeout.add(LOADING_TIMEOUT_MSEC, () => {
+                if (this.loading_timeout_id != 0) {
+                    debug("Loading timed out\n");
+                    show_loading();
+                }
+                this.loading_timeout_id = 0;
+                return false;
+            });
     }
 
     public override void destroy() {
+        if (this.loading_timeout_id != 0) {
+            Source.remove(this.loading_timeout_id);
+        }
         this.cancellable.cancel();
         this.id_to_row.clear();
         base.destroy();
@@ -252,7 +271,7 @@ public class ConversationListBox : Gtk.ListBox {
         // Add them all
         foreach (Geary.Email full_email in full_emails) {
             if (this.cancellable.is_cancelled()) {
-                return;
+                break;
             }
             if (!this.id_to_row.contains(full_email.id)) {
                 EmailRow row = add_email(full_email);
@@ -293,9 +312,12 @@ public class ConversationListBox : Gtk.ListBox {
                         }
                     }
                 });
-        
+
             debug("Conversation loading complete");
         }
+
+        this.loading_timeout_id = 0;
+        set_placeholder(null);
     }
 
     /**
@@ -636,6 +658,13 @@ public class ConversationListBox : Gtk.ListBox {
             remove(row);
             email_removed(row.view);
         }
+    }
+
+    private void show_loading() {
+        Gtk.Spinner spinner = new Gtk.Spinner();
+        spinner.start();
+        spinner.show();
+        set_placeholder(spinner);
     }
 
     private void scroll_to(EmailRow row) {

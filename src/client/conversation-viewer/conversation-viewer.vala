@@ -12,8 +12,6 @@
 [GtkTemplate (ui = "/org/gnome/Geary/conversation-viewer.ui")]
 public class ConversationViewer : Gtk.Stack {
 
-    private const int SELECT_CONVERSATION_TIMEOUT_MSEC = 100;
-
     /**
      * The current conversation listbox, if any.
      */
@@ -58,8 +56,6 @@ public class ConversationViewer : Gtk.Stack {
 
     [GtkChild]
     private Gtk.Button conversation_find_prev;
-
-    private uint conversation_timeout_id = 0;
 
 
     /* Emitted when a new conversation list was added to this view. */
@@ -170,22 +166,6 @@ public class ConversationViewer : Gtk.Stack {
     public async void load_conversation(Geary.App.Conversation conversation,
                                         Geary.Folder location)
         throws Error {
-        // If the load is taking too long, display the spinner
-        if (this.conversation_timeout_id != 0) {
-            Source.remove(this.conversation_timeout_id);
-        }
-        this.conversation_timeout_id =
-            Timeout.add(SELECT_CONVERSATION_TIMEOUT_MSEC, () => {
-                if (this.conversation_timeout_id != 0) {
-                    debug("Loading timed out\n");
-                    // XXX should disable message buttons here, so
-                    // need to move this timer to the controller.
-                    show_loading();
-                }
-                this.conversation_timeout_id = 0;
-                return false;
-            });
-
         Geary.Account account = location.account;
         ConversationListBox new_list = new ConversationListBox(
             conversation,
@@ -202,7 +182,6 @@ public class ConversationViewer : Gtk.Stack {
         // during loading.
         this.conversation_added(new_list);
 
-        yield new_list.load_conversation();
         // Also set up find infrastructure early so matching emails
         // are expanded and highlighted as they are added.
         this.conversation_find_next.set_sensitive(false);
@@ -219,7 +198,9 @@ public class ConversationViewer : Gtk.Stack {
         remove_current_list();
         add_new_list(new_list);
         set_visible_child(this.conversation_page);
-        this.conversation_timeout_id = 0;
+
+        yield new_list.load_conversation();
+
         // Highlight matching terms from the search if it exists, but
         // don't clobber any find terms.
         if (find_terms == null && location is Geary.SearchFolder) {
@@ -270,7 +251,7 @@ public class ConversationViewer : Gtk.Stack {
         }
         base.set_visible_child(widget);
     }
-        
+
     private Gee.Set<string>? get_find_search_terms() {
         Gee.Set<string>? terms = null;
         string search = this.conversation_find_entry.get_text().strip();
