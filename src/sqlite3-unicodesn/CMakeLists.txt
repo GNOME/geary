@@ -23,9 +23,9 @@ add_definitions(
     -DSQLITE_ENABLE_FTS4_UNICODE61
 )
 
-if (SQLITE312_FOUND)
-    message(STATUS "SQLite 3.12 support: ON")
-    add_definitions(-DSQLITE_3_12)
+if (HAVE_FTS3_TOKENIZER)
+    message(STATUS "SQLite FTS3 tokenizer support: ON")
+    add_definitions(-DHAVE_FTS3_TOKENIZER)
 endif ()
 
 include_directories(

@@ -86,11 +86,42 @@ pkg_check_modules(LIBMESSAGINGMENU QUIET messaging-menu>=12.10.2)
 
 pkg_check_modules(ENCHANT QUIET enchant)
 
-pkg_check_modules(SQLITE311 QUIET sqlite3>=3.11.0)
-pkg_check_modules(SQLITE312 QUIET sqlite3>=3.12.0)
-if (SQLITE311_FOUND AND NOT SQLITE312_FOUND)
-    message(WARNING "SQLite 3.11.x found. Ensure it has been compiled with -DSQLITE_ENABLE_FTS3_TOKENIZER or upgrade to SQLite 3.12.x. See https://bugzilla.gnome.org/show_bug.cgi?id=763203 for details.")
-endif ()
+pkg_check_modules(SQLITE3 sqlite3)
+if (NOT ${SQLITE3_VERSION} VERSION_LESS 3.12)
+  include(CheckSymbolExists)
+  check_symbol_exists(SQLITE_DBCONFIG_ENABLE_FTS3_TOKENIZER sqlite3.h HAVE_FTS3_TOKENIZER)
+    if (NOT HAVE_FTS3_TOKENIZER)
+        message(FATAL_ERROR "SQLite3 is missing FTS3 tokenizer support. Please compile it with -DSQLITE_ENABLE_FTS3."
+                            " See https://bugzilla.gnome.org/show_bug.cgi?id=763203 for details.")
+    endif()
+else()
+  # detect that the current sqlite3 library has FTS3 support (at run time)
+  include(CMakePushCheckState)
+  include(CheckCSourceRuns)
+  cmake_push_check_state(RESET)
+  set(CMAKE_REQUIRED_LIBRARIES sqlite3)
+  check_c_source_runs("
+      #include <sqlite3.h>
+      #include <stdlib.h>
+      int main() {
+          sqlite3 *db;
+          char tmpfile[] = \"sqliteXXXXXX\";
+          mkstemp(tmpfile);
+          if (sqlite3_open(tmpfile, &db) == SQLITE_OK) {
+              return sqlite3_exec(db, \"CREATE VIRTUAL TABLE mail USING fts3(subject, body);\", 0, 0, 0);
+          }
+          return -1;
+      }
+  " HAVE_FTS3)
+  cmake_pop_check_state()
+  if (NOT HAVE_FTS3)
+      if (${SQLITE3_VERSION} VERSION_LESS 3.11)
+          message(FATAL_ERROR "SQLite3 is missing FTS3 support. Please compile it with -DSQLITE_ENABLE_FTS3.")
+      else()
+          message(FATAL_ERROR "SQLite3 is missing FTS3 tokenizer support. Please compile it with -DSQLITE_ENABLE_FTS3 -DSQLITE_ENABLE_FTS3_TOKENIZER.")
+      endif()
+  endif()
+endif()
 
 # intl
 include(Gettext)

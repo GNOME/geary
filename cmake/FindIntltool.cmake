@@ -18,13 +18,13 @@ if (INTLTOOL_MERGE_FOUND)
                 ${CMAKE_CURRENT_SOURCE_DIR}/${appstream_name}.in ${appstream_name}
         )
         install (FILES ${CMAKE_CURRENT_BINARY_DIR}/${appstream_name} DESTINATION ${CMAKE_INSTALL_PREFIX}/share/appdata)
-    endmacro (INTLTOOL_MERGE_DESKTOP appstream_name po_dir)
+    endmacro (INTLTOOL_MERGE_APPDATA appstream_name po_dir)
     macro (INTLTOOL_MERGE_DESKTOP desktop_id po_dir)
         add_custom_target (geary.desktop ALL
             ${INTLTOOL_MERGE_EXECUTABLE} --desktop-style ${CMAKE_SOURCE_DIR}/${po_dir}
                 ${CMAKE_CURRENT_SOURCE_DIR}/${desktop_id}.in ${desktop_id}
         )
-        install (FILES ${CMAKE_CURRENT_BINARY_DIR}/geary.desktop DESTINATION ${CMAKE_INSTALL_PREFIX}/share/applications) 
+        install (FILES ${CMAKE_CURRENT_BINARY_DIR}/geary.desktop DESTINATION ${CMAKE_INSTALL_PREFIX}/share/applications)
     endmacro (INTLTOOL_MERGE_DESKTOP desktop_id po_dir)
     macro (INTLTOOL_MERGE_AUTOSTART_DESKTOP desktop_id po_dir)
         add_custom_target (geary-autostart.desktop ALL
