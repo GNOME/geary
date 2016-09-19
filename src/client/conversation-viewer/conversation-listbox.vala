@@ -52,6 +52,11 @@ public class ConversationListBox : Gtk.ListBox {
         private const string LAST_CLASS = "geary-last";
         private const string MATCH_CLASS = "geary-match";
 
+        // The email view for this row
+        public ConversationEmail view { get; private set; }
+
+        // The embedded composer for this row, if any
+        public ComposerEmbed composer { get; private set; default = null; }
 
         // Is the row showing the email's message body or just headers?
         public bool is_expanded { get; private set; default = false; }
@@ -76,6 +81,8 @@ public class ConversationListBox : Gtk.ListBox {
             set { set_style_context_class(LAST_CLASS, value); }
         }
 
+        private Gtk.Grid container = new Gtk.Grid();
+
 
         // We can only scroll to a specific row once it has been
         // allocated space. This signal allows the viewer to hook up
@@ -83,12 +90,14 @@ public class ConversationListBox : Gtk.ListBox {
         public signal void should_scroll();
 
 
-        public ConversationEmail view {
-            get { return (ConversationEmail) get_child(); }
-        }
-
         public EmailRow(ConversationEmail view) {
-            add(view);
+            this.view = view;
+
+            this.container.set_orientation(Gtk.Orientation.VERTICAL);
+            this.container.show();
+            this.container.add(view);
+
+            add(this.container);
         }
 
         public new void expand() {
@@ -100,6 +109,26 @@ public class ConversationListBox : Gtk.ListBox {
             this.is_expanded = false;
             this.is_pinned = false;
             update_row_expansion();
+        }
+
+        /**
+         * Attach an embedded composer to this email view.
+         */
+        public void attach_composer(ComposerEmbed embed, bool is_draft) {
+            this.composer = embed;
+            this.container.add(embed);
+            if (is_draft) {
+                this.view.hide();
+            }
+        }
+
+        /**
+         * Detaches an embedded composer to this email view.
+         */
+        public void remove_composer(ComposerEmbed embed) {
+            this.view.show();
+            this.container.remove(embed);
+            this.composer = null;
         }
 
         public void enable_should_scroll() {
@@ -143,9 +172,10 @@ public class ConversationListBox : Gtk.ListBox {
 
 
     private static int on_sort(Gtk.ListBoxRow row1, Gtk.ListBoxRow row2) {
-        ConversationEmail? msg1 = row1.get_child() as ConversationEmail;
-        ConversationEmail? msg2 = row2.get_child() as ConversationEmail;
-        return Geary.Email.compare_sent_date_ascending(msg1.email, msg2.email);
+        return Geary.Email.compare_sent_date_ascending(
+            ((EmailRow) row1).view.email,
+            ((EmailRow) row2).view.email
+        );
     }
 
 
@@ -356,15 +386,15 @@ public class ConversationListBox : Gtk.ListBox {
     /**
      * Adds an an embedded composer to the view.
      */
-    public void add_embedded_composer(ComposerEmbed embed) {
+    public void add_embedded_composer(ComposerEmbed embed, bool is_draft) {
         EmailRow? row = this.id_to_row.get(embed.referred.id);
         if (row != null) {
-            row.view.attach_composer(embed);
+            row.attach_composer(embed, is_draft);
             embed.loaded.connect((box) => {
-                    embed.grab_focus();
+                    row.grab_focus();
                 });
             embed.vanished.connect((box) => {
-                    row.view.remove_composer(embed);
+                    row.remove_composer(embed);
                 });
         } else {
             error("Could not find referred email for embedded composer: %s",
@@ -734,7 +764,7 @@ public class ConversationListBox : Gtk.ListBox {
      */
     private Gee.Iterator<ConversationEmail> email_view_iterator() {
         return this.id_to_row.values.map<ConversationEmail>((row) => {
-                return (ConversationEmail) row.get_child();
+                return ((EmailRow) row).view;
             });
     }
 
@@ -846,7 +876,7 @@ public class ConversationListBox : Gtk.ListBox {
         // be appended last. Finally, don't let rows with active
         // composers be collapsed.
         if (row.is_expanded) {
-            if (this.last_email_row != row && row.view.composer == null) {
+            if (this.last_email_row != row && row.composer == null) {
                 row.collapse();
             }
         } else {

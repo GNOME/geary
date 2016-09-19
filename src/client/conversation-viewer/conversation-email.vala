@@ -260,9 +260,6 @@ public class ConversationEmail : Gtk.Box {
     /** Determines if all message's web views have finished loading. */
     public bool message_bodies_loaded { get; private set; default = false; }
 
-    /** The embedded composer for this email, if any. */
-    public ComposerEmbed composer { get; private set; default = null; }
-
     // Backing for attached_messages
     private Gee.List<ConversationMessage> _attached_messages =
         new Gee.LinkedList<ConversationMessage>();
@@ -559,22 +556,6 @@ public class ConversationEmail : Gtk.Box {
         return (this.body_selection_message != null)
             ? this.body_selection_message.get_selection_for_find()
             : null;
-    }
-
-    /**
-     * Attach an embedded composer to this email view.
-     */
-    public void attach_composer(ComposerEmbed embed) {
-        this.composer = embed;
-        add(embed);
-    }
-
-    /**
-     * Detaches an embedded composer to this email view.
-     */
-    public void remove_composer(ComposerEmbed embed) {
-        remove(embed);
-        this.composer = null;
     }
 
     /**

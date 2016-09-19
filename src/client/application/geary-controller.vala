@@ -2271,7 +2271,7 @@ public class GearyController : Geary.BaseObject {
                     main_window.conversation_viewer.conversation_scroller
                 );
                 if (conversation_view != null) {
-                    conversation_view.add_embedded_composer(embed);
+                    conversation_view.add_embedded_composer(embed, is_draft);
                 }
             }
         } else {
