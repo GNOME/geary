@@ -595,6 +595,7 @@
                         <property name="can_focus">True</property>
                         <property name="hscrollbar_policy">automatic</property>
                         <property name="vscrollbar_policy">automatic</property>
+                        <property name="min_content_height">200</property>
                         <child>
                           <placeholder />
                         </child>
