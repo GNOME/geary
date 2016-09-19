@@ -43,7 +43,7 @@ public class ConversationViewer : Gtk.Stack {
     private Gtk.Grid composer_page;
 
     [GtkChild]
-    internal Gtk.ScrolledWindow conversation_scroller;
+    private Gtk.ScrolledWindow conversation_scroller;
 
     [GtkChild]
     internal Gtk.SearchBar conversation_find_bar;
@@ -123,6 +123,23 @@ public class ConversationViewer : Gtk.Stack {
             });
         this.composer_page.add(box);
         set_visible_child(this.composer_page);
+    }
+
+    /**
+     * Puts the view into composer mode, showing an embedded composer.
+     */
+    public void do_compose_embedded(ComposerWidget composer,
+                                    Geary.Email? referred,
+                                    bool is_draft) {
+        ComposerEmbed embed = new ComposerEmbed(
+            referred,
+            composer,
+            this.conversation_scroller
+        );
+
+        if (this.current_list != null) {
+            this.current_list.add_embedded_composer(embed, is_draft);
+        }
     }
 
     /**

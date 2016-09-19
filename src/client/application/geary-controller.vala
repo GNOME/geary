@@ -2226,9 +2226,6 @@ public class GearyController : Geary.BaseObject {
         if (!should_create_new_composer(compose_type, referred, quote, is_draft, out inline))
             return;
 
-        ConversationListBox? conversation_view =
-            main_window.conversation_viewer.current_list;
-
         ComposerWidget widget;
         if (mailto != null) {
             widget = new ComposerWidget.from_mailto(current_account, mailto);
@@ -2265,14 +2262,11 @@ public class GearyController : Geary.BaseObject {
                     ACTION_FIND_IN_CONVERSATION
                 ).set_sensitive(false);
             } else {
-                ComposerEmbed embed = new ComposerEmbed(
-                    referred,
+                main_window.conversation_viewer.do_compose_embedded(
                     widget,
-                    main_window.conversation_viewer.conversation_scroller
+                    referred,
+                    is_draft
                 );
-                if (conversation_view != null) {
-                    conversation_view.add_embedded_composer(embed, is_draft);
-                }
             }
         } else {
             new ComposerWindow(widget);
