@@ -57,8 +57,7 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
     private void on_realize() {
         update_style();
 
-        Gtk.ScrolledWindow win = (Gtk.ScrolledWindow) this.composer.editor.parent;
-        win.get_vscrollbar().hide();
+        this.composer.editor_scrolled.get_vscrollbar().hide();
 
         this.composer.editor.vadjustment.value_changed.connect(on_inner_scroll);
         this.composer.editor.vadjustment.changed.connect(on_adjust_changed);
@@ -122,8 +121,7 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
         this.composer.editor.vadjustment.value_changed.disconnect(on_inner_scroll);
         this.composer.editor.user_changed_contents.disconnect(on_inner_size_changed);
         disable_scroll_reroute(this);
-        Gtk.ScrolledWindow win = (Gtk.ScrolledWindow) composer.editor.parent;
-        win.get_vscrollbar().show();
+        this.composer.editor_scrolled.get_vscrollbar().show();
 
         try {
             this.composer.editor.get_dom_document().body.get_class_list().remove("embedded");

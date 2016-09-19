@@ -274,6 +274,9 @@ public class ComposerWidget : Gtk.EventBox {
 
     public string window_title { get; set; }
 
+    [GtkChild]
+    internal Gtk.ScrolledWindow editor_scrolled;
+
     private ContactListStore? contact_list_store = null;
 
     private string? body_html = null;
@@ -339,8 +342,6 @@ public class ComposerWidget : Gtk.EventBox {
     private Gtk.Label info_label;
     [GtkChild]
     private Gtk.Box message_area;
-    [GtkChild]
-    private Gtk.ScrolledWindow editor_scrolled;
 
     private Menu html_menu;
     private Menu plain_menu;
