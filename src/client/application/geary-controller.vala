@@ -2243,17 +2243,14 @@ public class GearyController : Geary.BaseObject {
                     message("Could not load full message: %s", e.message);
                 }
             }
-            
+
             widget = new ComposerWidget(current_account, compose_type, full, quote, is_draft);
             if (is_draft) {
                 yield widget.restore_draft_state_async(current_account);
-                if (conversation_view != null) {
-                    conversation_view.blacklist_by_id(referred.id);
-                }
             }
         }
         widget.show_all();
-        
+
         // We want to keep track of the open composer windows, so we can allow the user to cancel
         // an exit without losing their data.
         composer_widgets.add(widget);

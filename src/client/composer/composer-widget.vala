@@ -379,6 +379,10 @@ public class ComposerWidget : Gtk.EventBox {
         get { return (ComposerContainer) parent; }
     }
 
+
+    public signal void draft_id_changed(Geary.EmailIdentifier id);
+
+
     public ComposerWidget(Geary.Account account, ComposeType compose_type,
         Geary.Email? referred = null, string? quote = null, bool is_referred_draft = false) {
         this.account = account;
@@ -548,18 +552,6 @@ public class ComposerWidget : Gtk.EventBox {
         chain.append(this.composer_toolbar);
         chain.append(this.attachments_box);
         this.composer_container.set_focus_chain(chain);
-
-        // Remind the conversation viewer of draft ids when it
-        // reloads. Need to use the signal handler's viewer instance
-        // to avoid some sort of ref that is preventing the composer
-        // from being finalised when closed.
-        ConversationViewer conversation_viewer =
-            GearyApplication.instance.controller.main_window.conversation_viewer;
-        conversation_viewer.conversation_added.connect((list_view) => {
-                if (this.draft_manager != null) {
-                    list_view.blacklist_by_id(this.draft_manager.current_draft_id);
-                }
-        });
 
         // Don't do this in an overridden version of the destroy
         // method, it somehow ends up in an infinite loop
@@ -1414,11 +1406,7 @@ public class ComposerWidget : Gtk.EventBox {
     }
 
     private void on_draft_id_changed() {
-        ConversationListBox? list_view =
-            GearyApplication.instance.controller.main_window.conversation_viewer.current_list;
-        if (list_view != null) {
-            list_view.blacklist_by_id(this.draft_manager.current_draft_id);
-        }
+        draft_id_changed(this.draft_manager.current_draft_id);
     }
 
     private void on_draft_manager_fatal(Error err) {
@@ -1517,11 +1505,6 @@ public class ComposerWidget : Gtk.EventBox {
             yield close_draft_manager_async(null);
         } catch (Error err) {
             // ignored
-        }
-        ConversationListBox? list_view =
-            GearyApplication.instance.controller.main_window.conversation_viewer.current_list;
-        if (this.draft_manager != null && list_view != null) {
-            list_view.unblacklist_by_id(this.draft_manager.current_draft_id);
         }
         container.close_container();
     }

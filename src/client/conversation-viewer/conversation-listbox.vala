@@ -445,28 +445,6 @@ public class ConversationListBox : Gtk.ListBox {
     }
 
     /**
-     * Hides a specific email in the conversation.
-     */
-    public void blacklist_by_id(Geary.EmailIdentifier? id) {
-        EmailRow? row = this.id_to_row.get(id);
-        if (row != null) {
-            row.hide();
-            update_last_row();
-        }
-    }
-
-    /**
-     * Re-displays a previously blacklisted email.
-     */
-    public void unblacklist_by_id(Geary.EmailIdentifier? id) {
-        EmailRow? row = this.id_to_row.get(id);
-        if (row != null) {
-            row.show();
-            update_last_row();
-        }
-    }
-
-    /**
      * Loads search term matches for this list's emails.
      */
     public async void load_search_terms() {
