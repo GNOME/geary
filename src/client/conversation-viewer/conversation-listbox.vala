@@ -648,7 +648,8 @@ public class ConversationListBox : Gtk.ListBox {
 
         // Expand interesting messages by default
         if (email.is_unread().is_certain() ||
-            email.is_flagged().is_certain()) {
+            email.is_flagged().is_certain() ||
+            is_draft) {
             row.expand();
         }
 
