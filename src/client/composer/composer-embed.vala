@@ -119,7 +119,9 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
         this.composer.editor.focus_out_event.disconnect(on_focus_out);
 
         this.composer.editor.vadjustment.value_changed.disconnect(on_inner_scroll);
+        this.composer.editor.vadjustment.changed.disconnect(on_adjust_changed);
         this.composer.editor.user_changed_contents.disconnect(on_inner_size_changed);
+
         disable_scroll_reroute(this);
         this.composer.editor_scrolled.get_vscrollbar().show();
 
@@ -129,7 +131,7 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
             debug("Error setting class of editor: %s", error.message);
         }
 
-        remove(composer);
+        remove(this.composer);
         close_container();
     }
 
@@ -238,7 +240,7 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
     }
 
     public void close_container() {
-        if (visible)
+        if (this.visible)
             vanish();
         destroy();
     }

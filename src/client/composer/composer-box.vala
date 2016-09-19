@@ -18,28 +18,28 @@ public class ComposerBox : Gtk.Frame, ComposerContainer {
 
     protected Gee.MultiMap<string, string>? old_accelerators { get; set; }
 
+    private MainToolbar main_toolbar { get; private set; }
+
 
     public signal void vanished();
 
 
     public ComposerBox(ComposerWidget composer) {
         this.composer = composer;
+        this.composer.free_header();
+
+        this.main_toolbar = GearyApplication.instance.controller.main_window.main_toolbar;
+
         get_style_context().add_class("geary-composer-box");
         this.halign = Gtk.Align.FILL;
         this.vexpand = true;
         this.vexpand_set = true;
 
         add(this.composer);
+        this.main_toolbar.set_conversation_header(composer.header);
         this.composer.editor.focus_in_event.connect(on_focus_in);
         this.composer.editor.focus_out_event.connect(on_focus_out);
         show();
-
-        if (this.composer.state == ComposerWidget.ComposerState.NEW) {
-            this.composer.free_header();
-            GearyApplication.instance.controller.main_window.main_toolbar.set_conversation_header(
-                composer.header);
-            get_style_context().add_class("geary-full-pane");
-        }
     }
 
     public void remove_composer() {
@@ -54,18 +54,15 @@ public class ComposerBox : Gtk.Frame, ComposerContainer {
 
     public void vanish() {
         hide();
-        if (get_style_context().has_class("geary-full-pane"))
-            GearyApplication.instance.controller.main_window.main_toolbar.remove_conversation_header(
-                composer.header);
+        this.main_toolbar.remove_conversation_header(composer.header);
         this.composer.state = ComposerWidget.ComposerState.DETACHED;
         this.composer.editor.focus_in_event.disconnect(on_focus_in);
         this.composer.editor.focus_out_event.disconnect(on_focus_out);
-
         vanished();
     }
 
     public void close_container() {
-        if (visible)
+        if (this.visible)
             vanish();
         destroy();
     }
