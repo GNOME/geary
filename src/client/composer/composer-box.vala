@@ -24,13 +24,15 @@ public class ComposerBox : Gtk.Frame, ComposerContainer {
 
     public ComposerBox(ComposerWidget composer) {
         this.composer = composer;
+        get_style_context().add_class("geary-composer-box");
+        this.halign = Gtk.Align.FILL;
+        this.vexpand = true;
+        this.vexpand_set = true;
 
         add(this.composer);
         this.composer.editor.focus_in_event.connect(on_focus_in);
         this.composer.editor.focus_out_event.connect(on_focus_out);
         show();
-
-        get_style_context().add_class("geary-composer-box");
 
         if (this.composer.state == ComposerWidget.ComposerState.NEW) {
             this.composer.free_header();

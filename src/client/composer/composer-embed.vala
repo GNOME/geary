@@ -40,8 +40,11 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
         this.referred = referred;
         this.composer = composer;
         this.outer_scroller = outer_scroller;
+
+        get_style_context().add_class("geary-composer-embed");
         this.halign = Gtk.Align.FILL;
-        this.valign = Gtk.Align.FILL;
+        this.vexpand = true;
+        this.vexpand_set = true;
 
         add(composer);
         realize.connect(on_realize);
