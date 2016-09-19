@@ -761,7 +761,7 @@ public class ConversationMessage : Gtk.Grid {
             debug("Error loading Gravatar response: %s", err.message);
         }
 
-        if (avatar_buf != null) {
+        if (avatar_buf != null && !load_cancelled.is_cancelled()) {
             int window_scale = get_scale_factor();
             int avatar_size = this.avatar.pixel_size * window_scale;
             if (avatar_buf.width != avatar_size) {
