@@ -527,14 +527,19 @@ public class ComposerWidget : Gtk.EventBox {
         chain.append(this.attachments_box);
         this.composer_container.set_focus_chain(chain);
 
-        // Remind the conversation viewer of draft ids when it reloads
+        // Remind the conversation viewer of draft ids when it
+        // reloads. Need to use the signal handler's viewer instance
+        // to avoid some sort of ref that is preventing the composer
+        // from being finalised when closed.
         ConversationViewer conversation_viewer =
             GearyApplication.instance.controller.main_window.conversation_viewer;
-        conversation_viewer.cleared.connect(() => {
+        conversation_viewer.cleared.connect((viewer) => {
                 if (this.draft_manager != null)
-                    conversation_viewer.blacklist_by_id(this.draft_manager.current_draft_id);
+                    viewer.blacklist_by_id(this.draft_manager.current_draft_id);
         });
 
+        // Don't do this in an overridden version of the destroy
+        // method, it somehow ends up in an infinite loop
         destroy.connect(() => { close_draft_manager_async.begin(null); });
     }
 
