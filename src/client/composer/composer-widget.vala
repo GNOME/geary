@@ -1377,11 +1377,14 @@ public class ComposerWidget : Gtk.EventBox {
     throws Error {
         this.draft_save_text = "";
         yield close_draft_manager_async(cancellable);
-        
-        if (!account.information.save_drafts)
+
+        Gtk.Action close_and_save = this.actions.get_action(ACTION_CLOSE_SAVE);
+        if (!this.account.information.save_drafts) {
+            close_and_save.set_visible(false);
             return;
-        
-        draft_manager = new Geary.App.DraftManager(account);
+        }
+
+        this.draft_manager = new Geary.App.DraftManager(account);
         try {
             yield this.draft_manager.open_async(editing_draft_id, cancellable);
         } catch (Error err) {
@@ -1392,9 +1395,13 @@ public class ComposerWidget : Gtk.EventBox {
             throw err;
         }
         connect_to_draft_manager();
+
+        close_and_save.set_visible(true);
+        close_and_save.set_sensitive(true);
     }
     
     private async void close_draft_manager_async(Cancellable? cancellable) throws Error {
+        this.actions.get_action(ACTION_CLOSE_SAVE).set_sensitive(false);
         if (this.draft_manager == null)
             return;
         
