@@ -12,6 +12,9 @@ public class ComposerHeaderbar : Gtk.HeaderBar {
     public bool show_pending_attachments { get; set; default = false; }
 
     [GtkChild]
+    internal Gtk.Button save_and_close_button; // { get; private set; }
+
+    [GtkChild]
     private Gtk.Box detach_start;
     [GtkChild]
     private Gtk.Box detach_end;

@@ -462,7 +462,6 @@ public class ComposerWidget : Gtk.EventBox {
             editing_draft_id = fill_in_from_referred(referred, quote, is_referred_draft);
 
         update_from_field();
-        open_draft_manager_async.begin(editing_draft_id);
 
         // only add signature if the option is actually set and if this is not a draft
         if (this.account.information.use_email_signature && !is_referred_draft)
@@ -501,6 +500,8 @@ public class ComposerWidget : Gtk.EventBox {
         this.editor.navigation_policy_decision_requested.connect(on_navigation_policy_decision_requested);
         this.editor.new_window_policy_decision_requested.connect(on_navigation_policy_decision_requested);
 
+        open_draft_manager_async.begin(editing_draft_id);
+
         GearyApplication.instance.config.settings.changed[Configuration.SPELL_CHECK_KEY].connect(
             on_spell_check_changed);
 
@@ -530,8 +531,8 @@ public class ComposerWidget : Gtk.EventBox {
         ConversationViewer conversation_viewer =
             GearyApplication.instance.controller.main_window.conversation_viewer;
         conversation_viewer.cleared.connect(() => {
-            if (this.draft_manager != null)
-                conversation_viewer.blacklist_by_id(this.draft_manager.current_draft_id);
+                if (this.draft_manager != null)
+                    conversation_viewer.blacklist_by_id(this.draft_manager.current_draft_id);
         });
 
         destroy.connect(() => { close_draft_manager_async.begin(null); });
@@ -1334,8 +1335,11 @@ public class ComposerWidget : Gtk.EventBox {
         this.draft_save_text = "";
         yield close_draft_manager_async(cancellable);
 
-        if (!this.account.information.save_drafts)
+        SimpleAction close_and_save = get_action(ACTION_CLOSE_AND_SAVE);
+        if (!this.account.information.save_drafts) {
+            this.header.save_and_close_button.hide();
             return;
+        }
 
         this.draft_manager = new Geary.App.DraftManager(account);
         try {
@@ -1349,6 +1353,9 @@ public class ComposerWidget : Gtk.EventBox {
             throw err;
         }
 
+        close_and_save.set_enabled(true);
+        this.header.save_and_close_button.show();
+
         this.draft_manager.notify[Geary.App.DraftManager.PROP_DRAFT_STATE]
             .connect(on_draft_state_changed);
         this.draft_manager.notify[Geary.App.DraftManager.PROP_CURRENT_DRAFT_ID]
@@ -1357,6 +1364,7 @@ public class ComposerWidget : Gtk.EventBox {
     }
 
     private async void close_draft_manager_async(Cancellable? cancellable) throws Error {
+        get_action(ACTION_CLOSE_AND_SAVE).set_enabled(false);
         if (this.draft_manager == null)
             return;
 
