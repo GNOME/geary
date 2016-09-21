@@ -12,8 +12,8 @@ msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=internationalization\n"
-"POT-Creation-Date: 2016-09-05 02:15+0000\n"
-"PO-Revision-Date: 2016-09-10 09:09+0200\n"
+"POT-Creation-Date: 2016-09-21 16:22+0000\n"
+"PO-Revision-Date: 2016-09-21 21:33+0200\n"
 "Last-Translator: Marek Černocký <marek@manet.cz>\n"
 "Language-Team: čeština <gnome-cs-list@gnome.org>\n"
 "Language: cs\n"
@@ -72,7 +72,6 @@ msgid "Full-featured HTML and plain text message composer"
 msgstr "Plnohodnotný editor zpráv v HTML i prostém textu"
 
 #: ../desktop/geary.appdata.xml.in.h:10
-#| msgid "Show _notifications for new mail"
 msgid "Desktop notification of new mail"
 msgstr "Upozornění na nové zprávy přímo v uživatelském prostředí"
 
@@ -81,16 +80,14 @@ msgid "Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers"
 msgstr "Kompatibilitu s GMail, Yahoo! Mail, Outlook.com a dalšími servery IMAP"
 
 #: ../desktop/geary.desktop.in.h:2
-#| msgid "Gmail"
 msgid "Email"
 msgstr "E-mail"
 
 #: ../desktop/geary.desktop.in.h:3
-#| msgid "Geary Mail"
 msgid "Geary Email"
 msgstr "Pošta Geary"
 
-#. semicolons, end line with a semicolon.
+#. Translators: These are desktop search terms. Do not translate semicolons, end line with a semicolon.
 #: ../desktop/geary.desktop.in.h:6
 msgid "Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;"
 msgstr "pošta;mail;e-mail;elektronická pošta;imap;gmail;yahoo;hotmail;outlook;"
@@ -726,53 +723,53 @@ msgstr "Nah_radit"
 
 #. Find out what to do with the inline composers.
 #. TODO: Remove this in favor of automatically saving drafts
-#: ../src/client/application/geary-controller.vala:2301
+#: ../src/client/application/geary-controller.vala:2310
 msgid "Close open draft messages?"
 msgstr "Zavřít otevřený koncept zprávy?"
 
-#: ../src/client/application/geary-controller.vala:2431
+#: ../src/client/application/geary-controller.vala:2440
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Vyprázdnit všechny zprávy z vaší složky %s?"
 
-#: ../src/client/application/geary-controller.vala:2432
+#: ../src/client/application/geary-controller.vala:2441
 msgid "This removes the email from Geary and your email server."
 msgstr "Tímto se odstraní pošta z aplikace Geary i z poštovního serveru."
 
-#: ../src/client/application/geary-controller.vala:2433
+#: ../src/client/application/geary-controller.vala:2442
 msgid "This cannot be undone."
 msgstr "Nebude možné to vrátit zpět."
 
-#: ../src/client/application/geary-controller.vala:2434
+#: ../src/client/application/geary-controller.vala:2443
 #, c-format
 msgid "Empty %s"
 msgstr "Vyprázdnit %s"
 
-#: ../src/client/application/geary-controller.vala:2451
+#: ../src/client/application/geary-controller.vala:2460
 #, c-format
 msgid "Error emptying %s"
 msgstr "Chyba při vyprazďňování složky %s"
 
-#: ../src/client/application/geary-controller.vala:2481
+#: ../src/client/application/geary-controller.vala:2490
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Chcete trvale smazat tuto zprávu?"
 msgstr[1] "Chcete trvale smazat tyto zprávy?"
 msgstr[2] "Chcete trvale smazat tyto zprávy?"
 
-#: ../src/client/application/geary-controller.vala:2483
+#: ../src/client/application/geary-controller.vala:2492
 msgid "Delete"
 msgstr "Smazat"
 
-#: ../src/client/application/geary-controller.vala:2514
+#: ../src/client/application/geary-controller.vala:2523
 msgid "Undo archive (Ctrl+Z)"
 msgstr "Zpět archivace (Ctrl+Z)"
 
-#: ../src/client/application/geary-controller.vala:2529
+#: ../src/client/application/geary-controller.vala:2538
 msgid "Undo trash (Ctrl+Z)"
 msgstr "Zpět přesunutí do koše (Ctrl+Z)"
 
-#: ../src/client/application/geary-controller.vala:2582
+#: ../src/client/application/geary-controller.vala:2591
 msgid "Undo (Ctrl+Z)"
 msgstr "Zpět (Ctrl+Z)"
 
@@ -857,39 +854,33 @@ msgstr "_Tisk…"
 msgid "_Remove"
 msgstr "_Odstranit"
 
-#. Select all.
 #: ../src/client/components/stock.vala:32
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1358
-msgid "Select _All"
-msgstr "Vybrat _vše"
-
-#: ../src/client/components/stock.vala:33
 msgid "_Keep"
 msgstr "_Zachovat"
 
-#: ../src/client/composer/composer-widget.vala:71
+#: ../src/client/composer/composer-widget.vala:135
 msgid "Saved"
 msgstr "Uloženo"
 
-#: ../src/client/composer/composer-widget.vala:72
+#: ../src/client/composer/composer-widget.vala:136
 msgid "Saving"
 msgstr "Ukládá se"
 
-#: ../src/client/composer/composer-widget.vala:73
+#: ../src/client/composer/composer-widget.vala:137
 msgid "Error saving"
 msgstr "Chyba při ukládání"
 
-#: ../src/client/composer/composer-widget.vala:74
+#: ../src/client/composer/composer-widget.vala:138
 msgid "Press Backspace to delete quote"
 msgstr "Citaci smažete zmáčknutím Backspace"
 
-#: ../src/client/composer/composer-widget.vala:75
+#: ../src/client/composer/composer-widget.vala:139
 msgid "New Message"
 msgstr "Nová zpráva"
 
 #. A list of keywords, separated by pipe ("|") characters, that suggest an attachment; since
 #. this is full-word checking, include all variants of each word.  No spaces are allowed.
-#: ../src/client/composer/composer-widget.vala:136
+#: ../src/client/composer/composer-widget.vala:200
 msgid ""
 "attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|"
 "enclosing|encloses|enclosure|enclosures"
@@ -898,93 +889,93 @@ msgstr ""
 "přiloženým|přiloženou|přiložit|přikládám|přiložil|přikládá|přikládáme|"
 "přiložili|přiložily"
 
-#: ../src/client/composer/composer-widget.vala:1108
-#: ../src/client/composer/composer-widget.vala:1112
+#: ../src/client/composer/composer-widget.vala:1084
+#: ../src/client/composer/composer-widget.vala:1088
 msgid "Do you want to discard this message?"
 msgstr "Chcete zahodit tuto zprávu?"
 
-#: ../src/client/composer/composer-widget.vala:1268
+#: ../src/client/composer/composer-widget.vala:1243
 msgid "Send message with an empty subject and body?"
 msgstr "Poslat zprávu s prázdným předmětem a tělem?"
 
-#: ../src/client/composer/composer-widget.vala:1270
+#: ../src/client/composer/composer-widget.vala:1245
 msgid "Send message with an empty subject?"
 msgstr "Poslat zprávu s prázdným předmětem?"
 
-#: ../src/client/composer/composer-widget.vala:1272
+#: ../src/client/composer/composer-widget.vala:1247
 msgid "Send message with an empty body?"
 msgstr "Poslat zprávu s prázdným tělem?"
 
-#: ../src/client/composer/composer-widget.vala:1274
+#: ../src/client/composer/composer-widget.vala:1249
 msgid "Send message without an attachment?"
 msgstr "Poslat zprávu bez přílohy?"
 
-#: ../src/client/composer/composer-widget.vala:1530
+#: ../src/client/composer/composer-widget.vala:1505
 msgid "Cannot add attachment"
 msgstr "Nelze připojit přílohu"
 
-#: ../src/client/composer/composer-widget.vala:1541
+#: ../src/client/composer/composer-widget.vala:1516
 #, c-format
 msgid "\"%s\" could not be found."
 msgstr "Soubor „%s“ nebyl nalezen."
 
-#: ../src/client/composer/composer-widget.vala:1548
+#: ../src/client/composer/composer-widget.vala:1523
 #, c-format
 msgid "\"%s\" is a folder."
 msgstr "„%s“ je složka."
 
-#: ../src/client/composer/composer-widget.vala:1555
+#: ../src/client/composer/composer-widget.vala:1530
 #, c-format
 msgid "\"%s\" is an empty file."
 msgstr "Soubor „%s“ je prázdný."
 
-#: ../src/client/composer/composer-widget.vala:1569
+#: ../src/client/composer/composer-widget.vala:1544
 #, c-format
 msgid "\"%s\" could not be opened for reading."
 msgstr "Soubor „%s“ nemohl být otevřen pro čtení."
 
-#: ../src/client/composer/composer-widget.vala:1576
+#: ../src/client/composer/composer-widget.vala:1551
 #, c-format
 msgid "\"%s\" already attached for delivery."
 msgstr "Soubor „%s“ už byl pro doručení přiložen."
 
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
-#: ../src/client/composer/composer-widget.vala:1585
+#: ../src/client/composer/composer-widget.vala:1560
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: ../src/client/composer/composer-widget.vala:1646
+#: ../src/client/composer/composer-widget.vala:1623
 msgid "To: "
 msgstr "Komu: "
 
-#: ../src/client/composer/composer-widget.vala:1649
+#: ../src/client/composer/composer-widget.vala:1626
 msgid "Cc: "
 msgstr "Kopie: "
 
-#: ../src/client/composer/composer-widget.vala:1652
+#: ../src/client/composer/composer-widget.vala:1629
 msgid "Bcc: "
 msgstr "Skrytá kopie: "
 
-#: ../src/client/composer/composer-widget.vala:1655
+#: ../src/client/composer/composer-widget.vala:1632
 msgid "Reply-To: "
 msgstr "Odpověď:"
 
-#: ../src/client/composer/composer-widget.vala:1888
+#: ../src/client/composer/composer-widget.vala:1820
 msgid "Select Color"
 msgstr "Vybrat barvu"
 
 #. Displayed in the From dropdown to indicate an "alternate email address"
 #. for an account.  The first printf argument will be the alternate email
 #. address, and the second will be the account's primary email address.
-#: ../src/client/composer/composer-widget.vala:2335
+#: ../src/client/composer/composer-widget.vala:2221
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%1$s přes %2$s"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: ../src/client/composer/composer-widget.vala:2377
+#: ../src/client/composer/composer-widget.vala:2261
 msgid "_From:"
 msgstr "_Od:"
 
@@ -1071,7 +1062,7 @@ msgstr "Tato zpráva byla úspěšně odeslána, ale nelze ji uložit do %s"
 
 #. Add a menu item for copying the current selection.
 #: ../src/client/conversation-viewer/conversation-viewer.vala:1331
-#: ../ui/composer.glade.h:4
+#: ../ui/composer-menus.ui.h:13
 msgid "_Copy"
 msgstr "_Kopírovat"
 
@@ -1082,7 +1073,7 @@ msgstr "Kopírovat _e-mailovou adresu"
 
 #. Add a menu item for copying the link.
 #: ../src/client/conversation-viewer/conversation-viewer.vala:1344
-#: ../ui/composer.glade.h:17
+#: ../ui/composer-menus.ui.h:14
 msgid "Copy _Link"
 msgstr "Kopírovat _odkaz"
 
@@ -1090,6 +1081,12 @@ msgstr "Kopírovat _odkaz"
 #: ../src/client/conversation-viewer/conversation-viewer.vala:1352
 msgid "Select _Message"
 msgstr "Vybrat _zprávu"
+
+#. Select all.
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1358
+#: ../ui/composer-menus.ui.h:17
+msgid "Select _All"
+msgstr "Vybrat _vše"
 
 #. Inspect.
 #: ../src/client/conversation-viewer/conversation-viewer.vala:1364
@@ -1163,7 +1160,7 @@ msgstr "žádný"
 msgid "Failed to open default text editor."
 msgstr "Nepodařilo se otevřít výchozí textový editor."
 
-#: ../src/client/conversation-viewer/conversation-web-view.vala:319
+#: ../src/client/conversation-viewer/conversation-web-view.vala:329
 #, c-format
 msgid "%s - Conversation Inspector"
 msgstr "%s – Inspektor konverzace"
@@ -1851,250 +1848,160 @@ msgstr "_Důvěřovat tomuto serveru"
 msgid "_Don't Trust This Server"
 msgstr "_Nedůvěřovat tomuto serveru"
 
-#: ../ui/composer.glade.h:1
-msgid "_Undo"
-msgstr "_Zpět"
+#: ../ui/composer-headerbar.ui.h:1
+msgid "Detach (Ctrl+D)"
+msgstr "Odpojit (Ctrl+D)"
 
-#: ../ui/composer.glade.h:2
-msgid "_Redo"
-msgstr "Zno_vu"
+#: ../ui/composer-headerbar.ui.h:2
+msgid "Attach File (Ctrl+T)"
+msgstr "Přiložit soubor (Ctrl+T)"
 
-#: ../ui/composer.glade.h:3
-msgid "Cu_t"
-msgstr "_Vyjmout"
+#: ../ui/composer-headerbar.ui.h:3
+msgid "Include Original Attachments"
+msgstr "Vložit původní přílohy"
 
-#: ../ui/composer.glade.h:5
-msgid "_Paste"
-msgstr "V_ložit"
+#: ../ui/composer-headerbar.ui.h:4
+msgid "Send (Ctrl+Enter)"
+msgstr "Odeslat (Ctrl+Enter)"
 
-#: ../ui/composer.glade.h:6
-msgid "_Left"
-msgstr "_Vlevo"
+#: ../ui/composer-headerbar.ui.h:5
+msgid "_Send"
+msgstr "_Odeslat"
 
-#: ../ui/composer.glade.h:7
-msgid "_Right"
-msgstr "_Vpravo"
+#: ../ui/composer-headerbar.ui.h:6
+msgid "Close and Discard"
+msgstr "Zahodit a zavřít"
 
-#: ../ui/composer.glade.h:8
-msgid "_Center"
-msgstr "Na _střed"
+#: ../ui/composer-headerbar.ui.h:7
+msgid "Close and Save"
+msgstr "Uložit a zavřít"
 
-#: ../ui/composer.glade.h:9
-msgid "_Justify"
-msgstr "Do _bloku"
+#: ../ui/composer-menus.ui.h:1
+msgid "S_ans Serif"
+msgstr "B_ezpatkové"
 
-#: ../ui/composer.glade.h:10
-msgid "Link (Ctrl+L)"
-msgstr "Odkaz (Ctrl+L)"
+#: ../ui/composer-menus.ui.h:2
+msgid "S_erif"
+msgstr "P_atkové"
 
-#: ../ui/composer.glade.h:11
+#: ../ui/composer-menus.ui.h:3
+msgid "_Fixed Width"
+msgstr "_Pevná šířka"
+
+#: ../ui/composer-menus.ui.h:4
+msgid "_Small"
+msgstr "_Malé"
+
+#: ../ui/composer-menus.ui.h:5
+msgid "_Medium"
+msgstr "_Střední"
+
+#: ../ui/composer-menus.ui.h:6
+msgid "Lar_ge"
+msgstr "Vel_ké"
+
+#: ../ui/composer-menus.ui.h:7
 msgid "C_olor"
 msgstr "B_arva"
 
-#: ../ui/composer.glade.h:12
-msgid "More options"
-msgstr "Další volby"
+#: ../ui/composer-menus.ui.h:8
+msgid "_Rich Text"
+msgstr "Fo_rmátovaný text"
 
-#: ../ui/composer.glade.h:13
-msgid "Quote text  (Ctrl+])"
-msgstr "Citace textu (Ctrl+])"
+#: ../ui/composer-menus.ui.h:9
+msgid "Show Extended Fields"
+msgstr "Zobrazit rozšiřující pole"
 
-#: ../ui/composer.glade.h:14
-msgid "Unquote text (Ctrl+[)"
-msgstr "Konec citace textu (Ctrl+[)"
+#: ../ui/composer-menus.ui.h:10
+msgid "_Undo"
+msgstr "_Zpět"
 
-#: ../ui/composer.glade.h:15
-msgid "Remove formatting (Ctrl+Space)"
-msgstr "Odstranit formátování (Ctrl+Space)"
+#: ../ui/composer-menus.ui.h:11
+msgid "_Redo"
+msgstr "Zno_vu"
 
-#: ../ui/composer.glade.h:16
+#: ../ui/composer-menus.ui.h:12
+msgid "Cu_t"
+msgstr "_Vyjmout"
+
+#: ../ui/composer-menus.ui.h:15
+msgid "_Paste"
+msgstr "V_ložit"
+
+#: ../ui/composer-menus.ui.h:16
 msgctxt "Clipboard paste with rich text"
 msgid "Paste _With Formatting"
 msgstr "Vložit _s formátováním"
 
-#: ../ui/composer.glade.h:18
-msgid "Bold (Ctrl+B)"
-msgstr "Tučný (Ctrl+B)"
-
-#: ../ui/composer.glade.h:19
-msgid "Italic (Ctrl+I)"
-msgstr "Kurzíva (Ctrl+I)"
-
-#: ../ui/composer.glade.h:20
-msgid "Underline (Ctrl+U)"
-msgstr "Podtržené (Ctrl+U)"
-
-#: ../ui/composer.glade.h:21
-msgid "Strikethrough (Ctrl+K)"
-msgstr "Přeškrtnuté (Ctrl+K)"
-
-#: ../ui/composer.glade.h:22
-msgid "_Rich Text"
-msgstr "Fo_rmátovaný text"
-
-#: ../ui/composer.glade.h:23
-msgid "Show Extended Fields"
-msgstr "Zobrazit rozšiřující pole"
-
-#: ../ui/composer.glade.h:24
-msgctxt "Label"
-msgid "Close and Save"
-msgstr "Uložit a zavřít"
-
-#: ../ui/composer.glade.h:25
-msgctxt "Short Label"
-msgid "Close and Save"
-msgstr "Uložit a zavřít"
-
-#: ../ui/composer.glade.h:26
-msgctxt "Tooltip"
-msgid "Close and Save"
-msgstr "Uložit a zavřít"
-
-#: ../ui/composer.glade.h:27
-msgctxt "Label"
-msgid "Close and Discard"
-msgstr "Zahodit a zavřít"
-
-#: ../ui/composer.glade.h:28
-msgctxt "Short Label"
-msgid "Close and Discard"
-msgstr "Zahodit a zavřít"
-
-#: ../ui/composer.glade.h:29
-msgctxt "Tooltip"
-msgid "Close and Discard"
-msgstr "Zahodit a zavřít"
-
-#: ../ui/composer.glade.h:30
-msgid "Lar_ge"
-msgstr "Vel_ké"
-
-#: ../ui/composer.glade.h:31
-msgid "Large"
-msgstr "Velké"
-
-#: ../ui/composer.glade.h:32
-msgid "_Medium"
-msgstr "_Střední"
-
-#: ../ui/composer.glade.h:33
-msgid "Medium"
-msgstr "Střední"
-
-#: ../ui/composer.glade.h:34
-msgid "_Small"
-msgstr "_Malé"
-
-#: ../ui/composer.glade.h:35
-msgid "Small"
-msgstr "Malé"
-
-#: ../ui/composer.glade.h:36
-msgid "S_ans Serif"
-msgstr "B_ezpatkové"
-
-#: ../ui/composer.glade.h:37
-msgid "Sans Serif"
-msgstr "Bezpatkové (sans serif)"
-
-#: ../ui/composer.glade.h:38
-msgid "S_erif"
-msgstr "P_atkové"
-
-#: ../ui/composer.glade.h:39
-msgid "Serif"
-msgstr "Patkové (serif)"
-
-#: ../ui/composer.glade.h:40
-msgid "_Fixed Width"
-msgstr "_Pevná šířka"
-
-#: ../ui/composer.glade.h:41
-msgid "Fixed Width"
-msgstr "Pevná šířka"
-
-#: ../ui/composer.glade.h:42
-msgid "Detach"
-msgstr "Odpojit"
-
-#: ../ui/composer.glade.h:43
-msgid "Detach (Ctrl+D)"
-msgstr "Odpojit (Ctrl+D)"
-
-#: ../ui/composer.glade.h:44
-msgid "_Send"
-msgstr "_Odeslat"
-
-#: ../ui/composer.glade.h:45
-msgid "Send"
-msgstr "Odeslat"
-
-#: ../ui/composer.glade.h:46
-msgid "Send (Ctrl+Enter)"
-msgstr "Odeslat (Ctrl+Enter)"
-
-#: ../ui/composer.glade.h:47
-msgid "_Attach File"
-msgstr "_Přiložit soubor"
-
-#: ../ui/composer.glade.h:48
-msgid "Attach File"
-msgstr "Přiložit soubor"
-
-#: ../ui/composer.glade.h:49
-msgid "Attach File (Ctrl+T)"
-msgstr "Přiložit soubor (Ctrl+T)"
-
-#: ../ui/composer.glade.h:50
-msgid "_Include Original Attachments"
-msgstr "Vlož_it původní přílohy"
-
-#: ../ui/composer.glade.h:51
-msgid "Include Original Attachments"
-msgstr "Vložit původní přílohy"
-
-#: ../ui/composer.glade.h:52
-msgid "Select spell checking language"
-msgstr "Vybrat jazyk pro kontrolu pravopisu"
-
-#: ../ui/composer.glade.h:53
-msgid "Spelling language"
-msgstr "Jazyk pro kontrolu pravopisu"
-
 #. Address(es) e-mail is to be sent to
-#: ../ui/composer.glade.h:55
+#: ../ui/composer-widget.ui.h:2
 msgid "_To"
 msgstr "_Komu"
 
-#: ../ui/composer.glade.h:56
+#: ../ui/composer-widget.ui.h:3
 msgid "_Cc"
 msgstr "Ko_pie"
 
-#: ../ui/composer.glade.h:57
+#: ../ui/composer-widget.ui.h:4
 msgid "_Subject"
 msgstr "_Předmět"
 
-#: ../ui/composer.glade.h:58
+#: ../ui/composer-widget.ui.h:5
 msgid "_Bcc"
 msgstr "_Skrytá kopie"
 
-#: ../ui/composer.glade.h:59
+#: ../ui/composer-widget.ui.h:6
 msgid "_Reply-To"
 msgstr "_Odpověď"
 
 #. Geary account mail will be sent from
-#: ../ui/composer.glade.h:61
+#: ../ui/composer-widget.ui.h:8
 msgid "From"
 msgstr "Od"
 
-#: ../ui/composer.glade.h:62
+#: ../ui/composer-widget.ui.h:9
 msgid "Drop files here"
 msgstr "upusťte soubory zde"
 
-#: ../ui/composer.glade.h:63
+#: ../ui/composer-widget.ui.h:10
 msgid "To add them as attachments"
 msgstr "Chcete-li je přidat jako přílohy"
+
+#: ../ui/composer-widget.ui.h:11
+msgid "Bold (Ctrl+B)"
+msgstr "Tučný (Ctrl+B)"
+
+#: ../ui/composer-widget.ui.h:12
+msgid "Italic (Ctrl+I)"
+msgstr "Kurzíva (Ctrl+I)"
+
+#: ../ui/composer-widget.ui.h:13
+msgid "Underline (Ctrl+U)"
+msgstr "Podtržené (Ctrl+U)"
+
+#: ../ui/composer-widget.ui.h:14
+msgid "Strikethrough (Ctrl+K)"
+msgstr "Přeškrtnuté (Ctrl+K)"
+
+#: ../ui/composer-widget.ui.h:15
+msgid "Quote text  (Ctrl+])"
+msgstr "Citace textu (Ctrl+])"
+
+#: ../ui/composer-widget.ui.h:16
+msgid "Unquote text  (Ctrl+[)"
+msgstr "Konec citace textu (Ctrl+[)"
+
+#: ../ui/composer-widget.ui.h:17
+msgid "Link (Ctrl+L)"
+msgstr "Odkaz (Ctrl+L)"
+
+#: ../ui/composer-widget.ui.h:18
+msgid "Remove formatting (Ctrl+Space)"
+msgstr "Odstranit formátování (Ctrl+Space)"
+
+#: ../ui/composer-widget.ui.h:19
+msgid "Select spell checking language"
+msgstr "Vybrat jazyk pro kontrolu pravopisu"
 
 #: ../ui/edit_alternate_emails.glade.h:1
 msgid "Remove email address"
@@ -2351,3 +2258,4 @@ msgstr "E-mailová adresa:"
 #: ../ui/upgrade_dialog.glade.h:1
 msgid "Geary update in progress…"
 msgstr "Probíhá aktualizace aplikace Geary…"
+
