@@ -75,33 +75,39 @@
     <section>
       <item>
         <attribute name="label" translatable="yes">_Undo</attribute>
-        <attribute name="action">undo</attribute>
+        <attribute name="action">cme.undo</attribute>
       </item>
       <item>
         <attribute name="label" translatable="yes">_Redo</attribute>
-        <attribute name="action">redo</attribute>
+        <attribute name="action">cme.redo</attribute>
       </item>
     </section>
     <section>
       <item>
         <attribute name="label" translatable="yes">Cu_t</attribute>
-        <attribute name="action">cut</attribute>
+        <attribute name="action">cme.cut</attribute>
       </item>
       <item>
         <attribute name="label" translatable="yes">_Copy</attribute>
-        <attribute name="action">copy</attribute>
+        <attribute name="action">cme.copy</attribute>
       </item>
       <item>
         <attribute name="label" translatable="yes">Copy _Link</attribute>
-        <attribute name="action">copy-link</attribute>
+        <attribute name="action">cme.copy-link</attribute>
       </item>
       <item>
         <attribute name="label" translatable="yes">_Paste</attribute>
-        <attribute name="action">paste</attribute>
+        <attribute name="action">cme.paste</attribute>
       </item>
       <item>
-        <attribute name="label" translatable="yes">Paste _With Formatting</attribute>
-        <attribute name="action">paste-with-formatting</attribute>
+        <attribute name="label" translatable="yes" context="Clipboard paste with rich text">Paste _With Formatting</attribute>
+        <attribute name="action">cme.paste-with-formatting</attribute>
+      </item>
+    </section>
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">Select _All</attribute>
+        <attribute name="action">cme.select-all</attribute>
       </item>
     </section>
   </menu>

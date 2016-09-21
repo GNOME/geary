@@ -46,6 +46,7 @@ public class ComposerWidget : Gtk.EventBox {
     private const string ACTION_COPY_LINK = "copy-link";
     private const string ACTION_PASTE = "paste";
     private const string ACTION_PASTE_WITH_FORMATTING = "paste-with-formatting";
+    private const string ACTION_SELECT_ALL = "select-all";
     private const string ACTION_BOLD = "bold";
     private const string ACTION_ITALIC = "italic";
     private const string ACTION_UNDERLINE = "underline";
@@ -71,7 +72,8 @@ public class ComposerWidget : Gtk.EventBox {
 
     private const string[] html_actions = {
         ACTION_BOLD, ACTION_ITALIC, ACTION_UNDERLINE, ACTION_STRIKETHROUGH, ACTION_FONT_SIZE,
-        ACTION_FONT_FAMILY, ACTION_REMOVE_FORMAT, ACTION_COLOR, ACTION_JUSTIFY, ACTION_INSERT_LINK
+        ACTION_FONT_FAMILY, ACTION_REMOVE_FORMAT, ACTION_COLOR, ACTION_JUSTIFY, ACTION_INSERT_LINK,
+        ACTION_COPY_LINK, ACTION_PASTE_WITH_FORMATTING
     };
 
     private const ActionEntry[] action_entries = {
@@ -83,6 +85,7 @@ public class ComposerWidget : Gtk.EventBox {
         {ACTION_COPY_LINK,                on_copy_link                                  },
         {ACTION_PASTE,                    on_paste                                      },
         {ACTION_PASTE_WITH_FORMATTING,    on_paste_with_formatting                      },
+        {ACTION_SELECT_ALL,               on_select_all                                 },
         {ACTION_BOLD,                     on_action,                null,      "false"  },
         {ACTION_ITALIC,                   on_action,                null,      "false"  },
         {ACTION_UNDERLINE,                on_action,                null,      "false"  },
@@ -1741,7 +1744,7 @@ public class ComposerWidget : Gtk.EventBox {
             this.editor.paste_clipboard();
     }
 
-    private void on_select_all() {
+    private void on_select_all(SimpleAction action, Variant? param) {
         this.editor.select_all();
     }
 
@@ -2011,42 +2014,36 @@ public class ComposerWidget : Gtk.EventBox {
     private bool on_context_menu(Gtk.Widget default_menu, WebKit.HitTestResult hit_test_result,
         bool keyboard_triggered) {
         Gtk.Menu context_menu = (Gtk.Menu) default_menu;
-        Gtk.MenuItem? ignore_spelling = null, learn_spelling = null;
-        bool suggestions = false;
 
-        GLib.List<weak Gtk.Widget> children = context_menu.get_children();
-        foreach (weak Gtk.Widget child in children) {
+        // Keep the spelling menu items
+        foreach (weak Gtk.Widget child in context_menu.get_children()) {
             Gtk.MenuItem item = (Gtk.MenuItem) child;
-            if (item.is_sensitive()) {
-                WebKit.ContextMenuAction action = WebKit.context_menu_item_get_action(item);
-                if (action == WebKit.ContextMenuAction.SPELLING_GUESS) {
-                    suggestions = true;
-                    continue;
-                }
+            WebKit.ContextMenuAction action = WebKit.context_menu_item_get_action(item);
 
-                if (action == WebKit.ContextMenuAction.IGNORE_SPELLING)
-                    ignore_spelling = item;
-                else if (action == WebKit.ContextMenuAction.LEARN_SPELLING)
-                    learn_spelling = item;
-            }
+            const WebKit.ContextMenuAction[] spelling_actions = {
+                WebKit.ContextMenuAction.SPELLING_GUESS,
+                WebKit.ContextMenuAction.IGNORE_SPELLING,
+                WebKit.ContextMenuAction.LEARN_SPELLING
+            };
+
+            if (!(action in spelling_actions))
+                context_menu.remove(item);
         }
 
+        // Add our own Menu (but don't add formatting actions if they are disabled).
         context_menu.insert_action_group("cme", this.actions);
-        context_menu.bind_model(this.context_menu_model, "cme", true);
-
-        if (suggestions)
-            context_menu.append(new Gtk.SeparatorMenuItem());
-        if (ignore_spelling != null)
-            context_menu.append(ignore_spelling);
-        if (learn_spelling != null)
-            context_menu.append(learn_spelling);
-        if (ignore_spelling != null || learn_spelling != null)
-            context_menu.append(new Gtk.SeparatorMenuItem());
-
-        // Select all.
-        Gtk.MenuItem select_all_item = new Gtk.MenuItem.with_mnemonic(Stock.SELECT__ALL);
-        select_all_item.activate.connect(on_select_all);
-        context_menu.append(select_all_item);
+        GtkUtil.add_g_menu_to_gtk_menu(context_menu, context_menu_model, (label, detailed_action_name) => {
+            string action_name;
+            Variant? target;
+            try {
+                Action.parse_detailed_name(detailed_action_name, out action_name, out target);
+                if ("." in action_name) // Remove possible prefixes
+                    action_name = action_name.split(".")[1];
+            } catch (GLib.Error e) {
+                debug("Couldn't parse action \"%s\" in context menu".printf(detailed_action_name));
+            }
+            return !(action_name in html_actions) || (this.actions.get_action_enabled(action_name));
+        });
 
         context_menu.show_all();
         update_actions();

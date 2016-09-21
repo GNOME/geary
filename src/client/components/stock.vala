@@ -29,7 +29,6 @@ public const string _PRINT_MENU = _("_Print...");
 public const string _QUIT = _("_Quit");
 public const string _REMOVE = _("_Remove");
 public const string _SAVE = _("_Save");
-public const string SELECT__ALL = _("Select _All");
 public const string _KEEP = _("_Keep");
 
 }
