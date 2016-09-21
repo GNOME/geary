@@ -16,8 +16,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-09-08 04:19+0200\n"
-"PO-Revision-Date: 2016-09-08 04:20+0200\n"
+"POT-Creation-Date: 2016-09-21 18:20+0200\n"
+"PO-Revision-Date: 2016-09-21 18:21+0200\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <community-poland@mozilla.org>\n"
 "Language: pl\n"
@@ -739,53 +739,53 @@ msgstr "_Zastąp"
 
 #. Find out what to do with the inline composers.
 #. TODO: Remove this in favor of automatically saving drafts
-#: ../src/client/application/geary-controller.vala:2301
+#: ../src/client/application/geary-controller.vala:2310
 msgid "Close open draft messages?"
 msgstr "Zamknąć otwarte szkice?"
 
-#: ../src/client/application/geary-controller.vala:2431
+#: ../src/client/application/geary-controller.vala:2440
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Usunąć wszystkie wiadomości z katalogu %s?"
 
-#: ../src/client/application/geary-controller.vala:2432
+#: ../src/client/application/geary-controller.vala:2441
 msgid "This removes the email from Geary and your email server."
 msgstr "Spowoduje to usunięcie wiadomości z programu Geary i serwera poczty."
 
-#: ../src/client/application/geary-controller.vala:2433
+#: ../src/client/application/geary-controller.vala:2442
 msgid "This cannot be undone."
 msgstr "Tego nie można cofnąć."
 
-#: ../src/client/application/geary-controller.vala:2434
+#: ../src/client/application/geary-controller.vala:2443
 #, c-format
 msgid "Empty %s"
 msgstr "Opróżnij %s"
 
-#: ../src/client/application/geary-controller.vala:2451
+#: ../src/client/application/geary-controller.vala:2460
 #, c-format
 msgid "Error emptying %s"
 msgstr "Błąd podczas opróżniania %s"
 
-#: ../src/client/application/geary-controller.vala:2481
+#: ../src/client/application/geary-controller.vala:2490
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Trwale usunąć tę wiadomość?"
 msgstr[1] "Trwale usunąć te wiadomości?"
 msgstr[2] "Trwale usunąć te wiadomości?"
 
-#: ../src/client/application/geary-controller.vala:2483
+#: ../src/client/application/geary-controller.vala:2492
 msgid "Delete"
 msgstr "Usuń"
 
-#: ../src/client/application/geary-controller.vala:2514
+#: ../src/client/application/geary-controller.vala:2523
 msgid "Undo archive (Ctrl+Z)"
 msgstr "Cofnij archiwizację (Ctrl+Z)"
 
-#: ../src/client/application/geary-controller.vala:2529
+#: ../src/client/application/geary-controller.vala:2538
 msgid "Undo trash (Ctrl+Z)"
 msgstr "Cofnij przeniesienie do kosza (Ctrl+Z)"
 
-#: ../src/client/application/geary-controller.vala:2582
+#: ../src/client/application/geary-controller.vala:2591
 msgid "Undo (Ctrl+Z)"
 msgstr "Cofnij (Ctrl+Z)"
 
@@ -871,39 +871,33 @@ msgstr "Wy_drukuj…"
 msgid "_Remove"
 msgstr "_Usuń"
 
-#. Select all.
 #: ../src/client/components/stock.vala:32
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1358
-msgid "Select _All"
-msgstr "Zaznacz _wszystko"
-
-#: ../src/client/components/stock.vala:33
 msgid "_Keep"
 msgstr "_Zachowaj"
 
-#: ../src/client/composer/composer-widget.vala:71
+#: ../src/client/composer/composer-widget.vala:135
 msgid "Saved"
 msgstr "Zapisano"
 
-#: ../src/client/composer/composer-widget.vala:72
+#: ../src/client/composer/composer-widget.vala:136
 msgid "Saving"
 msgstr "Zapisywanie"
 
-#: ../src/client/composer/composer-widget.vala:73
+#: ../src/client/composer/composer-widget.vala:137
 msgid "Error saving"
 msgstr "Błąd podczas zapisywania"
 
-#: ../src/client/composer/composer-widget.vala:74
+#: ../src/client/composer/composer-widget.vala:138
 msgid "Press Backspace to delete quote"
 msgstr "Naciśnięcie klawisza Backspace usunie cytat"
 
-#: ../src/client/composer/composer-widget.vala:75
+#: ../src/client/composer/composer-widget.vala:139
 msgid "New Message"
 msgstr "Nowa wiadomość"
 
 #. A list of keywords, separated by pipe ("|") characters, that suggest an attachment; since
 #. this is full-word checking, include all variants of each word.  No spaces are allowed.
-#: ../src/client/composer/composer-widget.vala:136
+#: ../src/client/composer/composer-widget.vala:200
 msgid ""
 "attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|"
 "enclosing|encloses|enclosure|enclosures"
@@ -912,93 +906,93 @@ msgstr ""
 "załączyłam|załączono|dołączyłem|dołączyłam|dołączono|zalacznik|zalaczam|"
 "zalaczylem|zalaczylam|zalaczono|dolaczylem|dolaczylam|dolaczono"
 
-#: ../src/client/composer/composer-widget.vala:1108
-#: ../src/client/composer/composer-widget.vala:1112
+#: ../src/client/composer/composer-widget.vala:1084
+#: ../src/client/composer/composer-widget.vala:1088
 msgid "Do you want to discard this message?"
 msgstr "Odrzucić tę wiadomość?"
 
-#: ../src/client/composer/composer-widget.vala:1268
+#: ../src/client/composer/composer-widget.vala:1243
 msgid "Send message with an empty subject and body?"
 msgstr "Wysłać wiadomość niezawierającą tematu i treści?"
 
-#: ../src/client/composer/composer-widget.vala:1270
+#: ../src/client/composer/composer-widget.vala:1245
 msgid "Send message with an empty subject?"
 msgstr "Wysłać wiadomość niezawierającą tematu?"
 
-#: ../src/client/composer/composer-widget.vala:1272
+#: ../src/client/composer/composer-widget.vala:1247
 msgid "Send message with an empty body?"
 msgstr "Wysłać wiadomość niezawierającą treści?"
 
-#: ../src/client/composer/composer-widget.vala:1274
+#: ../src/client/composer/composer-widget.vala:1249
 msgid "Send message without an attachment?"
 msgstr "Wysłać wiadomość niezawierającą załączników?"
 
-#: ../src/client/composer/composer-widget.vala:1530
+#: ../src/client/composer/composer-widget.vala:1505
 msgid "Cannot add attachment"
 msgstr "Nie można dodać załącznika"
 
-#: ../src/client/composer/composer-widget.vala:1541
+#: ../src/client/composer/composer-widget.vala:1516
 #, c-format
 msgid "\"%s\" could not be found."
 msgstr "Nie można odnaleźć „%s”."
 
-#: ../src/client/composer/composer-widget.vala:1548
+#: ../src/client/composer/composer-widget.vala:1523
 #, c-format
 msgid "\"%s\" is a folder."
 msgstr "„%s” jest katalogiem."
 
-#: ../src/client/composer/composer-widget.vala:1555
+#: ../src/client/composer/composer-widget.vala:1530
 #, c-format
 msgid "\"%s\" is an empty file."
 msgstr "„%s” jest pustym plikiem."
 
-#: ../src/client/composer/composer-widget.vala:1569
+#: ../src/client/composer/composer-widget.vala:1544
 #, c-format
 msgid "\"%s\" could not be opened for reading."
 msgstr "Nie można otworzyć „%s” do odczytania."
 
-#: ../src/client/composer/composer-widget.vala:1576
+#: ../src/client/composer/composer-widget.vala:1551
 #, c-format
 msgid "\"%s\" already attached for delivery."
 msgstr "Do wiadomości już załączono „%s”."
 
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
-#: ../src/client/composer/composer-widget.vala:1585
+#: ../src/client/composer/composer-widget.vala:1560
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: ../src/client/composer/composer-widget.vala:1646
+#: ../src/client/composer/composer-widget.vala:1623
 msgid "To: "
 msgstr "Do: "
 
-#: ../src/client/composer/composer-widget.vala:1649
+#: ../src/client/composer/composer-widget.vala:1626
 msgid "Cc: "
 msgstr "Dw: "
 
-#: ../src/client/composer/composer-widget.vala:1652
+#: ../src/client/composer/composer-widget.vala:1629
 msgid "Bcc: "
 msgstr "Udw: "
 
-#: ../src/client/composer/composer-widget.vala:1655
+#: ../src/client/composer/composer-widget.vala:1632
 msgid "Reply-To: "
 msgstr "Odpowiedź do: "
 
-#: ../src/client/composer/composer-widget.vala:1888
+#: ../src/client/composer/composer-widget.vala:1820
 msgid "Select Color"
 msgstr "Wybór koloru"
 
 #. Displayed in the From dropdown to indicate an "alternate email address"
 #. for an account.  The first printf argument will be the alternate email
 #. address, and the second will be the account's primary email address.
-#: ../src/client/composer/composer-widget.vala:2335
+#: ../src/client/composer/composer-widget.vala:2221
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%1$s przez %2$s"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: ../src/client/composer/composer-widget.vala:2377
+#: ../src/client/composer/composer-widget.vala:2261
 msgid "_From:"
 msgstr "_Od:"
 
@@ -1085,7 +1079,7 @@ msgstr "Pomyślnie wysłano tę wiadomość, ale nie można jej zapisać w %s."
 
 #. Add a menu item for copying the current selection.
 #: ../src/client/conversation-viewer/conversation-viewer.vala:1331
-#: ../ui/composer.glade.h:4
+#: ../ui/composer-menus.ui.h:13
 msgid "_Copy"
 msgstr "S_kopiuj"
 
@@ -1096,7 +1090,7 @@ msgstr "Skopiuj adres _e-mail"
 
 #. Add a menu item for copying the link.
 #: ../src/client/conversation-viewer/conversation-viewer.vala:1344
-#: ../ui/composer.glade.h:17
+#: ../ui/composer-menus.ui.h:14
 msgid "Copy _Link"
 msgstr "Skopiuj _odnośnik"
 
@@ -1104,6 +1098,12 @@ msgstr "Skopiuj _odnośnik"
 #: ../src/client/conversation-viewer/conversation-viewer.vala:1352
 msgid "Select _Message"
 msgstr "Zaznacz _wiadomość"
+
+#. Select all.
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1358
+#: ../ui/composer-menus.ui.h:17
+msgid "Select _All"
+msgstr "Zaznacz _wszystko"
 
 #. Inspect.
 #: ../src/client/conversation-viewer/conversation-viewer.vala:1364
@@ -1177,7 +1177,7 @@ msgstr "brak"
 msgid "Failed to open default text editor."
 msgstr "Otwarcie domyślnego edytora tekstu się nie powiodło."
 
-#: ../src/client/conversation-viewer/conversation-web-view.vala:319
+#: ../src/client/conversation-viewer/conversation-web-view.vala:329
 #, c-format
 msgid "%s - Conversation Inspector"
 msgstr "%s — inspektor wątków"
@@ -1861,250 +1861,160 @@ msgstr "Z_aufaj temu serwerowi"
 msgid "_Don't Trust This Server"
 msgstr "_Nie ufaj temu serwerowi"
 
-#: ../ui/composer.glade.h:1
-msgid "_Undo"
-msgstr "Cof_nij"
+#: ../ui/composer-headerbar.ui.h:1
+msgid "Detach (Ctrl+D)"
+msgstr "Odłącza (Ctrl+D)"
 
-#: ../ui/composer.glade.h:2
-msgid "_Redo"
-msgstr "P_onów"
+#: ../ui/composer-headerbar.ui.h:2
+msgid "Attach File (Ctrl+T)"
+msgstr "Załącza plik (Ctrl+T)"
 
-#: ../ui/composer.glade.h:3
-msgid "Cu_t"
-msgstr "_Wytnij"
+#: ../ui/composer-headerbar.ui.h:3
+msgid "Include Original Attachments"
+msgstr "Załącza oryginalne załączniki"
 
-#: ../ui/composer.glade.h:5
-msgid "_Paste"
-msgstr "Wk_lej"
+#: ../ui/composer-headerbar.ui.h:4
+msgid "Send (Ctrl+Enter)"
+msgstr "Wysyła (Ctrl+Enter)"
 
-#: ../ui/composer.glade.h:6
-msgid "_Left"
-msgstr "Wyrównanie w _lewo"
+#: ../ui/composer-headerbar.ui.h:5
+msgid "_Send"
+msgstr "_Wyślij"
 
-#: ../ui/composer.glade.h:7
-msgid "_Right"
-msgstr "Wy_równanie w prawo"
+#: ../ui/composer-headerbar.ui.h:6
+msgid "Close and Discard"
+msgstr "Zamyka i odrzuca"
 
-#: ../ui/composer.glade.h:8
-msgid "_Center"
-msgstr "Wyśro_dkowanie"
+#: ../ui/composer-headerbar.ui.h:7
+msgid "Close and Save"
+msgstr "Zamyka i zapisuje"
 
-#: ../ui/composer.glade.h:9
-msgid "_Justify"
-msgstr "Wyrów_nanie w prawo i lewo"
+#: ../ui/composer-menus.ui.h:1
+msgid "S_ans Serif"
+msgstr "_Bezszeryfowa"
 
-#: ../ui/composer.glade.h:10
-msgid "Link (Ctrl+L)"
-msgstr "Odnośnik (Ctrl+L)"
+#: ../ui/composer-menus.ui.h:2
+msgid "S_erif"
+msgstr "Sz_eryfowa"
 
-#: ../ui/composer.glade.h:11
+#: ../ui/composer-menus.ui.h:3
+msgid "_Fixed Width"
+msgstr "S_tała szerokość"
+
+#: ../ui/composer-menus.ui.h:4
+msgid "_Small"
+msgstr "_Mały"
+
+#: ../ui/composer-menus.ui.h:5
+msgid "_Medium"
+msgstr "Ś_redni"
+
+#: ../ui/composer-menus.ui.h:6
+msgid "Lar_ge"
+msgstr "_Duży"
+
+#: ../ui/composer-menus.ui.h:7
 msgid "C_olor"
 msgstr "K_olor"
 
-#: ../ui/composer.glade.h:12
-msgid "More options"
-msgstr "Więcej opcji"
+#: ../ui/composer-menus.ui.h:8
+msgid "_Rich Text"
+msgstr "Tekst _sformatowany"
 
-#: ../ui/composer.glade.h:13
-msgid "Quote text  (Ctrl+])"
-msgstr "Cytuj tekst (Ctrl+])"
+#: ../ui/composer-menus.ui.h:9
+msgid "Show Extended Fields"
+msgstr "Rozszerzone pola"
 
-#: ../ui/composer.glade.h:14
-msgid "Unquote text (Ctrl+[)"
-msgstr "Usuń cytat (Ctrl+[)"
+#: ../ui/composer-menus.ui.h:10
+msgid "_Undo"
+msgstr "Cof_nij"
 
-#: ../ui/composer.glade.h:15
-msgid "Remove formatting (Ctrl+Space)"
-msgstr "Usuń formatowanie (Ctrl+Space)"
+#: ../ui/composer-menus.ui.h:11
+msgid "_Redo"
+msgstr "P_onów"
 
-#: ../ui/composer.glade.h:16
+#: ../ui/composer-menus.ui.h:12
+msgid "Cu_t"
+msgstr "_Wytnij"
+
+#: ../ui/composer-menus.ui.h:15
+msgid "_Paste"
+msgstr "Wk_lej"
+
+#: ../ui/composer-menus.ui.h:16
 msgctxt "Clipboard paste with rich text"
 msgid "Paste _With Formatting"
 msgstr "Wstaw _z formatowaniem"
 
-#: ../ui/composer.glade.h:18
-msgid "Bold (Ctrl+B)"
-msgstr "Pogrub tekst (Ctrl+B)"
-
-#: ../ui/composer.glade.h:19
-msgid "Italic (Ctrl+I)"
-msgstr "Pochyl tekst (Ctrl+I)"
-
-#: ../ui/composer.glade.h:20
-msgid "Underline (Ctrl+U)"
-msgstr "Podkreśl tekst (Ctrl+U)"
-
-#: ../ui/composer.glade.h:21
-msgid "Strikethrough (Ctrl+K)"
-msgstr "Przekreśl tekst (Ctrl+K)"
-
-#: ../ui/composer.glade.h:22
-msgid "_Rich Text"
-msgstr "Tekst _sformatowany"
-
-#: ../ui/composer.glade.h:23
-msgid "Show Extended Fields"
-msgstr "Rozszerzone pola"
-
-#: ../ui/composer.glade.h:24
-msgctxt "Label"
-msgid "Close and Save"
-msgstr "Zamknij i zapisz"
-
-#: ../ui/composer.glade.h:25
-msgctxt "Short Label"
-msgid "Close and Save"
-msgstr "Zamknij i zapisz"
-
-#: ../ui/composer.glade.h:26
-msgctxt "Tooltip"
-msgid "Close and Save"
-msgstr "Zamyka i zapisuje"
-
-#: ../ui/composer.glade.h:27
-msgctxt "Label"
-msgid "Close and Discard"
-msgstr "Zamknij i odrzuć"
-
-#: ../ui/composer.glade.h:28
-msgctxt "Short Label"
-msgid "Close and Discard"
-msgstr "Zamknij i odrzuć"
-
-#: ../ui/composer.glade.h:29
-msgctxt "Tooltip"
-msgid "Close and Discard"
-msgstr "Zamyka i odrzuca"
-
-#: ../ui/composer.glade.h:30
-msgid "Lar_ge"
-msgstr "_Duży"
-
-#: ../ui/composer.glade.h:31
-msgid "Large"
-msgstr "Duży"
-
-#: ../ui/composer.glade.h:32
-msgid "_Medium"
-msgstr "Ś_redni"
-
-#: ../ui/composer.glade.h:33
-msgid "Medium"
-msgstr "Średni"
-
-#: ../ui/composer.glade.h:34
-msgid "_Small"
-msgstr "_Mały"
-
-#: ../ui/composer.glade.h:35
-msgid "Small"
-msgstr "Mały"
-
-#: ../ui/composer.glade.h:36
-msgid "S_ans Serif"
-msgstr "_Bezszeryfowa"
-
-#: ../ui/composer.glade.h:37
-msgid "Sans Serif"
-msgstr "Bezszeryfowa"
-
-#: ../ui/composer.glade.h:38
-msgid "S_erif"
-msgstr "Sz_eryfowa"
-
-#: ../ui/composer.glade.h:39
-msgid "Serif"
-msgstr "Szeryfowa"
-
-#: ../ui/composer.glade.h:40
-msgid "_Fixed Width"
-msgstr "S_tała szerokość"
-
-#: ../ui/composer.glade.h:41
-msgid "Fixed Width"
-msgstr "Stała szerokość"
-
-#: ../ui/composer.glade.h:42
-msgid "Detach"
-msgstr "Odłącz"
-
-#: ../ui/composer.glade.h:43
-msgid "Detach (Ctrl+D)"
-msgstr "Odłącz (Ctrl+D)"
-
-#: ../ui/composer.glade.h:44
-msgid "_Send"
-msgstr "_Wyślij"
-
-#: ../ui/composer.glade.h:45
-msgid "Send"
-msgstr "Wyślij"
-
-#: ../ui/composer.glade.h:46
-msgid "Send (Ctrl+Enter)"
-msgstr "Wyślij (Ctrl+Enter)"
-
-#: ../ui/composer.glade.h:47
-msgid "_Attach File"
-msgstr "Z_ałącz plik"
-
-#: ../ui/composer.glade.h:48
-msgid "Attach File"
-msgstr "Załącz plik"
-
-#: ../ui/composer.glade.h:49
-msgid "Attach File (Ctrl+T)"
-msgstr "Załącz plik (Ctrl+T)"
-
-#: ../ui/composer.glade.h:50
-msgid "_Include Original Attachments"
-msgstr "Załącz _oryginalne załączniki"
-
-#: ../ui/composer.glade.h:51
-msgid "Include Original Attachments"
-msgstr "Załącz oryginalne załączniki"
-
-#: ../ui/composer.glade.h:52
-msgid "Select spell checking language"
-msgstr "Wybierz język sprawdzania pisowni"
-
-#: ../ui/composer.glade.h:53
-msgid "Spelling language"
-msgstr "Język sprawdzania pisowni"
-
 #. Address(es) e-mail is to be sent to
-#: ../ui/composer.glade.h:55
+#: ../ui/composer-widget.ui.h:2
 msgid "_To"
 msgstr "_Do"
 
-#: ../ui/composer.glade.h:56
+#: ../ui/composer-widget.ui.h:3
 msgid "_Cc"
 msgstr "Do _wiadomości"
 
-#: ../ui/composer.glade.h:57
+#: ../ui/composer-widget.ui.h:4
 msgid "_Subject"
 msgstr "_Temat"
 
-#: ../ui/composer.glade.h:58
+#: ../ui/composer-widget.ui.h:5
 msgid "_Bcc"
 msgstr "_Ukryty do wiadomości"
 
-#: ../ui/composer.glade.h:59
+#: ../ui/composer-widget.ui.h:6
 msgid "_Reply-To"
 msgstr "_Odpowiedź do"
 
 #. Geary account mail will be sent from
-#: ../ui/composer.glade.h:61
+#: ../ui/composer-widget.ui.h:8
 msgid "From"
 msgstr "Od"
 
-#: ../ui/composer.glade.h:62
+#: ../ui/composer-widget.ui.h:9
 msgid "Drop files here"
 msgstr "Tutaj można upuścić pliki,"
 
-#: ../ui/composer.glade.h:63
+#: ../ui/composer-widget.ui.h:10
 msgid "To add them as attachments"
 msgstr "aby dodać je jako załączniki."
+
+#: ../ui/composer-widget.ui.h:11
+msgid "Bold (Ctrl+B)"
+msgstr "Pogrub tekst (Ctrl+B)"
+
+#: ../ui/composer-widget.ui.h:12
+msgid "Italic (Ctrl+I)"
+msgstr "Pochyl tekst (Ctrl+I)"
+
+#: ../ui/composer-widget.ui.h:13
+msgid "Underline (Ctrl+U)"
+msgstr "Podkreśl tekst (Ctrl+U)"
+
+#: ../ui/composer-widget.ui.h:14
+msgid "Strikethrough (Ctrl+K)"
+msgstr "Przekreśl tekst (Ctrl+K)"
+
+#: ../ui/composer-widget.ui.h:15
+msgid "Quote text  (Ctrl+])"
+msgstr "Cytuj tekst (Ctrl+])"
+
+#: ../ui/composer-widget.ui.h:16
+msgid "Unquote text  (Ctrl+[)"
+msgstr "Usuń cytat (Ctrl+[)"
+
+#: ../ui/composer-widget.ui.h:17
+msgid "Link (Ctrl+L)"
+msgstr "Odnośnik (Ctrl+L)"
+
+#: ../ui/composer-widget.ui.h:18
+msgid "Remove formatting (Ctrl+Space)"
+msgstr "Usuń formatowanie (Ctrl+Space)"
+
+#: ../ui/composer-widget.ui.h:19
+msgid "Select spell checking language"
+msgstr "Wybierz język sprawdzania pisowni"
 
 #: ../ui/edit_alternate_emails.glade.h:1
 msgid "Remove email address"
