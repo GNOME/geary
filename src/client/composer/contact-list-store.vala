@@ -12,6 +12,46 @@ public class ContactListStore : Gtk.ListStore {
     // Batch size for loading contacts asynchronously
     private uint LOAD_BATCH_SIZE = 4096;
 
+
+    private static int sort_func(Gtk.TreeModel model, Gtk.TreeIter aiter, Gtk.TreeIter biter) {
+        // Order by importance, then by real name, then by email.
+        GLib.Value avalue, bvalue;
+        model.get_value(aiter, Column.CONTACT_OBJECT, out avalue);
+        model.get_value(biter, Column.CONTACT_OBJECT, out bvalue);
+        Geary.Contact? acontact = avalue.get_object() as Geary.Contact;
+        Geary.Contact? bcontact = bvalue.get_object() as Geary.Contact;
+
+        // Contacts can be null if the sort func is called between TreeModel.append and
+        // TreeModel.set.
+        if (acontact == bcontact)
+            return 0;
+        if (acontact == null && bcontact != null)
+            return -1;
+        if (acontact != null && bcontact == null)
+            return 1;
+
+        // First order by importance.
+        if (acontact.highest_importance > bcontact.highest_importance)
+            return -1;
+        if (acontact.highest_importance < bcontact.highest_importance)
+            return 1;
+
+        // Then order by real name.
+        string? anormalized_real_name = acontact.real_name == null ? null :
+            acontact.real_name.normalize().casefold();
+        string? bnormalized_real_name = bcontact.real_name == null ? null :
+            bcontact.real_name.normalize().casefold();
+        // strcmp correctly marks 'null' as first in lexigraphic order, so we don't need to
+        // special-case it.
+        int result = strcmp(anormalized_real_name, bnormalized_real_name);
+        if (result != 0)
+            return result;
+
+        // Finally, order by email.
+        return strcmp(acontact.normalized_email, bcontact.normalized_email);
+    }
+
+
     public enum Column {
         CONTACT_OBJECT,
         CONTACT_MARKUP_NAME,
@@ -55,7 +95,7 @@ public class ContactListStore : Gtk.ListStore {
         }
 
         // set sort function *after* adding all the contacts
-        set_sort_func(Column.CONTACT_OBJECT, sort_func);
+        set_sort_func(Column.CONTACT_OBJECT, ContactListStore.sort_func);
         set_sort_column_id(Column.CONTACT_OBJECT, Gtk.SortType.ASCENDING);
     }
 
@@ -124,43 +164,6 @@ public class ContactListStore : Gtk.ListStore {
     private void on_contact_updated(Geary.Contact contact) {
         update_contact(contact);
     }
-    
-    private int sort_func(Gtk.TreeModel model, Gtk.TreeIter aiter, Gtk.TreeIter biter) {
-        // Order by importance, then by real name, then by email.
-        GLib.Value avalue, bvalue;
-        model.get_value(aiter, Column.CONTACT_OBJECT, out avalue);
-        model.get_value(biter, Column.CONTACT_OBJECT, out bvalue);
-        Geary.Contact? acontact = avalue.get_object() as Geary.Contact;
-        Geary.Contact? bcontact = bvalue.get_object() as Geary.Contact;
-        
-        // Contacts can be null if the sort func is called between TreeModel.append and
-        // TreeModel.set.
-        if (acontact == bcontact)
-            return 0;
-        if (acontact == null && bcontact != null)
-            return -1;
-        if (acontact != null && bcontact == null)
-            return 1;
-        
-        // First order by importance.
-        if (acontact.highest_importance > bcontact.highest_importance)
-            return -1;
-        if (acontact.highest_importance < bcontact.highest_importance)
-            return 1;
-        
-        // Then order by real name.
-        string? anormalized_real_name = acontact.real_name == null ? null :
-            acontact.real_name.normalize().casefold();
-        string? bnormalized_real_name = bcontact.real_name == null ? null :
-            bcontact.real_name.normalize().casefold();
-        // strcmp correctly marks 'null' as first in lexigraphic order, so we don't need to
-        // special-case it.
-        int result = strcmp(anormalized_real_name, bnormalized_real_name);
-        if (result != 0)
-            return result;
-        
-        // Finally, order by email.
-        return strcmp(acontact.normalized_email, bcontact.normalized_email);
-    }
+
 }
 

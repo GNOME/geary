@@ -5,15 +5,38 @@
  */
 
 public class ContactEntryCompletion : Gtk.EntryCompletion {
+
+
+    private static bool completion_match_func(Gtk.EntryCompletion completion, string key, Gtk.TreeIter iter) {
+        ContactEntryCompletion contacts = (ContactEntryCompletion) completion;
+
+        // We don't use the provided key, because the user can enter multiple addresses.
+        int current_address_index;
+        string current_address_key;
+        contacts.get_addresses(completion, out current_address_index, out current_address_key);
+
+        Geary.Contact? contact = contacts.list_store.get_contact(iter);
+        if (contact == null)
+            return false;
+
+        string highlighted_result;
+        if (!contacts.match_prefix_contact(current_address_key, contact, out highlighted_result))
+            return false;
+
+        contacts.list_store.set_highlighted_result(iter, highlighted_result, current_address_key);
+
+        return true;
+    }
+
     private ContactListStore list_store;
     private Gtk.TreeIter? last_iter = null;
-    
+
     public ContactEntryCompletion(ContactListStore list_store) {
         this.list_store = list_store;
-        
+
         model = list_store;
-        set_match_func(completion_match_func);
-        
+        set_match_func(ContactEntryCompletion.completion_match_func);
+
         Gtk.CellRendererText text_renderer = new Gtk.CellRendererText();
         pack_start(text_renderer, true);
         add_attribute(text_renderer, "markup", ContactListStore.Column.CONTACT_MARKUP_NAME);
@@ -63,25 +86,6 @@ public class ContactEntryCompletion : Gtk.EntryCompletion {
     
     public void reset_selection() {
         last_iter = null;
-    }
-    
-    private bool completion_match_func(Gtk.EntryCompletion completion, string key, Gtk.TreeIter iter) {
-        // We don't use the provided key, because the user can enter multiple addresses.
-        int current_address_index;
-        string current_address_key;
-        get_addresses(completion, out current_address_index, out current_address_key);
-        
-        Geary.Contact? contact = list_store.get_contact(iter);
-        if (contact == null)
-            return false;
-        
-        string highlighted_result;
-        if (!match_prefix_contact(current_address_key, contact, out highlighted_result))
-            return false;
-        
-        list_store.set_highlighted_result(iter, highlighted_result, current_address_key);
-        
-        return true;
     }
     
     private Gee.List<string> get_addresses(Gtk.EntryCompletion completion,
