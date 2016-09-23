@@ -1219,6 +1219,18 @@ public class ComposerWidget : Gtk.EventBox {
         Gtk.Widget? focus = this.container.top_window.get_focus();
         this.container.remove_composer();
         ComposerWindow window = new ComposerWindow(this);
+
+        // Workaround a GTK+ crasher, Bug 771812. When the composer is
+        // re-parented, its menu_button's popover keeps a reference to
+        // the conversation window's viewport, so when that is removed
+        // it has a null parent and we crash. To reproduce: Reply
+        // inline, detach the composer, then choose a different
+        // conversation back in the main window. The workaround here
+        // sets a new menu model and hence the menu_button constructs
+        // a new popover.
+        this.actions.change_action_state(ACTION_COMPOSE_AS_HTML,
+            GearyApplication.instance.config.compose_as_html);
+
         this.state = ComposerWidget.ComposerState.DETACHED;
         if (focus != null && focus.parent.visible) {
             ComposerWindow focus_win = focus.get_toplevel() as ComposerWindow;
