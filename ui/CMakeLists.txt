@@ -11,6 +11,7 @@ set(RESOURCE_LIST
   STRIPBLANKS "edit_alternate_emails.glade"
   STRIPBLANKS "find_bar.glade"
   STRIPBLANKS "folder-popover.ui"
+  STRIPBLANKS "gtk/help-overlay.ui"
   STRIPBLANKS "gtk/menus.ui"
   STRIPBLANKS "login.glade"
   STRIPBLANKS "password-dialog.glade"
