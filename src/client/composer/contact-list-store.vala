@@ -5,9 +5,13 @@
  */
 
 public class ContactListStore : Gtk.ListStore {
+
     // Minimum visibility for the contact to appear in autocompletion.
     private const Geary.ContactImportance CONTACT_VISIBILITY_THRESHOLD = Geary.ContactImportance.TO_TO;
-    
+
+    // Batch size for loading contacts asynchronously
+    private uint LOAD_BATCH_SIZE = 4096;
+
     public enum Column {
         CONTACT_OBJECT,
         CONTACT_MARKUP_NAME,
@@ -26,25 +30,35 @@ public class ContactListStore : Gtk.ListStore {
     
     public ContactListStore(Geary.ContactStore contact_store) {
         set_column_types(Column.get_types());
-        
         this.contact_store = contact_store;
-        
-        foreach (Geary.Contact contact in contact_store.contacts)
-            add_contact(contact);
-        
-        // set sort function *after* adding all the contacts
-        set_sort_func(Column.CONTACT_OBJECT, sort_func);
-        set_sort_column_id(Column.CONTACT_OBJECT, Gtk.SortType.ASCENDING);
-        
         contact_store.contact_added.connect(on_contact_added);
         contact_store.contact_updated.connect(on_contact_updated);
     }
-    
+
     ~ContactListStore() {
-        contact_store.contact_added.disconnect(on_contact_added);
-        contact_store.contact_updated.disconnect(on_contact_updated);
+        this.contact_store.contact_added.disconnect(on_contact_added);
+        this.contact_store.contact_updated.disconnect(on_contact_updated);
     }
-    
+
+    /**
+     * Loads contacts from the model's contact store.
+     */
+    public async void load() {
+        uint count = 0;
+        foreach (Geary.Contact contact in this.contact_store.contacts) {
+            add_contact(contact);
+            count++;
+            if (count % LOAD_BATCH_SIZE == 0) {
+                Idle.add(load.callback);
+                yield;
+            }
+        }
+
+        // set sort function *after* adding all the contacts
+        set_sort_func(Column.CONTACT_OBJECT, sort_func);
+        set_sort_column_id(Column.CONTACT_OBJECT, Gtk.SortType.ASCENDING);
+    }
+
     public Geary.Contact get_contact(Gtk.TreeIter iter) {
         GLib.Value contact_value;
         get_value(iter, Column.CONTACT_OBJECT, out contact_value);
@@ -73,20 +87,19 @@ public class ContactListStore : Gtk.ListStore {
             set(iter, Column.CONTACT_MARKUP_NAME, highlighted_result, -1);
         }
     }
-    
-    private void add_contact(Geary.Contact contact) {
-        if (contact.highest_importance < CONTACT_VISIBILITY_THRESHOLD)
-            return;
-        
-        string full_address = contact.get_rfc822_address().to_rfc822_string();
-        Gtk.TreeIter iter;
-        append(out iter);
-        set(iter,
-            Column.CONTACT_OBJECT, contact,
-            Column.CONTACT_MARKUP_NAME, Markup.escape_text(full_address),
-            Column.PRIOR_KEYS, new Gee.HashSet<string>());
+
+    private inline void add_contact(Geary.Contact contact) {
+        if (contact.highest_importance >= CONTACT_VISIBILITY_THRESHOLD) {
+            string full_address = contact.get_rfc822_address().to_rfc822_string();
+            Gtk.TreeIter iter;
+            append(out iter);
+            set(iter,
+                Column.CONTACT_OBJECT, contact,
+                Column.CONTACT_MARKUP_NAME, Markup.escape_text(full_address),
+                Column.PRIOR_KEYS, new Gee.HashSet<string>());
+        }
     }
-    
+
     private void update_contact(Geary.Contact updated_contact) {
         Gtk.TreeIter iter;
         if (!get_iter_first(out iter))

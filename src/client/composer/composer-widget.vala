@@ -429,9 +429,6 @@ public class ComposerWidget : Gtk.EventBox {
         this.plain_menu = (Menu) builder.get_object("plain_menu_model");
         this.context_menu_model = (Menu) builder.get_object("context_menu_model");
 
-        // TODO: It would be nicer to set the completions inside the EmailEntry constructor. But in
-        // testing, this can cause non-deterministic segfaults. Investigate why, and fix if possible.
-        set_entry_completions();
         this.subject_entry.bind_property("text", this, "window-title", BindingFlags.SYNC_CREATE,
             (binding, source_value, ref target_value) => {
                 target_value = Geary.String.is_empty_or_whitespace(this.subject_entry.text)
@@ -457,9 +454,8 @@ public class ComposerWidget : Gtk.EventBox {
 
         this.from = new Geary.RFC822.MailboxAddresses.single(account.information.primary_mailbox);
 
-        Geary.EmailIdentifier? editing_draft_id = null;
         if (referred != null)
-            editing_draft_id = fill_in_from_referred(referred, quote, is_referred_draft);
+            fill_in_from_referred(referred, quote);
 
         update_from_field();
 
@@ -499,8 +495,6 @@ public class ComposerWidget : Gtk.EventBox {
 
         this.editor.navigation_policy_decision_requested.connect(on_navigation_policy_decision_requested);
         this.editor.new_window_policy_decision_requested.connect(on_navigation_policy_decision_requested);
-
-        open_draft_manager_async.begin(editing_draft_id);
 
         GearyApplication.instance.config.settings.changed[Configuration.SPELL_CHECK_KEY].connect(
             on_spell_check_changed);
@@ -599,10 +593,37 @@ public class ComposerWidget : Gtk.EventBox {
         update_actions();
     }
 
+    /**
+     * Loads and sets contact auto-complete data for the current account.
+     */
+    public async void load_entry_completions() {
+        // XXX Since ContactListStore hooks into ContactStore to
+        // listen for contacts being added and removed,
+        // GearyController or some composer-related controller should
+        // construct an instance per account and keep it around for
+        // the lifetime of the app, since there can be tens of
+        // thousands of contacts for large accounts.
+        Geary.ContactStore contacts = this.account.get_contact_store();
+        if (this.contact_list_store == null ||
+            this.contact_list_store.contact_store != contacts) {
+            ContactListStore store = new ContactListStore(contacts);
+            this.contact_list_store = store;
+            yield store.load();
+
+            this.to_entry.completion = new ContactEntryCompletion(store);
+            this.cc_entry.completion = new ContactEntryCompletion(store);
+            this.bcc_entry.completion = new ContactEntryCompletion(store);
+            this.reply_to_entry.completion = new ContactEntryCompletion(store);
+        }
+    }
+
+    /**
+     * Restores the composer's widget state from its draft.
+     */
     public async void restore_draft_state_async(Geary.Account account) {
         bool first_email = true;
         
-        foreach (Geary.RFC822.MessageID mid in in_reply_to) {
+        foreach (Geary.RFC822.MessageID mid in this.in_reply_to) {
             Gee.MultiMap<Geary.Email, Geary.FolderPath?>? email_map;
             try {
                 email_map =
@@ -664,12 +685,46 @@ public class ComposerWidget : Gtk.EventBox {
         }
     }
 
-    // Copies the addresses (e.g. From/To/CC) and content from referred into this one
-    private Geary.EmailIdentifier? fill_in_from_referred(Geary.Email referred, string? quote, bool is_referred_draft) {
-        if (referred == null)
-            return null;
+    /**
+     * Creates and opens the composer's draft manager.
+     */
+    public async void open_draft_manager_async(
+        Geary.EmailIdentifier? editing_draft_id = null,
+        Cancellable? cancellable = null)
+    throws Error {
+        this.draft_save_text = "";
+        yield close_draft_manager_async(cancellable);
 
-        Geary.EmailIdentifier? editing_draft_id = null;
+        SimpleAction close_and_save = get_action(ACTION_CLOSE_AND_SAVE);
+        if (!this.account.information.save_drafts) {
+            this.header.save_and_close_button.hide();
+            return;
+        }
+
+        this.draft_manager = new Geary.App.DraftManager(account);
+        try {
+            yield this.draft_manager.open_async(editing_draft_id, cancellable);
+        } catch (Error err) {
+            debug("Unable to open draft manager %s: %s",
+                  this.draft_manager.to_string(), err.message);
+
+            this.draft_manager = null;
+
+            throw err;
+        }
+
+        close_and_save.set_enabled(true);
+        this.header.save_and_close_button.show();
+
+        this.draft_manager.notify[Geary.App.DraftManager.PROP_DRAFT_STATE]
+            .connect(on_draft_state_changed);
+        this.draft_manager.notify[Geary.App.DraftManager.PROP_CURRENT_DRAFT_ID]
+            .connect(on_draft_id_changed);
+        this.draft_manager.fatal.connect(on_draft_manager_fatal);
+    }
+
+    // Copies the addresses (e.g. From/To/CC) and content from referred into this one
+    private void fill_in_from_referred(Geary.Email referred, string? quote) {
         if (this.compose_type != ComposeType.NEW_MESSAGE) {
             add_recipients_and_ids(this.compose_type, referred);
             this.reply_subject = Geary.RFC822.Utils.create_subject_for_reply(referred);
@@ -703,9 +758,6 @@ public class ComposerWidget : Gtk.EventBox {
                     debug("Error getting message body: %s", error.message);
                 }
 
-                if (is_referred_draft)
-                    editing_draft_id = referred.id;
-
                 add_attachments(referred.attachments);
             break;
 
@@ -730,7 +782,6 @@ public class ComposerWidget : Gtk.EventBox {
                 this.pending_attachments = referred.attachments;
             break;
         }
-        return editing_draft_id;
     }
 
     public void set_focus() {
@@ -1330,42 +1381,6 @@ public class ComposerWidget : Gtk.EventBox {
 
     private void on_draft_manager_fatal(Error err) {
         this.draft_save_text = DRAFT_ERROR_TEXT;
-    }
-
-    // Returns the drafts folder for the current From account.
-    private async void open_draft_manager_async(
-        Geary.EmailIdentifier? editing_draft_id = null,
-        Cancellable? cancellable = null)
-    throws Error {
-        this.draft_save_text = "";
-        yield close_draft_manager_async(cancellable);
-
-        SimpleAction close_and_save = get_action(ACTION_CLOSE_AND_SAVE);
-        if (!this.account.information.save_drafts) {
-            this.header.save_and_close_button.hide();
-            return;
-        }
-
-        this.draft_manager = new Geary.App.DraftManager(account);
-        try {
-            yield this.draft_manager.open_async(editing_draft_id, cancellable);
-        } catch (Error err) {
-            debug("Unable to open draft manager %s: %s",
-                  this.draft_manager.to_string(), err.message);
-
-            this.draft_manager = null;
-
-            throw err;
-        }
-
-        close_and_save.set_enabled(true);
-        this.header.save_and_close_button.show();
-
-        this.draft_manager.notify[Geary.App.DraftManager.PROP_DRAFT_STATE]
-            .connect(on_draft_state_changed);
-        this.draft_manager.notify[Geary.App.DraftManager.PROP_CURRENT_DRAFT_ID]
-            .connect(on_draft_id_changed);
-        this.draft_manager.fatal.connect(on_draft_manager_fatal);
     }
 
     private async void close_draft_manager_async(Cancellable? cancellable) throws Error {
@@ -2335,22 +2350,9 @@ public class ComposerWidget : Gtk.EventBox {
             return false;
 
         this.account = new_account;
-        set_entry_completions();
-        
+        load_entry_completions.begin();
+
         return true;
-    }
-
-    private void set_entry_completions() {
-        if (this.contact_list_store != null
-            && this.contact_list_store.contact_store == account.get_contact_store())
-            return;
-
-        this.contact_list_store = new ContactListStore(account.get_contact_store());
-
-        this.to_entry.completion = new ContactEntryCompletion(this.contact_list_store);
-        this.cc_entry.completion = new ContactEntryCompletion(this.contact_list_store);
-        this.bcc_entry.completion = new ContactEntryCompletion(this.contact_list_store);
-        this.reply_to_entry.completion = new ContactEntryCompletion(this.contact_list_store);
     }
 
 }

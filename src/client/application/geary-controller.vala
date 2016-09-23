@@ -2258,6 +2258,19 @@ public class GearyController : Geary.BaseObject {
             new ComposerWindow(widget);
             widget.state = ComposerWidget.ComposerState.DETACHED;
         }
+
+        if (is_draft) {
+            try {
+                yield widget.open_draft_manager_async(referred.id);
+            } catch (Error e) {
+                message("Could not open draft manager: %s", e.message);
+            }
+        }
+
+        // For accounts with large numbers of contacts, loading the
+        // entry completions can some time, so do it after the UI has
+        // been shown
+        yield widget.load_entry_completions();
     }
     
     private bool should_create_new_composer(ComposerWidget.ComposeType? compose_type,
