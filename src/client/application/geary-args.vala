@@ -24,7 +24,7 @@ private const OptionEntry[] options = {
     { "log-folder-normalization", 0, 0, OptionArg.NONE, ref log_folder_normalization, N_("Log folder normalization"), null },
     { "inspector", 'i', 0, OptionArg.NONE, ref inspector, N_("Allow inspection of WebView"), null },
     { "revoke-certs", 0, 0, OptionArg.NONE, ref revoke_certs, N_("Revoke all server certificates with TLS warnings"), null },
-    { "quit", 'q', 0, OptionArg.NONE, ref quit, N_("Perform a graceful quit."), null },
+    { "quit", 'q', 0, OptionArg.NONE, ref quit, N_("Perform a graceful quit"), null },
     { "version", 'V', 0, OptionArg.NONE, ref version, N_("Display program version"), null },
     { null }
 };
