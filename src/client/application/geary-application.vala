@@ -88,8 +88,10 @@ public class GearyApplication : Gtk.Application {
     private bool is_destroyed = false;
 
     public GearyApplication() {
-        Object(application_id: APP_ID);
-
+        Object(
+            application_id: APP_ID,
+            resource_base_path: "/org/gnome/Geary" // XXX remove this when Bug 766196 is fixed 
+        );
         _instance = this;
     }
 

@@ -4,7 +4,6 @@ set(RESOURCE_LIST
   STRIPBLANKS "account_cannot_remove.glade"
   STRIPBLANKS "account_list.glade"
   STRIPBLANKS "account_spinner.glade"
-  STRIPBLANKS "app_menu.interface"
   STRIPBLANKS "certificate_warning_dialog.glade"
   STRIPBLANKS "composer-headerbar.ui"
   STRIPBLANKS "composer-menus.ui"
@@ -12,6 +11,7 @@ set(RESOURCE_LIST
   STRIPBLANKS "edit_alternate_emails.glade"
   STRIPBLANKS "find_bar.glade"
   STRIPBLANKS "folder-popover.ui"
+  STRIPBLANKS "gtk/menus.ui"
   STRIPBLANKS "login.glade"
   STRIPBLANKS "password-dialog.glade"
   STRIPBLANKS "preferences.glade"
@@ -50,7 +50,7 @@ add_custom_target(resource_copy ALL
   COMMAND
     cp ${RESOURCES_XML} ${CMAKE_BINARY_DIR}/ui
   COMMAND
-    cp ${CMAKE_SOURCE_DIR}/ui/*.glade ${CMAKE_SOURCE_DIR}/ui/*.interface ${CMAKE_SOURCE_DIR}/ui/*.ui ${CMAKE_BINARY_DIR}/ui
+    cp ${CMAKE_SOURCE_DIR}/ui/*.glade ${CMAKE_SOURCE_DIR}/ui/*.ui ${CMAKE_BINARY_DIR}/ui
   COMMAND
     cp ${CMAKE_SOURCE_DIR}/ui/*.css ${CMAKE_BINARY_DIR}/ui
 )
