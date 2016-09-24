@@ -124,6 +124,7 @@ public class GearyApplication : Gtk.Application {
         }
 
         if (!Args.quit) {
+            // Normal application startup or activation
             activate();
             foreach (unowned string arg in args) {
                 if (arg != null) {
@@ -134,7 +135,11 @@ public class GearyApplication : Gtk.Application {
                 }
             }
         } else {
-            activate_action(ACTION_QUIT, null);
+            // User requested quit, only try to if we aren't running
+            // already.
+            if (this.is_remote) {
+                activate_action(ACTION_QUIT, null);
+            }
         }
 
         exit_status = 0;
