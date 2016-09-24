@@ -122,13 +122,19 @@ public class GearyApplication : Gtk.Application {
             exit_status = 1;
             return true;
         }
-        
-        activate();
-        foreach (unowned string arg in args) {
-            if (arg != null && arg == Geary.ComposedEmail.MAILTO_SCHEME)
-                activate_action(ACTION_COMPOSE, null);
-            else if (arg != null && arg.has_prefix(Geary.ComposedEmail.MAILTO_SCHEME))
-                activate_action(ACTION_MAILTO, new Variant.string(arg));
+
+        if (!Args.quit) {
+            activate();
+            foreach (unowned string arg in args) {
+                if (arg != null) {
+                    if (arg == Geary.ComposedEmail.MAILTO_SCHEME)
+                        activate_action(ACTION_COMPOSE, null);
+                    else if (arg.has_prefix(Geary.ComposedEmail.MAILTO_SCHEME))
+                        activate_action(ACTION_MAILTO, new Variant.string(arg));
+                }
+            }
+        } else {
+            activate_action(ACTION_QUIT, null);
         }
 
         exit_status = 0;
