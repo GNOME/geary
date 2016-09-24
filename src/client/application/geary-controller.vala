@@ -19,9 +19,6 @@ public class GearyController : Geary.BaseObject {
     // Named actions.
     //
     // NOTE: Some actions with accelerators need to also be added to ui/accelerators.ui
-    public const string ACTION_HELP = "GearyHelp";
-    public const string ACTION_ABOUT = "GearyAbout";
-    public const string ACTION_QUIT = "GearyQuit";
     public const string ACTION_NEW_MESSAGE = "GearyNewMessage";
     public const string ACTION_REPLY_TO_MESSAGE = "GearyReplyToMessage";
     public const string ACTION_REPLY_ALL_MESSAGE = "GearyReplyAllMessage";
@@ -39,8 +36,6 @@ public class GearyController : Geary.BaseObject {
     public const string ACTION_ZOOM_IN = "GearyZoomIn";
     public const string ACTION_ZOOM_OUT = "GearyZoomOut";
     public const string ACTION_ZOOM_NORMAL = "GearyZoomNormal";
-    public const string ACTION_ACCOUNTS = "GearyAccounts";
-    public const string ACTION_PREFERENCES = "GearyPreferences";
     public const string ACTION_MARK_AS_MENU = "GearyMarkAsMenuButton";
     public const string ACTION_MARK_AS_READ = "GearyMarkAsRead";
     public const string ACTION_MARK_AS_UNREAD = "GearyMarkAsUnread";
@@ -369,7 +364,26 @@ public class GearyController : Geary.BaseObject {
             message("Error closing Geary Engine instance: %s", err.message);
         }
     }
-    
+
+    /**
+     * Opens a new, blank composer.
+     */
+    public void compose() {
+        create_compose_widget(ComposerWidget.ComposeType.NEW_MESSAGE);
+    }
+
+    /**
+     * Opens or queues a new composer addressed to a specific email address.
+     */
+    public void compose_mailto(string mailto) {
+        if (current_account == null) {
+            // Schedule the send for after we have an account open.
+            pending_mailtos.add(mailto);
+        } else {
+            create_compose_widget(ComposerWidget.ComposeType.NEW_MESSAGE, null, null, mailto);
+        }
+    }
+
     private void add_accelerator(string accelerator, string action) {
         GtkUtil.add_accelerator(GearyApplication.instance.ui_manager, GearyApplication.instance.actions,
             accelerator, action);
@@ -377,29 +391,7 @@ public class GearyController : Geary.BaseObject {
 
     private Gtk.ActionEntry[] create_actions() {
         Gtk.ActionEntry[] entries = new Gtk.ActionEntry[0];
-        
-        Gtk.ActionEntry accounts = { ACTION_ACCOUNTS, null, TRANSLATABLE, null,
-            null, on_accounts };
-        accounts.label = _("A_ccounts");
-        entries += accounts;
-        
-        Gtk.ActionEntry prefs = { ACTION_PREFERENCES, Stock._PREFERENCES, TRANSLATABLE, null,
-            null, on_preferences };
-        prefs.label = _("_Preferences");
-        entries += prefs;
 
-        Gtk.ActionEntry help = { ACTION_HELP, Stock._HELP, TRANSLATABLE, "F1", null, on_help };
-        help.label = _("_Help");
-        entries += help;
-
-        Gtk.ActionEntry about = { ACTION_ABOUT, Stock._ABOUT, TRANSLATABLE, null, null, on_about };
-        about.label = _("_About");
-        entries += about;
-        
-        Gtk.ActionEntry quit = { ACTION_QUIT, Stock._QUIT, TRANSLATABLE, "<Ctrl>Q", null, on_quit };
-        quit.label = _("_Quit");
-        entries += quit;
-        
         Gtk.ActionEntry mark_menu = { ACTION_MARK_AS_MENU, null, TRANSLATABLE, null, _("Mark conversation"),
             on_show_mark_menu };
         mark_menu.label = _("_Mark as...");
@@ -559,14 +551,6 @@ public class GearyController : Geary.BaseObject {
             ACTION_TRASH_MESSAGE,
             ACTION_DELETE_MESSAGE,
         };
-        const string[] exported_actions = {
-            ACTION_ACCOUNTS,
-            ACTION_PREFERENCES,
-            ACTION_HELP,
-            ACTION_ABOUT,
-            ACTION_QUIT,
-        };
-        
         Gtk.ActionGroup action_group = GearyApplication.instance.actions;
         
         Gtk.ActionEntry[] action_entries = create_actions();
@@ -582,15 +566,7 @@ public class GearyController : Geary.BaseObject {
         
         Gtk.ToggleActionEntry[] toggle_action_entries = create_toggle_actions();
         action_group.add_toggle_actions(toggle_action_entries, this);
-        
-        foreach (Geary.ActionAdapter a in GearyApplication.instance.action_adapters) {
-            if (a.action.name in exported_actions)
-                GearyApplication.instance.add_action(a.action);
-        }
         GearyApplication.instance.ui_manager.insert_action_group(action_group, 0);
-        
-        Gtk.Builder builder = GearyApplication.instance.create_builder("app_menu.interface");
-        GearyApplication.instance.set_app_menu((MenuModel) builder.get_object("app-menu"));
     }
     
     private void open_account(Geary.Account account) {
@@ -1662,55 +1638,6 @@ public class GearyController : Geary.BaseObject {
         
         return sender.cancel_exit();
     }
-    
-    private void on_quit() {
-        GearyApplication.instance.exit();
-    }
-
-    private void on_help() {
-        try {
-            if (GearyApplication.instance.is_installed()) {
-                Gtk.show_uri(null, "ghelp:geary", Gdk.CURRENT_TIME);
-            } else {
-                Pid pid;
-                File exec_dir = GearyApplication.instance.get_exec_dir();
-                string[] argv = new string[3];
-                argv[0] = "gnome-help";
-                argv[1] = GearyApplication.SOURCE_ROOT_DIR + "/help/C/";
-                argv[2] = null;
-                if (!Process.spawn_async(exec_dir.get_path(), argv, null,
-                    SpawnFlags.SEARCH_PATH | SpawnFlags.STDERR_TO_DEV_NULL, null, out pid)) {
-                    debug("Failed to launch help locally.");
-                }
-            }
-        } catch (Error error) {
-            debug("Error showing help: %s", error.message);
-            Gtk.Dialog dialog = new Gtk.Dialog.with_buttons("Error", null,
-                Gtk.DialogFlags.DESTROY_WITH_PARENT, Stock._CLOSE, Gtk.ResponseType.CLOSE, null);
-            dialog.response.connect(() => { dialog.destroy(); });
-            dialog.get_content_area().add(new Gtk.Label("Error showing help: %s".printf(error.message)));
-            dialog.show_all();
-            dialog.run();
-        }
-    }
-
-    private void on_about() {
-        Gtk.show_about_dialog(main_window,
-            "program-name", GearyApplication.NAME,
-            "comments", GearyApplication.DESCRIPTION,
-            "authors", GearyApplication.AUTHORS,
-            "copyright", GearyApplication.COPYRIGHT,
-            "license-type", Gtk.License.LGPL_2_1,
-            "logo-icon-name", "geary",
-            "version", GearyApplication.VERSION,
-            "website", GearyApplication.WEBSITE,
-            "website-label", GearyApplication.WEBSITE_LABEL,
-            "title", _("About %s").printf(GearyApplication.NAME),
-            /// Translators: add your name and email address to receive credit in the About dialog
-            /// For example: Yamada Taro <yamada.taro@example.com>
-            "translator-credits", _("translator-credits")
-        );
-    }
 
     private void on_shift_key(bool pressed) {
         if (main_window != null && main_window.main_toolbar != null
@@ -1725,19 +1652,7 @@ public class GearyController : Geary.BaseObject {
     private void on_has_toplevel_focus() {
         clear_new_messages("on_has_toplevel_focus", null);
     }
-    
-    private void on_accounts() {
-        AccountDialog dialog = new AccountDialog(main_window);
-        dialog.show_all();
-        dialog.run();
-        dialog.destroy();
-    }
-    
-    private void on_preferences() {
-        PreferencesDialog dialog = new PreferencesDialog(main_window);
-        dialog.run();
-    }
-    
+
     // latest_sent_only uses Email's Date: field, which corresponds to how they're sorted in the
     // ConversationViewer
     private Gee.ArrayList<Geary.EmailIdentifier> get_conversation_email_ids(
@@ -2772,18 +2687,7 @@ public class GearyController : Geary.BaseObject {
         GearyApplication.instance.actions.get_action(ACTION_DELETE_MESSAGE).tooltip = single ?
             DELETE_MESSAGE_TOOLTIP_SINGLE : DELETE_MESSAGE_TOOLTIP_MULTIPLE;
     }
-    
-    public void compose_mailto(string mailto) {
-        if (current_account == null) {
-            // Schedule the send for after we have an account open.
-            pending_mailtos.add(mailto);
-            
-            return;
-        }
-        
-        create_compose_widget(ComposerWidget.ComposeType.NEW_MESSAGE, null, null, mailto);
-    }
-    
+
     // Returns a list of composer windows for an account, or null if none.
     public Gee.List<ComposerWidget>? get_composer_widgets_for_account(Geary.AccountInformation account) {
         Gee.LinkedList<ComposerWidget> ret = Geary.traverse<ComposerWidget>(composer_widgets)

@@ -35,13 +35,25 @@ public class GearyApplication : Gtk.Application {
         "Robert Schroll <rschroll@gmail.com>",
         null
     };
-    
-    private const string ACTION_ENTRY_COMPOSE = "compose";
-    
-    public const ActionEntry[] action_entries = {
-        {ACTION_ENTRY_COMPOSE, activate_compose, "s"},
+
+    private const string ACTION_ABOUT = "about";
+    private const string ACTION_ACCOUNTS = "accounts";
+    private const string ACTION_COMPOSE = "compose";
+    private const string ACTION_MAILTO = "mailto";
+    private const string ACTION_HELP = "help";
+    private const string ACTION_PREFERENCES = "preferences";
+    private const string ACTION_QUIT = "quit";
+
+    private const ActionEntry[] action_entries = {
+        {ACTION_ABOUT, on_activate_about},
+        {ACTION_ACCOUNTS, on_activate_accounts},
+        {ACTION_COMPOSE, on_activate_compose},
+        {ACTION_MAILTO, on_activate_mailto, "s"},
+        {ACTION_HELP, on_activate_help},
+        {ACTION_PREFERENCES, on_activate_preferences},
+        {ACTION_QUIT, on_activate_quit},
     };
-    
+
     private const int64 USEC_PER_SEC = 1000000;
     private const int64 FORCE_SHUTDOWN_USEC = 5 * USEC_PER_SEC;
     
@@ -113,10 +125,12 @@ public class GearyApplication : Gtk.Application {
         
         activate();
         foreach (unowned string arg in args) {
-            if (arg != null && arg.has_prefix(Geary.ComposedEmail.MAILTO_SCHEME))
-                activate_action(ACTION_ENTRY_COMPOSE, new Variant.string(arg));
+            if (arg != null && arg == Geary.ComposedEmail.MAILTO_SCHEME)
+                activate_action(ACTION_COMPOSE, null);
+            else if (arg != null && arg.has_prefix(Geary.ComposedEmail.MAILTO_SCHEME))
+                activate_action(ACTION_MAILTO, new Variant.string(arg));
         }
-        
+
         exit_status = 0;
         return true;
     }
@@ -142,13 +156,6 @@ public class GearyApplication : Gtk.Application {
         
         if (!present())
             create_async.begin();
-    }
-    
-    public void activate_compose(SimpleAction action, Variant? param) {
-        if (param == null)
-            return;
-        
-        compose(param.get_string());
     }
     
     public bool present() {
@@ -203,15 +210,7 @@ public class GearyApplication : Gtk.Application {
         
         is_destroyed = true;
     }
-    
-    public bool compose(string mailto) {
-        if (controller == null)
-            return false;
-        
-        controller.compose_mailto(mailto);
-        return true;
-    }
-    
+
     // NOTE: This assert()'s if the Gtk.Action is not present in the default action group
     public Gtk.Action get_action(string name) {
         Gtk.Action? action = actions.get_action(name);
@@ -374,5 +373,89 @@ public class GearyApplication : Gtk.Application {
         
         Posix.exit(1);
     }
-}
 
+    private void on_activate_about() {
+        Gtk.show_about_dialog(get_active_window(),
+            "program-name", NAME,
+            "comments", DESCRIPTION,
+            "authors", AUTHORS,
+            "copyright", COPYRIGHT,
+            "license-type", Gtk.License.LGPL_2_1,
+            "logo-icon-name", "geary",
+            "version", VERSION,
+            "website", WEBSITE,
+            "website-label", WEBSITE_LABEL,
+            "title", _("About %s").printf(NAME),
+            // Translators: add your name and email address to receive
+            // credit in the About dialog For example: Yamada Taro
+            // <yamada.taro@example.com>
+            "translator-credits", _("translator-credits")
+        );
+    }
+
+    private void on_activate_accounts() {
+        AccountDialog dialog = new AccountDialog(get_active_window());
+        dialog.show_all();
+        dialog.run();
+        dialog.destroy();
+    }
+
+    private void on_activate_compose() {
+        if (this.controller != null) {
+            this.controller.compose();
+        }
+    }
+
+    private void on_activate_mailto(SimpleAction action, Variant? param) {
+        if (this.controller != null && param != null) {
+            this.controller.compose_mailto(param.get_string());
+        }
+    }
+
+    private void on_activate_preferences() {
+        PreferencesDialog dialog = new PreferencesDialog(get_active_window());
+        dialog.run();
+    }
+
+    private void on_activate_quit() {
+        exit();
+    }
+
+    private void on_activate_help() {
+        try {
+            if (is_installed()) {
+                Gtk.show_uri(null, "ghelp:geary", Gdk.CURRENT_TIME);
+            } else {
+                Pid pid;
+                File exec_dir = get_exec_dir();
+                string[] argv = new string[3];
+                argv[0] = "gnome-help";
+                argv[1] = GearyApplication.SOURCE_ROOT_DIR + "/help/C/";
+                argv[2] = null;
+                if (!Process.spawn_async(
+                        exec_dir.get_path(),
+                        argv,
+                        null,
+                        SpawnFlags.SEARCH_PATH | SpawnFlags.STDERR_TO_DEV_NULL,
+                        null,
+                        out pid)) {
+                    debug("Failed to launch help locally.");
+                }
+            }
+        } catch (Error error) {
+            debug("Error showing help: %s", error.message);
+            Gtk.Dialog dialog = new Gtk.Dialog.with_buttons(
+                "Error",
+                get_active_window(),
+                Gtk.DialogFlags.DESTROY_WITH_PARENT,
+                Stock._CLOSE, Gtk.ResponseType.CLOSE, null);
+            dialog.response.connect(() => { dialog.destroy(); });
+            dialog.get_content_area().add(
+                new Gtk.Label("Error showing help: %s".printf(error.message))
+            );
+            dialog.show_all();
+            dialog.run();
+        }
+    }
+
+}
