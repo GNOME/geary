@@ -561,7 +561,6 @@ public class GearyController : Geary.BaseObject {
             
             if (e.name in important_actions)
                 action.is_important = true;
-            GearyApplication.instance.action_adapters.add(new Geary.ActionAdapter(action));
         }
         
         Gtk.ToggleActionEntry[] toggle_action_entries = create_toggle_actions();

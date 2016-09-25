@@ -81,10 +81,7 @@ public class GearyApplication : Gtk.Application {
     public Gtk.ActionGroup actions {
         get; private set; default = new Gtk.ActionGroup("GearyActionGroup");
     }
-    public Gee.Collection<Geary.ActionAdapter> action_adapters {
-        get; private set; default = new Gee.ArrayList<Geary.ActionAdapter>();
-    }
-    
+
     public Gtk.UIManager ui_manager {
         get; private set; default = new Gtk.UIManager();
     }

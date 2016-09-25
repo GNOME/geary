@@ -15,7 +15,6 @@ src/client/accounts/account-spinner-page.vala
 src/client/accounts/add-edit-page.vala
 src/client/accounts/login-dialog.vala
 src/client/application/autostart-manager.vala
-src/client/application/geary-action-adapter.vala
 src/client/application/geary-application.vala
 src/client/application/geary-args.vala
 src/client/application/geary-config.vala
