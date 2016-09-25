@@ -292,7 +292,7 @@ public class ConversationListBox : Gtk.ListBox {
 
         // Fetch full emails from the conversation
         Gee.Collection<Geary.Email> full_emails =
-            yield list_full_emails_async(
+            yield load_full_emails(
                 this.conversation.get_emails(
                     Geary.App.Conversation.Ordering.SENT_DATE_ASCENDING
                 )
@@ -593,6 +593,43 @@ public class ConversationListBox : Gtk.ListBox {
             });
     }
 
+    // Given some emails, fetch the full versions with all required fields.
+    private async Gee.Collection<Geary.Email> load_full_emails(
+        Gee.Collection<Geary.Email> emails) throws Error {
+        Gee.ArrayList<Geary.EmailIdentifier> ids = new Gee.ArrayList<Geary.EmailIdentifier>();
+        foreach (Geary.Email email in emails)
+            ids.add(email.id);
+
+        Gee.Collection<Geary.Email>? full_emails =
+            yield this.email_store.list_email_by_sparse_id_async(
+                ids,
+                REQUIRED_FIELDS,
+                Geary.Folder.ListFlags.NONE,
+                this.cancellable
+            );
+
+        if (full_emails == null) {
+            full_emails = Gee.Collection.empty<Geary.Email>();
+        }
+
+        return full_emails;
+    }
+
+    // Loads full version of an email, adds it to the listbox
+    private async void load_full_email(Geary.EmailIdentifier id)
+        throws Error {
+        Geary.Email full_email = yield this.email_store.fetch_email_async(
+            id, REQUIRED_FIELDS, Geary.Folder.ListFlags.NONE, this.cancellable
+        );
+
+        if (!this.cancellable.is_cancelled()) {
+            EmailRow row = add_email(full_email);
+            update_last_row();
+            yield row.view.start_loading(this.cancellable);
+        }
+    }
+
+    // Constructs a row and view for an email, adds it to the listbox
     private EmailRow add_email(Geary.Email email) {
         // Should be able to edit draft emails from any
         // conversation. This test should be more like "is in drafts
@@ -661,6 +698,7 @@ public class ConversationListBox : Gtk.ListBox {
         return row;
     }
 
+    // Removes the email's row from the listbox, if any
     private void remove_email(Geary.Email email) {
         EmailRow? row = null;
         if (this.id_to_row.unset(email.id, out row)) {
@@ -713,28 +751,6 @@ public class ConversationListBox : Gtk.ListBox {
         }
     }
 
-    // Given some emails, fetch the full versions with all required fields.
-    private async Gee.Collection<Geary.Email> list_full_emails_async(
-        Gee.Collection<Geary.Email> emails) throws Error {
-        Gee.ArrayList<Geary.EmailIdentifier> ids = new Gee.ArrayList<Geary.EmailIdentifier>();
-        foreach (Geary.Email email in emails)
-            ids.add(email.id);
-
-        Gee.Collection<Geary.Email>? full_emails =
-            yield this.email_store.list_email_by_sparse_id_async(
-                ids,
-                REQUIRED_FIELDS,
-                Geary.Folder.ListFlags.NONE,
-                this.cancellable
-            );
-
-        if (full_emails == null) {
-            full_emails = Gee.Collection.empty<Geary.Email>();
-        }
-
-        return full_emails;
-    }
-    
     private void apply_search_terms(EmailRow row) {
         if (row.view.message_bodies_loaded) {
             apply_search_terms_impl(row);
@@ -780,28 +796,24 @@ public class ConversationListBox : Gtk.ListBox {
         );
     }
 
-    private void on_conversation_appended(Geary.App.Conversation conversation, Geary.Email email) {
+    private void on_conversation_appended(Geary.App.Conversation conversation,
+                                          Geary.Email email) {
         on_conversation_appended_async.begin(conversation, email);
     }
 
     private async void on_conversation_appended_async(
         Geary.App.Conversation conversation, Geary.Email part_email) {
-        try {
-            if (!this.id_to_row.contains(part_email.id)) {
-                Geary.Email full_email = yield this.email_store.fetch_email_async(
-                    part_email.id,
-                    REQUIRED_FIELDS,
-                    Geary.Folder.ListFlags.NONE,
-                    this.cancellable
-                );
-
-                if (!this.cancellable.is_cancelled()) {
-                    EmailRow row = add_email(full_email);
-                    yield row.view.start_loading(this.cancellable);
-                }
-            }
-        } catch (Error err) {
-            debug("Unable to append email to conversation: %s", err.message);
+        if (!this.id_to_row.contains(part_email.id)) {
+            load_full_email.begin(part_email.id, (obj, ret) => {
+                    try {
+                        load_full_email.end(ret);
+                    } catch (Error err) {
+                        debug(
+                            "Unable to append email to conversation: %s",
+                            err.message
+                        );
+                    }
+                });
         }
     }
 
