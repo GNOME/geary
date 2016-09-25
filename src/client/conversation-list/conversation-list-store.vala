@@ -68,6 +68,17 @@ public class ConversationListStore : Gtk.ListStore {
         }
     }
 
+
+    private static int sort_by_date(Gtk.TreeModel model,
+                                    Gtk.TreeIter aiter,
+                                    Gtk.TreeIter biter) {
+        Geary.App.Conversation a, b;
+        model.get(aiter, Column.CONVERSATION_OBJECT, out a);
+        model.get(biter, Column.CONVERSATION_OBJECT, out b);
+        return compare_conversation_ascending(a, b);
+    }
+
+
     public Geary.App.ConversationMonitor conversations { get; set; }
     public Geary.ProgressMonitor preview_monitor { get; private set; default =
         new Geary.SimpleProgressMonitor(Geary.ProgressType.ACTIVITY); }
@@ -86,7 +97,7 @@ public class ConversationListStore : Gtk.ListStore {
 
     public ConversationListStore(Geary.App.ConversationMonitor conversations) {
         set_column_types(Column.get_types());
-        set_default_sort_func(sort_by_date);
+        set_default_sort_func(ConversationListStore.sort_by_date);
         set_sort_column_id(Gtk.SortColumn.DEFAULT, Gtk.SortType.DESCENDING);
 
         this.conversations = conversations;
@@ -120,11 +131,6 @@ public class ConversationListStore : Gtk.ListStore {
             Source.remove(this.update_id);
             this.update_id = 0;
         }
-        // We need to clear the sort func to release its ref to this
-        // object so it can be finalised, but the API doesn't let a
-        // null sort fun to be set, hence set it to a dummy static
-        // func.
-        set_default_sort_func(ConversationListStore.finaliser_sort_by_date);
     }
 
     public Geary.App.Conversation? get_conversation_at_path(Gtk.TreePath path) {
@@ -450,15 +456,6 @@ public class ConversationListStore : Gtk.ListStore {
         // TODO: need support code to load preview for single conversation, not scan all
         refresh_previews_async.begin(this.conversations);
     }
-    
-    private int sort_by_date(Gtk.TreeModel model, Gtk.TreeIter aiter, Gtk.TreeIter biter) {
-        Geary.App.Conversation a, b;
-        
-        get(aiter, Column.CONVERSATION_OBJECT, out a);
-        get(biter, Column.CONVERSATION_OBJECT, out b);
-        
-        return compare_conversation_ascending(a, b);
-    }
 
     private bool update_date_strings() {
         this.foreach(update_date_string);
@@ -474,12 +471,6 @@ public class ConversationListStore : Gtk.ListStore {
         
         // Continue iterating, don't stop
         return false;
-    }
-
-    private static int finaliser_sort_by_date(Gtk.TreeModel m,
-                                              Gtk.TreeIter a,
-                                              Gtk.TreeIter b) {
-        return 0;
     }
 
 }
