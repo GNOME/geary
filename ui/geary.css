@@ -67,11 +67,11 @@ row.geary-folder-popover-list-row > label {
   box-shadow: 0 4px 8px 1px rgba(0,0,0,0.4);
   transition: margin 0.1s;
 }
-.conversation-listbox > row > grid {
+.conversation-listbox > row > box {
   background: @theme_base_color;
   transition: background 0.25s;
 }
-.conversation-listbox > row:hover > grid {
+.conversation-listbox > row:hover > box {
   background: shade(@theme_base_color, 0.96);
 }
 .conversation-listbox > row.geary-expanded {
