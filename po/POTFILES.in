@@ -22,7 +22,6 @@ src/client/application/geary-config.vala
 src/client/application/geary-controller.vala
 src/client/application/main.vala
 src/client/application/secret-mediator.vala
-src/client/components/conversation-find-bar.vala
 src/client/components/count-badge.vala
 src/client/components/empty-placeholder.vala
 src/client/components/folder-popover.vala

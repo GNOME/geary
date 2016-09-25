@@ -331,7 +331,6 @@ client/accounts/account-spinner-page.vala
 client/accounts/add-edit-page.vala
 client/accounts/login-dialog.vala
 
-client/components/conversation-find-bar.vala
 client/components/count-badge.vala
 client/components/empty-placeholder.vala
 client/components/folder-popover.vala
