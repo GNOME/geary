@@ -853,7 +853,7 @@ private class Geary.Imap.Folder : BaseObject {
                     email.set_message_subject(envelope.subject);
                     email.set_originators(
                         envelope.from,
-                        envelope.sender.equal_to(envelope.from) ? null : envelope.sender[0],
+                        envelope.sender.equal_to(envelope.from) || envelope.sender.size == 0 ? null : envelope.sender[0],
                         envelope.reply_to.equal_to(envelope.from) ? null : envelope.reply_to
                     );
                     email.set_receivers(envelope.to, envelope.cc, envelope.bcc);
