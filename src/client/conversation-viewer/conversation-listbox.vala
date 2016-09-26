@@ -226,9 +226,9 @@ public class ConversationListBox : Gtk.ListBox {
     // Email view with selected text, if any
     private ConversationEmail? body_selected_view = null;
 
-    // Maps displayed emails to their corresponding EmailRow.
-    private Gee.HashMap<Geary.EmailIdentifier, EmailRow> id_to_row = new
-        Gee.HashMap<Geary.EmailIdentifier, EmailRow>();
+    // Maps displayed emails to their corresponding rows.
+    private Gee.HashMap<Geary.EmailIdentifier,EmailRow> email_rows =
+        new Gee.HashMap<Geary.EmailIdentifier,EmailRow>();
 
     // The id of the draft referred to by the current composer.
     private Geary.EmailIdentifier? draft_id = null;
@@ -331,7 +331,7 @@ public class ConversationListBox : Gtk.ListBox {
             if (this.cancellable.is_cancelled()) {
                 break;
             }
-            if (!this.id_to_row.contains(full_email.id)) {
+            if (!this.email_rows.contains(full_email.id)) {
                 EmailRow row = add_email(full_email);
                 if (first_expanded_row == null && row.is_expanded) {
                     first_expanded_row = row;
@@ -429,8 +429,8 @@ public class ConversationListBox : Gtk.ListBox {
      */
     public void add_embedded_composer(ComposerEmbed embed, bool is_draft) {
         if (is_draft) {
-            EmailRow? draft = this.id_to_row.get(embed.referred.id);
             this.draft_id = embed.referred.id;
+            EmailRow? draft = this.email_rows.get(embed.referred.id);
             if (draft != null) {
                 remove_email(draft.email);
             }
@@ -510,7 +510,7 @@ public class ConversationListBox : Gtk.ListBox {
      * Displays an email as being read, regardless of its actual flags.
      */
     public void mark_manual_read(Geary.EmailIdentifier id) {
-        EmailRow? row = this.id_to_row.get(id);
+        EmailRow? row = this.email_rows.get(id);
         if (row != null) {
             row.view.is_manually_read = true;
         }
@@ -520,7 +520,7 @@ public class ConversationListBox : Gtk.ListBox {
      * Displays an email as being unread, regardless of its actual flags.
      */
     public void mark_manual_unread(Geary.EmailIdentifier id) {
-        EmailRow? row = this.id_to_row.get(id);
+        EmailRow? row = this.email_rows.get(id);
         if (row != null) {
             row.view.is_manually_read = false;
         }
@@ -538,7 +538,7 @@ public class ConversationListBox : Gtk.ListBox {
             Gee.Collection<Geary.EmailIdentifier> ids =
                 new Gee.ArrayList<Geary.EmailIdentifier>();
             foreach (Gee.Map.Entry<Geary.EmailIdentifier, EmailRow> entry
-                        in this.id_to_row.entries) {
+                        in this.email_rows.entries) {
                 if (entry.value.get_visible()) {
                     ids.add(entry.key);
                 }
@@ -729,7 +729,7 @@ public class ConversationListBox : Gtk.ListBox {
 
         EmailRow row = new EmailRow(view);
         row.show();
-        this.id_to_row.set(email.id, row);
+        this.email_rows.set(email.id, row);
 
         add(row);
         email_added(view);
@@ -752,7 +752,7 @@ public class ConversationListBox : Gtk.ListBox {
     // Removes the email's row from the listbox, if any
     private void remove_email(Geary.Email email) {
         EmailRow? row = null;
-        if (this.id_to_row.unset(email.id, out row)) {
+        if (this.email_rows.unset(email.id, out row)) {
             remove(row);
             email_removed(row.view);
         }
@@ -827,7 +827,7 @@ public class ConversationListBox : Gtk.ListBox {
      * Returns an new Iterable over all email views in the viewer
      */
     private Gee.Iterator<ConversationEmail> email_view_iterator() {
-        return this.id_to_row.values.map<ConversationEmail>((row) => {
+        return this.email_rows.values.map<ConversationEmail>((row) => {
                 return ((EmailRow) row).view;
             });
     }
@@ -852,7 +852,7 @@ public class ConversationListBox : Gtk.ListBox {
         Geary.App.Conversation conversation, Geary.Email part_email) {
         // Don't add rows that are already present, or that are
         // currently being edited.
-        if (!(part_email.id in this.id_to_row) &&
+        if (!(part_email.id in this.email_rows) &&
             part_email.id != this.draft_id) {
             load_full_email.begin(part_email.id, (obj, ret) => {
                     try {
@@ -872,11 +872,11 @@ public class ConversationListBox : Gtk.ListBox {
     }
 
     private void on_update_flags(Geary.Email email) {
-        if (!this.id_to_row.has_key(email.id)) {
+        if (!this.email_rows.has_key(email.id)) {
             return;
         }
 
-        EmailRow row = this.id_to_row.get(email.id);
+        EmailRow row = this.email_rows.get(email.id);
         row.view.update_flags(email);
     }
 
