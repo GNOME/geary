@@ -296,16 +296,18 @@ public class ConversationListBox : Gtk.ListBox {
                     show_loading();
                 }
                 this.loading_timeout_id = 0;
-                return false;
+                return Source.REMOVE;
             });
     }
 
     public override void destroy() {
         if (this.loading_timeout_id != 0) {
             Source.remove(this.loading_timeout_id);
+            // Clear in case this is called twice
+            this.loading_timeout_id = 0;
         }
         this.cancellable.cancel();
-        this.id_to_row.clear();
+        this.email_rows.clear();
         base.destroy();
     }
 
