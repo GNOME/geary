@@ -83,7 +83,7 @@
             <property name="width_chars">0</property>
             <property name="primary_icon_activatable">False</property>
             <property name="secondary_icon_activatable">False</property>
-            <property name="placeholder_text">email@example.com</property>
+            <property name="placeholder_text" translatable="yes">email@example.com</property>
           </object>
           <packing>
             <property name="left_attach">1</property>
@@ -381,7 +381,7 @@
                 <property name="hexpand">True</property>
                 <property name="invisible_char">•</property>
                 <property name="activates_default">True</property>
-                <property name="placeholder_text">imap.example.com</property>
+                <property name="placeholder_text" translatable="yes">imap.example.com</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
@@ -435,7 +435,7 @@
                 <property name="can_focus">True</property>
                 <property name="invisible_char">•</property>
                 <property name="activates_default">True</property>
-                <property name="placeholder_text">smtp.example.com</property>
+                <property name="placeholder_text" translatable="yes">smtp.example.com</property>
               </object>
               <packing>
                 <property name="left_attach">1</property>
