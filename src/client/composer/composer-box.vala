@@ -14,7 +14,7 @@ public class ComposerBox : Gtk.Frame, ComposerContainer {
         get { return (Gtk.ApplicationWindow) get_toplevel(); }
     }
 
-    protected ComposerWidget composer { get; set; }
+    internal ComposerWidget composer { get; set; }
 
     protected Gee.MultiMap<string, string>? old_accelerators { get; set; }
 

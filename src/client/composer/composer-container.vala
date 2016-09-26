@@ -10,7 +10,7 @@
 public interface ComposerContainer {
 
     // The ComposerWidget-child.
-    protected abstract ComposerWidget composer { get; set; }
+    internal abstract ComposerWidget composer { get; set; }
 
     // Workaround to retrieve all Gtk.Actions with conflicting accelerators
     protected const string[] conflicting_actions = {

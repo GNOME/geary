@@ -230,6 +230,9 @@ public class ConversationListBox : Gtk.ListBox {
     private Gee.HashMap<Geary.EmailIdentifier, EmailRow> id_to_row = new
         Gee.HashMap<Geary.EmailIdentifier, EmailRow>();
 
+    // The id of the draft referred to by the current composer.
+    private Geary.EmailIdentifier? draft_id = null;
+
     // Last visible row in the list, if any
     private ConversationRow? last_row = null;
 
@@ -427,6 +430,7 @@ public class ConversationListBox : Gtk.ListBox {
     public void add_embedded_composer(ComposerEmbed embed, bool is_draft) {
         if (is_draft) {
             EmailRow? draft = this.id_to_row.get(embed.referred.id);
+            this.draft_id = embed.referred.id;
             if (draft != null) {
                 remove_email(draft.email);
             }
@@ -437,8 +441,10 @@ public class ConversationListBox : Gtk.ListBox {
         add(row);
         update_last_row();
 
+        embed.composer.draft_id_changed.connect((id) => { this.draft_id = id; });
         embed.loaded.connect(() => { row.grab_focus(); });
         embed.vanished.connect(() => {
+                this.draft_id = null;
                 remove(row);
                 if (is_draft &&
                     row.email != null &&
@@ -844,7 +850,10 @@ public class ConversationListBox : Gtk.ListBox {
 
     private async void on_conversation_appended_async(
         Geary.App.Conversation conversation, Geary.Email part_email) {
-        if (!this.id_to_row.contains(part_email.id)) {
+        // Don't add rows that are already present, or that are
+        // currently being edited.
+        if (!(part_email.id in this.id_to_row) &&
+            part_email.id != this.draft_id) {
             load_full_email.begin(part_email.id, (obj, ret) => {
                     try {
                         load_full_email.end(ret);
