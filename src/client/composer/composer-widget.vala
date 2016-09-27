@@ -177,9 +177,6 @@ public class ComposerWidget : Gtk.EventBox {
             outline: 0px solid transparent;
             min-height: 100%;
         }
-        .embedded #message-body {
-            min-height: 200px;
-        }
         blockquote {
             margin-top: 0px;
             margin-bottom: 0px;

@@ -66,14 +66,9 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
     }
 
     private void on_loaded() {
-        try {
-           composer.editor.get_dom_document().body.get_class_list().add("embedded");
-        } catch (Error error) {
-            debug("Error setting class of editor: %s", error.message);
-        }
         Idle.add(() => {
             recalc_height();
-            return false;
+            return Source.REMOVE;
         });
     }
 
@@ -122,12 +117,6 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
 
         disable_scroll_reroute(this);
         this.composer.editor_scrolled.get_vscrollbar().show();
-
-        try {
-            this.composer.editor.get_dom_document().body.get_class_list().remove("embedded");
-        } catch (Error error) {
-            debug("Error setting class of editor: %s", error.message);
-        }
 
         remove(this.composer);
         close_container();
@@ -206,7 +195,7 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
                 .query_selector("#message-body").offset_height;
         } catch (Error error) {
             debug("Error getting height of editor: %s", error.message);
-            return false;
+            return Source.REMOVE;
         }
 
         if (view_height != inner_view_height || min_height != base_height + MIN_EDITOR_HEIGHT) {
@@ -217,7 +206,7 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
             int widget_height = int.max(view_height + base_height - 2, min_height); //? about 2
             set_size_request(-1, widget_height);
         }
-        return false;
+        return Source.REMOVE;
     }
 
     private bool on_inner_scroll_event(Gdk.EventScroll event) {
