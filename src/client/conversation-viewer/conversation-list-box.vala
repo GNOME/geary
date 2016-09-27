@@ -66,6 +66,12 @@ public class ConversationListBox : Gtk.ListBox {
         }
 
 
+        // We can only scroll to a specific row once it has been
+        // allocated space. This signal allows the viewer to hook up
+        // to appropriate times to try to do that scroll.
+        public signal void should_scroll();
+
+
         public ConversationRow(Geary.Email? email) {
             this.email = email;
         }
@@ -80,12 +86,25 @@ public class ConversationListBox : Gtk.ListBox {
             // Not supported by default
         }
 
+        // Enables firing the should_scroll signal when this row is
+        // allocated a size
+        public void enable_should_scroll() {
+            this.size_allocate.connect(on_size_allocate);
+        }
+
         protected inline void set_style_context_class(string class_name, bool value) {
             if (value) {
                 get_style_context().add_class(class_name);
             } else {
                 get_style_context().remove_class(class_name);
             }
+        }
+
+        protected virtual void on_size_allocate() {
+            // Disable should_scroll so we don't keep on scrolling
+            // later, like when the window has been resized.
+            this.size_allocate.disconnect(on_size_allocate);
+            should_scroll();
         }
 
     }
@@ -116,12 +135,6 @@ public class ConversationListBox : Gtk.ListBox {
         public ConversationEmail view { get; private set; }
 
 
-        // We can only scroll to a specific row once it has been
-        // allocated space. This signal allows the viewer to hook up
-        // to appropriate times to try to do that scroll.
-        public signal void should_scroll();
-
-
         public EmailRow(ConversationEmail view) {
             base(view.email);
             this.view = view;
@@ -139,11 +152,7 @@ public class ConversationListBox : Gtk.ListBox {
             update_row_expansion();
         }
 
-        public void enable_should_scroll() {
-            this.size_allocate.connect(on_size_allocate);
-        }
-
-        private void on_size_allocate() {
+        protected override void on_size_allocate() {
             // We need to wait the web view to load first, so that the
             // message has a non-trivial height, and then wait for it
             // to be reallocated, so that it picks up the web_view's
@@ -438,11 +447,12 @@ public class ConversationListBox : Gtk.ListBox {
 
         ComposerRow row = new ComposerRow(embed);
         row.show();
+        row.enable_should_scroll();
+        row.should_scroll.connect(() => { scroll_to(row); });
         add(row);
         update_last_row();
 
         embed.composer.draft_id_changed.connect((id) => { this.draft_id = id; });
-        embed.loaded.connect(() => { row.grab_focus(); });
         embed.vanished.connect(() => {
                 this.draft_id = null;
                 remove(row);
@@ -765,7 +775,7 @@ public class ConversationListBox : Gtk.ListBox {
         set_placeholder(spinner);
     }
 
-    private void scroll_to(EmailRow row) {
+    private void scroll_to(ConversationRow row) {
         Gtk.Allocation? alloc = null;
         row.get_allocation(out alloc);
         int y = 0;

@@ -30,7 +30,6 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
     private int min_height = MIN_EDITOR_HEIGHT;
 
 
-    public signal void loaded();
     public signal void vanished();
 
 
@@ -74,7 +73,6 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
         }
         Idle.add(() => {
             recalc_height();
-            loaded();
             return false;
         });
     }
