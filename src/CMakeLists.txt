@@ -557,6 +557,13 @@ else ()
     message(STATUS "Reference tracking: OFF")
 endif ()
 
+if (GTK3_FOUND AND NOT GTK3_VERSION VERSION_LESS 3.20)
+    set(EXTRA_VALA_OPTIONS
+        ${EXTRA_VALA_OPTIONS}
+        -D GTK_3_20
+    )
+endif()
+
 if (DISABLE_POODLE)
     message(STATUS "POODLE SSLv3 fix: OFF")
     set(EXTRA_VALA_OPTIONS

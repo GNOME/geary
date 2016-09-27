@@ -4,7 +4,12 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class AttachmentDialog : Gtk.FileChooserDialog {
+public class AttachmentDialog : Object {
+#if GTK_3_20
+    private Gtk.FileChooserNative? chooser = null;
+#else
+    private Gtk.FileChooserDialog? chooser = null;
+#endif
     private const int PREVIEW_SIZE = 180;
     private const int PREVIEW_PADDING = 3;
     
@@ -15,46 +20,47 @@ public class AttachmentDialog : Gtk.FileChooserDialog {
     public delegate bool Attacher(File attachment_file, bool alert_errors = true);
 
     public AttachmentDialog(Gtk.Window? parent) {
-        Object(title: _("Choose a file"), transient_for: parent, action: Gtk.FileChooserAction.OPEN);
-    }
-    
-    construct {
-        add_button(Stock._CANCEL, Gtk.ResponseType.CANCEL);
-        add_button(_("_Attach"), Gtk.ResponseType.ACCEPT);
+#if GTK_3_20
+        chooser = new Gtk.FileChooserNative(_("Choose a file"), parent, Gtk.FileChooserAction.OPEN, _("_Attach"), Stock._CANCEL);
+#else
+        chooser = new Gtk.FileChooserDialog(_("Choose a file"), parent, Gtk.FileChooserAction.OPEN, Stock._CANCEL, Gtk.ResponseType.CANCEL, _("_Attach"), Gtk.ResponseType.ACCEPT);
+#endif
 
         if (!Geary.String.is_empty(current_folder)) {
-            set_current_folder(current_folder);
+            chooser.set_current_folder(current_folder);
         }
-        set_local_only(false);
-        set_select_multiple(true);
-        
+        chooser.set_local_only(false);
+        chooser.set_select_multiple(true);
+
+        // preview widget is not supported on Win32 (this will fallback to gtk file chooser)
+        // and possibly by some org.freedesktop.portal.FileChooser (preview will be ignored).
         preview_image = new Gtk.Image();
-        set_preview_widget(preview_image);
-        use_preview_label = false;
-        
-        update_preview.connect(on_update_preview);
+        chooser.set_preview_widget(preview_image);
+        chooser.use_preview_label = false;
+
+        chooser.update_preview.connect(on_update_preview);
     }
     
     public bool is_finished(Attacher add_attachment) {
-        if (run() != Gtk.ResponseType.ACCEPT) {
-            destroy();
+        if (chooser.run() != Gtk.ResponseType.ACCEPT) {
+            chooser.destroy();
             return true;
         }
-        current_folder = get_current_folder();
-        foreach (File file in get_files()) {
+        current_folder = chooser.get_current_folder();
+        foreach (File file in chooser.get_files()) {
             if (!add_attachment(file)) {
-                destroy();
+                chooser.destroy();
                 return false;
             }
         }
-        destroy();
+        chooser.destroy();
         return true;
     }
     
     private void on_update_preview() {
-        string? filename = get_preview_filename();
+        string? filename = chooser.get_preview_filename();
         if (filename == null) {
-            set_preview_widget_active(false);
+            chooser.set_preview_widget_active(false);
             return;
         }
         
@@ -64,25 +70,21 @@ public class AttachmentDialog : Gtk.FileChooserDialog {
         Gdk.PixbufFormat? format = Gdk.Pixbuf.get_file_info(filename, out width, out height);
         
         if (format == null) {
-            set_preview_widget_active(false);
+            chooser.set_preview_widget_active(false);
             return;
         }
         
         // if the image is too big, resize it
         Gdk.Pixbuf pixbuf;
         try {
-            if (width > PREVIEW_SIZE || height > PREVIEW_SIZE) {
-                pixbuf = new Gdk.Pixbuf.from_file_at_size(filename, PREVIEW_SIZE, PREVIEW_SIZE);
-            } else {
-                pixbuf = new Gdk.Pixbuf.from_file(filename);
-            }
+            pixbuf = new Gdk.Pixbuf.from_file_at_scale(filename, PREVIEW_SIZE, PREVIEW_SIZE, true);
         } catch (Error e) {
-            set_preview_widget_active(false);
+            chooser.set_preview_widget_active(false);
             return;
         }
         
         if (pixbuf == null) {
-            set_preview_widget_active(false);
+            chooser.set_preview_widget_active(false);
             return;
         }
         
@@ -99,6 +101,6 @@ public class AttachmentDialog : Gtk.FileChooserDialog {
         
         // show the preview
         preview_image.set_from_pixbuf(pixbuf);
-        set_preview_widget_active(true);
+        chooser.set_preview_widget_active(true);
     }
 }
