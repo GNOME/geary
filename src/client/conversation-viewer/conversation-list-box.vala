@@ -74,6 +74,7 @@ public class ConversationListBox : Gtk.ListBox {
 
         public ConversationRow(Geary.Email? email) {
             this.email = email;
+            show();
         }
 
         // Request the row be expanded, if supported.
@@ -446,7 +447,6 @@ public class ConversationListBox : Gtk.ListBox {
         }
 
         ComposerRow row = new ComposerRow(embed);
-        row.show();
         row.enable_should_scroll();
         row.should_scroll.connect(() => { scroll_to(row); });
         add(row);
@@ -738,7 +738,6 @@ public class ConversationListBox : Gtk.ListBox {
             });
 
         EmailRow row = new EmailRow(view);
-        row.show();
         this.email_rows.set(email.id, row);
 
         add(row);
