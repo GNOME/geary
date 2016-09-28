@@ -758,7 +758,8 @@ public class ComposerWidget : Gtk.EventBox {
                     debug("Error getting message body: %s", error.message);
                 }
 
-                add_attachments(referred.attachments);
+                foreach(Geary.Attachment attachment in referred.attachments)
+                    add_attachment(attachment.file, true);
             break;
 
             case ComposeType.REPLY:
@@ -778,7 +779,8 @@ public class ComposerWidget : Gtk.EventBox {
                 this.subject = forward_subject;
                 this.body_html = "\n\n" + Geary.RFC822.Utils.quote_email_for_forward(referred, quote,
                     Geary.RFC822.TextFormat.HTML);
-                add_attachments(referred.attachments);
+                foreach(Geary.Attachment attachment in referred.attachments)
+                    add_attachment(attachment.file, true);
                 this.pending_attachments = referred.attachments;
             break;
         }
@@ -1513,7 +1515,8 @@ public class ComposerWidget : Gtk.EventBox {
     }
 
     private void on_pending_attachments() {
-        add_attachments(this.pending_attachments, false);
+        foreach(Geary.Attachment attachment in this.pending_attachments)
+            add_attachment(attachment.file, false);
     }
 
     private void check_pending_attachments() {
@@ -1599,11 +1602,6 @@ public class ComposerWidget : Gtk.EventBox {
         show_attachments();
         
         return true;
-    }
-
-    private void add_attachments(Gee.List<Geary.Attachment> attachments, bool alert_errors = true) {
-        foreach(Geary.Attachment attachment in attachments)
-            add_attachment(attachment.file, alert_errors);
     }
 
     private void remove_attachment(File file, Gtk.Box box) {
