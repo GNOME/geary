@@ -58,6 +58,7 @@ public class ComposerWidget : Gtk.EventBox {
     private const string ACTION_OUTDENT = "outdent";
     private const string ACTION_JUSTIFY = "justify";
     private const string ACTION_COLOR = "color";
+    private const string ACTION_INSERT_IMAGE = "insert-image";
     private const string ACTION_INSERT_LINK = "insert-link";
     private const string ACTION_COMPOSE_AS_HTML = "compose-as-html";
     private const string ACTION_SHOW_EXTENDED = "show-extended";
@@ -72,8 +73,8 @@ public class ComposerWidget : Gtk.EventBox {
 
     private const string[] html_actions = {
         ACTION_BOLD, ACTION_ITALIC, ACTION_UNDERLINE, ACTION_STRIKETHROUGH, ACTION_FONT_SIZE,
-        ACTION_FONT_FAMILY, ACTION_REMOVE_FORMAT, ACTION_COLOR, ACTION_JUSTIFY, ACTION_INSERT_LINK,
-        ACTION_COPY_LINK, ACTION_PASTE_WITH_FORMATTING
+        ACTION_FONT_FAMILY, ACTION_REMOVE_FORMAT, ACTION_COLOR, ACTION_JUSTIFY,
+        ACTION_INSERT_IMAGE, ACTION_INSERT_LINK, ACTION_COPY_LINK, ACTION_PASTE_WITH_FORMATTING
     };
 
     private const ActionEntry[] action_entries = {
@@ -97,6 +98,7 @@ public class ComposerWidget : Gtk.EventBox {
         {ACTION_OUTDENT,                  on_action                                     },
         {ACTION_JUSTIFY,                  on_justify,                "s",     "'left'"  },
         {ACTION_COLOR,                    on_select_color                               },
+        {ACTION_INSERT_IMAGE,             on_insert_image                               },
         {ACTION_INSERT_LINK,              on_insert_link                                },
         // Composer commands
         {ACTION_COMPOSE_AS_HTML,          on_toggle_action,        null,   "true",  on_compose_as_html_toggled },
@@ -119,6 +121,7 @@ public class ComposerWidget : Gtk.EventBox {
         action_accelerators.set(ACTION_COPY, "<Ctrl>x");
         action_accelerators.set(ACTION_PASTE, "<Ctrl>v");
         action_accelerators.set(ACTION_PASTE_WITH_FORMATTING, "<Ctrl><Shift>v");
+        action_accelerators.set(ACTION_INSERT_IMAGE, "<Ctrl>g");
         action_accelerators.set(ACTION_INSERT_LINK, "<Ctrl>l");
         action_accelerators.set(ACTION_INDENT, "<Ctrl>bracketright");
         action_accelerators.set(ACTION_OUTDENT, "<Ctrl>bracketleft");
@@ -1882,6 +1885,11 @@ public class ComposerWidget : Gtk.EventBox {
         } catch (Error error) {
             debug("Error protecting blockquotes: %s", error.message);
         }
+    }
+
+    private void on_insert_image(SimpleAction action, Variant? param) {
+        AttachmentDialog dialog = new AttachmentDialog(this.container.top_window);
+        dialog.is_finished(add_attachment);
     }
 
     private void on_insert_link(SimpleAction action, Variant? param) {
