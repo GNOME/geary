@@ -489,6 +489,7 @@ public class ComposerWidget : Gtk.EventBox {
         this.editor.selection_changed.connect(update_actions);
         this.editor.key_press_event.connect(on_editor_key_press);
         this.editor.user_changed_contents.connect(reset_draft_timer);
+        this.editor.web_inspector.inspect_web_view.connect(on_inspect_web_view);
 
         // only do this after setting body_html
         this.editor.load_string(HTML_BODY, "text/html", "UTF8", "");
@@ -507,6 +508,7 @@ public class ComposerWidget : Gtk.EventBox {
         s.enable_scripts = false;
         s.enable_java_applet = false;
         s.enable_plugins = false;
+        s.enable_developer_extras = Args.inspector;
         this.editor.settings = s;
 
         this.editor_scrolled.add(editor);
@@ -2070,6 +2072,15 @@ public class ComposerWidget : Gtk.EventBox {
             return !(action_name in html_actions) || (this.actions.get_action_enabled(action_name));
         });
 
+        if (Args.inspector) {
+            Gtk.MenuItem inspect_item = new Gtk.MenuItem.with_mnemonic(_("_Inspect"));
+            inspect_item.activate.connect(() => {
+                    this.editor.web_inspector.inspect_node(hit_test_result.inner_node);
+                });
+            context_menu.append(new Gtk.SeparatorMenuItem());
+            context_menu.append(inspect_item);
+        }
+
         context_menu.show_all();
         update_actions();
         return false;
@@ -2353,5 +2364,26 @@ public class ComposerWidget : Gtk.EventBox {
         return true;
     }
 
+    private unowned WebKit.WebView on_inspect_web_view(WebKit.WebInspector inspector, WebKit.WebView target_view) {
+        // XXX This was copy-pasta'ed from the conversation
+        // viewer. Both should be moved into a common superclass when
+        // ported to WebKit2 in Bug 728002.
+        Gtk.Window window = new Gtk.Window();
+        window.set_default_size(600, 600);
+        window.set_title(_("%s - Composer Inspector").printf(GearyApplication.NAME));
+        Gtk.ScrolledWindow scrolled = new Gtk.ScrolledWindow(null, null);
+        WebKit.WebView inspector_view = new WebKit.WebView();
+        scrolled.add(inspector_view);
+        window.add(scrolled);
+        window.show_all();
+        window.delete_event.connect(() => {
+            inspector.close();
+            return false;
+        });
+        
+        unowned WebKit.WebView r = inspector_view;
+        return r;
+    }
+    
 }
 
