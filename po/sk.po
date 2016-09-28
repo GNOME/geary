@@ -10,8 +10,8 @@ msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=internationalization\n"
-"POT-Creation-Date: 2016-08-28 06:24+0000\n"
-"PO-Revision-Date: 2016-09-10 17:09+0200\n"
+"POT-Creation-Date: 2016-09-26 21:45+0000\n"
+"PO-Revision-Date: 2016-09-28 20:56+0200\n"
 "Last-Translator: Dušan Kazik <prescott66@gmail.com>\n"
 "Language-Team: Slovak (http://www.transifex.com/projects/p/geary/language/"
 "sk/)\n"
@@ -20,7 +20,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
-"X-Generator: Poedit 1.8.8\n"
+"X-Generator: Poedit 1.8.9\n"
 
 #: ../desktop/geary.desktop.in.h:1 ../desktop/geary-autostart.desktop.in.h:1
 msgid "Geary"
@@ -141,7 +141,7 @@ msgstr "Zobrazí náhľad"
 msgid "Remem_ber passwords"
 msgstr "Zapa_mätať heslá"
 
-#: ../src/client/accounts/add-edit-page.vala:730 ../ui/login.glade.h:6
+#: ../src/client/accounts/add-edit-page.vala:730 ../ui/login.glade.h:7
 msgid "Remem_ber password"
 msgstr "Zapa_mätať heslo"
 
@@ -1459,7 +1459,7 @@ msgstr "Pošta na odoslanie"
 msgid "Archive"
 msgstr "Archív"
 
-#: ../src/engine/api/geary-special-folder-type.vala:58 ../ui/login.glade.h:26
+#: ../src/engine/api/geary-special-folder-type.vala:58 ../ui/login.glade.h:29
 msgid "None"
 msgstr "Nič"
 
@@ -2061,135 +2061,147 @@ msgstr "_Rozlišovať veľkosť písmen"
 msgid "label"
 msgstr "menovka"
 
-#: ../ui/login.glade.h:1 ../ui/password-dialog.glade.h:3
+#: ../ui/login.glade.h:1
+msgid "email@example.com"
+msgstr "email@priklad.sk"
+
+#: ../ui/login.glade.h:2 ../ui/password-dialog.glade.h:3
 msgid "Password"
 msgstr "Heslo"
 
-#: ../ui/login.glade.h:2
+#: ../ui/login.glade.h:3
 msgid "E_mail address"
 msgstr "E_mailová adresa"
 
-#: ../ui/login.glade.h:3
+#: ../ui/login.glade.h:4
 msgid "_Password"
 msgstr "_Heslo"
 
-#: ../ui/login.glade.h:4
+#: ../ui/login.glade.h:5
 msgid "S_ervice"
 msgstr "S_lužba"
 
-#: ../ui/login.glade.h:5
+#: ../ui/login.glade.h:6
 msgid "N_ame"
 msgstr "_Meno"
 
-#: ../ui/login.glade.h:7
+#: ../ui/login.glade.h:8
 msgid "N_ickname"
 msgstr "Pre_zývka"
 
-#: ../ui/login.glade.h:8
+#: ../ui/login.glade.h:9
 msgid "Work, Home, etc."
 msgstr "Práca, domov, atď."
 
-#: ../ui/login.glade.h:9
+#: ../ui/login.glade.h:10
 msgid "_Save sent mail"
 msgstr "_Uložiť odoslanú poštu"
 
-#: ../ui/login.glade.h:10
+#: ../ui/login.glade.h:11
 msgid "Addi_tional email addresses…"
 msgstr "Doda_točné emailové adresy…"
 
-#: ../ui/login.glade.h:11
+#: ../ui/login.glade.h:12
 msgid "IMAP settings"
 msgstr "Nastavenia IMAP"
 
-#: ../ui/login.glade.h:12
+#: ../ui/login.glade.h:13
 msgid "Se_rver"
 msgstr "Se_rver"
 
-#: ../ui/login.glade.h:13
+#: ../ui/login.glade.h:14
+msgid "imap.example.com"
+msgstr "imap.priklad.sk"
+
+#: ../ui/login.glade.h:15
 msgid "P_ort"
 msgstr "P_ort"
 
-#: ../ui/login.glade.h:14
+#: ../ui/login.glade.h:16
+msgid "smtp.example.com"
+msgstr "smtp.priklad.sk"
+
+#: ../ui/login.glade.h:17
 msgid "Ser_ver"
 msgstr "Ser_ver"
 
-#: ../ui/login.glade.h:15
+#: ../ui/login.glade.h:18
 msgid "Por_t"
 msgstr "Por_t"
 
-#: ../ui/login.glade.h:16
+#: ../ui/login.glade.h:19
 msgid "SMTP settings"
 msgstr "Nastavenia SMTP"
 
-#: ../ui/login.glade.h:17
+#: ../ui/login.glade.h:20
 msgid "User_name"
 msgstr "Používateľské _meno"
 
-#: ../ui/login.glade.h:18
+#: ../ui/login.glade.h:21
 msgid "Pass_word"
 msgstr "He_slo"
 
-#: ../ui/login.glade.h:19
+#: ../ui/login.glade.h:22
 msgid "SMTP username"
 msgstr "Používateľské meno pre SMTP"
 
-#: ../ui/login.glade.h:20
+#: ../ui/login.glade.h:23
 msgid "SMTP password"
 msgstr "Heslo pre SMTP"
 
-#: ../ui/login.glade.h:21
+#: ../ui/login.glade.h:24
 msgid "_Username"
 msgstr "_Používateľské meno"
 
-#: ../ui/login.glade.h:22
+#: ../ui/login.glade.h:25
 msgid "IMAP username"
 msgstr "Používateľské meno pre IMAP"
 
-#: ../ui/login.glade.h:23
+#: ../ui/login.glade.h:26
 msgid "IMAP password"
 msgstr "Heslo pre IMAP"
 
-#: ../ui/login.glade.h:24
+#: ../ui/login.glade.h:27
 msgid "Encr_yption"
 msgstr "Š_ifrovanie"
 
-#: ../ui/login.glade.h:25
+#: ../ui/login.glade.h:28
 msgid "Encrypt_ion"
 msgstr "Ši_frovanie"
 
-#: ../ui/login.glade.h:27
+#: ../ui/login.glade.h:30
 msgid "SSL/TLS"
 msgstr "SSL/TLS"
 
-#: ../ui/login.glade.h:28
+#: ../ui/login.glade.h:31
 msgid "STARTTLS"
 msgstr "STARTTLS"
 
-#: ../ui/login.glade.h:29
+#: ../ui/login.glade.h:32
 msgid "No authentication re_quired"
 msgstr "Ne_požaduje sa overenie totožnosti"
 
-#: ../ui/login.glade.h:30
+#: ../ui/login.glade.h:33
 msgid "Use IMAP cre_dentials"
 msgstr "Použiť p_overenia pre IMAP"
 
-#: ../ui/login.glade.h:31 ../ui/preferences.glade.h:5
+#: ../ui/login.glade.h:34 ../ui/preferences.glade.h:5
 msgid "Composer"
 msgstr "Tvorca správy"
 
-#: ../ui/login.glade.h:32
+#: ../ui/login.glade.h:35
 msgid "Save dra_fts on server"
 msgstr "Uložiť _koncepty na serveri"
 
-#: ../ui/login.glade.h:33
+#: ../ui/login.glade.h:36
 msgid "Si_gn emails (HTML allowed):"
 msgstr "_Podpísať emaily (s povoleným HTML):"
 
-#: ../ui/login.glade.h:34
+#: ../ui/login.glade.h:37
 msgid "Storage"
 msgstr "Úložisko"
 
-#: ../ui/login.glade.h:35
+#: ../ui/login.glade.h:38
 msgid "_Download mail"
 msgstr "_Prevziať poštu"
 
