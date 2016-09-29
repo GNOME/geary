@@ -245,7 +245,7 @@ public class ComposerWidget : Gtk.EventBox {
         owned get { return get_html(); }
         set {
             this.body_html = value;
-            this.editor.load_string(HTML_BODY, "text/html", "UTF8", "");
+            this.editor.load_string(HTML_BODY, "text/html", "UTF-8", "");
         }
     }
 
@@ -1613,7 +1613,6 @@ public class ComposerWidget : Gtk.EventBox {
             box.pack_start(remove_button, false, false);
             remove_button.clicked.connect(() => remove_attachment(target, box));
         
-        
             show_attachments();
         } else {
             this.inline_files.add(target);
@@ -1900,20 +1899,6 @@ public class ComposerWidget : Gtk.EventBox {
             }
         } catch (Error error) {
             debug("Error protecting blockquotes: %s", error.message);
-        }
-    }
-
-    private void on_insert_link(SimpleAction action, Variant? param) {
-        link_dialog("http://");
-    }
-
-    private static void on_link_clicked(WebKit.DOM.Element element, WebKit.DOM.Event event,
-        ComposerWidget composer) {
-        try {
-            composer.editor.get_dom_document().get_default_view().get_selection().
-                select_all_children(element);
-        } catch (Error e) {
-            debug("Error selecting link: %s", e.message);
         }
     }
 
@@ -2399,7 +2384,7 @@ public class ComposerWidget : Gtk.EventBox {
             inspector.close();
             return false;
         });
-        
+
         unowned WebKit.WebView r = inspector_view;
         return r;
     }
@@ -2454,6 +2439,20 @@ public class ComposerWidget : Gtk.EventBox {
             }
         }
         dialog.destroy();
+    }
+
+    private void on_insert_link(SimpleAction action, Variant? param) {
+        link_dialog("http://");
+    }
+
+    private static void on_link_clicked(WebKit.DOM.Element element, WebKit.DOM.Event event,
+        ComposerWidget composer) {
+        try {
+            composer.editor.get_dom_document().get_default_view().get_selection().
+                select_all_children(element);
+        } catch (Error e) {
+            debug("Error selecting link: %s", e.message);
+        }
     }
 
     private void on_resource_request_starting(WebKit.WebFrame web_frame,
