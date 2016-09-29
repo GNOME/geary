@@ -40,23 +40,7 @@ public class AttachmentDialog : Object {
 
         chooser.update_preview.connect(on_update_preview);
     }
-    
-    public bool is_finished(Attacher add_attachment) {
-        if (chooser.run() != Gtk.ResponseType.ACCEPT) {
-            chooser.destroy();
-            return true;
-        }
-        current_folder = chooser.get_current_folder();
-        foreach (File file in chooser.get_files()) {
-            if (!add_attachment(file)) {
-                chooser.destroy();
-                return false;
-            }
-        }
-        chooser.destroy();
-        return true;
-    }
-    
+
     private void on_update_preview() {
         string? filename = chooser.get_preview_filename();
         if (filename == null) {

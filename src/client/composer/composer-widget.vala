@@ -4,6 +4,11 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
+private errordomain AttachmentError {
+    FILE,
+    DUPLICATE
+}
+
 // The actual widget for sending messages. Should be put in a ComposerContainer
 [GtkTemplate (ui = "/org/gnome/Geary/composer-widget.ui")]
 public class ComposerWidget : Gtk.EventBox {
@@ -253,7 +258,7 @@ public class ComposerWidget : Gtk.EventBox {
     public bool blank {
         get {
             return this.to_entry.empty && this.cc_entry.empty && this.bcc_entry.empty && this.reply_to_entry.empty &&
-                this.subject_entry.buffer.length == 0 && !this.editor.can_undo() && this.attachment_files.size == 0;
+                this.subject_entry.buffer.length == 0 && !this.editor.can_undo() && this.attached_files.size == 0;
         }
     }
 
@@ -270,7 +275,10 @@ public class ComposerWidget : Gtk.EventBox {
     private ContactListStore? contact_list_store = null;
 
     private string? body_html = null;
-    private Gee.Set<File> attachment_files = new Gee.HashSet<File>(Geary.Files.nullable_hash,
+
+    private Gee.Set<File> attached_files = new Gee.HashSet<File>(Geary.Files.nullable_hash,
+        Geary.Files.nullable_equal);
+    private Gee.Set<File> inline_files = new Gee.HashSet<File>(Geary.Files.nullable_hash,
         Geary.Files.nullable_equal);
 
     [GtkChild]
@@ -580,10 +588,16 @@ public class ComposerWidget : Gtk.EventBox {
                 this.body_html = Geary.HTML.preserve_whitespace(Geary.HTML.escape_markup(
                     Geary.Collection.get_first(headers.get("body"))));
 
-            foreach (string attachment in headers.get("attach"))
-                add_attachment(File.new_for_commandline_arg(attachment));
-            foreach (string attachment in headers.get("attachment"))
-                add_attachment(File.new_for_commandline_arg(attachment));
+            Gee.List<string> attachments = new Gee.LinkedList<string>();
+            attachments.add_all(headers.get("attach"));
+            attachments.add_all(headers.get("attachment"));
+            foreach (string attachment in attachments) {
+                try {
+                    add_attachment(File.new_for_commandline_arg(attachment));
+                } catch (Error err) {
+                    attachment_failed(err.message);
+                }
+            }
         }
     }
 
@@ -908,8 +922,12 @@ public class ComposerWidget : Gtk.EventBox {
             foreach (string uri in uris) {
                 if (!uri.has_prefix(FILE_URI_PREFIX))
                     continue;
-                
-                add_attachment(File.new_for_uri(uri.strip()));
+
+                try {
+                    add_attachment(File.new_for_uri(uri.strip()));
+                } catch (Error err) {
+                    attachment_failed(err.message);
+                }
             }
         }
         
@@ -957,7 +975,8 @@ public class ComposerWidget : Gtk.EventBox {
         if (!Geary.String.is_empty(this.subject))
             email.subject = this.subject;
 
-        email.attachment_files.add_all(this.attachment_files);
+        email.attachment_files.add_all(this.attached_files);
+        //email.inline_files.add_all(this.inline_files);
 
         if (actions.get_action_state(ACTION_COMPOSE_AS_HTML).get_boolean() || only_html)
             email.body_html = get_html();
@@ -1300,7 +1319,7 @@ public class ComposerWidget : Gtk.EventBox {
     private bool should_send() {
         bool has_subject = !Geary.String.is_empty(subject.strip());
         bool has_body = !Geary.String.is_empty(get_html());
-        bool has_attachment = this.attachment_files.size > 0;
+        bool has_attachment = this.attached_files.size > 0;
 
         string? confirmation = null;
         if (!has_subject && !has_body && !has_attachment) {
@@ -1502,28 +1521,24 @@ public class ComposerWidget : Gtk.EventBox {
         this.container.close_container();
     }
 
-    private void on_add_attachment() {
-        AttachmentDialog dialog = null;
-        do {
-            // Transient parent of AttachmentDialog is this ComposerWindow
-            // But this generates the following warning:
-            // Attempting to add a widget with type AttachmentDialog to a
-            // ComposerWindow, but as a GtkBin subclass a ComposerWindow can
-            // only contain one widget at a time;
-            // it already contains a widget of type GtkBox
-            dialog = new AttachmentDialog(this.container.top_window);
-        } while (!dialog.is_finished(add_attachment));
-    }
-
     private void add_pending_attachments() {
-        foreach(Geary.Attachment attachment in this.pending_attachments)
-            add_attachment(attachment.file, false);
+        foreach(Geary.Attachment att in this.pending_attachments) {
+            try {
+                add_attachment(
+                    att.file,
+                    att.content_disposition.disposition_type
+                );
+            } catch (Error err) {
+                attachment_failed(err.message);
+            }
+        }
     }
 
     private void check_pending_attachments() {
         if (this.pending_attachments != null) {
             foreach (Geary.Attachment attachment in this.pending_attachments) {
-                if (!this.attachment_files.contains(attachment.file)) {
+                if (!this.attached_files.contains(attachment.file) &&
+                    !this.inline_files.contains(attachment.file)) {
                     this.header.show_pending_attachments = true;
                     return;
                 }
@@ -1532,81 +1547,81 @@ public class ComposerWidget : Gtk.EventBox {
         this.header.show_pending_attachments = false;
     }
 
+    private void add_attachment(File target,
+                                Geary.Mime.DispositionType? disposition = null)
+        throws AttachmentError {
+        FileInfo target_info;
+        try {
+            target_info = target.query_info("standard::size,standard::type",
+                FileQueryInfoFlags.NONE);
+        } catch (Error e) {
+            throw new AttachmentError.FILE(
+                _("\"%s\" could not be found.").printf(target.get_path())
+            );
+        }
+        
+        if (target_info.get_file_type() == FileType.DIRECTORY) {
+            throw new AttachmentError.FILE(
+                _("\"%s\" is a folder.").printf(target.get_path())
+            );
+        }
+
+        if (target_info.get_size() == 0){
+            throw new AttachmentError.FILE(
+                _("\"%s\" is an empty file.").printf(target.get_path())
+            );
+        }
+        
+        try {
+            FileInputStream? stream = target.read();
+            if (stream != null)
+                stream.close();
+        } catch(Error e) {
+            debug("File '%s' could not be opened for reading. Error: %s", target.get_path(),
+                e.message);
+            
+            throw new AttachmentError.FILE(
+                _("\"%s\" could not be opened for reading.").printf(target.get_path())
+            );
+        }
+
+        if (disposition != Geary.Mime.DispositionType.INLINE) {
+            if (!this.attached_files.add(target)) {
+                throw new AttachmentError.DUPLICATE(
+                    _("\"%s\" already attached for delivery.").printf(target.get_path())
+                );
+            }
+
+            Gtk.Box box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 6);
+            this.attachments_box.pack_start(box);
+
+            /// In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
+            string label_text = _("%s (%s)").printf(target.get_basename(),
+                Files.get_filesize_as_string(target_info.get_size()));
+            Gtk.Label label = new Gtk.Label(label_text);
+            box.pack_start(label);
+            label.halign = Gtk.Align.START;
+            label.margin_start = 4;
+            label.margin_end = 4;
+
+            Gtk.Button remove_button = new Gtk.Button.with_mnemonic(Stock._REMOVE);
+            box.pack_start(remove_button, false, false);
+            remove_button.clicked.connect(() => remove_attachment(target, box));
+        
+        
+            show_attachments();
+        } else {
+            this.inline_files.add(target);
+        }
+    }
+
     private void attachment_failed(string msg) {
         ErrorDialog dialog = new ErrorDialog(this.container.top_window, _("Cannot add attachment"), msg);
         dialog.run();
     }
 
-    private bool add_attachment(File attachment_file, bool alert_errors = true) {
-        FileInfo attachment_file_info;
-        try {
-            attachment_file_info = attachment_file.query_info("standard::size,standard::type",
-                FileQueryInfoFlags.NONE);
-        } catch(Error e) {
-            if (alert_errors)
-                attachment_failed(_("\"%s\" could not be found.").printf(attachment_file.get_path()));
-            
-            return false;
-        }
-        
-        if (attachment_file_info.get_file_type() == FileType.DIRECTORY) {
-            if (alert_errors)
-                attachment_failed(_("\"%s\" is a folder.").printf(attachment_file.get_path()));
-            
-            return false;
-        }
-
-        if (attachment_file_info.get_size() == 0){
-            if (alert_errors)
-                attachment_failed(_("\"%s\" is an empty file.").printf(attachment_file.get_path()));
-            
-            return false;
-        }
-        
-        try {
-            FileInputStream? stream = attachment_file.read();
-            if (stream != null)
-                stream.close();
-        } catch(Error e) {
-            debug("File '%s' could not be opened for reading. Error: %s", attachment_file.get_path(),
-                e.message);
-            
-            if (alert_errors)
-                attachment_failed(_("\"%s\" could not be opened for reading.").printf(attachment_file.get_path()));
-            
-            return false;
-        }
-        
-        if (!this.attachment_files.add(attachment_file)) {
-            if (alert_errors)
-                attachment_failed(_("\"%s\" already attached for delivery.").printf(attachment_file.get_path()));
-            
-            return false;
-        }
-
-        Gtk.Box box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 6);
-        this.attachments_box.pack_start(box);
-
-        /// In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
-        string label_text = _("%s (%s)").printf(attachment_file.get_basename(),
-            Files.get_filesize_as_string(attachment_file_info.get_size()));
-        Gtk.Label label = new Gtk.Label(label_text);
-        box.pack_start(label);
-        label.halign = Gtk.Align.START;
-        label.margin_start = 4;
-        label.margin_end = 4;
-
-        Gtk.Button remove_button = new Gtk.Button.with_mnemonic(Stock._REMOVE);
-        box.pack_start(remove_button, false, false);
-        remove_button.clicked.connect(() => remove_attachment(attachment_file, box));
-        
-        show_attachments();
-        
-        return true;
-    }
-
     private void remove_attachment(File file, Gtk.Box box) {
-        if (!this.attachment_files.remove(file))
+        if (!this.attached_files.remove(file))
             return;
         
         foreach (weak Gtk.Widget child in this.attachments_box.get_children()) {
@@ -1620,7 +1635,7 @@ public class ComposerWidget : Gtk.EventBox {
     }
 
     private void show_attachments() {
-        if (this.attachment_files.size > 0 )
+        if (this.attached_files.size > 0 )
             attachments_box.show_all();
         else
             attachments_box.hide();
@@ -1881,11 +1896,6 @@ public class ComposerWidget : Gtk.EventBox {
         } catch (Error error) {
             debug("Error protecting blockquotes: %s", error.message);
         }
-    }
-
-    private void on_insert_image(SimpleAction action, Variant? param) {
-        AttachmentDialog dialog = new AttachmentDialog(this.container.top_window);
-        dialog.is_finished(add_attachment);
     }
 
     private void on_insert_link(SimpleAction action, Variant? param) {
@@ -2388,10 +2398,50 @@ public class ComposerWidget : Gtk.EventBox {
         unowned WebKit.WebView r = inspector_view;
         return r;
     }
-    
-}
+
+    private void on_add_attachment() {
+        AttachmentDialog dialog = new AttachmentDialog(this.container.top_window);
+        if (dialog.run() == Gtk.ResponseType.ACCEPT) {
+            dialog.hide();
+            foreach (File file in dialog.get_files()) {
+                try {
+                    add_attachment(file, Geary.Mime.DispositionType.ATTACHMENT);
+                } catch (Error err) {
+                    attachment_failed(err.message);
+                    break;
+                }
+            }
+        }
+        dialog.destroy();
+    }
 
     private void on_pending_attachments() {
         add_pending_attachments();
+    }
+
+    private void on_insert_image(SimpleAction action, Variant? param) {
+        AttachmentDialog dialog = new AttachmentDialog(this.container.top_window);
+        if (dialog.run() == Gtk.ResponseType.ACCEPT) {
+            dialog.hide();
+            foreach (File file in dialog.get_files()) {
+                try {
+                    add_attachment(file, Geary.Mime.DispositionType.INLINE);
+                    // Use insertHTML instead of insertImage here so
+                    // we can specify a max width inline, preventing
+                    // large images from overflowing the view port.
+                    this.editor.get_dom_document().exec_command(
+                        "insertHTML",
+                        false,
+                        "<img style=\"max-width: 100%\" src=\"%s\">".printf(
+                            this.editor_allow_prefix + file.get_uri()
+                        )
+                    );
+                } catch (Error err) {
+                    attachment_failed(err.message);
+                    break;
+                }
+            }
+        }
+        dialog.destroy();
     }
 
