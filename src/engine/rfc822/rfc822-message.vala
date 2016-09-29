@@ -152,43 +152,37 @@ public class Geary.RFC822.Message : BaseObject {
             this.message.set_header(HEADER_MAILER, email.mailer);
         }
 
+        // Build the message's body mime parts
+
+        Gee.List<GMime.Object> body_parts = new Gee.LinkedList<GMime.Object>();
+
         // Share the body charset and encoding between plain and HTML
         // parts, so we don't need to work it out twice.
         string? body_charset = null;
         GMime.ContentEncoding? body_encoding = null;
 
         // Body: text format (optional)
-        GMime.Part? body_text = null;
         if (email.body_text != null) {
-            body_text = body_data_to_part(email.body_text.data,
-                                          ref body_charset,
-                                          ref body_encoding,
-                                          "text/plain",
-                                          true);
+            GMime.Part? body_text = body_data_to_part(email.body_text.data,
+                                                      ref body_charset,
+                                                      ref body_encoding,
+                                                      "text/plain",
+                                                      true);
+            body_parts.add(body_text);
         }
 
         // Body: HTML format (also optional)
-        GMime.Object? body_html = null;
         if (email.body_html != null) {
-            body_html = body_data_to_part(email.body_html.data,
-                                          ref body_charset,
-                                          ref body_encoding,
-                                          "text/html",
-                                          false);
-        }
+            GMime.Object? body_html = body_data_to_part(email.body_html.data,
+                                                        ref body_charset,
+                                                        ref body_encoding,
+                                                        "text/html",
+                                                        false);
 
-        // Build the message's mime part.
-        Gee.List<GMime.Object> main_parts = new Gee.LinkedList<GMime.Object>();
-
-        Gee.List<GMime.Object> body_parts = new Gee.LinkedList<GMime.Object>();
-        if (body_text != null)
-            body_parts.add(body_text);
-
-        if (body_html != null) {
+            // Create parts for inline images, if any
             Gee.List<GMime.Object> related_parts =
                 new Gee.LinkedList<GMime.Object>();
             if (!email.inline_files.is_empty) {
-                // Check inline images to be attached
                 uint index = 0;
                 foreach (File file in email.inline_files) {
                     GMime.Object? inline_part = get_file_part(
@@ -203,6 +197,8 @@ public class Geary.RFC822.Message : BaseObject {
                 }
             }
 
+            // Assemble the HTML and inline images into a related
+            // part, if needed
             if (!related_parts.is_empty) {
                 related_parts.insert(0, body_html);
                 GMime.Object? related_part =
@@ -214,6 +210,8 @@ public class Geary.RFC822.Message : BaseObject {
             body_parts.add(body_html);
         }
 
+        // Build the message's main part.
+        Gee.List<GMime.Object> main_parts = new Gee.LinkedList<GMime.Object>();
         GMime.Object? body_part = coalesce_parts(body_parts, "alternative");
         if (body_part != null)
             main_parts.add(body_part);
