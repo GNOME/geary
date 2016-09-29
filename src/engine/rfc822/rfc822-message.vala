@@ -168,7 +168,7 @@ public class Geary.RFC822.Message : BaseObject {
         }
 
         // Body: HTML format (also optional)
-        GMime.Part? body_html = null;
+        GMime.Object? body_html = null;
         if (email.body_html != null) {
             body_html = body_data_to_part(email.body_html.data,
                                           ref body_charset,
@@ -179,19 +179,50 @@ public class Geary.RFC822.Message : BaseObject {
 
         // Build the message's mime part.
         Gee.List<GMime.Object> main_parts = new Gee.LinkedList<GMime.Object>();
-        
+
         Gee.List<GMime.Object> body_parts = new Gee.LinkedList<GMime.Object>();
         if (body_text != null)
             body_parts.add(body_text);
-        if (body_html != null)
+
+        if (body_html != null) {
+            Gee.List<GMime.Object> related_parts =
+                new Gee.LinkedList<GMime.Object>();
+            if (!email.inline_files.is_empty) {
+                // Check inline images to be attached
+                uint index = 0;
+                foreach (File file in email.inline_files) {
+                    GMime.Object? inline_part = get_file_part(
+                        file, Geary.Mime.DispositionType.INLINE
+                    );
+                    if (inline_part != null) {
+                        inline_part.set_content_id(
+                            "inline_%u@geary".printf(index++)
+                        );
+                        related_parts.add(inline_part);
+                    }
+                }
+            }
+
+            if (!related_parts.is_empty) {
+                related_parts.insert(0, body_html);
+                GMime.Object? related_part =
+                   coalesce_related(related_parts, "text/html");
+                if (related_part != null)
+                    body_html = related_part;
+            }
+
             body_parts.add(body_html);
+        }
+
         GMime.Object? body_part = coalesce_parts(body_parts, "alternative");
         if (body_part != null)
             main_parts.add(body_part);
-        
+
         Gee.List<GMime.Object> attachment_parts = new Gee.LinkedList<GMime.Object>();
-        foreach (File attachment_file in email.attachment_files) {
-            GMime.Object? attachment_part = get_attachment_part(attachment_file);
+        foreach (File file in email.attached_files) {
+            GMime.Object? attachment_part = get_file_part(
+                file, Geary.Mime.DispositionType.ATTACHMENT
+            );
             if (attachment_part != null)
                 attachment_parts.add(attachment_part);
         }
@@ -235,7 +266,16 @@ public class Geary.RFC822.Message : BaseObject {
         
         message.set_mime_part(original_mime_part);
     }
-    
+
+    private GMime.Object? coalesce_related(Gee.List<GMime.Object> parts,
+                                           string type) {
+        GMime.Object? part = coalesce_parts(parts, "related");
+        if (parts.size > 1) {
+            part.set_header("Type", type);
+        }
+        return part;
+    }
+
     private GMime.Object? coalesce_parts(Gee.List<GMime.Object> parts, string subtype) {
         if (parts.size == 0) {
             return null;
@@ -248,11 +288,12 @@ public class Geary.RFC822.Message : BaseObject {
             return multipart;
         }
     }
-    
-    private GMime.Part? get_attachment_part(File file) {
+
+    private GMime.Part? get_file_part(File file,
+                                      Geary.Mime.DispositionType disposition) {
         if (!file.query_exists())
             return null;
-            
+
         FileInfo file_info;
         try {
             file_info = file.query_info(FileAttribute.STANDARD_CONTENT_TYPE, FileQueryInfoFlags.NONE);
@@ -260,12 +301,12 @@ public class Geary.RFC822.Message : BaseObject {
             debug("Error querying info from file: %s", err.message);
             return null;
         }
-        
+
         GMime.Part part = new GMime.Part();
-        part.set_disposition("attachment");
+        part.set_disposition(disposition.serialize());
         part.set_filename(file.get_basename());
         part.set_content_type(new GMime.ContentType.from_string(file_info.get_content_type()));
-        
+
         // This encoding is the initial encoding of the stream.
         GMime.StreamGIO stream = new GMime.StreamGIO(file);
         stream.set_owner(false);
