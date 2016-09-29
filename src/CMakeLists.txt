@@ -306,6 +306,8 @@ engine/util/util-string.vala
 engine/util/util-synchronization.vala
 engine/util/util-time.vala
 engine/util/util-trillian.vala
+
+${CMAKE_BINARY_DIR}/geary-version.vala
 )
 
 set(CLIENT_SRC
@@ -499,6 +501,15 @@ pkg_check_modules(DEPS REQUIRED
     ${EXTRA_CLIENT_PKG_CONFIG}
 )
 
+add_custom_target(git-version
+    COMMAND ${CMAKE_COMMAND}
+    -DSRC_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+    -DDST_DIR=${CMAKE_BINARY_DIR}
+    -DVERSION=${VERSION}
+    -P ${CMAKE_CURRENT_SOURCE_DIR}/../cmake/gitversion.cmake
+    BYPRODUCTS ${CMAKE_BINARY_DIR}/geary-version.vala
+)
+
 set(ENGINE_PACKAGES
     glib-2.0 gee-0.8 gio-2.0 gmime-2.6 posix sqlite3 libxml-2.0
 )
@@ -515,10 +526,9 @@ set(CONSOLE_PACKAGES
 
 set(GSETTINGS_DIR ${CMAKE_SOURCE_DIR}/desktop)
 
-set(CFLAGS 
+set(CFLAGS
     ${DEPS_CFLAGS}
     ${DEPS_CFLAGS_OTHER}
-    -D_VERSION=\"${VERSION}\"
     -D_INSTALL_PREFIX=\"${CMAKE_INSTALL_PREFIX}\"
     -D_SOURCE_ROOT_DIR=\"${CMAKE_SOURCE_DIR}\"
     -D_GSETTINGS_DIR=\"${CMAKE_BINARY_DIR}/gsettings\"
@@ -591,6 +601,7 @@ OPTIONS
 )
 
 add_library(geary-static STATIC ${ENGINE_VALA_C})
+add_dependencies(geary-static git-version)
 target_link_libraries(geary-static ${DEPS_LIBRARIES} sqlite3-unicodesn gthread-2.0)
 
 # WebKitGTK VAPI generation
@@ -630,7 +641,7 @@ add_custom_command(
     TARGET
         geary
     POST_BUILD
-    COMMAND 
+    COMMAND
         ${CMAKE_COMMAND} -E copy geary ${CMAKE_BINARY_DIR}/
 )
 

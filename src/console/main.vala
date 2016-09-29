@@ -4,8 +4,6 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-// Defined by CMake build script.
-extern const string _VERSION;
 
 errordomain CommandException {
     USAGE,
@@ -13,8 +11,6 @@ errordomain CommandException {
 }
 
 class ImapConsole : Gtk.Window {
-    public const string VERSION = _VERSION;
-    
     private const int KEEPALIVE_SEC = 60 * 10;
     
     private Gtk.TextView console = new Gtk.TextView();
@@ -424,8 +420,8 @@ class ImapConsole : Gtk.Window {
         
         Gee.HashMap<string, string> fields = new Gee.HashMap<string, string>();
         fields.set("name", "geary-console");
-        fields.set("version", VERSION);
-        
+        fields.set("version", Geary.Version.GEARY_VERSION);
+
         cx.send_async.begin(new Geary.Imap.IdCommand(fields), null, on_id);
     }
     

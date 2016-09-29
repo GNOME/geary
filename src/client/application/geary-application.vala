@@ -5,7 +5,6 @@
  */
 
 // Defined by CMake build script.
-extern const string _VERSION;
 extern const string _INSTALL_PREFIX;
 extern const string _GSETTINGS_DIR;
 extern const string _SOURCE_ROOT_DIR;
@@ -20,8 +19,8 @@ public class GearyApplication : Gtk.Application {
     public const string WEBSITE = "https://wiki.gnome.org/Apps/Geary";
     public const string WEBSITE_LABEL = _("Visit the Geary web site");
     public const string BUGREPORT = "https://wiki.gnome.org/Apps/Geary/ReportingABug";
-    
-    public const string VERSION = _VERSION;
+
+    public const string VERSION = Geary.Version.GEARY_VERSION;
     public const string INSTALL_PREFIX = _INSTALL_PREFIX;
     public const string GSETTINGS_DIR = _GSETTINGS_DIR;
     public const string SOURCE_ROOT_DIR = _SOURCE_ROOT_DIR;

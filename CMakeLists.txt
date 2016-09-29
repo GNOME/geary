@@ -19,7 +19,7 @@ list(APPEND
 #
 set(GETTEXT_PACKAGE "geary")
 set(RELEASE_NAME "Lightweight email client for GNOME.")
-set(VERSION "0.11.0")
+set(VERSION "0.11.2-dev")
 set(VERSION_INFO "Release")
 set(LANGUAGE_SUPPORT_DIRECTORY ${CMAKE_INSTALL_PREFIX}/share/locale)
 
@@ -123,6 +123,8 @@ else()
   endif()
 endif()
 
+find_package(Git QUIET)
+
 # intl
 include(Gettext)
 if (XGETTEXT_FOUND)
@@ -167,13 +169,15 @@ add_custom_target(
 
 # Dist
 # This generates the dist tarballs
-add_custom_target(
-    dist
-    COMMAND 
-        git archive --prefix=${ARCHIVE_BASE_NAME}/ HEAD
-        | xz -z > ${CMAKE_BINARY_DIR}/${ARCHIVE_FULL_NAME}
-    WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
-)
+if (GIT_FOUND)
+    add_custom_target(
+        dist
+        COMMAND
+            ${GIT_EXECUTABLE} archive --prefix=${ARCHIVE_BASE_NAME}/ HEAD
+            | xz -z > ${CMAKE_BINARY_DIR}/${ARCHIVE_FULL_NAME}
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+    )
+endif()
 
 # Ubuntu
 # Builds the source Debian package used for the Launchpad PPA
