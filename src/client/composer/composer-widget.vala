@@ -369,6 +369,8 @@ public class ComposerWidget : Gtk.EventBox {
     // We need to keep a reference to the edit-fixer in composer-window, so it doesn't get
     // garbage-collected.
     private WebViewEditFixer edit_fixer;
+    private string editor_allow_prefix = "";
+
     private ComposerContainer container {
         get { return (ComposerContainer) parent; }
     }
@@ -477,6 +479,7 @@ public class ComposerWidget : Gtk.EventBox {
             set_cursor();
 
         this.edit_fixer = new WebViewEditFixer(editor);
+        this.editor_allow_prefix = random_string(10) + ":";
 
         // Add actions once every element has been initialized and added
         initialize_actions();
@@ -499,6 +502,7 @@ public class ComposerWidget : Gtk.EventBox {
         this.editor.redo.connect(update_actions);
         this.editor.selection_changed.connect(update_actions);
         this.editor.key_press_event.connect(on_editor_key_press);
+        this.editor.resource_request_starting.connect(on_resource_request_starting);
         this.editor.user_changed_contents.connect(reset_draft_timer);
         this.editor.web_inspector.inspect_web_view.connect(on_inspect_web_view);
 
@@ -515,7 +519,6 @@ public class ComposerWidget : Gtk.EventBox {
         s.enable_spell_checking = GearyApplication.instance.config.spell_check;
         s.spell_checking_languages = string.joinv(",",
                                                   GearyApplication.instance.config.spell_check_languages);
-        s.auto_load_images = false;
         s.enable_scripts = false;
         s.enable_java_applet = false;
         s.enable_plugins = false;
@@ -2421,6 +2424,12 @@ public class ComposerWidget : Gtk.EventBox {
 
     private void on_insert_image(SimpleAction action, Variant? param) {
         AttachmentDialog dialog = new AttachmentDialog(this.container.top_window);
+        Gtk.FileFilter filter = new Gtk.FileFilter();
+        // Translators: This is the name of the file chooser filter
+        // when inserting an image in the composer.
+        filter.set_name(_("Images"));
+        filter.add_mime_type("image/*");
+        dialog.add_filter(filter);
         if (dialog.run() == Gtk.ResponseType.ACCEPT) {
             dialog.hide();
             foreach (File file in dialog.get_files()) {
@@ -2445,3 +2454,24 @@ public class ComposerWidget : Gtk.EventBox {
         dialog.destroy();
     }
 
+    private void on_resource_request_starting(WebKit.WebFrame web_frame,
+                                              WebKit.WebResource web_resource,
+                                              WebKit.NetworkRequest request,
+                                              WebKit.NetworkResponse? response) {
+        // XXX This was copy-pasta'ed from the conversation
+        // viewer. Both should be moved into a common superclass when
+        // ported to WebKit2 in Bug 728002.
+
+        if (response != null) {
+            // A request that was previously approved resulted in a redirect.
+            return;
+        }
+
+        string? uri = request.get_uri();
+        if (uri.has_prefix(this.editor_allow_prefix))
+            request.set_uri(uri.substring(this.editor_allow_prefix.length));
+        else
+            request.set_uri("about:blank");
+    }
+
+}
