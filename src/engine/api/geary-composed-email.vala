@@ -4,6 +4,9 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
+/**
+ * Encapsulates a message created by the user in the composer.
+ */
 public class Geary.ComposedEmail : BaseObject {
     public const string MAILTO_SCHEME = "mailto:";
     
@@ -37,6 +40,8 @@ public class Geary.ComposedEmail : BaseObject {
     public Gee.Set<File> inline_files { get; private set;
         default = new Gee.HashSet<File>(Geary.Files.nullable_hash, Geary.Files.nullable_equal); }
 
+    public string img_src_prefix { get; set; default = ""; }
+
     public ComposedEmail(DateTime date, RFC822.MailboxAddresses from, 
         RFC822.MailboxAddresses? to = null, RFC822.MailboxAddresses? cc = null,
         RFC822.MailboxAddresses? bcc = null, string? subject = null,
@@ -54,5 +59,29 @@ public class Geary.ComposedEmail : BaseObject {
     public Geary.RFC822.Message to_rfc822_message(string? message_id = null) {
         return new RFC822.Message.from_composed_email(this, message_id);
     }
-}
 
+    /**
+     * Replaces the IMG SRC value in the HTML part of any matching strings.
+     *
+     * Will also remove the random prefix set by the composer for
+     * security reasons.
+     *
+     * Returns true if `orig` has been replaced by `replacement`.
+     */
+    public bool replace_inline_img_src(string orig, string replacement) {
+        const string src = "src=\"%s%s\"";
+        bool ret = false;
+        if (this.body_html != null) {
+            string old_body = this.body_html;
+            this.body_html = old_body.replace(
+                src.printf(this.img_src_prefix, orig),
+                src.printf("", replacement)
+            );
+            // Avoid doing a proper comparison so we don't need to scan
+            // the whole string again.
+            ret = this.body_html.length != old_body.length;
+        }
+        return ret;
+    }
+
+}

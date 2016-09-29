@@ -981,6 +981,8 @@ public class ComposerWidget : Gtk.EventBox {
         email.attached_files.add_all(this.attached_files);
         email.inline_files.add_all(this.inline_files);
 
+        email.img_src_prefix = this.editor_allow_prefix;
+
         if (actions.get_action_state(ACTION_COMPOSE_AS_HTML).get_boolean() || only_html)
             email.body_html = get_html();
         if (!only_html)

@@ -173,29 +173,35 @@ public class Geary.RFC822.Message : BaseObject {
 
         // Body: HTML format (also optional)
         if (email.body_html != null) {
-            GMime.Object? body_html = body_data_to_part(email.body_html.data,
-                                                        ref body_charset,
-                                                        ref body_encoding,
-                                                        "text/html",
-                                                        false);
-
-            // Create parts for inline images, if any
+            // Create parts for inline images, if any, and updating
+            // the IMG SRC attributes as we go.
             Gee.List<GMime.Object> related_parts =
                 new Gee.LinkedList<GMime.Object>();
             if (!email.inline_files.is_empty) {
                 uint index = 0;
                 foreach (File file in email.inline_files) {
-                    GMime.Object? inline_part = get_file_part(
-                        file, Geary.Mime.DispositionType.INLINE
-                    );
-                    if (inline_part != null) {
-                        inline_part.set_content_id(
-                            "inline_%u@geary".printf(index++)
-                        );
-                        related_parts.add(inline_part);
+                    string cid = "inline_%u@geary".printf(index++);
+                    // Only include the inline file if it is actually
+                    // referenced by the HTML - it may have been
+                    // deleted by the user after being added
+                    if (email.replace_inline_img_src(file.get_uri(),
+                                                     "cid:" + cid)) {
+                        GMime.Object? inline_part = get_file_part(
+                            file, Geary.Mime.DispositionType.INLINE
+                            );
+                        if (inline_part != null) {
+                            inline_part.set_content_id(cid);
+                            related_parts.add(inline_part);
+                        }
                     }
                 }
             }
+
+            GMime.Object? body_html = body_data_to_part(email.body_html.data,
+                                                        ref body_charset,
+                                                        ref body_encoding,
+                                                        "text/html",
+                                                        false);
 
             // Assemble the HTML and inline images into a related
             // part, if needed
