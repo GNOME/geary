@@ -362,6 +362,8 @@ public class ComposerWidget : Gtk.EventBox {
         Geary.Files.nullable_equal);
     private Gee.Set<File> inline_files = new Gee.HashSet<File>(Geary.Files.nullable_hash,
         Geary.Files.nullable_equal);
+    private Gee.Map<string,File> cid_files = new Gee.HashMap<string,File>();
+
     private Geary.App.DraftManager? draft_manager = null;
     private Geary.EmailFlags draft_flags = new Geary.EmailFlags.with(Geary.EmailFlags.DRAFT);
     private uint draft_save_timeout_id = 0;
@@ -1544,7 +1546,9 @@ public class ComposerWidget : Gtk.EventBox {
                     Geary.Mime.DispositionType? type =
                     part.content_disposition.disposition_type;
                     File file = part.file;
-                    if (type == Geary.Mime.DispositionType.INLINE) {
+                    if (part.content_id != null) {
+                        this.cid_files[part.content_id] = file;
+                    } else if (type == Geary.Mime.DispositionType.INLINE) {
                         // Inline part with no CID, so it is not
                         // possible to be referenced from an IMG SRC
                         // using a cid: URL, hence treat it as an
@@ -2491,11 +2495,20 @@ public class ComposerWidget : Gtk.EventBox {
             return;
         }
 
-        string? uri = request.get_uri();
-        if (uri.has_prefix(this.editor_allow_prefix))
-            request.set_uri(uri.substring(this.editor_allow_prefix.length));
-        else
-            request.set_uri("about:blank");
+        const string CID_PREFIX = "cid:";
+        const string ABOUT_BLANK = "about:blank";
+
+        string? req_uri = request.get_uri();
+        string resp_url = ABOUT_BLANK;
+        if (req_uri.has_prefix(CID_PREFIX)) {
+            File? file = this.cid_files[req_uri.substring(CID_PREFIX.length)];
+            if (file != null) {
+                resp_url = file.get_uri();
+            }
+        } else if (req_uri.has_prefix(this.editor_allow_prefix)) {
+            resp_url = req_uri.substring(this.editor_allow_prefix.length);
+        }
+        request.set_uri(resp_url);
     }
 
 }
