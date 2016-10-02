@@ -33,6 +33,8 @@ public class ComposerWidget : Gtk.EventBox {
         INLINE_COMPACT
     }
 
+    private enum AttachPending { ALL, INLINE_ONLY }
+
     private class FromAddressMap {
         public Geary.Account account;
         public Geary.RFC822.MailboxAddresses from;
@@ -276,11 +278,6 @@ public class ComposerWidget : Gtk.EventBox {
 
     private string? body_html = null;
 
-    private Gee.Set<File> attached_files = new Gee.HashSet<File>(Geary.Files.nullable_hash,
-        Geary.Files.nullable_equal);
-    private Gee.Set<File> inline_files = new Gee.HashSet<File>(Geary.Files.nullable_hash,
-        Geary.Files.nullable_equal);
-
     [GtkChild]
     private Gtk.Box composer_container;
     [GtkChild]
@@ -352,7 +349,6 @@ public class ComposerWidget : Gtk.EventBox {
     private SpellCheckPopover? spell_check_popover = null;
     private string? hover_url = null;
     private bool is_attachment_overlay_visible = false;
-    private Gee.List<Geary.Attachment>? pending_attachments = null;
     private Geary.RFC822.MailboxAddresses reply_to_addresses;
     private Geary.RFC822.MailboxAddresses reply_cc_addresses;
     private string reply_subject = "";
@@ -360,6 +356,12 @@ public class ComposerWidget : Gtk.EventBox {
     private bool top_posting = true;
     private string? last_quote = null;
 
+    private Gee.List<Geary.Attachment>? pending_attachments = null;
+    private AttachPending pending_include = AttachPending.INLINE_ONLY;
+    private Gee.Set<File> attached_files = new Gee.HashSet<File>(Geary.Files.nullable_hash,
+        Geary.Files.nullable_equal);
+    private Gee.Set<File> inline_files = new Gee.HashSet<File>(Geary.Files.nullable_hash,
+        Geary.Files.nullable_equal);
     private Geary.App.DraftManager? draft_manager = null;
     private Geary.EmailFlags draft_flags = new Geary.EmailFlags.with(Geary.EmailFlags.DRAFT);
     private uint draft_save_timeout_id = 0;
@@ -467,10 +469,18 @@ public class ComposerWidget : Gtk.EventBox {
 
         this.from = new Geary.RFC822.MailboxAddresses.single(account.information.primary_mailbox);
 
-        if (referred != null)
+        if (referred != null) {
             fill_in_from_referred(referred, quote);
 
+            if (is_referred_draft ||
+                compose_type == ComposeType.NEW_MESSAGE ||
+                compose_type == ComposeType.FORWARD) {
+                this.pending_include = AttachPending.ALL;
+            }
+        }
+
         update_from_field();
+        update_pending_attachments(this.pending_include, true);
 
         // only add signature if the option is actually set and if this is not a draft
         if (this.account.information.use_email_signature && !is_referred_draft)
@@ -780,7 +790,6 @@ public class ComposerWidget : Gtk.EventBox {
                 } catch (Error error) {
                     debug("Error getting message body: %s", error.message);
                 }
-                add_pending_attachments();
             break;
 
             case ComposeType.REPLY:
@@ -799,7 +808,6 @@ public class ComposerWidget : Gtk.EventBox {
                 this.subject = forward_subject;
                 this.body_html = "\n\n" + Geary.RFC822.Utils.quote_email_for_forward(referred, quote,
                     Geary.RFC822.TextFormat.HTML);
-                add_pending_attachments();
             break;
         }
     }
@@ -1526,30 +1534,45 @@ public class ComposerWidget : Gtk.EventBox {
         this.container.close_container();
     }
 
-    private void add_pending_attachments() {
-        foreach(Geary.Attachment att in this.pending_attachments) {
-            try {
-                add_attachment(
-                    att.file,
-                    att.content_disposition.disposition_type
-                );
-            } catch (Error err) {
-                attachment_failed(err.message);
-            }
-        }
-    }
-
-    private void check_pending_attachments() {
+    // Both adds pending attachments and updates the UI if there are
+    // any that were left out, that could have been added manually.
+    private void update_pending_attachments(AttachPending include, bool do_add) {
+        bool manual_enabled = false;
         if (this.pending_attachments != null) {
-            foreach (Geary.Attachment attachment in this.pending_attachments) {
-                if (!this.attached_files.contains(attachment.file) &&
-                    !this.inline_files.contains(attachment.file)) {
-                    this.header.show_pending_attachments = true;
-                    return;
+            foreach(Geary.Attachment part in this.pending_attachments) {
+                try {
+                    Geary.Mime.DispositionType? type =
+                    part.content_disposition.disposition_type;
+                    File file = part.file;
+                    if (type == Geary.Mime.DispositionType.INLINE) {
+                        // Inline part with no CID, so it is not
+                        // possible to be referenced from an IMG SRC
+                        // using a cid: URL, hence treat it as an
+                        // attachment instead.
+                        type = Geary.Mime.DispositionType.ATTACHMENT;
+                    }
+
+                    if (type == Geary.Mime.DispositionType.INLINE ||
+                        include == AttachPending.ALL) {
+                        // The pending attachment should be added
+                        // automatically, so add it if asked to and it
+                        // hasn't already been added
+                        if (do_add &&
+                            !(file in this.attached_files) &&
+                            !(file in this.inline_files)) {
+                            add_attachment(file, type);
+                        }
+                    } else {
+                        // The pending attachment should only be added
+                        // manually
+                        manual_enabled = true;
+                    }
+                } catch (Error err) {
+                    attachment_failed(err.message);
                 }
             }
         }
-        this.header.show_pending_attachments = false;
+        this.header.show_pending_attachments = manual_enabled;
     }
 
     private void add_attachment(File target,
@@ -1644,7 +1667,7 @@ public class ComposerWidget : Gtk.EventBox {
         else
             attachments_box.hide();
 
-        check_pending_attachments();
+        update_pending_attachments(this.pending_include, true);
     }
 
     [GtkCallback]
@@ -2406,7 +2429,7 @@ public class ComposerWidget : Gtk.EventBox {
     }
 
     private void on_pending_attachments() {
-        add_pending_attachments();
+        update_pending_attachments(AttachPending.ALL, true);
     }
 
     private void on_insert_image(SimpleAction action, Variant? param) {
