@@ -16,8 +16,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2016-09-26 21:21+0200\n"
-"PO-Revision-Date: 2016-09-26 21:22+0200\n"
+"POT-Creation-Date: 2016-10-02 12:39+0200\n"
+"PO-Revision-Date: 2016-10-02 12:40+0200\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <community-poland@mozilla.org>\n"
 "Language: pl\n"
@@ -104,7 +104,7 @@ msgid "Compose Message"
 msgstr "Utwórz wiadomość"
 
 #: ../desktop/geary-autostart.desktop.in.h:2
-#: ../src/client/application/geary-application.vala:18
+#: ../src/client/application/geary-application.vala:17
 msgid "Mail Client"
 msgstr "Klient poczty"
 
@@ -250,15 +250,15 @@ msgstr "        &#8226; Błąd połączenia.\n"
 msgid "        &#8226; Username or password incorrect.\n"
 msgstr "        &#8226; Niepoprawna nazwa użytkownika lub hasło.\n"
 
-#: ../src/client/application/geary-application.vala:19
+#: ../src/client/application/geary-application.vala:18
 msgid "Copyright 2016 Software Freedom Conservancy Inc."
 msgstr "Copyright 2016 Software Freedom Conservancy Inc."
 
-#: ../src/client/application/geary-application.vala:21
+#: ../src/client/application/geary-application.vala:20
 msgid "Visit the Geary web site"
 msgstr "Witryna programu Geary"
 
-#: ../src/client/application/geary-application.vala:396
+#: ../src/client/application/geary-application.vala:395
 #, c-format
 msgid "About %s"
 msgstr "O programie %s"
@@ -266,7 +266,7 @@ msgstr "O programie %s"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: ../src/client/application/geary-application.vala:400
+#: ../src/client/application/geary-application.vala:399
 msgid "translator-credits"
 msgstr ""
 "scrx <mattpiskorz@gmail.com>, 2012\n"
@@ -902,58 +902,58 @@ msgstr ""
 "załączyłam|załączono|dołączyłem|dołączyłam|dołączono|zalacznik|zalaczam|"
 "zalaczylem|zalaczylam|zalaczono|dolaczylem|dolaczylam|dolaczono"
 
-#: ../src/client/composer/composer-widget.vala:1145
 #: ../src/client/composer/composer-widget.vala:1149
+#: ../src/client/composer/composer-widget.vala:1153
 msgid "Do you want to discard this message?"
 msgstr "Odrzucić tę wiadomość?"
 
-#: ../src/client/composer/composer-widget.vala:1304
+#: ../src/client/composer/composer-widget.vala:1308
 msgid "Send message with an empty subject and body?"
 msgstr "Wysłać wiadomość niezawierającą tematu i treści?"
 
-#: ../src/client/composer/composer-widget.vala:1306
+#: ../src/client/composer/composer-widget.vala:1310
 msgid "Send message with an empty subject?"
 msgstr "Wysłać wiadomość niezawierającą tematu?"
 
-#: ../src/client/composer/composer-widget.vala:1308
+#: ../src/client/composer/composer-widget.vala:1312
 msgid "Send message with an empty body?"
 msgstr "Wysłać wiadomość niezawierającą treści?"
 
-#: ../src/client/composer/composer-widget.vala:1310
+#: ../src/client/composer/composer-widget.vala:1314
 msgid "Send message without an attachment?"
 msgstr "Wysłać wiadomość niezawierającą załączników?"
 
-#: ../src/client/composer/composer-widget.vala:1532
+#: ../src/client/composer/composer-widget.vala:1537
 msgid "Cannot add attachment"
 msgstr "Nie można dodać załącznika"
 
-#: ../src/client/composer/composer-widget.vala:1543
+#: ../src/client/composer/composer-widget.vala:1548
 #, c-format
 msgid "\"%s\" could not be found."
 msgstr "Nie można odnaleźć „%s”."
 
-#: ../src/client/composer/composer-widget.vala:1550
+#: ../src/client/composer/composer-widget.vala:1555
 #, c-format
 msgid "\"%s\" is a folder."
 msgstr "„%s” jest katalogiem."
 
-#: ../src/client/composer/composer-widget.vala:1557
+#: ../src/client/composer/composer-widget.vala:1562
 #, c-format
 msgid "\"%s\" is an empty file."
 msgstr "„%s” jest pustym plikiem."
 
-#: ../src/client/composer/composer-widget.vala:1571
+#: ../src/client/composer/composer-widget.vala:1576
 #, c-format
 msgid "\"%s\" could not be opened for reading."
 msgstr "Nie można otworzyć „%s” do odczytania."
 
-#: ../src/client/composer/composer-widget.vala:1578
+#: ../src/client/composer/composer-widget.vala:1583
 #, c-format
 msgid "\"%s\" already attached for delivery."
 msgstr "Do wiadomości już załączono „%s”."
 
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
-#: ../src/client/composer/composer-widget.vala:1587
+#: ../src/client/composer/composer-widget.vala:1592
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
@@ -978,19 +978,30 @@ msgstr "Odpowiedź do: "
 msgid "Select Color"
 msgstr "Wybór koloru"
 
+#. Inspect.
+#: ../src/client/composer/composer-widget.vala:2076
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1364
+msgid "_Inspect"
+msgstr "Z_badaj"
+
 #. Displayed in the From dropdown to indicate an "alternate email address"
 #. for an account.  The first printf argument will be the alternate email
 #. address, and the second will be the account's primary email address.
-#: ../src/client/composer/composer-widget.vala:2248
+#: ../src/client/composer/composer-widget.vala:2257
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%1$s przez %2$s"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: ../src/client/composer/composer-widget.vala:2290
+#: ../src/client/composer/composer-widget.vala:2299
 msgid "_From:"
 msgstr "_Od:"
+
+#: ../src/client/composer/composer-widget.vala:2373
+#, c-format
+msgid "%s - Composer Inspector"
+msgstr "%s — inspektor okna tworzenia wiadomości"
 
 #: ../src/client/composer/spell-check-popover.vala:210
 msgid "Search for more languages"
@@ -1100,11 +1111,6 @@ msgstr "Zaznacz _wiadomość"
 #: ../ui/composer-menus.ui.h:17
 msgid "Select _All"
 msgstr "Zaznacz _wszystko"
-
-#. Inspect.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1364
-msgid "_Inspect"
-msgstr "Z_badaj"
 
 #: ../src/client/conversation-viewer/conversation-viewer.vala:1595
 msgid "This link appears to go to"
@@ -1822,7 +1828,7 @@ msgid ""
 "A composer window associated with this account is currently open. Send or "
 "discard the message and try again."
 msgstr ""
-"Otwarto okno modyfikacji wiadomości powiązane z tym kontem. Proszę wysłać "
+"Otwarto okno tworzenia wiadomości powiązane z tym kontem. Proszę wysłać "
 "wiadomość lub przerwać jej tworzenie i spróbować ponownie."
 
 #: ../ui/account_list.glade.h:1
