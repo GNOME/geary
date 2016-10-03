@@ -145,14 +145,14 @@
                         <child>
                             <object class="GtkShortcutsShortcut">
                                 <property name="visible">True</property>
-                                <property context="shortcut window" name="title" translatable="yes">Open Move Conversation menu</property>
+                                <property context="shortcut window" name="title" translatable="yes">Move the conversation</property>
                                 <property name="accelerator">M</property>
                             </object>
                         </child>
                         <child>
                             <object class="GtkShortcutsShortcut">
                                 <property name="visible">True</property>
-                                <property context="shortcut window" name="title" translatable="yes">Open Label Conversation menu</property>
+                                <property context="shortcut window" name="title" translatable="yes">Label the conversation</property>
                                 <property name="accelerator">L</property>
                             </object>
                         </child>

@@ -56,12 +56,12 @@
   		<td><p> <keyseq><key>Ctrl</key><key>U</key></keyseq> or <keyseq><key>Shift</key><key>U</key></keyseq> </p></td>
   	</tr>
   	<tr>
-  	    <td><p>Open the Label Conversation menu</p></td>
-  		<td><p><key>L</key></p></td>
+  	    <td><p>Move the conversation</p></td>
+  		<td><p><key>M</key></p></td>
   	</tr>
   	<tr>
-  	    <td><p>Open the Move Conversation menu</p></td>
-  		<td><p><key>M</key></p></td>
+  	    <td><p>Label the conversation</p></td>
+  		<td><p><key>L</key></p></td>
   	</tr>
     <tr>
         <td><p>Move focus to the next/previous pane</p></td>
