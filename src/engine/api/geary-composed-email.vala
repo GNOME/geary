@@ -8,8 +8,11 @@
  * Encapsulates a message created by the user in the composer.
  */
 public class Geary.ComposedEmail : BaseObject {
+
     public const string MAILTO_SCHEME = "mailto:";
-    
+
+    private const string IMG_SRC_TEMPLATE = "src=\"%s\"";
+
     public const Geary.Email.Field REQUIRED_REPLY_FIELDS =
         Geary.Email.Field.HEADER
         | Geary.Email.Field.BODY
@@ -39,6 +42,7 @@ public class Geary.ComposedEmail : BaseObject {
         default = new Gee.HashSet<File>(Geary.Files.nullable_hash, Geary.Files.nullable_equal); }
     public Gee.Set<File> inline_files { get; private set;
         default = new Gee.HashSet<File>(Geary.Files.nullable_hash, Geary.Files.nullable_equal); }
+    public Gee.Map<string,File> cid_files = new Gee.HashMap<string,File>();
 
     public string img_src_prefix { get; set; default = ""; }
 
@@ -61,7 +65,18 @@ public class Geary.ComposedEmail : BaseObject {
     }
 
     /**
-     * Replaces the IMG SRC value in the HTML part of any matching strings.
+     * Determines if an IMG SRC value is present in the HTML part.
+     *
+     * Returns true if `value` is present as an IMG SRC value.
+     */
+    public bool contains_inline_img_src(string value) {
+        // XXX This and replace_inline_img_src are pretty
+        // hacky. Should probably be working with a DOM tree.
+        return this.body_html.contains(IMG_SRC_TEMPLATE.printf(value));
+    }
+
+    /**
+     * Replaces matching IMG SRC values in the HTML part.
      *
      * Will also remove the random prefix set by the composer for
      * security reasons.
@@ -69,13 +84,14 @@ public class Geary.ComposedEmail : BaseObject {
      * Returns true if `orig` has been replaced by `replacement`.
      */
     public bool replace_inline_img_src(string orig, string replacement) {
-        const string src = "src=\"%s%s\"";
+        // XXX This and contains_inline_img_src are pretty
+        // hacky. Should probably be working with a DOM tree.
         bool ret = false;
         if (this.body_html != null) {
             string old_body = this.body_html;
             this.body_html = old_body.replace(
-                src.printf(this.img_src_prefix, orig),
-                src.printf("", replacement)
+                IMG_SRC_TEMPLATE.printf(this.img_src_prefix + orig),
+                IMG_SRC_TEMPLATE.printf(replacement)
             );
             // Avoid doing a proper comparison so we don't need to scan
             // the whole string again.

@@ -990,6 +990,7 @@ public class ComposerWidget : Gtk.EventBox {
 
         email.attached_files.add_all(this.attached_files);
         email.inline_files.add_all(this.inline_files);
+        email.cid_files.set_all(this.cid_files);
 
         email.img_src_prefix = this.editor_allow_prefix;
 
@@ -1546,14 +1547,19 @@ public class ComposerWidget : Gtk.EventBox {
                     Geary.Mime.DispositionType? type =
                     part.content_disposition.disposition_type;
                     File file = part.file;
-                    if (part.content_id != null) {
-                        this.cid_files[part.content_id] = file;
-                    } else if (type == Geary.Mime.DispositionType.INLINE) {
-                        // Inline part with no CID, so it is not
+                    if (type == Geary.Mime.DispositionType.INLINE) {
+                        // We only care about the Content Ids of
+                        // inline parts, since we need to display them
+                        // in the editor web view. However if an
+                        // inline part does not have a CID, it is not
                         // possible to be referenced from an IMG SRC
-                        // using a cid: URL, hence treat it as an
+                        // using a cid: URL anyway, so treat it as an
                         // attachment instead.
-                        type = Geary.Mime.DispositionType.ATTACHMENT;
+                        if (part.content_id != null) {
+                            this.cid_files[part.content_id] = file;
+                        } else {
+                            type = Geary.Mime.DispositionType.ATTACHMENT;
+                        }
                     }
 
                     if (type == Geary.Mime.DispositionType.INLINE ||

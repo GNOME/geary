@@ -173,22 +173,55 @@ public class Geary.RFC822.Message : BaseObject {
 
         // Body: HTML format (also optional)
         if (email.body_html != null) {
-            // Create parts for inline images, if any, and updating
-            // the IMG SRC attributes as we go.
+            const string CID_URL_PREFIX = "cid:";
             Gee.List<GMime.Object> related_parts =
                 new Gee.LinkedList<GMime.Object>();
-            if (!email.inline_files.is_empty) {
-                uint index = 0;
-                foreach (File file in email.inline_files) {
-                    string cid = "inline_%u@geary".printf(index++);
-                    // Only include the inline file if it is actually
-                    // referenced by the HTML - it may have been
-                    // deleted by the user after being added
+
+            // The files that need to have Content IDs assigned
+            Gee.Set<File> inline_files = new Gee.HashSet<File>(
+                Geary.Files.nullable_hash, Geary.Files.nullable_equal
+            );
+            inline_files.add_all(email.inline_files);
+
+            // Create parts for inline images, if any, and updating
+            // the IMG SRC attributes as we go. An inline file is only
+            // included if it is actually referenced by the HTML - it
+            // may have been deleted by the user after being added.
+
+            // First, treat parts that already have Content Ids
+            // assigned
+            foreach (string cid in email.cid_files.keys) {
+                if (email.contains_inline_img_src(CID_URL_PREFIX + cid)) {
+                    File file = email.cid_files[cid];
+                    GMime.Object? inline_part = get_file_part(
+                        file, Geary.Mime.DispositionType.INLINE
+                    );
+                    if (inline_part != null) {
+                        inline_part.set_content_id(cid);
+                        related_parts.add(inline_part);
+                    }
+                    // Don't need to assign a CID to this file, so
+                    // don't process it below any further.
+                    inline_files.remove(file);
+                }
+            }
+
+            // Then, treat parts that need to have Content Id
+            // assigned.
+            if (!inline_files.is_empty) {
+                const string CID_TEMPLATE = "inline_%02u@geary";
+                uint cid_index = 0;
+                foreach (File file in inline_files) {
+                    string cid = "";
+                    do {
+                        cid = CID_TEMPLATE.printf(cid_index++);
+                    } while (cid in email.cid_files);
+
                     if (email.replace_inline_img_src(file.get_uri(),
-                                                     "cid:" + cid)) {
+                                                     CID_URL_PREFIX + cid)) {
                         GMime.Object? inline_part = get_file_part(
                             file, Geary.Mime.DispositionType.INLINE
-                            );
+                        );
                         if (inline_part != null) {
                             inline_part.set_content_id(cid);
                             related_parts.add(inline_part);
