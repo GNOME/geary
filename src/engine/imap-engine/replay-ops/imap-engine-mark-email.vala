@@ -6,13 +6,13 @@
 
 private class Geary.ImapEngine.MarkEmail : Geary.ImapEngine.SendReplayOperation {
     private MinimalFolder engine;
-    private Gee.List<Geary.EmailIdentifier> to_mark = new Gee.ArrayList<Geary.EmailIdentifier>();
+    private Gee.List<ImapDB.EmailIdentifier> to_mark = new Gee.ArrayList<ImapDB.EmailIdentifier>();
     private Geary.EmailFlags? flags_to_add;
     private Geary.EmailFlags? flags_to_remove;
     private Gee.Map<ImapDB.EmailIdentifier, Geary.EmailFlags>? original_flags = null;
     private Cancellable? cancellable;
     
-    public MarkEmail(MinimalFolder engine, Gee.List<Geary.EmailIdentifier> to_mark, 
+    public MarkEmail(MinimalFolder engine, Gee.List<ImapDB.EmailIdentifier> to_mark, 
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove, 
         Cancellable? cancellable = null) {
         base("MarkEmail", OnError.RETRY);
@@ -28,7 +28,7 @@ private class Geary.ImapEngine.MarkEmail : Geary.ImapEngine.SendReplayOperation 
     public override void notify_remote_removed_ids(Gee.Collection<ImapDB.EmailIdentifier> ids) {
         // don't bother updating on server or backing out locally
         if (original_flags != null)
-            Collection.map_unset_all_keys<ImapDB.EmailIdentifier, Geary.EmailFlags>(original_flags, ids);
+            Collection.map_unset_all_keys<EmailIdentifier, Geary.EmailFlags>(original_flags, ids);
     }
     
     public override void get_ids_to_be_remote_removed(Gee.Collection<ImapDB.EmailIdentifier> ids) {
@@ -50,7 +50,7 @@ private class Geary.ImapEngine.MarkEmail : Geary.ImapEngine.SendReplayOperation 
             cancellable);
         
         // Notify using flags from DB.
-        Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags>? map = yield engine.local_folder.get_email_flags_async(
+        Gee.Map<EmailIdentifier, Geary.EmailFlags>? map = yield engine.local_folder.get_email_flags_async(
             original_flags.keys, cancellable);
         if (map != null && map.size > 0)
             engine.replay_notify_email_flags_changed(map);

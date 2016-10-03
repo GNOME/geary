@@ -95,7 +95,7 @@ public class Geary.Imap.MessageFlagsDecoder : Geary.Imap.FetchDataDecoder {
     }
     
     protected override MessageData decode_list(ListParameter listp) throws ImapError {
-        Gee.List<Flag> flags = new Gee.ArrayList<Flag>();
+        Gee.List<MessageFlag> flags = new Gee.ArrayList<MessageFlag>();
         for (int ctr = 0; ctr < listp.size; ctr++)
             flags.add(new MessageFlag(listp.get_as_string(ctr).ascii));
         

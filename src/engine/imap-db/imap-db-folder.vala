@@ -870,10 +870,10 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         if (unread_status.size > 0)
             unread_updated(unread_status);
     }
-    
-    public async Gee.Map<ImapDB.EmailIdentifier, Geary.EmailFlags>? get_email_flags_async(
-        Gee.Collection<ImapDB.EmailIdentifier> ids, Cancellable? cancellable) throws Error {
-        Gee.Map<ImapDB.EmailIdentifier, Geary.EmailFlags>? map = null;
+
+    internal async Gee.Map<ImapDB.EmailIdentifier, Geary.EmailFlags>? get_email_flags_async(
+        Gee.Collection<EmailIdentifier> ids, Cancellable? cancellable) throws Error {
+        Gee.Map<EmailIdentifier, Geary.EmailFlags>? map = null;
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx, cancellable) => {
             map = do_get_email_flags(cx, ids, cancellable);
             
@@ -1085,11 +1085,11 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         if (ids.size == 0)
             return null;
         
-        Gee.HashMap<Geary.EmailIdentifier, Geary.Email.Field> map = new Gee.HashMap<
-            Geary.EmailIdentifier, Geary.Email.Field>();
+        Gee.HashMap<ImapDB.EmailIdentifier,Geary.Email.Field> map = new Gee.HashMap<
+            ImapDB.EmailIdentifier,Geary.Email.Field>();
         
         // Break up the work
-        Gee.List<ImapDB.EmailIdentifier> list = new Gee.ArrayList<Geary.EmailIdentifier>();
+        Gee.List<ImapDB.EmailIdentifier> list = new Gee.ArrayList<ImapDB.EmailIdentifier>();
         Gee.Iterator<ImapDB.EmailIdentifier> iter = ids.iterator();
         while (iter.next()) {
             list.add(iter.get());
@@ -1576,7 +1576,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         Db.Statement fetch_stmt = cx.prepare("SELECT flags FROM MessageTable WHERE id=?");
         
         Gee.Map<ImapDB.EmailIdentifier, Geary.EmailFlags> map = new Gee.HashMap<
-            Geary.EmailIdentifier, Geary.EmailFlags>();
+            ImapDB.EmailIdentifier, Geary.EmailFlags>();
         // TODO: Unroll this loop
         foreach (LocationIdentifier location in locs) {
             fetch_stmt.reset(Db.ResetScope.CLEAR_BINDINGS);

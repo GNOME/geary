@@ -807,7 +807,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         
         // If path in local but not remote (and isn't local-only, i.e. the Outbox), need to remove it
         Gee.ArrayList<Geary.Folder> to_remove
-            = Geary.traverse<Gee.Map.Entry<FolderPath, Imap.Folder>>(existing_folders)
+            = Geary.traverse<Gee.Map.Entry<FolderPath,Geary.Folder>>(existing_folders)
             .filter(e => !remote_folders.has_key(e.key) && !local_only.has_key(e.key))
             .map<Geary.Folder>(e => (Geary.Folder) e.value)
             .to_array_list();
@@ -834,7 +834,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
                 debug("Unable to fetch local folder after cloning: %s", convert_err.message);
             }
         }
-        Gee.Collection<MinimalFolder> engine_added = new Gee.ArrayList<Geary.Folder>();
+        Gee.Collection<MinimalFolder> engine_added = new Gee.ArrayList<MinimalFolder>();
         engine_added.add_all(build_folders(folders_to_build));
         
         Gee.ArrayList<Geary.Folder> engine_removed = new Gee.ArrayList<Geary.Folder>();
