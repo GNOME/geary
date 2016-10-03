@@ -3,6 +3,7 @@ desktop/geary.appdata.xml.in
 desktop/geary.desktop.in
 desktop/geary-autostart.desktop.in
 [type: gettext/ini]desktop/geary-attach.contract.in
+src/geary-version.vala.in
 src/client/accounts/account-dialog-account-list-pane.vala
 src/client/accounts/account-dialog-add-edit-pane.vala
 src/client/accounts/account-dialog-edit-alternate-emails-pane.vala
