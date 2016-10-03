@@ -41,6 +41,30 @@ public class AttachmentDialog : Object {
         chooser.update_preview.connect(on_update_preview);
     }
 
+    // XXX Once we depend on GTK+ 3.20 as a minimum, convert this
+    // class to a subclass of FileChooserNative and remove these API
+    // compat classes.
+
+    public void add_filter(owned Gtk.FileFilter filter) {
+        this.chooser.add_filter(filter);
+    }
+
+    public SList<File> get_files() {
+        return this.chooser.get_files();
+    }
+
+    public int run() {
+        return this.chooser.run();
+    }
+
+    public void hide() {
+        this.chooser.hide();
+    }
+
+    public void destroy() {
+        this.chooser.destroy();
+    }
+
     private void on_update_preview() {
         string? filename = chooser.get_preview_filename();
         if (filename == null) {
