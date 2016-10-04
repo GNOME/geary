@@ -243,10 +243,17 @@ public class ConversationViewer : Gtk.Stack {
 
     // Remove any existing conversation list, cancelling its loading
     private void remove_current_list() {
+        // Remove the viewport that contains the current list
         Gtk.Widget? scrolled_child = this.conversation_scroller.get_child();
         if (scrolled_child != null) {
             scrolled_child.destroy();
         }
+
+        // Reset the scrollbars to their initial positions
+        this.conversation_scroller.hadjustment.set_value(0);
+        this.conversation_scroller.vadjustment.set_value(0);
+
+        // Notify that the current list was removed
         if (this.current_list != null) {
             this.conversation_removed(this.current_list);
             this.current_list = null;
