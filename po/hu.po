@@ -11,8 +11,8 @@ msgstr ""
 "Project-Id-Version: geary-master\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=internationalization\n"
-"POT-Creation-Date: 2016-09-28 23:21+0000\n"
-"PO-Revision-Date: 2016-09-29 16:15+0200\n"
+"POT-Creation-Date: 2016-10-04 10:32+0000\n"
+"PO-Revision-Date: 2016-10-04 13:03+0200\n"
 "Last-Translator: Meskó Balázs <meskobalazs@gmail.com>\n"
 "Language-Team: Hungarian <openscope at googlegroups dot com>\n"
 "Language: hu\n"
@@ -98,7 +98,7 @@ msgid "Compose Message"
 msgstr "Levél írása"
 
 #: ../desktop/geary-autostart.desktop.in.h:2
-#: ../src/client/application/geary-application.vala:18
+#: ../src/client/application/geary-application.vala:17
 msgid "Mail Client"
 msgstr "Levelezőkliens"
 
@@ -245,15 +245,15 @@ msgstr "        &#8226; Kapcsolódási hiba.\n"
 msgid "        &#8226; Username or password incorrect.\n"
 msgstr "        &#8226; A felhasználónév vagy jelszó helytelen.\n"
 
-#: ../src/client/application/geary-application.vala:19
+#: ../src/client/application/geary-application.vala:18
 msgid "Copyright 2016 Software Freedom Conservancy Inc."
 msgstr "Copyright 2016 Software Freedom Conservancy Inc."
 
-#: ../src/client/application/geary-application.vala:21
+#: ../src/client/application/geary-application.vala:20
 msgid "Visit the Geary web site"
 msgstr "Keresse fel a Geary weboldalát"
 
-#: ../src/client/application/geary-application.vala:396
+#: ../src/client/application/geary-application.vala:395
 #, c-format
 msgid "About %s"
 msgstr "%s névjegye"
@@ -261,7 +261,7 @@ msgstr "%s névjegye"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: ../src/client/application/geary-application.vala:400
+#: ../src/client/application/geary-application.vala:399
 msgid "translator-credits"
 msgstr ""
 "Kelemen Gábor <kelemeng at gnome dot hu>\n"
@@ -744,6 +744,7 @@ msgstr[0] "Véglegesen törölni szeretné ezt a levelet?"
 msgstr[1] "Véglegesen törölni szeretné ezeket a leveleket?"
 
 #: ../src/client/application/geary-controller.vala:2419
+#: ../ui/gtk/help-overlay.ui.h:33
 msgid "Delete"
 msgstr "Törlés"
 
@@ -785,6 +786,7 @@ msgstr "%s (%d)"
 #: ../src/client/components/search-bar.vala:8
 #: ../src/client/folder-list/folder-list-search-branch.vala:38
 #: ../src/engine/api/geary-special-folder-type.vala:51
+#: ../ui/gtk/help-overlay.ui.h:10
 msgid "Search"
 msgstr "Keresés"
 
@@ -818,7 +820,7 @@ msgstr "_OK"
 msgid "_Cancel"
 msgstr "Mé_gse"
 
-#: ../src/client/components/stock.vala:21 ../ui/gtk/menus.ui.h:5
+#: ../src/client/components/stock.vala:21 ../ui/gtk/menus.ui.h:6
 msgid "_About"
 msgstr "_Névjegy"
 
@@ -830,7 +832,7 @@ msgstr "_Bezárás"
 msgid "_Discard"
 msgstr "El_dobás"
 
-#: ../src/client/components/stock.vala:25 ../ui/gtk/menus.ui.h:4
+#: ../src/client/components/stock.vala:25 ../ui/gtk/menus.ui.h:5
 msgid "_Help"
 msgstr "_Súgó"
 
@@ -846,7 +848,7 @@ msgstr "_Beállítások"
 msgid "_Print..."
 msgstr "_Nyomtatás…"
 
-#: ../src/client/components/stock.vala:29 ../ui/gtk/menus.ui.h:6
+#: ../src/client/components/stock.vala:29 ../ui/gtk/menus.ui.h:7
 msgid "_Quit"
 msgstr "_Kilépés"
 
@@ -858,29 +860,29 @@ msgstr "_Eltávolítás"
 msgid "_Keep"
 msgstr "_Megtartás"
 
-#: ../src/client/composer/composer-widget.vala:135
+#: ../src/client/composer/composer-widget.vala:145
 msgid "Saved"
 msgstr "Elmentve"
 
-#: ../src/client/composer/composer-widget.vala:136
+#: ../src/client/composer/composer-widget.vala:146
 msgid "Saving"
 msgstr "Mentés"
 
-#: ../src/client/composer/composer-widget.vala:137
+#: ../src/client/composer/composer-widget.vala:147
 msgid "Error saving"
 msgstr "Hiba a mentéskor"
 
-#: ../src/client/composer/composer-widget.vala:138
+#: ../src/client/composer/composer-widget.vala:148
 msgid "Press Backspace to delete quote"
 msgstr "Nyomja meg a Backspace billentyűt az idézet törléséhez"
 
-#: ../src/client/composer/composer-widget.vala:139
+#: ../src/client/composer/composer-widget.vala:149
 msgid "New Message"
 msgstr "Új levél"
 
 #. A list of keywords, separated by pipe ("|") characters, that suggest an attachment; since
 #. this is full-word checking, include all variants of each word.  No spaces are allowed.
-#: ../src/client/composer/composer-widget.vala:200
+#: ../src/client/composer/composer-widget.vala:210
 msgid ""
 "attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|"
 "enclosing|encloses|enclosure|enclosures"
@@ -895,84 +897,84 @@ msgstr ""
 "önéletrajzot|önéletrajzom|önéletrajzomat|.doc|.docx|.pdf|.xls|.xlsx|.ppt|."
 "pptx|.rtf|.pps|.odt|.ods|.odp|.odg|.odb"
 
-#: ../src/client/composer/composer-widget.vala:1149
-#: ../src/client/composer/composer-widget.vala:1153
+#: ../src/client/composer/composer-widget.vala:1183
+#: ../src/client/composer/composer-widget.vala:1187
 msgid "Do you want to discard this message?"
 msgstr "El szeretné dobni ezt a levelet?"
 
-#: ../src/client/composer/composer-widget.vala:1308
+#: ../src/client/composer/composer-widget.vala:1342
 msgid "Send message with an empty subject and body?"
 msgstr "Elküldi a levelet üres tárggyal és törzzsel?"
 
-#: ../src/client/composer/composer-widget.vala:1310
+#: ../src/client/composer/composer-widget.vala:1344
 msgid "Send message with an empty subject?"
 msgstr "Elküldi a levelet üres tárggyal?"
 
-#: ../src/client/composer/composer-widget.vala:1312
+#: ../src/client/composer/composer-widget.vala:1346
 msgid "Send message with an empty body?"
 msgstr "Elküldi a levelet üres törzzsel?"
 
-#: ../src/client/composer/composer-widget.vala:1314
+#: ../src/client/composer/composer-widget.vala:1348
 msgid "Send message without an attachment?"
 msgstr "Elküldi a levelet melléklet nélkül?"
 
-#: ../src/client/composer/composer-widget.vala:1537
-msgid "Cannot add attachment"
-msgstr "Nem sikerült mellékletet hozzáadni"
-
-#: ../src/client/composer/composer-widget.vala:1548
+#: ../src/client/composer/composer-widget.vala:1597
 #, c-format
 msgid "\"%s\" could not be found."
 msgstr "„%s” nem található."
 
-#: ../src/client/composer/composer-widget.vala:1555
+#: ../src/client/composer/composer-widget.vala:1603
 #, c-format
 msgid "\"%s\" is a folder."
 msgstr "„%s” egy mappa."
 
-#: ../src/client/composer/composer-widget.vala:1562
+#: ../src/client/composer/composer-widget.vala:1609
 #, c-format
 msgid "\"%s\" is an empty file."
 msgstr "„%s” egy üres fájl."
 
-#: ../src/client/composer/composer-widget.vala:1576
+#: ../src/client/composer/composer-widget.vala:1622
 #, c-format
 msgid "\"%s\" could not be opened for reading."
 msgstr "„%s” nem nyitható meg olvasásra."
 
-#: ../src/client/composer/composer-widget.vala:1583
+#: ../src/client/composer/composer-widget.vala:1629
 #, c-format
 msgid "\"%s\" already attached for delivery."
 msgstr "„%s” már csatolva van a küldeményhez."
 
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
-#: ../src/client/composer/composer-widget.vala:1592
+#: ../src/client/composer/composer-widget.vala:1637
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: ../src/client/composer/composer-widget.vala:1650
+#: ../src/client/composer/composer-widget.vala:1656
+msgid "Cannot add attachment"
+msgstr "Nem sikerült mellékletet hozzáadni"
+
+#: ../src/client/composer/composer-widget.vala:1701
 msgid "To: "
 msgstr "Címzett: "
 
-#: ../src/client/composer/composer-widget.vala:1653
+#: ../src/client/composer/composer-widget.vala:1704
 msgid "Cc: "
 msgstr "Másolat: "
 
-#: ../src/client/composer/composer-widget.vala:1656
+#: ../src/client/composer/composer-widget.vala:1707
 msgid "Bcc: "
 msgstr "Titkos másolat: "
 
-#: ../src/client/composer/composer-widget.vala:1659
+#: ../src/client/composer/composer-widget.vala:1710
 msgid "Reply-To: "
 msgstr "Válaszcím: "
 
-#: ../src/client/composer/composer-widget.vala:1847
+#: ../src/client/composer/composer-widget.vala:1898
 msgid "Select Color"
 msgstr "Szín kiválasztása"
 
 #. Inspect.
-#: ../src/client/composer/composer-widget.vala:2076
+#: ../src/client/composer/composer-widget.vala:2113
 #: ../src/client/conversation-viewer/conversation-viewer.vala:1364
 msgid "_Inspect"
 msgstr "_Vizsgálat"
@@ -980,21 +982,27 @@ msgstr "_Vizsgálat"
 #. Displayed in the From dropdown to indicate an "alternate email address"
 #. for an account.  The first printf argument will be the alternate email
 #. address, and the second will be the account's primary email address.
-#: ../src/client/composer/composer-widget.vala:2257
+#: ../src/client/composer/composer-widget.vala:2294
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%1$s ezen keresztül: %2$s"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: ../src/client/composer/composer-widget.vala:2299
+#: ../src/client/composer/composer-widget.vala:2336
 msgid "_From:"
 msgstr "_Feladó:"
 
-#: ../src/client/composer/composer-widget.vala:2373
+#: ../src/client/composer/composer-widget.vala:2410
 #, c-format
 msgid "%s - Composer Inspector"
 msgstr "%s - Szerkesztő vizsgáló"
+
+#. Translators: This is the name of the file chooser filter
+#. when inserting an image in the composer.
+#: ../src/client/composer/composer-widget.vala:2450
+msgid "Images"
+msgstr "Képek"
 
 #: ../src/client/composer/spell-check-popover.vala:210
 msgid "Search for more languages"
@@ -1175,11 +1183,13 @@ msgstr "Nem sikerült megnyitni az alapértelmezett szövegszerkesztőt."
 msgid "%s - Conversation Inspector"
 msgstr "%s - Beszélgetés felügyelő"
 
-#: ../src/client/dialogs/attachment-dialog.vala:18
+#: ../src/client/dialogs/attachment-dialog.vala:24
+#: ../src/client/dialogs/attachment-dialog.vala:26
 msgid "Choose a file"
 msgstr "Válasszon egy fájlt"
 
-#: ../src/client/dialogs/attachment-dialog.vala:23
+#: ../src/client/dialogs/attachment-dialog.vala:24
+#: ../src/client/dialogs/attachment-dialog.vala:26
 msgid "_Attach"
 msgstr "C_satolás"
 
@@ -1426,7 +1436,7 @@ msgid "%A"
 msgstr "%A"
 
 #: ../src/client/util/util-email.vala:30
-#: ../src/engine/rfc822/rfc822-message.vala:808
+#: ../src/engine/rfc822/rfc822-message.vala:886
 msgid "(no subject)"
 msgstr "(nincs tárgy)"
 
@@ -1515,6 +1525,7 @@ msgid "Outbox"
 msgstr "Postázandó"
 
 #: ../src/engine/api/geary-special-folder-type.vala:54
+#: ../ui/gtk/help-overlay.ui.h:19
 msgid "Archive"
 msgstr "Archívum"
 
@@ -1997,10 +2008,14 @@ msgid "Link (Ctrl+L)"
 msgstr "Hivatkozás (Ctrl+L)"
 
 #: ../ui/composer-widget.ui.h:18
+msgid "Image (Ctrl+G)"
+msgstr "Kép (Ctrl+G)"
+
+#: ../ui/composer-widget.ui.h:19
 msgid "Remove formatting (Ctrl+Space)"
 msgstr "Formázás eltávolítása (Ctrl+Space)"
 
-#: ../ui/composer-widget.ui.h:19
+#: ../ui/composer-widget.ui.h:20
 msgid "Select spell checking language"
 msgstr "Helyesírás-ellenőrzés nyelvének kiválasztása"
 
@@ -2040,9 +2055,189 @@ msgstr "K_is- és nagybetűk megkülönböztetése"
 msgid "label"
 msgstr "címke"
 
+#: ../ui/gtk/help-overlay.ui.h:1
+msgid "Conversation Shortcuts"
+msgstr "Beszélgetési gyorsbillentyűk"
+
+#: ../ui/gtk/help-overlay.ui.h:2
+msgid "General"
+msgstr "Általános"
+
+#: ../ui/gtk/help-overlay.ui.h:3
+msgid "Move focus to the next/previous pane"
+msgstr "Fókusz átvitele a következő/előző panelra"
+
+#: ../ui/gtk/help-overlay.ui.h:4
+msgid "Move focus to conversation list"
+msgstr "Fókusz átvitele a beszélgetések listájára"
+
+#: ../ui/gtk/help-overlay.ui.h:5
+msgid "Detach composer window"
+msgstr "Levélíró ablak leválasztása"
+
+#: ../ui/gtk/help-overlay.ui.h:6
+msgid "Close composer window"
+msgstr "Levélíró ablak bezárása"
+
+#: ../ui/gtk/help-overlay.ui.h:7
+msgid "Show keyboard shortcuts"
+msgstr "Gyorsbillentyűk megjelenítése"
+
+#: ../ui/gtk/help-overlay.ui.h:8
+msgid "Show help"
+msgstr "Súgó megjelenítése"
+
+#: ../ui/gtk/help-overlay.ui.h:9
+msgid "Quit the application"
+msgstr "Kilépés az alkalmazásból"
+
+#: ../ui/gtk/help-overlay.ui.h:11
+msgid "Jump to search box"
+msgstr "Ugrás a keresődobozra"
+
+#: ../ui/gtk/help-overlay.ui.h:12
+msgid "Find in current conversation"
+msgstr "Keresés a jelenlegi beszélgetésben"
+
+#: ../ui/gtk/help-overlay.ui.h:13
+msgid "Find next/previous in current conversation"
+msgstr "Következő/előző keresése a beszélgetésben"
+
+#: ../ui/gtk/help-overlay.ui.h:14
+msgid "Actions"
+msgstr "Műveletek"
+
+#: ../ui/gtk/help-overlay.ui.h:15
+msgid "Compose a new message"
+msgstr "Új levél írása"
+
+#: ../ui/gtk/help-overlay.ui.h:16
+msgid "Reply to sender "
+msgstr "Válasz a feladónak "
+
+#: ../ui/gtk/help-overlay.ui.h:17
+msgid "Reply to all"
+msgstr "Válasz mindenkinek"
+
+#: ../ui/gtk/help-overlay.ui.h:18
+msgid "Forward"
+msgstr "Továbbítás"
+
+#: ../ui/gtk/help-overlay.ui.h:20
+msgid "Move to trash"
+msgstr "Áthelyezés a Kukába"
+
+#: ../ui/gtk/help-overlay.ui.h:21
+msgid "Toggle spam"
+msgstr "Levélszemét jelölés be/ki"
+
+#: ../ui/gtk/help-overlay.ui.h:22
+msgid "Move the conversation"
+msgstr "Beszélgetés áthelyezése"
+
+#: ../ui/gtk/help-overlay.ui.h:23
+msgid "Label the conversation"
+msgstr "Beszélgetés címkézése"
+
+#: ../ui/gtk/help-overlay.ui.h:24
+msgid "Mark read"
+msgstr "Megjelölés olvasottként"
+
+#: ../ui/gtk/help-overlay.ui.h:25
+msgid "Mark unread"
+msgstr "Megjelölés olvasatlanként"
+
+#: ../ui/gtk/help-overlay.ui.h:26
+msgid "View"
+msgstr "Nézet"
+
+#: ../ui/gtk/help-overlay.ui.h:27
+msgid "Zoom in"
+msgstr "Nagyítás"
+
+#: ../ui/gtk/help-overlay.ui.h:28
+msgid "Zoom out"
+msgstr "Kicsinyítés"
+
+#: ../ui/gtk/help-overlay.ui.h:29
+msgid "Reset zoom"
+msgstr "Nagyítás visszaállítása"
+
+#: ../ui/gtk/help-overlay.ui.h:30
+msgid "Additional Shortcuts"
+msgstr "További gyorsbillentyűk"
+
+#: ../ui/gtk/help-overlay.ui.h:31
+msgid "Star"
+msgstr "Csillagozás"
+
+#: ../ui/gtk/help-overlay.ui.h:32
+msgid "Unstar"
+msgstr "Csillagozás megszüntetése"
+
+#: ../ui/gtk/help-overlay.ui.h:34
+msgid "Jump to next (older) conversation"
+msgstr "Ugrás a következő (régebbi) beszélgetésre"
+
+#: ../ui/gtk/help-overlay.ui.h:35
+msgid "Jump to previous (newer) conversation"
+msgstr "Ugrás az előző (újabb) beszélgetésre"
+
+#: ../ui/gtk/help-overlay.ui.h:36
+msgid "Composer Shortcuts"
+msgstr "Szerkesztő gyorsbillentyűk"
+
+#: ../ui/gtk/help-overlay.ui.h:37
+msgid "Quote text"
+msgstr "Szöveg idézése"
+
+#: ../ui/gtk/help-overlay.ui.h:38
+msgid "Unquote text"
+msgstr "Szöveg idézésének visszavonása"
+
+#: ../ui/gtk/help-overlay.ui.h:39
+msgid "Send"
+msgstr "Küldés"
+
+#: ../ui/gtk/help-overlay.ui.h:40
+msgid "Add attachment"
+msgstr "Melléklet hozzáadása"
+
+#: ../ui/gtk/help-overlay.ui.h:41
+msgid "Rich text mode"
+msgstr "Rich text mód"
+
+#: ../ui/gtk/help-overlay.ui.h:42
+msgid "Bold text"
+msgstr "Szöveg félkövérré tétele"
+
+#: ../ui/gtk/help-overlay.ui.h:43
+msgid "Italicize text"
+msgstr "Szöveg dőltté tétele"
+
+#: ../ui/gtk/help-overlay.ui.h:44
+msgid "Underline text"
+msgstr "Szöveg aláhúzása"
+
+#: ../ui/gtk/help-overlay.ui.h:45
+msgid "Strike text"
+msgstr "Szöveg áthúzása"
+
+#: ../ui/gtk/help-overlay.ui.h:46
+msgid "Insert a link"
+msgstr "Hivatkozás beszúrása"
+
+#: ../ui/gtk/help-overlay.ui.h:47
+msgid "Remove formatting"
+msgstr "Formázás eltávolítása"
+
 #: ../ui/gtk/menus.ui.h:2
 msgid "A_ccounts"
 msgstr "F_iókok"
+
+#: ../ui/gtk/menus.ui.h:4
+msgid "_Keyboard Shortcuts"
+msgstr "Gyorsbille_ntyűk"
 
 #: ../ui/login.glade.h:1
 msgid "email@example.com"
@@ -2327,9 +2522,6 @@ msgstr "Geary frissítés folyamatban…"
 
 #~ msgid "Detach"
 #~ msgstr "Leválasztás"
-
-#~ msgid "Send"
-#~ msgstr "Küldés"
 
 #~ msgid "_Attach File"
 #~ msgstr "Fájl _csatolása"
