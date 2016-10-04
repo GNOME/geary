@@ -6,8 +6,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: geary master\n"
-"POT-Creation-Date: 2016-06-09 05:56+0000\n"
-"PO-Revision-Date: 2016-08-23 13:51+0200\n"
+"POT-Creation-Date: 2016-10-03 23:00+0000\n"
+"PO-Revision-Date: 2016-10-04 14:27+0200\n"
 "Last-Translator: Marek Černocký <marek@manet.cz>\n"
 "Language-Team: čeština <gnome-cs-list@gnome.org>\n"
 "Language: cs\n"
@@ -302,20 +302,20 @@ msgstr ""
 "key><key>U</key></keyseq>"
 
 #: C/shortcuts.page:59(p)
-msgid "Open the Label Conversation menu"
-msgstr "Otevřít nabídku štítků konverzací"
+msgid "Move the conversation"
+msgstr "Přesunout konverzaci"
 
-#: C/shortcuts.page:60(key) C/shortcuts.page:170(key)
-msgid "L"
-msgstr "L"
-
-#: C/shortcuts.page:63(p)
-msgid "Open the Move Conversation menu"
-msgstr "Otevřít nabídku přesunu konverzací"
-
-#: C/shortcuts.page:64(key)
+#: C/shortcuts.page:60(key)
 msgid "M"
 msgstr "M"
+
+#: C/shortcuts.page:63(p)
+msgid "Label the conversation"
+msgstr "Přidat konverzaci štítek"
+
+#: C/shortcuts.page:64(key) C/shortcuts.page:170(key)
+msgid "L"
+msgstr "L"
 
 #: C/shortcuts.page:67(p)
 msgid "Move focus to the next/previous pane"
@@ -1292,3 +1292,9 @@ msgstr ""
 #: C/accounts.page:0(None)
 msgid "translator-credits"
 msgstr "Marek Černocký <marek@manet.cz>"
+
+#~ msgid "Open the Label Conversation menu"
+#~ msgstr "Otevřít nabídku štítků konverzací"
+
+#~ msgid "Open the Move Conversation menu"
+#~ msgstr "Otevřít nabídku přesunu konverzací"

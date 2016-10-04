@@ -12,8 +12,8 @@ msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=internationalization\n"
-"POT-Creation-Date: 2016-09-28 23:21+0000\n"
-"PO-Revision-Date: 2016-09-29 21:32+0200\n"
+"POT-Creation-Date: 2016-10-03 23:47+0000\n"
+"PO-Revision-Date: 2016-10-04 14:27+0200\n"
 "Last-Translator: Marek Černocký <marek@manet.cz>\n"
 "Language-Team: čeština <gnome-cs-list@gnome.org>\n"
 "Language: cs\n"
@@ -97,7 +97,7 @@ msgid "Compose Message"
 msgstr "Napsat zprávu"
 
 #: ../desktop/geary-autostart.desktop.in.h:2
-#: ../src/client/application/geary-application.vala:18
+#: ../src/client/application/geary-application.vala:17
 msgid "Mail Client"
 msgstr "Poštovní klient"
 
@@ -243,15 +243,15 @@ msgstr "        &#8226; Chyba připojení.\n"
 msgid "        &#8226; Username or password incorrect.\n"
 msgstr "        &#8226; Nesprávné uživatelské jméno nebo heslo.\n"
 
-#: ../src/client/application/geary-application.vala:19
+#: ../src/client/application/geary-application.vala:18
 msgid "Copyright 2016 Software Freedom Conservancy Inc."
 msgstr "Copyright 2016 Software Freedom Conservancy Inc."
 
-#: ../src/client/application/geary-application.vala:21
+#: ../src/client/application/geary-application.vala:20
 msgid "Visit the Geary web site"
 msgstr "Navštívit webové stránky Geary"
 
-#: ../src/client/application/geary-application.vala:396
+#: ../src/client/application/geary-application.vala:395
 #, c-format
 msgid "About %s"
 msgstr "O aplikaci %s"
@@ -259,7 +259,7 @@ msgstr "O aplikaci %s"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: ../src/client/application/geary-application.vala:400
+#: ../src/client/application/geary-application.vala:399
 msgid "translator-credits"
 msgstr ""
 "Petr Šimáček <petr.simacek@gmail.com>\n"
@@ -738,6 +738,7 @@ msgstr[1] "Chcete trvale smazat tyto zprávy?"
 msgstr[2] "Chcete trvale smazat tyto zprávy?"
 
 #: ../src/client/application/geary-controller.vala:2419
+#: ../ui/gtk/help-overlay.ui.h:33
 msgid "Delete"
 msgstr "Smazat"
 
@@ -781,6 +782,7 @@ msgstr "%s (%d)"
 #: ../src/client/components/search-bar.vala:8
 #: ../src/client/folder-list/folder-list-search-branch.vala:38
 #: ../src/engine/api/geary-special-folder-type.vala:51
+#: ../ui/gtk/help-overlay.ui.h:10
 msgid "Search"
 msgstr "Hledat"
 
@@ -814,7 +816,7 @@ msgstr "_Budiž"
 msgid "_Cancel"
 msgstr "_Zrušit"
 
-#: ../src/client/components/stock.vala:21 ../ui/gtk/menus.ui.h:5
+#: ../src/client/components/stock.vala:21 ../ui/gtk/menus.ui.h:6
 msgid "_About"
 msgstr "O _aplikaci"
 
@@ -826,7 +828,7 @@ msgstr "_Zavřít"
 msgid "_Discard"
 msgstr "_Vyřadit"
 
-#: ../src/client/components/stock.vala:25 ../ui/gtk/menus.ui.h:4
+#: ../src/client/components/stock.vala:25 ../ui/gtk/menus.ui.h:5
 msgid "_Help"
 msgstr "Nápo_věda"
 
@@ -842,7 +844,7 @@ msgstr "_Předvolby"
 msgid "_Print..."
 msgstr "_Tisk…"
 
-#: ../src/client/components/stock.vala:29 ../ui/gtk/menus.ui.h:6
+#: ../src/client/components/stock.vala:29 ../ui/gtk/menus.ui.h:7
 msgid "_Quit"
 msgstr "U_končit"
 
@@ -854,29 +856,29 @@ msgstr "_Odstranit"
 msgid "_Keep"
 msgstr "_Zachovat"
 
-#: ../src/client/composer/composer-widget.vala:135
+#: ../src/client/composer/composer-widget.vala:145
 msgid "Saved"
 msgstr "Uloženo"
 
-#: ../src/client/composer/composer-widget.vala:136
+#: ../src/client/composer/composer-widget.vala:146
 msgid "Saving"
 msgstr "Ukládá se"
 
-#: ../src/client/composer/composer-widget.vala:137
+#: ../src/client/composer/composer-widget.vala:147
 msgid "Error saving"
 msgstr "Chyba při ukládání"
 
-#: ../src/client/composer/composer-widget.vala:138
+#: ../src/client/composer/composer-widget.vala:148
 msgid "Press Backspace to delete quote"
 msgstr "Citaci smažete zmáčknutím Backspace"
 
-#: ../src/client/composer/composer-widget.vala:139
+#: ../src/client/composer/composer-widget.vala:149
 msgid "New Message"
 msgstr "Nová zpráva"
 
 #. A list of keywords, separated by pipe ("|") characters, that suggest an attachment; since
 #. this is full-word checking, include all variants of each word.  No spaces are allowed.
-#: ../src/client/composer/composer-widget.vala:200
+#: ../src/client/composer/composer-widget.vala:210
 msgid ""
 "attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|"
 "enclosing|encloses|enclosure|enclosures"
@@ -885,84 +887,84 @@ msgstr ""
 "přiloženým|přiloženou|přiložit|přikládám|přiložil|přikládá|přikládáme|"
 "přiložili|přiložily"
 
-#: ../src/client/composer/composer-widget.vala:1149
-#: ../src/client/composer/composer-widget.vala:1153
+#: ../src/client/composer/composer-widget.vala:1183
+#: ../src/client/composer/composer-widget.vala:1187
 msgid "Do you want to discard this message?"
 msgstr "Chcete zahodit tuto zprávu?"
 
-#: ../src/client/composer/composer-widget.vala:1308
+#: ../src/client/composer/composer-widget.vala:1342
 msgid "Send message with an empty subject and body?"
 msgstr "Poslat zprávu s prázdným předmětem a tělem?"
 
-#: ../src/client/composer/composer-widget.vala:1310
+#: ../src/client/composer/composer-widget.vala:1344
 msgid "Send message with an empty subject?"
 msgstr "Poslat zprávu s prázdným předmětem?"
 
-#: ../src/client/composer/composer-widget.vala:1312
+#: ../src/client/composer/composer-widget.vala:1346
 msgid "Send message with an empty body?"
 msgstr "Poslat zprávu s prázdným tělem?"
 
-#: ../src/client/composer/composer-widget.vala:1314
+#: ../src/client/composer/composer-widget.vala:1348
 msgid "Send message without an attachment?"
 msgstr "Poslat zprávu bez přílohy?"
 
-#: ../src/client/composer/composer-widget.vala:1537
-msgid "Cannot add attachment"
-msgstr "Nelze připojit přílohu"
-
-#: ../src/client/composer/composer-widget.vala:1548
+#: ../src/client/composer/composer-widget.vala:1597
 #, c-format
 msgid "\"%s\" could not be found."
 msgstr "Soubor „%s“ nebyl nalezen."
 
-#: ../src/client/composer/composer-widget.vala:1555
+#: ../src/client/composer/composer-widget.vala:1603
 #, c-format
 msgid "\"%s\" is a folder."
 msgstr "„%s“ je složka."
 
-#: ../src/client/composer/composer-widget.vala:1562
+#: ../src/client/composer/composer-widget.vala:1609
 #, c-format
 msgid "\"%s\" is an empty file."
 msgstr "Soubor „%s“ je prázdný."
 
-#: ../src/client/composer/composer-widget.vala:1576
+#: ../src/client/composer/composer-widget.vala:1622
 #, c-format
 msgid "\"%s\" could not be opened for reading."
 msgstr "Soubor „%s“ nemohl být otevřen pro čtení."
 
-#: ../src/client/composer/composer-widget.vala:1583
+#: ../src/client/composer/composer-widget.vala:1629
 #, c-format
 msgid "\"%s\" already attached for delivery."
 msgstr "Soubor „%s“ už byl pro doručení přiložen."
 
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
-#: ../src/client/composer/composer-widget.vala:1592
+#: ../src/client/composer/composer-widget.vala:1637
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: ../src/client/composer/composer-widget.vala:1650
+#: ../src/client/composer/composer-widget.vala:1656
+msgid "Cannot add attachment"
+msgstr "Nelze připojit přílohu"
+
+#: ../src/client/composer/composer-widget.vala:1701
 msgid "To: "
 msgstr "Komu: "
 
-#: ../src/client/composer/composer-widget.vala:1653
+#: ../src/client/composer/composer-widget.vala:1704
 msgid "Cc: "
 msgstr "Kopie: "
 
-#: ../src/client/composer/composer-widget.vala:1656
+#: ../src/client/composer/composer-widget.vala:1707
 msgid "Bcc: "
 msgstr "Skrytá kopie: "
 
-#: ../src/client/composer/composer-widget.vala:1659
+#: ../src/client/composer/composer-widget.vala:1710
 msgid "Reply-To: "
 msgstr "Odpověď:"
 
-#: ../src/client/composer/composer-widget.vala:1847
+#: ../src/client/composer/composer-widget.vala:1898
 msgid "Select Color"
 msgstr "Vybrat barvu"
 
 #. Inspect.
-#: ../src/client/composer/composer-widget.vala:2076
+#: ../src/client/composer/composer-widget.vala:2113
 #: ../src/client/conversation-viewer/conversation-viewer.vala:1364
 msgid "_Inspect"
 msgstr "_Kontrolovat"
@@ -970,21 +972,27 @@ msgstr "_Kontrolovat"
 #. Displayed in the From dropdown to indicate an "alternate email address"
 #. for an account.  The first printf argument will be the alternate email
 #. address, and the second will be the account's primary email address.
-#: ../src/client/composer/composer-widget.vala:2257
+#: ../src/client/composer/composer-widget.vala:2294
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%1$s přes %2$s"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: ../src/client/composer/composer-widget.vala:2299
+#: ../src/client/composer/composer-widget.vala:2336
 msgid "_From:"
 msgstr "_Od:"
 
-#: ../src/client/composer/composer-widget.vala:2373
+#: ../src/client/composer/composer-widget.vala:2410
 #, c-format
 msgid "%s - Composer Inspector"
 msgstr "%s – Inspektor editoru"
+
+#. Translators: This is the name of the file chooser filter
+#. when inserting an image in the composer.
+#: ../src/client/composer/composer-widget.vala:2450
+msgid "Images"
+msgstr "Obrázky"
 
 #: ../src/client/composer/spell-check-popover.vala:210
 msgid "Search for more languages"
@@ -1167,11 +1175,13 @@ msgstr "Nepodařilo se otevřít výchozí textový editor."
 msgid "%s - Conversation Inspector"
 msgstr "%s – Inspektor konverzace"
 
-#: ../src/client/dialogs/attachment-dialog.vala:18
+#: ../src/client/dialogs/attachment-dialog.vala:24
+#: ../src/client/dialogs/attachment-dialog.vala:26
 msgid "Choose a file"
 msgstr "Vybrat soubor"
 
-#: ../src/client/dialogs/attachment-dialog.vala:23
+#: ../src/client/dialogs/attachment-dialog.vala:24
+#: ../src/client/dialogs/attachment-dialog.vala:26
 msgid "_Attach"
 msgstr "_Příloha"
 
@@ -1425,7 +1435,7 @@ msgid "%A"
 msgstr "%A"
 
 #: ../src/client/util/util-email.vala:30
-#: ../src/engine/rfc822/rfc822-message.vala:808
+#: ../src/engine/rfc822/rfc822-message.vala:886
 msgid "(no subject)"
 msgstr "(bez předmětu)"
 
@@ -1514,6 +1524,7 @@ msgid "Outbox"
 msgstr "K odeslání"
 
 #: ../src/engine/api/geary-special-folder-type.vala:54
+#: ../ui/gtk/help-overlay.ui.h:19
 msgid "Archive"
 msgstr "Archiv"
 
@@ -1998,10 +2009,14 @@ msgid "Link (Ctrl+L)"
 msgstr "Odkaz (Ctrl+L)"
 
 #: ../ui/composer-widget.ui.h:18
+msgid "Image (Ctrl+G)"
+msgstr "Obrázek (Ctrl+G)"
+
+#: ../ui/composer-widget.ui.h:19
 msgid "Remove formatting (Ctrl+Space)"
 msgstr "Odstranit formátování (Ctrl+Space)"
 
-#: ../ui/composer-widget.ui.h:19
+#: ../ui/composer-widget.ui.h:20
 msgid "Select spell checking language"
 msgstr "Vybrat jazyk pro kontrolu pravopisu"
 
@@ -2041,9 +2056,189 @@ msgstr "_Rozlišovat velikost písmen"
 msgid "label"
 msgstr "štítek"
 
+#: ../ui/gtk/help-overlay.ui.h:1
+msgid "Conversation Shortcuts"
+msgstr "Klávesové zkratky konverzace"
+
+#: ../ui/gtk/help-overlay.ui.h:2
+msgid "General"
+msgstr "Obecné"
+
+#: ../ui/gtk/help-overlay.ui.h:3
+msgid "Move focus to the next/previous pane"
+msgstr "Přesunout zaměření na následující/předchozí panel"
+
+#: ../ui/gtk/help-overlay.ui.h:4
+msgid "Move focus to conversation list"
+msgstr "Přesunout zaměření na seznam konverzací"
+
+#: ../ui/gtk/help-overlay.ui.h:5
+msgid "Detach composer window"
+msgstr "Odpojit okno pro psaní zprávy"
+
+#: ../ui/gtk/help-overlay.ui.h:6
+msgid "Close composer window"
+msgstr "Zavřít okno pro psaní zprávy"
+
+#: ../ui/gtk/help-overlay.ui.h:7
+msgid "Show keyboard shortcuts"
+msgstr "Zobrazit klávesové zkratky"
+
+#: ../ui/gtk/help-overlay.ui.h:8
+msgid "Show help"
+msgstr "Zobrazit nápovědu"
+
+#: ../ui/gtk/help-overlay.ui.h:9
+msgid "Quit the application"
+msgstr "Ukončit aplikaci"
+
+#: ../ui/gtk/help-overlay.ui.h:11
+msgid "Jump to search box"
+msgstr "Přejít do vyhledávacího pole"
+
+#: ../ui/gtk/help-overlay.ui.h:12
+msgid "Find in current conversation"
+msgstr "Najít v aktuální konverzaci"
+
+#: ../ui/gtk/help-overlay.ui.h:13
+msgid "Find next/previous in current conversation"
+msgstr "Najít následující/předchozí v aktuální konverzaci"
+
+#: ../ui/gtk/help-overlay.ui.h:14
+msgid "Actions"
+msgstr "Činnosti"
+
+#: ../ui/gtk/help-overlay.ui.h:15
+msgid "Compose a new message"
+msgstr "Napsat novou zprávu"
+
+#: ../ui/gtk/help-overlay.ui.h:16
+msgid "Reply to sender "
+msgstr "Odpovědět odesilateli"
+
+#: ../ui/gtk/help-overlay.ui.h:17
+msgid "Reply to all"
+msgstr "Odpovědět všem"
+
+#: ../ui/gtk/help-overlay.ui.h:18
+msgid "Forward"
+msgstr "Přeposlat"
+
+#: ../ui/gtk/help-overlay.ui.h:20
+msgid "Move to trash"
+msgstr "Přesunout do koše"
+
+#: ../ui/gtk/help-overlay.ui.h:21
+msgid "Toggle spam"
+msgstr "Přepnout příznak nevyžadné zprávy"
+
+#: ../ui/gtk/help-overlay.ui.h:22
+msgid "Move the conversation"
+msgstr "Přesunout konverzaci"
+
+#: ../ui/gtk/help-overlay.ui.h:23
+msgid "Label the conversation"
+msgstr "Přidat konverzaci štítek"
+
+#: ../ui/gtk/help-overlay.ui.h:24
+msgid "Mark read"
+msgstr "Označit jako přečtené"
+
+#: ../ui/gtk/help-overlay.ui.h:25
+msgid "Mark unread"
+msgstr "Označit jako nepřečtené"
+
+#: ../ui/gtk/help-overlay.ui.h:26
+msgid "View"
+msgstr "Zobrazení"
+
+#: ../ui/gtk/help-overlay.ui.h:27
+msgid "Zoom in"
+msgstr "Přiblížit"
+
+#: ../ui/gtk/help-overlay.ui.h:28
+msgid "Zoom out"
+msgstr "Oddálit"
+
+#: ../ui/gtk/help-overlay.ui.h:29
+msgid "Reset zoom"
+msgstr "Výchozí přiblížení"
+
+#: ../ui/gtk/help-overlay.ui.h:30
+msgid "Additional Shortcuts"
+msgstr "Další klávesové zkratky"
+
+#: ../ui/gtk/help-overlay.ui.h:31
+msgid "Star"
+msgstr "Označit hvězdičkou"
+
+#: ../ui/gtk/help-overlay.ui.h:32
+msgid "Unstar"
+msgstr "Odebrat hvězdičku"
+
+#: ../ui/gtk/help-overlay.ui.h:34
+msgid "Jump to next (older) conversation"
+msgstr "Přejít na následující (starší) konverzaci"
+
+#: ../ui/gtk/help-overlay.ui.h:35
+msgid "Jump to previous (newer) conversation"
+msgstr "Přejít na předchozí (novější) konverzaci"
+
+#: ../ui/gtk/help-overlay.ui.h:36
+msgid "Composer Shortcuts"
+msgstr "Klávesové zkratky editoru"
+
+#: ../ui/gtk/help-overlay.ui.h:37
+msgid "Quote text"
+msgstr "Citovat text"
+
+#: ../ui/gtk/help-overlay.ui.h:38
+msgid "Unquote text"
+msgstr "Zrušit citaci textu"
+
+#: ../ui/gtk/help-overlay.ui.h:39
+msgid "Send"
+msgstr "Odeslat"
+
+#: ../ui/gtk/help-overlay.ui.h:40
+msgid "Add attachment"
+msgstr "Přidat přílohu"
+
+#: ../ui/gtk/help-overlay.ui.h:41
+msgid "Rich text mode"
+msgstr "Režim formátovaného textu"
+
+#: ../ui/gtk/help-overlay.ui.h:42
+msgid "Bold text"
+msgstr "Tučný text"
+
+#: ../ui/gtk/help-overlay.ui.h:43
+msgid "Italicize text"
+msgstr "Kurzíva"
+
+#: ../ui/gtk/help-overlay.ui.h:44
+msgid "Underline text"
+msgstr "Podtržený text"
+
+#: ../ui/gtk/help-overlay.ui.h:45
+msgid "Strike text"
+msgstr "Přeškrtnutý text"
+
+#: ../ui/gtk/help-overlay.ui.h:46
+msgid "Insert a link"
+msgstr "Vložit odkaz"
+
+#: ../ui/gtk/help-overlay.ui.h:47
+msgid "Remove formatting"
+msgstr "Odstranit formátování"
+
 #: ../ui/gtk/menus.ui.h:2
 msgid "A_ccounts"
 msgstr "Úč_ty"
+
+#: ../ui/gtk/menus.ui.h:4
+msgid "_Keyboard Shortcuts"
+msgstr "_Klávesové zkratky"
 
 #: ../ui/login.glade.h:1
 msgid "email@example.com"
