@@ -1932,8 +1932,13 @@ public class GearyController : Geary.BaseObject {
         Gtk.FileChooserAction action = (attachments.size == 1)
             ? Gtk.FileChooserAction.SAVE
             : Gtk.FileChooserAction.SELECT_FOLDER;
+#if GTK_3_20
+        Gtk.FileChooserNative dialog = new Gtk.FileChooserNative(null, main_window, action,
+            Stock._CANCEL, Stock._SAVE);
+#else
         Gtk.FileChooserDialog dialog = new Gtk.FileChooserDialog(null, main_window, action,
-            Stock._CANCEL, Gtk.ResponseType.CANCEL, Stock._SAVE, Gtk.ResponseType.ACCEPT, null);
+             Stock._CANCEL, Gtk.ResponseType.CANCEL, Stock._SAVE, Gtk.ResponseType.ACCEPT, null);
+#endif
         if (last_save_directory != null)
             dialog.set_current_folder(last_save_directory.get_path());
         if (attachments.size == 1) {
@@ -1986,8 +1991,13 @@ public class GearyController : Geary.BaseObject {
     }
     
     private void on_save_buffer_to_file(string? filename, Geary.Memory.Buffer buffer) {
+#if GTK_3_20
+        Gtk.FileChooserNative dialog = new Gtk.FileChooserNative(null, main_window, Gtk.FileChooserAction.SAVE,
+            Stock._CANCEL, Stock._SAVE);
+#else
         Gtk.FileChooserDialog dialog = new Gtk.FileChooserDialog(null, main_window, Gtk.FileChooserAction.SAVE,
             Stock._CANCEL, Gtk.ResponseType.CANCEL, Stock._SAVE, Gtk.ResponseType.ACCEPT, null);
+#endif
         if (last_save_directory != null)
             dialog.set_current_folder(last_save_directory.get_path());
         if (!Geary.String.is_empty(filename))
