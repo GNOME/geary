@@ -84,20 +84,17 @@ hr {
 }
 .button:hover {
     border-color: rgba(0,0,0,0.18);
-    box-shadow: inset 0px 0px 1px rgba(255,255,255,0.8);
 }
 .button:active {
     border-color: rgba(0,0,0,0.20);
     background-color: rgba(0,0,0,0.05);;
     padding: 5px 3px 3px 5px;
-    box-shadow: inset 0px 0px 1px rgba(0,0,0,0.05);
 }
 
 .email, .composer_embed {
     border: 1px rgba(0,0,0,1) solid;
     background-color: white;/* recv-normal */
     color: black;
-    box-shadow: 0 3px 11px rgba(0,0,0,1);
     display: block;
     word-wrap: break-word;
     width: 100%;
@@ -126,12 +123,11 @@ hr {
     display: none;
 }
 .email.read, #multiple_messages .email, .composer_embed {
-    border-color: rgba(0,0,0,0.4);
-    box-shadow: 0 3px 11px rgba(0,0,0,0.21);
+    border-color: rgba(0,0,0,0.2);
+    border-radius: 3px;
 }
 .email.animate {
     -webkit-transition: border-color 3s ease;
-    -webkit-transition: box-shadow 3s ease;
 }
 
 .email .email_warning {
@@ -233,7 +229,6 @@ body:not(.nohide) .email.hide .header_container .avatar {
     border: 1px solid #999;
     padding: 1em;
     background: #ffc;
-    box-shadow: 0 3px 11px rgba(0,0,0,0.21);
     /* Reset styles */
     font: caption;
     color: black;
@@ -254,12 +249,11 @@ body:not(.nohide) .email.hide .header_container .avatar {
 @media screen {
 
     body {
-        background-color: #ccc !important;
+        background-color: #ededed !important;
     }
     body:not(.nohide) .email.hide,
     body:not(.nohide) .email .email.hide {
         background-color: #f5f5f5;/* recv-collapsed */
-        box-shadow: 0 2px 5px rgba(0,0,0,0.12);
     }
     body:not(.nohide) .email.sent.hide,
     body:not(.nohide) .email.sent .email.hide {
@@ -351,10 +345,9 @@ body.nohide .email .compressed_note > span {
 }
 
 .email .email {
-    box-shadow: none;
     margin-top: 0;
     border: none;
-    border-top: 1px rgba(0,0,0,0.4) solid;
+    border-top: 1px rgba(0,0,0,0.2) solid;
     background-color: white;/* recv-normal */
 }
 .email.sent .email {
@@ -398,14 +391,12 @@ body.nohide .email .compressed_note > span {
 .email > .attachment_container > .attachment:hover,
 .email > .attachment_container > .attachment:active {
     border-color: rgba(0,0,0,0.18);
-    box-shadow: inset 0px 0px 1px rgba(255,255,255,0.8);
 }
 
 .email > .attachment_container > .attachment:active {
     padding: 3px 1px 1px 3px;
     border-color: rgba(0,0,0,0.20);
     background-color: rgba(0,0,0,0.05);
-    box-shadow: inset 0px 0px 2px rgba(0,0,0,0.05);
 }
 
 .email > .attachment_container > .attachment .preview {
@@ -420,7 +411,6 @@ body.nohide .email .compressed_note > span {
 }
 .email > .attachment_container > .attachment .preview .thumbnail {
     border: 1px solid #999;
-    box-shadow: 0 0 5px #b8b8b8;
     background-size: 16px 16px;
     background-position:0 0, 8px 0, 8px -8px, 0px 8px;
 }
