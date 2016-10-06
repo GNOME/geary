@@ -331,6 +331,7 @@ client/accounts/account-spinner-page.vala
 client/accounts/add-edit-page.vala
 client/accounts/login-dialog.vala
 
+client/components/client-web-view.vala
 client/components/count-badge.vala
 client/components/empty-placeholder.vala
 client/components/folder-popover.vala
@@ -342,19 +343,18 @@ client/components/monitored-spinner.vala
 client/components/search-bar.vala
 client/components/status-bar.vala
 client/components/stock.vala
-client/components/stylish-webview.vala
 
 client/composer/composer-box.vala
 client/composer/composer-container.vala
 client/composer/composer-embed.vala
 client/composer/composer-headerbar.vala
+client/composer/composer-web-view.vala
 client/composer/composer-widget.vala
 client/composer/composer-window.vala
 client/composer/contact-entry-completion.vala
 client/composer/contact-list-store.vala
 client/composer/email-entry.vala
 client/composer/spell-check-popover.vala
-client/composer/webview-edit-fixer.vala
 
 client/conversation-list/conversation-list-cell-renderer.vala
 client/conversation-list/conversation-list-store.vala
@@ -403,8 +403,14 @@ client/util/util-gravatar.vala
 client/util/util-gtk.vala
 client/util/util-international.vala
 client/util/util-random.vala
-client/util/util-webkit.vala
 client/util/util-migrate.vala
+)
+
+set(WEB_PROCESS_SRC
+client/web-process/web-process-extension.vala
+client/web-process/util-composer.vala
+client/web-process/util-conversation.vala
+client/web-process/util-webkit.vala
 )
 
 set(CONSOLE_SRC
@@ -498,6 +504,7 @@ pkg_check_modules(DEPS REQUIRED
     gcr-3>=3.10.1
     gobject-introspection-1.0
     webkit2gtk-4.0>=2.6
+    webkit2gtk-web-extension-4.0>=2.6
     enchant>=1.6
     ${EXTRA_CLIENT_PKG_CONFIG}
 )
@@ -533,6 +540,10 @@ set(CLIENT_PACKAGES
   libsoup-2.4
   webkit2gtk-4.0
   ${EXTRA_CLIENT_PACKAGES}
+)
+
+set(WEB_PROCESS_PACKAGES
+    gtk+-3.0 gee-0.8 webkit2gtk-web-extension-4.0
 )
 
 set(CONSOLE_PACKAGES
@@ -664,6 +675,29 @@ add_custom_command(
 # directory
 include(GSettings)
 add_schemas(geary ${GSETTINGS_DIR} ${CMAKE_INSTALL_PREFIX})
+
+# Client web process extension library
+#################################################
+vala_precompile(WEB_PROCESS_VALA_C geary-web-process
+    ${WEB_PROCESS_SRC}
+PACKAGES
+    ${WEB_PROCESS_PACKAGES}
+    ${ENGINE_PACKAGES} ## XXX REMOVE ME
+CUSTOM_VAPIS
+    "${CMAKE_BINARY_DIR}/src/geary-static.vapi"
+OPTIONS
+    ${VALAC_OPTIONS}
+)
+
+add_library(geary-web-process ${WEB_PROCESS_VALA_C})
+target_link_libraries(geary-web-process ${DEPS_LIBRARIES} gthread-2.0)
+add_custom_command(
+    TARGET
+        geary-web-process
+    POST_BUILD
+    COMMAND
+        ${CMAKE_COMMAND} -E copy geary-console ${CMAKE_BINARY_DIR}/
+)
 
 # Console app
 #################################################

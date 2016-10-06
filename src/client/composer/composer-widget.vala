@@ -151,7 +151,6 @@ public class ComposerWidget : Gtk.EventBox {
 
     private const string URI_LIST_MIME_TYPE = "text/uri-list";
     private const string FILE_URI_PREFIX = "file://";
-    private const string BODY_ID = "message-body";
     private const string HTML_BODY = """
         <html><head><title></title>
         <style>
@@ -245,7 +244,7 @@ public class ComposerWidget : Gtk.EventBox {
         owned get { return get_html(); }
         set {
             this.body_html = value;
-            this.editor.load_string(HTML_BODY, "text/html", "UTF-8", "");
+            this.editor.load_html(HTML_BODY, null);
         }
     }
 
@@ -257,12 +256,19 @@ public class ComposerWidget : Gtk.EventBox {
 
     public bool blank {
         get {
-            return this.to_entry.empty && this.cc_entry.empty && this.bcc_entry.empty && this.reply_to_entry.empty &&
-                this.subject_entry.buffer.length == 0 && !this.editor.can_undo() && this.attached_files.size == 0;
+            return this.to_entry.empty &&
+                this.cc_entry.empty &&
+                this.bcc_entry.empty &&
+                this.reply_to_entry.empty &&
+                this.subject_entry.buffer.length == 0 &&
+                !this.editor.can_undo() &&
+                this.attached_files.size == 0;
         }
     }
 
     public ComposerHeaderbar header { get; private set; }
+
+    public ComposerWebView editor { get; private set; default = new ComposerWebView(); }
 
     public string draft_save_text { get; private set; }
 
@@ -369,12 +375,6 @@ public class ComposerWidget : Gtk.EventBox {
     private Geary.EmailFlags draft_flags = new Geary.EmailFlags.with(Geary.EmailFlags.DRAFT);
     private uint draft_save_timeout_id = 0;
     private bool is_closing = false;
-
-    public WebKit.WebView editor = new StylishWebView();
-    // We need to keep a reference to the edit-fixer in composer-window, so it doesn't get
-    // garbage-collected.
-    private WebViewEditFixer edit_fixer;
-    private string editor_allow_prefix = "";
 
     private ComposerContainer container {
         get { return (ComposerContainer) parent; }
@@ -497,9 +497,6 @@ public class ComposerWidget : Gtk.EventBox {
         else
             set_cursor();
 
-        this.edit_fixer = new WebViewEditFixer(editor);
-        this.editor_allow_prefix = random_string(10) + ":";
-
         // Add actions once every element has been initialized and added
         initialize_actions();
 
@@ -510,39 +507,33 @@ public class ComposerWidget : Gtk.EventBox {
         this.cc_entry.changed.connect(validate_send_button);
         this.bcc_entry.changed.connect(validate_send_button);
         this.reply_to_entry.changed.connect(validate_send_button);
-        this.editor.load_finished.connect(on_load_finished);
-        this.editor.hovering_over_link.connect(on_hovering_over_link);
         this.editor.context_menu.connect(on_context_menu);
-        this.editor.move_focus.connect(update_actions);
-        this.editor.copy_clipboard.connect(update_actions);
-        this.editor.cut_clipboard.connect(update_actions);
-        this.editor.paste_clipboard.connect(update_actions);
-        this.editor.undo.connect(update_actions);
-        this.editor.redo.connect(update_actions);
-        this.editor.selection_changed.connect(update_actions);
+        this.editor.link_activated.connect(on_link_activated);
+        this.editor.load_changed.connect(on_load_changed);
+        this.editor.mouse_target_changed.connect(on_mouse_target_changed);
+        this.editor.text_attributes_changed.connect(on_text_attributes_changed);
+        // this.editor.move_focus.connect(update_actions);
+        // this.editor.copy_clipboard.connect(update_actions);
+        // this.editor.cut_clipboard.connect(update_actions);
+        // this.editor.paste_clipboard.connect(update_actions);
+        // this.editor.undo.connect(update_actions);
+        // this.editor.redo.connect(update_actions);
+        // this.editor.selection_changed.connect(update_actions);
         this.editor.key_press_event.connect(on_editor_key_press);
-        this.editor.resource_request_starting.connect(on_resource_request_starting);
-        this.editor.user_changed_contents.connect(reset_draft_timer);
-        this.editor.web_inspector.inspect_web_view.connect(on_inspect_web_view);
+        //this.editor.user_changed_contents.connect(reset_draft_timer);
 
         // only do this after setting body_html
-        this.editor.load_string(HTML_BODY, "text/html", "UTF8", "");
-
-        this.editor.navigation_policy_decision_requested.connect(on_navigation_policy_decision_requested);
-        this.editor.new_window_policy_decision_requested.connect(on_navigation_policy_decision_requested);
+        this.editor.load_html(HTML_BODY, null);
 
         GearyApplication.instance.config.settings.changed[Configuration.SPELL_CHECK_KEY].connect(
             on_spell_check_changed);
 
-        WebKit.WebSettings s = this.editor.settings;
-        s.enable_spell_checking = GearyApplication.instance.config.spell_check;
-        s.spell_checking_languages = string.joinv(",",
-                                                  GearyApplication.instance.config.spell_check_languages);
-        s.enable_scripts = false;
-        s.enable_java_applet = false;
-        s.enable_plugins = false;
-        s.enable_developer_extras = Args.inspector;
-        this.editor.settings = s;
+        // WebKit.Settings s = this.editor.settings;
+        // s.enable_spell_checking = GearyApplication.instance.config.spell_check;
+        // s.spell_checking_languages = string.joinv(
+        //     ",", GearyApplication.instance.config.spell_check_languages
+        // );
+        // this.editor.settings = s;
 
         this.editor_scrolled.add(editor);
 
@@ -846,59 +837,33 @@ public class ComposerWidget : Gtk.EventBox {
         return false;
     }
 
-    private void on_load_finished(WebKit.WebFrame frame) {
-        if (get_realized())
-            on_load_finished_and_realized();
-        else
-            realize.connect(on_load_finished_and_realized);
+    private void on_load_changed(WebKit.WebView view, WebKit.LoadEvent event) {
+        if (event == WebKit.LoadEvent.FINISHED) {
+            if (get_realized())
+                on_load_finished_and_realized();
+            else
+                realize.connect(on_load_finished_and_realized);
+        }
     }
 
     private void on_load_finished_and_realized() {
         // This is safe to call even when this connection hasn't been made.
         realize.disconnect(on_load_finished_and_realized);
-        WebKit.DOM.Document document = this.editor.get_dom_document();
-        WebKit.DOM.HTMLElement? body = document.get_element_by_id(BODY_ID) as WebKit.DOM.HTMLElement;
-        assert(body != null);
 
         if (!Geary.String.is_empty(this.body_html)) {
-            try {
-                body.set_inner_html(this.body_html);
-            } catch (Error e) {
-                debug("Failed to load prefilled body: %s", e.message);
-            }
+            this.editor.load_finished_and_realised();
         }
-        body.focus();  // Focus within the HTML document
-
-        // Set cursor at appropriate position
-        try {
-            WebKit.DOM.Element? cursor = document.get_element_by_id("cursormarker");
-            if (cursor != null) {
-                WebKit.DOM.Range range = document.create_range();
-                range.select_node_contents(cursor);
-                range.collapse(false);
-                WebKit.DOM.DOMSelection selection = document.default_view.get_selection();
-                selection.remove_all_ranges();
-                selection.add_range(range);
-                cursor.parent_element.remove_child(cursor);
-            }
-        } catch (Error error) {
-            debug("Error setting cursor at end of text: %s", error.message);
-        }
-
-        protect_blockquote_styles();
-
-        set_focus();  // Focus in the GTK widget hierarchy
 
         on_spell_check_changed();
-
-        Util.DOM.bind_event(this.editor, "a", "click", (Callback) on_link_clicked, this);
         update_actions();
+
         this.actions.change_action_state(ACTION_SHOW_EXTENDED, false);
         this.actions.change_action_state(ACTION_COMPOSE_AS_HTML,
             GearyApplication.instance.config.compose_as_html);
 
-        if (can_delete_quote)
-            this.editor.selection_changed.connect(() => { this.can_delete_quote = false; });
+        // XXX
+        // if (can_delete_quote)
+        //     this.editor.selection_changed.connect(() => { this.can_delete_quote = false; });
     }
 
     private void show_attachment_overlay(bool visible) {
@@ -1002,7 +967,7 @@ public class ComposerWidget : Gtk.EventBox {
         email.inline_files.add_all(this.inline_files);
         email.cid_files.set_all(this.cid_files);
 
-        email.img_src_prefix = this.editor_allow_prefix;
+        email.img_src_prefix = this.editor.allow_prefix;
 
         if (actions.get_action_state(ACTION_COMPOSE_AS_HTML).get_boolean() || only_html)
             email.body_html = get_html();
@@ -1027,10 +992,10 @@ public class ComposerWidget : Gtk.EventBox {
         string? quote = null) {
         if (referred != null && quote != null && quote != this.last_quote) {
             this.last_quote = quote;
-            WebKit.DOM.Document document = this.editor.get_dom_document();
             // Always use reply styling, since forward styling doesn't work for inline quotes
-            document.exec_command("insertHTML", false,
-                Geary.RFC822.Utils.quote_email_for_reply(referred, quote, Geary.RFC822.TextFormat.HTML));
+            this.editor.insert_quote(
+                Geary.RFC822.Utils.quote_email_for_reply(referred, quote, Geary.RFC822.TextFormat.HTML)
+            );
 
             if (!referred_ids.contains(referred.id)) {
                 add_recipients_and_ids(new_type, referred);
@@ -1142,7 +1107,7 @@ public class ComposerWidget : Gtk.EventBox {
                     set_cursor();
                     return;
                 }
-                signature = Util.DOM.smart_escape(signature, false);
+                signature = Geary.HTML.smart_escape(signature, false);
             } catch (Error error) {
                 debug("Error reading signature file %s: %s", signature_file.get_path(), error.message);
                 set_cursor();
@@ -1154,7 +1119,7 @@ public class ComposerWidget : Gtk.EventBox {
                 set_cursor();
                 return;
             }
-            signature = Util.DOM.smart_escape(signature, true);
+            signature = Geary.HTML.smart_escape(signature, true);
         }
 
         if (this.body_html == null)
@@ -1301,12 +1266,12 @@ public class ComposerWidget : Gtk.EventBox {
     private bool email_contains_attachment_keywords() {
         // Filter out all content contained in block quotes
         string filtered = @"$subject\n";
-        filtered += Util.DOM.get_text_representation(this.editor.get_dom_document(), "blockquote");
+        filtered += this.editor.get_block_quote_representation();
         
         Regex url_regex = null;
         try {
             // Prepare to ignore urls later
-            url_regex = new Regex(URL_REGEX, RegexCompileFlags.CASELESS);
+            url_regex = new Regex(Geary.HTML.URL_REGEX, RegexCompileFlags.CASELESS);
         } catch (Error error) {
             debug("Error building regex in keyword checker: %s", error.message);
         }
@@ -1387,7 +1352,7 @@ public class ComposerWidget : Gtk.EventBox {
         this.container.vanish();
         this.is_closing = true;
         
-        Util.DOM.linkify_document(this.editor.get_dom_document());
+        this.editor.linkify_document();
         
         // Perform send.
         try {
@@ -1568,6 +1533,7 @@ public class ComposerWidget : Gtk.EventBox {
                         // attachment instead.
                         if (part.content_id != null) {
                             this.cid_files[part.content_id] = file;
+                            this.editor.add_cid_resource(part.content_id, file);
                         } else {
                             type = Geary.Mime.DispositionType.ATTACHMENT;
                         }
@@ -1726,7 +1692,7 @@ public class ComposerWidget : Gtk.EventBox {
     }
 
     private void on_justify(SimpleAction action, Variant? param) {
-        this.editor.get_dom_document().exec_command("justify" + param.get_string(), false, "");
+        this.editor.execute_editing_command("justify" + param.get_string());
     }
 
     private void on_action(SimpleAction action, Variant? param) {
@@ -1736,7 +1702,7 @@ public class ComposerWidget : Gtk.EventBox {
         // We need the unprefixed name to send as a command to the editor
         string[] prefixed_action_name = action.get_name().split(".");
         string action_name = prefixed_action_name[prefixed_action_name.length - 1];
-        this.editor.get_dom_document().exec_command(action_name, false, "");
+        this.editor.execute_editing_command(action_name);
     }
 
     private void on_cut(SimpleAction action, Variant? param) {
@@ -1755,69 +1721,13 @@ public class ComposerWidget : Gtk.EventBox {
 
     private void on_copy_link(SimpleAction action, Variant? param) {
         Gtk.Clipboard c = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD);
-        c.set_text(hover_url, -1);
+        c.set_text(this.hover_url, -1);
         c.store();
     }
 
-    private WebKit.DOM.Node? get_left_text(WebKit.DOM.Node node, long offset) {
-        WebKit.DOM.Document document = this.editor.get_dom_document();
-        string node_value = node.node_value;
-
-        // Offset is in unicode characters, but index is in bytes. We need to get the corresponding
-        // byte index for the given offset.
-        int char_count = node_value.char_count();
-        int index = offset > char_count ? node_value.length : node_value.index_of_nth_char(offset);
-
-        return offset > 0 ? document.create_text_node(node_value[0:index]) : null;
-    }
-
     private void on_clipboard_text_received(Gtk.Clipboard clipboard, string? text) {
-        if (text == null)
-            return;
-        
-        // Insert plain text from clipboard.
-        WebKit.DOM.Document document = this.editor.get_dom_document();
-        document.exec_command("inserttext", false, text);
-    
-        // The inserttext command will not scroll if needed, but we can't use the clipboard
-        // for plain text. WebKit allows us to scroll a node into view, but not an arbitrary
-        // position within a text node. So we add a placeholder node at the cursor position,
-        // scroll to that, then remove the placeholder node.
-        try {
-            WebKit.DOM.DOMSelection selection = document.default_view.get_selection();
-            WebKit.DOM.Node selection_base_node = selection.get_base_node();
-            long selection_base_offset = selection.get_base_offset();
-            
-            WebKit.DOM.NodeList selection_child_nodes = selection_base_node.get_child_nodes();
-            WebKit.DOM.Node ref_child = selection_child_nodes.item(selection_base_offset);
-        
-            WebKit.DOM.Element placeholder = document.create_element("SPAN");
-            WebKit.DOM.Text placeholder_text = document.create_text_node("placeholder");
-            placeholder.append_child(placeholder_text);
-            
-            if (selection_base_node.node_name == "#text") {
-                WebKit.DOM.Node? left = get_left_text(selection_base_node, selection_base_offset);
-                
-                WebKit.DOM.Node parent = selection_base_node.parent_node;
-                if (left != null)
-                    parent.insert_before(left, selection_base_node);
-                parent.insert_before(placeholder, selection_base_node);
-                parent.remove_child(selection_base_node);
-                
-                placeholder.scroll_into_view_if_needed(false);
-                parent.insert_before(selection_base_node, placeholder);
-                if (left != null)
-                    parent.remove_child(left);
-                parent.remove_child(placeholder);
-                selection.set_base_and_extent(selection_base_node, selection_base_offset, selection_base_node, selection_base_offset);
-            } else {
-                selection_base_node.insert_before(placeholder, ref_child);
-                placeholder.scroll_into_view_if_needed(false);
-                selection_base_node.remove_child(placeholder);
-            }
-            
-        } catch (Error err) {
-            debug("Error scrolling pasted text into view: %s", err.message);
+        if (text != null) {
+            this.editor.insert_text(text);
         }
     }
 
@@ -1838,11 +1748,11 @@ public class ComposerWidget : Gtk.EventBox {
     }
 
     private void on_remove_format(SimpleAction action, Variant? param) {
-        this.editor.get_dom_document().exec_command("removeformat", false, "");
-        this.editor.get_dom_document().exec_command("removeparaformat", false, "");
-        this.editor.get_dom_document().exec_command("unlink", false, "");
-        this.editor.get_dom_document().exec_command("backcolor", false, "#ffffff");
-        this.editor.get_dom_document().exec_command("forecolor", false, "#000000");
+        this.editor.execute_editing_command("removeformat");
+        this.editor.execute_editing_command("removeparaformat");
+        this.editor.execute_editing_command("unlink");
+        this.editor.execute_editing_command_with_argument("backcolor", "#ffffff");
+        this.editor.execute_editing_command_with_argument("forecolor", "#000000");
     }
 
     // Use this for toggle actions, and use the change-state signal to respond to these state changes
@@ -1860,18 +1770,8 @@ public class ComposerWidget : Gtk.EventBox {
 
         this.menu_button.menu_model = (compose_as_html) ? this.html_menu : this.plain_menu;
 
-        // style editor accordingly
-        WebKit.DOM.DOMTokenList body_classes = this.editor.get_dom_document().body.get_class_list();
-        try {
-            if (compose_as_html)
-                body_classes.remove("plain");
-            else
-                body_classes.add("plain");
-        } catch (Error error) {
-            debug("Error setting composer style: %s", error.message);
-        }
+        this.editor.enable_rich_text(compose_as_html);
 
-        // Remember preference
         GearyApplication.instance.config.compose_as_html = compose_as_html;
     }
 
@@ -1888,7 +1788,9 @@ public class ComposerWidget : Gtk.EventBox {
     }
 
     private void on_font_family(SimpleAction action, Variant? param) {
-        this.editor.get_dom_document().exec_command("fontname", false, param.get_string());
+        this.editor.execute_editing_command_with_argument(
+            "fontname", param.get_string()
+        );
         action.set_state(param.get_string());
   }
 
@@ -1901,139 +1803,112 @@ public class ComposerWidget : Gtk.EventBox {
         else // Large
             size = "7";
 
-        this.editor.get_dom_document().exec_command("fontsize", false, size);
+        this.editor.execute_editing_command_with_argument("fontsize", size);
         action.set_state(param.get_string());
     }
 
     private void on_select_color() {
         Gtk.ColorChooserDialog dialog = new Gtk.ColorChooserDialog(_("Select Color"),
             this.container.top_window);
-        if (dialog.run() == Gtk.ResponseType.OK)
-            this.editor.get_dom_document().exec_command("forecolor", false, dialog.get_rgba().to_string());
-
+        if (dialog.run() == Gtk.ResponseType.OK) {
+            this.editor.execute_editing_command_with_argument(
+                "forecolor", dialog.get_rgba().to_string()
+            );
+        }
         dialog.destroy();
     }
 
     private void on_indent(SimpleAction action, Variant? param) {
         on_action(action, param);
-
-        // Undo styling of blockquotes
-        try {
-            WebKit.DOM.NodeList node_list = this.editor.get_dom_document().query_selector_all(
-                "blockquote[style=\"margin: 0 0 0 40px; border: none; padding: 0px;\"]");
-            for (int i = 0; i < node_list.length; ++i) {
-                WebKit.DOM.Element element = (WebKit.DOM.Element) node_list.item(i);
-                element.remove_attribute("style");
-                element.set_attribute("type", "cite");
-            }
-        } catch (Error error) {
-            debug("Error removing blockquote style: %s", error.message);
-        }
-    }
-
-    private void protect_blockquote_styles() {
-        // We will search for an remove a particular styling when we quote text.  If that style
-        // exists in the quoted text, we alter it slightly so we don't mess with it later.
-        try {
-            WebKit.DOM.NodeList node_list = this.editor.get_dom_document().query_selector_all(
-                "blockquote[style=\"margin: 0 0 0 40px; border: none; padding: 0px;\"]");
-            for (int i = 0; i < node_list.length; ++i) {
-                ((WebKit.DOM.Element) node_list.item(i)).set_attribute("style", 
-                    "margin: 0 0 0 40px; padding: 0px; border:none;");
-            }
-        } catch (Error error) {
-            debug("Error protecting blockquotes: %s", error.message);
-        }
+        this.editor.undo_blockquote_style();
     }
 
     private void link_dialog(string link) {
-        Gtk.Dialog dialog = new Gtk.Dialog();
-        bool existing_link = false;
-        
-        // Save information needed to re-establish selection
-        WebKit.DOM.DOMSelection selection = this.editor.get_dom_document().get_default_view().
-            get_selection();
-        WebKit.DOM.Node anchor_node = selection.anchor_node;
-        long anchor_offset = selection.anchor_offset;
-        WebKit.DOM.Node focus_node = selection.focus_node;
-        long focus_offset = selection.focus_offset;
-        
-        // Allow user to remove link if they're editing an existing one.
-        if (focus_node != null && (focus_node is WebKit.DOM.HTMLAnchorElement ||
-            focus_node.get_parent_element() is WebKit.DOM.HTMLAnchorElement)) {
-            existing_link = true;
-            dialog.add_buttons(Stock._REMOVE, Gtk.ResponseType.REJECT);
-        }
-        
-        dialog.add_buttons(Stock._CANCEL, Gtk.ResponseType.CANCEL, Stock._OK,
-            Gtk.ResponseType.OK);
-        
-        Gtk.Entry entry = new Gtk.Entry();
-        entry.changed.connect(() => {
-            // Only allow OK when there's text in the box.
-            dialog.set_response_sensitive(Gtk.ResponseType.OK, 
-                !Geary.String.is_empty(entry.text.strip()));
-        });
-        
-        dialog.width_request = 350;
-        dialog.get_content_area().spacing = 7;
-        dialog.get_content_area().border_width = 10;
-        dialog.get_content_area().pack_start(new Gtk.Label("Link URL:"));
-        dialog.get_content_area().pack_start(entry);
-        dialog.get_widget_for_response(Gtk.ResponseType.OK).can_default = true;
-        dialog.set_default_response(Gtk.ResponseType.OK);
-        dialog.show_all();
-        
-        entry.set_text(link);
-        entry.activates_default = true;
-        entry.move_cursor(Gtk.MovementStep.BUFFER_ENDS, 0, false);
-        
-        int response = dialog.run();
-        
-        // Re-establish selection, since selecting text in the Entry will de-select all
-        // in the WebView.
-        try {
-            selection.set_base_and_extent(anchor_node, anchor_offset, focus_node, focus_offset);
-        } catch (Error e) {
-            debug("Error re-establishing selection: %s", e.message);
-        }
-        
-        if (response == Gtk.ResponseType.OK)
-            this.editor.get_dom_document().exec_command("createLink", false, entry.text);
-        else if (response == Gtk.ResponseType.REJECT)
-            this.editor.get_dom_document().exec_command("unlink", false, "");
-        
-        dialog.destroy();
-        
+        // Gtk.Dialog dialog = new Gtk.Dialog();
+        // bool existing_link = false;
+
+        // // Save information needed to re-establish selection
+        // WebKit.DOM.DOMSelection selection = this.editor.get_dom_document().get_default_view().
+        //     get_selection();
+        // WebKit.DOM.Node anchor_node = selection.anchor_node;
+        // long anchor_offset = selection.anchor_offset;
+        // WebKit.DOM.Node focus_node = selection.focus_node;
+        // long focus_offset = selection.focus_offset;
+
+        // // Allow user to remove link if they're editing an existing one.
+        // if (focus_node != null && (focus_node is WebKit.DOM.HTMLAnchorElement ||
+        //     focus_node.get_parent_element() is WebKit.DOM.HTMLAnchorElement)) {
+        //     existing_link = true;
+        //     dialog.add_buttons(Stock._REMOVE, Gtk.ResponseType.REJECT);
+        // }
+
+        // dialog.add_buttons(Stock._CANCEL, Gtk.ResponseType.CANCEL, Stock._OK,
+        //     Gtk.ResponseType.OK);
+
+        // Gtk.Entry entry = new Gtk.Entry();
+        // entry.changed.connect(() => {
+        //     // Only allow OK when there's text in the box.
+        //     dialog.set_response_sensitive(Gtk.ResponseType.OK,
+        //         !Geary.String.is_empty(entry.text.strip()));
+        // });
+
+        // dialog.width_request = 350;
+        // dialog.get_content_area().spacing = 7;
+        // dialog.get_content_area().border_width = 10;
+        // dialog.get_content_area().pack_start(new Gtk.Label("Link URL:"));
+        // dialog.get_content_area().pack_start(entry);
+        // dialog.get_widget_for_response(Gtk.ResponseType.OK).can_default = true;
+        // dialog.set_default_response(Gtk.ResponseType.OK);
+        // dialog.show_all();
+
+        // entry.set_text(link);
+        // entry.activates_default = true;
+        // entry.move_cursor(Gtk.MovementStep.BUFFER_ENDS, 0, false);
+
+        // int response = dialog.run();
+
+        // // Re-establish selection, since selecting text in the Entry will de-select all
+        // // in the WebView.
+        // try {
+        //     selection.set_base_and_extent(anchor_node, anchor_offset, focus_node, focus_offset);
+        // } catch (Error e) {
+        //     debug("Error re-establishing selection: %s", e.message);
+        // }
+
+        // if (response == Gtk.ResponseType.OK)
+        //     this.editor.execute_editing_command_with_argument("createLink", entry.text);
+        // else if (response == Gtk.ResponseType.REJECT)
+        //     this.editor.execute_editing_command("unlink");
+
+        // dialog.destroy();
+
         // Re-bind to anchor links.  This must be done every time link have changed.
-        Util.DOM.bind_event(this.editor,"a", "click", (Callback) on_link_clicked, this);
+        //Util.DOM.bind_event(this.editor,"a", "click", (Callback) on_link_clicked, this);
     }
 
     private string get_html() {
-        return ((WebKit.DOM.HTMLElement) this.editor.get_dom_document().get_element_by_id(BODY_ID))
-            .get_inner_html();
+        return this.editor.get_html();
     }
 
     private string get_text() {
-        return Util.DOM.html_to_flowed_text((WebKit.DOM.HTMLElement) this.editor.get_dom_document()
-            .get_element_by_id(BODY_ID));
+        return this.editor.get_text();
     }
 
-    private bool on_navigation_policy_decision_requested(WebKit.WebFrame frame,
-        WebKit.NetworkRequest request, WebKit.WebNavigationAction navigation_action,
-        WebKit.WebPolicyDecision policy_decision) {
-        policy_decision.ignore();
+    private void on_link_activated(ClientWebView view, string uri) {
         if (this.actions.get_action_state(ACTION_COMPOSE_AS_HTML).get_boolean())
-            link_dialog(request.uri);
-        return true;
+            link_dialog(uri);
     }
 
-    private void on_hovering_over_link(string? title, string? url) {
-        if (this.actions.get_action_state(ACTION_COMPOSE_AS_HTML).get_boolean()) {
-            message_overlay_label.label = url;
-            hover_url = url;
-            update_actions();
+
+    private void on_mouse_target_changed(WebKit.WebView web_view,
+                                         WebKit.HitTestResult hit_test,
+                                         uint modifiers) {
+        bool copy_link_enabled = false;
+        if (hit_test.context_is_link()) {
+            copy_link_enabled = true;
+            this.hover_url = hit_test.get_link_uri();
         }
+        get_action(ACTION_COPY_LINK).set_enabled(copy_link_enabled);
     }
 
     private void update_message_overlay_label_style() {
@@ -2062,8 +1937,8 @@ public class ComposerWidget : Gtk.EventBox {
     }
 
     private void on_spell_check_changed() {
-        this.editor.settings.enable_spell_checking = GearyApplication.instance.config.spell_check;
-        get_action(ACTION_SELECT_DICTIONARY).set_enabled(this.editor.settings.enable_spell_checking);
+        //this.editor.settings.enable_spell_checking = GearyApplication.instance.config.spell_check;
+        //get_action(ACTION_SELECT_DICTIONARY).set_enabled(this.editor.settings.enable_spell_checking);
     }
 
     // This overrides the keypress handling for the *widget*; the WebView editor's keypress overrides
@@ -2086,51 +1961,53 @@ public class ComposerWidget : Gtk.EventBox {
         return base.key_press_event(event);
     }
 
-    private bool on_context_menu(Gtk.Widget default_menu, WebKit.HitTestResult hit_test_result,
-        bool keyboard_triggered) {
-        Gtk.Menu context_menu = (Gtk.Menu) default_menu;
+    private bool on_context_menu(WebKit.WebView view,
+                                 WebKit.ContextMenu default_menu,
+                                 Gdk.Event event,
+                                 WebKit.HitTestResult hit_test_result) {
+        // Gtk.Menu context_menu = (Gtk.Menu) default_menu;
 
-        // Keep the spelling menu items
-        foreach (weak Gtk.Widget child in context_menu.get_children()) {
-            Gtk.MenuItem item = (Gtk.MenuItem) child;
-            WebKit.ContextMenuAction action = WebKit.context_menu_item_get_action(item);
+        // // Keep the spelling menu items
+        // foreach (weak Gtk.Widget child in context_menu.get_children()) {
+        //     Gtk.MenuItem item = (Gtk.MenuItem) child;
+        //     WebKit.ContextMenuAction action = WebKit.context_menu_item_get_action(item);
 
-            const WebKit.ContextMenuAction[] spelling_actions = {
-                WebKit.ContextMenuAction.SPELLING_GUESS,
-                WebKit.ContextMenuAction.IGNORE_SPELLING,
-                WebKit.ContextMenuAction.LEARN_SPELLING
-            };
+        //     const WebKit.ContextMenuAction[] spelling_actions = {
+        //         WebKit.ContextMenuAction.SPELLING_GUESS,
+        //         WebKit.ContextMenuAction.IGNORE_SPELLING,
+        //         WebKit.ContextMenuAction.LEARN_SPELLING
+        //     };
 
-            if (!(action in spelling_actions))
-                context_menu.remove(item);
-        }
+        //     if (!(action in spelling_actions))
+        //         context_menu.remove(item);
+        // }
 
-        // Add our own Menu (but don't add formatting actions if they are disabled).
-        context_menu.insert_action_group("cme", this.actions);
-        GtkUtil.add_g_menu_to_gtk_menu(context_menu, context_menu_model, (label, detailed_action_name) => {
-            string action_name;
-            Variant? target;
-            try {
-                Action.parse_detailed_name(detailed_action_name, out action_name, out target);
-                if ("." in action_name) // Remove possible prefixes
-                    action_name = action_name.split(".")[1];
-            } catch (GLib.Error e) {
-                debug("Couldn't parse action \"%s\" in context menu".printf(detailed_action_name));
-            }
-            return !(action_name in html_actions) || (this.actions.get_action_enabled(action_name));
-        });
+        // // Add our own Menu (but don't add formatting actions if they are disabled).
+        // context_menu.insert_action_group("cme", this.actions);
+        // GtkUtil.add_g_menu_to_gtk_menu(context_menu, context_menu_model, (label, detailed_action_name) => {
+        //     string action_name;
+        //     Variant? target;
+        //     try {
+        //         Action.parse_detailed_name(detailed_action_name, out action_name, out target);
+        //         if ("." in action_name) // Remove possible prefixes
+        //             action_name = action_name.split(".")[1];
+        //     } catch (GLib.Error e) {
+        //         debug("Couldn't parse action \"%s\" in context menu".printf(detailed_action_name));
+        //     }
+        //     return !(action_name in html_actions) || (this.actions.get_action_enabled(action_name));
+        // });
 
-        if (Args.inspector) {
-            Gtk.MenuItem inspect_item = new Gtk.MenuItem.with_mnemonic(_("_Inspect"));
-            inspect_item.activate.connect(() => {
-                    this.editor.web_inspector.inspect_node(hit_test_result.inner_node);
-                });
-            context_menu.append(new Gtk.SeparatorMenuItem());
-            context_menu.append(inspect_item);
-        }
+        // if (Args.inspector) {
+        //     Gtk.MenuItem inspect_item = new Gtk.MenuItem.with_mnemonic(_("_Inspect"));
+        //     inspect_item.activate.connect(() => {
+        //             this.editor.get_inspector().show();
+        //         });
+        //     context_menu.append(new Gtk.SeparatorMenuItem());
+        //     context_menu.append(inspect_item);
+        // }
 
-        context_menu.show_all();
-        update_actions();
+        // context_menu.show_all();
+        // update_actions();
         return false;
     }
 
@@ -2138,7 +2015,7 @@ public class ComposerWidget : Gtk.EventBox {
         if (this.spell_check_popover == null) {
             this.spell_check_popover = new SpellCheckPopover(select_dictionary_button);
             this.spell_check_popover.selection_changed.connect((active_langs) => {
-                    this.editor.settings.spell_checking_languages = string.joinv(",", active_langs);
+                    //this.editor.settings.spell_checking_languages = string.joinv(",", active_langs);
                     GearyApplication.instance.config.spell_check_languages = active_langs;
                 });
         }
@@ -2177,36 +2054,12 @@ public class ComposerWidget : Gtk.EventBox {
                     add_signature_and_cursor();
                 else
                     set_cursor();
-                this.editor.load_string(HTML_BODY, "text/html", "UTF8", "");
+                this.editor.load_html(HTML_BODY, null);
                 return true;
             }
         }
-        
-        WebKit.DOM.Document document = this.editor.get_dom_document();
-        if (event.keyval == Gdk.Key.Tab) {
-            document.exec_command("inserthtml", false,
-                "<span style='white-space: pre-wrap'>\t</span>");
-            return true;
-        }
-        
-        if (event.keyval == Gdk.Key.ISO_Left_Tab) {
-            // If there is no selection and the character before the cursor is tab, delete it.
-            WebKit.DOM.DOMSelection selection = document.get_default_view().get_selection();
-            if (selection.is_collapsed) {
-                selection.modify("extend", "backward", "character");
-                try {
-                    if (selection.get_range_at(0).get_text() == "\t")
-                        selection.delete_from_document();
-                    else
-                        selection.collapse_to_end();
-                } catch (Error error) {
-                    debug("Error handling Left Tab: %s", error.message);
-                }
-            }
-            return true;
-        }
-        
-        return false;
+
+        return this.editor.handle_key_press(event);
     }
 
     /**
@@ -2226,62 +2079,53 @@ public class ComposerWidget : Gtk.EventBox {
         get_action(ACTION_REDO).set_enabled(this.editor.can_redo());
         get_action(ACTION_CUT).set_enabled(this.editor.can_cut_clipboard());
         get_action(ACTION_COPY).set_enabled(this.editor.can_copy_clipboard());
-        get_action(ACTION_COPY_LINK).set_enabled(hover_url != null);
         get_action(ACTION_PASTE).set_enabled(this.editor.can_paste_clipboard());
         get_action(ACTION_PASTE_WITH_FORMATTING).set_enabled(this.editor.can_paste_clipboard()
             && get_action(ACTION_COMPOSE_AS_HTML).state.get_boolean());
 
-        // Style formatting actions.
-        WebKit.DOM.Document document = this.editor.get_dom_document();
-        WebKit.DOM.DOMWindow window = document.get_default_view();
-        WebKit.DOM.DOMSelection? selection = window.get_selection();
-        if (selection == null)
-            return;
+        // // Style formatting actions.
+        // WebKit.DOM.Document document = this.editor.get_dom_document();
+        // WebKit.DOM.DOMWindow window = document.get_default_view();
+        // WebKit.DOM.DOMSelection? selection = window.get_selection();
+        // if (selection == null)
+        //     return;
 
-        get_action(ACTION_REMOVE_FORMAT).set_enabled(!selection.is_collapsed
-            && get_action(ACTION_COMPOSE_AS_HTML).state.get_boolean());
+        // get_action(ACTION_REMOVE_FORMAT).set_enabled(!selection.is_collapsed
+        //     && get_action(ACTION_COMPOSE_AS_HTML).state.get_boolean());
 
-        WebKit.DOM.Element? active = selection.focus_node as WebKit.DOM.Element;
-        if (active == null && selection.focus_node != null)
-            active = selection.focus_node.get_parent_element();
+        // WebKit.DOM.Element? active = selection.focus_node as WebKit.DOM.Element;
+        // if (active == null && selection.focus_node != null)
+        //     active = selection.focus_node.get_parent_element();
 
-        if (active != null) {
-            WebKit.DOM.CSSStyleDeclaration styles = window.get_computed_style(active, "");
+        // if (active != null) {
+        //     WebKit.DOM.CSSStyleDeclaration styles = window.get_computed_style(active, "");
 
-            this.actions.change_action_state(ACTION_BOLD, document.query_command_state("bold"));
-            this.actions.change_action_state(ACTION_ITALIC,
-                document.query_command_state("italic"));
-            this.actions.change_action_state(ACTION_UNDERLINE,
-                document.query_command_state("underline"));
-            this.actions.change_action_state(ACTION_STRIKETHROUGH,
-                document.query_command_state("strikethrough"));
+        //     // Font family.
+        //     string font_name = styles.get_property_value("font-family").down();
+        //     if (font_name.contains("sans") ||
+        //         font_name.contains("arial") ||
+        //         font_name.contains("trebuchet") ||
+        //         font_name.contains("helvetica"))
+        //         this.actions.change_action_state(ACTION_FONT_FAMILY, "sans");
+        //     else if (font_name.contains("serif") ||
+        //         font_name.contains("georgia") ||
+        //         font_name.contains("times"))
+        //         this.actions.change_action_state(ACTION_FONT_FAMILY, "serif");
+        //     else if (font_name.contains("monospace") ||
+        //         font_name.contains("courier") ||
+        //         font_name.contains("console"))
+        //         this.actions.change_action_state(ACTION_FONT_FAMILY, "monospace");
 
-            // Font family.
-            string font_name = styles.get_property_value("font-family").down();
-            if (font_name.contains("sans") ||
-                font_name.contains("arial") ||
-                font_name.contains("trebuchet") ||
-                font_name.contains("helvetica"))
-                this.actions.change_action_state(ACTION_FONT_FAMILY, "sans");
-            else if (font_name.contains("serif") ||
-                font_name.contains("georgia") ||
-                font_name.contains("times"))
-                this.actions.change_action_state(ACTION_FONT_FAMILY, "serif");
-            else if (font_name.contains("monospace") ||
-                font_name.contains("courier") ||
-                font_name.contains("console"))
-                this.actions.change_action_state(ACTION_FONT_FAMILY, "monospace");
-
-            // Font size.
-            int font_size;
-            styles.get_property_value("font-size").scanf("%dpx", out font_size);
-            if (font_size < 11)
-                this.actions.change_action_state(ACTION_FONT_SIZE, "small");
-            else if (font_size > 20)
-                this.actions.change_action_state(ACTION_FONT_SIZE, "large");
-            else
-                this.actions.change_action_state(ACTION_FONT_SIZE, "medium");
-        }
+        //     // Font size.
+        //     int font_size;
+        //     styles.get_property_value("font-size").scanf("%dpx", out font_size);
+        //     if (font_size < 11)
+        //         this.actions.change_action_state(ACTION_FONT_SIZE, "small");
+        //     else if (font_size > 20)
+        //         this.actions.change_action_state(ACTION_FONT_SIZE, "large");
+        //     else
+        //         this.actions.change_action_state(ACTION_FONT_SIZE, "medium");
+        // }
     }
 
     private bool add_account_emails_to_from_list(Geary.Account other_account, bool set_active = false) {
@@ -2413,25 +2257,23 @@ public class ComposerWidget : Gtk.EventBox {
         return true;
     }
 
-    private unowned WebKit.WebView on_inspect_web_view(WebKit.WebInspector inspector, WebKit.WebView target_view) {
-        // XXX This was copy-pasta'ed from the conversation
-        // viewer. Both should be moved into a common superclass when
-        // ported to WebKit2 in Bug 728002.
-        Gtk.Window window = new Gtk.Window();
-        window.set_default_size(600, 600);
-        window.set_title(_("%s — Composer Inspector").printf(GearyApplication.NAME));
-        Gtk.ScrolledWindow scrolled = new Gtk.ScrolledWindow(null, null);
-        WebKit.WebView inspector_view = new WebKit.WebView();
-        scrolled.add(inspector_view);
-        window.add(scrolled);
-        window.show_all();
-        window.delete_event.connect(() => {
-            inspector.close();
-            return false;
-        });
-
-        unowned WebKit.WebView r = inspector_view;
-        return r;
+    private void on_text_attributes_changed(uint mask) {
+        this.actions.change_action_state(
+            ACTION_BOLD,
+            (mask & WebKit.EditorTypingAttributes.BOLD) == WebKit.EditorTypingAttributes.BOLD
+        );
+        this.actions.change_action_state(
+            ACTION_ITALIC,
+            (mask & WebKit.EditorTypingAttributes.ITALIC) == WebKit.EditorTypingAttributes.ITALIC
+        );
+        this.actions.change_action_state(
+            ACTION_UNDERLINE,
+            (mask & WebKit.EditorTypingAttributes.UNDERLINE) == WebKit.EditorTypingAttributes.UNDERLINE
+        );
+        this.actions.change_action_state(
+            ACTION_STRIKETHROUGH,
+            (mask & WebKit.EditorTypingAttributes.STRIKETHROUGH) == WebKit.EditorTypingAttributes.STRIKETHROUGH
+        );
     }
 
     private void on_add_attachment() {
@@ -2470,11 +2312,10 @@ public class ComposerWidget : Gtk.EventBox {
                     // Use insertHTML instead of insertImage here so
                     // we can specify a max width inline, preventing
                     // large images from overflowing the view port.
-                    this.editor.get_dom_document().exec_command(
+                    this.editor.execute_editing_command_with_argument(
                         "insertHTML",
-                        false,
                         "<img style=\"max-width: 100%\" src=\"%s\">".printf(
-                            this.editor_allow_prefix + file.get_uri()
+                            this.editor.allow_prefix + file.get_uri()
                         )
                     );
                 } catch (Error err) {
@@ -2490,43 +2331,14 @@ public class ComposerWidget : Gtk.EventBox {
         link_dialog("http://");
     }
 
-    private static void on_link_clicked(WebKit.DOM.Element element, WebKit.DOM.Event event,
-        ComposerWidget composer) {
-        try {
-            composer.editor.get_dom_document().get_default_view().get_selection().
-                select_all_children(element);
-        } catch (Error e) {
-            debug("Error selecting link: %s", e.message);
-        }
-    }
-
-    private void on_resource_request_starting(WebKit.WebFrame web_frame,
-                                              WebKit.WebResource web_resource,
-                                              WebKit.NetworkRequest request,
-                                              WebKit.NetworkResponse? response) {
-        // XXX This was copy-pasta'ed from the conversation
-        // viewer. Both should be moved into a common superclass when
-        // ported to WebKit2 in Bug 728002.
-
-        if (response != null) {
-            // A request that was previously approved resulted in a redirect.
-            return;
-        }
-
-        const string CID_PREFIX = "cid:";
-        const string ABOUT_BLANK = "about:blank";
-
-        string? req_uri = request.get_uri();
-        string resp_url = ABOUT_BLANK;
-        if (req_uri.has_prefix(CID_PREFIX)) {
-            File? file = this.cid_files[req_uri.substring(CID_PREFIX.length)];
-            if (file != null) {
-                resp_url = file.get_uri();
-            }
-        } else if (req_uri.has_prefix(this.editor_allow_prefix)) {
-            resp_url = req_uri.substring(this.editor_allow_prefix.length);
-        }
-        request.set_uri(resp_url);
-    }
+    // private static void on_link_clicked(WebKit.DOM.Element element, WebKit.DOM.Event event,
+    //     ComposerWidget composer) {
+    //     try {
+    //         composer.editor.get_dom_document().get_default_view().get_selection().
+    //             select_all_children(element);
+    //     } catch (Error e) {
+    //         debug("Error selecting link: %s", e.message);
+    //     }
+    // }
 
 }

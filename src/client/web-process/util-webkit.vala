@@ -4,10 +4,6 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-// Regex to detect URLs.
-// Originally from here: http://daringfireball.net/2010/07/improved_regex_for_matching_urls
-public const string URL_REGEX = "(?i)\\b((?:[a-z][\\w-]+:(?:/{1,3}|[a-z0-9%])|www\\d{0,3}[.]|[a-z0-9.\\-]+[.][a-z]{2,4}/)(?:[^\\s()<>]+|\\(([^\\s()<>]+|(\\([^\\s()<>]+\\)))*\\))+(?:\\(([^\\s()<>]+|(\\([^\\s()<>]+\\)))*\\)|[^\\s`!()\\[\\]{};:'\".,<>?«»“”‘’]))";
-
 // Regex to determine if a URL has a known protocol.
 public const string PROTOCOL_REGEX = "^(aim|apt|bitcoin|cvs|ed2k|ftp|file|finger|git|gtalk|http|https|irc|ircs|irc6|lastfm|ldap|ldaps|magnet|news|nntp|rsync|sftp|skype|smb|sms|svn|telnet|tftp|ssh|webcal|xmpp):";
 
@@ -30,7 +26,13 @@ namespace Util.DOM {
     }
 
     public WebKit.DOM.HTMLElement? clone_node(WebKit.DOM.Node node, bool deep = true) {
-        return node.clone_node(deep) as WebKit.DOM.HTMLElement;
+        WebKit.DOM.HTMLElement? clone = null;
+        try {
+            clone = node.clone_node(deep) as WebKit.DOM.HTMLElement;
+        } catch (Error err) {
+            debug("Error selecting cloning node: %s", err.message);
+        }
+        return clone;
     }
 
     public WebKit.DOM.HTMLElement? clone_select(WebKit.DOM.Node node, string selector,
@@ -38,13 +40,13 @@ namespace Util.DOM {
         return clone_node(select(node, selector), deep);
     }
 
-    public void toggle_class(WebKit.DOM.DOMTokenList class_list, string clas, bool add) throws Error {
-        if (add) {
-            class_list.add(clas);
-        } else {
-            class_list.remove(clas);
-        }
-    }
+    //public void toggle_class(WebKit.DOM.DOMTokenList class_list, string clas, bool add) throws Error {
+    //     if (add) {
+    //         class_list.add(clas);
+    //     } else {
+    //         class_list.remove(clas);
+    //     }
+    //}
 
     // Returns the text contained in the DOM document, after ignoring tags of type "exclude"
     // and padding newlines where appropriate. Used to scan for attachment keywords.
@@ -109,19 +111,19 @@ namespace Util.DOM {
         return copy.get_inner_text();
     }
 
-    public void bind_event(WebKit.WebView view, string selector, string event, Callback callback,
-        Object? extra = null) {
-        try {
-            WebKit.DOM.NodeList node_list = view.get_dom_document().query_selector_all(selector);
-            for (int i = 0; i < node_list.length; ++i) {
-                WebKit.DOM.EventTarget node = node_list.item(i) as WebKit.DOM.EventTarget;
-                node.remove_event_listener(event, callback, false);
-                node.add_event_listener(event, callback, false, extra);
-            }
-        } catch (Error error) {
-            warning("Error setting up click handlers: %s", error.message);
-        }
-    }
+    // public void bind_event(WebKit.WebView view, string selector, string event, Callback callback,
+    //     Object? extra = null) {
+    //     try {
+    //         WebKit.DOM.NodeList node_list = view.get_dom_document().query_selector_all(selector);
+    //         for (int i = 0; i < node_list.length; ++i) {
+    //             WebKit.DOM.EventTarget node = node_list.item(i) as WebKit.DOM.EventTarget;
+    //             node.remove_event_listener(event, callback, false);
+    //             node.add_event_listener(event, callback, false, extra);
+    //         }
+    //     } catch (Error error) {
+    //         warning("Error setting up click handlers: %s", error.message);
+    //     }
+    // }
 
     // Linkifies plain text links in an HTML document.
     public void linkify_document(WebKit.DOM.Document document) {
@@ -157,7 +159,7 @@ namespace Util.DOM {
         string input = node.get_node_value();
         if (!in_link && !Geary.String.is_empty(input)) {
             try {
-                Regex r = new Regex(URL_REGEX, RegexCompileFlags.CASELESS);
+                Regex r = new Regex(Geary.HTML.URL_REGEX, RegexCompileFlags.CASELESS);
                 string output = r.replace_eval(input, -1, 0, 0, pre_split_urls);
                 if (input != output) {
                     // We got one!  Now split the text and swap out the node.
@@ -228,7 +230,7 @@ namespace Util.DOM {
         string output = input.replace("<", " \01 ").replace(">", " \02 ").replace("&", "&amp;");
 
         // Converts text links into HTML hyperlinks.
-        Regex r = new Regex(URL_REGEX, RegexCompileFlags.CASELESS);
+        Regex r = new Regex(Geary.HTML.URL_REGEX, RegexCompileFlags.CASELESS);
 
         output = r.replace_eval(output, -1, 0, 0, is_valid_url);
         return output.replace(" \01 ", "&lt;").replace(" \02 ", "&gt;");
@@ -244,25 +246,18 @@ namespace Util.DOM {
         return false;
     }
 
-    public WebKit.DOM.HTMLElement? closest_ancestor(WebKit.DOM.Element element, string selector) {
-        try {
-            WebKit.DOM.Element? parent = element.get_parent_element();
-            while (parent != null && !parent.webkit_matches_selector(selector)) {
-                parent = parent.get_parent_element();
-            }
-            return parent as WebKit.DOM.HTMLElement;
-        } catch (Error error) {
-            warning("Failed to find ancestor: %s", error.message);
-            return null;
-        }
-    }
-
     public bool is_descendant_of(WebKit.DOM.Element? element, string selector) {
         try {
-            while (element != null) {
-                if (element.webkit_matches_selector(selector))
-                    return true;
-                element = element.get_parent_element();
+            WebKit.DOM.NodeList matching = element.owner_document.query_selector_all(selector);
+            for (int i = 0; i < matching.length; i++) {
+                WebKit.DOM.Node parent = matching.item(i);
+                WebKit.DOM.Node child = element;
+                while (child != null) {
+                    if (child.parent_node == parent) {
+                        return true;
+                    }
+                    child = child.parent_node;
+                }
             }
         } catch (Error error) {
             warning("Problem traversing DOM: %s", error.message);
@@ -440,54 +435,5 @@ namespace Util.DOM {
         return "data:%s;base64,%s".printf(mimetype, base64);
     }
 
-    // Turns the data: URI created by assemble_data_uri() back into its components.  The returned
-    // buffer is decoded.
-    //
-    // TODO: Return mimetype
-    public bool disassemble_data_uri(string uri, out Geary.Memory.Buffer? buffer) {
-        buffer = null;
-
-        if (!uri.has_prefix("data:"))
-            return false;
-
-        // count from semicolon past encoding type specifier
-        int start_index = uri.index_of(";");
-        if (start_index <= 0)
-            return false;
-
-        // watch for string termination to avoid overflow
-        int base64_len = "base64,".length;
-        for (int ctr = 0; ctr < base64_len; ctr++) {
-            if (uri[start_index++] == Geary.String.EOS)
-                return false;
-        }
-
-        // avoid a memory copy of the substring by manually calculating the start address
-        uint8[] bytes = Base64.decode((string) (((char *) uri) + start_index));
-
-        // transfer ownership of the byte array directly to the Buffer; this prevents an
-        // unnecessary copy ... save length before transferring ownership (which frees the array)
-        int bytes_length = bytes.length;
-        buffer = new Geary.Memory.ByteBuffer.take((owned) bytes, bytes_length);
-
-        return true;
-    }
-
-    // Escape reserved HTML entities if the string does not have HTML tags.  If there are no tags,
-    // or if preserve_whitespace_in_html is true, wrap the string a div to preserve whitespace.
-    public string smart_escape(string? text, bool preserve_whitespace_in_html) {
-        if (text == null)
-            return text;
-
-        string res = text;
-        if (!Regex.match_simple("<([A-Z]*)(?: [^>]*)?>.*</(\\1)>|<[A-Z]*(?: [^>]*)?/>", res,
-            RegexCompileFlags.CASELESS)) {
-            res = Geary.HTML.escape_markup(res);
-            preserve_whitespace_in_html = true;
-        }
-        if (preserve_whitespace_in_html)
-            res = @"<div style='white-space: pre;'>$res</div>";
-        return res;
-    }
 }
 

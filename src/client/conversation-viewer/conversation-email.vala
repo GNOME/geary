@@ -588,8 +588,7 @@ public class ConversationEmail : Gtk.Box {
         view.web_view.notify["load-status"].connect(() => {
                 bool all_loaded = true;
                 message_view_iterator().foreach((view) => {
-                        if (view.web_view.load_status !=
-                                WebKit.LoadStatus.FINISHED) {
+                        if (!view.web_view.is_loaded) {
                             all_loaded = false;
                             return false;
                         }
@@ -599,9 +598,9 @@ public class ConversationEmail : Gtk.Box {
                     this.message_bodies_loaded = true;
                 }
             });
-        view.web_view.selection_changed.connect(() => {
-                on_message_selection_changed(view);
-            });
+        // view.web_view.selection_changed.connect(() => {
+        //         on_message_selection_changed(view);
+        //     });
     }
 
     private void update_email_state() {
@@ -696,7 +695,13 @@ public class ConversationEmail : Gtk.Box {
     private void print() {
         // XXX This isn't anywhere near good enough - headers aren't
         // being printed.
-        primary_message.web_view.get_main_frame().print();
+        WebKit.PrintOperation op = new WebKit.PrintOperation(
+            this.primary_message.web_view
+        );
+        Gtk.Window? window = get_toplevel() as Gtk.Window;
+        if (op.run_dialog(window) == WebKit.PrintOperationResponse.PRINT) {
+            op.print();
+        }
     }
 
     private void on_flag_remote_images(ConversationMessage view) {
@@ -727,17 +732,11 @@ public class ConversationEmail : Gtk.Box {
         contact_store.mark_contacts_async.begin(contact_list, flags, null);
     }
 
-    private void on_message_selection_changed(ConversationMessage view) {
-        bool has_selection = false;
-        if (view.web_view.has_selection()) {
-            WebKit.DOM.Document document = view.web_view.get_dom_document();
-            has_selection = !document.default_view.get_selection().is_collapsed;
-            this.body_selection_message = view;
-        } else {
-            this.body_selection_message = null;
-        }
-        body_selection_changed(has_selection);
-    }
+    // private void on_message_selection_changed(ConversationMessage view) {
+    //     bool has_selection = view.web_view.has_selection();
+    //     this.body_selection_message = has_selection ? view : null;
+    //     body_selection_changed(has_selection);
+    // }
 
     [GtkCallback]
     private void on_attachments_child_activated(Gtk.FlowBox view,

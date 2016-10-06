@@ -23,11 +23,11 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
     protected Gee.MultiMap<string, string>? old_accelerators { get; set; }
 
     private Gtk.ScrolledWindow outer_scroller;
-    private bool setting_inner_scroll;
-    private bool scrolled_to_bottom = false;
-    private double inner_scroll_adj_value;
-    private int inner_view_height;
-    private int min_height = MIN_EDITOR_HEIGHT;
+    //private bool setting_inner_scroll;
+    //private bool scrolled_to_bottom = false;
+    //private double inner_scroll_adj_value;
+    //private int inner_view_height;
+    //private int min_height = MIN_EDITOR_HEIGHT;
 
 
     public signal void vanished();
@@ -49,7 +49,14 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
         realize.connect(on_realize);
         this.composer.editor.focus_in_event.connect(on_focus_in);
         this.composer.editor.focus_out_event.connect(on_focus_out);
-        this.composer.editor.document_load_finished.connect(on_loaded);
+        this.composer.editor.load_changed.connect((web_view, event) => {
+                if (event == WebKit.LoadEvent.FINISHED) {
+                    Idle.add(() => {
+                            recalc_height();
+                            return Source.REMOVE;
+                        });
+                }
+            });
         show();
     }
 
@@ -58,18 +65,11 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
 
         this.composer.editor_scrolled.get_vscrollbar().hide();
 
-        this.composer.editor.vadjustment.value_changed.connect(on_inner_scroll);
-        this.composer.editor.vadjustment.changed.connect(on_adjust_changed);
-        this.composer.editor.user_changed_contents.connect(on_inner_size_changed);
+        //this.composer.editor.vadjustment.value_changed.connect(on_inner_scroll);
+        //this.composer.editor.vadjustment.changed.connect(on_adjust_changed);
+        //this.composer.editor.user_changed_contents.connect(on_inner_size_changed);
 
         reroute_scroll_handling(this);
-    }
-
-    private void on_loaded() {
-        Idle.add(() => {
-            recalc_height();
-            return Source.REMOVE;
-        });
     }
 
     private void reroute_scroll_handling(Gtk.Widget widget) {
@@ -111,9 +111,9 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
         this.composer.editor.focus_in_event.disconnect(on_focus_in);
         this.composer.editor.focus_out_event.disconnect(on_focus_out);
 
-        this.composer.editor.vadjustment.value_changed.disconnect(on_inner_scroll);
-        this.composer.editor.vadjustment.changed.disconnect(on_adjust_changed);
-        this.composer.editor.user_changed_contents.disconnect(on_inner_size_changed);
+        //this.composer.editor.vadjustment.value_changed.disconnect(on_inner_scroll);
+        //this.composer.editor.vadjustment.changed.disconnect(on_adjust_changed);
+        //this.composer.editor.user_changed_contents.disconnect(on_inner_size_changed);
 
         disable_scroll_reroute(this);
         this.composer.editor_scrolled.get_vscrollbar().show();
@@ -165,57 +165,57 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
         return true;
     }
 
-    private void on_inner_scroll(Gtk.Adjustment adj) {
-        double delta = adj.value - this.inner_scroll_adj_value;
-        this.inner_scroll_adj_value = adj.value;
-        if (delta != 0 && !this.setting_inner_scroll) {
-            Gtk.Adjustment outer_adj = outer_scroller.vadjustment;
-            outer_adj.set_value(outer_adj.value + delta);
-        }
-    }
+    // private void on_inner_scroll(Gtk.Adjustment adj) {
+    //     double delta = adj.value - this.inner_scroll_adj_value;
+    //     this.inner_scroll_adj_value = adj.value;
+    //     if (delta != 0 && !this.setting_inner_scroll) {
+    //         Gtk.Adjustment outer_adj = outer_scroller.vadjustment;
+    //         outer_adj.set_value(outer_adj.value + delta);
+    //     }
+    // }
 
-    private void on_adjust_changed(Gtk.Adjustment adj) {
-        if (this.scrolled_to_bottom) {
-            this.setting_inner_scroll = true;
-            adj.set_value(adj.upper);
-            this.setting_inner_scroll = false;
-        }
-    }
+    // private void on_adjust_changed(Gtk.Adjustment adj) {
+    //     if (this.scrolled_to_bottom) {
+    //         this.setting_inner_scroll = true;
+    //         adj.set_value(adj.upper);
+    //         this.setting_inner_scroll = false;
+    //     }
+    // }
 
-    private void on_inner_size_changed() {
-        this.scrolled_to_bottom = false;  // The inserted character may cause a desired scroll
-        Idle.add(recalc_height);  // So that this runs after the character has been inserted
-    }
+    // private void on_inner_size_changed() {
+    //     this.scrolled_to_bottom = false;  // The inserted character may cause a desired scroll
+    //     Idle.add(recalc_height);  // So that this runs after the character has been inserted
+    // }
 
     private bool recalc_height() {
-        int view_height,
-            base_height = get_allocated_height() - this.composer.editor.get_allocated_height();
-        try {
-            view_height = (int) this.composer.editor.get_dom_document()
-                .query_selector("#message-body").offset_height;
-        } catch (Error error) {
-            debug("Error getting height of editor: %s", error.message);
-            return Source.REMOVE;
-        }
+        // int view_height,
+        //     base_height = get_allocated_height() - this.composer.editor.get_allocated_height();
+        // try {
+        //     view_height = (int) this.composer.editor.get_dom_document()
+        //         .query_selector("#message-body").offset_height;
+        // } catch (Error error) {
+        //     debug("Error getting height of editor: %s", error.message);
+        //     return Source.REMOVE;
+        // }
 
-        if (view_height != inner_view_height || min_height != base_height + MIN_EDITOR_HEIGHT) {
-            this.inner_view_height = view_height;
-            this.min_height = base_height + MIN_EDITOR_HEIGHT;
+        // if (view_height != inner_view_height || min_height != base_height + MIN_EDITOR_HEIGHT) {
+        //     this.inner_view_height = view_height;
+        //     this.min_height = base_height + MIN_EDITOR_HEIGHT;
 
-            // Calculate height widget should be to avoid scrolling in editor
-            int widget_height = int.max(view_height + base_height - 2, min_height); //? about 2
+        //     // Calculate height widget should be to avoid scrolling in editor
+        //     int widget_height = int.max(view_height + base_height - 2, min_height); //? about 2
 
-            // XXX Clamp the widget height to something arbitrary for
-            // the same reasons as in
-            // ConversationWebView::get_preferred_height, to avoid a
-            // crash. See Bug 765516 and Bug 728002.
-            const int MAX_HEIGHT = 5000;
-            if (widget_height > MAX_HEIGHT) {
-                widget_height = MAX_HEIGHT;
-            }
+        //     // XXX Clamp the widget height to something arbitrary for
+        //     // the same reasons as in
+        //     // ConversationWebView::get_preferred_height, to avoid a
+        //     // crash. See Bug 765516 and Bug 728002.
+        //     const int MAX_HEIGHT = 5000;
+        //     if (widget_height > MAX_HEIGHT) {
+        //         widget_height = MAX_HEIGHT;
+        //     }
 
-            set_size_request(-1, widget_height);
-        }
+        //     set_size_request(-1, widget_height);
+        // }
         return Source.REMOVE;
     }
 

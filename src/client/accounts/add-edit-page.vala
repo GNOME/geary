@@ -178,8 +178,8 @@ public class AddEditPage : Gtk.Box {
     private Gtk.CheckButton check_use_email_signature;
     private Gtk.Stack signature_stack;
     private Gtk.TextView textview_email_signature;
-    private StylishWebView preview_webview;
-    
+    private ClientWebView preview_webview = new ClientWebView(null);
+
     private Gtk.Alignment other_info;
     
     // IMAP info widgets
@@ -271,13 +271,12 @@ public class AddEditPage : Gtk.Box {
         edit_window.set_shadow_type(Gtk.ShadowType.IN);
         textview_email_signature = new Gtk.TextView();
         edit_window.add(textview_email_signature);
-        
+
         Gtk.ScrolledWindow preview_window = new Gtk.ScrolledWindow(null, null);
         preview_window.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC);
         preview_window.set_shadow_type(Gtk.ShadowType.IN);
-        preview_webview = new StylishWebView();
         preview_window.add(preview_webview);
-        
+
         signature_stack = new Gtk.Stack();
         signature_stack.add_titled(edit_window, "edit_window", _("Edit"));
         signature_stack.child_set_property(edit_window, "icon-name", "text-editor-symbolic");
@@ -596,7 +595,7 @@ public class AddEditPage : Gtk.Box {
     
     private void on_signature_stack_changed() {
         if (signature_stack.visible_child_name == "preview_window")
-            preview_webview.load_html_string(Util.DOM.smart_escape(email_signature, true), "");
+            preview_webview.load_html(Geary.HTML.smart_escape(email_signature, true), null);
     }
 
     private uint16 get_default_smtp_port() {
