@@ -12,7 +12,7 @@ msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=internationalization\n"
-"POT-Creation-Date: 2016-10-03 23:47+0000\n"
+"POT-Creation-Date: 2016-10-04 19:44+0000\n"
 "PO-Revision-Date: 2016-10-04 14:27+0200\n"
 "Last-Translator: Marek Černocký <marek@manet.cz>\n"
 "Language-Team: čeština <gnome-cs-list@gnome.org>\n"
@@ -738,7 +738,6 @@ msgstr[1] "Chcete trvale smazat tyto zprávy?"
 msgstr[2] "Chcete trvale smazat tyto zprávy?"
 
 #: ../src/client/application/geary-controller.vala:2419
-#: ../ui/gtk/help-overlay.ui.h:33
 msgid "Delete"
 msgstr "Smazat"
 
@@ -782,7 +781,6 @@ msgstr "%s (%d)"
 #: ../src/client/components/search-bar.vala:8
 #: ../src/client/folder-list/folder-list-search-branch.vala:38
 #: ../src/engine/api/geary-special-folder-type.vala:51
-#: ../ui/gtk/help-overlay.ui.h:10
 msgid "Search"
 msgstr "Hledat"
 
@@ -1524,7 +1522,6 @@ msgid "Outbox"
 msgstr "K odeslání"
 
 #: ../src/engine/api/geary-special-folder-type.vala:54
-#: ../ui/gtk/help-overlay.ui.h:19
 msgid "Archive"
 msgstr "Archiv"
 
@@ -2061,126 +2058,172 @@ msgid "Conversation Shortcuts"
 msgstr "Klávesové zkratky konverzace"
 
 #: ../ui/gtk/help-overlay.ui.h:2
+msgctxt "shortcut window"
 msgid "General"
 msgstr "Obecné"
 
 #: ../ui/gtk/help-overlay.ui.h:3
+msgctxt "shortcut window"
 msgid "Move focus to the next/previous pane"
 msgstr "Přesunout zaměření na následující/předchozí panel"
 
 #: ../ui/gtk/help-overlay.ui.h:4
+msgctxt "shortcut window"
 msgid "Move focus to conversation list"
 msgstr "Přesunout zaměření na seznam konverzací"
 
 #: ../ui/gtk/help-overlay.ui.h:5
+msgctxt "shortcut window"
 msgid "Detach composer window"
 msgstr "Odpojit okno pro psaní zprávy"
 
 #: ../ui/gtk/help-overlay.ui.h:6
+msgctxt "shortcut window"
 msgid "Close composer window"
 msgstr "Zavřít okno pro psaní zprávy"
 
 #: ../ui/gtk/help-overlay.ui.h:7
+msgctxt "shortcut window"
 msgid "Show keyboard shortcuts"
 msgstr "Zobrazit klávesové zkratky"
 
 #: ../ui/gtk/help-overlay.ui.h:8
+msgctxt "shortcut window"
 msgid "Show help"
 msgstr "Zobrazit nápovědu"
 
 #: ../ui/gtk/help-overlay.ui.h:9
+msgctxt "shortcut window"
 msgid "Quit the application"
 msgstr "Ukončit aplikaci"
 
+#: ../ui/gtk/help-overlay.ui.h:10
+msgctxt "shortcut window"
+msgid "Search"
+msgstr "Hledat"
+
 #: ../ui/gtk/help-overlay.ui.h:11
+msgctxt "shortcut window"
 msgid "Jump to search box"
 msgstr "Přejít do vyhledávacího pole"
 
 #: ../ui/gtk/help-overlay.ui.h:12
+msgctxt "shortcut window"
 msgid "Find in current conversation"
 msgstr "Najít v aktuální konverzaci"
 
 #: ../ui/gtk/help-overlay.ui.h:13
+msgctxt "shortcut window"
 msgid "Find next/previous in current conversation"
 msgstr "Najít následující/předchozí v aktuální konverzaci"
 
 #: ../ui/gtk/help-overlay.ui.h:14
+msgctxt "shortcut window"
 msgid "Actions"
 msgstr "Činnosti"
 
 #: ../ui/gtk/help-overlay.ui.h:15
+msgctxt "shortcut window"
 msgid "Compose a new message"
 msgstr "Napsat novou zprávu"
 
 #: ../ui/gtk/help-overlay.ui.h:16
+msgctxt "shortcut window"
 msgid "Reply to sender "
 msgstr "Odpovědět odesilateli"
 
 #: ../ui/gtk/help-overlay.ui.h:17
+msgctxt "shortcut window"
 msgid "Reply to all"
 msgstr "Odpovědět všem"
 
 #: ../ui/gtk/help-overlay.ui.h:18
+msgctxt "shortcut window"
 msgid "Forward"
 msgstr "Přeposlat"
 
+#: ../ui/gtk/help-overlay.ui.h:19
+msgctxt "shortcut window"
+msgid "Archive"
+msgstr "Archivovat"
+
 #: ../ui/gtk/help-overlay.ui.h:20
+msgctxt "shortcut window"
 msgid "Move to trash"
 msgstr "Přesunout do koše"
 
 #: ../ui/gtk/help-overlay.ui.h:21
+msgctxt "shortcut window"
 msgid "Toggle spam"
 msgstr "Přepnout příznak nevyžadné zprávy"
 
 #: ../ui/gtk/help-overlay.ui.h:22
+msgctxt "shortcut window"
 msgid "Move the conversation"
 msgstr "Přesunout konverzaci"
 
 #: ../ui/gtk/help-overlay.ui.h:23
+msgctxt "shortcut window"
 msgid "Label the conversation"
 msgstr "Přidat konverzaci štítek"
 
 #: ../ui/gtk/help-overlay.ui.h:24
+msgctxt "shortcut window"
 msgid "Mark read"
 msgstr "Označit jako přečtené"
 
 #: ../ui/gtk/help-overlay.ui.h:25
+msgctxt "shortcut window"
 msgid "Mark unread"
 msgstr "Označit jako nepřečtené"
 
 #: ../ui/gtk/help-overlay.ui.h:26
+msgctxt "shortcut window"
 msgid "View"
 msgstr "Zobrazení"
 
 #: ../ui/gtk/help-overlay.ui.h:27
+msgctxt "shortcut window"
 msgid "Zoom in"
 msgstr "Přiblížit"
 
 #: ../ui/gtk/help-overlay.ui.h:28
+msgctxt "shortcut window"
 msgid "Zoom out"
 msgstr "Oddálit"
 
 #: ../ui/gtk/help-overlay.ui.h:29
+msgctxt "shortcut window"
 msgid "Reset zoom"
 msgstr "Výchozí přiblížení"
 
 #: ../ui/gtk/help-overlay.ui.h:30
+msgctxt "shortcut window"
 msgid "Additional Shortcuts"
 msgstr "Další klávesové zkratky"
 
 #: ../ui/gtk/help-overlay.ui.h:31
+msgctxt "shortcut window"
 msgid "Star"
 msgstr "Označit hvězdičkou"
 
 #: ../ui/gtk/help-overlay.ui.h:32
+msgctxt "shortcut window"
 msgid "Unstar"
 msgstr "Odebrat hvězdičku"
 
+#: ../ui/gtk/help-overlay.ui.h:33
+msgctxt "shortcut window"
+msgid "Delete"
+msgstr "Smazat"
+
 #: ../ui/gtk/help-overlay.ui.h:34
+msgctxt "shortcut window"
 msgid "Jump to next (older) conversation"
 msgstr "Přejít na následující (starší) konverzaci"
 
 #: ../ui/gtk/help-overlay.ui.h:35
+msgctxt "shortcut window"
 msgid "Jump to previous (newer) conversation"
 msgstr "Přejít na předchozí (novější) konverzaci"
 
@@ -2189,46 +2232,57 @@ msgid "Composer Shortcuts"
 msgstr "Klávesové zkratky editoru"
 
 #: ../ui/gtk/help-overlay.ui.h:37
+msgctxt "shortcut window"
 msgid "Quote text"
 msgstr "Citovat text"
 
 #: ../ui/gtk/help-overlay.ui.h:38
+msgctxt "shortcut window"
 msgid "Unquote text"
 msgstr "Zrušit citaci textu"
 
 #: ../ui/gtk/help-overlay.ui.h:39
+msgctxt "shortcut window"
 msgid "Send"
 msgstr "Odeslat"
 
 #: ../ui/gtk/help-overlay.ui.h:40
+msgctxt "shortcut window"
 msgid "Add attachment"
 msgstr "Přidat přílohu"
 
 #: ../ui/gtk/help-overlay.ui.h:41
+msgctxt "shortcut window"
 msgid "Rich text mode"
 msgstr "Režim formátovaného textu"
 
 #: ../ui/gtk/help-overlay.ui.h:42
+msgctxt "shortcut window"
 msgid "Bold text"
 msgstr "Tučný text"
 
 #: ../ui/gtk/help-overlay.ui.h:43
+msgctxt "shortcut window"
 msgid "Italicize text"
 msgstr "Kurzíva"
 
 #: ../ui/gtk/help-overlay.ui.h:44
+msgctxt "shortcut window"
 msgid "Underline text"
 msgstr "Podtržený text"
 
 #: ../ui/gtk/help-overlay.ui.h:45
+msgctxt "shortcut window"
 msgid "Strike text"
 msgstr "Přeškrtnutý text"
 
 #: ../ui/gtk/help-overlay.ui.h:46
+msgctxt "shortcut window"
 msgid "Insert a link"
 msgstr "Vložit odkaz"
 
 #: ../ui/gtk/help-overlay.ui.h:47
+msgctxt "shortcut window"
 msgid "Remove formatting"
 msgstr "Odstranit formátování"
 
