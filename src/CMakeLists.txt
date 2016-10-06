@@ -497,7 +497,7 @@ pkg_check_modules(DEPS REQUIRED
     libxml-2.0>=2.7.8
     gcr-3>=3.10.1
     gobject-introspection-1.0
-    webkitgtk-3.0>=2.4.0
+    webkit2gtk-4.0>=2.6
     enchant>=1.6
     ${EXTRA_CLIENT_PKG_CONFIG}
 )
@@ -531,7 +531,7 @@ set(CLIENT_PACKAGES
   libnotify
   libsecret-1
   libsoup-2.4
-  webkitgtk-3.0
+  webkit2gtk-4.0
   ${EXTRA_CLIENT_PACKAGES}
 )
 
@@ -582,9 +582,6 @@ else ()
     message(STATUS "POODLE SSLv3 fix: ON")
 endif ()
 
-set(WEBKITGTK_METADATA_DIR webkitgtk-2.4)
-set(WEBKITGTK_CUSTOM_VALA webkitgtk-2.4/WebKit-3.0-custom.vala)
-
 set(LIB_PATHS ${DEPS_LIBRARY_DIRS})
 link_directories(${LIB_PATHS})
 add_definitions(${CFLAGS})
@@ -593,7 +590,6 @@ set(VALAC_OPTIONS
     --vapidir=${CMAKE_SOURCE_DIR}/bindings/vapi
     --vapidir=${CMAKE_BINARY_DIR}/src
     --metadatadir=${CMAKE_SOURCE_DIR}/bindings/metadata
-    --metadatadir=${CMAKE_SOURCE_DIR}/bindings/metadata/${WEBKITGTK_METADATA_DIR}
     --target-glib=${TARGET_GLIB}
     --thread
     --debug
@@ -618,20 +614,6 @@ OPTIONS
 add_library(geary-engine STATIC ${ENGINE_VALA_C})
 add_dependencies(geary-engine git-version)
 target_link_libraries(geary-engine m ${DEPS_LIBRARIES} sqlite3-unicodesn)
-
-# WebKitGTK VAPI generation
-#################################################
-add_custom_target(webkitgtk-vapi
-  DEPENDS "${CMAKE_BINARY_DIR}/src/webkitgtk-3.0.vapi"
-)
-add_custom_command(
-    OUTPUT
-        "${CMAKE_BINARY_DIR}/src/webkitgtk-3.0.vapi"
-    WORKING_DIRECTORY
-        "${CMAKE_SOURCE_DIR}/bindings/metadata"
-    COMMAND
-        vapigen --pkg=gio-2.0 --pkg=gtk+-3.0 --pkg=libsoup-2.4 --metadatadir=. --metadatadir=${WEBKITGTK_METADATA_DIR} --library=webkitgtk-3.0 --directory=${CMAKE_BINARY_DIR}/src ${WEBKITGTK_CUSTOM_VALA} `${PKG_CONFIG_EXECUTABLE} --variable=girdir gobject-introspection-1.0`/WebKit-3.0.gir
-)
 
 # Client library (static lib used for building client and unit tests)
 #################################################
