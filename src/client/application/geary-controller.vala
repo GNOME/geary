@@ -1119,7 +1119,7 @@ public class GearyController : Geary.BaseObject {
         // give the user two options: reset the Account local store, or exit Geary.  A third
         // could be done to leave the Account in an unopened state, but we don't currently
         // have provisions for that.
-        AlertDialog dialog = new QuestionDialog(main_window,
+        QuestionDialog dialog = new QuestionDialog(main_window,
             _("Unable to open the database for %s").printf(account.information.id),
             _("There was an error opening the local mail database for this account. This is possibly due to corruption of the database file in this directory:\n\n%s\n\nGeary can rebuild the database and re-synchronize with the server or exit.\n\nRebuilding the database will destroy all local email and its attachments. <b>The mail on the your server will not be affected.</b>")
                 .printf(account.information.data_dir.get_path()),
@@ -1131,10 +1131,10 @@ public class GearyController : Geary.BaseObject {
                 try {
                     yield account.rebuild_async();
                 } catch (Error err) {
-                    dialog = new ErrorDialog(main_window,
+                    ErrorDialog errdialog = new ErrorDialog(main_window,
                         _("Unable to rebuild database for \"%s\"").printf(account.information.id),
                         _("Error during rebuild:\n\n%s").printf(err.message));
-                    dialog.run();
+                    errdialog.run();
                     
                     retry = false;
                 }
@@ -2004,7 +2004,7 @@ public class GearyController : Geary.BaseObject {
         string secondary = _("The file already exists in \"%s\".  Replacing it will overwrite its contents.").printf(
             to_overwrite.get_parent().get_basename());
         
-        ConfirmationDialog dialog = new ConfirmationDialog(main_window, primary, secondary, _("_Replace"));
+        ConfirmationDialog dialog = new ConfirmationDialog(main_window, primary, secondary, _("_Replace"), "destructive-action");
         
         return (dialog.run() == Gtk.ResponseType.OK);
     }
@@ -2347,8 +2347,8 @@ public class GearyController : Geary.BaseObject {
         // Find out what to do with the inline composers.
         // TODO: Remove this in favor of automatically saving drafts
         main_window.present();
-        QuestionDialog dialog = new QuestionDialog(main_window, _("Close open draft messages?"), null,
-            Stock._CLOSE, Stock._CANCEL);
+        ConfirmationDialog dialog = new ConfirmationDialog(main_window, _("Close open draft messages?"), 
+            null, Stock._CLOSE, "destructive-action");
         if (dialog.run() == Gtk.ResponseType.OK) {
             Gee.List<ComposerWidget> composers_to_destroy = new Gee.ArrayList<ComposerWidget>();
             foreach (ComposerWidget cw in composer_widgets) {
@@ -2472,7 +2472,7 @@ public class GearyController : Geary.BaseObject {
             _("Empty all email from your %s folder?").printf(special_folder_type.get_display_name()),
             _("This removes the email from Geary and your email server.")
                 + "  <b>" + _("This cannot be undone.") + "</b>",
-            _("Empty %s").printf(special_folder_type.get_display_name()));
+            _("Empty %s").printf(special_folder_type.get_display_name()), "destructive-action");
         dialog.use_secondary_markup(true);
         dialog.set_focus_response(Gtk.ResponseType.CANCEL);
         
@@ -2518,10 +2518,10 @@ public class GearyController : Geary.BaseObject {
     
     public bool confirm_delete(int num_messages) {
         main_window.present();
-        AlertDialog dialog = new ConfirmationDialog(main_window, ngettext(
+        ConfirmationDialog dialog = new ConfirmationDialog(main_window, ngettext(
             "Do you want to permanently delete this message?",
             "Do you want to permanently delete these messages?", num_messages),
-            null, _("Delete"));
+            null, _("Delete"), "destructive-action");
         
         return (dialog.run() == Gtk.ResponseType.OK);
     }

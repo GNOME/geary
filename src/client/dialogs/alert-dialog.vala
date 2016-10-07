@@ -7,14 +7,14 @@
 class AlertDialog : Object {
     private Gtk.MessageDialog dialog;
     
-    public AlertDialog(Gtk.Window? parent, Gtk.MessageType message_type, string primary, string? secondary,
+    public AlertDialog(Gtk.Window? parent, Gtk.MessageType message_type, string title, string? description,
         string? ok_button, string? cancel_button, string? tertiary_button,
-        Gtk.ResponseType tertiary_response_type) {
+        Gtk.ResponseType tertiary_response_type, string? ok_action_type) {
         dialog = new Gtk.MessageDialog(parent, Gtk.DialogFlags.DESTROY_WITH_PARENT, message_type,
             Gtk.ButtonsType.NONE, "");
         
-        dialog.text = primary;
-        dialog.secondary_text = secondary;
+        dialog.text = title;
+        dialog.secondary_text = description;
         
         if (!Geary.String.is_empty_or_whitespace(tertiary_button))
             dialog.add_button(tertiary_button, tertiary_response_type);
@@ -22,8 +22,12 @@ class AlertDialog : Object {
         if (!Geary.String.is_empty_or_whitespace(cancel_button))
             dialog.add_button(cancel_button, Gtk.ResponseType.CANCEL);
         
-        if (!Geary.String.is_empty_or_whitespace(ok_button))
-            dialog.add_button(ok_button, Gtk.ResponseType.OK);
+        if (!Geary.String.is_empty_or_whitespace(ok_button)) {
+            Gtk.Widget? button = dialog.add_button(ok_button, Gtk.ResponseType.OK);
+            if (!Geary.String.is_empty_or_whitespace(ok_action_type)) {
+                button.get_style_context().add_class(ok_action_type);
+            }
+        }
     }
     
     public void use_secondary_markup(bool markup) {
@@ -51,24 +55,25 @@ class AlertDialog : Object {
 }
 
 class ConfirmationDialog : AlertDialog {
-    public ConfirmationDialog(Gtk.Window? parent, string primary, string? secondary, string? ok_button) {
-        base (parent, Gtk.MessageType.WARNING, primary, secondary, ok_button, Stock._CANCEL,
-            null, Gtk.ResponseType.NONE);
+    public ConfirmationDialog(Gtk.Window? parent, string title, string? description, 
+        string? ok_button, string? ok_action_type = "") {
+        base (parent, Gtk.MessageType.WARNING, title, description, ok_button, Stock._CANCEL,
+            null, Gtk.ResponseType.NONE, ok_action_type);
     }
 }
 
 class TernaryConfirmationDialog : AlertDialog {
-    public TernaryConfirmationDialog(Gtk.Window? parent, string primary, string? secondary,
-        string? ok_button, string? tertiary_button, Gtk.ResponseType tertiary_response_type) {
-        base (parent, Gtk.MessageType.WARNING, primary, secondary, ok_button,  Stock._CANCEL,
-            tertiary_button, tertiary_response_type);
+    public TernaryConfirmationDialog(Gtk.Window? parent, string title, string? description,
+        string? ok_button, string? tertiary_button, Gtk.ResponseType tertiary_response_type, string? ok_action_type = "") {
+        base (parent, Gtk.MessageType.WARNING, title, description, ok_button, tertiary_button, Stock._CANCEL,
+            tertiary_response_type, ok_action_type);
     }
 }
 
 class ErrorDialog : AlertDialog {
-    public ErrorDialog(Gtk.Window? parent, string primary, string? secondary) {
-        base (parent, Gtk.MessageType.ERROR, primary, secondary, Stock._OK, null, null,
-            Gtk.ResponseType.NONE);
+    public ErrorDialog(Gtk.Window? parent, string title, string? description) {
+        base (parent, Gtk.MessageType.ERROR, title, description, Stock._OK, null, null,
+            Gtk.ResponseType.NONE, null);
     }
 }
 
@@ -77,15 +82,15 @@ class QuestionDialog : AlertDialog {
     
     private Gtk.CheckButton? checkbutton = null;
     
-    public QuestionDialog(Gtk.Window? parent, string primary, string? secondary, string yes_button,
-        string no_button) {
-        base (parent, Gtk.MessageType.QUESTION, primary, secondary, yes_button, no_button, null,
-            Gtk.ResponseType.NONE);
+    public QuestionDialog(Gtk.Window? parent, string title, string? description, 
+        string yes_button, string no_button) {
+        base (parent, Gtk.MessageType.QUESTION, title, description, yes_button, no_button, null,
+            Gtk.ResponseType.NONE, "suggested-action");
     }
     
-    public QuestionDialog.with_checkbox(Gtk.Window? parent, string primary, string? secondary,
+    public QuestionDialog.with_checkbox(Gtk.Window? parent, string title, string? description,
         string yes_button, string no_button, string checkbox_label, bool checkbox_default) {
-        this (parent, primary, secondary, yes_button, no_button);
+        this (parent, title, description, yes_button, no_button);
         
         checkbutton = new Gtk.CheckButton.with_mnemonic(checkbox_label);
         checkbutton.active = checkbox_default;

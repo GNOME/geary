@@ -1168,14 +1168,13 @@ public class ComposerWidget : Gtk.EventBox {
 
         this.container.present();
         AlertDialog dialog;
-
         if (try_to_save) {
             dialog = new TernaryConfirmationDialog(container.top_window,
-                _("Do you want to discard this message?"), null, Stock._KEEP, Stock._DISCARD,
-                Gtk.ResponseType.CLOSE);
+                _("Do you want to discard this message?"), null, Stock._KEEP, Stock._DISCARD, 
+                Gtk.ResponseType.CLOSE, "suggested-action");
         } else {
             dialog = new ConfirmationDialog(container.top_window,
-                _("Do you want to discard this message?"), null, Stock._DISCARD);
+                _("Do you want to discard this message?"), null, Stock._DISCARD, "destructive-action");
         }
 
         Gtk.ResponseType response = dialog.run();
@@ -1352,9 +1351,8 @@ public class ComposerWidget : Gtk.EventBox {
         }
         if (confirmation != null) {
             ConfirmationDialog dialog = new ConfirmationDialog(container.top_window,
-                confirmation, null, Stock._OK);
-            if (dialog.run() != Gtk.ResponseType.OK)
-                return false;
+                confirmation, null, Stock._OK, "suggested-action");
+            return (dialog.run() == Gtk.ResponseType.OK);
         }
         return true;
     }
