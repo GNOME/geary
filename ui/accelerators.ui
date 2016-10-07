@@ -4,8 +4,6 @@
     <accelerator action="GearyCopyMenuButton" />
     <accelerator action="GearyDeleteMessage" />
     <accelerator action="GearyFindInConversation" />
-    <accelerator action="GearyFindNextInConversation" />
-    <accelerator action="GearyFindPreviousInConversation" />
     <accelerator action="GearyForwardMessage" />
     <accelerator action="GearyMoveMenuButton" />
     <accelerator action="GearyNewMessage" />

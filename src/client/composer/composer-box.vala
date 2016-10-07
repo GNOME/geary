@@ -10,37 +10,36 @@
  */
 public class ComposerBox : Gtk.Frame, ComposerContainer {
 
-    private Gee.Set<Geary.App.Conversation>? prev_selection = null;
-
-    protected ComposerWidget composer { get; set; }
-
-    protected Gee.MultiMap<string, string>? old_accelerators { get; set; }
-
     public Gtk.ApplicationWindow top_window {
         get { return (Gtk.ApplicationWindow) get_toplevel(); }
     }
 
+    internal ComposerWidget composer { get; set; }
+
+    protected Gee.MultiMap<string, string>? old_accelerators { get; set; }
+
+    private MainToolbar main_toolbar { get; private set; }
+
+
+    public signal void vanished();
+
+
     public ComposerBox(ComposerWidget composer) {
         this.composer = composer;
+        this.composer.free_header();
+
+        this.main_toolbar = GearyApplication.instance.controller.main_window.main_toolbar;
+
+        get_style_context().add_class("geary-composer-box");
+        this.halign = Gtk.Align.FILL;
+        this.vexpand = true;
+        this.vexpand_set = true;
 
         add(this.composer);
+        this.main_toolbar.set_conversation_header(composer.header);
         this.composer.editor.focus_in_event.connect(on_focus_in);
         this.composer.editor.focus_out_event.connect(on_focus_out);
         show();
-
-        get_style_context().add_class("geary-composer-box");
-
-        if (this.composer.state == ComposerWidget.ComposerState.NEW) {
-            ConversationListView conversation_list_view = ((MainWindow) GearyApplication.
-                instance.controller.main_window).conversation_list_view;
-            this.prev_selection = conversation_list_view.get_selected_conversations();
-            conversation_list_view.get_selection().unselect_all();
-
-            this.composer.free_header();
-            GearyApplication.instance.controller.main_window.main_toolbar.set_conversation_header(
-                composer.header);
-            get_style_context().add_class("geary-full-pane");
-        }
     }
 
     public void remove_composer() {
@@ -55,31 +54,17 @@ public class ComposerBox : Gtk.Frame, ComposerContainer {
 
     public void vanish() {
         hide();
-        parent.hide();
-        if (get_style_context().has_class("geary-full-pane"))
-            GearyApplication.instance.controller.main_window.main_toolbar.remove_conversation_header(
-                composer.header);
-
+        this.main_toolbar.remove_conversation_header(composer.header);
         this.composer.state = ComposerWidget.ComposerState.DETACHED;
         this.composer.editor.focus_in_event.disconnect(on_focus_in);
         this.composer.editor.focus_out_event.disconnect(on_focus_out);
-
-        if (this.prev_selection != null) {
-            ConversationListView conversation_list_view = ((MainWindow) GearyApplication.
-                instance.controller.main_window).conversation_list_view;
-            if (this.prev_selection.is_empty)
-                // Need to trigger "No messages selected"
-                conversation_list_view.conversations_selected(this.prev_selection);
-            else
-                conversation_list_view.select_conversations(this.prev_selection);
-            this.prev_selection = null;
-        }
+        vanished();
     }
 
     public void close_container() {
-        if (visible)
+        if (this.visible)
             vanish();
-        parent.remove(this);
+        destroy();
     }
 }
 

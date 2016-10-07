@@ -14,7 +14,6 @@ public class Configuration {
     public const string FOLDER_LIST_PANE_POSITION_VERTICAL_KEY = "folder-list-pane-position-vertical";
     public const string FOLDER_LIST_PANE_HORIZONTAL_KEY = "folder-list-pane-horizontal";
     public const string MESSAGES_PANE_POSITION_KEY = "messages-pane-position";
-    public const string COMPOSER_PANE_POSITION_KEY = "composer-pane-position";
     public const string AUTOSELECT_KEY = "autoselect";
     public const string DISPLAY_PREVIEW_KEY = "display-preview";
     public const string SPELL_CHECK_KEY = "spell-check";
@@ -62,10 +61,6 @@ public class Configuration {
     public int messages_pane_position {
         get { return settings.get_int(MESSAGES_PANE_POSITION_KEY); }
         set { settings.set_int(MESSAGES_PANE_POSITION_KEY, value); }
-    }
-    
-    public int composer_pane_position {
-        get { return settings.get_int(COMPOSER_PANE_POSITION_KEY); }
     }
     
     public bool autoselect {

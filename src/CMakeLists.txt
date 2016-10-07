@@ -331,8 +331,8 @@ client/accounts/account-spinner-page.vala
 client/accounts/add-edit-page.vala
 client/accounts/login-dialog.vala
 
-client/components/conversation-find-bar.vala
 client/components/count-badge.vala
+client/components/empty-placeholder.vala
 client/components/folder-popover.vala
 client/components/icon-factory.vala
 client/components/main-toolbar.vala
@@ -354,7 +354,6 @@ client/composer/composer-window.vala
 client/composer/contact-entry-completion.vala
 client/composer/contact-list-store.vala
 client/composer/email-entry.vala
-client/composer/scrollable-overlay.vala
 client/composer/spell-check-popover.vala
 client/composer/webview-edit-fixer.vala
 
@@ -363,6 +362,9 @@ client/conversation-list/conversation-list-store.vala
 client/conversation-list/conversation-list-view.vala
 client/conversation-list/formatted-conversation-data.vala
 
+client/conversation-viewer/conversation-email.vala
+client/conversation-viewer/conversation-list-box.vala
+client/conversation-viewer/conversation-message.vala
 client/conversation-viewer/conversation-viewer.vala
 client/conversation-viewer/conversation-web-view.vala
 
@@ -487,6 +489,7 @@ pkg_check_modules(DEPS REQUIRED
     glib-2.0>=${TARGET_GLIB}.0
     gio-2.0>=${TARGET_GLIB}.0
     gtk+-3.0>=3.14.0
+    libsoup-2.4>=2.48
     gee-0.8>=0.8.5
     libnotify>=0.7.5
     libcanberra>=0.28

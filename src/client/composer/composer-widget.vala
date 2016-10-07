@@ -177,9 +177,6 @@ public class ComposerWidget : Gtk.EventBox {
             outline: 0px solid transparent;
             min-height: 100%;
         }
-        .embedded #message-body {
-            min-height: 200px;
-        }
         blockquote {
             margin-top: 0px;
             margin-bottom: 0px;
@@ -274,6 +271,9 @@ public class ComposerWidget : Gtk.EventBox {
 
     public string window_title { get; set; }
 
+    [GtkChild]
+    internal Gtk.ScrolledWindow editor_scrolled;
+
     private ContactListStore? contact_list_store = null;
 
     private string? body_html = null;
@@ -339,8 +339,6 @@ public class ComposerWidget : Gtk.EventBox {
     private Gtk.Label info_label;
     [GtkChild]
     private Gtk.Box message_area;
-    [GtkChild]
-    private Gtk.ScrolledWindow editor_scrolled;
 
     private Menu html_menu;
     private Menu plain_menu;
@@ -378,6 +376,10 @@ public class ComposerWidget : Gtk.EventBox {
     private ComposerContainer container {
         get { return (ComposerContainer) parent; }
     }
+
+
+    public signal void draft_id_changed(Geary.EmailIdentifier id);
+
 
     public ComposerWidget(Geary.Account account, ComposeType compose_type,
         Geary.Email? referred = null, string? quote = null, bool is_referred_draft = false) {
@@ -548,17 +550,6 @@ public class ComposerWidget : Gtk.EventBox {
         chain.append(this.composer_toolbar);
         chain.append(this.attachments_box);
         this.composer_container.set_focus_chain(chain);
-
-        // Remind the conversation viewer of draft ids when it
-        // reloads. Need to use the signal handler's viewer instance
-        // to avoid some sort of ref that is preventing the composer
-        // from being finalised when closed.
-        ConversationViewer conversation_viewer =
-            GearyApplication.instance.controller.main_window.conversation_viewer;
-        conversation_viewer.cleared.connect((viewer) => {
-                if (this.draft_manager != null)
-                    viewer.blacklist_by_id(this.draft_manager.current_draft_id);
-        });
 
         // Don't do this in an overridden version of the destroy
         // method, it somehow ends up in an infinite loop
@@ -1225,6 +1216,18 @@ public class ComposerWidget : Gtk.EventBox {
         Gtk.Widget? focus = this.container.top_window.get_focus();
         this.container.remove_composer();
         ComposerWindow window = new ComposerWindow(this);
+
+        // Workaround a GTK+ crasher, Bug 771812. When the composer is
+        // re-parented, its menu_button's popover keeps a reference to
+        // the conversation window's viewport, so when that is removed
+        // it has a null parent and we crash. To reproduce: Reply
+        // inline, detach the composer, then choose a different
+        // conversation back in the main window. The workaround here
+        // sets a new menu model and hence the menu_button constructs
+        // a new popover.
+        this.actions.change_action_state(ACTION_COMPOSE_AS_HTML,
+            GearyApplication.instance.config.compose_as_html);
+
         this.state = ComposerWidget.ComposerState.DETACHED;
         if (focus != null && focus.parent.visible) {
             ComposerWindow focus_win = focus.get_toplevel() as ComposerWindow;
@@ -1240,7 +1243,7 @@ public class ComposerWidget : Gtk.EventBox {
             return;
         this.container.remove_composer();
         GearyApplication.instance.controller.main_window.conversation_viewer
-            .set_paned_composer(this);
+            .do_compose(this);
         this.state = ComposerWidget.ComposerState.PANED;
     }
 
@@ -1413,8 +1416,7 @@ public class ComposerWidget : Gtk.EventBox {
     }
 
     private void on_draft_id_changed() {
-        GearyApplication.instance.controller.main_window.conversation_viewer.blacklist_by_id(
-            this.draft_manager.current_draft_id);
+        draft_id_changed(this.draft_manager.current_draft_id);
     }
 
     private void on_draft_manager_fatal(Error err) {
@@ -1514,11 +1516,7 @@ public class ComposerWidget : Gtk.EventBox {
         } catch (Error err) {
             // ignored
         }
-        if (this.draft_manager != null)
-            GearyApplication.instance.controller.main_window.conversation_viewer
-                .unblacklist_by_id(this.draft_manager.current_draft_id);
-        
-        this.container.close_container();
+        container.close_container();
     }
 
     private async void discard_and_exit_async() {

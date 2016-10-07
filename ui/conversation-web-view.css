@@ -1,0 +1,182 @@
+/**
+ * Style that is inserted into the message after it is loaded.
+ */
+
+/*
+ * General HTML style.
+ */
+
+* {
+  transition: height 0.25s;
+}
+
+html {
+  /* Trigger CSS 2.1 § 10.6.7 to get a shrink-wrapped height. */
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  bottom: auto !important;
+  width: 100% !important;
+  height: auto !important;
+
+  /* Lock down the box enough so we don't get an incrementally
+     expanding web view */
+  box-sizing: border-box !important;
+  margin: 0 !important;
+  border: 0 !important;
+  padding: 0;
+
+  /* Never show scroll bars */
+  overflow: hidden;
+}
+
+body {
+  margin: 0;
+  border: 0;
+  padding: 12px;
+  overflow-wrap: break-word !important;
+}
+
+table {
+  /* By default, tables reset the font properties to "normal" */
+  font-size: inherit;
+}
+
+a {
+  color: #08c;
+}
+
+hr {
+  background-color: #999;
+  height: 1px;
+  border: 0;
+  margin-top: 15px;
+  margin-bottom: 15px;
+}
+
+blockquote {
+  margin: 0.5em 16px;
+  border: 0;
+  border-left: 3px #aaa solid;
+  padding: 0 8px;
+}
+
+
+pre {
+  white-space: pre-wrap;
+}
+
+/**
+ * Message chrome style.
+ */
+
+.geary_signature {
+    color: #777;
+    display: inline;
+}
+
+.geary_signature a,
+.geary_quote_container a {
+    color: #5fb2e7;
+}
+
+@media screen {
+
+  .geary_replaced_inline_image {
+    display: block;
+    max-width: 100%;
+    margin-top: 1em;
+  }
+
+  /* Inline collapsable quote blocks */
+
+  .geary_quote_container {
+    position: relative;
+    /* Split 1em of top/bottom margin between here and the default
+    blockquote style, so if a message specifies 0px margin and padding
+    (i.e. GMail) there will still be some space space between the
+    container's background and and the blockquote. */
+    margin: 0.5em 0;
+    border-radius: 4px;
+    padding: 0.5em 0;
+    color: #303030;
+    background-color: #e8e8e8;/* recv-quoted */
+  }
+  .geary_sent .geary_quote_container {
+    background-color: #e8e8e8;/* sent-quoted */
+  }
+
+  .geary_quote_container > .quote {
+    position: relative;
+    padding: 0;
+    border: 0;
+    padding: 0;
+    overflow: hidden;
+    z-index: 0;
+  }
+  .geary_quote_container.controllable.hide > .quote {
+    /* Use a fraction value to cut the last visible line off half way. */
+    max-height: 7.75em;
+  }
+
+  .geary_quote_container.controllable > .quote > blockquote {
+    /* Add space between the quote and the hider button */
+    margin-bottom: 18px;
+  }
+
+  .geary_quote_container > .shower,
+  .geary_quote_container > .hider {
+    position: absolute;
+    display: none;
+    left: 0;
+    right: 0;
+    bottom: -8px;
+    z-index: 1;
+    -webkit-user-select: none;
+    -webkit-user-drag: none;
+  }
+
+  .geary_quote_container > .shower > input,
+  .geary_quote_container > .hider > input {
+    width: 100%;
+    height: 16px;
+    padding: 0;
+    font-size: 8px;  /* Absolute size in pixels for graphics */
+    color: #888;
+  }
+  .geary_quote_container > .shower:hover > input,
+  .geary_quote_container > .hider:hover > input {
+    color: #000;
+  }
+
+  .geary_quote_container.controllable.hide > .hider {
+    display: none;
+  }
+  .geary_quote_container.controllable.hide > .shower,
+  .geary_quote_container.controllable > .hider {
+    display: block;
+  }
+
+  /* Highlight search terms */
+
+  .geary_search_coloring *::selection {
+    background-color: #00ddff;
+  }
+}
+
+@media print {
+  body {
+    background-color: white !important;
+  }
+
+  #geary_part_container {
+    display: none !important;
+  }
+  #geary_print_container {
+    display: inline-block !important;
+    background-color: white !important;
+  }
+  #geary_print_container .preview {
+    display: none !important;
+  }
+}

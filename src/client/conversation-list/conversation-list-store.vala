@@ -67,12 +67,22 @@ public class ConversationListStore : Gtk.ListStore {
             return row.get_model().get_iter(out iter, get_path());
         }
     }
-    
-    public Geary.ProgressMonitor preview_monitor { get; private set; default = 
+
+
+    private static int sort_by_date(Gtk.TreeModel model,
+                                    Gtk.TreeIter aiter,
+                                    Gtk.TreeIter biter) {
+        Geary.App.Conversation a, b;
+        model.get(aiter, Column.CONVERSATION_OBJECT, out a);
+        model.get(biter, Column.CONVERSATION_OBJECT, out b);
+        return compare_conversation_ascending(a, b);
+    }
+
+
+    public Geary.App.ConversationMonitor conversations { get; set; }
+    public Geary.ProgressMonitor preview_monitor { get; private set; default =
         new Geary.SimpleProgressMonitor(Geary.ProgressType.ACTIVITY); }
-    public bool is_clearing { get; private set; default = false; }
-    
-    private Geary.App.ConversationMonitor conversation_monitor;
+
     private Gee.HashMap<Geary.App.Conversation, RowWrapper> row_map = new Gee.HashMap<
         Geary.App.Conversation, RowWrapper>();
     private Geary.App.EmailStore? email_store = null;
@@ -84,65 +94,45 @@ public class ConversationListStore : Gtk.ListStore {
     public signal void conversations_added_began();
     
     public signal void conversations_added_finished();
-    
-    public ConversationListStore() {
+
+    public ConversationListStore(Geary.App.ConversationMonitor conversations) {
         set_column_types(Column.get_types());
-        set_default_sort_func(sort_by_date);
+        set_default_sort_func(ConversationListStore.sort_by_date);
         set_sort_column_id(Gtk.SortColumn.DEFAULT, Gtk.SortType.DESCENDING);
-        
+
+        this.conversations = conversations;
+        this.update_id = Timeout.add_seconds_full(
+            Priority.LOW, 60, update_date_strings
+        );
+        this.email_store = new Geary.App.EmailStore(
+            conversations.folder.account
+        );
         GearyApplication.instance.config.settings.changed[Configuration.DISPLAY_PREVIEW_KEY].connect(
             on_display_preview_changed);
-        update_id = Timeout.add_seconds_full(Priority.LOW, 60, update_date_strings);
-        
-        GearyApplication.instance.controller.notify[GearyController.PROP_CURRENT_CONVERSATION].
-            connect(on_conversation_monitor_changed);
+
+        conversations.scan_completed.connect(on_scan_completed);
+        conversations.conversations_added.connect(on_conversations_added);
+        conversations.conversation_removed.connect(on_conversation_removed);
+        conversations.conversation_appended.connect(on_conversation_appended);
+        conversations.conversation_trimmed.connect(on_conversation_trimmed);
+        conversations.email_flags_changed.connect(on_email_flags_changed);
+
+        // add all existing conversations
+        on_conversations_added(conversations.get_conversations());
     }
-    
-    ~ConversationListStore() {
-        if (update_id != 0)
-            Source.remove(update_id);
-        
-        GearyApplication.instance.controller.notify[GearyController.PROP_CURRENT_CONVERSATION].
-            disconnect(on_conversation_monitor_changed);
-    }
-    
-    private void on_conversation_monitor_changed() {
-        is_clearing = true;
-        
-        if (conversation_monitor != null) {
-            conversation_monitor.scan_completed.disconnect(on_scan_completed);
-            conversation_monitor.conversations_added.disconnect(on_conversations_added);
-            conversation_monitor.conversation_removed.disconnect(on_conversation_removed);
-            conversation_monitor.conversation_appended.disconnect(on_conversation_appended);
-            conversation_monitor.conversation_trimmed.disconnect(on_conversation_trimmed);
-            conversation_monitor.email_flags_changed.disconnect(on_email_flags_changed);
-        }
-        
-        cancellable.cancel();
-        cancellable = new Cancellable();
-        
+
+    public void destroy() {
+        this.cancellable.cancel();
         clear();
-        row_map.clear();
-        conversation_monitor = GearyApplication.instance.controller.current_conversations;
-        email_store = null;
-        
-        if (conversation_monitor != null) {
-            email_store = new Geary.App.EmailStore(conversation_monitor.folder.account);
-            
-            // add all existing conversations
-            on_conversations_added(conversation_monitor.get_conversations());
-            
-            conversation_monitor.scan_completed.connect(on_scan_completed);
-            conversation_monitor.conversations_added.connect(on_conversations_added);
-            conversation_monitor.conversation_removed.connect(on_conversation_removed);
-            conversation_monitor.conversation_appended.connect(on_conversation_appended);
-            conversation_monitor.conversation_trimmed.connect(on_conversation_trimmed);
-            conversation_monitor.email_flags_changed.connect(on_email_flags_changed);
+
+        // Release circular refs.
+        this.row_map.clear();
+        if (this.update_id != 0) {
+            Source.remove(this.update_id);
+            this.update_id = 0;
         }
-        
-        is_clearing = false;
     }
-    
+
     public Geary.App.Conversation? get_conversation_at_path(Gtk.TreePath path) {
         Gtk.TreeIter iter;
         if (!get_iter(out iter, path))
@@ -228,7 +218,7 @@ public class ConversationListStore : Gtk.ListStore {
         // the user experience
         Gee.TreeSet<Geary.App.Conversation> sorted_conversations = new Gee.TreeSet<Geary.App.Conversation>(
             compare_conversation_descending);
-        sorted_conversations.add_all(conversation_monitor.get_conversations());
+        sorted_conversations.add_all(this.conversations.get_conversations());
         foreach (Geary.App.Conversation conversation in sorted_conversations) {
             // find oldest unread message for the preview
             Geary.Email? need_preview = null;
@@ -282,12 +272,15 @@ public class ConversationListStore : Gtk.ListStore {
         else
             debug("Unable to find preview for conversation");
     }
-    
+
     private void set_row(Gtk.TreeIter iter, Geary.App.Conversation conversation, Geary.Email preview) {
-        FormattedConversationData conversation_data = new FormattedConversationData(conversation,
-            preview, conversation_monitor.folder,
-            conversation_monitor.folder.account.information.get_all_mailboxes());
-        
+        FormattedConversationData conversation_data = new FormattedConversationData(
+            conversation,
+            preview,
+            this.conversations.folder,
+            this.conversations.folder.account.information.get_all_mailboxes()
+        );
+
         Gtk.TreePath? path = get_path(iter);
         assert(path != null);
         RowWrapper wrapper = new RowWrapper(this, conversation, path);
@@ -452,7 +445,7 @@ public class ConversationListStore : Gtk.ListStore {
     }
     
     private void on_display_preview_changed() {
-        refresh_previews_async.begin(conversation_monitor);
+        refresh_previews_async.begin(this.conversations);
     }
     
     private void on_email_flags_changed(Geary.App.Conversation conversation) {
@@ -461,24 +454,14 @@ public class ConversationListStore : Gtk.ListStore {
         // refresh previews because the oldest unread message is displayed as the preview, and if
         // that's changed, need to change the preview
         // TODO: need support code to load preview for single conversation, not scan all
-        refresh_previews_async.begin(conversation_monitor);
+        refresh_previews_async.begin(this.conversations);
     }
-    
-    private int sort_by_date(Gtk.TreeModel model, Gtk.TreeIter aiter, Gtk.TreeIter biter) {
-        Geary.App.Conversation a, b;
-        
-        get(aiter, Column.CONVERSATION_OBJECT, out a);
-        get(biter, Column.CONVERSATION_OBJECT, out b);
-        
-        return compare_conversation_ascending(a, b);
-    }
-    
+
     private bool update_date_strings() {
         this.foreach(update_date_string);
-        // Keep calling this SourceFunc
-        return true;
+        return Source.CONTINUE;
     }
-    
+
     private bool update_date_string(Gtk.TreeModel model, Gtk.TreePath path, Gtk.TreeIter iter) {
         FormattedConversationData? message_data;
         model.get(iter, Column.CONVERSATION_DATA, out message_data);
@@ -489,5 +472,6 @@ public class ConversationListStore : Gtk.ListStore {
         // Continue iterating, don't stop
         return false;
     }
+
 }
 

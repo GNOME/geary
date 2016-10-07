@@ -22,8 +22,8 @@ src/client/application/geary-config.vala
 src/client/application/geary-controller.vala
 src/client/application/main.vala
 src/client/application/secret-mediator.vala
-src/client/components/conversation-find-bar.vala
 src/client/components/count-badge.vala
+src/client/components/empty-placeholder.vala
 src/client/components/folder-popover.vala
 src/client/components/icon-factory.vala
 src/client/components/main-toolbar.vala
@@ -51,6 +51,9 @@ src/client/conversation-list/conversation-list-cell-renderer.vala
 src/client/conversation-list/conversation-list-store.vala
 src/client/conversation-list/conversation-list-view.vala
 src/client/conversation-list/formatted-conversation-data.vala
+src/client/conversation-viewer/conversation-email.vala
+src/client/conversation-viewer/conversation-list-box.vala
+src/client/conversation-viewer/conversation-message.vala
 src/client/conversation-viewer/conversation-viewer.vala
 src/client/conversation-viewer/conversation-web-view.vala
 src/client/dialogs/alert-dialog.vala
@@ -385,6 +388,12 @@ src/mailer/main.vala
 [type: gettext/glade]ui/composer-headerbar.ui
 [type: gettext/glade]ui/composer-menus.ui
 [type: gettext/glade]ui/composer-widget.ui
+[type: gettext/glade]ui/conversation-email.ui
+[type: gettext/glade]ui/conversation-email-attachment-view.ui
+[type: gettext/glade]ui/conversation-email-menus.ui
+[type: gettext/glade]ui/conversation-message.ui
+[type: gettext/glade]ui/conversation-message-menus.ui
+[type: gettext/glade]ui/conversation-viewer.ui
 [type: gettext/glade]ui/edit_alternate_emails.glade
 [type: gettext/glade]ui/find_bar.glade
 [type: gettext/glade]ui/gtk/help-overlay.ui

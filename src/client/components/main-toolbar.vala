@@ -14,6 +14,7 @@ public class MainToolbar : Gtk.Box {
     public bool show_close_button_left { get; private set; default = true; }
     public bool show_close_button_right { get; private set; default = true; }
     public bool search_open { get; set; default = false; }
+    public bool find_open { get; set; default = false; }
     public int left_pane_width { get; set; }
     
     private PillHeaderbar folder_header;
@@ -106,17 +107,27 @@ public class MainToolbar : Gtk.Box {
         insert.add(conversation_header.create_popover_button("folder-symbolic", move_folder_menu,
             GearyController.ACTION_MOVE_MENU));
         conversation_header.add_start(conversation_header.create_pill_buttons(insert));
-        
+
+        // Archive, undo, find
         insert.clear();
         insert.add(archive_button = conversation_header.create_toolbar_button(null, GearyController.ACTION_ARCHIVE_MESSAGE, true));
         insert.add(trash_delete_button = conversation_header.create_toolbar_button(null, GearyController.ACTION_TRASH_MESSAGE, false));
         Gtk.Box archive_trash_delete = conversation_header.create_pill_buttons(insert);
-        
+
         insert.clear();
         insert.add(conversation_header.create_toolbar_button(null, GearyController.ACTION_UNDO,
             false));
         Gtk.Box undo = conversation_header.create_pill_buttons(insert);
-        
+
+        Gtk.Button find_button = folder_header.create_toggle_button(
+            "preferences-system-search-symbolic", GearyController.ACTION_TOGGLE_FIND);
+        this.bind_property("find-open", find_button, "active",
+            BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
+        insert.clear();
+        insert.add(find_button);
+        Gtk.Box find = conversation_header.create_pill_buttons(insert);
+
+        conversation_header.add_end(find);
         conversation_header.add_end(undo);
         conversation_header.add_end(archive_trash_delete);
         

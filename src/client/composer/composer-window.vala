@@ -10,15 +10,16 @@
  */
 public class ComposerWindow : Gtk.ApplicationWindow, ComposerContainer {
 
-    private bool closing = false;
-
-    protected ComposerWidget composer { get; set; }
-
-    protected Gee.MultiMap<string, string>? old_accelerators { get; set; }
-
     public Gtk.ApplicationWindow top_window {
         get { return this; }
     }
+
+    internal ComposerWidget composer { get; set; }
+
+    protected Gee.MultiMap<string, string>? old_accelerators { get; set; }
+
+    private bool closing = false;
+
 
     public ComposerWindow(ComposerWidget composer) {
         Object(type: Gtk.WindowType.TOPLEVEL);
