@@ -2278,7 +2278,7 @@ public class ComposerWidget : Gtk.EventBox {
             other_account.information.primary_mailbox);
         this.from_multiple.append_text(primary_address.to_rfc822_string());
         this.from_list.add(new FromAddressMap(other_account, primary_address));
-        if (!set_active && from.equal_to(primary_address)) {
+        if (!set_active && this.from.equal_to(primary_address)) {
             this.from_multiple.set_active(this.from_list.size - 1);
             set_active = true;
         }
@@ -2339,11 +2339,11 @@ public class ComposerWidget : Gtk.EventBox {
         this.from_multiple.remove_all();
         this.from_list = new Gee.ArrayList<FromAddressMap>();
 
-        // This is set to true if the current message's from address
-        // has been selected in the ComboBox
-        bool set_active = false;
+        // Always add at least the current account. The var set_active
+        // is set to true if the current message's from address has
+        // been set in the ComboBox.
+        bool set_active = add_account_emails_to_from_list(this.account);
         if (this.compose_type == ComposeType.NEW_MESSAGE) {
-            set_active = add_account_emails_to_from_list(this.account);
             foreach (Geary.AccountInformation info in accounts.values) {
                 try {
                     Geary.Account a = Geary.Engine.instance.get_account_instance(info);
@@ -2356,8 +2356,9 @@ public class ComposerWidget : Gtk.EventBox {
         }
 
         if (!set_active) {
-            // The identity or account that was active before has been removed
-            // use the best we can get now (primary address of the account or any other)
+            // The identity or account that was active before has been
+            // removed use the best we can get now (primary address of
+            // the account or any other)
             this.from_multiple.set_active(0);
         }
 
