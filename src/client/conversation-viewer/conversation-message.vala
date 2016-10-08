@@ -447,11 +447,11 @@ public class ConversationMessage : Gtk.Grid {
             try {
                 InputStream data =
                     yield session.send_async(message, load_cancelled);
-                if (data != null) {
+                if (data != null && message.status_code == 200) {
                     yield set_avatar(data, load_cancelled);
                 }
             } catch (Error err) {
-                debug("Unable to load avatar: %s", err.message);
+                debug("Error loading Gravatar response: %s", err.message);
             }
         }
     }
@@ -783,15 +783,10 @@ public class ConversationMessage : Gtk.Grid {
     }
 
     private async void set_avatar(InputStream data,
-                                  Cancellable load_cancelled) {
-        Gdk.Pixbuf avatar_buf = null;
-        try {
-            avatar_buf = yield Gdk.Pixbuf.new_from_stream_async(
-                data, load_cancelled
-            );
-        } catch (Error err) {
-            debug("Error loading Gravatar response: %s", err.message);
-        }
+                                  Cancellable load_cancelled)
+    throws Error {
+        Gdk.Pixbuf avatar_buf =
+            yield Gdk.Pixbuf.new_from_stream_async(data, load_cancelled);
 
         if (avatar_buf != null && !load_cancelled.is_cancelled()) {
             int window_scale = get_scale_factor();
