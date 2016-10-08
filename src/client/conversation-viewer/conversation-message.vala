@@ -372,7 +372,7 @@ public class ConversationMessage : Gtk.Grid {
         this.preview_date.set_tooltip_text(date_tooltip);
 
         this.preview_body.set_text(
-            Geary.String.reduce_whitespace(this.message.get_preview())
+            Geary.String.reduce_whitespace(this.message.get_preview()) + "…"
         );
 
         // Full headers
