@@ -122,6 +122,18 @@ row.geary-folder-popover-list-row > label {
   font-weight: bold;
 }
 
+.geary-header-value flowboxchild:active {
+  background: mix(@theme_base_color, @theme_bg_color, 0.5);
+}
+
+.geary-header-value flowboxchild:hover {
+  background: @theme_base_color;
+}
+
+.geary-header-value flowboxchild label:not(.geary-primary) {
+  margin-left: 6px;
+}
+
 .geary-submessages .geary-message {
   background-image: linear-gradient(rgba(0,0,0,0.2), @bg_color 6px);
 }

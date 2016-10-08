@@ -80,7 +80,18 @@ public class ConversationMessage : Gtk.Grid {
                 primary.set_text(address.address);
             }
 
-            add(address_parts);
+            // Update prelight state when mouse-overed.
+            Gtk.EventBox events = new Gtk.EventBox();
+            events.add_events(
+                Gdk.EventMask.ENTER_NOTIFY_MASK |
+                Gdk.EventMask.LEAVE_NOTIFY_MASK
+            );
+            events.set_visible_window(false);
+            events.enter_notify_event.connect(on_prelight_in_event);
+            events.leave_notify_event.connect(on_prelight_out_event);
+            events.add(address_parts);
+
+            add(events);
             set_halign(Gtk.Align.START);
             show_all();
         }
@@ -97,6 +108,16 @@ public class ConversationMessage : Gtk.Grid {
 
         public void unmark_search_terms() {
             get_style_context().remove_class(MATCH_CLASS);
+        }
+
+        private bool on_prelight_in_event(Gdk.Event event) {
+            set_state_flags(Gtk.StateFlags.PRELIGHT, false);
+            return Gdk.EVENT_STOP;
+        }
+
+        private bool on_prelight_out_event(Gdk.Event event) {
+            unset_state_flags(Gtk.StateFlags.PRELIGHT);
+            return Gdk.EVENT_STOP;
         }
 
     }
@@ -1253,6 +1274,8 @@ public class ConversationMessage : Gtk.Grid {
                                                 Gtk.FlowBoxChild child) {
         AddressFlowBoxChild address_child = child as AddressFlowBoxChild;
         if (address_child != null) {
+            address_child.set_state_flags(Gtk.StateFlags.ACTIVE, false);
+
             string address = address_child.address.address;
             Menu model = new Menu();
             model.append_section(
@@ -1266,6 +1289,9 @@ public class ConversationMessage : Gtk.Grid {
             Gtk.Popover popover =
             new Gtk.Popover.from_model(child, model);
             popover.set_position(Gtk.PositionType.BOTTOM);
+            popover.closed.connect(() => {
+                    address_child.unset_state_flags(Gtk.StateFlags.ACTIVE);
+                });
             popover.show();
         }
     }
