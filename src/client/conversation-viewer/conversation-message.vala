@@ -681,6 +681,24 @@ public class ConversationMessage : Gtk.Grid {
         return menu;
     }
 
+    private Menu set_action_param_strings(MenuModel existing,
+                                          Gee.Map<string,string> values) {
+        Menu menu = new Menu();
+        for (int i = 0; i < existing.get_n_items(); i++) {
+            MenuItem item = new MenuItem.from_model(existing, i);
+            Variant action = item.get_attribute_value(
+                Menu.ATTRIBUTE_ACTION, VariantType.STRING
+            );
+            string fq_name = action.get_string();
+            string name = fq_name.substring(fq_name.index_of(".") + 1);
+            item.set_action_and_target(
+                fq_name, VariantType.STRING.dup_string(), values[name]
+            );
+            menu.append_item(item);
+        }
+        return menu;
+    }
+
     private string format_originator_preview(string empty_from_text) {
         string text = "";
         if (this.message.from != null && this.message.from.size > 0) {
@@ -1276,18 +1294,21 @@ public class ConversationMessage : Gtk.Grid {
         if (address_child != null) {
             address_child.set_state_flags(Gtk.StateFlags.ACTIVE, false);
 
-            string address = address_child.address.address;
+            Geary.RFC822.MailboxAddress address = address_child.address;
+            Gee.Map<string,string> values = new Gee.HashMap<string,string>();
+            values[ACTION_OPEN_LINK] =
+                Geary.ComposedEmail.MAILTO_SCHEME + address.address;
+            values[ACTION_COPY_EMAIL] = address.get_full_address();
+            values[ACTION_SEARCH_FROM] = address.address;
+
             Menu model = new Menu();
             model.append_section(
-                null, set_action_param_string(
-                    this.context_menu_email, "mailto:" + address
-                    ));
+                null, set_action_param_strings(this.context_menu_email, values)
+            );
             model.append_section(
-                null, set_action_param_string(
-                    this.context_menu_contact, address
-                    ));
-            Gtk.Popover popover =
-            new Gtk.Popover.from_model(child, model);
+                null, set_action_param_strings(this.context_menu_contact, values)
+            );
+            Gtk.Popover popover = new Gtk.Popover.from_model(child, model);
             popover.set_position(Gtk.PositionType.BOTTOM);
             popover.closed.connect(() => {
                     address_child.unset_state_flags(Gtk.StateFlags.ACTIVE);
@@ -1461,11 +1482,12 @@ public class ConversationMessage : Gtk.Grid {
     }
 
     private void on_copy_email_address(Variant? param) {
-        string mailto = param.get_string().substring(
-            Geary.ComposedEmail.MAILTO_SCHEME.length, -1
-        );
+        string value = param.get_string();
+        if (value.has_prefix(Geary.ComposedEmail.MAILTO_SCHEME)) {
+            value = value.substring(Geary.ComposedEmail.MAILTO_SCHEME.length, -1);
+        }
         Gtk.Clipboard clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD);
-        clipboard.set_text(mailto, -1);
+        clipboard.set_text(value, -1);
         clipboard.store();
     }
 
