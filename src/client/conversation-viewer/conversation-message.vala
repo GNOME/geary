@@ -18,30 +18,8 @@
 public class ConversationMessage : Gtk.Grid {
 
 
-    internal static string get_dim_label_colour(Gtk.Widget widget) {
-        return GtkUtil.pango_color_from_theme(
-            widget.get_style_context(), "insensitive_fg_color"
-        );
-    }
+    private const string FROM_CLASS = "geary-from";
 
-    internal static string format_address(Geary.RFC822.MailboxAddress address,
-                                          string dim_colour,
-                                          string weight = "normal") {
-        string markup = "";
-        string name = Geary.HTML.escape_markup(address.name);
-        string addr = Geary.HTML.escape_markup(address.address);
-        if (has_distinct_name(address)) {
-            markup = (
-                "<span weight=\"%s\">%s</span> <span color=\"%s\">%s</span>"
-                .printf(weight, name, dim_colour, addr)
-            );
-        } else {
-            markup = (
-                "<span weight=\"%s\">%s</span>".printf(weight, addr)
-            );
-        }
-        return markup;
-    }
 
     internal static inline bool has_distinct_name(
         Geary.RFC822.MailboxAddress address) {
@@ -56,26 +34,53 @@ public class ConversationMessage : Gtk.Grid {
     // message header Gtk.FlowBox instances.
     private class AddressFlowBoxChild : Gtk.FlowBoxChild {
 
+        private const string PRIMARY_CLASS = "geary-primary";
         private const string MATCH_CLASS = "geary-match";
+
+        public enum Type { FROM, OTHER; }
 
         public Geary.RFC822.MailboxAddress address { get; private set; }
 
         private string search_value;
 
         public AddressFlowBoxChild(Geary.RFC822.MailboxAddress address,
-                                   string markup) {
+                                   Type type = Type.OTHER) {
             this.address = address;
             this.search_value = address.address.casefold();
 
-            Gtk.Label label = new Gtk.Label(null);
-            label.ellipsize = Pango.EllipsizeMode.END;
-            label.set_xalign(0.0f);
-            label.set_markup(markup);
+            // We use two label instances here when address has
+            // distinct parts so we can dim the secondary part, if
+            // any. Ideally, it would be just one label instance in
+            // both cases, but we can't yet include CSS classes in
+            // Pango markup. See Bug 766763.
+
+            Gtk.Grid address_parts = new Gtk.Grid();
+
+            Gtk.Label primary = new Gtk.Label(null);
+            primary.ellipsize = Pango.EllipsizeMode.END;
+            primary.set_xalign(0.0f);
+            primary.get_style_context().add_class(PRIMARY_CLASS);
+            if (type == Type.FROM) {
+                primary.get_style_context().add_class(FROM_CLASS);
+            }
+            address_parts.add(primary);
+
             if (has_distinct_name(address)) {
+                primary.set_text(address.name);
+
+                Gtk.Label secondary = new Gtk.Label(null);
+                secondary.ellipsize = Pango.EllipsizeMode.END;
+                secondary.set_xalign(0.0f);
+                secondary.get_style_context().add_class(Gtk.STYLE_CLASS_DIM_LABEL);
+                secondary.set_text(address.address);
+                address_parts.add(secondary);
+
                 this.search_value = address.name.casefold() + this.search_value;
+            } else {
+                primary.set_text(address.address);
             }
 
-            add(label);
+            add(address_parts);
             set_halign(Gtk.Align.START);
             show_all();
         }
@@ -327,7 +332,8 @@ public class ConversationMessage : Gtk.Grid {
         // when the message has no from address.
         string empty_from = _("No sender");
 
-        this.preview_from.set_markup(format_originator_preview(empty_from));
+        this.preview_from.set_text(format_originator_preview(empty_from));
+        this.preview_from.get_style_context().add_class(FROM_CLASS);
 
         string date_text = "";
         string date_tooltip = "";
@@ -654,45 +660,40 @@ public class ConversationMessage : Gtk.Grid {
         return menu;
     }
 
-    private string format_originator_preview(string empty_from_markup) {
-        string dim_colour = get_dim_label_colour(preview_from);
-        string markup = "";
-
-        // From addresses
+    private string format_originator_preview(string empty_from_text) {
+        string text = "";
         if (this.message.from != null && this.message.from.size > 0) {
             int i = 0;
             Gee.List<Geary.RFC822.MailboxAddress> list =
                 this.message.from.get_all();
             foreach (Geary.RFC822.MailboxAddress addr in list) {
-                markup += format_address(addr, dim_colour, "bold");
+                text += has_distinct_name(addr) ? addr.name : addr.address;
 
                 if (++i < list.size)
                     // Translators: This separates multiple 'from'
                     // addresses in the header preview for a message.
-                    markup += _(", ");
+                    text += _(", ");
             }
         } else {
-            markup = empty_from_markup;
+            text = empty_from_text;
         }
 
-        return markup;
+        return text;
     }
 
-    private void fill_originator_addresses(string empty_from_markup)  {
-        string dim_colour = get_dim_label_colour(this.from);
-
+    private void fill_originator_addresses(string empty_from_text)  {
         // Show any From header addresses
         if (this.message.from != null && this.message.from.size > 0) {
             foreach (Geary.RFC822.MailboxAddress address in this.message.from) {
                 AddressFlowBoxChild child = new AddressFlowBoxChild(
-                    address, format_address(address, dim_colour, "bold")
+                    address, AddressFlowBoxChild.Type.FROM
                 );
                 this.searchable_addresses.add(child);
                 this.from.add(child);
             }
         } else {
             Gtk.Label label = new Gtk.Label(null);
-            label.set_markup(empty_from_markup);
+            label.set_text(empty_from_text);
 
             Gtk.FlowBoxChild child = new Gtk.FlowBoxChild();
             child.add(label);
@@ -706,10 +707,7 @@ public class ConversationMessage : Gtk.Grid {
         if (this.message.sender != null &&
             (this.message.from == null ||
              !this.message.from.contains_normalized(this.message.sender.address))) {
-            AddressFlowBoxChild child = new AddressFlowBoxChild(
-                this.message.sender,
-                format_address(this.message.sender, dim_colour)
-            );
+            AddressFlowBoxChild child = new AddressFlowBoxChild(this.message.sender);
             this.searchable_addresses.add(child);
             this.sender_header.show();
             this.sender_address.add(child);
@@ -721,9 +719,7 @@ public class ConversationMessage : Gtk.Grid {
             foreach (Geary.RFC822.MailboxAddress address in this.message.reply_to) {
                 if (this.message.from == null ||
                     !this.message.from.contains_normalized(address.address)) {
-                    AddressFlowBoxChild child = new AddressFlowBoxChild(
-                        address, format_address(address, dim_colour)
-                    );
+                    AddressFlowBoxChild child = new AddressFlowBoxChild(address);
                     this.searchable_addresses.add(child);
                     this.reply_to_addresses.add(child);
                     this.reply_to_header.show();
@@ -737,11 +733,8 @@ public class ConversationMessage : Gtk.Grid {
         if (addresses != null && addresses.size > 0) {
             Gtk.FlowBox box = header.get_children().nth(0).data as Gtk.FlowBox;
             if (box != null) {
-                string dim_colour = get_dim_label_colour(this);
                 foreach (Geary.RFC822.MailboxAddress address in addresses) {
-                    AddressFlowBoxChild child = new AddressFlowBoxChild(
-                        address, format_address(address, dim_colour)
-                    );
+                    AddressFlowBoxChild child = new AddressFlowBoxChild(address);
                     this.searchable_addresses.add(child);
                     box.add(child);
                 }

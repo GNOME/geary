@@ -118,6 +118,10 @@ row.geary-folder-popover-list-row > label {
   padding: 0;
 }
 
+.geary-headers label.geary-from {
+  font-weight: bold;
+}
+
 .geary-submessages .geary-message {
   background-image: linear-gradient(rgba(0,0,0,0.2), @bg_color 6px);
 }

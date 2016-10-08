@@ -109,19 +109,6 @@ void set_source_color_from_string(Cairo.Context ctx, string spec) {
 }
 
 /**
- * Returns a Pango markup-compatible string for a GTK+ CSS theme color name.
- */
-string pango_color_from_theme(Gtk.StyleContext style, string name) {
-    Gdk.RGBA colour = new Gdk.RGBA();
-    style.lookup_color(name, out colour);
-    return "#%02x%02x%02x".printf(
-        (uint) (256.0 * colour.red),
-        (uint) (256.0 * colour.green),
-        (uint) (256.0 * colour.blue)
-    );
-}
-
-/**
  * This is not bound in Vala < 0.26.
  */
 [CCode(cname = "g_binding_unbind")]
