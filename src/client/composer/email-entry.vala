@@ -42,7 +42,11 @@ public class EmailEntry : Gtk.Entry {
             return;
         modified = true;
 
-        ((ContactEntryCompletion) get_completion()).reset_selection();
+        ContactEntryCompletion? completion = get_completion() as ContactEntryCompletion;
+        if (completion != null) {
+            completion.reset_selection();
+        }
+
         if (Geary.String.is_empty(text.strip())) {
             updating = true;
             addresses = null;
