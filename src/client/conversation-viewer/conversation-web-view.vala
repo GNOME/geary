@@ -68,24 +68,6 @@ public class ConversationWebView : StylishWebView {
         notify["zoom-level"].connect(() => { zoom_level_wrap = zoom_level; });
     }
 
-    // Overridden to get the correct height from get_preferred_height.
-    public new void get_preferred_size(out Gtk.Requisition minimum_size,
-                                       out Gtk.Requisition natural_size) {
-        base.get_preferred_size(out minimum_size, out natural_size);
-
-        int minimum = 0;
-        int natural = 0;
-        get_preferred_height(out minimum, out natural);
-        minimum_size.height = minimum;
-        natural_size.height = natural;
-
-        minimum = 0;
-        natural = 0;
-        get_preferred_width(out minimum, out natural);
-        minimum_size.width = minimum;
-        natural_size.width = natural;
-    }
-
     // Overridden since WebKitGTK+ 2.4.10 at least doesn't want to
     // report a useful height. In combination with the rules from
     // ui/conversation-web-view.css we can get an accurate idea of
