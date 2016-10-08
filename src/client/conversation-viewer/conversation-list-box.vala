@@ -942,17 +942,19 @@ public class ConversationListBox : Gtk.ListBox {
     }
 
     private void on_row_activated(Gtk.ListBoxRow widget) {
-        EmailRow row = (EmailRow) widget;
-        // Allow non-last rows to be expanded/collapsed, but also let
-        // the last row to be expanded since appended sent emails will
-        // be appended last. Finally, don't let rows with active
-        // composers be collapsed.
-        if (row.is_expanded) {
-            if (row != this.last_row) {
-                row.collapse();
+        EmailRow? row = widget as EmailRow;
+        if (row != null) {
+            // Allow non-last rows to be expanded/collapsed, but also let
+            // the last row to be expanded since appended sent emails will
+            // be appended last. Finally, don't let rows with active
+            // composers be collapsed.
+            if (row.is_expanded) {
+                if (row != this.last_row) {
+                    row.collapse();
+                }
+            } else {
+                row.expand();
             }
-        } else {
-            row.expand();
         }
     }
 
