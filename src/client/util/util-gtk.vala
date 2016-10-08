@@ -109,12 +109,6 @@ void set_source_color_from_string(Cairo.Context ctx, string spec) {
 }
 
 /**
- * This is not bound in Vala < 0.26.
- */
-[CCode(cname = "g_binding_unbind")]
-extern void unbind(Binding binding);
-
-/**
  * Set xalign property on Gtk.Label in a compatible way.
  *
  * GtkMisc is being deprecated in GTK+ 3 and the "xalign" property has been moved to GtkLabel.  This

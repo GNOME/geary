@@ -158,7 +158,7 @@ public class MainToolbar : Gtk.Box {
         remove(header);
         header.get_style_context().remove_class("geary-titlebar");
         header.get_style_context().remove_class("geary-titlebar-right");
-        GtkUtil.unbind(guest_header_binding);
+        guest_header_binding.unbind();
         header.show_close_button = false;
         header.decoration_layout = Gtk.Settings.get_default().gtk_decoration_layout;
         conversation_header.show();
