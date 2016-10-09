@@ -170,6 +170,24 @@ public class GearyController : Geary.BaseObject {
         // Ensure all geary windows have an icon
         Gtk.Window.set_default_icon_name("geary");
 
+        // Fix for clients having both:
+        //   * disabled Gtk/ShellShowsAppMenu setting
+        //   * no 'menu' setting in Gtk/DecorationLayout
+        // See https://bugzilla.gnome.org/show_bug.cgi?id=770617
+        Gtk.Settings settings = Gtk.Settings.get_default();
+        assert(settings != null);
+
+        string decoration_layout = settings.gtk_decoration_layout;
+        assert(decoration_layout != null);
+
+        if (!decoration_layout.contains("menu")) {
+            string prefix = "menu:";
+            if (decoration_layout.contains(":")) {
+                prefix = (decoration_layout.has_prefix(":")) ? "menu" : "menu,";
+            }
+            settings.gtk_decoration_layout = prefix + settings.gtk_decoration_layout;
+        }
+
         // Setup actions.
         setup_actions();
         GearyApplication.instance.load_ui_resource("accelerators.ui");
