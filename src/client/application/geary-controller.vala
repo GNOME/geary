@@ -219,7 +219,7 @@ public class GearyController : Geary.BaseObject {
         main_window.folder_list.move_conversation.connect(on_move_conversation);
         main_window.main_toolbar.copy_folder_menu.folder_selected.connect(on_copy_conversation);
         main_window.main_toolbar.move_folder_menu.folder_selected.connect(on_move_conversation);
-        main_window.search_bar.search_text_changed.connect(on_search_text_changed);
+        main_window.search_bar.search_text_changed.connect((text) => { do_search(text); });
         main_window.conversation_viewer.conversation_added.connect(
             on_conversation_view_added
         );
@@ -293,7 +293,6 @@ public class GearyController : Geary.BaseObject {
         main_window.folder_list.move_conversation.disconnect(on_move_conversation);
         main_window.main_toolbar.copy_folder_menu.folder_selected.disconnect(on_copy_conversation);
         main_window.main_toolbar.move_folder_menu.folder_selected.disconnect(on_move_conversation);
-        main_window.search_bar.search_text_changed.disconnect(on_search_text_changed);
         main_window.conversation_viewer.conversation_added.disconnect(
             on_conversation_view_added
         );
@@ -1667,14 +1666,14 @@ public class GearyController : Geary.BaseObject {
 
         old_cancellable.cancel();
     }
-    
+
     private void cancel_search() {
-        Cancellable old_cancellable = cancellable_search;
-        cancellable_search = new Cancellable();
-        
+        Cancellable old_cancellable = this.cancellable_search;
+        this.cancellable_search = new Cancellable();
+
         old_cancellable.cancel();
     }
-    
+
     private void cancel_context_dependent_buttons() {
         Cancellable old_cancellable = cancellable_context_dependent_buttons;
         cancellable_context_dependent_buttons = new Cancellable();
@@ -2724,7 +2723,6 @@ public class GearyController : Geary.BaseObject {
                 mview.search_activated.connect((op, value) => {
                         string search = op + ":" + value;
                         show_search_bar(search);
-                        do_search(search);
                     });
                 return true;
             });
@@ -2896,18 +2894,14 @@ public class GearyController : Geary.BaseObject {
             return;
         
         cancel_search(); // Stop any search in progress.
-        
+
         folder.search(search_text, GearyApplication.instance.config.get_search_strategy(),
-            cancellable_search);
-        
+            this.cancellable_search);
+
         main_window.folder_list.set_search(folder);
         search_text_changed(main_window.search_bar.search_text);
     }
-    
-    private void on_search_text_changed(string search_text) {
-        do_search(search_text);
-    }
-    
+
     /**
      * Returns a read-only set of currently selected conversations.
      */
