@@ -7,8 +7,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: geary-help\n"
-"POT-Creation-Date: 2016-08-19 12:51+0000\n"
-"PO-Revision-Date: 2016-08-19 18:59+0200\n"
+"POT-Creation-Date: 2016-10-03 23:00+0000\n"
+"PO-Revision-Date: 2016-10-09 09:22+0200\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <community-poland@mozilla.org>\n"
 "Language: pl\n"
@@ -263,20 +263,20 @@ msgstr ""
 "key><key>U</key></keyseq>"
 
 #: C/shortcuts.page:59(p)
-msgid "Open the Label Conversation menu"
-msgstr "Otwarcie menu etykiet rozmowy"
+msgid "Move the conversation"
+msgstr "Przeniesienie wątku"
 
-#: C/shortcuts.page:60(key) C/shortcuts.page:170(key)
-msgid "L"
-msgstr "L"
-
-#: C/shortcuts.page:63(p)
-msgid "Open the Move Conversation menu"
-msgstr "Otwarcie menu przenoszenia rozmowy"
-
-#: C/shortcuts.page:64(key)
+#: C/shortcuts.page:60(key)
 msgid "M"
 msgstr "M"
+
+#: C/shortcuts.page:63(p)
+msgid "Label the conversation"
+msgstr "Nadanie etykiety wątkowi"
+
+#: C/shortcuts.page:64(key) C/shortcuts.page:170(key)
+msgid "L"
+msgstr "L"
 
 #: C/shortcuts.page:67(p)
 msgid "Move focus to the next/previous pane"
@@ -291,7 +291,7 @@ msgstr ""
 
 #: C/shortcuts.page:71(p)
 msgid "Move focus to conversation list"
-msgstr "Przejście do listy rozmów"
+msgstr "Przejście do listy wątków"
 
 #: C/shortcuts.page:72(key) C/shortcuts.page:88(key) C/shortcuts.page:104(key)
 #: C/shortcuts.page:108(key) C/shortcuts.page:112(key)
@@ -310,7 +310,7 @@ msgstr "B"
 
 #: C/shortcuts.page:75(p)
 msgid "Jump to next (older) conversation"
-msgstr "Przejście do następnej (starszej) rozmowy"
+msgstr "Przejście do następnego (starszego) wątku"
 
 #: C/shortcuts.page:76(key)
 msgid "J"
@@ -318,7 +318,7 @@ msgstr "J"
 
 #: C/shortcuts.page:79(p)
 msgid "Jump to previous (newer) conversation"
-msgstr "Przejście do poprzedniej (nowszej) rozmowy"
+msgstr "Przejście do poprzedniego (nowszego) wątku"
 
 #: C/shortcuts.page:80(key) C/shortcuts.page:166(key)
 msgid "K"
@@ -378,7 +378,7 @@ msgstr "Przejście do wyszukiwania"
 
 #: C/shortcuts.page:111(p)
 msgid "Find in current conversation"
-msgstr "Wyszukiwanie w obecnej rozmowie"
+msgstr "Wyszukiwanie w obecnym wątku"
 
 #: C/shortcuts.page:112(key)
 msgid "F"
@@ -386,7 +386,7 @@ msgstr "F"
 
 #: C/shortcuts.page:115(p)
 msgid "Find next in current conversation"
-msgstr "Wyszukiwanie następnego wystąpienia w obecnej rozmowie"
+msgstr "Wyszukiwanie następnego wystąpienia w obecnym wątku"
 
 #: C/shortcuts.page:116(key) C/shortcuts.page:120(key)
 msgid "G"
@@ -394,7 +394,7 @@ msgstr "G"
 
 #: C/shortcuts.page:119(p)
 msgid "Find previous in current conversation"
-msgstr "Wyszukiwanie poprzedniego wystąpienia w obecnej rozmowie"
+msgstr "Wyszukiwanie poprzedniego wystąpienia w obecnym wątku"
 
 #: C/shortcuts.page:120(key)
 msgid "Shift"
@@ -928,23 +928,23 @@ msgstr ""
 #. It doesn't matter what you translate it to: it's not used at all.
 #: C/index.page:5(None)
 msgid "@@image: 'figures/geary.svg'; md5=18b50c9e10fe5256ae1cb12aaa3a7600"
-msgstr ""
+msgstr "@@image: 'figures/geary.svg'; md5=18b50c9e10fe5256ae1cb12aaa3a7600"
 
 #: C/index.page:5(title)
 msgid "<media type=\"image\" src=\"figures/geary.svg\"/> Geary"
-msgstr ""
+msgstr "<media type=\"image\" src=\"figures/geary.svg\"/> Geary"
 
 #: C/index.page:9(title)
 msgid "Introduction"
-msgstr ""
+msgstr "Wprowadzenie"
 
 #: C/index.page:13(title)
 msgid "Using Geary"
-msgstr ""
+msgstr "Używanie programu Geary"
 
 #: C/index.page:17(title)
 msgid "Bugs"
-msgstr ""
+msgstr "Błędy"
 
 #: C/bugs.page:8(title)
 msgid "Think you've found a bug?"
