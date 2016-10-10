@@ -84,7 +84,9 @@ public class GearyController : Geary.BaseObject {
     private const int SELECT_FOLDER_TIMEOUT_USEC = 100 * 1000;
     
     private const string PROP_ATTEMPT_OPEN_ACCOUNT = "attempt-open-account";
-    
+
+    public weak GearyApplication application { get; private set; } // circular ref
+
     public MainWindow main_window { get; private set; }
     
     public Geary.App.ConversationMonitor? current_conversations { get; private set; default = null; }
@@ -150,14 +152,18 @@ public class GearyController : Geary.BaseObject {
      * for a brief typmatic delay.
      */
     public signal void search_text_changed(string keywords);
-    
-    public GearyController() {
+
+    /**
+     * Constructs a new instance of the controller.
+     */
+    public GearyController(GearyApplication application) {
+        this.application = application;
     }
-    
+
     ~GearyController() {
         assert(current_account == null);
     }
-    
+
     /**
      * Starts the controller and brings up Geary.
      */
@@ -172,10 +178,10 @@ public class GearyController : Geary.BaseObject {
 
         // Setup actions.
         setup_actions();
-        GearyApplication.instance.load_ui_resource("accelerators.ui");
-        
+        this.application.load_ui_resource("accelerators.ui");
+
         // Listen for attempts to close the application.
-        GearyApplication.instance.exiting.connect(on_application_exiting);
+        this.application.exiting.connect(on_application_exiting);
         
         // Create DB upgrade dialog.
         upgrade_dialog = new UpgradeDialog();
@@ -184,7 +190,7 @@ public class GearyController : Geary.BaseObject {
         // Use a global avatar session because a cache must be used
         // per-session, and we don't want to have to load the cache
         // for each conversation load.
-        File avatar_cache_dir = GearyApplication.instance.get_user_cache_directory()
+        File avatar_cache_dir = this.application.get_user_cache_directory()
             .get_child("avatar_cache");
         this.avatar_cache = new Soup.Cache(
             avatar_cache_dir.get_path(),
@@ -198,7 +204,7 @@ public class GearyController : Geary.BaseObject {
         this.avatar_session.add_feature(avatar_cache);
 
         // Create the main window (must be done after creating actions.)
-        main_window = new MainWindow(GearyApplication.instance);
+        main_window = new MainWindow(this.application);
         main_window.on_shift_key.connect(on_shift_key);
         main_window.notify["has-toplevel-focus"].connect(on_has_toplevel_focus);
         
@@ -251,8 +257,8 @@ public class GearyController : Geary.BaseObject {
 
         // Migrate configuration if necessary.
         try {
-            Migrate.xdg_config_dir(GearyApplication.instance.get_user_data_directory(),
-                GearyApplication.instance.get_user_config_directory());
+            Migrate.xdg_config_dir(this.application.get_user_data_directory(),
+                this.application.get_user_config_directory());
         } catch (Error e) {
             error("Error migrating configuration directories: %s", e.message);
         }
@@ -260,9 +266,9 @@ public class GearyController : Geary.BaseObject {
         // Start Geary.
         try {
             yield Geary.Engine.instance.open_async(
-                GearyApplication.instance.get_user_config_directory(),
-                GearyApplication.instance.get_user_data_directory(),
-                GearyApplication.instance.get_resource_directory(),
+                this.application.get_user_config_directory(),
+                this.application.get_user_data_directory(),
+                this.application.get_resource_directory(),
                 new SecretMediator()
             );
             if (Geary.Engine.instance.get_accounts().size == 0) {
@@ -390,7 +396,7 @@ public class GearyController : Geary.BaseObject {
     }
 
     private void add_accelerator(string accelerator, string action) {
-        GtkUtil.add_accelerator(GearyApplication.instance.ui_manager, GearyApplication.instance.actions,
+        GtkUtil.add_accelerator(this.application.ui_manager, this.application.actions,
             accelerator, action);
     }
 
@@ -556,8 +562,8 @@ public class GearyController : Geary.BaseObject {
             ACTION_TRASH_MESSAGE,
             ACTION_DELETE_MESSAGE,
         };
-        Gtk.ActionGroup action_group = GearyApplication.instance.actions;
-        
+        Gtk.ActionGroup action_group = this.application.actions;
+
         Gtk.ActionEntry[] action_entries = create_actions();
         action_group.add_actions(action_entries, this);
         foreach (Gtk.ActionEntry e in action_entries) {
@@ -567,12 +573,12 @@ public class GearyController : Geary.BaseObject {
             if (e.name in important_actions)
                 action.is_important = true;
         }
-        
+
         Gtk.ToggleActionEntry[] toggle_action_entries = create_toggle_actions();
         action_group.add_toggle_actions(toggle_action_entries, this);
-        GearyApplication.instance.ui_manager.insert_action_group(action_group, 0);
+        this.application.ui_manager.insert_action_group(action_group, 0);
     }
-    
+
     private void open_account(Geary.Account account) {
         account.report_problem.connect(on_report_problem);
         account.email_removed.connect(on_account_email_removed);
@@ -875,8 +881,8 @@ public class GearyController : Geary.BaseObject {
                 options, cancellable);
         } catch (Error err) {
             debug("Error validating account: %s", err.message);
-            GearyApplication.instance.exit(-1); // Fatal error
-            
+            this.application.exit(-1); // Fatal error
+
             return result;
         }
         
@@ -925,8 +931,7 @@ public class GearyController : Geary.BaseObject {
             login_dialog = new LoginDialog();
         } else if (!login_dialog.get_visible()) {
             // If the dialog has been dismissed, exit here.
-            GearyApplication.instance.exit();
-            
+            this.application.exit();
             return null;
         }
         
@@ -938,8 +943,7 @@ public class GearyController : Geary.BaseObject {
             login_dialog.show_spinner(false);
             if (login_dialog.run() != Gtk.ResponseType.OK) {
                 debug("User refused to enter account information. Exiting...");
-                GearyApplication.instance.exit(1);
-                
+                this.application.exit(1);
                 return null;
             }
             
@@ -1140,10 +1144,10 @@ public class GearyController : Geary.BaseObject {
                 retry = false;
             break;
         }
-        
+
         if (!retry)
-            GearyApplication.instance.exit(1);
-        
+            this.application.exit(1);
+
         return retry;
     }
     
@@ -1155,19 +1159,19 @@ public class GearyController : Geary.BaseObject {
             _("There was an error opening the local mail database for this account. This is possibly due to a file permissions problem.\n\nPlease check that you have read/write permissions for all files in this directory:\n\n%s")
                 .printf(account.information.data_dir.get_path()));
         dialog.run();
-        
-        GearyApplication.instance.exit(1);
+
+        this.application.exit(1);
     }
-    
+
     private async void account_database_version_async(Geary.Account account) {
         ErrorDialog dialog = new ErrorDialog(main_window,
             _("Unable to open local mailbox for %s").printf(account.information.id),
             _("The version number of the local mail database is formatted for a newer version of Geary. Unfortunately, the database cannot be \"rolled back\" to work with this version of Geary.\n\nPlease install the latest version of Geary and try again."));
         dialog.run();
-        
-        GearyApplication.instance.exit(1);
+
+        this.application.exit(1);
     }
-    
+
     private async void account_general_error_async(Geary.Account account) {
         // some other problem opening the account ... as with other flow path, can't run
         // Geary today with an account in unopened state, so have to exit
@@ -1175,10 +1179,10 @@ public class GearyController : Geary.BaseObject {
             _("Unable to open local mailbox for %s").printf(account.information.id),
             _("There was an error opening the local account. This is probably due to connectivity issues.\n\nPlease check your network connection and restart Geary."));
         dialog.run();
-        
-        GearyApplication.instance.exit(1);
+
+        this.application.exit(1);
     }
-    
+
     public async void disconnect_account_async(Geary.Account account, Cancellable? cancellable = null) {
         cancel_inbox(account);
         
@@ -1218,7 +1222,7 @@ public class GearyController : Geary.BaseObject {
         // enter a password on their account.)
         try {
             if (get_num_open_accounts() == 0)
-                GearyApplication.instance.exit();
+                this.application.exit();
         } catch (Error e) {
             message("Error enumerating accounts: %s", e.message);
         }
@@ -1295,7 +1299,7 @@ public class GearyController : Geary.BaseObject {
             folder_selected(null);
         } else if (folder != this.current_folder) {
             this.main_window.conversation_viewer.show_loading();
-            GearyApplication.instance.get_action(
+            this.application.get_action(
                 ACTION_FIND_IN_CONVERSATION
             ).set_sensitive(false);
             enable_message_buttons(false);
@@ -1494,7 +1498,7 @@ public class GearyController : Geary.BaseObject {
 
     private void on_conversations_selected(Gee.Set<Geary.App.Conversation> selected) {
         this.selected_conversations = selected;
-        GearyApplication.instance.get_action(
+        this.application.get_action(
             ACTION_FIND_IN_CONVERSATION
             ).set_sensitive(false);
         ConversationViewer viewer = this.main_window.conversation_viewer;
@@ -1515,7 +1519,7 @@ public class GearyController : Geary.BaseObject {
                         try {
                             viewer.load_conversation.end(ret);
                             enable_message_buttons(true);
-                            GearyApplication.instance.get_action(
+                            this.application.get_action(
                                 ACTION_FIND_IN_CONVERSATION
                             ).set_sensitive(true);
                         } catch (Error err) {
@@ -1771,7 +1775,7 @@ public class GearyController : Geary.BaseObject {
                 unstarred_selected = true;
             }
         }
-        var actions = GearyApplication.instance.actions;
+        var actions = this.application.actions;
         actions.get_action(ACTION_MARK_AS_READ).set_visible(unread_selected);
         actions.get_action(ACTION_MARK_AS_UNREAD).set_visible(read_selected);
         actions.get_action(ACTION_MARK_AS_STARRED).set_visible(unstarred_selected);
@@ -1947,7 +1951,7 @@ public class GearyController : Geary.BaseObject {
     }
 
     private void on_attachments_activated(Gee.Collection<Geary.Attachment> attachments) {
-        if (GearyApplication.instance.config.ask_open_attachment) {
+        if (this.application.config.ask_open_attachment) {
             QuestionDialog ask_to_open = new QuestionDialog.with_checkbox(main_window,
                 _("Are you sure you want to open these attachments?"),
                 _("Attachments may cause damage to your system if opened.  Only open files from trusted sources."),
@@ -1956,7 +1960,7 @@ public class GearyController : Geary.BaseObject {
                 return;
             }
             // only save checkbox state if OK was selected
-            GearyApplication.instance.config.ask_open_attachment = !ask_to_open.is_checked;
+            this.application.config.ask_open_attachment = !ask_to_open.is_checked;
         }
 
         foreach (Geary.Attachment attachment in attachments) {
@@ -2267,7 +2271,7 @@ public class GearyController : Geary.BaseObject {
             if (widget.state == ComposerWidget.ComposerState.NEW ||
                 widget.state == ComposerWidget.ComposerState.PANED) {
                 main_window.conversation_viewer.do_compose(widget);
-                GearyApplication.instance.get_action(
+                this.application.get_action(
                     ACTION_FIND_IN_CONVERSATION
                 ).set_sensitive(false);
             } else {
@@ -2378,7 +2382,7 @@ public class GearyController : Geary.BaseObject {
         if (waiting_to_close.remove((ComposerWidget) sender)) {
             // If we just removed the last window in the waiting to close list, it's time to exit!
             if (waiting_to_close.size == 0)
-                GearyApplication.instance.exit();
+                this.application.exit();
         }
     }
     
@@ -2616,15 +2620,15 @@ public class GearyController : Geary.BaseObject {
             revokable.notify[Geary.Revokable.PROP_IN_PROCESS].connect(update_revokable_action);
             revokable.committed.connect(on_revokable_committed);
         }
-        
-        Gtk.Action undo_action = GearyApplication.instance.get_action(ACTION_UNDO);
+
+        Gtk.Action undo_action = this.application.get_action(ACTION_UNDO);
         undo_action.tooltip = (revokable != null && description != null) ? description : _("Undo (Ctrl+Z)");
-        
+
         update_revokable_action();
     }
     
     private void update_revokable_action() {
-        Gtk.Action undo_action = GearyApplication.instance.get_action(ACTION_UNDO);
+        Gtk.Action undo_action = this.application.get_action(ACTION_UNDO);
         undo_action.sensitive = revokable != null && revokable.valid && !revokable.in_process;
     }
     
@@ -2637,9 +2641,9 @@ public class GearyController : Geary.BaseObject {
     private void on_revokable_committed(Geary.Revokable? committed_revokable) {
         if (committed_revokable == null)
             return;
-        
+
         // use existing description
-        Gtk.Action undo_action = GearyApplication.instance.get_action(ACTION_UNDO);
+        Gtk.Action undo_action = this.application.get_action(ACTION_UNDO);
         save_revokable(committed_revokable, undo_action.tooltip);
     }
     
@@ -2759,22 +2763,22 @@ public class GearyController : Geary.BaseObject {
     // Disables all single-message buttons and enables all multi-message buttons.
     public void enable_multiple_message_buttons() {
         update_tooltips();
-        
+
         // Single message only buttons.
-        GearyApplication.instance.actions.get_action(ACTION_REPLY_TO_MESSAGE).sensitive = false;
-        GearyApplication.instance.actions.get_action(ACTION_REPLY_ALL_MESSAGE).sensitive = false;
-        GearyApplication.instance.actions.get_action(ACTION_FORWARD_MESSAGE).sensitive = false;
+        this.application.actions.get_action(ACTION_REPLY_TO_MESSAGE).sensitive = false;
+        this.application.actions.get_action(ACTION_REPLY_ALL_MESSAGE).sensitive = false;
+        this.application.actions.get_action(ACTION_FORWARD_MESSAGE).sensitive = false;
 
         // Mutliple message buttons.
-        GearyApplication.instance.actions.get_action(ACTION_MOVE_MENU).sensitive =
+        this.application.actions.get_action(ACTION_MOVE_MENU).sensitive =
             (current_folder is Geary.FolderSupport.Move);
-        GearyApplication.instance.actions.get_action(ACTION_ARCHIVE_MESSAGE).sensitive =
+        this.application.actions.get_action(ACTION_ARCHIVE_MESSAGE).sensitive =
             (current_folder is Geary.FolderSupport.Archive);
-        GearyApplication.instance.actions.get_action(ACTION_TRASH_MESSAGE).sensitive =
+        this.application.actions.get_action(ACTION_TRASH_MESSAGE).sensitive =
             current_folder_supports_trash();
-        GearyApplication.instance.actions.get_action(ACTION_DELETE_MESSAGE).sensitive =
+        this.application.actions.get_action(ACTION_DELETE_MESSAGE).sensitive =
             (current_folder is Geary.FolderSupport.Remove);
-        
+
         cancel_context_dependent_buttons();
         enable_context_dependent_buttons_async.begin(true, cancellable_context_dependent_buttons);
     }
@@ -2787,19 +2791,19 @@ public class GearyController : Geary.BaseObject {
         bool respond_sensitive = sensitive;
         if (current_folder != null && current_folder.special_folder_type == Geary.SpecialFolderType.DRAFTS)
             respond_sensitive = false;
-        
-        GearyApplication.instance.actions.get_action(ACTION_REPLY_TO_MESSAGE).sensitive = respond_sensitive;
-        GearyApplication.instance.actions.get_action(ACTION_REPLY_ALL_MESSAGE).sensitive = respond_sensitive;
-        GearyApplication.instance.actions.get_action(ACTION_FORWARD_MESSAGE).sensitive = respond_sensitive;
-        GearyApplication.instance.actions.get_action(ACTION_MOVE_MENU).sensitive =
+
+        this.application.actions.get_action(ACTION_REPLY_TO_MESSAGE).sensitive = respond_sensitive;
+        this.application.actions.get_action(ACTION_REPLY_ALL_MESSAGE).sensitive = respond_sensitive;
+        this.application.actions.get_action(ACTION_FORWARD_MESSAGE).sensitive = respond_sensitive;
+        this.application.actions.get_action(ACTION_MOVE_MENU).sensitive =
             sensitive && (current_folder is Geary.FolderSupport.Move);
-        GearyApplication.instance.actions.get_action(ACTION_ARCHIVE_MESSAGE).sensitive = sensitive
+        this.application.actions.get_action(ACTION_ARCHIVE_MESSAGE).sensitive = sensitive
             && (current_folder is Geary.FolderSupport.Archive);
-        GearyApplication.instance.actions.get_action(ACTION_TRASH_MESSAGE).sensitive = sensitive
+        this.application.actions.get_action(ACTION_TRASH_MESSAGE).sensitive = sensitive
             && current_folder_supports_trash();
-        GearyApplication.instance.actions.get_action(ACTION_DELETE_MESSAGE).sensitive = sensitive
+        this.application.actions.get_action(ACTION_DELETE_MESSAGE).sensitive = sensitive
             && (current_folder is Geary.FolderSupport.Remove);
-        
+
         cancel_context_dependent_buttons();
         enable_context_dependent_buttons_async.begin(sensitive, cancellable_context_dependent_buttons);
     }
@@ -2826,29 +2830,29 @@ public class GearyController : Geary.BaseObject {
         Gee.HashSet<Type> supported_operations = new Gee.HashSet<Type>();
         if (selected_operations != null)
             supported_operations.add_all(selected_operations.get_values());
-        
-        GearyApplication.instance.actions.get_action(ACTION_MARK_AS_MENU).sensitive =
+
+        this.application.actions.get_action(ACTION_MARK_AS_MENU).sensitive =
             sensitive && (supported_operations.contains(typeof(Geary.FolderSupport.Mark)));
-        GearyApplication.instance.actions.get_action(ACTION_COPY_MENU).sensitive =
+        this.application.actions.get_action(ACTION_COPY_MENU).sensitive =
             sensitive && (supported_operations.contains(typeof(Geary.FolderSupport.Copy)));
     }
-    
+
     // Updates tooltip text depending on number of conversations selected.
     private void update_tooltips() {
         bool single = selected_conversations.size == 1;
-        
-        GearyApplication.instance.actions.get_action(ACTION_MARK_AS_MENU).tooltip = single ?
+
+        this.application.actions.get_action(ACTION_MARK_AS_MENU).tooltip = single ?
             MARK_MESSAGE_MENU_TOOLTIP_SINGLE : MARK_MESSAGE_MENU_TOOLTIP_MULTIPLE;
-        GearyApplication.instance.actions.get_action(ACTION_COPY_MENU).tooltip = single ?
+        this.application.actions.get_action(ACTION_COPY_MENU).tooltip = single ?
             LABEL_MESSAGE_TOOLTIP_SINGLE : LABEL_MESSAGE_TOOLTIP_MULTIPLE;
-        GearyApplication.instance.actions.get_action(ACTION_MOVE_MENU).tooltip = single ?
+        this.application.actions.get_action(ACTION_MOVE_MENU).tooltip = single ?
             MOVE_MESSAGE_TOOLTIP_SINGLE : MOVE_MESSAGE_TOOLTIP_MULTIPLE;
-        
-        GearyApplication.instance.actions.get_action(ACTION_ARCHIVE_MESSAGE).tooltip = single ?
+
+        this.application.actions.get_action(ACTION_ARCHIVE_MESSAGE).tooltip = single ?
             ARCHIVE_MESSAGE_TOOLTIP_SINGLE : ARCHIVE_MESSAGE_TOOLTIP_MULTIPLE;
-        GearyApplication.instance.actions.get_action(ACTION_TRASH_MESSAGE).tooltip = single ?
+        this.application.actions.get_action(ACTION_TRASH_MESSAGE).tooltip = single ?
             TRASH_MESSAGE_TOOLTIP_SINGLE : TRASH_MESSAGE_TOOLTIP_MULTIPLE;
-        GearyApplication.instance.actions.get_action(ACTION_DELETE_MESSAGE).tooltip = single ?
+        this.application.actions.get_action(ACTION_DELETE_MESSAGE).tooltip = single ?
             DELETE_MESSAGE_TOOLTIP_SINGLE : DELETE_MESSAGE_TOOLTIP_MULTIPLE;
     }
 
@@ -2895,7 +2899,7 @@ public class GearyController : Geary.BaseObject {
         
         cancel_search(); // Stop any search in progress.
 
-        folder.search(search_text, GearyApplication.instance.config.get_search_strategy(),
+        folder.search(search_text, this.application.config.get_search_strategy(),
             this.cancellable_search);
 
         main_window.folder_list.set_search(folder);
@@ -2935,5 +2939,6 @@ public class GearyController : Geary.BaseObject {
             debug("Could not locate inbox: %s", e.message);
         }
     }
+
 }
 

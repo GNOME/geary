@@ -78,7 +78,7 @@ public class GearyApplication : Gtk.Application {
         return true;
     }
     
-    public GearyController controller { get; private set; default = new GearyController(); }
+    public GearyController controller { get; private set; default = new GearyController(this); }
     
     public Gtk.ActionGroup actions {
         get; private set; default = new Gtk.ActionGroup("GearyActionGroup");
