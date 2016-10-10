@@ -191,11 +191,8 @@ public class GearyApplication : Gtk.Application {
         Geary.Logging.init();
         Date.init();
 
-        WebKit.WebContext context = WebKit.WebContext.get_default();
-        context.set_cache_model(WebKit.CacheModel.DOCUMENT_BROWSER);
-
         base.startup();
-        
+
         add_action_entries(action_entries, this);
     }
     

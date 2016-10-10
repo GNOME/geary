@@ -188,6 +188,11 @@ public class GearyController : Geary.BaseObject {
         upgrade_dialog = new UpgradeDialog();
         upgrade_dialog.notify[UpgradeDialog.PROP_VISIBLE_NAME].connect(display_main_window_if_ready);
 
+        // Initialise global WebKit settings
+        WebKit.WebContext context = WebKit.WebContext.get_default();
+        context.set_process_model(WebKit.ProcessModel.SHARED_SECONDARY_PROCESS);
+        context.set_cache_model(WebKit.CacheModel.DOCUMENT_BROWSER);
+
         // Use a global avatar session because a cache must be used
         // per-session, and we don't want to have to load the cache
         // for each conversation load.
