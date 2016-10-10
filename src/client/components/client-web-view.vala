@@ -130,6 +130,24 @@ public class ClientWebView : WebKit.WebView {
         this.zoom_level -= (this.zoom_level * ZOOM_FACTOR);
     }
 
+    internal void handle_cid_request(WebKit.URISchemeRequest request) {
+        const string CID_PREFIX = "cid:";
+
+        string cid = request.get_uri().substring(CID_PREFIX.length);
+        File? file = this.cid_resources[cid];
+        if (file != null) {
+            try {
+                request.finish(file.read(), -1, null);
+            } catch (Error err) {
+                request.finish_error(err);
+            }
+        } else {
+            request.finish_error(
+                new FileError.NOENT("Unknown CID: %s".printf(cid))
+            );
+        }
+    }
+
     // Only allow string-based page loads, and notify but ignore if
     // the user attempts to click on a link. Deny everything else.
     private bool on_decide_policy(WebKit.WebView view,

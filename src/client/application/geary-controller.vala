@@ -192,6 +192,12 @@ public class GearyController : Geary.BaseObject {
         WebKit.WebContext context = WebKit.WebContext.get_default();
         context.set_process_model(WebKit.ProcessModel.SHARED_SECONDARY_PROCESS);
         context.set_cache_model(WebKit.CacheModel.DOCUMENT_BROWSER);
+        context.register_uri_scheme("cid", (req) => {
+                ClientWebView? view = req.get_web_view() as ClientWebView;
+                if (view != null) {
+                    view.handle_cid_request(req);
+                }
+            });
         context.initialize_web_extensions.connect((context) => {
                 context.set_web_extensions_directory(
                     this.application.get_web_extensions_dir().get_path()
