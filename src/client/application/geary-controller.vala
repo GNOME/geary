@@ -192,6 +192,14 @@ public class GearyController : Geary.BaseObject {
         WebKit.WebContext context = WebKit.WebContext.get_default();
         context.set_process_model(WebKit.ProcessModel.SHARED_SECONDARY_PROCESS);
         context.set_cache_model(WebKit.CacheModel.DOCUMENT_BROWSER);
+        context.initialize_web_extensions.connect((context) => {
+                context.set_web_extensions_directory(
+                    this.application.get_web_extensions_dir().get_path()
+                );
+                context.set_web_extensions_initialization_user_data(
+                    new Variant.boolean(Args.log_debug)
+                );
+            });
 
         // Use a global avatar session because a cache must be used
         // per-session, and we don't want to have to load the cache

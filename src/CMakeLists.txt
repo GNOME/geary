@@ -543,7 +543,10 @@ set(CLIENT_PACKAGES
 )
 
 set(WEB_PROCESS_PACKAGES
-    gtk+-3.0 gee-0.8 webkit2gtk-web-extension-4.0
+  geary-engine
+  gee-0.8
+  gtk+-3.0
+  webkit2gtk-web-extension-4.0
 )
 
 set(CONSOLE_PACKAGES
@@ -557,6 +560,7 @@ set(CFLAGS
     ${DEPS_CFLAGS}
     ${DEPS_CFLAGS_OTHER}
     -D_INSTALL_PREFIX=\"${CMAKE_INSTALL_PREFIX}\"
+    -D_BUILD_ROOT_DIR=\"${CMAKE_BINARY_DIR}\"
     -D_SOURCE_ROOT_DIR=\"${CMAKE_SOURCE_DIR}\"
     -D_GSETTINGS_DIR=\"${CMAKE_BINARY_DIR}/gsettings\"
     -DGETTEXT_PACKAGE=\"${GETTEXT_PACKAGE}\"
@@ -624,6 +628,12 @@ OPTIONS
 
 add_library(geary-engine STATIC ${ENGINE_VALA_C})
 add_dependencies(geary-engine git-version)
+# Build the library statically so we can it statically, but make it
+# relocatable so we can link it to the web extension dynamic lib.
+set_property(
+  TARGET geary-engine
+  PROPERTY POSITION_INDEPENDENT_CODE TRUE
+)
 target_link_libraries(geary-engine m ${DEPS_LIBRARIES} sqlite3-unicodesn)
 
 # Client library (static lib used for building client and unit tests)
@@ -683,21 +693,13 @@ vala_precompile(WEB_PROCESS_VALA_C geary-web-process
 PACKAGES
     ${WEB_PROCESS_PACKAGES}
     ${ENGINE_PACKAGES} ## XXX REMOVE ME
-CUSTOM_VAPIS
-    "${CMAKE_BINARY_DIR}/src/geary-static.vapi"
 OPTIONS
     ${VALAC_OPTIONS}
 )
 
-add_library(geary-web-process ${WEB_PROCESS_VALA_C})
-target_link_libraries(geary-web-process ${DEPS_LIBRARIES} gthread-2.0)
-add_custom_command(
-    TARGET
-        geary-web-process
-    POST_BUILD
-    COMMAND
-        ${CMAKE_COMMAND} -E copy geary-console ${CMAKE_BINARY_DIR}/
-)
+add_library(geary-web-process MODULE ${WEB_PROCESS_VALA_C})
+target_link_libraries(geary-web-process PRIVATE ${DEPS_LIBRARIES} geary-engine)
+install(TARGETS geary-web-process LIBRARY DESTINATION lib/geary/web-extensions)
 
 # Console app
 #################################################

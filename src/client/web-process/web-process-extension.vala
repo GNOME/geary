@@ -5,7 +5,35 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
+/**
+ * Initialises GearyWebExtension for WebKit web processes.
+ */
+public void webkit_web_extension_initialize_with_user_data(WebKit.WebExtension extension,
+                                                           Variant data) {
+    bool logging_enabled = data.get_boolean();
 
-public static void webkit_web_extension_initialize (WebKit.WebExtension extension) {
-    // noop for now
+    Geary.Logging.init();
+    if (logging_enabled)
+        Geary.Logging.log_to(stdout);
+
+    debug("Initialising...");
+
+    // Ref it so it doesn't get free'ed right away
+    GearyWebExtension instance = new GearyWebExtension(extension);
+    instance.ref();
+}
+
+/**
+ * A WebExtension that manages Geary-specific behaviours in web processes.
+ */
+public class GearyWebExtension : Object {
+
+
+    private WebKit.WebExtension extension;
+
+
+    public GearyWebExtension(WebKit.WebExtension extension) {
+        this.extension = extension;
+    }
+
 }

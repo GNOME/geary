@@ -8,6 +8,7 @@
 extern const string _INSTALL_PREFIX;
 extern const string _GSETTINGS_DIR;
 extern const string _SOURCE_ROOT_DIR;
+extern const string _BUILD_ROOT_DIR;
 extern const string GETTEXT_PACKAGE;
 
 /**
@@ -27,7 +28,8 @@ public class GearyApplication : Gtk.Application {
     public const string INSTALL_PREFIX = _INSTALL_PREFIX;
     public const string GSETTINGS_DIR = _GSETTINGS_DIR;
     public const string SOURCE_ROOT_DIR = _SOURCE_ROOT_DIR;
-    
+    public const string BUILD_ROOT_DIR = _BUILD_ROOT_DIR;
+
     public const string[] AUTHORS = {
         "Jim Nelson <jim@yorba.org>",
         "Eric Gregory <eric@yorba.org>",
@@ -288,12 +290,27 @@ public class GearyApplication : Gtk.Application {
         else
             return File.new_for_path(SOURCE_ROOT_DIR);
     }
-    
-    // Returns the directory the application is currently executing from.
+
+    /** Returns the directory the application is currently executing from. */
     public File get_exec_dir() {
-        return exec_dir;
+        return this.exec_dir;
     }
-    
+
+    /**
+     * Returns the directory containing the application's WebExtension libs.
+     *
+     * If the application is installed, this will be
+     * `$INSTALL_PREFIX/lib/geary/web-extension`, else it will be
+     */
+    public File get_web_extensions_dir() {
+        File? dir = get_install_dir();
+        if (dir != null)
+            dir = dir.get_child("lib").get_child("geary").get_child("web-extensions");
+        else
+            dir = File.new_for_path(BUILD_ROOT_DIR).get_child("src");
+        return dir;
+    }
+
     public File? get_desktop_file() {
         File? install_dir = get_install_dir();
         File desktop_file = (install_dir != null)

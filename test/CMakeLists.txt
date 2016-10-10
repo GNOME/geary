@@ -28,7 +28,7 @@ pkg_check_modules(DEPS REQUIRED
   gthread-2.0
   gtk+-3.0
   libsoup-2.4
-  webkitgtk-3.0
+  webkit2gtk-4.0
 )
 
 set(TEST_PACKAGES
@@ -40,7 +40,7 @@ set(TEST_PACKAGES
   gmime-2.6
   gtk+-3.0
   libsoup-2.4
-  webkitgtk-3.0
+  webkit2gtk-4.0
 )
 
 set(CFLAGS
