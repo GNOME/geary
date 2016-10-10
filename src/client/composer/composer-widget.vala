@@ -1533,7 +1533,10 @@ public class ComposerWidget : Gtk.EventBox {
                         // attachment instead.
                         if (part.content_id != null) {
                             this.cid_files[part.content_id] = file;
-                            this.editor.add_cid_resource(part.content_id, file);
+                            this.editor.add_cid_resource(
+                                part.content_id,
+                                new Geary.Memory.FileBuffer(file, true)
+                            );
                         } else {
                             type = Geary.Mime.DispositionType.ATTACHMENT;
                         }

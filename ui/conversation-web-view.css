@@ -85,7 +85,7 @@ pre {
   .geary_replaced_inline_image {
     display: block;
     max-width: 100%;
-    margin-top: 1em;
+    margin: 1em 0;
   }
 
   /* Inline collapsable quote blocks */

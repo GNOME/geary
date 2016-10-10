@@ -8,6 +8,8 @@
 public class ClientWebView : WebKit.WebView {
 
 
+    public const string CID_PREFIX = "cid:";
+
     private const double ZOOM_DEFAULT = 1.0;
     private const double ZOOM_FACTOR = 0.1;
 
@@ -52,7 +54,8 @@ public class ClientWebView : WebKit.WebView {
         set { if (zoom_level != (float)value) zoom_level = (float)value; }
     }
 
-    private Gee.Map<string,File> cid_resources = new Gee.HashMap<string,File>();
+    private Gee.Map<string,Geary.Memory.Buffer> cid_resources =
+        new Gee.HashMap<string,Geary.Memory.Buffer>();
 
 
     /** Emitted when a user clicks a link in this web view. */
@@ -90,8 +93,8 @@ public class ClientWebView : WebKit.WebView {
     /**
      * Adds a resource that may be accessed via a cid:id url.
      */
-    public void add_cid_resource(string id, File file) {
-        this.cid_resources[id] = file;
+    public void add_cid_resource(string id, Geary.Memory.Buffer buf) {
+        this.cid_resources[id] = buf;
     }
 
     /**
@@ -131,16 +134,11 @@ public class ClientWebView : WebKit.WebView {
     }
 
     internal void handle_cid_request(WebKit.URISchemeRequest request) {
-        const string CID_PREFIX = "cid:";
-
         string cid = request.get_uri().substring(CID_PREFIX.length);
-        File? file = this.cid_resources[cid];
-        if (file != null) {
-            try {
-                request.finish(file.read(), -1, null);
-            } catch (Error err) {
-                request.finish_error(err);
-            }
+        Geary.Memory.Buffer? buf = this.cid_resources[cid];
+        if (buf != null) {
+            request.finish(buf.get_input_stream(), buf.size, null);
+            attachment_loaded(cid);
         } else {
             request.finish_error(
                 new FileError.NOENT("Unknown CID: %s".printf(cid))

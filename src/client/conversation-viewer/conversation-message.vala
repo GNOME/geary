@@ -19,7 +19,7 @@ public class ConversationMessage : Gtk.Grid {
 
 
     private const string FROM_CLASS = "geary-from";
-    private const string DATA_IMAGE_CLASS = "geary_data_inline_image";
+    private const string REPLACED_CID_TEMPLATE = "replaced_%02u@geary";
     private const string REPLACED_IMAGE_CLASS = "geary_replaced_inline_image";
 
     private const int MAX_PREVIEW_BYTES = Geary.Email.MAX_PREVIEW_BYTES;
@@ -124,21 +124,6 @@ public class ConversationMessage : Gtk.Grid {
             return Gdk.EVENT_STOP;
         }
 
-    }
-
-    // Internal class to associate inline image buffers (replaced by
-    // rotated scaled versions of them) so they can be saved intact if
-    // the user requires it
-    private class ReplacedImage : Geary.BaseObject {
-        public string id;
-        public string filename;
-        public Geary.Memory.Buffer buffer;
-
-        public ReplacedImage(int replaced_number, string filename, Geary.Memory.Buffer buffer) {
-            id = "%X".printf(replaced_number);
-            this.filename = filename;
-            this.buffer = buffer;
-        }
     }
 
     private const string[] INLINE_MIME_TYPES = {
@@ -252,10 +237,6 @@ public class ConversationMessage : Gtk.Grid {
     // Should any remote messages be always loaded and displayed?
     private bool always_load_remote_images;
 
-    private int next_replaced_buffer_number = 0;
-    private Gee.HashMap<string, ReplacedImage> replaced_images = new Gee.HashMap<string, ReplacedImage>();
-    private Gee.HashSet<string> replaced_content_ids = new Gee.HashSet<string>();
-
     // Resource that have been loaded by the web view
     private Gee.Map<string,WebKit.WebResource> resources =
         new Gee.HashMap<string,WebKit.WebResource>();
@@ -265,6 +246,8 @@ public class ConversationMessage : Gtk.Grid {
 
     /** Fired when an attachment is added for inline display. */
     public signal void attachment_displayed_inline(string id);
+    private int next_replaced_buffer_number = 0;
+
 
     /** Fired when the user requests remote images be loaded. */
     public signal void flag_remote_images();
@@ -742,111 +725,20 @@ public class ConversationMessage : Gtk.Grid {
             
             return null;
         }
-        
-        // Even if the image doesn't need to be rotated, there's a win here: by reducing the size
-        // of the image at load time, it reduces the amount of work that has to be done to insert
-        // it into the HTML and then decoded and displayed for the user ... note that we currently
-        // have the doucment set up to reduce the size of the image to fit in the viewport, and a
-        // scaled load-and-deode is always faster than load followed by scale.
-        Geary.Memory.Buffer rotated_image = buffer;
-        string mime_type = content_type.get_mime_type();
-        try {
-            Gdk.PixbufLoader loader = new Gdk.PixbufLoader();
-            loader.size_prepared.connect(on_inline_image_size_prepared);
-            
-            Geary.Memory.UnownedBytesBuffer? unowned_buffer = buffer as Geary.Memory.UnownedBytesBuffer;
-            if (unowned_buffer != null)
-                loader.write(unowned_buffer.to_unowned_uint8_array());
-            else
-                loader.write(buffer.get_uint8_array());
-            loader.close();
-            
-            Gdk.Pixbuf? pixbuf = loader.get_pixbuf();
-            if (pixbuf != null) {
-                pixbuf = pixbuf.apply_embedded_orientation();
-                
-                // trade-off here between how long it takes to compress the data and how long it
-                // takes to turn it into Base-64 (coupled with how long it takes WebKit to then
-                // Base-64 decode and uncompress it)
-                uint8[] image_data;
-                pixbuf.save_to_buffer(out image_data, "png", "compression", "5");
-                
-                // Save length before transferring ownership (which frees the array)
-                int image_length = image_data.length;
-                rotated_image = new Geary.Memory.ByteBuffer.take((owned) image_data, image_length);
-                mime_type = "image/png";
-            }
-        } catch (Error err) {
-            debug("Unable to load and rotate image %s for display: %s", filename, err.message);
+
+        string id = content_id;
+        if (id == null) {
+            id = REPLACED_CID_TEMPLATE.printf(this.next_replaced_buffer_number++);
         }
-        
-        // store so later processing of the message doesn't replace this element with the original
-        // MIME part
-        string? escaped_content_id = null;
-        if (!Geary.String.is_empty(content_id)) {
-            replaced_content_ids.add(content_id);
-            escaped_content_id = Geary.HTML.escape_markup(content_id);
-        }
-        
-        // Store the original buffer and its filename in a local map so they can be recalled later
-        // (if the user wants to save it) ... note that Content-ID is optional and there's no
-        // guarantee that filename will be unique, even in the same message, so need to generate
-        // a unique identifier for each object
-        ReplacedImage replaced_image = new ReplacedImage(next_replaced_buffer_number++, filename,
-            buffer);
-        replaced_images.set(replaced_image.id, replaced_image);
-        
-        return "<img alt=\"%s\" class=\"%s %s\" src=\"%s\" replaced-id=\"%s\" %s />".printf(
+
+        this.web_view.add_cid_resource(id, buffer);
+
+        return "<img alt=\"%s\" class=\"%s\" src=\"%s%s\" />".printf(
             Geary.HTML.escape_markup(filename),
-            DATA_IMAGE_CLASS, REPLACED_IMAGE_CLASS,
-            assemble_data_uri(mime_type, rotated_image),
-            Geary.HTML.escape_markup(replaced_image.id),
-            escaped_content_id != null ? @"cid=\"$escaped_content_id\"" : "");
-    }
-
-    // Returns a URI suitable for an IMG SRC attribute (or elsewhere, potentially) that is the
-    // memory buffer unpacked into a Base-64 encoded data: URI
-    private string assemble_data_uri(string mimetype, Geary.Memory.Buffer buffer) {
-        // attempt to use UnownedBytesBuffer to avoid memcpying a potentially huge buffer only to
-        // free it when the encoding operation is completed
-        string base64;
-        Geary.Memory.UnownedBytesBuffer? unowned_bytes = buffer as Geary.Memory.UnownedBytesBuffer;
-        if (unowned_bytes != null)
-            base64 = Base64.encode(unowned_bytes.to_unowned_uint8_array());
-        else
-            base64 = Base64.encode(buffer.get_uint8_array());
-
-        return "data:%s;base64,%s".printf(mimetype, base64);
-    }
-
-    // Called by Gdk.PixbufLoader when the image's size has been determined but not loaded yet ...
-    // this allows us to load the image scaled down, for better performance when manipulating and
-    // writing the data URI for WebKit
-    private static void on_inline_image_size_prepared(Gdk.PixbufLoader loader, int width, int height) {
-        // easier to use as local variable than have the const listed everywhere in the code
-        // IN ALL SCREAMING CAPS
-        int scale = MAX_INLINE_IMAGE_MAJOR_DIM;
-        
-        // Borrowed liberally from Shotwell's Dimensions.get_scaled() method
-        
-        // check for existing fit
-        if (width <= scale && height <= scale)
-            return;
-        
-        int adj_width, adj_height;
-        if ((width - scale) > (height - scale)) {
-            double aspect = (double) scale / (double) width;
-            
-            adj_width = scale;
-            adj_height = (int) Math.round((double) height * aspect);
-        } else {
-            double aspect = (double) scale / (double) height;
-            
-            adj_width = (int) Math.round((double) width * aspect);
-            adj_height = scale;
-        }
-        
-        loader.set_size(adj_width, adj_height);
+            REPLACED_IMAGE_CLASS,
+            ClientWebView.CID_PREFIX,
+            Geary.HTML.escape_markup(id)
+        );
     }
 
     private void show_images(bool remember) {
@@ -937,18 +829,6 @@ public class ConversationMessage : Gtk.Grid {
     //             short_ += parts[3];
     //     }
     // }
-
-    private ReplacedImage? get_replaced_image() {
-        ReplacedImage? image = null;
-        // string? replaced_id = this.context_menu_element.get_attribute(
-        //     "replaced-id"
-        // );
-        // this.context_menu_element = null;
-        // if (!Geary.String.is_empty(replaced_id)) {
-        //     image = replaced_images.get(replaced_id);
-        // }
-        return image;
-    }
 
     private inline void set_revealer(Gtk.Revealer revealer,
                                      bool expand,
