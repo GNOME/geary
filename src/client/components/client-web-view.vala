@@ -13,6 +13,7 @@ public class ClientWebView : WebKit.WebView {
 
 
     public bool is_loaded { get; private set; default = false; }
+    public string allow_prefix { get; private set; default = ""; }
 
     private string _document_font;
     public string document_font {
@@ -51,8 +52,6 @@ public class ClientWebView : WebKit.WebView {
         set { if (zoom_level != (float)value) zoom_level = (float)value; }
     }
 
-    public string allow_prefix { get; private set; }
-
     private Gee.Map<string,File> cid_resources = new Gee.HashMap<string,File>();
 
 
@@ -70,9 +69,8 @@ public class ClientWebView : WebKit.WebView {
 
         Object(user_content_manager: content_manager, settings: setts);
 
-        this.allow_prefix = random_string(10) + ":";
+        // XXX get the allow prefix from the extension somehow
 
-        this.resource_load_started.connect(on_resource_load_started);
         this.decide_policy.connect(on_decide_policy);
         this.load_changed.connect((web_view, event) => {
                 if (event == WebKit.LoadEvent.FINISHED) {
@@ -89,8 +87,11 @@ public class ClientWebView : WebKit.WebView {
         system_settings.bind("monospace-font-name", this, "monospace-font", SettingsBindFlags.DEFAULT);
     }
 
-    public void add_cid_resource(string cid, File file) {
-        this.cid_resources[cid] = file;
+    /**
+     * Adds a resource that may be accessed via a cid:id url.
+     */
+    public void add_cid_resource(string id, File file) {
+        this.cid_resources[id] = file;
     }
 
     /**
@@ -158,28 +159,6 @@ public class ClientWebView : WebKit.WebView {
             policy.ignore();
         }
         return Gdk.EVENT_STOP;
-    }
-
-    private void on_resource_load_started(WebKit.WebView view,
-                                          WebKit.WebResource resource,
-                                          WebKit.URIRequest request) {
-        const string ABOUT_BLANK = "about:blank";
-        const string CID_PREFIX = "cid:";
-        const string DATA_PREFIX = "data:";
-
-        string? req_uri = request.get_uri();
-        string resp_uri = ABOUT_BLANK;
-        if (req_uri.has_prefix(CID_PREFIX)) {
-            File? file = this.cid_resources[req_uri.substring(CID_PREFIX.length)];
-            if (file != null) {
-                resp_uri = file.get_uri();
-            }
-        } else if (req_uri.has_prefix(this.allow_prefix)) {
-            resp_uri = req_uri.substring(this.allow_prefix.length);
-        } else if (req_uri.has_prefix(DATA_PREFIX)) {
-            resp_uri = req_uri;
-        }
-        request.set_uri(resp_uri);
     }
 
     private bool on_scroll_event(Gdk.EventScroll event) {
