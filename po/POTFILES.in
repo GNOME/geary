@@ -86,7 +86,6 @@ src/client/util/util-gravatar.vala
 src/client/util/util-gtk.vala
 src/client/util/util-international.vala
 src/client/util/util-migrate.vala
-src/client/util/util-random.vala
 src/client/web-process/web-process-extension.vala
 src/client/web-process/util-composer.vala
 src/client/web-process/util-conversation.vala

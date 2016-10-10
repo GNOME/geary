@@ -402,7 +402,6 @@ client/util/util-files.vala
 client/util/util-gravatar.vala
 client/util/util-gtk.vala
 client/util/util-international.vala
-client/util/util-random.vala
 client/util/util-migrate.vala
 )
 
