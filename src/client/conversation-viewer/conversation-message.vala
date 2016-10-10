@@ -244,8 +244,6 @@ public class ConversationMessage : Gtk.Grid {
     // Message-specific actions
     private SimpleActionGroup message_actions = new SimpleActionGroup();
 
-    /** Fired when an attachment is added for inline display. */
-    public signal void attachment_displayed_inline(string id);
     private int next_replaced_buffer_number = 0;
 
 

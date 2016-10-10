@@ -580,11 +580,11 @@ public class ConversationEmail : Gtk.Box {
     }
 
     private void connect_message_view_signals(ConversationMessage view) {
-        view.attachment_displayed_inline.connect((id) => {
-                inlined_content_ids.add(id);
-            });
         view.flag_remote_images.connect(on_flag_remote_images);
         view.remember_remote_images.connect(on_remember_remote_images);
+        view.web_view.inline_resource_loaded.connect((id) => {
+                this.inlined_content_ids.add(id);
+            });
         view.web_view.notify["load-status"].connect(() => {
                 bool all_loaded = true;
                 message_view_iterator().foreach((view) => {

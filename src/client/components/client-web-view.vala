@@ -61,6 +61,9 @@ public class ClientWebView : WebKit.WebView {
     /** Emitted when a user clicks a link in this web view. */
     public signal void link_activated(string uri);
 
+    /** Emitted when the web view has loaded an inline part. */
+    public signal void inline_resource_loaded(string cid);
+
 
     public ClientWebView(WebKit.UserContentManager? content_manager = null) {
         WebKit.Settings setts = new WebKit.Settings();
@@ -138,7 +141,7 @@ public class ClientWebView : WebKit.WebView {
         Geary.Memory.Buffer? buf = this.cid_resources[cid];
         if (buf != null) {
             request.finish(buf.get_input_stream(), buf.size, null);
-            attachment_loaded(cid);
+            inline_resource_loaded(cid);
         } else {
             request.finish_error(
                 new FileError.NOENT("Unknown CID: %s".printf(cid))
