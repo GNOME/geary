@@ -714,13 +714,23 @@ public class ConversationMessage : Gtk.Grid {
         Geary.Mime.ContentDisposition? disposition, string? content_id, Geary.Memory.Buffer buffer) {
         if (content_type == null) {
             debug("Not displaying inline: no Content-Type");
-            
             return null;
         }
-        
-        if (!is_content_type_supported_inline(content_type)) {
+
+        bool is_supported = false;
+        foreach (string mime_type in INLINE_MIME_TYPES) {
+            try {
+                is_supported = content_type.is_mime_type(mime_type);
+            } catch (Error err) {
+                debug("Unable to compare MIME type %s: %s", mime_type, err.message);
+            }
+            if (is_supported) {
+                break;
+            }
+        }
+
+        if (!is_supported) {
             debug("Not displaying %s inline: unsupported Content-Type", content_type.to_string());
-            
             return null;
         }
 
@@ -744,19 +754,6 @@ public class ConversationMessage : Gtk.Grid {
         if (remember) {
             flag_remote_images();
         }
-    }
-
-    private static bool is_content_type_supported_inline(Geary.Mime.ContentType content_type) {
-        foreach (string mime_type in INLINE_MIME_TYPES) {
-            try {
-                if (content_type.is_mime_type(mime_type))
-                    return true;
-            } catch (Error err) {
-                debug("Unable to compare MIME type %s: %s", mime_type, err.message);
-            }
-        }
-
-        return false;
     }
 
     /*
