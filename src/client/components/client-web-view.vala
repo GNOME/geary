@@ -129,6 +129,37 @@ public class ClientWebView : WebKit.WebView {
         this.zoom_level -= (this.zoom_level * ZOOM_FACTOR);
     }
 
+    // Only allow string-based page loads, and notify but ignore if
+    // the user attempts to click on a link. Deny everything else.
+    private bool on_decide_policy(WebKit.WebView view,
+                                  WebKit.PolicyDecision policy,
+                                  WebKit.PolicyDecisionType type) {
+        if (type == WebKit.PolicyDecisionType.NAVIGATION_ACTION) {
+            WebKit.NavigationPolicyDecision nav_policy =
+                (WebKit.NavigationPolicyDecision) policy;
+            switch (nav_policy.get_navigation_type()) {
+            case WebKit.NavigationType.OTHER:
+                // HTML string load, and maybe other random things?
+                policy.use();
+                break;
+
+            case WebKit.NavigationType.LINK_CLICKED:
+                // Let the app know a user activated a link, but don't
+                // try to load it ourselves.
+                link_activated(nav_policy.request.uri);
+                policy.ignore();
+                break;
+
+            default:
+                policy.ignore();
+                break;
+            }
+        } else {
+            policy.ignore();
+        }
+        return Gdk.EVENT_STOP;
+    }
+
     private void on_resource_load_started(WebKit.WebView view,
                                           WebKit.WebResource resource,
                                           WebKit.URIRequest request) {
@@ -149,20 +180,6 @@ public class ClientWebView : WebKit.WebView {
             resp_uri = req_uri;
         }
         request.set_uri(resp_uri);
-    }
-
-    private bool on_decide_policy(WebKit.WebView view,
-                                  WebKit.PolicyDecision policy,
-                                  WebKit.PolicyDecisionType type) {
-        policy.ignore();
-        if (type == WebKit.PolicyDecisionType.NAVIGATION_ACTION) {
-            WebKit.NavigationPolicyDecision nav_policy =
-                (WebKit.NavigationPolicyDecision) policy;
-            if (nav_policy.navigation_action.is_user_gesture()) {
-                link_activated(nav_policy.request.uri);
-            }
-        }
-        return true;
     }
 
     private bool on_scroll_event(Gdk.EventScroll event) {
