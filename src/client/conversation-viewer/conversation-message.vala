@@ -256,6 +256,9 @@ public class ConversationMessage : Gtk.Grid {
     private Gee.HashMap<string, ReplacedImage> replaced_images = new Gee.HashMap<string, ReplacedImage>();
     private Gee.HashSet<string> replaced_content_ids = new Gee.HashSet<string>();
 
+    // Resource that have been loaded by the web view
+    private Gee.Map<string,WebKit.WebResource> resources =
+        new Gee.HashMap<string,WebKit.WebResource>();
 
     // Message-specific actions
     private SimpleActionGroup message_actions = new SimpleActionGroup();
@@ -315,10 +318,8 @@ public class ConversationMessage : Gtk.Grid {
             .activate.connect((param) => {
                 link_activated(param.get_string());
             });
-        add_action(ACTION_SAVE_IMAGE, true).activate.connect((param) => {
-                ReplacedImage? replaced_image = get_replaced_image();
-                save_image(replaced_image.filename, replaced_image.buffer);
-            });
+        add_action(ACTION_SAVE_IMAGE, true, VariantType.STRING)
+            .activate.connect(on_save_image);
         add_action(ACTION_SEARCH_FROM, true, VariantType.STRING)
             .activate.connect((param) => {
                 search_activated("from", param.get_string());
@@ -393,11 +394,13 @@ public class ConversationMessage : Gtk.Grid {
         // Web view
 
         this.web_view = new ConversationWebView();
-        // Suppress default context menu.
         this.web_view.context_menu.connect(on_context_menu);
-        this.web_view.mouse_target_changed.connect(on_mouse_target_changed);
         this.web_view.link_activated.connect((link) => {
                 link_activated(link);
+            });
+        this.web_view.mouse_target_changed.connect(on_mouse_target_changed);
+        this.web_view.resource_load_started.connect((view, res, req) => {
+                this.resources[res.get_uri()] = res;
             });
         //this.web_view.selection_changed.connect(on_selection_changed);
         this.web_view.show();
@@ -407,6 +410,7 @@ public class ConversationMessage : Gtk.Grid {
     }
 
     public override void destroy() {
+        this.resources.clear();
         this.searchable_addresses.clear();
         base.destroy();
     }
@@ -1014,9 +1018,11 @@ public class ConversationMessage : Gtk.Grid {
         }
 
         if (hit_test.context_is_image()) {
-            ReplacedImage image = get_replaced_image();
-            set_action_enabled(ACTION_SAVE_IMAGE, image != null);
-            model.append_section(null, context_menu_image);
+            string uri = hit_test.get_image_uri();
+            set_action_enabled(ACTION_SAVE_IMAGE, uri in this.resources);
+            model.append_section(
+                null, set_action_param_string(context_menu_image, uri)
+            );
         }
 
         model.append_section(null, context_menu_main);
@@ -1127,6 +1133,22 @@ public class ConversationMessage : Gtk.Grid {
         Gtk.Clipboard clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD);
         clipboard.set_text(value, -1);
         clipboard.store();
+    }
+
+    private void on_save_image(Variant? param) {
+        WebKit.WebResource response = this.resources.get(param.get_string());
+        response.get_data.begin(null, (obj, res) => {
+                try {
+                    uint8[] data = response.get_data.end(res);
+                    save_image(response.get_uri(),
+                               new Geary.Memory.ByteBuffer(data, data.length));
+                } catch (Error err) {
+                    debug(
+                        "Failed to get image data from web view: %s",
+                        err.message
+                    );
+                }
+            });
     }
 
 }
