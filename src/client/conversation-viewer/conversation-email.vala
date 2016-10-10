@@ -418,8 +418,23 @@ public class ConversationEmail : Gtk.Box {
             });
         insert_action_group("eml", message_actions);
 
+        // Construct CID resources from attachments
+
+        Gee.Map<string,Geary.Memory.Buffer> cid_resources =
+            new Gee.HashMap<string,Geary.Memory.Buffer>();
+        foreach (Geary.Attachment att in email.attachments) {
+            if (att.content_id != null) {
+                try {
+                    cid_resources[att.content_id] =
+                        new Geary.Memory.FileBuffer(att.file, true);
+                } catch (Error err) {
+                    debug("Could not open attachment: %s", err.message);
+                }
+            }
+        }
+
         // Construct the view for the primary message, hook into it
-        
+
         Geary.RFC822.Message message;
         try {
             message = email.get_message();
@@ -433,6 +448,7 @@ public class ConversationEmail : Gtk.Box {
             contact_store,
             email.load_remote_images().is_certain()
         );
+        this.primary_message.web_view.add_inline_resources(cid_resources);
         connect_message_view_signals(this.primary_message);
 
         this.primary_message.summary.add(this.actions);
@@ -475,6 +491,7 @@ public class ConversationEmail : Gtk.Box {
             ConversationMessage attached_message =
                 new ConversationMessage(sub_message, contact_store, false);
             connect_message_view_signals(attached_message);
+            attached_message.web_view.add_inline_resources(cid_resources);
             this.sub_messages.add(attached_message);
             this._attached_messages.add(attached_message);
         }
@@ -496,11 +513,22 @@ public class ConversationEmail : Gtk.Box {
                     GearyApplication.instance.controller.avatar_session,
                     load_cancelled
                 );
+
                 return !load_cancelled.is_cancelled();
             });
 
+        // Only load attachments once the web views have finished
+        // loading, since we want to know if any attachments marked as
+        // being inline were actually not displayed inline, and hence
+        // need to be displayed as if they were attachments.
         if (!load_cancelled.is_cancelled()) {
-            yield load_attachments(load_cancelled);
+            if (this.message_bodies_loaded) {
+                yield load_attachments(load_cancelled);
+            } else {
+                this.notify["message-bodies-loaded"].connect(() => {
+                        load_attachments.begin(load_cancelled);
+                    });
+            }
         }
     }
 
@@ -636,12 +664,13 @@ public class ConversationEmail : Gtk.Box {
     }
 
     private async void load_attachments(Cancellable load_cancelled) {
-        // Do we have any attachments to be displayed? This relies on
-        // the primary and any attached message bodies having being
-        // already loaded, so that we know which attachments have been
-        // shown inline and hence do not need to be included here.
+        // Determine if we have any attachments to be displayed. This
+        // relies on the primary and any attached message bodies
+        // having being already loaded, so that we know which
+        // attachments have been shown inline and hence do not need to
+        // be included here.
         foreach (Geary.Attachment attachment in email.attachments) {
-            if (!(attachment.content_id in inlined_content_ids)) {
+            if (!(attachment.content_id in this.inlined_content_ids)) {
                 Geary.Mime.DispositionType? disposition = null;
                 if (attachment.content_disposition != null) {
                     disposition = attachment.content_disposition.disposition_type;
@@ -661,6 +690,7 @@ public class ConversationEmail : Gtk.Box {
             }
         }
 
+        // Now we can actually show the attachments, if any
         if (!this.displayed_attachments.is_empty) {
             this.attachments_button.show();
             this.attachments_button.set_sensitive(!this.is_collapsed);

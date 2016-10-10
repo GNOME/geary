@@ -94,10 +94,17 @@ public class ClientWebView : WebKit.WebView {
     }
 
     /**
-     * Adds a resource that may be accessed via a cid:id url.
+     * Adds an inline resource that may be accessed via a cid:id url.
      */
-    public void add_cid_resource(string id, Geary.Memory.Buffer buf) {
+    public void add_inline_resource(string id, Geary.Memory.Buffer buf) {
         this.cid_resources[id] = buf;
+    }
+
+    /**
+     * Adds a set of inline resource that may be accessed via a cid:id url.
+     */
+    public void add_inline_resources(Gee.Map<string,Geary.Memory.Buffer> res) {
+        this.cid_resources.set_all(res);
     }
 
     /**

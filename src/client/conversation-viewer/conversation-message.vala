@@ -729,7 +729,7 @@ public class ConversationMessage : Gtk.Grid {
             id = REPLACED_CID_TEMPLATE.printf(this.next_replaced_buffer_number++);
         }
 
-        this.web_view.add_cid_resource(id, buffer);
+        this.web_view.add_inline_resource(id, buffer);
 
         return "<img alt=\"%s\" class=\"%s\" src=\"%s%s\" />".printf(
             Geary.HTML.escape_markup(filename),
