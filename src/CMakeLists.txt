@@ -540,15 +540,7 @@ set(CFLAGS
     -DISO_CODE_639_XML=\"${ISO_CODE_639_XML}\"
     -DISO_CODE_3166_XML=\"${ISO_CODE_3166_XML}\"
     -DGCR_API_SUBJECT_TO_CHANGE
-    -g
 )
-
-if (NOT DEBUG)
-    set(CFLAGS
-        ${CFLAGS}
-        -O2
-    )    
-endif ()
 
 if (REF_TRACKING)
     message(STATUS "Reference tracking: ON")

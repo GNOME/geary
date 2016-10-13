@@ -54,13 +54,17 @@ set(ARCHIVE_BASE_NAME ${CMAKE_PROJECT_NAME}-${VERSION})
 set(ARCHIVE_FULL_NAME ${ARCHIVE_BASE_NAME}.tar.xz)
 set(ARCHIVE_DEBUILD_FULL_NAME ${CMAKE_PROJECT_NAME}_${VERSION}.orig.tar.xz)
 
-option(DEBUG "Build for debugging." OFF)
+if (NOT CMAKE_BUILD_TYPE)
+  #default build is -O2 -g
+  set(CMAKE_BUILD_TYPE "RelWithDebInfo")
+endif()
+
 option(ICON_UPDATE "Run gtk-update-icon-cache after the install." ON)
 option(DESKTOP_UPDATE "Run update-desktop-database after the install." ON)
 option(DESKTOP_VALIDATE "Check generated desktop file for errors during build." ON)
 option(TRANSLATE_HELP "Generate and install translated help documentation." ON)
 
-if (DEBUG)
+IF(CMAKE_BUILD_TYPE MATCHES Debug)
     message(STATUS "Debug build")
 endif ()
 

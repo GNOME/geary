@@ -83,7 +83,7 @@ do
         --disable-silent-rules | --disable-static ) ;;
         
         --debug)
-                            CMDLINE="${CMDLINE} -DDEBUG=ON"
+                            CMDLINE="${CMDLINE} -DCMAKE_BUILD_TYPE=Debug"
                             ;;
         
         --disable-fatal-warnings)
