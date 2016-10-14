@@ -1405,24 +1405,43 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         } catch (Error e) {
             // Ignore.
         }
-        
-        Db.Statement stmt = cx.prepare("""
-            INSERT INTO MessageSearchTable
-                (docid, body, attachment, subject, from_field, receivers, cc, bcc)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """);
-        stmt.bind_rowid(0, message_id);
-        stmt.bind_string(1, body);
-        stmt.bind_string(2, email.get_searchable_attachment_list());
-        stmt.bind_string(3, (email.subject != null ? email.subject.to_searchable_string() : null));
-        stmt.bind_string(4, (email.from != null ? email.from.to_searchable_string() : null));
-        stmt.bind_string(5, recipients);
-        stmt.bind_string(6, (email.cc != null ? email.cc.to_searchable_string() : null));
-        stmt.bind_string(7, (email.bcc != null ? email.bcc.to_searchable_string() : null));
-        
-        stmt.exec_insert(cancellable);
+
+        // Often when Geary first adds a message to the FTS table
+        // these fields will all be null or empty strings. Check that
+        // this isn't the case beforehand to avoid the IO overhead.
+
+        string? attachments = email.get_searchable_attachment_list();
+        string? subject = email.subject != null ? email.subject.to_searchable_string() : null;
+        string? from = email.from != null ? email.from.to_searchable_string() : null;
+        string? cc = email.cc != null ? email.cc.to_searchable_string() : null;
+        string? bcc = email.bcc != null ? email.bcc.to_searchable_string() : null;
+
+        if (!Geary.String.is_empty(body) ||
+            !Geary.String.is_empty(attachments) ||
+            !Geary.String.is_empty(subject) ||
+            !Geary.String.is_empty(from) ||
+            !Geary.String.is_empty(recipients) ||
+            !Geary.String.is_empty(cc) ||
+            !Geary.String.is_empty(bcc)) {
+
+            Db.Statement stmt = cx.prepare("""
+                INSERT INTO MessageSearchTable
+                    (docid, body, attachment, subject, from_field, receivers, cc, bcc)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            """);
+            stmt.bind_rowid(0, message_id);
+            stmt.bind_string(1, body);
+            stmt.bind_string(2, attachments);
+            stmt.bind_string(3, subject);
+            stmt.bind_string(4, from);
+            stmt.bind_string(5, recipients);
+            stmt.bind_string(6, cc);
+            stmt.bind_string(7, bcc);
+
+            stmt.exec_insert(cancellable);
+        }
     }
-    
+
     private static bool do_check_for_message_search_row(Db.Connection cx, int64 message_id,
         Cancellable? cancellable) throws Error {
         Db.Statement stmt = cx.prepare("SELECT 'TRUE' FROM MessageSearchTable WHERE docid=?");
