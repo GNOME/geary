@@ -2286,12 +2286,15 @@ public class GearyController : Geary.BaseObject {
             widget.state = ComposerWidget.ComposerState.DETACHED;
         }
 
+        Geary.EmailIdentifier? draft_id = null;
         if (is_draft) {
-            try {
-                yield widget.open_draft_manager_async(referred.id);
-            } catch (Error e) {
-                message("Could not open draft manager: %s", e.message);
-            }
+            draft_id = referred.id;
+        }
+
+        try {
+            yield widget.open_draft_manager_async(draft_id);
+        } catch (Error e) {
+            message("Could not open draft manager: %s", e.message);
         }
 
         // For accounts with large numbers of contacts, loading the
