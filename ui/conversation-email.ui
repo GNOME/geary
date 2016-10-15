@@ -357,7 +357,7 @@
           <object class="GtkLabel">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="label" translatable="yes">This message was sent, but has not been saved your account.</property>
+            <property name="label" translatable="yes">This message was sent, but has not been saved to your account.</property>
             <property name="ellipsize">end</property>
             <property name="xalign">0</property>
           </object>
