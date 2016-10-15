@@ -165,7 +165,7 @@
             <property name="can_focus">True</property>
             <property name="action_name">cmh.close-and-discard</property>
             <property name="always_show_image">True</property>
-            <property name="tooltip_text" translatable="yes">Close and Discard</property>
+            <property name="tooltip_text" translatable="yes">Discard and Close</property>
             <child>
               <object class="GtkImage" id="discard_and_close_image">
                 <property name="icon_name">user-trash-symbolic</property>
@@ -180,7 +180,7 @@
             <property name="can_focus">True</property>
             <property name="action_name">cmh.close-and-save</property>
             <property name="always_show_image">True</property>
-            <property name="tooltip_text" translatable="yes">Close and Save</property>
+            <property name="tooltip_text" translatable="yes">Save and Close</property>
             <child>
               <object class="GtkImage" id="save_and_close_image">
                 <property name="icon_name">document-save-symbolic</property>
