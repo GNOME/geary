@@ -47,6 +47,16 @@ public class ClientWebView : WebKit.WebView {
         return user_stylesheet;
     }
 
+    private static inline uint to_wk2_font_size(Pango.FontDescription font) {
+        Gdk.Screen? screen = Gdk.Screen.get_default();
+        double dpi = screen != null ? screen.get_resolution() : 96.0;
+        double size = font.get_size();
+        if (!font.get_size_is_absolute()) {
+            size = size / Pango.SCALE;
+        }
+        return (uint) (size * dpi / 72.0);
+    }
+
 
     public bool is_loaded { get; private set; default = false; }
     public string allow_prefix { get; private set; default = ""; }
@@ -61,7 +71,7 @@ public class ClientWebView : WebKit.WebView {
             Pango.FontDescription font = Pango.FontDescription.from_string(value);
             WebKit.Settings settings = get_settings();
             settings.default_font_family = font.get_family();
-            settings.default_font_size = font.get_size() / Pango.SCALE;
+            settings.default_font_size = to_wk2_font_size(font);
             set_settings(settings);
         }
     }
@@ -76,7 +86,7 @@ public class ClientWebView : WebKit.WebView {
             Pango.FontDescription font = Pango.FontDescription.from_string(value);
             WebKit.Settings settings = get_settings();
             settings.monospace_font_family = font.get_family();
-            settings.default_monospace_font_size = font.get_size() / Pango.SCALE;
+            settings.default_monospace_font_size = to_wk2_font_size(font);
             set_settings(settings);
         }
     }
