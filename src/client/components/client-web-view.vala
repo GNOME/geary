@@ -91,13 +91,6 @@ public class ClientWebView : WebKit.WebView {
         }
     }
 
-    // We need to wrap zoom_level (type float) because we cannot connect with float
-    // with double (cf https://bugzilla.gnome.org/show_bug.cgi?id=771534)
-    public double zoom_level_wrap {
-        get { return zoom_level; }
-        set { if (zoom_level != (float)value) zoom_level = (float)value; }
-    }
-
     private Gee.Map<string,Geary.Memory.Buffer> cid_resources =
         new Gee.HashMap<string,Geary.Memory.Buffer>();
 
@@ -128,8 +121,7 @@ public class ClientWebView : WebKit.WebView {
                 }
             });
 
-        GearyApplication.instance.config.bind(Configuration.CONVERSATION_VIEWER_ZOOM_KEY, this, "zoom_level_wrap");
-        this.notify["zoom-level"].connect(() => { zoom_level_wrap = zoom_level; });
+        GearyApplication.instance.config.bind(Configuration.CONVERSATION_VIEWER_ZOOM_KEY, this, "zoom_level");
         this.scroll_event.connect(on_scroll_event);
 
         Settings system_settings = GearyApplication.instance.config.gnome_interface;
