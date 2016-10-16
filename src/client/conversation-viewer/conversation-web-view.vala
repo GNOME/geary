@@ -10,43 +10,28 @@ public class ConversationWebView : ClientWebView {
 
     private const string USER_CSS = "user-message.css";
 
+    private static WebKit.UserStyleSheet? user_stylesheet = null;
+    private static WebKit.UserStyleSheet? app_stylesheet = null;
+
+    public static void load_stylehseets(GearyApplication app)
+        throws Error {
+        ConversationWebView.app_stylesheet =
+            ClientWebView.load_app_stylesheet(app, "conversation-web-view.css");
+        ConversationWebView.user_stylesheet =
+            ClientWebView.load_user_stylesheet(app, "user-message.css");
+    }
+
 
     public bool is_height_valid { get; private set; default = false; }
 
 
     public ConversationWebView() {
-        File user_css = GearyApplication.instance.get_user_config_directory().get_child(USER_CSS);
-        // Print out a debug line here if the user CSS file exists, so
-        // we get warning about it when debugging visual issues.
-        user_css.query_info_async.begin(
-            FileAttribute.STANDARD_TYPE,
-            FileQueryInfoFlags.NONE,
-            Priority.DEFAULT_IDLE,
-            null,
-            (obj, res) => {
-                try {
-                    user_css.query_info_async.end(res);
-                    debug("User CSS file exists: %s", USER_CSS);
-                } catch (Error e) {
-                    // No problem, file does not exist
-                }
-            });
-
-        WebKit.UserStyleSheet user_style = new WebKit.UserStyleSheet(
-            user_css.get_uri(),
-            WebKit.UserContentInjectedFrames.ALL_FRAMES,
-            WebKit.UserStyleLevel.USER,
-            null,
-            null
-        );
-
-        WebKit.UserContentManager content = new WebKit.UserContentManager();
-        content.add_style_sheet(user_style);
-
-        base(content);
-
-        // Set defaults.
-        set_border_width(0);
+        WebKit.UserContentManager manager = new WebKit.UserContentManager();
+        manager.add_style_sheet(ConversationWebView.app_stylesheet);
+        if (ConversationWebView.user_stylesheet != null) {
+            manager.add_style_sheet(ConversationWebView.user_stylesheet);
+        }
+        base(manager);
     }
 
     public bool clean_and_load(string html) {

@@ -13,6 +13,40 @@ public class ClientWebView : WebKit.WebView {
     private const double ZOOM_DEFAULT = 1.0;
     private const double ZOOM_FACTOR = 0.1;
 
+    protected static WebKit.UserStyleSheet load_app_stylesheet(GearyApplication app,
+                                                               string name)
+        throws Error {
+        return new WebKit.UserStyleSheet(
+            app.read_resource(name),
+            WebKit.UserContentInjectedFrames.TOP_FRAME,
+            WebKit.UserStyleLevel.USER,
+            null,
+            null
+        );
+    }
+
+    protected static WebKit.UserStyleSheet? load_user_stylesheet(GearyApplication app,
+                                                                 string name) {
+        File stylesheet = app.get_user_config_directory().get_child(name);
+        WebKit.UserStyleSheet? user_stylesheet = null;
+        try {
+            Geary.Memory.FileBuffer buf =
+                new Geary.Memory.FileBuffer(stylesheet, true);
+            user_stylesheet = new WebKit.UserStyleSheet(
+                buf.get_valid_utf8(),
+                WebKit.UserContentInjectedFrames.ALL_FRAMES,
+                WebKit.UserStyleLevel.USER,
+                null,
+                null
+            );
+        } catch (IOError.NOT_FOUND err) {
+            warning("User CSS file does not exist: %s", err.message);
+        } catch (Error err) {
+            warning("Failed to load user CSS file: %s", err.message);
+        }
+        return user_stylesheet;
+    }
+
 
     public bool is_loaded { get; private set; default = false; }
     public string allow_prefix { get; private set; default = ""; }

@@ -89,18 +89,6 @@ namespace Util.Conversation {
                 html.set_dir("auto");
             }
 
-            // Add application CSS to the document
-            WebKit.DOM.HTMLElement? head = Util.DOM.select(html, "head");
-            if (head == null) {
-                head = create(page, "head");
-                html.insert_before(head, html.get_first_child());
-            }
-            WebKit.DOM.HTMLElement style_element = create(page, "style");
-            string css_text = ""; // XXX GearyApplication.instance.read_resource("conversation-web-view.css");
-            WebKit.DOM.Text text_node = page.get_dom_document().create_text_node(css_text);
-            style_element.append_child(text_node);
-            head.insert_before(style_element, head.get_first_child());
-
             // Get all the top level block quotes and stick them into a hide/show controller.
             WebKit.DOM.NodeList blockquote_list = html.query_selector_all("blockquote");
             for (int i = 0; i < blockquote_list.length; ++i) {

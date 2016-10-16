@@ -207,6 +207,13 @@ public class GearyController : Geary.BaseObject {
                 );
             });
 
+        // Load web view stylesheets
+        try {
+            ConversationWebView.load_stylehseets(this.application);
+        } catch (Error err) {
+            error("Error loading application CSS: %s", err.message);
+        }
+
         // Use a global avatar session because a cache must be used
         // per-session, and we don't want to have to load the cache
         // for each conversation load.
