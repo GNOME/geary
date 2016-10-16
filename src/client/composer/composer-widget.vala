@@ -378,7 +378,7 @@ public class ComposerWidget : Gtk.EventBox {
     }
 
 
-    public signal void draft_id_changed(Geary.EmailIdentifier id);
+    public signal void draft_id_changed(Geary.EmailIdentifier? id);
 
 
     public ComposerWidget(Geary.Account account, ComposeType compose_type,
