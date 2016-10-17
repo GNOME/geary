@@ -135,10 +135,15 @@ public class ConversationListView : Gtk.TreeView {
     
     private void on_scan_completed() {
         enable_load_more = true;
-        
-        // Select first conversation.
-        if (GearyApplication.instance.config.autoselect)
+
+        if (GearyApplication.instance.config.autoselect) {
+            // Select first conversation
             select_first_conversation();
+        } else {
+            // Notify of that no conversations will be selected
+            conversations_selected(this.selected.read_only_view);
+        }
+
     }
     
     private void on_conversation_removed(Geary.App.Conversation conversation) {
