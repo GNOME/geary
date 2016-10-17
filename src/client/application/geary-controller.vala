@@ -2048,7 +2048,7 @@ public class GearyController : Geary.BaseObject {
             : Gtk.FileChooserAction.SELECT_FOLDER;
 #if GTK_3_20
         Gtk.FileChooserNative dialog = new Gtk.FileChooserNative(null, main_window, action,
-            Stock._CANCEL, Stock._SAVE);
+            Stock._SAVE, Stock._CANCEL);
 #else
         Gtk.FileChooserDialog dialog = new Gtk.FileChooserDialog(null, main_window, action,
              Stock._CANCEL, Gtk.ResponseType.CANCEL, Stock._SAVE, Gtk.ResponseType.ACCEPT, null);
@@ -2110,7 +2110,7 @@ public class GearyController : Geary.BaseObject {
     private void on_save_buffer_to_file(string? filename, Geary.Memory.Buffer buffer) {
 #if GTK_3_20
         Gtk.FileChooserNative dialog = new Gtk.FileChooserNative(null, main_window, Gtk.FileChooserAction.SAVE,
-            Stock._CANCEL, Stock._SAVE);
+            Stock._SAVE, Stock._CANCEL);
 #else
         Gtk.FileChooserDialog dialog = new Gtk.FileChooserDialog(null, main_window, Gtk.FileChooserAction.SAVE,
             Stock._CANCEL, Gtk.ResponseType.CANCEL, Stock._SAVE, Gtk.ResponseType.ACCEPT, null);
