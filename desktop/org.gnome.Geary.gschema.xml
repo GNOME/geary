@@ -128,6 +128,12 @@
         <description>The zoom to apply on the conservation view.</description>
     </key>
 
+    <key name="composer-window-size" type="ai">
+        <default>[-1,-1]</default>
+        <summary>size of dettached composer window</summary>
+        <description>The last recorded size of the dettached composer window.</description>
+    </key>
+
     <key name="migrated-config" type="b">
         <default>false</default>
         <summary>Whether we migrated the old settings</summary>

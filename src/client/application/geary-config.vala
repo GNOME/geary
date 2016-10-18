@@ -30,6 +30,7 @@ public class Configuration {
     public const string SPELL_CHECK_LANGUAGES = "spell-check-languages";
     public const string SEARCH_STRATEGY_KEY = "search-strategy";
     public const string CONVERSATION_VIEWER_ZOOM_KEY = "conversation-viewer-zoom";
+    public const string COMPOSER_WINDOW_SIZE_KEY = "composer-window-size";
 
 
     public enum DesktopEnvironment {
@@ -172,6 +173,21 @@ public class Configuration {
         set { settings.set_double(CONVERSATION_VIEWER_ZOOM_KEY, value); }
     }
 
+    public int[] composer_window_size {
+        owned get {
+            int[] size = new int[2];
+            var s = settings.get_value(COMPOSER_WINDOW_SIZE_KEY);
+            if (s.n_children () == 2) {
+                size = { (int) s.get_child_value(0), (int) s.get_child_value(1)};
+            } else {
+                size = {-1,-1};
+            }
+            return size;
+        }
+        set {
+            settings.set_value(COMPOSER_WINDOW_SIZE_KEY, value);
+        }
+    }
 
     // Creates a configuration object.
     public Configuration(string schema_id) {
