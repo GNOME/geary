@@ -143,10 +143,17 @@ public class ConversationWebView : StylishWebView {
 
         string? uri = request.get_uri();
         if (uri != null && !is_always_loaded(uri)) {
-            if (uri.has_prefix(allow_prefix))
-                request.set_uri(uri.substring(allow_prefix.length));
-            else
+            if (uri.has_prefix(allow_prefix)) {
+                // webkit_network_request_set_uri() will crash with
+                // "assertion 'soupURI' failed" if the string passed
+                // in is not a validi-sh URI, so check first
+                string allowed_uri = uri.substring(this.allow_prefix.length);
+                if (new Soup.URI(allowed_uri) != null) {
+                    request.set_uri(allowed_uri);
+                }
+            } else {
                 request.set_uri("about:blank");
+            }
         }
     }
 
