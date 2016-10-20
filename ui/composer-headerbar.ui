@@ -13,6 +13,7 @@
           <object class="GtkButton" id="detach_start_button">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
+            <property name="focus_on_click">False</property>
             <property name="margin_end">6</property>
             <property name="relief">GTK_RELIEF_NONE</property>
             <property name="action_name">cmh.detach</property>
@@ -39,6 +40,7 @@
       <object class="GtkButton" id="new_message_attach_button">
         <property name="visible">True</property>
         <property name="can_focus">True</property>
+        <property name="focus_on_click">False</property>
         <property name="action_name">cmh.add-attachment</property>
         <property name="always_show_image">True</property>
         <property name="tooltip_text" translatable="yes">Attach File (Ctrl+T)</property>
@@ -61,6 +63,7 @@
           <object class="GtkButton" id="conversation_attach_new_button">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
+            <property name="focus_on_click">False</property>
             <property name="action_name">cmh.add-attachment</property>
             <property name="always_show_image">True</property>
             <property name="tooltip_text" translatable="yes">Attach File (Ctrl+T)</property>
@@ -76,6 +79,7 @@
           <object class="GtkButton" id="conversation_attach_original_button">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
+            <property name="focus_on_click">False</property>
             <property name="action_name">cmh.add-original-attachments</property>
             <property name="always_show_image">True</property>
             <property name="tooltip_text" translatable="yes">Include Original Attachments</property>
@@ -94,6 +98,7 @@
         <property name="visible">True</property>
         <property name="can_focus">True</property>
         <property name="relief">GTK_RELIEF_NONE</property>
+        <property name="focus_on_click">False</property>
         <child>
           <object class="GtkLabel" id="recipients_label">
             <property name="visible">True</property>
@@ -117,6 +122,7 @@
           <object class="GtkButton" id="detach_end_button">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
+            <property name="focus_on_click">False</property>
             <property name="margin_start">6</property>
             <property name="relief">GTK_RELIEF_NONE</property>
             <property name="action_name">cmh.detach</property>
@@ -139,6 +145,7 @@
       <object class="GtkButton" id="send_button">
         <property name="visible">True</property>
         <property name="can_focus">True</property>
+        <property name="focus_on_click">False</property>
         <property name="action_name">cmh.send</property>
         <property name="always_show_image">True</property>
         <property name="use_underline">True</property>
@@ -163,6 +170,7 @@
           <object class="GtkButton" id="discard_and_close_button">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
+            <property name="focus_on_click">False</property>
             <property name="action_name">cmh.close-and-discard</property>
             <property name="always_show_image">True</property>
             <property name="tooltip_text" translatable="yes">Discard and Close</property>
@@ -178,6 +186,7 @@
           <object class="GtkButton" id="save_and_close_button">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
+            <property name="focus_on_click">False</property>
             <property name="action_name">cmh.close-and-save</property>
             <property name="always_show_image">True</property>
             <property name="tooltip_text" translatable="yes">Save and Close</property>

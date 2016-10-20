@@ -248,9 +248,9 @@ public class GearyController : Geary.BaseObject {
         
         // This is fired after the accounts are ready.
         Geary.Engine.instance.opened.connect(on_engine_opened);
-        
-        main_window.conversation_list_view.grab_focus();
-        
+
+        this.main_window.conversation_list_view.grab_focus();
+
         // instantiate here to ensure that Config is initialized and ready
         autostart_manager = new AutostartManager();
         
@@ -2578,10 +2578,6 @@ public class GearyController : Geary.BaseObject {
 
         last_deleted_conversation = selected_conversations.size > 0
             ? Geary.traverse<Geary.App.Conversation>(selected_conversations).first() : null;
-        
-        // Return focus to the conversation list from the clicked
-        // toolbar button.
-        this.main_window.conversation_list_view.grab_focus();
 
         this.main_window.conversation_list_view.set_changing_selection(true);
 
@@ -2732,9 +2728,9 @@ public class GearyController : Geary.BaseObject {
     }
 
     private void on_conversation_list() {
-        main_window.conversation_list_view.grab_focus();
+        this.main_window.conversation_list_view.grab_focus();
     }
-    
+
     private void on_sent(Geary.RFC822.Message rfc822) {
         Libnotify.play_sound("message-sent-email");
     }

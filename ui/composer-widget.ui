@@ -369,9 +369,10 @@
                 <child>
                   <object class="GtkToggleButton" id="bold_button">
                     <property name="visible" bind-source="bold_button" bind-property="sensitive" />
-                    <property name="can_focus">False</property>
                     <property name="always_show_image">True</property>
                     <property name="action_name">cmp.bold</property>
+                    <property name="can_focus">True</property>
+                    <property name="focus_on_click">False</property>
                     <property name="tooltip_text" translatable="yes">Bold (Ctrl+B)</property>
                     <child>
                       <object class="GtkImage" id="bold_image">
@@ -384,7 +385,8 @@
                 <child>
                   <object class="GtkToggleButton" id="italics_button">
                     <property name="visible" bind-source="italics_button" bind-property="sensitive" />
-                    <property name="can_focus">False</property>
+                    <property name="can_focus">True</property>
+                    <property name="focus_on_click">False</property>
                     <property name="action_name">cmp.italic</property>
                     <property name="always_show_image">True</property>
                     <property name="tooltip_text" translatable="yes">Italic (Ctrl+I)</property>
@@ -399,7 +401,8 @@
                 <child>
                   <object class="GtkToggleButton" id="underline_button">
                     <property name="visible" bind-source="underline_button" bind-property="sensitive" />
-                    <property name="can_focus">False</property>
+                    <property name="can_focus">True</property>
+                    <property name="focus_on_click">False</property>
                     <property name="action_name">cmp.underline</property>
                     <property name="always_show_image">True</property>
                     <property name="tooltip_text" translatable="yes">Underline (Ctrl+U)</property>
@@ -414,7 +417,8 @@
                 <child>
                   <object class="GtkToggleButton" id="strikethrough_button">
                     <property name="visible" bind-source="strikethrough_button" bind-property="sensitive" />
-                    <property name="can_focus">False</property>
+                    <property name="can_focus">True</property>
+                    <property name="focus_on_click">False</property>
                     <property name="action_name">cmp.strikethrough</property>
                     <property name="always_show_image">True</property>
                     <property name="tooltip_text" translatable="yes">Strikethrough (Ctrl+K)</property>
@@ -438,7 +442,8 @@
                 <child>
                   <object class="GtkButton" id="indent_button">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can_focus">True</property>
+                    <property name="focus_on_click">False</property>
                     <property name="action_name">cmp.indent</property>
                     <property name="always_show_image">True</property>
                     <property name="tooltip_text" translatable="yes">Quote text  (Ctrl+])</property>
@@ -453,7 +458,8 @@
                 <child>
                   <object class="GtkButton" id="outdent_button">
                     <property name="visible">True</property>
-                    <property name="can_focus">False</property>
+                    <property name="can_focus">True</property>
+                    <property name="focus_on_click">False</property>
                     <property name="action_name">cmp.outdent</property>
                     <property name="always_show_image">True</property>
                     <property name="tooltip_text" translatable="yes">Unquote text  (Ctrl+[)</property>
@@ -477,7 +483,8 @@
                 <child>
                   <object class="GtkButton" id="insert_link_button">
                     <property name="visible" bind-source="insert_link_button" bind-property="sensitive" />
-                    <property name="can_focus">False</property>
+                    <property name="can_focus">True</property>
+                    <property name="focus_on_click">False</property>
                     <property name="action_name">cmp.insert-link</property>
                     <property name="always_show_image">True</property>
                     <property name="tooltip_text" translatable="yes">Link (Ctrl+L)</property>
@@ -498,6 +505,7 @@
                   <object class="GtkButton" id="insert_image_button">
                     <property name="visible" bind-source="insert_image_button" bind-property="sensitive" />
                     <property name="can_focus">True</property>
+                    <property name="focus_on_click">False</property>
                     <property name="receives_default">False</property>
                     <property name="tooltip_text" translatable="yes">Image (Ctrl+G)</property>
                     <property name="action_name">cmp.insert-image</property>
@@ -521,9 +529,10 @@
             <child>
               <object class="GtkButton" id="remove_format_button">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
                 <property name="always_show_image">True</property>
                 <property name="action_name">cmp.remove-format</property>
+                <property name="can_focus">True</property>
+                <property name="focus_on_click">False</property>
                 <property name="tooltip_text" translatable="yes">Remove formatting (Ctrl+Space)</property>
                 <child>
                   <object class="GtkImage" id="remove_format_image">
@@ -536,7 +545,8 @@
             <child>
               <object class="GtkButton" id="select_dictionary_button">
                 <property name="visible">True</property>
-                <property name="can_focus">False</property>
+                <property name="can_focus">True</property>
+                <property name="focus_on_click">False</property>
                 <property name="action_name">cmp.select-dictionary</property>
                 <property name="always_show_image">True</property>
                 <property name="tooltip_text" translatable="yes">Select spell checking language</property>
@@ -552,6 +562,7 @@
               <object class="GtkMenuButton" id="menu_button">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <property name="focus_on_click">False</property>
               </object>
               <packing>
                 <property name="pack_type">end</property>
