@@ -90,9 +90,8 @@ public class ConversationListStore : Gtk.ListStore {
     private bool loading_local_only = true;
     private Geary.Nonblocking.Mutex refresh_mutex = new Geary.Nonblocking.Mutex();
     private uint update_id = 0;
-    
-    public signal void conversations_added_began();
-    public signal void conversations_added_finished();
+
+    public signal void conversations_added(bool start);
     public signal void conversations_removed(bool start);
 
     public ConversationListStore(Geary.App.ConversationMonitor conversations) {
@@ -415,7 +414,7 @@ public class ConversationListStore : Gtk.ListStore {
         if (conversations.size == 0)
             return;
         
-        conversations_added_began();
+        conversations_added(true);
         
         debug("Adding %d conversations.", conversations.size);
         int added = 0;
@@ -425,7 +424,7 @@ public class ConversationListStore : Gtk.ListStore {
         }
         debug("Added %d/%d conversations.", added, conversations.size);
         
-        conversations_added_finished();
+        conversations_added(false);
     }
     
     private void on_conversations_removed(Gee.Collection<Geary.App.Conversation> conversations) {

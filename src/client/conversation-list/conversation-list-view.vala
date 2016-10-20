@@ -78,12 +78,7 @@ public class ConversationListView : Gtk.TreeView {
     public new void set_model(ConversationListStore? new_store) {
         ConversationListStore? old_store = get_model();
         if (old_store != null) {
-            old_store.conversations_added_finished.disconnect(
-                on_conversations_added_finished
-            );
-            old_store.conversations_added_began.disconnect(
-                on_conversations_added_began
-            );
+            old_store.conversations_added.disconnect(on_conversations_added);
             old_store.conversations_removed.disconnect(on_conversations_removed);
             old_store.row_inserted.disconnect(on_rows_changed);
             old_store.rows_reordered.disconnect(on_rows_changed);
@@ -98,13 +93,8 @@ public class ConversationListView : Gtk.TreeView {
             new_store.row_changed.connect(on_rows_changed);
             new_store.row_deleted.connect(on_rows_changed);
             new_store.row_deleted.connect(on_row_deleted);
-            new_store.conversations_added_began.connect(
-                on_conversations_added_began
-            );
-            new_store.conversations_added_finished.connect(
-                on_conversations_added_finished
-            );
             new_store.conversations_removed.connect(on_conversations_removed);
+            new_store.conversations_added.connect(on_conversations_added);
         }
 
         // Disconnect the selection handler since we don't want to
@@ -174,27 +164,23 @@ public class ConversationListView : Gtk.TreeView {
         }
     }
 
-    private void on_conversations_added_began() {
+    private void on_conversations_added(bool start) {
         Gtk.Adjustment? adjustment = get_adjustment();
-        // If we were at the top, we want to stay there after conversations are added.
-        reset_adjustment = adjustment != null && adjustment.get_value() == 0;
-    }
-    
-    private void on_conversations_added_finished() {
-        if (!reset_adjustment)
-            return;
-        
-        // Pump the loop to make sure the new conversations are taking up space
-        // in the window.  Without this, setting the adjustment here is a no-op
-        // because as far as it's concerned, it's already at the top.
-        while (Gtk.events_pending())
-            Gtk.main_iteration();
-        
-        Gtk.Adjustment? adjustment = get_adjustment();
-        if (adjustment == null)
-            return;
-        
-        adjustment.set_value(0);
+        if (start) {
+            // If we were at the top, we want to stay there after
+            // conversations are added.
+            this.reset_adjustment = adjustment != null && adjustment.get_value() == 0;
+        } else if (this.reset_adjustment && adjustment != null) {
+            // Pump the loop to make sure the new conversations are
+            // taking up space in the window.  Without this, setting
+            // the adjustment here is a no-op because as far as it's
+            // concerned, it's already at the top.
+            while (Gtk.events_pending())
+                Gtk.main_iteration();
+
+            adjustment.set_value(0);
+        }
+        this.reset_adjustment = false;
     }
 
     private void on_conversations_removed(bool start) {
@@ -405,7 +391,7 @@ public class ConversationListView : Gtk.TreeView {
     // doing the same things (in particular, I/O) multiple times
     private void do_selection_changed() {
         Gee.HashSet<Geary.App.Conversation> new_selection =
-        new Gee.HashSet<Geary.App.Conversation>();
+            new Gee.HashSet<Geary.App.Conversation>();
         List<Gtk.TreePath> paths = get_all_selected_paths();
         if (paths.length() != 0) {
             // Conversations are selected, so collect them and
