@@ -92,8 +92,8 @@ public class ConversationListStore : Gtk.ListStore {
     private uint update_id = 0;
     
     public signal void conversations_added_began();
-    
     public signal void conversations_added_finished();
+    public signal void conversations_removed(bool start);
 
     public ConversationListStore(Geary.App.ConversationMonitor conversations) {
         set_column_types(Column.get_types());
@@ -112,7 +112,7 @@ public class ConversationListStore : Gtk.ListStore {
 
         conversations.scan_completed.connect(on_scan_completed);
         conversations.conversations_added.connect(on_conversations_added);
-        conversations.conversation_removed.connect(on_conversation_removed);
+        conversations.conversations_removed.connect(on_conversations_removed);
         conversations.conversation_appended.connect(on_conversation_appended);
         conversations.conversation_trimmed.connect(on_conversation_trimmed);
         conversations.email_flags_changed.connect(on_email_flags_changed);
@@ -428,10 +428,13 @@ public class ConversationListStore : Gtk.ListStore {
         conversations_added_finished();
     }
     
-    private void on_conversation_removed(Geary.App.Conversation conversation) {
-        remove_conversation(conversation);
+    private void on_conversations_removed(Gee.Collection<Geary.App.Conversation> conversations) {
+        conversations_removed(true);
+        foreach (Geary.App.Conversation removed in conversations)
+            remove_conversation(removed);
+        conversations_removed(false);
     }
-    
+
     private void on_conversation_appended(Geary.App.Conversation conversation) {
         if (has_conversation(conversation)) {
             refresh_conversation(conversation);

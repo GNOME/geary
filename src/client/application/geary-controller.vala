@@ -1442,7 +1442,7 @@ public class GearyController : Geary.BaseObject {
         current_conversations.seed_completed.connect(on_conversation_count_changed);
         current_conversations.scan_completed.connect(on_conversation_count_changed);
         current_conversations.conversations_added.connect(on_conversation_count_changed);
-        current_conversations.conversation_removed.connect(on_conversation_count_changed);
+        current_conversations.conversations_removed.connect(on_conversation_count_changed);
         
         if (!current_conversations.is_monitoring)
             yield current_conversations.start_monitoring_async(conversation_cancellable);
@@ -1960,12 +1960,19 @@ public class GearyController : Geary.BaseObject {
         Gee.List<Geary.EmailIdentifier> ids = get_selected_email_ids(false);
         if (ids.size == 0)
             return;
-        
+
+        this.main_window.conversation_list_view.set_changing_selection(true);
+
         Geary.FolderSupport.Move? supports_move = current_folder as Geary.FolderSupport.Move;
         if (supports_move != null)
-            move_conversation_async.begin(supports_move, ids, destination.path, cancellable_folder);
+            move_conversation_async.begin(
+                supports_move, ids, destination.path, cancellable_folder,
+                (obj, ret) => {
+                    move_conversation_async.end(ret);
+                    this.main_window.conversation_list_view.set_changing_selection(false);
+                });
     }
-    
+
     private async void move_conversation_async(Geary.FolderSupport.Move source_folder,
         Gee.List<Geary.EmailIdentifier> ids, Geary.FolderPath destination, Cancellable? cancellable) {
         try {
@@ -2572,9 +2579,12 @@ public class GearyController : Geary.BaseObject {
         last_deleted_conversation = selected_conversations.size > 0
             ? Geary.traverse<Geary.App.Conversation>(selected_conversations).first() : null;
         
-        // Return focus to the conversation list from the clicked toolbar button.
-        main_window.conversation_list_view.grab_focus();
-        
+        // Return focus to the conversation list from the clicked
+        // toolbar button.
+        this.main_window.conversation_list_view.grab_focus();
+
+        this.main_window.conversation_list_view.set_changing_selection(true);
+
         Gee.List<Geary.EmailIdentifier> ids = get_selected_email_ids(false);
         if (archive) {
             debug("Archiving selected messages");
@@ -2629,6 +2639,7 @@ public class GearyController : Geary.BaseObject {
         } catch (Error e) {
             debug("Unable to archive/trash/delete messages: %s", e.message);
         }
+        this.main_window.conversation_list_view.set_changing_selection(false);
     }
     
     private void save_revokable(Geary.Revokable? new_revokable, string? description) {

@@ -19,6 +19,7 @@ public class ConversationListView : Gtk.TreeView {
     private Gtk.Menu? context_menu = null;
     private Gee.Set<Geary.App.Conversation> selected = new Gee.HashSet<Geary.App.Conversation>();
     private uint selection_changed_id = 0;
+    private bool suppress_selection = false;
 
     public signal void conversations_selected(Gee.Set<Geary.App.Conversation> selected);
     
@@ -83,6 +84,7 @@ public class ConversationListView : Gtk.TreeView {
             old_store.conversations_added_began.disconnect(
                 on_conversations_added_began
             );
+            old_store.conversations_removed.disconnect(on_conversations_removed);
             old_store.row_inserted.disconnect(on_rows_changed);
             old_store.rows_reordered.disconnect(on_rows_changed);
             old_store.row_changed.disconnect(on_rows_changed);
@@ -102,6 +104,7 @@ public class ConversationListView : Gtk.TreeView {
             new_store.conversations_added_finished.connect(
                 on_conversations_added_finished
             );
+            new_store.conversations_removed.connect(on_conversations_removed);
         }
 
         // Disconnect the selection handler since we don't want to
@@ -113,12 +116,27 @@ public class ConversationListView : Gtk.TreeView {
         selection.changed.connect(on_selection_changed);
     }
 
+    /**
+     * Specifies an action is currently changing the view's selection.
+     */
+    public void set_changing_selection(bool is_changing) {
+        // Make sure that when not autoselecting, and if the user is
+        // causing selected rows to be removed, the next row is not
+        // automatically selected by GtkTreeView
+        if (is_changing) {
+            this.suppress_selection =
+                !GearyApplication.instance.config.autoselect;
+        } else {
+            // If no longer changing, always re-enable selection
+            get_selection().set_mode(Gtk.SelectionMode.MULTIPLE);
+        }
+    }
+
     private void on_conversation_monitor_changed() {
         if (conversation_monitor != null) {
             conversation_monitor.scan_started.disconnect(on_scan_started);
             conversation_monitor.scan_completed.disconnect(on_scan_completed);
             conversation_monitor.seed_completed.disconnect(on_seed_completed);
-            conversation_monitor.conversation_removed.disconnect(on_conversation_removed);
         }
         
         conversation_monitor = GearyApplication.instance.controller.current_conversations;
@@ -127,7 +145,6 @@ public class ConversationListView : Gtk.TreeView {
             conversation_monitor.scan_started.connect(on_scan_started);
             conversation_monitor.scan_completed.connect(on_scan_completed);
             conversation_monitor.seed_completed.connect(on_seed_completed);
-            conversation_monitor.conversation_removed.connect(on_conversation_removed);
         }
     }
     
@@ -157,11 +174,6 @@ public class ConversationListView : Gtk.TreeView {
         }
     }
 
-    private void on_conversation_removed(Geary.App.Conversation conversation) {
-        if (!GearyApplication.instance.config.autoselect)
-            get_selection().unselect_all();
-    }
-    
     private void on_conversations_added_began() {
         Gtk.Adjustment? adjustment = get_adjustment();
         // If we were at the top, we want to stay there after conversations are added.
@@ -184,7 +196,19 @@ public class ConversationListView : Gtk.TreeView {
         
         adjustment.set_value(0);
     }
-    
+
+    private void on_conversations_removed(bool start) {
+        if (!GearyApplication.instance.config.autoselect) {
+            Gtk.SelectionMode mode = start
+                // Stop GtkTreeView from automatically selecting the
+                // next row after the removed rows
+                ? Gtk.SelectionMode.NONE
+                // Allow the user to make selections again
+                : Gtk.SelectionMode.MULTIPLE;
+            get_selection().set_mode(mode);
+        }
+    }
+
     private Gtk.Adjustment? get_adjustment() {
         Gtk.ScrolledWindow? parent = get_parent() as Gtk.ScrolledWindow;
         if (parent == null) {

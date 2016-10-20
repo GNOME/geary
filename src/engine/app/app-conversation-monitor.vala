@@ -112,15 +112,15 @@ public class Geary.App.ConversationMonitor : BaseObject {
     /**
      * "conversations-removed" is fired when all the email in a Conversation has been removed.
      * It's possible this will be called without a signal alerting that it's emails have been
-     * removed, i.e. a "conversation-removed" signal may fire with no accompanying
+     * removed, i.e. a "conversations-removed" signal may fire with no accompanying
      * "conversation-trimmed".
      *
      * Note that this can only occur when monitoring is enabled.  There is (currently) no
      * user call to manually remove email from Conversations.
      */
-    public virtual signal void conversation_removed(Conversation conversation) {
-        Logging.debug(Logging.Flag.CONVERSATIONS, "[%s] ConversationMonitor::conversation_removed",
-            folder.to_string());
+    public virtual signal void conversations_removed(Gee.Collection<Conversation> conversations) {
+        Logging.debug(Logging.Flag.CONVERSATIONS, "[%s] ConversationMonitor::conversations_removed %d",
+            folder.to_string(), conversations.size);
     }
     
     /**
@@ -216,8 +216,8 @@ public class Geary.App.ConversationMonitor : BaseObject {
         conversations_added(conversations);
     }
     
-    protected virtual void notify_conversation_removed(Conversation conversation) {
-        conversation_removed(conversation);
+    protected virtual void notify_conversations_removed(Gee.Collection<Conversation> conversations) {
+        conversations_removed(conversations);
     }
     
     protected virtual void notify_conversation_appended(Conversation conversation,
@@ -583,9 +583,8 @@ public class Geary.App.ConversationMonitor : BaseObject {
             // fall-through
         }
         
-        if (removed_due_to_merge != null) {
-            foreach (Conversation conversation in removed_due_to_merge)
-                notify_conversation_removed(conversation);
+        if (removed_due_to_merge != null && removed_due_to_merge.size > 0) {
+            notify_conversations_removed(removed_due_to_merge);
         }
         
         if (added != null && added.size > 0)
@@ -637,8 +636,8 @@ public class Geary.App.ConversationMonitor : BaseObject {
         foreach (Conversation conversation in trimmed.get_keys())
             notify_conversation_trimmed(conversation, trimmed.get(conversation));
         
-        foreach (Conversation conversation in removed)
-            notify_conversation_removed(conversation);
+        if (removed.size > 0)
+            notify_conversations_removed(removed);
         
         // For any still-existing conversations that we've trimmed messages
         // from, do a search for any messages that should still be there due to
