@@ -65,7 +65,7 @@ class ConfirmationDialog : AlertDialog {
 class TernaryConfirmationDialog : AlertDialog {
     public TernaryConfirmationDialog(Gtk.Window? parent, string title, string? description,
         string? ok_button, string? tertiary_button, Gtk.ResponseType tertiary_response_type, string? ok_action_type = "") {
-        base (parent, Gtk.MessageType.WARNING, title, description, ok_button, tertiary_button, Stock._CANCEL,
+        base (parent, Gtk.MessageType.WARNING, title, description, ok_button, Stock._CANCEL, tertiary_button,
             tertiary_response_type, ok_action_type);
     }
 }
