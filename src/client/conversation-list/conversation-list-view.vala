@@ -353,10 +353,6 @@ public class ConversationListView : Gtk.TreeView {
         Gtk.TreeModel model;
         return get_selection().get_selected_rows(out model);
     }
-    
-    private Gtk.TreePath? get_selected_path() {
-        return get_all_selected_paths().nth_data(0);
-    }
 
     private void on_selection_changed() {
         if (this.selection_changed_id != 0)
@@ -506,25 +502,23 @@ public class ConversationListView : Gtk.TreeView {
         ConversationListCellRenderer.set_hover_selected(hover);
         queue_draw();
     }
-    
+
     private bool on_motion_notify_event(Gdk.EventMotion event) {
-        if (get_selected_path() == null)
-            return false;
-        
-        Gtk.TreePath? path = null;
-        int cell_x, cell_y;
-        get_path_at_pos((int) event.x, (int) event.y, out path, null, out cell_x, out cell_y);
-        
-        set_hover_selected(path != null && get_selection().path_is_selected(path));
-        
-        return false;
+        if (get_selection().count_selected_rows() > 0) {
+            Gtk.TreePath? path = null;
+            int cell_x, cell_y;
+            get_path_at_pos((int) event.x, (int) event.y, out path, null, out cell_x, out cell_y);
+
+            set_hover_selected(path != null && get_selection().path_is_selected(path));
+        }
+        return Gdk.EVENT_PROPAGATE;
     }
-    
+
     private bool on_leave_notify_event() {
-        if (get_selected_path() != null)
+        if (get_selection().count_selected_rows() > 0) {
             set_hover_selected(false);
-        
-        return false;
+        }
+        return Gdk.EVENT_PROPAGATE;
+
     }
 }
-
