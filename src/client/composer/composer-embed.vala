@@ -204,6 +204,16 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
 
             // Calculate height widget should be to avoid scrolling in editor
             int widget_height = int.max(view_height + base_height - 2, min_height); //? about 2
+
+            // XXX Clamp the widget height to something arbitrary for
+            // the same reasons as in
+            // ConversationWebView::get_preferred_height, to avoid a
+            // crash. See Bug 765516 and Bug 728002.
+            const int MAX_HEIGHT = 5000;
+            if (widget_height > MAX_HEIGHT) {
+                widget_height = MAX_HEIGHT;
+            }
+
             set_size_request(-1, widget_height);
         }
         return Source.REMOVE;
