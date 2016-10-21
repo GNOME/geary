@@ -1809,63 +1809,85 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             do_update_contact(cx, contact, cancellable);
         updated_contacts = message_addresses.contacts;
     }
-    
+
     private void do_merge_email_in_search_table(Db.Connection cx, int64 message_id,
         Geary.Email.Field new_fields, Geary.Email email, Cancellable? cancellable) throws Error {
+
+        // We can't simply issue an UPDATE here for the changed
+        // fields, since it will likely corrupt the
+        // MessageSearchTable. So instead do a SELECT to get the
+        // existing data, then do a DELETE and INSERT. See Bug 772522.
+
+        Db.Statement select = cx.prepare("""
+            SELECT body, attachment, subject, from_field, receivers, cc, bcc
+            FROM MessageSearchTable
+            WHERE docid=?
+        """);
+        select.bind_rowid(0, message_id);
+        Db.Result row = select.exec(cancellable);
+
+        string? body = row.string_at(0);
+        string? attachments = row.string_at(1);
+        string? subject = row.string_at(2);
+        string? from = row.string_at(3);
+        string? recipients = row.string_at(4);
+        string? cc = row.string_at(5);
+        string? bcc = row.string_at(6);
+
         if (new_fields.is_any_set(Geary.Email.REQUIRED_FOR_MESSAGE) &&
             email.fields.is_all_set(Geary.Email.REQUIRED_FOR_MESSAGE)) {
-            string? body = null;
             try {
                 body = email.get_message().get_searchable_body();
             } catch (Error e) {
                 // Ignore.
             }
-            string? recipients = null;
             try {
                 recipients = email.get_message().get_searchable_recipients();
             } catch (Error e) {
                 // Ignore.
             }
-            
-            Db.Statement stmt = cx.prepare(
-                "UPDATE MessageSearchTable SET body=?, attachment=?, receivers=? WHERE docid=?");
-            stmt.bind_string(0, body);
-            stmt.bind_string(1, email.get_searchable_attachment_list());
-            stmt.bind_string(2, recipients);
-            stmt.bind_rowid(3, message_id);
-            
-            stmt.exec(cancellable);
         }
-        
+
         if (new_fields.is_any_set(Geary.Email.Field.SUBJECT)) {
-            Db.Statement stmt = cx.prepare(
-                "UPDATE MessageSearchTable SET subject=? WHERE docid=?");
-            stmt.bind_string(0, (email.subject != null ? email.subject.to_searchable_string() : null));
-            stmt.bind_rowid(1, message_id);
-            
-            stmt.exec(cancellable);
+            if (email.subject != null)
+                email.subject.to_searchable_string();
         }
-        
+
         if (new_fields.is_any_set(Geary.Email.Field.ORIGINATORS)) {
-            Db.Statement stmt = cx.prepare(
-                "UPDATE MessageSearchTable SET from_field=? WHERE docid=?");
-            stmt.bind_string(0, (email.from != null ? email.from.to_searchable_string() : null));
-            stmt.bind_rowid(1, message_id);
-            
-            stmt.exec(cancellable);
+            if (email.from != null)
+                from = email.from.to_searchable_string();
         }
-        
+
         if (new_fields.is_any_set(Geary.Email.Field.RECEIVERS)) {
-            Db.Statement stmt = cx.prepare(
-                "UPDATE MessageSearchTable SET cc=?, bcc=? WHERE docid=?");
-            stmt.bind_string(0, (email.cc != null ? email.cc.to_searchable_string() : null));
-            stmt.bind_string(1, (email.bcc != null ? email.bcc.to_searchable_string() : null));
-            stmt.bind_rowid(2, message_id);
-            
-            stmt.exec(cancellable);
+            if (email.cc != null)
+                cc =  email.cc.to_searchable_string();
+            if (email.bcc != null)
+                bcc = email.bcc.to_searchable_string();
         }
+
+        Db.Statement del = cx.prepare(
+            "DELETE FROM MessageSearchTable WHERE docid=?"
+        );
+        del.bind_rowid(0, message_id);
+        del.exec(cancellable);
+
+        Db.Statement insert = cx.prepare("""
+            INSERT INTO MessageSearchTable
+                (docid, body, attachment, subject, from_field, receivers, cc, bcc)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """);
+        insert.bind_rowid(0, message_id);
+        insert.bind_string(1, body);
+        insert.bind_string(2, attachments);
+        insert.bind_string(3, subject);
+        insert.bind_string(4, from);
+        insert.bind_string(5, recipients);
+        insert.bind_string(6, cc);
+        insert.bind_string(7, bcc);
+
+        insert.exec_insert(cancellable);
     }
-    
+
     // This *replaces* the stored flags, it does not OR them ... this is simply a fast-path over
     // do_merge_email(), as updating FLAGS happens often and doesn't require a lot of extra work
     private void do_merge_email_flags(Db.Connection cx, LocationIdentifier location, Geary.Email email,

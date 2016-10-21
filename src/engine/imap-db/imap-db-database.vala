@@ -556,7 +556,51 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
             error("Error creating tokenizer table: %s", e.message);
         }
     }
-    
+
+    /**
+     * Determines if the database's FTS table indexes are valid.
+     */
+    public bool fts_integrity_check() throws Error {
+        Db.Statement stmt = prepare("""
+            INSERT INTO MessageSearchTable(MessageSearchTable)
+                VALUES('integrity-check')
+        """);
+        bool passed = true;
+        try {
+            stmt.exec();
+        } catch (DatabaseError.CORRUPT err) {
+            passed = false;
+        }
+        return passed;
+    }
+
+    /**
+     * Rebuilds the database's FTS table index.
+     *
+     * This can be used to recover from corrupt indexs, as indicated
+     * by fts_integrity_check() returning false.
+     */
+    public void fts_rebuild() throws Error {
+        Db.Statement stmt = prepare("""
+            INSERT INTO MessageSearchTable(MessageSearchTable)
+                VALUES('rebuild')
+        """);
+        stmt.exec();
+    }
+
+    /**
+     * Optimises the database's FTS table index.
+     *
+     * This is an expensive call, as much as performing a VACCUM.
+     */
+    public void fts_optimize() throws Error {
+        Db.Statement stmt = prepare("""
+            INSERT INTO MessageSearchTable(MessageSearchTable)
+                VALUES('optimize')
+        """);
+        stmt.exec();
+    }
+
     private void on_prepare_database_connection(Db.Connection cx) throws Error {
         cx.set_busy_timeout_msec(Db.Connection.RECOMMENDED_BUSY_TIMEOUT_MSEC);
         cx.set_foreign_keys(true);
