@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Generated with glade 3.20.0 -->
 <interface>
-  <requires lib="gtk+" version="3.10"/>
+  <requires lib="gtk+" version="3.14"/>
   <template class="ConversationViewer" parent="GtkStack">
     <property name="name">conversation_viewer</property>
     <property name="visible">True</property>
@@ -9,8 +9,12 @@
     <property name="transition_type">crossfade</property>
     <child>
       <object class="GtkSpinner" id="loading_page">
+        <property name="width_request">32</property>
+        <property name="height_request">32</property>
         <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <property name="halign">center</property>
+        <property name="valign">center</property>
         <property name="active">True</property>
       </object>
       <packing>

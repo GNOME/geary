@@ -761,6 +761,8 @@ public class ConversationListBox : Gtk.ListBox {
 
     private void show_loading() {
         Gtk.Spinner spinner = new Gtk.Spinner();
+        spinner.set_size_request(32, 32);
+        spinner.halign = spinner.valign = Gtk.Align.CENTER;
         spinner.start();
         spinner.show();
         set_placeholder(spinner);
