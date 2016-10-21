@@ -326,8 +326,6 @@ public class ConversationListBox : Gtk.ListBox {
 
     public async void load_conversation()
         throws Error {
-        EmailRow? first_expanded_row = null;
-
         // Fetch full emails from the conversation
         Gee.Collection<Geary.Email> full_emails =
             yield load_full_emails(
@@ -337,17 +335,17 @@ public class ConversationListBox : Gtk.ListBox {
             );
 
         // Add them all
+        EmailRow? first_expanded_row = null;
         foreach (Geary.Email full_email in full_emails) {
             if (this.cancellable.is_cancelled()) {
                 break;
             }
             if (!this.email_rows.contains(full_email.id)) {
                 EmailRow row = add_email(full_email);
-                if (first_expanded_row == null && row.is_expanded) {
+                if (row.is_expanded &&
+                    (first_expanded_row == null ||
+                     on_sort(row, first_expanded_row) < 0)) {
                     first_expanded_row = row;
-                    yield first_expanded_row.view.start_loading(
-                        this.cancellable
-                    );
                 }
             }
         }
@@ -356,21 +354,15 @@ public class ConversationListBox : Gtk.ListBox {
         EmailRow? last_email = this.last_row as EmailRow;
 
         if (last_email != null && !this.cancellable.is_cancelled()) {
-            // The last row should always be expanded, so expand it
-            // and start loading if needed.
-            last_email.expand();
-            if (last_email != first_expanded_row) {
-                yield last_email.view.start_loading(this.cancellable);
-            }
-
             // If no other row was expanded by default, use the last
-            // row.
             if (first_expanded_row == null) {
+                last_email.expand();
                 first_expanded_row = last_email;
             }
 
-            // Ensure we scroll to the first expanded roll when it
-            // finishes loading
+            // Start the first expanded row loading before any others,
+            // scroll the view to it when its done
+            yield first_expanded_row.view.start_loading(this.cancellable);
             first_expanded_row.should_scroll.connect(scroll_to);
             first_expanded_row.enable_should_scroll();
 
