@@ -401,7 +401,7 @@ public class ConversationEmail : Gtk.Box {
         add_action(ACTION_SAVE_ATTACHMENTS, false).activate.connect(() => {
                 save_attachments(get_selected_attachments());
             });
-        add_action(ACTION_SAVE_ALL_ATTACHMENTS, false).activate.connect(() => {
+        add_action(ACTION_SAVE_ALL_ATTACHMENTS).activate.connect(() => {
                 save_attachments(this.displayed_attachments);
             });
         add_action(ACTION_SELECT_ALL_ATTACHMENTS, false).activate.connect(() => {
