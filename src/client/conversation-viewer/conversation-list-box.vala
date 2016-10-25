@@ -144,6 +144,12 @@ public class ConversationListBox : Gtk.ListBox {
 
         public override void expand() {
             this.is_expanded = true;
+            this.view.message_view_iterator().foreach((view) => {
+                    if (!view.web_view.is_height_valid) {
+                        view.web_view.queue_resize();
+                    }
+                    return true;
+                });
             update_row_expansion();
         }
 
