@@ -209,7 +209,7 @@ public class Geary.Imap.ClientSession : BaseObject {
     
     public signal void logged_out();
     
-    public signal void login_failed();
+    public signal void login_failed(StatusResponse? response);
     
     public signal void disconnected(DisconnectReason reason);
     
@@ -681,7 +681,7 @@ public class Geary.Imap.ClientSession : BaseObject {
     public async StatusResponse login_async(Geary.Credentials credentials, Cancellable? cancellable = null)
         throws Error {
         if (!credentials.is_complete()) {
-            login_failed();
+            login_failed(null);
             throw new ImapError.UNAUTHENTICATED("No credentials provided for account: %s", credentials.to_string());
         }
         
@@ -816,7 +816,7 @@ public class Geary.Imap.ClientSession : BaseObject {
             
             default:
                 debug("[%s] Unable to LOGIN: %s", to_string(), completion_response.to_string());
-                fsm.do_post_transition(() => { login_failed(); });
+                fsm.do_post_transition((resp) => { login_failed((StatusResponse)resp); }, completion_response);
                 
                 return State.NOAUTH;
         }

@@ -29,6 +29,7 @@ public abstract class Geary.Account : BaseObject {
         DATABASE_FAILURE,
         EMAIL_DELIVERY_FAILURE,
         SAVE_SENT_MAIL_FAILED,
+        CONNECTION_FAILURE,
     }
     
     public Geary.AccountInformation information { get; protected set; }

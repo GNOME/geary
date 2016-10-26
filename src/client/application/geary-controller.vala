@@ -1027,6 +1027,13 @@ public class GearyController : Geary.BaseObject {
                 handle_outbox_failure(StatusBar.Message.OUTBOX_SAVE_SENT_MAIL_FAILED);
             break;
             
+            case Geary.Account.Problem.CONNECTION_FAILURE:
+                ErrorDialog dialog = new ErrorDialog(main_window,
+                    _("Error connecting to the server"),
+                    _("Geary encountered an error while connecting to the server.  Please try again in a few moments."));
+                dialog.run();
+            break;
+
             default:
                 assert_not_reached();
         }

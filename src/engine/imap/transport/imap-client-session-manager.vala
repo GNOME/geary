@@ -67,7 +67,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
     private int authorized_session_retry_sec = AUTHORIZED_SESSION_ERROR_MIN_RETRY_TIMEOUT_SEC;
     private bool checking_reachable = false;
     
-    public signal void login_failed();
+    public signal void login_failed(StatusResponse? response);
     
     public ClientSessionManager(AccountInformation account_information) {
         this.account_information = account_information;
@@ -442,10 +442,10 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         force_disconnect_async.begin(session, false);
     }
     
-    private void on_login_failed(ClientSession session) {
+    private void on_login_failed(ClientSession session, StatusResponse? response) {
         authentication_failed = true;
         
-        login_failed();
+        login_failed(response);
         
         session.disconnect_async.begin();
     }
