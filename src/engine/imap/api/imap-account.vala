@@ -37,7 +37,7 @@ private class Geary.Imap.Account : BaseObject {
     private string hierarchy_delimiter = null;
 
     
-    public signal void login_failed(Geary.Credentials cred);
+    public signal void login_failed(Geary.Credentials? cred, StatusResponse? response);
     
     public Account(Geary.AccountInformation account_information) {
         name = "IMAP Account for %s".printf(account_information.imap_credentials.to_string());
@@ -603,8 +603,8 @@ private class Geary.Imap.Account : BaseObject {
             (path != null) ? path.to_string() : "root", session_mgr.to_string());
     }
     
-    private void on_login_failed() {
-        login_failed(account_information.imap_credentials);
+    private void on_login_failed(StatusResponse? response) {
+        login_failed(account_information.imap_credentials, response);
     }
     
     public string to_string() {
