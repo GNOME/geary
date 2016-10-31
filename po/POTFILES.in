@@ -397,6 +397,7 @@ src/mailer/main.vala
 [type: gettext/glade]ui/gtk/help-overlay.ui
 [type: gettext/glade]ui/gtk/menus.ui
 [type: gettext/glade]ui/login.glade
+[type: gettext/glade]ui/main-toolbar.ui
 [type: gettext/glade]ui/password-dialog.glade
 [type: gettext/glade]ui/preferences.glade
 [type: gettext/glade]ui/remove_confirm.glade
