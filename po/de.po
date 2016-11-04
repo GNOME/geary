@@ -19,9 +19,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
-"product=geary&keywords=I18N+L10N&component=general\n"
-"POT-Creation-Date: 2016-06-19 12:32+0000\n"
-"PO-Revision-Date: 2016-06-22 13:44+0200\n"
+"product=geary&keywords=I18N+L10N&component=internationalization\n"
+"POT-Creation-Date: 2016-10-27 17:22+0000\n"
+"PO-Revision-Date: 2016-11-04 22:35+0100\n"
 "Last-Translator: Mario Blättermann <mario.blaettermann@gmail.com>\n"
 "Language-Team: Deutsch <gnome-de@gnome.org>\n"
 "Language: de\n"
@@ -29,7 +29,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 1.8.8\n"
+"X-Generator: Poedit 1.8.11\n"
 
 #: ../desktop/geary.desktop.in.h:1 ../desktop/geary-autostart.desktop.in.h:1
 msgid "Geary"
@@ -150,7 +150,7 @@ msgstr "Vorschau"
 msgid "Remem_ber passwords"
 msgstr "Passwörter _merken"
 
-#: ../src/client/accounts/add-edit-page.vala:730 ../ui/login.glade.h:6
+#: ../src/client/accounts/add-edit-page.vala:730 ../ui/login.glade.h:7
 msgid "Remem_ber password"
 msgstr "Passwort _merken"
 
@@ -408,7 +408,7 @@ msgstr "Neue Nachricht verfassen (Strg+N, N)"
 
 #. Reply to a message.
 #: ../src/client/application/geary-controller.vala:444
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1858
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1873
 msgid "_Reply"
 msgstr "_Antworten"
 
@@ -426,7 +426,7 @@ msgstr "Allen antworten (Strg+Umschalt+R, Umschalt+R)"
 
 #. Forward a message.
 #: ../src/client/application/geary-controller.vala:455
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1868
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1883
 msgid "_Forward"
 msgstr "_Weiterleiten"
 
@@ -745,7 +745,7 @@ msgstr[1] "%i Treffer (gefaltet)"
 msgid "not found"
 msgstr "nicht gefunden"
 
-#: ../src/client/components/main-window.vala:423
+#: ../src/client/components/main-window.vala:436
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -808,7 +808,7 @@ msgstr "_Entfernen"
 
 #. Select all.
 #: ../src/client/components/stock.vala:32
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1324
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1335
 msgid "Select _All"
 msgstr "Alles _auswählen"
 
@@ -846,93 +846,93 @@ msgstr ""
 "Anhang|Anhänge|angehängt|anhängen|Wiedervorlage|Beilage|beilegen|Anlage|"
 "anbei|beigefügt|anhängend"
 
-#: ../src/client/composer/composer-widget.vala:1102
-#: ../src/client/composer/composer-widget.vala:1106
+#: ../src/client/composer/composer-widget.vala:1114
+#: ../src/client/composer/composer-widget.vala:1118
 msgid "Do you want to discard this message?"
 msgstr "Möchten Sie diese Nachricht verwerfen?"
 
-#: ../src/client/composer/composer-widget.vala:1262
+#: ../src/client/composer/composer-widget.vala:1274
 msgid "Send message with an empty subject and body?"
 msgstr "Nachricht ohne Betreff und Inhalt senden?"
 
-#: ../src/client/composer/composer-widget.vala:1264
+#: ../src/client/composer/composer-widget.vala:1276
 msgid "Send message with an empty subject?"
 msgstr "Nachricht ohne Betreff senden?"
 
-#: ../src/client/composer/composer-widget.vala:1266
+#: ../src/client/composer/composer-widget.vala:1278
 msgid "Send message with an empty body?"
 msgstr "Nachricht ohne Inhalt senden?"
 
-#: ../src/client/composer/composer-widget.vala:1268
+#: ../src/client/composer/composer-widget.vala:1280
 msgid "Send message without an attachment?"
 msgstr "Nachricht ohne Anhang senden?"
 
-#: ../src/client/composer/composer-widget.vala:1530
+#: ../src/client/composer/composer-widget.vala:1542
 msgid "Cannot add attachment"
 msgstr "Anhang kann nicht hinzugefügt werden"
 
-#: ../src/client/composer/composer-widget.vala:1541
+#: ../src/client/composer/composer-widget.vala:1553
 #, c-format
 msgid "\"%s\" could not be found."
 msgstr "»%s« konnte nicht gefunden werden."
 
-#: ../src/client/composer/composer-widget.vala:1548
+#: ../src/client/composer/composer-widget.vala:1560
 #, c-format
 msgid "\"%s\" is a folder."
 msgstr "»%s« ist ein Ordner."
 
-#: ../src/client/composer/composer-widget.vala:1555
+#: ../src/client/composer/composer-widget.vala:1567
 #, c-format
 msgid "\"%s\" is an empty file."
 msgstr "»%s« ist eine leere Datei."
 
-#: ../src/client/composer/composer-widget.vala:1569
+#: ../src/client/composer/composer-widget.vala:1581
 #, c-format
 msgid "\"%s\" could not be opened for reading."
 msgstr "»%s« konnte nicht zum Lesen geöffnet werden."
 
-#: ../src/client/composer/composer-widget.vala:1576
+#: ../src/client/composer/composer-widget.vala:1588
 #, c-format
 msgid "\"%s\" already attached for delivery."
 msgstr "»%s« ist bereits als Anhang ausgewählt worden."
 
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
-#: ../src/client/composer/composer-widget.vala:1585
+#: ../src/client/composer/composer-widget.vala:1597
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: ../src/client/composer/composer-widget.vala:1645
+#: ../src/client/composer/composer-widget.vala:1657
 msgid "To: "
 msgstr "An: "
 
-#: ../src/client/composer/composer-widget.vala:1648
+#: ../src/client/composer/composer-widget.vala:1660
 msgid "Cc: "
 msgstr "Cc: "
 
-#: ../src/client/composer/composer-widget.vala:1651
+#: ../src/client/composer/composer-widget.vala:1663
 msgid "Bcc: "
 msgstr "Bcc:"
 
-#: ../src/client/composer/composer-widget.vala:1654
+#: ../src/client/composer/composer-widget.vala:1666
 msgid "Reply-To: "
 msgstr "Antwort an: "
 
-#: ../src/client/composer/composer-widget.vala:1887
+#: ../src/client/composer/composer-widget.vala:1899
 msgid "Select Color"
 msgstr "Farbe auswählen"
 
 #. Displayed in the From dropdown to indicate an "alternate email address"
 #. for an account.  The first printf argument will be the alternate email
 #. address, and the second will be the account's primary email address.
-#: ../src/client/composer/composer-widget.vala:2322
+#: ../src/client/composer/composer-widget.vala:2334
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%1$s über %2$s"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: ../src/client/composer/composer-widget.vala:2364
+#: ../src/client/composer/composer-widget.vala:2376
 msgid "_From:"
 msgstr "_Von:"
 
@@ -940,73 +940,73 @@ msgstr "_Von:"
 msgid "Me"
 msgstr "Mir"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:413
+#: ../src/client/conversation-viewer/conversation-viewer.vala:414
 msgid "No conversations selected."
 msgstr "Keine Konversation ausgewählt"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:415
+#: ../src/client/conversation-viewer/conversation-viewer.vala:416
 #, c-format
 msgid "%u conversation selected."
 msgid_plural "%u conversations selected."
 msgstr[0] "%u Konversation ausgewählt."
 msgstr[1] "%u Konversationen ausgewählt."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:444
+#: ../src/client/conversation-viewer/conversation-viewer.vala:446
 msgid "No search results found."
 msgstr "Suche war erfolglos."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:446
+#: ../src/client/conversation-viewer/conversation-viewer.vala:448
 msgid "No conversations in folder."
 msgstr "Keine Konversation in diesem Ordner."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:708
+#: ../src/client/conversation-viewer/conversation-viewer.vala:714
 msgid "This message contains remote images."
 msgstr "Diese Nachricht enthält Bilder aus entfernten Quellen."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:708
+#: ../src/client/conversation-viewer/conversation-viewer.vala:714
 msgid "Show Images"
 msgstr "Bilder anzeigen"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:709
+#: ../src/client/conversation-viewer/conversation-viewer.vala:715
 msgid "Always Show From Sender"
 msgstr "Von diesem Absender immer anzeigen"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:733
+#: ../src/client/conversation-viewer/conversation-viewer.vala:739
 msgid "Edit Draft"
 msgstr "Entwurf bearbeiten"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:809
+#: ../src/client/conversation-viewer/conversation-viewer.vala:815
 msgid "From:"
 msgstr "Von:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:812
+#: ../src/client/conversation-viewer/conversation-viewer.vala:818
 msgid "To:"
 msgstr "An:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:815
+#: ../src/client/conversation-viewer/conversation-viewer.vala:821
 msgid "Cc:"
 msgstr "Cc:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:818
+#: ../src/client/conversation-viewer/conversation-viewer.vala:824
 msgid "Bcc:"
 msgstr "Bcc:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:821
+#: ../src/client/conversation-viewer/conversation-viewer.vala:827
 msgid "Subject:"
 msgstr "Betreff:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:824
+#: ../src/client/conversation-viewer/conversation-viewer.vala:830
 msgid "Date:"
 msgstr "Datum:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1139
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1150
 #, c-format
 msgid "%u read message"
 msgid_plural "%u read messages"
 msgstr[0] "%u gelesene Nachricht"
 msgstr[1] "%u gelesene Nachrichten"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1271
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1282
 #, c-format
 msgid "This message was sent successfully, but could not be saved to %s."
 msgstr ""
@@ -1014,99 +1014,99 @@ msgstr ""
 "gespeichert werden."
 
 #. Add a menu item for copying the current selection.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1297
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1308
 #: ../ui/composer.glade.h:4
 msgid "_Copy"
 msgstr "_Kopieren"
 
 #. Add a menu item for copying the address.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1305
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1316
 msgid "Copy _Email Address"
 msgstr "_E-Mail-Adresse kopieren"
 
 #. Add a menu item for copying the link.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1310
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1321
 #: ../ui/composer.glade.h:17
 msgid "Copy _Link"
 msgstr "_Link kopieren"
 
 #. Select message.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1318
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1329
 msgid "Select _Message"
 msgstr "_Nachricht auswählen"
 
 #. Inspect.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1330
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1341
 msgid "_Inspect"
 msgstr "_Untersuchen"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1557
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1572
 msgid "This link appears to go to"
 msgstr "Dieser Verweis scheint zu folgender Seite zu führen:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1558
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1573
 msgid "but actually goes to"
 msgstr "aber führt tatsächlich zu"
 
 #. If href doesn't look like a URL, something is fishy, so warn the user
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1613
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1628
 msgid " (Invalid?)"
 msgstr " (Ungültig?)"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1719
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1734
 msgid "_Save Image As..."
 msgstr "_Bild speichern unter …"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1823
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1838
 msgid "_Save As..."
 msgstr "_Speichern unter …"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1828
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1843
 msgid "Save All A_ttachments..."
 msgstr "Alle _Anhänge speichern …"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1848
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1863
 msgid "Save A_ttachment..."
 msgid_plural "Save All A_ttachments..."
 msgstr[0] "_Anhang speichern …"
 msgstr[1] "Alle _Anhänge speichern …"
 
 #. Reply to all on a message.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1863
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1878
 msgid "Reply to _All"
 msgstr "_Allen antworten"
 
 #. Mark as read/unread.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1880
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1895
 msgid "_Mark as Read"
 msgstr "Als _gelesen markieren"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1884
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1899
 msgid "_Mark as Unread"
 msgstr "Als _ungelesen markieren"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1890
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1905
 msgid "Mark Unread From _Here"
 msgstr "Von _hier ab als ungelesen markieren"
 
 #. Separator.
 #. View original message source.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1905
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1920
 msgid "_View Source"
 msgstr "_Quelltext anzeigen"
 
 #. Generate the attachment table.
 #. / Placeholder filename for attachments with no filename.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:2229
-#: ../src/engine/rfc822/rfc822-utils.vala:378
+#: ../src/client/conversation-viewer/conversation-viewer.vala:2245
+#: ../src/engine/rfc822/rfc822-utils.vala:392
 msgid "none"
 msgstr "keine"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:2364
+#: ../src/client/conversation-viewer/conversation-viewer.vala:2380
 msgid "Failed to open default text editor."
 msgstr "Der Standard-Texteditor konnte nicht geöffnet werden."
 
-#: ../src/client/conversation-viewer/conversation-web-view.vala:322
+#: ../src/client/conversation-viewer/conversation-web-view.vala:319
 #, c-format
 msgid "%s - Conversation Inspector"
 msgstr "%s - Konversationsinspektor"
@@ -1253,21 +1253,21 @@ msgstr[1] "%d Ergebnisse"
 msgid "%s - New Messages"
 msgstr "%s - Neue Nachrichten"
 
-#: ../src/client/notification/libnotify.vala:72
+#: ../src/client/notification/libnotify.vala:74
 #, c-format
 msgid "%d new message"
 msgid_plural "%d new messages"
 msgstr[0] "%d neue Nachricht"
 msgstr[1] "%d neue Nachrichten"
 
-#: ../src/client/notification/libnotify.vala:75
+#: ../src/client/notification/libnotify.vala:77
 #, c-format
 msgid "%s, %d new message total"
 msgid_plural "%s, %d new messages total"
 msgstr[0] "%s, insgesamt %d neue Nachricht"
 msgstr[1] "%s, insgesamt %d neue Nachrichten"
 
-#: ../src/client/notification/libnotify.vala:107
+#: ../src/client/notification/libnotify.vala:109
 #, c-format
 msgid ""
 "%s\n"
@@ -1282,7 +1282,7 @@ msgstr[1] ""
 "%s\n"
 "(%d andere neue Nachrichten für %s)"
 
-#: ../src/client/notification/libnotify.vala:160
+#: ../src/client/notification/libnotify.vala:165
 msgid "Open"
 msgstr "Öffnen"
 
@@ -1367,7 +1367,7 @@ msgid "%A"
 msgstr "%A"
 
 #: ../src/client/util/util-email.vala:30
-#: ../src/engine/rfc822/rfc822-message.vala:781
+#: ../src/engine/rfc822/rfc822-message.vala:816
 msgid "(no subject)"
 msgstr "(kein Betreff)"
 
@@ -1459,7 +1459,7 @@ msgstr "Postausgang"
 msgid "Archive"
 msgstr "Archivieren"
 
-#: ../src/engine/api/geary-special-folder-type.vala:58 ../ui/login.glade.h:26
+#: ../src/engine/api/geary-special-folder-type.vala:58 ../ui/login.glade.h:29
 msgid "None"
 msgstr "Nichts"
 
@@ -2071,135 +2071,147 @@ msgstr "_Groß-/ Kleinschreibung"
 msgid "label"
 msgstr "Beschriftung"
 
-#: ../ui/login.glade.h:1 ../ui/password-dialog.glade.h:3
+#: ../ui/login.glade.h:1
+msgid "email@example.com"
+msgstr "email@example.com"
+
+#: ../ui/login.glade.h:2 ../ui/password-dialog.glade.h:3
 msgid "Password"
 msgstr "Passwort"
 
-#: ../ui/login.glade.h:2
+#: ../ui/login.glade.h:3
 msgid "E_mail address"
 msgstr "E-_Mail-Adresse"
 
-#: ../ui/login.glade.h:3
+#: ../ui/login.glade.h:4
 msgid "_Password"
 msgstr "_Passwort"
 
-#: ../ui/login.glade.h:4
+#: ../ui/login.glade.h:5
 msgid "S_ervice"
 msgstr "Di_enst"
 
-#: ../ui/login.glade.h:5
+#: ../ui/login.glade.h:6
 msgid "N_ame"
 msgstr "N_ame"
 
-#: ../ui/login.glade.h:7
+#: ../ui/login.glade.h:8
 msgid "N_ickname"
 msgstr "N_ickname"
 
-#: ../ui/login.glade.h:8
+#: ../ui/login.glade.h:9
 msgid "Work, Home, etc."
 msgstr "Arbeit, Zuhause, etc."
 
-#: ../ui/login.glade.h:9
+#: ../ui/login.glade.h:10
 msgid "_Save sent mail"
 msgstr "Gesendete E-Mail _speichern"
 
-#: ../ui/login.glade.h:10
+#: ../ui/login.glade.h:11
 msgid "Addi_tional email addresses…"
 msgstr "Zusätzliche _E-Mail-Adressen …"
 
-#: ../ui/login.glade.h:11
+#: ../ui/login.glade.h:12
 msgid "IMAP settings"
 msgstr "IMAP-Einstellungen"
 
-#: ../ui/login.glade.h:12
+#: ../ui/login.glade.h:13
 msgid "Se_rver"
 msgstr "Se_rver"
 
-#: ../ui/login.glade.h:13
+#: ../ui/login.glade.h:14
+msgid "imap.example.com"
+msgstr "imap.example.com"
+
+#: ../ui/login.glade.h:15
 msgid "P_ort"
 msgstr "P_ort"
 
-#: ../ui/login.glade.h:14
+#: ../ui/login.glade.h:16
+msgid "smtp.example.com"
+msgstr "smtp.example.com"
+
+#: ../ui/login.glade.h:17
 msgid "Ser_ver"
 msgstr "Ser_ver"
 
-#: ../ui/login.glade.h:15
+#: ../ui/login.glade.h:18
 msgid "Por_t"
 msgstr "Por_t"
 
-#: ../ui/login.glade.h:16
+#: ../ui/login.glade.h:19
 msgid "SMTP settings"
 msgstr "SMTP-Einstellungen"
 
-#: ../ui/login.glade.h:17
+#: ../ui/login.glade.h:20
 msgid "User_name"
 msgstr "Be_nutzername"
 
-#: ../ui/login.glade.h:18
+#: ../ui/login.glade.h:21
 msgid "Pass_word"
 msgstr "Pass_wort"
 
-#: ../ui/login.glade.h:19
+#: ../ui/login.glade.h:22
 msgid "SMTP username"
 msgstr "SMTP-Benutzername"
 
-#: ../ui/login.glade.h:20
+#: ../ui/login.glade.h:23
 msgid "SMTP password"
 msgstr "SMTP-Passwort"
 
-#: ../ui/login.glade.h:21
+#: ../ui/login.glade.h:24
 msgid "_Username"
 msgstr "Ben_utzername"
 
-#: ../ui/login.glade.h:22
+#: ../ui/login.glade.h:25
 msgid "IMAP username"
 msgstr "IMAP-Benutzername"
 
-#: ../ui/login.glade.h:23
+#: ../ui/login.glade.h:26
 msgid "IMAP password"
 msgstr "IMAP-Passwort"
 
-#: ../ui/login.glade.h:24
+#: ../ui/login.glade.h:27
 msgid "Encr_yption"
 msgstr "_Verschlüsselung"
 
-#: ../ui/login.glade.h:25
+#: ../ui/login.glade.h:28
 msgid "Encrypt_ion"
 msgstr "_Verschlüsselung"
 
-#: ../ui/login.glade.h:27
+#: ../ui/login.glade.h:30
 msgid "SSL/TLS"
 msgstr "SSL/TLS"
 
-#: ../ui/login.glade.h:28
+#: ../ui/login.glade.h:31
 msgid "STARTTLS"
 msgstr "STARTTLS"
 
-#: ../ui/login.glade.h:29
+#: ../ui/login.glade.h:32
 msgid "No authentication re_quired"
 msgstr "Keine Authentifizierung nötig"
 
-#: ../ui/login.glade.h:30
+#: ../ui/login.glade.h:33
 msgid "Use IMAP cre_dentials"
 msgstr "_IMAP-Zugangsinformationen verwenden"
 
-#: ../ui/login.glade.h:31 ../ui/preferences.glade.h:5
+#: ../ui/login.glade.h:34 ../ui/preferences.glade.h:5
 msgid "Composer"
 msgstr "Verfassen"
 
-#: ../ui/login.glade.h:32
+#: ../ui/login.glade.h:35
 msgid "Save dra_fts on server"
 msgstr "_Entwürfe auf dem Server speichern"
 
-#: ../ui/login.glade.h:33
+#: ../ui/login.glade.h:36
 msgid "Si_gn emails (HTML allowed):"
 msgstr "E-Mails _unterzeichnen (HTML erlaubt):"
 
-#: ../ui/login.glade.h:34
+#: ../ui/login.glade.h:37
 msgid "Storage"
 msgstr "Speicher"
 
-#: ../ui/login.glade.h:35
+#: ../ui/login.glade.h:38
 msgid "_Download mail"
 msgstr "_Mail herunterladen"
 
