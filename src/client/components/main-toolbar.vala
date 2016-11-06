@@ -54,7 +54,7 @@ public class MainToolbar : Gtk.Box {
     [GtkChild]
     private Gtk.ToggleButton find_button;
 
-    public MainToolbar() {
+    public MainToolbar(Configuration config) {
         this.action_group = GearyApplication.instance.actions;
 
         // Instead of putting a separator between the two headerbars, as other applications do,
@@ -70,8 +70,10 @@ public class MainToolbar : Gtk.Box {
                 return true;
             });
 
-        this.bind_property("account", folder_header, "title", BindingFlags.SYNC_CREATE);
-        this.bind_property("folder", folder_header, "subtitle", BindingFlags.SYNC_CREATE);
+        if (config.desktop_environment != Configuration.DesktopEnvironment.UNITY) {
+            this.bind_property("account", folder_header, "title", BindingFlags.SYNC_CREATE);
+            this.bind_property("folder", folder_header, "subtitle", BindingFlags.SYNC_CREATE);
+        }
         this.bind_property("show-close-button-left", folder_header, "show-close-button",
             BindingFlags.SYNC_CREATE);
         this.bind_property("show-close-button-right", conversation_header, "show-close-button",

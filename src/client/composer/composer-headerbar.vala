@@ -7,6 +7,8 @@
 [GtkTemplate (ui = "/org/gnome/Geary/composer-headerbar.ui")]
 public class ComposerHeaderbar : Gtk.HeaderBar {
 
+    public Configuration config { get; set; }
+
     public ComposerWidget.ComposerState state { get; set; }
 
     public bool show_pending_attachments { get; set; default = false; }
@@ -29,7 +31,8 @@ public class ComposerHeaderbar : Gtk.HeaderBar {
     [GtkChild]
     private Gtk.Button send_button;
 
-    public ComposerHeaderbar() {
+    public ComposerHeaderbar(Configuration config) {
+        this.config = config;
         recipients_button.clicked.connect(() => { state = ComposerWidget.ComposerState.INLINE; });
 
         send_button.image = new Gtk.Image.from_icon_name("mail-send-symbolic", Gtk.IconSize.MENU);
@@ -60,9 +63,14 @@ public class ComposerHeaderbar : Gtk.HeaderBar {
     }
 
     private void set_detach_button_side() {
-        bool at_end = GtkUtil.close_button_at_end();
-        detach_start.visible = !at_end;
-        detach_end.visible = at_end;
+        if(config.desktop_environment == Configuration.DesktopEnvironment.UNITY) {
+            detach_start.visible = false;
+            detach_end.visible = true;
+        } else {
+            bool at_end = GtkUtil.close_button_at_end();
+            detach_start.visible = !at_end;
+            detach_end.visible = at_end;
+        }
     }
 }
 

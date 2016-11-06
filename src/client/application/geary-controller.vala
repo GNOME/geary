@@ -2282,7 +2282,7 @@ public class GearyController : Geary.BaseObject {
 
         ComposerWidget widget;
         if (mailto != null) {
-            widget = new ComposerWidget.from_mailto(current_account, mailto);
+            widget = new ComposerWidget.from_mailto(current_account, mailto, application.config);
         } else {
             Geary.Email? full = null;
             if (referred != null) {
@@ -2295,7 +2295,7 @@ public class GearyController : Geary.BaseObject {
                 }
             }
 
-            widget = new ComposerWidget(current_account, compose_type, full, quote, is_draft);
+            widget = new ComposerWidget(current_account, compose_type, application.config, full, quote, is_draft);
             if (is_draft) {
                 yield widget.restore_draft_state_async(current_account);
             }

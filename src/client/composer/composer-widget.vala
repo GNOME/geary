@@ -261,7 +261,7 @@ public class ComposerWidget : Gtk.EventBox {
         }
     }
 
-    public ComposerHeaderbar header { get; private set; default = new ComposerHeaderbar(); }
+    public ComposerHeaderbar header { get; private set; }
 
     public string draft_save_text { get; private set; }
 
@@ -270,6 +270,8 @@ public class ComposerWidget : Gtk.EventBox {
     public string toolbar_text { get; set; }
 
     public string window_title { get; set; }
+
+    public Configuration config { get; set; }
 
     [GtkChild]
     internal Gtk.ScrolledWindow editor_scrolled;
@@ -381,8 +383,10 @@ public class ComposerWidget : Gtk.EventBox {
     public signal void draft_id_changed(Geary.EmailIdentifier? id);
 
 
-    public ComposerWidget(Geary.Account account, ComposeType compose_type,
+    public ComposerWidget(Geary.Account account, ComposeType compose_type, Configuration config,
         Geary.Email? referred = null, string? quote = null, bool is_referred_draft = false) {
+        this.config = config;
+        this.header = new ComposerHeaderbar(config);
         this.account = account;
         this.compose_type = compose_type;
         if (this.compose_type == ComposeType.NEW_MESSAGE)
@@ -556,8 +560,8 @@ public class ComposerWidget : Gtk.EventBox {
         destroy.connect(() => { close_draft_manager_async.begin(null); });
     }
 
-    public ComposerWidget.from_mailto(Geary.Account account, string mailto) {
-        this(account, ComposeType.NEW_MESSAGE);
+    public ComposerWidget.from_mailto(Geary.Account account, string mailto, Configuration config) {
+        this(account, ComposeType.NEW_MESSAGE, config);
         
         Gee.HashMultiMap<string, string> headers = new Gee.HashMultiMap<string, string>();
         if (mailto.length > Geary.ComposedEmail.MAILTO_SCHEME.length) {

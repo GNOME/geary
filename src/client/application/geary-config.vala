@@ -26,8 +26,24 @@ public class Configuration {
     public const string SPELL_CHECK_LANGUAGES = "spell-check-languages";
     public const string CONVERSATION_VIEWER_ZOOM_KEY = "conversation-viewer-zoom";
 
+    public enum DesktopEnvironment {
+        UNKNOWN = 0,
+        UNITY;
+    }
+
     public Settings settings { get; private set; }
     public Settings gnome_interface;
+
+    public DesktopEnvironment desktop_environment {
+        get {
+            switch (Environment.get_variable("XDG_CURRENT_DESKTOP")) {
+                case "Unity":
+                    return DesktopEnvironment.UNITY;
+                default:
+                    return DesktopEnvironment.UNKNOWN;
+            }
+        }
+    }
 
     public int window_width {
         get { return settings.get_int(WINDOW_WIDTH_KEY); }

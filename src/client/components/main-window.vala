@@ -18,9 +18,10 @@ public class MainWindow : Gtk.ApplicationWindow {
     public MainToolbar main_toolbar { get; private set; }
     public SearchBar search_bar { get; private set; default = new SearchBar(); }
     public ConversationListView conversation_list_view  { get; private set; default = new ConversationListView(); }
-    public ConversationViewer conversation_viewer { get; private set; default = new ConversationViewer(); }
+    public ConversationViewer conversation_viewer { get; private set; }
     public StatusBar status_bar { get; private set; default = new StatusBar(); }
     public Geary.Folder? current_folder { get; private set; default = null; }
+    public Configuration config { get; private set; }
     
     public int window_width { get; set; }
     public int window_height { get; set; }
@@ -39,15 +40,17 @@ public class MainWindow : Gtk.ApplicationWindow {
     public MainWindow(GearyApplication application) {
         Object(application: application);
         set_show_menubar(false);
-        
+
         add_events(Gdk.EventMask.KEY_PRESS_MASK | Gdk.EventMask.KEY_RELEASE_MASK
             | Gdk.EventMask.FOCUS_CHANGE_MASK);
-        
+
+        config = application.config;
+        conversation_viewer = new ConversationViewer();
+
         // This code both loads AND saves the pane positions with live
         // updating. This is more resilient against crashes because
         // the value in dconf changes *immediately*, and stays saved
         // in the event of a crash.
-        Configuration config = GearyApplication.instance.config;
         config.bind(Configuration.MESSAGES_PANE_POSITION_KEY, conversations_paned, "position");
         config.bind(Configuration.WINDOW_WIDTH_KEY, this, "window-width");
         config.bind(Configuration.WINDOW_HEIGHT_KEY, this, "window-height");
@@ -87,13 +90,26 @@ public class MainWindow : Gtk.ApplicationWindow {
         Geary.Engine.instance.account_unavailable.connect(on_account_unavailable);
 
         // Toolbar.
-        main_toolbar = new MainToolbar();
+        main_toolbar = new MainToolbar(config);
         main_toolbar.bind_property("search-open", search_bar, "search-mode-enabled",
             BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
         main_toolbar.bind_property("find-open", conversation_viewer.conversation_find_bar, "search-mode-enabled",
             BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
-        main_toolbar.show_close_button = true;
-        set_titlebar(main_toolbar);
+        if (config.desktop_environment == Configuration.DesktopEnvironment.UNITY) {
+            BindingTransformFunc title_func = (binding, source, ref target) => {
+                string folder = current_folder != null ? current_folder.get_display_name() + " " : "";
+                string account = main_toolbar.account != null ? "(%s)".printf(main_toolbar.account) : "";
+
+                target = "%s%s - %s".printf(folder, account, GearyApplication.NAME);
+
+                return true;
+            };
+            bind_property("current-folder", this, "title", BindingFlags.SYNC_CREATE, title_func);
+            main_toolbar.bind_property("account", this, "title", BindingFlags.SYNC_CREATE, title_func);
+        } else {
+            main_toolbar.show_close_button = true;
+            set_titlebar(main_toolbar);
+        }
 
         set_styling();
         create_layout();
@@ -209,6 +225,11 @@ public class MainWindow : Gtk.ApplicationWindow {
         // Message list left of message viewer.
         conversations_paned.pack1(search_bar_box, false, false);
         conversations_paned.pack2(conversation_viewer, true, true);
+
+        if (config.desktop_environment == Configuration.DesktopEnvironment.UNITY) {
+            main_layout.pack_start(main_toolbar, false, true, 0);
+        }
+
         main_layout.pack_end(conversations_paned, true, true, 0);
         
         add(main_layout);
