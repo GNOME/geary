@@ -150,7 +150,7 @@ public class MainToolbar : Gtk.Box {
         conversation_header.decoration_layout = ":" + buttons[1];
     }
 
-    public void setup_button(Gtk.Button b, string action_name, bool show_label = false) {
+    private void setup_button(Gtk.Button b, string action_name, bool show_label = false) {
         Gtk.Action related_action = action_group.get_action(action_name);
         b.focus_on_click = false;
         b.use_underline = true;
@@ -185,7 +185,7 @@ public class MainToolbar : Gtk.Box {
     /**
      * Given an icon, menu, and action, creates a button that triggers the menu and the action.
      */
-    public void setup_menu_button(Gtk.MenuButton b, Gtk.Menu menu, string action_name) {
+    private void setup_menu_button(Gtk.MenuButton b, Gtk.Menu menu, string action_name) {
         setup_button(b, action_name);
         menu.foreach(GtkUtil.show_menuitem_accel_labels);
         b.popup = menu;
@@ -203,7 +203,7 @@ public class MainToolbar : Gtk.Box {
     /**
      * Given an icon, popover, and action, creates a button that triggers the popover and the action.
      */
-    public void setup_popover_button(Gtk.MenuButton b, Gtk.Popover popover, string action_name) {
+    private void setup_popover_button(Gtk.MenuButton b, Gtk.Popover popover, string action_name) {
         setup_button(b, action_name);
         b.popover = popover;
         b.clicked.connect(() => popover.show_all());
