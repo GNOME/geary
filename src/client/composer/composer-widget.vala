@@ -718,9 +718,12 @@ public class ComposerWidget : Gtk.EventBox {
         Cancellable? cancellable = null)
     throws Error {
         this.draft_save_text = "";
+        SimpleAction close_and_save = get_action(ACTION_CLOSE_AND_SAVE);
+
+        close_and_save.set_enabled(false);
+
         yield close_draft_manager_async(cancellable);
 
-        SimpleAction close_and_save = get_action(ACTION_CLOSE_AND_SAVE);
         if (!this.account.information.save_drafts) {
             this.header.save_and_close_button.hide();
             return;
@@ -1202,7 +1205,7 @@ public class ComposerWidget : Gtk.EventBox {
         if (can_save())
             save_and_exit_async.begin();
         else
-            this.container.close_container();
+            on_close(action, param);
     }
 
     private void on_close_and_discard(SimpleAction action, Variant? param) {
