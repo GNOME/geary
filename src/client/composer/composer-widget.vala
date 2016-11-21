@@ -1150,7 +1150,7 @@ public class ComposerWidget : Gtk.EventBox {
         if (can_save())
             save_and_exit_async.begin();
         else
-            container.close_container();
+            on_close();
     }
     
     private void on_close_and_discard() {
@@ -1381,9 +1381,12 @@ public class ComposerWidget : Gtk.EventBox {
         Cancellable? cancellable = null)
     throws Error {
         this.draft_save_text = "";
+        Gtk.Action close_and_save = this.actions.get_action(ACTION_CLOSE_SAVE);
+
+        close_and_save.set_sensitive(false);
+
         yield close_draft_manager_async(cancellable);
 
-        Gtk.Action close_and_save = this.actions.get_action(ACTION_CLOSE_SAVE);
         if (!this.account.information.save_drafts) {
             close_and_save.set_visible(false);
             return;
