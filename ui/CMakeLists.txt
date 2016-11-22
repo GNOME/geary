@@ -23,6 +23,7 @@ set(RESOURCE_LIST
   STRIPBLANKS "gtk/menus.ui"
   STRIPBLANKS "login.glade"
   STRIPBLANKS "main-toolbar.ui"
+  STRIPBLANKS "main-window.ui"
   STRIPBLANKS "password-dialog.glade"
   STRIPBLANKS "preferences.glade"
   STRIPBLANKS "remove_confirm.glade"
