@@ -104,10 +104,18 @@ public class ClientWebView : WebKit.WebView {
 
     public ClientWebView(WebKit.UserContentManager? content_manager = null) {
         WebKit.Settings setts = new WebKit.Settings();
-        setts.enable_javascript = false;
-        setts.enable_java = false;
-        setts.enable_plugins = false;
+        setts.allow_modal_dialogs = false;
+        setts.default_charset = "UTF-8";
         setts.enable_developer_extras = Args.inspector;
+        setts.enable_fullscreen = false;
+        setts.enable_html5_database = false;
+        setts.enable_html5_local_storage = false;
+        setts.enable_java = false;
+        setts.enable_javascript = false;
+        setts.enable_media_stream = false;
+        setts.enable_offline_web_application_cache = false;
+        setts.enable_page_cache = false;
+        setts.enable_plugins = false;
         setts.javascript_can_access_clipboard = true;
 
         Object(user_content_manager: content_manager, settings: setts);
