@@ -1,5 +1,6 @@
 /*
  * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2016 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -13,6 +14,14 @@ public class ClientWebView : WebKit.WebView {
     private const double ZOOM_DEFAULT = 1.0;
     private const double ZOOM_FACTOR = 0.1;
 
+    private static WebKit.UserScript? script = null;
+
+    public static void load_scripts(GearyApplication app)
+        throws Error {
+        ClientWebView.script = load_app_script(app, "client-web-view.js");
+    }
+
+    /** Loads an application-specific WebKit stylesheet. */
     protected static WebKit.UserStyleSheet load_app_stylesheet(GearyApplication app,
                                                                string name)
         throws Error {
@@ -25,6 +34,7 @@ public class ClientWebView : WebKit.WebView {
         );
     }
 
+    /** Loads a user stylesheet, if any. */
     protected static WebKit.UserStyleSheet? load_user_stylesheet(GearyApplication app,
                                                                  string name) {
         File stylesheet = app.get_user_config_directory().get_child(name);
@@ -45,6 +55,19 @@ public class ClientWebView : WebKit.WebView {
             warning("Failed to load user CSS file: %s", err.message);
         }
         return user_stylesheet;
+    }
+
+    /** Loads an application-specific WebKit JavaScript script. */
+    protected static WebKit.UserScript load_app_script(GearyApplication app,
+                                                       string name)
+        throws Error {
+        return new WebKit.UserScript(
+            app.read_resource(name),
+            WebKit.UserContentInjectedFrames.TOP_FRAME,
+            WebKit.UserScriptInjectionTime.END,
+            null,
+            null
+        );
     }
 
     private static inline uint to_wk2_font_size(Pango.FontDescription font) {
@@ -102,7 +125,7 @@ public class ClientWebView : WebKit.WebView {
     public signal void inline_resource_loaded(string cid);
 
 
-    public ClientWebView(WebKit.UserContentManager? content_manager = null) {
+    public ClientWebView(WebKit.UserContentManager? custom_manager = null) {
         WebKit.Settings setts = new WebKit.Settings();
         setts.allow_modal_dialogs = false;
         setts.default_charset = "UTF-8";
@@ -118,6 +141,10 @@ public class ClientWebView : WebKit.WebView {
         setts.enable_plugins = false;
         setts.javascript_can_access_clipboard = true;
 
+        WebKit.UserContentManager content_manager =
+             custom_manager ?? new WebKit.UserContentManager();
+        content_manager.add_script(ClientWebView.script);
+        
         Object(user_content_manager: content_manager, settings: setts);
 
         // XXX get the allow prefix from the extension somehow
@@ -253,4 +280,3 @@ public class ClientWebView : WebKit.WebView {
     }
 
 }
-
