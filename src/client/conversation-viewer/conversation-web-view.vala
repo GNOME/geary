@@ -73,38 +73,4 @@ public class ConversationWebView : ClientWebView {
         // XXX
     }
 
-    // Overridden since WebKitGTK+ 2.4.10 at least doesn't want to
-    // report a useful height. In combination with the rules from
-    // ui/conversation-web-view.css we can get an accurate idea of
-    // the actual height of the content from the BODY element, but
-    // only once loaded.
-    public override void get_preferred_height(out int minimum_height,
-                                              out int natural_height) {
-        // Silence the "How does the code know the size to allocate?"
-        // warning in GTK 3.20-ish.
-        base.get_preferred_height(out minimum_height, out natural_height);
-
-        long offset_height = 0; // XXX set me
-
-        if (offset_height > 0) {
-            // Avoid multiple notify signals?
-            if (!this.is_height_valid) {
-                this.is_height_valid = true;
-            }
-        }
-
-        minimum_height = natural_height = (int) offset_height;
-    }
-
-    // Overridden since we always what the view to be sized according
-    // to the available space in the parent, not by the width of the
-    // web view.
-    public override void get_preferred_width(out int minimum_height,
-                                             out int natural_height) {
-        // Silence the "How does the code know the size to allocate?"
-        // warning in GTK 3.20-ish.
-        base.get_preferred_width(out minimum_height, out natural_height);
-        minimum_height = natural_height = 0;
-    }
-
 }

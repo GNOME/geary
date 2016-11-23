@@ -5,3 +5,6 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
+window.webkit.messageHandlers.preferredHeightChanged.postMessage(
+    window.document.documentElement.offsetHeight
+);

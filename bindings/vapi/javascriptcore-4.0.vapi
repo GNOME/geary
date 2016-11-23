@@ -6,6 +6,13 @@ namespace JS {
 	[CCode (cname = "JSGlobalContextRef")]
     [SimpleType]
 	public struct GlobalContext {
+
+        [CCode (cname = "JSValueIsNumber")]
+        public bool isNumber(JS.Value value);
+
+        [CCode (cname = "JSValueToNumber")]
+        public double toNumber(JS.Value value, out JS.Value err);
+
 	}
 
 	[CCode (cname = "JSValueRef")]

@@ -6,11 +6,15 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
+protected errordomain JSError { TYPE }
+
 public class ClientWebView : WebKit.WebView {
 
 
+    /** URI Scheme and delimiter for images loaded by Content-ID. */
     public const string CID_PREFIX = "cid:";
 
+    private const string PREFERRED_HEIGHT_MESSAGE = "preferredHeightChanged";
     private const double ZOOM_DEFAULT = 1.0;
     private const double ZOOM_FACTOR = 0.1;
 
@@ -70,6 +74,17 @@ public class ClientWebView : WebKit.WebView {
         );
     }
 
+    protected static int get_int_result(WebKit.JavascriptResult result)
+        throws JSError {
+        JS.GlobalContext context = result.get_global_context();
+        JS.Value value = result.get_value();
+        if (!context.isNumber(value)) {
+            throw new JSError.TYPE("Value is not a number");
+        }
+        JS.Value? err = null;
+        return (int) context.toNumber(value, out err);
+    }
+
     private static inline uint to_wk2_font_size(Pango.FontDescription font) {
         Gdk.Screen? screen = Gdk.Screen.get_default();
         double dpi = screen != null ? screen.get_resolution() : 96.0;
@@ -82,6 +97,7 @@ public class ClientWebView : WebKit.WebView {
 
 
     public bool is_loaded { get; private set; default = false; }
+
     public string allow_prefix { get; private set; default = ""; }
 
     private string _document_font;
@@ -116,6 +132,8 @@ public class ClientWebView : WebKit.WebView {
 
     private Gee.Map<string,Geary.Memory.Buffer> cid_resources =
         new Gee.HashMap<string,Geary.Memory.Buffer>();
+
+    private int preferred_height = 0;
 
 
     /** Emitted when a user clicks a link in this web view. */
@@ -155,6 +173,18 @@ public class ClientWebView : WebKit.WebView {
                     this.is_loaded = true;
                 }
             });
+
+        content_manager.script_message_received[PREFERRED_HEIGHT_MESSAGE].connect(
+            (result) => {
+                try {
+                    this.preferred_height = get_int_result(result);
+                    queue_resize();
+                } catch (JSError err) {
+                    debug("Could not get preferred height: %s", err.message);
+                }
+            });
+
+        register_message_handler(PREFERRED_HEIGHT_MESSAGE);
 
         GearyApplication.instance.config.bind(Configuration.CONVERSATION_VIEWER_ZOOM_KEY, this, "zoom_level");
         this.scroll_event.connect(on_scroll_event);
@@ -214,6 +244,22 @@ public class ClientWebView : WebKit.WebView {
         this.zoom_level -= (this.zoom_level * ZOOM_FACTOR);
     }
 
+    // XXX Surely since we are doing height-for-width, we should be
+    // overriding get_preferred_height_for_width here, but that
+    // doesn't seem to work.
+    public override void get_preferred_height(out int minimum_height,
+                                              out int natural_height) {
+        minimum_height = natural_height = this.preferred_height;
+    }
+
+    // Overridden since we always what the view to be sized according
+    // to the available space in the parent, not by the width of the
+    // web view.
+    public override void get_preferred_width(out int minimum_height,
+                                             out int natural_height) {
+        minimum_height = natural_height = 0;
+    }
+
     internal void handle_cid_request(WebKit.URISchemeRequest request) {
         string cid = request.get_uri().substring(CID_PREFIX.length);
         Geary.Memory.Buffer? buf = this.cid_resources[cid];
@@ -224,6 +270,12 @@ public class ClientWebView : WebKit.WebView {
             request.finish_error(
                 new FileError.NOENT("Unknown CID: %s".printf(cid))
             );
+        }
+    }
+
+    protected inline void register_message_handler(string name) {
+        if (!get_user_content_manager().register_script_message_handler(name)) {
+            debug("Failed to register script message handler: %s", name);
         }
     }
 
