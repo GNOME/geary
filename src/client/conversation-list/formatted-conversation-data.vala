@@ -230,17 +230,9 @@ public class FormattedConversationData : Geary.BaseObject {
     }
     
     // Must call calculate_sizes() first.
-    public void get_size(Gtk.Widget widget, Gdk.Rectangle? cell_area, out int x_offset, 
-        out int y_offset, out int width, out int height) {
+    public int get_height() {
         assert(cell_height != -1); // ensures calculate_sizes() was called.
-        
-        x_offset = 0;
-        y_offset = 0;
-        // set width to 1 (rather than 0) to work around certain themes that cause the
-        // conversation list to be shown as "squished":
-        // https://bugzilla.gnome.org/show_bug.cgi?id=713954
-        width = 1;
-        height = cell_height;
+        return cell_height;
     }
     
     // Can be used for rendering or calculating height.
