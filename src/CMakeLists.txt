@@ -505,6 +505,7 @@ pkg_check_modules(DEPS REQUIRED
     gobject-introspection-1.0
     webkit2gtk-4.0>=${TARGET_WEBKIT}
     webkit2gtk-web-extension-4.0>=${TARGET_WEBKIT}
+    javascriptcoregtk-4.0>=${TARGET_WEBKIT}
     enchant>=1.6
     ${EXTRA_CLIENT_PKG_CONFIG}
 )
@@ -534,6 +535,7 @@ set(CLIENT_PACKAGES
   geary-engine
   gio-2.0
   gtk+-3.0
+  javascriptcore-4.0
   libcanberra
   libnotify
   libsecret-1
@@ -602,8 +604,8 @@ link_directories(${LIB_PATHS})
 add_definitions(${CFLAGS})
 
 set(VALAC_OPTIONS
-    --vapidir=${CMAKE_SOURCE_DIR}/bindings/vapi
     --vapidir=${CMAKE_BINARY_DIR}/src
+    --vapidir=${CMAKE_SOURCE_DIR}/bindings/vapi
     --metadatadir=${CMAKE_SOURCE_DIR}/bindings/metadata
     --target-glib=${TARGET_GLIB}
     --thread
@@ -636,6 +638,23 @@ set_property(
 )
 target_link_libraries(geary-engine m ${DEPS_LIBRARIES} sqlite3-unicodesn)
 
+# WebKit2GTK VAPI generation
+#################################################
+add_custom_target(webkit2gtk-vapi
+  DEPENDS "${CMAKE_BINARY_DIR}/src/webkit2gtk-4.0.vapi"
+)
+add_custom_command(
+    OUTPUT
+        ${CMAKE_BINARY_DIR}/src/webkit2gtk-4.0.vapi
+    DEPENDS
+        "${CMAKE_SOURCE_DIR}/bindings/metadata/WebKit2-4.0.metadata"
+        "${CMAKE_SOURCE_DIR}/bindings/vapi/javascriptcore-4.0.vapi"
+    WORKING_DIRECTORY
+        "${CMAKE_SOURCE_DIR}/bindings/metadata"
+    COMMAND
+        vapigen --library=webkit2gtk-4.0 --pkg gtk+-3.0 --pkg libsoup-2.4 --pkg javascriptcore-4.0 --vapidir=${CMAKE_SOURCE_DIR}/bindings/vapi --metadatadir=${CMAKE_SOURCE_DIR}/bindings/metadata --directory=${CMAKE_BINARY_DIR}/src `${PKG_CONFIG_EXECUTABLE} --variable=girdir gobject-introspection-1.0`/WebKit2-4.0.gir
+)
+
 # Client library (static lib used for building client and unit tests)
 #################################################
 
@@ -652,7 +671,7 @@ OPTIONS
 )
 
 add_library(geary-client STATIC ${CLIENT_VALA_C})
-add_dependencies(geary-client resource_copy webkitgtk-vapi)
+add_dependencies(geary-client resource_copy webkit2gtk-vapi)
 target_link_libraries(geary-client m ${DEPS_LIBRARIES} geary-engine)
 
 # Main client application binary
