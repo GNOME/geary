@@ -59,6 +59,12 @@
             <property name="can_focus">True</property>
             <property name="focus_on_click">False</property>
             <property name="always_show_image">True</property>
+            <property name="tooltip_text" translatable="yes">Empty Spam or Trash folders</property>
+            <child>
+              <object class="GtkImage" id="empty_menu_image">
+                <property name="icon_name">edit-clear-all-symbolic</property>
+              </object>
+            </child>
           </object>
           <packing>
             <property name="pack_type">end</property>

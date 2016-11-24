@@ -30,7 +30,6 @@ public class GearyController : Geary.BaseObject {
     public const string ACTION_ARCHIVE_MESSAGE = "GearyArchiveMessage";
     public const string ACTION_TRASH_MESSAGE = "GearyTrashMessage";
     public const string ACTION_DELETE_MESSAGE = "GearyDeleteMessage";
-    public const string ACTION_EMPTY_MENU = "GearyEmptyMenu";
     public const string ACTION_EMPTY_SPAM = "GearyEmptySpam";
     public const string ACTION_EMPTY_TRASH = "GearyEmptyTrash";
     public const string ACTION_UNDO = "GearyUndo";
@@ -518,12 +517,6 @@ public class GearyController : Geary.BaseObject {
         delete_message.tooltip = DELETE_MESSAGE_TOOLTIP_SINGLE;
         entries += delete_message;
         add_accelerator("<Shift>BackSpace", ACTION_DELETE_MESSAGE);
-        
-        Gtk.ActionEntry empty_menu = { ACTION_EMPTY_MENU, "edit-clear-all-symbolic", null, null,
-            null, null };
-        empty_menu.label = _("Empty");
-        empty_menu.tooltip = _("Empty Spam or Trash folders");
-        entries += empty_menu;
         
         Gtk.ActionEntry empty_spam = { ACTION_EMPTY_SPAM, null, null, null, null, on_empty_spam };
         empty_spam.label = _("Empty _Spam…");

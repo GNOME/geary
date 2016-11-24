@@ -87,7 +87,7 @@ public class MainToolbar : Gtk.Box {
 
         // Setup folder header elements
         setup_button(compose_new_message_button, GearyController.ACTION_NEW_MESSAGE);
-        setup_menu_button(empty_menu_button, empty_menu, GearyController.ACTION_EMPTY_MENU);
+        empty_menu_button.popup = empty_menu;
 
         setup_button(search_conversations_button, GearyController.ACTION_TOGGLE_SEARCH);
         this.bind_property("search-open", search_conversations_button, "active",
