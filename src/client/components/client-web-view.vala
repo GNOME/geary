@@ -68,7 +68,7 @@ public class ClientWebView : WebKit.WebView {
         return new WebKit.UserScript(
             app.read_resource(name),
             WebKit.UserContentInjectedFrames.TOP_FRAME,
-            WebKit.UserScriptInjectionTime.END,
+            WebKit.UserScriptInjectionTime.START,
             null,
             null
         );
@@ -152,7 +152,7 @@ public class ClientWebView : WebKit.WebView {
         setts.enable_html5_database = false;
         setts.enable_html5_local_storage = false;
         setts.enable_java = false;
-        setts.enable_javascript = false;
+        setts.enable_javascript = true;
         setts.enable_media_stream = false;
         setts.enable_offline_web_application_cache = false;
         setts.enable_page_cache = false;

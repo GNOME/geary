@@ -5,6 +5,16 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-window.webkit.messageHandlers.preferredHeightChanged.postMessage(
-    window.document.documentElement.offsetHeight
-);
+/**
+ * Application logic for ClientWebView and subclasses.
+ */
+
+function emitPreferredHeightChanged() {
+    window.webkit.messageHandlers.preferredHeightChanged.postMessage(
+        window.document.documentElement.offsetHeight
+    );
+}
+
+window.onload = function() {
+    emitPreferredHeightChanged();
+};
