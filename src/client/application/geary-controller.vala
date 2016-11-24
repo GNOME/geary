@@ -1499,8 +1499,8 @@ public class GearyController : Geary.BaseObject {
         return null;
     }
     
-    private void on_folders_available_unavailable(Gee.List<Geary.Folder>? available,
-        Gee.List<Geary.Folder>? unavailable) {
+    private void on_folders_available_unavailable(Geary.Account account,
+        Gee.List<Geary.Folder>? available, Gee.List<Geary.Folder>? unavailable) {
         if (available != null && available.size > 0) {
             foreach (Geary.Folder folder in available) {
                 main_window.folder_list.add_folder(folder);
@@ -1524,9 +1524,21 @@ public class GearyController : Geary.BaseObject {
                             main_window.folder_list.select_folder(select_folder);
                     }
                     
-                    folder.open_async.begin(Geary.Folder.OpenFlags.NONE, inbox_cancellables.get(folder.account));
+                    GLib.Cancellable cancellable = inbox_cancellables.get(folder.account);
+                    folder.open_async.begin(Geary.Folder.OpenFlags.NONE, cancellable);
                     
-                    new_messages_monitor.add_folder(folder, inbox_cancellables.get(folder.account));
+                    new_messages_monitor.add_folder(folder, cancellable);
+
+                    // also monitor Inbox's children for notifications
+                    try {
+                        foreach (Geary.Folder children in account.list_matching_folders(folder.path)) {
+                            if (children.special_folder_type == Geary.SpecialFolderType.NONE) {
+                                new_messages_monitor.add_folder(children, cancellable);
+                            }
+                        }
+                    } catch (Error e) {
+                        debug("Could not retrieve Inbox children: %s", e.message);
+                    }
                 }
                 
                 folder.special_folder_type_changed.connect(on_special_folder_type_changed);
