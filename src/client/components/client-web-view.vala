@@ -15,14 +15,21 @@ public class ClientWebView : WebKit.WebView {
     public const string CID_PREFIX = "cid:";
 
     private const string PREFERRED_HEIGHT_MESSAGE = "preferredHeightChanged";
+    private const string REMOTE_IMAGE_LOAD_BLOCKED_MESSAGE = "remoteImageLoadBlocked";
     private const double ZOOM_DEFAULT = 1.0;
     private const double ZOOM_FACTOR = 0.1;
 
     private static WebKit.UserScript? script = null;
+    private static WebKit.UserScript? allow_remote_images = null;
 
     public static void load_scripts(GearyApplication app)
         throws Error {
-        ClientWebView.script = load_app_script(app, "client-web-view.js");
+        ClientWebView.script = load_app_script(
+            app, "client-web-view.js"
+        );
+        ClientWebView.allow_remote_images = load_app_script(
+            app, "client-web-view-allow-remote-images.js"
+        );
     }
 
     /** Loads an application-specific WebKit stylesheet. */
@@ -83,6 +90,7 @@ public class ClientWebView : WebKit.WebView {
         }
         JS.Value? err = null;
         return (int) context.to_number(value, out err);
+        // XXX unref result
     }
 
     private static inline uint to_wk2_font_size(Pango.FontDescription font) {
@@ -142,6 +150,9 @@ public class ClientWebView : WebKit.WebView {
     /** Emitted when the web view has loaded an inline part. */
     public signal void inline_resource_loaded(string cid);
 
+    /** Emitted when a remote image load was disallowed. */
+    public signal void remote_image_load_blocked();
+
 
     public ClientWebView(WebKit.UserContentManager? custom_manager = null) {
         WebKit.Settings setts = new WebKit.Settings();
@@ -183,8 +194,13 @@ public class ClientWebView : WebKit.WebView {
                     debug("Could not get preferred height: %s", err.message);
                 }
             });
+        content_manager.script_message_received[REMOTE_IMAGE_LOAD_BLOCKED_MESSAGE].connect(
+            (result) => {
+                remote_image_load_blocked();
+            });
 
         register_message_handler(PREFERRED_HEIGHT_MESSAGE);
+        register_message_handler(REMOTE_IMAGE_LOAD_BLOCKED_MESSAGE);
 
         GearyApplication.instance.config.bind(Configuration.CONVERSATION_VIEWER_ZOOM_KEY, this, "zoom_level");
         this.scroll_event.connect(on_scroll_event);
@@ -206,6 +222,29 @@ public class ClientWebView : WebKit.WebView {
      */
     public void add_inline_resources(Gee.Map<string,Geary.Memory.Buffer> res) {
         this.cid_resources.set_all(res);
+    }
+
+    /**
+     * Allows loading any remote images found during page load.
+     *
+     * This must be called before HTML content is loaded to have any
+     * effect.
+     */
+    public void allow_remote_image_loading() {
+        // Use a separate script here since we need to update the
+        // value of window.geary.allow_remote_image_loading after it
+        // was first created by client-web-view.js (which is loaded at
+        // the start of page load), but before the page load is
+        // started (so that any remote images present are actually
+        // loaded).
+        this.user_content_manager.add_script(ClientWebView.allow_remote_images);
+    }
+
+    /**
+     * Load any remote images previously that were blocked.
+     */
+    public void load_remote_images() {
+        run_javascript.begin("geary.loadRemoteImages();", null);
     }
 
     /**

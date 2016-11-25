@@ -420,20 +420,4 @@ namespace Util.DOM {
         }
     }
 
-    // Returns a URI suitable for an IMG SRC attribute (or elsewhere, potentially) that is the
-    // memory buffer unpacked into a Base-64 encoded data: URI
-    public string assemble_data_uri(string mimetype, Geary.Memory.Buffer buffer) {
-        // attempt to use UnownedBytesBuffer to avoid memcpying a potentially huge buffer only to
-        // free it when the encoding operation is completed
-        string base64;
-        Geary.Memory.UnownedBytesBuffer? unowned_bytes = buffer as Geary.Memory.UnownedBytesBuffer;
-        if (unowned_bytes != null)
-            base64 = Base64.encode(unowned_bytes.to_unowned_uint8_array());
-        else
-            base64 = Base64.encode(buffer.get_uint8_array());
-
-        return "data:%s;base64,%s".printf(mimetype, base64);
-    }
-
 }
-

@@ -34,10 +34,9 @@ public class ConversationWebView : ClientWebView {
         base(manager);
     }
 
-    public bool clean_and_load(string html) {
+    public void clean_and_load(string html) {
         // XXX clean me
         load_html(html, null);
-        return false; // XXX Work this thes hit out
     }
 
     public bool has_selection() {
@@ -63,13 +62,6 @@ public class ConversationWebView : ClientWebView {
      * XXX
      */
     public void unset_controllable_quotes() {
-        // XXX
-    }
-
-    /**
-     * XXX
-     */
-    public void show_images() {
         // XXX
     }
 

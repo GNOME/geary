@@ -43,8 +43,7 @@ namespace Util.Conversation {
         return offset_height;
     }
 
-    public string clean_html_markup(WebKit.WebPage page, string text, Geary.RFC822.Message message, out bool remote_images) {
-        remote_images = false;
+    public string clean_html_markup(WebKit.WebPage page, string text, Geary.RFC822.Message message) {
         try {
             WebKit.DOM.HTMLElement html = (WebKit.DOM.HTMLElement)
                 page.get_dom_document().document_element;
@@ -114,73 +113,6 @@ namespace Util.Conversation {
             // Now look for the signature.
             wrap_html_signature(page, ref html);
 
-            // Then look for all <img> tags. Inline images are replaced with
-            // data URLs.
-            WebKit.DOM.NodeList inline_list = html.query_selector_all("img");
-            Gee.HashSet<string> inlined_content_ids = new Gee.HashSet<string>();
-            for (ulong i = 0; i < inline_list.length; ++i) {
-                // Get the MIME content for the image.
-                WebKit.DOM.HTMLImageElement img = (WebKit.DOM.HTMLImageElement) inline_list.item(i);
-                string? src = img.get_attribute("src");
-                if (Geary.String.is_empty(src))
-                    continue;
-
-                // if no Content-ID, then leave as-is, but note if a non-data: URI is being used for
-                // purposes of detecting remote images
-                string? content_id = src.has_prefix("cid:") ? src.substring(4) : null;
-                if (Geary.String.is_empty(content_id)) {
-                    remote_images = remote_images || !src.has_prefix("data:");
-
-                    continue;
-                }
-
-                // if image has a Content-ID and it's already been replaced by the image replacer,
-                // drop this tag, otherwise fix up this one with the Base-64 data URI of the image
-                // if (!replaced_content_ids.contains(content_id)) {
-                //     string? filename = message.get_content_filename_by_mime_id(content_id);
-                //     Geary.Memory.Buffer image_content = message.get_content_by_mime_id(content_id);
-                //     Geary.Memory.UnownedBytesBuffer? unowned_buffer =
-                //         image_content as Geary.Memory.UnownedBytesBuffer;
-
-                //     // Get the content type.
-                //     string guess;
-                //     if (unowned_buffer != null)
-                //         guess = ContentType.guess(null, unowned_buffer.to_unowned_uint8_array(), null);
-                //     else
-                //         guess = ContentType.guess(null, image_content.get_uint8_array(), null);
-
-                //     string mimetype = ContentType.get_mime_type(guess);
-
-                //     // Replace the SRC to a data URI, the class to a known label for the popup menu,
-                //     // and the ALT to its filename, if supplied
-                //     img.remove_attribute("src");  // Work around a WebKitGTK+ crash. Bug 764152
-                //     img.set_attribute("src", Util.DOM.assemble_data_uri(mimetype, image_content));
-                //     //img.class_list.add(DATA_IMAGE_CLASS);
-                //     if (!Geary.String.is_empty(filename))
-                //         img.set_attribute("alt", filename);
-
-                //     // stash here so inlined image isn't listed as attachment (esp. if it has no
-                //     // Content-Disposition)
-                //     inlined_content_ids.add(content_id);
-                //     attachment_displayed_inline(content_id);
-                // } else {
-                //     // replaced by data: URI, remove this tag and let the inserted one shine through
-                //     img.parent_element.remove_child(img);
-                // }
-            }
-
-            // Remove any inline images that were referenced through Content-ID
-            foreach (string cid in inlined_content_ids) {
-                try {
-                    string escaped_cid = Geary.HTML.escape_markup(cid);
-                    WebKit.DOM.Element? img = html.query_selector(@"[cid='$escaped_cid']");
-                    if (img != null)
-                        img.parent_element.remove_child(img);
-                } catch (Error error) {
-                    debug("Error removing inlined image: %s", error.message);
-                }
-            }
-
             // Now return the whole message.
             return html.get_outer_html();
         } catch (Error e) {
@@ -210,26 +142,6 @@ namespace Util.Conversation {
                     //quote_container.class_list.remove(QUOTE_HIDE_CLASS);
                 }
             }
-        }
-    }
-
-    public void show_images(WebKit.WebPage page)
-    throws Error {
-        WebKit.DOM.NodeList nodes =
-            page.get_dom_document().body.get_elements_by_tag_name("img");
-        for (ulong i = 0; i < nodes.length; i++) {
-            WebKit.DOM.Element? element = nodes.item(i) as WebKit.DOM.Element;
-            if (element == null || !element.has_attribute("src"))
-                continue;
-
-            // string src = element.get_attribute("src");
-            // Don't prefix empty src strings since it will cause
-            // e.g. 0px images (commonly found in commercial mailouts)
-            // to be rendered as broken images instead of empty
-            // elements.
-            // if (src.length > 0 && !page.is_always_loaded(src)) {
-            //     element.set_attribute("src", page.allow_prefix + src);
-            // }
         }
     }
 

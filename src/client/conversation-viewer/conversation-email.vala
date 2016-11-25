@@ -443,11 +443,15 @@ public class ConversationEmail : Gtk.Box {
             return;
         }
 
-        this.primary_message = new ConversationMessage(
-            message,
-            contact_store,
-            email.load_remote_images().is_certain()
+        bool load_images = email.load_remote_images().is_certain();
+        Geary.Contact contact = this.contact_store.get_by_rfc822(
+            message.get_primary_originator()
         );
+        if (contact != null)  {
+            load_images |= contact.always_load_remote_images();
+        }
+
+        this.primary_message = new ConversationMessage(message, load_images);
         this.primary_message.web_view.add_inline_resources(cid_resources);
         connect_message_view_signals(this.primary_message);
 
@@ -489,7 +493,7 @@ public class ConversationEmail : Gtk.Box {
         }
         foreach (Geary.RFC822.Message sub_message in sub_messages) {
             ConversationMessage attached_message =
-                new ConversationMessage(sub_message, contact_store, false);
+                new ConversationMessage(sub_message, false);
             connect_message_view_signals(attached_message);
             attached_message.web_view.add_inline_resources(cid_resources);
             this.sub_messages.add(attached_message);

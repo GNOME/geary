@@ -227,15 +227,9 @@ public class ConversationMessage : Gtk.Grid {
     private MenuModel context_menu_contact;
     private MenuModel? context_menu_inspector = null;
 
-    // The contacts for the message's account
-    private Geary.ContactStore contact_store;
-
     // Address fields that can be search through
     private Gee.List<AddressFlowBoxChild> searchable_addresses =
         new Gee.LinkedList<AddressFlowBoxChild>();
-
-    // Should any remote messages be always loaded and displayed?
-    private bool always_load_remote_images;
 
     // Resource that have been loaded by the web view
     private Gee.Map<string,WebKit.WebResource> resources =
@@ -247,11 +241,11 @@ public class ConversationMessage : Gtk.Grid {
     private int next_replaced_buffer_number = 0;
 
 
-    /** Fired when the user requests remote images be loaded. */
-    public signal void flag_remote_images();
-
     /** Fired when the user clicks a link in the email. */
     public signal void link_activated(string link);
+
+    /** Fired when the user requests remote images be loaded. */
+    public signal void flag_remote_images();
 
     /** Fired when the user requests remote images be always loaded. */
     public signal void remember_remote_images();
@@ -271,11 +265,8 @@ public class ConversationMessage : Gtk.Grid {
      * loading processes.
      */
     public ConversationMessage(Geary.RFC822.Message message,
-                               Geary.ContactStore contact_store,
-                               bool always_load_remote_images) {
+                               bool load_remote_images) {
         this.message = message;
-        this.contact_store = contact_store;
-        this.always_load_remote_images = always_load_remote_images;
 
 #if !GTK_3_20
         // GTK < 3.20+ style workarounds. Keep this in sync with
@@ -375,6 +366,9 @@ public class ConversationMessage : Gtk.Grid {
         // Web view
 
         this.web_view = new ConversationWebView();
+        if (load_remote_images) {
+            this.web_view.allow_remote_image_loading();
+        }
         this.web_view.context_menu.connect(on_context_menu);
         this.web_view.link_activated.connect((link) => {
                 link_activated(link);
@@ -382,6 +376,9 @@ public class ConversationMessage : Gtk.Grid {
         this.web_view.mouse_target_changed.connect(on_mouse_target_changed);
         this.web_view.resource_load_started.connect((view, res, req) => {
                 this.resources[res.get_uri()] = res;
+            });
+        this.web_view.remote_image_load_blocked.connect(() => {
+                this.remote_images_infobar.show();
             });
         //this.web_view.selection_changed.connect(on_selection_changed);
         this.web_view.show();
@@ -472,29 +469,7 @@ public class ConversationMessage : Gtk.Grid {
                 }
             });
 
-        bool load_images = this.web_view.clean_and_load(body_text ?? "");
-        if (load_images) {
-            bool contact_load = false;
-            Geary.Contact contact = this.contact_store.get_by_rfc822(
-                message.get_primary_originator()
-            );
-            if (contact != null)
-                contact_load = contact.always_load_remote_images();
-            if (!contact_load && !this.always_load_remote_images) {
-                remote_images_infobar.show();
-                load_images = false;
-            }
-
-            // XXX racy
-            this.web_view.notify["load-status"].connect((source, param) => {
-                    if (this.web_view.is_loaded) {
-                        if (load_images) {
-                            show_images(false);
-                        }
-                    }
-                });
-        }
-
+        this.web_view.clean_and_load(body_text ?? "");
     }
 
     /**
@@ -750,7 +725,7 @@ public class ConversationMessage : Gtk.Grid {
     }
 
     private void show_images(bool remember) {
-        this.web_view.show_images();
+        this.web_view.load_remote_images();
         if (remember) {
             flag_remote_images();
         }

@@ -9,12 +9,31 @@
  * Application logic for ClientWebView and subclasses.
  */
 
+var PageState = function() { };
+PageState.prototype = {
+    allowRemoteImages: false,
+    loadRemoteImages: function() {
+        this.allowRemoteImages = true;
+        var images = document.getElementsByTagName("IMG");
+        for (var i = 0; i < images.length; i++) {
+            var img = images.item(i);
+            var src = img.src;
+            img.src = "";
+            img.src = src;
+        }
+    },
+    remoteImageLoadBlocked: function() {
+        window.webkit.messageHandlers.remoteImageLoadBlocked.postMessage(null);
+    }
+};
+
 function emitPreferredHeightChanged() {
     window.webkit.messageHandlers.preferredHeightChanged.postMessage(
         window.document.documentElement.offsetHeight
     );
 }
 
+var geary = new PageState();
 window.onload = function() {
     emitPreferredHeightChanged();
 };
