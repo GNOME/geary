@@ -544,10 +544,13 @@ set(CLIENT_PACKAGES
   ${EXTRA_CLIENT_PACKAGES}
 )
 
+# webkit2gtk-web-extension-4.0 is included as custom VAPI below
 set(WEB_PROCESS_PACKAGES
   geary-engine
   gee-0.8
   gtk+-3.0
+  javascriptcore-4.0
+  libsoup-2.4
   webkit2gtk-web-extension-4.0
 )
 
@@ -641,7 +644,9 @@ target_link_libraries(geary-engine m ${DEPS_LIBRARIES} sqlite3-unicodesn)
 # WebKit2GTK VAPI generation
 #################################################
 add_custom_target(webkit2gtk-vapi
-  DEPENDS "${CMAKE_BINARY_DIR}/src/webkit2gtk-4.0.vapi"
+  DEPENDS
+    "${CMAKE_BINARY_DIR}/src/webkit2gtk-4.0.vapi"
+    "${CMAKE_BINARY_DIR}/src/webkit2gtk-web-extension-4.0.vapi"
 )
 add_custom_command(
     OUTPUT
@@ -653,6 +658,18 @@ add_custom_command(
         "${CMAKE_SOURCE_DIR}/bindings/metadata"
     COMMAND
         vapigen --library=webkit2gtk-4.0 --pkg gtk+-3.0 --pkg libsoup-2.4 --pkg javascriptcore-4.0 --vapidir=${CMAKE_SOURCE_DIR}/bindings/vapi --metadatadir=${CMAKE_SOURCE_DIR}/bindings/metadata --directory=${CMAKE_BINARY_DIR}/src `${PKG_CONFIG_EXECUTABLE} --variable=girdir gobject-introspection-1.0`/WebKit2-4.0.gir
+)
+add_custom_command(
+    OUTPUT
+        "${CMAKE_BINARY_DIR}/src/webkit2gtk-web-extension-4.0.vapi"
+    DEPENDS
+        "${CMAKE_SOURCE_DIR}/bindings/metadata/WebKit2WebExtension-4.0.metadata"
+        "${CMAKE_SOURCE_DIR}/bindings/metadata/WebKit2WebExtension-4.0-custom.vala"
+        "${CMAKE_SOURCE_DIR}/bindings/vapi/javascriptcore-4.0.vapi"
+    WORKING_DIRECTORY
+        "${CMAKE_SOURCE_DIR}/bindings/metadata"
+    COMMAND
+        vapigen --library=webkit2gtk-web-extension-4.0 --pkg gtk+-3.0 --pkg libsoup-2.4 --pkg javascriptcore-4.0 --vapidir=${CMAKE_SOURCE_DIR}/bindings/vapi --metadatadir=${CMAKE_SOURCE_DIR}/bindings/metadata --directory=${CMAKE_BINARY_DIR}/src `${PKG_CONFIG_EXECUTABLE} --variable=girdir gobject-introspection-1.0`/WebKit2WebExtension-4.0.gir WebKit2WebExtension-4.0-custom.vala
 )
 
 # Client library (static lib used for building client and unit tests)
