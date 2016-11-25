@@ -78,11 +78,11 @@ public class ClientWebView : WebKit.WebView {
         throws JSError {
         JS.GlobalContext context = result.get_global_context();
         JS.Value value = result.get_value();
-        if (!context.isNumber(value)) {
+        if (!context.is_number(value)) {
             throw new JSError.TYPE("Value is not a number");
         }
         JS.Value? err = null;
-        return (int) context.toNumber(value, out err);
+        return (int) context.to_number(value, out err);
     }
 
     private static inline uint to_wk2_font_size(Pango.FontDescription font) {

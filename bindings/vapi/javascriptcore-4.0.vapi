@@ -8,10 +8,10 @@ namespace JS {
 	public struct GlobalContext {
 
         [CCode (cname = "JSValueIsNumber")]
-        public bool isNumber(JS.Value value);
+        public bool is_number(JS.Value value);
 
         [CCode (cname = "JSValueToNumber")]
-        public double toNumber(JS.Value value, out JS.Value err);
+        public double to_number(JS.Value value, out JS.Value exception);
 
 	}
 
