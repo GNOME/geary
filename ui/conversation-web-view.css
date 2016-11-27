@@ -169,15 +169,4 @@ pre {
   body {
     background-color: white !important;
   }
-
-  #geary_part_container {
-    display: none !important;
-  }
-  #geary_print_container {
-    display: inline-block !important;
-    background-color: white !important;
-  }
-  #geary_print_container .preview {
-    display: none !important;
-  }
 }
