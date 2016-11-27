@@ -70,13 +70,13 @@ pre {
  * Message chrome style.
  */
 
-.geary_signature {
+.geary-signature {
     color: #777;
     display: inline;
 }
 
-.geary_signature a,
-.geary_quote_container a {
+.geary-signature a,
+.geary-quote-container a {
     color: #5fb2e7;
 }
 
@@ -90,7 +90,7 @@ pre {
 
   /* Inline collapsable quote blocks */
 
-  .geary_quote_container {
+  .geary-quote-container {
     position: relative;
     /* Split 1em of top/bottom margin between here and the default
     blockquote style, so if a message specifies 0px margin and padding
@@ -102,11 +102,11 @@ pre {
     color: #303030;
     background-color: #e8e8e8;/* recv-quoted */
   }
-  .geary_sent .geary_quote_container {
+  .geary-sent .geary-quote-container {
     background-color: #e8e8e8;/* sent-quoted */
   }
 
-  .geary_quote_container > .quote {
+  .geary-quote-container > .geary-quote {
     position: relative;
     padding: 0;
     border: 0;
@@ -114,18 +114,18 @@ pre {
     overflow: hidden;
     z-index: 0;
   }
-  .geary_quote_container.controllable.hide > .quote {
+  .geary-quote-container.geary-controllable.geary-hide > .geary-quote {
     /* Use a fraction value to cut the last visible line off half way. */
     max-height: 7.75em;
   }
 
-  .geary_quote_container.controllable > .quote > blockquote {
+  .geary-quote-container.geary-controllable > .geary-quote > blockquote {
     /* Add space between the quote and the hider button */
     margin-bottom: 18px;
   }
 
-  .geary_quote_container > .shower,
-  .geary_quote_container > .hider {
+  .geary-quote-container > .geary-shower,
+  .geary-quote-container > .geary-hider {
     position: absolute;
     display: none;
     left: 0;
@@ -136,24 +136,25 @@ pre {
     -webkit-user-drag: none;
   }
 
-  .geary_quote_container > .shower > input,
-  .geary_quote_container > .hider > input {
+  .geary-quote-container > .geary-shower > input,
+  .geary-quote-container > .geary-hider > input {
+    display: block;
     width: 100%;
     height: 16px;
     padding: 0;
     font-size: 8px;  /* Absolute size in pixels for graphics */
     color: #888;
   }
-  .geary_quote_container > .shower:hover > input,
-  .geary_quote_container > .hider:hover > input {
+  .geary-quote-container > .geary-shower:hover > input,
+  .geary-quote-container > .geary-hider:hover > input {
     color: #000;
   }
 
-  .geary_quote_container.controllable.hide > .hider {
+  .geary-quote-container.geary-controllable.geary-hide > .geary-hider {
     display: none;
   }
-  .geary_quote_container.controllable.hide > .shower,
-  .geary_quote_container.controllable > .hider {
+  .geary-quote-container.geary-controllable.geary-hide > .geary-shower,
+  .geary-quote-container.geary-controllable > .geary-hider {
     display: block;
   }
 

@@ -210,7 +210,7 @@ public class GearyController : Geary.BaseObject {
         // Load web view resources
         try {
             ClientWebView.load_scripts(this.application);
-            ConversationWebView.load_stylehseets(this.application);
+            ConversationWebView.load_resources(this.application);
         } catch (Error err) {
             error("Error loading web resources: %s", err.message);
         }

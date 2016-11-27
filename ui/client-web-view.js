@@ -15,15 +15,18 @@ var PageState = function() {
 PageState.prototype = {
     init: function() {
         this.allowRemoteImages = false;
-        this.loaded = false;
+        this.is_loaded = false;
 
         var state = this;
         var timeoutId = window.setInterval(function() {
             state.preferredHeightChanged();
-            if (state.loaded) {
+            if (state.is_loaded) {
                 window.clearTimeout(timeoutId);
             }
         }, 50);
+    },
+    loaded: function() {
+        this.is_loaded = true;
     },
     loadRemoteImages: function() {
         this.allowRemoteImages = true;
@@ -50,9 +53,4 @@ PageState.prototype = {
         var has_selection = !window.getSelection().isCollapsed;
         window.webkit.messageHandlers.selectionChanged.postMessage(has_selection);
     }
-};
-
-var geary = new PageState();
-window.onload = function() {
-    geary.loaded = true;
 };

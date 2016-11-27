@@ -12,9 +12,12 @@ public class ConversationWebView : ClientWebView {
 
     private static WebKit.UserStyleSheet? user_stylesheet = null;
     private static WebKit.UserStyleSheet? app_stylesheet = null;
+    private static WebKit.UserScript? app_script = null;
 
-    public static void load_stylehseets(GearyApplication app)
+    public static void load_resources(GearyApplication app)
         throws Error {
+        ConversationWebView.app_script =
+            ClientWebView.load_app_script(app, "conversation-web-view.js");
         ConversationWebView.app_stylesheet =
             ClientWebView.load_app_stylesheet(app, "conversation-web-view.css");
         ConversationWebView.user_stylesheet =
@@ -23,12 +26,12 @@ public class ConversationWebView : ClientWebView {
 
 
     public ConversationWebView() {
-        WebKit.UserContentManager manager = new WebKit.UserContentManager();
-        manager.add_style_sheet(ConversationWebView.app_stylesheet);
+        base();
+        this.user_content_manager.add_script(ConversationWebView.app_script);
+        this.user_content_manager.add_style_sheet(ConversationWebView.app_stylesheet);
         if (ConversationWebView.user_stylesheet != null) {
-            manager.add_style_sheet(ConversationWebView.user_stylesheet);
+            this.user_content_manager.add_style_sheet(ConversationWebView.user_stylesheet);
         }
-        base(manager);
     }
 
     public void clean_and_load(string html) {
