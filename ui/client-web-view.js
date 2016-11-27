@@ -45,6 +45,10 @@ PageState.prototype = {
                 height
             );
         }
+    },
+    selectionChanged: function() {
+        var has_selection = !window.getSelection().isCollapsed;
+        window.webkit.messageHandlers.selectionChanged.postMessage(has_selection);
     }
 };
 

@@ -16,6 +16,8 @@ public class ClientWebView : WebKit.WebView {
 
     private const string PREFERRED_HEIGHT_MESSAGE = "preferredHeightChanged";
     private const string REMOTE_IMAGE_LOAD_BLOCKED_MESSAGE = "remoteImageLoadBlocked";
+    private const string SELECTION_CHANGED_MESSAGE = "selectionChanged";
+
     private const double ZOOM_DEFAULT = 1.0;
     private const double ZOOM_FACTOR = 0.1;
 
@@ -81,6 +83,14 @@ public class ClientWebView : WebKit.WebView {
         );
     }
 
+    protected static bool get_bool_result(WebKit.JavascriptResult result)
+        throws JSError {
+        JS.GlobalContext context = result.get_global_context();
+        JS.Value value = result.get_value();
+        return context.to_boolean(value);
+        // XXX unref result?
+    }
+
     protected static int get_int_result(WebKit.JavascriptResult result)
         throws JSError {
         JS.GlobalContext context = result.get_global_context();
@@ -90,7 +100,7 @@ public class ClientWebView : WebKit.WebView {
         }
         JS.Value? err = null;
         return (int) context.to_number(value, out err);
-        // XXX unref result
+        // XXX unref result?
     }
 
     private static inline uint to_wk2_font_size(Pango.FontDescription font) {
@@ -143,6 +153,9 @@ public class ClientWebView : WebKit.WebView {
 
     private int preferred_height = 0;
 
+
+    /** Emitted when the web view's selection has changed. */
+    public signal void selection_changed(bool has_selection);
 
     /** Emitted when a user clicks a link in this web view. */
     public signal void link_activated(string uri);
@@ -198,9 +211,18 @@ public class ClientWebView : WebKit.WebView {
             (result) => {
                 remote_image_load_blocked();
             });
+        content_manager.script_message_received[SELECTION_CHANGED_MESSAGE].connect(
+            (result) => {
+                try {
+                    selection_changed(get_bool_result(result));
+                } catch (JSError err) {
+                    debug("Could not get selection content: %s", err.message);
+                }
+            });
 
         register_message_handler(PREFERRED_HEIGHT_MESSAGE);
         register_message_handler(REMOTE_IMAGE_LOAD_BLOCKED_MESSAGE);
+        register_message_handler(SELECTION_CHANGED_MESSAGE);
 
         GearyApplication.instance.config.bind(Configuration.CONVERSATION_VIEWER_ZOOM_KEY, this, "zoom_level");
         this.scroll_event.connect(on_scroll_event);

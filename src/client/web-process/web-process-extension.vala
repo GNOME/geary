@@ -41,6 +41,9 @@ public class GearyWebExtension : Object {
                 // XXX Re-enable when we can depend on WK2 2.12
                 // web_page.console_message_sent.connect(on_console_message);
                 web_page.send_request.connect(on_send_request);
+                web_page.get_editor().selection_changed.connect(() => {
+                    selection_changed(web_page);
+                });
             });
     }
 
@@ -92,6 +95,12 @@ public class GearyWebExtension : Object {
         WebKit.Frame frame = page.get_main_frame();
         JS.Context context = frame.get_javascript_global_context();
         execute_script(context, "geary.remoteImageLoadBlocked();");
+    }
+
+    private void selection_changed(WebKit.WebPage page) {
+        WebKit.Frame frame = page.get_main_frame();
+        JS.Context context = frame.get_javascript_global_context();
+        execute_script(context, "geary.selectionChanged();");
     }
 
     private JS.Value execute_script(JS.Context context, string script) {

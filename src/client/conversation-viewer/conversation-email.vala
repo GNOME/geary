@@ -630,9 +630,9 @@ public class ConversationEmail : Gtk.Box {
                     this.message_bodies_loaded = true;
                 }
             });
-        // view.web_view.selection_changed.connect(() => {
-        //         on_message_selection_changed(view);
-        //     });
+        view.web_view.selection_changed.connect(() => {
+                on_message_selection_changed(view);
+            });
     }
 
     private void update_email_state() {
@@ -766,11 +766,11 @@ public class ConversationEmail : Gtk.Box {
         contact_store.mark_contacts_async.begin(contact_list, flags, null);
     }
 
-    // private void on_message_selection_changed(ConversationMessage view) {
-    //     bool has_selection = view.web_view.has_selection();
-    //     this.body_selection_message = has_selection ? view : null;
-    //     body_selection_changed(has_selection);
-    // }
+    private void on_message_selection_changed(ConversationMessage view) {
+        bool has_selection = view.web_view.has_selection();
+        this.body_selection_message = has_selection ? view : null;
+        body_selection_changed(has_selection);
+    }
 
     [GtkCallback]
     private void on_attachments_child_activated(Gtk.FlowBox view,

@@ -518,7 +518,7 @@ public class ComposerWidget : Gtk.EventBox {
         // this.editor.paste_clipboard.connect(update_actions);
         // this.editor.undo.connect(update_actions);
         // this.editor.redo.connect(update_actions);
-        // this.editor.selection_changed.connect(update_actions);
+        this.editor.selection_changed.connect(update_actions);
         this.editor.key_press_event.connect(on_editor_key_press);
         //this.editor.user_changed_contents.connect(reset_draft_timer);
 
@@ -861,9 +861,10 @@ public class ComposerWidget : Gtk.EventBox {
         this.actions.change_action_state(ACTION_COMPOSE_AS_HTML,
             GearyApplication.instance.config.compose_as_html);
 
-        // XXX
-        // if (can_delete_quote)
-        //     this.editor.selection_changed.connect(() => { this.can_delete_quote = false; });
+        if (can_delete_quote)
+            this.editor.selection_changed.connect(
+                () => { this.can_delete_quote = false; }
+            );
     }
 
     private void show_attachment_overlay(bool visible) {

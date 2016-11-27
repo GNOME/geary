@@ -380,7 +380,7 @@ public class ConversationMessage : Gtk.Grid {
         this.web_view.remote_image_load_blocked.connect(() => {
                 this.remote_images_infobar.show();
             });
-        //this.web_view.selection_changed.connect(on_selection_changed);
+        this.web_view.selection_changed.connect(on_selection_changed);
         this.web_view.show();
 
         this.body.set_has_tooltip(true); // Used to show link URLs
@@ -940,14 +940,9 @@ public class ConversationMessage : Gtk.Grid {
         return Gdk.EVENT_PROPAGATE;
     }
 
-    // private void on_selection_changed() {
-    //     bool has_selection = false;
-    //     if (web_view.has_selection()) {
-    //         WebKit.DOM.Document document = web_view.get_dom_document();
-    //         has_selection = !document.default_view.get_selection().is_collapsed;
-    //     }
-    //     set_action_enabled(ACTION_COPY_SELECTION, has_selection);
-    // }
+    private void on_selection_changed(bool has_selection) {
+        set_action_enabled(ACTION_COPY_SELECTION, has_selection);
+    }
 
     [GtkCallback]
     private void on_remote_images_response(Gtk.InfoBar info_bar, int response_id) {
