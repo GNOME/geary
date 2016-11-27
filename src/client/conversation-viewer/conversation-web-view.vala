@@ -22,9 +22,6 @@ public class ConversationWebView : ClientWebView {
     }
 
 
-    public bool is_height_valid { get; private set; default = false; }
-
-
     public ConversationWebView() {
         WebKit.UserContentManager manager = new WebKit.UserContentManager();
         manager.add_style_sheet(ConversationWebView.app_stylesheet);

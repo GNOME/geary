@@ -190,7 +190,7 @@ public class ConversationListBox : Gtk.ListBox {
         public override void expand() {
             this.is_expanded = true;
             this.view.message_view_iterator().foreach((view) => {
-                    if (!view.web_view.is_height_valid) {
+                    if (!view.web_view.is_loaded) {
                         view.web_view.queue_resize();
                     }
                     return true;
@@ -209,7 +209,7 @@ public class ConversationListBox : Gtk.ListBox {
             // message has a non-trivial height, and then wait for it
             // to be reallocated, so that it picks up the web_view's
             // height.
-            if (view.primary_message.web_view.is_height_valid) {
+            if (view.primary_message.web_view.is_loaded) {
                 // Disable should_scroll after the message body has
                 // been loaded so we don't keep on scrolling later,
                 // like when the window has been resized.
@@ -348,7 +348,7 @@ public class ConversationListBox : Gtk.ListBox {
 
         this.key_press_event.connect(on_key_press);
         this.realize.connect(() => {
-                adjustment.value_changed.connect(check_mark_read);
+                adjustment.value_changed.connect(() => { check_mark_read(); });
             });
         this.row_activated.connect(on_row_activated);
         this.size_allocate.connect(() => { check_mark_read(); });
@@ -530,7 +530,7 @@ public class ConversationListBox : Gtk.ListBox {
             // size of the body will be off, affecting the visibility
             // of emails further down the conversation.
             if (email_view.email.is_unread().is_certain() &&
-                conversation_message.web_view.is_height_valid &&
+                conversation_message.web_view.is_loaded &&
                 !email_view.is_manually_read) {
                  int body_top = 0;
                  int body_left = 0;
@@ -540,11 +540,13 @@ public class ConversationListBox : Gtk.ListBox {
                      0, 0,
                      out body_left, out body_top
                  );
-                 int body_bottom =
-                     body_top + web_view.get_allocated_height();
+
+                 int body_height = web_view.get_allocated_height();
+                 int body_bottom = body_top + body_height;
 
                  // Only mark the email as read if it's actually visible
-                 if (body_bottom > top_bound &&
+                 if (body_height > 0 &&
+                     body_bottom > top_bound &&
                      body_top + TEXT_PADDING < bottom_bound) {
                      email_ids.add(email_view.email.id);
 
