@@ -21,56 +21,6 @@ namespace Util.Composer {
     private const string EDITING_DELETE_CONTAINER_ID = "WebKit-Editing-Delete-Container";
 
 
-    public void on_load_finished_and_realized(WebKit.WebPage page, string body_html) {
-        WebKit.DOM.Document document = page.get_dom_document();
-        WebKit.DOM.HTMLElement? body = document.get_element_by_id(BODY_ID) as WebKit.DOM.HTMLElement;
-        assert(body != null);
-
-        try {
-            body.set_inner_html(body_html);
-        } catch (Error e) {
-            debug("Failed to load prefilled body: %s", e.message);
-        }
-
-        protect_blockquote_styles(page);
-
-        // Focus within the HTML document
-        body.focus();
-
-        // Set cursor at appropriate position
-        try {
-            WebKit.DOM.Element? cursor = document.get_element_by_id("cursormarker");
-            if (cursor != null) {
-                WebKit.DOM.Range range = document.create_range();
-                range.select_node_contents(cursor);
-                range.collapse(false);
-                // WebKit.DOM.DOMSelection selection = document.default_page.get_selection();
-                // selection.remove_all_ranges();
-                // selection.add_range(range);
-                // cursor.parent_element.remove_child(cursor);
-            }
-        } catch (Error error) {
-            debug("Error setting cursor at end of text: %s", error.message);
-        }
-
-        //Util.DOM.bind_event(view, "a", "click", (Callback) on_link_clicked, this);
-    }
-
-    private void protect_blockquote_styles(WebKit.WebPage page) {
-        // We will search for an remove a particular styling when we quote text.  If that style
-        // exists in the quoted text, we alter it slightly so we don't mess with it later.
-        try {
-            WebKit.DOM.NodeList node_list = page.get_dom_document().query_selector_all(
-                "blockquote[style=\"margin: 0 0 0 40px; border: none; padding: 0px;\"]");
-            for (int i = 0; i < node_list.length; ++i) {
-                ((WebKit.DOM.Element) node_list.item(i)).set_attribute("style",
-                    "margin: 0 0 0 40px; padding: 0px; border:none;");
-            }
-        } catch (Error error) {
-            debug("Error protecting blockquotes: %s", error.message);
-        }
-    }
-
     public void insert_quote(WebKit.WebPage page, string quote) {
         WebKit.DOM.Document document = page.get_dom_document();
         document.exec_command("insertHTML", false, quote);

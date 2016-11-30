@@ -12,6 +12,61 @@
 public class ComposerWebView : ClientWebView {
 
 
+    private const string HTML_BODY = """
+        <html><head><title></title>
+        <style>
+        body {
+            margin: 0px !important;
+            padding: 0 !important;
+            background-color: white !important;
+            font-size: medium !important;
+        }
+        body.plain, body.plain * {
+            font-family: monospace !important;
+            font-weight: normal;
+            font-style: normal;
+            font-size: medium !important;
+            color: black;
+            text-decoration: none;
+        }
+        body.plain a {
+            cursor: text;
+        }
+        #message-body {
+            box-sizing: border-box;
+            padding: 10px;
+            outline: 0px solid transparent;
+            min-height: 100%;
+        }
+        blockquote {
+            margin-top: 0px;
+            margin-bottom: 0px;
+            margin-left: 10px;
+            margin-right: 10px;
+            padding-left: 5px;
+            padding-right: 5px;
+            background-color: white;
+            border: 0;
+            border-left: 3px #aaa solid;
+        }
+        pre {
+            white-space: pre-wrap;
+            margin: 0;
+        }
+        </style>
+        </head><body>
+        <div id="message-body" contenteditable="true" dir="auto">%s</div>
+        </body></html>""";
+    private const string CURSOR = "<span id=\"cursormarker\"></span>";
+
+    private static WebKit.UserScript? app_script = null;
+
+    public static void load_resources(GearyApplication app)
+        throws Error {
+        ComposerWebView.app_script =
+            ClientWebView.load_app_script(app, "composer-web-view.js");
+    }
+
     private bool is_shift_down = false;
 
 
@@ -19,12 +74,32 @@ public class ComposerWebView : ClientWebView {
 
 
     public ComposerWebView() {
+        base();
+        this.user_content_manager.add_script(ComposerWebView.app_script);
+
         get_editor_state().notify["typing-attributes"].connect(() => {
                 text_attributes_changed(get_editor_state().typing_attributes);
             });
 
         // this.should_insert_text.connect(on_should_insert_text);
         this.key_press_event.connect(on_key_press_event);
+    }
+
+    /**
+     * Loads a message HTML body into the view.
+     */
+    public new void load_html(string? body, string? signature, bool top_posting) {
+        string html = "";
+        signature = signature ?? "";
+
+        if (body == null)
+            html = CURSOR + "<br /><br />" + signature;
+        else if (top_posting)
+            html = CURSOR + "<br /><br />" + signature + body;
+        else
+            html = body + CURSOR + "<br /><br />" + signature;
+
+        base.load_html(HTML_BODY.printf(html), null);
     }
 
     public bool can_undo() {
@@ -135,13 +210,6 @@ public class ComposerWebView : ClientWebView {
      */
     public string get_text() {
         return ""; // XXX
-    }
-
-    /**
-     * ???
-     */
-    public void load_finished_and_realised() {
-        // XXX
     }
 
     /**

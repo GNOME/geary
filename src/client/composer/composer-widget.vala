@@ -151,52 +151,6 @@ public class ComposerWidget : Gtk.EventBox {
 
     private const string URI_LIST_MIME_TYPE = "text/uri-list";
     private const string FILE_URI_PREFIX = "file://";
-    private const string HTML_BODY = """
-        <html><head><title></title>
-        <style>
-        body {
-            margin: 0px !important;
-            padding: 0 !important;
-            background-color: white !important;
-            font-size: medium !important;
-        }
-        body.plain, body.plain * {
-            font-family: monospace !important;
-            font-weight: normal;
-            font-style: normal;
-            font-size: medium !important;
-            color: black;
-            text-decoration: none;
-        }
-        body.plain a {
-            cursor: text;
-        }
-        #message-body {
-            box-sizing: border-box;
-            padding: 10px;
-            outline: 0px solid transparent;
-            min-height: 100%;
-        }
-        blockquote {
-            margin-top: 0px;
-            margin-bottom: 0px;
-            margin-left: 10px;
-            margin-right: 10px;
-            padding-left: 5px;
-            padding-right: 5px;
-            background-color: white;
-            border: 0;
-            border-left: 3px #aaa solid;
-        }
-        pre {
-            white-space: pre-wrap;
-            margin: 0;
-        }
-        </style>
-        </head><body>
-        <div id="message-body" contenteditable="true" dir="auto"></div>
-        </body></html>""";
-    private const string CURSOR = "<span id=\"cursormarker\"></span>";
     
     private const int DRAFT_TIMEOUT_SEC = 10;
     
@@ -240,14 +194,6 @@ public class ComposerWidget : Gtk.EventBox {
         set { this.subject_entry.set_text(value); }
     }
 
-    public string message {
-        owned get { return get_html(); }
-        set {
-            this.body_html = value;
-            this.editor.load_html(HTML_BODY, null);
-        }
-    }
-
     public ComposerState state { get; internal set; }
 
     public ComposeType compose_type { get; private set; default = ComposeType.NEW_MESSAGE; }
@@ -286,6 +232,7 @@ public class ComposerWidget : Gtk.EventBox {
     private ContactListStore? contact_list_store = null;
 
     private string? body_html = null;
+    private string? signature_html = null;
 
     [GtkChild]
     private Gtk.Box composer_container;
@@ -489,13 +436,8 @@ public class ComposerWidget : Gtk.EventBox {
         }
 
         update_from_field();
+        update_signature();
         update_pending_attachments(this.pending_include, true);
-
-        // only add signature if the option is actually set and if this is not a draft
-        if (this.account.information.use_email_signature && !is_referred_draft)
-            add_signature_and_cursor();
-        else
-            set_cursor();
 
         // Add actions once every element has been initialized and added
         initialize_actions();
@@ -522,8 +464,7 @@ public class ComposerWidget : Gtk.EventBox {
         this.editor.key_press_event.connect(on_editor_key_press);
         //this.editor.user_changed_contents.connect(reset_draft_timer);
 
-        // only do this after setting body_html
-        this.editor.load_html(HTML_BODY, null);
+        this.editor.load_html(this.body_html, this.signature_html, this.top_posting);
 
         GearyApplication.instance.config.settings.changed[Configuration.SPELL_CHECK_KEY].connect(
             on_spell_check_changed);
@@ -850,10 +791,6 @@ public class ComposerWidget : Gtk.EventBox {
         // This is safe to call even when this connection hasn't been made.
         realize.disconnect(on_load_finished_and_realized);
 
-        if (!Geary.String.is_empty(this.body_html)) {
-            this.editor.load_finished_and_realised();
-        }
-
         on_spell_check_changed();
         update_actions();
 
@@ -1089,55 +1026,6 @@ public class ComposerWidget : Gtk.EventBox {
         referred_ids.add(referred.id);
     }
     
-    private void add_signature_and_cursor() {
-        string? signature = null;
-        
-        // If use signature is enabled but no contents are on settings then we'll use ~/.signature, if any
-        // otherwise use whatever the user has input in settings dialog
-        if (this.account.information.use_email_signature
-            && Geary.String.is_empty_or_whitespace(this.account.information.email_signature)) {
-            File signature_file = File.new_for_path(Environment.get_home_dir()).get_child(".signature");
-            if (!signature_file.query_exists()) {
-                set_cursor();
-                return;
-            }
-            
-            try {
-                FileUtils.get_contents(signature_file.get_path(), out signature);
-                if (Geary.String.is_empty_or_whitespace(signature)) {
-                    set_cursor();
-                    return;
-                }
-                signature = Geary.HTML.smart_escape(signature, false);
-            } catch (Error error) {
-                debug("Error reading signature file %s: %s", signature_file.get_path(), error.message);
-                set_cursor();
-                return;
-            }
-        } else {
-            signature = account.information.email_signature;
-            if (Geary.String.is_empty_or_whitespace(signature)) {
-                set_cursor();
-                return;
-            }
-            signature = Geary.HTML.smart_escape(signature, true);
-        }
-
-        if (this.body_html == null)
-            this.body_html = CURSOR + "<br /><br />" + signature;
-        else if (top_posting)
-            this.body_html = CURSOR + "<br /><br />" + signature + this.body_html;
-        else
-            this.body_html = this.body_html + CURSOR + "<br /><br />" + signature;
-    }
-
-    private void set_cursor() {
-        if (top_posting)
-            this.body_html = CURSOR + this.body_html;
-        else
-            this.body_html = this.body_html + CURSOR;
-    }
-
     private bool can_save() {
         return this.draft_manager != null
             && this.draft_manager.is_open
@@ -2054,11 +1942,7 @@ public class ComposerWidget : Gtk.EventBox {
             this.can_delete_quote = false;
             if (event.keyval == Gdk.Key.BackSpace) {
                 this.body_html = null;
-                if (this.account.information.use_email_signature)
-                    add_signature_and_cursor();
-                else
-                    set_cursor();
-                this.editor.load_html(HTML_BODY, null);
+                this.editor.load_html(this.body_html, this.signature_html, this.top_posting);
                 return true;
             }
         }
@@ -2256,9 +2140,40 @@ public class ComposerWidget : Gtk.EventBox {
             return false;
 
         this.account = new_account;
+        update_signature();
         load_entry_completions.begin();
 
         return true;
+    }
+
+    private void update_signature() {
+        string? account_sig = null;
+
+        if (this.account.information.use_email_signature) {
+            account_sig = account.information.email_signature;
+            if (Geary.String.is_empty_or_whitespace(account_sig)) {
+                // No signature is specified in the settings, so use
+                // ~/.signature
+
+                // XXX This loading should be async, but that needs to
+                // be factored into how the signature HTML is passed
+                // to the editor.
+                File signature_file = File.new_for_path(Environment.get_home_dir()).get_child(".signature");
+                if (signature_file.query_exists()) {
+                    try {
+                        FileUtils.get_contents(signature_file.get_path(), out account_sig);
+                    } catch (Error error) {
+                        debug("Error reading signature file %s: %s", signature_file.get_path(), error.message);
+                    }
+                }
+            }
+
+            account_sig = (!Geary.String.is_empty_or_whitespace(account_sig))
+                ? Geary.HTML.smart_escape(account_sig, true)
+                : null;
+        }
+
+        this.signature_html = account_sig;
     }
 
     private void on_text_attributes_changed(uint mask) {
@@ -2334,15 +2249,5 @@ public class ComposerWidget : Gtk.EventBox {
     private void on_insert_link(SimpleAction action, Variant? param) {
         link_dialog("http://");
     }
-
-    // private static void on_link_clicked(WebKit.DOM.Element element, WebKit.DOM.Event event,
-    //     ComposerWidget composer) {
-    //     try {
-    //         composer.editor.get_dom_document().get_default_view().get_selection().
-    //             select_all_children(element);
-    //     } catch (Error e) {
-    //         debug("Error selecting link: %s", e.message);
-    //     }
-    // }
 
 }

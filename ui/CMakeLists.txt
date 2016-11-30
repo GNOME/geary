@@ -10,6 +10,7 @@ set(RESOURCE_LIST
   STRIPBLANKS "composer-headerbar.ui"
   STRIPBLANKS "composer-menus.ui"
   STRIPBLANKS "composer-widget.ui"
+              "composer-web-view.js"
   STRIPBLANKS "conversation-email.ui"
   STRIPBLANKS "conversation-email-attachment-view.ui"
   STRIPBLANKS "conversation-email-menus.ui"
