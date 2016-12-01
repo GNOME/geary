@@ -145,7 +145,12 @@ public class MainWindow : Gtk.ApplicationWindow {
             else
                 debug("Error parsing css on lines %u-%u: %s", start, end, error.message);
         });
-        provider.load_from_resource(@"/org/gnome/Geary/geary.css");
+        try {
+            File file = File.new_for_uri(@"resource:///org/gnome/Geary/geary.css");
+            provider.load_from_file(file);
+        } catch (Error e) {
+            error("Could not load CSS: %s", e.message);
+        }
     }
 
     private void setup_layout(Configuration config) {

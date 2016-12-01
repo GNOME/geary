@@ -24,9 +24,6 @@ public class SearchBar : Gtk.SearchBar {
         search_entry.search_changed.connect(() => {
             search_text_changed(search_entry.text);
         });
-        search_entry.stop_search.connect(() => {
-            search_entry.text = "";
-        });
         search_entry.activate.connect(() => {
             search_text_changed(search_entry.text);
         });

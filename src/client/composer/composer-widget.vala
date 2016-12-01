@@ -714,6 +714,17 @@ public class ComposerWidget : Gtk.EventBox {
         }
     }
 
+    // This code is in a separate method due to https://bugzilla.gnome.org/show_bug.cgi?id=742621
+    // connect_to_draft_manager() is simply for symmetry.  When above bug is fixed, this code can
+    // be moved back into open/close methods
+    private void disconnect_from_draft_manager() {
+        this.draft_manager.notify[Geary.App.DraftManager.PROP_DRAFT_STATE]
+            .disconnect(on_draft_state_changed);
+        this.draft_manager.notify[Geary.App.DraftManager.PROP_CURRENT_DRAFT_ID]
+            .disconnect(on_draft_id_changed);
+        this.draft_manager.fatal.disconnect(on_draft_manager_fatal);
+    }
+
     /**
      * Creates and opens the composer's draft manager.
      */
@@ -1433,11 +1444,7 @@ public class ComposerWidget : Gtk.EventBox {
         if (this.draft_manager == null)
             return;
 
-        this.draft_manager.notify[Geary.App.DraftManager.PROP_DRAFT_STATE]
-            .disconnect(on_draft_state_changed);
-        this.draft_manager.notify[Geary.App.DraftManager.PROP_CURRENT_DRAFT_ID]
-            .disconnect(on_draft_id_changed);
-        this.draft_manager.fatal.disconnect(on_draft_manager_fatal);
+        disconnect_from_draft_manager();
 
         // drop ref even if close failed
         try {

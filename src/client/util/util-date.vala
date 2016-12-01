@@ -164,7 +164,7 @@ private string pretty_print_coarse(CoarseDate coarse_date, ClockFormat clock_for
             return _("Now");
         
         case CoarseDate.MINUTES:
-            return ngettext("%dm ago", "%dm ago", (ulong) (diff / TimeSpan.MINUTE)).printf(diff / TimeSpan.MINUTE);
+            return ngettext("%dm ago", "%dm ago", (ulong) (diff / TimeSpan.MINUTE)).printf((int) (diff / TimeSpan.MINUTE));
         
         case CoarseDate.HOURS:
             int rounded = (int) Math.round((double) diff / TimeSpan.HOUR);
