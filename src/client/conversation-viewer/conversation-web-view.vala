@@ -37,16 +37,20 @@ public class ConversationWebView : ClientWebView {
     /**
      * Returns the current selection, for prefill as find text.
      */
-    public async string get_selection_for_find() throws Error{
-        WebKit.JavascriptResult result = yield this.run_javascript("geary.getSelectionForFind();", null);
+    public async string? get_selection_for_find() throws Error{
+        WebKit.JavascriptResult result = yield this.run_javascript(
+            "geary.getSelectionForFind();", null
+        );
         return get_string_result(result);
     }
 
     /**
      * Returns the current selection, for quoting in a message.
      */
-    public async string get_selection_for_quoting() throws Error {
-        WebKit.JavascriptResult result = yield this.run_javascript("geary.getSelectionForQuoting();", null);
+    public async string? get_selection_for_quoting() throws Error {
+        WebKit.JavascriptResult result = yield this.run_javascript(
+            "geary.getSelectionForQuoting();", null
+        );
         return get_string_result(result);
     }
 

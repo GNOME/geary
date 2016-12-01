@@ -104,7 +104,7 @@ public class ClientWebView : WebKit.WebView {
         // XXX unref result?
     }
 
-    protected static string get_string_result(WebKit.JavascriptResult result)
+    protected static string? get_string_result(WebKit.JavascriptResult result)
         throws JSError {
         JS.GlobalContext context = result.get_global_context();
         JS.Value js_str_value = result.get_value();
