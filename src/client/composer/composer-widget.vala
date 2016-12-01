@@ -732,7 +732,7 @@ public class ComposerWidget : Gtk.EventBox {
                         this.body_html = message.get_plain_body(true, null);
                     }
                 } catch (Error error) {
-                    debug("Error getting message body: %s", error.message);
+                    debug("Error getting draft message body: %s", error.message);
                 }
             break;
 
@@ -880,7 +880,7 @@ public class ComposerWidget : Gtk.EventBox {
         return true;
     }
 
-    public Geary.ComposedEmail get_composed_email(DateTime? date_override = null,
+    public async Geary.ComposedEmail get_composed_email(DateTime? date_override = null,
         bool only_html = false) {
         Geary.ComposedEmail email = new Geary.ComposedEmail(
             date_override ?? new DateTime.now_local(), from);
@@ -907,10 +907,14 @@ public class ComposerWidget : Gtk.EventBox {
 
         email.img_src_prefix = this.editor.allow_prefix;
 
-        if (actions.get_action_state(ACTION_COMPOSE_AS_HTML).get_boolean() || only_html)
-            email.body_html = get_html();
-        if (!only_html)
-            email.body_text = get_text();
+        try {
+            if (actions.get_action_state(ACTION_COMPOSE_AS_HTML).get_boolean() || only_html)
+                email.body_html = yield this.editor.get_html();
+            if (!only_html)
+                email.body_text = yield this.editor.get_text();
+        } catch (Error error) {
+            debug("Error getting composer message body: %s", error.message);
+        }
 
         // User-Agent
         email.mailer = GearyApplication.PRGNAME + "/" + GearyApplication.VERSION;
@@ -1207,10 +1211,16 @@ public class ComposerWidget : Gtk.EventBox {
         return false;
     }
 
-    private bool should_send() {
+    private async bool should_send() {
         bool has_subject = !Geary.String.is_empty(subject.strip());
-        bool has_body = !Geary.String.is_empty(get_html());
         bool has_attachment = this.attached_files.size > 0;
+        bool has_body = true;
+
+        try {
+            has_body = !Geary.String.is_empty(yield this.editor.get_html());
+        } catch (Error err) {
+            debug("Failed to get message body: %s", err.message);
+        }
 
         string? confirmation = null;
         if (!has_subject && !has_body && !has_attachment) {
@@ -1232,8 +1242,11 @@ public class ComposerWidget : Gtk.EventBox {
 
     // Sends the current message.
     private void on_send(SimpleAction action, Variant? param) {
-        if (should_send())
-            on_send_async.begin();
+        this.should_send.begin((obj, res) => {
+                if (this.should_send.end(res)) {
+                    on_send_async.begin();
+                }
+            });
     }
 
     // Used internally by on_send()
@@ -1245,7 +1258,7 @@ public class ComposerWidget : Gtk.EventBox {
         
         // Perform send.
         try {
-            yield this.account.send_email_async(get_composed_email());
+            yield this.account.send_email_async(yield get_composed_email());
         } catch (Error e) {
             GLib.message("Error sending email: %s", e.message);
         }
@@ -1337,20 +1350,24 @@ public class ComposerWidget : Gtk.EventBox {
     }
 
     // Note that drafts are NOT "linkified."
-    private Geary.Nonblocking.Semaphore? save_draft() {
+    private void save_draft() {
         // cancel timer in favor of just doing it now
         cancel_draft_timer();
-        
-        try {
-            if (this.draft_manager != null) {
-                return this.draft_manager.update(get_composed_email(null, true).to_rfc822_message(),
-                    this.draft_flags, null);
-            }
-        } catch (Error err) {
-            GLib.message("Unable to save draft: %s", err.message);
+
+        if (this.draft_manager != null) {
+            this.get_composed_email.begin(null, true, (obj, res) => {
+                    try {
+                        Geary.ComposedEmail draft = this.get_composed_email.end(res);
+                        this.draft_manager.update(
+                            draft.to_rfc822_message(),
+                            this.draft_flags,
+                            null
+                        );
+                    } catch (Error err) {
+                        GLib.message("Unable to save draft: %s", err.message);
+                    }
+                });
         }
-        
-        return null;
     }
 
     private Geary.Nonblocking.Semaphore? discard_draft() {
@@ -1776,14 +1793,6 @@ public class ComposerWidget : Gtk.EventBox {
 
         // Re-bind to anchor links.  This must be done every time link have changed.
         //Util.DOM.bind_event(this.editor,"a", "click", (Callback) on_link_clicked, this);
-    }
-
-    private string get_html() {
-        return this.editor.get_html();
-    }
-
-    private string get_text() {
-        return this.editor.get_text();
     }
 
     private void on_link_activated(ClientWebView view, string uri) {

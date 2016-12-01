@@ -201,15 +201,21 @@ public class ComposerWebView : ClientWebView {
     /**
      * Returns the editor content as an HTML string.
      */
-    public string get_html() {
-        return ""; // XXX
+    public async string? get_html() throws Error {
+        WebKit.JavascriptResult result = yield this.run_javascript(
+            "geary.getHtml();", null
+        );
+        return get_string_result(result);
     }
 
     /**
      * Returns the editor content as a plain text string.
      */
-    public string get_text() {
-        return ""; // XXX
+    public async string? get_text() throws Error {
+        WebKit.JavascriptResult result = yield this.run_javascript(
+            "geary.getText();", null
+        );
+        return get_string_result(result);
     }
 
     /**

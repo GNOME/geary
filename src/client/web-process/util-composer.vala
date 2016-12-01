@@ -6,8 +6,6 @@
 
 namespace Util.Composer {
 
-    private const string BODY_ID = "message-body";
-
     // HTML node names
     private const string BLOCKQUOTE_NAME = "BLOCKQUOTE";
     private const string BODY_NAME = "BODY";
@@ -118,18 +116,6 @@ namespace Util.Composer {
         } catch (Error error) {
             debug("Error removing blockquote style: %s", error.message);
         }
-    }
-
-    public string get_html(WebKit.WebPage page) {
-        return (
-            (WebKit.DOM.HTMLElement) page.get_dom_document().get_element_by_id(BODY_ID)
-         ).get_inner_html();
-    }
-
-    public string get_text(WebKit.WebPage page) {
-        return Util.DOM.html_to_flowed_text(
-            (WebKit.DOM.HTMLElement) page.get_dom_document().get_element_by_id(BODY_ID)
-        );
     }
 
     public bool handle_key_press(WebKit.WebPage page, Gdk.EventKey event) {

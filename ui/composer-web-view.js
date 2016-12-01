@@ -12,6 +12,8 @@
 var ComposerPageState = function() {
     this.init.apply(this, arguments);
 };
+ComposerPageState.BODY_ID = "message-body";
+
 ComposerPageState.prototype = {
     __proto__: PageState.prototype,
     init: function() {
@@ -51,6 +53,12 @@ ComposerPageState.prototype = {
         PageState.prototype.loaded.apply(this, []);
 
         //Util.DOM.bind_event(view, "a", "click", (Callback) on_link_clicked, this);
+    },
+    getHtml: function() {
+        return document.getElementById(ComposerPageState.BODY_ID).innerHTML;
+    },
+    getText: function() {
+        return document.getElementById(ComposerPageState.BODY_ID).innerText;
     }
     // private static void on_link_clicked(WebKit.DOM.Element element, WebKit.DOM.Event event,
     //     ComposerWidget composer) {
