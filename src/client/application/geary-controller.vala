@@ -2278,11 +2278,15 @@ public class GearyController : Geary.BaseObject {
                 email_view = list_view.get_reply_target();
             }
         }
-        string? quote = null;
+
         if (email_view != null) {
-            quote = email_view.get_selection_for_quoting();
+            email_view.get_selection_for_quoting.begin((obj, res) => {
+                    string? quote = email_view.get_selection_for_quoting.end(res);
+                    create_compose_widget(compose_type, email_view.email, quote);
+                });
+        } else {
+            create_compose_widget(compose_type, email_view.email, null);
         }
-        create_compose_widget(compose_type, email_view.email, quote);
     }
 
     private void create_compose_widget(ComposerWidget.ComposeType compose_type,

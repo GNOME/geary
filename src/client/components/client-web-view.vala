@@ -100,6 +100,23 @@ public class ClientWebView : WebKit.WebView {
         }
         JS.Value? err = null;
         return (int) context.to_number(value, out err);
+        // XXX check err
+        // XXX unref result?
+    }
+
+    protected static string get_string_result(WebKit.JavascriptResult result)
+        throws JSError {
+        JS.GlobalContext context = result.get_global_context();
+        JS.Value js_str_value = result.get_value();
+        JS.Value? err = null;
+        JS.String js_str = context.to_string_copy(js_str_value, out err);
+        // XXX check err
+        int len = js_str.get_maximum_utf8_cstring_size();
+        string value = string.nfill(len, 0);
+        js_str.get_utf8_cstring(value, len);
+        js_str.release();
+        debug("Got string: %s", value);
+        return value;
         // XXX unref result?
     }
 

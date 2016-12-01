@@ -294,11 +294,13 @@ public class ConversationViewer : Gtk.Stack {
                 ConversationEmail? email_view =
                     this.current_list.get_selection_view();
                 if (email_view != null) {
-                    string text = email_view.get_selection_for_find();
-                    if (text != null) {
-                        this.conversation_find_entry.set_text(text);
-                        this.conversation_find_entry.select_region(0, -1);
-                    }
+                    email_view.get_selection_for_find.begin((obj, res) => {
+                            string text = email_view.get_selection_for_find.end(res);
+                            if (text != null) {
+                                this.conversation_find_entry.set_text(text);
+                                this.conversation_find_entry.select_region(0, -1);
+                            }
+                        });
                 }
             } else {
                 // Find was disabled

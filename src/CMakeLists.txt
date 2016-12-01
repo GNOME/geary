@@ -408,7 +408,6 @@ client/util/util-migrate.vala
 set(WEB_PROCESS_SRC
 client/web-process/web-process-extension.vala
 client/web-process/util-composer.vala
-client/web-process/util-conversation.vala
 client/web-process/util-webkit.vala
 )
 

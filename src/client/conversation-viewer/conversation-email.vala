@@ -575,19 +575,33 @@ public class ConversationEmail : Gtk.Box {
     /**
      * Returns user-selected body HTML from a message, if any.
      */
-    public string? get_selection_for_quoting() {
-        return (this.body_selection_message != null)
-            ? this.body_selection_message.get_selection_for_quoting()
-            : null;
+    public async string? get_selection_for_quoting() {
+        string? selection = null;
+        if (this.body_selection_message != null) {
+            try {
+                selection =
+                   yield this.body_selection_message.web_view.get_selection_for_quoting();
+            } catch (Error err) {
+                debug("Failed to get selection for quoting: %s", err.message);
+            }
+        }
+        return selection;
     }
 
     /**
      * Returns user-selected body text from a message, if any.
      */
-    public string? get_selection_for_find() {
-        return (this.body_selection_message != null)
-            ? this.body_selection_message.get_selection_for_find()
-            : null;
+    public async string? get_selection_for_find() {
+        string? selection = null;
+        if (this.body_selection_message != null) {
+            try {
+                selection =
+                   yield this.body_selection_message.web_view.get_selection_for_find();
+            } catch (Error err) {
+                debug("Failed to get selection for find: %s", err.message);
+            }
+        }
+        return selection;
     }
 
     /**
@@ -630,8 +644,9 @@ public class ConversationEmail : Gtk.Box {
                     this.message_bodies_loaded = true;
                 }
             });
-        view.web_view.selection_changed.connect(() => {
-                on_message_selection_changed(view);
+        view.web_view.selection_changed.connect((has_selection) => {
+                this.body_selection_message = has_selection ? view : null;
+                body_selection_changed(has_selection);
             });
     }
 
@@ -764,12 +779,6 @@ public class ConversationEmail : Gtk.Box {
         Gee.ArrayList<Geary.Contact> contact_list = new Gee.ArrayList<Geary.Contact>();
         contact_list.add(contact);
         contact_store.mark_contacts_async.begin(contact_list, flags, null);
-    }
-
-    private void on_message_selection_changed(ConversationMessage view) {
-        bool has_selection = view.web_view.has_selection();
-        this.body_selection_message = has_selection ? view : null;
-        body_selection_changed(has_selection);
     }
 
     [GtkCallback]

@@ -19,6 +19,9 @@ namespace JS {
         [CCode (cname = "JSValueToNumber")]
         public double to_number(JS.Value value, out JS.Value exception);
 
+        [CCode (cname = "JSValueToStringCopy")]
+        public String to_string_copy(JS.Value value, out JS.Value exception);
+
         [CCode (cname = "JSGlobalContextRelease")]
         public bool release();
 	}
@@ -68,6 +71,21 @@ namespace JS {
 
         [CCode (cname = "JSStringCreateWithUTF8CString")]
         public String.create_with_utf8_cstring(string str);
-        
+
+        [CCode (cname = "JSStringGetLength")]
+        public int String.get_length();
+
+        [CCode (cname = "JSStringGetMaximumUTF8CStringSize")]
+        public int String.get_maximum_utf8_cstring_size();
+
+        [CCode (cname = "JSStringGetUTF8CString")]
+        public void String.get_utf8_cstring(string* buffer, int bufferSize);
+
+        [CCode (cname = "JSStringRetain")]
+        public void String.retain();
+
+        [CCode (cname = "JSStringRelease")]
+        public void String.release();
+
 	}
 }

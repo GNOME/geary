@@ -514,17 +514,6 @@ public class ConversationMessage : Gtk.Grid {
         web_view.get_find_controller().search_finish();
     }
 
-    internal string? get_selection_for_quoting() {
-        return this.web_view.get_selection_for_quoting();
-    }
-
-    /**
-     * Returns the current selection as a string, suitable for find.
-     */
-    internal string? get_selection_for_find() {
-        return this.web_view.get_selection_for_find();
-    }
-
     private SimpleAction add_action(string name, bool enabled, VariantType? type = null) {
         SimpleAction action = new SimpleAction(name, type);
         action.set_enabled(enabled);

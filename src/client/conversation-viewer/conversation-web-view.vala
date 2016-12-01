@@ -39,23 +39,20 @@ public class ConversationWebView : ClientWebView {
         load_html(html, null);
     }
 
-    public bool has_selection() {
-        bool has_selection = false; // XXX set me
-        return has_selection;
-    }
-
     /**
      * Returns the current selection, for prefill as find text.
      */
-    public string get_selection_for_find() {
-        return ""; // XXX
+    public async string get_selection_for_find() throws Error{
+        WebKit.JavascriptResult result = yield this.run_javascript("geary.getSelectionForFind();", null);
+        return get_string_result(result);
     }
 
     /**
      * Returns the current selection, for quoting in a message.
      */
-    public string get_selection_for_quoting() {
-        return ""; // XXX
+    public async string get_selection_for_quoting() throws Error {
+        WebKit.JavascriptResult result = yield this.run_javascript("geary.getSelectionForQuoting();", null);
+        return get_string_result(result);
     }
 
     /**
