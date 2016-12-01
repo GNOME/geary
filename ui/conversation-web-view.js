@@ -12,6 +12,9 @@
 var ConversationPageState = function() {
     this.init.apply(this, arguments);
 };
+
+ConversationPageState.QUOTE_CONTAINER_CLASS = "geary-quote-container";
+
 ConversationPageState.prototype = {
     __proto__: PageState.prototype,
     init: function() {
@@ -55,7 +58,7 @@ ConversationPageState.prototype = {
                 );
 
                 // Only make it controllable if the quote is tall enough
-                if (blockquote.offsetHeight > 50) {
+                if (blockquote.offsetHeight > 60) {
                     quoteContainer.classList.add("geary-controllable");
                     quoteContainer.classList.add("geary-hide");
                 }
@@ -125,34 +128,35 @@ ConversationPageState.prototype = {
         var selection = window.getSelection();
         if (!selection.isCollapsed) {
             var range = selection.getRangeAt(0);
-            var dummy = document.createElement("DIV");
-            var includeDummy = false;
             var ancestor = range.commonAncestorContainer;
             if (ancestor.nodeType != Node.ELEMENT_NODE) {
                 ancestor = ancestor.parentNode;
-                // If the selection is part of a plain text message,
-                // we have to stick it in an appropriately styled div,
-                // so that new lines are preserved.
-                if (ConversationPageState.isDescendantOf(ancestor, ".plaintext")) {
-                    dummy.classList.add("plaintext");
-                    dummy.setAttribute("style", "white-space: pre-wrap;");
-                    includeDummy = true;
-                }
-                dummy.appendChild(range.cloneContents());
-
-                // Remove the chrome we put around quotes, leaving
-                // only the blockquote element.
-                var quotes = dummy.querySelectorAll(
-                    "." + ConversationPageState.QUOTE_CONTAINER_CLASS
-                );
-                for (var i = 0; i < quotes.length; i++) {
-                    var div = quotes.item(i);
-                    var blockquote = div.querySelector("blockquote");
-                    div.parentElement().replaceChild(blockquote, div);
-                }
-
-                quote = includeDummy ? dummy.outerHTML : dummy.innerHTML;
             }
+
+            // If the selection is part of a plain text message,
+            // we have to stick it in an appropriately styled div,
+            // so that new lines are preserved.
+            var dummy = document.createElement("DIV");
+            var includeDummy = false;
+            if (ConversationPageState.isDescendantOf(ancestor, ".plaintext")) {
+                dummy.classList.add("plaintext");
+                dummy.setAttribute("style", "white-space: pre-wrap;");
+                includeDummy = true;
+            }
+            dummy.appendChild(range.cloneContents());
+
+            // Remove the chrome we put around quotes, leaving
+            // only the blockquote element.
+            var quotes = dummy.querySelectorAll(
+                "." + ConversationPageState.QUOTE_CONTAINER_CLASS
+            );
+            for (var i = 0; i < quotes.length; i++) {
+                var div = quotes.item(i);
+                var blockquote = div.querySelector("blockquote");
+                div.parentNode.replaceChild(blockquote, div);
+            }
+
+            quote = includeDummy ? dummy.outerHTML : dummy.innerHTML;
         }
         return quote;
     },
@@ -171,7 +175,6 @@ ConversationPageState.prototype = {
     }
 };
 
-ConversationPageState.QUOTE_CONTAINER_CLASS = "geary-quote-container";
 ConversationPageState.isDescendantOf = function(node, ancestorTag) {
     var ancestor = node.parentNode;
     while (ancestor != null) {
