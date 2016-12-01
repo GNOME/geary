@@ -452,23 +452,7 @@ public class ConversationMessage : Gtk.Grid {
         }
 
         load_cancelled.cancelled.connect(() => { web_view.stop_loading(); });
-        // XXX Hook up unset_controllable_quotes() to size_allocate
-        // and check if loaded since we need to accurately know
-        // what the sizes of the quote and its container is to
-        // determine if it should be unhidden. However this means that
-        // when the user expands a hidden quote, this handler gets
-        // executed again and since the expanded quote will meet the
-        // criteria for being unset as controllable, that will
-        // happen. That's actually okay for now though, because if the
-        // user could collapse the quote again the space wouldn't be
-        // reclaimed, which is worse than this.
-        this.web_view.size_allocate.connect(() => {
-                if (this.web_view.is_loaded) {
-                    this.web_view.unset_controllable_quotes();
-                }
-            });
-
-        this.web_view.clean_and_load(body_text ?? "");
+        this.web_view.load_html(body_text ?? "", null);
     }
 
     /**

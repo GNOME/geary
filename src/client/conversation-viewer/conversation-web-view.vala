@@ -34,11 +34,6 @@ public class ConversationWebView : ClientWebView {
         }
     }
 
-    public void clean_and_load(string html) {
-        // XXX clean me
-        load_html(html, null);
-    }
-
     /**
      * Returns the current selection, for prefill as find text.
      */
@@ -53,13 +48,6 @@ public class ConversationWebView : ClientWebView {
     public async string get_selection_for_quoting() throws Error {
         WebKit.JavascriptResult result = yield this.run_javascript("geary.getSelectionForQuoting();", null);
         return get_string_result(result);
-    }
-
-    /**
-     * XXX
-     */
-    public void unset_controllable_quotes() {
-        // XXX
     }
 
 }
