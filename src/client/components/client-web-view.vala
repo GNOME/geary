@@ -203,7 +203,7 @@ public class ClientWebView : WebKit.WebView {
         WebKit.UserContentManager content_manager =
              custom_manager ?? new WebKit.UserContentManager();
         content_manager.add_script(ClientWebView.script);
-        
+
         Object(user_content_manager: content_manager, settings: setts);
 
         // XXX get the allow prefix from the extension somehow
@@ -213,6 +213,10 @@ public class ClientWebView : WebKit.WebView {
                 if (event == WebKit.LoadEvent.FINISHED) {
                     this.is_loaded = true;
                 }
+            });
+        this.web_process_crashed.connect(() => {
+                debug("Web process crashed");
+                return Gdk.EVENT_PROPAGATE;
             });
 
         content_manager.script_message_received[PREFERRED_HEIGHT_MESSAGE].connect(

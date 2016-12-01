@@ -38,8 +38,7 @@ public class GearyWebExtension : Object {
     public GearyWebExtension(WebKit.WebExtension extension) {
         this.extension = extension;
         extension.page_created.connect((extension, web_page) => {
-                // XXX Re-enable when we can depend on WK2 2.12
-                // web_page.console_message_sent.connect(on_console_message);
+                web_page.console_message_sent.connect(on_console_message);
                 web_page.send_request.connect(on_send_request);
                 web_page.get_editor().selection_changed.connect(() => {
                     selection_changed(web_page);
@@ -47,17 +46,17 @@ public class GearyWebExtension : Object {
             });
     }
 
-    // XXX Re-enable when we can depend on WK2 2.12
-    // private void on_console_message(WebKit.WebPage page,
-    //                                 WebKit.ConsoleMessage message) {
-    //     debug("[%s] %s %s:%u: %s",
-    //           message.get_level().to_string(),
-    //           message.get_source().to_string(),
-    //           message.get_source_id(),
-    //           message.get_line(),
-    //           message.get_text()
-    //     );
-    // }
+    // XXX Conditionally enable while we still depend on WK2 <2.12
+    private void on_console_message(WebKit.WebPage page,
+                                    WebKit.ConsoleMessage message) {
+        debug("Console: [%s] %s %s:%u: %s",
+              message.get_level().to_string(),
+              message.get_source().to_string(),
+              message.get_source_id(),
+              message.get_line(),
+              message.get_text()
+        );
+    }
 
     private bool on_send_request(WebKit.WebPage page,
                                  WebKit.URIRequest request,
