@@ -92,18 +92,6 @@ namespace Util.Composer {
     //     return offset > 0 ? document.create_text_node(node_value[0:index]) : null;
     // }
 
-    public void enable_rich_text(WebKit.WebPage page, bool is_enabled) {
-        // WebKit.DOM.DOMTokenList body_classes = this.editor.get_dom_document().body.get_class_list();
-        // try {
-        //     if (is_enabled)
-        //         body_classes.remove("plain");
-        //     else
-        //         body_classes.add("plain");
-        // } catch (Error error) {
-        //     debug("Error setting composer style: %s", error.message);
-        // }
-    }
-
     public void undo_blockquote_style(WebKit.WebPage page) {
         try {
             WebKit.DOM.NodeList node_list = page.get_dom_document().query_selector_all(

@@ -173,8 +173,10 @@ public class ComposerWebView : ClientWebView {
     /**
      * Sets whether the editor is in rich text or plain text mode.
      */
-    public void enable_rich_text(bool enabled) {
-        // XXX
+    public void set_rich_text(bool enabled) {
+        this.run_javascript.begin(
+            "geary.setRichText(%s);".printf(enabled ? "true" : "false"), null
+        );
     }
 
     /**

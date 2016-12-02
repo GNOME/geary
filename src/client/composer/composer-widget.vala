@@ -1679,7 +1679,7 @@ public class ComposerWidget : Gtk.EventBox {
 
         this.menu_button.menu_model = (compose_as_html) ? this.html_menu : this.plain_menu;
 
-        this.editor.enable_rich_text(compose_as_html);
+        this.editor.set_rich_text(compose_as_html);
 
         GearyApplication.instance.config.compose_as_html = compose_as_html;
     }

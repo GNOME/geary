@@ -59,6 +59,13 @@ ComposerPageState.prototype = {
     },
     getText: function() {
         return document.getElementById(ComposerPageState.BODY_ID).innerText;
+    },
+    setRichText: function(enabled) {
+        if (enabled) {
+            document.body.classList.remove("plain");
+        } else {
+            document.body.classList.add("plain");
+        }
     }
     // private static void on_link_clicked(WebKit.DOM.Element element, WebKit.DOM.Event event,
     //     ComposerWidget composer) {
