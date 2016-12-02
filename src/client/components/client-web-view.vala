@@ -366,7 +366,8 @@ public class ClientWebView : WebKit.WebView {
     private bool on_decide_policy(WebKit.WebView view,
                                   WebKit.PolicyDecision policy,
                                   WebKit.PolicyDecisionType type) {
-        if (type == WebKit.PolicyDecisionType.NAVIGATION_ACTION) {
+        if (type == WebKit.PolicyDecisionType.NAVIGATION_ACTION ||
+            type == WebKit.PolicyDecisionType.NEW_WINDOW_ACTION) {
             WebKit.NavigationPolicyDecision nav_policy =
                 (WebKit.NavigationPolicyDecision) policy;
             switch (nav_policy.get_navigation_type()) {
