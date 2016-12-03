@@ -18,6 +18,13 @@ ComposerPageState.prototype = {
     __proto__: PageState.prototype,
     init: function() {
         PageState.prototype.init.apply(this, []);
+
+        var state = this;
+        document.addEventListener("click", function(e) {
+            if (e.target.tagName == "A") {
+                state.linkClicked(e.target);
+            }
+        }, true);
     },
     loaded: function() {
         // Search for and remove a particular styling when we quote
@@ -51,8 +58,6 @@ ComposerPageState.prototype = {
         // Chain up here so we continue to a preferred size update
         // after munging the HTML above.
         PageState.prototype.loaded.apply(this, []);
-
-        //Util.DOM.bind_event(view, "a", "click", (Callback) on_link_clicked, this);
     },
     getHtml: function() {
         return document.getElementById(ComposerPageState.BODY_ID).innerHTML;
@@ -66,16 +71,10 @@ ComposerPageState.prototype = {
         } else {
             document.body.classList.add("plain");
         }
+    },
+    linkClicked: function(element) {
+        window.getSelection().selectAllChildren(element);
     }
-    // private static void on_link_clicked(WebKit.DOM.Element element, WebKit.DOM.Event event,
-    //     ComposerWidget composer) {
-    //     try {
-    //         composer.editor.get_dom_document().get_default_view().get_selection().
-    //             select_all_children(element);
-    //     } catch (Error e) {
-    //         debug("Error selecting link: %s", e.message);
-    //     }
-    // }
 };
 
 var geary = new ComposerPageState();
