@@ -31,19 +31,6 @@ namespace Util.DOM {
         return clone;
     }
 
-    public WebKit.DOM.HTMLElement? clone_select(WebKit.DOM.Node node, string selector,
-        bool deep = true) {
-        return clone_node(select(node, selector), deep);
-    }
-
-    //public void toggle_class(WebKit.DOM.DOMTokenList class_list, string clas, bool add) throws Error {
-    //     if (add) {
-    //         class_list.add(clas);
-    //     } else {
-    //         class_list.remove(clas);
-    //     }
-    //}
-
     // Returns the text contained in the DOM document, after ignoring tags of type "exclude"
     // and padding newlines where appropriate. Used to scan for attachment keywords.
     public string get_text_representation(WebKit.DOM.Document doc, string exclude) {
@@ -106,20 +93,6 @@ namespace Util.DOM {
         }
         return copy.get_inner_text();
     }
-
-    // public void bind_event(WebKit.WebView view, string selector, string event, Callback callback,
-    //     Object? extra = null) {
-    //     try {
-    //         WebKit.DOM.NodeList node_list = view.get_dom_document().query_selector_all(selector);
-    //         for (int i = 0; i < node_list.length; ++i) {
-    //             WebKit.DOM.EventTarget node = node_list.item(i) as WebKit.DOM.EventTarget;
-    //             node.remove_event_listener(event, callback, false);
-    //             node.add_event_listener(event, callback, false, extra);
-    //         }
-    //     } catch (Error error) {
-    //         warning("Error setting up click handlers: %s", error.message);
-    //     }
-    // }
 
     // Linkifies plain text links in an HTML document.
     public void linkify_document(WebKit.DOM.Document document) {
@@ -232,35 +205,6 @@ namespace Util.DOM {
         return output.replace(" \01 ", "&lt;").replace(" \02 ", "&gt;");
     }
 
-    public bool node_is_child_of(WebKit.DOM.Node node, string ancestor_tag) {
-        WebKit.DOM.Element? ancestor = node.get_parent_element();
-        for (; ancestor != null; ancestor = ancestor.get_parent_element()) {
-            if (ancestor.get_tag_name() == ancestor_tag) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    public bool is_descendant_of(WebKit.DOM.Element? element, string selector) {
-        try {
-            WebKit.DOM.NodeList matching = element.owner_document.query_selector_all(selector);
-            for (int i = 0; i < matching.length; i++) {
-                WebKit.DOM.Node parent = matching.item(i);
-                WebKit.DOM.Node child = element;
-                while (child != null) {
-                    if (child.parent_node == parent) {
-                        return true;
-                    }
-                    child = child.parent_node;
-                }
-            }
-        } catch (Error error) {
-            warning("Problem traversing DOM: %s", error.message);
-        }
-        return false;
-    }
-
     public string decorate_quotes(string text) throws Error {
         int level = 0;
         string outtext = "";
@@ -295,3 +239,4 @@ namespace Util.DOM {
     }
 
 }
+
