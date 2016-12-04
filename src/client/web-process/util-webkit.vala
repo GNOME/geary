@@ -7,10 +7,6 @@
 // Regex to determine if a URL has a known protocol.
 public const string PROTOCOL_REGEX = "^(aim|apt|bitcoin|cvs|ed2k|ftp|file|finger|git|gtalk|http|https|irc|ircs|irc6|lastfm|ldap|ldaps|magnet|news|nntp|rsync|sftp|skype|smb|sms|svn|telnet|tftp|ssh|webcal|xmpp):";
 
-// Private use unicode characters are used for quote tokens
-public const string QUOTE_START = "";
-public const string QUOTE_END = "";
-
 namespace Util.DOM {
     public WebKit.DOM.HTMLElement? select(WebKit.DOM.Node node, string selector) {
         try {
@@ -296,128 +292,6 @@ namespace Util.DOM {
             level -= 1;
         }
         return outtext;
-    }
-
-    /**
-     * Convert a HTML DOM tree to RFC 3676 format=flowed text.
-     *
-     * This will modify/reset the DOM.
-     */
-    public string html_to_flowed_text(WebKit.DOM.HTMLElement el) {
-        string saved_doc = el.get_inner_html();
-        WebKit.DOM.NodeList blockquotes;
-        try {
-            blockquotes = el.query_selector_all("blockquote");
-        } catch (Error error) {
-            debug("Error selecting blockquotes: %s", error.message);
-            return "";
-        }
-
-        int nbq = (int) blockquotes.length;
-        string[] bqtexts = new string[nbq];
-
-        // Get text of blockquotes and pull them out of DOM.  They are replaced with tokens deliminated
-        // with the characters QUOTE_START and QUOTE_END (from a unicode private use block).  We need to
-        // get the text while they're  still in the DOM to get newlines at appropriate places.  We go
-        // through the list of blockquotes from the end so that we get the innermost ones first.
-        for (int i = nbq - 1; i >= 0; i--) {
-            WebKit.DOM.HTMLElement bq = (WebKit.DOM.HTMLElement) blockquotes.item(i);
-            bqtexts[i] = bq.get_inner_text();
-            if (bqtexts[i].length > 0 && bqtexts[i].substring(-1, 1) == "\n")
-                bqtexts[i] = bqtexts[i].slice(0, -1);
-            else
-                debug("Did not find expected newline at end of quote.");
-
-            try {
-                bq.set_inner_text(@"$QUOTE_START$i$QUOTE_END");
-            } catch (Error error) {
-                debug("Error manipulating DOM: %s", error.message);
-            }
-        }
-
-        // Reassemble plain text out of parts, replace non-breaking space with regular space
-        string doctext = resolve_nesting(el.get_inner_text(), bqtexts).replace("\xc2\xa0", " ");
-
-        // Reassemble DOM
-        try {
-            el.set_inner_html(saved_doc);
-        } catch (Error error) {
-            debug("Error resetting DOM: %s", error.message);
-        }
-
-        // Wrap, space stuff, quote
-        string[] lines = doctext.split("\n");
-        GLib.StringBuilder flowed = new GLib.StringBuilder.sized(doctext.length);
-        foreach (string line in lines) {
-            // Strip trailing whitespace, so it doesn't look like a flowed line.  But the
-            // signature separator "-- " is special, so leave that alone.
-            if (line != "-- ")
-                line = line.chomp();
-            int quote_level = 0;
-            while (line[quote_level] == Geary.RFC822.Utils.QUOTE_MARKER)
-                quote_level += 1;
-            line = line[quote_level:line.length];
-            string prefix = quote_level > 0 ? string.nfill(quote_level, '>') + " " : "";
-            int max_len = 72 - prefix.length;
-
-            do {
-                int start_ind = 0;
-                if (quote_level == 0 &&
-                    (line.has_prefix(">") || line.has_prefix("From"))) {
-                    line = " " + line;
-                    start_ind = 1;
-                }
-
-                int cut_ind = line.length;
-                if (cut_ind > max_len) {
-                    string beg = line[0:max_len];
-                    cut_ind = beg.last_index_of(" ", start_ind) + 1;
-                    if (cut_ind == 0) {
-                        cut_ind = line.index_of(" ", start_ind) + 1;
-                        if (cut_ind == 0)
-                            cut_ind = line.length;
-                        if (cut_ind > 998 - prefix.length)
-                            cut_ind = 998 - prefix.length;
-                    }
-                }
-                flowed.append(prefix + line[0:cut_ind] + "\n");
-                line = line[cut_ind:line.length];
-            } while (line.length > 0);
-        }
-
-        return flowed.str;
-    }
-
-    public string quote_lines(string text) {
-        string[] lines = text.split("\n");
-        for (int i=0; i<lines.length; i++)
-            lines[i] = @"$(Geary.RFC822.Utils.QUOTE_MARKER)" + lines[i];
-        return string.joinv("\n", lines);
-    }
-
-    public string resolve_nesting(string text, string[] values) {
-        try {
-            GLib.Regex tokenregex = new GLib.Regex(@"(.?)$QUOTE_START([0-9]*)$QUOTE_END(?=(.?))");
-            return tokenregex.replace_eval(text, -1, 0, 0, (info, res) => {
-                int key = int.parse(info.fetch(2));
-                string prev_char = info.fetch(1), next_char = info.fetch(3), insert_next = "";
-                // Make sure there's a newline before and after the quote.
-                if (prev_char != "" && prev_char != "\n")
-                    prev_char = prev_char + "\n";
-                if (next_char != "" && next_char != "\n")
-                    insert_next = "\n";
-                if (key >= 0 && key < values.length) {
-                    res.append(prev_char + quote_lines(resolve_nesting(values[key], values)) + insert_next);
-                } else {
-                    debug("Regex error in denesting blockquotes: Invalid key");
-                    res.append("");
-                }
-                return false;
-            });
-        } catch (Error error) {
-            debug("Regex error in denesting blockquotes: %s", error.message);
-            return "";
-        }
     }
 
 }
