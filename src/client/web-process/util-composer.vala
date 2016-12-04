@@ -92,20 +92,6 @@ namespace Util.Composer {
     //     return offset > 0 ? document.create_text_node(node_value[0:index]) : null;
     // }
 
-    public void undo_blockquote_style(WebKit.WebPage page) {
-        try {
-            WebKit.DOM.NodeList node_list = page.get_dom_document().query_selector_all(
-                "blockquote[style=\"margin: 0 0 0 40px; border: none; padding: 0px;\"]");
-            for (int i = 0; i < node_list.length; ++i) {
-                WebKit.DOM.Element element = (WebKit.DOM.Element) node_list.item(i);
-                element.remove_attribute("style");
-                element.set_attribute("type", "cite");
-            }
-        } catch (Error error) {
-            debug("Error removing blockquote style: %s", error.message);
-        }
-    }
-
     public bool handle_key_press(WebKit.WebPage page, Gdk.EventKey event) {
         WebKit.DOM.Document document = page.get_dom_document();
         if (event.keyval == Gdk.Key.Tab) {

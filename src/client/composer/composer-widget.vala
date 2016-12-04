@@ -450,10 +450,9 @@ public class ComposerWidget : Gtk.EventBox {
         this.bcc_entry.changed.connect(validate_send_button);
         this.reply_to_entry.changed.connect(validate_send_button);
         this.editor.context_menu.connect(on_context_menu);
-        this.editor.link_activated.connect(on_link_activated);
         this.editor.load_changed.connect(on_load_changed);
         this.editor.mouse_target_changed.connect(on_mouse_target_changed);
-        this.editor.text_attributes_changed.connect(on_text_attributes_changed);
+        this.editor.get_editor_state().notify["typing-attributes"].connect(on_typing_attributes_changed);
         // this.editor.move_focus.connect(update_actions);
         // this.editor.copy_clipboard.connect(update_actions);
         // this.editor.cut_clipboard.connect(update_actions);
@@ -1795,11 +1794,6 @@ public class ComposerWidget : Gtk.EventBox {
         //Util.DOM.bind_event(this.editor,"a", "click", (Callback) on_link_clicked, this);
     }
 
-    private void on_link_activated(ClientWebView view, string uri) {
-        if (this.actions.get_action_state(ACTION_COMPOSE_AS_HTML).get_boolean())
-            link_dialog(uri);
-    }
-
 
     private void on_mouse_target_changed(WebKit.WebView web_view,
                                          WebKit.HitTestResult hit_test,
@@ -2185,7 +2179,8 @@ public class ComposerWidget : Gtk.EventBox {
         this.signature_html = account_sig;
     }
 
-    private void on_text_attributes_changed(uint mask) {
+    private void on_typing_attributes_changed() {
+        uint mask = this.editor.get_editor_state().get_typing_attributes();
         this.actions.change_action_state(
             ACTION_BOLD,
             (mask & WebKit.EditorTypingAttributes.BOLD) == WebKit.EditorTypingAttributes.BOLD

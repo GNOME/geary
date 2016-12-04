@@ -70,17 +70,9 @@ public class ComposerWebView : ClientWebView {
     private bool is_shift_down = false;
 
 
-    public signal void text_attributes_changed(uint wk_typing_attrs);
-
-
     public ComposerWebView() {
         base();
         this.user_content_manager.add_script(ComposerWebView.app_script);
-
-        get_editor_state().notify["typing-attributes"].connect(() => {
-                text_attributes_changed(get_editor_state().typing_attributes);
-            });
-
         // this.should_insert_text.connect(on_should_insert_text);
         this.key_press_event.connect(on_key_press_event);
     }
@@ -197,7 +189,7 @@ public class ComposerWebView : ClientWebView {
      * ???
      */
     public void undo_blockquote_style() {
-        // XXX
+        this.run_javascript.begin("geary.undoBlockquoteStyle();", null);
     }
 
     /**
