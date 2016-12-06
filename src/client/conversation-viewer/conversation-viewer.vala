@@ -326,19 +326,21 @@ public class ConversationViewer : Gtk.Stack {
         }
     }
 
-    [GtkCallback]
-    private void on_find_next(Gtk.Widget entry) {
-        if (this.current_list != null) {
-            //this.current_list.show_prev_search_term();
-        }
-    }
+    // XXX We can't use this signal with GTK 3.14.
+    // [GtkCallback]
+    // private void on_find_next(Gtk.Widget entry) {
+    //     if (this.current_list != null) {
+    //         //this.current_list.show_prev_search_term();
+    //     }
+    // }
 
-    [GtkCallback]
-    private void on_find_prev(Gtk.Widget entry) {
-        if (this.current_list != null) {
-            //this.current_list.show_next_search_term();
-        }
-    }
+    // XXX We can't use this signal with GTK 3.14.
+    // [GtkCallback]
+    // private void on_find_prev(Gtk.Widget entry) {
+    //     if (this.current_list != null) {
+    //         //this.current_list.show_next_search_term();
+    //     }
+    // }
 
 }
 

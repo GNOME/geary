@@ -58,8 +58,6 @@
                     <property name="primary_icon_activatable">False</property>
                     <property name="primary_icon_sensitive">False</property>
                     <property name="placeholder_text" translatable="yes">Find in conversation</property>
-                    <signal name="next-match" handler="on_find_next" swapped="no"/>
-                    <signal name="previous-match" handler="on_find_prev" swapped="no"/>
                     <signal name="search-changed" handler="on_find_text_changed" swapped="no"/>
                   </object>
                   <packing>

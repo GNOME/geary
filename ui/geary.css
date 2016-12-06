@@ -130,7 +130,7 @@ row.geary-folder-popover-list-row > label {
   background: @theme_base_color;
 }
 
-.geary-header-value flowboxchild label:not(.geary-primary) {
+.geary-header-value flowboxchild label.dim-label {
   margin-left: 6px;
 }
 
