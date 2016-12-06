@@ -9,7 +9,7 @@ private class Geary.ImapDB.Attachment : Geary.Attachment {
     
     private const string ATTACHMENTS_DIR = "attachments";
     
-    protected Attachment(File data_dir, string? filename, Mime.ContentType content_type, int64 filesize,
+    public Attachment(File data_dir, string? filename, Mime.ContentType content_type, int64 filesize,
         int64 message_id, int64 attachment_id, Mime.ContentDisposition content_disposition,
         string? content_id, string? content_description) {
         base (generate_id(attachment_id),generate_file(data_dir, message_id, attachment_id, filename),

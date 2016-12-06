@@ -12,7 +12,7 @@ private class Geary.Db.TransactionAsyncJob : BaseObject {
     private TransactionOutcome outcome = TransactionOutcome.ROLLBACK;
     private Error? caught_err = null;
     
-    protected TransactionAsyncJob(TransactionType type, TransactionMethod cb, Cancellable? cancellable) {
+    public TransactionAsyncJob(TransactionType type, TransactionMethod cb, Cancellable? cancellable) {
         this.type = type;
         this.cb = cb;
         this.cancellable = cancellable ?? new Cancellable();
