@@ -108,4 +108,33 @@ namespace Migrate {
             is_migrated.create(FileCreateFlags.PRIVATE);
         }
     }
+
+    private const string OLD_APP_ID = "org.yorba.geary";
+    private const string MIGRATED_CONFIG_KEY = "migrated-config";
+
+    public static void old_app_config(Settings newSettings, string old_app_id = OLD_APP_ID) {
+        SettingsSchemaSource schemaSource = SettingsSchemaSource.get_default();
+        if (GearyApplication.GSETTINGS_DIR != null) {
+            try {
+                schemaSource = new SettingsSchemaSource.from_directory(GearyApplication.GSETTINGS_DIR, null, false);
+            } catch (Error e) {
+                // If it didn't work, do nothing (i.e. use the default GSettings dir)
+            }
+        }
+        SettingsSchema oldSettingsSchema = schemaSource.lookup(old_app_id, false);
+
+        if (newSettings.get_boolean(MIGRATED_CONFIG_KEY))
+            return;
+
+        if (oldSettingsSchema != null) {
+            Settings oldSettings = new Settings.full(oldSettingsSchema, null, null);
+
+            string[] oldKeys = oldSettings.list_keys();
+            foreach (string key in newSettings.list_keys())
+                if (key in oldKeys)
+                    newSettings.set_value(key, oldSettings.get_value(key));
+        }
+
+        newSettings.set_boolean(MIGRATED_CONFIG_KEY, true);
+    }
 }

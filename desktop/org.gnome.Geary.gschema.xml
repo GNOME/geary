@@ -121,6 +121,12 @@
         <summary>zoom of conversation viewer</summary>
         <description>The zoom to apply on the conservation view.</description>
     </key>
+
+    <key name="migrated-config" type="b">
+        <default>false</default>
+        <summary>Whether we migrated the old settings</summary>
+        <description>False to check for the old 'org.yorba.geary'-schema and copy its values</description>
+    </key>
 </schema>
 
 </schemalist>

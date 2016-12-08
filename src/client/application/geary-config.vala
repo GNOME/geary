@@ -24,6 +24,7 @@ public class Configuration {
     public const string COMPOSE_AS_HTML_KEY = "compose-as-html";
     public const string SPELL_CHECK_VISIBLE_LANGUAGES = "spell-check-visible-languages";
     public const string SPELL_CHECK_LANGUAGES = "spell-check-languages";
+    public const string SEARCH_STRATEGY_KEY = "search-strategy";
     public const string CONVERSATION_VIEWER_ZOOM_KEY = "conversation-viewer-zoom";
 
     public enum DesktopEnvironment {
@@ -153,6 +154,8 @@ public class Configuration {
         // Start GSettings.
         settings = new Settings(schema_id);
         gnome_interface = new Settings("org.gnome.desktop.interface");
+
+        Migrate.old_app_config(settings);
     }
 
     // is_installed: set to true if installed, else false.
@@ -177,7 +180,7 @@ public class Configuration {
     }
     
     public Geary.SearchQuery.Strategy get_search_strategy() {
-        switch (settings.get_string("search-strategy").down()) {
+        switch (settings.get_string(SEARCH_STRATEGY_KEY).down()) {
             case "exact":
                 return Geary.SearchQuery.Strategy.EXACT;
             
@@ -196,20 +199,20 @@ public class Configuration {
     public void set_search_strategy(Geary.SearchQuery.Strategy strategy) {
         switch (strategy) {
             case Geary.SearchQuery.Strategy.EXACT:
-                settings.set_string("search-strategy", "exact");
+                settings.set_string(SEARCH_STRATEGY_KEY, "exact");
             break;
             
             case Geary.SearchQuery.Strategy.AGGRESSIVE:
-                settings.set_string("search-strategy", "aggressive");
+                settings.set_string(SEARCH_STRATEGY_KEY, "aggressive");
             break;
             
             case Geary.SearchQuery.Strategy.HORIZON:
-                settings.set_string("search-strategy", "horizon");
+                settings.set_string(SEARCH_STRATEGY_KEY, "horizon");
             break;
             
             case Geary.SearchQuery.Strategy.CONSERVATIVE:
             default:
-                settings.set_string("search-strategy", "conservative");
+                settings.set_string(SEARCH_STRATEGY_KEY, "conservative");
             break;
         }
     }
