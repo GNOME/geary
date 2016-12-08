@@ -49,20 +49,59 @@ public class ConversationListBox : Gtk.ListBox {
 
 
         protected const string EXPANDED_CLASS = "geary-expanded";
+        private const string FIRST_CLASS = "geary-first";
         private const string LAST_CLASS = "geary-last";
-
+#if !GTK_3_20
+        // GTK < 3.20+ style workarounds. Keep this in sync
+        // with geary.css.
+        private const int CANT_USE_PADDING_WORKAROUND = 18;
+#endif
 
         // The email being displayed by this row, if any
         public Geary.Email? email { get; private set; default = null; }
 
         // Is the row showing the email's message body or just headers?
-        public bool is_expanded { get; protected set; default = false; }
+        public bool is_expanded {
+            get {
+                return this._is_expanded;
+            }
+            protected set {
+#if !GTK_3_20
+                // GTK+ < 3.20 style workaround. Keep this in sync
+                // with geary.css
+                this.margin_bottom = value ? 6 : 0;
+#endif
+                this._is_expanded = value;
+            }
+        }
+        private bool _is_expanded = false;
+
+        // Designate this row as the first visible row in the
+        // conversation listbox, or not. See Bug 764710 and
+        // ::update_first_last_row() below.
+        internal bool is_first {
+            set {
+                set_style_context_class(FIRST_CLASS, value);
+#if !GTK_3_20
+                // GTK < 3.20+ style workarounds. Keep this in sync
+                // with geary.css.
+                this.margin_top = CANT_USE_PADDING_WORKAROUND;
+#endif
+            }
+        }
 
         // Designate this row as the last visible row in the
         // conversation listbox, or not. See Bug 764710 and
-        // ::update_last_row() below.
+        // ::update_first_last_row() below.
         internal bool is_last {
-            set { set_style_context_class(LAST_CLASS, value); }
+            set {
+                set_style_context_class(LAST_CLASS, value);
+#if !GTK_3_20
+                // GTK < 3.20+ style workarounds. Keep this in sync
+                // with geary.css.
+                this.margin_bottom = CANT_USE_PADDING_WORKAROUND;
+#endif
+            }
         }
 
 
@@ -75,6 +114,13 @@ public class ConversationListBox : Gtk.ListBox {
         public ConversationRow(Geary.Email? email) {
             this.email = email;
             show();
+
+#if !GTK_3_20
+            // GTK < 3.20+ style workarounds. Keep this in sync with
+            // geary.css.
+            this.margin_start = CANT_USE_PADDING_WORKAROUND;
+            this.margin_end = CANT_USE_PADDING_WORKAROUND;
+#endif
         }
 
         // Request the row be expanded, if supported.
@@ -249,7 +295,8 @@ public class ConversationListBox : Gtk.ListBox {
     // The id of the draft referred to by the current composer.
     private Geary.EmailIdentifier? draft_id = null;
 
-    // Last visible row in the list, if any
+    // First and last visible row in the list, if any
+    private ConversationRow? first_row = null;
     private ConversationRow? last_row = null;
 
     // Cached search terms to apply to new messages
@@ -291,6 +338,10 @@ public class ConversationListBox : Gtk.ListBox {
 
         get_style_context().add_class("background");
         get_style_context().add_class("conversation-listbox");
+#if !GTK_3_20
+        // GTK < 3.20+ style workaround
+        get_style_context().remove_class("list");
+#endif
 
         set_adjustment(adjustment);
         set_selection_mode(Gtk.SelectionMode.NONE);
@@ -356,7 +407,7 @@ public class ConversationListBox : Gtk.ListBox {
             }
         }
 
-        update_last_row();
+        update_first_last_row();
         EmailRow? last_email = this.last_row as EmailRow;
 
         if (last_email != null && !this.cancellable.is_cancelled()) {
@@ -448,7 +499,7 @@ public class ConversationListBox : Gtk.ListBox {
         row.enable_should_scroll();
         row.should_scroll.connect(() => { scroll_to(row); });
         add(row);
-        update_last_row();
+        update_first_last_row();
 
         embed.composer.draft_id_changed.connect((id) => { this.draft_id = id; });
         embed.vanished.connect(() => {
@@ -684,7 +735,7 @@ public class ConversationListBox : Gtk.ListBox {
 
         if (!this.cancellable.is_cancelled()) {
             EmailRow row = add_email(full_email);
-            update_last_row();
+            update_first_last_row();
             yield row.view.start_loading(this.cancellable);
         }
     }
@@ -793,9 +844,24 @@ public class ConversationListBox : Gtk.ListBox {
     // Due to Bug 764710, we can only use the CSS :last-child selector
     // for GTK themes after 3.20.3, so for now manually maintain a
     // class on the last box so we can emulate it
-    private void update_last_row() {
+    private void update_first_last_row() {
+        ConversationRow? first = null;
         ConversationRow? last = null;
-        this.foreach((child) => { last = (ConversationRow) child; });
+        this.foreach((child) => {
+                if (first == null) {
+                    first = (ConversationRow) child;
+                }
+                last = (ConversationRow) child;
+            });
+
+        if (this.first_row != first) {
+            if (this.first_row != null) {
+                this.first_row.is_first = false;
+            }
+
+            this.first_row = first;
+            this.first_row.is_first = true;
+        }
 
         if (this.last_row != last) {
             if (this.last_row != null) {

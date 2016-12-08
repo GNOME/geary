@@ -301,6 +301,12 @@ public class ConversationMessage : Gtk.Grid {
         this.contact_store = contact_store;
         this.always_load_remote_images = always_load_remote_images;
 
+#if !GTK_3_20
+        // GTK < 3.20+ style workarounds. Keep this in sync with
+        // geary.css.
+        this.summary.border_width = 12;
+#endif
+
         // Actions
 
         add_action(ACTION_COPY_EMAIL, true, VariantType.STRING)
