@@ -1,6 +1,6 @@
 [encoding: UTF-8]
-desktop/geary.appdata.xml.in
-desktop/geary.desktop.in
+desktop/org.gnome.Geary.appdata.xml.in
+desktop/org.gnome.Geary.desktop.in
 desktop/geary-autostart.desktop.in
 [type: gettext/ini]desktop/geary-attach.contract.in
 src/geary-version.vala.in

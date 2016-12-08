@@ -19,7 +19,7 @@ public class Libmessagingmenu : NewMessagesIndicator {
             return;
         }
         
-        app = new MessagingMenu.App("geary.desktop");
+        app = new MessagingMenu.App("org.gnome.Geary.desktop");
         app.register();
         app.activate_source.connect(on_activate_source);
         

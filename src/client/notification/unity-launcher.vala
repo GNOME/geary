@@ -12,7 +12,7 @@ public class UnityLauncher : Geary.BaseObject {
     public UnityLauncher(NewMessagesMonitor monitor) {
         this.monitor = monitor;
         
-        entry = Unity.LauncherEntry.get_for_desktop_id("geary.desktop");
+        entry = Unity.LauncherEntry.get_for_desktop_id("org.gnome.Geary.desktop");
         set_count(0);
         
         monitor.folder_removed.connect(on_folder_removed);

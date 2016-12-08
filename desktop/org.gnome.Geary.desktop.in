@@ -14,6 +14,7 @@ Categories=GNOME;GTK;Network;Email;
 MimeType=x-scheme-handler/mailto;
 StartupNotify=true
 Actions=Compose;
+DBusActivatable=true
 
 [Desktop Action Compose]
 _Name=Compose Message

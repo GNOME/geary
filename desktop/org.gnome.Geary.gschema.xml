@@ -1,67 +1,67 @@
 <schemalist>
 
-<schema id="org.yorba.geary" path="/org/yorba/geary/">
-    
+<schema id="org.gnome.Geary" path="/org/gnome/Geary/">
+
     <key name="window-maximize" type="b">
         <default>false</default>
         <summary>maximize window</summary>
         <description>True if library application is maximized, false otherwise.</description>
     </key>
-    
+
     <key name="window-width" type="i">
         <default>1024</default>
         <summary>width of window</summary>
         <description>The last recorded width of the application window.</description>
     </key>
-    
+
     <key name="window-height" type="i">
         <default>768</default>
         <summary>height of window</summary>
         <description>The last recorded height of the application window.</description>
     </key>
-    
+
     <key name="folder-list-pane-position" type="i">
         <default>100</default>
         <summary>position of folder list pane</summary>
         <description>Position of the folder list Paned grabber.</description>
     </key>
-    
+
     <key name="folder-list-pane-position-horizontal" type="i">
         <default>-1</default>
         <summary>position of folder list pane when horizontal</summary>
         <description>Position of the folder list Paned grabber in the horizontal orientation.</description>
     </key>
-    
+
     <key name="folder-list-pane-position-vertical" type="i">
         <default>200</default>
         <summary>position of folder list pane when vertical</summary>
         <description>Position of the folder list Paned grabber in the vertical orientation.</description>
     </key>
-    
+
     <key name="folder-list-pane-horizontal" type="b">
         <default>true</default>
         <summary>orientation of the folder list pane</summary>
         <description>True if the folder list Paned is in the horizontal orientation.</description>
     </key>
-    
+
     <key name="messages-pane-position" type="i">
         <default>250</default>
         <summary>position of message list pane</summary>
         <description>Position of the message list Paned grabber.</description>
     </key>
-    
+
     <key name="autoselect" type="b">
         <default>true</default>
         <summary>autoselect next message</summary>
         <description>True if we should autoselect the next available conversation.</description>
     </key>
-    
+
     <key name="display-preview" type="b">
         <default>true</default>
         <summary>display message previews</summary>
         <description>True if we should display a short preview of each message.</description>
     </key>
-    
+
     <key name="spell-check" type="b">
         <default>true</default>
         <summary>enable inline spell checking</summary>
@@ -79,37 +79,43 @@
         <summary>Languages that are displayed in the spell checker popover.</summary>
         <description>List of languages that are always displayed in the popover of the spell checker.</description>
     </key>
+
     <key name="play-sounds" type="b">
         <default>true</default>
         <summary>enable notification sounds</summary>
         <description>True to play sounds for notifications and sending.</description>
     </key>
+
     <key name="show-notifications" type="b">
         <default>true</default>
         <summary>show notifications for new mail</summary>
         <description>True to show notification bubbles.</description>
     </key>
+
     <key name="startup-notifications" type="b">
         <default>false</default>
         <summary>notify of new mail at startup</summary>
         <description>True to notify of new mail at startup.</description>
     </key>
+
     <key name="ask-open-attachment" type="b">
         <default>true</default>
         <summary>ask when opening an attachment</summary>
         <description>True to ask when opening an attachment.</description>
     </key>
+
     <key name="compose-as-html" type="b">
         <default>true</default>
         <summary>whether to compose emails in HTML</summary>
         <description>True to compose emails in HTML; false for plain text.</description>
     </key>
-    
+
     <key name="search-strategy" type="s">
         <default>"conservative"</default>
         <summary>Advisory strategy for full-text searching</summary>
         <description>Acceptable values are EXACT, CONSERVATIVE, AGGRESSIVE, and HORIZON.</description>
     </key>
+
     <key name="conversation-viewer-zoom" type="d">
         <default>1</default>
         <summary>zoom of conversation viewer</summary>

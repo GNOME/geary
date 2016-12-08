@@ -1,17 +1,17 @@
 #
-# Build and install geary.desktop
+# Build and install org.gnome.Geary.desktop
 #
 
 include (FindIntltool)
 include (FindDesktopFileValidate)
 if (INTLTOOL_MERGE_FOUND)
-    INTLTOOL_MERGE_APPDATA (geary.appdata.xml po)
-    INTLTOOL_MERGE_DESKTOP (geary.desktop po)
+    INTLTOOL_MERGE_APPDATA (org.gnome.Geary.appdata.xml po)
+    INTLTOOL_MERGE_DESKTOP (org.gnome.Geary.desktop po)
     INTLTOOL_MERGE_AUTOSTART_DESKTOP (geary-autostart.desktop po)
 
     if (DESKTOP_VALIDATE)
         if (DESKTOP_FILE_VALIDATE_FOUND)
-            VALIDATE_DESKTOP_FILE (geary.desktop)
+            VALIDATE_DESKTOP_FILE (org.gnome.Geary.desktop)
             VALIDATE_DESKTOP_FILE (geary-autostart.desktop)
         else (DESKTOP_FILE_VALIDATE_FOUND)
             message (FATAL_ERROR "desktop-file-validate must be installed to validate generated .desktop file")
@@ -22,7 +22,7 @@ else (INTLTOOL_MERGE_FOUND)
 endif (INTLTOOL_MERGE_FOUND)
 
 # Optional: run update-desktop-database at install time.
-# (This has to happen after the geary.desktop file is installed.)
+# (This has to happen after the org.gnome.Geary.desktop file is installed.)
 if (DESKTOP_UPDATE)
     install(
         CODE

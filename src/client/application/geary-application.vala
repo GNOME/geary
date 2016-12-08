@@ -16,7 +16,7 @@ extern const string GETTEXT_PACKAGE;
 public class GearyApplication : Gtk.Application {
     public const string NAME = "Geary";
     public const string PRGNAME = "geary";
-    public const string APP_ID = "org.yorba.geary";
+    public const string APP_ID = "org.gnome.Geary";
     public const string DESCRIPTION = _("Mail Client");
     public const string COPYRIGHT = _("Copyright 2016 Software Freedom Conservancy Inc.");
     public const string WEBSITE = "https://wiki.gnome.org/Apps/Geary";
@@ -100,8 +100,7 @@ public class GearyApplication : Gtk.Application {
 
     public GearyApplication() {
         Object(
-            application_id: APP_ID,
-            resource_base_path: "/org/gnome/Geary" // XXX remove this when Bug 766196 is fixed 
+            application_id: APP_ID
         );
         _instance = this;
     }
@@ -262,8 +261,8 @@ public class GearyApplication : Gtk.Application {
     public File? get_desktop_file() {
         File? install_dir = get_install_dir();
         File desktop_file = (install_dir != null)
-            ? install_dir.get_child("share").get_child("applications").get_child("geary.desktop")
-            : File.new_for_path(SOURCE_ROOT_DIR).get_child("build").get_child("desktop").get_child("geary.desktop");
+            ? install_dir.get_child("share").get_child("applications").get_child("org.gnome.Geary.desktop")
+            : File.new_for_path(SOURCE_ROOT_DIR).get_child("build").get_child("desktop").get_child("org.gnome.Geary.desktop");
         
         return desktop_file.query_exists() ? desktop_file : null;
     }
