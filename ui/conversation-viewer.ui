@@ -125,10 +125,12 @@
             <property name="hexpand">True</property>
             <property name="vexpand">True</property>
             <property name="hscrollbar_policy">never</property>
-            <property name="shadow_type">in</property>
             <child>
               <placeholder/>
             </child>
+            <style>
+              <class name=".geary-conversation-scroller"/>
+            </style>
           </object>
           <packing>
             <property name="left_attach">0</property>
