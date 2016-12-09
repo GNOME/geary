@@ -88,6 +88,11 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         Object(application: application);
         base_ref();
 
+        // GTK+ 3.14 (and others?) ignores this property in the UI
+        // file, so set it explicitly here to avoid having a menubar
+        // appear when the desktop shell does not show the app menu
+        this.show_menubar = false;
+
         load_config(application.config);
         restore_saved_window_state();
 
