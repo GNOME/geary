@@ -45,6 +45,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         
         this.remote.login_failed.connect(on_login_failed);
         this.local.email_sent.connect(on_email_sent);
+        this.local.contacts_loaded.connect(() => { contacts_loaded(); });
         
         search_upgrade_monitor = local.search_index_monitor;
         db_upgrade_monitor = local.upgrade_monitor;

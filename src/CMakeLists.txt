@@ -358,6 +358,7 @@ client/composer/composer-widget.vala
 client/composer/composer-window.vala
 client/composer/contact-entry-completion.vala
 client/composer/contact-list-store.vala
+client/composer/contact-list-store-cache.vala
 client/composer/email-entry.vala
 client/composer/spell-check-popover.vala
 

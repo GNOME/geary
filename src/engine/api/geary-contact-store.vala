@@ -11,17 +11,34 @@ public abstract class Geary.ContactStore : BaseObject {
     
     private Gee.Map<string, Contact> contact_map;
     
-    public signal void contact_added(Contact contact);
+    public signal void contacts_added(Gee.Collection<Contact> contacts);
     
-    public signal void contact_updated(Contact contact);
+    public signal void contacts_updated(Gee.Collection<Contact> contacts);
     
     internal ContactStore() {
         contact_map = new Gee.HashMap<string, Contact>();
     }
     
     public void update_contacts(Gee.Collection<Contact> new_contacts) {
-        foreach (Contact contact in new_contacts)
-            update_contact(contact);
+        Gee.LinkedList<Contact> added = new Gee.LinkedList<Contact>();
+        Gee.LinkedList<Contact> updated = new Gee.LinkedList<Contact>();
+
+        foreach (Contact contact in new_contacts) {
+            Contact? old_contact = contact_map[contact.normalized_email];
+            if (old_contact == null) {
+                contact_map[contact.normalized_email] = contact;
+                added.add(contact);
+            } else if (old_contact.highest_importance < contact.highest_importance) {
+                old_contact.highest_importance = contact.highest_importance;
+                updated.add(contact);
+            }
+        }
+
+        if (!added.is_empty)
+            contacts_added(added);
+
+        if (!updated.is_empty)
+            contacts_updated(updated);
     }
     
     public abstract async void mark_contacts_async(Gee.Collection<Contact> contacts, ContactFlags? to_add,
@@ -29,16 +46,5 @@ public abstract class Geary.ContactStore : BaseObject {
     
     public Contact? get_by_rfc822(Geary.RFC822.MailboxAddress address) {
         return contact_map[address.address.normalize().casefold()];
-    }
-    
-    private void update_contact(Contact contact) {
-        Contact? old_contact = contact_map[contact.normalized_email];
-        if (old_contact == null) {
-            contact_map[contact.normalized_email] = contact;
-            contact_added(contact);
-        } else if (old_contact.highest_importance < contact.highest_importance) {
-            old_contact.highest_importance = contact.highest_importance;
-            contact_updated(old_contact);
-        }
     }
 }

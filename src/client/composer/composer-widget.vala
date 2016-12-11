@@ -359,6 +359,8 @@ public class ComposerWidget : Gtk.EventBox {
     // Is the composer closing (e.g. saving a draft or sending)?
     private bool is_closing = false;
 
+    private ContactListStoreCache contact_list_store_cache;
+
     private ComposerContainer container {
         get { return (ComposerContainer) parent; }
     }
@@ -371,8 +373,12 @@ public class ComposerWidget : Gtk.EventBox {
     public signal void link_activated(string url);
 
 
-    public ComposerWidget(Geary.Account account, ComposeType compose_type, Configuration config) {
+    public ComposerWidget(Geary.Account account,
+                          ContactListStoreCache contact_list_store_cache,
+                          ComposeType compose_type,
+                          Configuration config) {
         this.account = account;
+        this.contact_list_store_cache = contact_list_store_cache;
         this.config = config;
         this.compose_type = compose_type;
         if (this.compose_type == ComposeType.NEW_MESSAGE)
@@ -513,6 +519,7 @@ public class ComposerWidget : Gtk.EventBox {
         this.composer_container.set_focus_chain(chain);
 
         update_composer_view();
+        load_entry_completions();
     }
 
     public override void destroy() {
@@ -522,8 +529,10 @@ public class ComposerWidget : Gtk.EventBox {
         base.destroy();
     }
 
-    public ComposerWidget.from_mailto(Geary.Account account, string mailto, Configuration config) {
-        this(account, ComposeType.NEW_MESSAGE, config);
+    public ComposerWidget.from_mailto(Geary.Account account,
+        ContactListStoreCache contact_list_store_cache, string mailto, Configuration config) {
+
+        this(account, contact_list_store_cache, ComposeType.NEW_MESSAGE, config);
         
         Gee.HashMultiMap<string, string> headers = new Gee.HashMultiMap<string, string>();
         if (mailto.length > Geary.ComposedEmail.MAILTO_SCHEME.length) {
@@ -614,34 +623,27 @@ public class ComposerWidget : Gtk.EventBox {
         } catch (Error e) {
             debug("Could not open draft manager: %s", e.message);
         }
-
-        // For accounts with large numbers of contacts, loading the
-        // entry completions can some time, so do it after the UI has
-        // been shown
-        yield load_entry_completions();
     }
 
     /**
      * Loads and sets contact auto-complete data for the current account.
      */
-    private async void load_entry_completions() {
-        // XXX Since ContactListStore hooks into ContactStore to
-        // listen for contacts being added and removed,
-        // GearyController or some composer-related controller should
-        // construct an instance per account and keep it around for
-        // the lifetime of the app, since there can be tens of
-        // thousands of contacts for large accounts.
+    private void load_entry_completions() {
         Geary.ContactStore contacts = this.account.get_contact_store();
         if (this.contact_list_store == null ||
             this.contact_list_store.contact_store != contacts) {
-            ContactListStore store = new ContactListStore(contacts);
-            this.contact_list_store = store;
-            yield store.load();
+            ContactListStore? store = this.contact_list_store_cache.get(contacts);
 
-            this.to_entry.completion = new ContactEntryCompletion(store);
-            this.cc_entry.completion = new ContactEntryCompletion(store);
-            this.bcc_entry.completion = new ContactEntryCompletion(store);
-            this.reply_to_entry.completion = new ContactEntryCompletion(store);
+            if (store == null) {
+                error("Error loading contact_list_store from cache");
+            } else {
+                this.contact_list_store = store;
+
+                this.to_entry.completion = new ContactEntryCompletion(store);
+                this.cc_entry.completion = new ContactEntryCompletion(store);
+                this.bcc_entry.completion = new ContactEntryCompletion(store);
+                this.reply_to_entry.completion = new ContactEntryCompletion(store);
+            }
         }
     }
 
@@ -2074,7 +2076,8 @@ public class ComposerWidget : Gtk.EventBox {
         this.load_signature.begin(null, (obj, res) => {
                 this.editor.update_signature(this.load_signature.end(res));
             });
-        load_entry_completions.begin();
+
+        load_entry_completions();
 
         return true;
     }

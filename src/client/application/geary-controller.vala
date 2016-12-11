@@ -82,6 +82,7 @@ public class GearyController : Geary.BaseObject {
     private Cancellable cancellable_context_dependent_buttons = new Cancellable();
     private Gee.HashMap<Geary.Account, Cancellable> inbox_cancellables
         = new Gee.HashMap<Geary.Account, Cancellable>();
+    private ContactListStoreCache contact_list_store_cache = new ContactListStoreCache();
     private Gee.Set<Geary.App.Conversation> selected_conversations = new Gee.HashSet<Geary.App.Conversation>();
     private Geary.App.Conversation? last_deleted_conversation = null;
     private Gee.LinkedList<ComposerWidget> composer_widgets = new Gee.LinkedList<ComposerWidget>();
@@ -471,9 +472,18 @@ public class GearyController : Geary.BaseObject {
         account.report_problem.connect(on_report_problem);
         account.email_removed.connect(on_account_email_removed);
         connect_account_async.begin(account, cancellable_open_account);
+
+        ContactListStore list_store = this.contact_list_store_cache.create(account.get_contact_store());
+        account.contacts_loaded.connect(list_store.set_sort_function);
     }
     
     private void close_account(Geary.Account account) {
+        Geary.ContactStore contact_store = account.get_contact_store();
+        ContactListStore list_store = this.contact_list_store_cache.get(contact_store);
+
+        account.contacts_loaded.disconnect(list_store.set_sort_function);
+        this.contact_list_store_cache.unset(account.get_contact_store());
+
         account.report_problem.disconnect(on_report_problem);
         account.email_removed.disconnect(on_account_email_removed);
         disconnect_account_async.begin(account);
@@ -2108,9 +2118,10 @@ public class GearyController : Geary.BaseObject {
 
         ComposerWidget widget;
         if (mailto != null) {
-            widget = new ComposerWidget.from_mailto(current_account, mailto, application.config);
+            widget = new ComposerWidget.from_mailto(current_account, contact_list_store_cache,
+                mailto, application.config);
         } else {
-            widget = new ComposerWidget(current_account, compose_type, application.config);
+            widget = new ComposerWidget(current_account, contact_list_store_cache, compose_type, application.config);
         }
         widget.destroy.connect(on_composer_widget_destroy);
         widget.link_activated.connect((uri) => { open_uri(uri); });

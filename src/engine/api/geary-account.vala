@@ -47,6 +47,8 @@ public abstract class Geary.Account : BaseObject {
     public signal void email_sent(Geary.RFC822.Message rfc822);
     
     public signal void report_problem(Geary.Account.Problem problem, Error? err);
+
+    public signal void contacts_loaded();
     
     /**
      * Fired when folders become available or unavailable in the account.

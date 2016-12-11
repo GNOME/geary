@@ -60,6 +60,8 @@ private class Geary.ImapDB.Account : BaseObject {
         new Gee.HashMap<string, string>();
 
     public signal void email_sent(Geary.RFC822.Message rfc822);
+
+    public signal void contacts_loaded();
     
     // Only available when the Account is opened
     public SmtpOutboxFolder? outbox { get; private set; default = null; }
@@ -607,8 +609,10 @@ private class Geary.ImapDB.Account : BaseObject {
             return Db.TransactionOutcome.DONE;
         }, cancellable);
         
-        if (outcome == Db.TransactionOutcome.DONE)
+        if (outcome == Db.TransactionOutcome.DONE) {
             contact_store.update_contacts(contacts);
+            contacts_loaded();
+        }
     }
     
     public async Gee.Collection<Geary.ImapDB.Folder> list_folders_async(Geary.FolderPath? parent,
