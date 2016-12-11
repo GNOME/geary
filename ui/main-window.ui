@@ -122,6 +122,7 @@
             </child>
           </object>
           <packing>
+            <property name="pack_type">end</property>
             <property name="expand">True</property>
             <property name="fill">True</property>
           </packing>
