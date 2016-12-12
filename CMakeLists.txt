@@ -90,7 +90,7 @@ pkg_check_modules(LIBMESSAGINGMENU QUIET messaging-menu>=12.10.2)
 
 pkg_check_modules(ENCHANT QUIET enchant)
 
-pkg_check_modules(SQLITE3 sqlite3)
+pkg_check_modules(SQLITE3 sqlite3 REQUIRED)
 if (NOT ${SQLITE3_VERSION} VERSION_LESS 3.12)
   include(CheckSymbolExists)
   check_symbol_exists(SQLITE_DBCONFIG_ENABLE_FTS3_TOKENIZER sqlite3.h HAVE_FTS3_TOKENIZER)
@@ -151,9 +151,9 @@ configure_file(
 
 add_custom_target(
     uninstall-base
-    COMMAND 
+    COMMAND
         ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake
-    COMMAND 
+    COMMAND
         ${glib_schema_compiler} ${GSETTINGS_DIR}
 )
 
@@ -189,7 +189,7 @@ add_custom_target(
     ubuntu_pre
     DEPENDS
         dist
-    COMMAND 
+    COMMAND
         ${CMAKE_COMMAND} -E copy ${ARCHIVE_FULL_NAME} ${ARCHIVE_DEBUILD_FULL_NAME}
     COMMAND
         tar xvfx ${ARCHIVE_FULL_NAME}
@@ -200,9 +200,9 @@ add_custom_target(
     DEPENDS
         ubuntu_pre
     COMMAND
-        ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/debian" 
+        ${CMAKE_COMMAND} -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/debian"
         "${CMAKE_CURRENT_BINARY_DIR}/${ARCHIVE_BASE_NAME}/debian"
-    COMMAND 
+    COMMAND
         debuild -S -k$ENV{GPGKEY}
     COMMAND
 
