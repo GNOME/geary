@@ -140,6 +140,7 @@ public class ComposerWidget : Gtk.EventBox {
         action_accelerators.set(ACTION_CLOSE, "<Ctrl>w");
         action_accelerators.set(ACTION_CLOSE, "Escape");
         action_accelerators.set(ACTION_ADD_ATTACHMENT, "<Ctrl>t");
+        action_accelerators.set(ACTION_DETACH, "<Ctrl>d");
     }
 
     private const string DRAFT_SAVED_TEXT = _("Saved");
