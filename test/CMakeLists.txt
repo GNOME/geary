@@ -4,6 +4,9 @@
 
 set(TEST_SRC
   main.vala
+  testcase.vala # Taken as-is from libgee, courtesy Julien Peeters
+
+  engine/rfc822-mailbox-address-test.vala
 )
 
 # Vala
@@ -29,6 +32,8 @@ set(CFLAGS
     -D_BUILD_ROOT_DIR=\"${CMAKE_BINARY_DIR}\"
     -D_SOURCE_ROOT_DIR=\"${CMAKE_SOURCE_DIR}\"
 )
+
+include_directories(${CMAKE_BINARY_DIR}/src)
 
 set(LIB_PATHS ${DEPS_LIBRARY_DIRS})
 link_directories(${LIB_PATHS})

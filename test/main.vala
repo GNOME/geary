@@ -5,7 +5,11 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-void main(string[] args) {
+int main(string[] args) {
     Test.init(ref args);
-    print("OHHAI!");
+    TestSuite root = TestSuite.get_root();
+
+    root.add_suite(new Geary.RFC822.MailboxAddressTest().get_suite());
+
+    return Test.run();
 }
