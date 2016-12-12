@@ -37,16 +37,19 @@ distclean: clean
 	@-rm -rf $(BUILD_DIR)
 	@-rm -f Makefile
 
+.PHONY: test
+test:
+	@$(MAKE) -C $(BUILD_DIR) $@
+
 .PHONY: dist
-dist:
+dist: test
 	@$(MAKE) -C $(BUILD_DIR) dist
 	@cp build/*.xz .
 
 .PHONY: ubuntu
-ubuntu:
+ubuntu: test
 	@$(MAKE) -C $(BUILD_DIR) ubuntu
 
 .PHONY: valadoc
 valadoc:
 	@$(MAKE) -C $(BUILD_DIR) valadoc
-

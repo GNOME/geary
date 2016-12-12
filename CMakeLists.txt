@@ -23,6 +23,13 @@ set(VERSION "0.11.2-dev")
 set(VERSION_INFO "Release")
 set(LANGUAGE_SUPPORT_DIRECTORY ${CMAKE_INSTALL_PREFIX}/share/locale)
 
+#
+# Primary library minimum version requirements. See src/CMakeLists.txt
+# for others.
+#
+set(TARGET_GLIB 2.42) # Also passed to valac, so don't include a point rev
+set(TARGET_GTK 3.14.0)
+
 if (NOT ISO_CODE_639_XML)
   find_path(ISOCODES_DIRECTORY NAMES iso_639.xml PATHS ${CMAKE_INSTALL_PREFIX} /usr/share/xml/iso-codes)
   if (ISOCODES_DIRECTORY)
@@ -141,6 +148,14 @@ endif ()
 include(GlibCompileResourcesSupport)
 
 #
+# Unit tests.
+#
+# We don't use CMake's enable_testing/add_test built-ins because they
+# use ctest.
+add_custom_target(test ALL geary-test)
+add_dependencies(test geary-test)
+
+#
 # Uninstall target
 #
 configure_file(
@@ -169,7 +184,7 @@ add_dependencies(uninstall uninstall-base)
 # everything has has been removed
 add_custom_target(
     post-uninstall
-)
+    )
 
 # Dist
 # This generates the dist tarballs
@@ -216,3 +231,4 @@ add_subdirectory(po)
 add_subdirectory(sql)
 add_subdirectory(ui)
 add_subdirectory(src)
+add_subdirectory(test)
