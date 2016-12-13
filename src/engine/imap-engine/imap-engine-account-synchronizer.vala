@@ -148,9 +148,11 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
             // if considering folder not because it's available (i.e. because its contents changed),
             // and the folder is open, don't process it; MinimalFolder will take care of changes as
             // they occur, in order to remain synchronized
-            if (imap_folder.get_open_state() != Folder.OpenState.CLOSED)
+            if (!reason_available &&
+                imap_folder.get_open_state() != Folder.OpenState.CLOSED) {
                 continue;
-            
+            }
+
             // don't requeue the currently processing folder
             if (imap_folder != current_folder)
                 bg_queue.send(imap_folder);
@@ -336,7 +338,7 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
             debug("Unable to open %s: %s", folder.to_string(), err.message);
             
             // retry later
-            delayed_send_all(iterate<Folder>(folder).to_array_list(), false, RETRY_SYNC_DELAY_SEC);
+            delayed_send_all(iterate<Folder>(folder).to_array_list(), availability_check, RETRY_SYNC_DELAY_SEC);
             
             return true;
         }
@@ -351,7 +353,7 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
                 debug("Error background syncing folder %s: %s", folder.to_string(), err.message);
                 
                 // retry later
-                delayed_send_all(iterate<Folder>(folder).to_array_list(), false, RETRY_SYNC_DELAY_SEC);
+                delayed_send_all(iterate<Folder>(folder).to_array_list(), availability_check, RETRY_SYNC_DELAY_SEC);
             }
             
             // fallthrough and close
