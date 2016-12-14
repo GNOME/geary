@@ -47,7 +47,7 @@
         <property name="sensitive">False</property>
         <property name="can_focus">True</property>
         <property name="receives_default">True</property>
-        <property name="tooltip_text" translatable="yes">Mark this message as starred</property>
+        <property name="tooltip_text" translatable="yes" comments="Note: The application will never show this button at the same time as unstar_button, one will always be hidden.">Mark this message as starred</property>
         <property name="valign">start</property>
         <property name="action_name">eml.star</property>
         <property name="relief">none</property>
@@ -69,7 +69,7 @@
         <property name="sensitive">False</property>
         <property name="can_focus">True</property>
         <property name="receives_default">True</property>
-        <property name="tooltip_text" translatable="yes">Mark this message as not starred</property>
+        <property name="tooltip_text" translatable="yes" comments="Note: The application will never show this button at the same time as star_button, one will always be hidden.">Mark this message as not starred</property>
         <property name="valign">start</property>
         <property name="action_name">eml.unstar</property>
         <property name="relief">none</property>
