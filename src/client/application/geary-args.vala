@@ -69,7 +69,7 @@ public bool parse(string[] args) {
         string arg = args[ctr];
         
         if (!arg.has_prefix(Geary.ComposedEmail.MAILTO_SCHEME)) {
-            stdout.printf(_("Unrecognized command line option \"%s\"\n").printf(arg));
+            stdout.printf(_("Unrecognized command line option “%s”\n").printf(arg));
             stdout.printf("\n%s", context.get_help(true, null));
             
             return false;

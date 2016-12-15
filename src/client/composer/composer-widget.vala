@@ -1605,19 +1605,19 @@ public class ComposerWidget : Gtk.EventBox {
                 FileQueryInfoFlags.NONE);
         } catch (Error e) {
             throw new AttachmentError.FILE(
-                _("\"%s\" could not be found.").printf(target.get_path())
+                _("“%s” could not be found.").printf(target.get_path())
             );
         }
         
         if (target_info.get_file_type() == FileType.DIRECTORY) {
             throw new AttachmentError.FILE(
-                _("\"%s\" is a folder.").printf(target.get_path())
+                _("“%s” is a folder.").printf(target.get_path())
             );
         }
 
         if (target_info.get_size() == 0){
             throw new AttachmentError.FILE(
-                _("\"%s\" is an empty file.").printf(target.get_path())
+                _("“%s” is an empty file.").printf(target.get_path())
             );
         }
         
@@ -1630,14 +1630,14 @@ public class ComposerWidget : Gtk.EventBox {
                 e.message);
             
             throw new AttachmentError.FILE(
-                _("\"%s\" could not be opened for reading.").printf(target.get_path())
+                _("“%s” could not be opened for reading.").printf(target.get_path())
             );
         }
 
         if (disposition != Geary.Mime.DispositionType.INLINE) {
             if (!this.attached_files.add(target)) {
                 throw new AttachmentError.DUPLICATE(
-                    _("\"%s\" already attached for delivery.").printf(target.get_path())
+                    _("“%s” already attached for delivery.").printf(target.get_path())
                 );
             }
 
@@ -2419,7 +2419,7 @@ public class ComposerWidget : Gtk.EventBox {
         // ported to WebKit2 in Bug 728002.
         Gtk.Window window = new Gtk.Window();
         window.set_default_size(600, 600);
-        window.set_title(_("%s - Composer Inspector").printf(GearyApplication.NAME));
+        window.set_title(_("%s — Composer Inspector").printf(GearyApplication.NAME));
         Gtk.ScrolledWindow scrolled = new Gtk.ScrolledWindow(null, null);
         WebKit.WebView inspector_view = new WebKit.WebView();
         scrolled.add(inspector_view);

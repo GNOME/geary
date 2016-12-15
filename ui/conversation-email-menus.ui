@@ -32,7 +32,7 @@
     </section>
     <section>
       <item>
-        <attribute name="label" translatable="yes">_Print...</attribute>
+        <attribute name="label" translatable="yes">_Print…</attribute>
         <attribute name="action">eml.print</attribute>
       </item>
       <item>

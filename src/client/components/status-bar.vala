@@ -23,7 +23,7 @@ public class StatusBar : Gtk.Statusbar {
             switch (this) {
                 case Message.OUTBOX_SENDING:
                     /// Displayed in the space-limited status bar while a message is in the process of being sent.
-                    return _("Sending...");
+                    return _("Sending…");
                 case Message.OUTBOX_SEND_FAILURE:
                     /// Displayed in the space-limited status bar when a message fails to be sent due to error.
                     return _("Error sending email");

@@ -14,7 +14,7 @@
     </section>
     <section id="context_menu_email">
       <item>
-        <attribute name="label" translatable="yes">Send New _Message...</attribute>
+        <attribute name="label" translatable="yes">Send New _Message…</attribute>
         <attribute name="action">msg.open_link</attribute>
       </item>
       <item>
@@ -24,7 +24,7 @@
     </section>
     <section id="context_menu_image">
       <item>
-        <attribute name="label" translatable="yes">Save _Image As...</attribute>
+        <attribute name="label" translatable="yes">Save _Image As…</attribute>
         <attribute name="action">msg.save_image</attribute>
       </item>
     </section>
@@ -46,7 +46,7 @@
     </section>
     <section id="context_menu_inspector">
       <item>
-        <attribute name="label" translatable="yes">_Inspect...</attribute>
+        <attribute name="label" translatable="yes">_Inspect…</attribute>
         <attribute name="action">msg.open_inspector</attribute>
       </item>
     </section>

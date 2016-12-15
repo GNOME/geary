@@ -431,7 +431,7 @@ public class GearyController : Geary.BaseObject {
 
         Gtk.ActionEntry mark_menu = { ACTION_MARK_AS_MENU, null, TRANSLATABLE, null, _("Mark conversation"),
             on_show_mark_menu };
-        mark_menu.label = _("_Mark as...");
+        mark_menu.label = _("_Mark as…");
         mark_menu.tooltip = MARK_MESSAGE_MENU_TOOLTIP_SINGLE;
         entries += mark_menu;
 
@@ -1159,7 +1159,7 @@ public class GearyController : Geary.BaseObject {
                     yield account.rebuild_async();
                 } catch (Error err) {
                     ErrorDialog errdialog = new ErrorDialog(main_window,
-                        _("Unable to rebuild database for \"%s\"").printf(account.information.id),
+                        _("Unable to rebuild database for “%s”").printf(account.information.id),
                         _("Error during rebuild:\n\n%s").printf(err.message));
                     errdialog.run();
                     
@@ -1193,7 +1193,7 @@ public class GearyController : Geary.BaseObject {
     private async void account_database_version_async(Geary.Account account) {
         ErrorDialog dialog = new ErrorDialog(main_window,
             _("Unable to open local mailbox for %s").printf(account.information.id),
-            _("The version number of the local mail database is formatted for a newer version of Geary. Unfortunately, the database cannot be \"rolled back\" to work with this version of Geary.\n\nPlease install the latest version of Geary and try again."));
+            _("The version number of the local mail database is formatted for a newer version of Geary. Unfortunately, the database cannot be “rolled back” to work with this version of Geary.\n\nPlease install the latest version of Geary and try again."));
         dialog.run();
 
         this.application.exit(1);
@@ -1989,7 +1989,7 @@ public class GearyController : Geary.BaseObject {
             QuestionDialog ask_to_open = new QuestionDialog.with_checkbox(main_window,
                 _("Are you sure you want to open these attachments?"),
                 _("Attachments may cause damage to your system if opened.  Only open files from trusted sources."),
-                Stock._OPEN_BUTTON, Stock._CANCEL, _("Don't _ask me again"), false);
+                Stock._OPEN_BUTTON, Stock._CANCEL, _("Don’t _ask me again"), false);
             if (ask_to_open.run() != Gtk.ResponseType.OK) {
                 return;
             }
@@ -2033,9 +2033,9 @@ public class GearyController : Geary.BaseObject {
     }
 
     private bool do_overwrite_confirmation(File to_overwrite) {
-        string primary = _("A file named \"%s\" already exists.  Do you want to replace it?").printf(
+        string primary = _("A file named “%s” already exists.  Do you want to replace it?").printf(
             to_overwrite.get_basename());
-        string secondary = _("The file already exists in \"%s\".  Replacing it will overwrite its contents.").printf(
+        string secondary = _("The file already exists in “%s”.  Replacing it will overwrite its contents.").printf(
             to_overwrite.get_parent().get_basename());
         
         ConfirmationDialog dialog = new ConfirmationDialog(main_window, primary, secondary, _("_Replace"), "destructive-action");

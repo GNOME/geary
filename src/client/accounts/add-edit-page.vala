@@ -778,31 +778,31 @@ public class AddEditPage : Gtk.Box {
             
             string error_string = _("Unable to validate:\n");
             if (last_validation_result.is_all_set(Geary.Engine.ValidationResult.INVALID_NICKNAME))
-                error_string += _("        &#8226; Invalid account nickname.\n");
+                error_string += _("        • Invalid account nickname.\n");
             
             if (last_validation_result.is_all_set(Geary.Engine.ValidationResult.EMAIL_EXISTS))
-                error_string += _("        &#8226; Email address already added to Geary.\n");
+                error_string += _("        • Email address already added to Geary.\n");
             
             if (get_service_provider() == Geary.ServiceProvider.OTHER) {
                 if (last_validation_result.is_all_set(Geary.Engine.ValidationResult.IMAP_CONNECTION_FAILED))
-                    error_string += _("        &#8226; IMAP connection error.\n");
+                    error_string += _("        • IMAP connection error.\n");
                 
                 if (last_validation_result.is_all_set(Geary.Engine.ValidationResult.IMAP_CREDENTIALS_INVALID))
-                    error_string += _("        &#8226; IMAP username or password incorrect.\n");
+                    error_string += _("        • IMAP username or password incorrect.\n");
                 
                 if (last_validation_result.is_all_set(Geary.Engine.ValidationResult.SMTP_CONNECTION_FAILED))
-                    error_string += _("        &#8226; SMTP connection error.\n");
+                    error_string += _("        • SMTP connection error.\n");
                 
                 if (last_validation_result.is_all_set(Geary.Engine.ValidationResult.SMTP_CREDENTIALS_INVALID))
-                    error_string += _("        &#8226; SMTP username or password incorrect.\n");
+                    error_string += _("        • SMTP username or password incorrect.\n");
             } else {
                 if (last_validation_result.is_all_set(Geary.Engine.ValidationResult.IMAP_CONNECTION_FAILED) ||
                     last_validation_result.is_all_set(Geary.Engine.ValidationResult.SMTP_CONNECTION_FAILED))
-                    error_string += _("        &#8226; Connection error.\n");
+                    error_string += _("        • Connection error.\n");
                 
                 if (last_validation_result.is_all_set(Geary.Engine.ValidationResult.IMAP_CREDENTIALS_INVALID) ||
                     last_validation_result.is_all_set(Geary.Engine.ValidationResult.SMTP_CREDENTIALS_INVALID))
-                    error_string += _("        &#8226; Username or password incorrect.\n");
+                    error_string += _("        • Username or password incorrect.\n");
             }
             
             label_error.label = "<span color=\"red\">" + error_string + "</span>";

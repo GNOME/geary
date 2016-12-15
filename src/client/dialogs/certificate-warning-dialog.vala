@@ -41,7 +41,7 @@ public class CertificateWarningDialog {
         
         trust_label.label =
             "<b>"
-            +_("Selecting \"Trust This Server\" or \"Always Trust This Server\" may cause your username and password to be transmitted insecurely.")
+            +_("Selecting “Trust This Server” or “Always Trust This Server” may cause your username and password to be transmitted insecurely.")
             + "</b>";
         trust_label.use_markup = true;
         
@@ -49,14 +49,14 @@ public class CertificateWarningDialog {
             // could be a new or existing account
             dont_trust_label.label =
                 "<b>"
-                + _("Selecting \"Don't Trust This Server\" will cause Geary not to access this server.")
+                + _("Selecting “Don’t Trust This Server” will cause Geary not to access this server.")
                 + "</b> "
                 + _("Geary will not add or update this email account.");
         } else {
             // a registered account
             dont_trust_label.label =
                 "<b>"
-                + _("Selecting \"Don't Trust This Server\" will cause Geary to stop accessing this account.")
+                + _("Selecting “Don’t Trust This Server” will cause Geary to stop accessing this account.")
                 + "</b> "
                 + _("Geary will exit if you have no other open email accounts.");
         }
@@ -70,25 +70,25 @@ public class CertificateWarningDialog {
         StringBuilder builder = new StringBuilder();
          
         if ((warnings & TlsCertificateFlags.UNKNOWN_CA) != 0)
-            builder.append(BULLET + _("The server's certificate is not signed by a known authority") + "\n");
+            builder.append(BULLET + _("The server’s certificate is not signed by a known authority") + "\n");
         
         if ((warnings & TlsCertificateFlags.BAD_IDENTITY) != 0)
-            builder.append(BULLET + _("The server's identity does not match the identity in the certificate") + "\n");
+            builder.append(BULLET + _("The server’s identity does not match the identity in the certificate") + "\n");
         
         if ((warnings & TlsCertificateFlags.EXPIRED) != 0)
-            builder.append(BULLET + _("The server's certificate has expired") + "\n");
+            builder.append(BULLET + _("The server’s certificate has expired") + "\n");
         
         if ((warnings & TlsCertificateFlags.NOT_ACTIVATED) != 0)
-            builder.append(BULLET + _("The server's certificate has not been activated") + "\n");
+            builder.append(BULLET + _("The server’s certificate has not been activated") + "\n");
         
         if ((warnings & TlsCertificateFlags.REVOKED) != 0)
-            builder.append(BULLET + _("The server's certificate has been revoked and is now invalid") + "\n");
+            builder.append(BULLET + _("The server’s certificate has been revoked and is now invalid") + "\n");
         
         if ((warnings & TlsCertificateFlags.INSECURE) != 0)
-            builder.append(BULLET + _("The server's certificate is considered insecure") + "\n");
+            builder.append(BULLET + _("The server’s certificate is considered insecure") + "\n");
         
         if ((warnings & TlsCertificateFlags.GENERIC_ERROR) != 0)
-            builder.append(BULLET + _("An error has occurred processing the server's certificate") + "\n");
+            builder.append(BULLET + _("An error has occurred processing the server’s certificate") + "\n");
         
         return builder.str;
     }

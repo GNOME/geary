@@ -195,7 +195,7 @@ public class ConversationWebView : StylishWebView {
     private unowned WebKit.WebView activate_inspector(WebKit.WebInspector inspector, WebKit.WebView target_view) {
         Gtk.Window window = new Gtk.Window();
         window.set_default_size(600, 600);
-        window.set_title(_("%s - Conversation Inspector").printf(GearyApplication.NAME));
+        window.set_title(_("%s — Conversation Inspector").printf(GearyApplication.NAME));
         Gtk.ScrolledWindow scrolled = new Gtk.ScrolledWindow(null, null);
         WebKit.WebView inspector_view = new WebKit.WebView();
         scrolled.add(inspector_view);

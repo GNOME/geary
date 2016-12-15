@@ -54,7 +54,7 @@
             </child>
             <child>
               <object class="GtkButton" id="dont_trust_button">
-                <property name="label" translatable="yes">_Don't Trust This Server</property>
+                <property name="label" translatable="yes">_Don’t Trust This Server</property>
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="receives_default">True</property>
