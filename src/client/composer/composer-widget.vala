@@ -264,7 +264,6 @@ public class ComposerWidget : Gtk.EventBox {
     private string? last_quote = null;
     
     private Geary.App.DraftManager? draft_manager = null;
-    private Geary.EmailIdentifier? editing_draft_id = null;
     private Geary.EmailFlags draft_flags = new Geary.EmailFlags.with(Geary.EmailFlags.DRAFT);
     private uint draft_save_timeout_id = 0;
     private bool is_closing = false;
@@ -374,8 +373,14 @@ public class ComposerWidget : Gtk.EventBox {
         bind_property("state", header, "state", BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
         
         // Listen to account signals to update from menu.
-        Geary.Engine.instance.account_available.connect(update_from_field);
-        Geary.Engine.instance.account_unavailable.connect(update_from_field);
+        Geary.Engine.instance.account_available.connect(() => {
+                update_from_field();
+            });
+        Geary.Engine.instance.account_unavailable.connect(() => {
+                if (update_from_field()) {
+                    on_from_changed();
+                }
+            });
         // TODO: also listen for account updates to allow adding identities while writing an email
         
         Gtk.ScrolledWindow scroll = new Gtk.ScrolledWindow(null, null);
@@ -456,6 +461,7 @@ public class ComposerWidget : Gtk.EventBox {
         add_extra_accelerators();
 
         from = account.information.get_primary_from();
+        Geary.EmailIdentifier? editing_draft_id = null;
 
         if (referred != null) {
             if (compose_type != ComposeType.NEW_MESSAGE) {
@@ -521,6 +527,7 @@ public class ComposerWidget : Gtk.EventBox {
         }
 
         update_from_field();
+        open_draft_manager_async.begin(editing_draft_id);
 
         // only add signature if the option is actually set and if this is not a draft
         if (account.information.use_email_signature && !is_referred_draft)
@@ -607,20 +614,20 @@ public class ComposerWidget : Gtk.EventBox {
         chain.append(composer_toolbar);
         chain.append(attachments_box);
         box.set_focus_chain(chain);
-        
-        // If there's only one From option, open the drafts manager.  If there's more than one,
-        // the drafts manager will be opened by on_from_changed().
-        if (!from_multiple.visible)
-            open_draft_manager_async.begin(null);
-        
-        // Remind the conversation viewer of draft ids when it reloads
+
+        // Remind the conversation viewer of draft ids when it
+        // reloads. Need to use the signal handler's viewer instance
+        // to avoid some sort of ref that is preventing the composer
+        // from being finalised when closed.
         ConversationViewer conversation_viewer =
             GearyApplication.instance.controller.main_window.conversation_viewer;
-        conversation_viewer.cleared.connect(() => {
+        conversation_viewer.cleared.connect((viewer) => {
             if (draft_manager != null)
-                conversation_viewer.blacklist_by_id(draft_manager.current_draft_id);
+                    viewer.blacklist_by_id(draft_manager.current_draft_id);
         });
-        
+
+        // Don't do this in an overridden version of the destroy
+        // method, it somehow ends up in an infinite loop
         destroy.connect(() => { close_draft_manager_async.begin(null); });
     }
     
@@ -1143,7 +1150,7 @@ public class ComposerWidget : Gtk.EventBox {
         if (can_save())
             save_and_exit_async.begin();
         else
-            container.close_container();
+            on_close();
     }
     
     private void on_close_and_discard() {
@@ -1369,15 +1376,25 @@ public class ComposerWidget : Gtk.EventBox {
     }
     
     // Returns the drafts folder for the current From account.
-    private async void open_draft_manager_async(Cancellable? cancellable) throws Error {
+    private async void open_draft_manager_async(
+        Geary.EmailIdentifier? editing_draft_id = null,
+        Cancellable? cancellable = null)
+    throws Error {
+        this.draft_save_text = "";
+        Gtk.Action close_and_save = this.actions.get_action(ACTION_CLOSE_SAVE);
+
+        close_and_save.set_sensitive(false);
+
         yield close_draft_manager_async(cancellable);
-        
-        if (!account.information.save_drafts)
+
+        if (!this.account.information.save_drafts) {
+            close_and_save.set_visible(false);
             return;
-        
-        draft_manager = new Geary.App.DraftManager(account);
+        }
+
+        this.draft_manager = new Geary.App.DraftManager(account);
         try {
-            yield draft_manager.open_async(editing_draft_id, cancellable);
+            yield this.draft_manager.open_async(editing_draft_id, cancellable);
         } catch (Error err) {
             debug("Unable to open draft manager %s: %s", draft_manager.to_string(), err.message);
             
@@ -1385,20 +1402,15 @@ public class ComposerWidget : Gtk.EventBox {
             
             throw err;
         }
-        
-        // clear now, as it was only needed to open draft manager
-        editing_draft_id = null;
-        
         connect_to_draft_manager();
+
+        close_and_save.set_visible(true);
+        close_and_save.set_sensitive(true);
     }
     
     private async void close_draft_manager_async(Cancellable? cancellable) throws Error {
-        // clear status text
-        draft_save_text = "";
-        
-        // only clear editing_draft_id if associated with prior draft_manager, not due to this
-        // widget being initialized with it
-        if (draft_manager == null)
+        this.actions.get_action(ACTION_CLOSE_SAVE).set_sensitive(false);
+        if (this.draft_manager == null)
             return;
         
         disconnect_from_draft_manager();
@@ -1407,8 +1419,7 @@ public class ComposerWidget : Gtk.EventBox {
         try {
             yield draft_manager.close_async(cancellable);
         } finally {
-            draft_manager = null;
-            editing_draft_id = null;
+            this.draft_manager = null;
         }
     }
     
@@ -2343,8 +2354,10 @@ public class ComposerWidget : Gtk.EventBox {
         }
         return set_active;
     }
-    
-    private void update_from_field() {
+
+    // Updates from combobox contents and visibility, returns true if
+    // the from address had to be set
+    private bool update_from_field() {
         from_multiple.changed.disconnect(on_from_changed);
         from_single.visible = from_multiple.visible = from_label.visible = false;
         
@@ -2353,20 +2366,20 @@ public class ComposerWidget : Gtk.EventBox {
             accounts = Geary.Engine.instance.get_accounts();
         } catch (Error e) {
             debug("Could not fetch account info: %s", e.message);
-            
-            return;
+
+            return false;
         }
-        
+
         // Don't show in inline, compact, or paned modes.
         if (state == ComposerState.INLINE || state == ComposerState.INLINE_COMPACT ||
             state == ComposerState.PANED)
-            return;
-        
+            return false;
+
         // If there's only one account, show nothing. (From fields are hidden above.)
         if (accounts.size < 1 || (accounts.size == 1 && Geary.traverse<Geary.AccountInformation>(
             accounts.values).first().alternate_mailboxes == null))
-            return;
-        
+            return false;
+
         from_label.visible = true;
         
         from_label.set_use_underline(true);
@@ -2378,7 +2391,9 @@ public class ComposerWidget : Gtk.EventBox {
         from_multiple.visible = true;
         from_multiple.remove_all();
         from_list = new Gee.ArrayList<FromAddressMap>();
-        
+
+        // This is set to true if the current message's from address
+        // has been selected in the ComboBox
         bool set_active = false;
         if (compose_type == ComposeType.NEW_MESSAGE) {
             set_active = add_account_emails_to_from_list(account);
@@ -2399,12 +2414,12 @@ public class ComposerWidget : Gtk.EventBox {
             // The identity or account that was active before has been removed
             // use the best we can get now (primary address of the account or any other)
             from_multiple.set_active(0);
-            on_from_changed();
         }
-        
+
         from_multiple.changed.connect(on_from_changed);
+        return !set_active;
     }
-    
+
     private void on_from_changed() {
         bool changed = false;
         try {
@@ -2419,7 +2434,7 @@ public class ComposerWidget : Gtk.EventBox {
         if (!changed && draft_manager != null)
             return;
         
-        open_draft_manager_async.begin(null);
+        open_draft_manager_async.begin();
         reset_draft_timer();
     }
     
