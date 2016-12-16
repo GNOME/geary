@@ -10,8 +10,8 @@ msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=internationalization\n"
-"POT-Creation-Date: 2016-09-26 21:45+0000\n"
-"PO-Revision-Date: 2016-09-28 20:56+0200\n"
+"POT-Creation-Date: 2016-12-15 00:05+0000\n"
+"PO-Revision-Date: 2016-12-16 16:43+0100\n"
 "Last-Translator: Dušan Kazik <prescott66@gmail.com>\n"
 "Language-Team: Slovak (http://www.transifex.com/projects/p/geary/language/"
 "sk/)\n"
@@ -20,7 +20,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
-"X-Generator: Poedit 1.8.9\n"
+"X-Generator: Poedit 1.8.11\n"
 
 #: ../desktop/geary.desktop.in.h:1 ../desktop/geary-autostart.desktop.in.h:1
 msgid "Geary"
@@ -472,13 +472,25 @@ msgstr ""
 msgid "Co_ntinue"
 msgstr "Po_kračovať"
 
+#: ../src/client/application/geary-controller.vala:1030
+msgid "Error connecting to the server"
+msgstr "Chyba počas pripájania k serveru"
+
+#: ../src/client/application/geary-controller.vala:1031
+msgid ""
+"Geary encountered an error while connecting to the server.  Please try again "
+"in a few moments."
+msgstr ""
+"Aplikácia Geary narazila na chybu počas pripájania k serveru. Prosím, skúste "
+"to znovu neskôr."
+
 #. / Displayed in the space-limited status bar when a message fails to be sent due to error.
-#: ../src/client/application/geary-controller.vala:1061
+#: ../src/client/application/geary-controller.vala:1068
 #: ../src/client/components/status-bar.vala:29
 msgid "Error sending email"
 msgstr "Chyba pri odosielaní emailu"
 
-#: ../src/client/application/geary-controller.vala:1062
+#: ../src/client/application/geary-controller.vala:1069
 msgid ""
 "Geary encountered an error sending an email.  If the problem persists, "
 "please manually delete the email from your Outbox folder."
@@ -489,12 +501,12 @@ msgstr ""
 
 #. Displayed in the space-limited status bar when a message fails to be uploaded
 #. to Sent Mail after being sent.
-#: ../src/client/application/geary-controller.vala:1066
+#: ../src/client/application/geary-controller.vala:1073
 #: ../src/client/components/status-bar.vala:33
 msgid "Error saving sent mail"
 msgstr "Chyba pri ukladaní odoslanej pošty"
 
-#: ../src/client/application/geary-controller.vala:1067
+#: ../src/client/application/geary-controller.vala:1074
 msgid ""
 "Geary encountered an error saving a sent message to Sent Mail.  The message "
 "will stay in your Outbox folder until you delete it."
@@ -503,19 +515,19 @@ msgstr ""
 "priečinka „Odoslaná pošta“. Správa zostane vo vašom priečinku „Pošta na "
 "odoslanie“, pokiaľ ju neodstránite."
 
-#: ../src/client/application/geary-controller.vala:1136
+#: ../src/client/application/geary-controller.vala:1143
 msgid "Labels"
 msgstr "Menovky"
 
 #. give the user two options: reset the Account local store, or exit Geary.  A third
 #. could be done to leave the Account in an unopened state, but we don't currently
 #. have provisions for that.
-#: ../src/client/application/geary-controller.vala:1148
+#: ../src/client/application/geary-controller.vala:1155
 #, c-format
 msgid "Unable to open the database for %s"
 msgstr "Nie je možné otvoriť databázu pre %s"
 
-#: ../src/client/application/geary-controller.vala:1149
+#: ../src/client/application/geary-controller.vala:1156
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -540,20 +552,20 @@ msgstr ""
 "Znovu zostavenie databázy zničí všetku miestnu poštu a jej prílohy. <b>Pošta "
 "na serveri nebude ovplyvnená.</b>"
 
-#: ../src/client/application/geary-controller.vala:1151
+#: ../src/client/application/geary-controller.vala:1158
 msgid "_Rebuild"
 msgstr "_Znovu zostaviť"
 
-#: ../src/client/application/geary-controller.vala:1151
+#: ../src/client/application/geary-controller.vala:1158
 msgid "E_xit"
 msgstr "_Ukončiť"
 
-#: ../src/client/application/geary-controller.vala:1160
+#: ../src/client/application/geary-controller.vala:1167
 #, c-format
 msgid "Unable to rebuild database for \"%s\""
 msgstr "Nie je možné znovu zostaviť databázu účtu „%s“"
 
-#: ../src/client/application/geary-controller.vala:1161
+#: ../src/client/application/geary-controller.vala:1168
 #, c-format
 msgid ""
 "Error during rebuild:\n"
@@ -566,14 +578,14 @@ msgstr ""
 
 #. some other problem opening the account ... as with other flow path, can't run
 #. Geary today with an account in unopened state, so have to exit
-#: ../src/client/application/geary-controller.vala:1183
-#: ../src/client/application/geary-controller.vala:1193
-#: ../src/client/application/geary-controller.vala:1204
+#: ../src/client/application/geary-controller.vala:1190
+#: ../src/client/application/geary-controller.vala:1200
+#: ../src/client/application/geary-controller.vala:1211
 #, c-format
 msgid "Unable to open local mailbox for %s"
 msgstr "Nie je možné otvoriť miestnu poštovú schránku účtu %s"
 
-#: ../src/client/application/geary-controller.vala:1184
+#: ../src/client/application/geary-controller.vala:1191
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -592,7 +604,7 @@ msgstr ""
 "\n"
 "%s"
 
-#: ../src/client/application/geary-controller.vala:1194
+#: ../src/client/application/geary-controller.vala:1201
 msgid ""
 "The version number of the local mail database is formatted for a newer "
 "version of Geary. Unfortunately, the database cannot be \"rolled back\" to "
@@ -605,7 +617,7 @@ msgstr ""
 "s touto verziou aplikácie Geary.\n"
 "ynProsím, nainštalujte najnovšiu verziu programu Geary a skúste to znovu."
 
-#: ../src/client/application/geary-controller.vala:1205
+#: ../src/client/application/geary-controller.vala:1212
 msgid ""
 "There was an error opening the local account. This is probably due to "
 "connectivity issues.\n"
@@ -618,27 +630,27 @@ msgstr ""
 "Prosím, skontrolujte vaše sieťové pripojenie a znovu spustite aplikáciu "
 "Geary."
 
-#: ../src/client/application/geary-controller.vala:1716
+#: ../src/client/application/geary-controller.vala:1723
 #, c-format
 msgid "About %s"
 msgstr "O %s"
 
 #. / Translators: add your name and email address to receive credit in the About dialog
 #. / For example: Yamada Taro <yamada.taro@example.com>
-#: ../src/client/application/geary-controller.vala:1719
+#: ../src/client/application/geary-controller.vala:1726
 msgid "translator-credits"
 msgstr "Dušan Kazik <prescott66@gmail.com>"
 
-#: ../src/client/application/geary-controller.vala:1977
+#: ../src/client/application/geary-controller.vala:1984
 msgid "Undo move (Ctrl+Z)"
 msgstr "Vráti späť presunutie (Ctrl+Z)"
 
-#: ../src/client/application/geary-controller.vala:1987
+#: ../src/client/application/geary-controller.vala:1994
 #, c-format
 msgid "Are you sure you want to open \"%s\"?"
 msgstr "Naozaj chcete otvoriť „%s“?"
 
-#: ../src/client/application/geary-controller.vala:1988
+#: ../src/client/application/geary-controller.vala:1995
 msgid ""
 "Attachments may cause damage to your system if opened.  Only open files from "
 "trusted sources."
@@ -646,76 +658,76 @@ msgstr ""
 "Prílohy môžu po otvorení poškodiť váš systém.  Otvárajte iba súbory z "
 "dôveryhodných zdrojov."
 
-#: ../src/client/application/geary-controller.vala:1989
+#: ../src/client/application/geary-controller.vala:1996
 msgid "Don't _ask me again"
 msgstr "Nepýtať s_a znovu"
 
-#: ../src/client/application/geary-controller.vala:2007
+#: ../src/client/application/geary-controller.vala:2014
 #, c-format
 msgid "A file named \"%s\" already exists.  Do you want to replace it?"
 msgstr "Súbor s názvom „%s“ už existuje.  Chcete ho nahradiť?"
 
-#: ../src/client/application/geary-controller.vala:2009
+#: ../src/client/application/geary-controller.vala:2016
 #, c-format
 msgid ""
 "The file already exists in \"%s\".  Replacing it will overwrite its contents."
 msgstr "Súbor v „%s“ už existuje.  Nahradením sa prepíše jeho obsah."
 
-#: ../src/client/application/geary-controller.vala:2012
+#: ../src/client/application/geary-controller.vala:2019
 msgid "_Replace"
 msgstr "_Nahradiť"
 
 #. Find out what to do with the inline composers.
 #. TODO: Remove this in favor of automatically saving drafts
-#: ../src/client/application/geary-controller.vala:2310
+#: ../src/client/application/geary-controller.vala:2317
 msgid "Close open draft messages?"
 msgstr "Zavrieť otvorené koncepty správ?"
 
-#: ../src/client/application/geary-controller.vala:2440
+#: ../src/client/application/geary-controller.vala:2447
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Vyprázdniť všetky emaily z vášho priečinka %s?"
 
-#: ../src/client/application/geary-controller.vala:2441
+#: ../src/client/application/geary-controller.vala:2448
 msgid "This removes the email from Geary and your email server."
 msgstr ""
 "Týmto sa odstránia všetky emaily z aplikácie Geary a vášho emailového "
 "servera."
 
-#: ../src/client/application/geary-controller.vala:2442
+#: ../src/client/application/geary-controller.vala:2449
 msgid "This cannot be undone."
 msgstr "Táto akcia sa nebude dať vrátiť späť."
 
-#: ../src/client/application/geary-controller.vala:2443
+#: ../src/client/application/geary-controller.vala:2450
 #, c-format
 msgid "Empty %s"
 msgstr "Vyprázdniť priečinok %s"
 
-#: ../src/client/application/geary-controller.vala:2460
+#: ../src/client/application/geary-controller.vala:2467
 #, c-format
 msgid "Error emptying %s"
 msgstr "Chyba pri vyprázdňovaní priečinka %s"
 
-#: ../src/client/application/geary-controller.vala:2490
+#: ../src/client/application/geary-controller.vala:2497
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Chcete natrvalo odstrániť túto správu?"
 msgstr[1] "Chcete natrvalo odstrániť tieto správy?"
 msgstr[2] "Chcete natrvalo odstrániť tieto správy?"
 
-#: ../src/client/application/geary-controller.vala:2492
+#: ../src/client/application/geary-controller.vala:2499
 msgid "Delete"
 msgstr "Odstrániť"
 
-#: ../src/client/application/geary-controller.vala:2523
+#: ../src/client/application/geary-controller.vala:2530
 msgid "Undo archive (Ctrl+Z)"
 msgstr "Vráti späť archiváciu (Ctrl+Z)"
 
-#: ../src/client/application/geary-controller.vala:2538
+#: ../src/client/application/geary-controller.vala:2545
 msgid "Undo trash (Ctrl+Z)"
 msgstr "Vráti späť kôš (Ctrl+Z)"
 
-#: ../src/client/application/geary-controller.vala:2591
+#: ../src/client/application/geary-controller.vala:2598
 msgid "Undo (Ctrl+Z)"
 msgstr "Vráti späť (Ctrl+Z)"
 
