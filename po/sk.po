@@ -10,8 +10,8 @@ msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=internationalization\n"
-"POT-Creation-Date: 2016-11-21 12:18+0000\n"
-"PO-Revision-Date: 2016-11-24 21:04+0100\n"
+"POT-Creation-Date: 2016-12-16 01:14+0000\n"
+"PO-Revision-Date: 2016-12-16 16:38+0100\n"
 "Last-Translator: Dušan Kazik <prescott66@gmail.com>\n"
 "Language-Team: Slovak (http://www.transifex.com/projects/p/geary/language/"
 "sk/)\n"
@@ -22,17 +22,19 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 "X-Generator: Poedit 1.8.11\n"
 
-#: ../desktop/geary.appdata.xml.in.h:1 ../desktop/geary.desktop.in.h:1
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:1
+#: ../desktop/org.gnome.Geary.desktop.in.h:1
 #: ../desktop/geary-autostart.desktop.in.h:1
 msgid "Geary"
 msgstr "Geary"
 
-#: ../desktop/geary.appdata.xml.in.h:2 ../desktop/geary.desktop.in.h:4
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:2
+#: ../desktop/org.gnome.Geary.desktop.in.h:4
 #: ../desktop/geary-autostart.desktop.in.h:4
 msgid "Send and receive email"
 msgstr "Odosiela a prijíma emaily"
 
-#: ../desktop/geary.appdata.xml.in.h:3
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:3
 msgid ""
 "Geary is an email application built around conversations, for the GNOME 3 "
 "desktop. It allows you to read, find and send email with a straightforward, "
@@ -42,7 +44,7 @@ msgstr ""
 "Umožňuje vám prečítať, hľadať a odosielať emaily s jasným a moderným "
 "rozhraním."
 
-#: ../desktop/geary.appdata.xml.in.h:4
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:4
 msgid ""
 "Conversations allow you to read a complete discussion without having to find "
 "and click from message to message."
@@ -50,50 +52,50 @@ msgstr ""
 "Rozhovory vám umožňujú prečítať kompletnú diskusiu bez nutnosti vyhľadania a "
 "klikania zo správy na správu."
 
-#: ../desktop/geary.appdata.xml.in.h:5
-msgid "Geary's features include:"
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:5
+msgid "Geary’s features include:"
 msgstr "Funkcie aplikácie Geary zahŕňajú:"
 
-#: ../desktop/geary.appdata.xml.in.h:6
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:6
 msgid "Quick email account setup"
 msgstr "Rýchle nastavenie emailového účtu"
 
-#: ../desktop/geary.appdata.xml.in.h:7
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:7
 msgid "Shows related messages together in conversations"
 msgstr "Zobrazenie spolu súvisiacich správ v rozhovoroch"
 
-#: ../desktop/geary.appdata.xml.in.h:8
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:8
 msgid "Fast, full text and keyword search"
 msgstr "Rýchle, fulltextové vyhľadávanie a hľadanie podľa kľúčového slova"
 
-#: ../desktop/geary.appdata.xml.in.h:9
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:9
 msgid "Full-featured HTML and plain text message composer"
 msgstr "Plnohodnotný nástroj na tvorbu správ vo formáte HTML a v čistom texte"
 
-#: ../desktop/geary.appdata.xml.in.h:10
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:10
 msgid "Desktop notification of new mail"
 msgstr "Upozornenie pracovného prostredia na novú poštu"
 
-#: ../desktop/geary.appdata.xml.in.h:11
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:11
 msgid "Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers"
 msgstr ""
 "Kompatibilita so servermi GMail, Yahoo! Mail, Outlook.com a inými servermi "
 "typu IMAP"
 
-#: ../desktop/geary.desktop.in.h:2
+#: ../desktop/org.gnome.Geary.desktop.in.h:2
 msgid "Email"
 msgstr "Email"
 
-#: ../desktop/geary.desktop.in.h:3
+#: ../desktop/org.gnome.Geary.desktop.in.h:3
 msgid "Geary Email"
 msgstr "Geary Email"
 
 #. Translators: These are desktop search terms. Do not translate semicolons, end line with a semicolon.
-#: ../desktop/geary.desktop.in.h:6
+#: ../desktop/org.gnome.Geary.desktop.in.h:6
 msgid "Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;"
 msgstr "Mail;pošta;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;"
 
-#: ../desktop/geary.desktop.in.h:7 ../ui/gtk/menus.ui.h:1
+#: ../desktop/org.gnome.Geary.desktop.in.h:7 ../ui/gtk/menus.ui.h:1
 msgid "Compose Message"
 msgstr "Napísať správu"
 
@@ -116,7 +118,7 @@ msgstr "Odoslať emailom"
 
 #: ../desktop/geary-attach.contract.in.h:2
 msgid "Send files using Geary"
-msgstr "Odošle súbory pomocou programu Geary"
+msgstr "Odošle súbory pomocou aplikácie Geary"
 
 #: ../src/client/accounts/account-dialog-add-edit-pane.vala:51
 #: ../src/client/components/stock.vala:31
@@ -153,7 +155,7 @@ msgstr "Meno a priezvisko"
 
 #: ../src/client/accounts/add-edit-page.vala:235
 msgid "Welcome to Geary."
-msgstr "Vitajte v programe Geary."
+msgstr "Vitajte v aplikácii Geary."
 
 #: ../src/client/accounts/add-edit-page.vala:235
 msgid "Enter your account information to get started."
@@ -214,38 +216,36 @@ msgid "Unable to validate:\n"
 msgstr "Nie je možné overiť:\n"
 
 #: ../src/client/accounts/add-edit-page.vala:781
-msgid "        &#8226; Invalid account nickname.\n"
-msgstr "        &#8226; Neplatná prezývka účtu.\n"
+msgid "        • Invalid account nickname.\n"
+msgstr "        • Neplatná prezývka účtu.\n"
 
 #: ../src/client/accounts/add-edit-page.vala:784
-msgid "        &#8226; Email address already added to Geary.\n"
-msgstr "        &#8226; Emailová adresa už je pridaná v programe Geary.\n"
+msgid "        • Email address already added to Geary.\n"
+msgstr "        • Emailová adresa už je pridaná v aplikácii Geary.\n"
 
 #: ../src/client/accounts/add-edit-page.vala:788
-msgid "        &#8226; IMAP connection error.\n"
-msgstr "        &#8226; Chyba pripojenia k serveru IMAP.\n"
+msgid "        • IMAP connection error.\n"
+msgstr "        • Chyba pripojenia k serveru IMAP.\n"
 
 #: ../src/client/accounts/add-edit-page.vala:791
-msgid "        &#8226; IMAP username or password incorrect.\n"
-msgstr ""
-"        &#8226; Používateľské meno alebo heslo servera IMAP je nesprávne.\n"
+msgid "        • IMAP username or password incorrect.\n"
+msgstr "        • Používateľské meno alebo heslo servera IMAP je nesprávne.\n"
 
 #: ../src/client/accounts/add-edit-page.vala:794
-msgid "        &#8226; SMTP connection error.\n"
-msgstr "        &#8226; Chyba pripojenia k serveru SMTP.\n"
+msgid "        • SMTP connection error.\n"
+msgstr "        • Chyba pripojenia k serveru SMTP.\n"
 
 #: ../src/client/accounts/add-edit-page.vala:797
-msgid "        &#8226; SMTP username or password incorrect.\n"
-msgstr ""
-"        &#8226; Používateľské meno alebo heslo servera SMTP je nesprávne.\n"
+msgid "        • SMTP username or password incorrect.\n"
+msgstr "        • Používateľské meno alebo heslo servera SMTP je nesprávne.\n"
 
 #: ../src/client/accounts/add-edit-page.vala:801
-msgid "        &#8226; Connection error.\n"
-msgstr "        &#8226; Chyba pripojenia.\n"
+msgid "        • Connection error.\n"
+msgstr "        • Chyba pripojenia.\n"
 
 #: ../src/client/accounts/add-edit-page.vala:805
-msgid "        &#8226; Username or password incorrect.\n"
-msgstr "        &#8226; Používateľské meno alebo heslo je nesprávne.\n"
+msgid "        • Username or password incorrect.\n"
+msgstr "        • Používateľské meno alebo heslo je nesprávne.\n"
 
 #: ../src/client/application/geary-application.vala:21
 msgid "Copyright 2016 Software Freedom Conservancy Inc."
@@ -255,7 +255,7 @@ msgstr "Autorské práva 2016 Software Freedom Conservancy Inc."
 msgid "Visit the Geary web site"
 msgstr "Navštívte webovú stránku aplikácie Geary"
 
-#: ../src/client/application/geary-application.vala:395
+#: ../src/client/application/geary-application.vala:394
 #, c-format
 msgid "About %s"
 msgstr "O %s"
@@ -263,14 +263,14 @@ msgstr "O %s"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: ../src/client/application/geary-application.vala:399
+#: ../src/client/application/geary-application.vala:398
 msgid "translator-credits"
 msgstr "Dušan Kazik <prescott66@gmail.com>"
 
 # cmd line desc
 #: ../src/client/application/geary-args.vala:10
 msgid "Start Geary with hidden main window"
-msgstr "Spustí program Geary so skrytým hlavným oknom"
+msgstr "Spustí aplikáciu Geary so skrytým hlavným oknom"
 
 #: ../src/client/application/geary-args.vala:11
 msgid "Output debugging information"
@@ -329,7 +329,7 @@ msgstr "Vykoná ukončenie podľa správnosti"
 
 #: ../src/client/application/geary-args.vala:28
 msgid "Display program version"
-msgstr "Zobrazí verziu programu"
+msgstr "Zobrazí verziu aplikácie"
 
 #. This gives a command-line hint on how to open new composer windows with mailto:
 #: ../src/client/application/geary-args.vala:53
@@ -349,174 +349,166 @@ msgstr "Zlyhalo analyzovanie volieb príkazového riadka: %s\n"
 
 #: ../src/client/application/geary-args.vala:72
 #, c-format
-msgid "Unrecognized command line option \"%s\"\n"
+msgid "Unrecognized command line option “%s”\n"
 msgstr "Nerozpoznaná voľba príkazového riadku „%s“\n"
 
-#: ../src/client/application/geary-controller.vala:58
+#: ../src/client/application/geary-controller.vala:57
 msgid "Delete conversation"
 msgstr "Odstrániť rozhovor"
 
-#: ../src/client/application/geary-controller.vala:59
+#: ../src/client/application/geary-controller.vala:58
 msgid "Delete conversation (Shift+Delete)"
 msgstr "Odstráni rozhovor (Shift+Delete)"
 
-#: ../src/client/application/geary-controller.vala:60
+#: ../src/client/application/geary-controller.vala:59
 msgid "Delete conversations (Shift+Delete)"
 msgstr "Odstráni rozhovory (Shift+Delete)"
 
 #. This refers to the action ("move email to the trash"), not the Trash folder itself
-#: ../src/client/application/geary-controller.vala:64
+#: ../src/client/application/geary-controller.vala:63
 msgid "Move conversation to Trash (Delete, Backspace)"
 msgstr "Presunie rozhovory do Koša (Delete, Backspace)"
 
-#: ../src/client/application/geary-controller.vala:65
+#: ../src/client/application/geary-controller.vala:64
 msgid "Move conversations to Trash (Delete, Backspace)"
 msgstr "Presunie rozhovory do Koša (Delete, Backspace)"
 
 #. This refers to the action ("archive an email"), not the Archive folder itself
-#: ../src/client/application/geary-controller.vala:69
+#: ../src/client/application/geary-controller.vala:68
 msgid "_Archive"
 msgstr "_Archivovať"
 
-#: ../src/client/application/geary-controller.vala:70
+#: ../src/client/application/geary-controller.vala:69
 msgid "Archive conversation (A)"
 msgstr "Archivuje rozhovor (A)"
 
-#: ../src/client/application/geary-controller.vala:71
+#: ../src/client/application/geary-controller.vala:70
 msgid "Archive conversations (A)"
 msgstr "Archivuje rozhovory (A)"
 
-#: ../src/client/application/geary-controller.vala:74
+#: ../src/client/application/geary-controller.vala:73
 msgid "Mark as S_pam"
 msgstr "Označiť ako nev_yžiadanú poštu"
 
-#: ../src/client/application/geary-controller.vala:75
+#: ../src/client/application/geary-controller.vala:74
 msgid "Mark as not S_pam"
 msgstr "Označiť ako _vyžiadanú poštu"
 
-#: ../src/client/application/geary-controller.vala:77
-#: ../src/client/application/geary-controller.vala:433
+#: ../src/client/application/geary-controller.vala:76
+#: ../src/client/application/geary-controller.vala:432
 msgid "Mark conversation"
 msgstr "Označí rozhovor"
 
-#: ../src/client/application/geary-controller.vala:78
+#: ../src/client/application/geary-controller.vala:77
 msgid "Mark conversations"
 msgstr "Označí rozhovory"
 
-#: ../src/client/application/geary-controller.vala:79
+#: ../src/client/application/geary-controller.vala:78
 msgid "Add label to conversation"
 msgstr "Pridá menovku rozhovoru"
 
-#: ../src/client/application/geary-controller.vala:80
+#: ../src/client/application/geary-controller.vala:79
 msgid "Add label to conversations"
 msgstr "Pridá menovku rozhovorom"
 
-#: ../src/client/application/geary-controller.vala:81
-#: ../src/client/application/geary-controller.vala:472
+#: ../src/client/application/geary-controller.vala:80
+#: ../src/client/application/geary-controller.vala:471
 msgid "Move conversation"
 msgstr "Presunie rozhovor"
 
-#: ../src/client/application/geary-controller.vala:82
+#: ../src/client/application/geary-controller.vala:81
 msgid "Move conversations"
 msgstr "Presunie rozhovory"
 
-#: ../src/client/application/geary-controller.vala:435
-msgid "_Mark as..."
+#: ../src/client/application/geary-controller.vala:434
+msgid "_Mark as…"
 msgstr "_Označiť ako…"
 
-#: ../src/client/application/geary-controller.vala:441
+#: ../src/client/application/geary-controller.vala:440
 msgid "Mark as _Read"
 msgstr "Označiť ako _prečítanú"
 
-#: ../src/client/application/geary-controller.vala:447
+#: ../src/client/application/geary-controller.vala:446
 msgid "Mark as _Unread"
 msgstr "Označiť ako _neprečítanú"
 
-#: ../src/client/application/geary-controller.vala:453
+#: ../src/client/application/geary-controller.vala:452
 msgid "_Star"
 msgstr "Označiť _hviezdičkou"
 
-#: ../src/client/application/geary-controller.vala:458
+#: ../src/client/application/geary-controller.vala:457
 msgid "U_nstar"
 msgstr "Zrušiť oz_načenie hviezdičkou"
 
-#: ../src/client/application/geary-controller.vala:468
+#: ../src/client/application/geary-controller.vala:467
 msgid "Add label"
 msgstr "Pridá menovku"
 
-#: ../src/client/application/geary-controller.vala:469
+#: ../src/client/application/geary-controller.vala:468
 msgid "_Label"
 msgstr "_Menovka"
 
-#: ../src/client/application/geary-controller.vala:473
+#: ../src/client/application/geary-controller.vala:472
 msgid "_Move"
 msgstr "_Presunúť"
 
-#: ../src/client/application/geary-controller.vala:477
+#: ../src/client/application/geary-controller.vala:476
 msgid "Compose new message (Ctrl+N, N)"
 msgstr "Vytvorí novú správu (Ctrl+N, N)"
 
-#: ../src/client/application/geary-controller.vala:481
+#: ../src/client/application/geary-controller.vala:480
 #: ../ui/conversation-email-menus.ui.h:1
 msgid "_Reply"
 msgstr "_Odpovedať"
 
-#: ../src/client/application/geary-controller.vala:482
+#: ../src/client/application/geary-controller.vala:481
 msgid "Reply (Ctrl+R, R)"
 msgstr "Odpovie (Ctrl+R, R)"
 
-#: ../src/client/application/geary-controller.vala:486
+#: ../src/client/application/geary-controller.vala:485
 msgid "R_eply All"
 msgstr "Odpov_edať všetkým"
 
-#: ../src/client/application/geary-controller.vala:487
+#: ../src/client/application/geary-controller.vala:486
 msgid "Reply all (Ctrl+Shift+R, Shift+R)"
 msgstr "Odpovie všetkým (Ctrl+Shift+R, Shift+R)"
 
-#: ../src/client/application/geary-controller.vala:492
+#: ../src/client/application/geary-controller.vala:491
 #: ../ui/conversation-email-menus.ui.h:3
 msgid "_Forward"
 msgstr "_Preposlať"
 
-#: ../src/client/application/geary-controller.vala:493
+#: ../src/client/application/geary-controller.vala:492
 msgid "Forward (Ctrl+L, F)"
 msgstr "Prepošle (Ctrl+L, F)"
 
-#: ../src/client/application/geary-controller.vala:524
-msgid "Empty"
-msgstr "Vyprázdniť"
-
-#: ../src/client/application/geary-controller.vala:525
-msgid "Empty Spam or Trash folders"
-msgstr "Vyprázdni priečinky Nevyžiadaná pošta alebo Kôš"
-
-#: ../src/client/application/geary-controller.vala:529
+#: ../src/client/application/geary-controller.vala:522
 msgid "Empty _Spam…"
 msgstr "Vyprázdniť _Nevyžiadanú poštu…"
 
-#: ../src/client/application/geary-controller.vala:533
+#: ../src/client/application/geary-controller.vala:526
 msgid "Empty _Trash…"
 msgstr "Vyprázdniť _Kôš…"
 
 #. No callback is connected, since we bind the toggle button to the search bar visibility
-#: ../src/client/application/geary-controller.vala:565
+#: ../src/client/application/geary-controller.vala:558
 msgid "Toggle search bar"
 msgstr "Prepne panel vyhľadávania"
 
 #. No callback is connected, since we bind the toggle button to the find bar visibility
-#: ../src/client/application/geary-controller.vala:570
+#: ../src/client/application/geary-controller.vala:563
 msgid "Toggle find bar"
 msgstr "Prepne panel nájdených výrazov"
 
-#: ../src/client/application/geary-controller.vala:748
+#: ../src/client/application/geary-controller.vala:741
 msgid "Unable to store server trust exception"
 msgstr "Nie je možné uložiť výnimku dôveryhodnosti servera"
 
-#: ../src/client/application/geary-controller.vala:983
+#: ../src/client/application/geary-controller.vala:976
 msgid "Your settings are insecure"
 msgstr "Vaše nastavenie nie sú bezpečné"
 
-#: ../src/client/application/geary-controller.vala:984
+#: ../src/client/application/geary-controller.vala:977
 msgid ""
 "Your IMAP and/or SMTP settings do not specify SSL or TLS.  This means your "
 "username and password could be read by another person on the network.  Are "
@@ -526,15 +518,15 @@ msgstr ""
 "TLS.  To znamená, že vaše meno používateľa a heslo môže byť prečítané inou "
 "osobou v sieti.  Naozaj chcete toto vykonať?"
 
-#: ../src/client/application/geary-controller.vala:985
+#: ../src/client/application/geary-controller.vala:978
 msgid "Co_ntinue"
 msgstr "Po_kračovať"
 
-#: ../src/client/application/geary-controller.vala:1032
+#: ../src/client/application/geary-controller.vala:1025
 msgid "Error connecting to the server"
 msgstr "Chyba počas pripájania k serveru"
 
-#: ../src/client/application/geary-controller.vala:1033
+#: ../src/client/application/geary-controller.vala:1026
 msgid ""
 "Geary encountered an error while connecting to the server.  Please try again "
 "in a few moments."
@@ -543,49 +535,49 @@ msgstr ""
 "to znovu neskôr."
 
 #. / Displayed in the space-limited status bar when a message fails to be sent due to error.
-#: ../src/client/application/geary-controller.vala:1070
+#: ../src/client/application/geary-controller.vala:1063
 #: ../src/client/components/status-bar.vala:29
 msgid "Error sending email"
 msgstr "Chyba pri odosielaní emailu"
 
-#: ../src/client/application/geary-controller.vala:1071
+#: ../src/client/application/geary-controller.vala:1064
 msgid ""
 "Geary encountered an error sending an email.  If the problem persists, "
 "please manually delete the email from your Outbox folder."
 msgstr ""
-"Program Geary narazil na chybu počas odosielania pošty. Ak problém "
+"Aplikácia Geary narazila na chybu počas odosielania pošty. Ak problém "
 "pretrváva, prosím, ručne odstráňte email z vášho priečinka „Pošta na "
 "odoslanie“."
 
 #. Displayed in the space-limited status bar when a message fails to be uploaded
 #. to Sent Mail after being sent.
-#: ../src/client/application/geary-controller.vala:1075
+#: ../src/client/application/geary-controller.vala:1068
 #: ../src/client/components/status-bar.vala:33
 msgid "Error saving sent mail"
 msgstr "Chyba pri ukladaní odoslanej pošty"
 
-#: ../src/client/application/geary-controller.vala:1076
+#: ../src/client/application/geary-controller.vala:1069
 msgid ""
 "Geary encountered an error saving a sent message to Sent Mail.  The message "
 "will stay in your Outbox folder until you delete it."
 msgstr ""
-"Program Geary narazil na chybu počas ukladania odoslanej správy do priečinka "
-"„Odoslaná pošta“. Správa zostane vo vašom priečinku „Pošta na odoslanie“, "
-"pokiaľ ju neodstránite."
+"Aplikácia Geary narazila na chybu počas ukladania odoslanej správy do "
+"priečinka „Odoslaná pošta“. Správa zostane vo vašom priečinku „Pošta na "
+"odoslanie“, pokiaľ ju neodstránite."
 
-#: ../src/client/application/geary-controller.vala:1145
+#: ../src/client/application/geary-controller.vala:1138
 msgid "Labels"
 msgstr "Menovky"
 
 #. give the user two options: reset the Account local store, or exit Geary.  A third
 #. could be done to leave the Account in an unopened state, but we don't currently
 #. have provisions for that.
-#: ../src/client/application/geary-controller.vala:1157
+#: ../src/client/application/geary-controller.vala:1150
 #, c-format
 msgid "Unable to open the database for %s"
 msgstr "Nie je možné otvoriť databázu pre %s"
 
-#: ../src/client/application/geary-controller.vala:1158
+#: ../src/client/application/geary-controller.vala:1151
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -604,26 +596,26 @@ msgstr ""
 "\n"
 "%s\n"
 "\n"
-"Program Geary môže pri skončení znovu zostaviť databázu a znovu spustiť "
+"Aplikácia Geary môže pri skončení znovu zostaviť databázu a znovu spustiť "
 "synchronizáciu so serverom.\n"
 "\n"
 "Znovu zostavenie databázy zničí všetku miestnu poštu a jej prílohy. <b>Pošta "
 "na serveri nebude ovplyvnená.</b>"
 
-#: ../src/client/application/geary-controller.vala:1160
+#: ../src/client/application/geary-controller.vala:1153
 msgid "_Rebuild"
 msgstr "_Znovu zostaviť"
 
-#: ../src/client/application/geary-controller.vala:1160
+#: ../src/client/application/geary-controller.vala:1153
 msgid "E_xit"
 msgstr "_Ukončiť"
 
-#: ../src/client/application/geary-controller.vala:1169
+#: ../src/client/application/geary-controller.vala:1162
 #, c-format
-msgid "Unable to rebuild database for \"%s\""
+msgid "Unable to rebuild database for “%s”"
 msgstr "Nie je možné znovu zostaviť databázu účtu „%s“"
 
-#: ../src/client/application/geary-controller.vala:1170
+#: ../src/client/application/geary-controller.vala:1163
 #, c-format
 msgid ""
 "Error during rebuild:\n"
@@ -636,14 +628,14 @@ msgstr ""
 
 #. some other problem opening the account ... as with other flow path, can't run
 #. Geary today with an account in unopened state, so have to exit
-#: ../src/client/application/geary-controller.vala:1192
-#: ../src/client/application/geary-controller.vala:1202
-#: ../src/client/application/geary-controller.vala:1213
+#: ../src/client/application/geary-controller.vala:1185
+#: ../src/client/application/geary-controller.vala:1195
+#: ../src/client/application/geary-controller.vala:1206
 #, c-format
 msgid "Unable to open local mailbox for %s"
 msgstr "Nie je možné otvoriť miestnu poštovú schránku účtu %s"
 
-#: ../src/client/application/geary-controller.vala:1193
+#: ../src/client/application/geary-controller.vala:1186
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -662,20 +654,20 @@ msgstr ""
 "\n"
 "%s"
 
-#: ../src/client/application/geary-controller.vala:1203
+#: ../src/client/application/geary-controller.vala:1196
 msgid ""
 "The version number of the local mail database is formatted for a newer "
-"version of Geary. Unfortunately, the database cannot be \"rolled back\" to "
+"version of Geary. Unfortunately, the database cannot be “rolled back” to "
 "work with this version of Geary.\n"
 "\n"
 "Please install the latest version of Geary and try again."
 msgstr ""
 "Číslo verzie miestnej poštovej databázy je sformátované pre novšiu verziu "
-"programu Geary. Bohužiaľ, databáza sa nedá vrátiť späť, aby mohla pracovať s "
-"touto verziou programu Geary.\n"
+"aplikácie Geary. Bohužiaľ, databáza sa nedá vrátiť späť, aby mohla pracovať "
+"s touto verziou aplikácie Geary.\n"
 "ynProsím, nainštalujte najnovšiu verziu programu Geary a skúste to znovu."
 
-#: ../src/client/application/geary-controller.vala:1214
+#: ../src/client/application/geary-controller.vala:1207
 msgid ""
 "There was an error opening the local account. This is probably due to "
 "connectivity issues.\n"
@@ -685,17 +677,18 @@ msgstr ""
 "Vyskytla sa chyba počas otvárania miestneho účtu. Môže to byť spôsobené "
 "problémom s pripojením.\n"
 "\n"
-"Prosím, skontrolujte vaše sieťové pripojenie a znovu spustite program Geary."
+"Prosím, skontrolujte vaše sieťové pripojenie a znovu spustite aplikáciu "
+"Geary."
 
-#: ../src/client/application/geary-controller.vala:1987
+#: ../src/client/application/geary-controller.vala:1980
 msgid "Undo move (Ctrl+Z)"
 msgstr "Vráti späť presunutie (Ctrl+Z)"
 
-#: ../src/client/application/geary-controller.vala:1997
+#: ../src/client/application/geary-controller.vala:1990
 msgid "Are you sure you want to open these attachments?"
 msgstr "Naozaj chcete otvoriť tieto prílohy?"
 
-#: ../src/client/application/geary-controller.vala:1998
+#: ../src/client/application/geary-controller.vala:1991
 msgid ""
 "Attachments may cause damage to your system if opened.  Only open files from "
 "trusted sources."
@@ -703,83 +696,84 @@ msgstr ""
 "Prílohy môžu po otvorení poškodiť váš systém.  Otvárajte iba súbory z "
 "dôveryhodných zdrojov."
 
-#: ../src/client/application/geary-controller.vala:1999
-msgid "Don't _ask me again"
+#: ../src/client/application/geary-controller.vala:1992
+msgid "Don’t _ask me again"
 msgstr "Nepýtať s_a znovu"
 
-#: ../src/client/application/geary-controller.vala:2043
+#: ../src/client/application/geary-controller.vala:2036
 #, c-format
-msgid "A file named \"%s\" already exists.  Do you want to replace it?"
+msgid "A file named “%s” already exists.  Do you want to replace it?"
 msgstr "Súbor s názvom „%s“ už existuje.  Chcete ho nahradiť?"
 
-#: ../src/client/application/geary-controller.vala:2045
+#: ../src/client/application/geary-controller.vala:2038
 #, c-format
 msgid ""
-"The file already exists in \"%s\".  Replacing it will overwrite its contents."
+"The file already exists in “%s”.  Replacing it will overwrite its contents."
 msgstr "Súbor v „%s“ už existuje.  Nahradením sa prepíše jeho obsah."
 
-#: ../src/client/application/geary-controller.vala:2048
+#: ../src/client/application/geary-controller.vala:2041
 msgid "_Replace"
 msgstr "_Nahradiť"
 
 #. Find out what to do with the inline composers.
 #. TODO: Remove this in favor of automatically saving drafts
-#: ../src/client/application/geary-controller.vala:2394
+#: ../src/client/application/geary-controller.vala:2387
 msgid "Close open draft messages?"
 msgstr "Zavrieť otvorené koncepty správ?"
 
-#: ../src/client/application/geary-controller.vala:2516
+#: ../src/client/application/geary-controller.vala:2509
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Vyprázdniť všetky emaily z vášho priečinka %s?"
 
-#: ../src/client/application/geary-controller.vala:2517
+#: ../src/client/application/geary-controller.vala:2510
 msgid "This removes the email from Geary and your email server."
 msgstr ""
-"Týmto sa odstránia všetky emaily z programu Geary a vášho emailového servera."
+"Týmto sa odstránia všetky emaily z aplikácie Geary a vášho emailového "
+"servera."
 
-#: ../src/client/application/geary-controller.vala:2518
+#: ../src/client/application/geary-controller.vala:2511
 msgid "This cannot be undone."
 msgstr "Táto akcia sa nebude dať vrátiť späť."
 
-#: ../src/client/application/geary-controller.vala:2519
+#: ../src/client/application/geary-controller.vala:2512
 #, c-format
 msgid "Empty %s"
 msgstr "Vyprázdniť priečinok %s"
 
-#: ../src/client/application/geary-controller.vala:2536
+#: ../src/client/application/geary-controller.vala:2529
 #, c-format
 msgid "Error emptying %s"
 msgstr "Chyba pri vyprázdňovaní priečinka %s"
 
-#: ../src/client/application/geary-controller.vala:2566
+#: ../src/client/application/geary-controller.vala:2559
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Chcete natrvalo odstrániť túto správu?"
 msgstr[1] "Chcete natrvalo odstrániť tieto správy?"
 msgstr[2] "Chcete natrvalo odstrániť tieto správy?"
 
-#: ../src/client/application/geary-controller.vala:2568
+#: ../src/client/application/geary-controller.vala:2561
 msgid "Delete"
 msgstr "Odstrániť"
 
-#: ../src/client/application/geary-controller.vala:2600
+#: ../src/client/application/geary-controller.vala:2593
 msgid "Undo archive (Ctrl+Z)"
 msgstr "Vráti späť archiváciu (Ctrl+Z)"
 
-#: ../src/client/application/geary-controller.vala:2615
+#: ../src/client/application/geary-controller.vala:2608
 msgid "Undo trash (Ctrl+Z)"
 msgstr "Vráti späť kôš (Ctrl+Z)"
 
-#: ../src/client/application/geary-controller.vala:2669
+#: ../src/client/application/geary-controller.vala:2662
 msgid "Undo (Ctrl+Z)"
 msgstr "Vráti späť (Ctrl+Z)"
 
-#: ../src/client/application/geary-controller.vala:2800
+#: ../src/client/application/geary-controller.vala:2793
 msgid "Failed to open default text editor."
 msgstr "Zlyhalo otvorenie predvoleného textového editora."
 
-#: ../src/client/components/main-window.vala:373
+#: ../src/client/components/main-window.vala:334
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -795,12 +789,12 @@ msgstr "Vyhľadať"
 msgid "Search all mail in account for keywords (Ctrl+S)"
 msgstr "Cyhľadá kľúčové slová vo všetkých správach poštového účtu (Ctrl+S)"
 
-#: ../src/client/components/search-bar.vala:103
+#: ../src/client/components/search-bar.vala:100
 #, c-format
 msgid "Indexing %s account"
 msgstr "Indexuje sa účet %s"
 
-#: ../src/client/components/search-bar.vala:114
+#: ../src/client/components/search-bar.vala:111
 #: ../src/client/folder-list/folder-list-search-branch.vala:39
 #, c-format
 msgid "Search %s account"
@@ -808,8 +802,8 @@ msgstr "Prehľadať účet %s"
 
 #. / Displayed in the space-limited status bar while a message is in the process of being sent.
 #: ../src/client/components/status-bar.vala:26
-msgid "Sending..."
-msgstr "Odosiela sa"
+msgid "Sending…"
+msgstr "Odosiela sa…"
 
 #: ../src/client/components/stock.vala:18 ../ui/account_cannot_remove.glade.h:3
 msgid "_OK"
@@ -822,7 +816,7 @@ msgstr "_Zrušiť"
 
 #: ../src/client/components/stock.vala:21 ../ui/gtk/menus.ui.h:6
 msgid "_About"
-msgstr "_O programe"
+msgstr "_O aplikácii"
 
 #: ../src/client/components/stock.vala:23
 msgid "_Close"
@@ -845,7 +839,7 @@ msgid "_Preferences"
 msgstr "N_astavenia"
 
 #: ../src/client/components/stock.vala:28 ../ui/conversation-email-menus.ui.h:7
-msgid "_Print..."
+msgid "_Print…"
 msgstr "_Tlačiť…"
 
 #: ../src/client/components/stock.vala:29 ../ui/gtk/menus.ui.h:7
@@ -860,29 +854,29 @@ msgstr "O_dstrániť"
 msgid "_Keep"
 msgstr "_Ponechať"
 
-#: ../src/client/composer/composer-widget.vala:145
+#: ../src/client/composer/composer-widget.vala:146
 msgid "Saved"
 msgstr "Uložené"
 
-#: ../src/client/composer/composer-widget.vala:146
+#: ../src/client/composer/composer-widget.vala:147
 msgid "Saving"
 msgstr "Ukladá sa"
 
-#: ../src/client/composer/composer-widget.vala:147
+#: ../src/client/composer/composer-widget.vala:148
 msgid "Error saving"
 msgstr "Chyba pri ukladaní"
 
-#: ../src/client/composer/composer-widget.vala:148
+#: ../src/client/composer/composer-widget.vala:149
 msgid "Press Backspace to delete quote"
 msgstr "Stlačte kláves Backspace na odstránenie citácie"
 
-#: ../src/client/composer/composer-widget.vala:149
+#: ../src/client/composer/composer-widget.vala:150
 msgid "New Message"
 msgstr "Nová správa"
 
 #. A list of keywords, separated by pipe ("|") characters, that suggest an attachment; since
 #. this is full-word checking, include all variants of each word.  No spaces are allowed.
-#: ../src/client/composer/composer-widget.vala:207
+#: ../src/client/composer/composer-widget.vala:208
 msgid ""
 "attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|"
 "enclosing|encloses|enclosure|enclosures"
@@ -891,50 +885,50 @@ msgstr ""
 "priloženým|priložených|priloženého|prikladám|prikladanú|prikladané|"
 "prikladaný|prikladaným|prikladanému"
 
-#: ../src/client/composer/composer-widget.vala:1173
-#: ../src/client/composer/composer-widget.vala:1177
+#: ../src/client/composer/composer-widget.vala:1192
+#: ../src/client/composer/composer-widget.vala:1196
 msgid "Do you want to discard this message?"
 msgstr "Chcete zahodiť túto správu?"
 
-#: ../src/client/composer/composer-widget.vala:1344
+#: ../src/client/composer/composer-widget.vala:1363
 msgid "Send message with an empty subject and body?"
 msgstr "Odoslať správu bez predmetu a s prázdnym telom?"
 
-#: ../src/client/composer/composer-widget.vala:1346
+#: ../src/client/composer/composer-widget.vala:1365
 msgid "Send message with an empty subject?"
 msgstr "Odoslať správu bez predmetu?"
 
-#: ../src/client/composer/composer-widget.vala:1348
+#: ../src/client/composer/composer-widget.vala:1367
 msgid "Send message with an empty body?"
 msgstr "Odoslať správu s prázdnym telom?"
 
-#: ../src/client/composer/composer-widget.vala:1350
+#: ../src/client/composer/composer-widget.vala:1369
 msgid "Send message without an attachment?"
 msgstr "Odoslať správu bez prílohy?"
 
-#: ../src/client/composer/composer-widget.vala:1593
+#: ../src/client/composer/composer-widget.vala:1608
 #, c-format
-msgid "\"%s\" could not be found."
+msgid "“%s” could not be found."
 msgstr "„%s“ sa nepodarilo nájsť."
 
-#: ../src/client/composer/composer-widget.vala:1599
+#: ../src/client/composer/composer-widget.vala:1614
 #, c-format
-msgid "\"%s\" is a folder."
+msgid "“%s” is a folder."
 msgstr "„%s“ je priečinok."
 
-#: ../src/client/composer/composer-widget.vala:1605
+#: ../src/client/composer/composer-widget.vala:1620
 #, c-format
-msgid "\"%s\" is an empty file."
+msgid "“%s” is an empty file."
 msgstr "„%s“ je prázdny súbor."
 
-#: ../src/client/composer/composer-widget.vala:1618
+#: ../src/client/composer/composer-widget.vala:1633
 #, c-format
-msgid "\"%s\" could not be opened for reading."
+msgid "“%s” could not be opened for reading."
 msgstr "„%s“ sa nepodarilo otvoriť na čítanie."
 
-#: ../src/client/composer/composer-widget.vala:1625
+#: ../src/client/composer/composer-widget.vala:1640
 #, c-format
-msgid "\"%s\" already attached for delivery."
+msgid "“%s” already attached for delivery."
 msgstr "„%s“ je už priložený na doručenie."
 
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
@@ -942,62 +936,62 @@ msgstr "„%s“ je už priložený na doručenie."
 #. description of the document type, the second will
 #. be a human-friendly size string. For example:
 #. Document (100.9MB)
-#: ../src/client/composer/composer-widget.vala:1633
+#: ../src/client/composer/composer-widget.vala:1648
 #: ../src/client/conversation-viewer/conversation-email.vala:145
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: ../src/client/composer/composer-widget.vala:1652
+#: ../src/client/composer/composer-widget.vala:1667
 msgid "Cannot add attachment"
 msgstr "Nedá sa pridať príloha"
 
-#: ../src/client/composer/composer-widget.vala:1697
+#: ../src/client/composer/composer-widget.vala:1712
 msgid "To: "
 msgstr "Pre: "
 
-#: ../src/client/composer/composer-widget.vala:1700
+#: ../src/client/composer/composer-widget.vala:1715
 msgid "Cc: "
 msgstr "Kópia: "
 
-#: ../src/client/composer/composer-widget.vala:1703
+#: ../src/client/composer/composer-widget.vala:1718
 msgid "Bcc: "
 msgstr "Skrytá kópia: "
 
-#: ../src/client/composer/composer-widget.vala:1706
+#: ../src/client/composer/composer-widget.vala:1721
 msgid "Reply-To: "
 msgstr "Komu odpovedať: "
 
-#: ../src/client/composer/composer-widget.vala:1894
+#: ../src/client/composer/composer-widget.vala:1909
 msgid "Select Color"
 msgstr "Výber farby"
 
-#: ../src/client/composer/composer-widget.vala:2109
+#: ../src/client/composer/composer-widget.vala:2124
 msgid "_Inspect"
 msgstr "_Preskúmať"
 
 #. Displayed in the From dropdown to indicate an "alternate email address"
 #. for an account.  The first printf argument will be the alternate email
 #. address, and the second will be the account's primary email address.
-#: ../src/client/composer/composer-widget.vala:2290
+#: ../src/client/composer/composer-widget.vala:2305
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%1$s prostredníctvom účtu %2$s"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: ../src/client/composer/composer-widget.vala:2332
+#: ../src/client/composer/composer-widget.vala:2347
 msgid "_From:"
 msgstr "Od:"
 
-#: ../src/client/composer/composer-widget.vala:2407
+#: ../src/client/composer/composer-widget.vala:2422
 #, c-format
-msgid "%s - Composer Inspector"
-msgstr "%s - Inšpektor tvorcu správ"
+msgid "%s — Composer Inspector"
+msgstr "%s — Inšpektor tvorcu správ"
 
 #. Translators: This is the name of the file chooser filter
 #. when inserting an image in the composer.
-#: ../src/client/composer/composer-widget.vala:2447
+#: ../src/client/composer/composer-widget.vala:2462
 msgid "Images"
 msgstr "Obrázky"
 
@@ -1019,18 +1013,18 @@ msgstr "Neznámy"
 #. Preview headers
 #. Translators: This is displayed in place of the from address
 #. when the message has no from address.
-#: ../src/client/conversation-viewer/conversation-message.vala:354
+#: ../src/client/conversation-viewer/conversation-message.vala:360
 msgid "No sender"
 msgstr "Žiadny odosielateľ"
 
 #. Translators: This separates multiple 'from'
 #. addresses in the header preview for a message.
-#: ../src/client/conversation-viewer/conversation-message.vala:714
+#: ../src/client/conversation-viewer/conversation-message.vala:720
 msgid ", "
 msgstr ", "
 
 #. If href doesn't look like a URL, something is fishy, so warn the user
-#: ../src/client/conversation-viewer/conversation-message.vala:1222
+#: ../src/client/conversation-viewer/conversation-message.vala:1228
 msgid " (Invalid?)"
 msgstr " (Neplatný?)"
 
@@ -1066,8 +1060,8 @@ msgstr ""
 
 #: ../src/client/conversation-viewer/conversation-web-view.vala:198
 #, c-format
-msgid "%s - Conversation Inspector"
-msgstr "%s - Inšpektor rozhovorov"
+msgid "%s — Conversation Inspector"
+msgstr "%s — Inšpektor rozhovorov"
 
 #: ../src/client/dialogs/attachment-dialog.vala:24
 #: ../src/client/dialogs/attachment-dialog.vala:26
@@ -1091,8 +1085,8 @@ msgstr "Identitu poštového servera %s na adrese %s:%u sa nepodarilo overiť."
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:44
 msgid ""
-"Selecting \"Trust This Server\" or \"Always Trust This Server\" may cause "
-"your username and password to be transmitted insecurely."
+"Selecting “Trust This Server” or “Always Trust This Server” may cause your "
+"username and password to be transmitted insecurely."
 msgstr ""
 "Vybratie voľby „Dôverovať tomuto serveru“ alebo „Vždy dôverovať tomuto "
 "serveru“ môže spôsobiť, že prenos vášho používateľského mena a hesla nebude "
@@ -1100,27 +1094,27 @@ msgstr ""
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:52
 msgid ""
-"Selecting \"Don't Trust This Server\" will cause Geary not to access this "
+"Selecting “Don’t Trust This Server” will cause Geary not to access this "
 "server."
 msgstr ""
-"Vybratie voľby „Nedôverovať tomuto serveru“ spôsobí, že program Geary nebude "
-"pristupovať k tomuto serveru."
+"Vybratie voľby „Nedôverovať tomuto serveru“ spôsobí, že aplikácia Geary "
+"nebude pristupovať k tomuto serveru."
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:54
 msgid "Geary will not add or update this email account."
-msgstr "Program Geary nepridá alebo neaktualizuje tento emailový účet."
+msgstr "Aplikácia Geary nepridá alebo neaktualizuje tento emailový účet."
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:59
 msgid ""
-"Selecting \"Don't Trust This Server\" will cause Geary to stop accessing "
-"this account."
+"Selecting “Don’t Trust This Server” will cause Geary to stop accessing this "
+"account."
 msgstr ""
-"Vybratie voľby „Nedôverovať tomuto serveru“ spôsobí, že program Geary "
+"Vybratie voľby „Nedôverovať tomuto serveru“ spôsobí, že aplikácia Geary "
 "prestane pristupovať k tomuto účtu."
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:61
 msgid "Geary will exit if you have no other open email accounts."
-msgstr "Program Geary skončí, ak nemáte otvorené žiadne iné emailové účty."
+msgstr "Aplikácia Geary skončí, ak nemáte otvorené žiadne iné emailové účty."
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:66
 msgid ""
@@ -1131,31 +1125,31 @@ msgstr ""
 "systému, alebo poskytovateľa emailovej služby."
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:73
-msgid "The server's certificate is not signed by a known authority"
+msgid "The server’s certificate is not signed by a known authority"
 msgstr "Certifikát servera nie je podpísaný známou autoritou"
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:76
-msgid "The server's identity does not match the identity in the certificate"
+msgid "The server’s identity does not match the identity in the certificate"
 msgstr "Identita servera sa nezhoduje s identitou uvedenou v certifikáte"
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:79
-msgid "The server's certificate has expired"
+msgid "The server’s certificate has expired"
 msgstr "Platnosť certifikátu servera skončila"
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:82
-msgid "The server's certificate has not been activated"
+msgid "The server’s certificate has not been activated"
 msgstr "Certifikát servera nebol aktivovaný"
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:85
-msgid "The server's certificate has been revoked and is now invalid"
+msgid "The server’s certificate has been revoked and is now invalid"
 msgstr "Certifikát servera bol odvolaný a teraz je neplatný"
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:88
-msgid "The server's certificate is considered insecure"
+msgid "The server’s certificate is considered insecure"
 msgstr "Certifikát servera je považovaný za nebezpečný"
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:91
-msgid "An error has occurred processing the server's certificate"
+msgid "An error has occurred processing the server’s certificate"
 msgstr "Vyskytla sa chyba počas spracovávania certifikátu servera"
 
 #. We can't keep these in the glade file, because Gnome doesn't want markup in translatable
@@ -1163,7 +1157,7 @@ msgstr "Vyskytla sa chyba počas spracovávania certifikátu servera"
 #. details: https://bugzilla.gnome.org/show_bug.cgi?id=679006
 #: ../src/client/dialogs/password-dialog.vala:16
 msgid "Geary requires your email password to continue"
-msgstr "Program Geary vyžaduje pre pokračovanie heslo k vášmu emailu"
+msgstr "Aplikácia Geary vyžaduje pre pokračovanie heslo k vášmu emailu"
 
 #. Label displaying total number of email messages in a folder
 #: ../src/client/folder-list/folder-list-folder-entry.vala:32
@@ -1205,8 +1199,9 @@ msgstr[2] "%d výsledkov"
 
 #: ../src/client/notification/libmessagingmenu.vala:75
 #, c-format
-msgid "%s - New Messages"
-msgstr "%s - Nové správy"
+#| msgid "%s - New Messages"
+msgid "%s — New Messages"
+msgstr "%s — Nové správy"
 
 #: ../src/client/notification/libnotify.vala:74
 #, c-format
@@ -1737,7 +1732,7 @@ msgstr "Odstráni účet"
 
 #: ../ui/account_spinner.glade.h:1
 msgid "Please wait while Geary validates your account."
-msgstr "Prosím, čakajte, kým program Geary overí váš účet."
+msgstr "Prosím, čakajte, kým aplikácia Geary overí váš účet."
 
 #: ../ui/certificate_warning_dialog.glade.h:1
 msgid "Untrusted Connection"
@@ -1752,7 +1747,7 @@ msgid "_Trust This Server"
 msgstr "_Dôverovať tomuto serveru"
 
 #: ../ui/certificate_warning_dialog.glade.h:4
-msgid "_Don't Trust This Server"
+msgid "_Don’t Trust This Server"
 msgstr "_Nedôverovať tomuto serveru"
 
 #: ../ui/composer-headerbar.ui.h:1
@@ -1936,56 +1931,58 @@ msgid "Save all attachments"
 msgstr "Uloží všetky prílohy"
 
 # tooltip
-#: ../ui/conversation-email.ui.h:2
+#. Note: The application will never show this button at the same time as unstar_button, one will always be hidden.
+#: ../ui/conversation-email.ui.h:3
 msgid "Mark this message as starred"
 msgstr "Označí túto správu hviezdičkou"
 
 # tooltip
-#: ../ui/conversation-email.ui.h:3
+#. Note: The application will never show this button at the same time as star_button, one will always be hidden.
+#: ../ui/conversation-email.ui.h:5
 msgid "Mark this message as not starred"
 msgstr "Zruší označenie tejto správy hviezdičkou"
 
 # tooltip
-#: ../ui/conversation-email.ui.h:4
+#: ../ui/conversation-email.ui.h:6
 msgid "Display the message menu"
 msgstr "Zobrazí ponuku správy"
 
 # tooltip
-#: ../ui/conversation-email.ui.h:5
+#: ../ui/conversation-email.ui.h:7
 msgid "Open selected attachments"
 msgstr "Otvorí vybrané prílohy"
 
 # tooltip
-#: ../ui/conversation-email.ui.h:6
+#: ../ui/conversation-email.ui.h:8
 msgid "Save selected attachments"
 msgstr "Uloží všetky prílohy"
 
 # tooltip
-#: ../ui/conversation-email.ui.h:7
+#: ../ui/conversation-email.ui.h:9
 msgid "Select all attachments"
 msgstr "Vyberie všetky prílohy"
 
-#: ../ui/conversation-email.ui.h:8
+#: ../ui/conversation-email.ui.h:10
 msgid "Edit Draft"
 msgstr "Upraviť koncept"
 
-#: ../ui/conversation-email.ui.h:9
+#: ../ui/conversation-email.ui.h:11
 msgid "Draft message"
 msgstr "Koncept"
 
-#: ../ui/conversation-email.ui.h:10
+#: ../ui/conversation-email.ui.h:12
 msgid "This message has not yet been sent."
 msgstr "Táto správa ešte nebola odoslaná."
 
-#: ../ui/conversation-email.ui.h:11
+#: ../ui/conversation-email.ui.h:13
 msgid "Try Again"
 msgstr "Skúsiť znovu"
 
-#: ../ui/conversation-email.ui.h:12
+#: ../ui/conversation-email.ui.h:14
 msgid "Message not saved"
 msgstr "Správa nebola uložená"
 
-#: ../ui/conversation-email.ui.h:13
+#: ../ui/conversation-email.ui.h:15
 msgid "This message was sent, but has not been saved to your account."
 msgstr "Táto správa bola odoslaná, ale nebola uložená do vášho účtu."
 
@@ -2082,7 +2079,7 @@ msgid "Copy Link _Address"
 msgstr "Skopírovať _adresu odkazu"
 
 #: ../ui/conversation-message-menus.ui.h:3
-msgid "Send New _Message..."
+msgid "Send New _Message…"
 msgstr "Odoslať _novú správu…"
 
 #: ../ui/conversation-message-menus.ui.h:4
@@ -2090,7 +2087,7 @@ msgid "Copy Email _Address"
 msgstr "Skopírovať _emailovú adresu"
 
 #: ../ui/conversation-message-menus.ui.h:5
-msgid "Save _Image As..."
+msgid "Save _Image As…"
 msgstr "_Uložiť obrázok ako…"
 
 #: ../ui/conversation-message-menus.ui.h:6
@@ -2103,7 +2100,7 @@ msgid "Search for messages from"
 msgstr "Vyhľadať správy od"
 
 #: ../ui/conversation-message-menus.ui.h:9
-msgid "_Inspect..."
+msgid "_Inspect…"
 msgstr "_Preskúmať…"
 
 # placeholder
@@ -2542,6 +2539,10 @@ msgstr "Úložisko"
 msgid "_Download mail"
 msgstr "_Prevziať poštu"
 
+#: ../ui/main-toolbar.ui.h:1
+msgid "Empty Spam or Trash folders"
+msgstr "Vyprázdni priečinky Nevyžiadaná pošta alebo Kôš"
+
 #: ../ui/password-dialog.glade.h:1
 msgid "SMTP Credentials"
 msgstr "Poverenia pre SMTP"
@@ -2596,7 +2597,8 @@ msgstr "Vždy _sledovať novú poštu"
 
 #: ../ui/preferences.glade.h:11
 msgid "Geary will run in the background and notify of new mail"
-msgstr "Program Geary bude spustený na pozadí a bude upozorňovať na novú poštu"
+msgstr ""
+"Aplikácia Geary bude spustená na pozadí a bude upozorňovať na novú poštu"
 
 #: ../ui/preferences.glade.h:12
 msgid "Preferences"
@@ -2628,7 +2630,13 @@ msgstr "Emailová adresa:"
 
 #: ../ui/upgrade_dialog.glade.h:1
 msgid "Geary update in progress…"
-msgstr "Prebieha aktualizácia programu Geary…"
+msgstr "Prebieha aktualizácia aplikácie Geary…"
+
+#~ msgid "Empty"
+#~ msgstr "Vyprázdniť"
+
+#~ msgid "_Inspect..."
+#~ msgstr "_Preskúmať…"
 
 # tooltip
 #~ msgid "Close and Discard"
