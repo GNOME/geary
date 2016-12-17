@@ -2151,30 +2151,37 @@ public class GearyController : Geary.BaseObject {
         
         return ret;
     }
-    
-    private bool close_composition_windows() {
+
+    internal bool close_composition_windows(bool main_window_only = false) {
         Gee.List<ComposerWidget> composers_to_destroy = new Gee.ArrayList<ComposerWidget>();
         bool quit_cancelled = false;
-        
-        // If there's composer windows open, give the user a chance to save or cancel.
+
+        // If there's composer windows open, give the user a chance to
+        // save or cancel.
         foreach(ComposerWidget cw in composer_widgets) {
-            // Check if we should close the window immediately, or if we need to wait.
-            ComposerWidget.CloseStatus status = cw.should_close();
-            if (status == ComposerWidget.CloseStatus.PENDING_CLOSE) {
-                // Window is currently busy saving.
-                waiting_to_close.add(cw);
-            } else if (status == ComposerWidget.CloseStatus.CANCEL_CLOSE) {
-                // User cancelled operation.
-                quit_cancelled = true;
-                break;
-            } else if (status == ComposerWidget.CloseStatus.DO_CLOSE) {
-                // Hide any existing composer windows for the moment; actually deleting the windows
-                // will result in their removal from composer_windows, which could crash this loop.
-                composers_to_destroy.add(cw);
-                ((ComposerContainer) cw.parent).vanish();
+            if (!main_window_only ||
+                cw.state != ComposerWidget.ComposerState.DETACHED) {
+                // Check if we should close the window immediately, or
+                // if we need to wait.
+                ComposerWidget.CloseStatus status = cw.should_close();
+                if (status == ComposerWidget.CloseStatus.PENDING_CLOSE) {
+                    // Window is currently busy saving.
+                    waiting_to_close.add(cw);
+                } else if (status == ComposerWidget.CloseStatus.CANCEL_CLOSE) {
+                    // User cancelled operation.
+                    quit_cancelled = true;
+                    break;
+                } else if (status == ComposerWidget.CloseStatus.DO_CLOSE) {
+                    // Hide any existing composer windows for the
+                    // moment; actually deleting the windows will
+                    // result in their removal from composer_windows,
+                    // which could crash this loop.
+                    composers_to_destroy.add(cw);
+                    ((ComposerContainer) cw.parent).vanish();
+                }
             }
         }
-        
+
         // Safely destroy windows.
         foreach(ComposerWidget cw in composers_to_destroy)
             ((ComposerContainer) cw.parent).close_container();

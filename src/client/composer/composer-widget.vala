@@ -190,9 +190,9 @@ public class ComposerWidget : Gtk.EventBox {
         get { return ((Gtk.ToggleAction) actions.get_action(ACTION_SHOW_EXTENDED)).active; }
         set { ((Gtk.ToggleAction) actions.get_action(ACTION_SHOW_EXTENDED)).active = value; }
     }
-    
-    public ComposerState state { get; set; }
-    
+
+    public ComposerState state { get; internal set; }
+
     public ComposeType compose_type { get; private set; default = ComposeType.NEW_MESSAGE; }
     
     public Gee.Set<Geary.EmailIdentifier> referred_ids = new Gee.HashSet<Geary.EmailIdentifier>();

@@ -115,12 +115,14 @@ public class MainWindow : Gtk.ApplicationWindow {
     }
 
     private bool on_delete_event() {
-        if (Args.hidden_startup || GearyApplication.instance.config.startup_notifications)
-            return hide_on_delete();
-        
-        GearyApplication.instance.exit();
-        
-        return true;
+        if (Args.hidden_startup || GearyApplication.instance.config.startup_notifications) {
+            if (GearyApplication.instance.controller.close_composition_windows(true)) {
+                hide();
+            }
+        } else {
+            GearyApplication.instance.exit();
+        }
+        return Gdk.EVENT_STOP;
     }
 
     // Fired on [un]maximize and possibly others. Save maximized state
@@ -437,5 +439,6 @@ public class MainWindow : Gtk.ApplicationWindow {
         else
             main_toolbar.folder = current_folder.get_display_name();
     }
+
 }
 
