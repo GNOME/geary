@@ -98,6 +98,17 @@ public class GearyApplication : Gtk.Application {
      */
     public Configuration config { get; private set; }
 
+    /**
+     * Determines if Geary configured to run as as a background service.
+     *
+     * If this returns `true`, then the primary application instance
+     * will continue to run in the background after the last window is
+     * closed, instead of existing as usual.
+     */
+    public bool is_background_service {
+        get { return Args.hidden_startup || this.config.startup_notifications; }
+    }
+
     public Gtk.ActionGroup actions {
         get; private set; default = new Gtk.ActionGroup("GearyActionGroup");
     }

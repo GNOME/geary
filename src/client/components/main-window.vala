@@ -375,7 +375,7 @@ public class MainWindow : Gtk.ApplicationWindow {
 
     [GtkCallback]
     private bool on_delete_event() {
-        if (Args.hidden_startup || this.application.config.startup_notifications)
+        if (this.application.is_background_service)
             return hide_on_delete();
 
         this.application.exit();
@@ -383,4 +383,3 @@ public class MainWindow : Gtk.ApplicationWindow {
         return true;
     }
 }
-

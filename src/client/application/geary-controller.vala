@@ -1276,8 +1276,10 @@ public class GearyController : Geary.BaseObject {
      * Displays the main window if we're ready.  Otherwise does nothing.
      */
     private void display_main_window_if_ready() {
-        if (did_attempt_open_all_accounts() && !upgrade_dialog.visible &&
-            !cancellable_open_account.is_cancelled() && !Args.hidden_startup)
+        if (did_attempt_open_all_accounts() &&
+            !upgrade_dialog.visible &&
+            !cancellable_open_account.is_cancelled() &&
+            !this.application.is_background_service)
             main_window.show_all();
     }
     
