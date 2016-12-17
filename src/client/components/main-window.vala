@@ -375,11 +375,13 @@ public class MainWindow : Gtk.ApplicationWindow {
 
     [GtkCallback]
     private bool on_delete_event() {
-        if (this.application.is_background_service)
-            return hide_on_delete();
-
-        this.application.exit();
-
-        return true;
+        if (this.application.is_background_service) {
+            if (this.application.controller.close_composition_windows(true)) {
+                hide();
+            }
+        } else {
+            this.application.exit();
+        }
+        return Gdk.EVENT_STOP;
     }
 }

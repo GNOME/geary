@@ -249,7 +249,7 @@ public class ComposerWidget : Gtk.EventBox {
         }
     }
 
-    public ComposerState state { get; set; }
+    public ComposerState state { get; internal set; }
 
     public ComposeType compose_type { get; private set; default = ComposeType.NEW_MESSAGE; }
 
