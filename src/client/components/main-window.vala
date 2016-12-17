@@ -10,8 +10,10 @@
 public class MainWindow : Gtk.ApplicationWindow {
     private const int STATUS_BAR_HEIGHT = 18;
 
-    /** Fired when the shift key is pressed or released. */
-    public signal void on_shift_key(bool pressed);
+    public new GearyApplication application {
+        get { return (GearyApplication) base.get_application(); }
+        set { base.set_application(value); }
+    }
 
     public Geary.Folder? current_folder { get; private set; default = null; }
 
@@ -48,6 +50,11 @@ public class MainWindow : Gtk.ApplicationWindow {
     [GtkChild]
     private Gtk.ScrolledWindow conversation_list_scrolled;
 
+
+    /** Fired when the shift key is pressed or released. */
+    public signal void on_shift_key(bool pressed);
+
+
     public MainWindow(GearyApplication application) {
         Object(application: application);
 
@@ -64,8 +71,8 @@ public class MainWindow : Gtk.ApplicationWindow {
         application.controller.notify[GearyController.PROP_CURRENT_CONVERSATION]
             .connect(on_conversation_monitor_changed);
         application.controller.folder_selected.connect(on_folder_selected);
-        Geary.Engine.instance.account_available.connect(on_account_available);
-        Geary.Engine.instance.account_unavailable.connect(on_account_unavailable);
+        this.application.engine.account_available.connect(on_account_available);
+        this.application.engine.account_unavailable.connect(on_account_unavailable);
 
         set_styling();
         setup_layout(application.config);
@@ -216,7 +223,7 @@ public class MainWindow : Gtk.ApplicationWindow {
         }
 
         Geary.App.ConversationMonitor? conversations =
-            GearyApplication.instance.controller.current_conversations;
+            this.application.controller.current_conversations;
 
         if (conversations != null) {
             ConversationListStore new_model =
@@ -259,8 +266,8 @@ public class MainWindow : Gtk.ApplicationWindow {
 
     private void on_account_available(Geary.AccountInformation account) {
         try {
-            this.progress_monitor.add(Geary.Engine.instance.get_account_instance(account).opening_monitor);
-            this.progress_monitor.add(Geary.Engine.instance.get_account_instance(account).sending_monitor);
+            this.progress_monitor.add(this.application.engine.get_account_instance(account).opening_monitor);
+            this.progress_monitor.add(this.application.engine.get_account_instance(account).sending_monitor);
         } catch (Error e) {
             debug("Could not access account progress monitors: %s", e.message);
         }
@@ -268,15 +275,15 @@ public class MainWindow : Gtk.ApplicationWindow {
 
     private void on_account_unavailable(Geary.AccountInformation account) {
         try {
-            this.progress_monitor.remove(Geary.Engine.instance.get_account_instance(account).opening_monitor);
-            this.progress_monitor.remove(Geary.Engine.instance.get_account_instance(account).sending_monitor);
+            this.progress_monitor.remove(this.application.engine.get_account_instance(account).opening_monitor);
+            this.progress_monitor.remove(this.application.engine.get_account_instance(account).sending_monitor);
         } catch (Error e) {
             debug("Could not access account progress monitors: %s", e.message);
         }
     }
 
     private void on_change_orientation() {
-        bool horizontal = GearyApplication.instance.config.folder_list_pane_horizontal;
+        bool horizontal = this.application.config.folder_list_pane_horizontal;
         bool initial = true;
 
         if (this.status_bar.parent != null) {
@@ -289,7 +296,7 @@ public class MainWindow : Gtk.ApplicationWindow {
             Gtk.Orientation.VERTICAL;
 
         int folder_list_width =
-            GearyApplication.instance.config.folder_list_pane_position_horizontal;
+            this.application.config.folder_list_pane_position_horizontal;
         if (horizontal) {
             if (!initial)
                 this.conversations_paned.position += folder_list_width;
@@ -300,7 +307,7 @@ public class MainWindow : Gtk.ApplicationWindow {
             this.conversation_box.pack_start(status_bar, false, false);
         }
 
-        GearyApplication.instance.config.bind(
+        this.application.config.bind(
             horizontal ? Configuration.FOLDER_LIST_PANE_POSITION_HORIZONTAL_KEY
             : Configuration.FOLDER_LIST_PANE_POSITION_VERTICAL_KEY,
             this.folder_paned, "position");
@@ -368,10 +375,10 @@ public class MainWindow : Gtk.ApplicationWindow {
 
     [GtkCallback]
     private bool on_delete_event() {
-        if (Args.hidden_startup || GearyApplication.instance.config.startup_notifications)
+        if (Args.hidden_startup || this.application.config.startup_notifications)
             return hide_on_delete();
 
-        GearyApplication.instance.exit();
+        this.application.exit();
 
         return true;
     }

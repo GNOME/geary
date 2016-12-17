@@ -58,7 +58,9 @@ public class GearyApplication : Gtk.Application {
 
     private const int64 USEC_PER_SEC = 1000000;
     private const int64 FORCE_SHUTDOWN_USEC = 5 * USEC_PER_SEC;
-    
+
+
+    [Version(deprecated = true)]
     public static GearyApplication instance {
         get { return _instance; }
         private set {
@@ -67,7 +69,50 @@ public class GearyApplication : Gtk.Application {
             _instance = value;
         }
     }
-    
+    private static GearyApplication _instance = null;
+
+
+    /**
+     * The global UI controller for this app instance.
+     */
+    public GearyController controller {
+        get;
+        private set;
+        default = new GearyController(this);
+    }
+
+    /**
+     * The global email subsystem controller for this app instance.
+     */
+    public Geary.Engine engine {
+        get {
+            // XXX We should be managing the engine's lifecycle here,
+            // but until that happens provide this property to
+            // encourage access via the application anyway
+            return Geary.Engine.instance;
+        }
+    }
+
+    /**
+     * The user's desktop-wide settings for the application.
+     */
+    public Configuration config { get; private set; }
+
+    public Gtk.ActionGroup actions {
+        get; private set; default = new Gtk.ActionGroup("GearyActionGroup");
+    }
+
+    public Gtk.UIManager ui_manager {
+        get; private set; default = new Gtk.UIManager();
+    }
+
+    private string bin;
+    private File exec_dir;
+    private bool exiting_fired = false;
+    private int exitcode = 0;
+    private bool is_destroyed = false;
+
+
     /**
      * Signal that is activated when 'exit' is called, but before the application actually exits.
      *
@@ -77,26 +122,7 @@ public class GearyApplication : Gtk.Application {
     public virtual signal bool exiting(bool panicked) {
         return true;
     }
-    
-    public GearyController controller { get; private set; default = new GearyController(this); }
-    
-    public Gtk.ActionGroup actions {
-        get; private set; default = new Gtk.ActionGroup("GearyActionGroup");
-    }
 
-    public Gtk.UIManager ui_manager {
-        get; private set; default = new Gtk.UIManager();
-    }
-    
-    public Configuration config { get; private set; }
-
-    private static GearyApplication _instance = null;
-
-    private string bin;
-    private File exec_dir;
-    private bool exiting_fired = false;
-    private int exitcode = 0;
-    private bool is_destroyed = false;
 
     public GearyApplication() {
         Object(
