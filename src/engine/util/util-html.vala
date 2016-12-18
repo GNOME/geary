@@ -141,7 +141,7 @@ public string remove_html_tags(string input) {
  * entities, etc.  The layout of the text is largely lost.  This is primarily
  * useful for pulling out tokens for searching, not for presenting to the user.
  */
-public string html_to_text(string html, string encoding = "UTF-8") {
+public string html_to_text(string html, string encoding = Geary.RFC822.UTF8_CHARSET) {
     Html.Doc *doc = Html.Doc.read_doc(html, "", encoding, Html.ParserOption.RECOVER |
         Html.ParserOption.NOERROR | Html.ParserOption.NOWARNING | Html.ParserOption.NOBLANKS |
         Html.ParserOption.NONET | Html.ParserOption.COMPACT);

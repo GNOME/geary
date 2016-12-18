@@ -16,8 +16,6 @@ public class Geary.RFC822.Message : BaseObject {
     public delegate string? InlinePartReplacer(string filename, Mime.ContentType? content_type,
         Mime.ContentDisposition? disposition, string? content_id, Geary.Memory.Buffer buffer);
 
-    private const string DEFAULT_CHARSET = "UTF-8";
-
     private const string HEADER_SENDER = "Sender";
     private const string HEADER_IN_REPLY_TO = "In-Reply-To";
     private const string HEADER_REFERENCES = "References";
@@ -1000,8 +998,6 @@ public class Geary.RFC822.Message : BaseObject {
             // Assume encoded text, convert to unencoded UTF-8
             GMime.StreamFilter stream_filter = new GMime.StreamFilter(stream);
             string? charset = (content_type != null) ? content_type.params.get_value("charset") : null;
-            if (String.is_empty(charset))
-                charset = DEFAULT_CHARSET;
             stream_filter.add(Geary.RFC822.Utils.create_utf8_filter_charset(charset));
 
             bool flowed = (content_type != null) ? content_type.params.has_value_ci("format", "flowed") : false;
@@ -1068,9 +1064,7 @@ public class Geary.RFC822.Message : BaseObject {
             charset = Geary.RFC822.Utils.get_best_charset(content_stream);
         }
         GMime.StreamFilter filter_stream = new GMime.StreamFilter(content_stream);
-        if (charset != DEFAULT_CHARSET) {
-            filter_stream.add(new GMime.FilterCharset(DEFAULT_CHARSET, charset));
-        }
+        filter_stream.add(new GMime.FilterCharset(UTF8_CHARSET, charset));
         if (encoding == null) {
             encoding = Geary.RFC822.Utils.get_best_encoding(filter_stream);
         }

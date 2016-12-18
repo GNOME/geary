@@ -373,7 +373,8 @@ public class Geary.RFC822.PreviewText : Geary.RFC822.Text {
             
             encoding = part.get_header("Content-Transfer-Encoding");
         }
-        
+
+        // Parse the preview
         GMime.StreamMem input_stream = Utils.create_stream_mem(preview);
         ByteArray output = new ByteArray();
         GMime.StreamMem output_stream = new GMime.StreamMem.with_byte_array(output);
@@ -383,10 +384,9 @@ public class Geary.RFC822.PreviewText : Geary.RFC822.Text {
         GMime.StreamFilter filter = new GMime.StreamFilter(output_stream);
         if (encoding != null)
             filter.add(new GMime.FilterBasic(GMime.content_encoding_from_string(encoding), false));
-        
-        if (!String.is_empty(charset))
-            filter.add(Geary.RFC822.Utils.create_utf8_filter_charset(charset));
-        
+
+        filter.add(Geary.RFC822.Utils.create_utf8_filter_charset(charset));
+
         input_stream.write_to_stream(filter);
         uint8[] data = output.data;
         data += (uint8) '\0';
