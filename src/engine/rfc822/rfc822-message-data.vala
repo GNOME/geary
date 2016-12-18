@@ -390,14 +390,14 @@ public class Geary.RFC822.PreviewText : Geary.RFC822.Text {
         input_stream.write_to_stream(filter);
         uint8[] data = output.data;
         data += (uint8) '\0';
-        
+
         // Fix the preview up by removing HTML tags, redundant white space, common types of
         // message armor, text-based quotes, and various MIME fields.
         string preview_text = "";
-        string original_text = is_html ? Geary.HTML.remove_html_tags((string) data) : (string) data;
+        string original_text = is_html ? Geary.HTML.html_to_text((string) data, false) : (string) data;
         string[] all_lines = original_text.split("\r\n");
         bool in_header = false; // True after a header
-        
+
         foreach(string line in all_lines) {
             if (in_header && line.has_prefix(" ") || line.has_prefix("\t")) {
                 continue; // Skip "folded" (multi-line) headers.

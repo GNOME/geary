@@ -384,12 +384,12 @@ public class Geary.RFC822.Message : BaseObject {
             preview = get_plain_body(false, null);
         } catch (Error e) {
             try {
-                preview = Geary.HTML.remove_html_tags(get_html_body(null));
+                preview = Geary.HTML.html_to_text(get_html_body(null), false);
             } catch (Error error) {
                 debug("Could not generate message preview: %s\n and: %s", e.message, error.message);
             }
         }
-        
+
         return Geary.String.safe_byte_substring((preview ?? "").chug(),
             Geary.Email.MAX_PREVIEW_BYTES);
     }
