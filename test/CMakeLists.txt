@@ -8,6 +8,7 @@ set(TEST_SRC
 
   engine/rfc822-mailbox-address-test.vala
   engine/rfc822-message-data-test.vala
+  engine/rfc822-utils-test.vala
   engine/util-html-test.vala
 )
 

@@ -391,40 +391,10 @@ public class Geary.RFC822.PreviewText : Geary.RFC822.Text {
         uint8[] data = output.data;
         data += (uint8) '\0';
 
-        // Fix the preview up by removing HTML tags, redundant white space, common types of
-        // message armor, text-based quotes, and various MIME fields.
-        string preview_text = "";
-        string original_text = is_html ? Geary.HTML.html_to_text((string) data, false) : (string) data;
-        string[] all_lines = original_text.split("\r\n");
-        bool in_header = false; // True after a header
-
-        foreach(string line in all_lines) {
-            if (in_header && line.has_prefix(" ") || line.has_prefix("\t")) {
-                continue; // Skip "folded" (multi-line) headers.
-            } else {
-                in_header = false;
-            }
-            
-            if (line.has_prefix("Content-")) {
-                in_header = true;
-                continue;
-            }
-            
-            if (Geary.String.is_empty_or_whitespace(line))
-                continue;
-            
-            if (line.has_prefix("--"))
-                continue;
-            
-            if (line.has_prefix(">"))
-                continue;
-            
-            preview_text += " " + line;
-        }
-        
-        base (new Geary.Memory.StringBuffer(Geary.String.reduce_whitespace(preview_text)));
+        string preview_text = Geary.RFC822.Utils.to_preview_text((string) data, is_html ? TextFormat.HTML : TextFormat.PLAIN);
+        base(new Geary.Memory.StringBuffer(preview_text));
     }
-    
+
     public PreviewText.from_string(string preview) {
         base (new Geary.Memory.StringBuffer(preview));
     }

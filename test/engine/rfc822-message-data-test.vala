@@ -13,20 +13,32 @@ class Geary.RFC822.MessageDataTest : Gee.TestCase {
     }
 
     public void preview_text_with_header() {
-        string part_headers = "Content-Type: text/html; charset=utf-8\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\n";
+        PreviewText plain_preview1 = new PreviewText.with_header(
+            new Geary.Memory.StringBuffer(PLAIN_BODY1_ENCODED),
+            new Geary.Memory.StringBuffer(PLAIN_BODY1_HEADERS)
+        );
+        assert(plain_preview1.buffer.to_string() == PLAIN_BODY1_EXPECTED.substring(0, Geary.Email.MAX_PREVIEW_BYTES));
 
-        PreviewText preview1 = new PreviewText.with_header(
+        string html_part_headers = "Content-Type: text/html; charset=utf-8\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\n";
+
+        PreviewText html_preview1 = new PreviewText.with_header(
             new Geary.Memory.StringBuffer(HTML_BODY1_ENCODED),
-            new Geary.Memory.StringBuffer(part_headers)
+            new Geary.Memory.StringBuffer(html_part_headers)
         );
-        assert(preview1.buffer.to_string() == HTML_BODY1_EXPECTED);
+        assert(html_preview1.buffer.to_string() == HTML_BODY1_EXPECTED.substring(0, Geary.Email.MAX_PREVIEW_BYTES));
 
-        PreviewText preview2 = new PreviewText.with_header(
+        PreviewText html_preview2 = new PreviewText.with_header(
             new Geary.Memory.StringBuffer(HTML_BODY2_ENCODED),
-            new Geary.Memory.StringBuffer(part_headers)
+            new Geary.Memory.StringBuffer(html_part_headers)
         );
-        assert(preview2.buffer.to_string() == HTML_BODY2_EXPECTED);
+        assert(html_preview2.buffer.to_string() == HTML_BODY2_EXPECTED.substring(0, Geary.Email.MAX_PREVIEW_BYTES));
     }
+
+    public static string PLAIN_BODY1_HEADERS = "Content-Type: text/plain; charset=\"us-ascii\"\r\nContent-Transfer-Encoding: 7bit\r\n";
+
+    public static string PLAIN_BODY1_ENCODED = "Content-Type: text/plain; charset=\"us-ascii\"\r\nContent-Transfer-Encoding: 7bit\r\n\r\n-----BEGIN PGP SIGNED MESSAGE-----\r\nHash: SHA512\r\n\r\n=============================================================================\r\nFreeBSD-EN-16:11.vmbus                                          Errata Notice\r\n                                                          The FreeBSD Project\r\n\r\nTopic:          Avoid using spin locks for channel message locks\r\n\r\nCategory:       core\r\nModule:         vmbus\r\nAnnounced:      2016-08-12\r\nCredits:        Microsoft OSTC\r\nAffects:        FreeBSD 10.3\r\nCorrected:      2016-06-15 09:52:01 UTC (stable/10, 10.3-STABLE)\r\n                2016-08-12 04:01:16 UTC (releng/10.3, 10.3-RELEASE-p7)\r\n\r\nFor general information regarding FreeBSD Errata Notices and Security\r\nAdvisories, including descriptions of the fields above, security\r\nbranches, and the following sections, please visit\r\n<URL:https://security.FreeBSD.org/>.\r\n";
+
+    public static string PLAIN_BODY1_EXPECTED = "FreeBSD-EN-16:11.vmbus Errata Notice The FreeBSD Project Topic: Avoid using spin locks for channel message locks Category: core Module: vmbus Announced: 2016-08-12 Credits: Microsoft OSTC Affects: FreeBSD 10.3 Corrected: 2016-06-15 09:52:01 UTC (stable/10, 10.3-STABLE) 2016-08-12 04:01:16 UTC (releng/10.3, 10.3-RELEASE-p7)";
 
     public static string HTML_BODY1_ENCODED = """<html><head>
 <meta http-equiv=3DContent-Type content=3D"text/html; charset=3Dutf-8">

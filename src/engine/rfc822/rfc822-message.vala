@@ -375,23 +375,30 @@ public class Geary.RFC822.Message : BaseObject {
         
         return email;
     }
-    
-    // Takes an e-mail object with a body and generates a preview.  If there is no body
-    // or the body is the empty string, the empty string will be returned.
+
+    /**
+     * Generates a preview from the email's message body.
+     *
+     * If there is no body or the body is the empty string, the empty
+     * string will be returned.
+     */
     public string get_preview() {
+        TextFormat format = TextFormat.PLAIN;
         string? preview = null;
         try {
             preview = get_plain_body(false, null);
         } catch (Error e) {
             try {
-                preview = Geary.HTML.html_to_text(get_html_body(null), false);
+                format = TextFormat.HTML;
+                preview = get_html_body(null);
             } catch (Error error) {
                 debug("Could not generate message preview: %s\n and: %s", e.message, error.message);
             }
         }
 
-        return Geary.String.safe_byte_substring((preview ?? "").chug(),
-            Geary.Email.MAX_PREVIEW_BYTES);
+        return (preview != null)
+          ? Geary.RFC822.Utils.to_preview_text(preview, format)
+          : "";
     }
 
     /**

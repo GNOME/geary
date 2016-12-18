@@ -343,6 +343,78 @@ public bool comp_char_arr_slice(char[] array, uint start, string comp) {
 }
 
 /**
+ * Obtains the best preview text from a plain or HTML string.
+ *
+ * The string returned will be at most `Geary.Email.MAX_PREVIEW_BYTES`
+ * long, and will have had its whitespace squashed.
+ */
+public string to_preview_text(string? text, TextFormat format) {
+    string preview = "";
+
+    if (format == TextFormat.PLAIN) {
+        StringBuilder buf = new StringBuilder();
+        string[] all_lines = text.split("\r\n");
+        bool in_mime_header = false;
+        bool in_inline_pgp_header = false;
+        foreach (string line in all_lines) {
+            if ((in_mime_header || in_inline_pgp_header) &&
+                line.has_prefix(" ") ||
+                line.has_prefix("\t")) {
+                continue; // Skip "folded" (multi-line) headers.
+            } else {
+                in_mime_header = false;
+            }
+
+            if (in_inline_pgp_header) {
+                if (Geary.String.is_empty(line)) {
+                    in_inline_pgp_header = false;
+                }
+                continue;
+            }
+
+            if (line.has_prefix("Content-")) {
+                in_mime_header = true;
+                continue;
+            }
+
+            if (line.has_prefix("-----BEGIN PGP SIGNED MESSAGE-----")) {
+                in_inline_pgp_header = true;
+                continue;
+            }
+
+            if (line.has_prefix(">"))
+                continue;
+
+            if (line.has_prefix("--"))
+                continue;
+
+            if (line.has_prefix("===="))
+                continue;
+
+            if (line.has_prefix("~~~~"))
+                continue;
+
+            if (Geary.String.is_empty_or_whitespace(line)) {
+                buf.append("\n");
+                continue;
+            }
+
+            buf.append(" ");
+            buf.append(line);
+        }
+
+        preview = buf.str;
+    } else if (format == TextFormat.HTML) {
+        preview = Geary.HTML.html_to_text(text, false);
+    }
+
+    return Geary.String.safe_byte_substring(
+        Geary.String.reduce_whitespace(preview),
+        Geary.Email.MAX_PREVIEW_BYTES
+    );
+}
+
+/**
  * Uses a GMime.FilterBest to determine the best charset.
  *
  * WARNING: This call does not perform async I/O, meaning it will loop on the
