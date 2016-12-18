@@ -122,7 +122,7 @@ public class MainWindow : Gtk.ApplicationWindow {
         } else {
             GearyApplication.instance.exit();
         }
-        return Gdk.EVENT_STOP;
+        return true;
     }
 
     // Fired on [un]maximize and possibly others. Save maximized state
