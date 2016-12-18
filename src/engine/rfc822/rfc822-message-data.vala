@@ -353,12 +353,13 @@ public class Geary.RFC822.PreviewText : Geary.RFC822.Text {
     public PreviewText(Memory.Buffer _buffer) {
         base (_buffer);
     }
-    
+
     public PreviewText.with_header(Memory.Buffer preview, Memory.Buffer preview_header) {
         string? charset = null;
         string? encoding = null;
+        bool is_plain = false;
         bool is_html = false;
-        
+
         // Parse the header.
         GMime.Stream header_stream = Utils.create_stream_mem(preview_header);
         GMime.Parser parser = new GMime.Parser.with_stream(header_stream);
@@ -367,31 +368,36 @@ public class Geary.RFC822.PreviewText : Geary.RFC822.Text {
             Mime.ContentType? content_type = null;
             if (part.get_content_type() != null) {
                 content_type = new Mime.ContentType.from_gmime(part.get_content_type());
+                is_plain = content_type.is_type("text", "plain");
                 is_html = content_type.is_type("text", "html");
                 charset = content_type.params.get_value("charset");
             }
-            
+
             encoding = part.get_header("Content-Transfer-Encoding");
         }
 
-        // Parse the preview
-        GMime.StreamMem input_stream = Utils.create_stream_mem(preview);
-        ByteArray output = new ByteArray();
-        GMime.StreamMem output_stream = new GMime.StreamMem.with_byte_array(output);
-        output_stream.set_owner(false);
-        
-        // Convert the encoding and character set.
-        GMime.StreamFilter filter = new GMime.StreamFilter(output_stream);
-        if (encoding != null)
-            filter.add(new GMime.FilterBasic(GMime.content_encoding_from_string(encoding), false));
+        string preview_text = "";
+        if (is_plain || is_html) {
+            // Parse the preview
+            GMime.StreamMem input_stream = Utils.create_stream_mem(preview);
+            ByteArray output = new ByteArray();
+            GMime.StreamMem output_stream = new GMime.StreamMem.with_byte_array(output);
+            output_stream.set_owner(false);
 
-        filter.add(Geary.RFC822.Utils.create_utf8_filter_charset(charset));
+            // Convert the encoding and character set.
+            GMime.StreamFilter filter = new GMime.StreamFilter(output_stream);
+            if (encoding != null)
+                filter.add(new GMime.FilterBasic(GMime.content_encoding_from_string(encoding), false));
 
-        input_stream.write_to_stream(filter);
-        uint8[] data = output.data;
-        data += (uint8) '\0';
+            filter.add(Geary.RFC822.Utils.create_utf8_filter_charset(charset));
 
-        string preview_text = Geary.RFC822.Utils.to_preview_text((string) data, is_html ? TextFormat.HTML : TextFormat.PLAIN);
+            input_stream.write_to_stream(filter);
+            uint8[] data = output.data;
+            data += (uint8) '\0';
+
+            preview_text = Geary.RFC822.Utils.to_preview_text((string) data, is_html ? TextFormat.HTML : TextFormat.PLAIN);
+        }
+
         base(new Geary.Memory.StringBuffer(preview_text));
     }
 
