@@ -354,26 +354,12 @@ public string to_preview_text(string? text, TextFormat format) {
     if (format == TextFormat.PLAIN) {
         StringBuilder buf = new StringBuilder();
         string[] all_lines = text.split("\r\n");
-        bool in_mime_header = false;
         bool in_inline_pgp_header = false;
         foreach (string line in all_lines) {
-            if ((in_mime_header || in_inline_pgp_header) &&
-                line.has_prefix(" ") ||
-                line.has_prefix("\t")) {
-                continue; // Skip "folded" (multi-line) headers.
-            } else {
-                in_mime_header = false;
-            }
-
             if (in_inline_pgp_header) {
                 if (Geary.String.is_empty(line)) {
                     in_inline_pgp_header = false;
                 }
-                continue;
-            }
-
-            if (line.has_prefix("Content-")) {
-                in_mime_header = true;
                 continue;
             }
 
