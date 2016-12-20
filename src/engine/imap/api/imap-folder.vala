@@ -483,14 +483,23 @@ private class Geary.Imap.Folder : BaseObject {
         } else {
             body_specifier = null;
         }
-        
-        // PREVIEW requires two separate commands
-        if (fields.require(Email.Field.PREVIEW)) {
-            // Get the preview text (the initial MAX_PREVIEW_BYTES of the first MIME section
+
+        // PREVIEW obtains the content type and a truncated version of
+        // the first part of the message, which often leads to poor
+        // results. It can also be also be synthesised from the
+        // email's RFC822 message in fetched_data_to_email, if the
+        // fields needed for reconstructing the RFC822 message are
+        // present. If so, rely on that and don't also request any
+        // additional data for the preview here.
+        if (fields.require(Email.Field.PREVIEW) &&
+            !fields.require(Email.REQUIRED_FOR_MESSAGE)) {
+            // Get the preview text (the initial MAX_PREVIEW_BYTES of
+            // the first MIME section
+
             preview_specifier = new FetchBodyDataSpecifier.peek(FetchBodyDataSpecifier.SectionPart.NONE,
                 { 1 }, 0, Geary.Email.MAX_PREVIEW_BYTES, null);
             cmds.add(new FetchCommand.body_data_type(msg_set, preview_specifier));
-            
+
             // Also get the character set to properly decode it
             preview_charset_specifier = new FetchBodyDataSpecifier.peek(
                 FetchBodyDataSpecifier.SectionPart.MIME, { 1 }, -1, -1, null);
@@ -499,7 +508,7 @@ private class Geary.Imap.Folder : BaseObject {
             preview_specifier = null;
             preview_charset_specifier = null;
         }
-        
+
         // PROPERTIES and FLAGS are a separate command
         if (fields.requires_any(Email.Field.PROPERTIES | Email.Field.FLAGS)) {
             Gee.List<FetchDataSpecifier> data_types = new Gee.ArrayList<FetchDataSpecifier>();
@@ -990,24 +999,12 @@ private class Geary.Imap.Folder : BaseObject {
         // the server, so use requested fields for determination
         if (required_but_not_set(Geary.Email.Field.REFERENCES, required_fields, email))
             email.set_full_references(message_id, in_reply_to, references);
-        
-        // if body was requested, get it now
-        if (body_specifier != null) {
-            if (fetched_data.body_data_map.has_key(body_specifier)) {
-                email.set_message_body(new Geary.RFC822.Text(
-                    fetched_data.body_data_map.get(body_specifier)));
-            } else {
-                message("[%s] No body specifier \"%s\" found", folder_name,
-                    body_specifier.to_string());
-                foreach (FetchBodyDataSpecifier specifier in fetched_data.body_data_map.keys)
-                    message("[%s] has %s", folder_name, specifier.to_string());
-            }
-        }
-        
-        // if preview was requested, get it now ... both identifiers must be supplied if one is
+
+        // if preview was requested, get it now ... both identifiers
+        // must be supplied if one is
         if (preview_specifier != null || preview_charset_specifier != null) {
             assert(preview_specifier != null && preview_charset_specifier != null);
-            
+
             if (fetched_data.body_data_map.has_key(preview_specifier)
                 && fetched_data.body_data_map.has_key(preview_charset_specifier)) {
                 email.set_message_preview(new RFC822.PreviewText.with_header(
@@ -1020,10 +1017,46 @@ private class Geary.Imap.Folder : BaseObject {
                     message("[%s] has %s", folder_name, specifier.to_string());
             }
         }
-        
+
+        // If body was requested, get it now. We also set the preview
+        // here from the body if possible since for HTML messages at
+        // least there's a lot of boilerplate HTML to wade through to
+        // get some actual preview text, which usually requires more
+        // than Geary.Email.MAX_PREVIEW_BYTES will allow for
+        if (body_specifier != null) {
+            if (fetched_data.body_data_map.has_key(body_specifier)) {
+                email.set_message_body(new Geary.RFC822.Text(
+                    fetched_data.body_data_map.get(body_specifier)));
+
+                // Try to set the preview
+                Geary.RFC822.Message? message = null;
+                try {
+                    message = email.get_message();
+                } catch (Error e) {
+                    // Not enough fields to construct the message
+                }
+                if (message != null) {
+                    string preview = message.get_preview();
+                    if (preview.length > Geary.Email.MAX_PREVIEW_BYTES) {
+                        preview = Geary.String.safe_byte_substring(
+                            preview, Geary.Email.MAX_PREVIEW_BYTES
+                        );
+                    }
+                    email.set_message_preview(
+                        new RFC822.PreviewText.from_string(preview)
+                    );
+                }
+            } else {
+                message("[%s] No body specifier \"%s\" found", folder_name,
+                    body_specifier.to_string());
+                foreach (FetchBodyDataSpecifier specifier in fetched_data.body_data_map.keys)
+                    message("[%s] has %s", folder_name, specifier.to_string());
+            }
+        }
+
         return email;
     }
-    
+
     // Returns a no-message-id ImapDB.EmailIdentifier with the UID stored in it.
     // This method does not take a cancellable; there is currently no way to tell if an email was
     // created or not if exec_commands_async() is cancelled during the append.  For atomicity's sake,
