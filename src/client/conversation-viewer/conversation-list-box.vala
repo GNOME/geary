@@ -29,7 +29,6 @@ public class ConversationListBox : Gtk.ListBox {
         | Geary.Email.Field.SUBJECT
         | Geary.Email.Field.DATE
         | Geary.Email.Field.FLAGS
-        | Geary.Email.Field.PREVIEW
         | Geary.ComposedEmail.REQUIRED_REPLY_FIELDS;
 
     // Offset from the top of the list box which emails views will

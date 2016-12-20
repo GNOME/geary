@@ -16,10 +16,12 @@
 public class ConversationListStore : Gtk.ListStore {
     public const Geary.Email.Field REQUIRED_FIELDS =
         Geary.Email.Field.ENVELOPE | Geary.Email.Field.FLAGS | Geary.Email.Field.PROPERTIES;
-    
-    public const Geary.Email.Field WITH_PREVIEW_FIELDS =
-        Geary.Email.Field.ENVELOPE | Geary.Email.Field.FLAGS | Geary.Email.Field.PROPERTIES | Geary.Email.Field.PREVIEW;
-    
+
+        // XXX Remove ALL and NONE when PREVIEW has been fixed. See Bug 714317.
+        public const Geary.Email.Field WITH_PREVIEW_FIELDS =
+        Geary.Email.Field.ENVELOPE | Geary.Email.Field.FLAGS | Geary.Email.Field.PROPERTIES | Geary.Email.Field.PREVIEW |
+            Geary.Email.Field.ALL | Geary.Email.Field.NONE;
+
     public enum Column {
         CONVERSATION_DATA,
         CONVERSATION_OBJECT,
