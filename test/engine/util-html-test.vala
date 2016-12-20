@@ -31,12 +31,13 @@ px; }
         assert(Geary.HTML.html_to_text(HTML_BODY_COMPLETE) == HTML_BODY_COMPLETE_EXPECTED);
         assert(Geary.HTML.html_to_text(blockquote_body) == "hello\n there\n");
         assert(Geary.HTML.html_to_text(blockquote_body, false) == " there\n");
+        assert(Geary.HTML.html_to_text(HTML_ENTITIES_BODY) == HTML_ENTITIES_EXPECTED);
         assert(Geary.HTML.html_to_text(style_complete) == "");
         assert(Geary.HTML.html_to_text(style_complete) == "");
         assert(Geary.HTML.html_to_text(style_truncated) == "");
     }
 
-    public static string HTML_BODY_COMPLETE = """<html><head>
+    private static string HTML_BODY_COMPLETE = """<html><head>
 <meta http-equiv=Content-Type content="text/html; charset=utf-8">
 <style>
 .bodyblack { font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 12px; }
@@ -51,7 +52,7 @@ X XXXXXX<br /><br />You can reply directly to this message or click the followin
 </table></body></html>
 """;
 
-    public static string HTML_BODY_COMPLETE_EXPECTED = """
+    private static string HTML_BODY_COMPLETE_EXPECTED = """
 
 Hi Kenneth, 
 
@@ -71,6 +72,29 @@ https://app.foobar.com/xxxxxxxxxxxxxxxx1641966deff6c48623aba
 You can change your email preferences at:
 https://app.foobar.com/xxxxxxxxxxx
  
+""";
+
+        private static string HTML_ENTITIES_BODY = """<html><head></head><body><div style="font-family: Verdana;font-size: 12.0px;"><div>
+<div style="font-family: Verdana;font-size: 12.0px;">
+<div>What if I said that I&#39;d like to go to the theater tomorrow night.</div>
+
+<div>&nbsp;</div>
+
+<div>I think we could do that!</div>
+""";
+
+        private static string HTML_ENTITIES_EXPECTED = """
+
+What if I said that I'd like to go to the theater tomorrow night.
+
+
+ 
+
+
+I think we could do that!
+
+
+
 """;
 
 }
