@@ -139,7 +139,7 @@ namespace Util.DOM {
             Regex r = new Regex(PROTOCOL_REGEX, RegexCompileFlags.CASELESS);
             result.append(r.match(url) ? "\01%s\01".printf(url) : url);
         } catch (Error e) {
-            debug("URL parsing error: %s\n", e.message);
+            debug("URL parsing error: %s", e.message);
         }
         return false; // False to continue processing.
     }
@@ -217,7 +217,7 @@ namespace Util.DOM {
 
             result.append(r.match(url) ? "<a href=\"%s\">%s</a>".printf(url, url) : url);
         } catch (Error e) {
-            debug("URL parsing error: %s\n", e.message);
+            debug("URL parsing error: %s", e.message);
         }
         return false; // False to continue processing.
     }

@@ -2086,7 +2086,7 @@ private class Geary.ImapDB.Account : BaseObject {
             // malformed" error occurs. Remove this when the SQLite
             // bug is fixed. See b.g.o #765515 for more info.
             if (result.string_at(1) == null) {
-                debug("Avoiding a crash from 'database disk image is malformed' error\n");
+                debug("Avoiding a crash from 'database disk image is malformed' error");
                 result.next(cancellable);
                 continue;
             }

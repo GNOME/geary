@@ -362,7 +362,7 @@ public class ConversationListBox : Gtk.ListBox {
         this.loading_timeout_id =
             Timeout.add(LOADING_TIMEOUT_MSEC, () => {
                 if (this.loading_timeout_id != 0) {
-                    debug("Loading timed out\n");
+                    debug("Loading timed out");
                     show_loading();
                 }
                 this.loading_timeout_id = 0;

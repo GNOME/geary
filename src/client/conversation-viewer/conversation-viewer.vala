@@ -264,7 +264,7 @@ public class ConversationViewer : Gtk.Stack {
      * Sets the currently visible page of the stack.
      */
     private new void set_visible_child(Gtk.Widget widget) {
-        debug("Showing: %s\n", widget.get_name());
+        debug("Showing: %s", widget.get_name());
         if (widget != this.conversation_page &&
             get_visible_child() == this.conversation_page) {
             // By removing the current list, any load it is currently
