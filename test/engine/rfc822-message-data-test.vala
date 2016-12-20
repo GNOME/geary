@@ -19,6 +19,12 @@ class Geary.RFC822.MessageDataTest : Gee.TestCase {
         );
         assert(plain_preview1.buffer.to_string() == PLAIN_BODY1_EXPECTED);
 
+        PreviewText base64_preview = new PreviewText.with_header(
+            new Geary.Memory.StringBuffer(BASE64_BODY_ENCODED),
+            new Geary.Memory.StringBuffer(BASE64_BODY_HEADERS)
+        );
+        assert(base64_preview.buffer.to_string() == BASE64_BODY_EXPECTED);
+
         string html_part_headers = "Content-Type: text/html; charset=utf-8\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\n";
 
         PreviewText html_preview1 = new PreviewText.with_header(
@@ -35,10 +41,12 @@ class Geary.RFC822.MessageDataTest : Gee.TestCase {
     }
 
     public static string PLAIN_BODY1_HEADERS = "Content-Type: text/plain; charset=\"us-ascii\"\r\nContent-Transfer-Encoding: 7bit\r\n";
-
     public static string PLAIN_BODY1_ENCODED = "-----BEGIN PGP SIGNED MESSAGE-----\r\nHash: SHA512\r\n\r\n=============================================================================\r\nFreeBSD-EN-16:11.vmbus                                          Errata Notice\r\n                                                          The FreeBSD Project\r\n\r\nTopic:          Avoid using spin locks for channel message locks\r\n\r\nCategory:       core\r\nModule:         vmbus\r\nAnnounced:      2016-08-12\r\nCredits:        Microsoft OSTC\r\nAffects:        FreeBSD 10.3\r\nCorrected:      2016-06-15 09:52:01 UTC (stable/10, 10.3-STABLE)\r\n                2016-08-12 04:01:16 UTC (releng/10.3, 10.3-RELEASE-p7)\r\n\r\nFor general information regarding FreeBSD Errata Notices and Security\r\nAdvisories, including descriptions of the fields above, security\r\nbranches, and the following sections, please visit\r\n<URL:https://security.FreeBSD.org/>.\r\n";
-
     public static string PLAIN_BODY1_EXPECTED = "FreeBSD-EN-16:11.vmbus Errata Notice The FreeBSD Project Topic: Avoid using spin locks for channel message locks Category: core Module: vmbus Announced: 2016-08-12 Credits: Microsoft OSTC Affects: FreeBSD 10.3 Corrected: 2016-06-15 09:52:01 UTC (stable/10, 10.3-STABLE) 2016-08-12 04:01:16 UTC (releng/10.3, 10.3-RELEASE-p7) For general information regarding FreeBSD Errata Notices and Security Advisories, including descriptions of the fields above, security branches, and the following sections, please visit <URL:https://security.FreeBSD.org/>.";
+
+    public static string BASE64_BODY_HEADERS = "Content-Transfer-Encoding: base64\r\nContent-Type: text/plain; charset=\"utf-8\"; Format=\"flowed\"\r\n";
+    public static string BASE64_BODY_ENCODED = "CkhleSBSaWNhcmRvLAoKVGhhbmtzIGZvciBsb29raW5nIGludG8gdGhpcy4KCk9uIFR1ZSwgRGVj\r\nIDEzLCAyMDE2IGF0IDEwOjIzIEFNLCBSaWNhcmRvIEJ1Z2FsaG8gPHJidWdhbGhvQGdtYWlsLmNv\r\nbT4gCndyb3RlOgo+IGZyb20gbXkgdGVzdGluZywgdGhlIHByZWZldGNoX3BlcmlvZF9kYXlzIGRv\r\nZXMgbm90IHdvcmsgZm9yIElOQk9YLgo+IFRoaXMgaXMgYW5ub3lpbmcsIEkgd2FudCB0byBwcmVm\r\nZXRjaCBhbGwgbXkgZS1tYWlsLCBzbyBJIGNhbiBydW4gCj4gc2VhcmNoCj4gZXMuCj4gCj4gQXMg\r\nZmFyIGFzIEkgY291bGQsIEkndmUgdHJhY2VkIHRoZSBwcm9ibGVtIGRvd24gdG8gdGhpcyBjb25k\r\naXRpb24gaW4KPiBzZW5kX2FsbDoKPiAKPiAgICAgaWYgKGltYXBfZm9sZGVyLmdldF9vcGVuX3N0\r\nYXRlKCkgIT0gRm9sZGVyLk9wZW5TdGF0ZS5DTE9TRUQpCj4gICAgICAgICAgICAgICAgIGNvbnRp\r\nbnVlOwo+IAo+IGh0dHBzOi8vZ2l0aHViLmNvbS9HTk9NRS9nZWFyeS9ibG9iL21hc3Rlci9zcmMv\r\nZW5naW5lL2ltYXAtZW5naW5lL2ltYXAtCj4gZW5naW5lLWFjY291bnQtc3luY2hyb25pemVyLnZh\r\nbGEjTDE1MQo+IAo+IElOQk9YIGlzIGFsd2F5cyBvcGVuIGFuZCB0aHVzIGlzIG5ldmVyIHNlbnQg\r\ndG8gcHJvY2Vzc19xdWV1ZV9hc3luYy4KPiAKPi";
+    public static string BASE64_BODY_EXPECTED = "Hey Ricardo, Thanks for looking into this. On Tue, Dec 13, 2016 at 10:23 AM, Ricardo Bugalho <rbugalho@gmail.com> wrote:";
 
     public static string HTML_BODY1_ENCODED = """<html><head>
 <meta http-equiv=3DContent-Type content=3D"text/html; charset=3Dutf-8">

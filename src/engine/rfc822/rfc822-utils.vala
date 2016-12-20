@@ -345,14 +345,16 @@ public bool comp_char_arr_slice(char[] array, uint start, string comp) {
 /**
  * Obtains the best preview text from a plain or HTML string.
  *
- * The string returned will will have had its whitespace squashed.
+ * The given string `text` should have UNIX encoded line endings (LF),
+ * rather than RFC822 (CRLF). The string returned will will have had
+ * its whitespace squashed.
  */
 public string to_preview_text(string? text, TextFormat format) {
     string preview = "";
 
     if (format == TextFormat.PLAIN) {
         StringBuilder buf = new StringBuilder();
-        string[] all_lines = text.split("\r\n");
+        string[] all_lines = text.split("\n");
         bool in_inline_pgp_header = false;
         foreach (string line in all_lines) {
             if (in_inline_pgp_header) {
