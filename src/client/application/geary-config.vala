@@ -52,6 +52,15 @@ public class Configuration {
     public Settings settings { get; private set; }
     public Settings gnome_interface { get; private set; }
 
+    // Can be set as an arguments
+    public bool enable_debug { get; set; default = false; }
+
+    // Can be set as an arguments
+    public bool enable_inspector { get; set; default = false; }
+
+    // Can be set as an arguments
+    public bool revoke_certs { get; set; default = false; }
+
     public DesktopEnvironment desktop_environment {
         get {
             string? xdg_current_desktop = Environment.get_variable("XDG_CURRENT_DESKTOP");

@@ -13,6 +13,7 @@ Terminal=false
 Categories=GNOME;GTK;Network;Email;
 MimeType=x-scheme-handler/mailto;
 StartupNotify=true
+DBusActivatable=true
 X-GNOME-UsesNotifications=true
 Actions=Compose;
 

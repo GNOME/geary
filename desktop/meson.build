@@ -87,3 +87,18 @@ geary_compiled_schema = gnome.compile_schemas(
 install_data('org.gnome.Geary.gschema.xml',
   install_dir: join_paths(datadir, 'glib-2.0', 'schemas'),
 )
+
+#
+# DBus services
+#
+
+service_conf = configuration_data()
+service_conf.set('bindir', bindir)
+
+configure_file(
+  input: 'org.gnome.Geary.service.in',
+  output: 'org.gnome.Geary.service',
+  configuration: service_conf,
+  install: true,
+  install_dir: dbus_services_dir
+)

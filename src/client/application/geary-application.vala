@@ -18,7 +18,6 @@ extern const string GETTEXT_PACKAGE;
 public class GearyApplication : Gtk.Application {
 
     public const string NAME = "Geary";
-    public const string PRGNAME = "geary";
     public const string APP_ID = "org.gnome.Geary";
     public const string DESCRIPTION = _("Send and receive email");
     public const string COPYRIGHT_1 = _("Copyright 2016 Software Freedom Conservancy Inc.");
@@ -52,14 +51,14 @@ public class GearyApplication : Gtk.Application {
     public const string ACTION_UNDO = "undo";
 
     // App-wide actions
-    private const string ACTION_ABOUT = "about";
-    private const string ACTION_ACCOUNTS = "accounts";
-    private const string ACTION_COMPOSE = "compose";
-    private const string ACTION_INSPECT = "inspect";
-    private const string ACTION_HELP = "help";
-    private const string ACTION_MAILTO = "mailto";
-    private const string ACTION_PREFERENCES = "preferences";
-    private const string ACTION_QUIT = "quit";
+    public const string ACTION_ABOUT = "about";
+    public const string ACTION_ACCOUNTS = "accounts";
+    public const string ACTION_COMPOSE = "compose";
+    public const string ACTION_INSPECT = "inspect";
+    public const string ACTION_HELP = "help";
+    public const string ACTION_MAILTO = "mailto";
+    public const string ACTION_PREFERENCES = "preferences";
+    public const string ACTION_QUIT = "quit";
 
     private const ActionEntry[] action_entries = {
         {ACTION_ABOUT, on_activate_about},
@@ -127,10 +126,10 @@ public class GearyApplication : Gtk.Application {
      *
      * If this returns `true`, then the primary application instance
      * will continue to run in the background after the last window is
-     * closed, instead of existing as usual.
+     * closed, instead of exiting as usual.
      */
     public bool is_background_service {
-        get { return Args.hidden_startup || this.config.startup_notifications; }
+        get { return (this.flags & ApplicationFlags.IS_SERVICE) != 0; }
     }
 
     private string bin;
@@ -238,57 +237,45 @@ public class GearyApplication : Gtk.Application {
 
     public GearyApplication() {
         Object(
-            application_id: APP_ID
+            application_id: APP_ID,
+            flags: ApplicationFlags.HANDLES_COMMAND_LINE
         );
+        this.add_main_option_entries(Args.OPTION_ENTRIES);
         _instance = this;
     }
 
-    // Application.run() calls this as an entry point.
-    public override bool local_command_line(ref unowned string[] args, out int exit_status) {
-        bin = args[0];
-        exec_dir = (File.new_for_path(Posix.realpath(Environment.find_program_in_path(bin)))).get_parent();
+    public override bool local_command_line(ref unowned string[] args,
+                                            out int exit_status) {
+        this.bin = args[0];
+        string current_path = Posix.realpath(Environment.find_program_in_path(this.bin));
+        this.exec_dir = File.new_for_path(current_path).get_parent();
 
-        try {
-            register();
-        } catch (Error e) {
-            error("Error registering GearyApplication: %s", e.message);
-        }
+        return base.local_command_line(ref args, out exit_status);
+    }
 
-        if (!Args.parse(args)) {
-            exit_status = 1;
-            return true;
-        }
+    public override int handle_local_options(VariantDict options) {
+        return Args.handle_local_options(options);
+    }
 
-        if (!Args.quit) {
-            // Normal application startup or activation
-            activate();
-            foreach (unowned string arg in args) {
-                if (arg != null) {
-                    if (arg == Geary.ComposedEmail.MAILTO_SCHEME)
-                        activate_action(ACTION_COMPOSE, null);
-                    else if (arg.has_prefix(Geary.ComposedEmail.MAILTO_SCHEME))
-                        activate_action(ACTION_MAILTO, new Variant.string(arg));
-                }
-            }
-        } else {
-            // User requested quit, only try to if we aren't running
-            // already.
-            if (this.is_remote) {
-                activate_action(ACTION_QUIT, null);
-            }
-        }
+    public override int command_line(ApplicationCommandLine command_line) {
+        int exit_value = Args.handle_general_options(this.config, command_line.get_options_dict());
+        if (exit_value != -1)
+            return exit_value;
 
-        exit_status = 0;
-        return true;
+        exit_value = Args.handle_arguments(this, command_line.get_arguments());
+        if (exit_value != -1)
+            return exit_value;
+
+        activate();
+
+        return -1;
     }
 
     public override void startup() {
-        Configuration.init(is_installed(), GSETTINGS_DIR);
-
         Environment.set_application_name(NAME);
-        Environment.set_prgname(PRGNAME);
-        International.init(GETTEXT_PACKAGE, bin);
+        International.init(GETTEXT_PACKAGE, this.bin);
 
+        Configuration.init(is_installed(), GSETTINGS_DIR);
         Geary.Logging.init();
         Geary.Logging.log_to(stderr);
         GLib.Log.set_default_handler(Geary.Logging.default_handler);
@@ -301,7 +288,12 @@ public class GearyApplication : Gtk.Application {
         // Ensure all geary windows have an icon
         Gtk.Window.set_default_icon_name(APP_ID);
 
+        this.config = new Configuration(APP_ID);
+
         add_action_entries(action_entries, this);
+
+        // Use a hold() here (if started as a service, we will shutdown after 10s).
+        hold();
     }
 
     public override void activate() {
@@ -340,8 +332,6 @@ public class GearyApplication : Gtk.Application {
         message("%s %s prefix=%s exec_dir=%s is_installed=%s", NAME, VERSION, INSTALL_PREFIX,
             exec_dir.get_path(), is_installed().to_string());
 
-        config = new Configuration(APP_ID);
-
         // Application accels
         add_app_accelerators(ACTION_COMPOSE, { "<Ctrl>N" });
         add_app_accelerators(ACTION_HELP, { "F1" });
@@ -358,7 +348,7 @@ public class GearyApplication : Gtk.Application {
         ComposerWidget.add_window_accelerators(this);
         Components.Inspector.add_window_accelerators(this);
 
-        yield controller.open_async(null);
+        yield this.controller.open_async(null);
 
         release();
     }
@@ -367,11 +357,11 @@ public class GearyApplication : Gtk.Application {
         // see create_async() for reasoning hold/release is used
         hold();
 
-        yield controller.close_async();
+        if (this.controller != null) // If we didn't get activated, controller might be null
+            yield this.controller.close_async();
 
         release();
-
-        is_destroyed = true;
+        this.is_destroyed = true;
     }
 
     public void add_window_accelerators(string action,
@@ -479,7 +469,7 @@ public class GearyApplication : Gtk.Application {
 
     // This call will fire "exiting" only if it's not already been fired.
     public void exit(int exitcode = 0) {
-        if (exiting_fired)
+        if (this.exiting_fired)
             return;
 
         this.exitcode = exitcode;
@@ -580,7 +570,7 @@ public class GearyApplication : Gtk.Application {
 
     private void on_activate_mailto(SimpleAction action, Variant? param) {
         if (this.controller != null && param != null) {
-            this.controller.compose_mailto(param.get_string());
+            this.controller.compose(param.get_string());
         }
     }
 

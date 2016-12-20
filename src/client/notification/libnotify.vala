@@ -26,7 +26,7 @@ public class Libnotify : Geary.BaseObject {
         monitor.add_required_fields(REQUIRED_FIELDS);
 
         if (!Notify.is_initted()) {
-            if (!Notify.init(GearyApplication.PRGNAME))
+            if (!Notify.init(Environment.get_prgname()))
                 message("Failed to initialize libnotify.");
         }
 

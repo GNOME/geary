@@ -998,7 +998,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
         }
 
         // User-Agent
-        email.mailer = GearyApplication.PRGNAME + "/" + GearyApplication.VERSION;
+        email.mailer = Environment.get_prgname() + "/" + GearyApplication.VERSION;
 
         return email;
     }
@@ -1968,7 +1968,7 @@ public class ComposerWidget : Gtk.EventBox, Geary.BaseInterface {
                     if (!this.editor.is_rich_text)
                         append_menu_section(context_menu, section);
                 } else if (section == this.context_menu_inspector) {
-                    if (Args.inspector)
+                    if (this.config.enable_inspector)
                         append_menu_section(context_menu, section);
                 } else {
                     append_menu_section(context_menu, section);

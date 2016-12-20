@@ -16,11 +16,11 @@ public abstract class ClientWebViewTestCase<V> : TestCase {
     protected ClientWebViewTestCase(string name) {
         base(name);
         this.config = new Configuration(GearyApplication.APP_ID);
+        this.config.enable_debug = true;
         ClientWebView.init_web_context(
             this.config,
             File.new_for_path(_BUILD_ROOT_DIR).get_child("src"),
-            File.new_for_path("/tmp"), // XXX use something better here
-            true
+            File.new_for_path("/tmp") // XXX use something better here
         );
         try {
             ClientWebView.load_resources(GLib.File.new_for_path("/tmp"));
