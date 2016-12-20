@@ -345,8 +345,7 @@ public bool comp_char_arr_slice(char[] array, uint start, string comp) {
 /**
  * Obtains the best preview text from a plain or HTML string.
  *
- * The string returned will be at most `Geary.Email.MAX_PREVIEW_BYTES`
- * long, and will have had its whitespace squashed.
+ * The string returned will will have had its whitespace squashed.
  */
 public string to_preview_text(string? text, TextFormat format) {
     string preview = "";
@@ -394,10 +393,7 @@ public string to_preview_text(string? text, TextFormat format) {
         preview = Geary.HTML.html_to_text(text, false);
     }
 
-    return Geary.String.safe_byte_substring(
-        Geary.String.reduce_whitespace(preview),
-        Geary.Email.MAX_PREVIEW_BYTES
-    );
+    return Geary.String.reduce_whitespace(preview);
 }
 
 /**

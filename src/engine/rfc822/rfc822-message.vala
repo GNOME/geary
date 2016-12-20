@@ -371,16 +371,13 @@ public class Geary.RFC822.Message : BaseObject {
         email.set_message_subject(subject);
         email.set_message_body(new Geary.RFC822.Text(new Geary.Memory.OffsetBuffer(
             body_buffer, body_offset)));
-        email.set_message_preview(new Geary.RFC822.PreviewText.from_string(get_preview()));
-        
         return email;
     }
 
     /**
      * Generates a preview from the email's message body.
      *
-     * If there is no body or the body is the empty string, the empty
-     * string will be returned.
+     * If there is no body, the empty string will be returned.
      */
     public string get_preview() {
         TextFormat format = TextFormat.PLAIN;
@@ -392,13 +389,14 @@ public class Geary.RFC822.Message : BaseObject {
                 format = TextFormat.HTML;
                 preview = get_html_body(null);
             } catch (Error error) {
-                debug("Could not generate message preview: %s\n and: %s", e.message, error.message);
+                debug("Could not generate message preview: %s\n and: %s",
+                      e.message, error.message);
             }
         }
 
         return (preview != null)
-          ? Geary.RFC822.Utils.to_preview_text(preview, format)
-          : "";
+            ? Geary.RFC822.Utils.to_preview_text(preview, format)
+            : "";
     }
 
     /**

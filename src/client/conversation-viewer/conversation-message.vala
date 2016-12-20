@@ -19,6 +19,7 @@ public class ConversationMessage : Gtk.Grid {
 
 
     private const string FROM_CLASS = "geary-from";
+    private const int MAX_PREVIEW_BYTES = Geary.Email.MAX_PREVIEW_BYTES;
 
 
     internal static inline bool has_distinct_name(
@@ -377,9 +378,13 @@ public class ConversationMessage : Gtk.Grid {
         this.preview_date.set_text(date_text);
         this.preview_date.set_tooltip_text(date_tooltip);
 
-        this.preview_body.set_text(
-            Geary.String.reduce_whitespace(this.message.get_preview()) + "…"
-        );
+        string preview = this.message.get_preview();
+        if (preview.length > MAX_PREVIEW_BYTES) {
+            preview = Geary.String.safe_byte_substring(preview, MAX_PREVIEW_BYTES);
+            // Add an ellipsis in case the wider is wider than the text
+            preview += "…";
+        }
+        this.preview_body.set_text(preview);
 
         // Full headers
 
