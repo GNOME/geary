@@ -485,8 +485,6 @@ else ()
     )
 endif ()
 
-set(TARGET_WEBKIT 2.10)
-
 pkg_check_modules(DEPS REQUIRED
     gthread-2.0
     glib-2.0>=${TARGET_GLIB}.0
