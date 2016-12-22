@@ -21,6 +21,7 @@
 #  GETTEXT_FOUND: True if gettext has been found.
 #  XGETTEXT_EXECUTABLE: the full path to the xgettext.
 #  XGETTEXT_FOUND: True if xgettext has been found.
+#  XGETTEXT_VERSION: The xgettext version.
 #
 #===================================================================
 # Macros:
@@ -55,66 +56,81 @@ SET(XGETTEXT_OPTIONS_DEFAULT
     --language=C --keyword=_ --keyword=N_ --keyword=C_:1c,2 --keyword=NC_:1c,2 -s
     --escape --add-comments="/" --package-name=${PROJECT_NAME} --package-version=${VERSION})
 
+# Check for gettext
 IF (GETTEXT_MSGMERGE_EXECUTABLE AND GETTEXT_MSGFMT_EXECUTABLE AND GETTEXT_MSGCAT_EXECUTABLE)
     SET(GETTEXT_FOUND TRUE)
 ELSE (GETTEXT_MSGMERGE_EXECUTABLE AND GETTEXT_MSGFMT_EXECUTABLE)
     SET(GETTEXT_FOUND FALSE)
     IF (GetText_REQUIRED)
-	MESSAGE(FATAL_ERROR "GetText not found")
+        MESSAGE(FATAL_ERROR "GetText not found")
     ENDIF (GetText_REQUIRED)
 ENDIF (GETTEXT_MSGMERGE_EXECUTABLE AND GETTEXT_MSGFMT_EXECUTABLE AND GETTEXT_MSGCAT_EXECUTABLE)
 
+# Check xgettext and the version
 IF(XGETTEXT_EXECUTABLE)
     SET(XGETTEXT_FOUND TRUE)
+
+    # Liberally taken from
+    # https://github.com/boghison/mixcloudscope/blob/master/cmake/FindXGettext.cmake
+    execute_process(COMMAND ${XGETTEXT_EXECUTABLE} --version
+                    OUTPUT_VARIABLE _xgettext_version
+                    ERROR_QUIET OUTPUT_STRIP_TRAILING_WHITESPACE)
+    if (_xgettext_version MATCHES "^xgettext \\(.*\\) [0-9]")
+        string(
+            REGEX REPLACE "^xgettext \\([^\\)]*\\) ([0-9\\.]+[^ \n]*).*" "\\1"
+            XGETTEXT_VERSION "${_xgettext_version}"
+        )
+    endif()
+    unset(_xgettext_version)
 ELSE(XGETTEXT_EXECUTABLE)
     MESSAGE(STATUS "xgettext not found.")
     SET(XGETTTEXT_FOUND FALSE)
 ENDIF(XGETTEXT_EXECUTABLE)
 
+# Set the default options if not specified
 IF(NOT DEFINED XGETTEXT_OPTIONS)
     SET(XGETTEXT_OPTIONS ${XGETTEXT_OPTIONS_DEFAULT})
 ENDIF(NOT DEFINED XGETTEXT_OPTIONS)
 
+# Add translations target
 IF(XGETTEXT_FOUND)
     MACRO(GETTEXT_CREATE_TRANSLATIONS _firstLang)
-	SET(_gmoFiles)
-	SET(_addToAll)
-	SET(_is_comment FALSE)
+        SET(_gmoFiles)
+        SET(_addToAll)
+        SET(_is_comment FALSE)
 
-	FOREACH (_currentLang ${_firstLang} ${ARGN})
-	    IF(_currentLang STREQUAL "ALL")
-		SET(_addToAll "ALL")
-	    ELSEIF(_currentLang STREQUAL "COMMENT")
-		SET(_is_comment TRUE)
-	    ELSEIF(_is_comment)
-		SET(_is_comment FALSE)
-		SET(_comment ${_currentLang})
-	    ELSE()
-		SET(_lang ${_currentLang})
-		GET_FILENAME_COMPONENT(_absFile ${_currentLang}.po ABSOLUTE)
-		GET_FILENAME_COMPONENT(_abs_PATH ${_absFile} PATH)
-		SET(_gmoFile ${CMAKE_CURRENT_BINARY_DIR}/${_lang}.mo)
+        FOREACH (_currentLang ${_firstLang} ${ARGN})
+            IF(_currentLang STREQUAL "ALL")
+                SET(_addToAll "ALL")
+            ELSEIF(_currentLang STREQUAL "COMMENT")
+                SET(_is_comment TRUE)
+            ELSEIF(_is_comment)
+                SET(_is_comment FALSE)
+                SET(_comment ${_currentLang})
+            ELSE()
+                SET(_lang ${_currentLang})
+                GET_FILENAME_COMPONENT(_absFile ${_currentLang}.po ABSOLUTE)
+                GET_FILENAME_COMPONENT(_abs_PATH ${_absFile} PATH)
+                SET(_gmoFile ${CMAKE_CURRENT_BINARY_DIR}/${_lang}.mo)
 
-		#MESSAGE("_absFile=${_absFile} _abs_PATH=${_abs_PATH} _lang=${_lang} curr_bin=${CMAKE_CURRENT_BINARY_DIR}")
-		ADD_CUSTOM_COMMAND(
-		    OUTPUT ${_gmoFile}
-		    COMMAND ${GETTEXT_MSGFMT_EXECUTABLE} -o ${_gmoFile} ${_absFile}
-		    DEPENDS ${_absFile}
-		    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
-		    )
+                #MESSAGE("_absFile=${_absFile} _abs_PATH=${_abs_PATH} _lang=${_lang} curr_bin=${CMAKE_CURRENT_BINARY_DIR}")
+                ADD_CUSTOM_COMMAND(
+                    OUTPUT ${_gmoFile}
+                    COMMAND ${GETTEXT_MSGFMT_EXECUTABLE} -o ${_gmoFile} ${_absFile}
+                    DEPENDS ${_absFile}
+                    WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
+                    )
 
                 INSTALL(FILES ${_gmoFile} DESTINATION share/locale/${_lang}/LC_MESSAGES RENAME ${GETTEXT_PACKAGE}.mo)
-		SET(_gmoFiles ${_gmoFiles} ${_gmoFile})
-	    ENDIF()
-	ENDFOREACH (_currentLang )
+                SET(_gmoFiles ${_gmoFiles} ${_gmoFile})
+            ENDIF()
+        ENDFOREACH (_currentLang )
 
-	IF(DEFINED _comment)
-	    ADD_CUSTOM_TARGET(translations ${_addToAll} DEPENDS ${_gmoFiles} COMMENT ${_comment})
-	ELSE(DEFINED _comment)
-	    ADD_CUSTOM_TARGET(translations ${_addToAll} DEPENDS ${_gmoFiles})
-	ENDIF(DEFINED _comment)
+        IF(DEFINED _comment)
+            ADD_CUSTOM_TARGET(translations ${_addToAll} DEPENDS ${_gmoFiles} COMMENT ${_comment})
+        ELSE(DEFINED _comment)
+            ADD_CUSTOM_TARGET(translations ${_addToAll} DEPENDS ${_gmoFiles})
+        ENDIF(DEFINED _comment)
     ENDMACRO(GETTEXT_CREATE_TRANSLATIONS )
 ENDIF(XGETTEXT_FOUND)
-
-
 
