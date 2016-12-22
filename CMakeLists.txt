@@ -137,12 +137,17 @@ endif()
 
 find_package(Git QUIET)
 
-# intl
-include(Gettext)
+# xgettext
+include(FindXGettext)
+SET(MIN_XGETTEXT_VERSION "0.19.8")
 if (XGETTEXT_FOUND)
-    message(STATUS "xgettext found")
+    if (XGETTEXT_VERSION VERSION_LESS MIN_XGETTEXT_VERSION)
+        message (FATAL_ERROR "xgettext found, but version is ${XGETTEXT_VERSION} (minimum version required is ${MIN_XGETTEXT_VERSION}).")
+    else ()
+        message(STATUS "xgettext found, version ${XGETTEXT_VERSION}")
+    endif ()
 else ()
-    message(STATUS "xgettext not found")
+    message (FATAL_ERROR "xgettext not found")
 endif ()
 
 # GResources

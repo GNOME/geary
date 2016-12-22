@@ -63,7 +63,7 @@
     Fedora 25 and later ships with the correct versions of the
     required libraries. Install them by running this command:
 
-        $ sudo dnf install vala gobject-introspection-devel intltool cmake \
+        $ sudo yum install vala gobject-introspection-devel cmake \
             desktop-file-utils gnome-doc-utils libcanberra-devel libgee-devel \
             glib2-devel gmime-devel gtk3-devel libnotify-devel sqlite-devel \
             webkitgtk4-devel libsecret-devel libxml2-devel vala-tools \
@@ -82,7 +82,7 @@
 
     Install them by running this command:
 
-        $ sudo apt-get install valac libgirepository1.0-dev intltool \
+        $ sudo apt-get install valac libgirepository1.0-dev \
             cmake desktop-file-utils gnome-doc-utils libcanberra-dev \
             libgee-0.8-dev libglib2.0-dev libgmime-2.6-dev libgtk-3-dev \
             libsecret-1-dev libxml2-dev libnotify-dev libsqlite3-dev \

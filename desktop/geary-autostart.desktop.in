@@ -1,9 +1,9 @@
 [Desktop Entry]
-_Name=Geary
-_GenericName=Email
-_X-GNOME-FullName=Geary Mail
-_Comment=Send and receive email
-_Keywords=Email;E-mail;Mail;
+Name=Geary
+GenericName=Email
+X-GNOME-FullName=Geary Mail
+Comment=Send and receive email
+Keywords=Email;E-mail;Mail;
 Icon=geary
 TryExec=geary
 Exec=geary --hidden

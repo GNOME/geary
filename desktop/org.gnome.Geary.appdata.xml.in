@@ -8,29 +8,29 @@
   <update_contact>geary-list@gnome.org</update_contact>
 
   <!-- Translators: The application name -->
-  <_name>Geary</_name>
+  <name>Geary</name>
   <!-- Translators: The development team's name -->
-  <_developer_name>Geary Development Team</_developer_name>
+  <developer_name>Geary Development Team</developer_name>
   <!-- Translators: The application's summary / tagline -->
-  <_summary>Send and receive email</_summary>
+  <summary>Send and receive email</summary>
   <description>
-    <_p>
+    <p>
       Geary is an email application built around conversations, for
       the GNOME 3 desktop. It allows you to read, find and send email
       with a straightforward, modern interface.
-    </_p>
-    <_p>
+    </p>
+    <p>
       Conversations allow you to read a complete discussion without
       having to find and click from message to message.
-    </_p>
-    <_p>Geary’s features include:</_p>
+    </p>
+    <p>Geary’s features include:</p>
     <ul>
-      <_li>Quick email account setup</_li>
-      <_li>Shows related messages together in conversations</_li>
-      <_li>Fast, full text and keyword search</_li>
-      <_li>Full-featured HTML and plain text message composer</_li>
-      <_li>Desktop notification of new mail</_li>
-      <_li>Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers</_li>
+      <li>Quick email account setup</li>
+      <li>Shows related messages together in conversations</li>
+      <li>Fast, full text and keyword search</li>
+      <li>Full-featured HTML and plain text message composer</li>
+      <li>Desktop notification of new mail</li>
+      <li>Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers</li>
     </ul>
   </description>
 

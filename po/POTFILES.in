@@ -1,8 +1,7 @@
-[encoding: UTF-8]
 desktop/org.gnome.Geary.appdata.xml.in
 desktop/org.gnome.Geary.desktop.in
 desktop/geary-autostart.desktop.in
-[type: gettext/ini]desktop/geary-attach.contract.in
+desktop/geary-attach.contract.in
 src/geary-version.vala.in
 src/client/accounts/account-dialog-account-list-pane.vala
 src/client/accounts/account-dialog-add-edit-pane.vala
@@ -385,31 +384,31 @@ src/engine/util/util-time.vala
 src/engine/util/util-timeout-manager.vala
 src/engine/util/util-trillian.vala
 src/mailer/main.vala
-[type: gettext/glade]ui/account_cannot_remove.glade
-[type: gettext/glade]ui/account_list.glade
-[type: gettext/glade]ui/account_spinner.glade
-[type: gettext/glade]ui/certificate_warning_dialog.glade
-[type: gettext/glade]ui/composer-headerbar.ui
-[type: gettext/glade]ui/composer-link-popover.ui
-[type: gettext/glade]ui/composer-menus.ui
-[type: gettext/glade]ui/composer-widget.ui
-[type: gettext/glade]ui/conversation-email.ui
-[type: gettext/glade]ui/conversation-email-attachment-view.ui
-[type: gettext/glade]ui/conversation-email-menus.ui
-[type: gettext/glade]ui/conversation-message-menus.ui
-[type: gettext/glade]ui/conversation-message.ui
-[type: gettext/glade]ui/conversation-viewer.ui
-[type: gettext/glade]ui/edit_alternate_emails.glade
-[type: gettext/glade]ui/empty-placeholder.ui
-[type: gettext/glade]ui/find_bar.glade
-[type: gettext/glade]ui/folder-popover.ui
-[type: gettext/glade]ui/gtk/help-overlay.ui
-[type: gettext/glade]ui/gtk/menus.ui
-[type: gettext/glade]ui/login.glade
-[type: gettext/glade]ui/main-toolbar.ui
-[type: gettext/glade]ui/main-toolbar-menus.ui
-[type: gettext/glade]ui/main-window.ui
-[type: gettext/glade]ui/password-dialog.glade
-[type: gettext/glade]ui/preferences-dialog.ui
-[type: gettext/glade]ui/remove_confirm.glade
-[type: gettext/glade]ui/upgrade_dialog.glade
+ui/account_cannot_remove.glade
+ui/account_list.glade
+ui/account_spinner.glade
+ui/certificate_warning_dialog.glade
+ui/composer-headerbar.ui
+ui/composer-link-popover.ui
+ui/composer-menus.ui
+ui/composer-widget.ui
+ui/conversation-email.ui
+ui/conversation-email-attachment-view.ui
+ui/conversation-email-menus.ui
+ui/conversation-message-menus.ui
+ui/conversation-message.ui
+ui/conversation-viewer.ui
+ui/edit_alternate_emails.glade
+ui/empty-placeholder.ui
+ui/find_bar.glade
+ui/folder-popover.ui
+ui/gtk/help-overlay.ui
+ui/gtk/menus.ui
+ui/login.glade
+ui/main-toolbar.ui
+ui/main-window.ui
+ui/main-toolbar-menus.ui
+ui/password-dialog.glade
+ui/preferences-dialog.ui
+ui/remove_confirm.glade
+ui/upgrade_dialog.glade
