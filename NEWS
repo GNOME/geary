@@ -1,3 +1,26 @@
+Geary 0.11.3 - 25 December 2016
+-------------------------------
+
+  * Fix drafts not being saved when closing composer (#747627)
+    - Jiri Cerny, Gautier Pelloux-Prayer
+  * Fix breaking due to full-text-search table corruption (#772522)
+    - Gautier Pelloux-Prayer
+  * Fix Inboxes never being prefetched or sync'ed (#776029)
+  * Fix composers not being closed when started hidden (#770037)
+  * Fix password being lost when server rejects connections (#772808)
+    - Gautier Pelloux-Prayer
+  * Minor other bug fixes
+  * Updated UI translations:
+    Anders Jonsson (sv)
+    Balázs Meskó (hu)
+    Dušan Kazik (sk)
+    Federico Bruni (it)
+    Marek Černocký (cs)
+    Mario Blättermann (de)
+    Piotr Drąg (pl)
+    Rafael Fontenelle (pt_BR)
+    Мирослав Николић (sr) (sr@latin)
+
 Geary 0.11.2 - 29 August 2016
 -----------------------------
 

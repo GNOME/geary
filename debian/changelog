@@ -1,3 +1,16 @@
+geary (0.11.3-1~xenial1) xenial; urgency=medium
+
+  * Fix drafts not being saved when closing composer (#747627)
+  * Fix breaking due to full-text-search table corruption (#772522)
+  * Fix Inboxes never being prefetched or sync'ed (#776029)
+  * Fix composers not being closed when started hidden (#770037)
+  * Fix password being lost when server rejects connections (#772808)
+  * Fix compilatuon under Vala >= 0.35.1 (#775533)
+  * Make account setup placeholder translatable (#771930)
+  * Updated UI translations
+
+ -- Michael Gratton <mike@vee.net>  Sun, 25 Dec 2016 11:41:46 +1030
+
 geary (0.11.2-1~xenial1) xenial; urgency=medium
 
   * Improve showing RTL email with no direction set as RTL (#713062)
