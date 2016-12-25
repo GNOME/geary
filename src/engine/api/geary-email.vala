@@ -4,11 +4,17 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
+/**
+ * Representation of a single email message in the engine.
+ *
+ * This class encapsulates an email, attachments and its related
+ * server and database state.
+ */
 public class Geary.Email : BaseObject {
-    // This value is not persisted, but it does represent the expected max size of the preview
-    // when returned.
-    public const int MAX_PREVIEW_BYTES = 128;
-    
+
+    /** The maximum expected length of message body preview text. */
+    public const int MAX_PREVIEW_BYTES = 256;
+
     /**
      * Currently only one field is mutable: FLAGS.  All others never change once stored in the
      * database.

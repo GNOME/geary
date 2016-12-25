@@ -11,11 +11,32 @@ namespace Geary.RFC822.Utils {
 // in UTF-8, and is unmolested by GMime.FilterHTML.
 public const char QUOTE_MARKER = '\x7f';
 
-public GMime.FilterCharset create_utf8_filter_charset(string from_charset) {
-    GMime.FilterCharset? filter_charset = new GMime.FilterCharset(from_charset, "UTF-8");
+/**
+ * Charset to use when it is otherwise missing or invalid
+ *
+ * Per RFC 2045, Section 5.2.
+ */
+public const string DEFAULT_MIME_CHARSET = "us-ascii";
+
+/**
+ * Creates a filter to convert a MIME charset to UTF-8.
+ *
+ * Param `from_charset` may be null, empty or invalid, in which case
+ * `DEFAULT_MIME_CHARSET` will be used instead.
+ */
+public GMime.FilterCharset create_utf8_filter_charset(string? from_charset) {
+    string actual_charset = from_charset != null ? from_charset.strip() : "";
+    if (Geary.String.is_empty(actual_charset)) {
+        actual_charset = DEFAULT_MIME_CHARSET;
+    }
+    GMime.FilterCharset? filter_charset = new GMime.FilterCharset(
+        actual_charset, Geary.RFC822.UTF8_CHARSET
+    );
     if (filter_charset == null) {
-        debug("Unknown charset %s; treating as UTF-8", from_charset);
-        filter_charset = new GMime.FilterCharset("UTF-8", "UTF-8");
+        debug("Unknown charset: %s; using RFC 2045 default instead", from_charset);
+        filter_charset = new GMime.FilterCharset(
+            DEFAULT_MIME_CHARSET, Geary.RFC822.UTF8_CHARSET
+        );
         assert(filter_charset != null);
     }
     return filter_charset;
@@ -319,6 +340,62 @@ public bool comp_char_arr_slice(char[] array, uint start, string comp) {
     }
     
     return true;
+}
+
+/**
+ * Obtains the best preview text from a plain or HTML string.
+ *
+ * The given string `text` should have UNIX encoded line endings (LF),
+ * rather than RFC822 (CRLF). The string returned will will have had
+ * its whitespace squashed.
+ */
+public string to_preview_text(string? text, TextFormat format) {
+    string preview = "";
+
+    if (format == TextFormat.PLAIN) {
+        StringBuilder buf = new StringBuilder();
+        string[] all_lines = text.split("\n");
+        bool in_inline_pgp_header = false;
+        foreach (string line in all_lines) {
+            if (in_inline_pgp_header) {
+                if (Geary.String.is_empty(line)) {
+                    in_inline_pgp_header = false;
+                }
+                continue;
+            }
+
+            if (line.has_prefix("-----BEGIN PGP SIGNED MESSAGE-----")) {
+                in_inline_pgp_header = true;
+                continue;
+            }
+
+            if (line.has_prefix(">"))
+                continue;
+
+            if (line.has_prefix("--"))
+                continue;
+
+            if (line.has_prefix("===="))
+                continue;
+
+            if (line.has_prefix("~~~~"))
+                continue;
+
+            if (Geary.String.is_empty_or_whitespace(line)) {
+                buf.append("\n");
+                continue;
+            }
+
+            buf.append(" ");
+            buf.append(line);
+        }
+
+        preview = buf.str;
+    } else if (format == TextFormat.HTML) {
+        preview = Geary.HTML.html_to_text(text, false);
+    }
+
+    return Geary.String.reduce_whitespace(preview);
 }
 
 /**

@@ -7,7 +7,10 @@
 namespace Geary.HTML {
 
 private int init_count = 0;
-private Gee.HashSet<string>? breaking_elements = null;
+private Gee.HashSet<string>? breaking_elements;
+private Gee.HashSet<string>? spacing_elements;
+private Gee.HashSet<string>? alt_text_elements;
+private Gee.HashSet<string>? ignored_elements;
 
 /**
  * Must be called before ''any'' call to the HTML namespace.
@@ -18,58 +21,74 @@ private Gee.HashSet<string>? breaking_elements = null;
 public void init() {
     if (init_count++ != 0)
         return;
-    
-    init_breaking_elements();
+
+    init_element_sets();
 }
 
-private void init_breaking_elements() {
-    // Organized from <https://en.wikipedia.org/wiki/HTML_element>.  This is a
-    // list of block elements and some others that get special treatment.
-    // NOTE: this SHOULD be a const list, but due to
-    // <https://bugzilla.gnome.org/show_bug.cgi?id=646970>, it can't be.
-    string[] elements = {
+private void init_element_sets() {
+    // Organized from <https://en.wikipedia.org/wiki/HTML_element>,
+    // <https://html.spec.whatwg.org/multipage> and some custom
+    // inference.
+
+    // Block elements and some others that cause new lines to be
+    // inserted when converting to text. Not all block elements are
+    // included since some (e.g. lists) will have nested breaking
+    // children.
+    breaking_elements = new Gee.HashSet<string>(Ascii.stri_hash, Ascii.stri_equal);
+    breaking_elements.add_all_array({
         "address",
         "blockquote",
         "br", // [1]
         "caption", // [2]
         "center",
-        "dd",
-        "del", // [3]
-        "dir",
         "div",
-        "dl",
         "dt",
         "embed",
+        "form",
         "h1", "h2", "h3", "h4", "h5", "h6",
         "hr",
-        "img", // [1]
-        "ins", // [3]
+        "iframe", // [1]
         "li",
         "map", // [1]
         "menu",
         "noscript", // [2]
         "object", // [1]
-        "ol",
         "p",
         "pre",
-        "script", // [2]
-        "table",
-        "tbody",
-        "td",
-        "tfoot",
-        "th",
-        "thead",
         "tr",
-        "ul",
-        
+
         // [1]: Not block elements, but still break up the text
         // [2]: Some of these are oddities, but I figure they should break flow
-        // [3]: Can be used as either block or inline; we go for broke
-    };
-    
-    breaking_elements = new Gee.HashSet<string>(Ascii.stri_hash, Ascii.stri_equal);
-    foreach (string element in elements)
-        breaking_elements.add(element);
+    });
+
+    // Elements that cause spaces to be inserted afterwards when
+    // converting to text.
+    spacing_elements = new Gee.HashSet<string>(Ascii.stri_hash, Ascii.stri_equal);
+    spacing_elements.add_all_array({
+        "dt",
+        "dd",
+        "img",
+        "td",
+        "th",
+    });
+
+    // Elements that may have alt text
+    alt_text_elements = new Gee.HashSet<string>(Ascii.stri_hash, Ascii.stri_equal);
+    alt_text_elements.add_all_array({
+        "img",
+    });
+
+    // Elements that should not be included when converting to text
+    ignored_elements = new Gee.HashSet<string>(Ascii.stri_hash, Ascii.stri_equal);
+    ignored_elements.add_all_array({
+        "base",
+        "link",
+        "meta",
+        "head",
+        "script",
+        "style",
+        "template",
+    });
 }
 
 public inline string escape_markup(string? plain) {
@@ -88,89 +107,61 @@ public string preserve_whitespace(string? text) {
     return output;
 }
 
-// Removes any text between < and >.  Additionally, if input terminates in the middle of a tag, 
-// the tag will be removed.
-// If the HTML is invalid, the original string will be returned.
-public string remove_html_tags(string input) {
-    try {
-        string output = input;
-        
-        // Count the number of < and > characters.
-        unichar c;
-        uint64 less_than = 0;
-        uint64 greater_than = 0;
-        for (int i = 0; output.get_next_char (ref i, out c);) {
-            if (c == '<')
-                less_than++;
-            else if (c == '>')
-                greater_than++;
-        }
-        
-        if (less_than == greater_than + 1) {
-            output += ">"; // Append an extra > so our regex works.
-            greater_than++;
-        }
-        
-        if (less_than != greater_than)
-            return input; // Invalid HTML.
-        
-        // Removes script tags and everything between them.
-        // Based on regex here: http://stackoverflow.com/questions/116403/im-looking-for-a-regular-expression-to-remove-a-given-xhtml-tag-from-a-string
-        Regex script = new Regex("<script[^>]*?>[\\s\\S]*?<\\/script>", RegexCompileFlags.CASELESS);
-        output = script.replace(output, -1, 0, "");
-        
-        // Removes style tags and everything between them.
-        // Based on regex above.
-        Regex style = new Regex("<style[^>]*?>[\\s\\S]*?<\\/style>", RegexCompileFlags.CASELESS);
-        output = style.replace(output, -1, 0, "");
-        
-        // Removes remaining tags.
-        Regex tags = new Regex("<[^>]*>", RegexCompileFlags.CASELESS);
-        return tags.replace(output, -1, 0, "");
-    } catch (Error e) {
-        debug("Error stripping HTML tags: %s", e.message);
-    }
-    
-    return input;
-}
-
 /**
  * Does a very approximate conversion from HTML to text.
  *
- * This does more than stripping tags -- it inserts line breaks where appropriate, decodes
- * entities, etc.  The layout of the text is largely lost.  This is primarily
- * useful for pulling out tokens for searching, not for presenting to the user.
+ * This does more than stripping tags -- it inserts line breaks where
+ * appropriate, decodes entities, etc. Note the full string is parsed
+ * by libxml's HTML parser to create a DOM-like tree representation,
+ * which is then walked, so this function can be somewhat
+ * computationally expensive.
  */
-public string html_to_text(string html, string encoding = "UTF-8") {
+public string html_to_text(string html,
+                           bool include_blockquotes = true,
+                           string encoding = Geary.RFC822.UTF8_CHARSET) {
     Html.Doc *doc = Html.Doc.read_doc(html, "", encoding, Html.ParserOption.RECOVER |
         Html.ParserOption.NOERROR | Html.ParserOption.NOWARNING | Html.ParserOption.NOBLANKS |
         Html.ParserOption.NONET | Html.ParserOption.COMPACT);
-    
+
     StringBuilder text = new StringBuilder();
     if (doc != null) {
-        recurse_html_nodes_for_text(doc->get_root_element(), text);
+        recurse_html_nodes_for_text(doc->get_root_element(), include_blockquotes, text);
         delete doc;
     }
-    
+
     return text.str;
 }
 
-private void recurse_html_nodes_for_text(Xml.Node? node, StringBuilder text) {
-    // TODO: add alt text for things that have it?
-    
+private void recurse_html_nodes_for_text(Xml.Node? node,
+                                         bool include_blockquotes,
+                                         StringBuilder text) {
     for (unowned Xml.Node? n = node; n != null; n = n.next) {
-        if (n.type == Xml.ElementType.TEXT_NODE)
+        if (n.type == Xml.ElementType.TEXT_NODE) {
             text.append(n.content);
-        else if (n.type == Xml.ElementType.ELEMENT_NODE && element_needs_break(n.name))
-            text.append("\n");
-        
-        recurse_html_nodes_for_text(n.children, text);
-    }
-}
+        } else if (n.type == Xml.ElementType.ELEMENT_NODE) {
+            string name = n.name;
+            if (include_blockquotes || name != "blockquote") {
+                if (name in alt_text_elements) {
+                    string? alt_text = node.get_prop("alt");
+                    if (alt_text != null) {
+                        text.append(alt_text);
+                    }
+                }
 
-// Determines if the named element should break the flow of text.
-private bool element_needs_break(string element) {
-    return breaking_elements.contains(element);
+                if (!(name in ignored_elements)) {
+                    recurse_html_nodes_for_text(n.children, include_blockquotes, text);
+                }
+
+                if (name in spacing_elements) {
+                    text.append(" ");
+                }
+
+                if (name in breaking_elements) {
+                    text.append("\n");
+                }
+            }
+        }
+    }
 }
 
 }

@@ -173,14 +173,16 @@ private class Geary.ImapEngine.EmailPrefetcher : Object {
             return;
         
         debug("do_prefetch_batch_async %s start_total=%d", folder.to_string(), emails.size);
-        
-        // Big TODO: The engine needs to be able to synthesize ENVELOPE (and any of the fields
-        // constituting it) and PREVIEW from HEADER and BODY if available.  When it can do that
-        // won't need to prefetch ENVELOPE or PREVIEW; prefetching HEADER and BODY will be enough.
-        
-        // Another big TODO: The engine needs to be able to chunk BODY requests so a large email
-        // doesn't monopolize the pipe and prevent other requests from going through
-        
+
+        // Big TODO: The engine needs to be able to synthesize
+        // ENVELOPE (and any of the fields constituting it) from
+        // HEADER if available.  When it can do that won't need to
+        // prefetch ENVELOPE; prefetching HEADER will be enough.
+
+        // Another big TODO: The engine needs to be able to chunk BODY
+        // requests so a large email doesn't monopolize the pipe and
+        // prevent other requests from going through
+
         Gee.HashSet<Geary.EmailIdentifier> ids = new Gee.HashSet<Geary.EmailIdentifier>();
         int64 chunk_bytes = 0;
         int count = 0;

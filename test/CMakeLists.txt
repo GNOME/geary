@@ -7,6 +7,10 @@ set(TEST_SRC
   testcase.vala # Taken as-is from libgee, courtesy Julien Peeters
 
   engine/rfc822-mailbox-address-test.vala
+  engine/rfc822-message-test.vala
+  engine/rfc822-message-data-test.vala
+  engine/rfc822-utils-test.vala
+  engine/util-html-test.vala
 )
 
 # Vala

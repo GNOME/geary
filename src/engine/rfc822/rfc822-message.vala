@@ -16,8 +16,6 @@ public class Geary.RFC822.Message : BaseObject {
     public delegate string? InlinePartReplacer(string filename, Mime.ContentType? content_type,
         Mime.ContentDisposition? disposition, string? content_id, Geary.Memory.Buffer buffer);
 
-    private const string DEFAULT_CHARSET = "UTF-8";
-
     private const string HEADER_SENDER = "Sender";
     private const string HEADER_IN_REPLY_TO = "In-Reply-To";
     private const string HEADER_REFERENCES = "References";
@@ -373,27 +371,32 @@ public class Geary.RFC822.Message : BaseObject {
         email.set_message_subject(subject);
         email.set_message_body(new Geary.RFC822.Text(new Geary.Memory.OffsetBuffer(
             body_buffer, body_offset)));
-        email.set_message_preview(new Geary.RFC822.PreviewText.from_string(get_preview()));
-        
         return email;
     }
-    
-    // Takes an e-mail object with a body and generates a preview.  If there is no body
-    // or the body is the empty string, the empty string will be returned.
+
+    /**
+     * Generates a preview from the email's message body.
+     *
+     * If there is no body, the empty string will be returned.
+     */
     public string get_preview() {
+        TextFormat format = TextFormat.PLAIN;
         string? preview = null;
         try {
             preview = get_plain_body(false, null);
         } catch (Error e) {
             try {
-                preview = Geary.HTML.remove_html_tags(get_html_body(null));
+                format = TextFormat.HTML;
+                preview = get_html_body(null);
             } catch (Error error) {
-                debug("Could not generate message preview: %s\n and: %s", e.message, error.message);
+                debug("Could not generate message preview: %s\n and: %s",
+                      e.message, error.message);
             }
         }
-        
-        return Geary.String.safe_byte_substring((preview ?? "").chug(),
-            Geary.Email.MAX_PREVIEW_BYTES);
+
+        return (preview != null)
+            ? Geary.RFC822.Utils.to_preview_text(preview, format)
+            : "";
     }
 
     /**
@@ -1000,8 +1003,6 @@ public class Geary.RFC822.Message : BaseObject {
             // Assume encoded text, convert to unencoded UTF-8
             GMime.StreamFilter stream_filter = new GMime.StreamFilter(stream);
             string? charset = (content_type != null) ? content_type.params.get_value("charset") : null;
-            if (String.is_empty(charset))
-                charset = DEFAULT_CHARSET;
             stream_filter.add(Geary.RFC822.Utils.create_utf8_filter_charset(charset));
 
             bool flowed = (content_type != null) ? content_type.params.has_value_ci("format", "flowed") : false;
@@ -1068,9 +1069,7 @@ public class Geary.RFC822.Message : BaseObject {
             charset = Geary.RFC822.Utils.get_best_charset(content_stream);
         }
         GMime.StreamFilter filter_stream = new GMime.StreamFilter(content_stream);
-        if (charset != DEFAULT_CHARSET) {
-            filter_stream.add(new GMime.FilterCharset(DEFAULT_CHARSET, charset));
-        }
+        filter_stream.add(new GMime.FilterCharset(UTF8_CHARSET, charset));
         if (encoding == null) {
             encoding = Geary.RFC822.Utils.get_best_encoding(filter_stream);
         }
