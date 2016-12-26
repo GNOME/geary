@@ -24,10 +24,21 @@ pkg_check_modules(DEPS REQUIRED
   glib-2.0
   gmime-2.6
   gthread-2.0
+  gtk+-3.0
+  libsoup-2.4
+  webkitgtk-3.0
 )
 
 set(TEST_PACKAGES
-  glib-2.0 gio-2.0 gee-0.8 gmime-2.6 geary-engine
+  geary-client
+  geary-engine
+  gee-0.8
+  gio-2.0
+  glib-2.0
+  gmime-2.6
+  gtk+-3.0
+  libsoup-2.4
+  webkitgtk-3.0
 )
 
 set(CFLAGS
@@ -65,4 +76,4 @@ OPTIONS
 )
 
 add_executable(geary-test ${TEST_VALA_C})
-target_link_libraries(geary-test ${DEPS_LIBRARIES} geary-engine)
+target_link_libraries(geary-test ${DEPS_LIBRARIES} geary-client geary-engine)
