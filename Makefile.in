@@ -37,12 +37,16 @@ distclean: clean
 	@-rm -rf $(BUILD_DIR)
 	@-rm -f Makefile
 
-.PHONY: test
-test:
+.PHONY: tests
+tests:
 	@$(MAKE) -C $(BUILD_DIR) $@
 
+.PHONY: test
+test:
+	@$(MAKE) -C $(BUILD_DIR) tests
+
 .PHONY: dist
-dist: test
+dist: tests
 	@$(MAKE) -C $(BUILD_DIR) dist
 	@cp build/*.xz .
 
