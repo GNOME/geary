@@ -576,6 +576,7 @@ add_definitions(${CFLAGS})
 
 set(VALAC_OPTIONS
     --vapidir=${CMAKE_SOURCE_DIR}/bindings/vapi
+    --vapidir=${CMAKE_BINARY_DIR}/src
     --metadatadir=${CMAKE_SOURCE_DIR}/bindings/metadata
     --metadatadir=${CMAKE_SOURCE_DIR}/bindings/metadata/${WEBKITGTK_METADATA_DIR}
     --target-glib=${TARGET_GLIB}
@@ -630,7 +631,6 @@ CUSTOM_VAPIS
     "${CMAKE_BINARY_DIR}/src/webkitgtk-3.0.vapi"
 OPTIONS
     ${VALAC_OPTIONS}
-    --vapidir=${CMAKE_BINARY_DIR}/src
     --gresources=${RESOURCES_XML}
 )
 
@@ -662,7 +662,6 @@ CUSTOM_VAPIS
     "${CMAKE_BINARY_DIR}/src/geary-static.vapi"
 OPTIONS
     ${VALAC_OPTIONS}
-    --vapidir=${CMAKE_BINARY_DIR}/src
 )
 
 add_executable(geary-console ${CONSOLE_VALA_C})
@@ -685,7 +684,6 @@ CUSTOM_VAPIS
     "${CMAKE_BINARY_DIR}/src/geary-static.vapi"
 OPTIONS
     ${VALAC_OPTIONS}
-    --vapidir=${CMAKE_BINARY_DIR}/src
 )
 
 add_executable(geary-mailer ${MAILER_VALA_C})

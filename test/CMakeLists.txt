@@ -44,6 +44,7 @@ link_directories(${LIB_PATHS})
 add_definitions(${CFLAGS})
 
 set(VALAC_OPTIONS
+    --vapidir=${CMAKE_BINARY_DIR}/src
     --vapidir=${CMAKE_SOURCE_DIR}/bindings/vapi
     --metadatadir=${CMAKE_SOURCE_DIR}/bindings/metadata
     --target-glib=${TARGET_GLIB}
@@ -61,7 +62,6 @@ PACKAGES
     ${TEST_PACKAGES}
 OPTIONS
     ${VALAC_OPTIONS}
-    --vapidir=${CMAKE_BINARY_DIR}/src
 )
 
 add_executable(geary-test ${TEST_VALA_C})
