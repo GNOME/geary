@@ -512,15 +512,32 @@ add_custom_target(git-version
 )
 
 set(ENGINE_PACKAGES
-    glib-2.0 gee-0.8 gio-2.0 gmime-2.6 posix sqlite3 libxml-2.0
+  gee-0.8
+  gio-2.0
+  glib-2.0
+  gmime-2.6
+  libxml-2.0
+  posix
+  sqlite3
 )
 
 set(CLIENT_PACKAGES
-    gtk+-3.0 webkitgtk-3.0 libsecret-1 libsoup-2.4 libnotify libcanberra gcr-3 enchant ${EXTRA_CLIENT_PACKAGES}
+  enchant
+  gcr-3
+  geary-engine
+  gio-2.0
+  gtk+-3.0
+  libcanberra
+  libnotify
+  libsecret-1
+  libsoup-2.4
+  webkitgtk-3.0
+  ${EXTRA_CLIENT_PACKAGES}
 )
 
 set(CONSOLE_PACKAGES
-    gtk+-3.0
+  geary-engine
+  gtk+-3.0
 )
 
 set(GSETTINGS_DIR ${CMAKE_SOURCE_DIR}/desktop)
@@ -586,22 +603,21 @@ set(VALAC_OPTIONS
     ${EXTRA_VALA_OPTIONS}
 )
 
-# Engine (static library used for building)
+# Engine (static library used for building apps and unit test)
 #################################################
-vala_precompile(ENGINE_VALA_C geary-static
+vala_precompile(ENGINE_VALA_C geary-engine
     ${ENGINE_SRC}
 PACKAGES
-    ${CONSOLE_PACKAGES}
     ${ENGINE_PACKAGES}
 GENERATE_VAPI
-    geary-static
+    geary-engine
 OPTIONS
     ${VALAC_OPTIONS}
 )
 
-add_library(geary-static STATIC ${ENGINE_VALA_C})
-add_dependencies(geary-static git-version)
-target_link_libraries(geary-static ${DEPS_LIBRARIES} sqlite3-unicodesn)
+add_library(geary-engine STATIC ${ENGINE_VALA_C})
+add_dependencies(geary-engine git-version)
+target_link_libraries(geary-engine m ${DEPS_LIBRARIES} sqlite3-unicodesn)
 
 # WebKitGTK VAPI generation
 #################################################
@@ -627,16 +643,14 @@ vala_precompile(GEARY_VALA_C geary
 PACKAGES
     ${CLIENT_PACKAGES}
     ${ENGINE_PACKAGES}
-CUSTOM_VAPIS
-    "${CMAKE_BINARY_DIR}/src/geary-static.vapi"
 OPTIONS
     ${VALAC_OPTIONS}
     --gresources=${RESOURCES_XML}
 )
 
 add_executable(geary ${GEARY_VALA_C} ${RESOURCES_C})
-target_link_libraries(geary m ${DEPS_LIBRARIES} geary-static)
 add_dependencies(geary webkitgtk-vapi)
+target_link_libraries(geary m ${DEPS_LIBRARIES} geary-engine)
 install(TARGETS geary RUNTIME DESTINATION bin)
 add_custom_command(
     TARGET
@@ -659,14 +673,12 @@ vala_precompile(CONSOLE_VALA_C geary-console
 PACKAGES
     ${CONSOLE_PACKAGES}
     ${ENGINE_PACKAGES}
-CUSTOM_VAPIS
-    "${CMAKE_BINARY_DIR}/src/geary-static.vapi"
 OPTIONS
     ${VALAC_OPTIONS}
 )
 
 add_executable(geary-console ${CONSOLE_VALA_C})
-target_link_libraries(geary-console ${DEPS_LIBRARIES} geary-static)
+target_link_libraries(geary-console ${DEPS_LIBRARIES} geary-engine)
 add_custom_command(
     TARGET
         geary-console
@@ -680,15 +692,14 @@ add_custom_command(
 vala_precompile(MAILER_VALA_C geary-mailer
     ${MAILER_SRC}
 PACKAGES
+    geary-engine
     ${ENGINE_PACKAGES}
-CUSTOM_VAPIS
-    "${CMAKE_BINARY_DIR}/src/geary-static.vapi"
 OPTIONS
     ${VALAC_OPTIONS}
 )
 
 add_executable(geary-mailer ${MAILER_VALA_C})
-target_link_libraries(geary-mailer ${DEPS_LIBRARIES} geary-static)
+target_link_libraries(geary-mailer ${DEPS_LIBRARIES} geary-engine)
 add_custom_command(
     TARGET
         geary-mailer

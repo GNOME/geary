@@ -27,7 +27,7 @@ pkg_check_modules(DEPS REQUIRED
 )
 
 set(TEST_PACKAGES
-  glib-2.0 gio-2.0 gee-0.8 gmime-2.6 geary-static
+  glib-2.0 gio-2.0 gee-0.8 gmime-2.6 geary-engine
 )
 
 set(CFLAGS
@@ -65,4 +65,4 @@ OPTIONS
 )
 
 add_executable(geary-test ${TEST_VALA_C})
-target_link_libraries(geary-test ${DEPS_LIBRARIES} geary-static)
+target_link_libraries(geary-test ${DEPS_LIBRARIES} geary-engine)
