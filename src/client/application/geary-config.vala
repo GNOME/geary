@@ -4,8 +4,11 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-// Wrapper class for GSettings.
+/**
+ * Provides convenience properties to current Geary GSettings values.
+ */
 public class Configuration {
+
     public const string WINDOW_WIDTH_KEY = "window-width";
     public const string WINDOW_HEIGHT_KEY = "window-height";
     public const string WINDOW_MAXIMIZE_KEY = "window-maximize";
@@ -27,13 +30,27 @@ public class Configuration {
     public const string SEARCH_STRATEGY_KEY = "search-strategy";
     public const string CONVERSATION_VIEWER_ZOOM_KEY = "conversation-viewer-zoom";
 
+
     public enum DesktopEnvironment {
         UNKNOWN = 0,
         UNITY;
     }
 
+
+    // is_installed: set to true if installed, else false.
+    // schema_dir: MUST be set if not installed. Directory where GSettings schema is located.
+    public static void init(bool is_installed, string? schema_dir = null) {
+        if (!is_installed) {
+            assert(schema_dir != null);
+            // If not installed, set an environment variable pointing to where the GSettings schema
+            // is to be found.
+            GLib.Environment.set_variable("GSETTINGS_SCHEMA_DIR", schema_dir, true);
+        }
+    }
+
+
     public Settings settings { get; private set; }
-    public Settings gnome_interface;
+    public Settings gnome_interface { get; private set; }
 
     public DesktopEnvironment desktop_environment {
         get {
@@ -158,17 +175,6 @@ public class Configuration {
         Migrate.old_app_config(settings);
     }
 
-    // is_installed: set to true if installed, else false.
-    // schema_dir: MUST be set if not installed. Directory where GSettings schema is located.
-    public static void init(bool is_installed, string? schema_dir = null) {
-        if (!is_installed) {
-            assert(schema_dir != null);
-            // If not installed, set an environment variable pointing to where the GSettings schema
-            // is to be found.
-            GLib.Environment.set_variable("GSETTINGS_SCHEMA_DIR", schema_dir, true);
-        }
-    }
-    
     public void bind(string key, Object object, string property,
         SettingsBindFlags flags = GLib.SettingsBindFlags.DEFAULT) {
         settings.bind(key, object, property, flags);

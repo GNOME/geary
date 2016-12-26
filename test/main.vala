@@ -7,6 +7,14 @@
 
 int main(string[] args) {
     /*
+     * Set env vars right up front to avoid weird bugs
+     */
+
+    // Use the memory GSettings DB so we a) always start with default
+    // values, and b) don't persist any changes made during a test
+    Environment.set_variable("GSETTINGS_BACKEND", "memory", true);
+
+    /*
      * Initialise all the things.
      */
 
@@ -28,6 +36,8 @@ int main(string[] args) {
     engine.add_suite(new Geary.RFC822.Utils.Test().get_suite());
 
     TestSuite client = new TestSuite("client");
+
+    client.add_suite(new ConfigurationTest().get_suite());
 
     /*
      * Run the tests
