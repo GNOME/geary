@@ -515,10 +515,8 @@ set(ENGINE_PACKAGES
     glib-2.0 gee-0.8 gio-2.0 gmime-2.6 posix sqlite3 libxml-2.0
 )
 
-# webkitgtk-3.0 is listed as a custom VAPI (below) to ensure it's treated as a dependency and
-# built before compilation
 set(CLIENT_PACKAGES
-    gtk+-3.0 libsecret-1 libsoup-2.4 libnotify libcanberra gcr-3 enchant ${EXTRA_CLIENT_PACKAGES}
+    gtk+-3.0 webkitgtk-3.0 libsecret-1 libsoup-2.4 libnotify libcanberra gcr-3 enchant ${EXTRA_CLIENT_PACKAGES}
 )
 
 set(CONSOLE_PACKAGES
@@ -607,11 +605,14 @@ target_link_libraries(geary-static ${DEPS_LIBRARIES} sqlite3-unicodesn)
 
 # WebKitGTK VAPI generation
 #################################################
+add_custom_target(webkitgtk-vapi
+  DEPENDS "${CMAKE_BINARY_DIR}/src/webkitgtk-3.0.vapi"
+)
 add_custom_command(
     OUTPUT
-        ${CMAKE_BINARY_DIR}/src/webkitgtk-3.0.vapi
+        "${CMAKE_BINARY_DIR}/src/webkitgtk-3.0.vapi"
     WORKING_DIRECTORY
-        ${CMAKE_SOURCE_DIR}/bindings/metadata
+        "${CMAKE_SOURCE_DIR}/bindings/metadata"
     COMMAND
         vapigen --pkg=gio-2.0 --pkg=gtk+-3.0 --pkg=libsoup-2.4 --metadatadir=. --metadatadir=${WEBKITGTK_METADATA_DIR} --library=webkitgtk-3.0 --directory=${CMAKE_BINARY_DIR}/src ${WEBKITGTK_CUSTOM_VALA} `${PKG_CONFIG_EXECUTABLE} --variable=girdir gobject-introspection-1.0`/WebKit-3.0.gir
 )
@@ -628,7 +629,6 @@ PACKAGES
     ${ENGINE_PACKAGES}
 CUSTOM_VAPIS
     "${CMAKE_BINARY_DIR}/src/geary-static.vapi"
-    "${CMAKE_BINARY_DIR}/src/webkitgtk-3.0.vapi"
 OPTIONS
     ${VALAC_OPTIONS}
     --gresources=${RESOURCES_XML}
@@ -636,6 +636,7 @@ OPTIONS
 
 add_executable(geary ${GEARY_VALA_C} ${RESOURCES_C})
 target_link_libraries(geary m ${DEPS_LIBRARIES} geary-static)
+add_dependencies(geary webkitgtk-vapi)
 install(TARGETS geary RUNTIME DESTINATION bin)
 add_custom_command(
     TARGET
