@@ -65,4 +65,4 @@ OPTIONS
 )
 
 add_executable(geary-test ${TEST_VALA_C})
-target_link_libraries(geary-test ${DEPS_LIBRARIES} gthread-2.0 geary-static)
+target_link_libraries(geary-test ${DEPS_LIBRARIES} geary-static)
