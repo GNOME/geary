@@ -316,7 +316,6 @@ client/application/geary-application.vala
 client/application/geary-args.vala
 client/application/geary-config.vala
 client/application/geary-controller.vala
-client/application/main.vala
 client/application/secret-mediator.vala
 
 client/accounts/account-dialog.vala
@@ -512,17 +511,32 @@ add_custom_target(git-version
 )
 
 set(ENGINE_PACKAGES
-    glib-2.0 gee-0.8 gio-2.0 gmime-2.6 posix sqlite3 libxml-2.0
+  gee-0.8
+  gio-2.0
+  glib-2.0
+  gmime-2.6
+  libxml-2.0
+  posix
+  sqlite3
 )
 
-# webkitgtk-3.0 is listed as a custom VAPI (below) to ensure it's treated as a dependency and
-# built before compilation
 set(CLIENT_PACKAGES
-    gtk+-3.0 libsecret-1 libsoup-2.4 libnotify libcanberra gcr-3 enchant ${EXTRA_CLIENT_PACKAGES}
+  enchant
+  gcr-3
+  geary-engine
+  gio-2.0
+  gtk+-3.0
+  libcanberra
+  libnotify
+  libsecret-1
+  libsoup-2.4
+  webkitgtk-3.0
+  ${EXTRA_CLIENT_PACKAGES}
 )
 
 set(CONSOLE_PACKAGES
-    gtk+-3.0
+  geary-engine
+  gtk+-3.0
 )
 
 set(GSETTINGS_DIR ${CMAKE_SOURCE_DIR}/desktop)
@@ -576,6 +590,7 @@ add_definitions(${CFLAGS})
 
 set(VALAC_OPTIONS
     --vapidir=${CMAKE_SOURCE_DIR}/bindings/vapi
+    --vapidir=${CMAKE_BINARY_DIR}/src
     --metadatadir=${CMAKE_SOURCE_DIR}/bindings/metadata
     --metadatadir=${CMAKE_SOURCE_DIR}/bindings/metadata/${WEBKITGTK_METADATA_DIR}
     --target-glib=${TARGET_GLIB}
@@ -587,55 +602,73 @@ set(VALAC_OPTIONS
     ${EXTRA_VALA_OPTIONS}
 )
 
-# Engine (static library used for building)
+# Engine (static library used for building apps and unit test)
 #################################################
-vala_precompile(ENGINE_VALA_C geary-static
+vala_precompile(ENGINE_VALA_C geary-engine
     ${ENGINE_SRC}
 PACKAGES
-    ${CONSOLE_PACKAGES}
     ${ENGINE_PACKAGES}
 GENERATE_VAPI
-    geary-static
+    geary-engine
 OPTIONS
     ${VALAC_OPTIONS}
 )
 
-add_library(geary-static STATIC ${ENGINE_VALA_C})
-add_dependencies(geary-static git-version)
-target_link_libraries(geary-static ${DEPS_LIBRARIES} sqlite3-unicodesn gthread-2.0)
+add_library(geary-engine STATIC ${ENGINE_VALA_C})
+add_dependencies(geary-engine git-version)
+target_link_libraries(geary-engine m ${DEPS_LIBRARIES} sqlite3-unicodesn)
 
 # WebKitGTK VAPI generation
 #################################################
+add_custom_target(webkitgtk-vapi
+  DEPENDS "${CMAKE_BINARY_DIR}/src/webkitgtk-3.0.vapi"
+)
 add_custom_command(
     OUTPUT
-        ${CMAKE_BINARY_DIR}/src/webkitgtk-3.0.vapi
+        "${CMAKE_BINARY_DIR}/src/webkitgtk-3.0.vapi"
     WORKING_DIRECTORY
-        ${CMAKE_SOURCE_DIR}/bindings/metadata
+        "${CMAKE_SOURCE_DIR}/bindings/metadata"
     COMMAND
         vapigen --pkg=gio-2.0 --pkg=gtk+-3.0 --pkg=libsoup-2.4 --metadatadir=. --metadatadir=${WEBKITGTK_METADATA_DIR} --library=webkitgtk-3.0 --directory=${CMAKE_BINARY_DIR}/src ${WEBKITGTK_CUSTOM_VALA} `${PKG_CONFIG_EXECUTABLE} --variable=girdir gobject-introspection-1.0`/WebKit-3.0.gir
 )
 
-# Geary client app
+# Client library (static lib used for building client and unit tests)
 #################################################
 set_property(SOURCE ${RESOURCES_C} PROPERTY GENERATED TRUE)
 set_property(SOURCE ${RESOURCES_XML} PROPERTY GENERATED TRUE)
 
-vala_precompile(GEARY_VALA_C geary
+vala_precompile(CLIENT_VALA_C geary-client
     ${CLIENT_SRC}
 PACKAGES
-    ${CLIENT_PACKAGES}
     ${ENGINE_PACKAGES}
-CUSTOM_VAPIS
-    "${CMAKE_BINARY_DIR}/src/geary-static.vapi"
-    "${CMAKE_BINARY_DIR}/src/webkitgtk-3.0.vapi"
+    ${CLIENT_PACKAGES}
+GENERATE_VAPI
+    geary-client
 OPTIONS
     ${VALAC_OPTIONS}
-    --vapidir=${CMAKE_BINARY_DIR}/src
     --gresources=${RESOURCES_XML}
 )
 
+add_library(geary-client STATIC ${CLIENT_VALA_C})
+target_link_libraries(geary-client m ${DEPS_LIBRARIES} geary-engine)
+
+# Main client application binary
+#################################################
+
+vala_precompile(GEARY_VALA_C geary
+    "client/application/main.vala"
+PACKAGES
+    webkitgtk-3.0
+    ${ENGINE_PACKAGES}
+    ${CLIENT_PACKAGES}
+    geary-client
+OPTIONS
+    ${VALAC_OPTIONS}
+)
+
 add_executable(geary ${GEARY_VALA_C} ${RESOURCES_C})
-target_link_libraries(geary m ${DEPS_LIBRARIES} gthread-2.0 geary-static)
+add_dependencies(geary webkitgtk-vapi)
+target_link_libraries(geary ${DEPS_LIBRARIES} geary-client)
 install(TARGETS geary RUNTIME DESTINATION bin)
 add_custom_command(
     TARGET
@@ -658,15 +691,12 @@ vala_precompile(CONSOLE_VALA_C geary-console
 PACKAGES
     ${CONSOLE_PACKAGES}
     ${ENGINE_PACKAGES}
-CUSTOM_VAPIS
-    "${CMAKE_BINARY_DIR}/src/geary-static.vapi"
 OPTIONS
     ${VALAC_OPTIONS}
-    --vapidir=${CMAKE_BINARY_DIR}/src
 )
 
 add_executable(geary-console ${CONSOLE_VALA_C})
-target_link_libraries(geary-console ${DEPS_LIBRARIES} gthread-2.0 geary-static)
+target_link_libraries(geary-console ${DEPS_LIBRARIES} geary-engine)
 add_custom_command(
     TARGET
         geary-console
@@ -680,16 +710,14 @@ add_custom_command(
 vala_precompile(MAILER_VALA_C geary-mailer
     ${MAILER_SRC}
 PACKAGES
+    geary-engine
     ${ENGINE_PACKAGES}
-CUSTOM_VAPIS
-    "${CMAKE_BINARY_DIR}/src/geary-static.vapi"
 OPTIONS
     ${VALAC_OPTIONS}
-    --vapidir=${CMAKE_BINARY_DIR}/src
 )
 
 add_executable(geary-mailer ${MAILER_VALA_C})
-target_link_libraries(geary-mailer ${DEPS_LIBRARIES} gthread-2.0 geary-static)
+target_link_libraries(geary-mailer ${DEPS_LIBRARIES} geary-engine)
 add_custom_command(
     TARGET
         geary-mailer

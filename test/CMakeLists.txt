@@ -11,6 +11,8 @@ set(TEST_SRC
   engine/rfc822-message-data-test.vala
   engine/rfc822-utils-test.vala
   engine/util-html-test.vala
+
+  client/application/geary-configuration-test.vala
 )
 
 # Vala
@@ -24,10 +26,21 @@ pkg_check_modules(DEPS REQUIRED
   glib-2.0
   gmime-2.6
   gthread-2.0
+  gtk+-3.0
+  libsoup-2.4
+  webkitgtk-3.0
 )
 
 set(TEST_PACKAGES
-  glib-2.0 gio-2.0 gee-0.8 gmime-2.6 geary-static
+  geary-client
+  geary-engine
+  gee-0.8
+  gio-2.0
+  glib-2.0
+  gmime-2.6
+  gtk+-3.0
+  libsoup-2.4
+  webkitgtk-3.0
 )
 
 set(CFLAGS
@@ -44,6 +57,7 @@ link_directories(${LIB_PATHS})
 add_definitions(${CFLAGS})
 
 set(VALAC_OPTIONS
+    --vapidir=${CMAKE_BINARY_DIR}/src
     --vapidir=${CMAKE_SOURCE_DIR}/bindings/vapi
     --metadatadir=${CMAKE_SOURCE_DIR}/bindings/metadata
     --target-glib=${TARGET_GLIB}
@@ -61,8 +75,7 @@ PACKAGES
     ${TEST_PACKAGES}
 OPTIONS
     ${VALAC_OPTIONS}
-    --vapidir=${CMAKE_BINARY_DIR}/src
 )
 
 add_executable(geary-test ${TEST_VALA_C})
-target_link_libraries(geary-test ${DEPS_LIBRARIES} gthread-2.0 geary-static)
+target_link_libraries(geary-test ${DEPS_LIBRARIES} geary-client geary-engine)
