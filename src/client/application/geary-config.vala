@@ -170,7 +170,7 @@ public class Configuration {
     }
     
     public void bind(string key, Object object, string property,
-        SettingsBindFlags flags = SettingsBindFlags.DEFAULT) {
+        SettingsBindFlags flags = GLib.SettingsBindFlags.DEFAULT) {
         settings.bind(key, object, property, flags);
     }
     

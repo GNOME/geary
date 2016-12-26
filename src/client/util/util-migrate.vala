@@ -109,7 +109,7 @@ namespace Migrate {
         }
     }
 
-    private const string OLD_APP_ID = "org.yorba.geary";
+    public const string OLD_APP_ID = "org.yorba.geary";
     private const string MIGRATED_CONFIG_KEY = "migrated-config";
 
     public static void old_app_config(Settings newSettings, string old_app_id = OLD_APP_ID) {

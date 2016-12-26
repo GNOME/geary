@@ -316,7 +316,6 @@ client/application/geary-application.vala
 client/application/geary-args.vala
 client/application/geary-config.vala
 client/application/geary-controller.vala
-client/application/main.vala
 client/application/secret-mediator.vala
 
 client/accounts/account-dialog.vala
@@ -633,24 +632,43 @@ add_custom_command(
         vapigen --pkg=gio-2.0 --pkg=gtk+-3.0 --pkg=libsoup-2.4 --metadatadir=. --metadatadir=${WEBKITGTK_METADATA_DIR} --library=webkitgtk-3.0 --directory=${CMAKE_BINARY_DIR}/src ${WEBKITGTK_CUSTOM_VALA} `${PKG_CONFIG_EXECUTABLE} --variable=girdir gobject-introspection-1.0`/WebKit-3.0.gir
 )
 
-# Geary client app
+# Client library (static lib used for building client and unit tests)
 #################################################
 set_property(SOURCE ${RESOURCES_C} PROPERTY GENERATED TRUE)
 set_property(SOURCE ${RESOURCES_XML} PROPERTY GENERATED TRUE)
 
-vala_precompile(GEARY_VALA_C geary
+vala_precompile(CLIENT_VALA_C geary-client
     ${CLIENT_SRC}
 PACKAGES
-    ${CLIENT_PACKAGES}
     ${ENGINE_PACKAGES}
+    ${CLIENT_PACKAGES}
+GENERATE_VAPI
+    geary-client
 OPTIONS
     ${VALAC_OPTIONS}
     --gresources=${RESOURCES_XML}
 )
 
+add_library(geary-client STATIC ${CLIENT_VALA_C})
+target_link_libraries(geary-client m ${DEPS_LIBRARIES} geary-engine)
+
+# Main client application binary
+#################################################
+
+vala_precompile(GEARY_VALA_C geary
+    "client/application/main.vala"
+PACKAGES
+    webkitgtk-3.0
+    ${ENGINE_PACKAGES}
+    ${CLIENT_PACKAGES}
+    geary-client
+OPTIONS
+    ${VALAC_OPTIONS}
+)
+
 add_executable(geary ${GEARY_VALA_C} ${RESOURCES_C})
 add_dependencies(geary webkitgtk-vapi)
-target_link_libraries(geary m ${DEPS_LIBRARIES} geary-engine)
+target_link_libraries(geary ${DEPS_LIBRARIES} geary-client)
 install(TARGETS geary RUNTIME DESTINATION bin)
 add_custom_command(
     TARGET
