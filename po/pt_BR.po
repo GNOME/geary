@@ -17,18 +17,18 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: geary\n"
-"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
-"product=geary&keywords=I18N+L10N&component=internationalization\n"
-"POT-Creation-Date: 2016-12-17 03:38+0000\n"
-"PO-Revision-Date: 2016-12-13 21:26-0200\n"
-"Last-Translator: Enrico Nicoletto <liverig@gmail.com>\n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?product=geary&k"
+"eywords=I18N+L10N&component=internationalization\n"
+"POT-Creation-Date: 2016-12-26 02:58+0000\n"
+"PO-Revision-Date: 2016-12-27 07:05-0200\n"
+"Last-Translator: Rafael Fontenelle <rafaelff@gnome.org>\n"
 "Language-Team: Brazilian Portuguese <gnome-pt_br-list@gnome.org>\n"
 "Language: pt_BR\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Generator: Poedit 1.8.7\n"
+"X-Generator: Virtaal 1.0.0-beta1\n"
 "X-Project-Style: gnome\n"
 
 #: ../desktop/org.gnome.Geary.appdata.xml.in.h:1
@@ -62,7 +62,6 @@ msgstr ""
 "procurar e clicar de mensagem em mensagem."
 
 #: ../desktop/org.gnome.Geary.appdata.xml.in.h:5
-#, fuzzy
 #| msgid "Geary's features include:"
 msgid "Geary’s features include:"
 msgstr "Os recursos do Geary incluem:"
@@ -226,52 +225,44 @@ msgid "Unable to validate:\n"
 msgstr "Incapaz de validar:\n"
 
 #: ../src/client/accounts/add-edit-page.vala:781
-#, fuzzy
 #| msgid "        &#8226; Invalid account nickname.\n"
 msgid "        • Invalid account nickname.\n"
-msgstr "        &#8226; Apelido de conta inválido.\n"
+msgstr "        • Apelido de conta inválido.\n"
 
 #: ../src/client/accounts/add-edit-page.vala:784
-#, fuzzy
 #| msgid "        &#8226; Email address already added to Geary.\n"
 msgid "        • Email address already added to Geary.\n"
-msgstr "        &#8226; Endereço de e-mail já adicionado ao Geary.\n"
+msgstr "        • Endereço de e-mail já adicionado ao Geary.\n"
 
 #: ../src/client/accounts/add-edit-page.vala:788
-#, fuzzy
 #| msgid "        &#8226; IMAP connection error.\n"
 msgid "        • IMAP connection error.\n"
-msgstr "        &#8226; Erro de conexão ao IMAP.\n"
+msgstr "        • Erro de conexão ao IMAP.\n"
 
 #: ../src/client/accounts/add-edit-page.vala:791
-#, fuzzy
 #| msgid "        &#8226; IMAP username or password incorrect.\n"
 msgid "        • IMAP username or password incorrect.\n"
-msgstr "        &#8226; Nome de usuário ou senha de IMAP incorretos.\n"
+msgstr "        • Nome de usuário ou senha de IMAP incorretos.\n"
 
 #: ../src/client/accounts/add-edit-page.vala:794
-#, fuzzy
 #| msgid "        &#8226; SMTP connection error.\n"
 msgid "        • SMTP connection error.\n"
-msgstr "        &#8226; Erro de conexão ao SMTP.\n"
+msgstr "        • Erro de conexão ao SMTP.\n"
 
 #: ../src/client/accounts/add-edit-page.vala:797
-#, fuzzy
 #| msgid "        &#8226; SMTP username or password incorrect.\n"
 msgid "        • SMTP username or password incorrect.\n"
-msgstr "        &#8226; Nome de usuário ou senha SMTP incorretos.\n"
+msgstr "        • Nome de usuário ou senha SMTP incorretos.\n"
 
 #: ../src/client/accounts/add-edit-page.vala:801
-#, fuzzy
 #| msgid "        &#8226; Connection error.\n"
 msgid "        • Connection error.\n"
-msgstr "        &#8226; Erro de conexão.\n"
+msgstr "        • Erro de conexão.\n"
 
 #: ../src/client/accounts/add-edit-page.vala:805
-#, fuzzy
 #| msgid "        &#8226; Username or password incorrect.\n"
 msgid "        • Username or password incorrect.\n"
-msgstr "        &#8226; Nome de usuário ou senha incorretos.\n"
+msgstr "        • Nome de usuário ou senha incorretos.\n"
 
 #: ../src/client/application/geary-application.vala:21
 msgid "Copyright 2016 Software Freedom Conservancy Inc."
@@ -376,10 +367,10 @@ msgid "Failed to parse command line options: %s\n"
 msgstr "Falha ao analisar as opções de linha de comando: %s\n"
 
 #: ../src/client/application/geary-args.vala:72
-#, fuzzy, c-format
+#, c-format
 #| msgid "Unrecognized command line option \"%s\"\n"
 msgid "Unrecognized command line option “%s”\n"
-msgstr "Opção de linha de comando não reconhecida \"%s\"\n"
+msgstr "Opção de linha de comando não reconhecida “%s”\n"
 
 #: ../src/client/application/geary-controller.vala:57
 msgid "Delete conversation"
@@ -450,10 +441,9 @@ msgid "Move conversations"
 msgstr "Mover conversas"
 
 #: ../src/client/application/geary-controller.vala:434
-#, fuzzy
 #| msgid "_Mark as..."
 msgid "_Mark as…"
-msgstr "_Marcar como..."
+msgstr "_Marcar como…"
 
 #: ../src/client/application/geary-controller.vala:440
 msgid "Mark as _Read"
@@ -640,10 +630,10 @@ msgid "E_xit"
 msgstr "S_air"
 
 #: ../src/client/application/geary-controller.vala:1162
-#, fuzzy, c-format
+#, c-format
 #| msgid "Unable to rebuild database for \"%s\""
 msgid "Unable to rebuild database for “%s”"
-msgstr "Incapaz de reconstruir o banco de dados para \"%s\""
+msgstr "Incapaz de reconstruir o banco de dados para “%s”"
 
 #: ../src/client/application/geary-controller.vala:1163
 #, c-format
@@ -685,7 +675,6 @@ msgstr ""
 "%s"
 
 #: ../src/client/application/geary-controller.vala:1196
-#, fuzzy
 #| msgid ""
 #| "The version number of the local mail database is formatted for a newer "
 #| "version of Geary. Unfortunately, the database cannot be \"rolled back\" "
@@ -701,7 +690,7 @@ msgid ""
 msgstr ""
 "O número da versão do banco de dados do correio local está formatado para "
 "uma versão mais recente do Geary. Infelizmente, o banco de dados não pode "
-"ser  \"revertido \" para trabalhar com esta versão do Geary.\n"
+"ser “revertido” para trabalhar com esta versão do Geary.\n"
 "\n"
 "Por favor, instale a última versão do Geary e tente outra vez."
 
@@ -734,26 +723,25 @@ msgstr ""
 "fontes confiáveis."
 
 #: ../src/client/application/geary-controller.vala:1994
-#, fuzzy
 #| msgid "Don't _ask me again"
 msgid "Don’t _ask me again"
 msgstr "Não me _pergunte novamente"
 
 #: ../src/client/application/geary-controller.vala:2038
-#, fuzzy, c-format
+#, c-format
 #| msgid "A file named \"%s\" already exists.  Do you want to replace it?"
 msgid "A file named “%s” already exists.  Do you want to replace it?"
-msgstr "Um arquivo chamado \"%s\" já existe. Você deseja substituí-lo?"
+msgstr "Um arquivo chamado “%s” já existe. Você deseja substituí-lo?"
 
 #: ../src/client/application/geary-controller.vala:2040
-#, fuzzy, c-format
+#, c-format
 #| msgid ""
 #| "The file already exists in \"%s\".  Replacing it will overwrite its "
 #| "contents."
 msgid ""
 "The file already exists in “%s”.  Replacing it will overwrite its contents."
 msgstr ""
-"O arquivo já existe em \"%s\". Substituí-lo irá sobrescrever o seu conteúdo."
+"O arquivo já existe em “%s”. Substituí-lo irá sobrescrever o seu conteúdo."
 
 #: ../src/client/application/geary-controller.vala:2043
 msgid "_Replace"
@@ -843,10 +831,9 @@ msgstr "Pesquisar conta %s"
 
 #. / Displayed in the space-limited status bar while a message is in the process of being sent.
 #: ../src/client/components/status-bar.vala:26
-#, fuzzy
 #| msgid "Sending..."
 msgid "Sending…"
-msgstr "Enviando..."
+msgstr "Enviando…"
 
 #: ../src/client/components/stock.vala:18 ../ui/account_cannot_remove.glade.h:3
 msgid "_OK"
@@ -882,10 +869,9 @@ msgid "_Preferences"
 msgstr "_Preferências"
 
 #: ../src/client/components/stock.vala:28 ../ui/conversation-email-menus.ui.h:7
-#, fuzzy
 #| msgid "_Print..."
 msgid "_Print…"
-msgstr "_Imprimir..."
+msgstr "_Imprimir…"
 
 #: ../src/client/components/stock.vala:29 ../ui/gtk/menus.ui.h:7
 msgid "_Quit"
@@ -951,34 +937,34 @@ msgid "Send message without an attachment?"
 msgstr "Enviar mensagem sem anexo?"
 
 #: ../src/client/composer/composer-widget.vala:1608
-#, fuzzy, c-format
+#, c-format
 #| msgid "\"%s\" could not be found."
 msgid "“%s” could not be found."
-msgstr "\"%s\" não foi encontrado."
+msgstr "“%s” não foi encontrado."
 
 #: ../src/client/composer/composer-widget.vala:1614
-#, fuzzy, c-format
+#, c-format
 #| msgid "\"%s\" is a folder."
 msgid "“%s” is a folder."
-msgstr "\"%s\" é uma pasta."
+msgstr "“%s” é uma pasta."
 
 #: ../src/client/composer/composer-widget.vala:1620
-#, fuzzy, c-format
+#, c-format
 #| msgid "\"%s\" is an empty file."
 msgid "“%s” is an empty file."
-msgstr "\"%s\" é um arquivo vazio."
+msgstr "“%s” é um arquivo vazio."
 
 #: ../src/client/composer/composer-widget.vala:1633
-#, fuzzy, c-format
+#, c-format
 #| msgid "\"%s\" could not be opened for reading."
 msgid "“%s” could not be opened for reading."
-msgstr "\"%s\" não pôde ser aberto para leitura."
+msgstr "“%s” não pôde ser aberto para leitura."
 
 #: ../src/client/composer/composer-widget.vala:1640
-#, fuzzy, c-format
+#, c-format
 #| msgid "\"%s\" already attached for delivery."
 msgid "“%s” already attached for delivery."
-msgstr "\"%s\" já foi anexado para envio."
+msgstr "“%s” já foi anexado para envio."
 
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
 #. Translators: The first argument will be a
@@ -1034,10 +1020,10 @@ msgid "_From:"
 msgstr "_De:"
 
 #: ../src/client/composer/composer-widget.vala:2422
-#, fuzzy, c-format
+#, c-format
 #| msgid "%s - Composer Inspector"
 msgid "%s — Composer Inspector"
-msgstr "%s - Inspetor do redator"
+msgstr "%s — Inspetor do redator"
 
 #. Translators: This is the name of the file chooser filter
 #. when inserting an image in the composer.
@@ -1062,18 +1048,18 @@ msgstr "Desconhecido"
 #. Preview headers
 #. Translators: This is displayed in place of the from address
 #. when the message has no from address.
-#: ../src/client/conversation-viewer/conversation-message.vala:360
+#: ../src/client/conversation-viewer/conversation-message.vala:361
 msgid "No sender"
 msgstr "Sem remetente"
 
 #. Translators: This separates multiple 'from'
 #. addresses in the header preview for a message.
-#: ../src/client/conversation-viewer/conversation-message.vala:720
+#: ../src/client/conversation-viewer/conversation-message.vala:725
 msgid ", "
 msgstr ", "
 
 #. If href doesn't look like a URL, something is fishy, so warn the user
-#: ../src/client/conversation-viewer/conversation-message.vala:1228
+#: ../src/client/conversation-viewer/conversation-message.vala:1233
 msgid " (Invalid?)"
 msgstr " (Inválido?)"
 
@@ -1107,10 +1093,10 @@ msgid "Your search returned no results, try refining your search terms"
 msgstr "Sua busca não retornou resultado, tente refinar os termos da pesquisa"
 
 #: ../src/client/conversation-viewer/conversation-web-view.vala:198
-#, fuzzy, c-format
+#, c-format
 #| msgid "%s - Conversation Inspector"
 msgid "%s — Conversation Inspector"
-msgstr "%s - Inspetor de conversa"
+msgstr "%s — Inspetor de conversa"
 
 #: ../src/client/dialogs/attachment-dialog.vala:24
 #: ../src/client/dialogs/attachment-dialog.vala:26
@@ -1134,7 +1120,6 @@ msgstr ""
 "A identidade do servidor de e-mail %s em %s:%u não pôde ser verificado."
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:44
-#, fuzzy
 #| msgid ""
 #| "Selecting \"Trust This Server\" or \"Always Trust This Server\" may cause "
 #| "your username and password to be transmitted insecurely."
@@ -1142,11 +1127,10 @@ msgid ""
 "Selecting “Trust This Server” or “Always Trust This Server” may cause your "
 "username and password to be transmitted insecurely."
 msgstr ""
-"Selecionar \"Confiar nesse servidor\" ou \"Sempre confiar nesse servidor\" "
-"pode resultar em seu usuário e senha serem transmitidos do forma insegura."
+"Selecionar “Confiar nesse servidor” ou “Sempre confiar nesse servidor” pode "
+"resultar em seu usuário e senha serem transmitidos do forma insegura."
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:52
-#, fuzzy
 #| msgid ""
 #| "Selecting \"Don't Trust This Server\" will cause Geary not to access this "
 #| "server."
@@ -1154,15 +1138,14 @@ msgid ""
 "Selecting “Don’t Trust This Server” will cause Geary not to access this "
 "server."
 msgstr ""
-"Selecionar \"Não confiar nesse servidor\" vai resultar em o Geary não "
-"acessar a esse servidor."
+"Selecionar “Não confiar nesse servidor” vai resultar em o Geary não acessar "
+"a esse servidor."
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:54
 msgid "Geary will not add or update this email account."
 msgstr "Geary não vai adicionar ou atualizar essa conta de e-mail."
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:59
-#, fuzzy
 #| msgid ""
 #| "Selecting \"Don't Trust This Server\" will cause Geary to stop accessing "
 #| "this account."
@@ -1170,7 +1153,7 @@ msgid ""
 "Selecting “Don’t Trust This Server” will cause Geary to stop accessing this "
 "account."
 msgstr ""
-"Selecionar \"Não confiar nesse servidor\" vai resultar em o Geary parar de "
+"Selecionar “Não confiar nesse servidor” vai resultar em o Geary parar de "
 "acessar essa conta."
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:61
@@ -1186,44 +1169,37 @@ msgstr ""
 "tenha alguma pergunta sobre esses problemas."
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:73
-#, fuzzy
 #| msgid "The server's certificate is not signed by a known authority"
 msgid "The server’s certificate is not signed by a known authority"
 msgstr ""
 "O certificado do servidor não está assinado por uma autoridade conhecida"
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:76
-#, fuzzy
 #| msgid "The server's identity does not match the identity in the certificate"
 msgid "The server’s identity does not match the identity in the certificate"
 msgstr "A identidade do servidor não corresponde à identidade no certificado"
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:79
-#, fuzzy
 #| msgid "The server's certificate has expired"
 msgid "The server’s certificate has expired"
 msgstr "O certificado do servidor expirou"
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:82
-#, fuzzy
 #| msgid "The server's certificate has not been activated"
 msgid "The server’s certificate has not been activated"
 msgstr "O certificado do servidor não foi ativado"
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:85
-#, fuzzy
 #| msgid "The server's certificate has been revoked and is now invalid"
 msgid "The server’s certificate has been revoked and is now invalid"
 msgstr "O certificado do servidor foi revogado e agora é inválido"
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:88
-#, fuzzy
 #| msgid "The server's certificate is considered insecure"
 msgid "The server’s certificate is considered insecure"
 msgstr "O certificado do servidor é considerado inseguro"
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:91
-#, fuzzy
 #| msgid "An error has occurred processing the server's certificate"
 msgid "An error has occurred processing the server’s certificate"
 msgstr "Ocorreu um erro ao processar o certificado do servidor"
@@ -1271,10 +1247,10 @@ msgstr[0] "%d resultado"
 msgstr[1] "%d resultados"
 
 #: ../src/client/notification/libmessagingmenu.vala:75
-#, fuzzy, c-format
+#, c-format
 #| msgid "%s - New Messages"
 msgid "%s — New Messages"
-msgstr "%s - Novas Mensagens"
+msgstr "%s — Novas Mensagens"
 
 #: ../src/client/notification/libnotify.vala:74
 #, c-format
@@ -1390,7 +1366,7 @@ msgid "%A"
 msgstr "%A"
 
 #: ../src/client/util/util-email.vala:30
-#: ../src/engine/rfc822/rfc822-message.vala:907
+#: ../src/engine/rfc822/rfc822-message.vala:910
 msgid "(no subject)"
 msgstr "(sem assunto)"
 
@@ -1714,63 +1690,63 @@ msgstr ""
 
 #. / Format for the datetime that a message being replied to was received
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: ../src/engine/rfc822/rfc822-utils.vala:215
+#: ../src/engine/rfc822/rfc822-utils.vala:236
 msgid "%a, %b %-e, %Y at %-l:%M %p"
 msgstr "%a, %b %-e, %Y em %-l:%M %p"
 
 #. / The quoted header for a message being replied to.
 #. / %1$s will be substituted for the date, and %2$s will be substituted for
 #. / the original sender.
-#: ../src/engine/rfc822/rfc822-utils.vala:221
+#: ../src/engine/rfc822/rfc822-utils.vala:242
 #, c-format
 msgid "On %1$s, %2$s wrote:"
 msgstr "Em %1$s, %2$s escreveu:"
 
 #. / The quoted header for a message being replied to (in case the date is not known).
 #. / %s will be replaced by the original sender.
-#: ../src/engine/rfc822/rfc822-utils.vala:228
+#: ../src/engine/rfc822/rfc822-utils.vala:249
 #, c-format
 msgid "%s wrote:"
 msgstr "%s escreveu:"
 
 #. / The quoted header for a message being replied to (in case the sender is not known).
 #. / %s will be replaced by the original date
-#: ../src/engine/rfc822/rfc822-utils.vala:234
+#: ../src/engine/rfc822/rfc822-utils.vala:255
 #, c-format
 msgid "On %s:"
 msgstr "Em %s:"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:263
+#: ../src/engine/rfc822/rfc822-utils.vala:284
 msgid "---------- Forwarded message ----------"
 msgstr "---------- Mensagem encaminhada ----------"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:267
+#: ../src/engine/rfc822/rfc822-utils.vala:288
 #, c-format
 msgid "From: %s\n"
 msgstr "De: %s\n"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:268
+#: ../src/engine/rfc822/rfc822-utils.vala:289
 #, c-format
 msgid "Subject: %s\n"
 msgstr "Assunto: %s\n"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:269
+#: ../src/engine/rfc822/rfc822-utils.vala:290
 #, c-format
 msgid "Date: %s\n"
 msgstr "Data: %s\n"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:272
+#: ../src/engine/rfc822/rfc822-utils.vala:293
 #, c-format
 msgid "To: %s\n"
 msgstr "Para: %s\n"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:275
+#: ../src/engine/rfc822/rfc822-utils.vala:296
 #, c-format
 msgid "Cc: %s\n"
 msgstr "Cc: %s\n"
 
 #. / Placeholder filename for attachments with no filename.
-#: ../src/engine/rfc822/rfc822-utils.vala:364
+#: ../src/engine/rfc822/rfc822-utils.vala:441
 msgid "none"
 msgstr "nenhum"
 
@@ -1817,7 +1793,6 @@ msgid "_Trust This Server"
 msgstr "_Confiar nesse servidor"
 
 #: ../ui/certificate_warning_dialog.glade.h:4
-#, fuzzy
 #| msgid "_Don't Trust This Server"
 msgid "_Don’t Trust This Server"
 msgstr "_Não confiar nesse servidor"
@@ -2141,20 +2116,18 @@ msgid "Copy Link _Address"
 msgstr "Copiar endereço do _link"
 
 #: ../ui/conversation-message-menus.ui.h:3
-#, fuzzy
 #| msgid "Send New _Message..."
 msgid "Send New _Message…"
-msgstr "Enviar nova _mensagem..."
+msgstr "Enviar nova _mensagem…"
 
 #: ../ui/conversation-message-menus.ui.h:4
 msgid "Copy Email _Address"
 msgstr "Copiar endereço de _e-mail"
 
 #: ../ui/conversation-message-menus.ui.h:5
-#, fuzzy
 #| msgid "Save _Image As..."
 msgid "Save _Image As…"
-msgstr "Salvar _imagem como..."
+msgstr "Salvar _imagem como…"
 
 #: ../ui/conversation-message-menus.ui.h:6
 msgid "_Select All"
@@ -2165,10 +2138,9 @@ msgid "Search for messages from"
 msgstr "Procurar por mensagens de"
 
 #: ../ui/conversation-message-menus.ui.h:9
-#, fuzzy
 #| msgid "_Inspect"
 msgid "_Inspect…"
-msgstr "_Inspecionar"
+msgstr "_Inspecionar…"
 
 #: ../ui/conversation-viewer.ui.h:1
 msgid "Find in conversation"
