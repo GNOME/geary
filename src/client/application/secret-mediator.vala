@@ -83,12 +83,14 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
         Cancellable? cancellable = null) throws Error {
         string key_name = get_key_name(service, account_information.id);
         Geary.Credentials credentials = get_credentials(service, account_information);
-        
-        bool result = yield Secret.password_store(Secret.SCHEMA_COMPAT_NETWORK,
-            null, key_name, credentials.pass, cancellable, "user", key_name);
-        if (!result)
-            debug("Unable to store password for \"%s\" in libsecret keyring", key_name);
+        try {
+            yield Secret.password_store(Secret.SCHEMA_COMPAT_NETWORK,
+                null, key_name, credentials.pass, cancellable, "user", key_name);
+        } catch (Error e) {
+            debug("Unable to store password for \"%s\" in libsecret keyring: %s", key_name, e.message);
+        }
     }
+
     
     public virtual async void clear_password_async(
         Geary.Service service, Geary.AccountInformation account_information, Cancellable? cancellable = null)
