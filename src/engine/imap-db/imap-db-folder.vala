@@ -1234,13 +1234,19 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             
             return null;
         }
-        
+
         // look for duplicate in IMAP message properties
-        Db.Statement stmt = cx.prepare(
-            "SELECT id FROM MessageTable WHERE internaldate=? AND rfc822_size=?");
+        Db.Statement stmt;
+        if (email.message_id != null)
+            stmt = cx.prepare("SELECT id FROM MessageTable WHERE internaldate=? AND rfc822_size=? AND message_id=?");
+         else
+            stmt = cx.prepare("SELECT id FROM MessageTable WHERE internaldate=? AND rfc822_size=?");
+
         stmt.bind_string(0, internaldate);
         stmt.bind_int64(1, rfc822_size);
-        
+        if (email.message_id != null)
+            stmt.bind_string(2, email.message_id.to_string());
+
         Db.Result results = stmt.exec(cancellable);
         // no duplicates found
         if (results.finished)

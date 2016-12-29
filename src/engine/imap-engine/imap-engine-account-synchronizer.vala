@@ -398,17 +398,18 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
                 
                 // if past max_epoch, then just pull in everything and be done with it
                 if (current_epoch.compare(max_epoch) < 0) {
-                    debug("Background sync reached max epoch of %s, fetching all mail from %s",
-                        max_epoch.to_string(), folder.to_string());
-                    
+                    debug("Background sync reached max epoch of %s, fetching all mail from %s (already got %d of %d emails)",
+                        max_epoch.to_string(), folder.to_string(), local_count, folder.properties.email_total);
+
                     yield folder.list_email_by_id_async(null, 1, Geary.Email.Field.NONE,
                         Geary.Folder.ListFlags.OLDEST_TO_NEWEST, bg_cancellable);
                 } else {
                     // don't go past proscribed epoch
                     if (current_epoch.compare(epoch) < 0)
                         current_epoch = epoch;
-                    
-                    debug("Background sync'ing %s to %s", folder.to_string(), current_epoch.to_string());
+
+                    debug("Background sync'ing %s to %s (already got %d of %d emails)",
+                        folder.to_string(), current_epoch.to_string(), local_count, folder.properties.email_total);
                     Geary.EmailIdentifier? earliest_span_id = yield folder.find_earliest_email_async(current_epoch,
                         oldest_local_id, bg_cancellable);
                     if (earliest_span_id == null && current_epoch.compare(epoch) <= 0) {
