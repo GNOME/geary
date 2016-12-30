@@ -14,7 +14,9 @@ public enum TextFormat {
     HTML
 }
 
-/** Offical IANA charset encoding name for UTF-8. */
+/**
+ * Official IANA charset encoding name for UTF-8.
+ */
 public const string UTF8_CHARSET = "UTF-8";
 
 // This has the effect of ensuring all non US-ASCII and non-ISO-8859-1

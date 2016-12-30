@@ -12,7 +12,9 @@
  */
 public class Geary.Email : BaseObject {
 
-    /** The maximum expected length of message body preview text. */
+    /**
+     * The maximum expected length of message body preview text.
+     */
     public const int MAX_PREVIEW_BYTES = 256;
 
     /**

@@ -3,6 +3,7 @@
 
 set(ENGINE_SRC
 
+engine/api/geary.vala
 engine/api/geary-abstract-local-folder.vala
 engine/api/geary-account.vala
 engine/api/geary-account-information.vala
@@ -595,8 +596,8 @@ set(VALAC_OPTIONS
     --metadatadir=${CMAKE_SOURCE_DIR}/bindings/metadata/${WEBKITGTK_METADATA_DIR}
     --target-glib=${TARGET_GLIB}
     --thread
-    --enable-checking
     --debug
+    --enable-checking
     --enable-deprecated
     --fatal-warnings
     ${EXTRA_VALA_OPTIONS}
@@ -729,17 +730,24 @@ add_custom_command(
 # Valadoc
 #################################################
 foreach(pkg ${ENGINE_PACKAGES})
-    list(APPEND valadoc_pkg_opts "--pkg=${pkg}")
+    list(APPEND VALADOC_PKG_OPTS "--pkg=${pkg}")
 endforeach(pkg ${ENGINE_PACKAGES})
 
 include(FindValadoc)
-add_custom_target(
-    valadoc
-    WORKING_DIRECTORY
-        ${CMAKE_SOURCE_DIR}/src
-    COMMAND
-        ${VALADOC_EXECUTABLE} --force --no-protected --target-glib=${TARGET_GLIB} -b ${CMAKE_CURRENT_SOURCE_DIR} -o ${CMAKE_SOURCE_DIR}/valadoc --package-name=geary --package-version=${VERSION} ${ENGINE_SRC} ${valadoc_pkg_opts} --vapidir=${CMAKE_SOURCE_DIR}/bindings/vapi
+add_custom_target(valadoc
+  WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/src
+  COMMAND ${VALADOC_EXECUTABLE}
+    --verbose --force --deps
+    --package-name=geary-${VERSION}
+    --package-version=${VERSION}
+    --target-glib=${TARGET_GLIB}
+    -b ${CMAKE_CURRENT_SOURCE_DIR}
+    -o ${CMAKE_SOURCE_DIR}/valadoc
+    --vapidir=${CMAKE_BINARY_DIR}/src
+    --vapidir=${CMAKE_SOURCE_DIR}/bindings/vapi
+    ${VALADOC_PKG_OPTS} ${ENGINE_SRC}
 )
+add_dependencies(valadoc git-version)
 
 ## Make clean: remove copied files
 ##################################################

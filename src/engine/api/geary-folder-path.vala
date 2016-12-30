@@ -251,7 +251,7 @@ public class Geary.FolderPath : BaseObject, Gee.Hashable<Geary.FolderPath>,
      * are less-than longer paths, assuming the path elements are equal up to the shorter path's
      * length.
      *
-     * Note that {@link FolderRoot.case_sensitive} affects comparisons.
+     * Note that {@link FolderPath.case_sensitive} affects comparisons.
      *
      * Returns -1 if this path is lexiographically before the other, 1 if its after, and 0 if they
      * are equal.
@@ -263,7 +263,7 @@ public class Geary.FolderPath : BaseObject, Gee.Hashable<Geary.FolderPath>,
     /**
      * {@inheritDoc}
      *
-     * Note that {@link FolderRoot.case_sensitive} affects comparisons.
+     * Note that {@link FolderPath.case_sensitive} affects comparisons.
      */
     public uint hash() {
         if (stored_hash != uint.MAX)

@@ -148,6 +148,21 @@ then
     CMDLINE="${CMDLINE} -DVALA_EXECUTABLE='$VALA_EXECUTABLE'"
 fi
 
+# Verify use supplied valadoc executable
+if [ -n "$VALADOC" ]
+then
+    VALADOC_EXECUTABLE=`type -p "$VALADOC"`
+
+    if [ -z "$VALADOC_EXECUTABLE" ]
+    then
+        printf "$VALADOC is not an executable program.\n"
+        exit 1
+    fi
+
+    CMDLINE="${CMDLINE} -DVALADOC_EXECUTABLE='$VALADOC_EXECUTABLE'"
+fi
+
+
 # Verify cmake is installed
 # TODO: Check for minimum version number
 if ! cmake --version

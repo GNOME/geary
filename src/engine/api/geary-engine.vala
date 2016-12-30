@@ -14,7 +14,6 @@
  * Engine can list existing {@link Account} objects and create/delete them.  It can also validate
  * changes to Accounts prior to saving those changes.
  */
-
 public class Geary.Engine : BaseObject {
 
     private const string ID_PREFIX = "account_";
