@@ -337,43 +337,41 @@ public class GearyApplication : Gtk.Application {
         
         return exec_dir.has_prefix(prefix_dir) ? prefix_dir : null;
     }
-    
-    // Creates a GTK builder given the name of a GResource.
+
+    /**
+     * Creates a GTK builder given the name of a GResource.
+     *
+     * @deprecated Use {@link GioUtil.create_builder} instead.
+     */
+    [Version (deprecated = true)]
     public Gtk.Builder create_builder(string name) {
-        Gtk.Builder builder = new Gtk.Builder();
-        try {
-            builder.add_from_resource("/org/gnome/Geary/" + name);
-        } catch(GLib.Error error) {
-            warning("Unable to create Gtk.Builder: %s".printf(error.message));
-        }
-        
-        return builder;
+        return GioUtil.create_builder(name);
     }
 
+    /**
+     * Loads a GResource as a string.
+     *
+     * @deprecated Use {@link GioUtil.read_resource} instead.
+     */
+    [Version (deprecated = true)]
     public string read_resource(string name) throws Error {
-        InputStream input_stream = resources_open_stream(
-            "/org/gnome/Geary/" + name,
-            ResourceLookupFlags.NONE
-        );
-        DataInputStream data_stream = new DataInputStream(input_stream);
-        size_t length;
-        return data_stream.read_upto("\0", 1, out length);
+        return GioUtil.read_resource(name);
     }
 
-    // Loads a UI GResource into the specified UI manager.
-    public void load_ui_resource_for_manager(Gtk.UIManager ui, string name) {
+    /**
+     * Loads a UI GResource into the UI manager.
+     */
+    [Version (deprecated = true)]
+    public void load_ui_resource(string name) {
         try {
-            ui.add_ui_from_resource("/org/gnome/Geary/" + name);
+            this.ui_manager.add_ui_from_resource("/org/gnome/Geary/" + name);
         } catch(GLib.Error error) {
-            warning("Unable to create Gtk.UIManager: %s".printf(error.message));
+            critical("Unable to load \"%s\" for Gtk.UIManager: %s".printf(
+                name, error.message
+            ));
         }
     }
-    
-    // Loads a UI GResource into the UI manager.
-    public void load_ui_resource(string name) {
-        load_ui_resource_for_manager(ui_manager, name);
-    }
-    
+
     // This call will fire "exiting" only if it's not already been fired.
     public void exit(int exitcode = 0) {
         if (exiting_fired)

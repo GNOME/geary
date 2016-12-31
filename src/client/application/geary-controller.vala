@@ -183,35 +183,22 @@ public class GearyController : Geary.BaseObject {
 
         // Listen for attempts to close the application.
         this.application.exiting.connect(on_application_exiting);
-        
+
         // Create DB upgrade dialog.
         upgrade_dialog = new UpgradeDialog();
         upgrade_dialog.notify[UpgradeDialog.PROP_VISIBLE_NAME].connect(display_main_window_if_ready);
 
-        // Initialise global WebKit settings
-        WebKit.WebContext context = WebKit.WebContext.get_default();
-        context.set_process_model(WebKit.ProcessModel.SHARED_SECONDARY_PROCESS);
-        context.set_cache_model(WebKit.CacheModel.DOCUMENT_BROWSER);
-        context.register_uri_scheme("cid", (req) => {
-                ClientWebView? view = req.get_web_view() as ClientWebView;
-                if (view != null) {
-                    view.handle_cid_request(req);
-                }
-            });
-        context.initialize_web_extensions.connect((context) => {
-                context.set_web_extensions_directory(
-                    this.application.get_web_extensions_dir().get_path()
-                );
-                context.set_web_extensions_initialization_user_data(
-                    new Variant.boolean(Args.log_debug)
-                );
-            });
-
-        // Load web view resources
+        // Initialise WebKit and WebViews
+        ClientWebView.init_web_context(
+            this.application.get_web_extensions_dir(),
+            Args.log_debug
+        );
         try {
-            ClientWebView.load_scripts(this.application);
-            ComposerWebView.load_resources(this.application);
-            ConversationWebView.load_resources(this.application);
+            ClientWebView.load_scripts();
+            ComposerWebView.load_resources();
+            ConversationWebView.load_resources(
+                this.application.get_user_config_directory()
+            );
         } catch (Error err) {
             error("Error loading web resources: %s", err.message);
         }

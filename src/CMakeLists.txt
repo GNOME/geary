@@ -399,6 +399,7 @@ client/sidebar/sidebar-tree.vala
 client/util/util-date.vala
 client/util/util-email.vala
 client/util/util-files.vala
+client/util/util-gio.vala
 client/util/util-gravatar.vala
 client/util/util-gtk.vala
 client/util/util-international.vala

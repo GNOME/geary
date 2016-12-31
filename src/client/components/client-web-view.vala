@@ -24,22 +24,48 @@ public class ClientWebView : WebKit.WebView {
     private static WebKit.UserScript? script = null;
     private static WebKit.UserScript? allow_remote_images = null;
 
-    public static void load_scripts(GearyApplication app)
+    /**
+     * Initialises WebKit.WebContext for use by the client.
+     */
+    public static void init_web_context(File web_extension_dir,
+                                        bool enable_logging) {
+        WebKit.WebContext context = WebKit.WebContext.get_default();
+        context.set_process_model(WebKit.ProcessModel.SHARED_SECONDARY_PROCESS);
+        context.set_cache_model(WebKit.CacheModel.DOCUMENT_BROWSER);
+        context.register_uri_scheme("cid", (req) => {
+                ClientWebView? view = req.get_web_view() as ClientWebView;
+                if (view != null) {
+                    view.handle_cid_request(req);
+                }
+            });
+        context.initialize_web_extensions.connect((context) => {
+                context.set_web_extensions_directory(
+                    web_extension_dir.get_path()
+                );
+                context.set_web_extensions_initialization_user_data(
+                    new Variant.boolean(enable_logging)
+                );
+            });
+    }
+
+    /**
+     * Loads static resources used by ClientWebView.
+     */
+    public static void load_scripts()
         throws Error {
         ClientWebView.script = load_app_script(
-            app, "client-web-view.js"
+            "client-web-view.js"
         );
         ClientWebView.allow_remote_images = load_app_script(
-            app, "client-web-view-allow-remote-images.js"
+            "client-web-view-allow-remote-images.js"
         );
     }
 
     /** Loads an application-specific WebKit stylesheet. */
-    protected static WebKit.UserStyleSheet load_app_stylesheet(GearyApplication app,
-                                                               string name)
+    protected static WebKit.UserStyleSheet load_app_stylesheet(string name)
         throws Error {
         return new WebKit.UserStyleSheet(
-            app.read_resource(name),
+            GioUtil.read_resource(name),
             WebKit.UserContentInjectedFrames.TOP_FRAME,
             WebKit.UserStyleLevel.USER,
             null,
@@ -48,13 +74,10 @@ public class ClientWebView : WebKit.WebView {
     }
 
     /** Loads a user stylesheet, if any. */
-    protected static WebKit.UserStyleSheet? load_user_stylesheet(GearyApplication app,
-                                                                 string name) {
-        File stylesheet = app.get_user_config_directory().get_child(name);
+    protected static WebKit.UserStyleSheet? load_user_stylesheet(File name) {
         WebKit.UserStyleSheet? user_stylesheet = null;
         try {
-            Geary.Memory.FileBuffer buf =
-                new Geary.Memory.FileBuffer(stylesheet, true);
+            Geary.Memory.FileBuffer buf = new Geary.Memory.FileBuffer(name, true);
             user_stylesheet = new WebKit.UserStyleSheet(
                 buf.get_valid_utf8(),
                 WebKit.UserContentInjectedFrames.ALL_FRAMES,
@@ -71,11 +94,10 @@ public class ClientWebView : WebKit.WebView {
     }
 
     /** Loads an application-specific WebKit JavaScript script. */
-    protected static WebKit.UserScript load_app_script(GearyApplication app,
-                                                       string name)
+    protected static WebKit.UserScript load_app_script(string name)
         throws Error {
         return new WebKit.UserScript(
-            app.read_resource(name),
+            GioUtil.read_resource(name),
             WebKit.UserContentInjectedFrames.TOP_FRAME,
             WebKit.UserScriptInjectionTime.START,
             null,

@@ -61,10 +61,11 @@ public class ComposerWebView : ClientWebView {
 
     private static WebKit.UserScript? app_script = null;
 
-    public static void load_resources(GearyApplication app)
+    public static void load_resources()
         throws Error {
-        ComposerWebView.app_script =
-            ClientWebView.load_app_script(app, "composer-web-view.js");
+        ComposerWebView.app_script = ClientWebView.load_app_script(
+            "composer-web-view.js"
+        );
     }
 
     private bool is_shift_down = false;

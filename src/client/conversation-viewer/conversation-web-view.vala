@@ -14,14 +14,17 @@ public class ConversationWebView : ClientWebView {
     private static WebKit.UserStyleSheet? app_stylesheet = null;
     private static WebKit.UserScript? app_script = null;
 
-    public static void load_resources(GearyApplication app)
+    public static void load_resources(File user_dir)
         throws Error {
-        ConversationWebView.app_script =
-            ClientWebView.load_app_script(app, "conversation-web-view.js");
-        ConversationWebView.app_stylesheet =
-            ClientWebView.load_app_stylesheet(app, "conversation-web-view.css");
-        ConversationWebView.user_stylesheet =
-            ClientWebView.load_user_stylesheet(app, "user-message.css");
+        ConversationWebView.app_script = ClientWebView.load_app_script(
+            "conversation-web-view.js"
+        );
+        ConversationWebView.app_stylesheet = ClientWebView.load_app_stylesheet(
+            "conversation-web-view.css"
+        );
+        ConversationWebView.user_stylesheet = ClientWebView.load_user_stylesheet(
+            user_dir.get_child("user-message.css")
+        );
     }
 
 
