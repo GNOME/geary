@@ -13,6 +13,8 @@ set(TEST_SRC
   engine/util-html-test.vala
 
   client/application/geary-configuration-test.vala
+
+  js/composer-page-state-test.vala
 )
 
 # Vala

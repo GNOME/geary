@@ -197,7 +197,7 @@ ComposerPageState.resolveNesting = function(text, values) {
             ComposerPageState.QUOTE_START +
             "([0-9]*)" +
             ComposerPageState.QUOTE_END +
-            "(?=(.?))"
+            "(?=(.?))", "g"
     );
     return text.replace(tokenregex, function(match, p1, p2, p3, offset, str) {
         let key = new Number(p2);

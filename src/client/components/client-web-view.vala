@@ -6,7 +6,7 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-protected errordomain JSError { TYPE }
+protected errordomain JSError { EXCEPTION, TYPE }
 
 public class ClientWebView : WebKit.WebView {
 

@@ -29,6 +29,7 @@ int main(string[] args) {
 
     Geary.RFC822.init();
     Geary.HTML.init();
+    Geary.Logging.init();
 
     /*
      * Hook up all tests into appropriate suites
@@ -46,12 +47,17 @@ int main(string[] args) {
 
     client.add_suite(new ConfigurationTest().get_suite());
 
+    TestSuite js = new TestSuite("js");
+
+    js.add_suite(new ComposerPageStateTest().get_suite());
+
     /*
      * Run the tests
      */
     TestSuite root = TestSuite.get_root();
     root.add_suite(engine);
     root.add_suite(client);
+    root.add_suite(js);
 
     int ret = -1;
     Idle.add(() => {
