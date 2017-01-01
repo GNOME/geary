@@ -18,7 +18,9 @@ public class ClientWebView : WebKit.WebView {
 
 
     /** URI Scheme and delimiter for images loaded by Content-ID. */
-    public const string CID_PREFIX = "cid:";
+    public const string CID_URL_PREFIX = "cid:";
+
+    private const string INTERNAL_URL_BODY = "geary:body";
 
     private const string PREFERRED_HEIGHT_MESSAGE = "preferredHeightChanged";
     private const string REMOTE_IMAGE_LOAD_BLOCKED_MESSAGE = "remoteImageLoadBlocked";
@@ -42,6 +44,12 @@ public class ClientWebView : WebKit.WebView {
                 ClientWebView? view = req.get_web_view() as ClientWebView;
                 if (view != null) {
                     view.handle_cid_request(req);
+                }
+            });
+        context.register_uri_scheme("geary", (req) => {
+                ClientWebView? view = req.get_web_view() as ClientWebView;
+                if (view != null) {
+                    view.handle_internal_request(req);
                 }
             });
         context.initialize_web_extensions.connect((context) => {
@@ -156,6 +164,8 @@ public class ClientWebView : WebKit.WebView {
         }
     }
 
+    private weak string? body = null;
+
     private Gee.Map<string,Geary.Memory.Buffer> cid_resources =
         new Gee.HashMap<string,Geary.Memory.Buffer>();
 
@@ -258,6 +268,14 @@ public class ClientWebView : WebKit.WebView {
     }
 
     /**
+     * Loads a message HTML body into the view.
+     */
+    public new void load_html(string? body, string? base_uri=null) {
+        this.body = body;
+        base.load_html(body, base_uri ?? INTERNAL_URL_BODY);
+    }
+
+    /**
      * Adds an inline resource that may be accessed via a cid:id url.
      */
     public void add_inline_resource(string id, Geary.Memory.Buffer buf) {
@@ -347,7 +365,7 @@ public class ClientWebView : WebKit.WebView {
     }
 
     internal void handle_cid_request(WebKit.URISchemeRequest request) {
-        string cid = request.get_uri().substring(CID_PREFIX.length);
+        string cid = request.get_uri().substring(CID_URL_PREFIX.length);
         Geary.Memory.Buffer? buf = this.cid_resources[cid];
         if (buf != null) {
             request.finish(buf.get_input_stream(), buf.size, null);
@@ -356,6 +374,15 @@ public class ClientWebView : WebKit.WebView {
             request.finish_error(
                 new FileError.NOENT("Unknown CID: %s".printf(cid))
             );
+        }
+    }
+
+    internal void handle_internal_request(WebKit.URISchemeRequest request) {
+        if (request.get_uri() == INTERNAL_URL_BODY) {
+            Geary.Memory.Buffer buf = new Geary.Memory.StringBuffer(this.body);
+            request.finish(buf.get_input_stream(), buf.size, null);
+        } else {
+            request.finish_error(new FileError.NOENT("Unknown internal URL"));
         }
     }
 

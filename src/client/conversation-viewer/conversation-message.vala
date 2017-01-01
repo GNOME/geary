@@ -451,7 +451,7 @@ public class ConversationMessage : Gtk.Grid {
         }
 
         load_cancelled.cancelled.connect(() => { web_view.stop_loading(); });
-        this.web_view.load_html(body_text ?? "", null);
+        this.web_view.load_html(body_text ?? "");
     }
 
     /**
@@ -690,7 +690,7 @@ public class ConversationMessage : Gtk.Grid {
         return "<img alt=\"%s\" class=\"%s\" src=\"%s%s\" />".printf(
             Geary.HTML.escape_markup(filename),
             REPLACED_IMAGE_CLASS,
-            ClientWebView.CID_PREFIX,
+            ClientWebView.CID_URL_PREFIX,
             Geary.HTML.escape_markup(id)
         );
     }

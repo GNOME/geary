@@ -92,7 +92,7 @@ public class ComposerWebView : ClientWebView {
         else
             html = body + CURSOR + "<br /><br />" + signature;
 
-        base.load_html(HTML_BODY.printf(html), null);
+        base.load_html(HTML_BODY.printf(html));
     }
 
     public bool can_undo() {

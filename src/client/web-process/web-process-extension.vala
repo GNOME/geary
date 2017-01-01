@@ -29,8 +29,10 @@ public void webkit_web_extension_initialize_with_user_data(WebKit.WebExtension e
 public class GearyWebExtension : Object {
 
 
-    private const string CID_PREFIX = "cid:";
-    private const string DATA_PREFIX = "data:";
+    private const string CID_URL_PREFIX = "cid:";
+    private const string DATA_URL_PREFIX = "data:";
+    private const string INTERNAL_URL_PREFIX = "geary:";
+    private const string INTERNAL_URL_BODY = INTERNAL_URL_PREFIX + "body";
 
     private WebKit.WebExtension extension;
 
@@ -63,9 +65,10 @@ public class GearyWebExtension : Object {
                                  WebKit.URIResponse? response) {
         bool should_load = false;
         string req_uri = request.get_uri();
-        if (req_uri.has_prefix(CID_PREFIX) ||
-            req_uri.has_prefix(DATA_PREFIX)) {
-            // Always load images with these prefixes
+        if (req_uri.has_prefix(CID_URL_PREFIX) ||
+            req_uri.has_prefix(DATA_URL_PREFIX) ||
+            req_uri == INTERNAL_URL_BODY) {
+            // Always load images/resources with these prefixes
             should_load = true;
         } else {
             // Only load anything else if remote image loading is
