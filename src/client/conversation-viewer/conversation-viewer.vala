@@ -191,6 +191,7 @@ public class ConversationViewer : Gtk.Stack {
             account.get_contact_store(),
             account.information,
             location.special_folder_type == Geary.SpecialFolderType.DRAFTS,
+            ((MainWindow) get_ancestor(typeof(MainWindow))).application.config,
             conversation_scroller.get_vadjustment()
         );
 

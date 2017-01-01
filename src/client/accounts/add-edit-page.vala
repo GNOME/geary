@@ -178,7 +178,7 @@ public class AddEditPage : Gtk.Box {
     private Gtk.CheckButton check_use_email_signature;
     private Gtk.Stack signature_stack;
     private Gtk.TextView textview_email_signature;
-    private ClientWebView preview_webview = new ClientWebView(null);
+    private ClientWebView preview_webview;
 
     private Gtk.Alignment other_info;
     
@@ -271,6 +271,8 @@ public class AddEditPage : Gtk.Box {
         edit_window.set_shadow_type(Gtk.ShadowType.IN);
         textview_email_signature = new Gtk.TextView();
         edit_window.add(textview_email_signature);
+
+        preview_webview = new ClientWebView(GearyApplication.instance.config);
 
         Gtk.ScrolledWindow preview_window = new Gtk.ScrolledWindow(null, null);
         preview_window.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC);

@@ -365,6 +365,7 @@ public class ConversationEmail : Gtk.Box {
      */
     public ConversationEmail(Geary.Email email,
                              Geary.ContactStore contact_store,
+                             Configuration config,
                              bool is_sent,
                              bool is_draft) {
         this.email = email;
@@ -451,7 +452,7 @@ public class ConversationEmail : Gtk.Box {
             load_images |= contact.always_load_remote_images();
         }
 
-        this.primary_message = new ConversationMessage(message, load_images);
+        this.primary_message = new ConversationMessage(message, config, load_images);
         this.primary_message.web_view.add_inline_resources(cid_resources);
         connect_message_view_signals(this.primary_message);
 
@@ -493,7 +494,7 @@ public class ConversationEmail : Gtk.Box {
         }
         foreach (Geary.RFC822.Message sub_message in sub_messages) {
             ConversationMessage attached_message =
-                new ConversationMessage(sub_message, false);
+                new ConversationMessage(sub_message, config, false);
             connect_message_view_signals(attached_message);
             attached_message.web_view.add_inline_resources(cid_resources);
             this.sub_messages.add(attached_message);

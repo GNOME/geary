@@ -206,7 +206,8 @@ public class ClientWebView : WebKit.WebView {
     public signal void remote_image_load_blocked();
 
 
-    public ClientWebView(WebKit.UserContentManager? custom_manager = null) {
+    public ClientWebView(Configuration config,
+                         WebKit.UserContentManager? custom_manager = null) {
         WebKit.Settings setts = new WebKit.Settings();
         setts.allow_modal_dialogs = false;
         setts.default_charset = "UTF-8";
@@ -267,12 +268,14 @@ public class ClientWebView : WebKit.WebView {
         register_message_handler(REMOTE_IMAGE_LOAD_BLOCKED_MESSAGE);
         register_message_handler(SELECTION_CHANGED_MESSAGE);
 
-        GearyApplication.instance.config.bind(Configuration.CONVERSATION_VIEWER_ZOOM_KEY, this, "zoom_level");
+        config.bind(Configuration.CONVERSATION_VIEWER_ZOOM_KEY, this, "zoom_level");
         this.scroll_event.connect(on_scroll_event);
 
-        Settings system_settings = GearyApplication.instance.config.gnome_interface;
-        system_settings.bind("document-font-name", this, "document-font", SettingsBindFlags.DEFAULT);
-        system_settings.bind("monospace-font-name", this, "monospace-font", SettingsBindFlags.DEFAULT);
+        Settings system_settings = config.gnome_interface;
+        system_settings.bind("document-font-name", this,
+                             "document-font", SettingsBindFlags.DEFAULT);
+        system_settings.bind("monospace-font-name", this,
+                             "monospace-font", SettingsBindFlags.DEFAULT);
     }
 
     /**

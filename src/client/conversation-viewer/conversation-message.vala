@@ -265,6 +265,7 @@ public class ConversationMessage : Gtk.Grid {
      * loading processes.
      */
     public ConversationMessage(Geary.RFC822.Message message,
+                               Configuration config,
                                bool load_remote_images) {
         this.message = message;
 
@@ -329,13 +330,11 @@ public class ConversationMessage : Gtk.Grid {
         string date_text = "";
         string date_tooltip = "";
         if (this.message.date != null) {
-            Date.ClockFormat clock_format =
-                GearyApplication.instance.config.clock_format;
             date_text = Date.pretty_print(
-                this.message.date.value, clock_format
+                this.message.date.value, config.clock_format
             );
             date_tooltip = Date.pretty_print_verbose(
-                this.message.date.value, clock_format
+                this.message.date.value, config.clock_format
             );
         }
         this.preview_date.set_text(date_text);
@@ -365,7 +364,7 @@ public class ConversationMessage : Gtk.Grid {
 
         // Web view
 
-        this.web_view = new ConversationWebView();
+        this.web_view = new ConversationWebView(config);
         if (load_remote_images) {
             this.web_view.allow_remote_image_loading();
         }

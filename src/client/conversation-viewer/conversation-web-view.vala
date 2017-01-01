@@ -28,8 +28,8 @@ public class ConversationWebView : ClientWebView {
     }
 
 
-    public ConversationWebView() {
-        base();
+    public ConversationWebView(Configuration config) {
+        base(config);
         this.user_content_manager.add_script(ConversationWebView.app_script);
         this.user_content_manager.add_style_sheet(ConversationWebView.app_stylesheet);
         if (ConversationWebView.user_stylesheet != null) {

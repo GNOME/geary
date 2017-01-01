@@ -71,8 +71,8 @@ public class ComposerWebView : ClientWebView {
     private bool is_shift_down = false;
 
 
-    public ComposerWebView() {
-        base();
+    public ComposerWebView(Configuration config) {
+        base(config);
         this.user_content_manager.add_script(ComposerWebView.app_script);
         // this.should_insert_text.connect(on_should_insert_text);
         this.key_press_event.connect(on_key_press_event);

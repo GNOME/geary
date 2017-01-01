@@ -284,6 +284,9 @@ public class ConversationListBox : Gtk.ListBox {
     // Cancellable for this conversation's data loading.
     private Cancellable cancellable = new Cancellable();
 
+    // App config
+    private Configuration config;
+
     // Email view with selected text, if any
     private ConversationEmail? body_selected_view = null;
 
@@ -327,6 +330,7 @@ public class ConversationListBox : Gtk.ListBox {
                                Geary.ContactStore contact_store,
                                Geary.AccountInformation account_info,
                                bool is_draft_folder,
+                               Configuration config,
                                Gtk.Adjustment adjustment) {
         this.conversation = conversation;
         this.location = location;
@@ -334,6 +338,7 @@ public class ConversationListBox : Gtk.ListBox {
         this.contact_store = contact_store;
         this.account_info = account_info;
         this.is_draft_folder = is_draft_folder;
+        this.config = config;
 
         get_style_context().add_class("background");
         get_style_context().add_class("conversation-listbox");
@@ -762,6 +767,7 @@ public class ConversationListBox : Gtk.ListBox {
         ConversationEmail view = new ConversationEmail(
             email,
             this.contact_store,
+            this.config,
             is_sent,
             is_draft
         );

@@ -214,7 +214,7 @@ public class ComposerWidget : Gtk.EventBox {
 
     public ComposerHeaderbar header { get; private set; }
 
-    public ComposerWebView editor { get; private set; default = new ComposerWebView(); }
+    public ComposerWebView editor { get; private set; }
 
     public string draft_save_text { get; private set; }
 
@@ -391,6 +391,8 @@ public class ComposerWidget : Gtk.EventBox {
         this.reply_to_label.set_mnemonic_widget(this.reply_to_entry);
 
         this.to_entry.margin_top = this.cc_entry.margin_top = this.bcc_entry.margin_top = this.reply_to_entry.margin_top = 6;
+
+        this.editor = new ComposerWebView(config);
 
         // Initialize menus
         Gtk.Builder builder = new Gtk.Builder.from_resource(
