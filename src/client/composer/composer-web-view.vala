@@ -211,6 +211,9 @@ public class ComposerWebView : ClientWebView {
             "geary.getText();", null
         );
 
+        const int MAX_BREAKABLE_LEN = 72; // F=F recommended line limit
+        const int MAX_UNBREAKABLE_LEN = 998; // SMTP line limit
+
         string body_text = WebKitUtil.to_string(result);
         string[] lines = body_text.split("\n");
         GLib.StringBuilder flowed = new GLib.StringBuilder.sized(body_text.length);
@@ -220,33 +223,52 @@ public class ComposerWebView : ClientWebView {
             // special, so leave that alone.
             if (line != "-- ")
                 line = line.chomp();
+
+            // Determine quoting depth by counting the the number of
+            // QUOTE_MARKERs present, and build a quote prefix for it.
             int quote_level = 0;
             while (line[quote_level] == Geary.RFC822.Utils.QUOTE_MARKER)
                 quote_level += 1;
             line = line[quote_level:line.length];
             string prefix = quote_level > 0 ? string.nfill(quote_level, '>') + " " : "";
-            int max_len = 72 - prefix.length;
 
+            // Check to see if the line (with quote prefix) is longer
+            // than the recommended limit, if so work out where to do
+            int max_breakable = MAX_BREAKABLE_LEN - prefix.length;
+            int max_unbreakable = MAX_UNBREAKABLE_LEN - prefix.length;
             do {
                 int start_ind = 0;
+
+                // Space stuff if needed
                 if (quote_level == 0 &&
                     (line.has_prefix(">") || line.has_prefix("From"))) {
                     line = " " + line;
                     start_ind = 1;
                 }
 
+                // Check to see if we need to break the line, if so
+                // determine where to do it.
                 int cut_ind = line.length;
-                if (cut_ind > max_len) {
-                    string beg = line[0:max_len];
+                if (cut_ind > max_breakable) {
+                    // Line needs to be broken, look for the last
+                    // useful place to break before before the
+                    // max recommended length.
+                    string beg = line[0:max_breakable];
                     cut_ind = beg.last_index_of(" ", start_ind) + 1;
                     if (cut_ind == 0) {
+                        // No natural places to break found, so look
+                        // for place further along, and if that is
+                        // also not found then break on the SMTP max
+                        // line length.
                         cut_ind = line.index_of(" ", start_ind) + 1;
                         if (cut_ind == 0)
                             cut_ind = line.length;
-                        if (cut_ind > 998 - prefix.length)
-                            cut_ind = 998 - prefix.length;
+                        if (cut_ind > max_unbreakable)
+                            cut_ind = max_unbreakable;
                     }
                 }
+
+                // Actually break the line
                 flowed.append(prefix + line[0:cut_ind] + "\n");
                 line = line[cut_ind:line.length];
             } while (line.length > 0);

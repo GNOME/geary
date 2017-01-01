@@ -22,7 +22,7 @@ ComposerPageState.prototype = {
     init: function() {
         PageState.prototype.init.apply(this, []);
 
-        var state = this;
+        let state = this;
         document.addEventListener("click", function(e) {
             if (e.target.tagName == "A") {
                 state.linkClicked(e.target);
@@ -33,9 +33,9 @@ ComposerPageState.prototype = {
         // Search for and remove a particular styling when we quote
         // text. If that style exists in the quoted text, we alter it
         // slightly so we don't mess with it later.
-        var nodeList = document.querySelectorAll(
+        let nodeList = document.querySelectorAll(
             "blockquote[style=\"margin: 0 0 0 40px; border: none; padding: 0px;\"]");
-        for (var i = 0; i < nodeList.length; ++i) {
+        for (let i = 0; i < nodeList.length; ++i) {
             nodeList.item(i).setAttribute(
                 "style",
                 "margin: 0 0 0 40px; padding: 0px; border:none;"
@@ -46,13 +46,13 @@ ComposerPageState.prototype = {
         document.body.focus();
 
         // Set cursor at appropriate position
-        var cursor = document.getElementById("cursormarker");
+        let cursor = document.getElementById("cursormarker");
         if (cursor != null) {
-            var range = document.createRange();
+            let range = document.createRange();
             range.selectNodeContents(cursor);
             range.collapse(false);
 
-            var selection = window.getSelection();
+            let selection = window.getSelection();
             selection.removeAllRanges();
             selection.addRange(range);
             cursor.parentNode.removeChild(cursor);

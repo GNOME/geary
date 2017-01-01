@@ -24,10 +24,10 @@ class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
         try {
             assert(run_javascript(@"window.geary.getHtml();") == html + "<br><br>");
         } catch (Geary.JS.Error err) {
-            print("Geary.JS.Error: %s", err.message);
+            print("Geary.JS.Error: %s\n", err.message);
             assert_not_reached();
         } catch (Error err) {
-            print("WKError: %s", err.message);
+            print("WKError: %s\n", err.message);
             assert_not_reached();
         }
     }
@@ -37,10 +37,10 @@ class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
         try {
             assert(run_javascript(@"window.geary.getText();") == "para\n\n\n\n");
         } catch (Geary.JS.Error err) {
-            print("Geary.JS.Error: %s", err.message);
+            print("Geary.JS.Error: %s\n", err.message);
             assert_not_reached();
         } catch (Error err) {
-            print("WKError: %s", err.message);
+            print("WKError: %s\n", err.message);
             assert_not_reached();
         }
     }
@@ -67,10 +67,10 @@ class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
             assert(run_javascript(@"window.geary.getText();") ==
                    @"pre\n\n$(q_marker)quote1\n$(q_marker)\n$(q_marker)$(q_marker)quote2\n$(q_marker)$(q_marker)\npost\n\n\n\n");
         } catch (Geary.JS.Error err) {
-            print("Geary.JS.Error: %s", err.message);
+            print("Geary.JS.Error: %s\n", err.message);
             assert_not_reached();
         } catch (Error err) {
-            print("WKError: %s", err.message);
+            print("WKError: %s\n", err.message);
             assert_not_reached();
         }
     }
@@ -101,10 +101,10 @@ class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
             assert(run_javascript(@"ComposerPageState.resolveNesting('$(js_cosy_quote2)', $(js_values));") ==
                    @"foo\n$(q_marker)quote1\n$(q_marker)quote2\nbar");
         } catch (Geary.JS.Error err) {
-            print("Geary.JS.Error: %s", err.message);
+            print("Geary.JS.Error: %s\n", err.message);
             assert_not_reached();
         } catch (Error err) {
-            print("WKError: %s", err.message);
+            print("WKError: %s\n", err.message);
             assert_not_reached();
         }
     }
@@ -120,10 +120,10 @@ class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
             assert(run_javascript("ComposerPageState.quoteLines('line1\\nline2');") ==
                    @"$(q_marker)line1\n$(q_marker)line2");
         } catch (Geary.JS.Error err) {
-            print("Geary.JS.Error: %s", err.message);
+            print("Geary.JS.Error: %s\n", err.message);
             assert_not_reached();
         } catch (Error err) {
-            print("WKError: %s", err.message);
+            print("WKError: %s\n", err.message);
             assert_not_reached();
         }
     }
