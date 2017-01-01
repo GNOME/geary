@@ -200,7 +200,7 @@ public class ComposerWebView : ClientWebView {
         WebKit.JavascriptResult result = yield this.run_javascript(
             "geary.getHtml();", null
         );
-        return get_string_result(result);
+        return WebKitUtil.to_string(result);
     }
 
     /**
@@ -210,7 +210,7 @@ public class ComposerWebView : ClientWebView {
         WebKit.JavascriptResult result = yield this.run_javascript(
             "geary.getText();", null
         );
-        return get_string_result(result);
+        return WebKitUtil.to_string(result);
     }
 
     /**

@@ -6,8 +6,6 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-protected errordomain JSError { EXCEPTION, TYPE }
-
 public class ClientWebView : WebKit.WebView {
 
 
@@ -103,43 +101,6 @@ public class ClientWebView : WebKit.WebView {
             null,
             null
         );
-    }
-
-    protected static bool get_bool_result(WebKit.JavascriptResult result)
-        throws JSError {
-        JS.GlobalContext context = result.get_global_context();
-        JS.Value value = result.get_value();
-        return context.to_boolean(value);
-        // XXX unref result?
-    }
-
-    protected static int get_int_result(WebKit.JavascriptResult result)
-        throws JSError {
-        JS.GlobalContext context = result.get_global_context();
-        JS.Value value = result.get_value();
-        if (!context.is_number(value)) {
-            throw new JSError.TYPE("Value is not a number");
-        }
-        JS.Value? err = null;
-        return (int) context.to_number(value, out err);
-        // XXX check err
-        // XXX unref result?
-    }
-
-    protected static string? get_string_result(WebKit.JavascriptResult result)
-        throws JSError {
-        JS.GlobalContext context = result.get_global_context();
-        JS.Value js_str_value = result.get_value();
-        JS.Value? err = null;
-        JS.String js_str = context.to_string_copy(js_str_value, out err);
-        // XXX check err
-        int len = js_str.get_maximum_utf8_cstring_size();
-        string value = string.nfill(len, 0);
-        js_str.get_utf8_cstring(value, len);
-        js_str.release();
-        debug("Got string: %s", value);
-        return value;
-        // XXX unref result?
     }
 
     private static inline uint to_wk2_font_size(Pango.FontDescription font) {
@@ -245,9 +206,9 @@ public class ClientWebView : WebKit.WebView {
         content_manager.script_message_received[PREFERRED_HEIGHT_MESSAGE].connect(
             (result) => {
                 try {
-                    this.preferred_height = get_int_result(result);
+                    this.preferred_height = (int) WebKitUtil.to_number(result);
                     queue_resize();
-                } catch (JSError err) {
+                } catch (Geary.JS.Error err) {
                     debug("Could not get preferred height: %s", err.message);
                 }
             });
@@ -258,8 +219,8 @@ public class ClientWebView : WebKit.WebView {
         content_manager.script_message_received[SELECTION_CHANGED_MESSAGE].connect(
             (result) => {
                 try {
-                    selection_changed(get_bool_result(result));
-                } catch (JSError err) {
+                    selection_changed(WebKitUtil.to_bool(result));
+                } catch (Geary.JS.Error err) {
                     debug("Could not get selection content: %s", err.message);
                 }
             });

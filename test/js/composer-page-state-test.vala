@@ -41,8 +41,8 @@ class ComposerPageStateTest : Gee.TestCase {
         load_body_fixture(html);
         try {
             assert(run_javascript(@"window.geary.getHtml();") == html + "<br><br>");
-        } catch (JSError err) {
-            print("JSError: %s", err.message);
+        } catch (Geary.JS.Error err) {
+            print("Geary.JS.Error: %s", err.message);
             assert_not_reached();
         } catch (Error err) {
             print("WKError: %s", err.message);
@@ -54,8 +54,8 @@ class ComposerPageStateTest : Gee.TestCase {
         load_body_fixture("<p>para</p>");
         try {
             assert(run_javascript(@"window.geary.getText();") == "para\n\n\n\n\n");
-        } catch (JSError err) {
-            print("JSError: %s", err.message);
+        } catch (Geary.JS.Error err) {
+            print("Geary.JS.Error: %s", err.message);
             assert_not_reached();
         } catch (Error err) {
             print("WKError: %s", err.message);
@@ -68,8 +68,8 @@ class ComposerPageStateTest : Gee.TestCase {
         try {
             assert(run_javascript(@"window.geary.getText();") ==
                    "pre\n\n> quote\n> \npost\n\n\n\n\n");
-        } catch (JSError err) {
-            print("JSError: %s", err.message);
+        } catch (Geary.JS.Error err) {
+            print("Geary.JS.Error: %s", err.message);
             assert_not_reached();
         } catch (Error err) {
             print("WKError: %s", err.message);
@@ -82,8 +82,8 @@ class ComposerPageStateTest : Gee.TestCase {
         try {
             assert(run_javascript(@"window.geary.getText();") ==
                    "pre\n\n> quote1\n> \n>> quote2\n>> \npost\n\n\n\n\n");
-        } catch (JSError err) {
-            print("JSError: %s", err.message);
+        } catch (Geary.JS.Error err) {
+            print("Geary.JS.Error: %s", err.message);
             assert_not_reached();
         } catch (Error err) {
             print("WKError: %s", err.message);
@@ -116,8 +116,8 @@ class ComposerPageStateTest : Gee.TestCase {
                    @"foo\n$(q_marker)quote1\nbar");
             assert(run_javascript(@"ComposerPageState.resolveNesting('$(js_cosy_quote2)', $(js_values));") ==
                    @"foo\n$(q_marker)quote1\n$(q_marker)quote2\nbar");
-        } catch (JSError err) {
-            print("JSError: %s", err.message);
+        } catch (Geary.JS.Error err) {
+            print("Geary.JS.Error: %s", err.message);
             assert_not_reached();
         } catch (Error err) {
             print("WKError: %s", err.message);
@@ -135,8 +135,8 @@ class ComposerPageStateTest : Gee.TestCase {
                    @"$(q_marker)line1");
             assert(run_javascript("ComposerPageState.quoteLines('line1\\nline2');") ==
                    @"$(q_marker)line1\n$(q_marker)line2");
-        } catch (JSError err) {
-            print("JSError: %s", err.message);
+        } catch (Geary.JS.Error err) {
+            print("Geary.JS.Error: %s", err.message);
             assert_not_reached();
         } catch (Error err) {
             print("WKError: %s", err.message);
@@ -158,7 +158,7 @@ class ComposerPageStateTest : Gee.TestCase {
 
         WebKit.JavascriptResult result =
            this.test_view.run_javascript.end(async_result());
-        return get_string_result(result);
+        return WebKitUtil.to_string(result);
     }
 
     protected void async_complete(AsyncResult result) {
@@ -172,50 +172,6 @@ class ComposerPageStateTest : Gee.TestCase {
             result = this.async_results.try_pop();
         }
         return result;
-    }
-
-    protected static string? get_string_result(WebKit.JavascriptResult result)
-        throws JSError {
-        JS.GlobalContext context = result.get_global_context();
-        JS.Value js_str_value = result.get_value();
-        JS.Value? err = null;
-        JS.String js_str = context.to_string_copy(js_str_value, out err);
-
-        check_exception(context, err);
-        return to_string_released(js_str);
-    }
-
-    protected static inline void check_exception(JS.Context exe, JS.Value? err_value)
-        throws JSError {
-        if (!is_null(exe, err_value)) {
-            JS.Value? nested_err = null;
-            JS.Type err_type = err_value.get_type(exe);
-            JS.String err_str = exe.to_string_copy(err_value, out nested_err);
-
-            if (!is_null(exe, nested_err)) {
-                throw new JSError.EXCEPTION(
-                    "Nested exception getting exception %s as a string",
-                    err_type.to_string()
-                );
-            }
-
-            throw new JSError.EXCEPTION(
-                "JS exception thrown [%s]: %s"
-                .printf(err_type.to_string(), to_string_released(err_str))
-            );
-        }
-    }
-
-    protected static inline bool is_null(JS.Context exe, JS.Value? js) {
-        return (js == null || js.get_type(exe) == JS.Type.NULL);
-    }
-
-    protected static string to_string_released(JS.String js) {
-        int len = js.get_maximum_utf8_cstring_size();
-        string str = string.nfill(len, 0);
-        js.get_utf8_cstring(str, len);
-        js.release();
-        return str;
     }
 
 }

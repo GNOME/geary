@@ -1,4 +1,9 @@
-/* javascriptcore-4.0.vapi. */
+/*
+ * Copyright 2017 Michael Gratton <mike@vee.net>
+ *
+ * This software is licensed under the GNU Lesser General Public License
+ * (version 2.1 or later). See the COPYING file in this distribution.
+ */
 
 [CCode (cprefix = "JS", gir_namespace = "JavaScriptCore", gir_version = "4.0", lower_case_cprefix = "JS_", cheader_filename = "JavaScriptCore/JavaScript.h")]
 namespace JS {
@@ -7,27 +12,6 @@ namespace JS {
     [SimpleType]
 	public struct Context {
 
-        [CCode (cname = "JSValueIsBoolean")]
-        public bool is_boolean(JS.Value value);
-
-        [CCode (cname = "JSValueIsNumber")]
-        public bool is_number(JS.Value value);
-
-        [CCode (cname = "JSValueIsObject")]
-        public bool is_object(JS.Value value);
-
-        [CCode (cname = "JSValueToBoolean")]
-        public bool to_boolean(JS.Value value);
-
-        [CCode (cname = "JSValueToNumber")]
-        public double to_number(JS.Value value, out JS.Value exception);
-
-        [CCode (cname = "JSValueToObject")]
-        public Object to_object(JS.Value value, out JS.Value exception);
-
-        [CCode (cname = "JSValueToStringCopy")]
-        public String to_string_copy(JS.Value value, out JS.Value exception);
-
         [CCode (cname = "JSEvaluateScript")]
         public Value evaluate_script(String script,
                                      Object? thisObject,
@@ -35,21 +19,11 @@ namespace JS {
                                      int startingLineNumber,
                                      out Value? exception);
 
-        [CCode (cname = "JSObjectMakeFunction")]
-        public Object make_function(String? name,
-                                    [CCode (array_length_pos=1.5)]
-                                    String[]? parameterNames,
-                                    String body,
-                                    String? sourceURL,
-                                    int startingLineNumber,
-                                    out Value? exception);
-
-        [CCode (cname = "JSObjectCallAsFunction")]
-        public Value call_as_function(Object object,
-                                      Object? thisObject,
-                                      [CCode (array_length_pos=2.5)]
-                                      Value[]? arguments,
-                                      out Value? exception);
+        [CCode (cname = "JSCheckScriptSyntax")]
+        public Value check_script_syntax(String script,
+                                         String? sourceURL,
+                                         int startingLineNumber,
+                                         out Value? exception);
 
 	}
 
@@ -61,9 +35,47 @@ namespace JS {
         public bool release();
 	}
 
+	[CCode (cname = "JSType", has_type_id = false)]
+	public enum Type {
+
+        [CCode (cname = "kJSTypeUndefined")]
+        UNDEFINED,
+
+        [CCode (cname = "kJSTypeNull")]
+        NULL,
+
+        [CCode (cname = "kJSTypeBoolean")]
+        BOOLEAN,
+
+        [CCode (cname = "kJSTypeNumber")]
+        NUMBER,
+
+        [CCode (cname = "kJSTypeString")]
+        STRING,
+
+        [CCode (cname = "kJSTypeObject")]
+        OBJECT
+    }
+
 	[CCode (cname = "JSObjectRef")]
     [SimpleType]
 	public struct Object {
+
+        [CCode (cname = "JSObjectMakeFunction")]
+        public Object.make_function(String? name,
+                                    [CCode (array_length_pos=1.5)]
+                                    String[]? parameterNames,
+                                    String body,
+                                    String? sourceURL,
+                                    int startingLineNumber,
+                                    out Value? exception);
+
+        [CCode (cname = "JSObjectCallAsFunction", instance_pos = 1.1)]
+        public Value call_as_function(Context ctx,
+                                      Object? thisObject,
+                                      [CCode (array_length_pos=2.5)]
+                                      Value[]? arguments,
+                                      out Value? exception);
 
         [CCode (cname = "JSObjectHasProperty", instance_pos = 1.1)]
         public bool has_property(Context ctx, String property_name);
@@ -80,7 +92,31 @@ namespace JS {
 	public struct Value {
 
         [CCode (cname = "JSValueGetType", instance_pos = 1.1)]
-        public JS.Type get_type(JS.Context context);
+        public Type get_type(Context context);
+
+        [CCode (cname = "JSValueIsBoolean", instance_pos = 1.1)]
+        public bool is_boolean(Context ctx);
+
+        [CCode (cname = "JSValueIsNumber", instance_pos = 1.1)]
+        public bool is_number(Context ctx);
+
+        [CCode (cname = "JSValueIsObject", instance_pos = 1.1)]
+        public bool is_object(Context ctx);
+
+        [CCode (cname = "JSValueIsString", instance_pos = 1.1)]
+        public bool is_string(Context ctx);
+
+        [CCode (cname = "JSValueToBoolean", instance_pos = 1.1)]
+        public bool to_boolean(Context ctx);
+
+        [CCode (cname = "JSValueToNumber", instance_pos = 1.1)]
+        public double to_number(Context ctx, out Value exception);
+
+        [CCode (cname = "JSValueToObject", instance_pos = 1.1)]
+        public Object to_object(Context ctx, out Value exception);
+
+        [CCode (cname = "JSValueToStringCopy", instance_pos = 1.1)]
+        public String to_string_copy(Context ctx, out Value exception);
 
 	}
 
@@ -107,27 +143,5 @@ namespace JS {
         public void String.release();
 
 	}
-
-	[CCode (cname = "JSType", has_type_id = false)]
-	public enum Type {
-
-        [CCode (cname = "kJSTypeUndefined")]
-        UNDEFINED,
-
-        [CCode (cname = "kJSTypeNull")]
-        NULL,
-
-        [CCode (cname = "kJSTypeBoolean")]
-        BOOLEAN,
-
-        [CCode (cname = "kJSTypeNumber")]
-        NUMBER,
-
-        [CCode (cname = "kJSTypeString")]
-        STRING,
-
-        [CCode (cname = "kJSTypeObject")]
-        OBJECT
-    }
 
 }

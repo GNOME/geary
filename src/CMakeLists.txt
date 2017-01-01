@@ -298,6 +298,7 @@ engine/util/util-html.vala
 engine/util/util-imap-utf7.vala
 engine/util/util-inet.vala
 engine/util/util-iterable.vala
+engine/util/util-js.vala
 engine/util/util-numeric.vala
 engine/util/util-object.vala
 engine/util/util-reference-semantics.vala
@@ -404,6 +405,7 @@ client/util/util-gravatar.vala
 client/util/util-gtk.vala
 client/util/util-international.vala
 client/util/util-migrate.vala
+client/util/util-webkit.vala
 )
 
 set(WEB_PROCESS_SRC
@@ -522,6 +524,7 @@ set(ENGINE_PACKAGES
   gio-2.0
   glib-2.0
   gmime-2.6
+  javascriptcore-4.0
   libxml-2.0
   posix
   sqlite3
@@ -533,7 +536,6 @@ set(CLIENT_PACKAGES
   geary-engine
   gio-2.0
   gtk+-3.0
-  javascriptcore-4.0
   libcanberra
   libnotify
   libsecret-1
@@ -645,6 +647,7 @@ add_custom_target(webkit2gtk-vapi
   DEPENDS
     "${CMAKE_BINARY_DIR}/src/webkit2gtk-4.0.vapi"
     "${CMAKE_BINARY_DIR}/src/webkit2gtk-web-extension-4.0.vapi"
+    "${CMAKE_SOURCE_DIR}/bindings/vapi/javascriptcore-4.0.vapi"
 )
 add_custom_command(
     OUTPUT

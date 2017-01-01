@@ -44,7 +44,7 @@ public class ConversationWebView : ClientWebView {
         WebKit.JavascriptResult result = yield this.run_javascript(
             "geary.getSelectionForFind();", null
         );
-        return get_string_result(result);
+        return WebKitUtil.to_string(result);
     }
 
     /**
@@ -54,7 +54,7 @@ public class ConversationWebView : ClientWebView {
         WebKit.JavascriptResult result = yield this.run_javascript(
             "geary.getSelectionForQuoting();", null
         );
-        return get_string_result(result);
+        return WebKitUtil.to_string(result);
     }
 
 }

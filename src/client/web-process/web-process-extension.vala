@@ -81,33 +81,65 @@ public class GearyWebExtension : Object {
     }
 
     private bool should_load_remote_images(WebKit.WebPage page) {
+        bool should_load = false;
         WebKit.Frame frame = page.get_main_frame();
         JS.GlobalContext context = frame.get_javascript_global_context();
-        JS.Value ret = execute_script(context, "geary.allowRemoteImages");
-        // XXX check err here, log it
-        //JS.Value? err;
-        //return context.to_boolean(ret, err);
-        return context.to_boolean(ret);
+        try {
+            JS.Value ret = execute_script(
+                context, "geary.allowRemoteImages", int.parse("__LINE__")
+            );
+            should_load = ret.to_boolean(context);
+        } catch (Error err) {
+            debug(
+                "Error checking PageState::allowRemoteImages: %s",
+                err.message
+            );
+        }
+        return should_load;
     }
 
     private void remote_image_load_blocked(WebKit.WebPage page) {
         WebKit.Frame frame = page.get_main_frame();
-        JS.Context context = frame.get_javascript_global_context();
-        execute_script(context, "geary.remoteImageLoadBlocked();");
+        JS.GlobalContext context = frame.get_javascript_global_context();
+        try {
+            execute_script(
+                context, "geary.remoteImageLoadBlocked();", int.parse("__LINE__")
+            );
+        } catch (Error err) {
+            debug(
+                "Error calling PageState::remoteImageLoadBlocked: %s",
+                err.message
+            );
+        }
     }
 
     private void selection_changed(WebKit.WebPage page) {
         WebKit.Frame frame = page.get_main_frame();
-        JS.Context context = frame.get_javascript_global_context();
-        execute_script(context, "geary.selectionChanged();");
+        JS.GlobalContext context = frame.get_javascript_global_context();
+        try {
+            execute_script(
+                context, "geary.selectionChanged();", int.parse("__LINE__")
+            );
+        } catch (Error err) {
+            debug("Error calling PageStates::selectionChanged: %s", err.message);
+        }
     }
 
-    private JS.Value execute_script(JS.Context context, string script) {
+    private JS.Value execute_script(JS.Context context, string script, int line)
+    throws Geary.JS.Error {
         JS.String js_script = new JS.String.create_with_utf8_cstring(script);
-        // XXX check err here, log it
-        //JS.Value? err;
-        //context.evaluate_script(js_script, null, null, 0, out err);
-        return context.evaluate_script(js_script, null, null, 0, null);
+        JS.String js_source = new JS.String.create_with_utf8_cstring("__FILE__");
+        JS.Value? err = null;
+        try {
+            JS.Value ret = context.evaluate_script(
+                js_script, null, js_source, line, out err
+            );
+            Geary.JS.check_exception(context, err);
+            return ret;
+        } finally {
+            js_script.release();
+            js_source.release();
+        }
     }
 
 }
