@@ -6,6 +6,14 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
+/**
+ * Base class for all WebKit2 WebView instances used by the Geary client.
+ *
+ * This provides common functionality expected by the client for
+ * displaying HTML, such as common WebKit settings, desktop font
+ * integration, Inspector support, and remote and inline image
+ * handling.
+ */
 public class ClientWebView : WebKit.WebView {
 
 
@@ -237,9 +245,11 @@ public class ClientWebView : WebKit.WebView {
         register_message_handler(REMOTE_IMAGE_LOAD_BLOCKED_MESSAGE);
         register_message_handler(SELECTION_CHANGED_MESSAGE);
 
+        // Manage zoom level
         config.bind(Configuration.CONVERSATION_VIEWER_ZOOM_KEY, this, "zoom_level");
         this.scroll_event.connect(on_scroll_event);
 
+        // Watch desktop font settings
         Settings system_settings = config.gnome_interface;
         system_settings.bind("document-font-name", this,
                              "document-font", SettingsBindFlags.DEFAULT);

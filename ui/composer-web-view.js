@@ -113,12 +113,10 @@ ComposerPageState.htmlToFlowedText = function(root) {
     for (let i = nbq - 1; i >= 0; i--) {
         let bq = blockquotes.item(i);
         let text = bq.innerText;
-        console.log("Line: " + text);
         if (text.substr(-1, 1) == "\n") {
             text = text.slice(0, -1);
-            console.log("  found expected newline at end of quote!");
         } else {
-            console.log(
+            console.debug(
                 "  no newline at end of quote: " +
                     text.length > 0
                     ? "0x" + text.codePointAt(text.length - 1).toString(16)
@@ -201,21 +199,21 @@ ComposerPageState.resolveNesting = function(text, values) {
     );
     return text.replace(tokenregex, function(match, p1, p2, p3, offset, str) {
         let key = new Number(p2);
-        let prevChar = p1;
-        let nextChar = p3;
+        let prevChars = p1;
+        let nextChars = p3;
         let insertNext = "";
         // Make sure there's a newline before and after the quote.
-        if (prevChar != "" && prevChar != "\n")
-            prevChar = prevChar + "\n";
-        if (nextChar != "" && nextChar != "\n")
+        if (prevChars != "" && prevChars != "\n")
+            prevChars = prevChars + "\n";
+        if (nextChars != "" && nextChars != "\n")
             insertNext = "\n";
 
         let value = "";
         if (key >= 0 && key < values.length) {
             let nested = ComposerPageState.resolveNesting(values[key], values);
-            value = prevChar + ComposerPageState.quoteLines(nested) + insertNext;
+            value = prevChars + ComposerPageState.quoteLines(nested) + insertNext;
         } else {
-            console.log("Regex error in denesting blockquotes: Invalid key");
+            console.error("Regex error in denesting blockquotes: Invalid key");
         }
         return value;
     });
