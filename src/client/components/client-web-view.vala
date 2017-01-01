@@ -210,11 +210,17 @@ public class ClientWebView : WebKit.WebView {
                     queue_resize();
                 } catch (Geary.JS.Error err) {
                     debug("Could not get preferred height: %s", err.message);
+                } finally {
+                    result.unref();
                 }
             });
         content_manager.script_message_received[REMOTE_IMAGE_LOAD_BLOCKED_MESSAGE].connect(
             (result) => {
-                remote_image_load_blocked();
+                try {
+                    remote_image_load_blocked();
+                } finally {
+                    result.unref();
+                }
             });
         content_manager.script_message_received[SELECTION_CHANGED_MESSAGE].connect(
             (result) => {
@@ -222,6 +228,8 @@ public class ClientWebView : WebKit.WebView {
                     selection_changed(WebKitUtil.to_bool(result));
                 } catch (Geary.JS.Error err) {
                     debug("Could not get selection content: %s", err.message);
+                } finally {
+                    result.unref();
                 }
             });
 
