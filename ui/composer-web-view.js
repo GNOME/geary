@@ -66,7 +66,7 @@ ComposerPageState.prototype = {
         return document.getElementById(ComposerPageState.BODY_ID).innerHTML;
     },
     getText: function() {
-        return ComposerPageState.htmlToFlowedText(
+        return ComposerPageState.htmlToQuotedText(
             document.getElementById(ComposerPageState.BODY_ID)
         );
     },
@@ -93,15 +93,27 @@ ComposerPageState.prototype = {
 };
 
 /**
- * Convert a HTML DOM tree to RFC 3676 format=flowed text.
+ * Convert a HTML DOM tree to plain text with delineated quotes.
  *
- * This will modify/reset the DOM.
+ * Lines are delinated using LF. Quoted lines are prefixed with
+ * `ComposerPageState.QUOTE_MARKER`, where the number of markers
+ * indicates the depth of nesting of the quote.
+ *
+ * This will modify/reset the DOM, since it ultimately requires
+ * stuffing `QUOTE_MARKER` into existing paragraphs and getting it
+ * back out in a way that preserves the visual presentation.
  */
-ComposerPageState.htmlToFlowedText = function(root) {
-    var savedDoc = root.innerHTML;
-    var blockquotes = root.querySelectorAll("blockquote");
-    var nbq = blockquotes.length;
-    var bqtexts = new Array(nbq);
+ComposerPageState.htmlToQuotedText = function(root) {
+    // XXX It would be nice to just clone the root and modify that, or
+    // see if we can implement this some other way so as to not modify
+    // the DOM at all, but currently unit test show that the results
+    // are not the same if we work on a clone, likely because of the
+    // use of HTMLElement::innerText. Need to look into it more.
+
+    let savedDoc = root.innerHTML;
+    let blockquotes = root.querySelectorAll("blockquote");
+    let nbq = blockquotes.length;
+    let bqtexts = new Array(nbq);
 
     // Get text of blockquotes and pull them out of DOM.  They are
     // replaced with tokens deliminated with the characters
@@ -132,61 +144,14 @@ ComposerPageState.htmlToFlowedText = function(root) {
         );
     }
 
-    // Reassemble plain text out of parts, replace non-breaking
-    // space with regular space
-    var doctext = ComposerPageState.resolveNesting(
-        root.innerText, bqtexts
-    ).replace("\xc2\xa0", " ");
+    // Reassemble plain text out of parts, and replace non-breaking
+    // space with regular space.
+    let text = ComposerPageState.resolveNesting(root.innerText, bqtexts)
 
-    // Reassemble DOM
+    // Reassemble DOM now we have the plain text
     root.innerHTML = savedDoc;
 
-    // Wrap, space stuff, quote
-    var lines = doctext.split("\n");
-    flowed = [];
-    for (let line of lines) {
-        // Strip trailing whitespace, so it doesn't look like a flowed
-        // line.  But the signature separator "-- " is special, so
-        // leave that alone.
-        if (line != "-- ") {
-            line = line.trimRight();
-        }
-        let quoteLevel = 0;
-        while (line[quoteLevel] == ComposerPageState.QUOTE_MARKER) {
-            quoteLevel += 1;
-        }
-        line = line.substr(quoteLevel, line.length);
-        let prefix = quoteLevel > 0 ? '>'.repeat(quoteLevel) + " " : "";
-        let maxLen = 72 - prefix.length;
-
-        do {
-            let startInd = 0;
-            if (quoteLevel == 0 &&
-                (line.startsWith(">") || line.startsWith("From"))) {
-                line = " " + line;
-                startInd = 1;
-            }
-
-            let cutInd = line.length;
-            if (cutInd > maxLen) {
-                let beg = line.substr(0, maxLen);
-                cutInd = beg.lastIndexOf(" ", startInd) + 1;
-                if (cutInd == 0) {
-                    cutInd = line.indexOf(" ", startInd) + 1;
-                    if (cutInd == 0) {
-                        cutInd = line.length;
-                    }
-                    if (cutInd > 998 - prefix.length) {
-                        cutInd = 998 - prefix.length;
-                    }
-                }
-            }
-            flowed.push(prefix + line.substr(0, cutInd) + "\n");
-            line = line.substr(cutInd, line.length);
-        } while (line.length > 0);
-    }
-
-    return flowed.join("");
+    return ComposerPageState.replaceNonBreakingSpace(text);
 };
 
 ComposerPageState.resolveNesting = function(text, values) {
@@ -219,11 +184,24 @@ ComposerPageState.resolveNesting = function(text, values) {
     });
 };
 
+/**
+ * Prefixes each NL-delineated line with `ComposerPageState.QUOTE_MARKER`.
+ */
 ComposerPageState.quoteLines = function(text) {
     let lines = text.split("\n");
     for (let i = 0; i < lines.length; i++)
         lines[i] = ComposerPageState.QUOTE_MARKER + lines[i];
     return lines.join("\n");
+};
+
+/**
+ * Converts all non-breaking space chars to plain spaces.
+ */
+ComposerPageState.replaceNonBreakingSpace = function(text) {
+    // XXX this is a separate function for unit testing - since when
+    // running as a unit test, HTMLElement.innerText appears to not
+    // convert &nbsp into U+00A0.
+    return text.replace(new RegExp(" ", "g"), " ");
 };
 
 

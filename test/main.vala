@@ -45,6 +45,7 @@ int main(string[] args) {
 
     TestSuite client = new TestSuite("client");
 
+    client.add_suite(new ComposerWebViewTest().get_suite());
     client.add_suite(new ConfigurationTest().get_suite());
 
     TestSuite js = new TestSuite("js");

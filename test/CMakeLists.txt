@@ -13,6 +13,8 @@ set(TEST_SRC
   engine/util-html-test.vala
 
   client/application/geary-configuration-test.vala
+  client/components/client-web-view-test-case.vala
+  client/composer/composer-web-view-test.vala
 
   js/composer-page-state-test.vala
 )

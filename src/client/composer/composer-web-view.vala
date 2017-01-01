@@ -204,13 +204,55 @@ public class ComposerWebView : ClientWebView {
     }
 
     /**
-     * Returns the editor content as a plain text string.
+     * Returns the editor text as RFC 3676 format=flowed text.
      */
     public async string? get_text() throws Error {
         WebKit.JavascriptResult result = yield this.run_javascript(
             "geary.getText();", null
         );
-        return WebKitUtil.to_string(result);
+
+        string body_text = WebKitUtil.to_string(result);
+        string[] lines = body_text.split("\n");
+        GLib.StringBuilder flowed = new GLib.StringBuilder.sized(body_text.length);
+        foreach (string line in lines) {
+            // Strip trailing whitespace, so it doesn't look like a
+            // flowed line.  But the signature separator "-- " is
+            // special, so leave that alone.
+            if (line != "-- ")
+                line = line.chomp();
+            int quote_level = 0;
+            while (line[quote_level] == Geary.RFC822.Utils.QUOTE_MARKER)
+                quote_level += 1;
+            line = line[quote_level:line.length];
+            string prefix = quote_level > 0 ? string.nfill(quote_level, '>') + " " : "";
+            int max_len = 72 - prefix.length;
+
+            do {
+                int start_ind = 0;
+                if (quote_level == 0 &&
+                    (line.has_prefix(">") || line.has_prefix("From"))) {
+                    line = " " + line;
+                    start_ind = 1;
+                }
+
+                int cut_ind = line.length;
+                if (cut_ind > max_len) {
+                    string beg = line[0:max_len];
+                    cut_ind = beg.last_index_of(" ", start_ind) + 1;
+                    if (cut_ind == 0) {
+                        cut_ind = line.index_of(" ", start_ind) + 1;
+                        if (cut_ind == 0)
+                            cut_ind = line.length;
+                        if (cut_ind > 998 - prefix.length)
+                            cut_ind = 998 - prefix.length;
+                    }
+                }
+                flowed.append(prefix + line[0:cut_ind] + "\n");
+                line = line[cut_ind:line.length];
+            } while (line.length > 0);
+        }
+
+        return flowed.str;
     }
 
     /**

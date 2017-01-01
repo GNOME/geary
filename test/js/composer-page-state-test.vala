@@ -5,13 +5,7 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-// Defined by CMake build script.
-extern const string _BUILD_ROOT_DIR;
-
-class ComposerPageStateTest : Gee.TestCase {
-
-    private ComposerWebView test_view = null;
-    private AsyncQueue<AsyncResult> async_results = new AsyncQueue<AsyncResult>();
+class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
 
     public ComposerPageStateTest() {
         base("ComposerPageStateTest");
@@ -21,19 +15,7 @@ class ComposerPageStateTest : Gee.TestCase {
         add_test("get_text_with_nested_quote", get_text_with_nested_quote);
         add_test("resolve_nesting", resolve_nesting);
         add_test("quote_lines", quote_lines);
-    }
-
-    public override void set_up() {
-        ClientWebView.init_web_context(File.new_for_path(_BUILD_ROOT_DIR).get_child("src"), true);
-        try {
-            ClientWebView.load_scripts();
-            ComposerWebView.load_resources();
-        } catch (Error err) {
-            print("\nComposerPageStateTest::set_up: %s\n", err.message);
-            assert_not_reached();
-        }
-        Configuration config = new Configuration(GearyApplication.APP_ID);
-        this.test_view = new ComposerWebView(config);
+        add_test("replace_non_breaking_space", replace_non_breaking_space);
     }
 
     public void get_html() {
@@ -53,7 +35,7 @@ class ComposerPageStateTest : Gee.TestCase {
     public void get_text() {
         load_body_fixture("<p>para</p>");
         try {
-            assert(run_javascript(@"window.geary.getText();") == "para\n\n\n\n\n");
+            assert(run_javascript(@"window.geary.getText();") == "para\n\n\n\n");
         } catch (Geary.JS.Error err) {
             print("Geary.JS.Error: %s", err.message);
             assert_not_reached();
@@ -64,10 +46,11 @@ class ComposerPageStateTest : Gee.TestCase {
     }
 
     public void get_text_with_quote() {
+        unichar q_marker = Geary.RFC822.Utils.QUOTE_MARKER;
         load_body_fixture("<p>pre</p> <blockquote><p>quote</p></blockquote> <p>post</p>");
         try {
             assert(run_javascript(@"window.geary.getText();") ==
-                   "pre\n\n> quote\n> \npost\n\n\n\n\n");
+                   @"pre\n\n$(q_marker)quote\n$(q_marker)\npost\n\n\n\n");
         } catch (Geary.JS.Error err) {
             print("Geary.JS.Error: %s", err.message);
             assert_not_reached();
@@ -78,10 +61,11 @@ class ComposerPageStateTest : Gee.TestCase {
     }
 
     public void get_text_with_nested_quote() {
+        unichar q_marker = Geary.RFC822.Utils.QUOTE_MARKER;
         load_body_fixture("<p>pre</p> <blockquote><p>quote1</p> <blockquote><p>quote2</p></blockquote></blockquote> <p>post</p>");
         try {
             assert(run_javascript(@"window.geary.getText();") ==
-                   "pre\n\n> quote1\n> \n>> quote2\n>> \npost\n\n\n\n\n");
+                   @"pre\n\n$(q_marker)quote1\n$(q_marker)\n$(q_marker)$(q_marker)quote2\n$(q_marker)$(q_marker)\npost\n\n\n\n");
         } catch (Geary.JS.Error err) {
             print("Geary.JS.Error: %s", err.message);
             assert_not_reached();
@@ -144,7 +128,35 @@ class ComposerPageStateTest : Gee.TestCase {
         }
     }
 
-    protected void load_body_fixture(string? html = null) {
+    public void replace_non_breaking_space() {
+        load_body_fixture();
+        string single_nbsp = "a b";
+        string multiple_nbsp = "a b c";
+        try {
+            assert(run_javascript(@"ComposerPageState.replaceNonBreakingSpace('$(single_nbsp)');") ==
+                   "a b");
+            assert(run_javascript(@"ComposerPageState.replaceNonBreakingSpace('$(multiple_nbsp)');") ==
+                   "a b c");
+        } catch (Geary.JS.Error err) {
+            print("Geary.JS.Error: %s\n", err.message);
+            assert_not_reached();
+        } catch (Error err) {
+            print("WKError: %s\n", err.message);
+            assert_not_reached();
+        }
+    }
+
+    protected override ComposerWebView set_up_test_view() {
+        try {
+            ComposerWebView.load_resources();
+        } catch (Error err) {
+            assert_not_reached();
+        }
+        Configuration config = new Configuration(GearyApplication.APP_ID);
+        return new ComposerWebView(config);
+    }
+
+    protected override void load_body_fixture(string? html = null) {
         this.test_view.load_html(html, null, false);
         while (this.test_view.is_loading) {
             Gtk.main_iteration();
@@ -159,19 +171,6 @@ class ComposerPageStateTest : Gee.TestCase {
         WebKit.JavascriptResult result =
            this.test_view.run_javascript.end(async_result());
         return WebKitUtil.to_string(result);
-    }
-
-    protected void async_complete(AsyncResult result) {
-        this.async_results.push(result);
-    }
-
-    protected AsyncResult async_result() {
-        AsyncResult? result = null;
-        while (result == null) {
-            Gtk.main_iteration();
-            result = this.async_results.try_pop();
-        }
-        return result;
     }
 
 }
