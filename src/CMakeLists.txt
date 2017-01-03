@@ -307,6 +307,7 @@ engine/util/util-stream.vala
 engine/util/util-string.vala
 engine/util/util-synchronization.vala
 engine/util/util-time.vala
+engine/util/util-timeout-manager.vala
 engine/util/util-trillian.vala
 
 ${CMAKE_BINARY_DIR}/geary-version.vala

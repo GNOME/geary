@@ -42,6 +42,7 @@ int main(string[] args) {
     engine.add_suite(new Geary.RFC822.MessageTest().get_suite());
     engine.add_suite(new Geary.RFC822.MessageDataTest().get_suite());
     engine.add_suite(new Geary.RFC822.Utils.Test().get_suite());
+    engine.add_suite(new Geary.TimeoutManagerTest().get_suite());
 
     TestSuite client = new TestSuite("client");
 
