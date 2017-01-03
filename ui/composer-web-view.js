@@ -9,7 +9,7 @@
 /**
  * Application logic for ComposerWebView.
  */
-var ComposerPageState = function() {
+let ComposerPageState = function() {
     this.init.apply(this, arguments);
 };
 ComposerPageState.BODY_ID = "message-body";
@@ -146,7 +146,7 @@ ComposerPageState.htmlToQuotedText = function(root) {
 
     // Reassemble plain text out of parts, and replace non-breaking
     // space with regular space.
-    let text = ComposerPageState.resolveNesting(root.innerText, bqtexts)
+    let text = ComposerPageState.resolveNesting(root.innerText, bqtexts);
 
     // Reassemble DOM now we have the plain text
     root.innerHTML = savedDoc;

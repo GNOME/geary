@@ -9,7 +9,7 @@
  * Application logic for ClientWebView and subclasses.
  */
 
-var PageState = function() {
+let PageState = function() {
     this.init.apply(this, arguments);
 };
 PageState.prototype = {
@@ -17,8 +17,8 @@ PageState.prototype = {
         this.allowRemoteImages = false;
         this.is_loaded = false;
 
-        var state = this;
-        var timeoutId = window.setInterval(function() {
+        let state = this;
+        let timeoutId = window.setInterval(function() {
             state.preferredHeightChanged();
             if (state.is_loaded) {
                 window.clearTimeout(timeoutId);
@@ -33,10 +33,10 @@ PageState.prototype = {
     },
     loadRemoteImages: function() {
         this.allowRemoteImages = true;
-        var images = document.getElementsByTagName("IMG");
-        for (var i = 0; i < images.length; i++) {
-            var img = images.item(i);
-            var src = img.src;
+        let images = document.getElementsByTagName("IMG");
+        for (let i = 0; i < images.length; i++) {
+            let img = images.item(i);
+            let src = img.src;
             img.src = "";
             img.src = src;
         }
@@ -53,7 +53,7 @@ PageState.prototype = {
         }
     },
     selectionChanged: function() {
-        var has_selection = !window.getSelection().isCollapsed;
+        let has_selection = !window.getSelection().isCollapsed;
         window.webkit.messageHandlers.selectionChanged.postMessage(has_selection);
     }
 };

@@ -366,7 +366,13 @@ public class ClientWebView : WebKit.WebView {
         minimum_height = natural_height = 0;
     }
 
-    internal void handle_cid_request(WebKit.URISchemeRequest request) {
+    protected inline void register_message_handler(string name) {
+        if (!get_user_content_manager().register_script_message_handler(name)) {
+            debug("Failed to register script message handler: %s", name);
+        }
+    }
+
+    private void handle_cid_request(WebKit.URISchemeRequest request) {
         string cid = request.get_uri().substring(CID_URL_PREFIX.length);
         Geary.Memory.Buffer? buf = this.cid_resources[cid];
         if (buf != null) {
@@ -379,18 +385,12 @@ public class ClientWebView : WebKit.WebView {
         }
     }
 
-    internal void handle_internal_request(WebKit.URISchemeRequest request) {
+    private void handle_internal_request(WebKit.URISchemeRequest request) {
         if (request.get_uri() == INTERNAL_URL_BODY) {
             Geary.Memory.Buffer buf = new Geary.Memory.StringBuffer(this.body);
             request.finish(buf.get_input_stream(), buf.size, null);
         } else {
             request.finish_error(new FileError.NOENT("Unknown internal URL"));
-        }
-    }
-
-    protected inline void register_message_handler(string name) {
-        if (!get_user_content_manager().register_script_message_handler(name)) {
-            debug("Failed to register script message handler: %s", name);
         }
     }
 

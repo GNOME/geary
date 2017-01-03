@@ -9,7 +9,7 @@
 /**
  * Application logic for ConversationWebView.
  */
-var ConversationPageState = function() {
+let ConversationPageState = function() {
     this.init.apply(this, arguments);
 };
 
@@ -35,7 +35,7 @@ ConversationPageState.prototype = {
      * This should provide a slightly better RTL experience.
      */
     updateDirection: function() {
-        var dir = document.documentElement.dir;
+        let dir = document.documentElement.dir;
         if (dir == null || dir.trim() == "") {
             document.documentElement.dir = "auto";
         }
@@ -58,16 +58,16 @@ ConversationPageState.prototype = {
      * Add top level blockquotes to hide/show container.
      */
     createControllableQuotes: function() {
-        var blockquoteList = document.documentElement.querySelectorAll("blockquote");
-        for (var i = 0; i < blockquoteList.length; ++i) {
-            var blockquote = blockquoteList.item(i);
-            var nextSibling = blockquote.nextSibling;
-            var parent = blockquote.parentNode;
+        let blockquoteList = document.documentElement.querySelectorAll("blockquote");
+        for (let i = 0; i < blockquoteList.length; ++i) {
+            let blockquote = blockquoteList.item(i);
+            let nextSibling = blockquote.nextSibling;
+            let parent = blockquote.parentNode;
 
             // Only insert into a quote container if the element is a
             // top level blockquote
             if (!ConversationPageState.isDescendantOf(blockquote, "BLOCKQUOTE")) {
-                var quoteContainer = document.createElement("DIV");
+                let quoteContainer = document.createElement("DIV");
                 quoteContainer.classList.add(
                     ConversationPageState.QUOTE_CONTAINER_CLASS
                 );
@@ -130,15 +130,15 @@ ConversationPageState.prototype = {
      *
      */
     wrapSignature: function() {
-        var possibleSigs = document.documentElement.querySelectorAll("div,span,p");
-        var i = 0;
-        var sigRegex = new RegExp("^--\\s*$");
-        var alternateSigRegex = new RegExp("^--\\s*(?:<br|\\R)");
+        let possibleSigs = document.documentElement.querySelectorAll("div,span,p");
+        let i = 0;
+        let sigRegex = new RegExp("^--\\s*$");
+        let alternateSigRegex = new RegExp("^--\\s*(?:<br|\\R)");
         for (; i < possibleSigs.length; ++i) {
             // Get the div and check that it starts a signature block
             // and is not inside a quote.
-            var div = possibleSigs.item(i);
-            var innerHTML = div.innerHTML;
+            let div = possibleSigs.item(i);
+            let innerHTML = div.innerHTML;
             if ((sigRegex.test(innerHTML) || alternateSigRegex.test(innerHTML)) &&
                 !ConversationPageState.isDescendantOf(div, "BLOCKQUOTE")) {
                 break;
@@ -147,13 +147,13 @@ ConversationPageState.prototype = {
         // If we have a signature, move it and all of its following
         // siblings that are not quotes inside a signature div.
         if (i < possibleSigs.length) {
-            var elem = possibleSigs.item(i);
-            var parent = elem.parentNode;
-            var signatureContainer = document.createElement("DIV");
+            let elem = possibleSigs.item(i);
+            let parent = elem.parentNode;
+            let signatureContainer = document.createElement("DIV");
             signatureContainer.classList.add("geary-signature");
             do {
                 // Get its sibling _before_ we move it into the signature div.
-                var sibling = elem.nextSibling;
+                let sibling = elem.nextSibling;
                 signatureContainer.appendChild(elem);
                 elem = sibling;
             } while (elem != null);
@@ -161,11 +161,11 @@ ConversationPageState.prototype = {
         }
     },
     getSelectionForQuoting: function() {
-        var quote = null;
-        var selection = window.getSelection();
+        let quote = null;
+        let selection = window.getSelection();
         if (!selection.isCollapsed) {
-            var range = selection.getRangeAt(0);
-            var ancestor = range.commonAncestorContainer;
+            let range = selection.getRangeAt(0);
+            let ancestor = range.commonAncestorContainer;
             if (ancestor.nodeType != Node.ELEMENT_NODE) {
                 ancestor = ancestor.parentNode;
             }
@@ -173,8 +173,8 @@ ConversationPageState.prototype = {
             // If the selection is part of a plain text message,
             // we have to stick it in an appropriately styled div,
             // so that new lines are preserved.
-            var dummy = document.createElement("DIV");
-            var includeDummy = false;
+            let dummy = document.createElement("DIV");
+            let includeDummy = false;
             if (ConversationPageState.isDescendantOf(ancestor, ".plaintext")) {
                 dummy.classList.add("plaintext");
                 dummy.setAttribute("style", "white-space: pre-wrap;");
@@ -184,12 +184,12 @@ ConversationPageState.prototype = {
 
             // Remove the chrome we put around quotes, leaving
             // only the blockquote element.
-            var quotes = dummy.querySelectorAll(
+            let quotes = dummy.querySelectorAll(
                 "." + ConversationPageState.QUOTE_CONTAINER_CLASS
             );
-            for (var i = 0; i < quotes.length; i++) {
-                var div = quotes.item(i);
-                var blockquote = div.querySelector("blockquote");
+            for (let i = 0; i < quotes.length; i++) {
+                let div = quotes.item(i);
+                let blockquote = div.querySelector("blockquote");
                 div.parentNode.replaceChild(blockquote, div);
             }
 
@@ -198,11 +198,11 @@ ConversationPageState.prototype = {
         return quote;
     },
     getSelectionForFind: function() {
-        var value = null;
-        var selection = window.getSelection();
+        let value = null;
+        let selection = window.getSelection();
 
         if (selection.rangeCount > 0) {
-            var range = selection.getRangeAt(0);
+            let range = selection.getRangeAt(0);
             value = range.toString().trim();
             if (value == "") {
                 value = null;
@@ -213,7 +213,7 @@ ConversationPageState.prototype = {
 };
 
 ConversationPageState.isDescendantOf = function(node, ancestorTag) {
-    var ancestor = node.parentNode;
+    let ancestor = node.parentNode;
     while (ancestor != null) {
         if (ancestor.tagName == ancestorTag) {
             return true;
