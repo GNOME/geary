@@ -14,6 +14,7 @@ var ConversationPageState = function() {
 };
 
 ConversationPageState.QUOTE_CONTAINER_CLASS = "geary-quote-container";
+ConversationPageState.QUOTE_HIDE_CLASS = "geary-hide";
 
 ConversationPageState.prototype = {
     __proto__: PageState.prototype,
@@ -40,6 +41,20 @@ ConversationPageState.prototype = {
         }
     },
     /**
+     * Starts looking for changes to the page's height.
+     */
+    updatePreferredHeight: function() {
+        let height = this.getPreferredHeight();
+        let state = this;
+        let timeoutId = window.setInterval(function() {
+            let newHeight = state.getPreferredHeight();
+            if (height != newHeight) {
+                state.preferredHeightChanged();
+                window.clearTimeout(timeoutId);
+            }
+        }, 50);
+    },
+    /**
      * Add top level blockquotes to hide/show container.
      */
     createControllableQuotes: function() {
@@ -58,26 +73,48 @@ ConversationPageState.prototype = {
                 );
 
                 // Only make it controllable if the quote is tall enough
-                if (blockquote.offsetHeight > 60) {
+                if (blockquote.offsetHeight > 120) {
                     quoteContainer.classList.add("geary-controllable");
-                    quoteContainer.classList.add("geary-hide");
+                    quoteContainer.classList.add(
+                        ConversationPageState.QUOTE_HIDE_CLASS
+                    );
                 }
-                // New lines are preserved within blockquotes, so this
-                // string needs to be new-line free.
-                quoteContainer.innerHTML =
-                    "<div class=\"geary-shower\">" +
-                    "<input type=\"button\" value=\"▼        ▼        ▼\" />" +
-                    "</div>" +
-                    "<div class=\"geary-hider\">" +
-                    "<input type=\"button\" value=\"▲        ▲        ▲\" />" +
-                    "</div>";
 
-                var quoteDiv = document.createElement("DIV");
+                let script = this;
+                function newControllerButton(styleClass, text) {
+                    let button = document.createElement("BUTTON");
+                    button.classList.add("geary-button");
+                    button.type = "button";
+                    button.onclick = function() {
+                        quoteContainer.classList.toggle(
+                            ConversationPageState.QUOTE_HIDE_CLASS
+                        );
+                        script.updatePreferredHeight();
+                    };
+                    button.appendChild(document.createTextNode(text));
+
+                    let container = document.createElement("DIV");
+                    container.classList.add(styleClass);
+                    container.appendChild(button);
+
+                    return container;
+                }
+
+                quoteContainer.appendChild(newControllerButton(
+                    "geary-shower", "▼        ▼        ▼"
+                ));
+                quoteContainer.appendChild(newControllerButton(
+                    "geary-hider", "▲        ▲        ▲"
+                ));
+
+                let quoteDiv = document.createElement("DIV");
                 quoteDiv.classList.add("geary-quote");
                 quoteDiv.appendChild(blockquote);
 
                 quoteContainer.appendChild(quoteDiv);
                 parent.insertBefore(quoteContainer, nextSibling);
+
+                this.updatePreferredHeight();
             }
         }
     },

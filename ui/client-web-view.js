@@ -25,6 +25,9 @@ PageState.prototype = {
             }
         }, 50);
     },
+    getPreferredHeight: function() {
+        return window.document.documentElement.offsetHeight;
+    },
     loaded: function() {
         this.is_loaded = true;
     },
@@ -42,7 +45,7 @@ PageState.prototype = {
         window.webkit.messageHandlers.remoteImageLoadBlocked.postMessage(null);
     },
     preferredHeightChanged: function() {
-        var height = window.document.documentElement.offsetHeight;
+        let height = this.getPreferredHeight();
         if (height > 0) {
             window.webkit.messageHandlers.preferredHeightChanged.postMessage(
                 height
