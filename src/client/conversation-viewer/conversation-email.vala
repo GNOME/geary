@@ -633,7 +633,7 @@ public class ConversationEmail : Gtk.Box {
         view.web_view.notify["load-status"].connect(() => {
                 bool all_loaded = true;
                 message_view_iterator().foreach((view) => {
-                        if (!view.web_view.is_loaded) {
+                        if (!view.web_view.has_valid_height) {
                             all_loaded = false;
                             return false;
                         }

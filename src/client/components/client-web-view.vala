@@ -134,7 +134,7 @@ public class ClientWebView : WebKit.WebView {
     }
 
 
-    public bool is_loaded { get; private set; default = false; }
+    public bool has_valid_height = false;
 
     public string allow_prefix { get; private set; default = ""; }
 
@@ -215,11 +215,6 @@ public class ClientWebView : WebKit.WebView {
         // XXX get the allow prefix from the extension somehow
 
         this.decide_policy.connect(on_decide_policy);
-        this.load_changed.connect((web_view, event) => {
-                if (event == WebKit.LoadEvent.FINISHED) {
-                    this.is_loaded = true;
-                }
-            });
         this.web_process_crashed.connect(() => {
                 debug("Web process crashed");
                 return Gdk.EVENT_PROPAGATE;
@@ -229,7 +224,10 @@ public class ClientWebView : WebKit.WebView {
             (result) => {
                 try {
                     this.preferred_height = (int) WebKitUtil.to_number(result);
-                    queue_resize();
+                    if (this.preferred_height >= 1) {
+                        this.has_valid_height = true;
+                        queue_resize();
+                    }
                 } catch (Geary.JS.Error err) {
                     debug("Could not get preferred height: %s", err.message);
                 } finally {
