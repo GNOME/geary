@@ -134,7 +134,7 @@ public class ClientWebView : WebKit.WebView {
     }
 
 
-    public bool has_valid_height = false;
+    public bool has_valid_height { get; set; default = false; }
 
     public string allow_prefix { get; private set; default = ""; }
 

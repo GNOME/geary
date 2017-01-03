@@ -630,7 +630,7 @@ public class ConversationEmail : Gtk.Box {
         view.web_view.inline_resource_loaded.connect((id) => {
                 this.inlined_content_ids.add(id);
             });
-        view.web_view.notify["load-status"].connect(() => {
+        view.web_view.notify["has-valid-height"].connect(() => {
                 bool all_loaded = true;
                 message_view_iterator().foreach((view) => {
                         if (!view.web_view.has_valid_height) {
