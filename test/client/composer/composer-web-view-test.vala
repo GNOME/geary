@@ -152,8 +152,7 @@ long, long, long, long, long, long, long, long, long, long,
         } catch (Error err) {
             assert_not_reached();
         }
-        Configuration config = new Configuration(GearyApplication.APP_ID);
-        return new ComposerWebView(config);
+        return new ComposerWebView(this.config);
     }
 
     protected override void load_body_fixture(string? html = null) {

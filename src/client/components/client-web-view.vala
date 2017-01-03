@@ -39,7 +39,8 @@ public class ClientWebView : WebKit.WebView {
     /**
      * Initialises WebKit.WebContext for use by the client.
      */
-    public static void init_web_context(File web_extension_dir,
+    public static void init_web_context(Configuration config,
+                                        File web_extension_dir,
                                         bool enable_logging) {
         WebKit.WebContext context = WebKit.WebContext.get_default();
         context.set_process_model(WebKit.ProcessModel.SHARED_SECONDARY_PROCESS);
@@ -63,6 +64,11 @@ public class ClientWebView : WebKit.WebView {
                 context.set_web_extensions_initialization_user_data(
                     new Variant.boolean(enable_logging)
                 );
+            });
+
+        update_spellcheck(context, config);
+        config.settings.changed[Configuration.SPELL_CHECK_LANGUAGES].connect(() => {
+                update_spellcheck(context, config);
             });
     }
 
@@ -121,6 +127,12 @@ public class ClientWebView : WebKit.WebView {
             null,
             null
         );
+    }
+
+    private static inline void update_spellcheck(WebKit.WebContext context,
+                                                 Configuration config) {
+        context.set_spell_checking_enabled(config.spell_check_languages.length > 0);
+        context.set_spell_checking_languages(config.spell_check_languages);
     }
 
     private static inline uint to_wk2_font_size(Pango.FontDescription font) {

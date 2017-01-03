@@ -467,16 +467,6 @@ public class ComposerWidget : Gtk.EventBox {
 
         this.editor.load_html(this.body_html, this.signature_html, this.top_posting);
 
-        GearyApplication.instance.config.settings.changed[Configuration.SPELL_CHECK_KEY].connect(
-            on_spell_check_changed);
-
-        // WebKit.Settings s = this.editor.settings;
-        // s.enable_spell_checking = GearyApplication.instance.config.spell_check;
-        // s.spell_checking_languages = string.joinv(
-        //     ",", GearyApplication.instance.config.spell_check_languages
-        // );
-        // this.editor.settings = s;
-
         this.editor_scrolled.add(editor);
 
         // Place the message area before the compose toolbar in the focus chain, so that
@@ -792,7 +782,6 @@ public class ComposerWidget : Gtk.EventBox {
         // This is safe to call even when this connection hasn't been made.
         realize.disconnect(on_load_finished_and_realized);
 
-        on_spell_check_changed();
         update_actions();
 
         this.actions.change_action_state(ACTION_SHOW_EXTENDED, false);
@@ -1833,11 +1822,6 @@ public class ComposerWidget : Gtk.EventBox {
         update_message_overlay_label_style();
     }
 
-    private void on_spell_check_changed() {
-        //this.editor.settings.enable_spell_checking = GearyApplication.instance.config.spell_check;
-        //get_action(ACTION_SELECT_DICTIONARY).set_enabled(this.editor.settings.enable_spell_checking);
-    }
-
     // This overrides the keypress handling for the *widget*; the WebView editor's keypress overrides
     // are handled by on_editor_key_press
     public override bool key_press_event(Gdk.EventKey event) {
@@ -1910,10 +1894,11 @@ public class ComposerWidget : Gtk.EventBox {
 
     private void on_select_dictionary(SimpleAction action, Variant? param) {
         if (this.spell_check_popover == null) {
-            this.spell_check_popover = new SpellCheckPopover(select_dictionary_button);
+            this.spell_check_popover = new SpellCheckPopover(
+                this.select_dictionary_button, this.config
+            );
             this.spell_check_popover.selection_changed.connect((active_langs) => {
-                    //this.editor.settings.spell_checking_languages = string.joinv(",", active_langs);
-                    GearyApplication.instance.config.spell_check_languages = active_langs;
+                    this.config.spell_check_languages = active_langs;
                 });
         }
         this.spell_check_popover.toggle();

@@ -470,7 +470,7 @@ public class GearyApplication : Gtk.Application {
     }
 
     private void on_activate_preferences() {
-        PreferencesDialog dialog = new PreferencesDialog(get_active_window());
+        PreferencesDialog dialog = new PreferencesDialog(get_active_window(), this);
         dialog.run();
     }
 

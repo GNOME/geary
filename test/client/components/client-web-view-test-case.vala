@@ -10,14 +10,20 @@ extern const string _BUILD_ROOT_DIR;
 
 public abstract class ClientWebViewTestCase<V> : Gee.TestCase {
 
-    protected V test_view = null;
+    protected V? test_view = null;
+    protected Configuration? config = null;
 
     public ClientWebViewTestCase(string name) {
         base(name);
     }
 
     public override void set_up() {
-        ClientWebView.init_web_context(File.new_for_path(_BUILD_ROOT_DIR).get_child("src"), true);
+        this.config = new Configuration(GearyApplication.APP_ID);
+        ClientWebView.init_web_context(
+            this.config,
+            File.new_for_path(_BUILD_ROOT_DIR).get_child("src"),
+            true
+        );
         try {
             ClientWebView.load_scripts();
         } catch (Error err) {

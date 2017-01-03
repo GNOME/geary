@@ -19,7 +19,6 @@ public class Configuration {
     public const string MESSAGES_PANE_POSITION_KEY = "messages-pane-position";
     public const string AUTOSELECT_KEY = "autoselect";
     public const string DISPLAY_PREVIEW_KEY = "display-preview";
-    public const string SPELL_CHECK_KEY = "spell-check";
     public const string PLAY_SOUNDS_KEY = "play-sounds";
     public const string SHOW_NOTIFICATIONS_KEY = "show-notifications";
     public const string STARTUP_NOTIFICATIONS_KEY = "startup-notifications";
@@ -103,10 +102,6 @@ public class Configuration {
     
     public bool display_preview {
         get { return settings.get_boolean(DISPLAY_PREVIEW_KEY); }
-    }
-    
-    public bool spell_check {
-        get { return settings.get_boolean(SPELL_CHECK_KEY); }
     }
 
     public string[] spell_check_languages {

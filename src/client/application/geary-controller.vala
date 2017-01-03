@@ -190,6 +190,7 @@ public class GearyController : Geary.BaseObject {
 
         // Initialise WebKit and WebViews
         ClientWebView.init_web_context(
+            this.application.config,
             this.application.get_web_extensions_dir(),
             Args.log_debug
         );
