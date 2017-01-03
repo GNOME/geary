@@ -778,7 +778,7 @@ public class ConversationListBox : Gtk.ListBox {
             });
 
         ConversationMessage conversation_message = view.primary_message;
-        conversation_message.body.button_release_event.connect_after((event) => {
+        conversation_message.body_container.button_release_event.connect_after((event) => {
                 // Consume all non-consumed clicks so the row is not
                 // inadvertently activated after clicking on the
                 // email body.

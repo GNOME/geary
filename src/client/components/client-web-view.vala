@@ -17,10 +17,14 @@
 public class ClientWebView : WebKit.WebView {
 
 
+    /** URI Scheme and delimiter for internal resource loads. */
+    public const string INTERNAL_URL_PREFIX = "geary:";
+
+    /** URI for internal message body page loads. */
+    public const string INTERNAL_URL_BODY = INTERNAL_URL_PREFIX + "body";
+
     /** URI Scheme and delimiter for images loaded by Content-ID. */
     public const string CID_URL_PREFIX = "cid:";
-
-    private const string INTERNAL_URL_BODY = "geary:body";
 
     private const string PREFERRED_HEIGHT_MESSAGE = "preferredHeightChanged";
     private const string REMOTE_IMAGE_LOAD_BLOCKED_MESSAGE = "remoteImageLoadBlocked";

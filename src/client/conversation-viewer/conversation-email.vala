@@ -488,9 +488,7 @@ public class ConversationEmail : Gtk.Box {
 
         Gee.List<Geary.RFC822.Message> sub_messages = message.get_sub_messages();
         if (sub_messages.size > 0) {
-            this.primary_message.body.pack_start(
-                this.sub_messages, false, false, 0
-            );
+            this.primary_message.body_container.add(this.sub_messages);
         }
         foreach (Geary.RFC822.Message sub_message in sub_messages) {
             ConversationMessage attached_message =
@@ -714,7 +712,7 @@ public class ConversationEmail : Gtk.Box {
         if (!this.displayed_attachments.is_empty) {
             this.attachments_button.show();
             this.attachments_button.set_sensitive(!this.is_collapsed);
-            this.primary_message.body.add(this.attachments);
+            this.primary_message.body_container.add(this.attachments);
 
             if (this.displayed_attachments.size > 1) {
                 this.select_all_attachments.show();

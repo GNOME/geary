@@ -5,7 +5,6 @@
   <template class="ConversationMessage" parent="GtkGrid">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="hexpand">True</property>
     <property name="orientation">vertical</property>
     <child>
       <object class="GtkGrid" id="summary">
@@ -475,13 +474,10 @@
       <object class="GtkRevealer" id="body_revealer">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="hexpand">True</property>
         <child>
-          <object class="GtkBox" id="body">
+          <object class="GtkGrid">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
-            <property name="hexpand">True</property>
-            <property name="orientation">vertical</property>
             <child>
               <object class="GtkGrid" id="infobars">
                 <property name="visible">True</property>
@@ -582,6 +578,9 @@
                       <action-widget response="1">button1</action-widget>
                       <action-widget response="2">button2</action-widget>
                     </action-widgets>
+                    <child>
+                      <placeholder/>
+                    </child>
                   </object>
                   <packing>
                     <property name="left_attach">0</property>
@@ -590,14 +589,42 @@
                 </child>
               </object>
               <packing>
-                <property name="expand">False</property>
-                <property name="fill">True</property>
-                <property name="position">0</property>
+                <property name="left_attach">0</property>
+                <property name="top_attach">0</property>
               </packing>
             </child>
-            <style>
-              <class name="geary-message-body"/>
-            </style>
+            <child>
+              <object class="GtkOverlay">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <child>
+                  <object class="GtkGrid" id="body_container">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <style>
+                      <class name="geary-message-body"/>
+                    </style>
+                  </object>
+                  <packing>
+                    <property name="index">-1</property>
+                  </packing>
+                </child>
+                <child type="overlay">
+                  <object class="GtkProgressBar" id="body_progress">
+                    <property name="can_focus">False</property>
+                    <property name="valign">start</property>
+                    <style>
+                      <class name="osd"/>
+                      <class name="top"/>
+                    </style>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">1</property>
+              </packing>
+            </child>
           </object>
         </child>
       </object>
@@ -612,7 +639,7 @@
   </template>
   <object class="GtkPopover" id="link_popover">
     <property name="can_focus">False</property>
-    <property name="relative_to">body</property>
+    <property name="relative_to">body_container</property>
     <property name="position">bottom</property>
     <child>
       <object class="GtkGrid">

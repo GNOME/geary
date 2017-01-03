@@ -204,7 +204,9 @@ public class ConversationMessage : Gtk.Grid {
     [GtkChild]
     private Gtk.Revealer body_revealer;
     [GtkChild]
-    public Gtk.Box body; // WebKit.WebView crashes when added to a Grid
+    public Gtk.Grid body_container;
+    [GtkChild]
+    public Gtk.ProgressBar body_progress;
 
     [GtkChild]
     private Gtk.Popover link_popover;
@@ -240,6 +242,16 @@ public class ConversationMessage : Gtk.Grid {
 
     private int next_replaced_buffer_number = 0;
 
+    // Is the view set to allow remote image loads?
+    private bool is_loading_images;
+
+    private int remote_resources_requested = 0;
+
+    private int remote_resources_loaded = 0;
+
+    // Timer for hiding the progress bar when complete
+    private Geary.TimeoutManager body_progress_timer = null;
+
 
     /** Fired when the user clicks a link in the email. */
     public signal void link_activated(string link);
@@ -268,6 +280,7 @@ public class ConversationMessage : Gtk.Grid {
                                Configuration config,
                                bool load_remote_images) {
         this.message = message;
+        this.is_loading_images = load_remote_images;
 
 #if !GTK_3_20
         // GTK < 3.20+ style workarounds. Keep this in sync with
@@ -372,21 +385,29 @@ public class ConversationMessage : Gtk.Grid {
         this.web_view.link_activated.connect((link) => {
                 link_activated(link);
             });
+        this.web_view.load_changed.connect(on_load_changed);
         this.web_view.mouse_target_changed.connect(on_mouse_target_changed);
-        this.web_view.resource_load_started.connect((view, res, req) => {
-                this.resources[res.get_uri()] = res;
+        this.web_view.notify["estimated-load-progress"].connect(() => {
+                this.body_progress.set_fraction(this.web_view.estimated_load_progress);
             });
+        this.web_view.resource_load_started.connect(on_resource_load_started);
         this.web_view.remote_image_load_blocked.connect(() => {
                 this.remote_images_infobar.show();
             });
         this.web_view.selection_changed.connect(on_selection_changed);
+        this.web_view.set_hexpand(true);
+        this.web_view.set_vexpand(true);
         this.web_view.show();
 
-        this.body.set_has_tooltip(true); // Used to show link URLs
-        this.body.pack_start(this.web_view, true, true, 0);
+        this.body_container.set_has_tooltip(true); // Used to show link URLs
+        this.body_container.add(this.web_view);
+        this.body_progress_timer = new Geary.TimeoutManager.seconds(
+            1, () => { this.body_progress.hide(); }
+        );
     }
 
     public override void destroy() {
+        this.body_progress_timer.reset();
         this.resources.clear();
         this.searchable_addresses.clear();
         base.destroy();
@@ -696,6 +717,7 @@ public class ConversationMessage : Gtk.Grid {
     }
 
     private void show_images(bool remember) {
+        this.is_loading_images = true;
         this.web_view.load_remote_images();
         if (remember) {
             flag_remote_images();
@@ -782,6 +804,49 @@ public class ConversationMessage : Gtk.Grid {
         revealer.set_transition_type(transition);
     }
 
+    private void on_load_changed(WebKit.LoadEvent load_event) {
+        if (load_event != WebKit.LoadEvent.FINISHED) {
+            this.body_progress_timer.reset();
+            this.body_progress.pulse();
+        } else {
+            this.body_progress_timer.start();
+        }
+    }
+
+    private void on_resource_load_started(WebKit.WebView view,
+                                          WebKit.WebResource res,
+                                          WebKit.URIRequest req) {
+        // We only want to show the body loading progress meter if we
+        // are loading images, so do it here rather than
+        // on_load_changed.
+        if (this.is_loading_images &&
+            !res.get_uri().has_prefix(ClientWebView.INTERNAL_URL_PREFIX)) {
+            this.body_progress.show();
+            this.body_progress.pulse();
+            if (!this.web_view.is_loading) {
+                // The initial page load has finished, so we must be
+                // loading a remote image, but can't rely on the
+                // load_changed signal to stop the timer or
+                // estimated-load-progress changing. So manually
+                // manage it here.
+                this.remote_resources_requested++;
+                res.finished.connect(() => {
+                        this.remote_resources_loaded++;
+                        this.body_progress.set_fraction(
+                            (this.remote_resources_loaded /
+                             this.remote_resources_requested) +
+                            this.body_progress.get_pulse_step()
+                        );
+                        if (this.remote_resources_loaded >=
+                            this.remote_resources_requested) {
+                            this.body_progress_timer.start();
+                        }
+                    });
+            }
+            this.resources[res.get_uri()] = res;
+        }
+    }
+
     [GtkCallback]
     private void on_address_box_child_activated(Gtk.FlowBox box,
                                                 Gtk.FlowBoxChild child) {
@@ -863,8 +928,8 @@ public class ConversationMessage : Gtk.Grid {
                                          WebKit.HitTestResult hit_test,
                                          uint modifiers) {
         if (hit_test.context_is_link()) {
-            this.body.set_tooltip_text(hit_test.get_link_uri());
-            this.body.trigger_tooltip_query();
+            this.body_container.set_tooltip_text(hit_test.get_link_uri());
+            this.body_container.trigger_tooltip_query();
         }
     }
 
