@@ -119,17 +119,8 @@ public class ComposerWebView : ClientWebView {
         this.key_press_event.connect(on_key_press_event);
 
         this.user_content_manager.script_message_received[COMMAND_STACK_CHANGED].connect(
-            (result) => {
-                try {
-                    string[] values = WebKitUtil.to_string(result).split(",");
-                    command_stack_changed(values[0] == "true", values[1] == "true");
-                } catch (Geary.JS.Error err) {
-                    debug("Could not get command stack state: %s", err.message);
-                } finally {
-                    result.unref();
-                }
-            });
-                    result.unref();
+            on_command_stack_changed_message
+        );
         this.user_content_manager.script_message_received[CURSOR_STYLE_CHANGED].connect(
             on_cursor_style_changed_message
         );
@@ -155,6 +146,15 @@ public class ComposerWebView : ClientWebView {
         base.load_html(HTML_BODY.printf(html));
     }
 
+    /**
+     * Sets whether the editor is in rich text or plain text mode.
+     */
+    public void set_rich_text(bool enabled) {
+        this.is_rich_text = enabled;
+        this.run_javascript.begin(
+            "geary.setRichText(%s);".printf(enabled ? "true" : "false"), null
+        );
+    }
 
     /**
      * Undoes the last edit operation.
@@ -266,37 +266,6 @@ public class ComposerWebView : ClientWebView {
     }
 
     /**
-     * Sets whether the editor is in rich text or plain text mode.
-     */
-    public void set_rich_text(bool enabled) {
-        this.is_rich_text = enabled;
-        this.run_javascript.begin(
-            "geary.setRichText(%s);".printf(enabled ? "true" : "false"), null
-        );
-    }
-
-    /**
-     * ???
-     */
-    public void linkify_document() {
-        // XXX
-    }
-
-    /**
-     * ???
-     */
-    public string get_block_quote_representation() {
-        return ""; // XXX
-    }
-
-    /**
-     * ???
-     */
-    public void undo_blockquote_style() {
-        this.run_javascript.begin("geary.undoBlockquoteStyle();", null);
-    }
-
-    /**
      * Returns the editor content as an HTML string.
      */
     public async string? get_html() throws Error {
@@ -383,9 +352,41 @@ public class ComposerWebView : ClientWebView {
     /**
      * ???
      */
+    public void undo_blockquote_style() {
+        this.run_javascript.begin("geary.undoBlockquoteStyle();", null);
+    }
+
+    /**
+     * ???
+     */
+    public void linkify_document() {
+        // XXX
+    }
+
+    /**
+     * ???
+     */
+    public string get_block_quote_representation() {
+        return ""; // XXX
+    }
+
+    /**
+     * ???
+     */
     public bool handle_key_press(Gdk.EventKey event) {
         // XXX
         return false;
+    }
+
+    private void on_command_stack_changed_message(WebKit.JavascriptResult result) {
+        try {
+            string[] values = WebKitUtil.to_string(result).split(",");
+            command_stack_changed(values[0] == "true", values[1] == "true");
+        } catch (Geary.JS.Error err) {
+            debug("Could not get command stack state: %s", err.message);
+        } finally {
+            result.unref();
+        }
     }
 
     private void on_cursor_style_changed_message(WebKit.JavascriptResult result) {

@@ -472,14 +472,15 @@ public class ComposerWidget : Gtk.EventBox {
         this.cc_entry.changed.connect(validate_send_button);
         this.bcc_entry.changed.connect(validate_send_button);
         this.reply_to_entry.changed.connect(validate_send_button);
-        this.editor.context_menu.connect(on_context_menu);
+
         this.editor.command_stack_changed.connect(on_command_state_changed);
+        this.editor.context_menu.connect(on_context_menu);
+        this.editor.cursor_style_changed.connect(on_cursor_style_changed);
+        this.editor.get_editor_state().notify["typing-attributes"].connect(on_typing_attributes_changed);
+        this.editor.key_press_event.connect(on_editor_key_press);
         this.editor.load_changed.connect(on_load_changed);
         this.editor.mouse_target_changed.connect(on_mouse_target_changed);
-        this.editor.get_editor_state().notify["typing-attributes"].connect(on_typing_attributes_changed);
         this.editor.selection_changed.connect(on_selection_changed);
-        this.editor.cursor_style_changed.connect(on_cursor_style_changed);
-        this.editor.key_press_event.connect(on_editor_key_press);
         //this.editor.user_changed_contents.connect(reset_draft_timer);
 
         this.editor.load_html(this.body_html, this.signature_html, this.top_posting);

@@ -497,6 +497,7 @@ public class ConversationMessage : Gtk.Grid {
                 }
             }
 
+            // XXX WK2
             //webkit_found += this.web_view.mark_text_matches(raw_match, false, 0);
             this.web_view.get_find_controller().search(
                 raw_match,
