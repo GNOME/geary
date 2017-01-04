@@ -898,7 +898,7 @@ public class ComposerWidget : Gtk.EventBox {
         email.img_src_prefix = this.editor.allow_prefix;
 
         try {
-            if (actions.get_action_state(ACTION_COMPOSE_AS_HTML).get_boolean() || only_html)
+            if (this.editor.is_rich_text || only_html)
                 email.body_html = yield this.editor.get_html();
             if (!only_html)
                 email.body_text = yield this.editor.get_text();
@@ -1958,8 +1958,10 @@ public class ComposerWidget : Gtk.EventBox {
         get_action(ACTION_CUT).set_enabled(this.editor.can_cut_clipboard());
         get_action(ACTION_COPY).set_enabled(this.editor.can_copy_clipboard());
         get_action(ACTION_PASTE).set_enabled(this.editor.can_paste_clipboard());
-        get_action(ACTION_PASTE_WITH_FORMATTING).set_enabled(this.editor.can_paste_clipboard()
-            && get_action(ACTION_COMPOSE_AS_HTML).state.get_boolean());
+        get_action(ACTION_PASTE_WITH_FORMATTING).set_enabled(
+            this.editor.can_paste_clipboard() &&
+            this.editor.is_rich_text
+        );
 
         // // Style formatting actions.
         // WebKit.DOM.Document document = this.editor.get_dom_document();
@@ -1969,7 +1971,7 @@ public class ComposerWidget : Gtk.EventBox {
         //     return;
 
         // get_action(ACTION_REMOVE_FORMAT).set_enabled(!selection.is_collapsed
-        //     && get_action(ACTION_COMPOSE_AS_HTML).state.get_boolean());
+        //     && this.editor.is_rich_text);
 
         // WebKit.DOM.Element? active = selection.focus_node as WebKit.DOM.Element;
         // if (active == null && selection.focus_node != null)

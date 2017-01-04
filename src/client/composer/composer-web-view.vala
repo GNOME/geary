@@ -68,6 +68,9 @@ public class ComposerWebView : ClientWebView {
         );
     }
 
+    /** Determines if the view is in rich text mode */
+    public bool is_rich_text { get; private set; default = true; }
+
     private bool is_shift_down = false;
 
 
@@ -167,6 +170,7 @@ public class ComposerWebView : ClientWebView {
      * Sets whether the editor is in rich text or plain text mode.
      */
     public void set_rich_text(bool enabled) {
+        this.is_rich_text = enabled;
         this.run_javascript.begin(
             "geary.setRichText(%s);".printf(enabled ? "true" : "false"), null
         );
