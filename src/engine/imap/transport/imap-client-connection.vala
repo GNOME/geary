@@ -324,7 +324,7 @@ public class Geary.Imap.ClientConnection : BaseObject {
         try {
             return cx.get_local_address();
         } catch (Error err) {
-            debug("Unable to retrieve remote address: %s", err.message);
+            debug("Unable to retrieve local address: %s", err.message);
         }
         
         return null;

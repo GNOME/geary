@@ -191,7 +191,7 @@ public class Geary.Smtp.ClientConnection {
     
     /**
      * Sends the appropriate HELO/EHLO command and returns the response of the one that worked.
-     * Also saves the server's capabilities in the capabilties property (overwriting any that may
+     * Also saves the server's capabilities in the capabilities property (overwriting any that may
      * already be present).
      */
     public async Response say_hello_async(Cancellable? cancellable) throws Error {
