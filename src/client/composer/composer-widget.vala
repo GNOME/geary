@@ -127,7 +127,7 @@ public class ComposerWidget : Gtk.EventBox {
         action_accelerators.set(ACTION_UNDO, "<Ctrl>z");
         action_accelerators.set(ACTION_REDO, "<Ctrl><Shift>z");
         action_accelerators.set(ACTION_CUT, "<Ctrl>x");
-        action_accelerators.set(ACTION_COPY, "<Ctrl>x");
+        action_accelerators.set(ACTION_COPY, "<Ctrl>c");
         action_accelerators.set(ACTION_PASTE, "<Ctrl>v");
         action_accelerators.set(ACTION_PASTE_WITH_FORMATTING, "<Ctrl><Shift>v");
         action_accelerators.set(ACTION_INSERT_IMAGE, "<Ctrl>g");
@@ -469,12 +469,9 @@ public class ComposerWidget : Gtk.EventBox {
         this.editor.mouse_target_changed.connect(on_mouse_target_changed);
         this.editor.get_editor_state().notify["typing-attributes"].connect(on_typing_attributes_changed);
         // this.editor.move_focus.connect(update_actions);
-        // this.editor.copy_clipboard.connect(update_actions);
-        // this.editor.cut_clipboard.connect(update_actions);
-        // this.editor.paste_clipboard.connect(update_actions);
         // this.editor.undo.connect(update_actions);
         // this.editor.redo.connect(update_actions);
-        this.editor.selection_changed.connect(update_actions);
+        this.editor.selection_changed.connect(on_selection_changed);
         this.editor.key_press_event.connect(on_editor_key_press);
         //this.editor.user_changed_contents.connect(reset_draft_timer);
 
@@ -1637,22 +1634,16 @@ public class ComposerWidget : Gtk.EventBox {
         c.store();
     }
 
-    private void on_clipboard_text_received(Gtk.Clipboard clipboard, string? text) {
-        if (text != null) {
-            this.editor.insert_text(text);
-        }
-    }
-
     private void on_paste(SimpleAction action, Variant? param) {
         if (this.container.get_focus() == this.editor)
-            get_clipboard(Gdk.SELECTION_CLIPBOARD).request_text(on_clipboard_text_received);
+            this.editor.paste_plain_text();
         else if (this.container.get_focus() is Gtk.Editable)
             ((Gtk.Editable) this.container.get_focus()).paste_clipboard();
     }
 
     private void on_paste_with_formatting(SimpleAction action, Variant? param) {
         if (this.container.get_focus() == this.editor)
-            this.editor.paste_clipboard();
+            this.editor.paste_rich_text();
     }
 
     private void on_select_all(SimpleAction action, Variant? param) {
@@ -1921,6 +1912,14 @@ public class ComposerWidget : Gtk.EventBox {
                     append_menu_section(context_menu, section);
                 }
             });
+
+        // 4. Update the clipboard
+        // get_clipboard(Gdk.SELECTION_CLIPBOARD).request_targets(
+        //     (_, targets) => {
+        //         foreach (Gdk.Atom atom in targets) {
+        //             debug("atom name: %s", atom.name());
+        //         }
+        //     });
 
         return Gdk.EVENT_PROPAGATE;
     }
@@ -2214,6 +2213,14 @@ public class ComposerWidget : Gtk.EventBox {
         }
 
         this.signature_html = account_sig;
+    }
+
+    private void on_selection_changed(bool has_selection) {
+        get_action(ACTION_CUT).set_enabled(has_selection);
+        get_action(ACTION_COPY).set_enabled(has_selection);
+        get_action(ACTION_REMOVE_FORMAT).set_enabled(
+            has_selection && this.editor.is_rich_text
+        );
     }
 
     private void on_typing_attributes_changed() {

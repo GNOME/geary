@@ -334,20 +334,10 @@ public class ClientWebView : WebKit.WebView {
     }
 
     /**
-     * Sends a copy command to the web view.
+     * Copies selected content and sends it to the clipboard.
      */
     public void copy_clipboard() {
-        execute_editing_command(WebKit.EDITING_COMMAND_CUT);
-    }
-
-    public bool can_copy_clipboard() {
-        // can_execute_editing_command.begin(
-        //     WebKit.EDITING_COMMAND_COPY,
-        //     null,
-        //     (obj, res) => {
-        //         return can_execute_editing_command.end(res);
-        //     });
-        return false;
+        execute_editing_command(WebKit.EDITING_COMMAND_COPY);
     }
 
     public void reset_zoom() {
