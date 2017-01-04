@@ -110,9 +110,9 @@ public class ClientWebView : WebKit.WebView {
                 null
             );
         } catch (IOError.NOT_FOUND err) {
-            warning("User CSS file does not exist: %s", err.message);
+            debug("User CSS file does not exist: %s", err.message);
         } catch (Error err) {
-            warning("Failed to load user CSS file: %s", err.message);
+            debug("Failed to load user CSS file: %s", err.message);
         }
         return user_stylesheet;
     }
