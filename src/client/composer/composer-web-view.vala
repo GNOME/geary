@@ -160,10 +160,10 @@ public class ComposerWebView : ClientWebView {
     }
 
     /**
-     * Inserts some text at the current cursor location, quoting it.
+     * Inserts some HTML at the current cursor location.
      */
-    public void insert_quote(string text) {
-        // XXX
+    public void insert_html(string markup) {
+        execute_editing_command_with_argument("insertHTML", markup);
     }
 
     /**

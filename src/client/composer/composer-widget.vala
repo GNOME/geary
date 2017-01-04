@@ -938,7 +938,7 @@ public class ComposerWidget : Gtk.EventBox {
         if (referred != null && quote != null && quote != this.last_quote) {
             this.last_quote = quote;
             // Always use reply styling, since forward styling doesn't work for inline quotes
-            this.editor.insert_quote(
+            this.editor.insert_html(
                 Geary.RFC822.Utils.quote_email_for_reply(referred, quote, Geary.RFC822.TextFormat.HTML)
             );
 

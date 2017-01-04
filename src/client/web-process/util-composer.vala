@@ -19,11 +19,6 @@ namespace Util.Composer {
     private const string EDITING_DELETE_CONTAINER_ID = "WebKit-Editing-Delete-Container";
 
 
-    public void insert_quote(WebKit.WebPage page, string quote) {
-        WebKit.DOM.Document document = page.get_dom_document();
-        document.exec_command("insertHTML", false, quote);
-    }
-
     public string get_block_quote_representation(WebKit.WebPage page) {
         return Util.DOM.get_text_representation(page.get_dom_document(), "blockquote");
     }
