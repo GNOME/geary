@@ -27,6 +27,9 @@ ComposerPageState.prototype = {
         this.undoEnabled = false;
         this.redoEnabled = false;
 
+        this.cursorFontFamily = null;
+        this.cursorFontSize = null;
+
         let state = this;
 
         document.addEventListener("click", function(e) {
@@ -142,6 +145,30 @@ ComposerPageState.prototype = {
     },
     linkClicked: function(element) {
         window.getSelection().selectAllChildren(element);
+    },
+    selectionChanged: function() {
+        PageState.prototype.selectionChanged.apply(this, []);
+
+        let selection = window.getSelection();
+        let active = selection.focusNode;
+        if (active != null && active.nodeType != Node.ELEMENT_TYPE) {
+            active = active.parentNode;
+        }
+
+        if (active != null) {
+            let styles = window.getComputedStyle(active);
+            let fontFamily = styles.getPropertyValue("font-family");
+            let fontSize = styles.getPropertyValue("font-size");
+
+            if (fontFamily != this.cursorFontFamily ||
+                fontSize != this.cursorFontSize) {
+                this.cursorFontFamily = fontFamily;
+                this.cursorFontSize = fontSize;
+                window.webkit.messageHandlers.cursorStyleChanged.postMessage(
+                    fontFamily + "," + fontSize
+                );
+            }
+        }
     }
 };
 

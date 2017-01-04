@@ -13,6 +13,17 @@ public class ComposerWebView : ClientWebView {
 
 
     private const string COMMAND_STACK_CHANGED = "commandStackChanged";
+    private const string CURSOR_STYLE_CHANGED = "cursorStyleChanged";
+
+    private const string[] SANS_FAMILY_NAMES = {
+        "sans", "arial", "trebuchet", "helvetica"
+    };
+    private const string[] SERIF_FAMILY_NAMES = {
+        "serif", "georgia", "times"
+    };
+    private const string[] MONO_FAMILY_NAMES = {
+        "monospace", "courier", "console"
+    };
 
     private const string HTML_BODY = """
         <html><head><title></title>
@@ -61,6 +72,21 @@ public class ComposerWebView : ClientWebView {
         </body></html>""";
     private const string CURSOR = "<span id=\"cursormarker\"></span>";
 
+    private static Gee.HashMap<string,string> font_family_map =
+        new Gee.HashMap<string,string>();
+
+    static construct {
+        foreach (string name in SANS_FAMILY_NAMES) {
+            font_family_map["sans"] = name;
+        }
+        foreach (string name in SERIF_FAMILY_NAMES) {
+            font_family_map["serif"] = name;
+        }
+        foreach (string name in MONO_FAMILY_NAMES) {
+            font_family_map["monospace"] = name;
+        }
+    }
+
     private static WebKit.UserScript? app_script = null;
 
     public static void load_resources()
@@ -82,6 +108,10 @@ public class ComposerWebView : ClientWebView {
     /** Emitted when the web view's undo/redo stack has changed. */
     public signal void command_stack_changed(bool can_undo, bool can_redo);
 
+    /** Emitted when the style under the cursor has changed. */
+    public signal void cursor_style_changed(string face, uint size);
+
+
     public ComposerWebView(Configuration config) {
         base(config);
         this.user_content_manager.add_script(ComposerWebView.app_script);
@@ -100,7 +130,12 @@ public class ComposerWebView : ClientWebView {
                 }
             });
                     result.unref();
+        this.user_content_manager.script_message_received[CURSOR_STYLE_CHANGED].connect(
+            on_cursor_style_changed_message
+        );
+
         register_message_handler(COMMAND_STACK_CHANGED);
+        register_message_handler(CURSOR_STYLE_CHANGED);
     }
 
     /**
@@ -351,6 +386,29 @@ public class ComposerWebView : ClientWebView {
     public bool handle_key_press(Gdk.EventKey event) {
         // XXX
         return false;
+    }
+
+    private void on_cursor_style_changed_message(WebKit.JavascriptResult result) {
+        try {
+            string[] values = WebKitUtil.to_string(result).split(",");
+            string view_name = values[0].down();
+            string? font_family = "sans";
+            foreach (string name in ComposerWebView.font_family_map.keys) {
+                if (name in view_name) {
+                    font_family = ComposerWebView.font_family_map[name];
+                    break;
+                }
+            }
+
+            uint font_size = 12;
+            values[1].scanf("%dpx", out font_size);
+
+            cursor_style_changed(font_family, font_size);
+        } catch (Geary.JS.Error err) {
+            debug("Could not get cursor style: %s", err.message);
+        } finally {
+            result.unref();
+        }
     }
 
     // We really want to examine

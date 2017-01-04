@@ -12,6 +12,8 @@ private errordomain AttachmentError {
 // The actual widget for sending messages. Should be put in a ComposerContainer
 [GtkTemplate (ui = "/org/gnome/Geary/composer-widget.ui")]
 public class ComposerWidget : Gtk.EventBox {
+
+
     public enum ComposeType {
         NEW_MESSAGE,
         REPLY,
@@ -475,8 +477,8 @@ public class ComposerWidget : Gtk.EventBox {
         this.editor.load_changed.connect(on_load_changed);
         this.editor.mouse_target_changed.connect(on_mouse_target_changed);
         this.editor.get_editor_state().notify["typing-attributes"].connect(on_typing_attributes_changed);
-        // this.editor.move_focus.connect(update_actions);
         this.editor.selection_changed.connect(on_selection_changed);
+        this.editor.cursor_style_changed.connect(on_cursor_style_changed);
         this.editor.key_press_event.connect(on_editor_key_press);
         //this.editor.user_changed_contents.connect(reset_draft_timer);
 
@@ -558,7 +560,6 @@ public class ComposerWidget : Gtk.EventBox {
         insert_action_group("cmp", this.actions);
         this.header.insert_action_group("cmh", this.actions);
 
-        update_actions();
         get_action(ACTION_UNDO).set_enabled(false);
         get_action(ACTION_REDO).set_enabled(false);
     }
@@ -799,11 +800,12 @@ public class ComposerWidget : Gtk.EventBox {
         // This is safe to call even when this connection hasn't been made.
         realize.disconnect(on_load_finished_and_realized);
 
-        update_actions();
-
-        this.actions.change_action_state(ACTION_SHOW_EXTENDED, false);
-        this.actions.change_action_state(ACTION_COMPOSE_AS_HTML,
-            GearyApplication.instance.config.compose_as_html);
+        this.actions.change_action_state(
+            ACTION_SHOW_EXTENDED, false
+        );
+        this.actions.change_action_state(
+            ACTION_COMPOSE_AS_HTML, this.config.compose_as_html
+        );
 
         if (can_delete_quote)
             this.editor.selection_changed.connect(
@@ -1847,8 +1849,6 @@ public class ComposerWidget : Gtk.EventBox {
     // This overrides the keypress handling for the *widget*; the WebView editor's keypress overrides
     // are handled by on_editor_key_press
     public override bool key_press_event(Gdk.EventKey event) {
-        update_actions();
-        
         switch (Gdk.keyval_name(event.keyval)) {
             case "Return":
             case "KP_Enter":
@@ -1860,7 +1860,7 @@ public class ComposerWidget : Gtk.EventBox {
                 }
             break;
         }
-        
+
         return base.key_press_event(event);
     }
 
@@ -2011,66 +2011,6 @@ public class ComposerWidget : Gtk.EventBox {
      */
     public SimpleAction? get_action(string action_name) {
         return this.actions.lookup_action(action_name) as SimpleAction;
-    }
-
-    /**
-     * Updates the states of the composer's actions and whether they should be enabled.
-     */
-    private void update_actions() {
-        // Basic editor commands
-        get_action(ACTION_UNDO).set_enabled(this.editor.can_undo());
-        get_action(ACTION_REDO).set_enabled(this.editor.can_redo());
-        get_action(ACTION_CUT).set_enabled(this.editor.can_cut_clipboard());
-        get_action(ACTION_COPY).set_enabled(this.editor.can_copy_clipboard());
-        get_action(ACTION_PASTE).set_enabled(this.editor.can_paste_clipboard());
-        get_action(ACTION_PASTE_WITH_FORMATTING).set_enabled(
-            this.editor.can_paste_clipboard() &&
-            this.editor.is_rich_text
-        );
-
-        // // Style formatting actions.
-        // WebKit.DOM.Document document = this.editor.get_dom_document();
-        // WebKit.DOM.DOMWindow window = document.get_default_view();
-        // WebKit.DOM.DOMSelection? selection = window.get_selection();
-        // if (selection == null)
-        //     return;
-
-        // get_action(ACTION_REMOVE_FORMAT).set_enabled(!selection.is_collapsed
-        //     && this.editor.is_rich_text);
-
-        // WebKit.DOM.Element? active = selection.focus_node as WebKit.DOM.Element;
-        // if (active == null && selection.focus_node != null)
-        //     active = selection.focus_node.get_parent_element();
-
-        // if (active != null) {
-        //     WebKit.DOM.CSSStyleDeclaration styles = window.get_computed_style(active, "");
-
-        //     // Font family.
-        //     string font_name = styles.get_property_value("font-family").down();
-        //     if (font_name.contains("sans") ||
-        //         font_name.contains("arial") ||
-        //         font_name.contains("trebuchet") ||
-        //         font_name.contains("helvetica"))
-        //         this.actions.change_action_state(ACTION_FONT_FAMILY, "sans");
-        //     else if (font_name.contains("serif") ||
-        //         font_name.contains("georgia") ||
-        //         font_name.contains("times"))
-        //         this.actions.change_action_state(ACTION_FONT_FAMILY, "serif");
-        //     else if (font_name.contains("monospace") ||
-        //         font_name.contains("courier") ||
-        //         font_name.contains("console"))
-        //         this.actions.change_action_state(ACTION_FONT_FAMILY, "monospace");
-
-        //     // Font size.
-        //     int font_size;
-        //     styles.get_property_value("font-size").scanf("%dpx", out font_size);
-        //     if (font_size < 11)
-        //         this.actions.change_action_state(ACTION_FONT_SIZE, "small");
-        //     else if (font_size > 20)
-        //         this.actions.change_action_state(ACTION_FONT_SIZE, "large");
-        //     else
-        //         this.actions.change_action_state(ACTION_FONT_SIZE, "medium");
-        // }
     }
 
     private bool add_account_emails_to_from_list(Geary.Account other_account, bool set_active = false) {
@@ -2244,6 +2184,17 @@ public class ComposerWidget : Gtk.EventBox {
         get_action(ACTION_REMOVE_FORMAT).set_enabled(
             has_selection && this.editor.is_rich_text
         );
+    }
+
+    private void on_cursor_style_changed(string font_family, uint font_size) {
+        this.actions.change_action_state(ACTION_FONT_FAMILY, font_family);
+
+        if (font_size < 11)
+            this.actions.change_action_state(ACTION_FONT_SIZE, "small");
+        else if (font_size > 20)
+            this.actions.change_action_state(ACTION_FONT_SIZE, "large");
+        else
+            this.actions.change_action_state(ACTION_FONT_SIZE, "medium");
     }
 
     private void on_typing_attributes_changed() {
