@@ -639,7 +639,9 @@ public class ConversationEmail : Gtk.Box {
                         }
                         return true;
                     });
-                if (all_loaded == true) {
+                if (all_loaded == true && !this.message_bodies_loaded) {
+                    // Only update the property value if not already
+                    // true
                     this.message_bodies_loaded = true;
                 }
             });

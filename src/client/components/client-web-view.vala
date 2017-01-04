@@ -237,7 +237,11 @@ public class ClientWebView : WebKit.WebView {
                 try {
                     this.preferred_height = (int) WebKitUtil.to_number(result);
                     if (this.preferred_height >= 1) {
-                        this.has_valid_height = true;
+                        if (!this.has_valid_height) {
+                            // Only update the property value if not
+                            // already true
+                            this.has_valid_height = true;
+                        }
                         queue_resize();
                     }
                 } catch (Geary.JS.Error err) {
