@@ -51,7 +51,8 @@ public class Geary.Smtp.EhloRequest : Geary.Smtp.Request {
     }
     
     public EhloRequest.for_local_address(InetAddress local_addr) {
-        this ("[%s]".printf(local_addr.to_string()));
+        string prefix = (local_addr.family == SocketFamily.IPV6) ? "IPv6:" : "";
+        this ("[%s%s]".printf(prefix, local_addr.to_string()));
     }
 }
 
