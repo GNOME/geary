@@ -12,6 +12,8 @@
 public class ComposerWebView : ClientWebView {
 
 
+    private const string COMMAND_STACK_CHANGED = "commandStackChanged";
+
     private const string HTML_BODY = """
         <html><head><title></title>
         <style>
@@ -55,7 +57,7 @@ public class ComposerWebView : ClientWebView {
         }
         </style>
         </head><body>
-        <div id="message-body" contenteditable="true" dir="auto">%s</div>
+        <div id="message-body" dir="auto">%s</div>
         </body></html>""";
     private const string CURSOR = "<span id=\"cursormarker\"></span>";
 
@@ -68,17 +70,37 @@ public class ComposerWebView : ClientWebView {
         );
     }
 
+    /** Determines if the view contains any edited text */
+    public bool is_empty { get; private set; default = false; }
+
     /** Determines if the view is in rich text mode */
     public bool is_rich_text { get; private set; default = true; }
 
     private bool is_shift_down = false;
 
 
+    /** Emitted when the web view's undo/redo stack has changed. */
+    public signal void command_stack_changed(bool can_undo, bool can_redo);
+
     public ComposerWebView(Configuration config) {
         base(config);
         this.user_content_manager.add_script(ComposerWebView.app_script);
         // this.should_insert_text.connect(on_should_insert_text);
         this.key_press_event.connect(on_key_press_event);
+
+        this.user_content_manager.script_message_received[COMMAND_STACK_CHANGED].connect(
+            (result) => {
+                try {
+                    string[] values = WebKitUtil.to_string(result).split(",");
+                    command_stack_changed(values[0] == "true", values[1] == "true");
+                } catch (Geary.JS.Error err) {
+                    debug("Could not get command stack state: %s", err.message);
+                } finally {
+                    result.unref();
+                }
+            });
+                    result.unref();
+        register_message_handler(COMMAND_STACK_CHANGED);
     }
 
     /**
@@ -98,24 +120,19 @@ public class ComposerWebView : ClientWebView {
         base.load_html(HTML_BODY.printf(html));
     }
 
-    public bool can_undo() {
-        // can_execute_editing_command.begin(
-        //     WebKit.EDITING_COMMAND_UNDO,
-        //     null,
-        //     (obj, res) => {
-        //         return can_execute_editing_command.end(res);
-        //     });
-        return false;
+
+    /**
+     * Undoes the last edit operation.
+     */
+    public void undo() {
+        this.run_javascript.begin("geary.undo();", null);
     }
 
-    public bool can_redo() {
-        // can_execute_editing_command.begin(
-        //     WebKit.EDITING_COMMAND_REDO,
-        //     null,
-        //     (obj, res) => {
-        //         return can_execute_editing_command.end(res);
-        //     });
-        return false;
+    /**
+     * Redoes the last undone edit operation.
+     */
+    public void redo() {
+        this.run_javascript.begin("geary.redo();", null);
     }
 
     /**

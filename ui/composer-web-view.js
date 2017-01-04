@@ -22,14 +22,26 @@ ComposerPageState.prototype = {
     init: function() {
         PageState.prototype.init.apply(this, []);
 
+        this.messageBody = null;
+
+        this.undoEnabled = false;
+        this.redoEnabled = false;
+
         let state = this;
+
         document.addEventListener("click", function(e) {
             if (e.target.tagName == "A") {
                 state.linkClicked(e.target);
             }
         }, true);
+
+        this.bodyObserver = new MutationObserver(function() {
+            state.checkCommandStack();
+        });
     },
     loaded: function() {
+        this.messageBody = document.getElementById(ComposerPageState.BODY_ID);
+
         // Search for and remove a particular styling when we quote
         // text. If that style exists in the quoted text, we alter it
         // slightly so we don't mess with it later.
@@ -58,23 +70,64 @@ ComposerPageState.prototype = {
             cursor.parentNode.removeChild(cursor);
         }
 
+        // Enable editing and observation machinery only after
+        // modifying the body above.
+        this.messageBody.contentEditable = true;
+        this.setBodyObserverEnabled(true);
+
         // Chain up here so we continue to a preferred size update
         // after munging the HTML above.
         PageState.prototype.loaded.apply(this, []);
     },
+    undo: function() {
+        document.execCommand("undo", false, null);
+        this.checkCommandStack();
+    },
+    redo: function() {
+        document.execCommand("redo", false, null);
+        this.checkCommandStack();
+    },
     getHtml: function() {
-        return document.getElementById(ComposerPageState.BODY_ID).innerHTML;
+        return this.messageBody.innerHTML;
     },
     getText: function() {
-        return ComposerPageState.htmlToQuotedText(
-            document.getElementById(ComposerPageState.BODY_ID)
-        );
+        return ComposerPageState.htmlToQuotedText(this.messageBody);
     },
     setRichText: function(enabled) {
         if (enabled) {
             document.body.classList.remove("plain");
         } else {
             document.body.classList.add("plain");
+        }
+    },
+    setBodyObserverEnabled: function(enabled) {
+        if (enabled) {
+            let config = {
+                attributes: true,
+                childList: true,
+                characterData: true,
+                subtree: true
+            };
+            this.bodyObserver.observe(this.messageBody, config);
+        } else {
+            this.bodyObserver.disconnect();
+        }
+    },
+    checkCommandStack: function() {
+        let canUndo = document.queryCommandEnabled("undo");
+        let canRedo = document.queryCommandEnabled("redo");
+
+        // Update the body observer - if we can undo we don't need to
+        // keep an eye on mutations any more, until we can't undo
+        // again.
+        this.setBodyObserverEnabled(!canUndo);
+
+        if (canUndo != this.undoEnabled || canRedo != this.redoEnabled) {
+            this.undoEnabled = canUndo;
+            this.redoEnabled = canRedo;
+            window.webkit.messageHandlers.commandStackChanged.postMessage(
+                this.undoEnabled + "," + this.redoEnabled
+            );
         }
     },
     undoBlockquoteStyle: function() {

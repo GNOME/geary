@@ -87,8 +87,8 @@ public class ComposerWidget : Gtk.EventBox {
 
     private const ActionEntry[] action_entries = {
         // Editor commands
-        {ACTION_UNDO,                     on_action                                     },
-        {ACTION_REDO,                     on_action                                     },
+        {ACTION_UNDO,                     on_undo                                       },
+        {ACTION_REDO,                     on_redo                                       },
         {ACTION_CUT,                      on_cut                                        },
         {ACTION_COPY,                     on_copy                                       },
         {ACTION_COPY_LINK,                on_copy_link                                  },
@@ -209,7 +209,7 @@ public class ComposerWidget : Gtk.EventBox {
                 this.bcc_entry.empty &&
                 this.reply_to_entry.empty &&
                 this.subject_entry.buffer.length == 0 &&
-                !this.editor.can_undo() &&
+                !this.editor.is_empty &&
                 this.attached_files.size == 0;
         }
     }
@@ -286,7 +286,12 @@ public class ComposerWidget : Gtk.EventBox {
     [GtkChild]
     private Gtk.Box header_area;
     [GtkChild]
+
     private Gtk.Box composer_toolbar;
+    [GtkChild]
+    private Gtk.Box insert_buttons;
+    [GtkChild]
+    private Gtk.Box font_style_buttons;
     [GtkChild]
     private Gtk.Button remove_format_button;
     [GtkChild]
@@ -295,6 +300,7 @@ public class ComposerWidget : Gtk.EventBox {
     private Gtk.MenuButton menu_button;
     [GtkChild]
     private Gtk.Label info_label;
+
     [GtkChild]
     private Gtk.Box message_area;
 
@@ -465,12 +471,11 @@ public class ComposerWidget : Gtk.EventBox {
         this.bcc_entry.changed.connect(validate_send_button);
         this.reply_to_entry.changed.connect(validate_send_button);
         this.editor.context_menu.connect(on_context_menu);
+        this.editor.command_stack_changed.connect(on_command_state_changed);
         this.editor.load_changed.connect(on_load_changed);
         this.editor.mouse_target_changed.connect(on_mouse_target_changed);
         this.editor.get_editor_state().notify["typing-attributes"].connect(on_typing_attributes_changed);
         // this.editor.move_focus.connect(update_actions);
-        // this.editor.undo.connect(update_actions);
-        // this.editor.redo.connect(update_actions);
         this.editor.selection_changed.connect(on_selection_changed);
         this.editor.key_press_event.connect(on_editor_key_press);
         //this.editor.user_changed_contents.connect(reset_draft_timer);
@@ -554,6 +559,8 @@ public class ComposerWidget : Gtk.EventBox {
         this.header.insert_action_group("cmh", this.actions);
 
         update_actions();
+        get_action(ACTION_UNDO).set_enabled(false);
+        get_action(ACTION_REDO).set_enabled(false);
     }
 
     /**
@@ -1033,7 +1040,7 @@ public class ComposerWidget : Gtk.EventBox {
     private bool can_save() {
         return this.draft_manager != null
             && this.draft_manager.is_open
-            && this.editor.can_undo()
+            && this.editor.is_empty
             && this.account.information.save_drafts;
     }
 
@@ -1614,6 +1621,14 @@ public class ComposerWidget : Gtk.EventBox {
         this.editor.execute_editing_command(action_name);
     }
 
+    private void on_undo(SimpleAction action, Variant? param) {
+        this.editor.undo();
+    }
+
+    private void on_redo(SimpleAction action, Variant? param) {
+        this.editor.redo();
+    }
+
     private void on_cut(SimpleAction action, Variant? param) {
         if (this.container.get_focus() == this.editor)
             this.editor.cut_clipboard();
@@ -1669,6 +1684,9 @@ public class ComposerWidget : Gtk.EventBox {
 
         foreach (string html_action in html_actions)
             get_action(html_action).set_enabled(compose_as_html);
+
+        this.insert_buttons.visible = compose_as_html;
+        this.font_style_buttons.visible = compose_as_html;
         this.remove_format_button.visible = compose_as_html;
 
         this.menu_button.menu_model = (compose_as_html) ? this.html_menu : this.plain_menu;
@@ -2213,6 +2231,11 @@ public class ComposerWidget : Gtk.EventBox {
         }
 
         this.signature_html = account_sig;
+    }
+
+    private void on_command_state_changed(bool can_undo, bool can_redo) {
+        get_action(ACTION_UNDO).set_enabled(can_undo);
+        get_action(ACTION_REDO).set_enabled(can_redo);
     }
 
     private void on_selection_changed(bool has_selection) {

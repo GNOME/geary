@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.20.0 -->
 <interface>
   <requires lib="gtk+" version="3.14"/>
   <template class="ComposerWidget" parent="GtkEventBox">
@@ -44,18 +45,17 @@
                     <property name="margin_start">6</property>
                     <property name="margin_end">6</property>
                     <property name="margin_top">6</property>
-                    <property name="row_spacing">0</property>
                     <property name="column_spacing">6</property>
                     <child>
                       <object class="GtkLabel" id="to_label">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="halign">end</property>
+                        <property name="margin_top">6</property>
                         <property name="label" translatable="yes" comments="Address(es) e-mail is to be sent to">_To</property>
                         <property name="use_underline">True</property>
                         <property name="justify">right</property>
                         <property name="mnemonic_widget">to_box</property>
-                        <property name="margin_top">6</property>
                         <style>
                           <class name="dim-label"/>
                         </style>
@@ -63,8 +63,6 @@
                       <packing>
                         <property name="left_attach">0</property>
                         <property name="top_attach">1</property>
-                        <property name="width">1</property>
-                        <property name="height">1</property>
                       </packing>
                     </child>
                     <child>
@@ -72,11 +70,11 @@
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="halign">end</property>
+                        <property name="margin_top">6</property>
                         <property name="label" translatable="yes">_Cc</property>
                         <property name="use_underline">True</property>
                         <property name="justify">right</property>
                         <property name="mnemonic_widget">to_box</property>
-                        <property name="margin_top">6</property>
                         <style>
                           <class name="dim-label"/>
                         </style>
@@ -84,8 +82,6 @@
                       <packing>
                         <property name="left_attach">0</property>
                         <property name="top_attach">2</property>
-                        <property name="width">1</property>
-                        <property name="height">1</property>
                       </packing>
                     </child>
                     <child>
@@ -97,8 +93,6 @@
                       <packing>
                         <property name="left_attach">1</property>
                         <property name="top_attach">1</property>
-                        <property name="width">1</property>
-                        <property name="height">1</property>
                       </packing>
                     </child>
                     <child>
@@ -110,25 +104,20 @@
                       <packing>
                         <property name="left_attach">1</property>
                         <property name="top_attach">2</property>
-                        <property name="width">1</property>
-                        <property name="height">1</property>
                       </packing>
                     </child>
                     <child>
                       <object class="GtkEntry" id="subject_entry">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
+                        <property name="margin_top">6</property>
                         <property name="hexpand">True</property>
                         <property name="invisible_char">•</property>
-                        <property name="invisible_char_set">True</property>
-                        <property name="margin_top">6</property>
                         <signal name="changed" handler="on_subject_changed" swapped="no"/>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
                         <property name="top_attach">5</property>
-                        <property name="width">1</property>
-                        <property name="height">1</property>
                       </packing>
                     </child>
                     <child>
@@ -136,11 +125,11 @@
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="halign">end</property>
+                        <property name="margin_top">6</property>
                         <property name="label" translatable="yes">_Subject</property>
                         <property name="use_underline">True</property>
                         <property name="justify">right</property>
                         <property name="mnemonic_widget">subject_entry</property>
-                        <property name="margin_top">6</property>
                         <style>
                           <class name="dim-label"/>
                         </style>
@@ -148,8 +137,6 @@
                       <packing>
                         <property name="left_attach">0</property>
                         <property name="top_attach">5</property>
-                        <property name="width">1</property>
-                        <property name="height">1</property>
                       </packing>
                     </child>
                     <child>
@@ -157,11 +144,11 @@
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="halign">end</property>
+                        <property name="margin_top">6</property>
                         <property name="label" translatable="yes">_Bcc</property>
                         <property name="use_underline">True</property>
                         <property name="justify">right</property>
                         <property name="mnemonic_widget">to_box</property>
-                        <property name="margin_top">6</property>
                         <style>
                           <class name="dim-label"/>
                         </style>
@@ -169,8 +156,6 @@
                       <packing>
                         <property name="left_attach">0</property>
                         <property name="top_attach">3</property>
-                        <property name="width">1</property>
-                        <property name="height">1</property>
                       </packing>
                     </child>
                     <child>
@@ -182,8 +167,6 @@
                       <packing>
                         <property name="left_attach">1</property>
                         <property name="top_attach">3</property>
-                        <property name="width">1</property>
-                        <property name="height">1</property>
                       </packing>
                     </child>
                     <child>
@@ -191,11 +174,11 @@
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="halign">end</property>
+                        <property name="margin_top">6</property>
                         <property name="label" translatable="yes">_Reply-To</property>
                         <property name="use_underline">True</property>
                         <property name="justify">right</property>
                         <property name="mnemonic_widget">to_box</property>
-                        <property name="margin_top">6</property>
                         <style>
                           <class name="dim-label"/>
                         </style>
@@ -203,8 +186,6 @@
                       <packing>
                         <property name="left_attach">0</property>
                         <property name="top_attach">4</property>
-                        <property name="width">1</property>
-                        <property name="height">1</property>
                       </packing>
                     </child>
                     <child>
@@ -216,8 +197,6 @@
                       <packing>
                         <property name="left_attach">1</property>
                         <property name="top_attach">4</property>
-                        <property name="width">1</property>
-                        <property name="height">1</property>
                       </packing>
                     </child>
                     <child>
@@ -225,8 +204,8 @@
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="halign">end</property>
-                        <property name="use_underline">True</property>
                         <property name="label" translatable="yes" comments="Geary account mail will be sent from">From</property>
+                        <property name="use_underline">True</property>
                         <property name="justify">right</property>
                         <property name="mnemonic_widget">to_box</property>
                         <style>
@@ -236,8 +215,6 @@
                       <packing>
                         <property name="left_attach">0</property>
                         <property name="top_attach">0</property>
-                        <property name="width">1</property>
-                        <property name="height">1</property>
                       </packing>
                     </child>
                     <child>
@@ -261,8 +238,6 @@
                           <object class="GtkComboBoxText" id="from_multiple">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
-                            <property name="entry_text_column">0</property>
-                            <property name="id_column">1</property>
                           </object>
                           <packing>
                             <property name="expand">False</property>
@@ -274,8 +249,6 @@
                       <packing>
                         <property name="left_attach">1</property>
                         <property name="top_attach">0</property>
-                        <property name="width">1</property>
-                        <property name="height">1</property>
                       </packing>
                     </child>
                   </object>
@@ -289,6 +262,7 @@
               <packing>
                 <property name="expand">True</property>
                 <property name="fill">True</property>
+                <property name="position">0</property>
               </packing>
             </child>
           </object>
@@ -342,6 +316,7 @@
               <packing>
                 <property name="expand">True</property>
                 <property name="fill">True</property>
+                <property name="position">0</property>
               </packing>
             </child>
           </object>
@@ -354,144 +329,249 @@
         <child>
           <object class="GtkBox" id="composer_toolbar">
             <property name="visible">True</property>
-            <property name="orientation">horizontal</property>
             <property name="can_focus">False</property>
             <property name="margin_start">6</property>
             <property name="margin_end">6</property>
             <property name="spacing">6</property>
             <child>
-              <object class="GtkBox" id="font_style_buttons">
+              <object class="GtkBox" id="command_buttons">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
+                <child>
+                  <object class="GtkButton">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="focus_on_click">False</property>
+                    <property name="receives_default">False</property>
+                    <property name="tooltip_text" translatable="yes">Undo last edit (Ctrl+Z)</property>
+                    <property name="action_name">cmp.undo</property>
+                    <property name="always_show_image">True</property>
+                    <child>
+                      <object class="GtkImage">
+                        <property name="can_focus">False</property>
+                        <property name="pixel_size">16</property>
+                        <property name="icon_name">edit-undo-symbolic</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="focus_on_click">False</property>
+                    <property name="receives_default">False</property>
+                    <property name="tooltip_text" translatable="yes">Redo last edit  (Ctrl+Shift+Z)</property>
+                    <property name="action_name">cmp.redo</property>
+                    <property name="always_show_image">True</property>
+                    <child>
+                      <object class="GtkImage">
+                        <property name="can_focus">False</property>
+                        <property name="pixel_size">16</property>
+                        <property name="icon_name">edit-redo-symbolic</property>
+                      </object>
+                    </child>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
                 <style>
                   <class name="linked"/>
                 </style>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkBox" id="font_style_buttons">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
                 <child>
                   <object class="GtkToggleButton" id="bold_button">
-                    <property name="visible" bind-source="bold_button" bind-property="sensitive" />
-                    <property name="always_show_image">True</property>
-                    <property name="action_name">cmp.bold</property>
                     <property name="can_focus">True</property>
                     <property name="focus_on_click">False</property>
+                    <property name="receives_default">False</property>
                     <property name="tooltip_text" translatable="yes">Bold (Ctrl+B)</property>
+                    <property name="action_name">cmp.bold</property>
+                    <property name="always_show_image">True</property>
                     <child>
                       <object class="GtkImage" id="bold_image">
+                        <property name="can_focus">False</property>
+                        <property name="pixel_size">16</property>
                         <property name="icon_name">format-text-bold-symbolic</property>
-                        <property name="pixel-size">16</property>
                       </object>
                     </child>
                   </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
                 </child>
                 <child>
                   <object class="GtkToggleButton" id="italics_button">
-                    <property name="visible" bind-source="italics_button" bind-property="sensitive" />
                     <property name="can_focus">True</property>
                     <property name="focus_on_click">False</property>
+                    <property name="receives_default">False</property>
+                    <property name="tooltip_text" translatable="yes">Italic (Ctrl+I)</property>
                     <property name="action_name">cmp.italic</property>
                     <property name="always_show_image">True</property>
-                    <property name="tooltip_text" translatable="yes">Italic (Ctrl+I)</property>
                     <child>
                       <object class="GtkImage" id="italics_image">
+                        <property name="can_focus">False</property>
+                        <property name="pixel_size">16</property>
                         <property name="icon_name">format-text-italic-symbolic</property>
-                        <property name="pixel-size">16</property>
                       </object>
                     </child>
                   </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
                 </child>
                 <child>
                   <object class="GtkToggleButton" id="underline_button">
-                    <property name="visible" bind-source="underline_button" bind-property="sensitive" />
                     <property name="can_focus">True</property>
                     <property name="focus_on_click">False</property>
+                    <property name="receives_default">False</property>
+                    <property name="tooltip_text" translatable="yes">Underline (Ctrl+U)</property>
                     <property name="action_name">cmp.underline</property>
                     <property name="always_show_image">True</property>
-                    <property name="tooltip_text" translatable="yes">Underline (Ctrl+U)</property>
                     <child>
                       <object class="GtkImage" id="underline_image">
+                        <property name="can_focus">False</property>
+                        <property name="pixel_size">16</property>
                         <property name="icon_name">format-text-underline-symbolic</property>
-                        <property name="pixel-size">16</property>
                       </object>
                     </child>
                   </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">2</property>
+                  </packing>
                 </child>
                 <child>
                   <object class="GtkToggleButton" id="strikethrough_button">
-                    <property name="visible" bind-source="strikethrough_button" bind-property="sensitive" />
                     <property name="can_focus">True</property>
                     <property name="focus_on_click">False</property>
+                    <property name="receives_default">False</property>
+                    <property name="tooltip_text" translatable="yes">Strikethrough (Ctrl+K)</property>
                     <property name="action_name">cmp.strikethrough</property>
                     <property name="always_show_image">True</property>
-                    <property name="tooltip_text" translatable="yes">Strikethrough (Ctrl+K)</property>
                     <child>
                       <object class="GtkImage" id="strikethrough_image">
+                        <property name="can_focus">False</property>
+                        <property name="pixel_size">16</property>
                         <property name="icon_name">format-text-strikethrough-symbolic</property>
-                        <property name="pixel-size">16</property>
                       </object>
                     </child>
                   </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">3</property>
+                  </packing>
                 </child>
+                <style>
+                  <class name="linked"/>
+                </style>
               </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">1</property>
+              </packing>
             </child>
             <child>
               <object class="GtkBox" id="indentation_buttons">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <style>
-                  <class name="linked"/>
-                </style>
                 <child>
                   <object class="GtkButton" id="indent_button">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="focus_on_click">False</property>
+                    <property name="receives_default">False</property>
+                    <property name="tooltip_text" translatable="yes">Quote text  (Ctrl+])</property>
                     <property name="action_name">cmp.indent</property>
                     <property name="always_show_image">True</property>
-                    <property name="tooltip_text" translatable="yes">Quote text  (Ctrl+])</property>
                     <child>
                       <object class="GtkImage" id="indent_image">
+                        <property name="can_focus">False</property>
+                        <property name="pixel_size">16</property>
                         <property name="icon_name">format-indent-more-symbolic</property>
-                        <property name="pixel-size">16</property>
                       </object>
                     </child>
                   </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
                 </child>
                 <child>
                   <object class="GtkButton" id="outdent_button">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="focus_on_click">False</property>
+                    <property name="receives_default">False</property>
+                    <property name="tooltip_text" translatable="yes">Unquote text  (Ctrl+[)</property>
                     <property name="action_name">cmp.outdent</property>
                     <property name="always_show_image">True</property>
-                    <property name="tooltip_text" translatable="yes">Unquote text  (Ctrl+[)</property>
                     <child>
                       <object class="GtkImage" id="outdent_image">
+                        <property name="can_focus">False</property>
+                        <property name="pixel_size">16</property>
                         <property name="icon_name">format-indent-less-symbolic</property>
-                        <property name="pixel-size">16</property>
                       </object>
                     </child>
                   </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
                 </child>
+                <style>
+                  <class name="linked"/>
+                </style>
               </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
+              </packing>
             </child>
             <child>
               <object class="GtkBox" id="insert_buttons">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <style>
-                  <class name="linked"/>
-                </style>
                 <child>
                   <object class="GtkButton" id="insert_link_button">
-                    <property name="visible" bind-source="insert_link_button" bind-property="sensitive" />
                     <property name="can_focus">True</property>
                     <property name="focus_on_click">False</property>
+                    <property name="receives_default">False</property>
+                    <property name="tooltip_text" translatable="yes">Link (Ctrl+L)</property>
                     <property name="action_name">cmp.insert-link</property>
                     <property name="always_show_image">True</property>
-                    <property name="tooltip_text" translatable="yes">Link (Ctrl+L)</property>
                     <child>
                       <object class="GtkImage" id="insert_link_image">
+                        <property name="can_focus">False</property>
+                        <property name="pixel_size">16</property>
                         <property name="icon_name">insert-link-symbolic</property>
-                        <property name="pixel-size">16</property>
                       </object>
                     </child>
                   </object>
@@ -503,7 +583,6 @@
                 </child>
                 <child>
                   <object class="GtkButton" id="insert_image_button">
-                    <property name="visible" bind-source="insert_image_button" bind-property="sensitive" />
                     <property name="can_focus">True</property>
                     <property name="focus_on_click">False</property>
                     <property name="receives_default">False</property>
@@ -524,48 +603,77 @@
                     <property name="position">1</property>
                   </packing>
                 </child>
+                <style>
+                  <class name="linked"/>
+                </style>
               </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">3</property>
+              </packing>
             </child>
             <child>
               <object class="GtkButton" id="remove_format_button">
                 <property name="visible">True</property>
-                <property name="always_show_image">True</property>
-                <property name="action_name">cmp.remove-format</property>
                 <property name="can_focus">True</property>
                 <property name="focus_on_click">False</property>
+                <property name="receives_default">False</property>
                 <property name="tooltip_text" translatable="yes">Remove formatting (Ctrl+Space)</property>
+                <property name="action_name">cmp.remove-format</property>
+                <property name="always_show_image">True</property>
                 <child>
                   <object class="GtkImage" id="remove_format_image">
+                    <property name="can_focus">False</property>
+                    <property name="pixel_size">16</property>
                     <property name="icon_name">format-text-remove-symbolic</property>
-                    <property name="pixel-size">16</property>
                   </object>
                 </child>
               </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">4</property>
+              </packing>
             </child>
             <child>
               <object class="GtkButton" id="select_dictionary_button">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="focus_on_click">False</property>
+                <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">Select spell checking language</property>
                 <property name="action_name">cmp.select-dictionary</property>
                 <property name="always_show_image">True</property>
-                <property name="tooltip_text" translatable="yes">Select spell checking language</property>
                 <child>
                   <object class="GtkImage" id="select_dictionary_image">
+                    <property name="can_focus">False</property>
+                    <property name="pixel_size">16</property>
                     <property name="icon_name">accessories-dictionary-symbolic</property>
-                    <property name="pixel-size">16</property>
                   </object>
                 </child>
               </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">5</property>
+              </packing>
             </child>
             <child>
               <object class="GtkMenuButton" id="menu_button">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="focus_on_click">False</property>
+                <property name="receives_default">False</property>
+                <child>
+                  <placeholder/>
+                </child>
               </object>
               <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
                 <property name="pack_type">end</property>
+                <property name="position">5</property>
               </packing>
             </child>
             <child>
@@ -577,7 +685,10 @@
                 </style>
               </object>
               <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
                 <property name="pack_type">end</property>
+                <property name="position">6</property>
               </packing>
             </child>
           </object>
@@ -591,6 +702,7 @@
           <object class="GtkFrame">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="label_xalign">0</property>
             <property name="shadow_type">in</property>
             <child>
               <object class="GtkBox" id="message_area">
@@ -598,19 +710,20 @@
                 <property name="can_focus">False</property>
                 <child>
                   <object class="GtkOverlay" id="message_overlay">
-                  <property name="visible">True</property>
-                  <property name="can_focus">False</property>
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
                     <child>
                       <object class="GtkScrolledWindow" id="editor_scrolled">
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
-                        <property name="hscrollbar_policy">automatic</property>
-                        <property name="vscrollbar_policy">automatic</property>
                         <property name="min_content_height">200</property>
                         <child>
-                          <placeholder />
+                          <placeholder/>
                         </child>
                       </object>
+                      <packing>
+                        <property name="index">-1</property>
+                      </packing>
                     </child>
                     <child type="overlay">
                       <object class="GtkLabel" id="message_overlay_label">
@@ -626,6 +739,7 @@
                   <packing>
                     <property name="expand">True</property>
                     <property name="fill">True</property>
+                    <property name="position">0</property>
                   </packing>
                 </child>
               </object>
