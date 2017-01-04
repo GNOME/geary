@@ -77,6 +77,7 @@ public class ComposerWidget : Gtk.EventBox {
     private const string ACTION_ADD_ATTACHMENT = "add-attachment";
     private const string ACTION_ADD_ORIGINAL_ATTACHMENTS = "add-original-attachments";
     private const string ACTION_SELECT_DICTIONARY = "select-dictionary";
+    private const string ACTION_OPEN_INSPECTOR = "open_inspector";
 
     private const string[] html_actions = {
         ACTION_BOLD, ACTION_ITALIC, ACTION_UNDERLINE, ACTION_STRIKETHROUGH, ACTION_FONT_SIZE,
@@ -118,6 +119,7 @@ public class ComposerWidget : Gtk.EventBox {
         {ACTION_ADD_ATTACHMENT,           on_add_attachment                                                    },
         {ACTION_ADD_ORIGINAL_ATTACHMENTS, on_pending_attachments                                               },
         {ACTION_SELECT_DICTIONARY,        on_select_dictionary                                                 },
+        {ACTION_OPEN_INSPECTOR,           on_open_inspector                                                    },
     };
 
     public static Gee.MultiMap<string, string> action_accelerators = new Gee.HashMultiMap<string, string>();
@@ -298,7 +300,13 @@ public class ComposerWidget : Gtk.EventBox {
 
     private Menu html_menu;
     private Menu plain_menu;
+
     private Menu context_menu_model;
+    private Menu context_menu_rich_text;
+    private Menu context_menu_plain_text;
+    private Menu context_menu_webkit_spelling;
+    private Menu context_menu_webkit_text_entry;
+    private Menu context_menu_inspector;
 
     private SpellCheckPopover? spell_check_popover = null;
     private string? hover_url = null;
@@ -401,6 +409,11 @@ public class ComposerWidget : Gtk.EventBox {
         this.html_menu = (Menu) builder.get_object("html_menu_model");
         this.plain_menu = (Menu) builder.get_object("plain_menu_model");
         this.context_menu_model = (Menu) builder.get_object("context_menu_model");
+        this.context_menu_rich_text = (Menu) builder.get_object("context_menu_rich_text");
+        this.context_menu_plain_text = (Menu) builder.get_object("context_menu_plain_text");
+        this.context_menu_inspector = (Menu) builder.get_object("context_menu_inspector");
+        this.context_menu_webkit_spelling = (Menu) builder.get_object("context_menu_webkit_spelling");
+        this.context_menu_webkit_text_entry = (Menu) builder.get_object("context_menu_webkit_text_entry");
 
         this.subject_entry.bind_property("text", this, "window-title", BindingFlags.SYNC_CREATE,
             (binding, source_value, ref target_value) => {
@@ -1843,53 +1856,88 @@ public class ComposerWidget : Gtk.EventBox {
     }
 
     private bool on_context_menu(WebKit.WebView view,
-                                 WebKit.ContextMenu default_menu,
+                                 WebKit.ContextMenu context_menu,
                                  Gdk.Event event,
                                  WebKit.HitTestResult hit_test_result) {
-        // Gtk.Menu context_menu = (Gtk.Menu) default_menu;
+        // This is a three step process:
+        // 1. Work out what existing menu items exist that we want to keep
+        // 2. Clear the existing menu
+        // 3. Rebuild it based on our GMenu specification
 
-        // // Keep the spelling menu items
-        // foreach (weak Gtk.Widget child in context_menu.get_children()) {
-        //     Gtk.MenuItem item = (Gtk.MenuItem) child;
-        //     WebKit.ContextMenuAction action = WebKit.context_menu_item_get_action(item);
+        // Step 1.
 
-        //     const WebKit.ContextMenuAction[] spelling_actions = {
-        //         WebKit.ContextMenuAction.SPELLING_GUESS,
-        //         WebKit.ContextMenuAction.IGNORE_SPELLING,
-        //         WebKit.ContextMenuAction.LEARN_SPELLING
-        //     };
+        const WebKit.ContextMenuAction[] SPELLING_ACTIONS = {
+            WebKit.ContextMenuAction.SPELLING_GUESS,
+            WebKit.ContextMenuAction.NO_GUESSES_FOUND,
+            WebKit.ContextMenuAction.IGNORE_SPELLING,
+            WebKit.ContextMenuAction.IGNORE_GRAMMAR,
+            WebKit.ContextMenuAction.LEARN_SPELLING,
+        };
+        const WebKit.ContextMenuAction[] TEXT_INPUT_ACTIONS = {
+            WebKit.ContextMenuAction.INPUT_METHODS,
+            WebKit.ContextMenuAction.UNICODE,
+        };
 
-        //     if (!(action in spelling_actions))
-        //         context_menu.remove(item);
-        // }
+        Gee.List<WebKit.ContextMenuItem> existing_spelling =
+            new Gee.LinkedList<WebKit.ContextMenuItem>();
+        Gee.List<WebKit.ContextMenuItem> existing_text_entry =
+            new Gee.LinkedList<WebKit.ContextMenuItem>();
 
-        // // Add our own Menu (but don't add formatting actions if they are disabled).
-        // context_menu.insert_action_group("cme", this.actions);
-        // GtkUtil.add_g_menu_to_gtk_menu(context_menu, context_menu_model, (label, detailed_action_name) => {
-        //     string action_name;
-        //     Variant? target;
-        //     try {
-        //         Action.parse_detailed_name(detailed_action_name, out action_name, out target);
-        //         if ("." in action_name) // Remove possible prefixes
-        //             action_name = action_name.split(".")[1];
-        //     } catch (GLib.Error e) {
-        //         debug("Couldn't parse action \"%s\" in context menu".printf(detailed_action_name));
-        //     }
-        //     return !(action_name in html_actions) || (this.actions.get_action_enabled(action_name));
-        // });
+        foreach (WebKit.ContextMenuItem item in context_menu.get_items()) {
+            if (item.get_stock_action() in SPELLING_ACTIONS) {
+                existing_spelling.add(item);
+            } else if (item.get_stock_action() in TEXT_INPUT_ACTIONS) {
+                existing_text_entry.add(item);
+            }
+        }
 
-        // if (Args.inspector) {
-        //     Gtk.MenuItem inspect_item = new Gtk.MenuItem.with_mnemonic(_("_Inspect"));
-        //     inspect_item.activate.connect(() => {
-        //             this.editor.get_inspector().show();
-        //         });
-        //     context_menu.append(new Gtk.SeparatorMenuItem());
-        //     context_menu.append(inspect_item);
-        // }
+        // Step 2.
 
-        // context_menu.show_all();
-        // update_actions();
-        return false;
+        context_menu.remove_all();
+
+        // Step 3.
+
+        GtkUtil.menu_foreach(context_menu_model, (label, name, target, section) => {
+                if (context_menu.last() != null) {
+                    context_menu.append(new WebKit.ContextMenuItem.separator());
+                }
+
+                if (section == this.context_menu_webkit_spelling) {
+                    foreach (WebKit.ContextMenuItem item in existing_spelling)
+                        context_menu.append(item);
+                } else if (section == this.context_menu_webkit_text_entry) {
+                    foreach (WebKit.ContextMenuItem item in existing_text_entry)
+                        context_menu.append(item);
+                } else if (section == this.context_menu_rich_text) {
+                    if (this.editor.is_rich_text)
+                        append_menu_section(context_menu, section);
+                } else if (section == this.context_menu_plain_text) {
+                    if (!this.editor.is_rich_text)
+                        append_menu_section(context_menu, section);
+                } else if (section == this.context_menu_inspector) {
+                    if (Args.inspector)
+                        append_menu_section(context_menu, section);
+                } else {
+                    append_menu_section(context_menu, section);
+                }
+            });
+
+        return Gdk.EVENT_PROPAGATE;
+    }
+
+    private inline void append_menu_section(WebKit.ContextMenu context_menu,
+                                            Menu section) {
+        GtkUtil.menu_foreach(section, (label, name, target, section) => {
+                if ("." in name)
+                    name = name.split(".")[1];
+
+                Gtk.Action action = new Gtk.Action(name, label, null, null);
+                action.set_sensitive(get_action(name).enabled);
+                action.activate.connect((action) => {
+                        this.actions.activate_action(name, target);
+                    });
+                context_menu.append(new WebKit.ContextMenuItem(action));
+            });
     }
 
     private void on_select_dictionary(SimpleAction action, Variant? param) {
@@ -2241,6 +2289,10 @@ public class ComposerWidget : Gtk.EventBox {
 
     private void on_insert_link(SimpleAction action, Variant? param) {
         link_dialog("http://");
+    }
+
+    private void on_open_inspector(SimpleAction action, Variant? param) {
+        this.editor.get_inspector().show();
     }
 
 }

@@ -72,42 +72,60 @@
   </menu>
 
   <menu id="context_menu_model">
+    <section id="context_menu_webkit_spelling"/>
     <section>
       <item>
         <attribute name="label" translatable="yes">_Undo</attribute>
-        <attribute name="action">cme.undo</attribute>
+        <attribute name="action">cmp.undo</attribute>
       </item>
       <item>
         <attribute name="label" translatable="yes">_Redo</attribute>
-        <attribute name="action">cme.redo</attribute>
+        <attribute name="action">cmp.redo</attribute>
       </item>
     </section>
-    <section>
+    <section id="context_menu_rich_text">
       <item>
         <attribute name="label" translatable="yes">Cu_t</attribute>
-        <attribute name="action">cme.cut</attribute>
+        <attribute name="action">cmp.cut</attribute>
       </item>
       <item>
         <attribute name="label" translatable="yes">_Copy</attribute>
-        <attribute name="action">cme.copy</attribute>
-      </item>
-      <item>
-        <attribute name="label" translatable="yes">Copy _Link</attribute>
-        <attribute name="action">cme.copy-link</attribute>
+        <attribute name="action">cmp.copy</attribute>
       </item>
       <item>
         <attribute name="label" translatable="yes">_Paste</attribute>
-        <attribute name="action">cme.paste</attribute>
+        <attribute name="action">cmp.paste</attribute>
       </item>
       <item>
         <attribute name="label" translatable="yes" context="Clipboard paste with rich text">Paste _With Formatting</attribute>
-        <attribute name="action">cme.paste-with-formatting</attribute>
+        <attribute name="action">cmp.paste-with-formatting</attribute>
+      </item>
+    </section>
+    <section id="context_menu_plain_text">
+      <item>
+        <attribute name="label" translatable="yes">Cu_t</attribute>
+        <attribute name="action">cmp.cut</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_Copy</attribute>
+        <attribute name="action">cmp.copy</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_Paste</attribute>
+        <attribute name="action">cmp.paste</attribute>
       </item>
     </section>
     <section>
       <item>
         <attribute name="label" translatable="yes">Select _All</attribute>
-        <attribute name="action">cme.select-all</attribute>
+        <attribute name="action">cmp.select-all</attribute>
+      </item>
+    </section>
+    <section id="context_menu_webkit_text_entry"/>
+    <section id="context_menu_inspector">
+      <item>
+        <attribute name="label" translatable="yes">_Inspect…</attribute>
+        <attribute name="action">cmp.open_inspector</attribute>
       </item>
     </section>
   </menu>
