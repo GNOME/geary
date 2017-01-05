@@ -102,12 +102,16 @@ public class Geary.TimeoutManager : BaseObject {
     }
 
     private bool on_trigger() {
-        callback(this);
         bool ret = Source.CONTINUE;
+        // If running only once, reset the source id now in case the
+        // callback resets the timer while it is executing, so we
+        // avoid removing the source just before it would be removed
+        // after this call anyway
         if (this.repetition == Repeat.ONCE) {
             this.source_id = -1;
             ret = Source.REMOVE;
         }
+        callback(this);
         return ret;
     }
 
