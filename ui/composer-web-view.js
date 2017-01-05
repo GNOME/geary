@@ -43,7 +43,19 @@ ComposerPageState.prototype = {
         });
     },
     loaded: function() {
+        let state = this;
+
         this.messageBody = document.getElementById(ComposerPageState.BODY_ID);
+        this.messageBody.addEventListener("keydown", function(e) {
+            if (e.keyCode == 9) {
+                if (!e.shiftKey) {
+                    state.tabOut();
+                } else {
+                    state.tabIn();
+                }
+                e.preventDefault();
+            }
+        });
 
         // Search for and remove a particular styling when we quote
         // text. If that style exists in the quoted text, we alter it
@@ -89,6 +101,24 @@ ComposerPageState.prototype = {
     redo: function() {
         document.execCommand("redo", false, null);
         this.checkCommandStack();
+    },
+    tabOut: function() {
+        document.execCommand(
+            "inserthtml", false, "<span style='white-space: pre-wrap'>\t</span>"
+        );
+    },
+    tabIn: function() {
+        // If there is no selection and the character before the
+        // cursor is tab, delete it.
+        let selection = window.getSelection();
+        if (selection.isCollapsed) {
+            selection.modify("extend", "backward", "character");
+            if (selection.getRangeAt(0).toString() == "\t") {
+                document.execCommand("delete", false, null);
+            } else {
+                selection.collapseToEnd();
+            }
+        }
     },
     getHtml: function() {
         return this.messageBody.innerHTML;

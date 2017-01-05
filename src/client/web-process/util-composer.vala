@@ -27,34 +27,6 @@ namespace Util.Composer {
         Util.DOM.linkify_document(page.get_dom_document());
     }
 
-    public bool handle_key_press(WebKit.WebPage page, Gdk.EventKey event) {
-        WebKit.DOM.Document document = page.get_dom_document();
-        if (event.keyval == Gdk.Key.Tab) {
-            document.exec_command("inserthtml", false,
-                "<span style='white-space: pre-wrap'>\t</span>");
-            return true;
-        }
-
-        if (event.keyval == Gdk.Key.ISO_Left_Tab) {
-            // If there is no selection and the character before the cursor is tab, delete it.
-            // WebKit.DOM.DOMSelection selection = document.get_default_view().get_selection();
-            // if (selection.is_collapsed) {
-            //     selection.modify("extend", "backward", "character");
-            //     try {
-            //         if (selection.get_range_at(0).get_text() == "\t")
-            //             selection.delete_from_document();
-            //         else
-            //             selection.collapse_to_end();
-            //     } catch (Error error) {
-            //         debug("Error handling Left Tab: %s", error.message);
-            //     }
-            // }
-            return true;
-        }
-
-        return false;
-    }
-
 
     /////////////////////// From WebEditorFixer ///////////////////////
 
