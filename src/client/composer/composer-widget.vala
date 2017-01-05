@@ -690,12 +690,11 @@ public class ComposerWidget : Gtk.EventBox {
         this.draft_manager = new Geary.App.DraftManager(account);
         try {
             yield this.draft_manager.open_async(editing_draft_id, cancellable);
+            debug("Draft manager opened");
         } catch (Error err) {
             debug("Unable to open draft manager %s: %s",
                   this.draft_manager.to_string(), err.message);
-
             this.draft_manager = null;
-
             throw err;
         }
 
@@ -1337,6 +1336,7 @@ public class ComposerWidget : Gtk.EventBox {
         } finally {
             this.draft_manager = null;
         }
+        debug("Draft manager closed");
     }
 
     // Resets the draft save timeout.
@@ -1361,29 +1361,25 @@ public class ComposerWidget : Gtk.EventBox {
         // this is not rescheduled by the event loop, so kill the timeout id
         this.draft_save_timeout_id = 0;
         
-        save_draft();
+        save_draft.begin();
         
         return false;
     }
 
     // Note that drafts are NOT "linkified."
-    private void save_draft() {
+    private async void save_draft() {
         // cancel timer in favor of just doing it now
         cancel_draft_timer();
 
         if (this.draft_manager != null) {
-            this.get_composed_email.begin(null, true, (obj, res) => {
-                    try {
-                        Geary.ComposedEmail draft = this.get_composed_email.end(res);
-                        this.draft_manager.update(
-                            draft.to_rfc822_message(),
-                            this.draft_flags,
-                            null
-                        );
-                    } catch (Error err) {
-                        GLib.message("Unable to save draft: %s", err.message);
-                    }
-                });
+            try {
+                Geary.ComposedEmail draft = yield get_composed_email(null, true);
+                this.draft_manager.update(
+                    draft.to_rfc822_message(), this.draft_flags, null
+                );
+            } catch (Error err) {
+                GLib.message("Unable to save draft: %s", err.message);
+            }
         }
     }
 
@@ -1410,8 +1406,8 @@ public class ComposerWidget : Gtk.EventBox {
     private async void save_and_exit_async() {
         make_gui_insensitive();
         this.is_closing = true;
-        
-        save_draft();
+
+        yield save_draft();
         try {
             yield close_draft_manager_async(null);
         } catch (Error err) {
@@ -2130,9 +2126,15 @@ public class ComposerWidget : Gtk.EventBox {
         // is handled here alone, so changed open it if not already
         if (!changed && this.draft_manager != null)
             return;
-        
-        open_draft_manager_async.begin();
-        reset_draft_timer();
+
+        this.open_draft_manager_async.begin(null, null, (obj, res) => {
+                try {
+                    this.open_draft_manager_async.end(res);
+                    reset_draft_timer();
+                } catch (Error e) {
+                    // Oh well?
+                }
+            });
     }
 
     private bool update_from_account() throws Error {
