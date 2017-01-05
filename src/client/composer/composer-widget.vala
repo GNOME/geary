@@ -1842,6 +1842,10 @@ public class ComposerWidget : Gtk.EventBox {
         if (hit_test.context_is_link()) {
             copy_link_enabled = true;
             this.hover_url = hit_test.get_link_uri();
+            this.message_overlay_label.label = this.hover_url;
+        } else {
+            this.hover_url = null;
+            this.message_overlay_label.label = "";
         }
         get_action(ACTION_COPY_LINK).set_enabled(copy_link_enabled);
     }
