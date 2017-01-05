@@ -215,12 +215,13 @@ public class ComposerWidget : Gtk.EventBox {
         }
     }
 
-    /** Determines if current message can be saved as draft. */
-    private bool can_save {
+    /** Determines if current message should be saved as draft. */
+    private bool should_save {
         get {
             return this.draft_manager != null
                 && this.draft_manager.is_open
                 && this.account.information.save_drafts
+                && !this.is_draft_saved
                 && !this.is_blank;
         }
     }
@@ -345,6 +346,7 @@ public class ComposerWidget : Gtk.EventBox {
     private Geary.App.DraftManager? draft_manager = null;
     private Geary.EmailFlags draft_flags = new Geary.EmailFlags.with(Geary.EmailFlags.DRAFT);
     private Geary.TimeoutManager draft_timer;
+    private bool is_draft_saved = false;
 
     // Is the composer closing (e.g. saving a draft or sending)?
     private bool is_closing = false;
@@ -712,6 +714,7 @@ public class ComposerWidget : Gtk.EventBox {
             throw err;
         }
 
+        update_draft_state();
         close_and_save.set_enabled(true);
         this.header.save_and_close_button.show();
 
@@ -1059,7 +1062,7 @@ public class ComposerWidget : Gtk.EventBox {
         if (this.is_blank)
             return CloseStatus.DO_CLOSE;
 
-        bool try_to_save = this.can_save;
+        bool try_to_save = this.should_save;
 
         this.container.present();
         AlertDialog dialog;
@@ -1094,7 +1097,7 @@ public class ComposerWidget : Gtk.EventBox {
     }
 
     private void on_close_and_save(SimpleAction action, Variant? param) {
-        if (this.can_save)
+        if (this.should_save)
             save_and_exit_async.begin();
         else
             on_close(action, param);
@@ -1301,36 +1304,31 @@ public class ComposerWidget : Gtk.EventBox {
         this.container.close_container();
     }
 
-    private void on_draft_state_changed() {
+    private void update_draft_state() {
         switch (this.draft_manager.draft_state) {
             case Geary.App.DraftManager.DraftState.STORED:
                 this.draft_save_text = DRAFT_SAVED_TEXT;
+                this.is_draft_saved = true;
             break;
 
             case Geary.App.DraftManager.DraftState.STORING:
                 this.draft_save_text = DRAFT_SAVING_TEXT;
+                this.is_draft_saved = true;
             break;
 
             case Geary.App.DraftManager.DraftState.NOT_STORED:
                 this.draft_save_text = "";
+                this.is_draft_saved = false;
             break;
 
             case Geary.App.DraftManager.DraftState.ERROR:
                 this.draft_save_text = DRAFT_ERROR_TEXT;
+                this.is_draft_saved = false;
             break;
 
             default:
                 assert_not_reached();
         }
-    }
-
-    private void on_draft_id_changed() {
-        draft_id_changed(this.draft_manager.current_draft_id);
-    }
-
-    private void on_draft_manager_fatal(Error err) {
-        this.draft_save_text = DRAFT_ERROR_TEXT;
-    }
 
     private async void close_draft_manager_async(Cancellable? cancellable) throws Error {
         get_action(ACTION_CLOSE_AND_SAVE).set_enabled(false);
@@ -1349,10 +1347,13 @@ public class ComposerWidget : Gtk.EventBox {
     }
 
     private inline void draft_changed() {
-        this.draft_save_text = "";
         if (this.can_save) {
             this.draft_timer.start();
         }
+        this.draft_save_text = "";
+        // can_save depends on the value of this, so reset it after
+        // the if test above
+        this.is_draft_saved = false;
     }
 
     // Note that drafts are NOT "linkified."
@@ -2198,6 +2199,18 @@ public class ComposerWidget : Gtk.EventBox {
     private void on_command_state_changed(bool can_undo, bool can_redo) {
         get_action(ACTION_UNDO).set_enabled(can_undo);
         get_action(ACTION_REDO).set_enabled(can_redo);
+    }
+
+    private void on_draft_id_changed() {
+        draft_id_changed(this.draft_manager.current_draft_id);
+    }
+
+    private void on_draft_manager_fatal(Error err) {
+        this.draft_save_text = DRAFT_ERROR_TEXT;
+    }
+
+    private void on_draft_state_changed() {
+        update_draft_state();
     }
 
     private void on_selection_changed(bool has_selection) {
