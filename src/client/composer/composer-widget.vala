@@ -155,9 +155,7 @@ public class ComposerWidget : Gtk.EventBox {
 
     private const string URI_LIST_MIME_TYPE = "text/uri-list";
     private const string FILE_URI_PREFIX = "file://";
-    
-    private const int DRAFT_TIMEOUT_SEC = 10;
-    
+
     public const string ATTACHMENT_KEYWORDS_SUFFIX = ".doc|.pdf|.xls|.ppt|.rtf|.pps";
     
     // A list of keywords, separated by pipe ("|") characters, that suggest an attachment; since
@@ -204,15 +202,26 @@ public class ComposerWidget : Gtk.EventBox {
 
     public Gee.Set<Geary.EmailIdentifier> referred_ids = new Gee.HashSet<Geary.EmailIdentifier>();
 
-    public bool blank {
+    /** Determines if the composer is completely empty. */
+    public bool is_blank {
         get {
-            return this.to_entry.empty &&
-                this.cc_entry.empty &&
-                this.bcc_entry.empty &&
-                this.reply_to_entry.empty &&
-                this.subject_entry.buffer.length == 0 &&
-                !this.editor.is_empty &&
-                this.attached_files.size == 0;
+            return this.to_entry.empty
+                && this.cc_entry.empty
+                && this.bcc_entry.empty
+                && this.reply_to_entry.empty
+                && this.subject_entry.buffer.length == 0
+                && this.editor.is_empty
+                && this.attached_files.size == 0;
+        }
+    }
+
+    /** Determines if current message can be saved as draft. */
+    private bool can_save {
+        get {
+            return this.draft_manager != null
+                && this.draft_manager.is_open
+                && this.account.information.save_drafts
+                && !this.is_blank;
         }
     }
 
@@ -336,7 +345,9 @@ public class ComposerWidget : Gtk.EventBox {
 
     private Geary.App.DraftManager? draft_manager = null;
     private Geary.EmailFlags draft_flags = new Geary.EmailFlags.with(Geary.EmailFlags.DRAFT);
-    private uint draft_save_timeout_id = 0;
+    private Geary.TimeoutManager draft_timer;
+
+    // Is the composer closing (e.g. saving a draft or sending)?
     private bool is_closing = false;
 
     private ComposerContainer container {
@@ -462,6 +473,10 @@ public class ComposerWidget : Gtk.EventBox {
         update_signature();
         update_pending_attachments(this.pending_include, true);
 
+        this.draft_timer = new Geary.TimeoutManager.seconds(
+            10, () => { this.save_draft.begin(); }
+        );
+
         // Add actions once every element has been initialized and added
         initialize_actions();
 
@@ -476,12 +491,12 @@ public class ComposerWidget : Gtk.EventBox {
         this.editor.command_stack_changed.connect(on_command_state_changed);
         this.editor.context_menu.connect(on_context_menu);
         this.editor.cursor_style_changed.connect(on_cursor_style_changed);
+        this.editor.document_modified.connect(() => { draft_changed(); });
         this.editor.get_editor_state().notify["typing-attributes"].connect(on_typing_attributes_changed);
         this.editor.key_press_event.connect(on_editor_key_press_event);
         this.editor.load_changed.connect(on_load_changed);
         this.editor.mouse_target_changed.connect(on_mouse_target_changed);
         this.editor.selection_changed.connect(on_selection_changed);
-        //this.editor.user_changed_contents.connect(reset_draft_timer);
 
         this.editor.load_html(this.body_html, this.signature_html, this.top_posting);
 
@@ -1034,23 +1049,16 @@ public class ComposerWidget : Gtk.EventBox {
                     this.to_entry.addresses);
             this.to_entry.modified = this.cc_entry.modified = false;
         }
-        
+
         in_reply_to.add(referred.message_id);
         referred_ids.add(referred.id);
-    }
-    
-    private bool can_save() {
-        return this.draft_manager != null
-            && this.draft_manager.is_open
-            && this.editor.is_empty
-            && this.account.information.save_drafts;
     }
 
     public CloseStatus should_close() {
         if (this.is_closing)
             return CloseStatus.PENDING_CLOSE;
 
-        bool try_to_save = can_save();
+        bool try_to_save = this.can_save;
 
         this.container.present();
         AlertDialog dialog;
@@ -1085,7 +1093,7 @@ public class ComposerWidget : Gtk.EventBox {
     }
 
     private void on_close_and_save(SimpleAction action, Variant? param) {
-        if (can_save())
+        if (this.can_save)
             save_and_exit_async.begin();
         else
             on_close(action, param);
@@ -1339,37 +1347,17 @@ public class ComposerWidget : Gtk.EventBox {
         debug("Draft manager closed");
     }
 
-    // Resets the draft save timeout.
-    private void reset_draft_timer() {
+    private inline void draft_changed() {
         this.draft_save_text = "";
-        cancel_draft_timer();
-        
-        if (can_save())
-            draft_save_timeout_id = Timeout.add_seconds(DRAFT_TIMEOUT_SEC, on_save_draft_timeout);
-    }
-
-    // Cancels the draft save timeout
-    private void cancel_draft_timer() {
-        if (this.draft_save_timeout_id == 0)
-            return;
-        
-        Source.remove(this.draft_save_timeout_id);
-        this.draft_save_timeout_id = 0;
-    }
-
-    private bool on_save_draft_timeout() {
-        // this is not rescheduled by the event loop, so kill the timeout id
-        this.draft_save_timeout_id = 0;
-        
-        save_draft.begin();
-        
-        return false;
+        if (this.can_save) {
+            this.draft_timer.start();
+        }
     }
 
     // Note that drafts are NOT "linkified."
     private async void save_draft() {
         // cancel timer in favor of just doing it now
-        cancel_draft_timer();
+        this.draft_timer.reset();
 
         if (this.draft_manager != null) {
             try {
@@ -1385,8 +1373,8 @@ public class ComposerWidget : Gtk.EventBox {
 
     private Geary.Nonblocking.Semaphore? discard_draft() {
         // cancel timer in favor of this operation
-        cancel_draft_timer();
-        
+        this.draft_timer.reset();
+
         try {
             if (this.draft_manager != null)
                 return this.draft_manager.discard();
@@ -1400,7 +1388,7 @@ public class ComposerWidget : Gtk.EventBox {
     // Used while waiting for draft to save before closing widget.
     private void make_gui_insensitive() {
         this.container.vanish();
-        cancel_draft_timer();
+        this.draft_timer.reset();
     }
 
     private async void save_and_exit_async() {
@@ -1598,7 +1586,7 @@ public class ComposerWidget : Gtk.EventBox {
 
     [GtkCallback]
     private void on_subject_changed() {
-        reset_draft_timer();
+        draft_changed();
     }
 
     private void validate_send_button() {
@@ -1627,7 +1615,7 @@ public class ComposerWidget : Gtk.EventBox {
             this.header.set_recipients(label, tooltip.str.slice(0, -1));  // Remove trailing \n
         }
 
-        reset_draft_timer();
+        draft_changed();
     }
 
     private void on_justify(SimpleAction action, Variant? param) {
@@ -2130,7 +2118,7 @@ public class ComposerWidget : Gtk.EventBox {
         this.open_draft_manager_async.begin(null, null, (obj, res) => {
                 try {
                     this.open_draft_manager_async.end(res);
-                    reset_draft_timer();
+                    draft_changed();
                 } catch (Error e) {
                     // Oh well?
                 }

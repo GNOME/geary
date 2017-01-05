@@ -2403,7 +2403,7 @@ public class GearyController : Geary.BaseObject {
         if (compose_type == ComposerWidget.ComposeType.NEW_MESSAGE) {
             foreach (ComposerWidget cw in composer_widgets) {
                 if (cw.state == ComposerWidget.ComposerState.NEW) {
-                    if (!cw.blank) {
+                    if (!cw.is_blank) {
                         inline = false;
                         return true;
                     } else {

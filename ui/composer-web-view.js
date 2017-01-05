@@ -38,8 +38,15 @@ ComposerPageState.prototype = {
             }
         }, true);
 
+        let modifiedId = null;
         this.bodyObserver = new MutationObserver(function() {
-            state.checkCommandStack();
+            if (modifiedId == null) {
+                modifiedId = window.setTimeout(function() {
+                    state.documentModified();
+                    state.checkCommandStack();
+                    modifiedId = null;
+                }, 1000);
+            }
         });
     },
     loaded: function() {
@@ -88,7 +95,13 @@ ComposerPageState.prototype = {
         // Enable editing and observation machinery only after
         // modifying the body above.
         this.messageBody.contentEditable = true;
-        this.setBodyObserverEnabled(true);
+        let config = {
+            attributes: true,
+            childList: true,
+            characterData: true,
+            subtree: true
+        };
+        this.bodyObserver.observe(this.messageBody, config);
 
         // Chain up here so we continue to a preferred size update
         // after munging the HTML above.
@@ -133,27 +146,9 @@ ComposerPageState.prototype = {
             document.body.classList.add("plain");
         }
     },
-    setBodyObserverEnabled: function(enabled) {
-        if (enabled) {
-            let config = {
-                attributes: true,
-                childList: true,
-                characterData: true,
-                subtree: true
-            };
-            this.bodyObserver.observe(this.messageBody, config);
-        } else {
-            this.bodyObserver.disconnect();
-        }
-    },
     checkCommandStack: function() {
         let canUndo = document.queryCommandEnabled("undo");
         let canRedo = document.queryCommandEnabled("redo");
-
-        // Update the body observer - if we can undo we don't need to
-        // keep an eye on mutations any more, until we can't undo
-        // again.
-        this.setBodyObserverEnabled(!canUndo);
 
         if (canUndo != this.undoEnabled || canRedo != this.redoEnabled) {
             this.undoEnabled = canUndo;
@@ -172,6 +167,9 @@ ComposerPageState.prototype = {
             element.removeAttribute("style");
             element.setAttribute("type", "cite");
         }
+    },
+    documentModified: function(element) {
+        window.webkit.messageHandlers.documentModified.postMessage(null);
     },
     linkClicked: function(element) {
         window.getSelection().selectAllChildren(element);

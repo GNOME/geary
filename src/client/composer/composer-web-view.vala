@@ -14,6 +14,7 @@ public class ComposerWebView : ClientWebView {
 
     private const string COMMAND_STACK_CHANGED = "commandStackChanged";
     private const string CURSOR_STYLE_CHANGED = "cursorStyleChanged";
+    private const string DOCUMENT_MODIFIED = "documentModified";
 
     private const string[] SANS_FAMILY_NAMES = {
         "sans", "arial", "trebuchet", "helvetica"
@@ -96,14 +97,24 @@ public class ComposerWebView : ClientWebView {
         );
     }
 
-    /** Determines if the view contains any edited text */
-    public bool is_empty { get; private set; default = false; }
+    /**
+     * Determines if the body contains any non-boilerplate content.
+     *
+     * Currently, only a signatures are considered to be boilerplate.
+     * Any user-made changes or message body content from a
+     * forwarded/replied-to message present will make the view
+     * considered to be non-empty.
+     */
+    public bool is_empty { get; private set; default = true; }
 
-    /** Determines if the view is in rich text mode */
+    /** Determines if the view is in rich text mode. */
     public bool is_rich_text { get; private set; default = true; }
 
 
-    /** Emitted when the web view's undo/redo stack has changed. */
+    /** Emitted when the web view's content has changed. */
+    public signal void document_modified();
+
+    /** Emitted when the web view's undo/redo stack state changes. */
     public signal void command_stack_changed(bool can_undo, bool can_redo);
 
     /** Emitted when the style under the cursor has changed. */
@@ -124,9 +135,13 @@ public class ComposerWebView : ClientWebView {
         this.user_content_manager.script_message_received[CURSOR_STYLE_CHANGED].connect(
             on_cursor_style_changed_message
         );
+        this.user_content_manager.script_message_received[DOCUMENT_MODIFIED].connect(
+            on_document_modified_message
+        );
 
         register_message_handler(COMMAND_STACK_CHANGED);
         register_message_handler(CURSOR_STYLE_CHANGED);
+        register_message_handler(DOCUMENT_MODIFIED);
     }
 
     /**
@@ -136,7 +151,8 @@ public class ComposerWebView : ClientWebView {
         string html = "";
         signature = signature ?? "";
 
-        if (body == null)
+        this.is_empty = Geary.String.is_empty(body);
+        if (this.is_empty)
             html = CURSOR + "<br /><br />" + signature;
         else if (top_posting)
             html = CURSOR + "<br /><br />" + signature + body;
@@ -404,4 +420,14 @@ public class ComposerWebView : ClientWebView {
         }
     }
 
+    private void on_document_modified_message(WebKit.JavascriptResult result) {
+        result.unref();
+
+        // Only modify actually changed to avoid excessive notify
+        // signals being fired.
+        if (this.is_empty) {
+            this.is_empty = false;
+        }
+        document_modified();
+    }
 }
