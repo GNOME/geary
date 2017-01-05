@@ -2349,6 +2349,10 @@ public class GearyController : Geary.BaseObject {
             widget.state = ComposerWidget.ComposerState.DETACHED;
         }
 
+        // Now that the composer has been added to a window, we can
+        // set up its focus.
+        widget.set_focus();
+
         Geary.EmailIdentifier? draft_id = null;
         if (is_draft) {
             draft_id = referred.id;
