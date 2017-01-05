@@ -6,7 +6,6 @@
     <property name="show_menubar">False</property>
     <property name="events">GDK_KEY_PRESS_MASK | GDK_KEY_RELEASE_MASK | GDK_FOCUS_CHANGE_MASK | GDK_STRUCTURE_MASK</property>
     <signal name="delete_event" handler="on_delete_event"/>
-    <signal name="key_press_event" handler="on_key_press_event"/>
     <signal name="key_release_event" handler="on_key_release_event"/>
     <signal name="focus_in_event" handler="on_focus_event"/>
     <child>

@@ -215,6 +215,54 @@ public class MainWindow : Gtk.ApplicationWindow {
         return scrollbar != null && scrollbar.get_visible();
     }
 
+    public override bool key_press_event(Gdk.EventKey event) {
+        check_shift_event(event);
+
+        /* Ensure that single-key command (SKC) shortcuts don't
+         * interfere with text input.
+         *
+         * The default GtkWindow::key_press_event implementation calls
+         * gtk_window_activate_key -- which would activate the SKC,
+         * before calling gtk_window_propagate_key_event -- which
+         * would send the event to any focused text entry control, so
+         * we need to override that. A quick hack is to just call
+         * gtk_window_propagate_key_event here, then chain up. But
+         * that means two calls to that method for every key press,
+         * which in the worst case means all widgets in the focus
+         * chain would be consulted to handle the press twice, which
+         * sucks.
+         *
+         * Worse however, is that due to WK2 Bug 136430[0], WebView
+         * instances duplicate any key events they don't handle. For
+         * the editor, that means simple key presses like 'a' will
+         * only result in a single event, since the web view adds the
+         * letter to the document. But if not handled, e.g. when the
+         * user presses Shift, Ctrl, or similar, then it also produces
+         * a second event. Combined with the
+         * gtk_window_propagate_key_event above, this leads to a
+         * cambrian explosion of key events - an exponential number
+         * are generated, which is bad. This problem also applies to
+         * ConversationWebView instances, since none of them handle
+         * events.
+         *
+         * The work around here is completely override the default
+         * implementation to reverse it. So if something related to
+         * key handling breaks in the future, this might be a good
+         * place to start looking. Better alternatives welcome.
+         *
+         * [0] - <https://bugs.webkit.org/show_bug.cgi?id=136430>
+         */
+
+        bool handled = propagate_key_event(event);
+        if (!handled) {
+            handled = activate_key(event);
+        }
+        if (!handled) {
+            handled = Gtk.bindings_activate_event(this, event);
+        }
+        return handled;
+    }
+
     private void on_conversation_monitor_changed() {
         ConversationListStore? old_model = this.conversation_list_view.get_model();
         if (old_model != null) {
@@ -343,28 +391,23 @@ public class MainWindow : Gtk.ApplicationWindow {
             this.main_toolbar.folder = this.current_folder.get_display_name();
     }
 
-    [GtkCallback]
-    private bool on_key_press_event(Gdk.EventKey event) {
-        if ((event.keyval == Gdk.Key.Shift_L || event.keyval == Gdk.Key.Shift_R)
-            && (event.state & Gdk.ModifierType.SHIFT_MASK) == 0
-            && !this.search_bar.search_entry_has_focus)
-            on_shift_key(true);
-
-        // Check whether the focused widget wants to handle it, if not let the accelerators kick in
-        // via the default handling
-        return propagate_key_event(event);
+    private inline void check_shift_event(Gdk.EventKey event) {
+        // FIXME: it's possible the user will press two shift keys.  We want
+        // the shift key to report as released when they release ALL of them.
+        // There doesn't seem to be an easy way to do this in Gdk.
+        if (event.keyval == Gdk.Key.Shift_L || event.keyval == Gdk.Key.Shift_R) {
+            Gtk.Widget? focus = get_focus();
+            if (focus == null ||
+                (!(focus is Gtk.Entry) && !(focus is ComposerWebView))) {
+                on_shift_key(event.type == Gdk.EventType.KEY_PRESS);
+            }
+        }
     }
 
     [GtkCallback]
     private bool on_key_release_event(Gdk.EventKey event) {
-        // FIXME: it's possible the user will press two shift keys.  We want
-        // the shift key to report as released when they release ALL of them.
-        // There doesn't seem to be an easy way to do this in Gdk.
-        if ((event.keyval == Gdk.Key.Shift_L || event.keyval == Gdk.Key.Shift_R)
-            && !this.search_bar.search_entry_has_focus)
-            on_shift_key(false);
-
-        return propagate_key_event(event);
+        check_shift_event(event);
+        return Gdk.EVENT_PROPAGATE;
     }
 
     [GtkCallback]
