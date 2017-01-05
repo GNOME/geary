@@ -102,8 +102,6 @@ public class ComposerWebView : ClientWebView {
     /** Determines if the view is in rich text mode */
     public bool is_rich_text { get; private set; default = true; }
 
-    private bool is_shift_down = false;
-
 
     /** Emitted when the web view's undo/redo stack has changed. */
     public signal void command_stack_changed(bool can_undo, bool can_redo);
@@ -114,9 +112,11 @@ public class ComposerWebView : ClientWebView {
 
     public ComposerWebView(Configuration config) {
         base(config);
+
+        add_events(Gdk.EventMask.KEY_PRESS_MASK | Gdk.EventMask.KEY_RELEASE_MASK);
+
         this.user_content_manager.add_script(ComposerWebView.app_script);
         // this.should_insert_text.connect(on_should_insert_text);
-        this.key_press_event.connect(on_key_press_event);
 
         this.user_content_manager.script_message_received[COMMAND_STACK_CHANGED].connect(
             on_command_stack_changed_message
@@ -370,14 +370,6 @@ public class ComposerWebView : ClientWebView {
         return ""; // XXX
     }
 
-    /**
-     * ???
-     */
-    public bool handle_key_press(Gdk.EventKey event) {
-        // XXX
-        return false;
-    }
-
     private void on_command_stack_changed_message(WebKit.JavascriptResult result) {
         try {
             string[] values = WebKitUtil.to_string(result).split(",");
@@ -410,15 +402,6 @@ public class ComposerWebView : ClientWebView {
         } finally {
             result.unref();
         }
-    }
-
-    // We really want to examine
-    // Gdk.Keymap.get_default().get_modifier_state(), instead of
-    // storing whether the shift key is down at each keypress, but it
-    // isn't yet available in the Vala bindings.
-    private bool on_key_press_event (Gdk.EventKey event) {
-        is_shift_down = (event.state & Gdk.ModifierType.SHIFT_MASK) != 0;
-        return false;
     }
 
 }

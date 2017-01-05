@@ -477,7 +477,7 @@ public class ComposerWidget : Gtk.EventBox {
         this.editor.context_menu.connect(on_context_menu);
         this.editor.cursor_style_changed.connect(on_cursor_style_changed);
         this.editor.get_editor_state().notify["typing-attributes"].connect(on_typing_attributes_changed);
-        this.editor.key_press_event.connect(on_editor_key_press);
+        this.editor.key_press_event.connect(on_editor_key_press_event);
         this.editor.load_changed.connect(on_load_changed);
         this.editor.mouse_target_changed.connect(on_mouse_target_changed);
         this.editor.selection_changed.connect(on_selection_changed);
@@ -1145,6 +1145,13 @@ public class ComposerWidget : Gtk.EventBox {
             this.header.parent.remove(this.header);
     }
 
+    public override bool key_press_event(Gdk.EventKey event) {
+        // Override the method since key-press-event is run last, and
+        // we want this behaviour to take precedence over the default
+        // key handling
+        return check_send_on_return(event) && base.key_press_event(event);
+    }
+
     // compares all keys to all tokens according to user-supplied comparison function
     // Returns true if found
     private bool search_tokens(string[] keys, string[] tokens, CompareStringFunc cmp_func,
@@ -1576,6 +1583,23 @@ public class ComposerWidget : Gtk.EventBox {
         update_pending_attachments(this.pending_include, true);
     }
 
+    private bool check_send_on_return(Gdk.EventKey event) {
+        bool ret = Gdk.EVENT_PROPAGATE;
+        switch (Gdk.keyval_name(event.keyval)) {
+            case "Return":
+            case "KP_Enter":
+                // always trap Ctrl+Enter/Ctrl+KeypadEnter to prevent
+                // the Enter leaking through to the controls, but only
+                // send if send is available
+                if ((event.state & Gdk.ModifierType.CONTROL_MASK) != 0) {
+                    this.actions.activate_action(ACTION_SEND, null);
+                    ret = Gdk.EVENT_STOP;
+                }
+            break;
+        }
+        return ret;
+    }
+
     [GtkCallback]
     private void on_subject_changed() {
         reset_draft_timer();
@@ -1716,7 +1740,7 @@ public class ComposerWidget : Gtk.EventBox {
             "fontname", param.get_string()
         );
         action.set_state(param.get_string());
-  }
+    }
 
     private void on_font_size(SimpleAction action, Variant? param) {
         string size = "";
@@ -1847,24 +1871,6 @@ public class ComposerWidget : Gtk.EventBox {
         update_message_overlay_label_style();
     }
 
-    // This overrides the keypress handling for the *widget*; the WebView editor's keypress overrides
-    // are handled by on_editor_key_press
-    public override bool key_press_event(Gdk.EventKey event) {
-        switch (Gdk.keyval_name(event.keyval)) {
-            case "Return":
-            case "KP_Enter":
-                // always trap Ctrl+Enter/Ctrl+KeypadEnter to prevent the Enter leaking through
-                // to the controls, but only send if send is available
-                if ((event.state & Gdk.ModifierType.CONTROL_MASK) != 0) {
-                    this.actions.activate_action(ACTION_SEND, null);
-                    return true;
-                }
-            break;
-        }
-
-        return base.key_press_event(event);
-    }
-
     private bool on_context_menu(WebKit.WebView view,
                                  WebKit.ContextMenu context_menu,
                                  Gdk.Event event,
@@ -1970,40 +1976,40 @@ public class ComposerWidget : Gtk.EventBox {
         this.spell_check_popover.toggle();
     }
 
-    private bool on_editor_key_press(Gdk.EventKey event) {
-        // widget's keypress override doesn't receive non-modifier keys when the editor processes
-        // them, regardless if true or false is called; this deals with that issue (specifically
+    private bool on_editor_key_press_event(Gdk.EventKey event) {
+        // Widget's keypress override doesn't receive non-modifier
+        // keys when the editor processes them, regardless if true or
+        // false is called; this deals with that issue (specifically
         // so Ctrl+Enter will send the message)
         if (event.is_modifier == 0) {
-            if (key_press_event(event))
-                return true;
+            if (check_send_on_return(event) == Gdk.EVENT_STOP)
+                return Gdk.EVENT_STOP;
         }
-        
+
         if ((event.state & Gdk.ModifierType.MOD1_MASK) != 0)
-            return false;
-        
+            return Gdk.EVENT_PROPAGATE;
         if ((event.state & Gdk.ModifierType.CONTROL_MASK) != 0) {
             if (event.keyval == Gdk.Key.Tab) {
                 child_focus(Gtk.DirectionType.TAB_FORWARD);
-                return true;
+                return Gdk.EVENT_STOP;
             }
             if (event.keyval == Gdk.Key.ISO_Left_Tab) {
                 child_focus(Gtk.DirectionType.TAB_BACKWARD);
-                return true;
+                return Gdk.EVENT_STOP;
             }
-            return false;
+            return Gdk.EVENT_PROPAGATE;
         }
-        
+
         if (this.can_delete_quote) {
             this.can_delete_quote = false;
             if (event.keyval == Gdk.Key.BackSpace) {
                 this.body_html = null;
                 this.editor.load_html(this.body_html, this.signature_html, this.top_posting);
-                return true;
+                return Gdk.EVENT_STOP;
             }
         }
 
-        return this.editor.handle_key_press(event);
+        return Gdk.EVENT_PROPAGATE;
     }
 
     /**
