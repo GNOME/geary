@@ -13,8 +13,10 @@ class Geary.TimeoutManagerTest : Gee.TestCase {
     public TimeoutManagerTest() {
         base("Geary.TimeoutManagerTest");
         add_test("start_reset", start_reset);
-        add_test("test_seconds", test_seconds);
-        add_test("test_repeat_forever", test_repeat_forever);
+        if (Test.slow()) {
+            add_test("test_seconds", test_seconds);
+            add_test("test_repeat_forever", test_repeat_forever);
+        }
     }
 
     public void start_reset() {
