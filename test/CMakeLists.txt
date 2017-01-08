@@ -47,6 +47,7 @@ set(CFLAGS
     ${DEPS_CFLAGS}
     ${DEPS_CFLAGS_OTHER}
     -D_BUILD_ROOT_DIR=\"${CMAKE_BINARY_DIR}\"
+    -D_GSETTINGS_DIR=\"${CMAKE_BINARY_DIR}/gsettings\"
     -D_SOURCE_ROOT_DIR=\"${CMAKE_SOURCE_DIR}\"
 )
 
@@ -78,4 +79,7 @@ OPTIONS
 )
 
 add_executable(geary-test ${TEST_VALA_C})
+# Depend on geary so things like GResources, GSetting, etc are
+# compiled before the tests are built and run.
+add_dependencies(geary-test geary)
 target_link_libraries(geary-test ${DEPS_LIBRARIES} geary-client geary-engine)

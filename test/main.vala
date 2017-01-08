@@ -5,6 +5,9 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
+// Defined by CMake build script.
+extern const string _GSETTINGS_DIR;
+
 int main(string[] args) {
     /*
      * Set env vars right up front to avoid weird bugs
@@ -13,6 +16,9 @@ int main(string[] args) {
     // Use the memory GSettings DB so we a) always start with default
     // values, and b) don't persist any changes made during a test
     Environment.set_variable("GSETTINGS_BACKEND", "memory", true);
+
+    // Let GSettings know where to find the dev schema
+    Environment.set_variable("GSETTINGS_SCHEMA_DIR", _GSETTINGS_DIR, true);
 
     /*
      * Initialise all the things.
