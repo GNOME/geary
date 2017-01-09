@@ -817,19 +817,22 @@ public class ConversationMessage : Gtk.Grid {
     private void on_resource_load_started(WebKit.WebView view,
                                           WebKit.WebResource res,
                                           WebKit.URIRequest req) {
+        // Cache the resource to allow images to be saved
+        this.resources[res.get_uri()] = res;
+
         // We only want to show the body loading progress meter if we
-        // are loading images, so do it here rather than
-        // on_load_changed.
+        // are actually loading some images, so do it here rather than
+        // in on_load_changed.
         if (this.is_loading_images &&
             !res.get_uri().has_prefix(ClientWebView.INTERNAL_URL_PREFIX)) {
             this.body_progress.show();
             this.body_progress.pulse();
             if (!this.web_view.is_loading) {
                 // The initial page load has finished, so we must be
-                // loading a remote image, but can't rely on the
-                // load_changed signal to stop the timer or
-                // estimated-load-progress changing. So manually
-                // manage it here.
+                // loading a remote image afterwards at the user's
+                // request. We can't rely on the load_changed signal
+                // to stop the timer or estimated-load-progress
+                // changing, so manually manage it here.
                 this.remote_resources_requested++;
                 res.finished.connect(() => {
                         this.remote_resources_loaded++;
@@ -844,7 +847,6 @@ public class ConversationMessage : Gtk.Grid {
                         }
                     });
             }
-            this.resources[res.get_uri()] = res;
         }
     }
 
