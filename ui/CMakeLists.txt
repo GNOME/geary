@@ -42,17 +42,7 @@ compile_gresources(
   RESOURCES ${RESOURCE_LIST}
 )
 
-compile_gresources(
-  RESOURCES_H
-  RESOURCES_XML
-  TYPE EMBED_H
-  SOURCE_DIR "${CMAKE_SOURCE_DIR}/ui"
-  PREFIX "/org/gnome/Geary"
-  RESOURCES ${RESOURCE_LIST}
-)
-
-add_custom_target(resource_h ALL DEPENDS ${RESOURCES_H})
-add_custom_target(resource_c ALL DEPENDS ${RESOURCES_C})
+add_custom_target(resource_c DEPENDS ${RESOURCES_C})
 
 # Work around valac wanting the resource files to be in the same
 # directory as the XML file.

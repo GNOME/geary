@@ -635,8 +635,6 @@ add_custom_command(
 
 # Client library (static lib used for building client and unit tests)
 #################################################
-set_property(SOURCE ${RESOURCES_C} PROPERTY GENERATED TRUE)
-set_property(SOURCE ${RESOURCES_XML} PROPERTY GENERATED TRUE)
 
 vala_precompile(CLIENT_VALA_C geary-client
     ${CLIENT_SRC}
@@ -651,15 +649,16 @@ OPTIONS
 )
 
 add_library(geary-client STATIC ${CLIENT_VALA_C})
+add_dependencies(geary-client resource_copy webkitgtk-vapi)
 target_link_libraries(geary-client m ${DEPS_LIBRARIES} geary-engine)
 
 # Main client application binary
 #################################################
+set_property(SOURCE ${RESOURCES_C} PROPERTY GENERATED TRUE)
 
 vala_precompile(GEARY_VALA_C geary
     "client/application/main.vala"
 PACKAGES
-    webkitgtk-3.0
     ${ENGINE_PACKAGES}
     ${CLIENT_PACKAGES}
     geary-client
@@ -668,7 +667,6 @@ OPTIONS
 )
 
 add_executable(geary ${GEARY_VALA_C} ${RESOURCES_C})
-add_dependencies(geary webkitgtk-vapi)
 target_link_libraries(geary ${DEPS_LIBRARIES} geary-client)
 install(TARGETS geary RUNTIME DESTINATION bin)
 add_custom_command(
