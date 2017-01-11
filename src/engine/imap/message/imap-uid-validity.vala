@@ -20,9 +20,13 @@ public class Geary.Imap.UIDValidity : Geary.MessageData.Int64MessageData, Geary.
     
     /**
      * Maximum valid value for a {@link UIDValidity}.
+     *
+     * This is currently larger than what the spec allows for, since
+     * at least one mail server was returning values greater than an
+     * unsigned 32-bit integer. See Bug 755424.
      */
-    public const int64 MAX = 0xFFFFFFFF;
-    
+    public const int64 MAX = 0xFFFFFFFFFFFFFFF;
+
     /**
      * Invalid (placeholder) {@link UIDValidity} value.
      */
