@@ -965,7 +965,11 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     private async void do_login_failed_async(Geary.Credentials? credentials, Geary.Imap.StatusResponse? response) {
         bool reask_password = true;
         try {
-            reask_password = (response == null || response.response_code.get_response_code_type().value != Geary.Imap.ResponseCodeType.UNAVAILABLE);
+            reask_password = (
+                response == null ||
+                response.response_code == null ||
+                response.response_code.get_response_code_type().value != Geary.Imap.ResponseCodeType.UNAVAILABLE
+            );
         } catch (ImapError ierr) {
             debug("Unable to parse ResponseCode %s: %s", response.response_code.to_string(),
                 ierr.message);
