@@ -16,8 +16,17 @@
  */
 
 private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
-    public const Geary.Email.Field REQUIRED_FIELDS = Geary.Email.Field.PROPERTIES;
-    
+
+    /**
+     * Fields required for a message to be stored in the database.
+     */
+    public const Geary.Email.Field REQUIRED_FIELDS = Geary.Email.Field.PROPERTIES|Email.Field.REFERENCES;
+
+    /**
+     * Fields required for a message to be considered for full-text indexing.
+     */
+    public const Geary.Email.Field REQUIRED_FTS_FIELDS = Geary.Email.REQUIRED_FOR_MESSAGE;
+
     private const int LIST_EMAIL_WITH_MESSAGE_CHUNK_COUNT = 10;
     private const int LIST_EMAIL_METADATA_COUNT = 100;
     private const int LIST_EMAIL_FIELDS_CHUNK_COUNT = 500;
