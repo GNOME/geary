@@ -1589,21 +1589,20 @@ private class Geary.ImapDB.Account : BaseObject {
         
         int count = 0, total_unindexed = 0;
         yield db.exec_transaction_async(Db.TransactionType.RW, (cx, cancellable) => {
-            // Embedding a SELECT within a SELECT is painfully slow with SQLite, so manually
-            // perform the operation
-            //
-            // Get all rowids for the MessageSearchTable and turn it into a HashSet
+            // Embedding a SELECT within a SELECT is painfully slow
+            // with SQLite, and a LEFT OUTER JOIN will still take in
+            // the order of seconds, so manually perform the operation
+
             Db.Statement stmt = cx.prepare("""
-                SELECT docid
-                FROM MessageSearchTable
+                SELECT docid FROM MessageSearchTable
             """);
             Gee.HashSet<int64?> search_ids = do_build_rowid_set(stmt.exec(cancellable), cancellable);
-            
-            // Do the same for the MessageTable
+
             stmt = cx.prepare("""
-                SELECT id
-                FROM MessageTable
+                SELECT id FROM MessageTable WHERE (fields & ?) = ?
             """);
+            stmt.bind_uint(0, Geary.ImapDB.Folder.REQUIRED_FTS_FIELDS);
+            stmt.bind_uint(1, Geary.ImapDB.Folder.REQUIRED_FTS_FIELDS);
             Gee.HashSet<int64?> message_ids = do_build_rowid_set(stmt.exec(cancellable), cancellable);
             
             // guesstimate at the number that need to be indexed ... technically if this is zero then
