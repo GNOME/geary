@@ -1604,12 +1604,14 @@ private class Geary.ImapDB.Account : BaseObject {
             stmt.bind_uint(0, Geary.ImapDB.Folder.REQUIRED_FTS_FIELDS);
             stmt.bind_uint(1, Geary.ImapDB.Folder.REQUIRED_FTS_FIELDS);
             Gee.HashSet<int64?> message_ids = do_build_rowid_set(stmt.exec(cancellable), cancellable);
-            
-            // guesstimate at the number that need to be indexed ... technically if this is zero then
-            // we're done, but for safety allow the chaffing to go through, in case there are search
-            // rows that do not correspond to message rows (which is bad but not fatal)
-            total_unindexed = (message_ids.size - search_ids.size).clamp(0, int.MAX);
-            
+
+            // This is hard to calculate correctly without doing a
+            // join (which we should above, but is currently too
+            // slow), and if we do get it wrong the progress monitor
+            // will crash and burn, so just something too big to fail
+            // for now. See Bug 776383.
+            total_unindexed = message_ids.size;
+
             // chaff out any MessageTable entries not present in the MessageSearchTable ... since
             // we're given a limit, stuff messages req'ing search into separate set and stop when limit
             // reached
