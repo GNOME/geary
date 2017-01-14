@@ -25,10 +25,9 @@ public class ClientWebView : WebKit.WebView {
 
     /** URI Scheme and delimiter for images loaded by Content-ID. */
     public const string CID_URL_PREFIX = "cid:";
-
-    private const string PREFERRED_HEIGHT_MESSAGE = "preferredHeightChanged";
-    private const string REMOTE_IMAGE_LOAD_BLOCKED_MESSAGE = "remoteImageLoadBlocked";
-    private const string SELECTION_CHANGED_MESSAGE = "selectionChanged";
+    private const string PREFERRED_HEIGHT_CHANGED = "preferredHeightChanged";
+    private const string REMOTE_IMAGE_LOAD_BLOCKED = "remoteImageLoadBlocked";
+    private const string SELECTION_CHANGED = "selectionChanged";
 
     private const double ZOOM_DEFAULT = 1.0;
     private const double ZOOM_FACTOR = 0.1;
@@ -146,6 +145,8 @@ public class ClientWebView : WebKit.WebView {
     }
 
 
+    /** Delegate for UserContentManager message callbacks. */
+    public delegate void JavaScriptMessageHandler(WebKit.JavascriptResult js_result);
 
     /** Determines if the view has started rendering the HTML */
     public bool has_valid_height { get; set; default = false; }
@@ -188,10 +189,10 @@ public class ClientWebView : WebKit.WebView {
     private int preferred_height = 0;
 
 
-    /** Emitted when the web view's selection has changed. */
+    /** Emitted when the view's selection has changed. */
     public signal void selection_changed(bool has_selection);
 
-    /** Emitted when a user clicks a link in this web view. */
+    /** Emitted when a user clicks a link in the view. */
     public signal void link_activated(string uri);
 
     /** Emitted when the view has loaded a resource added to it. */
@@ -232,46 +233,15 @@ public class ClientWebView : WebKit.WebView {
                 return Gdk.EVENT_PROPAGATE;
             });
 
-        content_manager.script_message_received[PREFERRED_HEIGHT_MESSAGE].connect(
-            (result) => {
-                try {
-                    this.preferred_height = (int) WebKitUtil.to_number(result);
-                    if (this.preferred_height >= 1) {
-                        if (!this.has_valid_height) {
-                            // Only update the property value if not
-                            // already true
-                            this.has_valid_height = true;
-                        }
-                        queue_resize();
-                    }
-                } catch (Geary.JS.Error err) {
-                    debug("Could not get preferred height: %s", err.message);
-                } finally {
-                    result.unref();
-                }
-            });
-        content_manager.script_message_received[REMOTE_IMAGE_LOAD_BLOCKED_MESSAGE].connect(
-            (result) => {
-                try {
-                    remote_image_load_blocked();
-                } finally {
-                    result.unref();
-                }
-            });
-        content_manager.script_message_received[SELECTION_CHANGED_MESSAGE].connect(
-            (result) => {
-                try {
-                    selection_changed(WebKitUtil.to_bool(result));
-                } catch (Geary.JS.Error err) {
-                    debug("Could not get selection content: %s", err.message);
-                } finally {
-                    result.unref();
-                }
-            });
-
-        register_message_handler(PREFERRED_HEIGHT_MESSAGE);
-        register_message_handler(REMOTE_IMAGE_LOAD_BLOCKED_MESSAGE);
-        register_message_handler(SELECTION_CHANGED_MESSAGE);
+        register_message_handler(
+            PREFERRED_HEIGHT_CHANGED, on_preferred_height_changed
+        );
+        register_message_handler(
+            REMOTE_IMAGE_LOAD_BLOCKED, on_remote_image_load_blocked
+        );
+        register_message_handler(
+            SELECTION_CHANGED, on_selection_changed
+         );
 
         // Manage zoom level
         config.bind(Configuration.CONVERSATION_VIEWER_ZOOM_KEY, this, "zoom_level");
@@ -379,7 +349,15 @@ public class ClientWebView : WebKit.WebView {
         minimum_height = natural_height = 0;
     }
 
-    protected inline void register_message_handler(string name) {
+    /**
+     * Convenience function for registering and connecting JS messages.
+     */
+    protected inline void register_message_handler(string name,
+                                                   JavaScriptMessageHandler handler) {
+        // XXX cant use the delegate directly: b.g.o Bug 604781
+        this.user_content_manager.script_message_received[name].connect(
+            (result) => { handler(result); }
+        );
         if (!get_user_content_manager().register_script_message_handler(name)) {
             debug("Failed to register script message handler: %s", name);
         }
@@ -463,6 +441,34 @@ public class ClientWebView : WebKit.WebView {
             }
         }
         return false;
+    }
+
+    private void on_preferred_height_changed(WebKit.JavascriptResult result) {
+        try {
+            this.preferred_height = (int) WebKitUtil.to_number(result);
+            if (this.preferred_height >= 1) {
+                // Avoid firing multiple notifies if the value hasn't
+                // changed
+                if (!this.has_valid_height) {
+                    this.has_valid_height = true;
+                }
+                queue_resize();
+            }
+        } catch (Geary.JS.Error err) {
+            debug("Could not get preferred height: %s", err.message);
+        }
+    }
+
+    private void on_remote_image_load_blocked(WebKit.JavascriptResult result) {
+        remote_image_load_blocked();
+    }
+
+    private void on_selection_changed(WebKit.JavascriptResult result) {
+        try {
+            selection_changed(WebKitUtil.to_bool(result));
+        } catch (Geary.JS.Error err) {
+            debug("Could not get selection content: %s", err.message);
+        }
     }
 
 }

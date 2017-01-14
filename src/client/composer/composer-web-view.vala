@@ -129,19 +129,9 @@ public class ComposerWebView : ClientWebView {
         this.user_content_manager.add_script(ComposerWebView.app_script);
         // this.should_insert_text.connect(on_should_insert_text);
 
-        this.user_content_manager.script_message_received[COMMAND_STACK_CHANGED].connect(
-            on_command_stack_changed_message
-        );
-        this.user_content_manager.script_message_received[CURSOR_STYLE_CHANGED].connect(
-            on_cursor_style_changed_message
-        );
-        this.user_content_manager.script_message_received[DOCUMENT_MODIFIED].connect(
-            on_document_modified_message
-        );
-
-        register_message_handler(COMMAND_STACK_CHANGED);
-        register_message_handler(CURSOR_STYLE_CHANGED);
-        register_message_handler(DOCUMENT_MODIFIED);
+        register_message_handler(COMMAND_STACK_CHANGED, on_command_stack_changed);
+        register_message_handler(CURSOR_STYLE_CHANGED, on_cursor_style_changed);
+        register_message_handler(DOCUMENT_MODIFIED, on_document_modified);
     }
 
     /**
@@ -399,18 +389,16 @@ public class ComposerWebView : ClientWebView {
         return ""; // XXX
     }
 
-    private void on_command_stack_changed_message(WebKit.JavascriptResult result) {
+    private void on_command_stack_changed(WebKit.JavascriptResult result) {
         try {
             string[] values = WebKitUtil.to_string(result).split(",");
             command_stack_changed(values[0] == "true", values[1] == "true");
         } catch (Geary.JS.Error err) {
             debug("Could not get command stack state: %s", err.message);
-        } finally {
-            result.unref();
         }
     }
 
-    private void on_cursor_style_changed_message(WebKit.JavascriptResult result) {
+    private void on_cursor_style_changed(WebKit.JavascriptResult result) {
         try {
             string[] values = WebKitUtil.to_string(result).split(",");
             string view_name = values[0].down();
@@ -428,14 +416,10 @@ public class ComposerWebView : ClientWebView {
             cursor_style_changed(font_family, font_size);
         } catch (Geary.JS.Error err) {
             debug("Could not get cursor style: %s", err.message);
-        } finally {
-            result.unref();
         }
     }
 
-    private void on_document_modified_message(WebKit.JavascriptResult result) {
-        result.unref();
-
+    private void on_document_modified(WebKit.JavascriptResult result) {
         // Only modify actually changed to avoid excessive notify
         // signals being fired.
         if (this.is_empty) {
