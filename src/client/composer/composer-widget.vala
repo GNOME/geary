@@ -1056,6 +1056,8 @@ public class ComposerWidget : Gtk.EventBox {
     public CloseStatus should_close() {
         if (this.is_closing)
             return CloseStatus.PENDING_CLOSE;
+        if (this.is_blank)
+            return CloseStatus.DO_CLOSE;
 
         bool try_to_save = this.can_save;
 
