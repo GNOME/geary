@@ -453,7 +453,7 @@ public class ConversationEmail : Gtk.Box {
         }
 
         this.primary_message = new ConversationMessage(message, config, load_images);
-        this.primary_message.web_view.add_inline_resources(cid_resources);
+        this.primary_message.web_view.add_internal_resources(cid_resources);
         connect_message_view_signals(this.primary_message);
 
         this.primary_message.summary.add(this.actions);
@@ -494,7 +494,7 @@ public class ConversationEmail : Gtk.Box {
             ConversationMessage attached_message =
                 new ConversationMessage(sub_message, config, false);
             connect_message_view_signals(attached_message);
-            attached_message.web_view.add_inline_resources(cid_resources);
+            attached_message.web_view.add_internal_resources(cid_resources);
             this.sub_messages.add(attached_message);
             this._attached_messages.add(attached_message);
         }
@@ -627,7 +627,7 @@ public class ConversationEmail : Gtk.Box {
     private void connect_message_view_signals(ConversationMessage view) {
         view.flag_remote_images.connect(on_flag_remote_images);
         view.remember_remote_images.connect(on_remember_remote_images);
-        view.web_view.inline_resource_loaded.connect((id) => {
+        view.web_view.internal_resource_loaded.connect((id) => {
                 this.inlined_content_ids.add(id);
             });
         view.web_view.notify["has-valid-height"].connect(() => {

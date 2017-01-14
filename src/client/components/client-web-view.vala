@@ -182,7 +182,7 @@ public class ClientWebView : WebKit.WebView {
 
     private weak string? body = null;
 
-    private Gee.Map<string,Geary.Memory.Buffer> cid_resources =
+    private Gee.Map<string,Geary.Memory.Buffer> internal_resources =
         new Gee.HashMap<string,Geary.Memory.Buffer>();
 
     private int preferred_height = 0;
@@ -194,8 +194,8 @@ public class ClientWebView : WebKit.WebView {
     /** Emitted when a user clicks a link in this web view. */
     public signal void link_activated(string uri);
 
-    /** Emitted when the web view has loaded an inline part. */
-    public signal void inline_resource_loaded(string cid);
+    /** Emitted when the view has loaded a resource added to it. */
+    public signal void internal_resource_loaded(string name);
 
     /** Emitted when a remote image load was disallowed. */
     public signal void remote_image_load_blocked();
@@ -294,17 +294,24 @@ public class ClientWebView : WebKit.WebView {
     }
 
     /**
-     * Adds an inline resource that may be accessed via a cid:id url.
+     * Adds an resource that may be accessed from the view via a URL.
+     *
+     * Internal resources may be access via both the internal `geary`
+     * scheme (for resources such as an image inserted via the
+     * composer) or via the `cid` scheme (for standard HTML email IMG
+     * elements).
      */
-    public void add_inline_resource(string id, Geary.Memory.Buffer buf) {
-        this.cid_resources[id] = buf;
+    public void add_internal_resource(string id, Geary.Memory.Buffer buf) {
+        this.internal_resources[id] = buf;
     }
 
     /**
-     * Adds a set of inline resource that may be accessed via a cid:id url.
+     * Adds a set of internal resources to the view.
+     *
+     * @see add_internal_resource
      */
-    public void add_inline_resources(Gee.Map<string,Geary.Memory.Buffer> res) {
-        this.cid_resources.set_all(res);
+    public void add_internal_resources(Gee.Map<string,Geary.Memory.Buffer> res) {
+        this.internal_resources.set_all(res);
     }
 
     /**
@@ -379,15 +386,8 @@ public class ClientWebView : WebKit.WebView {
     }
 
     private void handle_cid_request(WebKit.URISchemeRequest request) {
-        string cid = request.get_uri().substring(CID_URL_PREFIX.length);
-        Geary.Memory.Buffer? buf = this.cid_resources[cid];
-        if (buf != null) {
-            request.finish(buf.get_input_stream(), buf.size, null);
-            inline_resource_loaded(cid);
-        } else {
-            request.finish_error(
-                new FileError.NOENT("Unknown CID: %s".printf(cid))
-            );
+        if (!handle_internal_response(request)) {
+            request.finish_error(new FileError.NOENT("Unknown CID"));
         }
     }
 
@@ -395,9 +395,21 @@ public class ClientWebView : WebKit.WebView {
         if (request.get_uri() == INTERNAL_URL_BODY) {
             Geary.Memory.Buffer buf = new Geary.Memory.StringBuffer(this.body);
             request.finish(buf.get_input_stream(), buf.size, null);
-        } else {
+        } else if (!handle_internal_response(request)) {
             request.finish_error(new FileError.NOENT("Unknown internal URL"));
         }
+    }
+
+    private bool handle_internal_response(WebKit.URISchemeRequest request) {
+        string name = soup_uri_decode(request.get_path());
+        Geary.Memory.Buffer? buf = this.internal_resources[name];
+        bool handled = false;
+        if (buf != null) {
+            request.finish(buf.get_input_stream(), buf.size, null);
+            internal_resource_loaded(name);
+            handled = true;
+        }
+        return handled;
     }
 
     // Only allow string-based page loads, and notify but ignore if
@@ -454,3 +466,7 @@ public class ClientWebView : WebKit.WebView {
     }
 
 }
+
+// XXX this needs to be moved into the libsoup bindings
+extern string soup_uri_decode(string part);
+

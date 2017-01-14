@@ -1427,8 +1427,9 @@ public class ComposerWidget : Gtk.EventBox {
         if (this.pending_attachments != null) {
             foreach(Geary.Attachment part in this.pending_attachments) {
                 try {
+                    string? content_id = part.content_id;
                     Geary.Mime.DispositionType? type =
-                    part.content_disposition.disposition_type;
+                        part.content_disposition.disposition_type;
                     File file = part.file;
                     if (type == Geary.Mime.DispositionType.INLINE) {
                         // We only care about the Content Ids of
@@ -1438,11 +1439,10 @@ public class ComposerWidget : Gtk.EventBox {
                         // possible to be referenced from an IMG SRC
                         // using a cid: URL anyway, so treat it as an
                         // attachment instead.
-                        if (part.content_id != null) {
-                            this.cid_files[part.content_id] = file;
-                            this.editor.add_inline_resource(
-                                part.content_id,
-                                new Geary.Memory.FileBuffer(file, true)
+                        if (content_id != null) {
+                            this.cid_files[content_id] = file;
+                            this.editor.add_internal_resource(
+                                content_id, new Geary.Memory.FileBuffer(file, true)
                             );
                         } else {
                             type = Geary.Mime.DispositionType.ATTACHMENT;
