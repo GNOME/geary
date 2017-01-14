@@ -282,6 +282,19 @@ public class ComposerWebView : ClientWebView {
     }
 
     /**
+     * Inserts an IMG with the given `src` at the current cursor location.
+     */
+    public void insert_image(string src) {
+        // Use insertHTML instead of insertImage here so
+        // we can specify a max width inline, preventing
+        // large images from overflowing the view port.
+        execute_editing_command_with_argument(
+            "insertHTML",
+            @"<img style=\"max-width: 100%\" src=\"$src\">"
+        );
+    }
+
+    /**
      * Returns the editor content as an HTML string.
      */
     public async string? get_html() throws Error {

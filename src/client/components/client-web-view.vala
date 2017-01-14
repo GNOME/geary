@@ -146,9 +146,9 @@ public class ClientWebView : WebKit.WebView {
     }
 
 
-    public bool has_valid_height { get; set; default = false; }
 
-    public string allow_prefix { get; private set; default = ""; }
+    /** Determines if the view has started rendering the HTML */
+    public bool has_valid_height { get; set; default = false; }
 
     private string _document_font;
     public string document_font {
