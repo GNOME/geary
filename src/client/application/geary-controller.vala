@@ -2361,7 +2361,7 @@ public class GearyController : Geary.BaseObject {
         try {
             yield widget.open_draft_manager_async(draft_id);
         } catch (Error e) {
-            message("Could not open draft manager: %s", e.message);
+            debug("Could not open draft manager: %s", e.message);
         }
 
         // For accounts with large numbers of contacts, loading the

@@ -673,17 +673,6 @@ public class ComposerWidget : Gtk.EventBox {
         }
     }
 
-    // This code is in a separate method due to https://bugzilla.gnome.org/show_bug.cgi?id=742621
-    // connect_to_draft_manager() is simply for symmetry.  When above bug is fixed, this code can
-    // be moved back into open/close methods
-    private void disconnect_from_draft_manager() {
-        this.draft_manager.notify[Geary.App.DraftManager.PROP_DRAFT_STATE]
-            .disconnect(on_draft_state_changed);
-        this.draft_manager.notify[Geary.App.DraftManager.PROP_CURRENT_DRAFT_ID]
-            .disconnect(on_draft_id_changed);
-        this.draft_manager.fatal.disconnect(on_draft_manager_fatal);
-    }
-
     /**
      * Creates and opens the composer's draft manager.
      */
@@ -1304,6 +1293,33 @@ public class ComposerWidget : Gtk.EventBox {
         this.container.close_container();
     }
 
+    private async void close_draft_manager_async(Cancellable? cancellable) throws Error {
+        get_action(ACTION_CLOSE_AND_SAVE).set_enabled(false);
+        if (this.draft_manager == null)
+            return;
+
+        disconnect_from_draft_manager();
+
+        // drop ref even if close failed
+        try {
+            yield this.draft_manager.close_async(cancellable);
+        } finally {
+            this.draft_manager = null;
+        }
+        debug("Draft manager closed");
+    }
+
+    // This code is in a separate method due to https://bugzilla.gnome.org/show_bug.cgi?id=742621
+    // connect_to_draft_manager() is simply for symmetry.  When above bug is fixed, this code can
+    // be moved back into open/close methods
+    private void disconnect_from_draft_manager() {
+        this.draft_manager.notify[Geary.App.DraftManager.PROP_DRAFT_STATE]
+            .disconnect(on_draft_state_changed);
+        this.draft_manager.notify[Geary.App.DraftManager.PROP_CURRENT_DRAFT_ID]
+            .disconnect(on_draft_id_changed);
+        this.draft_manager.fatal.disconnect(on_draft_manager_fatal);
+    }
+
     private void update_draft_state() {
         switch (this.draft_manager.draft_state) {
             case Geary.App.DraftManager.DraftState.STORED:
@@ -1329,21 +1345,6 @@ public class ComposerWidget : Gtk.EventBox {
             default:
                 assert_not_reached();
         }
-
-    private async void close_draft_manager_async(Cancellable? cancellable) throws Error {
-        get_action(ACTION_CLOSE_AND_SAVE).set_enabled(false);
-        if (this.draft_manager == null)
-            return;
-
-        disconnect_from_draft_manager();
-
-        // drop ref even if close failed
-        try {
-            yield this.draft_manager.close_async(cancellable);
-        } finally {
-            this.draft_manager = null;
-        }
-        debug("Draft manager closed");
     }
 
     private inline void draft_changed() {
@@ -2130,13 +2131,15 @@ public class ComposerWidget : Gtk.EventBox {
         } catch (Error err) {
             debug("Unable to update From: Account in composer: %s", err.message);
         }
-        
+
         // if the Geary.Account didn't change and the drafts folder is open(ing), do nothing more;
         // need to check for the drafts folder because opening it in the case of multiple From:
         // is handled here alone, so changed open it if not already
         if (!changed && this.draft_manager != null)
             return;
 
+        // XXX Need to work out what do to with any existing draft in
+        // this case. See Bug 713533.
         this.open_draft_manager_async.begin(null, null, (obj, res) => {
                 try {
                     this.open_draft_manager_async.end(res);
