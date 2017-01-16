@@ -408,12 +408,16 @@ public class ComposerWidget : Gtk.EventBox {
         bind_property("can-delete-quote", this, "toolbar-text", BindingFlags.SYNC_CREATE,
             set_toolbar_text);
         this.to_entry = new EmailEntry(this);
+        this.to_entry.changed.connect(on_envelope_changed);
         this.to_box.add(to_entry);
         this.cc_entry = new EmailEntry(this);
+        this.cc_entry.changed.connect(on_envelope_changed);
         this.cc_box.add(cc_entry);
         this.bcc_entry = new EmailEntry(this);
+        this.bcc_entry.changed.connect(on_envelope_changed);
         this.bcc_box.add(bcc_entry);
         this.reply_to_entry = new EmailEntry(this);
+        this.reply_to_entry.changed.connect(on_envelope_changed);
         this.reply_to_box.add(reply_to_entry);
 
         this.to_label.set_mnemonic_widget(this.to_entry);
@@ -1618,7 +1622,7 @@ public class ComposerWidget : Gtk.EventBox {
     }
 
     [GtkCallback]
-    private void on_subject_changed() {
+    private void on_envelope_changed() {
         draft_changed();
     }
 

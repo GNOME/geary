@@ -113,7 +113,7 @@
                         <property name="margin_top">6</property>
                         <property name="hexpand">True</property>
                         <property name="invisible_char">•</property>
-                        <signal name="changed" handler="on_subject_changed" swapped="no"/>
+                        <signal name="changed" handler="on_envelope_changed" swapped="no"/>
                       </object>
                       <packing>
                         <property name="left_attach">1</property>
@@ -238,6 +238,7 @@
                           <object class="GtkComboBoxText" id="from_multiple">
                             <property name="visible">True</property>
                             <property name="can_focus">False</property>
+                            <signal name="changed" handler="on_envelope_changed" swapped="no"/>
                           </object>
                           <packing>
                             <property name="expand">False</property>
