@@ -2318,10 +2318,18 @@ public class GearyController : Geary.BaseObject {
             }
 
             widget = new ComposerWidget(current_account, compose_type, application.config, full, quote, is_draft);
-            if (is_draft) {
-                yield widget.restore_draft_state_async(current_account);
-            }
         }
+
+        Geary.EmailIdentifier? draft_id = null;
+        if (is_draft) {
+            draft_id = referred.id;
+            // Restore widget state before displaying the composer and
+            // opening the manager, so the changing widgets do not
+            // flash at the user, or make it look like the draft has
+            // changed hence triggering a redundant save
+            yield widget.restore_draft_state_async();
+        }
+
         widget.show_all();
 
         // We want to keep track of the open composer windows, so we can allow the user to cancel
@@ -2352,11 +2360,6 @@ public class GearyController : Geary.BaseObject {
         // Now that the composer has been added to a window, we can
         // set up its focus.
         widget.set_focus();
-
-        Geary.EmailIdentifier? draft_id = null;
-        if (is_draft) {
-            draft_id = referred.id;
-        }
 
         try {
             yield widget.open_draft_manager_async(draft_id);

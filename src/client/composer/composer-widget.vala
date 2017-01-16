@@ -522,7 +522,10 @@ public class ComposerWidget : Gtk.EventBox {
 
         // Don't do this in an overridden version of the destroy
         // method, it somehow ends up in an infinite loop
-        destroy.connect(() => { close_draft_manager_async.begin(null); });
+        destroy.connect(() => {
+                if (this.draft_manager != null)
+                    close_draft_manager_async.begin(null);
+            });
     }
 
     public ComposerWidget.from_mailto(Geary.Account account, string mailto, Configuration config) {
@@ -584,6 +587,8 @@ public class ComposerWidget : Gtk.EventBox {
         insert_action_group("cmp", this.actions);
         this.header.insert_action_group("cmh", this.actions);
 
+        get_action(ACTION_CLOSE_AND_SAVE).set_enabled(false);
+
         get_action(ACTION_UNDO).set_enabled(false);
         get_action(ACTION_REDO).set_enabled(false);
     }
@@ -614,15 +619,19 @@ public class ComposerWidget : Gtk.EventBox {
 
     /**
      * Restores the composer's widget state from its draft.
+     *
+     * This should only be called once, after the composer has been
+     * opened, and the draft manager should not be opened until after
+     * this has completed.
      */
-    public async void restore_draft_state_async(Geary.Account account) {
+    public async void restore_draft_state_async() {
         bool first_email = true;
-        
+
         foreach (Geary.RFC822.MessageID mid in this.in_reply_to) {
             Gee.MultiMap<Geary.Email, Geary.FolderPath?>? email_map;
             try {
                 email_map =
-                    yield account.local_search_message_id_async(mid, Geary.Email.Field.ENVELOPE,
+                    yield this.account.local_search_message_id_async(mid, Geary.Email.Field.ENVELOPE,
                     true, null, new Geary.EmailFlags.with(Geary.EmailFlags.DRAFT)); // TODO: Folder blacklist
             } catch (Error error) {
                 continue;
@@ -687,13 +696,6 @@ public class ComposerWidget : Gtk.EventBox {
         Geary.EmailIdentifier? editing_draft_id = null,
         Cancellable? cancellable = null)
     throws Error {
-        this.draft_save_text = "";
-        SimpleAction close_and_save = get_action(ACTION_CLOSE_AND_SAVE);
-
-        close_and_save.set_enabled(false);
-
-        yield close_draft_manager_async(cancellable);
-
         if (!this.account.information.save_drafts) {
             this.header.save_and_close_button.hide();
             return;
@@ -711,7 +713,7 @@ public class ComposerWidget : Gtk.EventBox {
         }
 
         update_draft_state();
-        close_and_save.set_enabled(true);
+        get_action(ACTION_CLOSE_AND_SAVE).set_enabled(true);
         this.header.save_and_close_button.show();
 
         this.draft_manager.notify[Geary.App.DraftManager.PROP_DRAFT_STATE]
@@ -1307,11 +1309,23 @@ public class ComposerWidget : Gtk.EventBox {
         this.container.close_container();
     }
 
-    private async void close_draft_manager_async(Cancellable? cancellable) throws Error {
-        get_action(ACTION_CLOSE_AND_SAVE).set_enabled(false);
-        if (this.draft_manager == null)
-            return;
+    /**
+     * Closes current draft manager, if any, then opens a new one.
+     */
+    private async void reopen_draft_manager_async(Cancellable? cancellable)
+    throws Error {
+        if (this.draft_manager != null) {
+            yield close_draft_manager_async(cancellable);
+        }
+        // XXX Need to work out what do to with any existing draft in
+        // this case. See Bug 713533.
+        yield open_draft_manager_async(null);
+    }
 
+    private async void close_draft_manager_async(Cancellable? cancellable)
+    throws Error {
+        this.draft_save_text = "";
+        get_action(ACTION_CLOSE_AND_SAVE).set_enabled(false);
         disconnect_from_draft_manager();
 
         // drop ref even if close failed
@@ -1425,13 +1439,16 @@ public class ComposerWidget : Gtk.EventBox {
         make_gui_insensitive();
         this.is_closing = true;
 
-        discard_draft();
-        if (draft_manager != null)
+        // This method can be called even if drafts are not being
+        // saved, hence we need to check the draft manager
+        if (draft_manager != null) {
+            discard_draft();
             draft_manager.discard_on_close = true;
-        try {
-            yield close_draft_manager_async(null);
-        } catch (Error err) {
-            // ignored
+            try {
+                yield close_draft_manager_async(null);
+            } catch (Error err) {
+                // ignored
+            }
         }
 
         this.container.close_container();
@@ -1651,8 +1668,6 @@ public class ComposerWidget : Gtk.EventBox {
                     tooltip.append(_("Reply-To: ") + addr.get_full_address() + "\n");
             this.header.set_recipients(label, tooltip.str.slice(0, -1));  // Remove trailing \n
         }
-
-        draft_changed();
     }
 
     private void on_justify(SimpleAction action, Variant? param) {
@@ -2138,32 +2153,6 @@ public class ComposerWidget : Gtk.EventBox {
         return !set_active;
     }
 
-    private void on_from_changed() {
-        bool changed = false;
-        try {
-            changed = update_from_account();
-        } catch (Error err) {
-            debug("Unable to update From: Account in composer: %s", err.message);
-        }
-
-        // if the Geary.Account didn't change and the drafts folder is open(ing), do nothing more;
-        // need to check for the drafts folder because opening it in the case of multiple From:
-        // is handled here alone, so changed open it if not already
-        if (!changed && this.draft_manager != null)
-            return;
-
-        // XXX Need to work out what do to with any existing draft in
-        // this case. See Bug 713533.
-        this.open_draft_manager_async.begin(null, null, (obj, res) => {
-                try {
-                    this.open_draft_manager_async.end(res);
-                    draft_changed();
-                } catch (Error e) {
-                    // Oh well?
-                }
-            });
-    }
-
     private bool update_from_account() throws Error {
         int index = this.from_multiple.get_active();
         if (index < 0)
@@ -2228,6 +2217,23 @@ public class ComposerWidget : Gtk.EventBox {
 
     private void on_draft_state_changed() {
         update_draft_state();
+    }
+
+    private void on_from_changed() {
+        bool changed = false;
+        try {
+            changed = update_from_account();
+        } catch (Error err) {
+            debug("Unable to update From: Account in composer: %s", err.message);
+        }
+
+        // if the Geary.Account didn't change and the drafts manager
+        // is open(ing), do nothing more; need to check for the drafts
+        // manager because opening it in the case of multiple From: is
+        // handled here alone, so if changed open it if not already
+        if (changed || this.draft_manager == null) {
+            reopen_draft_manager_async.begin(null);
+        }
     }
 
     private void on_selection_changed(bool has_selection) {
