@@ -215,12 +215,15 @@ public class ComposerWidget : Gtk.EventBox {
         }
     }
 
+    /** Determines if the composer can currently save a draft. */
+    private bool can_save {
+        get { return this.draft_manager != null; }
+    }
+
     /** Determines if current message should be saved as draft. */
     private bool should_save {
         get {
-            return this.draft_manager != null
-                && this.draft_manager.is_open
-                && this.account.information.save_drafts
+            return this.can_save
                 && !this.is_draft_saved
                 && !this.is_blank;
         }
@@ -1051,33 +1054,40 @@ public class ComposerWidget : Gtk.EventBox {
         if (this.is_blank)
             return CloseStatus.DO_CLOSE;
 
-        bool try_to_save = this.should_save;
-
         this.container.present();
-        AlertDialog dialog;
-        if (try_to_save) {
-            dialog = new TernaryConfirmationDialog(container.top_window,
+
+        CloseStatus status = CloseStatus.PENDING_CLOSE;
+        if (this.can_save) {
+            AlertDialog dialog = new TernaryConfirmationDialog(container.top_window,
                 _("Do you want to discard this message?"), null, Stock._KEEP, Stock._DISCARD, 
                 Gtk.ResponseType.CLOSE, "suggested-action");
-        } else {
-            dialog = new ConfirmationDialog(container.top_window,
-                _("Do you want to discard this message?"), null, Stock._DISCARD, "destructive-action");
-        }
-
-        Gtk.ResponseType response = dialog.run();
-        if (response == Gtk.ResponseType.CANCEL || response == Gtk.ResponseType.DELETE_EVENT) {
-            return CloseStatus.CANCEL_CLOSE; // Cancel
-        } else if (response == Gtk.ResponseType.OK) {
-            if (try_to_save) {
-                save_and_exit_async.begin(); // Save
-                return CloseStatus.PENDING_CLOSE;
+            Gtk.ResponseType response = dialog.run();
+            if (response == Gtk.ResponseType.CANCEL ||
+                response == Gtk.ResponseType.DELETE_EVENT) {
+                status = CloseStatus.CANCEL_CLOSE;
+            } else if (response == Gtk.ResponseType.OK) {
+                // Keep
+                if (!this.is_draft_saved) {
+                    save_and_exit_async.begin();
+                } else {
+                    status = CloseStatus.DO_CLOSE;
+                }
             } else {
-                return CloseStatus.DO_CLOSE;
+                // Discard
+                discard_and_exit_async.begin();
             }
         } else {
-            discard_and_exit_async.begin(); // Discard
-            return CloseStatus.PENDING_CLOSE;
+            AlertDialog dialog = new ConfirmationDialog(container.top_window,
+                _("Do you want to discard this message?"), null, Stock._DISCARD, "destructive-action");
+            Gtk.ResponseType response = dialog.run();
+            if (response == Gtk.ResponseType.OK) {
+                discard_and_exit_async.begin();
+            } else {
+                status = CloseStatus.CANCEL_CLOSE;
+            }
         }
+
+        return status;
     }
 
     private void on_close(SimpleAction action, Variant? param) {
@@ -1089,7 +1099,7 @@ public class ComposerWidget : Gtk.EventBox {
         if (this.should_save)
             save_and_exit_async.begin();
         else
-            on_close(action, param);
+            this.container.close_container();
     }
 
     private void on_close_and_discard(SimpleAction action, Variant? param) {
