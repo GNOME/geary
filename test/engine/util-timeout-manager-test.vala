@@ -10,11 +10,14 @@ class Geary.TimeoutManagerTest : Gee.TestCase {
     // add_seconds seems to vary wildly, so needs a large epsilon
     private const double SECONDS_EPSILON = 1.8;
 
+    private const double MILLISECONDS_EPSILON = 0.1;
+
     public TimeoutManagerTest() {
         base("Geary.TimeoutManagerTest");
         add_test("start_reset", start_reset);
         if (Test.slow()) {
             add_test("test_seconds", test_seconds);
+            add_test("test_milliseconds", test_milliseconds);
             add_test("test_repeat_forever", test_repeat_forever);
         }
     }
@@ -40,6 +43,20 @@ class Geary.TimeoutManagerTest : Gee.TestCase {
         }
 
         assert_epsilon(timer.elapsed(), 1.0, SECONDS_EPSILON);
+    }
+
+    public void test_milliseconds() {
+        Timer timer = new Timer();
+
+        TimeoutManager test = new TimeoutManager.milliseconds(100, () => { timer.stop(); });
+        test.start();
+
+        timer.start();
+        while (test.is_running && timer.elapsed() < 100 + MILLISECONDS_EPSILON) {
+            Gtk.main_iteration();
+        }
+
+        assert_epsilon(timer.elapsed(), 0.1, MILLISECONDS_EPSILON);
     }
 
     public void test_repeat_forever() {

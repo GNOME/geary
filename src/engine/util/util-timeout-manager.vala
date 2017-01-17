@@ -66,6 +66,18 @@ public class Geary.TimeoutManager : BaseObject {
         this.callback = callback;
     }
 
+    /**
+     * Constructs a new timeout with an interval in milliseconds.
+     *
+     * The timeout will be by default not running, and hence needs to be
+     * started by a call to {@link start}.
+     */
+    public TimeoutManager.milliseconds(uint interval, TimeoutFunc callback) {
+        this.use_seconds = false;
+        this.interval = interval;
+        this.callback = callback;
+    }
+
     ~TimeoutManager() {
         reset();
     }
