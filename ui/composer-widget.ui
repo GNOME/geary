@@ -565,7 +565,7 @@
                     <property name="can_focus">True</property>
                     <property name="focus_on_click">False</property>
                     <property name="receives_default">False</property>
-                    <property name="tooltip_text" translatable="yes">Link (Ctrl+L)</property>
+                    <property name="tooltip_text" translatable="yes">Insert or update selection link (Ctrl+L)</property>
                     <property name="action_name">cmp.insert-link</property>
                     <property name="always_show_image">True</property>
                     <child>
@@ -587,7 +587,7 @@
                     <property name="can_focus">True</property>
                     <property name="focus_on_click">False</property>
                     <property name="receives_default">False</property>
-                    <property name="tooltip_text" translatable="yes">Image (Ctrl+G)</property>
+                    <property name="tooltip_text" translatable="yes">Insert an image (Ctrl+G)</property>
                     <property name="action_name">cmp.insert-image</property>
                     <property name="always_show_image">True</property>
                     <child>
@@ -620,7 +620,7 @@
                 <property name="can_focus">True</property>
                 <property name="focus_on_click">False</property>
                 <property name="receives_default">False</property>
-                <property name="tooltip_text" translatable="yes">Remove formatting (Ctrl+Space)</property>
+                <property name="tooltip_text" translatable="yes">Remove selection formatting (Ctrl+Space)</property>
                 <property name="action_name">cmp.remove-format</property>
                 <property name="always_show_image">True</property>
                 <child>
@@ -643,7 +643,7 @@
                 <property name="can_focus">True</property>
                 <property name="focus_on_click">False</property>
                 <property name="receives_default">False</property>
-                <property name="tooltip_text" translatable="yes">Select spell checking language</property>
+                <property name="tooltip_text" translatable="yes">Select spell checking languages</property>
                 <property name="action_name">cmp.select-dictionary</property>
                 <property name="always_show_image">True</property>
                 <child>
