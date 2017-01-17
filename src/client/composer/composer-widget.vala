@@ -523,13 +523,13 @@ public class ComposerWidget : Gtk.EventBox {
         chain.append(this.composer_toolbar);
         chain.append(this.attachments_box);
         this.composer_container.set_focus_chain(chain);
+    }
 
-        // Don't do this in an overridden version of the destroy
-        // method, it somehow ends up in an infinite loop
-        destroy.connect(() => {
-                if (this.draft_manager != null)
-                    close_draft_manager_async.begin(null);
-            });
+    public override void destroy() {
+        this.draft_timer.reset();
+        if (this.draft_manager != null)
+            close_draft_manager_async.begin(null);
+        base.destroy();
     }
 
     public ComposerWidget.from_mailto(Geary.Account account, string mailto, Configuration config) {
