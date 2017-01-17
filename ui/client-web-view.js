@@ -15,12 +15,12 @@ let PageState = function() {
 PageState.prototype = {
     init: function() {
         this.allowRemoteImages = false;
-        this.is_loaded = false;
+        this.isLoaded = false;
 
         let state = this;
         let timeoutId = window.setInterval(function() {
             state.preferredHeightChanged();
-            if (state.is_loaded) {
+            if (state.isLoaded) {
                 window.clearTimeout(timeoutId);
             }
         }, 50);
@@ -29,7 +29,7 @@ PageState.prototype = {
         return window.document.documentElement.offsetHeight;
     },
     loaded: function() {
-        this.is_loaded = true;
+        this.isLoaded = true;
     },
     loadRemoteImages: function() {
         this.allowRemoteImages = true;
@@ -53,7 +53,7 @@ PageState.prototype = {
         }
     },
     selectionChanged: function() {
-        let has_selection = !window.getSelection().isCollapsed;
-        window.webkit.messageHandlers.selectionChanged.postMessage(has_selection);
+        let hasSelection = !window.getSelection().isCollapsed;
+        window.webkit.messageHandlers.selectionChanged.postMessage(hasSelection);
     }
 };
