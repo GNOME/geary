@@ -148,8 +148,11 @@ public class ClientWebView : WebKit.WebView {
     /** Delegate for UserContentManager message callbacks. */
     public delegate void JavaScriptMessageHandler(WebKit.JavascriptResult js_result);
 
+    /** Determines if the view has any selected text */
+    public bool has_selection { get; private set; default = false; }
+
     /** Determines if the view has started rendering the HTML */
-    public bool has_valid_height { get; set; default = false; }
+    public bool has_valid_height { get; private set; default = false; }
 
     private string _document_font;
     public string document_font {
@@ -465,7 +468,13 @@ public class ClientWebView : WebKit.WebView {
 
     private void on_selection_changed(WebKit.JavascriptResult result) {
         try {
-            selection_changed(WebKitUtil.to_bool(result));
+            bool has_selection = WebKitUtil.to_bool(result);
+            // Avoid firing multiple notifies if the value hasn't
+            // changed
+            if (this.has_selection != has_selection) {
+                this.has_selection = has_selection;
+            }
+            selection_changed(has_selection);
         } catch (Geary.JS.Error err) {
             debug("Could not get selection content: %s", err.message);
         }

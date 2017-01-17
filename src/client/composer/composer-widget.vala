@@ -81,10 +81,12 @@ public class ComposerWidget : Gtk.EventBox {
     private const string ACTION_SELECT_DICTIONARY = "select-dictionary";
     private const string ACTION_OPEN_INSPECTOR = "open_inspector";
 
+    // ACTION_INSERT_LINK and ACTION_REMOVE_FORMAT are missing from
+    // here since they are handled in update_selection_actions
     private const string[] html_actions = {
-        ACTION_BOLD, ACTION_ITALIC, ACTION_UNDERLINE, ACTION_STRIKETHROUGH, ACTION_FONT_SIZE,
-        ACTION_FONT_FAMILY, ACTION_REMOVE_FORMAT, ACTION_COLOR, ACTION_JUSTIFY,
-        ACTION_INSERT_IMAGE, ACTION_INSERT_LINK, ACTION_COPY_LINK, ACTION_PASTE_WITH_FORMATTING
+        ACTION_BOLD, ACTION_ITALIC, ACTION_UNDERLINE, ACTION_STRIKETHROUGH,
+        ACTION_FONT_SIZE, ACTION_FONT_FAMILY, ACTION_COLOR, ACTION_JUSTIFY,
+        ACTION_INSERT_IMAGE, ACTION_COPY_LINK, ACTION_PASTE_WITH_FORMATTING
     };
 
     private const ActionEntry[] action_entries = {
@@ -504,7 +506,9 @@ public class ComposerWidget : Gtk.EventBox {
         this.editor.key_press_event.connect(on_editor_key_press_event);
         this.editor.load_changed.connect(on_load_changed);
         this.editor.mouse_target_changed.connect(on_mouse_target_changed);
-        this.editor.selection_changed.connect(on_selection_changed);
+        this.editor.selection_changed.connect((has_selection) => {
+                update_selection_actions(has_selection);
+            });
 
         this.editor.load_html(this.body_html, this.signature_html, this.top_posting);
 
@@ -577,20 +581,6 @@ public class ComposerWidget : Gtk.EventBox {
                 }
             }
         }
-    }
-
-    // Initializes all actions and adds them to the action group
-    private void initialize_actions() {
-        this.actions.add_action_entries(action_entries, this);
-
-        // for some reason, we can't use the same prefix.
-        insert_action_group("cmp", this.actions);
-        this.header.insert_action_group("cmh", this.actions);
-
-        get_action(ACTION_CLOSE_AND_SAVE).set_enabled(false);
-
-        get_action(ACTION_UNDO).set_enabled(false);
-        get_action(ACTION_REDO).set_enabled(false);
     }
 
     /**
@@ -787,6 +777,32 @@ public class ComposerWidget : Gtk.EventBox {
             this.subject_entry.grab_focus();
         else
             this.editor.grab_focus();
+    }
+
+    // Initializes all actions and adds them to the action group
+    private void initialize_actions() {
+        this.actions.add_action_entries(action_entries, this);
+
+        // for some reason, we can't use the same prefix.
+        insert_action_group("cmp", this.actions);
+        this.header.insert_action_group("cmh", this.actions);
+
+        get_action(ACTION_CLOSE_AND_SAVE).set_enabled(false);
+
+        get_action(ACTION_UNDO).set_enabled(false);
+        get_action(ACTION_REDO).set_enabled(false);
+
+        // No initial selection
+        update_selection_actions(false);
+    }
+
+    private void update_selection_actions(bool has_selection) {
+        get_action(ACTION_CUT).set_enabled(has_selection);
+        get_action(ACTION_COPY).set_enabled(has_selection);
+
+        bool rich_text_selected = has_selection && this.editor.is_rich_text;
+        get_action(ACTION_INSERT_LINK).set_enabled(rich_text_selected);
+        get_action(ACTION_REMOVE_FORMAT).set_enabled(rich_text_selected);
     }
 
     private bool check_preferred_from_address(Gee.List<Geary.RFC822.MailboxAddress> account_addresses,
@@ -1748,6 +1764,8 @@ public class ComposerWidget : Gtk.EventBox {
         foreach (string html_action in html_actions)
             get_action(html_action).set_enabled(compose_as_html);
 
+        update_selection_actions(this.editor.has_selection);
+
         this.insert_buttons.visible = compose_as_html;
         this.font_style_buttons.visible = compose_as_html;
         this.remove_format_button.visible = compose_as_html;
@@ -2234,14 +2252,6 @@ public class ComposerWidget : Gtk.EventBox {
         if (changed || this.draft_manager == null) {
             reopen_draft_manager_async.begin(null);
         }
-    }
-
-    private void on_selection_changed(bool has_selection) {
-        get_action(ACTION_CUT).set_enabled(has_selection);
-        get_action(ACTION_COPY).set_enabled(has_selection);
-        get_action(ACTION_REMOVE_FORMAT).set_enabled(
-            has_selection && this.editor.is_rich_text
-        );
     }
 
     private void on_cursor_style_changed(string font_family, uint font_size) {
