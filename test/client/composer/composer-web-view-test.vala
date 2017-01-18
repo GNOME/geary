@@ -9,6 +9,7 @@ public class ComposerWebViewTest : ClientWebViewTestCase<ComposerWebView> {
 
     public ComposerWebViewTest() {
         base("ComposerWebViewTest");
+        add_test("edit_context", edit_context);
         add_test("get_html", get_html);
         add_test("get_text", get_text);
         add_test("get_text_with_quote", get_text_with_quote);
@@ -16,6 +17,14 @@ public class ComposerWebViewTest : ClientWebViewTestCase<ComposerWebView> {
         add_test("get_text_with_long_line", get_text_with_long_line);
         add_test("get_text_with_long_quote", get_text_with_long_quote);
         add_test("get_text_with_nbsp", get_text_with_nbsp);
+    }
+
+    public void edit_context() {
+        assert(new ComposerWebView.EditContext("Helvetica,").font_family == "sans");
+        assert(new ComposerWebView.EditContext("Times New Roman,").font_family == "serif");
+        assert(new ComposerWebView.EditContext("Courier,").font_family == "monospace");
+
+        assert(new ComposerWebView.EditContext(",12").font_size == 12);
     }
 
     public void get_html() {

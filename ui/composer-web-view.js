@@ -27,8 +27,7 @@ ComposerPageState.prototype = {
         this.undoEnabled = false;
         this.redoEnabled = false;
 
-        this.cursorFontFamily = null;
-        this.cursorFontSize = null;
+        this.cursorContext = null;
 
         let state = this;
 
@@ -79,7 +78,7 @@ ComposerPageState.prototype = {
         // Focus within the HTML document
         document.body.focus();
 
-        // Set cursor at appropriate position
+        // Set text cursor at appropriate position
         let cursor = document.getElementById("cursormarker");
         if (cursor != null) {
             let range = document.createRange();
@@ -122,7 +121,7 @@ ComposerPageState.prototype = {
     },
     tabIn: function() {
         // If there is no selection and the character before the
-        // cursor is tab, delete it.
+        // text cursor is tab, delete it.
         let selection = window.getSelection();
         if (selection.isCollapsed) {
             selection.modify("extend", "backward", "character");
@@ -177,23 +176,13 @@ ComposerPageState.prototype = {
     selectionChanged: function() {
         PageState.prototype.selectionChanged.apply(this, []);
 
-        let selection = window.getSelection();
-        let active = selection.focusNode;
-        if (active != null && active.nodeType != Node.ELEMENT_TYPE) {
-            active = active.parentNode;
-        }
-
-        if (active != null) {
-            let styles = window.getComputedStyle(active);
-            let fontFamily = styles.getPropertyValue("font-family");
-            let fontSize = styles.getPropertyValue("font-size");
-
-            if (fontFamily != this.cursorFontFamily ||
-                fontSize != this.cursorFontSize) {
-                this.cursorFontFamily = fontFamily;
-                this.cursorFontSize = fontSize;
-                window.webkit.messageHandlers.cursorStyleChanged.postMessage(
-                    fontFamily + "," + fontSize
+        let cursor = SelectionUtil.getCursorElement();
+        if (cursor != null) {
+            let newContext = new EditContext(cursor);
+            if (!newContext.equals(this.cursorContext)) {
+                this.cursorContext = newContext;
+                window.webkit.messageHandlers.cursorContextChanged.postMessage(
+                    newContext.encode()
                 );
             }
         }
@@ -310,6 +299,61 @@ ComposerPageState.replaceNonBreakingSpace = function(text) {
     // running as a unit test, HTMLElement.innerText appears to not
     // convert &nbsp into U+00A0.
     return text.replace(new RegExp(" ", "g"), " ");
+};
+
+
+/**
+ * Encapsulates editing-related state for a specific DOM node.
+ *
+ * This must be kept in sync with the vala object of the same name.
+ */
+let EditContext = function() {
+    this.init.apply(this, arguments);
+};
+EditContext.LINK_MASK = 1 << 0;
+
+EditContext.prototype = {
+    init: function(node) {
+        let styles = window.getComputedStyle(node);
+        let fontFamily = styles.getPropertyValue("font-family");
+        if (fontFamily.charAt() == "'") {
+            fontFamily = fontFamily.substr(1, fontFamily.length - 2);
+        }
+        this.fontFamily = fontFamily;
+        this.fontSize = styles.getPropertyValue("font-size").replace("px", "");
+    },
+    equals: function(other) {
+        return other != null
+            && this.fontFamily == other.fontFamily
+            && this.fontSize == other.fontSize;
+    },
+    encode: function() {
+        return [
+            this.fontFamily,
+            this.fontSize
+        ].join(",");
+    }
+};
+
+
+/**
+ * Utility methods for managing the DOM Selection.
+ */
+let SelectionUtil = {
+    /**
+     * Returns the element immediately under the text cursor.
+     *
+     * If there is a non-empty selection, the element at the end of the
+     * selection is returned.
+     */
+    getCursorElement: function() {
+        let selection = window.getSelection();
+        let node = selection.focusNode;
+        if (node != null && node.nodeType != Node.ELEMENT_TYPE) {
+            node = node.parentNode;
+        }
+        return node;
+    }
 };
 
 

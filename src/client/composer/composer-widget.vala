@@ -500,7 +500,7 @@ public class ComposerWidget : Gtk.EventBox {
 
         this.editor.command_stack_changed.connect(on_command_state_changed);
         this.editor.context_menu.connect(on_context_menu);
-        this.editor.cursor_style_changed.connect(on_cursor_style_changed);
+        this.editor.cursor_context_changed.connect(on_cursor_context_changed);
         this.editor.document_modified.connect(() => { draft_changed(); });
         this.editor.get_editor_state().notify["typing-attributes"].connect(on_typing_attributes_changed);
         this.editor.key_press_event.connect(on_editor_key_press_event);
@@ -2254,12 +2254,13 @@ public class ComposerWidget : Gtk.EventBox {
         }
     }
 
-    private void on_cursor_style_changed(string font_family, uint font_size) {
-        this.actions.change_action_state(ACTION_FONT_FAMILY, font_family);
+    private void on_cursor_context_changed(ComposerWebView.EditContext context) {
 
-        if (font_size < 11)
+        this.actions.change_action_state(ACTION_FONT_FAMILY, context.font_family);
+
+        if (context.font_size < 11)
             this.actions.change_action_state(ACTION_FONT_SIZE, "small");
-        else if (font_size > 20)
+        else if (context.font_size > 20)
             this.actions.change_action_state(ACTION_FONT_SIZE, "large");
         else
             this.actions.change_action_state(ACTION_FONT_SIZE, "medium");

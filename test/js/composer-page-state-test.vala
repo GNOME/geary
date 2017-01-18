@@ -9,6 +9,7 @@ class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
 
     public ComposerPageStateTest() {
         base("ComposerPageStateTest");
+        add_test("edit_context_font", edit_context_font);
         add_test("get_html", get_html);
         add_test("get_text", get_text);
         add_test("get_text_with_quote", get_text_with_quote);
@@ -16,6 +17,22 @@ class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
         add_test("resolve_nesting", resolve_nesting);
         add_test("quote_lines", quote_lines);
         add_test("replace_non_breaking_space", replace_non_breaking_space);
+    }
+
+    public void edit_context_font() {
+        string html = "<p id=\"test\" style=\"font-family: Comic Sans; font-size: 144\">para</p>";
+        load_body_fixture(html);
+
+        try {
+            assert(run_javascript(@"new EditContext(document.getElementById('test')).encode()")
+                   == ("Comic Sans,144"));
+        } catch (Geary.JS.Error err) {
+            print("Geary.JS.Error: %s\n", err.message);
+            assert_not_reached();
+        } catch (Error err) {
+            print("WKError: %s\n", err.message);
+            assert_not_reached();
+        }
     }
 
     public void get_html() {

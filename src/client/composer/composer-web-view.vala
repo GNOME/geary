@@ -13,18 +13,8 @@ public class ComposerWebView : ClientWebView {
 
 
     private const string COMMAND_STACK_CHANGED = "commandStackChanged";
-    private const string CURSOR_STYLE_CHANGED = "cursorStyleChanged";
+    private const string CURSOR_CONTEXT_CHANGED = "cursorContextChanged";
     private const string DOCUMENT_MODIFIED = "documentModified";
-
-    private const string[] SANS_FAMILY_NAMES = {
-        "sans", "arial", "trebuchet", "helvetica"
-    };
-    private const string[] SERIF_FAMILY_NAMES = {
-        "serif", "georgia", "times"
-    };
-    private const string[] MONO_FAMILY_NAMES = {
-        "monospace", "courier", "console"
-    };
 
     private const string HTML_BODY = """
         <html><head><title></title>
@@ -73,20 +63,61 @@ public class ComposerWebView : ClientWebView {
         </body></html>""";
     private const string CURSOR = "<span id=\"cursormarker\"></span>";
 
-    private static Gee.HashMap<string,string> font_family_map =
-        new Gee.HashMap<string,string>();
 
-    static construct {
-        foreach (string name in SANS_FAMILY_NAMES) {
-            font_family_map["sans"] = name;
+    /**
+     * Encapsulates editing-related state for a specific DOM node.
+     *
+     * This must be kept in sync with the JS object of the same name.
+     */
+    public class EditContext : Object {
+
+        private const uint LINK_MASK = 1 << 0;
+
+        private const string[] SANS_FAMILY_NAMES = {
+            "sans", "arial", "trebuchet", "helvetica"
+        };
+        private const string[] SERIF_FAMILY_NAMES = {
+            "serif", "georgia", "times"
+        };
+        private const string[] MONO_FAMILY_NAMES = {
+            "monospace", "courier", "console"
+        };
+
+        private static Gee.HashMap<string,string> font_family_map =
+            new Gee.HashMap<string,string>();
+
+        static construct {
+            foreach (string name in SANS_FAMILY_NAMES) {
+                font_family_map[name] = "sans";
+            }
+            foreach (string name in SERIF_FAMILY_NAMES) {
+                font_family_map[name] = "serif";
+            }
+            foreach (string name in MONO_FAMILY_NAMES) {
+                font_family_map[name] = "monospace";
+            }
         }
-        foreach (string name in SERIF_FAMILY_NAMES) {
-            font_family_map["serif"] = name;
+
+
+        public string font_family { get; private set; default = "sans"; }
+        public uint font_size { get; private set; default = 12; }
+
+        public EditContext(string message) {
+            string[] values = message.split(",");
+
+            string view_name = values[0].down();
+            foreach (string specific_name in EditContext.font_family_map.keys) {
+                if (specific_name in view_name) {
+                    this.font_family = EditContext.font_family_map[specific_name];
+                    break;
+                }
+            }
+
+            this.font_size = (uint) uint64.parse(values[1]);
         }
-        foreach (string name in MONO_FAMILY_NAMES) {
-            font_family_map["monospace"] = name;
-        }
+
     }
+
 
     private static WebKit.UserScript? app_script = null;
 
@@ -117,8 +148,8 @@ public class ComposerWebView : ClientWebView {
     /** Emitted when the web view's undo/redo stack state changes. */
     public signal void command_stack_changed(bool can_undo, bool can_redo);
 
-    /** Emitted when the style under the cursor has changed. */
-    public signal void cursor_style_changed(string face, uint size);
+    /** Emitted when the cursor's edit context has changed. */
+    public signal void cursor_context_changed(EditContext cursor_context);
 
 
     public ComposerWebView(Configuration config) {
@@ -130,7 +161,7 @@ public class ComposerWebView : ClientWebView {
         // this.should_insert_text.connect(on_should_insert_text);
 
         register_message_handler(COMMAND_STACK_CHANGED, on_command_stack_changed);
-        register_message_handler(CURSOR_STYLE_CHANGED, on_cursor_style_changed);
+        register_message_handler(CURSOR_CONTEXT_CHANGED, on_cursor_context_changed);
         register_message_handler(DOCUMENT_MODIFIED, on_document_modified);
     }
 
@@ -202,7 +233,7 @@ public class ComposerWebView : ClientWebView {
     }
 
     /**
-     * Inserts some text at the current cursor location.
+     * Inserts some text at the current text cursor location.
      */
     public void insert_text(string text) {
         execute_editing_command_with_argument("inserttext", text);
@@ -265,7 +296,7 @@ public class ComposerWebView : ClientWebView {
     // }
 
     /**
-     * Inserts some HTML at the current cursor location.
+     * Inserts some HTML at the current text cursor location.
      */
     public void insert_html(string markup) {
         execute_editing_command_with_argument("insertHTML", markup);
@@ -398,24 +429,11 @@ public class ComposerWebView : ClientWebView {
         }
     }
 
-    private void on_cursor_style_changed(WebKit.JavascriptResult result) {
+    private void on_cursor_context_changed(WebKit.JavascriptResult result) {
         try {
-            string[] values = WebKitUtil.to_string(result).split(",");
-            string view_name = values[0].down();
-            string? font_family = "sans";
-            foreach (string name in ComposerWebView.font_family_map.keys) {
-                if (name in view_name) {
-                    font_family = ComposerWebView.font_family_map[name];
-                    break;
-                }
-            }
-
-            uint font_size = 12;
-            values[1].scanf("%dpx", out font_size);
-
-            cursor_style_changed(font_family, font_size);
+            cursor_context_changed(new EditContext(WebKitUtil.to_string(result)));
         } catch (Geary.JS.Error err) {
-            debug("Could not get cursor style: %s", err.message);
+            debug("Could not get text cursor style: %s", err.message);
         }
     }
 
