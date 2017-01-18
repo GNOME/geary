@@ -317,12 +317,16 @@ public class ComposerWebView : ClientWebView {
      * will be inserted wrapping the selection.
      */
     public void insert_link(string href) {
+        this.run_javascript.begin(
+            "geary.insertLink(\"%s\");".printf(href), null
+        );
     }
 
     /**
      * Removes any A element at the current text cursor location.
      */
     public void delete_link() {
+        this.run_javascript.begin("geary.deleteLink();", null);
     }
 
     /**

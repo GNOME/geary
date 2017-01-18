@@ -114,6 +114,40 @@ ComposerPageState.prototype = {
         document.execCommand("redo", false, null);
         this.checkCommandStack();
     },
+    insertLink: function(href) {
+        if (!window.getSelection().isCollapsed) {
+            // There is currently a selection, so assume the user
+            // knows what they are doing and just linkify it.
+            document.execCommand("createLink", false, href);
+        } else {
+            let selected = SelectionUtil.getCursorElement();
+            if (selected != null && selected.tagName == "A") {
+                // The current cursor element is an A, so select it
+                // since createLink requires a range
+                let selection = SelectionUtil.save();
+                SelectionUtil.selectNode(selected);
+                document.execCommand("createLink", false, href);
+                SelectionUtil.restore(selection);
+            }
+        }
+    },
+    deleteLink: function() {
+        if (!window.getSelection().isCollapsed) {
+            // There is currently a selection, so assume the user
+            // knows what they are doing and just unlink it.
+            document.execCommand("unlink", false, null);
+        } else {
+            let selected = SelectionUtil.getCursorElement();
+            if (selected != null && selected.tagName == "A") {
+                // The current cursor element is an A, so select it
+                // since unlink requires a range
+                let selection = SelectionUtil.save();
+                SelectionUtil.selectNode(selected);
+                document.execCommand("unlink", false, null);
+                SelectionUtil.restore(selection);
+            }
+        }
+    },
     tabOut: function() {
         document.execCommand(
             "inserthtml", false, "<span style='white-space: pre-wrap'>\t</span>"
@@ -365,6 +399,39 @@ let SelectionUtil = {
             node = node.parentNode;
         }
         return node;
+    },
+    /**
+     * Modifies the selection so that it contains the given target node.
+     */
+    selectNode: function(target) {
+        let newRange = new Range();
+        newRange.selectNode(target);
+
+        let selection = window.getSelection();
+        selection.removeAllRanges();
+        selection.addRange(newRange);
+    },
+    /**
+     * Saves the current selection so it can be restored with `restore`.
+     */
+    save: function() {
+        let selection = window.getSelection();
+        var ranges = [];
+        let len = selection.rangeCount;
+        for (let i = 0; i < len; ++i) {
+            ranges.push(selection.getRangeAt(i));
+        }
+        return ranges;
+    },
+    /**
+     * Restores the selection saved with `save`.
+     */
+    restore: function(saved) {
+        let selection = window.getSelection();
+        selection.removeAllRanges();
+        for (let i = 0; i < saved.length; i++) {
+            selection.addRange(saved[i]);
+        }
     }
 };
 
