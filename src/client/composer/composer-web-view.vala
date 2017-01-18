@@ -99,13 +99,20 @@ public class ComposerWebView : ClientWebView {
         }
 
 
+        public bool is_link { get { return (this.context & LINK_MASK) > 0; } }
+        public string link_url { get; private set; default = ""; }
         public string font_family { get; private set; default = "sans"; }
         public uint font_size { get; private set; default = 12; }
 
+        private uint context = 0;
+
         public EditContext(string message) {
             string[] values = message.split(",");
+            this.context = (uint) uint64.parse(values[0]);
 
-            string view_name = values[0].down();
+            this.link_url = values[1];
+
+            string view_name = values[2].down();
             foreach (string specific_name in EditContext.font_family_map.keys) {
                 if (specific_name in view_name) {
                     this.font_family = EditContext.font_family_map[specific_name];
@@ -113,7 +120,7 @@ public class ComposerWebView : ClientWebView {
                 }
             }
 
-            this.font_size = (uint) uint64.parse(values[1]);
+            this.font_size = (uint) uint64.parse(values[3]);
         }
 
     }
@@ -303,7 +310,23 @@ public class ComposerWebView : ClientWebView {
     }
 
     /**
-     * Inserts an IMG with the given `src` at the current cursor location.
+     * Inserts or updates an A element at the current text cursor location.
+     *
+     * If the cursor is located on an A element, the element's HREF
+     * will be updated, else if some text is selected, an A element
+     * will be inserted wrapping the selection.
+     */
+    public void insert_link(string href) {
+    }
+
+    /**
+     * Removes any A element at the current text cursor location.
+     */
+    public void delete_link() {
+    }
+
+    /**
+     * Inserts an IMG element at the current text cursor location.
      */
     public void insert_image(string src) {
         // Use insertHTML instead of insertImage here so

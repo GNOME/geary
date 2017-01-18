@@ -20,11 +20,15 @@ public class ComposerWebViewTest : ClientWebViewTestCase<ComposerWebView> {
     }
 
     public void edit_context() {
-        assert(new ComposerWebView.EditContext("Helvetica,").font_family == "sans");
-        assert(new ComposerWebView.EditContext("Times New Roman,").font_family == "serif");
-        assert(new ComposerWebView.EditContext("Courier,").font_family == "monospace");
+        assert(!(new ComposerWebView.EditContext("0,,,").is_link));
+        assert(new ComposerWebView.EditContext("1,,,").is_link);
+        assert(new ComposerWebView.EditContext("1,url,,").link_url == "url");
 
-        assert(new ComposerWebView.EditContext(",12").font_size == 12);
+        assert(new ComposerWebView.EditContext("0,,Helvetica,").font_family == "sans");
+        assert(new ComposerWebView.EditContext("0,,Times New Roman,").font_family == "serif");
+        assert(new ComposerWebView.EditContext("0,,Courier,").font_family == "monospace");
+
+        assert(new ComposerWebView.EditContext("0,,,12").font_size == 12);
     }
 
     public void get_html() {

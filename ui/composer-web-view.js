@@ -314,6 +314,14 @@ EditContext.LINK_MASK = 1 << 0;
 
 EditContext.prototype = {
     init: function(node) {
+        this.context = 0;
+        this.linkUrl = "";
+
+        if (node.nodeName == "A") {
+            this.context |=  EditContext.LINK_MASK;
+            this.linkUrl = node.href;
+        }
+
         let styles = window.getComputedStyle(node);
         let fontFamily = styles.getPropertyValue("font-family");
         if (fontFamily.charAt() == "'") {
@@ -324,11 +332,15 @@ EditContext.prototype = {
     },
     equals: function(other) {
         return other != null
+            && this.context == other.context
+            && this.linkUrl == other.linkUrl
             && this.fontFamily == other.fontFamily
             && this.fontSize == other.fontSize;
     },
     encode: function() {
         return [
+            this.context.toString(16),
+            this.linkUrl,
             this.fontFamily,
             this.fontSize
         ].join(",");

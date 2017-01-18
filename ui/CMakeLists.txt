@@ -8,6 +8,7 @@ set(RESOURCE_LIST
               "client-web-view.js"
               "client-web-view-allow-remote-images.js"
   STRIPBLANKS "composer-headerbar.ui"
+  STRIPBLANKS "composer-link-popover.ui"
   STRIPBLANKS "composer-menus.ui"
   STRIPBLANKS "composer-widget.ui"
               "composer-web-view.js"

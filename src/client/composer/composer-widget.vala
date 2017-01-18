@@ -1,7 +1,9 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2017 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
 private errordomain AttachmentError {
@@ -310,6 +312,8 @@ public class ComposerWidget : Gtk.EventBox {
     [GtkChild]
     private Gtk.Box font_style_buttons;
     [GtkChild]
+    private Gtk.Button insert_link_button;
+    [GtkChild]
     private Gtk.Button remove_format_button;
     [GtkChild]
     private Gtk.Button select_dictionary_button;
@@ -332,7 +336,8 @@ public class ComposerWidget : Gtk.EventBox {
     private Menu context_menu_inspector;
 
     private SpellCheckPopover? spell_check_popover = null;
-    private string? hover_url = null;
+    private string? pointer_url = null;
+    private string? cursor_url = null;
     private bool is_attachment_overlay_visible = false;
     private Geary.RFC822.MailboxAddresses reply_to_addresses;
     private Geary.RFC822.MailboxAddresses reply_cc_addresses;
@@ -361,7 +366,11 @@ public class ComposerWidget : Gtk.EventBox {
     }
 
 
+    /** Fired when the current saved draft's id has changed. */
     public signal void draft_id_changed(Geary.EmailIdentifier? id);
+
+    /** Fired when the user opens a link in the composer. */
+    public signal void link_activated(string url);
 
 
     public ComposerWidget(Geary.Account account, ComposeType compose_type, Configuration config,
@@ -506,9 +515,7 @@ public class ComposerWidget : Gtk.EventBox {
         this.editor.key_press_event.connect(on_editor_key_press_event);
         this.editor.load_changed.connect(on_load_changed);
         this.editor.mouse_target_changed.connect(on_mouse_target_changed);
-        this.editor.selection_changed.connect((has_selection) => {
-                update_selection_actions(has_selection);
-            });
+        this.editor.selection_changed.connect((has_selection) => { update_cursor_actions(); });
 
         this.editor.load_html(this.body_html, this.signature_html, this.top_posting);
 
@@ -792,17 +799,20 @@ public class ComposerWidget : Gtk.EventBox {
         get_action(ACTION_UNDO).set_enabled(false);
         get_action(ACTION_REDO).set_enabled(false);
 
-        // No initial selection
-        update_selection_actions(false);
+        update_cursor_actions();
     }
 
-    private void update_selection_actions(bool has_selection) {
+    private void update_cursor_actions() {
+        bool has_selection = this.editor.has_selection;
         get_action(ACTION_CUT).set_enabled(has_selection);
         get_action(ACTION_COPY).set_enabled(has_selection);
 
-        bool rich_text_selected = has_selection && this.editor.is_rich_text;
-        get_action(ACTION_INSERT_LINK).set_enabled(rich_text_selected);
-        get_action(ACTION_REMOVE_FORMAT).set_enabled(rich_text_selected);
+        get_action(ACTION_INSERT_LINK).set_enabled(
+            this.editor.is_rich_text && (has_selection || this.cursor_url != null)
+        );
+        get_action(ACTION_REMOVE_FORMAT).set_enabled(
+            this.editor.is_rich_text && has_selection
+        );
     }
 
     private bool check_preferred_from_address(Gee.List<Geary.RFC822.MailboxAddress> account_addresses,
@@ -1724,7 +1734,9 @@ public class ComposerWidget : Gtk.EventBox {
 
     private void on_copy_link(SimpleAction action, Variant? param) {
         Gtk.Clipboard c = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD);
-        c.set_text(this.hover_url, -1);
+        // XXX could this also be the cursor URL? We should be getting
+        // the target URL as from the action param
+        c.set_text(this.pointer_url, -1);
         c.store();
     }
 
@@ -1764,7 +1776,7 @@ public class ComposerWidget : Gtk.EventBox {
         foreach (string html_action in html_actions)
             get_action(html_action).set_enabled(compose_as_html);
 
-        update_selection_actions(this.editor.has_selection);
+        update_cursor_actions();
 
         this.insert_buttons.visible = compose_as_html;
         this.font_style_buttons.visible = compose_as_html;
@@ -1825,82 +1837,12 @@ public class ComposerWidget : Gtk.EventBox {
         this.editor.undo_blockquote_style();
     }
 
-    private void link_dialog(string link) {
-        // Gtk.Dialog dialog = new Gtk.Dialog();
-        // bool existing_link = false;
-
-        // // Save information needed to re-establish selection
-        // WebKit.DOM.DOMSelection selection = this.editor.get_dom_document().get_default_view().
-        //     get_selection();
-        // WebKit.DOM.Node anchor_node = selection.anchor_node;
-        // long anchor_offset = selection.anchor_offset;
-        // WebKit.DOM.Node focus_node = selection.focus_node;
-        // long focus_offset = selection.focus_offset;
-
-        // // Allow user to remove link if they're editing an existing one.
-        // if (focus_node != null && (focus_node is WebKit.DOM.HTMLAnchorElement ||
-        //     focus_node.get_parent_element() is WebKit.DOM.HTMLAnchorElement)) {
-        //     existing_link = true;
-        //     dialog.add_buttons(Stock._REMOVE, Gtk.ResponseType.REJECT);
-        // }
-
-        // dialog.add_buttons(Stock._CANCEL, Gtk.ResponseType.CANCEL, Stock._OK,
-        //     Gtk.ResponseType.OK);
-
-        // Gtk.Entry entry = new Gtk.Entry();
-        // entry.changed.connect(() => {
-        //     // Only allow OK when there's text in the box.
-        //     dialog.set_response_sensitive(Gtk.ResponseType.OK,
-        //         !Geary.String.is_empty(entry.text.strip()));
-        // });
-
-        // dialog.width_request = 350;
-        // dialog.get_content_area().spacing = 7;
-        // dialog.get_content_area().border_width = 10;
-        // dialog.get_content_area().pack_start(new Gtk.Label("Link URL:"));
-        // dialog.get_content_area().pack_start(entry);
-        // dialog.get_widget_for_response(Gtk.ResponseType.OK).can_default = true;
-        // dialog.set_default_response(Gtk.ResponseType.OK);
-        // dialog.show_all();
-
-        // entry.set_text(link);
-        // entry.activates_default = true;
-        // entry.move_cursor(Gtk.MovementStep.BUFFER_ENDS, 0, false);
-
-        // int response = dialog.run();
-
-        // // Re-establish selection, since selecting text in the Entry will de-select all
-        // // in the WebView.
-        // try {
-        //     selection.set_base_and_extent(anchor_node, anchor_offset, focus_node, focus_offset);
-        // } catch (Error e) {
-        //     debug("Error re-establishing selection: %s", e.message);
-        // }
-
-        // if (response == Gtk.ResponseType.OK)
-        //     this.editor.execute_editing_command_with_argument("createLink", entry.text);
-        // else if (response == Gtk.ResponseType.REJECT)
-        //     this.editor.execute_editing_command("unlink");
-
-        // dialog.destroy();
-
-        // Re-bind to anchor links.  This must be done every time link have changed.
-        //Util.DOM.bind_event(this.editor,"a", "click", (Callback) on_link_clicked, this);
-    }
-
-
     private void on_mouse_target_changed(WebKit.WebView web_view,
                                          WebKit.HitTestResult hit_test,
                                          uint modifiers) {
-        bool copy_link_enabled = false;
-        if (hit_test.context_is_link()) {
-            copy_link_enabled = true;
-            this.hover_url = hit_test.get_link_uri();
-            this.message_overlay_label.label = this.hover_url;
-        } else {
-            this.hover_url = null;
-            this.message_overlay_label.label = "";
-        }
+        bool copy_link_enabled = hit_test.context_is_link();
+        this.pointer_url = copy_link_enabled ? hit_test.get_link_uri() : null;
+        this.message_overlay_label.label = this.pointer_url ?? "";
         get_action(ACTION_COPY_LINK).set_enabled(copy_link_enabled);
     }
 
@@ -2220,6 +2162,23 @@ public class ComposerWidget : Gtk.EventBox {
         this.signature_html = account_sig;
     }
 
+    private ComposerLinkPopover new_link_popover(ComposerLinkPopover.Type type,
+                                                 string url) {
+        ComposerLinkPopover popover = new ComposerLinkPopover(type);
+        popover.set_link_url(url);
+        popover.hide.connect(() => {
+                Idle.add(() => { popover.destroy(); return Source.REMOVE; });
+            });
+        popover.link_activate.connect((link_uri) => {
+                this.editor.insert_link(popover.link_uri);
+            });
+        popover.link_delete.connect(() => {
+                this.editor.delete_link();
+            });
+        popover.link_open.connect(() => { link_activated(popover.link_uri); });
+        return popover;
+    }
+
     private void on_command_state_changed(bool can_undo, bool can_redo) {
         get_action(ACTION_UNDO).set_enabled(can_undo);
         get_action(ACTION_REDO).set_enabled(can_redo);
@@ -2255,6 +2214,8 @@ public class ComposerWidget : Gtk.EventBox {
     }
 
     private void on_cursor_context_changed(ComposerWebView.EditContext context) {
+        this.cursor_url = context.is_link ? context.link_url : null;
+        update_cursor_actions();
 
         this.actions.change_action_state(ACTION_FONT_FAMILY, context.font_family);
 
@@ -2333,7 +2294,11 @@ public class ComposerWidget : Gtk.EventBox {
     }
 
     private void on_insert_link(SimpleAction action, Variant? param) {
-        link_dialog("http://");
+        ComposerLinkPopover popover = this.cursor_url == null
+            ? new_link_popover(ComposerLinkPopover.Type.NEW_LINK, "http://")
+            : new_link_popover(ComposerLinkPopover.Type.EXISTING_LINK, this.cursor_url);
+        popover.set_relative_to(this.insert_link_button);
+        popover.show();
     }
 
     private void on_open_inspector(SimpleAction action, Variant? param) {

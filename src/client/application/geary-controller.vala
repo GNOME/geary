@@ -2330,6 +2330,7 @@ public class GearyController : Geary.BaseObject {
             yield widget.restore_draft_state_async();
         }
 
+        widget.link_activated.connect((uri) => { open_uri(uri); });
         widget.show_all();
 
         // We want to keep track of the open composer windows, so we can allow the user to cancel
