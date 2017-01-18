@@ -16,6 +16,7 @@ PageState.prototype = {
     init: function() {
         this.allowRemoteImages = false;
         this.isLoaded = false;
+        this.hasSelection = false;
 
         let state = this;
         let timeoutId = window.setInterval(function() {
@@ -54,6 +55,9 @@ PageState.prototype = {
     },
     selectionChanged: function() {
         let hasSelection = !window.getSelection().isCollapsed;
-        window.webkit.messageHandlers.selectionChanged.postMessage(hasSelection);
+        if (this.hasSelection != hasSelection) {
+            this.hasSelection = hasSelection;
+            window.webkit.messageHandlers.selectionChanged.postMessage(hasSelection);
+        }
     }
 };

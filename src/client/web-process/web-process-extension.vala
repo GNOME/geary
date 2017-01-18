@@ -39,6 +39,10 @@ public class GearyWebExtension : Object {
         extension.page_created.connect((extension, web_page) => {
                 web_page.console_message_sent.connect(on_console_message);
                 web_page.send_request.connect(on_send_request);
+                // XXX investigate whether the earliest supported
+                // version of WK supports the DOM "selectionchanged"
+                // event, and if so use that rather that doing it in
+                // here in the extension
                 web_page.get_editor().selection_changed.connect(() => {
                     selection_changed(web_page);
                 });
