@@ -158,6 +158,9 @@ public class ComposerWebView : ClientWebView {
     /** Emitted when the cursor's edit context has changed. */
     public signal void cursor_context_changed(EditContext cursor_context);
 
+    /** Workaround for WebView eating the button event */
+    internal signal bool button_release_event_done(Gdk.Event event);
+
 
     public ComposerWebView(Configuration config) {
         base(config);
@@ -445,6 +448,15 @@ public class ComposerWebView : ClientWebView {
      */
     public string get_block_quote_representation() {
         return ""; // XXX
+    }
+
+    public override bool button_release_event(Gdk.EventButton event) {
+        // WebView seems to unconditionally consume button events, so
+        // to show a link popopver after the view has processed one,
+        // we need to emit our own.
+        bool ret = base.button_press_event(event);
+        button_release_event_done(event);
+        return ret;
     }
 
     private void on_command_stack_changed(WebKit.JavascriptResult result) {

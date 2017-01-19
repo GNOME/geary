@@ -33,7 +33,7 @@ ComposerPageState.prototype = {
 
         document.addEventListener("click", function(e) {
             if (e.target.tagName == "A") {
-                state.linkClicked(e.target);
+                e.preventDefault();
             }
         }, true);
 
@@ -203,9 +203,6 @@ ComposerPageState.prototype = {
     },
     documentModified: function(element) {
         window.webkit.messageHandlers.documentModified.postMessage(null);
-    },
-    linkClicked: function(element) {
-        window.getSelection().selectAllChildren(element);
     },
     selectionChanged: function() {
         PageState.prototype.selectionChanged.apply(this, []);

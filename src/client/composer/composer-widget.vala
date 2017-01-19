@@ -508,6 +508,7 @@ public class ComposerWidget : Gtk.EventBox {
         this.reply_to_entry.changed.connect(validate_send_button);
 
         this.editor.command_stack_changed.connect(on_command_state_changed);
+        this.editor.button_release_event_done.connect(on_button_release);
         this.editor.context_menu.connect(on_context_menu);
         this.editor.cursor_context_changed.connect(on_cursor_context_changed);
         this.editor.document_modified.connect(() => { draft_changed(); });
@@ -2211,6 +2212,29 @@ public class ComposerWidget : Gtk.EventBox {
         if (changed || this.draft_manager == null) {
             reopen_draft_manager_async.begin(null);
         }
+    }
+
+    private bool on_button_release(Gdk.Event event) {
+        // Show the link popover on mouse release (instead of press)
+        // so the user can still select text with a link in it,
+        // without the popover immediately appearing and raining on
+        // their text selection parade.
+        if (this.pointer_url != null &&
+            this.actions.get_action_state(ACTION_COMPOSE_AS_HTML).get_boolean()) {
+            Gdk.EventButton? button = (Gdk.EventButton) event;
+            Gdk.Rectangle location = new Gdk.Rectangle();
+            location.x = (int) button.x;
+            location.y = (int) button.y;
+
+            ComposerLinkPopover popover = new_link_popover(
+                ComposerLinkPopover.Type.EXISTING_LINK,
+                this.pointer_url
+            );
+            popover.set_relative_to(this.editor);
+            popover.set_pointing_to(location);
+            popover.show();
+        }
+        return Gdk.EVENT_PROPAGATE;
     }
 
     private void on_cursor_context_changed(ComposerWebView.EditContext context) {
