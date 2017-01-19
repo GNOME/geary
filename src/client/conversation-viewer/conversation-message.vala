@@ -930,10 +930,10 @@ public class ConversationMessage : Gtk.Grid {
     private void on_mouse_target_changed(WebKit.WebView web_view,
                                          WebKit.HitTestResult hit_test,
                                          uint modifiers) {
-        if (hit_test.context_is_link()) {
-            this.body_container.set_tooltip_text(hit_test.get_link_uri());
-            this.body_container.trigger_tooltip_query();
-        }
+        this.body_container.set_tooltip_text(
+            hit_test.context_is_link() ? hit_test.get_link_uri() : null
+        );
+        this.body_container.trigger_tooltip_query();
     }
 
     // // Check for possible phishing links, displays a popover if found.
