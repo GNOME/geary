@@ -37,6 +37,45 @@ namespace Geary.JS {
     }
 
     /**
+     * Returns a JSC Value as a number.
+     *
+     * This will raise a {@link Geary.JS.Error.TYPE} error if the
+     * value is not a JavaScript `Number`.
+     */
+    public double to_number(global::JS.Context context,
+                            global::JS.Value value)
+        throws Geary.JS.Error {
+        if (!value.is_number(context)) {
+            throw new Geary.JS.Error.TYPE("Value is not a JS Number object");
+        }
+
+        global::JS.Value? err = null;
+        double number = value.to_number(context, out err);
+        Geary.JS.check_exception(context, err);
+        return number;
+    }
+
+    /**
+     * Returns a JSC Value as a string.
+     *
+     * This will raise a {@link Geary.JS.Error.TYPE} error if the
+     * value is not a JavaScript `String`.
+     */
+    public string to_string(global::JS.Context context,
+                            global::JS.Value value)
+        throws Geary.JS.Error {
+        if (!value.is_string(context)) {
+            throw new Geary.JS.Error.TYPE("Value is not a JS String object");
+        }
+
+        global::JS.Value? err = null;
+        global::JS.String js_str = value.to_string_copy(context, out err);
+        Geary.JS.check_exception(context, err);
+
+        return Geary.JS.to_string_released(js_str);
+    }
+
+    /**
      * Returns a JSC {@link JS.String} as a Vala {@link string}.
      */
     public inline string to_string_released(global::JS.String js) {
