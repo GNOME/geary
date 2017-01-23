@@ -25,7 +25,7 @@ class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
         load_body_fixture(html);
 
         try {
-            assert(run_javascript(@"new EditContext(document.getElementById('test')).encode()")
+            assert(WebKitUtil.to_string(run_javascript(@"new EditContext(document.getElementById('test')).encode()"))
                    .has_prefix("1,url,"));
         } catch (Geary.JS.Error err) {
             print("Geary.JS.Error: %s\n", err.message);
@@ -41,8 +41,8 @@ class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
         load_body_fixture(html);
 
         try {
-            assert(run_javascript(@"new EditContext(document.getElementById('test')).encode()")
-                   == ("0,,Comic Sans,144"));
+            assert(WebKitUtil.to_string(run_javascript(@"new EditContext(document.getElementById('test')).encode()")) ==
+                   "0,,Comic Sans,144");
         } catch (Geary.JS.Error err) {
             print("Geary.JS.Error: %s\n", err.message);
             assert_not_reached();
@@ -56,7 +56,8 @@ class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
         string html = "<p>para</p>";
         load_body_fixture(html);
         try {
-            assert(run_javascript(@"window.geary.getHtml();") == html + "<br><br>");
+            assert(WebKitUtil.to_string(run_javascript(@"window.geary.getHtml();")) ==
+                   html + "<br><br>");
         } catch (Geary.JS.Error err) {
             print("Geary.JS.Error: %s\n", err.message);
             assert_not_reached();
@@ -69,7 +70,8 @@ class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
     public void get_text() {
         load_body_fixture("<p>para</p>");
         try {
-            assert(run_javascript(@"window.geary.getText();") == "para\n\n\n\n");
+            assert(WebKitUtil.to_string(run_javascript(@"window.geary.getText();")) ==
+                   "para\n\n\n\n");
         } catch (Geary.JS.Error err) {
             print("Geary.JS.Error: %s\n", err.message);
             assert_not_reached();
@@ -83,7 +85,7 @@ class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
         unichar q_marker = Geary.RFC822.Utils.QUOTE_MARKER;
         load_body_fixture("<p>pre</p> <blockquote><p>quote</p></blockquote> <p>post</p>");
         try {
-            assert(run_javascript(@"window.geary.getText();") ==
+            assert(WebKitUtil.to_string(run_javascript(@"window.geary.getText();")) ==
                    @"pre\n\n$(q_marker)quote\n$(q_marker)\npost\n\n\n\n");
         } catch (Geary.JS.Error err) {
             print("Geary.JS.Error: %s", err.message);
@@ -98,7 +100,7 @@ class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
         unichar q_marker = Geary.RFC822.Utils.QUOTE_MARKER;
         load_body_fixture("<p>pre</p> <blockquote><p>quote1</p> <blockquote><p>quote2</p></blockquote></blockquote> <p>post</p>");
         try {
-            assert(run_javascript(@"window.geary.getText();") ==
+            assert(WebKitUtil.to_string(run_javascript(@"window.geary.getText();")) ==
                    @"pre\n\n$(q_marker)quote1\n$(q_marker)\n$(q_marker)$(q_marker)quote2\n$(q_marker)$(q_marker)\npost\n\n\n\n");
         } catch (Geary.JS.Error err) {
             print("Geary.JS.Error: %s\n", err.message);
@@ -122,17 +124,17 @@ class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
         string js_cosy_quote2 = @"foo$(q_start)0$(q_end)$(q_start)1$(q_end)bar";
         string js_values = "['quote1','quote2']";
         try {
-            assert(run_javascript(@"ComposerPageState.resolveNesting('$(js_no_quote)', $(js_values));") ==
+            assert(WebKitUtil.to_string(run_javascript(@"ComposerPageState.resolveNesting('$(js_no_quote)', $(js_values));")) ==
                    @"foo");
-            assert(run_javascript(@"ComposerPageState.resolveNesting('$(js_spaced_quote)', $(js_values));") ==
+            assert(WebKitUtil.to_string(run_javascript(@"ComposerPageState.resolveNesting('$(js_spaced_quote)', $(js_values));")) ==
                    @"foo \n$(q_marker)quote1\n bar");
-            assert(run_javascript(@"ComposerPageState.resolveNesting('$(js_leading_quote)', $(js_values));") ==
+            assert(WebKitUtil.to_string(run_javascript(@"ComposerPageState.resolveNesting('$(js_leading_quote)', $(js_values));")) ==
                    @"$(q_marker)quote1\n bar");
-            assert(run_javascript(@"ComposerPageState.resolveNesting('$(js_hanging_quote)', $(js_values));") ==
+            assert(WebKitUtil.to_string(run_javascript(@"ComposerPageState.resolveNesting('$(js_hanging_quote)', $(js_values));")) ==
                    @"foo \n$(q_marker)quote1");
-            assert(run_javascript(@"ComposerPageState.resolveNesting('$(js_cosy_quote1)', $(js_values));") ==
+            assert(WebKitUtil.to_string(run_javascript(@"ComposerPageState.resolveNesting('$(js_cosy_quote1)', $(js_values));")) ==
                    @"foo\n$(q_marker)quote1\nbar");
-            assert(run_javascript(@"ComposerPageState.resolveNesting('$(js_cosy_quote2)', $(js_values));") ==
+            assert(WebKitUtil.to_string(run_javascript(@"ComposerPageState.resolveNesting('$(js_cosy_quote2)', $(js_values));")) ==
                    @"foo\n$(q_marker)quote1\n$(q_marker)quote2\nbar");
         } catch (Geary.JS.Error err) {
             print("Geary.JS.Error: %s\n", err.message);
@@ -147,11 +149,11 @@ class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
         load_body_fixture();
         unichar q_marker = Geary.RFC822.Utils.QUOTE_MARKER;
         try {
-            assert(run_javascript("ComposerPageState.quoteLines('');") ==
+            assert(WebKitUtil.to_string(run_javascript("ComposerPageState.quoteLines('');")) ==
                    @"$(q_marker)");
-            assert(run_javascript("ComposerPageState.quoteLines('line1');") ==
+            assert(WebKitUtil.to_string(run_javascript("ComposerPageState.quoteLines('line1');")) ==
                    @"$(q_marker)line1");
-            assert(run_javascript("ComposerPageState.quoteLines('line1\\nline2');") ==
+            assert(WebKitUtil.to_string(run_javascript("ComposerPageState.quoteLines('line1\\nline2');")) ==
                    @"$(q_marker)line1\n$(q_marker)line2");
         } catch (Geary.JS.Error err) {
             print("Geary.JS.Error: %s\n", err.message);
@@ -167,9 +169,9 @@ class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
         string single_nbsp = "a b";
         string multiple_nbsp = "a b c";
         try {
-            assert(run_javascript(@"ComposerPageState.replaceNonBreakingSpace('$(single_nbsp)');") ==
+            assert(WebKitUtil.to_string(run_javascript(@"ComposerPageState.replaceNonBreakingSpace('$(single_nbsp)');")) ==
                    "a b");
-            assert(run_javascript(@"ComposerPageState.replaceNonBreakingSpace('$(multiple_nbsp)');") ==
+            assert(WebKitUtil.to_string(run_javascript(@"ComposerPageState.replaceNonBreakingSpace('$(multiple_nbsp)');")) ==
                    "a b c");
         } catch (Geary.JS.Error err) {
             print("Geary.JS.Error: %s\n", err.message);
@@ -194,16 +196,6 @@ class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
         while (this.test_view.is_loading) {
             Gtk.main_iteration();
         }
-    }
-
-    protected string run_javascript(string command) throws Error {
-        this.test_view.run_javascript.begin(
-            command, null, (obj, res) => { async_complete(res); }
-        );
-
-        WebKit.JavascriptResult result =
-           this.test_view.run_javascript.end(async_result());
-        return WebKitUtil.to_string(result);
     }
 
 }

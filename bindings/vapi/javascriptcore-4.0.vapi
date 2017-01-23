@@ -89,9 +89,9 @@ namespace JS {
         public bool has_property(Context ctx, String property_name);
 
         [CCode (cname = "JSObjectGetProperty", instance_pos = 1.1)]
-        public String get_property(Context ctx,
-                                   String property_name,
-                                   out Value? exception);
+        public Value get_property(Context ctx,
+                                  String property_name,
+                                  out Value? exception);
 
 	}
 

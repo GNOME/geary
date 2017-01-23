@@ -19,6 +19,7 @@ set(TEST_SRC
   client/composer/composer-web-view-test.vala
 
   js/composer-page-state-test.vala
+  js/conversation-page-state-test.vala
 )
 
 # Vala

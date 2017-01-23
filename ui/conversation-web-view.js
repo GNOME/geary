@@ -16,10 +16,24 @@ let ConversationPageState = function() {
 ConversationPageState.QUOTE_CONTAINER_CLASS = "geary-quote-container";
 ConversationPageState.QUOTE_HIDE_CLASS = "geary-hide";
 
+// Keep these in sync with ConversationWebView
+ConversationPageState.NOT_DECEPTIVE = 0;
+ConversationPageState.DECEPTIVE_HREF = 1;
+ConversationPageState.DECEPTIVE_DOMAIN = 2;
+
 ConversationPageState.prototype = {
     __proto__: PageState.prototype,
     init: function() {
         PageState.prototype.init.apply(this, []);
+
+        let state = this;
+        document.addEventListener("click", function(e) {
+            if (e.target.tagName == "A" &&
+                state.linkClicked(e.target)) {
+                e.preventDefault();
+            }
+        }, true);
+
     },
     loaded: function() {
         this.updateDirection();
@@ -209,7 +223,85 @@ ConversationPageState.prototype = {
             }
         }
         return value;
+    },
+    linkClicked: function(link) {
+        let cancelClick = false;
+        let href = link.href;
+        if (!href.startsWith("mailto:")) {
+            let text = link.innerText;
+            let reason = ConversationPageState.isDeceptiveText(text, href);
+            if (reason != ConversationPageState.NOT_DECEPTIVE) {
+                cancelClick = true;
+                window.webkit.messageHandlers.deceptiveLinkClicked.postMessage({
+                    reason: reason,
+                    text: text,
+                    href: href,
+                    location: ConversationPageState.getNodeBounds(link)
+                });
+            }
+        }
+
+        return cancelClick;
     }
+};
+
+/**
+ * Returns an [x, y, width, height] array of a node's bounds.
+ */
+ConversationPageState.getNodeBounds = function(node) {
+    let x = 0;
+    let y = 0;
+    let parent = node;
+    while (parent != null) {
+        x += parent.offsetLeft;
+        y += parent.offsetTop;
+        parent = parent.offsetParent;
+    }
+    return {
+        x: x,
+        y: y,
+        width: node.offsetWidth,
+        height: node.offsetHeight
+    };
+};
+
+/**
+ * Test for URL-like `text` that leads somewhere other than `href`.
+ */
+ConversationPageState.isDeceptiveText = function(text, href) {
+    // First, does text look like a URI?  Right now, just test whether
+    // it has <string>.<string> in it.  More sophisticated tests are
+    // possible.
+    let domain = new RegExp("([a-z]*://)?"               // Optional scheme
+                          + "([^\\s:/]+\\.[^\\s:/\\.]+)" // Domain
+                          + "(/[^\\s]*)?");              // Optional path
+    let textParts = text.match(domain);
+    if (textParts == null) {
+        return ConversationPageState.NOT_DECEPTIVE;
+    }
+    let hrefParts = href.match(domain);
+    if (hrefParts == null) {
+        // If href doesn't look like a URL, something is fishy, so
+        // warn the user
+        return ConversationPageState.DECEPTIVE_HREF;
+    }
+
+    // Second, do the top levels of the two domains match?  We
+    // compare the top n levels, where n is the minimum of the
+    // number of levels of the two domains.
+    let textDomain = textParts[2].toLowerCase().split(".").reverse();
+    let hrefDomain = hrefParts[2].toLowerCase().split(".").reverse();
+    let segmentCount = Math.min(textDomain.length, hrefDomain.length);
+    if (segmentCount == 0) {
+        return ConversationPageState.DECEPTIVE_DOMAIN;
+    }
+    for (let i = 0; i < segmentCount; i++) {
+        if (textDomain[i] != hrefDomain[i]) {
+            return ConversationPageState.DECEPTIVE_DOMAIN;
+        }
+    }
+
+    return ConversationPageState.NOT_DECEPTIVE;
 };
 
 ConversationPageState.isDescendantOf = function(node, ancestorTag) {

@@ -210,10 +210,10 @@ public class ConversationMessage : Gtk.Grid {
 
     [GtkChild]
     private Gtk.Popover link_popover;
-    //[GtkChild]
-    //private Gtk.Label good_link_label;
-    //[GtkChild]
-    //private Gtk.Label bad_link_label;
+    [GtkChild]
+    private Gtk.Label good_link_label;
+    [GtkChild]
+    private Gtk.Label bad_link_label;
 
     [GtkChild]
     private Gtk.InfoBar remote_images_infobar;
@@ -382,6 +382,7 @@ public class ConversationMessage : Gtk.Grid {
             this.web_view.allow_remote_image_loading();
         }
         this.web_view.context_menu.connect(on_context_menu);
+        this.web_view.deceptive_link_clicked.connect(on_deceptive_link_clicked);
         this.web_view.link_activated.connect((link) => {
                 link_activated(link);
             });
@@ -725,75 +726,6 @@ public class ConversationMessage : Gtk.Grid {
         }
     }
 
-    /*
-     * Test whether text looks like a URI that leads somewhere other than href.  The text
-     * will have a scheme prepended if it doesn't already have one, and the short versions
-     * have the scheme skipped and long paths truncated.
-     */
-    // private bool deceptive_text(string href, ref string text, out string href_short,
-    //     out string text_short) {
-    //     href_short = "";
-    //     text_short = "";
-    //     // mailto URLs have a different form, and the worst they can do is pop up a composer,
-    //     // so we don't trigger on them.
-    //     if (href.has_prefix("mailto:"))
-    //         return false;
-        
-    //     // First, does text look like a URI?  Right now, just test whether it has
-    //     // <string>.<string> in it.  More sophisticated tests are possible.
-    //     GLib.MatchInfo text_match, href_match;
-    //     try {
-    //         GLib.Regex domain = new GLib.Regex(
-    //             "([a-z]*://)?"                  // Optional scheme
-    //             + "([^\\s:/]+\\.[^\\s:/\\.]+)"  // Domain
-    //             + "(/[^\\s]*)?"                 // Optional path
-    //             );
-    //         if (!domain.match(text, 0, out text_match))
-    //             return false;
-    //         if (!domain.match(href, 0, out href_match)) {
-    //             // If href doesn't look like a URL, something is fishy, so warn the user
-    //             href_short = href + _(" (Invalid?)");
-    //             text_short = text;
-    //             return true;
-    //         }
-    //     } catch (Error error) {
-    //         warning("Error in Regex text for deceptive urls: %s", error.message);
-    //         return false;
-    //     }
-        
-    //     // Second, do the top levels of the two domains match?  We compare the top n levels,
-    //     // where n is the minimum of the number of levels of the two domains.
-    //     string[] href_parts = href_match.fetch_all();
-    //     string[] text_parts = text_match.fetch_all();
-    //     string[] text_domain = text_parts[2].down().reverse().split(".");
-    //     string[] href_domain = href_parts[2].down().reverse().split(".");
-    //     for (int i = 0; i < text_domain.length && i < href_domain.length; i++) {
-    //         if (text_domain[i] != href_domain[i]) {
-    //             if (href_parts[1] == "")
-    //                 href_parts[1] = "http://";
-    //             if (text_parts[1] == "")
-    //                 text_parts[1] = href_parts[1];
-    //             string temp;
-    //             assemble_uris(href_parts, out temp, out href_short);
-    //             assemble_uris(text_parts, out text, out text_short);
-    //             return true;
-    //         }
-    //     }
-    //     return false;
-    // }
-
-    // private void assemble_uris(string[] parts, out string full, out string short_) {
-    //     full = parts[1] + parts[2];
-    //     short_ = parts[2];
-    //     if (parts.length == 4 && parts[3] != "/") {
-    //         full += parts[3];
-    //         if (parts[3].length > 20)
-    //             short_ += parts[3].substring(0, 20) + "…";
-    //         else
-    //             short_ += parts[3];
-    //     }
-    // }
-
     private inline void set_revealer(Gtk.Revealer revealer,
                                      bool expand,
                                      bool use_transition) {
@@ -936,42 +868,36 @@ public class ConversationMessage : Gtk.Grid {
         this.body_container.trigger_tooltip_query();
     }
 
-    // // Check for possible phishing links, displays a popover if found.
-    // // If not, lets it go through to the default handler.
-    // private bool on_link_clicked() {
-    //     string? href = element.get_attribute("href");
-    //     if (Geary.String.is_empty(href))
-    //         return false;
-    //     string text = ((WebKit.DOM.HTMLElement) element).get_inner_text();
-    //     string href_short, text_short;
-    //     if (!deceptive_text(href, ref text, out href_short, out text_short))
-    //         return false;
+    // Check for possible phishing links, displays a popover if found.
+    // If not, lets it go through to the default handler.
+    private void on_deceptive_link_clicked(ConversationWebView.DeceptiveText reason,
+                                           string text,
+                                           string href,
+                                           Gdk.Rectangle location) {
+        string text_href = text;
+        if (Uri.parse_scheme(text_href) == null) {
+            text_href = "http://" + text_href;
+        }
+        string text_label = Soup.URI.decode(text_href);
 
-    //     Escape text and especially URLs since we got them from the
-    //     HREF, and Gtk.Label.set_markup is a strict parser.
-    //     good_link_label.set_markup(
-    //         Markup.printf_escaped("<a href=\"%s\">%s</a>", text, text_short)
-    //     );
-    //     bad_link_label.set_markup(
-    //         Markup.printf_escaped("<a href=\"%s\">%s</a>", href, href_short)
-    //     );
+        string anchor_href = href;
+        if (Uri.parse_scheme(anchor_href) == null) {
+            anchor_href = "http://" + anchor_href;
+        }
+        string anchor_label = Soup.URI.decode(anchor_href);
 
-    //     Work out the link's position, update the popover.
-    //     Gdk.Rectangle link_rect = Gdk.Rectangle();
-    //     web_view.get_allocation(out link_rect);
-    //     WebKit.DOM.Element? offset_parent = element;
-    //     while (offset_parent != null) {
-    //         link_rect.x += (int) offset_parent.offset_left;
-    //         link_rect.y += (int) offset_parent.offset_top;
-    //         offset_parent = offset_parent.offset_parent;
-    //     }
-    //     link_rect.width = (int) element.offset_width;
-    //     link_rect.height = (int) element.offset_height;
-    //     link_popover.set_pointing_to(link_rect);
-
-    //     link_popover.show();
-    //     return true;
-    // }
+        // Escape text and especially URLs since we got them from the
+        // HREF, and Gtk.Label.set_markup is a strict parser.
+        good_link_label.set_markup(
+            Markup.printf_escaped("<a href=\"%s\">%s</a>", text_href, text_label)
+        );
+        bad_link_label.set_markup(
+            Markup.printf_escaped("<a href=\"%s\">%s</a>", anchor_href, anchor_label)
+        );
+        link_popover.set_relative_to(this.web_view);
+        link_popover.set_pointing_to(location);
+        link_popover.show();
+    }
 
     [GtkCallback]
     private bool on_link_popover_activated() {

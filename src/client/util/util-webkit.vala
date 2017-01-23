@@ -67,4 +67,16 @@ namespace WebKitUtil {
         return Geary.JS.to_string_released(js_str);
     }
 
+    /**
+     * Returns a WebKit {@link WebKit.JavascriptResult} as an Object.
+     *
+     * This will raise a {@link Geary.JS.Error.TYPE} error if the
+     * result is not a JavaScript `Object`.
+     */
+    public JS.Object to_object(WebKit.JavascriptResult result)
+        throws Geary.JS.Error {
+        return Geary.JS.to_object(result.get_global_context(),
+                                  result.get_value());
+    }
+
 }

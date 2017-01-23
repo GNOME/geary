@@ -76,6 +76,26 @@ namespace Geary.JS {
     }
 
     /**
+     * Returns a JSC Value as an object.
+     *
+     * This will raise a {@link Geary.JS.Error.TYPE} error if the
+     * value is not a JavaScript `Object`.
+     */
+    public global::JS.Object to_object(global::JS.Context context,
+                                       global::JS.Value value)
+        throws Geary.JS.Error {
+        if (!value.is_object(context)) {
+            throw new Geary.JS.Error.TYPE("Value is not a JS Object");
+        }
+
+        global::JS.Value? err = null;
+        global::JS.Object js_obj = value.to_object(context, out err);
+        Geary.JS.check_exception(context, err);
+
+        return js_obj;
+    }
+
+    /**
      * Returns a JSC {@link JS.String} as a Vala {@link string}.
      */
     public inline string to_string_released(global::JS.String js) {
@@ -84,6 +104,27 @@ namespace Geary.JS {
         js.get_utf8_cstring(str, len);
         js.release();
         return str;
+    }
+
+    /**
+     * Returns the value of an object's property.
+     *
+     * This will raise a {@link Geary.JS.Error.TYPE} error if the
+     * object does not contain the named property.
+     */
+    public inline global::JS.Value get_property(global::JS.Context context,
+                                                global::JS.Object object,
+                                                string name)
+        throws Geary.JS.Error {
+        global::JS.String js_name = new global::JS.String.create_with_utf8_cstring(name);
+        global::JS.Value? err = null;
+        global::JS.Value prop = object.get_property(context, js_name, out err);
+        try {
+            Geary.JS.check_exception(context, err);
+        } finally {
+            js_name.release();
+        }
+        return prop;
     }
 
     /**

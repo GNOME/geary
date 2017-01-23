@@ -42,4 +42,13 @@ public abstract class ClientWebViewTestCase<V> : Gee.TestCase {
         }
     }
 
+    protected WebKit.JavascriptResult run_javascript(string command) throws Error {
+        ClientWebView view = (ClientWebView) this.test_view;
+        view.run_javascript.begin(
+            command, null, (obj, res) => { async_complete(res); }
+        );
+
+        return view.run_javascript.end(async_result());
+    }
+
 }
