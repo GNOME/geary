@@ -779,9 +779,10 @@ public class ComposerWidget : Gtk.EventBox {
     }
 
     public void set_focus() {
-        if (Geary.String.is_empty(to))
+        bool not_compact = (this.state != ComposerState.INLINE_COMPACT);
+        if (not_compact && Geary.String.is_empty(to))
             this.to_entry.grab_focus();
-        else if (Geary.String.is_empty(subject))
+        else if (not_compact && Geary.String.is_empty(subject))
             this.subject_entry.grab_focus();
         else
             this.editor.grab_focus();
