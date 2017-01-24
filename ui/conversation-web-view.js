@@ -33,14 +33,11 @@ ConversationPageState.prototype = {
                 e.preventDefault();
             }
         }, true);
-
     },
     loaded: function() {
         this.updateDirection();
         this.createControllableQuotes();
         this.wrapSignature();
-        // Chain up here so we continue to a preferred size update
-        // after munging the HTML above.
         PageState.prototype.loaded.apply(this, []);
     },
     /**
@@ -55,18 +52,18 @@ ConversationPageState.prototype = {
         }
     },
     /**
-     * Starts looking for changes to the page's height.
+     * Polls for a change in the page's preferred height.
      */
-    updatePreferredHeight: function() {
-        let height = this.getPreferredHeight();
+    pollPreferredHeightUpdate: function() {
         let state = this;
+        let count = 0;
         let timeoutId = window.setInterval(function() {
-            let newHeight = state.getPreferredHeight();
-            if (height != newHeight) {
-                state.preferredHeightChanged();
+            if (state.updatePreferredHeight() || ++count >= 10) {
+                // Cancel polling when height actually changes or if
+                // no change was found after a long enough period
                 window.clearTimeout(timeoutId);
             }
-        }, 50);
+        }, 10);
     },
     /**
      * Add top level blockquotes to hide/show container.
@@ -94,7 +91,7 @@ ConversationPageState.prototype = {
                     );
                 }
 
-                let script = this;
+                let state = this;
                 function newControllerButton(styleClass, text) {
                     let button = document.createElement("BUTTON");
                     button.classList.add("geary-button");
@@ -103,7 +100,7 @@ ConversationPageState.prototype = {
                         quoteContainer.classList.toggle(
                             ConversationPageState.QUOTE_HIDE_CLASS
                         );
-                        script.updatePreferredHeight();
+                        state.pollPreferredHeightUpdate();
                     };
                     button.appendChild(document.createTextNode(text));
 
@@ -127,8 +124,6 @@ ConversationPageState.prototype = {
 
                 quoteContainer.appendChild(quoteDiv);
                 parent.insertBefore(quoteContainer, nextSibling);
-
-                this.updatePreferredHeight();
             }
         }
     },
@@ -316,6 +311,3 @@ ConversationPageState.isDescendantOf = function(node, ancestorTag) {
 };
 
 var geary = new ConversationPageState();
-window.onload = function() {
-    geary.loaded();
-};

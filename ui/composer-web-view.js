@@ -102,8 +102,7 @@ ComposerPageState.prototype = {
         };
         this.bodyObserver.observe(this.messageBody, config);
 
-        // Chain up here so we continue to a preferred size update
-        // after munging the HTML above.
+        // Chain up
         PageState.prototype.loaded.apply(this, []);
     },
     undo: function() {
@@ -434,6 +433,3 @@ let SelectionUtil = {
 
 
 var geary = new ComposerPageState();
-window.onload = function() {
-    geary.loaded();
-};

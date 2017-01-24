@@ -17,14 +17,40 @@ PageState.prototype = {
         this.allowRemoteImages = false;
         this.isLoaded = false;
         this.hasSelection = false;
+        this.lastPreferredHeight = 0;
 
         let state = this;
-        let timeoutId = window.setInterval(function() {
-            state.preferredHeightChanged();
-            if (state.isLoaded) {
-                window.clearTimeout(timeoutId);
+
+        // Coalesce multiple calls to updatePreferredHeight using a
+        // timeout to avoid the overhead of multiple JS messages sent
+        // to the app and hence view multiple resizes being queued.
+        let queueTimeout = null;
+        let queuePreferredHeightUpdate = function() {
+            if (queueTimeout != null) {
+                clearTimeout(queueTimeout);
             }
-        }, 50);
+            queueTimeout = setTimeout(
+                function() { state.updatePreferredHeight(); }, 10
+            );
+        };
+
+        // Queues an update after the DOM has been initially loaded
+        // and had any changes made to it by derived classes.
+        document.addEventListener("DOMContentLoaded", function(e) {
+            state.loaded();
+            queuePreferredHeightUpdate();
+        });
+        // Queues updates for not only the complete document, but also
+        // for any IMG elements loaded, hence handles resizing when
+        // the user later requests remote images loading.
+        //
+        // Note also that the delay introduced here by the last call
+        // to queuePreferredHeightUpdate when the complete document is
+        // loaded seems to be important to get an acurate idea of the
+        // final document size.
+        document.addEventListener("load", function(e) {
+            queuePreferredHeightUpdate();
+        }, true);
     },
     getPreferredHeight: function() {
         return window.document.documentElement.offsetHeight;
@@ -45,13 +71,20 @@ PageState.prototype = {
     remoteImageLoadBlocked: function() {
         window.webkit.messageHandlers.remoteImageLoadBlocked.postMessage(null);
     },
-    preferredHeightChanged: function() {
+    /**
+     * Sends "preferredHeightChanged" message if it has changed.
+     */
+    updatePreferredHeight: function() {
+        let updated = false;
         let height = this.getPreferredHeight();
-        if (height > 0) {
+        if (height > 0 && height != this.lastPreferredHeight) {
+            updated = true;
+            this.lastPreferredHeight = height;
             window.webkit.messageHandlers.preferredHeightChanged.postMessage(
                 height
             );
         }
+        return updated;
     },
     selectionChanged: function() {
         let hasSelection = !window.getSelection().isCollapsed;
