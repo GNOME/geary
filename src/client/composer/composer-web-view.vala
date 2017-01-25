@@ -61,7 +61,6 @@ public class ComposerWebView : ClientWebView {
         </head><body>
         <div id="message-body" dir="auto">%s</div>
         </body></html>""";
-    private const string CURSOR = "<span id=\"cursormarker\"></span>";
 
 
     /**
@@ -178,19 +177,44 @@ public class ComposerWebView : ClientWebView {
     /**
      * Loads a message HTML body into the view.
      */
-    public new void load_html(string? body, string? signature, bool top_posting) {
-        string html = "";
-        signature = signature ?? "";
+    public new void load_html(string body,
+                              string signature,
+                              string quote,
+                              bool top_posting,
+                              bool is_draft) {
+        const string CURSOR = "<span id=\"cursormarker\"></span>";
+        const string SPACER = "<br />";
 
-        this.is_empty = Geary.String.is_empty(body);
-        if (this.is_empty)
-            html = CURSOR + "<br /><br />" + signature;
-        else if (top_posting)
-            html = CURSOR + "<br /><br />" + signature + body;
-        else
-            html = body + CURSOR + "<br /><br />" + signature;
+        StringBuilder html = new StringBuilder();
+        if (!is_draft) {
+            if (!Geary.String.is_empty(body)) {
+                html.append(body);
+                html.append(SPACER);
+                html.append(SPACER);
+            }
 
-        base.load_html(HTML_BODY.printf(html));
+            if (!top_posting && !Geary.String.is_empty(quote)) {
+                html.append(quote);
+                html.append(SPACER);
+            }
+
+            html.append(CURSOR);
+
+            if (!Geary.String.is_empty(signature)) {
+                html.append(SPACER);
+                html.append(signature);
+            }
+
+            if (top_posting && !Geary.String.is_empty(quote)) {
+                html.append(SPACER);
+                html.append(SPACER);
+                html.append(quote);
+            }
+        } else {
+            html.append(quote);
+        }
+
+        base.load_html(HTML_BODY.printf(html.data));
     }
 
     /**
@@ -343,6 +367,22 @@ public class ComposerWebView : ClientWebView {
             "insertHTML",
             @"<img style=\"max-width: 100%\" src=\"$src\">"
         );
+    }
+
+    /**
+     * Updates the signature block if it has not been deleted.
+     */
+    public new void update_signature(string signature) {
+        this.run_javascript.begin(
+            "geary.updateSignature(\"%s\");".printf(signature), null
+        );
+    }
+
+    /**
+     * Removes the quoted message (if any) from the composer.
+     */
+    public void delete_quoted_message() {
+        this.run_javascript.begin("geary.deleteQuotedMessage();", null);
     }
 
     /**

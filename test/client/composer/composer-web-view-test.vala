@@ -168,8 +168,8 @@ long, long, long, long, long, long, long, long, long, long,
         return new ComposerWebView(this.config);
     }
 
-    protected override void load_body_fixture(string? html = null) {
-        this.test_view.load_html(html, null, false);
+    protected override void load_body_fixture(string html = "") {
+        this.test_view.load_html(html, "", "", false, false);
         while (this.test_view.is_loading) {
             Gtk.main_iteration();
         }

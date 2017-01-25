@@ -147,6 +147,14 @@ ComposerPageState.prototype = {
             }
         }
     },
+    updateSignature: function(signature) {
+        // XXX need mark the sig somehow so we can find it, select
+        // it and replace it using execCommand
+    },
+    deleteQuotedMessage: function() {
+        // XXX need mark the quote somehow so we can find it, select
+        // it and delete it using execCommand
+    },
     tabOut: function() {
         document.execCommand(
             "inserthtml", false, "<span style='white-space: pre-wrap'>\t</span>"

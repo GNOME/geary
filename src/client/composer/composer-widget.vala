@@ -252,8 +252,7 @@ public class ComposerWidget : Gtk.EventBox {
 
     private ContactListStore? contact_list_store = null;
 
-    private string? body_html = null;
-    private string? signature_html = null;
+    private string body_html = "";
 
     [GtkChild]
     private Gtk.Box composer_container;
@@ -373,8 +372,7 @@ public class ComposerWidget : Gtk.EventBox {
     public signal void link_activated(string url);
 
 
-    public ComposerWidget(Geary.Account account, ComposeType compose_type, Configuration config,
-        Geary.Email? referred = null, string? quote = null, bool is_referred_draft = false) {
+    public ComposerWidget(Geary.Account account, ComposeType compose_type, Configuration config) {
         this.config = config;
         this.header = new ComposerHeaderbar(config);
         this.account = account;
@@ -478,30 +476,15 @@ public class ComposerWidget : Gtk.EventBox {
 
         this.from = new Geary.RFC822.MailboxAddresses.single(account.information.primary_mailbox);
 
-        if (referred != null) {
-            fill_in_from_referred(referred, quote);
-
-            if (is_referred_draft ||
-                compose_type == ComposeType.NEW_MESSAGE ||
-                compose_type == ComposeType.FORWARD) {
-                this.pending_include = AttachPending.ALL;
-            }
-        }
-
-        update_from_field();
-        update_signature();
-        update_pending_attachments(this.pending_include, true);
-
         this.draft_timer = new Geary.TimeoutManager.seconds(
             10, () => { this.save_draft.begin(); }
         );
 
         // Add actions once every element has been initialized and added
         initialize_actions();
+        validate_send_button();
 
         // Connect everything (can only happen after actions were added)
-        validate_send_button();
-        set_header_recipients();
         this.to_entry.changed.connect(validate_send_button);
         this.cc_entry.changed.connect(validate_send_button);
         this.bcc_entry.changed.connect(validate_send_button);
@@ -517,8 +500,6 @@ public class ComposerWidget : Gtk.EventBox {
         this.editor.load_changed.connect(on_load_changed);
         this.editor.mouse_target_changed.connect(on_mouse_target_changed);
         this.editor.selection_changed.connect((has_selection) => { update_cursor_actions(); });
-
-        this.editor.load_html(this.body_html, this.signature_html, this.top_posting);
 
         this.editor_scrolled.add(editor);
 
@@ -592,9 +573,54 @@ public class ComposerWidget : Gtk.EventBox {
     }
 
     /**
+     * Loads the message into the composer editor.
+     */
+    public async void load(Geary.Email? referred = null,
+                           string? quote = null,
+                           bool is_referred_draft = false,
+                           Cancellable? cancellable = null) {
+        this.last_quote = quote;
+        string referred_quote = "";
+        if (referred != null) {
+            referred_quote = fill_in_from_referred(referred, quote);
+            if (is_referred_draft ||
+                compose_type == ComposeType.NEW_MESSAGE ||
+                compose_type == ComposeType.FORWARD) {
+                this.pending_include = AttachPending.ALL;
+            }
+        }
+
+        yield restore_reply_to_state();
+
+        set_header_recipients();
+        update_from_field();
+        update_pending_attachments(this.pending_include, true);
+
+        string signature = yield load_signature(cancellable);
+        this.editor.load_html(
+            this.body_html,
+            signature,
+            referred_quote,
+            this.top_posting,
+            is_referred_draft
+        );
+
+        try {
+            yield open_draft_manager_async(is_referred_draft ? referred.id : null);
+        } catch (Error e) {
+            debug("Could not open draft manager: %s", e.message);
+        }
+
+        // For accounts with large numbers of contacts, loading the
+        // entry completions can some time, so do it after the UI has
+        // been shown
+        yield load_entry_completions();
+    }
+
+    /**
      * Loads and sets contact auto-complete data for the current account.
      */
-    public async void load_entry_completions() {
+    private async void load_entry_completions() {
         // XXX Since ContactListStore hooks into ContactStore to
         // listen for contacts being added and removed,
         // GearyController or some composer-related controller should
@@ -616,13 +642,9 @@ public class ComposerWidget : Gtk.EventBox {
     }
 
     /**
-     * Restores the composer's widget state from its draft.
-     *
-     * This should only be called once, after the composer has been
-     * opened, and the draft manager should not be opened until after
-     * this has completed.
+     * Restores the composer's widget state from any replied to messages.
      */
-    public async void restore_draft_state_async() {
+    private async void restore_reply_to_state() {
         bool first_email = true;
 
         foreach (Geary.RFC822.MessageID mid in this.in_reply_to) {
@@ -682,15 +704,13 @@ public class ComposerWidget : Gtk.EventBox {
             this.state = ComposerState.INLINE;
         } else {
             this.state = ComposerState.INLINE_COMPACT;
-            // Set recipients in header
-            set_header_recipients();
         }
     }
 
     /**
      * Creates and opens the composer's draft manager.
      */
-    public async void open_draft_manager_async(
+    private async void open_draft_manager_async(
         Geary.EmailIdentifier? editing_draft_id = null,
         Cancellable? cancellable = null)
     throws Error {
@@ -722,15 +742,16 @@ public class ComposerWidget : Gtk.EventBox {
     }
 
     // Copies the addresses (e.g. From/To/CC) and content from referred into this one
-    private void fill_in_from_referred(Geary.Email referred, string? quote) {
+    private string fill_in_from_referred(Geary.Email referred, string? quote) {
+        string referred_quote = "";
         if (this.compose_type != ComposeType.NEW_MESSAGE) {
             add_recipients_and_ids(this.compose_type, referred);
             this.reply_subject = Geary.RFC822.Utils.create_subject_for_reply(referred);
             this.forward_subject = Geary.RFC822.Utils.create_subject_for_forward(referred);
         }
         this.pending_attachments = referred.attachments;
-        this.last_quote = quote;
         switch (this.compose_type) {
+            // Restoring a draft
             case ComposeType.NEW_MESSAGE:
                 if (referred.from != null)
                     this.from = referred.from;
@@ -749,9 +770,9 @@ public class ComposerWidget : Gtk.EventBox {
                 try {
                     Geary.RFC822.Message message = referred.get_message();
                     if (message.has_html_body()) {
-                        this.body_html = message.get_html_body(null);
+                        referred_quote = message.get_html_body(null);
                     } else {
-                        this.body_html = message.get_plain_body(true, null);
+                        referred_quote = message.get_plain_body(true, null);
                     }
                 } catch (Error error) {
                     debug("Error getting draft message body: %s", error.message);
@@ -762,9 +783,9 @@ public class ComposerWidget : Gtk.EventBox {
             case ComposeType.REPLY_ALL:
                 this.subject = reply_subject;
                 this.references = Geary.RFC822.Utils.reply_references(referred);
-                this.body_html = "\n\n" + Geary.RFC822.Utils.quote_email_for_reply(referred, quote,
+                referred_quote = Geary.RFC822.Utils.quote_email_for_reply(referred, quote,
                     Geary.RFC822.TextFormat.HTML);
-                if (quote != null)
+                if (!Geary.String.is_empty(quote))
                     this.top_posting = false;
                 else
                     this.can_delete_quote = true;
@@ -772,10 +793,11 @@ public class ComposerWidget : Gtk.EventBox {
 
             case ComposeType.FORWARD:
                 this.subject = forward_subject;
-                this.body_html = "\n\n" + Geary.RFC822.Utils.quote_email_for_forward(referred, quote,
+                referred_quote = Geary.RFC822.Utils.quote_email_for_forward(referred, quote,
                     Geary.RFC822.TextFormat.HTML);
             break;
         }
+        return referred_quote;
     }
 
     public void set_focus() {
@@ -2005,8 +2027,7 @@ public class ComposerWidget : Gtk.EventBox {
         if (this.can_delete_quote) {
             this.can_delete_quote = false;
             if (event.keyval == Gdk.Key.BackSpace) {
-                this.body_html = null;
-                this.editor.load_html(this.body_html, this.signature_html, this.top_posting);
+                this.editor.delete_quoted_message();
                 return Gdk.EVENT_STOP;
             }
         }
@@ -2128,29 +2149,29 @@ public class ComposerWidget : Gtk.EventBox {
             return false;
 
         this.account = new_account;
-        update_signature();
+        this.load_signature.begin(null, (obj, res) => {
+                this.editor.update_signature(this.load_signature.end(res));
+            });
         load_entry_completions.begin();
 
         return true;
     }
 
-    private void update_signature() {
-        string? account_sig = null;
+    private async string load_signature(Cancellable? cancellable = null) {
+        string account_sig = "";
 
         if (this.account.information.use_email_signature) {
-            account_sig = account.information.email_signature;
+            account_sig = account.information.email_signature ?? "";
             if (Geary.String.is_empty_or_whitespace(account_sig)) {
                 // No signature is specified in the settings, so use
                 // ~/.signature
-
-                // XXX This loading should be async, but that needs to
-                // be factored into how the signature HTML is passed
-                // to the editor.
                 File signature_file = File.new_for_path(Environment.get_home_dir()).get_child(".signature");
-                if (signature_file.query_exists()) {
-                    try {
-                        FileUtils.get_contents(signature_file.get_path(), out account_sig);
-                    } catch (Error error) {
+                try {
+                    uint8[] data;
+                    yield signature_file.load_contents_async(cancellable, out data, null);
+                    account_sig = (string) data;
+                } catch (Error error) {
+                    if (!(error is IOError.NOT_FOUND)) {
                         debug("Error reading signature file %s: %s", signature_file.get_path(), error.message);
                     }
                 }
@@ -2158,10 +2179,10 @@ public class ComposerWidget : Gtk.EventBox {
 
             account_sig = (!Geary.String.is_empty_or_whitespace(account_sig))
                 ? Geary.HTML.smart_escape(account_sig, true)
-                : null;
+                : "";
         }
 
-        this.signature_html = account_sig;
+        return account_sig;
     }
 
     private ComposerLinkPopover new_link_popover(ComposerLinkPopover.Type type,

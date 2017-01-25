@@ -2306,30 +2306,9 @@ public class GearyController : Geary.BaseObject {
         if (mailto != null) {
             widget = new ComposerWidget.from_mailto(current_account, mailto, application.config);
         } else {
-            Geary.Email? full = null;
-            if (referred != null) {
-                try {
-                    full = yield email_stores.get(current_folder.account).fetch_email_async(
-                        referred.id, Geary.ComposedEmail.REQUIRED_REPLY_FIELDS,
-                        Geary.Folder.ListFlags.NONE, cancellable_folder);
-                } catch (Error e) {
-                    message("Could not load full message: %s", e.message);
-                }
-            }
-
-            widget = new ComposerWidget(current_account, compose_type, application.config, full, quote, is_draft);
+            widget = new ComposerWidget(current_account, compose_type, application.config);
         }
-
-        Geary.EmailIdentifier? draft_id = null;
-        if (is_draft) {
-            draft_id = referred.id;
-            // Restore widget state before displaying the composer and
-            // opening the manager, so the changing widgets do not
-            // flash at the user, or make it look like the draft has
-            // changed hence triggering a redundant save
-            yield widget.restore_draft_state_async();
-        }
-
+        widget.destroy.connect(on_composer_widget_destroy);
         widget.link_activated.connect((uri) => { open_uri(uri); });
         widget.show_all();
 
@@ -2337,8 +2316,7 @@ public class GearyController : Geary.BaseObject {
         // an exit without losing their data.
         composer_widgets.add(widget);
         debug(@"Creating composer of type $(widget.compose_type); $(composer_widgets.size) composers total");
-        widget.destroy.connect(on_composer_widget_destroy);
-        
+
         if (inline) {
             if (widget.state == ComposerWidget.ComposerState.NEW ||
                 widget.state == ComposerWidget.ComposerState.PANED) {
@@ -2358,22 +2336,22 @@ public class GearyController : Geary.BaseObject {
             widget.state = ComposerWidget.ComposerState.DETACHED;
         }
 
-        // Now that the composer has been added to a window, we can
-        // set up its focus.
-        widget.set_focus();
-
-        try {
-            yield widget.open_draft_manager_async(draft_id);
-        } catch (Error e) {
-            debug("Could not open draft manager: %s", e.message);
+        // Load the widget's content
+        Geary.Email? full = null;
+        if (referred != null) {
+            try {
+                full = yield email_stores.get(current_folder.account).fetch_email_async(
+                    referred.id, Geary.ComposedEmail.REQUIRED_REPLY_FIELDS,
+                    Geary.Folder.ListFlags.NONE, cancellable_folder);
+            } catch (Error e) {
+                message("Could not load full message: %s", e.message);
+            }
         }
+        yield widget.load(full, quote, is_draft);
 
-        // For accounts with large numbers of contacts, loading the
-        // entry completions can some time, so do it after the UI has
-        // been shown
-        yield widget.load_entry_completions();
+        widget.set_focus();
     }
-    
+
     private bool should_create_new_composer(ComposerWidget.ComposeType? compose_type,
         Geary.Email? referred, string? quote, bool is_draft, out bool inline) {
         inline = true;

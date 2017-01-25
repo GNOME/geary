@@ -34,7 +34,7 @@ public abstract class ClientWebViewTestCase<V> : Gee.TestCase {
 
     protected abstract V set_up_test_view();
 
-    protected virtual void load_body_fixture(string? html = null) {
+    protected virtual void load_body_fixture(string html = "") {
         ClientWebView client_view = (ClientWebView) this.test_view;
         client_view.load_html(html);
         while (client_view.is_loading) {
