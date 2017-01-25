@@ -2010,23 +2010,9 @@ public class ComposerWidget : Gtk.EventBox {
                 return Gdk.EVENT_STOP;
         }
 
-        if ((event.state & Gdk.ModifierType.MOD1_MASK) != 0)
-            return Gdk.EVENT_PROPAGATE;
-        if ((event.state & Gdk.ModifierType.CONTROL_MASK) != 0) {
-            if (event.keyval == Gdk.Key.Tab) {
-                child_focus(Gtk.DirectionType.TAB_FORWARD);
-                return Gdk.EVENT_STOP;
-            }
-            if (event.keyval == Gdk.Key.ISO_Left_Tab) {
-                child_focus(Gtk.DirectionType.TAB_BACKWARD);
-                return Gdk.EVENT_STOP;
-            }
-            return Gdk.EVENT_PROPAGATE;
-        }
-
         if (this.can_delete_quote) {
             this.can_delete_quote = false;
-            if (event.keyval == Gdk.Key.BackSpace) {
+            if (event.is_modifier == 0 && event.keyval == Gdk.Key.BackSpace) {
                 this.editor.delete_quoted_message();
                 return Gdk.EVENT_STOP;
             }

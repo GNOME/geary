@@ -53,7 +53,13 @@ ComposerPageState.prototype = {
 
         this.messageBody = document.getElementById(ComposerPageState.BODY_ID);
         this.messageBody.addEventListener("keydown", function(e) {
-            if (e.keyCode == 9) {
+            // Should be using 'e.key == "Tab"' here, but that was
+            // only fixed in WK in Oct 2016 (WK Bug 36267). Migrate to
+            // that when we can rely on it being in WebKitGTK.
+            if (e.keyIdentifier == "U+0009"
+                && !e.ctrlKey
+                && !e.altKey
+                && !e.metaKey) {
                 if (!e.shiftKey) {
                     state.tabOut();
                 } else {
