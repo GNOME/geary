@@ -494,7 +494,7 @@ public class ComposerWebView : ClientWebView {
         // WebView seems to unconditionally consume button events, so
         // to show a link popopver after the view has processed one,
         // we need to emit our own.
-        bool ret = base.button_press_event(event);
+        bool ret = base.button_release_event(event);
         button_release_event_done(event);
         return ret;
     }
