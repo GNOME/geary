@@ -245,15 +245,16 @@ public class ComposerWidget : Gtk.EventBox {
 
     public Configuration config { get; set; }
 
-    [GtkChild]
-    internal Gtk.ScrolledWindow editor_scrolled;
-
     private ContactListStore? contact_list_store = null;
 
     private string body_html = "";
 
     [GtkChild]
     private Gtk.Box composer_container;
+
+    [GtkChild]
+    internal Gtk.Grid editor_container;
+
     [GtkChild]
     private Gtk.Label from_label;
     [GtkChild]
@@ -435,6 +436,11 @@ public class ComposerWidget : Gtk.EventBox {
         this.to_entry.margin_top = this.cc_entry.margin_top = this.bcc_entry.margin_top = this.reply_to_entry.margin_top = 6;
 
         this.editor = new ComposerWebView(config);
+        this.editor.set_hexpand(true);
+        this.editor.set_vexpand(true);
+        this.editor.show();
+
+        this.editor_container.add(this.editor);
 
         // Initialize menus
         Gtk.Builder builder = new Gtk.Builder.from_resource(
@@ -498,8 +504,6 @@ public class ComposerWidget : Gtk.EventBox {
         this.editor.load_changed.connect(on_load_changed);
         this.editor.mouse_target_changed.connect(on_mouse_target_changed);
         this.editor.selection_changed.connect((has_selection) => { update_cursor_actions(); });
-
-        this.editor_scrolled.add(editor);
 
         // Place the message area before the compose toolbar in the focus chain, so that
         // the user can tab directly from the Subject: field to the message area.

@@ -63,12 +63,9 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
     private void on_realize() {
         update_style();
 
-        this.composer.editor_scrolled.get_vscrollbar().hide();
-
         //this.composer.editor.vadjustment.value_changed.connect(on_inner_scroll);
         //this.composer.editor.vadjustment.changed.connect(on_adjust_changed);
         //this.composer.editor.user_changed_contents.connect(on_inner_size_changed);
-
         reroute_scroll_handling(this);
     }
 
@@ -116,7 +113,6 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
         //this.composer.editor.user_changed_contents.disconnect(on_inner_size_changed);
 
         disable_scroll_reroute(this);
-        this.composer.editor_scrolled.get_vscrollbar().show();
 
         remove(this.composer);
         close_container();
