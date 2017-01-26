@@ -14,12 +14,13 @@ let ComposerPageState = function() {
 };
 ComposerPageState.BODY_ID = "message-body";
 ComposerPageState.KEYWORD_SPLIT_REGEX = /[\s]+/g;
-ComposerPageState.QUOTE_START = "";
-ComposerPageState.QUOTE_END = "";
-ComposerPageState.QUOTE_MARKER = "\x7f";
+ComposerPageState.QUOTE_START = "\x91";  // private use one
+ComposerPageState.QUOTE_END = "\x92";    // private use two
+ComposerPageState.QUOTE_MARKER = "\x7f"; // delete
+ComposerPageState.PROTOCOL_REGEX = /^(aim|apt|bitcoin|cvs|ed2k|ftp|file|finger|git|gtalk|http|https|irc|ircs|irc6|lastfm|ldap|ldaps|magnet|news|nntp|rsync|sftp|skype|smb|sms|svn|telnet|tftp|ssh|webcal|xmpp):/i;
 // Taken from Geary.HTML.URL_REGEX, without the inline modifier (?x)
 // at the start, which is unsupported in JS
-ComposerPageState.URL_REGEX = new RegExp("\\b((?:[a-z][\\w-]+:(?:/{1,3}|[a-z0-9%])|www\\d{0,3}[.]|[a-z0-9.\\-]+[.][a-z]{2,4}/)(?:[^\\s()<>]+|\\(([^\\s()<>]+|(\\([^\\s()<>]+\\)))*\\))+(?:\\(([^\\s()<>]+|(\\([^\\s()<>]+\\)))*\\)|[^\\s`!()\\[\\]{};:'\".,<>?«»“”‘’]))", "i");
+ComposerPageState.URL_REGEX = new RegExp("\\b((?:[a-z][\\w-]+:(?:/{1,3}|[a-z0-9%])|www\\d{0,3}[.]|[a-z0-9.\\-]+[.][a-z]{2,4}/)(?:[^\\s()<>]+|\\(([^\\s()<>]+|(\\([^\\s()<>]+\\)))*\\))+(?:\\(([^\\s()<>]+|(\\([^\\s()<>]+\\)))*\\)|[^\\s`!()\\[\\]{};:'\".,<>?«»“”‘’]))", "gi");
 
 ComposerPageState.prototype = {
     __proto__: PageState.prototype,
@@ -264,6 +265,9 @@ ComposerPageState.prototype = {
             }
         }
     },
+    linkifyContent: function() {
+        ComposerPageState.linkify(this.messageBody);
+    },
     getHtml: function() {
         return this.messageBody.innerHTML;
     },
@@ -401,6 +405,54 @@ ComposerPageState.htmlToQuotedText = function(root) {
     root.innerHTML = savedDoc;
 
     return ComposerPageState.replaceNonBreakingSpace(text);
+};
+
+// Linkifies "plain text" link
+ComposerPageState.linkify = function(node) {
+    if (node.nodeType == Node.TEXT_NODE) {
+        // Examine text node for something that looks like a URL
+        let input = node.nodeValue;
+        if (input != null) {
+            let output = input.replace(ComposerPageState.URL_REGEX, function(url) {
+                if (url.match(ComposerPageState.PROTOCOL_REGEX) != null) {
+                    url = "\x01" + url + "\x01";
+                }
+                return url;
+            });
+
+            if (input != output) {
+                // We got one!  Now split the text and swap in a new anchor.
+                let parent = node.parentNode;
+                let sibling = node.nextSibling;
+                for (let part of output.split("\x01")) {
+                    let newNode = null;
+                    if (part.match(ComposerPageState.URL_REGEX) != null) {
+                        newNode = document.createElement("A");
+                        newNode.href = part;
+                        newNode.innerText = part;
+                    } else {
+                        newNode = document.createTextNode(part);
+                    }
+                    parent.insertBefore(newNode, sibling);
+                }
+                parent.removeChild(node);
+            }
+        }
+    } else {
+        // Recurse
+        let child = node.firstChild;
+        while (child != null) {
+            // Save the child and get its next sibling early since if
+            // it does actually contain a URL, it will be removed from
+            // the tree
+            let target = child;
+            child = child.nextSibling;
+            // Don't attempt to linkify existing links
+            if (target.nodeName != "A") {
+                ComposerPageState.linkify(target);
+            }
+        }
+    }
 };
 
 ComposerPageState.resolveNesting = function(text, values) {

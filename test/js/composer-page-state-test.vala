@@ -13,13 +13,15 @@ class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
         add_test("edit_context_link", edit_context_link);
         add_test("indent_line", indent_line);
         add_test("contains_attachment_keywords", contains_attachment_keywords);
+        add_test("linkify_content", linkify_content);
         add_test("get_html", get_html);
         add_test("get_text", get_text);
         add_test("get_text_with_quote", get_text_with_quote);
         add_test("get_text_with_nested_quote", get_text_with_nested_quote);
-        add_test("resolve_nesting", resolve_nesting);
+
         add_test("contains_keywords", contains_keywords);
         add_test("quote_lines", quote_lines);
+        add_test("resolve_nesting", resolve_nesting);
         add_test("replace_non_breaking_space", replace_non_breaking_space);
     }
 
@@ -100,6 +102,45 @@ some text
             assert(!WebKitUtil.to_bool(run_javascript(
                 @"geary.containsAttachmentKeyword(\"outerquote\", \"subject text\");"
             )));
+        } catch (Geary.JS.Error err) {
+            print("Geary.JS.Error: %s\n", err.message);
+            assert_not_reached();
+        } catch (Error err) {
+            print("WKError: %s\n", err.message);
+            assert_not_reached();
+        }
+    }
+
+    public void linkify_content() {
+        // XXX split these up into multiple tests
+        load_body_fixture("""
+http://example1.com
+
+<p>http://example2.com</p>
+
+<p>http://example3.com http://example4.com</p>
+
+<a href="blarg">http://example5.com</a>
+
+unknown://example6.com
+""");
+
+        string expected = """
+<a href="http://example1.com">http://example1.com</a>
+
+<p><a href="http://example2.com">http://example2.com</a></p>
+
+<p><a href="http://example3.com">http://example3.com</a> <a href="http://example4.com">http://example4.com</a></p>
+
+<a href="blarg">http://example5.com</a>
+
+unknown://example6.com
+<br><br>""";
+
+        try {
+            run_javascript("geary.linkifyContent();");
+            assert(WebKitUtil.to_string(run_javascript("geary.messageBody.innerHTML;")) ==
+                   expected);
         } catch (Geary.JS.Error err) {
             print("Geary.JS.Error: %s\n", err.message);
             assert_not_reached();

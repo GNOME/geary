@@ -408,6 +408,13 @@ public class ComposerWebView : ClientWebView {
     }
 
     /**
+     * Converts plain text URLs in the editor content into links.
+     */
+    public async void linkify_content() throws Error {
+        yield run_javascript("geary.linkifyContent();", null);
+    }
+
+    /**
      * Returns the editor content as an HTML string.
      */
     public async string? get_html() throws Error {
@@ -489,13 +496,6 @@ public class ComposerWebView : ClientWebView {
         }
 
         return flowed.str;
-    }
-
-    /**
-     * ???
-     */
-    public void linkify_document() {
-        // XXX
     }
 
     public override bool button_release_event(Gdk.EventButton event) {

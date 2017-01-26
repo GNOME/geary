@@ -1260,16 +1260,15 @@ public class ComposerWidget : Gtk.EventBox {
     private async void on_send_async() {
         this.container.vanish();
         this.is_closing = true;
-        
-        this.editor.linkify_document();
-        
+
         // Perform send.
         try {
+            yield this.editor.linkify_content();
             yield this.account.send_email_async(yield get_composed_email());
         } catch (Error e) {
             GLib.message("Error sending email: %s", e.message);
         }
-        
+
         Geary.Nonblocking.Semaphore? semaphore = discard_draft();
         if (semaphore != null) {
             try {

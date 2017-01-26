@@ -19,11 +19,6 @@ namespace Util.Composer {
     private const string EDITING_DELETE_CONTAINER_ID = "WebKit-Editing-Delete-Container";
 
 
-    public void linkify_document(WebKit.WebPage page) {
-        Util.DOM.linkify_document(page.get_dom_document());
-    }
-
-
     /////////////////////// From WebEditorFixer ///////////////////////
 
     public bool on_should_insert_text(WebKit.WebPage page,
