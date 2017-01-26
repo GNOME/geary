@@ -412,7 +412,6 @@ client/util/util-webkit.vala
 
 set(WEB_PROCESS_SRC
 client/web-process/web-process-extension.vala
-client/web-process/util-composer.vala
 )
 
 set(CONSOLE_SRC

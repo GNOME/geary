@@ -57,14 +57,13 @@ ComposerPageState.prototype = {
         let state = this;
 
         this.messageBody = document.getElementById(ComposerPageState.BODY_ID);
+        // Should be using 'e.key' in listeners below instead of
+        // keyIdentifier, but that was only fixed in WK in Oct 2016
+        // (WK Bug 36267). Migrate to that when we can rely on it
+        // being in WebKitGTK.
         this.messageBody.addEventListener("keydown", function(e) {
-            // Should be using 'e.key == "Tab"' here, but that was
-            // only fixed in WK in Oct 2016 (WK Bug 36267). Migrate to
-            // that when we can rely on it being in WebKitGTK.
-            if (e.keyIdentifier == "U+0009"
-                && !e.ctrlKey
-                && !e.altKey
-                && !e.metaKey) {
+            if (e.keyIdentifier == "U+0009" &&// Tab
+                !e.ctrlKey && !e.altKey && !e.metaKey) {
                 if (!e.shiftKey) {
                     state.tabOut();
                 } else {
@@ -73,6 +72,21 @@ ComposerPageState.prototype = {
                 e.preventDefault();
             }
         });
+        // We can't use keydown for this, captured or bubbled, since
+        // that will also cause the line that the cursor is currenty
+        // positioned on when Enter is pressed to also be outdented.
+        this.messageBody.addEventListener("keyup", function(e) {
+            if (e.keyIdentifier == "Enter" && !e.shiftKey) {
+                // XXX WebKit seems to support both InsertNewline and
+                // InsertNewlineInQuotedContent arguments for
+                // execCommand, both of which sound like they would be
+                // useful here. After a quick bit of testing neither
+                // worked out of the box, so need to investigate
+                // further. See:
+                // https://github.com/WebKit/webkit/blob/master/Source/WebCore/editing/EditorCommand.cpp
+                state.breakBlockquotes();
+            }
+        }, true);
 
         // Search for and remove a particular styling when we quote
         // text. If that style exists in the quoted text, we alter it
@@ -263,6 +277,22 @@ ComposerPageState.prototype = {
             } else {
                 selection.collapseToEnd();
             }
+        }
+    },
+    breakBlockquotes: function() {
+        // Do this in two phases to avoid in-line mutations caused by
+        // execCommand affecting the DOM srtcuture
+        let count = 0;
+        let node = SelectionUtil.getCursorElement();
+        while (node != this.messageBody) {
+            if (node.nodeName == "BLOCKQUOTE") {
+                count++;
+            }
+            node = node.parentNode;
+        }
+        while (count > 0) {
+            document.execCommand("outdent", false, null);
+            count--;
         }
     },
     linkifyContent: function() {
