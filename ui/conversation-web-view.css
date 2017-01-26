@@ -7,33 +7,15 @@
  */
 
 * {
-  transition: height 0.25s;
-}
-
-html {
-  /* Trigger CSS 2.1 § 10.6.7 to get a shrink-wrapped height. */
-  position: absolute !important;
-  top: 0 !important;
-  left: 0 !important;
-  bottom: auto !important;
-  width: 100% !important;
-  height: auto !important;
-
-  /* Lock down the box enough so we don't get an incrementally
-     expanding web view */
-  box-sizing: border-box !important;
-  margin: 0 !important;
-  border: 0 !important;
-  padding: 0;
-
-  /* Never show scroll bars */
-  overflow: hidden;
+  transition: height 0.25s !important;
 }
 
 body {
-  margin: 0;
+  margin: 12px;
   border: 0;
-  padding: 12px;
+  padding: 0;
+
+  /* XXX for plain text only? */
   overflow-wrap: break-word !important;
 }
 
@@ -60,7 +42,6 @@ blockquote {
   border-left: 3px #aaa solid;
   padding: 0 8px;
 }
-
 
 pre {
   white-space: pre-wrap;
