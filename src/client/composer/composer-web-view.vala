@@ -147,6 +147,11 @@ public class ComposerWebView : ClientWebView {
     /** Determines if the view is in rich text mode. */
     public bool is_rich_text { get; private set; default = true; }
 
+    // Determines if signals should be sent, useful for e.g. stopping
+    // document_modified being sent when the editor content is being
+    // updated before sending.
+    private bool signals_enabled = true;
+
 
     /** Emitted when the web view's content has changed. */
     public signal void document_modified();
@@ -215,6 +220,14 @@ public class ComposerWebView : ClientWebView {
         }
 
         base.load_html(HTML_BODY.printf(html.data));
+    }
+
+    /**
+     * Makes the view uneditable and stops signals from being sent.
+     */
+    public void disable() {
+        set_sensitive(false);
+        this.signals_enabled = false;
     }
 
     /**
@@ -503,14 +516,18 @@ public class ComposerWebView : ClientWebView {
         // to show a link popopver after the view has processed one,
         // we need to emit our own.
         bool ret = base.button_release_event(event);
-        button_release_event_done(event);
+        if (this.signals_enabled) {
+            button_release_event_done(event);
+        }
         return ret;
     }
 
     private void on_command_stack_changed(WebKit.JavascriptResult result) {
         try {
-            string[] values = WebKitUtil.to_string(result).split(",");
-            command_stack_changed(values[0] == "true", values[1] == "true");
+            if (this.signals_enabled) {
+                string[] values = WebKitUtil.to_string(result).split(",");
+                command_stack_changed(values[0] == "true", values[1] == "true");
+            }
         } catch (Geary.JS.Error err) {
             debug("Could not get command stack state: %s", err.message);
         }
@@ -518,7 +535,9 @@ public class ComposerWebView : ClientWebView {
 
     private void on_cursor_context_changed(WebKit.JavascriptResult result) {
         try {
-            cursor_context_changed(new EditContext(WebKitUtil.to_string(result)));
+            if (this.signals_enabled) {
+                cursor_context_changed(new EditContext(WebKitUtil.to_string(result)));
+            }
         } catch (Geary.JS.Error err) {
             debug("Could not get text cursor style: %s", err.message);
         }
@@ -527,9 +546,11 @@ public class ComposerWebView : ClientWebView {
     private void on_document_modified(WebKit.JavascriptResult result) {
         // Only modify actually changed to avoid excessive notify
         // signals being fired.
-        if (this.is_empty) {
-            this.is_empty = false;
+        if (this.signals_enabled) {
+            if (this.is_empty) {
+                this.is_empty = false;
+            }
+            document_modified();
         }
-        document_modified();
     }
 }

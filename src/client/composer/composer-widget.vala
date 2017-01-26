@@ -1258,6 +1258,7 @@ public class ComposerWidget : Gtk.EventBox {
 
     // Used internally by on_send()
     private async void on_send_async() {
+        this.editor.disable();
         this.container.vanish();
         this.is_closing = true;
 
