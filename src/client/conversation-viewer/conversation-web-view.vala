@@ -80,6 +80,22 @@ public class ConversationWebView : ClientWebView {
         return WebKitUtil.to_string(result);
     }
 
+    // XXX Surely since we are doing height-for-width, we should be
+    // overriding get_preferred_height_for_width here, but that
+    // doesn't seem to work.
+    public override void get_preferred_height(out int minimum_height,
+                                              out int natural_height) {
+        minimum_height = natural_height = this.preferred_height;
+    }
+
+    // Overridden since we always what the view to be sized according
+    // to the available space in the parent, not by the width of the
+    // web view.
+    public override void get_preferred_width(out int minimum_height,
+                                             out int natural_height) {
+        minimum_height = natural_height = 0;
+    }
+
     private void on_deceptive_link_clicked(WebKit.JavascriptResult result) {
         try {
             JS.GlobalContext context = result.get_global_context();

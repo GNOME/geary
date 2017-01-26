@@ -154,7 +154,9 @@ public class ClientWebView : WebKit.WebView {
     /** Determines if the view has started rendering the HTML */
     public bool has_valid_height { get; private set; default = false; }
 
-    private string _document_font;
+    /** The HTML content's current preferred height. */
+    public int preferred_height { get; private set; default = 0; }
+
     public string document_font {
         get {
             return _document_font;
@@ -168,8 +170,8 @@ public class ClientWebView : WebKit.WebView {
             set_settings(settings);
         }
     }
+    private string _document_font;
 
-    private string _monospace_font;
     public string monospace_font {
         get {
             return _monospace_font;
@@ -183,13 +185,12 @@ public class ClientWebView : WebKit.WebView {
             set_settings(settings);
         }
     }
+    private string _monospace_font;
 
     private weak string? body = null;
 
     private Gee.Map<string,Geary.Memory.Buffer> internal_resources =
         new Gee.HashMap<string,Geary.Memory.Buffer>();
-
-    private int preferred_height = 0;
 
 
     /** Emitted when the view's selection has changed. */
@@ -336,22 +337,6 @@ public class ClientWebView : WebKit.WebView {
         this.zoom_level -= (this.zoom_level * ZOOM_FACTOR);
     }
 
-    // XXX Surely since we are doing height-for-width, we should be
-    // overriding get_preferred_height_for_width here, but that
-    // doesn't seem to work.
-    public override void get_preferred_height(out int minimum_height,
-                                              out int natural_height) {
-        minimum_height = natural_height = this.preferred_height;
-    }
-
-    // Overridden since we always what the view to be sized according
-    // to the available space in the parent, not by the width of the
-    // web view.
-    public override void get_preferred_width(out int minimum_height,
-                                             out int natural_height) {
-        minimum_height = natural_height = 0;
-    }
-
     /**
      * Convenience function for registering and connecting JS messages.
      */
@@ -448,14 +433,19 @@ public class ClientWebView : WebKit.WebView {
 
     private void on_preferred_height_changed(WebKit.JavascriptResult result) {
         try {
-            this.preferred_height = (int) WebKitUtil.to_number(result);
-            if (this.preferred_height >= 1) {
-                // Avoid firing multiple notifies if the value hasn't
-                // changed
-                if (!this.has_valid_height) {
-                    this.has_valid_height = true;
+            int height = (int) WebKitUtil.to_number(result);
+            // Avoid notifying if the values have not changed
+            if (this.preferred_height != height) {
+                // value has changed
+                this.preferred_height = height;
+                if (height >= 1) {
+                    // value is valid
+                    if (!this.has_valid_height) {
+                        // validity has changed
+                        this.has_valid_height = true;
+                    }
+                    queue_resize();
                 }
-                queue_resize();
             }
         } catch (Geary.JS.Error err) {
             debug("Could not get preferred height: %s", err.message);
