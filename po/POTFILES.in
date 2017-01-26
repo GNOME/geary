@@ -64,8 +64,8 @@ src/client/dialogs/upgrade-dialog.vala
 src/client/folder-list/folder-list-abstract-folder-entry.vala
 src/client/folder-list/folder-list-account-branch.vala
 src/client/folder-list/folder-list-folder-entry.vala
-src/client/folder-list/folder-list-inboxes-branch.vala
 src/client/folder-list/folder-list-inbox-folder-entry.vala
+src/client/folder-list/folder-list-inboxes-branch.vala
 src/client/folder-list/folder-list-search-branch.vala
 src/client/folder-list/folder-list-special-grouping.vala
 src/client/folder-list/folder-list-tree.vala
@@ -83,15 +83,15 @@ src/client/sidebar/sidebar-tree.vala
 src/client/util/util-date.vala
 src/client/util/util-email.vala
 src/client/util/util-files.vala
+src/client/util/util-gio.vala
 src/client/util/util-gravatar.vala
 src/client/util/util-gtk.vala
 src/client/util/util-international.vala
 src/client/util/util-migrate.vala
+src/client/util/util-webkit.vala
 src/client/web-process/web-process-extension.vala
-src/client/web-process/util-composer.vala
-src/client/web-process/util-conversation.vala
-src/client/web-process/util-webkit.vala
 src/console/main.vala
+src/engine/api/geary.vala
 src/engine/api/geary-abstract-local-folder.vala
 src/engine/api/geary-account-information.vala
 src/engine/api/geary-account.vala
@@ -123,8 +123,8 @@ src/engine/api/geary-folder-supports-move.vala
 src/engine/api/geary-folder-supports-remove.vala
 src/engine/api/geary-folder.vala
 src/engine/api/geary-logging.vala
-src/engine/api/geary-named-flags.vala
 src/engine/api/geary-named-flag.vala
+src/engine/api/geary-named-flags.vala
 src/engine/api/geary-progress-monitor.vala
 src/engine/api/geary-revokable.vala
 src/engine/api/geary-search-folder.vala
@@ -163,8 +163,10 @@ src/engine/db/db-synchronous-mode.vala
 src/engine/db/db-transaction-async-job.vala
 src/engine/db/db-transaction-outcome.vala
 src/engine/db/db-transaction-type.vala
-src/engine/db/db.vala
 src/engine/db/db-versioned-database.vala
+src/engine/db/db.vala
+src/engine/imap/imap.vala
+src/engine/imap/imap-error.vala
 src/engine/imap/api/imap-account.vala
 src/engine/imap/api/imap-email-flags.vala
 src/engine/imap/api/imap-email-properties.vala
@@ -260,25 +262,23 @@ src/engine/imap-engine/replay-ops/imap-engine-server-search-email.vala
 src/engine/imap-engine/replay-ops/imap-engine-user-close.vala
 src/engine/imap-engine/yahoo/imap-engine-yahoo-account.vala
 src/engine/imap-engine/yahoo/imap-engine-yahoo-folder.vala
-src/engine/imap/imap-error.vala
-src/engine/imap/imap.vala
 src/engine/imap/message/imap-data-format.vala
 src/engine/imap/message/imap-envelope.vala
 src/engine/imap/message/imap-fetch-body-data-specifier.vala
 src/engine/imap/message/imap-fetch-data-specifier.vala
-src/engine/imap/message/imap-flags.vala
 src/engine/imap/message/imap-flag.vala
+src/engine/imap/message/imap-flags.vala
 src/engine/imap/message/imap-internal-date.vala
 src/engine/imap/message/imap-mailbox-parameter.vala
 src/engine/imap/message/imap-mailbox-specifier.vala
 src/engine/imap/message/imap-message-data.vala
-src/engine/imap/message/imap-message-flags.vala
 src/engine/imap/message/imap-message-flag.vala
+src/engine/imap/message/imap-message-flags.vala
 src/engine/imap/message/imap-sequence-number.vala
 src/engine/imap/message/imap-status-data-type.vala
 src/engine/imap/message/imap-tag.vala
-src/engine/imap/message/imap-uid.vala
 src/engine/imap/message/imap-uid-validity.vala
+src/engine/imap/message/imap-uid.vala
 src/engine/imap/parameter/imap-atom-parameter.vala
 src/engine/imap/parameter/imap-list-parameter.vala
 src/engine/imap/parameter/imap-literal-parameter.vala
@@ -293,8 +293,8 @@ src/engine/imap/response/imap-capabilities.vala
 src/engine/imap/response/imap-continuation-response.vala
 src/engine/imap/response/imap-fetch-data-decoder.vala
 src/engine/imap/response/imap-fetched-data.vala
-src/engine/imap/response/imap-mailbox-attributes.vala
 src/engine/imap/response/imap-mailbox-attribute.vala
+src/engine/imap/response/imap-mailbox-attributes.vala
 src/engine/imap/response/imap-mailbox-information.vala
 src/engine/imap/response/imap-response-code-type.vala
 src/engine/imap/response/imap-response-code.vala
@@ -339,8 +339,8 @@ src/engine/rfc822/rfc822-error.vala
 src/engine/rfc822/rfc822-gmime-filter-blockquotes.vala
 src/engine/rfc822/rfc822-gmime-filter-flowed.vala
 src/engine/rfc822/rfc822-gmime-filter-plain.vala
-src/engine/rfc822/rfc822-mailbox-addresses.vala
 src/engine/rfc822/rfc822-mailbox-address.vala
+src/engine/rfc822/rfc822-mailbox-addresses.vala
 src/engine/rfc822/rfc822-message-data.vala
 src/engine/rfc822/rfc822-message.vala
 src/engine/rfc822/rfc822-utils.vala
@@ -371,6 +371,7 @@ src/engine/util/util-html.vala
 src/engine/util/util-imap-utf7.vala
 src/engine/util/util-inet.vala
 src/engine/util/util-iterable.vala
+src/engine/util/util-js.vala
 src/engine/util/util-numeric.vala
 src/engine/util/util-object.vala
 src/engine/util/util-reference-semantics.vala
@@ -379,6 +380,7 @@ src/engine/util/util-stream.vala
 src/engine/util/util-string.vala
 src/engine/util/util-synchronization.vala
 src/engine/util/util-time.vala
+src/engine/util/util-timeout-manager.vala
 src/engine/util/util-trillian.vala
 src/mailer/main.vala
 [type: gettext/glade]ui/accelerators.ui
@@ -393,18 +395,21 @@ src/mailer/main.vala
 [type: gettext/glade]ui/conversation-email.ui
 [type: gettext/glade]ui/conversation-email-attachment-view.ui
 [type: gettext/glade]ui/conversation-email-menus.ui
-[type: gettext/glade]ui/conversation-message.ui
 [type: gettext/glade]ui/conversation-message-menus.ui
+[type: gettext/glade]ui/conversation-message.ui
 [type: gettext/glade]ui/conversation-viewer.ui
 [type: gettext/glade]ui/edit_alternate_emails.glade
+[type: gettext/glade]ui/empty-placeholder.ui
 [type: gettext/glade]ui/find_bar.glade
+[type: gettext/glade]ui/folder-popover.ui
 [type: gettext/glade]ui/gtk/help-overlay.ui
 [type: gettext/glade]ui/gtk/menus.ui
 [type: gettext/glade]ui/login.glade
 [type: gettext/glade]ui/main-toolbar.ui
 [type: gettext/glade]ui/main-window.ui
 [type: gettext/glade]ui/password-dialog.glade
-[type: gettext/glade]ui/preferences.glade
+[type: gettext/glade]ui/preferences-dialog.ui
 [type: gettext/glade]ui/remove_confirm.glade
+[type: gettext/glade]ui/toolbar_empty_menu.ui
 [type: gettext/glade]ui/toolbar_mark_menu.ui
 [type: gettext/glade]ui/upgrade_dialog.glade
