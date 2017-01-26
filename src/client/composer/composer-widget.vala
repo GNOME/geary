@@ -1781,8 +1781,7 @@ public class ComposerWidget : Gtk.EventBox {
     }
 
     private void on_indent(SimpleAction action, Variant? param) {
-        on_action(action, param);
-        this.editor.undo_blockquote_style();
+        this.editor.indent_line();
     }
 
     private void on_mouse_target_changed(WebKit.WebView web_view,

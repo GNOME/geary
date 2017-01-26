@@ -370,6 +370,13 @@ public class ComposerWebView : ClientWebView {
     }
 
     /**
+     * Indents the line at the current text cursor location.
+     */
+    public void indent_line() {
+        this.run_javascript.begin("geary.indentLine();", null);
+    }
+
+    /**
      * Updates the signature block if it has not been deleted.
      */
     public new void update_signature(string signature) {
@@ -482,13 +489,6 @@ public class ComposerWebView : ClientWebView {
         }
 
         return flowed.str;
-    }
-
-    /**
-     * ???
-     */
-    public void undo_blockquote_style() {
-        this.run_javascript.begin("geary.undoBlockquoteStyle();", null);
     }
 
     /**

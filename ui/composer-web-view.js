@@ -157,6 +157,17 @@ ComposerPageState.prototype = {
             }
         }
     },
+    indentLine: function() {
+        document.execCommand("indent", false, null);
+        let nodeList = document.querySelectorAll(
+            "blockquote[style=\"margin: 0 0 0 40px; border: none; padding: 0px;\"]"
+        );
+        for (let i = 0; i < nodeList.length; ++i) {
+            let element = nodeList.item(i);
+            element.removeAttribute("style");
+            element.setAttribute("type", "cite");
+        }
+    },
     updateSignature: function(signature) {
         // XXX need mark the sig somehow so we can find it, select
         // it and replace it using execCommand
@@ -276,16 +287,6 @@ ComposerPageState.prototype = {
             window.webkit.messageHandlers.commandStackChanged.postMessage(
                 this.undoEnabled + "," + this.redoEnabled
             );
-        }
-    },
-    undoBlockquoteStyle: function() {
-        let nodeList = document.querySelectorAll(
-            "blockquote[style=\"margin: 0 0 0 40px; border: none; padding: 0px;\"]"
-        );
-        for (let i = 0; i < nodeList.length; ++i) {
-            let element = nodeList.item(i);
-            element.removeAttribute("style");
-            element.setAttribute("type", "cite");
         }
     },
     documentModified: function(element) {

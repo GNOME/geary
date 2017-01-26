@@ -11,6 +11,7 @@ class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
         base("ComposerPageStateTest");
         add_test("edit_context_font", edit_context_font);
         add_test("edit_context_link", edit_context_link);
+        add_test("indent_line", indent_line);
         add_test("contains_attachment_keywords", contains_attachment_keywords);
         add_test("get_html", get_html);
         add_test("get_text", get_text);
@@ -45,6 +46,23 @@ class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
         try {
             assert(WebKitUtil.to_string(run_javascript(@"new EditContext(document.getElementById('test')).encode()")) ==
                    "0,,Comic Sans,144");
+        } catch (Geary.JS.Error err) {
+            print("Geary.JS.Error: %s\n", err.message);
+            assert_not_reached();
+        } catch (Error err) {
+            print("WKError: %s\n", err.message);
+            assert_not_reached();
+        }
+    }
+
+    public void indent_line() {
+        load_body_fixture("""<span id="test">some text</span>""");
+        try {
+            run_javascript(@"SelectionUtil.selectNode(document.getElementById('test'))");
+            run_javascript(@"geary.indentLine()");
+            assert(WebKitUtil.to_number(run_javascript(@"document.querySelectorAll('blockquote[type=cite]').length")) == 1);
+            assert(WebKitUtil.to_string(run_javascript(@"document.querySelectorAll('blockquote[type=cite]').item(0).innerText")) ==
+                "some text");
         } catch (Geary.JS.Error err) {
             print("Geary.JS.Error: %s\n", err.message);
             assert_not_reached();
