@@ -13,9 +13,13 @@ let ComposerPageState = function() {
     this.init.apply(this, arguments);
 };
 ComposerPageState.BODY_ID = "message-body";
+ComposerPageState.KEYWORD_SPLIT_REGEX = /[\s]+/g;
 ComposerPageState.QUOTE_START = "";
 ComposerPageState.QUOTE_END = "";
 ComposerPageState.QUOTE_MARKER = "\x7f";
+// Taken from Geary.HTML.URL_REGEX, without the inline modifier (?x)
+// at the start, which is unsupported in JS
+ComposerPageState.URL_REGEX = new RegExp("\\b((?:[a-z][\\w-]+:(?:/{1,3}|[a-z0-9%])|www\\d{0,3}[.]|[a-z0-9.\\-]+[.][a-z]{2,4}/)(?:[^\\s()<>]+|\\(([^\\s()<>]+|(\\([^\\s()<>]+\\)))*\\))+(?:\\(([^\\s()<>]+|(\\([^\\s()<>]+\\)))*\\)|[^\\s`!()\\[\\]{};:'\".,<>?«»“”‘’]))", "i");
 
 ComposerPageState.prototype = {
     __proto__: PageState.prototype,
@@ -161,6 +165,76 @@ ComposerPageState.prototype = {
         // XXX need mark the quote somehow so we can find it, select
         // it and delete it using execCommand
     },
+    /**
+     * Determines if subject or body content refers to attachments.
+     */
+    containsAttachmentKeyword: function(keywordSpec, subject) {
+        // XXX this could also use a structured representation of the
+        // message body so we don't need to text to check
+
+        let ATTACHMENT_KEYWORDS_SUFFIX = "doc|pdf|xls|ppt|rtf|pps";
+
+        let completeKeys = new Set(keywordSpec.toLocaleLowerCase().split("|"));
+        let suffixKeys = new Set(ATTACHMENT_KEYWORDS_SUFFIX.split("|"));
+
+        // Check the subject line
+        if (ComposerPageState.containsKeywords(subject, completeKeys, suffixKeys)) {
+            return true;
+        }
+
+        // Check interesting body text
+        let breakingElements = new Set([
+            "BR", "P", "DIV", "BLOCKQUOTE", "TABLE", "OL", "UL", "HR"
+        ]);
+        let content = this.messageBody.firstChild;
+        let found = false;
+        let done = false;
+        let textContent = [];
+        while (content != null && !done) {
+            if (content.nodeType == Node.TEXT_NODE) {
+                textContent.push(content.textContent);
+            } else if (content.nodeType == Node.ELEMENT_NODE) {
+                let isBreaking = breakingElements.has(content.nodeName);
+                if (isBreaking) {
+                    textContent.push("\n");
+                }
+
+                // Always exclude quoted text
+                if (content.nodeName != "BLOCKQUOTE") {
+                    textContent.push(content.innerText);
+                }
+
+                if (isBreaking || content.nextSibling == null) {
+                    for (let line of textContent.join("").split("\n")) {
+                        // Ignore everything after a sig or a
+                        // forwarded message.
+                        // XXX This breaks if the user types this at
+                        // the start of a line, also, WK's innerText
+                        // impl strips trailing whitespace, so can't
+                        // test for 'line == "-- "' :(
+                        if (line.startsWith("--")) {
+                            done = true;
+                            break;
+                        }
+
+                        line = line.trim();
+                        if (line != "") {
+                            if (ComposerPageState.containsKeywords(line, completeKeys, suffixKeys)) {
+                                found = true;
+                                done = true;
+                                break;
+                            }
+                        }
+                    }
+                    textContent = [];
+                }
+            }
+
+            content = content.nextSibling;
+        }
+
+        return found;
+    },
     tabOut: function() {
         document.execCommand(
             "inserthtml", false, "<span style='white-space: pre-wrap'>\t</span>"
@@ -231,6 +305,39 @@ ComposerPageState.prototype = {
             }
         }
     }
+};
+
+/**
+ * Determines if any keywords are present in a string.
+ */
+ComposerPageState.containsKeywords = function(line, completeKeys, suffixKeys) {
+    let tokens = new Set(
+        line.toLocaleLowerCase().split(ComposerPageState.KEYWORD_SPLIT_REGEX)
+    );
+
+    for (let key of completeKeys) {
+        if (tokens.has(key)) {
+            return true;
+        }
+    }
+
+    let urlRegex = ComposerPageState.URL_REGEX;
+    // XXX assuming all suffixes have length = 3 here.
+    let extLen = 3;
+    for (let token of tokens) {
+        let extDelim = token.length - (extLen + 1);
+        // We do care about "a.pdf", but not ".pdf"
+        if (token.length >= extLen + 2 && token.charAt(extDelim) == ".") {
+            let suffix = token.substring(extDelim + 1);
+            if (suffixKeys.has(suffix)) {
+                if (token.match(urlRegex) == null) {
+                    return true;
+                }
+            }
+        }
+    }
+
+    return false;
 };
 
 /**
@@ -405,7 +512,7 @@ let SelectionUtil = {
     getCursorElement: function() {
         let selection = window.getSelection();
         let node = selection.focusNode;
-        if (node != null && node.nodeType != Node.ELEMENT_TYPE) {
+        if (node != null && node.nodeType != Node.ELEMENT_NODE) {
             node = node.parentNode;
         }
         return node;

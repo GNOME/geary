@@ -160,14 +160,12 @@ public class ComposerWidget : Gtk.EventBox {
     private const string URI_LIST_MIME_TYPE = "text/uri-list";
     private const string FILE_URI_PREFIX = "file://";
 
-    public const string ATTACHMENT_KEYWORDS_SUFFIX = ".doc|.pdf|.xls|.ppt|.rtf|.pps";
-    
-    // A list of keywords, separated by pipe ("|") characters, that suggest an attachment; since
-    // this is full-word checking, include all variants of each word.  No spaces are allowed.
-    public const string ATTACHMENT_KEYWORDS_LOCALIZED = _("attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|enclosing|encloses|enclosure|enclosures");
-    
-    private delegate bool CompareStringFunc(string key, string token);
-    
+    // Translators: This is list of keywords, separated by pipe ("|")
+    // characters, that suggest an attachment; since this is full-word
+    // checking, include all variants of each word.  No spaces are
+    // allowed.
+    private const string ATTACHMENT_KEYWORDS_LOCALIZED = _("attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|enclosing|encloses|enclosure|enclosures");
+
     public Geary.Account account { get; private set; }
 
     public Geary.RFC822.MailboxAddresses from { get; private set; }
@@ -1218,82 +1216,6 @@ public class ComposerWidget : Gtk.EventBox {
         return check_send_on_return(event) && base.key_press_event(event);
     }
 
-    // compares all keys to all tokens according to user-supplied comparison function
-    // Returns true if found
-    private bool search_tokens(string[] keys, string[] tokens, CompareStringFunc cmp_func,
-        out string? found_key, out string? found_token) {
-        foreach (string key in keys) {
-            foreach (string token in tokens) {
-                if (cmp_func(key, token)) {
-                    found_key = key;
-                    found_token = token;
-                    
-                    return true;
-                }
-            }
-        }
-        
-        found_key = null;
-        found_token = null;
-        
-        return false;
-    }
-    
-    private bool email_contains_attachment_keywords() {
-        // Filter out all content contained in block quotes
-        string filtered = @"$subject\n";
-        filtered += this.editor.get_block_quote_representation();
-        
-        Regex url_regex = null;
-        try {
-            // Prepare to ignore urls later
-            url_regex = new Regex(Geary.HTML.URL_REGEX, RegexCompileFlags.CASELESS);
-        } catch (Error error) {
-            debug("Error building regex in keyword checker: %s", error.message);
-        }
-        
-        string[] suffix_keys = ATTACHMENT_KEYWORDS_SUFFIX.casefold().split("|");
-        string[] full_word_keys = ATTACHMENT_KEYWORDS_LOCALIZED.casefold().split("|");
-        
-        foreach (string line in filtered.split("\n")) {
-            // Stop looking once we hit forwarded content
-            if (line.has_prefix("--")) {
-                break;
-            }
-            
-            // casefold line, strip start and ending whitespace, then tokenize by whitespace
-            string folded = line.casefold().strip();
-            string[] tokens = folded.split_set(" \t");
-            
-            // search for full-word matches
-            string? found_key, found_token;
-            bool found = search_tokens(full_word_keys, tokens, (key, token) => {
-                return key == token;
-            }, out found_key, out found_token);
-            
-            // if not found, search for suffix matches
-            if (!found) {
-                found = search_tokens(suffix_keys, tokens, (key, token) => {
-                    return token.has_suffix(key);
-                }, out found_key, out found_token);
-            }
-            
-            if (found) {
-                try {
-                    // Make sure the match isn't coming from a url
-                    if (found_key in url_regex.replace(folded, -1, 0, "")) {
-                        return true;
-                    }
-                } catch (Error error) {
-                    debug("Regex replacement error in keyword checker: %s", error.message);
-                    return true;
-                }
-            }
-        }
-        
-        return false;
-    }
-
     private async bool should_send() {
         bool has_subject = !Geary.String.is_empty(subject.strip());
         bool has_attachment = this.attached_files.size > 0;
@@ -1312,7 +1234,9 @@ public class ComposerWidget : Gtk.EventBox {
             confirmation = _("Send message with an empty subject?");
         } else if (!has_body && !has_attachment) {
             confirmation = _("Send message with an empty body?");
-        } else if (!has_attachment && email_contains_attachment_keywords()) {
+        } else if (!has_attachment &&
+                   yield this.editor.contains_attachment_keywords(
+                       ATTACHMENT_KEYWORDS_LOCALIZED, this.subject)) {
             confirmation = _("Send message without an attachment?");
         }
         if (confirmation != null) {

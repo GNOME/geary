@@ -386,6 +386,21 @@ public class ComposerWebView : ClientWebView {
     }
 
     /**
+     * Determines if the editor content contains an attachment keyword.
+     */
+    public async bool contains_attachment_keywords(string keyword_spec, string subject) {
+        try {
+            return WebKitUtil.to_bool(
+                yield run_javascript("geary.containsAttachmentKeyword(\"%s\", \"%s\");"
+                                     .printf(keyword_spec, subject), null)
+                );
+        } catch (Error err) {
+            debug("Error checking or attchment keywords: %s", err.message);
+            return false;
+        }
+    }
+
+    /**
      * Returns the editor content as an HTML string.
      */
     public async string? get_html() throws Error {
@@ -481,13 +496,6 @@ public class ComposerWebView : ClientWebView {
      */
     public void linkify_document() {
         // XXX
-    }
-
-    /**
-     * ???
-     */
-    public string get_block_quote_representation() {
-        return ""; // XXX
     }
 
     public override bool button_release_event(Gdk.EventButton event) {

@@ -11,11 +11,13 @@ class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
         base("ComposerPageStateTest");
         add_test("edit_context_font", edit_context_font);
         add_test("edit_context_link", edit_context_link);
+        add_test("contains_attachment_keywords", contains_attachment_keywords);
         add_test("get_html", get_html);
         add_test("get_text", get_text);
         add_test("get_text_with_quote", get_text_with_quote);
         add_test("get_text_with_nested_quote", get_text_with_nested_quote);
         add_test("resolve_nesting", resolve_nesting);
+        add_test("contains_keywords", contains_keywords);
         add_test("quote_lines", quote_lines);
         add_test("replace_non_breaking_space", replace_non_breaking_space);
     }
@@ -43,6 +45,43 @@ class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
         try {
             assert(WebKitUtil.to_string(run_javascript(@"new EditContext(document.getElementById('test')).encode()")) ==
                    "0,,Comic Sans,144");
+        } catch (Geary.JS.Error err) {
+            print("Geary.JS.Error: %s\n", err.message);
+            assert_not_reached();
+        } catch (Error err) {
+            print("WKError: %s\n", err.message);
+            assert_not_reached();
+        }
+    }
+
+    public void contains_attachment_keywords() {
+        load_body_fixture("""
+<blockquote>inner quote</blockquote>
+
+<p>some text</p>
+
+some text
+
+-- <br>sig
+
+<p>outerquote text<p>
+""");
+        try {
+            assert(WebKitUtil.to_bool(run_javascript(
+                @"geary.containsAttachmentKeyword(\"some\", \"subject text\");"
+            )));
+            assert(WebKitUtil.to_bool(run_javascript(
+                @"geary.containsAttachmentKeyword(\"subject\", \"subject text\");"
+            )));
+            assert(!WebKitUtil.to_bool(run_javascript(
+                @"geary.containsAttachmentKeyword(\"innerquote\", \"subject text\");"
+            )));
+            assert(!WebKitUtil.to_bool(run_javascript(
+                @"geary.containsAttachmentKeyword(\"sig\", \"subject text\");"
+            )));
+            assert(!WebKitUtil.to_bool(run_javascript(
+                @"geary.containsAttachmentKeyword(\"outerquote\", \"subject text\");"
+            )));
         } catch (Geary.JS.Error err) {
             print("Geary.JS.Error: %s\n", err.message);
             assert_not_reached();
@@ -102,6 +141,59 @@ class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
         try {
             assert(WebKitUtil.to_string(run_javascript(@"window.geary.getText();")) ==
                    @"pre\n\n$(q_marker)quote1\n$(q_marker)\n$(q_marker)$(q_marker)quote2\n$(q_marker)$(q_marker)\npost\n\n\n\n");
+        } catch (Geary.JS.Error err) {
+            print("Geary.JS.Error: %s\n", err.message);
+            assert_not_reached();
+        } catch (Error err) {
+            print("WKError: %s\n", err.message);
+            assert_not_reached();
+        }
+    }
+
+    public void contains_keywords() {
+        load_body_fixture();
+        string complete_keys = """new Set(["keyword1", "keyword2"])""";
+        string suffix_keys = """new Set(["sf1", "sf2"])""";
+        try {
+            // Doesn't contain
+            assert(!WebKitUtil.to_bool(run_javascript(
+                @"ComposerPageState.containsKeywords('notcontained', $complete_keys, $suffix_keys);"
+            )));
+            assert(!WebKitUtil.to_bool(run_javascript(
+                @"ComposerPageState.containsKeywords('not contained', $complete_keys, $suffix_keys);"
+            )));
+            assert(!WebKitUtil.to_bool(run_javascript(
+                @"ComposerPageState.containsKeywords('not\tcontained', $complete_keys, $suffix_keys);"
+            )));
+            assert(!WebKitUtil.to_bool(run_javascript(
+                @"ComposerPageState.containsKeywords('http://www.keyword1.com', $complete_keys, $suffix_keys);"
+            )));
+            assert(!WebKitUtil.to_bool(run_javascript(
+                @"ComposerPageState.containsKeywords('http://www.something.com/something.sf1', $complete_keys, $suffix_keys);"
+            )));
+            assert(!WebKitUtil.to_bool(run_javascript(
+                @"ComposerPageState.containsKeywords('sf1', $complete_keys, $suffix_keys);"
+            )));
+            assert(!WebKitUtil.to_bool(run_javascript(
+                @"ComposerPageState.containsKeywords('.sf1', $complete_keys, $suffix_keys);"
+            )));
+
+            // Does contain
+            assert(WebKitUtil.to_bool(run_javascript(
+                @"ComposerPageState.containsKeywords('keyword1', $complete_keys, $suffix_keys);"
+            )));
+            assert(WebKitUtil.to_bool(run_javascript(
+                @"ComposerPageState.containsKeywords('keyword2 contained', $complete_keys, $suffix_keys);"
+            )));
+            assert(WebKitUtil.to_bool(run_javascript(
+                @"ComposerPageState.containsKeywords('keyword2\tcontained', $complete_keys, $suffix_keys);"
+            )));
+            assert(WebKitUtil.to_bool(run_javascript(
+                @"ComposerPageState.containsKeywords('something.sf1', $complete_keys, $suffix_keys);"
+            )));
+            assert(WebKitUtil.to_bool(run_javascript(
+                @"ComposerPageState.containsKeywords('something.something.sf2', $complete_keys, $suffix_keys);"
+            )));
         } catch (Geary.JS.Error err) {
             print("Geary.JS.Error: %s\n", err.message);
             assert_not_reached();
