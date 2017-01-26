@@ -52,10 +52,11 @@ public class GearyWebExtension : Object {
     // XXX Conditionally enable while we still depend on WK2 <2.12
     private void on_console_message(WebKit.WebPage page,
                                     WebKit.ConsoleMessage message) {
+        string source = message.get_source_id();
         debug("Console: [%s] %s %s:%u: %s",
-              message.get_level().to_string(),
-              message.get_source().to_string(),
-              message.get_source_id(),
+              message.get_level().to_string().substring("WEBKIT_CONSOLE_MESSAGE_LEVEL_".length),
+              message.get_source().to_string().substring("WEBKIT_CONSOLE_MESSAGE_SOURCE_".length),
+              Geary.String.is_empty(source) ? "unknown" : source,
               message.get_line(),
               message.get_text()
         );
