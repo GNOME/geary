@@ -1,5 +1,6 @@
 [encoding: UTF-8]
 desktop/geary.desktop.in
+desktop/org.gnome.Geary.desktop.in
 desktop/geary-autostart.desktop.in
 [type: gettext/ini]desktop/geary-attach.contract.in
 src/client/accounts/account-dialog-account-list-pane.vala
