@@ -23,11 +23,6 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
     protected Gee.MultiMap<string, string>? old_accelerators { get; set; }
 
     private Gtk.ScrolledWindow outer_scroller;
-    //private bool setting_inner_scroll;
-    //private bool scrolled_to_bottom = false;
-    //private double inner_scroll_adj_value;
-    //private int inner_view_height;
-    //private int min_height = MIN_EDITOR_HEIGHT;
 
 
     public signal void vanished();
@@ -49,23 +44,10 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
         realize.connect(on_realize);
         this.composer.editor.focus_in_event.connect(on_focus_in);
         this.composer.editor.focus_out_event.connect(on_focus_out);
-        this.composer.editor.load_changed.connect((web_view, event) => {
-                if (event == WebKit.LoadEvent.FINISHED) {
-                    Idle.add(() => {
-                            recalc_height();
-                            return Source.REMOVE;
-                        });
-                }
-            });
         show();
     }
 
     private void on_realize() {
-        update_style();
-
-        //this.composer.editor.vadjustment.value_changed.connect(on_inner_scroll);
-        //this.composer.editor.vadjustment.changed.connect(on_adjust_changed);
-        //this.composer.editor.user_changed_contents.connect(on_inner_size_changed);
         reroute_scroll_handling(this);
     }
 
@@ -88,19 +70,6 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
         }
     }
 
-    private void update_style() {
-        Gdk.RGBA window_background = top_window.get_style_context()
-            .get_background_color(Gtk.StateFlags.NORMAL);
-        Gdk.RGBA background = get_style_context().get_background_color(Gtk.StateFlags.NORMAL);
-
-        if (background == window_background)
-            return;
-
-        get_style_context().changed.disconnect(update_style);
-        override_background_color(Gtk.StateFlags.NORMAL, window_background);
-        get_style_context().changed.connect(update_style);
-    }
-
     public void remove_composer() {
         if (this.composer.editor.has_focus)
             on_focus_out();
@@ -108,116 +77,113 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
         this.composer.editor.focus_in_event.disconnect(on_focus_in);
         this.composer.editor.focus_out_event.disconnect(on_focus_out);
 
-        //this.composer.editor.vadjustment.value_changed.disconnect(on_inner_scroll);
-        //this.composer.editor.vadjustment.changed.disconnect(on_adjust_changed);
-        //this.composer.editor.user_changed_contents.disconnect(on_inner_size_changed);
-
         disable_scroll_reroute(this);
 
         remove(this.composer);
         close_container();
     }
 
-    public bool set_position(ref Gdk.Rectangle allocation, double hscroll, double vscroll,
-        int view_height) {
-        // WebKit.DOM.Element embed = this.conversation_viewer.web_view.get_dom_document()
-        //     .get_element_by_id(this.embed_id);
-        // if (embed == null)
-        //     return false;
-
-        // int div_height = (int) embed.client_height;
-        // int y_top = (int) (embed.offset_top + embed.client_top) - (int) vscroll;
-        // int available_height = int.min(y_top + div_height, view_height) - int.max(y_top, 0);
-
-        // if (available_height < 0 || available_height == div_height) {
-        //     // It fits in the available space, or it doesn't fit at all
-        //     allocation.y = y_top;
-        //     // When offscreen, make it very small to ensure scrolling during any edit
-        //     allocation.height = (available_height < 0) ? 1 : div_height;
-        // } else if (available_height > min_height) {
-        //     // There's enough room, so make sure we get the whole widget in
-        //     allocation.y = int.max(y_top, 0);
-        //     allocation.height = available_height;
-        // } else {
-        //     // Minimum height widget, placed so as much as possible is visible
-        //     allocation.y = int.max(y_top, int.min(y_top + div_height - min_height, 0));
-        //     allocation.height = min_height;
-        // }
-        // allocation.x = (int) (embed.offset_left + embed.client_left) - (int) hscroll;
-        // allocation.width = (int) embed.client_width;
-
-        // // Work out adjustment of composer web view
-        // this.setting_inner_scroll = true;
-        // this.composer.editor.vadjustment.set_value(allocation.y - y_top);
-        // this.setting_inner_scroll = false;
-        // // This sets the scroll before the widget gets resized.  Although the adjustment
-        // // may be scrolled to the bottom right now, the current value may not do that
-        // // once the widget is shrunk; for example, while scrolling down the page past
-        // // the bottom of the editor.  So if we're at the bottom, record that fact.  When
-        // // the limits of the adjustment are changed (watched by on_adjust_changed), we
-        // // can keep it at the bottom.
-        // this.scrolled_to_bottom = (y_top <= 0 && available_height < view_height);
-
-        return true;
-    }
-
-    // private void on_inner_scroll(Gtk.Adjustment adj) {
-    //     double delta = adj.value - this.inner_scroll_adj_value;
-    //     this.inner_scroll_adj_value = adj.value;
-    //     if (delta != 0 && !this.setting_inner_scroll) {
-    //         Gtk.Adjustment outer_adj = outer_scroller.vadjustment;
-    //         outer_adj.set_value(outer_adj.value + delta);
-    //     }
-    // }
-
-    // private void on_adjust_changed(Gtk.Adjustment adj) {
-    //     if (this.scrolled_to_bottom) {
-    //         this.setting_inner_scroll = true;
-    //         adj.set_value(adj.upper);
-    //         this.setting_inner_scroll = false;
-    //     }
-    // }
-
-    // private void on_inner_size_changed() {
-    //     this.scrolled_to_bottom = false;  // The inserted character may cause a desired scroll
-    //     Idle.add(recalc_height);  // So that this runs after the character has been inserted
-    // }
-
-    private bool recalc_height() {
-        // int view_height,
-        //     base_height = get_allocated_height() - this.composer.editor.get_allocated_height();
-        // try {
-        //     view_height = (int) this.composer.editor.get_dom_document()
-        //         .query_selector("#message-body").offset_height;
-        // } catch (Error error) {
-        //     debug("Error getting height of editor: %s", error.message);
-        //     return Source.REMOVE;
-        // }
-
-        // if (view_height != inner_view_height || min_height != base_height + MIN_EDITOR_HEIGHT) {
-        //     this.inner_view_height = view_height;
-        //     this.min_height = base_height + MIN_EDITOR_HEIGHT;
-
-        //     // Calculate height widget should be to avoid scrolling in editor
-        //     int widget_height = int.max(view_height + base_height - 2, min_height); //? about 2
-
-        //     // XXX Clamp the widget height to something arbitrary for
-        //     // the same reasons as in
-        //     // ConversationWebView::get_preferred_height, to avoid a
-        //     // crash. See Bug 765516 and Bug 728002.
-        //     const int MAX_HEIGHT = 5000;
-        //     if (widget_height > MAX_HEIGHT) {
-        //         widget_height = MAX_HEIGHT;
-        //     }
-
-        //     set_size_request(-1, widget_height);
-        // }
-        return Source.REMOVE;
-    }
-
+    // This method intercepts scroll events destined for the embedded
+    // composer and diverts them them to the conversation listbox's
+    // outer scrolled window or the composer's editor as appropriate.
+    //
+    // The aim is to let the user increase the height of the composer
+    // via scrolling when it it smaller than the current scrolled
+    // window, scroll through the conversation itself, and also scroll
+    // the composer's editor, in a reasonably natural way.
     private bool on_inner_scroll_event(Gdk.EventScroll event) {
-        this.outer_scroller.scroll_event(event);
-        return true;
+        // Bugs & improvements:
+        //
+        // - Clamp top of embedded window to top/bottom of viewport a
+        //   bit better, sometimes it will sit a few pixels below the
+        //   toolbar will be or be half obscured by the top of the
+        //   viewport, etc
+        // - Maybe let the user shrink the size of the composer down
+        //   when scrolling up?
+        // - When window size changes, need to adjust size of composer
+        //   window, although maybe that might be taken care of by
+        //   allowing the user to scroll to shrink the size of the
+        //   window?
+
+        bool ret = Gdk.EVENT_STOP;
+        if (event.direction == Gdk.ScrollDirection.SMOOTH &&
+            event.delta_y != 0.0) {
+            // Scrolling vertically
+            Gtk.Adjustment adj  = this.outer_scroller.vadjustment;
+            Gtk.Allocation alloc;
+            get_allocation(out alloc);
+
+            // Scroll unit calc taken from
+            // gtk_scrolled_window_scroll_event
+            double scroll_unit = Math.pow(adj.page_size, 2.0 / 3.0);
+            double scroll_delta = event.delta_y * scroll_unit;
+            double initial_value = adj.value;
+
+            if (event.delta_y > 0.0) {
+                // Scrolling down
+                if (alloc.y > adj.value) {
+                    // This embed isn't against the top of the visible
+                    // area, so scroll the outer. Clamp the scroll
+                    // delta to bring it to the top at most.
+                    event.delta_y = (
+                        Math.fmin(scroll_delta, alloc.y - adj.value) / scroll_unit
+                    );
+                    this.outer_scroller.scroll_event(event);
+                }
+                double remainder_delta = scroll_delta - (adj.value - initial_value);
+
+                if (remainder_delta > 0.0001) {
+                    // Outer scroller didn't use the complete delta,
+                    // so work out what to do with the remainder.
+
+                    int editor_height = this.composer.editor.get_allocated_height();
+                    int editor_preferred = this.composer.editor.preferred_height;
+                    int scrolled_height = this.outer_scroller.get_allocated_height();
+
+                    if (alloc.height < scrolled_height &&
+                        editor_height < editor_preferred) {
+                        // The editor is smaller than allowed/preferred,
+                        // so make it bigger
+                        int editor_delta = (int) Math.round(remainder_delta);
+                        if (editor_delta + alloc.height > scrolled_height) {
+                            editor_delta = scrolled_height - alloc.height;
+                        }
+                        if (editor_delta + editor_height > editor_preferred) {
+                            editor_delta = editor_preferred - editor_height;
+                        }
+                        remainder_delta -= editor_delta;
+                        set_size_request(-1, get_allocated_height() + editor_delta);
+                    } else {
+                        // Still some scroll distance unused, so let the
+                        // editor have at it.
+                        event.delta_y = (remainder_delta / scroll_unit);
+                        ret = Gdk.EVENT_PROPAGATE;
+                    }
+                }
+            } else if (event.delta_y < 0.0) {
+                // Scrolling up
+                double alloc_bottom = alloc.y + alloc.height;
+                double adj_bottom = adj.value + adj.page_size;
+                if (alloc_bottom < adj_bottom) {
+                    // This embed isn't against the bottom of the
+                    // scrolled window, so scroll the scroll the
+                    // outer. Clamp the scroll delta to bring it to
+                    // the bottom at most.
+                    event.delta_y = (
+                        Math.fmax(scroll_delta, alloc_bottom - adj_bottom) / scroll_unit
+                    );
+                    this.outer_scroller.scroll_event(event);
+                    double remainder_delta = scroll_delta - (adj.value - initial_value);
+                    if (Math.fabs(remainder_delta) > 0.0001) {
+                        event.delta_y = (remainder_delta / scroll_unit);
+                        ret = Gdk.EVENT_PROPAGATE;
+                    }
+                } else {
+                    ret = Gdk.EVENT_PROPAGATE;
+                }
+            }
+        }
+        return ret;
     }
 
     public void present() {
