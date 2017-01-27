@@ -22,6 +22,7 @@ public abstract class ClientWebViewTestCase<V> : Gee.TestCase {
         ClientWebView.init_web_context(
             this.config,
             File.new_for_path(_BUILD_ROOT_DIR).get_child("src"),
+            File.new_for_path("/tmp"), // XXX use something better here
             true
         );
         try {

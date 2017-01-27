@@ -32,6 +32,19 @@ public class ClientWebView : WebKit.WebView {
     private const double ZOOM_DEFAULT = 1.0;
     private const double ZOOM_FACTOR = 0.1;
 
+
+    // Workaround WK binding ctor not accepting any args
+    private class WebsiteDataManager : WebKit.WebsiteDataManager {
+
+        public WebsiteDataManager(string base_cache_directory) {
+            Object(base_cache_directory: base_cache_directory);
+        }
+
+    }
+
+
+    private static WebKit.WebContext? default_context = null;
+
     private static WebKit.UserScript? script = null;
     private static WebKit.UserScript? allow_remote_images = null;
 
@@ -40,10 +53,13 @@ public class ClientWebView : WebKit.WebView {
      */
     public static void init_web_context(Configuration config,
                                         File web_extension_dir,
+                                        File cache_dir,
                                         bool enable_logging) {
-        WebKit.WebContext context = WebKit.WebContext.get_default();
+        WebsiteDataManager data_manager = new WebsiteDataManager(cache_dir.get_path());
+        WebKit.WebContext context = new WebKit.WebContext.with_website_data_manager(data_manager);
         context.set_process_model(WebKit.ProcessModel.SHARED_SECONDARY_PROCESS);
         context.set_cache_model(WebKit.CacheModel.DOCUMENT_BROWSER);
+
         context.register_uri_scheme("cid", (req) => {
                 ClientWebView? view = req.get_web_view() as ClientWebView;
                 if (view != null) {
@@ -69,6 +85,8 @@ public class ClientWebView : WebKit.WebView {
         config.settings.changed[Configuration.SPELL_CHECK_LANGUAGES].connect(() => {
                 update_spellcheck(context, config);
             });
+
+        ClientWebView.default_context = context;
     }
 
     /**
@@ -227,7 +245,11 @@ public class ClientWebView : WebKit.WebView {
              custom_manager ?? new WebKit.UserContentManager();
         content_manager.add_script(ClientWebView.script);
 
-        Object(user_content_manager: content_manager, settings: setts);
+        Object(
+            web_context: ClientWebView.default_context,
+            user_content_manager: content_manager,
+            settings: setts
+        );
 
         // XXX get the allow prefix from the extension somehow
 

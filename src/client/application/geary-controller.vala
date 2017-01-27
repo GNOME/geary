@@ -192,6 +192,7 @@ public class GearyController : Geary.BaseObject {
         ClientWebView.init_web_context(
             this.application.config,
             this.application.get_web_extensions_dir(),
+            this.application.get_user_cache_directory().get_child("web-resources"),
             Args.log_debug
         );
         try {
@@ -208,7 +209,7 @@ public class GearyController : Geary.BaseObject {
         // per-session, and we don't want to have to load the cache
         // for each conversation load.
         File avatar_cache_dir = this.application.get_user_cache_directory()
-            .get_child("avatar_cache");
+            .get_child("avatars");
         this.avatar_cache = new Soup.Cache(
             avatar_cache_dir.get_path(),
             Soup.CacheType.SINGLE_USER
