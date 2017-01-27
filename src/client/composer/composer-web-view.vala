@@ -235,23 +235,21 @@ public class ComposerWebView : ClientWebView {
      */
     public void set_rich_text(bool enabled) {
         this.is_rich_text = enabled;
-        this.run_javascript.begin(
-            "geary.setRichText(%s);".printf(enabled ? "true" : "false"), null
-        );
+        this.call.begin(Geary.JS.callable("geary.setRichText").bool(enabled), null);
     }
 
     /**
      * Undoes the last edit operation.
      */
     public void undo() {
-        this.run_javascript.begin("geary.undo();", null);
+        this.call.begin(Geary.JS.callable("geary.undo"), null);
     }
 
     /**
      * Redoes the last undone edit operation.
      */
     public void redo() {
-        this.run_javascript.begin("geary.redo();", null);
+        this.call.begin(Geary.JS.callable("geary.redo"), null);
     }
 
     /**
@@ -357,16 +355,14 @@ public class ComposerWebView : ClientWebView {
      * will be inserted wrapping the selection.
      */
     public void insert_link(string href) {
-        this.run_javascript.begin(
-            "geary.insertLink(\"%s\");".printf(href), null
-        );
+        this.call.begin(Geary.JS.callable("geary.insertLink").string(href), null);
     }
 
     /**
      * Removes any A element at the current text cursor location.
      */
     public void delete_link() {
-        this.run_javascript.begin("geary.deleteLink();", null);
+        this.call.begin(Geary.JS.callable("geary.deleteLink"), null);
     }
 
     /**
@@ -386,23 +382,21 @@ public class ComposerWebView : ClientWebView {
      * Indents the line at the current text cursor location.
      */
     public void indent_line() {
-        this.run_javascript.begin("geary.indentLine();", null);
+        this.call.begin(Geary.JS.callable("geary.indentLine"), null);
     }
 
     /**
      * Updates the signature block if it has not been deleted.
      */
     public new void update_signature(string signature) {
-        this.run_javascript.begin(
-            "geary.updateSignature(\"%s\");".printf(signature), null
-        );
+        this.call.begin(Geary.JS.callable("geary.updateSignature").string(signature), null);
     }
 
     /**
      * Removes the quoted message (if any) from the composer.
      */
     public void delete_quoted_message() {
-        this.run_javascript.begin("geary.deleteQuotedMessage();", null);
+        this.call.begin(Geary.JS.callable("geary.deleteQuotedMessage"), null);
     }
 
     /**
@@ -411,8 +405,11 @@ public class ComposerWebView : ClientWebView {
     public async bool contains_attachment_keywords(string keyword_spec, string subject) {
         try {
             return WebKitUtil.to_bool(
-                yield run_javascript("geary.containsAttachmentKeyword(\"%s\", \"%s\");"
-                                     .printf(keyword_spec, subject), null)
+                yield call(
+                    Geary.JS.callable("geary.containsAttachmentKeyword")
+                    .string(keyword_spec)
+                    .string(subject),
+                    null)
                 );
         } catch (Error err) {
             debug("Error checking or attchment keywords: %s", err.message);
@@ -424,31 +421,28 @@ public class ComposerWebView : ClientWebView {
      * Converts plain text URLs in the editor content into links.
      */
     public async void linkify_content() throws Error {
-        yield run_javascript("geary.linkifyContent();", null);
+        this.call.begin(Geary.JS.callable("geary.linkifyContent"), null);
     }
 
     /**
      * Returns the editor content as an HTML string.
      */
     public async string? get_html() throws Error {
-        WebKit.JavascriptResult result = yield this.run_javascript(
-            "geary.getHtml();", null
+        return WebKitUtil.to_string(
+            yield call(Geary.JS.callable("geary.getHtml"), null)
         );
-        return WebKitUtil.to_string(result);
     }
 
     /**
      * Returns the editor text as RFC 3676 format=flowed text.
      */
     public async string? get_text() throws Error {
-        WebKit.JavascriptResult result = yield this.run_javascript(
-            "geary.getText();", null
-        );
-
         const int MAX_BREAKABLE_LEN = 72; // F=F recommended line limit
         const int MAX_UNBREAKABLE_LEN = 998; // SMTP line limit
 
-        string body_text = WebKitUtil.to_string(result);
+        string body_text = WebKitUtil.to_string(
+            yield call(Geary.JS.callable("geary.getText"), null)
+        );
         string[] lines = body_text.split("\n");
         GLib.StringBuilder flowed = new GLib.StringBuilder.sized(body_text.length);
         foreach (string line in lines) {

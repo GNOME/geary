@@ -330,7 +330,7 @@ public class ClientWebView : WebKit.WebView {
      * Load any remote images previously that were blocked.
      */
     public void load_remote_images() {
-        run_javascript.begin("geary.loadRemoteImages();", null);
+        this.call.begin(Geary.JS.callable("geary.loadRemoteImages"), null);
     }
 
     /**
@@ -357,6 +357,15 @@ public class ClientWebView : WebKit.WebView {
 
     public void zoom_out() {
         this.zoom_level -= (this.zoom_level * ZOOM_FACTOR);
+    }
+
+    /**
+     * Invokes a {@link Geary.JS.Callable} on this web view.
+     */
+    protected async WebKit.JavascriptResult call(Geary.JS.Callable target,
+                                                 Cancellable? cancellable)
+    throws Error {
+        return yield run_javascript(target.to_string(), cancellable);
     }
 
     /**

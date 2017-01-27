@@ -64,8 +64,8 @@ public class ConversationWebView : ClientWebView {
      * Returns the current selection, for prefill as find text.
      */
     public async string? get_selection_for_find() throws Error{
-        WebKit.JavascriptResult result = yield this.run_javascript(
-            "geary.getSelectionForFind();", null
+        WebKit.JavascriptResult result = yield call(
+            Geary.JS.callable("geary.getSelectionForFind"), null
         );
         return WebKitUtil.to_string(result);
     }
@@ -74,8 +74,8 @@ public class ConversationWebView : ClientWebView {
      * Returns the current selection, for quoting in a message.
      */
     public async string? get_selection_for_quoting() throws Error {
-        WebKit.JavascriptResult result = yield this.run_javascript(
-            "geary.getSelectionForQuoting();", null
+        WebKit.JavascriptResult result = yield call(
+            Geary.JS.callable("geary.getSelectionForQuoting"), null
         );
         return WebKitUtil.to_string(result);
     }

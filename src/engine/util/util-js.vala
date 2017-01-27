@@ -156,4 +156,76 @@ namespace Geary.JS {
         }
     }
 
+    /**
+     * Escapes a string so as to be safte to use as a JS string literal.
+     *
+     * This does not append opening or closing quotes.
+     */
+    public string escape_string(string value) {
+        const unichar[] RESERVED = {
+            '\x00', '\'', '"', '\\', '\n', '\r', '\v', '\t', '\b', '\f'
+        };
+        StringBuilder builder = new StringBuilder.sized(value.length);
+        for (int i = 0; i < value.length; i++) {
+            if (value.valid_char(i)) {
+                unichar c = value.get_char(i);
+                if (c in RESERVED) {
+                    builder.append_c('\\');
+                }
+                builder.append_unichar(c);
+            }
+        }
+        return (string) builder.data;
+    }
+
+    /**
+     * Convenience method for returning a new Callable instance.
+     */
+    public Callable callable(string base_name) {
+        return new Callable(base_name);
+    }
+
+    /**
+     * A class for constructing a well formed, safe, invokable JS call.
+     */
+    public class Callable {
+
+        private string base_name;
+        private string[] safe_args = new string[0];
+
+
+        public Callable(string base_name) {
+            this.base_name = base_name;
+        }
+
+        public string to_string() {
+            return base_name + "(" + global::string.joinv(",", safe_args) + ");";
+        }
+
+        public Callable string(string value) {
+            add_param("\"" + escape_string(value) + "\"");
+            return this;
+        }
+
+        public Callable double(double value) {
+            add_param(value.to_string());
+            return this;
+        }
+
+        public Callable int(int value) {
+            add_param(value.to_string());
+            return this;
+        }
+
+        public Callable bool(bool value) {
+            add_param(value ? "true" : "false");
+            return this;
+        }
+
+        private inline void add_param(string value) {
+            this.safe_args += value;
+        }
+
+    }
+
 }
