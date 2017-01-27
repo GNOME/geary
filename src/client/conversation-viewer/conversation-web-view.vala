@@ -85,7 +85,17 @@ public class ConversationWebView : ClientWebView {
     // doesn't seem to work.
     public override void get_preferred_height(out int minimum_height,
                                               out int natural_height) {
-        minimum_height = natural_height = this.preferred_height;
+        // XXX clamp height to something not too outrageous so we
+        // don't get an XServer error trying to allocate a massive
+        // window.
+        const uint max_pixels = 8 * 1024 * 1024;
+        int width = get_allocated_width();
+        int height = this.preferred_height;
+        if (height * width > max_pixels) {
+            height = (int) Math.floor(max_pixels / (double) width);
+        }
+
+        minimum_height = natural_height = height;
     }
 
     // Overridden since we always what the view to be sized according
