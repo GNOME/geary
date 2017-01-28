@@ -10,6 +10,22 @@
   transition: height 0.25s !important;
 }
 
+html {
+  /* Trigger CSS 2.1 § 10.6.7 to get a shrink-wrapped height. */
+  position: absolute !important;
+  top: 0 !important;
+  bottom: auto !important;
+  height: auto !important;
+
+  /* Fix up the width after going to absolute positioning above. */
+  width: 100%;
+
+  /* Lock down the box just enough so we don't get an incrementally
+     expanding web view */
+  box-sizing: border-box !important;
+  margin: 0 !important;
+}
+
 body {
   margin: 12px;
   border: 0;
