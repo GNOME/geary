@@ -8,6 +8,7 @@ Icon=geary
 TryExec=geary
 Exec=geary %U
 NoDisplay=true
+Hidden=true
 Type=Application
 Terminal=false
 Categories=GNOME;GTK;Network;Email;
