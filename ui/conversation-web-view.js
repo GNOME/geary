@@ -52,20 +52,6 @@ ConversationPageState.prototype = {
         }
     },
     /**
-     * Polls for a change in the page's preferred height.
-     */
-    pollPreferredHeightUpdate: function() {
-        let state = this;
-        let count = 0;
-        let timeoutId = window.setInterval(function() {
-            if (state.updatePreferredHeight() || ++count >= 10) {
-                // Cancel polling when height actually changes or if
-                // no change was found after a long enough period
-                window.clearTimeout(timeoutId);
-            }
-        }, 10);
-    },
-    /**
      * Add top level blockquotes to hide/show container.
      */
     createControllableQuotes: function() {
@@ -91,16 +77,30 @@ ConversationPageState.prototype = {
                     );
                 }
 
+                let quoteDiv = document.createElement("DIV");
+                quoteDiv.classList.add("geary-quote");
+                quoteDiv.appendChild(blockquote);
+
                 let state = this;
                 function newControllerButton(styleClass, text) {
                     let button = document.createElement("BUTTON");
                     button.classList.add("geary-button");
                     button.type = "button";
                     button.onclick = function() {
-                        quoteContainer.classList.toggle(
-                            ConversationPageState.QUOTE_HIDE_CLASS
-                        );
-                        state.pollPreferredHeightUpdate();
+                        let hide = ConversationPageState.QUOTE_HIDE_CLASS;
+                        quoteContainer.classList.toggle(hide);
+
+                        // Update the preferred height. We calculate
+                        // what the difference should be rather than
+                        // getting it directly, since WK won't ever
+                        // shrink the height of the HTML element.
+                        let height = quoteContainer.offsetHeight - quoteDiv.offsetHeight;
+                        if (quoteContainer.classList.contains(hide)) {
+                            height = state.lastPreferredHeight - height;
+                        } else {
+                            height = state.lastPreferredHeight + height;
+                        }
+                        state.updatePreferredHeight(height);
                     };
                     button.appendChild(document.createTextNode(text));
 
@@ -117,10 +117,6 @@ ConversationPageState.prototype = {
                 quoteContainer.appendChild(newControllerButton(
                     "geary-hider", "▲        ▲        ▲"
                 ));
-
-                let quoteDiv = document.createElement("DIV");
-                quoteDiv.classList.add("geary-quote");
-                quoteDiv.appendChild(blockquote);
 
                 quoteContainer.appendChild(quoteDiv);
                 parent.insertBefore(quoteContainer, nextSibling);

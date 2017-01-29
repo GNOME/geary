@@ -84,9 +84,12 @@ PageState.prototype = {
     /**
      * Sends "preferredHeightChanged" message if it has changed.
      */
-    updatePreferredHeight: function() {
+    updatePreferredHeight: function(height) {
+        if (height === undefined) {
+            height = this.getPreferredHeight();
+        }
+
         let updated = false;
-        let height = this.getPreferredHeight();
         if (height > 0 && height != this.lastPreferredHeight) {
             updated = true;
             this.lastPreferredHeight = height;
