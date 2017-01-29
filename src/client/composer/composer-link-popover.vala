@@ -88,8 +88,9 @@ public class ComposerLinkPopover : Gtk.Popover {
         );
     }
 
-    ~ComposerLinkPopover() {
-        debug("Destructing...");
+    public override void show() {
+        base.show();
+        this.url.grab_focus();
     }
 
     public override void destroy() {

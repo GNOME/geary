@@ -16,17 +16,6 @@
         <property name="row_spacing">6</property>
         <property name="column_spacing">6</property>
         <child>
-          <object class="GtkLabel">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="label" translatable="yes">Link URL:</property>
-          </object>
-          <packing>
-            <property name="left_attach">0</property>
-            <property name="top_attach">0</property>
-          </packing>
-        </child>
-        <child>
           <object class="GtkEntry" id="url">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
@@ -40,7 +29,7 @@
             <signal name="changed" handler="on_url_changed" swapped="no"/>
           </object>
           <packing>
-            <property name="left_attach">1</property>
+            <property name="left_attach">0</property>
             <property name="top_attach">0</property>
           </packing>
         </child>
@@ -49,7 +38,32 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <property name="tooltip_text" translatable="yes">Insert a new link with this URL</property>
+            <property name="tooltip_text" translatable="yes" comments="Note that this button and the Update button will never be shown at the same time to the user.">Insert the new link with this URL</property>
+            <signal name="clicked" handler="on_activate_popover" swapped="no"/>
+            <child>
+              <object class="GtkImage">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="icon_name">emblem-ok-symbolic</property>
+              </object>
+            </child>
+            <child internal-child="accessible">
+              <object class="AtkObject" id="insert-atkobject">
+                <property name="AtkObject::accessible-name" translatable="yes">Link URL</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="left_attach">1</property>
+            <property name="top_attach">0</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="update">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="tooltip_text" translatable="yes" comments="Note that this button and the Insert button will never be shown at the same time to the user.">Update this link’s URL</property>
             <signal name="clicked" handler="on_activate_popover" swapped="no"/>
             <child>
               <object class="GtkImage">
@@ -61,26 +75,6 @@
           </object>
           <packing>
             <property name="left_attach">2</property>
-            <property name="top_attach">0</property>
-          </packing>
-        </child>
-        <child>
-          <object class="GtkButton" id="update">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="receives_default">True</property>
-            <property name="tooltip_text" translatable="yes">Update the link URL</property>
-            <signal name="clicked" handler="on_activate_popover" swapped="no"/>
-            <child>
-              <object class="GtkImage">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="icon_name">emblem-ok-symbolic</property>
-              </object>
-            </child>
-          </object>
-          <packing>
-            <property name="left_attach">3</property>
             <property name="top_attach">0</property>
           </packing>
         </child>
@@ -100,7 +94,7 @@
             </child>
           </object>
           <packing>
-            <property name="left_attach">4</property>
+            <property name="left_attach">3</property>
             <property name="top_attach">0</property>
           </packing>
         </child>
@@ -120,7 +114,7 @@
             </child>
           </object>
           <packing>
-            <property name="left_attach">5</property>
+            <property name="left_attach">4</property>
             <property name="top_attach">0</property>
           </packing>
         </child>
