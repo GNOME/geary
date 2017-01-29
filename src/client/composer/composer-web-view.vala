@@ -253,6 +253,25 @@ public class ComposerWebView : ClientWebView {
     }
 
     /**
+     * Saves the current text selection so it can be restored later.
+     *
+     * Returns an id to be used to refer to the selection in
+     * subsequent calls.
+     */
+    public async string save_selection() throws Error {
+        return WebKitUtil.to_string(
+            yield call(Geary.JS.callable("geary.saveSelection"), null)
+        );
+    }
+
+    /**
+     * Removes a saved selection.
+     */
+    public void free_selection(string id) {
+        this.call.begin(Geary.JS.callable("geary.freeSelection").string(id), null);
+    }
+
+    /**
      * Cuts selected content and sends it to the clipboard.
      */
     public void cut_clipboard() {
@@ -354,8 +373,11 @@ public class ComposerWebView : ClientWebView {
      * will be updated, else if some text is selected, an A element
      * will be inserted wrapping the selection.
      */
-    public void insert_link(string href) {
-        this.call.begin(Geary.JS.callable("geary.insertLink").string(href), null);
+    public void insert_link(string href, string selection_id) {
+        this.call.begin(
+            Geary.JS.callable("geary.insertLink").string(href).string(selection_id),
+            null
+        );
     }
 
     /**

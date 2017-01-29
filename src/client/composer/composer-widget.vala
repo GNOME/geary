@@ -503,7 +503,7 @@ public class ComposerWidget : Gtk.EventBox {
         this.editor.key_press_event.connect(on_editor_key_press_event);
         this.editor.load_changed.connect(on_load_changed);
         this.editor.mouse_target_changed.connect(on_mouse_target_changed);
-        this.editor.selection_changed.connect((has_selection) => { update_cursor_actions(); });
+        this.editor.selection_changed.connect(on_selection_changed);
 
         // Place the message area before the compose toolbar in the focus chain, so that
         // the user can tab directly from the Subject: field to the message area.
@@ -2098,15 +2098,22 @@ public class ComposerWidget : Gtk.EventBox {
         return account_sig;
     }
 
-    private ComposerLinkPopover new_link_popover(ComposerLinkPopover.Type type,
-                                                 string url) {
+    private async ComposerLinkPopover new_link_popover(ComposerLinkPopover.Type type,
+                                                       string url) {
+        var selection_id = "";
+        try {
+            selection_id = yield this.editor.save_selection();
+        } catch (Error err) {
+            debug("Error saving selection: %s", err.message);
+        }
         ComposerLinkPopover popover = new ComposerLinkPopover(type);
         popover.set_link_url(url);
-        popover.hide.connect(() => {
+        popover.closed.connect(() => {
+                this.editor.free_selection(selection_id);
                 Idle.add(() => { popover.destroy(); return Source.REMOVE; });
             });
         popover.link_activate.connect((link_uri) => {
-                this.editor.insert_link(popover.link_uri);
+                this.editor.insert_link(popover.link_uri, selection_id);
             });
         popover.link_delete.connect(() => {
                 this.editor.delete_link();
@@ -2161,13 +2168,14 @@ public class ComposerWidget : Gtk.EventBox {
             location.x = (int) button.x;
             location.y = (int) button.y;
 
-            ComposerLinkPopover popover = new_link_popover(
-                ComposerLinkPopover.Type.EXISTING_LINK,
-                this.pointer_url
-            );
-            popover.set_relative_to(this.editor);
-            popover.set_pointing_to(location);
-            popover.show();
+            this.new_link_popover.begin(
+                ComposerLinkPopover.Type.EXISTING_LINK, this.pointer_url,
+                (obj, res) => {
+                    ComposerLinkPopover popover = this.new_link_popover.end(res);
+                    popover.set_relative_to(this.editor);
+                    popover.set_pointing_to(location);
+                    popover.show();
+                });
         }
         return Gdk.EVENT_PROPAGATE;
     }
@@ -2253,15 +2261,38 @@ public class ComposerWidget : Gtk.EventBox {
     }
 
     private void on_insert_link(SimpleAction action, Variant? param) {
-        ComposerLinkPopover popover = this.cursor_url == null
-            ? new_link_popover(ComposerLinkPopover.Type.NEW_LINK, "http://")
-            : new_link_popover(ComposerLinkPopover.Type.EXISTING_LINK, this.cursor_url);
-        popover.set_relative_to(this.insert_link_button);
-        popover.show();
+        ComposerLinkPopover.Type type = ComposerLinkPopover.Type.NEW_LINK;
+        string url = "http://";
+        if (this.cursor_url != null) {
+            type = ComposerLinkPopover.Type.EXISTING_LINK;
+            url = this.cursor_url;
+        }
+
+        this.new_link_popover.begin(type, url, (obj, res) => {
+                ComposerLinkPopover popover = this.new_link_popover.end(res);
+
+                // We have to disconnect then reconnect the selection
+                // changed signal for the duration of the popover
+                // being active since if the user selects the text in
+                // the URL entry, then the editor will lose its
+                // selection, the inset link action will become
+                // disabled, and the popover will disappear
+                this.editor.selection_changed.disconnect(on_selection_changed);
+                popover.closed.connect(() => {
+                        this.editor.selection_changed.connect(on_selection_changed);
+                    });
+
+                popover.set_relative_to(this.insert_link_button);
+                popover.show();
+            });
     }
 
     private void on_open_inspector(SimpleAction action, Variant? param) {
         this.editor.get_inspector().show();
+    }
+
+    private void on_selection_changed(bool has_selection) {
+        update_cursor_actions();
     }
 
 }

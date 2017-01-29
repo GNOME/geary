@@ -26,12 +26,11 @@ ComposerPageState.prototype = {
     __proto__: PageState.prototype,
     init: function() {
         PageState.prototype.init.apply(this, []);
-
         this.messageBody = null;
-
         this.undoEnabled = false;
         this.redoEnabled = false;
-
+        this.selections = new Map();
+        this.nextSelectionId = 0;
         this.cursorContext = null;
 
         let state = this;
@@ -138,21 +137,22 @@ ComposerPageState.prototype = {
         document.execCommand("redo", false, null);
         this.checkCommandStack();
     },
-    insertLink: function(href) {
+    saveSelection: function() {
+        let id = ++this.nextSelectionId.toString();
+        this.selections.set(id, SelectionUtil.save());
+        return id;
+    },
+    freeSelection: function(id) {
+        this.selections.delete(id);
+    },
+    insertLink: function(href, selectionId) {
         if (!window.getSelection().isCollapsed) {
             // There is currently a selection, so assume the user
             // knows what they are doing and just linkify it.
             document.execCommand("createLink", false, href);
         } else {
-            let selected = SelectionUtil.getCursorElement();
-            if (selected != null && selected.tagName == "A") {
-                // The current cursor element is an A, so select it
-                // since createLink requires a range
-                let selection = SelectionUtil.save();
-                SelectionUtil.selectNode(selected);
-                document.execCommand("createLink", false, href);
-                SelectionUtil.restore(selection);
-            }
+            SelectionUtil.restore(this.selections.get(selectionId));
+            document.execCommand("createLink", false, href);
         }
     },
     deleteLink: function() {
