@@ -1,6 +1,7 @@
 /* testcase.vala
  *
  * Copyright (C) 2009 Julien Peeters
+ * Copyright (C) 2017 Michael Gratton
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
