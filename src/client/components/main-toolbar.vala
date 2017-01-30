@@ -102,8 +102,8 @@ public class MainToolbar : Gtk.Box {
         setup_popover_button(copy_message_button, copy_folder_menu, GearyController.ACTION_COPY_MENU);
         setup_popover_button(move_message_button, move_folder_menu, GearyController.ACTION_MOVE_MENU);
 
-        setup_button(archive_button, GearyController.ACTION_ARCHIVE_MESSAGE, true);
-        setup_button(trash_delete_button, GearyController.ACTION_TRASH_MESSAGE);
+        setup_button(archive_button, GearyController.ACTION_ARCHIVE_CONVERSATION, true);
+        setup_button(trash_delete_button, GearyController.ACTION_TRASH_CONVERSATION);
         setup_button(undo_button, GearyController.ACTION_UNDO);
 
         setup_button(find_button, GearyController.ACTION_TOGGLE_FIND);
@@ -115,8 +115,8 @@ public class MainToolbar : Gtk.Box {
     }
 
     public void update_trash_button(bool is_trash) {
-        string action_name = (is_trash ? GearyController.ACTION_TRASH_MESSAGE
-            : GearyController.ACTION_DELETE_MESSAGE);
+        string action_name = (is_trash ? GearyController.ACTION_TRASH_CONVERSATION
+            : GearyController.ACTION_DELETE_CONVERSATION);
         setup_button(trash_delete_button, action_name, false);
     }
 

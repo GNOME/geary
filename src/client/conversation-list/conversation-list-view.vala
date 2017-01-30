@@ -283,7 +283,7 @@ public class ConversationListView : Gtk.TreeView {
             Geary.App.Conversation conversation = get_model().get_conversation_at_path(path);
             
             string?[] action_names = {};
-            action_names += GearyController.ACTION_DELETE_MESSAGE;
+            action_names += GearyController.ACTION_DELETE_CONVERSATION;
             
             if (conversation.is_unread())
                 action_names += GearyController.ACTION_MARK_AS_READ;

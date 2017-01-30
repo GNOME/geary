@@ -1,8 +1,8 @@
 <ui>
-    <accelerator action="GearyArchiveMessage" />
+    <accelerator action="GearyArchiveConversation" />
     <accelerator action="GearyConversationList" />
     <accelerator action="GearyCopyMenuButton" />
-    <accelerator action="GearyDeleteMessage" />
+    <accelerator action="GearyDeleteConversation" />
     <accelerator action="GearyFindInConversation" />
     <accelerator action="GearyForwardMessage" />
     <accelerator action="GearyMoveMenuButton" />
@@ -10,7 +10,7 @@
     <accelerator action="GearyReplyAllMessage" />
     <accelerator action="GearyReplyToMessage" />
     <accelerator action="GearySearch" />
-    <accelerator action="GearyTrashMessage" />
+    <accelerator action="GearyTrashConversation" />
     <accelerator action="GearyZoomIn" />
     <accelerator action="GearyZoomNormal" />
     <accelerator action="GearyZoomOut" />

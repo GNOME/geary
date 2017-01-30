@@ -27,9 +27,9 @@ public class GearyController : Geary.BaseObject {
     public const string ACTION_REPLY_TO_MESSAGE = "GearyReplyToMessage";
     public const string ACTION_REPLY_ALL_MESSAGE = "GearyReplyAllMessage";
     public const string ACTION_FORWARD_MESSAGE = "GearyForwardMessage";
-    public const string ACTION_ARCHIVE_MESSAGE = "GearyArchiveMessage";
-    public const string ACTION_TRASH_MESSAGE = "GearyTrashMessage";
-    public const string ACTION_DELETE_MESSAGE = "GearyDeleteMessage";
+    public const string ACTION_ARCHIVE_CONVERSATION = "GearyArchiveConversation";
+    public const string ACTION_TRASH_CONVERSATION = "GearyTrashConversation";
+    public const string ACTION_DELETE_CONVERSATION = "GearyDeleteConversation";
     public const string ACTION_EMPTY_SPAM = "GearyEmptySpam";
     public const string ACTION_EMPTY_TRASH = "GearyEmptyTrash";
     public const string ACTION_UNDO = "GearyUndo";
@@ -54,21 +54,21 @@ public class GearyController : Geary.BaseObject {
     
     public const int MIN_CONVERSATION_COUNT = 50;
     
-    private const string DELETE_MESSAGE_LABEL = _("Delete conversation");
-    private const string DELETE_MESSAGE_TOOLTIP_SINGLE = _("Delete conversation (Shift+Delete)");
-    private const string DELETE_MESSAGE_TOOLTIP_MULTIPLE = _("Delete conversations (Shift+Delete)");
-    private const string DELETE_MESSAGE_ICON_NAME = "edit-delete-symbolic";
+    private const string DELETE_CONVERSATION_LABEL = _("Delete conversation");
+    private const string DELETE_CONVERSATION_TOOLTIP_SINGLE = _("Delete conversation (Shift+Delete)");
+    private const string DELETE_CONVERSATION_TOOLTIP_MULTIPLE = _("Delete conversations (Shift+Delete)");
+    private const string DELETE_CONVERSATION_ICON_NAME = "edit-delete-symbolic";
     
     // This refers to the action ("move email to the trash"), not the Trash folder itself
-    private const string TRASH_MESSAGE_TOOLTIP_SINGLE = _("Move conversation to Trash (Delete, Backspace)");
-    private const string TRASH_MESSAGE_TOOLTIP_MULTIPLE = _("Move conversations to Trash (Delete, Backspace)");
-    private const string TRASH_MESSAGE_ICON_NAME = "user-trash-symbolic";
+    private const string TRASH_CONVERSATION_TOOLTIP_SINGLE = _("Move conversation to Trash (Delete, Backspace)");
+    private const string TRASH_CONVERSATION_TOOLTIP_MULTIPLE = _("Move conversations to Trash (Delete, Backspace)");
+    private const string TRASH_CONVERSATION_ICON_NAME = "user-trash-symbolic";
     
     // This refers to the action ("archive an email"), not the Archive folder itself
-    private const string ARCHIVE_MESSAGE_LABEL = _("_Archive");
-    private const string ARCHIVE_MESSAGE_TOOLTIP_SINGLE = _("Archive conversation (A)");
-    private const string ARCHIVE_MESSAGE_TOOLTIP_MULTIPLE = _("Archive conversations (A)");
-    private const string ARCHIVE_MESSAGE_ICON_NAME = "mail-archive-symbolic";
+    private const string ARCHIVE_CONVERSATION_LABEL = _("_Archive");
+    private const string ARCHIVE_CONVERSATION_TOOLTIP_SINGLE = _("Archive conversation (A)");
+    private const string ARCHIVE_CONVERSATION_TOOLTIP_MULTIPLE = _("Archive conversations (A)");
+    private const string ARCHIVE_CONVERSATION_ICON_NAME = "mail-archive-symbolic";
     
     private const string MARK_AS_SPAM_LABEL = _("Mark as S_pam");
     private const string MARK_AS_NOT_SPAM_LABEL = _("Mark as not S_pam");
@@ -515,25 +515,25 @@ public class GearyController : Geary.BaseObject {
         entries += find_in_conversation;
         add_accelerator("slash", ACTION_FIND_IN_CONVERSATION);
 
-        Gtk.ActionEntry archive_message = { ACTION_ARCHIVE_MESSAGE, ARCHIVE_MESSAGE_ICON_NAME,
-            ARCHIVE_MESSAGE_LABEL, "A", null, on_archive_message };
-        archive_message.tooltip = ARCHIVE_MESSAGE_TOOLTIP_SINGLE;
-        entries += archive_message;
+        Gtk.ActionEntry archive_conversation = { ACTION_ARCHIVE_CONVERSATION, ARCHIVE_CONVERSATION_ICON_NAME,
+            ARCHIVE_CONVERSATION_LABEL, "A", null, on_archive_conversation };
+        archive_conversation.tooltip = ARCHIVE_CONVERSATION_TOOLTIP_SINGLE;
+        entries += archive_conversation;
         
         // although this action changes according to the account's capabilities, set to Delete
         // until they're known so the "translatable" string doesn't first appear
-        Gtk.ActionEntry trash_message = { ACTION_TRASH_MESSAGE, TRASH_MESSAGE_ICON_NAME,
-            null, "Delete", null, on_trash_message };
-        trash_message.tooltip = TRASH_MESSAGE_TOOLTIP_SINGLE;
-        entries += trash_message;
-        add_accelerator("BackSpace", ACTION_TRASH_MESSAGE);
-        
-        Gtk.ActionEntry delete_message = { ACTION_DELETE_MESSAGE, DELETE_MESSAGE_ICON_NAME,
-            null, "<Shift>Delete", null, on_delete_message };
-        delete_message.label = DELETE_MESSAGE_LABEL;
-        delete_message.tooltip = DELETE_MESSAGE_TOOLTIP_SINGLE;
-        entries += delete_message;
-        add_accelerator("<Shift>BackSpace", ACTION_DELETE_MESSAGE);
+        Gtk.ActionEntry trash_conversation = { ACTION_TRASH_CONVERSATION, TRASH_CONVERSATION_ICON_NAME,
+            null, "Delete", null, on_trash_conversation };
+        trash_conversation.tooltip = TRASH_CONVERSATION_TOOLTIP_SINGLE;
+        entries += trash_conversation;
+        add_accelerator("BackSpace", ACTION_TRASH_CONVERSATION);
+
+        Gtk.ActionEntry delete_conversation = { ACTION_DELETE_CONVERSATION, DELETE_CONVERSATION_ICON_NAME,
+            null, "<Shift>Delete", null, on_delete_conversation };
+        delete_conversation.label = DELETE_CONVERSATION_LABEL;
+        delete_conversation.tooltip = DELETE_CONVERSATION_TOOLTIP_SINGLE;
+        entries += delete_conversation;
+        add_accelerator("<Shift>BackSpace", ACTION_DELETE_CONVERSATION);
         
         Gtk.ActionEntry empty_spam = { ACTION_EMPTY_SPAM, null, null, null, null, on_empty_spam };
         empty_spam.label = _("Empty _Spam…");
@@ -595,9 +595,9 @@ public class GearyController : Geary.BaseObject {
             ACTION_REPLY_TO_MESSAGE,
             ACTION_REPLY_ALL_MESSAGE,
             ACTION_FORWARD_MESSAGE,
-            ACTION_ARCHIVE_MESSAGE,
-            ACTION_TRASH_MESSAGE,
-            ACTION_DELETE_MESSAGE,
+            ACTION_ARCHIVE_CONVERSATION,
+            ACTION_TRASH_CONVERSATION,
+            ACTION_DELETE_CONVERSATION,
         };
         Gtk.ActionGroup action_group = this.application.actions;
 
@@ -2466,17 +2466,17 @@ public class GearyController : Geary.BaseObject {
         this.main_window.conversation_viewer.conversation_find_bar.set_search_mode(true);
     }
 
-    private void on_archive_message() {
+    private void on_archive_conversation() {
         archive_or_delete_selection_async.begin(true, false, cancellable_folder,
             on_archive_or_delete_selection_finished);
     }
     
-    private void on_trash_message() {
+    private void on_trash_conversation() {
         archive_or_delete_selection_async.begin(false, true, cancellable_folder,
             on_archive_or_delete_selection_finished);
     }
     
-    private void on_delete_message() {
+    private void on_delete_conversation() {
         archive_or_delete_selection_async.begin(false, false, cancellable_folder,
             on_archive_or_delete_selection_finished);
     }
@@ -2820,11 +2820,11 @@ public class GearyController : Geary.BaseObject {
         // Mutliple message buttons.
         this.application.actions.get_action(ACTION_MOVE_MENU).sensitive =
             (current_folder is Geary.FolderSupport.Move);
-        this.application.actions.get_action(ACTION_ARCHIVE_MESSAGE).sensitive =
+        this.application.actions.get_action(ACTION_ARCHIVE_CONVERSATION).sensitive =
             (current_folder is Geary.FolderSupport.Archive);
-        this.application.actions.get_action(ACTION_TRASH_MESSAGE).sensitive =
+        this.application.actions.get_action(ACTION_TRASH_CONVERSATION).sensitive =
             current_folder_supports_trash();
-        this.application.actions.get_action(ACTION_DELETE_MESSAGE).sensitive =
+        this.application.actions.get_action(ACTION_DELETE_CONVERSATION).sensitive =
             (current_folder is Geary.FolderSupport.Remove);
 
         cancel_context_dependent_buttons();
@@ -2845,11 +2845,11 @@ public class GearyController : Geary.BaseObject {
         this.application.actions.get_action(ACTION_FORWARD_MESSAGE).sensitive = respond_sensitive;
         this.application.actions.get_action(ACTION_MOVE_MENU).sensitive =
             sensitive && (current_folder is Geary.FolderSupport.Move);
-        this.application.actions.get_action(ACTION_ARCHIVE_MESSAGE).sensitive = sensitive
+        this.application.actions.get_action(ACTION_ARCHIVE_CONVERSATION).sensitive = sensitive
             && (current_folder is Geary.FolderSupport.Archive);
-        this.application.actions.get_action(ACTION_TRASH_MESSAGE).sensitive = sensitive
+        this.application.actions.get_action(ACTION_TRASH_CONVERSATION).sensitive = sensitive
             && current_folder_supports_trash();
-        this.application.actions.get_action(ACTION_DELETE_MESSAGE).sensitive = sensitive
+        this.application.actions.get_action(ACTION_DELETE_CONVERSATION).sensitive = sensitive
             && (current_folder is Geary.FolderSupport.Remove);
 
         cancel_context_dependent_buttons();
@@ -2896,12 +2896,12 @@ public class GearyController : Geary.BaseObject {
         this.application.actions.get_action(ACTION_MOVE_MENU).tooltip = single ?
             MOVE_MESSAGE_TOOLTIP_SINGLE : MOVE_MESSAGE_TOOLTIP_MULTIPLE;
 
-        this.application.actions.get_action(ACTION_ARCHIVE_MESSAGE).tooltip = single ?
-            ARCHIVE_MESSAGE_TOOLTIP_SINGLE : ARCHIVE_MESSAGE_TOOLTIP_MULTIPLE;
-        this.application.actions.get_action(ACTION_TRASH_MESSAGE).tooltip = single ?
-            TRASH_MESSAGE_TOOLTIP_SINGLE : TRASH_MESSAGE_TOOLTIP_MULTIPLE;
-        this.application.actions.get_action(ACTION_DELETE_MESSAGE).tooltip = single ?
-            DELETE_MESSAGE_TOOLTIP_SINGLE : DELETE_MESSAGE_TOOLTIP_MULTIPLE;
+        this.application.actions.get_action(ACTION_ARCHIVE_CONVERSATION).tooltip = single ?
+            ARCHIVE_CONVERSATION_TOOLTIP_SINGLE : ARCHIVE_CONVERSATION_TOOLTIP_MULTIPLE;
+        this.application.actions.get_action(ACTION_TRASH_CONVERSATION).tooltip = single ?
+            TRASH_CONVERSATION_TOOLTIP_SINGLE : TRASH_CONVERSATION_TOOLTIP_MULTIPLE;
+        this.application.actions.get_action(ACTION_DELETE_CONVERSATION).tooltip = single ?
+            DELETE_CONVERSATION_TOOLTIP_SINGLE : DELETE_CONVERSATION_TOOLTIP_MULTIPLE;
     }
 
     // Returns a list of composer windows for an account, or null if none.
