@@ -138,7 +138,7 @@ ComposerPageState.prototype = {
         this.checkCommandStack();
     },
     saveSelection: function() {
-        let id = ++this.nextSelectionId.toString();
+        let id = (++this.nextSelectionId).toString();
         this.selections.set(id, SelectionUtil.save());
         return id;
     },
