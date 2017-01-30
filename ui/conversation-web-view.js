@@ -64,13 +64,16 @@ ConversationPageState.prototype = {
             // Only insert into a quote container if the element is a
             // top level blockquote
             if (!ConversationPageState.isDescendantOf(blockquote, "BLOCKQUOTE")) {
+                let quoteHeight = blockquote.offsetHeight;
+
+                // Only make the quote it controllable if it is tall enough
+                let isControllable = (quoteHeight > 120);
+
                 let quoteContainer = document.createElement("DIV");
                 quoteContainer.classList.add(
                     ConversationPageState.QUOTE_CONTAINER_CLASS
                 );
-
-                // Only make it controllable if the quote is tall enough
-                if (blockquote.offsetHeight > 120) {
+                if (isControllable) {
                     quoteContainer.classList.add("geary-controllable");
                     quoteContainer.classList.add(
                         ConversationPageState.QUOTE_HIDE_CLASS
@@ -79,7 +82,12 @@ ConversationPageState.prototype = {
 
                 let quoteDiv = document.createElement("DIV");
                 quoteDiv.classList.add("geary-quote");
+
                 quoteDiv.appendChild(blockquote);
+                quoteContainer.appendChild(quoteDiv);
+                parent.insertBefore(quoteContainer, nextSibling);
+
+                let containerHeight = quoteDiv.offsetHeight;
 
                 let state = this;
                 function newControllerButton(styleClass, text) {
@@ -94,7 +102,7 @@ ConversationPageState.prototype = {
                         // what the difference should be rather than
                         // getting it directly, since WK won't ever
                         // shrink the height of the HTML element.
-                        let height = quoteContainer.offsetHeight - quoteDiv.offsetHeight;
+                        let height = quoteHeight - containerHeight;
                         if (quoteContainer.classList.contains(hide)) {
                             height = state.lastPreferredHeight - height;
                         } else {
@@ -111,15 +119,14 @@ ConversationPageState.prototype = {
                     return container;
                 }
 
-                quoteContainer.appendChild(newControllerButton(
-                    "geary-shower", "▼        ▼        ▼"
-                ));
-                quoteContainer.appendChild(newControllerButton(
-                    "geary-hider", "▲        ▲        ▲"
-                ));
-
-                quoteContainer.appendChild(quoteDiv);
-                parent.insertBefore(quoteContainer, nextSibling);
+                if (isControllable) {
+                    quoteContainer.appendChild(newControllerButton(
+                        "geary-shower", "▼        ▼        ▼"
+                    ));
+                    quoteContainer.appendChild(newControllerButton(
+                        "geary-hider", "▲        ▲        ▲"
+                    ));
+                }
             }
         }
     },
