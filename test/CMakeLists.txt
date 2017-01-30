@@ -12,6 +12,7 @@ set(TEST_SRC
   engine/rfc822-utils-test.vala
   engine/util-html-test.vala
   engine/util-inet-test.vala
+  engine/util-js-test.vala
   engine/util-timeout-manager-test.vala
 
   client/application/geary-configuration-test.vala

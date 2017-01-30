@@ -157,22 +157,50 @@ namespace Geary.JS {
     }
 
     /**
-     * Escapes a string so as to be safte to use as a JS string literal.
+     * Escapes a string so as to be safe to use as a JS string literal.
      *
      * This does not append opening or closing quotes.
      */
     public string escape_string(string value) {
-        const unichar[] RESERVED = {
-            '\x00', '\'', '"', '\\', '\n', '\r', '\x0b', '\t', '\b', '\f'
-        };
         StringBuilder builder = new StringBuilder.sized(value.length);
         for (int i = 0; i < value.length; i++) {
             if (value.valid_char(i)) {
                 unichar c = value.get_char(i);
-                if (c in RESERVED) {
-                    builder.append_c('\\');
+                switch (c) {
+                case '\x00':
+                    builder.append("\x00");
+                    break;
+                case '\'':
+                    builder.append("""\'""");
+                    break;
+                case '"':
+                    builder.append("""\"""");
+                    break;
+                case '\\':
+                    builder.append("""\\""");
+                    break;
+                case '\n':
+                    builder.append("""\n""");
+                    break;
+                case '\r':
+                    builder.append("""\r""");
+                    break;
+                case '\x0b':
+                    builder.append("\x0b");
+                    break;
+                case '\t':
+                    builder.append("""\t""");
+                    break;
+                case '\b':
+                    builder.append("""\b""");
+                    break;
+                case '\f':
+                    builder.append("""\f""");
+                    break;
+                default:
+                    builder.append_unichar(c);
+                    break;
                 }
-                builder.append_unichar(c);
             }
         }
         return (string) builder.data;
