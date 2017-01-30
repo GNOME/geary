@@ -72,7 +72,8 @@ public class ComposerLinkPopover : Gtk.Popover {
 
 
     public ComposerLinkPopover(Type type) {
-        set_default_widget(this.url);
+        // GTK_ 3.18: Re-enable this
+        //set_default_widget(this.url);
         set_focus_child(this.url);
         switch (type) {
         case Type.NEW_LINK:
@@ -159,7 +160,7 @@ public class ComposerLinkPopover : Gtk.Popover {
             style.remove_class(Gtk.STYLE_CLASS_ERROR);
             style.remove_class(Gtk.STYLE_CLASS_WARNING);
             this.url.set_icon_from_icon_name(pos, null);
-            this.url.set_tooltip_text(null);
+            this.url.set_tooltip_text("");
         }
 
         link_changed(url, is_valid && is_nominal);
