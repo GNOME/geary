@@ -153,7 +153,7 @@ include(GlibCompileResourcesSupport)
 #
 # We don't use CMake's enable_testing/add_test built-ins because they
 # use ctest. It's not called "test" because that is cmake reserved.
-add_custom_target(tests ALL geary-test)
+add_custom_target(tests geary-test)
 add_dependencies(tests geary-test)
 
 #

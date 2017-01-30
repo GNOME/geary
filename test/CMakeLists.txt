@@ -91,8 +91,6 @@ OPTIONS
     ${VALAC_OPTIONS}
 )
 
-add_executable(geary-test ${TEST_VALA_C} ${RESOURCES_C})
-# Depend on geary so things like GResources, GSetting, etc are
-# compiled before the tests are built and run.
-add_dependencies(geary-test geary)
+# Exclude from all so tests aren't built by default
+add_executable(geary-test EXCLUDE_FROM_ALL ${TEST_VALA_C} ${RESOURCES_C})
 target_link_libraries(geary-test ${DEPS_LIBRARIES} geary-client geary-engine)
