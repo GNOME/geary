@@ -15,9 +15,6 @@ public abstract class ClientWebViewTestCase<V> : Gee.TestCase {
 
     public ClientWebViewTestCase(string name) {
         base(name);
-    }
-
-    public override void set_up() {
         this.config = new Configuration(GearyApplication.APP_ID);
         ClientWebView.init_web_context(
             this.config,
@@ -30,6 +27,9 @@ public abstract class ClientWebViewTestCase<V> : Gee.TestCase {
         } catch (Error err) {
             assert_not_reached();
         }
+    }
+
+    public override void set_up() {
         this.test_view = set_up_test_view();
     }
 

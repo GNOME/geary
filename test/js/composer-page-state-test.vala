@@ -23,6 +23,12 @@ class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
         add_test("quote_lines", quote_lines);
         add_test("resolve_nesting", resolve_nesting);
         add_test("replace_non_breaking_space", replace_non_breaking_space);
+
+        try {
+            ComposerWebView.load_resources();
+        } catch (Error err) {
+            assert_not_reached();
+        }
     }
 
     public void edit_context_link() {
@@ -334,11 +340,6 @@ unknown://example6.com
     }
 
     protected override ComposerWebView set_up_test_view() {
-        try {
-            ComposerWebView.load_resources();
-        } catch (Error err) {
-            assert_not_reached();
-        }
         return new ComposerWebView(this.config);
     }
 

@@ -9,6 +9,7 @@ public class ComposerWebViewTest : ClientWebViewTestCase<ComposerWebView> {
 
     public ComposerWebViewTest() {
         base("ComposerWebViewTest");
+        add_test("load_resources", load_resources);
         add_test("edit_context", edit_context);
         add_test("get_html", get_html);
         add_test("get_text", get_text);
@@ -17,6 +18,14 @@ public class ComposerWebViewTest : ClientWebViewTestCase<ComposerWebView> {
         add_test("get_text_with_long_line", get_text_with_long_line);
         add_test("get_text_with_long_quote", get_text_with_long_quote);
         add_test("get_text_with_nbsp", get_text_with_nbsp);
+    }
+
+    public void load_resources() {
+        try {
+            ComposerWebView.load_resources();
+        } catch (Error err) {
+            assert_not_reached();
+        }
     }
 
     public void edit_context() {
@@ -160,11 +169,6 @@ long, long, long, long, long, long, long, long, long, long,
     }
 
     protected override ComposerWebView set_up_test_view() {
-        try {
-            ComposerWebView.load_resources();
-        } catch (Error err) {
-            assert_not_reached();
-        }
         return new ComposerWebView(this.config);
     }
 

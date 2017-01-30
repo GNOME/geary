@@ -17,6 +17,12 @@ class ConversationPageStateTest : ClientWebViewTestCase<ConversationWebView> {
         add_test("is_deceptive_text_deceptive_href", is_deceptive_text_deceptive_href);
         add_test("is_deceptive_text_non_matching_subdomain", is_deceptive_text_non_matching_subdomain);
         add_test("is_deceptive_text_different_domain", is_deceptive_text_different_domain);
+
+        try {
+            ConversationWebView.load_resources(File.new_for_path(""));
+        } catch (Error err) {
+            assert_not_reached();
+        }
     }
 
     public void is_deceptive_text_not_url() {
@@ -68,11 +74,6 @@ class ConversationPageStateTest : ClientWebViewTestCase<ConversationWebView> {
     }
 
     protected override ConversationWebView set_up_test_view() {
-        try {
-            ConversationWebView.load_resources(File.new_for_path(""));
-        } catch (Error err) {
-            assert_not_reached();
-        }
         return new ConversationWebView(this.config);
     }
 
