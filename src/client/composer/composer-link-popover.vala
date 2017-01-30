@@ -173,13 +173,15 @@ public class ComposerLinkPopover : Gtk.Popover {
     [GtkCallback]
     private void on_activate_popover() {
         link_activate();
-        this.popdown();
+        // GTK+ 3.22/4: Change change this to popdown()
+        hide();
     }
 
     [GtkCallback]
     private void on_delete_clicked() {
         link_delete();
-        this.popdown();
+        // GTK+ 3.22/4: Change change this to popdown()
+        hide();
     }
 
     [GtkCallback]

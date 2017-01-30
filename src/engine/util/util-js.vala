@@ -163,7 +163,7 @@ namespace Geary.JS {
      */
     public string escape_string(string value) {
         const unichar[] RESERVED = {
-            '\x00', '\'', '"', '\\', '\n', '\r', '\v', '\t', '\b', '\f'
+            '\x00', '\'', '"', '\\', '\n', '\r', '\x0b', '\t', '\b', '\f'
         };
         StringBuilder builder = new StringBuilder.sized(value.length);
         for (int i = 0; i < value.length; i++) {
