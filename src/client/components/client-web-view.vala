@@ -409,8 +409,12 @@ public class ClientWebView : WebKit.WebView {
         return handled;
     }
 
-    // Only allow string-based page loads, and notify but ignore if
-    // the user attempts to click on a link. Deny everything else.
+    // This method is called only when determining if something should
+    // be loaded for display in the web view as the primary
+    // resource. It is not used to determine if sub-resources such as
+    // images or JS will be loaded. So we only allow geary:body loads,
+    // and notify but ignore if the user attempts to click on a link,
+    // and deny everything else.
     private bool on_decide_policy(WebKit.WebView view,
                                   WebKit.PolicyDecision policy,
                                   WebKit.PolicyDecisionType type) {
@@ -420,8 +424,11 @@ public class ClientWebView : WebKit.WebView {
                 (WebKit.NavigationPolicyDecision) policy;
             switch (nav_policy.get_navigation_type()) {
             case WebKit.NavigationType.OTHER:
-                // HTML string load, and maybe other random things?
-                policy.use();
+                if (nav_policy.request.uri == INTERNAL_URL_BODY) {
+                    policy.use();
+                } else {
+                    policy.ignore();
+                }
                 break;
 
             case WebKit.NavigationType.LINK_CLICKED:
