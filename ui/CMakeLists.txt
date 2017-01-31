@@ -11,6 +11,7 @@ set(RESOURCE_LIST
   STRIPBLANKS "composer-link-popover.ui"
   STRIPBLANKS "composer-menus.ui"
   STRIPBLANKS "composer-widget.ui"
+              "composer-web-view.css"
               "composer-web-view.js"
   STRIPBLANKS "conversation-email.ui"
   STRIPBLANKS "conversation-email-attachment-view.ui"

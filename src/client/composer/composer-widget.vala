@@ -1268,7 +1268,7 @@ public class ComposerWidget : Gtk.EventBox {
 
         // Perform send.
         try {
-            yield this.editor.linkify_content();
+            yield this.editor.clean_content();
             yield this.account.send_email_async(yield get_composed_email());
         } catch (Error e) {
             GLib.message("Error sending email: %s", e.message);

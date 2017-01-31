@@ -7,13 +7,16 @@
 
 class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
 
+    private const string COMPLETE_BODY_TEMPLATE = """<div id="geary-body">%s<div><br></div><div><br></div><div><br></div></div>""";
+    private const string CLEAN_BODY_TEMPLATE = "%s<div><br></div><div><br></div><div><br></div>";
+
     public ComposerPageStateTest() {
         base("ComposerPageStateTest");
         add_test("edit_context_font", edit_context_font);
         add_test("edit_context_link", edit_context_link);
         add_test("indent_line", indent_line);
         add_test("contains_attachment_keywords", contains_attachment_keywords);
-        add_test("linkify_content", linkify_content);
+        add_test("clean_content", clean_content);
         add_test("get_html", get_html);
         add_test("get_text", get_text);
         add_test("get_text_with_quote", get_text_with_quote);
@@ -81,17 +84,17 @@ class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
     }
 
     public void contains_attachment_keywords() {
-        load_body_fixture("""
-<blockquote>inner quote</blockquote>
+        load_body_fixture_full("""
+<blockquote>innerquote</blockquote>
 
 <p>some text</p>
 
 some text
-
--- <br>sig
-
-<p>outerquote text<p>
-""");
+""",
+                          "-- <br>sig",
+                          "<p>outerquote text</p>",
+                          true
+            );
         try {
             assert(WebKitUtil.to_bool(run_javascript(
                 @"geary.containsAttachmentKeyword(\"some\", \"subject text\");"
@@ -117,7 +120,7 @@ some text
         }
     }
 
-    public void linkify_content() {
+    public void clean_content() {
         // XXX split these up into multiple tests
         load_body_fixture("""
 http://example1.com
@@ -141,12 +144,12 @@ unknown://example6.com
 <a href="blarg">http://example5.com</a>
 
 unknown://example6.com
-<br><br>""";
+""";
 
         try {
-            run_javascript("geary.linkifyContent();");
-            assert(WebKitUtil.to_string(run_javascript("geary.messageBody.innerHTML;")) ==
-                   expected);
+            run_javascript("geary.cleanContent();");
+            assert(WebKitUtil.to_string(run_javascript("geary.bodyPart.innerHTML;")) ==
+                   CLEAN_BODY_TEMPLATE.printf(expected));
         } catch (Geary.JS.Error err) {
             print("Geary.JS.Error: %s\n", err.message);
             assert_not_reached();
@@ -161,7 +164,7 @@ unknown://example6.com
         load_body_fixture(html);
         try {
             assert(WebKitUtil.to_string(run_javascript(@"window.geary.getHtml();")) ==
-                   html + "<br><br>");
+                   COMPLETE_BODY_TEMPLATE.printf(html));
         } catch (Geary.JS.Error err) {
             print("Geary.JS.Error: %s\n", err.message);
             assert_not_reached();
@@ -175,7 +178,7 @@ unknown://example6.com
         load_body_fixture("<p>para</p>");
         try {
             assert(WebKitUtil.to_string(run_javascript(@"window.geary.getText();")) ==
-                   "para\n\n\n\n");
+                   "para\n\n\n\n\n");
         } catch (Geary.JS.Error err) {
             print("Geary.JS.Error: %s\n", err.message);
             assert_not_reached();
@@ -190,7 +193,7 @@ unknown://example6.com
         load_body_fixture("<p>pre</p> <blockquote><p>quote</p></blockquote> <p>post</p>");
         try {
             assert(WebKitUtil.to_string(run_javascript(@"window.geary.getText();")) ==
-                   @"pre\n\n$(q_marker)quote\n$(q_marker)\npost\n\n\n\n");
+                   @"pre\n\n$(q_marker)quote\n$(q_marker)\npost\n\n\n\n\n");
         } catch (Geary.JS.Error err) {
             print("Geary.JS.Error: %s", err.message);
             assert_not_reached();
@@ -205,7 +208,7 @@ unknown://example6.com
         load_body_fixture("<p>pre</p> <blockquote><p>quote1</p> <blockquote><p>quote2</p></blockquote></blockquote> <p>post</p>");
         try {
             assert(WebKitUtil.to_string(run_javascript(@"window.geary.getText();")) ==
-                   @"pre\n\n$(q_marker)quote1\n$(q_marker)\n$(q_marker)$(q_marker)quote2\n$(q_marker)$(q_marker)\npost\n\n\n\n");
+                   @"pre\n\n$(q_marker)quote1\n$(q_marker)\n$(q_marker)$(q_marker)quote2\n$(q_marker)$(q_marker)\npost\n\n\n\n\n");
         } catch (Geary.JS.Error err) {
             print("Geary.JS.Error: %s\n", err.message);
             assert_not_reached();
@@ -343,8 +346,15 @@ unknown://example6.com
         return new ComposerWebView(this.config);
     }
 
-    protected override void load_body_fixture(string html = "") {
-        this.test_view.load_html(html, "", "", false, false);
+    protected override void load_body_fixture(string body = "") {
+        load_body_fixture_full(body, "", "", true);
+    }
+
+    protected void load_body_fixture_full(string body,
+                                          string sig,
+                                          string quote,
+                                          bool top_posting) {
+        this.test_view.load_html(body, sig, quote, top_posting, false);
         while (this.test_view.is_loading) {
             Gtk.main_iteration();
         }

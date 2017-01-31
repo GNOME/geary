@@ -12,7 +12,6 @@
 let ComposerPageState = function() {
     this.init.apply(this, arguments);
 };
-ComposerPageState.BODY_ID = "message-body";
 ComposerPageState.KEYWORD_SPLIT_REGEX = /[\s]+/g;
 ComposerPageState.QUOTE_START = "\x91";  // private use one
 ComposerPageState.QUOTE_END = "\x92";    // private use two
@@ -26,7 +25,11 @@ ComposerPageState.prototype = {
     __proto__: PageState.prototype,
     init: function() {
         PageState.prototype.init.apply(this, []);
-        this.messageBody = null;
+        this.bodyPart = null;
+        this.signaturePart = null;
+        this.quotePart = null;
+        this.focusedPart = null;
+
         this.undoEnabled = false;
         this.redoEnabled = false;
         this.selections = new Map();
@@ -55,12 +58,19 @@ ComposerPageState.prototype = {
     loaded: function() {
         let state = this;
 
-        this.messageBody = document.getElementById(ComposerPageState.BODY_ID);
+        this.bodyPart = document.getElementById("geary-body");
+        if (this.bodyPart == null) {
+            this.bodyPart = document.body;
+        }
+
+        this.signaturePart = document.getElementById("geary-signature");
+        this.quotePart = document.getElementById("geary-quote");
+
         // Should be using 'e.key' in listeners below instead of
         // keyIdentifier, but that was only fixed in WK in Oct 2016
         // (WK Bug 36267). Migrate to that when we can rely on it
         // being in WebKitGTK.
-        this.messageBody.addEventListener("keydown", function(e) {
+        document.body.addEventListener("keydown", function(e) {
             if (e.keyIdentifier == "U+0009" &&// Tab
                 !e.ctrlKey && !e.altKey && !e.metaKey) {
                 if (!e.shiftKey) {
@@ -74,7 +84,7 @@ ComposerPageState.prototype = {
         // We can't use keydown for this, captured or bubbled, since
         // that will also cause the line that the cursor is currenty
         // positioned on when Enter is pressed to also be outdented.
-        this.messageBody.addEventListener("keyup", function(e) {
+        document.body.addEventListener("keyup", function(e) {
             if (e.keyIdentifier == "Enter" && !e.shiftKey) {
                 // XXX WebKit seems to support both InsertNewline and
                 // InsertNewlineInQuotedContent arguments for
@@ -101,6 +111,7 @@ ComposerPageState.prototype = {
 
         // Focus within the HTML document
         document.body.focus();
+        this.updateFocusClass(this.bodyPart);
 
         // Set text cursor at appropriate position
         let cursor = document.getElementById("cursormarker");
@@ -117,14 +128,20 @@ ComposerPageState.prototype = {
 
         // Enable editing and observation machinery only after
         // modifying the body above.
-        this.messageBody.contentEditable = true;
+        this.bodyPart.contentEditable = true;
+        if (this.signaturePart != null) {
+            this.signaturePart.contentEditable = true;
+        }
+        if (this.quotePart != null) {
+            this.quotePart.contentEditable = true;
+        }
         let config = {
             attributes: true,
             childList: true,
             characterData: true,
             subtree: true
         };
-        this.bodyObserver.observe(this.messageBody, config);
+        this.bodyObserver.observe(document.body, config);
 
         // Chain up
         PageState.prototype.loaded.apply(this, []);
@@ -184,20 +201,21 @@ ComposerPageState.prototype = {
         }
     },
     updateSignature: function(signature) {
-        // XXX need mark the sig somehow so we can find it, select
-        // it and replace it using execCommand
+        if (this.signaturePart != null) {
+            console.log(signature);
+            this.signaturePart.innerHTML = signature;
+        }
     },
     deleteQuotedMessage: function() {
-        // XXX need mark the quote somehow so we can find it, select
-        // it and delete it using execCommand
+        if (this.quotePart != null) {
+            this.quotePart.parentNode.removeChild(this.quotePart);
+            this.quotePart = null;
+        }
     },
     /**
      * Determines if subject or body content refers to attachments.
      */
     containsAttachmentKeyword: function(keywordSpec, subject) {
-        // XXX this could also use a structured representation of the
-        // message body so we don't need to text to check
-
         let ATTACHMENT_KEYWORDS_SUFFIX = "doc|pdf|xls|ppt|rtf|pps";
 
         let completeKeys = new Set(keywordSpec.toLocaleLowerCase().split("|"));
@@ -209,57 +227,30 @@ ComposerPageState.prototype = {
         }
 
         // Check interesting body text
+        let node = this.bodyPart.firstChild;
+        let content = [];
         let breakingElements = new Set([
             "BR", "P", "DIV", "BLOCKQUOTE", "TABLE", "OL", "UL", "HR"
         ]);
-        let content = this.messageBody.firstChild;
-        let found = false;
-        let done = false;
-        let textContent = [];
-        while (content != null && !done) {
-            if (content.nodeType == Node.TEXT_NODE) {
-                textContent.push(content.textContent);
+        while (node != null) {
+            if (node.nodeType == Node.TEXT_NODE) {
+                content.push(node.textContent);
             } else if (content.nodeType == Node.ELEMENT_NODE) {
-                let isBreaking = breakingElements.has(content.nodeName);
+                let isBreaking = breakingElements.has(node.nodeName);
                 if (isBreaking) {
-                    textContent.push("\n");
+                    content.push("\n");
                 }
 
-                // Always exclude quoted text
+                // Only include non-quoted text
                 if (content.nodeName != "BLOCKQUOTE") {
-                    textContent.push(content.innerText);
-                }
-
-                if (isBreaking || content.nextSibling == null) {
-                    for (let line of textContent.join("").split("\n")) {
-                        // Ignore everything after a sig or a
-                        // forwarded message.
-                        // XXX This breaks if the user types this at
-                        // the start of a line, also, WK's innerText
-                        // impl strips trailing whitespace, so can't
-                        // test for 'line == "-- "' :(
-                        if (line.startsWith("--")) {
-                            done = true;
-                            break;
-                        }
-
-                        line = line.trim();
-                        if (line != "") {
-                            if (ComposerPageState.containsKeywords(line, completeKeys, suffixKeys)) {
-                                found = true;
-                                done = true;
-                                break;
-                            }
-                        }
-                    }
-                    textContent = [];
+                    content.push(content.textContent);
                 }
             }
-
-            content = content.nextSibling;
+            node = node.nextSibling;
         }
-
-        return found;
+        return ComposerPageState.containsKeywords(
+            content.join(""), completeKeys, suffixKeys
+        );
     },
     tabOut: function() {
         document.execCommand(
@@ -284,7 +275,7 @@ ComposerPageState.prototype = {
         // execCommand affecting the DOM srtcuture
         let count = 0;
         let node = SelectionUtil.getCursorElement();
-        while (node != this.messageBody) {
+        while (node != document.body) {
             if (node.nodeName == "BLOCKQUOTE") {
                 count++;
             }
@@ -295,14 +286,39 @@ ComposerPageState.prototype = {
             count--;
         }
     },
-    linkifyContent: function() {
-        ComposerPageState.linkify(this.messageBody);
+    cleanContent: function() {
+        ComposerPageState.cleanPart(this.bodyPart, false);
+        ComposerPageState.linkify(this.bodyPart);
+
+        this.signaturePart = ComposerPageState.cleanPart(this.signaturePart, true);
+        this.quotePart = ComposerPageState.cleanPart(this.quotePart, true);
     },
     getHtml: function() {
-        return this.messageBody.innerHTML;
+        // Clone the message parts so we can clean them without
+        // modifiying the DOM, needed when saving drafts. In contrast
+        // with cleanContent above, we don't remove empty elements so
+        // they still exist when restoring from draft
+        let parent = document.createElement("DIV");
+        parent.appendChild(
+            ComposerPageState.cleanPart(this.bodyPart.cloneNode(true), false)
+        );
+
+        if (this.signaturePart != null) {
+            parent.appendChild(
+                ComposerPageState.cleanPart(this.signaturePart.cloneNode(true), false)
+            );
+        }
+
+        if (this.quotePart != null) {
+            parent.appendChild(
+                ComposerPageState.cleanPart(this.quotePart.cloneNode(true), false)
+            );
+        }
+
+        return parent.innerHTML;
     },
     getText: function() {
-        return ComposerPageState.htmlToQuotedText(this.messageBody);
+        return ComposerPageState.htmlToQuotedText(document.body);
     },
     setRichText: function(enabled) {
         if (enabled) {
@@ -330,6 +346,8 @@ ComposerPageState.prototype = {
         PageState.prototype.selectionChanged.apply(this, []);
 
         let cursor = SelectionUtil.getCursorElement();
+
+        // Update cursor context
         if (cursor != null) {
             let newContext = new EditContext(cursor);
             if (!newContext.equals(this.cursorContext)) {
@@ -338,6 +356,30 @@ ComposerPageState.prototype = {
                     newContext.encode()
                 );
             }
+        }
+
+        while (cursor != null) {
+            let parent = cursor.parentNode;
+            if (parent == document.body) {
+                this.updateFocusClass(cursor);
+                break;
+            }
+            cursor = parent;
+        }
+    },
+    /**
+     * Work around WebKit note yet supporting :focus-inside pseudoclass.
+     */
+    updateFocusClass: function(newFocus) {
+        if (this.focusedPart != null) {
+            this.focusedPart.classList.remove("geary-focus");
+            this.focusedPart = null;
+        }
+        if (newFocus == this.bodyPart ||
+            newFocus == this.signaturePart ||
+            newFocus == this.quotePart) {
+            this.focusedPart = newFocus;
+            this.focusedPart.classList.add("geary-focus");
         }
     }
 };
@@ -373,6 +415,22 @@ ComposerPageState.containsKeywords = function(line, completeKeys, suffixKeys) {
     }
 
     return false;
+};
+
+/**
+ * Removes internal attributes from a composer part..
+ */
+ComposerPageState.cleanPart = function(part, removeIfEmpty) {
+    if (part != null) {
+        part.removeAttribute("class");
+        part.removeAttribute("contenteditable");
+
+        if (removeIfEmpty && part.innerText.trim() == "") {
+            part.parentNode.removeChild(part);
+            part = null;
+        }
+    }
+    return part;
 };
 
 /**

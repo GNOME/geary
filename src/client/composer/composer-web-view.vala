@@ -16,53 +16,6 @@ public class ComposerWebView : ClientWebView {
     private const string CURSOR_CONTEXT_CHANGED = "cursorContextChanged";
     private const string DOCUMENT_MODIFIED = "documentModified";
 
-    private const string HTML_BODY = """
-        <html><head><title></title>
-        <style>
-        body {
-            margin: 0px !important;
-            padding: 0 !important;
-            background-color: white !important;
-            font-size: medium !important;
-        }
-        body.plain, body.plain * {
-            font-family: monospace !important;
-            font-weight: normal;
-            font-style: normal;
-            font-size: medium !important;
-            color: black;
-            text-decoration: none;
-        }
-        body.plain a {
-            cursor: text;
-        }
-        #message-body {
-            box-sizing: border-box;
-            padding: 10px;
-            outline: 0px solid transparent;
-            min-height: 100%;
-        }
-        blockquote {
-            margin-top: 0px;
-            margin-bottom: 0px;
-            margin-left: 10px;
-            margin-right: 10px;
-            padding-left: 5px;
-            padding-right: 5px;
-            background-color: white;
-            border: 0;
-            border-left: 3px #aaa solid;
-        }
-        pre {
-            white-space: pre-wrap;
-            margin: 0;
-        }
-        </style>
-        </head><body>
-        <div id="message-body" dir="auto">%s</div>
-        </body></html>""";
-
-
     /**
      * Encapsulates editing-related state for a specific DOM node.
      *
@@ -125,10 +78,14 @@ public class ComposerWebView : ClientWebView {
     }
 
 
+    private static WebKit.UserStyleSheet? app_style = null;
     private static WebKit.UserScript? app_script = null;
 
     public static void load_resources()
         throws Error {
+        ComposerWebView.app_style = ClientWebView.load_app_stylesheet(
+            "composer-web-view.css"
+        );
         ComposerWebView.app_script = ClientWebView.load_app_script(
             "composer-web-view.js"
         );
@@ -171,8 +128,8 @@ public class ComposerWebView : ClientWebView {
 
         add_events(Gdk.EventMask.KEY_PRESS_MASK | Gdk.EventMask.KEY_RELEASE_MASK);
 
+        this.user_content_manager.add_style_sheet(ComposerWebView.app_style);
         this.user_content_manager.add_script(ComposerWebView.app_script);
-        // this.should_insert_text.connect(on_should_insert_text);
 
         register_message_handler(COMMAND_STACK_CHANGED, on_command_stack_changed);
         register_message_handler(CURSOR_CONTEXT_CHANGED, on_cursor_context_changed);
@@ -187,39 +144,54 @@ public class ComposerWebView : ClientWebView {
                               string quote,
                               bool top_posting,
                               bool is_draft) {
-        const string CURSOR = "<span id=\"cursormarker\"></span>";
-        const string SPACER = "<br />";
+        const string HTML_PRE = """<html><body dir="auto">""";
+        const string HTML_POST = """</body></html>""";
+        const string BODY_PRE = """
+<div id="geary-body">""";
+        const string BODY_POST = """</div>
+""";
+        const string SIGNATURE = """
+<div id="geary-signature">%s</div>
+""";
+        const string QUOTE = """
+<div id="geary-quote"><br />%s</div>
+""";
+        const string CURSOR = "<div><span id=\"cursormarker\"></span><br /></div>";
+        const string SPACER = "<div><br /></div>";
 
         StringBuilder html = new StringBuilder();
+        html.append(HTML_PRE);
         if (!is_draft) {
-            if (!Geary.String.is_empty(body)) {
+            html.append(BODY_PRE);
+            bool have_body = !Geary.String.is_empty(body);
+            if (have_body) {
                 html.append(body);
-                html.append(SPACER);
-                html.append(SPACER);
             }
 
             if (!top_posting && !Geary.String.is_empty(quote)) {
+                if (have_body) {
+                    html.append(SPACER);
+                }
                 html.append(quote);
-                html.append(SPACER);
             }
 
+            html.append(SPACER);
             html.append(CURSOR);
+            html.append(SPACER);
+            html.append(BODY_POST);
 
             if (!Geary.String.is_empty(signature)) {
-                html.append(SPACER);
-                html.append(signature);
+                html.append_printf(SIGNATURE, signature);
             }
 
             if (top_posting && !Geary.String.is_empty(quote)) {
-                html.append(SPACER);
-                html.append(SPACER);
-                html.append(quote);
+                html.append_printf(QUOTE, quote);
             }
         } else {
             html.append(quote);
         }
-
-        base.load_html(HTML_BODY.printf(html.data));
+        html.append(HTML_POST);
+        base.load_html((string) html.data);
     }
 
     /**
@@ -440,10 +412,13 @@ public class ComposerWebView : ClientWebView {
     }
 
     /**
-     * Converts plain text URLs in the editor content into links.
+     * Cleans the editor content ready for sending.
+     *
+     * This modifies the DOM, so there's no going back after calling
+     * this.
      */
-    public async void linkify_content() throws Error {
-        this.call.begin(Geary.JS.callable("geary.linkifyContent"), null);
+    public async void clean_content() throws Error {
+        this.call.begin(Geary.JS.callable("geary.cleanContent"), null);
     }
 
     /**

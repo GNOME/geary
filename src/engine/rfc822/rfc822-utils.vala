@@ -257,7 +257,7 @@ public string quote_email_for_reply(Geary.Email email, string? quote, TextFormat
     }
 
     quoted += "<br />";
-    quoted += "\n" + quote_body(email, quote, true, format);
+    quoted += quote_body(email, quote, true, format);
 
     return quoted;
 }
@@ -276,7 +276,7 @@ public string quote_email_for_forward(Geary.Email email, string? quote, TextForm
         return "";
 
     string quoted = _("---------- Forwarded message ----------");
-    quoted += "\n\n";
+    quoted += "\n";
     string from_line = email_addresses_for_reply(email.from, format);
     if (!String.is_empty_or_whitespace(from_line))
         quoted += _("From: %s\n").printf(from_line);
@@ -289,11 +289,8 @@ public string quote_email_for_forward(Geary.Email email, string? quote, TextForm
     if (!String.is_empty_or_whitespace(cc_line))
         quoted += _("Cc: %s\n").printf(cc_line);
     quoted += "\n";  // A blank line between headers and body
-    
     quoted = quoted.replace("\n", "<br />");
-    
     quoted += quote_body(email, quote, false, format);
-    
     return quoted;
 }
 
