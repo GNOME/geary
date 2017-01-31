@@ -228,9 +228,9 @@ public string email_addresses_for_reply(Geary.RFC822.MailboxAddresses? addresses
 public string quote_email_for_reply(Geary.Email email, string? quote, TextFormat format) {
     if (email.body == null && quote == null)
         return "";
-    
-    string quoted = (quote == null) ? "<br /><br />" : "";
-    
+
+    string quoted = "";
+
     /// Format for the datetime that a message being replied to was received
     /// See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
     string DATE_FORMAT = _("%a, %b %-e, %Y at %-l:%M %p");
@@ -255,14 +255,10 @@ public string quote_email_for_reply(Geary.Email email, string? quote, TextFormat
         string QUOTED_LABEL = _("On %s:");
         quoted += QUOTED_LABEL.printf(email.date.value.format(DATE_FORMAT));
     }
-    
+
     quoted += "<br />";
-    
-    quoted += "\n" + quote_body(email, quote, true, format);
-    
-    if (quote != null)
-        quoted += "<br /><br />\n";
-    
+    quoted += quote_body(email, quote, true, format);
+
     return quoted;
 }
 
@@ -278,11 +274,9 @@ public string quote_email_for_reply(Geary.Email email, string? quote, TextFormat
 public string quote_email_for_forward(Geary.Email email, string? quote, TextFormat format) {
     if (email.body == null && quote == null)
         return "";
-    
-    string quoted = "\n\n";
-    
-    quoted += _("---------- Forwarded message ----------");
-    quoted += "\n\n";
+
+    string quoted = _("---------- Forwarded message ----------");
+    quoted += "\n";
     string from_line = email_addresses_for_reply(email.from, format);
     if (!String.is_empty_or_whitespace(from_line))
         quoted += _("From: %s\n").printf(from_line);
@@ -295,11 +289,8 @@ public string quote_email_for_forward(Geary.Email email, string? quote, TextForm
     if (!String.is_empty_or_whitespace(cc_line))
         quoted += _("Cc: %s\n").printf(cc_line);
     quoted += "\n";  // A blank line between headers and body
-    
     quoted = quoted.replace("\n", "<br />");
-    
     quoted += quote_body(email, quote, false, format);
-    
     return quoted;
 }
 

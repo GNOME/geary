@@ -365,6 +365,7 @@ public class ConversationEmail : Gtk.Box {
      */
     public ConversationEmail(Geary.Email email,
                              Geary.ContactStore contact_store,
+                             Configuration config,
                              bool is_sent,
                              bool is_draft) {
         this.email = email;
@@ -418,8 +419,23 @@ public class ConversationEmail : Gtk.Box {
             });
         insert_action_group("eml", message_actions);
 
+        // Construct CID resources from attachments
+
+        Gee.Map<string,Geary.Memory.Buffer> cid_resources =
+            new Gee.HashMap<string,Geary.Memory.Buffer>();
+        foreach (Geary.Attachment att in email.attachments) {
+            if (att.content_id != null) {
+                try {
+                    cid_resources[att.content_id] =
+                        new Geary.Memory.FileBuffer(att.file, true);
+                } catch (Error err) {
+                    debug("Could not open attachment: %s", err.message);
+                }
+            }
+        }
+
         // Construct the view for the primary message, hook into it
-        
+
         Geary.RFC822.Message message;
         try {
             message = email.get_message();
@@ -428,11 +444,16 @@ public class ConversationEmail : Gtk.Box {
             return;
         }
 
-        this.primary_message = new ConversationMessage(
-            message,
-            contact_store,
-            email.load_remote_images().is_certain()
+        bool load_images = email.load_remote_images().is_certain();
+        Geary.Contact contact = this.contact_store.get_by_rfc822(
+            message.get_primary_originator()
         );
+        if (contact != null)  {
+            load_images |= contact.always_load_remote_images();
+        }
+
+        this.primary_message = new ConversationMessage(message, config, load_images);
+        this.primary_message.web_view.add_internal_resources(cid_resources);
         connect_message_view_signals(this.primary_message);
 
         this.primary_message.summary.add(this.actions);
@@ -467,14 +488,13 @@ public class ConversationEmail : Gtk.Box {
 
         Gee.List<Geary.RFC822.Message> sub_messages = message.get_sub_messages();
         if (sub_messages.size > 0) {
-            this.primary_message.body.pack_start(
-                this.sub_messages, false, false, 0
-            );
+            this.primary_message.body_container.add(this.sub_messages);
         }
         foreach (Geary.RFC822.Message sub_message in sub_messages) {
             ConversationMessage attached_message =
-                new ConversationMessage(sub_message, contact_store, false);
+                new ConversationMessage(sub_message, config, false);
             connect_message_view_signals(attached_message);
+            attached_message.web_view.add_internal_resources(cid_resources);
             this.sub_messages.add(attached_message);
             this._attached_messages.add(attached_message);
         }
@@ -496,11 +516,22 @@ public class ConversationEmail : Gtk.Box {
                     GearyApplication.instance.controller.avatar_session,
                     load_cancelled
                 );
+
                 return !load_cancelled.is_cancelled();
             });
 
+        // Only load attachments once the web views have finished
+        // loading, since we want to know if any attachments marked as
+        // being inline were actually not displayed inline, and hence
+        // need to be displayed as if they were attachments.
         if (!load_cancelled.is_cancelled()) {
-            yield load_attachments(load_cancelled);
+            if (this.message_bodies_loaded) {
+                yield load_attachments(load_cancelled);
+            } else {
+                this.notify["message-bodies-loaded"].connect(() => {
+                        load_attachments.begin(load_cancelled);
+                    });
+            }
         }
     }
 
@@ -543,19 +574,33 @@ public class ConversationEmail : Gtk.Box {
     /**
      * Returns user-selected body HTML from a message, if any.
      */
-    public string? get_selection_for_quoting() {
-        return (this.body_selection_message != null)
-            ? this.body_selection_message.get_selection_for_quoting()
-            : null;
+    public async string? get_selection_for_quoting() {
+        string? selection = null;
+        if (this.body_selection_message != null) {
+            try {
+                selection =
+                   yield this.body_selection_message.web_view.get_selection_for_quoting();
+            } catch (Error err) {
+                debug("Failed to get selection for quoting: %s", err.message);
+            }
+        }
+        return selection;
     }
 
     /**
      * Returns user-selected body text from a message, if any.
      */
-    public string? get_selection_for_find() {
-        return (this.body_selection_message != null)
-            ? this.body_selection_message.get_selection_for_find()
-            : null;
+    public async string? get_selection_for_find() {
+        string? selection = null;
+        if (this.body_selection_message != null) {
+            try {
+                selection =
+                   yield this.body_selection_message.web_view.get_selection_for_find();
+            } catch (Error err) {
+                debug("Failed to get selection for find: %s", err.message);
+            }
+        }
+        return selection;
     }
 
     /**
@@ -580,27 +625,29 @@ public class ConversationEmail : Gtk.Box {
     }
 
     private void connect_message_view_signals(ConversationMessage view) {
-        view.attachment_displayed_inline.connect((id) => {
-                inlined_content_ids.add(id);
-            });
         view.flag_remote_images.connect(on_flag_remote_images);
         view.remember_remote_images.connect(on_remember_remote_images);
-        view.web_view.notify["load-status"].connect(() => {
+        view.web_view.internal_resource_loaded.connect((id) => {
+                this.inlined_content_ids.add(id);
+            });
+        view.web_view.notify["has-valid-height"].connect(() => {
                 bool all_loaded = true;
                 message_view_iterator().foreach((view) => {
-                        if (view.web_view.load_status !=
-                                WebKit.LoadStatus.FINISHED) {
+                        if (!view.web_view.has_valid_height) {
                             all_loaded = false;
                             return false;
                         }
                         return true;
                     });
-                if (all_loaded == true) {
+                if (all_loaded == true && !this.message_bodies_loaded) {
+                    // Only update the property value if not already
+                    // true
                     this.message_bodies_loaded = true;
                 }
             });
-        view.web_view.selection_changed.connect(() => {
-                on_message_selection_changed(view);
+        view.web_view.selection_changed.connect((has_selection) => {
+                this.body_selection_message = has_selection ? view : null;
+                body_selection_changed(has_selection);
             });
     }
 
@@ -637,12 +684,13 @@ public class ConversationEmail : Gtk.Box {
     }
 
     private async void load_attachments(Cancellable load_cancelled) {
-        // Do we have any attachments to be displayed? This relies on
-        // the primary and any attached message bodies having being
-        // already loaded, so that we know which attachments have been
-        // shown inline and hence do not need to be included here.
+        // Determine if we have any attachments to be displayed. This
+        // relies on the primary and any attached message bodies
+        // having being already loaded, so that we know which
+        // attachments have been shown inline and hence do not need to
+        // be included here.
         foreach (Geary.Attachment attachment in email.attachments) {
-            if (!(attachment.content_id in inlined_content_ids)) {
+            if (!(attachment.content_id in this.inlined_content_ids)) {
                 Geary.Mime.DispositionType? disposition = null;
                 if (attachment.content_disposition != null) {
                     disposition = attachment.content_disposition.disposition_type;
@@ -662,10 +710,11 @@ public class ConversationEmail : Gtk.Box {
             }
         }
 
+        // Now we can actually show the attachments, if any
         if (!this.displayed_attachments.is_empty) {
             this.attachments_button.show();
             this.attachments_button.set_sensitive(!this.is_collapsed);
-            this.primary_message.body.add(this.attachments);
+            this.primary_message.body_container.add(this.attachments);
 
             if (this.displayed_attachments.size > 1) {
                 this.select_all_attachments.show();
@@ -696,7 +745,13 @@ public class ConversationEmail : Gtk.Box {
     private void print() {
         // XXX This isn't anywhere near good enough - headers aren't
         // being printed.
-        primary_message.web_view.get_main_frame().print();
+        WebKit.PrintOperation op = new WebKit.PrintOperation(
+            this.primary_message.web_view
+        );
+        Gtk.Window? window = get_toplevel() as Gtk.Window;
+        if (op.run_dialog(window) == WebKit.PrintOperationResponse.PRINT) {
+            op.print();
+        }
     }
 
     private void on_flag_remote_images(ConversationMessage view) {
@@ -725,18 +780,6 @@ public class ConversationEmail : Gtk.Box {
         Gee.ArrayList<Geary.Contact> contact_list = new Gee.ArrayList<Geary.Contact>();
         contact_list.add(contact);
         contact_store.mark_contacts_async.begin(contact_list, flags, null);
-    }
-
-    private void on_message_selection_changed(ConversationMessage view) {
-        bool has_selection = false;
-        if (view.web_view.has_selection()) {
-            WebKit.DOM.Document document = view.web_view.get_dom_document();
-            has_selection = !document.default_view.get_selection().is_collapsed;
-            this.body_selection_message = view;
-        } else {
-            this.body_selection_message = null;
-        }
-        body_selection_changed(has_selection);
     }
 
     [GtkCallback]

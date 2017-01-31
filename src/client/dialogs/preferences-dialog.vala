@@ -4,34 +4,52 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class PreferencesDialog : Object {
-    private Gtk.Dialog dialog;
-    
-    public PreferencesDialog(Gtk.Window parent) {
-        Gtk.Builder builder = GearyApplication.instance.create_builder("preferences.glade");
-        
-        // Get all of the dialog elements.
-        dialog = builder.get_object("dialog") as Gtk.Dialog;
-        dialog.set_transient_for(parent);
-        dialog.set_modal(true);
-        
-        Configuration config = GearyApplication.instance.config;
-        config.bind(Configuration.AUTOSELECT_KEY, builder.get_object("autoselect"), "active");
-        config.bind(Configuration.DISPLAY_PREVIEW_KEY, builder.get_object("display_preview"), "active");
-        config.bind(Configuration.FOLDER_LIST_PANE_HORIZONTAL_KEY,
-            builder.get_object("three_pane_view"), "active");
-        config.bind(Configuration.SPELL_CHECK_KEY, builder.get_object("spell_check"), "active");
-        config.bind(Configuration.PLAY_SOUNDS_KEY, builder.get_object("play_sounds"), "active");
-        config.bind(Configuration.SHOW_NOTIFICATIONS_KEY, builder.get_object("show_notifications"), "active");
-        config.bind(Configuration.STARTUP_NOTIFICATIONS_KEY, builder.get_object("startup_notifications"), "active");
+[GtkTemplate (ui = "/org/gnome/Geary/preferences-dialog.ui")]
+public class PreferencesDialog : Gtk.Dialog {
+
+    [GtkChild]
+    private Gtk.CheckButton autoselect;
+
+    [GtkChild]
+    private Gtk.CheckButton display_preview;
+
+    [GtkChild]
+    private Gtk.CheckButton three_pane_view;
+
+    [GtkChild]
+    private Gtk.CheckButton play_sounds;
+
+    [GtkChild]
+    private Gtk.CheckButton show_notifications;
+
+    [GtkChild]
+    private Gtk.CheckButton startup_notifications;
+
+    [GtkChild]
+    private Gtk.HeaderBar header;
+
+    private GearyApplication app;
+
+    public PreferencesDialog(Gtk.Window parent, GearyApplication app) {
+        set_transient_for(parent);
+        set_titlebar(this.header);
+        this.app = app;
+
+        Configuration config = app.config;
+        config.bind(Configuration.AUTOSELECT_KEY, autoselect, "active");
+        config.bind(Configuration.DISPLAY_PREVIEW_KEY, display_preview, "active");
+        config.bind(Configuration.FOLDER_LIST_PANE_HORIZONTAL_KEY, three_pane_view, "active");
+        config.bind(Configuration.PLAY_SOUNDS_KEY, play_sounds, "active");
+        config.bind(Configuration.SHOW_NOTIFICATIONS_KEY, show_notifications, "active");
+        config.bind(Configuration.STARTUP_NOTIFICATIONS_KEY, startup_notifications, "active");
     }
-    
-    public void run() {
+
+    public new void run() {
         // Sync startup notification option with file state
-        GearyApplication.instance.controller.autostart_manager.sync_with_config();
-        dialog.show_all();
-        dialog.run();
-        dialog.destroy();
+        this.app.controller.autostart_manager.sync_with_config();
+
+        base.run();
+        destroy();
     }
 }
 

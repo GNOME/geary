@@ -21,6 +21,7 @@ public class SpellCheckPopover {
     private Gtk.SearchEntry search_box;
     private Gtk.ScrolledWindow view;
     private Gtk.Box content;
+    private Configuration config;
 
     private enum SpellCheckStatus {
         INACTIVE,
@@ -50,9 +51,12 @@ public class SpellCheckPopover {
         private Gtk.Image active_image;
         private Gtk.Button remove_button;
         private SpellCheckStatus lang_active = SpellCheckStatus.INACTIVE;
+        private Configuration config;
 
-        public SpellCheckLangRow (string lang_code) {
+        public SpellCheckLangRow (string lang_code, Configuration config) {
             this.lang_code = lang_code;
+            this.config = config;
+
             Gtk.Box box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 6);
 
             lang_name = International.language_name_from_locale(lang_code);
@@ -78,12 +82,12 @@ public class SpellCheckPopover {
             remove_button.clicked.connect(on_remove_clicked);
 
             is_lang_visible = false;
-            foreach (string visible_lang in GearyApplication.instance.config.spell_check_visible_languages) {
+            foreach (string visible_lang in this.config.spell_check_visible_languages) {
                 if (visible_lang == lang_code)
                     is_lang_visible = true;
             }
 
-            foreach (string active_lang in GearyApplication.instance.config.spell_check_languages) {
+            foreach (string active_lang in this.config.spell_check_languages) {
                 if (active_lang == lang_code)
                     lang_active = SpellCheckStatus.ACTIVE;
             }
@@ -125,17 +129,17 @@ public class SpellCheckPopover {
                 set_lang_active(SpellCheckStatus.INACTIVE);
 
             if (is_lang_visible) {
-                string[] visible_langs = GearyApplication.instance.config.spell_check_visible_languages;
+                string[] visible_langs = this.config.spell_check_visible_languages;
                 visible_langs += lang_code;
-                GearyApplication.instance.config.spell_check_visible_languages = visible_langs;
+                this.config.spell_check_visible_languages = visible_langs;
             }
             else {
                 string[] visible_langs = {};
-                foreach (string lang in GearyApplication.instance.config.spell_check_visible_languages) {
+                foreach (string lang in this.config.spell_check_visible_languages) {
                     if (lang != lang_code)
                         visible_langs += lang;
                 }
-                GearyApplication.instance.config.spell_check_visible_languages = visible_langs;
+                this.config.spell_check_visible_languages = visible_langs;
             }
 
             visibility_changed();
@@ -154,9 +158,9 @@ public class SpellCheckPopover {
                 case SpellCheckStatus.ACTIVE:
                     // If the lang is not visible make it visible now
                     if (!is_lang_visible) {
-                        string[] visible_langs = GearyApplication.instance.config.spell_check_visible_languages;
+                        string[] visible_langs = this.config.spell_check_visible_languages;
                         visible_langs += lang_code;
-                        GearyApplication.instance.config.spell_check_visible_languages = visible_langs;
+                        this.config.spell_check_visible_languages = visible_langs;
                         is_lang_visible = true;
                     }
                     break;
@@ -189,9 +193,10 @@ public class SpellCheckPopover {
         }
     }
 
-    public SpellCheckPopover(Gtk.Widget button) {
-        popover = new Gtk.Popover(button);
-        selected_rows = new GLib.GenericSet<string>(GLib.str_hash, GLib.str_equal);
+    public SpellCheckPopover(Gtk.Widget button, Configuration config) {
+        this.popover = new Gtk.Popover(button);
+        this.config = config;
+        this.selected_rows = new GLib.GenericSet<string>(GLib.str_hash, GLib.str_equal);
         setup_popover();
     }
 
@@ -219,7 +224,7 @@ public class SpellCheckPopover {
         langs_list = new Gtk.ListBox();
         langs_list.set_selection_mode(Gtk.SelectionMode.NONE);
         foreach (string lang in languages) {
-            SpellCheckLangRow row = new SpellCheckLangRow(lang);
+            SpellCheckLangRow row = new SpellCheckLangRow(lang, this.config);
             langs_list.add(row);
 
             if (row.is_lang_active())

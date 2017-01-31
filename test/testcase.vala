@@ -1,6 +1,7 @@
 /* testcase.vala
  *
  * Copyright (C) 2009 Julien Peeters
+ * Copyright (C) 2017 Michael Gratton
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -18,12 +19,14 @@
  *
  * Author:
  * 	Julien Peeters <contact@julienpeeters.fr>
+ * 	Michael Gratton <mike@vee.net>
  */
 
 public abstract class Gee.TestCase : Object {
 
 	private GLib.TestSuite suite;
 	private Adaptor[] adaptors = new Adaptor[0];
+    private AsyncQueue<AsyncResult> async_results = new AsyncQueue<AsyncResult>();
 
 	public delegate void TestMethod ();
 
@@ -50,6 +53,19 @@ public abstract class Gee.TestCase : Object {
 	public GLib.TestSuite get_suite () {
 		return this.suite;
 	}
+
+    protected void async_complete(AsyncResult result) {
+        this.async_results.push(result);
+    }
+
+    protected AsyncResult async_result() {
+        AsyncResult? result = null;
+        while (result == null) {
+            Gtk.main_iteration();
+            result = this.async_results.try_pop();
+        }
+        return result;
+    }
 
 	private class Adaptor {
 		[CCode (notify = false)]

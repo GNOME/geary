@@ -13,15 +13,26 @@ public class ConversationListCellRenderer : Gtk.CellRenderer {
     
     public ConversationListCellRenderer() {
     }
-    
-    public override void get_size(Gtk.Widget widget, Gdk.Rectangle? cell_area, out int x_offset, 
-        out int y_offset, out int width, out int height) {
+
+    public override void get_preferred_height(Gtk.Widget widget,
+                                              out int minimum_size,
+                                              out int natural_size) {
         if (example_data == null)
             style_changed(widget);
-        
-        example_data.get_size(widget, cell_area, out x_offset, out y_offset, out width, out height);
+
+        minimum_size = natural_size = example_data.get_height();
     }
-    
+
+    public override void get_preferred_width(Gtk.Widget widget,
+                                              out int minimum_size,
+                                              out int natural_size) {
+        // Set width to 1 (rather than 0) to work around certain
+        // themes that cause the conversation list to be shown as
+        // "squished":
+        // https://bugzilla.gnome.org/show_bug.cgi?id=713954
+        minimum_size = natural_size = 1;
+    }
+
     public override void render(Cairo.Context ctx, Gtk.Widget widget, Gdk.Rectangle background_area, 
         Gdk.Rectangle cell_area, Gtk.CellRendererState flags) {
         if (data != null)
@@ -42,5 +53,14 @@ public class ConversationListCellRenderer : Gtk.CellRenderer {
     public static void set_hover_selected(bool hover) {
         hover_selected = hover;
     }
-}
 
+    // This is implemented because it's required; ignore it and look at get_preferred_height() instead.
+    public override void get_size(Gtk.Widget widget, Gdk.Rectangle? cell_area, out int x_offset, 
+        out int y_offset, out int width, out int height) {
+        // Set values to avoid compiler warning.
+        x_offset = 0;
+        y_offset = 0;
+        width = 0;
+        height = 0;
+    }
+}

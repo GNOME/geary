@@ -113,13 +113,11 @@
     <property name="name">box</property>
     <property name="visible">True</property>
     <property name="can_focus">False</property>
-    <property name="hexpand">True</property>
     <property name="orientation">vertical</property>
     <child>
       <object class="GtkSeparator">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="hexpand">True</property>
       </object>
       <packing>
         <property name="left_attach">0</property>

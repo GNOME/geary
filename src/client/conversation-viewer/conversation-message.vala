@@ -19,6 +19,9 @@ public class ConversationMessage : Gtk.Grid {
 
 
     private const string FROM_CLASS = "geary-from";
+    private const string REPLACED_CID_TEMPLATE = "replaced_%02u@geary";
+    private const string REPLACED_IMAGE_CLASS = "geary_replaced_inline_image";
+
     private const int MAX_PREVIEW_BYTES = Geary.Email.MAX_PREVIEW_BYTES;
 
 
@@ -123,39 +126,7 @@ public class ConversationMessage : Gtk.Grid {
 
     }
 
-    // Internal class to associate inline image buffers (replaced by
-    // rotated scaled versions of them) so they can be saved intact if
-    // the user requires it
-    private class ReplacedImage : Geary.BaseObject {
-        public string id;
-        public string filename;
-        public Geary.Memory.Buffer buffer;
-
-        public ReplacedImage(int replaced_number, string filename, Geary.Memory.Buffer buffer) {
-            id = "%X".printf(replaced_number);
-            this.filename = filename;
-            this.buffer = buffer;
-        }
-    }
-
-    private const string[] INLINE_MIME_TYPES = {
-        "image/png",
-        "image/gif",
-        "image/jpeg",
-        "image/pjpeg",
-        "image/bmp",
-        "image/x-icon",
-        "image/x-xbitmap",
-        "image/x-xbm"
-    };
-    private const string QUOTE_CONTAINER_CLASS = "geary_quote_container";
-    private const string QUOTE_CONTROLLABLE_CLASS = "controllable";
-    private const string QUOTE_HIDE_CLASS = "hide";
-    private const string SIGNATURE_CONTAINER_CLASS = "geary_signature";
-    private const string REPLACED_IMAGE_CLASS = "geary_replaced_inline_image";
-    private const string DATA_IMAGE_CLASS = "geary_data_inline_image";
     private const int MAX_INLINE_IMAGE_MAJOR_DIM = 1024;
-    private const float QUOTE_SIZE_THRESHOLD = 2.0f;
 
     private const string ACTION_COPY_EMAIL = "copy_email";
     private const string ACTION_COPY_LINK = "copy_link";
@@ -222,7 +193,9 @@ public class ConversationMessage : Gtk.Grid {
     [GtkChild]
     private Gtk.Revealer body_revealer;
     [GtkChild]
-    public Gtk.Box body; // WebKit.WebView crashes when added to a Grid
+    public Gtk.Grid body_container;
+    [GtkChild]
+    public Gtk.ProgressBar body_progress;
 
     [GtkChild]
     private Gtk.Popover link_popover;
@@ -245,38 +218,35 @@ public class ConversationMessage : Gtk.Grid {
     private MenuModel context_menu_contact;
     private MenuModel? context_menu_inspector = null;
 
-    // Last known DOM element under the context menu
-    private WebKit.DOM.HTMLElement? context_menu_element = null;
-
-    // Contains the current mouse-over'ed link URL, if any
-    private string? hover_url = null;
-
-    // The contacts for the message's account
-    private Geary.ContactStore contact_store;
-
     // Address fields that can be search through
     private Gee.List<AddressFlowBoxChild> searchable_addresses =
         new Gee.LinkedList<AddressFlowBoxChild>();
 
-    // Should any remote messages be always loaded and displayed?
-    private bool always_load_remote_images;
-
-    private int next_replaced_buffer_number = 0;
-    private Gee.HashMap<string, ReplacedImage> replaced_images = new Gee.HashMap<string, ReplacedImage>();
-    private Gee.HashSet<string> replaced_content_ids = new Gee.HashSet<string>();
-
+    // Resource that have been loaded by the web view
+    private Gee.Map<string,WebKit.WebResource> resources =
+        new Gee.HashMap<string,WebKit.WebResource>();
 
     // Message-specific actions
     private SimpleActionGroup message_actions = new SimpleActionGroup();
 
-    /** Fired when an attachment is added for inline display. */
-    public signal void attachment_displayed_inline(string id);
+    private int next_replaced_buffer_number = 0;
 
-    /** Fired when the user requests remote images be loaded. */
-    public signal void flag_remote_images();
+    // Is the view set to allow remote image loads?
+    private bool is_loading_images;
+
+    private int remote_resources_requested = 0;
+
+    private int remote_resources_loaded = 0;
+
+    // Timer for hiding the progress bar when complete
+    private Geary.TimeoutManager body_progress_timer = null;
+
 
     /** Fired when the user clicks a link in the email. */
     public signal void link_activated(string link);
+
+    /** Fired when the user requests remote images be loaded. */
+    public signal void flag_remote_images();
 
     /** Fired when the user requests remote images be always loaded. */
     public signal void remember_remote_images();
@@ -296,11 +266,10 @@ public class ConversationMessage : Gtk.Grid {
      * loading processes.
      */
     public ConversationMessage(Geary.RFC822.Message message,
-                               Geary.ContactStore contact_store,
-                               bool always_load_remote_images) {
+                               Configuration config,
+                               bool load_remote_images) {
         this.message = message;
-        this.contact_store = contact_store;
-        this.always_load_remote_images = always_load_remote_images;
+        this.is_loading_images = load_remote_images;
 
 #if !GTK_3_20
         // GTK < 3.20+ style workarounds. Keep this in sync with
@@ -318,17 +287,14 @@ public class ConversationMessage : Gtk.Grid {
                 web_view.copy_clipboard();
             });
         add_action(ACTION_OPEN_INSPECTOR, Args.inspector).activate.connect(() => {
-                web_view.web_inspector.inspect_node(this.context_menu_element);
-                this.context_menu_element = null;
+                this.web_view.get_inspector().show();
             });
         add_action(ACTION_OPEN_LINK, true, VariantType.STRING)
             .activate.connect((param) => {
                 link_activated(param.get_string());
             });
-        add_action(ACTION_SAVE_IMAGE, true).activate.connect((param) => {
-                ReplacedImage? replaced_image = get_replaced_image();
-                save_image(replaced_image.filename, replaced_image.buffer);
-            });
+        add_action(ACTION_SAVE_IMAGE, true, VariantType.STRING)
+            .activate.connect(on_save_image);
         add_action(ACTION_SEARCH_FROM, true, VariantType.STRING)
             .activate.connect((param) => {
                 search_activated("from", param.get_string());
@@ -366,13 +332,11 @@ public class ConversationMessage : Gtk.Grid {
         string date_text = "";
         string date_tooltip = "";
         if (this.message.date != null) {
-            Date.ClockFormat clock_format =
-                GearyApplication.instance.config.clock_format;
             date_text = Date.pretty_print(
-                this.message.date.value, clock_format
+                this.message.date.value, config.clock_format
             );
             date_tooltip = Date.pretty_print_verbose(
-                this.message.date.value, clock_format
+                this.message.date.value, config.clock_format
             );
         }
         this.preview_date.set_text(date_text);
@@ -402,22 +366,39 @@ public class ConversationMessage : Gtk.Grid {
 
         // Web view
 
-        this.web_view = new ConversationWebView();
-        // Suppress default context menu.
-        this.web_view.context_menu.connect(() => { return true; });
-        this.web_view.hovering_over_link.connect(on_hovering_over_link);
-        this.web_view.link_selected.connect((link) => {
+        this.web_view = new ConversationWebView(config);
+        if (load_remote_images) {
+            this.web_view.allow_remote_image_loading();
+        }
+        this.web_view.context_menu.connect(on_context_menu);
+        this.web_view.deceptive_link_clicked.connect(on_deceptive_link_clicked);
+        this.web_view.link_activated.connect((link) => {
                 link_activated(link);
             });
+        this.web_view.load_changed.connect(on_load_changed);
+        this.web_view.mouse_target_changed.connect(on_mouse_target_changed);
+        this.web_view.notify["estimated-load-progress"].connect(() => {
+                this.body_progress.set_fraction(this.web_view.estimated_load_progress);
+            });
+        this.web_view.resource_load_started.connect(on_resource_load_started);
+        this.web_view.remote_image_load_blocked.connect(() => {
+                this.remote_images_infobar.show();
+            });
         this.web_view.selection_changed.connect(on_selection_changed);
+        this.web_view.set_hexpand(true);
+        this.web_view.set_vexpand(true);
         this.web_view.show();
 
-        this.body.set_has_tooltip(true); // Used to show link URLs
-        this.body.pack_start(this.web_view, true, true, 0);
+        this.body_container.set_has_tooltip(true); // Used to show link URLs
+        this.body_container.add(this.web_view);
+        this.body_progress_timer = new Geary.TimeoutManager.seconds(
+            1, () => { this.body_progress.hide(); }
+        );
     }
 
     public override void destroy() {
-        this.context_menu_element = null;
+        this.body_progress_timer.reset();
+        this.resources.clear();
         this.searchable_addresses.clear();
         base.destroy();
     }
@@ -480,78 +461,8 @@ public class ConversationMessage : Gtk.Grid {
             debug("Could not get message text. %s", err.message);
         }
 
-        bool load_images = false;
-        body_text = clean_html_markup(
-            body_text ?? "", this.message, out load_images
-        );
-
-        if (load_images) {
-            bool contact_load = false;
-            Geary.Contact contact = this.contact_store.get_by_rfc822(
-                message.get_primary_originator()
-            );
-            if (contact != null)
-                contact_load = contact.always_load_remote_images();
-            if (!contact_load && !this.always_load_remote_images) {
-                remote_images_infobar.show();
-                load_images = false;
-            }
-        }
-
         load_cancelled.cancelled.connect(() => { web_view.stop_loading(); });
-        // XXX Hook up unset_controllable_quotes() to size_allocate
-        // and check is_height_valid since we need to accurately know
-        // what the sizes of the quote and its container is to
-        // determine if it should be unhidden. However this means that
-        // when the user expands a hidden quote, this handler gets
-        // executed again and since the expanded quote will meet the
-        // criteria for being unset as controllable, that will
-        // happen. That's actually okay for now though, because if the
-        // user could collapse the quote again the space wouldn't be
-        // reclaimed, which is worse than this.
-        this.web_view.size_allocate.connect(() => {
-                if (this.web_view.load_status == WebKit.LoadStatus.FINISHED &&
-                    this.web_view.is_height_valid) {
-                    WebKit.DOM.HTMLElement html = (
-                        this.web_view.get_dom_document().document_element as
-                        WebKit.DOM.HTMLElement
-                    );
-                    if (html != null) {
-                        try {
-                            unset_controllable_quotes(html);
-                        } catch (Error error) {
-                            warning("Error unsetting controllable_quotes: %s",
-                                    error.message);
-                        }
-                    }
-                }
-            });
-        this.web_view.notify["load-status"].connect((source, param) => {
-                if (this.web_view.load_status == WebKit.LoadStatus.FINISHED) {
-                    if (load_images) {
-                        show_images(false);
-                    }
-                    Util.DOM.bind_event(
-                        this.web_view, "html", "contextmenu",
-                        (Callback) on_context_menu, this
-                    );
-                    Util.DOM.bind_event(
-                        this.web_view, "body a", "click",
-                        (Callback) on_link_clicked, this
-                    );
-                    Util.DOM.bind_event(
-                        this.web_view, ".%s > .shower".printf(QUOTE_CONTAINER_CLASS),
-                        "click",
-                        (Callback) on_show_quote_clicked, this);
-                    Util.DOM.bind_event(
-                        this.web_view, ".%s > .hider".printf(QUOTE_CONTAINER_CLASS),
-                        "click",
-                        (Callback) on_hide_quote_clicked, this);
-                }
-            });
-
-        // Only load it after we've hooked up the signals above
-        this.web_view.load_string(body_text, "text/html", "UTF-8", "");
+        this.web_view.load_html(body_text ?? "");
     }
 
     /**
@@ -561,7 +472,7 @@ public class ConversationMessage : Gtk.Grid {
      */
     public uint highlight_search_terms(Gee.Set<string> search_matches) {
         // Remove existing highlights
-        this.web_view.unmark_text_matches();
+        this.web_view.get_find_controller().search_finish();
 
         uint headers_found = 0;
         uint webkit_found = 0;
@@ -576,11 +487,13 @@ public class ConversationMessage : Gtk.Grid {
                 }
             }
 
-            webkit_found += this.web_view.mark_text_matches(raw_match, false, 0);
-        }
-
-        if (webkit_found > 0) {
-            this.web_view.set_highlight_text_matches(true);
+            // XXX WK2
+            //webkit_found += this.web_view.mark_text_matches(raw_match, false, 0);
+            this.web_view.get_find_controller().search(
+                raw_match,
+                WebKit.FindOptions.CASE_INSENSITIVE,
+                1024
+            );
         }
 
         return headers_found + webkit_found;
@@ -593,72 +506,7 @@ public class ConversationMessage : Gtk.Grid {
         foreach (AddressFlowBoxChild address in this.searchable_addresses) {
             address.unmark_search_terms();
         }
-        web_view.set_highlight_text_matches(false);
-        web_view.unmark_text_matches();
-    }
-
-    internal string? get_selection_for_quoting() {
-        string? quote = null;
-        WebKit.DOM.Document document = this.web_view.get_dom_document();
-        WebKit.DOM.DOMSelection selection = document.default_view.get_selection();
-        if (!selection.is_collapsed) {
-            try {
-                WebKit.DOM.Range range = selection.get_range_at(0);
-                WebKit.DOM.HTMLElement dummy =
-                    (WebKit.DOM.HTMLElement) document.create_element("div");
-                bool include_dummy = false;
-                WebKit.DOM.Node ancestor_node = range.get_common_ancestor_container();
-                WebKit.DOM.Element? ancestor = ancestor_node as WebKit.DOM.Element;
-                if (ancestor == null)
-                    ancestor = ancestor_node.get_parent_element();
-                // If the selection is part of a plain text message,
-                // we have to stick it in an appropriately styled div,
-                // so that new lines are preserved.
-                if (Util.DOM.is_descendant_of(ancestor, ".plaintext")) {
-                    dummy.get_class_list().add("plaintext");
-                    dummy.set_attribute("style", "white-space: pre-wrap;");
-                    include_dummy = true;
-                }
-                dummy.append_child(range.clone_contents());
-
-                // Remove the chrome we put around quotes, leaving
-                // only the blockquote element.
-                WebKit.DOM.NodeList quotes =
-                    dummy.query_selector_all("." + QUOTE_CONTAINER_CLASS);
-                for (int i = 0; i < quotes.length; i++) {
-                    WebKit.DOM.Element div = (WebKit.DOM.Element) quotes.item(i);
-                    WebKit.DOM.Element blockquote = div.query_selector("blockquote");
-                    div.get_parent_element().replace_child(blockquote, div);
-                }
-
-                quote = include_dummy ? dummy.get_outer_html() : dummy.get_inner_html();
-            } catch (Error error) {
-                debug("Problem getting selected text: %s", error.message);
-            }
-        }
-        return quote;
-    }
-
-    /**
-     * Returns the current selection as a string, suitable for find.
-     */
-    internal string? get_selection_for_find() {
-        string? value = null;
-        WebKit.DOM.Document document = web_view.get_dom_document();
-        WebKit.DOM.DOMWindow window = document.get_default_view();
-        WebKit.DOM.DOMSelection selection = window.get_selection();
-
-        if (selection.get_range_count() > 0) {
-            try {
-                WebKit.DOM.Range range = selection.get_range_at(0);
-                value = range.get_text().strip();
-                if (value.length <= 0)
-                    value = null;
-            } catch (Error e) {
-                warning("Could not get selected text from web view: %s", e.message);
-            }
-        }
-        return value;
+        web_view.get_find_controller().search_finish();
     }
 
     private SimpleAction add_action(string name, bool enabled, VariantType? type = null) {
@@ -824,464 +672,36 @@ public class ConversationMessage : Gtk.Grid {
         Geary.Mime.ContentDisposition? disposition, string? content_id, Geary.Memory.Buffer buffer) {
         if (content_type == null) {
             debug("Not displaying inline: no Content-Type");
-            
             return null;
         }
-        
-        if (!is_content_type_supported_inline(content_type)) {
+
+        if (content_type.media_type != "image" ||
+            !this.web_view.can_show_mime_type(content_type.to_string())) {
             debug("Not displaying %s inline: unsupported Content-Type", content_type.to_string());
-            
             return null;
         }
-        
-        // Even if the image doesn't need to be rotated, there's a win here: by reducing the size
-        // of the image at load time, it reduces the amount of work that has to be done to insert
-        // it into the HTML and then decoded and displayed for the user ... note that we currently
-        // have the doucment set up to reduce the size of the image to fit in the viewport, and a
-        // scaled load-and-deode is always faster than load followed by scale.
-        Geary.Memory.Buffer rotated_image = buffer;
-        string mime_type = content_type.get_mime_type();
-        try {
-            Gdk.PixbufLoader loader = new Gdk.PixbufLoader();
-            loader.size_prepared.connect(on_inline_image_size_prepared);
-            
-            Geary.Memory.UnownedBytesBuffer? unowned_buffer = buffer as Geary.Memory.UnownedBytesBuffer;
-            if (unowned_buffer != null)
-                loader.write(unowned_buffer.to_unowned_uint8_array());
-            else
-                loader.write(buffer.get_uint8_array());
-            loader.close();
-            
-            Gdk.Pixbuf? pixbuf = loader.get_pixbuf();
-            if (pixbuf != null) {
-                pixbuf = pixbuf.apply_embedded_orientation();
-                
-                // trade-off here between how long it takes to compress the data and how long it
-                // takes to turn it into Base-64 (coupled with how long it takes WebKit to then
-                // Base-64 decode and uncompress it)
-                uint8[] image_data;
-                pixbuf.save_to_buffer(out image_data, "png", "compression", "5");
-                
-                // Save length before transferring ownership (which frees the array)
-                int image_length = image_data.length;
-                rotated_image = new Geary.Memory.ByteBuffer.take((owned) image_data, image_length);
-                mime_type = "image/png";
-            }
-        } catch (Error err) {
-            debug("Unable to load and rotate image %s for display: %s", filename, err.message);
+
+        string id = content_id;
+        if (id == null) {
+            id = REPLACED_CID_TEMPLATE.printf(this.next_replaced_buffer_number++);
         }
-        
-        // store so later processing of the message doesn't replace this element with the original
-        // MIME part
-        string? escaped_content_id = null;
-        if (!Geary.String.is_empty(content_id)) {
-            replaced_content_ids.add(content_id);
-            escaped_content_id = Geary.HTML.escape_markup(content_id);
-        }
-        
-        // Store the original buffer and its filename in a local map so they can be recalled later
-        // (if the user wants to save it) ... note that Content-ID is optional and there's no
-        // guarantee that filename will be unique, even in the same message, so need to generate
-        // a unique identifier for each object
-        ReplacedImage replaced_image = new ReplacedImage(next_replaced_buffer_number++, filename,
-            buffer);
-        replaced_images.set(replaced_image.id, replaced_image);
-        
-        return "<img alt=\"%s\" class=\"%s %s\" src=\"%s\" replaced-id=\"%s\" %s />".printf(
+
+        this.web_view.add_internal_resource(id, buffer);
+
+        return "<img alt=\"%s\" class=\"%s\" src=\"%s%s\" />".printf(
             Geary.HTML.escape_markup(filename),
-            DATA_IMAGE_CLASS, REPLACED_IMAGE_CLASS,
-            Util.DOM.assemble_data_uri(mime_type, rotated_image),
-            Geary.HTML.escape_markup(replaced_image.id),
-            escaped_content_id != null ? @"cid=\"$escaped_content_id\"" : "");
-    }
-    
-    // Called by Gdk.PixbufLoader when the image's size has been determined but not loaded yet ...
-    // this allows us to load the image scaled down, for better performance when manipulating and
-    // writing the data URI for WebKit
-    private static void on_inline_image_size_prepared(Gdk.PixbufLoader loader, int width, int height) {
-        // easier to use as local variable than have the const listed everywhere in the code
-        // IN ALL SCREAMING CAPS
-        int scale = MAX_INLINE_IMAGE_MAJOR_DIM;
-        
-        // Borrowed liberally from Shotwell's Dimensions.get_scaled() method
-        
-        // check for existing fit
-        if (width <= scale && height <= scale)
-            return;
-        
-        int adj_width, adj_height;
-        if ((width - scale) > (height - scale)) {
-            double aspect = (double) scale / (double) width;
-            
-            adj_width = scale;
-            adj_height = (int) Math.round((double) height * aspect);
-        } else {
-            double aspect = (double) scale / (double) height;
-            
-            adj_width = (int) Math.round((double) width * aspect);
-            adj_height = scale;
-        }
-        
-        loader.set_size(adj_width, adj_height);
-    }
-
-    private string clean_html_markup(string text, Geary.RFC822.Message message, out bool remote_images) {
-        remote_images = false;
-        try {
-            WebKit.DOM.HTMLElement html = (WebKit.DOM.HTMLElement)
-                this.web_view.get_dom_document().document_element;
-
-            // If the message has a HTML element, get its inner
-            // markup. We can't just set this on a temp container div
-            // (the old approach) using set_inner_html() will refuse
-            // to parse any HTML, HEAD and BODY elements that are out
-            // of place in the structure. We can't use
-            // set_outer_html() on the document element since it
-            // throws an error.
-            GLib.Regex html_regex = new GLib.Regex("<html([^>]*)>(.*)</html>",
-                GLib.RegexCompileFlags.DOTALL);
-            GLib.MatchInfo matches;
-            if (html_regex.match(text, 0, out matches)) {
-                // Set the existing HTML element's content. Here, HEAD
-                // and BODY elements will be parsed fine.
-                html.set_inner_html(matches.fetch(2));
-                // Copy email HTML element attrs across to the
-                // existing HTML element
-                string attrs = matches.fetch(1);
-                if (attrs != "") {
-                    WebKit.DOM.HTMLElement container =
-                        this.web_view.create("div");
-                    container.set_inner_html(@"<div$attrs></div>");
-                    WebKit.DOM.HTMLElement? attr_element =
-                        Util.DOM.select(container, "div");
-                    WebKit.DOM.NamedNodeMap html_attrs =
-                        attr_element.get_attributes();
-                    for (int i = 0; i < html_attrs.get_length(); i++) {
-                        WebKit.DOM.Node attr = html_attrs.item(i);
-                        html.set_attribute(attr.node_name, attr.text_content);
-                    }
-                }
-            } else {
-                html.set_inner_html(text);
-            }
-
-            // Set dir="auto" if not already set possibly get a
-            // slightly better RTL experience.
-            string? dir = html.get_dir();
-            if (dir == null || dir.length == 0) {
-                html.set_dir("auto");
-            }
-
-            // Add application CSS to the document
-            WebKit.DOM.HTMLElement? head = Util.DOM.select(html, "head");
-            if (head == null) {
-                head = this.web_view.create("head");
-                html.insert_before(head, html.get_first_child());
-            }
-            WebKit.DOM.HTMLElement style_element = this.web_view.create("style");
-            string css_text = GearyApplication.instance.read_resource("conversation-web-view.css");
-            WebKit.DOM.Text text_node = this.web_view.get_dom_document().create_text_node(css_text);
-            style_element.append_child(text_node);
-            head.insert_before(style_element, head.get_first_child());
-
-            // Get all the top level block quotes and stick them into a hide/show controller.
-            WebKit.DOM.NodeList blockquote_list = html.query_selector_all("blockquote");
-            for (int i = 0; i < blockquote_list.length; ++i) {
-                // Get the nodes we need.
-                WebKit.DOM.Node blockquote_node = blockquote_list.item(i);
-                WebKit.DOM.Node? next_sibling = blockquote_node.get_next_sibling();
-                WebKit.DOM.Node parent = blockquote_node.get_parent_node();
-
-                // Make sure this is a top level blockquote.
-                if (Util.DOM.node_is_child_of(blockquote_node, "BLOCKQUOTE")) {
-                    continue;
-                }
-
-                WebKit.DOM.Element quote_container = create_quote_container();
-                Util.DOM.select(quote_container, ".quote").append_child(blockquote_node);
-                if (next_sibling == null) {
-                    parent.append_child(quote_container);
-                } else {
-                    parent.insert_before(quote_container, next_sibling);
-                }
-            }
-
-            // Now look for the signature.
-            wrap_html_signature(ref html);
-
-            // Then look for all <img> tags. Inline images are replaced with
-            // data URLs.
-            WebKit.DOM.NodeList inline_list = html.query_selector_all("img");
-            Gee.HashSet<string> inlined_content_ids = new Gee.HashSet<string>();
-            for (ulong i = 0; i < inline_list.length; ++i) {
-                // Get the MIME content for the image.
-                WebKit.DOM.HTMLImageElement img = (WebKit.DOM.HTMLImageElement) inline_list.item(i);
-                string? src = img.get_attribute("src");
-                if (Geary.String.is_empty(src))
-                    continue;
-                
-                // if no Content-ID, then leave as-is, but note if a non-data: URI is being used for
-                // purposes of detecting remote images
-                string? content_id = src.has_prefix("cid:") ? src.substring(4) : null;
-                if (Geary.String.is_empty(content_id)) {
-                    remote_images = remote_images || !src.has_prefix("data:");
-                    
-                    continue;
-                }
-                
-                // if image has a Content-ID and it's already been replaced by the image replacer,
-                // drop this tag, otherwise fix up this one with the Base-64 data URI of the image
-                if (!replaced_content_ids.contains(content_id)) {
-                    string? filename = message.get_content_filename_by_mime_id(content_id);
-                    Geary.Memory.Buffer image_content = message.get_content_by_mime_id(content_id);
-                    if (image_content.size > 0) {
-                        Geary.Memory.UnownedBytesBuffer? unowned_buffer =
-                            image_content as Geary.Memory.UnownedBytesBuffer;
-
-                        // Get the content type.
-                        string guess;
-                        if (unowned_buffer != null)
-                            guess = ContentType.guess(null, unowned_buffer.to_unowned_uint8_array(), null);
-                        else
-                            guess = ContentType.guess(null, image_content.get_uint8_array(), null);
-
-                        string mimetype = ContentType.get_mime_type(guess);
-
-                        // Replace the SRC to a data URI, the class to a known label for the popup menu,
-                        // and the ALT to its filename, if supplied
-                        img.remove_attribute("src");  // Work around a WebKitGTK+ crash. Bug 764152
-                        img.set_attribute("src", Util.DOM.assemble_data_uri(mimetype, image_content));
-                        img.class_list.add(DATA_IMAGE_CLASS);
-                        if (!Geary.String.is_empty(filename))
-                            img.set_attribute("alt", filename);
-
-                        // stash here so inlined image isn't listed as attachment (esp. if it has no
-                        // Content-Disposition)
-                        inlined_content_ids.add(content_id);
-                        attachment_displayed_inline(content_id);
-                    }
-                } else {
-                    // replaced by data: URI, remove this tag and let the inserted one shine through
-                    img.parent_element.remove_child(img);
-                }
-            }
-            
-            // Remove any inline images that were referenced through Content-ID
-            foreach (string cid in inlined_content_ids) {
-                try {
-                    string escaped_cid = Geary.HTML.escape_markup(cid);
-                    WebKit.DOM.Element? img = html.query_selector(@"[cid='$escaped_cid']");
-                    if (img != null)
-                        img.parent_element.remove_child(img);
-                } catch (Error error) {
-                    debug("Error removing inlined image: %s", error.message);
-                }
-            }
-            
-            // Now return the whole message.
-            return html.get_outer_html();
-        } catch (Error e) {
-            debug("Error modifying HTML message: %s", e.message);
-            return text;
-        }
-    }
-
-    private WebKit.DOM.HTMLElement create_quote_container() throws Error {
-        WebKit.DOM.HTMLElement quote_container = web_view.create("div");
-        quote_container.class_list.add(QUOTE_CONTAINER_CLASS);
-        quote_container.class_list.add(QUOTE_CONTROLLABLE_CLASS);
-        quote_container.class_list.add(QUOTE_HIDE_CLASS);
-        // New lines are preserved within blockquotes, so this string
-        // needs to be new-line free.
-        quote_container.set_inner_html("""<div class="shower"><input type="button" value="▼        ▼        ▼" /></div><div class="hider"><input type="button" value="▲        ▲        ▲" /></div><div class="quote"></div>""");
-        return quote_container;
-    }
-
-    private void wrap_html_signature(ref WebKit.DOM.HTMLElement container) throws Error {
-        // Most HTML signatures fall into one of these designs which are handled by this method:
-        //
-        // 1. GMail:            <div>-- </div>$SIGNATURE
-        // 2. GMail Alternate:  <div><span>-- </span></div>$SIGNATURE
-        // 3. Thunderbird:      <div>-- <br>$SIGNATURE</div>
-        //
-        WebKit.DOM.NodeList div_list = container.query_selector_all("div,span,p");
-        int i = 0;
-        Regex sig_regex = new Regex("^--\\s*$");
-        Regex alternate_sig_regex = new Regex("^--\\s*(?:<br|\\R)");
-        for (; i < div_list.length; ++i) {
-            // Get the div and check that it starts a signature block and is not inside a quote.
-            WebKit.DOM.HTMLElement div = div_list.item(i) as WebKit.DOM.HTMLElement;
-            string inner_html = div.get_inner_html();
-            if ((sig_regex.match(inner_html) || alternate_sig_regex.match(inner_html)) &&
-                !Util.DOM.node_is_child_of(div, "BLOCKQUOTE")) {
-                break;
-            }
-        }
-
-        // If we have a signature, move it and all of its following siblings that are not quotes
-        // inside a signature div.
-        if (i == div_list.length) {
-            return;
-        }
-        WebKit.DOM.Node elem = div_list.item(i) as WebKit.DOM.Node;
-        WebKit.DOM.Element parent = elem.get_parent_element();
-        WebKit.DOM.HTMLElement signature_container = web_view.create("div");
-        signature_container.class_list.add(SIGNATURE_CONTAINER_CLASS);
-        do {
-            // Get its sibling _before_ we move it into the signature div.
-            WebKit.DOM.Node? sibling = elem.get_next_sibling();
-            signature_container.append_child(elem);
-            elem = sibling;
-        } while (elem != null);
-        parent.append_child(signature_container);
-    }
-
-    private void unset_controllable_quotes(WebKit.DOM.HTMLElement element) throws GLib.Error {
-        WebKit.DOM.NodeList quote_list = element.query_selector_all(
-            ".%s.%s".printf(QUOTE_CONTAINER_CLASS, QUOTE_CONTROLLABLE_CLASS)
+            REPLACED_IMAGE_CLASS,
+            ClientWebView.CID_URL_PREFIX,
+            Geary.HTML.escape_markup(id)
         );
-        for (int i = 0; i < quote_list.length; ++i) {
-            WebKit.DOM.Element quote_container = quote_list.item(i) as WebKit.DOM.Element;
-            long outer_client_height = quote_container.client_height;
-            long scroll_height = quote_container.query_selector(".quote").scroll_height;
-            // If the message is hidden, scroll_height will be
-            // 0. Otherwise, unhide the full quote if there is not a
-            // substantial amount hidden.
-            if (scroll_height > 0 &&
-                scroll_height <= outer_client_height * QUOTE_SIZE_THRESHOLD) {
-                quote_container.class_list.remove(QUOTE_CONTROLLABLE_CLASS);
-                quote_container.class_list.remove(QUOTE_HIDE_CLASS);
-            }
-        }
     }
 
     private void show_images(bool remember) {
-        try {
-            WebKit.DOM.Element body = Util.DOM.select(
-                web_view.get_dom_document(), "body"
-            );
-            if (body == null) {
-                warning("Could not find message body");
-            } else {
-                WebKit.DOM.NodeList nodes = body.get_elements_by_tag_name("img");
-                for (ulong i = 0; i < nodes.length; i++) {
-                    WebKit.DOM.Element? element = nodes.item(i) as WebKit.DOM.Element;
-                    if (element == null || !element.has_attribute("src"))
-                        continue;
-
-                    string src = element.get_attribute("src");
-                    // Don't prefix empty src strings since it will
-                    // cause e.g. 0px images (commonly found in
-                    // commercial mailouts) to be rendered as broken
-                    // images instead of empty elements.
-                    if (src.length > 0 && !web_view.is_always_loaded(src)) {
-                        // Workaround a WebKitGTK+ 2.4.10 crash. See Bug 763933
-                        element.remove_attribute("src");
-                        element.set_attribute("src", web_view.allow_prefix + src);
-                    }
-                }
-            }
-        } catch (Error error) {
-            warning("Error showing images: %s", error.message);
-        }
-
+        this.is_loading_images = true;
+        this.web_view.load_remote_images();
         if (remember) {
             flag_remote_images();
         }
-    }
-
-    private static bool is_content_type_supported_inline(Geary.Mime.ContentType content_type) {
-        foreach (string mime_type in INLINE_MIME_TYPES) {
-            try {
-                if (content_type.is_mime_type(mime_type))
-                    return true;
-            } catch (Error err) {
-                debug("Unable to compare MIME type %s: %s", mime_type, err.message);
-            }
-        }
-
-        return false;
-    }
-
-    /*
-     * Test whether text looks like a URI that leads somewhere other than href.  The text
-     * will have a scheme prepended if it doesn't already have one, and the short versions
-     * have the scheme skipped and long paths truncated.
-     */
-    private bool deceptive_text(string href, ref string text, out string href_short,
-        out string text_short) {
-        href_short = "";
-        text_short = "";
-        // mailto URLs have a different form, and the worst they can do is pop up a composer,
-        // so we don't trigger on them.
-        if (href.has_prefix("mailto:"))
-            return false;
-        
-        // First, does text look like a URI?  Right now, just test whether it has
-        // <string>.<string> in it.  More sophisticated tests are possible.
-        GLib.MatchInfo text_match, href_match;
-        try {
-            GLib.Regex domain = new GLib.Regex(
-                "([a-z]*://)?"                  // Optional scheme
-                + "([^\\s:/]+\\.[^\\s:/\\.]+)"  // Domain
-                + "(/[^\\s]*)?"                 // Optional path
-                );
-            if (!domain.match(text, 0, out text_match))
-                return false;
-            if (!domain.match(href, 0, out href_match)) {
-                // If href doesn't look like a URL, something is fishy, so warn the user
-                href_short = href + _(" (Invalid?)");
-                text_short = text;
-                return true;
-            }
-        } catch (Error error) {
-            warning("Error in Regex text for deceptive urls: %s", error.message);
-            return false;
-        }
-        
-        // Second, do the top levels of the two domains match?  We compare the top n levels,
-        // where n is the minimum of the number of levels of the two domains.
-        string[] href_parts = href_match.fetch_all();
-        string[] text_parts = text_match.fetch_all();
-        string[] text_domain = text_parts[2].down().reverse().split(".");
-        string[] href_domain = href_parts[2].down().reverse().split(".");
-        for (int i = 0; i < text_domain.length && i < href_domain.length; i++) {
-            if (text_domain[i] != href_domain[i]) {
-                if (href_parts[1] == "")
-                    href_parts[1] = "http://";
-                if (text_parts[1] == "")
-                    text_parts[1] = href_parts[1];
-                string temp;
-                assemble_uris(href_parts, out temp, out href_short);
-                assemble_uris(text_parts, out text, out text_short);
-                return true;
-            }
-        }
-        return false;
-    }
-
-    private void assemble_uris(string[] parts, out string full, out string short_) {
-        full = parts[1] + parts[2];
-        short_ = parts[2];
-        if (parts.length == 4 && parts[3] != "/") {
-            full += parts[3];
-            if (parts[3].length > 20)
-                short_ += parts[3].substring(0, 20) + "…";
-            else
-                short_ += parts[3];
-        }
-    }
-
-    private ReplacedImage? get_replaced_image() {
-        ReplacedImage? image = null;
-        string? replaced_id = this.context_menu_element.get_attribute(
-            "replaced-id"
-        );
-        this.context_menu_element = null;
-        if (!Geary.String.is_empty(replaced_id)) {
-            image = replaced_images.get(replaced_id);
-        }
-        return image;
     }
 
     private inline void set_revealer(Gtk.Revealer revealer,
@@ -1293,6 +713,51 @@ public class ConversationMessage : Gtk.Grid {
         }
         revealer.set_reveal_child(expand);
         revealer.set_transition_type(transition);
+    }
+
+    private void on_load_changed(WebKit.LoadEvent load_event) {
+        if (load_event != WebKit.LoadEvent.FINISHED) {
+            this.body_progress_timer.reset();
+            this.body_progress.pulse();
+        } else {
+            this.body_progress_timer.start();
+        }
+    }
+
+    private void on_resource_load_started(WebKit.WebView view,
+                                          WebKit.WebResource res,
+                                          WebKit.URIRequest req) {
+        // Cache the resource to allow images to be saved
+        this.resources[res.get_uri()] = res;
+
+        // We only want to show the body loading progress meter if we
+        // are actually loading some images, so do it here rather than
+        // in on_load_changed.
+        if (this.is_loading_images &&
+            !res.get_uri().has_prefix(ClientWebView.INTERNAL_URL_PREFIX)) {
+            this.body_progress.show();
+            this.body_progress.pulse();
+            if (!this.web_view.is_loading) {
+                // The initial page load has finished, so we must be
+                // loading a remote image afterwards at the user's
+                // request. We can't rely on the load_changed signal
+                // to stop the timer or estimated-load-progress
+                // changing, so manually manage it here.
+                this.remote_resources_requested++;
+                res.finished.connect(() => {
+                        this.remote_resources_loaded++;
+                        this.body_progress.set_fraction(
+                            (this.remote_resources_loaded /
+                             this.remote_resources_requested) +
+                            this.body_progress.get_pulse_step()
+                        );
+                        if (this.remote_resources_loaded >=
+                            this.remote_resources_requested) {
+                            this.body_progress_timer.start();
+                        }
+                    });
+            }
+        }
     }
 
     [GtkCallback]
@@ -1325,43 +790,12 @@ public class ConversationMessage : Gtk.Grid {
         }
     }
 
-    private static void on_show_quote_clicked(WebKit.DOM.Element element,
-                                              WebKit.DOM.Event event) {
-        try {
-            ((WebKit.DOM.HTMLElement) element.parent_node).class_list.remove(
-                QUOTE_HIDE_CLASS
-            );
-        } catch (Error error) {
-            warning("Error showing quote: %s", error.message);
-        }
-    }
-
-    private static void on_hide_quote_clicked(WebKit.DOM.Element element,
-                                              WebKit.DOM.Event event,
-                                              ConversationMessage message) {
-        try {
-            ((WebKit.DOM.HTMLElement) element.parent_node).class_list.add(
-                QUOTE_HIDE_CLASS
-            );
-            message.web_view.queue_resize();
-        } catch (Error error) {
-            warning("Error toggling quote: %s", error.message);
-        }
-    }
-
-    private static void on_context_menu(WebKit.DOM.Element element,
-                                        WebKit.DOM.Event event,
-                                        ConversationMessage message) {
-        message.on_context_menu_self(element, event);
-        event.prevent_default();
-    }
-
-    private void on_context_menu_self(WebKit.DOM.Element element,
-                                      WebKit.DOM.Event event) {
-        this.context_menu_element =
-             event.get_target() as WebKit.DOM.HTMLElement;
-        if (context_menu != null) {
-            context_menu.detach();
+    private bool on_context_menu(WebKit.WebView view,
+                                 WebKit.ContextMenu context_menu,
+                                 Gdk.Event event,
+                                 WebKit.HitTestResult hit_test) {
+        if (this.context_menu != null) {
+            this.context_menu.detach();
         }
 
         // Build a new context menu every time the user clicks because
@@ -1370,82 +804,77 @@ public class ConversationMessage : Gtk.Grid {
         // have a single menu model and disable the parts we don't
         // need.
         Menu model = new Menu();
-        if (this.hover_url != null) {
+
+        if (hit_test.context_is_link()) {
+            string link_url = hit_test.get_link_uri();
             MenuModel link_menu =
-                this.hover_url.has_prefix(Geary.ComposedEmail.MAILTO_SCHEME)
+                link_url.has_prefix(Geary.ComposedEmail.MAILTO_SCHEME)
                 ? context_menu_email
                 : context_menu_link;
             model.append_section(
-                null, set_action_param_string(link_menu, this.hover_url)
+                null, set_action_param_string(link_menu, link_url)
             );
         }
-        if (this.context_menu_element.local_name.down() == "img") {
-            ReplacedImage image = get_replaced_image();
-            set_action_enabled(ACTION_SAVE_IMAGE, image != null);
-            model.append_section(null, context_menu_image);
+
+        if (hit_test.context_is_image()) {
+            string uri = hit_test.get_image_uri();
+            set_action_enabled(ACTION_SAVE_IMAGE, uri in this.resources);
+            model.append_section(
+                null, set_action_param_string(context_menu_image, uri)
+            );
         }
+
         model.append_section(null, context_menu_main);
+
         if (context_menu_inspector != null) {
             model.append_section(null, context_menu_inspector);
         }
 
-        context_menu = new Gtk.Menu.from_model(model);
-        context_menu.attach_to_widget(this, null);
-        context_menu.popup(null, null, null, 0, Gtk.get_current_event_time());
+        this.context_menu = new Gtk.Menu.from_model(model);
+        this.context_menu.attach_to_widget(this, null);
+        this.context_menu.popup(null, null, null, 0, event.get_time());
+
+        return true;
     }
 
-    private static void on_link_clicked(WebKit.DOM.Element element,
-                                        WebKit.DOM.Event event,
-                                        ConversationMessage message) {
-        if (message.on_link_clicked_self(element)) {
-            event.prevent_default();
-        }
+    private void on_mouse_target_changed(WebKit.WebView web_view,
+                                         WebKit.HitTestResult hit_test,
+                                         uint modifiers) {
+        this.body_container.set_tooltip_text(
+            hit_test.context_is_link() ? hit_test.get_link_uri() : null
+        );
+        this.body_container.trigger_tooltip_query();
     }
 
     // Check for possible phishing links, displays a popover if found.
     // If not, lets it go through to the default handler.
-    private bool on_link_clicked_self(WebKit.DOM.Element element) {
-        string? href = element.get_attribute("href");
-        if (Geary.String.is_empty(href))
-            return false;
-        string text = ((WebKit.DOM.HTMLElement) element).get_inner_text();
-        string href_short, text_short;
-        if (!deceptive_text(href, ref text, out href_short, out text_short))
-            return false;
+    private void on_deceptive_link_clicked(ConversationWebView.DeceptiveText reason,
+                                           string text,
+                                           string href,
+                                           Gdk.Rectangle location) {
+        string text_href = text;
+        if (Uri.parse_scheme(text_href) == null) {
+            text_href = "http://" + text_href;
+        }
+        string text_label = Soup.URI.decode(text_href);
+
+        string anchor_href = href;
+        if (Uri.parse_scheme(anchor_href) == null) {
+            anchor_href = "http://" + anchor_href;
+        }
+        string anchor_label = Soup.URI.decode(anchor_href);
 
         // Escape text and especially URLs since we got them from the
         // HREF, and Gtk.Label.set_markup is a strict parser.
         good_link_label.set_markup(
-            Markup.printf_escaped("<a href=\"%s\">%s</a>", text, text_short)
+            Markup.printf_escaped("<a href=\"%s\">%s</a>", text_href, text_label)
         );
         bad_link_label.set_markup(
-            Markup.printf_escaped("<a href=\"%s\">%s</a>", href, href_short)
+            Markup.printf_escaped("<a href=\"%s\">%s</a>", anchor_href, anchor_label)
         );
-
-        // Work out the link's position, update the popover.
-        Gdk.Rectangle link_rect = Gdk.Rectangle();
-        web_view.get_allocation(out link_rect);
-        WebKit.DOM.Element? offset_parent = element;
-        while (offset_parent != null) {
-            link_rect.x += (int) offset_parent.offset_left;
-            link_rect.y += (int) offset_parent.offset_top;
-            offset_parent = offset_parent.offset_parent;
-        }
-        link_rect.width = (int) element.offset_width;
-        link_rect.height = (int) element.offset_height;
-        link_popover.set_pointing_to(link_rect);
-
+        link_popover.set_relative_to(this.web_view);
+        link_popover.set_pointing_to(location);
         link_popover.show();
-        return true;
-    }
-
-    private void on_hovering_over_link(string? title, string? url) {
-        this.hover_url = (url != null) ? Uri.unescape_string(url) : null;
-
-        // Use tooltip on the containing box since the web_view
-        // doesn't want to pay ball.
-        this.body.set_tooltip_text(this.hover_url);
-        this.body.trigger_tooltip_query();
     }
 
     [GtkCallback]
@@ -1454,12 +883,7 @@ public class ConversationMessage : Gtk.Grid {
         return Gdk.EVENT_PROPAGATE;
     }
 
-    private void on_selection_changed() {
-        bool has_selection = false;
-        if (web_view.has_selection()) {
-            WebKit.DOM.Document document = web_view.get_dom_document();
-            has_selection = !document.default_view.get_selection().is_collapsed;
-        }
+    private void on_selection_changed(bool has_selection) {
         set_action_enabled(ACTION_COPY_SELECTION, has_selection);
     }
 
@@ -1497,6 +921,22 @@ public class ConversationMessage : Gtk.Grid {
         Gtk.Clipboard clipboard = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD);
         clipboard.set_text(value, -1);
         clipboard.store();
+    }
+
+    private void on_save_image(Variant? param) {
+        WebKit.WebResource response = this.resources.get(param.get_string());
+        response.get_data.begin(null, (obj, res) => {
+                try {
+                    uint8[] data = response.get_data.end(res);
+                    save_image(response.get_uri(),
+                               new Geary.Memory.ByteBuffer(data, data.length));
+                } catch (Error err) {
+                    debug(
+                        "Failed to get image data from web view: %s",
+                        err.message
+                    );
+                }
+            });
     }
 
 }

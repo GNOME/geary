@@ -6,6 +6,10 @@
 
 namespace Geary.HTML {
 
+// Regex to detect URLs.
+// Originally from here: http://daringfireball.net/2010/07/improved_regex_for_matching_urls
+public const string URL_REGEX = "(?i)\\b((?:[a-z][\\w-]+:(?:/{1,3}|[a-z0-9%])|www\\d{0,3}[.]|[a-z0-9.\\-]+[.][a-z]{2,4}/)(?:[^\\s()<>]+|\\(([^\\s()<>]+|(\\([^\\s()<>]+\\)))*\\))+(?:\\(([^\\s()<>]+|(\\([^\\s()<>]+\\)))*\\)|[^\\s`!()\\[\\]{};:'\".,<>?«»“”‘’]))";
+
 private int init_count = 0;
 private Gee.HashSet<string>? breaking_elements;
 private Gee.HashSet<string>? spacing_elements;
@@ -162,6 +166,24 @@ private void recurse_html_nodes_for_text(Xml.Node? node,
             }
         }
     }
+}
+
+// Escape reserved HTML entities if the string does not have HTML
+// tags.  If there are no tags, or if preserve_whitespace_in_html is
+// true, wrap the string a div to preserve whitespace.
+public string smart_escape(string? text, bool preserve_whitespace_in_html) {
+    if (text == null)
+        return text;
+
+    string res = text;
+    if (!Regex.match_simple("<([A-Z]*)(?: [^>]*)?>.*</(\\1)>|<[A-Z]*(?: [^>]*)?/>", res,
+                            RegexCompileFlags.CASELESS)) {
+        res = Geary.HTML.escape_markup(res);
+        preserve_whitespace_in_html = true;
+    }
+    if (preserve_whitespace_in_html)
+        res = @"<div style='white-space: pre;'>$res</div>";
+    return res;
 }
 
 }

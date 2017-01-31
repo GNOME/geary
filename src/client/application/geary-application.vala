@@ -8,6 +8,7 @@
 extern const string _INSTALL_PREFIX;
 extern const string _GSETTINGS_DIR;
 extern const string _SOURCE_ROOT_DIR;
+extern const string _BUILD_ROOT_DIR;
 extern const string GETTEXT_PACKAGE;
 
 /**
@@ -27,7 +28,8 @@ public class GearyApplication : Gtk.Application {
     public const string INSTALL_PREFIX = _INSTALL_PREFIX;
     public const string GSETTINGS_DIR = _GSETTINGS_DIR;
     public const string SOURCE_ROOT_DIR = _SOURCE_ROOT_DIR;
-    
+    public const string BUILD_ROOT_DIR = _BUILD_ROOT_DIR;
+
     public const string[] AUTHORS = {
         "Jim Nelson <jim@yorba.org>",
         "Eric Gregory <eric@yorba.org>",
@@ -190,10 +192,9 @@ public class GearyApplication : Gtk.Application {
         
         Geary.Logging.init();
         Date.init();
-        WebKit.set_cache_model(WebKit.CacheModel.DOCUMENT_BROWSER);
-        
+
         base.startup();
-        
+
         add_action_entries(action_entries, this);
     }
     
@@ -289,12 +290,27 @@ public class GearyApplication : Gtk.Application {
         else
             return File.new_for_path(SOURCE_ROOT_DIR);
     }
-    
-    // Returns the directory the application is currently executing from.
+
+    /** Returns the directory the application is currently executing from. */
     public File get_exec_dir() {
-        return exec_dir;
+        return this.exec_dir;
     }
-    
+
+    /**
+     * Returns the directory containing the application's WebExtension libs.
+     *
+     * If the application is installed, this will be
+     * `$INSTALL_PREFIX/lib/geary/web-extension`, else it will be
+     */
+    public File get_web_extensions_dir() {
+        File? dir = get_install_dir();
+        if (dir != null)
+            dir = dir.get_child("lib").get_child("geary").get_child("web-extensions");
+        else
+            dir = File.new_for_path(BUILD_ROOT_DIR).get_child("src");
+        return dir;
+    }
+
     public File? get_desktop_file() {
         File? install_dir = get_install_dir();
         File desktop_file = (install_dir != null)
@@ -321,43 +337,41 @@ public class GearyApplication : Gtk.Application {
         
         return exec_dir.has_prefix(prefix_dir) ? prefix_dir : null;
     }
-    
-    // Creates a GTK builder given the name of a GResource.
+
+    /**
+     * Creates a GTK builder given the name of a GResource.
+     *
+     * @deprecated Use {@link GioUtil.create_builder} instead.
+     */
+    [Version (deprecated = true)]
     public Gtk.Builder create_builder(string name) {
-        Gtk.Builder builder = new Gtk.Builder();
-        try {
-            builder.add_from_resource("/org/gnome/Geary/" + name);
-        } catch(GLib.Error error) {
-            warning("Unable to create Gtk.Builder: %s".printf(error.message));
-        }
-        
-        return builder;
+        return GioUtil.create_builder(name);
     }
 
+    /**
+     * Loads a GResource as a string.
+     *
+     * @deprecated Use {@link GioUtil.read_resource} instead.
+     */
+    [Version (deprecated = true)]
     public string read_resource(string name) throws Error {
-        InputStream input_stream = resources_open_stream(
-            "/org/gnome/Geary/" + name,
-            ResourceLookupFlags.NONE
-        );
-        DataInputStream data_stream = new DataInputStream(input_stream);
-        size_t length;
-        return data_stream.read_upto("\0", 1, out length);
+        return GioUtil.read_resource(name);
     }
 
-    // Loads a UI GResource into the specified UI manager.
-    public void load_ui_resource_for_manager(Gtk.UIManager ui, string name) {
+    /**
+     * Loads a UI GResource into the UI manager.
+     */
+    [Version (deprecated = true)]
+    public void load_ui_resource(string name) {
         try {
-            ui.add_ui_from_resource("/org/gnome/Geary/" + name);
+            this.ui_manager.add_ui_from_resource("/org/gnome/Geary/" + name);
         } catch(GLib.Error error) {
-            warning("Unable to create Gtk.UIManager: %s".printf(error.message));
+            critical("Unable to load \"%s\" for Gtk.UIManager: %s".printf(
+                name, error.message
+            ));
         }
     }
-    
-    // Loads a UI GResource into the UI manager.
-    public void load_ui_resource(string name) {
-        load_ui_resource_for_manager(ui_manager, name);
-    }
-    
+
     // This call will fire "exiting" only if it's not already been fired.
     public void exit(int exitcode = 0) {
         if (exiting_fired)
@@ -456,7 +470,7 @@ public class GearyApplication : Gtk.Application {
     }
 
     private void on_activate_preferences() {
-        PreferencesDialog dialog = new PreferencesDialog(get_active_window());
+        PreferencesDialog dialog = new PreferencesDialog(get_active_window(), this);
         dialog.run();
     }
 

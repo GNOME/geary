@@ -146,61 +146,26 @@ void menu_foreach(Menu menu, MenuForeachFunc foreach_func) {
         Variant? label = menu.get_item_attribute_value(i, Menu.ATTRIBUTE_LABEL, VariantType.STRING);
         Variant? action_name = menu.get_item_attribute_value(i, Menu.ATTRIBUTE_ACTION, VariantType.STRING);
         Variant? action_target = menu.get_item_attribute_value(i, Menu.ATTRIBUTE_TARGET, VariantType.STRING);
-        string detailed_action_name = null;
-        if (action_name != null)
-            detailed_action_name = Action.print_detailed_name(action_name.get_string(), action_target);
 
         // Check if the child is a section
         Menu? section = (Menu) menu.get_item_link(i, Menu.LINK_SECTION);
 
         // Callback
-        foreach_func((label != null) ? label.get_string() : null
-                     , detailed_action_name
-                     , section);
+        foreach_func((label != null) ? label.get_string() : null,
+                     (action_name != null) ? action_name.get_string() : null,
+                     action_target,
+                     section);
     }
 }
 
 /*
  * Used for menu_foreach()
+ * @param id - The id if one was set
  * @param label - The label if one was set
- * @param detailed_action_name - The action if it was set
+ * @param action_name - The action name, if set
+ * @param action_target - The action target, if set
  * @param section - If the item represents a section, this will return that section (or null otherwise)
  */
-delegate void MenuForeachFunc(string? label, string? detailed_action_name, Menu? section);
-
-/**
- * Adds the entries of a GLib.Menu to a Gtk.Menu
- * @param gtk_menu - The Gtk.Menu to add entries to.
- * @param g_menu - The Menu whose entries should be added
- * @param filter - If this function returns false for a menu item, it will not be added to the menu
- */
-void add_g_menu_to_gtk_menu(Gtk.Menu gtk_menu, Menu g_menu, MenuItemFilterFunc filter) {
-    menu_foreach(g_menu, (label, action_name, section) => {
-        List<weak Gtk.Widget> children = gtk_menu.get_children();
-        weak Gtk.Widget? last_child = (children.length() > 0) ? children.last().data : null;
-
-        if (section != null) {
-            // Section. Set separators (without getting double separators)
-            if ((children.length() > 0) && ((last_child as Gtk.SeparatorMenuItem) == null))
-                gtk_menu.add(new Gtk.SeparatorMenuItem());
-
-            add_g_menu_to_gtk_menu(gtk_menu, section, filter);
-
-            if ((children.length() > 0) && ((last_child as Gtk.SeparatorMenuItem) == null))
-                gtk_menu.add(new Gtk.SeparatorMenuItem());
-        } else {
-            // Regular menu-item
-            if (filter(label, action_name) && label != null) {
-                Gtk.MenuItem item = new Gtk.MenuItem.with_mnemonic(label);
-                if (action_name != null)
-                    item.set_detailed_action_name(action_name);
-                gtk_menu.add(item);
-            }
-        }
-    });
-}
-
-// Used for add_g_menu_to_gtk_menu()
-delegate bool MenuItemFilterFunc(string? label, string? detailed_action_name);
+delegate void MenuForeachFunc(string? label, string? action_name, Variant? target, Menu? section);
 
 }

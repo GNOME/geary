@@ -1,0 +1,14 @@
+
+JavascriptResult
+    .get_global_context nullable=false unowned=true
+    .get_value nullable=false unowned=true
+
+//Forward upstream
+Download
+  .failed#signal.error type="WebKit.DownloadError"
+PrintOperation
+  .failed#signal.error type="WebKit.PrintError"
+WebResource
+  .failed#signal.error type="GLib.Error"
+WebView
+  .load_failed#signal.error type="GLib.Error"

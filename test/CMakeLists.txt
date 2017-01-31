@@ -4,15 +4,24 @@
 
 set(TEST_SRC
   main.vala
-  testcase.vala # Taken as-is from libgee, courtesy Julien Peeters
+  testcase.vala # Based on same file in libgee, courtesy Julien Peeters
 
   engine/rfc822-mailbox-address-test.vala
   engine/rfc822-message-test.vala
   engine/rfc822-message-data-test.vala
   engine/rfc822-utils-test.vala
   engine/util-html-test.vala
+  engine/util-inet-test.vala
+  engine/util-js-test.vala
+  engine/util-timeout-manager-test.vala
 
   client/application/geary-configuration-test.vala
+  client/components/client-web-view-test.vala
+  client/components/client-web-view-test-case.vala
+  client/composer/composer-web-view-test.vala
+
+  js/composer-page-state-test.vala
+  js/conversation-page-state-test.vala
 )
 
 # Vala
@@ -27,8 +36,10 @@ pkg_check_modules(DEPS REQUIRED
   gmime-2.6
   gthread-2.0
   gtk+-3.0
+  javascriptcoregtk-4.0
   libsoup-2.4
-  webkitgtk-3.0
+  webkit2gtk-4.0
+  libxml-2.0
 )
 
 set(TEST_PACKAGES
@@ -39,8 +50,9 @@ set(TEST_PACKAGES
   glib-2.0
   gmime-2.6
   gtk+-3.0
+  javascriptcore-4.0
   libsoup-2.4
-  webkitgtk-3.0
+  webkit2gtk-4.0
 )
 
 set(CFLAGS
@@ -56,6 +68,9 @@ include_directories(${CMAKE_BINARY_DIR}/src)
 set(LIB_PATHS ${DEPS_LIBRARY_DIRS})
 link_directories(${LIB_PATHS})
 add_definitions(${CFLAGS})
+
+# GResources must be compiled into the binary??
+set_property(SOURCE ${RESOURCES_C} PROPERTY GENERATED TRUE)
 
 set(VALAC_OPTIONS
     --vapidir=${CMAKE_BINARY_DIR}/src
@@ -78,8 +93,6 @@ OPTIONS
     ${VALAC_OPTIONS}
 )
 
-add_executable(geary-test ${TEST_VALA_C})
-# Depend on geary so things like GResources, GSetting, etc are
-# compiled before the tests are built and run.
-add_dependencies(geary-test geary)
+# Exclude from all so tests aren't built by default
+add_executable(geary-test EXCLUDE_FROM_ALL ${TEST_VALA_C} ${RESOURCES_C})
 target_link_libraries(geary-test ${DEPS_LIBRARIES} geary-client geary-engine)

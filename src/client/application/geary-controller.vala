@@ -183,16 +183,33 @@ public class GearyController : Geary.BaseObject {
 
         // Listen for attempts to close the application.
         this.application.exiting.connect(on_application_exiting);
-        
+
         // Create DB upgrade dialog.
         upgrade_dialog = new UpgradeDialog();
         upgrade_dialog.notify[UpgradeDialog.PROP_VISIBLE_NAME].connect(display_main_window_if_ready);
+
+        // Initialise WebKit and WebViews
+        ClientWebView.init_web_context(
+            this.application.config,
+            this.application.get_web_extensions_dir(),
+            this.application.get_user_cache_directory().get_child("web-resources"),
+            Args.log_debug
+        );
+        try {
+            ClientWebView.load_scripts();
+            ComposerWebView.load_resources();
+            ConversationWebView.load_resources(
+                this.application.get_user_config_directory()
+            );
+        } catch (Error err) {
+            error("Error loading web resources: %s", err.message);
+        }
 
         // Use a global avatar session because a cache must be used
         // per-session, and we don't want to have to load the cache
         // for each conversation load.
         File avatar_cache_dir = this.application.get_user_cache_directory()
-            .get_child("avatar_cache");
+            .get_child("avatars");
         this.avatar_cache = new Soup.Cache(
             avatar_cache_dir.get_path(),
             Soup.CacheType.SINGLE_USER
@@ -2250,11 +2267,15 @@ public class GearyController : Geary.BaseObject {
                 email_view = list_view.get_reply_target();
             }
         }
-        string? quote = null;
+
         if (email_view != null) {
-            quote = email_view.get_selection_for_quoting();
+            email_view.get_selection_for_quoting.begin((obj, res) => {
+                    string? quote = email_view.get_selection_for_quoting.end(res);
+                    create_compose_widget(compose_type, email_view.email, quote);
+                });
+        } else {
+            create_compose_widget(compose_type, email_view.email, null);
         }
-        create_compose_widget(compose_type, email_view.email, quote);
     }
 
     private void create_compose_widget(ComposerWidget.ComposeType compose_type,
@@ -2286,30 +2307,17 @@ public class GearyController : Geary.BaseObject {
         if (mailto != null) {
             widget = new ComposerWidget.from_mailto(current_account, mailto, application.config);
         } else {
-            Geary.Email? full = null;
-            if (referred != null) {
-                try {
-                    full = yield email_stores.get(current_folder.account).fetch_email_async(
-                        referred.id, Geary.ComposedEmail.REQUIRED_REPLY_FIELDS,
-                        Geary.Folder.ListFlags.NONE, cancellable_folder);
-                } catch (Error e) {
-                    message("Could not load full message: %s", e.message);
-                }
-            }
-
-            widget = new ComposerWidget(current_account, compose_type, application.config, full, quote, is_draft);
-            if (is_draft) {
-                yield widget.restore_draft_state_async(current_account);
-            }
+            widget = new ComposerWidget(current_account, compose_type, application.config);
         }
+        widget.destroy.connect(on_composer_widget_destroy);
+        widget.link_activated.connect((uri) => { open_uri(uri); });
         widget.show_all();
 
         // We want to keep track of the open composer windows, so we can allow the user to cancel
         // an exit without losing their data.
         composer_widgets.add(widget);
         debug(@"Creating composer of type $(widget.compose_type); $(composer_widgets.size) composers total");
-        widget.destroy.connect(on_composer_widget_destroy);
-        
+
         if (inline) {
             if (widget.state == ComposerWidget.ComposerState.NEW ||
                 widget.state == ComposerWidget.ComposerState.PANED) {
@@ -2329,23 +2337,22 @@ public class GearyController : Geary.BaseObject {
             widget.state = ComposerWidget.ComposerState.DETACHED;
         }
 
-        Geary.EmailIdentifier? draft_id = null;
-        if (is_draft) {
-            draft_id = referred.id;
+        // Load the widget's content
+        Geary.Email? full = null;
+        if (referred != null) {
+            try {
+                full = yield email_stores.get(current_folder.account).fetch_email_async(
+                    referred.id, Geary.ComposedEmail.REQUIRED_REPLY_FIELDS,
+                    Geary.Folder.ListFlags.NONE, cancellable_folder);
+            } catch (Error e) {
+                message("Could not load full message: %s", e.message);
+            }
         }
+        yield widget.load(full, quote, is_draft);
 
-        try {
-            yield widget.open_draft_manager_async(draft_id);
-        } catch (Error e) {
-            message("Could not open draft manager: %s", e.message);
-        }
-
-        // For accounts with large numbers of contacts, loading the
-        // entry completions can some time, so do it after the UI has
-        // been shown
-        yield widget.load_entry_completions();
+        widget.set_focus();
     }
-    
+
     private bool should_create_new_composer(ComposerWidget.ComposeType? compose_type,
         Geary.Email? referred, string? quote, bool is_draft, out bool inline) {
         inline = true;
@@ -2379,7 +2386,7 @@ public class GearyController : Geary.BaseObject {
         if (compose_type == ComposerWidget.ComposeType.NEW_MESSAGE) {
             foreach (ComposerWidget cw in composer_widgets) {
                 if (cw.state == ComposerWidget.ComposerState.NEW) {
-                    if (!cw.blank) {
+                    if (!cw.is_blank) {
                         inline = false;
                         return true;
                     } else {

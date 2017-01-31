@@ -298,6 +298,7 @@ engine/util/util-html.vala
 engine/util/util-imap-utf7.vala
 engine/util/util-inet.vala
 engine/util/util-iterable.vala
+engine/util/util-js.vala
 engine/util/util-numeric.vala
 engine/util/util-object.vala
 engine/util/util-reference-semantics.vala
@@ -306,6 +307,7 @@ engine/util/util-stream.vala
 engine/util/util-string.vala
 engine/util/util-synchronization.vala
 engine/util/util-time.vala
+engine/util/util-timeout-manager.vala
 engine/util/util-trillian.vala
 
 ${CMAKE_BINARY_DIR}/geary-version.vala
@@ -331,6 +333,7 @@ client/accounts/account-spinner-page.vala
 client/accounts/add-edit-page.vala
 client/accounts/login-dialog.vala
 
+client/components/client-web-view.vala
 client/components/count-badge.vala
 client/components/empty-placeholder.vala
 client/components/folder-popover.vala
@@ -342,19 +345,19 @@ client/components/monitored-spinner.vala
 client/components/search-bar.vala
 client/components/status-bar.vala
 client/components/stock.vala
-client/components/stylish-webview.vala
 
 client/composer/composer-box.vala
 client/composer/composer-container.vala
 client/composer/composer-embed.vala
 client/composer/composer-headerbar.vala
+client/composer/composer-link-popover.vala
+client/composer/composer-web-view.vala
 client/composer/composer-widget.vala
 client/composer/composer-window.vala
 client/composer/contact-entry-completion.vala
 client/composer/contact-list-store.vala
 client/composer/email-entry.vala
 client/composer/spell-check-popover.vala
-client/composer/webview-edit-fixer.vala
 
 client/conversation-list/conversation-list-cell-renderer.vala
 client/conversation-list/conversation-list-store.vala
@@ -399,12 +402,16 @@ client/sidebar/sidebar-tree.vala
 client/util/util-date.vala
 client/util/util-email.vala
 client/util/util-files.vala
+client/util/util-gio.vala
 client/util/util-gravatar.vala
 client/util/util-gtk.vala
 client/util/util-international.vala
-client/util/util-random.vala
-client/util/util-webkit.vala
 client/util/util-migrate.vala
+client/util/util-webkit.vala
+)
+
+set(WEB_PROCESS_SRC
+client/web-process/web-process-extension.vala
 )
 
 set(CONSOLE_SRC
@@ -481,7 +488,6 @@ else ()
     )
 endif ()
 
-
 pkg_check_modules(DEPS REQUIRED
     gthread-2.0
     glib-2.0>=${TARGET_GLIB}.0
@@ -497,7 +503,9 @@ pkg_check_modules(DEPS REQUIRED
     libxml-2.0>=2.7.8
     gcr-3>=3.10.1
     gobject-introspection-1.0
-    webkitgtk-3.0>=2.4.0
+    webkit2gtk-4.0>=${TARGET_WEBKIT}
+    webkit2gtk-web-extension-4.0>=${TARGET_WEBKIT}
+    javascriptcoregtk-4.0>=${TARGET_WEBKIT}
     enchant>=1.6
     ${EXTRA_CLIENT_PKG_CONFIG}
 )
@@ -516,6 +524,7 @@ set(ENGINE_PACKAGES
   gio-2.0
   glib-2.0
   gmime-2.6
+  javascriptcore-4.0
   libxml-2.0
   posix
   sqlite3
@@ -531,8 +540,18 @@ set(CLIENT_PACKAGES
   libnotify
   libsecret-1
   libsoup-2.4
-  webkitgtk-3.0
+  webkit2gtk-4.0
   ${EXTRA_CLIENT_PACKAGES}
+)
+
+# webkit2gtk-web-extension-4.0 is included as custom VAPI below
+set(WEB_PROCESS_PACKAGES
+  geary-engine
+  gee-0.8
+  gtk+-3.0
+  javascriptcore-4.0
+  libsoup-2.4
+  webkit2gtk-web-extension-4.0
 )
 
 set(CONSOLE_PACKAGES
@@ -546,6 +565,7 @@ set(CFLAGS
     ${DEPS_CFLAGS}
     ${DEPS_CFLAGS_OTHER}
     -D_INSTALL_PREFIX=\"${CMAKE_INSTALL_PREFIX}\"
+    -D_BUILD_ROOT_DIR=\"${CMAKE_BINARY_DIR}\"
     -D_SOURCE_ROOT_DIR=\"${CMAKE_SOURCE_DIR}\"
     -D_GSETTINGS_DIR=\"${CMAKE_BINARY_DIR}/gsettings\"
     -DGETTEXT_PACKAGE=\"${GETTEXT_PACKAGE}\"
@@ -582,18 +602,14 @@ else ()
     message(STATUS "POODLE SSLv3 fix: ON")
 endif ()
 
-set(WEBKITGTK_METADATA_DIR webkitgtk-2.4)
-set(WEBKITGTK_CUSTOM_VALA webkitgtk-2.4/WebKit-3.0-custom.vala)
-
 set(LIB_PATHS ${DEPS_LIBRARY_DIRS})
 link_directories(${LIB_PATHS})
 add_definitions(${CFLAGS})
 
 set(VALAC_OPTIONS
-    --vapidir=${CMAKE_SOURCE_DIR}/bindings/vapi
     --vapidir=${CMAKE_BINARY_DIR}/src
+    --vapidir=${CMAKE_SOURCE_DIR}/bindings/vapi
     --metadatadir=${CMAKE_SOURCE_DIR}/bindings/metadata
-    --metadatadir=${CMAKE_SOURCE_DIR}/bindings/metadata/${WEBKITGTK_METADATA_DIR}
     --target-glib=${TARGET_GLIB}
     --thread
     --debug
@@ -617,20 +633,44 @@ OPTIONS
 
 add_library(geary-engine STATIC ${ENGINE_VALA_C})
 add_dependencies(geary-engine git-version)
+# Build the library statically so we can it statically, but make it
+# relocatable so we can link it to the web extension dynamic lib.
+set_property(
+  TARGET geary-engine
+  PROPERTY POSITION_INDEPENDENT_CODE TRUE
+)
 target_link_libraries(geary-engine m ${DEPS_LIBRARIES} sqlite3-unicodesn)
 
-# WebKitGTK VAPI generation
+# WebKit2GTK VAPI generation
 #################################################
-add_custom_target(webkitgtk-vapi
-  DEPENDS "${CMAKE_BINARY_DIR}/src/webkitgtk-3.0.vapi"
+add_custom_target(webkit2gtk-vapi
+  DEPENDS
+    "${CMAKE_BINARY_DIR}/src/webkit2gtk-4.0.vapi"
+    "${CMAKE_BINARY_DIR}/src/webkit2gtk-web-extension-4.0.vapi"
+    "${CMAKE_SOURCE_DIR}/bindings/vapi/javascriptcore-4.0.vapi"
 )
 add_custom_command(
     OUTPUT
-        "${CMAKE_BINARY_DIR}/src/webkitgtk-3.0.vapi"
+        ${CMAKE_BINARY_DIR}/src/webkit2gtk-4.0.vapi
+    DEPENDS
+        "${CMAKE_SOURCE_DIR}/bindings/metadata/WebKit2-4.0.metadata"
+        "${CMAKE_SOURCE_DIR}/bindings/vapi/javascriptcore-4.0.vapi"
     WORKING_DIRECTORY
         "${CMAKE_SOURCE_DIR}/bindings/metadata"
     COMMAND
-        vapigen --pkg=gio-2.0 --pkg=gtk+-3.0 --pkg=libsoup-2.4 --metadatadir=. --metadatadir=${WEBKITGTK_METADATA_DIR} --library=webkitgtk-3.0 --directory=${CMAKE_BINARY_DIR}/src ${WEBKITGTK_CUSTOM_VALA} `${PKG_CONFIG_EXECUTABLE} --variable=girdir gobject-introspection-1.0`/WebKit-3.0.gir
+        vapigen --library=webkit2gtk-4.0 --pkg gtk+-3.0 --pkg libsoup-2.4 --pkg javascriptcore-4.0 --vapidir=${CMAKE_SOURCE_DIR}/bindings/vapi --metadatadir=${CMAKE_SOURCE_DIR}/bindings/metadata --directory=${CMAKE_BINARY_DIR}/src `${PKG_CONFIG_EXECUTABLE} --variable=girdir gobject-introspection-1.0`/WebKit2-4.0.gir
+)
+add_custom_command(
+    OUTPUT
+        "${CMAKE_BINARY_DIR}/src/webkit2gtk-web-extension-4.0.vapi"
+    DEPENDS
+        "${CMAKE_SOURCE_DIR}/bindings/metadata/WebKit2WebExtension-4.0.metadata"
+        "${CMAKE_SOURCE_DIR}/bindings/metadata/WebKit2WebExtension-4.0-custom.vala"
+        "${CMAKE_SOURCE_DIR}/bindings/vapi/javascriptcore-4.0.vapi"
+    WORKING_DIRECTORY
+        "${CMAKE_SOURCE_DIR}/bindings/metadata"
+    COMMAND
+        vapigen --library=webkit2gtk-web-extension-4.0 --pkg gtk+-3.0 --pkg libsoup-2.4 --pkg javascriptcore-4.0 --vapidir=${CMAKE_SOURCE_DIR}/bindings/vapi --metadatadir=${CMAKE_SOURCE_DIR}/bindings/metadata --directory=${CMAKE_BINARY_DIR}/src `${PKG_CONFIG_EXECUTABLE} --variable=girdir gobject-introspection-1.0`/WebKit2WebExtension-4.0.gir WebKit2WebExtension-4.0-custom.vala
 )
 
 # Client library (static lib used for building client and unit tests)
@@ -649,7 +689,7 @@ OPTIONS
 )
 
 add_library(geary-client STATIC ${CLIENT_VALA_C})
-add_dependencies(geary-client resource_copy webkitgtk-vapi)
+add_dependencies(geary-client resource_copy webkit2gtk-vapi)
 target_link_libraries(geary-client m ${DEPS_LIBRARIES} geary-engine)
 
 # Main client application binary
@@ -682,6 +722,21 @@ add_custom_command(
 # directory
 include(GSettings)
 add_schemas(geary ${GSETTINGS_DIR} ${CMAKE_INSTALL_PREFIX})
+
+# Client web process extension library
+#################################################
+vala_precompile(WEB_PROCESS_VALA_C geary-web-process
+    ${WEB_PROCESS_SRC}
+PACKAGES
+    ${WEB_PROCESS_PACKAGES}
+    ${ENGINE_PACKAGES} ## XXX REMOVE ME
+OPTIONS
+    ${VALAC_OPTIONS}
+)
+
+add_library(geary-web-process MODULE ${WEB_PROCESS_VALA_C})
+target_link_libraries(geary-web-process PRIVATE ${DEPS_LIBRARIES} geary-engine)
+install(TARGETS geary-web-process LIBRARY DESTINATION lib/geary/web-extensions)
 
 # Console app
 #################################################

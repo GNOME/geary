@@ -1,7 +1,9 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2017 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
 private errordomain AttachmentError {
@@ -12,6 +14,8 @@ private errordomain AttachmentError {
 // The actual widget for sending messages. Should be put in a ComposerContainer
 [GtkTemplate (ui = "/org/gnome/Geary/composer-widget.ui")]
 public class ComposerWidget : Gtk.EventBox {
+
+
     public enum ComposeType {
         NEW_MESSAGE,
         REPLY,
@@ -77,17 +81,20 @@ public class ComposerWidget : Gtk.EventBox {
     private const string ACTION_ADD_ATTACHMENT = "add-attachment";
     private const string ACTION_ADD_ORIGINAL_ATTACHMENTS = "add-original-attachments";
     private const string ACTION_SELECT_DICTIONARY = "select-dictionary";
+    private const string ACTION_OPEN_INSPECTOR = "open_inspector";
 
+    // ACTION_INSERT_LINK and ACTION_REMOVE_FORMAT are missing from
+    // here since they are handled in update_selection_actions
     private const string[] html_actions = {
-        ACTION_BOLD, ACTION_ITALIC, ACTION_UNDERLINE, ACTION_STRIKETHROUGH, ACTION_FONT_SIZE,
-        ACTION_FONT_FAMILY, ACTION_REMOVE_FORMAT, ACTION_COLOR, ACTION_JUSTIFY,
-        ACTION_INSERT_IMAGE, ACTION_INSERT_LINK, ACTION_COPY_LINK, ACTION_PASTE_WITH_FORMATTING
+        ACTION_BOLD, ACTION_ITALIC, ACTION_UNDERLINE, ACTION_STRIKETHROUGH,
+        ACTION_FONT_SIZE, ACTION_FONT_FAMILY, ACTION_COLOR, ACTION_JUSTIFY,
+        ACTION_INSERT_IMAGE, ACTION_COPY_LINK, ACTION_PASTE_WITH_FORMATTING
     };
 
     private const ActionEntry[] action_entries = {
         // Editor commands
-        {ACTION_UNDO,                     on_action                                     },
-        {ACTION_REDO,                     on_action                                     },
+        {ACTION_UNDO,                     on_undo                                       },
+        {ACTION_REDO,                     on_redo                                       },
         {ACTION_CUT,                      on_cut                                        },
         {ACTION_COPY,                     on_copy                                       },
         {ACTION_COPY_LINK,                on_copy_link                                  },
@@ -118,6 +125,7 @@ public class ComposerWidget : Gtk.EventBox {
         {ACTION_ADD_ATTACHMENT,           on_add_attachment                                                    },
         {ACTION_ADD_ORIGINAL_ATTACHMENTS, on_pending_attachments                                               },
         {ACTION_SELECT_DICTIONARY,        on_select_dictionary                                                 },
+        {ACTION_OPEN_INSPECTOR,           on_open_inspector                                                    },
     };
 
     public static Gee.MultiMap<string, string> action_accelerators = new Gee.HashMultiMap<string, string>();
@@ -125,7 +133,7 @@ public class ComposerWidget : Gtk.EventBox {
         action_accelerators.set(ACTION_UNDO, "<Ctrl>z");
         action_accelerators.set(ACTION_REDO, "<Ctrl><Shift>z");
         action_accelerators.set(ACTION_CUT, "<Ctrl>x");
-        action_accelerators.set(ACTION_COPY, "<Ctrl>x");
+        action_accelerators.set(ACTION_COPY, "<Ctrl>c");
         action_accelerators.set(ACTION_PASTE, "<Ctrl>v");
         action_accelerators.set(ACTION_PASTE_WITH_FORMATTING, "<Ctrl><Shift>v");
         action_accelerators.set(ACTION_INSERT_IMAGE, "<Ctrl>g");
@@ -151,64 +159,13 @@ public class ComposerWidget : Gtk.EventBox {
 
     private const string URI_LIST_MIME_TYPE = "text/uri-list";
     private const string FILE_URI_PREFIX = "file://";
-    private const string BODY_ID = "message-body";
-    private const string HTML_BODY = """
-        <html><head><title></title>
-        <style>
-        body {
-            margin: 0px !important;
-            padding: 0 !important;
-            background-color: white !important;
-            font-size: medium !important;
-        }
-        body.plain, body.plain * {
-            font-family: monospace !important;
-            font-weight: normal;
-            font-style: normal;
-            font-size: medium !important;
-            color: black;
-            text-decoration: none;
-        }
-        body.plain a {
-            cursor: text;
-        }
-        #message-body {
-            box-sizing: border-box;
-            padding: 10px;
-            outline: 0px solid transparent;
-            min-height: 100%;
-        }
-        blockquote {
-            margin-top: 0px;
-            margin-bottom: 0px;
-            margin-left: 10px;
-            margin-right: 10px;
-            padding-left: 5px;
-            padding-right: 5px;
-            background-color: white;
-            border: 0;
-            border-left: 3px #aaa solid;
-        }
-        pre {
-            white-space: pre-wrap;
-            margin: 0;
-        }
-        </style>
-        </head><body>
-        <div id="message-body" contenteditable="true" dir="auto"></div>
-        </body></html>""";
-    private const string CURSOR = "<span id=\"cursormarker\"></span>";
-    
-    private const int DRAFT_TIMEOUT_SEC = 10;
-    
-    public const string ATTACHMENT_KEYWORDS_SUFFIX = ".doc|.pdf|.xls|.ppt|.rtf|.pps";
-    
-    // A list of keywords, separated by pipe ("|") characters, that suggest an attachment; since
-    // this is full-word checking, include all variants of each word.  No spaces are allowed.
-    public const string ATTACHMENT_KEYWORDS_LOCALIZED = _("attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|enclosing|encloses|enclosure|enclosures");
-    
-    private delegate bool CompareStringFunc(string key, string token);
-    
+
+    // Translators: This is list of keywords, separated by pipe ("|")
+    // characters, that suggest an attachment; since this is full-word
+    // checking, include all variants of each word.  No spaces are
+    // allowed.
+    private const string ATTACHMENT_KEYWORDS_LOCALIZED = _("attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|enclosing|encloses|enclosure|enclosures");
+
     public Geary.Account account { get; private set; }
 
     public Geary.RFC822.MailboxAddresses from { get; private set; }
@@ -241,28 +198,42 @@ public class ComposerWidget : Gtk.EventBox {
         set { this.subject_entry.set_text(value); }
     }
 
-    public string message {
-        owned get { return get_html(); }
-        set {
-            this.body_html = value;
-            this.editor.load_string(HTML_BODY, "text/html", "UTF-8", "");
-        }
-    }
-
     public ComposerState state { get; internal set; }
 
     public ComposeType compose_type { get; private set; default = ComposeType.NEW_MESSAGE; }
 
     public Gee.Set<Geary.EmailIdentifier> referred_ids = new Gee.HashSet<Geary.EmailIdentifier>();
 
-    public bool blank {
+    /** Determines if the composer is completely empty. */
+    public bool is_blank {
         get {
-            return this.to_entry.empty && this.cc_entry.empty && this.bcc_entry.empty && this.reply_to_entry.empty &&
-                this.subject_entry.buffer.length == 0 && !this.editor.can_undo() && this.attached_files.size == 0;
+            return this.to_entry.empty
+                && this.cc_entry.empty
+                && this.bcc_entry.empty
+                && this.reply_to_entry.empty
+                && this.subject_entry.buffer.length == 0
+                && this.editor.is_empty
+                && this.attached_files.size == 0;
+        }
+    }
+
+    /** Determines if the composer can currently save a draft. */
+    private bool can_save {
+        get { return this.draft_manager != null; }
+    }
+
+    /** Determines if current message should be saved as draft. */
+    private bool should_save {
+        get {
+            return this.can_save
+                && !this.is_draft_saved
+                && !this.is_blank;
         }
     }
 
     public ComposerHeaderbar header { get; private set; }
+
+    public ComposerWebView editor { get; private set; }
 
     public string draft_save_text { get; private set; }
 
@@ -274,15 +245,16 @@ public class ComposerWidget : Gtk.EventBox {
 
     public Configuration config { get; set; }
 
-    [GtkChild]
-    internal Gtk.ScrolledWindow editor_scrolled;
-
     private ContactListStore? contact_list_store = null;
 
-    private string? body_html = null;
+    private string body_html = "";
 
     [GtkChild]
     private Gtk.Box composer_container;
+
+    [GtkChild]
+    internal Gtk.Grid editor_container;
+
     [GtkChild]
     private Gtk.Label from_label;
     [GtkChild]
@@ -331,7 +303,14 @@ public class ComposerWidget : Gtk.EventBox {
     [GtkChild]
     private Gtk.Box header_area;
     [GtkChild]
+
     private Gtk.Box composer_toolbar;
+    [GtkChild]
+    private Gtk.Box insert_buttons;
+    [GtkChild]
+    private Gtk.Box font_style_buttons;
+    [GtkChild]
+    private Gtk.Button insert_link_button;
     [GtkChild]
     private Gtk.Button remove_format_button;
     [GtkChild]
@@ -340,15 +319,23 @@ public class ComposerWidget : Gtk.EventBox {
     private Gtk.MenuButton menu_button;
     [GtkChild]
     private Gtk.Label info_label;
+
     [GtkChild]
     private Gtk.Box message_area;
 
     private Menu html_menu;
     private Menu plain_menu;
+
     private Menu context_menu_model;
+    private Menu context_menu_rich_text;
+    private Menu context_menu_plain_text;
+    private Menu context_menu_webkit_spelling;
+    private Menu context_menu_webkit_text_entry;
+    private Menu context_menu_inspector;
 
     private SpellCheckPopover? spell_check_popover = null;
-    private string? hover_url = null;
+    private string? pointer_url = null;
+    private string? cursor_url = null;
     private bool is_attachment_overlay_visible = false;
     private Geary.RFC822.MailboxAddresses reply_to_addresses;
     private Geary.RFC822.MailboxAddresses reply_cc_addresses;
@@ -361,31 +348,30 @@ public class ComposerWidget : Gtk.EventBox {
     private AttachPending pending_include = AttachPending.INLINE_ONLY;
     private Gee.Set<File> attached_files = new Gee.HashSet<File>(Geary.Files.nullable_hash,
         Geary.Files.nullable_equal);
-    private Gee.Set<File> inline_files = new Gee.HashSet<File>(Geary.Files.nullable_hash,
-        Geary.Files.nullable_equal);
+    private Gee.Map<string,File> inline_files = new Gee.HashMap<string,File>();
     private Gee.Map<string,File> cid_files = new Gee.HashMap<string,File>();
 
     private Geary.App.DraftManager? draft_manager = null;
     private Geary.EmailFlags draft_flags = new Geary.EmailFlags.with(Geary.EmailFlags.DRAFT);
-    private uint draft_save_timeout_id = 0;
-    private bool is_closing = false;
+    private Geary.TimeoutManager draft_timer;
+    private bool is_draft_saved = false;
 
-    public WebKit.WebView editor = new StylishWebView();
-    // We need to keep a reference to the edit-fixer in composer-window, so it doesn't get
-    // garbage-collected.
-    private WebViewEditFixer edit_fixer;
-    private string editor_allow_prefix = "";
+    // Is the composer closing (e.g. saving a draft or sending)?
+    private bool is_closing = false;
 
     private ComposerContainer container {
         get { return (ComposerContainer) parent; }
     }
 
 
+    /** Fired when the current saved draft's id has changed. */
     public signal void draft_id_changed(Geary.EmailIdentifier? id);
 
+    /** Fired when the user opens a link in the composer. */
+    public signal void link_activated(string url);
 
-    public ComposerWidget(Geary.Account account, ComposeType compose_type, Configuration config,
-        Geary.Email? referred = null, string? quote = null, bool is_referred_draft = false) {
+
+    public ComposerWidget(Geary.Account account, ComposeType compose_type, Configuration config) {
         this.config = config;
         this.header = new ComposerHeaderbar(config);
         this.account = account;
@@ -430,12 +416,16 @@ public class ComposerWidget : Gtk.EventBox {
         bind_property("can-delete-quote", this, "toolbar-text", BindingFlags.SYNC_CREATE,
             set_toolbar_text);
         this.to_entry = new EmailEntry(this);
+        this.to_entry.changed.connect(on_envelope_changed);
         this.to_box.add(to_entry);
         this.cc_entry = new EmailEntry(this);
+        this.cc_entry.changed.connect(on_envelope_changed);
         this.cc_box.add(cc_entry);
         this.bcc_entry = new EmailEntry(this);
+        this.bcc_entry.changed.connect(on_envelope_changed);
         this.bcc_box.add(bcc_entry);
         this.reply_to_entry = new EmailEntry(this);
+        this.reply_to_entry.changed.connect(on_envelope_changed);
         this.reply_to_box.add(reply_to_entry);
 
         this.to_label.set_mnemonic_widget(this.to_entry);
@@ -445,6 +435,13 @@ public class ComposerWidget : Gtk.EventBox {
 
         this.to_entry.margin_top = this.cc_entry.margin_top = this.bcc_entry.margin_top = this.reply_to_entry.margin_top = 6;
 
+        this.editor = new ComposerWebView(config);
+        this.editor.set_hexpand(true);
+        this.editor.set_vexpand(true);
+        this.editor.show();
+
+        this.editor_container.add(this.editor);
+
         // Initialize menus
         Gtk.Builder builder = new Gtk.Builder.from_resource(
             "/org/gnome/Geary/composer-menus.ui"
@@ -452,6 +449,11 @@ public class ComposerWidget : Gtk.EventBox {
         this.html_menu = (Menu) builder.get_object("html_menu_model");
         this.plain_menu = (Menu) builder.get_object("plain_menu_model");
         this.context_menu_model = (Menu) builder.get_object("context_menu_model");
+        this.context_menu_rich_text = (Menu) builder.get_object("context_menu_rich_text");
+        this.context_menu_plain_text = (Menu) builder.get_object("context_menu_plain_text");
+        this.context_menu_inspector = (Menu) builder.get_object("context_menu_inspector");
+        this.context_menu_webkit_spelling = (Menu) builder.get_object("context_menu_webkit_spelling");
+        this.context_menu_webkit_text_entry = (Menu) builder.get_object("context_menu_webkit_text_entry");
 
         this.subject_entry.bind_property("text", this, "window-title", BindingFlags.SYNC_CREATE,
             (binding, source_value, ref target_value) => {
@@ -478,73 +480,30 @@ public class ComposerWidget : Gtk.EventBox {
 
         this.from = new Geary.RFC822.MailboxAddresses.single(account.information.primary_mailbox);
 
-        if (referred != null) {
-            fill_in_from_referred(referred, quote);
-
-            if (is_referred_draft ||
-                compose_type == ComposeType.NEW_MESSAGE ||
-                compose_type == ComposeType.FORWARD) {
-                this.pending_include = AttachPending.ALL;
-            }
-        }
-
-        update_from_field();
-        update_pending_attachments(this.pending_include, true);
-
-        // only add signature if the option is actually set and if this is not a draft
-        if (this.account.information.use_email_signature && !is_referred_draft)
-            add_signature_and_cursor();
-        else
-            set_cursor();
-
-        this.edit_fixer = new WebViewEditFixer(editor);
-        this.editor_allow_prefix = random_string(10) + ":";
+        this.draft_timer = new Geary.TimeoutManager.seconds(
+            10, () => { this.save_draft.begin(); }
+        );
 
         // Add actions once every element has been initialized and added
         initialize_actions();
+        validate_send_button();
 
         // Connect everything (can only happen after actions were added)
-        validate_send_button();
-        set_header_recipients();
         this.to_entry.changed.connect(validate_send_button);
         this.cc_entry.changed.connect(validate_send_button);
         this.bcc_entry.changed.connect(validate_send_button);
         this.reply_to_entry.changed.connect(validate_send_button);
-        this.editor.load_finished.connect(on_load_finished);
-        this.editor.hovering_over_link.connect(on_hovering_over_link);
+
+        this.editor.command_stack_changed.connect(on_command_state_changed);
+        this.editor.button_release_event_done.connect(on_button_release);
         this.editor.context_menu.connect(on_context_menu);
-        this.editor.move_focus.connect(update_actions);
-        this.editor.copy_clipboard.connect(update_actions);
-        this.editor.cut_clipboard.connect(update_actions);
-        this.editor.paste_clipboard.connect(update_actions);
-        this.editor.undo.connect(update_actions);
-        this.editor.redo.connect(update_actions);
-        this.editor.selection_changed.connect(update_actions);
-        this.editor.key_press_event.connect(on_editor_key_press);
-        this.editor.resource_request_starting.connect(on_resource_request_starting);
-        this.editor.user_changed_contents.connect(reset_draft_timer);
-        this.editor.web_inspector.inspect_web_view.connect(on_inspect_web_view);
-
-        // only do this after setting body_html
-        this.editor.load_string(HTML_BODY, "text/html", "UTF8", "");
-
-        this.editor.navigation_policy_decision_requested.connect(on_navigation_policy_decision_requested);
-        this.editor.new_window_policy_decision_requested.connect(on_navigation_policy_decision_requested);
-
-        GearyApplication.instance.config.settings.changed[Configuration.SPELL_CHECK_KEY].connect(
-            on_spell_check_changed);
-
-        WebKit.WebSettings s = this.editor.settings;
-        s.enable_spell_checking = GearyApplication.instance.config.spell_check;
-        s.spell_checking_languages = string.joinv(",",
-                                                  GearyApplication.instance.config.spell_check_languages);
-        s.enable_scripts = false;
-        s.enable_java_applet = false;
-        s.enable_plugins = false;
-        s.enable_developer_extras = Args.inspector;
-        this.editor.settings = s;
-
-        this.editor_scrolled.add(editor);
+        this.editor.cursor_context_changed.connect(on_cursor_context_changed);
+        this.editor.document_modified.connect(() => { draft_changed(); });
+        this.editor.get_editor_state().notify["typing-attributes"].connect(on_typing_attributes_changed);
+        this.editor.key_press_event.connect(on_editor_key_press_event);
+        this.editor.load_changed.connect(on_load_changed);
+        this.editor.mouse_target_changed.connect(on_mouse_target_changed);
+        this.editor.selection_changed.connect(on_selection_changed);
 
         // Place the message area before the compose toolbar in the focus chain, so that
         // the user can tab directly from the Subject: field to the message area.
@@ -555,10 +514,13 @@ public class ComposerWidget : Gtk.EventBox {
         chain.append(this.composer_toolbar);
         chain.append(this.attachments_box);
         this.composer_container.set_focus_chain(chain);
+    }
 
-        // Don't do this in an overridden version of the destroy
-        // method, it somehow ends up in an infinite loop
-        destroy.connect(() => { close_draft_manager_async.begin(null); });
+    public override void destroy() {
+        this.draft_timer.reset();
+        if (this.draft_manager != null)
+            close_draft_manager_async.begin(null);
+        base.destroy();
     }
 
     public ComposerWidget.from_mailto(Geary.Account account, string mailto, Configuration config) {
@@ -604,7 +566,7 @@ public class ComposerWidget : Gtk.EventBox {
             attachments.add_all(headers.get("attachment"));
             foreach (string attachment in attachments) {
                 try {
-                    add_attachment(File.new_for_commandline_arg(attachment));
+                    add_attachment_part(File.new_for_commandline_arg(attachment));
                 } catch (Error err) {
                     attachment_failed(err.message);
                 }
@@ -612,21 +574,55 @@ public class ComposerWidget : Gtk.EventBox {
         }
     }
 
-    // Initializes all actions and adds them to the action group
-    private void initialize_actions() {
-        this.actions.add_action_entries(action_entries, this);
+    /**
+     * Loads the message into the composer editor.
+     */
+    public async void load(Geary.Email? referred = null,
+                           string? quote = null,
+                           bool is_referred_draft = false,
+                           Cancellable? cancellable = null) {
+        this.last_quote = quote;
+        string referred_quote = "";
+        if (referred != null) {
+            referred_quote = fill_in_from_referred(referred, quote);
+            if (is_referred_draft ||
+                compose_type == ComposeType.NEW_MESSAGE ||
+                compose_type == ComposeType.FORWARD) {
+                this.pending_include = AttachPending.ALL;
+            }
+        }
 
-        // for some reason, we can't use the same prefix.
-        insert_action_group("cmp", this.actions);
-        this.header.insert_action_group("cmh", this.actions);
+        yield restore_reply_to_state();
 
-        update_actions();
+        set_header_recipients();
+        update_from_field();
+        update_pending_attachments(this.pending_include, true);
+
+        string signature = yield load_signature(cancellable);
+        this.editor.load_html(
+            this.body_html,
+            signature,
+            referred_quote,
+            this.top_posting,
+            is_referred_draft
+        );
+
+        try {
+            yield open_draft_manager_async(is_referred_draft ? referred.id : null);
+        } catch (Error e) {
+            debug("Could not open draft manager: %s", e.message);
+        }
+
+        // For accounts with large numbers of contacts, loading the
+        // entry completions can some time, so do it after the UI has
+        // been shown
+        yield load_entry_completions();
     }
 
     /**
      * Loads and sets contact auto-complete data for the current account.
      */
-    public async void load_entry_completions() {
+    private async void load_entry_completions() {
         // XXX Since ContactListStore hooks into ContactStore to
         // listen for contacts being added and removed,
         // GearyController or some composer-related controller should
@@ -648,16 +644,16 @@ public class ComposerWidget : Gtk.EventBox {
     }
 
     /**
-     * Restores the composer's widget state from its draft.
+     * Restores the composer's widget state from any replied to messages.
      */
-    public async void restore_draft_state_async(Geary.Account account) {
+    private async void restore_reply_to_state() {
         bool first_email = true;
-        
+
         foreach (Geary.RFC822.MessageID mid in this.in_reply_to) {
             Gee.MultiMap<Geary.Email, Geary.FolderPath?>? email_map;
             try {
                 email_map =
-                    yield account.local_search_message_id_async(mid, Geary.Email.Field.ENVELOPE,
+                    yield this.account.local_search_message_id_async(mid, Geary.Email.Field.ENVELOPE,
                     true, null, new Geary.EmailFlags.with(Geary.EmailFlags.DRAFT)); // TODO: Folder blacklist
             } catch (Error error) {
                 continue;
@@ -710,36 +706,16 @@ public class ComposerWidget : Gtk.EventBox {
             this.state = ComposerState.INLINE;
         } else {
             this.state = ComposerState.INLINE_COMPACT;
-            // Set recipients in header
-            set_header_recipients();
         }
-    }
-
-    // This code is in a separate method due to https://bugzilla.gnome.org/show_bug.cgi?id=742621
-    // connect_to_draft_manager() is simply for symmetry.  When above bug is fixed, this code can
-    // be moved back into open/close methods
-    private void disconnect_from_draft_manager() {
-        this.draft_manager.notify[Geary.App.DraftManager.PROP_DRAFT_STATE]
-            .disconnect(on_draft_state_changed);
-        this.draft_manager.notify[Geary.App.DraftManager.PROP_CURRENT_DRAFT_ID]
-            .disconnect(on_draft_id_changed);
-        this.draft_manager.fatal.disconnect(on_draft_manager_fatal);
     }
 
     /**
      * Creates and opens the composer's draft manager.
      */
-    public async void open_draft_manager_async(
+    private async void open_draft_manager_async(
         Geary.EmailIdentifier? editing_draft_id = null,
         Cancellable? cancellable = null)
     throws Error {
-        this.draft_save_text = "";
-        SimpleAction close_and_save = get_action(ACTION_CLOSE_AND_SAVE);
-
-        close_and_save.set_enabled(false);
-
-        yield close_draft_manager_async(cancellable);
-
         if (!this.account.information.save_drafts) {
             this.header.save_and_close_button.hide();
             return;
@@ -748,16 +724,16 @@ public class ComposerWidget : Gtk.EventBox {
         this.draft_manager = new Geary.App.DraftManager(account);
         try {
             yield this.draft_manager.open_async(editing_draft_id, cancellable);
+            debug("Draft manager opened");
         } catch (Error err) {
             debug("Unable to open draft manager %s: %s",
                   this.draft_manager.to_string(), err.message);
-
             this.draft_manager = null;
-
             throw err;
         }
 
-        close_and_save.set_enabled(true);
+        update_draft_state();
+        get_action(ACTION_CLOSE_AND_SAVE).set_enabled(true);
         this.header.save_and_close_button.show();
 
         this.draft_manager.notify[Geary.App.DraftManager.PROP_DRAFT_STATE]
@@ -768,15 +744,16 @@ public class ComposerWidget : Gtk.EventBox {
     }
 
     // Copies the addresses (e.g. From/To/CC) and content from referred into this one
-    private void fill_in_from_referred(Geary.Email referred, string? quote) {
+    private string fill_in_from_referred(Geary.Email referred, string? quote) {
+        string referred_quote = "";
         if (this.compose_type != ComposeType.NEW_MESSAGE) {
             add_recipients_and_ids(this.compose_type, referred);
             this.reply_subject = Geary.RFC822.Utils.create_subject_for_reply(referred);
             this.forward_subject = Geary.RFC822.Utils.create_subject_for_forward(referred);
         }
         this.pending_attachments = referred.attachments;
-        this.last_quote = quote;
         switch (this.compose_type) {
+            // Restoring a draft
             case ComposeType.NEW_MESSAGE:
                 if (referred.from != null)
                     this.from = referred.from;
@@ -795,12 +772,12 @@ public class ComposerWidget : Gtk.EventBox {
                 try {
                     Geary.RFC822.Message message = referred.get_message();
                     if (message.has_html_body()) {
-                        this.body_html = message.get_html_body(null);
+                        referred_quote = message.get_html_body(null);
                     } else {
-                        this.body_html = message.get_plain_body(true, null);
+                        referred_quote = message.get_plain_body(true, null);
                     }
                 } catch (Error error) {
-                    debug("Error getting message body: %s", error.message);
+                    debug("Error getting draft message body: %s", error.message);
                 }
             break;
 
@@ -808,9 +785,9 @@ public class ComposerWidget : Gtk.EventBox {
             case ComposeType.REPLY_ALL:
                 this.subject = reply_subject;
                 this.references = Geary.RFC822.Utils.reply_references(referred);
-                this.body_html = "\n\n" + Geary.RFC822.Utils.quote_email_for_reply(referred, quote,
+                referred_quote = Geary.RFC822.Utils.quote_email_for_reply(referred, quote,
                     Geary.RFC822.TextFormat.HTML);
-                if (quote != null)
+                if (!Geary.String.is_empty(quote))
                     this.top_posting = false;
                 else
                     this.can_delete_quote = true;
@@ -818,19 +795,50 @@ public class ComposerWidget : Gtk.EventBox {
 
             case ComposeType.FORWARD:
                 this.subject = forward_subject;
-                this.body_html = "\n\n" + Geary.RFC822.Utils.quote_email_for_forward(referred, quote,
+                referred_quote = Geary.RFC822.Utils.quote_email_for_forward(referred, quote,
                     Geary.RFC822.TextFormat.HTML);
             break;
         }
+        return referred_quote;
     }
 
     public void set_focus() {
-        if (Geary.String.is_empty(to))
+        bool not_compact = (this.state != ComposerState.INLINE_COMPACT);
+        if (not_compact && Geary.String.is_empty(to))
             this.to_entry.grab_focus();
-        else if (Geary.String.is_empty(subject))
+        else if (not_compact && Geary.String.is_empty(subject))
             this.subject_entry.grab_focus();
         else
             this.editor.grab_focus();
+    }
+
+    // Initializes all actions and adds them to the action group
+    private void initialize_actions() {
+        this.actions.add_action_entries(action_entries, this);
+
+        // for some reason, we can't use the same prefix.
+        insert_action_group("cmp", this.actions);
+        this.header.insert_action_group("cmh", this.actions);
+
+        get_action(ACTION_CLOSE_AND_SAVE).set_enabled(false);
+
+        get_action(ACTION_UNDO).set_enabled(false);
+        get_action(ACTION_REDO).set_enabled(false);
+
+        update_cursor_actions();
+    }
+
+    private void update_cursor_actions() {
+        bool has_selection = this.editor.has_selection;
+        get_action(ACTION_CUT).set_enabled(has_selection);
+        get_action(ACTION_COPY).set_enabled(has_selection);
+
+        get_action(ACTION_INSERT_LINK).set_enabled(
+            this.editor.is_rich_text && (has_selection || this.cursor_url != null)
+        );
+        get_action(ACTION_REMOVE_FORMAT).set_enabled(
+            this.editor.is_rich_text && has_selection
+        );
     }
 
     private bool check_preferred_from_address(Gee.List<Geary.RFC822.MailboxAddress> account_addresses,
@@ -846,59 +854,30 @@ public class ComposerWidget : Gtk.EventBox {
         return false;
     }
 
-    private void on_load_finished(WebKit.WebFrame frame) {
-        if (get_realized())
-            on_load_finished_and_realized();
-        else
-            realize.connect(on_load_finished_and_realized);
+    private void on_load_changed(WebKit.WebView view, WebKit.LoadEvent event) {
+        if (event == WebKit.LoadEvent.FINISHED) {
+            if (get_realized())
+                on_load_finished_and_realized();
+            else
+                realize.connect(on_load_finished_and_realized);
+        }
     }
 
     private void on_load_finished_and_realized() {
         // This is safe to call even when this connection hasn't been made.
         realize.disconnect(on_load_finished_and_realized);
-        WebKit.DOM.Document document = this.editor.get_dom_document();
-        WebKit.DOM.HTMLElement? body = document.get_element_by_id(BODY_ID) as WebKit.DOM.HTMLElement;
-        assert(body != null);
 
-        if (!Geary.String.is_empty(this.body_html)) {
-            try {
-                body.set_inner_html(this.body_html);
-            } catch (Error e) {
-                debug("Failed to load prefilled body: %s", e.message);
-            }
-        }
-        body.focus();  // Focus within the HTML document
-
-        // Set cursor at appropriate position
-        try {
-            WebKit.DOM.Element? cursor = document.get_element_by_id("cursormarker");
-            if (cursor != null) {
-                WebKit.DOM.Range range = document.create_range();
-                range.select_node_contents(cursor);
-                range.collapse(false);
-                WebKit.DOM.DOMSelection selection = document.default_view.get_selection();
-                selection.remove_all_ranges();
-                selection.add_range(range);
-                cursor.parent_element.remove_child(cursor);
-            }
-        } catch (Error error) {
-            debug("Error setting cursor at end of text: %s", error.message);
-        }
-
-        protect_blockquote_styles();
-
-        set_focus();  // Focus in the GTK widget hierarchy
-
-        on_spell_check_changed();
-
-        Util.DOM.bind_event(this.editor, "a", "click", (Callback) on_link_clicked, this);
-        update_actions();
-        this.actions.change_action_state(ACTION_SHOW_EXTENDED, false);
-        this.actions.change_action_state(ACTION_COMPOSE_AS_HTML,
-            GearyApplication.instance.config.compose_as_html);
+        this.actions.change_action_state(
+            ACTION_SHOW_EXTENDED, false
+        );
+        this.actions.change_action_state(
+            ACTION_COMPOSE_AS_HTML, this.config.compose_as_html
+        );
 
         if (can_delete_quote)
-            this.editor.selection_changed.connect(() => { this.can_delete_quote = false; });
+            this.editor.selection_changed.connect(
+                () => { this.can_delete_quote = false; }
+            );
     }
 
     private void show_attachment_overlay(bool visible) {
@@ -947,7 +926,7 @@ public class ComposerWidget : Gtk.EventBox {
                     continue;
 
                 try {
-                    add_attachment(File.new_for_uri(uri.strip()));
+                    add_attachment_part(File.new_for_uri(uri.strip()));
                 } catch (Error err) {
                     attachment_failed(err.message);
                 }
@@ -977,7 +956,7 @@ public class ComposerWidget : Gtk.EventBox {
         return true;
     }
 
-    public Geary.ComposedEmail get_composed_email(DateTime? date_override = null,
+    public async Geary.ComposedEmail get_composed_email(DateTime? date_override = null,
         bool only_html = false) {
         Geary.ComposedEmail email = new Geary.ComposedEmail(
             date_override ?? new DateTime.now_local(), from);
@@ -999,15 +978,19 @@ public class ComposerWidget : Gtk.EventBox {
             email.subject = this.subject;
 
         email.attached_files.add_all(this.attached_files);
-        email.inline_files.add_all(this.inline_files);
+        email.inline_files.set_all(this.inline_files);
         email.cid_files.set_all(this.cid_files);
 
-        email.img_src_prefix = this.editor_allow_prefix;
+        email.img_src_prefix = ClientWebView.INTERNAL_URL_PREFIX;
 
-        if (actions.get_action_state(ACTION_COMPOSE_AS_HTML).get_boolean() || only_html)
-            email.body_html = get_html();
-        if (!only_html)
-            email.body_text = get_text();
+        try {
+            if (this.editor.is_rich_text || only_html)
+                email.body_html = yield this.editor.get_html();
+            if (!only_html)
+                email.body_text = yield this.editor.get_text();
+        } catch (Error error) {
+            debug("Error getting composer message body: %s", error.message);
+        }
 
         // User-Agent
         email.mailer = GearyApplication.PRGNAME + "/" + GearyApplication.VERSION;
@@ -1027,10 +1010,10 @@ public class ComposerWidget : Gtk.EventBox {
         string? quote = null) {
         if (referred != null && quote != null && quote != this.last_quote) {
             this.last_quote = quote;
-            WebKit.DOM.Document document = this.editor.get_dom_document();
             // Always use reply styling, since forward styling doesn't work for inline quotes
-            document.exec_command("insertHTML", false,
-                Geary.RFC822.Utils.quote_email_for_reply(referred, quote, Geary.RFC822.TextFormat.HTML));
+            this.editor.insert_html(
+                Geary.RFC822.Utils.quote_email_for_reply(referred, quote, Geary.RFC822.TextFormat.HTML)
+            );
 
             if (!referred_ids.contains(referred.id)) {
                 add_recipients_and_ids(new_type, referred);
@@ -1118,98 +1101,51 @@ public class ComposerWidget : Gtk.EventBox {
                     this.to_entry.addresses);
             this.to_entry.modified = this.cc_entry.modified = false;
         }
-        
+
         in_reply_to.add(referred.message_id);
         referred_ids.add(referred.id);
-    }
-    
-    private void add_signature_and_cursor() {
-        string? signature = null;
-        
-        // If use signature is enabled but no contents are on settings then we'll use ~/.signature, if any
-        // otherwise use whatever the user has input in settings dialog
-        if (this.account.information.use_email_signature
-            && Geary.String.is_empty_or_whitespace(this.account.information.email_signature)) {
-            File signature_file = File.new_for_path(Environment.get_home_dir()).get_child(".signature");
-            if (!signature_file.query_exists()) {
-                set_cursor();
-                return;
-            }
-            
-            try {
-                FileUtils.get_contents(signature_file.get_path(), out signature);
-                if (Geary.String.is_empty_or_whitespace(signature)) {
-                    set_cursor();
-                    return;
-                }
-                signature = Util.DOM.smart_escape(signature, false);
-            } catch (Error error) {
-                debug("Error reading signature file %s: %s", signature_file.get_path(), error.message);
-                set_cursor();
-                return;
-            }
-        } else {
-            signature = account.information.email_signature;
-            if (Geary.String.is_empty_or_whitespace(signature)) {
-                set_cursor();
-                return;
-            }
-            signature = Util.DOM.smart_escape(signature, true);
-        }
-
-        if (this.body_html == null)
-            this.body_html = CURSOR + "<br /><br />" + signature;
-        else if (top_posting)
-            this.body_html = CURSOR + "<br /><br />" + signature + this.body_html;
-        else
-            this.body_html = this.body_html + CURSOR + "<br /><br />" + signature;
-    }
-
-    private void set_cursor() {
-        if (top_posting)
-            this.body_html = CURSOR + this.body_html;
-        else
-            this.body_html = this.body_html + CURSOR;
-    }
-
-    private bool can_save() {
-        return this.draft_manager != null
-            && this.draft_manager.is_open
-            && this.editor.can_undo()
-            && this.account.information.save_drafts;
     }
 
     public CloseStatus should_close() {
         if (this.is_closing)
             return CloseStatus.PENDING_CLOSE;
-
-        bool try_to_save = can_save();
+        if (this.is_blank)
+            return CloseStatus.DO_CLOSE;
 
         this.container.present();
-        AlertDialog dialog;
-        if (try_to_save) {
-            dialog = new TernaryConfirmationDialog(container.top_window,
+
+        CloseStatus status = CloseStatus.PENDING_CLOSE;
+        if (this.can_save) {
+            AlertDialog dialog = new TernaryConfirmationDialog(container.top_window,
                 _("Do you want to discard this message?"), null, Stock._KEEP, Stock._DISCARD, 
                 Gtk.ResponseType.CLOSE, "suggested-action");
-        } else {
-            dialog = new ConfirmationDialog(container.top_window,
-                _("Do you want to discard this message?"), null, Stock._DISCARD, "destructive-action");
-        }
-
-        Gtk.ResponseType response = dialog.run();
-        if (response == Gtk.ResponseType.CANCEL || response == Gtk.ResponseType.DELETE_EVENT) {
-            return CloseStatus.CANCEL_CLOSE; // Cancel
-        } else if (response == Gtk.ResponseType.OK) {
-            if (try_to_save) {
-                save_and_exit_async.begin(); // Save
-                return CloseStatus.PENDING_CLOSE;
+            Gtk.ResponseType response = dialog.run();
+            if (response == Gtk.ResponseType.CANCEL ||
+                response == Gtk.ResponseType.DELETE_EVENT) {
+                status = CloseStatus.CANCEL_CLOSE;
+            } else if (response == Gtk.ResponseType.OK) {
+                // Keep
+                if (!this.is_draft_saved) {
+                    save_and_exit_async.begin();
+                } else {
+                    status = CloseStatus.DO_CLOSE;
+                }
             } else {
-                return CloseStatus.DO_CLOSE;
+                // Discard
+                discard_and_exit_async.begin();
             }
         } else {
-            discard_and_exit_async.begin(); // Discard
-            return CloseStatus.PENDING_CLOSE;
+            AlertDialog dialog = new ConfirmationDialog(container.top_window,
+                _("Do you want to discard this message?"), null, Stock._DISCARD, "destructive-action");
+            Gtk.ResponseType response = dialog.run();
+            if (response == Gtk.ResponseType.OK) {
+                discard_and_exit_async.begin();
+            } else {
+                status = CloseStatus.CANCEL_CLOSE;
+            }
         }
+
+        return status;
     }
 
     private void on_close(SimpleAction action, Variant? param) {
@@ -1218,10 +1154,10 @@ public class ComposerWidget : Gtk.EventBox {
     }
 
     private void on_close_and_save(SimpleAction action, Variant? param) {
-        if (can_save())
+        if (this.should_save)
             save_and_exit_async.begin();
         else
-            on_close(action, param);
+            this.container.close_container();
     }
 
     private void on_close_and_discard(SimpleAction action, Variant? param) {
@@ -1277,86 +1213,23 @@ public class ComposerWidget : Gtk.EventBox {
             this.header.parent.remove(this.header);
     }
 
-    // compares all keys to all tokens according to user-supplied comparison function
-    // Returns true if found
-    private bool search_tokens(string[] keys, string[] tokens, CompareStringFunc cmp_func,
-        out string? found_key, out string? found_token) {
-        foreach (string key in keys) {
-            foreach (string token in tokens) {
-                if (cmp_func(key, token)) {
-                    found_key = key;
-                    found_token = token;
-                    
-                    return true;
-                }
-            }
-        }
-        
-        found_key = null;
-        found_token = null;
-        
-        return false;
-    }
-    
-    private bool email_contains_attachment_keywords() {
-        // Filter out all content contained in block quotes
-        string filtered = @"$subject\n";
-        filtered += Util.DOM.get_text_representation(this.editor.get_dom_document(), "blockquote");
-        
-        Regex url_regex = null;
-        try {
-            // Prepare to ignore urls later
-            url_regex = new Regex(URL_REGEX, RegexCompileFlags.CASELESS);
-        } catch (Error error) {
-            debug("Error building regex in keyword checker: %s", error.message);
-        }
-        
-        string[] suffix_keys = ATTACHMENT_KEYWORDS_SUFFIX.casefold().split("|");
-        string[] full_word_keys = ATTACHMENT_KEYWORDS_LOCALIZED.casefold().split("|");
-        
-        foreach (string line in filtered.split("\n")) {
-            // Stop looking once we hit forwarded content
-            if (line.has_prefix("--")) {
-                break;
-            }
-            
-            // casefold line, strip start and ending whitespace, then tokenize by whitespace
-            string folded = line.casefold().strip();
-            string[] tokens = folded.split_set(" \t");
-            
-            // search for full-word matches
-            string? found_key, found_token;
-            bool found = search_tokens(full_word_keys, tokens, (key, token) => {
-                return key == token;
-            }, out found_key, out found_token);
-            
-            // if not found, search for suffix matches
-            if (!found) {
-                found = search_tokens(suffix_keys, tokens, (key, token) => {
-                    return token.has_suffix(key);
-                }, out found_key, out found_token);
-            }
-            
-            if (found) {
-                try {
-                    // Make sure the match isn't coming from a url
-                    if (found_key in url_regex.replace(folded, -1, 0, "")) {
-                        return true;
-                    }
-                } catch (Error error) {
-                    debug("Regex replacement error in keyword checker: %s", error.message);
-                    return true;
-                }
-            }
-        }
-        
-        return false;
+    public override bool key_press_event(Gdk.EventKey event) {
+        // Override the method since key-press-event is run last, and
+        // we want this behaviour to take precedence over the default
+        // key handling
+        return check_send_on_return(event) && base.key_press_event(event);
     }
 
-    private bool should_send() {
+    private async bool should_send() {
         bool has_subject = !Geary.String.is_empty(subject.strip());
-        bool has_body = !Geary.String.is_empty(get_html());
         bool has_attachment = this.attached_files.size > 0;
+        bool has_body = true;
+
+        try {
+            has_body = !Geary.String.is_empty(yield this.editor.get_html());
+        } catch (Error err) {
+            debug("Failed to get message body: %s", err.message);
+        }
 
         string? confirmation = null;
         if (!has_subject && !has_body && !has_attachment) {
@@ -1365,7 +1238,9 @@ public class ComposerWidget : Gtk.EventBox {
             confirmation = _("Send message with an empty subject?");
         } else if (!has_body && !has_attachment) {
             confirmation = _("Send message with an empty body?");
-        } else if (!has_attachment && email_contains_attachment_keywords()) {
+        } else if (!has_attachment &&
+                   yield this.editor.contains_attachment_keywords(
+                       ATTACHMENT_KEYWORDS_LOCALIZED, this.subject)) {
             confirmation = _("Send message without an attachment?");
         }
         if (confirmation != null) {
@@ -1378,24 +1253,27 @@ public class ComposerWidget : Gtk.EventBox {
 
     // Sends the current message.
     private void on_send(SimpleAction action, Variant? param) {
-        if (should_send())
-            on_send_async.begin();
+        this.should_send.begin((obj, res) => {
+                if (this.should_send.end(res)) {
+                    on_send_async.begin();
+                }
+            });
     }
 
     // Used internally by on_send()
     private async void on_send_async() {
+        this.editor.disable();
         this.container.vanish();
         this.is_closing = true;
-        
-        Util.DOM.linkify_document(this.editor.get_dom_document());
-        
+
         // Perform send.
         try {
-            yield this.account.send_email_async(get_composed_email());
+            yield this.editor.clean_content();
+            yield this.account.send_email_async(yield get_composed_email());
         } catch (Error e) {
             GLib.message("Error sending email: %s", e.message);
         }
-        
+
         Geary.Nonblocking.Semaphore? semaphore = discard_draft();
         if (semaphore != null) {
             try {
@@ -1409,42 +1287,23 @@ public class ComposerWidget : Gtk.EventBox {
         this.container.close_container();
     }
 
-    private void on_draft_state_changed() {
-        switch (this.draft_manager.draft_state) {
-            case Geary.App.DraftManager.DraftState.STORED:
-                this.draft_save_text = DRAFT_SAVED_TEXT;
-            break;
-
-            case Geary.App.DraftManager.DraftState.STORING:
-                this.draft_save_text = DRAFT_SAVING_TEXT;
-            break;
-
-            case Geary.App.DraftManager.DraftState.NOT_STORED:
-                this.draft_save_text = "";
-            break;
-
-            case Geary.App.DraftManager.DraftState.ERROR:
-                this.draft_save_text = DRAFT_ERROR_TEXT;
-            break;
-
-            default:
-                assert_not_reached();
+    /**
+     * Closes current draft manager, if any, then opens a new one.
+     */
+    private async void reopen_draft_manager_async(Cancellable? cancellable)
+    throws Error {
+        if (this.draft_manager != null) {
+            yield close_draft_manager_async(cancellable);
         }
+        // XXX Need to work out what do to with any existing draft in
+        // this case. See Bug 713533.
+        yield open_draft_manager_async(null);
     }
 
-    private void on_draft_id_changed() {
-        draft_id_changed(this.draft_manager.current_draft_id);
-    }
-
-    private void on_draft_manager_fatal(Error err) {
-        this.draft_save_text = DRAFT_ERROR_TEXT;
-    }
-
-    private async void close_draft_manager_async(Cancellable? cancellable) throws Error {
+    private async void close_draft_manager_async(Cancellable? cancellable)
+    throws Error {
+        this.draft_save_text = "";
         get_action(ACTION_CLOSE_AND_SAVE).set_enabled(false);
-        if (this.draft_manager == null)
-            return;
-
         disconnect_from_draft_manager();
 
         // drop ref even if close failed
@@ -1453,56 +1312,78 @@ public class ComposerWidget : Gtk.EventBox {
         } finally {
             this.draft_manager = null;
         }
+        debug("Draft manager closed");
     }
 
-    // Resets the draft save timeout.
-    private void reset_draft_timer() {
+    // This code is in a separate method due to https://bugzilla.gnome.org/show_bug.cgi?id=742621
+    // connect_to_draft_manager() is simply for symmetry.  When above bug is fixed, this code can
+    // be moved back into open/close methods
+    private void disconnect_from_draft_manager() {
+        this.draft_manager.notify[Geary.App.DraftManager.PROP_DRAFT_STATE]
+            .disconnect(on_draft_state_changed);
+        this.draft_manager.notify[Geary.App.DraftManager.PROP_CURRENT_DRAFT_ID]
+            .disconnect(on_draft_id_changed);
+        this.draft_manager.fatal.disconnect(on_draft_manager_fatal);
+    }
+
+    private void update_draft_state() {
+        switch (this.draft_manager.draft_state) {
+            case Geary.App.DraftManager.DraftState.STORED:
+                this.draft_save_text = DRAFT_SAVED_TEXT;
+                this.is_draft_saved = true;
+            break;
+
+            case Geary.App.DraftManager.DraftState.STORING:
+                this.draft_save_text = DRAFT_SAVING_TEXT;
+                this.is_draft_saved = true;
+            break;
+
+            case Geary.App.DraftManager.DraftState.NOT_STORED:
+                this.draft_save_text = "";
+                this.is_draft_saved = false;
+            break;
+
+            case Geary.App.DraftManager.DraftState.ERROR:
+                this.draft_save_text = DRAFT_ERROR_TEXT;
+                this.is_draft_saved = false;
+            break;
+
+            default:
+                assert_not_reached();
+        }
+    }
+
+    private inline void draft_changed() {
+        if (this.can_save) {
+            this.draft_timer.start();
+        }
         this.draft_save_text = "";
-        cancel_draft_timer();
-        
-        if (can_save())
-            draft_save_timeout_id = Timeout.add_seconds(DRAFT_TIMEOUT_SEC, on_save_draft_timeout);
-    }
-
-    // Cancels the draft save timeout
-    private void cancel_draft_timer() {
-        if (this.draft_save_timeout_id == 0)
-            return;
-        
-        Source.remove(this.draft_save_timeout_id);
-        this.draft_save_timeout_id = 0;
-    }
-
-    private bool on_save_draft_timeout() {
-        // this is not rescheduled by the event loop, so kill the timeout id
-        this.draft_save_timeout_id = 0;
-        
-        save_draft();
-        
-        return false;
+        // can_save depends on the value of this, so reset it after
+        // the if test above
+        this.is_draft_saved = false;
     }
 
     // Note that drafts are NOT "linkified."
-    private Geary.Nonblocking.Semaphore? save_draft() {
+    private async void save_draft() {
         // cancel timer in favor of just doing it now
-        cancel_draft_timer();
-        
-        try {
-            if (this.draft_manager != null) {
-                return this.draft_manager.update(get_composed_email(null, true).to_rfc822_message(),
-                    this.draft_flags, null);
+        this.draft_timer.reset();
+
+        if (this.draft_manager != null) {
+            try {
+                Geary.ComposedEmail draft = yield get_composed_email(null, true);
+                this.draft_manager.update(
+                    draft.to_rfc822_message(), this.draft_flags, null
+                );
+            } catch (Error err) {
+                GLib.message("Unable to save draft: %s", err.message);
             }
-        } catch (Error err) {
-            GLib.message("Unable to save draft: %s", err.message);
         }
-        
-        return null;
     }
 
     private Geary.Nonblocking.Semaphore? discard_draft() {
         // cancel timer in favor of this operation
-        cancel_draft_timer();
-        
+        this.draft_timer.reset();
+
         try {
             if (this.draft_manager != null)
                 return this.draft_manager.discard();
@@ -1516,14 +1397,14 @@ public class ComposerWidget : Gtk.EventBox {
     // Used while waiting for draft to save before closing widget.
     private void make_gui_insensitive() {
         this.container.vanish();
-        cancel_draft_timer();
+        this.draft_timer.reset();
     }
 
     private async void save_and_exit_async() {
         make_gui_insensitive();
         this.is_closing = true;
-        
-        save_draft();
+
+        yield save_draft();
         try {
             yield close_draft_manager_async(null);
         } catch (Error err) {
@@ -1536,13 +1417,16 @@ public class ComposerWidget : Gtk.EventBox {
         make_gui_insensitive();
         this.is_closing = true;
 
-        discard_draft();
-        if (draft_manager != null)
+        // This method can be called even if drafts are not being
+        // saved, hence we need to check the draft manager
+        if (draft_manager != null) {
+            discard_draft();
             draft_manager.discard_on_close = true;
-        try {
-            yield close_draft_manager_async(null);
-        } catch (Error err) {
-            // ignored
+            try {
+                yield close_draft_manager_async(null);
+            } catch (Error err) {
+                // ignored
+            }
         }
 
         this.container.close_container();
@@ -1555,8 +1439,9 @@ public class ComposerWidget : Gtk.EventBox {
         if (this.pending_attachments != null) {
             foreach(Geary.Attachment part in this.pending_attachments) {
                 try {
+                    string? content_id = part.content_id;
                     Geary.Mime.DispositionType? type =
-                    part.content_disposition.disposition_type;
+                        part.content_disposition.disposition_type;
                     File file = part.file;
                     if (type == Geary.Mime.DispositionType.INLINE) {
                         // We only care about the Content Ids of
@@ -1566,8 +1451,11 @@ public class ComposerWidget : Gtk.EventBox {
                         // possible to be referenced from an IMG SRC
                         // using a cid: URL anyway, so treat it as an
                         // attachment instead.
-                        if (part.content_id != null) {
-                            this.cid_files[part.content_id] = file;
+                        if (content_id != null) {
+                            this.cid_files[content_id] = file;
+                            this.editor.add_internal_resource(
+                                content_id, new Geary.Memory.FileBuffer(file, true)
+                            );
                         } else {
                             type = Geary.Mime.DispositionType.ATTACHMENT;
                         }
@@ -1580,8 +1468,12 @@ public class ComposerWidget : Gtk.EventBox {
                         // hasn't already been added
                         if (do_add &&
                             !(file in this.attached_files) &&
-                            !(file in this.inline_files)) {
-                            add_attachment(file, type);
+                            !(content_id in this.inline_files)) {
+                            if (type == Geary.Mime.DispositionType.INLINE) {
+                                add_inline_part(file, content_id);
+                            } else {
+                                add_attachment_part(file);
+                            }
                         }
                     } else {
                         // The pending attachment should only be added
@@ -1596,8 +1488,50 @@ public class ComposerWidget : Gtk.EventBox {
         this.header.show_pending_attachments = manual_enabled;
     }
 
-    private void add_attachment(File target,
-                                Geary.Mime.DispositionType? disposition = null)
+    private void add_attachment_part(File target)
+        throws AttachmentError {
+        FileInfo target_info = check_attachment_file(target);
+
+        if (!this.attached_files.add(target)) {
+            throw new AttachmentError.DUPLICATE(
+                _("“%s” already attached for delivery.").printf(target.get_path())
+                );
+        }
+
+        Gtk.Box box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 6);
+        this.attachments_box.pack_start(box);
+
+        /// In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
+        string label_text = _("%s (%s)").printf(target.get_basename(),
+                                                Files.get_filesize_as_string(target_info.get_size()));
+        Gtk.Label label = new Gtk.Label(label_text);
+        box.pack_start(label);
+        label.halign = Gtk.Align.START;
+        label.margin_start = 4;
+        label.margin_end = 4;
+
+        Gtk.Button remove_button = new Gtk.Button.with_mnemonic(Stock._REMOVE);
+        box.pack_start(remove_button, false, false);
+        remove_button.clicked.connect(() => remove_attachment(target, box));
+
+        show_attachments();
+    }
+
+    private void add_inline_part(File target, string content_id)
+        throws AttachmentError {
+        check_attachment_file(target);
+        this.inline_files[content_id] = target;
+        try {
+            this.editor.add_internal_resource(
+                content_id, new Geary.Memory.FileBuffer(target, true)
+            );
+        } catch (Error err) {
+            // unlikely
+            debug("Failed to re-open file for attachment: %s", err.message);
+        }
+    }
+
+    private FileInfo check_attachment_file(File target)
         throws AttachmentError {
         FileInfo target_info;
         try {
@@ -1608,7 +1542,7 @@ public class ComposerWidget : Gtk.EventBox {
                 _("“%s” could not be found.").printf(target.get_path())
             );
         }
-        
+
         if (target_info.get_file_type() == FileType.DIRECTORY) {
             throw new AttachmentError.FILE(
                 _("“%s” is a folder.").printf(target.get_path())
@@ -1620,7 +1554,7 @@ public class ComposerWidget : Gtk.EventBox {
                 _("“%s” is an empty file.").printf(target.get_path())
             );
         }
-        
+
         try {
             FileInputStream? stream = target.read();
             if (stream != null)
@@ -1628,39 +1562,13 @@ public class ComposerWidget : Gtk.EventBox {
         } catch(Error e) {
             debug("File '%s' could not be opened for reading. Error: %s", target.get_path(),
                 e.message);
-            
+
             throw new AttachmentError.FILE(
                 _("“%s” could not be opened for reading.").printf(target.get_path())
             );
         }
 
-        if (disposition != Geary.Mime.DispositionType.INLINE) {
-            if (!this.attached_files.add(target)) {
-                throw new AttachmentError.DUPLICATE(
-                    _("“%s” already attached for delivery.").printf(target.get_path())
-                );
-            }
-
-            Gtk.Box box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 6);
-            this.attachments_box.pack_start(box);
-
-            /// In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
-            string label_text = _("%s (%s)").printf(target.get_basename(),
-                Files.get_filesize_as_string(target_info.get_size()));
-            Gtk.Label label = new Gtk.Label(label_text);
-            box.pack_start(label);
-            label.halign = Gtk.Align.START;
-            label.margin_start = 4;
-            label.margin_end = 4;
-
-            Gtk.Button remove_button = new Gtk.Button.with_mnemonic(Stock._REMOVE);
-            box.pack_start(remove_button, false, false);
-            remove_button.clicked.connect(() => remove_attachment(target, box));
-        
-            show_attachments();
-        } else {
-            this.inline_files.add(target);
-        }
+        return target_info;
     }
 
     private void attachment_failed(string msg) {
@@ -1691,9 +1599,26 @@ public class ComposerWidget : Gtk.EventBox {
         update_pending_attachments(this.pending_include, true);
     }
 
+    private bool check_send_on_return(Gdk.EventKey event) {
+        bool ret = Gdk.EVENT_PROPAGATE;
+        switch (Gdk.keyval_name(event.keyval)) {
+            case "Return":
+            case "KP_Enter":
+                // always trap Ctrl+Enter/Ctrl+KeypadEnter to prevent
+                // the Enter leaking through to the controls, but only
+                // send if send is available
+                if ((event.state & Gdk.ModifierType.CONTROL_MASK) != 0) {
+                    this.actions.activate_action(ACTION_SEND, null);
+                    ret = Gdk.EVENT_STOP;
+                }
+            break;
+        }
+        return ret;
+    }
+
     [GtkCallback]
-    private void on_subject_changed() {
-        reset_draft_timer();
+    private void on_envelope_changed() {
+        draft_changed();
     }
 
     private void validate_send_button() {
@@ -1721,12 +1646,10 @@ public class ComposerWidget : Gtk.EventBox {
                     tooltip.append(_("Reply-To: ") + addr.get_full_address() + "\n");
             this.header.set_recipients(label, tooltip.str.slice(0, -1));  // Remove trailing \n
         }
-
-        reset_draft_timer();
     }
 
     private void on_justify(SimpleAction action, Variant? param) {
-        this.editor.get_dom_document().exec_command("justify" + param.get_string(), false, "");
+        this.editor.execute_editing_command("justify" + param.get_string());
     }
 
     private void on_action(SimpleAction action, Variant? param) {
@@ -1736,7 +1659,15 @@ public class ComposerWidget : Gtk.EventBox {
         // We need the unprefixed name to send as a command to the editor
         string[] prefixed_action_name = action.get_name().split(".");
         string action_name = prefixed_action_name[prefixed_action_name.length - 1];
-        this.editor.get_dom_document().exec_command(action_name, false, "");
+        this.editor.execute_editing_command(action_name);
+    }
+
+    private void on_undo(SimpleAction action, Variant? param) {
+        this.editor.undo();
+    }
+
+    private void on_redo(SimpleAction action, Variant? param) {
+        this.editor.redo();
     }
 
     private void on_cut(SimpleAction action, Variant? param) {
@@ -1755,82 +1686,22 @@ public class ComposerWidget : Gtk.EventBox {
 
     private void on_copy_link(SimpleAction action, Variant? param) {
         Gtk.Clipboard c = Gtk.Clipboard.get(Gdk.SELECTION_CLIPBOARD);
-        c.set_text(hover_url, -1);
+        // XXX could this also be the cursor URL? We should be getting
+        // the target URL as from the action param
+        c.set_text(this.pointer_url, -1);
         c.store();
-    }
-
-    private WebKit.DOM.Node? get_left_text(WebKit.DOM.Node node, long offset) {
-        WebKit.DOM.Document document = this.editor.get_dom_document();
-        string node_value = node.node_value;
-
-        // Offset is in unicode characters, but index is in bytes. We need to get the corresponding
-        // byte index for the given offset.
-        int char_count = node_value.char_count();
-        int index = offset > char_count ? node_value.length : node_value.index_of_nth_char(offset);
-
-        return offset > 0 ? document.create_text_node(node_value[0:index]) : null;
-    }
-
-    private void on_clipboard_text_received(Gtk.Clipboard clipboard, string? text) {
-        if (text == null)
-            return;
-        
-        // Insert plain text from clipboard.
-        WebKit.DOM.Document document = this.editor.get_dom_document();
-        document.exec_command("inserttext", false, text);
-    
-        // The inserttext command will not scroll if needed, but we can't use the clipboard
-        // for plain text. WebKit allows us to scroll a node into view, but not an arbitrary
-        // position within a text node. So we add a placeholder node at the cursor position,
-        // scroll to that, then remove the placeholder node.
-        try {
-            WebKit.DOM.DOMSelection selection = document.default_view.get_selection();
-            WebKit.DOM.Node selection_base_node = selection.get_base_node();
-            long selection_base_offset = selection.get_base_offset();
-            
-            WebKit.DOM.NodeList selection_child_nodes = selection_base_node.get_child_nodes();
-            WebKit.DOM.Node ref_child = selection_child_nodes.item(selection_base_offset);
-        
-            WebKit.DOM.Element placeholder = document.create_element("SPAN");
-            WebKit.DOM.Text placeholder_text = document.create_text_node("placeholder");
-            placeholder.append_child(placeholder_text);
-            
-            if (selection_base_node.node_name == "#text") {
-                WebKit.DOM.Node? left = get_left_text(selection_base_node, selection_base_offset);
-                
-                WebKit.DOM.Node parent = selection_base_node.parent_node;
-                if (left != null)
-                    parent.insert_before(left, selection_base_node);
-                parent.insert_before(placeholder, selection_base_node);
-                parent.remove_child(selection_base_node);
-                
-                placeholder.scroll_into_view_if_needed(false);
-                parent.insert_before(selection_base_node, placeholder);
-                if (left != null)
-                    parent.remove_child(left);
-                parent.remove_child(placeholder);
-                selection.set_base_and_extent(selection_base_node, selection_base_offset, selection_base_node, selection_base_offset);
-            } else {
-                selection_base_node.insert_before(placeholder, ref_child);
-                placeholder.scroll_into_view_if_needed(false);
-                selection_base_node.remove_child(placeholder);
-            }
-            
-        } catch (Error err) {
-            debug("Error scrolling pasted text into view: %s", err.message);
-        }
     }
 
     private void on_paste(SimpleAction action, Variant? param) {
         if (this.container.get_focus() == this.editor)
-            get_clipboard(Gdk.SELECTION_CLIPBOARD).request_text(on_clipboard_text_received);
+            this.editor.paste_plain_text();
         else if (this.container.get_focus() is Gtk.Editable)
             ((Gtk.Editable) this.container.get_focus()).paste_clipboard();
     }
 
     private void on_paste_with_formatting(SimpleAction action, Variant? param) {
         if (this.container.get_focus() == this.editor)
-            this.editor.paste_clipboard();
+            this.editor.paste_rich_text();
     }
 
     private void on_select_all(SimpleAction action, Variant? param) {
@@ -1838,11 +1709,11 @@ public class ComposerWidget : Gtk.EventBox {
     }
 
     private void on_remove_format(SimpleAction action, Variant? param) {
-        this.editor.get_dom_document().exec_command("removeformat", false, "");
-        this.editor.get_dom_document().exec_command("removeparaformat", false, "");
-        this.editor.get_dom_document().exec_command("unlink", false, "");
-        this.editor.get_dom_document().exec_command("backcolor", false, "#ffffff");
-        this.editor.get_dom_document().exec_command("forecolor", false, "#000000");
+        this.editor.execute_editing_command("removeformat");
+        this.editor.execute_editing_command("removeparaformat");
+        this.editor.execute_editing_command("unlink");
+        this.editor.execute_editing_command_with_argument("backcolor", "#ffffff");
+        this.editor.execute_editing_command_with_argument("forecolor", "#000000");
     }
 
     // Use this for toggle actions, and use the change-state signal to respond to these state changes
@@ -1856,22 +1727,17 @@ public class ComposerWidget : Gtk.EventBox {
 
         foreach (string html_action in html_actions)
             get_action(html_action).set_enabled(compose_as_html);
+
+        update_cursor_actions();
+
+        this.insert_buttons.visible = compose_as_html;
+        this.font_style_buttons.visible = compose_as_html;
         this.remove_format_button.visible = compose_as_html;
 
         this.menu_button.menu_model = (compose_as_html) ? this.html_menu : this.plain_menu;
 
-        // style editor accordingly
-        WebKit.DOM.DOMTokenList body_classes = this.editor.get_dom_document().body.get_class_list();
-        try {
-            if (compose_as_html)
-                body_classes.remove("plain");
-            else
-                body_classes.add("plain");
-        } catch (Error error) {
-            debug("Error setting composer style: %s", error.message);
-        }
+        this.editor.set_rich_text(compose_as_html);
 
-        // Remember preference
         GearyApplication.instance.config.compose_as_html = compose_as_html;
     }
 
@@ -1888,9 +1754,11 @@ public class ComposerWidget : Gtk.EventBox {
     }
 
     private void on_font_family(SimpleAction action, Variant? param) {
-        this.editor.get_dom_document().exec_command("fontname", false, param.get_string());
+        this.editor.execute_editing_command_with_argument(
+            "fontname", param.get_string()
+        );
         action.set_state(param.get_string());
-  }
+    }
 
     private void on_font_size(SimpleAction action, Variant? param) {
         string size = "";
@@ -1901,139 +1769,32 @@ public class ComposerWidget : Gtk.EventBox {
         else // Large
             size = "7";
 
-        this.editor.get_dom_document().exec_command("fontsize", false, size);
+        this.editor.execute_editing_command_with_argument("fontsize", size);
         action.set_state(param.get_string());
     }
 
     private void on_select_color() {
         Gtk.ColorChooserDialog dialog = new Gtk.ColorChooserDialog(_("Select Color"),
             this.container.top_window);
-        if (dialog.run() == Gtk.ResponseType.OK)
-            this.editor.get_dom_document().exec_command("forecolor", false, dialog.get_rgba().to_string());
-
+        if (dialog.run() == Gtk.ResponseType.OK) {
+            this.editor.execute_editing_command_with_argument(
+                "forecolor", dialog.get_rgba().to_string()
+            );
+        }
         dialog.destroy();
     }
 
     private void on_indent(SimpleAction action, Variant? param) {
-        on_action(action, param);
-
-        // Undo styling of blockquotes
-        try {
-            WebKit.DOM.NodeList node_list = this.editor.get_dom_document().query_selector_all(
-                "blockquote[style=\"margin: 0 0 0 40px; border: none; padding: 0px;\"]");
-            for (int i = 0; i < node_list.length; ++i) {
-                WebKit.DOM.Element element = (WebKit.DOM.Element) node_list.item(i);
-                element.remove_attribute("style");
-                element.set_attribute("type", "cite");
-            }
-        } catch (Error error) {
-            debug("Error removing blockquote style: %s", error.message);
-        }
+        this.editor.indent_line();
     }
 
-    private void protect_blockquote_styles() {
-        // We will search for an remove a particular styling when we quote text.  If that style
-        // exists in the quoted text, we alter it slightly so we don't mess with it later.
-        try {
-            WebKit.DOM.NodeList node_list = this.editor.get_dom_document().query_selector_all(
-                "blockquote[style=\"margin: 0 0 0 40px; border: none; padding: 0px;\"]");
-            for (int i = 0; i < node_list.length; ++i) {
-                ((WebKit.DOM.Element) node_list.item(i)).set_attribute("style", 
-                    "margin: 0 0 0 40px; padding: 0px; border:none;");
-            }
-        } catch (Error error) {
-            debug("Error protecting blockquotes: %s", error.message);
-        }
-    }
-
-    private void link_dialog(string link) {
-        Gtk.Dialog dialog = new Gtk.Dialog();
-        bool existing_link = false;
-        
-        // Save information needed to re-establish selection
-        WebKit.DOM.DOMSelection selection = this.editor.get_dom_document().get_default_view().
-            get_selection();
-        WebKit.DOM.Node anchor_node = selection.anchor_node;
-        long anchor_offset = selection.anchor_offset;
-        WebKit.DOM.Node focus_node = selection.focus_node;
-        long focus_offset = selection.focus_offset;
-        
-        // Allow user to remove link if they're editing an existing one.
-        if (focus_node != null && (focus_node is WebKit.DOM.HTMLAnchorElement ||
-            focus_node.get_parent_element() is WebKit.DOM.HTMLAnchorElement)) {
-            existing_link = true;
-            dialog.add_buttons(Stock._REMOVE, Gtk.ResponseType.REJECT);
-        }
-        
-        dialog.add_buttons(Stock._CANCEL, Gtk.ResponseType.CANCEL, Stock._OK,
-            Gtk.ResponseType.OK);
-        
-        Gtk.Entry entry = new Gtk.Entry();
-        entry.changed.connect(() => {
-            // Only allow OK when there's text in the box.
-            dialog.set_response_sensitive(Gtk.ResponseType.OK, 
-                !Geary.String.is_empty(entry.text.strip()));
-        });
-        
-        dialog.width_request = 350;
-        dialog.get_content_area().spacing = 7;
-        dialog.get_content_area().border_width = 10;
-        dialog.get_content_area().pack_start(new Gtk.Label("Link URL:"));
-        dialog.get_content_area().pack_start(entry);
-        dialog.get_widget_for_response(Gtk.ResponseType.OK).can_default = true;
-        dialog.set_default_response(Gtk.ResponseType.OK);
-        dialog.show_all();
-        
-        entry.set_text(link);
-        entry.activates_default = true;
-        entry.move_cursor(Gtk.MovementStep.BUFFER_ENDS, 0, false);
-        
-        int response = dialog.run();
-        
-        // Re-establish selection, since selecting text in the Entry will de-select all
-        // in the WebView.
-        try {
-            selection.set_base_and_extent(anchor_node, anchor_offset, focus_node, focus_offset);
-        } catch (Error e) {
-            debug("Error re-establishing selection: %s", e.message);
-        }
-        
-        if (response == Gtk.ResponseType.OK)
-            this.editor.get_dom_document().exec_command("createLink", false, entry.text);
-        else if (response == Gtk.ResponseType.REJECT)
-            this.editor.get_dom_document().exec_command("unlink", false, "");
-        
-        dialog.destroy();
-        
-        // Re-bind to anchor links.  This must be done every time link have changed.
-        Util.DOM.bind_event(this.editor,"a", "click", (Callback) on_link_clicked, this);
-    }
-
-    private string get_html() {
-        return ((WebKit.DOM.HTMLElement) this.editor.get_dom_document().get_element_by_id(BODY_ID))
-            .get_inner_html();
-    }
-
-    private string get_text() {
-        return Util.DOM.html_to_flowed_text((WebKit.DOM.HTMLElement) this.editor.get_dom_document()
-            .get_element_by_id(BODY_ID));
-    }
-
-    private bool on_navigation_policy_decision_requested(WebKit.WebFrame frame,
-        WebKit.NetworkRequest request, WebKit.WebNavigationAction navigation_action,
-        WebKit.WebPolicyDecision policy_decision) {
-        policy_decision.ignore();
-        if (this.actions.get_action_state(ACTION_COMPOSE_AS_HTML).get_boolean())
-            link_dialog(request.uri);
-        return true;
-    }
-
-    private void on_hovering_over_link(string? title, string? url) {
-        if (this.actions.get_action_state(ACTION_COMPOSE_AS_HTML).get_boolean()) {
-            message_overlay_label.label = url;
-            hover_url = url;
-            update_actions();
-        }
+    private void on_mouse_target_changed(WebKit.WebView web_view,
+                                         WebKit.HitTestResult hit_test,
+                                         uint modifiers) {
+        bool copy_link_enabled = hit_test.context_is_link();
+        this.pointer_url = copy_link_enabled ? hit_test.get_link_uri() : null;
+        this.message_overlay_label.label = this.pointer_url ?? "";
+        get_action(ACTION_COPY_LINK).set_enabled(copy_link_enabled);
     }
 
     private void update_message_overlay_label_style() {
@@ -2061,152 +1822,130 @@ public class ComposerWidget : Gtk.EventBox {
         update_message_overlay_label_style();
     }
 
-    private void on_spell_check_changed() {
-        this.editor.settings.enable_spell_checking = GearyApplication.instance.config.spell_check;
-        get_action(ACTION_SELECT_DICTIONARY).set_enabled(this.editor.settings.enable_spell_checking);
-    }
+    private bool on_context_menu(WebKit.WebView view,
+                                 WebKit.ContextMenu context_menu,
+                                 Gdk.Event event,
+                                 WebKit.HitTestResult hit_test_result) {
+        // This is a three step process:
+        // 1. Work out what existing menu items exist that we want to keep
+        // 2. Clear the existing menu
+        // 3. Rebuild it based on our GMenu specification
 
-    // This overrides the keypress handling for the *widget*; the WebView editor's keypress overrides
-    // are handled by on_editor_key_press
-    public override bool key_press_event(Gdk.EventKey event) {
-        update_actions();
-        
-        switch (Gdk.keyval_name(event.keyval)) {
-            case "Return":
-            case "KP_Enter":
-                // always trap Ctrl+Enter/Ctrl+KeypadEnter to prevent the Enter leaking through
-                // to the controls, but only send if send is available
-                if ((event.state & Gdk.ModifierType.CONTROL_MASK) != 0) {
-                    this.actions.activate_action(ACTION_SEND, null);
-                    return true;
-                }
-            break;
-        }
-        
-        return base.key_press_event(event);
-    }
+        // Step 1.
 
-    private bool on_context_menu(Gtk.Widget default_menu, WebKit.HitTestResult hit_test_result,
-        bool keyboard_triggered) {
-        Gtk.Menu context_menu = (Gtk.Menu) default_menu;
+        const WebKit.ContextMenuAction[] SPELLING_ACTIONS = {
+            WebKit.ContextMenuAction.SPELLING_GUESS,
+            WebKit.ContextMenuAction.NO_GUESSES_FOUND,
+            WebKit.ContextMenuAction.IGNORE_SPELLING,
+            WebKit.ContextMenuAction.IGNORE_GRAMMAR,
+            WebKit.ContextMenuAction.LEARN_SPELLING,
+        };
+        const WebKit.ContextMenuAction[] TEXT_INPUT_ACTIONS = {
+            WebKit.ContextMenuAction.INPUT_METHODS,
+            WebKit.ContextMenuAction.UNICODE,
+        };
 
-        // Keep the spelling menu items
-        foreach (weak Gtk.Widget child in context_menu.get_children()) {
-            Gtk.MenuItem item = (Gtk.MenuItem) child;
-            WebKit.ContextMenuAction action = WebKit.context_menu_item_get_action(item);
+        Gee.List<WebKit.ContextMenuItem> existing_spelling =
+            new Gee.LinkedList<WebKit.ContextMenuItem>();
+        Gee.List<WebKit.ContextMenuItem> existing_text_entry =
+            new Gee.LinkedList<WebKit.ContextMenuItem>();
 
-            const WebKit.ContextMenuAction[] spelling_actions = {
-                WebKit.ContextMenuAction.SPELLING_GUESS,
-                WebKit.ContextMenuAction.IGNORE_SPELLING,
-                WebKit.ContextMenuAction.LEARN_SPELLING
-            };
-
-            if (!(action in spelling_actions))
-                context_menu.remove(item);
-        }
-
-        // Add our own Menu (but don't add formatting actions if they are disabled).
-        context_menu.insert_action_group("cme", this.actions);
-        GtkUtil.add_g_menu_to_gtk_menu(context_menu, context_menu_model, (label, detailed_action_name) => {
-            string action_name;
-            Variant? target;
-            try {
-                Action.parse_detailed_name(detailed_action_name, out action_name, out target);
-                if ("." in action_name) // Remove possible prefixes
-                    action_name = action_name.split(".")[1];
-            } catch (GLib.Error e) {
-                debug("Couldn't parse action \"%s\" in context menu".printf(detailed_action_name));
+        foreach (WebKit.ContextMenuItem item in context_menu.get_items()) {
+            if (item.get_stock_action() in SPELLING_ACTIONS) {
+                existing_spelling.add(item);
+            } else if (item.get_stock_action() in TEXT_INPUT_ACTIONS) {
+                existing_text_entry.add(item);
             }
-            return !(action_name in html_actions) || (this.actions.get_action_enabled(action_name));
-        });
-
-        if (Args.inspector) {
-            Gtk.MenuItem inspect_item = new Gtk.MenuItem.with_mnemonic(_("_Inspect"));
-            inspect_item.activate.connect(() => {
-                    this.editor.web_inspector.inspect_node(hit_test_result.inner_node);
-                });
-            context_menu.append(new Gtk.SeparatorMenuItem());
-            context_menu.append(inspect_item);
         }
 
-        context_menu.show_all();
-        update_actions();
-        return false;
+        // Step 2.
+
+        context_menu.remove_all();
+
+        // Step 3.
+
+        GtkUtil.menu_foreach(context_menu_model, (label, name, target, section) => {
+                if (context_menu.last() != null) {
+                    context_menu.append(new WebKit.ContextMenuItem.separator());
+                }
+
+                if (section == this.context_menu_webkit_spelling) {
+                    foreach (WebKit.ContextMenuItem item in existing_spelling)
+                        context_menu.append(item);
+                } else if (section == this.context_menu_webkit_text_entry) {
+                    foreach (WebKit.ContextMenuItem item in existing_text_entry)
+                        context_menu.append(item);
+                } else if (section == this.context_menu_rich_text) {
+                    if (this.editor.is_rich_text)
+                        append_menu_section(context_menu, section);
+                } else if (section == this.context_menu_plain_text) {
+                    if (!this.editor.is_rich_text)
+                        append_menu_section(context_menu, section);
+                } else if (section == this.context_menu_inspector) {
+                    if (Args.inspector)
+                        append_menu_section(context_menu, section);
+                } else {
+                    append_menu_section(context_menu, section);
+                }
+            });
+
+        // 4. Update the clipboard
+        // get_clipboard(Gdk.SELECTION_CLIPBOARD).request_targets(
+        //     (_, targets) => {
+        //         foreach (Gdk.Atom atom in targets) {
+        //             debug("atom name: %s", atom.name());
+        //         }
+        //     });
+
+        return Gdk.EVENT_PROPAGATE;
+    }
+
+    private inline void append_menu_section(WebKit.ContextMenu context_menu,
+                                            Menu section) {
+        GtkUtil.menu_foreach(section, (label, name, target, section) => {
+                if ("." in name)
+                    name = name.split(".")[1];
+
+                Gtk.Action action = new Gtk.Action(name, label, null, null);
+                action.set_sensitive(get_action(name).enabled);
+                action.activate.connect((action) => {
+                        this.actions.activate_action(name, target);
+                    });
+                context_menu.append(new WebKit.ContextMenuItem(action));
+            });
     }
 
     private void on_select_dictionary(SimpleAction action, Variant? param) {
         if (this.spell_check_popover == null) {
-            this.spell_check_popover = new SpellCheckPopover(select_dictionary_button);
+            this.spell_check_popover = new SpellCheckPopover(
+                this.select_dictionary_button, this.config
+            );
             this.spell_check_popover.selection_changed.connect((active_langs) => {
-                    this.editor.settings.spell_checking_languages = string.joinv(",", active_langs);
-                    GearyApplication.instance.config.spell_check_languages = active_langs;
+                    this.config.spell_check_languages = active_langs;
                 });
         }
         this.spell_check_popover.toggle();
     }
 
-    private bool on_editor_key_press(Gdk.EventKey event) {
-        // widget's keypress override doesn't receive non-modifier keys when the editor processes
-        // them, regardless if true or false is called; this deals with that issue (specifically
+    private bool on_editor_key_press_event(Gdk.EventKey event) {
+        // Widget's keypress override doesn't receive non-modifier
+        // keys when the editor processes them, regardless if true or
+        // false is called; this deals with that issue (specifically
         // so Ctrl+Enter will send the message)
         if (event.is_modifier == 0) {
-            if (key_press_event(event))
-                return true;
+            if (check_send_on_return(event) == Gdk.EVENT_STOP)
+                return Gdk.EVENT_STOP;
         }
-        
-        if ((event.state & Gdk.ModifierType.MOD1_MASK) != 0)
-            return false;
-        
-        if ((event.state & Gdk.ModifierType.CONTROL_MASK) != 0) {
-            if (event.keyval == Gdk.Key.Tab) {
-                child_focus(Gtk.DirectionType.TAB_FORWARD);
-                return true;
-            }
-            if (event.keyval == Gdk.Key.ISO_Left_Tab) {
-                child_focus(Gtk.DirectionType.TAB_BACKWARD);
-                return true;
-            }
-            return false;
-        }
-        
+
         if (this.can_delete_quote) {
             this.can_delete_quote = false;
-            if (event.keyval == Gdk.Key.BackSpace) {
-                this.body_html = null;
-                if (this.account.information.use_email_signature)
-                    add_signature_and_cursor();
-                else
-                    set_cursor();
-                this.editor.load_string(HTML_BODY, "text/html", "UTF8", "");
-                return true;
+            if (event.is_modifier == 0 && event.keyval == Gdk.Key.BackSpace) {
+                this.editor.delete_quoted_message();
+                return Gdk.EVENT_STOP;
             }
         }
-        
-        WebKit.DOM.Document document = this.editor.get_dom_document();
-        if (event.keyval == Gdk.Key.Tab) {
-            document.exec_command("inserthtml", false,
-                "<span style='white-space: pre-wrap'>\t</span>");
-            return true;
-        }
-        
-        if (event.keyval == Gdk.Key.ISO_Left_Tab) {
-            // If there is no selection and the character before the cursor is tab, delete it.
-            WebKit.DOM.DOMSelection selection = document.get_default_view().get_selection();
-            if (selection.is_collapsed) {
-                selection.modify("extend", "backward", "character");
-                try {
-                    if (selection.get_range_at(0).get_text() == "\t")
-                        selection.delete_from_document();
-                    else
-                        selection.collapse_to_end();
-                } catch (Error error) {
-                    debug("Error handling Left Tab: %s", error.message);
-                }
-            }
-            return true;
-        }
-        
-        return false;
+
+        return Gdk.EVENT_PROPAGATE;
     }
 
     /**
@@ -2215,73 +1954,6 @@ public class ComposerWidget : Gtk.EventBox {
      */
     public SimpleAction? get_action(string action_name) {
         return this.actions.lookup_action(action_name) as SimpleAction;
-    }
-
-    /**
-     * Updates the states of the composer's actions and whether they should be enabled.
-     */
-    private void update_actions() {
-        // Basic editor commands
-        get_action(ACTION_UNDO).set_enabled(this.editor.can_undo());
-        get_action(ACTION_REDO).set_enabled(this.editor.can_redo());
-        get_action(ACTION_CUT).set_enabled(this.editor.can_cut_clipboard());
-        get_action(ACTION_COPY).set_enabled(this.editor.can_copy_clipboard());
-        get_action(ACTION_COPY_LINK).set_enabled(hover_url != null);
-        get_action(ACTION_PASTE).set_enabled(this.editor.can_paste_clipboard());
-        get_action(ACTION_PASTE_WITH_FORMATTING).set_enabled(this.editor.can_paste_clipboard()
-            && get_action(ACTION_COMPOSE_AS_HTML).state.get_boolean());
-
-        // Style formatting actions.
-        WebKit.DOM.Document document = this.editor.get_dom_document();
-        WebKit.DOM.DOMWindow window = document.get_default_view();
-        WebKit.DOM.DOMSelection? selection = window.get_selection();
-        if (selection == null)
-            return;
-
-        get_action(ACTION_REMOVE_FORMAT).set_enabled(!selection.is_collapsed
-            && get_action(ACTION_COMPOSE_AS_HTML).state.get_boolean());
-
-        WebKit.DOM.Element? active = selection.focus_node as WebKit.DOM.Element;
-        if (active == null && selection.focus_node != null)
-            active = selection.focus_node.get_parent_element();
-
-        if (active != null) {
-            WebKit.DOM.CSSStyleDeclaration styles = window.get_computed_style(active, "");
-
-            this.actions.change_action_state(ACTION_BOLD, document.query_command_state("bold"));
-            this.actions.change_action_state(ACTION_ITALIC,
-                document.query_command_state("italic"));
-            this.actions.change_action_state(ACTION_UNDERLINE,
-                document.query_command_state("underline"));
-            this.actions.change_action_state(ACTION_STRIKETHROUGH,
-                document.query_command_state("strikethrough"));
-
-            // Font family.
-            string font_name = styles.get_property_value("font-family").down();
-            if (font_name.contains("sans") ||
-                font_name.contains("arial") ||
-                font_name.contains("trebuchet") ||
-                font_name.contains("helvetica"))
-                this.actions.change_action_state(ACTION_FONT_FAMILY, "sans");
-            else if (font_name.contains("serif") ||
-                font_name.contains("georgia") ||
-                font_name.contains("times"))
-                this.actions.change_action_state(ACTION_FONT_FAMILY, "serif");
-            else if (font_name.contains("monospace") ||
-                font_name.contains("courier") ||
-                font_name.contains("console"))
-                this.actions.change_action_state(ACTION_FONT_FAMILY, "monospace");
-
-            // Font size.
-            int font_size;
-            styles.get_property_value("font-size").scanf("%dpx", out font_size);
-            if (font_size < 11)
-                this.actions.change_action_state(ACTION_FONT_SIZE, "small");
-            else if (font_size > 20)
-                this.actions.change_action_state(ACTION_FONT_SIZE, "large");
-            else
-                this.actions.change_action_state(ACTION_FONT_SIZE, "medium");
-        }
     }
 
     private bool add_account_emails_to_from_list(Geary.Account other_account, bool set_active = false) {
@@ -2377,24 +2049,6 @@ public class ComposerWidget : Gtk.EventBox {
         return !set_active;
     }
 
-    private void on_from_changed() {
-        bool changed = false;
-        try {
-            changed = update_from_account();
-        } catch (Error err) {
-            debug("Unable to update From: Account in composer: %s", err.message);
-        }
-        
-        // if the Geary.Account didn't change and the drafts folder is open(ing), do nothing more;
-        // need to check for the drafts folder because opening it in the case of multiple From:
-        // is handled here alone, so changed open it if not already
-        if (!changed && this.draft_manager != null)
-            return;
-        
-        open_draft_manager_async.begin();
-        reset_draft_timer();
-    }
-
     private bool update_from_account() throws Error {
         int index = this.from_multiple.get_active();
         if (index < 0)
@@ -2408,30 +2062,156 @@ public class ComposerWidget : Gtk.EventBox {
             return false;
 
         this.account = new_account;
+        this.load_signature.begin(null, (obj, res) => {
+                this.editor.update_signature(this.load_signature.end(res));
+            });
         load_entry_completions.begin();
 
         return true;
     }
 
-    private unowned WebKit.WebView on_inspect_web_view(WebKit.WebInspector inspector, WebKit.WebView target_view) {
-        // XXX This was copy-pasta'ed from the conversation
-        // viewer. Both should be moved into a common superclass when
-        // ported to WebKit2 in Bug 728002.
-        Gtk.Window window = new Gtk.Window();
-        window.set_default_size(600, 600);
-        window.set_title(_("%s — Composer Inspector").printf(GearyApplication.NAME));
-        Gtk.ScrolledWindow scrolled = new Gtk.ScrolledWindow(null, null);
-        WebKit.WebView inspector_view = new WebKit.WebView();
-        scrolled.add(inspector_view);
-        window.add(scrolled);
-        window.show_all();
-        window.delete_event.connect(() => {
-            inspector.close();
-            return false;
-        });
+    private async string load_signature(Cancellable? cancellable = null) {
+        string account_sig = "";
 
-        unowned WebKit.WebView r = inspector_view;
-        return r;
+        if (this.account.information.use_email_signature) {
+            account_sig = account.information.email_signature ?? "";
+            if (Geary.String.is_empty_or_whitespace(account_sig)) {
+                // No signature is specified in the settings, so use
+                // ~/.signature
+                File signature_file = File.new_for_path(Environment.get_home_dir()).get_child(".signature");
+                try {
+                    uint8[] data;
+                    yield signature_file.load_contents_async(cancellable, out data, null);
+                    account_sig = (string) data;
+                } catch (Error error) {
+                    if (!(error is IOError.NOT_FOUND)) {
+                        debug("Error reading signature file %s: %s", signature_file.get_path(), error.message);
+                    }
+                }
+            }
+
+            account_sig = (!Geary.String.is_empty_or_whitespace(account_sig))
+                ? Geary.HTML.smart_escape(account_sig, true)
+                : "";
+        }
+
+        return account_sig;
+    }
+
+    private async ComposerLinkPopover new_link_popover(ComposerLinkPopover.Type type,
+                                                       string url) {
+        var selection_id = "";
+        try {
+            selection_id = yield this.editor.save_selection();
+        } catch (Error err) {
+            debug("Error saving selection: %s", err.message);
+        }
+        ComposerLinkPopover popover = new ComposerLinkPopover(type);
+        popover.set_link_url(url);
+        popover.closed.connect(() => {
+                this.editor.free_selection(selection_id);
+                Idle.add(() => { popover.destroy(); return Source.REMOVE; });
+            });
+        popover.link_activate.connect((link_uri) => {
+                this.editor.insert_link(popover.link_uri, selection_id);
+            });
+        popover.link_delete.connect(() => {
+                this.editor.delete_link();
+            });
+        popover.link_open.connect(() => { link_activated(popover.link_uri); });
+        return popover;
+    }
+
+    private void on_command_state_changed(bool can_undo, bool can_redo) {
+        get_action(ACTION_UNDO).set_enabled(can_undo);
+        get_action(ACTION_REDO).set_enabled(can_redo);
+    }
+
+    private void on_draft_id_changed() {
+        draft_id_changed(this.draft_manager.current_draft_id);
+    }
+
+    private void on_draft_manager_fatal(Error err) {
+        this.draft_save_text = DRAFT_ERROR_TEXT;
+    }
+
+    private void on_draft_state_changed() {
+        update_draft_state();
+    }
+
+    private void on_from_changed() {
+        bool changed = false;
+        try {
+            changed = update_from_account();
+        } catch (Error err) {
+            debug("Unable to update From: Account in composer: %s", err.message);
+        }
+
+        // if the Geary.Account didn't change and the drafts manager
+        // is open(ing), do nothing more; need to check for the drafts
+        // manager because opening it in the case of multiple From: is
+        // handled here alone, so if changed open it if not already
+        if (changed || this.draft_manager == null) {
+            reopen_draft_manager_async.begin(null);
+        }
+    }
+
+    private bool on_button_release(Gdk.Event event) {
+        // Show the link popover on mouse release (instead of press)
+        // so the user can still select text with a link in it,
+        // without the popover immediately appearing and raining on
+        // their text selection parade.
+        if (this.pointer_url != null &&
+            this.actions.get_action_state(ACTION_COMPOSE_AS_HTML).get_boolean()) {
+            Gdk.EventButton? button = (Gdk.EventButton) event;
+            Gdk.Rectangle location = new Gdk.Rectangle();
+            location.x = (int) button.x;
+            location.y = (int) button.y;
+
+            this.new_link_popover.begin(
+                ComposerLinkPopover.Type.EXISTING_LINK, this.pointer_url,
+                (obj, res) => {
+                    ComposerLinkPopover popover = this.new_link_popover.end(res);
+                    popover.set_relative_to(this.editor);
+                    popover.set_pointing_to(location);
+                    popover.show();
+                });
+        }
+        return Gdk.EVENT_PROPAGATE;
+    }
+
+    private void on_cursor_context_changed(ComposerWebView.EditContext context) {
+        this.cursor_url = context.is_link ? context.link_url : null;
+        update_cursor_actions();
+
+        this.actions.change_action_state(ACTION_FONT_FAMILY, context.font_family);
+
+        if (context.font_size < 11)
+            this.actions.change_action_state(ACTION_FONT_SIZE, "small");
+        else if (context.font_size > 20)
+            this.actions.change_action_state(ACTION_FONT_SIZE, "large");
+        else
+            this.actions.change_action_state(ACTION_FONT_SIZE, "medium");
+    }
+
+    private void on_typing_attributes_changed() {
+        uint mask = this.editor.get_editor_state().get_typing_attributes();
+        this.actions.change_action_state(
+            ACTION_BOLD,
+            (mask & WebKit.EditorTypingAttributes.BOLD) == WebKit.EditorTypingAttributes.BOLD
+        );
+        this.actions.change_action_state(
+            ACTION_ITALIC,
+            (mask & WebKit.EditorTypingAttributes.ITALIC) == WebKit.EditorTypingAttributes.ITALIC
+        );
+        this.actions.change_action_state(
+            ACTION_UNDERLINE,
+            (mask & WebKit.EditorTypingAttributes.UNDERLINE) == WebKit.EditorTypingAttributes.UNDERLINE
+        );
+        this.actions.change_action_state(
+            ACTION_STRIKETHROUGH,
+            (mask & WebKit.EditorTypingAttributes.STRIKETHROUGH) == WebKit.EditorTypingAttributes.STRIKETHROUGH
+        );
     }
 
     private void on_add_attachment() {
@@ -2440,7 +2220,7 @@ public class ComposerWidget : Gtk.EventBox {
             dialog.hide();
             foreach (File file in dialog.get_files()) {
                 try {
-                    add_attachment(file, Geary.Mime.DispositionType.ATTACHMENT);
+                    add_attachment_part(file);
                 } catch (Error err) {
                     attachment_failed(err.message);
                     break;
@@ -2466,16 +2246,10 @@ public class ComposerWidget : Gtk.EventBox {
             dialog.hide();
             foreach (File file in dialog.get_files()) {
                 try {
-                    add_attachment(file, Geary.Mime.DispositionType.INLINE);
-                    // Use insertHTML instead of insertImage here so
-                    // we can specify a max width inline, preventing
-                    // large images from overflowing the view port.
-                    this.editor.get_dom_document().exec_command(
-                        "insertHTML",
-                        false,
-                        "<img style=\"max-width: 100%\" src=\"%s\">".printf(
-                            this.editor_allow_prefix + file.get_uri()
-                        )
+                    string path = file.get_path();
+                    add_inline_part(file, path);
+                    this.editor.insert_image(
+                        ClientWebView.INTERNAL_URL_PREFIX + path
                     );
                 } catch (Error err) {
                     attachment_failed(err.message);
@@ -2487,46 +2261,38 @@ public class ComposerWidget : Gtk.EventBox {
     }
 
     private void on_insert_link(SimpleAction action, Variant? param) {
-        link_dialog("http://");
+        ComposerLinkPopover.Type type = ComposerLinkPopover.Type.NEW_LINK;
+        string url = "http://";
+        if (this.cursor_url != null) {
+            type = ComposerLinkPopover.Type.EXISTING_LINK;
+            url = this.cursor_url;
+        }
+
+        this.new_link_popover.begin(type, url, (obj, res) => {
+                ComposerLinkPopover popover = this.new_link_popover.end(res);
+
+                // We have to disconnect then reconnect the selection
+                // changed signal for the duration of the popover
+                // being active since if the user selects the text in
+                // the URL entry, then the editor will lose its
+                // selection, the inset link action will become
+                // disabled, and the popover will disappear
+                this.editor.selection_changed.disconnect(on_selection_changed);
+                popover.closed.connect(() => {
+                        this.editor.selection_changed.connect(on_selection_changed);
+                    });
+
+                popover.set_relative_to(this.insert_link_button);
+                popover.show();
+            });
     }
 
-    private static void on_link_clicked(WebKit.DOM.Element element, WebKit.DOM.Event event,
-        ComposerWidget composer) {
-        try {
-            composer.editor.get_dom_document().get_default_view().get_selection().
-                select_all_children(element);
-        } catch (Error e) {
-            debug("Error selecting link: %s", e.message);
-        }
+    private void on_open_inspector(SimpleAction action, Variant? param) {
+        this.editor.get_inspector().show();
     }
 
-    private void on_resource_request_starting(WebKit.WebFrame web_frame,
-                                              WebKit.WebResource web_resource,
-                                              WebKit.NetworkRequest request,
-                                              WebKit.NetworkResponse? response) {
-        // XXX This was copy-pasta'ed from the conversation
-        // viewer. Both should be moved into a common superclass when
-        // ported to WebKit2 in Bug 728002.
-
-        if (response != null) {
-            // A request that was previously approved resulted in a redirect.
-            return;
-        }
-
-        const string CID_PREFIX = "cid:";
-        const string ABOUT_BLANK = "about:blank";
-
-        string? req_uri = request.get_uri();
-        string resp_url = ABOUT_BLANK;
-        if (req_uri.has_prefix(CID_PREFIX)) {
-            File? file = this.cid_files[req_uri.substring(CID_PREFIX.length)];
-            if (file != null) {
-                resp_url = file.get_uri();
-            }
-        } else if (req_uri.has_prefix(this.editor_allow_prefix)) {
-            resp_url = req_uri.substring(this.editor_allow_prefix.length);
-        }
-        request.set_uri(resp_url);
+    private void on_selection_changed(bool has_selection) {
+        update_cursor_actions();
     }
 
 }

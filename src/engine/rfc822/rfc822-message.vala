@@ -176,10 +176,8 @@ public class Geary.RFC822.Message : BaseObject {
                 new Gee.LinkedList<GMime.Object>();
 
             // The files that need to have Content IDs assigned
-            Gee.Set<File> inline_files = new Gee.HashSet<File>(
-                Geary.Files.nullable_hash, Geary.Files.nullable_equal
-            );
-            inline_files.add_all(email.inline_files);
+            Gee.Map<string,File> inline_files = new Gee.HashMap<string,File>();
+            inline_files.set_all(email.inline_files);
 
             // Create parts for inline images, if any, and updating
             // the IMG SRC attributes as we go. An inline file is only
@@ -200,7 +198,7 @@ public class Geary.RFC822.Message : BaseObject {
                     }
                     // Don't need to assign a CID to this file, so
                     // don't process it below any further.
-                    inline_files.remove(file);
+                    inline_files.remove(cid);
                 }
             }
 
@@ -209,16 +207,16 @@ public class Geary.RFC822.Message : BaseObject {
             if (!inline_files.is_empty) {
                 const string CID_TEMPLATE = "inline_%02u@geary";
                 uint cid_index = 0;
-                foreach (File file in inline_files) {
+                foreach (string name in inline_files.keys) {
                     string cid = "";
                     do {
                         cid = CID_TEMPLATE.printf(cid_index++);
                     } while (cid in email.cid_files);
 
-                    if (email.replace_inline_img_src(file.get_uri(),
+                    if (email.replace_inline_img_src(name,
                                                      CID_URL_PREFIX + cid)) {
                         GMime.Object? inline_part = get_file_part(
-                            file, Geary.Mime.DispositionType.INLINE
+                            inline_files[name], Geary.Mime.DispositionType.INLINE
                         );
                         if (inline_part != null) {
                             inline_part.set_content_id(cid);

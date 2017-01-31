@@ -40,9 +40,10 @@ public class Geary.ComposedEmail : BaseObject {
 
     public Gee.Set<File> attached_files { get; private set;
         default = new Gee.HashSet<File>(Geary.Files.nullable_hash, Geary.Files.nullable_equal); }
-    public Gee.Set<File> inline_files { get; private set;
-        default = new Gee.HashSet<File>(Geary.Files.nullable_hash, Geary.Files.nullable_equal); }
-    public Gee.Map<string,File> cid_files = new Gee.HashMap<string,File>();
+    public Gee.Map<string,File> inline_files { get; private set;
+        default = new Gee.HashMap<string,File>(); }
+    public Gee.Map<string,File> cid_files { get; private set;
+        default = new Gee.HashMap<string,File>(); }
 
     public string img_src_prefix { get; set; default = ""; }
 
