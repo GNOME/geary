@@ -126,17 +126,6 @@ public class ConversationMessage : Gtk.Grid {
 
     }
 
-    private const string[] INLINE_MIME_TYPES = {
-        "image/png",
-        "image/gif",
-        "image/jpeg",
-        "image/pjpeg",
-        "image/bmp",
-        "image/x-icon",
-        "image/x-xbitmap",
-        "image/x-xbm"
-    };
-
     private const int MAX_INLINE_IMAGE_MAJOR_DIM = 1024;
 
     private const string ACTION_COPY_EMAIL = "copy_email";
@@ -686,19 +675,8 @@ public class ConversationMessage : Gtk.Grid {
             return null;
         }
 
-        bool is_supported = false;
-        foreach (string mime_type in INLINE_MIME_TYPES) {
-            try {
-                is_supported = content_type.is_mime_type(mime_type);
-            } catch (Error err) {
-                debug("Unable to compare MIME type %s: %s", mime_type, err.message);
-            }
-            if (is_supported) {
-                break;
-            }
-        }
-
-        if (!is_supported) {
+        if (content_type.media_type != "image" ||
+            !this.web_view.can_show_mime_type(content_type.to_string())) {
             debug("Not displaying %s inline: unsupported Content-Type", content_type.to_string());
             return null;
         }
