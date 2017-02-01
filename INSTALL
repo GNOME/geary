@@ -65,7 +65,7 @@
     Fedora 23 and later ships with the correct versions of the
     required libraries. Install them by running this command:
 
-        $ sudo yum install vala gobject-introspection-devel intltool cmake \
+        $ sudo dnf install vala gobject-introspection-devel intltool cmake \
             desktop-file-utils gnome-doc-utils libcanberra-devel libgee-devel \
             glib2-devel gmime-devel gtk3-devel libnotify-devel sqlite-devel \
             unique3-devel webkitgtk4-devel libsecret-devel libxml2-devel \
