@@ -16,10 +16,15 @@
 
   * Dependencies
 
-    Building Geary requires at least GTK+ version 3.14, WebKitGTK+
-    2.10 and Vala 0.26, with a full GObject introspection repository,
-    intltool, cmake, desktop-file-validate, and xml2po.  Vala's
-    vapigen must be installed as well.
+    Building Geary requires at least the following major libraries:
+
+      * GTK+ version 3.14
+      * WebKitGTK+ 2.10
+      * Vala 0.26
+
+    With a full GObject introspection repository, intltool, cmake,
+    desktop-file-validate, and xml2po. Vala's vapigen must be
+    installed as well.
 
     See the file `src/CMakeLists.txt` for the complete list of minimum
     version requirements.
@@ -57,7 +62,7 @@
 
   * Installing dependencies on Fedora
 
-    Fedora 21 and later ships with the correct versions of the
+    Fedora 23 and later ships with the correct versions of the
     required libraries. Install them by running this command:
 
         $ sudo yum install vala gobject-introspection-devel intltool cmake \
@@ -69,9 +74,15 @@
 
   * Installing dependencies on Ubuntu/Debian
 
-    Ubuntu 15.10 (Wily) and Debian 8.5 (Jessie) and later ships with
-    the correct versions of the required libraries. Install them by
-    running this command:
+    Ubuntu 16.04 LTS (Xenial) and later ships with the correct
+    versions of the required libraries.
+
+    Debian 8 (Jessie) requires stable backports enabled for
+    WebKitGTK. See <https://backports.debian.org/Instructions/> for
+    more information about using stable backports. Later versions
+    ships with the correct versions of the required libraries.
+
+    Install them by running this command:
 
         $ sudo apt-get install valac libgirepository1.0-dev intltool \
             cmake desktop-file-utils gnome-doc-utils libcanberra-dev \
@@ -80,10 +91,9 @@
             libunique-3.0-dev libwebkit2gtk-4.0-dev libmessaging-menu-dev \
             libunity-dev libgcr-3-dev libenchant-dev
 
-    Ubuntu 14.04 (Trusty LTS) and 12.04 (Precise LTS) do not have all
-    the dependencies to build Geary.  See
-    <https://wiki.gnome.org/Apps/Geary/BuildingOnUbuntu12.04> for
-    details and instructions.
+    Ubuntu 14.04 LTS (Trusty) does not have all the dependencies to
+    build this version Geary. Consier using the Geary 0.11 LTS series
+    instead.
 
 
   * Running
