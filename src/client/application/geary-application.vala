@@ -62,7 +62,7 @@ public class GearyApplication : Gtk.Application {
     private const int64 FORCE_SHUTDOWN_USEC = 5 * USEC_PER_SEC;
 
 
-    [Version(deprecated = true)]
+    [Deprecated]
     public static GearyApplication instance {
         get { return _instance; }
         private set {
@@ -343,7 +343,7 @@ public class GearyApplication : Gtk.Application {
      *
      * @deprecated Use {@link GioUtil.create_builder} instead.
      */
-    [Version (deprecated = true)]
+    [Deprecated]
     public Gtk.Builder create_builder(string name) {
         return GioUtil.create_builder(name);
     }
@@ -353,7 +353,7 @@ public class GearyApplication : Gtk.Application {
      *
      * @deprecated Use {@link GioUtil.read_resource} instead.
      */
-    [Version (deprecated = true)]
+    [Deprecated]
     public string read_resource(string name) throws Error {
         return GioUtil.read_resource(name);
     }
@@ -361,7 +361,7 @@ public class GearyApplication : Gtk.Application {
     /**
      * Loads a UI GResource into the UI manager.
      */
-    [Version (deprecated = true)]
+    [Deprecated]
     public void load_ui_resource(string name) {
         try {
             this.ui_manager.add_ui_from_resource("/org/gnome/Geary/" + name);
