@@ -68,8 +68,8 @@
         $ sudo dnf install vala gobject-introspection-devel intltool cmake \
             desktop-file-utils gnome-doc-utils libcanberra-devel libgee-devel \
             glib2-devel gmime-devel gtk3-devel libnotify-devel sqlite-devel \
-            unique3-devel webkitgtk4-devel libsecret-devel libxml2-devel \
-            vala-tools gcr-devel enchant-devel
+            webkitgtk4-devel libsecret-devel libxml2-devel vala-tools \
+            gcr-devel enchant-devel
 
 
   * Installing dependencies on Ubuntu/Debian
@@ -88,8 +88,11 @@
             cmake desktop-file-utils gnome-doc-utils libcanberra-dev \
             libgee-0.8-dev libglib2.0-dev libgmime-2.6-dev libgtk-3-dev \
             libsecret-1-dev libxml2-dev libnotify-dev libsqlite3-dev \
-            libunique-3.0-dev libwebkit2gtk-4.0-dev libmessaging-menu-dev \
-            libunity-dev libgcr-3-dev libenchant-dev
+            libwebkit2gtk-4.0-dev libgcr-3-dev libenchant-dev
+
+    And for Ubuntu Unity integration:
+
+        $ sudo apt-get install libunity-dev libmessaging-menu-dev
 
     Ubuntu 14.04 LTS (Trusty) does not have all the dependencies to
     build this version Geary. Consier using the Geary 0.11 LTS series
