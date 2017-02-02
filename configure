@@ -13,39 +13,40 @@ PREFIX=$DEFAULT_PREFIX
 
 configure_help() {
     cat <<- EOT
-	Usage:
-	  ./configure [OPTIONS]...
-	
-	Options:
-	  -h, --help            Print this help and exit.
-	  --prefix=PREFIX       Prepend PREFIX to program installation paths.
-	                        [$DEFAULT_PREFIX]
-	  --debug               Build for debugging.
-	
-	  --disable-fatal-warnings
-	                        Disable Vala fatal warnings when compiling.
-	  --enable-ref-tracking
-	                        Enable reference tracking which is dumped to stdout when the program exits.
-	  --disable-schemas-compile
-	                        Disable compiling the GSettings schema.
-	  --disable-desktop-update
-	                        Disable desktop database update.
-	  --disable-desktop-validate
-	                        Disable checking for errors in generated desktop file.
-	  --disable-icon-update
-	                        Disable icon cache update.
-	  --disable-documentation
-	                        Disable generating and installing translated help documentation.
-	  --disable-contractor
-	                        Disable installing Contractor files.
-	  --disable-poodle-ssl3
-	                        Disable POODLE SSLv3 GnuTLS priority fix. (Not recommended.)
+    Usage:
+      ./configure [OPTIONS]...
+
+    Options:
+      -h, --help            Print this help and exit.
+      --prefix=PREFIX       Prepend PREFIX to program installation paths.
+                            [$DEFAULT_PREFIX]
+      --debug               Build for debugging.
+
+      --disable-fatal-warnings
+                            Disable Vala fatal warnings when compiling.
+      --enable-ref-tracking
+                            Enable reference tracking which is dumped to stdout when the program exits.
+      --disable-schemas-compile
+                            Disable compiling the GSettings schema.
+      --disable-desktop-update
+                            Disable desktop database update.
+      --disable-desktop-validate
+                            Disable checking for errors in generated desktop file.
+      --disable-icon-update
+                            Disable icon cache update.
+      --disable-documentation
+                            Disable generating and installing translated help documentation.
+      --disable-contractor
+                            Disable installing Contractor files.
+      --disable-poodle-ssl3
+                            Disable POODLE SSLv3 GnuTLS priority fix. (Not recommended.)
 
 	Some influential environment variables:
-	  PKG_CONFIG_PATH       Adds directories to pkg-config's search path.
-	  PKG_CONFIG_LIBDIR     Overrides pkg-config's built-in search path.
+      PKG_CONFIG_PATH       Adds directories to pkg-config's search path.
+      PKG_CONFIG_LIBDIR     Overrides pkg-config's built-in search path.
 
-	  VALAC                 Name of the vala compiler to use, e.g. "valac-0.18".
+      VALAC                 Name of the vala compiler to use, e.g. "valac-0.18".
+      VALADOC               Name of the valadoc executable to use, e.g. "valadoc-0.18".
 
 EOT
 }
@@ -96,24 +97,24 @@ do
         --debug)
                             CMDLINE="${CMDLINE} -DCMAKE_BUILD_TYPE=Debug"
                             ;;
-        
+
         --disable-fatal-warnings)
                             CMDLINE="${CMDLINE} -DNO_FATAL_WARNINGS=ON"
                             ;;
-        
+
         --enable-ref-tracking)
                             CMDLINE="${CMDLINE} -DREF_TRACKING=ON"
                             ;;
-        
+
         --disable-schemas-compile)
                             CMDLINE="${CMDLINE} -DGSETTINGS_COMPILE=OFF"
                             CMDLINE="${CMDLINE} -DGSETTINGS_COMPILE_IN_PLACE=OFF"
                             ;;
-        
+
         --disable-icon-update)
                             CMDLINE="${CMDLINE} -DICON_UPDATE=OFF"
                             ;;
-        
+
         --disable-desktop-update)
                             CMDLINE="${CMDLINE} -DDESKTOP_UPDATE=OFF"
                             ;;
@@ -125,23 +126,23 @@ do
         --disable-documentation)
                             CMDLINE="${CMDLINE} -DTRANSLATE_HELP=OFF"
                             ;;
-        
+
         --disable-contractor)
                             CMDLINE="${CMDLINE} -DDISABLE_CONTRACT=ON"
                             ;;
-        
+
         --disable-poodle-ssl3)
                             CMDLINE="${CMDLINE} -DDISABLE_POODLE=ON"
                             ;;
-        
+
         VALAC)              [ ! $value ] && abort $1
                             VALAC=$value
                             ;;
-        
+
         *)                  abort $option
                             ;;
     esac
-    
+
     shift
 done
 
