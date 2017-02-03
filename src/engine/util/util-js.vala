@@ -80,8 +80,11 @@ namespace Geary.JS {
      *
      * This will raise a {@link Geary.JS.Error.TYPE} error if the
      * value is not a JavaScript `Object`.
+     *
+     * Return type is nullable as a workaround for Bug 778046, it will
+     * never actually be null.
      */
-    public global::JS.Object to_object(global::JS.Context context,
+    public global::JS.Object? to_object(global::JS.Context context,
                                        global::JS.Value value)
         throws Geary.JS.Error {
         if (!value.is_object(context)) {
@@ -111,8 +114,11 @@ namespace Geary.JS {
      *
      * This will raise a {@link Geary.JS.Error.TYPE} error if the
      * object does not contain the named property.
+     *
+     * Return type is nullable as a workaround for Bug 778046, it will
+     * never actually be null.
      */
-    public inline global::JS.Value get_property(global::JS.Context context,
+    public inline global::JS.Value? get_property(global::JS.Context context,
                                                 global::JS.Object object,
                                                 string name)
         throws Geary.JS.Error {

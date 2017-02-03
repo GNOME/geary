@@ -72,8 +72,11 @@ namespace WebKitUtil {
      *
      * This will raise a {@link Geary.JS.Error.TYPE} error if the
      * result is not a JavaScript `Object`.
+     *
+     * Return type is nullable as a workaround for Bug 778046, it will
+     * never actually be null.
      */
-    public JS.Object to_object(WebKit.JavascriptResult result)
+    public JS.Object? to_object(WebKit.JavascriptResult result)
         throws Geary.JS.Error {
         return Geary.JS.to_object(result.get_global_context(),
                                   result.get_value());

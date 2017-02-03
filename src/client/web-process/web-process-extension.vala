@@ -128,7 +128,9 @@ public class GearyWebExtension : Object {
         }
     }
 
-    private JS.Value execute_script(JS.Context context, string script, int line)
+    // Return type is nullable as a workaround for Bug 778046, it will
+    // never actually be null.
+    private JS.Value? execute_script(JS.Context context, string script, int line)
     throws Geary.JS.Error {
         JS.String js_script = new JS.String.create_with_utf8_cstring(script);
         JS.String js_source = new JS.String.create_with_utf8_cstring("__FILE__");
