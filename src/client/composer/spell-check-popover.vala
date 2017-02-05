@@ -114,9 +114,11 @@ public class SpellCheckPopover {
 
             if (is_lang_visible) {
                 remove_button.set_image(new Gtk.Image.from_icon_name("list-remove-symbolic", sz));
+                remove_button.set_tooltip_text(_("Remove this language from the preferred list"));
             }
             else {
                 remove_button.set_image(new Gtk.Image.from_icon_name("list-add-symbolic", sz));
+                remove_button.set_tooltip_text(_("Add this language to the preferred list"));
             }
         }
 
