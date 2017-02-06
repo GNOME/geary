@@ -1,12 +1,12 @@
 # Brazilian Portuguese translation for geary.
-# Copyright (C) 2016 geary's COPYRIGHT HOLDER
+# Copyright 2017 Software Freedom Conservancy Inc.
 # This file is distributed under the same license as the geary package.
-# Rafael Fontenelle <rafaelff@gnome.org>, 2016.
+# Rafael Fontenelle <rafaelff@gnome.org>, 2016, 2017.
 msgid ""
 msgstr ""
 "Project-Id-Version: geary master\n"
-"POT-Creation-Date: 2016-06-20 11:05+0000\n"
-"PO-Revision-Date: 2016-06-20 08:08-0200\n"
+"POT-Creation-Date: 2017-01-31 23:08+0000\n"
+"PO-Revision-Date: 2017-02-06 08:10-0200\n"
 "Last-Translator: Rafael Fontenelle <rafaelff@gnome.org>\n"
 "Language-Team: Brazilian Portuguese <gnome-pt_br-list@gnome.org>\n"
 "Language: pt_BR\n"
@@ -14,7 +14,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Generator: Virtaal 0.7.1\n"
+"X-Generator: Virtaal 1.0.0-beta1\n"
 
 #: C/write.page:9(title)
 msgid "Write a message"
@@ -305,20 +305,22 @@ msgstr ""
 "key><key>U</key></keyseq>"
 
 #: C/shortcuts.page:59(p)
-msgid "Open the Label Conversation menu"
-msgstr "Abrir o menu de conversa de rótulo"
+#| msgid "Label a conversation"
+msgid "Move the conversation"
+msgstr "Mover a conversação"
 
-#: C/shortcuts.page:60(key) C/shortcuts.page:170(key)
-msgid "L"
-msgstr "L"
-
-#: C/shortcuts.page:63(p)
-msgid "Open the Move Conversation menu"
-msgstr "Abrir o menu de conversa de rótulo"
-
-#: C/shortcuts.page:64(key)
+#: C/shortcuts.page:60(key)
 msgid "M"
 msgstr "M"
+
+#: C/shortcuts.page:63(p)
+#| msgid "Label a conversation"
+msgid "Label the conversation"
+msgstr "Rotular a conversa"
+
+#: C/shortcuts.page:64(key) C/shortcuts.page:170(key)
+msgid "L"
+msgstr "L"
 
 #: C/shortcuts.page:67(p)
 msgid "Move focus to the next/previous pane"
@@ -1300,7 +1302,13 @@ msgstr ""
 #. Put one translator per line, in the form of NAME <EMAIL>, YEAR1, YEAR2
 #: C/accounts.page:0(None)
 msgid "translator-credits"
-msgstr "Rafael Fontenelle <rafaelff@gnome.org>, 2016"
+msgstr "Rafael Fontenelle <rafaelff@gnome.org>, 2016, 2017"
+
+#~ msgid "Open the Label Conversation menu"
+#~ msgstr "Abrir o menu de conversa de rótulo"
+
+#~ msgid "Open the Move Conversation menu"
+#~ msgstr "Abrir o menu de conversa de rótulo"
 
 #~ msgid "j"
 #~ msgstr "j"
