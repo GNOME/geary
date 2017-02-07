@@ -3,13 +3,11 @@
 #
 
 install(FILES geary.appdata.xml DESTINATION share/appdata)
-install(FILES geary.appdata.xml DESTINATION share/appdata RENAME org.gnome.Geary.appdata.xml)
 
 include (FindIntltool)
 include (FindDesktopFileValidate)
 if (INTLTOOL_MERGE_FOUND)
     INTLTOOL_MERGE_DESKTOP (geary po)
-    INTLTOOL_MERGE_DESKTOP (org.gnome.Geary po)
     INTLTOOL_MERGE_AUTOSTART_DESKTOP (geary-autostart po)
     
     if (DESKTOP_VALIDATE)
