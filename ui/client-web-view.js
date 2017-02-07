@@ -40,17 +40,23 @@ PageState.prototype = {
             state.loaded();
             queuePreferredHeightUpdate();
         });
-        // Queues updates for not only the complete document, but also
-        // for any IMG elements loaded, hence handles resizing when
-        // the user later requests remote images loading.
+
+        // Queues an update when the complete document is loaded.
         //
-        // Note also that the delay introduced here by the last call
+        // Note also that the delay introduced here by this last call
         // to queuePreferredHeightUpdate when the complete document is
         // loaded seems to be important to get an acurate idea of the
         // final document size.
+        window.addEventListener("load", function(e) {
+            queuePreferredHeightUpdate();
+        }, true); // load does not bubble
+
+        // Queues updates for any STYLE, IMG and other loaded
+        // elements, hence handles resizing when the user later
+        // requests remote images loading.
         document.addEventListener("load", function(e) {
             queuePreferredHeightUpdate();
-        }, true);
+        }, true); // load does not bubble
     },
     getPreferredHeight: function() {
         let html = window.document.documentElement;
