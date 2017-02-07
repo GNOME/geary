@@ -33,6 +33,9 @@ body {
 
   /* XXX for plain text only? */
   overflow-wrap: break-word !important;
+
+  /* Fix messages with broken body style. See Bug 750075. */
+  height: auto !important;
 }
 
 table {
