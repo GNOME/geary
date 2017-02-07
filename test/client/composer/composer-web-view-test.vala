@@ -7,7 +7,7 @@
 
 public class ComposerWebViewTest : ClientWebViewTestCase<ComposerWebView> {
 
-    private const string BODY_TEMPLATE = """<div id="geary-body">%s<div><br></div><div><br></div><div><br></div></div>""";
+    private const string BODY_TEMPLATE = """<div id="geary-body">%s<div><br></div><div><br></div></div>""";
 
     public ComposerWebViewTest() {
         base("ComposerWebViewTest");
@@ -59,7 +59,7 @@ public class ComposerWebViewTest : ClientWebViewTestCase<ComposerWebView> {
         load_body_fixture("<p>para</p>");
         this.test_view.get_text.begin((obj, ret) => { async_complete(ret); });
         try {
-            assert(this.test_view.get_text.end(async_result()) == "para\n\n\n\n\n\n");
+            assert(this.test_view.get_text.end(async_result()) == "para\n\n\n\n\n");
         } catch (Error err) {
             print("Error: %s\n", err.message);
             assert_not_reached();
@@ -71,7 +71,7 @@ public class ComposerWebViewTest : ClientWebViewTestCase<ComposerWebView> {
         this.test_view.get_text.begin((obj, ret) => { async_complete(ret); });
         try {
             assert(this.test_view.get_text.end(async_result()) ==
-                   "pre\n\n> quote\n> \npost\n\n\n\n\n\n");
+                   "pre\n\n> quote\n> \npost\n\n\n\n\n");
         } catch (Error err) {
             print("Error: %s\n", err.message);
             assert_not_reached();
@@ -83,7 +83,7 @@ public class ComposerWebViewTest : ClientWebViewTestCase<ComposerWebView> {
         this.test_view.get_text.begin((obj, ret) => { async_complete(ret); });
         try {
             assert(this.test_view.get_text.end(async_result()) ==
-                   "pre\n\n> quote1\n> \n>> quote2\n>> \npost\n\n\n\n\n\n");
+                   "pre\n\n> quote1\n> \n>> quote2\n>> \npost\n\n\n\n\n");
         } catch (Error err) {
             print("Error: %s\n", err.message);
             assert_not_reached();
@@ -101,7 +101,6 @@ at least. Really long, long, long, long, long long, long long, long long, long.<
 """A long, long, long, long, long, long para. Well, longer than 
 MAX_BREAKABLE_LEN at least. Really long, long, long, long, long long, 
 long long, long long, long.
-
 
 
 
@@ -128,7 +127,6 @@ at least. Really long, long, long, long, long long, long long, long long, long.<
 A long, long, long, long, long, long para. Well, longer than 
 MAX_BREAKABLE_LEN at least. Really long, long, long, long, long long, 
 long long, long long, long.
-
 
 
 
@@ -162,7 +160,6 @@ long, long, long, long, long, long, long, long, long, long, long, long,
 long, long, long, long, long, long, long, long, long, long, long, long, 
 long, long, long, long, long, long, long, long, long, long, long, long, 
 long, long, long, long, long, long, long, long, long, long,
-
 
 
 

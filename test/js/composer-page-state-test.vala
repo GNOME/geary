@@ -7,8 +7,8 @@
 
 class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
 
-    private const string COMPLETE_BODY_TEMPLATE = """<div id="geary-body">%s<div><br></div><div><br></div><div><br></div></div>""";
-    private const string CLEAN_BODY_TEMPLATE = "%s<div><br></div><div><br></div><div><br></div>";
+    private const string COMPLETE_BODY_TEMPLATE = """<div id="geary-body">%s<div><br></div><div><br></div></div>""";
+    private const string CLEAN_BODY_TEMPLATE = "%s<div><br></div><div><br></div>";
 
     public ComposerPageStateTest() {
         base("ComposerPageStateTest");
@@ -178,7 +178,7 @@ unknown://example6.com
         load_body_fixture("<p>para</p>");
         try {
             assert(WebKitUtil.to_string(run_javascript(@"window.geary.getText();")) ==
-                   "para\n\n\n\n\n");
+                   "para\n\n\n\n");
         } catch (Geary.JS.Error err) {
             print("Geary.JS.Error: %s\n", err.message);
             assert_not_reached();
@@ -193,7 +193,7 @@ unknown://example6.com
         load_body_fixture("<p>pre</p> <blockquote><p>quote</p></blockquote> <p>post</p>");
         try {
             assert(WebKitUtil.to_string(run_javascript(@"window.geary.getText();")) ==
-                   @"pre\n\n$(q_marker)quote\n$(q_marker)\npost\n\n\n\n\n");
+                   @"pre\n\n$(q_marker)quote\n$(q_marker)\npost\n\n\n\n");
         } catch (Geary.JS.Error err) {
             print("Geary.JS.Error: %s", err.message);
             assert_not_reached();
@@ -208,7 +208,7 @@ unknown://example6.com
         load_body_fixture("<p>pre</p> <blockquote><p>quote1</p> <blockquote><p>quote2</p></blockquote></blockquote> <p>post</p>");
         try {
             assert(WebKitUtil.to_string(run_javascript(@"window.geary.getText();")) ==
-                   @"pre\n\n$(q_marker)quote1\n$(q_marker)\n$(q_marker)$(q_marker)quote2\n$(q_marker)$(q_marker)\npost\n\n\n\n\n");
+                   @"pre\n\n$(q_marker)quote1\n$(q_marker)\n$(q_marker)$(q_marker)quote2\n$(q_marker)$(q_marker)\npost\n\n\n\n");
         } catch (Geary.JS.Error err) {
             print("Geary.JS.Error: %s\n", err.message);
             assert_not_reached();

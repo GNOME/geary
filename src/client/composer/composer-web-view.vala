@@ -166,18 +166,15 @@ public class ComposerWebView : ClientWebView {
             bool have_body = !Geary.String.is_empty(body);
             if (have_body) {
                 html.append(body);
+                html.append(SPACER);
             }
 
             if (!top_posting && !Geary.String.is_empty(quote)) {
-                if (have_body) {
-                    html.append(SPACER);
-                }
                 html.append(quote);
+                html.append(SPACER);
             }
 
-            html.append(SPACER);
             html.append(CURSOR);
-            html.append(SPACER);
             html.append(BODY_POST);
 
             if (!Geary.String.is_empty(signature)) {
