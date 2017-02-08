@@ -18,7 +18,7 @@ public class ConversationListView : Gtk.TreeView {
     private Geary.Scheduler.Scheduled? scheduled_update_visible_conversations = null;
     private Gtk.Menu? context_menu = null;
     private Gee.Set<Geary.App.Conversation> selected = new Gee.HashSet<Geary.App.Conversation>();
-    private uint selection_changed_id = 0;
+    private Geary.IdleManager selection_update;
     private bool suppress_selection = false;
 
     public signal void conversations_selected(Gee.Set<Geary.App.Conversation> selected);
@@ -34,6 +34,7 @@ public class ConversationListView : Gtk.TreeView {
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove, bool only_mark_preview);
     
     public signal void visible_conversations_changed(Gee.Set<Geary.App.Conversation> visible);
+
 
     public ConversationListView() {
         set_show_expanders(false);
@@ -69,6 +70,14 @@ public class ConversationListView : Gtk.TreeView {
         unowned Gtk.BindingSet? binding_set = Gtk.BindingSet.find("GtkTreeView");
         assert(binding_set != null);
         Gtk.BindingEntry.remove(binding_set, Gdk.Key.N, Gdk.ModifierType.CONTROL_MASK);
+
+        this.selection_update = new Geary.IdleManager(do_selection_changed);
+        this.selection_update.priority = Geary.IdleManager.Priority.LOW;
+    }
+
+    public override void destroy() {
+        this.selection_update.reset();
+        base.destroy();
     }
 
     public new ConversationListStore? get_model() {
@@ -365,9 +374,6 @@ public class ConversationListView : Gtk.TreeView {
     }
 
     private void on_selection_changed() {
-        if (this.selection_changed_id != 0)
-            Source.remove(this.selection_changed_id);
-
         // Schedule processing selection changes at low idle for
         // two reasons: (a) if a lot of changes come in
         // back-to-back, this allows for all that activity to
@@ -377,13 +383,7 @@ public class ConversationListView : Gtk.TreeView {
         // order by this class and the ConversationListView and
         // not result in a lot of screen flashing and (again)
         // unnecessary I/O as both classes update selection state.
-        this.selection_changed_id = Idle.add(() => {
-                // De-schedule the callback
-                this.selection_changed_id = 0;
-
-                do_selection_changed();
-                return Source.REMOVE;
-            }, Priority.LOW);
+        this.selection_update.schedule();
     }
 
     // Gtk.TreeSelection can fire its "changed" signal even when
