@@ -20,3 +20,6 @@ override_dh_strip:
 
 override_dh_auto_install:
 	dh_auto_install --destdir=debian/geary --parallel
+
+override_dh_auto_test:
+    # Disable for now since some tests require a GUI
