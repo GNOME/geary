@@ -295,6 +295,7 @@ engine/util/util-converter.vala
 engine/util/util-files.vala
 engine/util/util-generic-capabilities.vala
 engine/util/util-html.vala
+engine/util/util-idle-manager.vala
 engine/util/util-imap-utf7.vala
 engine/util/util-inet.vala
 engine/util/util-iterable.vala
