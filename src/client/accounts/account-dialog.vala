@@ -66,7 +66,7 @@ public class AccountDialog : Gtk.Dialog {
     
     // Grab the account info.  While the addresses passed into this method should *always* be
     // available in Geary, we double-check to be defensive.
-    private Geary.AccountInformation? get_account_info_for_email(string email_address) {
+    private Geary.AccountInformation? get_account_info(string id) {
     Gee.Map<string, Geary.AccountInformation> accounts;
         try {
             accounts = Geary.Engine.instance.get_accounts();
@@ -76,21 +76,21 @@ public class AccountDialog : Gtk.Dialog {
             return null;
         }
         
-        if (!accounts.has_key(email_address)) {
-            debug("Unable to get account info for: %s", email_address);
+        if (!accounts.has_key(id)) {
+            debug("No such account: %s", id);
             
             return null;
         }
         
-        return accounts.get(email_address);
+        return accounts.get(id);
     }
     
-    private void on_edit_account(string email_address) {
-        on_edit_account_async.begin(email_address);
+    private void on_edit_account(string id) {
+        on_edit_account_async.begin(id);
     }
     
-    private async void on_edit_account_async(string email_address) {
-        Geary.AccountInformation? account = get_account_info_for_email(email_address);
+    private async void on_edit_account_async(string id) {
+        Geary.AccountInformation? account = get_account_info(id);
         if (account == null)
             return;
         
@@ -105,8 +105,8 @@ public class AccountDialog : Gtk.Dialog {
         add_edit_pane.present();
     }
     
-    private void on_delete_account(string email_address) {
-        Geary.AccountInformation? account = get_account_info_for_email(email_address);
+    private void on_delete_account(string id) {
+        Geary.AccountInformation? account = get_account_info(id);
         if (account == null)
             return;
         
@@ -136,8 +136,8 @@ public class AccountDialog : Gtk.Dialog {
         }
     }
     
-    private void on_edit_alternate_emails(string email_address) {
-        Geary.AccountInformation? account_info = get_account_info_for_email(email_address);
+    private void on_edit_alternate_emails(string id) {
+        Geary.AccountInformation? account_info = get_account_info(id);
         if (account_info == null)
             return;
         

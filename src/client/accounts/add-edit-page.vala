@@ -15,7 +15,7 @@ public class AddEditPage : Gtk.Box {
         EDIT
     }
 
-    private string? id = null;
+    public string? id { get; private set; default = null; }
 
     public string real_name {
         get { return entry_real_name.text; }
