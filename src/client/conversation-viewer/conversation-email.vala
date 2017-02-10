@@ -114,7 +114,7 @@ public class ConversationEmail : Gtk.Box {
             );
 
             string file_name = null;
-            if (attachment.has_supplied_filename) {
+            if (attachment.has_content_filename) {
                 file_name = attachment.file.get_basename();
             }
             string file_desc = ContentType.get_description(gio_content_type);

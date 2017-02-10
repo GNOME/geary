@@ -2006,17 +2006,26 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         Db.Result results = stmt.exec(cancellable);
         if (results.finished)
             return null;
-        
+
         Gee.List<Geary.Attachment> list = new Gee.ArrayList<Geary.Attachment>();
         do {
             Mime.ContentDisposition disposition = new Mime.ContentDisposition.simple(
                 Mime.DispositionType.from_int(results.int_at(4)));
-            list.add(new ImapDB.Attachment(cx.database.db_file.get_parent(), results.string_at(1),
-                Mime.ContentType.deserialize(results.nonnull_string_at(2)), results.int64_at(3),
-                message_id, results.rowid_at(0), disposition, results.string_at(5),
-                results.string_at(6)));
+            list.add(
+                new ImapDB.Attachment(
+                    message_id,
+                    results.rowid_at(0),
+                    Mime.ContentType.deserialize(results.nonnull_string_at(2)),
+                    results.string_at(5),
+                    results.string_at(6),
+                    disposition,
+                    results.string_at(1),
+                    cx.database.db_file.get_parent(),
+                    results.int64_at(3)
+                )
+            );
         } while (results.next(cancellable));
-        
+
         return list;
     }
 
