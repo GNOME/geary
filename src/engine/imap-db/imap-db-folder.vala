@@ -2009,6 +2009,14 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
 
         Gee.List<Geary.Attachment> list = new Gee.ArrayList<Geary.Attachment>();
         do {
+            string? content_filename = results.string_at(1);
+            if (content_filename == ImapDB.Attachment.NULL_FILE_NAME) {
+                // Prior to 0.12, Geary would store the untranslated
+                // string "none" as the filename when none was
+                // specified by the MIME content disposition. Check
+                // for that and clean it up.
+                content_filename = null;
+            }
             Mime.ContentDisposition disposition = new Mime.ContentDisposition.simple(
                 Mime.DispositionType.from_int(results.int_at(4)));
             list.add(
@@ -2019,7 +2027,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                     results.string_at(5),
                     results.string_at(6),
                     disposition,
-                    results.string_at(1),
+                    content_filename,
                     cx.database.db_file.get_parent(),
                     results.int64_at(3)
                 )
@@ -2048,8 +2056,8 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             string? disposition = attachment.get_disposition();
             string? content_id = attachment.get_content_id();
             string? description = attachment.get_content_description();
-            string filename = RFC822.Utils.get_clean_attachment_filename(attachment);
-            
+            string? filename = RFC822.Utils.get_clean_attachment_filename(attachment);
+
             // Convert the attachment content into a usable ByteArray.
             GMime.DataWrapper? attachment_data = attachment.get_content_object();
             ByteArray byte_array = new ByteArray();

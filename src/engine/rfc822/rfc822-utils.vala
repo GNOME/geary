@@ -425,19 +425,17 @@ public GMime.ContentEncoding get_best_encoding(GMime.Stream in_stream) {
     return filter.encoding(GMime.EncodingConstraint.7BIT);
 }
 
-public string get_clean_attachment_filename(GMime.Part part) {
+public string? get_clean_attachment_filename(GMime.Part part) {
     string? filename = part.get_filename();
-    if (String.is_empty(filename)) {
-        /// Placeholder filename for attachments with no filename.
-        filename = _("none");
+    if (filename != null) {
+        try {
+            filename = invalid_filename_character_re.replace_literal(
+                filename, filename.length, 0, "_"
+            );
+        } catch (RegexError e) {
+            debug("Error sanitizing attachment filename: %s", e.message);
+        }
     }
-    
-    try {
-        filename = invalid_filename_character_re.replace_literal(filename, filename.length, 0, "_");
-    } catch (RegexError e) {
-        debug("Error sanitizing attachment filename: %s", e.message);
-    }
-    
     return filename;
 }
 

@@ -6,7 +6,8 @@
 
 private class Geary.ImapDB.Attachment : Geary.Attachment {
     public const Email.Field REQUIRED_FIELDS = Email.REQUIRED_FOR_MESSAGE;
-    
+
+    internal const string NULL_FILE_NAME = "none";
     private const string ATTACHMENTS_DIR = "attachments";
 
     public Attachment(int64 message_id,
@@ -31,17 +32,15 @@ private class Geary.ImapDB.Attachment : Geary.Attachment {
     private static string generate_id(int64 attachment_id) {
         return "imap-db:%s".printf(attachment_id.to_string());
     }
-    
+
     public static File generate_file(File data_dir, int64 message_id, int64 attachment_id,
         string? filename) {
-        // "none" should not be translated, or the user will be unable to retrieve their
-        // attachments with no filenames after changing their language.
         return get_attachments_dir(data_dir)
             .get_child(message_id.to_string())
             .get_child(attachment_id.to_string())
-            .get_child(filename ?? "none");
+            .get_child(filename ?? NULL_FILE_NAME);
     }
-    
+
     public static File get_attachments_dir(File data_dir) {
         return data_dir.get_child(ATTACHMENTS_DIR);
     }

@@ -113,10 +113,7 @@ public class ConversationEmail : Gtk.Box {
                 mime_content_type
             );
 
-            string file_name = null;
-            if (attachment.has_content_filename) {
-                file_name = attachment.file.get_basename();
-            }
+            string? file_name = attachment.content_filename;
             string file_desc = ContentType.get_description(gio_content_type);
             if (ContentType.is_unknown(gio_content_type)) {
                 // Translators: This is the file type displayed for
@@ -125,14 +122,7 @@ public class ConversationEmail : Gtk.Box {
             }
             string file_size = Files.get_filesize_as_string(attachment.filesize);
 
-            // XXX Geary.ImapDb.Attachment will use "none" when
-            // saving attachments with no filename to disk, this
-            // seems to be getting saved to be the filename and
-            // passed back, breaking the has_supplied_filename
-            // test - so check for it here.
-            if (file_name == null ||
-                file_name == "" ||
-                file_name == "none") {
+            if (Geary.String.is_empty(file_name)) {
                 // XXX Check for unknown types here and try to guess
                 // using attachment data.
                 file_name = file_desc;

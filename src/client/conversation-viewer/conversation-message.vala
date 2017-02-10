@@ -668,7 +668,7 @@ public class ConversationMessage : Gtk.Grid {
     // If this returns null, the MIME part is dropped from the final returned document; otherwise,
     // this returns HTML that is placed into the document in the position where the MIME part was
     // found
-    private string? inline_image_replacer(string filename, Geary.Mime.ContentType? content_type,
+    private string? inline_image_replacer(string? filename, Geary.Mime.ContentType? content_type,
         Geary.Mime.ContentDisposition? disposition, string? content_id, Geary.Memory.Buffer buffer) {
         if (content_type == null) {
             debug("Not displaying inline: no Content-Type");
@@ -688,8 +688,16 @@ public class ConversationMessage : Gtk.Grid {
 
         this.web_view.add_internal_resource(id, buffer);
 
+        // Translators: This string is used as the HTML IMG ALT
+        // attribute value when displaying an inline image in an email
+        // that did not specify a file name. E.g. <IMG ALT="Image" ...
+        string UNKNOWN_FILENAME_ALT_TEXT = _("Image");
+        string clean_filename = Geary.HTML.escape_markup(
+            filename ?? UNKNOWN_FILENAME_ALT_TEXT
+        );
+
         return "<img alt=\"%s\" class=\"%s\" src=\"%s%s\" />".printf(
-            Geary.HTML.escape_markup(filename),
+            clean_filename,
             REPLACED_IMAGE_CLASS,
             ClientWebView.CID_URL_PREFIX,
             Geary.HTML.escape_markup(id)

@@ -13,7 +13,7 @@ public class Geary.RFC822.Message : BaseObject {
      * referred to by rich text in alternative or related documents must be located by the caller
      * and appropriately presented.
      */
-    public delegate string? InlinePartReplacer(string filename, Mime.ContentType? content_type,
+    public delegate string? InlinePartReplacer(string? filename, Mime.ContentType? content_type,
         Mime.ContentDisposition? disposition, string? content_id, Geary.Memory.Buffer buffer);
 
     private const string HEADER_SENDER = "Sender";

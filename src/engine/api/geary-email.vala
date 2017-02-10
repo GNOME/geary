@@ -272,8 +272,10 @@ public class Geary.Email : BaseObject {
     public string get_searchable_attachment_list() {
         StringBuilder search = new StringBuilder();
         foreach (Geary.Attachment attachment in attachments) {
-            search.append(attachment.file.get_basename());
-            search.append("\n");
+            if (attachment.has_content_filename) {
+                search.append(attachment.content_filename);
+                search.append("\n");
+            }
         }
         return search.str;
     }
