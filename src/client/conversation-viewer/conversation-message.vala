@@ -252,7 +252,7 @@ public class ConversationMessage : Gtk.Grid {
     public signal void remember_remote_images();
 
     /** Fired when the user saves an inline displayed image. */
-    public signal void save_image(string? filename, Geary.Memory.Buffer buffer);
+    public signal void save_image(string? uri, Geary.Memory.Buffer buffer);
 
     /** Fired when the user activates a specific search shortcut. */
     public signal void search_activated(string operator, string value);

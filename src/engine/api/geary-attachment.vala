@@ -12,6 +12,7 @@
 
 public abstract class Geary.Attachment : BaseObject {
 
+
     /**
      * An identifier that can be used to locate the {@link Attachment} in an {@link Email}.
      *
@@ -87,5 +88,73 @@ public abstract class Geary.Attachment : BaseObject {
         this.file = file;
         this.filesize = filesize;
     }
-}
 
+    /**
+     * Returns a string to use as a file name, even if not specified.
+     *
+     * This checks that the extension of the given content file name
+     * matches the given content type, even if the attachment has the
+     * default content type.
+     *
+     * If no file name was specified for the attachment, it will
+     * construct one from the attachment's id and by guessing the file
+     * name extension, and also guessing the MIME content type if
+     * needed.
+     */
+    public async string get_safe_file_name() {
+        string? file_name = this.content_filename;
+        if (Geary.String.is_empty(file_name)) {
+            string[] others = {
+                this.content_id,
+                this.id ?? "attachment",
+            };
+
+            int i = 0;
+            while (Geary.String.is_empty(file_name)) {
+                file_name = others[i++];
+            }
+        }
+
+        file_name = file_name.strip();
+
+        // Check the content type suggested by the file name is
+        // consistent with the declared content type. This adds an
+        // appropriate file name extension if missing, and ensures
+        // that malicious file names are fixed up.
+        Mime.ContentType mime_type = this.content_type;
+        Mime.ContentType? name_type = null;
+        try {
+            name_type = Mime.ContentType.guess_type(file_name, null);
+        } catch (Error err) {
+            debug("Error guessing attachment file name content type: %s", err.message);
+        }
+
+        if (name_type == null ||
+            name_type.is_default() ||
+            !name_type.is_same(mime_type)) {
+            // Substitute file name either is of unknown type
+            // (e.g. it does not have an extension) or is not the
+            // same type as the declared type, so try to fix it.
+            if (mime_type.is_default()) {
+                // Declared type is unknown, see if we can guess
+                // it. Don't use GFile.query_info however since
+                // that will attempt to use the filename, which is
+                // what we are trying to guess in the first place.
+                try {
+                    mime_type = Mime.ContentType.guess_type(
+                        null,
+                        new Geary.Memory.FileBuffer(this.file, true)
+                    );
+                } catch (Error err) {
+                    debug("Error guessing attachment data content type: %s", err.message);
+                }
+            }
+            string? ext = mime_type.get_file_name_extension();
+            if (!file_name.has_suffix(ext)) {
+                file_name = file_name + (ext ?? "");
+            }
+        }
+        return file_name;
+    }
+
+}

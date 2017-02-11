@@ -297,15 +297,37 @@ public class Geary.Email : BaseObject {
     }
 
     /**
+     * Returns the attachment with the given {@link Geary.Attachment.id}.
+     *
      * Requires the REQUIRED_FOR_MESSAGE fields be present; else
      * EngineError.INCOMPLETE_MESSAGE is thrown.
      */
-    public Geary.Attachment? get_attachment(string attachment_id) throws EngineError {
+    public Geary.Attachment? get_attachment_by_id(string attachment_id)
+    throws EngineError {
         if (!fields.fulfills(REQUIRED_FOR_MESSAGE))
             throw new EngineError.INCOMPLETE_MESSAGE("Parsed email requires HEADER and BODY");
 
         foreach (Geary.Attachment attachment in attachments) {
             if (attachment.id == attachment_id) {
+                return attachment;
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Returns the attachment with the given MIME Content ID.
+     *
+     * Requires the REQUIRED_FOR_MESSAGE fields be present; else
+     * EngineError.INCOMPLETE_MESSAGE is thrown.
+     */
+    public Geary.Attachment? get_attachment_by_content_id(string cid)
+    throws EngineError {
+        if (!fields.fulfills(REQUIRED_FOR_MESSAGE))
+            throw new EngineError.INCOMPLETE_MESSAGE("Parsed email requires HEADER and BODY");
+
+        foreach (Geary.Attachment attachment in attachments) {
+            if (attachment.content_id == cid) {
                 return attachment;
             }
         }

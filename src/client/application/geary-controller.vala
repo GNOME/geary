@@ -2051,49 +2051,24 @@ public class GearyController : Geary.BaseObject {
         }
     }
 
-    private bool do_overwrite_confirmation(File to_overwrite) {
-        string primary = _("A file named “%s” already exists.  Do you want to replace it?").printf(
-            to_overwrite.get_basename());
-        string secondary = _("The file already exists in “%s”.  Replacing it will overwrite its contents.").printf(
-            to_overwrite.get_parent().get_basename());
-        
-        ConfirmationDialog dialog = new ConfirmationDialog(main_window, primary, secondary, _("_Replace"), "destructive-action");
-        
-        return (dialog.run() == Gtk.ResponseType.OK);
-    }
-    
-    private Gtk.FileChooserConfirmation on_confirm_overwrite(Gtk.FileChooser chooser) {
-        // this is only called when choosing one file
-        return do_overwrite_confirmation(chooser.get_file()) ? Gtk.FileChooserConfirmation.ACCEPT_FILENAME
-            : Gtk.FileChooserConfirmation.SELECT_AGAIN;
+    private async void save_attachment_to_file(Geary.Attachment attachment) {
+        string file_name = yield attachment.get_safe_file_name();
+        try {
+            yield this.prompt_save_buffer(
+                file_name, new Geary.Memory.FileBuffer(attachment.file, true)
+            );
+        } catch (Error err) {
+            message("Unable to save buffer to \"%s\": %s", file_name, err.message);
+        }
     }
 
-    private void on_save_attachments(Gee.Collection<Geary.Attachment> attachments) {
-        Gtk.FileChooserAction action = (attachments.size == 1)
-            ? Gtk.FileChooserAction.SAVE
-            : Gtk.FileChooserAction.SELECT_FOLDER;
+    private async void save_attachments_to_file(Gee.Collection<Geary.Attachment> attachments) {
 #if GTK_3_20
-        Gtk.FileChooserNative dialog = new Gtk.FileChooserNative(null, main_window, action,
-            Stock._SAVE, Stock._CANCEL);
+        Gtk.FileChooserNative dialog = new_save_chooser(Gtk.FileChooserAction.SELECT_FOLDER);
 #else
-        Gtk.FileChooserDialog dialog = new Gtk.FileChooserDialog(null, main_window, action,
-             Stock._CANCEL, Gtk.ResponseType.CANCEL, Stock._SAVE, Gtk.ResponseType.ACCEPT, null);
+        Gtk.FileChooserDialog dialog = new_save_chooser(Gtk.FileChooserAction.SELECT_FOLDER);
 #endif
-        if (last_save_directory != null)
-            dialog.set_current_folder(last_save_directory.get_path());
-        if (attachments.size == 1) {
-            Gee.Iterator<Geary.Attachment> it = attachments.iterator();
-            it.next();
-            Geary.Attachment attachment = it.get();
-            dialog.set_current_name(attachment.file.get_basename());
-            dialog.set_do_overwrite_confirmation(true);
-            // use custom overwrite confirmation so it looks consistent whether one or many
-            // attachments are being saved
-            dialog.confirm_overwrite.connect(on_confirm_overwrite);
-        }
-        dialog.set_create_folders(true);
-        dialog.set_local_only(false);
-        
+
         bool accepted = (dialog.run() == Gtk.ResponseType.ACCEPT);
         string? filename = dialog.get_filename();
         
@@ -2102,89 +2077,108 @@ public class GearyController : Geary.BaseObject {
         if (!accepted || Geary.String.is_empty(filename))
             return;
         
-        File destination = File.new_for_path(filename);
-        
-        // Proceeding, save this as last destination directory
-        last_save_directory = (attachments.size == 1) ? destination.get_parent() : destination;
-        
-        debug("Saving attachments to %s", destination.get_path());
-        
-        // Save each one, checking for overwrite only if multiple attachments are being written
+        File dest_dir = File.new_for_path(filename);
+        this.last_save_directory = dest_dir;
+
+        debug("Saving attachments to %s", dest_dir.get_path());
+
         foreach (Geary.Attachment attachment in attachments) {
             File source_file = attachment.file;
-            File dest_file = (attachments.size == 1) ? destination : destination.get_child(attachment.file.get_basename());
-            
-            if (attachments.size > 1 && dest_file.query_exists() && !do_overwrite_confirmation(dest_file))
+            File dest_file = dest_dir.get_child(yield attachment.get_safe_file_name());
+            if (dest_file.query_exists() && !do_overwrite_confirmation(dest_file))
                 return;
-            
-            debug("Copying %s to %s...", source_file.get_path(), dest_file.get_path());
-            
-            source_file.copy_async.begin(dest_file, FileCopyFlags.OVERWRITE, Priority.DEFAULT, null,
-                null, on_save_completed);
+
+            try {
+                yield write_buffer_to_file(
+                    new Geary.Memory.FileBuffer(source_file, true), dest_file
+                );
+            } catch (Error error) {
+                message(
+                    "Failed to copy attachment %s to destination: %s",
+                    source_file.get_path(), error.message
+                );
+            }
         }
     }
-    
-    private void on_save_completed(Object? source, AsyncResult result) {
-        try {
-            ((File) source).copy_async.end(result);
-        } catch (Error error) {
-            message("Failed to copy attachment %s to destination: %s", ((File) source).get_path(),
-                error.message);
-        }
-    }
-    
-    private void on_save_buffer_to_file(string? filename, Geary.Memory.Buffer buffer) {
+
+    private async void prompt_save_buffer(string? filename, Geary.Memory.Buffer buffer)
+    throws Error {
 #if GTK_3_20
-        Gtk.FileChooserNative dialog = new Gtk.FileChooserNative(null, main_window, Gtk.FileChooserAction.SAVE,
-            Stock._SAVE, Stock._CANCEL);
+        Gtk.FileChooserNative dialog = new_save_chooser(Gtk.FileChooserAction.SAVE);
 #else
-        Gtk.FileChooserDialog dialog = new Gtk.FileChooserDialog(null, main_window, Gtk.FileChooserAction.SAVE,
-            Stock._CANCEL, Gtk.ResponseType.CANCEL, Stock._SAVE, Gtk.ResponseType.ACCEPT, null);
+        Gtk.FileChooserDialog dialog = new_save_chooser(Gtk.FileChooserAction.SAVE);
 #endif
-        if (last_save_directory != null)
-            dialog.set_current_folder(last_save_directory.get_path());
         if (!Geary.String.is_empty(filename))
             dialog.set_current_name(filename);
         dialog.set_do_overwrite_confirmation(true);
-        dialog.confirm_overwrite.connect(on_confirm_overwrite);
-        dialog.set_create_folders(true);
-        dialog.set_local_only(false);
-        
+        dialog.confirm_overwrite.connect((chooser) => {
+            return do_overwrite_confirmation(chooser.get_file())
+                ? Gtk.FileChooserConfirmation.ACCEPT_FILENAME
+                : Gtk.FileChooserConfirmation.SELECT_AGAIN;
+            });
         bool accepted = (dialog.run() == Gtk.ResponseType.ACCEPT);
         string? accepted_filename = dialog.get_filename();
-        
+
         dialog.destroy();
-        
-        if (!accepted || Geary.String.is_empty(accepted_filename))
-            return;
-        
-        File destination = File.new_for_path(accepted_filename);
-        
-        // Proceeding, save this as last destination directory
-        last_save_directory = destination.get_parent();
-        
-        debug("Saving buffer to %s", destination.get_path());
-        
-        // Create the file where the image will be saved and get the output stream.
-        try {
-            FileOutputStream outs = destination.replace(null, false, FileCreateFlags.REPLACE_DESTINATION,
-                null);
-            outs.splice_async.begin(buffer.get_input_stream(),
-                OutputStreamSpliceFlags.CLOSE_SOURCE | OutputStreamSpliceFlags.CLOSE_TARGET,
-                Priority.DEFAULT, null, on_save_buffer_to_file_completed);
-        } catch (Error err) {
-            message("Unable to save buffer to \"%s\": %s", filename, err.message);
+
+        if (accepted && !Geary.String.is_empty(accepted_filename)) {
+            File destination = File.new_for_path(accepted_filename);
+            this.last_save_directory = destination.get_parent();
+            yield write_buffer_to_file(buffer, destination);
         }
     }
-    
-    private void on_save_buffer_to_file_completed(Object? source, AsyncResult result) {
-        try {
-            ((FileOutputStream) source).splice_async.end(result);
-        } catch (Error err) {
-            message("Failed to save buffer to file: %s", err.message);
-        }
+
+    private async void write_buffer_to_file(Geary.Memory.Buffer buffer, File dest)
+    throws Error {
+        debug("Saving buffer to: %s", dest.get_path());
+        FileOutputStream outs = dest.replace(
+            null, false, FileCreateFlags.REPLACE_DESTINATION, null
+        );
+        yield outs.splice_async(
+            buffer.get_input_stream(),
+            OutputStreamSpliceFlags.CLOSE_SOURCE | OutputStreamSpliceFlags.CLOSE_TARGET,
+            Priority.DEFAULT, null
+        );
     }
-    
+
+    private bool do_overwrite_confirmation(File to_overwrite) {
+        string primary = _("A file named “%s” already exists.  Do you want to replace it?").printf(
+            to_overwrite.get_basename());
+        string secondary = _("The file already exists in “%s”.  Replacing it will overwrite its contents.").printf(
+            to_overwrite.get_parent().get_basename());
+
+        ConfirmationDialog dialog = new ConfirmationDialog(main_window, primary, secondary, _("_Replace"), "destructive-action");
+
+        return (dialog.run() == Gtk.ResponseType.OK);
+    }
+
+#if GTK_3_20
+    private inline Gtk.FileChooserNative new_save_chooser(Gtk.FileChooserAction action) {
+        Gtk.FileChooserNative dialog = new Gtk.FileChooserNative(
+            null,
+            this.main_window,
+            action,
+            Stock._SAVE,
+            Stock._CANCEL
+        );
+#else
+    private inline Gtk.FileChooserDialog new_save_chooser(Gtk.FileChooserAction action) {
+        Gtk.FileChooserDialog dialog = new Gtk.FileChooserDialog(
+            null,
+            this.main_window,
+            action,
+            Stock._CANCEL, Gtk.ResponseType.CANCEL,
+            Stock._SAVE, Gtk.ResponseType.ACCEPT,
+            null
+        );
+#endif
+        if (this.last_save_directory != null)
+            dialog.set_current_folder(this.last_save_directory.get_path());
+        dialog.set_create_folders(true);
+        dialog.set_local_only(false);
+        return dialog;
+    }
+
     // Opens a link in an external browser.
     private bool open_uri(string _link) {
         string link = _link;
@@ -2776,7 +2770,9 @@ public class GearyController : Geary.BaseObject {
                             open_uri(link);
                         }
                     });
-                mview.save_image.connect(on_save_buffer_to_file);
+                mview.save_image.connect((filename, buf) => {
+                    on_save_image_extended(view, filename, buf);
+                });
                 mview.search_activated.connect((op, value) => {
                         string search = op + ":" + value;
                         show_search_bar(search);
@@ -2993,5 +2989,49 @@ public class GearyController : Geary.BaseObject {
         }
     }
 
+    private void on_save_attachments(Gee.Collection<Geary.Attachment> attachments) {
+        if (attachments.size == 1) {
+            this.save_attachment_to_file.begin(attachments.to_array()[0]);
+        } else {
+            this.save_attachments_to_file.begin(attachments);
+        }
+    }
+
+    private void on_save_image_extended(ConversationEmail view,
+                                        string url,
+                                        Geary.Memory.Buffer resource_buf) {
+        // This is going to be either an inline image, or a remote
+        // image, so either treat it as an attachment ot assume we'll
+        // have a valid filename in the URL
+
+        bool handled = false;
+        if (url.has_prefix(ClientWebView.CID_URL_PREFIX)) {
+            string cid = url.substring(ClientWebView.CID_URL_PREFIX.length);
+            Geary.Attachment? attachment = null;
+            try {
+                attachment = view.email.get_attachment_by_content_id(cid);
+            } catch (Error err) {
+                debug("Could not get attachment \"%s\": %s", cid, err.message);
+            }
+            if (attachment != null) {
+                this.save_attachment_to_file.begin(attachment);
+                handled = true;
+            }
+        }
+
+        if (!handled) {
+            File source = File.new_for_uri(url);
+            string filename = source.get_basename();
+            this.prompt_save_buffer.begin(
+                filename, resource_buf,
+                (obj, res) => {
+                    try {
+                        this.prompt_save_buffer.end(res);
+                    } catch (Error err) {
+                        message("Unable to save buffer to \"%s\": %s", filename, err.message);
+                    }
+                });
+        }
+    }
 }
 
