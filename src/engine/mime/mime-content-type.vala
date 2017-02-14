@@ -11,18 +11,91 @@
  */
 
 public class Geary.Mime.ContentType : Geary.BaseObject {
-    /*
+
+    /**
      * MIME wildcard for comparing {@link media_type} and {@link media_subtype}.
      *
      * @see is_type
      */
     public const string WILDCARD = "*";
-    
+
     /**
      * Default Content-Type for unknown or unmarked content.
      */
     public const string DEFAULT_CONTENT_TYPE = "application/octet-stream";
-    
+
+
+    private static Gee.Map<string,string> TYPES_TO_EXTENSIONS =
+        new Gee.HashMap<string,string>();
+
+    static construct {
+        // XXX We should be loading file name extension information
+        // from /etc/mime.types and/or the XDG Shared MIME-info
+        // Database globs2 file, usually located at
+        // "/usr/share/mime/globs2" (See: {@link
+        // https://specifications.freedesktop.org/shared-mime-info-spec/latest/}).
+        //
+        // But for now the most part the only things that we have to
+        // guess this for are inline embeds that don't have filenames,
+        // i.e. images, so we can hopefully get away with the set
+        // below for now.
+        TYPES_TO_EXTENSIONS["image/jpeg"] = ".jpeg";
+        TYPES_TO_EXTENSIONS["image/png"] = ".png";
+        TYPES_TO_EXTENSIONS["image/gif"] = ".gif";
+        TYPES_TO_EXTENSIONS["image/svg+xml"] = ".svg";
+        TYPES_TO_EXTENSIONS["image/bmp"] = ".bmp";
+        TYPES_TO_EXTENSIONS["image/x-bmp"] = ".bmp";
+    }
+
+    public static ContentType deserialize(string str) throws MimeError {
+        // perform a little sanity checking here, as it doesn't appear the GMime constructor has
+        // any error-reporting at all
+        if (String.is_empty(str))
+            throw new MimeError.PARSE("Empty MIME Content-Type");
+
+        if (!str.contains("/"))
+            throw new MimeError.PARSE("Invalid MIME Content-Type: %s", str); 
+
+        return new ContentType.from_gmime(new GMime.ContentType.from_string(str));
+    }
+
+    /**
+     * Attempts to guess the content type for a buffer using GIO sniffing.
+     */
+    public static ContentType guess_type(string? file_name, Geary.Memory.Buffer? buf) throws Error {
+        string? mime_type = null;
+
+        if (file_name != null) {
+            // XXX might just want to use xdgmime lib directly here to
+            // avoid the intermediate glib_content_type step here?
+            string glib_type = GLib.ContentType.guess(file_name, null, null);
+            mime_type = GLib.ContentType.get_mime_type(glib_type);
+            if (Geary.String.is_empty(mime_type)) {
+                mime_type = null;
+            }
+        }
+
+        if (mime_type == null && buf != null) {
+            int max_len = 4096;
+            // XXX determine actual max needed buffer size using
+            // xdg_mime_get_max_buffer_extents?
+            uint8[] data = (max_len > buf.size)
+                ? buf.get_bytes()[0:max_len - 1].get_data()
+                : buf.get_uint8_array();
+
+            // XXX might just want to use xdgmime lib directly here to
+            // avoid the intermediate glib_content_type step here?
+            string glib_type = GLib.ContentType.guess(null, data, null);
+            mime_type = GLib.ContentType.get_mime_type(glib_type);
+        }
+
+        if (Geary.String.is_empty(mime_type)) {
+            mime_type = DEFAULT_CONTENT_TYPE;
+        }
+        return deserialize(mime_type);
+    }
+
+
     /**
      * The type (discrete or concrete) portion of the Content-Type field.
      *
@@ -69,19 +142,7 @@ public class Geary.Mime.ContentType : Geary.BaseObject {
         media_subtype = content_type.get_media_subtype().strip();
         params = new ContentParameters.from_gmime(content_type.get_params());
     }
-    
-    public static ContentType deserialize(string str) throws MimeError {
-        // perform a little sanity checking here, as it doesn't appear the GMime constructor has
-        // any error-reporting at all
-        if (String.is_empty(str))
-            throw new MimeError.PARSE("Empty MIME Content-Type");
-        
-        if (!str.contains("/"))
-            throw new MimeError.PARSE("Invalid MIME Content-Type: %s", str); 
-        
-        return new ContentType.from_gmime(new GMime.ContentType.from_string(str));
-    }
-    
+
     /**
      * Compares the {@link media_type} with the supplied type.
      *
@@ -115,7 +176,14 @@ public class Geary.Mime.ContentType : Geary.BaseObject {
     public string get_mime_type() {
         return "%s/%s".printf(media_type, media_subtype);
     }
-    
+
+    /**
+     * Returns the file name extension for this type, if known.
+     */
+    public string? get_file_name_extension() {
+        return TYPES_TO_EXTENSIONS[get_mime_type()];
+    }
+
     /**
      * Compares the supplied type and subtype with this instance's.
      *
