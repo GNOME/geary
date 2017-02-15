@@ -9,10 +9,14 @@ class Geary.Mime.ContentTypeTest : Gee.TestCase {
 
     public ContentTypeTest() {
         base("Geary.Mime.ContentTypeTest");
+        add_test("is_default", is_default);
         add_test("get_file_name_extension", get_file_name_extension);
         add_test("guess_type_from_name", guess_type_from_name);
         add_test("guess_type_from_buf", guess_type_from_buf);
     }
+
+    public void is_default() {
+        assert(new ContentType("application", "octet-stream", null).is_default());
     }
 
     public void get_file_name_extension() {

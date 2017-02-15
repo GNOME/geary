@@ -233,7 +233,14 @@ public class Geary.Mime.ContentType : Geary.BaseObject {
         
         return is_type(mime_media_type, mime_media_subtype);
     }
-    
+
+    /**
+     * Determines if this type is the same as the default content type.
+     */
+    public bool is_default() {
+        return get_mime_type() == DEFAULT_CONTENT_TYPE;
+    }
+
     public string serialize() {
         StringBuilder builder = new StringBuilder();
         builder.append_printf("%s/%s", media_type, media_subtype);
