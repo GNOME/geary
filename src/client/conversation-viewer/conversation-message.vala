@@ -437,9 +437,18 @@ public class ConversationMessage : Gtk.Grid {
             );
 
             try {
-                InputStream data =
-                    yield session.send_async(message, load_cancelled);
-                if (data != null && message.status_code == 200) {
+                // We want to just pass load_cancelled to send_async
+                // here, but per Bug 778720 this is causing some
+                // crashy race in libsoup's cache implementation, so
+                // for now just let the load go through and manually
+                // check to see if the load has been cancelled before
+                // setting the avatar
+                InputStream data = yield session.send_async(
+                    message,
+                    null // should be 'load_cancelled'
+                );
+                if (!load_cancelled.is_cancelled() &&
+                    data != null && message.status_code == 200) {
                     yield set_avatar(data, load_cancelled);
                 }
             } catch (Error err) {
