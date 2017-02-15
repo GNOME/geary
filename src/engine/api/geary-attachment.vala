@@ -100,11 +100,16 @@ public abstract class Geary.Attachment : BaseObject {
      * construct one from the attachment's id and by guessing the file
      * name extension, and also guessing the MIME content type if
      * needed.
+     *
+     * If a file name is constructed and a non-empty value for the
+     * `alt_file_name` parameter is specified, then that will be used
+     * in preference over the content id and attachment id.
      */
-    public async string get_safe_file_name() {
+    public async string get_safe_file_name(string? alt_file_name = null) {
         string? file_name = this.content_filename;
         if (Geary.String.is_empty(file_name)) {
             string[] others = {
+                alt_file_name,
                 this.content_id,
                 this.id ?? "attachment",
             };

@@ -43,6 +43,8 @@ class Geary.AttachmentTest : Gee.TestCase {
                  get_safe_file_name_with_bad_content_name);
         add_test("get_safe_file_name_with_bad_file_name",
                  get_safe_file_name_with_bad_file_name);
+        add_test("get_safe_file_name_with_alt_file_name",
+                 get_safe_file_name_with_alt_file_name);
         add_test("get_safe_file_name_with_no_content_name",
                  get_safe_file_name_with_no_content_name);
         add_test("get_safe_file_name_with_no_content_name_or_id",
@@ -80,7 +82,7 @@ class Geary.AttachmentTest : Gee.TestCase {
             742
         );
 
-        test.get_safe_file_name.begin((obj, ret) => {
+        test.get_safe_file_name.begin(null, (obj, ret) => {
                 async_complete(ret);
             });
 
@@ -101,7 +103,7 @@ class Geary.AttachmentTest : Gee.TestCase {
             742
         );
 
-        test.get_safe_file_name.begin((obj, ret) => {
+        test.get_safe_file_name.begin(null, (obj, ret) => {
                 async_complete(ret);
             });
 
@@ -122,7 +124,7 @@ class Geary.AttachmentTest : Gee.TestCase {
             742
         );
 
-        test.get_safe_file_name.begin((obj, ret) => {
+        test.get_safe_file_name.begin(null, (obj, ret) => {
                 async_complete(ret);
             });
 
@@ -142,7 +144,7 @@ class Geary.AttachmentTest : Gee.TestCase {
             742
         );
 
-        test.get_safe_file_name.begin((obj, ret) => {
+        test.get_safe_file_name.begin(null, (obj, ret) => {
                 async_complete(ret);
             });
 
@@ -162,7 +164,28 @@ class Geary.AttachmentTest : Gee.TestCase {
             742
         );
 
-        test.get_safe_file_name.begin((obj, ret) => {
+        test.get_safe_file_name.begin(null, (obj, ret) => {
+                async_complete(ret);
+            });
+
+        assert(test.get_safe_file_name.end(async_result()) == RESULT_FILENAME);
+    }
+
+    public void get_safe_file_name_with_alt_file_name() {
+        const string ALT_TEXT = "some text";
+        const string RESULT_FILENAME = "some text.png";
+        Attachment test = new TestAttachment(
+            ATTACHMENT_ID,
+            this.content_type,
+            null,
+            CONTENT_DESC,
+            content_disposition,
+            null,
+            this.file,
+            742
+        );
+
+        test.get_safe_file_name.begin(ALT_TEXT, (obj, ret) => {
                 async_complete(ret);
             });
 
@@ -182,7 +205,7 @@ class Geary.AttachmentTest : Gee.TestCase {
             742
         );
 
-        test.get_safe_file_name.begin((obj, ret) => {
+        test.get_safe_file_name.begin(null, (obj, ret) => {
                 async_complete(ret);
             });
 
@@ -205,7 +228,7 @@ class Geary.AttachmentTest : Gee.TestCase {
             742
         );
 
-        test.get_safe_file_name.begin((obj, ret) => {
+        test.get_safe_file_name.begin(null, (obj, ret) => {
                 async_complete(ret);
             });
 

@@ -252,7 +252,7 @@ public class ConversationMessage : Gtk.Grid {
     public signal void remember_remote_images();
 
     /** Fired when the user saves an inline displayed image. */
-    public signal void save_image(string? uri, Geary.Memory.Buffer buffer);
+    public signal void save_image(string? uri, string? alt_text, Geary.Memory.Buffer buffer);
 
     /** Fired when the user activates a specific search shortcut. */
     public signal void search_activated(string operator, string value);
@@ -293,7 +293,7 @@ public class ConversationMessage : Gtk.Grid {
             .activate.connect((param) => {
                 link_activated(param.get_string());
             });
-        add_action(ACTION_SAVE_IMAGE, true, VariantType.STRING)
+        add_action(ACTION_SAVE_IMAGE, true, new VariantType("(sms)"))
             .activate.connect(on_save_image);
         add_action(ACTION_SEARCH_FROM, true, VariantType.STRING)
             .activate.connect((param) => {
@@ -523,18 +523,14 @@ public class ConversationMessage : Gtk.Grid {
         }
     }
 
-    private Menu set_action_param_string(MenuModel existing, string value) {
+    private Menu set_action_param_value(MenuModel existing, Variant value) {
         Menu menu = new Menu();
         for (int i = 0; i < existing.get_n_items(); i++) {
             MenuItem item = new MenuItem.from_model(existing, i);
             Variant action = item.get_attribute_value(
                 Menu.ATTRIBUTE_ACTION, VariantType.STRING
             );
-            item.set_action_and_target(
-                action.get_string(),
-                VariantType.STRING.dup_string(),
-                value
-            );
+            item.set_action_and_target_value(action.get_string(), value);
             menu.append_item(item);
         }
         return menu;
@@ -820,7 +816,10 @@ public class ConversationMessage : Gtk.Grid {
                 ? context_menu_email
                 : context_menu_link;
             model.append_section(
-                null, set_action_param_string(link_menu, link_url)
+                null,
+                set_action_param_value(
+                    link_menu, new Variant.string(link_url)
+                )
             );
         }
 
@@ -828,7 +827,14 @@ public class ConversationMessage : Gtk.Grid {
             string uri = hit_test.get_image_uri();
             set_action_enabled(ACTION_SAVE_IMAGE, uri in this.resources);
             model.append_section(
-                null, set_action_param_string(context_menu_image, uri)
+                null,
+                set_action_param_value(
+                    context_menu_image,
+                    new Variant.tuple({
+                            new Variant.string(uri),
+                            new Variant("ms", hit_test.get_link_label()),
+                        })
+                )
             );
         }
 
@@ -932,11 +938,19 @@ public class ConversationMessage : Gtk.Grid {
     }
 
     private void on_save_image(Variant? param) {
-        WebKit.WebResource response = this.resources.get(param.get_string());
+        string cid_url = param.get_child_value(0).get_string();
+
+        string? alt_text = null;
+        Variant? alt_maybe = param.get_child_value(1).get_maybe();
+        if (alt_maybe != null) {
+            alt_text = alt_maybe.get_string();
+        }
+        WebKit.WebResource response = this.resources.get(cid_url);
         response.get_data.begin(null, (obj, res) => {
                 try {
                     uint8[] data = response.get_data.end(res);
                     save_image(response.get_uri(),
+                               alt_text,
                                new Geary.Memory.ByteBuffer(data, data.length));
                 } catch (Error err) {
                     debug(

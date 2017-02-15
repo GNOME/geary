@@ -2051,8 +2051,9 @@ public class GearyController : Geary.BaseObject {
         }
     }
 
-    private async void save_attachment_to_file(Geary.Attachment attachment) {
-        string file_name = yield attachment.get_safe_file_name();
+    private async void save_attachment_to_file(Geary.Attachment attachment,
+                                               string? alt_text) {
+        string file_name = yield attachment.get_safe_file_name(alt_text);
         try {
             yield this.prompt_save_buffer(
                 file_name, new Geary.Memory.FileBuffer(attachment.file, true)
@@ -2770,8 +2771,8 @@ public class GearyController : Geary.BaseObject {
                             open_uri(link);
                         }
                     });
-                mview.save_image.connect((filename, buf) => {
-                    on_save_image_extended(view, filename, buf);
+                mview.save_image.connect((url, alt_text, buf) => {
+                        on_save_image_extended(view, url, alt_text, buf);
                 });
                 mview.search_activated.connect((op, value) => {
                         string search = op + ":" + value;
@@ -2991,7 +2992,7 @@ public class GearyController : Geary.BaseObject {
 
     private void on_save_attachments(Gee.Collection<Geary.Attachment> attachments) {
         if (attachments.size == 1) {
-            this.save_attachment_to_file.begin(attachments.to_array()[0]);
+            this.save_attachment_to_file.begin(attachments.to_array()[0], null);
         } else {
             this.save_attachments_to_file.begin(attachments);
         }
@@ -2999,6 +3000,7 @@ public class GearyController : Geary.BaseObject {
 
     private void on_save_image_extended(ConversationEmail view,
                                         string url,
+                                        string? alt_text,
                                         Geary.Memory.Buffer resource_buf) {
         // This is going to be either an inline image, or a remote
         // image, so either treat it as an attachment ot assume we'll
@@ -3014,7 +3016,7 @@ public class GearyController : Geary.BaseObject {
                 debug("Could not get attachment \"%s\": %s", cid, err.message);
             }
             if (attachment != null) {
-                this.save_attachment_to_file.begin(attachment);
+                this.save_attachment_to_file.begin(attachment, alt_text);
                 handled = true;
             }
         }
