@@ -590,7 +590,9 @@ public class ComposerWidget : Gtk.EventBox {
                 compose_type == ComposeType.FORWARD) {
                 this.pending_include = AttachPending.ALL;
             }
-            yield restore_reply_to_state();
+            if (is_referred_draft) {
+                yield restore_reply_to_state();
+            }
         }
 
         set_header_recipients();
