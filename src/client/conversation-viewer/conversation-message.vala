@@ -238,8 +238,11 @@ public class ConversationMessage : Gtk.Grid {
 
     private int remote_resources_loaded = 0;
 
-    // Timer for hiding the progress bar when complete
-    private Geary.TimeoutManager body_progress_timer = null;
+    // Timeouts for showing the progress bar and hiding it when
+    // complete. The former is so that when loading cached images it
+    // doesn't pop up and then go away immediately afterwards.
+    private Geary.TimeoutManager show_progress_timeout = null;
+    private Geary.TimeoutManager hide_progress_timeout = null;
 
 
     /** Fired when the user clicks a link in the email. */
@@ -391,13 +394,17 @@ public class ConversationMessage : Gtk.Grid {
 
         this.body_container.set_has_tooltip(true); // Used to show link URLs
         this.body_container.add(this.web_view);
-        this.body_progress_timer = new Geary.TimeoutManager.seconds(
+        this.show_progress_timeout = new Geary.TimeoutManager.seconds(
+            1, () => { this.body_progress.show(); }
+        );
+        this.hide_progress_timeout = new Geary.TimeoutManager.seconds(
             1, () => { this.body_progress.hide(); }
         );
     }
 
     public override void destroy() {
-        this.body_progress_timer.reset();
+        this.show_progress_timeout.reset();
+        this.hide_progress_timeout.reset();
         this.resources.clear();
         this.searchable_addresses.clear();
         base.destroy();
@@ -730,10 +737,11 @@ public class ConversationMessage : Gtk.Grid {
 
     private void on_load_changed(WebKit.LoadEvent load_event) {
         if (load_event != WebKit.LoadEvent.FINISHED) {
-            this.body_progress_timer.reset();
+            this.hide_progress_timeout.reset();
             this.body_progress.pulse();
         } else {
-            this.body_progress_timer.start();
+            this.show_progress_timeout.reset();
+            this.hide_progress_timeout.start();
         }
     }
 
@@ -748,7 +756,7 @@ public class ConversationMessage : Gtk.Grid {
         // in on_load_changed.
         if (this.is_loading_images &&
             !res.get_uri().has_prefix(ClientWebView.INTERNAL_URL_PREFIX)) {
-            this.body_progress.show();
+            this.show_progress_timeout.start();
             this.body_progress.pulse();
             if (!this.web_view.is_loading) {
                 // The initial page load has finished, so we must be
@@ -766,7 +774,8 @@ public class ConversationMessage : Gtk.Grid {
                         );
                         if (this.remote_resources_loaded >=
                             this.remote_resources_requested) {
-                            this.body_progress_timer.start();
+                            this.show_progress_timeout.start();
+                            this.hide_progress_timeout.start();
                         }
                     });
             }
