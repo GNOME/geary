@@ -518,60 +518,6 @@ public class ConversationListBox : Gtk.ListBox {
     }
 
     /**
-     * Finds any currently visible messages, marks them as being read.
-     */
-    public void check_mark_read() {
-        Gee.ArrayList<Geary.EmailIdentifier> email_ids =
-            new Gee.ArrayList<Geary.EmailIdentifier>();
-
-        Gtk.Adjustment adj = get_adjustment();
-        int top_bound = (int) adj.value;
-        int bottom_bound = top_bound + (int) adj.page_size;
-
-        email_view_iterator().foreach((email_view) => {
-            const int TEXT_PADDING = 50;
-            ConversationMessage conversation_message = email_view.primary_message;
-            // Don't bother with not-yet-loaded emails since the
-            // size of the body will be off, affecting the visibility
-            // of emails further down the conversation.
-            if (email_view.email.is_unread().is_certain() &&
-                conversation_message.web_view.has_valid_height &&
-                !email_view.is_manually_read) {
-                 int body_top = 0;
-                 int body_left = 0;
-                 ConversationWebView web_view = conversation_message.web_view;
-                 web_view.translate_coordinates(
-                     this,
-                     0, 0,
-                     out body_left, out body_top
-                 );
-
-                 int body_height = web_view.get_allocated_height();
-                 int body_bottom = body_top + body_height;
-
-                 // Only mark the email as read if it's actually visible
-                 if (body_height > 0 &&
-                     body_bottom > top_bound &&
-                     body_top + TEXT_PADDING < bottom_bound) {
-                     email_ids.add(email_view.email.id);
-
-                     // Since it can take some time for the new flags
-                     // to round-trip back to our signal handlers,
-                     // mark as manually read here
-                     email_view.is_manually_read = true;
-                 }
-             }
-            return true;
-        });
-
-        if (email_ids.size > 0) {
-            Geary.EmailFlags flags = new Geary.EmailFlags();
-            flags.add(Geary.EmailFlags.UNREAD);
-            mark_emails(email_ids, null, flags);
-        }
-    }
-
-    /**
      * Displays an email as being read, regardless of its actual flags.
      */
     public void mark_manual_read(Geary.EmailIdentifier id) {
@@ -846,6 +792,60 @@ public class ConversationListBox : Gtk.ListBox {
         // body has finished loading, but attachments and sub-messages
         // may still be loading. Or both?
         get_adjustment().set_value(y);
+    }
+
+    /**
+     * Finds any currently visible messages, marks them as being read.
+     */
+    private void check_mark_read() {
+        Gee.ArrayList<Geary.EmailIdentifier> email_ids =
+            new Gee.ArrayList<Geary.EmailIdentifier>();
+
+        Gtk.Adjustment adj = get_adjustment();
+        int top_bound = (int) adj.value;
+        int bottom_bound = top_bound + (int) adj.page_size;
+
+        email_view_iterator().foreach((email_view) => {
+            const int TEXT_PADDING = 50;
+            ConversationMessage conversation_message = email_view.primary_message;
+            // Don't bother with not-yet-loaded emails since the
+            // size of the body will be off, affecting the visibility
+            // of emails further down the conversation.
+            if (email_view.email.is_unread().is_certain() &&
+                conversation_message.web_view.has_valid_height &&
+                !email_view.is_manually_read) {
+                 int body_top = 0;
+                 int body_left = 0;
+                 ConversationWebView web_view = conversation_message.web_view;
+                 web_view.translate_coordinates(
+                     this,
+                     0, 0,
+                     out body_left, out body_top
+                 );
+
+                 int body_height = web_view.get_allocated_height();
+                 int body_bottom = body_top + body_height;
+
+                 // Only mark the email as read if it's actually visible
+                 if (body_height > 0 &&
+                     body_bottom > top_bound &&
+                     body_top + TEXT_PADDING < bottom_bound) {
+                     email_ids.add(email_view.email.id);
+
+                     // Since it can take some time for the new flags
+                     // to round-trip back to our signal handlers,
+                     // mark as manually read here
+                     email_view.is_manually_read = true;
+                 }
+             }
+            return true;
+        });
+
+        if (email_ids.size > 0) {
+            Geary.EmailFlags flags = new Geary.EmailFlags();
+            flags.add(Geary.EmailFlags.UNREAD);
+            mark_emails(email_ids, null, flags);
+        }
     }
 
     // Due to Bug 764710, we can only use the CSS :last-child selector
