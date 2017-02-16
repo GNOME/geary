@@ -248,6 +248,49 @@ public class ConversationListBox : Gtk.ListBox {
 
     }
 
+    static construct {
+        // Set up custom keybindings
+        unowned Gtk.BindingSet bindings = Gtk.BindingSet.by_class(
+            (ObjectClass) typeof(ConversationListBox).class_ref()
+        );
+        Gtk.BindingEntry.add_signal(
+            bindings, Gdk.Key.space, 0, "focus-next", 0
+        );
+        Gtk.BindingEntry.add_signal(
+            bindings, Gdk.Key.KP_Space, 0, "focus-next", 0
+        );
+        Gtk.BindingEntry.add_signal(
+            bindings, Gdk.Key.space, Gdk.ModifierType.SHIFT_MASK, "focus-prev", 0
+        );
+        Gtk.BindingEntry.add_signal(
+            bindings, Gdk.Key.KP_Space, Gdk.ModifierType.SHIFT_MASK, "focus-prev", 0
+        );
+
+        Gtk.BindingEntry.add_signal(
+            bindings, Gdk.Key.Up, 0, "scroll", 1,
+            typeof(Gtk.ScrollType), Gtk.ScrollType.STEP_UP
+        );
+        Gtk.BindingEntry.add_signal(
+            bindings, Gdk.Key.Down, 0, "scroll", 1,
+            typeof(Gtk.ScrollType), Gtk.ScrollType.STEP_DOWN
+        );
+        Gtk.BindingEntry.add_signal(
+            bindings, Gdk.Key.Page_Up, 0, "scroll", 1,
+            typeof(Gtk.ScrollType), Gtk.ScrollType.PAGE_UP
+        );
+        Gtk.BindingEntry.add_signal(
+            bindings, Gdk.Key.Page_Down, 0, "scroll", 1,
+            typeof(Gtk.ScrollType), Gtk.ScrollType.PAGE_DOWN
+        );
+        Gtk.BindingEntry.add_signal(
+            bindings, Gdk.Key.Home, 0, "scroll", 1,
+            typeof(Gtk.ScrollType), Gtk.ScrollType.START
+        );
+        Gtk.BindingEntry.add_signal(
+            bindings, Gdk.Key.End, 0, "scroll", 1,
+            typeof(Gtk.ScrollType), Gtk.ScrollType.END
+        );
+    }
 
     private static int on_sort(Gtk.ListBoxRow row1, Gtk.ListBoxRow row2) {
         Geary.Email? email1 = ((ConversationRow) row1).email;
@@ -307,6 +350,46 @@ public class ConversationListBox : Gtk.ListBox {
     private uint loading_timeout_id = 0;
 
 
+    /** Keyboard action to scroll the conversation. */
+    [Signal (action=true)]
+    public virtual signal void scroll(Gtk.ScrollType type) {
+        Gtk.Adjustment adj = get_adjustment();
+        double value = adj.get_value();
+        switch (type) {
+        case Gtk.ScrollType.STEP_UP:
+            value -= adj.get_step_increment();
+            break;
+        case Gtk.ScrollType.STEP_DOWN:
+            value += adj.get_step_increment();
+            break;
+        case Gtk.ScrollType.PAGE_UP:
+            value -= adj.get_page_increment();
+            break;
+        case Gtk.ScrollType.PAGE_DOWN:
+            value += adj.get_page_increment();
+            break;
+        case Gtk.ScrollType.START:
+            value = 0.0;
+            break;
+        case Gtk.ScrollType.END:
+            value = adj.get_upper();
+            break;
+        }
+        adj.set_value(value);
+    }
+
+    /** Keyboard action to shift focus to the next message, if any. */
+    [Signal (action=true)]
+    public virtual signal void focus_next() {
+        this.move_cursor(Gtk.MovementStep.DISPLAY_LINES, 1);
+    }
+
+    /** Keyboard action to shift focus to the prev message, if any. */
+    [Signal (action=true)]
+    public virtual signal void focus_prev() {
+        this.move_cursor(Gtk.MovementStep.DISPLAY_LINES, -1);
+    }
+
     /** Fired when an email view is added to the conversation list. */
     public signal void email_added(ConversationEmail email);
 
@@ -351,7 +434,6 @@ public class ConversationListBox : Gtk.ListBox {
         set_selection_mode(Gtk.SelectionMode.NONE);
         set_sort_func(ConversationListBox.on_sort);
 
-        this.key_press_event.connect(on_key_press);
         this.realize.connect(() => {
                 adjustment.value_changed.connect(() => { check_mark_read(); });
             });
@@ -731,14 +813,6 @@ public class ConversationListBox : Gtk.ListBox {
                 return true;
             });
 
-        // Capture key events on the email's web views to allow
-        // scrolling on Space, etc. need to do this after loading so
-        // attached messages are present
-        view.message_view_iterator().foreach((msg_view) => {
-                msg_view.web_view.key_press_event.connect(on_key_press);
-                return true;
-            });
-
         EmailRow row = new EmailRow(view);
         this.email_rows.set(email.id, row);
 
@@ -997,21 +1071,6 @@ public class ConversationListBox : Gtk.ListBox {
             flags.add(flag);
         }
         return flags;
-    }
-
-    private bool on_key_press(Gtk.Widget widget, Gdk.EventKey event) {
-        // Override some key bindings to get something that works more
-        // like a browser page.
-        if (event.keyval == Gdk.Key.space) {
-            Gtk.ScrollType dir = Gtk.ScrollType.PAGE_DOWN;
-            if ((event.state & Gdk.ModifierType.SHIFT_MASK) ==
-                Gdk.ModifierType.SHIFT_MASK) {
-                dir = Gtk.ScrollType.PAGE_UP;
-            }
-            this.move_cursor(Gtk.MovementStep.PAGES, 1);
-            return true;
-        }
-        return false;
     }
 
     private void on_row_activated(Gtk.ListBoxRow widget) {

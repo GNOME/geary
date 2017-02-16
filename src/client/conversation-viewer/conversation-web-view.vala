@@ -12,6 +12,20 @@ public class ConversationWebView : ClientWebView {
 
     private const string DECEPTIVE_LINK_CLICKED = "deceptiveLinkClicked";
 
+    // Key codes we don't forward on to the super class on key press
+    // since we want to override them elsewhere, especially
+    // ConversationListBox.
+    private const int[] BLACKLISTED_KEY_CODES = {
+        Gdk.Key.space,
+        Gdk.Key.KP_Space,
+        Gdk.Key.Up,
+        Gdk.Key.Down,
+        Gdk.Key.Page_Up,
+        Gdk.Key.Page_Down,
+        Gdk.Key.Home,
+        Gdk.Key.End
+    };
+
     /** Specifies the type of deceptive link text when clicked. */
     public enum DeceptiveText {
         // Keep this in sync with JS ConversationPageState
@@ -79,6 +93,18 @@ public class ConversationWebView : ClientWebView {
         );
         return WebKitUtil.to_string(result);
     }
+
+    public override bool key_press_event(Gdk.EventKey event) {
+        // WebView consumes a number of key presses for scrolling
+        // itself internally, but we want them to navigate around in
+        // ConversationListBox, so don't forward any on.
+        bool ret = Gdk.EVENT_PROPAGATE;
+        if (!(((int) event.keyval) in BLACKLISTED_KEY_CODES)) {
+            ret = base.key_press_event(event);
+        }
+        return ret;
+    }
+
 
     // XXX Surely since we are doing height-for-width, we should be
     // overriding get_preferred_height_for_width here, but that
