@@ -209,8 +209,8 @@ public class Geary.AccountInformation : BaseObject {
     /**
      * Creates a new, empty account info file.
      */
-    internal AccountInformation(File config_directory, File data_directory) {
-        this.id = config_directory.get_basename();
+    public AccountInformation(string id, File config_directory, File data_directory) {
+        this.id = id;
         this.config_dir = config_directory;
         this.data_dir = data_directory;
         this.file = config_dir.get_child(SETTINGS_FILENAME);
@@ -222,10 +222,11 @@ public class Geary.AccountInformation : BaseObject {
      * Throws an error if the config file was not found, could not be
      * parsed, or doesn't have all required fields.
      */
-    internal AccountInformation.from_file(File config_directory,
+    internal AccountInformation.from_file(string id,
+                                          File config_directory,
                                           File data_directory)
         throws Error {
-        this(config_directory, data_directory);
+        this(id, config_directory, data_directory);
 
         KeyFile key_file = new KeyFile();
         key_file.load_from_file(file.get_path() ?? "", KeyFileFlags.NONE);

@@ -105,10 +105,11 @@ public class Geary.Engine : BaseObject {
      */
     public signal void untrusted_host(Geary.AccountInformation account_information,
         Endpoint endpoint, Endpoint.SecurityType security, TlsConnection cx, Service service);
-    
-    private Engine() {
+
+    // Public so it can be tested
+    public Engine() {
     }
-    
+
     private void check_opened() throws EngineError {
         if (!is_open)
             throw new EngineError.OPEN_REQUIRED("Geary.Engine instance not open");
@@ -192,10 +193,12 @@ public class Geary.Engine : BaseObject {
             FileInfo info = info_list.nth_data(0);
             if (info.get_file_type() == FileType.DIRECTORY) {
                 try {
+                    string id = info.get_name();
                     account_list.add(
                         new AccountInformation.from_file(
-                            user_config_dir.get_child(info.get_name()),
-                            user_data_dir.get_child(info.get_name())
+                            id,
+                            user_config_dir.get_child(id),
+                            user_data_dir.get_child(id)
                         )
                     );
                 } catch (Error err) {
@@ -291,8 +294,7 @@ public class Geary.Engine : BaseObject {
             throw new EngineError.ALREADY_EXISTS("Account %s already exists", id);
 
         return new AccountInformation(
-            user_config_dir.get_child(id),
-            user_data_dir.get_child(id)
+            id, user_config_dir.get_child(id), user_data_dir.get_child(id)
         );
     }
 
