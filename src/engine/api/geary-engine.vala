@@ -435,7 +435,7 @@ public class Geary.Engine : BaseObject {
      * Adds the account to be tracked by the engine.  Should only be called from
      * AccountInformation.store_async() and this class.
      */
-    internal void add_account(AccountInformation account, bool created = false) throws Error {
+    public void add_account(AccountInformation account, bool created = false) throws Error {
         check_opened();
 
         bool already_added = accounts.has_key(account.id);

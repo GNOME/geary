@@ -38,6 +38,7 @@ int main(string[] args) {
     TestSuite engine = new TestSuite("engine");
 
     engine.add_suite(new Geary.AttachmentTest().get_suite());
+    engine.add_suite(new Geary.EngineTest().get_suite());
     engine.add_suite(new Geary.HTML.UtilTest().get_suite());
     engine.add_suite(new Geary.IdleManagerTest().get_suite());
     engine.add_suite(new Geary.Inet.Test().get_suite());

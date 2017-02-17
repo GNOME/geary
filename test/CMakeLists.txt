@@ -7,6 +7,7 @@ set(TEST_SRC
   testcase.vala # Based on same file in libgee, courtesy Julien Peeters
 
   engine/api/geary-attachment-test.vala
+  engine/api/geary-engine-test.vala
   engine/mime-content-type-test.vala
   engine/rfc822-mailbox-address-test.vala
   engine/rfc822-message-test.vala
