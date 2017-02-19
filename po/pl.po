@@ -16,8 +16,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-02-05 16:25+0100\n"
-"PO-Revision-Date: 2017-02-05 16:27+0100\n"
+"POT-Creation-Date: 2017-02-19 19:37+0100\n"
+"PO-Revision-Date: 2017-02-19 19:38+0100\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <community-poland@mozilla.org>\n"
 "Language: pl\n"
@@ -711,74 +711,74 @@ msgstr ""
 msgid "Don’t _ask me again"
 msgstr "_Bez pytania ponownie"
 
-#: ../src/client/application/geary-controller.vala:2055
+#: ../src/client/application/geary-controller.vala:2146
 #, c-format
 msgid "A file named “%s” already exists.  Do you want to replace it?"
 msgstr "Plik o nazwie „%s” już istnieje. Zastąpić go?"
 
-#: ../src/client/application/geary-controller.vala:2057
+#: ../src/client/application/geary-controller.vala:2148
 #, c-format
 msgid ""
 "The file already exists in “%s”.  Replacing it will overwrite its contents."
 msgstr "Plik w „%s” już istnieje. Zastąpienie go nadpisze jego zawartość."
 
-#: ../src/client/application/geary-controller.vala:2060
+#: ../src/client/application/geary-controller.vala:2151
 msgid "_Replace"
 msgstr "_Zastąp"
 
 #. Find out what to do with the inline composers.
 #. TODO: Remove this in favor of automatically saving drafts
-#: ../src/client/application/geary-controller.vala:2403
+#: ../src/client/application/geary-controller.vala:2398
 msgid "Close open draft messages?"
 msgstr "Zamknąć otwarte szkice?"
 
-#: ../src/client/application/geary-controller.vala:2525
+#: ../src/client/application/geary-controller.vala:2520
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Usunąć wszystkie wiadomości z katalogu %s?"
 
-#: ../src/client/application/geary-controller.vala:2526
+#: ../src/client/application/geary-controller.vala:2521
 msgid "This removes the email from Geary and your email server."
 msgstr "Spowoduje to usunięcie wiadomości z programu Geary i serwera poczty."
 
-#: ../src/client/application/geary-controller.vala:2527
+#: ../src/client/application/geary-controller.vala:2522
 msgid "This cannot be undone."
 msgstr "Tego nie można cofnąć."
 
-#: ../src/client/application/geary-controller.vala:2528
+#: ../src/client/application/geary-controller.vala:2523
 #, c-format
 msgid "Empty %s"
 msgstr "Opróżnij %s"
 
-#: ../src/client/application/geary-controller.vala:2545
+#: ../src/client/application/geary-controller.vala:2540
 #, c-format
 msgid "Error emptying %s"
 msgstr "Błąd podczas opróżniania %s"
 
-#: ../src/client/application/geary-controller.vala:2575
+#: ../src/client/application/geary-controller.vala:2570
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Trwale usunąć tę wiadomość?"
 msgstr[1] "Trwale usunąć te wiadomości?"
 msgstr[2] "Trwale usunąć te wiadomości?"
 
-#: ../src/client/application/geary-controller.vala:2577
+#: ../src/client/application/geary-controller.vala:2572
 msgid "Delete"
 msgstr "Usuń"
 
-#: ../src/client/application/geary-controller.vala:2609
+#: ../src/client/application/geary-controller.vala:2604
 msgid "Undo archive (Ctrl+Z)"
 msgstr "Cofnij archiwizację (Ctrl+Z)"
 
-#: ../src/client/application/geary-controller.vala:2624
+#: ../src/client/application/geary-controller.vala:2619
 msgid "Undo trash (Ctrl+Z)"
 msgstr "Cofnij przeniesienie do kosza (Ctrl+Z)"
 
-#: ../src/client/application/geary-controller.vala:2678
+#: ../src/client/application/geary-controller.vala:2673
 msgid "Undo (Ctrl+Z)"
 msgstr "Cofnij (Ctrl+Z)"
 
-#: ../src/client/application/geary-controller.vala:2809
+#: ../src/client/application/geary-controller.vala:2806
 msgid "Failed to open default text editor."
 msgstr "Otwarcie domyślnego edytora tekstu się nie powiodło."
 
@@ -910,28 +910,28 @@ msgstr ""
 "załączyłam|załączono|dołączyłem|dołączyłam|dołączono|zalacznik|zalaczam|"
 "zalaczylem|zalaczylam|zalaczono|dolaczylem|dolaczylam|dolaczono"
 
-#: ../src/client/composer/composer-widget.vala:1120
-#: ../src/client/composer/composer-widget.vala:1139
+#: ../src/client/composer/composer-widget.vala:1121
+#: ../src/client/composer/composer-widget.vala:1140
 msgid "Do you want to discard this message?"
 msgstr "Odrzucić tę wiadomość?"
 
-#: ../src/client/composer/composer-widget.vala:1236
+#: ../src/client/composer/composer-widget.vala:1237
 msgid "Send message with an empty subject and body?"
 msgstr "Wysłać wiadomość niezawierającą tematu i treści?"
 
-#: ../src/client/composer/composer-widget.vala:1238
+#: ../src/client/composer/composer-widget.vala:1239
 msgid "Send message with an empty subject?"
 msgstr "Wysłać wiadomość niezawierającą tematu?"
 
-#: ../src/client/composer/composer-widget.vala:1240
+#: ../src/client/composer/composer-widget.vala:1241
 msgid "Send message with an empty body?"
 msgstr "Wysłać wiadomość niezawierającą treści?"
 
-#: ../src/client/composer/composer-widget.vala:1244
+#: ../src/client/composer/composer-widget.vala:1245
 msgid "Send message without an attachment?"
 msgstr "Wysłać wiadomość niezawierającą załączników?"
 
-#: ../src/client/composer/composer-widget.vala:1497
+#: ../src/client/composer/composer-widget.vala:1498
 #, c-format
 msgid "“%s” already attached for delivery."
 msgstr "Do wiadomości już załączono „%s”."
@@ -941,73 +941,73 @@ msgstr "Do wiadomości już załączono „%s”."
 #. description of the document type, the second will
 #. be a human-friendly size string. For example:
 #. Document (100.9MB)
-#: ../src/client/composer/composer-widget.vala:1505
-#: ../src/client/conversation-viewer/conversation-email.vala:145
+#: ../src/client/composer/composer-widget.vala:1506
+#: ../src/client/conversation-viewer/conversation-email.vala:135
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: ../src/client/composer/composer-widget.vala:1542
+#: ../src/client/composer/composer-widget.vala:1543
 #, c-format
 msgid "“%s” could not be found."
 msgstr "Nie można odnaleźć „%s”."
 
-#: ../src/client/composer/composer-widget.vala:1548
+#: ../src/client/composer/composer-widget.vala:1549
 #, c-format
 msgid "“%s” is a folder."
 msgstr "„%s” jest katalogiem."
 
-#: ../src/client/composer/composer-widget.vala:1554
+#: ../src/client/composer/composer-widget.vala:1555
 #, c-format
 msgid "“%s” is an empty file."
 msgstr "„%s” jest pustym plikiem."
 
-#: ../src/client/composer/composer-widget.vala:1567
+#: ../src/client/composer/composer-widget.vala:1568
 #, c-format
 msgid "“%s” could not be opened for reading."
 msgstr "Nie można otworzyć „%s” do odczytania."
 
-#: ../src/client/composer/composer-widget.vala:1575
+#: ../src/client/composer/composer-widget.vala:1576
 msgid "Cannot add attachment"
 msgstr "Nie można dodać załącznika"
 
-#: ../src/client/composer/composer-widget.vala:1637
+#: ../src/client/composer/composer-widget.vala:1638
 msgid "To: "
 msgstr "Do: "
 
-#: ../src/client/composer/composer-widget.vala:1640
+#: ../src/client/composer/composer-widget.vala:1641
 msgid "Cc: "
 msgstr "DW: "
 
-#: ../src/client/composer/composer-widget.vala:1643
+#: ../src/client/composer/composer-widget.vala:1644
 msgid "Bcc: "
 msgstr "UDW: "
 
-#: ../src/client/composer/composer-widget.vala:1646
+#: ../src/client/composer/composer-widget.vala:1647
 msgid "Reply-To: "
 msgstr "Odpowiedź do: "
 
-#: ../src/client/composer/composer-widget.vala:1777
+#: ../src/client/composer/composer-widget.vala:1778
 msgid "Select Color"
 msgstr "Wybór koloru"
 
 #. Displayed in the From dropdown to indicate an "alternate email address"
 #. for an account.  The first printf argument will be the alternate email
 #. address, and the second will be the account's primary email address.
-#: ../src/client/composer/composer-widget.vala:1977
+#: ../src/client/composer/composer-widget.vala:1978
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%1$s przez %2$s"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: ../src/client/composer/composer-widget.vala:2019
+#: ../src/client/composer/composer-widget.vala:2020
 msgid "_From:"
 msgstr "_Od:"
 
 #. Translators: This is the name of the file chooser filter
 #. when inserting an image in the composer.
-#: ../src/client/composer/composer-widget.vala:2242
+#: ../src/client/composer/composer-widget.vala:2243
 msgid "Images"
 msgstr "Obrazy"
 
@@ -1029,22 +1029,29 @@ msgstr "Ja"
 
 #. Translators: This is the file type displayed for
 #. attachments with unknown file types.
-#: ../src/client/conversation-viewer/conversation-email.vala:124
+#: ../src/client/conversation-viewer/conversation-email.vala:121
 msgid "Unknown"
 msgstr "Nieznany"
 
 #. Preview headers
 #. Translators: This is displayed in place of the from address
 #. when the message has no from address.
-#: ../src/client/conversation-viewer/conversation-message.vala:327
+#: ../src/client/conversation-viewer/conversation-message.vala:330
 msgid "No sender"
 msgstr "Brak nadawcy"
 
 #. Translators: This separates multiple 'from'
 #. addresses in the header preview for a message.
-#: ../src/client/conversation-viewer/conversation-message.vala:573
+#: ../src/client/conversation-viewer/conversation-message.vala:585
 msgid ", "
 msgstr ", "
+
+#. Translators: This string is used as the HTML IMG ALT
+#. attribute value when displaying an inline image in an email
+#. that did not specify a file name. E.g. <IMG ALT="Image" ...
+#: ../src/client/conversation-viewer/conversation-message.vala:706
+msgid "Image"
+msgstr "Obraz"
 
 #: ../src/client/conversation-viewer/conversation-viewer.vala:73
 msgid "No conversations selected"
@@ -1713,11 +1720,6 @@ msgstr "Do: %s\n"
 #, c-format
 msgid "Cc: %s\n"
 msgstr "DW: %s\n"
-
-#. / Placeholder filename for attachments with no filename.
-#: ../src/engine/rfc822/rfc822-utils.vala:432
-msgid "none"
-msgstr "brak"
 
 #: ../ui/account_cannot_remove.glade.h:1
 msgid "<span weight=\"bold\" size=\"larger\">Cannot remove account</span> "
