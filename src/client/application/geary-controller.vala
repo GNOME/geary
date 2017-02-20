@@ -1636,8 +1636,8 @@ public class GearyController : Geary.BaseObject {
         return null;
     }
     
-    private void on_folders_available_unavailable(Gee.Collection<Geary.Folder>? available,
-        Gee.Collection<Geary.Folder>? unavailable) {
+    private void on_folders_available_unavailable(Gee.List<Geary.Folder>? available,
+        Gee.List<Geary.Folder>? unavailable) {
         if (available != null && available.size > 0) {
             foreach (Geary.Folder folder in available) {
                 main_window.folder_list.add_folder(folder);
@@ -1671,7 +1671,8 @@ public class GearyController : Geary.BaseObject {
         }
         
         if (unavailable != null) {
-            foreach (Geary.Folder folder in unavailable) {
+            for (int i = (unavailable.size - 1); i >= 0; i--) {
+                Geary.Folder folder = unavailable[i];
                 main_window.folder_list.remove_folder(folder);
                 if (folder.account == current_account) {
                     if (main_window.main_toolbar.copy_folder_menu.has_folder(folder))

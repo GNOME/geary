@@ -55,8 +55,8 @@ public abstract class Geary.Account : BaseObject {
      * they're created later; they become unavailable when the account is
      * closed or they're deleted later.
      *
-     * Folders are ordered for the convenience of the caller from the top of the heirarchy to
-     * lower in the heirarchy.  In other words, parents are listed before children, assuming the
+     * Folders are ordered for the convenience of the caller from the top of the hierarchy to
+     * lower in the hierarchy.  In other words, parents are listed before children, assuming the
      * lists are traversed in natural order.
      *
      * @see sort_by_path
@@ -67,8 +67,8 @@ public abstract class Geary.Account : BaseObject {
     /**
      * Fired when folders are created or deleted.
      *
-     * Folders are ordered for the convenience of the caller from the top of the heirarchy to
-     * lower in the heirarchy.  In other words, parents are listed before children, assuming the
+     * Folders are ordered for the convenience of the caller from the top of the hierarchy to
+     * lower in the hierarchy.  In other words, parents are listed before children, assuming the
      * lists are traversed in natural order.
      *
      * @see sort_by_path
