@@ -483,10 +483,11 @@ public class ConversationMessage : Gtk.Grid {
 
     /**
      * Highlights user search terms in the message view.
-     &
-     * Returns the number of matching search terms.
+     *
+     * Highlighting includes both in the message headers, and the
+     * mesage body. returns the number of matching search terms.
      */
-    public uint highlight_search_terms(Gee.Set<string> search_matches) {
+    public async uint highlight_search_terms(Gee.Set<string> search_matches) {
         // Remove existing highlights
         this.web_view.get_find_controller().search_finish();
 
@@ -502,16 +503,9 @@ public class ConversationMessage : Gtk.Grid {
                     ++headers_found;
                 }
             }
-
-            // XXX WK2
-            //webkit_found += this.web_view.mark_text_matches(raw_match, false, 0);
-            this.web_view.get_find_controller().search(
-                raw_match,
-                WebKit.FindOptions.CASE_INSENSITIVE,
-                1024
-            );
         }
 
+        webkit_found += yield this.web_view.highlight_search_terms(search_matches);
         return headers_found + webkit_found;
     }
 
@@ -522,7 +516,7 @@ public class ConversationMessage : Gtk.Grid {
         foreach (AddressFlowBoxChild address in this.searchable_addresses) {
             address.unmark_search_terms();
         }
-        web_view.get_find_controller().search_finish();
+        this.web_view.unmark_search_terms();
     }
 
     private SimpleAction add_action(string name, bool enabled, VariantType? type = null) {

@@ -344,7 +344,10 @@ public class ConversationListBox : Gtk.ListBox {
     private ConversationRow? last_row = null;
 
     // Cached search terms to apply to new messages
-    private Gee.Set<string>? ordered_search_terms = null;
+    private Gee.Set<string>? search_terms = null;
+
+    // Total number of search matches found
+    private uint search_matches_found = 0;
 
     private uint loading_timeout_id = 0;
 
@@ -400,7 +403,7 @@ public class ConversationListBox : Gtk.ListBox {
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove);
 
     /** Fired when an email that matches the current search terms is found. */
-    public signal void search_matches_found();
+    public signal void search_matches_updated(uint matches);
 
 
     /**
@@ -664,6 +667,7 @@ public class ConversationListBox : Gtk.ListBox {
                 if (!Geary.String.is_empty_or_whitespace(word))
                     search_matches.add(word);
             }
+
             if (!this.cancellable.is_cancelled()) {
                 highlight_search_terms(search_matches);
             }
@@ -675,16 +679,9 @@ public class ConversationListBox : Gtk.ListBox {
      *
      * Returns true if any were found, else returns false.
      */
-    public void highlight_search_terms(Gee.Set<string> search_matches) {
-        // Webkit's highlighting is ... weird.  In order to actually
-        // see all the highlighting you're applying, it seems
-        // necessary to start with the shortest string and work up.
-        // If you don't, it seems that shorter strings will overwrite
-        // longer ones, and you're left with incomplete highlighting.
-        Gee.TreeSet<string> ordered_matches =
-            new Gee.TreeSet<string>((a, b) => a.length - b.length);
-        ordered_matches.add_all(search_matches);
-        this.ordered_search_terms = ordered_matches;
+    public void highlight_search_terms(Gee.Set<string> terms) {
+        this.search_terms = terms;
+        this.search_matches_found = 0;
         foreach (Gtk.Widget child in get_children()) {
             EmailRow? row = child as EmailRow;
             if (row != null) {
@@ -697,7 +694,9 @@ public class ConversationListBox : Gtk.ListBox {
      * Removes search term highlighting from all messages.
      */
     public void unmark_search_terms() {
-        this.ordered_search_terms = null;
+        this.search_terms = null;
+        this.search_matches_found = 0;
+
         this.foreach((child) => {
                 EmailRow? row = child as EmailRow;
                 if (row != null) {
@@ -709,6 +708,7 @@ public class ConversationListBox : Gtk.ListBox {
                     }
                 }
             });
+        search_matches_updated(this.search_matches_found);
     }
 
     /**
@@ -830,7 +830,7 @@ public class ConversationListBox : Gtk.ListBox {
         }
 
         // Apply any existing search terms to the new row
-        if (this.ordered_search_terms != null) {
+        if (this.search_terms != null) {
             apply_search_terms(row);
         }
 
@@ -958,27 +958,29 @@ public class ConversationListBox : Gtk.ListBox {
     }
 
     private void apply_search_terms(EmailRow row) {
+        // Message bodies need to be loaded to be able to search for
+        // them?
         if (row.view.message_bodies_loaded) {
-            apply_search_terms_impl(row);
+            this.apply_search_terms_impl.begin(row);
         } else {
             row.view.notify["message-bodies-loaded"].connect(() => {
-                    apply_search_terms_impl(row);
+                    this.apply_search_terms_impl.begin(row);
                 });
         }
     }
 
-    private inline void apply_search_terms_impl(EmailRow row) {
+    // This should only be called from apply_search_terms above
+    private async void apply_search_terms_impl(EmailRow row) {
         bool found = false;
         foreach (ConversationMessage view in row.view) {
-                if (view.highlight_search_terms(this.ordered_search_terms) > 0) {
-                    found = true;
-                    break;
-                }
-        }
-        if (found) {
-            search_matches_found();
+            uint count = yield view.highlight_search_terms(this.search_terms);
+            if (count > 0) {
+                found = true;
+            }
+            this.search_matches_found += count;
         }
         row.is_search_match = found;
+        search_matches_updated(this.search_matches_found);
     }
 
     /**

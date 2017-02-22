@@ -94,6 +94,55 @@ public class ConversationWebView : ClientWebView {
         return WebKitUtil.to_string(result);
     }
 
+    /**
+     * Highlights user search terms in the message view.
+     *
+     * Returns the number of matching search terms.
+     */
+    public async uint highlight_search_terms(Gee.Collection<string> search_matches) {
+        // XXX WK2 doesn't deal with the multiple highlighting
+        // required by search folder matches, only single highlighting
+        // for a fine-like interface. For now, just highlight the
+        // first term
+
+        uint found = 0;
+
+        WebKit.FindController controller = get_find_controller();
+        SourceFunc callback = this.highlight_search_terms.callback;
+        ulong found_handler = 0;
+        ulong not_found_handler = 0;
+
+        found_handler = controller.found_text.connect((count) => {
+                found = count;
+                controller.disconnect(found_handler);
+                controller.disconnect(not_found_handler);
+                callback();
+            });
+        not_found_handler = controller.failed_to_find_text.connect(() => {
+                controller.disconnect(found_handler);
+                controller.disconnect(not_found_handler);
+                callback();
+            });
+
+        controller.search(
+            Geary.Collection.get_first(search_matches),
+            WebKit.FindOptions.CASE_INSENSITIVE |
+            WebKit.FindOptions.WRAP_AROUND,
+            128
+        );
+
+        yield;
+
+        return found;
+    }
+
+    /**
+     * Unmarks any search terms highlighted in the message view.
+     */
+    public void unmark_search_terms() {
+        get_find_controller().search_finish();
+    }
+
     public override bool key_press_event(Gdk.EventKey event) {
         // WebView consumes a number of key presses for scrolling
         // itself internally, but we want them to navigate around in

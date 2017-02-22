@@ -204,9 +204,15 @@ public class ConversationViewer : Gtk.Stack {
         // are expanded and highlighted as they are added.
         this.conversation_find_next.set_sensitive(false);
         this.conversation_find_prev.set_sensitive(false);
-        new_list.search_matches_found.connect(() => {
-                this.conversation_find_next.set_sensitive(true);
-                this.conversation_find_prev.set_sensitive(true);
+        new_list.search_matches_updated.connect((count) => {
+                bool found = count > 0;
+                this.conversation_find_entry.set_icon_from_icon_name(
+                    Gtk.EntryIconPosition.PRIMARY,
+                    found || Geary.String.is_empty(this.conversation_find_entry.text)
+                    ? "edit-find-symbolic" : "computer-fail-symbolic"
+                );
+                this.conversation_find_next.set_sensitive(found);
+                this.conversation_find_prev.set_sensitive(found);
             });
         Gee.Set<string>? find_terms = get_find_search_terms();
         if (find_terms != null) {
