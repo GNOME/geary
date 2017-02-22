@@ -189,12 +189,11 @@ public class ConversationListBox : Gtk.ListBox {
 
         public override void expand() {
             this.is_expanded = true;
-            this.view.message_view_iterator().foreach((view) => {
-                    if (!view.web_view.has_valid_height) {
-                        view.web_view.queue_resize();
-                    }
-                    return true;
-                });
+            foreach (ConversationMessage message in this.view) {
+                if (!message.web_view.has_valid_height) {
+                    message.web_view.queue_resize();
+                }
+            };
             update_row_expansion();
         }
 
@@ -686,9 +685,12 @@ public class ConversationListBox : Gtk.ListBox {
             new Gee.TreeSet<string>((a, b) => a.length - b.length);
         ordered_matches.add_all(search_matches);
         this.ordered_search_terms = ordered_matches;
-        this.foreach((child) => {
-                apply_search_terms((EmailRow) child);
-            });
+        foreach (Gtk.Widget child in get_children()) {
+            EmailRow? row = child as EmailRow;
+            if (row != null) {
+                apply_search_terms(row);
+            }
+        }
     }
 
     /**
@@ -697,13 +699,14 @@ public class ConversationListBox : Gtk.ListBox {
     public void unmark_search_terms() {
         this.ordered_search_terms = null;
         this.foreach((child) => {
-                EmailRow row = (EmailRow) child;
-                if (row.is_search_match) {
-                    row.is_search_match = false;
-                    row.view.message_view_iterator().foreach((msg_view) => {
+                EmailRow? row = child as EmailRow;
+                if (row != null) {
+                    if (row.is_search_match) {
+                        row.is_search_match = false;
+                        foreach (ConversationMessage msg_view in row.view) {
                             msg_view.unmark_search_terms();
-                            return true;
-                        });
+                        }
+                    }
                 }
             });
     }
@@ -966,17 +969,16 @@ public class ConversationListBox : Gtk.ListBox {
 
     private inline void apply_search_terms_impl(EmailRow row) {
         bool found = false;
-        row.view.message_view_iterator().foreach((view) => {
+        foreach (ConversationMessage view in row.view) {
                 if (view.highlight_search_terms(this.ordered_search_terms) > 0) {
                     found = true;
-                    return false;
+                    break;
                 }
-                return true;
-            });
-        row.is_search_match = found;
+        }
         if (found) {
             search_matches_found();
         }
+        row.is_search_match = found;
     }
 
     /**
@@ -994,7 +996,7 @@ public class ConversationListBox : Gtk.ListBox {
     private Gee.Iterator<ConversationMessage> message_view_iterator() {
         return Gee.Iterator.concat<ConversationMessage>(
             email_view_iterator().map<Gee.Iterator<ConversationMessage>>(
-                (email_view) => { return email_view.message_view_iterator(); }
+                (email_view) => { return email_view.iterator(); }
             )
         );
     }

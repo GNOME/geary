@@ -2762,24 +2762,22 @@ public class GearyController : Geary.BaseObject {
                     draft_view.email, null, null, true
                 );
             });
-        view.message_view_iterator().foreach((mview) => {
-                mview.link_activated.connect((link) => {
-                        if (link.down().has_prefix(
-                                Geary.ComposedEmail.MAILTO_SCHEME)) {
-                            compose_mailto(link);
-                        } else {
-                            open_uri(link);
-                        }
-                    });
-                mview.save_image.connect((url, alt_text, buf) => {
-                        on_save_image_extended(view, url, alt_text, buf);
+        foreach (ConversationMessage msg_view in view) {
+            msg_view.link_activated.connect((link) => {
+                    if (link.down().has_prefix(Geary.ComposedEmail.MAILTO_SCHEME)) {
+                        compose_mailto(link);
+                    } else {
+                        open_uri(link);
+                    }
                 });
-                mview.search_activated.connect((op, value) => {
-                        string search = op + ":" + value;
-                        show_search_bar(search);
-                    });
-                return true;
-            });
+            msg_view.save_image.connect((url, alt_text, buf) => {
+                    on_save_image_extended(view, url, alt_text, buf);
+                });
+            msg_view.search_activated.connect((op, value) => {
+                    string search = op + ":" + value;
+                    show_search_bar(search);
+                });
+        }
         view.save_attachments.connect(on_save_attachments);
         view.view_source.connect(on_view_source);
     }

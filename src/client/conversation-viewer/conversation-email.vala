@@ -25,7 +25,10 @@ public class ConversationEmail : Gtk.Box {
      * Iterator that returns all message views in an email view.
      */
     private class MessageViewIterator :
-        Gee.Traversable<ConversationMessage>, Gee.Iterator<ConversationMessage>, Object {
+        Gee.Traversable<ConversationMessage>,
+        Gee.Iterator<ConversationMessage>,
+        Object {
+
 
         public bool read_only {
             get { return true; }
@@ -498,17 +501,16 @@ public class ConversationEmail : Gtk.Box {
      * attachment names, types and icons.
      */
     public async void start_loading(Cancellable load_cancelled) {
-        message_view_iterator().foreach((view) => {
-                if (!load_cancelled.is_cancelled()) {
-                    primary_message.load_message_body.begin(load_cancelled);
-                }
-                view.load_avatar.begin(
-                    GearyApplication.instance.controller.avatar_session,
-                    load_cancelled
-                );
-
-                return !load_cancelled.is_cancelled();
-            });
+        foreach (ConversationMessage view in this)  {
+            if (load_cancelled.is_cancelled()) {
+                break;
+            }
+            yield primary_message.load_message_body(load_cancelled);
+            view.load_avatar.begin(
+                GearyApplication.instance.controller.avatar_session,
+                load_cancelled
+            );
+        }
 
         // Only load attachments once the web views have finished
         // loading, since we want to know if any attachments marked as
@@ -596,7 +598,7 @@ public class ConversationEmail : Gtk.Box {
     /**
      * Returns a new Iterable over all message views in this email view
      */
-    internal Gee.Iterator<ConversationMessage> message_view_iterator() {
+    internal Gee.Iterator<ConversationMessage> iterator() {
         return new MessageViewIterator(this);
     }
 
@@ -622,13 +624,12 @@ public class ConversationEmail : Gtk.Box {
             });
         view.web_view.notify["has-valid-height"].connect(() => {
                 bool all_loaded = true;
-                message_view_iterator().foreach((view) => {
-                        if (!view.web_view.has_valid_height) {
-                            all_loaded = false;
-                            return false;
-                        }
-                        return true;
-                    });
+                foreach (ConversationMessage message in this) {
+                    if (!message.web_view.has_valid_height) {
+                        all_loaded = false;
+                        break;
+                    }
+                }
                 if (all_loaded == true && !this.message_bodies_loaded) {
                     // Only update the property value if not already
                     // true
