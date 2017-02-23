@@ -160,7 +160,7 @@ public class ConversationListBox : Gtk.ListBox {
     private class EmailRow : ConversationRow {
 
 
-        private const string MATCH_CLASS = "geary-match";
+        private const string MATCH_CLASS = "geary-matched";
 
 
         // Has the row been temporarily expanded to show search matches?

@@ -19,6 +19,7 @@ public class ConversationMessage : Gtk.Grid {
 
 
     private const string FROM_CLASS = "geary-from";
+    private const string MATCH_CLASS = "geary-match";
     private const string REPLACED_CID_TEMPLATE = "replaced_%02u@geary";
     private const string REPLACED_IMAGE_CLASS = "geary_replaced_inline_image";
 
@@ -39,7 +40,6 @@ public class ConversationMessage : Gtk.Grid {
     private class AddressFlowBoxChild : Gtk.FlowBoxChild {
 
         private const string PRIMARY_CLASS = "geary-primary";
-        private const string MATCH_CLASS = "geary-match";
 
         public enum Type { FROM, OTHER; }
 
@@ -170,6 +170,7 @@ public class ConversationMessage : Gtk.Grid {
     private Gtk.FlowBox from;
     [GtkChild]
     private Gtk.Label subject;
+    private string subject_searchable = "";
     [GtkChild]
     private Gtk.Label date;
 
@@ -362,6 +363,7 @@ public class ConversationMessage : Gtk.Grid {
         if (this.message.subject != null) {
             this.subject.set_text(this.message.subject.value);
             this.subject.set_visible(true);
+            this.subject_searchable = this.message.subject.value.casefold();
         }
         fill_header_addresses(this.to_header, this.message.to);
         fill_header_addresses(this.cc_header, this.message.cc);
@@ -496,7 +498,12 @@ public class ConversationMessage : Gtk.Grid {
         foreach(string raw_match in search_matches) {
             string match = raw_match.casefold();
 
-            debug("Matching: %s", match);
+            if (this.subject_searchable.contains(match)) {
+                this.subject.get_style_context().add_class(MATCH_CLASS);
+                ++headers_found;
+            } else {
+                this.subject.get_style_context().remove_class(MATCH_CLASS);
+            }
 
             foreach (AddressFlowBoxChild address in this.searchable_addresses) {
                 if (address.highlight_search_term(match)) {

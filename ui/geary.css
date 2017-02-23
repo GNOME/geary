@@ -94,8 +94,7 @@ row.geary-folder-popover-list-row > label {
   margin-bottom: 6px;
   border-bottom-width: 1px;
 }
-.conversation-listbox > .list-row.geary-match GtkFlowBox > *.geary-match, /* GTK < 3.20 */
-.conversation-listbox > row.geary-match flowboxchild.geary-match {
+.conversation-listbox *.geary-matched *.geary-match {
   color: @theme_selected_fg_color;
   background: @theme_selected_bg_color;
 }
