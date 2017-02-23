@@ -279,7 +279,7 @@ public class Geary.Engine : BaseObject {
         string? last_account = this.accounts.keys.fold<string?>((next, last) => {
                 string? result = last;
                 if (next.has_prefix(ID_PREFIX)) {
-                    result = (last == null || strcmp(last, next) > 0) ? next : last;
+                    result = (last == null || strcmp(last, next) < 0) ? next : last;
                 }
                 return result;
             },
