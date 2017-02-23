@@ -63,14 +63,6 @@
   	    <td><p>Label the conversation</p></td>
   		<td><p><key>L</key></p></td>
   	</tr>
-    <tr>
-        <td><p>Move focus to the next/previous pane</p></td>
-      <td><p> <keyseq><key>F6</key></keyseq> / <keyseq><key>Shift</key><key>F6</key></keyseq> </p></td>
-    </tr>
-  	<tr>
-  	    <td><p>Move focus to conversation list</p></td>
-  		<td><p> <keyseq><key>Ctrl</key><key>B</key></keyseq> </p></td>
-  	</tr>
   	<tr>
   	    <td><p>Jump to next (older) conversation</p></td>
   		<td><p><keyseq><key>J</key></keyseq></p></td>
@@ -176,5 +168,39 @@
         </table>
     </section>
 
-</page>
+    <section id="conversation">
+      <title>Keyboard navigation</title>
+      <p>These shortcuts can be used to move the keyboard focus in the main window.</p>
+      <table frame="all" rules="rows">
+        <tr>
+          <td><p>Move focus to the next/previous pane</p></td>
+          <td><p><keyseq><key>F6</key></keyseq> / <keyseq><key>Shift</key><key>F6</key></keyseq> </p></td>
+        </tr>
+        <tr>
+          <td><p>Move focus to conversation list</p></td>
+          <td><p><keyseq><key>Ctrl</key><key>B</key></keyseq> </p></td>
+        </tr>
+        <tr>
+          <td><p>Move to the next message in a conversation</p></td>
+          <td><p>
+            <keyseq><key>Space</key></keyseq>
+          </p></td>
+        </tr>
+        <tr>
+          <td><p>Move to the next/previous message in a conversation</p></td>
+          <td><p>
+            <keyseq><key>Ctrl</key><key>Down</key></keyseq> /
+            <keyseq><key>Ctrl</key><key>Up</key></keyseq>
+          </p></td>
+        </tr>
+        <tr>
+          <td><p>Move to the first/last message in a conversation</p></td>
+          <td><p>
+            <keyseq><key>Ctrl</key><key>Home</key></keyseq> /
+            <keyseq><key>Ctrl</key><key>End</key></keyseq>
+          </p></td>
+        </tr>
+      </table>
+    </section>
 
+</page>
