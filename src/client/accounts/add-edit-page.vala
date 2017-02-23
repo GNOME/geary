@@ -615,10 +615,14 @@ public class AddEditPage : Gtk.Box {
     }
     
     public bool is_complete() {
+        if (Geary.String.is_empty_or_whitespace(email_address) ||
+            !Geary.RFC822.MailboxAddress.is_valid_address(email_address)) {
+            return false;
+        }
+
         switch (get_service_provider()) {
             case Geary.ServiceProvider.OTHER:
                 if (Geary.String.is_empty_or_whitespace(nickname) ||
-                    Geary.String.is_empty_or_whitespace(email_address) ||
                     Geary.String.is_empty_or_whitespace(imap_host) ||
                     Geary.String.is_empty_or_whitespace(imap_port.to_string()) ||
                     Geary.String.is_empty_or_whitespace(imap_username) ||
@@ -635,7 +639,6 @@ public class AddEditPage : Gtk.Box {
             // GMAIL, YAHOO, and OUTLOOK
             default:
                 if (Geary.String.is_empty_or_whitespace(nickname) ||
-                    Geary.String.is_empty_or_whitespace(email_address) ||
                     Geary.String.is_empty_or_whitespace(password))
                     return false;
             break;
