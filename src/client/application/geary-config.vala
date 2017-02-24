@@ -9,6 +9,7 @@
  */
 public class Configuration {
 
+    public const string PRINT_DIR_KEY = "print-directory";
     public const string WINDOW_WIDTH_KEY = "window-width";
     public const string WINDOW_HEIGHT_KEY = "window-height";
     public const string WINDOW_MAXIMIZE_KEY = "window-maximize";
@@ -60,6 +61,11 @@ public class Configuration {
                     return DesktopEnvironment.UNKNOWN;
             }
         }
+    }
+
+    public string? print_dir {
+        owned get { return settings.get_string(PRINT_DIR_KEY); }
+        set { settings.set_string(PRINT_DIR_KEY, value); }
     }
 
     public int window_width {

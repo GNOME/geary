@@ -260,6 +260,8 @@ public class ConversationEmail : Gtk.Box {
     // Contacts for the email's account
     private Geary.ContactStore contact_store;
 
+    private Configuration config;
+
     // Message view with selected text, if any
     private ConversationMessage? body_selection_message = null;
 
@@ -363,6 +365,7 @@ public class ConversationEmail : Gtk.Box {
                              bool is_draft) {
         this.email = email;
         this.contact_store = contact_store;
+        this.config = config;
 
         if (is_sent) {
             get_style_context().add_class(SENT_CLASS);
@@ -736,12 +739,37 @@ public class ConversationEmail : Gtk.Box {
     private void print() {
         // XXX This isn't anywhere near good enough - headers aren't
         // being printed.
+
+        Gtk.Window? window = get_toplevel() as Gtk.Window;
         WebKit.PrintOperation op = new WebKit.PrintOperation(
             this.primary_message.web_view
         );
-        Gtk.Window? window = get_toplevel() as Gtk.Window;
+        Gtk.PrintSettings settings = new Gtk.PrintSettings();
+
+        if (!Geary.String.is_empty(this.config.print_dir)) {
+            settings.set(Gtk.PRINT_SETTINGS_OUTPUT_DIR, this.config.print_dir);
         }
+
+        if (this.email.subject != null) {
+            string file_name = Geary.String.reduce_whitespace(this.email.subject.value);
+            file_name = file_name.replace("/", "_");
+            if (file_name.char_count() > 128) {
+                file_name = Geary.String.safe_byte_substring(file_name, 128);
+            }
+
+            if (!Geary.String.is_empty(file_name)) {
+                settings.set(Gtk.PRINT_SETTINGS_OUTPUT_BASENAME, file_name);
+            }
+        }
+
+        op.set_print_settings(settings);
         op.run_dialog(window);
+
+        string? file_uri = op.get_print_settings().get(Gtk.PRINT_SETTINGS_OUTPUT_URI);
+        if (!Geary.String.is_empty(file_uri)) {
+            File print_file = File.new_for_uri(file_uri);
+            this.config.print_dir = print_file.get_parent().get_path();
+        }
     }
 
     private void on_flag_remote_images(ConversationMessage view) {

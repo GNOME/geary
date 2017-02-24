@@ -2,6 +2,12 @@
 
 <schema id="org.gnome.Geary" path="/org/gnome/Geary/">
 
+    <key name="print-directory" type="s">
+        <default>''</default>
+        <summary>Default print output directory</summary>
+        <description>Location used when printing to a file</description>
+    </key>
+
     <key name="window-maximize" type="b">
         <default>false</default>
         <summary>maximize window</summary>
@@ -121,6 +127,7 @@
         <summary>Whether we migrated the old settings</summary>
         <description>False to check for the old 'org.yorba.geary'-schema and copy its values</description>
     </key>
+
 </schema>
 
 </schemalist>
