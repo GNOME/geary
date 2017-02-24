@@ -740,9 +740,8 @@ public class ConversationEmail : Gtk.Box {
             this.primary_message.web_view
         );
         Gtk.Window? window = get_toplevel() as Gtk.Window;
-        if (op.run_dialog(window) == WebKit.PrintOperationResponse.PRINT) {
-            op.print();
         }
+        op.run_dialog(window);
     }
 
     private void on_flag_remote_images(ConversationMessage view) {
