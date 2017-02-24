@@ -2216,7 +2216,7 @@ public class ComposerWidget : Gtk.EventBox {
     }
 
     private void on_add_attachment() {
-        AttachmentDialog dialog = new AttachmentDialog(this.container.top_window);
+        AttachmentDialog dialog = new AttachmentDialog(this.container.top_window, this.config);
         if (dialog.run() == Gtk.ResponseType.ACCEPT) {
             dialog.hide();
             foreach (File file in dialog.get_files()) {
@@ -2227,6 +2227,7 @@ public class ComposerWidget : Gtk.EventBox {
                     break;
                 }
             }
+
         }
         dialog.destroy();
     }
@@ -2236,7 +2237,7 @@ public class ComposerWidget : Gtk.EventBox {
     }
 
     private void on_insert_image(SimpleAction action, Variant? param) {
-        AttachmentDialog dialog = new AttachmentDialog(this.container.top_window);
+        AttachmentDialog dialog = new AttachmentDialog(this.container.top_window, this.config);
         Gtk.FileFilter filter = new Gtk.FileFilter();
         // Translators: This is the name of the file chooser filter
         // when inserting an image in the composer.

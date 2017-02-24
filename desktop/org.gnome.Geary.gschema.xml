@@ -2,6 +2,12 @@
 
 <schema id="org.gnome.Geary" path="/org/gnome/Geary/">
 
+    <key name="attachments-directory" type="s">
+        <default>''</default>
+        <summary>Default attachments directory</summary>
+        <description>Location used when opening and saving attachments</description>
+    </key>
+
     <key name="print-directory" type="s">
         <default>''</default>
         <summary>Default print output directory</summary>

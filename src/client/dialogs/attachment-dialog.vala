@@ -5,40 +5,44 @@
  */
 
 public class AttachmentDialog : Object {
+
+    private const int PREVIEW_SIZE = 180;
+    private const int PREVIEW_PADDING = 3;
+
+    private Configuration config;
+
 #if GTK_3_20
     private Gtk.FileChooserNative? chooser = null;
 #else
     private Gtk.FileChooserDialog? chooser = null;
 #endif
-    private const int PREVIEW_SIZE = 180;
-    private const int PREVIEW_PADDING = 3;
-    
-    private static string? current_folder = null;
-    
-    private Gtk.Image preview_image;
-    
+
+    private Gtk.Image preview_image = new Gtk.Image();
+
     public delegate bool Attacher(File attachment_file, bool alert_errors = true);
 
-    public AttachmentDialog(Gtk.Window? parent) {
+    public AttachmentDialog(Gtk.Window? parent, Configuration config) {
+        this.config = config;
+
 #if GTK_3_20
-        chooser = new Gtk.FileChooserNative(_("Choose a file"), parent, Gtk.FileChooserAction.OPEN, _("_Attach"), Stock._CANCEL);
+        this.chooser = new Gtk.FileChooserNative(_("Choose a file"), parent, Gtk.FileChooserAction.OPEN, _("_Attach"), Stock._CANCEL);
 #else
-        chooser = new Gtk.FileChooserDialog(_("Choose a file"), parent, Gtk.FileChooserAction.OPEN, Stock._CANCEL, Gtk.ResponseType.CANCEL, _("_Attach"), Gtk.ResponseType.ACCEPT);
+        this.chooser = new Gtk.FileChooserDialog(_("Choose a file"), parent, Gtk.FileChooserAction.OPEN, Stock._CANCEL, Gtk.ResponseType.CANCEL, _("_Attach"), Gtk.ResponseType.ACCEPT);
 #endif
 
-        if (!Geary.String.is_empty(current_folder)) {
-            chooser.set_current_folder(current_folder);
+        string? dir = config.attachments_dir;
+        if (!Geary.String.is_empty(dir)) {
+            this.chooser.set_current_folder(dir);
         }
-        chooser.set_local_only(false);
-        chooser.set_select_multiple(true);
+        this.chooser.set_local_only(false);
+        this.chooser.set_select_multiple(true);
 
         // preview widget is not supported on Win32 (this will fallback to gtk file chooser)
         // and possibly by some org.freedesktop.portal.FileChooser (preview will be ignored).
-        preview_image = new Gtk.Image();
-        chooser.set_preview_widget(preview_image);
-        chooser.use_preview_label = false;
+        this.chooser.set_preview_widget(this.preview_image);
+        this.chooser.use_preview_label = false;
 
-        chooser.update_preview.connect(on_update_preview);
+        this.chooser.update_preview.connect(on_update_preview);
     }
 
     // XXX Once we depend on GTK+ 3.20 as a minimum, convert this
@@ -54,7 +58,11 @@ public class AttachmentDialog : Object {
     }
 
     public int run() {
-        return this.chooser.run();
+        int response = this.chooser.run();
+        if (response == Gtk.ResponseType.ACCEPT) {
+            this.config.attachments_dir = this.chooser.get_current_folder();
+        }
+        return response;
     }
 
     public void hide() {

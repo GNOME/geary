@@ -112,7 +112,6 @@ public class GearyController : Geary.BaseObject {
     private Gee.Set<Geary.App.Conversation> selected_conversations = new Gee.HashSet<Geary.App.Conversation>();
     private Geary.App.Conversation? last_deleted_conversation = null;
     private Gee.LinkedList<ComposerWidget> composer_widgets = new Gee.LinkedList<ComposerWidget>();
-    private File? last_save_directory = null;
     private NewMessagesMonitor? new_messages_monitor = null;
     private NewMessagesIndicator? new_messages_indicator = null;
     private UnityLauncher? unity_launcher = null;
@@ -2079,7 +2078,7 @@ public class GearyController : Geary.BaseObject {
             return;
         
         File dest_dir = File.new_for_path(filename);
-        this.last_save_directory = dest_dir;
+        this.application.config.attachments_dir = dest_dir.get_path();
 
         debug("Saving attachments to %s", dest_dir.get_path());
 
@@ -2124,7 +2123,7 @@ public class GearyController : Geary.BaseObject {
 
         if (accepted && !Geary.String.is_empty(accepted_filename)) {
             File destination = File.new_for_path(accepted_filename);
-            this.last_save_directory = destination.get_parent();
+            this.application.config.attachments_dir = destination.get_parent().get_path();
             yield write_buffer_to_file(buffer, destination);
         }
     }
@@ -2173,8 +2172,9 @@ public class GearyController : Geary.BaseObject {
             null
         );
 #endif
-        if (this.last_save_directory != null)
-            dialog.set_current_folder(this.last_save_directory.get_path());
+        string? dir = this.application.config.attachments_dir;
+        if (!Geary.String.is_empty(dir))
+            dialog.set_current_folder(dir);
         dialog.set_create_folders(true);
         dialog.set_local_only(false);
         return dialog;
