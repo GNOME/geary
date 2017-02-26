@@ -158,7 +158,11 @@ public class AccountDialogAccountListPane : AccountDialogPane {
         if (iter == null)
             return;
         
+#if VALA_0_36
+        list_model.remove(ref iter);
+#else
         list_model.remove(iter);
+#endif
     }
     
     private void on_account_changed(Object object, ParamSpec p) {
