@@ -1,14 +1,14 @@
 # Polish translation for geary help.
-# Copyright © 2016 the geary authors.
+# Copyright © 2016-2017 the geary authors.
 # This file is distributed under the same license as the geary package.
-# Piotr Drąg <piotrdrag@gmail.com>, 2016.
-# Aviary.pl <community-poland@mozilla.org>, 2016.
+# Piotr Drąg <piotrdrag@gmail.com>, 2016-2017.
+# Aviary.pl <community-poland@mozilla.org>, 2016-2017.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: geary-help\n"
-"POT-Creation-Date: 2016-10-03 23:00+0000\n"
-"PO-Revision-Date: 2016-10-09 09:22+0200\n"
+"POT-Creation-Date: 2017-02-23 03:08+0000\n"
+"PO-Revision-Date: 2017-02-26 18:37+0100\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <community-poland@mozilla.org>\n"
 "Language: pl\n"
@@ -226,7 +226,7 @@ msgstr ""
 msgid "Star"
 msgstr "Wyróżnienie"
 
-#: C/shortcuts.page:44(key) C/shortcuts.page:108(key)
+#: C/shortcuts.page:44(key) C/shortcuts.page:100(key)
 msgid "S"
 msgstr "S"
 
@@ -234,7 +234,7 @@ msgstr "S"
 msgid "Unstar"
 msgstr "Usunięcie wyróżnienia"
 
-#: C/shortcuts.page:48(key) C/shortcuts.page:146(key)
+#: C/shortcuts.page:48(key) C/shortcuts.page:138(key)
 msgid "D"
 msgstr "D"
 
@@ -274,217 +274,254 @@ msgstr "M"
 msgid "Label the conversation"
 msgstr "Nadanie etykiety wątkowi"
 
-#: C/shortcuts.page:64(key) C/shortcuts.page:170(key)
+#: C/shortcuts.page:64(key) C/shortcuts.page:162(key)
 msgid "L"
 msgstr "L"
 
 #: C/shortcuts.page:67(p)
+msgid "Jump to next (older) conversation"
+msgstr "Przejście do następnego (starszego) wątku"
+
+#: C/shortcuts.page:68(key)
+msgid "J"
+msgstr "J"
+
+#: C/shortcuts.page:71(p)
+msgid "Jump to previous (newer) conversation"
+msgstr "Przejście do poprzedniego (nowszego) wątku"
+
+#: C/shortcuts.page:72(key) C/shortcuts.page:158(key)
+msgid "K"
+msgstr "K"
+
+#: C/shortcuts.page:75(p)
+msgid "Toggle spam"
+msgstr "Oznaczenie jako niechciane"
+
+#: C/shortcuts.page:76(p)
+msgid "<keyseq><key>Ctrl</key><key>J</key></keyseq> or <key>!</key>"
+msgstr "<keyseq><key>Ctrl</key><key>J</key></keyseq> lub <key>!</key>"
+
+#: C/shortcuts.page:79(p)
+msgid "Quit"
+msgstr "Zakończenie działania"
+
+#: C/shortcuts.page:80(key) C/shortcuts.page:96(key) C/shortcuts.page:100(key)
+#: C/shortcuts.page:104(key) C/shortcuts.page:108(key)
+#: C/shortcuts.page:112(key) C/shortcuts.page:122(key)
+#: C/shortcuts.page:126(key) C/shortcuts.page:130(key)
+#: C/shortcuts.page:138(key) C/shortcuts.page:146(key)
+#: C/shortcuts.page:150(key) C/shortcuts.page:154(key)
+#: C/shortcuts.page:158(key) C/shortcuts.page:162(key)
+#: C/shortcuts.page:166(key) C/shortcuts.page:181(key)
+msgid "Ctrl"
+msgstr "Ctrl"
+
+#: C/shortcuts.page:80(key)
+msgid "Q"
+msgstr "Q"
+
+#: C/shortcuts.page:83(p)
+msgid "Zoom in"
+msgstr "Przybliżenie"
+
+#: C/shortcuts.page:84(p)
+msgid "<keyseq><key>Ctrl</key><key>=</key></keyseq> or <key>=</key>"
+msgstr "<keyseq><key>Ctrl</key><key>=</key></keyseq> lub <key>=</key>"
+
+#: C/shortcuts.page:87(p)
+msgid "Zoom out"
+msgstr "Oddalenie"
+
+#: C/shortcuts.page:88(p)
+msgid "<keyseq><key>Ctrl</key><key>-</key></keyseq> or <key>-</key>"
+msgstr "<keyseq><key>Ctrl</key><key>-</key></keyseq> lub <key>-</key>"
+
+#: C/shortcuts.page:91(p)
+msgid "Reset zoom"
+msgstr "Przywrócenie domyślnego poziomu przybliżenia"
+
+#: C/shortcuts.page:92(p)
+msgid "<keyseq><key>Ctrl</key><key>0</key></keyseq> or <key>0</key>"
+msgstr "<keyseq><key>Ctrl</key><key>0</key></keyseq> lub <key>0</key>"
+
+#: C/shortcuts.page:95(p)
+msgid "Close composer window"
+msgstr "Zamknięcie okna pisania wiadomości"
+
+#: C/shortcuts.page:96(key)
+msgid "W"
+msgstr "W"
+
+#: C/shortcuts.page:99(p)
+msgid "Jump to search box"
+msgstr "Przejście do wyszukiwania"
+
+#: C/shortcuts.page:103(p)
+msgid "Find in current conversation"
+msgstr "Wyszukiwanie w obecnym wątku"
+
+#: C/shortcuts.page:104(key)
+msgid "F"
+msgstr "F"
+
+#: C/shortcuts.page:107(p)
+msgid "Find next in current conversation"
+msgstr "Wyszukiwanie następnego wystąpienia w obecnym wątku"
+
+#: C/shortcuts.page:108(key) C/shortcuts.page:112(key)
+msgid "G"
+msgstr "G"
+
+#: C/shortcuts.page:111(p)
+msgid "Find previous in current conversation"
+msgstr "Wyszukiwanie poprzedniego wystąpienia w obecnym wątku"
+
+#: C/shortcuts.page:112(key)
+msgid "Shift"
+msgstr "Shift"
+
+#: C/shortcuts.page:117(title)
+msgid "Composer shortcuts"
+msgstr "Skróty okna pisania wiadomości"
+
+#: C/shortcuts.page:118(p)
+msgid "These shortcuts are active whenever focus is in a composer."
+msgstr "Poniższe skróty są aktywne w oknie pisania wiadomości."
+
+#: C/shortcuts.page:121(p)
+msgid "Attach file"
+msgstr "Załączenie pliku"
+
+#: C/shortcuts.page:122(key)
+msgid "T"
+msgstr "T"
+
+#: C/shortcuts.page:125(p)
+msgid "Quote text"
+msgstr "Cytowanie tekstu"
+
+#: C/shortcuts.page:126(key)
+msgid "]"
+msgstr "]"
+
+#: C/shortcuts.page:129(p)
+msgid "Unquote text"
+msgstr "Zakończenie cytowania tekstu"
+
+#: C/shortcuts.page:130(key)
+msgid "["
+msgstr "["
+
+#: C/shortcuts.page:133(p)
+msgid "Close composer"
+msgstr "Zamknięcie okna pisania wiadomości"
+
+#: C/shortcuts.page:134(p)
+msgid "<keyseq><key>Ctrl</key><key>W</key></keyseq> or <key>Esc</key>"
+msgstr "<keyseq><key>Ctrl</key><key>W</key></keyseq> lub <key>Esc</key>"
+
+#: C/shortcuts.page:137(p)
+msgid "Detach composer"
+msgstr "Odłączenie okna pisania wiadomości"
+
+#: C/shortcuts.page:142(p)
+msgid "These shortcuts are only active in composers in rich text mode."
+msgstr ""
+"Poniższe skróty są aktywne tylko, gdy okno pisania wiadomości jest w trybie "
+"tekstu sformatowanego."
+
+#: C/shortcuts.page:145(p)
+msgid "Bold text"
+msgstr "Pogrubienie tekstu"
+
+#: C/shortcuts.page:146(key) C/shortcuts.page:181(key)
+msgid "B"
+msgstr "B"
+
+#: C/shortcuts.page:149(p)
+msgid "Italicize text"
+msgstr "Pochylenie tekstu"
+
+#: C/shortcuts.page:150(key)
+msgid "I"
+msgstr "I"
+
+#: C/shortcuts.page:153(p)
+msgid "Underline text"
+msgstr "Podkreślenie tekstu"
+
+#: C/shortcuts.page:154(key)
+msgid "U"
+msgstr "U"
+
+#: C/shortcuts.page:157(p)
+msgid "Strike text"
+msgstr "Przekreślenie tekstu"
+
+#: C/shortcuts.page:161(p)
+msgid "Insert a link"
+msgstr "Wstawienie odnośnika"
+
+#: C/shortcuts.page:165(p)
+msgid "Remove formatting"
+msgstr "Usunięcie formatowania"
+
+#: C/shortcuts.page:166(key) C/shortcuts.page:186(key)
+msgid "Space"
+msgstr "Spacja"
+
+#: C/shortcuts.page:172(title)
+msgid "Keyboard navigation"
+msgstr "Nawigacja za pomocą klawiatury"
+
+#: C/shortcuts.page:173(p)
+msgid ""
+"These shortcuts can be used to move the keyboard focus in the main window."
+msgstr "Poniższe skróty mogą być używane do nawigacji w głównym oknie."
+
+#: C/shortcuts.page:176(p)
 msgid "Move focus to the next/previous pane"
 msgstr "Przejście do następnego/poprzedniego panelu"
 
-#: C/shortcuts.page:68(p)
+#: C/shortcuts.page:177(p)
 msgid ""
 "<keyseq><key>F6</key></keyseq> / <keyseq><key>Shift</key><key>F6</key></"
 "keyseq>"
 msgstr ""
 "<keyseq><key>F6</key></keyseq>/<keyseq><key>Shift</key><key>F6</key></keyseq>"
 
-#: C/shortcuts.page:71(p)
+#: C/shortcuts.page:180(p)
 msgid "Move focus to conversation list"
 msgstr "Przejście do listy wątków"
 
-#: C/shortcuts.page:72(key) C/shortcuts.page:88(key) C/shortcuts.page:104(key)
-#: C/shortcuts.page:108(key) C/shortcuts.page:112(key)
-#: C/shortcuts.page:116(key) C/shortcuts.page:120(key)
-#: C/shortcuts.page:130(key) C/shortcuts.page:134(key)
-#: C/shortcuts.page:138(key) C/shortcuts.page:146(key)
-#: C/shortcuts.page:154(key) C/shortcuts.page:158(key)
-#: C/shortcuts.page:162(key) C/shortcuts.page:166(key)
-#: C/shortcuts.page:170(key) C/shortcuts.page:174(key)
-msgid "Ctrl"
-msgstr "Ctrl"
+#: C/shortcuts.page:184(p)
+msgid "Move to the next message in a conversation"
+msgstr "Przejście do następnej wiadomości w wątku"
 
-#: C/shortcuts.page:72(key) C/shortcuts.page:154(key)
-msgid "B"
-msgstr "B"
+#: C/shortcuts.page:190(p)
+msgid "Move to the next/previous message in a conversation"
+msgstr "Przejście do następnej/poprzedniej wiadomości w wątku"
 
-#: C/shortcuts.page:75(p)
-msgid "Jump to next (older) conversation"
-msgstr "Przejście do następnego (starszego) wątku"
-
-#: C/shortcuts.page:76(key)
-msgid "J"
-msgstr "J"
-
-#: C/shortcuts.page:79(p)
-msgid "Jump to previous (newer) conversation"
-msgstr "Przejście do poprzedniego (nowszego) wątku"
-
-#: C/shortcuts.page:80(key) C/shortcuts.page:166(key)
-msgid "K"
-msgstr "K"
-
-#: C/shortcuts.page:83(p)
-msgid "Toggle spam"
-msgstr "Oznaczenie jako niechciane"
-
-#: C/shortcuts.page:84(p)
-msgid "<keyseq><key>Ctrl</key><key>J</key></keyseq> or <key>!</key>"
-msgstr "<keyseq><key>Ctrl</key><key>J</key></keyseq> lub <key>!</key>"
-
-#: C/shortcuts.page:87(p)
-msgid "Quit"
-msgstr "Zakończenie działania"
-
-#: C/shortcuts.page:88(key)
-msgid "Q"
-msgstr "Q"
-
-#: C/shortcuts.page:91(p)
-msgid "Zoom in"
-msgstr "Przybliżenie"
-
-#: C/shortcuts.page:92(p)
-msgid "<keyseq><key>Ctrl</key><key>=</key></keyseq> or <key>=</key>"
-msgstr "<keyseq><key>Ctrl</key><key>=</key></keyseq> lub <key>=</key>"
-
-#: C/shortcuts.page:95(p)
-msgid "Zoom out"
-msgstr "Oddalenie"
-
-#: C/shortcuts.page:96(p)
-msgid "<keyseq><key>Ctrl</key><key>-</key></keyseq> or <key>-</key>"
-msgstr "<keyseq><key>Ctrl</key><key>-</key></keyseq> lub <key>-</key>"
-
-#: C/shortcuts.page:99(p)
-msgid "Reset zoom"
-msgstr "Przywrócenie domyślnego poziomu przybliżenia"
-
-#: C/shortcuts.page:100(p)
-msgid "<keyseq><key>Ctrl</key><key>0</key></keyseq> or <key>0</key>"
-msgstr "<keyseq><key>Ctrl</key><key>0</key></keyseq> lub <key>0</key>"
-
-#: C/shortcuts.page:103(p)
-msgid "Close composer window"
-msgstr "Zamknięcie okna pisania wiadomości"
-
-#: C/shortcuts.page:104(key)
-msgid "W"
-msgstr "W"
-
-#: C/shortcuts.page:107(p)
-msgid "Jump to search box"
-msgstr "Przejście do wyszukiwania"
-
-#: C/shortcuts.page:111(p)
-msgid "Find in current conversation"
-msgstr "Wyszukiwanie w obecnym wątku"
-
-#: C/shortcuts.page:112(key)
-msgid "F"
-msgstr "F"
-
-#: C/shortcuts.page:115(p)
-msgid "Find next in current conversation"
-msgstr "Wyszukiwanie następnego wystąpienia w obecnym wątku"
-
-#: C/shortcuts.page:116(key) C/shortcuts.page:120(key)
-msgid "G"
-msgstr "G"
-
-#: C/shortcuts.page:119(p)
-msgid "Find previous in current conversation"
-msgstr "Wyszukiwanie poprzedniego wystąpienia w obecnym wątku"
-
-#: C/shortcuts.page:120(key)
-msgid "Shift"
-msgstr "Shift"
-
-#: C/shortcuts.page:125(title)
-msgid "Composer shortcuts"
-msgstr "Skróty okna pisania wiadomości"
-
-#: C/shortcuts.page:126(p)
-msgid "These shortcuts are active whenever focus is in a composer."
-msgstr "Poniższe skróty są aktywne w oknie pisania wiadomości."
-
-#: C/shortcuts.page:129(p)
-msgid "Attach file"
-msgstr "Załączenie pliku"
-
-#: C/shortcuts.page:130(key)
-msgid "T"
-msgstr "T"
-
-#: C/shortcuts.page:133(p)
-msgid "Quote text"
-msgstr "Cytowanie tekstu"
-
-#: C/shortcuts.page:134(key)
-msgid "]"
-msgstr "]"
-
-#: C/shortcuts.page:137(p)
-msgid "Unquote text"
-msgstr "Zakończenie cytowania tekstu"
-
-#: C/shortcuts.page:138(key)
-msgid "["
-msgstr "["
-
-#: C/shortcuts.page:141(p)
-msgid "Close composer"
-msgstr "Zamknięcie okna pisania wiadomości"
-
-#: C/shortcuts.page:142(p)
-msgid "<keyseq><key>Ctrl</key><key>W</key></keyseq> or <key>Esc</key>"
-msgstr "<keyseq><key>Ctrl</key><key>W</key></keyseq> lub <key>Esc</key>"
-
-#: C/shortcuts.page:145(p)
-msgid "Detach composer"
-msgstr "Odłączenie okna pisania wiadomości"
-
-#: C/shortcuts.page:150(p)
-msgid "These shortcuts are only active in composers in rich text mode."
+#: C/shortcuts.page:191(p)
+msgid ""
+"<keyseq><key>Ctrl</key><key>Down</key></keyseq> / <keyseq><key>Ctrl</"
+"key><key>Up</key></keyseq>"
 msgstr ""
-"Poniższe skróty są aktywne tylko, gdy okno pisania wiadomości jest w trybie "
-"tekstu sformatowanego."
+"<keyseq><key>Ctrl</key><key>W dół</key></keyseq>/<keyseq><key>Ctrl</"
+"key><key>W górę</key></keyseq>"
 
-#: C/shortcuts.page:153(p)
-msgid "Bold text"
-msgstr "Pogrubienie tekstu"
+#: C/shortcuts.page:197(p)
+msgid "Move to the first/last message in a conversation"
+msgstr "Przejście do pierwszej/ostatniej wiadomości w wątku"
 
-#: C/shortcuts.page:157(p)
-msgid "Italicize text"
-msgstr "Pochylenie tekstu"
-
-#: C/shortcuts.page:158(key)
-msgid "I"
-msgstr "I"
-
-#: C/shortcuts.page:161(p)
-msgid "Underline text"
-msgstr "Podkreślenie tekstu"
-
-#: C/shortcuts.page:162(key)
-msgid "U"
-msgstr "U"
-
-#: C/shortcuts.page:165(p)
-msgid "Strike text"
-msgstr "Przekreślenie tekstu"
-
-#: C/shortcuts.page:169(p)
-msgid "Insert a link"
-msgstr "Wstawienie odnośnika"
-
-#: C/shortcuts.page:173(p)
-msgid "Remove formatting"
-msgstr "Usunięcie formatowania"
-
-#: C/shortcuts.page:174(key)
-msgid "Space"
-msgstr "Spacja"
+#: C/shortcuts.page:198(p)
+msgid ""
+"<keyseq><key>Ctrl</key><key>Home</key></keyseq> / <keyseq><key>Ctrl</"
+"key><key>End</key></keyseq>"
+msgstr ""
+"<keyseq><key>Ctrl</key><key>Home</key></keyseq>/<keyseq><key>Ctrl</"
+"key><key>End</key></keyseq>"
 
 #: C/search.page:10(title)
 msgid "Search"
@@ -1104,5 +1141,5 @@ msgstr ""
 #: C/accounts.page:0(None)
 msgid "translator-credits"
 msgstr ""
-"Piotr Drąg <piotrdrag@gmail.com>, 2016\n"
-"Aviary.pl <community-poland@mozilla.org>, 2016"
+"Piotr Drąg <piotrdrag@gmail.com>, 2016-2017\n"
+"Aviary.pl <community-poland@mozilla.org>, 2016-2017"
