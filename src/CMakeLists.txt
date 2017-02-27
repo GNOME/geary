@@ -593,6 +593,13 @@ if (NOT DEPS_gtk+-3.0_VERSION VERSION_LESS 3.20)
     )
 endif()
 
+if (NOT DEPS_gtk+-3.0_VERSION VERSION_LESS 3.22)
+    set(EXTRA_VALA_OPTIONS
+        ${EXTRA_VALA_OPTIONS}
+        -D GTK_3_22
+    )
+endif()
+
 if (DISABLE_POODLE)
     message(STATUS "POODLE SSLv3 fix: OFF")
     set(EXTRA_VALA_OPTIONS

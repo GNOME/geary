@@ -372,6 +372,25 @@ public class GearyApplication : Gtk.Application {
         }
     }
 
+    /**
+     * Displays a URI on the current active window, if any.
+     */
+    public void show_uri(string uri) throws Error {
+        Gtk.Window? window = get_active_window();
+#if !GTK_3_22
+        bool success = Gtk.show_uri(
+            window != null ? window.get_screen() : null, uri, Gdk.CURRENT_TIME
+        );
+        if (!success) {
+            throw new IOError.FAILED("gtk_show_uri() returned false");
+        }
+#else
+        if (!Gtk.show_uri_on_window(window, uri, Gdk.CURRENT_TIME)) {
+            throw new IOError.FAILED("gtk_show_uri_on_window() returned false");
+        }
+#endif
+    }
+
     // This call will fire "exiting" only if it's not already been fired.
     public void exit(int exitcode = 0) {
         if (exiting_fired)
@@ -481,7 +500,7 @@ public class GearyApplication : Gtk.Application {
     private void on_activate_help() {
         try {
             if (is_installed()) {
-                Gtk.show_uri(null, "ghelp:geary", Gdk.CURRENT_TIME);
+                show_uri("ghelp:geary");
             } else {
                 Pid pid;
                 File exec_dir = get_exec_dir();

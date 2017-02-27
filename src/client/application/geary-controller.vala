@@ -2184,19 +2184,20 @@ public class GearyController : Geary.BaseObject {
     // Opens a link in an external browser.
     private bool open_uri(string _link) {
         string link = _link;
-        
+
         // Support web URLs that ommit the protocol.
         if (!link.contains(":"))
             link = "http://" + link;
-        
-        bool ret = false;
+
+        bool success = true;
         try {
-            ret = Gtk.show_uri(main_window.get_screen(), link, Gdk.CURRENT_TIME);
+            this.application.show_uri(link);
         } catch (Error err) {
-            debug("Unable to open URL. %s", err.message);
+            success = false;
+            debug("Unable to open URL: \"%s\" %s", link, err.message);
         }
-        
-        return ret;
+
+        return success;
     }
 
     internal bool close_composition_windows(bool main_window_only = false) {
@@ -2798,7 +2799,7 @@ public class GearyController : Geary.BaseObject {
             FileUtils.chmod(temporary_filename, (int) (Posix.S_IRUSR | Posix.S_IWUSR));
 
             string temporary_uri = Filename.to_uri(temporary_filename, null);
-            Gtk.show_uri(main_window.get_screen(), temporary_uri, Gdk.CURRENT_TIME);
+            this.application.show_uri(temporary_uri);
         } catch (Error error) {
             ErrorDialog dialog = new ErrorDialog(
                 main_window,
