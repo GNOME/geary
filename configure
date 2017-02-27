@@ -73,7 +73,7 @@ do
                             exit 0
                             ;;
 
-        --prefix)           if [ -z "$value"]; then
+        --prefix)           if [ -z "$value" ]; then
                                 # handle jhbuild's use of "--prefix /path"
                                 value="$2"
                                 shift
@@ -85,7 +85,7 @@ do
         # ignored for autotools compatibility
         --bindir | --libdir | --sbindir | --datadir | --localstatedir | \
         --includedir | --infodir | --sysconfdir |  --mandir | --libexecdir)
-                            if [ -z "$value"]; then
+                            if [ -z "$value" ]; then
                                 # handle jhbuild's use of "--option /path"
                                 value="$2"
                                 shift
