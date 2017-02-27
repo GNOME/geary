@@ -2017,36 +2017,11 @@ public class GearyController : Geary.BaseObject {
         }
 
         foreach (Geary.Attachment attachment in attachments) {
-            string gio_content_type = ContentType.from_mime_type(
-                attachment.content_type.get_mime_type()
-            );
-            AppInfo? app = null;
-            if (!ContentType.can_be_executable(gio_content_type) &&
-                !ContentType.is_unknown(gio_content_type)) {
-                app = AppInfo.get_default_for_type(gio_content_type, false);
-            }
-            if (app == null) {
-                string content_type = attachment.content_type.get_mime_type();
-                Gtk.AppChooserDialog app_chooser =
-                    new Gtk.AppChooserDialog.for_content_type(
-                        this.main_window,
-                        Gtk.DialogFlags.MODAL | Gtk.DialogFlags.USE_HEADER_BAR,
-                        content_type
-                    );
-                if (app_chooser.run() == Gtk.ResponseType.OK) {
-                    app = app_chooser.get_app_info();
-                }
-                app_chooser.hide();
-            }
-            if (app != null) {
-                List<File> files = new List<File>();
-                files.append(attachment.file);
-                try {
-                    app.launch(files, null);
-                } catch (Error error) {
-                    warning("Failed to launch %s: %s\n",
-                            app.get_name(), error.message);
-                }
+            string uri = attachment.file.get_uri();
+            try {
+                this.application.show_uri(uri);
+            } catch (Error err) {
+                message("Unable to open attachment \"%s\": %s", uri, err.message);
             }
         }
     }
