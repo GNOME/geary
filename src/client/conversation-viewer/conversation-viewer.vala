@@ -42,7 +42,6 @@ public class ConversationViewer : Gtk.Stack {
     [GtkChild]
     private Gtk.Grid composer_page;
 
-    [GtkChild]
     private Gtk.ScrolledWindow conversation_scroller;
 
     [GtkChild]
@@ -96,6 +95,9 @@ public class ConversationViewer : Gtk.Stack {
             "Your search returned no results, try refining your search terms"
         );
         this.empty_search_page.add(empty_search);
+
+        // XXX GTK+ Bug 778190 workaround
+        new_conversation_scroller();
 
         // XXX Do this in Glade when possible.
         this.conversation_find_bar.connect_entry(this.conversation_find_entry);
@@ -192,7 +194,7 @@ public class ConversationViewer : Gtk.Stack {
             account.information,
             location.special_folder_type == Geary.SpecialFolderType.DRAFTS,
             ((MainWindow) get_ancestor(typeof(MainWindow))).application.config,
-            conversation_scroller.get_vadjustment()
+            this.conversation_scroller.get_vadjustment()
         );
 
         // Need to fire this signal early so the the controller
@@ -250,21 +252,31 @@ public class ConversationViewer : Gtk.Stack {
 
     // Remove any existing conversation list, cancelling its loading
     private void remove_current_list() {
-        // Remove the viewport that contains the current list
-        Gtk.Widget? scrolled_child = this.conversation_scroller.get_child();
-        if (scrolled_child != null) {
-            scrolled_child.destroy();
-        }
-
-        // Reset the scrollbars to their initial positions
-        this.conversation_scroller.hadjustment.set_value(0);
-        this.conversation_scroller.vadjustment.set_value(0);
+        // XXX GTK+ Bug 778190 workaround
+        this.conversation_scroller.destroy();
+        new_conversation_scroller();
 
         // Notify that the current list was removed
         if (this.current_list != null) {
             this.conversation_removed(this.current_list);
             this.current_list = null;
         }
+    }
+
+    private void new_conversation_scroller() {
+        // XXX Work around for GTK+ Bug 778190: Instead of replacing
+        // the Viewport that contains the current list, replace the
+        // complete ScrolledWindow. Need to put remove this method and
+        // put the settings back into conversation-viewer.ui when we
+        // can rely on it being fixed again.
+        Gtk.ScrolledWindow scroller = new Gtk.ScrolledWindow(null, null);
+        scroller.get_style_context().add_class("geary-conversation-scroller");
+        scroller.hscrollbar_policy = Gtk.PolicyType.NEVER;
+        scroller.set_hexpand(true);
+        scroller.set_vexpand(true);
+        scroller.show();
+        this.conversation_scroller = scroller;
+        this.conversation_page.add(scroller);
     }
 
     /**
