@@ -658,7 +658,7 @@ public class ConversationMessage : Gtk.Grid {
                                   Cancellable load_cancelled)
     throws Error {
         Gdk.Pixbuf avatar_buf =
-            yield Gdk.Pixbuf.new_from_stream_async(data, load_cancelled);
+            yield new Gdk.Pixbuf.from_stream_async(data, load_cancelled);
 
         if (avatar_buf != null && !load_cancelled.is_cancelled()) {
             int window_scale = get_scale_factor();
