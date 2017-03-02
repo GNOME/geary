@@ -20,14 +20,14 @@ public class FolderList.AccountBranch : Sidebar.Branch {
         
         account.information.notify["nickname"].connect(on_nicknamed_changed);
         
-        graft(get_root(), user_folder_group);
-        
         entry_removed.connect(on_entry_removed);
+        entry_moved.connect(check_user_folders);
     }
     
     ~AccountBranch() {
         account.information.notify["nickname"].disconnect(on_nicknamed_changed);
         entry_removed.disconnect(on_entry_removed);
+        entry_moved.disconnect(check_user_folders);
     }
     
     private void on_nicknamed_changed() {
@@ -87,6 +87,10 @@ public class FolderList.AccountBranch : Sidebar.Branch {
         } else if (folder.path.get_parent() == null) {
             // Top-level folders get put in our special user folders group.
             graft_point = user_folder_group;
+
+            if (!has_entry(user_folder_group)) {
+                graft(get_root(), user_folder_group);
+            }
         } else {
             Sidebar.Entry? entry = folder_entries.get(folder.path.get_parent());
             if (entry != null)
@@ -129,5 +133,16 @@ public class FolderList.AccountBranch : Sidebar.Branch {
         FolderEntry? folder_entry = entry as FolderEntry;
         if (folder_entry != null && folder_entries.has_key(folder_entry.folder.path))
             folder_entries.unset(folder_entry.folder.path);
+
+        check_user_folders(entry);
+    }
+
+    private void check_user_folders(Sidebar.Entry entry) {
+        if (entry != user_folder_group) {
+            // remove "Labels" entry if there are no more user entries
+            if (has_entry(user_folder_group) && (get_child_count(user_folder_group) == 0)) {
+                prune(user_folder_group);
+            }
+        }
     }
 }
