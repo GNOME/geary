@@ -466,8 +466,8 @@ public class Geary.AccountInformation : BaseObject {
     /**
      * Sets the path Geary will look for or create a special folder.  This is
      * only obeyed if the server doesn't tell Geary which folders are special.
-     * Only the DRAFTS, SENT, SPAM, and TRASH special folder types are valid to
-     * pass to this function.
+     * Only the DRAFTS, SENT, SPAM, TRASH and ARCHIVE special folder types are
+     * valid to pass to this function.
      */
     public void set_special_folder_path(Geary.SpecialFolderType special, Geary.FolderPath? path) {
         switch (special) {

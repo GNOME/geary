@@ -641,10 +641,10 @@ public class Sidebar.Tree : Gtk.TreeView {
     
     private void on_branch_entry_removed(Sidebar.Branch branch, Sidebar.Entry entry) {
         EntryWrapper? wrapper = get_wrapper(entry);
-        assert(wrapper != null);
-        assert(!(wrapper is RootWrapper));
-        
-        disassociate_wrapper_and_signal(wrapper, false);
+        if (wrapper != null) {
+            assert(!(wrapper is RootWrapper));
+            disassociate_wrapper_and_signal(wrapper, false);
+        }
     }
     
     private void on_branch_entry_moved(Sidebar.Branch branch, Sidebar.Entry entry) {
