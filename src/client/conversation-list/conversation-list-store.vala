@@ -389,7 +389,7 @@ public class ConversationListStore : Gtk.ListStore {
             remove(iter);
 #endif
         
-        row_map.remove(conversation);
+        row_map.unset(conversation);
     }
     
     private bool add_conversation(Geary.App.Conversation conversation) {

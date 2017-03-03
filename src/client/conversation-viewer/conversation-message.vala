@@ -101,7 +101,7 @@ public class ConversationMessage : Gtk.Grid {
         }
 
         public bool highlight_search_term(string term) {
-            bool found = this.search_value.contains(term);
+            bool found = term in this.search_value;
             if (found) {
                 get_style_context().add_class(MATCH_CLASS);
             } else {

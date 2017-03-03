@@ -485,7 +485,7 @@ public class ConversationListBox : Gtk.ListBox {
             if (this.cancellable.is_cancelled()) {
                 break;
             }
-            if (!this.email_rows.contains(full_email.id)) {
+            if (!(full_email.id in this.email_rows)) {
                 EmailRow row = add_email(full_email);
                 if (row.is_expanded &&
                     (first_expanded_row == null ||

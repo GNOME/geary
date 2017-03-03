@@ -198,7 +198,7 @@ public class Geary.RFC822.Message : BaseObject {
                     }
                     // Don't need to assign a CID to this file, so
                     // don't process it below any further.
-                    inline_files.remove(cid);
+                    inline_files.unset(cid);
                 }
             }
 
