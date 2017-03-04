@@ -185,6 +185,8 @@ public class ConversationViewer : Gtk.Stack {
     public async void load_conversation(Geary.App.Conversation conversation,
                                         Geary.Folder location)
         throws Error {
+        remove_current_list();
+
         Geary.Account account = location.account;
         ConversationListBox new_list = new ConversationListBox(
             conversation,
@@ -221,7 +223,6 @@ public class ConversationViewer : Gtk.Stack {
             new_list.highlight_search_terms(find_terms);
         }
 
-        remove_current_list();
         add_new_list(new_list);
         set_visible_child(this.conversation_page);
 
