@@ -349,6 +349,7 @@
                     <property name="always_show_image">True</property>
                     <child>
                       <object class="GtkImage">
+                        <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="pixel_size">16</property>
                         <property name="icon_name">edit-undo-symbolic</property>
@@ -372,6 +373,7 @@
                     <property name="always_show_image">True</property>
                     <child>
                       <object class="GtkImage">
+                        <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="pixel_size">16</property>
                         <property name="icon_name">edit-redo-symbolic</property>
@@ -400,6 +402,7 @@
                 <property name="can_focus">False</property>
                 <child>
                   <object class="GtkToggleButton" id="bold_button">
+                    <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="focus_on_click">False</property>
                     <property name="receives_default">False</property>
@@ -408,6 +411,7 @@
                     <property name="always_show_image">True</property>
                     <child>
                       <object class="GtkImage" id="bold_image">
+                        <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="pixel_size">16</property>
                         <property name="icon_name">format-text-bold-symbolic</property>
@@ -422,6 +426,7 @@
                 </child>
                 <child>
                   <object class="GtkToggleButton" id="italics_button">
+                    <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="focus_on_click">False</property>
                     <property name="receives_default">False</property>
@@ -430,6 +435,7 @@
                     <property name="always_show_image">True</property>
                     <child>
                       <object class="GtkImage" id="italics_image">
+                        <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="pixel_size">16</property>
                         <property name="icon_name">format-text-italic-symbolic</property>
@@ -444,6 +450,7 @@
                 </child>
                 <child>
                   <object class="GtkToggleButton" id="underline_button">
+                    <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="focus_on_click">False</property>
                     <property name="receives_default">False</property>
@@ -452,6 +459,7 @@
                     <property name="always_show_image">True</property>
                     <child>
                       <object class="GtkImage" id="underline_image">
+                        <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="pixel_size">16</property>
                         <property name="icon_name">format-text-underline-symbolic</property>
@@ -466,6 +474,7 @@
                 </child>
                 <child>
                   <object class="GtkToggleButton" id="strikethrough_button">
+                    <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="focus_on_click">False</property>
                     <property name="receives_default">False</property>
@@ -474,6 +483,7 @@
                     <property name="always_show_image">True</property>
                     <child>
                       <object class="GtkImage" id="strikethrough_image">
+                        <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="pixel_size">16</property>
                         <property name="icon_name">format-text-strikethrough-symbolic</property>
@@ -511,6 +521,7 @@
                     <property name="always_show_image">True</property>
                     <child>
                       <object class="GtkImage" id="indent_image">
+                        <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="pixel_size">16</property>
                         <property name="icon_name">format-indent-more-symbolic</property>
@@ -534,6 +545,7 @@
                     <property name="always_show_image">True</property>
                     <child>
                       <object class="GtkImage" id="outdent_image">
+                        <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="pixel_size">16</property>
                         <property name="icon_name">format-indent-less-symbolic</property>
@@ -562,6 +574,7 @@
                 <property name="can_focus">False</property>
                 <child>
                   <object class="GtkButton" id="insert_link_button">
+                    <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="focus_on_click">False</property>
                     <property name="receives_default">False</property>
@@ -570,6 +583,7 @@
                     <property name="always_show_image">True</property>
                     <child>
                       <object class="GtkImage" id="insert_link_image">
+                        <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="pixel_size">16</property>
                         <property name="icon_name">insert-link-symbolic</property>
@@ -584,6 +598,7 @@
                 </child>
                 <child>
                   <object class="GtkButton" id="insert_image_button">
+                    <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="focus_on_click">False</property>
                     <property name="receives_default">False</property>
@@ -592,6 +607,7 @@
                     <property name="always_show_image">True</property>
                     <child>
                       <object class="GtkImage">
+                        <property name="visible">True</property>
                         <property name="can_focus">False</property>
                         <property name="pixel_size">16</property>
                         <property name="icon_name">insert-image-symbolic</property>
@@ -625,6 +641,7 @@
                 <property name="always_show_image">True</property>
                 <child>
                   <object class="GtkImage" id="remove_format_image">
+                    <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="pixel_size">16</property>
                     <property name="icon_name">format-text-remove-symbolic</property>
@@ -648,6 +665,7 @@
                 <property name="always_show_image">True</property>
                 <child>
                   <object class="GtkImage" id="select_dictionary_image">
+                    <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="pixel_size">16</property>
                     <property name="icon_name">accessories-dictionary-symbolic</property>

@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
   <requires lib="gtk+" version="3.14"/>
+  <object class="GtkImage" id="send_image">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="icon_name">mail-send-symbolic</property>
+  </object>
   <template class="ComposerHeaderbar" parent="GtkHeaderBar">
     <property name="visible">True</property>
     <property name="can_focus">False</property>
@@ -46,6 +51,7 @@
         <property name="tooltip_text" translatable="yes">Attach File (Ctrl+T)</property>
         <child>
           <object class="GtkImage" id="new_message_attach_image">
+            <property name="visible">True</property>
             <property name="icon_name">mail-attachment-symbolic</property>
             <property name="pixel-size">16</property>
           </object>
@@ -69,6 +75,7 @@
             <property name="tooltip_text" translatable="yes">Attach File (Ctrl+T)</property>
             <child>
               <object class="GtkImage" id="conversation_attach_new_image">
+                <property name="visible">True</property>
                 <property name="icon_name">mail-attachment-symbolic</property>
                 <property name="pixel-size">16</property>
               </object>
@@ -85,6 +92,7 @@
             <property name="tooltip_text" translatable="yes">Include Original Attachments</property>
             <child>
               <object class="GtkImage" id="conversation_attach_original_image">
+                <property name="visible">True</property>
                 <property name="icon_name">edit-copy-symbolic</property>
                 <property name="pixel-size">16</property>
               </object>
@@ -130,6 +138,7 @@
             <property name="tooltip_text" translatable="yes">Detach (Ctrl+D)</property>
             <child>
               <object class="GtkImage" id="detach_end_image">
+                <property name="visible">True</property>
                 <property name="icon_name">detach-symbolic</property>
                 <property name="pixel-size">16</property>
               </object>
@@ -148,6 +157,7 @@
         <property name="focus_on_click">False</property>
         <property name="action_name">cmh.send</property>
         <property name="always_show_image">True</property>
+        <property name="image">send_image</property>
         <property name="use_underline">True</property>
         <property name="tooltip_text" translatable="yes">Send (Ctrl+Enter)</property>
         <property name="label" translatable="yes">_Send</property>
@@ -176,6 +186,7 @@
             <property name="tooltip_text" translatable="yes">Discard and Close</property>
             <child>
               <object class="GtkImage" id="discard_and_close_image">
+                <property name="visible">True</property>
                 <property name="icon_name">user-trash-symbolic</property>
                 <property name="pixel-size">16</property>
               </object>
@@ -192,6 +203,7 @@
             <property name="tooltip_text" translatable="yes">Save and Close</property>
             <child>
               <object class="GtkImage" id="save_and_close_image">
+                <property name="visible">True</property>
                 <property name="icon_name">document-save-symbolic</property>
                 <property name="pixel-size">16</property>
               </object>

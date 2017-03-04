@@ -35,6 +35,8 @@ public class EmailEntry : Gtk.Entry {
             text = (addresses == null) ? "" : addresses.to_rfc822_string();
             updating = false;
         });
+
+        show();
     }
 
     private void on_changed() {

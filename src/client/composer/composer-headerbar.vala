@@ -28,20 +28,19 @@ public class ComposerHeaderbar : Gtk.HeaderBar {
     private Gtk.Button new_message_attach_button;
     [GtkChild]
     private Gtk.Box conversation_attach_buttons;
-    [GtkChild]
-    private Gtk.Button send_button;
 
-    public ComposerHeaderbar(Configuration config) {
+    /** Fired when the user wants to expand a compact composer. */
+    public signal void expand_composer();
+
+    public ComposerHeaderbar(Configuration config, bool is_compact) {
         this.config = config;
-        recipients_button.clicked.connect(() => { state = ComposerWidget.ComposerState.INLINE; });
 
-        send_button.image = new Gtk.Image.from_icon_name("mail-send-symbolic", Gtk.IconSize.MENU);
-
-        bind_property("state", recipients_button, "visible", BindingFlags.SYNC_CREATE,
-            (binding, source_value, ref target_value) => {
-                target_value = (state == ComposerWidget.ComposerState.INLINE_COMPACT);
-                return true;
+        this.recipients_button.set_visible(is_compact);
+        this.recipients_button.clicked.connect(() => {
+                this.recipients_button.hide();
+                expand_composer();
             });
+
         bind_property("show-pending-attachments", new_message_attach_button, "visible",
             BindingFlags.SYNC_CREATE | BindingFlags.INVERT_BOOLEAN);
         bind_property("show-pending-attachments", conversation_attach_buttons, "visible",
@@ -49,12 +48,6 @@ public class ComposerHeaderbar : Gtk.HeaderBar {
 
         notify["decoration-layout"].connect(set_detach_button_side);
         realize.connect(set_detach_button_side);
-        notify["state"].connect((s, p) => {
-            if (state == ComposerWidget.ComposerState.DETACHED) {
-                notify["decoration-layout"].disconnect(set_detach_button_side);
-                detach_start.visible = detach_end.visible = false;
-            }
-        });
     }
 
     public void set_recipients(string label, string tooltip) {
@@ -62,8 +55,14 @@ public class ComposerHeaderbar : Gtk.HeaderBar {
         recipients_button.tooltip_text = tooltip;
     }
 
+    public void detached() {
+        notify["decoration-layout"].disconnect(set_detach_button_side);
+        this.recipients_button.hide();
+        this.detach_start.visible = this.detach_end.visible = false;
+    }
+
     private void set_detach_button_side() {
-        if(config.desktop_environment == Configuration.DesktopEnvironment.UNITY) {
+        if (config.desktop_environment == Configuration.DesktopEnvironment.UNITY) {
             detach_start.visible = false;
             detach_end.visible = true;
         } else {

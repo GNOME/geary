@@ -2283,7 +2283,6 @@ public class GearyController : Geary.BaseObject {
         }
         widget.destroy.connect(on_composer_widget_destroy);
         widget.link_activated.connect((uri) => { open_uri(uri); });
-        widget.show_all();
 
         // We want to keep track of the open composer windows, so we can allow the user to cancel
         // an exit without losing their data.

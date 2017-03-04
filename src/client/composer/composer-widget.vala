@@ -372,9 +372,8 @@ public class ComposerWidget : Gtk.EventBox {
 
 
     public ComposerWidget(Geary.Account account, ComposeType compose_type, Configuration config) {
-        this.config = config;
-        this.header = new ComposerHeaderbar(config);
         this.account = account;
+        this.config = config;
         this.compose_type = compose_type;
         if (this.compose_type == ComposeType.NEW_MESSAGE)
             this.state = ComposerState.NEW;
@@ -382,6 +381,17 @@ public class ComposerWidget : Gtk.EventBox {
             this.state = ComposerState.INLINE;
         else
             this.state = ComposerState.INLINE_COMPACT;
+
+        this.header = new ComposerHeaderbar(
+            config,
+            this.state == ComposerState.INLINE_COMPACT
+        );
+        this.header.expand_composer.connect(() => {
+                if (this.state == ComposerState.INLINE_COMPACT) {
+                    this.state = ComposerState.INLINE;
+                    update_composer_view();
+                }
+            });
 
         // Setup drag 'n drop
         const Gtk.TargetEntry[] target_entries = { { URI_LIST_MIME_TYPE, 0, 0 } };
@@ -391,18 +401,6 @@ public class ComposerWidget : Gtk.EventBox {
         add_events(Gdk.EventMask.KEY_PRESS_MASK | Gdk.EventMask.KEY_RELEASE_MASK);
 
         this.visible_on_attachment_drag_over.remove(this.visible_on_attachment_drag_over_child);
-        bind_property("state", recipients, "visible", BindingFlags.SYNC_CREATE,
-            (binding, source_value, ref target_value) => {
-                target_value = (this.state != ComposerState.INLINE_COMPACT);
-                return true;
-            });
-        BindingTransformFunc bind_not_inline = (binding, source_value, ref target_value) => {
-            target_value = (this.state != ComposerState.INLINE && state != ComposerState.PANED);
-            return true;
-        };
-        bind_property("state", this.subject_label, "visible", BindingFlags.SYNC_CREATE, bind_not_inline);
-        bind_property("state", this.subject_entry, "visible", BindingFlags.SYNC_CREATE, bind_not_inline);
-        notify["state"].connect((s, p) => { update_from_field(); });
 
         BindingTransformFunc set_toolbar_text = (binding, source_value, ref target_value) => {
                 if (draft_save_text == "" && can_delete_quote)
@@ -463,7 +461,6 @@ public class ComposerWidget : Gtk.EventBox {
             });
 
         embed_header();
-        bind_property("state", this.header, "state", BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
 
         // Listen to account signals to update from menu.
         Geary.Engine.instance.account_available.connect(() => {
@@ -514,6 +511,8 @@ public class ComposerWidget : Gtk.EventBox {
         chain.append(this.composer_toolbar);
         chain.append(this.attachments_box);
         this.composer_container.set_focus_chain(chain);
+
+        update_composer_view();
     }
 
     public override void destroy() {
@@ -595,9 +594,11 @@ public class ComposerWidget : Gtk.EventBox {
             }
         }
 
-        set_header_recipients();
-        update_from_field();
-        update_pending_attachments(this.pending_include, true);
+        if (this.state == ComposerState.INLINE_COMPACT)
+            set_compact_header_recipients();
+
+        update_composer_view();
+        update_attachments_view();
 
         string signature = yield load_signature(cancellable);
         this.editor.load_html(
@@ -999,14 +1000,6 @@ public class ComposerWidget : Gtk.EventBox {
         return email;
     }
 
-    public override void show_all() {
-        base.show_all();
-        // Now, hide elements that we don't want shown
-        update_from_field();
-        this.state = this.state;  // Triggers visibilities
-        show_attachments();
-    }
-
     public void change_compose_type(ComposeType new_type, Geary.Email? referred = null,
         string? quote = null) {
         if (referred != null && quote != null && quote != this.last_quote) {
@@ -1018,7 +1011,14 @@ public class ComposerWidget : Gtk.EventBox {
 
             if (!referred_ids.contains(referred.id)) {
                 add_recipients_and_ids(new_type, referred);
-                ensure_paned();
+
+                if (this.state != ComposerState.PANED &&
+                    this.state != ComposerState.DETACHED) {
+                    this.state = ComposerWidget.ComposerState.PANED;
+                    // XXX move the two lines below to the controller
+                    this.container.remove_composer();
+                    GearyApplication.instance.controller.main_window.conversation_viewer.do_compose(this);
+                }
             }
         } else if (new_type != this.compose_type) {
             bool recipients_modified = this.to_entry.modified || this.cc_entry.modified || this.bcc_entry.modified;
@@ -1055,6 +1055,7 @@ public class ComposerWidget : Gtk.EventBox {
             this.compose_type = new_type;
         }
 
+        update_composer_view();
         this.container.present();
         set_focus();
     }
@@ -1184,6 +1185,8 @@ public class ComposerWidget : Gtk.EventBox {
             GearyApplication.instance.config.compose_as_html);
 
         this.state = ComposerWidget.ComposerState.DETACHED;
+        this.header.detached();
+        update_composer_view();
         if (focus != null && focus.parent.visible) {
             ComposerWindow focus_win = focus.get_toplevel() as ComposerWindow;
             if (focus_win != null && focus_win == window)
@@ -1191,15 +1194,6 @@ public class ComposerWidget : Gtk.EventBox {
         } else {
             set_focus();
         }
-    }
-
-    public void ensure_paned() {
-        if (this.state == ComposerState.PANED || this.state == ComposerState.DETACHED)
-            return;
-        this.container.remove_composer();
-        GearyApplication.instance.controller.main_window.conversation_viewer
-            .do_compose(this);
-        this.state = ComposerWidget.ComposerState.PANED;
     }
 
     public void embed_header() {
@@ -1219,6 +1213,20 @@ public class ComposerWidget : Gtk.EventBox {
         // we want this behaviour to take precedence over the default
         // key handling
         return check_send_on_return(event) && base.key_press_event(event);
+    }
+
+    // Updates the composer's UI after its state has changed
+    private void update_composer_view() {
+        this.recipients.set_visible(this.state != ComposerState.INLINE_COMPACT);
+
+        bool not_inline = (this.state != ComposerState.INLINE &&
+                           this.state != ComposerState.INLINE_COMPACT);
+        this.subject_label.set_visible(not_inline);
+        this.subject_entry.set_visible(not_inline);
+
+        this.header.state = this.state;
+
+        update_from_field();
     }
 
     private async bool should_send() {
@@ -1433,6 +1441,15 @@ public class ComposerWidget : Gtk.EventBox {
         this.container.close_container();
     }
 
+    private void update_attachments_view() {
+        if (this.attached_files.size > 0 )
+            attachments_box.show_all();
+        else
+            attachments_box.hide();
+
+        update_pending_attachments(this.pending_include, true);
+    }
+
     // Both adds pending attachments and updates the UI if there are
     // any that were left out, that could have been added manually.
     private void update_pending_attachments(AttachPending include, bool do_add) {
@@ -1515,7 +1532,7 @@ public class ComposerWidget : Gtk.EventBox {
         box.pack_start(remove_button, false, false);
         remove_button.clicked.connect(() => remove_attachment(target, box));
 
-        show_attachments();
+        update_attachments_view();
     }
 
     private void add_inline_part(File target, string content_id)
@@ -1588,16 +1605,7 @@ public class ComposerWidget : Gtk.EventBox {
             }
         }
         
-        show_attachments();
-    }
-
-    private void show_attachments() {
-        if (this.attached_files.size > 0 )
-            attachments_box.show_all();
-        else
-            attachments_box.hide();
-
-        update_pending_attachments(this.pending_include, true);
+        update_attachments_view();
     }
 
     private bool check_send_on_return(Gdk.EventKey event) {
@@ -1626,27 +1634,25 @@ public class ComposerWidget : Gtk.EventBox {
         get_action(ACTION_SEND).set_enabled(this.to_entry.valid || this.cc_entry.valid || this.bcc_entry.valid);
     }
 
-    private void set_header_recipients() {
-        if (this.state == ComposerState.INLINE_COMPACT) {
-            bool tocc = !this.to_entry.empty && !this.cc_entry.empty,
-                ccbcc = !(this.to_entry.empty && this.cc_entry.empty) && !this.bcc_entry.empty;
-            string label = this.to_entry.buffer.text + (tocc ? ", " : "")
-                + this.cc_entry.buffer.text + (ccbcc ? ", " : "") + this.bcc_entry.buffer.text;
-            StringBuilder tooltip = new StringBuilder();
-            if (to_entry.addresses != null)
-                foreach(Geary.RFC822.MailboxAddress addr in this.to_entry.addresses)
-                    tooltip.append(_("To: ") + addr.get_full_address() + "\n");
-            if (cc_entry.addresses != null)
-                foreach(Geary.RFC822.MailboxAddress addr in this.cc_entry.addresses)
-                    tooltip.append(_("Cc: ") + addr.get_full_address() + "\n");
-            if (bcc_entry.addresses != null)
-                foreach(Geary.RFC822.MailboxAddress addr in this.bcc_entry.addresses)
-                    tooltip.append(_("Bcc: ") + addr.get_full_address() + "\n");
-            if (reply_to_entry.addresses != null)
-                foreach(Geary.RFC822.MailboxAddress addr in this.reply_to_entry.addresses)
-                    tooltip.append(_("Reply-To: ") + addr.get_full_address() + "\n");
-            this.header.set_recipients(label, tooltip.str.slice(0, -1));  // Remove trailing \n
-        }
+    private void set_compact_header_recipients() {
+        bool tocc = !this.to_entry.empty && !this.cc_entry.empty,
+            ccbcc = !(this.to_entry.empty && this.cc_entry.empty) && !this.bcc_entry.empty;
+        string label = this.to_entry.buffer.text + (tocc ? ", " : "")
+            + this.cc_entry.buffer.text + (ccbcc ? ", " : "") + this.bcc_entry.buffer.text;
+        StringBuilder tooltip = new StringBuilder();
+        if (to_entry.addresses != null)
+            foreach(Geary.RFC822.MailboxAddress addr in this.to_entry.addresses)
+                tooltip.append(_("To: ") + addr.get_full_address() + "\n");
+        if (cc_entry.addresses != null)
+            foreach(Geary.RFC822.MailboxAddress addr in this.cc_entry.addresses)
+                tooltip.append(_("Cc: ") + addr.get_full_address() + "\n");
+        if (bcc_entry.addresses != null)
+            foreach(Geary.RFC822.MailboxAddress addr in this.bcc_entry.addresses)
+                tooltip.append(_("Bcc: ") + addr.get_full_address() + "\n");
+        if (reply_to_entry.addresses != null)
+            foreach(Geary.RFC822.MailboxAddress addr in this.reply_to_entry.addresses)
+                tooltip.append(_("Reply-To: ") + addr.get_full_address() + "\n");
+        this.header.set_recipients(label, tooltip.str.slice(0, -1));  // Remove trailing \n
     }
 
     private void on_justify(SimpleAction action, Variant? param) {
@@ -1750,8 +1756,10 @@ public class ComposerWidget : Gtk.EventBox {
             this.reply_to_label.visible =
             this.reply_to_entry.visible = show_extended;
 
-        if (show_extended && this.state == ComposerState.INLINE_COMPACT)
+        if (show_extended && this.state == ComposerState.INLINE_COMPACT) {
             this.state = ComposerState.INLINE;
+            update_composer_view();
+        }
     }
 
     private void on_font_family(SimpleAction action, Variant? param) {
