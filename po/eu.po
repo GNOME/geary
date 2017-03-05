@@ -1,25 +1,26 @@
-# po/geary.pot
+# Basque translation for Geary
 # PO message string template file for Geary email client
 # Copyright 2016 Software Freedom Conservancy Inc.
 # This file is distributed under the GNU LGPL, version 2.1.
 #
 # Translators:
-# Iñaki Larrañaga Murgoitio <dooteo@zundan.com>, 2014.
+# Iñaki Larrañaga Murgoitio <dooteo@zundan.com>, 2014, 2017.
 msgid ""
 msgstr ""
-"Project-Id-Version: geary-0.4.1\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2014-07-21 11:07+0200\n"
-"PO-Revision-Date: 2014-07-21 11:13+0200\n"
+"Project-Id-Version: geary geary-0.11\n"
+"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
+"product=geary&keywords=I18N+L10N&component=internationalization\n"
+"POT-Creation-Date: 2016-12-15 00:05+0000\n"
+"PO-Revision-Date: 2017-03-05 00:20+0100\n"
 "Last-Translator: Iñaki Larrañaga Murgoitio <dooteo@zundan.com>\n"
-"Language-Team: Basque <librezale@librezale.org>\n"
+"Language-Team: Basque <librezale@librezale.eus>\n"
 "Language: eu\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "eu/)\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Lokalize 1.4\n"
+"X-Generator: Lokalize 1.5\n"
 
 #: ../desktop/geary.desktop.in.h:1 ../desktop/geary-autostart.desktop.in.h:1
 msgid "Geary"
@@ -46,120 +47,150 @@ msgstr "posta;helb.elek;helb.el.;"
 msgid "Compose Message"
 msgstr "Prestatu mezua"
 
-#: ../src/client/accounts/account-dialog-add-edit-pane.vala:48
+#: ../desktop/geary-attach.contract.in.h:1
+#| msgid "Send and receive email"
+msgid "Send by email"
+msgstr "Bidali posta elektronikoz"
+
+#: ../desktop/geary-attach.contract.in.h:2
+msgid "Send files using Geary"
+msgstr "Bidali fitxategiak Geary erabiliz"
+
+#: ../src/client/accounts/account-dialog-add-edit-pane.vala:51
 #: ../src/client/components/stock.vala:31
 msgid "_Save"
 msgstr "_Gorde"
 
-#: ../src/client/accounts/account-dialog-add-edit-pane.vala:48
+#: ../src/client/accounts/account-dialog-add-edit-pane.vala:51
 #: ../src/client/components/stock.vala:22
 msgid "_Add"
 msgstr "_Gehitu"
 
+#. reset/clear widgets
+#: ../src/client/accounts/account-dialog-edit-alternate-emails-pane.vala:124
+#, c-format
+msgid "Additional addresses for %s"
+msgstr "'%s'(r)en helbide gehigarriak"
+
 #. Sets min size.
-#: ../src/client/accounts/account-dialog.vala:19
+#: ../src/client/accounts/account-dialog.vala:21
 msgid "Accounts"
 msgstr "Kontuak"
 
+#. Copyright 2016 Software Freedom Conservancy Inc.
+#. *
+#. * This software is licensed under the GNU Lesser General Public License
+#. * (version 2.1 or later).  See the COPYING file in this distribution.
+#.
+#. Page for adding or editing an account.
 #. / Placeholder text indicating that the user should type their first name and last name
 #: ../src/client/accounts/add-edit-page.vala:10
 msgid "First Last"
 msgstr "First Last"
 
-#: ../src/client/accounts/add-edit-page.vala:228
-#, c-format
+#: ../src/client/accounts/add-edit-page.vala:233
 msgid "Welcome to Geary."
 msgstr "Ongi etorri Geary-ra."
 
-#: ../src/client/accounts/add-edit-page.vala:228
+#: ../src/client/accounts/add-edit-page.vala:233
 msgid "Enter your account information to get started."
 msgstr "Sartu zure kontuaren informazioa hasteko."
 
-#: ../src/client/accounts/add-edit-page.vala:247
+#: ../src/client/accounts/add-edit-page.vala:253
 msgid "2 weeks back"
 msgstr "2 aste atzera"
 
 #. IDs are # of days
-#: ../src/client/accounts/add-edit-page.vala:248
+#: ../src/client/accounts/add-edit-page.vala:254
 msgid "1 month back"
 msgstr "Hilabete 1 atzera"
 
-#: ../src/client/accounts/add-edit-page.vala:249
+#: ../src/client/accounts/add-edit-page.vala:255
 msgid "3 months back"
 msgstr "3 hilabete atzera"
 
-#: ../src/client/accounts/add-edit-page.vala:250
+#: ../src/client/accounts/add-edit-page.vala:256
 msgid "6 months back"
 msgstr "6 hilabete atzera"
 
-#: ../src/client/accounts/add-edit-page.vala:251
+#: ../src/client/accounts/add-edit-page.vala:257
 msgid "1 year back"
 msgstr "Urte 1 atzera"
 
-#: ../src/client/accounts/add-edit-page.vala:252
+#: ../src/client/accounts/add-edit-page.vala:258
 msgid "2 years back"
 msgstr "2 urte atzera"
 
-#: ../src/client/accounts/add-edit-page.vala:253
+#: ../src/client/accounts/add-edit-page.vala:259
 msgid "4 years back"
 msgstr "4 urte atzera"
 
 #. Separator
-#: ../src/client/accounts/add-edit-page.vala:255
+#: ../src/client/accounts/add-edit-page.vala:261
 msgid "Everything"
 msgstr "Dena"
 
-#: ../src/client/accounts/add-edit-page.vala:686
+#: ../src/client/accounts/add-edit-page.vala:280
+msgid "Edit"
+msgstr "Editatu"
+
+#: ../src/client/accounts/add-edit-page.vala:282
+#| msgid "_Previous"
+msgid "Preview"
+msgstr "Aurrebista"
+
+#: ../src/client/accounts/add-edit-page.vala:723
 msgid "Remem_ber passwords"
 msgstr "_Gogoratu pasahitzak"
 
-#: ../src/client/accounts/add-edit-page.vala:693 ../ui/login.glade.h:6
+#: ../src/client/accounts/add-edit-page.vala:730 ../ui/login.glade.h:7
 msgid "Remem_ber password"
 msgstr "_Gogoratu pasahitza"
 
-#: ../src/client/accounts/add-edit-page.vala:727
+#: ../src/client/accounts/add-edit-page.vala:764
 msgid "Unable to validate:\n"
 msgstr "Ezin da balidatu:\n"
 
-#: ../src/client/accounts/add-edit-page.vala:729
+#: ../src/client/accounts/add-edit-page.vala:766
 msgid "        &#8226; Invalid account nickname.\n"
 msgstr "        &#8226; Kontuaren goitizena baliogabea.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:732
+#: ../src/client/accounts/add-edit-page.vala:769
 msgid "        &#8226; Email address already added to Geary.\n"
 msgstr "        &#8226; Helbide elektronikoa jadanik Geary-ri gehituta.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:736
+#: ../src/client/accounts/add-edit-page.vala:773
 msgid "        &#8226; IMAP connection error.\n"
 msgstr "        &#8226; IMAP konexioaren errorea.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:739
+#: ../src/client/accounts/add-edit-page.vala:776
 msgid "        &#8226; IMAP username or password incorrect.\n"
 msgstr "        &#8226; Okerreko IMAP erabiltzaile-izena edo pasahitza.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:742
+#: ../src/client/accounts/add-edit-page.vala:779
 msgid "        &#8226; SMTP connection error.\n"
 msgstr "        &#8226; SMTP konexioaren errorea.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:745
+#: ../src/client/accounts/add-edit-page.vala:782
 msgid "        &#8226; SMTP username or password incorrect.\n"
 msgstr "        &#8226; Okerreko SMTP erabiltzaile-izena edo pasahitza.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:749
+#: ../src/client/accounts/add-edit-page.vala:786
 msgid "        &#8226; Connection error.\n"
 msgstr "        &#8226; Konexioaren errorea.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:753
+#: ../src/client/accounts/add-edit-page.vala:790
 msgid "        &#8226; Username or password incorrect.\n"
 msgstr "        &#8226; Okerreko erabiltzaile-izena edo pasahitza.\n"
 
 #: ../src/client/application/geary-application.vala:19
-msgid "Copyright 2011-2014 Yorba Foundation"
-msgstr "Copyright-a 2011-2014 Yorba Fundazioa"
+msgid "Copyright 2016 Software Freedom Conservancy Inc."
+msgstr "Copyright-a 2016 Software Freedom Conservancy Inc."
 
 #: ../src/client/application/geary-application.vala:21
-msgid "Visit the Yorba web site"
-msgstr "Bisitatu Yorba-ren webgunea"
+#| msgid "Visit the Yorba web site"
+msgid "Visit the Geary web site"
+msgstr "Bisitatu Geary-ren webgunea"
 
 #: ../src/client/application/geary-args.vala:10
 msgid "Start Geary with hidden main window"
@@ -211,199 +242,224 @@ msgid "Allow inspection of WebView"
 msgstr "Baimendu WebView aztertzea"
 
 #: ../src/client/application/geary-args.vala:26
+msgid "Revoke all server certificates with TLS warnings"
+msgstr "Zerbitzariaren TLS abisuak dituzten ziurtagiri guztiak errebokatu"
+
+#: ../src/client/application/geary-args.vala:27
 msgid "Display program version"
 msgstr "Bistaratu programaren bertsioa"
 
 #. This gives a command-line hint on how to open new composer windows with mailto:
-#: ../src/client/application/geary-args.vala:49
+#: ../src/client/application/geary-args.vala:51
 #, c-format
 msgid "Use %s to open a new composer window"
 msgstr "Erabili '%s' prestatzeko leiho berria irekitzeko"
 
-#: ../src/client/application/geary-args.vala:50
+#: ../src/client/application/geary-args.vala:52
 msgid "Please report comments, suggestions and bugs to:"
 msgstr "Bidali iruzkinak, iradokizunak eta eman akatsen berri hemen:"
 
 #. i18n: Command line arguments are invalid
-#: ../src/client/application/geary-args.vala:57
+#: ../src/client/application/geary-args.vala:59
 #, c-format
 msgid "Failed to parse command line options: %s\n"
 msgstr "Huts egin du komando-lerroaren aukerak aztertzean: %s\n"
 
-#: ../src/client/application/geary-args.vala:68
+#: ../src/client/application/geary-args.vala:70
 #, c-format
 msgid "Unrecognized command line option \"%s\"\n"
 msgstr "Komando-lerroaren '%s' aukera ezezaguna\n"
 
-#: ../src/client/application/geary-controller.vala:46
-msgid "_Delete"
-msgstr "E_zabatu"
+#: ../src/client/application/geary-controller.vala:61
+#| msgid "Move conversation"
+msgid "Delete conversation"
+msgstr "Ezabatu berriketa"
 
-#: ../src/client/application/geary-controller.vala:47
+#: ../src/client/application/geary-controller.vala:62
 msgid "Delete conversation (Shift+Delete)"
 msgstr "Ezabatu berriketa (Maius+Ezabatu)"
 
-#: ../src/client/application/geary-controller.vala:48
+#: ../src/client/application/geary-controller.vala:63
 msgid "Delete conversations (Shift+Delete)"
 msgstr "Ezabatu berriketa (Maius+Ezabatu)"
 
 #. This refers to the action ("move email to the trash"), not the Trash folder itself
-#: ../src/client/application/geary-controller.vala:52
-msgid "_Trash"
-msgstr "_Zakarrontzia"
-
-#: ../src/client/application/geary-controller.vala:53
-msgid "Move conversation to trash (Delete, Backspace)"
+#: ../src/client/application/geary-controller.vala:67
+#| msgid "Move conversation to trash (Delete, Backspace)"
+msgid "Move conversation to Trash (Delete, Backspace)"
 msgstr "Bota berriketa zakarrontzira (Ezabatu, Atzera tekla)"
 
-#: ../src/client/application/geary-controller.vala:54
-msgid "Move conversations to trash (Delete, Backspace)"
+#: ../src/client/application/geary-controller.vala:68
+#| msgid "Move conversations to trash (Delete, Backspace)"
+msgid "Move conversations to Trash (Delete, Backspace)"
 msgstr "Bota berriketak zakarrontzira (Ezabatu, Atzera tekla)"
 
 #. This refers to the action ("archive an email"), not the Archive folder itself
-#: ../src/client/application/geary-controller.vala:58
+#: ../src/client/application/geary-controller.vala:72
 msgid "_Archive"
 msgstr "_Artxiboa"
 
-#: ../src/client/application/geary-controller.vala:59
+#: ../src/client/application/geary-controller.vala:73
 msgid "Archive conversation (A)"
 msgstr "Artxibatu berriketa (A)"
 
-#: ../src/client/application/geary-controller.vala:60
+#: ../src/client/application/geary-controller.vala:74
 msgid "Archive conversations (A)"
 msgstr "Artxibatu berriketak (A)"
 
-#: ../src/client/application/geary-controller.vala:63
+#: ../src/client/application/geary-controller.vala:77
 msgid "Mark as S_pam"
 msgstr "Markatu _baztergarri gisa"
 
-#: ../src/client/application/geary-controller.vala:64
+#: ../src/client/application/geary-controller.vala:78
 msgid "Mark as not S_pam"
 msgstr "Markatu e_z-baztergarri gisa"
 
-#: ../src/client/application/geary-controller.vala:66
-#: ../src/client/application/geary-controller.vala:282
+#: ../src/client/application/geary-controller.vala:80
+#: ../src/client/application/geary-controller.vala:396
 msgid "Mark conversation"
 msgstr "Markatu berriketa"
 
-#: ../src/client/application/geary-controller.vala:67
+#: ../src/client/application/geary-controller.vala:81
 msgid "Mark conversations"
 msgstr "Markatu berriketak"
 
-#: ../src/client/application/geary-controller.vala:68
+#: ../src/client/application/geary-controller.vala:82
 msgid "Add label to conversation"
 msgstr "Gehitu etiketa berriketari"
 
-#: ../src/client/application/geary-controller.vala:69
+#: ../src/client/application/geary-controller.vala:83
 msgid "Add label to conversations"
 msgstr "Gehitu etiketa berriketei"
 
-#: ../src/client/application/geary-controller.vala:70
-#: ../src/client/application/geary-controller.vala:321
+#: ../src/client/application/geary-controller.vala:84
+#: ../src/client/application/geary-controller.vala:435
 msgid "Move conversation"
 msgstr "Aldatu berriketa lekuz"
 
-#: ../src/client/application/geary-controller.vala:71
+#: ../src/client/application/geary-controller.vala:85
 msgid "Move conversations"
 msgstr "Aldatu berriketak lekuz"
 
-#: ../src/client/application/geary-controller.vala:258
+#: ../src/client/application/geary-controller.vala:376
+#: ../ui/app_menu.interface.h:1
 msgid "A_ccounts"
 msgstr "K_ontuak"
 
-#: ../src/client/application/geary-controller.vala:263
-#: ../src/client/components/stock.vala:27
+#: ../src/client/application/geary-controller.vala:381
+#: ../src/client/components/stock.vala:27 ../ui/app_menu.interface.h:2
 msgid "_Preferences"
 msgstr "_Hobespenak"
 
-#: ../src/client/application/geary-controller.vala:267
-#: ../src/client/components/stock.vala:25
+#: ../src/client/application/geary-controller.vala:385
+#: ../src/client/components/stock.vala:25 ../ui/app_menu.interface.h:3
 msgid "_Help"
 msgstr "_Laguntza"
 
-#: ../src/client/application/geary-controller.vala:271
-#: ../src/client/components/stock.vala:21
+#: ../src/client/application/geary-controller.vala:389
+#: ../src/client/components/stock.vala:21 ../ui/app_menu.interface.h:4
 msgid "_About"
 msgstr "Honi _buruz"
 
-#: ../src/client/application/geary-controller.vala:275
-msgid "_Donate"
-msgstr "_Eman dirua"
-
-#: ../src/client/application/geary-controller.vala:279
-#: ../src/client/components/stock.vala:29
+#: ../src/client/application/geary-controller.vala:393
+#: ../src/client/components/stock.vala:29 ../ui/app_menu.interface.h:5
 msgid "_Quit"
 msgstr "I_rten"
 
-#: ../src/client/application/geary-controller.vala:284
+#: ../src/client/application/geary-controller.vala:398
 msgid "_Mark as..."
 msgstr "_Markatu honela..."
 
-#: ../src/client/application/geary-controller.vala:290
+#: ../src/client/application/geary-controller.vala:404
 msgid "Mark as _Read"
 msgstr "Markatu '_Irakurrita' gisa"
 
-#: ../src/client/application/geary-controller.vala:296
+#: ../src/client/application/geary-controller.vala:410
 msgid "Mark as _Unread"
 msgstr "Markatu i_rakurri gabeko gisa"
 
-#: ../src/client/application/geary-controller.vala:302
+#: ../src/client/application/geary-controller.vala:416
 msgid "_Star"
 msgstr "_Izarra"
 
-#: ../src/client/application/geary-controller.vala:307
+#: ../src/client/application/geary-controller.vala:421
 msgid "U_nstar"
 msgstr "Ke_ndu izarra"
 
-#: ../src/client/application/geary-controller.vala:317
+#: ../src/client/application/geary-controller.vala:431
 msgid "Add label"
 msgstr "Gehitu etiketa"
 
-#: ../src/client/application/geary-controller.vala:318
+#: ../src/client/application/geary-controller.vala:432
 msgid "_Label"
 msgstr "_Etiketa"
 
-#: ../src/client/application/geary-controller.vala:322
+#: ../src/client/application/geary-controller.vala:436
 msgid "_Move"
 msgstr "Aldatu _lekuz"
 
-#: ../src/client/application/geary-controller.vala:326
+#: ../src/client/application/geary-controller.vala:440
 msgid "Compose new message (Ctrl+N, N)"
 msgstr "Prestatu mezu berria (Ktrl+N, N)"
 
 #. Reply to a message.
-#: ../src/client/application/geary-controller.vala:330
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1574
+#: ../src/client/application/geary-controller.vala:444
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1873
 msgid "_Reply"
 msgstr "_Erantzun"
 
-#: ../src/client/application/geary-controller.vala:331
+#: ../src/client/application/geary-controller.vala:445
 msgid "Reply (Ctrl+R, R)"
 msgstr "Erantzun (Ktrl+R, R)"
 
-#: ../src/client/application/geary-controller.vala:335
+#: ../src/client/application/geary-controller.vala:449
 msgid "R_eply All"
 msgstr "Erantzun _denei"
 
-#: ../src/client/application/geary-controller.vala:336
+#: ../src/client/application/geary-controller.vala:450
 msgid "Reply all (Ctrl+Shift+R, Shift+R)"
 msgstr "Erantzun _denei (Ktrl+Maius+R, Maius+R)"
 
 #. Forward a message.
-#: ../src/client/application/geary-controller.vala:341
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1584
+#: ../src/client/application/geary-controller.vala:455
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1883
 msgid "_Forward"
 msgstr "A_urrera"
 
-#: ../src/client/application/geary-controller.vala:342
+#: ../src/client/application/geary-controller.vala:456
 msgid "Forward (Ctrl+L, F)"
 msgstr "Aurrera (Ktrl+L, F)"
 
-#: ../src/client/application/geary-controller.vala:625
+#: ../src/client/application/geary-controller.vala:495
+msgid "Empty"
+msgstr "Hustu"
+
+#: ../src/client/application/geary-controller.vala:496
+msgid "Empty Spam or Trash folders"
+msgstr "Hustu Baztergarriak edo Zakarrontzia karpetak"
+
+#: ../src/client/application/geary-controller.vala:500
+msgid "Empty _Spam…"
+msgstr "Hustu _Baztergarriak…"
+
+#: ../src/client/application/geary-controller.vala:504
+msgid "Empty _Trash…"
+msgstr "Hustu _Zakarrontzia…"
+
+#. No callback is connected, since we bind the toggle button to the search bar visibility
+#: ../src/client/application/geary-controller.vala:537
+msgid "Toggle search bar"
+msgstr "Txandakatu bilaketa-barra"
+
+#: ../src/client/application/geary-controller.vala:744
+msgid "Unable to store server trust exception"
+msgstr "Ezin da zerbitzariaren salbuespena gorde"
+
+#: ../src/client/application/geary-controller.vala:981
 msgid "Your settings are insecure"
 msgstr "Zure ezarpenak ez dira seguruak"
 
-#: ../src/client/application/geary-controller.vala:626
+#: ../src/client/application/geary-controller.vala:982
 msgid ""
 "Your IMAP and/or SMTP settings do not specify SSL or TLS.  This means your "
 "username and password could be read by another person on the network.  Are "
@@ -413,17 +469,29 @@ msgstr ""
 "izena eta pasahitza sareko beste pertsona batek irakur ditzakeela adierazten "
 "du honek. Ziur zaude hau nahi duzula?"
 
-#: ../src/client/application/geary-controller.vala:627
+#: ../src/client/application/geary-controller.vala:983
 msgid "Co_ntinue"
 msgstr "_Jarraitu"
 
+#: ../src/client/application/geary-controller.vala:1030
+msgid "Error connecting to the server"
+msgstr "Errorea zerbitzariarekin konektatzean"
+
+#: ../src/client/application/geary-controller.vala:1031
+msgid ""
+"Geary encountered an error while connecting to the server.  Please try again "
+"in a few moments."
+msgstr ""
+"Geary-k errore bat aurkitu du zerbitzariarekin konektatzean. Saia "
+"zaitez berriro geroago."
+
 #. / Displayed in the space-limited status bar when a message fails to be sent due to error.
-#: ../src/client/application/geary-controller.vala:705
+#: ../src/client/application/geary-controller.vala:1068
 #: ../src/client/components/status-bar.vala:29
 msgid "Error sending email"
 msgstr "Errorea mezua bidaltzean"
 
-#: ../src/client/application/geary-controller.vala:706
+#: ../src/client/application/geary-controller.vala:1069
 msgid ""
 "Geary encountered an error sending an email.  If the problem persists, "
 "please manually delete the email from your Outbox folder."
@@ -433,12 +501,12 @@ msgstr ""
 
 #. Displayed in the space-limited status bar when a message fails to be uploaded
 #. to Sent Mail after being sent.
-#: ../src/client/application/geary-controller.vala:710
+#: ../src/client/application/geary-controller.vala:1073
 #: ../src/client/components/status-bar.vala:33
 msgid "Error saving sent mail"
 msgstr "Errorea bidalitako mezua gordetzean"
 
-#: ../src/client/application/geary-controller.vala:711
+#: ../src/client/application/geary-controller.vala:1074
 msgid ""
 "Geary encountered an error saving a sent message to Sent Mail.  The message "
 "will stay in your Outbox folder until you delete it."
@@ -446,16 +514,19 @@ msgstr ""
 "Errorea gertatu da bidalitako mezua Bidalita karpetan gordetzean. Arazoak "
 "jarraitzen badu, ezabatu eskuz mezua zure Irteera karpetatik."
 
-#: ../src/client/application/geary-controller.vala:780
+#: ../src/client/application/geary-controller.vala:1143
 msgid "Labels"
 msgstr "Etiketak"
 
-#: ../src/client/application/geary-controller.vala:792
+#. give the user two options: reset the Account local store, or exit Geary.  A third
+#. could be done to leave the Account in an unopened state, but we don't currently
+#. have provisions for that.
+#: ../src/client/application/geary-controller.vala:1155
 #, c-format
 msgid "Unable to open the database for %s"
 msgstr "Ezin da '%s'(r)en datu-basea ireki"
 
-#: ../src/client/application/geary-controller.vala:793
+#: ../src/client/application/geary-controller.vala:1156
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -479,20 +550,20 @@ msgstr ""
 "Datu-basea berreraikitzean lokaleko mezu guztiak (beraien eranskinekin) "
 "ezabatzea dakar. <b>Zerbitzariko zure mezuak ez dute eraginik jasoko.</b>"
 
-#: ../src/client/application/geary-controller.vala:795
+#: ../src/client/application/geary-controller.vala:1158
 msgid "_Rebuild"
 msgstr "_Berreraiki"
 
-#: ../src/client/application/geary-controller.vala:795
+#: ../src/client/application/geary-controller.vala:1158
 msgid "E_xit"
 msgstr "I_rten"
 
-#: ../src/client/application/geary-controller.vala:804
+#: ../src/client/application/geary-controller.vala:1167
 #, c-format
 msgid "Unable to rebuild database for \"%s\""
 msgstr "Ezin da '%s'(r)en datu-basea berreraiki"
 
-#: ../src/client/application/geary-controller.vala:805
+#: ../src/client/application/geary-controller.vala:1168
 #, c-format
 msgid ""
 "Error during rebuild:\n"
@@ -503,14 +574,16 @@ msgstr ""
 "\n"
 "%s"
 
-#: ../src/client/application/geary-controller.vala:827
-#: ../src/client/application/geary-controller.vala:837
-#: ../src/client/application/geary-controller.vala:848
+#. some other problem opening the account ... as with other flow path, can't run
+#. Geary today with an account in unopened state, so have to exit
+#: ../src/client/application/geary-controller.vala:1190
+#: ../src/client/application/geary-controller.vala:1200
+#: ../src/client/application/geary-controller.vala:1211
 #, c-format
 msgid "Unable to open local mailbox for %s"
 msgstr "Ezin da '%s'(r)en lokaleko postontzia ireki"
 
-#: ../src/client/application/geary-controller.vala:828
+#: ../src/client/application/geary-controller.vala:1191
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -529,7 +602,7 @@ msgstr ""
 "\n"
 "%s"
 
-#: ../src/client/application/geary-controller.vala:838
+#: ../src/client/application/geary-controller.vala:1201
 msgid ""
 "The version number of the local mail database is formatted for a newer "
 "version of Geary. Unfortunately, the database cannot be \"rolled back\" to "
@@ -543,7 +616,7 @@ msgstr ""
 "\n"
 "Instalatu Geary-ren azken bertsioa eta saiatu berriro."
 
-#: ../src/client/application/geary-controller.vala:849
+#: ../src/client/application/geary-controller.vala:1212
 msgid ""
 "There was an error opening the local account. This is probably due to "
 "connectivity issues.\n"
@@ -555,23 +628,28 @@ msgstr ""
 "\n"
 "Egiaztatu sareko konexioa eta berrabiarazi Geary."
 
-#: ../src/client/application/geary-controller.vala:1356
+#: ../src/client/application/geary-controller.vala:1723
 #, c-format
 msgid "About %s"
 msgstr "%s(r)i buruz"
 
 #. / Translators: add your name and email address to receive credit in the About dialog
 #. / For example: Yamada Taro <yamada.taro@example.com>
-#: ../src/client/application/geary-controller.vala:1359
+#: ../src/client/application/geary-controller.vala:1726
 msgid "translator-credits"
 msgstr "Iñaki Larrañaga Murgoitio <dooteo@zundan.com>"
 
-#: ../src/client/application/geary-controller.vala:1623
+#: ../src/client/application/geary-controller.vala:1984
+#| msgid "Underline (Ctrl+U)"
+msgid "Undo move (Ctrl+Z)"
+msgstr "Desegin lekuz aldatzea (Ktrl+U)"
+
+#: ../src/client/application/geary-controller.vala:1994
 #, c-format
 msgid "Are you sure you want to open \"%s\"?"
 msgstr "Ziur zaude '%s' ireki nahi duzula?"
 
-#: ../src/client/application/geary-controller.vala:1624
+#: ../src/client/application/geary-controller.vala:1995
 msgid ""
 "Attachments may cause damage to your system if opened.  Only open files from "
 "trusted sources."
@@ -579,16 +657,16 @@ msgstr ""
 "Eranskinek kalteak sor ditzakete sisteman irekitzen badira. Iturburu "
 "fidagarrietako fitxategiak bakarrik ireki."
 
-#: ../src/client/application/geary-controller.vala:1625
+#: ../src/client/application/geary-controller.vala:1996
 msgid "Don't _ask me again"
 msgstr "_Ez galdetu berriro"
 
-#: ../src/client/application/geary-controller.vala:1643
+#: ../src/client/application/geary-controller.vala:2014
 #, c-format
 msgid "A file named \"%s\" already exists.  Do you want to replace it?"
 msgstr "'%s' izeneko fitxategia badago lehendik. Ordeztea nahi duzu?"
 
-#: ../src/client/application/geary-controller.vala:1645
+#: ../src/client/application/geary-controller.vala:2016
 #, c-format
 msgid ""
 "The file already exists in \"%s\".  Replacing it will overwrite its contents."
@@ -596,23 +674,65 @@ msgstr ""
 "'%s'(e)n badago fitxategia lehendik. Hau ordeztean bere eduki guztia "
 "gainidatziko da."
 
-#: ../src/client/application/geary-controller.vala:1648
+#: ../src/client/application/geary-controller.vala:2019
 msgid "_Replace"
 msgstr "_Ordeztu"
 
-#: ../src/client/application/geary-controller.vala:1915
+#. Find out what to do with the inline composers.
+#. TODO: Remove this in favor of automatically saving drafts
+#: ../src/client/application/geary-controller.vala:2317
 msgid "Close open draft messages?"
 msgstr "Itxi irekitako mezu zirriborroak?"
 
-#: ../src/client/application/geary-controller.vala:2024
+#: ../src/client/application/geary-controller.vala:2447
+#, c-format
+msgid "Empty all email from your %s folder?"
+msgstr "Hustu '%s' karpetako mezu guztiak?"
+
+#: ../src/client/application/geary-controller.vala:2448
+msgid "This removes the email from Geary and your email server."
+msgstr "Honek mezuak Geary-tik eta zure posta-zerbitzaritik ezabatzen ditu."
+
+#: ../src/client/application/geary-controller.vala:2449
+#| msgid "\"%s\" could not be found."
+msgid "This cannot be undone."
+msgstr "Hau ezin da desegin."
+
+#: ../src/client/application/geary-controller.vala:2450
+#, c-format
+msgid "Empty %s"
+msgstr "Hustu '%s'"
+
+#: ../src/client/application/geary-controller.vala:2467
+#, c-format
+#| msgid "Error saving"
+msgid "Error emptying %s"
+msgstr "Errorea '%s' hustean"
+
+#: ../src/client/application/geary-controller.vala:2497
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Mezu hau betirako ezabatzea nahi duzu?"
 msgstr[1] "Mezu hauek betirako ezabatzea nahi dituzu?"
 
-#: ../src/client/application/geary-controller.vala:2026
+#: ../src/client/application/geary-controller.vala:2499
 msgid "Delete"
 msgstr "Ezabatu"
+
+#: ../src/client/application/geary-controller.vala:2530
+#| msgid "Underline (Ctrl+U)"
+msgid "Undo archive (Ctrl+Z)"
+msgstr "Desegin artxibatzea (Ktrl+Z)"
+
+#: ../src/client/application/geary-controller.vala:2545
+#| msgid "Unquote text (Ctrl+[)"
+msgid "Undo trash (Ctrl+Z)"
+msgstr "Desegin zakarrontzira botatzea (Ktrl+Z)"
+
+#: ../src/client/application/geary-controller.vala:2598
+#| msgid "Underline (Ctrl+U)"
+msgid "Undo (Ctrl+Z)"
+msgstr "Desegin (Ktrl+Z)"
 
 #: ../src/client/components/conversation-find-bar.vala:214
 #, c-format
@@ -632,48 +752,48 @@ msgstr[1] "%i bat datoz (doituta)"
 msgid "not found"
 msgstr "ez da aurkitu"
 
-#: ../src/client/components/main-toolbar.vala:11
+#: ../src/client/components/main-window.vala:436
+#, c-format
+msgid "%s (%d)"
+msgstr "%s (%d)"
+
+#: ../src/client/components/search-bar.vala:10
 #: ../src/client/folder-list/folder-list-search-branch.vala:38
 #: ../src/engine/api/geary-special-folder-type.vala:51
 msgid "Search"
 msgstr "Bilatu"
 
-#: ../src/client/components/main-toolbar.vala:78
+#. Search entry.
+#: ../src/client/components/search-bar.vala:25
 msgid "Search all mail in account for keywords (Ctrl+S)"
 msgstr "Bilatu kontuaren mezu guztietan gako-hitzak (Ktrl+S)"
 
-#: ../src/client/components/main-toolbar.vala:212
+#: ../src/client/components/search-bar.vala:118
 #, c-format
 msgid "Indexing %s account"
 msgstr "'%s' kontua indexatzen"
 
-#: ../src/client/components/main-toolbar.vala:223
+#: ../src/client/components/search-bar.vala:129
 #: ../src/client/folder-list/folder-list-search-branch.vala:39
 #, c-format
 msgid "Search %s account"
 msgstr "Bilatu '%s' kontua"
-
-#: ../src/client/components/main-window.vala:305
-#, c-format
-msgid "%s (%d)"
-msgstr "%s (%d)"
 
 #. / Displayed in the space-limited status bar while a message is in the process of being sent.
 #: ../src/client/components/status-bar.vala:26
 msgid "Sending..."
 msgstr "Bidaltzen..."
 
-#: ../src/client/components/stock.vala:18
-#: ../ui/account_cannot_remove.glade.h:3
+#: ../src/client/components/stock.vala:18 ../ui/account_cannot_remove.glade.h:3
 msgid "_OK"
 msgstr "_Ados"
 
-#: ../src/client/components/stock.vala:19 ../ui/remove_confirm.glade.h:5
+#: ../src/client/components/stock.vala:19 ../ui/edit_alternate_emails.glade.h:3
+#: ../ui/password-dialog.glade.h:5 ../ui/remove_confirm.glade.h:5
 msgid "_Cancel"
 msgstr "_Utzi"
 
-#: ../src/client/components/stock.vala:23 ../ui/account_list.glade.h:4
-#: ../ui/preferences.glade.h:2
+#: ../src/client/components/stock.vala:23
 msgid "_Close"
 msgstr "It_xi"
 
@@ -695,7 +815,7 @@ msgstr "_Kendu"
 
 #. Select all.
 #: ../src/client/components/stock.vala:32
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1042
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1335
 msgid "Select _All"
 msgstr "Hautatu _dena"
 
@@ -703,278 +823,294 @@ msgstr "Hautatu _dena"
 msgid "_Keep"
 msgstr "_Mantendu"
 
-#: ../src/client/composer/composer-widget.vala:57
+#: ../src/client/composer/composer-widget.vala:73
 msgid "Saved"
 msgstr "Gordeta"
 
-#: ../src/client/composer/composer-widget.vala:58
+#: ../src/client/composer/composer-widget.vala:74
 msgid "Saving"
 msgstr "Gordetzen"
 
-#: ../src/client/composer/composer-widget.vala:59
+#: ../src/client/composer/composer-widget.vala:75
 msgid "Error saving"
 msgstr "Errorea gordetzean"
 
-#. / A list of keywords, separated by pipe ("|") characters, that suggest an attachment
-#: ../src/client/composer/composer-widget.vala:106
-msgid "attach|enclosed|enclosing|cover letter"
-msgstr "eranskina|inguratua|inguratzea|gutun-azala"
+#: ../src/client/composer/composer-widget.vala:76
+msgid "Press Backspace to delete quote"
+msgstr "Sakatu 'Atzera tekla' aipua ezabatzeko"
 
-#: ../src/client/composer/composer-widget.vala:823
-msgid "Do you want to discard the unsaved message?"
-msgstr "Gorde gabeko mezua baztertzea nahi duzu?"
+#: ../src/client/composer/composer-widget.vala:77
+msgid "New Message"
+msgstr "Mezu berria"
 
-#: ../src/client/composer/composer-widget.vala:826
-#: ../src/client/composer/composer-widget.vala:830
+#. A list of keywords, separated by pipe ("|") characters, that suggest an attachment; since
+#. this is full-word checking, include all variants of each word.  No spaces are allowed.
+#: ../src/client/composer/composer-widget.vala:138
+msgid ""
+"attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|"
+"enclosing|encloses|enclosure|enclosures"
+msgstr "eranskina|eransketa|eranskinak|eransketak"
+
+#: ../src/client/composer/composer-widget.vala:1114
+#: ../src/client/composer/composer-widget.vala:1118
 msgid "Do you want to discard this message?"
 msgstr "Mezu hau baztertzea nahi duzu?"
 
-#: ../src/client/composer/composer-widget.vala:911
+#: ../src/client/composer/composer-widget.vala:1274
 msgid "Send message with an empty subject and body?"
 msgstr "Bidali gairik eta gorputzik gabeko mezua?"
 
-#: ../src/client/composer/composer-widget.vala:913
+#: ../src/client/composer/composer-widget.vala:1276
 msgid "Send message with an empty subject?"
 msgstr "Bidali gairik gabeko mezua?"
 
-#: ../src/client/composer/composer-widget.vala:915
+#: ../src/client/composer/composer-widget.vala:1278
 msgid "Send message with an empty body?"
 msgstr "Bidali gorputzik gabeko mezua?"
 
-#: ../src/client/composer/composer-widget.vala:917
+#: ../src/client/composer/composer-widget.vala:1280
 msgid "Send message without an attachment?"
 msgstr "Bidali eranskinik gabeko mezua?"
 
-#: ../src/client/composer/composer-widget.vala:1100
+#: ../src/client/composer/composer-widget.vala:1542
 msgid "Cannot add attachment"
 msgstr "Ezin da eranskina gehitu"
 
-#: ../src/client/composer/composer-widget.vala:1111
+#: ../src/client/composer/composer-widget.vala:1553
 #, c-format
 msgid "\"%s\" could not be found."
 msgstr "Ezin izan da '%s' aurkitu."
 
-#: ../src/client/composer/composer-widget.vala:1118
+#: ../src/client/composer/composer-widget.vala:1560
 #, c-format
 msgid "\"%s\" is a folder."
 msgstr "'%s' karpeta da."
 
-#: ../src/client/composer/composer-widget.vala:1125
+#: ../src/client/composer/composer-widget.vala:1567
 #, c-format
 msgid "\"%s\" is an empty file."
 msgstr "'%s' fitxategi hutsa da."
 
-#: ../src/client/composer/composer-widget.vala:1139
+#: ../src/client/composer/composer-widget.vala:1581
 #, c-format
 msgid "\"%s\" could not be opened for reading."
 msgstr "Ezin izan da '%s' irakurtzeko ireki."
 
-#: ../src/client/composer/composer-widget.vala:1146
+#: ../src/client/composer/composer-widget.vala:1588
 #, c-format
 msgid "\"%s\" already attached for delivery."
 msgstr "'%s' jadanik bidaltzeko erantsita dago."
 
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
-#: ../src/client/composer/composer-widget.vala:1155
+#: ../src/client/composer/composer-widget.vala:1597
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: ../src/client/composer/composer-widget.vala:1215
+#: ../src/client/composer/composer-widget.vala:1657
 msgid "To: "
 msgstr "Nori: "
 
-#: ../src/client/composer/composer-widget.vala:1218
+#: ../src/client/composer/composer-widget.vala:1660
 msgid "Cc: "
 msgstr "Cc: "
 
-#: ../src/client/composer/composer-widget.vala:1221
+#: ../src/client/composer/composer-widget.vala:1663
 msgid "Bcc: "
 msgstr "Bcc: "
 
-#: ../src/client/composer/composer-widget.vala:1438
+#: ../src/client/composer/composer-widget.vala:1666
+#| msgid "_Reply"
+msgid "Reply-To: "
+msgstr "Erantzun honi: "
+
+#: ../src/client/composer/composer-widget.vala:1899
 msgid "Select Color"
 msgstr "Hautatu kolorea"
 
+#. Displayed in the From dropdown to indicate an "alternate email address"
+#. for an account.  The first printf argument will be the alternate email
+#. address, and the second will be the account's primary email address.
+#: ../src/client/composer/composer-widget.vala:2334
+#, c-format
+msgid "%1$s via %2$s"
+msgstr "%1$s (%2$s bidez)"
+
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: ../src/client/composer/composer-widget.vala:1884
+#: ../src/client/composer/composer-widget.vala:2376
 msgid "_From:"
 msgstr "_Nork:"
-
-#. Composer label (without mnemonic underscore) for the account selector
-#. when choosing what address to send a message from.
-#. Geary account mail will be sent from
-#: ../src/client/composer/composer-widget.vala:1900
-#: ../src/client/conversation-viewer/conversation-viewer.vala:635
-#: ../ui/composer.glade.h:48
-msgid "From:"
-msgstr "Nork:"
-
-#: ../src/client/composer/composer-window.vala:10
-msgid "New Message"
-msgstr "Mezu berria"
 
 #: ../src/client/conversation-list/formatted-conversation-data.vala:11
 msgid "Me"
 msgstr "Ni"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:260
+#: ../src/client/conversation-viewer/conversation-viewer.vala:414
 msgid "No conversations selected."
 msgstr "Ez da berriketarik hautatu."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:262
+#: ../src/client/conversation-viewer/conversation-viewer.vala:416
 #, c-format
 msgid "%u conversation selected."
 msgid_plural "%u conversations selected."
 msgstr[0] "Berriketa %u hautatuta."
 msgstr[1] "%u berriketa hautatuta."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:291
+#: ../src/client/conversation-viewer/conversation-viewer.vala:446
 msgid "No search results found."
 msgstr "Ez da bilaketaren emaitzarik aurkitu."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:293
+#: ../src/client/conversation-viewer/conversation-viewer.vala:448
 msgid "No conversations in folder."
 msgstr "Ez dago berriketarik karpetan."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:534
+#: ../src/client/conversation-viewer/conversation-viewer.vala:714
 msgid "This message contains remote images."
 msgstr "Mezu honek urruneko irudiak ditu."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:534
+#: ../src/client/conversation-viewer/conversation-viewer.vala:714
 msgid "Show Images"
 msgstr "Erakutsi irudiak"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:535
+#: ../src/client/conversation-viewer/conversation-viewer.vala:715
 msgid "Always Show From Sender"
 msgstr "Erakutsi beti bidaltzailetik"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:559
+#: ../src/client/conversation-viewer/conversation-viewer.vala:739
 msgid "Edit Draft"
 msgstr "Editatu zirriborroa"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:638
+#: ../src/client/conversation-viewer/conversation-viewer.vala:815
+msgid "From:"
+msgstr "Nork:"
+
+#: ../src/client/conversation-viewer/conversation-viewer.vala:818
 msgid "To:"
 msgstr "Nori:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:641
+#: ../src/client/conversation-viewer/conversation-viewer.vala:821
 msgid "Cc:"
 msgstr "Cc:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:644
+#: ../src/client/conversation-viewer/conversation-viewer.vala:824
 msgid "Bcc:"
 msgstr "Bcc:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:647
+#: ../src/client/conversation-viewer/conversation-viewer.vala:827
 msgid "Subject:"
 msgstr "Gaia:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:650
+#: ../src/client/conversation-viewer/conversation-viewer.vala:830
 msgid "Date:"
 msgstr "Data:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:857
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1150
 #, c-format
 msgid "%u read message"
 msgid_plural "%u read messages"
 msgstr[0] "Mezu %u irakurrita"
 msgstr[1] "%u mezu irakurrita"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:989
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1282
 #, c-format
 msgid "This message was sent successfully, but could not be saved to %s."
 msgstr "Mezu hori ongi bidali da, baina ez da '%s'(e)n gorde."
 
 #. Add a menu item for copying the current selection.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1015
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1308
 #: ../ui/composer.glade.h:4
 msgid "_Copy"
 msgstr "_Kopiatu"
 
 #. Add a menu item for copying the address.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1023
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1316
 msgid "Copy _Email Address"
 msgstr "Kopiatu _helbide elektronikoa"
 
 #. Add a menu item for copying the link.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1028
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1321
 #: ../ui/composer.glade.h:17
 msgid "Copy _Link"
 msgstr "Kopiatu _esteka"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1036
+#. Select message.
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1329
 msgid "Select _Message"
 msgstr "Hautatu _mezua"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1048
+#. Inspect.
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1341
 msgid "_Inspect"
 msgstr "_Aztertu"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1274
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1572
 msgid "This link appears to go to"
 msgstr "Esteka hori hona bideratzen duela dirudi:"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1275
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1573
 msgid "but actually goes to"
 msgstr "baina benetan hona zuzentzen du:"
 
 #. If href doesn't look like a URL, something is fishy, so warn the user
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1330
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1628
 msgid " (Invalid?)"
 msgstr " (baliogabea?)"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1522
-msgid "_Save As..."
-msgstr "Gorde _honela..."
-
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1527
-msgid "Save All A_ttachments..."
-msgstr "Gorde eranskin _guztiak..."
-
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1541
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1734
 msgid "_Save Image As..."
 msgstr "Gorde irudia _honela..."
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1564
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1838
+msgid "_Save As..."
+msgstr "Gorde _honela..."
+
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1843
+msgid "Save All A_ttachments..."
+msgstr "Gorde eranskin _guztiak..."
+
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1863
 msgid "Save A_ttachment..."
 msgid_plural "Save All A_ttachments..."
 msgstr[0] "Gorde _eranskina..."
 msgstr[1] "Gorde _eranskin guztiak..."
 
 #. Reply to all on a message.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1579
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1878
 msgid "Reply to _All"
 msgstr "Erantzun g_uztiei"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1596
+#. Mark as read/unread.
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1895
 msgid "_Mark as Read"
 msgstr "_Markatu irakurritako gisa"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1600
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1899
 msgid "_Mark as Unread"
 msgstr "_Markatu 'Irakurri gabea'"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1606
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1905
 msgid "Mark Unread From _Here"
 msgstr "Markatu irakurri gabe _hemendik"
 
+#. Separator.
 #. View original message source.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1621
+#: ../src/client/conversation-viewer/conversation-viewer.vala:1920
 msgid "_View Source"
 msgstr "Ikusi i_turburua"
 
+#. Generate the attachment table.
 #. / Placeholder filename for attachments with no filename.
-#: ../src/client/conversation-viewer/conversation-viewer.vala:1915
-#: ../src/engine/rfc822/rfc822-utils.vala:327
+#: ../src/client/conversation-viewer/conversation-viewer.vala:2245
+#: ../src/engine/rfc822/rfc822-utils.vala:392
 msgid "none"
 msgstr "bat ere ez"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:2045
+#: ../src/client/conversation-viewer/conversation-viewer.vala:2380
 msgid "Failed to open default text editor."
 msgstr "Huts egin du testuaren editore lehenetsia irekitzean."
 
-#: ../src/client/conversation-viewer/conversation-web-view.vala:321
+#: ../src/client/conversation-viewer/conversation-web-view.vala:319
 #, c-format
 msgid "%s - Conversation Inspector"
 msgstr "%s - bihurketaren ikustatzailea"
@@ -987,9 +1123,95 @@ msgstr "Aukeratu fitxategia"
 msgid "_Attach"
 msgstr "_Erantsi"
 
+#: ../src/client/dialogs/certificate-warning-dialog.vala:33
+#, c-format
+msgid "Untrusted Connection: %s"
+msgstr "Konexio ez-fidagarria: %s"
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:36
+#, c-format
+msgid "The identity of the %s mail server at %s:%u could not be verified."
+msgstr "Ezin izan da '%2$s:%3$u'(e)ko '%1$s' posta-zerbitzariaren identitatea"
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:44
+msgid ""
+"Selecting \"Trust This Server\" or \"Always Trust This Server\" may cause "
+"your username and password to be transmitted insecurely."
+msgstr ""
+"\"Fidatu zerbitzari honetaz\" edo \"Fidatu zerbitzari honetaz beti\" "
+"hautatzek "
+"zure erabiltzaile-izena eta pasahitza modu ez-seguru batean igortzea "
+"eragingo lezake."
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:52
+msgid ""
+"Selecting \"Don't Trust This Server\" will cause Geary not to access this "
+"server."
+msgstr ""
+"\"Ez fidatu zerbitzari honetaz\" hautatzeak Geary-k zerbitzari hau "
+"ez atzitzea eragingo du"
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:54
+msgid "Geary will not add or update this email account."
+msgstr "Geary-k ez du posta-kontu hau gehitu edo eguneratu."
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:59
+msgid ""
+"Selecting \"Don't Trust This Server\" will cause Geary to stop accessing "
+"this account."
+msgstr ""
+"\"Ez fidatu zerbitzari honetaz\" hautatzeak Geary-k kontu hau "
+"atzitzea geldituko da"
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:61
+msgid "Geary will exit if you have no other open email accounts."
+msgstr "Geary irten egingo da ez badaukazu beste posta-konturik irekita."
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:66
+msgid ""
+"Contact your system administrator or email service provider if you have any "
+"question about these issues."
+msgstr ""
+"Jar zaitez sistemaren administratzailearekin edo posta-zerbitzuaren "
+"hornitzailearekin harremanetan arazo hauei buruz inolako galderarik "
+"baduzu."
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:73
+msgid "The server's certificate is not signed by a known authority"
+msgstr ""
+"Zerbitzariaren ziurtagiria ez dago sinatuta autoritate ezagun bategatik"
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:76
+msgid "The server's identity does not match the identity in the certificate"
+msgstr ""
+"Zerbitzariaren identitatea ez dator bat ziurtagiriaren identitatearekin"
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:79
+msgid "The server's certificate has expired"
+msgstr "Zerbitzariaren ziurtagiria iraungi da"
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:82
+msgid "The server's certificate has not been activated"
+msgstr "Zerbitzariaren ziurtagiria ez da aktibatu"
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:85
+msgid "The server's certificate has been revoked and is now invalid"
+msgstr "Zerbitzariaren ziurtagiria errebokatua izan da eta orain baliogabea da"
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:88
+msgid "The server's certificate is considered insecure"
+msgstr "Zerbitzariaren ziurtagiria ez-segurua dela jo daiteke"
+
+#: ../src/client/dialogs/certificate-warning-dialog.vala:91
+msgid "An error has occurred processing the server's certificate"
+msgstr "Errorea gertatu da zerbitzariaren ziurtagiria prozesatzean"
+
+#. We can't keep these in the glade file, because Gnome doesn't want markup in translatable
+#. strings, and Glade doesn't support the "larger" size attribute. See this bug report for
+#. details: https://bugzilla.gnome.org/show_bug.cgi?id=679006
 #: ../src/client/dialogs/password-dialog.vala:16
-msgid "Please enter your password"
-msgstr "Sartu zure pasahitza"
+msgid "Geary requires your email password to continue"
+msgstr "Geary-k zure helb. elektronikoaren pasahitza behar du jarraitzeko"
 
 #. Label displaying total number of email messages in a folder
 #: ../src/client/folder-list/folder-list-folder-entry.vala:32
@@ -1031,21 +1253,21 @@ msgstr[1] "%d emaitz"
 msgid "%s - New Messages"
 msgstr "%s - Mezu berriak"
 
-#: ../src/client/notification/libnotify.vala:72
+#: ../src/client/notification/libnotify.vala:74
 #, c-format
 msgid "%d new message"
 msgid_plural "%d new messages"
 msgstr[0] "Mezu berri %d"
 msgstr[1] "%d mezu berri"
 
-#: ../src/client/notification/libnotify.vala:75
+#: ../src/client/notification/libnotify.vala:77
 #, c-format
 msgid "%s, %d new message total"
 msgid_plural "%s, %d new messages total"
 msgstr[0] "%s, mezu berri %d guztira"
 msgstr[1] "%s, %d mezu berri guztira"
 
-#: ../src/client/notification/libnotify.vala:107
+#: ../src/client/notification/libnotify.vala:109
 #, c-format
 msgid ""
 "%s\n"
@@ -1060,7 +1282,7 @@ msgstr[1] ""
 "%1$s\n"
 "%3$s(r)en beste %2$d mezu berri"
 
-#: ../src/client/notification/libnotify.vala:160
+#: ../src/client/notification/libnotify.vala:165
 msgid "Open"
 msgstr "Ireki"
 
@@ -1094,7 +1316,7 @@ msgstr "%b %e"
 #: ../src/client/util/util-date.vala:83
 #, no-c-format
 msgid "%x"
-msgstr ""
+msgstr "%x"
 
 #. / Verbose datetime format for 12-hour time, i.e. November 8, 2010 8:42 am
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
@@ -1145,7 +1367,7 @@ msgid "%A"
 msgstr "%A"
 
 #: ../src/client/util/util-email.vala:30
-#: ../src/engine/rfc822/rfc822-message.vala:741
+#: ../src/engine/rfc822/rfc822-message.vala:816
 msgid "(no subject)"
 msgstr "(gairik ez)"
 
@@ -1189,6 +1411,14 @@ msgstr "Outlook.com"
 msgid "Other"
 msgstr "Bestelakoa"
 
+#: ../src/engine/api/geary-service.vala:20
+msgid "IMAP"
+msgstr "IMAP"
+
+#: ../src/engine/api/geary-service.vala:23
+msgid "SMTP"
+msgstr "SMTP"
+
 #: ../src/engine/api/geary-special-folder-type.vala:24
 msgid "Inbox"
 msgstr "Sarrera"
@@ -1229,82 +1459,222 @@ msgstr "Irteera"
 msgid "Archive"
 msgstr "Artxiboa"
 
-#: ../src/engine/api/geary-special-folder-type.vala:58 ../ui/login.glade.h:25
+#: ../src/engine/api/geary-special-folder-type.vala:58 ../ui/login.glade.h:29
 msgid "None"
 msgstr "Bat ere ez"
 
-#. / Can be typed in the search box like attachment:file.txt to find
-#. / messages with attachments with a particular name.
-#: ../src/engine/imap-db/imap-db-account.vala:662
+#. Map of possibly translated search operator names and values
+#. to English/internal names and values. We include the
+#. English version anyway so that when translations provide a
+#. localised version of the operator names but have not also
+#. translated the user manual, the English version in the
+#. manual still works.
+#. Can be typed in the search box like "attachment:file.txt"
+#. to find messages with attachments with a particular name.
+#.
+#. The translated string must be a single word (use '-', '_'
+#. or similar to combine words into one), should be short, and
+#. also match the translation in "search.page" of the Geary User
+#. Guide.
+#: ../src/engine/imap-db/imap-db-account.vala:99
+#| msgid "attachment"
+msgctxt "Search operator"
 msgid "attachment"
 msgstr "eranskina"
 
-#. / Can be typed in the search box like bcc:johndoe@example.com to find
-#. / messages bcc'd to a particular person.
-#: ../src/engine/imap-db/imap-db-account.vala:665
-#: ../src/engine/imap-db/imap-db-account.vala:684
+#. Can be typed in the search box like
+#. "bcc:johndoe@example.com" to find messages bcc'd to a
+#. particular person.
+#.
+#. The translated string must be a single word (use '-', '_'
+#. or similar to combine words into one), should be short, and
+#. also match the translation in "search.page" of the Geary User
+#. Guide.
+#: ../src/engine/imap-db/imap-db-account.vala:108
+#| msgid "bcc"
+msgctxt "Search operator"
 msgid "bcc"
 msgstr "bcc"
 
-#. / Can be typed in the search box like body:word to find the word only
-#. / if it occurs in the body of a message.
-#: ../src/engine/imap-db/imap-db-account.vala:668
+#. Can be typed in the search box like "body:word" to find
+#. "word" only if it occurs in the body of a message.
+#.
+#. The translated string must be a single word (use '-', '_'
+#. or similar to combine words into one), should be short, and
+#. also match the translation in "search.page" of the Geary User
+#. Guide.
+#: ../src/engine/imap-db/imap-db-account.vala:116
+#| msgid "body"
+msgctxt "Search operator"
 msgid "body"
-msgstr "gorputza"
+msgstr "testua"
 
-#. / Can be typed in the search box like cc:johndoe@example.com to find
-#. / messages cc'd to a particular person.
-#: ../src/engine/imap-db/imap-db-account.vala:671
-#: ../src/engine/imap-db/imap-db-account.vala:684
+#. Can be typed in the search box like
+#. "cc:johndoe@example.com" to find messages cc'd to a
+#. particular person.
+#.
+#. The translated string must be a single word (use '-', '_'
+#. or similar to combine words into one), should be short, and
+#. also match the translation in "search.page" of the Geary User
+#. Guide.
+#: ../src/engine/imap-db/imap-db-account.vala:125
+#| msgid "cc"
+msgctxt "Search operator"
 msgid "cc"
 msgstr "cc"
 
-#. / Can be typed in the search box like from:johndoe@example.com to
-#. / find messages from a particular sender.
-#: ../src/engine/imap-db/imap-db-account.vala:674
-#: ../src/engine/imap-db/imap-db-account.vala:684
+#. Can be typed in the search box like
+#. "from:johndoe@example.com" to find messages from a
+#. particular sender.
+#.
+#. The translated string must be a single word (use '-', '_'
+#. or similar to combine words into one), should be short, and
+#. also match the translation in "search.page" of the Geary User
+#. Guide.
+#: ../src/engine/imap-db/imap-db-account.vala:134
+#| msgid "from"
+msgctxt "Search operator"
 msgid "from"
 msgstr "nork"
 
-#. / Can be typed in the search box like subject:word to find the word
-#. / only if it occurs in the subject of a message.
-#: ../src/engine/imap-db/imap-db-account.vala:677
+#. Can be typed in the search box like "is:unread" to find
+#. messages that are read, unread, or starred.
+#.
+#. The translated string must be a single word (use '-', '_'
+#. or similar to combine words into one), should be short, and
+#. also match the translation in "search.page" of the Geary User
+#. Guide.
+#: ../src/engine/imap-db/imap-db-account.vala:142
+msgctxt "Search operator"
+msgid "is"
+msgstr "dago"
+
+#. Can be typed in the search box like "subject:word" to find
+#. "word" only if it occurs in the subject of a message.
+#.
+#. The translated string must be a single word (use '-', '_'
+#. or similar to combine words into one), should be short, and
+#. also match the translation in "search.page" of the Geary
+#. User Guide.
+#: ../src/engine/imap-db/imap-db-account.vala:150
+#| msgid "subject"
+msgctxt "Search operator"
 msgid "subject"
 msgstr "gaia"
 
-#. / Can be typed in the search box like to:johndoe@example.com to find
-#. / messages received by a particular person.
-#: ../src/engine/imap-db/imap-db-account.vala:680
-#: ../src/engine/imap-db/imap-db-account.vala:684
+#. Can be typed in the search box like
+#. "to:johndoe@example.com" to find messages received by a
+#. particular person.
+#.
+#. The translated string must be a single word (use '-', '_'
+#. or similar to combine words into one), should be short, and
+#. also match the translation in "search.page" of the Geary User
+#. Guide.
+#: ../src/engine/imap-db/imap-db-account.vala:159
+#| msgid "to"
+msgctxt "Search operator"
 msgid "to"
 msgstr "nori"
 
-#. "me" can be typed like from:me or cc:me, etc. as a shorthand
-#. to find mail to or from yourself in search.
-#: ../src/engine/imap-db/imap-db-account.vala:699
+#. Can be typed in the search box after "to:", "cc:" and
+#. "bcc:" e.g.: "to:me". Matches conversations that are
+#. addressed to the user.
+#.
+#. The translated string must be a single word (use '-', '_'
+#. or similar to combine words into one), should be short, and
+#. also match the translation in "search.page" of the Geary User
+#. Guide.
+#: ../src/engine/imap-db/imap-db-account.vala:180
+#| msgid "me"
+msgctxt "Search operator value - mail addressed to the user"
 msgid "me"
 msgstr "ni"
 
-#. List of folder names to match for Drafts, separated by |.  Please add localized common
-#. names for the Drafts folder, leaving in the English names as well.  The first in the list
-#. will be the default, so please add the most common localized name to the front.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:535
+#. Can be typed in the search box after "from:" i.e.:
+#. "from:me". Matches conversations were sent by the user.
+#.
+#. The translated string must be a single word (use '-', '_'
+#. or similar to combine words into one), should be short, and
+#. also match the translation in "search.page" of the Geary User
+#. Guide.
+#: ../src/engine/imap-db/imap-db-account.vala:192
+#| msgid "me"
+msgctxt "Search operator value - mail sent by the user"
+msgid "me"
+msgstr "ni"
+
+#. Can be typed in the search box after "is:" i.e.:
+#. "is:read". Matches conversations that are flagged as read.
+#.
+#. The translated string must be a single word (use '-', '_'
+#. or similar to combine words into one), should be short, and
+#. also match the translation in "search.page" of the Geary User
+#. Guide.
+#: ../src/engine/imap-db/imap-db-account.vala:204
+#| msgid "%d unread"
+#| msgid_plural "%d unread"
+msgctxt "'is:' search operator value"
+msgid "read"
+msgstr "irakurrita"
+
+#. Can be typed in the search box after "is:" i.e.:
+#. "is:starred". Matches conversations that are flagged as
+#. starred.
+#.
+#. The translated string must be a single word (use '-', '_'
+#. or similar to combine words into one), should be short, and
+#. also match the translation in "search.page" of the Geary User
+#. Guide.
+#: ../src/engine/imap-db/imap-db-account.vala:215
+#| msgid "Starred"
+msgctxt "'is:' search operator value"
+msgid "starred"
+msgstr "puntuatuta"
+
+#. Can be typed in the search box after "is:" i.e.:
+#. "is:unread". Matches conversations that are flagged unread.
+#.
+#. The translated string must be a single word (use '-', '_'
+#. or similar to combine words into one), should be short, and
+#. also match the translation in "search.page" of the Geary User
+#. Guide.
+#: ../src/engine/imap-db/imap-db-account.vala:225
+#| msgid "%d unread"
+#| msgid_plural "%d unread"
+msgctxt "'is:' search operator value"
+msgid "unread"
+msgstr "irakurri gabea"
+
+#. List of general possible folder names to match for the
+#. Draft mailbox. Separate names using a vertical bar and
+#. put the most common localized name to the front for the
+#. default. English names do not need to be included.
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:625
 msgid "Drafts | Draft"
 msgstr "Zirriborroak | Zirriborroa | Drafts | Draft"
 
-#. List of folder names to match for Sent Mail, separated by |.  Please add localized common
-#. names for the Sent Mail folder, leaving in the English names as well.  The first in the list
-#. will be the default, so please add the most common localized name to the front.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:540
+#. List of general possible folder names to match for the
+#. Sent mailbox. Separate names using a vertical bar and
+#. put the most common localized name to the front for the
+#. default. English names do not need to be included.
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:634
 msgid "Sent | Sent Mail | Sent Email | Sent E-Mail"
 msgstr ""
 "Bidalita | Posta bidalita | Mezua bidalita | Sent | Sent Mail | Sent Email | "
 "Sent E-Mail"
 
-#. List of folder names to match for Spam, separated by |.  Please add localized common
-#. names for the Spam folder, leaving in the English names as well.  The first in the list
-#. will be the default, so please add the most common localized name to the front.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:545
+#. The localised name(s) of the Sent folder name as used
+#. by MS Outlook/Exchange.
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:639
+msgctxt "Outlook localised name"
+msgid "Sent Items"
+msgstr "Bidalitako elementuak"
+
+#. List of general possible folder names to match for the
+#. Spam mailbox. Separate names using a vertical bar and
+#. put the most common localized name to the front for the
+#. default. English names do not need to be included.
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:649
 msgid ""
 "Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email "
 "| Bulk E-Mail"
@@ -1313,66 +1683,83 @@ msgstr ""
 "| Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email | "
 "Bulk E-Mail"
 
-#. List of folder names to match for Trash, separated by |.  Please add localized common
-#. names for the Trash folder, leaving in the English names as well.  The first in the list
-#. will be the default, so please add the most common localized name to the front.
-#: ../src/engine/imap-engine/imap-engine-generic-account.vala:550
+#. List of general possible folder names to match for the
+#. Trash mailbox. Separate names using a vertical bar and
+#. put the most common localized name to the front for the
+#. default. English names do not need to be included.
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:659
 msgid "Trash | Rubbish | Rubbish Bin"
 msgstr "Zakarrontzia | Trash | Rubbish | Rubbish Bin"
 
+#. The localised name(s) of the Trash folder name as used
+#. by MS Outlook/Exchange.
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:664
+#| msgid "Delete"
+msgctxt "Outlook localised name"
+msgid "Deleted Items"
+msgstr "Ezabatutako elementuak"
+
+#. List of general possible folder names to match for the
+#. Archive mailbox. Separate names using a vertical bar
+#. and put the most common localized name to the front for
+#. the default. English names do not need to be included.
+#: ../src/engine/imap-engine/imap-engine-generic-account.vala:674
+msgid "Archive | Archives"
+msgstr "Artxiboa | Artxiboak"
+
 #. / Format for the datetime that a message being replied to was received
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
-#: ../src/engine/rfc822/rfc822-utils.vala:165
+#: ../src/engine/rfc822/rfc822-utils.vala:215
 msgid "%a, %b %-e, %Y at %-l:%M %p"
 msgstr "%a, %Y %b %e, %l:%M %p"
 
 #. / The quoted header for a message being replied to.
 #. / %1$s will be substituted for the date, and %2$s will be substituted for
 #. / the original sender.
-#: ../src/engine/rfc822/rfc822-utils.vala:171
+#: ../src/engine/rfc822/rfc822-utils.vala:221
 #, c-format
 msgid "On %1$s, %2$s wrote:"
 msgstr "%2$s(e)k %1$s(e)an idatzita:"
 
 #. / The quoted header for a message being replied to (in case the date is not known).
 #. / %s will be replaced by the original sender.
-#: ../src/engine/rfc822/rfc822-utils.vala:178
+#: ../src/engine/rfc822/rfc822-utils.vala:228
 #, c-format
 msgid "%s wrote:"
 msgstr "'%s'(e)k idatzita:"
 
 #. / The quoted header for a message being replied to (in case the sender is not known).
 #. / %s will be replaced by the original date
-#: ../src/engine/rfc822/rfc822-utils.vala:184
+#: ../src/engine/rfc822/rfc822-utils.vala:234
 #, c-format
 msgid "On %s:"
 msgstr "%s(e)an:"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:211
+#: ../src/engine/rfc822/rfc822-utils.vala:263
 msgid "---------- Forwarded message ----------"
 msgstr "---------- Birbidalitako mezua ----------"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:215
+#: ../src/engine/rfc822/rfc822-utils.vala:267
 #, c-format
 msgid "From: %s\n"
 msgstr "Nork: %s\n"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:216
+#: ../src/engine/rfc822/rfc822-utils.vala:268
 #, c-format
 msgid "Subject: %s\n"
 msgstr "Gaia: %s\n"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:217
+#: ../src/engine/rfc822/rfc822-utils.vala:269
 #, c-format
 msgid "Date: %s\n"
 msgstr "Data: %s\n"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:220
+#: ../src/engine/rfc822/rfc822-utils.vala:272
 #, c-format
 msgid "To: %s\n"
 msgstr "Nori: %s\n"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:223
+#: ../src/engine/rfc822/rfc822-utils.vala:275
 #, c-format
 msgid "Cc: %s\n"
 msgstr "Cc: %s\n"
@@ -1404,6 +1791,22 @@ msgstr "Kendu kontua"
 #: ../ui/account_spinner.glade.h:1
 msgid "Please wait while Geary validates your account."
 msgstr "Itxaron Geary-k zure kontua balidatu arte."
+
+#: ../ui/certificate_warning_dialog.glade.h:1
+msgid "Untrusted Connection"
+msgstr "Konexio ez-fidagarria"
+
+#: ../ui/certificate_warning_dialog.glade.h:2
+msgid "_Always Trust This Server"
+msgstr "Fidatu zerbitzari honetaz _beti"
+
+#: ../ui/certificate_warning_dialog.glade.h:3
+msgid "_Trust This Server"
+msgstr "_Fidatu zerbitzari honetaz"
+
+#: ../ui/certificate_warning_dialog.glade.h:4
+msgid "_Don't Trust This Server"
+msgstr "_Ez fidatu zerbitzari honetaz"
 
 #: ../ui/composer.glade.h:1
 msgid "_Undo"
@@ -1487,105 +1890,185 @@ msgid "_Rich Text"
 msgstr "Testu a_beratsa"
 
 #: ../ui/composer.glade.h:23
+msgid "Show Extended Fields"
+msgstr "Erakutsi hedatutako eremuak"
+
+#: ../ui/composer.glade.h:24
+msgctxt "Label"
+msgid "Close and Save"
+msgstr "Gorde eta itxi"
+
+#: ../ui/composer.glade.h:25
+msgctxt "Short Label"
+msgid "Close and Save"
+msgstr "Gorde eta itxi"
+
+#: ../ui/composer.glade.h:26
+msgctxt "Tooltip"
+msgid "Close and Save"
+msgstr "Gorde eta itxi"
+
+#: ../ui/composer.glade.h:27
+msgctxt "Label"
+msgid "Close and Discard"
+msgstr "Baztertu eta itxi"
+
+#: ../ui/composer.glade.h:28
+msgctxt "Short Label"
+msgid "Close and Discard"
+msgstr "Baztertu eta itxi"
+
+#: ../ui/composer.glade.h:29
+msgctxt "Tooltip"
+msgid "Close and Discard"
+msgstr "Baztertu eta itxi"
+
+#: ../ui/composer.glade.h:30
 msgid "Lar_ge"
 msgstr "_Handia"
 
-#: ../ui/composer.glade.h:24
+#: ../ui/composer.glade.h:31
 msgid "Large"
 msgstr "Handia"
 
-#: ../ui/composer.glade.h:25
+#: ../ui/composer.glade.h:32
 msgid "_Medium"
 msgstr "_Ertaina"
 
-#: ../ui/composer.glade.h:26
+#: ../ui/composer.glade.h:33
 msgid "Medium"
 msgstr "Ertaina"
 
-#: ../ui/composer.glade.h:27
+#: ../ui/composer.glade.h:34
 msgid "_Small"
 msgstr "T_xikia"
 
-#: ../ui/composer.glade.h:28
+#: ../ui/composer.glade.h:35
 msgid "Small"
 msgstr "Txikia"
 
-#: ../ui/composer.glade.h:29
+#: ../ui/composer.glade.h:36
 msgid "S_ans Serif"
 msgstr "S_ans serif"
 
-#: ../ui/composer.glade.h:30
+#: ../ui/composer.glade.h:37
 msgid "Sans Serif"
 msgstr "Sans Serif"
 
-#: ../ui/composer.glade.h:31
+#: ../ui/composer.glade.h:38
 msgid "S_erif"
 msgstr "S_erif"
 
-#: ../ui/composer.glade.h:32
+#: ../ui/composer.glade.h:39
 msgid "Serif"
 msgstr "Serif"
 
-#: ../ui/composer.glade.h:33
+#: ../ui/composer.glade.h:40
 msgid "_Fixed Width"
 msgstr "_Zabalera finkoa"
 
-#: ../ui/composer.glade.h:34
+#: ../ui/composer.glade.h:41
 msgid "Fixed Width"
 msgstr "Zabalera finkoa"
 
-#: ../ui/composer.glade.h:35
+#: ../ui/composer.glade.h:42
 msgid "Detach"
 msgstr "Desuztartu"
 
-#: ../ui/composer.glade.h:36
+#: ../ui/composer.glade.h:43
+#| msgid "Italic (Ctrl+I)"
+msgid "Detach (Ctrl+D)"
+msgstr "Askatu (Ktrl+D)"
+
+#: ../ui/composer.glade.h:44
 msgid "_Send"
 msgstr "_Bidali"
 
-#: ../ui/composer.glade.h:37
+#: ../ui/composer.glade.h:45
 msgid "Send"
 msgstr "Bidali"
 
-#: ../ui/composer.glade.h:38
+#: ../ui/composer.glade.h:46
+#| msgid "Bold (Ctrl+B)"
+msgid "Send (Ctrl+Enter)"
+msgstr "Bidali (Ktrl+Sartu)"
+
+#: ../ui/composer.glade.h:47
 msgid "_Attach File"
 msgstr "_Erantsi fitxategia"
 
-#: ../ui/composer.glade.h:39
+#: ../ui/composer.glade.h:48
 msgid "Attach File"
 msgstr "Erantsi fitxategia"
 
-#: ../ui/composer.glade.h:40
+#: ../ui/composer.glade.h:49
 msgid "_Include Original Attachments"
 msgstr "_Barneratu jatorrizko eranskinak"
 
-#: ../ui/composer.glade.h:41
+#: ../ui/composer.glade.h:50
 msgid "Include Original Attachments"
 msgstr "Barneratu jatorrizko eranskinak"
 
+#: ../ui/composer.glade.h:51
+msgid "Application Menu"
+msgstr "Aplikazioaren menua"
+
 #. Address(es) e-mail is to be sent to
-#: ../ui/composer.glade.h:43
-msgid "_To:"
-msgstr "Nor_i:"
+#: ../ui/composer.glade.h:53
+#| msgid "_To:"
+msgid "_To"
+msgstr "Nor_i"
 
-#: ../ui/composer.glade.h:44
-msgid "_Cc:"
-msgstr "_Cc:"
+#: ../ui/composer.glade.h:54
+#| msgid "_Cc:"
+msgid "_Cc"
+msgstr "_Cc"
 
-#: ../ui/composer.glade.h:45
-msgid "_Subject:"
-msgstr "_Gaia:"
+#: ../ui/composer.glade.h:55
+#| msgid "_Subject:"
+msgid "_Subject"
+msgstr "_Gaia"
 
-#: ../ui/composer.glade.h:46
-msgid "_Bcc:"
-msgstr "_Bcc:"
+#: ../ui/composer.glade.h:56
+#| msgid "_Bcc:"
+msgid "_Bcc"
+msgstr "_Bcc"
 
-#: ../ui/composer.glade.h:49
+#: ../ui/composer.glade.h:57
+#| msgid "_Reply"
+msgid "_Reply-To"
+msgstr "_Erantzun honi"
+
+#. Geary account mail will be sent from
+#: ../ui/composer.glade.h:59
+#| msgid "From:"
+msgid "From"
+msgstr "Nork"
+
+#: ../ui/composer.glade.h:60
 msgid "Drop files here"
 msgstr "Jaregin fitxategiak hemen"
 
-#: ../ui/composer.glade.h:50
+#: ../ui/composer.glade.h:61
 msgid "To add them as attachments"
 msgstr "Eranskin gisa gehitzeko"
+
+#: ../ui/edit_alternate_emails.glade.h:1
+#| msgid "E_mail address"
+msgid "Remove email address"
+msgstr "Kendu helb. elektronikoa"
+
+#: ../ui/edit_alternate_emails.glade.h:2
+msgid ""
+"Some email services require additional addresses be configured on the "
+"server.  Contact your email provider for more information."
+msgstr ""
+"Posta-zerbitzu batzuk zerbitzarian helbide gehigarriak konfiguratzea "
+"behar dute. Jar zaitez posta-hornitzailearekin informazio gehiagorako."
+
+#: ../ui/edit_alternate_emails.glade.h:4
+msgid "_Update"
+msgstr "_Eguneratu"
 
 #: ../ui/find_bar.glade.h:1
 msgid "Find:"
@@ -1608,184 +2091,211 @@ msgid "label"
 msgstr "etiketa"
 
 #: ../ui/login.glade.h:1
+msgid "email@example.com"
+msgstr "posta@example.com"
+
+#: ../ui/login.glade.h:2 ../ui/password-dialog.glade.h:3
 msgid "Password"
 msgstr "Pasahitza"
 
-#: ../ui/login.glade.h:2
+#: ../ui/login.glade.h:3
 msgid "E_mail address"
 msgstr "_Helb. elektronikoa"
 
-#: ../ui/login.glade.h:3
+#: ../ui/login.glade.h:4
 msgid "_Password"
 msgstr "_Pasahitza"
 
-#: ../ui/login.glade.h:4
+#: ../ui/login.glade.h:5
 msgid "S_ervice"
 msgstr "_Zerbitzua"
 
-#: ../ui/login.glade.h:5
+#: ../ui/login.glade.h:6
 msgid "N_ame"
 msgstr "_Izena"
 
-#: ../ui/login.glade.h:7
+#: ../ui/login.glade.h:8
 msgid "N_ickname"
 msgstr "_Goitizena"
 
-#: ../ui/login.glade.h:8
+#: ../ui/login.glade.h:9
 msgid "Work, Home, etc."
 msgstr "Lana, etxea, e.a."
 
-#: ../ui/login.glade.h:9
+#: ../ui/login.glade.h:10
 msgid "_Save sent mail"
 msgstr "_Gorde bidalitako mezua"
 
-#: ../ui/login.glade.h:10
+#: ../ui/login.glade.h:11
+msgid "Addi_tional email addresses…"
+msgstr "Helb.elektroniko _gehigarriak…"
+
+#: ../ui/login.glade.h:12
 msgid "IMAP settings"
 msgstr "IMAP ezarpenak"
 
-#: ../ui/login.glade.h:11
+#: ../ui/login.glade.h:13
 msgid "Se_rver"
 msgstr "_Zerbitzaria"
 
-#: ../ui/login.glade.h:12
+#: ../ui/login.glade.h:14
+msgid "imap.example.com"
+msgstr "imap.example.com"
+
+#: ../ui/login.glade.h:15
 msgid "P_ort"
 msgstr "A_taka"
 
-#: ../ui/login.glade.h:13
+#: ../ui/login.glade.h:16
+msgid "smtp.example.com"
+msgstr "smtp.example.com"
+
+#: ../ui/login.glade.h:17
 msgid "Ser_ver"
 msgstr "_Zerbitzaria"
 
-#: ../ui/login.glade.h:14
+#: ../ui/login.glade.h:18
 msgid "Por_t"
 msgstr "_Ataka"
 
-#: ../ui/login.glade.h:15
+#: ../ui/login.glade.h:19
 msgid "SMTP settings"
 msgstr "SMTP ezarpenak"
 
-#: ../ui/login.glade.h:16
+#: ../ui/login.glade.h:20
 msgid "User_name"
 msgstr "_Erabiltzaile-izena"
 
-#: ../ui/login.glade.h:17
+#: ../ui/login.glade.h:21
 msgid "Pass_word"
 msgstr "_Pasahitza"
 
-#: ../ui/login.glade.h:18
+#: ../ui/login.glade.h:22
 msgid "SMTP username"
 msgstr "SMTP erabiltzaile-izena"
 
-#: ../ui/login.glade.h:19
+#: ../ui/login.glade.h:23
 msgid "SMTP password"
 msgstr "SMTP pasahitza"
 
-#: ../ui/login.glade.h:20
+#: ../ui/login.glade.h:24
 msgid "_Username"
 msgstr "_Erabiltzaile-izena"
 
-#: ../ui/login.glade.h:21
+#: ../ui/login.glade.h:25
 msgid "IMAP username"
 msgstr "IMAP erabiltzaile-izena"
 
-#: ../ui/login.glade.h:22
+#: ../ui/login.glade.h:26
 msgid "IMAP password"
 msgstr "IMAP pasahitza"
 
-#: ../ui/login.glade.h:23
+#: ../ui/login.glade.h:27
 msgid "Encr_yption"
 msgstr "_Enkriptazioa"
 
-#: ../ui/login.glade.h:24
+#: ../ui/login.glade.h:28
 msgid "Encrypt_ion"
 msgstr "Enk_riptazioa"
 
-#: ../ui/login.glade.h:26
+#: ../ui/login.glade.h:30
 msgid "SSL/TLS"
 msgstr "SSL/TLS"
 
-#: ../ui/login.glade.h:27
+#: ../ui/login.glade.h:31
 msgid "STARTTLS"
 msgstr "STARTTLS"
 
-#: ../ui/login.glade.h:28
+#: ../ui/login.glade.h:32
 msgid "No authentication re_quired"
 msgstr "Ez da autentifikaziorik behar"
 
-#: ../ui/login.glade.h:29
+#: ../ui/login.glade.h:33
 msgid "Use IMAP cre_dentials"
 msgstr "Erabili IMAP _kredentzialak"
 
-#: ../ui/login.glade.h:30
-msgid "Storage"
-msgstr "Biltegia"
-
-#: ../ui/login.glade.h:31
-msgid "_Download mail"
-msgstr "_Deskargatu posta"
-
-#: ../ui/login.glade.h:32 ../ui/preferences.glade.h:6
+#: ../ui/login.glade.h:34 ../ui/preferences.glade.h:5
 msgid "Composer"
 msgstr "Konposatzailea"
 
-#: ../ui/login.glade.h:33
+#: ../ui/login.glade.h:35
 msgid "Save dra_fts on server"
 msgstr "Gorde _zirriborroak zerbitzarian"
 
-#: ../ui/login.glade.h:34
-msgid "Si_gn emails:"
-msgstr "_Sinatu mezuak:"
+#: ../ui/login.glade.h:36
+#| msgid "Si_gn emails:"
+msgid "Si_gn emails (HTML allowed):"
+msgstr "_Sinatu mezuak (HTML baimenduta):"
+
+#: ../ui/login.glade.h:37
+msgid "Storage"
+msgstr "Biltegia"
+
+#: ../ui/login.glade.h:38
+msgid "_Download mail"
+msgstr "_Deskargatu posta"
 
 #: ../ui/password-dialog.glade.h:1
 msgid "SMTP Credentials"
 msgstr "SMTP kredentzialak"
 
 #: ../ui/password-dialog.glade.h:2
-msgid "Username:"
-msgstr "Erabiltzaile-izena:"
-
-#: ../ui/password-dialog.glade.h:3
-msgid "Password:"
-msgstr "Pasahitza:"
+#| msgid "_Username"
+msgid "Username"
+msgstr "Erabiltzaile-izena"
 
 #: ../ui/password-dialog.glade.h:4
 msgid "_Remember password"
 msgstr "_Gogoratu pasahitza"
 
-#: ../ui/preferences.glade.h:1
-msgid "Preferences"
-msgstr "Hobespenak"
+#: ../ui/password-dialog.glade.h:6
+msgid "_Authenticate"
+msgstr "_Autentifikatu"
 
-#: ../ui/preferences.glade.h:3
+#: ../ui/preferences.glade.h:1
 msgid "Reading"
 msgstr "Irakurketa"
 
-#: ../ui/preferences.glade.h:4
+#: ../ui/preferences.glade.h:2
 msgid "_Automatically select next message"
 msgstr "Hautatu _automatikoki hurrengo mezua"
 
-#: ../ui/preferences.glade.h:5
+#: ../ui/preferences.glade.h:3
 msgid "_Display conversation preview"
 msgstr "_Bistaratu berriketaren aurrebista"
 
-#: ../ui/preferences.glade.h:7
+#: ../ui/preferences.glade.h:4
+msgid "Use _three pane view"
+msgstr "Erabili _zuhaitz-panelaren ikuspegia"
+
+#: ../ui/preferences.glade.h:6
 msgid "Enable _spell checking"
 msgstr "Gaitu _ortografia-egiaztapena"
 
-#: ../ui/preferences.glade.h:8
+#: ../ui/preferences.glade.h:7
 msgid "Notifications"
 msgstr "Jakinarazpenak"
 
-#: ../ui/preferences.glade.h:9
+#: ../ui/preferences.glade.h:8
 msgid "_Play notification sounds"
 msgstr "_Erreproduzitu jakinarazpenaren soinuak"
 
-#: ../ui/preferences.glade.h:10
+#: ../ui/preferences.glade.h:9
 msgid "Show _notifications for new mail"
 msgstr "Erakutsi mezu berrien _jakinarazpenak"
 
+#: ../ui/preferences.glade.h:10
+#| msgid "Show _notifications for new mail"
+msgid "Always _watch for new mail"
+msgstr "Begiratu _beti mezu berriak dauden"
+
 #: ../ui/preferences.glade.h:11
-msgid "Notify of new mail at start_up"
-msgstr "Jakinarazi mezu berriak _abioan"
+msgid "Geary will run in the background and notify of new mail"
+msgstr "Geary atzeko planoan exekutatuko da eta mezu berriak jakinaraziko ditu"
+
+#: ../ui/preferences.glade.h:12
+msgid "Preferences"
+msgstr "Hobespenak"
 
 #: ../ui/remove_confirm.glade.h:1
 msgid ""
@@ -1812,8 +2322,39 @@ msgid "Email address:"
 msgstr "Helb. elektronikoa:"
 
 #: ../ui/upgrade_dialog.glade.h:1
-msgid "Geary upgrade in progress."
-msgstr "Geary-ren eguneraketa lantzen."
+#| msgid "Geary upgrade in progress."
+msgid "Geary update in progress…"
+msgstr "Geary-ren eguneraketa lantzen…"
+
+#~ msgid "Copyright 2011-2014 Yorba Foundation"
+#~ msgstr "Copyright-a 2011-2014 Yorba Fundazioa"
+
+#~ msgid "_Delete"
+#~ msgstr "E_zabatu"
+
+#~ msgid "_Trash"
+#~ msgstr "_Zakarrontzia"
+
+#~ msgid "_Donate"
+#~ msgstr "_Eman dirua"
+
+#~ msgid "attach|enclosed|enclosing|cover letter"
+#~ msgstr "eranskina|inguratua|inguratzea|gutun-azala"
+
+#~ msgid "Do you want to discard the unsaved message?"
+#~ msgstr "Gorde gabeko mezua baztertzea nahi duzu?"
+
+#~ msgid "Please enter your password"
+#~ msgstr "Sartu zure pasahitza"
+
+#~ msgid "Username:"
+#~ msgstr "Erabiltzaile-izena:"
+
+#~ msgid "Password:"
+#~ msgstr "Pasahitza:"
+
+#~ msgid "Notify of new mail at start_up"
+#~ msgstr "Jakinarazi mezu berriak _abioan"
 
 #~ msgid "C_lose"
 #~ msgstr "It_xi"
