@@ -10,7 +10,7 @@
 public enum Geary.Service {
     IMAP,
     SMTP;
-    
+
     /**
      * Returns a user-visible label for the {@link Service}.
      */
@@ -18,10 +18,26 @@ public enum Geary.Service {
         switch (this) {
             case IMAP:
                 return _("IMAP");
-            
+
             case SMTP:
                 return _("SMTP");
-            
+
+            default:
+                assert_not_reached();
+        }
+    }
+
+    /**
+     * Returns a short version of the enum key.
+     */
+    public string name() {
+        switch (this) {
+            case IMAP:
+                return "IMAP";
+
+            case SMTP:
+                return "SMTP";
+
             default:
                 assert_not_reached();
         }
@@ -35,13 +51,12 @@ public enum Geary.Service {
 public enum Geary.ServiceFlag {
     IMAP,
     SMTP;
-    
+
     public bool has_imap() {
         return (this & IMAP) == IMAP;
     }
-    
+
     public bool has_smtp() {
         return (this & SMTP) == SMTP;
     }
 }
-
