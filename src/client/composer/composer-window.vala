@@ -29,6 +29,9 @@ public class ComposerWindow : Gtk.ApplicationWindow, ComposerContainer {
         // composer actions to work properly.
         GearyApplication.instance.add_window(this);
 
+        // XXX Bug 764622
+        set_property("name", "GearyComposerWindow");
+
         add(this.composer);
         focus_in_event.connect(on_focus_in);
         focus_out_event.connect(on_focus_out);
