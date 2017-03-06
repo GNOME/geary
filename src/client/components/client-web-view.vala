@@ -37,7 +37,13 @@ public class ClientWebView : WebKit.WebView {
     private class WebsiteDataManager : WebKit.WebsiteDataManager {
 
         public WebsiteDataManager(string base_cache_directory) {
-            Object(base_cache_directory: base_cache_directory);
+            // Use the cache dir for both cache and data since a)
+            // emails shouldn't be storing data anyway, and b) so WK
+            // doesn't use the default, shared data dir.
+            Object(
+                base_cache_directory: base_cache_directory,
+                base_data_directory: base_cache_directory
+            );
         }
 
     }
