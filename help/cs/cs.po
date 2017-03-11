@@ -1,13 +1,13 @@
 # Czech translation for geary.
 # Copyright (C) 2014 geary's COPYRIGHT HOLDER
 # This file is distributed under the same license as the geary package.
-# Marek Černocký <marek@manet.cz>, 2014, 2015, 2016.
+# Marek Černocký <marek@manet.cz>, 2014, 2015, 2016, 2017.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: geary master\n"
-"POT-Creation-Date: 2016-10-03 23:00+0000\n"
-"PO-Revision-Date: 2016-10-04 14:27+0200\n"
+"POT-Creation-Date: 2017-03-05 19:13+0000\n"
+"PO-Revision-Date: 2017-03-11 02:02+0100\n"
 "Last-Translator: Marek Černocký <marek@manet.cz>\n"
 "Language-Team: čeština <gnome-cs-list@gnome.org>\n"
 "Language: cs\n"
@@ -265,7 +265,7 @@ msgstr ""
 msgid "Star"
 msgstr "Přidělit hvězdičku"
 
-#: C/shortcuts.page:44(key) C/shortcuts.page:108(key)
+#: C/shortcuts.page:44(key) C/shortcuts.page:100(key)
 msgid "S"
 msgstr "S"
 
@@ -273,7 +273,7 @@ msgstr "S"
 msgid "Unstar"
 msgstr "Odebrat hvězdičku"
 
-#: C/shortcuts.page:48(key) C/shortcuts.page:146(key)
+#: C/shortcuts.page:48(key) C/shortcuts.page:138(key)
 msgid "D"
 msgstr "D"
 
@@ -313,15 +313,220 @@ msgstr "M"
 msgid "Label the conversation"
 msgstr "Přidat konverzaci štítek"
 
-#: C/shortcuts.page:64(key) C/shortcuts.page:170(key)
+#: C/shortcuts.page:64(key) C/shortcuts.page:162(key)
 msgid "L"
 msgstr "L"
 
 #: C/shortcuts.page:67(p)
+msgid "Jump to next (older) conversation"
+msgstr "Přejít na následující (starší) konverzaci"
+
+#: C/shortcuts.page:68(key)
+msgid "J"
+msgstr "J"
+
+#: C/shortcuts.page:71(p)
+msgid "Jump to previous (newer) conversation"
+msgstr "Přejít na předchozí (novější) konverzaci"
+
+#: C/shortcuts.page:72(key) C/shortcuts.page:158(key)
+msgid "K"
+msgstr "K"
+
+#: C/shortcuts.page:75(p)
+msgid "Toggle spam"
+msgstr "Označit jako spam/zrušit označení spamu"
+
+#: C/shortcuts.page:76(p)
+msgid "<keyseq><key>Ctrl</key><key>J</key></keyseq> or <key>!</key>"
+msgstr "<keyseq><key>Ctrl</key><key>J</key></keyseq> nebo <key>!</key>"
+
+#: C/shortcuts.page:79(p)
+msgid "Quit"
+msgstr "Ukončit"
+
+#: C/shortcuts.page:80(key) C/shortcuts.page:96(key) C/shortcuts.page:100(key)
+#: C/shortcuts.page:104(key) C/shortcuts.page:108(key)
+#: C/shortcuts.page:112(key) C/shortcuts.page:122(key)
+#: C/shortcuts.page:126(key) C/shortcuts.page:130(key)
+#: C/shortcuts.page:138(key) C/shortcuts.page:146(key)
+#: C/shortcuts.page:150(key) C/shortcuts.page:154(key)
+#: C/shortcuts.page:158(key) C/shortcuts.page:162(key)
+#: C/shortcuts.page:166(key) C/shortcuts.page:181(key)
+msgid "Ctrl"
+msgstr "Ctrl"
+
+#: C/shortcuts.page:80(key)
+msgid "Q"
+msgstr "Q"
+
+#: C/shortcuts.page:83(p)
+msgid "Zoom in"
+msgstr "Přiblížit"
+
+#: C/shortcuts.page:84(p)
+msgid "<keyseq><key>Ctrl</key><key>=</key></keyseq> or <key>=</key>"
+msgstr "<keyseq><key>Ctrl</key><key>=</key></keyseq> nebo <key>=</key>"
+
+#: C/shortcuts.page:87(p)
+msgid "Zoom out"
+msgstr "Oddálit"
+
+#: C/shortcuts.page:88(p)
+msgid "<keyseq><key>Ctrl</key><key>-</key></keyseq> or <key>-</key>"
+msgstr "<keyseq><key>Ctrl</key><key>-</key></keyseq> nebo <key>-</key>"
+
+#: C/shortcuts.page:91(p)
+msgid "Reset zoom"
+msgstr "Přiblížit na výchozí velikost"
+
+#: C/shortcuts.page:92(p)
+msgid "<keyseq><key>Ctrl</key><key>0</key></keyseq> or <key>0</key>"
+msgstr "<keyseq><key>Ctrl</key><key>0</key></keyseq> nebo <key>0</key>"
+
+#: C/shortcuts.page:95(p)
+msgid "Close composer window"
+msgstr "Zavřít okno editoru"
+
+#: C/shortcuts.page:96(key)
+msgid "W"
+msgstr "W"
+
+#: C/shortcuts.page:99(p)
+msgid "Jump to search box"
+msgstr "Přejít do vyhledávacího pole"
+
+#: C/shortcuts.page:103(p)
+msgid "Find in current conversation"
+msgstr "Hledat v aktuální konverzaci"
+
+#: C/shortcuts.page:104(key)
+msgid "F"
+msgstr "F"
+
+#: C/shortcuts.page:107(p)
+msgid "Find next in current conversation"
+msgstr "Najít následující v aktuální konverzaci"
+
+#: C/shortcuts.page:108(key) C/shortcuts.page:112(key)
+msgid "G"
+msgstr "G"
+
+#: C/shortcuts.page:111(p)
+msgid "Find previous in current conversation"
+msgstr "Najít předchozí v aktuální konverzaci"
+
+#: C/shortcuts.page:112(key)
+msgid "Shift"
+msgstr "Shift"
+
+#: C/shortcuts.page:117(title)
+msgid "Composer shortcuts"
+msgstr "Klávesové zkratky editoru"
+
+#: C/shortcuts.page:118(p)
+msgid "These shortcuts are active whenever focus is in a composer."
+msgstr ""
+"Následující klávesové zkratky jsou funkční, kdykoliv je aktivní editor zpráv."
+
+#: C/shortcuts.page:121(p)
+msgid "Attach file"
+msgstr "Přiložit soubor"
+
+#: C/shortcuts.page:122(key)
+msgid "T"
+msgstr "T"
+
+#: C/shortcuts.page:125(p)
+msgid "Quote text"
+msgstr "Citovat text"
+
+#: C/shortcuts.page:126(key)
+msgid "]"
+msgstr "]"
+
+#: C/shortcuts.page:129(p)
+msgid "Unquote text"
+msgstr "Ukončit citaci textu"
+
+#: C/shortcuts.page:130(key)
+msgid "["
+msgstr "["
+
+#: C/shortcuts.page:133(p)
+msgid "Close composer"
+msgstr "Zavřít okno editoru"
+
+#: C/shortcuts.page:134(p)
+msgid "<keyseq><key>Ctrl</key><key>W</key></keyseq> or <key>Esc</key>"
+msgstr "<keyseq><key>Ctrl</key><key>W</key></keyseq> nebo <key>Esc</key>"
+
+#: C/shortcuts.page:137(p)
+msgid "Detach composer"
+msgstr "Odpojit okno editor"
+
+#: C/shortcuts.page:142(p)
+msgid "These shortcuts are only active in composers in rich text mode."
+msgstr ""
+"Následující klávesové zkratky jsou funkční pouze když je editor v režimu "
+"formátovaného textu."
+
+#: C/shortcuts.page:145(p)
+msgid "Bold text"
+msgstr "Tučný text"
+
+#: C/shortcuts.page:146(key) C/shortcuts.page:181(key)
+msgid "B"
+msgstr "B"
+
+#: C/shortcuts.page:149(p)
+msgid "Italicize text"
+msgstr "Text kurzívou"
+
+#: C/shortcuts.page:150(key)
+msgid "I"
+msgstr "I"
+
+#: C/shortcuts.page:153(p)
+msgid "Underline text"
+msgstr "Podtržený text"
+
+#: C/shortcuts.page:154(key)
+msgid "U"
+msgstr "U"
+
+#: C/shortcuts.page:157(p)
+msgid "Strike text"
+msgstr "Přeškrtnutý text"
+
+#: C/shortcuts.page:161(p)
+msgid "Insert a link"
+msgstr "Vložit odkaz"
+
+#: C/shortcuts.page:165(p)
+msgid "Remove formatting"
+msgstr "Odstranit formátování"
+
+#: C/shortcuts.page:166(key) C/shortcuts.page:186(key)
+msgid "Space"
+msgstr "mezerník"
+
+#: C/shortcuts.page:172(title)
+msgid "Keyboard navigation"
+msgstr "Navigace"
+
+#: C/shortcuts.page:173(p)
+msgid ""
+"These shortcuts can be used to move the keyboard focus in the main window."
+msgstr ""
+"Následující klávesové zkratky se dají použít k přesunu zaměření v hlavním "
+"okně."
+
+#: C/shortcuts.page:176(p)
 msgid "Move focus to the next/previous pane"
 msgstr "Přesunout zaměření na následující/předchozí panel"
 
-#: C/shortcuts.page:68(p)
+#: C/shortcuts.page:177(p)
 msgid ""
 "<keyseq><key>F6</key></keyseq> / <keyseq><key>Shift</key><key>F6</key></"
 "keyseq>"
@@ -329,203 +534,37 @@ msgstr ""
 "<keyseq><key>F6</key></keyseq> / <keyseq><key>Shift</key><key>F6</key></"
 "keyseq>"
 
-#: C/shortcuts.page:71(p)
+#: C/shortcuts.page:180(p)
 msgid "Move focus to conversation list"
 msgstr "Přesunout zaměření na seznam konverzací"
 
-#: C/shortcuts.page:72(key) C/shortcuts.page:88(key) C/shortcuts.page:104(key)
-#: C/shortcuts.page:108(key) C/shortcuts.page:112(key)
-#: C/shortcuts.page:116(key) C/shortcuts.page:120(key)
-#: C/shortcuts.page:130(key) C/shortcuts.page:134(key)
-#: C/shortcuts.page:138(key) C/shortcuts.page:146(key)
-#: C/shortcuts.page:154(key) C/shortcuts.page:158(key)
-#: C/shortcuts.page:162(key) C/shortcuts.page:166(key)
-#: C/shortcuts.page:170(key) C/shortcuts.page:174(key)
-msgid "Ctrl"
-msgstr "Ctrl"
+#: C/shortcuts.page:184(p)
+msgid "Move to the next message in a conversation"
+msgstr "Přesunout se na následující zprávu v konverzaci"
 
-#: C/shortcuts.page:72(key) C/shortcuts.page:154(key)
-msgid "B"
-msgstr "B"
+#: C/shortcuts.page:190(p)
+msgid "Move to the next/previous message in a conversation"
+msgstr "Přesunout se na následující/předchozí zprávu v konverzaci"
 
-#: C/shortcuts.page:75(p)
-msgid "Jump to next (older) conversation"
-msgstr "Přejít na následující (starší) konverzaci"
-
-#: C/shortcuts.page:76(key)
-msgid "J"
-msgstr "J"
-
-#: C/shortcuts.page:79(p)
-msgid "Jump to previous (newer) conversation"
-msgstr "Přejít na předchozí (novější) konverzaci"
-
-#: C/shortcuts.page:80(key) C/shortcuts.page:166(key)
-msgid "K"
-msgstr "K"
-
-#: C/shortcuts.page:83(p)
-msgid "Toggle spam"
-msgstr "Označit jako spam/zrušit označení spamu"
-
-#: C/shortcuts.page:84(p)
-msgid "<keyseq><key>Ctrl</key><key>J</key></keyseq> or <key>!</key>"
-msgstr "<keyseq><key>Ctrl</key><key>J</key></keyseq> nebo <key>!</key>"
-
-#: C/shortcuts.page:87(p)
-msgid "Quit"
-msgstr "Ukončit"
-
-#: C/shortcuts.page:88(key)
-msgid "Q"
-msgstr "Q"
-
-#: C/shortcuts.page:91(p)
-msgid "Zoom in"
-msgstr "Přiblížit"
-
-#: C/shortcuts.page:92(p)
-msgid "<keyseq><key>Ctrl</key><key>=</key></keyseq> or <key>=</key>"
-msgstr "<keyseq><key>Ctrl</key><key>=</key></keyseq> nebo <key>=</key>"
-
-#: C/shortcuts.page:95(p)
-msgid "Zoom out"
-msgstr "Oddálit"
-
-#: C/shortcuts.page:96(p)
-msgid "<keyseq><key>Ctrl</key><key>-</key></keyseq> or <key>-</key>"
-msgstr "<keyseq><key>Ctrl</key><key>-</key></keyseq> nebo <key>-</key>"
-
-#: C/shortcuts.page:99(p)
-msgid "Reset zoom"
-msgstr "Přiblížit na výchozí velikost"
-
-#: C/shortcuts.page:100(p)
-msgid "<keyseq><key>Ctrl</key><key>0</key></keyseq> or <key>0</key>"
-msgstr "<keyseq><key>Ctrl</key><key>0</key></keyseq> nebo <key>0</key>"
-
-#: C/shortcuts.page:103(p)
-msgid "Close composer window"
-msgstr "Zavřít okno editoru"
-
-#: C/shortcuts.page:104(key)
-msgid "W"
-msgstr "W"
-
-#: C/shortcuts.page:107(p)
-msgid "Jump to search box"
-msgstr "Přejít do vyhledávacího pole"
-
-#: C/shortcuts.page:111(p)
-msgid "Find in current conversation"
-msgstr "Hledat v aktuální konverzaci"
-
-#: C/shortcuts.page:112(key)
-msgid "F"
-msgstr "F"
-
-#: C/shortcuts.page:115(p)
-msgid "Find next in current conversation"
-msgstr "Najít následující v aktuální konverzaci"
-
-#: C/shortcuts.page:116(key) C/shortcuts.page:120(key)
-msgid "G"
-msgstr "G"
-
-#: C/shortcuts.page:119(p)
-msgid "Find previous in current conversation"
-msgstr "Najít předchozí v aktuální konverzaci"
-
-#: C/shortcuts.page:120(key)
-msgid "Shift"
-msgstr "Shift"
-
-#: C/shortcuts.page:125(title)
-msgid "Composer shortcuts"
-msgstr "Klávesové zkratky editoru"
-
-#: C/shortcuts.page:126(p)
-msgid "These shortcuts are active whenever focus is in a composer."
+#: C/shortcuts.page:191(p)
+msgid ""
+"<keyseq><key>Ctrl</key><key>Down</key></keyseq> / <keyseq><key>Ctrl</"
+"key><key>Up</key></keyseq>"
 msgstr ""
-"Následující klávesové zkratky jsou funkční, kdykoliv je aktivní editor zpráv."
+"<keyseq><key>Ctrl</key><key>↓</key></keyseq> / <keyseq><key>Ctrl</"
+"key><key>↑</key></keyseq>"
 
-#: C/shortcuts.page:129(p)
-msgid "Attach file"
-msgstr "Přiložit soubor"
+#: C/shortcuts.page:197(p)
+msgid "Move to the first/last message in a conversation"
+msgstr "Přesunout se na první/poslední zprávu v konverzaci"
 
-#: C/shortcuts.page:130(key)
-msgid "T"
-msgstr "T"
-
-#: C/shortcuts.page:133(p)
-msgid "Quote text"
-msgstr "Citovat text"
-
-#: C/shortcuts.page:134(key)
-msgid "]"
-msgstr "]"
-
-#: C/shortcuts.page:137(p)
-msgid "Unquote text"
-msgstr "Ukončit citaci textu"
-
-#: C/shortcuts.page:138(key)
-msgid "["
-msgstr "["
-
-#: C/shortcuts.page:141(p)
-msgid "Close composer"
-msgstr "Zavřít okno editoru"
-
-#: C/shortcuts.page:142(p)
-msgid "<keyseq><key>Ctrl</key><key>W</key></keyseq> or <key>Esc</key>"
-msgstr "<keyseq><key>Ctrl</key><key>W</key></keyseq> nebo <key>Esc</key>"
-
-#: C/shortcuts.page:145(p)
-msgid "Detach composer"
-msgstr "Odpojit okno editor"
-
-#: C/shortcuts.page:150(p)
-msgid "These shortcuts are only active in composers in rich text mode."
+#: C/shortcuts.page:198(p)
+msgid ""
+"<keyseq><key>Ctrl</key><key>Home</key></keyseq> / <keyseq><key>Ctrl</"
+"key><key>End</key></keyseq>"
 msgstr ""
-"Následující klávesové zkratky jsou funkční pouze když je editor v režimu "
-"formátovaného textu."
-
-#: C/shortcuts.page:153(p)
-msgid "Bold text"
-msgstr "Tučný text"
-
-#: C/shortcuts.page:157(p)
-msgid "Italicize text"
-msgstr "Text kurzívou"
-
-#: C/shortcuts.page:158(key)
-msgid "I"
-msgstr "I"
-
-#: C/shortcuts.page:161(p)
-msgid "Underline text"
-msgstr "Podtržený text"
-
-#: C/shortcuts.page:162(key)
-msgid "U"
-msgstr "U"
-
-#: C/shortcuts.page:165(p)
-msgid "Strike text"
-msgstr "Přeškrtnutý text"
-
-#: C/shortcuts.page:169(p)
-msgid "Insert a link"
-msgstr "Vložit odkaz"
-
-#: C/shortcuts.page:173(p)
-msgid "Remove formatting"
-msgstr "Odstranit formátování"
-
-#: C/shortcuts.page:174(key)
-msgid "Space"
-msgstr "mezerník"
+"<keyseq><key>Ctrl</key><key>Home</key></keyseq> / <keyseq><key>Ctrl</"
+"key><key>End</key></keyseq>"
 
 #: C/search.page:10(title)
 msgid "Search"
@@ -1292,9 +1331,3 @@ msgstr ""
 #: C/accounts.page:0(None)
 msgid "translator-credits"
 msgstr "Marek Černocký <marek@manet.cz>"
-
-#~ msgid "Open the Label Conversation menu"
-#~ msgstr "Otevřít nabídku štítků konverzací"
-
-#~ msgid "Open the Move Conversation menu"
-#~ msgstr "Otevřít nabídku přesunu konverzací"
