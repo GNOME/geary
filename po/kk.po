@@ -1,15 +1,15 @@
 # Kazakh translation for geary.
 # Copyright (C) 2014 geary's COPYRIGHT HOLDER
 # This file is distributed under the same license as the geary package.
-# Baurzhan Muftakhidinov <baurthefirst@gmail.com>, 2014.
+# Baurzhan Muftakhidinov <baurthefirst@gmail.com>, 2014-2017.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: geary master\n"
 "Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=internationalization\n"
-"POT-Creation-Date: 2017-03-05 19:12+0000\n"
-"PO-Revision-Date: 2017-03-12 10:10+0500\n"
+"POT-Creation-Date: 2017-03-12 05:11+0000\n"
+"PO-Revision-Date: 2017-03-16 17:44+0500\n"
 "Last-Translator: Baurzhan Muftakhidinov <baurthefirst@gmail.com>\n"
 "Language-Team: Kazakh <kk_KZ@googlegroups.com>\n"
 "Language: kk\n"
@@ -17,7 +17,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
-"X-Generator: Poedit 1.8.12\n"
+"X-Generator: Poedit 1.8.11\n"
 
 #: ../desktop/org.gnome.Geary.appdata.xml.in.h:1
 #: ../desktop/org.gnome.Geary.desktop.in.h:1
@@ -37,12 +37,17 @@ msgid ""
 "desktop. It allows you to read, find and send email with a straightforward, "
 "modern interface."
 msgstr ""
+"Geary - бұл сөйлесулер негізінде жасалған эл. пошта қолданбасы, GNOME 3 "
+"жұмыс үстелі үшін арналған. Оның көмегімен тура, замануи интерфейсін "
+"қолданып, эл. поштаны оқу, табу және жіберуге болады."
 
 #: ../desktop/org.gnome.Geary.appdata.xml.in.h:4
 msgid ""
 "Conversations allow you to read a complete discussion without having to find "
 "and click from message to message."
 msgstr ""
+"Сөйлесулер көмегімен сіз талқылауды толығымен оқи аласыз, бір хаттан екінші "
+"хатқа іздеп, шертуді орындамай-ақ."
 
 #: ../desktop/org.gnome.Geary.appdata.xml.in.h:5
 msgid "Geary’s features include:"
@@ -50,15 +55,15 @@ msgstr "Geary мүмкіндіктерінің ішінде:"
 
 #: ../desktop/org.gnome.Geary.appdata.xml.in.h:6
 msgid "Quick email account setup"
-msgstr ""
+msgstr "Эл. пошта тіркелгісін жылдам баптау"
 
 #: ../desktop/org.gnome.Geary.appdata.xml.in.h:7
 msgid "Shows related messages together in conversations"
-msgstr ""
+msgstr "Өзара байланысқан хабарламаларды сөйлесуде бірге көрсетеді"
 
 #: ../desktop/org.gnome.Geary.appdata.xml.in.h:8
 msgid "Fast, full text and keyword search"
-msgstr ""
+msgstr "Жылдам, толық мәтіндік және кілт сөздерін іздеу"
 
 #: ../desktop/org.gnome.Geary.appdata.xml.in.h:9
 msgid "Full-featured HTML and plain text message composer"
@@ -84,7 +89,7 @@ msgstr "Geary поштасы"
 #. Translators: These are desktop search terms. Do not translate semicolons, end line with a semicolon.
 #: ../desktop/org.gnome.Geary.desktop.in.h:6
 msgid "Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;"
-msgstr "Пошта;Эл.пошта;Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;"
+msgstr "Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;Пошта;Эл.пошта;"
 
 #: ../desktop/org.gnome.Geary.desktop.in.h:7 ../ui/gtk/menus.ui.h:1
 msgid "Compose Message"
@@ -101,7 +106,7 @@ msgstr "Geary поштасы"
 
 #: ../desktop/geary-autostart.desktop.in.h:5
 msgid "Email;E-mail;Mail;"
-msgstr "Эл. пошта;электрондық пошта;е-пошта;"
+msgstr "Email;E-mail;Mail;Эл. пошта;электрондық пошта;е-пошта;"
 
 #: ../desktop/geary-attach.contract.in.h:1
 msgid "Send by email"
@@ -313,7 +318,7 @@ msgstr "TLS ескертулері бар барлық сервер сертиф
 
 #: ../src/client/application/geary-args.vala:27
 msgid "Perform a graceful quit"
-msgstr ""
+msgstr "Қалыпты шығуды орындау"
 
 #: ../src/client/application/geary-args.vala:28
 msgid "Display program version"
@@ -512,13 +517,15 @@ msgstr "Жалғ_астыру"
 
 #: ../src/client/application/geary-controller.vala:1041
 msgid "Error connecting to the server"
-msgstr ""
+msgstr "Серверге байланысу қатесі"
 
 #: ../src/client/application/geary-controller.vala:1042
 msgid ""
 "Geary encountered an error while connecting to the server.  Please try again "
 "in a few moments."
 msgstr ""
+"Geary серверге байланысу кезінде қате орын алды. Біраз уақыттан кейін "
+"қайталап көріңіз."
 
 #. / Displayed in the space-limited status bar when a message fails to be sent due to error.
 #: ../src/client/application/geary-controller.vala:1079
@@ -839,11 +846,11 @@ msgstr "Ұс_тау"
 
 #: ../src/client/composer/composer-link-popover.vala:150
 msgid "Link URL is not correctly formatted, e.g. http://example.com"
-msgstr ""
+msgstr "Сілтеме URL-ы дұрыс пішімделмеген, мыс. http://example.com"
 
 #: ../src/client/composer/composer-link-popover.vala:157
 msgid "Invalid link URL"
-msgstr ""
+msgstr "Бұл сілтеменің URL-ы қате"
 
 #: ../src/client/composer/composer-link-popover.vala:157
 msgid "Invalid email address"
@@ -985,11 +992,11 @@ msgstr "Суреттер"
 
 #: ../src/client/composer/spell-check-popover.vala:117
 msgid "Remove this language from the preferred list"
-msgstr ""
+msgstr "Бұл тілді таңдамалы тілдер тізімінен өшіру"
 
 #: ../src/client/composer/spell-check-popover.vala:121
 msgid "Add this language to the preferred list"
-msgstr ""
+msgstr "Бұл тілді таңдамалы тілдер тізіміне қосу"
 
 #: ../src/client/composer/spell-check-popover.vala:217
 msgid "Search for more languages"
@@ -1010,13 +1017,13 @@ msgstr "Белгісіз"
 #. when the message has no from address.
 #: ../src/client/conversation-viewer/conversation-message.vala:331
 msgid "No sender"
-msgstr ""
+msgstr "Жіберуші жоқ"
 
 #. Translators: This separates multiple 'from'
 #. addresses in the header preview for a message.
 #: ../src/client/conversation-viewer/conversation-message.vala:586
 msgid ", "
-msgstr ""
+msgstr ", "
 
 #. Translators: This string is used as the HTML IMG ALT
 #. attribute value when displaying an inline image in an email
@@ -1031,7 +1038,7 @@ msgstr "Бірде-бір сөйлесу таңдалмады."
 
 #: ../src/client/conversation-viewer/conversation-viewer.vala:74
 msgid "Selecting a conversation from the list will display it here"
-msgstr ""
+msgstr "Тізімнен сөйлесуді таңдау оны осында көрсетеді"
 
 #: ../src/client/conversation-viewer/conversation-viewer.vala:79
 msgid "Multiple conversations selected"
@@ -1039,7 +1046,7 @@ msgstr "Бірнеше сөйлесу таңдалды."
 
 #: ../src/client/conversation-viewer/conversation-viewer.vala:81
 msgid "Choosing an action will apply to all selected conversations"
-msgstr ""
+msgstr "Әрекетті таңдау барлық таңдалған сөйлесулерге іске асырылады"
 
 #: ../src/client/conversation-viewer/conversation-viewer.vala:86
 #: ../src/client/conversation-viewer/conversation-viewer.vala:93
@@ -1048,11 +1055,11 @@ msgstr "Сөйлесулер табылмады"
 
 #: ../src/client/conversation-viewer/conversation-viewer.vala:88
 msgid "This folder does not contain any conversations"
-msgstr ""
+msgstr "Бумада бірде-бір сөйлесу жоқ"
 
 #: ../src/client/conversation-viewer/conversation-viewer.vala:95
 msgid "Your search returned no results, try refining your search terms"
-msgstr ""
+msgstr "Сіздің іздеуіңіз бірде-бір нәтиже қайтармады, іздеу шарттарын баптаңыз"
 
 #: ../src/client/dialogs/attachment-dialog.vala:28
 #: ../src/client/dialogs/attachment-dialog.vala:30
@@ -1749,16 +1756,16 @@ msgstr "Сақтау және жабу"
 #. Note that this button and the Update button will never be shown at the same time to the user.
 #: ../ui/composer-link-popover.ui.h:2
 msgid "Insert the new link with this URL"
-msgstr ""
+msgstr "Бұл URL-мен жаңа сілтемені кірістіру"
 
 #: ../ui/composer-link-popover.ui.h:3
 msgid "Link URL"
-msgstr ""
+msgstr "Сілтеме URL-ы"
 
 #. Note that this button and the Insert button will never be shown at the same time to the user.
 #: ../ui/composer-link-popover.ui.h:5
 msgid "Update this link’s URL"
-msgstr ""
+msgstr "Бұл сілтеменің URL-ын жаңарту"
 
 #: ../ui/composer-link-popover.ui.h:6
 msgid "Delete this link"
@@ -1905,7 +1912,7 @@ msgstr "Мәтінді дәйексөз емес қылу (Ctrl+[)"
 
 #: ../ui/composer-widget.ui.h:19
 msgid "Insert or update selection link (Ctrl+L)"
-msgstr ""
+msgstr "Таңдалғанның сілтемесін кірістіру немесе жаңарту (Ctrl+L)"
 
 #: ../ui/composer-widget.ui.h:20
 msgid "Insert an image (Ctrl+G)"
@@ -1926,16 +1933,16 @@ msgstr "Барлық салынымдарды сақтау"
 #. Note: The application will never show this button at the same time as unstar_button, one will always be hidden.
 #: ../ui/conversation-email.ui.h:3
 msgid "Mark this message as starred"
-msgstr ""
+msgstr "Бұл хабарламаны жұлдызшамен белгілеу"
 
 #. Note: The application will never show this button at the same time as star_button, one will always be hidden.
 #: ../ui/conversation-email.ui.h:5
 msgid "Mark this message as not starred"
-msgstr ""
+msgstr "Бұл хабарламадан жұлдызшаны алып тастау"
 
 #: ../ui/conversation-email.ui.h:6
 msgid "Display the message menu"
-msgstr ""
+msgstr "Хабарлама мәзірін көрсету"
 
 #: ../ui/conversation-email.ui.h:7
 msgid "Open selected attachments"
@@ -2027,24 +2034,23 @@ msgstr ""
 
 #: ../ui/conversation-message.ui.h:1
 msgid "From <email>"
-msgstr ""
+msgstr "<email> жіберген"
 
 #: ../ui/conversation-message.ui.h:2
 msgid "1/1/1970\t"
-msgstr ""
+msgstr "1/1/1970\t"
 
 #: ../ui/conversation-message.ui.h:3
 msgid "Preview body text."
-msgstr ""
+msgstr "Дене мәтінін алдын-ала қарау."
 
 #: ../ui/conversation-message.ui.h:4
 msgid "Sent by:"
-msgstr ""
+msgstr "Кім жіберген:"
 
 #: ../ui/conversation-message.ui.h:5
-#| msgid "Reply-To: "
 msgid "Reply to:"
-msgstr ""
+msgstr "Кімге жауап беру:"
 
 #: ../ui/conversation-message.ui.h:6
 msgid "Subject"
@@ -2076,7 +2082,7 @@ msgstr "Қашықтағы суреттер көрсетілмейді"
 
 #: ../ui/conversation-message.ui.h:13
 msgid "Only show remote images from senders you trust."
-msgstr ""
+msgstr "Тек өзіңіз сенетін жіберушілерден суреттерді көрсету."
 
 #: ../ui/conversation-message.ui.h:14
 msgid "But actually goes to:"
@@ -2092,11 +2098,11 @@ msgstr "Зиянкес сілтеме табылды"
 
 #: ../ui/conversation-message.ui.h:17
 msgid "The email sender may be leading you to the wrong web site."
-msgstr ""
+msgstr "Эл. поштаны жіберуші сізді қате сайтқа бағдарлауы мүмкін."
 
 #: ../ui/conversation-message.ui.h:18
 msgid "If unsure, contact the sender and ask before continuing."
-msgstr ""
+msgstr "Сенімсіз болсаңыз, жалғастыру алдында жіберушіге хабарласыңыз."
 
 #: ../ui/conversation-viewer.ui.h:1
 msgid "Find in conversation"
@@ -2246,7 +2252,6 @@ msgid "Move to trash"
 msgstr "Қоқыс шелегіне тастау"
 
 #: ../ui/gtk/help-overlay.ui.h:21
-#| msgid "Toggle search bar"
 msgctxt "shortcut window"
 msgid "Toggle spam"
 msgstr "Спам күйін ауыстыру"
@@ -2274,7 +2279,7 @@ msgstr "Оқылмаған етіп белгілеу"
 #: ../ui/gtk/help-overlay.ui.h:26
 msgctxt "shortcut window"
 msgid "View"
-msgstr ""
+msgstr "Қарау"
 
 #: ../ui/gtk/help-overlay.ui.h:27
 msgctxt "shortcut window"
