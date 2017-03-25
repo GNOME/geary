@@ -11,10 +11,10 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
-"Report-Msgid-Bugs-To: http://bugzilla.gnome.org/enter_bug.cgi?"
+"Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=internationalization\n"
-"POT-Creation-Date: 2017-01-08 22:15+0000\n"
-"PO-Revision-Date: 2017-01-09 16:00+0100\n"
+"POT-Creation-Date: 2017-03-18 17:03+0000\n"
+"PO-Revision-Date: 2017-03-25 16:48+0100\n"
 "Last-Translator: Alan Mortensen <alanmortensen.am@gmail.com>\n"
 "Language-Team: Danish (http://www.transifex.com/projects/p/geary/language/"
 "da/)\n"
@@ -102,7 +102,7 @@ msgid "Compose Message"
 msgstr "Skriv besked"
 
 #: ../desktop/geary-autostart.desktop.in.h:2
-#: ../src/client/application/geary-application.vala:20
+#: ../src/client/application/geary-application.vala:21
 msgid "Mail Client"
 msgstr "E-mailklient"
 
@@ -123,8 +123,7 @@ msgid "Send files using Geary"
 msgstr "Send filer med Geary"
 
 #: ../src/client/accounts/account-dialog-add-edit-pane.vala:51
-#: ../src/client/components/stock.vala:31
-#: ../ui/conversation-email-menus.ui.h:10
+#: ../src/client/components/stock.vala:31 ../ui/conversation-email-menus.ui.h:10
 msgid "_Save"
 msgstr "_Gem"
 
@@ -197,67 +196,67 @@ msgstr "4 år siden"
 msgid "Everything"
 msgstr "Alt"
 
-#: ../src/client/accounts/add-edit-page.vala:282
+#: ../src/client/accounts/add-edit-page.vala:283
 msgid "Edit"
 msgstr "Redigér"
 
-#: ../src/client/accounts/add-edit-page.vala:284
+#: ../src/client/accounts/add-edit-page.vala:285
 msgid "Preview"
 msgstr "Forhåndsvisning"
 
-#: ../src/client/accounts/add-edit-page.vala:738
+#: ../src/client/accounts/add-edit-page.vala:751
 msgid "Remem_ber passwords"
 msgstr "Hus_k adgangskoder"
 
-#: ../src/client/accounts/add-edit-page.vala:745 ../ui/login.glade.h:7
+#: ../src/client/accounts/add-edit-page.vala:758 ../ui/login.glade.h:7
 msgid "Remem_ber password"
 msgstr "Hu_sk adgangskode"
 
-#: ../src/client/accounts/add-edit-page.vala:779
+#: ../src/client/accounts/add-edit-page.vala:792
 msgid "Unable to validate:\n"
-msgstr "Kunne ikke validére.\n"
+msgstr "Kunne ikke validere:\n"
 
-#: ../src/client/accounts/add-edit-page.vala:781
+#: ../src/client/accounts/add-edit-page.vala:794
 msgid "        • Invalid account nickname.\n"
 msgstr "        • Ugyldigt kaldenavn til bruger.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:784
+#: ../src/client/accounts/add-edit-page.vala:797
 msgid "        • Email address already added to Geary.\n"
 msgstr "        • E-mailadressen er allerede tilføjet til Geary.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:788
+#: ../src/client/accounts/add-edit-page.vala:801
 msgid "        • IMAP connection error.\n"
 msgstr "        • IMAP-forbindelsesfejl.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:791
+#: ../src/client/accounts/add-edit-page.vala:804
 msgid "        • IMAP username or password incorrect.\n"
 msgstr "        • Forkert brugernavn eller adgangskode til IMAP.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:794
+#: ../src/client/accounts/add-edit-page.vala:807
 msgid "        • SMTP connection error.\n"
 msgstr "        • SMTP-forbindelsesfejl.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:797
+#: ../src/client/accounts/add-edit-page.vala:810
 msgid "        • SMTP username or password incorrect.\n"
 msgstr "        • Forkert brugernavn eller adgangskode til SMTP.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:801
+#: ../src/client/accounts/add-edit-page.vala:814
 msgid "        • Connection error.\n"
 msgstr "        • Forbindelsesfejl.\n"
 
-#: ../src/client/accounts/add-edit-page.vala:805
+#: ../src/client/accounts/add-edit-page.vala:818
 msgid "        • Username or password incorrect.\n"
 msgstr "        • Forkert brugernavn eller adgangskode.\n"
 
-#: ../src/client/application/geary-application.vala:21
+#: ../src/client/application/geary-application.vala:22
 msgid "Copyright 2016 Software Freedom Conservancy Inc."
-msgstr "Copyright 2016 Software Freedom Conservancy Inc."
+msgstr "Ophavsret 2016 Software Freedom Conservancy Inc."
 
-#: ../src/client/application/geary-application.vala:23
+#: ../src/client/application/geary-application.vala:24
 msgid "Visit the Geary web site"
 msgstr "Besøg Gearys hjemmeside"
 
-#: ../src/client/application/geary-application.vala:431
+#: ../src/client/application/geary-application.vala:464
 #, c-format
 msgid "About %s"
 msgstr "Om %s"
@@ -265,7 +264,7 @@ msgstr "Om %s"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: ../src/client/application/geary-application.vala:435
+#: ../src/client/application/geary-application.vala:468
 msgid "translator-credits"
 msgstr ""
 "Nikolaj Holmquist Pedersen <nikolajholmquist@gmail.com>\n"
@@ -400,7 +399,7 @@ msgid "Mark as not S_pam"
 msgstr "Marker som ikke s_pam"
 
 #: ../src/client/application/geary-controller.vala:76
-#: ../src/client/application/geary-controller.vala:432
+#: ../src/client/application/geary-controller.vala:448
 msgid "Mark conversation"
 msgstr "Markér samtale"
 
@@ -417,7 +416,7 @@ msgid "Add label to conversations"
 msgstr "Tilføj label til samtaler"
 
 #: ../src/client/application/geary-controller.vala:80
-#: ../src/client/application/geary-controller.vala:471
+#: ../src/client/application/geary-controller.vala:487
 msgid "Move conversation"
 msgstr "Flyt samtale"
 
@@ -425,113 +424,113 @@ msgstr "Flyt samtale"
 msgid "Move conversations"
 msgstr "Flyt samtaler"
 
-#: ../src/client/application/geary-controller.vala:434
+#: ../src/client/application/geary-controller.vala:450
 msgid "_Mark as…"
 msgstr "_Markér som …"
 
-#: ../src/client/application/geary-controller.vala:440
+#: ../src/client/application/geary-controller.vala:456
 msgid "Mark as _Read"
 msgstr "Markér som _læst"
 
-#: ../src/client/application/geary-controller.vala:446
+#: ../src/client/application/geary-controller.vala:462
 msgid "Mark as _Unread"
 msgstr "Markér som _ulæst"
 
-#: ../src/client/application/geary-controller.vala:452
+#: ../src/client/application/geary-controller.vala:468
 msgid "_Star"
 msgstr "St_jern"
 
-#: ../src/client/application/geary-controller.vala:457
+#: ../src/client/application/geary-controller.vala:473
 msgid "U_nstar"
-msgstr "Stjern ikke"
+msgstr "Stj_ern ikke"
 
-#: ../src/client/application/geary-controller.vala:467
+#: ../src/client/application/geary-controller.vala:483
 msgid "Add label"
 msgstr "Tilføj etiket"
 
-#: ../src/client/application/geary-controller.vala:468
+#: ../src/client/application/geary-controller.vala:484
 msgid "_Label"
 msgstr "_Etiket"
 
-#: ../src/client/application/geary-controller.vala:472
+#: ../src/client/application/geary-controller.vala:488
 msgid "_Move"
 msgstr "_Flyt"
 
-#: ../src/client/application/geary-controller.vala:476
+#: ../src/client/application/geary-controller.vala:492
 msgid "Compose new message (Ctrl+N, N)"
 msgstr "Skriv ny besked (Ctrl+N, N)"
 
-#: ../src/client/application/geary-controller.vala:480
+#: ../src/client/application/geary-controller.vala:496
 #: ../ui/conversation-email-menus.ui.h:1
 msgid "_Reply"
 msgstr "_Svar"
 
-#: ../src/client/application/geary-controller.vala:481
+#: ../src/client/application/geary-controller.vala:497
 msgid "Reply (Ctrl+R, R)"
 msgstr "Svar (Ctrl+R, R)"
 
-#: ../src/client/application/geary-controller.vala:485
+#: ../src/client/application/geary-controller.vala:501
 msgid "R_eply All"
 msgstr "S_var til alle"
 
-#: ../src/client/application/geary-controller.vala:486
+#: ../src/client/application/geary-controller.vala:502
 msgid "Reply all (Ctrl+Shift+R, Shift+R)"
 msgstr "Svar til alle (Ctrl+Skift+R, Skift+R)"
 
-#: ../src/client/application/geary-controller.vala:491
+#: ../src/client/application/geary-controller.vala:507
 #: ../ui/conversation-email-menus.ui.h:3
 msgid "_Forward"
 msgstr "_Videresend"
 
-#: ../src/client/application/geary-controller.vala:492
+#: ../src/client/application/geary-controller.vala:508
 msgid "Forward (Ctrl+L, F)"
 msgstr "Videresend (Ctrl+L, F)"
 
-#: ../src/client/application/geary-controller.vala:522
+#: ../src/client/application/geary-controller.vala:538
 msgid "Empty _Spam…"
 msgstr "Tøm _spam…"
 
-#: ../src/client/application/geary-controller.vala:526
+#: ../src/client/application/geary-controller.vala:542
 msgid "Empty _Trash…"
 msgstr "Tøm _papirkurv…"
 
 #. No callback is connected, since we bind the toggle button to the search bar visibility
-#: ../src/client/application/geary-controller.vala:558
+#: ../src/client/application/geary-controller.vala:574
 msgid "Toggle search bar"
 msgstr "Slå søgebjælke til/fra"
 
 #. No callback is connected, since we bind the toggle button to the find bar visibility
-#: ../src/client/application/geary-controller.vala:563
+#: ../src/client/application/geary-controller.vala:579
 msgid "Toggle find bar"
 msgstr "Slå find-bjælke til/fra"
 
-#: ../src/client/application/geary-controller.vala:741
+#: ../src/client/application/geary-controller.vala:757
 msgid "Unable to store server trust exception"
 msgstr "Kan ikke gemme undtagelse for tillid til server"
 
-#: ../src/client/application/geary-controller.vala:976
+#: ../src/client/application/geary-controller.vala:992
 msgid "Your settings are insecure"
 msgstr "Dine indstillinger er usikre"
 
-#: ../src/client/application/geary-controller.vala:977
+#: ../src/client/application/geary-controller.vala:993
 msgid ""
 "Your IMAP and/or SMTP settings do not specify SSL or TLS.  This means your "
-"username and password could be read by another person on the network.  Are "
-"you sure you want to do this?"
+"username and password could be read by another person on the network.  Are you "
+"sure you want to do this?"
 msgstr ""
 "Dine IMAP- og/eller SMTP-indstillinger anvender ikke SSL eller TLS. Dette "
-"betyder, at dit brugernavn og din adgangskode kan læses af andre på "
-"netværket. Er du sikker på, at du vil gære dette?"
+"betyder, at dit brugernavn og din adgangskode kan læses af andre på netværket. "
+"Er du sikker på, at du vil gære dette?"
 
-#: ../src/client/application/geary-controller.vala:978
+#: ../src/client/application/geary-controller.vala:994
 msgid "Co_ntinue"
 msgstr "F_ortsæt"
 
-#: ../src/client/application/geary-controller.vala:1025
+#: ../src/client/application/geary-controller.vala:1041
 msgid "Error connecting to the server"
 msgstr "Fejl i forsøget på at forbinde til serveren"
 
-#: ../src/client/application/geary-controller.vala:1026
+#: ../src/client/application/geary-controller.vala:1042
 msgid ""
 "Geary encountered an error while connecting to the server.  Please try again "
 "in a few moments."
@@ -540,27 +539,27 @@ msgstr ""
 "lidt."
 
 #. / Displayed in the space-limited status bar when a message fails to be sent due to error.
-#: ../src/client/application/geary-controller.vala:1063
+#: ../src/client/application/geary-controller.vala:1079
 #: ../src/client/components/status-bar.vala:29
 msgid "Error sending email"
 msgstr "Der opstod en fejl ved afsendelse af e-mail"
 
-#: ../src/client/application/geary-controller.vala:1064
+#: ../src/client/application/geary-controller.vala:1080
 msgid ""
-"Geary encountered an error sending an email.  If the problem persists, "
-"please manually delete the email from your Outbox folder."
+"Geary encountered an error sending an email.  If the problem persists, please "
+"manually delete the email from your Outbox folder."
 msgstr ""
 "Geary stødte ind i en fejl under afsendelse af en e-mail. Hvis dette problem "
 "fortsætter, bør du manuelt slette beskeden fra din \"Udbakke\"-mappe."
 
 #. Displayed in the space-limited status bar when a message fails to be uploaded
 #. to Sent Mail after being sent.
-#: ../src/client/application/geary-controller.vala:1068
+#: ../src/client/application/geary-controller.vala:1084
 #: ../src/client/components/status-bar.vala:33
 msgid "Error saving sent mail"
 msgstr "Der opstod en fejl ved lagring af den afsendte e-mail"
 
-#: ../src/client/application/geary-controller.vala:1069
+#: ../src/client/application/geary-controller.vala:1085
 msgid ""
 "Geary encountered an error saving a sent message to Sent Mail.  The message "
 "will stay in your Outbox folder until you delete it."
@@ -568,19 +567,19 @@ msgstr ""
 "Der opstod en fejl, da Geary forsøgte på at gemme en sendt besked til mappen "
 "med afsendt e-mail.  Beskeden vil blive i din Udbakke, indtil du sletter den."
 
-#: ../src/client/application/geary-controller.vala:1138
+#: ../src/client/application/geary-controller.vala:1154
 msgid "Labels"
 msgstr "Etiketter"
 
 #. give the user two options: reset the Account local store, or exit Geary.  A third
 #. could be done to leave the Account in an unopened state, but we don't currently
 #. have provisions for that.
-#: ../src/client/application/geary-controller.vala:1150
+#: ../src/client/application/geary-controller.vala:1166
 #, c-format
 msgid "Unable to open the database for %s"
 msgstr "Kunne ikke åbne databasen for %s"
 
-#: ../src/client/application/geary-controller.vala:1151
+#: ../src/client/application/geary-controller.vala:1167
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -601,23 +600,23 @@ msgstr ""
 "Geary kan genopbygge databasefilen og synkronisére med serveren igen eller "
 "afslutte.\n"
 "\n"
-"Genopbygning af databasen vil slette al lokal e-mail og dets vedhæftede "
-"filer. <b>Mail'en på serveren vil ikke blive rørt.</b>"
+"Genopbygning af databasen vil slette al lokal e-mail og dets vedhæftede filer. "
+"<b>Mail'en på serveren vil ikke blive rørt.</b>"
 
-#: ../src/client/application/geary-controller.vala:1153
+#: ../src/client/application/geary-controller.vala:1169
 msgid "_Rebuild"
 msgstr "_Genopbyg"
 
-#: ../src/client/application/geary-controller.vala:1153
+#: ../src/client/application/geary-controller.vala:1169
 msgid "E_xit"
 msgstr "_Afslut"
 
-#: ../src/client/application/geary-controller.vala:1162
+#: ../src/client/application/geary-controller.vala:1178
 #, c-format
 msgid "Unable to rebuild database for “%s”"
 msgstr "Kunne ikke genopbygge databasen for \"%s\""
 
-#: ../src/client/application/geary-controller.vala:1163
+#: ../src/client/application/geary-controller.vala:1179
 #, c-format
 msgid ""
 "Error during rebuild:\n"
@@ -630,14 +629,14 @@ msgstr ""
 
 #. some other problem opening the account ... as with other flow path, can't run
 #. Geary today with an account in unopened state, so have to exit
-#: ../src/client/application/geary-controller.vala:1185
-#: ../src/client/application/geary-controller.vala:1195
-#: ../src/client/application/geary-controller.vala:1206
+#: ../src/client/application/geary-controller.vala:1201
+#: ../src/client/application/geary-controller.vala:1211
+#: ../src/client/application/geary-controller.vala:1222
 #, c-format
 msgid "Unable to open local mailbox for %s"
 msgstr "Kunne ikke åbne den lokale postkasse for %s"
 
-#: ../src/client/application/geary-controller.vala:1186
+#: ../src/client/application/geary-controller.vala:1202
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -655,21 +654,21 @@ msgstr ""
 "\n"
 "%s"
 
-#: ../src/client/application/geary-controller.vala:1196
+#: ../src/client/application/geary-controller.vala:1212
 msgid ""
-"The version number of the local mail database is formatted for a newer "
-"version of Geary. Unfortunately, the database cannot be “rolled back” to "
-"work with this version of Geary.\n"
+"The version number of the local mail database is formatted for a newer version "
+"of Geary. Unfortunately, the database cannot be “rolled back” to work with "
+"this version of Geary.\n"
 "\n"
 "Please install the latest version of Geary and try again."
 msgstr ""
 "Den lokale e-maildatabases versionsnummer er til en nyere version af Geary. "
-"Desværre kan databasen ikke blive \"rullet tilbage\", så den virker med "
-"denne version of Geary.\n"
+"Desværre kan databasen ikke blive \"rullet tilbage\", så den virker med denne "
+"version of Geary.\n"
 "\n"
 "Installér venligst den nyeste version af Geary og prøv igen."
 
-#: ../src/client/application/geary-controller.vala:1207
+#: ../src/client/application/geary-controller.vala:1223
 msgid ""
 "There was an error opening the local account. This is probably due to "
 "connectivity issues.\n"
@@ -681,32 +680,32 @@ msgstr ""
 "\n"
 "Tjek, at din internetforbindelse virker og genstart derefter Geary."
 
-#: ../src/client/application/geary-controller.vala:1982
+#: ../src/client/application/geary-controller.vala:1999
 msgid "Undo move (Ctrl+Z)"
 msgstr "Fortryd flyt (Ctrl+Z)"
 
-#: ../src/client/application/geary-controller.vala:1992
+#: ../src/client/application/geary-controller.vala:2009
 msgid "Are you sure you want to open these attachments?"
 msgstr "Er du sikker på, at du vil åbne disse vedhæftede filer?"
 
-#: ../src/client/application/geary-controller.vala:1993
+#: ../src/client/application/geary-controller.vala:2010
 msgid ""
 "Attachments may cause damage to your system if opened.  Only open files from "
 "trusted sources."
 msgstr ""
-"Vedhæftede filer kan skade dit system, når de åbnes.  Åbn kun filer fra "
-"folk, du stoler på."
+"Vedhæftede filer kan skade dit system, når de åbnes.  Åbn kun filer fra folk, "
+"du stoler på."
 
-#: ../src/client/application/geary-controller.vala:1994
+#: ../src/client/application/geary-controller.vala:2011
 msgid "Don’t _ask me again"
 msgstr "S_pørg mig ikke igen"
 
-#: ../src/client/application/geary-controller.vala:2038
+#: ../src/client/application/geary-controller.vala:2121
 #, c-format
 msgid "A file named “%s” already exists.  Do you want to replace it?"
 msgstr "Filen \"%s\" findes allerede. Vil du erstatte den?"
 
-#: ../src/client/application/geary-controller.vala:2040
+#: ../src/client/application/geary-controller.vala:2123
 #, c-format
 msgid ""
 "The file already exists in “%s”.  Replacing it will overwrite its contents."
@@ -714,66 +713,66 @@ msgstr ""
 "Filen findes allerede i \"%s\". Hvis du erstatter den, overskrives dens "
 "indhold."
 
-#: ../src/client/application/geary-controller.vala:2043
+#: ../src/client/application/geary-controller.vala:2126
 msgid "_Replace"
 msgstr "_Erstat"
 
 #. Find out what to do with the inline composers.
 #. TODO: Remove this in favor of automatically saving drafts
-#: ../src/client/application/geary-controller.vala:2396
+#: ../src/client/application/geary-controller.vala:2374
 msgid "Close open draft messages?"
 msgstr "Luk åbne kladder?"
 
-#: ../src/client/application/geary-controller.vala:2518
+#: ../src/client/application/geary-controller.vala:2496
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Tøm al e-mail fra din %s-mappe?"
 
-#: ../src/client/application/geary-controller.vala:2519
+#: ../src/client/application/geary-controller.vala:2497
 msgid "This removes the email from Geary and your email server."
 msgstr "Dette fjerner e-mail fra Geary samt din e-mailserver."
 
-#: ../src/client/application/geary-controller.vala:2520
+#: ../src/client/application/geary-controller.vala:2498
 msgid "This cannot be undone."
 msgstr "Dette kan ikke fortrydes."
 
-#: ../src/client/application/geary-controller.vala:2521
+#: ../src/client/application/geary-controller.vala:2499
 #, c-format
 msgid "Empty %s"
 msgstr "Tøm %s"
 
-#: ../src/client/application/geary-controller.vala:2538
+#: ../src/client/application/geary-controller.vala:2516
 #, c-format
 msgid "Error emptying %s"
 msgstr "Fejl ved tømning af %s"
 
-#: ../src/client/application/geary-controller.vala:2568
+#: ../src/client/application/geary-controller.vala:2546
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Ønsker du at slette denne besked permanent?"
 msgstr[1] "Ønsker du at slette disse beskeder permanent?"
 
-#: ../src/client/application/geary-controller.vala:2570
+#: ../src/client/application/geary-controller.vala:2548
 msgid "Delete"
 msgstr "Slet"
 
-#: ../src/client/application/geary-controller.vala:2602
+#: ../src/client/application/geary-controller.vala:2580
 msgid "Undo archive (Ctrl+Z)"
 msgstr "Fortryd arkivér (Ctrl+Z)"
 
-#: ../src/client/application/geary-controller.vala:2617
+#: ../src/client/application/geary-controller.vala:2595
 msgid "Undo trash (Ctrl+Z)"
 msgstr "Fortryd smid i papirkurv (Ctrl+Z)"
 
-#: ../src/client/application/geary-controller.vala:2671
+#: ../src/client/application/geary-controller.vala:2649
 msgid "Undo (Ctrl+Z)"
 msgstr "Fortryd (Ctrl+Z)"
 
-#: ../src/client/application/geary-controller.vala:2802
+#: ../src/client/application/geary-controller.vala:2780
 msgid "Failed to open default text editor."
 msgstr "Kunne ikke åbne standardprogrammet til tekstredigéring."
 
-#: ../src/client/components/main-window.vala:341
+#: ../src/client/components/main-window.vala:389
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -854,79 +853,73 @@ msgstr "_Fjern"
 msgid "_Keep"
 msgstr "_Behold"
 
-#: ../src/client/composer/composer-widget.vala:146
+#: ../src/client/composer/composer-link-popover.vala:150
+msgid "Link URL is not correctly formatted, e.g. http://example.com"
+msgstr "Link-URL er ikke korrekt formateret, f.eks. http://eksempel.dk"
+
+#: ../src/client/composer/composer-link-popover.vala:157
+msgid "Invalid link URL"
+msgstr "Ugyldig link-URL"
+
+#: ../src/client/composer/composer-link-popover.vala:157
+msgid "Invalid email address"
+msgstr "Ugyldig e-mailadresse"
+
+#: ../src/client/composer/composer-widget.vala:154
 msgid "Saved"
 msgstr "Gemt"
 
-#: ../src/client/composer/composer-widget.vala:147
+#: ../src/client/composer/composer-widget.vala:155
 msgid "Saving"
 msgstr "Gemmer"
 
-#: ../src/client/composer/composer-widget.vala:148
+#: ../src/client/composer/composer-widget.vala:156
 msgid "Error saving"
 msgstr "Der opstod en fejl under lagring"
 
-#: ../src/client/composer/composer-widget.vala:149
+#: ../src/client/composer/composer-widget.vala:157
 msgid "Press Backspace to delete quote"
 msgstr "Tryk tilbagetast for at slette citat"
 
-#: ../src/client/composer/composer-widget.vala:150
+#: ../src/client/composer/composer-widget.vala:158
 msgid "New Message"
 msgstr "Ny besked"
 
-#. A list of keywords, separated by pipe ("|") characters, that suggest an attachment; since
-#. this is full-word checking, include all variants of each word.  No spaces are allowed.
-#: ../src/client/composer/composer-widget.vala:208
+#. Translators: This is list of keywords, separated by pipe ("|")
+#. characters, that suggest an attachment; since this is full-word
+#. checking, include all variants of each word.  No spaces are
+#. allowed.
+#: ../src/client/composer/composer-widget.vala:167
 msgid ""
 "attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|"
 "enclosing|encloses|enclosure|enclosures"
 msgstr ""
-"vedhæft|vedhæfte|vedhæftet|vedhæfter|bilag|bilagene|vedlagt|vedlægger|"
-"vedlægge|vedhæftede|attach|attaching|attaches|attachment|attachments|"
-"attached|enclose|enclosed|enclosing|encloses|enclosure|enclosures"
+"vedhæft|vedhæfte|vedhæftet|vedhæfter|bilag|bilagene|vedlagt|vedlægger|vedlægge|"
+"vedhæftede|attach|attaching|attaches|attachment|attachments|attached|enclose|"
+"enclosed|enclosing|encloses|enclosure|enclosures"
 
-#: ../src/client/composer/composer-widget.vala:1192
-#: ../src/client/composer/composer-widget.vala:1196
+#: ../src/client/composer/composer-widget.vala:1122
+#: ../src/client/composer/composer-widget.vala:1141
 msgid "Do you want to discard this message?"
 msgstr "Ønsker du at kassére denne besked?"
 
-#: ../src/client/composer/composer-widget.vala:1363
+#: ../src/client/composer/composer-widget.vala:1245
 msgid "Send message with an empty subject and body?"
 msgstr "Send beskeden uden tekst og emne?"
 
-#: ../src/client/composer/composer-widget.vala:1365
+#: ../src/client/composer/composer-widget.vala:1247
 msgid "Send message with an empty subject?"
 msgstr "Send beskeden uden et emne?"
 
-#: ../src/client/composer/composer-widget.vala:1367
+#: ../src/client/composer/composer-widget.vala:1249
 msgid "Send message with an empty body?"
 msgstr "Send beskeden uden nogen tekst?"
 
-#: ../src/client/composer/composer-widget.vala:1369
+#: ../src/client/composer/composer-widget.vala:1253
 msgid "Send message without an attachment?"
 msgstr "Send beskeden uden en vedhæftet fil?"
 
-#: ../src/client/composer/composer-widget.vala:1608
-#, c-format
-msgid "“%s” could not be found."
-msgstr "\"%s\" blev ikke fundet."
-
-#: ../src/client/composer/composer-widget.vala:1614
-#, c-format
-msgid "“%s” is a folder."
-msgstr "\"%s\" er en mappe."
-
-#: ../src/client/composer/composer-widget.vala:1620
-#, c-format
-msgid "“%s” is an empty file."
-msgstr "\"%s\" er en tom fil."
-
-#: ../src/client/composer/composer-widget.vala:1633
-#, c-format
-msgid "“%s” could not be opened for reading."
-msgstr "\"%s\" kunne ikke åbnes til læsning."
-
-#: ../src/client/composer/composer-widget.vala:1640
+#: ../src/client/composer/composer-widget.vala:1515
 #, c-format
 msgid "“%s” already attached for delivery."
 msgstr "\"%s\" er allerede vedhæftet."
@@ -936,66 +929,85 @@ msgstr "\"%s\" er allerede vedhæftet."
 #. description of the document type, the second will
 #. be a human-friendly size string. For example:
 #. Document (100.9MB)
-#: ../src/client/composer/composer-widget.vala:1648
-#: ../src/client/conversation-viewer/conversation-email.vala:145
+#: ../src/client/composer/composer-widget.vala:1523
+#: ../src/client/conversation-viewer/conversation-email.vala:138
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: ../src/client/composer/composer-widget.vala:1667
+#: ../src/client/composer/composer-widget.vala:1560
+#, c-format
+msgid "“%s” could not be found."
+msgstr "\"%s\" blev ikke fundet."
+
+#: ../src/client/composer/composer-widget.vala:1566
+#, c-format
+msgid "“%s” is a folder."
+msgstr "\"%s\" er en mappe."
+
+#: ../src/client/composer/composer-widget.vala:1572
+#, c-format
+msgid "“%s” is an empty file."
+msgstr "\"%s\" er en tom fil."
+
+#: ../src/client/composer/composer-widget.vala:1585
+#, c-format
+msgid "“%s” could not be opened for reading."
+msgstr "\"%s\" kunne ikke åbnes til læsning."
+
+#: ../src/client/composer/composer-widget.vala:1593
 msgid "Cannot add attachment"
 msgstr "Kan ikke tilføje filen"
 
-#: ../src/client/composer/composer-widget.vala:1712
+#: ../src/client/composer/composer-widget.vala:1645
 msgid "To: "
 msgstr "Til: "
 
-#: ../src/client/composer/composer-widget.vala:1715
+#: ../src/client/composer/composer-widget.vala:1648
 msgid "Cc: "
 msgstr "Cc: "
 
-#: ../src/client/composer/composer-widget.vala:1718
+#: ../src/client/composer/composer-widget.vala:1651
 msgid "Bcc: "
 msgstr "Bcc: "
 
-#: ../src/client/composer/composer-widget.vala:1721
+#: ../src/client/composer/composer-widget.vala:1654
 msgid "Reply-To: "
 msgstr "Svar-Til: "
 
-#: ../src/client/composer/composer-widget.vala:1909
+#: ../src/client/composer/composer-widget.vala:1786
 msgid "Select Color"
 msgstr "Vælg farve"
-
-#: ../src/client/composer/composer-widget.vala:2124
-msgid "_Inspect"
-msgstr "_Undersøg"
 
 #. Displayed in the From dropdown to indicate an "alternate email address"
 #. for an account.  The first printf argument will be the alternate email
 #. address, and the second will be the account's primary email address.
-#: ../src/client/composer/composer-widget.vala:2305
+#: ../src/client/composer/composer-widget.vala:1986
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%1$s via %2$s"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: ../src/client/composer/composer-widget.vala:2347
+#: ../src/client/composer/composer-widget.vala:2028
 msgid "_From:"
 msgstr "_Fra:"
 
-#: ../src/client/composer/composer-widget.vala:2422
-#, c-format
-msgid "%s — Composer Inspector"
-msgstr "%s — Redigeringsundersøger"
-
 #. Translators: This is the name of the file chooser filter
 #. when inserting an image in the composer.
-#: ../src/client/composer/composer-widget.vala:2462
+#: ../src/client/composer/composer-widget.vala:2252
 msgid "Images"
 msgstr "Billeder"
 
-#: ../src/client/composer/spell-check-popover.vala:210
+#: ../src/client/composer/spell-check-popover.vala:117
+msgid "Remove this language from the preferred list"
+msgstr "Fjern dette sprog fra listen over foretrukne"
+
+#: ../src/client/composer/spell-check-popover.vala:121
+msgid "Add this language to the preferred list"
+msgstr "Tilføj dette sprog til listen over foretrukne"
+
+#: ../src/client/composer/spell-check-popover.vala:217
 msgid "Search for more languages"
 msgstr "Søg efter flere sprog"
 
@@ -1012,62 +1024,59 @@ msgstr "Ukendt"
 #. Preview headers
 #. Translators: This is displayed in place of the from address
 #. when the message has no from address.
-#: ../src/client/conversation-viewer/conversation-message.vala:361
+#: ../src/client/conversation-viewer/conversation-message.vala:331
 msgid "No sender"
 msgstr "Ingen afsender"
 
 #. Translators: This separates multiple 'from'
 #. addresses in the header preview for a message.
-#: ../src/client/conversation-viewer/conversation-message.vala:725
+#: ../src/client/conversation-viewer/conversation-message.vala:586
 msgid ", "
 msgstr ", "
 
-#. If href doesn't look like a URL, something is fishy, so warn the user
-#: ../src/client/conversation-viewer/conversation-message.vala:1233
-msgid " (Invalid?)"
-msgstr "(Ugyldig?)"
+#. Translators: This string is used as the HTML IMG ALT
+#. attribute value when displaying an inline image in an email
+#. that did not specify a file name. E.g. <IMG ALT="Image" ...
+#: ../src/client/conversation-viewer/conversation-message.vala:707
+msgid "Image"
+msgstr "Billede"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:73
+#: ../src/client/conversation-viewer/conversation-viewer.vala:72
 msgid "No conversations selected"
 msgstr "Ingen samtaler valgt"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:75
+#: ../src/client/conversation-viewer/conversation-viewer.vala:74
 msgid "Selecting a conversation from the list will display it here"
 msgstr "Vælg en samtale fra listen for at vise den her"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:80
+#: ../src/client/conversation-viewer/conversation-viewer.vala:79
 msgid "Multiple conversations selected"
 msgstr "Flere samtaler valgt"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:82
+#: ../src/client/conversation-viewer/conversation-viewer.vala:81
 msgid "Choosing an action will apply to all selected conversations"
 msgstr "Ved valg af en handling, vil denne udføres på alle valgte samtaler"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:87
-#: ../src/client/conversation-viewer/conversation-viewer.vala:94
+#: ../src/client/conversation-viewer/conversation-viewer.vala:86
+#: ../src/client/conversation-viewer/conversation-viewer.vala:93
 msgid "No conversations found"
 msgstr "Ingen samtaler fundet"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:89
+#: ../src/client/conversation-viewer/conversation-viewer.vala:88
 msgid "This folder does not contain any conversations"
 msgstr "Denne mappe indeholder ikke nogen samtaler"
 
-#: ../src/client/conversation-viewer/conversation-viewer.vala:96
+#: ../src/client/conversation-viewer/conversation-viewer.vala:95
 msgid "Your search returned no results, try refining your search terms"
 msgstr "Din søgning gav ingen resultater. Prøv at ændre dine søgeord"
 
-#: ../src/client/conversation-viewer/conversation-web-view.vala:198
-#, c-format
-msgid "%s — Conversation Inspector"
-msgstr "%s — Samtaleundersøger"
-
-#: ../src/client/dialogs/attachment-dialog.vala:24
-#: ../src/client/dialogs/attachment-dialog.vala:26
+#: ../src/client/dialogs/attachment-dialog.vala:28
+#: ../src/client/dialogs/attachment-dialog.vala:30
 msgid "Choose a file"
 msgstr "Vælg en fil"
 
-#: ../src/client/dialogs/attachment-dialog.vala:24
-#: ../src/client/dialogs/attachment-dialog.vala:26
+#: ../src/client/dialogs/attachment-dialog.vala:28
+#: ../src/client/dialogs/attachment-dialog.vala:30
 msgid "_Attach"
 msgstr "_Vedhæft"
 
@@ -1086,13 +1095,12 @@ msgid ""
 "Selecting “Trust This Server” or “Always Trust This Server” may cause your "
 "username and password to be transmitted insecurely."
 msgstr ""
-"Hvis du vælger \"Stol på serveren\" eller \"Stol altid på serveren\", kan "
-"dit brugernavn og din adgangskode blive sendt uden sikkerhed."
+"Hvis du vælger \"Stol på serveren\" eller \"Stol altid på serveren\", kan dit "
+"brugernavn og din adgangskode blive sendt uden sikkerhed."
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:52
 msgid ""
-"Selecting “Don’t Trust This Server” will cause Geary not to access this "
-"server."
+"Selecting “Don’t Trust This Server” will cause Geary not to access this server."
 msgstr ""
 "Hvis du vælger \"Stol ikke på serveren\", vil Geary ikke forbinde til denne "
 "server."
@@ -1127,8 +1135,7 @@ msgstr "Serverens certifikat er ikke signeret af en kendt autoritet"
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:76
 msgid "The server’s identity does not match the identity in the certificate"
-msgstr ""
-"Serverens identitet stemmer ikke overens med identiteten i certifikatet"
+msgstr "Serverens identitet stemmer ikke overens med identiteten i certifikatet"
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:79
 msgid "The server’s certificate has expired"
@@ -1311,7 +1318,7 @@ msgid "%A"
 msgstr "%A"
 
 #: ../src/client/util/util-email.vala:30
-#: ../src/engine/rfc822/rfc822-message.vala:910
+#: ../src/engine/rfc822/rfc822-message.vala:908
 msgid "(no subject)"
 msgstr "(intet emne)"
 
@@ -1608,11 +1615,11 @@ msgstr "Sendt post"
 #. default. English names do not need to be included.
 #: ../src/engine/imap-engine/imap-engine-generic-account.vala:650
 msgid ""
-"Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email "
-"| Bulk E-Mail"
+"Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email | "
+"Bulk E-Mail"
 msgstr ""
-"Uønsket | Spam | Uønsket Mail | Uønsket E-mail | Uønsket E-mail |Junk | Spam "
-"| Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email | Bulk E-Mail"
+"Uønsket | Spam | Uønsket Mail | Uønsket E-mail | Uønsket E-mail |Junk | Spam | "
+"Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email | Bulk E-Mail"
 
 #. List of general possible folder names to match for the
 #. Trash mailbox. Separate names using a vertical bar and
@@ -1665,39 +1672,34 @@ msgstr "%s skrev:"
 msgid "On %s:"
 msgstr "Den %s:"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:284
+#: ../src/engine/rfc822/rfc822-utils.vala:278
 msgid "---------- Forwarded message ----------"
 msgstr "---------- Videresendt besked ----------"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:288
+#: ../src/engine/rfc822/rfc822-utils.vala:282
 #, c-format
 msgid "From: %s\n"
 msgstr "Fra: %s\n"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:289
+#: ../src/engine/rfc822/rfc822-utils.vala:283
 #, c-format
 msgid "Subject: %s\n"
 msgstr "Emne: %s\n"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:290
+#: ../src/engine/rfc822/rfc822-utils.vala:284
 #, c-format
 msgid "Date: %s\n"
 msgstr "Dato: %s\n"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:293
+#: ../src/engine/rfc822/rfc822-utils.vala:287
 #, c-format
 msgid "To: %s\n"
 msgstr "Til: %s\n"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:296
+#: ../src/engine/rfc822/rfc822-utils.vala:290
 #, c-format
 msgid "Cc: %s\n"
 msgstr "CC: %s\n"
-
-#. / Placeholder filename for attachments with no filename.
-#: ../src/engine/rfc822/rfc822-utils.vala:441
-msgid "none"
-msgstr "intet"
 
 #: ../ui/account_cannot_remove.glade.h:1
 msgid "<span weight=\"bold\" size=\"larger\">Cannot remove account</span> "
@@ -1708,7 +1710,7 @@ msgid ""
 "A composer window associated with this account is currently open. Send or "
 "discard the message and try again."
 msgstr ""
-"Et beskedskrivningsvindue associéret med denne bruger er i forvejen åbent."
+"Et beskedskrivningsvindue associéret med denne bruger er i forvejen åbent. "
 "Send eller kassér beskeden og prøv igen."
 
 #: ../ui/account_list.glade.h:1
@@ -1771,6 +1773,28 @@ msgstr "Forkast og luk"
 msgid "Save and Close"
 msgstr "Gem og luk"
 
+#. Note that this button and the Update button will never be shown at the same time to the user.
+#: ../ui/composer-link-popover.ui.h:2
+msgid "Insert the new link with this URL"
+msgstr "Indsæt det nye link med denne URL"
+
+#: ../ui/composer-link-popover.ui.h:3
+msgid "Link URL"
+msgstr "Link-URL"
+
+#. Note that this button and the Insert button will never be shown at the same time to the user.
+#: ../ui/composer-link-popover.ui.h:5
+msgid "Update this link’s URL"
+msgstr "Opdatér dette links URL"
+
+#: ../ui/composer-link-popover.ui.h:6
+msgid "Delete this link"
+msgstr "Slet dette link"
+
+#: ../ui/composer-link-popover.ui.h:7
+msgid "Open this link"
+msgstr "Åbn dette link"
+
 #: ../ui/composer-menus.ui.h:1
 msgid "S_ans Serif"
 msgstr "S_ans serif"
@@ -1824,21 +1848,21 @@ msgid "_Copy"
 msgstr "_Kopiér"
 
 #: ../ui/composer-menus.ui.h:14
-msgid "Copy _Link"
-msgstr "Kopiér _link"
-
-#: ../ui/composer-menus.ui.h:15
 msgid "_Paste"
 msgstr "Sæt _ind"
 
-#: ../ui/composer-menus.ui.h:16
+#: ../ui/composer-menus.ui.h:15
 msgctxt "Clipboard paste with rich text"
 msgid "Paste _With Formatting"
 msgstr "Sæt ind _med formatering"
 
-#: ../ui/composer-menus.ui.h:17
+#: ../ui/composer-menus.ui.h:16
 msgid "Select _All"
 msgstr "Markér _alt"
+
+#: ../ui/composer-menus.ui.h:17 ../ui/conversation-message-menus.ui.h:9
+msgid "_Inspect…"
+msgstr "_Undersøg …"
 
 #. Address(es) e-mail is to be sent to
 #: ../ui/composer-widget.ui.h:2
@@ -1875,43 +1899,51 @@ msgid "To add them as attachments"
 msgstr "For at vedhæfte dem"
 
 #: ../ui/composer-widget.ui.h:11
+msgid "Undo last edit (Ctrl+Z)"
+msgstr "Fortryd seneste redigering (Ctrl+Z)"
+
+#: ../ui/composer-widget.ui.h:12
+msgid "Redo last edit  (Ctrl+Shift+Z)"
+msgstr "Omgør seneste redigering (Ctrl+Skift+Z)"
+
+#: ../ui/composer-widget.ui.h:13
 msgid "Bold (Ctrl+B)"
 msgstr "Fed (Ctrl+B)"
 
-#: ../ui/composer-widget.ui.h:12
+#: ../ui/composer-widget.ui.h:14
 msgid "Italic (Ctrl+I)"
 msgstr "Kursiv (Ctrl+I)"
 
-#: ../ui/composer-widget.ui.h:13
+#: ../ui/composer-widget.ui.h:15
 msgid "Underline (Ctrl+U)"
 msgstr "Understreget (Ctrl+U)"
 
-#: ../ui/composer-widget.ui.h:14
+#: ../ui/composer-widget.ui.h:16
 msgid "Strikethrough (Ctrl+K)"
 msgstr "Overstreget (Ctrl+K)"
 
-#: ../ui/composer-widget.ui.h:15
+#: ../ui/composer-widget.ui.h:17
 msgid "Quote text  (Ctrl+])"
 msgstr "Citér tekst (Ctrl+])"
 
-#: ../ui/composer-widget.ui.h:16
+#: ../ui/composer-widget.ui.h:18
 msgid "Unquote text  (Ctrl+[)"
 msgstr "Fjern citat (Ctrl+[)"
 
-#: ../ui/composer-widget.ui.h:17
-msgid "Link (Ctrl+L)"
-msgstr "Link (Ctrl+L)"
-
-#: ../ui/composer-widget.ui.h:18
-msgid "Image (Ctrl+G)"
-msgstr "Billede (Ctrl+G)"
-
 #: ../ui/composer-widget.ui.h:19
-msgid "Remove formatting (Ctrl+Space)"
-msgstr "Fjern formatering (Ctrl+Mellemrum)"
+msgid "Insert or update selection link (Ctrl+L)"
+msgstr "Indsæt eller opdatér markeringens link (Ctrl+L)"
 
 #: ../ui/composer-widget.ui.h:20
-msgid "Select spell checking language"
+msgid "Insert an image (Ctrl+G)"
+msgstr "Indsæt et billede (Ctrl+G)"
+
+#: ../ui/composer-widget.ui.h:21
+msgid "Remove selection formatting (Ctrl+Space)"
+msgstr "Fjern markeringens formatering (Ctrl+Mellemrum)"
+
+#: ../ui/composer-widget.ui.h:22
+msgid "Select spell checking languages"
 msgstr "Vælg sprog for stavekontrol"
 
 #: ../ui/conversation-email.ui.h:1
@@ -1993,6 +2025,34 @@ msgstr "Vis _kilde"
 msgid "_Save All"
 msgstr "_Gem alle"
 
+#: ../ui/conversation-message-menus.ui.h:1
+msgid "_Open Link"
+msgstr "_Åbn link"
+
+#: ../ui/conversation-message-menus.ui.h:2
+msgid "Copy Link _Address"
+msgstr "Kopiér link-_adresse"
+
+#: ../ui/conversation-message-menus.ui.h:3
+msgid "Send New _Message…"
+msgstr "Send ny _besked …"
+
+#: ../ui/conversation-message-menus.ui.h:4
+msgid "Copy Email _Address"
+msgstr "Kopiér e-mail_adresse"
+
+#: ../ui/conversation-message-menus.ui.h:5
+msgid "Save _Image As…"
+msgstr "Gem _billede som …"
+
+#: ../ui/conversation-message-menus.ui.h:6
+msgid "_Select All"
+msgstr "Markér _alt"
+
+#: ../ui/conversation-message-menus.ui.h:8
+msgid "Search for messages from"
+msgstr "Søg efter meddelelser fra"
+
 #: ../ui/conversation-message.ui.h:1
 msgid "From <email>"
 msgstr "Fra <e-mail>"
@@ -2046,44 +2106,25 @@ msgid "Only show remote images from senders you trust."
 msgstr "Vis kun fjernlagrede billeder fra afsendere, du stoler på."
 
 #: ../ui/conversation-message.ui.h:14
-msgid "This link appears to go to:"
-msgstr "Dette link ser ud til at føre til:"
-
-#: ../ui/conversation-message.ui.h:15
 msgid "But actually goes to:"
 msgstr "men fører faktisk til:"
 
-#: ../ui/conversation-message-menus.ui.h:1
-msgid "_Open Link"
-msgstr "_Åbn link"
+#: ../ui/conversation-message.ui.h:15
+msgid "The link appears to go to:"
+msgstr "Linket ser ud til at føre til:"
 
-#: ../ui/conversation-message-menus.ui.h:2
-msgid "Copy Link _Address"
-msgstr "Kopiér link-_adresse"
+#: ../ui/conversation-message.ui.h:16
+msgid "Deceptive link found"
+msgstr "Bedragerisk link fundet"
 
-#: ../ui/conversation-message-menus.ui.h:3
-msgid "Send New _Message…"
-msgstr "Send ny _besked …"
+#: ../ui/conversation-message.ui.h:17
+msgid "The email sender may be leading you to the wrong web site."
+msgstr ""
+"Afsenderen af denne e-mail forsøger måske at lede dig til det forkerte websted."
 
-#: ../ui/conversation-message-menus.ui.h:4
-msgid "Copy Email _Address"
-msgstr "Kopiér e-mail_adresse"
-
-#: ../ui/conversation-message-menus.ui.h:5
-msgid "Save _Image As…"
-msgstr "Gem _billede som …"
-
-#: ../ui/conversation-message-menus.ui.h:6
-msgid "_Select All"
-msgstr "Markér _alt"
-
-#: ../ui/conversation-message-menus.ui.h:8
-msgid "Search for messages from"
-msgstr "Søg efter meddelelser fra"
-
-#: ../ui/conversation-message-menus.ui.h:9
-msgid "_Inspect…"
-msgstr "_Undersøg …"
+#: ../ui/conversation-message.ui.h:18
+msgid "If unsure, contact the sender and ask before continuing."
+msgstr "Hvis du er i tvivl, så kontakt afsenderen og spørg, inden du fortsætter."
 
 #: ../ui/conversation-viewer.ui.h:1
 msgid "Find in conversation"
@@ -2103,8 +2144,8 @@ msgstr "Fjern e-mailadresse"
 
 #: ../ui/edit_alternate_emails.glade.h:2
 msgid ""
-"Some email services require additional addresses be configured on the "
-"server.  Contact your email provider for more information."
+"Some email services require additional addresses be configured on the server.  "
+"Contact your email provider for more information."
 msgstr ""
 "Visse e-mailtjenester kræver at der konfigureres yderligere adresser på "
 "serveren.  Kontakt din e-mailudbyder for at få yderligere information."
@@ -2496,9 +2537,9 @@ msgstr "Ingen autentifikation kr_ævet"
 
 #: ../ui/login.glade.h:33
 msgid "Use IMAP cre_dentials"
-msgstr "Brug IMAP-akkreditiver"
+msgstr "Br_ug IMAP-akkreditiver"
 
-#: ../ui/login.glade.h:34 ../ui/preferences.glade.h:5
+#: ../ui/login.glade.h:34
 msgid "Composer"
 msgstr "Beskedskriver"
 
@@ -2538,48 +2579,44 @@ msgstr "_Husk adgangskode"
 msgid "_Authenticate"
 msgstr "_Godkend"
 
-#: ../ui/preferences.glade.h:1
+#: ../ui/preferences-dialog.ui.h:1
 msgid "Reading"
 msgstr "Læsning"
 
-#: ../ui/preferences.glade.h:2
+#: ../ui/preferences-dialog.ui.h:2
 msgid "_Automatically select next message"
 msgstr "_Vælg automatisk næste besked"
 
-#: ../ui/preferences.glade.h:3
+#: ../ui/preferences-dialog.ui.h:3
 msgid "_Display conversation preview"
 msgstr "_Vis samtaleforudvisning"
 
-#: ../ui/preferences.glade.h:4
+#: ../ui/preferences-dialog.ui.h:4
 msgid "Use _three pane view"
 msgstr "Vis _tre ruder"
 
-#: ../ui/preferences.glade.h:6
-msgid "Enable _spell checking"
-msgstr "Aktiver _stavekontrol"
-
-#: ../ui/preferences.glade.h:7
+#: ../ui/preferences-dialog.ui.h:5
 msgid "Notifications"
 msgstr "Påmindelser"
 
-#: ../ui/preferences.glade.h:8
+#: ../ui/preferences-dialog.ui.h:6
 msgid "_Play notification sounds"
 msgstr "_Afspil påmindelseslyde"
 
-#: ../ui/preferences.glade.h:9
+#: ../ui/preferences-dialog.ui.h:7
 msgid "Show _notifications for new mail"
 msgstr "Vis _påmindelse om ny e-mail"
 
 # oversættelse med vilje indirekte (se forklaring nedenfor)
-#: ../ui/preferences.glade.h:10
+#: ../ui/preferences-dialog.ui.h:8
 msgid "Always _watch for new mail"
 msgstr "_Tjek efter ny post i baggrunden"
 
-#: ../ui/preferences.glade.h:11
+#: ../ui/preferences-dialog.ui.h:9
 msgid "Geary will run in the background and notify of new mail"
 msgstr "Geary vil køre i baggrunden og vise, når der kommer ny post"
 
-#: ../ui/preferences.glade.h:12
+#: ../ui/preferences-dialog.ui.h:10
 msgid "Preferences"
 msgstr "Indstillinger"
 
@@ -2588,16 +2625,16 @@ msgid ""
 "<span weight=\"bold\" size=\"larger\">Are you sure you want to remove this "
 "account?</span> "
 msgstr ""
-"<span weight=\"bold\" size=\"larger\">Er du sikker på, at du vil fjerne "
-"denne konto?</span> "
+"<span weight=\"bold\" size=\"larger\">Er du sikker på, at du vil fjerne denne "
+"konto?</span> "
 
 #: ../ui/remove_confirm.glade.h:2
 msgid ""
 "All email associated with this account will be removed from your computer. "
 "This will not affect email on the server."
 msgstr ""
-"Al e-mail, der tilhører denne konto vil blive fjernet fra din computer. "
-"Dette vil ikke fjerne e-mailen på serveren."
+"Al e-mail, der tilhører denne konto vil blive fjernet fra din computer. Dette "
+"vil ikke fjerne e-mailen på serveren."
 
 #: ../ui/remove_confirm.glade.h:3
 msgid "Nickname:"
@@ -2610,6 +2647,30 @@ msgstr "E-mailadresse:"
 #: ../ui/upgrade_dialog.glade.h:1
 msgid "Geary update in progress…"
 msgstr "Geary er ved at blive opgraderet…"
+
+#~ msgid "_Inspect"
+#~ msgstr "_Undersøg"
+
+#~ msgid "%s — Composer Inspector"
+#~ msgstr "%s — Redigeringsundersøger"
+
+#~ msgid " (Invalid?)"
+#~ msgstr "(Ugyldig?)"
+
+#~ msgid "%s — Conversation Inspector"
+#~ msgstr "%s — Samtaleundersøger"
+
+#~ msgid "none"
+#~ msgstr "intet"
+
+#~ msgid "Copy _Link"
+#~ msgstr "Kopiér _link"
+
+#~ msgid "Link (Ctrl+L)"
+#~ msgstr "Link (Ctrl+L)"
+
+#~ msgid "Enable _spell checking"
+#~ msgstr "Aktiver _stavekontrol"
 
 # Ifl. kildekoden er dette navn på en menu og ikke f.eks. en tilstand
 #~ msgid "Empty"
