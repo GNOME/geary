@@ -16,8 +16,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2017-03-25 20:02+0100\n"
-"PO-Revision-Date: 2017-03-25 20:03+0100\n"
+"POT-Creation-Date: 2017-03-25 23:27+0100\n"
+"PO-Revision-Date: 2017-03-25 23:28+0100\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <community-poland@mozilla.org>\n"
 "Language: pl\n"
@@ -1668,7 +1668,7 @@ msgstr "Archiwum | Archiwa"
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../src/engine/rfc822/rfc822-utils.vala:236
 msgid "%a, %b %-e, %Y at %-l:%M %p"
-msgstr "%a %-e %b, %Y o %-H∶%M"
+msgstr "%a, %-e %b %Y o %-H∶%M"
 
 #. / The quoted header for a message being replied to.
 #. / %1$s will be substituted for the date, and %2$s will be substituted for
