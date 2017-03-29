@@ -1,15 +1,24 @@
+# German translation for geary user manual.
+# Copyright (C) 2012 geary's COPYRIGHT HOLDER
+# This file is distributed under the same license as the geary package.
+#
+# Frank Schiersner <fs9@live.de>, 2014.
+# Simon Linden <xhi2018@googlemail.com, 2015.
+# Andreas Wilhelm <info@avedo.net>, 2014.
+# Mario Blättermann <mario.blaettermann@gmail.com>, 2017.
+#
 msgid ""
 msgstr ""
-"Project-Id-Version: Geary 0.5.1\n"
-"POT-Creation-Date: 2016-08-25 06:30+0000\n"
-"PO-Revision-Date: 2016-09-17 22:45-0400\n"
-"Last-Translator: Florian Heiser <gnu.l10n.de@gmail.com>\n"
-"Language-Team: Andreas Wilhelm <info@avedo.net>\n"
+"Project-Id-Version: Geary master\n"
+"POT-Creation-Date: 2017-03-26 00:20+0000\n"
+"PO-Revision-Date: 2017-03-29 21:16+0200\n"
+"Last-Translator: Mario Blättermann <mario.blaettermann@gmail.com>\n"
+"Language-Team: Deutsch <gnome-de@gnome.org>\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 1.8.8\n"
+"X-Generator: Poedit 1.8.12\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: C/write.page:9(title)
@@ -72,8 +81,8 @@ msgid ""
 "Press the <gui>Attach File</gui> button at the lower left of the composer "
 "window, then select a file to attach."
 msgstr ""
-"Drücken Sie den Knopf <gui>Datei anhängen</gui> in der unteren linken Ecke "
-"des Editor-Fensters und wählen Sie anschließend die anzuhängende Datei."
+"Klicken Sie auf den Knopf <gui>Datei anhängen</gui> in der unteren linken "
+"Ecke des Editor-Fensters und wählen Sie anschließend die anzuhängende Datei."
 
 #: C/write.page:31(p)
 msgid ""
@@ -90,7 +99,7 @@ msgid ""
 "A number of keyboard shortcuts are available in the composer; see <link xref="
 "\"shortcuts#composer\"/> for details."
 msgstr ""
-"Im Editor stehen eine große Zahl von Tastaturkürzel zur Verfügung; Details "
+"Im Editor stehen eine große Zahl von Tastaturkürzeln zur Verfügung; Details "
 "unter <link xref=\"shortcuts#composer\"/>."
 
 #: C/write.page:37(p)
@@ -112,9 +121,9 @@ msgid ""
 "prompt you to keep the draft or to discard it."
 msgstr ""
 "Unterstützt ein E-Mail Server das Speichern von Entwürfen, speichert Geary "
-"die Nachricht automatisch während Sie schreiben. Schließen Sie den Editor "
+"die Nachricht automatisch während Sie schreiben. Schließen Sie den Editor, "
 "ohne die Nachricht zu senden, fragt Geary, ob die Nachricht als Entwurf "
-"gespeichert oder verworfen werden soll. "
+"gespeichert oder verworfen werden soll."
 
 #: C/write.page:47(p)
 msgid ""
@@ -123,7 +132,7 @@ msgid ""
 msgstr ""
 "Um einen bereits existierenden Entwurf zu bearbeiten, wählen Sie den "
 "Entwürfe-Ordner aus der Ordnerliste, wählen die Nachricht und wählen in der "
-"Nachrichten Ansicht \"Entwurf bearbeiten\"."
+"Nachrichten Ansicht <gui>Entwurf bearbeiten</gui>."
 
 #: C/write.page:50(p)
 msgid "Geary deletes the draft when you send the message."
@@ -147,17 +156,17 @@ msgid ""
 msgstr ""
 "Sie können Nachrichten mit Sternchen versehen, um sie als besonders wichtig "
 "zu kennzeichnen. Um eine Konversation mit einem Sternchen zu versehen, "
-"drücken Sie das Sternchen-Symbol in der Konversationsliste. Eine einzelne "
-"Nachricht können Sie mit einem Sternchen versehen, indem Sie auf das "
-"Sternchen-Symbol in der oberen rechten Ecke der Nachricht drücken."
+"klicken Sie auf das Sternchen-Symbol in der Konversationsliste. Eine "
+"einzelne Nachricht können Sie mit einem Sternchen versehen, indem Sie auf "
+"das Sternchen-Symbol in der oberen rechten Ecke der Nachricht klicken."
 
 #: C/star.page:15(p)
 msgid ""
 "With Gmail accounts, starred messages appear in the Starred folder in the "
 "folder list."
 msgstr ""
-"Bei Gmail-Konten erscheinen mit Sternchen markierte Nachrichten im Ordner "
-"»Markiert« in der Ordnerliste."
+"Bei Gmail-Konten erscheinen mit Sternchen markierte Nachrichten im "
+"<gui>Markiert</gui>-Ordner in der Ordnerliste."
 
 #: C/star.page:18(title)
 msgid "Mark messages as read or unread"
@@ -171,7 +180,7 @@ msgid ""
 msgstr ""
 "Geary markiert Nachrichten automatisch als gelesen, während Sie sie lesen. "
 "Um eine Konversation von Hand als gelesen oder ungelesen zu markieren, "
-"drücken Sie das Kreis-Symbol in der Konversationsliste."
+"klicken Sie auf das Kreis-Symbol in der Konversationsliste."
 
 #: C/star.page:22(p)
 msgid ""
@@ -181,7 +190,7 @@ msgid ""
 msgstr ""
 "Alternativ kann auch <gui>Als ungelesen markieren</gui> aus dem "
 "<gui>Markierungen</gui>-Menü in der Werkzeugleiste verwendet werden, um den "
-"gelesen Status der Konversation zu ändern."
+"Gelesen-Status der Konversation zu ändern."
 
 #: C/star.page:25(p)
 msgid ""
@@ -189,7 +198,7 @@ msgid ""
 "the dropdown menu."
 msgstr ""
 "Um eine einzelne Nachricht als gelesen zu markieren, wählen Sie <gui>Als "
-"gelesen markieren</gui> aus dem DropDown-Menü."
+"gelesen markieren</gui> aus dem Auswahlmenü."
 
 #: C/shortcuts.page:11(title)
 msgid "Keyboard shortcuts"
@@ -267,7 +276,7 @@ msgstr ""
 msgid "Star"
 msgstr "Mit Sternchen markieren"
 
-#: C/shortcuts.page:44(key) C/shortcuts.page:108(key)
+#: C/shortcuts.page:44(key) C/shortcuts.page:100(key)
 msgid "S"
 msgstr "S"
 
@@ -275,7 +284,7 @@ msgstr "S"
 msgid "Unstar"
 msgstr "Sternchen-Markierung entfernen"
 
-#: C/shortcuts.page:48(key) C/shortcuts.page:146(key)
+#: C/shortcuts.page:48(key) C/shortcuts.page:138(key)
 msgid "D"
 msgstr "D"
 
@@ -303,233 +312,276 @@ msgstr ""
 "<keyseq><key>Strg</key><key>U</key></keyseq> oder "
 "<keyseq><key>Umschalttaste</key><key>U</key></keyseq>"
 
-# Da im Rest der Übersetzung der Begriff Label nicht übersetzt wurde, folge ich im Sinne der Einheitlichkeit, würde aber anregen, dass wir Label durchgehend übersetzen
 #: C/shortcuts.page:59(p)
-#, fuzzy
-msgid "Open the Label Conversation menu"
-msgstr "Konversation mit einem Label versehen"
+msgid "Move the conversation"
+msgstr "Eine Konversation verschieben"
 
-#: C/shortcuts.page:60(key) C/shortcuts.page:170(key)
-msgid "L"
-msgstr "L"
-
-#: C/shortcuts.page:63(p)
-msgid "Open the Move Conversation menu"
-msgstr "Menü zum Verschieben einer Konversation öffnen"
-
-#: C/shortcuts.page:64(key)
+#: C/shortcuts.page:60(key)
 msgid "M"
 msgstr "M"
 
+#: C/shortcuts.page:63(p)
+msgid "Label the conversation"
+msgstr "Eine Konversation mit einer Beschriftung versehen"
+
+#: C/shortcuts.page:64(key) C/shortcuts.page:162(key)
+msgid "L"
+msgstr "L"
+
 #: C/shortcuts.page:67(p)
-msgid "Move focus to the next/previous pane"
-msgstr "Fokus auf die nächste/vorherige Leiste verlegen"
-
-#: C/shortcuts.page:68(p)
-msgid ""
-"<keyseq><key>F6</key></keyseq> / <keyseq><key>Shift</key><key>F6</key></"
-"keyseq>"
-msgstr ""
-"<keyseq><key>F6</key></keyseq> / <keyseq><key>Umschalttaste</key><key>F6</"
-"key></keyseq>"
-
-#: C/shortcuts.page:71(p)
-msgid "Move focus to conversation list"
-msgstr "Fokus auf Konversationsliste wechseln"
-
-#: C/shortcuts.page:72(key) C/shortcuts.page:88(key) C/shortcuts.page:104(key)
-#: C/shortcuts.page:108(key) C/shortcuts.page:112(key)
-#: C/shortcuts.page:116(key) C/shortcuts.page:120(key)
-#: C/shortcuts.page:130(key) C/shortcuts.page:134(key)
-#: C/shortcuts.page:138(key) C/shortcuts.page:146(key)
-#: C/shortcuts.page:154(key) C/shortcuts.page:158(key)
-#: C/shortcuts.page:162(key) C/shortcuts.page:166(key)
-#: C/shortcuts.page:170(key) C/shortcuts.page:174(key)
-msgid "Ctrl"
-msgstr "Strg"
-
-#: C/shortcuts.page:72(key) C/shortcuts.page:154(key)
-msgid "B"
-msgstr "B"
-
-#: C/shortcuts.page:75(p)
 msgid "Jump to next (older) conversation"
 msgstr "Zur nächsten (älteren) Konversation wechseln"
 
-#: C/shortcuts.page:76(key)
+#: C/shortcuts.page:68(key)
 msgid "J"
 msgstr "J"
 
-#: C/shortcuts.page:79(p)
+#: C/shortcuts.page:71(p)
 msgid "Jump to previous (newer) conversation"
 msgstr "Zur vorhergehenden (jüngeren) Konversation wechseln"
 
-#: C/shortcuts.page:80(key) C/shortcuts.page:166(key)
+#: C/shortcuts.page:72(key) C/shortcuts.page:158(key)
 msgid "K"
 msgstr "K"
 
-#: C/shortcuts.page:83(p)
+#: C/shortcuts.page:75(p)
 msgid "Toggle spam"
-msgstr "Spam-Markierung umschalten"
+msgstr "Unerwünscht-Markierung umschalten"
 
-#: C/shortcuts.page:84(p)
+#: C/shortcuts.page:76(p)
 msgid "<keyseq><key>Ctrl</key><key>J</key></keyseq> or <key>!</key>"
 msgstr "<keyseq><key>Strg</key><key>J</key></keyseq> oder <key>!</key>"
 
-#: C/shortcuts.page:87(p)
+#: C/shortcuts.page:79(p)
 msgid "Quit"
 msgstr "Beenden"
 
-#: C/shortcuts.page:88(key)
+#: C/shortcuts.page:80(key) C/shortcuts.page:96(key) C/shortcuts.page:100(key)
+#: C/shortcuts.page:104(key) C/shortcuts.page:108(key)
+#: C/shortcuts.page:112(key) C/shortcuts.page:122(key)
+#: C/shortcuts.page:126(key) C/shortcuts.page:130(key)
+#: C/shortcuts.page:138(key) C/shortcuts.page:146(key)
+#: C/shortcuts.page:150(key) C/shortcuts.page:154(key)
+#: C/shortcuts.page:158(key) C/shortcuts.page:162(key)
+#: C/shortcuts.page:166(key) C/shortcuts.page:181(key)
+msgid "Ctrl"
+msgstr "Strg"
+
+#: C/shortcuts.page:80(key)
 msgid "Q"
 msgstr "Q"
 
-#: C/shortcuts.page:91(p)
+#: C/shortcuts.page:83(p)
 msgid "Zoom in"
 msgstr "Ansicht vergrößern"
 
-#: C/shortcuts.page:92(p)
+#: C/shortcuts.page:84(p)
 msgid "<keyseq><key>Ctrl</key><key>=</key></keyseq> or <key>=</key>"
 msgstr "<keyseq><key>Strg</key><key>=</key></keyseq> oder <key>=</key>"
 
-#: C/shortcuts.page:95(p)
+#: C/shortcuts.page:87(p)
 msgid "Zoom out"
 msgstr "Ansicht verkleinern"
 
-#: C/shortcuts.page:96(p)
+#: C/shortcuts.page:88(p)
 msgid "<keyseq><key>Ctrl</key><key>-</key></keyseq> or <key>-</key>"
 msgstr "<keyseq><key>Strg</key><key>-</key></keyseq> oder <key>-</key>"
 
-#: C/shortcuts.page:99(p)
+#: C/shortcuts.page:91(p)
 msgid "Reset zoom"
 msgstr "Ansicht zurücksetzen"
 
-#: C/shortcuts.page:100(p)
+#: C/shortcuts.page:92(p)
 msgid "<keyseq><key>Ctrl</key><key>0</key></keyseq> or <key>0</key>"
 msgstr "<keyseq><key>Strg</key><key>0</key></keyseq> oder <key>0</key>"
 
-#: C/shortcuts.page:103(p)
+#: C/shortcuts.page:95(p)
 msgid "Close composer window"
 msgstr "Editor-Fenster schließen"
 
-#: C/shortcuts.page:104(key)
+#: C/shortcuts.page:96(key)
 msgid "W"
 msgstr "W"
 
-#: C/shortcuts.page:107(p)
+#: C/shortcuts.page:99(p)
 msgid "Jump to search box"
 msgstr "Zur Suche springen"
 
-#: C/shortcuts.page:111(p)
+#: C/shortcuts.page:103(p)
 msgid "Find in current conversation"
 msgstr "Aktuelle Konversation durchsuchen"
 
-#: C/shortcuts.page:112(key)
+#: C/shortcuts.page:104(key)
 msgid "F"
 msgstr "F"
 
-#: C/shortcuts.page:115(p)
+#: C/shortcuts.page:107(p)
 msgid "Find next in current conversation"
 msgstr "Nächstes in aktueller Konversation finden"
 
-#: C/shortcuts.page:116(key) C/shortcuts.page:120(key)
+#: C/shortcuts.page:108(key) C/shortcuts.page:112(key)
 msgid "G"
 msgstr "G"
 
-#: C/shortcuts.page:119(p)
+#: C/shortcuts.page:111(p)
 msgid "Find previous in current conversation"
 msgstr "Vorheriges in aktueller Konversation finden"
 
-#: C/shortcuts.page:120(key)
+#: C/shortcuts.page:112(key)
 msgid "Shift"
 msgstr "Umschalttaste"
 
-#: C/shortcuts.page:125(title)
+#: C/shortcuts.page:117(title)
 msgid "Composer shortcuts"
 msgstr "Tastenkombinationen des Editors"
 
-#: C/shortcuts.page:126(p)
+#: C/shortcuts.page:118(p)
 msgid "These shortcuts are active whenever focus is in a composer."
 msgstr ""
 "Diese Tastenkombinationen stehen zur Verfügung, sobald der Editor aktiv ist."
 
-#: C/shortcuts.page:129(p)
+#: C/shortcuts.page:121(p)
 msgid "Attach file"
 msgstr "Datei anhängen"
 
-#: C/shortcuts.page:130(key)
+#: C/shortcuts.page:122(key)
 msgid "T"
 msgstr "T"
 
-#: C/shortcuts.page:133(p)
+#: C/shortcuts.page:125(p)
 msgid "Quote text"
 msgstr "Text zitieren"
 
-#: C/shortcuts.page:134(key)
+#: C/shortcuts.page:126(key)
 msgid "]"
 msgstr "]"
 
-#: C/shortcuts.page:137(p)
+#: C/shortcuts.page:129(p)
 msgid "Unquote text"
 msgstr "Text nicht mehr zitieren"
 
-#: C/shortcuts.page:138(key)
+#: C/shortcuts.page:130(key)
 msgid "["
 msgstr "["
 
-#: C/shortcuts.page:141(p)
+#: C/shortcuts.page:133(p)
 msgid "Close composer"
 msgstr "Editor schließen"
 
-#: C/shortcuts.page:142(p)
+#: C/shortcuts.page:134(p)
 msgid "<keyseq><key>Ctrl</key><key>W</key></keyseq> or <key>Esc</key>"
 msgstr "<keyseq><key>Strg</key><key>W</key></keyseq> oder <key>Esc</key>"
 
-#: C/shortcuts.page:145(p)
+#: C/shortcuts.page:137(p)
 msgid "Detach composer"
 msgstr "Editor abtrennen"
 
-#: C/shortcuts.page:150(p)
+#: C/shortcuts.page:142(p)
 msgid "These shortcuts are only active in composers in rich text mode."
 msgstr ""
 "Diese Tastenkombinationen stehen nur in Editoren mit Rich-Text-Modus zur "
 "Verfügung."
 
-#: C/shortcuts.page:153(p)
+#: C/shortcuts.page:145(p)
 msgid "Bold text"
 msgstr "Fetter Text"
 
-#: C/shortcuts.page:157(p)
+#: C/shortcuts.page:146(key) C/shortcuts.page:181(key)
+msgid "B"
+msgstr "B"
+
+#: C/shortcuts.page:149(p)
 msgid "Italicize text"
 msgstr "Kursiver Text"
 
-#: C/shortcuts.page:158(key)
+#: C/shortcuts.page:150(key)
 msgid "I"
 msgstr "I"
 
-#: C/shortcuts.page:161(p)
+#: C/shortcuts.page:153(p)
 msgid "Underline text"
 msgstr "Text unterstreichen"
 
-#: C/shortcuts.page:162(key)
+#: C/shortcuts.page:154(key)
 msgid "U"
 msgstr "U"
 
-#: C/shortcuts.page:165(p)
+#: C/shortcuts.page:157(p)
 msgid "Strike text"
 msgstr "Text durchstreichen"
 
-#: C/shortcuts.page:169(p)
+#: C/shortcuts.page:161(p)
 msgid "Insert a link"
 msgstr "Verweis einfügen"
 
-#: C/shortcuts.page:173(p)
+#: C/shortcuts.page:165(p)
 msgid "Remove formatting"
 msgstr "Formatierung entfernen"
 
-#: C/shortcuts.page:174(key)
+#: C/shortcuts.page:166(key) C/shortcuts.page:186(key)
 msgid "Space"
 msgstr "Leerzeichen"
+
+#: C/shortcuts.page:172(title)
+msgid "Keyboard navigation"
+msgstr "Tastatursteuerung"
+
+#: C/shortcuts.page:173(p)
+msgid ""
+"These shortcuts can be used to move the keyboard focus in the main window."
+msgstr ""
+"Diese Tastenkombinationen können dazu verwendet werden, um den Tastaturfokus "
+"in das Hauptfenster zu verschieben."
+
+#: C/shortcuts.page:176(p)
+msgid "Move focus to the next/previous pane"
+msgstr "Fokus in die nächste bzw. vorige Ansicht wechseln"
+
+#: C/shortcuts.page:177(p)
+msgid ""
+"<keyseq><key>F6</key></keyseq> / <keyseq><key>Shift</key><key>F6</key></"
+"keyseq>"
+msgstr ""
+"<keyseq><key>F6</key><key>I</key></keyseq> oder <keyseq><key>Umschalttaste</"
+"key><key>F6</key></keyseq>"
+
+#: C/shortcuts.page:180(p)
+msgid "Move focus to conversation list"
+msgstr "Fokus auf Konversationsliste wechseln"
+
+#: C/shortcuts.page:184(p)
+msgid "Move to the next message in a conversation"
+msgstr "Zur nächsten Nachricht in einer Konversation wechseln"
+
+#: C/shortcuts.page:190(p)
+msgid "Move to the next/previous message in a conversation"
+msgstr "Zur nächsten/vorigen Nachricht in einer Konversation wechseln"
+
+#: C/shortcuts.page:191(p)
+#| msgid ""
+#| "<keyseq><key>Ctrl</key><key>U</key></keyseq> or <keyseq><key>Shift</"
+#| "key><key>U</key></keyseq>"
+msgid ""
+"<keyseq><key>Ctrl</key><key>Down</key></keyseq> / <keyseq><key>Ctrl</"
+"key><key>Up</key></keyseq>"
+msgstr ""
+"<keyseq><key>Strg</key><key>Runter</key></keyseq> / <keyseq><key>Strg</"
+"key><key>Hoch</key></keyseq>"
+
+#: C/shortcuts.page:197(p)
+msgid "Move to the first/last message in a conversation"
+msgstr "Zur ersten/letzten Nachricht in einer Konversation wechseln"
+
+#: C/shortcuts.page:198(p)
+#| msgid ""
+#| "<keyseq><key>Ctrl</key><key>I</key></keyseq> or <keyseq><key>Shift</"
+#| "key><key>I</key></keyseq>"
+msgid ""
+"<keyseq><key>Ctrl</key><key>Home</key></keyseq> / <keyseq><key>Ctrl</"
+"key><key>End</key></keyseq>"
+msgstr ""
+"<keyseq><key>Strg</key><key>Pos1</key></keyseq> / <keyseq><key>Strg</"
+"key><key>Ende</key></keyseq>"
 
 #: C/search.page:10(title)
 msgid "Search"
@@ -543,7 +595,7 @@ msgid ""
 "keyseq>) and start typing. Results will appear after a brief delay."
 msgstr ""
 "Geary unterstützt eine Volltextsuche je Konto. Um eine Suche zu starten, "
-"wählen Sie einen Ordner des zu durchsuchenden Kontos. Dann drücken Sie auf "
+"wählen Sie einen Ordner des zu durchsuchenden Kontos. Dann klicken Sie auf "
 "das Suchfeld in der Werkzeugleiste (oder Sie drücken <keyseq><key>Strg</"
 "key><key>S</key></keyseq>) und beginnen zu tippen. Die Ergebnisse werden "
 "nach einer kurzen Verzögerung angezeigt."
@@ -633,31 +685,28 @@ msgid "Finds messages where <var>sender</var> matches the From header."
 msgstr "Findet Nachrichten mit <var>Absender</var> im Von-Feld."
 
 #: C/search.page:47(input)
-#, fuzzy
 msgid "is:read"
-msgstr "ist:gelesen"
+msgstr "is:read"
 
 #: C/search.page:48(p)
 msgid "Finds messages that have been marked as read."
-msgstr "Sucht Nachrichten, die als gelesen markiert sind"
+msgstr "Findet Nachrichten, die als gelesen markiert sind."
 
 #: C/search.page:51(input)
-#, fuzzy
 msgid "is:starred"
-msgstr "ist:markiert"
+msgstr "is:starred"
 
 #: C/search.page:52(p)
 msgid "Finds messages that have been marked as starred."
-msgstr "Sucht Nachrichten, die mit Sternchen markiert sind."
+msgstr "Findet Nachrichten, die mit einem Sternchen markiert sind."
 
 #: C/search.page:55(input)
-#, fuzzy
 msgid "is:unread"
-msgstr "ist:ungelesen"
+msgstr "is:unread"
 
 #: C/search.page:56(p)
 msgid "Finds messages that have been marked as not read."
-msgstr "Sucht Nachrichten, die als ungelesen markiert sind"
+msgstr "Findet Nachrichten, die als ungelesen markiert sind."
 
 #: C/search.page:59(input)
 msgid "subject:<placeholder-1/>"
@@ -701,9 +750,9 @@ msgid ""
 "application menu is available near the top-left corner of the screen.)"
 msgstr ""
 "Das Fenster <gui>Einstellungen</gui> erreichen Sie über das Programm-Menü "
-"oder das Menu in der oberen rechten Ecke der Werkzeugleiste. (Das hängt von "
-"Ihrem Desktop ab. Bei der GNOME Shell und Unity befindet sich das "
-"Programmmenü nahe der oberen linken Ecke des Bildschirms.)"
+"oder das Menü in der oberen rechten Ecke der Werkzeugleiste. Das hängt von "
+"Ihrer Arbeitsumgebung ab. Bei der GNOME Shell und Unity befindet sich das "
+"Programmmenü nahe der oberen linken Ecke des Bildschirms."
 
 # There may be a better translation, but I am missing a context.
 #: C/preferences.page:17(title)
@@ -726,7 +775,7 @@ msgstr ""
 
 #: C/preferences.page:26(gui)
 msgid "Display conversation preview"
-msgstr "Zeige Konversationsvorschau"
+msgstr "Konversationsvorschau anzeigen"
 
 #: C/preferences.page:27(p)
 msgid ""
@@ -738,18 +787,18 @@ msgstr ""
 
 #: C/preferences.page:31(gui)
 msgid "Use three pane view"
-msgstr "Ansicht mit drei Leisten verwenden"
+msgstr "Dreispaltige Ansicht verwenden"
 
-# 3-Spalten-Ansicht heisst das in u.a. in Thunderbird...
 #: C/preferences.page:32(p)
 msgid ""
 "Show the folder list, the conversation list, and the messages side-by-side-"
 "by-side in three panes. If not selected, the folder list and conversation "
 "list will be stacked vertically in a single pane."
 msgstr ""
-"3-Spalten-Ansicht (Ordnerliste, Konversationsliste, Nachrichten) verwenden. "
-"Wenn nicht ausgewählt, werden Ordnerliste und Konversationsliste vertikal in "
-"einer Spalte angeordnet."
+"Zeigt die Ordnerliste, die Konversationsliste und die Nachrichten "
+"nebeneinander in drei Ansichten an. Falls nicht ausgewählt, werden die "
+"Ordnerliste und die Konversationsliste vertikal übereinander in einer "
+"Ansicht angezeigt."
 
 #: C/preferences.page:40(title)
 msgid "Composer"
@@ -757,7 +806,7 @@ msgstr "Editor"
 
 #: C/preferences.page:43(gui)
 msgid "Enable spell checking"
-msgstr "Aktiviere Rechtschreibkorrektur"
+msgstr "Rechtschreibkorrektur aktivieren"
 
 #: C/preferences.page:44(p)
 msgid ""
@@ -773,7 +822,7 @@ msgstr "Benachrichtigungen"
 
 #: C/preferences.page:54(gui)
 msgid "Play notification sounds"
-msgstr "Abspielen von Benachrichtigungstönen"
+msgstr "Benachrichtigungstöne abspielen"
 
 #: C/preferences.page:55(p)
 msgid "When set, Geary plays a sound whenever a new message arrives."
@@ -782,7 +831,7 @@ msgstr ""
 
 #: C/preferences.page:58(gui)
 msgid "Show notifications for new mail"
-msgstr "Anzeigen von Benachrichtigungen für neue Nachrichten"
+msgstr "Benachrichtigung bei _neuen E-Mails anzeigen"
 
 #: C/preferences.page:59(p)
 msgid ""
@@ -794,14 +843,13 @@ msgid ""
 msgstr ""
 "Falls aktiviert, zeigt Geary jedes Mal eine <em>Benachrichtigung</em> an, "
 "wenn eine neue Nachricht eintrifft. Benachrichtigungen werden systemabhängig "
-"angezeigt. Unter der GNOME Shell werden Benachrichtigungen bei alten "
-"Versionen am unteren Bildschirmrand angezeigt und oben mittig bei neueren "
-"Versionen. Unter Ubuntu Unity werden Benachrichtigungen in der oberen "
-"rechten Ecke angezeigt."
+"angezeigt. Unter der GNOME Shell werden Benachrichtigungen am unteren "
+"Bildschirmrand angezeigt. Unter Ubuntu Unity werden Benachrichtigungen in "
+"der oberen rechten Ecke des Bildschirms angezeigt."
 
 #: C/preferences.page:65(gui)
 msgid "Always watch for new mail"
-msgstr "Immer auf neue Nachrichten achten"
+msgstr "Ständig nach neuen E-Mails prüfen"
 
 #: C/preferences.page:66(p)
 msgid ""
@@ -809,10 +857,10 @@ msgid ""
 "open. To do this, it will silently start when you log in to your computer, "
 "and it will continue to run after you close the main window."
 msgstr ""
-"Geary überwacht Ihre E-Mailkonten auf neue Nachrichten auch wenn das "
-"Hauptfenster der Anwendung nicht geöffnet ist. Dazu startet Geary im "
-"Hintergrund wenn Sie sich an Ihrem Computer anmelden, und wird weiterhin "
-"ausgeführt wenn das Hauptfenster geschlossen wird."
+"Geary wird in Ihren Konten nach neuen Nachrichten suchen, auch wenn das "
+"Hauptfenster nicht geöffnet ist. Damit dies möglich wird, startet es im "
+"Hintergrund, wenn Sie sich an Ihrem Rechner anmelden, und löuft auch dann "
+"weiter, wenn Sie das Hauptfenster schließen."
 
 #: C/overview.page:8(title)
 msgid "Overview"
@@ -825,10 +873,10 @@ msgid ""
 "protocol, including popular services such as Gmail, Yahoo Mail, and Outlook."
 "com."
 msgstr ""
-"Geary ist ein schlankes E-Mail-Programm für den <link href=\"http://gnome.org"
-"\">GNOME</link> Desktop. Es arbeitet mit allen E-Mail-Servern, die das IMAP "
-"Protokoll unterstützen, wie beispielsweise Gmail, Yahoo Mail und Outlook."
-"com. "
+"Geary ist ein schlankes E-Mail-Programm für die <link href=\"http://gnome.org"
+"\">GNOME</link>-Arbeitsumgebung. Es arbeitet mit allen E-Mail-Servern, die "
+"das IMAP-Protokoll unterstützen, wie beispielsweise Gmail, Yahoo Mail und "
+"Outlook.com."
 
 #: C/overview.page:14(p)
 msgid ""
@@ -846,9 +894,7 @@ msgstr "Das Hauptfenster von Geary ist in verschiedene Bereiche unterteilt:"
 msgid "Folder list"
 msgstr "Ordnerliste"
 
-# Übersetzen wir Label nicht, als Bezeichnung, Kennzeichnung, oder so??
 #: C/overview.page:21(p)
-#, fuzzy
 msgid ""
 "The <em>folder list</em> at the left displays all <em>folders</em> and "
 "<em>labels</em> in your mail account. Geary uses the term <em>label</em> for "
@@ -856,10 +902,10 @@ msgid ""
 "web interface also uses this term; most other mail services do not.)"
 msgstr ""
 "Die <em>Ordnerliste</em> auf der linken Seite zeigt alle <em>Ordner</em> und "
-"<em>Label</em> Ihres E-Mail-Kontos. Geary verwendet den Begriff <em>Label</"
-"em> für alle Ordner, die Sie erstellt haben, um Ihre Nachrichten zu "
-"organisiern. (Die Gmail Web-Oberfläche nutzt diesen Begriff ebenfalls; die "
-"meisten anderen E-Mail-Dienste tun das nicht.)"
+"<em>Label</em> Ihres E-Mail-Kontos. Geary verwendet den Begriff "
+"<em>Beschriftung</em> für alle Ordner, die Sie erstellt haben, um Ihre "
+"Nachrichten zu organisiern. Die Gmail Web-Oberfläche verwendet den Begriff "
+"»Markierung«; die meisten anderen E-Mail-Dienste tun das nicht."
 
 #: C/overview.page:28(title)
 msgid "Conversation list"
@@ -906,7 +952,7 @@ msgid ""
 "first conversation in a range, then hold down <key>Shift</key> and click the "
 "last conversation."
 msgstr ""
-"Manche Befehle in Geary können auf eine Gruppe von Konversationen angewandt "
+"Manche Befehle in Geary können auf eine Gruppe von Konversationen angewendet "
 "werden. Um mehrere Konversationen auszuwählen, halten Sie die <key>Strg</"
 "key>-Taste gedrückt und wählen die Konversationen durch Anklicken einzeln in "
 "der Konversationsliste aus. Alternativ können Sie auch die erste "
@@ -931,9 +977,9 @@ msgid ""
 "lets you open the <em>message menu</em> with commands that operate on the "
 "message."
 msgstr ""
-"In der oberen rechten Ecke jeder Nachricht zeigt Geary einen DropDown-Pfeil "
-"an, um das <em>Nachrichten-Menü</em> zu öffnen. Es enthält Befehlen, die "
-"sich nur auf die jeweilige Nachricht auswirken."
+"In der oberen rechten Ecke jeder Nachricht zeigt Geary einen Ausklapp-Pfeil "
+"an, um das <em>Nachrichten-Menü</em> zu öffnen. Es enthält Befehle, die sich "
+"nur auf die jeweilige Nachricht auswirken."
 
 #: C/overview.page:49(p)
 msgid ""
@@ -942,18 +988,17 @@ msgid ""
 "header to collapse it."
 msgstr ""
 "Wenn Sie eine Konversation ansehen, klappt Geary Nachrichten ein, die Sie "
-"bereits gesehen haben. Drücken Sie auf eingeklappte Nachrichten, um sie "
-"aufzuklappen. Drücken Sie auf die Kopfzeile einer aufgeklappten Nachricht um "
-"sie zu einzuklappen. "
+"bereits gesehen haben. Klicken Sie auf eingeklappte Nachrichten, um sie "
+"aufzuklappen. Drücken Sie auf die Kopfzeile einer aufgeklappten Nachricht, "
+"um sie zu einzuklappen."
 
 #: C/overview.page:50(p)
 msgid ""
 "Any attachments in a message appear at the bottom of the message. You can "
 "click an attachment to open it or right-click to save it."
 msgstr ""
-"Alle Anhänge einer Nachricht erscheinen am Ende der Nachricht. Sie können "
-"einen Anhang anklicken, um ihn zu öffnen oder mit einem Rechtsklick "
-"speichern."
+"Alle Anhänge einer Nachricht erscheinen an deren Ende. Sie können einen "
+"Anhang anklicken, um ihn zu öffnen oder mit einem Rechtsklick speichern."
 
 #: C/overview.page:52(p)
 msgid ""
@@ -975,12 +1020,12 @@ msgid ""
 "servers. At this time Geary is still missing numerous features including "
 "offline mode."
 msgstr ""
-"Geary befindet sich noch in einem frühen Entwicklungsstadium. Geary "
-"unterstützt IMAP und wurde mit Gmail, Yahoo und dem freien Dovecot E-Mail-"
-"Server getestet. Die Unterstützung von Outlook.com ist noch experimentell. "
-"Es kann sein, dass Geary mit einigen IMAP-Servern noch nicht gut zusammen "
-"arbeitet. Zum aktuellen Zeitpunkt fehlen Geary noch viele Leistungsmerkmale, "
-"wie beispielsweise ein Offline Modus. "
+"Geary befindet sich noch in einem frühen Entwicklungsstadium. Es unterstützt "
+"IMAP und wurde mit Gmail, Yahoo und dem freien Dovecot E-Mail-Server "
+"getestet. Die Unterstützung von Outlook.com ist noch experimentell. Es kann "
+"sein, dass Geary mit einigen IMAP-Servern noch nicht gut zusammen arbeitet. "
+"Zum aktuellen Zeitpunkt fehlen Geary noch viele Leistungsmerkmale, wie "
+"beispielsweise ein Offline Modus."
 
 #: C/limits.page:14(p)
 msgid ""
@@ -994,11 +1039,11 @@ msgstr ""
 
 #: C/label.page:10(title)
 msgid "Label or move a conversation"
-msgstr "Eine Konversation mit einem Label versehen oder verschieben"
+msgstr "Eine Konversation mit einer Beschriftung versehen oder verschieben"
 
 #: C/label.page:12(title)
 msgid "Label a conversation"
-msgstr "Eine Konversation mit einem Label versehen"
+msgstr "Eine Konversation mit einer Beschriftung versehen"
 
 #: C/label.page:13(p)
 msgid ""
@@ -1006,26 +1051,26 @@ msgid ""
 "labels correspond to labels in Gmail, or ordinary folders in other mail "
 "services."
 msgstr ""
-"Mit Geary können Sie einer Konversation ein oder mehrere <em>Label</em> "
-"zuweisen. Geary Labels entsprechen Gmail-Labels oder normalen Ordnern "
-"anderer E-Mail-Dienste."
+"Mit Geary können Sie einer Konversation eine oder mehrere "
+"<em>Beschriftungen</em> zuweisen. Gearys Beschriftungen entsprechen Gmail-"
+"Markierungen oder normalen Ordnern anderer E-Mail-Dienste."
 
 #: C/label.page:15(p)
 msgid ""
 "To label one or more conversations, first select the conversation(s), then "
 "do either of the following:"
 msgstr ""
-"Um eine oder mehrere Konversationen mit einem Label zu versehen, wählen Sie "
-"zuerst die Konversation(en) aus und können dann einen der folgenden Wege "
-"nutzen:"
+"Um eine oder mehrere Konversationen mit einer Beschriftung zu versehen, "
+"wählen Sie zuerst die Konversation(en) aus und können dann einen der "
+"folgenden Wege nutzen:"
 
 #: C/label.page:18(p)
 msgid ""
 "Click the <gui>Label</gui> button on the toolbar and select a label from the "
 "resulting drop-down menu."
 msgstr ""
-"Drücken Sie den <gui>Label</gui> Knopf in der Werkzeugleiste und wählen Sie "
-"ein Label aus dem erscheinenden DropDown-Menü."
+"Klicken Sie den <gui>Beschriftung</gui>-Knopf in der Werkzeugleiste und "
+"wählen Sie eine Beschriftung aus dem erscheinenden Auswahlmenü."
 
 #: C/label.page:20(p)
 msgid ""
@@ -1033,19 +1078,19 @@ msgid ""
 "conversation list to the label in the sidebar."
 msgstr ""
 "Drücken Sie die <key>Strg</key>-Taste und ziehen Sie die Konversation(en) "
-"aus der Konversationsliste auf das Label in der Seitenleiste."
+"aus der Konversationsliste auf die Beschriftung in der Seitenleiste."
 
 #: C/label.page:25(title)
 msgid "Move a conversation to a folder or label"
-msgstr "Verschieben einer Konversation in einen Ordner oder ein Label"
+msgstr "Verschieben einer Konversation in einen Ordner oder eine Beschriftung"
 
 #: C/label.page:26(p)
 msgid ""
 "To move one or more conversations to a folder or label, first select the "
 "conversation(s), then do either of the following:"
 msgstr ""
-"Um eine oder mehrere Konversationen in einen Ordner oder ein Label zu "
-"verschieben, wählen Sie zunächst die Konversation(en) aus und können dann "
+"Um eine oder mehrere Konversationen in einen Ordner oder eine Beschriftung "
+"zu verschieben, wählen Sie zunächst die Konversation(en) aus und können dann "
 "einen der folgenden Wege nutzen:"
 
 #: C/label.page:29(p)
@@ -1053,9 +1098,9 @@ msgid ""
 "Click the <gui>Move</gui> button on the toolbar and select a folder or label "
 "from the resulting drop-down menu."
 msgstr ""
-"Drücken Sie den <gui>Verschieben</gui> Knopf in der Werkzeugleiste und "
-"wählen Sie einen Ordner oder ein Label aus dem erscheinenden DropDown-Menü "
-"aus."
+"Klicken Sie den <gui>Verschieben</gui> Knopf in der Werkzeugleiste und "
+"wählen Sie einen Ordner oder eine Beschriftung aus dem erscheinenden "
+"Auswahlmenü aus."
 
 #: C/label.page:31(p)
 msgid ""
@@ -1063,7 +1108,7 @@ msgid ""
 "in the sidebar."
 msgstr ""
 "Ziehen Sie die Konversation(en) aus der Konversationsliste auf den Ordner "
-"oder das Label in der Seitenleiste."
+"oder die Beschriftung in der Seitenleiste."
 
 #. When image changes, this message will be marked fuzzy or untranslated for you.
 #. It doesn't matter what you translate it to: it's not used at all.
@@ -1105,7 +1150,7 @@ msgid ""
 "bug."
 msgstr ""
 "Suchen Sie in Gearys <link href=\"https://bugzilla.gnome.org/browse.cgi?"
-"product=geary\">Fehler Datenbank</link>, um zu sehen, ob jemand anderes "
+"product=geary\">Fehlerdatenbank</link>, um zu sehen, ob jemand anderes "
 "diesen Fehler bereits gemeldet hat."
 
 #: C/bugs.page:13(p)
@@ -1121,17 +1166,17 @@ msgstr ""
 "Fehler entdeckt. Um einen Fehlerbericht zu erstellen, legen Sie sich ein "
 "Konto bei GNOMEs Bugzilla an und <link href=\"https://bugzilla.gnome.org/"
 "enter_bug.cgi?product=geary\">melden einen neuen Fehler</link>. Seien Sie so "
-"präzise wie möglich und beschreiben Sie die Schritte um diesen Fehler zu "
-"erzeugen. Vergessen Sie nicht, Details zu Ihrem Betriebssystem und der "
-"verwendeten Geary Version anzugeben."
+"präzise wie möglich und beschreiben Sie die Schritte, um diesen Fehler zu "
+"reproduzieren. Vergessen Sie nicht, Details zu Ihrem Betriebssystem und der "
+"verwendeten Geary-Version anzugeben."
 
 #: C/bugs.page:18(p)
 msgid ""
 "For general inquiries, please join the <link href=\"https://mail.gnome.org/"
 "mailman/listinfo/geary-list\"> Geary mailing list</link>."
 msgstr ""
-"Für allgemeine Anfragen, melden Sie sich bitte bei der <link href=\"http://"
-"lists.yorba.org/cgi-bin/mailman/listinfo/geary\">Geary Mailing List</link> "
+"Für allgemeine Anfragen melden Sie sich bitte bei der <link href=\"http://"
+"lists.yorba.org/cgi-bin/mailman/listinfo/geary\">Geary-Mailingliste</link> "
 "an."
 
 #: C/archive.page:10(title)
@@ -1161,10 +1206,10 @@ msgstr ""
 "Bei anderen E-Mail-Servern können Sie Nachrichten in den Papierkorb "
 "verschieben oder löschen, nicht aber archivieren. Um eine oder mehrere "
 "Konversationen in den <gui>Papierkorb</gui> zu verschieben, wählen Sie diese "
-"aus und drücken den <gui>Papierkorb</gui> Knopf in der Werkzeugleiste. Um "
+"aus und klicken den <gui>Papierkorb</gui>-Knopf in der Werkzeugleiste. Um "
 "die Konversationen vollständig zu löschen, halten Sie die "
-"<key>Umschalttaste</key> Taste gedrückt und klicken auf den <gui>Löschen</"
-"gui> Knopf, der an Stelle von <gui>Papierkorb</gui> erscheint."
+"<key>Umschalttaste</key> gedrückt und klicken auf den <gui>Löschen</gui>-"
+"Knopf, der an Stelle von <gui>Papierkorb</gui> erscheint."
 
 #: C/archive.page:21(p)
 msgid ""
@@ -1197,7 +1242,7 @@ msgstr ""
 "Wenn Sie Geary das erste Mal starten, werden Sie gebeten, ein E-Mail-Konto "
 "hinzuzufügen. In diesem Fenster wählen Sie aus, ob es sich um ein Gmail-, "
 "Yahoo-, Outlook.com oder ein anderes E-Mail-Konto handelt. Für andere Konto-"
-"Arten müssen Sie die IMAP- und SMTP-Angaben selbst eingetragen. "
+"Arten müssen Sie die IMAP- und SMTP-Angaben selbst eingetragen."
 
 #: C/accounts.page:19(p)
 msgid ""
@@ -1211,11 +1256,11 @@ msgid ""
 msgstr ""
 "Weitere Konten können Sie im Konten-Dialogfenster hinzufügen. Sie erreichen "
 "<gui>Konten</gui> über Gearys Programm-Menü oder das Menü in der oberen "
-"rechten Ecke der Werkzeugleiste. (Das hängt von Ihrem Desktop ab. Bei der "
-"GNOME Shell und Unity befindet sich das Programmmenü nahe der oberen linken "
-"Ecke des Bildschirms.) Alternativ öffnen Sie das Konten-Dialogfenster mit "
-"der Tastenkombination <keyseq><key>Ctrl</key><key>M</key></keyseq>. Klicken "
-"Sie auf den + Knopf, um ein Konto hinzuzufügen ."
+"rechten Ecke der Werkzeugleiste. Das hängt von Ihrer Arbeitsumgebung ab. Bei "
+"der GNOME Shell und Unity befindet sich das Programmmenü nahe der oberen "
+"linken Ecke des Bildschirms. Alternativ öffnen Sie das Konten-Dialogfenster "
+"mit der Tastenkombination <keyseq><key>Strg</key><key>M</key></keyseq>. "
+"Klicken Sie auf den + Knopf, um ein Konto hinzuzufügen."
 
 #: C/accounts.page:28(title)
 msgid "Editing existing accounts"
@@ -1228,7 +1273,7 @@ msgid ""
 "settings on an existing account. If you need to change your IMAP or SMTP "
 "server, you will need to delete the account and re-add it."
 msgstr ""
-"Wählen Sie im Konten Dialog ein Konto aus und drücken Sie auf das Stift-"
+"Wählen Sie im Konten-Dialog ein Konto aus und klicken Sie auf das Stift-"
 "Symbol, um die Einstellungen zu bearbeiten. Bitte beachten Sie, dass Geary "
 "die Server-Einstellungen bestehender Konten nicht verändern kann. Wenn Sie "
 "den IMAP- oder SMTP-Server ändern wollen, müssen Sie das bereits "
@@ -1239,8 +1284,8 @@ msgid ""
 "To change the order that accounts are displayed in the folder list, drag the "
 "accounts in the Accounts dialog to the desired order."
 msgstr ""
-"Um die Reihenfolge zu ändern in der die Konten in der Ordnerliste angezeigt "
-"werden, ziehen Sie die Konten im Konten Dialog an die gewünschte Position."
+"Um die Reihenfolge zu ändern, in der die Konten in der Ordnerliste angezeigt "
+"werden, ziehen Sie die Konten im Konten-Dialog an die gewünschte Position."
 
 #: C/accounts.page:37(p)
 msgid "There are some advanced options available when editing accounts:"
@@ -1273,7 +1318,7 @@ msgstr ""
 "Das Ankreuzfeld <gui>E-Mails unterzeichnen</gui> zeigt an ob beim öffnen des "
 "E-Mail-Editors automatisch eine Signatur in die E-Mail eingefügt wird. In "
 "dem Eingabefeld direkt darunter können Sie die Signatur eingeben. Um den "
-"Text hervorzuheben können Sie auch HTML-Tags verwenden. Mit den Knöpfen auf "
+"Text hervorzuheben, können Sie auch HTML-Tags verwenden. Mit den Knöpfen auf "
 "der rechten Seite wechseln Sie zur Vorschau der Signatur."
 
 #: C/accounts.page:50(p)
@@ -1286,7 +1331,7 @@ msgstr ""
 "Wenn Sie im Konten-Dialog kein Signatur einstellen, wird Geary den Inhalt "
 "der Datei <file>.signature</file> aus Ihrem Persönlicher Ordner verwenden, "
 "sofern diese vorhanden ist. Diese Datei kann sowohl reinen Text als auch "
-"HTML-Textauszeichnungen enthalten. Im letzteren Fall, werden die "
+"HTML-Textauszeichnungen enthalten. Im letzteren Fall werden die "
 "Textauszeichnungen direkt und ohne Maskierung im E-Mail-Editor eingefügt."
 
 #: C/accounts.page:55(p)
@@ -1295,8 +1340,8 @@ msgid ""
 "Geary will keep locally. Geary can only use locally available mail when "
 "searching and forming conversations."
 msgstr ""
-"Über das <gui>Mail herunterladen</gui> Dropdown-Menü können Sie festlegen, "
-"wieviel E-Mail Geary lokal behält. Geary kann nur lokal verfügbar E-Mails "
+"Über das <gui>Mail herunterladen</gui>-Auswahlmenü können Sie festlegen, "
+"wieviel E-Mail Geary lokal behält. Geary kann nur lokal verfügbare E-Mails "
 "berücksichtigen, wenn es um das Durchsuchen oder das Bündeln von Nachrichten "
 "in Konversationen geht."
 
@@ -1310,48 +1355,16 @@ msgid ""
 "press the - button. Geary will delete all information associated with the "
 "account."
 msgstr ""
-"Um ein Konto zu löschen, öffnen Sie den Konten Dialog, wählen das "
-"betreffende Konto und drücken den - Knopf. Geary wird alle mit diesem Konto "
-"verknüpften Daten löschen."
+"Um ein Konto zu löschen, öffnen Sie den Konten-Dialog, wählen das "
+"betreffende Konto und klicken auf den - Knopf. Geary wird alle mit diesem "
+"Konto verknüpften Daten löschen."
 
 #. Put one translator per line, in the form of NAME <EMAIL>, YEAR1, YEAR2
 #: C/accounts.page:0(None)
 msgid "translator-credits"
 msgstr ""
 "Andreas Wilhelm <info@avedo.net>, 2014\n"
-"Frank Schiersner <fs9@live.de>, 2014"
+"Frank Schiersner <fs9@live.de>, 2014\n"
+"Simon Linden <xhi2018@googlemail.com, 2015\n"
+"Mario Blättermann <mario.blaettermann@gmail.com>, 2017"
 
-#~ msgid "j"
-#~ msgstr "j"
-
-#~ msgid "k"
-#~ msgstr "k"
-
-#~ msgid "E"
-#~ msgstr "E"
-
-#~ msgid ""
-#~ "To set preferences in Geary, click the gear menu at the upper right of "
-#~ "the toolbar and choose <gui>Preferences</gui>."
-#~ msgstr ""
-#~ "Um Einstellungen in Geary vorzunehmen, wähle das Einstellungsmenü in der "
-#~ "oberen rechten Ecke der Werkzeugleiste und Wähle <gui>Einstellungen</gui>."
-
-#~ msgid ""
-#~ "With other mail servers, you can delete but not archive messages. To "
-#~ "delete one or more conversations, select them and press the <gui>Delete</"
-#~ "gui> button on the toolbar."
-#~ msgstr ""
-#~ "Bei anderen E-Mail-Servern können Nachrichten gelöscht, jedoch nicht "
-#~ "archiviert werden. Um eine oder mehrere Konversationen zu löschen wähle "
-#~ "diese aus und drücke den <gui>Löschen</gui> Knopf in der Werkzeugleiste."
-
-#~ msgid ""
-#~ "Additional accounts can be added from the Accounts dialog. Click Accounts "
-#~ "in the Gear menu (or press <keyseq><key>Ctrl</key><key>M</key></keyseq>) "
-#~ "to open the Accounts dialog. To add an account, click the + button."
-#~ msgstr ""
-#~ "Zusätzliche Konten können im Konten Dialog hinzugefügt werden. Drücke "
-#~ "Konten im Einstellungsmenü (oder drücke <keyseq><key>Strg</key><key>M</"
-#~ "key></keyseq>) um den Konten Dialog zu öffnen. Um ein Konto hinzuzufügen, "
-#~ "drücke den + Knopf."
