@@ -14,6 +14,9 @@ public class PreferencesDialog : Gtk.Dialog {
     private Gtk.CheckButton display_preview;
 
     [GtkChild]
+    private Gtk.CheckButton display_reverse;
+
+    [GtkChild]
     private Gtk.CheckButton three_pane_view;
 
     [GtkChild]
@@ -38,6 +41,7 @@ public class PreferencesDialog : Gtk.Dialog {
         Configuration config = app.config;
         config.bind(Configuration.AUTOSELECT_KEY, autoselect, "active");
         config.bind(Configuration.DISPLAY_PREVIEW_KEY, display_preview, "active");
+        config.bind(Configuration.DISPLAY_REVERSE_KEY, display_reverse, "active");
         config.bind(Configuration.FOLDER_LIST_PANE_HORIZONTAL_KEY, three_pane_view, "active");
         config.bind(Configuration.PLAY_SOUNDS_KEY, play_sounds, "active");
         config.bind(Configuration.SHOW_NOTIFICATIONS_KEY, show_notifications, "active");
@@ -52,4 +56,3 @@ public class PreferencesDialog : Gtk.Dialog {
         destroy();
     }
 }
-
