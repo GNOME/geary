@@ -501,13 +501,17 @@ public class ConversationListBox : Gtk.ListBox {
         }
 
         update_first_last_row();
-        EmailRow? last_email = this.last_row as EmailRow;
+        EmailRow? latest_email = this.last_row as EmailRow;
 
-        if (last_email != null && !this.cancellable.is_cancelled()) {
-            // If no other row was expanded by default, use the last
+        if (GearyApplication.instance.config.display_reverse) {
+          latest_email = this.first_row as EmailRow;
+        }
+
+        if (latest_email != null && !this.cancellable.is_cancelled()) {
+            // If no other row was expanded by default, use the last/first
             if (first_expanded_row == null) {
-                last_email.expand();
-                first_expanded_row = last_email;
+              latest_email.expand();
+              first_expanded_row = latest_email;
             }
 
             // Start the first expanded row loading before any others,
@@ -1084,13 +1088,20 @@ public class ConversationListBox : Gtk.ListBox {
 
     private void on_row_activated(Gtk.ListBoxRow widget) {
         EmailRow? row = widget as EmailRow;
+
+        EmailRow? latest_row = this.last_row as EmailRow;
+
+        if (GearyApplication.instance.config.display_reverse) {
+          latest_row = this.first_row as EmailRow;
+        }
+
         if (row != null) {
             // Allow non-last rows to be expanded/collapsed, but also let
             // the last row to be expanded since appended sent emails will
             // be appended last. Finally, don't let rows with active
             // composers be collapsed.
             if (row.is_expanded) {
-                if (row != this.last_row) {
+                if (row != latest_row) {
                     row.collapse();
                 }
             } else {
