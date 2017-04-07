@@ -301,6 +301,11 @@ public class ConversationListBox : Gtk.ListBox {
         if (email2 == null) {
             return -1;
         }
+
+        if (GearyApplication.instance.config.display_reverse) {
+          return Geary.Email.compare_sent_date_descending(email1, email2);
+        }
+
         return Geary.Email.compare_sent_date_ascending(email1, email2);
     }
 
