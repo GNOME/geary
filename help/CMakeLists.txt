@@ -23,6 +23,7 @@ set(TRANSLATED
     it
     pl
     pt_BR
+    sv
 )
 
 set(HELP_DEST share/gnome/help/geary)
