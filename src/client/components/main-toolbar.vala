@@ -1,4 +1,4 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/* Copyright 2017 Software Freedom Conservancy Inc.
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -7,23 +7,34 @@
 // Draws the main toolbar.
 [GtkTemplate (ui = "/org/gnome/Geary/main-toolbar.ui")]
 public class MainToolbar : Gtk.Box {
-    private Gtk.ActionGroup action_group;
-    public FolderPopover copy_folder_menu { get; private set; default = new FolderPopover(); }
-    public FolderPopover move_folder_menu { get; private set; default = new FolderPopover(); }
+    // How wide the left pane should be. Auto-synced with our settings
+    public int left_pane_width { get; set; }
+    // Used to form the title of the folder header
     public string account { get; set; }
     public string folder { get; set; }
+    // Close button settings
     public bool show_close_button { get; set; default = false; }
     public bool show_close_button_left { get; private set; default = true; }
     public bool show_close_button_right { get; private set; default = true; }
+    // Search and find bar
     public bool search_open { get; set; default = false; }
     public bool find_open { get; set; default = false; }
-    public int left_pane_width { get; set; }
+    // Copy and Move popovers
+    public FolderPopover copy_folder_menu { get; private set; default = new FolderPopover(); }
+    public FolderPopover move_folder_menu { get; private set; default = new FolderPopover(); }
+    // How many conversations are selected right now. Should automatically be updated.
+    public int selected_conversations { get; set; }
+    // Whether to show the trash or the delete button
+    public bool show_trash_button { get; set; default = true; }
+    // The tooltip of the Undo-button
+    public string undo_tooltip {
+        owned get { return this.undo_button.tooltip_text; }
+        set { this.undo_button.tooltip_text = value; }
+    }
 
     // Folder header elements
     [GtkChild]
     private Gtk.HeaderBar folder_header;
-    [GtkChild]
-    private Gtk.Button compose_new_message_button;
     [GtkChild]
     private Gtk.MenuButton empty_menu_button;
     [GtkChild]
@@ -34,90 +45,85 @@ public class MainToolbar : Gtk.Box {
     [GtkChild]
     private Gtk.HeaderBar conversation_header;
     [GtkChild]
-    private Gtk.Button reply_sender_button;
-    [GtkChild]
-    private Gtk.Button reply_all_button;
-    [GtkChild]
-    private Gtk.Button forward_button;
-    [GtkChild]
     private Gtk.MenuButton mark_message_button;
     [GtkChild]
-    private Gtk.MenuButton copy_message_button;
+    public Gtk.MenuButton copy_message_button;
     [GtkChild]
-    private Gtk.MenuButton move_message_button;
+    public Gtk.MenuButton move_message_button;
     [GtkChild]
     private Gtk.Button archive_button;
     [GtkChild]
     private Gtk.Button trash_delete_button;
     [GtkChild]
-    private Gtk.Button undo_button;
-    [GtkChild]
     private Gtk.ToggleButton find_button;
 
-    public MainToolbar(Configuration config) {
-        this.action_group = GearyApplication.instance.actions;
+    // Other
+    [GtkChild]
+    private Gtk.Button undo_button;
 
+    // Load these at construction time
+    private Gtk.Image trash_image = new Gtk.Image.from_icon_name("user-trash-symbolic", Gtk.IconSize.MENU);
+    private Gtk.Image delete_image = new Gtk.Image.from_icon_name("edit-delete-symbolic", Gtk.IconSize.MENU);
+
+    // Tooltips
+    private const string DELETE_CONVERSATION_TOOLTIP_SINGLE = _("Delete conversation (Shift+Delete)");
+    private const string DELETE_CONVERSATION_TOOLTIP_MULTIPLE = _("Delete conversations (Shift+Delete)");
+    private const string TRASH_CONVERSATION_TOOLTIP_SINGLE = _("Move conversation to Trash (Delete, Backspace)");
+    private const string TRASH_CONVERSATION_TOOLTIP_MULTIPLE = _("Move conversations to Trash (Delete, Backspace)");
+    private const string ARCHIVE_CONVERSATION_TOOLTIP_SINGLE = _("Archive conversation (A)");
+    private const string ARCHIVE_CONVERSATION_TOOLTIP_MULTIPLE = _("Archive conversations (A)");
+    private const string MARK_MESSAGE_MENU_TOOLTIP_SINGLE = _("Mark conversation");
+    private const string MARK_MESSAGE_MENU_TOOLTIP_MULTIPLE = _("Mark conversations");
+    private const string LABEL_MESSAGE_TOOLTIP_SINGLE = _("Add label to conversation");
+    private const string LABEL_MESSAGE_TOOLTIP_MULTIPLE = _("Add label to conversations");
+    private const string MOVE_MESSAGE_TOOLTIP_SINGLE = _("Move conversation");
+    private const string MOVE_MESSAGE_TOOLTIP_MULTIPLE = _("Move conversations");
+
+    public MainToolbar(Configuration config) {
         // Instead of putting a separator between the two headerbars, as other applications do,
         // we put a separator at the right end of the left headerbar.  This greatly improves
         // the appearance under the Ambiance theme (see bug #746171).  To get this separator to
         // line up with the handle of the pane, we need to extend the width of the left-hand
         // headerbar a bit.  Six pixels is right both for Adwaita and Ambiance.
-        GearyApplication.instance.config.bind(Configuration.MESSAGES_PANE_POSITION_KEY,
-            this, "left-pane-width", SettingsBindFlags.GET);
-        this.bind_property("left-pane-width", folder_header, "width-request",
+        config.bind(Configuration.MESSAGES_PANE_POSITION_KEY, this, "left-pane-width",
+            SettingsBindFlags.GET);
+        this.bind_property("left-pane-width", this.folder_header, "width-request",
             BindingFlags.SYNC_CREATE, (binding, source_value, ref target_value) => {
                 target_value = left_pane_width + 6;
                 return true;
             });
 
         if (config.desktop_environment != Configuration.DesktopEnvironment.UNITY) {
-            this.bind_property("account", folder_header, "title", BindingFlags.SYNC_CREATE);
-            this.bind_property("folder", folder_header, "subtitle", BindingFlags.SYNC_CREATE);
+            this.bind_property("account", this.folder_header, "title", BindingFlags.SYNC_CREATE);
+            this.bind_property("folder", this.folder_header, "subtitle", BindingFlags.SYNC_CREATE);
         }
-        this.bind_property("show-close-button-left", folder_header, "show-close-button",
+        this.bind_property("show-close-button-left", this.folder_header, "show-close-button",
             BindingFlags.SYNC_CREATE);
-        this.bind_property("show-close-button-right", conversation_header, "show-close-button",
+        this.bind_property("show-close-button-right", this.conversation_header, "show-close-button",
             BindingFlags.SYNC_CREATE);
 
         // Assemble the empty/mark menus
-        GearyApplication.instance.load_ui_resource("toolbar_empty_menu.ui");
-        Gtk.Menu empty_menu = (Gtk.Menu) GearyApplication.instance.ui_manager.get_widget("/ui/ToolbarEmptyMenu");
-        GearyApplication.instance.load_ui_resource("toolbar_mark_menu.ui");
-        Gtk.Menu mark_menu = (Gtk.Menu) GearyApplication.instance.ui_manager.get_widget("/ui/ToolbarMarkMenu");
+        Gtk.Builder builder = new Gtk.Builder.from_resource("/org/gnome/Geary/main-toolbar-menus.ui");
+        MenuModel empty_menu = (MenuModel) builder.get_object("empty_menu");
+        MenuModel mark_menu = (MenuModel) builder.get_object("mark_message_menu");
 
         // Setup folder header elements
-        setup_button(compose_new_message_button, GearyController.ACTION_NEW_MESSAGE);
-        empty_menu_button.popup = empty_menu;
-
-        setup_button(search_conversations_button, GearyController.ACTION_TOGGLE_SEARCH);
-        this.bind_property("search-open", search_conversations_button, "active",
+        this.empty_menu_button.popover = new Gtk.Popover.from_model(null, empty_menu);
+        this.bind_property("search-open", this.search_conversations_button, "active",
             BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
 
         // Setup conversation header elements
-        setup_button(reply_sender_button, GearyController.ACTION_REPLY_TO_MESSAGE);
-        setup_button(reply_all_button, GearyController.ACTION_REPLY_ALL_MESSAGE);
-        setup_button(forward_button, GearyController.ACTION_FORWARD_MESSAGE);
+        this.notify["selected-conversations"].connect(() => update_conversation_buttons());
+        this.notify["show-trash-button"].connect(() => update_conversation_buttons());
+        this.mark_message_button.popover = new Gtk.Popover.from_model(null, mark_menu);
+        this.copy_message_button.popover = copy_folder_menu;
+        this.move_message_button.popover = move_folder_menu;
 
-        setup_menu_button(mark_message_button, mark_menu, GearyController.ACTION_MARK_AS_MENU);
-        setup_popover_button(copy_message_button, copy_folder_menu, GearyController.ACTION_COPY_MENU);
-        setup_popover_button(move_message_button, move_folder_menu, GearyController.ACTION_MOVE_MENU);
-
-        setup_button(archive_button, GearyController.ACTION_ARCHIVE_CONVERSATION, true);
-        setup_button(trash_delete_button, GearyController.ACTION_TRASH_CONVERSATION);
-        setup_button(undo_button, GearyController.ACTION_UNDO);
-
-        setup_button(find_button, GearyController.ACTION_TOGGLE_FIND);
-        this.bind_property("find-open", find_button, "active",
+        this.bind_property("find-open", this.find_button, "active",
             BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
 
         Gtk.Settings.get_default().notify["gtk-decoration-layout"].connect(set_window_buttons);
-        realize.connect(set_window_buttons);
-    }
-
-    public void update_trash_button(bool is_trash) {
-        string action_name = (is_trash ? GearyController.ACTION_TRASH_CONVERSATION
-            : GearyController.ACTION_DELETE_CONVERSATION);
-        setup_button(trash_delete_button, action_name, false);
+        this.realize.connect(set_window_buttons);
     }
 
     public void set_conversation_header(Gtk.HeaderBar header) {
@@ -152,71 +158,33 @@ public class MainToolbar : Gtk.Box {
         conversation_header.decoration_layout = ":" + buttons[1];
     }
 
-    private void setup_button(Gtk.Button b, string action_name, bool show_label = false) {
-        Gtk.Action related_action = action_group.get_action(action_name);
-        b.focus_on_click = false;
-        b.use_underline = true;
-        b.tooltip_text = related_action.tooltip;
-        related_action.notify["tooltip"].connect(() => { b.tooltip_text = related_action.tooltip; });
-        b.related_action = related_action;
+    // Updates tooltip text depending on number of conversations selected.
+    private void update_conversation_buttons() {
+        this.mark_message_button.tooltip_text = ngettext(MARK_MESSAGE_MENU_TOOLTIP_SINGLE,
+                                                         MARK_MESSAGE_MENU_TOOLTIP_MULTIPLE,
+                                                         this.selected_conversations);
+        this.copy_message_button.tooltip_text = ngettext(LABEL_MESSAGE_TOOLTIP_SINGLE,
+                                                         LABEL_MESSAGE_TOOLTIP_MULTIPLE,
+                                                         this.selected_conversations);
+        this.move_message_button.tooltip_text = ngettext(MOVE_MESSAGE_TOOLTIP_SINGLE,
+                                                         MOVE_MESSAGE_TOOLTIP_MULTIPLE,
+                                                         this.selected_conversations);
+        this.archive_button.tooltip_text = ngettext(ARCHIVE_CONVERSATION_TOOLTIP_SINGLE,
+                                                    ARCHIVE_CONVERSATION_TOOLTIP_MULTIPLE,
+                                                    this.selected_conversations);
 
-        // Load icon by name with this fallback order: specified icon name, the action's icon name,
-        // the action's stock ID ... although stock IDs are being deprecated, that's how we specify
-        // the icon in the GtkActionEntry (also being deprecated) and GTK+ 3.14 doesn't support that
-        // any longer
-        string? icon_to_load = b.related_action.icon_name;
-        if (icon_to_load == null)
-            icon_to_load = b.related_action.stock_id;
-
-        // set pixel size to force GTK+ to load our images from our installed directory, not the theme
-        // directory
-        if (icon_to_load != null) {
-            Gtk.Image image = new Gtk.Image.from_icon_name(icon_to_load, Gtk.IconSize.MENU);
-            image.set_pixel_size(16);
-            b.image = image;
-        }
-
-        b.always_show_image = true;
-
-        if (show_label)
-            b.label = related_action.label;
-        else
-            b.label = null;
-    }
-
-    /**
-     * Given an icon, menu, and action, creates a button that triggers the menu and the action.
-     */
-    private void setup_menu_button(Gtk.MenuButton b, Gtk.Menu menu, string action_name) {
-        setup_button(b, action_name);
-        menu.foreach(GtkUtil.show_menuitem_accel_labels);
-        b.popup = menu;
-
-        if (b.related_action != null) {
-            b.related_action.activate.connect(() => {
-                    b.clicked();
-                });
-            // Null out the action since by connecting it to clicked
-            // above, invoking would cause an infinite loop otherwise.
-            b.related_action = null;
-        }
-    }
-
-    /**
-     * Given an icon, popover, and action, creates a button that triggers the popover and the action.
-     */
-    private void setup_popover_button(Gtk.MenuButton b, Gtk.Popover popover, string action_name) {
-        setup_button(b, action_name);
-        b.popover = popover;
-        b.clicked.connect(() => popover.show_all());
-
-        if (b.related_action != null) {
-            b.related_action.activate.connect(() => {
-                    b.clicked();
-                });
-            // Null out the action since by connecting it to clicked
-            // above, invoking would cause an infinite loop otherwise.
-            b.related_action = null;
+        if (this.show_trash_button) {
+            this.trash_delete_button.action_name = "win."+GearyController.ACTION_TRASH_CONVERSATION;
+            this.trash_delete_button.image = trash_image;
+            this.trash_delete_button.tooltip_text = ngettext(TRASH_CONVERSATION_TOOLTIP_SINGLE,
+                                                             TRASH_CONVERSATION_TOOLTIP_MULTIPLE,
+                                                             this.selected_conversations);
+        } else {
+            this.trash_delete_button.action_name = "win."+GearyController.ACTION_DELETE_CONVERSATION;
+            this.trash_delete_button.image = delete_image;
+            this.trash_delete_button.tooltip_text = ngettext(DELETE_CONVERSATION_TOOLTIP_SINGLE,
+                                                             DELETE_CONVERSATION_TOOLTIP_MULTIPLE,
+                                                             this.selected_conversations);
         }
     }
 }

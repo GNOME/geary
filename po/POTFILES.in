@@ -384,7 +384,6 @@ src/engine/util/util-time.vala
 src/engine/util/util-timeout-manager.vala
 src/engine/util/util-trillian.vala
 src/mailer/main.vala
-[type: gettext/glade]ui/accelerators.ui
 [type: gettext/glade]ui/account_cannot_remove.glade
 [type: gettext/glade]ui/account_list.glade
 [type: gettext/glade]ui/account_spinner.glade
@@ -407,10 +406,9 @@ src/mailer/main.vala
 [type: gettext/glade]ui/gtk/menus.ui
 [type: gettext/glade]ui/login.glade
 [type: gettext/glade]ui/main-toolbar.ui
+[type: gettext/glade]ui/main-toolbar-menus.ui
 [type: gettext/glade]ui/main-window.ui
 [type: gettext/glade]ui/password-dialog.glade
 [type: gettext/glade]ui/preferences-dialog.ui
 [type: gettext/glade]ui/remove_confirm.glade
-[type: gettext/glade]ui/toolbar_empty_menu.ui
-[type: gettext/glade]ui/toolbar_mark_menu.ui
 [type: gettext/glade]ui/upgrade_dialog.glade

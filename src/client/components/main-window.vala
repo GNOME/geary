@@ -29,7 +29,7 @@ public class MainWindow : Gtk.ApplicationWindow {
     public FolderList.Tree folder_list { get; private set; default = new FolderList.Tree(); }
     public MainToolbar main_toolbar { get; private set; }
     public SearchBar search_bar { get; private set; default = new SearchBar(); }
-    public ConversationListView conversation_list_view  { get; private set; default = new ConversationListView(); }
+    public ConversationListView conversation_list_view  { get; private set; }
     public ConversationViewer conversation_viewer { get; private set; default = new ConversationViewer(); }
     public StatusBar status_bar { get; private set; default = new StatusBar(); }
     private MonitoredSpinner spinner = new MonitoredSpinner();
@@ -60,8 +60,6 @@ public class MainWindow : Gtk.ApplicationWindow {
 
         load_config(application.config);
         restore_saved_window_state();
-
-        add_accel_group(application.ui_manager.get_accel_group());
 
         application.controller.notify[GearyController.PROP_CURRENT_CONVERSATION]
             .connect(on_conversation_monitor_changed);
@@ -163,6 +161,8 @@ public class MainWindow : Gtk.ApplicationWindow {
     }
 
     private void setup_layout(Configuration config) {
+        // ConversationListView
+        this.conversation_list_view = new ConversationListView(this);
         // Toolbar
         this.main_toolbar = new MainToolbar(config);
         this.main_toolbar.bind_property("search-open", this.search_bar, "search-mode-enabled",
