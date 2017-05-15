@@ -6,9 +6,12 @@
 
 public class ConversationListView : Gtk.TreeView {
     const int LOAD_MORE_HEIGHT = 100;
-    
+
+    // Used to be able to refer to the action names of the MainWindow
+    private MainWindow main_window;
+
     private bool enable_load_more = true;
-    
+
     // Used to avoid repeated calls to load_more(). Contains the last "upper" bound of the
     // scroll adjustment seen at the call to load_more().
     private double last_upper = -1.0;
@@ -16,7 +19,6 @@ public class ConversationListView : Gtk.TreeView {
     private Geary.App.ConversationMonitor? conversation_monitor;
     private Gee.Set<Geary.App.Conversation>? current_visible_conversations = null;
     private Geary.Scheduler.Scheduled? scheduled_update_visible_conversations = null;
-    private Gtk.Menu? context_menu = null;
     private Gee.Set<Geary.App.Conversation> selected = new Gee.HashSet<Geary.App.Conversation>();
     private Geary.IdleManager selection_update;
     private bool suppress_selection = false;
@@ -36,9 +38,10 @@ public class ConversationListView : Gtk.TreeView {
     public signal void visible_conversations_changed(Gee.Set<Geary.App.Conversation> visible);
 
 
-    public ConversationListView() {
+    public ConversationListView(MainWindow parent) {
         set_show_expanders(false);
         set_headers_visible(false);
+        this.main_window = parent;
 
         append_column(create_column(ConversationListStore.Column.CONVERSATION_DATA,
             new ConversationListCellRenderer(), ConversationListStore.Column.CONVERSATION_DATA.to_string(),
@@ -281,47 +284,36 @@ public class ConversationListView : Gtk.TreeView {
         
         if (event.button == 3 && event.type == Gdk.EventType.BUTTON_PRESS) {
             Geary.App.Conversation conversation = get_model().get_conversation_at_path(path);
-            
-            string?[] action_names = {};
-            action_names += GearyController.ACTION_DELETE_CONVERSATION;
-            
+
+            Menu context_menu_model = new Menu();
+            context_menu_model.append(_("Delete conversation"), "win."+GearyController.ACTION_DELETE_CONVERSATION);
+
             if (conversation.is_unread())
-                action_names += GearyController.ACTION_MARK_AS_READ;
-            
+                context_menu_model.append(_("Mark as _Read"), "win."+GearyController.ACTION_MARK_AS_READ);
+
             if (conversation.has_any_read_message())
-                action_names += GearyController.ACTION_MARK_AS_UNREAD;
-            
+                context_menu_model.append(_("Mark as _Unread"), "win."+GearyController.ACTION_MARK_AS_UNREAD);
+
             if (conversation.is_flagged())
-                action_names += GearyController.ACTION_MARK_AS_UNSTARRED;
+                context_menu_model.append(_("U_nstar"), "win."+GearyController.ACTION_MARK_AS_UNSTARRED);
             else
-                action_names += GearyController.ACTION_MARK_AS_STARRED;
-            
-            // treat null as separator
-            action_names += null;
-            action_names += GearyController.ACTION_REPLY_TO_MESSAGE;
-            action_names += GearyController.ACTION_REPLY_ALL_MESSAGE;
-            action_names += GearyController.ACTION_FORWARD_MESSAGE;
-            
-            context_menu = new Gtk.Menu();
-            foreach (string? action_name in action_names) {
-                if (action_name == null) {
-                    context_menu.add(new Gtk.SeparatorMenuItem());
-                    
-                    continue;
-                }
-                
-                Gtk.Action? menu_action = GearyApplication.instance.actions.get_action(action_name);
-                if (menu_action != null)
-                    context_menu.add(menu_action.create_menu_item());
-            }
-            
+                context_menu_model.append(_("_Star"), "win."+GearyController.ACTION_MARK_AS_STARRED);
+
+            Menu actions_section = new Menu();
+            actions_section.append(_("_Reply"), "win."+GearyController.ACTION_REPLY_TO_MESSAGE);
+            actions_section.append(_("R_eply All"), "win."+GearyController.ACTION_REPLY_ALL_MESSAGE);
+            actions_section.append(_("_Forward"), "win."+GearyController.ACTION_FORWARD_MESSAGE);
+            context_menu_model.append_section(null, actions_section);
+
+            Gtk.Menu context_menu = new Gtk.Menu.from_model(context_menu_model);
+            context_menu.insert_action_group("win", this.main_window);
             context_menu.show_all();
             context_menu.popup(null, null, null, event.button, event.time);
-            
+
             // When the conversation under the mouse is selected, stop event propagation
             return get_selection().path_is_selected(path);
         }
-        
+
         return false;
     }
 

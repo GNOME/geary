@@ -20,6 +20,7 @@
             <property name="can_focus">True</property>
             <property name="focus_on_click">False</property>
             <property name="always_show_image">True</property>
+            <property name="action_name">win.new-message</property>
             <child>
               <object class="GtkImage" id="compose_new_message_image">
                 <property name="icon_name">text-editor-symbolic</property>
@@ -43,6 +44,7 @@
             <property name="can_focus">True</property>
             <property name="focus_on_click">False</property>
             <property name="always_show_image">True</property>
+            <property name="tooltip_text" translatable="yes">Toggle search bar</property>
             <child>
               <object class="GtkImage" id="search_conversations_image">
                 <property name="icon_name">preferences-system-search-symbolic</property>
@@ -94,6 +96,8 @@
                 <property name="can_focus">True</property>
                 <property name="focus_on_click">False</property>
                 <property name="always_show_image">True</property>
+                <property name="tooltip_text" translatable="yes">Reply</property>
+                <property name="action_name">win.reply-to-message</property>
                 <child>
                   <object class="GtkImage" id="reply_sender_image">
                     <property name="icon_name">mail-reply-sender-symbolic</property>
@@ -107,6 +111,8 @@
                 <property name="can_focus">True</property>
                 <property name="focus_on_click">False</property>
                 <property name="always_show_image">True</property>
+                <property name="tooltip_text" translatable="yes">Reply All</property>
+                <property name="action_name">win.reply-all-message</property>
                 <child>
                   <object class="GtkImage" id="reply_all_image">
                     <property name="icon_name">mail-reply-all-symbolic</property>
@@ -120,6 +126,8 @@
                 <property name="can_focus">True</property>
                 <property name="focus_on_click">False</property>
                 <property name="always_show_image">True</property>
+                <property name="tooltip_text" translatable="yes">Forward</property>
+                <property name="action_name">win.forward-message</property>
                 <child>
                   <object class="GtkImage" id="forward_image">
                     <property name="icon_name">mail-forward-symbolic</property>
@@ -143,6 +151,7 @@
                 <property name="can_focus">True</property>
                 <property name="focus_on_click">False</property>
                 <property name="always_show_image">True</property>
+                <property name="action_name">win.mark-message-menu</property>
                 <child>
                   <object class="GtkImage" id="mark_message_image">
                     <property name="icon_name">marker-symbolic</property>
@@ -151,7 +160,7 @@
               </object>
             </child>
             <child>
-              <object class="GtkMenuButton" id="copy_message_button">
+              <object class="GtkMenuButton" id="move_message_button">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="focus_on_click">False</property>
@@ -164,7 +173,7 @@
               </object>
             </child>
             <child>
-              <object class="GtkMenuButton" id="move_message_button">
+              <object class="GtkMenuButton" id="copy_message_button">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="focus_on_click">False</property>
@@ -184,6 +193,7 @@
             <property name="can_focus">True</property>
             <property name="focus_on_click">False</property>
             <property name="always_show_image">True</property>
+            <property name="tooltip_text" translatable="yes">Toggle find bar</property>
             <child>
               <object class="GtkImage" id="find_image">
                 <property name="icon_name">preferences-system-search-symbolic</property>
@@ -200,9 +210,10 @@
             <property name="can_focus">True</property>
             <property name="focus_on_click">False</property>
             <property name="always_show_image">True</property>
+            <property name="action_name">win.undo</property>
             <child>
               <object class="GtkImage" id="undo_image">
-                <property name="icon_name">preferences-system-search-symbolic</property>
+                <property name="icon_name">edit-undo-symbolic</property>
               </object>
             </child>
           </object>
@@ -224,6 +235,12 @@
                 <property name="can_focus">True</property>
                 <property name="focus_on_click">False</property>
                 <property name="always_show_image">True</property>
+                <property name="action_name">win.archive-conv</property>
+                <child>
+                  <object class="GtkImage" id="archive_image">
+                    <property name="icon_name">mail-archive-symbolic</property>
+                  </object>
+                </child>
               </object>
             </child>
             <child>
@@ -232,6 +249,12 @@
                 <property name="can_focus">True</property>
                 <property name="focus_on_click">False</property>
                 <property name="always_show_image">True</property>
+                <property name="action_name">win.trash-conv</property>
+                <child>
+                  <object class="GtkImage" id="trash_delete_image">
+                    <property name="icon_name">user-trash-symbolic</property>
+                  </object>
+                </child>
               </object>
             </child>
           </object>

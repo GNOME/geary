@@ -12,12 +12,6 @@ public interface ComposerContainer {
     // The ComposerWidget-child.
     internal abstract ComposerWidget composer { get; set; }
 
-    // Workaround to retrieve all Gtk.Actions with conflicting accelerators
-    protected const string[] conflicting_actions = {
-        GearyController.ACTION_MARK_AS_UNREAD,
-        GearyController.ACTION_FORWARD_MESSAGE
-    };
-
     // We use old_accelerators to keep track of the accelerators we temporarily disabled.
     protected abstract Gee.MultiMap<string, string>? old_accelerators { get; set; }
 
@@ -80,10 +74,6 @@ public interface ComposerContainer {
             }
         }
 
-        // Very stupid workaround while we still use Gtk.Actions in the GearyController
-        foreach (string conflicting_action in conflicting_actions)
-            app.actions.get_action(conflicting_action).disconnect_accelerator();
-
         // Now add our actions to the window and their accelerators
         foreach (string action in ComposerWidget.action_accelerators.get_keys()) {
             this.top_window.add_action(composer.get_action(action));
@@ -98,10 +88,6 @@ public interface ComposerContainer {
     protected virtual void remove_accelerators() {
         foreach (string action in ComposerWidget.action_accelerators.get_keys())
             GearyApplication.instance.set_accels_for_action("win." + action, {});
-
-        // Very stupid workaround while we still use Gtk.Actions in the GearyController
-        foreach (string conflicting_action in conflicting_actions)
-            GearyApplication.instance.actions.get_action(conflicting_action).connect_accelerator();
 
         foreach (string action in old_accelerators.get_keys())
             foreach (string accelerator in this.old_accelerators[action])

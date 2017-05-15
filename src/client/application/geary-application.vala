@@ -113,14 +113,6 @@ public class GearyApplication : Gtk.Application {
         get { return Args.hidden_startup || this.config.startup_notifications; }
     }
 
-    public Gtk.ActionGroup actions {
-        get; private set; default = new Gtk.ActionGroup("GearyActionGroup");
-    }
-
-    public Gtk.UIManager ui_manager {
-        get; private set; default = new Gtk.UIManager();
-    }
-
     private string bin;
     private File exec_dir;
     private bool exiting_fired = false;
@@ -260,14 +252,6 @@ public class GearyApplication : Gtk.Application {
         is_destroyed = true;
     }
 
-    // NOTE: This assert()'s if the Gtk.Action is not present in the default action group
-    public Gtk.Action get_action(string name) {
-        Gtk.Action? action = actions.get_action(name);
-        assert(action != null);
-        
-        return action;
-    }
-    
     public File get_user_data_directory() {
         return File.new_for_path(Environment.get_user_data_dir()).get_child("geary");
     }
@@ -348,30 +332,6 @@ public class GearyApplication : Gtk.Application {
     [Deprecated]
     public Gtk.Builder create_builder(string name) {
         return GioUtil.create_builder(name);
-    }
-
-    /**
-     * Loads a GResource as a string.
-     *
-     * @deprecated Use {@link GioUtil.read_resource} instead.
-     */
-    [Deprecated]
-    public string read_resource(string name) throws Error {
-        return GioUtil.read_resource(name);
-    }
-
-    /**
-     * Loads a UI GResource into the UI manager.
-     */
-    [Deprecated]
-    public void load_ui_resource(string name) {
-        try {
-            this.ui_manager.add_ui_from_resource("/org/gnome/Geary/" + name);
-        } catch(GLib.Error error) {
-            critical("Unable to load \"%s\" for Gtk.UIManager: %s".printf(
-                name, error.message
-            ));
-        }
     }
 
     /**
