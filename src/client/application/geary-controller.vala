@@ -2713,6 +2713,13 @@ public class GearyController : Geary.BaseObject {
     }
 
     private void on_sent(Geary.RFC822.Message rfc822) {
+        // Translators: The label for an in-app notification. The
+        // string substitution is a list of recipients of the email.
+        string message = _(
+            "Successfully sent mail to %s."
+        ).printf(EmailUtil.to_short_recipient_display(rfc822.to));
+        InAppNotification notification = new InAppNotification(message);
+        this.main_window.add_notification(notification);
         Libnotify.play_sound("message-sent-email");
     }
 

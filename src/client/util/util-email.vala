@@ -30,5 +30,40 @@ public string strip_subject_prefixes(Geary.Email email) {
     return !Geary.String.is_empty(cleaned) ? cleaned : _("(no subject)");
 }
 
-}
+    /**
+     * Returns a shortened recipient list suitable for display.
+     *
+     * This is useful in case there are a lot of recipients, or there
+     * is little room for the display.
+     *
+     * @return a string containing at least the first mailbox
+     * serialised by {@link MailboxAddress.to_short_display}, if the
+     * list contains more mailboxes then an indication of how many
+     * additional are present.
+     */
+    public string to_short_recipient_display(Geary.RFC822.MailboxAddresses mailboxes) {
+        if (mailboxes.size == 0) {
+            // Translators: This is shown for displaying a list of
+            // email recipients that happens to be empty,
+            // i.e. contains no email addresses.
+            return _("(No recipients)");
+        }
 
+        // Always mention the first recipient
+        string first_recipient = mailboxes.get(0).to_short_display();
+        if (mailboxes.size == 1)
+            return first_recipient;
+
+        // Translators: This is used for displaying a short list of
+        // email recipients lists with two or more addresses. The
+        // first (string) substitution is address of the first, the
+        // second substitution is the number of n - 1 remaining
+        // recipients.
+        return GLib.ngettext(
+            "%s and %d other",
+            "%s and %d others",
+            mailboxes.size - 1
+        ).printf(first_recipient, mailboxes.size - 1);
+    }
+
+}
