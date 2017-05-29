@@ -110,7 +110,7 @@ msgstr "Geary Mail"
 
 #: ../desktop/geary-autostart.desktop.in.h:5
 msgid "Email;E-mail;Mail;"
-msgstr "Email;E-mail;Mail;"
+msgstr "Email;Correu electrònic;Correu;"
 
 #: ../desktop/geary-attach.contract.in.h:1
 msgid "Send by email"
@@ -336,7 +336,7 @@ msgstr "Utilitza %s per obrir una nova finestra de l'editor"
 
 #: ../src/client/application/geary-args.vala:54
 msgid "Please report comments, suggestions and bugs to:"
-msgstr "Envieu comentaris, suggerències i errors a:"
+msgstr "Envieu comentaris, suggeriments i errors a:"
 
 #. i18n: Command line arguments are invalid
 #: ../src/client/application/geary-args.vala:61
@@ -355,11 +355,11 @@ msgstr "Suprimeix la conversa"
 
 #: ../src/client/application/geary-controller.vala:58
 msgid "Delete conversation (Shift+Delete)"
-msgstr "Suprimeix la conversa (Shift+Esborrar)"
+msgstr "Suprimeix la conversa (Maj + Supr)"
 
 #: ../src/client/application/geary-controller.vala:59
 msgid "Delete conversations (Shift+Delete)"
-msgstr "Suprimeix les converses (Shift+Esborrar)"
+msgstr "Suprimeix les converses (Maj + Supr)"
 
 #. This refers to the action ("move email to the trash"), not the Trash folder itself
 #: ../src/client/application/geary-controller.vala:63
@@ -385,11 +385,11 @@ msgstr "Arxiva les converses (A)"
 
 #: ../src/client/application/geary-controller.vala:73
 msgid "Mark as S_pam"
-msgstr "Marca com a S_pam"
+msgstr "Marca com a correu _brossa"
 
 #: ../src/client/application/geary-controller.vala:74
 msgid "Mark as not S_pam"
-msgstr "Maca com a no S_pam"
+msgstr "M_arca com a correu no brossa"
 
 #: ../src/client/application/geary-controller.vala:76
 #: ../src/client/application/geary-controller.vala:449
@@ -423,7 +423,7 @@ msgstr "_Marca com..."
 
 #: ../src/client/application/geary-controller.vala:457
 msgid "Mark as _Read"
-msgstr "Ma_rca com a Llegit"
+msgstr "Ma_rca com a llegit"
 
 #: ../src/client/application/geary-controller.vala:463
 msgid "Mark as _Unread"
@@ -468,7 +468,7 @@ msgstr "R_espon tot"
 
 #: ../src/client/application/geary-controller.vala:503
 msgid "Reply all (Ctrl+Shift+R, Shift+R)"
-msgstr "Respon tot (Ctrl+Shift+R, Shift+R)"
+msgstr "Respon tot (Ctrl+Maj+R, Maj+R)"
 
 #: ../src/client/application/geary-controller.vala:508
 #: ../ui/conversation-email-menus.ui.h:3
@@ -481,11 +481,11 @@ msgstr "Reenvia (Ctrl+L, F)"
 
 #: ../src/client/application/geary-controller.vala:539
 msgid "Empty _Spam…"
-msgstr "Buida _Spam..."
+msgstr "Buida _correu brossa..."
 
 #: ../src/client/application/geary-controller.vala:543
 msgid "Empty _Trash…"
-msgstr "Buida la paperera..."
+msgstr "Buida la _paperera..."
 
 #. No callback is connected, since we bind the toggle button to the search bar visibility
 #: ../src/client/application/geary-controller.vala:575
@@ -600,11 +600,11 @@ msgstr ""
 
 #: ../src/client/application/geary-controller.vala:1170
 msgid "_Rebuild"
-msgstr "_Reconstruir"
+msgstr "_Reconstrueix"
 
 #: ../src/client/application/geary-controller.vala:1170
 msgid "E_xit"
-msgstr "_Sortir"
+msgstr "_Surt"
 
 #: ../src/client/application/geary-controller.vala:1179
 #, c-format
@@ -799,11 +799,11 @@ msgstr "Compte de cerca %s"
 #. / Displayed in the space-limited status bar while a message is in the process of being sent.
 #: ../src/client/components/status-bar.vala:26
 msgid "Sending…"
-msgstr "Enviant..."
+msgstr "S'està enviant..."
 
 #: ../src/client/components/stock.vala:18 ../ui/account_cannot_remove.glade.h:3
 msgid "_OK"
-msgstr "_Ok"
+msgstr "_D'acord"
 
 #: ../src/client/components/stock.vala:19 ../ui/edit_alternate_emails.glade.h:3
 #: ../ui/password-dialog.glade.h:5 ../ui/remove_confirm.glade.h:5
@@ -865,15 +865,15 @@ msgstr "Adreça de correu electrònic no vàlida"
 
 #: ../src/client/composer/composer-widget.vala:154
 msgid "Saved"
-msgstr "Guardat"
+msgstr "Desat"
 
 #: ../src/client/composer/composer-widget.vala:155
 msgid "Saving"
-msgstr "Guardant"
+msgstr "S'està desant"
 
 #: ../src/client/composer/composer-widget.vala:156
 msgid "Error saving"
-msgstr "Guardant error"
+msgstr "S'ha produït un error en desar"
 
 #: ../src/client/composer/composer-widget.vala:157
 msgid "Press Backspace to delete quote"
@@ -919,7 +919,7 @@ msgstr "Vols enviar un missatge sense un fitxer adjunt?"
 #: ../src/client/composer/composer-widget.vala:1498
 #, c-format
 msgid "“%s” already attached for delivery."
-msgstr "«%s» ja està seleccionat com a fitxer adjunt per a lenviament."
+msgstr "«%s» ja està seleccionat com a fitxer adjunt per a l'enviament."
 
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
 #. Translators: The first argument will be a
@@ -1300,15 +1300,15 @@ msgstr "Ara"
 #, c-format
 msgid "%dm ago"
 msgid_plural "%dm ago"
-msgstr[0] "%dm fa"
-msgstr[1] "%dm fan"
+msgstr[0] "fa %dm"
+msgstr[1] "fa %dm"
 
 #: ../src/client/util/util-date.vala:171
 #, c-format
 msgid "%dh ago"
 msgid_plural "%dh ago"
-msgstr[0] "%dh fa"
-msgstr[1] "%dh fan"
+msgstr[0] "fa %dh"
+msgstr[1] "fa %dh"
 
 #: ../src/client/util/util-date.vala:178
 msgid "Yesterday"
@@ -1777,7 +1777,7 @@ msgstr "Descarta i Tanca"
 
 #: ../ui/composer-headerbar.ui.h:7
 msgid "Save and Close"
-msgstr "Guarda i Tanca"
+msgstr "Desa i tanca"
 
 #. Note that this button and the Update button will never be shown at the same time to the user.
 #: ../ui/composer-link-popover.ui.h:2
@@ -1823,7 +1823,7 @@ msgstr "_Mitjà"
 
 #: ../ui/composer-menus.ui.h:6
 msgid "Lar_ge"
-msgstr "Llar_g"
+msgstr "_Gran"
 
 #: ../ui/composer-menus.ui.h:7
 msgid "C_olor"
@@ -1835,11 +1835,11 @@ msgstr "Text en_riquit"
 
 #: ../ui/composer-menus.ui.h:9
 msgid "Show Extended Fields"
-msgstr "Mostra Camps Extesos"
+msgstr "Mostra camps estesos"
 
 #: ../ui/composer-menus.ui.h:10
 msgid "_Undo"
-msgstr "_Desfés "
+msgstr "_Desfés"
 
 #: ../ui/composer-menus.ui.h:11
 msgid "_Redo"
@@ -1860,7 +1860,7 @@ msgstr "_Enganxa"
 #: ../ui/composer-menus.ui.h:15
 msgctxt "Clipboard paste with rich text"
 msgid "Paste _With Formatting"
-msgstr "Enganxa amb el Format"
+msgstr "_Enganxa amb format"
 
 #: ../ui/composer-menus.ui.h:16
 msgid "Select _All"
@@ -1910,7 +1910,7 @@ msgstr "Desfés l'última edició (Ctrl+Z)"
 
 #: ../ui/composer-widget.ui.h:12
 msgid "Redo last edit  (Ctrl+Shift+Z)"
-msgstr "Refés l'última edició  (Ctrl+Shift+Z)"
+msgstr "Refés l'última edició  (Ctrl+Maj+Z)"
 
 #: ../ui/composer-widget.ui.h:13
 msgid "Bold (Ctrl+B)"
@@ -2040,15 +2040,15 @@ msgstr "Copi_a l'enllaç de l'adreça electrònica"
 
 #: ../ui/conversation-message-menus.ui.h:3
 msgid "Send New _Message…"
-msgstr "Enviant missatge nou..."
+msgstr "_Envia el correu nou..."
 
 #: ../ui/conversation-message-menus.ui.h:4
 msgid "Copy Email _Address"
-msgstr "Copia l'adreça del correu electrònic"
+msgstr "_Copia l'adreça del correu electrònic"
 
 #: ../ui/conversation-message-menus.ui.h:5
 msgid "Save _Image As…"
-msgstr "Guarda l'_imatge com..."
+msgstr "Desa la _imatge com..."
 
 #: ../ui/conversation-message-menus.ui.h:6
 msgid "_Select All"
@@ -2389,7 +2389,7 @@ msgstr "Mode de text enriquit"
 #: ../ui/gtk/help-overlay.ui.h:42
 msgctxt "shortcut window"
 msgid "Bold text"
-msgstr "Text en negrita"
+msgstr "Text en negreta"
 
 #: ../ui/gtk/help-overlay.ui.h:43
 msgctxt "shortcut window"
@@ -2458,11 +2458,11 @@ msgstr "Treball, Casa, etc."
 
 #: ../ui/login.glade.h:10
 msgid "_Save sent mail"
-msgstr "Guarda els mi_ssatges enviat"
+msgstr "Desa els mi_ssatges enviats"
 
 #: ../ui/login.glade.h:11
 msgid "Addi_tional email addresses…"
-msgstr "Adreces de correu electrònic addicionals..."
+msgstr "_Adreces de correu electrònic addicionals..."
 
 #: ../ui/login.glade.h:12
 msgid "IMAP settings"
@@ -2546,7 +2546,7 @@ msgstr "No es re_quereix autenticació"
 
 #: ../ui/login.glade.h:33
 msgid "Use IMAP cre_dentials"
-msgstr "Utilitza credencials IMAP"
+msgstr "_Utilitza credencials IMAP"
 
 #: ../ui/login.glade.h:34
 msgid "Composer"
@@ -2554,11 +2554,11 @@ msgstr "Editor"
 
 #: ../ui/login.glade.h:35
 msgid "Save dra_fts on server"
-msgstr "Guarda es_borranys al servidor"
+msgstr "Desa es_borranys al servidor"
 
 #: ../ui/login.glade.h:36
 msgid "Si_gn emails (HTML allowed):"
-msgstr "Signa missatges de correu electrònic (HTML permès):"
+msgstr "_Signa missatges de correu electrònic (HTML permès):"
 
 #: ../ui/login.glade.h:37
 msgid "Storage"
@@ -2566,7 +2566,7 @@ msgstr "Emmagatzematge"
 
 #: ../ui/login.glade.h:38
 msgid "_Download mail"
-msgstr "_Baixa el missatge"
+msgstr "_Baixa els missatges"
 
 #: ../ui/main-toolbar.ui.h:1
 msgid "Empty Spam or Trash folders"
@@ -2589,8 +2589,9 @@ msgid "_Authenticate"
 msgstr "_Autenticació"
 
 #: ../ui/preferences-dialog.ui.h:1
+# N.T.: Títol de secció a les prefèrencies
 msgid "Reading"
-msgstr "Llegint"
+msgstr "Lectura"
 
 #: ../ui/preferences-dialog.ui.h:2
 msgid "_Automatically select next message"
@@ -2598,7 +2599,7 @@ msgstr "Selecciona el missatge següent _automàticament"
 
 #: ../ui/preferences-dialog.ui.h:3
 msgid "_Display conversation preview"
-msgstr "Mostra la vista prèvia de la conversació"
+msgstr "_Mostra la vista prèvia de la conversació"
 
 #: ../ui/preferences-dialog.ui.h:4
 msgid "Use _three pane view"
@@ -2618,7 +2619,7 @@ msgstr "Mostra les _notificacions quan arribi correu nou"
 
 #: ../ui/preferences-dialog.ui.h:8
 msgid "Always _watch for new mail"
-msgstr "Sempre veure quan arribi correu nou"
+msgstr "Sempre _vigila si arriba correu nou"
 
 #: ../ui/preferences-dialog.ui.h:9
 msgid "Geary will run in the background and notify of new mail"
