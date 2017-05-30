@@ -6,6 +6,8 @@
 # Translators:
 # Alfredo Hernández <aldomann.designs@gmail.com>, 2012
 # martin.steghoefer <martin@steghoefer.de>, 2013
+# Gerard Bertran <bertran.gerardo@gmail.com>, 2017
+# Jordi Mas i Hernàndez <jmas@softcatala.org>, 2017
 msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
@@ -265,7 +267,9 @@ msgstr "Quant al %s"
 #. <yamada.taro@example.com>
 #: ../src/client/application/geary-application.vala:449
 msgid "translator-credits"
-msgstr "Martin Steghöfer <martin@steghoefer.de>, 2013"
+msgstr "Martin Steghöfer <martin@steghoefer.de>, 2013\n"
+"Gerard Bertran <bertran.gerardo@gmail.com>, 2017\n"
+"Jordi Mas i Hernàndez <jmas@softcatala.org>, 2017"
 
 #: ../src/client/application/geary-args.vala:10
 msgid "Start Geary with hidden main window"
@@ -495,7 +499,7 @@ msgstr "Selecciona la barra de cerca"
 #. No callback is connected, since we bind the toggle button to the find bar visibility
 #: ../src/client/application/geary-controller.vala:580
 msgid "Toggle find bar"
-msgstr "Selecciona la barra de trobada"
+msgstr "Selecciona la barra de cerca"
 
 #: ../src/client/application/geary-controller.vala:758
 msgid "Unable to store server trust exception"
@@ -848,7 +852,7 @@ msgstr "_Elimina"
 
 #: ../src/client/components/stock.vala:32
 msgid "_Keep"
-msgstr "_Guarda"
+msgstr "_Mantén"
 
 #: ../src/client/composer/composer-link-popover.vala:150
 msgid "Link URL is not correctly formatted, e.g. http://example.com"
@@ -1509,7 +1513,7 @@ msgstr "és"
 #: ../src/engine/imap-db/imap-db-account.vala:150
 msgctxt "Search operator"
 msgid "subject"
-msgstr "Assumpte"
+msgstr "assumpte"
 
 #. Can be typed in the search box like
 #. "to:johndoe@example.com" to find messages received by a
@@ -1535,7 +1539,7 @@ msgstr "per"
 #: ../src/engine/imap-db/imap-db-account.vala:180
 msgctxt "Search operator value - mail addressed to the user"
 msgid "me"
-msgstr "En a mi"
+msgstr "jo"
 
 #. Can be typed in the search box after "from:" i.e.:
 #. "from:me". Matches conversations were sent by the user.
@@ -1547,7 +1551,7 @@ msgstr "En a mi"
 #: ../src/engine/imap-db/imap-db-account.vala:192
 msgctxt "Search operator value - mail sent by the user"
 msgid "me"
-msgstr "meu"
+msgstr "jo"
 
 #. Can be typed in the search box after "is:" i.e.:
 #. "is:read". Matches conversations that are flagged as read.
@@ -1644,7 +1648,7 @@ msgstr "Elements suprimits"
 #. the default. English names do not need to be included.
 #: ../src/engine/imap-engine/imap-engine-generic-account.vala:675
 msgid "Archive | Archives"
-msgstr "Fitxer | Fitxers"
+msgstr "Arxiu | Arxius"
 
 #. / Format for the datetime that a message being replied to was received
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
@@ -1701,9 +1705,7 @@ msgstr "Per a: %s\n"
 #: ../src/engine/rfc822/rfc822-utils.vala:290
 #, c-format
 msgid "Cc: %s\n"
-msgstr ""
-"Cc: %s\n"
-"\n"
+msgstr "Cc: %s\n"
 
 #: ../ui/account_cannot_remove.glade.h:1
 msgid "<span weight=\"bold\" size=\"larger\">Cannot remove account</span> "
@@ -1773,7 +1775,7 @@ msgstr "_Envia"
 
 #: ../ui/composer-headerbar.ui.h:6
 msgid "Discard and Close"
-msgstr "Descarta i Tanca"
+msgstr "Descarta i tanca"
 
 #: ../ui/composer-headerbar.ui.h:7
 msgid "Save and Close"
@@ -2000,11 +2002,11 @@ msgstr "Torna a provar"
 
 #: ../ui/conversation-email.ui.h:14
 msgid "Message not saved"
-msgstr "Missatge no guardat"
+msgstr "Missatge no desat"
 
 #: ../ui/conversation-email.ui.h:15
 msgid "This message was sent, but has not been saved to your account."
-msgstr "Aquest missatge s'ha enviat, però no s'ha guardat en el seu compte."
+msgstr "Aquest missatge s'ha enviat, però no s'ha desat en el seu compte."
 
 #: ../ui/conversation-email-menus.ui.h:2
 msgid "Reply to _All"
@@ -2100,7 +2102,7 @@ msgstr "Mostra les imatges"
 
 #: ../ui/conversation-message.ui.h:11
 msgid "Always Show From Sender"
-msgstr "Mostra sempre de remitent"
+msgstr "Mostra sempre del remitent"
 
 #: ../ui/conversation-message.ui.h:12
 msgid "Remote images not shown"
@@ -2426,7 +2428,7 @@ msgstr "Dreceres de _teclat"
 
 #: ../ui/login.glade.h:1
 msgid "email@example.com"
-msgstr "email@exemple.com"
+msgstr "correu@exemple.com"
 
 #: ../ui/login.glade.h:2 ../ui/password-dialog.glade.h:3
 msgid "Password"
@@ -2589,7 +2591,7 @@ msgid "_Authenticate"
 msgstr "_Autenticació"
 
 #: ../ui/preferences-dialog.ui.h:1
-# N.T.: Títol de secció a les prefèrencies
+# N.T.: Títol de secció a les preferències
 msgid "Reading"
 msgstr "Lectura"
 
