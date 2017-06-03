@@ -22,13 +22,13 @@ public class Geary.Email : BaseObject {
      * database.
      */
     public const Field MUTABLE_FIELDS = Geary.Email.Field.FLAGS;
-    
+
     /**
      * The fields required to build an RFC822.Message for get_message() and
      * any attachments.
      */
     public const Field REQUIRED_FOR_MESSAGE = Geary.Email.Field.HEADER | Geary.Email.Field.BODY;
-    
+
     // THESE VALUES ARE PERSISTED.  Change them only if you know what you're doing.
     public enum Field {
         NONE =              0,
@@ -42,11 +42,11 @@ public class Geary.Email : BaseObject {
         PROPERTIES =        1 << 7,
         PREVIEW =           1 << 8,
         FLAGS =             1 << 9,
-        
+
         ENVELOPE =          DATE | ORIGINATORS | RECEIVERS | REFERENCES | SUBJECT,
         ALL =               DATE | ORIGINATORS | RECEIVERS | REFERENCES | SUBJECT | HEADER | BODY
                             | PROPERTIES | PREVIEW | FLAGS;
-        
+
         public static Field[] all() {
             return {
                 DATE,
@@ -61,54 +61,54 @@ public class Geary.Email : BaseObject {
                 FLAGS
             };
         }
-        
+
         public inline bool is_all_set(Field required_fields) {
             return (this & required_fields) == required_fields;
         }
-        
+
         public inline bool is_any_set(Field required_fields) {
             return (this & required_fields) != 0;
         }
-        
+
         public inline Field set(Field field) {
             return (this | field);
         }
-        
+
         public inline Field clear(Field field) {
             return (this & ~(field));
         }
-        
+
         public inline bool fulfills(Field required_fields) {
             return is_all_set(required_fields);
         }
-        
+
         public inline bool fulfills_any(Field required_fields) {
             return is_any_set(required_fields);
         }
-        
+
         public inline bool require(Field required_fields) {
             return is_all_set(required_fields);
         }
-        
+
         public inline bool requires_any(Field required_fields) {
             return is_any_set(required_fields);
         }
-        
+
         public string to_list_string() {
             StringBuilder builder = new StringBuilder();
             foreach (Field f in all()) {
                 if (is_all_set(f)) {
                     if (!String.is_empty(builder.str))
                         builder.append(", ");
-                    
+
                     builder.append(f.to_string());
                 }
             }
-            
+
             return builder.str;
         }
     }
-    
+
     /**
      * id is a unique identifier for the Email in the Folder.  It is guaranteed to be unique for
      * as long as the Folder is open.  Once closed, guarantees are no longer made.
@@ -116,7 +116,7 @@ public class Geary.Email : BaseObject {
      * This field is always returned, no matter what Fields are used to retrieve the Email.
      */
     public Geary.EmailIdentifier id { get; private set; }
-    
+
     // DATE
     public Geary.RFC822.Date? date { get; private set; default = null; }
 
@@ -129,40 +129,40 @@ public class Geary.Email : BaseObject {
     public Geary.RFC822.MailboxAddresses? to { get; private set; default = null; }
     public Geary.RFC822.MailboxAddresses? cc { get; private set; default = null; }
     public Geary.RFC822.MailboxAddresses? bcc { get; private set; default = null; }
-    
+
     // REFERENCES
     public Geary.RFC822.MessageID? message_id { get; private set; default = null; }
     public Geary.RFC822.MessageIDList? in_reply_to { get; private set; default = null; }
     public Geary.RFC822.MessageIDList? references { get; private set; default = null; }
-    
+
     // SUBJECT
     public Geary.RFC822.Subject? subject { get; private set; default = null; }
-    
+
     // HEADER
     public RFC822.Header? header { get; private set; default = null; }
-    
+
     // BODY
     public RFC822.Text? body { get; private set; default = null; }
     public Gee.List<Geary.Attachment> attachments { get; private set;
         default = new Gee.ArrayList<Geary.Attachment>(); }
-    
+
     // PROPERTIES
     public Geary.EmailProperties? properties { get; private set; default = null; }
-    
+
     // PREVIEW
     public RFC822.PreviewText? preview { get; private set; default = null; }
-    
+
     // FLAGS
     public Geary.EmailFlags? email_flags { get; private set; default = null; }
-    
+
     public Geary.Email.Field fields { get; private set; default = Field.NONE; }
-    
+
     private Geary.RFC822.Message? message = null;
-    
+
     public Email(Geary.EmailIdentifier id) {
         this.id = id;
     }
-    
+
     public inline Trillian is_unread() {
         return email_flags != null ? Trillian.from_boolean(email_flags.is_unread()) : Trillian.UNKNOWN;
     }
@@ -170,14 +170,14 @@ public class Geary.Email : BaseObject {
     public inline Trillian is_flagged() {
         return email_flags != null ? Trillian.from_boolean(email_flags.is_flagged()) : Trillian.UNKNOWN;
     }
-    
+
     public inline Trillian load_remote_images() {
         return email_flags != null ? Trillian.from_boolean(email_flags.load_remote_images()) : Trillian.UNKNOWN;
     }
 
     public void set_send_date(Geary.RFC822.Date? date) {
         this.date = date;
-        
+
         fields |= Field.DATE;
     }
 
@@ -206,69 +206,69 @@ public class Geary.Email : BaseObject {
         this.to = to;
         this.cc = cc;
         this.bcc = bcc;
-        
+
         fields |= Field.RECEIVERS;
     }
-    
+
     public void set_full_references(Geary.RFC822.MessageID? message_id, Geary.RFC822.MessageIDList? in_reply_to,
         Geary.RFC822.MessageIDList? references) {
         this.message_id = message_id;
         this.in_reply_to = in_reply_to;
         this.references = references;
-        
+
         fields |= Field.REFERENCES;
     }
-    
+
     public void set_message_subject(Geary.RFC822.Subject? subject) {
         this.subject = subject;
-        
+
         fields |= Field.SUBJECT;
     }
-    
+
     public void set_message_header(Geary.RFC822.Header header) {
         this.header = header;
-        
+
         // reset the message object, which is built from this text
         message = null;
-        
+
         fields |= Field.HEADER;
     }
-    
+
     public void set_message_body(Geary.RFC822.Text body) {
         this.body = body;
-        
+
         // reset the message object, which is built from this text
         message = null;
-        
+
         fields |= Field.BODY;
     }
-    
+
     public void set_email_properties(Geary.EmailProperties properties) {
         this.properties = properties;
-        
+
         fields |= Field.PROPERTIES;
     }
-    
+
     public void set_message_preview(Geary.RFC822.PreviewText preview) {
         this.preview = preview;
-        
+
         fields |= Field.PREVIEW;
     }
 
     public void set_flags(Geary.EmailFlags email_flags) {
         this.email_flags = email_flags;
-        
+
         fields |= Field.FLAGS;
     }
 
     public void add_attachment(Geary.Attachment attachment) {
         attachments.add(attachment);
     }
-    
+
     public void add_attachments(Gee.Collection<Geary.Attachment> attachments) {
         this.attachments.add_all(attachments);
     }
-    
+
     public string get_searchable_attachment_list() {
         StringBuilder search = new StringBuilder();
         foreach (Geary.Attachment attachment in attachments) {
@@ -279,7 +279,7 @@ public class Geary.Email : BaseObject {
         }
         return search.str;
     }
-    
+
     /**
      * This method requires the REQUIRED_FOR_MESSAGE fields be present.
      * If not, EngineError.INCOMPLETE_MESSAGE is thrown.
@@ -287,12 +287,12 @@ public class Geary.Email : BaseObject {
     public Geary.RFC822.Message get_message() throws EngineError, RFC822Error {
         if (message != null)
             return message;
-        
+
         if (!fields.fulfills(REQUIRED_FOR_MESSAGE))
             throw new EngineError.INCOMPLETE_MESSAGE("Parsed email requires HEADER and BODY");
-        
+
         message = new Geary.RFC822.Message.from_parts(header, body);
-        
+
         return message;
     }
 
@@ -342,27 +342,27 @@ public class Geary.Email : BaseObject {
      */
     public Gee.Set<RFC822.MessageID>? get_ancestors() {
         Gee.Set<RFC822.MessageID> ancestors = new Gee.HashSet<RFC822.MessageID>();
-        
+
         // the email's Message-ID counts as its lineage
         if (message_id != null)
             ancestors.add(message_id);
-        
+
         // References list the email trail back to its source
         if (references != null)
             ancestors.add_all(references.list);
-        
+
         // RFC822 requires the In-Reply-To Message-ID be prepended to the References list, but
         // this ensures that's the case
         if (in_reply_to != null)
            ancestors.add_all(in_reply_to.list);
-       
+
        return (ancestors.size > 0) ? ancestors : null;
     }
-    
+
     public string get_preview_as_string() {
         return (preview != null) ? preview.buffer.to_string() : "";
     }
-    
+
     /**
      * Returns the primary originator of an email, which is defined as the first mailbox address
      * in From:, Sender:, or Reply-To:, in that order, depending on availability.
@@ -385,7 +385,7 @@ public class Geary.Email : BaseObject {
     public string to_string() {
         return "[%s] ".printf(id.to_string());
     }
-    
+
     /**
      * Converts a Collection of {@link Email}s to a Map of Emails keyed by {@link EmailIdentifier}s.
      *
@@ -394,15 +394,15 @@ public class Geary.Email : BaseObject {
     public static Gee.Map<Geary.EmailIdentifier, Geary.Email>? emails_to_map(Gee.Collection<Geary.Email>? emails) {
         if (emails == null || emails.size == 0)
             return null;
-        
+
         Gee.Map<Geary.EmailIdentifier, Geary.Email> map = new Gee.HashMap<Geary.EmailIdentifier,
             Geary.Email>();
         foreach (Email email in emails)
             map.set(email.id, email);
-        
+
         return map;
     }
-    
+
     /**
      * CompareFunc to sort {@link Email} by {@link date} ascending.
      *
@@ -412,16 +412,15 @@ public class Geary.Email : BaseObject {
     public static int compare_sent_date_ascending(Geary.Email aemail, Geary.Email bemail) {
         if (aemail.date == null || bemail.date == null) {
             GLib.message("Warning: comparing email for sent date but no Date: field loaded");
-            
             return compare_id_ascending(aemail, bemail);
         }
-        
+
         int compare = aemail.date.value.compare(bemail.date.value);
-        
+
         // stabilize sort by using the mail identifier's stable sort ordering
         return (compare != 0) ? compare : compare_id_ascending(aemail, bemail);
     }
-    
+
     /**
      * CompareFunc to sort {@link Email} by {@link date} descending.
      *
@@ -429,9 +428,17 @@ public class Geary.Email : BaseObject {
      * stabilize the sort.
      */
     public static int compare_sent_date_descending(Geary.Email aemail, Geary.Email bemail) {
-        return compare_sent_date_ascending(bemail, aemail);
+      if (aemail.date == null || bemail.date == null) {
+          GLib.message("Warning: comparing email for sent date but no Date: field loaded");
+          return compare_id_descending(aemail, bemail);
+      }
+
+      int compare = bemail.date.value.compare(aemail.date.value);
+
+      // stabilize sort by using the mail identifier's stable sort ordering
+      return (compare != 0) ? compare : compare_id_descending(aemail, bemail);
     }
-    
+
     /**
      * CompareFunc to sort {@link Email} by {@link EmailProperties.date_received} ascending.
      *
@@ -441,16 +448,16 @@ public class Geary.Email : BaseObject {
     public static int compare_recv_date_ascending(Geary.Email aemail, Geary.Email bemail) {
         if (aemail.properties == null || bemail.properties == null) {
             GLib.message("Warning: comparing email for received date but email properties not loaded");
-            
+
             return compare_id_ascending(aemail, bemail);
         }
-        
+
         int compare = aemail.properties.date_received.compare(bemail.properties.date_received);
-        
+
         // stabilize sort with identifiers
         return (compare != 0) ? compare : compare_id_ascending(aemail, bemail);
     }
-    
+
     /**
      * CompareFunc to sort {@link Email} by {@link EmailProperties.date_received} descending.
      *
@@ -460,12 +467,16 @@ public class Geary.Email : BaseObject {
     public static int compare_recv_date_descending(Geary.Email aemail, Geary.Email bemail) {
         return compare_recv_date_ascending(bemail, aemail);
     }
-    
+
     // only used to stabilize a sort
     private static int compare_id_ascending(Geary.Email aemail, Geary.Email bemail) {
         return aemail.id.stable_sort_comparator(bemail.id);
     }
-    
+
+    private static int compare_id_descending(Geary.Email aemail, Geary.Email bemail) {
+        return bemail.id.stable_sort_comparator(aemail.id);
+    }
+
     /**
      * CompareFunc to sort Email by EmailProperties.total_bytes.  If not available, emails are
      * compared by EmailIdentifier.
@@ -473,18 +484,18 @@ public class Geary.Email : BaseObject {
     public static int compare_size_ascending(Geary.Email aemail, Geary.Email bemail) {
         Geary.EmailProperties? aprop = (Geary.EmailProperties) aemail.properties;
         Geary.EmailProperties? bprop = (Geary.EmailProperties) bemail.properties;
-        
+
         if (aprop == null || bprop == null) {
             GLib.message("Warning: comparing email by size but email properties not loaded");
-            
+
             return compare_id_ascending(aemail, bemail);
         }
-        
+
         int cmp = (int) (aprop.total_bytes - bprop.total_bytes).clamp(-1, 1);
-        
+
         return (cmp != 0) ? cmp : compare_id_ascending(aemail, bemail);
     }
-    
+
     /**
      * CompareFunc to sort Email by EmailProperties.total_bytes.  If not available, emails are
      * compared by EmailIdentifier.
@@ -493,4 +504,3 @@ public class Geary.Email : BaseObject {
         return compare_size_ascending(bemail, aemail);
     }
 }
-
