@@ -60,8 +60,6 @@ goa = dependency('goa-1.0')
 gobject_introspection = dependency('gobject-introspection-1.0')
 gthread = dependency('gthread-2.0', version: '>=' + target_glib)
 javascriptcoregtk = dependency('javascriptcoregtk-4.0', version: '>=' + target_webkit)
-javascriptcoregtk_lib = cc.find_library('javascriptcoregtk-4.0')
-javascriptcoregtk_vapi = valac.find_library('javascriptcore-4.0', dirs: vapi_dir)
 libcanberra = dependency('libcanberra', version: '>= 0.28')
 libmath = cc.find_library('m')
 libnotify = dependency('libnotify', version: '>= 0.7.5')
@@ -71,8 +69,8 @@ libunwind_dep = dependency('libunwind', version: '>= 1.1')
 libunwind_generic_dep = dependency('libunwind-generic', version: '>= 1.1')
 libxml = dependency('libxml-2.0', version: '>= 2.7.8')
 posix = valac.find_library('posix')
-webkit2gtk_dep = dependency('webkit2gtk-4.0', version: '>=' + target_webkit)
-webkit2gtk_web_extension_dep = dependency('webkit2gtk-web-extension-4.0', version: '>=' + target_webkit)
+webkit2gtk = dependency('webkit2gtk-4.0', version: '>=' + target_webkit)
+webkit2gtk_web_extension = dependency('webkit2gtk-web-extension-4.0', version: '>=' + target_webkit)
 
 # Libunwind system dependencies above ensures appropriate versions,
 # but this declared depencency is what we actually build against so we
@@ -102,9 +100,6 @@ endif
 if enable_valadoc
   valadoc = find_program('valadoc')
 endif
-
-# This will provide our custom dependencies, such as webkit2gtk
-subdir('bindings')
 
 # Language detection
 iso_codes_dir = join_paths('/', 'usr', 'share', 'xml', 'iso-codes')
