@@ -257,7 +257,8 @@ private class Geary.Imap.Account : BaseObject {
     
     public async void create_folder_async(FolderPath path, Cancellable? cancellable) throws Error {
         check_open();
-        
+        yield claim_session_async(cancellable);
+
         StatusResponse response = yield send_command_async(new CreateCommand(
             new MailboxSpecifier.from_folder_path(path, this.hierarchy_delimiter)), null, null, cancellable);
         
