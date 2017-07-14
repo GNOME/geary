@@ -35,6 +35,7 @@ engine/api/geary-folder-supports-empty.vala
 engine/api/geary-folder-supports-mark.vala
 engine/api/geary-folder-supports-move.vala
 engine/api/geary-folder-supports-remove.vala
+engine/api/geary-local-service-information.vala
 engine/api/geary-logging.vala
 engine/api/geary-named-flag.vala
 engine/api/geary-named-flags.vala
@@ -43,6 +44,7 @@ engine/api/geary-revokable.vala
 engine/api/geary-search-folder.vala
 engine/api/geary-search-query.vala
 engine/api/geary-service.vala
+engine/api/geary-service-information.vala
 engine/api/geary-service-provider.vala
 engine/api/geary-special-folder-type.vala
 
