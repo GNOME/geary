@@ -168,8 +168,8 @@ public class AccountDialog : Gtk.Dialog {
             Geary.AccountInformation? real_info =
                 GearyApplication.instance.controller.get_real_account_information(info);
             if (real_info != null) {
-                validate_connection = !real_info.imap_credentials.equal_to(info.imap_credentials) ||
-                    (info.smtp_credentials != null && !real_info.smtp_credentials.equal_to(info.smtp_credentials));
+                validate_connection = !real_info.imap.credentials.equal_to(info.imap.credentials) ||
+                    (info.smtp.credentials != null && !real_info.smtp.credentials.equal_to(info.smtp.credentials));
             }
         }
         

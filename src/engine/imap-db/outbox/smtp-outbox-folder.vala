@@ -194,8 +194,8 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
             // Get SMTP password if we haven't loaded it yet and the account needs credentials.
             // If the account needs a password but it's not set or incorrect in the keyring, we'll
             // prompt below after getting an AUTHENTICATION_FAILED error.
-            if (_account.information.smtp_credentials != null &&
-                !_account.information.smtp_credentials.is_complete()) {
+            if (_account.information.smtp.credentials != null &&
+                !_account.information.smtp.credentials.is_complete()) {
                 try {
                     yield _account.information.get_passwords_async(ServiceFlag.SMTP);
                 } catch (Error e) {
@@ -626,7 +626,7 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
         
         Error? smtp_err = null;
         try {
-            yield smtp.login_async(_account.information.smtp_credentials, cancellable);
+            yield smtp.login_async(_account.information.smtp.credentials, cancellable);
         } catch (Error login_err) {
             debug("SMTP login error: %s", login_err.message);
             smtp_err = login_err;

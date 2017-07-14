@@ -988,8 +988,8 @@ public class GearyController : Geary.BaseObject {
             login_dialog.show_spinner(true);
             new_info = login_dialog.get_account_information();
             
-            if ((!new_info.default_imap_server_ssl && !new_info.default_imap_server_starttls)
-                || (!new_info.default_smtp_server_ssl && !new_info.default_smtp_server_starttls)) {
+            if ((!new_info.imap.use_ssl && !new_info.imap.use_starttls)
+                || (!new_info.smtp.use_ssl && !new_info.smtp.use_starttls)) {
                 ConfirmationDialog security_dialog = new ConfirmationDialog(main_window,
                     _("Your settings are insecure"),
                     _("Your IMAP and/or SMTP settings do not specify SSL or TLS.  This means your username and password could be read by another person on the network.  Are you sure you want to do this?"),

@@ -198,7 +198,9 @@ public class Geary.Engine : BaseObject {
                         new AccountInformation.from_file(
                             id,
                             user_config_dir.get_child(id),
-                            user_data_dir.get_child(id)
+                            user_data_dir.get_child(id),
+                            new Geary.LocalServiceInformation(Service.IMAP, user_config_dir.get_child(id), this.authentication_mediator),
+                            new Geary.LocalServiceInformation(Service.SMTP, user_config_dir.get_child(id), this.authentication_mediator)
                         )
                     );
                 } catch (Error err) {
@@ -294,7 +296,9 @@ public class Geary.Engine : BaseObject {
             throw new EngineError.ALREADY_EXISTS("Account %s already exists", id);
 
         return new AccountInformation(
-            id, user_config_dir.get_child(id), user_data_dir.get_child(id)
+            id, user_config_dir.get_child(id), user_data_dir.get_child(id),
+                new LocalServiceInformation(Service.IMAP, user_config_dir.get_child(id), this.authentication_mediator),
+                new LocalServiceInformation(Service.SMTP, user_config_dir.get_child(id), this.authentication_mediator)
         );
     }
 
@@ -339,7 +343,7 @@ public class Geary.Engine : BaseObject {
         
         if (!error_code.is_all_set(ValidationResult.IMAP_CONNECTION_FAILED)) {
             try {
-                yield imap_session.initiate_session_async(account.imap_credentials, cancellable);
+                yield imap_session.initiate_session_async(account.imap.credentials, cancellable);
                 
                 // Connected and initiated, still need to be sure connection authorized
                 Imap.MailboxSpecifier current_mailbox;
@@ -365,7 +369,7 @@ public class Geary.Engine : BaseObject {
         // SMTP is simpler, merely see if login works and done (throws an SmtpError if not)
         Geary.Smtp.ClientSession? smtp_session = new Geary.Smtp.ClientSession(account.get_smtp_endpoint());
         try {
-            yield smtp_session.login_async(account.smtp_credentials, cancellable);
+            yield smtp_session.login_async(account.smtp.credentials, cancellable);
         } catch (Error err) {
             debug("Error validating SMTP account info: %s", err.message);
             if (err is SmtpError.AUTHENTICATION_FAILED)

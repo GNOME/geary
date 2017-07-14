@@ -40,7 +40,7 @@ private class Geary.Imap.Account : BaseObject {
     public signal void login_failed(Geary.Credentials? cred, StatusResponse? response);
     
     public Account(Geary.AccountInformation account_information) {
-        name = "IMAP Account for %s".printf(account_information.imap_credentials.to_string());
+        name = "IMAP Account for %s".printf(account_information.imap.credentials.to_string());
         this.account_information = account_information;
         this.session_mgr = new ClientSessionManager(account_information);
         
@@ -604,7 +604,7 @@ private class Geary.Imap.Account : BaseObject {
     }
     
     private void on_login_failed(StatusResponse? response) {
-        login_failed(account_information.imap_credentials, response);
+        login_failed(account_information.imap.credentials, response);
     }
     
     public string to_string() {

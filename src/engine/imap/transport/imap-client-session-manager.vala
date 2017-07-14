@@ -242,7 +242,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         }
         
         try {
-            yield new_session.initiate_session_async(account_information.imap_credentials, cancellable);
+            yield new_session.initiate_session_async(account_information.imap.credentials, cancellable);
         } catch (Error err) {
             debug("[%s] Initiate session failure: %s", new_session.to_string(), err.message);
             
