@@ -6,7 +6,7 @@
 
 public class Geary.AccountInformation : BaseObject {
     public const string PROP_NICKNAME = "nickname"; // Name of nickname property.
-    
+
     private const string GROUP = "AccountInformation";
     private const string REAL_NAME_KEY = "real_name";
     private const string NICKNAME_KEY = "nickname";
@@ -38,23 +38,23 @@ public class Geary.AccountInformation : BaseObject {
     private const string SAVE_DRAFTS_KEY = "save_drafts";
     private const string USE_EMAIL_SIGNATURE_KEY = "use_email_signature";
     private const string EMAIL_SIGNATURE_KEY = "email_signature";
-    
+
     //
     // "Retired" keys
     //
-    
+
     /*
      * key: "imap_pipeline"
      * value: bool
      */
-    
+
     public const string SETTINGS_FILENAME = "geary.ini";
     public const int DEFAULT_PREFETCH_PERIOD_DAYS = 14;
-    
+
     public static int default_ordinal = 0;
-    
+
     private static Gee.HashMap<string, Geary.Endpoint>? known_endpoints = null;
-    
+
     /**
      * Location account information is stored (as well as other data, including database and
      * attachment files.
@@ -184,11 +184,11 @@ public class Geary.AccountInformation : BaseObject {
     public bool smtp_remember_password { get; set; default = true; }
     
     public bool save_drafts { get; set; default = true; }
-    
+
     private bool _save_sent_mail = true;
     private Endpoint? imap_endpoint = null;
     private Endpoint? smtp_endpoint = null;
-    
+
     /**
      * Indicates the supplied {@link Endpoint} has reported TLS certificate warnings during
      * connection.
@@ -321,29 +321,29 @@ public class Geary.AccountInformation : BaseObject {
     ~AccountInformation() {
         if (imap_endpoint != null)
             imap_endpoint.untrusted_host.disconnect(on_imap_untrusted_host);
-        
+
         if (smtp_endpoint != null)
             smtp_endpoint.untrusted_host.disconnect(on_smtp_untrusted_host);
     }
-    
+
     internal static void init() {
         known_endpoints = new Gee.HashMap<string, Geary.Endpoint>();
     }
-    
+
     private static Geary.Endpoint get_shared_endpoint(Service service, Endpoint endpoint) {
         string key = "%s/%s:%u".printf(service.user_label(), endpoint.remote_address.hostname,
             endpoint.remote_address.port);
-        
+
         // if already known, prefer it over this one
         if (known_endpoints.has_key(key))
             return known_endpoints.get(key);
-        
+
         // save for future use and return this one
         known_endpoints.set(key, endpoint);
-        
+
         return endpoint;
     }
-    
+
     // Copies all data from the "from" object into this one.
     public void copy_from(AccountInformation from) {
         this.id = from.id;
@@ -391,10 +391,10 @@ public class Geary.AccountInformation : BaseObject {
 
         if (alternate_mailboxes != null)
             all.add_all(alternate_mailboxes);
-        
+
         return all;
     }
-    
+
     /**
      * Add an alternate email address to the account.
      *
@@ -403,11 +403,11 @@ public class Geary.AccountInformation : BaseObject {
     public void add_alternate_mailbox(Geary.RFC822.MailboxAddress mailbox) {
         if (alternate_mailboxes == null)
             alternate_mailboxes = new Gee.ArrayList<RFC822.MailboxAddress>();
-        
+
         if (!alternate_mailboxes.contains(mailbox))
             alternate_mailboxes.add(mailbox);
     }
-    
+
     /**
      * Replaces the list of alternate email addresses with the supplied collection.
      *
@@ -415,14 +415,14 @@ public class Geary.AccountInformation : BaseObject {
      */
     public void replace_alternate_mailboxes(Gee.Collection<Geary.RFC822.MailboxAddress>? mailboxes) {
         alternate_mailboxes = null;
-        
+
         if (mailboxes == null || mailboxes.size == 0)
             return;
-        
+
         foreach (RFC822.MailboxAddress mailbox in mailboxes)
             add_alternate_mailbox(mailbox);
     }
-    
+
     /**
      * Return whether this account allows setting the save_sent_mail option.
      * If not, save_sent_mail will always be true and setting it will be
@@ -445,7 +445,7 @@ public class Geary.AccountInformation : BaseObject {
         switch (special) {
             case Geary.SpecialFolderType.DRAFTS:
                 return drafts_folder_path;
-            
+
             case Geary.SpecialFolderType.SENT:
                 return sent_mail_folder_path;
             
@@ -513,13 +513,13 @@ public class Geary.AccountInformation : BaseObject {
             if (services.has_imap()) {
                 yield Geary.Engine.instance.authentication_mediator.clear_password_async(
                     Service.IMAP, this);
-                
+
                 if (imap_credentials != null)
                     imap_credentials.pass = null;
             } else if (services.has_smtp()) {
                 yield Geary.Engine.instance.authentication_mediator.clear_password_async(
                     Service.SMTP, this);
-                
+
                 if (smtp_credentials != null)
                     smtp_credentials.pass = null;
             }
@@ -533,19 +533,19 @@ public class Geary.AccountInformation : BaseObject {
         
         if (services.has_smtp() && smtp_credentials != null && !smtp_credentials.is_complete())
             get_services |= ServiceFlag.SMTP;
-        
+
         ServiceFlag unset_services = services;
         if (get_services != 0)
             unset_services = yield get_passwords_async(get_services);
         else
             return true;
-        
+
         if (unset_services == 0)
             return true;
-        
+
         return yield prompt_passwords_async(unset_services);
     }
-    
+
     private void check_mediator_instance() throws EngineError {
         if (Geary.Engine.instance.authentication_mediator == null)
             throw new EngineError.OPEN_REQUIRED(
@@ -562,7 +562,7 @@ public class Geary.AccountInformation : BaseObject {
         // See above.  Same argument.
         smtp_credentials = new Credentials(smtp_credentials.user, smtp_password);
     }
-    
+
     /**
      * Use Engine's authentication mediator to retrieve the passwords for the
      * given services.  The passwords will be stored in the appropriate
@@ -573,13 +573,13 @@ public class Geary.AccountInformation : BaseObject {
      */
     public async ServiceFlag get_passwords_async(ServiceFlag services) throws Error {
         check_mediator_instance();
-        
+
         CredentialsMediator mediator = Geary.Engine.instance.authentication_mediator;
         ServiceFlag failed_services = 0;
-        
+
         if (services.has_imap()) {
             string? imap_password = yield mediator.get_password_async(Service.IMAP, this);
-            
+
             if (imap_password != null)
                 set_imap_password(imap_password);
              else
@@ -588,16 +588,16 @@ public class Geary.AccountInformation : BaseObject {
         
         if (services.has_smtp() && smtp_credentials != null) {
             string? smtp_password = yield mediator.get_password_async(Service.SMTP, this);
-            
+
             if (smtp_password != null)
                 set_smtp_password(smtp_password);
             else
                 failed_services |= ServiceFlag.SMTP;
         }
-        
+
         return failed_services;
     }
-    
+
     /**
      * Use the Engine's authentication mediator to prompt for the passwords for
      * the given services.  The passwords will be stored in the appropriate
@@ -608,49 +608,49 @@ public class Geary.AccountInformation : BaseObject {
      */
     public async bool prompt_passwords_async(ServiceFlag services) throws Error {
         check_mediator_instance();
-        
+
         string? imap_password, smtp_password;
         bool imap_remember_password, smtp_remember_password;
-        
+
         if (smtp_credentials == null)
             services &= ~ServiceFlag.SMTP;
-        
+
         if (!yield Geary.Engine.instance.authentication_mediator.prompt_passwords_async(
             services, this, out imap_password, out smtp_password,
             out imap_remember_password, out smtp_remember_password))
             return false;
-        
+
         if (services.has_imap()) {
             set_imap_password(imap_password);
             this.imap_remember_password = imap_remember_password;
         }
-        
+
         if (services.has_smtp()) {
             set_smtp_password(smtp_password);
             this.smtp_remember_password = smtp_remember_password;
         }
 
         yield update_stored_passwords_async(services);
-        
+
         return true;
     }
-    
+
     /**
      * Use the Engine's authentication mediator to set or clear the passwords
      * for the given services in the key store.
      */
     public async void update_stored_passwords_async(ServiceFlag services) throws Error {
         check_mediator_instance();
-        
+
         CredentialsMediator mediator = Geary.Engine.instance.authentication_mediator;
-        
+
         if (services.has_imap()) {
             if (imap_remember_password)
                 yield mediator.set_password_async(Service.IMAP, this);
             else
                 yield mediator.clear_password_async(Service.IMAP, this);
         }
-        
+
         if (services.has_smtp() && smtp_credentials != null) {
             if (smtp_remember_password)
                 yield mediator.set_password_async(Service.SMTP, this);
@@ -658,7 +658,7 @@ public class Geary.AccountInformation : BaseObject {
                 yield mediator.clear_password_async(Service.SMTP, this);
         }
     }
-    
+
     /**
      * Returns the {@link Endpoint} for the account's IMAP service.
      *
@@ -669,27 +669,27 @@ public class Geary.AccountInformation : BaseObject {
     public Endpoint get_imap_endpoint() {
         if (imap_endpoint != null)
             return imap_endpoint;
-        
+
         switch (service_provider) {
             case ServiceProvider.GMAIL:
                 imap_endpoint = ImapEngine.GmailAccount.generate_imap_endpoint();
             break;
-            
+
             case ServiceProvider.YAHOO:
                 imap_endpoint = ImapEngine.YahooAccount.generate_imap_endpoint();
             break;
-            
+
             case ServiceProvider.OUTLOOK:
                 imap_endpoint = ImapEngine.OutlookAccount.generate_imap_endpoint();
             break;
-            
+
             case ServiceProvider.OTHER:
                 Endpoint.Flags imap_flags = Endpoint.Flags.NONE;
                 if (default_imap_server_ssl)
                     imap_flags |= Endpoint.Flags.SSL;
                 if (default_imap_server_starttls)
                     imap_flags |= Endpoint.Flags.STARTTLS;
-                
+
                 imap_endpoint = new Endpoint(default_imap_server_host, default_imap_server_port,
                     imap_flags, Imap.ClientConnection.RECOMMENDED_TIMEOUT_SEC);
             break;
@@ -697,22 +697,22 @@ public class Geary.AccountInformation : BaseObject {
             default:
                 assert_not_reached();
         }
-        
+
         // look for existing one in the global pool; want to use that because Endpoint is mutable
         // and signalled in such a way that it's better to share them
         imap_endpoint = get_shared_endpoint(Service.IMAP, imap_endpoint);
-        
+
         // bind shared Endpoint signal to this AccountInformation's signal
         imap_endpoint.untrusted_host.connect(on_imap_untrusted_host);
-        
+
         return imap_endpoint;
     }
-    
+
     private void on_imap_untrusted_host(Endpoint endpoint, Endpoint.SecurityType security,
         TlsConnection cx) {
         untrusted_host(endpoint, security, cx, Service.IMAP);
     }
-    
+
     /**
      * Returns the {@link Endpoint} for the account's SMTP service.
      *
@@ -736,22 +736,22 @@ public class Geary.AccountInformation : BaseObject {
             case ServiceProvider.OUTLOOK:
                 smtp_endpoint = ImapEngine.OutlookAccount.generate_smtp_endpoint();
             break;
-            
+
             case ServiceProvider.OTHER:
                 Endpoint.Flags smtp_flags = Endpoint.Flags.NONE;
                 if (default_smtp_server_ssl)
                     smtp_flags |= Endpoint.Flags.SSL;
                 if (default_smtp_server_starttls)
                     smtp_flags |= Endpoint.Flags.STARTTLS;
-                
+
                 smtp_endpoint = new Endpoint(default_smtp_server_host, default_smtp_server_port,
                     smtp_flags, Smtp.ClientConnection.DEFAULT_TIMEOUT_SEC);
             break;
-            
+
             default:
                 assert_not_reached();
         }
-        
+
         // look for existing one in the global pool; want to use that because Endpoint is mutable
         // and signalled in such a way that it's better to share them
         smtp_endpoint = get_shared_endpoint(Service.SMTP, smtp_endpoint);
@@ -766,7 +766,7 @@ public class Geary.AccountInformation : BaseObject {
         TlsConnection cx) {
         untrusted_host(endpoint, security, cx, Service.SMTP);
     }
-    
+
     public Geary.Endpoint get_endpoint_for_service(Geary.Service service) {
         switch (service) {
             case Service.IMAP:
@@ -774,7 +774,7 @@ public class Geary.AccountInformation : BaseObject {
             
             case Service.SMTP:
                 return get_smtp_endpoint();
-            
+
             default:
                 assert_not_reached();
         }
@@ -789,7 +789,7 @@ public class Geary.AccountInformation : BaseObject {
             path = path.get_child(parts.get(i));
         return path;
     }
-    
+
     private string get_string_value(KeyFile key_file, string group, string key, string def = "") {
         try {
             return key_file.get_value(group, key);
@@ -941,30 +941,30 @@ public class Geary.AccountInformation : BaseObject {
             debug("Error writing to account info file: %s", err.message);
         }
     }
-    
+
     public async void clear_stored_passwords_async(ServiceFlag services) throws Error {
         Error? return_error = null;
         check_mediator_instance();
         CredentialsMediator mediator = Geary.Engine.instance.authentication_mediator;
-        
+
         try {
             if (services.has_imap())
                 yield mediator.clear_password_async(Service.IMAP, this);
         } catch (Error e) {
             return_error = e;
         }
-        
+
         try {
             if (services.has_smtp() && smtp_credentials != null)
                 yield mediator.clear_password_async(Service.SMTP, this);
         } catch (Error e) {
             return_error = e;
         }
-        
+
         if (return_error != null)
             throw return_error;
     }
-    
+
     /**
      * Deletes an account from disk.  This is used by Geary.Engine and should not
      * normally be invoked directly.
@@ -981,7 +981,7 @@ public class Geary.AccountInformation : BaseObject {
         } else {
             yield Files.recursive_delete_async(config_dir, cancellable);
         }
-        
+
         try {
             yield clear_stored_passwords_async(ServiceFlag.IMAP | ServiceFlag.SMTP);
         } catch (Error e) {

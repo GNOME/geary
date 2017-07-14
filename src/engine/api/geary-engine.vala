@@ -145,10 +145,10 @@ public class Geary.Engine : BaseObject {
         // initialize *before* opening the Engine ... all initialize code should assume the Engine
         // is closed
         initialize_library();
-        
+
         if (is_open)
             throw new EngineError.ALREADY_OPEN("Geary.Engine instance already open");
-        
+
         this.user_config_dir = user_config_dir;
         this.user_data_dir = user_data_dir;
         this.resource_dir = resource_dir;
@@ -221,16 +221,16 @@ public class Geary.Engine : BaseObject {
         
         Gee.Collection<AccountInformation> unavailable_accounts = accounts.values;
         accounts.clear();
-        
+
         foreach(AccountInformation account in unavailable_accounts)
             account_unavailable(account);
-        
+
         user_data_dir = null;
         resource_dir = null;
         authentication_mediator = null;
         accounts = null;
         account_instances = null;
-        
+
         is_open = false;
         closed();
     }
@@ -361,7 +361,7 @@ public class Geary.Engine : BaseObject {
         } finally {
             imap_session = null;
         }
-        
+
         // SMTP is simpler, merely see if login works and done (throws an SmtpError if not)
         Geary.Smtp.ClientSession? smtp_session = new Geary.Smtp.ClientSession(account.get_smtp_endpoint());
         try {

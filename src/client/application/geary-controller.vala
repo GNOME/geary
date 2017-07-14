@@ -126,7 +126,7 @@ public class GearyController : Geary.BaseObject {
     private Geary.Nonblocking.Mutex untrusted_host_prompt_mutex = new Geary.Nonblocking.Mutex();
     private Gee.HashSet<Geary.Endpoint> validating_endpoints = new Gee.HashSet<Geary.Endpoint>();
     private Geary.Revokable? revokable = null;
-    
+
     // List of windows we're waiting to close before Geary closes.
     private Gee.List<ComposerWidget> waiting_to_close = new Gee.ArrayList<ComposerWidget>();
     
@@ -464,7 +464,7 @@ public class GearyController : Geary.BaseObject {
         mark_unread.label = _("Mark as _Unread");
         entries += mark_unread;
         add_accelerator("<Shift>U", ACTION_MARK_AS_UNREAD);
-        
+
         Gtk.ActionEntry mark_starred = { ACTION_MARK_AS_STARRED, "star-symbolic", TRANSLATABLE, "S", null,
             on_mark_as_starred };
         mark_starred.label = _("_Star");
@@ -474,13 +474,13 @@ public class GearyController : Geary.BaseObject {
             null, on_mark_as_unstarred };
         mark_unstarred.label = _("U_nstar");
         entries += mark_unstarred;
-        
+
         Gtk.ActionEntry mark_spam = { ACTION_MARK_AS_SPAM, null, TRANSLATABLE, "<Ctrl>J", null,
             on_mark_as_spam };
         mark_spam.label = MARK_AS_SPAM_LABEL;
         entries += mark_spam;
         add_accelerator("exclam", ACTION_MARK_AS_SPAM); // Exclamation mark (!)
-        
+
         Gtk.ActionEntry copy_menu = { ACTION_COPY_MENU, null, TRANSLATABLE, "L",
             _("Add label"), null };
         copy_menu.label = _("_Label");
@@ -543,7 +543,7 @@ public class GearyController : Geary.BaseObject {
         Gtk.ActionEntry empty_trash = { ACTION_EMPTY_TRASH, null, null, null, null, on_empty_trash };
         empty_trash.label = _("Empty _Trash…");
         entries += empty_trash;
-        
+
         Gtk.ActionEntry undo = { ACTION_UNDO, "edit-undo-symbolic", null, "<Ctrl>Z", null, on_revoke };
         entries += undo;
         
@@ -622,7 +622,7 @@ public class GearyController : Geary.BaseObject {
         account.email_removed.connect(on_account_email_removed);
         connect_account_async.begin(account, cancellable_open_account);
     }
-    
+
     private void close_account(Geary.Account account) {
         account.report_problem.disconnect(on_report_problem);
         account.email_removed.disconnect(on_account_email_removed);
@@ -935,7 +935,7 @@ public class GearyController : Geary.BaseObject {
                 real_account_information = get_real_account_information(account_information);
                 real_account_information.copy_from(account_information);
             }
-            
+
             real_account_information.store_async.begin(cancellable);
             do_update_stored_passwords_async.begin(Geary.ServiceFlag.IMAP | Geary.ServiceFlag.SMTP,
                 real_account_information);
