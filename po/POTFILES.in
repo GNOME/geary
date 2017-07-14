@@ -98,6 +98,7 @@ src/engine/api/geary-account.vala
 src/engine/api/geary-aggregated-folder-properties.vala
 src/engine/api/geary-attachment.vala
 src/engine/api/geary-base-object.vala
+src/engine/api/geary-config.vala
 src/engine/api/geary-composed-email.vala
 src/engine/api/geary-contact-flags.vala
 src/engine/api/geary-contact-importance.vala

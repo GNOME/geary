@@ -11,6 +11,7 @@ engine/api/geary-aggregated-folder-properties.vala
 engine/api/geary-attachment.vala
 engine/api/geary-base-object.vala
 engine/api/geary-composed-email.vala
+engine/api/geary-config.vala
 engine/api/geary-contact.vala
 engine/api/geary-contact-flags.vala
 engine/api/geary-contact-importance.vala
