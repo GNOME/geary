@@ -246,7 +246,7 @@ private class Geary.ImapDB.MessageRow {
         if (email.fields.is_all_set(Geary.Email.Field.PROPERTIES)) {
             Geary.Imap.EmailProperties? imap_properties = (Geary.Imap.EmailProperties) email.properties;
             internaldate = (imap_properties != null) ? imap_properties.internaldate.serialize() : null;
-            internaldate_time_t = (imap_properties != null) ? imap_properties.internaldate.as_time_t : -1;
+            internaldate_time_t = (imap_properties != null) ? imap_properties.internaldate.to_time_t() : -1;
             rfc822_size = (imap_properties != null) ? imap_properties.rfc822_size.value : -1;
             
             fields = fields.set(Geary.Email.Field.PROPERTIES);

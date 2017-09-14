@@ -28,18 +28,15 @@ public class Geary.Imap.InternalDate : Geary.MessageData.AbstractMessageData, Ge
     };
     
     public DateTime value { get; private set; }
-    public time_t as_time_t { get; private set; }
     public string? original { get; private set; default = null; }
     
     private InternalDate(string original, DateTime datetime) {
         this.original = original;
         value = datetime;
-        as_time_t = Time.datetime_to_time_t(datetime);
     }
     
     public InternalDate.from_date_time(DateTime datetime) throws ImapError {
         value = datetime;
-        as_time_t = Time.datetime_to_time_t(datetime);
     }
     
     public static InternalDate decode(string internaldate) throws ImapError {
@@ -92,6 +89,13 @@ public class Geary.Imap.InternalDate : Geary.MessageData.AbstractMessageData, Ge
         DateTime datetime = new DateTime(timezone, year, month + 1, day, hour, min, sec);
         
         return new InternalDate(internaldate, datetime);
+    }
+
+    /**
+     * Returns the value of the InternalDate as a time_t representation.
+     */
+    public time_t to_time_t () {
+        return Time.datetime_to_time_t(this.value);
     }
     
     /**
