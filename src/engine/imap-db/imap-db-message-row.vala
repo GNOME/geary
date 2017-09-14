@@ -183,7 +183,7 @@ private class Geary.ImapDB.MessageRow {
         
         if (email.fields.is_all_set(Geary.Email.Field.DATE)) {
             date = (email.date != null) ? email.date.original : null;
-            date_time_t = (email.date != null) ? email.date.as_time_t : -1;
+            date_time_t = (email.date != null) ? email.date.to_time_t() : -1;
             
             fields = fields.set(Geary.Email.Field.DATE);
         }

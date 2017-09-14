@@ -158,23 +158,25 @@ public class Geary.RFC822.MessageIDList : Geary.MessageData.AbstractMessageData,
 
 public class Geary.RFC822.Date : Geary.RFC822.MessageData, Geary.MessageData.AbstractMessageData,
     Gee.Hashable<Geary.RFC822.Date> {
+
+    private time_t as_time_t;
+
     public string? original { get; private set; }
     public DateTime value { get; private set; }
-    public time_t as_time_t { get; private set; }
     
     public Date(string iso8601) throws ImapError {
-        as_time_t = GMime.utils_header_decode_date(iso8601, null);
+        this.as_time_t = GMime.utils_header_decode_date(iso8601, null);
         if (as_time_t == 0)
             throw new ImapError.PARSE_ERROR("Unable to parse \"%s\": not ISO-8601 date", iso8601);
         
-        value = new DateTime.from_unix_local(as_time_t);
+        value = new DateTime.from_unix_local(this.as_time_t);
         original = iso8601;
     }
     
     public Date.from_date_time(DateTime datetime) {
         original = null;
         value = datetime;
-        as_time_t = Time.datetime_to_time_t(datetime);
+        this.as_time_t = Time.datetime_to_time_t(datetime);
     }
     
     /**
@@ -184,10 +186,17 @@ public class Geary.RFC822.Date : Geary.RFC822.MessageData, Geary.MessageData.Abs
         // Although GMime documents its conversion methods as requiring the tz offset in hours,
         // it appears the number is handed directly to the string (i.e. an offset of -7 becomes
         // "-0007", whereas we want "-0700").
-        return GMime.utils_header_format_date(as_time_t,
+        return GMime.utils_header_format_date(this.as_time_t,
             (int) (value.get_utc_offset() / TimeSpan.HOUR) * 100);
     }
-    
+
+    /**
+     * Returns {@link Date} as a time_t representation.
+     */
+    public time_t to_time_t() {
+        return this.as_time_t;
+    }
+
     /**
      * Returns {@link Date} for transmission.
      *
