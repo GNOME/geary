@@ -385,7 +385,7 @@ msgstr "από:<placeholder-1/>"
 
 #: C/search.page:44(p)
 msgid "Finds messages where <var>sender</var> matches the From header."
-msgstr "Βρίσκει μηνύματα όπου ο <var>αποστολέας</ var> ταιριάζει με την κεφαλίδα Από."
+msgstr "Βρίσκει μηνύματα όπου ο <var>αποστολέας</var> ταιριάζει με την κεφαλίδα Από."
 
 #: C/search.page:47(input)
 msgid "subject:<placeholder-1/>"
@@ -401,7 +401,7 @@ msgstr "πρός:<placeholder-1/>"
 
 #: C/search.page:52(p)
 msgid "Finds messages where <var>sender</var> matches the To, CC, or BCC header."
-msgstr "Βρίσκει μηνύματα όπου ο <var>αποστολέας</ var> ταιριάζει με τις κεφαλίδες Πρός, Κοιν., Κρυφή Κοιν.."
+msgstr "Βρίσκει μηνύματα όπου ο <var>αποστολέας</var> ταιριάζει με τις κεφαλίδες Πρός, Κοιν., Κρυφή Κοιν.."
 
 #: C/search.page:56(p)
 msgid "As a special case, the <input>bcc</input>, <input>cc</input>, <input>from</input>, and <input>to</input> operators support <input>me</input> as their argument, which searches for the account's email address in the appropriate context."
@@ -635,7 +635,7 @@ msgstr "Όταν χρησιμοποιείτε το Geary με έναν λογα�
 
 #: C/archive.page:16(p)
 msgid "With other mail servers, you can trash or delete, but not archive, messages. To move one or more conversations to the <gui>Trash</gui> folder, select them and press the <gui>Trash</gui> button on the toolbar. To permanently delete the conversations, hold down <key>Shift</key> and press the <gui>Delete</gui> button that appears in place of the <gui>Trash</gui> button."
-msgstr "Με άλλους διακομιστές αλληλογραφίας, μπορείτε να στείλετε στα απορρίματα ή να διαγράψετε, αλλά όχι να αρχειοθετήσετε, μηνύματα. Για να μετακινήσετε μία ή περισσότερες συνομιλίες στον φάκελο<gui>Απορρίματα</gui>, επιλέξτε και πατήστε το κουμπί<gui>Απορρίματα</gui> στη γραμμή εργαλείων. Για να διαγράψετε οριστικά τις συζητήσεις, κρατήστε πατημένο το πλήκτρο <key>Shift</key> και πιέστε το κουμπί <gui>Delete</gui> που εμφανίζεται στη θέση του κουμπιού <gui>Απορρίματα<gui/>."
+msgstr "Με άλλους διακομιστές αλληλογραφίας, μπορείτε να στείλετε στα απορρίματα ή να διαγράψετε, αλλά όχι να αρχειοθετήσετε, μηνύματα. Για να μετακινήσετε μία ή περισσότερες συνομιλίες στον φάκελο<gui>Απορρίματα</gui>, επιλέξτε και πατήστε το κουμπί<gui>Απορρίματα</gui> στη γραμμή εργαλείων. Για να διαγράψετε οριστικά τις συζητήσεις, κρατήστε πατημένο το πλήκτρο <key>Shift</key> και πιέστε το κουμπί <gui>Delete</gui> που εμφανίζεται στη θέση του κουμπιού <gui>Απορρίματα</gui>."
 
 #: C/archive.page:21(p)
 msgid "Delete is not available from every folder, such as Search. Delete is also unavailable for Gmail. For Gmail, <gui>Trash</gui> will move messages to the Trash folder on the server, where the user can then manually delete them. The server will automatically remove trashed messages after 30 days."
@@ -651,7 +651,7 @@ msgstr "Την πρώτη φορά που ξεκινάτε το Geary, θα σα
 
 #: C/accounts.page:19(p)
 msgid "Additional accounts can be added from the Accounts dialog. The <gui>Accounts</gui> option is available in either Geary's application menu or the gear menu in the upper-right of the toolbar. (The location depends on the install desktop shell. For GNOME Shell and Unity, the application menu is available near the top-left corner of the screen.) Alternately, <keyseq><key>Ctrl</key><key>M</key></keyseq> will open the Accounts dialog. To add an account, click the + button."
-msgstr "Πρόσθετοι λογαριασμοί μπορούν να προστεθούν από το παράθυρο διαλόγου Λογαριασμοί. Η επιλογή <gui>Λογαριασμοί</ gui> είναι διαθέσιμη είτε στο μενού εφαρμογών Geary ή στο μενού με το γρανάζι στην επάνω δεξιά γωνία της γραμμής εργαλείων. (Η θέση εξαρτάται από την εγκατάσταση του κελύφους επιφάνειας εργασίας. Για το κέλυφος GNOME και Unity, το μενού της εφαρμογής είναι διαθέσιμο κοντά στην επάνω αριστερή γωνία της οθόνης.) Εναλλακτικά, το <keyseq><key>Ctrl</key><key>M</key></keyseq> θα ανοίξει το παράθυρο διαλόγου Λογαριασμοί. Για να προσθέσετε ένα λογαριασμό, πατήστε το κουμπί +."
+msgstr "Πρόσθετοι λογαριασμοί μπορούν να προστεθούν από το παράθυρο διαλόγου Λογαριασμοί. Η επιλογή <gui>Λογαριασμοί</gui> είναι διαθέσιμη είτε στο μενού εφαρμογών Geary ή στο μενού με το γρανάζι στην επάνω δεξιά γωνία της γραμμής εργαλείων. (Η θέση εξαρτάται από την εγκατάσταση του κελύφους επιφάνειας εργασίας. Για το κέλυφος GNOME και Unity, το μενού της εφαρμογής είναι διαθέσιμο κοντά στην επάνω αριστερή γωνία της οθόνης.) Εναλλακτικά, το <keyseq><key>Ctrl</key><key>M</key></keyseq> θα ανοίξει το παράθυρο διαλόγου Λογαριασμοί. Για να προσθέσετε ένα λογαριασμό, πατήστε το κουμπί +."
 
 #: C/accounts.page:28(title)
 msgid "Editing existing accounts"
