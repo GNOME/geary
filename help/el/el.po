@@ -373,7 +373,7 @@ msgstr "κοιν.:<placeholder-1/>"
 
 #: C/search.page:40(p)
 msgid "Finds messages where <var>recipient</var> matches the CC header."
-msgstr "Βρίσκει μηνύματα όπου ο <var>παραλήπτης</ var> ταιριάζει με την κεφαλίδα Κοιν."
+msgstr "Βρίσκει μηνύματα όπου ο <var>παραλήπτης</var> ταιριάζει με την κεφαλίδα Κοιν."
 
 #: C/search.page:43(var)
 msgid "sender"
