@@ -36,7 +36,7 @@ Getting in Touch
 
  * Geary wiki:   https://wiki.gnome.org/Apps/Geary
  * Mailing list: http://mail.gnome.org/mailman/listinfo/geary-list
- * IRC Channel:  [irc://irc.gimp.org/%23geary](#geary on irc.gimp.org)
+ * IRC Channel:  [#geary on irc.gimp.org](irc://irc.gimp.org/%23geary)
 
 ---
 Copyright 2016 Software Freedom Conservancy Inc.  
