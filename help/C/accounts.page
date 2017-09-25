@@ -9,7 +9,7 @@
     </info>
 	<title>Accounts</title>
 	
-	<section>
+	<section id="adding-accounts">
 	<title>Adding accounts</title>
 	
 	<p>The first time you start Geary, you will be prompted to add an email account.  On this screen,
@@ -24,7 +24,7 @@
 	dialog.  To add an account, click the + button.</p>
 	</section>
 	
-	<section>
+	<section id="editing-accounts">
 	<title>Editing existing accounts</title>
 	
 	<p>From the Accounts dialog, select an account and click the pencil icon to change various settings.
@@ -59,7 +59,7 @@
 	
 	</section>
 	
-	<section>
+	<section id="removing-accounts">
 	<title>Removing accounts</title>
 	
 	<p>To delete an account, open the Accounts dialog, select the account, and press the - button.

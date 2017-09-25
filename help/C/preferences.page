@@ -13,7 +13,7 @@
 	shell.  For GNOME Shell and Unity, the application menu is available near the top-left corner of
 	the screen.)</p>
 	
-    <section>
+    <section id="reading">
 	<title>Reading</title>
 	<terms>
 	<item>
@@ -36,7 +36,7 @@
 	</terms>
 	</section>
 	
-	<section>
+	<section id="composer">
 	<title>Composer</title>
 	<terms>
 	<item>
@@ -47,7 +47,7 @@
 	</terms>
 	</section>
 	
-	<section>
+	<section id="notifications">
 	<title>Notifications</title>
 	<terms>
 	<item>

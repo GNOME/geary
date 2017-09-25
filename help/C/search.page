@@ -19,7 +19,7 @@
 	<p>Keywords that match your search are highlighted in the message view.  Geary will match different
 	forms of the same word, for example searching for "walk" will also match "walking" and "walked."</p>
 	
-	<section>
+	<section id="search-operators">
 	<title>Search operators</title>
 	<p>Geary supports the following operators to limit the scope of searches:</p>
 	<table frame="all" rules="rows">

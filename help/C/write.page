@@ -8,7 +8,8 @@
     </info>
 	<title>Write a message</title>
 	
-	<section>
+	<section id="overview">
+	<title>Composing and replying</title>
 	<p>To compose a new message in Geary, press the <gui>New Message</gui> button
 	on the toolbar.</p>
 	
@@ -16,7 +17,7 @@
 	
 	</section>
 	
-	<section>
+	<section id="features">
 	<title>Features</title>
 	
 	<p>Geary's email composer lets you adjust the font, size and color of text. You can also insert hyperlinks into messages.</p>
@@ -38,7 +39,7 @@
 	dialog.</p>
 	
 	</section>
-	<section>
+	<section id="drafts">
 	<title>Drafts</title>
 	
 	<p>For mail servers that support drafts, Geary will automatically save the message as you type.

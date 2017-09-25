@@ -8,7 +8,7 @@
         <link type="next" xref="preferences"/>
     </info>
 	<title>Label or move a conversation</title>
-	<section>
+	<section id="label-conversation">
 	<title>Label a conversation</title>
 	<p>Geary lets you apply one or more <em>labels</em> to each conversation.  Geary labels
 	correspond to labels in Gmail, or ordinary folders in other mail services.</p>
@@ -21,7 +21,7 @@
 	conversation list to the label in the sidebar.</p></item>
 	</list>
 	</section>
-	<section>
+	<section id="move-conversation">
 	<title>Move a conversation to a folder or label</title>
 	<p>To move one or more conversations to a folder or label, first select the
 	conversation(s), then do either of the following:</p>

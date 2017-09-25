@@ -16,7 +16,7 @@ support the IMAP protocol, including popular services such as Gmail, Yahoo Mail,
 
     <p>The main Geary window is divided into several areas:</p>
     
-    <section>
+    <section id="folder-list">
     <title>Folder list</title>
     <p>The <em>folder list</em> at the left displays all <em>folders</em> and
     <em>labels</em> in your mail account.  Geary uses the term <em>label</em> for any folder
@@ -24,7 +24,7 @@ support the IMAP protocol, including popular services such as Gmail, Yahoo Mail,
     also uses this term; most other mail services do not.)</p>
     </section>
     
-    <section>
+    <section id="conversation-list">
     <title>Conversation list</title>
     <p>The <em>conversation list</em> displays a list of conversations in the
     selected folder.  Newer conversations appear at the top.</p>
@@ -40,7 +40,7 @@ support the IMAP protocol, including popular services such as Gmail, Yahoo Mail,
     conversation in a range, then hold down <key>Shift</key> and click the last conversation.</p>
     </section>
     
-    <section>
+    <section id="message-area">
     <title>Message area</title>
     <p>The <em>message area</em> displays all messages in the selected conversation,
     with the oldest message at the top.</p>

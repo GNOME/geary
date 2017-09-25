@@ -8,13 +8,13 @@
         <link type="next" xref="write"/>
     </info>
 	<title>Star a message or mark it as read/unread</title>
-	<section>
+	<section id="star-messages">
 	<title>Star messages</title>
 	<p>You can star messages to indicate that they're important to you.
 	To mark a conversation with a star, click its star icon in the conversation list. You can star an individual message by clicking the star at the upper right of the message itself.</p>
 	<p>With Gmail accounts, starred messages appear in the Starred folder in the folder list.</p>
 	</section>
-	<section>
+	<section id="mark-read-unread">
 	<title>Mark messages as read or unread</title>
 	<p>Geary marks messages as read automatically as you read them.
 	To manually toggle a conversation as read or unread, click the circle icon in the conversation list.</p>
