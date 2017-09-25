@@ -12,8 +12,8 @@ msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=internationalization\n"
-"POT-Creation-Date: 2017-03-18 17:03+0000\n"
-"PO-Revision-Date: 2017-03-23 12:36+0100\n"
+"POT-Creation-Date: 2017-09-25 12:19+0000\n"
+"PO-Revision-Date: 2017-09-25 16:24+0200\n"
 "Last-Translator: Marek Černocký <marek@manet.cz>\n"
 "Language-Team: čeština <gnome-cs-list@gnome.org>\n"
 "Language: cs\n"
@@ -80,6 +80,14 @@ msgstr "Upozornění na nové zprávy přímo v uživatelském prostředí"
 #: ../desktop/org.gnome.Geary.appdata.xml.in.h:11
 msgid "Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers"
 msgstr "Kompatibilitu s GMail, Yahoo! Mail, Outlook.com a dalšími servery IMAP"
+
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:12
+msgid "Geary displaying a conversation"
+msgstr "Geary zobrazující konverzaci"
+
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:13
+msgid "Geary showing the rich text composer"
+msgstr "Geary se zobrazeným editorem formátovaného textu"
 
 #: ../desktop/org.gnome.Geary.desktop.in.h:2
 msgid "Email"
@@ -2650,6 +2658,3 @@ msgstr "E-mailová adresa:"
 #: ../ui/upgrade_dialog.glade.h:1
 msgid "Geary update in progress…"
 msgstr "Probíhá aktualizace aplikace Geary…"
-
-#~ msgid "none"
-#~ msgstr "žádný"
