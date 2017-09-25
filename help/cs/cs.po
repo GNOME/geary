@@ -6,8 +6,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: geary master\n"
-"POT-Creation-Date: 2017-03-05 19:13+0000\n"
-"PO-Revision-Date: 2017-03-11 02:02+0100\n"
+"POT-Creation-Date: 2017-09-25 16:02+0000\n"
+"PO-Revision-Date: 2017-09-25 19:00+0200\n"
 "Last-Translator: Marek Černocký <marek@manet.cz>\n"
 "Language-Team: čeština <gnome-cs-list@gnome.org>\n"
 "Language: cs\n"
@@ -21,7 +21,11 @@ msgstr ""
 msgid "Write a message"
 msgstr "Psaní zprávy"
 
-#: C/write.page:12(p)
+#: C/write.page:12(title)
+msgid "Composing and replying"
+msgstr "Psaní zpráv a odpovídání"
+
+#: C/write.page:13(p)
 msgid ""
 "To compose a new message in Geary, press the <gui>New Message</gui> button "
 "on the toolbar."
@@ -29,7 +33,7 @@ msgstr ""
 "Když chcete v Geary napsat novou zprávu, zmáčkněte na nástrojové liště "
 "tlačítko <gui>Nová zpráva</gui>."
 
-#: C/write.page:15(p)
+#: C/write.page:16(p)
 msgid ""
 "To reply to a message, open the message menu in the upper right corner of "
 "the message and choose <gui>Reply</gui>, <gui>Reply All</gui> or "
@@ -43,11 +47,11 @@ msgstr ""
 "přes tlačítka <gui>Odpovědět</gui>, <gui>Odpovědět všem</gui> nebo "
 "<gui>Přeposlat</gui> na nástrojové liště."
 
-#: C/write.page:20(title)
+#: C/write.page:21(title)
 msgid "Features"
 msgstr "Funkce"
 
-#: C/write.page:22(p)
+#: C/write.page:23(p)
 msgid ""
 "Geary's email composer lets you adjust the font, size and color of text. You "
 "can also insert hyperlinks into messages."
@@ -55,7 +59,7 @@ msgstr ""
 "Při psaní e-mailů v Geary si můžete přizpůsobit písmo, velikost a barvu "
 "textu. Rovněž můžete do zpráv vkládat hypertextové odkazy."
 
-#: C/write.page:24(p)
+#: C/write.page:25(p)
 msgid ""
 "Geary can also send plain text messages. In the drop-down menu, check or "
 "uncheck \"Rich Text\" to toggle between plain text and rich text mode."
@@ -64,12 +68,12 @@ msgstr ""
 "zaškrtněte nebo zrušte zaškrtnutí „Formátovaný text“, abyste se přepnuli "
 "mezi režimy prostého textu a formátovaného textu."
 
-#: C/write.page:27(p)
+#: C/write.page:28(p)
 msgid ""
 "You can attach a file to a message you're writing in either of these ways:"
 msgstr "K napsané zprávě můžete přiložit soubory a to následujícími způsoby:"
 
-#: C/write.page:29(p)
+#: C/write.page:30(p)
 msgid ""
 "Press the <gui>Attach File</gui> button at the lower left of the composer "
 "window, then select a file to attach."
@@ -77,7 +81,7 @@ msgstr ""
 "Zmáčkněte tlačítko <gui>Přiložit soubor</gui> v levém dolním rohu okna "
 "editoru a následně vyberte soubor, který chcete přiložit."
 
-#: C/write.page:31(p)
+#: C/write.page:32(p)
 msgid ""
 "Drag the file from the Nautilus file manager to the composer window, and "
 "drop it either on the text fields at the top of the window or on the toolbar "
@@ -86,7 +90,7 @@ msgstr ""
 "Přetáhněte soubor ze správce souborů Nautilus do okna editoru a upusťte jej "
 "buď na textových polích v horní části okna nebo na nástrojové liště dole."
 
-#: C/write.page:35(p)
+#: C/write.page:36(p)
 msgid ""
 "A number of keyboard shortcuts are available in the composer; see <link xref="
 "\"shortcuts#composer\"/> for details."
@@ -94,7 +98,7 @@ msgstr ""
 "Řada klávesových zkratek je dostupná v editoru zpráv, podrobnosti viz <link "
 "xref=\"shortcuts#composer\"/>."
 
-#: C/write.page:37(p)
+#: C/write.page:38(p)
 msgid ""
 "You may specify a signature to be inserted into the composer in the <link "
 "xref=\"accounts\"/> dialog."
@@ -102,11 +106,11 @@ msgstr ""
 "V dialogovém okně <link xref=\"accounts\"/> můžete zadat patičku, která se "
 "bude vkládat do editoru."
 
-#: C/write.page:42(title)
+#: C/write.page:43(title)
 msgid "Drafts"
 msgstr "Koncepty"
 
-#: C/write.page:44(p)
+#: C/write.page:45(p)
 msgid ""
 "For mail servers that support drafts, Geary will automatically save the "
 "message as you type. If you close the composer without sending, Geary will "
@@ -116,7 +120,7 @@ msgstr ""
 "během psaní. Pokud zavřete okno editoru, aniž byste zprávu odeslali, Geary "
 "se vás dotáže, jestli má zprávu uchovat v konceptech nebo ji zahodit."
 
-#: C/write.page:47(p)
+#: C/write.page:48(p)
 msgid ""
 "To edit an existing draft, select the Drafts folder in the folder list, "
 "select the message, and click \"Edit Draft\" in the message viewer."
@@ -125,7 +129,7 @@ msgstr ""
 "složku Koncepty, vyberte zprávu a klikněte v prohlížeči zpráv na „Upravit "
 "koncept“ ."
 
-#: C/write.page:50(p)
+#: C/write.page:51(p)
 msgid "Geary deletes the draft when you send the message."
 msgstr "Po odeslání zprávy Geary koncept smaže."
 
