@@ -19,10 +19,6 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     private static Geary.FolderPath? outbox_path = null;
     private static Geary.FolderPath? search_path = null;
 
-    protected virtual Geary.SpecialFolderType[] supported_special_folders {
-        get { return SUPPORTED_SPECIAL_FOLDERS; }
-    }
-
     private Imap.Account remote;
     private ImapDB.Account local;
     private bool open = false;
@@ -508,7 +504,11 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     public override Geary.ContactStore get_contact_store() {
         return local.contact_store;
     }
-    
+
+    protected virtual Geary.SpecialFolderType[] get_supported_special_folders() {
+        return SUPPORTED_SPECIAL_FOLDERS;
+    }
+
     public override async bool folder_exists_async(Geary.FolderPath path,
         Cancellable? cancellable = null) throws Error {
         check_open();
@@ -593,7 +593,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
          * session's language. Also checks for lower-case versions of
          * each.
          */
-        foreach (Geary.SpecialFolderType type in this.supported_special_folders) {
+        foreach (Geary.SpecialFolderType type in get_supported_special_folders()) {
             Gee.List<string> compiled = new Gee.ArrayList<string>();
             foreach (string names in get_special_search_names(type)) {
                 foreach (string name in names.split("|")) {
@@ -748,7 +748,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     
     public override async Geary.Folder get_required_special_folder_async(Geary.SpecialFolderType special,
         Cancellable? cancellable) throws Error {
-        if (!(special in this.supported_special_folders)) {
+        if (!(special in get_supported_special_folders())) {
             throw new EngineError.BAD_PARAMETERS(
                 "Invalid special folder type %s passed to get_required_special_folder_async",
                 special.to_string());
@@ -759,7 +759,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     }
 
     private async void ensure_special_folders_async(Cancellable? cancellable) throws Error {
-        foreach (Geary.SpecialFolderType special in this.supported_special_folders)
+        foreach (Geary.SpecialFolderType special in get_supported_special_folders())
             yield ensure_special_folder_async(special, cancellable);
     }
 

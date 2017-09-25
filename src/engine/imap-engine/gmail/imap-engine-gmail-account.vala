@@ -30,13 +30,13 @@ private class Geary.ImapEngine.GmailAccount : Geary.ImapEngine.GenericAccount {
             Smtp.ClientConnection.DEFAULT_TIMEOUT_SEC);
     }
 
-    protected override Geary.SpecialFolderType[] supported_special_folders {
-        get { return SUPPORTED_SPECIAL_FOLDERS; }
-    }
-
     public GmailAccount(string name, Geary.AccountInformation account_information,
         Imap.Account remote, ImapDB.Account local) {
         base (name, account_information, remote, local);
+    }
+
+    protected override Geary.SpecialFolderType[] get_supported_special_folders() {
+        return SUPPORTED_SPECIAL_FOLDERS;
     }
 
     protected override MinimalFolder new_folder(Geary.FolderPath path, Imap.Account remote_account,
