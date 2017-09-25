@@ -29,8 +29,9 @@
   </description>
   <url type="homepage">https://wiki.gnome.org/Apps/Geary</url>
   <url type="faq">https://wiki.gnome.org/Apps/Geary/FAQ</url>
-  <url type="bugtracker">https://bugzilla.gnome.org/enter_bug.cgi?product=geary</url>
-  <url type="donation">http://www.gnome.org/friends/</url>
+  <url type="bugtracker">https://bugzilla.gnome.org/page.cgi?id=browse.html&amp;product=geary</url>
+  <url type="translate">https://wiki.gnome.org/Apps/Geary/Translating</url>
+  <url type="donation">https://www.gnome.org/friends/</url>
   <screenshots>
     <screenshot>
       <_caption>Geary displaying a conversation</_caption>
