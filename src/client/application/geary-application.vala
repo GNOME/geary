@@ -18,8 +18,8 @@ public class GearyApplication : Gtk.Application {
     public const string NAME = "Geary";
     public const string PRGNAME = "geary";
     public const string APP_ID = "org.gnome.Geary";
-    public const string DESCRIPTION = _("Mail Client");
     public const string COPYRIGHT = _("Copyright 2016 Software Freedom Conservancy Inc.");
+    public const string DESCRIPTION = _("Send and receive email");
     public const string WEBSITE = "https://wiki.gnome.org/Apps/Geary";
     public const string WEBSITE_LABEL = _("Visit the Geary web site");
     public const string BUGREPORT = "https://wiki.gnome.org/Apps/Geary/ReportingABug";
