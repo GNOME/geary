@@ -37,6 +37,7 @@ public class GearyApplication : Gtk.Application {
         "Matthew Pirocchi <matthew@yorba.org>",
         "Charles Lindsay <chaz@yorba.org>",
         "Robert Schroll <rschroll@gmail.com>",
+        "Michael Gratton <mike@vee.net>",
         null
     };
 
