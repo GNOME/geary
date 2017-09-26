@@ -19,30 +19,37 @@ msgstr ""
 "Project-Id-Version: geary-0.5.2\n"
 "Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=internationalization\n"
-"POT-Creation-Date: 2017-02-28 10:20+0000\n"
-"PO-Revision-Date: 2017-03-03 21:45+0100\n"
-"Last-Translator: Josef Andersson <l10nl18nsweja@gmail.com>\n"
+"POT-Creation-Date: 2017-09-26 12:56+0000\n"
+"PO-Revision-Date: 2017-09-26 22:46+0200\n"
+"Last-Translator: Anders Jonsson <anders.jonsson@norsjovallen.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "Language: sv\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 1.8.11\n"
+"X-Generator: Poedit 2.0.3\n"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:1
+#. Translators: The application name
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:2
 #: ../desktop/org.gnome.Geary.desktop.in.h:1
 #: ../desktop/geary-autostart.desktop.in.h:1
 msgid "Geary"
 msgstr "Geary"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:2
+#. Translators: The development team's name
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:4
+msgid "Geary Development Team"
+msgstr "Gearys utvecklingsgrupp"
+
+#. Translators: The application's summary / tagline
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:6
 #: ../desktop/org.gnome.Geary.desktop.in.h:4
 #: ../desktop/geary-autostart.desktop.in.h:4
 msgid "Send and receive email"
 msgstr "Skicka och ta emot e-post"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:3
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:7
 msgid ""
 "Geary is an email application built around conversations, for the GNOME 3 "
 "desktop. It allows you to read, find and send email with a straightforward, "
@@ -52,7 +59,7 @@ msgstr ""
 "skrivbordet. Det låter dig läsa, söka och sända e-post med ett enkelt "
 "modernt gränssnitt."
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:4
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:8
 msgid ""
 "Conversations allow you to read a complete discussion without having to find "
 "and click from message to message."
@@ -60,33 +67,43 @@ msgstr ""
 "Konversationer låter dig läsa en fullständig diskussion utan att behöva "
 "hitta och klicka från meddelande till meddelande."
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:5
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:9
 msgid "Geary’s features include:"
 msgstr "Gearys egenskaper omfattar:"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:6
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:10
 msgid "Quick email account setup"
 msgstr "Snabb inställning av e-postkonto"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:7
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:11
 msgid "Shows related messages together in conversations"
 msgstr "Visa relaterade meddelanden tillsammans i konversationer"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:8
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:12
 msgid "Fast, full text and keyword search"
 msgstr "Snabb heltext- och nyckelordssökning"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:9
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:13
 msgid "Full-featured HTML and plain text message composer"
 msgstr "Fullständig HTML- och textbehandlare"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:10
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:14
 msgid "Desktop notification of new mail"
 msgstr "Skrivbordasaviseringar för ny e-post"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:11
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:15
 msgid "Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers"
 msgstr "Kompatibel med GMail, Yahoo! Mail, Outlook.com och andra IMAP-servrar"
+
+#. Translators: A screenshot description.
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:17
+msgid "Geary displaying a conversation"
+msgstr "Geary visande en konversation"
+
+#. Translators: A screenshot description.
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:19
+msgid "Geary showing the rich text composer"
+msgstr "Geary visande rich text-redigeraren"
 
 #: ../desktop/org.gnome.Geary.desktop.in.h:2
 msgid "Email"
@@ -724,56 +741,56 @@ msgstr "E_rsätt"
 
 #. Find out what to do with the inline composers.
 #. TODO: Remove this in favor of automatically saving drafts
-#: ../src/client/application/geary-controller.vala:2375
+#: ../src/client/application/geary-controller.vala:2374
 msgid "Close open draft messages?"
 msgstr "Stänga öppna utkast?"
 
-#: ../src/client/application/geary-controller.vala:2497
+#: ../src/client/application/geary-controller.vala:2496
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Ta bort alla e-postmeddelanden från din mapp %s?"
 
-#: ../src/client/application/geary-controller.vala:2498
+#: ../src/client/application/geary-controller.vala:2497
 msgid "This removes the email from Geary and your email server."
 msgstr "Detta tar bort e-postmeddelanden från Geary och din e-postserver."
 
-#: ../src/client/application/geary-controller.vala:2499
+#: ../src/client/application/geary-controller.vala:2498
 msgid "This cannot be undone."
 msgstr "Detta kan inte ångras."
 
-#: ../src/client/application/geary-controller.vala:2500
+#: ../src/client/application/geary-controller.vala:2499
 #, c-format
 msgid "Empty %s"
 msgstr "Töm %s"
 
-#: ../src/client/application/geary-controller.vala:2517
+#: ../src/client/application/geary-controller.vala:2516
 #, c-format
 msgid "Error emptying %s"
 msgstr "Fel vid tömning av %s"
 
-#: ../src/client/application/geary-controller.vala:2547
+#: ../src/client/application/geary-controller.vala:2546
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Vill du radera detta meddelande permanent?"
 msgstr[1] "Vill du radera dessa meddelanden permanent?"
 
-#: ../src/client/application/geary-controller.vala:2549
+#: ../src/client/application/geary-controller.vala:2548
 msgid "Delete"
 msgstr "Radera"
 
-#: ../src/client/application/geary-controller.vala:2581
+#: ../src/client/application/geary-controller.vala:2580
 msgid "Undo archive (Ctrl+Z)"
 msgstr "Ångra arkivering (Ctrl+Z)"
 
-#: ../src/client/application/geary-controller.vala:2596
+#: ../src/client/application/geary-controller.vala:2595
 msgid "Undo trash (Ctrl+Z)"
 msgstr "Ångra flytt till papperskorgen (Ctrl+Z)"
 
-#: ../src/client/application/geary-controller.vala:2650
+#: ../src/client/application/geary-controller.vala:2649
 msgid "Undo (Ctrl+Z)"
 msgstr "Ångra (Ctrl+Z)"
 
-#: ../src/client/application/geary-controller.vala:2781
+#: ../src/client/application/geary-controller.vala:2780
 msgid "Failed to open default text editor."
 msgstr "Det gick inte att öppna standardtextredigeraren."
 
@@ -903,28 +920,28 @@ msgstr ""
 "bifoga|bifogar|bifogat|inkludera|inkluderar|inkluderat|bilaga|bilagor|"
 "skickar med|medföljande|attachment"
 
-#: ../src/client/composer/composer-widget.vala:1121
-#: ../src/client/composer/composer-widget.vala:1140
+#: ../src/client/composer/composer-widget.vala:1122
+#: ../src/client/composer/composer-widget.vala:1141
 msgid "Do you want to discard this message?"
 msgstr "Vill du förkasta detta meddelande?"
 
-#: ../src/client/composer/composer-widget.vala:1237
+#: ../src/client/composer/composer-widget.vala:1245
 msgid "Send message with an empty subject and body?"
 msgstr "Skicka meddelande med en tom ämnesrad och utan innehåll?"
 
-#: ../src/client/composer/composer-widget.vala:1239
+#: ../src/client/composer/composer-widget.vala:1247
 msgid "Send message with an empty subject?"
 msgstr "Skicka meddelande med en tom ämnesrad?"
 
-#: ../src/client/composer/composer-widget.vala:1241
+#: ../src/client/composer/composer-widget.vala:1249
 msgid "Send message with an empty body?"
 msgstr "Skicka meddelande utan innehåll?"
 
-#: ../src/client/composer/composer-widget.vala:1245
+#: ../src/client/composer/composer-widget.vala:1253
 msgid "Send message without an attachment?"
 msgstr "Skicka meddelande utan att bifoga filer?"
 
-#: ../src/client/composer/composer-widget.vala:1498
+#: ../src/client/composer/composer-widget.vala:1515
 #, c-format
 msgid "“%s” already attached for delivery."
 msgstr "”%s” är redan bifogad och kommer att skickas."
@@ -934,73 +951,73 @@ msgstr "”%s” är redan bifogad och kommer att skickas."
 #. description of the document type, the second will
 #. be a human-friendly size string. For example:
 #. Document (100.9MB)
-#: ../src/client/composer/composer-widget.vala:1506
+#: ../src/client/composer/composer-widget.vala:1523
 #: ../src/client/conversation-viewer/conversation-email.vala:138
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: ../src/client/composer/composer-widget.vala:1543
+#: ../src/client/composer/composer-widget.vala:1560
 #, c-format
 msgid "“%s” could not be found."
 msgstr "”%s” kunde inte hittas."
 
-#: ../src/client/composer/composer-widget.vala:1549
+#: ../src/client/composer/composer-widget.vala:1566
 #, c-format
 msgid "“%s” is a folder."
 msgstr "”%s” är en mapp."
 
-#: ../src/client/composer/composer-widget.vala:1555
+#: ../src/client/composer/composer-widget.vala:1572
 #, c-format
 msgid "“%s” is an empty file."
 msgstr "”%s” är en tom fil."
 
-#: ../src/client/composer/composer-widget.vala:1568
+#: ../src/client/composer/composer-widget.vala:1585
 #, c-format
 msgid "“%s” could not be opened for reading."
 msgstr "”%s” kunde inte öppnas för läsning."
 
-#: ../src/client/composer/composer-widget.vala:1576
+#: ../src/client/composer/composer-widget.vala:1593
 msgid "Cannot add attachment"
 msgstr "Kan inte bifoga din fil"
 
-#: ../src/client/composer/composer-widget.vala:1638
+#: ../src/client/composer/composer-widget.vala:1645
 msgid "To: "
 msgstr "Till: "
 
-#: ../src/client/composer/composer-widget.vala:1641
+#: ../src/client/composer/composer-widget.vala:1648
 msgid "Cc: "
 msgstr "Cc: "
 
-#: ../src/client/composer/composer-widget.vala:1644
+#: ../src/client/composer/composer-widget.vala:1651
 msgid "Bcc: "
 msgstr "Bcc: "
 
-#: ../src/client/composer/composer-widget.vala:1647
+#: ../src/client/composer/composer-widget.vala:1654
 msgid "Reply-To: "
 msgstr "Svara-till: "
 
-#: ../src/client/composer/composer-widget.vala:1778
+#: ../src/client/composer/composer-widget.vala:1786
 msgid "Select Color"
 msgstr "Välj färg"
 
 #. Displayed in the From dropdown to indicate an "alternate email address"
 #. for an account.  The first printf argument will be the alternate email
 #. address, and the second will be the account's primary email address.
-#: ../src/client/composer/composer-widget.vala:1978
+#: ../src/client/composer/composer-widget.vala:1986
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%1$s via %2$s"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: ../src/client/composer/composer-widget.vala:2020
+#: ../src/client/composer/composer-widget.vala:2028
 msgid "_From:"
 msgstr "_Från:"
 
 #. Translators: This is the name of the file chooser filter
 #. when inserting an image in the composer.
-#: ../src/client/composer/composer-widget.vala:2244
+#: ../src/client/composer/composer-widget.vala:2252
 msgid "Images"
 msgstr "Bilder"
 
