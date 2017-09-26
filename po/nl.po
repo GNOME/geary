@@ -11,48 +11,56 @@
 # Peter Nijssen <peter@peternijssen.nl>, 2012.
 # Martijn Braam <pizzamartijn@gmail.com>, 2013.
 # renearts <renearts@gmail.com>, 2013.
-# Hannie Dumoleyn <hannie@ubuntu-nl.org>, 2014.
+# Hannie Dumoleyn <hannie@ubuntu-nl.org>, 2014, 2017.
 # Nathan Follens <nthn@unseen.is>, 2015-2016.
 # Justin van Steijn <justin50@live.nl>, 2016.
 msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
-"Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?"
-"product=geary&keywords=I18N+L10N&component=internationalization\n"
-"POT-Creation-Date: 2017-06-28 17:51+0000\n"
-"PO-Revision-Date: 2017-08-06 18:32+0200\n"
-"Last-Translator: Nathan Follens <nthn@unseen.is>\n"
-"Language-Team: Dutch <vertaling@vrijschrift.org>\n"
+"Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?product=geary"
+"&keywords=I18N+L10N&component=internationalization\n"
+"POT-Creation-Date: 2017-09-26 12:56+0000\n"
+"PO-Revision-Date: 2017-09-26 17:15+0100\n"
+"Last-Translator: Hannie Dumoleyn <hannie@ubuntu-nl.org>\n"
+"Language-Team: Dutch <gnome-nl-list@gnome.org>\n"
 "Language: nl_NL\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 2.0.2\n"
+"X-Generator: Lokalize 2.0\n"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:1
+#. Translators: The application name
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:2
 #: ../desktop/org.gnome.Geary.desktop.in.h:1
 #: ../desktop/geary-autostart.desktop.in.h:1
 msgid "Geary"
 msgstr "Geary"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:2
+#. Translators: The development team's name
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:4
+msgid "Geary Development Team"
+msgstr "Geary-ontwikkelingsteam"
+
+#. Translators: The application's summary / tagline
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:6
 #: ../desktop/org.gnome.Geary.desktop.in.h:4
 #: ../desktop/geary-autostart.desktop.in.h:4
 msgid "Send and receive email"
 msgstr "E-mail verzenden en ontvangen"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:3
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:7
 msgid ""
 "Geary is an email application built around conversations, for the GNOME 3 "
 "desktop. It allows you to read, find and send email with a straightforward, "
 "modern interface."
 msgstr ""
-"Geary is een e-mailtoepassing die draait om gesprekken, voor de Gnome 3-"
-"desktop. U kunt uw e-mail lezen, zoeken en verzenden met een duidelijke, "
-"moderne interface."
+"Geary is een e-mailtoepassing die draait om gesprekken, voor de Gnome"
+" 3-desktop. Via de duidelijke, moderne interface kunt u e-mails lezen, zoeken"
+" en verzenden."
+"."
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:4
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:8
 msgid ""
 "Conversations allow you to read a complete discussion without having to find "
 "and click from message to message."
@@ -60,33 +68,44 @@ msgstr ""
 "Met gesprekken kunt u een volledige discussie lezen zonder te hoeven zoeken "
 "of van bericht naar bericht te hoeven klikken."
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:5
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:9
 msgid "Geary’s features include:"
 msgstr "Functies van Geary zijn:"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:6
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:10
 msgid "Quick email account setup"
 msgstr "Snel instellen van e-mailaccount"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:7
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:11
 msgid "Shows related messages together in conversations"
 msgstr "Groepeert gerelateerde berichten in gesprekken"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:8
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:12
 msgid "Fast, full text and keyword search"
 msgstr "Snel zoeken in volledige tekst met zoekwoorden"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:9
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:13
 msgid "Full-featured HTML and plain text message composer"
 msgstr "Berichten opstellen in HTML en platte tekst met veel functies"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:10
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:14
 msgid "Desktop notification of new mail"
 msgstr "Bureaubladmelding voor nieuwe e-mail"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:11
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:15
 msgid "Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers"
 msgstr "Werkt met Gmail, Yahoo! Mail, Outlook.com en andere IMAP-servers"
+
+#. Translators: A screenshot description.
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:17
+#| msgid "_Display conversation preview"
+msgid "Geary displaying a conversation"
+msgstr "Weergave van een gesprek in Geary"
+
+#. Translators: A screenshot description.
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:19
+msgid "Geary showing the rich text composer"
+msgstr "Tekstverwerker met opmaakmogelijkheden in Geary"
 
 #: ../desktop/org.gnome.Geary.desktop.in.h:2
 msgid "Email"
@@ -273,8 +292,9 @@ msgstr "Over %s"
 msgid "translator-credits"
 msgstr ""
 "Bas Duineveld <basduineveld@gmail.com>\n"
-"Nathan Follens\n"
-"Justin van Steijn\n"
+"Nathan Follens <nthn@unseen.is>\n"
+"Justin van Steijn <jvs@fsfe.org>\n"
+"\n"
 "Meer info over Gnome-NL http://nl.gnome.org"
 
 #: ../src/client/application/geary-args.vala:10
@@ -819,7 +839,7 @@ msgstr "_Annuleren"
 
 #: ../src/client/components/stock.vala:21 ../ui/gtk/menus.ui.h:6
 msgid "_About"
-msgstr "_Over"
+msgstr "_Info"
 
 #: ../src/client/components/stock.vala:23
 msgid "_Close"
@@ -859,11 +879,12 @@ msgstr "_Behouden"
 
 #: ../src/client/composer/composer-link-popover.vala:150
 msgid "Link URL is not correctly formatted, e.g. http://example.com"
-msgstr "Koppelings-URL is niet correct geformatteerd, bv. http://voorbeeld.be"
+msgstr ""
+"Verwijzings-URL is niet correct geformatteerd, bv. https://voorbeeld.be"
 
 #: ../src/client/composer/composer-link-popover.vala:157
 msgid "Invalid link URL"
-msgstr "Ongeldige koppelings-URL"
+msgstr "Ongeldige verwijzings-URL"
 
 #: ../src/client/composer/composer-link-popover.vala:157
 msgid "Invalid email address"
@@ -1786,24 +1807,24 @@ msgstr "Opslaan en sluiten"
 #. Note that this button and the Update button will never be shown at the same time to the user.
 #: ../ui/composer-link-popover.ui.h:2
 msgid "Insert the new link with this URL"
-msgstr "Nieuwe koppeling met deze URL invoeren"
+msgstr "Nieuwe verwijzing met deze URL invoeren"
 
 #: ../ui/composer-link-popover.ui.h:3
 msgid "Link URL"
-msgstr "Koppelings-URL"
+msgstr "Verwijzings-URL"
 
 #. Note that this button and the Insert button will never be shown at the same time to the user.
 #: ../ui/composer-link-popover.ui.h:5
 msgid "Update this link’s URL"
-msgstr "URL van deze koppeling bijwerken"
+msgstr "URL van deze verwijzing bijwerken"
 
 #: ../ui/composer-link-popover.ui.h:6
 msgid "Delete this link"
-msgstr "Deze koppeling verwijderen"
+msgstr "Deze verwijzing verwijderen"
 
 #: ../ui/composer-link-popover.ui.h:7
 msgid "Open this link"
-msgstr "Deze koppeling openen"
+msgstr "Deze verwijzing openen"
 
 #: ../ui/composer-menus.ui.h:1
 msgid "S_ans Serif"
@@ -1942,7 +1963,7 @@ msgstr "Einde citaat (Ctrl+[)"
 
 #: ../ui/composer-widget.ui.h:19
 msgid "Insert or update selection link (Ctrl+L)"
-msgstr "Selectiekoppeling invoegen of bijwerken (Ctrl+L)"
+msgstr "Selectieverwijzing invoegen of bijwerken (Ctrl+L)"
 
 #: ../ui/composer-widget.ui.h:20
 msgid "Insert an image (Ctrl+G)"
@@ -2036,11 +2057,11 @@ msgstr "Alles op_slaan"
 
 #: ../ui/conversation-message-menus.ui.h:1
 msgid "_Open Link"
-msgstr "Koppeling _openen"
+msgstr "Verwijzing _openen"
 
 #: ../ui/conversation-message-menus.ui.h:2
 msgid "Copy Link _Address"
-msgstr "Koppelings_adres kopiëren"
+msgstr "Verwijzings_adres kopiëren"
 
 #: ../ui/conversation-message-menus.ui.h:3
 msgid "Send New _Message…"
@@ -2080,7 +2101,7 @@ msgstr "Verzonden door:"
 
 #: ../ui/conversation-message.ui.h:5
 msgid "Reply to:"
-msgstr "Beantwoord:"
+msgstr "Antwoorden aan:"
 
 #: ../ui/conversation-message.ui.h:6
 msgid "Subject"
@@ -2104,7 +2125,7 @@ msgstr "Afbeeldingen tonen"
 
 #: ../ui/conversation-message.ui.h:11
 msgid "Always Show From Sender"
-msgstr "Laat altijd ‘Van afzender’ zien"
+msgstr "Afbeeldingen van deze afzender altijd tonen"
 
 #: ../ui/conversation-message.ui.h:12
 msgid "Remote images not shown"
@@ -2120,11 +2141,11 @@ msgstr "Maar gaat eigenlijk naar:"
 
 #: ../ui/conversation-message.ui.h:15
 msgid "The link appears to go to:"
-msgstr "De koppeling lijkt te leiden naar:"
+msgstr "De verwijzing lijkt te leiden naar:"
 
 #: ../ui/conversation-message.ui.h:16
 msgid "Deceptive link found"
-msgstr "Misleidende koppeling gevonden"
+msgstr "Misleidende verwijzing gevonden"
 
 #: ../ui/conversation-message.ui.h:17
 msgid "The email sender may be leading you to the wrong web site."
@@ -2411,7 +2432,7 @@ msgstr "Tekst doorstrepen"
 #: ../ui/gtk/help-overlay.ui.h:46
 msgctxt "shortcut window"
 msgid "Insert a link"
-msgstr "Een koppeling invoegen"
+msgstr "Een verwijzing invoegen"
 
 #: ../ui/gtk/help-overlay.ui.h:47
 msgctxt "shortcut window"
@@ -2657,7 +2678,7 @@ msgstr "E-mailadres:"
 
 #: ../ui/upgrade_dialog.glade.h:1
 msgid "Geary update in progress…"
-msgstr "Geary wordt geactualiseerd…"
+msgstr "Geary wordt bijgewerkt…"
 
 #~ msgid "_Inspect"
 #~ msgstr "_Inspecteren"
