@@ -18,8 +18,9 @@ public class GearyApplication : Gtk.Application {
     public const string NAME = "Geary";
     public const string PRGNAME = "geary";
     public const string APP_ID = "org.gnome.Geary";
-    public const string COPYRIGHT = _("Copyright 2016 Software Freedom Conservancy Inc.");
     public const string DESCRIPTION = _("Send and receive email");
+    public const string COPYRIGHT_1 = _("Copyright 2016 Software Freedom Conservancy Inc.");
+    public const string COPYRIGHT_2 = _("Copyright 2016-2017 Geary Development Team.");
     public const string WEBSITE = "https://wiki.gnome.org/Apps/Geary";
     public const string WEBSITE_LABEL = _("Visit the Geary web site");
     public const string BUGREPORT = "https://wiki.gnome.org/Apps/Geary/ReportingABug";
@@ -456,7 +457,7 @@ public class GearyApplication : Gtk.Application {
             "program-name", NAME,
             "comments", DESCRIPTION,
             "authors", AUTHORS,
-            "copyright", COPYRIGHT,
+            "copyright", string.join("\n", COPYRIGHT_1, COPYRIGHT_2),
             "license-type", Gtk.License.LGPL_2_1,
             "logo-icon-name", "geary",
             "version", VERSION,

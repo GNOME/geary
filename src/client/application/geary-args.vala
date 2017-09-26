@@ -48,10 +48,12 @@ public bool parse(string[] args) {
     var context = new OptionContext("[%s...]".printf(Geary.ComposedEmail.MAILTO_SCHEME));
     context.set_help_enabled(true);
     context.add_main_entries(options, null);
-    context.set_description("%s\n\n%s\n\n%s\n\t%s\n".printf(
+    context.set_description("%s\n\n%s\n%s\n\n%s\n\t%s\n".printf(
         // This gives a command-line hint on how to open new composer windows with mailto:
         _("Use %s to open a new composer window").printf(Geary.ComposedEmail.MAILTO_SCHEME),
-        GearyApplication.COPYRIGHT, _("Please report comments, suggestions and bugs to:"),
+        GearyApplication.COPYRIGHT_1,
+        GearyApplication.COPYRIGHT_2,
+        _("Please report comments, suggestions and bugs to:"),
         GearyApplication.BUGREPORT));
     
     try {
