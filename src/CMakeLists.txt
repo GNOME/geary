@@ -291,6 +291,7 @@ engine/state/state-mapping.vala
 
 engine/util/util-ascii.vala
 engine/util/util-collection.vala
+engine/util/util-connectivity-manager.vala
 engine/util/util-converter.vala
 engine/util/util-files.vala
 engine/util/util-generic-capabilities.vala

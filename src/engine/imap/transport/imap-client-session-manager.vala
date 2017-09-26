@@ -47,16 +47,16 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
     
     /**
      * Indicates if the {@link Endpoint} the {@link ClientSessionManager} connects to is reachable,
-     * according to the NetworkMonitor.
+     * according to NetworkMonitor.
      *
-     * By default, this is true, optimistic the network is reachable.  It is updated even if the
+     * By default, this is false, pessimistic that the network is reachable.  It is updated even if the
      * {@link ClientSessionManager} is not open, maintained for the lifetime of the object.
      */
-    public bool is_endpoint_reachable { get; private set; default = true; }
-    
+    public bool is_endpoint_reachable { get; private set; default = false; }
+
     private AccountInformation account_information;
     private Endpoint endpoint;
-    private NetworkMonitor network_monitor;
+	private ConnectivityManager connectivity;
     private Gee.HashSet<ClientSession> sessions = new Gee.HashSet<ClientSession>();
     private int pending_sessions = 0;
     private Nonblocking.Mutex sessions_mutex = new Nonblocking.Mutex();
@@ -65,41 +65,36 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
     private bool untrusted_host = false;
     private uint authorized_session_error_retry_timeout_id = 0;
     private int authorized_session_retry_sec = AUTHORIZED_SESSION_ERROR_MIN_RETRY_TIMEOUT_SEC;
-    private bool checking_reachable = false;
-    
+
     public signal void login_failed(StatusResponse? response);
-    
+
     public ClientSessionManager(AccountInformation account_information) {
         this.account_information = account_information;
+        this.account_information.notify["imap-credentials"].connect(on_imap_credentials_notified);
+
         // NOTE: This works because AccountInformation guarantees the IMAP endpoint not to change
         // for the lifetime of the AccountInformation object; if this ever changes, will need to
         // refactor for that
-        endpoint = account_information.get_imap_endpoint();
-        network_monitor = NetworkMonitor.get_default();
-        
-        account_information.notify["imap-credentials"].connect(on_imap_credentials_notified);
-        endpoint.untrusted_host.connect(on_imap_untrusted_host);
-        endpoint.notify[Endpoint.PROP_TRUST_UNTRUSTED_HOST].connect(on_imap_trust_untrusted_host);
-        
-        network_monitor.network_changed.connect(on_network_changed);
-        network_monitor.notify["network-available"].connect(on_network_available_changed);
-        
-        // get this started now
-        check_endpoint_reachable(null);
+        this.endpoint = account_information.get_imap_endpoint();
+        this.endpoint.notify[Endpoint.PROP_TRUST_UNTRUSTED_HOST].connect(on_imap_trust_untrusted_host);
+        this.endpoint.untrusted_host.connect(on_imap_untrusted_host);
+
+		this.connectivity = new ConnectivityManager(this.endpoint);
+		this.connectivity.notify["is-reachable"].connect(on_connectivity_change);
+		this.connectivity.check_reachable.begin();
     }
-    
+
     ~ClientSessionManager() {
         if (is_open)
             warning("Destroying opened ClientSessionManager");
-        
+
         account_information.notify["imap-credentials"].disconnect(on_imap_credentials_notified);
         endpoint.untrusted_host.disconnect(on_imap_untrusted_host);
         endpoint.notify[Endpoint.PROP_TRUST_UNTRUSTED_HOST].disconnect(on_imap_trust_untrusted_host);
-        
-        network_monitor.network_changed.disconnect(on_network_changed);
-        network_monitor.notify["network-available"].disconnect(on_network_available_changed);
+		this.connectivity.cancel_check();
+		this.connectivity = null;
     }
-    
+
     public async void open_async(Cancellable? cancellable) throws Error {
         if (is_open)
             throw new EngineError.ALREADY_OPEN("ClientSessionManager already open");
@@ -156,9 +151,9 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
     // TODO: Need a more thorough and bulletproof system for maintaining a pool of ready
     // authorized sessions.
     private async void adjust_session_pool() {
-        if (!is_open)
+        if (!this.is_open)
             return;
-        
+
         int token;
         try {
             token = yield sessions_mutex.claim_async();
@@ -502,55 +497,17 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
                 adjust_session_pool.begin();
         }
     }
-    
-    private void on_network_changed() {
-        // Always check if reachable because IMAP server could be on localhost.  (This is a Linux
-        // program, after all...)
-        check_endpoint_reachable(null);
-    }
-    
-    private void on_network_available_changed() {
-        // If network is available and endpoint is reachable, do nothing more, all is good,
-        // otherwise check (see note in on_network_changed)
-        if (network_monitor.network_available && is_endpoint_reachable)
-            return;
-        
-        check_endpoint_reachable(null);
-    }
-    
-    private void check_endpoint_reachable(Cancellable? cancellable) {
-        if (checking_reachable)
-            return;
-        
-        debug("Checking if IMAP host %s reachable...", endpoint.to_string());
-        
-        checking_reachable = true;
-        check_endpoint_reachable_async.begin(cancellable);
-    }
-    
-    // Use check_endpoint_reachable to properly schedule
-    private async void check_endpoint_reachable_async(Cancellable? cancellable) {
-        try {
-            is_endpoint_reachable = yield network_monitor.can_reach_async(endpoint.remote_address,
-                cancellable);
-            message("IMAP host %s considered %s", endpoint.to_string(),
-                is_endpoint_reachable ? "reachable" : "unreachable");
-        } catch (Error err) {
-            // If cancelled, don't change anything
-            if (err is IOError.CANCELLED)
-                return;
-            
-            message("Error determining if IMAP host %s is reachable, treating as unreachable: %s",
-                endpoint.to_string(), err.message);
-            is_endpoint_reachable = false;
-        } finally {
-            checking_reachable = false;
-        }
-        
-        if (is_endpoint_reachable)
-            adjust_session_pool.begin();
-    }
-    
+
+	private void on_connectivity_change() {
+		this.is_endpoint_reachable = this.connectivity.is_reachable;
+		debug("Host %s became %s",
+			  this.endpoint.to_string(),
+			  this.is_endpoint_reachable ? "reachable" : "unreachable");
+		if (this.is_endpoint_reachable) {
+            this.adjust_session_pool.begin();
+		}
+	}
+
     /**
      * Use only for debugging and logging.
      */
@@ -559,4 +516,3 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
             sessions.size, reserved_sessions.size);
     }
 }
-
