@@ -2,9 +2,11 @@
 <!-- Copyright 2016 Software Freedom Conservancy Inc. -->
 <!-- Copyright 2016 Michael Gratton <mike@vee.net> -->
 <component type="desktop">
-  <id>org.gnome.Geary.desktop</id>
+  <id>org.gnome.Geary</id>
   <metadata_license>CC0-1.0</metadata_license>
   <project_license>LGPL-2.1+</project_license>
+  <update_contact>geary-list@gnome.org</update_contact>
+
   <_name>Geary</_name>
   <_summary>Send and receive email</_summary>
   <description>
@@ -27,11 +29,14 @@
       <_li>Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers</_li>
     </ul>
   </description>
+
   <url type="homepage">https://wiki.gnome.org/Apps/Geary</url>
+  <url type="help">https://wiki.gnome.org/Apps/Geary/Contact</url>
   <url type="faq">https://wiki.gnome.org/Apps/Geary/FAQ</url>
-  <url type="bugtracker">https://bugzilla.gnome.org/page.cgi?id=browse.html&amp;product=geary</url>
+  <url type="bugtracker">https://wiki.gnome.org/Apps/Geary/ReportingABug</url>
   <url type="translate">https://wiki.gnome.org/Apps/Geary/Translating</url>
   <url type="donation">https://www.gnome.org/friends/</url>
+
   <screenshots>
     <screenshot>
       <_caption>Geary displaying a conversation</_caption>
@@ -42,9 +47,14 @@
       <image type="source" width="1600" height="900">https://wiki.gnome.org/Apps/Geary?action=AttachFile&amp;do=get&amp;target=geary-composer-0.12.png</image>
     </screenshot>
   </screenshots>
-  <translation type="gettext">geary</translation>
-  <update_contact>geary-list@gnome.org</update_contact>
+
   <project_group>GNOME</project_group>
+  <categories>
+    <category>Office</category>
+    <category>Network</category>
+    <category>Email</category>
+  ​</categories>
+
   <kudos>
     <kudo>AppMenu</kudo>
     <kudo>HiDpiIcon</kudo>
@@ -53,4 +63,10 @@
     <kudo>Notifications</kudo>
     <kudo>UserDocs</kudo>
   </kudos>
+
+  <launchable type="desktop-id">org.gnome.Geary.desktop</launchable>
+  <provides>
+    <binary>geary</binary>
+  </provides>
+  <translation type="gettext">geary</translation>
 </component>
