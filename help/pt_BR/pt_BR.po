@@ -5,8 +5,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: geary master\n"
-"POT-Creation-Date: 2017-01-31 23:08+0000\n"
-"PO-Revision-Date: 2017-02-06 08:10-0200\n"
+"POT-Creation-Date: 2017-09-25 16:02+0000\n"
+"PO-Revision-Date: 2017-09-26 19:29-0200\n"
 "Last-Translator: Rafael Fontenelle <rafaelff@gnome.org>\n"
 "Language-Team: Brazilian Portuguese <gnome-pt_br-list@gnome.org>\n"
 "Language: pt_BR\n"
@@ -20,7 +20,11 @@ msgstr ""
 msgid "Write a message"
 msgstr "Escrevendo uma mensagem"
 
-#: C/write.page:12(p)
+#: C/write.page:12(title)
+msgid "Composing and replying"
+msgstr "Composição e resposta"
+
+#: C/write.page:13(p)
 msgid ""
 "To compose a new message in Geary, press the <gui>New Message</gui> button "
 "on the toolbar."
@@ -28,7 +32,7 @@ msgstr ""
 "Para compor uma nova mensagem no Geary, pressione o botão <gui>Nova "
 "mensagem</gui> na barra de ferramentas."
 
-#: C/write.page:15(p)
+#: C/write.page:16(p)
 msgid ""
 "To reply to a message, open the message menu in the upper right corner of "
 "the message and choose <gui>Reply</gui>, <gui>Reply All</gui> or "
@@ -42,11 +46,11 @@ msgstr ""
 "em uma conversa via os botões <gui>Responder</gui>, <gui>Responder todos</"
 "gui> ou <gui>Encaminhar</gui> na barra de ferramentas."
 
-#: C/write.page:20(title)
+#: C/write.page:21(title)
 msgid "Features"
 msgstr "Recursos"
 
-#: C/write.page:22(p)
+#: C/write.page:23(p)
 msgid ""
 "Geary's email composer lets you adjust the font, size and color of text. You "
 "can also insert hyperlinks into messages."
@@ -54,7 +58,7 @@ msgstr ""
 "O compositor de e-mail do Geary permite que você ajuste a fonte, tamanho e "
 "cor do texto. Você também pode inserir hyperlinks nas mensagens."
 
-#: C/write.page:24(p)
+#: C/write.page:25(p)
 msgid ""
 "Geary can also send plain text messages. In the drop-down menu, check or "
 "uncheck \"Rich Text\" to toggle between plain text and rich text mode."
@@ -63,14 +67,14 @@ msgstr ""
 "marque ou desmarque \"Texto rico\" para alternar entre modos texto simples "
 "ou texto rico."
 
-#: C/write.page:27(p)
+#: C/write.page:28(p)
 msgid ""
 "You can attach a file to a message you're writing in either of these ways:"
 msgstr ""
 "Você pode anexar um arquivo a uma mensagem que você está escrever de duas "
 "formas:"
 
-#: C/write.page:29(p)
+#: C/write.page:30(p)
 msgid ""
 "Press the <gui>Attach File</gui> button at the lower left of the composer "
 "window, then select a file to attach."
@@ -78,7 +82,7 @@ msgstr ""
 "Pressione o botão <gui>Anexar arquivo</gui> na esquerda inferior da janela "
 "do compositor e, então, selecione um arquivo para anexar."
 
-#: C/write.page:31(p)
+#: C/write.page:32(p)
 msgid ""
 "Drag the file from the Nautilus file manager to the composer window, and "
 "drop it either on the text fields at the top of the window or on the toolbar "
@@ -88,7 +92,7 @@ msgstr ""
 "então, solte-o nos campos de texto no topo da janela ou na barra de "
 "ferramentas em baixo."
 
-#: C/write.page:35(p)
+#: C/write.page:36(p)
 msgid ""
 "A number of keyboard shortcuts are available in the composer; see <link xref="
 "\"shortcuts#composer\"/> for details."
@@ -96,7 +100,7 @@ msgstr ""
 "Uma quantidade de teclas de atalho estão disponíveis no compositor; veja "
 "<link xref=\"shortcuts#composer\"/> para detalhes."
 
-#: C/write.page:37(p)
+#: C/write.page:38(p)
 msgid ""
 "You may specify a signature to be inserted into the composer in the <link "
 "xref=\"accounts\"/> dialog."
@@ -104,11 +108,11 @@ msgstr ""
 "Você pode especificar uma assinatura a ser inserida no compositor no diálogo "
 "<link xref=\"accounts\"/>."
 
-#: C/write.page:42(title)
+#: C/write.page:43(title)
 msgid "Drafts"
 msgstr "Rascunhos"
 
-#: C/write.page:44(p)
+#: C/write.page:45(p)
 msgid ""
 "For mail servers that support drafts, Geary will automatically save the "
 "message as you type. If you close the composer without sending, Geary will "
@@ -119,7 +123,7 @@ msgstr ""
 "compositor sem enviar, Geary vai perguntar se deseja manter o rascunho ou "
 "descartá-lo."
 
-#: C/write.page:47(p)
+#: C/write.page:48(p)
 msgid ""
 "To edit an existing draft, select the Drafts folder in the folder list, "
 "select the message, and click \"Edit Draft\" in the message viewer."
@@ -128,7 +132,7 @@ msgstr ""
 "pastas, selecione a mensagem e, então, clique em \"Editar rascunho\" no "
 "visualizador de mensagem."
 
-#: C/write.page:50(p)
+#: C/write.page:51(p)
 msgid "Geary deletes the draft when you send the message."
 msgstr "Geary exclui o rascunho quando você envia a mensagem."
 
@@ -268,7 +272,7 @@ msgstr ""
 msgid "Star"
 msgstr "Marcar estrela"
 
-#: C/shortcuts.page:44(key) C/shortcuts.page:108(key)
+#: C/shortcuts.page:44(key) C/shortcuts.page:100(key)
 msgid "S"
 msgstr "S"
 
@@ -276,7 +280,7 @@ msgstr "S"
 msgid "Unstar"
 msgstr "Desmarcar estrela"
 
-#: C/shortcuts.page:48(key) C/shortcuts.page:146(key)
+#: C/shortcuts.page:48(key) C/shortcuts.page:138(key)
 msgid "D"
 msgstr "D"
 
@@ -305,7 +309,6 @@ msgstr ""
 "key><key>U</key></keyseq>"
 
 #: C/shortcuts.page:59(p)
-#| msgid "Label a conversation"
 msgid "Move the conversation"
 msgstr "Mover a conversação"
 
@@ -314,220 +317,268 @@ msgid "M"
 msgstr "M"
 
 #: C/shortcuts.page:63(p)
-#| msgid "Label a conversation"
 msgid "Label the conversation"
 msgstr "Rotular a conversa"
 
-#: C/shortcuts.page:64(key) C/shortcuts.page:170(key)
+#: C/shortcuts.page:64(key) C/shortcuts.page:162(key)
 msgid "L"
 msgstr "L"
 
 #: C/shortcuts.page:67(p)
+msgid "Jump to next (older) conversation"
+msgstr "Saltar para a próxima (mais antiga) conversa"
+
+#: C/shortcuts.page:68(key)
+msgid "J"
+msgstr "J"
+
+#: C/shortcuts.page:71(p)
+msgid "Jump to previous (newer) conversation"
+msgstr "Saltar para a conversa anterior (mais nova)"
+
+#: C/shortcuts.page:72(key) C/shortcuts.page:158(key)
+msgid "K"
+msgstr "K"
+
+#: C/shortcuts.page:75(p)
+msgid "Toggle spam"
+msgstr "Ativar spam"
+
+#: C/shortcuts.page:76(p)
+msgid "<keyseq><key>Ctrl</key><key>J</key></keyseq> or <key>!</key>"
+msgstr "<keyseq><key>Ctrl</key><key>J</key></keyseq> ou <key>!</key>"
+
+#: C/shortcuts.page:79(p)
+msgid "Quit"
+msgstr "Sair"
+
+#: C/shortcuts.page:80(key) C/shortcuts.page:96(key) C/shortcuts.page:100(key)
+#: C/shortcuts.page:104(key) C/shortcuts.page:108(key)
+#: C/shortcuts.page:112(key) C/shortcuts.page:122(key)
+#: C/shortcuts.page:126(key) C/shortcuts.page:130(key)
+#: C/shortcuts.page:138(key) C/shortcuts.page:146(key)
+#: C/shortcuts.page:150(key) C/shortcuts.page:154(key)
+#: C/shortcuts.page:158(key) C/shortcuts.page:162(key)
+#: C/shortcuts.page:166(key) C/shortcuts.page:181(key)
+msgid "Ctrl"
+msgstr "Ctrl"
+
+#: C/shortcuts.page:80(key)
+msgid "Q"
+msgstr "Q"
+
+#: C/shortcuts.page:83(p)
+msgid "Zoom in"
+msgstr "Aumentar o zoom"
+
+#: C/shortcuts.page:84(p)
+msgid "<keyseq><key>Ctrl</key><key>=</key></keyseq> or <key>=</key>"
+msgstr "<keyseq><key>Ctrl</key><key>=</key></keyseq> ou <key>=</key>"
+
+#: C/shortcuts.page:87(p)
+msgid "Zoom out"
+msgstr "Diminuir o zoom"
+
+#: C/shortcuts.page:88(p)
+msgid "<keyseq><key>Ctrl</key><key>-</key></keyseq> or <key>-</key>"
+msgstr "<keyseq><key>Ctrl</key><key>-</key></keyseq> ou <key>-</key>"
+
+#: C/shortcuts.page:91(p)
+msgid "Reset zoom"
+msgstr "Redefinir o zoom"
+
+#: C/shortcuts.page:92(p)
+msgid "<keyseq><key>Ctrl</key><key>0</key></keyseq> or <key>0</key>"
+msgstr "<keyseq><key>Ctrl</key><key>0</key></keyseq> ou <key>0</key>"
+
+#: C/shortcuts.page:95(p)
+msgid "Close composer window"
+msgstr "Fechar a janela do compositor"
+
+#: C/shortcuts.page:96(key)
+msgid "W"
+msgstr "W"
+
+#: C/shortcuts.page:99(p)
+msgid "Jump to search box"
+msgstr "Saltar para a caixa de pesquisa"
+
+#: C/shortcuts.page:103(p)
+msgid "Find in current conversation"
+msgstr "Localizar na conversa atual"
+
+#: C/shortcuts.page:104(key)
+msgid "F"
+msgstr "F"
+
+#: C/shortcuts.page:107(p)
+msgid "Find next in current conversation"
+msgstr "Localizar próximo na conversa atual"
+
+#: C/shortcuts.page:108(key) C/shortcuts.page:112(key)
+msgid "G"
+msgstr "G"
+
+#: C/shortcuts.page:111(p)
+msgid "Find previous in current conversation"
+msgstr "Localizar anterior na conversa atual"
+
+#: C/shortcuts.page:112(key)
+msgid "Shift"
+msgstr "Shift"
+
+#: C/shortcuts.page:117(title)
+msgid "Composer shortcuts"
+msgstr "Atalhos do compositor"
+
+#: C/shortcuts.page:118(p)
+msgid "These shortcuts are active whenever focus is in a composer."
+msgstr "Esses atalhos estão ativos sem que o foco estiver em um compositor."
+
+#: C/shortcuts.page:121(p)
+msgid "Attach file"
+msgstr "Anexar arquivo"
+
+#: C/shortcuts.page:122(key)
+msgid "T"
+msgstr "T"
+
+#: C/shortcuts.page:125(p)
+msgid "Quote text"
+msgstr "Texto citado"
+
+#: C/shortcuts.page:126(key)
+msgid "]"
+msgstr "]"
+
+#: C/shortcuts.page:129(p)
+msgid "Unquote text"
+msgstr "Texto não-citado"
+
+#: C/shortcuts.page:130(key)
+msgid "["
+msgstr "["
+
+#: C/shortcuts.page:133(p)
+msgid "Close composer"
+msgstr "Fechar o compositor"
+
+#: C/shortcuts.page:134(p)
+msgid "<keyseq><key>Ctrl</key><key>W</key></keyseq> or <key>Esc</key>"
+msgstr "<keyseq><key>Ctrl</key><key>W</key></keyseq> ou <key>Esc</key>"
+
+#: C/shortcuts.page:137(p)
+msgid "Detach composer"
+msgstr "Desanexar o compositor"
+
+#: C/shortcuts.page:142(p)
+msgid "These shortcuts are only active in composers in rich text mode."
+msgstr "Esses atalhos estão ativos apenas em compositores em modo texto rico."
+
+#: C/shortcuts.page:145(p)
+msgid "Bold text"
+msgstr "Texto em negrito"
+
+#: C/shortcuts.page:146(key) C/shortcuts.page:181(key)
+msgid "B"
+msgstr "B"
+
+#: C/shortcuts.page:149(p)
+msgid "Italicize text"
+msgstr "Texto em itálico"
+
+#: C/shortcuts.page:150(key)
+msgid "I"
+msgstr "I"
+
+#: C/shortcuts.page:153(p)
+msgid "Underline text"
+msgstr "Sublinhar o texto"
+
+#: C/shortcuts.page:154(key)
+msgid "U"
+msgstr "U"
+
+#: C/shortcuts.page:157(p)
+msgid "Strike text"
+msgstr "Riscar o texto"
+
+#: C/shortcuts.page:161(p)
+msgid "Insert a link"
+msgstr "Inserir um link"
+
+#: C/shortcuts.page:165(p)
+msgid "Remove formatting"
+msgstr "Remover formatação"
+
+#: C/shortcuts.page:166(key) C/shortcuts.page:186(key)
+msgid "Space"
+msgstr "Espaço"
+
+#: C/shortcuts.page:172(title)
+msgid "Keyboard navigation"
+msgstr "Navegação pelo teclado"
+
+#: C/shortcuts.page:173(p)
+#| msgid "These shortcuts are active whenever focus is in a composer."
+msgid ""
+"These shortcuts can be used to move the keyboard focus in the main window."
+msgstr ""
+"Esses atalhos pode ser usados para mover o foco do teclado na janela "
+"principal."
+
+#: C/shortcuts.page:176(p)
 msgid "Move focus to the next/previous pane"
 msgstr "Mover o foco ao próximo painel ou ao anterior"
 
-#: C/shortcuts.page:68(p)
+#: C/shortcuts.page:177(p)
 msgid ""
 "<keyseq><key>F6</key></keyseq> / <keyseq><key>Shift</key><key>F6</key></"
 "keyseq>"
 msgstr ""
-"<keyseq><key>F6</key></keyseq> / <keyseq><key>Shift</key><key>F6</key></"
-"keyseq>"
+"<keyseq><key>F6</key></keyseq> / "
+"<keyseq><key>Shift</key><key>F6</key></keyseq>"
 
-#: C/shortcuts.page:71(p)
+#: C/shortcuts.page:180(p)
 msgid "Move focus to conversation list"
 msgstr "Mover foco para a lista de conversa"
 
-#: C/shortcuts.page:72(key) C/shortcuts.page:88(key) C/shortcuts.page:104(key)
-#: C/shortcuts.page:108(key) C/shortcuts.page:112(key)
-#: C/shortcuts.page:116(key) C/shortcuts.page:120(key)
-#: C/shortcuts.page:130(key) C/shortcuts.page:134(key)
-#: C/shortcuts.page:138(key) C/shortcuts.page:146(key)
-#: C/shortcuts.page:154(key) C/shortcuts.page:158(key)
-#: C/shortcuts.page:162(key) C/shortcuts.page:166(key)
-#: C/shortcuts.page:170(key) C/shortcuts.page:174(key)
-msgid "Ctrl"
-msgstr "Ctrl"
+#: C/shortcuts.page:184(p)
+#| msgid "Move the conversation"
+msgid "Move to the next message in a conversation"
+msgstr "Mover para a próxima mensagem em uma conversa"
 
-#: C/shortcuts.page:72(key) C/shortcuts.page:154(key)
-msgid "B"
-msgstr "B"
+#: C/shortcuts.page:190(p)
+#| msgid "Move focus to the next/previous pane"
+msgid "Move to the next/previous message in a conversation"
+msgstr "Mover para a mensagem seguinte/anterior em uma conversa"
 
-#: C/shortcuts.page:75(p)
-msgid "Jump to next (older) conversation"
-msgstr "Saltar para a próxima (mais antiga) conversa"
+#: C/shortcuts.page:191(p)
+#| msgid ""
+#| "<keyseq><key>Ctrl</key><key>U</key></keyseq> or <keyseq><key>Shift</"
+#| "key><key>U</key></keyseq>"
+msgid ""
+"<keyseq><key>Ctrl</key><key>Down</key></keyseq> / <keyseq><key>Ctrl</"
+"key><key>Up</key></keyseq>"
+msgstr ""
+"<keyseq><key>Ctrl</key><key>Down</key></keyseq> / "
+"<keyseq><key>Ctrl</key><key>Up</key></keyseq>"
 
-#: C/shortcuts.page:76(key)
-msgid "J"
-msgstr "J"
+#: C/shortcuts.page:197(p)
+#| msgid "Move the conversation"
+msgid "Move to the first/last message in a conversation"
+msgstr "Mover para a primeira/última mensagem em uma conversa"
 
-#: C/shortcuts.page:79(p)
-msgid "Jump to previous (newer) conversation"
-msgstr "Saltar para a conversa anterior (mais nova)"
-
-#: C/shortcuts.page:80(key) C/shortcuts.page:166(key)
-msgid "K"
-msgstr "K"
-
-#: C/shortcuts.page:83(p)
-msgid "Toggle spam"
-msgstr "Ativar spam"
-
-#: C/shortcuts.page:84(p)
-msgid "<keyseq><key>Ctrl</key><key>J</key></keyseq> or <key>!</key>"
-msgstr "<keyseq><key>Ctrl</key><key>J</key></keyseq> ou <key>!</key>"
-
-#: C/shortcuts.page:87(p)
-msgid "Quit"
-msgstr "Sair"
-
-#: C/shortcuts.page:88(key)
-msgid "Q"
-msgstr "Q"
-
-#: C/shortcuts.page:91(p)
-msgid "Zoom in"
-msgstr "Aumentar o zoom"
-
-#: C/shortcuts.page:92(p)
-msgid "<keyseq><key>Ctrl</key><key>=</key></keyseq> or <key>=</key>"
-msgstr "<keyseq><key>Ctrl</key><key>=</key></keyseq> ou <key>=</key>"
-
-#: C/shortcuts.page:95(p)
-msgid "Zoom out"
-msgstr "Diminuir o zoom"
-
-#: C/shortcuts.page:96(p)
-msgid "<keyseq><key>Ctrl</key><key>-</key></keyseq> or <key>-</key>"
-msgstr "<keyseq><key>Ctrl</key><key>-</key></keyseq> ou <key>-</key>"
-
-#: C/shortcuts.page:99(p)
-msgid "Reset zoom"
-msgstr "Redefinir o zoom"
-
-#: C/shortcuts.page:100(p)
-msgid "<keyseq><key>Ctrl</key><key>0</key></keyseq> or <key>0</key>"
-msgstr "<keyseq><key>Ctrl</key><key>0</key></keyseq> ou <key>0</key>"
-
-#: C/shortcuts.page:103(p)
-msgid "Close composer window"
-msgstr "Fechar a janela do compositor"
-
-#: C/shortcuts.page:104(key)
-msgid "W"
-msgstr "W"
-
-#: C/shortcuts.page:107(p)
-msgid "Jump to search box"
-msgstr "Saltar para a caixa de pesquisa"
-
-#: C/shortcuts.page:111(p)
-msgid "Find in current conversation"
-msgstr "Localizar na conversa atual"
-
-#: C/shortcuts.page:112(key)
-msgid "F"
-msgstr "F"
-
-#: C/shortcuts.page:115(p)
-msgid "Find next in current conversation"
-msgstr "Localizar próximo na conversa atual"
-
-#: C/shortcuts.page:116(key) C/shortcuts.page:120(key)
-msgid "G"
-msgstr "G"
-
-#: C/shortcuts.page:119(p)
-msgid "Find previous in current conversation"
-msgstr "Localizar anterior na conversa atual"
-
-#: C/shortcuts.page:120(key)
-msgid "Shift"
-msgstr "Shift"
-
-#: C/shortcuts.page:125(title)
-msgid "Composer shortcuts"
-msgstr "Atalhos do compositor"
-
-#: C/shortcuts.page:126(p)
-msgid "These shortcuts are active whenever focus is in a composer."
-msgstr "Esses atalhos estão ativos sem que o foco estiver em um compositor."
-
-#: C/shortcuts.page:129(p)
-msgid "Attach file"
-msgstr "Anexar arquivo"
-
-#: C/shortcuts.page:130(key)
-msgid "T"
-msgstr "T"
-
-#: C/shortcuts.page:133(p)
-msgid "Quote text"
-msgstr "Texto citado"
-
-#: C/shortcuts.page:134(key)
-msgid "]"
-msgstr "]"
-
-#: C/shortcuts.page:137(p)
-msgid "Unquote text"
-msgstr "Texto não-citado"
-
-#: C/shortcuts.page:138(key)
-msgid "["
-msgstr "["
-
-#: C/shortcuts.page:141(p)
-msgid "Close composer"
-msgstr "Fechar o compositor"
-
-#: C/shortcuts.page:142(p)
-msgid "<keyseq><key>Ctrl</key><key>W</key></keyseq> or <key>Esc</key>"
-msgstr "<keyseq><key>Ctrl</key><key>W</key></keyseq> ou <key>Esc</key>"
-
-#: C/shortcuts.page:145(p)
-msgid "Detach composer"
-msgstr "Desanexar o compositor"
-
-#: C/shortcuts.page:150(p)
-msgid "These shortcuts are only active in composers in rich text mode."
-msgstr "Esses atalhos estão ativos apenas em compositores em modo texto rico."
-
-#: C/shortcuts.page:153(p)
-msgid "Bold text"
-msgstr "Texto em negrito"
-
-#: C/shortcuts.page:157(p)
-msgid "Italicize text"
-msgstr "Texto em itálico"
-
-#: C/shortcuts.page:158(key)
-msgid "I"
-msgstr "I"
-
-#: C/shortcuts.page:161(p)
-msgid "Underline text"
-msgstr "Sublinhar o texto"
-
-#: C/shortcuts.page:162(key)
-msgid "U"
-msgstr "U"
-
-#: C/shortcuts.page:165(p)
-msgid "Strike text"
-msgstr "Riscar o texto"
-
-#: C/shortcuts.page:169(p)
-msgid "Insert a link"
-msgstr "Inserir um link"
-
-#: C/shortcuts.page:173(p)
-msgid "Remove formatting"
-msgstr "Remover formatação"
-
-#: C/shortcuts.page:174(key)
-msgid "Space"
-msgstr "Espaço"
+#: C/shortcuts.page:198(p)
+#| msgid ""
+#| "<keyseq><key>Ctrl</key><key>I</key></keyseq> or <keyseq><key>Shift</"
+#| "key><key>I</key></keyseq>"
+msgid ""
+"<keyseq><key>Ctrl</key><key>Home</key></keyseq> / <keyseq><key>Ctrl</"
+"key><key>End</key></keyseq>"
+msgstr ""
+"<keyseq><key>Ctrl</key><key>Home</key></keyseq> / "
+"<keyseq><key>Ctrl</key><key>End</key></keyseq>"
 
 #: C/search.page:10(title)
 msgid "Search"
