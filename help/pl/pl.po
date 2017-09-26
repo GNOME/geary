@@ -7,8 +7,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: geary-help\n"
-"POT-Creation-Date: 2017-05-31 13:39+0000\n"
-"PO-Revision-Date: 2017-06-08 18:18+0200\n"
+"POT-Creation-Date: 2017-09-25 16:02+0000\n"
+"PO-Revision-Date: 2017-09-26 16:45+0200\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <community-poland@mozilla.org>\n"
 "Language: pl\n"
@@ -22,7 +22,11 @@ msgstr ""
 msgid "Write a message"
 msgstr "Pisanie wiadomości"
 
-#: C/write.page:12(p)
+#: C/write.page:12(title)
+msgid "Composing and replying"
+msgstr "Tworzenie wiadomości i odpowiadanie"
+
+#: C/write.page:13(p)
 msgid ""
 "To compose a new message in Geary, press the <gui>New Message</gui> button "
 "on the toolbar."
@@ -30,7 +34,7 @@ msgstr ""
 "Aby napisać nową wiadomość, kliknij przycisk <gui>Nowa wiadomość</gui> na "
 "pasku narzędziowym."
 
-#: C/write.page:15(p)
+#: C/write.page:16(p)
 msgid ""
 "To reply to a message, open the message menu in the upper right corner of "
 "the message and choose <gui>Reply</gui>, <gui>Reply All</gui> or "
@@ -44,11 +48,11 @@ msgstr ""
 "za pomocą przycisków <gui>Odpowiedz</gui>, <gui>Odpowiedz wszystkim</gui> "
 "i <gui>Przekaż</gui> na pasku narzędziowym."
 
-#: C/write.page:20(title)
+#: C/write.page:21(title)
 msgid "Features"
 msgstr "Funkcje"
 
-#: C/write.page:22(p)
+#: C/write.page:23(p)
 msgid ""
 "Geary's email composer lets you adjust the font, size and color of text. You "
 "can also insert hyperlinks into messages."
@@ -56,7 +60,7 @@ msgstr ""
 "Okno tworzenia wiadomości umożliwia dostosowanie czcionki, rozmiaru i koloru "
 "tekstu. Można także wstawiać odnośniki do wiadomości."
 
-#: C/write.page:24(p)
+#: C/write.page:25(p)
 msgid ""
 "Geary can also send plain text messages. In the drop-down menu, check or "
 "uncheck \"Rich Text\" to toggle between plain text and rich text mode."
@@ -65,12 +69,12 @@ msgstr ""
 "sformatowany” w rozwijanym menu, aby przełączyć między zwykłym "
 "a sformatowanym tekstem."
 
-#: C/write.page:27(p)
+#: C/write.page:28(p)
 msgid ""
 "You can attach a file to a message you're writing in either of these ways:"
 msgstr "Można dołączyć plik do pisanej wiadomości na trzy różne sposoby:"
 
-#: C/write.page:29(p)
+#: C/write.page:30(p)
 msgid ""
 "Press the <gui>Attach File</gui> button at the lower left of the composer "
 "window, then select a file to attach."
@@ -78,7 +82,7 @@ msgstr ""
 "Kliknij przycisk <gui>Załącz plik</gui> w dolnym lewym rogu okna tworzenia "
 "wiadomości, a następnie wybierz plik do dołączenia."
 
-#: C/write.page:31(p)
+#: C/write.page:32(p)
 msgid ""
 "Drag the file from the Nautilus file manager to the composer window, and "
 "drop it either on the text fields at the top of the window or on the toolbar "
@@ -87,7 +91,7 @@ msgstr ""
 "Przeciągnij plik z menedżera plików Nautilus do pól tekstowych na górze okna "
 "tworzenia wiadomości lub do paska narzędziowego na dole."
 
-#: C/write.page:35(p)
+#: C/write.page:36(p)
 msgid ""
 "A number of keyboard shortcuts are available in the composer; see <link xref="
 "\"shortcuts#composer\"/> for details."
@@ -95,7 +99,7 @@ msgstr ""
 "Okno tworzenia wiadomości obsługuje wiele skrótów klawiszowych. <link xref="
 "\"shortcuts#composer\"/> zawiera więcej informacji."
 
-#: C/write.page:37(p)
+#: C/write.page:38(p)
 msgid ""
 "You may specify a signature to be inserted into the composer in the <link "
 "xref=\"accounts\"/> dialog."
@@ -103,11 +107,11 @@ msgstr ""
 "Można określić podpis do wstawiania do okna tworzenia wiadomości w oknie "
 "<link xref=\"accounts\"/>."
 
-#: C/write.page:42(title)
+#: C/write.page:43(title)
 msgid "Drafts"
 msgstr "Szkice"
 
-#: C/write.page:44(p)
+#: C/write.page:45(p)
 msgid ""
 "For mail servers that support drafts, Geary will automatically save the "
 "message as you type. If you close the composer without sending, Geary will "
@@ -118,7 +122,7 @@ msgstr ""
 "wiadomości jest zamykane bez wysłania, zostanie wyświetlone pytanie, czy "
 "zachować lub odrzucić szkic."
 
-#: C/write.page:47(p)
+#: C/write.page:48(p)
 msgid ""
 "To edit an existing draft, select the Drafts folder in the folder list, "
 "select the message, and click \"Edit Draft\" in the message viewer."
@@ -126,7 +130,7 @@ msgstr ""
 "Aby zmodyfikować istniejący szkic, wybierz katalog Szkice z listy katalogów, "
 "wybierz wiadomość i kliknij „Modyfikuj szkic” w przeglądarce wiadomości."
 
-#: C/write.page:50(p)
+#: C/write.page:51(p)
 msgid "Geary deletes the draft when you send the message."
 msgstr "Szkic jest usuwany po wysłaniu wiadomości."
 
