@@ -7,7 +7,11 @@
   <project_license>LGPL-2.1+</project_license>
   <update_contact>geary-list@gnome.org</update_contact>
 
+  <!-- Translators: The application name -->
   <_name>Geary</_name>
+  <!-- Translators: The development team's name -->
+  <_developer_name>Geary Development Team</_developer_name>
+  <!-- Translators: The application's summary / tagline -->
   <_summary>Send and receive email</_summary>
   <description>
     <_p>
@@ -39,10 +43,12 @@
 
   <screenshots>
     <screenshot>
+      <!-- Translators: A screenshot description. -->
       <_caption>Geary displaying a conversation</_caption>
       <image type="default" width="1600" height="900">https://wiki.gnome.org/Apps/Geary?action=AttachFile&amp;do=get&amp;target=geary-conversation-0.12.png</image>
     </screenshot>
     <screenshot>
+      <!-- Translators: A screenshot description. -->
       <_caption>Geary showing the rich text composer</_caption>
       <image type="source" width="1600" height="900">https://wiki.gnome.org/Apps/Geary?action=AttachFile&amp;do=get&amp;target=geary-composer-0.12.png</image>
     </screenshot>
