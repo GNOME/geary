@@ -17,8 +17,8 @@ msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=internationalization\n"
-"POT-Creation-Date: 2017-04-30 12:02+0000\n"
-"PO-Revision-Date: 2017-06-21 12:44+0200\n"
+"POT-Creation-Date: 2017-09-26 12:56+0000\n"
+"PO-Revision-Date: 2017-09-26 16:49+0200\n"
 "Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
 "Language-Team: es <gnome-es-list@gnome.org>\n"
 "Language: es\n"
@@ -28,19 +28,26 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Gtranslator 2.91.6\n"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:1
+#. Translators: The application name
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:2
 #: ../desktop/org.gnome.Geary.desktop.in.h:1
 #: ../desktop/geary-autostart.desktop.in.h:1
 msgid "Geary"
 msgstr "Geary"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:2
+#. Translators: The development team's name
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:4
+msgid "Geary Development Team"
+msgstr "Equipo de desarrollo de Geary"
+
+#. Translators: The application's summary / tagline
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:6
 #: ../desktop/org.gnome.Geary.desktop.in.h:4
 #: ../desktop/geary-autostart.desktop.in.h:4
 msgid "Send and receive email"
 msgstr "Envíe y reciba mensajes de correo electrónico"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:3
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:7
 msgid ""
 "Geary is an email application built around conversations, for the GNOME 3 "
 "desktop. It allows you to read, find and send email with a straightforward, "
@@ -50,7 +57,7 @@ msgstr ""
 "escritorio GNOME 3. Le permite leer, buscar y enviar correos con una "
 "interfaz sencilla y moderna."
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:4
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:8
 msgid ""
 "Conversations allow you to read a complete discussion without having to find "
 "and click from message to message."
@@ -58,34 +65,44 @@ msgstr ""
 "Las conversaciones le permiten leer un hilo completo si tener que buscar y "
 "pulsa cada mensaje individual."
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:5
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:9
 msgid "Geary’s features include:"
 msgstr "Entre las características de Geary se incluyen:"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:6
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:10
 msgid "Quick email account setup"
 msgstr "Configuración rápida de la cuenta de correo"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:7
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:11
 msgid "Shows related messages together in conversations"
 msgstr "Mostrar mensajes relacionados entre ellos en las conversaciones"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:8
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:12
 msgid "Fast, full text and keyword search"
 msgstr "Búsqueda de palabras clave rápida y por texto completo"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:9
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:13
 msgid "Full-featured HTML and plain text message composer"
 msgstr "Editor completo de HYML y texto plano"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:10
-#| msgid "Show _notifications for new mail"
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:14
 msgid "Desktop notification of new mail"
 msgstr "Notificaciones de escritorio cuando llegue correo nuevo"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:11
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:15
 msgid "Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers"
 msgstr "Compatible con GMail, Yahoo! Mail, Outlook.com y otros servidores IMAP"
+
+#. Translators: A screenshot description.
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:17
+#| msgid "_Display conversation preview"
+msgid "Geary displaying a conversation"
+msgstr "Geary mostrando una conversación"
+
+#. Translators: A screenshot description.
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:19
+msgid "Geary showing the rich text composer"
+msgstr "Geary mostrando el editor de texto enriquecido"
 
 #: ../desktop/org.gnome.Geary.desktop.in.h:2
 msgid "Email"
@@ -687,7 +704,6 @@ msgid "Undo move (Ctrl+Z)"
 msgstr "Deshacer mover (Ctrl+Z)"
 
 #: ../src/client/application/geary-controller.vala:2009
-#| msgid "Are you sure you want to open \"%s\"?"
 msgid "Are you sure you want to open these attachments?"
 msgstr "¿Está seguro de que quiere abrir estos adjuntos?"
 
@@ -700,21 +716,16 @@ msgstr ""
 "archivos que provengan de fuentes fiables."
 
 #: ../src/client/application/geary-controller.vala:2011
-#| msgid "Don't _ask me again"
 msgid "Don’t _ask me again"
 msgstr "No volver a _preguntarme"
 
 #: ../src/client/application/geary-controller.vala:2121
 #, c-format
-#| msgid "A file named \"%s\" already exists.  Do you want to replace it?"
 msgid "A file named “%s” already exists.  Do you want to replace it?"
 msgstr "Ya existe un archivo llamado «%s». ¿Quiere reemplazarlo?"
 
 #: ../src/client/application/geary-controller.vala:2123
 #, c-format
-#| msgid ""
-#| "The file already exists in \"%s\".  Replacing it will overwrite its "
-#| "contents."
 msgid ""
 "The file already exists in “%s”.  Replacing it will overwrite its contents."
 msgstr ""
@@ -874,7 +885,6 @@ msgid "Invalid link URL"
 msgstr "Enlace a URL no válido"
 
 #: ../src/client/composer/composer-link-popover.vala:157
-#| msgid "Remove email address"
 msgid "Invalid email address"
 msgstr "Dirección correo-e no válida"
 
@@ -1050,7 +1060,6 @@ msgstr ", "
 #. attribute value when displaying an inline image in an email
 #. that did not specify a file name. E.g. <IMG ALT="Image" ...
 #: ../src/client/conversation-viewer/conversation-message.vala:707
-#| msgid "Images"
 msgid "Image"
 msgstr "Imagen"
 
@@ -1074,7 +1083,6 @@ msgstr ""
 
 #: ../src/client/conversation-viewer/conversation-viewer.vala:86
 #: ../src/client/conversation-viewer/conversation-viewer.vala:93
-#| msgid "No conversations in folder."
 msgid "No conversations found"
 msgstr "No se han encontrado conversaciones"
 
@@ -1808,13 +1816,10 @@ msgid "Update this link’s URL"
 msgstr "Actualizar el URL de este enlace"
 
 #: ../ui/composer-link-popover.ui.h:6
-#| msgctxt "Outlook localised name"
-#| msgid "Deleted Items"
 msgid "Delete this link"
 msgstr "Eliminar este enlace"
 
 #: ../ui/composer-link-popover.ui.h:7
-#| msgid "_Open Link"
 msgid "Open this link"
 msgstr "Abrir este enlace"
 
@@ -1922,7 +1927,6 @@ msgid "To add them as attachments"
 msgstr "Para añadirlos como adjuntos"
 
 #: ../ui/composer-widget.ui.h:11
-#| msgid "Undo trash (Ctrl+Z)"
 msgid "Undo last edit (Ctrl+Z)"
 msgstr "Deshacer la última edición (Ctrl+Z)"
 
@@ -1959,17 +1963,14 @@ msgid "Insert or update selection link (Ctrl+L)"
 msgstr "Insertar o actualizar el enlace seleccionado (Ctrl+L)"
 
 #: ../ui/composer-widget.ui.h:20
-#| msgid "Image (Ctrl+G)"
 msgid "Insert an image (Ctrl+G)"
 msgstr "Insertar una imagen (Ctrl+G)"
 
 #: ../ui/composer-widget.ui.h:21
-#| msgid "Remove formatting (Ctrl+Space)"
 msgid "Remove selection formatting (Ctrl+Space)"
 msgstr "Quitar formato de la selección (Ctrl+Espacio)"
 
 #: ../ui/composer-widget.ui.h:22
-#| msgid "Select spell checking language"
 msgid "Select spell checking languages"
 msgstr "Seleccione el idioma de la revisión ortográfica"
 
@@ -2008,13 +2009,10 @@ msgid "Edit Draft"
 msgstr "Editar borrador"
 
 #: ../ui/conversation-email.ui.h:11
-#| msgid "%u read message"
-#| msgid_plural "%u read messages"
 msgid "Draft message"
 msgstr "Borrador"
 
 #: ../ui/conversation-email.ui.h:12
-#| msgid "This message contains remote images."
 msgid "This message has not yet been sent."
 msgstr "Este mensaje no se ha enviado todavía."
 
@@ -2027,7 +2025,6 @@ msgid "Message not saved"
 msgstr "Mensaje no guardado"
 
 #: ../ui/conversation-email.ui.h:15
-#| msgid "This message was sent successfully, but could not be saved to %s."
 msgid "This message was sent, but has not been saved to your account."
 msgstr ""
 "Este mensaje se envió correctamente pero no se ha guardado en su cuenta."
@@ -2081,7 +2078,6 @@ msgid "_Select All"
 msgstr "Seleccionar _todo"
 
 #: ../ui/conversation-message-menus.ui.h:8
-#| msgid "Search for more languages"
 msgid "Search for messages from"
 msgstr "Buscar mensajes de"
 
@@ -2142,7 +2138,6 @@ msgid "But actually goes to:"
 msgstr "Pero en realidad apunta a:"
 
 #: ../ui/conversation-message.ui.h:15
-#| msgid "This link appears to go to:"
 msgid "The link appears to go to:"
 msgstr "Parece que este enlace apunta a:"
 
@@ -2160,7 +2155,6 @@ msgid "If unsure, contact the sender and ask before continuing."
 msgstr "Si no está seguro, pregunte con el remitente antes de continuar."
 
 #: ../ui/conversation-viewer.ui.h:1
-#| msgid "Mark conversation"
 msgid "Find in conversation"
 msgstr "Buscar en la conversación"
 
@@ -2210,7 +2204,6 @@ msgid "label"
 msgstr "etiqueta"
 
 #: ../ui/gtk/help-overlay.ui.h:1
-#| msgid "%s - Conversation Inspector"
 msgid "Conversation Shortcuts"
 msgstr "Atajos de conversaciones"
 
@@ -2225,19 +2218,16 @@ msgid "Move focus to the next/previous pane"
 msgstr "Mover el foco al panel siguiente/anterior"
 
 #: ../ui/gtk/help-overlay.ui.h:4
-#| msgid "Move conversations"
 msgctxt "shortcut window"
 msgid "Move focus to conversation list"
 msgstr "Mover el foco a lista de conversaciones"
 
 #: ../ui/gtk/help-overlay.ui.h:5
-#| msgid "Use %s to open a new composer window"
 msgctxt "shortcut window"
 msgid "Detach composer window"
 msgstr "Desacoplar la ventana del editor"
 
 #: ../ui/gtk/help-overlay.ui.h:6
-#| msgid "Use %s to open a new composer window"
 msgctxt "shortcut window"
 msgid "Close composer window"
 msgstr "Cerrar la ventana del editor"
