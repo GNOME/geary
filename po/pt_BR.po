@@ -19,8 +19,8 @@ msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?product=geary&"
 "keywords=I18N+L10N&component=internationalization\n"
-"POT-Creation-Date: 2017-03-18 17:03+0000\n"
-"PO-Revision-Date: 2017-03-25 21:18-0200\n"
+"POT-Creation-Date: 2017-09-26 12:56+0000\n"
+"PO-Revision-Date: 2017-09-26 18:46-0200\n"
 "Last-Translator: Rafael Fontenelle <rafaelff@gnome.org>\n"
 "Language-Team: Brazilian Portuguese <gnome-pt_br-list@gnome.org>\n"
 "Language: pt_BR\n"
@@ -31,19 +31,26 @@ msgstr ""
 "X-Generator: Virtaal 1.0.0-beta1\n"
 "X-Project-Style: gnome\n"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:1
+#. Translators: The application name
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:2
 #: ../desktop/org.gnome.Geary.desktop.in.h:1
 #: ../desktop/geary-autostart.desktop.in.h:1
 msgid "Geary"
 msgstr "Geary"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:2
+#. Translators: The development team's name
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:4
+msgid "Geary Development Team"
+msgstr "Equipe de Desenvolvimento do Geary"
+
+#. Translators: The application's summary / tagline
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:6
 #: ../desktop/org.gnome.Geary.desktop.in.h:4
 #: ../desktop/geary-autostart.desktop.in.h:4
 msgid "Send and receive email"
 msgstr "Envie e receba e-mail"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:3
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:7
 msgid ""
 "Geary is an email application built around conversations, for the GNOME 3 "
 "desktop. It allows you to read, find and send email with a straightforward, "
@@ -53,7 +60,7 @@ msgstr ""
 "GNOME 3. Ele permite que você leia, localize e envie e-mail com uma "
 "interface simples e moderna."
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:4
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:8
 msgid ""
 "Conversations allow you to read a complete discussion without having to find "
 "and click from message to message."
@@ -61,34 +68,45 @@ msgstr ""
 "As conversas permitem que você leia uma discussão completa sem ter que "
 "procurar e clicar de mensagem em mensagem."
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:5
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:9
 msgid "Geary’s features include:"
 msgstr "Os recursos do Geary incluem:"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:6
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:10
 msgid "Quick email account setup"
 msgstr "Configuração rápida de conta de e-mail"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:7
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:11
 msgid "Shows related messages together in conversations"
 msgstr "Mostrar mensagens relacionadas juntas, nas conversas"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:8
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:12
 msgid "Fast, full text and keyword search"
 msgstr "Pesquisa rápida, de texto completo e de palavra-chave"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:9
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:13
 msgid "Full-featured HTML and plain text message composer"
 msgstr "Compositor repleto de recursos para mensagens em HTML e texto simples"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:10
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:14
 msgid "Desktop notification of new mail"
 msgstr "Notificação na área de trabalho de novo e-mail"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:11
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:15
 msgid "Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers"
 msgstr ""
 "Compatível com GMail, Yahoo! Mail, Outlook.com e outros servidores IMAP"
+
+#. Translators: A screenshot description.
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:17
+#| msgid "_Display conversation preview"
+msgid "Geary displaying a conversation"
+msgstr "Geary exibindo uma conversa"
+
+#. Translators: A screenshot description.
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:19
+msgid "Geary showing the rich text composer"
+msgstr "Geary mostrando um compositor de texto rico"
 
 #: ../desktop/org.gnome.Geary.desktop.in.h:2
 msgid "Email"
@@ -1044,7 +1062,6 @@ msgstr ", "
 #. attribute value when displaying an inline image in an email
 #. that did not specify a file name. E.g. <IMG ALT="Image" ...
 #: ../src/client/conversation-viewer/conversation-message.vala:707
-#| msgid "Images"
 msgid "Image"
 msgstr "Imagem"
 
