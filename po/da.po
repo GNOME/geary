@@ -13,8 +13,8 @@ msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=internationalization\n"
-"POT-Creation-Date: 2017-03-18 17:03+0000\n"
-"PO-Revision-Date: 2017-03-25 16:48+0100\n"
+"POT-Creation-Date: 2017-09-26 12:56+0000\n"
+"PO-Revision-Date: 2017-09-27 17:21+0200\n"
 "Last-Translator: Alan Mortensen <alanmortensen.am@gmail.com>\n"
 "Language-Team: Danish (http://www.transifex.com/projects/p/geary/language/"
 "da/)\n"
@@ -25,19 +25,26 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 "X-Generator: Poedit 1.8.7.1\n"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:1
+#. Translators: The application name
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:2
 #: ../desktop/org.gnome.Geary.desktop.in.h:1
 #: ../desktop/geary-autostart.desktop.in.h:1
 msgid "Geary"
 msgstr "Geary"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:2
+#. Translators: The development team's name
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:4
+msgid "Geary Development Team"
+msgstr "Gearys udviklerhold"
+
+#. Translators: The application's summary / tagline
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:6
 #: ../desktop/org.gnome.Geary.desktop.in.h:4
 #: ../desktop/geary-autostart.desktop.in.h:4
 msgid "Send and receive email"
 msgstr "Send og modtag e-mail"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:3
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:7
 msgid ""
 "Geary is an email application built around conversations, for the GNOME 3 "
 "desktop. It allows you to read, find and send email with a straightforward, "
@@ -47,7 +54,7 @@ msgstr ""
 "omkring samtaler. Det lader dig læse, finde og sende e-mail via en enkel, "
 "moderne brugerflade."
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:4
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:8
 msgid ""
 "Conversations allow you to read a complete discussion without having to find "
 "and click from message to message."
@@ -55,33 +62,43 @@ msgstr ""
 "Samtaler lader dig læse en hel samtale uden at skulle finde hver enkelt "
 "meddelelse frem én ad gangen."
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:5
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:9
 msgid "Geary’s features include:"
 msgstr "Geary tilbyder:"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:6
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:10
 msgid "Quick email account setup"
 msgstr "Hurtig opsætning af e-mailkonto"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:7
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:11
 msgid "Shows related messages together in conversations"
 msgstr "Viser relaterede meddelelser sammen i samtaler"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:8
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:12
 msgid "Fast, full text and keyword search"
 msgstr "Hurtig fuldtekst- og nøgleordssøgning"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:9
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:13
 msgid "Full-featured HTML and plain text message composer"
 msgstr "Mange funktioner til redigering af HTML-meddelelser samt ren tekst"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:10
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:14
 msgid "Desktop notification of new mail"
 msgstr "Skrivebordspåmindelser om ny e-mail"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:11
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:15
 msgid "Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers"
 msgstr "Kompatibel med GMail, Yahoo! Mail, Outlook.com og andre IMAP-servere"
+
+#. Translators: A screenshot description.
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:17
+msgid "Geary displaying a conversation"
+msgstr "Geary som en samtale ser ud"
+
+#. Translators: A screenshot description.
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:19
+msgid "Geary showing the rich text composer"
+msgstr "Geary som redigering af formateret tekst ser ud"
 
 #: ../desktop/org.gnome.Geary.desktop.in.h:2
 msgid "Email"
@@ -123,7 +140,8 @@ msgid "Send files using Geary"
 msgstr "Send filer med Geary"
 
 #: ../src/client/accounts/account-dialog-add-edit-pane.vala:51
-#: ../src/client/components/stock.vala:31 ../ui/conversation-email-menus.ui.h:10
+#: ../src/client/components/stock.vala:31
+#: ../ui/conversation-email-menus.ui.h:10
 msgid "_Save"
 msgstr "_Gem"
 
@@ -515,12 +533,12 @@ msgstr "Dine indstillinger er usikre"
 #: ../src/client/application/geary-controller.vala:993
 msgid ""
 "Your IMAP and/or SMTP settings do not specify SSL or TLS.  This means your "
-"username and password could be read by another person on the network.  Are you "
-"sure you want to do this?"
+"username and password could be read by another person on the network.  Are "
+"you sure you want to do this?"
 msgstr ""
 "Dine IMAP- og/eller SMTP-indstillinger anvender ikke SSL eller TLS. Dette "
-"betyder, at dit brugernavn og din adgangskode kan læses af andre på netværket. "
-"Er du sikker på, at du vil gære dette?"
+"betyder, at dit brugernavn og din adgangskode kan læses af andre på "
+"netværket. Er du sikker på, at du vil gære dette?"
 
 #: ../src/client/application/geary-controller.vala:994
 msgid "Co_ntinue"
@@ -546,8 +564,8 @@ msgstr "Der opstod en fejl ved afsendelse af e-mail"
 
 #: ../src/client/application/geary-controller.vala:1080
 msgid ""
-"Geary encountered an error sending an email.  If the problem persists, please "
-"manually delete the email from your Outbox folder."
+"Geary encountered an error sending an email.  If the problem persists, "
+"please manually delete the email from your Outbox folder."
 msgstr ""
 "Geary stødte ind i en fejl under afsendelse af en e-mail. Hvis dette problem "
 "fortsætter, bør du manuelt slette beskeden fra din \"Udbakke\"-mappe."
@@ -600,8 +618,8 @@ msgstr ""
 "Geary kan genopbygge databasefilen og synkronisére med serveren igen eller "
 "afslutte.\n"
 "\n"
-"Genopbygning af databasen vil slette al lokal e-mail og dets vedhæftede filer. "
-"<b>Mail'en på serveren vil ikke blive rørt.</b>"
+"Genopbygning af databasen vil slette al lokal e-mail og dets vedhæftede "
+"filer. <b>Mail'en på serveren vil ikke blive rørt.</b>"
 
 #: ../src/client/application/geary-controller.vala:1169
 msgid "_Rebuild"
@@ -656,15 +674,15 @@ msgstr ""
 
 #: ../src/client/application/geary-controller.vala:1212
 msgid ""
-"The version number of the local mail database is formatted for a newer version "
-"of Geary. Unfortunately, the database cannot be “rolled back” to work with "
-"this version of Geary.\n"
+"The version number of the local mail database is formatted for a newer "
+"version of Geary. Unfortunately, the database cannot be “rolled back” to "
+"work with this version of Geary.\n"
 "\n"
 "Please install the latest version of Geary and try again."
 msgstr ""
 "Den lokale e-maildatabases versionsnummer er til en nyere version af Geary. "
-"Desværre kan databasen ikke blive \"rullet tilbage\", så den virker med denne "
-"version of Geary.\n"
+"Desværre kan databasen ikke blive \"rullet tilbage\", så den virker med "
+"denne version of Geary.\n"
 "\n"
 "Installér venligst den nyeste version af Geary og prøv igen."
 
@@ -693,8 +711,8 @@ msgid ""
 "Attachments may cause damage to your system if opened.  Only open files from "
 "trusted sources."
 msgstr ""
-"Vedhæftede filer kan skade dit system, når de åbnes.  Åbn kun filer fra folk, "
-"du stoler på."
+"Vedhæftede filer kan skade dit system, når de åbnes.  Åbn kun filer fra "
+"folk, du stoler på."
 
 #: ../src/client/application/geary-controller.vala:2011
 msgid "Don’t _ask me again"
@@ -894,9 +912,9 @@ msgid ""
 "attach|attaching|attaches|attachment|attachments|attached|enclose|enclosed|"
 "enclosing|encloses|enclosure|enclosures"
 msgstr ""
-"vedhæft|vedhæfte|vedhæftet|vedhæfter|bilag|bilagene|vedlagt|vedlægger|vedlægge|"
-"vedhæftede|attach|attaching|attaches|attachment|attachments|attached|enclose|"
-"enclosed|enclosing|encloses|enclosure|enclosures"
+"vedhæft|vedhæfte|vedhæftet|vedhæfter|bilag|bilagene|vedlagt|vedlægger|"
+"vedlægge|vedhæftede|attach|attaching|attaches|attachment|attachments|"
+"attached|enclose|enclosed|enclosing|encloses|enclosure|enclosures"
 
 #: ../src/client/composer/composer-widget.vala:1122
 #: ../src/client/composer/composer-widget.vala:1141
@@ -1095,12 +1113,13 @@ msgid ""
 "Selecting “Trust This Server” or “Always Trust This Server” may cause your "
 "username and password to be transmitted insecurely."
 msgstr ""
-"Hvis du vælger \"Stol på serveren\" eller \"Stol altid på serveren\", kan dit "
-"brugernavn og din adgangskode blive sendt uden sikkerhed."
+"Hvis du vælger \"Stol på serveren\" eller \"Stol altid på serveren\", kan "
+"dit brugernavn og din adgangskode blive sendt uden sikkerhed."
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:52
 msgid ""
-"Selecting “Don’t Trust This Server” will cause Geary not to access this server."
+"Selecting “Don’t Trust This Server” will cause Geary not to access this "
+"server."
 msgstr ""
 "Hvis du vælger \"Stol ikke på serveren\", vil Geary ikke forbinde til denne "
 "server."
@@ -1135,7 +1154,8 @@ msgstr "Serverens certifikat er ikke signeret af en kendt autoritet"
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:76
 msgid "The server’s identity does not match the identity in the certificate"
-msgstr "Serverens identitet stemmer ikke overens med identiteten i certifikatet"
+msgstr ""
+"Serverens identitet stemmer ikke overens med identiteten i certifikatet"
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:79
 msgid "The server’s certificate has expired"
@@ -1615,11 +1635,11 @@ msgstr "Sendt post"
 #. default. English names do not need to be included.
 #: ../src/engine/imap-engine/imap-engine-generic-account.vala:650
 msgid ""
-"Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email | "
-"Bulk E-Mail"
+"Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email "
+"| Bulk E-Mail"
 msgstr ""
-"Uønsket | Spam | Uønsket Mail | Uønsket E-mail | Uønsket E-mail |Junk | Spam | "
-"Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email | Bulk E-Mail"
+"Uønsket | Spam | Uønsket Mail | Uønsket E-mail | Uønsket E-mail |Junk | Spam "
+"| Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email | Bulk E-Mail"
 
 #. List of general possible folder names to match for the
 #. Trash mailbox. Separate names using a vertical bar and
@@ -2120,11 +2140,13 @@ msgstr "Bedragerisk link fundet"
 #: ../ui/conversation-message.ui.h:17
 msgid "The email sender may be leading you to the wrong web site."
 msgstr ""
-"Afsenderen af denne e-mail forsøger måske at lede dig til det forkerte websted."
+"Afsenderen af denne e-mail forsøger måske at lede dig til det forkerte "
+"websted."
 
 #: ../ui/conversation-message.ui.h:18
 msgid "If unsure, contact the sender and ask before continuing."
-msgstr "Hvis du er i tvivl, så kontakt afsenderen og spørg, inden du fortsætter."
+msgstr ""
+"Hvis du er i tvivl, så kontakt afsenderen og spørg, inden du fortsætter."
 
 #: ../ui/conversation-viewer.ui.h:1
 msgid "Find in conversation"
@@ -2144,8 +2166,8 @@ msgstr "Fjern e-mailadresse"
 
 #: ../ui/edit_alternate_emails.glade.h:2
 msgid ""
-"Some email services require additional addresses be configured on the server.  "
-"Contact your email provider for more information."
+"Some email services require additional addresses be configured on the "
+"server.  Contact your email provider for more information."
 msgstr ""
 "Visse e-mailtjenester kræver at der konfigureres yderligere adresser på "
 "serveren.  Kontakt din e-mailudbyder for at få yderligere information."
@@ -2625,16 +2647,16 @@ msgid ""
 "<span weight=\"bold\" size=\"larger\">Are you sure you want to remove this "
 "account?</span> "
 msgstr ""
-"<span weight=\"bold\" size=\"larger\">Er du sikker på, at du vil fjerne denne "
-"konto?</span> "
+"<span weight=\"bold\" size=\"larger\">Er du sikker på, at du vil fjerne "
+"denne konto?</span> "
 
 #: ../ui/remove_confirm.glade.h:2
 msgid ""
 "All email associated with this account will be removed from your computer. "
 "This will not affect email on the server."
 msgstr ""
-"Al e-mail, der tilhører denne konto vil blive fjernet fra din computer. Dette "
-"vil ikke fjerne e-mailen på serveren."
+"Al e-mail, der tilhører denne konto vil blive fjernet fra din computer. "
+"Dette vil ikke fjerne e-mailen på serveren."
 
 #: ../ui/remove_confirm.glade.h:3
 msgid "Nickname:"
