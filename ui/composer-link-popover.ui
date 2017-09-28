@@ -23,7 +23,7 @@
             <property name="width_chars">40</property>
             <property name="primary_icon_activatable">False</property>
             <property name="secondary_icon_activatable">False</property>
-            <property name="placeholder_text">http://</property>
+            <property name="placeholder_text">https://</property>
             <property name="input_purpose">url</property>
             <signal name="activate" handler="on_activate_popover" swapped="no"/>
             <signal name="changed" handler="on_url_changed" swapped="no"/>
