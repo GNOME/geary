@@ -12,6 +12,7 @@ debian/geary-dbg
 /geary
 /geary-mailer
 /geary-console
+.flatpak-builder
 *.diff
 *.patch
 *.xz
