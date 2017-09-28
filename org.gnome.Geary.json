@@ -36,7 +36,10 @@
 
         /* Needed for dconf to work */
         "--filesystem=xdg-run/dconf", "--filesystem=~/.config/dconf:ro",
-        "--talk-name=ca.desrt.dconf", "--env=DCONF_USER_CONFIG_DIR=.config/dconf"
+        "--talk-name=ca.desrt.dconf", "--env=DCONF_USER_CONFIG_DIR=.config/dconf",
+
+        /* Let view source keep on working as-sis for now. Bug 779311. */
+        "--filesystem=/tmp"
     ],
     "build-options" : {
         "cflags": "-O2 -g",
