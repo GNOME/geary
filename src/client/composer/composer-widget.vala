@@ -2272,7 +2272,7 @@ public class ComposerWidget : Gtk.EventBox {
 
     private void on_insert_link(SimpleAction action, Variant? param) {
         ComposerLinkPopover.Type type = ComposerLinkPopover.Type.NEW_LINK;
-        string url = "http://";
+        string url = "https://";
         if (this.cursor_url != null) {
             type = ComposerLinkPopover.Type.EXISTING_LINK;
             url = this.cursor_url;
