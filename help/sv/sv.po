@@ -6,8 +6,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: geary master\n"
-"POT-Creation-Date: 2017-09-25 16:02+0000\n"
-"PO-Revision-Date: 2017-09-28 19:28+0200\n"
+"POT-Creation-Date: 2017-09-28 17:54+0000\n"
+"PO-Revision-Date: 2017-09-29 10:55+0200\n"
 "Last-Translator: Anders Jonsson <anders.jonsson@norsjovallen.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "Language: sv\n"
@@ -338,7 +338,7 @@ msgstr "K"
 
 #: C/shortcuts.page:75(p)
 msgid "Toggle spam"
-msgstr "Växla spam"
+msgstr "Växla skräppost"
 
 #: C/shortcuts.page:76(p)
 msgid "<keyseq><key>Ctrl</key><key>J</key></keyseq> or <key>!</key>"
