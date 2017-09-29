@@ -6,8 +6,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: geary master\n"
-"POT-Creation-Date: 2017-04-21 22:41+0000\n"
-"PO-Revision-Date: 2017-04-29 22:40+0200\n"
+"POT-Creation-Date: 2017-09-06 15:41+0000\n"
+"PO-Revision-Date: 2017-09-29 10:52+0200\n"
 "Last-Translator: Anders Jonsson <anders.jonsson@norsjovallen.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "Language: sv\n"
@@ -15,7 +15,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 1.8.11\n"
+"X-Generator: Poedit 2.0.3\n"
 
 #: C/write.page:9(title)
 msgid "Write a message"
@@ -350,7 +350,7 @@ msgstr "k"
 
 #: C/shortcuts.page:75(p)
 msgid "Toggle spam"
-msgstr "Växla spam"
+msgstr "Växla skräppost"
 
 #: C/shortcuts.page:76(p)
 msgid "<keyseq><key>Ctrl</key><key>J</key></keyseq> or <key>!</key>"
