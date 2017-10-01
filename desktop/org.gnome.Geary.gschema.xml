@@ -1,6 +1,6 @@
 <schemalist>
 
-<schema id="org.gnome.Geary" path="/org/gnome/Geary/">
+<schema id="org.gnome.Geary" path="/org/gnome/Geary/" gettext-domain="geary">
 
     <key name="attachments-directory" type="s">
         <default>''</default>
