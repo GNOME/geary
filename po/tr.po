@@ -18,10 +18,10 @@ msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=internationalization\n"
-"POT-Creation-Date: 2017-03-29 19:17+0000\n"
-"PO-Revision-Date: 2017-04-10 15:19+0300\n"
+"POT-Creation-Date: 2017-09-28 14:35+0000\n"
+"PO-Revision-Date: 2017-09-30 15:06+0300\n"
 "Last-Translator: Emin Tufan Çetin <etcetin@gmail.com>\n"
-"Language-Team: Türkçe <>\n"
+"Language-Team: Türkçe <gnome-turk@gnome.org>\n"
 "Language: tr\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
@@ -30,29 +30,37 @@ msgstr ""
 "X-Generator: Gtranslator 2.91.7\n"
 "X-POOTLE-MTIME: 1423290848.000000\n"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:1
+#. Translators: The application name
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:2
 #: ../desktop/org.gnome.Geary.desktop.in.h:1
 #: ../desktop/geary-autostart.desktop.in.h:1
 msgid "Geary"
 msgstr "Geary"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:2
+#. Translators: The development team's name
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:4
+msgid "Geary Development Team"
+msgstr "Geary Geliştirme Takımı"
+
+#. Translators: The application's summary / tagline
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:6
 #: ../desktop/org.gnome.Geary.desktop.in.h:4
 #: ../desktop/geary-autostart.desktop.in.h:4
+#: ../src/client/application/geary-application.vala:22
 msgid "Send and receive email"
 msgstr "E-posta gönder ve al"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:3
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:7
 msgid ""
 "Geary is an email application built around conversations, for the GNOME 3 "
 "desktop. It allows you to read, find and send email with a straightforward, "
 "modern interface."
 msgstr ""
 "Geary, GNOME 3 masaüstü için konuşmalar etrafında inşa edilmiş bir e-posta "
-"uygulamasıdır. Dolambaçsız çağdaş arayüzle e-posta okumanızı, bulmanızı ve "
-"göndermenizi sağlar."
+"uygulamasıdır. Dolambaçsız çağdaş bir arayüzle e-posta okumanızı, bulmanızı "
+"ve göndermenizi sağlar."
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:4
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:8
 msgid ""
 "Conversations allow you to read a complete discussion without having to find "
 "and click from message to message."
@@ -60,35 +68,47 @@ msgstr ""
 "Konuşmalar, arayıp bulmanızı ve iletiden iletiye tıklamanızı gerektirmeden "
 "tüm tartışmayı okumanızı sağlar."
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:5
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:9
 msgid "Geary’s features include:"
 msgstr "Geary’nin özellikleri şunlardır:"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:6
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:10
 msgid "Quick email account setup"
 msgstr "Hızlı e-posta hesabı kurulumu"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:7
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:11
 msgid "Shows related messages together in conversations"
 msgstr "İlişkili iletileri konuşmalarda bir arada gösterir"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:8
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:12
 msgid "Fast, full text and keyword search"
 msgstr "Hızlı, tam metin ve anahtar sözcük arama"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:9
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:13
 msgid "Full-featured HTML and plain text message composer"
 msgstr "Tam donanımlı HTML ve düz metin ileti oluşturucu"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:10
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:14
 msgid "Desktop notification of new mail"
 msgstr "Yeni postanın masaüstü bildirimi"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:11
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:15
 msgid "Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers"
 msgstr "GMail, Yahoo! Mail, Outlook.com ve diğer IMAP sunucularıyla uyumludur"
 
+#. Translators: A screenshot description.
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:17
+#| msgid "_Display conversation preview"
+msgid "Geary displaying a conversation"
+msgstr "Geary bir konuşmayı gösteriyor"
+
+#. Translators: A screenshot description.
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:19
+msgid "Geary showing the rich text composer"
+msgstr "Geary zengin metin oluşturucusunu gösteriyor"
+
 #: ../desktop/org.gnome.Geary.desktop.in.h:2
+#: ../desktop/geary-autostart.desktop.in.h:2
 msgid "Email"
 msgstr "E-posta"
 
@@ -104,11 +124,6 @@ msgstr "Posta;E-posta;Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;"
 #: ../desktop/org.gnome.Geary.desktop.in.h:7 ../ui/gtk/menus.ui.h:1
 msgid "Compose Message"
 msgstr "İleti Oluştur"
-
-#: ../desktop/geary-autostart.desktop.in.h:2
-#: ../src/client/application/geary-application.vala:21
-msgid "Mail Client"
-msgstr "Posta İstemcisi"
 
 #: ../desktop/geary-autostart.desktop.in.h:3
 msgid "Geary Mail"
@@ -207,7 +222,7 @@ msgstr "Düzenle"
 
 #: ../src/client/accounts/add-edit-page.vala:285
 msgid "Preview"
-msgstr "Önizle"
+msgstr "Ön izle"
 
 #: ../src/client/accounts/add-edit-page.vala:751
 msgid "Remem_ber passwords"
@@ -253,7 +268,7 @@ msgstr "        • Bağlantı hatası.\n"
 msgid "        • Username or password incorrect.\n"
 msgstr "        • Kullanıcı adı veya parola hatalı.\n"
 
-#: ../src/client/application/geary-application.vala:22
+#: ../src/client/application/geary-application.vala:21
 msgid "Copyright 2016 Software Freedom Conservancy Inc."
 msgstr "Telif Hakkı 2016 Software Freedom Conservancy Inc."
 
@@ -328,7 +343,7 @@ msgstr "WebView denetimine izin ver"
 
 #: ../src/client/application/geary-args.vala:26
 msgid "Revoke all server certificates with TLS warnings"
-msgstr "TLS uyarıları ile bütün sertifikaları iptal et"
+msgstr "TLS uyarılı sunucu sertifikalarının tümünü iptal et"
 
 #: ../src/client/application/geary-args.vala:27
 msgid "Perform a graceful quit"
@@ -342,7 +357,7 @@ msgstr "Uygulama sürümünü göster"
 #: ../src/client/application/geary-args.vala:53
 #, c-format
 msgid "Use %s to open a new composer window"
-msgstr "Yeni bir düzenleyici pencere açmak için %s kullan"
+msgstr "Yeni bir oluşturucu pencere açmak için %s kullan"
 
 #: ../src/client/application/geary-args.vala:54
 msgid "Please report comments, suggestions and bugs to:"
@@ -491,11 +506,11 @@ msgstr "Yönlendir (Ctrl+L, F)"
 
 #: ../src/client/application/geary-controller.vala:538
 msgid "Empty _Spam…"
-msgstr "_İstenmeyeni boşalt..."
+msgstr "_İstenmeyeni boşalt…"
 
 #: ../src/client/application/geary-controller.vala:542
 msgid "Empty _Trash…"
-msgstr "_Çöpü boşalt..."
+msgstr "_Çöpü boşalt…"
 
 #. No callback is connected, since we bind the toggle button to the search bar visibility
 #: ../src/client/application/geary-controller.vala:574
@@ -603,7 +618,7 @@ msgstr ""
 "\n"
 "Geary, veri tabanını yeniden oluşturabilir ve sunucuyla yeniden "
 "eşitleyebilir ya da çıkabilir.\n"
-"Veri tabanının yeniden inşa edilmesi bütün yerel e-postaları ve eklerini yok "
+"Veri tabanının yeniden inşa edilmesi tüm yerel e-postaları ve eklerini yok "
 "edecektir.<b>Sizin sunucunuzdaki postalar etkilenmeyecektir.</b>"
 
 #: ../src/client/application/geary-controller.vala:1169
@@ -707,7 +722,7 @@ msgstr "Yeniden _sorma"
 #: ../src/client/application/geary-controller.vala:2121
 #, c-format
 msgid "A file named “%s” already exists.  Do you want to replace it?"
-msgstr "“%s” isimli bir dosya zaten var.  Değiştirmek istiyor musunuz?"
+msgstr "“%s” adlı bir dosya zaten var.  Değiştirmek istiyor musunuz?"
 
 #: ../src/client/application/geary-controller.vala:2123
 #, c-format
@@ -773,7 +788,7 @@ msgstr "Geri al (Ctrl+Z)"
 
 #: ../src/client/application/geary-controller.vala:2780
 msgid "Failed to open default text editor."
-msgstr "Varsayılan metin düzenleyici açılamadı."
+msgstr "Öntanımlı metin düzenleyici açılamadı."
 
 #: ../src/client/components/main-window.vala:389
 #, c-format
@@ -789,7 +804,7 @@ msgstr "Ara"
 #. Search entry.
 #: ../src/client/components/search-bar.vala:23
 msgid "Search all mail in account for keywords (Ctrl+S)"
-msgstr "Anahtar sözcükler için hesaptaki bütün postaları ara (Ctrl+S)"
+msgstr "Anahtar sözcükler için hesaptaki tüm postaları ara (Ctrl+S)"
 
 #: ../src/client/components/search-bar.vala:100
 #, c-format
@@ -865,7 +880,6 @@ msgid "Invalid link URL"
 msgstr "Geçersiz bağlantı URL’si"
 
 #: ../src/client/composer/composer-link-popover.vala:157
-#| msgid "Remove email address"
 msgid "Invalid email address"
 msgstr "Geçersiz e-posta adresi"
 
@@ -1041,7 +1055,6 @@ msgstr ", "
 #. attribute value when displaying an inline image in an email
 #. that did not specify a file name. E.g. <IMG ALT="Image" ...
 #: ../src/client/conversation-viewer/conversation-message.vala:707
-#| msgid "Images"
 msgid "Image"
 msgstr "Resim"
 
@@ -1181,7 +1194,7 @@ msgstr[0] "%d ileti"
 #, c-format
 msgid "%d unread"
 msgid_plural "%d unread"
-msgstr[0] "%d okunmamış"
+msgstr[0] "%d okunmadı"
 
 #. / This string represents the divider between two messages: "n messages" and "n unread",
 #. / shown in the folder list as a tooltip.  Please use your languages conventions for
@@ -1526,7 +1539,7 @@ msgstr "kime"
 #: ../src/engine/imap-db/imap-db-account.vala:180
 msgctxt "Search operator value - mail addressed to the user"
 msgid "me"
-msgstr "bana"
+msgstr "ben"
 
 #. Can be typed in the search box after "from:" i.e.:
 #. "from:me". Matches conversations were sent by the user.
@@ -1550,7 +1563,7 @@ msgstr "ben"
 #: ../src/engine/imap-db/imap-db-account.vala:204
 msgctxt "'is:' search operator value"
 msgid "read"
-msgstr "okunmuş"
+msgstr "okundu"
 
 #. Can be typed in the search box after "is:" i.e.:
 #. "is:starred". Matches conversations that are flagged as
@@ -1575,7 +1588,7 @@ msgstr "yıldızlı"
 #: ../src/engine/imap-db/imap-db-account.vala:225
 msgctxt "'is:' search operator value"
 msgid "unread"
-msgstr "okunmamış"
+msgstr "okunmadı"
 
 #. List of general possible folder names to match for the
 #. Draft mailbox. Separate names using a vertical bar and
@@ -1702,8 +1715,8 @@ msgid ""
 "A composer window associated with this account is currently open. Send or "
 "discard the message and try again."
 msgstr ""
-"Bu hesapla bağlantılı bir ileti penceresi açık. İletiyi gönderip veya iptal "
-"edip yeniden deneyin."
+"Bu hesapla bağlantılı bir oluşturucu penceresi açık. İletiyi gönderip veya "
+"iptal edip yeniden deneyin."
 
 #: ../ui/account_list.glade.h:1
 msgid "Add account"
@@ -1777,16 +1790,13 @@ msgstr "Bağlantı URL’si"
 #. Note that this button and the Insert button will never be shown at the same time to the user.
 #: ../ui/composer-link-popover.ui.h:5
 msgid "Update this link’s URL"
-msgstr "Bu bağlantının URL'sini güncelle"
+msgstr "Bu bağlantının URL’sini güncelle"
 
 #: ../ui/composer-link-popover.ui.h:6
-#| msgctxt "Outlook localised name"
-#| msgid "Deleted Items"
 msgid "Delete this link"
 msgstr "Bu bağlantıyı sil"
 
 #: ../ui/composer-link-popover.ui.h:7
-#| msgid "_Open Link"
 msgid "Open this link"
 msgstr "Bu bağlantıyı aç"
 
@@ -1853,7 +1863,7 @@ msgstr "_Biçimlendirmeyle Yapıştır"
 
 #: ../ui/composer-menus.ui.h:16
 msgid "Select _All"
-msgstr "Hepsini S_eç"
+msgstr "Tümünü S_eç"
 
 #: ../ui/composer-menus.ui.h:17 ../ui/conversation-message-menus.ui.h:9
 msgid "_Inspect…"
@@ -1894,7 +1904,6 @@ msgid "To add them as attachments"
 msgstr "Onları ek olarak eklemek için"
 
 #: ../ui/composer-widget.ui.h:11
-#| msgid "Undo trash (Ctrl+Z)"
 msgid "Undo last edit (Ctrl+Z)"
 msgstr "Son düzenlemeyi geri al (Ctrl+Z)"
 
@@ -1931,17 +1940,14 @@ msgid "Insert or update selection link (Ctrl+L)"
 msgstr "Seçime bağlantı ekle veya kaldır (Ctrl+L)"
 
 #: ../ui/composer-widget.ui.h:20
-#| msgid "Image (Ctrl+G)"
 msgid "Insert an image (Ctrl+G)"
 msgstr "Resim ekle (Ctrl+G)"
 
 #: ../ui/composer-widget.ui.h:21
-#| msgid "Remove formatting (Ctrl+Space)"
 msgid "Remove selection formatting (Ctrl+Space)"
 msgstr "Seçimin biçimlendirmesini kaldır (Ctrl+Boşluk)"
 
 #: ../ui/composer-widget.ui.h:22
-#| msgid "Select spell checking language"
 msgid "Select spell checking languages"
 msgstr "Yazım denetimi dillerini seç"
 
@@ -2009,11 +2015,11 @@ msgstr "Okunmuş olarak _imle"
 
 #: ../ui/conversation-email-menus.ui.h:5
 msgid "_Mark Unread"
-msgstr "Okunmamış olarak _imle"
+msgstr "Okunmadı olarak _imle"
 
 #: ../ui/conversation-email-menus.ui.h:6
 msgid "Mark Unread From _Here"
-msgstr "_Buradan Okunmamış İmle"
+msgstr "_Buradan Okunmadı İmle"
 
 #: ../ui/conversation-email-menus.ui.h:8
 msgid "_View Source"
@@ -2053,7 +2059,7 @@ msgstr "Şuradan iletiler için ara"
 
 #: ../ui/conversation-message.ui.h:1
 msgid "From <email>"
-msgstr "From <email>"
+msgstr "Kimden <email>"
 
 #: ../ui/conversation-message.ui.h:2
 msgid "1/1/1970\t"
@@ -2108,9 +2114,8 @@ msgid "But actually goes to:"
 msgstr "Aslında şuraya gider:"
 
 #: ../ui/conversation-message.ui.h:15
-#| msgid "This link appears to go to:"
 msgid "The link appears to go to:"
-msgstr "Bağlantı şuraya gidiyor görünür:"
+msgstr "Bağlantı şuraya gidiyor gibi görünür:"
 
 #: ../ui/conversation-message.ui.h:16
 msgid "Deceptive link found"
@@ -2195,12 +2200,12 @@ msgstr "Odağı konuşma listesine taşı"
 #: ../ui/gtk/help-overlay.ui.h:5
 msgctxt "shortcut window"
 msgid "Detach composer window"
-msgstr "Düzenleyici penceresini ayır"
+msgstr "Oluşturucu penceresini ayır"
 
 #: ../ui/gtk/help-overlay.ui.h:6
 msgctxt "shortcut window"
 msgid "Close composer window"
-msgstr "Düzenleyici penceresini kapat"
+msgstr "Oluşturucu penceresini kapat"
 
 #: ../ui/gtk/help-overlay.ui.h:7
 msgctxt "shortcut window"
@@ -2295,7 +2300,7 @@ msgstr "Okunmuş olarak imle"
 #: ../ui/gtk/help-overlay.ui.h:25
 msgctxt "shortcut window"
 msgid "Mark unread"
-msgstr "Okunmamış olarak imle"
+msgstr "Okunmadı olarak imle"
 
 #: ../ui/gtk/help-overlay.ui.h:26
 msgctxt "shortcut window"
@@ -2349,7 +2354,7 @@ msgstr "Önceki (yeni) konuşmaya atla"
 
 #: ../ui/gtk/help-overlay.ui.h:36
 msgid "Composer Shortcuts"
-msgstr "Düzenleyici Kısayolları"
+msgstr "Oluşturucu Kısayolları"
 
 #: ../ui/gtk/help-overlay.ui.h:37
 msgctxt "shortcut window"
@@ -2436,7 +2441,7 @@ msgstr "H_izmet"
 
 #: ../ui/login.glade.h:6
 msgid "N_ame"
-msgstr "İ_sim"
+msgstr "_Ad"
 
 #: ../ui/login.glade.h:8
 msgid "N_ickname"
@@ -2452,7 +2457,7 @@ msgstr "Gönderilmiş postayı _kaydet"
 
 #: ../ui/login.glade.h:11
 msgid "Addi_tional email addresses…"
-msgstr "E_k e-posta adresleri..."
+msgstr "E_k e-posta adresleri…"
 
 #: ../ui/login.glade.h:12
 msgid "IMAP settings"
@@ -2540,7 +2545,7 @@ msgstr "IMAP kim_liğini kullan"
 
 #: ../ui/login.glade.h:34
 msgid "Composer"
-msgstr "Yazar"
+msgstr "Oluşturucu"
 
 #: ../ui/login.glade.h:35
 msgid "Save dra_fts on server"
@@ -2584,11 +2589,11 @@ msgstr "Okunuyor"
 
 #: ../ui/preferences-dialog.ui.h:2
 msgid "_Automatically select next message"
-msgstr "_Kendiliğinden bir sonraki mesajı seç"
+msgstr "Bir sonraki iletiyi _kendiliğinden seç"
 
 #: ../ui/preferences-dialog.ui.h:3
 msgid "_Display conversation preview"
-msgstr "Konuşma önizlemesini _göster"
+msgstr "Konuşma ön izlemesini _göster"
 
 #: ../ui/preferences-dialog.ui.h:4
 msgid "Use _three pane view"
@@ -2608,7 +2613,7 @@ msgstr "Yeni postalar için _bildirimleri göster"
 
 #: ../ui/preferences-dialog.ui.h:8
 msgid "Always _watch for new mail"
-msgstr "Yeni posta için her zaman g_özetle"
+msgstr "Yeni postalar için her zaman g_özetle"
 
 #: ../ui/preferences-dialog.ui.h:9
 msgid "Geary will run in the background and notify of new mail"
@@ -2645,6 +2650,9 @@ msgstr "E-posta adresi:"
 #: ../ui/upgrade_dialog.glade.h:1
 msgid "Geary update in progress…"
 msgstr "Geary güncellemesi devam ediyor…"
+
+#~ msgid "Mail Client"
+#~ msgstr "Posta İstemcisi"
 
 #~ msgid "_Inspect"
 #~ msgstr "_Denetle"
