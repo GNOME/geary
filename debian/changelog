@@ -1,3 +1,9 @@
+geary (0.13~~master-1~artful1) unstable; urgency=medium
+
+  * Begin 0.13 development
+
+ -- Michael Gratton <mike@vee.net>  Mon, 02 Oct 2017 22:36:13 +1100
+
 geary (0.12.0-1~xenial1) xenial; urgency=medium
 
   * Insert images inline when composing rich text messages
