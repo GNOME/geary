@@ -104,7 +104,8 @@
             "sources": [
                 {
                     "type": "git",
-                    "url": "https://git.gnome.org/browse/geary"
+                    "url": "https://git.gnome.org/browse/geary",
+                    "branch": "geary-0.12"
                 }
             ]
         }
