@@ -1,3 +1,11 @@
+geary (0.11.4-1~xenial1) unstable; urgency=medium
+
+  * Crasher fixes (#776139, #776383, #777138)
+  * Server compatibility fixes (#755424, #776875)
+  * Translation updates
+
+ -- Michael Gratton <mike@vee.net>  Mon, 02 Oct 2017 20:07:07 +1100
+
 geary (0.11.3-1~xenial1) xenial; urgency=medium
 
   * Fix drafts not being saved when closing composer (#747627)

@@ -1,3 +1,26 @@
+Geary 0.11.4 - 2 October 2017
+-----------------------------
+
+  * Crasher fixes (#776139, #776383, #777138)
+  * Server compatibility fixes (#755424,#776875)
+  * Bug fixes courtesy of:
+    Gautier Pelloux-Prayer
+    Ralph Plawetzki
+  * UI translations courtesy of:
+    Anders Jonsson (sv)
+    Andika Triwidada (id)
+    Baurzhan Muftakhidinov (kk)
+    Christian Kirbach (de)
+    Daniel Mustieles (es)
+    Inaki Larranaga Murgoitio (eu)
+    Stas Solovey (ru)
+    Мирослав Николић (sr) (sr@latin)
+  * User manual translations courtesy of:
+    Anders Jonsson (sv)
+    Josef Andersson (sv)
+    Mario Blättermann (de)
+    Piotr Drąg (pl)
+
 Geary 0.11.3 - 25 December 2016
 -------------------------------
 
