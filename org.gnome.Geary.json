@@ -2,11 +2,10 @@
 {
     "app-id": "org.gnome.Geary",
     "runtime": "org.gnome.Platform",
-    "runtime-version": "master",
+    "runtime-version": "3.26",
     "sdk": "org.gnome.Sdk",
     "command": "geary",
-    "tags": ["nightly"],
-    "desktop-file-name-prefix": "(Nightly) ",
+    "tags": [],
     "rename-icon": "geary",
     "copy-icon": true,
     "finish-args": [
