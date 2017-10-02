@@ -20,8 +20,8 @@ msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=internationalization\n"
-"POT-Creation-Date: 2017-09-29 08:56+0000\n"
-"PO-Revision-Date: 2017-10-02 10:35+0200\n"
+"POT-Creation-Date: 2017-10-02 09:56+0000\n"
+"PO-Revision-Date: 2017-10-02 14:13+0200\n"
 "Last-Translator: Mario Blättermann <mario.blaettermann@gmail.com>\n"
 "Language-Team: Deutsch <gnome-de@gnome.org>\n"
 "Language: de\n"
@@ -47,7 +47,7 @@ msgstr "Geary-Entwicklerteam"
 #: ../desktop/org.gnome.Geary.appdata.xml.in.h:6
 #: ../desktop/org.gnome.Geary.desktop.in.h:4
 #: ../desktop/geary-autostart.desktop.in.h:4
-#: ../src/client/application/geary-application.vala:22
+#: ../src/client/application/geary-application.vala:21
 msgid "Send and receive email"
 msgstr "Senden und empfangen"
 
@@ -270,15 +270,19 @@ msgstr "        • Verbindungsfehler.\n"
 msgid "        • Username or password incorrect.\n"
 msgstr "        • IMAP-Benutzername oder Passwort ungültig.\n"
 
-#: ../src/client/application/geary-application.vala:21
+#: ../src/client/application/geary-application.vala:22
 msgid "Copyright 2016 Software Freedom Conservancy Inc."
 msgstr "Copyright 2016 Software Freedom Conservancy Inc."
 
-#: ../src/client/application/geary-application.vala:24
+#: ../src/client/application/geary-application.vala:23
+msgid "Copyright 2016-2017 Geary Development Team."
+msgstr "Copyright 2016-2017 Geary-Entwicklerteam."
+
+#: ../src/client/application/geary-application.vala:25
 msgid "Visit the Geary web site"
 msgstr "Geary-Webseite besuchen"
 
-#: ../src/client/application/geary-application.vala:464
+#: ../src/client/application/geary-application.vala:466
 #, c-format
 msgid "About %s"
 msgstr "Info zu %s"
@@ -286,7 +290,7 @@ msgstr "Info zu %s"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: ../src/client/application/geary-application.vala:468
+#: ../src/client/application/geary-application.vala:470
 msgid "translator-credits"
 msgstr ""
 "Benjamin Steinwender <b@stbe.at>\n"
@@ -361,17 +365,17 @@ msgstr "Programmversion anzeigen"
 msgid "Use %s to open a new composer window"
 msgstr "Benutzen Sie %s, um ein neues »Verfassen«-Fenster zu öffnen"
 
-#: ../src/client/application/geary-args.vala:54
+#: ../src/client/application/geary-args.vala:56
 msgid "Please report comments, suggestions and bugs to:"
 msgstr "Bitte melden Sie Kommentare, Vorschläge und Fehler an:"
 
 #. i18n: Command line arguments are invalid
-#: ../src/client/application/geary-args.vala:61
+#: ../src/client/application/geary-args.vala:63
 #, c-format
 msgid "Failed to parse command line options: %s\n"
 msgstr "Die Befehlszeilenargumente konnten nicht interpretiert werden: %s\n"
 
-#: ../src/client/application/geary-args.vala:72
+#: ../src/client/application/geary-args.vala:74
 #, c-format
 msgid "Unrecognized command line option “%s”\n"
 msgstr "Unbekanntes Befehlszeilenargument »%s«\n"
@@ -994,7 +998,7 @@ msgstr "Cc: "
 
 #: ../src/client/composer/composer-widget.vala:1651
 msgid "Bcc: "
-msgstr "Bcc:"
+msgstr "Bcc: "
 
 #: ../src/client/composer/composer-widget.vala:1654
 msgid "Reply-To: "
@@ -1139,7 +1143,7 @@ msgstr ""
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:54
 msgid "Geary will not add or update this email account."
-msgstr "Geary wird dieses E-Mail-Konto nicht hinzufügen oder aktualisieren"
+msgstr "Geary wird dieses E-Mail-Konto nicht hinzufügen oder aktualisieren."
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:59
 msgid ""
@@ -2113,7 +2117,7 @@ msgstr "Gesendet von:"
 
 #: ../ui/conversation-message.ui.h:5
 msgid "Reply to:"
-msgstr "Antwort an"
+msgstr "Antwort an:"
 
 #: ../ui/conversation-message.ui.h:6
 msgid "Subject"
@@ -2176,11 +2180,11 @@ msgstr "In Konversation suchen"
 
 #: ../ui/conversation-viewer.ui.h:2
 msgid "Find the previous occurrence of the search string."
-msgstr "Vorhergehende Übereinstimmungen mit dem Suchtext finden"
+msgstr "Vorhergehende Übereinstimmungen mit dem Suchtext finden."
 
 #: ../ui/conversation-viewer.ui.h:3
 msgid "Find the next occurrence of the search string."
-msgstr "Nächste Übereinstimmung mit dem Suchtext finden"
+msgstr "Nächste Übereinstimmung mit dem Suchtext finden."
 
 #: ../ui/edit_alternate_emails.glade.h:1
 msgid "Remove email address"
@@ -2669,7 +2673,7 @@ msgid ""
 "account?</span> "
 msgstr ""
 "<span weight=\"bold\" size=\"larger\">Sind Sie sicher, dass Sie dieses Konto "
-"löschen wollen?</span>"
+"löschen wollen?</span> "
 
 #: ../ui/remove_confirm.glade.h:2
 msgid ""
