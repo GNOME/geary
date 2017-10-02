@@ -1,8 +1,23 @@
-geary (0.12~~master-1~xenial1) xenial; urgency=medium
+geary (0.12.0-1~xenial1) xenial; urgency=medium
 
-  * Begin 0.12 development
+  * Insert images inline when composing rich text messages
+  * Improved interface for inserting links in rich text messages
+  * Choose multiple spell-checker languages when composing messages
+  * Support message archiving for Yahoo! Mail and Outlook.com
+  * Improved interface when displaying conversations
+  * Improved interface when moving and labelling conversations
+  * Improved support for right-to-left languages
+  * Automatically unfold starred messages in a conversation
+  * Support saving remote inline images
+  * Improved keyboard navigation for conversations
+  * Added in-application keyboard shortcut help (Ctrl + ?)
+  * Support for distribution via Flatpak
+  * Improved security when displaying messages
+  * Numerous bug fixes and minor user interface improvements
+  * Numerous user interface translation updates
+  * Updated UI & doc translations
 
- -- Michael Gratton <mike@vee.net>  Tue, 07 Feb 2017 13:25:24 +1100
+ -- Michael Gratton <mike@vee.net>  Tue, 02 Oct 2017 17:58:00 +1100
 
 geary (0.11.0-1~xenial1) xenial; urgency=medium
 

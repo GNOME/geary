@@ -75,4 +75,108 @@
     <binary>geary</binary>
   </provides>
   <translation type="gettext">geary</translation>
+
+  <releases>
+    <release version="0.12" date="2017-10-02">
+      <description>
+        <p>Enhances included in this release:</p>
+        <ul>
+          <li>Insert images inline when composing rich text messages</li>
+          <li>Improved interface for inserting links in rich text messages</li>
+          <li>Choose multiple spell-checker languages when composing messages</li>
+          <li>Support message archiving for Yahoo! Mail and Outlook.com</li>
+          <li>Improved interface when displaying conversations</li>
+          <li>Improved interface when moving and labelling conversations</li>
+          <li>Improved support for right-to-left languages</li>
+          <li>Automatically unfold starred messages in a conversation</li>
+          <li>Support saving remote inline images</li>
+          <li>Improved keyboard navigation for conversations</li>
+          <li>Added in-application keyboard shortcut help (Ctrl + ?)</li>
+          <li>Support for distribution via Flatpak</li>
+          <li>Improved security when displaying messages</li>
+          <li>Numerous bug fixes and minor user interface improvements</li>
+          <li>Numerous user interface translation updates</li>
+        </ul>
+        <p>Thanks to all who contributed code fixes and enhancements
+        to this release, in particular the many first-time
+        contributors:</p>
+        <ul>
+          <li>Alex Henrie</li>
+          <li>Colin Vidal</li>
+          <li>Federico Bruni</li>
+          <li>Gautier Pelloux-Prayer</li>
+          <li>Heiko Becker</li>
+          <li>Jeremy Bicha</li>
+          <li>Jiri Cerny</li>
+          <li>Kacper Bielecki</li>
+          <li>Leonardo Robol</li>
+          <li>Michael Gratton</li>
+          <li>Michael James Gratton</li>
+          <li>Niels De Graef</li>
+          <li>Oskar Viljasaar</li>
+          <li>Piotr Drąg</li>
+          <li>Ralph Plawetzki</li>
+          <li>Rico Tzschichholz</li>
+          <li>Timo Kluck</li>
+          <li>Ville Korhonen</li>
+          <li>Yosef Or Boczko</li>
+        </ul>
+        <p>Thanks also to the many that contributed translations, for the user interface:</p>
+        <ul>
+          <li>Alan Mortensen (da)</li>
+          <li>Alexandre Franke (fr)</li>
+          <li>Anders Jonsson (sv)</li>
+          <li>Andika Triwidada (id)</li>
+          <li>Ask Hjorth Larsen (da)</li>
+          <li>Aurimas Černius (lt)</li>
+          <li>Balázs Meskó (hu)</li>
+          <li>Balázs Úr (hu)</li>
+          <li>Baurzhan Muftakhidinov (kk)</li>
+          <li>Benedikt M. Thoma (de)</li>
+          <li>Daniel Korostil (uk)</li>
+          <li>Daniel Mustieles (es)</li>
+          <li>Daniel Șerbănescu (ro)</li>
+          <li>Dušan Kazik (sk)</li>
+          <li>Emin Tufan Çetin (tr)</li>
+          <li>E T (tr)</li>
+          <li>Federico Bruni (it)</li>
+          <li>Flo H (de)</li>
+          <li>Gábor Kelemen (hu)</li>
+          <li>Hannie Dumoleyn (nl)</li>
+          <li>hanniedu (nl)</li>
+          <li>Jeremy Bicha (bs)</li>
+          <li>Jiri Grönroos (fi)</li>
+          <li>Jordi Mas (ca)</li>
+          <li>Josef Andersson (sv)</li>
+          <li>Kjartan Maraas (nb)</li>
+          <li>Laudivan Freire de Almeida (pt_BR)</li>
+          <li>Marek Černocký (cs)</li>
+          <li>Mario Blättermann (de)</li>
+          <li>Matej Urbančič (sl)</li>
+          <li>Muhammet Kara (tr)</li>
+          <li>Piotr Drąg (hi) (hu) (ja) (km) (ms) (pl) (nl) (sl) (sr@latin)</li>
+          <li>Rafael Fontenelle (pt_BR)</li>
+          <li>Ronan Arraes Jardim Chagas (pt_BR)</li>
+          <li>Stas Solovey (ru)</li>
+          <li>Tiago Santos (pt)</li>
+          <li>Wolfgang Stöggl (de)</li>
+          <li>Yosef Or Boczko (he)</li>
+          <li>Мирослав Николић (sr) (sr@latin)</li>
+        </ul>
+        <p>And for the user manual:</p>
+        <ul>
+          <li>Anders Jonsson (sv)</li>
+          <li>Andre Klapper (el)</li>
+          <li>Christian Kirbach (de)</li>
+          <li>Daniel Mustieles (es)</li>
+          <li>Federico Bruni (it)</li>
+          <li>Josef Andersson (sv)</li>
+          <li>Marek Černocký (cs)</li>
+          <li>Mario Blättermann (de)</li>
+          <li>Piotr Drąg (pl)</li>
+          <li>Rafael Fontenelle (pt_BR)</li>
+        </ul>
+      </description>
+    </release>
+  </releases>
 </component>

@@ -1,3 +1,99 @@
+Version 0.12
+~~~~~~~~~~~~
+Released: 2017-10-02
+
+Enhancements included in this release:
+ * Insert images inline when composing rich text messages
+ * Improved interface for inserting links in rich text messages
+ * Choose multiple spell-checker languages when composing messages
+ * Support message archiving for Yahoo! Mail and Outlook.com
+ * Improved interface when displaying conversations
+ * Improved interface when moving and labelling conversations
+ * Improved support for right-to-left languages
+ * Automatically unfold starred messages in a conversation
+ * Support saving remote inline images
+ * Improved keyboard navigation for conversations
+ * Added in-application keyboard shortcut help (Ctrl + ?)
+ * Support for distribution via Flatpak
+ * Improved security when displaying messages
+ * Numerous bug fixes and minor user interface improvements
+ * Numerous user interface translation updates
+
+Thanks to all who contributed code fixes and enhancements to this release, in
+particular the many first-time contributors:
+ * Alex Henrie
+ * Colin Vidal
+ * Federico Bruni
+ * Gautier Pelloux-Prayer
+ * Heiko Becker
+ * Jeremy Bicha
+ * Jiri Cerny
+ * Kacper Bielecki
+ * Leonardo Robol
+ * Michael Gratton
+ * Michael James Gratton
+ * Niels De Graef
+ * Oskar Viljasaar
+ * Piotr Drąg
+ * Ralph Plawetzki
+ * Rico Tzschichholz
+ * Timo Kluck
+ * Ville Korhonen
+ * Yosef Or Boczko
+
+Thanks also to the many that contributed translations, for the user interface:
+ * Alan Mortensen (da)
+ * Alexandre Franke (fr)
+ * Anders Jonsson (sv)
+ * Andika Triwidada (id)
+ * Ask Hjorth Larsen (da)
+ * Aurimas Černius (lt)
+ * Balázs Meskó (hu)
+ * Balázs Úr (hu)
+ * Baurzhan Muftakhidinov (kk)
+ * Benedikt M. Thoma (de)
+ * Daniel Korostil (uk)
+ * Daniel Mustieles (es)
+ * Daniel Șerbănescu (ro)
+ * Dušan Kazik (sk)
+ * Emin Tufan Çetin (tr)
+ * E T (tr)
+ * Federico Bruni (it)
+ * Flo H (de)
+ * Gábor Kelemen (hu)
+ * Hannie Dumoleyn (nl)
+ * hanniedu (nl)
+ * Jeremy Bicha (bs)
+ * Jiri Grönroos (fi)
+ * Jordi Mas (ca)
+ * Josef Andersson (sv)
+ * Kjartan Maraas (nb)
+ * Laudivan Freire de Almeida (pt_BR)
+ * Marek Černocký (cs)
+ * Mario Blättermann (de)
+ * Matej Urbančič (sl)
+ * Muhammet Kara (tr)
+ * Piotr Drąg (hi) (hu) (ja) (km) (ms) (pl) (nl) (sl) (sr@latin)
+ * Rafael Fontenelle (pt_BR)
+ * Ronan Arraes Jardim Chagas (pt_BR)
+ * Stas Solovey (ru)
+ * Tiago Santos (pt)
+ * Wolfgang Stöggl (de)
+ * Yosef Or Boczko (he)
+ * Мирослав Николић (sr) (sr@latin)
+
+And for the user manual:
+ * Anders Jonsson (sv)
+ * Andre Klapper (el)
+ * Christian Kirbach (de)
+ * Daniel Mustieles (es)
+ * Federico Bruni (it)
+ * Josef Andersson (sv)
+ * Marek Černocký (cs)
+ * Mario Blättermann (de)
+ * Piotr Drąg (pl)
+ * Rafael Fontenelle (pt_BR)
+
 Geary 0.11.0 - 15 May 2016
 --------------------------
 
