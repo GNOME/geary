@@ -19,8 +19,8 @@ msgstr ""
 "Project-Id-Version: geary-0.5.2\n"
 "Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=internationalization\n"
-"POT-Creation-Date: 2017-09-26 12:56+0000\n"
-"PO-Revision-Date: 2017-09-26 22:46+0200\n"
+"POT-Creation-Date: 2017-10-02 14:41+0000\n"
+"PO-Revision-Date: 2017-10-03 13:21+0200\n"
 "Last-Translator: Anders Jonsson <anders.jonsson@norsjovallen.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "Language: sv\n"
@@ -28,7 +28,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Poedit 2.0.3\n"
+"X-Generator: Poedit 2.0.4\n"
 
 #. Translators: The application name
 #: ../desktop/org.gnome.Geary.appdata.xml.in.h:2
@@ -46,6 +46,7 @@ msgstr "Gearys utvecklingsgrupp"
 #: ../desktop/org.gnome.Geary.appdata.xml.in.h:6
 #: ../desktop/org.gnome.Geary.desktop.in.h:4
 #: ../desktop/geary-autostart.desktop.in.h:4
+#: ../src/client/application/geary-application.vala:21
 msgid "Send and receive email"
 msgstr "Skicka och ta emot e-post"
 
@@ -106,6 +107,7 @@ msgid "Geary showing the rich text composer"
 msgstr "Geary visande rich text-redigeraren"
 
 #: ../desktop/org.gnome.Geary.desktop.in.h:2
+#: ../desktop/geary-autostart.desktop.in.h:2
 msgid "Email"
 msgstr "E-post"
 
@@ -121,11 +123,6 @@ msgstr "E-post;Epost;IMAP;GMail;Yahoo;Hotmail;Outlook;"
 #: ../desktop/org.gnome.Geary.desktop.in.h:7 ../ui/gtk/menus.ui.h:1
 msgid "Compose Message"
 msgstr "Skriv meddelande"
-
-#: ../desktop/geary-autostart.desktop.in.h:2
-#: ../src/client/application/geary-application.vala:21
-msgid "Mail Client"
-msgstr "E-postklient"
 
 #: ../desktop/geary-autostart.desktop.in.h:3
 msgid "Geary Mail"
@@ -274,11 +271,15 @@ msgstr "        • Felaktigt användarnamn eller lösenord.\n"
 msgid "Copyright 2016 Software Freedom Conservancy Inc."
 msgstr "Copyright 2016 Software Freedom Conservancy Inc."
 
-#: ../src/client/application/geary-application.vala:24
+#: ../src/client/application/geary-application.vala:23
+msgid "Copyright 2016-2017 Geary Development Team."
+msgstr "Copyright 2016-2017 Gearys utvecklingsgrupp."
+
+#: ../src/client/application/geary-application.vala:25
 msgid "Visit the Geary web site"
 msgstr "Besök Gearys webbplats"
 
-#: ../src/client/application/geary-application.vala:464
+#: ../src/client/application/geary-application.vala:466
 #, c-format
 msgid "About %s"
 msgstr "Om %s"
@@ -286,7 +287,7 @@ msgstr "Om %s"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: ../src/client/application/geary-application.vala:468
+#: ../src/client/application/geary-application.vala:470
 msgid "translator-credits"
 msgstr ""
 "Joachim Johansson <joachim.j@gmail.com>\n"
@@ -362,17 +363,17 @@ msgstr "Visa programversion"
 msgid "Use %s to open a new composer window"
 msgstr "Använd %s för att öppna ett nytt redigerarfönster"
 
-#: ../src/client/application/geary-args.vala:54
+#: ../src/client/application/geary-args.vala:56
 msgid "Please report comments, suggestions and bugs to:"
 msgstr "Rapportera fel, eller kom med förslag och kommentarer, på:"
 
 #. i18n: Command line arguments are invalid
-#: ../src/client/application/geary-args.vala:61
+#: ../src/client/application/geary-args.vala:63
 #, c-format
 msgid "Failed to parse command line options: %s\n"
 msgstr "Kunde ej tyda kommandoradsalternativ: %s\n"
 
-#: ../src/client/application/geary-args.vala:72
+#: ../src/client/application/geary-args.vala:74
 #, c-format
 msgid "Unrecognized command line option “%s”\n"
 msgstr "Felaktigt kommandoradsalternativ: ”%s”\n"
@@ -2665,6 +2666,9 @@ msgstr "E-postadress:"
 #: ../ui/upgrade_dialog.glade.h:1
 msgid "Geary update in progress…"
 msgstr "Geary-uppgradering pågår…"
+
+#~ msgid "Mail Client"
+#~ msgstr "E-postklient"
 
 #~ msgid "none"
 #~ msgstr "inget"
