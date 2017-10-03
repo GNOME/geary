@@ -5,10 +5,13 @@
     "runtime-version": "master",
     "sdk": "org.gnome.Sdk",
     "command": "geary",
-    "tags": ["nightly"],
-    "desktop-file-name-prefix": "(Nightly) ",
     "rename-icon": "geary",
     "copy-icon": true,
+
+    /* Nightly build args, remove these when creating a new stable branch */
+    "tags": ["nightly"],
+    "desktop-file-name-prefix": "(Nightly) ",
+
     "finish-args": [
         /* X11 + XShm access */
         "--share=ipc", "--socket=x11",
@@ -102,7 +105,8 @@
             "sources": [
                 {
                     "type": "git",
-                    "url": "https://git.gnome.org/browse/geary"
+                    "url": "https://git.gnome.org/browse/geary",
+                    "branch": "master"
                 }
             ]
         }
