@@ -1,4 +1,4 @@
-geary (0.11.4-1~xenial1) unstable; urgency=medium
+geary (0.11.4-1~xenial1) xenial; urgency=medium
 
   * Crasher fixes (#776139, #776383, #777138)
   * Server compatibility fixes (#755424, #776875)
