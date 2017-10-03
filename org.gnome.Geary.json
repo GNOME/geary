@@ -19,9 +19,6 @@
         /* OpenGL access for WK2 */
         "--device=dri",
 
-        /* Bus access */
-        "--socket=session-bus",
-
         /* Pulseaudio */
         "--socket=pulseaudio",
 
