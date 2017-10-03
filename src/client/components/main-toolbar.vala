@@ -153,11 +153,12 @@ public class MainToolbar : Gtk.Box {
     }
 
     private void setup_button(Gtk.Button b, string action_name, bool show_label = false) {
-        // Use dynamic here to work around linker error on
-        // gtk_widget_set_focus_on_click when compiling vala >= 0.34
-        // against GTK+ < 3.20
-        dynamic Gtk.Action related_action = action_group.get_action(action_name);
-        b.focus_on_click = false;
+        Gtk.Action related_action = action_group.get_action(action_name);
+        // Explicitly call set_focus_on_click() here to work around
+        // linker error for gtk_widget_set_focus_on_click that would
+        // otherwise get generated when compiling vala >= 0.34 against
+        // GTK+ < 3.20
+        b.set_focus_on_click(false);
         b.use_underline = true;
         b.tooltip_text = related_action.tooltip;
         related_action.notify["tooltip"].connect(() => { b.tooltip_text = related_action.tooltip; });
