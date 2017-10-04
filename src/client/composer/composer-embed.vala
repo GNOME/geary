@@ -14,11 +14,11 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
 
     public Geary.Email referred { get; private set; }
 
-    public Gtk.ApplicationWindow top_window {
+    internal ComposerWidget composer { get; set; }
+
+    protected Gtk.ApplicationWindow top_window {
         get { return (Gtk.ApplicationWindow) get_toplevel(); }
     }
-
-    internal ComposerWidget composer { get; set; }
 
     protected Gee.MultiMap<string, string>? old_accelerators { get; set; }
 
@@ -184,10 +184,6 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
             }
         }
         return ret;
-    }
-
-    public void present() {
-        top_window.present();
     }
 
     public void vanish() {

@@ -1056,7 +1056,11 @@ public class ComposerWidget : Gtk.EventBox {
         }
 
         update_composer_view();
-        this.container.present();
+
+        Gtk.Window? window = get_toplevel() as Gtk.Window;
+        if (window != null) {
+            window.present();
+        }
         set_focus();
     }
 
@@ -1114,12 +1118,17 @@ public class ComposerWidget : Gtk.EventBox {
         if (this.is_blank)
             return CloseStatus.DO_CLOSE;
 
-        this.container.present();
+        Gtk.Window? window = get_toplevel() as Gtk.Window;
+        if (window != null) {
+            window.present();
+        }
 
         CloseStatus status = CloseStatus.PENDING_CLOSE;
         if (this.can_save) {
-            AlertDialog dialog = new TernaryConfirmationDialog(container.top_window,
-                _("Do you want to discard this message?"), null, Stock._KEEP, Stock._DISCARD, 
+            AlertDialog dialog = new TernaryConfirmationDialog(
+                get_toplevel() as Gtk.Window,
+                _("Do you want to discard this message?"),
+                null, Stock._KEEP, Stock._DISCARD,
                 Gtk.ResponseType.CLOSE, "suggested-action");
             Gtk.ResponseType response = dialog.run();
             if (response == Gtk.ResponseType.CANCEL ||
@@ -1137,8 +1146,10 @@ public class ComposerWidget : Gtk.EventBox {
                 discard_and_exit_async.begin();
             }
         } else {
-            AlertDialog dialog = new ConfirmationDialog(container.top_window,
-                _("Do you want to discard this message?"), null, Stock._DISCARD, "destructive-action");
+            AlertDialog dialog = new ConfirmationDialog(
+                get_toplevel() as Gtk.Window,
+                _("Do you want to discard this message?"),
+                null, Stock._DISCARD, "destructive-action");
             Gtk.ResponseType response = dialog.run();
             if (response == Gtk.ResponseType.OK) {
                 discard_and_exit_async.begin();
@@ -1169,9 +1180,17 @@ public class ComposerWidget : Gtk.EventBox {
     private void on_detach() {
         if (this.state == ComposerState.DETACHED)
             return;
-        Gtk.Widget? focus = this.container.top_window.get_focus();
+
+        // Get the currently focused widget before we remove ourselves
+        // from the window
+        Gtk.Widget? focus = null;
+        Gtk.Window? toplevel = get_toplevel() as Gtk.Window;
+        if (toplevel != null) {
+            focus = toplevel.get_focus();
+        }
+
         this.container.remove_composer();
-        ComposerWindow window = new ComposerWindow(this);
+        ComposerWindow window = new ComposerWindow(this, this.config);
 
         // Workaround a GTK+ crasher, Bug 771812. When the composer is
         // re-parented, its menu_button's popover keeps a reference to
@@ -1253,7 +1272,8 @@ public class ComposerWidget : Gtk.EventBox {
             confirmation = _("Send message without an attachment?");
         }
         if (confirmation != null) {
-            ConfirmationDialog dialog = new ConfirmationDialog(container.top_window,
+            ConfirmationDialog dialog = new ConfirmationDialog(
+                get_toplevel() as Gtk.Window,
                 confirmation, null, Stock._OK, "suggested-action");
             return (dialog.run() == Gtk.ResponseType.OK);
         }
@@ -1590,7 +1610,9 @@ public class ComposerWidget : Gtk.EventBox {
     }
 
     private void attachment_failed(string msg) {
-        ErrorDialog dialog = new ErrorDialog(this.container.top_window, _("Cannot add attachment"), msg);
+        ErrorDialog dialog = new ErrorDialog(
+            get_toplevel() as Gtk.Window, _("Cannot add attachment"), msg
+        );
         dialog.run();
     }
 
@@ -1678,17 +1700,11 @@ public class ComposerWidget : Gtk.EventBox {
     }
 
     private void on_cut(SimpleAction action, Variant? param) {
-        if (this.container.get_focus() == this.editor)
-            this.editor.cut_clipboard();
-        else if (this.container.get_focus() is Gtk.Editable)
-            ((Gtk.Editable) this.container.get_focus()).cut_clipboard();
+        this.editor.cut_clipboard();
     }
 
     private void on_copy(SimpleAction action, Variant? param) {
-        if (this.container.get_focus() == this.editor)
-            this.editor.copy_clipboard();
-        else if (this.container.get_focus() is Gtk.Editable)
-            ((Gtk.Editable) this.container.get_focus()).copy_clipboard();
+        this.editor.copy_clipboard();
     }
 
     private void on_copy_link(SimpleAction action, Variant? param) {
@@ -1700,15 +1716,11 @@ public class ComposerWidget : Gtk.EventBox {
     }
 
     private void on_paste(SimpleAction action, Variant? param) {
-        if (this.container.get_focus() == this.editor)
-            this.editor.paste_plain_text();
-        else if (this.container.get_focus() is Gtk.Editable)
-            ((Gtk.Editable) this.container.get_focus()).paste_clipboard();
+        this.editor.paste_plain_text();
     }
 
     private void on_paste_with_formatting(SimpleAction action, Variant? param) {
-        if (this.container.get_focus() == this.editor)
-            this.editor.paste_rich_text();
+        this.editor.paste_rich_text();
     }
 
     private void on_select_all(SimpleAction action, Variant? param) {
@@ -1783,8 +1795,10 @@ public class ComposerWidget : Gtk.EventBox {
     }
 
     private void on_select_color() {
-        Gtk.ColorChooserDialog dialog = new Gtk.ColorChooserDialog(_("Select Color"),
-            this.container.top_window);
+        Gtk.ColorChooserDialog dialog = new Gtk.ColorChooserDialog(
+            _("Select Color"),
+            get_toplevel() as Gtk.Window
+        );
         if (dialog.run() == Gtk.ResponseType.OK) {
             this.editor.execute_editing_command_with_argument(
                 "forecolor", dialog.get_rgba().to_string()
@@ -1807,19 +1821,22 @@ public class ComposerWidget : Gtk.EventBox {
     }
 
     private void update_message_overlay_label_style() {
-        Gdk.RGBA window_background = container.top_window.get_style_context()
-            .get_background_color(Gtk.StateFlags.NORMAL);
-        Gdk.RGBA label_background = message_overlay_label.get_style_context()
-            .get_background_color(Gtk.StateFlags.NORMAL);
-        
-        if (label_background == window_background)
-            return;
-        
-        message_overlay_label.get_style_context().changed.disconnect(
-            on_message_overlay_label_style_changed);
-        message_overlay_label.override_background_color(Gtk.StateFlags.NORMAL, window_background);
-        message_overlay_label.get_style_context().changed.connect(
-            on_message_overlay_label_style_changed);
+        Gtk.Window? window = get_toplevel() as Gtk.Window;
+        if (window != null) {
+            Gdk.RGBA window_background = window.get_style_context()
+                .get_background_color(Gtk.StateFlags.NORMAL);
+            Gdk.RGBA label_background = message_overlay_label.get_style_context()
+                .get_background_color(Gtk.StateFlags.NORMAL);
+
+            if (label_background == window_background)
+                return;
+
+            message_overlay_label.get_style_context().changed.disconnect(
+                on_message_overlay_label_style_changed);
+            message_overlay_label.override_background_color(Gtk.StateFlags.NORMAL, window_background);
+            message_overlay_label.get_style_context().changed.connect(
+                on_message_overlay_label_style_changed);
+        }
     }
 
     [GtkCallback]

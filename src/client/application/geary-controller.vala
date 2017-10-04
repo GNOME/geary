@@ -2295,7 +2295,7 @@ public class GearyController : Geary.BaseObject {
                 );
             }
         } else {
-            new ComposerWindow(widget);
+            new ComposerWindow(widget, this.application.config);
             widget.state = ComposerWidget.ComposerState.DETACHED;
         }
 

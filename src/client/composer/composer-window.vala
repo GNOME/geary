@@ -10,18 +10,17 @@
  */
 public class ComposerWindow : Gtk.ApplicationWindow, ComposerContainer {
 
-    public Gtk.ApplicationWindow top_window {
-        get { return this; }
-    }
 
     internal ComposerWidget composer { get; set; }
+
+    protected Gtk.ApplicationWindow top_window { get { return this; } }
 
     protected Gee.MultiMap<string, string>? old_accelerators { get; set; }
 
     private bool closing = false;
 
 
-    public ComposerWindow(ComposerWidget composer) {
+    public ComposerWindow(ComposerWidget composer, Configuration config) {
         Object(type: Gtk.WindowType.TOPLEVEL);
         this.composer = composer;
 
@@ -36,7 +35,7 @@ public class ComposerWindow : Gtk.ApplicationWindow, ComposerContainer {
         focus_in_event.connect(on_focus_in);
         focus_out_event.connect(on_focus_out);
 
-        if (composer.config.desktop_environment == Configuration.DesktopEnvironment.UNITY) {
+        if (config.desktop_environment == Configuration.DesktopEnvironment.UNITY) {
             composer.embed_header();
             composer.bind_property("window-title", this, "title", BindingFlags.SYNC_CREATE);
         } else {

@@ -21,17 +21,6 @@ public interface ComposerContainer {
     // We use old_accelerators to keep track of the accelerators we temporarily disabled.
     protected abstract Gee.MultiMap<string, string>? old_accelerators { get; set; }
 
-    // The toplevel window for the container. Note that it needs to be a GtkApplicationWindow.
-    public abstract Gtk.ApplicationWindow top_window { get; }
-
-    public virtual void present() {
-        this.top_window.present();
-    }
-
-    public virtual unowned Gtk.Widget get_focus() {
-        return this.top_window.get_focus();
-    }
-
     public abstract void close_container();
 
     /**
@@ -44,6 +33,9 @@ public interface ComposerContainer {
      * Removes the composer from this ComposerContainer (e.g. when detaching)
      */
     public abstract void remove_composer();
+
+    // The toplevel window for the container. Note that it needs to be a GtkApplicationWindow.
+    protected abstract Gtk.ApplicationWindow top_window { get; }
 
     protected virtual bool on_focus_in() {
         if (this.old_accelerators == null) {
