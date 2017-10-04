@@ -18,11 +18,12 @@ public class AttachmentDialog : Object {
 
     private Gtk.Image preview_image = new Gtk.Image();
 
-    public delegate bool Attacher(File attachment_file, bool alert_errors = true);
 
-    public AttachmentDialog(Gtk.Window? parent, Configuration config) {
+    public AttachmentDialog(string title, Gtk.Window? parent, string action, Configuration config) {
         this.config = config;
-        this.chooser = new Gtk.FileChooserNative(_("Choose a file"), parent, Gtk.FileChooserAction.OPEN, _("_Attach"), Stock._CANCEL);
+        this.chooser = new Gtk.FileChooserNative(
+            title, parent, Gtk.FileChooserAction.OPEN, action, Stock._CANCEL
+        );
 
         string? dir = config.attachments_dir;
         if (!Geary.String.is_empty(dir)) {
