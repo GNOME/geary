@@ -27,9 +27,9 @@ set(LANGUAGE_SUPPORT_DIRECTORY ${CMAKE_INSTALL_PREFIX}/share/locale)
 # Primary library minimum version requirements. See src/CMakeLists.txt
 # for others.
 #
-set(TARGET_GLIB 2.42) # Also passed to valac, so don't include a point rev
-set(TARGET_GTK 3.14.0)
-set(TARGET_WEBKIT 2.10)
+set(TARGET_GLIB 2.50) # Also passed to valac, so don't include a point rev
+set(TARGET_GTK 3.22.0)
+set(TARGET_WEBKIT 2.16)
 
 if (NOT ISO_CODE_639_XML)
   find_path(ISOCODES_DIRECTORY NAMES iso_639.xml PATHS ${CMAKE_INSTALL_PREFIX} /usr/share/xml/iso-codes)
