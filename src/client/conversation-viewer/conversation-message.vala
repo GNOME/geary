@@ -62,7 +62,7 @@ public class ConversationMessage : Gtk.Grid {
 
             Gtk.Label primary = new Gtk.Label(null);
             primary.ellipsize = Pango.EllipsizeMode.END;
-            GtkUtil.set_label_xalign(primary, 0.0f);
+            primary.set_halign(Gtk.Align.START);
             primary.get_style_context().add_class(PRIMARY_CLASS);
             if (type == Type.FROM) {
                 primary.get_style_context().add_class(FROM_CLASS);
@@ -74,7 +74,7 @@ public class ConversationMessage : Gtk.Grid {
 
                 Gtk.Label secondary = new Gtk.Label(null);
                 secondary.ellipsize = Pango.EllipsizeMode.END;
-                GtkUtil.set_label_xalign(secondary, 0.0f);
+                secondary.set_halign(Gtk.Align.START);
                 secondary.get_style_context().add_class(Gtk.STYLE_CLASS_DIM_LABEL);
                 secondary.set_text(address.address);
                 address_parts.add(secondary);

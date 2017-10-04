@@ -66,7 +66,7 @@ public class SpellCheckPopover {
             if (country_name != null)
                 label_text += " (" + country_name + ")";
             Gtk.Label label = new Gtk.Label(label_text);
-            GtkUtil.set_label_xalign(label, 0.0f);
+            label.set_halign(Gtk.Align.START);
             label.set_size_request(-1, 24);
 
             box.pack_start(label, false, false);
