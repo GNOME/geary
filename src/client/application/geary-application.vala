@@ -379,18 +379,12 @@ public class GearyApplication : Gtk.Application {
      */
     public void show_uri(string uri) throws Error {
         Gtk.Window? window = get_active_window();
-#if !GTK_3_22
         bool success = Gtk.show_uri(
             window != null ? window.get_screen() : null, uri, Gdk.CURRENT_TIME
         );
         if (!success) {
             throw new IOError.FAILED("gtk_show_uri() returned false");
         }
-#else
-        if (!Gtk.show_uri_on_window(window, uri, Gdk.CURRENT_TIME)) {
-            throw new IOError.FAILED("gtk_show_uri_on_window() returned false");
-        }
-#endif
     }
 
     // This call will fire "exiting" only if it's not already been fired.

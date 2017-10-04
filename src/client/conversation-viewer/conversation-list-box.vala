@@ -50,11 +50,6 @@ public class ConversationListBox : Gtk.ListBox {
         protected const string EXPANDED_CLASS = "geary-expanded";
         private const string FIRST_CLASS = "geary-first";
         private const string LAST_CLASS = "geary-last";
-#if !GTK_3_20
-        // GTK < 3.20+ style workarounds. Keep this in sync
-        // with geary.css.
-        private const int CANT_USE_PADDING_WORKAROUND = 18;
-#endif
 
         // The email being displayed by this row, if any
         public Geary.Email? email { get; private set; default = null; }
@@ -65,11 +60,6 @@ public class ConversationListBox : Gtk.ListBox {
                 return this._is_expanded;
             }
             protected set {
-#if !GTK_3_20
-                // GTK+ < 3.20 style workaround. Keep this in sync
-                // with geary.css
-                this.margin_bottom = value ? 6 : 0;
-#endif
                 this._is_expanded = value;
             }
         }
@@ -81,11 +71,6 @@ public class ConversationListBox : Gtk.ListBox {
         internal bool is_first {
             set {
                 set_style_context_class(FIRST_CLASS, value);
-#if !GTK_3_20
-                // GTK < 3.20+ style workarounds. Keep this in sync
-                // with geary.css.
-                this.margin_top = CANT_USE_PADDING_WORKAROUND;
-#endif
             }
         }
 
@@ -95,11 +80,6 @@ public class ConversationListBox : Gtk.ListBox {
         internal bool is_last {
             set {
                 set_style_context_class(LAST_CLASS, value);
-#if !GTK_3_20
-                // GTK < 3.20+ style workarounds. Keep this in sync
-                // with geary.css.
-                this.margin_bottom = CANT_USE_PADDING_WORKAROUND;
-#endif
             }
         }
 
@@ -113,13 +93,6 @@ public class ConversationListBox : Gtk.ListBox {
         public ConversationRow(Geary.Email? email) {
             this.email = email;
             show();
-
-#if !GTK_3_20
-            // GTK < 3.20+ style workarounds. Keep this in sync with
-            // geary.css.
-            this.margin_start = CANT_USE_PADDING_WORKAROUND;
-            this.margin_end = CANT_USE_PADDING_WORKAROUND;
-#endif
         }
 
         // Request the row be expanded, if supported.
@@ -427,10 +400,6 @@ public class ConversationListBox : Gtk.ListBox {
 
         get_style_context().add_class("background");
         get_style_context().add_class("conversation-listbox");
-#if !GTK_3_20
-        // GTK < 3.20+ style workaround
-        get_style_context().remove_class("list");
-#endif
 
         set_adjustment(adjustment);
         set_selection_mode(Gtk.SelectionMode.NONE);

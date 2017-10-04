@@ -275,12 +275,6 @@ public class ConversationMessage : Gtk.Grid {
         this.message = message;
         this.is_loading_images = load_remote_images;
 
-#if !GTK_3_20
-        // GTK < 3.20+ style workarounds. Keep this in sync with
-        // geary.css.
-        this.summary.border_width = 12;
-#endif
-
         // Actions
 
         add_action(ACTION_COPY_EMAIL, true, VariantType.STRING)

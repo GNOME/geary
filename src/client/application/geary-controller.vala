@@ -2039,11 +2039,7 @@ public class GearyController : Geary.BaseObject {
     }
 
     private async void save_attachments_to_file(Gee.Collection<Geary.Attachment> attachments) {
-#if GTK_3_20
         Gtk.FileChooserNative dialog = new_save_chooser(Gtk.FileChooserAction.SELECT_FOLDER);
-#else
-        Gtk.FileChooserDialog dialog = new_save_chooser(Gtk.FileChooserAction.SELECT_FOLDER);
-#endif
 
         bool accepted = (dialog.run() == Gtk.ResponseType.ACCEPT);
         string? filename = dialog.get_filename();
@@ -2079,11 +2075,7 @@ public class GearyController : Geary.BaseObject {
 
     private async void prompt_save_buffer(string? filename, Geary.Memory.Buffer buffer)
     throws Error {
-#if GTK_3_20
         Gtk.FileChooserNative dialog = new_save_chooser(Gtk.FileChooserAction.SAVE);
-#else
-        Gtk.FileChooserDialog dialog = new_save_chooser(Gtk.FileChooserAction.SAVE);
-#endif
         if (!Geary.String.is_empty(filename))
             dialog.set_current_name(filename);
         dialog.set_do_overwrite_confirmation(true);
@@ -2128,7 +2120,6 @@ public class GearyController : Geary.BaseObject {
         return (dialog.run() == Gtk.ResponseType.OK);
     }
 
-#if GTK_3_20
     private inline Gtk.FileChooserNative new_save_chooser(Gtk.FileChooserAction action) {
         Gtk.FileChooserNative dialog = new Gtk.FileChooserNative(
             null,
@@ -2137,17 +2128,6 @@ public class GearyController : Geary.BaseObject {
             Stock._SAVE,
             Stock._CANCEL
         );
-#else
-    private inline Gtk.FileChooserDialog new_save_chooser(Gtk.FileChooserAction action) {
-        Gtk.FileChooserDialog dialog = new Gtk.FileChooserDialog(
-            null,
-            this.main_window,
-            action,
-            Stock._CANCEL, Gtk.ResponseType.CANCEL,
-            Stock._SAVE, Gtk.ResponseType.ACCEPT,
-            null
-        );
-#endif
         string? dir = this.application.config.attachments_dir;
         if (!Geary.String.is_empty(dir))
             dialog.set_current_folder(dir);

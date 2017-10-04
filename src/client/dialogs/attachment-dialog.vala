@@ -4,6 +4,9 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
+/**
+ * A FileChooser-like object for choosing attachments for a message.
+ */
 public class AttachmentDialog : Object {
 
     private const int PREVIEW_SIZE = 180;
@@ -11,11 +14,7 @@ public class AttachmentDialog : Object {
 
     private Configuration config;
 
-#if GTK_3_20
     private Gtk.FileChooserNative? chooser = null;
-#else
-    private Gtk.FileChooserDialog? chooser = null;
-#endif
 
     private Gtk.Image preview_image = new Gtk.Image();
 
@@ -23,12 +22,7 @@ public class AttachmentDialog : Object {
 
     public AttachmentDialog(Gtk.Window? parent, Configuration config) {
         this.config = config;
-
-#if GTK_3_20
         this.chooser = new Gtk.FileChooserNative(_("Choose a file"), parent, Gtk.FileChooserAction.OPEN, _("_Attach"), Stock._CANCEL);
-#else
-        this.chooser = new Gtk.FileChooserDialog(_("Choose a file"), parent, Gtk.FileChooserAction.OPEN, Stock._CANCEL, Gtk.ResponseType.CANCEL, _("_Attach"), Gtk.ResponseType.ACCEPT);
-#endif
 
         string? dir = config.attachments_dir;
         if (!Geary.String.is_empty(dir)) {
@@ -44,10 +38,6 @@ public class AttachmentDialog : Object {
 
         this.chooser.update_preview.connect(on_update_preview);
     }
-
-    // XXX Once we depend on GTK+ 3.20 as a minimum, convert this
-    // class to a subclass of FileChooserNative and remove these API
-    // compat classes.
 
     public void add_filter(owned Gtk.FileFilter filter) {
         this.chooser.add_filter(filter);
