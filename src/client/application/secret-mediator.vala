@@ -20,8 +20,13 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
         null
     );
 
+    private GearyApplication instance;
     private Geary.Nonblocking.Mutex dialog_mutex = new Geary.Nonblocking.Mutex();
 
+
+    public SecretMediator(GearyApplication instance) {
+        this.instance = instance;
+    }
 
     public virtual async string? get_password_async(Geary.Service service,
                                                     Geary.AccountInformation account,
@@ -89,14 +94,14 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
         // to prevent multiple dialogs from popping up at the same time, use a nonblocking mutex
         // to serialize the code
         int token = yield dialog_mutex.claim_async(null);
-        
+
         // If the main window is hidden, make it visible now and present to user as transient parent
-        Gtk.Window? main_window = GearyApplication.instance.controller.main_window;
+        Gtk.Window? main_window = this.instance.get_active_window();
         if (main_window != null && !main_window.visible) {
             main_window.show_all();
             main_window.present_with_time(Gdk.CURRENT_TIME);
         }
-        
+
         PasswordDialog password_dialog = new PasswordDialog(main_window, services.has_smtp(),
             account_information, services);
         bool result = password_dialog.run();

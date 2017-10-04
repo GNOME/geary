@@ -267,8 +267,8 @@ public class GearyController : Geary.BaseObject {
         this.main_window.conversation_list_view.grab_focus();
 
         // instantiate here to ensure that Config is initialized and ready
-        autostart_manager = new AutostartManager();
-        
+        this.autostart_manager = new AutostartManager(this.application);
+
         // initialize revokable
         save_revokable(null, null);
 
@@ -286,7 +286,7 @@ public class GearyController : Geary.BaseObject {
                 this.application.get_user_config_directory(),
                 this.application.get_user_data_directory(),
                 this.application.get_resource_directory(),
-                new SecretMediator()
+                new SecretMediator(this.application)
             );
             if (Geary.Engine.instance.get_accounts().size == 0) {
                 create_account();
@@ -325,7 +325,9 @@ public class GearyController : Geary.BaseObject {
         
         // drop the Revokable, which will commit it if necessary
         save_revokable(null, null);
-        
+
+        this.autostart_manager = null;
+
         // close the ConversationMonitor
         try {
             if (current_conversations != null) {
