@@ -72,8 +72,7 @@ public class ComposerLinkPopover : Gtk.Popover {
 
 
     public ComposerLinkPopover(Type type) {
-        // GTK_ 3.18: Re-enable this
-        //set_default_widget(this.url);
+        set_default_widget(this.url);
         set_focus_child(this.url);
         switch (type) {
         case Type.NEW_LINK:
@@ -174,15 +173,13 @@ public class ComposerLinkPopover : Gtk.Popover {
     [GtkCallback]
     private void on_activate_popover() {
         link_activate();
-        // GTK+ 3.22/4: Change change this to popdown()
-        hide();
+        popdown();
     }
 
     [GtkCallback]
     private void on_delete_clicked() {
         link_delete();
-        // GTK+ 3.22/4: Change change this to popdown()
-        hide();
+        popdown();
     }
 
     [GtkCallback]
