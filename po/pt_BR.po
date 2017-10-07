@@ -19,8 +19,8 @@ msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?product=geary&"
 "keywords=I18N+L10N&component=internationalization\n"
-"POT-Creation-Date: 2017-09-26 12:56+0000\n"
-"PO-Revision-Date: 2017-09-26 18:46-0200\n"
+"POT-Creation-Date: 2017-10-02 14:41+0000\n"
+"PO-Revision-Date: 2017-10-07 03:52-0200\n"
 "Last-Translator: Rafael Fontenelle <rafaelff@gnome.org>\n"
 "Language-Team: Brazilian Portuguese <gnome-pt_br-list@gnome.org>\n"
 "Language: pt_BR\n"
@@ -47,6 +47,7 @@ msgstr "Equipe de Desenvolvimento do Geary"
 #: ../desktop/org.gnome.Geary.appdata.xml.in.h:6
 #: ../desktop/org.gnome.Geary.desktop.in.h:4
 #: ../desktop/geary-autostart.desktop.in.h:4
+#: ../src/client/application/geary-application.vala:21
 msgid "Send and receive email"
 msgstr "Envie e receba e-mail"
 
@@ -99,7 +100,6 @@ msgstr ""
 
 #. Translators: A screenshot description.
 #: ../desktop/org.gnome.Geary.appdata.xml.in.h:17
-#| msgid "_Display conversation preview"
 msgid "Geary displaying a conversation"
 msgstr "Geary exibindo uma conversa"
 
@@ -109,6 +109,7 @@ msgid "Geary showing the rich text composer"
 msgstr "Geary mostrando um compositor de texto rico"
 
 #: ../desktop/org.gnome.Geary.desktop.in.h:2
+#: ../desktop/geary-autostart.desktop.in.h:2
 msgid "Email"
 msgstr "E-mail"
 
@@ -124,11 +125,6 @@ msgstr "Correio;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;"
 #: ../desktop/org.gnome.Geary.desktop.in.h:7 ../ui/gtk/menus.ui.h:1
 msgid "Compose Message"
 msgstr "Escrever mensagem"
-
-#: ../desktop/geary-autostart.desktop.in.h:2
-#: ../src/client/application/geary-application.vala:21
-msgid "Mail Client"
-msgstr "Cliente de e-mail"
 
 #: ../desktop/geary-autostart.desktop.in.h:3
 msgid "Geary Mail"
@@ -277,11 +273,16 @@ msgstr "        • Nome de usuário ou senha incorretos.\n"
 msgid "Copyright 2016 Software Freedom Conservancy Inc."
 msgstr "Copyright 2016 Software Freedom Conservancy Inc."
 
-#: ../src/client/application/geary-application.vala:24
+#: ../src/client/application/geary-application.vala:23
+#| msgid "Geary Development Team"
+msgid "Copyright 2016-2017 Geary Development Team."
+msgstr "Copyright 2016-2017 Equipe de Desenvolvimento do Geary."
+
+#: ../src/client/application/geary-application.vala:25
 msgid "Visit the Geary web site"
 msgstr "Visite o website do Geary"
 
-#: ../src/client/application/geary-application.vala:464
+#: ../src/client/application/geary-application.vala:466
 #, c-format
 msgid "About %s"
 msgstr "Sobre %s"
@@ -289,7 +290,7 @@ msgstr "Sobre %s"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: ../src/client/application/geary-application.vala:468
+#: ../src/client/application/geary-application.vala:470
 msgid "translator-credits"
 msgstr ""
 "Leonardo Lemos <leonardolemos@live.com>\n"
@@ -365,17 +366,17 @@ msgstr "Mostra versão do programa"
 msgid "Use %s to open a new composer window"
 msgstr "Use %s para abrir uma nova janela do compositor"
 
-#: ../src/client/application/geary-args.vala:54
+#: ../src/client/application/geary-args.vala:56
 msgid "Please report comments, suggestions and bugs to:"
 msgstr "Por favor, envie sugestões, comentários ou erros para:"
 
 #. i18n: Command line arguments are invalid
-#: ../src/client/application/geary-args.vala:61
+#: ../src/client/application/geary-args.vala:63
 #, c-format
 msgid "Failed to parse command line options: %s\n"
 msgstr "Falha ao analisar as opções de linha de comando: %s\n"
 
-#: ../src/client/application/geary-args.vala:72
+#: ../src/client/application/geary-args.vala:74
 #, c-format
 msgid "Unrecognized command line option “%s”\n"
 msgstr "Opção de linha de comando não reconhecida “%s”\n"
@@ -2673,6 +2674,9 @@ msgstr "Endereço de e-mail:"
 #: ../ui/upgrade_dialog.glade.h:1
 msgid "Geary update in progress…"
 msgstr "Atualização do Geary em progresso…"
+
+#~ msgid "Mail Client"
+#~ msgstr "Cliente de e-mail"
 
 #~ msgid "none"
 #~ msgstr "nenhum"
