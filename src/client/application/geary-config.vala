@@ -55,11 +55,11 @@ public class Configuration {
 
     public DesktopEnvironment desktop_environment {
         get {
-            switch (Environment.get_variable("XDG_CURRENT_DESKTOP")) {
-                case "Unity":
-                    return DesktopEnvironment.UNITY;
-                default:
-                    return DesktopEnvironment.UNKNOWN;
+            string? xdg_current_desktop = Environment.get_variable("XDG_CURRENT_DESKTOP");
+            if (xdg_current_desktop != null && xdg_current_desktop.has_prefix("Unity")) {
+                return DesktopEnvironment.UNITY;
+            } else {
+                return DesktopEnvironment.UNKNOWN;
             }
         }
     }
