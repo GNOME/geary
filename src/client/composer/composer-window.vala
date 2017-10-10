@@ -10,6 +10,10 @@
  */
 public class ComposerWindow : Gtk.ApplicationWindow, ComposerContainer {
 
+    // Translators: The composer window's default title
+    private const string DEFAULT_TITLE = _("New Message");
+
+    public string window_title { get; set; }
 
     internal ComposerWidget composer { get; set; }
 
@@ -35,14 +39,28 @@ public class ComposerWindow : Gtk.ApplicationWindow, ComposerContainer {
         focus_in_event.connect(on_focus_in);
         focus_out_event.connect(on_focus_out);
 
+        composer.bind_property(
+            "subject",
+            this, "window-title",
+            BindingFlags.SYNC_CREATE,
+            (binding, source_value, ref target_value) => {
+                target_value = Geary.String.is_empty_or_whitespace(composer.subject)
+                ? DEFAULT_TITLE
+                : composer.subject.strip();
+                return true;
+            });
+
         if (config.desktop_environment == Configuration.DesktopEnvironment.UNITY) {
             composer.embed_header();
-            composer.bind_property("window-title", this, "title", BindingFlags.SYNC_CREATE);
+            this.bind_property("window-title",
+                                   this, "title",
+                                   BindingFlags.SYNC_CREATE);
         } else {
-            this.composer.header.show_close_button = true;
-            this.composer.free_header();
+            composer.header.show_close_button = true;
+            composer.free_header();
             set_titlebar(this.composer.header);
-            composer.bind_property("window-title", this.composer.header, "title",
+            this.bind_property("window-title",
+                                   this.composer.header, "title",
                                    BindingFlags.SYNC_CREATE);
         }
 
@@ -57,8 +75,8 @@ public class ComposerWindow : Gtk.ApplicationWindow, ComposerContainer {
 
     public void close_container() {
         on_focus_out();
-        this.composer.editor.focus_in_event.disconnect(on_focus_in);
-        this.composer.editor.focus_out_event.disconnect(on_focus_out);
+        this.composer.editor.body.focus_in_event.disconnect(on_focus_in);
+        this.composer.editor.body.focus_out_event.disconnect(on_focus_out);
 
         this.closing = true;
         destroy();

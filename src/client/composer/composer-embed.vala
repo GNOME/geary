@@ -42,8 +42,8 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
 
         add(composer);
         realize.connect(on_realize);
-        this.composer.editor.focus_in_event.connect(on_focus_in);
-        this.composer.editor.focus_out_event.connect(on_focus_out);
+        this.composer.editor.body.focus_in_event.connect(on_focus_in);
+        this.composer.editor.body.focus_out_event.connect(on_focus_out);
         show();
     }
 
@@ -71,11 +71,11 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
     }
 
     public void remove_composer() {
-        if (this.composer.editor.has_focus)
+        if (this.composer.editor.body.has_focus)
             on_focus_out();
 
-        this.composer.editor.focus_in_event.disconnect(on_focus_in);
-        this.composer.editor.focus_out_event.disconnect(on_focus_out);
+        this.composer.editor.body.focus_in_event.disconnect(on_focus_in);
+        this.composer.editor.body.focus_out_event.disconnect(on_focus_out);
 
         disable_scroll_reroute(this);
 
@@ -136,8 +136,8 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
                     // Outer scroller didn't use the complete delta,
                     // so work out what to do with the remainder.
 
-                    int editor_height = this.composer.editor.get_allocated_height();
-                    int editor_preferred = this.composer.editor.preferred_height;
+                    int editor_height = this.composer.editor.body.get_allocated_height();
+                    int editor_preferred = this.composer.editor.body.preferred_height;
                     int scrolled_height = this.outer_scroller.get_allocated_height();
 
                     if (alloc.height < scrolled_height &&
@@ -189,8 +189,8 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
     public void vanish() {
         hide();
         this.composer.state = ComposerWidget.ComposerState.DETACHED;
-        this.composer.editor.focus_in_event.disconnect(on_focus_in);
-        this.composer.editor.focus_out_event.disconnect(on_focus_out);
+        this.composer.editor.body.focus_in_event.disconnect(on_focus_in);
+        this.composer.editor.body.focus_out_event.disconnect(on_focus_out);
         vanished();
     }
 

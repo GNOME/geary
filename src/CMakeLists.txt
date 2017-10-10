@@ -350,6 +350,7 @@ client/components/stock.vala
 
 client/composer/composer-box.vala
 client/composer/composer-container.vala
+client/composer/composer-editor.vala
 client/composer/composer-embed.vala
 client/composer/composer-headerbar.vala
 client/composer/composer-link-popover.vala

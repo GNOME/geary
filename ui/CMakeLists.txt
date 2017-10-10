@@ -7,6 +7,7 @@ set(RESOURCE_LIST
   STRIPBLANKS "certificate_warning_dialog.glade"
               "client-web-view.js"
               "client-web-view-allow-remote-images.js"
+  STRIPBLANKS "composer-editor.ui"
   STRIPBLANKS "composer-headerbar.ui"
   STRIPBLANKS "composer-link-popover.ui"
   STRIPBLANKS "composer-menus.ui"
