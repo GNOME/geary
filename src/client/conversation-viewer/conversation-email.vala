@@ -508,7 +508,7 @@ public class ConversationEmail : Gtk.Box {
             if (load_cancelled.is_cancelled()) {
                 break;
             }
-            yield primary_message.load_message_body(load_cancelled);
+            yield view.load_message_body(load_cancelled);
             view.load_avatar.begin(
                 GearyApplication.instance.controller.avatar_session,
                 load_cancelled
