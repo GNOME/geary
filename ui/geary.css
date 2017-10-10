@@ -6,6 +6,8 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
+/* MainWindow */
+
 .geary-folder-frame > border {
   border-left-width: 0;
   border-top-width: 0;
@@ -18,15 +20,6 @@
 }
 /* For 3-pane mode only */
 .geary-sidebar-pane-separator.vertical .conversation-frame > border {
-  border-bottom-width: 0;
-}
-
-.geary-composer-box > border {
-  border-width: 0px;
-}
-.geary-composer-body > border {
-  border-left-width: 0;
-  border-right-width: 0;
   border-bottom-width: 0;
 }
 
@@ -140,6 +133,16 @@ grid.geary-message-summary {
 .geary-composer-embed headerbar {
   border-top: 1px solid @borders;
   border-radius: 0px;
+}
+
+.geary-composer-box > border {
+  border-width: 0px;
+}
+
+.geary-composer-body > border {
+  border-left-width: 0;
+  border-right-width: 0;
+  border-bottom-width: 0;
 }
 
 /* EmptyPlaceholder */
