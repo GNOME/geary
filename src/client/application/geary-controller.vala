@@ -1487,15 +1487,24 @@ public class GearyController : Geary.BaseObject {
 
     private void on_conversation_count_changed() {
         if (this.current_conversations != null) {
+            ConversationViewer viewer = this.main_window.conversation_viewer;
             int count = this.current_conversations.get_conversation_count();
             if (count == 0) {
                 // Let the user know if there's no available conversations
                 if (this.current_folder is Geary.SearchFolder) {
-                    this.main_window.conversation_viewer.show_empty_search();
+                    viewer.show_empty_search();
                 } else {
-                    this.main_window.conversation_viewer.show_empty_folder();
+                    viewer.show_empty_folder();
                 }
                 enable_message_buttons(false);
+            } else {
+                // When not doing autoselect, we never get
+                // conversations_selected firing from the convo list,
+                // so we need to stop the loading spinner here
+                if (!this.application.config.autoselect) {
+                    viewer.show_none_selected();
+                    enable_message_buttons(false);
+                }
             }
             conversation_count_changed(count);
         }
