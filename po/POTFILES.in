@@ -36,6 +36,7 @@ src/client/components/status-bar.vala
 src/client/components/stock.vala
 src/client/composer/composer-box.vala
 src/client/composer/composer-container.vala
+src/client/composer/composer-editor.vala
 src/client/composer/composer-embed.vala
 src/client/composer/composer-headerbar.vala
 src/client/composer/composer-link-popover.vala
@@ -389,6 +390,7 @@ src/mailer/main.vala
 [type: gettext/glade]ui/account_list.glade
 [type: gettext/glade]ui/account_spinner.glade
 [type: gettext/glade]ui/certificate_warning_dialog.glade
+[type: gettext/glade]ui/composer-editor.ui
 [type: gettext/glade]ui/composer-headerbar.ui
 [type: gettext/glade]ui/composer-link-popover.ui
 [type: gettext/glade]ui/composer-menus.ui
