@@ -39,7 +39,7 @@ namespace Geary.Config {
 
     public static string get_string_value(KeyFile key_file, string group, string key, string def = "") {
         try {
-            return key_file.get_value(group, key);
+            return key_file.get_string(group, key);
         } catch(KeyFileError err) {
             // Ignore.
         }
@@ -49,7 +49,7 @@ namespace Geary.Config {
 
     public static string get_escaped_string(KeyFile key_file, string group, string key, string def = "") {
         try {
-            return key_file.get_string(group, key);
+            return key_file.get_value(group, key);
         } catch (KeyFileError err) {
             // ignore
         }

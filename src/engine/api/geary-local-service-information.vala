@@ -20,14 +20,17 @@ public class Geary.LocalServiceInformation : Geary.ServiceInformation {
         this.credentials_method = "METHOD_LIBSECRET";
     }
 
-    public override void load_settings(KeyFile? key_file = null) throws Error {
+    public override void load_settings(KeyFile? existing = null) throws Error {
         string host_key = "";
         string port_key = "";
         string use_ssl_key = "";
         string use_starttls_key = "";
         uint16 default_port = 0;
 
-        key_file.load_from_file(file.get_path() ?? "", KeyFileFlags.NONE);
+        KeyFile key_file = existing ?? new KeyFile();
+        if (existing == null) {
+            key_file.load_from_file(file.get_path() ?? "", KeyFileFlags.NONE);
+        }
 
         switch (service) {
             case Geary.Service.IMAP:
@@ -62,11 +65,14 @@ public class Geary.LocalServiceInformation : Geary.ServiceInformation {
             key_file, Geary.Config.GROUP, use_starttls_key, this.use_starttls);
     }
 
-    public override void load_credentials(KeyFile? key_file = null, string? email_address = null) throws Error {
+    public override void load_credentials(KeyFile? existing = null, string? email_address = null) throws Error {
         string remember_password_key = "";
         string username_key = "";
 
-        key_file.load_from_file(file.get_path() ?? "", KeyFileFlags.NONE);
+        KeyFile key_file = existing ?? new KeyFile();
+        if (existing == null) {
+            key_file.load_from_file(file.get_path() ?? "", KeyFileFlags.NONE);
+        }
 
         switch (this.service) {
             case Geary.Service.IMAP:

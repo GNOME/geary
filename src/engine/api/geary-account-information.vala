@@ -205,8 +205,8 @@ public class Geary.AccountInformation : BaseObject {
             }
         }
 
-        this.imap.load_credentials(key_file);
-        this.smtp.load_credentials(key_file);
+        this.imap.load_credentials(key_file, primary_email);
+        this.smtp.load_credentials(key_file, primary_email);
 
         this.service_provider = Geary.ServiceProvider.from_string(
             Config.get_string_value(
