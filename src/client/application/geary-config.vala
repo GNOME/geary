@@ -1,4 +1,6 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2017 Michael Gratton <mike@vee.net>
+ * Copyright 2016 Software Freedom Conservancy Inc.
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -6,8 +8,9 @@
 
 /**
  * Provides convenience properties to current Geary GSettings values.
+
  */
-public class Configuration {
+public class Configuration : Geary.BaseObject {
 
     public const string ATTACHMENTS_DIR_KEY = "attachments-directory";
     public const string PRINT_DIR_KEY = "print-directory";
@@ -20,7 +23,6 @@ public class Configuration {
     public const string FOLDER_LIST_PANE_HORIZONTAL_KEY = "folder-list-pane-horizontal";
     public const string MESSAGES_PANE_POSITION_KEY = "messages-pane-position";
     public const string AUTOSELECT_KEY = "autoselect";
-    public const string DISPLAY_PREVIEW_KEY = "display-preview";
     public const string PLAY_SOUNDS_KEY = "play-sounds";
     public const string SHOW_NOTIFICATIONS_KEY = "show-notifications";
     public const string STARTUP_NOTIFICATIONS_KEY = "startup-notifications";
@@ -31,6 +33,10 @@ public class Configuration {
     public const string SEARCH_STRATEGY_KEY = "search-strategy";
     public const string CONVERSATION_VIEWER_ZOOM_KEY = "conversation-viewer-zoom";
     public const string COMPOSER_WINDOW_SIZE_KEY = "composer-window-size";
+
+    // Properties converted to be bind to the settings
+    private const string CLOCK_FORMAT_KEY = "clock-format";
+    public const string DISPLAY_PREVIEW_KEY = "display-preview";
 
 
     public enum DesktopEnvironment {
@@ -112,10 +118,8 @@ public class Configuration {
     public bool autoselect {
         get { return settings.get_boolean(AUTOSELECT_KEY); }
     }
-    
-    public bool display_preview {
-        get { return settings.get_boolean(DISPLAY_PREVIEW_KEY); }
-    }
+
+    public bool display_preview { get; set; }
 
     public string[] spell_check_languages {
         owned get {
@@ -147,17 +151,9 @@ public class Configuration {
         get { return settings.get_boolean(STARTUP_NOTIFICATIONS_KEY); }
         set { set_boolean(STARTUP_NOTIFICATIONS_KEY, value); }
     }
-    
-    private const string CLOCK_FORMAT_KEY = "clock-format";
-    public Date.ClockFormat clock_format {
-        get {
-            if (gnome_interface.get_string(CLOCK_FORMAT_KEY) == "12h")
-                return Date.ClockFormat.TWELVE_HOURS;
-            else
-                return Date.ClockFormat.TWENTY_FOUR_HOURS;
-        }
-    }
-    
+
+    public Date.ClockFormat clock_format { get; set; }
+
     public bool ask_open_attachment {
         get { return settings.get_boolean(ASK_OPEN_ATTACHMENT_KEY); }
         set { set_boolean(ASK_OPEN_ATTACHMENT_KEY, value); }
@@ -189,11 +185,26 @@ public class Configuration {
         }
     }
 
-    // Creates a configuration object.
     public Configuration(string schema_id) {
-        // Start GSettings.
-        settings = new Settings(schema_id);
-        gnome_interface = new Settings("org.gnome.desktop.interface");
+        this.settings = new Settings(schema_id);
+        this.gnome_interface = new Settings("org.gnome.desktop.interface");
+
+        bind_this(DISPLAY_PREVIEW_KEY);
+
+        this.gnome_interface.bind_with_mapping(
+            CLOCK_FORMAT_KEY, this, CLOCK_FORMAT_KEY,
+            GLib.SettingsBindFlags.DEFAULT,
+            (value, variant) => {
+                if (variant.get_string() == "12h")
+                    value.set_enum(Date.ClockFormat.TWELVE_HOURS);
+                else
+                    value.set_enum(Date.ClockFormat.TWENTY_FOUR_HOURS);
+                return true;
+            },
+            // we don't support setting
+            (value, expected_type) => { return false; },
+            null, null
+        );
 
         Migrate.old_app_config(settings);
     }
@@ -245,5 +256,10 @@ public class Configuration {
             break;
         }
     }
-}
 
+
+    private inline void bind_this(string property) {
+        this.settings.bind(property, this, property, GLib.SettingsBindFlags.DEFAULT);
+    }
+
+}
