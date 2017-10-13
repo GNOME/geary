@@ -95,19 +95,33 @@ public class ConversationListItem : Gtk.Grid {
     [GtkChild]
     private Gtk.Label count;
 
+    private Geary.App.Conversation conversation;
+    private Gee.List<Geary.RFC822.MailboxAddress> account_addresses;
+    private bool use_to;
     private Configuration config;
 
     public ConversationListItem(Geary.App.Conversation conversation,
                                 Gee.List<Geary.RFC822.MailboxAddress> account_addresses,
                                 bool use_to,
                                 Configuration config) {
-        // XXX should add a hook here to update the date when the
-        // preview pref and clock format changes
+        this.conversation = conversation;
+        this.account_addresses = account_addresses;
+        this.use_to = use_to;
         this.config = config;
 
+        this.conversation.appended.connect(() => { update(); });
+        this.conversation.trimmed.connect(() => { update(); });
+        this.conversation.email_flags_changed.connect(() => { update(); });
+
+        this.config.notify["clock-format"].connect(() => { update(); });
+        this.config.notify["display-preview"].connect(() => { update(); });
+        update();
+    }
+
+    private void update() {
         Gtk.StyleContext style = get_style_context();
 
-        if (conversation.is_flagged()) {
+        if (this.conversation.is_flagged()) {
             style.add_class(STARRED_CLASS);
             this.star_button.hide();
             this.unstar_button.show();
@@ -117,23 +131,23 @@ public class ConversationListItem : Gtk.Grid {
             this.unstar_button.hide();
         }
 
-        if (conversation.is_unread()) {
+        if (this.conversation.is_unread()) {
             style.add_class(UNREAD_CLASS);
         } else {
             style.remove_class(UNREAD_CLASS);
         }
 
-        string participants = get_participants_markup(conversation, use_to, account_addresses);
+        string participants = get_participants_markup();
         this.participants.set_markup(participants);
         this.participants.set_tooltip_markup(participants);
 
         // Use the latest message in the conversation by sender's date
         // for extracting preview text for use here
-        Geary.Email? preview_message = conversation.get_latest_recv_email(
+        Geary.Email? preview_message = this.conversation.get_latest_recv_email(
             Geary.App.Conversation.Location.ANYWHERE
         );
 
-        string subject_markup = conversation.is_unread() ? "<b>%s</b>" : "%s";
+        string subject_markup = this.conversation.is_unread() ? "<b>%s</b>" : "%s";
         subject_markup = Markup.printf_escaped(
             subject_markup,
             Geary.String.reduce_whitespace(EmailUtil.strip_subject_prefixes(preview_message))
@@ -146,80 +160,78 @@ public class ConversationListItem : Gtk.Grid {
         }
 
         string preview_text = "long long long long preview";
-        if (config.display_preview) {
+        if (this.config.display_preview) {
             // XXX load & format preview here
             // preview_text = XXXX;
             preview.set_text(preview_text);
             preview.show();
+        } else {
+            preview.hide();
         }
 
         // conversation list store sorts by date-received, so
         // display that instead of sender's Date:
         string date_text = "";
         string date_tooltip = "";
-        Geary.Email? latest_message = conversation.get_latest_recv_email(
+        Geary.Email? latest_message = this.conversation.get_latest_recv_email(
             Geary.App.Conversation.Location.IN_FOLDER_OUT_OF_FOLDER
         );
         if (latest_message != null && latest_message.properties != null) {
             date_text = Date.pretty_print(
-                latest_message.properties.date_received, config.clock_format
+                latest_message.properties.date_received, this.config.clock_format
             );
             date_tooltip = Date.pretty_print_verbose(
-                latest_message.properties.date_received, config.clock_format
+                latest_message.properties.date_received, this.config.clock_format
             );
         }
         this.date.set_text(date_text);
         this.date.set_tooltip_text(date_tooltip);
 
-        uint count = conversation.get_count();
+        uint count = this.conversation.get_count();
         this.count.set_text("%u".printf(count));
         if (count <= 1) {
             this.count.hide();
         }
     }
 
-    private static string get_participants_markup(Geary.App.Conversation conversation,
-                                                  bool use_to,
-                                                  Gee.List<Geary.RFC822.MailboxAddress> account_owner_emails) {
+    private string get_participants_markup() {
         // Build chronological list of AuthorDisplay records, setting
         // to unread if any message by that author is unread
         Gee.ArrayList<ParticipantDisplay> list = new Gee.ArrayList<ParticipantDisplay>();
         foreach (Geary.Email message in conversation.get_emails(Geary.App.Conversation.Ordering.RECV_DATE_ASCENDING)) {
-            // only display if something to display
-            Geary.RFC822.MailboxAddresses? addresses = use_to ? message.to : message.from;
-            if (addresses == null || addresses.size < 1)
-                continue;
+            Geary.RFC822.MailboxAddresses? addresses = this.use_to ? message.to : message.from;
+            if (addresses != null) {
+                foreach (Geary.RFC822.MailboxAddress address in addresses) {
+                    ParticipantDisplay participant_display = new ParticipantDisplay(address,
+                                                                                    message.email_flags.is_unread());
 
-            foreach (Geary.RFC822.MailboxAddress address in addresses) {
-                ParticipantDisplay participant_display = new ParticipantDisplay(address,
-                    message.email_flags.is_unread());
+                    // if not present, add in chronological order
+                    int existing_index = list.index_of(participant_display);
+                    if (existing_index < 0) {
+                        list.add(participant_display);
 
-                // if not present, add in chronological order
-                int existing_index = list.index_of(participant_display);
-                if (existing_index < 0) {
-                    list.add(participant_display);
+                        continue;
+                    }
 
-                    continue;
+                    // if present and this message is unread but the prior were read,
+                    // this author is now unread
+                    if (message.email_flags.is_unread() && !list[existing_index].is_unread)
+                        list[existing_index].is_unread = true;
                 }
-
-                // if present and this message is unread but the prior were read,
-                // this author is now unread
-                if (message.email_flags.is_unread() && !list[existing_index].is_unread)
-                    list[existing_index].is_unread = true;
             }
         }
 
         StringBuilder builder = new StringBuilder();
         if (list.size == 1) {
             // if only one participant, use full name
-            builder.append(list[0].get_full_markup(account_owner_emails));
+            builder.append(list[0].get_full_markup(this.account_addresses));
         } else {
             bool first = true;
             foreach (ParticipantDisplay participant in list) {
                 if (!first)
                     builder.append(", ");
 
-                builder.append(participant.get_short_markup(account_owner_emails));
+                builder.append(participant.get_short_markup(this.account_addresses));
                 first = false;
             }
         }
