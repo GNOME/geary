@@ -368,6 +368,9 @@ client/composer/email-entry.vala
 client/composer/spell-check-popover.vala
 
 client/conversation-list/conversation-list-cell-renderer.vala
+client/conversation-list/conversation-list.vala
+client/conversation-list/conversation-list-item.vala
+client/conversation-list/conversation-list-model.vala
 client/conversation-list/conversation-list-store.vala
 client/conversation-list/conversation-list-view.vala
 client/conversation-list/formatted-conversation-data.vala

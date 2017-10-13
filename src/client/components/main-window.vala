@@ -30,6 +30,7 @@ public class MainWindow : Gtk.ApplicationWindow {
     public MainToolbar main_toolbar { get; private set; }
     public SearchBar search_bar { get; private set; default = new SearchBar(); }
     public ConversationListView conversation_list_view  { get; private set; }
+    public ConversationList conversation_list  { get; private set; }
     public ConversationViewer conversation_viewer { get; private set; default = new ConversationViewer(); }
     public StatusBar status_bar { get; private set; default = new StatusBar(); }
     private MonitoredSpinner spinner = new MonitoredSpinner();
@@ -63,6 +64,8 @@ public class MainWindow : Gtk.ApplicationWindow {
 
     public MainWindow(GearyApplication application) {
         Object(application: application);
+
+        this.conversation_list = new ConversationList(application.config);
 
         load_config(application.config);
         restore_saved_window_state();
@@ -202,7 +205,11 @@ public class MainWindow : Gtk.ApplicationWindow {
         // Folder list
         this.folder_list_scrolled.add(this.folder_list);
         // Conversation list
-        this.conversation_list_scrolled.add(this.conversation_list_view);
+        this.conversation_list_scrolled.set_policy(
+            Gtk.PolicyType.NEVER,
+            Gtk.PolicyType.AUTOMATIC
+        );
+        this.conversation_list_scrolled.add(this.conversation_list);
         // Conversation viewer
         this.conversations_paned.pack2(this.conversation_viewer, true, true);
 
@@ -285,6 +292,8 @@ public class MainWindow : Gtk.ApplicationWindow {
             this.progress_monitor.add(new_model.preview_monitor);
             this.progress_monitor.add(conversations.progress_monitor);
             this.conversation_list_view.set_model(new_model);
+
+            this.conversation_list.set_model(conversations);
         }
 
         if (old_model != null) {

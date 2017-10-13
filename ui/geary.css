@@ -61,6 +61,37 @@ row.geary-folder-popover-list-row > label {
   color: @theme_text_color;
 }
 
+/* ConversationList */
+
+list.geary-conversation-list > row {
+  margin: 0;
+  border: 0;
+  padding: 0;
+}
+
+/* ConversationListItem */
+
+/* XXX RTL */
+grid.geary-conversation-list-item {
+  border-left: 4px solid transparent;
+  margin: 0px;
+  padding: 12px;
+  padding-left: 0;
+  transition: border 4s;
+}
+
+grid.geary-conversation-list-item.geary-unread {
+  border-color: @theme_selected_bg_color;
+  transition: border 0.25s;
+}
+
+grid.geary-conversation-list-item label.geary-count {
+  padding: 2px 6px;
+  border-radius: 2px;
+  color: @theme_selected_fg_color;
+  background: @theme_selected_bg_color;
+}
+
 /* ConversationListBox */
 
 .conversation-listbox {

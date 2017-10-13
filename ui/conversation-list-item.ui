@@ -1,0 +1,158 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Generated with glade 3.20.0 -->
+<interface>
+  <requires lib="gtk+" version="3.20"/>
+  <template class="ConversationListItem" parent="GtkGrid">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <child>
+      <object class="GtkLabel" id="participants">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="halign">start</property>
+        <property name="valign">start</property>
+        <property name="margin_bottom">2</property>
+        <property name="hexpand">True</property>
+        <property name="label" translatable="yes">Participants</property>
+        <property name="ellipsize">end</property>
+        <property name="single_line_mode">True</property>
+        <property name="xalign">0</property>
+      </object>
+      <packing>
+        <property name="left_attach">1</property>
+        <property name="top_attach">0</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkLabel" id="subject">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="halign">start</property>
+        <property name="hexpand">True</property>
+        <property name="label" translatable="yes">Subject</property>
+        <property name="ellipsize">end</property>
+        <property name="single_line_mode">True</property>
+        <property name="xalign">0</property>
+      </object>
+      <packing>
+        <property name="left_attach">1</property>
+        <property name="top_attach">1</property>
+        <property name="width">2</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkGrid">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="vexpand">True</property>
+        <child>
+          <object class="GtkButton" id="star_button">
+            <property name="visible">True</property>
+            <property name="sensitive">False</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="tooltip_text" translatable="yes" comments="Note: The application will never show this button at the same time as unstar_button, one will always be hidden.">Mark this message as starred</property>
+            <property name="valign">center</property>
+            <property name="vexpand">True</property>
+            <property name="action_name">eml.star</property>
+            <property name="relief">none</property>
+            <child>
+              <object class="GtkImage">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="icon_name">non-starred-symbolic</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">1</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="unstar_button">
+            <property name="sensitive">False</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="tooltip_text" translatable="yes" comments="Note: The application will never show this button at the same time as star_button, one will always be hidden.">Mark this message as not starred</property>
+            <property name="valign">center</property>
+            <property name="vexpand">True</property>
+            <property name="action_name">eml.unstar</property>
+            <property name="relief">none</property>
+            <child>
+              <object class="GtkImage">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="icon_name">starred-symbolic</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">0</property>
+          </packing>
+        </child>
+      </object>
+      <packing>
+        <property name="left_attach">0</property>
+        <property name="top_attach">0</property>
+        <property name="height">3</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkLabel" id="preview">
+        <property name="can_focus">False</property>
+        <property name="halign">start</property>
+        <property name="hexpand">True</property>
+        <property name="label" translatable="yes" comments="Placeholder for preview text used while loading the preview for a message in the conversation list.">…</property>
+        <property name="ellipsize">end</property>
+        <property name="single_line_mode">True</property>
+        <property name="xalign">0</property>
+        <style>
+          <class name="dim-label"/>
+        </style>
+      </object>
+      <packing>
+        <property name="left_attach">1</property>
+        <property name="top_attach">2</property>
+        <property name="width">2</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkLabel" id="count">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="halign">end</property>
+        <property name="valign">center</property>
+        <property name="vexpand">True</property>
+        <property name="label" translatable="yes">0</property>
+        <style>
+          <class name="geary-count"/>
+        </style>
+      </object>
+      <packing>
+        <property name="left_attach">3</property>
+        <property name="top_attach">1</property>
+        <property name="height">2</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkLabel" id="date">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="halign">end</property>
+        <property name="valign">start</property>
+        <property name="margin_left">6</property>
+        <property name="label" translatable="yes">Date</property>
+      </object>
+      <packing>
+        <property name="left_attach">2</property>
+        <property name="top_attach">0</property>
+        <property name="width">2</property>
+      </packing>
+    </child>
+    <style>
+      <class name="geary-conversation-list-item"/>
+    </style>
+  </template>
+</interface>

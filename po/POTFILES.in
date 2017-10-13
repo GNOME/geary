@@ -50,7 +50,10 @@ src/client/composer/contact-list-store.vala
 src/client/composer/contact-list-store-cache.vala
 src/client/composer/email-entry.vala
 src/client/composer/spell-check-popover.vala
+src/client/conversation-list/conversation-list.vala
 src/client/conversation-list/conversation-list-cell-renderer.vala
+src/client/conversation-list/conversation-list-item.vala
+src/client/conversation-list/conversation-list-model.vala
 src/client/conversation-list/conversation-list-store.vala
 src/client/conversation-list/conversation-list-view.vala
 src/client/conversation-list/formatted-conversation-data.vala
@@ -403,6 +406,7 @@ ui/composer-widget.ui
 ui/conversation-email.ui
 ui/conversation-email-attachment-view.ui
 ui/conversation-email-menus.ui
+ui/conversation-list-item.ui
 ui/conversation-message-menus.ui
 ui/conversation-message.ui
 ui/conversation-viewer.ui
