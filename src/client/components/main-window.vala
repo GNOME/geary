@@ -205,10 +205,6 @@ public class MainWindow : Gtk.ApplicationWindow {
         // Folder list
         this.folder_list_scrolled.add(this.folder_list);
         // Conversation list
-        this.conversation_list_scrolled.set_policy(
-            Gtk.PolicyType.NEVER,
-            Gtk.PolicyType.AUTOMATIC
-        );
         this.conversation_list_scrolled.add(this.conversation_list);
         // Conversation viewer
         this.conversations_paned.pack2(this.conversation_viewer, true, true);
