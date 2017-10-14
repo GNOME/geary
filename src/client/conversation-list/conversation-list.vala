@@ -14,9 +14,11 @@ public class ConversationList : Gtk.ListBox {
 
     private const string CLASS = "geary-conversation-list";
 
+    /** Underlying model for this list */
+    public ConversationListModel? model { get; private set; default=null; }
+
     private Configuration config;
 
-    private ConversationListModel? model = null;
 
 
     /** Fired when a user changes the list's selection. */

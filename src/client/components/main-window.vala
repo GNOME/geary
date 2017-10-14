@@ -296,6 +296,15 @@ public class MainWindow : Gtk.ApplicationWindow {
             this.progress_monitor.remove(old_model.conversations.progress_monitor);
         }
 
+        Geary.App.ConversationMonitor? old_monitor = (this.conversation_list != null)
+            ? this.conversation_list.model.monitor : null;
+        if (old_monitor != null) {
+            old_monitor.seed_completed.disconnect(on_conversation_count_changed);
+            old_monitor.scan_completed.disconnect(on_conversation_count_changed);
+            old_monitor.conversations_added.disconnect(on_conversation_count_changed);
+            old_monitor.conversations_removed.disconnect(on_conversation_count_changed);
+        }
+
         Geary.App.ConversationMonitor? new_monitor =
             this.application.controller.current_conversations;
 
@@ -307,6 +316,10 @@ public class MainWindow : Gtk.ApplicationWindow {
             this.conversation_list_view.set_model(new_model);
 
             this.conversation_list.bind_model(new_monitor);
+            new_monitor.seed_completed.connect(on_conversation_count_changed);
+            new_monitor.scan_completed.connect(on_conversation_count_changed);
+            new_monitor.conversations_added.connect(on_conversation_count_changed);
+            new_monitor.conversations_removed.connect(on_conversation_count_changed);
         }
 
         if (old_model != null) {
@@ -489,6 +502,29 @@ public class MainWindow : Gtk.ApplicationWindow {
             this.application.controller.create_compose_widget(
                 ComposerWidget.ComposeType.NEW_MESSAGE, draft, null, null, true
             );
+        }
+    }
+
+    private void on_conversation_count_changed() {
+        if (this.application.controller.current_conversations != null) {
+            int count = this.application.controller.current_conversations.get_conversation_count();
+            if (count == 0) {
+                // Let the user know if there's no available conversations
+                if (this.current_folder is Geary.SearchFolder) {
+                    this.conversation_viewer.show_empty_search();
+                } else {
+                    this.conversation_viewer.show_empty_folder();
+                }
+                this.application.controller.enable_message_buttons(false);
+            } else {
+                // When not doing autoselect, we never get
+                // conversations_selected firing from the convo list,
+                // so we need to stop the loading spinner here
+                if (!this.application.config.autoselect) {
+                    this.conversation_viewer.show_none_selected();
+                    this.application.controller.enable_message_buttons(false);
+                }
+            }
         }
     }
 

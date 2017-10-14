@@ -18,13 +18,14 @@
 public class ConversationListModel : Geary.BaseObject, GLib.ListModel {
 
 
+    /** The source of conversations for this model. */
+    public Geary.App.ConversationMonitor monitor { get; private set; }
+
     // The model's native sort order
     private static int model_sort(Geary.App.Conversation a, Geary.App.Conversation b) {
         return compare_conversation_descending(a, b);
     }
 
-
-    private Geary.App.ConversationMonitor monitor;
 
     // Backing store for this model. We can't just derive from this
     // directly since GLib.ListStore is a compact class.

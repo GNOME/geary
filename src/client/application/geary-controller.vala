@@ -140,12 +140,7 @@ public class GearyController : Geary.BaseObject {
      * Fired when the currently selected folder has changed.
      */
     public signal void folder_selected(Geary.Folder? folder);
-    
-    /**
-     * Fired when the number of conversations changes.
-     */
-    public signal void conversation_count_changed(int count);
-    
+
     /**
      * Fired when the search text is changed according to the controller.  This accounts
      * for a brief typmatic delay.
@@ -1350,11 +1345,7 @@ public class GearyController : Geary.BaseObject {
         
         current_conversations.scan_error.connect(on_scan_error);
         current_conversations.seed_completed.connect(on_seed_completed);
-        current_conversations.seed_completed.connect(on_conversation_count_changed);
-        current_conversations.scan_completed.connect(on_conversation_count_changed);
-        current_conversations.conversations_added.connect(on_conversation_count_changed);
-        current_conversations.conversations_removed.connect(on_conversation_count_changed);
-        
+
         if (!current_conversations.is_monitoring)
             yield current_conversations.start_monitoring_async(conversation_cancellable);
         
@@ -1373,31 +1364,6 @@ public class GearyController : Geary.BaseObject {
         if (!main_window.conversation_list_has_scrollbar()) {
             debug("Not enough messages, loading more for folder %s", current_folder.to_string());
             on_load_more();
-        }
-    }
-
-    private void on_conversation_count_changed() {
-        if (this.current_conversations != null) {
-            ConversationViewer viewer = this.main_window.conversation_viewer;
-            int count = this.current_conversations.get_conversation_count();
-            if (count == 0) {
-                // Let the user know if there's no available conversations
-                if (this.current_folder is Geary.SearchFolder) {
-                    viewer.show_empty_search();
-                } else {
-                    viewer.show_empty_folder();
-                }
-                enable_message_buttons(false);
-            } else {
-                // When not doing autoselect, we never get
-                // conversations_selected firing from the convo list,
-                // so we need to stop the loading spinner here
-                if (!this.application.config.autoselect) {
-                    viewer.show_none_selected();
-                    enable_message_buttons(false);
-                }
-            }
-            conversation_count_changed(count);
         }
     }
 
