@@ -16,21 +16,43 @@ public class ConversationList : Gtk.ListBox {
 
     private Configuration config;
 
+    private ConversationListModel? model = null;
+
+
+    /** Fired when a user changes the list's selection. */
+    public signal void conversation_selection_changed(Gee.Set<Geary.App.Conversation> selection);
+
+    /** Fired when a user activates a row in the list. */
+    public signal void conversation_activated(Geary.App.Conversation activated);
+
 
     public ConversationList(Configuration config) {
         this.config = config;
         get_style_context().add_class(CLASS);
         set_activate_on_single_click(true);
-        set_selection_mode(Gtk.SelectionMode.MULTIPLE);
+        set_selection_mode(Gtk.SelectionMode.SINGLE);
+
+        this.row_activated.connect((row) => {
+                uint activated = row.get_index();
+                this.conversation_activated(this.model.get_conversation(activated));
+            });
+        this.selected_rows_changed.connect(() => {
+                Gee.HashSet<Geary.App.Conversation> new_selection =
+                    new Gee.HashSet<Geary.App.Conversation>();
+                foreach (Gtk.ListBoxRow row in get_selected_rows()) {
+                    uint selected = row.get_index();
+                    new_selection.add(this.model.get_conversation(selected));
+                }
+                this.conversation_selection_changed(new_selection);
+            });
     }
 
     public void set_model(Geary.App.ConversationMonitor monitor) {
+        this.model = new ConversationListModel(monitor);
         Geary.Folder displayed = monitor.folder;
         Gee.List<Geary.RFC822.MailboxAddress> account_addresses = displayed.account.information.get_all_mailboxes();
         bool use_to = (displayed != null) && displayed.special_folder_type.is_outgoing();
-        bind_model(
-            new ConversationListModel(monitor),
-            (convo) => {
+        bind_model(this.model, (convo) => {
                 return new ConversationListItem(convo as Geary.App.Conversation,
                                                 account_addresses,
                                                 use_to,

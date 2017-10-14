@@ -33,6 +33,7 @@ public class MainWindow : Gtk.ApplicationWindow {
     public ConversationList conversation_list  { get; private set; }
     public ConversationViewer conversation_viewer { get; private set; default = new ConversationViewer(); }
     public StatusBar status_bar { get; private set; default = new StatusBar(); }
+    private Gee.Set<Geary.App.Conversation> selected_conversations = new Gee.HashSet<Geary.App.Conversation>();
     private MonitoredSpinner spinner = new MonitoredSpinner();
     [GtkChild]
     private Gtk.Box main_layout;
@@ -66,6 +67,8 @@ public class MainWindow : Gtk.ApplicationWindow {
         Object(application: application);
 
         this.conversation_list = new ConversationList(application.config);
+        this.conversation_list.conversation_selection_changed.connect(on_conversation_selection_changed);
+        this.conversation_list.conversation_activated.connect(on_conversation_activated);
 
         load_config(application.config);
         restore_saved_window_state();
@@ -79,6 +82,18 @@ public class MainWindow : Gtk.ApplicationWindow {
         set_styling();
         setup_layout(application.config);
         on_change_orientation();
+    }
+
+    ~MainWindow() {
+        this.conversation_list.conversation_selection_changed.disconnect(on_conversation_selection_changed);
+        this.conversation_list.conversation_activated.disconnect(on_conversation_activated);
+    }
+
+    /**
+     * Returns a read-only set of currently selected conversations.
+     */
+    public Gee.Set<Geary.App.Conversation> get_selected_conversations() {
+        return this.selected_conversations.read_only_view;
     }
 
     public void show_infobar(MainWindowInfoBar info_bar) {
@@ -412,6 +427,66 @@ public class MainWindow : Gtk.ApplicationWindow {
                 (!(focus is Gtk.Entry) && !(focus is ComposerWebView))) {
                 on_shift_key(event.type == Gdk.EventType.KEY_PRESS);
             }
+        }
+    }
+
+    private inline SimpleAction get_action(string name) {
+        return (SimpleAction) lookup_action(name);
+    }
+
+    private void on_conversation_selection_changed(Gee.Set<Geary.App.Conversation> selection) {
+        this.selected_conversations = selection;
+        SimpleAction find_action = get_action(
+            GearyController.ACTION_FIND_IN_CONVERSATION
+        );
+        find_action.set_enabled(false);
+        if (this.current_folder != null && !this.conversation_viewer.is_composer_visible) {
+            switch(selection.size) {
+            case 0:
+                this.application.controller.enable_message_buttons(false);
+                this.conversation_viewer.show_none_selected();
+                break;
+
+            case 1:
+                // Cancel existing avatar loads before loading new
+                // convo since that will start loading more avatars
+                this.conversation_viewer.load_conversation.begin(
+                    Geary.Collection.get_first(selection),
+                    this.current_folder,
+                    this.application.config,
+                    this.application.controller.avatar_session,
+                    (obj, ret) => {
+                        try {
+                            this.conversation_viewer.load_conversation.end(ret);
+                            this.application.controller.enable_message_buttons(true);
+                            find_action.set_enabled(true);
+                        } catch (Error err) {
+                            debug("Unable to load conversation: %s",
+                                  err.message);
+                        }
+                    }
+                );
+                break;
+
+            default:
+                this.application.controller.enable_multiple_message_buttons();
+                this.conversation_viewer.show_multiple_selected();
+                break;
+            }
+        }
+    }
+
+    private void on_conversation_activated(Geary.App.Conversation activated) {
+        // Currently activating a conversation is only available for drafts folders.
+        if (this.current_folder != null &&
+            this.current_folder.special_folder_type == Geary.SpecialFolderType.DRAFTS) {
+            // TODO: Determine how to map between conversations and drafts correctly.
+            Geary.Email draft = activated.get_latest_recv_email(
+                Geary.App.Conversation.Location.IN_FOLDER
+                );
+            this.application.controller.create_compose_widget(
+                ComposerWidget.ComposeType.NEW_MESSAGE, draft, null, null, true
+            );
         }
     }
 

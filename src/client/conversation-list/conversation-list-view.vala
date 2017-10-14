@@ -248,8 +248,8 @@ public class ConversationListView : Gtk.TreeView {
             // all selected conversations; otherwise, it just applies to this one.
             Geary.App.Conversation conversation = get_model().get_conversation_at_path(path);
             Gee.Collection<Geary.App.Conversation> to_mark;
-            if (GearyApplication.instance.controller.get_selected_conversations().contains(conversation))
-                to_mark = GearyApplication.instance.controller.get_selected_conversations();
+            if (GearyApplication.instance.controller.main_window.get_selected_conversations().contains(conversation))
+                to_mark = GearyApplication.instance.controller.main_window.get_selected_conversations();
             else
                 to_mark = Geary.iterate<Geary.App.Conversation>(conversation).to_array_list();
             
