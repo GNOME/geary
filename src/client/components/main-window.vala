@@ -514,7 +514,7 @@ public class MainWindow : Gtk.ApplicationWindow {
 
     private void on_load_more() {
         debug("on_load_more");
-        this.application.controller.current_conversations.min_window_count += GearyController.MIN_CONVERSATION_COUNT;
+        this.application.controller.current_conversations.min_window_count += GearyController.CONVERSATION_PAGE_SIZE;
     }
 
     private void on_scan_error(Error err) {
