@@ -18,23 +18,17 @@
 public class ConversationListModel : Geary.BaseObject, GLib.ListModel {
 
 
+    // The model's native sort order
+    private static int model_sort(Geary.App.Conversation a, Geary.App.Conversation b) {
+        return compare_conversation_descending(a, b);
+    }
+
+
     private Geary.App.ConversationMonitor monitor;
 
-    // Can't just derive from this directly since it's a compact class
+    // Backing store for this model. We can't just derive from this
+    // directly since GLib.ListStore is a compact class.
     private ListStore conversations = new ListStore(typeof(Geary.App.Conversation));
-
-
-    public Object? get_item(uint position) {
-        return this.conversations.get_item(position);
-    }
-
-    public uint get_n_items() {
-        return this.conversations.get_n_items();
-    }
-
-    public Type get_item_type() {
-        return this.conversations.get_item_type();
-    }
 
 
     public ConversationListModel(Geary.App.ConversationMonitor monitor) {
@@ -42,10 +36,9 @@ public class ConversationListModel : Geary.BaseObject, GLib.ListModel {
 
         //monitor.scan_completed.connect(on_scan_completed);
         monitor.conversations_added.connect(on_conversations_added);
-        //monitor.conversations_removed.connect(on_conversation_removed);
-        //monitor.conversation_appended.connect(on_conversation_appended);
-        //monitor.conversation_trimmed.connect(on_conversation_trimmed);
-        //monitor.email_flags_changed.connect(on_email_flags_changed);
+        monitor.conversations_removed.connect(on_conversations_removed);
+        // XXX
+        //monitor.email_flags_changed.connect((convo) => { update(convo); });
 
         // add all existing monitor
         on_conversations_added(monitor.get_conversations());
@@ -55,14 +48,70 @@ public class ConversationListModel : Geary.BaseObject, GLib.ListModel {
             });
     }
 
-    private void on_conversations_added(Gee.Collection<Geary.App.Conversation> monitor) {
-        foreach (Geary.App.Conversation conversation in monitor) {
+    public Object? get_item(uint position) {
+        return this.conversations.get_item(position);
+    }
+
+    public uint get_n_items() {
+        return this.monitor.get_conversation_count();
+    }
+
+    public Type get_item_type() {
+        return this.conversations.get_item_type();
+    }
+
+    public Geary.App.Conversation get_conversation(uint position) {
+        // XXX need to handle null here by throwing an error
+        return this.conversations.get_item(position) as Geary.App.Conversation;
+    }
+
+    // private void update(Geary.App.Conversation target) {
+    //     // XXX this is horribly inefficient
+    //     this.conversations.sort((a, b) => {
+    //             return model_sort(a as Geary.App.Conversation,
+    //                               b as Geary.App.Conversation);
+    //         });
+    // }
+
+    private uint get_index(Geary.App.Conversation target)
+        throws Error {
+        // Yet Another Binary Search Implementation :<
+        uint lower = 0;
+        uint upper = get_n_items();
+        while (lower <= upper) {
+            uint mid = (uint) Math.floor((upper + lower) / 2);
+            int cmp = model_sort(get_conversation(mid), target);
+            if (cmp < 1) {
+                lower = mid + 1;
+            } else if (cmp > 1) {
+                upper = mid - 1;
+            } else {
+                return mid;
+            }
+        }
+        // XXX UGH
+        throw new IOError.NOT_FOUND("Not found");
+    }
+
+    private void on_conversations_added(Gee.Collection<Geary.App.Conversation> conversations) {
+        foreach (Geary.App.Conversation convo in conversations) {
             this.conversations.insert_sorted(
-                conversation,
+                convo,
                 (a, b) => {
-                    return - compare_conversation_ascending(a as Geary.App.Conversation,
-                                                            b as Geary.App.Conversation); }
+                    return model_sort(a as Geary.App.Conversation,
+                                      b as Geary.App.Conversation);
+                }
             );
+        }
+    }
+
+    private void on_conversations_removed(Gee.Collection<Geary.App.Conversation> conversations) {
+        foreach (Geary.App.Conversation convo in conversations) {
+            try {
+                this.conversations.remove(get_index(convo));
+            } catch (Error err) {
+                debug("Failed to remove conversation");
+            }
         }
     }
 
