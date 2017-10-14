@@ -15,8 +15,7 @@ public class ConversationListItem : Gtk.Grid {
     private const string UNREAD_CLASS = "geary-unread";
 
     // Translators: This stands in place for the user's name in the
-    // list of participants in a conversation. Should be short,
-    // ideally.
+    // list of participants in a conversation.
     private const string ME = _("Me");
 
     private class ParticipantDisplay : Geary.BaseObject, Gee.Hashable<ParticipantDisplay> {

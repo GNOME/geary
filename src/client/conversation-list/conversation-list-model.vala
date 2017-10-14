@@ -65,6 +65,9 @@ public class ConversationListModel : Geary.BaseObject, GLib.ListModel {
         return this.conversations.get_item(position) as Geary.App.Conversation;
     }
 
+    // XXX Something like this should be enabled so that if flags like
+    // received date changes, the ordering will change to reflect
+    // that.
     // private void update(Geary.App.Conversation target) {
     //     // XXX this is horribly inefficient
     //     this.conversations.sort((a, b) => {
@@ -76,14 +79,14 @@ public class ConversationListModel : Geary.BaseObject, GLib.ListModel {
     private uint get_index(Geary.App.Conversation target)
         throws Error {
         // Yet Another Binary Search Implementation :<
-        uint lower = 0;
-        uint upper = get_n_items();
-        while (lower <= upper) {
-            uint mid = (uint) Math.floor((upper + lower) / 2);
+        int lower = 0;
+        int upper = ((int) get_n_items()) - 1;
+        while (lower < upper) {
+            int mid = (int) Math.floor((upper + lower) / 2);
             int cmp = model_sort(get_conversation(mid), target);
-            if (cmp < 1) {
+            if (cmp < 0) {
                 lower = mid + 1;
-            } else if (cmp > 1) {
+            } else if (cmp > 0) {
                 upper = mid - 1;
             } else {
                 return mid;
@@ -110,7 +113,7 @@ public class ConversationListModel : Geary.BaseObject, GLib.ListModel {
             try {
                 this.conversations.remove(get_index(convo));
             } catch (Error err) {
-                debug("Failed to remove conversation");
+                debug("Failed to remove conversation: %s", err.message);
             }
         }
     }

@@ -15,11 +15,6 @@ public class MainWindow : Gtk.ApplicationWindow {
         set { base.set_application(value); }
     }
 
-    public Geary.Folder? current_folder { get; private set; default = null; }
-
-    private Geary.AggregateProgressMonitor progress_monitor = new Geary.AggregateProgressMonitor();
-    private Geary.ProgressMonitor? folder_progress = null;
-
     // Used to save/load the window state between sessions.
     public int window_width { get; set; }
     public int window_height { get; set; }
@@ -33,8 +28,15 @@ public class MainWindow : Gtk.ApplicationWindow {
     public ConversationList conversation_list  { get; private set; }
     public ConversationViewer conversation_viewer { get; private set; default = new ConversationViewer(); }
     public StatusBar status_bar { get; private set; default = new StatusBar(); }
+
+    public Geary.Folder? current_folder { get; private set; default = null; }
+
+    private Geary.AggregateProgressMonitor progress_monitor = new Geary.AggregateProgressMonitor();
+    private Geary.ProgressMonitor? folder_progress = null;
     private Gee.Set<Geary.App.Conversation> selected_conversations = new Gee.HashSet<Geary.App.Conversation>();
+
     private MonitoredSpinner spinner = new MonitoredSpinner();
+
     [GtkChild]
     private Gtk.Box main_layout;
     [GtkChild]
@@ -294,17 +296,17 @@ public class MainWindow : Gtk.ApplicationWindow {
             this.progress_monitor.remove(old_model.conversations.progress_monitor);
         }
 
-        Geary.App.ConversationMonitor? conversations =
+        Geary.App.ConversationMonitor? new_monitor =
             this.application.controller.current_conversations;
 
-        if (conversations != null) {
+        if (new_monitor != null) {
             ConversationListStore new_model =
-                new ConversationListStore(conversations);
+                new ConversationListStore(new_monitor);
+            this.progress_monitor.add(new_monitor.progress_monitor);
             this.progress_monitor.add(new_model.preview_monitor);
-            this.progress_monitor.add(conversations.progress_monitor);
             this.conversation_list_view.set_model(new_model);
 
-            this.conversation_list.set_model(conversations);
+            this.conversation_list.bind_model(new_monitor);
         }
 
         if (old_model != null) {

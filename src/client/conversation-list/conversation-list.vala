@@ -47,12 +47,12 @@ public class ConversationList : Gtk.ListBox {
             });
     }
 
-    public void set_model(Geary.App.ConversationMonitor monitor) {
+    public new void bind_model(Geary.App.ConversationMonitor monitor) {
         this.model = new ConversationListModel(monitor);
         Geary.Folder displayed = monitor.folder;
         Gee.List<Geary.RFC822.MailboxAddress> account_addresses = displayed.account.information.get_all_mailboxes();
         bool use_to = (displayed != null) && displayed.special_folder_type.is_outgoing();
-        bind_model(this.model, (convo) => {
+        base.bind_model(this.model, (convo) => {
                 return new ConversationListItem(convo as Geary.App.Conversation,
                                                 account_addresses,
                                                 use_to,
