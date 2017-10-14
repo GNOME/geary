@@ -223,7 +223,6 @@ public class GearyController : Geary.BaseObject {
         Geary.Engine.instance.untrusted_host.connect(on_untrusted_host);
         
         // Connect to various UI signals.
-        main_window.conversation_list_view.load_more.connect(on_load_more);
         main_window.conversation_list_view.mark_conversations.connect(on_mark_conversations);
         main_window.conversation_list_view.visible_conversations_changed.connect(on_visible_conversations_changed);
         main_window.folder_list.folder_selected.connect(on_folder_selected);
@@ -295,7 +294,6 @@ public class GearyController : Geary.BaseObject {
         Geary.Engine.instance.untrusted_host.disconnect(on_untrusted_host);
 
         // Disconnect from various UI signals.
-        main_window.conversation_list_view.load_more.disconnect(on_load_more);
         main_window.conversation_list_view.mark_conversations.disconnect(on_mark_conversations);
         main_window.conversation_list_view.visible_conversations_changed.disconnect(on_visible_conversations_changed);
         main_window.folder_list.folder_selected.disconnect(on_folder_selected);
@@ -1342,9 +1340,6 @@ public class GearyController : Geary.BaseObject {
             // Inbox selected, clear new messages if visible
             clear_new_messages("do_select_folder (inbox)", null);
         }
-        
-        current_conversations.scan_error.connect(on_scan_error);
-        current_conversations.seed_completed.connect(on_seed_completed);
 
         if (!current_conversations.is_monitoring)
             yield current_conversations.start_monitoring_async(conversation_cancellable);
@@ -1352,19 +1347,6 @@ public class GearyController : Geary.BaseObject {
         select_folder_mutex.release(ref mutex_token);
         
         debug("Switched to %s", folder.to_string());
-    }
-
-    private void on_scan_error(Error err) {
-        debug("Scan error: %s", err.message);
-    }
-    
-    private void on_seed_completed() {
-        // Done scanning.  Check if we have enough messages to fill the conversation list; if not,
-        // trigger a load_more();
-        if (!main_window.conversation_list_has_scrollbar()) {
-            debug("Not enough messages, loading more for folder %s", current_folder.to_string());
-            on_load_more();
-        }
     }
 
     private void on_libnotify_invoked(Geary.Folder? folder, Geary.Email? email) {
@@ -1394,11 +1376,6 @@ public class GearyController : Geary.BaseObject {
     private void on_indicator_activated_inbox(Geary.Folder folder, uint32 timestamp) {
         on_indicator_activated_application(timestamp);
         main_window.folder_list.select_folder(folder);
-    }
-    
-    private void on_load_more() {
-        debug("on_load_more");
-        current_conversations.min_window_count += MIN_CONVERSATION_COUNT;
     }
     
     private void on_select_folder_completed(Object? source, AsyncResult result) {

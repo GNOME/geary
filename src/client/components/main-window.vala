@@ -72,6 +72,7 @@ public class MainWindow : Gtk.ApplicationWindow {
         this.conversation_list.conversation_selection_changed.connect(on_conversation_selection_changed);
         this.conversation_list.conversation_activated.connect(on_conversation_activated);
 
+        this.conversation_list.load_more.connect(on_load_more);
         load_config(application.config);
         restore_saved_window_state();
 
@@ -89,6 +90,7 @@ public class MainWindow : Gtk.ApplicationWindow {
     ~MainWindow() {
         this.conversation_list.conversation_selection_changed.disconnect(on_conversation_selection_changed);
         this.conversation_list.conversation_activated.disconnect(on_conversation_activated);
+        this.conversation_list.load_more.disconnect(on_load_more);
     }
 
     /**
@@ -299,6 +301,8 @@ public class MainWindow : Gtk.ApplicationWindow {
         Geary.App.ConversationMonitor? old_monitor = (this.conversation_list != null)
             ? this.conversation_list.model.monitor : null;
         if (old_monitor != null) {
+            old_monitor.scan_error.disconnect(on_scan_error);
+            old_monitor.seed_completed.disconnect(on_seed_completed);
             old_monitor.seed_completed.disconnect(on_conversation_count_changed);
             old_monitor.scan_completed.disconnect(on_conversation_count_changed);
             old_monitor.conversations_added.disconnect(on_conversation_count_changed);
@@ -316,6 +320,9 @@ public class MainWindow : Gtk.ApplicationWindow {
             this.conversation_list_view.set_model(new_model);
 
             this.conversation_list.bind_model(new_monitor);
+
+            new_monitor.scan_error.connect(on_scan_error);
+            new_monitor.seed_completed.connect(on_seed_completed);
             new_monitor.seed_completed.connect(on_conversation_count_changed);
             new_monitor.scan_completed.connect(on_conversation_count_changed);
             new_monitor.conversations_added.connect(on_conversation_count_changed);
@@ -502,6 +509,24 @@ public class MainWindow : Gtk.ApplicationWindow {
             this.application.controller.create_compose_widget(
                 ComposerWidget.ComposeType.NEW_MESSAGE, draft, null, null, true
             );
+        }
+    }
+
+    private void on_load_more() {
+        debug("on_load_more");
+        this.application.controller.current_conversations.min_window_count += GearyController.MIN_CONVERSATION_COUNT;
+    }
+
+    private void on_scan_error(Error err) {
+        debug("Scan error: %s", err.message);
+    }
+
+    private void on_seed_completed() {
+        // Done scanning.  Check if we have enough messages to fill the conversation list; if not,
+        // trigger a load_more();
+        if (!conversation_list_has_scrollbar()) {
+            debug("Not enough messages, loading more for folder %s", current_folder.to_string());
+            on_load_more();
         }
     }
 
