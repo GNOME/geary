@@ -17,7 +17,8 @@ public class Geary.LocalServiceInformation : Geary.ServiceInformation {
         this.service = service;
         this.file = config_directory.get_child(Geary.AccountInformation.SETTINGS_FILENAME);
         this.mediator = mediator;
-        this.credentials_method = "METHOD_LIBSECRET";
+        this.credentials_provider = CredentialsProvider.LIBSECRET;
+        this.credentials_method = CredentialsMethod.PASSWORD;
     }
 
     public override void load_settings(KeyFile? existing = null) throws Error {
@@ -63,6 +64,14 @@ public class Geary.LocalServiceInformation : Geary.ServiceInformation {
             key_file, Geary.Config.GROUP, use_ssl_key, this.use_ssl);
         this.use_starttls = Geary.Config.get_bool_value(
             key_file, Geary.Config.GROUP, use_starttls_key, this.use_starttls);
+
+        /* If the credentials provider and method keys are not in the config file,
+         * assume we have the libsecret credentials provider using plain password auth.
+         * Write these values back later when saving the configuration. */
+        this.credentials_provider = CredentialsProvider.from_string(Geary.Config.get_string_value(
+            key_file, Geary.Config.GROUP, Geary.Config.CREDENTIALS_PROVIDER_KEY, CredentialsProvider.LIBSECRET.to_string()));
+        this.credentials_method = CredentialsMethod.from_string(Geary.Config.get_string_value(
+            key_file, Geary.Config.GROUP, Geary.Config.CREDENTIALS_METHOD_KEY, CredentialsMethod.PASSWORD.to_string()));
     }
 
     public override void load_credentials(KeyFile? existing = null, string? email_address = null) throws Error {
@@ -92,12 +101,16 @@ public class Geary.LocalServiceInformation : Geary.ServiceInformation {
     }
 
     public override void save_settings(KeyFile? key_file = null) {
+        key_file.set_value(Geary.Config.GROUP, Geary.Config.CREDENTIALS_PROVIDER_KEY, this.credentials_provider.to_string());
+        key_file.set_value(Geary.Config.GROUP, Geary.Config.CREDENTIALS_METHOD_KEY, this.credentials_method.to_string());
+
         switch (this.service) {
             case Geary.Service.IMAP:
                 key_file.set_value(Geary.Config.GROUP, Geary.Config.IMAP_HOST, this.host);
                 key_file.set_integer(Geary.Config.GROUP, Geary.Config.IMAP_PORT, this.port);
                 key_file.set_boolean(Geary.Config.GROUP, Geary.Config.IMAP_SSL, this.use_ssl);
                 key_file.set_boolean(Geary.Config.GROUP, Geary.Config.IMAP_STARTTLS, this.use_starttls);
+                key_file.set_string(Geary.Config.GROUP, Geary.Config.IMAP_USERNAME_KEY, this.credentials.user);
                 break;
             case Geary.Service.SMTP:
                 key_file.set_value(Geary.Config.GROUP, Geary.Config.SMTP_HOST, this.host);
@@ -106,6 +119,7 @@ public class Geary.LocalServiceInformation : Geary.ServiceInformation {
                 key_file.set_boolean(Geary.Config.GROUP, Geary.Config.SMTP_STARTTLS, this.use_starttls);
                 key_file.set_boolean(Geary.Config.GROUP, Geary.Config.SMTP_USE_IMAP_CREDENTIALS, this.smtp_use_imap_credentials);
                 key_file.set_boolean(Geary.Config.GROUP, Geary.Config.SMTP_NOAUTH, this.smtp_noauth);
+                key_file.set_string(Geary.Config.GROUP, Geary.Config.SMTP_USERNAME_KEY, this.credentials.user);
                 break;
         }
     }

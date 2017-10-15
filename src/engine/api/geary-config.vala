@@ -36,6 +36,8 @@ namespace Geary.Config {
     public const string SAVE_DRAFTS_KEY = "save_drafts";
     public const string USE_EMAIL_SIGNATURE_KEY = "use_email_signature";
     public const string EMAIL_SIGNATURE_KEY = "email_signature";
+    public const string CREDENTIALS_PROVIDER_KEY = "credentials_provider";
+    public const string CREDENTIALS_METHOD_KEY = "credentials_method";
 
     public static string get_string_value(KeyFile key_file, string group, string key, string def = "") {
         try {
