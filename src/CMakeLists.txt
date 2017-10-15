@@ -374,7 +374,7 @@ client/conversation-list/conversation-list-model.vala
 client/conversation-list/conversation-list-store.vala
 client/conversation-list/conversation-list-view.vala
 client/conversation-list/formatted-conversation-data.vala
-
+client/conversation-list/preview-loader.vala
 client/conversation-viewer/conversation-email.vala
 client/conversation-viewer/conversation-list-box.vala
 client/conversation-viewer/conversation-message.vala

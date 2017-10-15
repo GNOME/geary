@@ -59,19 +59,26 @@ public class ConversationList : Gtk.ListBox {
     }
 
     public new void bind_model(Geary.App.ConversationMonitor monitor) {
+        Geary.Folder displayed = monitor.base_folder;
+        Geary.App.EmailStore store = new Geary.App.EmailStore(displayed.account);
+        PreviewLoader loader = new PreviewLoader(store, new Cancellable()); // XXX
+
         monitor.scan_started.connect(on_scan_started);
         monitor.scan_completed.connect(on_scan_completed);
+        monitor.scan_completed.connect(() => {
+                loader.load_remote();
+            });
 
         this.model = new ConversationListModel(monitor);
         this.model.items_changed.connect(on_model_items_changed);
 
-        Geary.Folder displayed = monitor.folder;
         Gee.List<Geary.RFC822.MailboxAddress> account_addresses = displayed.account.information.get_all_mailboxes();
         bool use_to = (displayed != null) && displayed.special_folder_type.is_outgoing();
         base.bind_model(this.model, (convo) => {
                 return new ConversationListItem(convo as Geary.App.Conversation,
                                                 account_addresses,
                                                 use_to,
+                                                loader,
                                                 this.config);
             }
         );

@@ -97,15 +97,18 @@ public class ConversationListItem : Gtk.Grid {
     private Geary.App.Conversation conversation;
     private Gee.List<Geary.RFC822.MailboxAddress> account_addresses;
     private bool use_to;
+    private PreviewLoader preview_loader;
     private Configuration config;
 
     public ConversationListItem(Geary.App.Conversation conversation,
                                 Gee.List<Geary.RFC822.MailboxAddress> account_addresses,
                                 bool use_to,
+                                PreviewLoader preview_loader,
                                 Configuration config) {
         this.conversation = conversation;
         this.account_addresses = account_addresses;
         this.use_to = use_to;
+        this.preview_loader = preview_loader;
         this.config = config;
 
         this.conversation.appended.connect(() => { update(); });
@@ -158,14 +161,17 @@ public class ConversationListItem : Gtk.Grid {
             );
         }
 
-        string preview_text = "long long long long preview";
         if (this.config.display_preview) {
             // XXX load & format preview here
-            // preview_text = XXXX;
-            preview.set_text(preview_text);
-            preview.show();
+            this.preview_loader.load.begin(preview_message, (obj, ret) => {
+                    string? preview_text = this.preview_loader.load.end(ret);
+                    if (preview_text != null) {
+                        this.preview.set_text(preview_text);
+                    }
+                });
+            this.preview.show();
         } else {
-            preview.hide();
+            this.preview.hide();
         }
 
         // conversation list store sorts by date-received, so
