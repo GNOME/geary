@@ -22,7 +22,6 @@
             <property name="receives_default">False</property>
             <property name="action_name">win.new-message</property>
             <property name="always_show_image">True</property>
-            <property name="action_name">win.new-message</property>
             <child>
               <object class="GtkImage" id="compose_new_message_image">
                 <property name="can_focus">False</property>
@@ -50,7 +49,6 @@
             <property name="receives_default">False</property>
             <property name="tooltip_text" translatable="yes">Toggle search bar</property>
             <property name="always_show_image">True</property>
-            <property name="tooltip_text" translatable="yes">Toggle search bar</property>
             <child>
               <object class="GtkImage" id="search_conversations_image">
                 <property name="can_focus">False</property>
@@ -111,8 +109,6 @@
                 <property name="tooltip_text" translatable="yes">Reply</property>
                 <property name="action_name">win.reply-to-message</property>
                 <property name="always_show_image">True</property>
-                <property name="tooltip_text" translatable="yes">Reply</property>
-                <property name="action_name">win.reply-to-message</property>
                 <child>
                   <object class="GtkImage" id="reply_sender_image">
                     <property name="can_focus">False</property>
@@ -135,8 +131,6 @@
                 <property name="tooltip_text" translatable="yes">Reply All</property>
                 <property name="action_name">win.reply-all-message</property>
                 <property name="always_show_image">True</property>
-                <property name="tooltip_text" translatable="yes">Reply All</property>
-                <property name="action_name">win.reply-all-message</property>
                 <child>
                   <object class="GtkImage" id="reply_all_image">
                     <property name="can_focus">False</property>
@@ -159,8 +153,6 @@
                 <property name="tooltip_text" translatable="yes">Forward</property>
                 <property name="action_name">win.forward-message</property>
                 <property name="always_show_image">True</property>
-                <property name="tooltip_text" translatable="yes">Forward</property>
-                <property name="action_name">win.forward-message</property>
                 <child>
                   <object class="GtkImage" id="forward_image">
                     <property name="can_focus">False</property>
@@ -192,7 +184,6 @@
                 <property name="receives_default">False</property>
                 <property name="action_name">win.mark-message-menu</property>
                 <property name="always_show_image">True</property>
-                <property name="action_name">win.mark-message-menu</property>
                 <child>
                   <object class="GtkImage" id="mark_message_image">
                     <property name="can_focus">False</property>
@@ -263,7 +254,6 @@
             <property name="receives_default">False</property>
             <property name="tooltip_text" translatable="yes">Toggle find bar</property>
             <property name="always_show_image">True</property>
-            <property name="tooltip_text" translatable="yes">Toggle find bar</property>
             <child>
               <object class="GtkImage" id="find_image">
                 <property name="can_focus">False</property>
@@ -284,7 +274,6 @@
             <property name="receives_default">False</property>
             <property name="action_name">win.undo</property>
             <property name="always_show_image">True</property>
-            <property name="action_name">win.undo</property>
             <child>
               <object class="GtkImage" id="undo_image">
                 <property name="can_focus">False</property>
@@ -312,12 +301,6 @@
                 <property name="image">archive_image</property>
                 <property name="use_underline">True</property>
                 <property name="always_show_image">True</property>
-                <property name="action_name">win.archive-conv</property>
-                <child>
-                  <object class="GtkImage" id="archive_image">
-                    <property name="icon_name">mail-archive-symbolic</property>
-                  </object>
-                </child>
               </object>
               <packing>
                 <property name="expand">False</property>
@@ -333,15 +316,11 @@
                 <property name="receives_default">False</property>
                 <property name="action_name">win.trash-conv</property>
                 <property name="always_show_image">True</property>
-<<<<<<< HEAD
+                <property name="action_name">win.trash-conv</property>
+                <property name="always_show_image">True</property>
                 <child>
                   <object class="GtkImage" id="trash_delete_image">
                     <property name="can_focus">False</property>
-=======
-                <property name="action_name">win.trash-conv</property>
-                <child>
-                  <object class="GtkImage" id="trash_delete_image">
->>>>>>> Start the final part of bug 713991.
                     <property name="icon_name">user-trash-symbolic</property>
                   </object>
                 </child>
