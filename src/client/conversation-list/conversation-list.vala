@@ -14,11 +14,14 @@ public class ConversationList : Gtk.ListBox {
 
     private const string CLASS = "geary-conversation-list";
 
+
     /** Underlying model for this list */
     public ConversationListModel? model { get; private set; default=null; }
 
     private Configuration config;
 
+    private Gee.Set<Geary.App.Conversation>? visible_conversations = null;
+    private Geary.Scheduler.Scheduled? update_visible_scheduled = null;
     private bool enable_load_more = true;
     private bool reset_adjustment = false;
     private double adj_last_upper = -1.0;
@@ -29,6 +32,9 @@ public class ConversationList : Gtk.ListBox {
 
     /** Fired when a user activates a row in the list. */
     public signal void conversation_activated(Geary.App.Conversation activated);
+
+    /** Fired the visible conversations in the widget change. */
+    public signal void visible_conversations_changed(Gee.Set<Geary.App.Conversation> visible);
 
     /** Fired when additional conversations are required. */
     public virtual signal void load_more() {
@@ -84,6 +90,30 @@ public class ConversationList : Gtk.ListBox {
         );
     }
 
+    private void schedule_visible_conversations_changed() {
+        this.update_visible_scheduled = Geary.Scheduler.on_idle(
+            () => {
+                update_visible_conversations();
+                return Source.REMOVE; // one-shot
+            });
+    }
+
+    private Gee.Set<Geary.App.Conversation> get_visible_conversations() {
+        Gee.HashSet<Geary.App.Conversation> visible = new Gee.HashSet<Geary.App.Conversation>();
+        // XXX
+        return visible;
+    }
+
+    private void update_visible_conversations() {
+        Gee.Set<Geary.App.Conversation> visible_now = get_visible_conversations();
+        if (this.visible_conversations == null ||
+            Geary.Collection.are_sets_equal<Geary.App.Conversation>(
+                this.visible_conversations, visible_now)) {
+            this.visible_conversations = visible_now;
+            this.visible_conversations_changed(visible_now.read_only_view);
+        }
+    }
+
     private void on_show() {
         // Wait until we're visible to set this signal up.
         get_adjustment().value_changed.connect(on_adjustment_value_changed);
@@ -101,6 +131,8 @@ public class ConversationList : Gtk.ListBox {
                 load_more();
                 this.adj_last_upper = upper;
             }
+
+            schedule_visible_conversations_changed();
         }
     }
 

@@ -224,7 +224,6 @@ public class GearyController : Geary.BaseObject {
         
         // Connect to various UI signals.
         main_window.conversation_list_view.mark_conversations.connect(on_mark_conversations);
-        main_window.conversation_list_view.visible_conversations_changed.connect(on_visible_conversations_changed);
         main_window.folder_list.folder_selected.connect(on_folder_selected);
         main_window.folder_list.copy_conversation.connect(on_copy_conversation);
         main_window.folder_list.move_conversation.connect(on_move_conversation);
@@ -295,7 +294,6 @@ public class GearyController : Geary.BaseObject {
 
         // Disconnect from various UI signals.
         main_window.conversation_list_view.mark_conversations.disconnect(on_mark_conversations);
-        main_window.conversation_list_view.visible_conversations_changed.disconnect(on_visible_conversations_changed);
         main_window.folder_list.folder_selected.disconnect(on_folder_selected);
         main_window.folder_list.copy_conversation.disconnect(on_copy_conversation);
         main_window.folder_list.move_conversation.disconnect(on_move_conversation);
@@ -1639,10 +1637,6 @@ public class GearyController : Geary.BaseObject {
             current_folder.special_folder_type != Geary.SpecialFolderType.OUTBOX);
     }
 
-    private void on_visible_conversations_changed(Gee.Set<Geary.App.Conversation> visible) {
-        clear_new_messages("on_visible_conversations_changed", visible);
-    }
-    
     private bool should_notify_new_messages(Geary.Folder folder) {
         // A monitored folder must be selected to squelch notifications;
         // if conversation list is at top of display, don't display
@@ -1654,7 +1648,7 @@ public class GearyController : Geary.BaseObject {
     
     // Clears messages if conditions are true: anything in should_notify_new_messages() is
     // false and the supplied visible messages are visible in the conversation list view
-    private void clear_new_messages(string caller, Gee.Set<Geary.App.Conversation>? supplied) {
+    internal void clear_new_messages(string caller, Gee.Set<Geary.App.Conversation>? supplied) {
         if (current_folder == null || !new_messages_monitor.get_folders().contains(current_folder)
             || should_notify_new_messages(current_folder))
             return;
