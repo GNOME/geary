@@ -575,6 +575,10 @@ set(CFLAGS
     -DISO_CODE_639_XML=\"${ISO_CODE_639_XML}\"
     -DISO_CODE_3166_XML=\"${ISO_CODE_3166_XML}\"
     -DGCR_API_SUBJECT_TO_CHANGE
+    # Vala causes a _lot_ of these to be emitted for otherwise valid
+    # code. Suppress them so we can actually see more useful warnings.
+    -Wno-incompatible-pointer-types
+    -Wno-discarded-qualifiers
 )
 
 if (REF_TRACKING)
