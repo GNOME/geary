@@ -198,7 +198,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkMenuButton" id="move_message_button">
+              <object class="GtkMenuButton" id="copy_message_button">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="focus_on_click">False</property>
@@ -218,7 +218,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkMenuButton" id="copy_message_button">
+              <object class="GtkMenuButton" id="move_message_button">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="focus_on_click">False</property>
