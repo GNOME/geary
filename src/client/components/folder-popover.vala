@@ -79,6 +79,8 @@ public class FolderPopover : Gtk.Popover {
         label.set_halign(Gtk.Align.START);
         row.add(label);
 
+        row.show_all();
+
         return row;
     }
 
