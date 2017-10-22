@@ -13,8 +13,8 @@ msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=internationalization\n"
-"POT-Creation-Date: 2017-09-26 12:56+0000\n"
-"PO-Revision-Date: 2017-09-27 17:21+0200\n"
+"POT-Creation-Date: 2017-10-02 14:41+0000\n"
+"PO-Revision-Date: 2017-10-18 15:55+0200\n"
 "Last-Translator: Alan Mortensen <alanmortensen.am@gmail.com>\n"
 "Language-Team: Danish (http://www.transifex.com/projects/p/geary/language/"
 "da/)\n"
@@ -41,6 +41,7 @@ msgstr "Gearys udviklerhold"
 #: ../desktop/org.gnome.Geary.appdata.xml.in.h:6
 #: ../desktop/org.gnome.Geary.desktop.in.h:4
 #: ../desktop/geary-autostart.desktop.in.h:4
+#: ../src/client/application/geary-application.vala:21
 msgid "Send and receive email"
 msgstr "Send og modtag e-mail"
 
@@ -101,6 +102,7 @@ msgid "Geary showing the rich text composer"
 msgstr "Geary som redigering af formateret tekst ser ud"
 
 #: ../desktop/org.gnome.Geary.desktop.in.h:2
+#: ../desktop/geary-autostart.desktop.in.h:2
 msgid "Email"
 msgstr "E-mail"
 
@@ -117,11 +119,6 @@ msgstr ""
 #: ../desktop/org.gnome.Geary.desktop.in.h:7 ../ui/gtk/menus.ui.h:1
 msgid "Compose Message"
 msgstr "Skriv besked"
-
-#: ../desktop/geary-autostart.desktop.in.h:2
-#: ../src/client/application/geary-application.vala:21
-msgid "Mail Client"
-msgstr "E-mailklient"
 
 #: ../desktop/geary-autostart.desktop.in.h:3
 msgid "Geary Mail"
@@ -270,11 +267,15 @@ msgstr "        • Forkert brugernavn eller adgangskode.\n"
 msgid "Copyright 2016 Software Freedom Conservancy Inc."
 msgstr "Ophavsret 2016 Software Freedom Conservancy Inc."
 
-#: ../src/client/application/geary-application.vala:24
+#: ../src/client/application/geary-application.vala:23
+msgid "Copyright 2016-2017 Geary Development Team."
+msgstr "Ophavsret 2016-2017 Gearys udviklerhold."
+
+#: ../src/client/application/geary-application.vala:25
 msgid "Visit the Geary web site"
 msgstr "Besøg Gearys hjemmeside"
 
-#: ../src/client/application/geary-application.vala:464
+#: ../src/client/application/geary-application.vala:466
 #, c-format
 msgid "About %s"
 msgstr "Om %s"
@@ -282,7 +283,7 @@ msgstr "Om %s"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: ../src/client/application/geary-application.vala:468
+#: ../src/client/application/geary-application.vala:470
 msgid "translator-credits"
 msgstr ""
 "Nikolaj Holmquist Pedersen <nikolajholmquist@gmail.com>\n"
@@ -359,17 +360,17 @@ msgstr "Vis programversion"
 msgid "Use %s to open a new composer window"
 msgstr "Brug %s for at åbne et nyt redigeringsvindue"
 
-#: ../src/client/application/geary-args.vala:54
+#: ../src/client/application/geary-args.vala:56
 msgid "Please report comments, suggestions and bugs to:"
 msgstr "Send kommentarer, idéer og fejlrapporter til:"
 
 #. i18n: Command line arguments are invalid
-#: ../src/client/application/geary-args.vala:61
+#: ../src/client/application/geary-args.vala:63
 #, c-format
 msgid "Failed to parse command line options: %s\n"
 msgstr "Kunne ikke genkende indstillingerne på kommandolinjen: %s\n"
 
-#: ../src/client/application/geary-args.vala:72
+#: ../src/client/application/geary-args.vala:74
 #, c-format
 msgid "Unrecognized command line option “%s”\n"
 msgstr "Ukendt kommandolinje-indstilling \"%s\"\n"
@@ -2669,6 +2670,9 @@ msgstr "E-mailadresse:"
 #: ../ui/upgrade_dialog.glade.h:1
 msgid "Geary update in progress…"
 msgstr "Geary er ved at blive opgraderet…"
+
+#~ msgid "Mail Client"
+#~ msgstr "E-mailklient"
 
 #~ msgid "_Inspect"
 #~ msgstr "_Undersøg"
