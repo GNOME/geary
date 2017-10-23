@@ -73,7 +73,7 @@
   * Installing dependencies on Ubuntu/Debian
 
     Ubuntu 17.04 (Zesty) and later ships with the correct versions of
-    the required libraries. Note that Ubutnu 16.04 LTS (Xenial) does
+    the required libraries. Note that Ubutnu 16.04 LTS (Xenial) does not
     meet the minimium requirements, users of that are encourage to use
     Geary 0.12 LTS instead.
 
