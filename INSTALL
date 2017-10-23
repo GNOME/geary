@@ -16,34 +16,28 @@
 
   * Dependencies
 
-    Building Geary requires at least the following major libraries:
+    Building Geary requires the following major libraries and tools:
 
-      * GTK+ version 3.14
-      * WebKitGTK+ 2.10
-      * Vala 0.26
-
-    With a full GObject introspection repository, intltool, cmake,
-    desktop-file-validate, and xml2po. Vala's vapigen must be
-    installed as well.
-
-    See the file `src/CMakeLists.txt` for the complete list of minimum
-    version requirements.
+      * GTK+ 3.22
+      * WebKitGTK+ 2.16
+      * Vala 0.34
+      * GObject introspection repository
 
     Geary also requires SQLite to be built with the compiler flag
     `-DSQLITE_ENABLE_FTS3`. Further, SQLite 3.11.x specifically must
-    also be built with `-DSQLITE_ENABLE_FTS3_TOKENIZER`. Most
-    distribution's packages meet these requirements, however Fedora 24
-    users and others may be required to rebuild SQLite 3.11 with the
-    second flag, or install SQLite 3.12 and recompile Geary.
+    also be built with `-DSQLITE_ENABLE_FTS3_TOKENIZER`.
 
-    The developer packages and headers for the following libraries are also
-    required when building Geary:
+    The developer packages and headers for the following libraries and
+    tools are required when building Geary:
 
       * canberra
+      * cmake
+      * desktop-file-utils
       * gee-0.8
       * gio-2.0
       * glib-2.0
       * gmime-2.6
+      * gnome-doc-utils
       * gtk+-3.0
       * libsecret-1
       * libxml-2.0
@@ -52,17 +46,21 @@
       * webkit2gtk-4.0
       * gcr-3
       * enchant
-      * messaging-menu (optional; enables support for Ubuntu Unity messaging
-        menu)
+      * messaging-menu (optional; enables support for Ubuntu Unity
+        messaging menu)
       * unity (optional; enables support for Ubuntu Unity launcher)
 
-    Most of these are standard libraries available from major distros' package
-    repositories.
+    Most of these are standard libraries available from major distros'
+    package repositories.
+
+    See the files `CMakeLists.txt` and `src/CMakeLists.txt` for the
+    complete list of required libraries, tools and minimum version
+    requirements.
 
 
   * Installing dependencies on Fedora
 
-    Fedora 23 and later ships with the correct versions of the
+    Fedora 25 and later ships with the correct versions of the
     required libraries. Install them by running this command:
 
         $ sudo dnf install vala gobject-introspection-devel intltool cmake \
@@ -74,13 +72,13 @@
 
   * Installing dependencies on Ubuntu/Debian
 
-    Ubuntu 16.04 LTS (Xenial) and later ships with the correct
-    versions of the required libraries.
+    Ubuntu 17.04 (Zesty) and later ships with the correct versions of
+    the required libraries. Note that Ubutnu 16.04 LTS (Xenial) does
+    meet the minimium requirements, users of that are encourage to use
+    Geary 0.12 LTS instead.
 
-    Debian 8 (Jessie) requires stable backports enabled for
-    WebKitGTK. See <https://backports.debian.org/Instructions/> for
-    more information about using stable backports. Later versions
-    ships with the correct versions of the required libraries.
+    Debian 9 (Stretch) and later ships with the correct versions of
+    the required libraries.
 
     Install them by running this command:
 
@@ -93,10 +91,6 @@
     And for Ubuntu Unity integration:
 
         $ sudo apt-get install libunity-dev libmessaging-menu-dev
-
-    Ubuntu 14.04 LTS (Trusty) does not have all the dependencies to
-    build this version Geary. Consier using the Geary 0.11 LTS series
-    instead.
 
 
   * Running
