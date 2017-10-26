@@ -36,6 +36,8 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
                                                     Geary.AccountInformation account,
                                                     Cancellable? cancellable = null)
     throws Error {
+        yield check_unlocked(cancellable);
+
         string? password = yield Secret.password_lookupv(
             SecretMediator.schema, new_attrs(service, account), cancellable
         );
@@ -54,6 +56,8 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
                                                  Geary.AccountInformation account,
                                                  Cancellable? cancellable = null)
     throws Error {
+        yield check_unlocked(cancellable);
+
         Geary.Credentials credentials = get_credentials(service, account);
         try {
             yield do_store(service, account, credentials.pass, cancellable);
@@ -67,6 +71,8 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
                                                    Geary.AccountInformation account,
                                                    Cancellable? cancellable = null)
     throws Error {
+        yield check_unlocked(cancellable);
+
         Geary.Credentials credentials = get_credentials(service, account);
         yield Secret.password_clearv(SecretMediator.schema,
                                      new_attrs(service, account),
@@ -135,6 +141,32 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
             smtp_remember_password = false;
         }
         return true;
+    }
+
+    // Ensure the default collection unlocked.  Try to unlock it since
+    // the user may be running in a limited environment and it would
+    // prevent us from prompting the user multiple times in one
+    // session. See Bug 784300.
+    private async void check_unlocked(Cancellable? cancellable = null)
+    throws Error {
+        Secret.Service service = yield Secret.Service.get(
+            Secret.ServiceFlags.OPEN_SESSION, cancellable
+        );
+        Secret.Collection collection = yield Secret.Collection.for_alias(
+            service,
+            Secret.COLLECTION_DEFAULT,
+            Secret.CollectionFlags.NONE,
+            cancellable
+        );
+        if (collection.get_locked()) {
+            List<Secret.Collection> to_lock = new List<Secret.Collection>();
+            to_lock.append(collection);
+            List<DBusProxy> unlocked;
+            yield service.unlock(to_lock, cancellable, out unlocked);
+            if (unlocked.length() != 0) {
+                // XXX
+            }
+        }
     }
 
     private async void do_store(Geary.Service service,
