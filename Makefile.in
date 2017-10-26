@@ -24,7 +24,7 @@ uninstall:
 .PHONY: pot_file
 pot_file:
 	@$(MAKE) -C $(BUILD_DIR) $@
-	@cp build/src/geary.pot po
+	@cp build/po/geary.pot po
 
 .PHONY: clean
 clean:
