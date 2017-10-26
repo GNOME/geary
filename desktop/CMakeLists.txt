@@ -61,7 +61,8 @@ else (DISABLE_CONTRACT)
     if (GETTEXT_FOUND)
         add_custom_target (geary-attach.contract ALL
             ${GETTEXT_MSGFMT_EXECUTABLE} --desktop -d '${CMAKE_SOURCE_DIR}/po'
-                --template '${CMAKE_CURRENT_SOURCE_DIR}/geary-attach.contract.in' -o geary-attach.contract
+            --template '${CMAKE_CURRENT_SOURCE_DIR}/geary-attach.contract.desktop.in' -o geary-attach.contract
+            DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/geary-attach.contract.desktop.in
         )
 
 # Can't validate Contractor file since it isn't a valid Desktop

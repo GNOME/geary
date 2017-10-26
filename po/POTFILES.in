@@ -1,7 +1,7 @@
 desktop/org.gnome.Geary.appdata.xml.in
 desktop/org.gnome.Geary.desktop.in
 desktop/geary-autostart.desktop.in
-desktop/geary-attach.contract.in
+desktop/geary-attach.contract.desktop.in
 src/geary-version.vala.in
 src/client/accounts/account-dialog-account-list-pane.vala
 src/client/accounts/account-dialog-add-edit-pane.vala

@@ -12,6 +12,7 @@ IF (XGETTEXT_FOUND)
         --keyword=C_:1c,2
         --keyword=NC_:1c,2
         --keyword=g_dngettext:2,3
+        --keyword=Description
     )
     GETTEXT_CREATE_TRANSLATIONS(ALL ${TRANSLATED}
         COMMENT "Creating translations."
