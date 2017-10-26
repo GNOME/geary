@@ -27,7 +27,6 @@
 # Macros:
 # GETTEXT_CREATE_POT(potFile
 #    [OPTION xgettext_options]
-#    SRC list_of_source_file_that_contains_msgid
 # )
 #
 # Generate .pot file.
@@ -94,6 +93,34 @@ ENDIF(NOT DEFINED XGETTEXT_OPTIONS)
 
 # Add translations target
 IF(XGETTEXT_FOUND)
+    MACRO(GETTEXT_CREATE_POT _potFile _pot_options )
+        SET(_xgettext_options_list)
+        SET(_src_list)
+        SET(_src_list_abs)
+        FOREACH(_pot_option ${_pot_options} ${ARGN})
+            IF(_pot_option STREQUAL "OPTION")
+                SET(_stage "OPTION")
+            ELSE(_pot_option STREQUAL "OPTION")
+                IF(_stage STREQUAL "OPTION")
+                    SET(_xgettext_options_list ${_xgettext_options_list} ${_pot_option})
+                ENDIF(_stage STREQUAL "OPTION")
+            ENDIF(_pot_option STREQUAL "OPTION")
+        ENDFOREACH(_pot_option ${_pot_options} ${ARGN})
+
+        IF (_xgettext_options_list)
+            SET(_xgettext_options ${_xgettext_options_list})
+        ELSE(_xgettext_options_list)
+            SET(_xgettext_options ${XGETTEXT_OPTIONS})
+        ENDIF(_xgettext_options_list)
+
+        ADD_CUSTOM_TARGET(pot_file
+            COMMAND ${XGETTEXT_EXECUTABLE} ${_xgettext_options_list} -f po/POTFILES.in -o ${CMAKE_CURRENT_BINARY_DIR}/${_potFile}
+            DEPENDS "POTFILES.in"
+            WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+            COMMENT "Extract translatable messages to ${_potFile}"
+        )
+    ENDMACRO(GETTEXT_CREATE_POT _potFile _pot_options)
+
     MACRO(GETTEXT_CREATE_TRANSLATIONS _firstLang)
         SET(_gmoFiles)
         SET(_addToAll)
