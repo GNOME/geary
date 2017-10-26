@@ -13,7 +13,6 @@ public class Geary.JS.Test : Gee.TestCase {
     }
 
     public void escape_string() {
-        print("\ndata: %s\n", Geary.JS.escape_string("\n"));
         assert(Geary.JS.escape_string("\n") == """\n""");
         assert(Geary.JS.escape_string("\r") == """\r""");
         assert(Geary.JS.escape_string("\t") == """\t""");

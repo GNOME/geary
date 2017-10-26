@@ -177,31 +177,31 @@ namespace Geary.JS {
                     builder.append("\x00");
                     break;
                 case '\'':
-                    builder.append("""\'""");
+                    builder.append("\\\'");
                     break;
                 case '"':
-                    builder.append("""\"""");
+                    builder.append("\\\"");
                     break;
                 case '\\':
-                    builder.append("""\\""");
+                    builder.append("\\\\");
                     break;
                 case '\n':
-                    builder.append("""\n""");
+                    builder.append("\\n");
                     break;
                 case '\r':
-                    builder.append("""\r""");
+                    builder.append("\\r");
                     break;
                 case '\x0b':
                     builder.append("\x0b");
                     break;
                 case '\t':
-                    builder.append("""\t""");
+                    builder.append("\\t");
                     break;
                 case '\b':
-                    builder.append("""\b""");
+                    builder.append("\\b");
                     break;
                 case '\f':
-                    builder.append("""\f""");
+                    builder.append("\\f");
                     break;
                 default:
                     builder.append_unichar(c);
