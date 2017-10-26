@@ -23,6 +23,10 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
     private GearyApplication instance;
     private Geary.Nonblocking.Mutex dialog_mutex = new Geary.Nonblocking.Mutex();
 
+    // See Bug 697681
+    [CCode (cheader_filename = "libsecret/secret.h", cname = "SECRET_SCHEMA_COMPAT_NETWORK")]
+    private Secret.Schema SCHEMA_COMPAT_NETWORK;
+
 
     public SecretMediator(GearyApplication instance) {
         this.instance = instance;
@@ -71,13 +75,13 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
         // Remove legacy formats
         // <= 0.11
         yield Secret.password_clear(
-            Secret.SCHEMA_COMPAT_NETWORK,
+            SCHEMA_COMPAT_NETWORK,
             cancellable,
             "user", get_legacy_user(service, account.primary_mailbox.address)
         );
         // <= 0.6
         yield Secret.password_clear(
-            Secret.SCHEMA_COMPAT_NETWORK,
+            SCHEMA_COMPAT_NETWORK,
             cancellable,
             "user", get_legacy_user(service, credentials.user)
          );
@@ -195,7 +199,7 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
     throws Error {
         // <= 0.11
         string? password = yield Secret.password_lookup(
-            Secret.SCHEMA_COMPAT_NETWORK,
+            SCHEMA_COMPAT_NETWORK,
             cancellable,
             "user", get_legacy_user(service, account.primary_mailbox.address)
         );
@@ -205,7 +209,7 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
             Geary.Credentials creds = get_credentials(service, account);
             string user = get_legacy_user(service, creds.user);
             password = yield Secret.password_lookup(
-                Secret.SCHEMA_COMPAT_NETWORK,
+                SCHEMA_COMPAT_NETWORK,
                 cancellable,
                 "user", user
             );
@@ -213,7 +217,7 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
             // Clear the old password
             if (password != null) {
                 yield Secret.password_clear(
-                    Secret.SCHEMA_COMPAT_NETWORK,
+                    SCHEMA_COMPAT_NETWORK,
                     cancellable,
                     "user", user
                 );
