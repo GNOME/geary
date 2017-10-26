@@ -9,7 +9,7 @@ top_builddir = ..
 
 # These options get passed to xgettext.
 # XXX Keep these in sync with CMakeLists.txt
-XGETTEXT_OPTIONS = --from-code=UTF-8 --add-comments --keyword=_ --keyword=N_ --keyword=C_:1c,2 --keyword=NC_:1c,2 --keyword=g_dngettext:2,3
+XGETTEXT_OPTIONS = --from-code=UTF-8 --add-comments --keyword=_ --keyword=N_ --keyword=C_:1c,2 --keyword=NC_:1c,2 --keyword=g_dngettext:2,3  --keyword=Description
 
 # This is the copyright holder that gets inserted into the header of the
 # $(DOMAIN).pot file.  Set this to the copyright holder of the surrounding
