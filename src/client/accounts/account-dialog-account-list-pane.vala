@@ -220,7 +220,7 @@ public class AccountDialogAccountListPane : AccountDialogPane {
                 // To prevent unnecessary work, only set ordinal if there's a change.
                 if (i != account.ordinal) {
                     account.ordinal = i;
-                    account.store_async.begin(null);
+                    AccountManager.store_to_file.begin(account, null);
                 }
             }
             

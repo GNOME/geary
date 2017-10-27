@@ -32,7 +32,7 @@ public class Geary.AccountInformation : BaseObject {
     public File? config_dir { get; private set; default = null; }
     public File? data_dir { get; private set; default = null; }
 
-    internal File? file = null;
+    public File? file = null;
 
     //
     // IMPORTANT: When adding new properties, be sure to add them to the copy method.
@@ -90,7 +90,7 @@ public class Geary.AccountInformation : BaseObject {
     public Gee.List<Geary.RFC822.MailboxAddress>? alternate_mailboxes { get; private set; default = null; }
 
     public Geary.ServiceProvider service_provider {
-        get; set; default = Geary.ServiceProvider.GMAIL;
+        get; set; default = Geary.ServiceProvider.OTHER;
     }
     public int prefetch_period_days {
         get; set; default = DEFAULT_PREFETCH_PERIOD_DAYS;
@@ -151,6 +151,9 @@ public class Geary.AccountInformation : BaseObject {
     public signal void untrusted_host(Endpoint endpoint, Endpoint.SecurityType security,
         TlsConnection cx, Service service);
 
+    /** Indicates that properties contained herein have changed. */
+    public signal void information_changed();
+
     // Used to create temporary AccountInformation objects.  (Note that these cannot be saved.)
     public AccountInformation.temp_copy(AccountInformation copy) {
         copy_from(copy);
@@ -169,84 +172,6 @@ public class Geary.AccountInformation : BaseObject {
         this.file = config_dir.get_child(SETTINGS_FILENAME);
         this.imap = imap;
         this.smtp = smtp;
-    }
-
-    /**
-     * Loads an account info from a config directory.
-     *
-     * Throws an error if the config file was not found, could not be
-     * parsed, or doesn't have all required fields.
-     */
-    internal AccountInformation.from_file(string id,
-                                          File config_directory,
-                                          File data_directory,
-                                          Geary.ServiceInformation? imap,
-                                          Geary.ServiceInformation? smtp)
-        throws Error {
-        this(id, config_directory, data_directory, imap, smtp);
-
-        KeyFile key_file = new KeyFile();
-        key_file.load_from_file(file.get_path() ?? "", KeyFileFlags.NONE);
-
-        // This is the only required value at the moment?
-        string primary_email = key_file.get_value(Config.GROUP, Config.PRIMARY_EMAIL_KEY);
-        string real_name = Config.get_string_value(key_file, Config.GROUP, Config.REAL_NAME_KEY);
-
-        this.primary_mailbox = new RFC822.MailboxAddress(real_name, primary_email);
-        this.nickname = Config.get_string_value(key_file, Config.GROUP, Config.NICKNAME_KEY);
-
-        // Store alternate emails in a list of case-insensitive strings
-        Gee.List<string> alt_email_list = Config.get_string_list_value(key_file, Config.GROUP, Config.ALTERNATE_EMAILS_KEY);
-        if (alt_email_list.size != 0) {
-            foreach (string alt_email in alt_email_list) {
-                RFC822.MailboxAddresses mailboxes = new RFC822.MailboxAddresses.from_rfc822_string(alt_email);
-                foreach (RFC822.MailboxAddress mailbox in mailboxes.get_all())
-                add_alternate_mailbox(mailbox);
-            }
-        }
-
-        this.imap.load_credentials(key_file, primary_email);
-        this.smtp.load_credentials(key_file, primary_email);
-
-        this.service_provider = Geary.ServiceProvider.from_string(
-            Config.get_string_value(
-                key_file, Config.GROUP, Config.SERVICE_PROVIDER_KEY, Geary.ServiceProvider.GMAIL.to_string()));
-        this.prefetch_period_days = Config.get_int_value(
-            key_file, Config.GROUP, Config.PREFETCH_PERIOD_DAYS_KEY, this.prefetch_period_days);
-        this.save_sent_mail = Config.get_bool_value(
-            key_file, Config.GROUP, Config.SAVE_SENT_MAIL_KEY, this.save_sent_mail);
-        this.ordinal = Config.get_int_value(
-            key_file, Config.GROUP, Config.ORDINAL_KEY, this.ordinal);
-        this.use_email_signature = Config.get_bool_value(
-            key_file, Config.GROUP, Config.USE_EMAIL_SIGNATURE_KEY, this.use_email_signature);
-        this.email_signature = Config.get_escaped_string(
-            key_file, Config.GROUP, Config.EMAIL_SIGNATURE_KEY, this.email_signature);
-
-        if (this.ordinal >= AccountInformation.default_ordinal)
-            AccountInformation.default_ordinal = this.ordinal + 1;
-
-        if (service_provider == ServiceProvider.OTHER) {
-            this.imap.load_settings(key_file);
-            this.smtp.load_settings(key_file);
-
-            if (this.smtp.smtp_use_imap_credentials) {
-                this.smtp.credentials.user = this.imap.credentials.user;
-                this.smtp.credentials.pass = this.imap.credentials.pass;
-            }
-        }
-
-        this.drafts_folder_path = build_folder_path(
-            Config.get_string_list_value(key_file, Config.GROUP, Config.DRAFTS_FOLDER_KEY));
-        this.sent_mail_folder_path = build_folder_path(
-            Config.get_string_list_value(key_file, Config.GROUP, Config.SENT_MAIL_FOLDER_KEY));
-        this.spam_folder_path = build_folder_path(
-            Config.get_string_list_value(key_file, Config.GROUP, Config.SPAM_FOLDER_KEY));
-        this.trash_folder_path = build_folder_path(
-            Config.get_string_list_value(key_file, Config.GROUP, Config.TRASH_FOLDER_KEY));
-        this.archive_folder_path = build_folder_path(
-            Config.get_string_list_value(key_file, Config.GROUP, Config.ARCHIVE_FOLDER_KEY));
-
-        this.save_drafts = Config.get_bool_value(key_file, Config.GROUP, Config.SAVE_DRAFTS_KEY, true);
     }
 
     ~AccountInformation() {
@@ -413,6 +338,9 @@ public class Geary.AccountInformation : BaseObject {
             default:
                 assert_not_reached();
         }
+
+        // This account's information should be stored again. Signal this.
+        information_changed();
     }
     
     /**
@@ -466,6 +394,7 @@ public class Geary.AccountInformation : BaseObject {
     }
 
     private void check_mediator_instance() throws EngineError {
+        stdout.printf("acctinfo: mediators @ %p %p\n", this.imap.mediator, this.smtp.mediator);
         if (this.imap.mediator == null || this.smtp.mediator == null)
             throw new EngineError.OPEN_REQUIRED(
                 "Account %s needs to be open with valid Geary.CredentialsMediators".printf(this.id));
@@ -688,7 +617,7 @@ public class Geary.AccountInformation : BaseObject {
         }
     }
     
-    private Geary.FolderPath? build_folder_path(Gee.List<string>? parts) {
+    public static Geary.FolderPath? build_folder_path(Gee.List<string>? parts) {
         if (parts == null || parts.size == 0)
             return null;
         
@@ -696,88 +625,6 @@ public class Geary.AccountInformation : BaseObject {
         for (int i = 1; i < parts.size; i++)
             path = path.get_child(parts.get(i));
         return path;
-    }
-
-    public async void store_async(Cancellable? cancellable = null) {
-        if (file == null || config_dir == null) {
-            warning("Cannot save account, no file set.\n");
-            return;
-        }
-
-        if (!config_dir.query_exists(cancellable)) {
-            try {
-                config_dir.make_directory_with_parents();
-            } catch (Error err) {
-                error("Error creating configuration directory for account '%s': %s",
-                      this.id, err.message);
-            }
-        }
-
-        if (!data_dir.query_exists(cancellable)) {
-            try {
-                data_dir.make_directory_with_parents();
-            } catch (Error err) {
-                error("Error creating storage directory for account '%s': %s",
-                      this.id, err.message);
-            }
-        }
-
-        if (!file.query_exists(cancellable)) {
-            try {
-                yield file.create_async(FileCreateFlags.REPLACE_DESTINATION);
-            } catch (Error err) {
-                debug("Error creating account info file: %s", err.message);
-            }
-        }
-
-        KeyFile key_file = new KeyFile();
-
-        key_file.set_value(Geary.Config.GROUP, Geary.Config.REAL_NAME_KEY, this.primary_mailbox.name);
-        key_file.set_value(Geary.Config.GROUP, Geary.Config.PRIMARY_EMAIL_KEY, this.primary_mailbox.address);
-        key_file.set_value(Geary.Config.GROUP, Geary.Config.NICKNAME_KEY, this.nickname);
-        key_file.set_value(Geary.Config.GROUP, Geary.Config.SERVICE_PROVIDER_KEY, this.service_provider.to_string());
-        key_file.set_integer(Geary.Config.GROUP, Geary.Config.ORDINAL_KEY, this.ordinal);
-        key_file.set_integer(Geary.Config.GROUP, Geary.Config.PREFETCH_PERIOD_DAYS_KEY, this.prefetch_period_days);
-        key_file.set_boolean(Geary.Config.GROUP, Geary.Config.SAVE_SENT_MAIL_KEY, this.save_sent_mail);
-        key_file.set_boolean(Geary.Config.GROUP, Geary.Config.USE_EMAIL_SIGNATURE_KEY, this.use_email_signature);
-        key_file.set_string(Geary.Config.GROUP, Geary.Config.EMAIL_SIGNATURE_KEY, this.email_signature);
-        if (alternate_mailboxes != null && this.alternate_mailboxes.size > 0) {
-            string[] list = new string[this.alternate_mailboxes.size];
-            for (int ctr = 0; ctr < this.alternate_mailboxes.size; ctr++)
-                list[ctr] = this.alternate_mailboxes[ctr].to_rfc822_string();
-
-            key_file.set_string_list(Config.GROUP, Config.ALTERNATE_EMAILS_KEY, list);
-        }
-
-        if (service_provider == ServiceProvider.OTHER) {
-            this.imap.save_settings(key_file);
-            this.smtp.save_settings(key_file);
-        }
-
-        key_file.set_string_list(Config.GROUP, Config.DRAFTS_FOLDER_KEY, (this.drafts_folder_path != null
-            ? this.drafts_folder_path.as_list().to_array() : new string[] {}));
-        key_file.set_string_list(Config.GROUP, Config.SENT_MAIL_FOLDER_KEY, (this.sent_mail_folder_path != null
-            ? this.sent_mail_folder_path.as_list().to_array() : new string[] {}));
-        key_file.set_string_list(Config.GROUP, Config.SPAM_FOLDER_KEY, (this.spam_folder_path != null
-            ? this.spam_folder_path.as_list().to_array() : new string[] {}));
-        key_file.set_string_list(Config.GROUP, Config.TRASH_FOLDER_KEY, (this.trash_folder_path != null
-            ? this.trash_folder_path.as_list().to_array() : new string[] {}));
-        key_file.set_string_list(Config.GROUP, Config.ARCHIVE_FOLDER_KEY, (this.archive_folder_path != null
-            ? this.archive_folder_path.as_list().to_array() : new string[] {}));
-
-        key_file.set_boolean(Config.GROUP, Config.SAVE_DRAFTS_KEY, this.save_drafts);
-
-        string data = key_file.to_data();
-        string new_etag;
-
-        try {
-            yield file.replace_contents_async(data.data, null, false, FileCreateFlags.NONE,
-                cancellable, out new_etag);
-
-            Geary.Engine.instance.add_account(this, true);
-        } catch (Error err) {
-            debug("Error writing to account info file: %s", err.message);
-        }
     }
 
     public async void clear_stored_passwords_async(ServiceFlag services) throws Error {
@@ -802,29 +649,6 @@ public class Geary.AccountInformation : BaseObject {
             throw return_error;
     }
 
-    /**
-     * Deletes an account from disk.  This is used by Geary.Engine and should not
-     * normally be invoked directly.
-     */
-    internal async void remove_async(Cancellable? cancellable = null) {
-        if (data_dir == null) {
-            warning("Cannot remove account storage directory; nothing to remove");
-        } else {
-            yield Files.recursive_delete_async(data_dir, cancellable);
-        }
-
-        if (config_dir == null) {
-            warning("Cannot remove account configuration directory; nothing to remove");
-        } else {
-            yield Files.recursive_delete_async(config_dir, cancellable);
-        }
-
-        try {
-            yield clear_stored_passwords_async(ServiceFlag.IMAP | ServiceFlag.SMTP);
-        } catch (Error e) {
-            debug("Error clearing SMTP password: %s", e.message);
-        }
-    }
 
     /**
      * Determines if this account contains a specific email address.

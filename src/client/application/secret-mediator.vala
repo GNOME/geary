@@ -24,8 +24,8 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
     private Geary.Nonblocking.Mutex dialog_mutex = new Geary.Nonblocking.Mutex();
 
 
-    public SecretMediator(GearyApplication instance) {
-        this.instance = instance;
+    public SecretMediator() {
+        this.instance = GearyApplication.instance;
     }
 
     public virtual async string? get_password_async(Geary.Service service,

@@ -334,6 +334,7 @@ client/accounts/account-dialog-pane.vala
 client/accounts/account-dialog-remove-confirm-pane.vala
 client/accounts/account-dialog-remove-fail-pane.vala
 client/accounts/account-dialog-spinner-pane.vala
+client/accounts/account-manager.vala
 client/accounts/account-spinner-page.vala
 client/accounts/add-edit-page.vala
 client/accounts/login-dialog.vala

@@ -38,6 +38,7 @@ namespace Geary.Config {
     public const string EMAIL_SIGNATURE_KEY = "email_signature";
     public const string CREDENTIALS_PROVIDER_KEY = "credentials_provider";
     public const string CREDENTIALS_METHOD_KEY = "credentials_method";
+    public const string SETTINGS_FILENAME = "geary.ini";
 
     public static string get_string_value(KeyFile key_file, string group, string key, string def = "") {
         try {

@@ -52,15 +52,13 @@ public class Geary.Engine : BaseObject {
         }
     }
 
+    private Gee.HashMap<string, AccountInformation>? accounts = null;
+    private Gee.HashMap<string, Account>? account_instances = null;
     public File? user_data_dir { get; private set; default = null; }
     public File? user_config_dir { get; private set; default = null; }
     public File? resource_dir { get; private set; default = null; }
-    public Geary.CredentialsMediator? authentication_mediator { get; private set; default = null; }
-    
     private bool is_initialized = false;
     private bool is_open = false;
-    private Gee.HashMap<string, AccountInformation>? accounts = null;
-    private Gee.HashMap<string, Account>? account_instances = null;
 
     /**
      * Fired when the engine is opened and all the existing accounts are loaded.
@@ -136,12 +134,10 @@ public class Geary.Engine : BaseObject {
     }
     
     /**
-     * Initializes the engine, and makes all existing accounts available.  The
-     * given authentication mediator will be used to retrieve all passwords
-     * when necessary.
+     * Initializes the engine, and makes all existing accounts available.
      */
     public async void open_async(File user_config_dir, File user_data_dir, File resource_dir,
-        Geary.CredentialsMediator? authentication_mediator, Cancellable? cancellable = null) throws Error {
+        Cancellable? cancellable = null) throws Error {
         // initialize *before* opening the Engine ... all initialize code should assume the Engine
         // is closed
         initialize_library();
@@ -152,67 +148,14 @@ public class Geary.Engine : BaseObject {
         this.user_config_dir = user_config_dir;
         this.user_data_dir = user_data_dir;
         this.resource_dir = resource_dir;
-        this.authentication_mediator = authentication_mediator;
 
         accounts = new Gee.HashMap<string, AccountInformation>();
         account_instances = new Gee.HashMap<string, Account>();
 
         is_open = true;
 
-        yield add_existing_accounts_async(cancellable);
-        
         opened();
    }
-
-    private async void add_existing_accounts_async(Cancellable? cancellable = null) throws Error {
-        try {
-            user_data_dir.make_directory_with_parents(cancellable);
-        } catch (IOError e) {
-            if (!(e is IOError.EXISTS))
-                throw e;
-        }
-
-        FileEnumerator enumerator
-            = yield user_config_dir.enumerate_children_async("standard::*",
-                FileQueryInfoFlags.NONE, Priority.DEFAULT, cancellable);
-        
-        Gee.List<AccountInformation> account_list = new Gee.ArrayList<AccountInformation>();
-        
-        for (;;) {
-            List<FileInfo> info_list;
-            try {
-                info_list = yield enumerator.next_files_async(1, Priority.DEFAULT, cancellable);
-            } catch (Error e) {
-                debug("Error enumerating existing accounts: %s", e.message);
-                break;
-            }
-
-            if (info_list.length() == 0)
-                break;
-
-            FileInfo info = info_list.nth_data(0);
-            if (info.get_file_type() == FileType.DIRECTORY) {
-                try {
-                    string id = info.get_name();
-                    account_list.add(
-                        new AccountInformation.from_file(
-                            id,
-                            user_config_dir.get_child(id),
-                            user_data_dir.get_child(id),
-                            new Geary.LocalServiceInformation(Service.IMAP, user_config_dir.get_child(id), this.authentication_mediator),
-                            new Geary.LocalServiceInformation(Service.SMTP, user_config_dir.get_child(id), this.authentication_mediator)
-                        )
-                    );
-                } catch (Error err) {
-                    warning("Ignoring empty/bad config in %s: %s",
-                            info.get_name(), err.message);
-                }
-            }
-        }
-
-        foreach(AccountInformation info in account_list)
-            add_account(info);
-     }
 
     /**
      * Uninitializes the engine, and makes all accounts unavailable.
@@ -229,7 +172,6 @@ public class Geary.Engine : BaseObject {
 
         user_data_dir = null;
         resource_dir = null;
-        authentication_mediator = null;
         accounts = null;
         account_instances = null;
 
@@ -296,10 +238,7 @@ public class Geary.Engine : BaseObject {
             throw new EngineError.ALREADY_EXISTS("Account %s already exists", id);
 
         return new AccountInformation(
-            id, user_config_dir.get_child(id), user_data_dir.get_child(id),
-                new LocalServiceInformation(Service.IMAP, user_config_dir.get_child(id), this.authentication_mediator),
-                new LocalServiceInformation(Service.SMTP, user_config_dir.get_child(id), this.authentication_mediator)
-        );
+            id, user_config_dir.get_child(id), user_data_dir.get_child(id), null, null);
     }
 
     /**
@@ -340,7 +279,7 @@ public class Geary.Engine : BaseObject {
             debug("Error connecting to IMAP server: %s", err.message);
             error_code |= ValidationResult.IMAP_CONNECTION_FAILED;
         }
-        
+
         if (!error_code.is_all_set(ValidationResult.IMAP_CONNECTION_FAILED)) {
             try {
                 yield imap_session.initiate_session_async(account.imap.credentials, cancellable);
@@ -357,7 +296,7 @@ public class Geary.Engine : BaseObject {
                     error_code |= ValidationResult.IMAP_CONNECTION_FAILED;
             }
         }
-        
+
         try {
             yield imap_session.disconnect_async(cancellable);
         } catch (Error err) {
@@ -474,15 +413,13 @@ public class Geary.Engine : BaseObject {
 
             // Removal *MUST* be done in the following order:
             // 1. Send the account-unavailable signal.
+            // Files will be deleted client side.
             account_unavailable(account);
-            
-            // 2. Delete the corresponding files.
-            yield account.remove_async(cancellable);
-            
-            // 3. Send the account-removed signal.
+
+            // 2. Send the account-removed signal.
             account_removed(account);
-            
-            // 4. Remove the account data from the engine.
+
+            // 3. Remove the account data from the engine.
             account_instances.unset(account.id);
         }
     }

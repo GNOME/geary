@@ -727,7 +727,6 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
                 path = new Imap.FolderRoot(search_names[0]);
             
             information.set_special_folder_path(special, path);
-            yield information.store_async(cancellable);
         }
         
         if (path in folder_map.keys) {

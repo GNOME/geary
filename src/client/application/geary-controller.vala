@@ -285,9 +285,11 @@ public class GearyController : Geary.BaseObject {
             yield Geary.Engine.instance.open_async(
                 this.application.get_user_config_directory(),
                 this.application.get_user_data_directory(),
-                this.application.get_resource_directory(),
-                new SecretMediator(this.application)
+                this.application.get_resource_directory()
             );
+            stdout.printf("adding local accounts...\n");
+            AccountManager manager = new AccountManager();
+            yield manager.add_existing_accounts_async(null);
             if (Geary.Engine.instance.get_accounts().size == 0) {
                 create_account();
             }
@@ -644,8 +646,9 @@ public class GearyController : Geary.BaseObject {
         open_account(account);
     }
     
-    private void on_account_unavailable(Geary.AccountInformation account_information) {
+    private async void on_account_unavailable(Geary.AccountInformation account_information) {
         close_account(get_account_instance(account_information));
+        yield AccountManager.remove_async(account_information);
     }
     
     private void on_untrusted_host(Geary.AccountInformation account_information,
@@ -936,7 +939,7 @@ public class GearyController : Geary.BaseObject {
                 real_account_information.copy_from(account_information);
             }
 
-            real_account_information.store_async.begin(cancellable);
+            yield AccountManager.store_to_file(real_account_information);
             do_update_stored_passwords_async.begin(Geary.ServiceFlag.IMAP | Geary.ServiceFlag.SMTP,
                 real_account_information);
             
