@@ -26,6 +26,9 @@ public class Geary.ConfigFile {
         }
 
 
+        /** The config file this group was obtained from. */
+        public ConfigFile file { get; private set; }
+
         /** The name of this group, as specified by a [Name] heading. */
         public string name { get; private set; }
 
@@ -33,7 +36,8 @@ public class Geary.ConfigFile {
         private GroupLookup[] lookups;
 
 
-        internal Group(string name, GLib.KeyFile backing) {
+        internal Group(ConfigFile file, string name, GLib.KeyFile backing) {
+            this.file = file;
             this.name = name;
             this.backing = backing;
 
@@ -172,7 +176,7 @@ public class Geary.ConfigFile {
      * Returns the config group under the given named heading.
      */
     public Group get_group(string name) {
-        return new Group(name, this.backing);
+        return new Group(this, name, this.backing);
     }
 
     /**

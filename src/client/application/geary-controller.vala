@@ -183,7 +183,7 @@ public class GearyController : Geary.BaseObject {
     /**
      * Starts the controller and brings up Geary.
      */
-    public async void open_async() {
+    public async void open_async(GLib.Cancellable? cancellable) {
         Geary.Engine engine = this.application.engine;
 
         // This initializes the IconFactory, important to do before
@@ -298,9 +298,24 @@ public class GearyController : Geary.BaseObject {
             this.application.get_user_config_directory(),
             this.application.get_user_data_directory()
         );
+
         try {
-            yield engine.open_async(this.application.get_resource_directory());
-            yield this.account_manager.add_existing_accounts_async(null);
+            yield this.account_manager.connect_libsecret(cancellable);
+        } catch (GLib.Error err) {
+            warning("Error opening libsecret: %s", err.message);
+        }
+
+        try {
+            yield this.account_manager.connect_goa(cancellable);
+        } catch (GLib.Error err) {
+            warning("Error opening GOA: %s", err.message);
+        }
+
+        try {
+            yield engine.open_async(
+                this.application.get_resource_directory(), cancellable
+            );
+            yield this.account_manager.load_accounts(cancellable);
             if (engine.get_accounts().size == 0) {
                 create_account();
             }
@@ -864,10 +879,12 @@ public class GearyController : Geary.BaseObject {
             try {
                 if (real_account_information.settings_file == null) {
                     yield this.account_manager.create_account_dirs(
-                        real_account_information
+                        real_account_information, cancellable
                     );
                 }
-                yield this.account_manager.save_account(real_account_information);
+                yield this.account_manager.save_account(
+                    real_account_information, cancellable
+                );
                 yield do_update_stored_passwords_async(
                     Geary.ServiceFlag.IMAP | Geary.ServiceFlag.SMTP,
                     real_account_information

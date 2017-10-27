@@ -245,7 +245,7 @@ public class GearyApplication : Gtk.Application {
             exec_dir.get_path(), is_installed().to_string());
         
         config = new Configuration(APP_ID);
-        yield controller.open_async();
+        yield controller.open_async(null);
         
         release();
     }
