@@ -70,27 +70,78 @@ public enum Geary.CredentialsMethod {
  */
 public abstract class Geary.ServiceInformation : GLib.Object {
 
+    /** The server's address. */
     public string host { get; set; default = ""; }
+
+    /** The server's port. */
     public uint16 port { get; set; }
+
+    /** Whether STARTTLS is used when connecting to the server. */
     public bool use_starttls { get; set; default = false; }
+
+    /** Whether SSL is used when connecting to the server. */
     public bool use_ssl { get; set; default = true; }
+
+    /**
+     * Whether the password should be remembered.
+     *
+     * This only makes sense with providers that support saving the password.
+     */
     public bool remember_password { get; set; default = false; }
+
+    /** The credentials used for authenticating. */
     public Geary.Credentials credentials { get; set; default = new Geary.Credentials(null, null); }
+
+    /** Whether this class instance is used with the account's IMAP or the SMTP server. */
     public Geary.Service service { get; set; }
+
+    /**
+     * The credentials mediator used with the account.
+     *
+     * It is responsible for fetching and storing the credentials if applicable.
+     */
     public Geary.CredentialsMediator? mediator { get; set; default = null; }
 
+    /**
+     * The default credentials provider.
+     *
+     * It is used for differentiating where Geary should get its credentials from,
+     * in case there may be multiple sources.
+     */
     public Geary.CredentialsProvider credentials_provider { get; set; default = CredentialsProvider.LIBSECRET; }
 
+    /** The method used for authenticating with the server. */
     public Geary.CredentialsMethod credentials_method { get; set; default = CredentialsMethod.PASSWORD; }
 
-    // Used with SMTP servers
+    /**
+     * Whether we should NOT authenticate with the server.
+     *
+     * Only valid if this instance represents an SMTP server.
+     */
     public bool smtp_noauth { get; set; default = false; }
+
+    /**
+     * Specifies if we should use IMAP credentials.
+     *
+     * Only valid if this instance represents an SMTP server.
+     */
     public bool smtp_use_imap_credentials { get; set; default = false; }
 
+    /**
+     * Loads the settings pertaining to this class's instance.
+     *
+     * This method depends on the concrete implementation used.
+     */
     public abstract void load_settings(KeyFile? key_file = null) throws Error;
 
+    /**
+     * Loads the credentials pertaining to this class's instance.
+     *
+     * This method depends on the concrete implementation used.
+     */
     public abstract void load_credentials(KeyFile? key_file = null, string? email_address = null) throws Error;
 
+    /** Saves settings pertaining to this class's instance to a key file. */
     public abstract void save_settings(KeyFile? key_file = null);
 
     public void copy_from(Geary.ServiceInformation from) {
@@ -108,6 +159,10 @@ public abstract class Geary.ServiceInformation : GLib.Object {
         this.smtp_use_imap_credentials = from.smtp_use_imap_credentials;
     }
 
+    /**
+     * Saves a new password for this instance's credentials, with the option
+     * of remembering the password.
+     */
     public void set_password(string password, bool remember = false) {
         this.credentials = new Credentials(this.credentials.user, password);
         this.remember_password = remember;
