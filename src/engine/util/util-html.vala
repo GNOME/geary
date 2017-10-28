@@ -176,7 +176,7 @@ public string smart_escape(string? text, bool preserve_whitespace_in_html) {
         return text;
 
     string res = text;
-    if (!Regex.match_simple("<([A-Z]*)(?: [^>]*)?>.*</(\\1)>|<[A-Z]*(?: [^>]*)?/>", res,
+    if (!Regex.match_simple("<[A-Z]*(?: [^>]*)?\\/?>", res,
                             RegexCompileFlags.CASELESS)) {
         res = Geary.HTML.escape_markup(res);
         preserve_whitespace_in_html = true;
