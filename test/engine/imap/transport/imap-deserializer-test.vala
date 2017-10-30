@@ -23,10 +23,17 @@ class Geary.Imap.DeserializerTest : Gee.TestCase {
         add_test("test_cyrus_2_4_greeting", test_cyrus_2_4_greeting);
         add_test("test_aliyun_greeting", test_aliyun_greeting);
 
+        add_test("test_invalid_atom_prefix", test_invalid_atom_prefix);
+
         add_test("test_gmail_flags", test_gmail_flags);
         add_test("test_gmail_permanent_flags", test_gmail_permanent_flags);
         add_test("test_cyrus_flags", test_cyrus_flags);
 
+        add_test("test_runin_special_flag", test_runin_special_flag);
+        add_test("test_invalid_flag_prefix", test_invalid_flag_prefix);
+
+        add_test("test_instant_eos", test_instant_eos);
+        add_test("test_bye_eos", test_bye_eos);
     }
 
     public override void set_up() {
@@ -73,6 +80,15 @@ class Geary.Imap.DeserializerTest : Gee.TestCase {
         assert(message.to_string() == parsed);
     }
 
+    public void test_invalid_atom_prefix() {
+        string flags = """* OK %atom""";
+        this.stream.add_data(flags.data);
+        this.stream.add_data(EOL.data);
+
+        this.process.begin(Expect.DESER_FAIL, (obj, ret) => { async_complete(ret); });
+        this.process.end(async_result());
+    }
+
     public void test_gmail_flags() {
         string flags = """* FLAGS (\Answered \Flagged \Draft \Deleted \Seen $NotPhishing $Phishing)""";
         this.stream.add_data(flags.data);
@@ -104,6 +120,50 @@ class Geary.Imap.DeserializerTest : Gee.TestCase {
         RootParameters? message = this.process.end(async_result());
 
         assert(message.to_string() == flags);
+    }
+
+    public void test_runin_special_flag() {
+        // since we must terminate a special flag upon receiving the
+        // '*', the following atom will be treated as a run-on but
+        // distinct atom.
+        string flags = """* OK \*atom""";
+        string expected = """* OK \* atom""";
+        this.stream.add_data(flags.data);
+        this.stream.add_data(EOL.data);
+
+        this.process.begin(Expect.MESSAGE, (obj, ret) => { async_complete(ret); });
+        RootParameters? message = this.process.end(async_result());
+
+        assert(message.to_string() == expected);
+    }
+
+    public void test_invalid_flag_prefix() {
+        string flags = """* OK \%atom""";
+        this.stream.add_data(flags.data);
+        this.stream.add_data(EOL.data);
+
+        this.process.begin(Expect.DESER_FAIL, (obj, ret) => { async_complete(ret); });
+        this.process.end(async_result());
+    }
+
+    public void test_instant_eos() {
+        this.process.begin(Expect.EOS, (obj, ret) => { async_complete(ret); });
+        this.process.end(async_result());
+        assert(this.deser.is_halted());
+    }
+
+    public void test_bye_eos() {
+        string bye = """* OK bye""";
+        this.stream.add_data(bye.data);
+
+        bool eos = false;
+        this.deser.eos.connect(() => { eos = true; });
+
+        this.process.begin(Expect.MESSAGE, (obj, ret) => { async_complete(ret); });
+        RootParameters? message = this.process.end(async_result());
+        assert(message.to_string() == bye);
+        assert(eos);
+        assert(this.deser.is_halted());
     }
 
     protected async RootParameters? process(Expect expected) {
