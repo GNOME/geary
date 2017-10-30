@@ -19,6 +19,14 @@ class Geary.Imap.DeserializerTest : Gee.TestCase {
 
     public DeserializerTest() {
         base("Geary.Imap.DeserializerTest");
+        add_test("test_gmail_greeting", test_gmail_greeting);
+        add_test("test_cyrus_2_4_greeting", test_cyrus_2_4_greeting);
+        add_test("test_aliyun_greeting", test_aliyun_greeting);
+
+        add_test("test_gmail_flags", test_gmail_flags);
+        add_test("test_gmail_permanent_flags", test_gmail_permanent_flags);
+        add_test("test_cyrus_flags", test_cyrus_flags);
+
     }
 
     public override void set_up() {
@@ -29,6 +37,73 @@ class Geary.Imap.DeserializerTest : Gee.TestCase {
     public override void tear_down() {
         this.deser.stop_async.begin((obj, ret) => { async_complete(ret); });
         async_result();
+    }
+
+    public void test_gmail_greeting() {
+        string greeting = "* OK Gimap ready for requests from 115.187.245.46 c194mb399904375ivc";
+        this.stream.add_data(greeting.data);
+        this.stream.add_data(EOL.data);
+
+        this.process.begin(Expect.MESSAGE, (obj, ret) => { async_complete(ret); });
+        RootParameters? message = this.process.end(async_result());
+
+        assert(message.to_string() == greeting);
+    }
+
+    public void test_cyrus_2_4_greeting() {
+        string greeting = "* OK [CAPABILITY IMAP4rev1 LITERAL+ ID ENABLE AUTH=PLAIN SASL-IR] mogul Cyrus IMAP v2.4.12-Debian-2.4.12-2 server ready";
+        this.stream.add_data(greeting.data);
+        this.stream.add_data(EOL.data);
+
+        this.process.begin(Expect.MESSAGE, (obj, ret) => { async_complete(ret); });
+        RootParameters? message = this.process.end(async_result());
+
+        assert(message.to_string() == greeting);
+    }
+
+    public void test_aliyun_greeting() {
+        string greeting = "* OK AliYun IMAP Server Ready(10.147.40.164)";
+        string parsed = "* OK AliYun IMAP Server Ready (10.147.40.164)";
+        this.stream.add_data(greeting.data);
+        this.stream.add_data(EOL.data);
+
+        this.process.begin(Expect.MESSAGE, (obj, ret) => { async_complete(ret); });
+        RootParameters? message = this.process.end(async_result());
+
+        assert(message.to_string() == parsed);
+    }
+
+    public void test_gmail_flags() {
+        string flags = """* FLAGS (\Answered \Flagged \Draft \Deleted \Seen $NotPhishing $Phishing)""";
+        this.stream.add_data(flags.data);
+        this.stream.add_data(EOL.data);
+
+        this.process.begin(Expect.MESSAGE, (obj, ret) => { async_complete(ret); });
+        RootParameters? message = this.process.end(async_result());
+
+        assert(message.to_string() == flags);
+    }
+
+    public void test_gmail_permanent_flags() {
+        string flags = """* OK [PERMANENTFLAGS (\Answered \Flagged \Draft \Deleted \Seen $NotPhishing $Phishing \*)] Flags permitted.""";
+        this.stream.add_data(flags.data);
+        this.stream.add_data(EOL.data);
+
+        this.process.begin(Expect.MESSAGE, (obj, ret) => { async_complete(ret); });
+        RootParameters? message = this.process.end(async_result());
+
+        assert(message.to_string() == flags);
+    }
+
+    public void test_cyrus_flags() {
+        string flags = """* 2934 FETCH (FLAGS (\Answered \Seen $Quuxo::Spam::Trained) UID 3041)""";
+        this.stream.add_data(flags.data);
+        this.stream.add_data(EOL.data);
+
+        this.process.begin(Expect.MESSAGE, (obj, ret) => { async_complete(ret); });
+        RootParameters? message = this.process.end(async_result());
+
+        assert(message.to_string() == flags);
     }
 
     protected async RootParameters? process(Expect expected) {

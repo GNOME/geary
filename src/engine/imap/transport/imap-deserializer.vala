@@ -37,7 +37,7 @@ public class Geary.Imap.Deserializer : BaseObject {
         TAG,
         START_PARAM,
         ATOM,
-        SYSTEM_FLAG,
+        FLAG,
         QUOTED,
         QUOTED_ESCAPE,
         PARTIAL_BODY_ATOM,
@@ -84,7 +84,6 @@ public class Geary.Imap.Deserializer : BaseObject {
     private Geary.Memory.GrowableBuffer? block_buffer = null;
     private unowned uint8[]? current_buffer = null;
     private int ins_priority = Priority.DEFAULT;
-    private char[] atom_specials_exceptions = { ' ', ' ', '\0' };
 
 
     /**
@@ -163,10 +162,10 @@ public class Geary.Imap.Deserializer : BaseObject {
             new Geary.State.Mapping(State.ATOM, Event.EOS, on_eos),
             new Geary.State.Mapping(State.ATOM, Event.ERROR, on_error),
             
-            new Geary.State.Mapping(State.SYSTEM_FLAG, Event.CHAR, on_system_flag_char),
-            new Geary.State.Mapping(State.SYSTEM_FLAG, Event.EOL, on_atom_eol),
-            new Geary.State.Mapping(State.SYSTEM_FLAG, Event.EOS, on_eos),
-            new Geary.State.Mapping(State.SYSTEM_FLAG, Event.ERROR, on_error),
+            new Geary.State.Mapping(State.FLAG, Event.CHAR, on_first_flag_char),
+            new Geary.State.Mapping(State.FLAG, Event.EOL, on_atom_eol),
+            new Geary.State.Mapping(State.FLAG, Event.EOS, on_eos),
+            new Geary.State.Mapping(State.FLAG, Event.ERROR, on_error),
             
             new Geary.State.Mapping(State.QUOTED, Event.CHAR, on_quoted_char),
             new Geary.State.Mapping(State.QUOTED, Event.EOS, on_eos),
@@ -540,29 +539,52 @@ public class Geary.Imap.Deserializer : BaseObject {
                 // open response code
                 ResponseCode response_code = new ResponseCode();
                 push(response_code);
-                
                 return State.START_PARAM;
-            
+
+            case ']':
+                if (ch == get_current_context_terminator()) {
+                    return pop();
+                }
+
+                // Received an unexpected closing brace
+                return State.FAILED;
+
             case '{':
                 return State.LITERAL;
-            
+
             case '\"':
                 return State.QUOTED;
-            
+
             case '(':
                 // open list
                 ListParameter list = new ListParameter();
                 push(list);
-                
                 return State.START_PARAM;
-            
-            default:
-                // if current context's terminator, close the context, otherwise deserializer is
-                // now "in" an Atom
-                if (ch == get_current_context_terminator())
+
+            case ')':
+                if (ch == get_current_context_terminator()) {
                     return pop();
-                else
-                    return on_atom_char(state, event, user);
+                }
+
+                // Received an unexpected closing parens
+                return State.FAILED;
+
+            case '\\':
+                // Start of a flag
+                append_to_string(ch);
+                return State.FLAG;
+
+            case ' ':
+                // just consume the space
+                return State.START_PARAM;
+
+            default:
+                if (!DataFormat.is_atom_special(ch)) {
+                    append_to_string(ch);
+                    return State.ATOM;
+                }
+                // Received an invalid atom-char
+                return State.FAILED;
         }
     }
     
@@ -585,86 +607,70 @@ public class Geary.Imap.Deserializer : BaseObject {
         
         return State.TAG;
     }
-    
+
     private uint on_atom_char(uint state, uint event, void *user) {
         char ch = *((char *) user);
-        
+
         // The partial body fetch results ("BODY[section]" or "BODY[section]<partial>" and their
         // .peek variants) offer so many exceptions to the decoding process they're given their own
         // state
         if (ch == '[' && (is_current_string_ci("body") || is_current_string_ci("body.peek"))) {
             append_to_string(ch);
-            
             return State.PARTIAL_BODY_ATOM;
         }
-        
-        // get the terminator for this context and re-use the atom_special_exceptions array to
-        // pass to DataFormat.is_atom_special() (this means not allocating a new array on the heap
-        // for each call here, which isn't a problem because the FSM is non-reentrant)
-        char terminator = get_current_context_terminator();
-        atom_specials_exceptions[1] = terminator;
-        
-        // drop if not allowed for atoms, barring specials which indicate special state changes
-        if (DataFormat.is_atom_special(ch, (string) atom_specials_exceptions))
-            return State.ATOM;
-        
-        // message flag indicator is only legal at start of atom
-        if (ch == '\\' && is_current_string_empty()) {
-            append_to_string(ch);
-            
-            return State.SYSTEM_FLAG;
-        }
-        
-        // space indicates end-of-atom
+
+        // space indicates end-of-atom, consume it and return to go.
         if (ch == ' ') {
             save_string_parameter(false);
-            
             return State.START_PARAM;
         }
-        
-        if (ch == get_current_context_terminator()) {
-            save_string_parameter(false);
-            
-            return pop();
-        }
-        
-        append_to_string(ch);
-        
-        return State.ATOM;
-    }
-    
-    private uint on_system_flag_char(uint state, uint event, void *user) {
-        char ch = *((char *) user);
-        
-        // see note in on_atom_char for why/how this works
+
+        // as does an end-of-list delim
         char terminator = get_current_context_terminator();
-        atom_specials_exceptions[1] = terminator;
-        
-        // drop if not allowed for atoms, barring specials which indicate state changes
-        // note that asterisk is allowed for flags
-        if (ch != '*' && DataFormat.is_atom_special(ch, (string) atom_specials_exceptions))
-            return State.SYSTEM_FLAG;
-        
-        // space indicates end-of-system-flag
-        if (ch == ' ') {
-            save_string_parameter(false);
-            
-            return State.START_PARAM;
-        }
-        
-        // close-parens/close-square-bracket after a system flag indicates end-of-list/end-of-response
-        // code
         if (ch == terminator) {
             save_string_parameter(false);
-            
             return pop();
         }
-        
+
+        // Any of the atom specials indicate end of atom, so save and
+        // work out where to go next
+        if (DataFormat.is_atom_special(ch)) {
+            save_string_parameter(false);
+            return on_first_param_char(state, event, user);
+        }
+
         append_to_string(ch);
-        
-        return State.SYSTEM_FLAG;
+        return State.ATOM;
     }
-    
+
+    // Although flags basically have the form "\atom", the special
+    // flag "\*" isn't a valid atom, and hence we need a special case
+    // for flag parsing. This is only used for the first char after
+    // the '\', since all following chars must be valid for atoms
+    private uint on_first_flag_char(uint state, uint event, void *user) {
+        char ch = *((char *) user);
+
+        // handle special flag "\*", this also indicates end-of-flag
+        if (ch == '*') {
+            append_to_string(ch);
+            save_string_parameter(false);
+            return State.START_PARAM;
+        }
+
+        // Any of the atom specials indicate end of atom, but we are
+        // at the first char after a "\" and a flag has to have at
+        // least one atom char to be valid, so if we get an
+        // atom-special here bail out.
+        if (DataFormat.is_atom_special(ch)) {
+            return State.FAILED;
+        }
+
+        // Append the char, but then switch to the ATOM state, since
+        // '*' is no longer valid and the remainder must be an atom
+        append_to_string(ch);
+        return State.ATOM;
+    }
+
     private uint on_eol(uint state, uint event, void *user) {
         return flush_params();
     }
