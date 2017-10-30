@@ -24,6 +24,8 @@
 
 public abstract class Gee.TestCase : Object {
 
+    protected MainContext main_loop = MainContext.default();
+
 	private GLib.TestSuite suite;
 	private Adaptor[] adaptors = new Adaptor[0];
     private AsyncQueue<AsyncResult> async_results = new AsyncQueue<AsyncResult>();
@@ -56,12 +58,15 @@ public abstract class Gee.TestCase : Object {
 
     protected void async_complete(AsyncResult result) {
         this.async_results.push(result);
+        // notify the loop so that if async_result() has already been
+        // called, that method won't block
+        this.main_loop.wakeup();
     }
 
     protected AsyncResult async_result() {
         AsyncResult? result = null;
         while (result == null) {
-            Gtk.main_iteration();
+            this.main_loop.iteration(true);
             result = this.async_results.try_pop();
         }
         return result;
