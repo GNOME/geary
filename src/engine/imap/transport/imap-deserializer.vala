@@ -72,7 +72,6 @@ public class Geary.Imap.Deserializer : BaseObject {
         state_to_string, event_to_string);
     
     private string identifier;
-    private ConverterInputStream cins;
     private DataInputStream dins;
     private Geary.State.Machine fsm;
     private ListParameter context;
@@ -86,7 +85,8 @@ public class Geary.Imap.Deserializer : BaseObject {
     private unowned uint8[]? current_buffer = null;
     private int ins_priority = Priority.DEFAULT;
     private char[] atom_specials_exceptions = { ' ', ' ', '\0' };
-    
+
+
     /**
      * Fired when a complete set of IMAP {@link Parameter}s have been received.
      *
@@ -99,21 +99,7 @@ public class Geary.Imap.Deserializer : BaseObject {
      * {@link QuotedStringParameter} which allows for some control characters).
      */
     public signal void parameters_ready(RootParameters root);
-    
-    /**
-     * Fired when the underlying InputStream is closed, whether due to normal EOS or input error.
-     *
-     * @see receive_failure
-     */
-    public signal void eos();
-    
-    /**
-     * Fired when an Error is trapped on the input stream.
-     *
-     * This is nonrecoverable and means the stream should be closed and this Deserializer destroyed.
-     */
-    public signal void receive_failure(Error err);
-    
+
     /**
      * Fired as data blocks are received during download.
      *
@@ -127,7 +113,14 @@ public class Geary.Imap.Deserializer : BaseObject {
      * on the receive channel, especially during long downloads.
      */
     public signal void bytes_received(size_t bytes);
-    
+
+    /**
+     * Fired when the underlying InputStream is closed, whether due to normal EOS or input error.
+     *
+     * @see receive_failure
+     */
+    public signal void eos();
+
     /**
      * Fired when a syntax error has occurred.
      *
@@ -135,11 +128,19 @@ public class Geary.Imap.Deserializer : BaseObject {
      * or impossible.
      */
     public signal void deserialize_failure();
-    
+
+    /**
+     * Fired when an Error is trapped on the input stream.
+     *
+     * This is nonrecoverable and means the stream should be closed and this Deserializer destroyed.
+     */
+    public signal void receive_failure(Error err);
+
+
     public Deserializer(string identifier, InputStream ins) {
         this.identifier = identifier;
-        
-        cins = new ConverterInputStream(ins, midstream);
+
+        ConverterInputStream cins = new ConverterInputStream(ins, midstream);
         cins.set_close_base_stream(false);
         dins = new DataInputStream(cins);
         dins.set_newline_type(DataStreamNewlineType.CR_LF);
@@ -251,7 +252,28 @@ public class Geary.Imap.Deserializer : BaseObject {
         yield closed_semaphore.wait_async();
         debug("[%s] Deserializer closed", to_string());
     }
-    
+
+    /**
+     * Determines if the deserializer is closed.
+     */
+    public bool is_halted() {
+        switch (get_mode()) {
+            case Mode.FAILED:
+            case Mode.CLOSED:
+                return true;
+
+            default:
+                return false;
+        }
+    }
+
+    /**
+     * Returns a string representation of this object for debugging.
+     */
+    public string to_string() {
+        return "des:%s/%s".printf(identifier, fsm.get_state_string(fsm.get_state()));
+    }
+
     private void next_deserialize_step() {
         switch (get_mode()) {
             case Mode.LINE:
@@ -407,19 +429,7 @@ public class Geary.Imap.Deserializer : BaseObject {
                 return Mode.LINE;
         }
     }
-    
-    // True if the Deserializer is FAILED or CLOSED.
-    private bool is_halted() {
-        switch (get_mode()) {
-            case Mode.FAILED:
-            case Mode.CLOSED:
-                return true;
-            
-            default:
-                return false;
-        }
-    }
-    
+
     private bool is_current_string_empty() {
         return (current_string == null) || String.is_empty(current_string.str);
     }
@@ -516,15 +526,11 @@ public class Geary.Imap.Deserializer : BaseObject {
         
         return State.TAG;
     }
-    
-    public string to_string() {
-        return "des:%s/%s".printf(identifier, fsm.get_state_string(fsm.get_state()));
-    }
-    
+
     //
     // Transition handlers
     //
-    
+
     private uint on_first_param_char(uint state, uint event, void *user) {
         // look for opening characters to special parameter formats, otherwise jump to atom
         // handler (i.e. don't drop this character in the case of atoms)
@@ -826,4 +832,3 @@ public class Geary.Imap.Deserializer : BaseObject {
         return State.FAILED;
     }
 }
-
