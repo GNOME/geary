@@ -8,6 +8,7 @@ set(TEST_SRC
 
   engine/api/geary-attachment-test.vala
   engine/api/geary-engine-test.vala
+  engine/imap/transport/imap-deserializer-test.vala
   engine/mime-content-type-test.vala
   engine/rfc822-mailbox-address-test.vala
   engine/rfc822-message-test.vala
