@@ -195,10 +195,11 @@ public class Geary.Imap.Deserializer : BaseObject {
             new Geary.State.Mapping(State.LITERAL_DATA, Event.DATA, on_literal_data),
             new Geary.State.Mapping(State.LITERAL_DATA, Event.EOS, on_eos),
             new Geary.State.Mapping(State.LITERAL_DATA, Event.ERROR, on_error),
-            
+
+            new Geary.State.Mapping(State.FAILED, Event.EOL, on_failed_eol),
             new Geary.State.Mapping(State.FAILED, Event.EOS, Geary.State.nop),
             new Geary.State.Mapping(State.FAILED, Event.ERROR, Geary.State.nop),
-            
+
             new Geary.State.Mapping(State.CLOSED, Event.EOS, Geary.State.nop),
             new Geary.State.Mapping(State.CLOSED, Event.ERROR, Geary.State.nop)
         };
@@ -314,15 +315,12 @@ public class Geary.Imap.Deserializer : BaseObject {
                 
                 return;
             }
-            
-            Logging.debug(Logging.Flag.DESERIALIZER, "[%s] line %s", to_string(), line);
-            
+
+            Logging.debug(Logging.Flag.DESERIALIZER, "[%s] line: %s", to_string(), line);
             bytes_received(bytes_read);
-            
             push_line(line, bytes_read);
         } catch (Error err) {
             push_error(err);
-            
             return;
         }
         
@@ -343,12 +341,11 @@ public class Geary.Imap.Deserializer : BaseObject {
             }
             
             Logging.debug(Logging.Flag.DESERIALIZER, "[%s] block %lub", to_string(), bytes_read);
-            
             bytes_received(bytes_read);
-            
+
             // adjust the current buffer's size to the amount that was actually read in
             block_buffer.trim(current_buffer, bytes_read);
-            
+
             push_data(bytes_read);
         } catch (Error err) {
             push_error(err);
@@ -358,51 +355,37 @@ public class Geary.Imap.Deserializer : BaseObject {
         
         next_deserialize_step();
     }
-    
+
     // Push a line (without the CRLF!).  Because DataInputStream reads to EOL but accepts all other
     // characters, it's possible for NULs to be embedded in the string, so the count must be passed
     // as well (and shouldn't be -1!)
-    private Mode push_line(string line, size_t count) {
+    private void push_line(string line, size_t count) {
         assert(get_mode() == Mode.LINE);
-        
+
         for (long ctr = 0; ctr < count; ctr++) {
             char ch = line[ctr];
-            if (ch == String.EOS) {
+            if (ch == '\0') {
                 // drop on the floor; IMAP spec does not allow NUL in lines at all, see
                 // http://tools.ietf.org/html/rfc3501#section-9 note 3.
-                // This also catches the terminating NUL.
                 continue;
             }
-            
+
             if (fsm.issue(Event.CHAR, &ch) == State.FAILED) {
-                deserialize_failure();
-                
-                return Mode.FAILED;
+                // Don't try to continue processing, but continue to
+                // EOL regardless for cleanup.
+                break;
             }
         }
-        
-        if (fsm.issue(Event.EOL) == State.FAILED) {
-            deserialize_failure();
-            
-            return Mode.FAILED;
-        }
-        
-        return get_mode();
+
+        fsm.issue(Event.EOL);
     }
-    
+
     // Push a block of literal data
-    private Mode push_data(size_t bytes_read) {
+    private void push_data(size_t bytes_read) {
         assert(get_mode() == Mode.BLOCK);
-        
-        if (fsm.issue(Event.DATA, &bytes_read) == State.FAILED) {
-            deserialize_failure();
-            
-            return Mode.FAILED;
-        }
-        
-        return get_mode();
+        fsm.issue(Event.DATA, &bytes_read);
     }
-    
+
     // Push an EOS event
     private void push_eos() {
         fsm.issue(Event.EOS);
@@ -465,11 +448,7 @@ public class Geary.Imap.Deserializer : BaseObject {
         
         current_string = null;
     }
-    
-    private void clear_string_parameter() {
-        current_string = null;
-    }
-    
+
     private void save_literal_parameter() {
         save_parameter(new LiteralParameter(block_buffer));
         block_buffer = null;
@@ -502,28 +481,34 @@ public class Geary.Imap.Deserializer : BaseObject {
         
         return State.START_PARAM;
     }
-    
-    private State flush_params() {
-        if (context != root) {
-            warning("Unclosed list in parameters");
-            
-            return State.FAILED;
+
+    private void flush_params() {
+        bool okay = true;
+        if (this.context != this.root) {
+            Logging.debug(Logging.Flag.DESERIALIZER, "[%s] Unclosed list in parameters");
+            okay = false;
         }
-        
-        if (!is_current_string_empty() || literal_length_remaining > 0) {
-            warning("Unfinished parameter: string=%s literal remaining=%lu", 
-                (!is_current_string_empty()).to_string(), literal_length_remaining);
-            
-            return State.FAILED;
+
+        if (!is_current_string_empty() || this.literal_length_remaining > 0) {
+            Logging.debug(
+                Logging.Flag.DESERIALIZER,
+                "Unfinished parameter: string=%s literal remaining=%lu",
+                (!is_current_string_empty()).to_string(), this.literal_length_remaining
+            );
+            okay = false;
         }
-        
-        RootParameters ready = root;
-        root = new RootParameters();
-        context = root;
-        
-        parameters_ready(ready);
-        
-        return State.TAG;
+
+        if (okay && this.root != null && root.size > 0) {
+            parameters_ready(this.root);
+        }
+
+        reset_params();
+    }
+
+    private void reset_params() {
+        this.context = this.root = new RootParameters();
+        this.current_string = null;
+        this.literal_length_remaining = 0;
     }
 
     //
@@ -672,16 +657,29 @@ public class Geary.Imap.Deserializer : BaseObject {
     }
 
     private uint on_eol(uint state, uint event, void *user) {
-        return flush_params();
+        flush_params();
+        return State.TAG;
     }
-    
+
     private uint on_atom_eol(uint state, uint event, void *user) {
         // clean up final atom
         save_string_parameter(false);
-        
-        return flush_params();
+        flush_params();
+        return State.TAG;
     }
-    
+
+    private uint on_failed_eol(uint state, uint event, void *user) {
+        // We don't go into the error state on syntax error, merely
+        // reset, cross our fingers and hope for the best. Maybe
+        // there's a better strategy though?
+        Logging.debug(
+            Logging.Flag.DESERIALIZER, "[%s] Syntax error, dropping", to_string()
+        );
+        deserialize_failure();
+        reset_params();
+        return State.TAG;
+    }
+
     private uint on_quoted_char(uint state, uint event, void *user) {
         char ch = *((char *) user);
         
@@ -765,16 +763,14 @@ public class Geary.Imap.Deserializer : BaseObject {
             // empty literal treated as garbage
             if (is_current_string_empty())
                 return State.FAILED;
-            
-            literal_length_remaining = (size_t) long.parse(current_string.str);
+
+            literal_length_remaining = (size_t) long.parse(this.current_string.str);
+            this.current_string = null;
             if (literal_length_remaining < 0) {
                 warning("Negative literal data length %lu", literal_length_remaining);
-                
                 return State.FAILED;
             }
-            
-            clear_string_parameter();
-            
+
             return State.LITERAL_DATA_BEGIN;
         }
         
@@ -804,17 +800,22 @@ public class Geary.Imap.Deserializer : BaseObject {
         
         return State.START_PARAM;
     }
-    
+
     private uint on_eos() {
         debug("[%s] EOS", to_string());
-        
+
+        // Per RFC 3501 7.1.5, we may get a EOS immediately after a
+        // BYE, so flush any message being processed.
+        // https://tools.ietf.org/html/rfc3501#section-7.1.5
+        flush_params();
+
         // always signal as closed and notify subscribers
         closed_semaphore.blind_notify();
         eos();
-        
+
         return State.CLOSED;
     }
-    
+
     private uint on_error(uint state, uint event, void *user, Object? object, Error? err) {
         assert(err != null);
         
