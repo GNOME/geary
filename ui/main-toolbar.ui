@@ -316,8 +316,6 @@
                 <property name="receives_default">False</property>
                 <property name="action_name">win.trash-conv</property>
                 <property name="always_show_image">True</property>
-                <property name="action_name">win.trash-conv</property>
-                <property name="always_show_image">True</property>
                 <child>
                   <object class="GtkImage" id="trash_delete_image">
                     <property name="can_focus">False</property>
