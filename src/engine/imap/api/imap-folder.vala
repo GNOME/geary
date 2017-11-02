@@ -9,7 +9,16 @@ private errordomain Geary.Imap.FolderError {
     RETRY
 }
 
+/**
+ * An interface between the high-level engine API and a single IMAP mailbox.
+ *
+ * When opening, this class will claim a {@link ClientSession} and
+ * issue an IMAP SELECT command for the mailbox represented by this
+ * folder. On closing, the session is released, causing it to be
+ * returned to the pool where an IMAP CLOSE will be issued.
+ */
 private class Geary.Imap.Folder : BaseObject {
+
     private const Geary.Email.Field BASIC_FETCH_FIELDS = Email.Field.ENVELOPE | Email.Field.DATE
         | Email.Field.ORIGINATORS | Email.Field.RECEIVERS | Email.Field.REFERENCES
         | Email.Field.SUBJECT | Email.Field.HEADER;

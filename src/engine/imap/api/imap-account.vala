@@ -1,23 +1,25 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 /**
- * Provides an interface into the IMAP stack that provides a simpler interface for a
- * Geary.Account implementation.
+ * An interface between the high-level engine API and the IMAP stack.
  *
- * Because of the complexities of the IMAP protocol, this private class takes common operations
- * that a Geary.Account implementation would need (in particular, {@link Geary.ImapEngine.Account}
- * and makes them into simple async calls.
+ * Because of the complexities of the IMAP protocol, this private
+ * class takes common operations that a Geary.Account implementation
+ * would need (in particular, {@link Geary.ImapEngine.Account} and
+ * makes them into simple async calls.
  *
- * Geary.Imap.Account manages the {@link Imap.Folder} objects it returns, but only in the sense
- * that it will not create new instances repeatedly.  Otherwise, it does not refresh or update the
- * Imap.Folders themselves (such as update their {@link Imap.StatusData} periodically).
- * That's the responsibility of the higher layers of the stack.
+ * Geary.Imap.Account manages the {@link Imap.Folder} objects it
+ * returns, but only in the sense that it will not create new
+ * instances repeatedly.  Otherwise, it does not refresh or update the
+ * Imap.Folders themselves (such as update their {@link
+ * Imap.StatusData} periodically).  That's the responsibility of the
+ * higher layers of the stack.
  */
-
 private class Geary.Imap.Account : BaseObject {
     public bool is_open { get; private set; default = false; }
     

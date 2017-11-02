@@ -84,7 +84,7 @@ public abstract class Geary.Account : BaseObject {
     public signal void folders_contents_altered(Gee.Collection<Geary.Folder> altered);
     
     /**
-     * Fired when a Folder's contents is detected having changed.
+     * Fired when a Folder's type is detected having changed.
      */
     public signal void folders_special_type(Gee.Collection<Geary.Folder> altered);
     

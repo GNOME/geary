@@ -4,6 +4,24 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
+/**
+ * High-level interface to a single IMAP server connection.
+ *
+ * The client session is responsible for opening, maintaining and
+ * closing a TCP connection to an IMAP server. When opening, the
+ * session will obtain and maintain capabilities, establish a StartTLS
+ * session if appropriate, authenticate, and obtain
+ * connection-specific information about the server such as the name
+ * used for the INBOX and any mailbox namespaces. When connecting has
+ * completed successfully, the connection will be in the IMAP
+ * authenticated state.
+ *
+ * Any IMAP commands that affect the IMAP connection's state (LOGIN,
+ * LOGOUT, SELECT, etc) must be executed by calling the appropriate
+ * method on this object. For example, call `login_async` rather than
+ * sending a {@link LoginCommand}. Other commands can be sent via
+ * {@link send_command_async} and {@link send_multiple_commands_async}.
+ */
 public class Geary.Imap.ClientSession : BaseObject {
     // 30 min keepalive required to maintain session
     public const uint MIN_KEEPALIVE_SEC = 30 * 60;
@@ -216,7 +234,7 @@ public class Geary.Imap.ClientSession : BaseObject {
     public signal void status_response_received(StatusResponse status_response);
     
     /**
-     * Fired before the specific {@link ServerData} signals (i.e. {@link capability}, {@link exists}
+     * Fired after the specific {@link ServerData} signals (i.e. {@link capability}, {@link exists}
      * {@link expunge}, etc.)
      */
     public signal void server_data_received(ServerData server_data);
