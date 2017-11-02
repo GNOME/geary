@@ -215,6 +215,20 @@ public class Geary.Imap.ClientSession : BaseObject {
     private Nonblocking.Semaphore? connect_waiter = null;
     private Error? connect_err = null;
 
+    // While the following should be server specific, there is a small
+    // chance they will differ between connections if the connections
+    // connect to different servers in a cluster, or if configuration
+    // changes between connections. We do assume however that once
+    // connected, this information will remain the same. This
+    // information becomes current only after initiate_session_async()
+    // has successfully completed.
+    private MailboxInformation? inbox = null;
+    private Gee.List<Namespace> personal_namespaces = new Gee.ArrayList<Namespace>();
+    private Gee.List<Namespace> user_namespaces = new Gee.ArrayList<Namespace>();
+    private Gee.List<Namespace> shared_namespaces = new Gee.ArrayList<Namespace>();
+    private Gee.Map<string,Namespace> namespaces = new Gee.HashMap<string,Namespace>();
+
+
     //
     // Connection state changes
     //
@@ -261,7 +275,9 @@ public class Geary.Imap.ClientSession : BaseObject {
     public signal void search(int64[] seq_or_uid);
     
     public signal void status(StatusData status_data);
-    
+
+    public signal void @namespace(NamespaceResponse namespace);
+
     /**
      * If the mailbox name is null it indicates the type of state change that has occurred
      * (authorized -> selected/examined or vice-versa).  If new_name is null readonly should be
@@ -799,8 +815,91 @@ public class Geary.Imap.ClientSession : BaseObject {
         } else {
             debug("[%s] No compression available", to_string());
         }
+
+        Gee.List<ServerData> server_data = new Gee.ArrayList<ServerData>();
+        ulong data_id = this.server_data_received.connect((data) => { server_data.add(data); });
+        try {
+            // Determine what this connection calls the inbox
+            Imap.StatusResponse response = yield send_command_async(
+                new ListCommand(MailboxSpecifier.inbox, false, null),
+                cancellable
+            );
+            if (response.status == Status.OK && !server_data.is_empty) {
+                this.inbox = server_data[0].get_list();
+                debug("[%s] Using as INBOX: %s", to_string(), this.inbox.to_string());
+            } else {
+                throw new ImapError.INVALID("Unable to find INBOX");
+            }
+
+            // Try to determine what the connection's namespaces are
+            server_data.clear();
+            if (caps.has_capability(Capabilities.NAMESPACE)) {
+                response = yield send_command_async(
+                    new NamespaceCommand(),
+                    cancellable
+                );
+                if (response.status == Status.OK && !server_data.is_empty) {
+                    NamespaceResponse ns = server_data[0].get_namespace();
+                    update_namespaces(ns.personal, this.personal_namespaces);
+                    update_namespaces(ns.user, this.user_namespaces);
+                    update_namespaces(ns.shared, this.shared_namespaces);
+                } else {
+                    debug("[%s] NAMESPACE command failed", to_string());
+                }
+            }
+            server_data.clear();
+            if (!this.personal_namespaces.is_empty) {
+                debug("[%s] Default personal namespace: %s", to_string(), this.personal_namespaces[0].to_string());
+            } else {
+                debug("[%s] Personal namespace not found, guessing it", to_string());
+                string? prefix = "";
+                string? delim = this.inbox.delim;
+                if (!this.inbox.attrs.contains(MailboxAttribute.NO_INFERIORS) &&
+                    this.inbox.delim == ".") {
+                    // We're probably on an ancient Cyrus install that
+                    // doesn't support NAMESPACE, so assume they go in the inbox
+                    prefix = this.inbox.mailbox.name + ".";
+                }
+
+                if (delim == null) {
+                    // We still don't know what the delim is, so fetch
+                    // it. In particular, uw-imap sends a null prefix
+                    // for the inbox.
+                    response = yield send_command_async(
+                        new ListCommand(new MailboxSpecifier(prefix), false, null),
+                        cancellable
+                    );
+                    if (response.status == Status.OK && !server_data.is_empty) {
+                        MailboxInformation list = server_data[0].get_list();
+                        delim = list.delim;
+                    } else {
+                        throw new ImapError.INVALID("Unable to determine personal namespace delimiter");
+                    }
+                }
+
+                this.personal_namespaces.add(new Namespace(prefix, delim));
+                debug("[%s] Personal namespace guessed as: %s",
+                      to_string(), this.personal_namespaces[0].to_string());
+            }
+        } finally {
+            disconnect(data_id);
+        }
     }
-    
+
+    private inline void update_namespaces(Namespace[]? response, Gee.List<Namespace> list) {
+        if (response != null) {
+            foreach (Namespace ns in response) {
+                list.add(ns);
+                string prefix = ns.prefix;
+                string? delim = ns.delim;
+                if (delim != null && prefix.has_suffix(delim)) {
+                    prefix = prefix.substring(0, prefix.length - delim.length);
+                }
+                this.namespaces.set(prefix, ns);
+            }
+        }
+    }
+
     private uint on_login(uint state, uint event, void *user, Object? object) {
         MachineParams params = (MachineParams) object;
         
@@ -1595,7 +1694,11 @@ public class Geary.Imap.ClientSession : BaseObject {
             case ServerDataType.SEARCH:
                 search(server_data.get_search());
             break;
-            
+
+            case ServerDataType.NAMESPACE:
+                namespace(server_data.get_namespace());
+            break;
+
             // TODO: LSUB
             case ServerDataType.LSUB:
             default:

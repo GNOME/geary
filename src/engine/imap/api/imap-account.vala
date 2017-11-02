@@ -99,9 +99,6 @@ private class Geary.Imap.Account : BaseObject {
                 account_session.status.connect(on_status_data);
                 account_session.server_data_received.connect(on_server_data_received);
                 account_session.disconnected.connect(on_disconnected);
-
-                // Determine INBOX, hierarchy delimiter, special use flags, etc
-                yield list_inbox(account_session, cancellable);
             } catch (Error claim_err) {
                 err = claim_err;
             }
@@ -115,79 +112,8 @@ private class Geary.Imap.Account : BaseObject {
             
             throw err;
         }
-        
+
         return account_session;
-    }
-
-    private async void list_inbox(ClientSession session, Cancellable? cancellable)
-        throws Error {
-        // Can't use send_command_async() directly because this is
-        // called by claim_session_async(), which is called by
-        // send_command_async().
-        int token = yield this.cmd_mutex.claim_async(cancellable);
-        Error? release_error = null;
-        try {
-            // collect server data directly for direct decoding
-            this.server_data_collector = new Gee.ArrayList<ServerData>();
-
-            MailboxInformation? info = null;
-            Imap.StatusResponse response = yield session.send_command_async(
-                new ListCommand(MailboxSpecifier.inbox, false, null), cancellable);
-            if (response.status == Imap.Status.OK && !this.server_data_collector.is_empty) {
-                info = MailboxInformation.decode(this.server_data_collector[0], false);
-            }
-
-            if (info != null) {
-                this.inbox_specifier = info.mailbox;
-                this.hierarchy_delimiter = info.delim;
-            }
-
-            if (this.hierarchy_delimiter == null) {
-                // LIST response didn't include a delim for the
-                // INBOX. Ideally we'd just use NAMESPACE instead (Bug
-                // 726866) but for now, just list folders alongside the
-                // INBOX.
-                this.server_data_collector = new Gee.ArrayList<ServerData>();
-                response = yield session.send_command_async(
-                    new ListCommand.wildcarded(
-                        "", new MailboxSpecifier("%"), false, null
-                    ),
-                    cancellable
-                );
-                if (response.status == Imap.Status.OK) {
-                    foreach (ServerData data in this.server_data_collector) {
-                        info = MailboxInformation.decode(data, false);
-                        this.hierarchy_delimiter = info.delim;
-                        if (this.hierarchy_delimiter != null) {
-                            break;
-                        }
-                    }
-                }
-            }
-
-            if (this.inbox_specifier == null) {
-                throw new ImapError.INVALID("Unable to find INBOX");
-            }
-            if (this.hierarchy_delimiter == null) {
-                throw new ImapError.INVALID("Unable to determine hierarchy delimiter");
-            }
-            debug("[%s] INBOX specifier: %s", to_string(),
-                  this.inbox_specifier.to_string());
-            debug("[%s] Hierarchy delimiter: %s", to_string(),
-                  this.hierarchy_delimiter);
-        } finally {
-            this.server_data_collector = new Gee.ArrayList<ServerData>();
-            try {
-                this.cmd_mutex.release(ref token);
-            } catch (Error e) {
-                // Vala 0.32.1 won't let you throw an exception from a
-                // finally block :(
-                release_error = e;
-            }
-        }
-        if (release_error != null) {
-            throw release_error;
-        }
     }
 
     private async void drop_session_async(Cancellable? cancellable) {
