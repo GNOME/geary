@@ -13,8 +13,8 @@ msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=internationalization\n"
-"POT-Creation-Date: 2017-10-02 14:41+0000\n"
-"PO-Revision-Date: 2017-10-18 15:55+0200\n"
+"POT-Creation-Date: 2017-10-22 13:04+0000\n"
+"PO-Revision-Date: 2017-10-25 18:16+0200\n"
 "Last-Translator: Alan Mortensen <alanmortensen.am@gmail.com>\n"
 "Language-Team: Danish (http://www.transifex.com/projects/p/geary/language/"
 "da/)\n"
@@ -275,7 +275,7 @@ msgstr "Ophavsret 2016-2017 Gearys udviklerhold."
 msgid "Visit the Geary web site"
 msgstr "Besøg Gearys hjemmeside"
 
-#: ../src/client/application/geary-application.vala:466
+#: ../src/client/application/geary-application.vala:420
 #, c-format
 msgid "About %s"
 msgstr "Om %s"
@@ -283,7 +283,7 @@ msgstr "Om %s"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: ../src/client/application/geary-application.vala:470
+#: ../src/client/application/geary-application.vala:424
 msgid "translator-credits"
 msgstr ""
 "Nikolaj Holmquist Pedersen <nikolajholmquist@gmail.com>\n"
@@ -375,163 +375,15 @@ msgstr "Kunne ikke genkende indstillingerne på kommandolinjen: %s\n"
 msgid "Unrecognized command line option “%s”\n"
 msgstr "Ukendt kommandolinje-indstilling \"%s\"\n"
 
-#: ../src/client/application/geary-controller.vala:57
-msgid "Delete conversation"
-msgstr "Slet samtale"
-
-#: ../src/client/application/geary-controller.vala:58
-msgid "Delete conversation (Shift+Delete)"
-msgstr "Slet samtale (skift+delete)"
-
-#: ../src/client/application/geary-controller.vala:59
-msgid "Delete conversations (Shift+Delete)"
-msgstr "Slet samtaler (skift+delete)"
-
-#. This refers to the action ("move email to the trash"), not the Trash folder itself
-#: ../src/client/application/geary-controller.vala:63
-msgid "Move conversation to Trash (Delete, Backspace)"
-msgstr "Flyt samtalen til papirkurven (delete, tilbagetast)"
-
-#: ../src/client/application/geary-controller.vala:64
-msgid "Move conversations to Trash (Delete, Backspace)"
-msgstr "Flyt samtalerne til papirkurven (delete, tilbagetast)"
-
-#. This refers to the action ("archive an email"), not the Archive folder itself
-#: ../src/client/application/geary-controller.vala:68
-msgid "_Archive"
-msgstr "_Arkivér"
-
-#: ../src/client/application/geary-controller.vala:69
-msgid "Archive conversation (A)"
-msgstr "Arkivér samtale (A)"
-
-#: ../src/client/application/geary-controller.vala:70
-msgid "Archive conversations (A)"
-msgstr "Arkivér samtaler (A)"
-
-#: ../src/client/application/geary-controller.vala:73
-msgid "Mark as S_pam"
-msgstr "Markér som s_pam"
-
-#: ../src/client/application/geary-controller.vala:74
-msgid "Mark as not S_pam"
-msgstr "Marker som ikke s_pam"
-
-#: ../src/client/application/geary-controller.vala:76
-#: ../src/client/application/geary-controller.vala:448
-msgid "Mark conversation"
-msgstr "Markér samtale"
-
-#: ../src/client/application/geary-controller.vala:77
-msgid "Mark conversations"
-msgstr "Markér samtaler"
-
-#: ../src/client/application/geary-controller.vala:78
-msgid "Add label to conversation"
-msgstr "Tilføj label til samtale"
-
-#: ../src/client/application/geary-controller.vala:79
-msgid "Add label to conversations"
-msgstr "Tilføj label til samtaler"
-
-#: ../src/client/application/geary-controller.vala:80
-#: ../src/client/application/geary-controller.vala:487
-msgid "Move conversation"
-msgstr "Flyt samtale"
-
-#: ../src/client/application/geary-controller.vala:81
-msgid "Move conversations"
-msgstr "Flyt samtaler"
-
-#: ../src/client/application/geary-controller.vala:450
-msgid "_Mark as…"
-msgstr "_Markér som …"
-
-#: ../src/client/application/geary-controller.vala:456
-msgid "Mark as _Read"
-msgstr "Markér som _læst"
-
-#: ../src/client/application/geary-controller.vala:462
-msgid "Mark as _Unread"
-msgstr "Markér som _ulæst"
-
-#: ../src/client/application/geary-controller.vala:468
-msgid "_Star"
-msgstr "St_jern"
-
-#: ../src/client/application/geary-controller.vala:473
-msgid "U_nstar"
-msgstr "Stj_ern ikke"
-
-#: ../src/client/application/geary-controller.vala:483
-msgid "Add label"
-msgstr "Tilføj etiket"
-
-#: ../src/client/application/geary-controller.vala:484
-msgid "_Label"
-msgstr "_Etiket"
-
-#: ../src/client/application/geary-controller.vala:488
-msgid "_Move"
-msgstr "_Flyt"
-
-#: ../src/client/application/geary-controller.vala:492
-msgid "Compose new message (Ctrl+N, N)"
-msgstr "Skriv ny besked (Ctrl+N, N)"
-
-#: ../src/client/application/geary-controller.vala:496
-#: ../ui/conversation-email-menus.ui.h:1
-msgid "_Reply"
-msgstr "_Svar"
-
-#: ../src/client/application/geary-controller.vala:497
-msgid "Reply (Ctrl+R, R)"
-msgstr "Svar (Ctrl+R, R)"
-
-#: ../src/client/application/geary-controller.vala:501
-msgid "R_eply All"
-msgstr "S_var til alle"
-
-#: ../src/client/application/geary-controller.vala:502
-msgid "Reply all (Ctrl+Shift+R, Shift+R)"
-msgstr "Svar til alle (Ctrl+Skift+R, Skift+R)"
-
-#: ../src/client/application/geary-controller.vala:507
-#: ../ui/conversation-email-menus.ui.h:3
-msgid "_Forward"
-msgstr "_Videresend"
-
-#: ../src/client/application/geary-controller.vala:508
-msgid "Forward (Ctrl+L, F)"
-msgstr "Videresend (Ctrl+L, F)"
-
-#: ../src/client/application/geary-controller.vala:538
-msgid "Empty _Spam…"
-msgstr "Tøm _spam…"
-
-#: ../src/client/application/geary-controller.vala:542
-msgid "Empty _Trash…"
-msgstr "Tøm _papirkurv…"
-
-#. No callback is connected, since we bind the toggle button to the search bar visibility
-#: ../src/client/application/geary-controller.vala:574
-msgid "Toggle search bar"
-msgstr "Slå søgebjælke til/fra"
-
-#. No callback is connected, since we bind the toggle button to the find bar visibility
-#: ../src/client/application/geary-controller.vala:579
-msgid "Toggle find bar"
-msgstr "Slå find-bjælke til/fra"
-
-#: ../src/client/application/geary-controller.vala:757
+#: ../src/client/application/geary-controller.vala:609
 msgid "Unable to store server trust exception"
 msgstr "Kan ikke gemme undtagelse for tillid til server"
 
-#: ../src/client/application/geary-controller.vala:992
+#: ../src/client/application/geary-controller.vala:844
 msgid "Your settings are insecure"
 msgstr "Dine indstillinger er usikre"
 
-#: ../src/client/application/geary-controller.vala:993
+#: ../src/client/application/geary-controller.vala:845
 msgid ""
 "Your IMAP and/or SMTP settings do not specify SSL or TLS.  This means your "
 "username and password could be read by another person on the network.  Are "
@@ -541,15 +393,15 @@ msgstr ""
 "betyder, at dit brugernavn og din adgangskode kan læses af andre på "
 "netværket. Er du sikker på, at du vil gære dette?"
 
-#: ../src/client/application/geary-controller.vala:994
+#: ../src/client/application/geary-controller.vala:846
 msgid "Co_ntinue"
 msgstr "F_ortsæt"
 
-#: ../src/client/application/geary-controller.vala:1041
+#: ../src/client/application/geary-controller.vala:893
 msgid "Error connecting to the server"
 msgstr "Fejl i forsøget på at forbinde til serveren"
 
-#: ../src/client/application/geary-controller.vala:1042
+#: ../src/client/application/geary-controller.vala:894
 msgid ""
 "Geary encountered an error while connecting to the server.  Please try again "
 "in a few moments."
@@ -558,12 +410,12 @@ msgstr ""
 "lidt."
 
 #. / Displayed in the space-limited status bar when a message fails to be sent due to error.
-#: ../src/client/application/geary-controller.vala:1079
+#: ../src/client/application/geary-controller.vala:931
 #: ../src/client/components/status-bar.vala:29
 msgid "Error sending email"
 msgstr "Der opstod en fejl ved afsendelse af e-mail"
 
-#: ../src/client/application/geary-controller.vala:1080
+#: ../src/client/application/geary-controller.vala:932
 msgid ""
 "Geary encountered an error sending an email.  If the problem persists, "
 "please manually delete the email from your Outbox folder."
@@ -573,12 +425,12 @@ msgstr ""
 
 #. Displayed in the space-limited status bar when a message fails to be uploaded
 #. to Sent Mail after being sent.
-#: ../src/client/application/geary-controller.vala:1084
+#: ../src/client/application/geary-controller.vala:936
 #: ../src/client/components/status-bar.vala:33
 msgid "Error saving sent mail"
 msgstr "Der opstod en fejl ved lagring af den afsendte e-mail"
 
-#: ../src/client/application/geary-controller.vala:1085
+#: ../src/client/application/geary-controller.vala:937
 msgid ""
 "Geary encountered an error saving a sent message to Sent Mail.  The message "
 "will stay in your Outbox folder until you delete it."
@@ -586,19 +438,19 @@ msgstr ""
 "Der opstod en fejl, da Geary forsøgte på at gemme en sendt besked til mappen "
 "med afsendt e-mail.  Beskeden vil blive i din Udbakke, indtil du sletter den."
 
-#: ../src/client/application/geary-controller.vala:1154
+#: ../src/client/application/geary-controller.vala:1006
 msgid "Labels"
 msgstr "Etiketter"
 
 #. give the user two options: reset the Account local store, or exit Geary.  A third
 #. could be done to leave the Account in an unopened state, but we don't currently
 #. have provisions for that.
-#: ../src/client/application/geary-controller.vala:1166
+#: ../src/client/application/geary-controller.vala:1018
 #, c-format
 msgid "Unable to open the database for %s"
 msgstr "Kunne ikke åbne databasen for %s"
 
-#: ../src/client/application/geary-controller.vala:1167
+#: ../src/client/application/geary-controller.vala:1019
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -622,20 +474,20 @@ msgstr ""
 "Genopbygning af databasen vil slette al lokal e-mail og dets vedhæftede "
 "filer. <b>Mail'en på serveren vil ikke blive rørt.</b>"
 
-#: ../src/client/application/geary-controller.vala:1169
+#: ../src/client/application/geary-controller.vala:1021
 msgid "_Rebuild"
 msgstr "_Genopbyg"
 
-#: ../src/client/application/geary-controller.vala:1169
+#: ../src/client/application/geary-controller.vala:1021
 msgid "E_xit"
 msgstr "_Afslut"
 
-#: ../src/client/application/geary-controller.vala:1178
+#: ../src/client/application/geary-controller.vala:1030
 #, c-format
 msgid "Unable to rebuild database for “%s”"
 msgstr "Kunne ikke genopbygge databasen for \"%s\""
 
-#: ../src/client/application/geary-controller.vala:1179
+#: ../src/client/application/geary-controller.vala:1031
 #, c-format
 msgid ""
 "Error during rebuild:\n"
@@ -648,14 +500,14 @@ msgstr ""
 
 #. some other problem opening the account ... as with other flow path, can't run
 #. Geary today with an account in unopened state, so have to exit
-#: ../src/client/application/geary-controller.vala:1201
-#: ../src/client/application/geary-controller.vala:1211
-#: ../src/client/application/geary-controller.vala:1222
+#: ../src/client/application/geary-controller.vala:1053
+#: ../src/client/application/geary-controller.vala:1063
+#: ../src/client/application/geary-controller.vala:1074
 #, c-format
 msgid "Unable to open local mailbox for %s"
 msgstr "Kunne ikke åbne den lokale postkasse for %s"
 
-#: ../src/client/application/geary-controller.vala:1202
+#: ../src/client/application/geary-controller.vala:1054
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -673,7 +525,7 @@ msgstr ""
 "\n"
 "%s"
 
-#: ../src/client/application/geary-controller.vala:1212
+#: ../src/client/application/geary-controller.vala:1064
 msgid ""
 "The version number of the local mail database is formatted for a newer "
 "version of Geary. Unfortunately, the database cannot be “rolled back” to "
@@ -687,7 +539,7 @@ msgstr ""
 "\n"
 "Installér venligst den nyeste version af Geary og prøv igen."
 
-#: ../src/client/application/geary-controller.vala:1223
+#: ../src/client/application/geary-controller.vala:1075
 msgid ""
 "There was an error opening the local account. This is probably due to "
 "connectivity issues.\n"
@@ -699,15 +551,15 @@ msgstr ""
 "\n"
 "Tjek, at din internetforbindelse virker og genstart derefter Geary."
 
-#: ../src/client/application/geary-controller.vala:1999
+#: ../src/client/application/geary-controller.vala:1850
 msgid "Undo move (Ctrl+Z)"
 msgstr "Fortryd flyt (Ctrl+Z)"
 
-#: ../src/client/application/geary-controller.vala:2009
+#: ../src/client/application/geary-controller.vala:1860
 msgid "Are you sure you want to open these attachments?"
 msgstr "Er du sikker på, at du vil åbne disse vedhæftede filer?"
 
-#: ../src/client/application/geary-controller.vala:2010
+#: ../src/client/application/geary-controller.vala:1861
 msgid ""
 "Attachments may cause damage to your system if opened.  Only open files from "
 "trusted sources."
@@ -715,16 +567,16 @@ msgstr ""
 "Vedhæftede filer kan skade dit system, når de åbnes.  Åbn kun filer fra "
 "folk, du stoler på."
 
-#: ../src/client/application/geary-controller.vala:2011
+#: ../src/client/application/geary-controller.vala:1862
 msgid "Don’t _ask me again"
 msgstr "S_pørg mig ikke igen"
 
-#: ../src/client/application/geary-controller.vala:2121
+#: ../src/client/application/geary-controller.vala:1964
 #, c-format
 msgid "A file named “%s” already exists.  Do you want to replace it?"
 msgstr "Filen \"%s\" findes allerede. Vil du erstatte den?"
 
-#: ../src/client/application/geary-controller.vala:2123
+#: ../src/client/application/geary-controller.vala:1966
 #, c-format
 msgid ""
 "The file already exists in “%s”.  Replacing it will overwrite its contents."
@@ -732,66 +584,115 @@ msgstr ""
 "Filen findes allerede i \"%s\". Hvis du erstatter den, overskrives dens "
 "indhold."
 
-#: ../src/client/application/geary-controller.vala:2126
+#: ../src/client/application/geary-controller.vala:1969
 msgid "_Replace"
 msgstr "_Erstat"
 
 #. Find out what to do with the inline composers.
 #. TODO: Remove this in favor of automatically saving drafts
-#: ../src/client/application/geary-controller.vala:2374
+#: ../src/client/application/geary-controller.vala:2203
 msgid "Close open draft messages?"
 msgstr "Luk åbne kladder?"
 
-#: ../src/client/application/geary-controller.vala:2496
+#: ../src/client/application/geary-controller.vala:2329
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Tøm al e-mail fra din %s-mappe?"
 
-#: ../src/client/application/geary-controller.vala:2497
+#: ../src/client/application/geary-controller.vala:2330
 msgid "This removes the email from Geary and your email server."
 msgstr "Dette fjerner e-mail fra Geary samt din e-mailserver."
 
-#: ../src/client/application/geary-controller.vala:2498
+#: ../src/client/application/geary-controller.vala:2331
 msgid "This cannot be undone."
 msgstr "Dette kan ikke fortrydes."
 
-#: ../src/client/application/geary-controller.vala:2499
+#: ../src/client/application/geary-controller.vala:2332
 #, c-format
 msgid "Empty %s"
 msgstr "Tøm %s"
 
-#: ../src/client/application/geary-controller.vala:2516
+#: ../src/client/application/geary-controller.vala:2349
 #, c-format
 msgid "Error emptying %s"
 msgstr "Fejl ved tømning af %s"
 
-#: ../src/client/application/geary-controller.vala:2546
+#: ../src/client/application/geary-controller.vala:2379
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Ønsker du at slette denne besked permanent?"
 msgstr[1] "Ønsker du at slette disse beskeder permanent?"
 
-#: ../src/client/application/geary-controller.vala:2548
+#: ../src/client/application/geary-controller.vala:2381
 msgid "Delete"
 msgstr "Slet"
 
-#: ../src/client/application/geary-controller.vala:2580
+#: ../src/client/application/geary-controller.vala:2413
 msgid "Undo archive (Ctrl+Z)"
 msgstr "Fortryd arkivér (Ctrl+Z)"
 
-#: ../src/client/application/geary-controller.vala:2595
+#: ../src/client/application/geary-controller.vala:2428
 msgid "Undo trash (Ctrl+Z)"
 msgstr "Fortryd smid i papirkurv (Ctrl+Z)"
 
-#: ../src/client/application/geary-controller.vala:2649
+#: ../src/client/application/geary-controller.vala:2484
 msgid "Undo (Ctrl+Z)"
 msgstr "Fortryd (Ctrl+Z)"
 
-#: ../src/client/application/geary-controller.vala:2780
+#: ../src/client/application/geary-controller.vala:2602
 msgid "Failed to open default text editor."
 msgstr "Kunne ikke åbne standardprogrammet til tekstredigéring."
 
-#: ../src/client/components/main-window.vala:389
+#. Tooltips
+#: ../src/client/components/main-toolbar.vala:69
+msgid "Delete conversation (Shift+Delete)"
+msgstr "Slet samtale (skift+delete)"
+
+#: ../src/client/components/main-toolbar.vala:70
+msgid "Delete conversations (Shift+Delete)"
+msgstr "Slet samtaler (skift+delete)"
+
+#: ../src/client/components/main-toolbar.vala:71
+msgid "Move conversation to Trash (Delete, Backspace)"
+msgstr "Flyt samtalen til papirkurven (delete, tilbagetast)"
+
+#: ../src/client/components/main-toolbar.vala:72
+msgid "Move conversations to Trash (Delete, Backspace)"
+msgstr "Flyt samtalerne til papirkurven (delete, tilbagetast)"
+
+#: ../src/client/components/main-toolbar.vala:73
+msgid "Archive conversation (A)"
+msgstr "Arkivér samtale (A)"
+
+#: ../src/client/components/main-toolbar.vala:74
+msgid "Archive conversations (A)"
+msgstr "Arkivér samtaler (A)"
+
+#: ../src/client/components/main-toolbar.vala:75
+msgid "Mark conversation"
+msgstr "Markér samtale"
+
+#: ../src/client/components/main-toolbar.vala:76
+msgid "Mark conversations"
+msgstr "Markér samtaler"
+
+#: ../src/client/components/main-toolbar.vala:77
+msgid "Add label to conversation"
+msgstr "Tilføj label til samtale"
+
+#: ../src/client/components/main-toolbar.vala:78
+msgid "Add label to conversations"
+msgstr "Tilføj label til samtaler"
+
+#: ../src/client/components/main-toolbar.vala:79
+msgid "Move conversation"
+msgstr "Flyt samtale"
+
+#: ../src/client/components/main-toolbar.vala:80
+msgid "Move conversations"
+msgstr "Flyt samtaler"
+
+#: ../src/client/components/main-window.vala:384
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -872,15 +773,15 @@ msgstr "_Fjern"
 msgid "_Keep"
 msgstr "_Behold"
 
-#: ../src/client/composer/composer-link-popover.vala:150
+#: ../src/client/composer/composer-link-popover.vala:149
 msgid "Link URL is not correctly formatted, e.g. http://example.com"
 msgstr "Link-URL er ikke korrekt formateret, f.eks. http://eksempel.dk"
 
-#: ../src/client/composer/composer-link-popover.vala:157
+#: ../src/client/composer/composer-link-popover.vala:156
 msgid "Invalid link URL"
 msgstr "Ugyldig link-URL"
 
-#: ../src/client/composer/composer-link-popover.vala:157
+#: ../src/client/composer/composer-link-popover.vala:156
 msgid "Invalid email address"
 msgstr "Ugyldig e-mailadresse"
 
@@ -1030,6 +931,44 @@ msgstr "Tilføj dette sprog til listen over foretrukne"
 msgid "Search for more languages"
 msgstr "Søg efter flere sprog"
 
+#: ../src/client/conversation-list/conversation-list-view.vala:289
+msgid "Delete conversation"
+msgstr "Slet samtale"
+
+#: ../src/client/conversation-list/conversation-list-view.vala:292
+#: ../ui/main-toolbar-menus.ui.h:3
+msgid "Mark as _Read"
+msgstr "Markér som _læst"
+
+#: ../src/client/conversation-list/conversation-list-view.vala:295
+#: ../ui/main-toolbar-menus.ui.h:4
+msgid "Mark as _Unread"
+msgstr "Markér som _ulæst"
+
+#: ../src/client/conversation-list/conversation-list-view.vala:298
+#: ../ui/main-toolbar-menus.ui.h:6
+msgid "U_nstar"
+msgstr "Stj_ern ikke"
+
+#: ../src/client/conversation-list/conversation-list-view.vala:300
+#: ../ui/main-toolbar-menus.ui.h:5
+msgid "_Star"
+msgstr "St_jern"
+
+#: ../src/client/conversation-list/conversation-list-view.vala:303
+#: ../ui/conversation-email-menus.ui.h:1
+msgid "_Reply"
+msgstr "_Svar"
+
+#: ../src/client/conversation-list/conversation-list-view.vala:304
+msgid "R_eply All"
+msgstr "S_var til alle"
+
+#: ../src/client/conversation-list/conversation-list-view.vala:305
+#: ../ui/conversation-email-menus.ui.h:3
+msgid "_Forward"
+msgstr "_Videresend"
+
 #: ../src/client/conversation-list/formatted-conversation-data.vala:11
 msgid "Me"
 msgstr "Mig"
@@ -1043,20 +982,20 @@ msgstr "Ukendt"
 #. Preview headers
 #. Translators: This is displayed in place of the from address
 #. when the message has no from address.
-#: ../src/client/conversation-viewer/conversation-message.vala:331
+#: ../src/client/conversation-viewer/conversation-message.vala:325
 msgid "No sender"
 msgstr "Ingen afsender"
 
 #. Translators: This separates multiple 'from'
 #. addresses in the header preview for a message.
-#: ../src/client/conversation-viewer/conversation-message.vala:586
+#: ../src/client/conversation-viewer/conversation-message.vala:580
 msgid ", "
 msgstr ", "
 
 #. Translators: This string is used as the HTML IMG ALT
 #. attribute value when displaying an inline image in an email
 #. that did not specify a file name. E.g. <IMG ALT="Image" ...
-#: ../src/client/conversation-viewer/conversation-message.vala:707
+#: ../src/client/conversation-viewer/conversation-message.vala:701
 msgid "Image"
 msgstr "Billede"
 
@@ -1089,13 +1028,11 @@ msgstr "Denne mappe indeholder ikke nogen samtaler"
 msgid "Your search returned no results, try refining your search terms"
 msgstr "Din søgning gav ingen resultater. Prøv at ændre dine søgeord"
 
-#: ../src/client/dialogs/attachment-dialog.vala:28
-#: ../src/client/dialogs/attachment-dialog.vala:30
+#: ../src/client/dialogs/attachment-dialog.vala:25
 msgid "Choose a file"
 msgstr "Vælg en fil"
 
-#: ../src/client/dialogs/attachment-dialog.vala:28
-#: ../src/client/dialogs/attachment-dialog.vala:30
+#: ../src/client/dialogs/attachment-dialog.vala:25
 msgid "_Attach"
 msgstr "_Vedhæft"
 
@@ -2583,8 +2520,48 @@ msgid "_Download mail"
 msgstr "_Download mail"
 
 #: ../ui/main-toolbar.ui.h:1
+msgid "Toggle search bar"
+msgstr "Slå søgebjælke til/fra"
+
+#: ../ui/main-toolbar.ui.h:2
 msgid "Empty Spam or Trash folders"
 msgstr "Tøm spam- eller papirkurvsmapper"
+
+#: ../ui/main-toolbar.ui.h:3
+msgid "Reply"
+msgstr "Svar"
+
+#: ../ui/main-toolbar.ui.h:4
+msgid "Reply All"
+msgstr "Svar til alle"
+
+#: ../ui/main-toolbar.ui.h:5
+msgid "Forward"
+msgstr "Videresend"
+
+#: ../ui/main-toolbar.ui.h:6
+msgid "Toggle find bar"
+msgstr "Slå find-bjælke til/fra"
+
+#: ../ui/main-toolbar.ui.h:7
+msgid "_Archive"
+msgstr "_Arkivér"
+
+#: ../ui/main-toolbar-menus.ui.h:1
+msgid "Empty _Spam…"
+msgstr "Tøm _spam…"
+
+#: ../ui/main-toolbar-menus.ui.h:2
+msgid "Empty _Trash…"
+msgstr "Tøm _papirkurv…"
+
+#: ../ui/main-toolbar-menus.ui.h:7
+msgid "Mark as S_pam"
+msgstr "Markér som s_pam"
+
+#: ../ui/main-toolbar-menus.ui.h:8
+msgid "Mark as not S_pam"
+msgstr "Marker som ikke s_pam"
 
 #: ../ui/password-dialog.glade.h:1
 msgid "SMTP Credentials"
@@ -2670,6 +2647,30 @@ msgstr "E-mailadresse:"
 #: ../ui/upgrade_dialog.glade.h:1
 msgid "Geary update in progress…"
 msgstr "Geary er ved at blive opgraderet…"
+
+#~ msgid "_Mark as…"
+#~ msgstr "_Markér som …"
+
+#~ msgid "Add label"
+#~ msgstr "Tilføj etiket"
+
+#~ msgid "_Label"
+#~ msgstr "_Etiket"
+
+#~ msgid "_Move"
+#~ msgstr "_Flyt"
+
+#~ msgid "Compose new message (Ctrl+N, N)"
+#~ msgstr "Skriv ny besked (Ctrl+N, N)"
+
+#~ msgid "Reply (Ctrl+R, R)"
+#~ msgstr "Svar (Ctrl+R, R)"
+
+#~ msgid "Reply all (Ctrl+Shift+R, Shift+R)"
+#~ msgstr "Svar til alle (Ctrl+Skift+R, Skift+R)"
+
+#~ msgid "Forward (Ctrl+L, F)"
+#~ msgstr "Videresend (Ctrl+L, F)"
 
 #~ msgid "Mail Client"
 #~ msgstr "E-mailklient"
