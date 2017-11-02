@@ -1,7 +1,10 @@
+# List of source files containing translatable strings.
+# Please keep this file sorted alphabetically.
 desktop/org.gnome.Geary.appdata.xml.in
 desktop/org.gnome.Geary.desktop.in
 desktop/geary-autostart.desktop.in
 desktop/geary-attach.contract.desktop.in
+desktop/org.gnome.Geary.gschema.xml
 src/geary-version.vala.in
 src/client/accounts/account-dialog-account-list-pane.vala
 src/client/accounts/account-dialog-add-edit-pane.vala
