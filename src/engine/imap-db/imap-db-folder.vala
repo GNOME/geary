@@ -198,11 +198,18 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             Imap.UIDValidity? uid_validity = !result.is_null_for("uid_validity")
                 ? new Imap.UIDValidity(result.int64_for("uid_validity"))
                 : null;
-            
+
             // Note that recent is not stored
-            status_data = new Imap.StatusData(new Imap.MailboxSpecifier.from_folder_path(path, "?"),
-                messages, 0, uid_next, uid_validity, result.int_for("unread_count"));
-            
+            status_data = new Imap.StatusData(
+                // XXX using to_string here very sketchy
+                new Imap.MailboxSpecifier(this.path.to_string()),
+                messages,
+                0,
+                uid_next,
+                uid_validity,
+                result.int_for("unread_count")
+            );
+
             return Db.TransactionOutcome.DONE;
         }, cancellable);
         

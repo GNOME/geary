@@ -26,18 +26,17 @@ private class Geary.Imap.Folder : BaseObject {
     public bool is_open { get; private set; default = false; }
     public FolderPath path { get; private set; }
     public Imap.FolderProperties properties { get; private set; }
-    public MailboxInformation info { get; private set; }
-    public string delim { get; private set; }
     public MessageFlags? permanent_flags { get; private set; default = null; }
     public Trillian readonly { get; private set; default = Trillian.UNKNOWN; }
     public Trillian accepts_user_flags { get; private set; default = Trillian.UNKNOWN; }
+
     /**
      * Set to true when it's detected that the server doesn't allow a space between "header.fields"
      * and the list of email headers to be requested via FETCH; see
      * https://bugzilla.gnome.org/show_bug.cgi?id=714902
      */
     public bool imap_header_fields_hack { get; private set; default = false; }
-    
+
     private ClientSessionManager session_mgr;
     private ClientSession? session = null;
     private Nonblocking.Mutex cmd_mutex = new Nonblocking.Mutex();
@@ -81,31 +80,11 @@ private class Geary.Imap.Folder : BaseObject {
      */
     public signal void disconnected(ClientSession.DisconnectReason reason);
 
-    internal Folder(FolderPath path, ClientSessionManager session_mgr, StatusData status, MailboxInformation info, string delim) {
-        // Used to assert() here, but that meant that any issue with internationalization/encoding
-        // made Geary unusable for a subset of servers accessed/configured in a non-English language...
-        // this is not the end of the world, but it does suggest an I18N issue, potentially with
-        // how XLIST returns folder names on different servers.
-        if (!status.mailbox.equal_to(info.mailbox)) {
-            message("%s: IMAP folder created with differing mailbox names (STATUS=%s LIST=%s)",
-                path.to_string(), status.to_string(), info.to_string());
-        }
 
-        this.session_mgr = session_mgr;
-        this.info = info;
-        this.delim = delim;
+    internal Folder(FolderPath path, Imap.FolderProperties properties, ClientSessionManager session_mgr) {
         this.path = path;
-
-        properties = new Imap.FolderProperties.status(status, info.attrs);
-    }
-
-    internal Folder.unselectable(FolderPath path, ClientSessionManager session_mgr, MailboxInformation info, string delim) {
+        this.properties = properties;
         this.session_mgr = session_mgr;
-        this.info = info;
-        this.delim = delim;
-        this.path = path;
-
-        properties = new Imap.FolderProperties(0, 0, 0, null, null, info.attrs);
     }
 
     public async void open_async(Cancellable? cancellable) throws Error {
@@ -127,11 +106,11 @@ private class Geary.Imap.Folder : BaseObject {
 
         properties.set_from_session_capabilities(session.capabilities);
 
+        MailboxSpecifier mailbox = this.session.get_mailbox_for_path(this.path);
         StatusResponse? response = null;
         Error? select_err = null;
         try {
-            response = yield session.select_async(
-                new MailboxSpecifier.from_folder_path(path, this.delim), cancellable);
+            response = yield this.session.select_async(mailbox, cancellable);
         } catch (Error err) {
             select_err = err;
         }
@@ -700,8 +679,8 @@ private class Geary.Imap.Folder : BaseObject {
         Cancellable? cancellable) throws Error {
         check_open();
 
-        CopyCommand cmd = new CopyCommand(msg_set,
-            new MailboxSpecifier.from_folder_path(destination, this.delim));
+        MailboxSpecifier mailbox = this.session.get_mailbox_for_path(destination);
+        CopyCommand cmd = new CopyCommand(msg_set, mailbox);
 
         Gee.Map<Command, StatusResponse>? responses = yield exec_commands_async(
             Geary.iterate<Command>(cmd).to_array_list(), null, null, cancellable);
@@ -1086,8 +1065,10 @@ private class Geary.Imap.Folder : BaseObject {
         if (date_received != null)
             internaldate = new InternalDate.from_date_time(date_received);
 
-        AppendCommand cmd = new AppendCommand(new MailboxSpecifier.from_folder_path(path, this.delim),
-            msg_flags, internaldate, message.get_network_buffer(false));
+        MailboxSpecifier mailbox = this.session.get_mailbox_for_path(this.path);
+        AppendCommand cmd = new AppendCommand(
+            mailbox, msg_flags, internaldate, message.get_network_buffer(false)
+        );
 
         Gee.Map<Command, StatusResponse> responses = yield exec_commands_async(
             Geary.iterate<AppendCommand>(cmd).to_array_list(), null, null, null);

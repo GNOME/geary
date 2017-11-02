@@ -26,10 +26,8 @@ public class Geary.FolderPath : BaseObject, Gee.Hashable<Geary.FolderPath>,
      * This has implications, as {@link FolderPath} is Comparable and Hashable.
      */
     public bool case_sensitive { get; private set; }
-    
+
     private Gee.List<Geary.FolderPath>? path = null;
-    private string? fullpath = null;
-    private string? fullpath_separator = null;
     private uint stored_hash = uint.MAX;
     
     protected FolderPath(string basename, bool case_sensitive) {
@@ -165,35 +163,7 @@ public class Geary.FolderPath : BaseObject, Gee.Hashable<Geary.FolderPath>,
         
         return false;
     }
-    
-    /**
-     * Returns the {@link FolderPath} as a single string with the supplied separator used as a
-     * delimiter.
-     *
-     * The separator is not appended to the fullpath.
-     */
-    public string get_fullpath(string separator) {
-        // use cached copy if the stars align
-        if (fullpath != null && fullpath_separator == separator)
-            return fullpath;
-        
-        StringBuilder builder = new StringBuilder();
-        
-        if (path != null) {
-            foreach (Geary.FolderPath folder in path) {
-                builder.append(folder.basename);
-                builder.append(separator);
-            }
-        }
-        
-        builder.append(basename);
-        
-        fullpath = builder.str;
-        fullpath_separator = separator;
-        
-        return fullpath;
-    }
-    
+
     private uint get_basename_hash() {
         return case_sensitive ? str_hash(basename) : str_hash(basename.down());
     }
@@ -303,14 +273,24 @@ public class Geary.FolderPath : BaseObject, Gee.Hashable<Geary.FolderPath>,
         
         return true;
     }
-    
+
     /**
-     * Returns the fullpath using the default separator.
+     * Returns a string version of the path using a default separator.
      *
-     * Use only for debugging and logging.
+     * Do not use this for obtaining an IMAP mailbox name to send to a
+     * server, use {@link Geary.Imap.MailboxSpecifier.from_folder_path}
+     * instead. This method is useful for debugging and logging only.
      */
     public string to_string() {
-        return get_fullpath(">");
+        StringBuilder builder = new StringBuilder();
+        if (this.path != null) {
+            foreach (Geary.FolderPath folder in this.path) {
+                builder.append(folder.basename);
+                builder.append_c('>');
+            }
+        }
+        builder.append(basename);
+        return builder.str;
     }
 }
 

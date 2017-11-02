@@ -447,7 +447,73 @@ public class Geary.Imap.ClientSession : BaseObject {
     public bool is_current_mailbox_readonly() {
         return current_mailbox_readonly;
     }
-    
+
+    /**
+     * Determines the SELECT-able mailbox name for a specific folder path.
+     */
+    public MailboxSpecifier get_mailbox_for_path(FolderPath path)
+    throws ImapError {
+        string? delim = get_delimiter_for_path(path);
+        return new MailboxSpecifier.from_folder_path(path, this.inbox.mailbox, delim);
+    }
+
+    /**
+     * Determines the folder path for a mailbox name.
+     */
+    public FolderPath get_path_for_mailbox(MailboxSpecifier mailbox)
+    throws ImapError {
+        string? delim = get_delimiter_for_mailbox(mailbox);
+        return mailbox.to_folder_path(delim, this.inbox.mailbox);
+    }
+
+    /**
+     * Determines the mailbox hierarchy delimiter for a given folder path.
+     *
+     * The returned delimiter be null if a namespace (INBOX, personal,
+     * etc) for the path does not exist, or if the namespace is flat.
+     */
+    public string? get_delimiter_for_path(FolderPath path)
+    throws ImapError {
+        string? delim = null;
+        Geary.FolderRoot root = path.get_root();
+        if (MailboxSpecifier.folder_path_is_inbox(root)) {
+            delim = this.inbox.delim;
+        } else {
+            Namespace? ns = this.namespaces.get(root.basename);
+            if (ns != null) {
+                delim = ns.delim;
+            }
+        }
+        return delim;
+    }
+
+    /**
+     * Determines the mailbox hierarchy delimiter for a given mailbox name.
+     *
+     * The returned delimiter be null if a namespace (INBOX, personal,
+     * etc) for the mailbox does not exist, or if the namespace is flat.
+     */
+    public string? get_delimiter_for_mailbox(MailboxSpecifier mailbox)
+    throws ImapError {
+        string name = mailbox.name;
+        string? delim = null;
+
+        string inbox_name = this.inbox.mailbox.name;
+        string? inbox_delim = this.inbox.delim;
+        if (inbox_name == name ||
+            (inbox_delim != null && inbox_name.has_prefix(name + inbox_delim))) {
+            delim = this.inbox.delim;
+        } else {
+            foreach (Namespace ns in this.namespaces.values) {
+                if (name.has_prefix(ns.prefix)) {
+                    delim = ns.delim;
+                    break;
+                }
+            }
+        }
+        return delim;
+    }
+
     /**
      * Returns the current {@link ProtocolState} of the {@link ClientSession} and, if selected,
      * the current mailbox.

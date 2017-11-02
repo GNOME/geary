@@ -349,33 +349,25 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             debug("Error refreshing unseen counts: %s", e.message);
         }
     }
-    
-    private async void refresh_unseen_async(Geary.Folder folder, Cancellable? cancellable) throws Error {
+
+    private async void refresh_unseen_async(Geary.Folder folder, Cancellable? cancellable)
+    throws Error {
         debug("Refreshing unseen counts for %s", folder.to_string());
-        
+
         try {
-            bool folder_created;
-            Imap.Folder remote_folder = yield remote.fetch_folder_async(folder.path,
-                out folder_created, null, cancellable);
-            
-            // if created, don't need to fetch count because it was fetched when it was created
-            int unseen, total;
-            if (!folder_created) {
-                yield remote.fetch_counts_async(folder.path, out unseen, out total, cancellable);
-                remote_folder.properties.set_status_unseen(unseen);
-                remote_folder.properties.set_status_message_count(total, false);
-            } else {
-                unseen = remote_folder.properties.unseen;
-                total = remote_folder.properties.email_total;
-            }
-            
+            Imap.Folder remote_folder = yield remote.fetch_folder_cached_async(
+                folder.path,
+                true,
+                cancellable
+            );
+
             yield local.update_folder_status_async(remote_folder, false, true, cancellable);
         } finally {
             // added when call scheduled (above)
             in_refresh_unseen.remove(folder);
         }
     }
-    
+
     private void reschedule_folder_refresh(bool immediate) {
         if (in_refresh_enumerate)
             return;
@@ -541,13 +533,14 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         int length = path.get_path_length();
         for (int ctr = 0; ctr < length; ctr++) {
             Geary.FolderPath folder = path.get_folder_at(ctr);
-            
+
             if (yield local.folder_exists_async(folder))
                 continue;
-            
-            Imap.Folder remote_folder = (Imap.Folder) yield remote.fetch_folder_async(folder,
-                null, null, cancellable);
-            
+
+            Imap.Folder remote_folder = yield remote.fetch_folder_cached_async(
+                folder, false, cancellable
+            );
+
             yield local.clone_folder_async(remote_folder, cancellable);
         }
         
@@ -574,13 +567,13 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     public async Imap.Folder fetch_detached_folder_async(Geary.FolderPath path, Cancellable? cancellable)
         throws Error {
         check_open();
-        
+
         if (local_only.has_key(path)) {
             throw new EngineError.NOT_FOUND("%s: path %s points to local-only folder, not IMAP",
                 to_string(), path.to_string());
         }
-        
-        return yield remote.fetch_unrecycled_folder_async(path, cancellable);
+
+        return yield remote.fetch_folder_async(path, cancellable);
     }
 
     private void compile_special_search_names() {

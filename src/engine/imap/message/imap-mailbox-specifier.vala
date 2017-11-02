@@ -91,10 +91,25 @@ public class Geary.Imap.MailboxSpecifier : BaseObject, Gee.Hashable<MailboxSpeci
     /**
      * Converts a generic {@link FolderPath} into an IMAP mailbox specifier.
      */
-    public MailboxSpecifier.from_folder_path(FolderPath path, string delim) throws ImapError {
-        init(path.get_fullpath(delim));
+    public MailboxSpecifier.from_folder_path(FolderPath path, MailboxSpecifier inbox, string? delim)
+    throws ImapError {
+        Gee.List<string> parts = path.as_list();
+        if (parts.size > 1 && delim == null) {
+            // XXX not quite right
+            throw new ImapError.INVALID("Path has more than one part but no delimiter given");
+        }
+
+        StringBuilder builder = new StringBuilder(
+            is_inbox_name(parts[0]) ? inbox.name : parts[0]);
+
+        for (int i = 1; i < parts.size; i++) {
+            builder.append(delim);
+            builder.append(parts[i]);
+        }
+
+        init(builder.str);
     }
-    
+
     private void init(string decoded) {
         name = decoded;
         is_inbox = is_inbox_name(decoded);

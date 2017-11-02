@@ -637,18 +637,38 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         // following blocks of code are fairly tricky because if the remote open fails need to
         // carefully back out and possibly retry
         Imap.Folder? opening_folder = null;
+        FolderPath path = local_folder.get_path();
         try {
-            debug("Fetching STATUS for remote %s from local", to_string());
-            Imap.StatusData local_status = yield local_folder.fetch_status_data(
-                ImapDB.Folder.ListFlags.NONE, cancellable);
-            
+            // Fetch the local status first anyway, since if it
+            // doesn't exist we haven't seen the folder before anyway
+            Imap.StatusData? local_status = yield local_folder.fetch_status_data(
+                ImapDB.Folder.ListFlags.NONE,
+                cancellable
+            );
+
             debug("Fetching information for remote folder %s", to_string());
-            opening_folder = yield remote.fetch_folder_async(local_folder.get_path(), null, local_status,
-                cancellable);
-            
+            try {
+                opening_folder = yield this.remote.fetch_folder_cached_async(
+                    path, false, cancellable
+                );
+            } catch (EngineError.NOT_FOUND err) {
+                if (err is EngineError.NOT_FOUND) {
+                    throw err;
+                }
+
+                // Use local STATUS data cache to be able to present
+                // something to the user at least. XXX get the attrs
+                // from somewhere for Bug 714775
+                opening_folder = this.remote.newSelectableFolder(
+                    path,
+                    local_status,
+                    new Imap.MailboxAttributes(new Gee.ArrayList<Geary.Imap.MailboxAttribute>())
+                );
+            }
+
             debug("Opening remote folder %s", opening_folder.to_string());
             yield opening_folder.open_async(cancellable);
-            
+
             // allow subclasses to examine the opened folder and resolve any vital
             // inconsistencies
             if (yield normalize_folders(opening_folder, cancellable)) {
