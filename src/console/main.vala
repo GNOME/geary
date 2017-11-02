@@ -108,25 +108,27 @@ class ImapConsole : Gtk.Window {
         "preview",
         "close"
     };
-    
+
     private void exec(string input) {
         string[] lines = input.strip().split(";");
         foreach (string line in lines) {
             string[] tokens = line.strip().split(" ");
             if (tokens.length == 0)
                 continue;
-            
+
             string cmd = tokens[0].strip().down();
-            
             string[] args = new string[0];
             for (int ctr = 1; ctr < tokens.length; ctr++) {
                 string arg = tokens[ctr].strip();
-                if (!Geary.String.is_empty(arg))
+                if (arg == "\"\"") {
+                    args += "";
+                } else if (!Geary.String.is_empty(arg)) {
                     args += arg;
+                }
             }
-            
+
             clear_status();
-            
+
             // TODO: Need to break out the command delegates into their own objects with the
             // human command-names and usage and exec()'s and such; this isn't a long-term approach
             try {
