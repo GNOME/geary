@@ -737,11 +737,6 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         return yield ensure_special_folder_async(special, cancellable);
     }
 
-    private async void ensure_special_folders_async(Cancellable? cancellable) throws Error {
-        foreach (Geary.SpecialFolderType special in get_supported_special_folders())
-            yield ensure_special_folder_async(special, cancellable);
-    }
-
     private async void update_folders_async(Gee.Map<FolderPath, Geary.Folder> existing_folders,
         Gee.Map<FolderPath, Imap.Folder> remote_folders, bool remote_folders_suspect, Cancellable? cancellable) {
         // update all remote folders properties in the local store and active in the system
@@ -855,14 +850,17 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             if (altered.size > 0)
                 notify_folders_contents_altered(altered);
         }
-        
-        try {
-            yield ensure_special_folders_async(cancellable);
-        } catch (Error e) {
-            warning("Unable to ensure special folders: %s", e.message);
+
+        // Ensure each of the important special folders we need already exist
+        foreach (Geary.SpecialFolderType special in get_supported_special_folders()) {
+            try {
+                yield ensure_special_folder_async(special, cancellable);
+            } catch (Error e) {
+                warning("Unable to ensure special folder %s: %s", special.to_string(), e.message);
+            }
         }
     }
-    
+
     public override async void send_email_async(Geary.ComposedEmail composed,
         Cancellable? cancellable = null) throws Error {
         check_open();

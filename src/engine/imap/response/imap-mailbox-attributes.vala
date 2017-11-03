@@ -74,6 +74,9 @@ public class Geary.Imap.MailboxAttributes : Geary.Imap.Flags {
         if (contains(MailboxAttribute.SPECIAL_FOLDER_SENT))
             return Geary.SpecialFolderType.SENT;
         
+        if (contains(MailboxAttribute.SPECIAL_FOLDER_JUNK))
+            return Geary.SpecialFolderType.SPAM;
+        
         if (contains(MailboxAttribute.SPECIAL_FOLDER_SPAM))
             return Geary.SpecialFolderType.SPAM;
         
@@ -83,17 +86,11 @@ public class Geary.Imap.MailboxAttributes : Geary.Imap.Flags {
         if (contains(MailboxAttribute.SPECIAL_FOLDER_IMPORTANT))
             return Geary.SpecialFolderType.IMPORTANT;
         
-        if (contains(MailboxAttribute.SPECIAL_FOLDER_ALL))
-            return Geary.SpecialFolderType.ALL_MAIL;
-        
         if (contains(MailboxAttribute.SPECIAL_FOLDER_ARCHIVE))
             return Geary.SpecialFolderType.ARCHIVE;
         
         if (contains(MailboxAttribute.SPECIAL_FOLDER_FLAGGED))
             return Geary.SpecialFolderType.FLAGGED;
-        
-        if (contains(MailboxAttribute.SPECIAL_FOLDER_JUNK))
-            return Geary.SpecialFolderType.SPAM;
         
         return Geary.SpecialFolderType.NONE;
     }
