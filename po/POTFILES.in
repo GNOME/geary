@@ -1,9 +1,9 @@
 # List of source files containing translatable strings.
 # Please keep this file sorted alphabetically.
+desktop/geary-attach.contract.desktop.in
+desktop/geary-autostart.desktop.in
 desktop/org.gnome.Geary.appdata.xml.in
 desktop/org.gnome.Geary.desktop.in
-desktop/geary-autostart.desktop.in
-desktop/geary-attach.contract.desktop.in
 desktop/org.gnome.Geary.gschema.xml
 src/geary-version.vala.in
 src/client/accounts/account-dialog-account-list-pane.vala
@@ -409,8 +409,8 @@ ui/gtk/help-overlay.ui
 ui/gtk/menus.ui
 ui/login.glade
 ui/main-toolbar.ui
-ui/main-window.ui
 ui/main-toolbar-menus.ui
+ui/main-window.ui
 ui/password-dialog.glade
 ui/preferences-dialog.ui
 ui/remove_confirm.glade
