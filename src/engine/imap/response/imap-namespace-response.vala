@@ -34,7 +34,7 @@ public class Geary.Imap.NamespaceResponse : BaseObject {
 
         if (server_data.size <= 2) {
             throw new ImapError.PARSE_ERROR(
-                "No NAMESPACEs privided: %s", server_data.to_string()
+                "No NAMESPACEs provided: %s", server_data.to_string()
             );
         }
 
@@ -56,9 +56,12 @@ public class Geary.Imap.NamespaceResponse : BaseObject {
     }
 
     private static Namespace[]? parse_namespaces(ListParameter? list) throws ImapError {
-        Namespace[] nss = new Namespace[list.size];
-        for (int i = 0; i < list.size; i++) {
-            nss[i] = parse_namespace(list.get_as_list(i));
+        Namespace[]? nss = null;
+        if (list != null) {
+            nss = new Namespace[list.size];
+            for (int i = 0; i < list.size; i++) {
+                nss[i] = parse_namespace(list.get_as_list(i));
+            }
         }
         return nss;
     }
