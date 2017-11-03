@@ -464,9 +464,9 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         results_suspect = false;
         check_open();
         
-        Gee.List<Imap.Folder>? remote_children = null;
+        Gee.List<Imap.Folder> remote_children = null;
         try {
-            remote_children = yield remote.list_child_folders_async(parent, cancellable);
+            remote_children = yield remote.fetch_child_folders_async(parent, cancellable);
         } catch (Error err) {
             // ignore everything but I/O and IMAP errors (cancellation is an IOError)
             if (err is IOError || err is ImapError)
@@ -475,25 +475,25 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
                 (parent != null ? parent.to_string() : "root"), err.message);
             results_suspect = true;
         }
-        
+
         Gee.HashMap<FolderPath, Imap.Folder> result = new Gee.HashMap<FolderPath, Imap.Folder>();
-        if (remote_children != null) {
-            foreach (Imap.Folder remote_child in remote_children) {
-                result.set(remote_child.path, remote_child);
-                if (remote_child.properties.has_children.is_possible()) {
-                    bool recursive_results_suspect;
-                    Collection.map_set_all<FolderPath, Imap.Folder>(result,
-                        yield enumerate_remote_folders_async(
-                        remote_child.path, out recursive_results_suspect, cancellable));
-                    if (recursive_results_suspect)
-                        results_suspect = true;
-                }
+        foreach (Imap.Folder remote_child in remote_children) {
+            result.set(remote_child.path, remote_child);
+            if (remote_child.properties.has_children.is_possible()) {
+                bool recursive_results_suspect;
+                Collection.map_set_all<FolderPath, Imap.Folder>(
+                    result, yield enumerate_remote_folders_async(
+                        remote_child.path, out recursive_results_suspect, cancellable
+                    )
+                );
+                if (recursive_results_suspect)
+                    results_suspect = true;
             }
         }
-        
+
         return result;
     }
-    
+
     public override Geary.ContactStore get_contact_store() {
         return local.contact_store;
     }

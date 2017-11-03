@@ -187,16 +187,14 @@ private class Geary.Imap.Account : BaseObject {
      * This method will perform a pipe-lined IMAP SELECT for all
      * folders found, and hence should be used with care.
      */
-    public async Gee.List<Imap.Folder>? list_child_folders_async(FolderPath? parent, Cancellable? cancellable)
+    public async Gee.List<Imap.Folder> fetch_child_folders_async(FolderPath? parent, Cancellable? cancellable)
     throws Error {
         ClientSession session = yield claim_session_async(cancellable);
-
+        Gee.List<Imap.Folder> children = new Gee.ArrayList<Imap.Folder>();
         Gee.List<MailboxInformation> mailboxes = yield send_list_async(session, parent, true, cancellable);
         if (mailboxes.size == 0) {
-            return null;
+            return children;
         }
-
-        Gee.List<Imap.Folder> children = new Gee.ArrayList<Imap.Folder>();
 
         // Work out which folders need a STATUS and send them all
         // pipe-lined to minimise network and server latency.
