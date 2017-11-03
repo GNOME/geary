@@ -220,23 +220,27 @@ public class Geary.Imap.ClientSession : BaseObject {
     private Endpoint imap_endpoint;
     private Geary.State.Machine fsm;
     private ClientConnection? cx = null;
+
     private MailboxSpecifier? current_mailbox = null;
     private bool current_mailbox_readonly = false;
-    private Gee.HashMap<Tag, StatusResponse> seen_completion_responses = new Gee.HashMap<
-        Tag, StatusResponse>();
-    private Gee.HashMap<Tag, CommandCallback> waiting_for_completion = new Gee.HashMap<
-        Tag, CommandCallback>();
-    private int next_capabilities_revision = 1;
+
     private uint keepalive_id = 0;
     private uint selected_keepalive_secs = 0;
     private uint unselected_keepalive_secs = 0;
     private uint selected_with_idle_keepalive_secs = 0;
     private bool allow_idle = true;
+
+    private Gee.HashMap<Tag, StatusResponse> seen_completion_responses = new Gee.HashMap<
+        Tag, StatusResponse>();
+    private Gee.HashMap<Tag, CommandCallback> waiting_for_completion = new Gee.HashMap<
+        Tag, CommandCallback>();
     private Command? state_change_cmd = null;
     private Nonblocking.Semaphore? connect_waiter = null;
     private Error? connect_err = null;
 
+    private int next_capabilities_revision = 1;
     private Gee.Map<string,Namespace> namespaces = new Gee.HashMap<string,Namespace>();
+
 
 
     //
