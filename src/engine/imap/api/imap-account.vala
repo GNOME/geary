@@ -111,19 +111,36 @@ private class Geary.Imap.Account : BaseObject {
         return exists;
     }
 
-    public async void create_folder_async(FolderPath path, Cancellable? cancellable)
+    /**
+     * Creates a new special folder on the remote server.
+     *
+     * The given path must be a fully-qualified path, including
+     * namespace prefix.
+     *
+     * If the optional special folder type is specified, and
+     * CREATE-SPECIAL-USE is supported by the connection, that will be
+     * used to specify the type of the new folder.
+     */
+    public async void create_folder_async(FolderPath path,
+                                          Geary.SpecialFolderType? type,
+                                          Cancellable? cancellable)
     throws Error {
         ClientSession session = yield claim_session_async(cancellable);
+        MailboxSpecifier mailbox = session.get_mailbox_for_path(path);
+        bool can_create_special = session.capabilities.has_capability(Capabilities.CREATE_SPECIAL_USE);
+        CreateCommand cmd = (type != null && can_create_special)
+            ? new CreateCommand.special_use(mailbox, type)
+            : new CreateCommand(mailbox);
+
         StatusResponse response = yield send_command_async(
-            session,
-            new CreateCommand(session.get_mailbox_for_path(path)),
-            null, null,
-            cancellable
+            session, cmd, null, null, cancellable
         );
 
         if (response.status != Status.OK) {
-            throw new ImapError.SERVER_ERROR("Server reports error creating path %s: %s", path.to_string(),
-                response.to_string());
+            throw new ImapError.SERVER_ERROR(
+                "Server reports error creating folder %s: %s",
+                mailbox.to_string(), response.to_string()
+            );
         }
     }
 

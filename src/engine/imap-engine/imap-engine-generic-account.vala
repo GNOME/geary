@@ -716,16 +716,15 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             minimal_folder = folder_map.get(path);
         } else {
             debug("Creating %s to use as special folder %s", path.to_string(), special.to_string());
-            
             // TODO: ignore error due to already existing.
-            yield remote.create_folder_async(path, cancellable);
+            yield remote.create_folder_async(path, special, cancellable);
             minimal_folder = (MinimalFolder) yield fetch_folder_async(path, cancellable);
         }
-        
+
         minimal_folder.set_special_folder_type(special);
         return minimal_folder;
     }
-    
+
     public override async Geary.Folder get_required_special_folder_async(Geary.SpecialFolderType special,
         Cancellable? cancellable) throws Error {
         if (!(special in get_supported_special_folders())) {
