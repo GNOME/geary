@@ -77,6 +77,26 @@ private class Geary.Imap.Account : BaseObject {
         is_open = false;
     }
 
+    /**
+     * Returns the root path for the default personal namespace.
+     */
+    public async FolderPath get_default_personal_namespace(Cancellable? cancellable)
+    throws Error {
+        ClientSession session = yield claim_session_async(cancellable);
+        if (session.personal_namespaces.is_empty) {
+            throw new ImapError.INVALID("No personal namespace found");
+        }
+
+        Namespace ns = session.personal_namespaces[0];
+        string prefix = ns.prefix;
+        string? delim = ns.delim;
+        if (delim != null && prefix.has_suffix(delim)) {
+            prefix = prefix.substring(0, prefix.length - delim.length);
+        }
+
+        return new FolderRoot(prefix);
+    }
+
     public async bool folder_exists_async(FolderPath path, Cancellable? cancellable)
     throws Error {
         ClientSession session = yield claim_session_async(cancellable);

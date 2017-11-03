@@ -690,9 +690,10 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             // This is the first time we're turning a non-special folder into a special one.
             // After we do this, we'll record which one we picked in the account info.
 
+            Geary.FolderPath root = yield remote.get_default_personal_namespace(cancellable);
             Gee.List<string> search_names = special_search_names.get(special);
             foreach (string search_name in search_names) {
-                Geary.FolderPath search_path = new Imap.FolderRoot(search_name);
+                Geary.FolderPath search_path = root.get_child(search_name);
                 foreach (Geary.FolderPath test_path in folder_map.keys) {
                     if (test_path.compare_normalized_ci(search_path) == 0) {
                         path = search_path;
@@ -702,31 +703,16 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
                 if (path != null)
                     break;
             }
-            if (path == null) {
-                foreach (string search_name in search_names) {
-                    Geary.FolderPath search_path = new Imap.FolderRoot(
-                        Imap.MailboxSpecifier.CANONICAL_INBOX_NAME).get_child(search_name);
-                    foreach (Geary.FolderPath test_path in folder_map.keys) {
-                        if (test_path.compare_normalized_ci(search_path) == 0) {
-                            path = search_path;
-                            break;
-                        }
-                    }
-                    if (path != null)
-                        break;
-                }
-            }
-            
+
             if (path == null)
-                path = new Imap.FolderRoot(search_names[0]);
-            
+                path = root.get_child(search_names[0]);
+
             information.set_special_folder_path(special, path);
             yield information.store_async(cancellable);
         }
-        
+
         if (path in folder_map.keys) {
             debug("Promoting %s to special folder %s", path.to_string(), special.to_string());
-            
             minimal_folder = folder_map.get(path);
         } else {
             debug("Creating %s to use as special folder %s", path.to_string(), special.to_string());

@@ -195,7 +195,28 @@ public class Geary.Imap.ClientSession : BaseObject {
      * (specifically for IDLE support).
      */
     public Capabilities capabilities { get; private set; default = new Capabilities(0); }
-    
+
+    // While the following inbox and namespace data should be server
+    // specific, there is a small chance they will differ between
+    // connections if the connections connect to different servers in
+    // a cluster, or if configuration changes between connections. We
+    // do assume however that once connected, this information will
+    // remain the same. This information becomes current only after
+    // initiate_session_async() has successfully completed.
+
+    /** Records the actual name and delimiter used for the inbox */
+    internal MailboxInformation? inbox = null;
+
+    /** The locations personal mailboxes on this  connection. */
+    internal Gee.List<Namespace> personal_namespaces = new Gee.ArrayList<Namespace>();
+
+    /** The locations of other user's mailboxes on this connection. */
+    internal Gee.List<Namespace> user_namespaces = new Gee.ArrayList<Namespace>();
+
+    /** The locations of shared mailboxes on this connection. */
+    internal Gee.List<Namespace> shared_namespaces = new Gee.ArrayList<Namespace>();
+
+
     private Endpoint imap_endpoint;
     private Geary.State.Machine fsm;
     private ClientConnection? cx = null;
@@ -215,17 +236,6 @@ public class Geary.Imap.ClientSession : BaseObject {
     private Nonblocking.Semaphore? connect_waiter = null;
     private Error? connect_err = null;
 
-    // While the following should be server specific, there is a small
-    // chance they will differ between connections if the connections
-    // connect to different servers in a cluster, or if configuration
-    // changes between connections. We do assume however that once
-    // connected, this information will remain the same. This
-    // information becomes current only after initiate_session_async()
-    // has successfully completed.
-    private MailboxInformation? inbox = null;
-    private Gee.List<Namespace> personal_namespaces = new Gee.ArrayList<Namespace>();
-    private Gee.List<Namespace> user_namespaces = new Gee.ArrayList<Namespace>();
-    private Gee.List<Namespace> shared_namespaces = new Gee.ArrayList<Namespace>();
     private Gee.Map<string,Namespace> namespaces = new Gee.HashMap<string,Namespace>();
 
 
