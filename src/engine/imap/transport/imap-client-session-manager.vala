@@ -501,8 +501,8 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
 	private void on_connectivity_change() {
 		this.is_endpoint_reachable = this.connectivity.is_reachable;
 		debug("Host %s became %s",
-			  this.endpoint.to_string(),
-			  this.is_endpoint_reachable ? "reachable" : "unreachable");
+              this.endpoint.to_string(),
+              this.is_endpoint_reachable ? "reachable" : "unreachable");
 		if (this.is_endpoint_reachable) {
             this.adjust_session_pool.begin();
 		}
