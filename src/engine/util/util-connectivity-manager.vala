@@ -23,7 +23,8 @@ public class Geary.ConnectivityManager : BaseObject {
 	/** Determines if the managed endpoint is currently reachable. */
 	public bool is_reachable { get; private set; default = false; }
 
-    private Endpoint endpoint;
+    // Weak to avoid a circular ref with the endpoint
+    private weak Endpoint endpoint;
 
     private NetworkMonitor monitor;
 
@@ -125,6 +126,8 @@ public class Geary.ConnectivityManager : BaseObject {
 		// change. 0.36 fixes that, so pull this out when we can
 		// depend on that as a minimum.
 		if (this.is_reachable != reachable) {
+            debug("Host %s became %s",
+                  this.endpoint.to_string(), reachable ? "reachable" : "unreachable");
 			this.is_reachable = reachable;
 		}
 	}

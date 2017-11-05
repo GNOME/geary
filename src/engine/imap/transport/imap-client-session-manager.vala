@@ -56,7 +56,6 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
 
     private AccountInformation account_information;
     private Endpoint endpoint;
-	private ConnectivityManager connectivity;
     private Gee.HashSet<ClientSession> sessions = new Gee.HashSet<ClientSession>();
     private int pending_sessions = 0;
     private Nonblocking.Mutex sessions_mutex = new Nonblocking.Mutex();
@@ -79,20 +78,21 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         this.endpoint.notify[Endpoint.PROP_TRUST_UNTRUSTED_HOST].connect(on_imap_trust_untrusted_host);
         this.endpoint.untrusted_host.connect(on_imap_untrusted_host);
 
-		this.connectivity = new ConnectivityManager(this.endpoint);
-		this.connectivity.notify["is-reachable"].connect(on_connectivity_change);
-		this.connectivity.check_reachable.begin();
+		this.endpoint.connectivity.notify["is-reachable"].connect(on_connectivity_change);
+        if (!this.endpoint.connectivity.is_reachable) {
+            this.endpoint.connectivity.check_reachable.begin();
+        }
     }
 
     ~ClientSessionManager() {
         if (is_open)
             warning("Destroying opened ClientSessionManager");
 
-        account_information.notify["imap-credentials"].disconnect(on_imap_credentials_notified);
-        endpoint.untrusted_host.disconnect(on_imap_untrusted_host);
-        endpoint.notify[Endpoint.PROP_TRUST_UNTRUSTED_HOST].disconnect(on_imap_trust_untrusted_host);
-		this.connectivity.cancel_check();
-		this.connectivity = null;
+        this.account_information.notify["imap-credentials"].disconnect(on_imap_credentials_notified);
+        this.endpoint.untrusted_host.disconnect(on_imap_untrusted_host);
+        this.endpoint.notify[Endpoint.PROP_TRUST_UNTRUSTED_HOST].disconnect(on_imap_trust_untrusted_host);
+		this.endpoint.connectivity.cancel_check();
+        
     }
 
     public async void open_async(Cancellable? cancellable) throws Error {
@@ -499,10 +499,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
     }
 
 	private void on_connectivity_change() {
-		this.is_endpoint_reachable = this.connectivity.is_reachable;
-		debug("Host %s became %s",
-              this.endpoint.to_string(),
-              this.is_endpoint_reachable ? "reachable" : "unreachable");
+		this.is_endpoint_reachable = this.endpoint.connectivity.is_reachable;
 		if (this.is_endpoint_reachable) {
             this.adjust_session_pool.begin();
 		}
