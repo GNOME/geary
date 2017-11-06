@@ -31,19 +31,26 @@ private class Geary.SmtpOutboxFolder :
         public bool sent;
         public Memory.Buffer? message;
         public SmtpOutboxEmailIdentifier outbox_id;
-        
+
         public OutboxRow(int64 id, int position, int64 ordering, bool sent, Memory.Buffer? message,
             SmtpOutboxFolderRoot root) {
             assert(position >= 1);
-            
+
             this.id = id;
             this.position = position;
             this.ordering = ordering;
             this.message = message;
             this.sent = sent;
-            
+
             outbox_id = new SmtpOutboxEmailIdentifier(id, ordering);
         }
+    }
+
+
+    // Used solely for debugging, hence "(no subject)" not marked for translation
+    private static string message_subject(RFC822.Message message) {
+        return (message.subject != null && !String.is_empty(message.subject.to_string()))
+            ? message.subject.to_string() : "(no subject)";
     }
 
 
@@ -57,7 +64,7 @@ private class Geary.SmtpOutboxFolder :
             return _path;
         }
     }
-    
+
     public override SpecialFolderType special_folder_type {
         get {
             return Geary.SpecialFolderType.OUTBOX;
@@ -81,7 +88,7 @@ private class Geary.SmtpOutboxFolder :
 
     public signal void report_problem(Geary.Account.Problem problem, Error? err);
     public signal void email_sent(Geary.RFC822.Message rfc822);
-    
+
     // Requires the Database from the get-go because it runs a background task that access it
     // whether open or not
     public SmtpOutboxFolder(ImapDB.Database db, Account account, Geary.ProgressMonitor sending_monitor) {
@@ -97,6 +104,104 @@ private class Geary.SmtpOutboxFolder :
         );
     }
 
+    // create_email_async() requires the Outbox be open according to contract, but enqueuing emails
+    // for background delivery can happen at any time, so this is the mechanism to do so.
+    // email_count is the number of emails in the Outbox after enqueueing the message.
+    public async SmtpOutboxEmailIdentifier enqueue_email_async(Geary.RFC822.Message rfc822,
+        Cancellable? cancellable) throws Error {
+        debug("Queuing message for sending: %s",
+              (rfc822.subject != null) ? rfc822.subject.to_string() : "(no subject)");
+
+        int email_count = 0;
+        OutboxRow? row = null;
+        yield db.exec_transaction_async(Db.TransactionType.WR, (cx) => {
+            int64 ordering = do_get_next_ordering(cx, cancellable);
+
+            // save in database ready for SMTP, but without dot-stuffing
+            Db.Statement stmt = cx.prepare(
+                "INSERT INTO SmtpOutboxTable (message, ordering) VALUES (?, ?)");
+            stmt.bind_string_buffer(0, rfc822.get_network_buffer(false));
+            stmt.bind_int64(1, ordering);
+
+            int64 id = stmt.exec_insert(cancellable);
+
+            stmt = cx.prepare("SELECT message FROM SmtpOutboxTable WHERE id=?");
+            stmt.bind_rowid(0, id);
+
+            // This has got to work; Db should throw an exception if the INSERT failed
+            Db.Result results = stmt.exec(cancellable);
+            assert(!results.finished);
+
+            Memory.Buffer message = results.string_buffer_at(0);
+
+            int position = do_get_position_by_ordering(cx, ordering, cancellable);
+
+            row = new OutboxRow(id, position, ordering, false, message, _path);
+            email_count = do_get_email_count(cx, cancellable);
+
+            return Db.TransactionOutcome.COMMIT;
+        }, cancellable);
+
+        // should have thrown an error if this failed
+        assert(row != null);
+
+        // update properties
+        _properties.set_total(yield get_email_count_async(cancellable));
+
+        // immediately add to outbox queue for delivery
+        outbox_queue.send(row);
+
+        Gee.List<SmtpOutboxEmailIdentifier> list = new Gee.ArrayList<SmtpOutboxEmailIdentifier>();
+        list.add(row.outbox_id);
+
+        notify_email_appended(list);
+        notify_email_locally_appended(list);
+        notify_email_count_changed(email_count, CountChangeReason.APPENDED);
+
+        return row.outbox_id;
+    }
+
+    public async void add_to_containing_folders_async(Gee.Collection<Geary.EmailIdentifier> ids,
+        Gee.HashMultiMap<Geary.EmailIdentifier, Geary.FolderPath> map, Cancellable? cancellable) throws Error {
+        yield db.exec_transaction_async(Db.TransactionType.RO, (cx, cancellable) => {
+            foreach (Geary.EmailIdentifier id in ids) {
+                SmtpOutboxEmailIdentifier? outbox_id = id as SmtpOutboxEmailIdentifier;
+                if (outbox_id == null)
+                    continue;
+
+                OutboxRow? row = do_fetch_row_by_ordering(cx, outbox_id.ordering, cancellable);
+                if (row == null)
+                    continue;
+
+                map.set(id, path);
+            }
+
+            return Db.TransactionOutcome.DONE;
+        }, cancellable);
+    }
+
+    public virtual async Geary.EmailIdentifier? create_email_async(Geary.RFC822.Message rfc822, EmailFlags? flags,
+        DateTime? date_received, Geary.EmailIdentifier? id = null, Cancellable? cancellable = null) throws Error {
+        check_open();
+
+        return yield enqueue_email_async(rfc822, cancellable);
+    }
+
+    public virtual async void remove_email_async(Gee.List<Geary.EmailIdentifier> email_ids,
+        Cancellable? cancellable = null) throws Error {
+        check_open();
+
+        yield internal_remove_email_async(email_ids, cancellable);
+    }
+
+    public virtual async void remove_single_email_async(Geary.EmailIdentifier id,
+        Cancellable? cancellable = null) throws Error {
+        Gee.List<Geary.EmailIdentifier> list = new Gee.ArrayList<Geary.EmailIdentifier>();
+        list.add(id);
+
+        yield remove_email_async(list, cancellable);
+    }
+
     public override async void find_boundaries_async(Gee.Collection<Geary.EmailIdentifier> ids,
         out Geary.EmailIdentifier? low, out Geary.EmailIdentifier? high,
         Cancellable? cancellable = null) throws Error {
@@ -107,88 +212,168 @@ private class Geary.SmtpOutboxFolder :
                 SmtpOutboxEmailIdentifier? outbox_id = id as SmtpOutboxEmailIdentifier;
                 if (outbox_id == null)
                     continue;
-                
+
                 OutboxRow? row = do_fetch_row_by_ordering(cx, outbox_id.ordering, cancellable);
                 if (row == null)
                     continue;
-                
+
                 if (outbox_low == null || outbox_id.ordering < outbox_low.ordering)
                     outbox_low = outbox_id;
                 if (outbox_high == null || outbox_id.ordering > outbox_high.ordering)
                     outbox_high = outbox_id;
             }
-            
+
             return Db.TransactionOutcome.DONE;
         }, cancellable);
-        
+
         low = outbox_low;
         high = outbox_high;
-    }
-    
-    public async void add_to_containing_folders_async(Gee.Collection<Geary.EmailIdentifier> ids,
-        Gee.HashMultiMap<Geary.EmailIdentifier, Geary.FolderPath> map, Cancellable? cancellable) throws Error {
-        yield db.exec_transaction_async(Db.TransactionType.RO, (cx, cancellable) => {
-            foreach (Geary.EmailIdentifier id in ids) {
-                SmtpOutboxEmailIdentifier? outbox_id = id as SmtpOutboxEmailIdentifier;
-                if (outbox_id == null)
-                    continue;
-                
-                OutboxRow? row = do_fetch_row_by_ordering(cx, outbox_id.ordering, cancellable);
-                if (row == null)
-                    continue;
-                
-                map.set(id, path);
-            }
-            
-            return Db.TransactionOutcome.DONE;
-        }, cancellable);
     }
 
     public override Geary.Folder.OpenState get_open_state() {
         return is_open() ? Geary.Folder.OpenState.LOCAL : Geary.Folder.OpenState.CLOSED;
     }
 
-    // Used solely for debugging, hence "(no subject)" not marked for translation
-    private static string message_subject(RFC822.Message message) {
-        return (message.subject != null && !String.is_empty(message.subject.to_string()))
-            ? message.subject.to_string() : "(no subject)";
+    public override async Gee.List<Geary.Email>? list_email_by_id_async(
+        Geary.EmailIdentifier? _initial_id, int count, Geary.Email.Field required_fields,
+        Geary.Folder.ListFlags flags, Cancellable? cancellable = null) throws Error {
+        check_open();
+
+        SmtpOutboxEmailIdentifier? initial_id = _initial_id as SmtpOutboxEmailIdentifier;
+        if (_initial_id != null && initial_id == null) {
+            throw new EngineError.BAD_PARAMETERS("EmailIdentifier %s not for Outbox",
+                initial_id.to_string());
+        }
+
+        if (count <= 0)
+            return null;
+
+        Gee.List<Geary.Email>? list = null;
+        yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
+            string dir = flags.is_newest_to_oldest() ? "DESC" : "ASC";
+
+            Db.Statement stmt;
+            if (initial_id != null) {
+                stmt = cx.prepare("""
+                    SELECT id, ordering, message, sent
+                    FROM SmtpOutboxTable
+                    WHERE ordering >= ?
+                    ORDER BY ordering %s
+                    LIMIT ?
+                """.printf(dir));
+                stmt.bind_int64(0,
+                    flags.is_including_id() ? initial_id.ordering : initial_id.ordering + 1);
+                stmt.bind_int(1, count);
+            } else {
+                stmt = cx.prepare("""
+                    SELECT id, ordering, message, sent
+                    FROM SmtpOutboxTable
+                    ORDER BY ordering %s
+                    LIMIT ?
+                """.printf(dir));
+                stmt.bind_int(0, count);
+            }
+
+            Db.Result results = stmt.exec(cancellable);
+            if (results.finished)
+                return Db.TransactionOutcome.DONE;
+
+            list = new Gee.ArrayList<Geary.Email>();
+            int position = -1;
+            do {
+                int64 ordering = results.int64_at(1);
+                if (position == -1) {
+                    position = do_get_position_by_ordering(cx, ordering, cancellable);
+                    assert(position >= 1);
+                }
+
+                list.add(row_to_email(new OutboxRow(results.rowid_at(0), position, ordering,
+                    results.bool_at(3), results.string_buffer_at(2), _path)));
+                position += flags.is_newest_to_oldest() ? -1 : 1;
+                assert(position >= 1);
+            } while (results.next());
+
+            return Db.TransactionOutcome.DONE;
+        }, cancellable);
+
+        return list;
     }
 
+    public override async Gee.List<Geary.Email>? list_email_by_sparse_id_async(
+        Gee.Collection<Geary.EmailIdentifier> ids, Geary.Email.Field required_fields,
+        Geary.Folder.ListFlags flags, Cancellable? cancellable = null) throws Error {
+        check_open();
 
-    // Fill the send queue with existing mail (if any)
-    private async void fill_outbox_queue() {
-        debug("Filling outbox queue");
-        try {
-            Gee.ArrayList<OutboxRow> list = new Gee.ArrayList<OutboxRow>();
-            yield db.exec_transaction_async(Db.TransactionType.RO, (cx, cancellable) => {
-                Db.Statement stmt = cx.prepare("""
-                    SELECT id, ordering, message
-                    FROM SmtpOutboxTable
-                    ORDER BY ordering
-                """);
-                
-                Db.Result results = stmt.exec(cancellable);
-                int position = 1;
-                while (!results.finished) {
-                    list.add(new OutboxRow(results.rowid_at(0), position++, results.int64_at(1),
-                        false, results.string_buffer_at(2), _path));
-                    results.next(cancellable);
-                }
-                
-                return Db.TransactionOutcome.DONE;
-            }, null);
-            
-            if (list.size > 0) {
-                // set properties now (can't do yield in ctor)
-                _properties.set_total(list.size);
-                
-                debug("Priming outbox postman with %d stored messages", list.size);
-                foreach (OutboxRow row in list)
-                    outbox_queue.send(row);
+        Gee.List<Geary.Email> list = new Gee.ArrayList<Geary.Email>();
+        yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
+            foreach (Geary.EmailIdentifier id in ids) {
+                SmtpOutboxEmailIdentifier? outbox_id = id as SmtpOutboxEmailIdentifier;
+                if (outbox_id == null)
+                    throw new EngineError.BAD_PARAMETERS("%s is not outbox EmailIdentifier", id.to_string());
+
+                OutboxRow? row = do_fetch_row_by_ordering(cx, outbox_id.ordering, cancellable);
+                if (row == null)
+                    continue;
+
+                list.add(row_to_email(row));
             }
-        } catch (Error prime_err) {
-            warning("Error priming outbox: %s", prime_err.message);
-        }
+
+            return Db.TransactionOutcome.DONE;
+        }, cancellable);
+
+        return (list.size > 0) ? list : null;
+    }
+
+    public override async Gee.Map<Geary.EmailIdentifier, Geary.Email.Field>?
+        list_local_email_fields_async(Gee.Collection<Geary.EmailIdentifier> ids,
+        Cancellable? cancellable = null) throws Error {
+        check_open();
+
+        Gee.Map<Geary.EmailIdentifier, Geary.Email.Field> map = new Gee.HashMap<
+            Geary.EmailIdentifier, Geary.Email.Field>();
+        yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
+            Db.Statement stmt = cx.prepare(
+                "SELECT id FROM SmtpOutboxTable WHERE ordering=?");
+            foreach (Geary.EmailIdentifier id in ids) {
+                SmtpOutboxEmailIdentifier? outbox_id = id as SmtpOutboxEmailIdentifier;
+                if (outbox_id == null)
+                    throw new EngineError.BAD_PARAMETERS("%s is not outbox EmailIdentifier", id.to_string());
+
+                stmt.reset(Db.ResetScope.CLEAR_BINDINGS);
+                stmt.bind_int64(0, outbox_id.ordering);
+
+                // merely checking for presence, all emails in outbox have same fields
+                Db.Result results = stmt.exec(cancellable);
+                if (!results.finished)
+                    map.set(outbox_id, Geary.Email.Field.ALL);
+            }
+
+            return Db.TransactionOutcome.DONE;
+        }, cancellable);
+
+        return (map.size > 0) ? map : null;
+    }
+
+    public override async Geary.Email fetch_email_async(Geary.EmailIdentifier id,
+        Geary.Email.Field required_fields, Geary.Folder.ListFlags flags,
+        Cancellable? cancellable = null) throws Error {
+        check_open();
+
+        SmtpOutboxEmailIdentifier? outbox_id = id as SmtpOutboxEmailIdentifier;
+        if (outbox_id == null)
+            throw new EngineError.BAD_PARAMETERS("%s is not outbox EmailIdentifier", id.to_string());
+
+        OutboxRow? row = null;
+        yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
+            row = do_fetch_row_by_ordering(cx, outbox_id.ordering, cancellable);
+
+            return Db.TransactionOutcome.DONE;
+        }, cancellable);
+
+        if (row == null)
+            throw new EngineError.NOT_FOUND("No message with ID %s in outbox", id.to_string());
+
+        return row_to_email(row);
     }
 
     private async void start_postman_async() {
@@ -223,7 +408,7 @@ private class Geary.SmtpOutboxFolder :
             } catch (RFC822Error msg_err) {
                 // TODO: This needs to be reported to the user
                 debug("Outbox postman message error: %s", msg_err.message);
-                
+
                 continue;
             }
 
@@ -368,297 +553,46 @@ private class Geary.SmtpOutboxFolder :
         }
     }
 
-    private async int get_email_count_async(Cancellable? cancellable) throws Error {
-        int count = 0;
-        yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
-            count = do_get_email_count(cx, cancellable);
-            
-            return Db.TransactionOutcome.DONE;
-        }, cancellable);
-        
-        return count;
-    }
-    
-    // create_email_async() requires the Outbox be open according to contract, but enqueuing emails
-    // for background delivery can happen at any time, so this is the mechanism to do so.
-    // email_count is the number of emails in the Outbox after enqueueing the message.
-    public async SmtpOutboxEmailIdentifier enqueue_email_async(Geary.RFC822.Message rfc822,
-        Cancellable? cancellable) throws Error {
-        debug("Queuing message for sending: %s",
-              (rfc822.subject != null) ? rfc822.subject.to_string() : "(no subject)");
+    // Fill the send queue with existing mail (if any)
+    private async void fill_outbox_queue() {
+        debug("Filling outbox queue");
+        try {
+            Gee.ArrayList<OutboxRow> list = new Gee.ArrayList<OutboxRow>();
+            yield db.exec_transaction_async(Db.TransactionType.RO, (cx, cancellable) => {
+                Db.Statement stmt = cx.prepare("""
+                    SELECT id, ordering, message
+                    FROM SmtpOutboxTable
+                    ORDER BY ordering
+                """);
 
-        int email_count = 0;
-        OutboxRow? row = null;
-        yield db.exec_transaction_async(Db.TransactionType.WR, (cx) => {
-            int64 ordering = do_get_next_ordering(cx, cancellable);
-            
-            // save in database ready for SMTP, but without dot-stuffing
-            Db.Statement stmt = cx.prepare(
-                "INSERT INTO SmtpOutboxTable (message, ordering) VALUES (?, ?)");
-            stmt.bind_string_buffer(0, rfc822.get_network_buffer(false));
-            stmt.bind_int64(1, ordering);
-            
-            int64 id = stmt.exec_insert(cancellable);
-            
-            stmt = cx.prepare("SELECT message FROM SmtpOutboxTable WHERE id=?");
-            stmt.bind_rowid(0, id);
-            
-            // This has got to work; Db should throw an exception if the INSERT failed
-            Db.Result results = stmt.exec(cancellable);
-            assert(!results.finished);
-            
-            Memory.Buffer message = results.string_buffer_at(0);
-            
-            int position = do_get_position_by_ordering(cx, ordering, cancellable);
-            
-            row = new OutboxRow(id, position, ordering, false, message, _path);
-            email_count = do_get_email_count(cx, cancellable);
-            
-            return Db.TransactionOutcome.COMMIT;
-        }, cancellable);
-        
-        // should have thrown an error if this failed
-        assert(row != null);
-        
-        // update properties
-        _properties.set_total(yield get_email_count_async(cancellable));
-        
-        // immediately add to outbox queue for delivery
-        outbox_queue.send(row);
-        
-        Gee.List<SmtpOutboxEmailIdentifier> list = new Gee.ArrayList<SmtpOutboxEmailIdentifier>();
-        list.add(row.outbox_id);
-        
-        notify_email_appended(list);
-        notify_email_locally_appended(list);
-        notify_email_count_changed(email_count, CountChangeReason.APPENDED);
-        
-        return row.outbox_id;
-    }
-    
-    public virtual async Geary.EmailIdentifier? create_email_async(Geary.RFC822.Message rfc822, EmailFlags? flags,
-        DateTime? date_received, Geary.EmailIdentifier? id = null, Cancellable? cancellable = null) throws Error {
-        check_open();
-        
-        return yield enqueue_email_async(rfc822, cancellable);
-    }
-    
-    public override async Gee.List<Geary.Email>? list_email_by_id_async(
-        Geary.EmailIdentifier? _initial_id, int count, Geary.Email.Field required_fields,
-        Geary.Folder.ListFlags flags, Cancellable? cancellable = null) throws Error {
-        check_open();
-        
-        SmtpOutboxEmailIdentifier? initial_id = _initial_id as SmtpOutboxEmailIdentifier;
-        if (_initial_id != null && initial_id == null) {
-            throw new EngineError.BAD_PARAMETERS("EmailIdentifier %s not for Outbox",
-                initial_id.to_string());
-        }
-        
-        if (count <= 0)
-            return null;
-        
-        Gee.List<Geary.Email>? list = null;
-        yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
-            string dir = flags.is_newest_to_oldest() ? "DESC" : "ASC";
-            
-            Db.Statement stmt;
-            if (initial_id != null) {
-                stmt = cx.prepare("""
-                    SELECT id, ordering, message, sent
-                    FROM SmtpOutboxTable
-                    WHERE ordering >= ?
-                    ORDER BY ordering %s
-                    LIMIT ?
-                """.printf(dir));
-                stmt.bind_int64(0,
-                    flags.is_including_id() ? initial_id.ordering : initial_id.ordering + 1);
-                stmt.bind_int(1, count);
-            } else {
-                stmt = cx.prepare("""
-                    SELECT id, ordering, message, sent
-                    FROM SmtpOutboxTable
-                    ORDER BY ordering %s
-                    LIMIT ?
-                """.printf(dir));
-                stmt.bind_int(0, count);
-            }
-            
-            Db.Result results = stmt.exec(cancellable);
-            if (results.finished)
-                return Db.TransactionOutcome.DONE;
-            
-            list = new Gee.ArrayList<Geary.Email>();
-            int position = -1;
-            do {
-                int64 ordering = results.int64_at(1);
-                if (position == -1) {
-                    position = do_get_position_by_ordering(cx, ordering, cancellable);
-                    assert(position >= 1);
-                }
-                
-                list.add(row_to_email(new OutboxRow(results.rowid_at(0), position, ordering,
-                    results.bool_at(3), results.string_buffer_at(2), _path)));
-                position += flags.is_newest_to_oldest() ? -1 : 1;
-                assert(position >= 1);
-            } while (results.next());
-            
-            return Db.TransactionOutcome.DONE;
-        }, cancellable);
-        
-        return list;
-    }
-    
-    public override async Gee.List<Geary.Email>? list_email_by_sparse_id_async(
-        Gee.Collection<Geary.EmailIdentifier> ids, Geary.Email.Field required_fields,
-        Geary.Folder.ListFlags flags, Cancellable? cancellable = null) throws Error {
-        check_open();
-        
-        Gee.List<Geary.Email> list = new Gee.ArrayList<Geary.Email>();
-        yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
-            foreach (Geary.EmailIdentifier id in ids) {
-                SmtpOutboxEmailIdentifier? outbox_id = id as SmtpOutboxEmailIdentifier;
-                if (outbox_id == null)
-                    throw new EngineError.BAD_PARAMETERS("%s is not outbox EmailIdentifier", id.to_string());
-                
-                OutboxRow? row = do_fetch_row_by_ordering(cx, outbox_id.ordering, cancellable);
-                if (row == null)
-                    continue;
-                
-                list.add(row_to_email(row));
-            }
-            
-            return Db.TransactionOutcome.DONE;
-        }, cancellable);
-        
-        return (list.size > 0) ? list : null;
-    }
-    
-    public override async Gee.Map<Geary.EmailIdentifier, Geary.Email.Field>? 
-        list_local_email_fields_async(Gee.Collection<Geary.EmailIdentifier> ids,
-        Cancellable? cancellable = null) throws Error {
-        check_open();
-        
-        Gee.Map<Geary.EmailIdentifier, Geary.Email.Field> map = new Gee.HashMap<
-            Geary.EmailIdentifier, Geary.Email.Field>();
-        yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
-            Db.Statement stmt = cx.prepare(
-                "SELECT id FROM SmtpOutboxTable WHERE ordering=?");
-            foreach (Geary.EmailIdentifier id in ids) {
-                SmtpOutboxEmailIdentifier? outbox_id = id as SmtpOutboxEmailIdentifier;
-                if (outbox_id == null)
-                    throw new EngineError.BAD_PARAMETERS("%s is not outbox EmailIdentifier", id.to_string());
-                
-                stmt.reset(Db.ResetScope.CLEAR_BINDINGS);
-                stmt.bind_int64(0, outbox_id.ordering);
-                
-                // merely checking for presence, all emails in outbox have same fields
                 Db.Result results = stmt.exec(cancellable);
-                if (!results.finished)
-                    map.set(outbox_id, Geary.Email.Field.ALL);
+                int position = 1;
+                while (!results.finished) {
+                    list.add(new OutboxRow(results.rowid_at(0), position++, results.int64_at(1),
+                        false, results.string_buffer_at(2), _path));
+                    results.next(cancellable);
+                }
+
+                return Db.TransactionOutcome.DONE;
+            }, null);
+
+            if (list.size > 0) {
+                // set properties now (can't do yield in ctor)
+                _properties.set_total(list.size);
+
+                debug("Priming outbox postman with %d stored messages", list.size);
+                foreach (OutboxRow row in list)
+                    outbox_queue.send(row);
             }
-            
-            return Db.TransactionOutcome.DONE;
-        }, cancellable);
-        
-        return (map.size > 0) ? map : null;
+        } catch (Error prime_err) {
+            warning("Error priming outbox: %s", prime_err.message);
+        }
     }
-    
-    public override async Geary.Email fetch_email_async(Geary.EmailIdentifier id,
-        Geary.Email.Field required_fields, Geary.Folder.ListFlags flags,
-        Cancellable? cancellable = null) throws Error {
-        check_open();
-        
-        SmtpOutboxEmailIdentifier? outbox_id = id as SmtpOutboxEmailIdentifier;
-        if (outbox_id == null)
-            throw new EngineError.BAD_PARAMETERS("%s is not outbox EmailIdentifier", id.to_string());
-        
-        OutboxRow? row = null;
-        yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
-            row = do_fetch_row_by_ordering(cx, outbox_id.ordering, cancellable);
-            
-            return Db.TransactionOutcome.DONE;
-        }, cancellable);
-        
-        if (row == null)
-            throw new EngineError.NOT_FOUND("No message with ID %s in outbox", id.to_string());
-        
-        return row_to_email(row);
-    }
-    
-    private async void mark_email_as_sent_async(SmtpOutboxEmailIdentifier outbox_id,
-        Cancellable? cancellable = null) throws Error {
-        yield db.exec_transaction_async(Db.TransactionType.WR, (cx) => {
-            do_mark_email_as_sent(cx, outbox_id, cancellable);
-            
-            return Db.TransactionOutcome.COMMIT;
-        }, cancellable);
-        
-        Geary.EmailFlags flags = new Geary.EmailFlags();
-        flags.add(Geary.EmailFlags.OUTBOX_SENT);
-        
-        Gee.HashMap<Geary.EmailIdentifier, Geary.EmailFlags> changed_map
-            = new Gee.HashMap<Geary.EmailIdentifier, Geary.EmailFlags>();
-        changed_map.set(outbox_id, flags);
-        notify_email_flags_changed(changed_map);
-    }
-    
-    public virtual async void remove_email_async(Gee.List<Geary.EmailIdentifier> email_ids,
-        Cancellable? cancellable = null) throws Error {
-        check_open();
-        
-        yield internal_remove_email_async(email_ids, cancellable);
-    }
-    
-    // Like remove_email_async(), but can be called even when the folder isn't open
-    private async bool internal_remove_email_async(Gee.List<Geary.EmailIdentifier> email_ids,
-        Cancellable? cancellable) throws Error {
-        Gee.List<Geary.EmailIdentifier> removed = new Gee.ArrayList<Geary.EmailIdentifier>();
-        int final_count = 0;
-        yield db.exec_transaction_async(Db.TransactionType.WR, (cx) => {
-            foreach (Geary.EmailIdentifier id in email_ids) {
-                // ignore anything not belonging to the outbox, but also don't report it as removed
-                // either
-                SmtpOutboxEmailIdentifier? outbox_id = id as SmtpOutboxEmailIdentifier;
-                if (outbox_id == null)
-                    continue;
-                
-                // Even though we discard the new value here, this check must
-                // occur before any insert/delete on the table, to ensure we
-                // never reuse an ordering value while Geary is running.
-                do_get_next_ordering(cx, cancellable);
-                
-                if (do_remove_email(cx, outbox_id, cancellable))
-                    removed.add(outbox_id);
-            }
-            
-            final_count = do_get_email_count(cx, cancellable);
-            
-            return Db.TransactionOutcome.COMMIT;
-        }, cancellable);
-        
-        if (removed.size == 0)
-            return false;
-        
-        _properties.set_total(final_count);
-        
-        notify_email_removed(removed);
-        notify_email_count_changed(final_count, CountChangeReason.REMOVED);
-        
-        return true;
-    }
-    
-    public virtual async void remove_single_email_async(Geary.EmailIdentifier id,
-        Cancellable? cancellable = null) throws Error {
-        Gee.List<Geary.EmailIdentifier> list = new Gee.ArrayList<Geary.EmailIdentifier>();
-        list.add(id);
-        
-        yield remove_email_async(list, cancellable);
-    }
-    
+
     // Utility for getting an email object back from an outbox row.
     private Geary.Email row_to_email(OutboxRow row) throws Error {
         RFC822.Message message = new RFC822.Message.from_buffer(row.message);
-        
+
         Geary.Email email = message.get_email(row.outbox_id);
         // TODO: Determine message's total size (header + body) to store in Properties.
         email.set_email_properties(new SmtpOutboxEmailProperties(new DateTime.now_local(), -1));
@@ -666,8 +600,23 @@ private class Geary.SmtpOutboxFolder :
         if (row.sent)
             flags.add(Geary.EmailFlags.OUTBOX_SENT);
         email.set_flags(flags);
-        
+
         return email;
+    }
+
+    private async bool is_unsent_async(int64 ordering, Cancellable? cancellable) throws Error {
+        bool exists = false;
+        yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
+            Db.Statement stmt = cx.prepare(
+                "SELECT 1 FROM SmtpOutboxTable WHERE ordering=? AND sent = 0");
+            stmt.bind_int64(0, ordering);
+
+            exists = !stmt.exec(cancellable).finished;
+
+            return Db.TransactionOutcome.DONE;
+        }, cancellable);
+
+        return exists;
     }
 
     private async void send_email_async(Geary.RFC822.Message rfc822, Cancellable? cancellable)
@@ -704,29 +653,46 @@ private class Geary.SmtpOutboxFolder :
         } catch (Error err) {
             debug("Unable to disconnect from SMTP server %s: %s", smtp.to_string(), err.message);
         }
-        
+
         sending_monitor.notify_finish();
-        
+
         if (smtp_err != null)
             throw smtp_err;
-        
+
         email_sent(rfc822);
     }
-    
+
+    private async void mark_email_as_sent_async(SmtpOutboxEmailIdentifier outbox_id,
+        Cancellable? cancellable = null) throws Error {
+        yield db.exec_transaction_async(Db.TransactionType.WR, (cx) => {
+            do_mark_email_as_sent(cx, outbox_id, cancellable);
+
+            return Db.TransactionOutcome.COMMIT;
+        }, cancellable);
+
+        Geary.EmailFlags flags = new Geary.EmailFlags();
+        flags.add(Geary.EmailFlags.OUTBOX_SENT);
+
+        Gee.HashMap<Geary.EmailIdentifier, Geary.EmailFlags> changed_map
+            = new Gee.HashMap<Geary.EmailIdentifier, Geary.EmailFlags>();
+        changed_map.set(outbox_id, flags);
+        notify_email_flags_changed(changed_map);
+    }
+
     private async void save_sent_mail_async(Geary.RFC822.Message rfc822, Cancellable? cancellable)
         throws Error {
         Geary.FolderSupport.Create? create = (yield _account.get_required_special_folder_async(
             Geary.SpecialFolderType.SENT, cancellable)) as Geary.FolderSupport.Create;
         if (create == null)
             throw new EngineError.NOT_FOUND("Save sent mail enabled, but no writable sent mail folder");
-        
+
         bool open = false;
         try {
             yield create.open_async(Geary.Folder.OpenFlags.FAST_OPEN, cancellable);
             open = true;
-            
+
             yield create.create_email_async(rfc822, null, null, null, cancellable);
-            
+
             yield create.close_async(cancellable);
             open = false;
         } catch (Error e) {
@@ -741,67 +707,101 @@ private class Geary.SmtpOutboxFolder :
             throw e;
         }
     }
-    
-    private async bool is_unsent_async(int64 ordering, Cancellable? cancellable) throws Error {
-        bool exists = false;
+
+    private async int get_email_count_async(Cancellable? cancellable) throws Error {
+        int count = 0;
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
-            Db.Statement stmt = cx.prepare(
-                "SELECT 1 FROM SmtpOutboxTable WHERE ordering=? AND sent = 0");
-            stmt.bind_int64(0, ordering);
-            
-            exists = !stmt.exec(cancellable).finished;
-            
+            count = do_get_email_count(cx, cancellable);
+
             return Db.TransactionOutcome.DONE;
         }, cancellable);
-        
-        return exists;
+
+        return count;
     }
-    
+
+    // Like remove_email_async(), but can be called even when the folder isn't open
+    private async bool internal_remove_email_async(Gee.List<Geary.EmailIdentifier> email_ids,
+        Cancellable? cancellable) throws Error {
+        Gee.List<Geary.EmailIdentifier> removed = new Gee.ArrayList<Geary.EmailIdentifier>();
+        int final_count = 0;
+        yield db.exec_transaction_async(Db.TransactionType.WR, (cx) => {
+            foreach (Geary.EmailIdentifier id in email_ids) {
+                // ignore anything not belonging to the outbox, but also don't report it as removed
+                // either
+                SmtpOutboxEmailIdentifier? outbox_id = id as SmtpOutboxEmailIdentifier;
+                if (outbox_id == null)
+                    continue;
+
+                // Even though we discard the new value here, this check must
+                // occur before any insert/delete on the table, to ensure we
+                // never reuse an ordering value while Geary is running.
+                do_get_next_ordering(cx, cancellable);
+
+                if (do_remove_email(cx, outbox_id, cancellable))
+                    removed.add(outbox_id);
+            }
+
+            final_count = do_get_email_count(cx, cancellable);
+
+            return Db.TransactionOutcome.COMMIT;
+        }, cancellable);
+
+        if (removed.size == 0)
+            return false;
+
+        _properties.set_total(final_count);
+
+        notify_email_removed(removed);
+        notify_email_count_changed(final_count, CountChangeReason.REMOVED);
+
+        return true;
+    }
+
     //
     // Transaction helper methods
     //
-    
+
     private int64 do_get_next_ordering(Db.Connection cx, Cancellable? cancellable) throws Error {
         lock (next_ordering) {
             if (next_ordering == 0) {
                 Db.Statement stmt = cx.prepare("SELECT COALESCE(MAX(ordering), 0) + 1 FROM SmtpOutboxTable");
-                
+
                 Db.Result result = stmt.exec(cancellable);
                 if (!result.finished)
                     next_ordering = result.int64_at(0);
-                
+
                 assert(next_ordering > 0);
             }
-            
+
             return next_ordering++;
         }
     }
-    
+
     private int do_get_email_count(Db.Connection cx, Cancellable? cancellable) throws Error {
         Db.Statement stmt = cx.prepare("SELECT COUNT(*) FROM SmtpOutboxTable");
-        
+
         Db.Result results = stmt.exec(cancellable);
-        
+
         return (!results.finished) ? results.int_at(0) : 0;
     }
-    
+
     private int do_get_position_by_ordering(Db.Connection cx, int64 ordering, Cancellable? cancellable)
         throws Error {
         Db.Statement stmt = cx.prepare(
             "SELECT COUNT(*), MAX(ordering) FROM SmtpOutboxTable WHERE ordering <= ? ORDER BY ordering ASC");
         stmt.bind_int64(0, ordering);
-        
+
         Db.Result results = stmt.exec(cancellable);
         if (results.finished)
             return -1;
-        
+
         // without the MAX it's possible to overshoot, so the MAX(ordering) *must* match the argument
         if (results.int64_at(1) != ordering)
             return -1;
-        
+
         return results.int_at(0) + 1;
     }
-    
+
     private OutboxRow? do_fetch_row_by_ordering(Db.Connection cx, int64 ordering, Cancellable? cancellable)
         throws Error {
         Db.Statement stmt = cx.prepare("""
@@ -810,32 +810,32 @@ private class Geary.SmtpOutboxFolder :
             WHERE ordering=?
         """);
         stmt.bind_int64(0, ordering);
-        
+
         Db.Result results = stmt.exec(cancellable);
         if (results.finished)
             return null;
-        
+
         int position = do_get_position_by_ordering(cx, ordering, cancellable);
         if (position < 1)
             return null;
-        
+
         return new OutboxRow(results.rowid_at(0), position, ordering, results.bool_at(2),
             results.string_buffer_at(1), _path);
     }
-    
+
     private void do_mark_email_as_sent(Db.Connection cx, SmtpOutboxEmailIdentifier id, Cancellable? cancellable)
         throws Error {
         Db.Statement stmt = cx.prepare("UPDATE SmtpOutboxTable SET sent = 1 WHERE ordering = ?");
         stmt.bind_int64(0, id.ordering);
-        
+
         stmt.exec(cancellable);
     }
-    
+
     private bool do_remove_email(Db.Connection cx, SmtpOutboxEmailIdentifier id, Cancellable? cancellable)
         throws Error {
         Db.Statement stmt = cx.prepare("DELETE FROM SmtpOutboxTable WHERE ordering=?");
         stmt.bind_int64(0, id.ordering);
-        
+
         return stmt.exec_get_modified(cancellable) > 0;
     }
 
