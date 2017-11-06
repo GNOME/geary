@@ -11,8 +11,19 @@
 // on the ImapDB.Database.  SmtpOutboxFolder assumes the database is opened before it's passed in
 // to the constructor -- it does not open or close the database itself and will start using it
 // immediately.
-private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSupport.Remove,
-    Geary.FolderSupport.Create {
+private class Geary.SmtpOutboxFolder :
+    Geary.AbstractLocalFolder, Geary.FolderSupport.Remove, Geary.FolderSupport.Create {
+
+
+    // Min and max times between attempting to re-send after a connection failure.
+    private const uint MIN_SEND_RETRY_INTERVAL_SEC = 4;
+    private const uint MAX_SEND_RETRY_INTERVAL_SEC = 64;
+
+    // Time to wait before starting the postman for accounts to be
+    // loaded, connections to settle, pigs to fly, etc.
+    private const uint START_TIMEOUT = 4;
+
+
     private class OutboxRow {
         public int64 id;
         public int position;
@@ -34,11 +45,12 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
             outbox_id = new SmtpOutboxEmailIdentifier(id, ordering);
         }
     }
-    
-    public override Account account { get { return _account; } }
-    
+
+
+    public override Account account { get { return this._account; } }
+
     public override FolderProperties properties { get { return _properties; } }
-    
+
     private SmtpOutboxFolderRoot _path = new SmtpOutboxFolderRoot();
     public override FolderPath path {
         get {
@@ -51,19 +63,22 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
             return Geary.SpecialFolderType.OUTBOX;
         }
     }
-    
-    // Min and max times between attempting to re-send after a connection failure.
-    private const uint MIN_SEND_RETRY_INTERVAL_SEC = 4;
-    private const uint MAX_SEND_RETRY_INTERVAL_SEC = 64;
-    
-    private ImapDB.Database db;
+
+    private Endpoint smtp_endpoint {
+        owned get { return this._account.information.get_smtp_endpoint(); }
+    }
+
     private weak Account _account;
-    private Geary.ProgressMonitor sending_monitor;
-    private Geary.Smtp.ClientSession smtp;
+    private ImapDB.Database db;
+
+    private Cancellable? queue_cancellable = null;
     private Nonblocking.Mailbox<OutboxRow> outbox_queue = new Nonblocking.Mailbox<OutboxRow>();
+    private Geary.ProgressMonitor sending_monitor;
     private SmtpOutboxFolderProperties _properties = new SmtpOutboxFolderProperties(0, 0);
     private int64 next_ordering = 0;
-    
+
+    private TimeoutManager start_timer;
+
     public signal void report_problem(Geary.Account.Problem problem, Error? err);
     public signal void email_sent(Geary.RFC822.Message rfc822);
     
@@ -71,17 +86,17 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
     // whether open or not
     public SmtpOutboxFolder(ImapDB.Database db, Account account, Geary.ProgressMonitor sending_monitor) {
         base();
-        
+        this._account = account;
+        this._account.opened.connect(on_account_opened);
+        this._account.closed.connect(on_account_closed);
         this.db = db;
-        _account = account;
-        _account.opened.connect(() => { this.fill_outbox_queue.begin(); });
         this.sending_monitor = sending_monitor;
-        
-        smtp = new Geary.Smtp.ClientSession(_account.information.get_smtp_endpoint());
-        
-        do_postman_async.begin();
+        this.start_timer = new TimeoutManager.seconds(
+            START_TIMEOUT,
+            () => { this.start_postman_async.begin(); }
+        );
     }
-    
+
     public override async void find_boundaries_async(Gee.Collection<Geary.EmailIdentifier> ids,
         out Geary.EmailIdentifier? low, out Geary.EmailIdentifier? high,
         Cancellable? cancellable = null) throws Error {
@@ -128,7 +143,11 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
             return Db.TransactionOutcome.DONE;
         }, cancellable);
     }
-    
+
+    public override Geary.Folder.OpenState get_open_state() {
+        return is_open() ? Geary.Folder.OpenState.LOCAL : Geary.Folder.OpenState.CLOSED;
+    }
+
     // Used solely for debugging, hence "(no subject)" not marked for translation
     private static string message_subject(RFC822.Message message) {
         return (message.subject != null && !String.is_empty(message.subject.to_string()))
@@ -172,26 +191,31 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
         }
     }
 
+    private async void start_postman_async() {
+        debug("Starting outbox postman with %u messages queued", this.outbox_queue.size);
+        if (this.queue_cancellable != null) {
+            debug("Postman already started, not starting another");
+            return;
+        }
 
-    // TODO: Use Cancellable to shut down outbox processor when closing account
-    private async void do_postman_async() {
-        debug("Starting outbox postman");
+        Cancellable cancellable = this.queue_cancellable = new Cancellable();
         uint send_retry_seconds = MIN_SEND_RETRY_INTERVAL_SEC;
-        
+
         // Start the send queue.
-        for (;;) {
+        while (!cancellable.is_cancelled()) {
             // yield until a message is ready
             OutboxRow row;
             bool mail_sent;
             try {
-                row = yield outbox_queue.recv_async();
-                mail_sent = !yield is_unsent_async(row.ordering, null);
+                row = yield this.outbox_queue.recv_async(cancellable);
+                mail_sent = !yield is_unsent_async(row.ordering, cancellable);
             } catch (Error wait_err) {
-                debug("Outbox postman queue error: %s", wait_err.message);
-                
+                if (!(wait_err is IOError.CANCELLED)) {
+                    debug("Outbox postman queue error: %s", wait_err.message);
+                }
                 break;
             }
-            
+
             // Convert row into RFC822 message suitable for sending or framing
             RFC822.Message message;
             try {
@@ -221,10 +245,10 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
                 try {
                     // only try if (a) no TLS issues or (b) user has acknowledged them and says to
                     // continue
-                    if (_account.information.get_smtp_endpoint().is_trusted_or_never_connected) {
-                        debug("Outbox postman: Sending \"%s\" (ID:%s)...", message_subject(message),
-                              row.outbox_id.to_string());
-                        yield send_email_async(message, null);
+                    if (this.smtp_endpoint.is_trusted_or_never_connected) {
+                        debug("Outbox postman: Sending \"%s\" (ID:%s)...",
+                              message_subject(message), row.outbox_id.to_string());
+                        yield send_email_async(message, cancellable);
                         mail_sent = true;
                     } else {
                         // user was warned via Geary.Engine signal, need to wait for that to be cleared
@@ -258,13 +282,13 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
                         // up to application to be aware of problem via Geary.Engine, but do nap and
                         // try later
                         debug("TLS connection warnings connecting to %s, user must confirm connection to continue",
-                              _account.information.get_smtp_endpoint().to_string());
+                              this.smtp_endpoint.to_string());
                     } else {
                         report_problem(Geary.Account.Problem.EMAIL_DELIVERY_FAILURE, send_err);
                     }
                 }
 
-                if (should_nap) {
+                if (should_nap && !cancellable.is_cancelled()) {
                     debug("Outbox napping for %u seconds...", send_retry_seconds);
 
                     // Take a brief nap before continuing to allow connection problems to resolve.
@@ -274,17 +298,23 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
 
                 // If we got this far the send was successful, so reset the send retry interval.
                 send_retry_seconds = MIN_SEND_RETRY_INTERVAL_SEC;
-
                 // Mark as sent, so if there's a problem pushing up to Sent Mail,
                 // we don't retry sending.
                 if (mail_sent) {
                     try {
                         debug("Outbox postman: Marking %s as sent", row.outbox_id.to_string());
+                        // Don't observe the cancellable here - if
+                        // it's been sent but not saved, we want to
+                        // try to update the sent flag anyway
                         yield mark_email_as_sent_async(row.outbox_id, null);
                     } catch (Error e) {
                         debug("Outbox postman: Unable to mark row as sent: %s", e.message);
                     }
                 }
+            }
+
+            if (cancellable.is_cancelled()) {
+                break;
             }
 
             if (!mail_sent) {
@@ -298,7 +328,7 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
                 mail_saved = false;
                 try {
                     debug("Outbox postman: Saving %s to sent mail", row.outbox_id.to_string());
-                    yield save_sent_mail_async(message, null);
+                    yield save_sent_mail_async(message, cancellable);
                     mail_saved = true;
                 } catch (Error e) {
                     debug("Outbox postman: Error saving sent mail: %s", e.message);
@@ -318,19 +348,26 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
                 debug("Outbox postman: Deleting row %s", row.outbox_id.to_string());
                 Gee.ArrayList<SmtpOutboxEmailIdentifier> list = new Gee.ArrayList<SmtpOutboxEmailIdentifier>();
                 list.add(row.outbox_id);
+                // Don't observe the cancellable here - if it's been
+                // saved we want to try to remove it anyway
                 yield internal_remove_email_async(list, null);
             } catch (Error e) {
                 debug("Outbox postman: Unable to delete row: %s", e.message);
             }
         }
-        
+
+        this.queue_cancellable = null;
         debug("Exiting outbox postman");
     }
-    
-    public override Geary.Folder.OpenState get_open_state() {
-        return is_open() ? Geary.Folder.OpenState.LOCAL : Geary.Folder.OpenState.CLOSED;
+
+    private void stop_postman() {
+        debug("Stopping outbox postman");
+        Cancellable? old_cancellable = this.queue_cancellable;
+        if (old_cancellable != null) {
+            old_cancellable.cancel();
+        }
     }
-    
+
     private async int get_email_count_async(Cancellable? cancellable) throws Error {
         int count = 0;
         yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
@@ -347,6 +384,9 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
     // email_count is the number of emails in the Outbox after enqueueing the message.
     public async SmtpOutboxEmailIdentifier enqueue_email_async(Geary.RFC822.Message rfc822,
         Cancellable? cancellable) throws Error {
+        debug("Queuing message for sending: %s",
+              (rfc822.subject != null) ? rfc822.subject.to_string() : "(no subject)");
+
         int email_count = 0;
         OutboxRow? row = null;
         yield db.exec_transaction_async(Db.TransactionType.WR, (cx) => {
@@ -629,32 +669,38 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
         
         return email;
     }
-    
+
     private async void send_email_async(Geary.RFC822.Message rfc822, Cancellable? cancellable)
         throws Error {
+        AccountInformation account = this._account.information;
+        Smtp.ClientSession smtp = new Geary.Smtp.ClientSession(this.smtp_endpoint);
+
         sending_monitor.notify_start();
-        
+
         Error? smtp_err = null;
         try {
-            yield smtp.login_async(_account.information.smtp_credentials, cancellable);
+            yield smtp.login_async(account.smtp_credentials, cancellable);
         } catch (Error login_err) {
             debug("SMTP login error: %s", login_err.message);
             smtp_err = login_err;
         }
-        
+
         if (smtp_err == null) {
             try {
-                yield smtp.send_email_async(_account.information.primary_mailbox,
-                    rfc822, cancellable);
+                yield smtp.send_email_async(
+                    account.primary_mailbox,
+                    rfc822,
+                    cancellable
+                );
             } catch (Error send_err) {
                 debug("SMTP send mail error: %s", send_err.message);
                 smtp_err = send_err;
             }
         }
-        
-        // always logout
+
         try {
-            yield smtp.logout_async(false, cancellable);
+            // no always logout
+            yield smtp.logout_async(false, null);
         } catch (Error err) {
             debug("Unable to disconnect from SMTP server %s: %s", smtp.to_string(), err.message);
         }
@@ -792,5 +838,33 @@ private class Geary.SmtpOutboxFolder : Geary.AbstractLocalFolder, Geary.FolderSu
         
         return stmt.exec_get_modified(cancellable) > 0;
     }
-}
 
+    private void on_account_opened() {
+        this.fill_outbox_queue.begin();
+        this.smtp_endpoint.connectivity.notify["is-reachable"].connect(on_reachable_changed);
+        if (this.smtp_endpoint.connectivity.is_reachable) {
+            this.start_timer.start();
+        } else {
+            this.smtp_endpoint.connectivity.check_reachable.begin();
+        }
+    }
+
+    private void on_account_closed() {
+        this.stop_postman();
+        this.smtp_endpoint.connectivity.notify["is-reachable"].disconnect(on_reachable_changed);
+    }
+
+    private void on_reachable_changed() {
+        print("Connectivity changed");
+        if (this.smtp_endpoint.connectivity.is_reachable) {
+            if (this.queue_cancellable == null) {
+                this.start_timer.start();
+            }
+        } else {
+            this.start_timer.reset();
+            if (this.queue_cancellable != null) {
+                stop_postman();
+            }
+        }
+    }
+}
