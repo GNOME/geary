@@ -20,11 +20,21 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
         null
     );
 
-    private Geary.Nonblocking.Mutex dialog_mutex = new Geary.Nonblocking.Mutex();
-
     // See Bug 697681
-    [CCode (cheader_filename = "libsecret/secret.h", cname = "SECRET_SCHEMA_COMPAT_NETWORK")]
-    private Secret.Schema SCHEMA_COMPAT_NETWORK;
+    private static Secret.Schema compat_schema = new Secret.Schema(
+        "org.gnome.keyring.NetworkPassword",
+        Secret.SchemaFlags.NONE,
+        "user", Secret.SchemaAttributeType.STRING,
+        "domain", Secret.SchemaAttributeType.STRING,
+        "object", Secret.SchemaAttributeType.STRING,
+        "protocol", Secret.SchemaAttributeType.STRING,
+        "port", Secret.SchemaAttributeType.INTEGER,
+        "server", Secret.SchemaAttributeType.STRING,
+        "authtype", Secret.SchemaAttributeType.STRING,
+        null
+    );
+
+    private Geary.Nonblocking.Mutex dialog_mutex = new Geary.Nonblocking.Mutex();
 
 
     public virtual async string? get_password_async(Geary.Service service,
@@ -76,13 +86,13 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
         // Remove legacy formats
         // <= 0.11
         yield Secret.password_clear(
-            SCHEMA_COMPAT_NETWORK,
+            compat_schema,
             cancellable,
             "user", get_legacy_user(service, account.primary_mailbox.address)
         );
         // <= 0.6
         yield Secret.password_clear(
-            SCHEMA_COMPAT_NETWORK,
+            compat_schema,
             cancellable,
             "user", get_legacy_user(service, credentials.user)
          );
@@ -226,7 +236,7 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
     throws Error {
         // <= 0.11
         string? password = yield Secret.password_lookup(
-            SCHEMA_COMPAT_NETWORK,
+            compat_schema,
             cancellable,
             "user", get_legacy_user(service, account.primary_mailbox.address)
         );
@@ -236,7 +246,7 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
             Geary.Credentials creds = get_credentials(service, account);
             string user = get_legacy_user(service, creds.user);
             password = yield Secret.password_lookup(
-                SCHEMA_COMPAT_NETWORK,
+                compat_schema,
                 cancellable,
                 "user", user
             );
@@ -244,7 +254,7 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
             // Clear the old password
             if (password != null) {
                 yield Secret.password_clear(
-                    SCHEMA_COMPAT_NETWORK,
+                    compat_schema,
                     cancellable,
                     "user", user
                 );
