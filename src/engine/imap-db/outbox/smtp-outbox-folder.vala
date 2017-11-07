@@ -1,4 +1,6 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2017 Michael Gratton <mike@vee.net>
+ * Copyright 2016 Software Freedom Conservancy Inc.
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -22,6 +24,9 @@ private class Geary.SmtpOutboxFolder :
     // Time to wait before starting the postman for accounts to be
     // loaded, connections to settle, pigs to fly, etc.
     private const uint START_TIMEOUT = 4;
+
+    // Number of times to retry sending after auth failures
+    private const uint AUTH_ERROR_MAX_RETRY = 3;
 
 
     private class OutboxRow {
@@ -389,160 +394,166 @@ private class Geary.SmtpOutboxFolder :
         // Start the send queue.
         while (!cancellable.is_cancelled()) {
             // yield until a message is ready
-            OutboxRow row;
-            bool mail_sent;
+            OutboxRow? row = null;
             try {
                 row = yield this.outbox_queue.recv_async(cancellable);
-                mail_sent = !yield is_unsent_async(row.ordering, cancellable);
-            } catch (Error wait_err) {
-                if (!(wait_err is IOError.CANCELLED)) {
-                    debug("Outbox postman queue error: %s", wait_err.message);
-                }
-                break;
-            }
+                if (yield postman_send(row, cancellable)) {
+                    // send was good, reset nap length
+                    send_retry_seconds = MIN_SEND_RETRY_INTERVAL_SEC;
+                } else {
+                    // send was bad, try sending again later
+                    this.outbox_queue.send(row);
 
-            // Convert row into RFC822 message suitable for sending or framing
-            RFC822.Message message;
-            try {
-                message = new RFC822.Message.from_buffer(row.message);
-            } catch (RFC822Error msg_err) {
-                // TODO: This needs to be reported to the user
-                debug("Outbox postman message error: %s", msg_err.message);
-
-                continue;
-            }
-
-            if (!mail_sent) {
-                // Get SMTP password if we haven't loaded it yet and the account needs credentials.
-                // If the account needs a password but it's not set or incorrect in the keyring, we'll
-                // prompt below after getting an AUTHENTICATION_FAILED error.
-                if (_account.information.smtp_credentials != null &&
-                    !_account.information.smtp_credentials.is_complete()) {
-                    try {
-                        yield _account.information.get_passwords_async(ServiceFlag.SMTP);
-                    } catch (Error e) {
-                        debug("SMTP password fetch error: %s", e.message);
+                    if (!cancellable.is_cancelled()) {
+                        debug("Outbox napping for %u seconds...", send_retry_seconds);
+                        // Take a brief nap before continuing to allow
+                        // connection problems to resolve.
+                        yield Geary.Scheduler.sleep_async(send_retry_seconds);
+                        send_retry_seconds = Geary.Numeric.uint_ceiling(
+                            send_retry_seconds * 2,
+                            MAX_SEND_RETRY_INTERVAL_SEC
+                        );
                     }
                 }
+            } catch (Error err) {
+                // A hard error occurred. This will cause the postman
+                // to exit but we still want to re-queue the row in
+                // case it restarts.
+                if (row != null) {
+                    this.outbox_queue.send(row);
+                }
+                debug("Outbox postman error: %s", err.message);
+                if (err is SmtpError.AUTHENTICATION_FAILED) {
+                    report_problem(Geary.Account.Problem.SEND_EMAIL_LOGIN_FAILED, err);
+                } else if (!(err is IOError.CANCELLED)) {
+                    report_problem(Geary.Account.Problem.SEND_EMAIL_ERROR, err);
+                }
+                // Get out of here
+                cancellable.cancel();
+            }
+        }
 
-                // Send the message, but only remove from database once sent
-                bool should_nap = false;
+        this.queue_cancellable = null;
+        debug("Exiting outbox postman");
+    }
+
+    // Returns true if row was successfully processed, else false
+    private async bool postman_send(OutboxRow row, Cancellable cancellable)
+        throws Error {
+        AccountInformation account = this.account.information;
+        bool mail_sent = !yield is_unsent_async(row.ordering, cancellable);
+
+        // Convert row into RFC822 message suitable for sending or framing
+        RFC822.Message message;
+        try {
+            message = new RFC822.Message.from_buffer(row.message);
+        } catch (RFC822Error msg_err) {
+            // TODO: This needs to be reported to the user
+            debug("Outbox postman message error: %s", msg_err.message);
+            return false;
+        }
+
+        if (!mail_sent) {
+            // Get SMTP password if we haven't loaded it yet and the account needs credentials.
+            // If the account needs a password but it's not set or incorrect in the keyring, we'll
+            // prompt below after getting an AUTHENTICATION_FAILED error.
+            if (account.smtp_credentials != null &&
+                !account.smtp_credentials.is_complete()) {
                 try {
-                    // only try if (a) no TLS issues or (b) user has acknowledged them and says to
-                    // continue
-                    if (this.smtp_endpoint.is_trusted_or_never_connected) {
-                        debug("Outbox postman: Sending \"%s\" (ID:%s)...",
-                              message_subject(message), row.outbox_id.to_string());
-                        yield send_email_async(message, cancellable);
-                        mail_sent = true;
-                    } else {
-                        // user was warned via Geary.Engine signal, need to wait for that to be cleared
-                        // befor sending
-                        outbox_queue.send(row);
-                        should_nap = true;
-                    }
+                    yield account.get_passwords_async(ServiceFlag.SMTP);
+                } catch (Error e) {
+                    debug("SMTP password fetch error: %s", e.message);
+                }
+            }
+
+            // only try sending if (a) no TLS issues or (b) user has
+            // acknowledged them and says to continue
+            if (!this.smtp_endpoint.is_trusted_or_never_connected) {
+                return false;
+            }
+
+            // We immediately retry auth errors after the prompting
+            // the user, but if they get it wrong enough times or
+            // cancel we have no choice other than to stop the postman
+            int attempts = 0;
+            while (!mail_sent && ++attempts <= AUTH_ERROR_MAX_RETRY) {
+                try {
+                    debug("Outbox postman: Sending \"%s\" (ID:%s)...",
+                          message_subject(message), row.outbox_id.to_string());
+                    yield send_email_async(message, cancellable);
+                    mail_sent = true;
                 } catch (Error send_err) {
-                    debug("Outbox postman send error, retrying: %s", send_err.message);
-
-                    should_nap = true;
-
+                    debug("Outbox postman send error: %s", send_err.message);
                     if (send_err is SmtpError.AUTHENTICATION_FAILED) {
-                        bool report = true;
-
-                        // Retry immediately (bug 6387)
-                        should_nap = false;
-
                         // At this point we may already have a password in memory -- but it's incorrect.
                         // Delete the current password, prompt the user for a new one, and try again.
+                        bool user_confirmed = false;
                         try {
-                            if (yield _account.information.fetch_passwords_async(ServiceFlag.SMTP, true))
-                                report = false;
+                            user_confirmed = yield account.fetch_passwords_async(
+                                ServiceFlag.SMTP, true
+                            );
                         } catch (Error e) {
                             debug("Error prompting for SMTP password: %s", e.message);
                         }
 
-                        if (report)
-                            report_problem(Geary.Account.Problem.SEND_EMAIL_LOGIN_FAILED, send_err);
+                        if (!user_confirmed) {
+                            // The user cancelled hence they don't
+                            // want to be prompted again, so report it
+                            // and bail out.
+                            throw send_err;
+                        }
                     } else if (send_err is TlsError) {
                         // up to application to be aware of problem via Geary.Engine, but do nap and
                         // try later
                         debug("TLS connection warnings connecting to %s, user must confirm connection to continue",
                               this.smtp_endpoint.to_string());
                     } else {
-                        report_problem(Geary.Account.Problem.EMAIL_DELIVERY_FAILURE, send_err);
-                    }
-                }
-
-                if (should_nap && !cancellable.is_cancelled()) {
-                    debug("Outbox napping for %u seconds...", send_retry_seconds);
-
-                    // Take a brief nap before continuing to allow connection problems to resolve.
-                    yield Geary.Scheduler.sleep_async(send_retry_seconds);
-                    send_retry_seconds = Geary.Numeric.uint_ceiling(send_retry_seconds * 2, MAX_SEND_RETRY_INTERVAL_SEC);
-                }
-
-                // If we got this far the send was successful, so reset the send retry interval.
-                send_retry_seconds = MIN_SEND_RETRY_INTERVAL_SEC;
-                // Mark as sent, so if there's a problem pushing up to Sent Mail,
-                // we don't retry sending.
-                if (mail_sent) {
-                    try {
-                        debug("Outbox postman: Marking %s as sent", row.outbox_id.to_string());
-                        // Don't observe the cancellable here - if
-                        // it's been sent but not saved, we want to
-                        // try to update the sent flag anyway
-                        yield mark_email_as_sent_async(row.outbox_id, null);
-                    } catch (Error e) {
-                        debug("Outbox postman: Unable to mark row as sent: %s", e.message);
+                        report_problem(Geary.Account.Problem.SEND_EMAIL_DELIVERY_FAILURE, send_err);
                     }
                 }
             }
 
-            if (cancellable.is_cancelled()) {
-                break;
+            // Mark as sent, so if there's a problem pushing up to
+            // Sent, we don't retry sending. Don't observe the
+            // cancellable here - if it's been sent we want to try to
+            // update the sent flag anyway
+            if (mail_sent) {
+                debug("Outbox postman: Marking %s as sent", row.outbox_id.to_string());
+                yield mark_email_as_sent_async(row.outbox_id, null);
             }
 
-            if (!mail_sent) {
+            if (!mail_sent || cancellable.is_cancelled()) {
                 // try again later
-                outbox_queue.send(row);
-                continue;
-            }
-
-            bool mail_saved = true;
-            if (_account.information.allow_save_sent_mail() && _account.information.save_sent_mail) {
-                mail_saved = false;
-                try {
-                    debug("Outbox postman: Saving %s to sent mail", row.outbox_id.to_string());
-                    yield save_sent_mail_async(message, cancellable);
-                    mail_saved = true;
-                } catch (Error e) {
-                    debug("Outbox postman: Error saving sent mail: %s", e.message);
-                    report_problem(Geary.Account.Problem.SAVE_SENT_MAIL_FAILED, e);
-                }
-            }
-
-            if (!mail_saved) {
-                // try again later
-                outbox_queue.send(row);
-                continue;
-            }
-
-            // Remove from database ... can't use remove_email_async() because this runs even if
-            // the outbox is closed as a Geary.Folder.
-            try {
-                debug("Outbox postman: Deleting row %s", row.outbox_id.to_string());
-                Gee.ArrayList<SmtpOutboxEmailIdentifier> list = new Gee.ArrayList<SmtpOutboxEmailIdentifier>();
-                list.add(row.outbox_id);
-                // Don't observe the cancellable here - if it's been
-                // saved we want to try to remove it anyway
-                yield internal_remove_email_async(list, null);
-            } catch (Error e) {
-                debug("Outbox postman: Unable to delete row: %s", e.message);
+                return false;
             }
         }
 
-        this.queue_cancellable = null;
-        debug("Exiting outbox postman");
+        // If we get to this point, the message has either been just
+        // sent, or previously sent but not saved. So now try saving
+        // if needed.
+        if (account.allow_save_sent_mail() &&
+            account.save_sent_mail) {
+            try {
+                debug("Outbox postman: Saving %s to sent mail", row.outbox_id.to_string());
+                yield save_sent_mail_async(message, cancellable);
+            } catch (Error err) {
+                debug("Outbox postman: Error saving sent mail: %s", err.message);
+                report_problem(Geary.Account.Problem.SEND_EMAIL_SAVE_FAILED, err);
+                return false;
+            }
+        }
+
+        // Remove from database ... can't use remove_email_async()
+        // because this runs even if the outbox is closed as a
+        // Geary.Folder. Again, don't observe the cancellable here -
+        // if it's been send and saved we want to try to remove it
+        // anyway.
+        debug("Outbox postman: Deleting row %s", row.outbox_id.to_string());
+        Gee.ArrayList<SmtpOutboxEmailIdentifier> list = new Gee.ArrayList<SmtpOutboxEmailIdentifier>();
+        list.add(row.outbox_id);
+        yield internal_remove_email_async(list, null);
+
+        return true;
     }
 
     private void stop_postman() {
@@ -648,7 +659,7 @@ private class Geary.SmtpOutboxFolder :
         }
 
         try {
-            // no always logout
+            // always logout
             yield smtp.logout_async(false, null);
         } catch (Error err) {
             debug("Unable to disconnect from SMTP server %s: %s", smtp.to_string(), err.message);

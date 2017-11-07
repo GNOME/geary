@@ -22,16 +22,17 @@
 
 public abstract class Geary.Account : BaseObject {
     public enum Problem {
-        RECV_EMAIL_LOGIN_FAILED,
-        SEND_EMAIL_LOGIN_FAILED,
+        CONNECTION_FAILURE,
+        DATABASE_FAILURE,
         HOST_UNREACHABLE,
         NETWORK_UNAVAILABLE,
-        DATABASE_FAILURE,
-        EMAIL_DELIVERY_FAILURE,
-        SAVE_SENT_MAIL_FAILED,
-        CONNECTION_FAILURE,
+        RECV_EMAIL_LOGIN_FAILED,
+        SEND_EMAIL_DELIVERY_FAILURE,
+        SEND_EMAIL_ERROR,
+        SEND_EMAIL_LOGIN_FAILED,
+        SEND_EMAIL_SAVE_FAILED,
     }
-    
+
     public Geary.AccountInformation information { get; protected set; }
     
     public Geary.ProgressMonitor search_upgrade_monitor { get; protected set; }

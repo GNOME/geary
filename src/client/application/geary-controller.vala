@@ -889,15 +889,15 @@ public class GearyController : Geary.BaseObject {
                 // they've hit cancel, so there's not much for us to do here.
                 close_account(account);
             break;
-            
-            case Geary.Account.Problem.EMAIL_DELIVERY_FAILURE:
+
+            case Geary.Account.Problem.SEND_EMAIL_DELIVERY_FAILURE:
                 handle_outbox_failure(StatusBar.Message.OUTBOX_SEND_FAILURE);
             break;
-            
-            case Geary.Account.Problem.SAVE_SENT_MAIL_FAILED:
+
+            case Geary.Account.Problem.SEND_EMAIL_SAVE_FAILED:
                 handle_outbox_failure(StatusBar.Message.OUTBOX_SAVE_SENT_MAIL_FAILED);
             break;
-            
+
             case Geary.Account.Problem.CONNECTION_FAILURE:
                 ErrorDialog dialog = new ErrorDialog(main_window,
                     _("Error connecting to the server"),
