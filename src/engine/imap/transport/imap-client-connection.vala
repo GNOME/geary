@@ -488,10 +488,11 @@ public class Geary.Imap.ClientConnection : BaseObject {
             
             return;
         }
-        
+
         // Close the Serializer/Deserializer, as need to use the TLS streams
+        debug("[%s] Closing serializer to switch to TLS", to_string());
         yield close_channels_async(cancellable);
-        
+
         // wrap connection with TLS connection
         TlsClientConnection tls_cx = yield endpoint.starttls_handshake_async(cx, cancellable);
         
