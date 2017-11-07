@@ -1,4 +1,6 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2017 Michael Gratton <mike@vee.net>
+ * Copyright 2016 Software Freedom Conservancy Inc.
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -6,11 +8,12 @@
 
 public class Geary.Imap.ClientSessionManager : BaseObject {
     private const int DEFAULT_MIN_POOL_SIZE = 1;
-    private const int AUTHORIZED_SESSION_ERROR_MIN_RETRY_TIMEOUT_SEC = 1;
-    private const int AUTHORIZED_SESSION_ERROR_MAX_RETRY_TIMEOUT_SEC = 10;
-    
+    private const int POOL_START_TIMEOUT_MS = 1000;
+    private const int POOL_RETRY_MIN_TIMEOUT_SEC = 1;
+    private const int POOL_RETRY_MAX_TIMEOUT_SEC = 10;
+
     public bool is_open { get; private set; default = false; }
-    
+
     /**
      * Set to zero or negative value if keepalives should be disabled when a connection has not
      * selected a mailbox.  (This is not recommended.)
@@ -44,15 +47,6 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
      * happen as connections are needed or closed.
      */
     public int min_pool_size { get; set; default = DEFAULT_MIN_POOL_SIZE; }
-    
-    /**
-     * Indicates if the {@link Endpoint} the {@link ClientSessionManager} connects to is reachable,
-     * according to NetworkMonitor.
-     *
-     * By default, this is false, pessimistic that the network is reachable.  It is updated even if the
-     * {@link ClientSessionManager} is not open, maintained for the lifetime of the object.
-     */
-    public bool is_endpoint_reachable { get; private set; default = false; }
 
     private AccountInformation account_information;
     private Endpoint endpoint;
@@ -62,8 +56,9 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
     private Gee.HashSet<ClientSession> reserved_sessions = new Gee.HashSet<ClientSession>();
     private bool authentication_failed = false;
     private bool untrusted_host = false;
-    private uint authorized_session_error_retry_timeout_id = 0;
-    private int authorized_session_retry_sec = AUTHORIZED_SESSION_ERROR_MIN_RETRY_TIMEOUT_SEC;
+
+    private TimeoutManager pool_start;
+    private TimeoutManager pool_retry;
 
     public signal void login_failed(StatusResponse? response);
 
@@ -78,10 +73,15 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         this.endpoint.notify[Endpoint.PROP_TRUST_UNTRUSTED_HOST].connect(on_imap_trust_untrusted_host);
         this.endpoint.untrusted_host.connect(on_imap_untrusted_host);
 
-		this.endpoint.connectivity.notify["is-reachable"].connect(on_connectivity_change);
-        if (!this.endpoint.connectivity.is_reachable) {
-            this.endpoint.connectivity.check_reachable.begin();
-        }
+        this.pool_start = new TimeoutManager.milliseconds(
+            POOL_START_TIMEOUT_MS,
+            () => { this.adjust_session_pool.begin(); }
+        );
+
+        this.pool_retry = new TimeoutManager.seconds(
+            POOL_RETRY_MIN_TIMEOUT_SEC,
+            () => { this.adjust_session_pool.begin(); }
+        );
     }
 
     ~ClientSessionManager() {
@@ -91,29 +91,34 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         this.account_information.notify["imap-credentials"].disconnect(on_imap_credentials_notified);
         this.endpoint.untrusted_host.disconnect(on_imap_untrusted_host);
         this.endpoint.notify[Endpoint.PROP_TRUST_UNTRUSTED_HOST].disconnect(on_imap_trust_untrusted_host);
-		this.endpoint.connectivity.cancel_check();
-        
     }
 
     public async void open_async(Cancellable? cancellable) throws Error {
         if (is_open)
             throw new EngineError.ALREADY_OPEN("ClientSessionManager already open");
-        
+
         is_open = true;
-        
-        adjust_session_pool.begin();
+
+		this.endpoint.connectivity.notify["is-reachable"].connect(on_connectivity_change);
+        if (this.endpoint.connectivity.is_reachable) {
+            this.adjust_session_pool.begin();
+        } else {
+            this.endpoint.connectivity.check_reachable.begin();
+        }
     }
-    
+
     public async void close_async(Cancellable? cancellable) throws Error {
         if (!is_open)
             return;
-        
+
         is_open = false;
-        
+
+		this.endpoint.connectivity.notify["is-reachable"].disconnect(on_connectivity_change);
+
         // to avoid locking down the sessions table while scheduling disconnects, make a copy
         // and work off of that
         ClientSession[]? sessions_copy = sessions.to_array();
-        
+
         // disconnect all existing sessions at once; don't wait for each, since as they disconnect
         // they'll remove themselves from the sessions list and cause this foreach to explode
         foreach (ClientSession session in sessions_copy)
@@ -159,54 +164,43 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
             token = yield sessions_mutex.claim_async();
         } catch (Error claim_err) {
             debug("Unable to claim session table mutex for adjusting pool: %s", claim_err.message);
-            
             return;
         }
-        
+
         while ((sessions.size + pending_sessions) < min_pool_size
-            && !authentication_failed
-            && is_open
-            && !untrusted_host
-            && is_endpoint_reachable) {
+            && this.is_open
+            && !this.authentication_failed
+            && !this.untrusted_host
+            && this.endpoint.connectivity.is_reachable) {
             pending_sessions++;
             create_new_authorized_session.begin(null, on_created_new_authorized_session);
         }
-        
+
         try {
             sessions_mutex.release(ref token);
         } catch (Error release_err) {
             debug("Unable to release session table mutex after adjusting pool: %s", release_err.message);
         }
     }
-    
+
     private void on_created_new_authorized_session(Object? source, AsyncResult result) {
-        pending_sessions--;
-        
+        this.pending_sessions--;
+
         try {
-            create_new_authorized_session.end(result);
+            this.create_new_authorized_session.end(result);
+            this.pool_retry.reset();
         } catch (Error err) {
             debug("Unable to create authorized session to %s: %s", endpoint.to_string(), err.message);
-            
+
             // try again after a slight delay and bump up delay
-            if (authorized_session_error_retry_timeout_id != 0)
-                Source.remove(authorized_session_error_retry_timeout_id);
-            
-            authorized_session_error_retry_timeout_id = Timeout.add_seconds(
-                authorized_session_retry_sec, on_authorized_session_error_retry_timeout);
-            
-            authorized_session_retry_sec = (authorized_session_retry_sec * 2).clamp(
-                AUTHORIZED_SESSION_ERROR_MIN_RETRY_TIMEOUT_SEC, AUTHORIZED_SESSION_ERROR_MAX_RETRY_TIMEOUT_SEC);
+            this.pool_retry.start();
+            this.pool_retry.interval = (this.pool_retry.interval * 2).clamp(
+                POOL_RETRY_MIN_TIMEOUT_SEC,
+                POOL_RETRY_MAX_TIMEOUT_SEC
+            );
         }
     }
-    
-    private bool on_authorized_session_error_retry_timeout() {
-        authorized_session_error_retry_timeout_id = 0;
-        
-        adjust_session_pool.begin();
-        
-        return false;
-    }
-    
+
     private async ClientSession create_new_authorized_session(Cancellable? cancellable) throws Error {
         if (authentication_failed)
             throw new ImapError.UNAUTHENTICATED("Invalid ClientSessionManager credentials");
@@ -214,7 +208,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         if (untrusted_host)
             throw new ImapError.UNAUTHENTICATED("Untrusted host %s", endpoint.to_string());
         
-        if (!is_endpoint_reachable)
+        if (!this.endpoint.connectivity.is_reachable)
             throw new ImapError.UNAVAILABLE("Host at %s is unreachable", endpoint.to_string());
         
         ClientSession new_session = new ClientSession(endpoint);
@@ -264,10 +258,10 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
             
             throw err;
         }
-        
+
         // reset delay
-        authorized_session_retry_sec = AUTHORIZED_SESSION_ERROR_MIN_RETRY_TIMEOUT_SEC;
-        
+        this.pool_retry.interval = POOL_RETRY_MIN_TIMEOUT_SEC;
+
         // do this after logging in
         new_session.enable_keepalives(selected_keepalive_sec, unselected_keepalive_sec,
             selected_with_idle_keepalive_sec);
@@ -345,11 +339,11 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
             case ClientSession.ProtocolState.CONNECTING:
             case ClientSession.ProtocolState.AUTHORIZING:
             case ClientSession.ProtocolState.UNAUTHORIZED:
-                yield force_disconnect_async(session, true);
+                yield force_disconnect(session, true);
             break;
             
             case ClientSession.ProtocolState.UNCONNECTED:
-                yield force_disconnect_async(session, false);
+                yield force_disconnect(session, false);
             break;
             
             case ClientSession.ProtocolState.SELECTED:
@@ -368,7 +362,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
                 if (session.get_protocol_state(out mailbox) == ClientSession.ProtocolState.AUTHORIZED)
                     unreserve = true;
                 else
-                    yield force_disconnect_async(session, true);
+                    yield force_disconnect(session, true);
             break;
             
             default:
@@ -380,7 +374,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         
         // if not open, disconnect, which will remove from the reserved pool anyway
         if (!is_open) {
-            yield force_disconnect_async(session, true);
+            yield force_disconnect(session, true);
         } else {
             debug("[%s] Unreserving session %s", to_string(), session.to_string());
             
@@ -398,24 +392,52 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
             }
         }
     }
-    
-    // It's possible this will be called more than once on the same session, especially in the case of a
-    // remote close on reserved ClientSession, so this code is forgiving.
-    private async void force_disconnect_async(ClientSession session, bool do_disconnect) {
-        debug("[%s] Dropping session %s (disconnecting=%s)", to_string(),
-            session.to_string(), do_disconnect.to_string());
-        
+
+    private async void force_disconnect_all() {
+        debug("[%s] Dropping and disconnecting %d sessions",
+              to_string(), this.sessions.size);
+
         int token;
         try {
             token = yield sessions_mutex.claim_async();
         } catch (Error err) {
             debug("Unable to acquire sessions mutex: %s", err.message);
-            
             return;
         }
-        
+
+        foreach (ClientSession session in this.sessions) {
+            try {
+                // Don't explicitly remove from the sessions list
+                // since the disconnect handler will do that for us
+                yield session.disconnect_async();
+            } catch (Error err) {
+                // ignored
+            }
+        }
+
+        try {
+            sessions_mutex.release(ref token);
+        } catch (Error err) {
+            debug("Unable to release sessions mutex: %s", err.message);
+        }
+    }
+
+    // It's possible this will be called more than once on the same
+    // session, especially in the case of a remote close on reserved
+    // ClientSession, so this code is forgiving.
+    private async void force_disconnect(ClientSession session, bool do_disconnect) {
+        debug("[%s] Dropping session %s (disconnecting=%s)", to_string(),
+            session.to_string(), do_disconnect.to_string());
+
+        int token;
+        try {
+            token = yield sessions_mutex.claim_async();
+        } catch (Error err) {
+            debug("Unable to acquire sessions mutex: %s", err.message);
+            return;
+        }
+
         locked_remove_session(session);
-        
         if (do_disconnect) {
             try {
                 yield session.disconnect_async();
@@ -423,18 +445,18 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
                 // ignored
             }
         }
-        
+
         try {
             sessions_mutex.release(ref token);
         } catch (Error err) {
             debug("Unable to release sessions mutex: %s", err.message);
         }
-        
+
         adjust_session_pool.begin();
     }
-    
+
     private void on_disconnected(ClientSession session, ClientSession.DisconnectReason reason) {
-        force_disconnect_async.begin(session, false);
+        force_disconnect.begin(session, false);
     }
     
     private void on_login_failed(ClientSession session, StatusResponse? response) {
@@ -499,10 +521,14 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
     }
 
 	private void on_connectivity_change() {
-		this.is_endpoint_reachable = this.endpoint.connectivity.is_reachable;
-		if (this.is_endpoint_reachable) {
-            this.adjust_session_pool.begin();
-		}
+		bool is_reachable = this.endpoint.connectivity.is_reachable;
+		if (is_reachable) {
+            this.pool_start.start();
+		} else {
+            this.pool_start.reset();
+            this.pool_retry.reset();
+            this.force_disconnect_all.begin();
+        }
 	}
 
     /**
