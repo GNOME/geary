@@ -872,44 +872,66 @@ public class GearyController : Geary.BaseObject {
             debug("Error updating stored passwords: %s", e.message);
         }
     }
-    
+
     private void on_report_problem(Geary.Account account, Geary.Account.Problem problem, Error? err) {
         debug("Reported problem: %s Error: %s", problem.to_string(), err != null ? err.message : "(N/A)");
-        
+
         switch (problem) {
-            case Geary.Account.Problem.DATABASE_FAILURE:
-            case Geary.Account.Problem.HOST_UNREACHABLE:
-            case Geary.Account.Problem.NETWORK_UNAVAILABLE:
-                // TODO
-            break;
-            
-            case Geary.Account.Problem.RECV_EMAIL_LOGIN_FAILED:
-            case Geary.Account.Problem.SEND_EMAIL_LOGIN_FAILED:
-                // At this point, we've prompted them for the password and
-                // they've hit cancel, so there's not much for us to do here.
-                close_account(account);
+        case Geary.Account.Problem.CONNECTION_FAILURE:
+            ErrorDialog dialog = new ErrorDialog(
+                main_window,
+                _("Error connecting to the server"),
+                _("Geary encountered an error while connecting to the server.  Please try again in a few moments.")
+            );
+            dialog.run();
             break;
 
-            case Geary.Account.Problem.SEND_EMAIL_DELIVERY_FAILURE:
-                handle_outbox_failure(StatusBar.Message.OUTBOX_SEND_FAILURE);
+        case Geary.Account.Problem.DATABASE_FAILURE:
+        case Geary.Account.Problem.HOST_UNREACHABLE:
+        case Geary.Account.Problem.NETWORK_UNAVAILABLE:
+        case Geary.Account.Problem.RECV_EMAIL_LOGIN_FAILED:
+        case Geary.Account.Problem.SEND_EMAIL_ERROR:
+        case Geary.Account.Problem.SEND_EMAIL_LOGIN_FAILED:
+            MainWindowInfoBar info_bar = new MainWindowInfoBar.for_problem(
+                problem, account, err
+            );
+            info_bar.retry.connect(on_retry_problem);
+            this.main_window.show_infobar(info_bar);
             break;
 
-            case Geary.Account.Problem.SEND_EMAIL_SAVE_FAILED:
-                handle_outbox_failure(StatusBar.Message.OUTBOX_SAVE_SENT_MAIL_FAILED);
+        case Geary.Account.Problem.SEND_EMAIL_DELIVERY_FAILURE:
+            handle_outbox_failure(StatusBar.Message.OUTBOX_SEND_FAILURE);
             break;
 
-            case Geary.Account.Problem.CONNECTION_FAILURE:
-                ErrorDialog dialog = new ErrorDialog(main_window,
-                    _("Error connecting to the server"),
-                    _("Geary encountered an error while connecting to the server.  Please try again in a few moments."));
-                dialog.run();
+        case Geary.Account.Problem.SEND_EMAIL_SAVE_FAILED:
+            handle_outbox_failure(StatusBar.Message.OUTBOX_SAVE_SENT_MAIL_FAILED);
             break;
 
-            default:
-                assert_not_reached();
+        default:
+            assert_not_reached();
         }
     }
-    
+
+    private void on_retry_problem(MainWindowInfoBar info_bar) {
+        switch (info_bar.problem) {
+        case Geary.Account.Problem.RECV_EMAIL_LOGIN_FAILED:
+            break;
+
+        case Geary.Account.Problem.SEND_EMAIL_ERROR:
+            break;
+
+        case Geary.Account.Problem.SEND_EMAIL_LOGIN_FAILED:
+            break;
+
+        default:
+            debug("Un-handled problem retry for %s: %s".printf(
+                      info_bar.account.information.id,
+                      info_bar.problem.to_string()
+                  ));
+            break;
+        }
+    }
+
     private void handle_outbox_failure(StatusBar.Message message) {
         bool activate_message = false;
         try {
@@ -2817,5 +2839,5 @@ public class GearyController : Geary.BaseObject {
                 });
         }
     }
-}
 
+}

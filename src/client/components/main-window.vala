@@ -50,6 +50,12 @@ public class MainWindow : Gtk.ApplicationWindow {
     [GtkChild]
     private Gtk.ScrolledWindow conversation_list_scrolled;
 
+    // This is a frame so users can use F6/Shift-F6 to get to it
+    [GtkChild]
+    private Gtk.Frame info_bar_frame;
+
+    [GtkChild]
+    private Gtk.Grid info_bar_container;
 
     /** Fired when the shift key is pressed or released. */
     public signal void on_shift_key(bool pressed);
@@ -70,6 +76,11 @@ public class MainWindow : Gtk.ApplicationWindow {
         set_styling();
         setup_layout(application.config);
         on_change_orientation();
+    }
+
+    public void show_infobar(MainWindowInfoBar info_bar) {
+        this.info_bar_container.add(info_bar);
+        this.info_bar_frame.show();
     }
 
     private void load_config(Configuration config) {
@@ -422,4 +433,14 @@ public class MainWindow : Gtk.ApplicationWindow {
         }
         return Gdk.EVENT_STOP;
     }
+
+    [GtkCallback]
+    private void on_info_bar_container_remove() {
+        // Ensure the info bar frame is hidden when the last info bar
+        // is removed from the container.
+        if (this.info_bar_container.get_children().length() == 0) {
+            this.info_bar_frame.hide();
+        }
+    }
+
 }

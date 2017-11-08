@@ -342,6 +342,7 @@ client/components/folder-popover.vala
 client/components/icon-factory.vala
 client/components/main-toolbar.vala
 client/components/main-window.vala
+client/components/main-window-info-bar.vala
 client/components/monitored-progress-bar.vala
 client/components/monitored-spinner.vala
 client/components/search-bar.vala
