@@ -662,7 +662,7 @@ private class Geary.Imap.Account : BaseObject {
                 // Either the server was unavailable, or we were unable to
                 // parse the login response. Either way, indicate a
                 // non-login error.
-                report_problem(Geary.Account.Problem.CONNECTION_FAILURE, login_error);
+                report_problem(Geary.Account.Problem.RECV_EMAIL_ERROR, login_error);
             } else {
                 // Now, we should ask the user for their password
                 this.account.fetch_passwords_async.begin(
@@ -677,7 +677,7 @@ private class Geary.Imap.Account : BaseObject {
                                 report_problem(Geary.Account.Problem.RECV_EMAIL_LOGIN_FAILED, null);
                             }
                         } catch (Error err) {
-                            report_problem(Geary.Account.Problem.CONNECTION_FAILURE, err);
+                            report_problem(Geary.Account.Problem.RECV_EMAIL_ERROR, err);
                         }
                     });
             }

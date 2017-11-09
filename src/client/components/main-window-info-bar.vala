@@ -72,6 +72,13 @@ public class MainWindowInfoBar : Gtk.InfoBar {
             show_close = true;
             break;
 
+        case Geary.Account.Problem.RECV_EMAIL_ERROR:
+            type = Gtk.MessageType.ERROR;
+            title = _("A problem occurred checking for new mail");
+            descr = _("New messages can not be received for %s, try again in a moment").printf(name);
+            retry = _("Retry checking for new mail");
+            break;
+
         case Geary.Account.Problem.RECV_EMAIL_LOGIN_FAILED:
             title = _("Incoming mail password required");
             descr = _("Messages cannot be received for %s without the correct password.").printf(name);

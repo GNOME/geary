@@ -433,7 +433,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             }
         } catch (Error err) {
             if (!(err is IOError.CANCELLED)) {
-                report_problem(Geary.Account.Problem.CONNECTION_FAILURE, err);
+                report_problem(Geary.Account.Problem.RECV_EMAIL_ERROR, err);
             }
         }
 

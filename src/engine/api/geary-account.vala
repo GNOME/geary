@@ -26,11 +26,13 @@ public abstract class Geary.Account : BaseObject {
     /** Number of times to attempt re-authentication. */
     internal const uint AUTH_ATTEMPTS_MAX = 3;
 
+
+    /** Describes problem types that are reported to the client. */
     public enum Problem {
-        CONNECTION_FAILURE,
         DATABASE_FAILURE,
         HOST_UNREACHABLE,
         NETWORK_UNAVAILABLE,
+        RECV_EMAIL_ERROR,
         RECV_EMAIL_LOGIN_FAILED,
         SEND_EMAIL_DELIVERY_FAILURE,
         SEND_EMAIL_ERROR,

@@ -877,18 +877,10 @@ public class GearyController : Geary.BaseObject {
         debug("Reported problem: %s Error: %s", problem.to_string(), err != null ? err.message : "(N/A)");
 
         switch (problem) {
-        case Geary.Account.Problem.CONNECTION_FAILURE:
-            ErrorDialog dialog = new ErrorDialog(
-                main_window,
-                _("Error connecting to the server"),
-                _("Geary encountered an error while connecting to the server.  Please try again in a few moments.")
-            );
-            dialog.run();
-            break;
-
         case Geary.Account.Problem.DATABASE_FAILURE:
         case Geary.Account.Problem.HOST_UNREACHABLE:
         case Geary.Account.Problem.NETWORK_UNAVAILABLE:
+        case Geary.Account.Problem.RECV_EMAIL_ERROR:
         case Geary.Account.Problem.RECV_EMAIL_LOGIN_FAILED:
         case Geary.Account.Problem.SEND_EMAIL_ERROR:
         case Geary.Account.Problem.SEND_EMAIL_LOGIN_FAILED:
@@ -914,12 +906,11 @@ public class GearyController : Geary.BaseObject {
 
     private void on_retry_problem(MainWindowInfoBar info_bar) {
         switch (info_bar.problem) {
+        case Geary.Account.Problem.RECV_EMAIL_ERROR:
         case Geary.Account.Problem.RECV_EMAIL_LOGIN_FAILED:
             break;
 
         case Geary.Account.Problem.SEND_EMAIL_ERROR:
-            break;
-
         case Geary.Account.Problem.SEND_EMAIL_LOGIN_FAILED:
             break;
 
