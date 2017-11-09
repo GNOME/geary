@@ -55,9 +55,9 @@ private class Geary.Imap.Account : BaseObject {
     public signal void login_failed(Geary.Credentials? cred, StatusResponse? response);
 
     public Account(Geary.AccountInformation account_information) {
-        name = "IMAP Account for %s".printf(account_information.imap_credentials.to_string());
         this.account_information = account_information;
         this.session_mgr = new ClientSessionManager(account_information);
+        this.name = account.id + ":imap";
         this.session_mgr.ready.connect(on_session_ready);
         this.session_mgr.login_failed.connect(on_login_failed);
     }

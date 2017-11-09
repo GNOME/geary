@@ -552,12 +552,11 @@ public abstract class Geary.Folder : BaseObject {
      */
     public abstract async Geary.Email fetch_email_async(Geary.EmailIdentifier email_id,
         Geary.Email.Field required_fields, ListFlags flags, Cancellable? cancellable = null) throws Error;
-    
+
     /**
      * Used for debugging.  Should not be used for user-visible labels.
      */
     public virtual string to_string() {
-        return "%s:%s".printf(account.to_string(), path.to_string());
+        return "%s:%s".printf(this.account.information.id, this.path.to_string());
     }
 }
-
