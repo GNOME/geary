@@ -873,7 +873,7 @@ public class GearyController : Geary.BaseObject {
         }
     }
 
-    private void on_report_problem(Geary.Account account, Geary.Account.Problem problem, Error? err) {
+    private void report_problem(Geary.Account.Problem problem, Geary.Account account, Error? err) {
         debug("Reported problem: %s Error: %s", problem.to_string(), err != null ? err.message : "(N/A)");
 
         switch (problem) {
@@ -904,10 +904,32 @@ public class GearyController : Geary.BaseObject {
         switch (info_bar.problem) {
         case Geary.Account.Problem.RECV_EMAIL_ERROR:
         case Geary.Account.Problem.RECV_EMAIL_LOGIN_FAILED:
+            info_bar.account.start_incoming_client.begin((obj, ret) => {
+                    try {
+                        info_bar.account.start_incoming_client.end(ret);
+                    } catch (Error err) {
+                        report_problem(
+                            Geary.Account.Problem.RECV_EMAIL_LOGIN_FAILED,
+                            info_bar.account,
+                            err
+                        );
+                    }
+                });
             break;
 
         case Geary.Account.Problem.SEND_EMAIL_ERROR:
         case Geary.Account.Problem.SEND_EMAIL_LOGIN_FAILED:
+            info_bar.account.start_outgoing_client.begin((obj, ret) => {
+                    try {
+                        info_bar.account.start_outgoing_client.end(ret);
+                    } catch (Error err) {
+                        report_problem(
+                            Geary.Account.Problem.SEND_EMAIL_ERROR,
+                            info_bar.account,
+                            err
+                        );
+                    }
+                });
             break;
 
         default:
@@ -961,7 +983,11 @@ public class GearyController : Geary.BaseObject {
             }
         }
     }
-    
+
+    private void on_report_problem(Geary.Account account, Geary.Account.Problem problem, Error? err) {
+        report_problem(problem, account, err);
+    }
+
     private void on_account_email_removed(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
         if (folder.special_folder_type == Geary.SpecialFolderType.OUTBOX) {
             main_window.status_bar.deactivate_message(StatusBar.Message.OUTBOX_SEND_FAILURE);

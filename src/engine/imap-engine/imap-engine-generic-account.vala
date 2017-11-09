@@ -262,7 +262,31 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         
         message("%s: Rebuild complete", to_string());
     }
-    
+
+    /**
+     * This starts the outbox postman running.
+     */
+    public override async void start_outgoing_client()
+        throws Error {
+        check_open();
+        this.local.outbox.start_postman_async.begin();
+    }
+
+    /**
+     * This closes then reopens the IMAP account.
+     */
+    public override async void start_incoming_client()
+        throws Error {
+        check_open();
+        try {
+            yield this.remote.close_async();
+        } catch (Error err) {
+            debug("Ignoring error closing IMAP account for restart: %s", err.message);
+        }
+
+        yield this.remote.open_async();
+    }
+
     // Subclasses should implement this to return their flavor of a MinimalFolder with the
     // appropriate interfaces attached.  The returned folder should have its SpecialFolderType
     // set using either the properties from the local folder or its path.

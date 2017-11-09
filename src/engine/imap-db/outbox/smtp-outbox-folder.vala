@@ -110,9 +110,73 @@ private class Geary.SmtpOutboxFolder :
         );
     }
 
-    // create_email_async() requires the Outbox be open according to contract, but enqueuing emails
-    // for background delivery can happen at any time, so this is the mechanism to do so.
-    // email_count is the number of emails in the Outbox after enqueueing the message.
+    /**
+     * Starts delivery of messages in the outbox.
+     */
+    public async void start_postman_async() {
+        debug("Starting outbox postman with %u messages queued", this.outbox_queue.size);
+        if (this.queue_cancellable != null) {
+            debug("Postman already started, not starting another");
+            return;
+        }
+
+        Cancellable cancellable = this.queue_cancellable = new Cancellable();
+        uint send_retry_seconds = MIN_SEND_RETRY_INTERVAL_SEC;
+
+        // Start the send queue.
+        while (!cancellable.is_cancelled()) {
+            // yield until a message is ready
+            OutboxRow? row = null;
+            try {
+                row = yield this.outbox_queue.recv_async(cancellable);
+                if (yield postman_send(row, cancellable)) {
+                    // send was good, reset nap length
+                    send_retry_seconds = MIN_SEND_RETRY_INTERVAL_SEC;
+                } else {
+                    // send was bad, try sending again later
+                    this.outbox_queue.send(row);
+
+                    if (!cancellable.is_cancelled()) {
+                        debug("Outbox napping for %u seconds...", send_retry_seconds);
+                        // Take a brief nap before continuing to allow
+                        // connection problems to resolve.
+                        yield Geary.Scheduler.sleep_async(send_retry_seconds);
+                        send_retry_seconds = Geary.Numeric.uint_ceiling(
+                            send_retry_seconds * 2,
+                            MAX_SEND_RETRY_INTERVAL_SEC
+                        );
+                    }
+                }
+            } catch (Error err) {
+                // A hard error occurred. This will cause the postman
+                // to exit but we still want to re-queue the row in
+                // case it restarts.
+                if (row != null) {
+                    this.outbox_queue.send(row);
+                }
+                debug("Outbox postman error: %s", err.message);
+                if (err is SmtpError.AUTHENTICATION_FAILED) {
+                    report_problem(Geary.Account.Problem.SEND_EMAIL_LOGIN_FAILED, err);
+                } else if (!(err is IOError.CANCELLED)) {
+                    report_problem(Geary.Account.Problem.SEND_EMAIL_ERROR, err);
+                }
+                // Get out of here
+                cancellable.cancel();
+            }
+        }
+
+        this.queue_cancellable = null;
+        debug("Exiting outbox postman");
+    }
+
+    /**
+     * Queues a message in the outbox for delivery.
+     *
+     * This should be used instead of {@link create_email_async()},
+     * since that requires the Outbox be open according to contract,
+     * but enqueuing emails for background delivery can happen at any
+     * time, so this is the mechanism to do so.
+     */
     public async SmtpOutboxEmailIdentifier enqueue_email_async(Geary.RFC822.Message rfc822,
         Cancellable? cancellable) throws Error {
         debug("Queuing message for sending: %s",
@@ -380,64 +444,6 @@ private class Geary.SmtpOutboxFolder :
             throw new EngineError.NOT_FOUND("No message with ID %s in outbox", id.to_string());
 
         return row_to_email(row);
-    }
-
-    private async void start_postman_async() {
-        debug("Starting outbox postman with %u messages queued", this.outbox_queue.size);
-        if (this.queue_cancellable != null) {
-            debug("Postman already started, not starting another");
-            return;
-        }
-
-        Cancellable cancellable = this.queue_cancellable = new Cancellable();
-        uint send_retry_seconds = MIN_SEND_RETRY_INTERVAL_SEC;
-
-        // Start the send queue.
-        while (!cancellable.is_cancelled()) {
-            // yield until a message is ready
-            OutboxRow? row = null;
-            try {
-                row = yield this.outbox_queue.recv_async(cancellable);
-                if (yield postman_send(row, cancellable)) {
-                    // send was good, reset nap length
-                    send_retry_seconds = MIN_SEND_RETRY_INTERVAL_SEC;
-                } else {
-                    // send was bad, try sending again later
-                    this.outbox_queue.send(row);
-
-                    if (!cancellable.is_cancelled()) {
-                        debug("Outbox napping for %u seconds...", send_retry_seconds);
-                        // Take a brief nap before continuing to allow
-                        // connection problems to resolve.
-                        yield Geary.Scheduler.sleep_async(send_retry_seconds);
-                        send_retry_seconds = Geary.Numeric.uint_ceiling(
-                            send_retry_seconds * 2,
-                            MAX_SEND_RETRY_INTERVAL_SEC
-                        );
-                    }
-                }
-            } catch (Error err) {
-                // A hard error occurred. This will cause the postman
-                // to exit but we still want to re-queue the row in
-                // case it restarts.
-                if (row != null) {
-                    this.outbox_queue.send(row);
-                }
-                if (!(err is IOError.CANCELLED)) {
-                    debug("Outbox postman error: %s", err.message);
-                    if (err is SmtpError.AUTHENTICATION_FAILED) {
-                        report_problem(Geary.Account.Problem.SEND_EMAIL_LOGIN_FAILED, err);
-                    } else {
-                        report_problem(Geary.Account.Problem.SEND_EMAIL_ERROR, err);
-                    }
-                }
-                // Get out of here
-                cancellable.cancel();
-            }
-        }
-
-        this.queue_cancellable = null;
-        debug("Exiting outbox postman");
     }
 
     // Returns true if row was successfully processed, else false

@@ -251,7 +251,27 @@ public abstract class Geary.Account : BaseObject {
      * Unlike most methods in Account, this should only be called when the Account is closed.
      */
     public abstract async void rebuild_async(Cancellable? cancellable = null) throws Error;
-    
+
+    /**
+     * Starts delivery of messages to the outgoing server.
+     *
+     * Outgoing delivery will be started by default when the account
+     * is opened. This method is mostly useful when re-starting it
+     * after an error has occurred.
+     */
+    public abstract async void start_outgoing_client()
+        throws Error;
+
+    /**
+     * Starts receiving messages from the incoming server.
+     *
+     * The incoming client will be started by default when the account
+     * is opened. This method is mostly useful when re-starting it
+     * after an error has occurred.
+     */
+    public abstract async void start_incoming_client()
+        throws Error;
+
     /**
      * Lists all the currently-available folders found under the parent path
      * unless it's null, in which case it lists all the root folders.  If the
