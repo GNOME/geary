@@ -34,11 +34,11 @@ public abstract class Geary.Account : BaseObject {
         NETWORK_UNAVAILABLE,
         RECV_EMAIL_ERROR,
         RECV_EMAIL_LOGIN_FAILED,
-        SEND_EMAIL_DELIVERY_FAILURE,
         SEND_EMAIL_ERROR,
         SEND_EMAIL_LOGIN_FAILED,
         SEND_EMAIL_SAVE_FAILED,
     }
+
 
     public Geary.AccountInformation information { get; protected set; }
     

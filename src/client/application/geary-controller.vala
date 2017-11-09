@@ -891,10 +891,6 @@ public class GearyController : Geary.BaseObject {
             this.main_window.show_infobar(info_bar);
             break;
 
-        case Geary.Account.Problem.SEND_EMAIL_DELIVERY_FAILURE:
-            handle_outbox_failure(StatusBar.Message.OUTBOX_SEND_FAILURE);
-            break;
-
         case Geary.Account.Problem.SEND_EMAIL_SAVE_FAILED:
             handle_outbox_failure(StatusBar.Message.OUTBOX_SAVE_SENT_MAIL_FAILED);
             break;

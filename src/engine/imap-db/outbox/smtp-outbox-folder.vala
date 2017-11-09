@@ -25,9 +25,6 @@ private class Geary.SmtpOutboxFolder :
     // loaded, connections to settle, pigs to fly, etc.
     private const uint START_TIMEOUT = 4;
 
-    // Number of times to retry sending after auth failures
-    private const uint AUTH_ERROR_MAX_RETRY = 3;
-
 
     private class OutboxRow {
         public int64 id;
@@ -481,8 +478,8 @@ private class Geary.SmtpOutboxFolder :
             // We immediately retry auth errors after the prompting
             // the user, but if they get it wrong enough times or
             // cancel we have no choice other than to stop the postman
-            int attempts = 0;
-            while (!mail_sent && ++attempts <= AUTH_ERROR_MAX_RETRY) {
+            uint attempts = 0;
+            while (!mail_sent && ++attempts <= Geary.Account.AUTH_ATTEMPTS_MAX) {
                 try {
                     debug("Outbox postman: Sending \"%s\" (ID:%s)...",
                           message_subject(message), row.outbox_id.to_string());
@@ -491,8 +488,14 @@ private class Geary.SmtpOutboxFolder :
                 } catch (Error send_err) {
                     debug("Outbox postman send error: %s", send_err.message);
                     if (send_err is SmtpError.AUTHENTICATION_FAILED) {
-                        // At this point we may already have a password in memory -- but it's incorrect.
-                        // Delete the current password, prompt the user for a new one, and try again.
+                        if (attempts == Geary.Account.AUTH_ATTEMPTS_MAX) {
+                            throw send_err;
+                        }
+
+                        // At this point we may already have a
+                        // password in memory -- but it's incorrect.
+                        // Delete the current password, prompt the
+                        // user for a new one, and try again.
                         bool user_confirmed = false;
                         try {
                             user_confirmed = yield account.fetch_passwords_async(
@@ -503,18 +506,19 @@ private class Geary.SmtpOutboxFolder :
                         }
 
                         if (!user_confirmed) {
-                            // The user cancelled hence they don't
-                            // want to be prompted again, so report it
-                            // and bail out.
+                            // The user cancelled and hence they don't
+                            // want to be prompted again, so bail out.
                             throw send_err;
                         }
                     } else if (send_err is TlsError) {
-                        // up to application to be aware of problem via Geary.Engine, but do nap and
-                        // try later
+                        // up to application to be aware of problem
+                        // via Geary.Engine, but do nap and try later
                         debug("TLS connection warnings connecting to %s, user must confirm connection to continue",
                               this.smtp_endpoint.to_string());
+                        break;
                     } else {
-                        report_problem(Geary.Account.Problem.SEND_EMAIL_DELIVERY_FAILURE, send_err);
+                        // not much else we can do - just bail out
+                        throw send_err;
                     }
                 }
             }
