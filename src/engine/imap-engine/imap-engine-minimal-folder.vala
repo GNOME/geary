@@ -43,12 +43,13 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     private Folder.OpenFlags open_flags = OpenFlags.NONE;
     private int open_count = 0;
     private bool remote_opened = false;
+    private bool remote_ready = false;
+    private TimeoutManager remote_open_timer;
     private Nonblocking.ReportingSemaphore<bool> remote_semaphore =
         new Nonblocking.ReportingSemaphore<bool>(false);
     private Nonblocking.Semaphore closed_semaphore = new Nonblocking.Semaphore();
     private ReplayQueue replay_queue;
     private int remote_count = -1;
-    private uint open_remote_timer_id = 0;
     private int reestablish_delay_msec = DEFAULT_REESTABLISH_DELAY_MSEC;
     private Nonblocking.Mutex open_mutex = new Nonblocking.Mutex();
     private Nonblocking.Mutex close_mutex = new Nonblocking.Mutex();
@@ -77,8 +78,11 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     
     public MinimalFolder(GenericAccount account, Imap.Account remote, ImapDB.Account local,
         ImapDB.Folder local_folder, SpecialFolderType special_folder_type) {
-        _account = account;
+        this._account = account;
         this.remote = remote;
+        this.remote_open_timer = new TimeoutManager.seconds(
+            FORCE_OPEN_REMOTE_TIMEOUT_SEC, () => { start_open_remote(); }
+        );
         this.local = local;
         this.local_folder = local_folder;
         _special_folder_type = special_folder_type;
@@ -92,16 +96,13 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         
         local_folder.email_complete.connect(on_email_complete);
     }
-    
+
     ~MinimalFolder() {
         if (open_count > 0)
             warning("Folder %s destroyed without closing", to_string());
-        
-        cancel_remote_open_timer();
-        
-        local_folder.email_complete.disconnect(on_email_complete);
+        this.local_folder.email_complete.disconnect(on_email_complete);
     }
-    
+
     protected virtual void notify_closing(Gee.List<ReplayOperation> final_ops) {
         closing(final_ops);
     }
@@ -520,8 +521,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         // an open_async, it's reset at close time
         if (!remote_opened) {
             debug("wait_for_open_async %s: opening remote on demand...", to_string());
-            
-            start_remote_open_now();
+            start_open_remote();
         }
         
         if (!yield remote_semaphore.wait_for_result_async(cancellable))
@@ -536,8 +536,8 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
                 // add NO_DELAY flag if it forces an open
                 if (!remote_opened)
                     this.open_flags |= OpenFlags.NO_DELAY;
-                
-                start_remote_open_now();
+
+                start_open_remote();
             }
             
             debug("Not opening %s: already open", to_string());
@@ -565,49 +565,32 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         // second account Inbox they don't manipulate), no remote connection will ever be made,
         // meaning that folder normalization never happens and unsolicited notifications never
         // arrive
-        if (open_flags.is_all_set(OpenFlags.NO_DELAY))
-            start_remote_open_now();
-        else
-            start_remote_open_timer();
-        
+        this.remote.ready.connect(on_remote_ready);
+        if (open_flags.is_all_set(OpenFlags.NO_DELAY)) {
+            start_open_remote();
+        } else {
+            this.remote_open_timer.start();
+        }
         return true;
     }
 
-    private void start_remote_open_timer() {
-        if (this.open_remote_timer_id != 0)
-            Source.remove(this.open_remote_timer_id);
-
-        this.open_remote_timer_id = Timeout.add_seconds(FORCE_OPEN_REMOTE_TIMEOUT_SEC, () => {
-            start_remote_open_now();
-            this.open_remote_timer_id = 0;
-            return false;
-        });
-    }
-
-    private void start_remote_open_now() {
-        if (remote_opened)
-            return;
-        
-        cancel_remote_open_timer();
-        remote_opened = true;
-        
-        open_remote_async.begin(null);
-    }
-
-    private void cancel_remote_open_timer() {
-        if (this.open_remote_timer_id == 0)
-            return;
-
-        Source.remove(this.open_remote_timer_id);
-        this.open_remote_timer_id = 0;
+    private void start_open_remote() {
+        if (!this.remote_opened &&
+            !this.remote_open_timer.is_running &&
+            this.remote_ready) {
+            this.remote_open_timer.reset();
+            this.remote_opened = true;
+            this.open_remote_async.begin(null);
+        }
     }
 
     // Open the remote connection using a Mutex to prevent concurrency.
     //
-    // start_remote_open_now() *should* prevent more than one open from occurring at the same time,
+    // start_open_remote() *should* prevent more than one open from occurring at the same time,
     // but it's still wise to use a nonblocking primitive to prevent it if that does occur to at
     // least keep Folder state cogent.
     private async void open_remote_async(Cancellable? cancellable) {
+        debug("%s: Opening remote folder", to_string());
         int token;
         try {
             token = yield open_mutex.claim_async(cancellable);
@@ -822,8 +805,8 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         bool flush_pending, Cancellable? cancellable) {
         // make sure no open is waiting in the wings to start; close_internal_locked_async() will
         // reestablish a connection if necessary
-        cancel_remote_open_timer();
-        
+        this.remote_open_timer.reset();
+
         int token;
         try {
             token = yield close_mutex.claim_async(cancellable);
@@ -1571,10 +1554,14 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         
         return ret;
     }
-    
+
     public override string to_string() {
         return "%s (open_count=%d remote_opened=%s)".printf(base.to_string(), open_count,
             remote_opened.to_string());
     }
-}
 
+    private void on_remote_ready() {
+        this.remote_ready = true;
+        start_open_remote();
+    }
+}

@@ -12,7 +12,17 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
     private const int POOL_RETRY_MIN_TIMEOUT_SEC = 1;
     private const int POOL_RETRY_MAX_TIMEOUT_SEC = 10;
 
+    /** Determines if the manager has been opened. */
     public bool is_open { get; private set; default = false; }
+
+    /**
+     * Determines if the manager has a working connection.
+     *
+     * This will be true once at least one connection has been
+     * established, and after the server has become reachable again
+     * after being unreachable.
+     */
+    public bool is_ready { get; private set; default = false; }
 
     /**
      * Set to zero or negative value if keepalives should be disabled when a connection has not
@@ -60,6 +70,16 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
     private TimeoutManager pool_start;
     private TimeoutManager pool_retry;
 
+    /**
+     * Fired after when the manager has a working connection.
+     *
+     * This will be fired both after opening if online and once at
+     * least one connection has been established, and after the server
+     * has become reachable again after being unreachable.
+     */
+    public signal void ready();
+
+    /** Fired when an authentication error occurs opening a session. */
     public signal void login_failed(StatusResponse? response);
 
     public ClientSessionManager(AccountInformation account_information) {
@@ -111,7 +131,8 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         if (!is_open)
             return;
 
-        is_open = false;
+        this.is_open = false;
+        this.is_ready = false;
 
 		this.endpoint.connectivity.notify["is-reachable"].disconnect(on_connectivity_change);
 
@@ -257,6 +278,11 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
             assert(removed);
             
             throw err;
+        }
+
+        if (!this.is_ready) {
+            this.is_ready = true;
+            ready();
         }
 
         // reset delay
@@ -458,15 +484,14 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
     private void on_disconnected(ClientSession session, ClientSession.DisconnectReason reason) {
         force_disconnect.begin(session, false);
     }
-    
+
     private void on_login_failed(ClientSession session, StatusResponse? response) {
-        authentication_failed = true;
-        
+        this.is_ready = false;
+        this.authentication_failed = true;
         login_failed(response);
-        
         session.disconnect_async.begin();
     }
-    
+
     // Only call with sessions mutex locked
     private void locked_add_session(ClientSession session) {
         sessions.add(session);
@@ -525,6 +550,8 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
 		if (is_reachable) {
             this.pool_start.start();
 		} else {
+            // Get a ready signal again once we are back online
+            this.is_ready = false;
             this.pool_start.reset();
             this.pool_retry.reset();
             this.force_disconnect_all.begin();

@@ -19,8 +19,16 @@
  */
 
 private class Geary.Imap.Account : BaseObject {
+    /** Determines if the IMAP account has been opened. */
     public bool is_open { get; private set; default = false; }
-    
+
+    /**
+     * Determines if the IMAP account has a working connection.
+     *
+     * See {@link ClientSessionManager.is_open} for more details.
+     */
+    public bool is_ready { get { return this.session_mgr.is_ready; } }
+
     private string name;
     private AccountInformation account_information;
     private ClientSessionManager session_mgr;
@@ -36,15 +44,22 @@ private class Geary.Imap.Account : BaseObject {
     private Imap.MailboxSpecifier? inbox_specifier = null;
     private string hierarchy_delimiter = null;
 
-    
+    /**
+     * Fired after opening when the account has a working connection.
+     *
+     * This may be fired multiple times, see @{link
+     * ClientSessionManager.ready} for details.
+     */
+    public signal void ready();
+
     public signal void login_failed(Geary.Credentials? cred, StatusResponse? response);
-    
+
     public Account(Geary.AccountInformation account_information) {
         name = "IMAP Account for %s".printf(account_information.imap_credentials.to_string());
         this.account_information = account_information;
         this.session_mgr = new ClientSessionManager(account_information);
-        
-        session_mgr.login_failed.connect(on_login_failed);
+        this.session_mgr.ready.connect(on_session_ready);
+        this.session_mgr.login_failed.connect(on_login_failed);
     }
     
     private void check_open() throws Error {
@@ -607,7 +622,11 @@ private class Geary.Imap.Account : BaseObject {
     private void on_login_failed(StatusResponse? response) {
         login_failed(account_information.imap_credentials, response);
     }
-    
+
+    private void on_session_ready() {
+        ready();
+    }
+
     public string to_string() {
         return name;
     }
