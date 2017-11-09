@@ -21,6 +21,11 @@
  */
 
 public abstract class Geary.Account : BaseObject {
+
+
+    /** Number of times to attempt re-authentication. */
+    internal const uint AUTH_ATTEMPTS_MAX = 3;
+
     public enum Problem {
         CONNECTION_FAILURE,
         DATABASE_FAILURE,

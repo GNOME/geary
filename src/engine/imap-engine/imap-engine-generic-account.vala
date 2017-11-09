@@ -29,7 +29,6 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         = new Gee.HashMap<FolderPath, uint>();
     private Gee.HashSet<Geary.Folder> in_refresh_unseen = new Gee.HashSet<Geary.Folder>();
     private AccountSynchronizer sync;
-    private bool awaiting_credentials = false;
     private Cancellable? enumerate_folder_cancellable = null;
     private TimeoutManager refresh_folder_timer;
 
@@ -43,10 +42,9 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
 
         this.remote = remote;
         this.remote.ready.connect(on_remote_ready);
+        this.remote.report_problem.connect(notify_report_problem);
 
         this.local = local;
-        
-        this.remote.login_failed.connect(on_login_failed);
         this.local.contacts_loaded.connect(() => { contacts_loaded(); });
         this.local.email_sent.connect(on_email_sent);
 
@@ -959,44 +957,8 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         return yield local.get_containing_folders_async(ids, cancellable);
     }
 
-    private void on_login_failed(Geary.Credentials? credentials, Geary.Imap.StatusResponse? response) {
-        if (awaiting_credentials)
-            return; // We're already asking for the password.
-        
-        awaiting_credentials = true;
-        do_login_failed_async.begin(credentials, response, () => { awaiting_credentials = false; });
-    }
-
     private void on_remote_ready() {
         this.enumerate_folders_async.begin();
     }
 
-    private async void do_login_failed_async(Geary.Credentials? credentials, Geary.Imap.StatusResponse? response) {
-        bool reask_password = true;
-        try {
-            reask_password = (
-                response == null ||
-                response.response_code == null ||
-                response.response_code.get_response_code_type().value != Geary.Imap.ResponseCodeType.UNAVAILABLE
-            );
-        } catch (ImapError ierr) {
-            debug("Unable to parse ResponseCode %s: %s", response.response_code.to_string(),
-                ierr.message);
-        }
-        // login can fail due to an invalid password hence we should re-ask it
-        // but it can also fail due to server inaccessibility, for instance "[UNAVAILABLE] /
-        // Maximum number of connections from user+IP exceeded". In that case, resetting password seems unneeded.
-        if (reask_password) {
-            try {
-                if (yield information.fetch_passwords_async(ServiceFlag.IMAP, true))
-                    return;
-            } catch (Error e) {
-                debug("Error prompting for IMAP password: %s", e.message);
-            }
-            notify_report_problem(Geary.Account.Problem.RECV_EMAIL_LOGIN_FAILED, null);
-        } else {
-            notify_report_problem(Geary.Account.Problem.CONNECTION_FAILURE, null);
-        }
-    }
 }
-

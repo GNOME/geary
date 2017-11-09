@@ -84,9 +84,9 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
     /** Fired when an authentication error occurs opening a session. */
     public signal void login_failed(StatusResponse? response);
 
+
     public ClientSessionManager(AccountInformation account_information) {
         this.account_information = account_information;
-        this.account_information.notify["imap-credentials"].connect(on_imap_credentials_notified);
 
         // NOTE: This works because AccountInformation guarantees the IMAP endpoint not to change
         // for the lifetime of the AccountInformation object; if this ever changes, will need to
@@ -115,7 +115,6 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         if (is_open)
             warning("Destroying opened ClientSessionManager");
 
-        this.account_information.notify["imap-credentials"].disconnect(on_imap_credentials_notified);
         this.endpoint.untrusted_host.disconnect(on_imap_untrusted_host);
         this.endpoint.notify[Endpoint.PROP_TRUST_UNTRUSTED_HOST].disconnect(on_imap_trust_untrusted_host);
     }
@@ -124,7 +123,8 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         if (is_open)
             throw new EngineError.ALREADY_OPEN("ClientSessionManager already open");
 
-        is_open = true;
+        this.is_open = true;
+        this.authentication_failed = false;
 
 		this.endpoint.connectivity.notify["is-reachable"].connect(on_connectivity_change);
         if (this.endpoint.connectivity.is_reachable) {
@@ -172,14 +172,20 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
                 break;
         }
     }
-    
-    private void on_imap_credentials_notified() {
-        authentication_failed = false;
-        
-        if (is_open)
-            adjust_session_pool.begin();
+
+    /**
+     * Informs the manager that the account's IMAP credentials have changed.
+     *
+     * This will reset the manager's authentication state and if open,
+     * attempt to open a connection to the server.
+     */
+    public void credentials_updated() {
+        this.authentication_failed = false;
+        if (this.is_open) {
+            this.adjust_session_pool.begin();
+        }
     }
-    
+
     private void check_open() throws Error {
         if (!is_open)
             throw new EngineError.OPEN_REQUIRED("ClientSessionManager is not open");
