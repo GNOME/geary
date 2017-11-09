@@ -4,6 +4,24 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
+/**
+ * High-level interface to a single IMAP server connection.
+ *
+ * The client session is responsible for opening, maintaining and
+ * closing a TCP connection to an IMAP server. When opening, the
+ * session will obtain and maintain capabilities, establish a StartTLS
+ * session if appropriate, authenticate, and obtain
+ * connection-specific information about the server such as the name
+ * used for the INBOX and any mailbox namespaces. When connecting has
+ * completed successfully, the connection will be in the IMAP
+ * authenticated state.
+ *
+ * Any IMAP commands that affect the IMAP connection's state (LOGIN,
+ * LOGOUT, SELECT, etc) must be executed by calling the appropriate
+ * method on this object. For example, call `login_async` rather than
+ * sending a {@link LoginCommand}. Other commands can be sent via
+ * {@link send_command_async} and {@link send_multiple_commands_async}.
+ */
 public class Geary.Imap.ClientSession : BaseObject {
     // 30 min keepalive required to maintain session
     public const uint MIN_KEEPALIVE_SEC = 30 * 60;
@@ -177,25 +195,53 @@ public class Geary.Imap.ClientSession : BaseObject {
      * (specifically for IDLE support).
      */
     public Capabilities capabilities { get; private set; default = new Capabilities(0); }
-    
+
+    // While the following inbox and namespace data should be server
+    // specific, there is a small chance they will differ between
+    // connections if the connections connect to different servers in
+    // a cluster, or if configuration changes between connections. We
+    // do assume however that once connected, this information will
+    // remain the same. This information becomes current only after
+    // initiate_session_async() has successfully completed.
+
+    /** Records the actual name and delimiter used for the inbox */
+    internal MailboxInformation? inbox = null;
+
+    /** The locations personal mailboxes on this  connection. */
+    internal Gee.List<Namespace> personal_namespaces = new Gee.ArrayList<Namespace>();
+
+    /** The locations of other user's mailboxes on this connection. */
+    internal Gee.List<Namespace> user_namespaces = new Gee.ArrayList<Namespace>();
+
+    /** The locations of shared mailboxes on this connection. */
+    internal Gee.List<Namespace> shared_namespaces = new Gee.ArrayList<Namespace>();
+
+
     private Endpoint imap_endpoint;
     private Geary.State.Machine fsm;
     private ClientConnection? cx = null;
+
     private MailboxSpecifier? current_mailbox = null;
     private bool current_mailbox_readonly = false;
-    private Gee.HashMap<Tag, StatusResponse> seen_completion_responses = new Gee.HashMap<
-        Tag, StatusResponse>();
-    private Gee.HashMap<Tag, CommandCallback> waiting_for_completion = new Gee.HashMap<
-        Tag, CommandCallback>();
-    private int next_capabilities_revision = 1;
+
     private uint keepalive_id = 0;
     private uint selected_keepalive_secs = 0;
     private uint unselected_keepalive_secs = 0;
     private uint selected_with_idle_keepalive_secs = 0;
     private bool allow_idle = true;
+
+    private Gee.HashMap<Tag, StatusResponse> seen_completion_responses = new Gee.HashMap<
+        Tag, StatusResponse>();
+    private Gee.HashMap<Tag, CommandCallback> waiting_for_completion = new Gee.HashMap<
+        Tag, CommandCallback>();
     private Command? state_change_cmd = null;
     private Nonblocking.Semaphore? connect_waiter = null;
     private Error? connect_err = null;
+
+    private int next_capabilities_revision = 1;
+    private Gee.Map<string,Namespace> namespaces = new Gee.HashMap<string,Namespace>();
+
+
 
     //
     // Connection state changes
@@ -216,7 +262,7 @@ public class Geary.Imap.ClientSession : BaseObject {
     public signal void status_response_received(StatusResponse status_response);
     
     /**
-     * Fired before the specific {@link ServerData} signals (i.e. {@link capability}, {@link exists}
+     * Fired after the specific {@link ServerData} signals (i.e. {@link capability}, {@link exists}
      * {@link expunge}, etc.)
      */
     public signal void server_data_received(ServerData server_data);
@@ -243,7 +289,9 @@ public class Geary.Imap.ClientSession : BaseObject {
     public signal void search(int64[] seq_or_uid);
     
     public signal void status(StatusData status_data);
-    
+
+    public signal void @namespace(NamespaceResponse namespace);
+
     /**
      * If the mailbox name is null it indicates the type of state change that has occurred
      * (authorized -> selected/examined or vice-versa).  If new_name is null readonly should be
@@ -413,7 +461,73 @@ public class Geary.Imap.ClientSession : BaseObject {
     public bool is_current_mailbox_readonly() {
         return current_mailbox_readonly;
     }
-    
+
+    /**
+     * Determines the SELECT-able mailbox name for a specific folder path.
+     */
+    public MailboxSpecifier get_mailbox_for_path(FolderPath path)
+    throws ImapError {
+        string? delim = get_delimiter_for_path(path);
+        return new MailboxSpecifier.from_folder_path(path, this.inbox.mailbox, delim);
+    }
+
+    /**
+     * Determines the folder path for a mailbox name.
+     */
+    public FolderPath get_path_for_mailbox(MailboxSpecifier mailbox)
+    throws ImapError {
+        string? delim = get_delimiter_for_mailbox(mailbox);
+        return mailbox.to_folder_path(delim, this.inbox.mailbox);
+    }
+
+    /**
+     * Determines the mailbox hierarchy delimiter for a given folder path.
+     *
+     * The returned delimiter be null if a namespace (INBOX, personal,
+     * etc) for the path does not exist, or if the namespace is flat.
+     */
+    public string? get_delimiter_for_path(FolderPath path)
+    throws ImapError {
+        string? delim = null;
+        Geary.FolderRoot root = path.get_root();
+        if (MailboxSpecifier.folder_path_is_inbox(root)) {
+            delim = this.inbox.delim;
+        } else {
+            Namespace? ns = this.namespaces.get(root.basename);
+            if (ns != null) {
+                delim = ns.delim;
+            }
+        }
+        return delim;
+    }
+
+    /**
+     * Determines the mailbox hierarchy delimiter for a given mailbox name.
+     *
+     * The returned delimiter be null if a namespace (INBOX, personal,
+     * etc) for the mailbox does not exist, or if the namespace is flat.
+     */
+    public string? get_delimiter_for_mailbox(MailboxSpecifier mailbox)
+    throws ImapError {
+        string name = mailbox.name;
+        string? delim = null;
+
+        string inbox_name = this.inbox.mailbox.name;
+        string? inbox_delim = this.inbox.delim;
+        if (inbox_name == name ||
+            (inbox_delim != null && inbox_name.has_prefix(name + inbox_delim))) {
+            delim = this.inbox.delim;
+        } else {
+            foreach (Namespace ns in this.namespaces.values) {
+                if (name.has_prefix(ns.prefix)) {
+                    delim = ns.delim;
+                    break;
+                }
+            }
+        }
+        return delim;
+    }
+
     /**
      * Returns the current {@link ProtocolState} of the {@link ClientSession} and, if selected,
      * the current mailbox.
@@ -781,8 +895,91 @@ public class Geary.Imap.ClientSession : BaseObject {
         } else {
             debug("[%s] No compression available", to_string());
         }
+
+        Gee.List<ServerData> server_data = new Gee.ArrayList<ServerData>();
+        ulong data_id = this.server_data_received.connect((data) => { server_data.add(data); });
+        try {
+            // Determine what this connection calls the inbox
+            Imap.StatusResponse response = yield send_command_async(
+                new ListCommand(MailboxSpecifier.inbox, false, null),
+                cancellable
+            );
+            if (response.status == Status.OK && !server_data.is_empty) {
+                this.inbox = server_data[0].get_list();
+                debug("[%s] Using as INBOX: %s", to_string(), this.inbox.to_string());
+            } else {
+                throw new ImapError.INVALID("Unable to find INBOX");
+            }
+
+            // Try to determine what the connection's namespaces are
+            server_data.clear();
+            if (caps.has_capability(Capabilities.NAMESPACE)) {
+                response = yield send_command_async(
+                    new NamespaceCommand(),
+                    cancellable
+                );
+                if (response.status == Status.OK && !server_data.is_empty) {
+                    NamespaceResponse ns = server_data[0].get_namespace();
+                    update_namespaces(ns.personal, this.personal_namespaces);
+                    update_namespaces(ns.user, this.user_namespaces);
+                    update_namespaces(ns.shared, this.shared_namespaces);
+                } else {
+                    debug("[%s] NAMESPACE command failed", to_string());
+                }
+            }
+            server_data.clear();
+            if (!this.personal_namespaces.is_empty) {
+                debug("[%s] Default personal namespace: %s", to_string(), this.personal_namespaces[0].to_string());
+            } else {
+                debug("[%s] Personal namespace not found, guessing it", to_string());
+                string? prefix = "";
+                string? delim = this.inbox.delim;
+                if (!this.inbox.attrs.contains(MailboxAttribute.NO_INFERIORS) &&
+                    this.inbox.delim == ".") {
+                    // We're probably on an ancient Cyrus install that
+                    // doesn't support NAMESPACE, so assume they go in the inbox
+                    prefix = this.inbox.mailbox.name + ".";
+                }
+
+                if (delim == null) {
+                    // We still don't know what the delim is, so fetch
+                    // it. In particular, uw-imap sends a null prefix
+                    // for the inbox.
+                    response = yield send_command_async(
+                        new ListCommand(new MailboxSpecifier(prefix), false, null),
+                        cancellable
+                    );
+                    if (response.status == Status.OK && !server_data.is_empty) {
+                        MailboxInformation list = server_data[0].get_list();
+                        delim = list.delim;
+                    } else {
+                        throw new ImapError.INVALID("Unable to determine personal namespace delimiter");
+                    }
+                }
+
+                this.personal_namespaces.add(new Namespace(prefix, delim));
+                debug("[%s] Personal namespace guessed as: %s",
+                      to_string(), this.personal_namespaces[0].to_string());
+            }
+        } finally {
+            disconnect(data_id);
+        }
     }
-    
+
+    private inline void update_namespaces(Namespace[]? response, Gee.List<Namespace> list) {
+        if (response != null) {
+            foreach (Namespace ns in response) {
+                list.add(ns);
+                string prefix = ns.prefix;
+                string? delim = ns.delim;
+                if (delim != null && prefix.has_suffix(delim)) {
+                    prefix = prefix.substring(0, prefix.length - delim.length);
+                }
+                this.namespaces.set(prefix, ns);
+            }
+        }
+    }
+
     private uint on_login(uint state, uint event, void *user, Object? object) {
         MachineParams params = (MachineParams) object;
         
@@ -1577,7 +1774,11 @@ public class Geary.Imap.ClientSession : BaseObject {
             case ServerDataType.SEARCH:
                 search(server_data.get_search());
             break;
-            
+
+            case ServerDataType.NAMESPACE:
+                namespace(server_data.get_namespace());
+            break;
+
             // TODO: LSUB
             case ServerDataType.LSUB:
             default:

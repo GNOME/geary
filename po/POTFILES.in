@@ -193,6 +193,7 @@ src/engine/imap/command/imap-list-return-parameter.vala
 src/engine/imap/command/imap-login-command.vala
 src/engine/imap/command/imap-logout-command.vala
 src/engine/imap/command/imap-message-set.vala
+src/engine/imap/command/imap-namespace-command.vala
 src/engine/imap/command/imap-noop-command.vala
 src/engine/imap/command/imap-search-command.vala
 src/engine/imap/command/imap-search-criteria.vala
@@ -277,6 +278,7 @@ src/engine/imap/message/imap-mailbox-specifier.vala
 src/engine/imap/message/imap-message-data.vala
 src/engine/imap/message/imap-message-flag.vala
 src/engine/imap/message/imap-message-flags.vala
+src/engine/imap/message/imap-namespace.vala
 src/engine/imap/message/imap-sequence-number.vala
 src/engine/imap/message/imap-status-data-type.vala
 src/engine/imap/message/imap-tag.vala
@@ -299,6 +301,7 @@ src/engine/imap/response/imap-fetched-data.vala
 src/engine/imap/response/imap-mailbox-attribute.vala
 src/engine/imap/response/imap-mailbox-attributes.vala
 src/engine/imap/response/imap-mailbox-information.vala
+src/engine/imap/response/imap-namespace-response.vala
 src/engine/imap/response/imap-response-code-type.vala
 src/engine/imap/response/imap-response-code.vala
 src/engine/imap/response/imap-server-data-type.vala

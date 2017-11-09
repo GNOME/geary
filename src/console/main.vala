@@ -88,6 +88,7 @@ class ImapConsole : Gtk.Window {
         "logout",
         "id",
         "bye",
+        "namespace",
         "list",
         "xlist",
         "examine",
@@ -107,25 +108,27 @@ class ImapConsole : Gtk.Window {
         "preview",
         "close"
     };
-    
+
     private void exec(string input) {
         string[] lines = input.strip().split(";");
         foreach (string line in lines) {
             string[] tokens = line.strip().split(" ");
             if (tokens.length == 0)
                 continue;
-            
+
             string cmd = tokens[0].strip().down();
-            
             string[] args = new string[0];
             for (int ctr = 1; ctr < tokens.length; ctr++) {
                 string arg = tokens[ctr].strip();
-                if (!Geary.String.is_empty(arg))
+                if (arg == "\"\"") {
+                    args += "";
+                } else if (!Geary.String.is_empty(arg)) {
                     args += arg;
+                }
             }
-            
+
             clear_status();
-            
+
             // TODO: Need to break out the command delegates into their own objects with the
             // human command-names and usage and exec()'s and such; this isn't a long-term approach
             try {
@@ -166,7 +169,11 @@ class ImapConsole : Gtk.Window {
                     case "id":
                         id(cmd, args);
                     break;
-                    
+
+                    case "namespace":
+                        namespace(cmd, args);
+                    break;
+
                     case "list":
                     case "xlist":
                         list(cmd, args);
@@ -433,7 +440,23 @@ class ImapConsole : Gtk.Window {
             exception(err);
         }
     }
-    
+
+    private void namespace(string cmd, string[] args) throws Error {
+        check_connected(cmd, args, 0, null);
+
+        status("Retrieving NAMESPACE...");
+        cx.send_async.begin(new Geary.Imap.NamespaceCommand(), null, on_namespace);
+    }
+
+    private void on_namespace(Object? source, AsyncResult result) {
+        try {
+            cx.send_async.end(result);
+            status("Retrieved NAMESPACE");
+        } catch (Error err) {
+            exception(err);
+        }
+    }
+
     private void list(string cmd, string[] args) throws Error {
         check_connected(cmd, args, 2, "<reference> <mailbox>");
         
