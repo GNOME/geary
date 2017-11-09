@@ -91,8 +91,12 @@ private class Geary.SmtpOutboxFolder :
 
     private TimeoutManager start_timer;
 
-    public signal void report_problem(Geary.Account.Problem problem, Error? err);
+    /** Fired when an email has successfully been sent. */
     public signal void email_sent(Geary.RFC822.Message rfc822);
+
+    /** Fired if a user-notifiable problem occurs. */
+    public signal void report_problem(Geary.Account.Problem problem, Error? err);
+
 
     // Requires the Database from the get-go because it runs a background task that access it
     // whether open or not
@@ -422,11 +426,13 @@ private class Geary.SmtpOutboxFolder :
                 if (row != null) {
                     this.outbox_queue.send(row);
                 }
-                debug("Outbox postman error: %s", err.message);
-                if (err is SmtpError.AUTHENTICATION_FAILED) {
-                    report_problem(Geary.Account.Problem.SEND_EMAIL_LOGIN_FAILED, err);
-                } else if (!(err is IOError.CANCELLED)) {
-                    report_problem(Geary.Account.Problem.SEND_EMAIL_ERROR, err);
+                if (!(err is IOError.CANCELLED)) {
+                    debug("Outbox postman error: %s", err.message);
+                    if (err is SmtpError.AUTHENTICATION_FAILED) {
+                        report_problem(Geary.Account.Problem.SEND_EMAIL_LOGIN_FAILED, err);
+                    } else {
+                        report_problem(Geary.Account.Problem.SEND_EMAIL_ERROR, err);
+                    }
                 }
                 // Get out of here
                 cancellable.cancel();
@@ -866,7 +872,6 @@ private class Geary.SmtpOutboxFolder :
     }
 
     private void on_reachable_changed() {
-        print("Connectivity changed");
         if (this.smtp_endpoint.connectivity.is_reachable) {
             if (this.queue_cancellable == null) {
                 this.start_timer.start();
