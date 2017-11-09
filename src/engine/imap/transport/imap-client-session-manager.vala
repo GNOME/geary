@@ -134,6 +134,9 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         this.is_open = false;
         this.is_ready = false;
 
+        this.pool_start.reset();
+        this.pool_retry.reset();
+
 		this.endpoint.connectivity.notify["is-reachable"].disconnect(on_connectivity_change);
 
         // to avoid locking down the sessions table while scheduling disconnects, make a copy
@@ -225,10 +228,10 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
     private async ClientSession create_new_authorized_session(Cancellable? cancellable) throws Error {
         if (authentication_failed)
             throw new ImapError.UNAUTHENTICATED("Invalid ClientSessionManager credentials");
-        
+
         if (untrusted_host)
-            throw new ImapError.UNAUTHENTICATED("Untrusted host %s", endpoint.to_string());
-        
+            throw new ImapError.UNAVAILABLE("Untrusted host %s", endpoint.to_string());
+
         if (!this.endpoint.connectivity.is_reachable)
             throw new ImapError.UNAVAILABLE("Host at %s is unreachable", endpoint.to_string());
         
