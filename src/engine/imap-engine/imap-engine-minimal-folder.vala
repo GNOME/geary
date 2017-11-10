@@ -43,7 +43,6 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     private Folder.OpenFlags open_flags = OpenFlags.NONE;
     private int open_count = 0;
     private bool remote_opened = false;
-    private bool remote_ready = false;
     private TimeoutManager remote_open_timer;
     private Nonblocking.ReportingSemaphore<bool> remote_semaphore =
         new Nonblocking.ReportingSemaphore<bool>(false);
@@ -577,7 +576,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     private void start_open_remote() {
         if (!this.remote_opened &&
             !this.remote_open_timer.is_running &&
-            this.remote_ready) {
+            this.remote.is_ready) {
             this.remote_open_timer.reset();
             this.remote_opened = true;
             this.open_remote_async.begin(null);
@@ -1561,7 +1560,6 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     }
 
     private void on_remote_ready() {
-        this.remote_ready = true;
         start_open_remote();
     }
 }
