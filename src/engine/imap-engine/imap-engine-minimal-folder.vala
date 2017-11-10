@@ -515,14 +515,15 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     public override async void wait_for_open_async(Cancellable? cancellable = null) throws Error {
         if (open_count == 0)
             throw new EngineError.OPEN_REQUIRED("wait_for_open_async() can only be called after open_async()");
-        
+
         // if remote has not yet been opened, do it now ... this bool can go true only once after
         // an open_async, it's reset at close time
         if (!remote_opened) {
-            debug("wait_for_open_async %s: opening remote on demand...", to_string());
+            // Someone wants this open right now, so cancel the timer and just do it already
+            this.remote_open_timer.reset();
             start_open_remote();
         }
-        
+
         if (!yield remote_semaphore.wait_for_result_async(cancellable))
             throw new EngineError.ALREADY_CLOSED("%s failed to open", to_string());
     }
