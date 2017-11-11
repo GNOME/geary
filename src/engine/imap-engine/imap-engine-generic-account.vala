@@ -28,6 +28,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     private Gee.HashMap<FolderPath, uint> refresh_unseen_timeout_ids
         = new Gee.HashMap<FolderPath, uint>();
     private Gee.HashSet<Geary.Folder> in_refresh_unseen = new Gee.HashSet<Geary.Folder>();
+    private AccountSynchronizer sync;
     private bool awaiting_credentials = false;
     private Cancellable? enumerate_folder_cancellable = null;
     private TimeoutManager refresh_folder_timer;
@@ -67,6 +68,8 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         if (search_path == null) {
             search_path = new ImapDB.SearchFolderRoot();
         }
+
+        this.sync = new AccountSynchronizer(this, this.remote);
 
         compile_special_search_names();
     }
@@ -193,6 +196,8 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     public override async void close_async(Cancellable? cancellable = null) throws Error {
         if (!open)
             return;
+
+        this.sync.stop();
 
         Cancellable folder_cancellable = this.enumerate_folder_cancellable;
         if (folder_cancellable != null) {
