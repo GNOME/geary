@@ -13,8 +13,8 @@ msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=internationalization\n"
-"POT-Creation-Date: 2017-09-26 12:56+0000\n"
-"PO-Revision-Date: 2017-09-27 17:21+0200\n"
+"POT-Creation-Date: 2017-10-24 20:18+0000\n"
+"PO-Revision-Date: 2017-10-25 18:16+0200\n"
 "Last-Translator: Alan Mortensen <alanmortensen.am@gmail.com>\n"
 "Language-Team: Danish (http://www.transifex.com/projects/p/geary/language/"
 "da/)\n"
@@ -41,6 +41,7 @@ msgstr "Gearys udviklerhold"
 #: ../desktop/org.gnome.Geary.appdata.xml.in.h:6
 #: ../desktop/org.gnome.Geary.desktop.in.h:4
 #: ../desktop/geary-autostart.desktop.in.h:4
+#: ../src/client/application/geary-application.vala:21
 msgid "Send and receive email"
 msgstr "Send og modtag e-mail"
 
@@ -101,6 +102,7 @@ msgid "Geary showing the rich text composer"
 msgstr "Geary som redigering af formateret tekst ser ud"
 
 #: ../desktop/org.gnome.Geary.desktop.in.h:2
+#: ../desktop/geary-autostart.desktop.in.h:2
 msgid "Email"
 msgstr "E-mail"
 
@@ -117,11 +119,6 @@ msgstr ""
 #: ../desktop/org.gnome.Geary.desktop.in.h:7 ../ui/gtk/menus.ui.h:1
 msgid "Compose Message"
 msgstr "Skriv besked"
-
-#: ../desktop/geary-autostart.desktop.in.h:2
-#: ../src/client/application/geary-application.vala:21
-msgid "Mail Client"
-msgstr "E-mailklient"
 
 #: ../desktop/geary-autostart.desktop.in.h:3
 msgid "Geary Mail"
@@ -270,11 +267,15 @@ msgstr "        • Forkert brugernavn eller adgangskode.\n"
 msgid "Copyright 2016 Software Freedom Conservancy Inc."
 msgstr "Ophavsret 2016 Software Freedom Conservancy Inc."
 
-#: ../src/client/application/geary-application.vala:24
+#: ../src/client/application/geary-application.vala:23
+msgid "Copyright 2016-2017 Geary Development Team."
+msgstr "Ophavsret 2016-2017 Gearys udviklerhold."
+
+#: ../src/client/application/geary-application.vala:25
 msgid "Visit the Geary web site"
 msgstr "Besøg Gearys hjemmeside"
 
-#: ../src/client/application/geary-application.vala:464
+#: ../src/client/application/geary-application.vala:466
 #, c-format
 msgid "About %s"
 msgstr "Om %s"
@@ -282,7 +283,7 @@ msgstr "Om %s"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: ../src/client/application/geary-application.vala:468
+#: ../src/client/application/geary-application.vala:470
 msgid "translator-credits"
 msgstr ""
 "Nikolaj Holmquist Pedersen <nikolajholmquist@gmail.com>\n"
@@ -359,20 +360,20 @@ msgstr "Vis programversion"
 msgid "Use %s to open a new composer window"
 msgstr "Brug %s for at åbne et nyt redigeringsvindue"
 
-#: ../src/client/application/geary-args.vala:54
+#: ../src/client/application/geary-args.vala:56
 msgid "Please report comments, suggestions and bugs to:"
 msgstr "Send kommentarer, idéer og fejlrapporter til:"
 
 #. i18n: Command line arguments are invalid
-#: ../src/client/application/geary-args.vala:61
+#: ../src/client/application/geary-args.vala:63
 #, c-format
 msgid "Failed to parse command line options: %s\n"
 msgstr "Kunne ikke genkende indstillingerne på kommandolinjen: %s\n"
 
-#: ../src/client/application/geary-args.vala:72
+#: ../src/client/application/geary-args.vala:74
 #, c-format
 msgid "Unrecognized command line option “%s”\n"
-msgstr "Ukendt kommandolinje-indstilling \"%s\"\n"
+msgstr "Ukendt kommandolinje-indstilling “%s”\n"
 
 #: ../src/client/application/geary-controller.vala:57
 msgid "Delete conversation"
@@ -506,11 +507,11 @@ msgstr "Videresend (Ctrl+L, F)"
 
 #: ../src/client/application/geary-controller.vala:538
 msgid "Empty _Spam…"
-msgstr "Tøm _spam…"
+msgstr "Tøm _spam …"
 
 #: ../src/client/application/geary-controller.vala:542
 msgid "Empty _Trash…"
-msgstr "Tøm _papirkurv…"
+msgstr "Tøm _papirkurv …"
 
 #. No callback is connected, since we bind the toggle button to the search bar visibility
 #: ../src/client/application/geary-controller.vala:574
@@ -568,7 +569,7 @@ msgid ""
 "please manually delete the email from your Outbox folder."
 msgstr ""
 "Geary stødte ind i en fejl under afsendelse af en e-mail. Hvis dette problem "
-"fortsætter, bør du manuelt slette beskeden fra din \"Udbakke\"-mappe."
+"fortsætter, bør du manuelt slette beskeden fra din “Udbakke”-mappe."
 
 #. Displayed in the space-limited status bar when a message fails to be uploaded
 #. to Sent Mail after being sent.
@@ -632,7 +633,7 @@ msgstr "_Afslut"
 #: ../src/client/application/geary-controller.vala:1178
 #, c-format
 msgid "Unable to rebuild database for “%s”"
-msgstr "Kunne ikke genopbygge databasen for \"%s\""
+msgstr "Kunne ikke genopbygge databasen for “%s”"
 
 #: ../src/client/application/geary-controller.vala:1179
 #, c-format
@@ -681,8 +682,8 @@ msgid ""
 "Please install the latest version of Geary and try again."
 msgstr ""
 "Den lokale e-maildatabases versionsnummer er til en nyere version af Geary. "
-"Desværre kan databasen ikke blive \"rullet tilbage\", så den virker med "
-"denne version of Geary.\n"
+"Desværre kan databasen ikke blive “rullet tilbage”, så den virker med denne "
+"version of Geary.\n"
 "\n"
 "Installér venligst den nyeste version af Geary og prøv igen."
 
@@ -698,15 +699,15 @@ msgstr ""
 "\n"
 "Tjek, at din internetforbindelse virker og genstart derefter Geary."
 
-#: ../src/client/application/geary-controller.vala:1999
+#: ../src/client/application/geary-controller.vala:2008
 msgid "Undo move (Ctrl+Z)"
 msgstr "Fortryd flyt (Ctrl+Z)"
 
-#: ../src/client/application/geary-controller.vala:2009
+#: ../src/client/application/geary-controller.vala:2018
 msgid "Are you sure you want to open these attachments?"
 msgstr "Er du sikker på, at du vil åbne disse vedhæftede filer?"
 
-#: ../src/client/application/geary-controller.vala:2010
+#: ../src/client/application/geary-controller.vala:2019
 msgid ""
 "Attachments may cause damage to your system if opened.  Only open files from "
 "trusted sources."
@@ -714,79 +715,79 @@ msgstr ""
 "Vedhæftede filer kan skade dit system, når de åbnes.  Åbn kun filer fra "
 "folk, du stoler på."
 
-#: ../src/client/application/geary-controller.vala:2011
+#: ../src/client/application/geary-controller.vala:2020
 msgid "Don’t _ask me again"
 msgstr "S_pørg mig ikke igen"
 
-#: ../src/client/application/geary-controller.vala:2121
+#: ../src/client/application/geary-controller.vala:2130
 #, c-format
 msgid "A file named “%s” already exists.  Do you want to replace it?"
-msgstr "Filen \"%s\" findes allerede. Vil du erstatte den?"
+msgstr "Filen “%s” findes allerede. Vil du erstatte den?"
 
-#: ../src/client/application/geary-controller.vala:2123
+#: ../src/client/application/geary-controller.vala:2132
 #, c-format
 msgid ""
 "The file already exists in “%s”.  Replacing it will overwrite its contents."
 msgstr ""
-"Filen findes allerede i \"%s\". Hvis du erstatter den, overskrives dens "
+"Filen findes allerede i “%s”. Hvis du erstatter den, overskrives dens "
 "indhold."
 
-#: ../src/client/application/geary-controller.vala:2126
+#: ../src/client/application/geary-controller.vala:2135
 msgid "_Replace"
 msgstr "_Erstat"
 
 #. Find out what to do with the inline composers.
 #. TODO: Remove this in favor of automatically saving drafts
-#: ../src/client/application/geary-controller.vala:2374
+#: ../src/client/application/geary-controller.vala:2383
 msgid "Close open draft messages?"
 msgstr "Luk åbne kladder?"
 
-#: ../src/client/application/geary-controller.vala:2496
+#: ../src/client/application/geary-controller.vala:2505
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Tøm al e-mail fra din %s-mappe?"
 
-#: ../src/client/application/geary-controller.vala:2497
+#: ../src/client/application/geary-controller.vala:2506
 msgid "This removes the email from Geary and your email server."
 msgstr "Dette fjerner e-mail fra Geary samt din e-mailserver."
 
-#: ../src/client/application/geary-controller.vala:2498
+#: ../src/client/application/geary-controller.vala:2507
 msgid "This cannot be undone."
 msgstr "Dette kan ikke fortrydes."
 
-#: ../src/client/application/geary-controller.vala:2499
+#: ../src/client/application/geary-controller.vala:2508
 #, c-format
 msgid "Empty %s"
 msgstr "Tøm %s"
 
-#: ../src/client/application/geary-controller.vala:2516
+#: ../src/client/application/geary-controller.vala:2525
 #, c-format
 msgid "Error emptying %s"
 msgstr "Fejl ved tømning af %s"
 
-#: ../src/client/application/geary-controller.vala:2546
+#: ../src/client/application/geary-controller.vala:2555
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Ønsker du at slette denne besked permanent?"
 msgstr[1] "Ønsker du at slette disse beskeder permanent?"
 
-#: ../src/client/application/geary-controller.vala:2548
+#: ../src/client/application/geary-controller.vala:2557
 msgid "Delete"
 msgstr "Slet"
 
-#: ../src/client/application/geary-controller.vala:2580
+#: ../src/client/application/geary-controller.vala:2589
 msgid "Undo archive (Ctrl+Z)"
 msgstr "Fortryd arkivér (Ctrl+Z)"
 
-#: ../src/client/application/geary-controller.vala:2595
+#: ../src/client/application/geary-controller.vala:2604
 msgid "Undo trash (Ctrl+Z)"
 msgstr "Fortryd smid i papirkurv (Ctrl+Z)"
 
-#: ../src/client/application/geary-controller.vala:2649
+#: ../src/client/application/geary-controller.vala:2658
 msgid "Undo (Ctrl+Z)"
 msgstr "Fortryd (Ctrl+Z)"
 
-#: ../src/client/application/geary-controller.vala:2780
+#: ../src/client/application/geary-controller.vala:2789
 msgid "Failed to open default text editor."
 msgstr "Kunne ikke åbne standardprogrammet til tekstredigéring."
 
@@ -940,7 +941,7 @@ msgstr "Send beskeden uden en vedhæftet fil?"
 #: ../src/client/composer/composer-widget.vala:1515
 #, c-format
 msgid "“%s” already attached for delivery."
-msgstr "\"%s\" er allerede vedhæftet."
+msgstr "“%s” er allerede vedhæftet."
 
 #. / In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
 #. Translators: The first argument will be a
@@ -956,22 +957,22 @@ msgstr "%s (%s)"
 #: ../src/client/composer/composer-widget.vala:1560
 #, c-format
 msgid "“%s” could not be found."
-msgstr "\"%s\" blev ikke fundet."
+msgstr "“%s” blev ikke fundet."
 
 #: ../src/client/composer/composer-widget.vala:1566
 #, c-format
 msgid "“%s” is a folder."
-msgstr "\"%s\" er en mappe."
+msgstr "“%s” er en mappe."
 
 #: ../src/client/composer/composer-widget.vala:1572
 #, c-format
 msgid "“%s” is an empty file."
-msgstr "\"%s\" er en tom fil."
+msgstr "“%s” er en tom fil."
 
 #: ../src/client/composer/composer-widget.vala:1585
 #, c-format
 msgid "“%s” could not be opened for reading."
-msgstr "\"%s\" kunne ikke åbnes til læsning."
+msgstr "“%s” kunne ikke åbnes til læsning."
 
 #: ../src/client/composer/composer-widget.vala:1593
 msgid "Cannot add attachment"
@@ -1113,15 +1114,15 @@ msgid ""
 "Selecting “Trust This Server” or “Always Trust This Server” may cause your "
 "username and password to be transmitted insecurely."
 msgstr ""
-"Hvis du vælger \"Stol på serveren\" eller \"Stol altid på serveren\", kan "
-"dit brugernavn og din adgangskode blive sendt uden sikkerhed."
+"Hvis du vælger “Stol på serveren” eller “Stol altid på serveren”, kan dit "
+"brugernavn og din adgangskode blive sendt uden sikkerhed."
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:52
 msgid ""
 "Selecting “Don’t Trust This Server” will cause Geary not to access this "
 "server."
 msgstr ""
-"Hvis du vælger \"Stol ikke på serveren\", vil Geary ikke forbinde til denne "
+"Hvis du vælger “Stol ikke på serveren”, vil Geary ikke forbinde til denne "
 "server."
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:54
@@ -1133,7 +1134,7 @@ msgid ""
 "Selecting “Don’t Trust This Server” will cause Geary to stop accessing this "
 "account."
 msgstr ""
-"Hvis du vælger \"Stol ikke på serveren\", vil Geary holde op med at tilgå "
+"Hvis du vælger “Stol ikke på serveren”, vil Geary holde op med at tilgå "
 "denne konto."
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:61
@@ -2475,7 +2476,7 @@ msgstr "_Gem sendt mail"
 
 #: ../ui/login.glade.h:11
 msgid "Addi_tional email addresses…"
-msgstr "_Yderligere e-mailadresser…"
+msgstr "_Yderligere e-mailadresser …"
 
 #: ../ui/login.glade.h:12
 msgid "IMAP settings"
@@ -2668,7 +2669,10 @@ msgstr "E-mailadresse:"
 
 #: ../ui/upgrade_dialog.glade.h:1
 msgid "Geary update in progress…"
-msgstr "Geary er ved at blive opgraderet…"
+msgstr "Geary er ved at blive opgraderet …"
+
+#~ msgid "Mail Client"
+#~ msgstr "E-mailklient"
 
 #~ msgid "_Inspect"
 #~ msgstr "_Undersøg"
@@ -2699,7 +2703,7 @@ msgstr "Geary er ved at blive opgraderet…"
 #~ msgstr "Tøm"
 
 #~ msgid "_Inspect..."
-#~ msgstr "_Undersøg..."
+#~ msgstr "_Undersøg …"
 
 #~ msgid "Copyright 2011-2014 Yorba Foundation"
 #~ msgstr "Copyright 2011-2014 Yorba Foundation"
@@ -2742,12 +2746,12 @@ msgstr "Geary er ved at blive opgraderet…"
 #~ msgstr "Vælg _besked"
 
 #~ msgid "_Save As..."
-#~ msgstr "Gem _som..."
+#~ msgstr "Gem _som …"
 
 #~ msgid "Save A_ttachment..."
 #~ msgid_plural "Save All A_ttachments..."
-#~ msgstr[0] "Gem v_edhæftet fil..."
-#~ msgstr[1] "Gem alle v_edhæftede filer..."
+#~ msgstr[0] "Gem v_edhæftet fil …"
+#~ msgstr[1] "Gem alle v_edhæftede filer …"
 
 #~ msgid "_Left"
 #~ msgstr "_Venstre"
