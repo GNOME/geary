@@ -11,30 +11,38 @@ msgstr ""
 "Project-Id-Version: geary-master\n"
 "Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=internationalization\n"
-"POT-Creation-Date: 2017-03-18 17:03+0000\n"
-"PO-Revision-Date: 2017-03-21 17:50+0100\n"
-"Last-Translator: Balázs Úr <urbalazs@gmail.com>\n"
+"POT-Creation-Date: 2017-10-02 14:41+0000\n"
+"PO-Revision-Date: 2017-10-25 12:27+0200\n"
+"Last-Translator: Meskó Balázs <meskobalazs@fedoraproject.org>\n"
 "Language-Team: Hungarian <openscope at googlegroups dot com>\n"
 "Language: hu\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Lokalize 1.2\n"
+"X-Generator: Poedit 2.0.4\n"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:1
+#. Translators: The application name
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:2
 #: ../desktop/org.gnome.Geary.desktop.in.h:1
 #: ../desktop/geary-autostart.desktop.in.h:1
 msgid "Geary"
 msgstr "Geary"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:2
+#. Translators: The development team's name
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:4
+msgid "Geary Development Team"
+msgstr "Geary fejlesztőcsapat"
+
+#. Translators: The application's summary / tagline
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:6
 #: ../desktop/org.gnome.Geary.desktop.in.h:4
 #: ../desktop/geary-autostart.desktop.in.h:4
+#: ../src/client/application/geary-application.vala:21
 msgid "Send and receive email"
 msgstr "E-mailek küldése és fogadása"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:3
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:7
 msgid ""
 "Geary is an email application built around conversations, for the GNOME 3 "
 "desktop. It allows you to read, find and send email with a straightforward, "
@@ -44,7 +52,7 @@ msgstr ""
 "GNOME 3 asztalhoz készült. Segítségével e-maileket olvashat, kereshet és "
 "küldhet egy lényegre törő és modern felületen."
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:4
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:8
 msgid ""
 "Conversations allow you to read a complete discussion without having to find "
 "and click from message to message."
@@ -52,38 +60,48 @@ msgstr ""
 "A társalgások segítségével teljes beszélgetéseket olvashat el anélkül, hogy "
 "egyesével végig kellene kattintania a leveleken."
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:5
-#| msgid "Geary's features include:"
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:9
 msgid "Geary’s features include:"
 msgstr "A Geary néhány funkciója:"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:6
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:10
 msgid "Quick email account setup"
 msgstr "Gyors e-mailfiók beállítás"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:7
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:11
 msgid "Shows related messages together in conversations"
 msgstr "A kapcsolódó leveleket együtt jeleníti meg a beszélgetésekben"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:8
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:12
 msgid "Fast, full text and keyword search"
 msgstr "Gyors, teljes szöveges és kulcsszavas keresés"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:9
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:13
 msgid "Full-featured HTML and plain text message composer"
 msgstr "Teljes funkcionalitású HTML és egyszerű szöveges levélszerkesztő"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:10
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:14
 msgid "Desktop notification of new mail"
 msgstr "Asztali értesítések új levél érkezésekor"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:11
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:15
 msgid "Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers"
 msgstr ""
 "Kompatibilis a GMaillel, a Yahoo! Maillel, az Outlook.commal és más IMAP "
 "kiszolgálókkal"
 
+#. Translators: A screenshot description.
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:17
+msgid "Geary displaying a conversation"
+msgstr "Egy beszélgetés megjelenítése a Gearyben"
+
+#. Translators: A screenshot description.
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:19
+msgid "Geary showing the rich text composer"
+msgstr "A Geary gazdag szövegszerkesztője"
+
 #: ../desktop/org.gnome.Geary.desktop.in.h:2
+#: ../desktop/geary-autostart.desktop.in.h:2
 msgid "Email"
 msgstr "E-mail"
 
@@ -99,11 +117,6 @@ msgstr "Levél;Levelezés;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;"
 #: ../desktop/org.gnome.Geary.desktop.in.h:7 ../ui/gtk/menus.ui.h:1
 msgid "Compose Message"
 msgstr "Levél írása"
-
-#: ../desktop/geary-autostart.desktop.in.h:2
-#: ../src/client/application/geary-application.vala:21
-msgid "Mail Client"
-msgstr "Levelezőkliens"
 
 #: ../desktop/geary-autostart.desktop.in.h:3
 msgid "Geary Mail"
@@ -217,42 +230,34 @@ msgid "Unable to validate:\n"
 msgstr "Nem sikerült érvényesíteni:\n"
 
 #: ../src/client/accounts/add-edit-page.vala:794
-#| msgid "        &#8226; Invalid account nickname.\n"
 msgid "        • Invalid account nickname.\n"
 msgstr "        • Érvénytelen fiók becenév.\n"
 
 #: ../src/client/accounts/add-edit-page.vala:797
-#| msgid "        &#8226; Email address already added to Geary.\n"
 msgid "        • Email address already added to Geary.\n"
 msgstr "        • Az e-mail cím már hozzá lett adva a Geary programhoz.\n"
 
 #: ../src/client/accounts/add-edit-page.vala:801
-#| msgid "        &#8226; IMAP connection error.\n"
 msgid "        • IMAP connection error.\n"
 msgstr "        • IMAP kapcsolódási hiba.\n"
 
 #: ../src/client/accounts/add-edit-page.vala:804
-#| msgid "        &#8226; IMAP username or password incorrect.\n"
 msgid "        • IMAP username or password incorrect.\n"
 msgstr "        • Az IMAP felhasználónév vagy jelszó helytelen.\n"
 
 #: ../src/client/accounts/add-edit-page.vala:807
-#| msgid "        &#8226; SMTP connection error.\n"
 msgid "        • SMTP connection error.\n"
 msgstr "        • SMTP kapcsolódási hiba.\n"
 
 #: ../src/client/accounts/add-edit-page.vala:810
-#| msgid "        &#8226; SMTP username or password incorrect.\n"
 msgid "        • SMTP username or password incorrect.\n"
 msgstr "        • Az SMTP felhasználónév vagy jelszó helytelen.\n"
 
 #: ../src/client/accounts/add-edit-page.vala:814
-#| msgid "        &#8226; Connection error.\n"
 msgid "        • Connection error.\n"
 msgstr "        • Kapcsolódási hiba.\n"
 
 #: ../src/client/accounts/add-edit-page.vala:818
-#| msgid "        &#8226; Username or password incorrect.\n"
 msgid "        • Username or password incorrect.\n"
 msgstr "        • A felhasználónév vagy jelszó helytelen.\n"
 
@@ -260,11 +265,15 @@ msgstr "        • A felhasználónév vagy jelszó helytelen.\n"
 msgid "Copyright 2016 Software Freedom Conservancy Inc."
 msgstr "Copyright 2016 Software Freedom Conservancy Inc."
 
-#: ../src/client/application/geary-application.vala:24
+#: ../src/client/application/geary-application.vala:23
+msgid "Copyright 2016-2017 Geary Development Team."
+msgstr "Copyright 2016-2017 Geary fejlesztőcsapat."
+
+#: ../src/client/application/geary-application.vala:25
 msgid "Visit the Geary web site"
 msgstr "Keresse fel a Geary weboldalát"
 
-#: ../src/client/application/geary-application.vala:464
+#: ../src/client/application/geary-application.vala:466
 #, c-format
 msgid "About %s"
 msgstr "%s névjegye"
@@ -272,12 +281,13 @@ msgstr "%s névjegye"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: ../src/client/application/geary-application.vala:468
+#: ../src/client/application/geary-application.vala:470
 msgid "translator-credits"
 msgstr ""
 "Kelemen Gábor <kelemeng at gnome dot hu>\n"
 "Lukács Bence <lukacs.bence1 at gmail dot com>\n"
-"Úr Balázs <urbalazs at gmail dot com>"
+"Úr Balázs <urbalazs at gmail dot com>\n"
+"Meskó Balázs <meskobalazs at fedoraproject dot org>"
 
 #: ../src/client/application/geary-args.vala:10
 msgid "Start Geary with hidden main window"
@@ -346,19 +356,18 @@ msgstr "A program verziójának megjelenítése"
 msgid "Use %s to open a new composer window"
 msgstr "%s használata egy új levélíró ablak megnyitásához"
 
-#: ../src/client/application/geary-args.vala:54
+#: ../src/client/application/geary-args.vala:56
 msgid "Please report comments, suggestions and bugs to:"
 msgstr "Kérjük írja le véleményét, észrevételeit és a hibákat ide:"
 
 #. i18n: Command line arguments are invalid
-#: ../src/client/application/geary-args.vala:61
+#: ../src/client/application/geary-args.vala:63
 #, c-format
 msgid "Failed to parse command line options: %s\n"
 msgstr "A parancssori kapcsolók feldolgozása meghiúsult: %s\n"
 
-#: ../src/client/application/geary-args.vala:72
+#: ../src/client/application/geary-args.vala:74
 #, c-format
-#| msgid "Unrecognized command line option \"%s\"\n"
 msgid "Unrecognized command line option “%s”\n"
 msgstr "Ismeretlen parancssori kapcsoló: „%s”\n"
 
@@ -431,7 +440,6 @@ msgid "Move conversations"
 msgstr "Beszélgetések áthelyezése"
 
 #: ../src/client/application/geary-controller.vala:450
-#| msgid "_Mark as..."
 msgid "_Mark as…"
 msgstr "_Megjelölés mint…"
 
@@ -542,8 +550,8 @@ msgid ""
 "Geary encountered an error while connecting to the server.  Please try again "
 "in a few moments."
 msgstr ""
-"A Geary hibába ütközött a kiszolgálóhoz történő kapcsolódáskor. Próbálja újra "
-"néhány másodperc múlva."
+"A Geary hibába ütközött a kiszolgálóhoz történő kapcsolódáskor. Próbálja "
+"újra néhány másodperc múlva."
 
 #. / Displayed in the space-limited status bar when a message fails to be sent due to error.
 #: ../src/client/application/geary-controller.vala:1079
@@ -621,7 +629,6 @@ msgstr "_Kilépés"
 
 #: ../src/client/application/geary-controller.vala:1178
 #, c-format
-#| msgid "Unable to rebuild database for \"%s\""
 msgid "Unable to rebuild database for “%s”"
 msgstr "Nem sikerült újjáépíteni az adatbázist ehhez: „%s”"
 
@@ -665,12 +672,6 @@ msgstr ""
 "%s"
 
 #: ../src/client/application/geary-controller.vala:1212
-#| msgid ""
-#| "The version number of the local mail database is formatted for a newer "
-#| "version of Geary. Unfortunately, the database cannot be \"rolled back\" "
-#| "to work with this version of Geary.\n"
-#| "\n"
-#| "Please install the latest version of Geary and try again."
 msgid ""
 "The version number of the local mail database is formatted for a newer "
 "version of Geary. Unfortunately, the database cannot be “rolled back” to "
@@ -713,21 +714,16 @@ msgstr ""
 "megbízható forrásokból nyisson meg fájlokat."
 
 #: ../src/client/application/geary-controller.vala:2011
-#| msgid "Don't _ask me again"
 msgid "Don’t _ask me again"
 msgstr "Ne _kérdezze újra"
 
 #: ../src/client/application/geary-controller.vala:2121
 #, c-format
-#| msgid "A file named \"%s\" already exists.  Do you want to replace it?"
 msgid "A file named “%s” already exists.  Do you want to replace it?"
 msgstr "Már létezik „%s” nevű fájl. Le akarja cserélni?"
 
 #: ../src/client/application/geary-controller.vala:2123
 #, c-format
-#| msgid ""
-#| "The file already exists in \"%s\".  Replacing it will overwrite its "
-#| "contents."
 msgid ""
 "The file already exists in “%s”.  Replacing it will overwrite its contents."
 msgstr ""
@@ -823,7 +819,6 @@ msgstr "%s fiók keresése"
 
 #. / Displayed in the space-limited status bar while a message is in the process of being sent.
 #: ../src/client/components/status-bar.vala:26
-#| msgid "Sending..."
 msgid "Sending…"
 msgstr "Küldés…"
 
@@ -861,7 +856,6 @@ msgid "_Preferences"
 msgstr "_Beállítások"
 
 #: ../src/client/components/stock.vala:28 ../ui/conversation-email-menus.ui.h:7
-#| msgid "_Print..."
 msgid "_Print…"
 msgstr "_Nyomtatás…"
 
@@ -886,7 +880,6 @@ msgid "Invalid link URL"
 msgstr "Érvénytelen hivatkozás URL"
 
 #: ../src/client/composer/composer-link-popover.vala:157
-#| msgid "Remove email address"
 msgid "Invalid email address"
 msgstr "Érvénytelen e-mail cím"
 
@@ -952,7 +945,6 @@ msgstr "Elküldi a levelet melléklet nélkül?"
 
 #: ../src/client/composer/composer-widget.vala:1515
 #, c-format
-#| msgid "\"%s\" already attached for delivery."
 msgid "“%s” already attached for delivery."
 msgstr "„%s” már csatolva van a küldeményhez."
 
@@ -969,25 +961,21 @@ msgstr "%s (%s)"
 
 #: ../src/client/composer/composer-widget.vala:1560
 #, c-format
-#| msgid "\"%s\" could not be found."
 msgid "“%s” could not be found."
 msgstr "„%s” nem található."
 
 #: ../src/client/composer/composer-widget.vala:1566
 #, c-format
-#| msgid "\"%s\" is a folder."
 msgid "“%s” is a folder."
 msgstr "„%s” egy mappa."
 
 #: ../src/client/composer/composer-widget.vala:1572
 #, c-format
-#| msgid "\"%s\" is an empty file."
 msgid "“%s” is an empty file."
 msgstr "„%s” egy üres fájl."
 
 #: ../src/client/composer/composer-widget.vala:1585
 #, c-format
-#| msgid "\"%s\" could not be opened for reading."
 msgid "“%s” could not be opened for reading."
 msgstr "„%s” nem nyitható meg olvasásra."
 
@@ -1074,7 +1062,6 @@ msgstr ", "
 #. attribute value when displaying an inline image in an email
 #. that did not specify a file name. E.g. <IMG ALT="Image" ...
 #: ../src/client/conversation-viewer/conversation-message.vala:707
-#| msgid "Images"
 msgid "Image"
 msgstr "Kép"
 
@@ -1088,11 +1075,11 @@ msgstr "A listában kiválasztott beszélgetés itt fog megjelenni"
 
 #: ../src/client/conversation-viewer/conversation-viewer.vala:79
 msgid "Multiple conversations selected"
-msgstr "Több beszélgetés kijelölve."
+msgstr "Több beszélgetés kijelölve"
 
 #: ../src/client/conversation-viewer/conversation-viewer.vala:81
 msgid "Choosing an action will apply to all selected conversations"
-msgstr "A kiválasztott művelet minden levélen végre lesz hajtva."
+msgstr "A kiválasztott művelet minden beszélgetésen végre lesz hajtva"
 
 #: ../src/client/conversation-viewer/conversation-viewer.vala:86
 #: ../src/client/conversation-viewer/conversation-viewer.vala:93
@@ -1130,9 +1117,6 @@ msgstr ""
 "ellenőrizhető."
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:44
-#| msgid ""
-#| "Selecting \"Trust This Server\" or \"Always Trust This Server\" may cause "
-#| "your username and password to be transmitted insecurely."
 msgid ""
 "Selecting “Trust This Server” or “Always Trust This Server” may cause your "
 "username and password to be transmitted insecurely."
@@ -1141,9 +1125,6 @@ msgstr ""
 "választása a felhasználónév és jelszó nem biztonságos átvitelét okozhatja."
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:52
-#| msgid ""
-#| "Selecting \"Don't Trust This Server\" will cause Geary not to access this "
-#| "server."
 msgid ""
 "Selecting “Don’t Trust This Server” will cause Geary not to access this "
 "server."
@@ -1156,9 +1137,6 @@ msgid "Geary will not add or update this email account."
 msgstr "A Geary nem fogja hozzáadni vagy frissíteni ezt az e-mail fiókot."
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:59
-#| msgid ""
-#| "Selecting \"Don't Trust This Server\" will cause Geary to stop accessing "
-#| "this account."
 msgid ""
 "Selecting “Don’t Trust This Server” will cause Geary to stop accessing this "
 "account."
@@ -1179,39 +1157,32 @@ msgstr ""
 "bármilyen kérdése van ezzel a hibával kapcsolatban."
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:73
-#| msgid "The server's certificate is not signed by a known authority"
 msgid "The server’s certificate is not signed by a known authority"
 msgstr "A kiszolgáló tanúsítványát nem ismert hitelesítésszolgáltató írta alá"
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:76
-#| msgid "The server's identity does not match the identity in the certificate"
 msgid "The server’s identity does not match the identity in the certificate"
 msgstr ""
 "A kiszolgáló személyazonossága nem egyezik a tanúsítványban lévő "
 "személyazonossággal"
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:79
-#| msgid "The server's certificate has expired"
 msgid "The server’s certificate has expired"
 msgstr "A kiszolgáló tanúsítványa lejárt"
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:82
-#| msgid "The server's certificate has not been activated"
 msgid "The server’s certificate has not been activated"
 msgstr "A kiszolgáló tanúsítványát még nem aktiválták"
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:85
-#| msgid "The server's certificate has been revoked and is now invalid"
 msgid "The server’s certificate has been revoked and is now invalid"
 msgstr "A kiszolgáló tanúsítványát visszavonták és most érvénytelen"
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:88
-#| msgid "The server's certificate is considered insecure"
 msgid "The server’s certificate is considered insecure"
 msgstr "A kiszolgáló tanúsítványa nem tekinthető biztonságosnak"
 
 #: ../src/client/dialogs/certificate-warning-dialog.vala:91
-#| msgid "An error has occurred processing the server's certificate"
 msgid "An error has occurred processing the server’s certificate"
 msgstr "Hiba történt a kiszolgáló tanúsítványának feldolgozása során"
 
@@ -1259,7 +1230,6 @@ msgstr[1] "%d találat"
 
 #: ../src/client/notification/libmessagingmenu.vala:75
 #, c-format
-#| msgid "%s - New Messages"
 msgid "%s — New Messages"
 msgstr "%s — Új levelek"
 
@@ -1797,7 +1767,6 @@ msgid "_Trust This Server"
 msgstr "_Megbízom a kiszolgálóban"
 
 #: ../ui/certificate_warning_dialog.glade.h:4
-#| msgid "_Don't Trust This Server"
 msgid "_Don’t Trust This Server"
 msgstr "_Nem bízom meg a kiszolgálóban"
 
@@ -1844,13 +1813,10 @@ msgid "Update this link’s URL"
 msgstr "Hivatkozás URL-ének frissítése"
 
 #: ../ui/composer-link-popover.ui.h:6
-#| msgctxt "Outlook localised name"
-#| msgid "Deleted Items"
 msgid "Delete this link"
 msgstr "Hivatkozás törlése"
 
 #: ../ui/composer-link-popover.ui.h:7
-#| msgid "_Open Link"
 msgid "Open this link"
 msgstr "Hivatkozás megnyitása"
 
@@ -1920,7 +1886,6 @@ msgid "Select _All"
 msgstr "Ö_sszes kijelölése"
 
 #: ../ui/composer-menus.ui.h:17 ../ui/conversation-message-menus.ui.h:9
-#| msgid "_Inspect"
 msgid "_Inspect…"
 msgstr "_Vizsgálat…"
 
@@ -1959,7 +1924,6 @@ msgid "To add them as attachments"
 msgstr "Mellékletként való hozzáadáshoz"
 
 #: ../ui/composer-widget.ui.h:11
-#| msgid "Undo trash (Ctrl+Z)"
 msgid "Undo last edit (Ctrl+Z)"
 msgstr "Utolsó szerkesztés visszavonása (Ctrl+Z)"
 
@@ -1996,17 +1960,14 @@ msgid "Insert or update selection link (Ctrl+L)"
 msgstr "Kijelölés hivatkozásának beszúrása vagy frissítése (Ctrl+L)"
 
 #: ../ui/composer-widget.ui.h:20
-#| msgid "Image (Ctrl+G)"
 msgid "Insert an image (Ctrl+G)"
 msgstr "Kép beszúrása (Ctrl+G)"
 
 #: ../ui/composer-widget.ui.h:21
-#| msgid "Remove formatting (Ctrl+Space)"
 msgid "Remove selection formatting (Ctrl+Space)"
 msgstr "Kijelölés formázásának eltávolítása (Ctrl+Space)"
 
 #: ../ui/composer-widget.ui.h:22
-#| msgid "Select spell checking language"
 msgid "Select spell checking languages"
 msgstr "Helyesírás-ellenőrzés nyelvének kiválasztása"
 
@@ -2098,7 +2059,6 @@ msgid "Copy Link _Address"
 msgstr "Hivatkozás_cím másolása"
 
 #: ../ui/conversation-message-menus.ui.h:3
-#| msgid "Send New _Message..."
 msgid "Send New _Message…"
 msgstr "Új _levél küldése…"
 
@@ -2107,7 +2067,6 @@ msgid "Copy Email _Address"
 msgstr "_E-mail cím másolása"
 
 #: ../ui/conversation-message-menus.ui.h:5
-#| msgid "Save _Image As..."
 msgid "Save _Image As…"
 msgstr "_Kép mentése másként…"
 
@@ -2176,7 +2135,6 @@ msgid "But actually goes to:"
 msgstr "De valójában ide:"
 
 #: ../ui/conversation-message.ui.h:15
-#| msgid "This link appears to go to:"
 msgid "The link appears to go to:"
 msgstr "Úgy tűnik, ez a hivatkozás ide mutat:"
 
@@ -2715,3 +2673,5 @@ msgstr "E-mail cím:"
 msgid "Geary update in progress…"
 msgstr "Geary frissítés folyamatban…"
 
+#~ msgid "Mail Client"
+#~ msgstr "Levelezőkliens"
