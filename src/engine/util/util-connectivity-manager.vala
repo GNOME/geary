@@ -23,7 +23,8 @@ public class Geary.ConnectivityManager : BaseObject {
 	/** Determines if the managed endpoint is currently reachable. */
 	public bool is_reachable { get; private set; default = false; }
 
-    private Endpoint endpoint;
+    // Weak to avoid a circular ref with the endpoint
+    private weak Endpoint endpoint;
 
     private NetworkMonitor monitor;
 
@@ -45,11 +46,11 @@ public class Geary.ConnectivityManager : BaseObject {
     }
 
 	/**
-	 * Starts checking if the manager's endpoint is reachable.
-	 *
-	 * This will cancel any existing check, and start a new one
-	 * running, updating the `is_reachable` property on completion.
-	 */
+     * Starts checking if the manager's endpoint is reachable.
+     *
+     * This will cancel any existing check, and start a new one
+     * running, updating the `is_reachable` property on completion.
+     */
     public async void check_reachable() {
 		// We use a cancellable here as a guard instead of a boolean
 		// "is_checking" var since when a series of checks are
@@ -79,7 +80,7 @@ public class Geary.ConnectivityManager : BaseObject {
 				// just assume the service is reachable is for now. :(
 				is_reachable = true;
 				debug("Assuming %s is reachable, despite network unavailability",
-					  endpoint);
+                      endpoint);
 			} else if (!(err is IOError.CANCELLED)) {
 				// Service is unreachable
 				debug("Error checking %s reachable, treating as unreachable: %s",
@@ -95,8 +96,8 @@ public class Geary.ConnectivityManager : BaseObject {
     }
 
 	/**
-	 * Cancels any running reachability check, if any.
-	 */
+     * Cancels any running reachability check, if any.
+     */
     public void cancel_check() {
 		if (this.existing_check != null) {
 			this.existing_check.cancel();
@@ -108,7 +109,7 @@ public class Geary.ConnectivityManager : BaseObject {
         // Always check if reachable because IMAP server could be on
         // localhost.  (This is a Linux program, after all...)
 		debug("Network changed: %s",
-			  some_available ? "some available" : "none available");
+              some_available ? "some available" : "none available");
 		if (some_available) {
 			// Some hosts may have dropped out despite network being
 			// still xavailable, so need to check again
@@ -125,6 +126,8 @@ public class Geary.ConnectivityManager : BaseObject {
 		// change. 0.36 fixes that, so pull this out when we can
 		// depend on that as a minimum.
 		if (this.is_reachable != reachable) {
+            debug("Host %s became %s",
+                  this.endpoint.to_string(), reachable ? "reachable" : "unreachable");
 			this.is_reachable = reachable;
 		}
 	}

@@ -8,74 +8,60 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
     private const int FETCH_DATE_RECEIVED_CHUNK_COUNT = 25;
     private const int SYNC_DELAY_SEC = 10;
     private const int RETRY_SYNC_DELAY_SEC = 60;
-    
-    public GenericAccount account { get; private set; }
-    
+
+    private weak GenericAccount account { get; private set; }
+    private weak Imap.Account remote { get; private set; }
+
     private Nonblocking.Mailbox<MinimalFolder> bg_queue = new Nonblocking.Mailbox<MinimalFolder>(bg_queue_comparator);
     private Gee.HashSet<MinimalFolder> made_available = new Gee.HashSet<MinimalFolder>();
+    private Gee.HashSet<FolderPath> unavailable_paths = new Gee.HashSet<FolderPath>();
     private MinimalFolder? current_folder = null;
     private Cancellable? bg_cancellable = null;
-    private Nonblocking.Semaphore stopped = new Nonblocking.Semaphore();
-    private Gee.HashSet<FolderPath> unavailable_paths = new Gee.HashSet<FolderPath>();
     private DateTime max_epoch = new DateTime(new TimeZone.local(), 2000, 1, 1, 0, 0, 0.0);
-    
-    public AccountSynchronizer(GenericAccount account) {
+
+
+    public AccountSynchronizer(GenericAccount account, Imap.Account remote) {
         this.account = account;
-        
+        this.remote = remote;
+
         // don't allow duplicates because it's possible for a Folder to change several times
         // before finally opened and synchronized, which we only want to do once
-        bg_queue.allow_duplicates = false;
-        bg_queue.requeue_duplicate = false;
-        
-        account.opened.connect(on_account_opened);
-        account.closed.connect(on_account_closed);
-        account.folders_available_unavailable.connect(on_folders_available_unavailable);
-        account.folders_contents_altered.connect(on_folders_contents_altered);
-        account.email_sent.connect(on_email_sent);
+        this.bg_queue.allow_duplicates = false;
+        this.bg_queue.requeue_duplicate = false;
+
+        this.account.information.notify["prefetch-period-days"].connect(on_account_prefetch_changed);
+        this.account.closed.connect(on_account_closed);
+        this.account.folders_available_unavailable.connect(on_folders_available_unavailable);
+        this.account.folders_contents_altered.connect(on_folders_contents_altered);
+        this.account.email_sent.connect(on_email_sent);
+        this.remote.ready.connect(on_account_ready);
     }
-    
+
     ~AccountSynchronizer() {
-        account.opened.disconnect(on_account_opened);
-        account.closed.disconnect(on_account_closed);
-        account.folders_available_unavailable.disconnect(on_folders_available_unavailable);
-        account.folders_contents_altered.disconnect(on_folders_contents_altered);
-        account.email_sent.disconnect(on_email_sent);
+        this.account.information.notify["prefetch-period-days"].connect(on_account_prefetch_changed);
+        this.account.closed.disconnect(on_account_closed);
+        this.account.folders_available_unavailable.disconnect(on_folders_available_unavailable);
+        this.account.folders_contents_altered.disconnect(on_folders_contents_altered);
+        this.account.email_sent.disconnect(on_email_sent);
+        this.remote.ready.disconnect(on_account_ready);
     }
-    
-    public async void stop_async() {
-        bg_cancellable.cancel();
-        
-        try {
-            yield stopped.wait_async();
-        } catch (Error err) {
-            debug("Error waiting for AccountSynchronizer background task for %s to complete: %s",
-                account.to_string(), err.message);
+
+    public void stop() {
+        Cancellable? cancellable = this.bg_cancellable;
+        if (cancellable != null) {
+            cancellable.cancel();
+
+            this.bg_queue.clear();
+            this.made_available.clear();
+            this.unavailable_paths.clear();
+            this.current_folder = null;
         }
     }
-    
-    private void on_account_opened() {
-        if (stopped.is_passed())
-            return;
-        
-        account.information.notify["prefetch-period-days"].connect(on_account_prefetch_changed);
-        
-        bg_queue.allow_duplicates = false;
-        bg_queue.requeue_duplicate = false;
-        bg_cancellable = new Cancellable();
-        unavailable_paths.clear();
-        
-        // immediately start processing folders as they are announced as available
-        process_queue_async.begin();
-    }
-    
+
     private void on_account_closed() {
-        account.information.notify["prefetch-period-days"].disconnect(on_account_prefetch_changed);
-        
-        bg_cancellable.cancel();
-        bg_queue.clear();
-        unavailable_paths.clear();
+        stop();
     }
-    
+
     private void on_account_prefetch_changed() {
         try {
             // treat as an availability check (i.e. as if the account had just opened) because
@@ -89,10 +75,7 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
     }
     
     private void on_folders_available_unavailable(Gee.Collection<Folder>? available,
-        Gee.Collection<Folder>? unavailable) {
-        if (stopped.is_passed())
-            return;
-        
+                                                  Gee.Collection<Folder>? unavailable) {
         if (available != null) {
             foreach (Folder folder in available)
                 unavailable_paths.remove(folder.path);
@@ -237,20 +220,23 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
     }
     
     private async void process_queue_async() {
-        for (;;) {
+        if (this.bg_cancellable != null) {
+            return;
+        }
+        Cancellable cancellable = this.bg_cancellable = new Cancellable();
+
+        debug("%s: Starting background sync", this.account.to_string());
+
+        while (!cancellable.is_cancelled()) {
             MinimalFolder folder;
             try {
                 folder = yield bg_queue.recv_async(bg_cancellable);
             } catch (Error err) {
                 if (!(err is IOError.CANCELLED))
                     debug("Failed to receive next folder for background sync: %s", err.message);
-                
                 break;
             }
-            
-            // mark as current folder to prevent requeues while processing
-            current_folder = folder;
-            
+
             // generate the current epoch for synchronization (could cache this value, obviously, but
             // doesn't seem like this biggest win in this class)
             DateTime epoch;
@@ -260,47 +246,60 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
             } else {
                 epoch = max_epoch;
             }
-            
-            bool ok = yield process_folder_async(folder, made_available.remove(folder), epoch);
-            
-            // clear current folder in every event
-            current_folder = null;
-            
-            if (!ok)
+
+            bool availability_check = false;
+            try {
+                // mark as current folder to prevent requeues while processing
+                this.current_folder = folder;
+                availability_check = this.made_available.remove(folder);
+                yield process_folder_async(folder, availability_check, epoch, cancellable);
+            } catch (Error err) {
+                // retry the folder later
+                delayed_send_all(
+                    iterate<Folder>(folder).to_array_list(),
+                    availability_check,
+                    RETRY_SYNC_DELAY_SEC
+                );
+                if (!(err is IOError.CANCELLED)) {
+                    debug("%s: Error synchronising %s: %s",
+                          this.account.to_string(), folder.to_string(), err.message);
+                }
                 break;
+            } finally {
+                this.current_folder = null;
+            }
         }
-        
-        // clear queue of any remaining folders so references aren't held
-        bg_queue.clear();
-        
-        // same with made_available table
-        made_available.clear();
-        
-        // flag as stopped for any waiting tasks
-        stopped.blind_notify();
+
+        this.bg_cancellable = null;
     }
-    
+
     // Returns false if IOError.CANCELLED received
-    private async bool process_folder_async(MinimalFolder folder, bool availability_check, DateTime epoch) {
+    private async void process_folder_async(MinimalFolder folder,
+                                            bool availability_check,
+                                            DateTime epoch,
+                                            Cancellable cancellable)
+        throws Error {
         // get oldest local email and its time, as well as number of messages in local store
         DateTime? oldest_local = null;
         Geary.EmailIdentifier? oldest_local_id = null;
         int local_count = 0;
-        try {
-            Gee.List<Geary.Email>? list = yield folder.local_folder.list_email_by_id_async(null, 1,
-                Email.Field.PROPERTIES, ImapDB.Folder.ListFlags.NONE | ImapDB.Folder.ListFlags.OLDEST_TO_NEWEST,
-                bg_cancellable);
-            if (list != null && list.size > 0) {
-                oldest_local = list[0].properties.date_received;
-                oldest_local_id = list[0].id;
-            }
-            
-            local_count = yield folder.local_folder.get_email_count_async(ImapDB.Folder.ListFlags.NONE,
-                bg_cancellable);
-        } catch (Error err) {
-            debug("Unable to fetch oldest local email for %s: %s", folder.to_string(), err.message);
+        Gee.List<Geary.Email>? list = yield folder.local_folder.list_email_by_id_async(
+            null,
+            1,
+            Email.Field.PROPERTIES,
+            ImapDB.Folder.ListFlags.NONE | ImapDB.Folder.ListFlags.OLDEST_TO_NEWEST,
+            cancellable
+        );
+        if (list != null && list.size > 0) {
+            oldest_local = list[0].properties.date_received;
+            oldest_local_id = list[0].id;
         }
-        
+        local_count = yield folder.local_folder.get_email_count_async(
+            ImapDB.Folder.ListFlags.NONE,
+            cancellable
+        );
+
+        bool do_sync = true;
         if (availability_check) {
             // Compare the oldest mail in the local store and see if it is before the epoch; if so, no
             // need to synchronize simply because this Folder is available; wait for its contents to
@@ -308,10 +307,10 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
             if (oldest_local != null) {
                 if (oldest_local.compare(epoch) < 0) {
                     // Oldest local email before epoch, don't sync from network
-                    return true;
+                    do_sync = false;
                 } else if (folder.properties.email_total == local_count) {
                     // Local earliest email is after epoch, but there's nothing before it
-                    return true;
+                    do_sync = false;
                 } else {
                     debug("Oldest local email in %s not old enough (%s vs. %s), email_total=%d vs. local_count=%d, synchronizing...",
                         folder.to_string(), oldest_local.to_string(), epoch.to_string(),
@@ -320,62 +319,45 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
             } else if (folder.properties.email_total == 0) {
                 // no local messages, no remote messages -- this is as good as having everything up
                 // to the epoch
-                return true;
+                do_sync = false;
             } else {
                 debug("No oldest message found for %s, synchronizing...", folder.to_string());
             }
         } else {
             debug("Folder %s changed, synchronizing...", folder.to_string());
         }
-        
-        try {
-            yield folder.open_async(Folder.OpenFlags.FAST_OPEN, bg_cancellable);
-        } catch (Error err) {
-            // don't need to close folder; if either calls throws an error, the folder is not open
-            if (err is IOError.CANCELLED)
-                return false;
-            
-            debug("Unable to open %s: %s", folder.to_string(), err.message);
-            
-            // retry later
-            delayed_send_all(iterate<Folder>(folder).to_array_list(), availability_check, RETRY_SYNC_DELAY_SEC);
-            
-            return true;
-        }
-        
-        bool not_cancelled = true;
-        try {
-            yield sync_folder_async(folder, epoch, oldest_local, oldest_local_id);
-        } catch (Error err) {
-            if (err is IOError.CANCELLED) {
-                not_cancelled = false;
-            } else {
-                debug("Error background syncing folder %s: %s", folder.to_string(), err.message);
-                
-                // retry later
-                delayed_send_all(iterate<Folder>(folder).to_array_list(), availability_check, RETRY_SYNC_DELAY_SEC);
+
+        if (do_sync) {
+            bool opened = false;
+            try {
+                yield folder.open_async(Folder.OpenFlags.FAST_OPEN, cancellable);
+                opened = true;
+                yield sync_folder_async(folder, epoch, oldest_local, oldest_local_id, cancellable);
+            } finally {
+                if (opened) {
+                    try {
+                        // don't pass Cancellable; really need this to complete in all cases
+                        yield folder.close_async();
+                    } catch (Error err) {
+                        debug("%s: Error closing folder %s: %s",
+                              this.account.to_string(), folder.to_string(), err.message);
+                    }
+                }
             }
-            
-            // fallthrough and close
         }
-        
-        try {
-            // don't pass Cancellable; really need this to complete in all cases
-            yield folder.close_async();
-        } catch (Error err) {
-            debug("Error closing %s: %s", folder.to_string(), err.message);
-        }
-        
-        return not_cancelled;
     }
-    
-    private async void sync_folder_async(MinimalFolder folder, DateTime epoch, DateTime? oldest_local,
-        Geary.EmailIdentifier? oldest_local_id) throws Error {
+
+    private async void sync_folder_async(MinimalFolder folder,
+                                         DateTime epoch,
+                                         DateTime? oldest_local,
+                                         Geary.EmailIdentifier? oldest_local_id,
+                                         Cancellable cancellable)
+        throws Error {
         debug("Background sync'ing %s", folder.to_string());
         
         // wait for the folder to be fully opened to be sure we have all the most current
         // information
-        yield folder.wait_for_open_async(bg_cancellable);
+        yield folder.wait_for_open_async(cancellable);
         
         // only perform vector expansion if oldest isn't old enough
         if (oldest_local == null || oldest_local.compare(epoch) > 0) {
@@ -386,7 +368,7 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
                 // look for complete synchronization of UIDs (i.e. complete vector normalization)
                 // no need to keep searching once this happens
                 int local_count = yield folder.local_folder.get_email_count_async(ImapDB.Folder.ListFlags.NONE,
-                    bg_cancellable);
+                    cancellable);
                 if (local_count >= folder.properties.email_total) {
                     debug("Total vector normalization for %s: %d/%d emails", folder.to_string(), local_count,
                         folder.properties.email_total);
@@ -402,7 +384,7 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
                         max_epoch.to_string(), folder.to_string(), local_count, folder.properties.email_total);
 
                     yield folder.list_email_by_id_async(null, 1, Geary.Email.Field.NONE,
-                        Geary.Folder.ListFlags.OLDEST_TO_NEWEST, bg_cancellable);
+                        Geary.Folder.ListFlags.OLDEST_TO_NEWEST, cancellable);
                 } else {
                     // don't go past proscribed epoch
                     if (current_epoch.compare(epoch) < 0)
@@ -411,7 +393,7 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
                     debug("Background sync'ing %s to %s (already got %d of %d emails)",
                         folder.to_string(), current_epoch.to_string(), local_count, folder.properties.email_total);
                     Geary.EmailIdentifier? earliest_span_id = yield folder.find_earliest_email_async(current_epoch,
-                        oldest_local_id, bg_cancellable);
+                        oldest_local_id, cancellable);
                     if (earliest_span_id == null && current_epoch.compare(epoch) <= 0) {
                         debug("Unable to locate epoch messages on remote folder %s%s, fetching one past oldest...",
                             folder.to_string(),
@@ -424,7 +406,7 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
                         // is null, as that means the local folder is empty and so we should at least
                         // pull the first one to get a marker of age
                         yield folder.list_email_by_id_async(oldest_local_id, 1, Geary.Email.Field.NONE,
-                            Geary.Folder.ListFlags.NONE, bg_cancellable);
+                            Geary.Folder.ListFlags.NONE, cancellable);
                     } else if (earliest_span_id != null) {
                         // use earliest email from that span for the next round
                         oldest_local_id = earliest_span_id;
@@ -441,7 +423,7 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
         // always give email prefetcher time to finish its work
         debug("Waiting for email prefetcher to complete %s...", folder.to_string());
         try {
-            yield folder.email_prefetcher.active_sem.wait_async(bg_cancellable);
+            yield folder.email_prefetcher.active_sem.wait_async(cancellable);
         } catch (Error err) {
             debug("Error waiting for email prefetcher to complete %s: %s", folder.to_string(),
                 err.message);
@@ -449,5 +431,9 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
         
         debug("Done background sync'ing %s", folder.to_string());
     }
-}
 
+    private void on_account_ready() {
+        this.process_queue_async.begin();
+    }
+
+}

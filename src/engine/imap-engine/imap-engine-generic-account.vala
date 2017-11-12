@@ -28,25 +28,33 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     private Gee.HashMap<FolderPath, uint> refresh_unseen_timeout_ids
         = new Gee.HashMap<FolderPath, uint>();
     private Gee.HashSet<Geary.Folder> in_refresh_unseen = new Gee.HashSet<Geary.Folder>();
-    private uint refresh_folder_timeout_id = 0;
-    private bool in_refresh_enumerate = false;
-    private Cancellable refresh_cancellable = new Cancellable();
+    private AccountSynchronizer sync;
     private bool awaiting_credentials = false;
+    private Cancellable? enumerate_folder_cancellable = null;
+    private TimeoutManager refresh_folder_timer;
 
     private Gee.Map<Geary.SpecialFolderType, Gee.List<string>> special_search_names =
         new Gee.HashMap<Geary.SpecialFolderType, Gee.List<string>>();
 
+
     public GenericAccount(string name, Geary.AccountInformation information,
         Imap.Account remote, ImapDB.Account local) {
         base (name, information);
-        
+
         this.remote = remote;
+        this.remote.ready.connect(on_remote_ready);
+
         this.local = local;
         
         this.remote.login_failed.connect(on_login_failed);
-        this.local.email_sent.connect(on_email_sent);
         this.local.contacts_loaded.connect(() => { contacts_loaded(); });
-        
+        this.local.email_sent.connect(on_email_sent);
+
+        this.refresh_folder_timer = new TimeoutManager.seconds(
+            REFRESH_FOLDER_LIST_SEC,
+            () => { this.enumerate_folders_async.begin(); }
+         );
+
         search_upgrade_monitor = local.search_index_monitor;
         db_upgrade_monitor = local.upgrade_monitor;
         db_vacuum_monitor = local.vacuum_monitor;
@@ -60,6 +68,8 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         if (search_path == null) {
             search_path = new ImapDB.SearchFolderRoot();
         }
+
+        this.sync = new AccountSynchronizer(this, this.remote);
 
         compile_special_search_names();
     }
@@ -159,8 +169,8 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         // IMAP password before attempting a connection.  This might have to be
         // reworked when we allow passwordless logins.
         if (!information.imap_credentials.is_complete())
-            yield information.fetch_passwords_async(ServiceFlag.IMAP);
-        
+            yield information.get_passwords_async(ServiceFlag.IMAP);
+
         // need to back out local.open_async() if remote fails
         try {
             yield remote.open_async(cancellable);
@@ -174,21 +184,26 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             
             throw err;
         }
-        
-        open = true;
-        
-        notify_opened();
 
+        this.open = true;
+
+        notify_opened();
         notify_folders_available_unavailable(sort_by_path(local_only.values), null);
-        
-        // schedule an immediate sweep of the folders; once this is finished, folders will be
-        // regularly enumerated
-        reschedule_folder_refresh(true);
+
+        this.enumerate_folders_async.begin();
     }
-    
+
     public override async void close_async(Cancellable? cancellable = null) throws Error {
         if (!open)
             return;
+
+        this.sync.stop();
+
+        Cancellable folder_cancellable = this.enumerate_folder_cancellable;
+        if (folder_cancellable != null) {
+            folder_cancellable.cancel();
+        }
+        this.refresh_folder_timer.reset();
 
         notify_folders_available_unavailable(null, sort_by_path(local_only.values));
         notify_folders_available_unavailable(null, sort_by_path(folder_map.values));
@@ -368,72 +383,60 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         }
     }
 
-    private void reschedule_folder_refresh(bool immediate) {
-        if (in_refresh_enumerate)
-            return;
-        
-        cancel_folder_refresh();
-        
-        refresh_folder_timeout_id = immediate
-            ? Idle.add(on_refresh_folders)
-            : Timeout.add_seconds(REFRESH_FOLDER_LIST_SEC, on_refresh_folders);
-    }
-    
-    private void cancel_folder_refresh() {
-        if (refresh_folder_timeout_id != 0) {
-            Source.remove(refresh_folder_timeout_id);
-            refresh_folder_timeout_id = 0;
-        }
-    }
-    
-    private bool on_refresh_folders() {
-        in_refresh_enumerate = true;
-        enumerate_folders_async.begin(refresh_cancellable, on_refresh_completed);
-        
-        refresh_folder_timeout_id = 0;
-        
-        return false;
-    }
-    
-    private void on_refresh_completed(Object? source, AsyncResult result) {
-        try {
-            enumerate_folders_async.end(result);
-        } catch (Error err) {
-            if (!(err is IOError.CANCELLED))
-                debug("Refresh of account %s folders did not complete: %s", to_string(), err.message);
-        }
-        
-        in_refresh_enumerate = false;
-        reschedule_folder_refresh(false);
-    }
-    
-    private async void enumerate_folders_async(Cancellable? cancellable) throws Error {
+    private async void enumerate_folders_async()
+        throws Error {
         check_open();
-        
-        // enumerate local folders first
-        Gee.HashMap<FolderPath, ImapDB.Folder> local_folders = yield enumerate_local_folders_async(
-            null, cancellable);
-        
-        // convert to a list of Geary.Folder ... build_folder() also reports new folders, so this
-        // gets the word out quickly (local_only folders have already been reported)
-        Gee.Collection<Geary.Folder> existing_list = new Gee.ArrayList<Geary.Folder>();
-        existing_list.add_all(build_folders(local_folders.values));
-        existing_list.add_all(local_only.values);
-        
-        // build a map of all existing folders
-        Gee.HashMap<FolderPath, Geary.Folder> existing_folders
-            = Geary.traverse<Geary.Folder>(existing_list).to_hash_map<FolderPath>(f => f.path);
-        
-        // now that all local have been enumerated and reported (this is important to assist
-        // startup of the UI), enumerate the remote folders
-        bool remote_folders_suspect;
-        Gee.HashMap<FolderPath, Imap.Folder>? remote_folders = yield enumerate_remote_folders_async(
-            null, out remote_folders_suspect, cancellable);
-        
-        // pair the local and remote folders and make sure everything is up-to-date
-        yield update_folders_async(existing_folders, remote_folders, remote_folders_suspect, cancellable);
+
+        if (this.enumerate_folder_cancellable != null) {
+            return;
+        }
+        Cancellable? cancellable = this.enumerate_folder_cancellable = new Cancellable();
+        this.refresh_folder_timer.reset();
+
+        debug("%s: Enumerating folders", to_string());
+
+        bool successful = false;
+        try {
+            // enumerate local folders first
+            Gee.HashMap<FolderPath, ImapDB.Folder> local_folders = yield enumerate_local_folders_async(
+                null, cancellable
+            );
+
+            // convert to a list of Geary.Folder ... build_folder() also reports new folders, so this
+            // gets the word out quickly (local_only folders have already been reported)
+            Gee.Collection<Geary.Folder> existing_list = new Gee.ArrayList<Geary.Folder>();
+            existing_list.add_all(build_folders(local_folders.values));
+            existing_list.add_all(local_only.values);
+
+            if (this.remote.is_ready && !cancellable.is_cancelled()) {
+                // build a map of all existing folders
+                Gee.HashMap<FolderPath, Geary.Folder> existing_folders
+                    = Geary.traverse<Geary.Folder>(existing_list).to_hash_map<FolderPath>(f => f.path);
+
+                // now that all local have been enumerated and
+                // reported (this is important to assist startup of
+                // the UI), enumerate the remote folders
+                bool remote_folders_suspect;
+                Gee.HashMap<FolderPath, Imap.Folder>? remote_folders = yield enumerate_remote_folders_async(
+                    null, out remote_folders_suspect, cancellable);
+
+                // pair the local and remote folders and make sure everything is up-to-date
+                yield update_folders_async(existing_folders, remote_folders, remote_folders_suspect, cancellable);
+
+                successful = true;
+            }
+        } catch (Error err) {
+            if (!(err is IOError.CANCELLED)) {
+                report_problem(Geary.Account.Problem.CONNECTION_FAILURE, err);
+            }
+        }
+
+        this.enumerate_folder_cancellable = null;
+        if (successful) {
+            this.refresh_folder_timer.start();
+        }
     }
-    
+
     private async Gee.HashMap<FolderPath, ImapDB.Folder> enumerate_local_folders_async(
         Geary.FolderPath? parent, Cancellable? cancellable) throws Error {
         check_open();
@@ -938,6 +941,10 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         
         awaiting_credentials = true;
         do_login_failed_async.begin(credentials, response, () => { awaiting_credentials = false; });
+    }
+
+    private void on_remote_ready() {
+        this.enumerate_folders_async.begin();
     }
 
     private async void do_login_failed_async(Geary.Credentials? credentials, Geary.Imap.StatusResponse? response) {

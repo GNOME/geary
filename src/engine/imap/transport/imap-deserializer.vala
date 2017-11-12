@@ -248,7 +248,6 @@ public class Geary.Imap.Deserializer : BaseObject {
         cancellable.cancel();
         
         // wait for outstanding I/O to exit
-        debug("[%s] Waiting for deserializer to close...", to_string());
         yield closed_semaphore.wait_async();
         debug("[%s] Deserializer closed", to_string());
     }
@@ -818,14 +817,14 @@ public class Geary.Imap.Deserializer : BaseObject {
 
     private uint on_error(uint state, uint event, void *user, Object? object, Error? err) {
         assert(err != null);
-        
-        debug("[%s] input error: %s", to_string(), err.message);
-        
+
         // only Cancellable allowed is internal used to notify when closed; all other errors should
         // be reported
-        if (!(err is IOError.CANCELLED))
+        if (!(err is IOError.CANCELLED)) {
+            debug("[%s] input error: %s", to_string(), err.message);
             receive_failure(err);
-        
+        }
+
         // always signal as closed and notify
         closed_semaphore.blind_notify();
         eos();

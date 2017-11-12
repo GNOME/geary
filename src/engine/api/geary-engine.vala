@@ -130,7 +130,6 @@ public class Geary.Engine : BaseObject {
         AccountInformation.init();
         Logging.init();
         RFC822.init();
-        ImapEngine.init();
         Imap.init();
         HTML.init();
     }
