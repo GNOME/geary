@@ -1,16 +1,15 @@
 /*
- * Copyright 2017 Michael Gratton <mike@vee.net>
  * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2017 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 public class Geary.Imap.ClientSessionManager : BaseObject {
+
     private const int DEFAULT_MIN_POOL_SIZE = 1;
     private const int POOL_START_TIMEOUT_SEC = 4;
-    private const int POOL_RETRY_MIN_TIMEOUT_SEC = 1;
-    private const int POOL_RETRY_MAX_TIMEOUT_SEC = 10;
     private const int POOL_STOP_TIMEOUT_SEC = 1;
 
     /** Determines if the manager has been opened. */
@@ -69,7 +68,6 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
     private bool untrusted_host = false;
 
     private TimeoutManager pool_start;
-    private TimeoutManager pool_retry;
     private TimeoutManager pool_stop;
 
     /**
@@ -80,6 +78,9 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
      * has become reachable again after being unreachable.
      */
     public signal void ready();
+
+    /** Fired when a network or non-auth error occurs opening a session. */
+    public signal void connection_failed(Error err);
 
     /** Fired when an authentication error occurs opening a session. */
     public signal void login_failed(StatusResponse? response);
@@ -97,11 +98,6 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
 
         this.pool_start = new TimeoutManager.seconds(
             POOL_START_TIMEOUT_SEC,
-            () => { this.adjust_session_pool.begin(); }
-        );
-
-        this.pool_retry = new TimeoutManager.seconds(
-            POOL_RETRY_MIN_TIMEOUT_SEC,
             () => { this.adjust_session_pool.begin(); }
         );
 
@@ -142,7 +138,6 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         this.is_ready = false;
 
         this.pool_start.reset();
-        this.pool_retry.reset();
         this.pool_stop.reset();
 
 		this.endpoint.connectivity.notify["is-reachable"].disconnect(on_connectivity_change);
@@ -210,32 +205,23 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
             && !this.authentication_failed
             && !this.untrusted_host
             && this.endpoint.connectivity.is_reachable) {
-            pending_sessions++;
-            create_new_authorized_session.begin(null, on_created_new_authorized_session);
+            this.pending_sessions++;
+            create_new_authorized_session.begin(
+                null,
+                (obj, res) => {
+                    this.pending_sessions--;
+                    try {
+                        this.create_new_authorized_session.end(res);
+                    } catch (Error err) {
+                        connection_failed(err);
+                    }
+                });
         }
 
         try {
             sessions_mutex.release(ref token);
         } catch (Error release_err) {
             debug("Unable to release session table mutex after adjusting pool: %s", release_err.message);
-        }
-    }
-
-    private void on_created_new_authorized_session(Object? source, AsyncResult result) {
-        this.pending_sessions--;
-
-        try {
-            this.create_new_authorized_session.end(result);
-            this.pool_retry.reset();
-        } catch (Error err) {
-            debug("Unable to create authorized session to %s: %s", endpoint.to_string(), err.message);
-
-            // try again after a slight delay and bump up delay
-            this.pool_retry.start();
-            this.pool_retry.interval = (this.pool_retry.interval * 2).clamp(
-                POOL_RETRY_MIN_TIMEOUT_SEC,
-                POOL_RETRY_MAX_TIMEOUT_SEC
-            );
         }
     }
 
@@ -301,9 +287,6 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
             this.is_ready = true;
             ready();
         }
-
-        // reset delay
-        this.pool_retry.interval = POOL_RETRY_MIN_TIMEOUT_SEC;
 
         // do this after logging in
         new_session.enable_keepalives(selected_keepalive_sec, unselected_keepalive_sec,
@@ -573,7 +556,6 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
             this.pool_start.reset();
             this.pool_stop.start();
         }
-        this.pool_retry.reset();
 	}
 
     /**

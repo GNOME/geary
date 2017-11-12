@@ -61,6 +61,7 @@ private class Geary.Imap.Account : BaseObject {
         this.account = account;
         this.session_mgr = new ClientSessionManager(account);
         this.session_mgr.ready.connect(on_session_ready);
+        this.session_mgr.connection_failed.connect(on_connection_failed);
         this.session_mgr.login_failed.connect(on_login_failed);
     }
 
@@ -631,6 +632,16 @@ private class Geary.Imap.Account : BaseObject {
         // Now have a valid session, so credentials must be good
         this.authentication_failures = 0;
         ready();
+    }
+
+    private void on_connection_failed(Error error) {
+        // There was an error connecting to the IMAP host
+        this.authentication_failures = 0;
+        if (!(error is IOError.CANCELLED)) {
+            // XXX check the type of the error and report a more
+            // fine-grained problem here
+            report_problem(Geary.Account.Problem.RECV_EMAIL_ERROR, error);
+        }
     }
 
     private void on_login_failed(Geary.Imap.StatusResponse? response) {
