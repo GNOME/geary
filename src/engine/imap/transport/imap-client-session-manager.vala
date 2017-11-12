@@ -8,9 +8,10 @@
 
 public class Geary.Imap.ClientSessionManager : BaseObject {
     private const int DEFAULT_MIN_POOL_SIZE = 1;
-    private const int POOL_START_TIMEOUT_MS = 1000;
+    private const int POOL_START_TIMEOUT_SEC = 4;
     private const int POOL_RETRY_MIN_TIMEOUT_SEC = 1;
     private const int POOL_RETRY_MAX_TIMEOUT_SEC = 10;
+    private const int POOL_STOP_TIMEOUT_SEC = 1;
 
     /** Determines if the manager has been opened. */
     public bool is_open { get; private set; default = false; }
@@ -69,6 +70,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
 
     private TimeoutManager pool_start;
     private TimeoutManager pool_retry;
+    private TimeoutManager pool_stop;
 
     /**
      * Fired after when the manager has a working connection.
@@ -93,14 +95,19 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         this.endpoint.notify[Endpoint.PROP_TRUST_UNTRUSTED_HOST].connect(on_imap_trust_untrusted_host);
         this.endpoint.untrusted_host.connect(on_imap_untrusted_host);
 
-        this.pool_start = new TimeoutManager.milliseconds(
-            POOL_START_TIMEOUT_MS,
+        this.pool_start = new TimeoutManager.seconds(
+            POOL_START_TIMEOUT_SEC,
             () => { this.adjust_session_pool.begin(); }
         );
 
         this.pool_retry = new TimeoutManager.seconds(
             POOL_RETRY_MIN_TIMEOUT_SEC,
             () => { this.adjust_session_pool.begin(); }
+        );
+
+        this.pool_stop = new TimeoutManager.seconds(
+            POOL_STOP_TIMEOUT_SEC,
+            () => { this.force_disconnect_all.begin(); }
         );
     }
 
@@ -136,6 +143,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
 
         this.pool_start.reset();
         this.pool_retry.reset();
+        this.pool_stop.reset();
 
 		this.endpoint.connectivity.notify["is-reachable"].disconnect(on_connectivity_change);
 
@@ -552,13 +560,14 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
 		bool is_reachable = this.endpoint.connectivity.is_reachable;
 		if (is_reachable) {
             this.pool_start.start();
+            this.pool_stop.reset();
 		} else {
             // Get a ready signal again once we are back online
             this.is_ready = false;
             this.pool_start.reset();
-            this.pool_retry.reset();
-            this.force_disconnect_all.begin();
+            this.pool_stop.start();
         }
+        this.pool_retry.reset();
 	}
 
     /**
