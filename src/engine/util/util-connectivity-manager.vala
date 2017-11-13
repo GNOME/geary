@@ -6,13 +6,13 @@
  */
 
 /**
- * Keeps track of network connectivity changes for an endpoint.
+ * Keeps track of network connectivity changes for a network address.
  *
  * This class is a convenience API for the GIO NetworkMonitor. Since
  * when connecting and disconnecting from a network, multiple
  * network-changed signals may be sent, this class coalesces these as
  * best as possible so the rest of the engine is only notified once
- * when an endpoint becomes reachable, and once when it becomes
+ * when an address becomes reachable, and once when it becomes
  * unreachable.
  *
  * Note this class is not thread safe and should only be invoked from
@@ -20,11 +20,19 @@
  */
 public class Geary.ConnectivityManager : BaseObject {
 
-	/** Determines if the managed endpoint is currently reachable. */
-	public bool is_reachable { get; private set; default = false; }
+    /** The address being monitored. */
+    public NetworkAddress address { get; private set; default = null; }
 
-    // Weak to avoid a circular ref with the endpoint
-    private weak Endpoint endpoint;
+	/** Determines if the managed address is currently reachable. */
+	public Trillian is_reachable { get; private set; default = Geary.Trillian.UNKNOWN; }
+
+	/**
+     * Determines if a the address's network address name is valid.
+     *
+     * This will become certain if the address becomes reachable, and
+     * will become impossible if a fatal address error is reported.
+     */
+	public Trillian is_valid { get; private set; default = Geary.Trillian.UNKNOWN; }
 
     private NetworkMonitor monitor;
 
@@ -32,10 +40,21 @@ public class Geary.ConnectivityManager : BaseObject {
 
 
     /**
-     * Constructs a new manager for a specific endpoint.
+     * Fired when a fatal error was reported checking the address.
+     *
+     * This is typically caused by an an authoritative DNS name not
+     * found error, but may be anything else that indicates that the
+     * address will be unusable as-is without some kind of user or
+     * server administrator intervention.
      */
-    public ConnectivityManager(Endpoint endpoint) {
-		this.endpoint = endpoint;
+    public signal void address_error_reported(Error error);
+
+
+    /**
+     * Constructs a new manager for a specific address.
+     */
+    public ConnectivityManager(NetworkAddress address) {
+		this.address = address;
 
         this.monitor = NetworkMonitor.get_default();
         this.monitor.network_changed.connect(on_network_changed);
@@ -46,7 +65,7 @@ public class Geary.ConnectivityManager : BaseObject {
     }
 
 	/**
-     * Starts checking if the manager's endpoint is reachable.
+     * Starts checking if the manager's address is reachable.
      *
      * This will cancel any existing check, and start a new one
      * running, updating the `is_reachable` property on completion.
@@ -63,14 +82,11 @@ public class Geary.ConnectivityManager : BaseObject {
 		Cancellable cancellable = new Cancellable();
 		this.existing_check = cancellable;
 
-		string endpoint = this.endpoint.to_string();
-		bool is_reachable = this.is_reachable;
+        string endpoint = to_address_string();
+		bool is_reachable = false;
         try {
 			debug("Checking if %s reachable...", endpoint);
-            is_reachable = yield this.monitor.can_reach_async(
-				this.endpoint.remote_address,
-				cancellable
-			);
+            is_reachable = yield this.monitor.can_reach_async(this.address, cancellable);
         } catch (Error err) {
             if (err is IOError.NETWORK_UNREACHABLE &&
 				this.monitor.network_available) {
@@ -81,11 +97,19 @@ public class Geary.ConnectivityManager : BaseObject {
 				is_reachable = true;
 				debug("Assuming %s is reachable, despite network unavailability",
                       endpoint);
+			} else if (err is ResolverError.TEMPORARY_FAILURE) {
+				// This often happens when networking is coming back
+				// online, may because the interface is up but has not
+				// been assigned an address yet? Since we should get
+				// another network change when the interface is
+				// configured, just ignore it.
+				debug("Ignoring: %s", err.message);
 			} else if (!(err is IOError.CANCELLED)) {
 				// Service is unreachable
 				debug("Error checking %s reachable, treating as unreachable: %s",
-						endpoint, err.message);
-				is_reachable = false;
+                      endpoint, err.message);
+				set_invalid();
+                address_error_reported(err);
 			}
         } finally {
 			if (!cancellable.is_cancelled()) {
@@ -123,13 +147,38 @@ public class Geary.ConnectivityManager : BaseObject {
 	private inline void set_reachable(bool reachable) {
 		// Coalesce changes to is_reachable, since Vala <= 0.34 always
 		// fires notify signals on set, even if the value doesn't
-		// change. 0.36 fixes that, so pull this out when we can
+		// change. 0.36 fixes that, so pull this test out when we can
 		// depend on that as a minimum.
-		if (this.is_reachable != reachable) {
+		if ((reachable && !this.is_reachable.is_certain()) ||
+            (!reachable && !this.is_reachable.is_impossible())) {
             debug("Host %s became %s",
-                  this.endpoint.to_string(), reachable ? "reachable" : "unreachable");
-			this.is_reachable = reachable;
+                  this.address.to_string(), reachable ? "reachable" : "unreachable");
+			this.is_reachable = reachable ? Trillian.TRUE : Trillian.FALSE;
 		}
+
+        // We only work out if the name is valid (or becomes valid
+        // again) if the address becomes reachable.
+        if (reachable && this.is_valid.is_uncertain()) {
+            this.is_valid = Trillian.TRUE;
+        }
+
 	}
+
+	private inline void set_invalid() {
+		// Coalesce changes to is_reachable, since Vala <= 0.34 always
+		// fires notify signals on set, even if the value doesn't
+		// change. 0.36 fixes that, so pull this method out when we can
+		// depend on that as a minimum.
+        if (this.is_valid != Trillian.FALSE) {
+            this.is_valid = Trillian.FALSE;
+        }
+    }
+
+    private inline string to_address_string() {
+        // Unlikely to be the case, but if IPv6 format it nicely
+        return (this.address.hostname.index_of(":") == -1)
+            ? "%s:%u".printf(this.address.hostname, this.address.port)
+            : "[%s]:%u".printf(this.address.hostname, this.address.port);
+    }
 
 }

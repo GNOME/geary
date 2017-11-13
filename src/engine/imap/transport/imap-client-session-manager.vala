@@ -123,7 +123,8 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         this.authentication_failed = false;
 
 		this.endpoint.connectivity.notify["is-reachable"].connect(on_connectivity_change);
-        if (this.endpoint.connectivity.is_reachable) {
+        this.endpoint.connectivity.address_error_reported.connect(on_connectivity_error);
+        if (this.endpoint.connectivity.is_reachable.is_certain()) {
             this.adjust_session_pool.begin();
         } else {
             this.endpoint.connectivity.check_reachable.begin();
@@ -141,6 +142,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         this.pool_stop.reset();
 
 		this.endpoint.connectivity.notify["is-reachable"].disconnect(on_connectivity_change);
+        this.endpoint.connectivity.address_error_reported.disconnect(on_connectivity_error);
 
         // to avoid locking down the sessions table while scheduling disconnects, make a copy
         // and work off of that
@@ -204,7 +206,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
             && this.is_open
             && !this.authentication_failed
             && !this.untrusted_host
-            && this.endpoint.connectivity.is_reachable) {
+            && this.endpoint.connectivity.is_reachable.is_certain()) {
             this.pending_sessions++;
             create_new_authorized_session.begin(
                 null,
@@ -232,9 +234,9 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         if (untrusted_host)
             throw new ImapError.UNAVAILABLE("Untrusted host %s", endpoint.to_string());
 
-        if (!this.endpoint.connectivity.is_reachable)
+        if (!this.endpoint.connectivity.is_reachable.is_certain())
             throw new ImapError.UNAVAILABLE("Host at %s is unreachable", endpoint.to_string());
-        
+
         ClientSession new_session = new ClientSession(endpoint);
         
         // add session to pool before launching all the connect activity so error cases can properly
@@ -546,7 +548,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
     }
 
 	private void on_connectivity_change() {
-		bool is_reachable = this.endpoint.connectivity.is_reachable;
+		bool is_reachable = this.endpoint.connectivity.is_reachable.is_certain();
 		if (is_reachable) {
             this.pool_start.start();
             this.pool_stop.reset();
@@ -556,6 +558,13 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
             this.pool_start.reset();
             this.pool_stop.start();
         }
+	}
+
+	private void on_connectivity_error(Error error) {
+        this.is_ready = false;
+        this.pool_start.reset();
+        this.pool_stop.start();
+        connection_failed(error);
 	}
 
     /**

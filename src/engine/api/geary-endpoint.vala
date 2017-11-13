@@ -127,7 +127,7 @@ public class Geary.Endpoint : BaseObject {
         this.remote_address = new NetworkAddress(host_specifier, default_port);
         this.flags = flags;
         this.timeout_sec = timeout_sec;
-        this.connectivity = new ConnectivityManager(this);
+        this.connectivity = new ConnectivityManager(this.remote_address);
     }
 
     private SocketClient get_socket_client() {

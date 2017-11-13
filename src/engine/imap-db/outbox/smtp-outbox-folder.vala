@@ -884,7 +884,8 @@ private class Geary.SmtpOutboxFolder :
     private void on_account_opened() {
         this.fill_outbox_queue.begin();
         this.smtp_endpoint.connectivity.notify["is-reachable"].connect(on_reachable_changed);
-        if (this.smtp_endpoint.connectivity.is_reachable) {
+        this.smtp_endpoint.connectivity.address_error_reported.connect(on_connectivity_error);
+        if (this.smtp_endpoint.connectivity.is_reachable.is_certain()) {
             this.start_timer.start();
         } else {
             this.smtp_endpoint.connectivity.check_reachable.begin();
@@ -894,18 +895,23 @@ private class Geary.SmtpOutboxFolder :
     private void on_account_closed() {
         this.stop_postman();
         this.smtp_endpoint.connectivity.notify["is-reachable"].disconnect(on_reachable_changed);
+        this.smtp_endpoint.connectivity.address_error_reported.disconnect(on_connectivity_error);
     }
 
     private void on_reachable_changed() {
-        if (this.smtp_endpoint.connectivity.is_reachable) {
+        if (this.smtp_endpoint.connectivity.is_reachable.is_certain()) {
             if (this.queue_cancellable == null) {
                 this.start_timer.start();
             }
         } else {
             this.start_timer.reset();
-            if (this.queue_cancellable != null) {
-                stop_postman();
-            }
+            stop_postman();
         }
     }
+
+    private void on_connectivity_error(Error error) {
+        stop_postman();
+        notify_report_problem(ProblemType.CONNECTION_ERROR, error);
+    }
+
 }
