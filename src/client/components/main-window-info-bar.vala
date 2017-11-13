@@ -14,16 +14,8 @@ public class MainWindowInfoBar : Gtk.InfoBar {
 
     private enum ResponseType { COPY, DETAILS, RETRY; }
 
-
-    /** If reporting a problem returns, the specific problem else null. */
-    public Geary.Account.Problem? problem { get; private set; default = null; }
-
-    /** If reporting a problem for an account, returns the account else null. */
-    public Geary.Account? account { get; private set; default = null; }
-
-    /** If reporting a problem, returns the error thrown, if any. */
-    public Error error { get; private set; default = null; }
-
+    /** If reporting a problem, returns the problem report else null. */
+    public Geary.ProblemReport? report { get; private set; default = null; }
 
     /** Emitted when the user clicks the Retry button, if any. */
     public signal void retry();
@@ -42,75 +34,130 @@ public class MainWindowInfoBar : Gtk.InfoBar {
     private Gtk.TextView detail_text;
 
 
-    public MainWindowInfoBar.for_problem(Geary.Account.Problem problem,
-                                         Geary.Account account,
-                                         GLib.Error? error) {
-        string name = account.information.display_name;
+    public MainWindowInfoBar.for_problem(Geary.ProblemReport report) {
         Gtk.MessageType type = Gtk.MessageType.WARNING;
         string title = "";
         string descr = "";
         string? retry = null;
+        bool show_generic = false;
         bool show_close = false;
-        switch (problem) {
-        case Geary.Account.Problem.DATABASE_FAILURE:
-            type = Gtk.MessageType.ERROR;
-            title = _("A database problem has occurred");
-            descr = _("Messages for %s must be downloaded again.").printf(name);
+
+        if (report is Geary.ServiceProblemReport) {
+            Geary.ServiceProblemReport service_report = (Geary.ServiceProblemReport) report;
+            Geary.Endpoint endpoint = service_report.endpoint;
+            string account = service_report.account.display_name;
+            string server = endpoint.remote_address.hostname;
+
+            if (report.problem_type == Geary.ProblemType.CONNECTION_ERROR &&
+                service_report.service_type == Geary.Service.IMAP) {
+                // Translators: String substitution is the account name
+                title = _("Problem connecting to incoming server for %s".printf(account));
+                // Translators: String substitution is the server name
+                descr = _("Could not connect to %s, check your Internet access and the server name and try again").printf(server);
+                retry = _("Retry connecting now");
+
+            } else if (report.problem_type == Geary.ProblemType.CONNECTION_ERROR &&
+                       service_report.service_type == Geary.Service.SMTP) {
+                // Translators: String substitution is the account name
+                title = _("Problem connecting to outgoing server for %s".printf(account));
+                // Translators: String substitution is the server name
+                descr = _("Could not connect to %s, check your Internet access and the server name and try again").printf(server);
+                retry = _("Try reconnecting now");
+                retry = _("Retry connecting now");
+
+            } else if (report.problem_type == Geary.ProblemType.NETWORK_ERROR &&
+                       service_report.service_type == Geary.Service.IMAP) {
+                // Translators: String substitution is the account name
+                title = _("Problem with connection to incoming server for %s").printf(account);
+                // Translators: String substitution is the server name
+                descr = _("Network error talking to %s, check your Internet access try again").printf(server);
+                retry = _("Try reconnecting");
+
+            } else if (report.problem_type == Geary.ProblemType.NETWORK_ERROR &&
+                       service_report.service_type == Geary.Service.SMTP) {
+                // Translators: String substitution is the account name
+                title = _("Problem with connection to outgoing server for %s").printf(account);
+                // Translators: String substitution is the server name
+                descr = _("Network error talking to %s, check your Internet access try again").printf(server);
+                retry = _("Try reconnecting");
+
+            } else if (report.problem_type == Geary.ProblemType.SERVER_ERROR &&
+                       service_report.service_type == Geary.Service.IMAP) {
+                // Translators: String substitution is the account name
+                title = _("Problem communicating with incoming server for %s").printf(account);
+                // Translators: String substitution is the server name
+                descr = _("Geary did not understand a message from %s or vice versa, please file a bug report").printf(server);
+                retry = _("Try reconnecting");
+
+            } else if (report.problem_type == Geary.ProblemType.SERVER_ERROR &&
+                       service_report.service_type == Geary.Service.SMTP) {
+                title = _("Problem communicating with outgoing mail server");
+                // Translators: First string substitution is the server
+                // name, second is the account name
+                descr = _("Could now communicate with %s for %s, server name and try again in a moment").printf(server, account);
+                retry = _("Try reconnecting");
+
+            } else if (report.problem_type == Geary.ProblemType.LOGIN_FAILED &&
+                       service_report.service_type == Geary.Service.IMAP) {
+                // Translators: String substitution is the account name
+                title = _("Incoming mail server password required for %s").printf(account);
+                descr = _("Messages cannot be received without the correct password.");
+                retry = _("Retry receiving email, you will be prompted for a password");
+
+            } else if (report.problem_type == Geary.ProblemType.LOGIN_FAILED &&
+                       service_report.service_type == Geary.Service.SMTP) {
+                // Translators: String substitution is the account name
+                title = _("Outgoing mail server password required for %s").printf(account);
+                descr = _("Messages cannot be sent without the correct password.");
+                retry = _("Retry sending queued messages, you will be prompted for a password");
+
+            } else if (report.problem_type == Geary.ProblemType.GENERIC_ERROR &&
+                       service_report.service_type == Geary.Service.IMAP) {
+                // Translators: String substitution is the account name
+                title = _("A problem occurred checking mail for %s").printf(account);
+                descr = _("Something went wrong, please file a bug report if the problem persists");
+                retry = _("Try reconnecting");
+
+            } else if (report.problem_type == Geary.ProblemType.GENERIC_ERROR &&
+                       service_report.service_type == Geary.Service.SMTP) {
+                // Translators: String substitution is the account name
+                title = _("A problem occurred sending mail for %s").printf(account);
+                descr = _("Something went wrong, please file a bug report if the problem persists");
+                retry = _("Retry sending queued messages");
+
+            } else {
+                debug("Un-handled service problem report: %s".printf(report.to_string()));
+                show_generic = true;
+            }
+        } else if (report is Geary.AccountProblemReport) {
+            Geary.AccountProblemReport account_report = (Geary.AccountProblemReport) report;
+            string account = account_report.account.display_name;
+            if (report.problem_type == Geary.ProblemType.DATABASE_FAILURE) {
+                type = Gtk.MessageType.ERROR;
+                title = _("A database problem has occurred");
+                // Translators: String substitution is the account name
+                descr = _("Messages for %s must be downloaded again.").printf(account);
+                show_close = true;
+
+            } else {
+                debug("Un-handled account problem report: %s".printf(report.to_string()));
+                show_generic = true;
+            }
+        } else {
+            debug("Un-handled generic problem report: %s".printf(report.to_string()));
+            show_generic = true;
+        }
+
+        if (show_generic) {
+            title = _("Geary has encountered a problem");
+            descr = _("Please check the technical details and report the problem if it persists.");
             show_close = true;
-            break;
-
-        case Geary.Account.Problem.HOST_UNREACHABLE:
-            // XXX should really be displaying the server name here
-            title = _("Could not contact server");
-            descr = _("Please check %s server names are correct and are working.").printf(name);
-            show_close = true;
-            break;
-
-        case Geary.Account.Problem.NETWORK_UNAVAILABLE:
-            title = _("Not connected to the Internet");
-            descr = _("Please check your connection to the Internet.");
-            show_close = true;
-            break;
-
-        case Geary.Account.Problem.RECV_EMAIL_ERROR:
-            type = Gtk.MessageType.ERROR;
-            title = _("A problem occurred checking for new mail");
-            descr = _("New messages can not be received for %s, try again in a moment").printf(name);
-            retry = _("Retry checking for new mail");
-            break;
-
-        case Geary.Account.Problem.RECV_EMAIL_LOGIN_FAILED:
-            title = _("Incoming mail password required");
-            descr = _("Messages cannot be received for %s without the correct password.").printf(name);
-            retry = _("Retry receiving email, you will be prompted for a password");
-            break;
-
-        case Geary.Account.Problem.SEND_EMAIL_ERROR:
-            type = Gtk.MessageType.ERROR;
-            title = _("A problem occurred sending mail");
-            descr = _("A message was unable to be sent for %s, try again in a moment").printf(name);
-            retry = _("Retry sending queued messages");
-            break;
-
-        case Geary.Account.Problem.SEND_EMAIL_LOGIN_FAILED:
-            title = _("Outgoing mail password required");
-            descr = _("Messages cannot be sent for %s without the correct password.").printf(name);
-            retry = _("Retry sending queued messages, you will be prompted for a password");
-            break;
-
-        default:
-            debug("Un-handled problem type for %s: %s".printf(
-                      account.information.id, problem.to_string()
-                  ));
-            break;
         }
 
         this(type, title, descr, show_close);
-        this.problem = problem;
-        this.account = account;
-        this.error = error;
+        this.report = report;
 
-        if (this.error != null) {
+        if (this.report.error != null) {
             Gtk.Button details = add_button(_("_Details"), ResponseType.DETAILS);
             details.tooltip_text = _("View technical details about the error");
         }
@@ -127,41 +174,52 @@ public class MainWindowInfoBar : Gtk.InfoBar {
                                 bool show_close) {
         this.message_type = type;
         this.title.label = title;
+
+        // Set the label and tooltip for the description in case it is
+        // long enough to be ellipsized
         this.description.label = description;
+        this.description.tooltip_text = description;
+
         this.show_close_button = show_close;
     }
 
     private string format_details() {
-        string type = "";
-        if (this.error != null) {
-            const string QUARK_SUFFIX = "-quark";
-            string ugly_domain = this.error.domain.to_string();
-            if (ugly_domain.has_suffix(QUARK_SUFFIX)) {
-                ugly_domain = ugly_domain.substring(
-                    0, ugly_domain.length - QUARK_SUFFIX.length
-                );
-            }
-            StringBuilder nice_domain = new StringBuilder();
-            foreach (string part in ugly_domain.split("_")) {
-                nice_domain.append(part.up(1));
-                nice_domain.append(part.substring(1));
-            }
+        Geary.ServiceProblemReport? service_report = this.report as Geary.ServiceProblemReport;
+        Geary.AccountProblemReport? account_report = this.report as Geary.AccountProblemReport;
 
-            type = "%s %i".printf(nice_domain.str, this.error.code);
+        StringBuilder details = new StringBuilder();
+        details.append_printf(
+            "Geary version: %s\n", GearyApplication.VERSION
+        );
+        details.append_printf(
+            "GTK version: %u.%u.%u\n", Gtk.get_major_version(), Gtk.get_minor_version(), Gtk.get_micro_version()
+        );
+        details.append_printf(
+            "Desktop: %s\n", Environment.get_variable("XDG_CURRENT_DESKTOP") ?? "Unknown"
+        );
+        details.append_printf(
+            "Problem type: %s\n", this.report.problem_type.to_string()
+        );
+        if (account_report != null) {
+            details.append_printf(
+                "Account type: %s\n", account_report.account.service_provider.to_string()
+            );
         }
-
-        return """Geary version: %s
-GTK+ version: %u.%u.%u
-Desktop: %s
-Error type: %s
-Message: %s
-""".printf(
-        GearyApplication.VERSION,
-        Gtk.get_major_version(), Gtk.get_minor_version(), Gtk.get_micro_version(),
-        Environment.get_variable("XDG_CURRENT_DESKTOP") ?? "Unknown",
-        type,
-        (this.error != null) ? error.message : ""
-    );
+        if (service_report != null) {
+            details.append_printf(
+                "Service type: %s\n", service_report.service_type.to_string()
+            );
+            details.append_printf(
+                "Endpoint: %s\n", service_report.endpoint.to_string()
+            );
+        }
+        details.append_printf(
+            "Error type: %s\n", (this.report.error != null) ? this.report.format_error_type() : "None specified"
+        );
+        details.append_printf(
+            "Message: %s\n", (this.report.error != null) ? this.report.error.message : "None specified"
+        );
+        return details.str;
     }
 
     private void show_details() {
@@ -170,7 +228,7 @@ Message: %s
         // Would love to construct the dialog in Builder, but we to
         // construct the dialog manually since we can't adjust the
         // Headerbar setting afterwards. If the user re-clicks on the
-        // Details button to re-show it, a whole bunch of GTK
+        // Details button to re-show it, a whole bunch of GTK 
         // criticals are spewed and the dialog appears b0rked, so just
         // do it from scratch ever time anyway.
         bool use_header = Gtk.Settings.get_default().gtk_dialogs_use_header;
@@ -181,7 +239,8 @@ Message: %s
         Gtk.Dialog dialog = new Gtk.Dialog.with_buttons(
             _("Details"), // same as the button
             get_toplevel() as Gtk.Window,
-            flags
+            flags,
+            null
         );
         dialog.set_default_size(600, -1);
         dialog.get_content_area().add(this.problem_details);

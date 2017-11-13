@@ -455,10 +455,12 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
 
                 successful = true;
             }
+        } catch (ImapError err) {
+            notify_account_problem(ProblemType.SERVER_ERROR, err);
+        } catch (IOError err) {
+            notify_account_problem(ProblemType.for_ioerror(err), err);
         } catch (Error err) {
-            if (!(err is IOError.CANCELLED)) {
-                report_problem(Geary.Account.Problem.RECV_EMAIL_ERROR, err);
-            }
+            notify_account_problem(ProblemType.GENERIC_ERROR, err);
         }
 
         this.enumerate_folder_cancellable = null;

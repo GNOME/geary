@@ -45,6 +45,7 @@ private class Geary.Imap.Account : BaseObject {
     private Imap.MailboxSpecifier? inbox_specifier = null;
     private string hierarchy_delimiter = null;
 
+
     /**
      * Fired after opening when the account has a working connection.
      *
@@ -54,7 +55,8 @@ private class Geary.Imap.Account : BaseObject {
     public signal void ready();
 
     /** Fired if a user-notifiable problem occurs. */
-    public signal void report_problem(Geary.Account.Problem problem, Error? err);
+    public signal void report_problem(ProblemReport report);
+
 
     public Account(Geary.AccountInformation account) {
         this.name = account.id + ":imap";
@@ -65,11 +67,6 @@ private class Geary.Imap.Account : BaseObject {
         this.session_mgr.login_failed.connect(on_login_failed);
     }
 
-    private void check_open() throws Error {
-        if (!is_open)
-            throw new EngineError.OPEN_REQUIRED("Imap.Account not open");
-    }
-    
     public async void open_async(Cancellable? cancellable = null) throws Error {
         if (is_open)
             throw new EngineError.ALREADY_OPEN("Imap.Account already open");
@@ -621,7 +618,16 @@ private class Geary.Imap.Account : BaseObject {
         
         return responses;
     }
-    
+
+    private void check_open() throws Error {
+        if (!is_open)
+            throw new EngineError.OPEN_REQUIRED("Imap.Account not open");
+    }
+
+    private void notify_report_problem(ProblemType problem, Error? err) {
+        report_problem(new ServiceProblemReport(problem, this.account, Service.IMAP, err));
+    }
+
     [NoReturn]
     private void throw_not_found(Geary.FolderPath? path) throws EngineError {
         throw new EngineError.NOT_FOUND("Folder %s not found on %s",
@@ -637,10 +643,11 @@ private class Geary.Imap.Account : BaseObject {
     private void on_connection_failed(Error error) {
         // There was an error connecting to the IMAP host
         this.authentication_failures = 0;
-        if (!(error is IOError.CANCELLED)) {
-            // XXX check the type of the error and report a more
-            // fine-grained problem here
-            report_problem(Geary.Account.Problem.RECV_EMAIL_ERROR, error);
+        if (error is ImapError.UNAUTHENTICATED) {
+            // This is effectively a login failure
+            on_login_failed(null);
+        } else {
+            notify_report_problem(ProblemType.CONNECTION_ERROR, error);
         }
     }
 
@@ -648,7 +655,7 @@ private class Geary.Imap.Account : BaseObject {
         this.authentication_failures++;
         if (this.authentication_failures >= Geary.Account.AUTH_ATTEMPTS_MAX) {
             // We have tried auth too many times, so bail out
-            report_problem(Geary.Account.Problem.RECV_EMAIL_LOGIN_FAILED, null);
+            notify_report_problem(ProblemType.LOGIN_FAILED, null);
         } else {
             // login can fail due to an invalid password hence we
             // should re-ask it but it can also fail due to server
@@ -673,7 +680,7 @@ private class Geary.Imap.Account : BaseObject {
                 // Either the server was unavailable, or we were unable to
                 // parse the login response. Either way, indicate a
                 // non-login error.
-                report_problem(Geary.Account.Problem.RECV_EMAIL_ERROR, login_error);
+                notify_report_problem(ProblemType.SERVER_ERROR, login_error);
             } else {
                 // Now, we should ask the user for their password
                 this.account.fetch_passwords_async.begin(
@@ -685,10 +692,10 @@ private class Geary.Imap.Account : BaseObject {
                                 this.session_mgr.credentials_updated();
                             } else {
                                 // User cancelled, so indicate a login problem
-                                report_problem(Geary.Account.Problem.RECV_EMAIL_LOGIN_FAILED, null);
+                                notify_report_problem(ProblemType.LOGIN_FAILED, null);
                             }
                         } catch (Error err) {
-                            report_problem(Geary.Account.Problem.RECV_EMAIL_ERROR, err);
+                            notify_report_problem(ProblemType.GENERIC_ERROR, err);
                         }
                     });
             }

@@ -873,71 +873,68 @@ public class GearyController : Geary.BaseObject {
         }
     }
 
-    private void report_problem(Geary.Account.Problem problem, Geary.Account account, Error? err) {
-        debug("Reported problem: %s Error: %s", problem.to_string(), err != null ? err.message : "(N/A)");
+    private void report_problem(Geary.ProblemReport report) {
+        debug("Problem reported: %s", report.to_string());
 
-        switch (problem) {
-        case Geary.Account.Problem.DATABASE_FAILURE:
-        case Geary.Account.Problem.HOST_UNREACHABLE:
-        case Geary.Account.Problem.NETWORK_UNAVAILABLE:
-        case Geary.Account.Problem.RECV_EMAIL_ERROR:
-        case Geary.Account.Problem.RECV_EMAIL_LOGIN_FAILED:
-        case Geary.Account.Problem.SEND_EMAIL_ERROR:
-        case Geary.Account.Problem.SEND_EMAIL_LOGIN_FAILED:
-            MainWindowInfoBar info_bar = new MainWindowInfoBar.for_problem(
-                problem, account, err
-            );
-            info_bar.retry.connect(on_retry_problem);
-            this.main_window.show_infobar(info_bar);
-            break;
-
-        case Geary.Account.Problem.SEND_EMAIL_SAVE_FAILED:
-            handle_outbox_failure(StatusBar.Message.OUTBOX_SAVE_SENT_MAIL_FAILED);
-            break;
-
-        default:
-            assert_not_reached();
+        if (!(report.error is IOError.CANCELLED)) {
+            if (report.problem_type == Geary.ProblemType.SEND_EMAIL_SAVE_FAILED) {
+                handle_outbox_failure(StatusBar.Message.OUTBOX_SAVE_SENT_MAIL_FAILED);
+            } else {
+                MainWindowInfoBar info_bar = new MainWindowInfoBar.for_problem(report);
+                info_bar.retry.connect(on_retry_problem);
+                this.main_window.show_infobar(info_bar);
+            }
         }
     }
 
     private void on_retry_problem(MainWindowInfoBar info_bar) {
-        switch (info_bar.problem) {
-        case Geary.Account.Problem.RECV_EMAIL_ERROR:
-        case Geary.Account.Problem.RECV_EMAIL_LOGIN_FAILED:
-            info_bar.account.start_incoming_client.begin((obj, ret) => {
-                    try {
-                        info_bar.account.start_incoming_client.end(ret);
-                    } catch (Error err) {
-                        report_problem(
-                            Geary.Account.Problem.RECV_EMAIL_LOGIN_FAILED,
-                            info_bar.account,
-                            err
-                        );
-                    }
-                });
-            break;
+        Geary.ServiceProblemReport? service_report =
+            info_bar.report as Geary.ServiceProblemReport;
+        Error retry_err = null;
+        if (service_report != null) {
+            Geary.Account? account = null;
+            try {
+                account = this.application.engine.get_account_instance(
+                    service_report.account
+                );
+            } catch (Error err) {
+                debug("Error getting account for error retry: %s", err.message);
+            }
 
-        case Geary.Account.Problem.SEND_EMAIL_ERROR:
-        case Geary.Account.Problem.SEND_EMAIL_LOGIN_FAILED:
-            info_bar.account.start_outgoing_client.begin((obj, ret) => {
-                    try {
-                        info_bar.account.start_outgoing_client.end(ret);
-                    } catch (Error err) {
-                        report_problem(
-                            Geary.Account.Problem.SEND_EMAIL_ERROR,
-                            info_bar.account,
-                            err
-                        );
-                    }
-                });
-            break;
+            if (account != null && account.is_open()) {
+                switch (service_report.service_type) {
+                case Geary.Service.IMAP:
+                    account.start_incoming_client.begin((obj, ret) => {
+                            try {
+                                account.start_incoming_client.end(ret);
+                            } catch (Error err) {
+                                retry_err = err;
+                            }
+                        });
+                    break;
 
-        default:
-            debug("Un-handled problem retry for %s: %s".printf(
-                      info_bar.account.information.id,
-                      info_bar.problem.to_string()
-                  ));
-            break;
+                case Geary.Service.SMTP:
+                    account.start_outgoing_client.begin((obj, ret) => {
+                            try {
+                                account.start_outgoing_client.end(ret);
+                            } catch (Error err) {
+                                retry_err = err;
+                            }
+                        });
+                    break;
+                }
+
+                if (retry_err != null) {
+                    report_problem(
+                        new Geary.ServiceProblemReport(
+                            Geary.ProblemType.GENERIC_ERROR,
+                            service_report.account,
+                            service_report.service_type,
+                            retry_err
+                        )
+                    );
+                }
+            }
         }
     }
 
@@ -984,8 +981,8 @@ public class GearyController : Geary.BaseObject {
         }
     }
 
-    private void on_report_problem(Geary.Account account, Geary.Account.Problem problem, Error? err) {
-        report_problem(problem, account, err);
+    private void on_report_problem(Geary.Account account, Geary.ProblemReport problem) {
+        report_problem(problem);
     }
 
     private void on_account_email_removed(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {

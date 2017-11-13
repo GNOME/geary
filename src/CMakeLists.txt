@@ -37,6 +37,7 @@ engine/api/geary-folder-supports-remove.vala
 engine/api/geary-logging.vala
 engine/api/geary-named-flag.vala
 engine/api/geary-named-flags.vala
+engine/api/geary-problem-report.vala
 engine/api/geary-progress-monitor.vala
 engine/api/geary-revokable.vala
 engine/api/geary-search-folder.vala
