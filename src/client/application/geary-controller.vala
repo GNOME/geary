@@ -171,9 +171,6 @@ public class GearyController : Geary.BaseObject {
         // custom icons)
         IconFactory.instance.init();
 
-        // Ensure all geary windows have an icon
-        Gtk.Window.set_default_icon_name("geary");
-
         apply_app_menu_fix();
 
         // Setup actions.

@@ -27,13 +27,13 @@ set(ICON_FILES
 install(FILES ${ICON_FILES} DESTINATION ${ICONS_DEST})
 
 # Application icon goes in theme directory
-install(FILES "hicolor/16x16/apps/geary.png" DESTINATION share/icons/hicolor/16x16/apps)
-install(FILES "hicolor/24x24/apps/geary.png" DESTINATION share/icons/hicolor/24x24/apps)
-install(FILES "hicolor/32x32/apps/geary.png" DESTINATION share/icons/hicolor/32x32/apps)
-install(FILES "hicolor/48x48/apps/geary.png" DESTINATION share/icons/hicolor/48x48/apps)
-install(FILES "hicolor/256x256/apps/geary.png" DESTINATION share/icons/hicolor/256x256/apps)
-install(FILES "hicolor/512x512/apps/geary.png" DESTINATION share/icons/hicolor/512x512/apps)
-install(FILES "hicolor/symbolic/apps/geary-symbolic.svg" DESTINATION share/icons/hicolor/symbolic/apps)
+install(FILES "hicolor/16x16/apps/org.gnome.Geary.png" DESTINATION share/icons/hicolor/16x16/apps)
+install(FILES "hicolor/24x24/apps/org.gnome.Geary.png" DESTINATION share/icons/hicolor/24x24/apps)
+install(FILES "hicolor/32x32/apps/org.gnome.Geary.png" DESTINATION share/icons/hicolor/32x32/apps)
+install(FILES "hicolor/48x48/apps/org.gnome.Geary.png" DESTINATION share/icons/hicolor/48x48/apps)
+install(FILES "hicolor/256x256/apps/org.gnome.Geary.png" DESTINATION share/icons/hicolor/256x256/apps)
+install(FILES "hicolor/512x512/apps/org.gnome.Geary.png" DESTINATION share/icons/hicolor/512x512/apps)
+install(FILES "hicolor/symbolic/apps/org.gnome.Geary-symbolic.svg" DESTINATION share/icons/hicolor/symbolic/apps)
 
 # Optional: update icon cache at install time.
 if (ICON_UPDATE)

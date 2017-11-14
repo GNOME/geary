@@ -158,7 +158,7 @@ public class Libnotify : Geary.BaseObject {
         // Avoid constructor due to ABI change
         Notify.Notification notification = (Notify.Notification) GLib.Object.new(
             typeof (Notify.Notification),
-            "icon-name", "geary",
+            "icon-name", "org.gnome.Geary",
             "summary", GLib.Environment.get_application_name());
         notification.set_hint_string("desktop-entry", "org.gnome.Geary");
         if (caps.find_custom("actions", GLib.strcmp) != null)
