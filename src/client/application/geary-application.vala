@@ -187,7 +187,11 @@ public class GearyApplication : Gtk.Application {
         Geary.Logging.init();
         Date.init();
 
+        // Calls Gtk.init(), amongst other things
         base.startup();
+
+        // Ensure all geary windows have an icon
+        Gtk.Window.set_default_icon_name(APP_ID);
 
         add_action_entries(action_entries, this);
     }
@@ -413,7 +417,7 @@ public class GearyApplication : Gtk.Application {
             "authors", AUTHORS,
             "copyright", string.join("\n", COPYRIGHT_1, COPYRIGHT_2),
             "license-type", Gtk.License.LGPL_2_1,
-            "logo-icon-name", "geary",
+            "logo-icon-name", APP_ID,
             "version", VERSION,
             "website", WEBSITE,
             "website-label", WEBSITE_LABEL,

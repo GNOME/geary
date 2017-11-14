@@ -5,8 +5,6 @@
     "runtime-version": "master",
     "sdk": "org.gnome.Sdk",
     "command": "geary",
-    "rename-icon": "geary",
-    "copy-icon": true,
 
     /* Nightly build args, remove these when creating a new stable branch */
     "tags": ["nightly"],
@@ -105,7 +103,7 @@
             "sources": [
                 {
                     "type": "git",
-                    "url": "https://git.gnome.org/browse/geary",
+                    "url": "/home/mjg/Projects/GNOME/geary",
                     "branch": "master"
                 }
             ]
