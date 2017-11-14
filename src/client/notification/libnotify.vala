@@ -160,7 +160,7 @@ public class Libnotify : Geary.BaseObject {
             typeof (Notify.Notification),
             "icon-name", "geary",
             "summary", GLib.Environment.get_application_name());
-        notification.set_hint_string("desktop-entry", "geary");
+        notification.set_hint_string("desktop-entry", "org.gnome.Geary");
         if (caps.find_custom("actions", GLib.strcmp) != null)
             notification.add_action("default", _("Open"), on_default_action);
         
