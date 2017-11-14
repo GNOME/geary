@@ -103,7 +103,7 @@
             "sources": [
                 {
                     "type": "git",
-                    "url": "/home/mjg/Projects/GNOME/geary",
+                    "url": "https://git.gnome.org/browse/geary",
                     "branch": "master"
                 }
             ]
