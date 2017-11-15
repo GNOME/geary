@@ -616,7 +616,7 @@ EditContext.prototype = {
 
         let styles = window.getComputedStyle(node);
         let fontFamily = styles.getPropertyValue("font-family");
-        if (fontFamily.charAt() == "'") {
+        if (["'", "\""].indexOf(fontFamily.charAt()) != -1) {
             fontFamily = fontFamily.substr(1, fontFamily.length - 2);
         }
         this.fontFamily = fontFamily;
