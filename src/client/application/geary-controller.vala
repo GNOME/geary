@@ -1948,12 +1948,6 @@ public class GearyController : Geary.BaseObject {
         Gtk.FileChooserNative dialog = new_save_chooser(Gtk.FileChooserAction.SAVE);
         if (!Geary.String.is_empty(filename))
             dialog.set_current_name(filename);
-        dialog.set_do_overwrite_confirmation(true);
-        dialog.confirm_overwrite.connect((chooser) => {
-            return do_overwrite_confirmation(chooser.get_file())
-                ? Gtk.FileChooserConfirmation.ACCEPT_FILENAME
-                : Gtk.FileChooserConfirmation.SELECT_AGAIN;
-            });
         bool accepted = (dialog.run() == Gtk.ResponseType.ACCEPT);
         string? accepted_filename = dialog.get_filename();
 
