@@ -5,13 +5,16 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
+// Defined by CMake build script.
+extern const string _SOURCE_ROOT_DIR;
+
 class Geary.AttachmentTest : Gee.TestCase {
 
     private const string ATTACHMENT_ID = "test-id";
     private const string CONTENT_TYPE = "image/png";
     private const string CONTENT_ID = "test-content-id";
     private const string CONTENT_DESC = "Mea navis volitans anguillis plena est";
-    private const string FILE_PATH = "../icons/hicolor/16x16/apps/geary.png";
+    private const string FILE_PATH = "icons/hicolor/16x16/apps/org.gnome.Geary.png";
 
     private Mime.ContentType? content_type;
     private Mime.ContentType? default_type;
@@ -60,10 +63,9 @@ class Geary.AttachmentTest : Gee.TestCase {
             this.content_type = Mime.ContentType.deserialize(CONTENT_TYPE);
             this.default_type = Mime.ContentType.deserialize(Mime.ContentType.DEFAULT_CONTENT_TYPE);
             this.content_disposition = new Mime.ContentDisposition("attachment", null);
-            // XXX this will break as soon as the test runner is not
-            // launched from the project root dir
-            this.file = File.new_for_path("../icons/hicolor/16x16/apps/geary.png");
 
+            File source = File.new_for_path(_SOURCE_ROOT_DIR);
+            this.file = source.get_child(FILE_PATH);
         } catch (Error err) {
             assert_not_reached();
         }
@@ -222,9 +224,7 @@ class Geary.AttachmentTest : Gee.TestCase {
             CONTENT_DESC,
             content_disposition,
             TEST_FILENAME,
-            // XXX this will break as soon as the test runner is not
-            // launched from the project root dir
-            File.new_for_path("../icons/hicolor/16x16/apps/geary.png"),
+            this.file,
             742
         );
 
