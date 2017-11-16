@@ -257,7 +257,11 @@ public string quote_email_for_reply(Geary.Email email, string? quote, TextFormat
     }
 
     quoted += "<br />";
-    quoted += quote_body(email, quote, true, format);
+    try {
+        quoted += quote_body(email, quote, true, format);
+    } catch (Error err) {
+        debug("Failed to quote body for replying: %s".printf(err.message));
+    }
 
     return quoted;
 }
@@ -290,31 +294,35 @@ public string quote_email_for_forward(Geary.Email email, string? quote, TextForm
         quoted += _("Cc: %s\n").printf(cc_line);
     quoted += "\n";  // A blank line between headers and body
     quoted = quoted.replace("\n", "<br />");
-    quoted += quote_body(email, quote, false, format);
+    try {
+        quoted += quote_body(email, quote, false, format);
+    } catch (Error err) {
+        debug("Failed to quote body for forwarding: %s".printf(err.message));
+    }
     return quoted;
 }
 
-private string quote_body(Geary.Email email, string? quote, bool use_quotes, TextFormat format) {
-    string? body_text = quote ?? "";
+private string quote_body(Geary.Email email, string? quote, bool use_quotes, TextFormat format)
+    throws Error {
+    Message? message = email.get_message();
+    bool preserve_whitespace = !message.has_html_body();
+    string? body_text = null;
     if (quote == null) {
-        try {
-            Message message = email.get_message();
-            switch (format) {
-            case TextFormat.HTML:
-                body_text = message.has_html_body()
-                    ? message.get_html_body(null)
-                    : message.get_plain_body(true, null);
-                    break;
+        switch (format) {
+        case TextFormat.HTML:
+            body_text = message.has_html_body()
+            ? message.get_html_body(null)
+            : message.get_plain_body(true, null);
+            break;
 
-            case TextFormat.PLAIN:
-                body_text = message.has_plain_body()
-                    ? message.get_plain_body(true, null)
-                    : message.get_html_body(null);
-                    break;
-            }
-        } catch (Error error) {
-            debug("Could not get message text for quoting: %s", error.message);
+        case TextFormat.PLAIN:
+            body_text = message.has_plain_body()
+            ? message.get_plain_body(true, null)
+            : message.get_html_body(null);
+            break;
         }
+    } else {
+        body_text = Geary.HTML.smart_escape(quote, preserve_whitespace);
     }
 
     // Wrap the whole thing in a blockquote.
