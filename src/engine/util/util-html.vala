@@ -182,7 +182,7 @@ public string smart_escape(string? text, bool preserve_whitespace_in_html) {
         preserve_whitespace_in_html = true;
     }
     if (preserve_whitespace_in_html)
-        res = @"<div style='white-space: pre;'>$res</div>";
+        res = @"<div style='white-space: pre-wrap;'>$res</div>";
     return res;
 }
 
