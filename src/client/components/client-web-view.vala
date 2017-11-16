@@ -25,6 +25,8 @@ public class ClientWebView : WebKit.WebView {
 
     /** URI Scheme and delimiter for images loaded by Content-ID. */
     public const string CID_URL_PREFIX = "cid:";
+
+    private const string CONTENT_LOADED = "contentLoaded";
     private const string PREFERRED_HEIGHT_CHANGED = "preferredHeightChanged";
     private const string REMOTE_IMAGE_LOAD_BLOCKED = "remoteImageLoadBlocked";
     private const string SELECTION_CHANGED = "selectionChanged";
@@ -172,6 +174,22 @@ public class ClientWebView : WebKit.WebView {
     /** Delegate for UserContentManager message callbacks. */
     public delegate void JavaScriptMessageHandler(WebKit.JavascriptResult js_result);
 
+    /**
+     * Determines if the view's content has been fully loaded.
+     *
+     * This property is updated immediately before the {@link
+     * content_loaded} signal is fired, and is triggered by the
+     * PageState JavaScript object completing its load
+     * handler. I.e. This will be true after the in-page JavaScript has
+     * finished making any modifications to the page content.
+     *
+     * This will likely be fired after WebKitGTK sets the `is-loading`
+     * property to `FALSE` and emits `load-changed` with
+     * `WebKitLoadEvent.LOAD_FINISHED`, since they are related to
+     * network resource loading, not page content.
+     */
+    public bool is_content_loaded { get; private set; default = false; }
+
     /** Determines if the view has any selected text */
     public bool has_selection { get; private set; default = false; }
 
@@ -216,6 +234,14 @@ public class ClientWebView : WebKit.WebView {
     private Gee.Map<string,Geary.Memory.Buffer> internal_resources =
         new Gee.HashMap<string,Geary.Memory.Buffer>();
 
+
+    /**
+     * Emitted when the view's content has finished loaded.
+     *
+     * See {@link is_content_loaded} for detail about when this is
+     * emitted.
+     */
+    public signal void content_loaded();
 
     /** Emitted when the view's selection has changed. */
     public signal void selection_changed(bool has_selection);
@@ -266,6 +292,9 @@ public class ClientWebView : WebKit.WebView {
             });
 
         register_message_handler(
+            CONTENT_LOADED, on_content_loaded
+        );
+        register_message_handler(
             PREFERRED_HEIGHT_CHANGED, on_preferred_height_changed
         );
         register_message_handler(
@@ -273,7 +302,7 @@ public class ClientWebView : WebKit.WebView {
         );
         register_message_handler(
             SELECTION_CHANGED, on_selection_changed
-         );
+        );
 
         // Manage zoom level
         config.bind(Configuration.CONVERSATION_VIEWER_ZOOM_KEY, this, "zoom_level");
@@ -500,6 +529,11 @@ public class ClientWebView : WebKit.WebView {
         remote_image_load_blocked();
     }
 
+    private void on_content_loaded(WebKit.JavascriptResult result) {
+        this.is_content_loaded = true;
+        content_loaded();
+    }
+
     private void on_selection_changed(WebKit.JavascriptResult result) {
         try {
             bool has_selection = WebKitUtil.to_bool(result);
@@ -518,4 +552,3 @@ public class ClientWebView : WebKit.WebView {
 
 // XXX this needs to be moved into the libsoup bindings
 extern string soup_uri_decode(string part);
-
