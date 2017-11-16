@@ -59,7 +59,19 @@ ComposerPageState.prototype = {
         let state = this;
 
         this.bodyPart = document.getElementById("geary-body");
-        if (this.bodyPart == null) {
+        if (this.bodyPart != null) {
+            // Capture clicks on the document that aren't on an
+            // existing part and prevent focus leaving it. Bug 779369.
+            document.addEventListener("mousedown", function(e) {
+                if (!state.containedInPart(e.target)) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            });
+        } else {
+            // This happens if we are loading a draft created by a MUA
+            // that isn't Geary, so we can't rely on any of the
+            // expected HTML structure to be in place.
             this.bodyPart = document.body;
         }
 
@@ -381,6 +393,16 @@ ComposerPageState.prototype = {
             this.focusedPart = newFocus;
             this.focusedPart.classList.add("geary-focus");
         }
+    },
+    containedInPart: function(target) {
+        let inPart = false;
+        for (let part of [this.bodyPart, this.quotePart, this.signaturePart]) {
+            if (part != null && (part == target || part.contains(target))) {
+                inPart = true;
+                break;
+            }
+        }
+        return inPart;
     }
 };
 
