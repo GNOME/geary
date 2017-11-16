@@ -64,6 +64,7 @@ int main(string[] args) {
 
     TestSuite js = new TestSuite("js");
 
+    js.add_suite(new ClientPageStateTest().get_suite());
     js.add_suite(new ComposerPageStateTest().get_suite());
     js.add_suite(new ConversationPageStateTest().get_suite());
 

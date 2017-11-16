@@ -73,6 +73,7 @@ PageState.prototype = {
     },
     loaded: function() {
         this.isLoaded = true;
+        window.webkit.messageHandlers.contentLoaded.postMessage(null);
     },
     loadRemoteImages: function() {
         this.allowRemoteImages = true;

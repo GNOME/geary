@@ -27,6 +27,7 @@ set(TEST_SRC
   client/components/client-web-view-test-case.vala
   client/composer/composer-web-view-test.vala
 
+  js/client-page-state-test.vala
   js/composer-page-state-test.vala
   js/conversation-page-state-test.vala
 )
