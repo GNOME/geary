@@ -20,6 +20,10 @@
  */
 public class Geary.ConnectivityManager : BaseObject {
 
+
+    private const uint CHECK_QUIESCENCE_MS = 60 * 1000;
+
+
 	/** Determines if the managed endpoint is currently reachable. */
 	public bool is_reachable { get; private set; default = false; }
 
@@ -30,6 +34,11 @@ public class Geary.ConnectivityManager : BaseObject {
 
 	private Cancellable? existing_check = null;
 
+    // Wall time the next already-connected check should not occur before
+    private int64 next_check = 0;
+
+    private TimeoutManager delayed_check;
+
 
     /**
      * Constructs a new manager for a specific endpoint.
@@ -39,6 +48,10 @@ public class Geary.ConnectivityManager : BaseObject {
 
         this.monitor = NetworkMonitor.get_default();
         this.monitor.network_changed.connect(on_network_changed);
+
+        this.delayed_check = new TimeoutManager.seconds(
+            CHECK_QUIESCENCE_MS, () => { this.check_reachable.begin(); }
+        );
     }
 
     ~ConnectivityManager() {
@@ -71,6 +84,7 @@ public class Geary.ConnectivityManager : BaseObject {
 				this.endpoint.remote_address,
 				cancellable
 			);
+            this.next_check = get_real_time() + CHECK_QUIESCENCE_MS;
         } catch (Error err) {
             if (err is IOError.NETWORK_UNREACHABLE &&
 				this.monitor.network_available) {
@@ -96,13 +110,14 @@ public class Geary.ConnectivityManager : BaseObject {
     }
 
 	/**
-     * Cancels any running reachability check, if any.
+     * Cancels any running or future reachability check, if any.
      */
     public void cancel_check() {
 		if (this.existing_check != null) {
 			this.existing_check.cancel();
 			this.existing_check = null;
 		}
+        this.delayed_check.reset();
 	}
 
     private void on_network_changed(bool some_available) {
@@ -111,11 +126,26 @@ public class Geary.ConnectivityManager : BaseObject {
 		debug("Network changed: %s",
               some_available ? "some available" : "none available");
 		if (some_available) {
-			// Some hosts may have dropped out despite network being
-			// still xavailable, so need to check again
-			this.check_reachable.begin();
+			// Some networks may have dropped out despite some being
+			// still available, so need to check again. Only run the
+			// check if we are either currently:
+            //
+            // 1. Unreachable
+            // 2. An existing check is already running (i.e. the
+            //    network configuration is changing)
+            // 3. Reachable, and a check hasn't been run recently
+            //
+            // Otherwise, schedule a delayed check to work around the
+            // issue in Bug 776042.
+            if (!this.is_reachable ||
+                this.existing_check != null ||
+                this.next_check <= get_real_time()) {
+                this.check_reachable.begin();
+            } else if (!this.delayed_check.is_running) {
+                this.delayed_check.start();
+            }
 		} else {
-			// None available, so definitely not reachable
+			// None available, so definitely not reachable.
 			set_reachable(false);
 		}
     }
