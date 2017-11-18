@@ -17,11 +17,11 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: geary-0.4.1\n"
+"Project-Id-Version: geary master\n"
 "Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=internationalization\n"
-"POT-Creation-Date: 2017-11-16 07:11+0000\n"
-"PO-Revision-Date: 2017-10-24 09:03+0200\n"
+"POT-Creation-Date: 2017-11-18 19:25+0000\n"
+"PO-Revision-Date: 2017-11-18 21:05+0100\n"
 "Last-Translator: Mario Blättermann <mario.blaettermann@gmail.com>\n"
 "Language-Team: Deutsch <gnome-de@gnome.org>\n"
 "Language: de\n"
@@ -38,7 +38,7 @@ msgstr "Als E-Mail versenden"
 #. Translators: Do NOT translate or transliterate this text (this is an icon file name)!
 #: desktop/geary-attach.contract.desktop.in:5
 msgid "mail-send"
-msgstr ""
+msgstr "mail-send"
 
 #: desktop/geary-attach.contract.desktop.in:6
 msgid "Send files using Geary"
@@ -71,7 +71,7 @@ msgstr "Email;E-Mail;Mail;"
 #. Translators: Do NOT translate or transliterate this text (this is an icon file name)!
 #: desktop/geary-autostart.desktop.in:9 desktop/org.gnome.Geary.desktop.in:9
 msgid "org.gnome.Geary"
-msgstr ""
+msgstr "org.gnome.Geary"
 
 #. Translators: The development team's name
 #: desktop/org.gnome.Geary.appdata.xml.in:13
@@ -145,213 +145,209 @@ msgid "Compose Message"
 msgstr "Nachricht verfassen"
 
 #: desktop/org.gnome.Geary.gschema.xml:8
-#, fuzzy
-#| msgid "Save all attachments"
 msgid "Default attachments directory"
-msgstr "Alle Anhänge speichern"
+msgstr "Vorgabeordner für Anhänge"
 
 #: desktop/org.gnome.Geary.gschema.xml:9
 msgid "Location used when opening and saving attachments."
-msgstr ""
+msgstr "Beim Öffnen und Speichern von Anhängen zu verwendender Speicherort."
 
 #: desktop/org.gnome.Geary.gschema.xml:14
 msgid "Default print output directory"
-msgstr ""
+msgstr "Vorgegebener Ordner zum Drucken"
 
 #: desktop/org.gnome.Geary.gschema.xml:15
 msgid "Location used when printing to a file."
-msgstr ""
+msgstr "Zu verwendender Ort, wenn in eine Datei ausgedruckt werden soll."
 
 #: desktop/org.gnome.Geary.gschema.xml:20
 msgid "Maximize window"
-msgstr ""
+msgstr "Fenster maximieren"
 
 #: desktop/org.gnome.Geary.gschema.xml:21
 msgid "True if library application is maximized, false otherwise."
-msgstr ""
+msgstr "Legt fest, ob das Anwendungsfenster maximiert werden soll."
 
 #: desktop/org.gnome.Geary.gschema.xml:26
 msgid "Width of window"
-msgstr ""
+msgstr "Breite des Fensters"
 
 #: desktop/org.gnome.Geary.gschema.xml:27
 msgid "The last recorded width of the application window."
-msgstr ""
+msgstr "Die zuletzt gespeicherte Breite des Anwendungsfensters."
 
 #: desktop/org.gnome.Geary.gschema.xml:32
 msgid "Height of window"
-msgstr ""
+msgstr "Höhe des Fensters"
 
 #: desktop/org.gnome.Geary.gschema.xml:33
 msgid "The last recorded height of the application window."
-msgstr ""
+msgstr "Die zuletzt gespeicherte Höhe des Anwendungsfensters."
 
 #: desktop/org.gnome.Geary.gschema.xml:38
 msgid "Position of folder list pane"
-msgstr ""
+msgstr "Position der Ordnerliste"
 
 #: desktop/org.gnome.Geary.gschema.xml:39
 msgid "Position of the folder list Paned grabber."
-msgstr ""
+msgstr "Position des Teilfensters mit der Ordnerliste."
 
 #: desktop/org.gnome.Geary.gschema.xml:44
 msgid "Position of folder list pane when horizontal"
-msgstr ""
+msgstr "Position der Ordnerliste im horizontalen Modus"
 
 #: desktop/org.gnome.Geary.gschema.xml:45
 msgid ""
 "Position of the folder list Paned grabber in the horizontal orientation."
 msgstr ""
+"Position des Teilfensters mit der Ordnerliste in horizontaler Ausrichtung."
 
 #: desktop/org.gnome.Geary.gschema.xml:50
 msgid "Position of folder list pane when vertical"
-msgstr ""
+msgstr "Position der Ordnerliste im vertikalen Modus"
 
 #: desktop/org.gnome.Geary.gschema.xml:51
 msgid "Position of the folder list Paned grabber in the vertical orientation."
 msgstr ""
+"Position des Teilfensters mit der Ordnerliste in vertikaler Ausrichtung."
 
 #: desktop/org.gnome.Geary.gschema.xml:56
 msgid "Orientation of the folder list pane"
-msgstr ""
+msgstr "Ausrichtung der Ordnerliste"
 
 #: desktop/org.gnome.Geary.gschema.xml:57
 msgid "True if the folder list Paned is in the horizontal orientation."
-msgstr ""
+msgstr "Horizontale Ausrichtung des Ordnerliste-Teilfensters."
 
 #: desktop/org.gnome.Geary.gschema.xml:62
 msgid "Position of message list pane"
-msgstr ""
+msgstr "Position der Nachrichtenliste"
 
 #: desktop/org.gnome.Geary.gschema.xml:63
 msgid "Position of the message list Paned grabber."
-msgstr ""
+msgstr "Position des Teilfensters mit der Nachrichtenliste."
 
 #: desktop/org.gnome.Geary.gschema.xml:68
-#, fuzzy
-#| msgid "_Automatically select next message"
 msgid "Autoselect next message"
-msgstr "Automatisch die nächste Nachricht _wählen"
+msgstr "Automatisch die nächste Nachricht wählen"
 
 #: desktop/org.gnome.Geary.gschema.xml:69
 msgid "True if we should autoselect the next available conversation."
 msgstr ""
+"Legt fest, ob die nächste verfügbare Konversation automatisch ausgewählt "
+"werden soll."
 
 #: desktop/org.gnome.Geary.gschema.xml:74
-#, fuzzy
-#| msgid "_Display conversation preview"
 msgid "Display message previews"
-msgstr "Konversations_vorschau anzeigen"
+msgstr "Nachrichtenvorschauen anzeigen"
 
 #: desktop/org.gnome.Geary.gschema.xml:75
 msgid "True if we should display a short preview of each message."
 msgstr ""
+"Legt fest, ob eine kurze Vorschau jeder Nachricht angezeigt werden soll."
 
 #: desktop/org.gnome.Geary.gschema.xml:80
 msgid "Languages that shall be used in the spell checker"
-msgstr ""
+msgstr "Sprachen, die in der Rechtschreibprüfung verwendet werden sollen"
 
 #: desktop/org.gnome.Geary.gschema.xml:81
 msgid "List of the languages to use in the spell checker."
 msgstr ""
+"Liste der Sprachen, die in der Rechtschreibprüfung verwendet werden sollen."
 
 #: desktop/org.gnome.Geary.gschema.xml:86
 msgid "Languages that are displayed in the spell checker popover"
 msgstr ""
+"Sprachen, die im Einblendmenü der Rechtschreibprüfung angezeigt werden sollen"
 
 #: desktop/org.gnome.Geary.gschema.xml:87
 msgid ""
 "List of languages that are always displayed in the popover of the spell "
 "checker."
 msgstr ""
+"Liste der Sprachen, die immer im Einblendmenü der Rechtschreibprüfung "
+"angezeigt werden sollen."
 
 #: desktop/org.gnome.Geary.gschema.xml:92
-#, fuzzy
-#| msgid "_Play notification sounds"
 msgid "Enable notification sounds"
-msgstr "_Benachrichtigungstöne abspielen"
+msgstr "Benachrichtigungstöne aktivieren"
 
 #: desktop/org.gnome.Geary.gschema.xml:93
 msgid "True to play sounds for notifications and sending."
 msgstr ""
+"Legt fest, ob Klänge für Benachrichtigungen und beim Senden abgespielt "
+"werden sollen."
 
 #: desktop/org.gnome.Geary.gschema.xml:98
-#, fuzzy
-#| msgid "Show _notifications for new mail"
 msgid "Show notifications for new mail"
-msgstr "Benachrichtigung bei _neuen E-Mails anzeigen"
+msgstr "Benachrichtigung bei neuen Nachrichten anzeigen"
 
 #: desktop/org.gnome.Geary.gschema.xml:99
 msgid "True to show notification bubbles."
-msgstr ""
+msgstr "Legt fest, ob Benachrichtigungen angezeigt werden sollen."
 
 #: desktop/org.gnome.Geary.gschema.xml:104
 msgid "Notify of new mail at startup"
-msgstr ""
+msgstr "Beim Start über neue Nachrichten benachrichtigen"
 
 #: desktop/org.gnome.Geary.gschema.xml:105
-#, fuzzy
-#| msgid "Desktop notification of new mail"
 msgid "True to notify of new mail at startup."
-msgstr "Benachrichtigung bei neuer E-Mail"
+msgstr ""
+"Legt fest, ob beim Start Benachrichtigungen bei neuen Nachrichten angezeigt "
+"werden sollen."
 
 #: desktop/org.gnome.Geary.gschema.xml:110
 msgid "Ask when opening an attachment"
-msgstr ""
+msgstr "Fragen, wenn ein Anhang geöffnet wird"
 
 #: desktop/org.gnome.Geary.gschema.xml:111
-#, fuzzy
-#| msgid "To add them as attachments"
 msgid "True to ask when opening an attachment."
-msgstr "Als Anhang einfügen"
+msgstr "Legt fest, ob nachgefragt werden soll, wenn ein Anhang geöffnet wird."
 
 #: desktop/org.gnome.Geary.gschema.xml:116
 msgid "Whether to compose emails in HTML"
-msgstr ""
+msgstr "Nachrichten in HTML verfassen"
 
 #: desktop/org.gnome.Geary.gschema.xml:117
 msgid "True to compose emails in HTML; false for plain text."
-msgstr ""
+msgstr "Legt fest, ob Nachrichten in HTML verfasst werden sollen."
 
 #: desktop/org.gnome.Geary.gschema.xml:122
 msgid "Advisory strategy for full-text searching"
-msgstr ""
+msgstr "Strategie für Volltextsuche"
 
 #: desktop/org.gnome.Geary.gschema.xml:123
 msgid ""
 "Acceptable values are “exact”, “conservative”, “aggressive”, and “horizon”."
 msgstr ""
+"Zulässige Werte sind »exact«, »conservative«, »aggressive« und »horizon«."
 
 #: desktop/org.gnome.Geary.gschema.xml:128
-#, fuzzy
-#| msgctxt "shortcut window"
-#| msgid "Move focus to conversation list"
 msgid "Zoom of conversation viewer"
-msgstr "Fokus auf die Konversationsliste verschieben"
+msgstr "Vergrößerungsstufe der Konversationsansicht"
 
 #: desktop/org.gnome.Geary.gschema.xml:129
 msgid "The zoom to apply on the conservation view."
-msgstr ""
+msgstr "Der auf die Konversationsansicht anzuwendende Vergrößerungsstufe."
 
 #: desktop/org.gnome.Geary.gschema.xml:134
-#, fuzzy
-#| msgctxt "shortcut window"
-#| msgid "Detach composer window"
 msgid "Size of detached composer window"
-msgstr "»Verfassen«-Fenster abkoppeln"
+msgstr "Größe des abgekoppelten Verfassen-Fensters"
 
 #: desktop/org.gnome.Geary.gschema.xml:135
 msgid "The last recorded size of the detached composer window."
-msgstr ""
+msgstr "Die zuletzt gespeicherte Größe des abgekoppelten Verfassen-Fensters."
 
 #: desktop/org.gnome.Geary.gschema.xml:140
 msgid "Whether we migrated the old settings"
-msgstr ""
+msgstr "Alte Einstellungen migrieren"
 
 #: desktop/org.gnome.Geary.gschema.xml:141
 msgid ""
 "False to check for the old “org.yorba.geary”-schema and copy its values."
 msgstr ""
+"Wenn nicht aktiviert, wird nach dem alten Schema »org.yorba.geary« geschaut "
+"und dessen Werte übernommen."
 
 #: src/client/accounts/account-dialog-add-edit-pane.vala:51
 #: src/client/components/stock.vala:31 ui/conversation-email-menus.ui:57
@@ -1130,7 +1126,7 @@ msgstr "%1$s über %2$s"
 #. when choosing what address to send a message from.
 #: src/client/composer/composer-widget.vala:2037
 msgid "_From:"
-msgstr "_Von"
+msgstr "_Von:"
 
 #. Translators: This is the name of the file chooser filter
 #. when inserting an image in the composer.
@@ -2297,7 +2293,7 @@ msgstr "Externe Bilder nur von Absendern anzeigen, denen Sie vertrauen."
 
 #: ui/conversation-message.ui:692
 msgid "But actually goes to:"
-msgstr "aber führt tatsächlich zu:"
+msgstr "Aber führt tatsächlich zu:"
 
 #: ui/conversation-message.ui:723
 msgid "The link appears to go to:"
@@ -2878,13 +2874,3 @@ msgstr "E-Mail-Adresse:"
 #: ui/upgrade_dialog.glade:60
 msgid "Geary update in progress…"
 msgstr "Aktualisierung von Geary wird durchgeführt …"
-
-# Oder Geary E-Mail
-#~ msgid "Geary Email"
-#~ msgstr "Geary E-Mail"
-
-#~ msgid "Geary Mail"
-#~ msgstr "Geary Mail"
-
-#~ msgid "Try Again"
-#~ msgstr "Erneut versuchen"
