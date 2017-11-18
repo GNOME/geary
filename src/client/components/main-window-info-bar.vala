@@ -213,12 +213,18 @@ public class MainWindowInfoBar : Gtk.InfoBar {
                 "Endpoint: %s\n", service_report.endpoint.to_string()
             );
         }
-        details.append_printf(
-            "Error type: %s\n", (this.report.error != null) ? this.report.format_error_type() : "None specified"
-        );
-        details.append_printf(
-            "Message: %s\n", (this.report.error != null) ? this.report.error.message : "None specified"
-        );
+        if (this.report.error == null) {
+            details.append("No error reported");
+        } else {
+            details.append_printf("Error type: %s\n", this.report.format_error_type());
+            details.append_printf("Message: %s\n", this.report.error.message);
+        }
+        if (this.report.backtrace != null) {
+            details.append("Back trace:\n");
+            foreach (Geary.ProblemReport.StackFrame frame in this.report.backtrace) {
+                details.append_printf(" - %s\n", frame.to_string());
+            }
+        }
         return details.str;
     }
 

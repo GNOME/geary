@@ -9,6 +9,7 @@
 /** Describes available problem types. */
 public enum Geary.ProblemType {
 
+
     /** Indicates an engine problem not covered by one of the other types. */
     GENERIC_ERROR,
 
@@ -29,6 +30,7 @@ public enum Geary.ProblemType {
 
     /** Indicates an outgoing message was sent, but not saved. */
     SEND_EMAIL_SAVE_FAILED;
+
 
     /** Determines the appropriate problem type for an IOError. */
     public static ProblemType for_ioerror(IOError error) {
@@ -54,16 +56,61 @@ public enum Geary.ProblemType {
  */
 public class Geary.ProblemReport : Object {
 
+
+    /**
+     * Represents an individual stack frame in a call back-trace.
+     */
+    public class StackFrame {
+
+
+        /** Name of the function being called. */
+        public string name = "unknown";
+
+
+        internal StackFrame(Unwind.Cursor frame) {
+            uint8 proc_name[256];
+            int ret = -frame.get_proc_name(proc_name);
+			if (ret == Unwind.Error.SUCCESS ||
+                ret == Unwind.Error.NOMEM) {
+                this.name = (string) proc_name;
+            }
+        }
+
+        public string to_string() {
+            return this.name;
+        }
+
+    }
+
+
     /** Describes the type of being reported. */
     public ProblemType problem_type { get; private set; }
 
     /** The exception caused the problem, if any. */
     public Error? error { get; private set; default = null; }
 
+    /** A back trace from when the problem report was constructed. */
+    public Gee.List<StackFrame>? backtrace = null;
+
 
     public ProblemReport(ProblemType type, Error? error) {
         this.problem_type = type;
         this.error = error;
+
+        if (error != null) {
+            // Some kind of exception occurred, so build a trace. This
+            // is far from perfect, but at least we will know where it
+            // was getting caught.
+            this.backtrace = new Gee.LinkedList<StackFrame>();
+            Unwind.Context trace = Unwind.Context();
+            Unwind.Cursor cursor = Unwind.Cursor.local(trace);
+
+            // This misses the first frame, but that's this
+            // constructor call, so we don't really care.
+            while (cursor.step() != 0) {
+                this.backtrace.add(new StackFrame(cursor));
+            }
+        }
     }
 
     /** Returns a string representation of the report, for debugging only. */

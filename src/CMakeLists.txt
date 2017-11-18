@@ -512,6 +512,7 @@ pkg_check_modules(DEPS REQUIRED
     webkit2gtk-web-extension-4.0>=${TARGET_WEBKIT}
     javascriptcoregtk-4.0>=${TARGET_WEBKIT}
     enchant>=1.6
+    libunwind-generic>=1.1
     ${EXTRA_CLIENT_PKG_CONFIG}
 )
 
@@ -529,6 +530,7 @@ set(ENGINE_PACKAGES
   gio-2.0
   glib-2.0
   gmime-2.6
+  libunwind
   javascriptcore-4.0
   libxml-2.0
   posix
