@@ -189,28 +189,35 @@ public class MainWindowInfoBar : Gtk.InfoBar {
 
         StringBuilder details = new StringBuilder();
         details.append_printf(
-            "Geary version: %s\n", GearyApplication.VERSION
+            "Geary version: %s\n",
+            GearyApplication.VERSION
         );
         details.append_printf(
-            "GTK version: %u.%u.%u\n", Gtk.get_major_version(), Gtk.get_minor_version(), Gtk.get_micro_version()
+            "GTK version: %u.%u.%u\n",
+            Gtk.get_major_version(), Gtk.get_minor_version(), Gtk.get_micro_version()
         );
         details.append_printf(
-            "Desktop: %s\n", Environment.get_variable("XDG_CURRENT_DESKTOP") ?? "Unknown"
+            "Desktop: %s\n",
+            Environment.get_variable("XDG_CURRENT_DESKTOP") ?? "Unknown"
         );
         details.append_printf(
-            "Problem type: %s\n", this.report.problem_type.to_string()
+            "Problem type: %s\n",
+            this.report.problem_type.to_string()
         );
         if (account_report != null) {
             details.append_printf(
-                "Account type: %s\n", account_report.account.service_provider.to_string()
+                "Account type: %s\n",
+                account_report.account.service_provider.to_string()
             );
         }
         if (service_report != null) {
             details.append_printf(
-                "Service type: %s\n", service_report.service_type.to_string()
+                "Service type: %s\n",
+                service_report.service_type.to_string()
             );
             details.append_printf(
-                "Endpoint: %s\n", service_report.endpoint.to_string()
+                "Endpoint: %s\n",
+                service_report.endpoint.to_string()
             );
         }
         if (this.report.error == null) {
