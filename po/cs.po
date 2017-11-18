@@ -12,8 +12,8 @@ msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=internationalization\n"
-"POT-Creation-Date: 2017-11-03 02:07+0000\n"
-"PO-Revision-Date: 2017-11-03 11:25+0100\n"
+"POT-Creation-Date: 2017-11-16 07:11+0000\n"
+"PO-Revision-Date: 2017-11-18 19:16+0100\n"
 "Last-Translator: Marek Černocký <marek@manet.cz>\n"
 "Language-Team: čeština <gnome-cs-list@gnome.org>\n"
 "Language: cs\n"
@@ -62,8 +62,8 @@ msgstr "email;e-mail;mail;pošta;e-pošta;zpráva;zprávy;"
 
 #. Translators: Do NOT translate or transliterate this text (this is an icon file name)!
 #: desktop/geary-autostart.desktop.in:9 desktop/org.gnome.Geary.desktop.in:9
-msgid "geary"
-msgstr "geary"
+msgid "org.gnome.Geary"
+msgstr "org.gnome.Geary"
 
 #. Translators: The development team's name
 #: desktop/org.gnome.Geary.appdata.xml.in:13
@@ -474,7 +474,7 @@ msgstr "© 2016 – 2017 Vývojářský tým aplikace Geary"
 msgid "Visit the Geary web site"
 msgstr "Navštívit webové stránky Geary"
 
-#: src/client/application/geary-application.vala:420
+#: src/client/application/geary-application.vala:424
 #, c-format
 msgid "About %s"
 msgstr "O aplikaci %s"
@@ -482,7 +482,7 @@ msgstr "O aplikaci %s"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: src/client/application/geary-application.vala:424
+#: src/client/application/geary-application.vala:428
 msgid "translator-credits"
 msgstr ""
 "Petr Šimáček <petr.simacek@gmail.com>\n"
@@ -570,15 +570,15 @@ msgstr "Nepodařilo se zpracovat přepínače příkazového řádku: %s\n"
 msgid "Unrecognized command line option “%s”\n"
 msgstr "Nerozpoznaný přepínač příkazového řádku „%s“\n"
 
-#: src/client/application/geary-controller.vala:619
+#: src/client/application/geary-controller.vala:616
 msgid "Unable to store server trust exception"
 msgstr "Nelze uložit výjimku důvěry k serveru"
 
-#: src/client/application/geary-controller.vala:854
+#: src/client/application/geary-controller.vala:851
 msgid "Your settings are insecure"
 msgstr "Vaše nastavení není bezpečené"
 
-#: src/client/application/geary-controller.vala:855
+#: src/client/application/geary-controller.vala:852
 msgid ""
 "Your IMAP and/or SMTP settings do not specify SSL or TLS.  This means your "
 "username and password could be read by another person on the network.  Are "
@@ -588,15 +588,15 @@ msgstr ""
 "vaše uživatelské jméno a heslo může číst jiná osoba na síti. Opravdu to tak "
 "chcete?"
 
-#: src/client/application/geary-controller.vala:856
+#: src/client/application/geary-controller.vala:853
 msgid "Co_ntinue"
 msgstr "Po_kračovat"
 
-#: src/client/application/geary-controller.vala:903
+#: src/client/application/geary-controller.vala:900
 msgid "Error connecting to the server"
 msgstr "Chyba během připojování k serveru"
 
-#: src/client/application/geary-controller.vala:904
+#: src/client/application/geary-controller.vala:901
 msgid ""
 "Geary encountered an error while connecting to the server.  Please try again "
 "in a few moments."
@@ -605,12 +605,12 @@ msgstr ""
 "chvíli znovu."
 
 #. / Displayed in the space-limited status bar when a message fails to be sent due to error.
-#: src/client/application/geary-controller.vala:941
+#: src/client/application/geary-controller.vala:938
 #: src/client/components/status-bar.vala:29
 msgid "Error sending email"
 msgstr "Chyba při odesílání e-mailu"
 
-#: src/client/application/geary-controller.vala:942
+#: src/client/application/geary-controller.vala:939
 msgid ""
 "Geary encountered an error sending an email.  If the problem persists, "
 "please manually delete the email from your Outbox folder."
@@ -620,12 +620,12 @@ msgstr ""
 
 #. Displayed in the space-limited status bar when a message fails to be uploaded
 #. to Sent Mail after being sent.
-#: src/client/application/geary-controller.vala:946
+#: src/client/application/geary-controller.vala:943
 #: src/client/components/status-bar.vala:33
 msgid "Error saving sent mail"
 msgstr "Chyba při ukládání odeslané pošty"
 
-#: src/client/application/geary-controller.vala:947
+#: src/client/application/geary-controller.vala:944
 msgid ""
 "Geary encountered an error saving a sent message to Sent Mail.  The message "
 "will stay in your Outbox folder until you delete it."
@@ -633,19 +633,19 @@ msgstr ""
 "V Geary došlo k chybě při ukládání odeslané zprávy. Zpráva zůstane ve vaší "
 "složce Pošta k odeslání, dokud ji nesmažete."
 
-#: src/client/application/geary-controller.vala:1016
+#: src/client/application/geary-controller.vala:1013
 msgid "Labels"
 msgstr "Štítky"
 
 #. give the user two options: reset the Account local store, or exit Geary.  A third
 #. could be done to leave the Account in an unopened state, but we don't currently
 #. have provisions for that.
-#: src/client/application/geary-controller.vala:1028
+#: src/client/application/geary-controller.vala:1025
 #, c-format
 msgid "Unable to open the database for %s"
 msgstr "Nelze otevřít databázi pro %s"
 
-#: src/client/application/geary-controller.vala:1029
+#: src/client/application/geary-controller.vala:1026
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -669,20 +669,20 @@ msgstr ""
 "Opětovné sestavení databáze zničí všechny místně uložené e-maily a jejich "
 "přílohy <b>Na e-maily na vašem serveru to nebude mít vliv.</b>"
 
-#: src/client/application/geary-controller.vala:1031
+#: src/client/application/geary-controller.vala:1028
 msgid "_Rebuild"
 msgstr "Znovu _sestavit"
 
-#: src/client/application/geary-controller.vala:1031
+#: src/client/application/geary-controller.vala:1028
 msgid "E_xit"
 msgstr "S_končit"
 
-#: src/client/application/geary-controller.vala:1040
+#: src/client/application/geary-controller.vala:1037
 #, c-format
 msgid "Unable to rebuild database for “%s”"
 msgstr "Nelze znovu sestavit databázi pro „%s“"
 
-#: src/client/application/geary-controller.vala:1041
+#: src/client/application/geary-controller.vala:1038
 #, c-format
 msgid ""
 "Error during rebuild:\n"
@@ -695,14 +695,14 @@ msgstr ""
 
 #. some other problem opening the account ... as with other flow path, can't run
 #. Geary today with an account in unopened state, so have to exit
-#: src/client/application/geary-controller.vala:1063
-#: src/client/application/geary-controller.vala:1073
-#: src/client/application/geary-controller.vala:1084
+#: src/client/application/geary-controller.vala:1060
+#: src/client/application/geary-controller.vala:1070
+#: src/client/application/geary-controller.vala:1081
 #, c-format
 msgid "Unable to open local mailbox for %s"
 msgstr "Nelze otevřít místní poštovní schránku pro %s"
 
-#: src/client/application/geary-controller.vala:1064
+#: src/client/application/geary-controller.vala:1061
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -721,7 +721,7 @@ msgstr ""
 "\n"
 "%s"
 
-#: src/client/application/geary-controller.vala:1074
+#: src/client/application/geary-controller.vala:1071
 msgid ""
 "The version number of the local mail database is formatted for a newer "
 "version of Geary. Unfortunately, the database cannot be “rolled back” to "
@@ -734,7 +734,7 @@ msgstr ""
 "\n"
 "Nainstalujte prosím nejnovější verzi Geary a zkuste to znovu."
 
-#: src/client/application/geary-controller.vala:1085
+#: src/client/application/geary-controller.vala:1082
 msgid ""
 "There was an error opening the local account. This is probably due to "
 "connectivity issues.\n"
@@ -747,15 +747,15 @@ msgstr ""
 "\n"
 "Zkontrolujte prosím připojení k síti a restartujte Geary."
 
-#: src/client/application/geary-controller.vala:1860
+#: src/client/application/geary-controller.vala:1869
 msgid "Undo move (Ctrl+Z)"
 msgstr "Zpět přesun (Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:1870
+#: src/client/application/geary-controller.vala:1879
 msgid "Are you sure you want to open these attachments?"
 msgstr "Opravdu chcete otevřít tuto přílohu?"
 
-#: src/client/application/geary-controller.vala:1871
+#: src/client/application/geary-controller.vala:1880
 msgid ""
 "Attachments may cause damage to your system if opened.  Only open files from "
 "trusted sources."
@@ -763,78 +763,78 @@ msgstr ""
 "Příloha by po otevření mohla poškodit váš počítač. Otevírejte pouze soubory "
 "z důvěryhodných zdrojů. "
 
-#: src/client/application/geary-controller.vala:1872
+#: src/client/application/geary-controller.vala:1881
 msgid "Don’t _ask me again"
 msgstr "Příště se nept_at"
 
-#: src/client/application/geary-controller.vala:1974
+#: src/client/application/geary-controller.vala:1977
 #, c-format
 msgid "A file named “%s” already exists.  Do you want to replace it?"
 msgstr "Soubor s názvem „%s“ již existuje. Chcete ho nahradit?"
 
-#: src/client/application/geary-controller.vala:1976
+#: src/client/application/geary-controller.vala:1979
 #, c-format
 msgid ""
 "The file already exists in “%s”.  Replacing it will overwrite its contents."
 msgstr "Soubor již existuje v „%s“. Nahrazením přepíšete jeho obsah."
 
-#: src/client/application/geary-controller.vala:1979
+#: src/client/application/geary-controller.vala:1982
 msgid "_Replace"
 msgstr "Nah_radit"
 
 #. Find out what to do with the inline composers.
 #. TODO: Remove this in favor of automatically saving drafts
-#: src/client/application/geary-controller.vala:2214
+#: src/client/application/geary-controller.vala:2217
 msgid "Close open draft messages?"
 msgstr "Zavřít otevřený koncept zprávy?"
 
-#: src/client/application/geary-controller.vala:2340
+#: src/client/application/geary-controller.vala:2343
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Vyprázdnit všechny zprávy z vaší složky %s?"
 
-#: src/client/application/geary-controller.vala:2341
+#: src/client/application/geary-controller.vala:2344
 msgid "This removes the email from Geary and your email server."
 msgstr "Tímto se odstraní pošta z aplikace Geary i z poštovního serveru."
 
-#: src/client/application/geary-controller.vala:2342
+#: src/client/application/geary-controller.vala:2345
 msgid "This cannot be undone."
 msgstr "Nebude možné to vrátit zpět."
 
-#: src/client/application/geary-controller.vala:2343
+#: src/client/application/geary-controller.vala:2346
 #, c-format
 msgid "Empty %s"
 msgstr "Vyprázdnit %s"
 
-#: src/client/application/geary-controller.vala:2360
+#: src/client/application/geary-controller.vala:2363
 #, c-format
 msgid "Error emptying %s"
 msgstr "Chyba při vyprazďňování složky %s"
 
-#: src/client/application/geary-controller.vala:2390
+#: src/client/application/geary-controller.vala:2393
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Chcete trvale smazat tuto zprávu?"
 msgstr[1] "Chcete trvale smazat tyto zprávy?"
 msgstr[2] "Chcete trvale smazat tyto zprávy?"
 
-#: src/client/application/geary-controller.vala:2392
+#: src/client/application/geary-controller.vala:2395
 msgid "Delete"
 msgstr "Smazat"
 
-#: src/client/application/geary-controller.vala:2424
+#: src/client/application/geary-controller.vala:2427
 msgid "Undo archive (Ctrl+Z)"
 msgstr "Zpět archivace (Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:2439
+#: src/client/application/geary-controller.vala:2442
 msgid "Undo trash (Ctrl+Z)"
 msgstr "Zpět přesunutí do koše (Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:2495
+#: src/client/application/geary-controller.vala:2498
 msgid "Undo (Ctrl+Z)"
 msgstr "Zpět (Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:2613
+#: src/client/application/geary-controller.vala:2616
 msgid "Failed to open default text editor."
 msgstr "Nepodařilo se otevřít výchozí textový editor."
 
@@ -1013,28 +1013,28 @@ msgstr ""
 "přiloženým|přiloženou|přiložit|přikládám|přiložil|přikládá|přikládáme|"
 "přiložili|přiložily"
 
-#: src/client/composer/composer-widget.vala:1124
-#: src/client/composer/composer-widget.vala:1143
+#: src/client/composer/composer-widget.vala:1131
+#: src/client/composer/composer-widget.vala:1150
 msgid "Do you want to discard this message?"
 msgstr "Chcete zahodit tuto zprávu?"
 
-#: src/client/composer/composer-widget.vala:1247
+#: src/client/composer/composer-widget.vala:1254
 msgid "Send message with an empty subject and body?"
 msgstr "Poslat zprávu s prázdným předmětem a tělem?"
 
-#: src/client/composer/composer-widget.vala:1249
+#: src/client/composer/composer-widget.vala:1256
 msgid "Send message with an empty subject?"
 msgstr "Poslat zprávu s prázdným předmětem?"
 
-#: src/client/composer/composer-widget.vala:1251
+#: src/client/composer/composer-widget.vala:1258
 msgid "Send message with an empty body?"
 msgstr "Poslat zprávu s prázdným tělem?"
 
-#: src/client/composer/composer-widget.vala:1255
+#: src/client/composer/composer-widget.vala:1262
 msgid "Send message without an attachment?"
 msgstr "Poslat zprávu bez přílohy?"
 
-#: src/client/composer/composer-widget.vala:1517
+#: src/client/composer/composer-widget.vala:1524
 #, c-format
 msgid "“%s” already attached for delivery."
 msgstr "Soubor „%s“ už byl pro doručení přiložen."
@@ -1044,73 +1044,73 @@ msgstr "Soubor „%s“ už byl pro doručení přiložen."
 #. description of the document type, the second will
 #. be a human-friendly size string. For example:
 #. Document (100.9MB)
-#: src/client/composer/composer-widget.vala:1525
+#: src/client/composer/composer-widget.vala:1532
 #: src/client/conversation-viewer/conversation-email.vala:138
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: src/client/composer/composer-widget.vala:1562
+#: src/client/composer/composer-widget.vala:1569
 #, c-format
 msgid "“%s” could not be found."
 msgstr "Soubor „%s“ nebyl nalezen."
 
-#: src/client/composer/composer-widget.vala:1568
+#: src/client/composer/composer-widget.vala:1575
 #, c-format
 msgid "“%s” is a folder."
 msgstr "„%s“ je složka."
 
-#: src/client/composer/composer-widget.vala:1574
+#: src/client/composer/composer-widget.vala:1581
 #, c-format
 msgid "“%s” is an empty file."
 msgstr "Soubor „%s“ je prázdný."
 
-#: src/client/composer/composer-widget.vala:1587
+#: src/client/composer/composer-widget.vala:1594
 #, c-format
 msgid "“%s” could not be opened for reading."
 msgstr "Soubor „%s“ se nezdařilo otevřít pro čtení."
 
-#: src/client/composer/composer-widget.vala:1595
+#: src/client/composer/composer-widget.vala:1602
 msgid "Cannot add attachment"
 msgstr "Nelze připojit přílohu"
 
-#: src/client/composer/composer-widget.vala:1647
+#: src/client/composer/composer-widget.vala:1654
 msgid "To: "
 msgstr "Komu: "
 
-#: src/client/composer/composer-widget.vala:1650
+#: src/client/composer/composer-widget.vala:1657
 msgid "Cc: "
 msgstr "Kopie: "
 
-#: src/client/composer/composer-widget.vala:1653
+#: src/client/composer/composer-widget.vala:1660
 msgid "Bcc: "
 msgstr "Skrytá kopie: "
 
-#: src/client/composer/composer-widget.vala:1656
+#: src/client/composer/composer-widget.vala:1663
 msgid "Reply-To: "
 msgstr "Odpověď:"
 
-#: src/client/composer/composer-widget.vala:1788
+#: src/client/composer/composer-widget.vala:1795
 msgid "Select Color"
 msgstr "Vybrat barvu"
 
 #. Displayed in the From dropdown to indicate an "alternate email address"
 #. for an account.  The first printf argument will be the alternate email
 #. address, and the second will be the account's primary email address.
-#: src/client/composer/composer-widget.vala:1988
+#: src/client/composer/composer-widget.vala:1995
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%1$s přes %2$s"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: src/client/composer/composer-widget.vala:2030
+#: src/client/composer/composer-widget.vala:2037
 msgid "_From:"
 msgstr "_Od:"
 
 #. Translators: This is the name of the file chooser filter
 #. when inserting an image in the composer.
-#: src/client/composer/composer-widget.vala:2255
+#: src/client/composer/composer-widget.vala:2262
 msgid "Images"
 msgstr "Obrázky"
 
@@ -1749,7 +1749,7 @@ msgstr "nepřečtená"
 #. Draft mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:627
+#: src/engine/imap-engine/imap-engine-generic-account.vala:623
 msgid "Drafts | Draft"
 msgstr ""
 "Drafts | Koncepty | Koncept | Rozepsané | Rozepsané zprávy | Rozepsané e-"
@@ -1759,13 +1759,13 @@ msgstr ""
 #. Sent mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:636
+#: src/engine/imap-engine/imap-engine-generic-account.vala:632
 msgid "Sent | Sent Mail | Sent Email | Sent E-Mail"
 msgstr "Sent | Odeslané | Odeslaná pošta  | Odeslané zprávy | Odeslané e-maily"
 
 #. The localised name(s) of the Sent folder name as used
 #. by MS Outlook/Exchange.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:641
+#: src/engine/imap-engine/imap-engine-generic-account.vala:637
 msgctxt "Outlook localised name"
 msgid "Sent Items"
 msgstr "Odeslaná pošta"
@@ -1774,7 +1774,7 @@ msgstr "Odeslaná pošta"
 #. Spam mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:651
+#: src/engine/imap-engine/imap-engine-generic-account.vala:647
 msgid ""
 "Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email "
 "| Bulk E-Mail"
@@ -1786,13 +1786,13 @@ msgstr ""
 #. Trash mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:661
+#: src/engine/imap-engine/imap-engine-generic-account.vala:657
 msgid "Trash | Rubbish | Rubbish Bin"
 msgstr "Trash | Koš | Smazané | Smazané zprávy | Smazaná pošta"
 
 #. The localised name(s) of the Trash folder name as used
 #. by MS Outlook/Exchange.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:666
+#: src/engine/imap-engine/imap-engine-generic-account.vala:662
 msgctxt "Outlook localised name"
 msgid "Deleted Items"
 msgstr "Smazaná pošta"
@@ -1801,7 +1801,7 @@ msgstr "Smazaná pošta"
 #. Archive mailbox. Separate names using a vertical bar
 #. and put the most common localized name to the front for
 #. the default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:676
+#: src/engine/imap-engine/imap-engine-generic-account.vala:672
 msgid "Archive | Archives"
 msgstr "Archiv | Archív | Archivy | Archívy | Archive | Archives"
 
@@ -1833,31 +1833,31 @@ msgstr "%s napsal:"
 msgid "On %s:"
 msgstr "%s:"
 
-#: src/engine/rfc822/rfc822-utils.vala:278
+#: src/engine/rfc822/rfc822-utils.vala:282
 msgid "---------- Forwarded message ----------"
 msgstr "---------- Přeposlaná zpráva ----------"
 
-#: src/engine/rfc822/rfc822-utils.vala:282
+#: src/engine/rfc822/rfc822-utils.vala:286
 #, c-format
 msgid "From: %s\n"
 msgstr "Od: %s\n"
 
-#: src/engine/rfc822/rfc822-utils.vala:283
+#: src/engine/rfc822/rfc822-utils.vala:287
 #, c-format
 msgid "Subject: %s\n"
 msgstr "Předmět: %s\n"
 
-#: src/engine/rfc822/rfc822-utils.vala:284
+#: src/engine/rfc822/rfc822-utils.vala:288
 #, c-format
 msgid "Date: %s\n"
 msgstr "Datum: %s\n"
 
-#: src/engine/rfc822/rfc822-utils.vala:287
+#: src/engine/rfc822/rfc822-utils.vala:291
 #, c-format
 msgid "To: %s\n"
 msgstr "Komu: %s\n"
 
-#: src/engine/rfc822/rfc822-utils.vala:290
+#: src/engine/rfc822/rfc822-utils.vala:294
 #, c-format
 msgid "Cc: %s\n"
 msgstr "Kopie: %s\n"
@@ -2844,3 +2844,6 @@ msgstr "E-mailová adresa:"
 #: ui/upgrade_dialog.glade:60
 msgid "Geary update in progress…"
 msgstr "Probíhá aktualizace aplikace Geary…"
+
+#~ msgid "geary"
+#~ msgstr "geary"
