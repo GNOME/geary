@@ -494,9 +494,17 @@ public class Geary.Imap.ClientSession : BaseObject {
             delim = this.inbox.delim;
         } else {
             Namespace? ns = this.namespaces.get(root.basename);
-            if (ns != null) {
-                delim = ns.delim;
+            if (ns == null) {
+                // Folder's root doesn't exist as a namespace, so try
+                // the empty namespace.
+                ns = this.namespaces.get("");
+                if (ns == null) {
+                    // If that doesn't exist, fall back to the default
+                    // personal namespace
+                    ns = this.personal_namespaces[0];
+                }
             }
+            delim = ns.delim;
         }
         return delim;
     }
