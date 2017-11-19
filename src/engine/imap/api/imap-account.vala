@@ -33,8 +33,9 @@ private class Geary.Imap.Account : BaseObject {
     public bool is_ready { get { return this.session_mgr.is_ready; } }
 
     private string name;
-    private AccountInformation account_information;
+    private AccountInformation account;
     private ClientSessionManager session_mgr;
+    private uint authentication_failures = 0;
     private ClientSession? account_session = null;
     private Nonblocking.Mutex account_session_mutex = new Nonblocking.Mutex();
     private Nonblocking.Mutex cmd_mutex = new Nonblocking.Mutex();
@@ -42,6 +43,7 @@ private class Geary.Imap.Account : BaseObject {
     private Gee.List<MailboxInformation>? list_collector = null;
     private Gee.List<StatusData>? status_collector = null;
     private Gee.List<ServerData>? server_data_collector = null;
+
 
     /**
      * Fired after opening when the account has a working connection.
@@ -51,27 +53,31 @@ private class Geary.Imap.Account : BaseObject {
      */
     public signal void ready();
 
-    public signal void login_failed(Geary.Credentials? cred, StatusResponse? response);
+    /** Fired if a user-notifiable problem occurs. */
+    public signal void report_problem(ProblemReport report);
 
-    public Account(Geary.AccountInformation account_information) {
-        name = "IMAP Account for %s".printf(account_information.imap_credentials.to_string());
-        this.account_information = account_information;
-        this.session_mgr = new ClientSessionManager(account_information);
+
+    public Account(Geary.AccountInformation account) {
+        this.name = account.id + ":imap";
+        this.account = account;
+        this.session_mgr = new ClientSessionManager(account);
         this.session_mgr.ready.connect(on_session_ready);
+        this.session_mgr.connection_failed.connect(on_connection_failed);
         this.session_mgr.login_failed.connect(on_login_failed);
     }
-    
-    private void check_open() throws Error {
-        if (!is_open)
-            throw new EngineError.OPEN_REQUIRED("Imap.Account not open");
-    }
-    
+
     public async void open_async(Cancellable? cancellable = null) throws Error {
         if (is_open)
             throw new EngineError.ALREADY_OPEN("Imap.Account already open");
-        
+
+        // Reset this so we start trying to authenticate again
+        this.authentication_failures = 0;
+
+        // This will cause the session manager to open at least one
+        // connection. We can't attempt to claim one straight away
+        // since we might not be online.
         yield session_mgr.open_async(cancellable);
-        
+
         is_open = true;
     }
     
@@ -569,20 +575,25 @@ private class Geary.Imap.Account : BaseObject {
         return responses;
     }
 
+    private void check_open() throws Error {
+        if (!is_open)
+            throw new EngineError.OPEN_REQUIRED("Imap.Account not open");
+    }
+
     private inline Imap.Folder newUnselectableFolder(FolderPath path, MailboxAttributes attrs) {
         return new Imap.Folder(
             path, new Imap.FolderProperties(0, 0, 0, null, null, attrs), this.session_mgr
         );
     }
 
+    private void notify_report_problem(ProblemType problem, Error? err) {
+        report_problem(new ServiceProblemReport(problem, this.account, Service.IMAP, err));
+    }
+
     [NoReturn]
     private void throw_not_found(Geary.FolderPath? path) throws EngineError {
         throw new EngineError.NOT_FOUND("Folder %s not found on %s",
             (path != null) ? path.to_string() : "root", session_mgr.to_string());
-    }
-
-    private void on_login_failed(StatusResponse? response) {
-        login_failed(account_information.imap_credentials, response);
     }
 
     private void on_list_data(MailboxInformation mailbox_info) {
@@ -605,10 +616,75 @@ private class Geary.Imap.Account : BaseObject {
     }
 
     private void on_session_ready() {
+        // Now have a valid session, so credentials must be good
+        this.authentication_failures = 0;
         ready();
+    }
+
+    private void on_connection_failed(Error error) {
+        // There was an error connecting to the IMAP host
+        this.authentication_failures = 0;
+        if (error is ImapError.UNAUTHENTICATED) {
+            // This is effectively a login failure
+            on_login_failed(null);
+        } else {
+            notify_report_problem(ProblemType.CONNECTION_ERROR, error);
+        }
+    }
+
+    private void on_login_failed(Geary.Imap.StatusResponse? response) {
+        this.authentication_failures++;
+        if (this.authentication_failures >= Geary.Account.AUTH_ATTEMPTS_MAX) {
+            // We have tried auth too many times, so bail out
+            notify_report_problem(ProblemType.LOGIN_FAILED, null);
+        } else {
+            // login can fail due to an invalid password hence we
+            // should re-ask it but it can also fail due to server
+            // inaccessibility, for instance "[UNAVAILABLE] / Maximum
+            // number of connections from user+IP exceeded". In that
+            // case, resetting password seems unneeded.
+            bool reask_password = false;
+            Error? login_error = null;
+            try {
+                reask_password = (
+                    response == null ||
+                    response.response_code == null ||
+                    response.response_code.get_response_code_type().value != Geary.Imap.ResponseCodeType.UNAVAILABLE
+                );
+            } catch (ImapError err) {
+                login_error = err;
+                debug("Unable to parse ResponseCode %s: %s", response.response_code.to_string(),
+                      err.message);
+            }
+
+            if (!reask_password) {
+                // Either the server was unavailable, or we were unable to
+                // parse the login response. Either way, indicate a
+                // non-login error.
+                notify_report_problem(ProblemType.SERVER_ERROR, login_error);
+            } else {
+                // Now, we should ask the user for their password
+                this.account.fetch_passwords_async.begin(
+                    ServiceFlag.IMAP, true,
+                    (obj, ret) => {
+                        try {
+                            if (this.account.fetch_passwords_async.end(ret)) {
+                                // Have a new password, so try that
+                                this.session_mgr.credentials_updated();
+                            } else {
+                                // User cancelled, so indicate a login problem
+                                notify_report_problem(ProblemType.LOGIN_FAILED, null);
+                            }
+                        } catch (Error err) {
+                            notify_report_problem(ProblemType.GENERIC_ERROR, err);
+                        }
+                    });
+            }
+        }
     }
 
     public string to_string() {
         return name;
     }
+
 }

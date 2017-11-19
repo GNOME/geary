@@ -1,16 +1,15 @@
 /*
- * Copyright 2017 Michael Gratton <mike@vee.net>
  * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2017 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 public class Geary.Imap.ClientSessionManager : BaseObject {
+
     private const int DEFAULT_MIN_POOL_SIZE = 1;
     private const int POOL_START_TIMEOUT_SEC = 4;
-    private const int POOL_RETRY_MIN_TIMEOUT_SEC = 1;
-    private const int POOL_RETRY_MAX_TIMEOUT_SEC = 10;
     private const int POOL_STOP_TIMEOUT_SEC = 1;
 
     /** Determines if the manager has been opened. */
@@ -69,7 +68,6 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
     private bool untrusted_host = false;
 
     private TimeoutManager pool_start;
-    private TimeoutManager pool_retry;
     private TimeoutManager pool_stop;
 
     /**
@@ -81,12 +79,15 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
      */
     public signal void ready();
 
+    /** Fired when a network or non-auth error occurs opening a session. */
+    public signal void connection_failed(Error err);
+
     /** Fired when an authentication error occurs opening a session. */
     public signal void login_failed(StatusResponse? response);
 
+
     public ClientSessionManager(AccountInformation account_information) {
         this.account_information = account_information;
-        this.account_information.notify["imap-credentials"].connect(on_imap_credentials_notified);
 
         // NOTE: This works because AccountInformation guarantees the IMAP endpoint not to change
         // for the lifetime of the AccountInformation object; if this ever changes, will need to
@@ -100,11 +101,6 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
             () => { this.adjust_session_pool.begin(); }
         );
 
-        this.pool_retry = new TimeoutManager.seconds(
-            POOL_RETRY_MIN_TIMEOUT_SEC,
-            () => { this.adjust_session_pool.begin(); }
-        );
-
         this.pool_stop = new TimeoutManager.seconds(
             POOL_STOP_TIMEOUT_SEC,
             () => { this.force_disconnect_all.begin(); }
@@ -115,7 +111,6 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         if (is_open)
             warning("Destroying opened ClientSessionManager");
 
-        this.account_information.notify["imap-credentials"].disconnect(on_imap_credentials_notified);
         this.endpoint.untrusted_host.disconnect(on_imap_untrusted_host);
         this.endpoint.notify[Endpoint.PROP_TRUST_UNTRUSTED_HOST].disconnect(on_imap_trust_untrusted_host);
     }
@@ -124,10 +119,12 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         if (is_open)
             throw new EngineError.ALREADY_OPEN("ClientSessionManager already open");
 
-        is_open = true;
+        this.is_open = true;
+        this.authentication_failed = false;
 
 		this.endpoint.connectivity.notify["is-reachable"].connect(on_connectivity_change);
-        if (this.endpoint.connectivity.is_reachable) {
+        this.endpoint.connectivity.address_error_reported.connect(on_connectivity_error);
+        if (this.endpoint.connectivity.is_reachable.is_certain()) {
             this.adjust_session_pool.begin();
         } else {
             this.endpoint.connectivity.check_reachable.begin();
@@ -142,10 +139,10 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         this.is_ready = false;
 
         this.pool_start.reset();
-        this.pool_retry.reset();
         this.pool_stop.reset();
 
 		this.endpoint.connectivity.notify["is-reachable"].disconnect(on_connectivity_change);
+        this.endpoint.connectivity.address_error_reported.disconnect(on_connectivity_error);
 
         // to avoid locking down the sessions table while scheduling disconnects, make a copy
         // and work off of that
@@ -172,14 +169,20 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
                 break;
         }
     }
-    
-    private void on_imap_credentials_notified() {
-        authentication_failed = false;
-        
-        if (is_open)
-            adjust_session_pool.begin();
+
+    /**
+     * Informs the manager that the account's IMAP credentials have changed.
+     *
+     * This will reset the manager's authentication state and if open,
+     * attempt to open a connection to the server.
+     */
+    public void credentials_updated() {
+        this.authentication_failed = false;
+        if (this.is_open) {
+            this.adjust_session_pool.begin();
+        }
     }
-    
+
     private void check_open() throws Error {
         if (!is_open)
             throw new EngineError.OPEN_REQUIRED("ClientSessionManager is not open");
@@ -203,33 +206,24 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
             && this.is_open
             && !this.authentication_failed
             && !this.untrusted_host
-            && this.endpoint.connectivity.is_reachable) {
-            pending_sessions++;
-            create_new_authorized_session.begin(null, on_created_new_authorized_session);
+            && this.endpoint.connectivity.is_reachable.is_certain()) {
+            this.pending_sessions++;
+            create_new_authorized_session.begin(
+                null,
+                (obj, res) => {
+                    this.pending_sessions--;
+                    try {
+                        this.create_new_authorized_session.end(res);
+                    } catch (Error err) {
+                        connection_failed(err);
+                    }
+                });
         }
 
         try {
             sessions_mutex.release(ref token);
         } catch (Error release_err) {
             debug("Unable to release session table mutex after adjusting pool: %s", release_err.message);
-        }
-    }
-
-    private void on_created_new_authorized_session(Object? source, AsyncResult result) {
-        this.pending_sessions--;
-
-        try {
-            this.create_new_authorized_session.end(result);
-            this.pool_retry.reset();
-        } catch (Error err) {
-            debug("Unable to create authorized session to %s: %s", endpoint.to_string(), err.message);
-
-            // try again after a slight delay and bump up delay
-            this.pool_retry.start();
-            this.pool_retry.interval = (this.pool_retry.interval * 2).clamp(
-                POOL_RETRY_MIN_TIMEOUT_SEC,
-                POOL_RETRY_MAX_TIMEOUT_SEC
-            );
         }
     }
 
@@ -240,9 +234,9 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         if (untrusted_host)
             throw new ImapError.UNAVAILABLE("Untrusted host %s", endpoint.to_string());
 
-        if (!this.endpoint.connectivity.is_reachable)
+        if (!this.endpoint.connectivity.is_reachable.is_certain())
             throw new ImapError.UNAVAILABLE("Host at %s is unreachable", endpoint.to_string());
-        
+
         ClientSession new_session = new ClientSession(endpoint);
         
         // add session to pool before launching all the connect activity so error cases can properly
@@ -295,9 +289,6 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
             this.is_ready = true;
             ready();
         }
-
-        // reset delay
-        this.pool_retry.interval = POOL_RETRY_MIN_TIMEOUT_SEC;
 
         // do this after logging in
         new_session.enable_keepalives(selected_keepalive_sec, unselected_keepalive_sec,
@@ -557,7 +548,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
     }
 
 	private void on_connectivity_change() {
-		bool is_reachable = this.endpoint.connectivity.is_reachable;
+		bool is_reachable = this.endpoint.connectivity.is_reachable.is_certain();
 		if (is_reachable) {
             this.pool_start.start();
             this.pool_stop.reset();
@@ -567,7 +558,13 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
             this.pool_start.reset();
             this.pool_stop.start();
         }
-        this.pool_retry.reset();
+	}
+
+	private void on_connectivity_error(Error error) {
+        this.is_ready = false;
+        this.pool_start.reset();
+        this.pool_stop.start();
+        connection_failed(error);
 	}
 
     /**

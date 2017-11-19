@@ -30,6 +30,7 @@ set(RESOURCE_LIST
   STRIPBLANKS "main-toolbar.ui"
   STRIPBLANKS "main-toolbar-menus.ui"
   STRIPBLANKS "main-window.ui"
+  STRIPBLANKS "main-window-info-bar.ui"
   STRIPBLANKS "password-dialog.glade"
   STRIPBLANKS "preferences-dialog.ui"
   STRIPBLANKS "remove_confirm.glade"

@@ -233,11 +233,10 @@ private class Geary.ImapDB.Account : BaseObject {
 
     public Account(Geary.AccountInformation account_information) {
         this.account_information = account_information;
-        contact_store = new ImapEngine.ContactStore(this);
-        
-        name = "IMAP database account for %s".printf(account_information.imap_credentials.user);
+        this.contact_store = new ImapEngine.ContactStore(this);
+        this.name = account_information.id + ":db";
     }
-    
+
     private void check_open() throws Error {
         if (db == null)
             throw new EngineError.OPEN_REQUIRED("Database not open");

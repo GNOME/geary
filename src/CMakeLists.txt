@@ -37,6 +37,7 @@ engine/api/geary-folder-supports-remove.vala
 engine/api/geary-logging.vala
 engine/api/geary-named-flag.vala
 engine/api/geary-named-flags.vala
+engine/api/geary-problem-report.vala
 engine/api/geary-progress-monitor.vala
 engine/api/geary-revokable.vala
 engine/api/geary-search-folder.vala
@@ -345,6 +346,7 @@ client/components/folder-popover.vala
 client/components/icon-factory.vala
 client/components/main-toolbar.vala
 client/components/main-window.vala
+client/components/main-window-info-bar.vala
 client/components/monitored-progress-bar.vala
 client/components/monitored-spinner.vala
 client/components/search-bar.vala
@@ -513,6 +515,7 @@ pkg_check_modules(DEPS REQUIRED
     webkit2gtk-web-extension-4.0>=${TARGET_WEBKIT}
     javascriptcoregtk-4.0>=${TARGET_WEBKIT}
     enchant>=1.6
+    libunwind-generic>=1.1
     ${EXTRA_CLIENT_PKG_CONFIG}
 )
 
@@ -530,6 +533,7 @@ set(ENGINE_PACKAGES
   gio-2.0
   glib-2.0
   gmime-2.6
+  libunwind
   javascriptcore-4.0
   libxml-2.0
   posix

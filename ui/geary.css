@@ -6,6 +6,8 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
+/* MainWindow */
+
 .geary-folder-frame > border {
   border-left-width: 0;
   border-top-width: 0;
@@ -37,6 +39,14 @@
 .geary-titlebar-right:dir(ltr),
 .geary-titlebar-left:dir(rtl) {
   border-top-left-radius: 0px;
+}
+
+/* MainWindowInfoBarSet */
+
+.geary-info-bar-frame > border {
+  border-top-width: 0;
+  border-left-width: 0;
+  border-right-width: 0;
 }
 
 /* FolderPopover */
