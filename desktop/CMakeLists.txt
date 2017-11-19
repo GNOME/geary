@@ -29,7 +29,6 @@ endif (DESKTOP_VALIDATE)
 install (FILES ${CMAKE_CURRENT_BINARY_DIR}/org.gnome.Geary.appdata.xml DESTINATION ${CMAKE_INSTALL_PREFIX}/share/metainfo)
 install (FILES ${CMAKE_CURRENT_BINARY_DIR}/org.gnome.Geary.desktop DESTINATION ${CMAKE_INSTALL_PREFIX}/share/applications)
 install (FILES ${CMAKE_CURRENT_BINARY_DIR}/geary-autostart.desktop DESTINATION ${CMAKE_INSTALL_PREFIX}/share/applications)
-install (FILES ${CMAKE_CURRENT_BINARY_DIR}/geary-attach.contract DESTINATION ${CMAKE_INSTALL_PREFIX}/share/contractor)
 
 # Optional: run update-desktop-database at install time.
 # (This has to happen after the org.gnome.Geary.desktop file is installed.)
@@ -79,4 +78,5 @@ else (DISABLE_CONTRACT)
 #        endif (DESKTOP_VALIDATE)
     endif (GETTEXT_FOUND)
     install (PROGRAMS geary-attach DESTINATION bin)
+    install (FILES ${CMAKE_CURRENT_BINARY_DIR}/geary-attach.contract DESTINATION ${CMAKE_INSTALL_PREFIX}/share/contractor)
 endif (DISABLE_CONTRACT)
