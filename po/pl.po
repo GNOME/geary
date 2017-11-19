@@ -17,8 +17,8 @@ msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=internationalization\n"
-"POT-Creation-Date: 2017-11-03 02:07+0000\n"
-"PO-Revision-Date: 2017-11-05 16:00+0100\n"
+"POT-Creation-Date: 2017-11-19 07:35+0000\n"
+"PO-Revision-Date: 2017-11-19 20:05+0100\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <community-poland@mozilla.org>\n"
 "Language: pl\n"
@@ -67,8 +67,8 @@ msgstr "Email;E-mail;Mail;Poczta;Skrzynka;Wiadomość;Wiadomości;mejl;majl;"
 
 #. Translators: Do NOT translate or transliterate this text (this is an icon file name)!
 #: desktop/geary-autostart.desktop.in:9 desktop/org.gnome.Geary.desktop.in:9
-msgid "geary"
-msgstr "geary"
+msgid "org.gnome.Geary"
+msgstr "org.gnome.Geary"
 
 #. Translators: The development team's name
 #: desktop/org.gnome.Geary.appdata.xml.in:13
@@ -476,7 +476,7 @@ msgstr "Copyright 2016-2017 Zespół programistów Geary"
 msgid "Visit the Geary web site"
 msgstr "Witryna programu Geary"
 
-#: src/client/application/geary-application.vala:420
+#: src/client/application/geary-application.vala:424
 #, c-format
 msgid "About %s"
 msgstr "O programie %s"
@@ -484,7 +484,7 @@ msgstr "O programie %s"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: src/client/application/geary-application.vala:424
+#: src/client/application/geary-application.vala:428
 msgid "translator-credits"
 msgstr ""
 "scrx <mattpiskorz@gmail.com>, 2012\n"
@@ -582,15 +582,15 @@ msgstr "Przetworzenie opcji wiersza poleceń się nie powiodło: %s\n"
 msgid "Unrecognized command line option “%s”\n"
 msgstr "Nieznana opcja wiersza poleceń „%s”\n"
 
-#: src/client/application/geary-controller.vala:619
+#: src/client/application/geary-controller.vala:616
 msgid "Unable to store server trust exception"
 msgstr "Nie można przechować wyjątku zaufania serwera"
 
-#: src/client/application/geary-controller.vala:854
+#: src/client/application/geary-controller.vala:851
 msgid "Your settings are insecure"
 msgstr "Ustawienia konta nie są bezpieczne"
 
-#: src/client/application/geary-controller.vala:855
+#: src/client/application/geary-controller.vala:852
 msgid ""
 "Your IMAP and/or SMTP settings do not specify SSL or TLS.  This means your "
 "username and password could be read by another person on the network.  Are "
@@ -600,29 +600,17 @@ msgstr ""
 "to, że nazwa użytkownika i hasło mogą być widoczne dla innych użytkowników "
 "sieci. Wprowadzić ustawienia?"
 
-#: src/client/application/geary-controller.vala:856
+#: src/client/application/geary-controller.vala:853
 msgid "Co_ntinue"
 msgstr "_Kontynuuj"
 
-#: src/client/application/geary-controller.vala:903
-msgid "Error connecting to the server"
-msgstr "Błąd podczas łączenia z serwerem"
-
-#: src/client/application/geary-controller.vala:904
-msgid ""
-"Geary encountered an error while connecting to the server.  Please try again "
-"in a few moments."
-msgstr ""
-"Wystąpił błąd podczas łączenia z serwerem. Proszę spróbować ponownie za "
-"chwilę."
-
 #. / Displayed in the space-limited status bar when a message fails to be sent due to error.
-#: src/client/application/geary-controller.vala:941
+#: src/client/application/geary-controller.vala:966
 #: src/client/components/status-bar.vala:29
 msgid "Error sending email"
 msgstr "Błąd podczas wysyłania wiadomości"
 
-#: src/client/application/geary-controller.vala:942
+#: src/client/application/geary-controller.vala:967
 msgid ""
 "Geary encountered an error sending an email.  If the problem persists, "
 "please manually delete the email from your Outbox folder."
@@ -632,12 +620,12 @@ msgstr ""
 
 #. Displayed in the space-limited status bar when a message fails to be uploaded
 #. to Sent Mail after being sent.
-#: src/client/application/geary-controller.vala:946
+#: src/client/application/geary-controller.vala:971
 #: src/client/components/status-bar.vala:33
 msgid "Error saving sent mail"
 msgstr "Błąd podczas zapisywania wysłanej wiadomości"
 
-#: src/client/application/geary-controller.vala:947
+#: src/client/application/geary-controller.vala:972
 msgid ""
 "Geary encountered an error saving a sent message to Sent Mail.  The message "
 "will stay in your Outbox folder until you delete it."
@@ -645,19 +633,19 @@ msgstr ""
 "Wystąpił błąd podczas zapisywania wysłanej wiadomości e-mail. Wiadomość "
 "pozostanie w katalogu Wychodzące do jej usunięcia."
 
-#: src/client/application/geary-controller.vala:1016
+#: src/client/application/geary-controller.vala:1045
 msgid "Labels"
 msgstr "Etykiety"
 
 #. give the user two options: reset the Account local store, or exit Geary.  A third
 #. could be done to leave the Account in an unopened state, but we don't currently
 #. have provisions for that.
-#: src/client/application/geary-controller.vala:1028
+#: src/client/application/geary-controller.vala:1057
 #, c-format
 msgid "Unable to open the database for %s"
 msgstr "Nie można otworzyć bazy danych dla %s"
 
-#: src/client/application/geary-controller.vala:1029
+#: src/client/application/geary-controller.vala:1058
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -682,20 +670,20 @@ msgstr ""
 "Przebudowanie bazy danych usunie wszystkie lokalne wiadomości e-mail i ich "
 "załączniki. <b>Poczta na serwerze nie zostanie usunięta.</b>"
 
-#: src/client/application/geary-controller.vala:1031
+#: src/client/application/geary-controller.vala:1060
 msgid "_Rebuild"
 msgstr "P_rzebuduj"
 
-#: src/client/application/geary-controller.vala:1031
+#: src/client/application/geary-controller.vala:1060
 msgid "E_xit"
 msgstr "Za_kończ"
 
-#: src/client/application/geary-controller.vala:1040
+#: src/client/application/geary-controller.vala:1069
 #, c-format
 msgid "Unable to rebuild database for “%s”"
 msgstr "Nie można przebudować bazy danych dla „%s”"
 
-#: src/client/application/geary-controller.vala:1041
+#: src/client/application/geary-controller.vala:1070
 #, c-format
 msgid ""
 "Error during rebuild:\n"
@@ -708,14 +696,14 @@ msgstr ""
 
 #. some other problem opening the account ... as with other flow path, can't run
 #. Geary today with an account in unopened state, so have to exit
-#: src/client/application/geary-controller.vala:1063
-#: src/client/application/geary-controller.vala:1073
-#: src/client/application/geary-controller.vala:1084
+#: src/client/application/geary-controller.vala:1092
+#: src/client/application/geary-controller.vala:1102
+#: src/client/application/geary-controller.vala:1113
 #, c-format
 msgid "Unable to open local mailbox for %s"
 msgstr "Nie można otworzyć lokalnej skrzynki pocztowej dla %s"
 
-#: src/client/application/geary-controller.vala:1064
+#: src/client/application/geary-controller.vala:1093
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -734,7 +722,7 @@ msgstr ""
 "\n"
 "%s"
 
-#: src/client/application/geary-controller.vala:1074
+#: src/client/application/geary-controller.vala:1103
 msgid ""
 "The version number of the local mail database is formatted for a newer "
 "version of Geary. Unfortunately, the database cannot be “rolled back” to "
@@ -748,7 +736,7 @@ msgstr ""
 "\n"
 "Proszę zainstalować najnowszą wersję programu Geary i spróbować ponownie."
 
-#: src/client/application/geary-controller.vala:1085
+#: src/client/application/geary-controller.vala:1114
 msgid ""
 "There was an error opening the local account. This is probably due to "
 "connectivity issues.\n"
@@ -760,15 +748,15 @@ msgstr ""
 "\n"
 "Proszę sprawdzić połączenie internetowe i uruchomić ponownie program Geary."
 
-#: src/client/application/geary-controller.vala:1860
+#: src/client/application/geary-controller.vala:1901
 msgid "Undo move (Ctrl+Z)"
 msgstr "Cofnij przeniesienie (Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:1870
+#: src/client/application/geary-controller.vala:1911
 msgid "Are you sure you want to open these attachments?"
 msgstr "Na pewno otworzyć te załączniki?"
 
-#: src/client/application/geary-controller.vala:1871
+#: src/client/application/geary-controller.vala:1912
 msgid ""
 "Attachments may cause damage to your system if opened.  Only open files from "
 "trusted sources."
@@ -776,78 +764,78 @@ msgstr ""
 "Załączniki po otwarciu mogą uszkodzić system. Należy otwierać załączniki "
 "pochodzące tylko z zaufanych źródeł."
 
-#: src/client/application/geary-controller.vala:1872
+#: src/client/application/geary-controller.vala:1913
 msgid "Don’t _ask me again"
 msgstr "_Bez pytania ponownie"
 
-#: src/client/application/geary-controller.vala:1974
+#: src/client/application/geary-controller.vala:2009
 #, c-format
 msgid "A file named “%s” already exists.  Do you want to replace it?"
 msgstr "Plik o nazwie „%s” już istnieje. Zastąpić go?"
 
-#: src/client/application/geary-controller.vala:1976
+#: src/client/application/geary-controller.vala:2011
 #, c-format
 msgid ""
 "The file already exists in “%s”.  Replacing it will overwrite its contents."
 msgstr "Plik w „%s” już istnieje. Zastąpienie go nadpisze jego zawartość."
 
-#: src/client/application/geary-controller.vala:1979
+#: src/client/application/geary-controller.vala:2014
 msgid "_Replace"
 msgstr "_Zastąp"
 
 #. Find out what to do with the inline composers.
 #. TODO: Remove this in favor of automatically saving drafts
-#: src/client/application/geary-controller.vala:2214
+#: src/client/application/geary-controller.vala:2249
 msgid "Close open draft messages?"
 msgstr "Zamknąć otwarte szkice?"
 
-#: src/client/application/geary-controller.vala:2340
+#: src/client/application/geary-controller.vala:2375
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Usunąć wszystkie wiadomości z katalogu %s?"
 
-#: src/client/application/geary-controller.vala:2341
+#: src/client/application/geary-controller.vala:2376
 msgid "This removes the email from Geary and your email server."
 msgstr "Spowoduje to usunięcie wiadomości z programu Geary i serwera poczty."
 
-#: src/client/application/geary-controller.vala:2342
+#: src/client/application/geary-controller.vala:2377
 msgid "This cannot be undone."
 msgstr "Tego nie można cofnąć."
 
-#: src/client/application/geary-controller.vala:2343
+#: src/client/application/geary-controller.vala:2378
 #, c-format
 msgid "Empty %s"
 msgstr "Opróżnij %s"
 
-#: src/client/application/geary-controller.vala:2360
+#: src/client/application/geary-controller.vala:2395
 #, c-format
 msgid "Error emptying %s"
 msgstr "Błąd podczas opróżniania %s"
 
-#: src/client/application/geary-controller.vala:2390
+#: src/client/application/geary-controller.vala:2425
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Trwale usunąć tę wiadomość?"
 msgstr[1] "Trwale usunąć te wiadomości?"
 msgstr[2] "Trwale usunąć te wiadomości?"
 
-#: src/client/application/geary-controller.vala:2392
+#: src/client/application/geary-controller.vala:2427
 msgid "Delete"
 msgstr "Usuń"
 
-#: src/client/application/geary-controller.vala:2424
+#: src/client/application/geary-controller.vala:2459
 msgid "Undo archive (Ctrl+Z)"
 msgstr "Cofnij archiwizację (Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:2439
+#: src/client/application/geary-controller.vala:2474
 msgid "Undo trash (Ctrl+Z)"
 msgstr "Cofnij przeniesienie do kosza (Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:2495
+#: src/client/application/geary-controller.vala:2530
 msgid "Undo (Ctrl+Z)"
 msgstr "Cofnij (Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:2613
+#: src/client/application/geary-controller.vala:2648
 msgid "Failed to open default text editor."
 msgstr "Otwarcie domyślnego edytora tekstu się nie powiodło."
 
@@ -900,10 +888,201 @@ msgstr "Przenosi wątek"
 msgid "Move conversations"
 msgstr "Przenosi wątki"
 
-#: src/client/components/main-window.vala:384
+#: src/client/components/main-window.vala:395
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
+
+#. Translators: String substitution is the account name
+#: src/client/components/main-window-info-bar.vala:54
+#, c-format
+msgid "Problem connecting to incoming server for %s"
+msgstr "Problem podczas łączenia z serwerem poczty przychodzącej dla konta %s"
+
+#. Translators: String substitution is the server name
+#: src/client/components/main-window-info-bar.vala:56
+#: src/client/components/main-window-info-bar.vala:64
+#, c-format
+msgid ""
+"Could not connect to %s, check your Internet access and the server name and "
+"try again"
+msgstr ""
+"Nie można połączyć się z %s, proszę sprawdzić dostęp do Internetu "
+"i poprawność nazwy serwera, a następnie spróbować ponownie"
+
+#: src/client/components/main-window-info-bar.vala:57
+#: src/client/components/main-window-info-bar.vala:66
+msgid "Retry connecting now"
+msgstr "Ponów połączenie"
+
+#. Translators: String substitution is the account name
+#: src/client/components/main-window-info-bar.vala:62
+#,c-format
+msgid "Problem connecting to outgoing server for %s"
+msgstr "Problem podczas łączenia z serwerem poczty wychodzącej dla konta %s"
+
+#: src/client/components/main-window-info-bar.vala:65
+msgid "Try reconnecting now"
+msgstr "Ponów połączenie"
+
+#. Translators: String substitution is the account name
+#: src/client/components/main-window-info-bar.vala:71
+#, c-format
+msgid "Problem with connection to incoming server for %s"
+msgstr "Problem podczas łączenia z serwerem poczty przychodzącej dla konta %s"
+
+#. Translators: String substitution is the server name
+#: src/client/components/main-window-info-bar.vala:73
+#: src/client/components/main-window-info-bar.vala:81
+#, c-format
+msgid "Network error talking to %s, check your Internet access try again"
+msgstr ""
+"Błąd sieci podczas komunikacji z serwerem %s, proszę sprawdzić dostęp do "
+"Internetu i spróbować ponownie"
+
+#: src/client/components/main-window-info-bar.vala:74
+#: src/client/components/main-window-info-bar.vala:82
+#: src/client/components/main-window-info-bar.vala:90
+#: src/client/components/main-window-info-bar.vala:98
+#: src/client/components/main-window-info-bar.vala:119
+msgid "Try reconnecting"
+msgstr "Ponów połączenie"
+
+#. Translators: String substitution is the account name
+#: src/client/components/main-window-info-bar.vala:79
+#, c-format
+msgid "Problem with connection to outgoing server for %s"
+msgstr "Problem podczas łączenia z serwerem poczty wychodzącej dla konta %s"
+
+#. Translators: String substitution is the account name
+#: src/client/components/main-window-info-bar.vala:87
+#, c-format
+msgid "Problem communicating with incoming server for %s"
+msgstr ""
+"Problem podczas komunikacji z serwerem poczty przychodzącej dla konta %s"
+
+#. Translators: String substitution is the server name
+#: src/client/components/main-window-info-bar.vala:89
+#, c-format
+msgid ""
+"Geary did not understand a message from %s or vice versa, please file a bug "
+"report"
+msgstr "Nie można przetworzyć komunikatu z serwera %s, proszę zgłosić błąd"
+
+#: src/client/components/main-window-info-bar.vala:94
+msgid "Problem communicating with outgoing mail server"
+msgstr "Problem podczas komunikacji z serwerem poczty wychodzącej"
+
+#. Translators: First string substitution is the server
+#. name, second is the account name
+#: src/client/components/main-window-info-bar.vala:97
+#, c-format
+msgid ""
+"Could now communicate with %s for %s, server name and try again in a moment"
+msgstr ""
+"Nie można komunikować się z serwerem %s dla konta %s, proszę sprawdzić "
+"poprawność nazwy serwera i spróbować ponownie za chwilę"
+
+#. Translators: String substitution is the account name
+#: src/client/components/main-window-info-bar.vala:103
+#, c-format
+msgid "Incoming mail server password required for %s"
+msgstr "Wymagane jest hasło serwera poczty przychodzącej dla konta %s"
+
+#: src/client/components/main-window-info-bar.vala:104
+msgid "Messages cannot be received without the correct password."
+msgstr "Nie można odbierać wiadomości bez właściwego hasła."
+
+#: src/client/components/main-window-info-bar.vala:105
+msgid "Retry receiving email, you will be prompted for a password"
+msgstr "Ponów odbieranie poczty, zostanie wyświetlona prośba o hasło"
+
+#. Translators: String substitution is the account name
+#: src/client/components/main-window-info-bar.vala:110
+#, c-format
+msgid "Outgoing mail server password required for %s"
+msgstr "Wymagane jest hasło serwera poczty wychodzącej dla konta %s"
+
+#: src/client/components/main-window-info-bar.vala:111
+msgid "Messages cannot be sent without the correct password."
+msgstr "Nie można wysyłać wiadomości bez właściwego hasła."
+
+#: src/client/components/main-window-info-bar.vala:112
+msgid "Retry sending queued messages, you will be prompted for a password"
+msgstr "Ponów wysyłanie poczty, zostanie wyświetlona prośba o hasło"
+
+#. Translators: String substitution is the account name
+#: src/client/components/main-window-info-bar.vala:117
+#, c-format
+msgid "A problem occurred checking mail for %s"
+msgstr "Wystąpił problem podczas wyszukiwania nowej poczty dla konta %s"
+
+#: src/client/components/main-window-info-bar.vala:118
+#: src/client/components/main-window-info-bar.vala:125
+msgid "Something went wrong, please file a bug report if the problem persists"
+msgstr "Coś się nie powiodło, proszę zgłosić błąd, jeśli problem się powtarza"
+
+#. Translators: String substitution is the account name
+#: src/client/components/main-window-info-bar.vala:124
+#, c-format
+msgid "A problem occurred sending mail for %s"
+msgstr "Wystąpił problem podczas wysyłania poczty dla konta %s"
+
+#: src/client/components/main-window-info-bar.vala:126
+msgid "Retry sending queued messages"
+msgstr "Ponów wysyłanie wiadomości"
+
+#: src/client/components/main-window-info-bar.vala:137
+msgid "A database problem has occurred"
+msgstr "Wystąpił problem z bazą danych"
+
+#. Translators: String substitution is the account name
+#: src/client/components/main-window-info-bar.vala:139
+#, c-format
+msgid "Messages for %s must be downloaded again."
+msgstr "Wiadomości dla konta %s muszą zostać pobrane ponownie."
+
+#: src/client/components/main-window-info-bar.vala:152
+msgid "Geary has encountered a problem"
+msgstr "Wystąpił problem"
+
+#: src/client/components/main-window-info-bar.vala:153
+msgid ""
+"Please check the technical details and report the problem if it persists."
+msgstr ""
+"Proszę sprawdzić informacje techniczne i zgłosić problem, jeśli się powtarza."
+
+#: src/client/components/main-window-info-bar.vala:161
+msgid "_Details"
+msgstr "_Informacje"
+
+#: src/client/components/main-window-info-bar.vala:162
+msgid "View technical details about the error"
+msgstr "Wyświetla informacje techniczne o błędzie"
+
+#: src/client/components/main-window-info-bar.vala:166
+msgid "_Retry"
+msgstr "_Ponów"
+
+#: src/client/components/main-window-info-bar.vala:253
+msgid "Details"
+msgstr "Informacje"
+
+#: src/client/components/main-window-info-bar.vala:266
+#: src/client/components/stock.vala:23
+msgid "_Close"
+msgstr "Za_mknij"
+
+#: src/client/components/main-window-info-bar.vala:270
+msgid "Copy to Clipboard"
+msgstr "Skopiuj do schowka"
+
+#: src/client/components/main-window-info-bar.vala:273
+msgid ""
+"Copy technical details to clipboard for pasting into an email or bug report"
+msgstr ""
+"Kopiuje informacje techniczne do schowka, aby można je było wkleić do "
+"wiadomości e-mail lub zgłoszenia błędu"
 
 #: src/client/components/search-bar.vala:8
 #: src/client/folder-list/folder-list-search-branch.vala:38
@@ -945,10 +1124,6 @@ msgstr "_Anuluj"
 #: src/client/components/stock.vala:21 ui/gtk/menus.ui:34
 msgid "_About"
 msgstr "_O programie"
-
-#: src/client/components/stock.vala:23
-msgid "_Close"
-msgstr "Za_mknij"
 
 #: src/client/components/stock.vala:24
 msgid "_Discard"
@@ -1028,28 +1203,28 @@ msgstr ""
 "załączyłam|załączono|dołączyłem|dołączyłam|dołączono|zalacznik|zalaczam|"
 "zalaczylem|zalaczylam|zalaczono|dolaczylem|dolaczylam|dolaczono"
 
-#: src/client/composer/composer-widget.vala:1124
-#: src/client/composer/composer-widget.vala:1143
+#: src/client/composer/composer-widget.vala:1131
+#: src/client/composer/composer-widget.vala:1150
 msgid "Do you want to discard this message?"
 msgstr "Odrzucić tę wiadomość?"
 
-#: src/client/composer/composer-widget.vala:1247
+#: src/client/composer/composer-widget.vala:1254
 msgid "Send message with an empty subject and body?"
 msgstr "Wysłać wiadomość niezawierającą tematu i treści?"
 
-#: src/client/composer/composer-widget.vala:1249
+#: src/client/composer/composer-widget.vala:1256
 msgid "Send message with an empty subject?"
 msgstr "Wysłać wiadomość niezawierającą tematu?"
 
-#: src/client/composer/composer-widget.vala:1251
+#: src/client/composer/composer-widget.vala:1258
 msgid "Send message with an empty body?"
 msgstr "Wysłać wiadomość niezawierającą treści?"
 
-#: src/client/composer/composer-widget.vala:1255
+#: src/client/composer/composer-widget.vala:1262
 msgid "Send message without an attachment?"
 msgstr "Wysłać wiadomość niezawierającą załączników?"
 
-#: src/client/composer/composer-widget.vala:1517
+#: src/client/composer/composer-widget.vala:1524
 #, c-format
 msgid "“%s” already attached for delivery."
 msgstr "Do wiadomości już załączono „%s”."
@@ -1059,73 +1234,73 @@ msgstr "Do wiadomości już załączono „%s”."
 #. description of the document type, the second will
 #. be a human-friendly size string. For example:
 #. Document (100.9MB)
-#: src/client/composer/composer-widget.vala:1525
+#: src/client/composer/composer-widget.vala:1532
 #: src/client/conversation-viewer/conversation-email.vala:138
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: src/client/composer/composer-widget.vala:1562
+#: src/client/composer/composer-widget.vala:1569
 #, c-format
 msgid "“%s” could not be found."
 msgstr "Nie można odnaleźć „%s”."
 
-#: src/client/composer/composer-widget.vala:1568
+#: src/client/composer/composer-widget.vala:1575
 #, c-format
 msgid "“%s” is a folder."
 msgstr "„%s” jest katalogiem."
 
-#: src/client/composer/composer-widget.vala:1574
+#: src/client/composer/composer-widget.vala:1581
 #, c-format
 msgid "“%s” is an empty file."
 msgstr "„%s” jest pustym plikiem."
 
-#: src/client/composer/composer-widget.vala:1587
+#: src/client/composer/composer-widget.vala:1594
 #, c-format
 msgid "“%s” could not be opened for reading."
 msgstr "Nie można otworzyć „%s” do odczytania."
 
-#: src/client/composer/composer-widget.vala:1595
+#: src/client/composer/composer-widget.vala:1602
 msgid "Cannot add attachment"
 msgstr "Nie można dodać załącznika"
 
-#: src/client/composer/composer-widget.vala:1647
+#: src/client/composer/composer-widget.vala:1654
 msgid "To: "
 msgstr "Do: "
 
-#: src/client/composer/composer-widget.vala:1650
+#: src/client/composer/composer-widget.vala:1657
 msgid "Cc: "
 msgstr "DW: "
 
-#: src/client/composer/composer-widget.vala:1653
+#: src/client/composer/composer-widget.vala:1660
 msgid "Bcc: "
 msgstr "UDW: "
 
-#: src/client/composer/composer-widget.vala:1656
+#: src/client/composer/composer-widget.vala:1663
 msgid "Reply-To: "
 msgstr "Odpowiedź do: "
 
-#: src/client/composer/composer-widget.vala:1788
+#: src/client/composer/composer-widget.vala:1795
 msgid "Select Color"
 msgstr "Wybór koloru"
 
 #. Displayed in the From dropdown to indicate an "alternate email address"
 #. for an account.  The first printf argument will be the alternate email
 #. address, and the second will be the account's primary email address.
-#: src/client/composer/composer-widget.vala:1988
+#: src/client/composer/composer-widget.vala:1995
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%1$s przez %2$s"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: src/client/composer/composer-widget.vala:2030
+#: src/client/composer/composer-widget.vala:2037
 msgid "_From:"
 msgstr "_Od:"
 
 #. Translators: This is the name of the file chooser filter
 #. when inserting an image in the composer.
-#: src/client/composer/composer-widget.vala:2255
+#: src/client/composer/composer-widget.vala:2262
 msgid "Images"
 msgstr "Obrazy"
 
@@ -1766,7 +1941,7 @@ msgstr "nieprzeczytane"
 #. Draft mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:627
+#: src/engine/imap-engine/imap-engine-generic-account.vala:647
 msgid "Drafts | Draft"
 msgstr "Szkice | Szkic"
 
@@ -1774,13 +1949,13 @@ msgstr "Szkice | Szkic"
 #. Sent mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:636
+#: src/engine/imap-engine/imap-engine-generic-account.vala:656
 msgid "Sent | Sent Mail | Sent Email | Sent E-Mail"
 msgstr "Wysłane | Wysłana poczta | Wysłane wiadomości | Skrzynka nadawcza"
 
 #. The localised name(s) of the Sent folder name as used
 #. by MS Outlook/Exchange.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:641
+#: src/engine/imap-engine/imap-engine-generic-account.vala:661
 msgctxt "Outlook localised name"
 msgid "Sent Items"
 msgstr "Elementy wysłane"
@@ -1789,7 +1964,7 @@ msgstr "Elementy wysłane"
 #. Spam mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:651
+#: src/engine/imap-engine/imap-engine-generic-account.vala:671
 msgid ""
 "Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email "
 "| Bulk E-Mail"
@@ -1799,13 +1974,13 @@ msgstr "Niechciane | Niechciana poczta | Niechciane wiadomości | Spam"
 #. Trash mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:661
+#: src/engine/imap-engine/imap-engine-generic-account.vala:681
 msgid "Trash | Rubbish | Rubbish Bin"
 msgstr "Kosz | Śmietnik | Usunięta poczta | Usunięte wiadomości"
 
 #. The localised name(s) of the Trash folder name as used
 #. by MS Outlook/Exchange.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:666
+#: src/engine/imap-engine/imap-engine-generic-account.vala:686
 msgctxt "Outlook localised name"
 msgid "Deleted Items"
 msgstr "Elementy usunięte"
@@ -1814,7 +1989,7 @@ msgstr "Elementy usunięte"
 #. Archive mailbox. Separate names using a vertical bar
 #. and put the most common localized name to the front for
 #. the default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:676
+#: src/engine/imap-engine/imap-engine-generic-account.vala:696
 msgid "Archive | Archives"
 msgstr "Archiwum | Archiwa"
 
@@ -1846,31 +2021,31 @@ msgstr "Użytkownik %s napisał:"
 msgid "On %s:"
 msgstr "W dniu %s:"
 
-#: src/engine/rfc822/rfc822-utils.vala:278
+#: src/engine/rfc822/rfc822-utils.vala:282
 msgid "---------- Forwarded message ----------"
 msgstr "---------- Przekazywana wiadomość ----------"
 
-#: src/engine/rfc822/rfc822-utils.vala:282
+#: src/engine/rfc822/rfc822-utils.vala:286
 #, c-format
 msgid "From: %s\n"
 msgstr "Od: %s\n"
 
-#: src/engine/rfc822/rfc822-utils.vala:283
+#: src/engine/rfc822/rfc822-utils.vala:287
 #, c-format
 msgid "Subject: %s\n"
 msgstr "Temat: %s\n"
 
-#: src/engine/rfc822/rfc822-utils.vala:284
+#: src/engine/rfc822/rfc822-utils.vala:288
 #, c-format
 msgid "Date: %s\n"
 msgstr "Data: %s\n"
 
-#: src/engine/rfc822/rfc822-utils.vala:287
+#: src/engine/rfc822/rfc822-utils.vala:291
 #, c-format
 msgid "To: %s\n"
 msgstr "Do: %s\n"
 
-#: src/engine/rfc822/rfc822-utils.vala:290
+#: src/engine/rfc822/rfc822-utils.vala:294
 #, c-format
 msgid "Cc: %s\n"
 msgstr "DW: %s\n"
@@ -2773,6 +2948,22 @@ msgstr "Oznacz jako _niechciana"
 #: ui/main-toolbar-menus.ui:36
 msgid "Mark as not S_pam"
 msgstr "Oznacz jako p_ożądana"
+
+#: ui/main-window-info-bar.ui:97
+msgid ""
+"If the problem is serious or persists, please copy and send these details to "
+"the <a href=\"https://wiki.gnome.org/Apps/Geary/Contact\">mailing list</a> "
+"or file a <a href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">new "
+"bug report</a>."
+msgstr ""
+"Jeśli problem jest poważny lub się powtarza, to proszę skopiować i wysłać te "
+"informacje na <a href=\"https://wiki.gnome.org/Apps/Geary/Contact\">listę "
+"dyskusyjną</a> lub <a href=\"https://wiki.gnome.org/Apps/Geary/"
+"ReportingABug\">zgłosić błąd</a> (w języku angielskim)."
+
+#: ui/main-window-info-bar.ui:113
+msgid "Details:"
+msgstr "Informacje:"
 
 #: ui/password-dialog.glade:74
 msgid "SMTP Credentials"

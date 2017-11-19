@@ -1,13 +1,13 @@
 # Polish translation for geary help.
 # Copyright © 2016-2017 the geary authors.
-# This file is distributed under the same license as the geary package.
+# This file is distributed under the same license as the geary help.
 # Piotr Drąg <piotrdrag@gmail.com>, 2016-2017.
 # Aviary.pl <community-poland@mozilla.org>, 2016-2017.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: geary-help\n"
-"POT-Creation-Date: 2017-09-25 16:02+0000\n"
+"POT-Creation-Date: 2017-11-02 16:21+0000\n"
 "PO-Revision-Date: 2017-09-26 16:45+0200\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <community-poland@mozilla.org>\n"
