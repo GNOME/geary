@@ -226,7 +226,9 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         folder_map.clear();
         local_only.clear();
         open = false;
-        
+
+        notify_closed();
+
         if (local_err != null)
             throw local_err;
         
