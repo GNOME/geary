@@ -69,8 +69,9 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     private int remote_count = -1;
     private Nonblocking.Mutex open_mutex = new Nonblocking.Mutex();
     private Nonblocking.Mutex close_mutex = new Nonblocking.Mutex();
+    private Cancellable? open_cancellable = null;
 
-    
+
     /**
      * Called when the folder is closing (and not reestablishing a connection) and will be flushing
      * the replay queue.  Subscribers may add ReplayOperations to the list, which will be enqueued
@@ -579,6 +580,8 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         
         // reset to force waiting in wait_for_close_async()
         closed_semaphore.reset();
+
+        this.open_cancellable = new Cancellable();
         
         // Unless NO_DELAY is set, do NOT open the remote side here; wait for the ReplayQueue to
         // require a remote connection or wait_for_open_async() to be called ... this allows for
@@ -964,6 +967,10 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
 
     // Returns the remote_folder, if it was set
     private Imap.Folder? clear_remote_folder() {
+        // Cancel any internal pending operations before unhooking
+        this.open_cancellable.cancel();
+        this.open_cancellable = null;
+
         if (remote_folder != null) {
             // disconnect signals before ripping out reference
             remote_folder.appended.disconnect(on_remote_appended);
