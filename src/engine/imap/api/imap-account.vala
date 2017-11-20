@@ -187,9 +187,9 @@ private class Geary.Imap.Account : BaseObject {
                 StatusDataType.all(),
                 cancellable
             );
-            folder = newSelectableFolder(path, status, mailbox_info.attrs);
+            folder = new_selectable_folder(path, status, mailbox_info.attrs);
         } else {
-            folder = newUnselectableFolder(path, mailbox_info.attrs);
+            folder = new_unselectable_folder(path, mailbox_info.attrs);
         }
 
         return folder;
@@ -209,8 +209,11 @@ private class Geary.Imap.Account : BaseObject {
         check_open();
 
         Imap.Folder? folder = this.folders.get(path);
-        if (folder != null) {
-            if (refresh_counts && folder.properties.attrs.is_no_select) {
+        if (folder == null) {
+            folder = yield fetch_folder_async(path, cancellable);
+            this.folders.set(path, folder);
+        } else {
+            if (refresh_counts && !folder.properties.attrs.is_no_select) {
                 try {
                     ClientSession session = yield claim_session_async(cancellable);
                     StatusData data = yield send_status_async(
@@ -227,9 +230,6 @@ private class Geary.Imap.Account : BaseObject {
                     throw_not_found(path);
                 }
             }
-        } else {
-            folder = yield fetch_folder_async(path, cancellable);
-            this.folders.set(path, folder);
         }
         return folder;
     }
@@ -273,7 +273,7 @@ private class Geary.Imap.Account : BaseObject {
                 FolderPath path = session.get_path_for_mailbox(mailbox_info.mailbox);
                 Folder? child = this.folders.get(path);
                 if (child == null) {
-                    child = newUnselectableFolder(path, mailbox_info.attrs);
+                    child = new_unselectable_folder(path, mailbox_info.attrs);
                     this.folders.set(path, child);
                 }
                 children.add(child);
@@ -323,7 +323,7 @@ private class Geary.Imap.Account : BaseObject {
                 if (child != null) {
                     child.properties.update_status(status);
                 } else {
-                    child = newSelectableFolder(child_path, status, mailbox_info.attrs);
+                    child = new_selectable_folder(child_path, status, mailbox_info.attrs);
                     this.folders.set(child_path, child);
                 }
 
@@ -337,7 +337,7 @@ private class Geary.Imap.Account : BaseObject {
         return children;
     }
 
-    internal Imap.Folder newSelectableFolder(FolderPath path, StatusData status, MailboxAttributes attrs) {
+    internal Imap.Folder new_selectable_folder(FolderPath path, StatusData status, MailboxAttributes attrs) {
         return new Imap.Folder(
             path, new Imap.FolderProperties.status(status, attrs), this.session_mgr
         );
@@ -580,7 +580,7 @@ private class Geary.Imap.Account : BaseObject {
             throw new EngineError.OPEN_REQUIRED("Imap.Account not open");
     }
 
-    private inline Imap.Folder newUnselectableFolder(FolderPath path, MailboxAttributes attrs) {
+    private inline Imap.Folder new_unselectable_folder(FolderPath path, MailboxAttributes attrs) {
         return new Imap.Folder(
             path, new Imap.FolderProperties(0, 0, 0, null, null, attrs), this.session_mgr
         );

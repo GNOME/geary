@@ -660,7 +660,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
                 // Use local STATUS data cache to be able to present
                 // something to the user at least. XXX get the attrs
                 // from somewhere for Bug 714775
-                opening_folder = this.remote.newSelectableFolder(
+                opening_folder = this.remote.new_selectable_folder(
                     path,
                     local_status,
                     new Imap.MailboxAttributes(new Gee.ArrayList<Geary.Imap.MailboxAttribute>())
