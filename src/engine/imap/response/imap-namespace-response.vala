@@ -13,9 +13,9 @@
 public class Geary.Imap.NamespaceResponse : BaseObject {
 
 
-    public Namespace[]? personal { get; private set; default = null; }
-    public Namespace[]? user { get; private set; default = null; }
-    public Namespace[]? shared { get; private set; default = null; }
+    public Gee.List<Namespace>? personal { get; private set; default = null; }
+    public Gee.List<Namespace>? user { get; private set; default = null; }
+    public Gee.List<Namespace>? shared { get; private set; default = null; }
 
 
     /**
@@ -55,12 +55,12 @@ public class Geary.Imap.NamespaceResponse : BaseObject {
         );
     }
 
-    private static Namespace[]? parse_namespaces(ListParameter? list) throws ImapError {
-        Namespace[]? nss = null;
+    private static Gee.List<Namespace>? parse_namespaces(ListParameter? list) throws ImapError {
+        Gee.List<Namespace>? nss = null;
         if (list != null) {
-            nss = new Namespace[list.size];
+            nss = new Gee.ArrayList<Namespace>();
             for (int i = 0; i < list.size; i++) {
-                nss[i] = parse_namespace(list.get_as_list(i));
+                nss.add(parse_namespace(list.get_as_list(i)));
             }
         }
         return nss;
@@ -77,7 +77,7 @@ public class Geary.Imap.NamespaceResponse : BaseObject {
         return ns;
     }
 
-    public NamespaceResponse(Namespace[]? personal, Namespace[]? user, Namespace[]? shared) {
+    public NamespaceResponse(Gee.List<Namespace>? personal, Gee.List<Namespace>? user, Gee.List<Namespace>? shared) {
         this.personal = personal;
         this.user = user;
         this.shared = shared;

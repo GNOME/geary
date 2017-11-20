@@ -1007,7 +1007,7 @@ public class Geary.Imap.ClientSession : BaseObject {
         }
     }
 
-    private inline void update_namespaces(Namespace[]? response, Gee.List<Namespace> list) {
+    private inline void update_namespaces(Gee.List<Namespace>? response, Gee.List<Namespace> list) {
         if (response != null) {
             foreach (Namespace ns in response) {
                 list.add(ns);
