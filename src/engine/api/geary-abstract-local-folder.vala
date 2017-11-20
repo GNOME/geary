@@ -13,10 +13,13 @@ public abstract class Geary.AbstractLocalFolder : Geary.Folder {
     
     private int open_count = 0;
     private Nonblocking.Semaphore closed_semaphore = new Nonblocking.Semaphore();
-    
+
     protected AbstractLocalFolder() {
+        // Notify now to ensure that wait_for_close_async does not
+        // block if never opened.
+        this.closed_semaphore.blind_notify();
     }
-    
+
     public override Geary.Folder.OpenState get_open_state() {
         return open_count > 0 ? Geary.Folder.OpenState.LOCAL : Geary.Folder.OpenState.CLOSED;
     }

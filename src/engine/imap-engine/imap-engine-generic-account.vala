@@ -203,12 +203,29 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         }
         this.refresh_folder_timer.reset();
 
-        notify_folders_available_unavailable(null, sort_by_path(local_only.values));
-        notify_folders_available_unavailable(null, sort_by_path(folder_map.values));
-        
-        local.outbox.report_problem.disconnect(notify_report_problem);
-        
-        // attempt to close both regardless of errors
+        // Notify folders and ensure they are closed
+
+        Gee.List<Geary.Folder> locals = sort_by_path(this.local_only.values);
+        Gee.List<Geary.Folder> remotes = sort_by_path(this.folder_map.values);
+
+        this.local_only.clear();
+        this.folder_map.clear();
+
+        notify_folders_available_unavailable(null, locals);
+        notify_folders_available_unavailable(null, remotes);
+
+        foreach (Geary.Folder folder in locals) {
+            debug("%s: Waiting for local to close: %s", to_string(), folder.to_string());
+            yield folder.wait_for_close_async();
+        }
+        foreach (Geary.Folder folder in remotes) {
+            debug("%s: Waiting for remote to close: %s", to_string(), folder.to_string());
+            yield folder.wait_for_close_async();
+        }
+
+        this.local.outbox.report_problem.disconnect(notify_report_problem);
+
+        // Close accounts
         Error? local_err = null;
         try {
             yield local.close_async(cancellable);
@@ -222,10 +239,8 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         } catch (Error rclose_err) {
             remote_err = rclose_err;
         }
-        
-        folder_map.clear();
-        local_only.clear();
-        open = false;
+
+        this.open = false;
 
         notify_closed();
 

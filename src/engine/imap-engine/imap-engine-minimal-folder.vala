@@ -112,6 +112,10 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         email_prefetcher = new EmailPrefetcher(this);
         
         local_folder.email_complete.connect(on_email_complete);
+
+        // Notify now to ensure that wait_for_close_async does not
+        // block if never opened.
+        this.closed_semaphore.blind_notify();
     }
 
     ~MinimalFolder() {

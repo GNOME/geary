@@ -1,6 +1,6 @@
 /*
  * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2016 Michael Gratton <mike@vee.net>
+ * Copyright 2016, 2017 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -326,57 +326,68 @@ public class GearyController : Geary.BaseObject {
 
         this.autostart_manager = null;
 
-        // close the ConversationMonitor
+        // Close the ConversationMonitor
+        if (current_conversations != null) {
+            debug("Stopping conversation monitor for %s...",
+                  this.current_conversations.folder.to_string());
+            try {
+                yield this.current_conversations.stop_monitoring_async(null);
+            } catch (Error err) {
+                debug(
+                    "Error closing conversation monitor %s at shutdown: %s",
+                    this.current_conversations.folder.to_string(),
+                    err.message
+                );
+            } finally {
+                this.current_conversations = null;
+            }
+        }
+
+        // Close all inboxes. Launch these in parallel so we're not
+        // waiting time waiting for each one to close. The account
+        // will wait around for them to actually close.
+        foreach (Geary.Folder inbox in this.inboxes.values) {
+            debug("Closing %s...", inbox.to_string());
+            inbox.close_async.begin(null, (obj, ret) => {
+                    try {
+                        inbox.close_async.end(ret);
+                    } catch (Error err) {
+                        debug(
+                            "Error closing Inbox %s at shutdown: %s",
+                            inbox.to_string(), err.message
+                        );
+                    }
+                });
+        }
+
+        // Close all Accounts. Again, do this in parallel to minimise
+        // time taken to close, but here use a barrier to wait for all
+        // to actually finish closing.
+        Geary.Nonblocking.CountingSemaphore close_barrier =
+            new Geary.Nonblocking.CountingSemaphore(null);
+        foreach (Geary.Account account in this.email_stores.keys) {
+            debug("Closing account %s", account.to_string());
+            close_barrier.acquire();
+            account.close_async.begin(null, (obj, res) => {
+                    try {
+                        account.close_async.end(res);
+                        debug("Closed account %s", account.to_string());
+                        close_barrier.notify();
+                    } catch (Error err) {
+                        debug(
+                            "Error closing account %s at shutdown: %s",
+                            account.to_string(),
+                            err.message
+                        );
+                    }
+                });
+        }
         try {
-            if (current_conversations != null) {
-                debug("Stopping conversation monitor for %s...", current_conversations.folder.to_string());
-                
-                bool closing = yield current_conversations.stop_monitoring_async(null);
-                
-                // If not an Inbox, wait for it to close so all pending operations are flushed
-                if (closing) {
-                    debug("Waiting for %s to close...", current_conversations.folder.to_string());
-                    yield current_conversations.folder.wait_for_close_async(null);
-                }
-                
-                debug("Stopped conversation monitor for %s", current_conversations.folder.to_string());
-            }
+            yield close_barrier.wait_async();
         } catch (Error err) {
-            message("Error closing conversation monitor %s at shutdown: %s",
-                current_conversations.folder.to_string(), err.message);
-        } finally {
-            current_conversations = null;
+            debug("Error waiting at shutdown barrier: %s", err.message);
         }
-        
-        // close all Inboxes
-        foreach (Geary.Folder inbox in inboxes.values) {
-            try {
-                debug("Closing %s...", inbox.to_string());
-                
-                // close and wait for all pending operations to be flushed
-                yield inbox.close_async(null);
-                
-                debug("Waiting for %s to close completely...", inbox.to_string());
-                
-                yield inbox.wait_for_close_async(null);
-                
-                debug("Closed %s", inbox.to_string());
-            } catch (Error err) {
-                message("Error closing Inbox %s at shutdown: %s", inbox.to_string(), err.message);
-            }
-        }
-        
-        // close all Accounts
-        foreach (Geary.Account account in email_stores.keys) {
-            try {
-                debug("Closing account %s", account.to_string());
-                yield account.close_async(null);
-                debug("Closed account %s", account.to_string());
-            } catch (Error err) {
-                message("Error closing account %s at shutdown: %s", account.to_string(), err.message);
-            }
-        }
-        
+
         main_window.destroy();
 
         debug("Flushing avatar cache...");
