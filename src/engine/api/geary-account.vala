@@ -41,6 +41,14 @@ public abstract class Geary.Account : BaseObject {
     
     public signal void email_sent(Geary.RFC822.Message rfc822);
 
+    /**
+     * Emitted to notify the client that some problem has occurred.
+     *
+     * The engine uses this signal to report internal errors and other
+     * issues that the client should notify the user about. The {@link
+     * ProblemReport} class provides context about the nature of the
+     * problem itself.
+     */
     public signal void report_problem(Geary.ProblemReport problem);
 
     public signal void contacts_loaded();

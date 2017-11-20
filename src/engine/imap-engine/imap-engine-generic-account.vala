@@ -337,6 +337,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         
         foreach(ImapDB.Folder folder_to_build in folders_to_build) {
             MinimalFolder folder = new_folder(folder_to_build.get_path(), remote, local, folder_to_build);
+            folder.report_problem.connect(notify_report_problem);
             folder_map.set(folder.path, folder);
             built_folders.add(folder);
             return_folders.add(folder);

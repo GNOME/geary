@@ -93,6 +93,10 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
      */
     public signal void marked_email_removed(Gee.Collection<Geary.EmailIdentifier> removed);
     
+    /** Emitted to notify the account that some problem has occurred. */
+    internal signal void report_problem(Geary.ProblemReport problem);
+
+
     public MinimalFolder(GenericAccount account, Imap.Account remote, ImapDB.Account local,
         ImapDB.Folder local_folder, SpecialFolderType special_folder_type) {
         this._account = account;
@@ -1548,6 +1552,13 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         return ret;
     }
 
+    /** Fires a {@link report_problem}} signal for a service for this folder. */
+    protected virtual void notify_service_problem(ProblemType type, Service service_type, Error? err) {
+        report_problem(new ServiceProblemReport(
+                           type, this._account.information, service_type, err
+                       ));
+    }
+
     public override string to_string() {
         return "%s (open_count=%d remote_opened=%s)".printf(base.to_string(), open_count,
             remote_opened.to_string());
@@ -1556,4 +1567,5 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     private void on_remote_ready() {
         start_open_remote();
     }
+
 }
