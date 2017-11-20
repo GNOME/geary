@@ -5,24 +5,36 @@
  */
 
 public class Geary.Imap.ClientConnection : BaseObject {
+
+    /** Default un-encrypted IMAP network port */
     public const uint16 DEFAULT_PORT = 143;
+
+    /** Default encrypted IMAP network port */
     public const uint16 DEFAULT_PORT_SSL = 993;
-    
+
     /**
-     * This is set very high to allow for IDLE connections to remain connected even when
-     * there is no traffic on them.  The side-effect is that if the physical connection is dropped,
-     * no error is reported and the connection won't know about it until the next send operation.
+     * Default socket timeout duration.
      *
-     * RECOMMENDED_TIMEOUT_SEC is more realistic in that if a connection is hung it's important
-     * to detect it early and drop it, at the expense of more keepalive traffic.
+     * This is set to the highest value required by RFC 3501 to allow
+     * for IDLE connections to remain connected even when there is no
+     * traffic on them.  The side-effect is that if the physical
+     * connection is dropped, no error is reported and the connection
+     * won't know about it until the next send operation.
      *
-     * In general, whatever timeout is used for the ClientConnection must be slightly higher than
-     * the keepalive timeout used by ClientSession, otherwise the ClientConnection will be dropped
-     * before the keepalive is sent.
+     * {@link RECOMMENDED_TIMEOUT_SEC} is more realistic in that if a
+     * connection is hung it's important to detect it early and drop
+     * it, at the expense of more keepalive traffic.
+     *
+     * In general, whatever timeout is used for the ClientConnection
+     * must be slightly higher than the keepalive timeout used by
+     * {@link ClientSession}, otherwise the ClientConnection will be
+     * dropped before the keepalive is sent.
      */
-    public const uint DEFAULT_TIMEOUT_SEC = ClientSession.MIN_KEEPALIVE_SEC + 15;
+    public const uint DEFAULT_TIMEOUT_SEC = ClientSession.MAX_KEEPALIVE_SEC;
+
+    /** Recommended socket timeout duration. */
     public const uint RECOMMENDED_TIMEOUT_SEC = ClientSession.RECOMMENDED_KEEPALIVE_SEC + 15;
-    
+
     /**
      * The default timeout for an issued command to result in a response code from the server.
      *

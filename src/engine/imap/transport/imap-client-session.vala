@@ -23,25 +23,58 @@
  * {@link send_command_async} and {@link send_multiple_commands_async}.
  */
 public class Geary.Imap.ClientSession : BaseObject {
-    // 30 min keepalive required to maintain session
-    public const uint MIN_KEEPALIVE_SEC = 30 * 60;
-    
-    // 10 minutes is more realistic, as underlying sockets will not necessarily report errors if
-    // physical connection is lost
-    public const uint RECOMMENDED_KEEPALIVE_SEC = 10 * 60;
-    
-    // A more aggressive keepalive will detect when a connection has died, thereby giving the client
-    // a chance to reestablish a connection without long lags.
+
+    /**
+     * Maximum keep-alive interval required to maintain a session.
+     *
+     * RFC 3501 requires servers have a minimum idle timeout of 30
+     * minutes, so the keep-alive interval should be set to less than
+     * this.
+     */
+    public const uint MAX_KEEPALIVE_SEC = 30 * 60;
+
+    /**
+     * Recommended keep-alive interval required to maintain a session.
+     *
+     * Although many servers will allow a timeout of at least what RFC
+     * 3501 requires, devices in between (e.g. NAT gateways) may have
+     * much shorter timeouts. Thus this is set much lower than what
+     * the RFC allows.
+     */
+    public const uint RECOMMENDED_KEEPALIVE_SEC = (10 * 60) - 30;
+
+    /**
+     * An aggressive keep-alive interval for polling for updates.
+     *
+     * Since a server may respond to NOOP with untagged responses for
+     * new messages or status updates, this is a useful timeout for
+     * polling for changes.
+     */
     public const uint AGGRESSIVE_KEEPALIVE_SEC = 5 * 60;
-    
-    // NOOP is only sent after this amount of time has passed since the last received
-    // message on the connection dependent on connection state (selected/examined vs. authorized)
+
+    /**
+     * Default keep-alive interval in the Selected state.
+     *
+     * This uses @{link AGGRESSIVE_KEEPALIVE_SEC} so that without IMAP
+     * IDLE, changes to the mailbox are still noticed without too much
+     * delay.
+     */
     public const uint DEFAULT_SELECTED_KEEPALIVE_SEC = AGGRESSIVE_KEEPALIVE_SEC;
+
+    /**
+     * Default keep-alive interval in the Selected state with IDLE.
+     *
+     * This uses @{link RECOMMENDED_KEEPALIVE_SEC} because IMAP IDLE
+     * will notify about changes to the mailbox as it happens .
+     */
+    public const uint DEFAULT_SELECTED_WITH_IDLE_KEEPALIVE_SEC = RECOMMENDED_KEEPALIVE_SEC;
+
+    /** Default keep-alive interval when not in the Selected state. */
     public const uint DEFAULT_UNSELECTED_KEEPALIVE_SEC = RECOMMENDED_KEEPALIVE_SEC;
-    public const uint DEFAULT_SELECTED_WITH_IDLE_KEEPALIVE_SEC = AGGRESSIVE_KEEPALIVE_SEC;
-    
+
     private const uint GREETING_TIMEOUT_SEC = ClientConnection.DEFAULT_COMMAND_TIMEOUT_SEC;
-    
+
+
     /**
      * The various states an IMAP {@link ClientSession} may be in at any moment.
      *
