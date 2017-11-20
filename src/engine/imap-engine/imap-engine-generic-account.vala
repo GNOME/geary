@@ -432,7 +432,11 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         Cancellable? cancellable = this.enumerate_folder_cancellable = new Cancellable();
         this.refresh_folder_timer.reset();
 
-        debug("%s: Enumerating folders", to_string());
+        Logging.debug(
+            Logging.Flag.PERIODIC,
+            "%s: Enumerating folders",
+            to_string()
+        );
 
         bool successful = false;
         try {
