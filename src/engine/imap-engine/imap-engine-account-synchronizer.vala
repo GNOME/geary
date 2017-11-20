@@ -30,20 +30,10 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
         this.bg_queue.requeue_duplicate = false;
 
         this.account.information.notify["prefetch-period-days"].connect(on_account_prefetch_changed);
-        this.account.closed.connect(on_account_closed);
         this.account.folders_available_unavailable.connect(on_folders_available_unavailable);
         this.account.folders_contents_altered.connect(on_folders_contents_altered);
         this.account.email_sent.connect(on_email_sent);
         this.remote.ready.connect(on_account_ready);
-    }
-
-    ~AccountSynchronizer() {
-        this.account.information.notify["prefetch-period-days"].connect(on_account_prefetch_changed);
-        this.account.closed.disconnect(on_account_closed);
-        this.account.folders_available_unavailable.disconnect(on_folders_available_unavailable);
-        this.account.folders_contents_altered.disconnect(on_folders_contents_altered);
-        this.account.email_sent.disconnect(on_email_sent);
-        this.remote.ready.disconnect(on_account_ready);
     }
 
     public void stop() {
@@ -58,16 +48,14 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
         }
     }
 
-    private void on_account_closed() {
-        stop();
-    }
-
     private void on_account_prefetch_changed() {
         try {
             // treat as an availability check (i.e. as if the account had just opened) because
             // just because this value has changed doesn't mean the contents in the folders
             // have changed
-            delayed_send_all(account.list_folders(), true, SYNC_DELAY_SEC);
+            if (this.account.is_open()) {
+                delayed_send_all(account.list_folders(), true, SYNC_DELAY_SEC);
+            }
         } catch (Error err) {
             debug("Unable to schedule re-sync for %s due to prefetch time changing: %s",
                 account.to_string(), err.message);
