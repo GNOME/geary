@@ -107,16 +107,15 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         );
         this.local = local;
         this.local_folder = local_folder;
-        _special_folder_type = special_folder_type;
-        _properties.add(local_folder.get_properties());
-        replay_queue = new ReplayQueue(this);
-        
+        this.local_folder.email_complete.connect(on_email_complete);
+
         email_flag_watcher = new EmailFlagWatcher(this);
         email_flag_watcher.email_flags_changed.connect(on_email_flags_changed);
-        
-        email_prefetcher = new EmailPrefetcher(this);
-        
-        local_folder.email_complete.connect(on_email_complete);
+
+        this._special_folder_type = special_folder_type;
+        this._properties.add(local_folder.get_properties());
+        this.replay_queue = new ReplayQueue(this);
+        this.email_prefetcher = new EmailPrefetcher(this);
 
         // Notify now to ensure that wait_for_close_async does not
         // block if never opened.
@@ -798,7 +797,10 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         }
         
         _properties.add(remote_folder.properties);
-        
+
+        // Now that the remote is open, update messages.
+        this.email_prefetcher.open();
+
         // notify any subscribers with similar information
         notify_opened(Geary.Folder.OpenState.BOTH, remote_count);
     }
@@ -824,10 +826,13 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         // decrement open_count and, if zero, continue closing Folder
         if (open_count == 0 || --open_count > 0)
             return false;
-        
+
+        // Close the prefetcher early so it stops using the remote ASAP
+        this.email_prefetcher.close();
+
         if (remote_folder != null)
             _properties.remove(remote_folder.properties);
-        
+
         // block anyone from wait_until_open_async(), as this is no longer open
         remote_semaphore.reset();
         
