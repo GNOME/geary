@@ -1485,9 +1485,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
             criteria.and(Imap.SearchCriterion.message_set(
                 new Imap.MessageSet.uid_range(new Imap.UID(Imap.UID.MIN), before_uid.previous(true))));
         }
-        
-        debug("%s: find_earliest_email_async: %s", to_string(), criteria.to_string());
-        
+
         ServerSearchEmail op = new ServerSearchEmail(this, criteria, Geary.Email.Field.NONE,
             cancellable);
         
@@ -1506,10 +1504,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
             if (earliest_id == null || email_id.uid.compare_to(earliest_id.uid) < 0)
                 earliest_id = email_id;
         }
-        
-        debug("%s: find_earliest_email_async: found %s", to_string(),
-            earliest_id != null ? earliest_id.to_string() : "(null)");
-        
+
         return earliest_id;
     }
     

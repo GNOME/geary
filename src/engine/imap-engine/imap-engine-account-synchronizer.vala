@@ -39,6 +39,7 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
     public void stop() {
         Cancellable? cancellable = this.bg_cancellable;
         if (cancellable != null) {
+            debug("%s: Stopping...", this.account.to_string());
             cancellable.cancel();
 
             this.bg_queue.clear();
@@ -267,6 +268,10 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
                                             DateTime epoch,
                                             Cancellable cancellable)
         throws Error {
+        Logging.debug(
+            Logging.Flag.PERIODIC, "Background sync'ing %s", folder.to_string()
+        );
+
         // get oldest local email and its time, as well as number of messages in local store
         DateTime? oldest_local = null;
         Geary.EmailIdentifier? oldest_local_id = null;
@@ -300,19 +305,33 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
                     // Local earliest email is after epoch, but there's nothing before it
                     do_sync = false;
                 } else {
-                    debug("Oldest local email in %s not old enough (%s vs. %s), email_total=%d vs. local_count=%d, synchronizing...",
-                        folder.to_string(), oldest_local.to_string(), epoch.to_string(),
-                        folder.properties.email_total, local_count);
+                    Logging.debug(
+                        Logging.Flag.PERIODIC,
+                        "Oldest local email in %s not old enough (%s vs. %s), email_total=%d vs. local_count=%d, synchronizing...",
+                        folder.to_string(),
+                        oldest_local.to_string(),
+                        epoch.to_string(),
+                        folder.properties.email_total,
+                        local_count
+                    );
                 }
             } else if (folder.properties.email_total == 0) {
                 // no local messages, no remote messages -- this is as good as having everything up
                 // to the epoch
                 do_sync = false;
             } else {
-                debug("No oldest message found for %s, synchronizing...", folder.to_string());
+                Logging.debug(
+                    Logging.Flag.PERIODIC,
+                    "No oldest message found for %s, synchronizing...",
+                    folder.to_string()
+                );
             }
         } else {
-            debug("Folder %s changed, synchronizing...", folder.to_string());
+            Logging.debug(
+                Logging.Flag.PERIODIC,
+                "Folder %s changed, synchronizing...",
+                folder.to_string()
+            );
         }
 
         if (do_sync) {
@@ -341,8 +360,7 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
                                          Geary.EmailIdentifier? oldest_local_id,
                                          Cancellable cancellable)
         throws Error {
-        debug("Background sync'ing %s", folder.to_string());
-        
+
         // wait for the folder to be fully opened to be sure we have all the most current
         // information
         yield folder.wait_for_open_async(cancellable);
@@ -358,18 +376,26 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
                 int local_count = yield folder.local_folder.get_email_count_async(ImapDB.Folder.ListFlags.NONE,
                     cancellable);
                 if (local_count >= folder.properties.email_total) {
-                    debug("Total vector normalization for %s: %d/%d emails", folder.to_string(), local_count,
-                        folder.properties.email_total);
-                    
+                    Logging.debug(
+                        Logging.Flag.PERIODIC,
+                        "Total vector normalization for %s: %d/%d emails", folder.to_string(), local_count,
+                        folder.properties.email_total
+                    );
                     break;
                 }
                 
-                current_epoch = current_epoch.add_months(-1);
+                current_epoch = current_epoch.add_months(-3);
                 
                 // if past max_epoch, then just pull in everything and be done with it
                 if (current_epoch.compare(max_epoch) < 0) {
-                    debug("Background sync reached max epoch of %s, fetching all mail from %s (already got %d of %d emails)",
-                        max_epoch.to_string(), folder.to_string(), local_count, folder.properties.email_total);
+                    Logging.debug(
+                        Logging.Flag.PERIODIC,
+                        "Synchronization reached max epoch of %s, fetching all mail from %s (already got %d of %d emails)",
+                        max_epoch.to_string(),
+                        folder.to_string(),
+                        local_count,
+                        folder.properties.email_total
+                    );
 
                     yield folder.list_email_by_id_async(null, 1, Geary.Email.Field.NONE,
                         Geary.Folder.ListFlags.OLDEST_TO_NEWEST, cancellable);
@@ -378,15 +404,24 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
                     if (current_epoch.compare(epoch) < 0)
                         current_epoch = epoch;
 
-                    debug("Background sync'ing %s to %s (already got %d of %d emails)",
-                        folder.to_string(), current_epoch.to_string(), local_count, folder.properties.email_total);
+                    Logging.debug(
+                        Logging.Flag.PERIODIC,
+                        "Synchronizing %s to %s (already got %d of %d emails)",
+                        folder.to_string(),
+                        current_epoch.to_string(),
+                        local_count,
+                        folder.properties.email_total
+                    );
                     Geary.EmailIdentifier? earliest_span_id = yield folder.find_earliest_email_async(current_epoch,
                         oldest_local_id, cancellable);
                     if (earliest_span_id == null && current_epoch.compare(epoch) <= 0) {
-                        debug("Unable to locate epoch messages on remote folder %s%s, fetching one past oldest...",
+                        Logging.debug(
+                            Logging.Flag.PERIODIC,
+                            "Unable to locate epoch messages on remote folder %s%s, fetching one past oldest...",
                             folder.to_string(),
-                            (oldest_local_id != null) ? " earlier than oldest local" : "");
-                        
+                            (oldest_local_id != null) ? " earlier than oldest local" : ""
+                        );
+
                         // if there's nothing between the oldest local and the epoch, that means the
                         // mail just prior to our local oldest is oldest than the epoch; rather than
                         // continually thrashing looking for something that's just out of reach, add it
@@ -404,20 +439,37 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
                 yield Scheduler.sleep_ms_async(200);
             } while (current_epoch.compare(epoch) > 0);
         } else {
-            debug("No expansion necessary for %s, oldest local (%s) is before epoch (%s)",
-                folder.to_string(), oldest_local.to_string(), epoch.to_string());
+            Logging.debug(
+                Logging.Flag.PERIODIC,
+                "No expansion necessary for %s, oldest local (%s) is before epoch (%s)",
+                folder.to_string(),
+                oldest_local.to_string(),
+                epoch.to_string()
+            );
         }
-        
+
         // always give email prefetcher time to finish its work
-        debug("Waiting for email prefetcher to complete %s...", folder.to_string());
+        Logging.debug(
+            Logging.Flag.PERIODIC,
+            "Waiting for email prefetcher to complete %s...",
+            folder.to_string()
+        );
         try {
             yield folder.email_prefetcher.active_sem.wait_async(cancellable);
         } catch (Error err) {
-            debug("Error waiting for email prefetcher to complete %s: %s", folder.to_string(),
-                err.message);
+            Logging.debug(
+                Logging.Flag.PERIODIC,
+                "Error waiting for email prefetcher to complete %s: %s",
+                folder.to_string(),
+                err.message
+            );
         }
-        
-        debug("Done background sync'ing %s", folder.to_string());
+
+        Logging.debug(
+            Logging.Flag.PERIODIC,
+            "Done background sync'ing %s",
+            folder.to_string()
+        );
     }
 
     private void on_account_ready() {
