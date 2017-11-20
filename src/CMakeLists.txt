@@ -416,6 +416,7 @@ mailer/main.vala
 find_package(Vala REQUIRED)
 include(ValaVersion)
 ensure_vala_version("0.22.1" MINIMUM)
+ensure_vala_version("0.34.99" MAXIMUM)
 include(ValaPrecompile)
 
 # Vapigen
