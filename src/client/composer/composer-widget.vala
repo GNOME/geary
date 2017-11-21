@@ -1518,19 +1518,22 @@ public class ComposerWidget : Gtk.EventBox {
     private void add_attachment_part(File target)
         throws AttachmentError {
         FileInfo target_info = check_attachment_file(target);
+        string display_name = target_info.get_display_name();
 
         if (!this.attached_files.add(target)) {
             throw new AttachmentError.DUPLICATE(
-                _("“%s” already attached for delivery.").printf(target.get_path())
-                );
+                _("“%s” already attached for delivery.").printf(display_name)
+            );
         }
 
         Gtk.Box box = new Gtk.Box(Gtk.Orientation.HORIZONTAL, 6);
         this.attachments_box.pack_start(box);
 
-        /// In the composer, the filename followed by its filesize, i.e. "notes.txt (1.12KB)"
-        string label_text = _("%s (%s)").printf(target.get_basename(),
-                                                Files.get_filesize_as_string(target_info.get_size()));
+        /// In the composer, the filename followed by its filesize,
+        /// i.e. "notes.txt (1.12KB)"
+        string label_text = _("%s (%s)").printf(
+            display_name, Files.get_filesize_as_string(target_info.get_size())
+        );
         Gtk.Label label = new Gtk.Label(label_text);
         box.pack_start(label);
         label.halign = Gtk.Align.START;
@@ -1560,19 +1563,24 @@ public class ComposerWidget : Gtk.EventBox {
 
     private FileInfo check_attachment_file(File target)
         throws AttachmentError {
-        FileInfo target_info;
+        FileInfo? target_info = null;
         try {
-            target_info = target.query_info("standard::size,standard::type",
-                FileQueryInfoFlags.NONE);
-        } catch (Error e) {
+            target_info = target.query_info(
+                "standard::size,standard::type,standard::display-name",
+                FileQueryInfoFlags.NONE
+            );
+        } catch (Error err) {
+            debug("Error querying file info for attachment: %s", err.message);
             throw new AttachmentError.FILE(
                 _("“%s” could not be found.").printf(target.get_path())
             );
         }
 
+        string display_name = target_info.get_display_name();
+
         if (target_info.get_file_type() == FileType.DIRECTORY) {
             throw new AttachmentError.FILE(
-                _("“%s” is a folder.").printf(target.get_path())
+                _("“%s” is a folder.").printf(display_name)
             );
         }
 
@@ -1582,16 +1590,17 @@ public class ComposerWidget : Gtk.EventBox {
             );
         }
 
+        // Need to just try opening the file here instead of querying
+        // for the "access:can-read" file attribute since at least for
+        // remote webdav mounts readable files do not report that as
+        // being true.
         try {
             FileInputStream? stream = target.read();
             if (stream != null)
                 stream.close();
         } catch(Error e) {
-            debug("File '%s' could not be opened for reading. Error: %s", target.get_path(),
-                e.message);
-
             throw new AttachmentError.FILE(
-                _("“%s” could not be opened for reading.").printf(target.get_path())
+                _("“%s” could not be opened for reading.").printf(display_name)
             );
         }
 
