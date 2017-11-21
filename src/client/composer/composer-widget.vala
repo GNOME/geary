@@ -933,9 +933,6 @@ public class ComposerWidget : Gtk.EventBox {
             string uri_list = (string) selection_data.get_data();
             string[] uris = uri_list.strip().split("\n");
             foreach (string uri in uris) {
-                if (!uri.has_prefix(FILE_URI_PREFIX))
-                    continue;
-
                 try {
                     add_attachment_part(File.new_for_uri(uri.strip()));
                 } catch (Error err) {
