@@ -157,9 +157,15 @@ include(GlibCompileResourcesSupport)
 # Unit tests.
 #
 # We don't use CMake's enable_testing/add_test built-ins because they
-# use ctest. It's not called "test" because that is cmake reserved.
-add_custom_target(tests geary-test)
-add_dependencies(tests geary-test)
+# use ctest. It's not called "test" because that is cmake
+# reserved.
+add_custom_target(tests)
+add_custom_target(test-engine-run COMMAND test-engine)
+add_custom_target(test-client-run COMMAND test-client)
+
+add_dependencies(tests test-engine-run test-client-run)
+add_dependencies(test-engine-run test-engine)
+add_dependencies(test-client-run test-client)
 
 #
 # Uninstall target

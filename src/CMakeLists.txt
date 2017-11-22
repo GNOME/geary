@@ -626,15 +626,20 @@ set(VALAC_OPTIONS
     ${EXTRA_VALA_OPTIONS}
 )
 
-# Engine (static library used for building apps and unit test)
+# Engine - static library used for building apps and unit tests
+#
+# See Vala Bug 731322 about the specifics of the arguments used below
+# to generate the internal VAPI and header.
 #################################################
 vala_precompile(ENGINE_VALA_C geary-engine
     ${ENGINE_SRC}
 PACKAGES
     ${ENGINE_PACKAGES}
-GENERATE_VAPI
-    geary-engine
 OPTIONS
+    --header=geary-engine.h
+    --vapi=geary-engine.vapi
+    --internal-header=geary-engine-internal.h
+    --internal-vapi=geary-engine-internal.vapi
     ${VALAC_OPTIONS}
 )
 
@@ -713,6 +718,12 @@ OPTIONS
     ${VALAC_OPTIONS}
 )
 
+# GSettings
+# This needs to be here and not in desktop/CMakeLists.txt in order for Geary to run in the build
+# directory
+include(GSettings)
+add_schemas(geary-client ${GSETTINGS_DIR} ${CMAKE_INSTALL_PREFIX})
+
 add_executable(geary ${GEARY_VALA_C} ${RESOURCES_C})
 target_link_libraries(geary ${DEPS_LIBRARIES} geary-client)
 install(TARGETS geary RUNTIME DESTINATION bin)
@@ -723,12 +734,6 @@ add_custom_command(
     COMMAND
         ${CMAKE_COMMAND} -E copy geary ${CMAKE_BINARY_DIR}/
 )
-
-# GSettings
-# This needs to be here and not in desktop/CMakeLists.txt in order for Geary to run in the build
-# directory
-include(GSettings)
-add_schemas(geary ${GSETTINGS_DIR} ${CMAKE_INSTALL_PREFIX})
 
 # Client web process extension library
 #################################################

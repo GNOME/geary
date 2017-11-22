@@ -29,10 +29,10 @@ class Geary.IdleManagerTest : Gee.TestCase {
         test.schedule();
 
         // There should be at least one event pending
-        assert(Gtk.events_pending());
+        assert(this.main_loop.pending());
 
         // Execute the idle function
-        Gtk.main_iteration();
+        this.main_loop.iteration(true);
 
         assert(did_run);
     }

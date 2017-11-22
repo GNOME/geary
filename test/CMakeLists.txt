@@ -2,8 +2,8 @@
 # Copyright 2016 Software Freedom Conservancy Inc.
 # Copyright 2016 Michael Gratton <mike@vee.net>
 
-set(TEST_SRC
-  main.vala
+set(TEST_ENGINE_SRC
+  test-engine.vala
   testcase.vala # Based on same file in libgee, courtesy Julien Peeters
 
   engine/api/geary-attachment-test.vala
@@ -21,6 +21,11 @@ set(TEST_SRC
   engine/util-inet-test.vala
   engine/util-js-test.vala
   engine/util-timeout-manager-test.vala
+)
+
+set(TEST_CLIENT_SRC
+  test-client.vala
+  testcase.vala # Based on same file in libgee, courtesy Julien Peeters
 
   client/application/geary-configuration-test.vala
   client/components/client-web-view-test.vala
@@ -50,15 +55,19 @@ pkg_check_modules(DEPS REQUIRED
   libxml-2.0
 )
 
-set(TEST_PACKAGES
-  geary-client
-  geary-engine
+set(TEST_ENGINE_PACKAGES
   gee-0.8
   gio-2.0
   glib-2.0
   gmime-2.6
-  gtk+-3.0
   javascriptcore-4.0
+  libunwind
+  libxml-2.0
+  sqlite3
+)
+
+set(TEST_CLIENT_PACKAGES
+  gtk+-3.0
   libsoup-2.4
   webkit2gtk-4.0
 )
@@ -74,6 +83,7 @@ set(CFLAGS
 include_directories(${CMAKE_BINARY_DIR}/src)
 
 set(LIB_PATHS ${DEPS_LIBRARY_DIRS})
+
 link_directories(${LIB_PATHS})
 add_definitions(${CFLAGS})
 
@@ -93,14 +103,30 @@ set(VALAC_OPTIONS
     ${EXTRA_VALA_OPTIONS}
 )
 
-vala_precompile(TEST_VALA_C geary-test
-    ${TEST_SRC}
+vala_precompile(TEST_ENGINE_VALA_C test-engine
+    ${TEST_ENGINE_SRC}
 PACKAGES
-    ${TEST_PACKAGES}
+    geary-engine-internal
+    ${TEST_ENGINE_PACKAGES}
+OPTIONS
+    ${VALAC_OPTIONS}
+)
+
+vala_precompile(TEST_CLIENT_VALA_C test-client
+    ${TEST_CLIENT_SRC}
+PACKAGES
+    geary-client
+    geary-engine
+    ${TEST_ENGINE_PACKAGES}
+    ${TEST_CLIENT_PACKAGES}
 OPTIONS
     ${VALAC_OPTIONS}
 )
 
 # Exclude from all so tests aren't built by default
-add_executable(geary-test EXCLUDE_FROM_ALL ${TEST_VALA_C} ${RESOURCES_C})
-target_link_libraries(geary-test ${DEPS_LIBRARIES} geary-client geary-engine)
+add_executable(test-engine EXCLUDE_FROM_ALL ${TEST_ENGINE_VALA_C})
+target_link_libraries(test-engine ${DEPS_LIBRARIES} geary-engine)
+
+# Exclude from all so tests aren't built by default
+add_executable(test-client EXCLUDE_FROM_ALL ${TEST_CLIENT_VALA_C} ${RESOURCES_C})
+target_link_libraries(test-client ${DEPS_LIBRARIES} geary-client geary-engine)
