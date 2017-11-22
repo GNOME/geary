@@ -45,6 +45,14 @@ tests:
 test:
 	@$(MAKE) -C $(BUILD_DIR) tests
 
+.PHONY: test-engine
+test-engine:
+	@$(MAKE) -C $(BUILD_DIR) $@-run
+
+.PHONY: test-client
+test-client:
+	@$(MAKE) -C $(BUILD_DIR) $@-run
+
 .PHONY: dist
 dist: tests
 	@$(MAKE) -C $(BUILD_DIR) dist
