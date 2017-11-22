@@ -258,8 +258,8 @@ engine/nonblocking/nonblocking-batch.vala
 engine/nonblocking/nonblocking-concurrent.vala
 engine/nonblocking/nonblocking-counting-semaphore.vala
 engine/nonblocking/nonblocking-error.vala
-engine/nonblocking/nonblocking-mailbox.vala
 engine/nonblocking/nonblocking-mutex.vala
+engine/nonblocking/nonblocking-queue.vala
 engine/nonblocking/nonblocking-reporting-semaphore.vala
 engine/nonblocking/nonblocking-variants.vala
 

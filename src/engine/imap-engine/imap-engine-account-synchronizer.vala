@@ -12,9 +12,12 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
     private weak GenericAccount account { get; private set; }
     private weak Imap.Account remote { get; private set; }
 
-    private Nonblocking.Mailbox<MinimalFolder> bg_queue = new Nonblocking.Mailbox<MinimalFolder>(bg_queue_comparator);
-    private Gee.HashSet<MinimalFolder> made_available = new Gee.HashSet<MinimalFolder>();
-    private Gee.HashSet<FolderPath> unavailable_paths = new Gee.HashSet<FolderPath>();
+    private Nonblocking.Queue<MinimalFolder> bg_queue =
+        new Nonblocking.Queue<MinimalFolder>.priority(bg_queue_comparator);
+    private Gee.HashSet<MinimalFolder> made_available =
+        new Gee.HashSet<MinimalFolder>();
+    private Gee.HashSet<FolderPath> unavailable_paths =
+        new Gee.HashSet<FolderPath>();
     private MinimalFolder? current_folder = null;
     private Cancellable? bg_cancellable = null;
     private DateTime max_epoch = new DateTime(new TimeZone.local(), 2000, 1, 1, 0, 0, 0.0);
@@ -219,7 +222,7 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
         while (!cancellable.is_cancelled()) {
             MinimalFolder folder;
             try {
-                folder = yield bg_queue.recv_async(bg_cancellable);
+                folder = yield bg_queue.receive(bg_cancellable);
             } catch (Error err) {
                 if (!(err is IOError.CANCELLED))
                     debug("Failed to receive next folder for background sync: %s", err.message);

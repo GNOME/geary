@@ -339,8 +339,8 @@ src/engine/nonblocking/nonblocking-batch.vala
 src/engine/nonblocking/nonblocking-concurrent.vala
 src/engine/nonblocking/nonblocking-counting-semaphore.vala
 src/engine/nonblocking/nonblocking-error.vala
-src/engine/nonblocking/nonblocking-mailbox.vala
 src/engine/nonblocking/nonblocking-mutex.vala
+src/engine/nonblocking/nonblocking-queue.vala
 src/engine/nonblocking/nonblocking-reporting-semaphore.vala
 src/engine/nonblocking/nonblocking-variants.vala
 src/engine/rfc822/rfc822-error.vala

@@ -125,7 +125,8 @@ public class Geary.App.DraftManager : BaseObject {
     private Folder? drafts_folder = null;
     private FolderSupport.Create? create_support = null;
     private FolderSupport.Remove? remove_support = null;
-    private Nonblocking.Mailbox<Operation?> mailbox = new Nonblocking.Mailbox<Operation?>();
+    private Nonblocking.Queue<Operation?> mailbox =
+        new Nonblocking.Queue<Operation?>.fifo();
     private bool was_opened = false;
     private Error? fatal_err = null;
     
@@ -380,16 +381,15 @@ public class Geary.App.DraftManager : BaseObject {
             // reporting it again
             if (fatal_err != null)
                 break;
-            
+
             Operation op;
             try {
-                op = yield mailbox.recv_async(null);
+                op = yield mailbox.receive(null);
             } catch (Error err) {
                 fatal(err);
-                
                 break;
             }
-            
+
             bool continue_loop = yield operation_loop_iteration_async(op);
             
             // fire semaphore, if present
