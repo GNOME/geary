@@ -28,6 +28,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     private Gee.HashMap<FolderPath, uint> refresh_unseen_timeout_ids
         = new Gee.HashMap<FolderPath, uint>();
     private Gee.HashSet<Geary.Folder> in_refresh_unseen = new Gee.HashSet<Geary.Folder>();
+    private AccountProcessor? processor;
     private AccountSynchronizer sync;
     private Cancellable? enumerate_folder_cancellable = null;
     private TimeoutManager refresh_folder_timer;
@@ -70,6 +71,19 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         this.sync = new AccountSynchronizer(this, this.remote);
 
         compile_special_search_names();
+    }
+
+    /**
+     * Queues an operation for execution by this account.
+     *
+     * The operation will added to the account's {@link
+     * AccountProcessor} and executed asynchronously by that when it
+     * reaches the front.
+     */
+    public void queue_operation(AccountOperation op)
+        throws EngineError {
+        check_open();
+        this.processor.enqueue(op);
     }
 
     protected override void notify_folders_available_unavailable(Gee.List<Geary.Folder>? available,
@@ -141,6 +155,8 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     }
     
     private async void internal_open_async(Cancellable? cancellable) throws Error {
+        this.processor = new AccountProcessor(this.to_string());
+
         try {
             yield local.open_async(information.data_dir, Engine.instance.resource_dir.get_child("sql"),
                 cancellable);
@@ -195,6 +211,9 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         if (!open)
             return;
 
+        // Halt internal tasks early so they stop using local and
+        // remote connections.
+        this.processor.stop();
         this.sync.stop();
 
         Cancellable folder_cancellable = this.enumerate_folder_cancellable;

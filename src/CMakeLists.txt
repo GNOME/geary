@@ -190,6 +190,8 @@ engine/imap-db/outbox/smtp-outbox-folder-properties.vala
 engine/imap-db/outbox/smtp-outbox-folder-root.vala
 
 engine/imap-engine/imap-engine.vala
+engine/imap-engine/imap-engine-account-operation.vala
+engine/imap-engine/imap-engine-account-processor.vala
 engine/imap-engine/imap-engine-account-synchronizer.vala
 engine/imap-engine/imap-engine-batch-operations.vala
 engine/imap-engine/imap-engine-contact-store.vala
