@@ -46,12 +46,12 @@ class Geary.HTML.UtilTest : Gee.TestCase {
 
     public void smart_escape_text() {
         string text = "some text";
-        assert(Geary.HTML.smart_escape(text, false) == "<div style='white-space: pre;'>some text</div>");
+        assert(Geary.HTML.smart_escape(text, false) == "<div style='white-space: pre-wrap;'>some text</div>");
     }
 
     public void smart_escape_text_url() {
         string text = "<http://example.com>";
-        assert(Geary.HTML.smart_escape(text, false) == "<div style='white-space: pre;'>&lt;http://example.com&gt;</div>");
+        assert(Geary.HTML.smart_escape(text, false) == "<div style='white-space: pre-wrap;'>&lt;http://example.com&gt;</div>");
     }
 
     public void remove_html_tags() {

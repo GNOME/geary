@@ -43,17 +43,17 @@ class Geary.Imap.NamespaceResponseTest : Gee.TestCase {
 
             NamespaceResponse response = NamespaceResponse.decode(data);
             assert(response.personal != null);
-            assert(response.personal.length == 1);
+            assert(response.personal.size == 1);
             assert(response.personal[0].prefix == "");
             assert(response.personal[0].delim == "/");
 
             assert(response.user != null);
-            assert(response.user.length == 1);
+            assert(response.user.size == 1);
             assert(response.user[0].prefix == "~");
             assert(response.user[0].delim == "/");
 
             assert(response.shared != null);
-            assert(response.shared.length == 1);
+            assert(response.shared.size == 1);
             assert(response.shared[0].prefix == "#shared/");
             assert(response.shared[0].delim == "/");
         } catch (Error err) {
@@ -76,7 +76,7 @@ class Geary.Imap.NamespaceResponseTest : Gee.TestCase {
             assert(response.personal[0].delim == ".");
             assert(response.user == null);
             assert(response.shared != null);
-            assert(response.shared.length == 1);
+            assert(response.shared.size == 1);
             assert(response.shared[0].prefix == "");
             assert(response.shared[0].delim == ".");
         } catch (Error err) {
@@ -95,7 +95,7 @@ class Geary.Imap.NamespaceResponseTest : Gee.TestCase {
             assert(response.personal == null);
             assert(response.user == null);
             assert(response.shared != null);
-            assert(response.shared.length == 1);
+            assert(response.shared.size == 1);
             assert(response.shared[0].prefix == "");
             assert(response.shared[0].delim == ",");
         } catch (Error err) {
