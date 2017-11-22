@@ -39,7 +39,7 @@ class Geary.TimeoutManagerTest : Gee.TestCase {
 
         timer.start();
         while (test.is_running && timer.elapsed() < SECONDS_EPSILON) {
-            Gtk.main_iteration();
+            this.main_loop.iteration(true);
         }
 
         assert_epsilon(timer.elapsed(), 1.0, SECONDS_EPSILON);
@@ -53,7 +53,7 @@ class Geary.TimeoutManagerTest : Gee.TestCase {
 
         timer.start();
         while (test.is_running && timer.elapsed() < 100 + MILLISECONDS_EPSILON) {
-            Gtk.main_iteration();
+            this.main_loop.iteration(true);
         }
 
         assert_epsilon(timer.elapsed(), 0.1, MILLISECONDS_EPSILON);
@@ -69,7 +69,7 @@ class Geary.TimeoutManagerTest : Gee.TestCase {
 
         timer.start();
         while (count < 2 && timer.elapsed() < SECONDS_EPSILON * 2) {
-            Gtk.main_iteration();
+            this.main_loop.iteration(true);
         }
         timer.stop();
 
