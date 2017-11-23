@@ -70,17 +70,35 @@ public abstract class Geary.Account : BaseObject {
         Gee.List<Geary.Folder>? unavailable);
 
     /**
-     * Fired when folders are created or deleted.
+     * Fired when new folders have been created.
      *
-     * Folders are ordered for the convenience of the caller from the top of the hierarchy to
-     * lower in the hierarchy.  In other words, parents are listed before children, assuming the
-     * lists are traversed in natural order.
+     * This is fired in response to new folders appearing, for example
+     * the user created a new folder. It will be fired after {@link
+     * folders_available_unavailable} has been fired to mark the
+     * folders as having been made available.
      *
-     * @see sort_by_path
+     * Folders are ordered for the convenience of the caller from the
+     * top of the hierarchy to lower in the hierarchy.  In other
+     * words, parents are listed before children, assuming the lists
+     * are traversed in natural order.
      */
-    public signal void folders_added_removed(Gee.List<Geary.Folder>? added,
-        Gee.List<Geary.Folder>? removed);
-    
+    public signal void folders_created(Gee.List<Geary.Folder> created);
+
+    /**
+     * Fired when existing folders are deleted.
+     *
+     * This is fired in response to existing folders being removed,
+     * for example if the user deleted a folder. it will be fired
+     * after {@link folders_available_unavailable} has been fired to
+     * mark the folders as having been made unavailable.
+     *
+     * Folders are ordered for the convenience of the caller from the
+     * top of the hierarchy to lower in the hierarchy.  In other
+     * words, parents are listed before children, assuming the lists
+     * are traversed in natural order.
+     */
+    public signal void folders_deleted(Gee.List<Geary.Folder> deleted);
+
     /**
      * Fired when a Folder's contents is detected having changed.
      */
@@ -377,10 +395,14 @@ public abstract class Geary.Account : BaseObject {
         folders_available_unavailable(available, unavailable);
     }
 
-    /** Fires a {@link folders_added_removed}} signal. */
-    protected virtual void notify_folders_added_removed(Gee.List<Geary.Folder>? added,
-        Gee.List<Geary.Folder>? removed) {
-        folders_added_removed(added, removed);
+    /** Fires a {@link folders_created}} signal. */
+    protected virtual void notify_folders_created(Gee.List<Geary.Folder> created) {
+        folders_created(created);
+    }
+
+    /** Fires a {@link folders_deleted}} signal. */
+    protected virtual void notify_folders_deleted(Gee.List<Geary.Folder> deleted) {
+        folders_deleted(deleted);
     }
 
     /** Fires a {@link folders_contents_altered}} signal. */
