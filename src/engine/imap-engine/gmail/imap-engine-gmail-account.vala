@@ -39,30 +39,30 @@ private class Geary.ImapEngine.GmailAccount : Geary.ImapEngine.GenericAccount {
         return SUPPORTED_SPECIAL_FOLDERS;
     }
 
-    protected override MinimalFolder new_folder(Geary.FolderPath path, Imap.Account remote_account,
-        ImapDB.Account local_account, ImapDB.Folder local_folder) {
+    protected override MinimalFolder new_folder(ImapDB.Folder local_folder) {
+        Geary.FolderPath path = local_folder.get_path();
         SpecialFolderType special_folder_type;
         if (Imap.MailboxSpecifier.folder_path_is_inbox(path))
             special_folder_type = SpecialFolderType.INBOX;
         else
             special_folder_type = local_folder.get_properties().attrs.get_special_folder_type();
-        
+
         switch (special_folder_type) {
             case SpecialFolderType.ALL_MAIL:
-                return new GmailAllMailFolder(this, remote_account, local_account, local_folder,
+                return new GmailAllMailFolder(this, this.remote, this.local, local_folder,
                     special_folder_type);
-            
+
             case SpecialFolderType.DRAFTS:
-                return new GmailDraftsFolder(this, remote_account, local_account, local_folder,
+                return new GmailDraftsFolder(this, this.remote, this.local, local_folder,
                     special_folder_type);
-            
+
             case SpecialFolderType.SPAM:
             case SpecialFolderType.TRASH:
-                return new GmailSpamTrashFolder(this, remote_account, local_account, local_folder,
+                return new GmailSpamTrashFolder(this, this.remote, this.local, local_folder,
                     special_folder_type);
-            
+
             default:
-                return new GmailFolder(this, remote_account, local_account, local_folder, special_folder_type);
+                return new GmailFolder(this, this.remote, this.local, local_folder, special_folder_type);
         }
     }
 

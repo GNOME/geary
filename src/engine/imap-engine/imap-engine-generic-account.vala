@@ -19,8 +19,9 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     private static Geary.FolderPath? outbox_path = null;
     private static Geary.FolderPath? search_path = null;
 
-    private Imap.Account remote;
-    private ImapDB.Account local;
+    protected Imap.Account remote { get; private set; }
+    protected ImapDB.Account local { get; private set; }
+
     private bool open = false;
     private Gee.HashMap<FolderPath, MinimalFolder> folder_map = new Gee.HashMap<
         FolderPath, MinimalFolder>();
@@ -328,8 +329,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     // set using either the properties from the local folder or its path.
     //
     // This won't be called to build the Outbox or search folder, but for all others (including Inbox) it will.
-    protected abstract MinimalFolder new_folder(Geary.FolderPath path, Imap.Account remote_account,
-        ImapDB.Account local_account, ImapDB.Folder local_folder);
+    protected abstract MinimalFolder new_folder(ImapDB.Folder local_folder);
     
     // Subclasses with specific SearchFolder implementations should override
     // this to return the correct subclass.
@@ -355,7 +355,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         }
         
         foreach(ImapDB.Folder folder_to_build in folders_to_build) {
-            MinimalFolder folder = new_folder(folder_to_build.get_path(), remote, local, folder_to_build);
+            MinimalFolder folder = new_folder(folder_to_build);
             folder.report_problem.connect(notify_report_problem);
             folder_map.set(folder.path, folder);
             built_folders.add(folder);

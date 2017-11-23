@@ -37,13 +37,11 @@ private class Geary.ImapEngine.YahooAccount : Geary.ImapEngine.GenericAccount {
             special_map.set(new Imap.FolderRoot("Trash"), Geary.SpecialFolderType.TRASH);
         }
     }
-    
-    protected override MinimalFolder new_folder(Geary.FolderPath path, Imap.Account remote_account,
-        ImapDB.Account local_account, ImapDB.Folder local_folder) {
+
+    protected override MinimalFolder new_folder(ImapDB.Folder local_folder) {
+        Geary.FolderPath path = local_folder.get_path();
         SpecialFolderType special_folder_type = special_map.has_key(path) ? special_map.get(path)
             : Geary.SpecialFolderType.NONE;
-        return new YahooFolder(this, remote_account, local_account, local_folder,
-            special_folder_type);
+        return new YahooFolder(this, this.remote, this.local, local_folder, special_folder_type);
     }
 }
-
