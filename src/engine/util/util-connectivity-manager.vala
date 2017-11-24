@@ -68,7 +68,10 @@ public class Geary.ConnectivityManager : BaseObject {
         this.monitor.network_changed.connect(on_network_changed);
 
         this.delayed_check = new TimeoutManager.seconds(
-            CHECK_QUIESCENCE_MS, () => { this.check_reachable.begin(); }
+            // Don't use the milliseconds ctor since we don't want
+            // high-frequency timing.
+            CHECK_QUIESCENCE_MS / 1000,
+            () => { this.check_reachable.begin(); }
         );
     }
 
