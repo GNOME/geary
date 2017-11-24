@@ -9,7 +9,6 @@
 private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
 
     private const int REFRESH_FOLDER_LIST_SEC = 2 * 60;
-    private const int REFRESH_UNSEEN_SEC = 1;
     private const Geary.SpecialFolderType[] SUPPORTED_SPECIAL_FOLDERS = {
         Geary.SpecialFolderType.DRAFTS,
         Geary.SpecialFolderType.SENT,
@@ -28,9 +27,6 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     private Gee.HashMap<FolderPath, MinimalFolder> folder_map = new Gee.HashMap<
         FolderPath, MinimalFolder>();
     private Gee.HashMap<FolderPath, Folder> local_only = new Gee.HashMap<FolderPath, Folder>();
-    private Gee.HashMap<FolderPath, uint> refresh_unseen_timeout_ids
-        = new Gee.HashMap<FolderPath, uint>();
-    private Gee.HashSet<Geary.Folder> in_refresh_unseen = new Gee.HashSet<Geary.Folder>();
     private AccountProcessor? processor;
     private AccountSynchronizer sync;
     private TimeoutManager refresh_folder_timer;
@@ -111,28 +107,28 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             }
         }
     }
-    
+
     protected override void notify_email_appended(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
         base.notify_email_appended(folder, ids);
-        reschedule_unseen_update(folder);
+        schedule_unseen_update(folder);
     }
-    
+
     protected override void notify_email_inserted(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
         base.notify_email_inserted(folder, ids);
-        reschedule_unseen_update(folder);
+        schedule_unseen_update(folder);
     }
-    
+
     protected override void notify_email_removed(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
         base.notify_email_removed(folder, ids);
-        reschedule_unseen_update(folder);
+        schedule_unseen_update(folder);
     }
-    
+
     protected override void notify_email_flags_changed(Geary.Folder folder,
         Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> flag_map) {
         base.notify_email_flags_changed(folder, flag_map);
-        reschedule_unseen_update(folder);
+        schedule_unseen_update(folder);
     }
-    
+
     private void check_open() throws EngineError {
         if (!open)
             throw new EngineError.OPEN_REQUIRED("Account %s not opened", to_string());
@@ -348,91 +344,8 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         return all_folders;
     }
 
-    // Subclasses should implement this to return their flavor of a MinimalFolder with the
-    // appropriate interfaces attached.  The returned folder should have its SpecialFolderType
-    // set using either the properties from the local folder or its path.
-    //
-    // This won't be called to build the Outbox or search folder, but for all others (including Inbox) it will.
-    protected abstract MinimalFolder new_folder(ImapDB.Folder local_folder);
-
-    /**
-     * Hooks up and queues an {@link UpdateRemoteFolders} operation.
-     */
-    private void update_remote_folders() {
-        UpdateRemoteFolders op = new UpdateRemoteFolders(
-            this,
-            this.remote,
-            this.local,
-            this.local_only.keys,
-            get_supported_special_folders()
-        );
-        op.completed.connect(() => {
-                this.refresh_folder_timer.start();
-            });
-        try {
-            queue_operation(op);
-        } catch (Error err) {
-            // oh well
-        }
-    }
-
-    private void reschedule_unseen_update(Geary.Folder folder) {
-        if (!folder_map.has_key(folder.path))
-            return;
-        
-        if (refresh_unseen_timeout_ids.get(folder.path) != 0)
-            Source.remove(refresh_unseen_timeout_ids.get(folder.path));
-        
-        refresh_unseen_timeout_ids.set(folder.path,
-            Timeout.add_seconds(REFRESH_UNSEEN_SEC, () => on_refresh_unseen(folder)));
-    }
-    
-    private bool on_refresh_unseen(Geary.Folder folder) {
-        // If we're in the process already, reschedule for later.
-        if (in_refresh_unseen.contains(folder))
-            return true;
-        
-        // add here, remove in completed callback
-        in_refresh_unseen.add(folder);
-        
-        refresh_unseen_async.begin(folder, null, on_refresh_unseen_completed);
-        
-        refresh_unseen_timeout_ids.unset(folder.path);
-        return false;
-    }
-    
-    private void on_refresh_unseen_completed(Object? source, AsyncResult result) {
-        try {
-            refresh_unseen_async.end(result);
-        } catch (Error e) {
-            debug("Error refreshing unseen counts: %s", e.message);
-        }
-    }
-
-    private async void refresh_unseen_async(Geary.Folder folder, Cancellable? cancellable)
-    throws Error {
-        debug("Refreshing unseen counts for %s", folder.to_string());
-
-        try {
-            Imap.Folder remote_folder = yield remote.fetch_folder_cached_async(
-                folder.path,
-                true,
-                cancellable
-            );
-
-            yield local.update_folder_status_async(remote_folder, false, true, cancellable);
-        } finally {
-            // added when call scheduled (above)
-            in_refresh_unseen.remove(folder);
-        }
-    }
-
     public override Geary.ContactStore get_contact_store() {
         return local.contact_store;
-    }
-
-    protected virtual Geary.SpecialFolderType[] get_supported_special_folders() {
-        return SUPPORTED_SPECIAL_FOLDERS;
     }
 
     public override async bool folder_exists_async(Geary.FolderPath path,
@@ -701,6 +614,48 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
 
         minimal_folder.set_special_folder_type(special);
         return minimal_folder;
+    }
+
+    // Subclasses should implement this to return their flavor of a MinimalFolder with the
+    // appropriate interfaces attached.  The returned folder should have its SpecialFolderType
+    // set using either the properties from the local folder or its path.
+    //
+    // This won't be called to build the Outbox or search folder, but for all others (including Inbox) it will.
+    protected abstract MinimalFolder new_folder(ImapDB.Folder local_folder);
+
+    /**
+     * Hooks up and queues an {@link UpdateRemoteFolders} operation.
+     */
+    private void update_remote_folders() {
+        UpdateRemoteFolders op = new UpdateRemoteFolders(
+            this,
+            this.remote,
+            this.local,
+            this.local_only.keys,
+            get_supported_special_folders()
+        );
+        op.completed.connect(() => {
+                this.refresh_folder_timer.start();
+            });
+        try {
+            queue_operation(op);
+        } catch (Error err) {
+            // oh well
+        }
+    }
+
+    /**
+     * Hooks up and queues an {@link RefreshFolderUnseen} operation.
+     */
+    private void schedule_unseen_update(Geary.Folder folder) {
+        MinimalFolder? impl = folder as MinimalFolder;
+        if (impl != null) {
+            impl.refresh_unseen();
+        }
+    }
+
+    protected virtual Geary.SpecialFolderType[] get_supported_special_folders() {
+        return SUPPORTED_SPECIAL_FOLDERS;
     }
 
     private void compile_special_search_names() {
@@ -1074,6 +1029,55 @@ internal class Geary.ImapEngine.UpdateRemoteFolders : AccountOperation {
             } catch (Error e) {
                 warning("Unable to ensure special folder %s: %s", special.to_string(), e.message);
             }
+        }
+    }
+
+}
+
+/**
+ * Account operation that updates a folder's unseen message count.
+ *
+ * This performs a IMAP STATUS on the folder, but only if it is not
+ * open - if it is open it is already maintaining its unseen count.
+ */
+internal class Geary.ImapEngine.RefreshFolderUnseen : AccountOperation {
+
+
+    private weak Geary.Folder folder;
+    private weak Imap.Account remote;
+    private weak ImapDB.Account local;
+
+
+    internal RefreshFolderUnseen(Geary.Folder folder,
+                                 Imap.Account remote,
+                                 ImapDB.Account local) {
+        this.folder = folder;
+        this.remote = remote;
+        this.local = local;
+    }
+
+    public override bool equal_to(AccountOperation op) {
+        return (
+            base.equal_to(op) &&
+            this.folder.path.equal_to(((RefreshFolderUnseen) op).folder.path)
+        );
+    }
+
+    public override string to_string() {
+        return "%s(%s)".printf(base.to_string(), folder.path.to_string());
+    }
+
+    public override async void execute(Cancellable cancellable) throws Error {
+        if (this.folder.get_open_state() == Geary.Folder.OpenState.CLOSED) {
+            Imap.Folder remote_folder = yield remote.fetch_folder_cached_async(
+                folder.path,
+                true,
+                cancellable
+            );
+
+            yield local.update_folder_status_async(
+                remote_folder, false, true, cancellable
+            );
         }
     }
 

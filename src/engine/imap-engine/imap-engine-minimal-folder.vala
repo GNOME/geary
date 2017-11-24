@@ -26,7 +26,10 @@
 private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport.Copy,
     Geary.FolderSupport.Mark, Geary.FolderSupport.Move {
 
+
     private const int FORCE_OPEN_REMOTE_TIMEOUT_SEC = 10;
+    private const int REFRESH_UNSEEN_TIMEOUT_SEC = 1;
+
 
     public override Account account { get { return _account; } }
     
@@ -69,6 +72,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     private int remote_count = -1;
     private Nonblocking.Mutex open_mutex = new Nonblocking.Mutex();
     private Nonblocking.Mutex close_mutex = new Nonblocking.Mutex();
+    private TimeoutManager refresh_unseen_timer;
     private Cancellable? open_cancellable = null;
 
 
@@ -116,6 +120,10 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         this._properties.add(local_folder.get_properties());
         this.replay_queue = new ReplayQueue(this);
         this.email_prefetcher = new EmailPrefetcher(this);
+
+        this.refresh_unseen_timer = new TimeoutManager.seconds(
+            REFRESH_UNSEEN_TIMEOUT_SEC, on_refresh_unseen
+        );
 
         // Notify now to ensure that wait_for_close_async does not
         // block if never opened.
@@ -573,15 +581,19 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         
         // first open gets to name the flags, but see note above
         this.open_flags = open_flags;
-        
+
         // reset to force waiting in wait_for_open_async()
-        remote_semaphore.reset();
-        
+        this.remote_semaphore.reset();
+
         // reset to force waiting in wait_for_close_async()
-        closed_semaphore.reset();
+        this.closed_semaphore.reset();
+
+        // reset unseen count refresh since it will be updated when
+        // the remote opens
+        this.refresh_unseen_timer.reset();
 
         this.open_cancellable = new Cancellable();
-        
+
         // Unless NO_DELAY is set, do NOT open the remote side here; wait for the ReplayQueue to
         // require a remote connection or wait_for_open_async() to be called ... this allows for
         // fast local-only operations to occur, local-only either because (a) the folder has all
@@ -1574,6 +1586,31 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     public override string to_string() {
         return "%s (open_count=%d remote_opened=%s)".printf(base.to_string(), open_count,
             remote_opened.to_string());
+    }
+
+    /**
+     * Schedules a refresh of the unseen count for the folder.
+     *
+     * This will only refresh folders that are not open, since if they
+     * are open or opening, they will already be updated. Hence it is safe to be called on closed folders.
+     */
+    internal void refresh_unseen() {
+        if (this.open_count == 0) {
+            this.refresh_unseen_timer.start();
+        }
+    }
+
+    private void on_refresh_unseen() {
+        // We queue an account operation since the folder itself is
+        // closed and hence does not have a connection to use for it.
+        RefreshFolderUnseen op = new RefreshFolderUnseen(
+            this, this.remote, this.local
+        );
+        try {
+            this._account.queue_operation(op);
+        } catch (Error err) {
+            // oh well
+        }
     }
 
     private void on_remote_ready() {
