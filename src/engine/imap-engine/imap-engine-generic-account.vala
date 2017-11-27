@@ -40,7 +40,6 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         base (name, information);
 
         this.remote = remote;
-        this.remote.ready.connect(on_remote_ready);
         this.remote.report_problem.connect(notify_report_problem);
 
         this.local = local;
@@ -207,11 +206,18 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         this.queue_operation(
             new LoadFolders(this, this.local, get_supported_special_folders())
         );
+
+        this.remote.ready.connect(on_remote_ready);
+        if (this.remote.is_ready) {
+            this.update_remote_folders();
+        }
     }
 
     public override async void close_async(Cancellable? cancellable = null) throws Error {
         if (!open)
             return;
+
+        this.remote.ready.disconnect(on_remote_ready);
 
         // Halt internal tasks early so they stop using local and
         // remote connections.
@@ -627,6 +633,8 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
      * Hooks up and queues an {@link UpdateRemoteFolders} operation.
      */
     private void update_remote_folders() {
+        this.refresh_folder_timer.reset();
+
         UpdateRemoteFolders op = new UpdateRemoteFolders(
             this,
             this.remote,
