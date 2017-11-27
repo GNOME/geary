@@ -700,6 +700,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
                 
                 // signals
                 opening_folder.appended.connect(on_remote_appended);
+                opening_folder.updated.connect(on_remote_updated);
                 opening_folder.removed.connect(on_remote_removed);
                 opening_folder.disconnected.connect(on_remote_disconnected);
                 
@@ -991,6 +992,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         if (remote_folder != null) {
             // disconnect signals before ripping out reference
             remote_folder.appended.disconnect(on_remote_appended);
+            remote_folder.updated.disconnect(on_remote_updated);
             remote_folder.removed.disconnect(on_remote_removed);
             remote_folder.disconnected.disconnect(on_remote_disconnected);
         }
@@ -1086,6 +1088,15 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
             op.email_count_changed.connect(notify_email_count_changed);
             this.replay_queue.schedule_server_notification(op);
         }
+    }
+
+    private void on_remote_updated(Imap.SequenceNumber position, Imap.FetchedData data) {
+        debug("%s on_remote_updated: remote_count=%d position=%s", to_string(),
+              this.remote_count, position.to_string());
+
+        this.replay_queue.schedule_server_notification(
+            new ReplayUpdate(this, this.remote_count, position, data)
+        );
     }
 
     private void on_remote_removed(Imap.SequenceNumber position, int reported_remote_count) {
