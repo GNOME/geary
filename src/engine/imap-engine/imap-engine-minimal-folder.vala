@@ -1579,7 +1579,9 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         // safely back out.
         if (cancellable != null && cancellable.is_cancelled() && ret != null && remove_folder != null)
             yield remove_folder.remove_email_async(iterate<EmailIdentifier>(ret).to_array_list());
-        
+
+        this._account.update_folder(this);
+
         return ret;
     }
 

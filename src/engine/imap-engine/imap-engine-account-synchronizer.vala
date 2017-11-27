@@ -35,7 +35,6 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
         this.account.information.notify["prefetch-period-days"].connect(on_account_prefetch_changed);
         this.account.folders_available_unavailable.connect(on_folders_available_unavailable);
         this.account.folders_contents_altered.connect(on_folders_contents_altered);
-        this.account.email_sent.connect(on_email_sent);
         this.remote.ready.connect(on_account_ready);
     }
 
@@ -86,17 +85,7 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
     private void on_folders_contents_altered(Gee.Collection<Folder> altered) {
         delayed_send_all(altered, false, SYNC_DELAY_SEC);
     }
-    
-    private void on_email_sent() {
-        try {
-            Folder? sent_mail = account.get_special_folder(SpecialFolderType.SENT);
-            if (sent_mail != null)
-                send_all(iterate<Folder>(sent_mail).to_array_list(), false);
-        } catch (Error err) {
-            debug("Unable to retrieve Sent Mail from %s: %s", account.to_string(), err.message);
-        }
-    }
-    
+
     private void delayed_send_all(Gee.Collection<Folder> folders, bool reason_available, int sec) {
         Timeout.add_seconds(sec, () => {
             // remove any unavailable folders
