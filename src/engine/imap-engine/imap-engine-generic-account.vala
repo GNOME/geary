@@ -8,7 +8,11 @@
 
 private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
 
-    private const int REFRESH_FOLDER_LIST_SEC = 2 * 60;
+    // This is high since it's an expensive operation, and we'll go
+    // looking changes caused by local operations as they happen, so
+    // we don't need to double check.
+    private const int REFRESH_FOLDER_LIST_SEC = 15 * 60;
+
     private const Geary.SpecialFolderType[] SUPPORTED_SPECIAL_FOLDERS = {
         Geary.SpecialFolderType.DRAFTS,
         Geary.SpecialFolderType.SENT,
