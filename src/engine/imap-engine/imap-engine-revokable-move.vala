@@ -14,7 +14,7 @@
  */
 
 private class Geary.ImapEngine.RevokableMove : Revokable {
-    private const int COMMIT_TIMEOUT_SEC = 60;
+    private const int COMMIT_TIMEOUT_SEC = 5;
     
     private GenericAccount account;
     private MinimalFolder source;
