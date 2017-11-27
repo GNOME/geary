@@ -1428,16 +1428,20 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         
         yield mark.wait_for_ready_async(cancellable);
     }
-    
+
     public virtual async void copy_email_async(Gee.List<Geary.EmailIdentifier> to_copy,
-        Geary.FolderPath destination, Cancellable? cancellable = null) throws Error {
+                                               Geary.FolderPath destination,
+                                               Cancellable? cancellable = null)
+        throws Error {
+        Geary.Folder target = yield this._account.fetch_folder_async(destination);
         yield copy_email_uids_async(to_copy, destination, cancellable);
+        this._account.update_folder(target);
     }
-    
+
     /**
      * Returns the destination folder's UIDs for the copied messages.
      */
-    public async Gee.Set<Imap.UID>? copy_email_uids_async(Gee.List<Geary.EmailIdentifier> to_copy,
+    protected async Gee.Set<Imap.UID>? copy_email_uids_async(Gee.List<Geary.EmailIdentifier> to_copy,
         Geary.FolderPath destination, Cancellable? cancellable = null) throws Error {
         check_open("copy_email_uids_async");
         check_ids("copy_email_uids_async", to_copy);
@@ -1471,10 +1475,13 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         
         if (prepare.prepared_for_move == null || prepare.prepared_for_move.size == 0)
             return null;
-        
-        return new RevokableMove(_account, this, destination, prepare.prepared_for_move);
+
+        Geary.Folder target = yield this._account.fetch_folder_async(destination);
+        return new RevokableMove(
+            _account, this, target, prepare.prepared_for_move
+        );
     }
-    
+
     public void schedule_op(ReplayOperation op) throws Error {
         check_open("schedule_op");
         
@@ -1604,7 +1611,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         // We queue an account operation since the folder itself is
         // closed and hence does not have a connection to use for it.
         RefreshFolderUnseen op = new RefreshFolderUnseen(
-            this, this.remote, this.local
+            this, this._account, this.remote, this.local
         );
         try {
             this._account.queue_operation(op);

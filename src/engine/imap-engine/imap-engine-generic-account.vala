@@ -532,7 +532,22 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     }
 
     /**
+     * Fires appropriate signals for a single altered folder.
+     *
+     * This is functionally equivalent to {@link update_folders}.
+     */
+    internal void update_folder(Geary.Folder folder) {
+        Gee.Collection<Geary.Folder> folders =
+            new Gee.LinkedList<Geary.Folder>();
+        folders.add(folder);
+        debug("Contents altered!");
+        notify_folders_contents_altered(folders);
+    }
+
+    /**
      * Fires appropriate signals for folders have been altered.
+     *
+     * This is functionally equivalent to {@link update_folder}.
      */
     internal void update_folders(Gee.Collection<Geary.Folder> folders) {
         if (!folders.is_empty) {
@@ -1051,15 +1066,18 @@ internal class Geary.ImapEngine.UpdateRemoteFolders : AccountOperation {
 internal class Geary.ImapEngine.RefreshFolderUnseen : AccountOperation {
 
 
-    private weak Geary.Folder folder;
+    private weak MinimalFolder folder;
+    private weak GenericAccount account;
     private weak Imap.Account remote;
     private weak ImapDB.Account local;
 
 
-    internal RefreshFolderUnseen(Geary.Folder folder,
+    internal RefreshFolderUnseen(MinimalFolder folder,
+                                 GenericAccount account,
                                  Imap.Account remote,
                                  ImapDB.Account local) {
         this.folder = folder;
+        this.account = account;
         this.remote = remote;
         this.local = local;
     }
@@ -1083,9 +1101,15 @@ internal class Geary.ImapEngine.RefreshFolderUnseen : AccountOperation {
                 cancellable
             );
 
-            yield local.update_folder_status_async(
-                remote_folder, false, true, cancellable
-            );
+            if (remote_folder.properties.have_contents_changed(
+                    this.folder.local_folder.get_properties(),
+                    this.folder.to_string())) {
+                yield local.update_folder_status_async(
+                    remote_folder, false, true, cancellable
+                );
+
+                this.account.update_folder(this.folder);
+            }
         }
     }
 
