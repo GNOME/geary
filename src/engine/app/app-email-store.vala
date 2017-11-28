@@ -181,30 +181,31 @@ public class Geary.App.EmailStore : BaseObject {
             try {
                 debug("EmailStore opening %s for %s on %d emails", folder.to_string(),
                     operation.get_type().name(), ids.size);
-                
+
                 yield folder.open_async(Geary.Folder.OpenFlags.FAST_OPEN, cancellable);
                 open = true;
-                
                 used_ids = yield operation.execute_async(folder, ids, cancellable);
-                
-                yield folder.close_async(cancellable);
-                open = false;
-                
-                debug("EmailStore closed %s after %s on %d emails", folder.to_string(),
-                    operation.get_type().name(), ids.size);
             } catch (Error e) {
                 debug("Error performing an operation on messages in %s: %s", folder.to_string(), e.message);
-                
+            } finally {
                 if (open) {
                     try {
-                        yield folder.close_async(cancellable);
-                        open = false;
+                        // Don't use the cancellable here, if it's been
+                        // opened we need to try to close it.
+                        yield folder.close_async(null);
+                        debug(
+                            "EmailStore closed %s after %s on %d emails",
+                            folder.to_string(),
+                            operation.get_type().name(),
+                            ids.size
+                        );
                     } catch (Error e) {
-                        debug("Error closing folder %s: %s", folder.to_string(), e.message);
+                        debug("Error closing folder %s: %s",
+                              folder.to_string(), e.message);
                     }
                 }
             }
-            
+
             // We don't want to operate on any mails twice.
             if (used_ids != null) {
                 foreach (Geary.EmailIdentifier id in used_ids.to_array()) {
