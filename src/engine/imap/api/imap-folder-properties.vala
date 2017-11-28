@@ -28,7 +28,7 @@
  * When new STATUS information comes in, this object's status_messages, unseen, recent, and attrs
  * fields are updated.
  *
- * When a SELECT/EXAMINE occurs on this folder, this object's select_examine_messages, unseen,
+ * When a SELECT/EXAMINE occurs on this folder, this object's select_examine_messages,
  * recent, uid_validity, and uid_next are updated.
  *
  * Over time, this object accumulates information depending on what operation was last
