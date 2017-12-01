@@ -7,10 +7,16 @@
  */
 
 /**
- * See [[http://tools.ietf.org/html/rfc3501#section-6.3.3]]
+ * The IMAP CREATE command.
+ *
+ * This command also supports the RFC 6154 Special-Use CREATE
+ * extension.
+ *
+ * See [[http://tools.ietf.org/html/rfc3501#section-6.3.3]] and
+ * [[https://tools.ietf.org/html/rfc6154#section-3]]
  */
-
 public class Geary.Imap.CreateCommand : Command {
+
     public const string NAME = "create";
     public const string USE = "use";
 
