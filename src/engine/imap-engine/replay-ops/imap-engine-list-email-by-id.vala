@@ -57,7 +57,14 @@ private class Geary.ImapEngine.ListEmailByID : Geary.ImapEngine.AbstractListEmai
                     add_unfulfilled_fields(uid, required_fields.clear(email.fields));
             }
         }
-        
+
+        if (this.flags.is_including_id() && this.initial_uid == null) {
+            throw new EngineError.NOT_FOUND(
+                "Initial id not found in local set: %s",
+                this.initial_id.to_string()
+            );
+        }
+
         // report fulfilled items
         fulfilled_count = fulfilled.size;
         if (fulfilled_count > 0)
