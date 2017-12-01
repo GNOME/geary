@@ -352,6 +352,10 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
                 }
             }
         }
+        Logging.debug(
+            Logging.Flag.PERIODIC, "Background sync of %s completed",
+            folder.to_string()
+        );
     }
 
     private async void sync_folder_async(MinimalFolder folder,
