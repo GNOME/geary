@@ -211,7 +211,7 @@ public class Geary.RFC822.Message : BaseObject {
                     string cid = "";
                     do {
                         cid = CID_TEMPLATE.printf(cid_index++);
-                    } while (cid in email.cid_files);
+                    } while (email.cid_files.has_key(cid));
 
                     if (email.replace_inline_img_src(name,
                                                      CID_URL_PREFIX + cid)) {
