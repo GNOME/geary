@@ -400,8 +400,21 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
                         remote_count
                     );
 
-                    yield folder.list_email_by_id_async(null, 1, Geary.Email.Field.NONE,
-                        Geary.Folder.ListFlags.OLDEST_TO_NEWEST, cancellable);
+                    // Per the contract for list_email_by_id_async, we
+                    // need to specify int.MAX count and ensure that
+                    // ListFlags.OLDEST_TO_NEWEST is *not* specified
+                    // to get all messages listed.
+                    //
+                    // XXX This is expensive, but should only usually
+                    // happen once per folder - at the end of a full
+                    // sync.
+                    yield folder.list_email_by_id_async(
+                        null,
+                        int.MAX,
+                        Geary.Email.Field.NONE,
+                        Geary.Folder.ListFlags.NONE,
+                        cancellable
+                    );
                 } else {
                     // don't go past proscribed epoch
                     if (current_epoch.compare(epoch) < 0)
