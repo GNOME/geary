@@ -269,69 +269,69 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
                                             Cancellable cancellable)
         throws Error {
         Logging.debug(
-            Logging.Flag.PERIODIC, "Background sync'ing %s", folder.to_string()
+            Logging.Flag.PERIODIC,
+            "Background sync'ing %s to %s",
+            folder.to_string(),
+            epoch.to_string()
         );
 
-        // get oldest local email and its time, as well as number of messages in local store
+        // If we aren't checking the folder because it became
+        // available, then it has changed and we need to check it.
+        // Otherwise compare the oldest mail in the local store and
+        // see if it is before the epoch; if so, no need to
+        // synchronize simply because this Folder is available; wait
+        // for its contents to change instead.
+        //
+        // Note we can't compare the local and remote folder counts
+        // here, since the folder may not have opened yet to determine
+        // what the actual remote count is, which is particularly
+        // problematic when an existing folder is seen for the first
+        // time, e.g. when the account was just added.
+
         DateTime? oldest_local = null;
         Geary.EmailIdentifier? oldest_local_id = null;
-        int local_count = 0;
-        Gee.List<Geary.Email>? list = yield folder.local_folder.list_email_by_id_async(
-            null,
-            1,
-            Email.Field.PROPERTIES,
-            ImapDB.Folder.ListFlags.NONE | ImapDB.Folder.ListFlags.OLDEST_TO_NEWEST,
-            cancellable
-        );
-        if (list != null && list.size > 0) {
-            oldest_local = list[0].properties.date_received;
-            oldest_local_id = list[0].id;
-        }
-        local_count = yield folder.local_folder.get_email_count_async(
-            ImapDB.Folder.ListFlags.NONE,
-            cancellable
-        );
-
         bool do_sync = true;
-        if (availability_check) {
-            // Compare the oldest mail in the local store and see if it is before the epoch; if so, no
-            // need to synchronize simply because this Folder is available; wait for its contents to
-            // change instead
-            if (oldest_local != null) {
-                if (oldest_local.compare(epoch) < 0) {
-                    // Oldest local email before epoch, don't sync from network
-                    do_sync = false;
-                } else if (folder.properties.email_total == local_count) {
-                    // Local earliest email is after epoch, but there's nothing before it
-                    do_sync = false;
-                } else {
-                    Logging.debug(
-                        Logging.Flag.PERIODIC,
-                        "Oldest local email in %s not old enough (%s vs. %s), email_total=%d vs. local_count=%d, synchronizing...",
-                        folder.to_string(),
-                        oldest_local.to_string(),
-                        epoch.to_string(),
-                        folder.properties.email_total,
-                        local_count
-                    );
-                }
-            } else if (folder.properties.email_total == 0) {
-                // no local messages, no remote messages -- this is as good as having everything up
-                // to the epoch
-                do_sync = false;
-            } else {
-                Logging.debug(
-                    Logging.Flag.PERIODIC,
-                    "No oldest message found for %s, synchronizing...",
-                    folder.to_string()
-                );
-            }
-        } else {
+
+        if (!availability_check) {
+            // Folder already available, so it must have changed
             Logging.debug(
                 Logging.Flag.PERIODIC,
                 "Folder %s changed, synchronizing...",
                 folder.to_string()
             );
+        } else {
+            // get oldest local email and its time, as well as number
+            // of messages in local store
+            Gee.List<Geary.Email>? list =yield folder.local_folder.list_email_by_id_async(
+                null,
+                1,
+                Email.Field.PROPERTIES,
+                ImapDB.Folder.ListFlags.NONE | ImapDB.Folder.ListFlags.OLDEST_TO_NEWEST,
+                cancellable
+            );
+            if (list != null && list.size > 0) {
+                oldest_local = list[0].properties.date_received;
+                oldest_local_id = list[0].id;
+            }
+
+            if (oldest_local == null) {
+                // No oldest message found, so we haven't seen the folder
+                // before or it has no messages. Either way we need to
+                // open it to check, so sync it.
+                Logging.debug(
+                    Logging.Flag.PERIODIC,
+                    "No oldest message found for %s, synchronizing...",
+                    folder.to_string()
+                );
+            } else if (oldest_local.compare(epoch) < 0) {
+                // Oldest local email before epoch, don't sync from network
+                do_sync = false;
+                Logging.debug(
+                    Logging.Flag.PERIODIC,
+                    "Oldest local message is older than the epoch for %s",
+                    folder.to_string()
+                );
+            }
         }
 
         if (do_sync) {
@@ -375,11 +375,14 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
                 // no need to keep searching once this happens
                 int local_count = yield folder.local_folder.get_email_count_async(ImapDB.Folder.ListFlags.NONE,
                     cancellable);
-                if (local_count >= folder.properties.email_total) {
+                int remote_count = folder.properties.email_total;
+                if (local_count >= remote_count) {
                     Logging.debug(
                         Logging.Flag.PERIODIC,
-                        "Total vector normalization for %s: %d/%d emails", folder.to_string(), local_count,
-                        folder.properties.email_total
+                        "Final vector normalization for %s: %d/%d emails",
+                        folder.to_string(),
+                        local_count,
+                        remote_count
                     );
                     break;
                 }
@@ -394,7 +397,7 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
                         max_epoch.to_string(),
                         folder.to_string(),
                         local_count,
-                        folder.properties.email_total
+                        remote_count
                     );
 
                     yield folder.list_email_by_id_async(null, 1, Geary.Email.Field.NONE,
@@ -410,7 +413,7 @@ private class Geary.ImapEngine.AccountSynchronizer : Geary.BaseObject {
                         folder.to_string(),
                         current_epoch.to_string(),
                         local_count,
-                        folder.properties.email_total
+                        remote_count
                     );
                     Geary.EmailIdentifier? earliest_span_id = yield folder.find_earliest_email_async(current_epoch,
                         oldest_local_id, cancellable);
