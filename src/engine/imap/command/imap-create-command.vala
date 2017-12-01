@@ -15,7 +15,10 @@ public class Geary.Imap.CreateCommand : Command {
     public const string USE = "use";
 
     public MailboxSpecifier mailbox { get; private set; }
-    public Geary.SpecialFolderType? use { get; private set; default = null; }
+
+    public Geary.SpecialFolderType use {
+        get; private set; default = Geary.SpecialFolderType.NONE;
+    }
 
 
     private static MailboxAttribute? get_special_folder_type(Geary.SpecialFolderType type) {
@@ -52,8 +55,10 @@ public class Geary.Imap.CreateCommand : Command {
         add(mailbox.to_parameter());
     }
 
-    public CreateCommand.special_use(MailboxSpecifier mailbox, Geary.SpecialFolderType use) {
+    public CreateCommand.special_use(MailboxSpecifier mailbox,
+                                     Geary.SpecialFolderType use) {
         this(mailbox);
+        this.use = use;
 
         MailboxAttribute? attr = get_special_folder_type(use);
         if (attr != null) {
