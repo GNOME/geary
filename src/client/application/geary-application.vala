@@ -342,9 +342,8 @@ public class GearyApplication : Gtk.Application {
      * Displays a URI on the current active window, if any.
      */
     public void show_uri(string uri) throws Error {
-        Gtk.Window? window = get_active_window();
-        bool success = Gtk.show_uri(
-            window != null ? window.get_screen() : null, uri, Gdk.CURRENT_TIME
+        bool success = Gtk.show_uri_on_window(
+            get_active_window(), uri, Gdk.CURRENT_TIME
         );
         if (!success) {
             throw new IOError.FAILED("gtk_show_uri() returned false");
