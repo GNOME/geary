@@ -66,21 +66,21 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             return result;
         }
     }
-    
+
     private class LocationIdentifier {
         public int64 message_id;
         public Imap.UID uid;
         public ImapDB.EmailIdentifier email_id;
         public bool marked_removed;
-        
+
         public LocationIdentifier(int64 message_id, Imap.UID uid, bool marked_removed) {
             this.message_id = message_id;
             this.uid = uid;
-            email_id = new ImapDB.EmailIdentifier(message_id, uid);
+            this.email_id = new ImapDB.EmailIdentifier(message_id, uid);
             this.marked_removed = marked_removed;
         }
     }
-    
+
     protected int manual_ref_count { get; protected set; }
     
     private ImapDB.Database db;
@@ -1194,52 +1194,45 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             stmt.reset(Db.ResetScope.SAVE_BINDINGS);
         }
     }
-    
-    // Returns message_id if duplicate found, associated set to true if message is already associated
-    // with this folder.  Only call this on emails that came from the IMAP Folder.
-    private LocationIdentifier? do_search_for_duplicates(Db.Connection cx, Geary.Email email,
-        out bool associated, Cancellable? cancellable) throws Error {
-        associated = false;
-        
-        ImapDB.EmailIdentifier email_id = (ImapDB.EmailIdentifier) email.id;
-        
-        // This should only ever get invoked for messages that came from the
-        // IMAP layer, which don't have a message id, but should have a UID.
-        assert(email_id.message_id == Db.INVALID_ROWID);
-        
-        LocationIdentifier? location = null;
-        // See if it already exists; first by UID (which is only guaranteed to
-        // be unique in a folder, not account-wide)
-        if (email_id.uid != null)
-            location = do_get_location_for_uid(cx, email_id.uid, ListFlags.INCLUDE_MARKED_FOR_REMOVE,
-                cancellable);
-        
-        if (location != null) {
-            associated = true;
-            
-            return location;
-        }
-        
+
+    /**
+     * Returns the id of any existing message matching the given.
+     *
+     * Searches for an existing message that matches `email`, based on
+     * its message attributes. Currently, since ImapDB only requests
+     * the IMAP internal date and RFC822 message size, these are the
+     * only attributes used.
+     *
+     * The unique, internal message ID of the first matching message
+     * is returned, else `-1` if no matching message was found.
+     *
+     * This should only be called on messages obtained via the IMAP
+     * stack.
+     */
+    private int64 do_search_for_duplicates(Db.Connection cx,
+                                           Geary.Email email,
+                                           ImapDB.EmailIdentifier email_id,
+                                           Cancellable? cancellable)
+        throws Error {
+        int64 id = -1;
         // if fields not present, then no duplicate can reliably be found
         if (!email.fields.is_all_set(REQUIRED_FIELDS)) {
             debug("Unable to detect duplicates for %s (%s available)", email.id.to_string(),
                 email.fields.to_list_string());
-            
-            return null;
+            return id;
         }
-        
+
         // what's more, actually need all those fields to be available, not merely attempted,
         // to err on the side of safety
         Imap.EmailProperties? imap_properties = (Imap.EmailProperties) email.properties;
         string? internaldate = (imap_properties != null && imap_properties.internaldate != null)
             ? imap_properties.internaldate.serialize() : null;
         int64 rfc822_size = (imap_properties != null) ? imap_properties.rfc822_size.value : -1;
-        
+
         if (String.is_empty(internaldate) || rfc822_size < 0) {
             debug("Unable to detect duplicates for %s (%s available but invalid)", email.id.to_string(),
                 email.fields.to_list_string());
-            
-            return null;
+            return id;
         }
 
         // look for duplicate in IMAP message properties
@@ -1255,49 +1248,32 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             stmt.bind_string(2, email.message_id.to_string());
 
         Db.Result results = stmt.exec(cancellable);
-        // no duplicates found
-        if (results.finished)
-            return null;
-        
-        int64 message_id = results.rowid_at(0);
-        if (results.next(cancellable)) {
-            debug("Warning: multiple messages with the same internaldate (%s) and size (%s) in %s",
-                internaldate, rfc822_size.to_string(), to_string());
+        if (!results.finished) {
+            id = results.int64_at(0);
         }
-        
-        Db.Statement search_stmt = cx.prepare(
-            "SELECT ordering, remove_marker FROM MessageLocationTable WHERE message_id=? AND folder_id=?");
-        search_stmt.bind_rowid(0, message_id);
-        search_stmt.bind_rowid(1, folder_id);
-        
-        Db.Result search_results = search_stmt.exec(cancellable);
-        if (!search_results.finished) {
-            associated = true;
-            location = new LocationIdentifier(message_id, new Imap.UID(search_results.int64_at(0)),
-                search_results.bool_at(1));
-        } else {
-            assert(email_id.uid != null);
-            location = new LocationIdentifier(message_id, email_id.uid, false);
-        }
-        
-        return location;
+        return id;
     }
-    
-    // Note: does NOT check if message is already associated with thie folder
-    private void do_associate_with_folder(Db.Connection cx, int64 message_id, Imap.UID uid,
-        Cancellable? cancellable) throws Error {
-        assert(message_id != Db.INVALID_ROWID);
-        
-        // insert email at supplied position
+
+    /**
+     * Adds a message to the folder.
+     *
+     * Note: does NOT check if message is already associated with thie
+     * folder.
+     */
+    private void do_associate_with_folder(Db.Connection cx,
+                                          int64 message_id,
+                                          Imap.UID uid,
+                                          Cancellable? cancellable)
+        throws Error {
         Db.Statement stmt = cx.prepare(
             "INSERT INTO MessageLocationTable (message_id, folder_id, ordering) VALUES (?, ?, ?)");
         stmt.bind_rowid(0, message_id);
-        stmt.bind_rowid(1, folder_id);
+        stmt.bind_rowid(1, this.folder_id);
         stmt.bind_int64(2, uid.value);
-        
+
         stmt.exec(cancellable);
     }
-    
+
     private void do_remove_association_with_folder(Db.Connection cx, LocationIdentifier location,
         Cancellable? cancellable) throws Error {
         Db.Statement stmt = cx.prepare(
@@ -1307,112 +1283,143 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         
         stmt.exec(cancellable);
     }
-    
+
+    /**
+     * Adds a single message to the folder, creating or merging it.
+     *
+     * This creates the message and appends it to the folder if the
+     * message does not already exist, else appends and merges if the
+     * message exists but not in the given position in this folder,
+     * else it exists in the given position, so simply merges it.
+     *
+     * Returns `true` if created, else was merged and returns `false`.
+     */
     private bool do_create_or_merge_email(Db.Connection cx, Geary.Email email,
         out Geary.Email.Field pre_fields, out Geary.Email.Field post_fields,
         out Gee.Collection<Contact> updated_contacts, ref int unread_count_change,
         Cancellable? cancellable) throws Error {
-        // see if message already present in current folder, if not, search for duplicate throughout
-        // mailbox
-        bool associated;
-        LocationIdentifier? location = do_search_for_duplicates(cx, email, out associated, cancellable);
-        
-        // if found, merge, and associate if necessary
+
+        // This should only ever get invoked for messages that came
+        // from the IMAP layer, which should not have a message id,
+        // but should have a UID.
+        ImapDB.EmailIdentifier? email_id = email.id as ImapDB.EmailIdentifier;
+        if (email_id == null ||
+            email_id.message_id != Db.INVALID_ROWID ||
+            email_id.uid == null) {
+            throw new EngineError.INCOMPLETE_MESSAGE(
+                "IMAP message with UID required"
+            );
+        }
+
+        int64 message_id = -1;
+        bool is_associated = false;
+
+        // First, look for the same message at the same location
+        LocationIdentifier? location = do_get_location_for_uid(
+            cx,
+            email_id.uid,
+            ListFlags.INCLUDE_MARKED_FOR_REMOVE,
+            cancellable
+        );
         if (location != null) {
-            if (!associated)
-                do_associate_with_folder(cx, location.message_id, location.uid, cancellable);
-            
-            // If the email came from the Imap layer, we need to fill in the id.
-            ImapDB.EmailIdentifier email_id = (ImapDB.EmailIdentifier) email.id;
-            if (email_id.message_id == Db.INVALID_ROWID)
-                email_id.promote_with_message_id(location.message_id);
-            
-            // special-case updating flags, which happens often and should only write to the DB
-            // if necessary
+            // Already at the specified location, so no need to create
+            // or associate with this folder — just merge it
+            message_id = location.message_id;
+            is_associated = true;
+        } else {
+            // Not already at the specified location, so look for the
+            // same message in other locations or other folders
+            message_id = do_search_for_duplicates(
+                cx, email, email_id, cancellable
+            );
+            if (message_id >= 0) {
+                location = new LocationIdentifier(
+                    message_id, email_id.uid, false
+                );
+            }
+        }
+
+        bool was_created = false;
+        if (location != null) {
+            // Found the same or a duplicate message, so merge it. We
+            // special-case flag-only updates, which happens often and
+            // will only write to the DB if necessary.
             if (email.fields != Geary.Email.Field.FLAGS) {
                 do_merge_email(cx, location, email, out pre_fields, out post_fields,
                     out updated_contacts, ref unread_count_change, cancellable);
-                
+
                 // Already associated with folder and flags were known.
-                if (associated && pre_fields.is_all_set(Geary.Email.Field.FLAGS))
+                if (is_associated && pre_fields.is_all_set(Geary.Email.Field.FLAGS))
                     unread_count_change = 0;
             } else {
                 do_merge_email_flags(cx, location, email, out pre_fields, out post_fields,
                     out updated_contacts, ref unread_count_change, cancellable);
             }
-            
-            // return false to indicate a merge
-            return false;
+        } else {
+            // Message was not found, so create a new message for it
+            was_created = true;
+            MessageRow row = new MessageRow.from_email(email);
+            pre_fields = Geary.Email.Field.NONE;
+            post_fields = email.fields;
+
+            Db.Statement stmt = cx.prepare(
+                "INSERT INTO MessageTable "
+                + "(fields, date_field, date_time_t, from_field, sender, reply_to, to_field, cc, bcc, "
+                + "message_id, in_reply_to, reference_ids, subject, header, body, preview, flags, "
+                + "internaldate, internaldate_time_t, rfc822_size) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            stmt.bind_int(0, row.fields);
+            stmt.bind_string(1, row.date);
+            stmt.bind_int64(2, row.date_time_t);
+            stmt.bind_string(3, row.from);
+            stmt.bind_string(4, row.sender);
+            stmt.bind_string(5, row.reply_to);
+            stmt.bind_string(6, row.to);
+            stmt.bind_string(7, row.cc);
+            stmt.bind_string(8, row.bcc);
+            stmt.bind_string(9, row.message_id);
+            stmt.bind_string(10, row.in_reply_to);
+            stmt.bind_string(11, row.references);
+            stmt.bind_string(12, row.subject);
+            stmt.bind_string_buffer(13, row.header);
+            stmt.bind_string_buffer(14, row.body);
+            stmt.bind_string(15, row.preview);
+            stmt.bind_string(16, row.email_flags);
+            stmt.bind_string(17, row.internaldate);
+            stmt.bind_int64(18, row.internaldate_time_t);
+            stmt.bind_int64(19, row.rfc822_size);
+
+            message_id = stmt.exec_insert(cancellable);
+
+            // write out attachments, if any
+            // TODO: Because this involves saving files, it potentially means holding up access to the
+            // database while they're being written; may want to do this outside of transaction.
+            if (email.fields.fulfills(Attachment.REQUIRED_FIELDS))
+                do_save_attachments(cx, message_id, email.get_message().get_attachments(), cancellable);
+
+            do_add_email_to_search_table(cx, message_id, email, cancellable);
+
+            MessageAddresses message_addresses =
+                new MessageAddresses.from_email(account_owner_email, email);
+            foreach (Contact contact in message_addresses.contacts)
+                do_update_contact(cx, contact, cancellable);
+            updated_contacts = message_addresses.contacts;
+
+            // Update unread count if our new email is unread.
+            if (email.email_flags != null && email.email_flags.is_unread())
+                unread_count_change++;
         }
-        
-        // not found, so create and associate with this folder
-        MessageRow row = new MessageRow.from_email(email);
-        
-        ImapDB.EmailIdentifier email_id = (ImapDB.EmailIdentifier) email.id;
-        
-        // the create case *requires* a UID be present (originating from Imap.Folder)
-        Imap.UID? uid = email_id.uid;
-        assert(uid != null);
-        
-        pre_fields = Geary.Email.Field.NONE;
-        post_fields = email.fields;
-        
-        Db.Statement stmt = cx.prepare(
-            "INSERT INTO MessageTable "
-            + "(fields, date_field, date_time_t, from_field, sender, reply_to, to_field, cc, bcc, "
-            + "message_id, in_reply_to, reference_ids, subject, header, body, preview, flags, "
-            + "internaldate, internaldate_time_t, rfc822_size) "
-            + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        stmt.bind_int(0, row.fields);
-        stmt.bind_string(1, row.date);
-        stmt.bind_int64(2, row.date_time_t);
-        stmt.bind_string(3, row.from);
-        stmt.bind_string(4, row.sender);
-        stmt.bind_string(5, row.reply_to);
-        stmt.bind_string(6, row.to);
-        stmt.bind_string(7, row.cc);
-        stmt.bind_string(8, row.bcc);
-        stmt.bind_string(9, row.message_id);
-        stmt.bind_string(10, row.in_reply_to);
-        stmt.bind_string(11, row.references);
-        stmt.bind_string(12, row.subject);
-        stmt.bind_string_buffer(13, row.header);
-        stmt.bind_string_buffer(14, row.body);
-        stmt.bind_string(15, row.preview);
-        stmt.bind_string(16, row.email_flags);
-        stmt.bind_string(17, row.internaldate);
-        stmt.bind_int64(18, row.internaldate_time_t);
-        stmt.bind_int64(19, row.rfc822_size);
-        
-        int64 message_id = stmt.exec_insert(cancellable);
-        
-        // Make sure the id is filled in even if it came from the Imap layer.
-        if (email_id.message_id == Db.INVALID_ROWID)
-            email_id.promote_with_message_id(message_id);
-        
-        do_associate_with_folder(cx, message_id, uid, cancellable);
-        
-        // write out attachments, if any
-        // TODO: Because this involves saving files, it potentially means holding up access to the
-        // database while they're being written; may want to do this outside of transaction.
-        if (email.fields.fulfills(Attachment.REQUIRED_FIELDS))
-            do_save_attachments(cx, message_id, email.get_message().get_attachments(), cancellable);
-        
-        do_add_email_to_search_table(cx, message_id, email, cancellable);
-        
-        MessageAddresses message_addresses =
-            new MessageAddresses.from_email(account_owner_email, email);
-        foreach (Contact contact in message_addresses.contacts)
-            do_update_contact(cx, contact, cancellable);
-        updated_contacts = message_addresses.contacts;
-        
-        // Update unread count if our new email is unread.
-        if (email.email_flags != null && email.email_flags.is_unread())
-            unread_count_change++;
-        
-        return true;
+
+        // Finally, update the email's message id and add it to the
+        // folder, if needed
+        email_id.promote_with_message_id(message_id);
+        if (!is_associated) {
+            do_associate_with_folder(cx, message_id, email_id.uid, cancellable);
+        }
+
+        return was_created;
     }
-    
+
     internal static void do_add_email_to_search_table(Db.Connection cx, int64 message_id,
         Geary.Email email, Cancellable? cancellable) throws Error {
         string? body = null;

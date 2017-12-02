@@ -4,6 +4,9 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
+/**
+ * A base class for building replay operations that list messages.
+ */
 private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.SendReplayOperation {
     private static int total_fetches_avoided = 0;
     
@@ -187,7 +190,10 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
         
         return ReplayOperation.Status.COMPLETED;
     }
-    
+
+    /**
+     * Determines if the owning folder's vector is fully expanded.
+     */
     protected async Trillian is_fully_expanded_async() throws Error {
         int remote_count;
         owner.get_remote_counts(out remote_count, null);
@@ -204,16 +210,29 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
         
         return Trillian.from_boolean(local_count_with_marked >= remote_count);
     }
-    
-    // Adds everything in the expansion to the unfulfilled set with ImapDB's field requirements ...
-    // UIDs are returned if anything else needs to be added to them
+
+    /**
+     * Expands the owning folder's vector.
+     *
+     * Lists on the remote messages needed to fulfill ImapDB's
+     * requirements from `initial_uid` (inclusive) forward to the
+     * start of the vector if the OLDEST_TO_NEWEST flag is set, else
+     * from `initial_uid` (inclusive) back at most by `count` number
+     * of messages. If `initial_uid` is null, the start or end of the
+     * remote is used, respectively.
+     *
+     * The returned UIDs are those added to the vector, which can then
+     * be examined and added to the messages to be fulfilled if
+     * needed.
+     */
     protected async Gee.Set<Imap.UID>? expand_vector_async(Imap.UID? initial_uid, int count) throws Error {
+        debug("%s: expanding vector...", owner.to_string());
         // watch out for situations where the entire folder is represented locally (i.e. no
         // expansion necessary)
         int remote_count = owner.get_remote_counts(null, null);
-        if (remote_count < 0)
+        if (remote_count <= 0)
             return null;
-        
+
         // include marked for removed in the count in case this is being called while a removal
         // is in process, in which case don't want to expand vector this moment because the
         // vector is in flux
@@ -223,74 +242,62 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
         // watch out for attempts to expand vector when it's expanded as far as it will go
         if (local_count >= remote_count)
             return null;
-        
-        // determine low and high position for expansion ... default in most code paths for high
-        // is the SequenceNumber just below the lowest known message, unless no local messages
-        // are present
-        Imap.SequenceNumber? low_pos = null;
-        Imap.SequenceNumber? high_pos = null;
-        if (local_count > 0)
-            high_pos = new Imap.SequenceNumber(Numeric.int_floor(remote_count - local_count, 1));
-        
-        if (flags.is_oldest_to_newest()) {
-            if (initial_uid == null) {
-                // if oldest to newest and initial-id is null, then start at the bottom
-                low_pos = new Imap.SequenceNumber(Imap.SequenceNumber.MIN);
-            } else {
-                Gee.Map<Imap.UID, Imap.SequenceNumber>? map = yield owner.remote_folder.uid_to_position_async(
-                    new Imap.MessageSet.uid(initial_uid), cancellable);
-                if (map == null || map.size == 0 || !map.has_key(initial_uid)) {
-                    debug("%s: Unable to expand vector for initial_uid=%s: unable to convert to position",
-                        to_string(), initial_uid.to_string());
-                    
-                    return null;
-                }
-                
-                low_pos = map.get(initial_uid);
-            }
-        } else {
-            // newest to oldest
-            //
-            // if initial_id is null or no local earliest UID, then vector expansion is simple:
-            // merely count backwards from the top of the locally available vector
-            if (initial_uid == null || local_count == 0) {
-                low_pos = new Imap.SequenceNumber(Numeric.int_floor((remote_count - local_count) - count, 1));
-                
-                // don't set high_pos, leave null to use symbolic "highest" in MessageSet
-                high_pos = null;
-            } else {
-                // not so simple; need to determine the *remote* position of the earliest local
-                // UID and count backward from that; if no UIDs present, then it's as if no initial_id
-                // is specified.
-                //
-                // low position: count backwards; note that it's possible this will overshoot and
-                // pull in more email than technically required, but without a round-trip to the
-                // server to determine the position number of a particular UID, this makes sense
-                assert(high_pos != null);
-                low_pos = new Imap.SequenceNumber(
-                    Numeric.int64_floor((high_pos.value - count) + 1, 1));
+
+        // Determine low and high position for expansion. The vector
+        // start position is based on the assumption that the vector
+        // end is the same as the remote end.
+        int64 vector_start = (remote_count - local_count + 1);
+        int64 low_pos = -1;
+        int64 high_pos = -1;
+        int64 initial_pos = -1;
+
+        if (initial_uid != null) {
+            Gee.Map<Imap.UID, Imap.SequenceNumber>? map =
+            yield owner.remote_folder.uid_to_position_async(
+                new Imap.MessageSet.uid(initial_uid), cancellable
+            );
+            Imap.SequenceNumber? pos = map.get(initial_uid);
+            if (pos != null) {
+                initial_pos = pos.value;
             }
         }
-        
-        // low_pos must be defined by this point
-        assert(low_pos != null);
-        
-        if (high_pos != null && low_pos.value > high_pos.value) {
-            debug("%s: Aborting vector expansion, low_pos=%s > high_pos=%s", owner.to_string(),
-                low_pos.to_string(), high_pos.to_string());
-            
+
+        // Determine low and high position for expansion
+        if (flags.is_oldest_to_newest()) {
+            low_pos = Imap.SequenceNumber.MIN;
+            if (initial_pos > Imap.SequenceNumber.MIN) {
+                low_pos = initial_pos;
+            }
+            high_pos = vector_start - 1;
+        } else {
+            // Newest to oldest.
+            if (initial_pos <= Imap.SequenceNumber.MIN) {
+                high_pos = remote_count;
+                low_pos = Numeric.int64_floor(
+                    high_pos - count + 1, Imap.SequenceNumber.MIN
+                );
+            } else {
+                high_pos = Numeric.int64_floor(
+                    initial_pos, vector_start - 1
+                );
+                low_pos = Numeric.int64_floor(
+                    initial_pos - (count - 1), Imap.SequenceNumber.MIN
+                );
+            }
+        }
+
+        if (low_pos > high_pos) {
+            debug("%s: Aborting vector expansion, low_pos=%s > high_pos=%s",
+                  owner.to_string(), low_pos.to_string(), high_pos.to_string());
             return null;
         }
-        
-        Imap.MessageSet msg_set;
-        int64 actual_count = -1;
-        if (high_pos != null) {
-            msg_set = new Imap.MessageSet.range_by_first_last(low_pos, high_pos);
-            actual_count = (high_pos.value - low_pos.value) + 1;
-        } else {
-            msg_set = new Imap.MessageSet.range_to_highest(low_pos);
-        }
-        
+
+        Imap.MessageSet msg_set = new Imap.MessageSet.range_by_first_last(
+            new Imap.SequenceNumber(low_pos),
+            new Imap.SequenceNumber(high_pos)
+        );
+        int64 actual_count = (high_pos - low_pos) + 1;
+
         debug("%s: Performing vector expansion using %s for initial_uid=%s count=%d actual_count=%s local_count=%d remote_count=%d oldest_to_newest=%s",
             owner.to_string(), msg_set.to_string(),
             (initial_uid != null) ? initial_uid.to_string() : "(null)", count, actual_count.to_string(),

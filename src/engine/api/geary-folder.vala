@@ -5,25 +5,55 @@
  */
 
 /**
- * Folder represents the basic unit of organization for email.
+ * A Folder represents the basic unit of organization for email.
  *
- * Each {@link Account} offers a hierarcichal listing of Folders.  Folders must be opened (with
- * {@link open_async} before using most of its methods and should be closed with
- * {@link close_async} when completed, even if a method has failed with an IOError.
+ * Folders may contain a set of messages, either stored purely locally
+ * (for example, in the case of an ''outbox'' for mail queued for
+ * sending), or as a representation of those found in a mailbox on a
+ * remote mail server, such as those provided by an IMAP server. For
+ * folders that represent a remote mailbox, messages are cached
+ * locally, and the set of cached messages may be a subset of those
+ * available in the mailbox, depending on an account's settings. Note
+ * that some folders may not be able to contain any messages, and may
+ * exist purely to construct a hierarchy.
  *
- * Folder offers various open states indicating when its "local" (disk or database) connection and
- * "remote" (network) connections are ready.  Generally the local connection opens first and the
- * remote connection takes time to establish.  When in this state, Folder's methods still operate,
- * but will only return locally stored information.
+ * The set of locally stored messages is called the folder's
+ * ''vector'', and contains generally the most recent message in the
+ * mailbox at the upper end, back through to some older message at the
+ * start or lower end of the vector. Thus the ordering of the vector
+ * is the ''natural'' ordering, based on the order in which messages
+ * were appended to the folder, not when messages were sent or some
+ * other criteria. For remote-backed folders, the engine will maintain
+ * the vector in accordance with the value of {@link
+ * AccountInformation.prefetch-period-days}, however the start of the
+ * vector will be extended back past that over time and in response to
+ * certain operations that cause the vector to be ''expanded'' ---
+ * that is for additional messages to be loaded from the remote
+ * server, extending the vector. The upper end of the vector is
+ * similarly extended as new messages are appended to the folder by
+ * another on the server or in response to user operations such as
+ * moving a message.
  *
- * Folder only offers a small selection of guaranteed functionality (in particular, the ability
- * to list its {@link Email}).  Additional functionality for Folders is indicated by the presence
- * of {@link FolderSupport} interfaces, include {@link FolderSupport.Remove},
- * {@link FolderSupport.Copy}, and so forth.
+ * Each {@link Account} offers a hierarchical listing of Folders.
+ * Folders must be opened (with {@link open_async} before using most
+ * of its methods and should be closed with {@link close_async} when
+ * completed, even if a method has failed with an IOError.
+ *
+ * Folders offer various open states indicating when its "local" (disk
+ * or database) connection and "remote" (network) connections are
+ * ready.  Generally the local connection opens first and the remote
+ * connection takes time to establish.  When in this state, Folder's
+ * methods still operate, but will only return locally stored
+ * information.
+ *
+ * This class only offers a small selection of guaranteed
+ * functionality (in particular, the ability to list its {@link
+ * Email}).  Additional functionality for Folders is indicated by the
+ * presence of {@link FolderSupport} interfaces, include {@link
+ * FolderSupport.Remove}, {@link FolderSupport.Copy}, and so forth.
  *
  * @see Geary.SpecialFolderType
  */
-
 public abstract class Geary.Folder : BaseObject {
     public enum OpenState {
         CLOSED,
@@ -475,26 +505,49 @@ public abstract class Geary.Folder : BaseObject {
     public abstract async void find_boundaries_async(Gee.Collection<Geary.EmailIdentifier> ids,
         out Geary.EmailIdentifier? low, out Geary.EmailIdentifier? high,
         Cancellable? cancellable = null) throws Error;
-    
+
     /**
-     * List emails from the {@link Folder} starting at a particular location within the vector
-     * and moving either direction along the mail stack.
+     * List a number of contiguous emails in the folder's vector.
      *
-     * If the {@link EmailIdentifier} is null, it indicates the end of the vector.  Which end
-     * depends on the {@link ListFlags.OLDEST_TO_NEWEST} flag.  Without, the default is to traverse
-     * from newest to oldest, with null being the newest email.  If set, the direction is reversed
-     * and null indicates the oldest email.
+     * Emails in the folder are listed starting at a particular
+     * location within the vector and moving either direction along
+     * it. For remote-backed folders, the remote server is contacted
+     * if any messages stored locally do not meet the requirements
+     * given by `required_fields`, or if `count` extends back past the
+     * low end of the vector.
      *
-     * If not null, the EmailIdentifier ''must'' have originated from this Folder.
+     * If the {@link EmailIdentifier} is null, it indicates the end of
+     * the vector, not the end of the remote.  Which end depends on
+     * the {@link ListFlags.OLDEST_TO_NEWEST} flag.  If not set, the
+     * default is to traverse from newest to oldest, with null being
+     * the newest email in the vector. If set, the direction is
+     * reversed and null indicates the oldest email in the vector, not
+     * the oldest in the mailbox.
      *
-     * To fetch all available messages in one call, use a count of int.MAX.
+     * If not null, the EmailIdentifier ''must'' have originated from
+     * this Folder.
      *
-     * Use {@link ListFlags.INCLUDING_ID} to include the {@link Email} for the particular identifier
-     * in the results.  Otherwise, the specified email will not be included.  A null
-     * EmailIdentifier implies that the top most email is included in the result (i.e.
+     * To fetch all available messages in one call, use a count of
+     * `int.MAX`. If the {@link ListFlags.OLDEST_TO_NEWEST} flag is
+     * set then the listing will contain all messages in the vector,
+     * and no expansion will be performed. It may still access the
+     * remote however in case of any of the messages not meeting the
+     * given `required_fields`. If {@link ListFlags.OLDEST_TO_NEWEST}
+     * is not set, the call will cause the vector to be fully expanded
+     * and the listing will return all messages in the remote
+     * mailbox. Note that specifying `int.MAX` in either case may be a
+     * expensive operation (in terms of both computation and memory)
+     * if the number of messages in the folder or mailbox is large,
+     * hence should be avoided if possible.
+     *
+     * Use {@link ListFlags.INCLUDING_ID} to include the {@link Email}
+     * for the particular identifier in the results.  Otherwise, the
+     * specified email will not be included.  A null EmailIdentifier
+     * implies that the top most email is included in the result (i.e.
      * ListFlags.INCLUDING_ID is not required);
      *
-     * If the remote connection fails, this call will return locally-available Email without error.
+     * If the remote connection fails, this call will return
+     * locally-available Email without error.
      *
      * There's no guarantee of the returned messages' order.
      *
@@ -503,8 +556,10 @@ public abstract class Geary.Folder : BaseObject {
     public abstract async Gee.List<Geary.Email>? list_email_by_id_async(Geary.EmailIdentifier? initial_id,
         int count, Geary.Email.Field required_fields, ListFlags flags, Cancellable? cancellable = null)
         throws Error;
-    
+
     /**
+     * List a set of non-contiguous emails in the folder's vector.
+     *
      * Similar in contract to {@link list_email_by_id_async}, but uses a list of
      * {@link Geary.EmailIdentifier}s rather than a range.
      *

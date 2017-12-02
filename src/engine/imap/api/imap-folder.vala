@@ -590,27 +590,39 @@ private class Geary.Imap.Folder : BaseObject {
         
         return (email_list.size > 0) ? email_list : null;
     }
-    
-    public async Gee.Map<UID, SequenceNumber>? uid_to_position_async(MessageSet msg_set,
-        Cancellable? cancellable) throws Error {
+
+    /**
+     * Returns the sequence numbers for a set of UIDs.
+     *
+     * The `msg_set` parameter must be a set containing UIDs. An error
+     * is thrown if the sequence numbers cannot be determined.
+     */
+    public async Gee.Map<UID, SequenceNumber> uid_to_position_async(MessageSet msg_set,
+                                                                    Cancellable? cancellable)
+        throws Error {
         check_open();
         
-        // MessageSet better be UID addressing
-        assert(msg_set.is_uid);
+        if (!msg_set.is_uid) {
+            throw new ImapError.NOT_SUPPORTED("Message set must contain UIDs");
+        }
         
         Gee.List<Command> cmds = new Gee.ArrayList<Command>();
         cmds.add(new FetchCommand.data_type(msg_set, FetchDataSpecifier.UID));
         
         Gee.HashMap<SequenceNumber, FetchedData>? fetched;
         yield exec_commands_async(cmds, out fetched, null, cancellable);
-        
-        if (fetched == null || fetched.size == 0)
-            return null;
-        
-        Gee.Map<UID, SequenceNumber> map = new Gee.HashMap<UID, SequenceNumber>();
-        foreach (SequenceNumber seq_num in fetched.keys)
-            map.set((UID) fetched.get(seq_num).data_map.get(FetchDataSpecifier.UID), seq_num);
-        
+
+        if (fetched == null || fetched.is_empty) {
+            throw new ImapError.INVALID("Server returned no sequence numbers");
+        }
+
+        Gee.Map<UID,SequenceNumber> map = new Gee.HashMap<UID,SequenceNumber>();
+        foreach (SequenceNumber seq_num in fetched.keys) {
+            map.set(
+                (UID) fetched.get(seq_num).data_map.get(FetchDataSpecifier.UID),
+                seq_num
+            );
+        }
         return map;
     }
     
