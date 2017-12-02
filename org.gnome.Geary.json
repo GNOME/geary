@@ -84,7 +84,7 @@
                 {
                     "type": "git",
                     "url": "https://git.gnome.org/browse/libgee",
-                    "tag": "0.20.0"
+                    "branch": "master"
                 }
             ]
         },
@@ -95,6 +95,16 @@
                     "type": "git",
                     "url": "https://git.gnome.org/browse/gmime",
                     "branch": "gmime-2-6"
+                }
+            ]
+        },
+        {
+            "name": "libunwind",
+            "sources": [
+                {
+                    "type": "git",
+                    "url": "https://git.savannah.gnu.org/git/libunwind.git",
+                    "branch": "master"
                 }
             ]
         },
