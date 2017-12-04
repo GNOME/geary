@@ -162,7 +162,7 @@ public class Geary.RFC822.MailboxAddress : Geary.MessageData.SearchableMessageDa
             // http://www.regular-expressions.info/email.html
             // matches john@dep.aol.museum not john@aol...com
             Regex email_regex =
-                new Regex("[A-Z0-9._%+-]+@(?:[A-Z0-9-]+\\.)+[A-Z]{2,5}",
+                new Regex("[A-Z0-9._%+-]+@((?:[A-Z0-9-]+\\.)+[A-Z]{2}|localhost)",
                     RegexCompileFlags.CASELESS);
             return email_regex.match(address);
         } catch (RegexError e) {
