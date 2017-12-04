@@ -15,10 +15,12 @@ class Geary.RFC822.MailboxAddressTest : Gee.TestCase {
     public void is_valid_address() {
         assert(Geary.RFC822.MailboxAddress.is_valid_address("john@dep.aol.museum") == true);
         assert(Geary.RFC822.MailboxAddress.is_valid_address("test@example.com") == true);
-        // This is Bug 714299
-        //assert(Geary.RFC822.MailboxAddress.is_valid_address("test@example") == true);
+        assert(Geary.RFC822.MailboxAddress.is_valid_address("test.other@example.com") == true);
+        assert(Geary.RFC822.MailboxAddress.is_valid_address("test@localhost") == true);
+        assert(Geary.RFC822.MailboxAddress.is_valid_address("test2@localhost") == true);
         assert(Geary.RFC822.MailboxAddress.is_valid_address("some context test@example.com text") == true);
 
+        assert(Geary.RFC822.MailboxAddress.is_valid_address("test@example") == false);
         assert(Geary.RFC822.MailboxAddress.is_valid_address("john@aol...com") == false);
         assert(Geary.RFC822.MailboxAddress.is_valid_address("@example.com") == false);
         assert(Geary.RFC822.MailboxAddress.is_valid_address("@example") == false);
