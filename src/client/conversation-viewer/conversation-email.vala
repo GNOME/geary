@@ -503,16 +503,14 @@ public class ConversationEmail : Gtk.Box {
      * primary message and any attached messages, as well as
      * attachment names, types and icons.
      */
-    public async void start_loading(Cancellable load_cancelled) {
+    public async void start_loading(ConversationListBox.AvatarStore avatars,
+                                    Cancellable load_cancelled) {
         foreach (ConversationMessage view in this)  {
             if (load_cancelled.is_cancelled()) {
                 break;
             }
             yield view.load_message_body(load_cancelled);
-            view.load_avatar.begin(
-                GearyApplication.instance.controller.avatar_session,
-                load_cancelled
-            );
+            view.load_avatar.begin(avatars, load_cancelled);
         }
 
         // Only load attachments once the web views have finished

@@ -220,6 +220,106 @@ public class ConversationListBox : Gtk.ListBox {
 
     }
 
+
+    /**
+     * Email address avatar loader and cache.
+     */
+    public class AvatarStore {
+
+
+        private Soup.Session session;
+        private Gee.Map<string,AvatarLoader> loaders =
+            new Gee.HashMap<string,AvatarLoader>();
+
+
+        internal AvatarStore(Soup.Session session) {
+            this.session = session;
+        }
+
+        internal async Gdk.Pixbuf? load(Geary.RFC822.MailboxAddress address,
+                                        int pixel_size,
+                                        Cancellable load_cancelled)
+            throws Error {
+            string key = address.to_string();
+            AvatarLoader loader = this.loaders.get(key);
+            if (loader == null) {
+                // Haven't started loading the avatar, so do it now
+                loader = new AvatarLoader(address, pixel_size);
+                this.loaders.set(key, loader);
+                yield loader.load(this.session, load_cancelled);
+            } else {
+                // Load has already started, so wait for it to finish
+                yield loader.lock.wait_async();
+            }
+            return loader.avatar;
+        }
+
+    }
+
+
+    // Initiates and manages an avatar load
+    private class AvatarLoader : Geary.BaseObject {
+
+
+        internal Gdk.Pixbuf? avatar = null;
+        internal Geary.Nonblocking.Semaphore lock =
+            new Geary.Nonblocking.Semaphore();
+
+        private Geary.RFC822.MailboxAddress address;
+        private int pixel_size;
+
+
+        internal AvatarLoader(Geary.RFC822.MailboxAddress address,
+                              int pixel_size) {
+            this.address = address;
+            this.pixel_size = pixel_size;
+        }
+
+        internal async void load(Soup.Session session,
+                                 Cancellable load_cancelled)
+            throws Error {
+            Soup.Message message = new Soup.Message(
+                "GET",
+                Gravatar.get_image_uri(
+                    this.address,
+                    Gravatar.Default.NOT_FOUND,
+                    this.pixel_size
+                )
+            );
+
+            Error? workaround_err = null;
+            try {
+                // We want to just pass load_cancelled to send_async
+                // here, but per Bug 778720 this is causing some
+                // crashy race in libsoup's cache implementation, so
+                // for now just let the load go through and manually
+                // check to see if the load has been cancelled before
+                // setting the avatar
+                InputStream data = yield session.send_async(
+                    message,
+                    null // should be 'load_cancelled'
+                );
+                if (message.status_code == 200 &&
+                    data != null &&
+                    !load_cancelled.is_cancelled()) {
+                    this.avatar = yield new Gdk.Pixbuf.from_stream_at_scale_async(
+                        data, pixel_size, pixel_size, true, load_cancelled
+                    );
+                }
+            } catch (Error err) {
+                workaround_err = err;
+            }
+
+            this.lock.blind_notify();
+
+            if (workaround_err != null) {
+                throw workaround_err;
+            }
+        }
+
+    }
+
+
     static construct {
         // Set up custom keybindings
         unowned Gtk.BindingSet bindings = Gtk.BindingSet.by_class(
@@ -290,7 +390,10 @@ public class ConversationListBox : Gtk.ListBox {
     // Contacts for the account this conversation exists in
     private Geary.ContactStore contact_store;
 
-    // Contacts for the account this conversation exists in
+    // Avatars for this conversation
+    private AvatarStore avatar_store;
+
+    // Account this conversation belongs to
     private Geary.AccountInformation account_info;
 
     // Was this conversation loaded from the drafts folder?
@@ -306,7 +409,7 @@ public class ConversationListBox : Gtk.ListBox {
     private ConversationEmail? body_selected_view = null;
 
     // Maps displayed emails to their corresponding rows.
-    private Gee.HashMap<Geary.EmailIdentifier,EmailRow> email_rows =
+    private Gee.Map<Geary.EmailIdentifier,EmailRow> email_rows =
         new Gee.HashMap<Geary.EmailIdentifier,EmailRow>();
 
     // The id of the draft referred to by the current composer.
@@ -389,11 +492,13 @@ public class ConversationListBox : Gtk.ListBox {
                                Geary.AccountInformation account_info,
                                bool is_draft_folder,
                                Configuration config,
+                               Soup.Session avatar_session,
                                Gtk.Adjustment adjustment) {
         this.conversation = conversation;
         this.location = location;
         this.email_store = email_store;
         this.contact_store = contact_store;
+        this.avatar_store = new AvatarStore(avatar_session);
         this.account_info = account_info;
         this.is_draft_folder = is_draft_folder;
         this.config = config;
@@ -476,7 +581,9 @@ public class ConversationListBox : Gtk.ListBox {
 
             // Start the first expanded row loading before any others,
             // scroll the view to it when its done
-            yield first_expanded_row.view.start_loading(this.cancellable);
+            yield first_expanded_row.view.start_loading(
+                this.avatar_store, this.cancellable
+            );
             first_expanded_row.should_scroll.connect(scroll_to);
             first_expanded_row.enable_should_scroll();
 
@@ -485,7 +592,9 @@ public class ConversationListBox : Gtk.ListBox {
                     if (!this.cancellable.is_cancelled()) {
                         EmailRow? row = child as EmailRow;
                         if (row != null && row != first_expanded_row) {
-                            row.view.start_loading.begin(this.cancellable);
+                            row.view.start_loading.begin(
+                                this.avatar_store, this.cancellable
+                            );
                         }
                     }
                 });
@@ -742,7 +851,7 @@ public class ConversationListBox : Gtk.ListBox {
         if (!this.cancellable.is_cancelled()) {
             EmailRow row = add_email(full_email);
             update_first_last_row();
-            yield row.view.start_loading(this.cancellable);
+            yield row.view.start_loading(this.avatar_store, this.cancellable);
         }
     }
 
