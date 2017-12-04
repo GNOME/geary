@@ -1569,6 +1569,8 @@ public class GearyController : Geary.BaseObject {
                 viewer.load_conversation.begin(
                     Geary.Collection.get_first(selected),
                     this.current_folder,
+                    this.application.config,
+                    this.avatar_session,
                     (obj, ret) => {
                         try {
                             viewer.load_conversation.end(ret);

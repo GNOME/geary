@@ -183,7 +183,9 @@ public class ConversationViewer : Gtk.Stack {
      * Shows a conversation in the viewer.
      */
     public async void load_conversation(Geary.App.Conversation conversation,
-                                        Geary.Folder location)
+                                        Geary.Folder location,
+                                        Configuration config,
+                                        Soup.Session avatar_session)
         throws Error {
         remove_current_list();
 
@@ -195,7 +197,8 @@ public class ConversationViewer : Gtk.Stack {
             account.get_contact_store(),
             account.information,
             location.special_folder_type == Geary.SpecialFolderType.DRAFTS,
-            ((MainWindow) get_ancestor(typeof(MainWindow))).application.config,
+            config,
+            avatar_session,
             this.conversation_scroller.get_vadjustment()
         );
 
