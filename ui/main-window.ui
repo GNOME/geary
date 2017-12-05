@@ -84,6 +84,7 @@
                             </child>
                             <style>
                               <class name="geary-conversation-frame"/>
+                              <class name="view"/>
                             </style>
                           </object>
                           <packing>
