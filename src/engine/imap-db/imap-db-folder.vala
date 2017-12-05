@@ -1217,8 +1217,11 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         int64 id = -1;
         // if fields not present, then no duplicate can reliably be found
         if (!email.fields.is_all_set(REQUIRED_FIELDS)) {
-            debug("Unable to detect duplicates for %s (%s available)", email.id.to_string(),
-                email.fields.to_list_string());
+            debug("%s: Unable to detect duplicates for %s, fields available: %s",
+                  this.to_string(),
+                  email.id.to_string(),
+                  email.fields.to_list_string()
+            );
             return id;
         }
 
