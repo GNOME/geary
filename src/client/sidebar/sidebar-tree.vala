@@ -832,22 +832,17 @@ public class Sidebar.Tree : Gtk.TreeView {
         Gtk.Menu? context_menu = contextable.get_sidebar_context_menu(event);
         if (context_menu == null)
             return false;
-        
-        if (event != null)
-            context_menu.popup(null, null, null, event.button, event.time);
-        else
-            context_menu.popup(null, null, null, 0, Gtk.get_current_event_time());
-        
+
+        context_menu.popup_at_pointer(event);
         return true;
     }
-    
+
     private bool popup_default_context_menu(Gdk.EventButton event) {
         if (default_context_menu != null)
-            default_context_menu.popup(null, null, null, event.button, event.time);
-        
+            default_context_menu.popup_at_pointer(event);
         return true;
     }
-    
+
     public bool on_toggle_row(Gtk.TreeIter iter, Gtk.TreePath path) {
         // Determine whether to allow the row to toggle
         EntryWrapper? wrapper = get_wrapper_at_iter(iter);
