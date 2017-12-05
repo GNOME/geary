@@ -263,7 +263,7 @@ public class ConversationMessage : Gtk.Grid {
 
 
     /**
-     * Constructs a new view to display an RFC 823 message headers and body.
+     * Constructs a new view to display an RFC 822 message headers and body.
      *
      * This method sets up most of the user interface for displaying
      * the message, but does not attempt any possibly long-running
@@ -427,35 +427,26 @@ public class ConversationMessage : Gtk.Grid {
     /**
      * Starts loading the avatar for the message's sender.
      */
-    public async void load_avatar(Soup.Session session, Cancellable load_cancelled) {
+    public async void load_avatar(ConversationListBox.AvatarStore loader,
+                                  Cancellable load_cancelled) {
         Geary.RFC822.MailboxAddress? primary = message.get_primary_originator();
         if (primary != null) {
             int window_scale = get_scale_factor();
-            int pixel_size = this.avatar.get_pixel_size();
-            Soup.Message message = new Soup.Message(
-                "GET",
-                Gravatar.get_image_uri(
-                    primary, Gravatar.Default.NOT_FOUND, pixel_size * window_scale
-                )
-            );
-
+            int pixel_size = this.avatar.get_pixel_size() * window_scale;
             try {
-                // We want to just pass load_cancelled to send_async
-                // here, but per Bug 778720 this is causing some
-                // crashy race in libsoup's cache implementation, so
-                // for now just let the load go through and manually
-                // check to see if the load has been cancelled before
-                // setting the avatar
-                InputStream data = yield session.send_async(
-                    message,
-                    null // should be 'load_cancelled'
+                Gdk.Pixbuf? avatar_buf = yield loader.load(
+                    primary, pixel_size, load_cancelled
                 );
-                if (!load_cancelled.is_cancelled() &&
-                    data != null && message.status_code == 200) {
-                    yield set_avatar(data, load_cancelled);
+                if (avatar_buf != null) {
+                    this.avatar.set_from_surface(
+                        Gdk.cairo_surface_create_from_pixbuf(
+                            avatar_buf, window_scale, get_window()
+                        )
+                    );
                 }
             } catch (Error err) {
-                debug("Error loading Gravatar response: %s", err.message);
+                debug("Avatar load failed for %s: %s",
+                      primary.to_string(), err.message);
             }
         }
     }
@@ -645,28 +636,6 @@ public class ConversationMessage : Gtk.Grid {
                 }
             }
             header.set_visible(true);
-        }
-    }
-
-    private async void set_avatar(InputStream data,
-                                  Cancellable load_cancelled)
-    throws Error {
-        Gdk.Pixbuf avatar_buf =
-            yield new Gdk.Pixbuf.from_stream_async(data, load_cancelled);
-
-        if (avatar_buf != null && !load_cancelled.is_cancelled()) {
-            int window_scale = get_scale_factor();
-            int avatar_size = this.avatar.pixel_size * window_scale;
-            if (avatar_buf.width != avatar_size) {
-                avatar_buf = avatar_buf.scale_simple(
-                    avatar_size, avatar_size, Gdk.InterpType.BILINEAR
-                );
-            }
-            this.avatar.set_from_surface(
-                Gdk.cairo_surface_create_from_pixbuf(
-                    avatar_buf, window_scale, get_window()
-                )
-            );
         }
     }
 
