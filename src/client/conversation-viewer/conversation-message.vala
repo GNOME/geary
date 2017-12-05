@@ -859,7 +859,7 @@ public class ConversationMessage : Gtk.Grid {
 
         this.context_menu = new Gtk.Menu.from_model(model);
         this.context_menu.attach_to_widget(this, null);
-        this.context_menu.popup(null, null, null, 0, event.get_time());
+        this.context_menu.popup_at_pointer(event);
 
         return true;
     }

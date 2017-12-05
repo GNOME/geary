@@ -307,8 +307,7 @@ public class ConversationListView : Gtk.TreeView {
 
             Gtk.Menu context_menu = new Gtk.Menu.from_model(context_menu_model);
             context_menu.insert_action_group("win", this.main_window);
-            context_menu.show_all();
-            context_menu.popup(null, null, null, event.button, event.time);
+            context_menu.popup_at_pointer(event);
 
             // When the conversation under the mouse is selected, stop event propagation
             return get_selection().path_is_selected(path);
