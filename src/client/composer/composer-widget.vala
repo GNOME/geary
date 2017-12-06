@@ -390,7 +390,7 @@ public class ComposerWidget : Gtk.EventBox {
         this.compose_type = compose_type;
         if (this.compose_type == ComposeType.NEW_MESSAGE)
             this.state = ComposerState.NEW;
-        else if (this.compose_type == ComposeType.FORWARD)
+        else if (this.compose_type == ComposeType.FORWARD || this.account.information.alternate_mailboxes != null)
             this.state = ComposerState.INLINE;
         else
             this.state = ComposerState.INLINE_COMPACT;
@@ -713,7 +713,8 @@ public class ComposerWidget : Gtk.EventBox {
         if (in_reply_to.size > 1) {
             this.state = ComposerState.PANED;
         } else if (this.compose_type == ComposeType.FORWARD || this.to_entry.modified
-                   || this.cc_entry.modified || this.bcc_entry.modified) {
+                   || this.cc_entry.modified || this.bcc_entry.modified
+                   || this.account.information.alternate_mailboxes != null) {
             this.state = ComposerState.INLINE;
         } else {
             this.state = ComposerState.INLINE_COMPACT;
