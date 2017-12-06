@@ -212,6 +212,12 @@ ComposerPageState.prototype = {
             element.setAttribute("type", "cite");
         }
     },
+    insertOrderedList: function() {
+        document.execCommand("insertOrderedList", false, null);
+    },
+    insertUnorderedList: function() {
+        document.execCommand("insertUnorderedList", false, null);
+    },
     updateSignature: function(signature) {
         if (this.signaturePart != null) {
             console.log(signature);

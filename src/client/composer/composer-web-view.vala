@@ -376,6 +376,14 @@ public class ComposerWebView : ClientWebView {
         this.call.begin(Geary.JS.callable("geary.indentLine"), null);
     }
 
+    public void insert_olist() {
+	this.call.begin(Geary.JS.callable("geary.insertOrderedList"), null);
+    }
+
+    public void insert_ulist() {
+	this.call.begin(Geary.JS.callable("geary.insertUnorderedList"), null);
+    }
+
     /**
      * Updates the signature block if it has not been deleted.
      */
