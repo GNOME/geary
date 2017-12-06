@@ -43,6 +43,13 @@ public class Geary.App.Conversation : BaseObject {
     /** Folder from which the conversation originated. */
     public Folder base_folder { get; private set; }
 
+    /** Cache of paths associated with each email */
+    internal Gee.HashMultiMap<Geary.EmailIdentifier,Geary.FolderPath> path_map {
+        get;
+        private set;
+        default = new Gee.HashMultiMap< Geary.EmailIdentifier,Geary.FolderPath>();
+    }
+
     private Gee.HashMultiSet<RFC822.MessageID> message_ids = new Gee.HashMultiSet<RFC822.MessageID>();
 
     private int convnum;
@@ -59,11 +66,7 @@ public class Geary.App.Conversation : BaseObject {
         Geary.Email.compare_recv_date_ascending);
     private Gee.SortedSet<Email> recv_date_descending = new Gee.TreeSet<Email>(
         Geary.Email.compare_recv_date_descending);
-    
-    // by storing all paths for each EmailIdentifier, can lookup without blocking
-    private Gee.HashMultiMap<Geary.EmailIdentifier, Geary.FolderPath> path_map = new Gee.HashMultiMap<
-        Geary.EmailIdentifier, Geary.FolderPath>();
-    
+
     /**
      * Fired when email has been added to this conversation.
      */

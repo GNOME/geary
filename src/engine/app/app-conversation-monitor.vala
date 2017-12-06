@@ -567,8 +567,21 @@ public class Geary.App.ConversationMonitor : BaseObject {
         Gee.MultiMap<Geary.App.Conversation, Geary.Email>? appended = null;
         Gee.Collection<Conversation>? removed_due_to_merge = null;
         try {
-            yield conversations.add_all_emails_async(job.emails.values, this, folder.path, out added, out appended,
-                out removed_due_to_merge, null);
+            // Get known paths for all emails
+            Gee.MultiMap<Geary.EmailIdentifier, Geary.FolderPath>? email_paths =
+                yield this.folder.account.get_containing_folders_async(
+                    job.emails.keys, null
+                );
+
+            // Add them to the conversation set
+            yield this.conversations.add_all_emails_async(
+                job.emails.values,
+                email_paths,
+                this.folder,
+                out added,
+                out appended,
+                out removed_due_to_merge,
+                null);
         } catch (Error err) {
             debug("Unable to add emails to conversation: %s", err.message);
             
