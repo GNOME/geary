@@ -67,6 +67,8 @@ public class ComposerWidget : Gtk.EventBox {
     private const string ACTION_REMOVE_FORMAT = "remove-format";
     private const string ACTION_INDENT = "indent";
     private const string ACTION_OUTDENT = "outdent";
+    private const string ACTION_OLIST = "olist";
+    private const string ACTION_ULIST = "ulist";
     private const string ACTION_JUSTIFY = "justify";
     private const string ACTION_COLOR = "color";
     private const string ACTION_INSERT_IMAGE = "insert-image";
@@ -88,7 +90,8 @@ public class ComposerWidget : Gtk.EventBox {
     private const string[] html_actions = {
         ACTION_BOLD, ACTION_ITALIC, ACTION_UNDERLINE, ACTION_STRIKETHROUGH,
         ACTION_FONT_SIZE, ACTION_FONT_FAMILY, ACTION_COLOR, ACTION_JUSTIFY,
-        ACTION_INSERT_IMAGE, ACTION_COPY_LINK, ACTION_PASTE_WITH_FORMATTING
+        ACTION_INSERT_IMAGE, ACTION_COPY_LINK, ACTION_PASTE_WITH_FORMATTING,
+	ACTION_OLIST, ACTION_ULIST
     };
 
     private const ActionEntry[] action_entries = {
@@ -109,6 +112,8 @@ public class ComposerWidget : Gtk.EventBox {
         {ACTION_FONT_FAMILY,              on_font_family,            "s",     "'sans'"  },
         {ACTION_REMOVE_FORMAT,            on_remove_format,         null,      "false"  },
         {ACTION_INDENT,                   on_indent                                     },
+        {ACTION_OLIST,                    on_olist                                      },
+        {ACTION_ULIST,                    on_ulist                                      },
         {ACTION_OUTDENT,                  on_action                                     },
         {ACTION_JUSTIFY,                  on_justify,                "s",     "'left'"  },
         {ACTION_COLOR,                    on_select_color                               },
@@ -1804,6 +1809,14 @@ public class ComposerWidget : Gtk.EventBox {
 
     private void on_indent(SimpleAction action, Variant? param) {
         this.editor.indent_line();
+    }
+
+    private void on_olist(SimpleAction action, Variant? param) {
+	this.editor.insert_olist();
+    }
+
+    private void on_ulist(SimpleAction action, Variant? param) {
+	this.editor.insert_ulist();
     }
 
     private void on_mouse_target_changed(WebKit.WebView web_view,

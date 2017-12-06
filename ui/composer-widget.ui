@@ -506,6 +506,68 @@
                 <property name="position">1</property>
               </packing>
             </child>
+	    <child>
+	      <object class="GtkBox" id="list_buttons">
+		<property name="visible">True</property>
+		<property name="can_focus">False</property>
+		<child>
+		  <object class="GtkButton" id="olist_button">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="focus_on_click">False</property>
+                    <property name="receives_default">False</property>
+                    <property name="tooltip_text" translatable="yes">Insert ordered list</property>
+                    <property name="action_name">cmp.olist</property>
+                    <property name="always_show_image">True</property>
+                    <child>
+                      <object class="GtkImage" id="olist_image">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="pixel_size">16</property>
+                        <property name="icon_name">format-ordered-list-symbolic</property>
+                      </object>
+                    </child>
+		  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+		</child>
+		<child>
+		  <object class="GtkButton" id="ulist_button">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="focus_on_click">False</property>
+                    <property name="receives_default">False</property>
+                    <property name="tooltip_text" translatable="yes">Insert unordered list</property>
+                    <property name="action_name">cmp.ulist</property>
+                    <property name="always_show_image">True</property>
+                    <child>
+                      <object class="GtkImage" id="ulist_image">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="pixel_size">16</property>
+                        <property name="icon_name">format-unordered-list-symbolic</property>
+                      </object>
+                    </child>
+		  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">1</property>
+                  </packing>
+		</child>
+                <style>
+                  <class name="linked"/>
+                </style>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
+              </packing>
+	    </child>
             <child>
               <object class="GtkBox" id="indentation_buttons">
                 <property name="visible">True</property>
@@ -565,7 +627,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">2</property>
+                <property name="position">3</property>
               </packing>
             </child>
             <child>
@@ -627,7 +689,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">3</property>
+                <property name="position">4</property>
               </packing>
             </child>
             <child>
@@ -651,7 +713,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">4</property>
+                <property name="position">5</property>
               </packing>
             </child>
             <child>
@@ -675,7 +737,7 @@
               <packing>
                 <property name="expand">False</property>
                 <property name="fill">True</property>
-                <property name="position">5</property>
+                <property name="position">6</property>
               </packing>
             </child>
             <child>
@@ -692,7 +754,7 @@
                 <property name="expand">False</property>
                 <property name="fill">True</property>
                 <property name="pack_type">end</property>
-                <property name="position">5</property>
+                <property name="position">7</property>
               </packing>
             </child>
             <child>
@@ -707,7 +769,7 @@
                 <property name="expand">False</property>
                 <property name="fill">True</property>
                 <property name="pack_type">end</property>
-                <property name="position">6</property>
+                <property name="position">8</property>
               </packing>
             </child>
           </object>
