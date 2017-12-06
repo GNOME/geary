@@ -54,12 +54,7 @@ private class Geary.App.ConversationSet : BaseObject {
     public Conversation? get_by_email_identifier(Geary.EmailIdentifier id) {
         return email_id_map.get(id);
     }
-    
-    public void clear_owners() {
-        foreach (Conversation conversation in _conversations)
-            conversation.clear_owner();
-    }
-    
+
     // Returns a Collection of zero or more Conversations that have Message-IDs associated with
     // the ancestors of the supplied Email ... if more than one, then add_email() should not be
     // called
@@ -105,7 +100,7 @@ private class Geary.App.ConversationSet : BaseObject {
             conversation = Collection.get_first<Conversation>(associated);
         
         if (conversation == null) {
-            conversation = new Conversation(monitor);
+            conversation = new Conversation(monitor.folder);
             _conversations.add(conversation);
             
             added_conversation = true;
@@ -283,8 +278,6 @@ private class Geary.App.ConversationSet : BaseObject {
         
         if (!_conversations.remove(conversation))
             error("Conversation %s already removed from set", conversation.to_string());
-        
-        conversation.clear_owner();
     }
     
     private Conversation? remove_email_by_identifier(Geary.EmailIdentifier id,

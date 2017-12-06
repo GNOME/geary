@@ -179,15 +179,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
         this.required_fields = required_fields | REQUIRED_FIELDS;
         _min_window_count = min_window_count;
     }
-    
-    ~ConversationMonitor() {
-        if (is_monitoring)
-            debug("Warning: Conversations object destroyed without stopping monitoring");
-        
-        // Manually detach all the weak refs in the Conversation objects
-        conversations.clear_owners();
-    }
-    
+
     protected virtual void notify_monitoring_started() {
         monitoring_started();
     }

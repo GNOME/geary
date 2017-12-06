@@ -40,12 +40,15 @@ public class Geary.App.Conversation : BaseObject {
     
     private static int next_convnum = 0;
     
+    /** Folder from which the conversation originated. */
+    public Folder base_folder { get; private set; }
+
     private Gee.HashMultiSet<RFC822.MessageID> message_ids = new Gee.HashMultiSet<RFC822.MessageID>();
-    
+
     private int convnum;
-    private weak Geary.App.ConversationMonitor? owner;
+
     private Gee.HashMap<EmailIdentifier, Email> emails = new Gee.HashMap<EmailIdentifier, Email>();
-    
+
     // this isn't ideal but the cost of adding an email to multiple sorted sets once versus
     // the number of times they're accessed makes it worth it
     private Gee.SortedSet<Email> sent_date_ascending = new Gee.TreeSet<Email>(
@@ -75,30 +78,16 @@ public class Geary.App.Conversation : BaseObject {
      * Fired when the flags of an email in this conversation have changed.
      */
     public signal void email_flags_changed(Geary.Email email);
-    
-    public Conversation(Geary.App.ConversationMonitor owner) {
-        convnum = next_convnum++;
-        this.owner = owner;
-        
-        owner.email_flags_changed.connect(on_email_flags_changed);
-        owner.folder.account.email_discovered.connect(on_email_discovered);
-        owner.folder.account.email_removed.connect(on_email_removed);
+
+
+    /**
+     * Constructs a conversation relative to the given base folder.
+     */
+    internal Conversation(Geary.Folder base_folder) {
+        this.convnum = Conversation.next_convnum++;
+        this.base_folder = base_folder;
     }
-    
-    ~Conversation() {
-        clear_owner();
-    }
-    
-    internal void clear_owner() {
-        if (owner != null) {
-            owner.email_flags_changed.disconnect(on_email_flags_changed);
-            owner.folder.account.email_discovered.disconnect(on_email_discovered);
-            owner.folder.account.email_removed.disconnect(on_email_removed);
-        }
-        
-        owner = null;
-    }
-    
+
     /**
      * Returns the number of emails in the conversation.
      */
@@ -187,12 +176,24 @@ public class Geary.App.Conversation : BaseObject {
         return email;
     }
 
+    /**
+     * Determines if the given id is in the conversation's base folder.
+     */
     public bool is_in_current_folder(Geary.EmailIdentifier id) {
-        Gee.Collection<Geary.FolderPath>? paths = path_map.get(id);
+        Gee.Collection<Geary.FolderPath>? paths = this.path_map.get(id);
+        return (paths != null && paths.contains(this.base_folder.path));
+    }
 
-        return (paths != null &&
-                owner != null &&
-                paths.contains(owner.folder.path));
+    /**
+     * Determines if the given id is in the conversation's base folder.
+     */
+    public uint get_folder_count(Geary.EmailIdentifier id) {
+        Gee.Collection<Geary.FolderPath>? paths = this.path_map.get(id);
+        uint count = 0;
+        if (paths != null) {
+            count = paths.size;
+        }
+        return count;
     }
 
     /**
@@ -218,62 +219,88 @@ public class Geary.App.Conversation : BaseObject {
     public Gee.Collection<Geary.EmailIdentifier> get_email_ids() {
         return emails.keys;
     }
-    
+
     /**
-     * Add the email to the conversation if it wasn't already in there.  Return
-     * whether it was added.
+     * Add the email to the conversation if not already present.
      *
-     * known_paths should contain all the known FolderPaths this email is contained in.
-     * Conversation will monitor Account for additions and removals as they occur.
+     * The value of `known_paths` should contain all the known {@link
+     * FolderPaths} this email is contained within.
+     *
+     * Returns if the email was added, else false if already present
+     * and only `known_paths` were merged.
      */
     internal bool add(Email email, Gee.Collection<Geary.FolderPath> known_paths) {
-        if (emails.has_key(email.id))
-            return false;
-        
-        emails.set(email.id, email);
-        sent_date_ascending.add(email);
-        sent_date_descending.add(email);
-        recv_date_ascending.add(email);
-        recv_date_descending.add(email);
-        
-        Gee.Set<RFC822.MessageID>? ancestors = email.get_ancestors();
-        if (ancestors != null)
-            message_ids.add_all(ancestors);
-        
+        // Add the known paths to the path map regardless of whether
+        // the email is already in the conversation or not, so that it
+        // remains complete
         foreach (Geary.FolderPath path in known_paths)
-            path_map.set(email.id, path);
-        
-        appended(email);
-        
-        return true;
-    }
-    
-    // Returns the removed Message-IDs
-    internal Gee.Set<RFC822.MessageID>? remove(Email email) {
-        emails.unset(email.id);
-        sent_date_ascending.remove(email);
-        sent_date_descending.remove(email);
-        recv_date_ascending.remove(email);
-        recv_date_descending.remove(email);
-        path_map.remove_all(email.id);
-        
-        Gee.Set<RFC822.MessageID> removed_message_ids = new Gee.HashSet<RFC822.MessageID>();
-        
-        Gee.Set<RFC822.MessageID>? ancestors = email.get_ancestors();
-        if (ancestors != null) {
-            foreach (RFC822.MessageID ancestor_id in ancestors) {
-                // if remove() changes set (i.e. it was present) but no longer present, that
-                // means the ancestor_id was the last one and is formally removed
-                if (message_ids.remove(ancestor_id) && !message_ids.contains(ancestor_id))
-                    removed_message_ids.add(ancestor_id);
-            }
+            this.path_map.set(email.id, path);
+
+        bool added = false;
+        if (!emails.has_key(email.id)) {
+            this.emails.set(email.id, email);
+            this.sent_date_ascending.add(email);
+            this.sent_date_descending.add(email);
+            this.recv_date_ascending.add(email);
+            this.recv_date_descending.add(email);
+
+            Gee.Set<RFC822.MessageID>? ancestors = email.get_ancestors();
+            if (ancestors != null)
+                message_ids.add_all(ancestors);
+
+            appended(email);
+            added = true;
         }
-        
-        trimmed(email);
-        
-        return (removed_message_ids.size > 0) ? removed_message_ids : null;
+        return added;
     }
-    
+
+    /**
+     * Unconditionally removes an email from the conversation.
+     *
+     * Returns all Message-IDs that should be removed as result of
+     * removing this message, or `null` if none were removed.
+     */
+    internal Gee.Set<RFC822.MessageID>? remove(Email email) {
+        Gee.Set<RFC822.MessageID>? removed_ids = null;
+
+        if (emails.unset(email.id)) {
+            this.sent_date_ascending.remove(email);
+            this.sent_date_descending.remove(email);
+            this.recv_date_ascending.remove(email);
+            this.recv_date_descending.remove(email);
+            this.path_map.remove_all(email.id);
+
+            Gee.Set<RFC822.MessageID>? ancestors = email.get_ancestors();
+            if (ancestors != null) {
+                removed_ids = new Gee.HashSet<RFC822.MessageID>();
+                foreach (RFC822.MessageID ancestor_id in ancestors) {
+                    // if remove() changes set (i.e. it was present) but no longer present, that
+                    // means the ancestor_id was the last one and is formally removed
+                    if (message_ids.remove(ancestor_id) &&
+                        !message_ids.contains(ancestor_id)) {
+                        removed_ids.add(ancestor_id);
+                    }
+                }
+
+                if (removed_ids.size == 0) {
+                    removed_ids = null;
+                }
+            }
+
+
+            trimmed(email);
+        }
+
+        return removed_ids;
+    }
+
+    /**
+     * Removes the target path from the known set for the given id.
+     */
+    internal void remove_path(Geary.EmailIdentifier id, FolderPath path) {
+        this.path_map.remove(id, path);
+    }
+
     /**
      * Returns true if *any* message in the conversation is unread.
      */
@@ -322,7 +349,7 @@ public class Geary.App.Conversation : BaseObject {
     public Geary.Email? get_latest_recv_email(Location location) {
         return get_single_email(Ordering.RECV_DATE_DESCENDING, location);
     }
-    
+
     private Geary.Email? get_single_email(Ordering ordering, Location location) {
         // note that the location-ordering preferences are treated as ANYWHERE by get_emails()
         Gee.Collection<Geary.Email> all = get_emails(ordering, location);
@@ -370,26 +397,7 @@ public class Geary.App.Conversation : BaseObject {
     private bool is_missing_flag(Geary.NamedFlag flag) {
         return check_flag(flag, false);
     }
-    
-    private void on_email_flags_changed(Conversation conversation, Geary.Email email) {
-        if (conversation == this)
-            email_flags_changed(email);
-    }
-    
-    private void on_email_discovered(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
-        // only add to the internal map if a part of this Conversation
-        foreach (Geary.EmailIdentifier id in ids) {
-            if (emails.has_key(id))
-                path_map.set(id, folder.path);
-        }
-    }
-    
-    private void on_email_removed(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
-        // To be forgiving, simply remove id without checking if it's a part of this Conversation
-        foreach (Geary.EmailIdentifier id in ids)
-            path_map.remove(id, folder.path);
-    }
-    
+
     public string to_string() {
         return "[#%d] (%d emails)".printf(convnum, emails.size);
     }
