@@ -2053,9 +2053,10 @@ public class ComposerWidget : Gtk.EventBox {
             return false;
         }
 
-        // Don't show in inline, compact, or paned modes.
-        if (this.state == ComposerState.INLINE || this.state == ComposerState.INLINE_COMPACT ||
-            this.state == ComposerState.PANED)
+        // Don't show in inline, compact, or paned modes, unless the current
+        // account has multiple emails.
+        if ((this.state == ComposerState.INLINE || this.state == ComposerState.INLINE_COMPACT ||
+             this.state == ComposerState.PANED) && this.account.information.alternate_mailboxes == null)
             return false;
 
         // If there's only one account, show nothing. (From fields are hidden above.)
