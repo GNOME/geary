@@ -26,6 +26,7 @@ int main(string[] args) {
     engine.add_suite(new Geary.EngineTest().get_suite());
     engine.add_suite(new Geary.IdleManagerTest().get_suite());
     engine.add_suite(new Geary.TimeoutManagerTest().get_suite());
+    engine.add_suite(new Geary.App.ConversationTest().get_suite());
     engine.add_suite(new Geary.HTML.UtilTest().get_suite());
     engine.add_suite(new Geary.Imap.DeserializerTest().get_suite());
     engine.add_suite(new Geary.Imap.CreateCommandTest().get_suite());
