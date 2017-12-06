@@ -84,8 +84,9 @@ private class Geary.App.ConversationSet : BaseObject {
      * NOTE: Do not call this method if get_associated_conversations() returns a Collection with
      * a size greater than one.  That indicates the Conversations *must* be merged before adding.
      */
-    private Conversation? add_email(Geary.Email email, ConversationMonitor monitor,
-        Geary.FolderPath? preferred_folder_path, Gee.Collection<Geary.FolderPath>? known_paths,
+    private Conversation? add_email(Geary.Email email,
+                                    Folder base_folder,
+                                    Gee.Collection<Geary.FolderPath>? known_paths,
         out bool added_conversation) {
         added_conversation = false;
         
@@ -100,7 +101,7 @@ private class Geary.App.ConversationSet : BaseObject {
             conversation = Collection.get_first<Conversation>(associated);
         
         if (conversation == null) {
-            conversation = new Conversation(monitor.folder);
+            conversation = new Conversation(base_folder);
             _conversations.add(conversation);
             
             added_conversation = true;
@@ -126,25 +127,38 @@ private class Geary.App.ConversationSet : BaseObject {
                 logical_message_id_map.set(ancestor, conversation);
         }
     }
-    
-    public async void add_all_emails_async(Gee.Collection<Geary.Email> emails,
-        ConversationMonitor monitor, Geary.FolderPath? preferred_folder_path,
+
+    /**
+     * Adds a set of emails to conversations in this set.
+     *
+     * This method will create and/or merge conversations as
+     * needed. The collection `emails` contains the messages to be
+     * added, and for each email in the collection, there should be an
+     * entry in `id_to_paths` that indicates the folders each message
+     * is known to belong to. The folder `base_folder` is the base
+     * folder for the conversation monitor that owns this set.
+     *
+     * The three collections returned include any conversation that
+     * were created, any that had email appended to them (and the
+     * messages that were appended), and any that were removed due to
+     * being merged into another.
+     */
+    public async void add_all_emails_async(
+        Gee.Collection<Geary.Email> emails,
+        Gee.MultiMap<Geary.EmailIdentifier, Geary.FolderPath>? id_to_paths,
+        Folder base_folder,
         out Gee.Collection<Conversation> added,
         out Gee.MultiMap<Conversation, Geary.Email> appended,
         out Gee.Collection<Conversation> removed_due_to_merge,
-        Cancellable? cancellable) throws Error {
-        // Get known paths for all emails
-        Gee.Map<Geary.EmailIdentifier, Geary.Email>? id_map = Email.emails_to_map(emails);
-        Gee.MultiMap<Geary.EmailIdentifier, Geary.FolderPath>? id_to_paths = null;
-        if (id_map != null) {
-            id_to_paths = yield monitor.folder.account.get_containing_folders_async(id_map.keys,
-                cancellable);
-        }
-        
-        Gee.HashSet<Conversation> _added = new Gee.HashSet<Conversation>();
-        Gee.HashMultiMap<Conversation, Geary.Email> _appended
-            = new Gee.HashMultiMap<Conversation, Geary.Email>();
-        Gee.HashSet<Conversation> _removed_due_to_merge = new Gee.HashSet<Conversation>();
+        Cancellable? cancellable)
+    throws Error {
+        Gee.HashSet<Conversation> _added =
+            new Gee.HashSet<Conversation>();
+        Gee.HashMultiMap<Conversation, Geary.Email> _appended =
+            new Gee.HashMultiMap<Conversation, Geary.Email>();
+        Gee.HashSet<Conversation> _removed_due_to_merge =
+            new Gee.HashSet<Conversation>();
+
         foreach (Geary.Email email in emails) {
             Gee.Set<Conversation> associated = get_associated_conversations(email);
             if (associated.size > 1) {
@@ -157,14 +171,15 @@ private class Geary.App.ConversationSet : BaseObject {
                 // By doing this first, it prevents ConversationSet getting itself into a bad state
                 // where more than one Conversation thinks it "owns" a Message-ID
                 debug("Merging %d conversations due new email associating with all...", associated.size);
-                
+
                 // Note that this call will modify the List so it only holds the to-be-axed
                 // Conversations
                 Gee.Set<Geary.Email> moved_email = new Gee.HashSet<Geary.Email>();
-                Conversation dest = yield merge_conversations_async(monitor, associated, moved_email,
-                    cancellable);
+                Conversation dest = yield merge_conversations_async(
+                    associated, moved_email, cancellable
+                );
                 assert(!associated.contains(dest));
-                
+
                 // remove the remaining conversations from the added/appended Collections
                 _added.remove_all(associated);
                 foreach (Conversation removed_conversation in associated)
@@ -182,13 +197,15 @@ private class Geary.App.ConversationSet : BaseObject {
                 // Nasty ol' Email won't cause problems now -- but let's check anyway!
                 assert(get_associated_conversations(email).size <= 1);
             }
-            
+
             bool added_conversation;
             Conversation? conversation = add_email(
-                email, monitor, preferred_folder_path,
+                email,
+                base_folder,
                 (id_to_paths != null) ? id_to_paths.get(email.id) : null,
-                out added_conversation);
-            
+                out added_conversation
+            );
+
             if (conversation == null)
                 continue;
             
@@ -199,19 +216,21 @@ private class Geary.App.ConversationSet : BaseObject {
                     _appended.set(conversation, email);
             }
         }
-        
+
         added = _added;
         appended = _appended;
         removed_due_to_merge = _removed_due_to_merge;
     }
-    
+
     // This method will remove the destination (merged) Conversation from the List and return it
     // as the result, along with a Collection of email that must be merged into it
-    private async Conversation merge_conversations_async(ConversationMonitor monitor,
-        Gee.Set<Conversation> conversations, Gee.Set<Geary.Email> moved_email,
-        Cancellable? cancellable) throws Error {
+    private async Conversation
+        merge_conversations_async(Gee.Set<Conversation> conversations,
+                                  Gee.Set<Geary.Email> moved_email,
+                                  Cancellable? cancellable)
+        throws Error {
         assert(conversations.size > 0);
-        
+
         // find the largest conversation and merge the others into it
         Conversation? dest = null;
         foreach (Conversation conversation in conversations) {
@@ -223,10 +242,19 @@ private class Geary.App.ConversationSet : BaseObject {
         // conversations merged into it
         bool removed = conversations.remove(dest);
         assert(removed);
-        
-        foreach (Conversation conversation in conversations)
-            moved_email.add_all(conversation.get_emails(Conversation.Ordering.NONE));
-        
+
+        Gee.MultiMap<Geary.EmailIdentifier,Geary.FolderPath>? id_to_paths =
+            new Gee.HashMultiMap<Geary.EmailIdentifier,Geary.FolderPath>();
+
+        foreach (Conversation conversation in conversations) {
+            foreach (EmailIdentifier id in conversation.path_map.get_keys()) {
+                moved_email.add(conversation.get_email_by_id(id));
+                foreach (FolderPath path in conversation.path_map.get(id)) {
+                    id_to_paths.set(id, path);
+                }
+            }
+        }
+
         // convert total sum of Emails to move into map of ID -> Email
         Gee.Map<Geary.EmailIdentifier, Geary.Email>? id_map = Geary.Email.emails_to_map(moved_email);
         // there better be some Email here, otherwise things are really hosed
@@ -243,15 +271,12 @@ private class Geary.App.ConversationSet : BaseObject {
         assert(removed_conversations.size == conversations.size);
         foreach (Conversation conversation in conversations)
             assert(removed_conversations.contains(conversation));
-        
-        // Get known paths for all emails being moved
-        Gee.MultiMap<Geary.EmailIdentifier, Geary.FolderPath>? id_to_paths =
-            yield monitor.folder.account.get_containing_folders_async(id_map.keys, cancellable);
-        
+
         // now add all that email back to the destination Conversation
-        foreach (Geary.Email moved in moved_email)
-            add_email_to_conversation(dest, moved, (id_to_paths != null) ? id_to_paths.get(moved.id) : null);
-        
+        foreach (Geary.Email moved in moved_email) {
+            add_email_to_conversation(dest, moved, id_to_paths.get(moved.id));
+        }
+
         return dest;
     }
     

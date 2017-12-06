@@ -12,6 +12,7 @@ set(TEST_ENGINE_SRC
   engine/api/geary-folder-test.vala
   engine/api/geary-folder-path-test.vala
   engine/app/app-conversation-test.vala
+  engine/app/app-conversation-set-test.vala
   engine/imap/command/imap-create-command-test.vala
   engine/imap/response/imap-namespace-response-test.vala
   engine/imap/transport/imap-deserializer-test.vala
