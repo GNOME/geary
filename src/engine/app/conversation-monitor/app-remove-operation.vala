@@ -5,14 +5,20 @@
  */
 
 private class Geary.App.RemoveOperation : ConversationOperation {
+
+    private Geary.Folder source_folder;
     private Gee.Collection<Geary.EmailIdentifier> removed_ids;
-    
-    public RemoveOperation(ConversationMonitor monitor, Gee.Collection<Geary.EmailIdentifier> removed_ids) {
+
+    public RemoveOperation(ConversationMonitor monitor,
+                           Geary.Folder source_folder,
+                           Gee.Collection<Geary.EmailIdentifier> removed_ids) {
         base(monitor);
+        this.source_folder = source_folder;
         this.removed_ids = removed_ids;
     }
-    
+
     public override async void execute_async() {
-        yield monitor.remove_emails_async(removed_ids);
+        yield monitor.remove_emails_async(this.source_folder, this.removed_ids);
     }
+
 }
