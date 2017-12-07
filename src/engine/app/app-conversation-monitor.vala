@@ -617,22 +617,38 @@ public class Geary.App.ConversationMonitor : BaseObject {
         yield load_by_sparse_id(appended_ids, Geary.Folder.ListFlags.NONE, null);
     }
 
-    internal async void remove_emails_async(Geary.Folder source_folder,
-                                            Gee.Collection<Geary.EmailIdentifier> removed_ids) {
-        debug("%d messages(s) removed from %s, trimming/removing conversations...", removed_ids.size,
-              source_folder.to_string());
+    internal async void remove_emails_async(Folder source_folder,
+                                            Gee.Collection<EmailIdentifier> removed_ids) {
+        debug("%d messages(s) removed from %s, trimming/removing conversations...",
+            removed_ids.size, source_folder.to_string()
+        );
 
-        Gee.Collection<Geary.App.Conversation> removed;
-        Gee.MultiMap<Geary.App.Conversation, Geary.Email> trimmed;
-        yield conversations.remove_emails_and_check_in_folder_async(
+        Gee.Collection<Conversation> removed;
+        Gee.MultiMap<Conversation, Email> trimmed;
+        conversations.remove_all_emails_by_identifier(
             source_folder.path,
             removed_ids,
-            this.folder.account,
-            this.folder.path,
             out removed,
-            out trimmed,
-            null
+            out trimmed
         );
+
+        // Check for conversations that have been evaporated as a
+        // result, update removed and trimmed collections to reflect
+        // any that evaporated
+        try {
+            Gee.Collection<Conversation> evaporated = yield check_conversations_in_base_folder(
+                trimmed.get_keys(), null
+            );
+            removed.add_all(evaporated);
+            foreach (Conversation target in evaporated) {
+                trimmed.remove_all(target);
+            }
+        } catch (Error err) {
+            debug("Error checking conversation for messages in %s: %s",
+                  this.folder.path.to_string(), err.message);
+        }
+
+        // Fire signals, clean up
 
         foreach (Conversation conversation in trimmed.get_keys())
             notify_conversation_trimmed(conversation, trimmed.get(conversation));
@@ -767,6 +783,32 @@ public class Geary.App.ConversationMonitor : BaseObject {
         // Run again to make sure we're full unless we ran out of messages.
         if (conversations.get_email_count() != initial_message_count)
             operation_queue.add(new FillWindowOperation(this, is_insert));
+    }
+
+    /**
+     * Check conversations to see if they still exist in the base folder.
+     *
+     * Returns the set of emails that were removed due to not being in
+     * the base folder.
+     */
+    private async Gee.Collection<Conversation>
+        check_conversations_in_base_folder(Gee.Collection<Conversation> conversations,
+                                           Cancellable? cancellable)
+        throws Error {
+        Gee.ArrayList<Conversation> evaporated = new Gee.ArrayList<Conversation>();
+        foreach (Geary.App.Conversation conversation in conversations) {
+            int count = yield conversation.get_count_in_folder_async(
+                this.folder.account, this.folder.path, cancellable
+            );
+            if (count == 0) {
+                debug("Evaporating conversation %s because it has no emails in %s",
+                      conversation.to_string(), this.folder.to_string());
+                this.conversations.remove_conversation(conversation);
+                evaporated.add(conversation);
+            }
+        }
+
+        return evaporated;
     }
 
     private void on_folder_email_appended(Gee.Collection<EmailIdentifier> appended_ids) {
