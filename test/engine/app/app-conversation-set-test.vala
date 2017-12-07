@@ -18,8 +18,11 @@ class Geary.App.ConversationSetTest : Gee.TestCase {
         add_test("add_all_append_descendants", add_all_append_descendants);
         add_test("add_all_append_ancestors", add_all_append_ancestors);
         add_test("add_all_merge", add_all_merge);
+        add_test("add_all_multi_path", add_all_multi_path);
+        add_test("add_all_append_path", add_all_append_path);
         add_test("remove_all_removed", remove_all_removed);
         add_test("remove_all_trimmed", remove_all_trimmed);
+        add_test("remove_all_remove_path", remove_all_remove_path);
     }
 
     public override void set_up() {
@@ -351,6 +354,87 @@ class Geary.App.ConversationSetTest : Gee.TestCase {
         assert(removed.size == 1);
     }
 
+    public void add_all_multi_path() {
+        Email e1 = setup_email(1);
+        MockFolderRoot other_path = new MockFolderRoot("other");
+
+        Gee.LinkedList<Email> emails = new Gee.LinkedList<Email>();
+        emails.add(e1);
+
+        Gee.MultiMap<Geary.EmailIdentifier, Geary.FolderPath> email_paths =
+            new Gee.HashMultiMap<Geary.EmailIdentifier, Geary.FolderPath>();
+        email_paths.set(e1.id, this.base_folder.path);
+        email_paths.set(e1.id, other_path);
+
+        Gee.Collection<Conversation>? added = null;
+        Gee.MultiMap<Conversation,Email>? appended = null;
+        Gee.Collection<Conversation>? removed = null;
+        this.test.add_all_emails_async.begin(
+            emails,
+            email_paths,
+            this.base_folder,
+            null,
+            (obj, ret) => { async_complete(ret); }
+        );
+        try {
+            this.test.add_all_emails_async.end(
+                async_result(), out added, out appended, out removed
+            );
+        } catch (Error error) {
+            assert_not_reached();
+        }
+
+        assert(this.test.size == 1);
+        assert(this.test.get_email_count() == 1);
+
+        Conversation convo = this.test.get_by_email_identifier(e1.id);
+        assert(convo.is_in_current_folder(e1.id) == true);
+        assert(convo.get_folder_count(e1.id) == 2);
+    }
+
+    public void add_all_append_path() {
+        Email e1 = setup_email(1);
+        add_email_to_test_set(e1);
+
+        MockFolderRoot other_path = new MockFolderRoot("other");
+
+        Gee.LinkedList<Email> emails = new Gee.LinkedList<Email>();
+        emails.add(e1);
+
+        Gee.MultiMap<Geary.EmailIdentifier, Geary.FolderPath> email_paths =
+            new Gee.HashMultiMap<Geary.EmailIdentifier, Geary.FolderPath>();
+        email_paths.set(e1.id, other_path);
+
+        Gee.Collection<Conversation>? added = null;
+        Gee.MultiMap<Conversation,Email>? appended = null;
+        Gee.Collection<Conversation>? removed = null;
+        this.test.add_all_emails_async.begin(
+            emails,
+            email_paths,
+            this.base_folder,
+            null,
+            (obj, ret) => { async_complete(ret); }
+        );
+        try {
+            this.test.add_all_emails_async.end(
+                async_result(), out added, out appended, out removed
+            );
+        } catch (Error error) {
+            assert_not_reached();
+        }
+
+        assert(this.test.size == 1);
+        assert(this.test.get_email_count() == 1);
+
+        assert(added.is_empty);
+        assert(appended.size == 0);
+        assert(removed.is_empty);
+
+        Conversation convo = this.test.get_by_email_identifier(e1.id);
+        assert(convo.is_in_current_folder(e1.id) == true);
+        assert(convo.get_folder_count(e1.id) == 2);
+    }
+
     public void remove_all_removed() {
         Email e1 = setup_email(1);
         add_email_to_test_set(e1);
@@ -364,7 +448,7 @@ class Geary.App.ConversationSetTest : Gee.TestCase {
         Gee.Collection<Conversation>? removed = null;
         Gee.MultiMap<Conversation,Email>? trimmed = null;
         this.test.remove_all_emails_by_identifier(
-            ids, out removed, out trimmed
+            this.base_folder.path, ids, out removed, out trimmed
         );
 
         assert(this.test.size == 0);
@@ -393,7 +477,7 @@ class Geary.App.ConversationSetTest : Gee.TestCase {
         Gee.Collection<Conversation>? removed = null;
         Gee.MultiMap<Conversation,Email>? trimmed = null;
         this.test.remove_all_emails_by_identifier(
-            ids, out removed, out trimmed
+            this.base_folder.path, ids, out removed, out trimmed
         );
 
         assert(this.test.size == 1);
@@ -405,6 +489,37 @@ class Geary.App.ConversationSetTest : Gee.TestCase {
         assert(removed.is_empty == true);
         assert(trimmed.contains(convo) == true);
         assert(trimmed.get(convo).contains(e1) == true);
+    }
+
+    public void remove_all_remove_path() {
+        MockFolderRoot other_path = new MockFolderRoot("other");
+        Email e1 = setup_email(1);
+        add_email_to_test_set(e1, other_path);
+
+        Conversation convo = this.test.get_by_email_identifier(e1.id);
+        assert(convo.get_folder_count(e1.id) == 2);
+
+        Gee.LinkedList<EmailIdentifier> ids =
+            new Gee.LinkedList<EmailIdentifier>();
+        ids.add(e1.id);
+
+        Gee.Collection<Conversation>? removed = null;
+        Gee.MultiMap<Conversation,Email>? trimmed = null;
+        this.test.remove_all_emails_by_identifier(
+            other_path, ids, out removed, out trimmed
+        );
+
+        assert(this.test.size == 1);
+        assert(this.test.get_email_count() == 1);
+
+        assert(removed != null);
+        assert(removed.is_empty == true);
+
+        assert(trimmed != null);
+        assert(trimmed.size == 0);
+
+        assert(convo.is_in_current_folder(e1.id) == true);
+        assert(convo.get_folder_count(e1.id) == 1);
     }
 
     private Email setup_email(int id, Email? references = null) {
@@ -423,13 +538,17 @@ class Geary.App.ConversationSetTest : Gee.TestCase {
         return email;
     }
 
-    private void add_email_to_test_set(Email to_add) {
+    private void add_email_to_test_set(Email to_add,
+                                       FolderPath? other_path=null) {
         Gee.LinkedList<Email> emails = new Gee.LinkedList<Email>();
         emails.add(to_add);
 
         Gee.MultiMap<Geary.EmailIdentifier, Geary.FolderPath> email_paths =
             new Gee.HashMultiMap<Geary.EmailIdentifier, Geary.FolderPath>();
         email_paths.set(to_add.id, this.base_folder.path);
+        if (other_path != null) {
+            email_paths.set(to_add.id, other_path);
+        }
 
         Gee.Collection<Conversation>? added = null;
         Gee.MultiMap<Conversation,Email>? appended = null;

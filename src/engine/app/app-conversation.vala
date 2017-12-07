@@ -200,6 +200,27 @@ public class Geary.App.Conversation : BaseObject {
     }
 
     /**
+     * Determines if an email with the give id exists in the conversation.
+     */
+    public bool contains_email_by_id(EmailIdentifier id) {
+        return emails.contains(id);
+    }
+
+    /**
+     * Returns the email associated with the EmailIdentifier, if it exists.
+     */
+    public Geary.Email? get_email_by_id(EmailIdentifier id) {
+        return emails.get(id);
+    }
+
+    /**
+     * Returns all EmailIdentifiers in the conversation, unsorted.
+     */
+    public Gee.Collection<Geary.EmailIdentifier> get_email_ids() {
+        return emails.keys;
+    }
+
+    /**
      * Return all Message IDs associated with the conversation.
      */
     public Gee.Collection<RFC822.MessageID> get_message_ids() {
@@ -207,20 +228,6 @@ public class Geary.App.Conversation : BaseObject {
         Gee.HashSet<RFC822.MessageID> ids = new Gee.HashSet<RFC822.MessageID>();
         ids.add_all(message_ids);
         return ids;
-    }
-    
-    /**
-     * Returns the email associated with the EmailIdentifier, if present in this conversation.
-     */
-    public Geary.Email? get_email_by_id(EmailIdentifier id) {
-        return emails.get(id);
-    }
-    
-    /**
-     * Returns all EmailIdentifiers in the conversation, unsorted.
-     */
-    public Gee.Collection<Geary.EmailIdentifier> get_email_ids() {
-        return emails.keys;
     }
 
     /**

@@ -68,59 +68,67 @@ private class Geary.App.ConversationSet : BaseObject {
         
         return Gee.Set.empty<Conversation>();
     }
-    
+
     /**
-     * Add the email (requires Field.REFERENCES) to the mix, potentially
-     * replacing an existing email with the same id, or creating a new
-     * conversation if necessary.  In the event of a duplicate (as detected by
-     * Message-ID), the email whose EmailIdentifier has the
-     * preferred_folder_path will be kept, and the other discarded (note that
-     * we always prefer an identifier with a non-null folder path over a null
-     * folder path, regardless of what the non-null path is).  Return null if
-     * we didn't add the email (e.g. it was a dupe and we preferred the
-     * existing email), or the conversation it was added to.  Return in
-     * added_conversation whether a new conversation was created.
+     * Conditionally adds an email to a conversation.
      *
-     * NOTE: Do not call this method if get_associated_conversations() returns a Collection with
-     * a size greater than one.  That indicates the Conversations *must* be merged before adding.
+     * The given email will be added to new conversation if there are
+     * not any associated conversations, added to an existing
+     * conversation if it does not exist in an associated
+     * conversation, otherwise if in an existing conversation,
+     * `known_paths` will be merged with the email's paths in that
+     * conversation.
+     *
+     * Returns the conversation the email was strictly added to, else
+     * `null` if the conversation was simply merged. The parameter
+     * `added_conversation` is set `true` if the returned conversation
+     * was created, else it is set to `false`.
      */
     private Conversation? add_email(Geary.Email email,
                                     Folder base_folder,
-                                    Gee.Collection<Geary.FolderPath>? known_paths,
-        out bool added_conversation) {
+                                    Gee.Collection<FolderPath>? known_paths,
+                                    out bool added_conversation) {
         added_conversation = false;
-        
-        if (email_id_map.has_key(email.id))
-            return null;
-        
-        Gee.Set<Conversation> associated = get_associated_conversations(email);
-        assert(associated.size <= 1);
-        
-        Conversation? conversation = null;
-        if (associated.size == 1)
+
+        Conversation? conversation = email_id_map.get(email.id);
+        if (conversation != null) {
+            // Exists in a conversation, so re-add it directly to
+            // merge its paths
+            conversation.add(email, known_paths);
+            // Don't give the caller the idea that the email was
+            // added
+            conversation = null;
+        } else {
+            Gee.Set<Conversation> associated =
+                get_associated_conversations(email);
             conversation = Collection.get_first<Conversation>(associated);
-        
-        if (conversation == null) {
-            conversation = new Conversation(base_folder);
-            _conversations.add(conversation);
-            
-            added_conversation = true;
+            if (conversation == null) {
+                // Not in or related to any existing conversations, so
+                // create one
+                conversation = new Conversation(base_folder);
+                _conversations.add(conversation);
+                added_conversation = true;
+            }
+
+            // Add it and update the set
+            add_email_to_conversation(conversation, email, known_paths);
         }
-        
-        add_email_to_conversation(conversation, email, known_paths);
-        
+
         return conversation;
     }
-    
+
+    /**
+     * Unconditionally adds an email to a conversation.
+     */
     private void add_email_to_conversation(Conversation conversation, Geary.Email email,
         Gee.Collection<Geary.FolderPath>? known_paths) {
         if (!conversation.add(email, known_paths)) {
             error("Couldn't add duplicate email %s to conversation %s",
                 email.id.to_string(), conversation.to_string());
         }
-        
+
         email_id_map.set(email.id, conversation);
-        
+
         Gee.Set<RFC822.MessageID>? ancestors = email.get_ancestors();
         if (ancestors != null) {
             foreach (Geary.RFC822.MessageID ancestor in ancestors)
@@ -129,7 +137,7 @@ private class Geary.App.ConversationSet : BaseObject {
     }
 
     /**
-     * Adds a set of emails to conversations in this set.
+     * Adds a collection of emails to conversations in this set.
      *
      * This method will create and/or merge conversations as
      * needed. The collection `emails` contains the messages to be
@@ -237,15 +245,16 @@ private class Geary.App.ConversationSet : BaseObject {
             if (dest == null || conversation.get_count() > dest.get_count())
                 dest = conversation;
         }
-        
+
         // remove the largest from the list so it's not included in the Collection of source
         // conversations merged into it
         bool removed = conversations.remove(dest);
         assert(removed);
 
+        // Collect all emails and their paths from all conversations
+        // to be merged, then remove those conversations
         Gee.MultiMap<Geary.EmailIdentifier,Geary.FolderPath>? id_to_paths =
             new Gee.HashMultiMap<Geary.EmailIdentifier,Geary.FolderPath>();
-
         foreach (Conversation conversation in conversations) {
             foreach (EmailIdentifier id in conversation.path_map.get_keys()) {
                 moved_email.add(conversation.get_email_by_id(id));
@@ -253,33 +262,31 @@ private class Geary.App.ConversationSet : BaseObject {
                     id_to_paths.set(id, path);
                 }
             }
+            remove_conversation(conversation);
         }
 
-        // convert total sum of Emails to move into map of ID -> Email
-        Gee.Map<Geary.EmailIdentifier, Geary.Email>? id_map = Geary.Email.emails_to_map(moved_email);
-        // there better be some Email here, otherwise things are really hosed
-        assert(id_map != null && id_map.size > 0);
-        
-        // remove using the standard call, to ensure all state is updated
-        Gee.MultiMap<Conversation, Geary.Email> trimmed_conversations;
-        Gee.Collection<Conversation> removed_conversations;
-        remove_all_emails_by_identifier(id_map.keys, out removed_conversations, out trimmed_conversations);
-        
-        // Conversations should have been removed, not trimmed, and it better have only been the
-        // conversations we're merging
-        assert(trimmed_conversations.size == 0);
-        assert(removed_conversations.size == conversations.size);
-        foreach (Conversation conversation in conversations)
-            assert(removed_conversations.contains(conversation));
-
-        // now add all that email back to the destination Conversation
+        // Now add all that email back to the destination Conversation
         foreach (Geary.Email moved in moved_email) {
             add_email_to_conversation(dest, moved, id_to_paths.get(moved.id));
         }
 
         return dest;
     }
-    
+
+    /**
+     * Removes a conversation from the set.
+     */
+    private void remove_conversation(Conversation conversation) {
+        foreach (Geary.Email conversation_email in conversation.get_emails(Conversation.Ordering.NONE))
+            remove_email_from_conversation(conversation, conversation_email);
+
+        if (!_conversations.remove(conversation))
+            error("Conversation %s already removed from set", conversation.to_string());
+    }
+
+    /**
+     * Unconditionally removes an email from a conversation.
+     */
     private void remove_email_from_conversation(Conversation conversation, Geary.Email email) {
         // Be very strict about our internal state getting out of whack, since
         // it would indicate a nasty error in our logic that we need to fix.
@@ -296,66 +303,91 @@ private class Geary.App.ConversationSet : BaseObject {
             }
         }
     }
-    
-    private void remove_conversation(Conversation conversation) {
-        foreach (Geary.Email conversation_email in conversation.get_emails(Conversation.Ordering.NONE))
-            remove_email_from_conversation(conversation, conversation_email);
-        
-        if (!_conversations.remove(conversation))
-            error("Conversation %s already removed from set", conversation.to_string());
-    }
-    
-    private Conversation? remove_email_by_identifier(Geary.EmailIdentifier id,
-        out Geary.Email? removed_email, out bool removed_conversation) {
+
+    /**
+     * Conditionally removes an email from a conversation.
+     *
+     * The given email will only be removed from the conversation if
+     * it is associated with a path, i.e. if it is present in more
+     * than one folder. Otherwise `source_path` is removed from the
+     * email's set of known paths.
+     */
+    private Conversation? remove_email_by_identifier(FolderPath source_path,
+                                                     EmailIdentifier id,
+                                                     out Geary.Email? removed_email,
+                                                     out bool removed_conversation) {
         removed_email = null;
         removed_conversation = false;
-        
+
         Conversation? conversation = email_id_map.get(id);
         // This can happen when the conversation monitor only goes back a few
         // emails, but something old gets removed.  It's especially likely when
         // changing search terms in the search folder.
         if (conversation == null)
             return null;
-        
+
         Geary.Email? email = conversation.get_email_by_id(id);
-        if (email == null)
-            error("Unable to locate email %s in conversation %s", id.to_string(), conversation.to_string());
-        removed_email = email;
-        
-        remove_email_from_conversation(conversation, email);
-        
+        switch (conversation.get_folder_count(id)) {
+        case 0:
+            error("Unable to locate email %s in conversation %s",
+                  id.to_string(), conversation.to_string());
+
+        case 1:
+            removed_email = email;
+            remove_email_from_conversation(conversation, email);
+            break;
+
+        default:
+            conversation.remove_path(id, source_path);
+            break;
+        }
+
         // Evaporate conversations with no more messages.
         if (conversation.get_count() == 0) {
             debug("Removing email %s evaporates conversation %s", id.to_string(), conversation.to_string());
             remove_conversation(conversation);
-            
+
             removed_conversation = true;
         }
-        
+
         return conversation;
     }
-    
-    public void remove_all_emails_by_identifier(Gee.Collection<Geary.EmailIdentifier> ids,
-        out Gee.Collection<Conversation> removed,
-        out Gee.MultiMap<Conversation, Geary.Email> trimmed) {
+
+    /**
+     * Removes a number of emails from conversations in this set.
+     *
+     * This method will remove and/or trim conversations as
+     * needed. The collection `emails_ids` contains the identifiers
+     * of emails to be removed.
+     *
+     * The returned collections include any conversations that were
+     * removed (if all of their emails were removed), and any that
+     * were trimmed and the emails that were trimmed from it,
+     * respectively.
+     */
+    public void remove_all_emails_by_identifier(FolderPath source_path,
+                                                Gee.Collection<Geary.EmailIdentifier> ids,
+                                                out Gee.Collection<Conversation> removed,
+                                                out Gee.MultiMap<Conversation, Geary.Email> trimmed) {
         Gee.HashSet<Conversation> _removed = new Gee.HashSet<Conversation>();
         Gee.HashMultiMap<Conversation, Geary.Email> _trimmed
             = new Gee.HashMultiMap<Conversation, Geary.Email>();
-        
+
         foreach (Geary.EmailIdentifier id in ids) {
             Geary.Email email;
             bool removed_conversation;
             Conversation? conversation = remove_email_by_identifier(
-                id, out email, out removed_conversation);
-            
+                source_path, id, out email, out removed_conversation
+            );
+
             if (conversation == null)
                 continue;
-            
+
             if (removed_conversation) {
                 if (_trimmed.contains(conversation))
                     _trimmed.remove_all(conversation);
                 _removed.add(conversation);
-            } else {
+            } else if (!conversation.contains_email_by_id(id)) {
                 _trimmed.set(conversation, email);
             }
         }
@@ -405,32 +437,55 @@ private class Geary.App.ConversationSet : BaseObject {
         return evaporated;
     }
     
-    public async void remove_emails_and_check_in_folder_async(
-        Gee.Collection<Geary.EmailIdentifier> ids, Geary.Account account,
-        Geary.FolderPath required_folder_path, out Gee.Collection<Conversation> removed,
-        out Gee.MultiMap<Conversation, Geary.Email> trimmed, Cancellable? cancellable) {
-        Gee.HashSet<Conversation> _removed = new Gee.HashSet<Conversation>();
-        Gee.HashMultiMap<Conversation, Geary.Email> _trimmed
-            = new Gee.HashMultiMap<Conversation, Geary.Email>();
-        
-        Gee.Collection<Conversation> initial_removed;
-        Gee.MultiMap<Conversation, Geary.Email> initial_trimmed;
-        remove_all_emails_by_identifier(ids, out initial_removed, out initial_trimmed);
-        
+    public async void remove_emails_and_check_in_folder_async(FolderPath source_path,
+                                                              Gee.Collection<Geary.EmailIdentifier> ids,
+                                                              Account account,
+                                                              FolderPath required_folder_path,
+                                                              out Gee.Collection<Conversation> removed,
+                                                              out Gee.MultiMap<Conversation, Geary.Email> trimmed,
+                                                              Cancellable? cancellable) {
+        Gee.Collection<Conversation> initial_removed =
+            new Gee.HashSet<Conversation>();
+        Gee.MultiMap<Conversation, Geary.Email> initial_trimmed =
+            new Gee.HashMultiMap<Conversation, Geary.Email>();
+
+        foreach (Geary.EmailIdentifier id in ids) {
+            Geary.Email email;
+            bool removed_conversation;
+            Conversation? conversation = remove_email_by_identifier(
+                source_path, id, out email, out removed_conversation);
+
+            if (conversation == null)
+                continue;
+
+            if (removed_conversation) {
+                if (initial_trimmed.contains(conversation))
+                    initial_trimmed.remove_all(conversation);
+                initial_removed.add(conversation);
+            } else {
+                initial_trimmed.set(conversation, email);
+            }
+        }
+
         Gee.Collection<Conversation> evaporated = yield check_conversations_in_folder_async(
             initial_trimmed.get_keys(), account, required_folder_path, cancellable);
-        
+
+        Gee.HashSet<Conversation> _removed = new Gee.HashSet<Conversation>();
         _removed.add_all(initial_removed);
         _removed.add_all(evaporated);
-        
+
+        Gee.HashMultiMap<Conversation, Geary.Email> _trimmed =
+            new Gee.HashMultiMap<Conversation, Geary.Email>();
+
         foreach (Conversation conversation in initial_trimmed.get_keys()) {
             if (!(conversation in _removed)) {
                 Geary.Collection.multi_map_set_all<Conversation, Geary.Email>(
                     _trimmed, conversation, initial_trimmed.get(conversation));
             }
         }
-        
+
         removed = _removed;
         trimmed = _trimmed;
     }
+
 }

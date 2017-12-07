@@ -635,7 +635,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
         
         Gee.Collection<Geary.App.Conversation> removed;
         Gee.MultiMap<Geary.App.Conversation, Geary.Email> trimmed;
-        yield conversations.remove_emails_and_check_in_folder_async(removed_ids, folder.account,
+        yield conversations.remove_emails_and_check_in_folder_async(folder. path, removed_ids, folder.account,
             folder.path, out removed, out trimmed, null);
         
         foreach (Conversation conversation in trimmed.get_keys())
