@@ -329,13 +329,13 @@ public class GearyController : Geary.BaseObject {
         // Close the ConversationMonitor
         if (current_conversations != null) {
             debug("Stopping conversation monitor for %s...",
-                  this.current_conversations.folder.to_string());
+                  this.current_conversations.base_folder.to_string());
             try {
                 yield this.current_conversations.stop_monitoring_async(null);
             } catch (Error err) {
                 debug(
                     "Error closing conversation monitor %s at shutdown: %s",
-                    this.current_conversations.folder.to_string(),
+                    this.current_conversations.base_folder.to_string(),
                     err.message
                 );
             } finally {

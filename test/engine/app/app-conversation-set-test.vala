@@ -40,9 +40,9 @@ class Geary.App.ConversationSetTest : Gee.TestCase {
         Email e1 = new Email(new MockEmailIdentifer(1));
         Email e2 = new Email(new MockEmailIdentifer(2));
 
-        Gee.LinkedList<Email> email = new Gee.LinkedList<Email>();
-        email.add(e1);
-        email.add(e2);
+        Gee.LinkedList<Email> emails = new Gee.LinkedList<Email>();
+        emails.add(e1);
+        emails.add(e2);
 
         Gee.MultiMap<Geary.EmailIdentifier, Geary.FolderPath> email_paths =
             new Gee.HashMultiMap<Geary.EmailIdentifier, Geary.FolderPath>();
@@ -53,20 +53,10 @@ class Geary.App.ConversationSetTest : Gee.TestCase {
         Gee.MultiMap<Conversation,Email>? appended = null;
         Gee.Collection<Conversation>? removed = null;
 
-        this.test.add_all_emails_async.begin(
-            email,
-            email_paths,
-            this.base_folder,
-            null,
-            (obj, ret) => { async_complete(ret); }
+        this.test.add_all_emails(
+            emails, email_paths, this.base_folder,
+            out added, out appended, out removed
         );
-        try {
-            this.test.add_all_emails_async.end(
-                async_result(), out added, out appended, out removed
-            );
-        } catch (Error error) {
-            assert_not_reached();
-        }
 
         assert(this.test.size == 2);
         assert(this.test.get_email_count() == 2);
@@ -96,8 +86,9 @@ class Geary.App.ConversationSetTest : Gee.TestCase {
     public void add_all_duplicate() {
         Email e1 = setup_email(1);
 
-        Gee.LinkedList<Email> email = new Gee.LinkedList<Email>();
-        email.add(e1);
+        Gee.LinkedList<Email> emails = new Gee.LinkedList<Email>();
+        emails.add(e1);
+        emails.add(e1);
 
         Gee.MultiMap<Geary.EmailIdentifier, Geary.FolderPath> email_paths =
             new Gee.HashMultiMap<Geary.EmailIdentifier, Geary.FolderPath>();
@@ -108,20 +99,10 @@ class Geary.App.ConversationSetTest : Gee.TestCase {
         Gee.Collection<Conversation>? added = null;
         Gee.MultiMap<Conversation,Email>? appended = null;
         Gee.Collection<Conversation>? removed = null;
-        this.test.add_all_emails_async.begin(
-            email,
-            email_paths,
-            this.base_folder,
-            null,
-            (obj, ret) => { async_complete(ret); }
+        this.test.add_all_emails(
+            emails, email_paths, this.base_folder,
+            out added, out appended, out removed
         );
-        try {
-            this.test.add_all_emails_async.end(
-                async_result(), out added, out appended, out removed
-            );
-        } catch (Error error) {
-            assert_not_reached();
-        }
 
         assert(this.test.size == 1);
         assert(this.test.get_email_count() == 1);
@@ -137,20 +118,10 @@ class Geary.App.ConversationSetTest : Gee.TestCase {
         added = null;
         appended = null;
         removed = null;
-        this.test.add_all_emails_async.begin(
-            email,
-            email_paths,
-            this.base_folder,
-            null,
-            (obj, ret) => { async_complete(ret); }
+        this.test.add_all_emails(
+            emails, email_paths, this.base_folder,
+            out added, out appended, out removed
         );
-        try {
-            this.test.add_all_emails_async.end(
-                async_result(), out added, out appended, out removed
-            );
-        } catch (Error error) {
-            assert_not_reached();
-        }
 
         assert(this.test.size == 1);
         assert(this.test.get_email_count() == 1);
@@ -178,21 +149,10 @@ class Geary.App.ConversationSetTest : Gee.TestCase {
         Gee.Collection<Conversation>? added = null;
         Gee.MultiMap<Conversation,Email>? appended = null;
         Gee.Collection<Conversation>? removed = null;
-
-        this.test.add_all_emails_async.begin(
-            emails,
-            email_paths,
-            this.base_folder,
-            null,
-            (obj, ret) => { async_complete(ret); }
+        this.test.add_all_emails(
+            emails, email_paths, this.base_folder,
+            out added, out appended, out removed
         );
-        try {
-            this.test.add_all_emails_async.end(
-                async_result(), out added, out appended, out removed
-            );
-        } catch (Error error) {
-            assert_not_reached();
-        }
 
         assert(this.test.size == 1);
         assert(this.test.get_email_count() == 2);
@@ -219,20 +179,10 @@ class Geary.App.ConversationSetTest : Gee.TestCase {
         added = null;
         appended = null;
         removed = null;
-        this.test.add_all_emails_async.begin(
-            emails,
-            email_paths,
-            this.base_folder,
-            null,
-            (obj, ret) => { async_complete(ret); }
+        this.test.add_all_emails(
+            emails, email_paths, this.base_folder,
+            out added, out appended, out removed
         );
-        try {
-            this.test.add_all_emails_async.end(
-                async_result(), out added, out appended, out removed
-            );
-        } catch (Error error) {
-            assert_not_reached();
-        }
 
         assert(this.test.size == 1);
         assert(this.test.get_email_count() == 3);
@@ -269,20 +219,10 @@ class Geary.App.ConversationSetTest : Gee.TestCase {
         Gee.Collection<Conversation>? added = null;
         Gee.MultiMap<Conversation,Email>? appended = null;
         Gee.Collection<Conversation>? removed = null;
-        this.test.add_all_emails_async.begin(
-            emails,
-            email_paths,
-            this.base_folder,
-            null,
-            (obj, ret) => { async_complete(ret); }
+        this.test.add_all_emails(
+            emails, email_paths, this.base_folder,
+            out added, out appended, out removed
         );
-        try {
-            this.test.add_all_emails_async.end(
-                async_result(), out added, out appended, out removed
-            );
-        } catch (Error error) {
-            assert_not_reached();
-        }
 
         assert(this.test.size == 1);
         assert(this.test.get_email_count() == 2);
@@ -322,20 +262,10 @@ class Geary.App.ConversationSetTest : Gee.TestCase {
         Gee.Collection<Conversation>? added = null;
         Gee.MultiMap<Conversation,Email>? appended = null;
         Gee.Collection<Conversation>? removed = null;
-        this.test.add_all_emails_async.begin(
-            emails,
-            email_paths,
-            this.base_folder,
-            null,
-            (obj, ret) => { async_complete(ret); }
+        this.test.add_all_emails(
+            emails, email_paths, this.base_folder,
+            out added, out appended, out removed
         );
-        try {
-            this.test.add_all_emails_async.end(
-                async_result(), out added, out appended, out removed
-            );
-        } catch (Error error) {
-            assert_not_reached();
-        }
 
         assert(this.test.size == 1);
         assert(this.test.get_email_count() == 3);
@@ -369,26 +299,16 @@ class Geary.App.ConversationSetTest : Gee.TestCase {
         Gee.Collection<Conversation>? added = null;
         Gee.MultiMap<Conversation,Email>? appended = null;
         Gee.Collection<Conversation>? removed = null;
-        this.test.add_all_emails_async.begin(
-            emails,
-            email_paths,
-            this.base_folder,
-            null,
-            (obj, ret) => { async_complete(ret); }
+        this.test.add_all_emails(
+            emails, email_paths, this.base_folder,
+            out added, out appended, out removed
         );
-        try {
-            this.test.add_all_emails_async.end(
-                async_result(), out added, out appended, out removed
-            );
-        } catch (Error error) {
-            assert_not_reached();
-        }
 
         assert(this.test.size == 1);
         assert(this.test.get_email_count() == 1);
 
         Conversation convo = this.test.get_by_email_identifier(e1.id);
-        assert(convo.is_in_current_folder(e1.id) == true);
+        assert(convo.is_in_base_folder(e1.id) == true);
         assert(convo.get_folder_count(e1.id) == 2);
     }
 
@@ -408,20 +328,10 @@ class Geary.App.ConversationSetTest : Gee.TestCase {
         Gee.Collection<Conversation>? added = null;
         Gee.MultiMap<Conversation,Email>? appended = null;
         Gee.Collection<Conversation>? removed = null;
-        this.test.add_all_emails_async.begin(
-            emails,
-            email_paths,
-            this.base_folder,
-            null,
-            (obj, ret) => { async_complete(ret); }
+        this.test.add_all_emails(
+            emails, email_paths, this.base_folder,
+            out added, out appended, out removed
         );
-        try {
-            this.test.add_all_emails_async.end(
-                async_result(), out added, out appended, out removed
-            );
-        } catch (Error error) {
-            assert_not_reached();
-        }
 
         assert(this.test.size == 1);
         assert(this.test.get_email_count() == 1);
@@ -431,7 +341,7 @@ class Geary.App.ConversationSetTest : Gee.TestCase {
         assert(removed.is_empty);
 
         Conversation convo = this.test.get_by_email_identifier(e1.id);
-        assert(convo.is_in_current_folder(e1.id) == true);
+        assert(convo.is_in_base_folder(e1.id) == true);
         assert(convo.get_folder_count(e1.id) == 2);
     }
 
@@ -518,7 +428,7 @@ class Geary.App.ConversationSetTest : Gee.TestCase {
         assert(trimmed != null);
         assert(trimmed.size == 0);
 
-        assert(convo.is_in_current_folder(e1.id) == true);
+        assert(convo.is_in_base_folder(e1.id) == true);
         assert(convo.get_folder_count(e1.id) == 1);
     }
 
@@ -553,20 +463,10 @@ class Geary.App.ConversationSetTest : Gee.TestCase {
         Gee.Collection<Conversation>? added = null;
         Gee.MultiMap<Conversation,Email>? appended = null;
         Gee.Collection<Conversation>? removed = null;
-        this.test.add_all_emails_async.begin(
-            emails,
-            email_paths,
-            this.base_folder,
-            null,
-            (obj, ret) => { async_complete(ret); }
+        this.test.add_all_emails(
+            emails, email_paths, this.base_folder,
+            out added, out appended, out removed
         );
-        try {
-            this.test.add_all_emails_async.end(
-                async_result(), out added, out appended, out removed
-            );
-        } catch (Error error) {
-            assert_not_reached();
-        }
     }
 
 }

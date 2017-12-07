@@ -106,7 +106,7 @@ public class ConversationListStore : Gtk.ListStore {
             Priority.LOW, 60, update_date_strings
         );
         this.email_store = new Geary.App.EmailStore(
-            conversations.folder.account
+            conversations.base_folder.account
         );
         GearyApplication.instance.config.settings.changed[Configuration.DISPLAY_PREVIEW_KEY].connect(
             on_display_preview_changed);
@@ -182,7 +182,7 @@ public class ConversationListStore : Gtk.ListStore {
         if (emails.size < 1)
             return;
         
-        debug("Displaying %d previews for %s...", emails.size, conversation_monitor.folder.to_string());
+        debug("Displaying %d previews for %s...", emails.size, conversation_monitor.base_folder.to_string());
         foreach (Geary.Email email in emails) {
             Geary.App.Conversation? conversation = conversation_monitor.get_conversation_for_email(email.id);
             if (conversation != null)
@@ -190,7 +190,7 @@ public class ConversationListStore : Gtk.ListStore {
             else
                 debug("Couldn't find conversation for %s", email.id.to_string());
         }
-        debug("Displayed %d previews for %s", emails.size, conversation_monitor.folder.to_string());
+        debug("Displayed %d previews for %s", emails.size, conversation_monitor.base_folder.to_string());
     }
     
     private async Gee.Collection<Geary.Email> do_get_previews_async(
@@ -278,8 +278,8 @@ public class ConversationListStore : Gtk.ListStore {
         FormattedConversationData conversation_data = new FormattedConversationData(
             conversation,
             preview,
-            this.conversations.folder,
-            this.conversations.folder.account.information.get_all_mailboxes()
+            this.conversations.base_folder,
+            this.conversations.base_folder.account.information.get_all_mailboxes()
         );
 
         Gtk.TreePath? path = get_path(iter);
