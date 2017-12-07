@@ -860,7 +860,7 @@ public class ConversationListBox : Gtk.ListBox {
         // Should be able to edit draft emails from any
         // conversation. This test should be more like "is in drafts
         // folder"
-        bool is_in_folder = this.conversation.is_in_current_folder(email.id);
+        bool is_in_folder = this.conversation.is_in_base_folder(email.id);
         bool is_draft = (this.is_draft_folder && is_in_folder);
 
         bool is_sent = false;

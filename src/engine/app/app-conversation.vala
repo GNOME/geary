@@ -18,9 +18,9 @@ public class Geary.App.Conversation : BaseObject {
         RECV_DATE_ASCENDING,
         RECV_DATE_DESCENDING
     }
-    
+
     /**
-     * Specify the location of the {@link Email} in relation to the {@link Folder} being monitored
+     * Specify the location of the {@link Email} in relation to the base folder being monitored
      * by the {@link Conversation}'s {@link ConversationMonitor}.
      *
      * IN_FOLDER represents Email that is found in the Folder the ConversationMonitor is
@@ -37,9 +37,9 @@ public class Geary.App.Conversation : BaseObject {
         OUT_OF_FOLDER_IN_FOLDER,
         ANYWHERE
     }
-    
+
     private static int next_convnum = 0;
-    
+
     /** Folder from which the conversation originated. */
     public Folder base_folder { get; private set; }
 
@@ -71,12 +71,12 @@ public class Geary.App.Conversation : BaseObject {
      * Fired when email has been added to this conversation.
      */
     public signal void appended(Geary.Email email);
-    
+
     /**
      * Fired when email has been trimmed from this conversation.
      */
     public signal void trimmed(Geary.Email email);
-    
+
     /**
      * Fired when the flags of an email in this conversation have changed.
      */
@@ -97,7 +97,7 @@ public class Geary.App.Conversation : BaseObject {
     public int get_count() {
         return emails.size;
     }
-    
+
     /**
      * Returns the number of emails in the conversation in a particular folder.
      */
@@ -105,7 +105,7 @@ public class Geary.App.Conversation : BaseObject {
         Cancellable? cancellable) throws Error {
         Gee.MultiMap<Geary.EmailIdentifier, Geary.FolderPath>? folder_map
             = yield account.get_containing_folders_async(emails.keys, cancellable);
-        
+
         int count = 0;
         if (folder_map != null) {
             foreach (Geary.EmailIdentifier id in folder_map.get_keys()) {
@@ -113,10 +113,59 @@ public class Geary.App.Conversation : BaseObject {
                     ++count;
             }
         }
-        
+
         return count;
     }
-    
+
+    /**
+     * Returns true if *any* message in the conversation is unread.
+     */
+    public bool is_unread() {
+        return has_flag(Geary.EmailFlags.UNREAD);
+    }
+
+    /**
+     * Returns true if any message in the conversation is not unread.
+     */
+    public bool has_any_read_message() {
+        return is_missing_flag(Geary.EmailFlags.UNREAD);
+    }
+
+    /**
+     * Returns true if *any* message in the conversation is flagged.
+     */
+    public bool is_flagged() {
+        return has_flag(Geary.EmailFlags.FLAGGED);
+    }
+
+    /**
+     * Returns the earliest (first sent) email in the Conversation.
+     */
+    public Geary.Email? get_earliest_sent_email(Location location) {
+        return get_single_email(Ordering.SENT_DATE_ASCENDING, location);
+    }
+
+    /**
+     * Returns the latest (most recently sent) email in the Conversation.
+     */
+    public Geary.Email? get_latest_sent_email(Location location) {
+        return get_single_email(Ordering.SENT_DATE_DESCENDING, location);
+    }
+
+    /**
+     * Returns the earliest (first received) email in the Conversation.
+     */
+    public Geary.Email? get_earliest_recv_email(Location location) {
+        return get_single_email(Ordering.RECV_DATE_ASCENDING, location);
+    }
+
+    /**
+     * Returns the latest (most recently received) email in the Conversation.
+     */
+    public Geary.Email? get_latest_recv_email(Location location) {
+        return get_single_email(Ordering.RECV_DATE_DESCENDING, location);
+    }
+
     /**
      * Returns all the email in the conversation sorted and filtered according to the specifiers.
      *
@@ -131,58 +180,58 @@ public class Geary.App.Conversation : BaseObject {
             case Ordering.SENT_DATE_ASCENDING:
                 email = sent_date_ascending;
             break;
-            
+
             case Ordering.SENT_DATE_DESCENDING:
                 email = sent_date_descending;
             break;
-            
+
             case Ordering.RECV_DATE_ASCENDING:
                 email = recv_date_ascending;
             break;
-            
+
             case Ordering.RECV_DATE_DESCENDING:
                 email = recv_date_descending;
             break;
-            
+
             case Ordering.NONE:
                 email = emails.values;
             break;
-            
+
             default:
                 assert_not_reached();
         }
-        
+
         switch (location) {
             case Location.IN_FOLDER:
                 email = traverse<Email>(email)
-                    .filter((e) => !is_in_current_folder(e.id))
+                    .filter((e) => !is_in_base_folder(e.id))
                     .to_array_list();
             break;
-            
+
             case Location.OUT_OF_FOLDER:
                 email = traverse<Email>(email)
-                    .filter((e) => is_in_current_folder(e.id))
+                    .filter((e) => is_in_base_folder(e.id))
                     .to_array_list();
             break;
-            
+
             case Location.IN_FOLDER_OUT_OF_FOLDER:
             case Location.OUT_OF_FOLDER_IN_FOLDER:
             case Location.ANYWHERE:
                 // make a modifiable copy
                 email = traverse<Email>(email).to_array_list();
             break;
-            
+
             default:
                 assert_not_reached();
         }
-        
+
         return email;
     }
 
     /**
      * Determines if the given id is in the conversation's base folder.
      */
-    public bool is_in_current_folder(Geary.EmailIdentifier id) {
+    public bool is_in_base_folder(Geary.EmailIdentifier id) {
         Gee.Collection<Geary.FolderPath>? paths = this.path_map.get(id);
         return (paths != null && paths.contains(this.base_folder.path));
     }
@@ -203,7 +252,7 @@ public class Geary.App.Conversation : BaseObject {
      * Determines if an email with the give id exists in the conversation.
      */
     public bool contains_email_by_id(EmailIdentifier id) {
-        return emails.contains(id);
+        return emails.has_key(id);
     }
 
     /**
@@ -228,6 +277,13 @@ public class Geary.App.Conversation : BaseObject {
         Gee.HashSet<RFC822.MessageID> ids = new Gee.HashSet<RFC822.MessageID>();
         ids.add_all(message_ids);
         return ids;
+    }
+
+    /**
+     * Returns a string representation for debugging.
+     */
+    public string to_string() {
+        return "[#%d] (%d emails)".printf(convnum, emails.size);
     }
 
     /**
@@ -311,61 +367,12 @@ public class Geary.App.Conversation : BaseObject {
         this.path_map.remove(id, path);
     }
 
-    /**
-     * Returns true if *any* message in the conversation is unread.
-     */
-    public bool is_unread() {
-        return has_flag(Geary.EmailFlags.UNREAD);
-    }
-
-    /**
-     * Returns true if any message in the conversation is not unread.
-     */
-    public bool has_any_read_message() {
-        return is_missing_flag(Geary.EmailFlags.UNREAD);
-    }
-
-    /**
-     * Returns true if *any* message in the conversation is flagged.
-     */
-    public bool is_flagged() {
-        return has_flag(Geary.EmailFlags.FLAGGED);
-    }
-    
-    /**
-     * Returns the earliest (first sent) email in the Conversation.
-     */
-    public Geary.Email? get_earliest_sent_email(Location location) {
-        return get_single_email(Ordering.SENT_DATE_ASCENDING, location);
-    }
-    
-    /**
-     * Returns the latest (most recently sent) email in the Conversation.
-     */
-    public Geary.Email? get_latest_sent_email(Location location) {
-        return get_single_email(Ordering.SENT_DATE_DESCENDING, location);
-    }
-    
-    /**
-     * Returns the earliest (first received) email in the Conversation.
-     */
-    public Geary.Email? get_earliest_recv_email(Location location) {
-        return get_single_email(Ordering.RECV_DATE_ASCENDING, location);
-    }
-    
-    /**
-     * Returns the latest (most recently received) email in the Conversation.
-     */
-    public Geary.Email? get_latest_recv_email(Location location) {
-        return get_single_email(Ordering.RECV_DATE_DESCENDING, location);
-    }
-
     private Geary.Email? get_single_email(Ordering ordering, Location location) {
         // note that the location-ordering preferences are treated as ANYWHERE by get_emails()
         Gee.Collection<Geary.Email> all = get_emails(ordering, location);
         if (all.size == 0)
             return null;
-        
+
         // Because IN_FOLDER_OUT_OF_FOLDER and OUT_OF_FOLDER_IN_FOLDER are treated as ANYWHERE,
         // have to do our own filtering
         switch (location) {
@@ -373,30 +380,30 @@ public class Geary.App.Conversation : BaseObject {
             case Location.OUT_OF_FOLDER:
             case Location.ANYWHERE:
                 return traverse<Email>(all).first();
-            
+
             case Location.IN_FOLDER_OUT_OF_FOLDER:
                 Geary.Email? found = traverse<Email>(all)
-                    .first_matching((email) => is_in_current_folder(email.id));
-                
+                    .first_matching((email) => is_in_base_folder(email.id));
+
                 return found ?? traverse<Email>(all).first();
-            
+
             case Location.OUT_OF_FOLDER_IN_FOLDER:
                 Geary.Email? found = traverse<Email>(all)
-                    .first_matching((email) => !is_in_current_folder(email.id));
-                
+                    .first_matching((email) => !is_in_base_folder(email.id));
+
                 return found ?? traverse<Email>(all).first();
-            
+
             default:
                 assert_not_reached();
         }
     }
-    
+
     private bool check_flag(Geary.NamedFlag flag, bool contains) {
         foreach (Geary.Email email in get_emails(Ordering.NONE)) {
             if (email.email_flags != null && email.email_flags.contains(flag) == contains)
                 return true;
         }
-        
+
         return false;
     }
 
@@ -408,7 +415,4 @@ public class Geary.App.Conversation : BaseObject {
         return check_flag(flag, false);
     }
 
-    public string to_string() {
-        return "[#%d] (%d emails)".printf(convnum, emails.size);
-    }
 }

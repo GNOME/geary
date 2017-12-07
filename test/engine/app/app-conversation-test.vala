@@ -40,13 +40,13 @@ class Geary.App.ConversationTest : Gee.TestCase {
             });
 
         assert(this.test.add(e1, singleton(this.base_folder.path)) == true);
-        assert(this.test.is_in_current_folder(e1.id) == true);
+        assert(this.test.is_in_base_folder(e1.id) == true);
         assert(this.test.get_folder_count(e1.id) == 1);
         assert(appended == 1);
         assert(this.test.get_count() == 1);
 
         assert(this.test.add(e2, singleton(this.base_folder.path)) == true);
-        assert(this.test.is_in_current_folder(e2.id) == true);
+        assert(this.test.is_in_base_folder(e2.id) == true);
         assert(this.test.get_folder_count(e2.id) == 1);
         assert(appended == 2);
         assert(this.test.get_count() == 2);
@@ -80,14 +80,14 @@ class Geary.App.ConversationTest : Gee.TestCase {
         other_paths.add(other_path);
 
         assert(this.test.add(e1, other_paths) == false);
-        assert(this.test.is_in_current_folder(e1.id) == true);
+        assert(this.test.is_in_base_folder(e1.id) == true);
         assert(this.test.get_folder_count(e1.id) == 2);
 
-        assert(this.test.is_in_current_folder(e2.id) == true);
+        assert(this.test.is_in_base_folder(e2.id) == true);
         assert(this.test.get_folder_count(e2.id) == 1);
 
         this.test.remove_path(e1.id, other_path);
-        assert(this.test.is_in_current_folder(e1.id) == true);
+        assert(this.test.is_in_base_folder(e1.id) == true);
         assert(this.test.get_folder_count(e1.id) == 1);
     }
 
