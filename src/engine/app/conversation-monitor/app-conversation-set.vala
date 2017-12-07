@@ -55,6 +55,17 @@ private class Geary.App.ConversationSet : BaseObject {
         return email_id_map.get(id);
     }
 
+    /**
+     * Removes a conversation from the set.
+     */
+    public void remove_conversation(Conversation conversation) {
+        foreach (Geary.Email conversation_email in conversation.get_emails(Conversation.Ordering.NONE))
+            remove_email_from_conversation(conversation, conversation_email);
+
+        if (!_conversations.remove(conversation))
+            error("Conversation %s already removed from set", conversation.to_string());
+    }
+
     // Returns a Collection of zero or more Conversations that have Message-IDs associated with
     // the ancestors of the supplied Email ... if more than one, then add_email() should not be
     // called
@@ -274,17 +285,6 @@ private class Geary.App.ConversationSet : BaseObject {
     }
 
     /**
-     * Removes a conversation from the set.
-     */
-    private void remove_conversation(Conversation conversation) {
-        foreach (Geary.Email conversation_email in conversation.get_emails(Conversation.Ordering.NONE))
-            remove_email_from_conversation(conversation, conversation_email);
-
-        if (!_conversations.remove(conversation))
-            error("Conversation %s already removed from set", conversation.to_string());
-    }
-
-    /**
      * Unconditionally removes an email from a conversation.
      */
     private void remove_email_from_conversation(Conversation conversation, Geary.Email email) {
@@ -389,98 +389,6 @@ private class Geary.App.ConversationSet : BaseObject {
                 _removed.add(conversation);
             } else if (!conversation.contains_email_by_id(id)) {
                 _trimmed.set(conversation, email);
-            }
-        }
-        
-        removed = _removed;
-        trimmed = _trimmed;
-    }
-    
-    /**
-     * Make sure that the conversation has some emails in the given folder, and
-     * remove the conversation if not.  Return true if there were emails in the
-     * folder, or false if the conversation was removed.
-     */
-    public async bool check_conversation_in_folder_async(Conversation conversation, Geary.Account account,
-        Geary.FolderPath required_folder_path, Cancellable? cancellable) throws Error {
-        if ((yield conversation.get_count_in_folder_async(account, required_folder_path, cancellable)) == 0) {
-            debug("Evaporating conversation %s because it has no emails in %s",
-                conversation.to_string(), required_folder_path.to_string());
-            remove_conversation(conversation);
-            
-            return false;
-        }
-        
-        return true;
-    }
-    
-    /**
-     * Check a set of emails using check_conversation_in_folder_async(), return
-     * the set of emails that were removed due to not being in the folder.
-     */
-    public async Gee.Collection<Conversation> check_conversations_in_folder_async(
-        Gee.Collection<Conversation> conversations, Geary.Account account,
-        Geary.FolderPath required_folder_path, Cancellable? cancellable) {
-        Gee.ArrayList<Conversation> evaporated = new Gee.ArrayList<Conversation>();
-        foreach (Geary.App.Conversation conversation in conversations) {
-            try {
-                if (!(yield check_conversation_in_folder_async(
-                    conversation, account, required_folder_path, cancellable))) {
-                    evaporated.add(conversation);
-                }
-            } catch (Error e) {
-                debug("Unable to check conversation %s for messages in %s: %s",
-                    conversation.to_string(), required_folder_path.to_string(), e.message);
-            }
-        }
-        
-        return evaporated;
-    }
-    
-    public async void remove_emails_and_check_in_folder_async(FolderPath source_path,
-                                                              Gee.Collection<Geary.EmailIdentifier> ids,
-                                                              Account account,
-                                                              FolderPath required_folder_path,
-                                                              out Gee.Collection<Conversation> removed,
-                                                              out Gee.MultiMap<Conversation, Geary.Email> trimmed,
-                                                              Cancellable? cancellable) {
-        Gee.Collection<Conversation> initial_removed =
-            new Gee.HashSet<Conversation>();
-        Gee.MultiMap<Conversation, Geary.Email> initial_trimmed =
-            new Gee.HashMultiMap<Conversation, Geary.Email>();
-
-        foreach (Geary.EmailIdentifier id in ids) {
-            Geary.Email email;
-            bool removed_conversation;
-            Conversation? conversation = remove_email_by_identifier(
-                source_path, id, out email, out removed_conversation);
-
-            if (conversation == null)
-                continue;
-
-            if (removed_conversation) {
-                if (initial_trimmed.contains(conversation))
-                    initial_trimmed.remove_all(conversation);
-                initial_removed.add(conversation);
-            } else {
-                initial_trimmed.set(conversation, email);
-            }
-        }
-
-        Gee.Collection<Conversation> evaporated = yield check_conversations_in_folder_async(
-            initial_trimmed.get_keys(), account, required_folder_path, cancellable);
-
-        Gee.HashSet<Conversation> _removed = new Gee.HashSet<Conversation>();
-        _removed.add_all(initial_removed);
-        _removed.add_all(evaporated);
-
-        Gee.HashMultiMap<Conversation, Geary.Email> _trimmed =
-            new Gee.HashMultiMap<Conversation, Geary.Email>();
-
-        foreach (Conversation conversation in initial_trimmed.get_keys()) {
-            if (!(conversation in _removed)) {
-                Geary.Collection.multi_map_set_all<Conversation, Geary.Email>(
-                    _trimmed, conversation, initial_trimmed.get(conversation));
             }
         }
 
