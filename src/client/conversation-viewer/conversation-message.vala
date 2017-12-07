@@ -429,10 +429,18 @@ public class ConversationMessage : Gtk.Grid {
      */
     public async void load_avatar(ConversationListBox.AvatarStore loader,
                                   Cancellable load_cancelled) {
+        const int PIXEL_SIZE = 32;
         Geary.RFC822.MailboxAddress? primary = message.get_primary_originator();
         if (primary != null) {
             int window_scale = get_scale_factor();
-            int pixel_size = this.avatar.get_pixel_size() * window_scale;
+            // We occasionally get crashes calling as below
+            // Gtk.Image.get_pixel_size() when the image is
+            // null. There's perhaps some race going on there. So we
+            // need to hard-code the size and keep it in sync with
+            // ui/conversation-message.ui. :(
+            //
+            //int pixel_size = this.avatar.get_pixel_size() * window_scale;
+            int pixel_size = PIXEL_SIZE * window_scale;
             try {
                 Gdk.Pixbuf? avatar_buf = yield loader.load(
                     primary, pixel_size, load_cancelled
