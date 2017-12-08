@@ -1,0 +1,31 @@
+sql_files = [
+  'version-001.sql',
+  'version-002.sql',
+  'version-003.sql',
+  'version-004.sql',
+  'version-005.sql',
+  'version-006.sql',
+  'version-007.sql',
+  'version-008.sql',
+  'version-009.sql',
+  'version-010.sql',
+  'version-011.sql',
+  'version-012.sql',
+  'version-013.sql',
+  'version-014.sql',
+  'version-015.sql',
+  'version-016.sql',
+  'version-017.sql',
+  'version-018.sql',
+  'version-019.sql',
+  'version-020.sql',
+  'version-021.sql',
+  'version-022.sql',
+  'version-023.sql',
+  'version-024.sql',
+  'version-025.sql',
+]
+
+install_data(sql_files,
+  install_dir: join_paths(datadir, meson.project_name(), 'sql')
+)
