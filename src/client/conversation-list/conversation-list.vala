@@ -75,7 +75,7 @@ public class ConversationList : Gtk.ListBox {
                 loader.load_remote();
             });
 
-        this.model = new ConversationListModel(monitor);
+        this.model = new ConversationListModel(monitor, loader);
         this.model.items_changed.connect(on_model_items_changed);
 
         Gee.List<Geary.RFC822.MailboxAddress> account_addresses = displayed.account.information.get_all_mailboxes();

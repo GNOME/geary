@@ -293,17 +293,12 @@ public class MainWindow : Gtk.ApplicationWindow {
     }
 
     private void on_conversation_monitor_changed() {
-        // Old list
-        ConversationListStore? old_store = this.conversation_list_view.get_model();
-        if (old_store != null) {
-            this.progress_monitor.remove(old_store.preview_monitor);
-            this.progress_monitor.remove(old_store.conversations.progress_monitor);
-        }
-
         ConversationListModel? old_model = this.conversation_list.model;
-        Geary.App.ConversationMonitor? old_monitor = (old_model != null)
-            ? old_model.monitor : null;
-        if (old_monitor != null) {
+        if (old_model != null) {
+            this.progress_monitor.remove(old_model.monitor.progress_monitor);
+            this.progress_monitor.remove(old_model.previews.progress);
+
+            Geary.App.ConversationMonitor? old_monitor = old_model.monitor;
             old_monitor.scan_error.disconnect(on_scan_error);
             old_monitor.seed_completed.disconnect(on_seed_completed);
             old_monitor.seed_completed.disconnect(on_conversation_count_changed);
@@ -315,15 +310,11 @@ public class MainWindow : Gtk.ApplicationWindow {
         Geary.App.ConversationMonitor? new_monitor =
             this.application.controller.current_conversations;
         if (new_monitor != null) {
-            // Old list
-            ConversationListStore new_model =
-                new ConversationListStore(new_monitor);
-            this.progress_monitor.add(new_monitor.progress_monitor);
-            this.progress_monitor.add(new_model.preview_monitor);
-            this.conversation_list_view.set_model(new_model);
-
-            // New list
             this.conversation_list.bind_model(new_monitor);
+            ConversationListModel new_model = this.conversation_list.model;
+
+            this.progress_monitor.add(new_model.monitor.progress_monitor);
+            this.progress_monitor.add(new_model.previews.progress);
 
             new_monitor.scan_error.connect(on_scan_error);
             new_monitor.seed_completed.connect(on_seed_completed);
@@ -331,11 +322,6 @@ public class MainWindow : Gtk.ApplicationWindow {
             new_monitor.scan_completed.connect(on_conversation_count_changed);
             new_monitor.conversations_added.connect(on_conversation_count_changed);
             new_monitor.conversations_removed.connect(on_conversation_count_changed);
-        }
-
-        if (old_store != null) {
-            // Must be destroyed, but only after it has been replaced.
-            old_store.destroy();
         }
     }
 

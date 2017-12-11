@@ -11,6 +11,15 @@
  */
 public class PreviewLoader : Geary.BaseObject {
 
+
+    public Geary.ProgressMonitor progress {
+        get;
+        private set;
+        default = new Geary.ReentrantProgressMonitor(
+            Geary.ProgressType.ACTIVITY
+        );
+    }
+
     // XXX Remove ALL and NONE when PREVIEW has been fixed. See Bug 714317.
     private const Geary.Email.Field WITH_PREVIEW_FIELDS =
         Geary.Email.Field.ENVELOPE | Geary.Email.Field.FLAGS |
@@ -32,6 +41,7 @@ public class PreviewLoader : Geary.BaseObject {
     }
 
     public async string? load(Geary.Email target, Cancellable load_cancellable) {
+        this.progress.notify_start();
         Gee.Collection<Geary.EmailIdentifier> pending = new Gee.HashSet<Geary.EmailIdentifier>();
         pending.add(target.id);
 
@@ -58,6 +68,7 @@ public class PreviewLoader : Geary.BaseObject {
         if (loaded != null && !load_cancellable.is_cancelled()) {
             preview = Geary.String.reduce_whitespace(loaded.get_preview_as_string());
         }
+        this.progress.notify_finish();
         return preview;
     }
 

@@ -21,6 +21,9 @@ public class ConversationListModel : Geary.BaseObject, GLib.ListModel {
     /** The source of conversations for this model. */
     public Geary.App.ConversationMonitor monitor { get; private set; }
 
+    /** The preview loader for this model. */
+    public PreviewLoader previews { get; private set; }
+
     // Backing store for this model
     private Sequence<Geary.App.Conversation> conversations =
         new Sequence<Geary.App.Conversation>();
@@ -33,8 +36,10 @@ public class ConversationListModel : Geary.BaseObject, GLib.ListModel {
     /**
      * Constructs a new model for the conversation list.
      */
-    public ConversationListModel(Geary.App.ConversationMonitor monitor) {
+    public ConversationListModel(Geary.App.ConversationMonitor monitor,
+                                 PreviewLoader previews) {
         this.monitor = monitor;
+        this.previews = previews;
 
         // XXX Should only start loading when scan is completed
         //monitor.scan_completed.connect(on_scan_completed);
