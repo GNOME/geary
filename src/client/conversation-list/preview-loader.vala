@@ -12,6 +12,16 @@
 public class PreviewLoader : Geary.BaseObject {
 
 
+    /** Email fields required to load message previews. */
+    public const Geary.Email.Field REQUIRED_FIELDS =
+        ConversationListModel.REQUIRED_FIELDS |
+        Geary.Email.Field.PREVIEW |
+        // XXX Remove ALL and NONE below when PREVIEW has been
+        // fixed. See Bug 714317.
+        Geary.Email.Field.ALL | Geary.Email.Field.NONE;
+
+
+    /** Progress monitor for loading previews from the database. */
     public Geary.ProgressMonitor progress {
         get;
         private set;
@@ -20,11 +30,6 @@ public class PreviewLoader : Geary.BaseObject {
         );
     }
 
-    // XXX Remove ALL and NONE when PREVIEW has been fixed. See Bug 714317.
-    private const Geary.Email.Field WITH_PREVIEW_FIELDS =
-        Geary.Email.Field.ENVELOPE | Geary.Email.Field.FLAGS |
-        Geary.Email.Field.PROPERTIES | Geary.Email.Field.PREVIEW |
-        Geary.Email.Field.ALL | Geary.Email.Field.NONE;
 
     private Geary.App.EmailStore email_store;
     private Cancellable cancellable;

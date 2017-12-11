@@ -1330,7 +1330,7 @@ public class GearyController : Geary.BaseObject {
         current_conversations = new Geary.App.ConversationMonitor(
             current_folder,
             Geary.Folder.OpenFlags.NO_DELAY,
-            ConversationListStore.REQUIRED_FIELDS,
+            ConversationListModel.REQUIRED_FIELDS,
             CONVERSATION_PAGE_SIZE * 2 // load double up front when not scrolling
         );
 

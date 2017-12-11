@@ -18,6 +18,13 @@
 public class ConversationListModel : Geary.BaseObject, GLib.ListModel {
 
 
+    /** Email fields required to load the message in this model. */
+    public const Geary.Email.Field REQUIRED_FIELDS =
+        Geary.Email.Field.ENVELOPE |
+        Geary.Email.Field.FLAGS |
+        Geary.Email.Field.PROPERTIES;
+
+
     /** The source of conversations for this model. */
     public Geary.App.ConversationMonitor monitor { get; private set; }
 
