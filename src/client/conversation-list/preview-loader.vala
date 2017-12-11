@@ -31,7 +31,20 @@ public class PreviewLoader : Geary.BaseObject {
     }
 
 
+    private class LoadSet {
+
+        public Gee.Map<Geary.EmailIdentifier,Geary.Email?> to_load =
+            new Gee.HashMap<Geary.EmailIdentifier,Geary.Email?>();
+        public Geary.Nonblocking.Semaphore loaded =
+            new Geary.Nonblocking.Semaphore();
+
+    }
+
+
+
+    private LoadSet next_set = new LoadSet();
     private Geary.App.EmailStore email_store;
+    private Geary.TimeoutManager load_timer;
     private Cancellable cancellable;
     private bool loading_local_only = true;
 
@@ -39,42 +52,63 @@ public class PreviewLoader : Geary.BaseObject {
     public PreviewLoader(Geary.App.EmailStore email_store, Cancellable cancellable) {
         this.email_store = email_store;
         this.cancellable = cancellable;
+
+        this.load_timer = new Geary.TimeoutManager.seconds(
+            1, () => { this.do_load.begin(); }
+        );
     }
 
     public void load_remote() {
         this.loading_local_only = false;
+        this.do_load.begin();
     }
 
-    public async string? load(Geary.Email target, Cancellable load_cancellable) {
-        this.progress.notify_start();
-        Gee.Collection<Geary.EmailIdentifier> pending = new Gee.HashSet<Geary.EmailIdentifier>();
-        pending.add(target.id);
-
-        Geary.Folder.ListFlags flags = (this.loading_local_only)
-            ? Geary.Folder.ListFlags.LOCAL_ONLY
-            : Geary.Folder.ListFlags.NONE;
-
-        Gee.Collection<Geary.Email>? emails = null;
+    public async Geary.Email request(Geary.Email target, Cancellable load_cancellable) {
+        LoadSet this_set = this.next_set;
+        this_set.to_load.set(target.id, null);
+        this.load_timer.start();
         try {
-            emails = yield email_store.list_email_by_sparse_id_async(
-                pending, ConversationListStore.WITH_PREVIEW_FIELDS, flags, this.cancellable
-            );
+            yield this_set.loaded.wait_async(load_cancellable);
         } catch (Error err) {
-            // Ignore NOT_FOUND, as that's entirely possible when waiting for the remote to open
-            if (!(err is Geary.EngineError.NOT_FOUND))
-                debug("Unable to fetch preview: %s", err.message);
+            // Oh well
         }
+        return this_set.to_load.get(target.id);
+    }
 
-        Geary.Email? loaded = null;
-        if (emails != null) {
-            loaded = Geary.Collection.get_first(emails);
+    private async void do_load() {
+        LoadSet this_set = this.next_set;
+        this.next_set = new LoadSet();
+        this.load_timer.reset();
+
+        if (!this_set.to_load.is_empty) {
+            Geary.Folder.ListFlags flags = (this.loading_local_only)
+                ? Geary.Folder.ListFlags.LOCAL_ONLY
+                : Geary.Folder.ListFlags.NONE;
+
+            Gee.Collection<Geary.Email>? emails = null;
+            try {
+                emails = yield email_store.list_email_by_sparse_id_async(
+                    this_set.to_load.keys,
+                    REQUIRED_FIELDS,
+                    flags,
+                    this.cancellable
+                );
+            } catch (Error err) {
+                // Ignore NOT_FOUND, as that's entirely possible when
+                // waiting for the remote to open
+                if (!(err is Geary.EngineError.NOT_FOUND))
+                    debug("Unable to fetch preview: %s", err.message);
+            }
+
+            if (emails != null) {
+                foreach (Geary.Email email in emails) {
+                    this_set.to_load.set(email.id, email);
+                }
+            }
+
+            this_set.loaded.blind_notify();
+            this.progress.notify_finish();
         }
-        string? preview = null;
-        if (loaded != null && !load_cancellable.is_cancelled()) {
-            preview = Geary.String.reduce_whitespace(loaded.get_preview_as_string());
-        }
-        this.progress.notify_finish();
-        return preview;
     }
 
 }

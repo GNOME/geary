@@ -97,19 +97,19 @@ public class ConversationListItem : Gtk.Grid {
     private Geary.App.Conversation conversation;
     private Gee.List<Geary.RFC822.MailboxAddress> account_addresses;
     private bool use_to;
-    private PreviewLoader preview_loader;
+    private PreviewLoader previews;
     private Cancellable preview_cancellable = new Cancellable();
     private Configuration config;
 
     public ConversationListItem(Geary.App.Conversation conversation,
                                 Gee.List<Geary.RFC822.MailboxAddress> account_addresses,
                                 bool use_to,
-                                PreviewLoader preview_loader,
+                                PreviewLoader previews,
                                 Configuration config) {
         this.conversation = conversation;
         this.account_addresses = account_addresses;
         this.use_to = use_to;
-        this.preview_loader = preview_loader;
+        this.previews = previews;
         this.config = config;
 
         this.conversation.appended.connect(() => {
@@ -180,15 +180,15 @@ public class ConversationListItem : Gtk.Grid {
             }
             this.subject.set_tooltip_text(tooltip_text);
 
-
             if (this.config.display_preview) {
-                this.preview_loader.load.begin(
+                this.previews.request.begin(
                     preview_message,
                     this.preview_cancellable,
                     (obj, ret) => {
-                        string? preview_text = this.preview_loader.load.end(ret);
-                        if (preview_text != null) {
-                            this.preview.set_text(preview_text);
+                        Geary.Email? updated = this.previews.request.end(ret);
+                        if (updated != null &&
+                            !this.preview_cancellable.is_cancelled()) {
+                            set_preview_text(updated);
                         }
                     });
                 this.preview.show();
@@ -265,6 +265,14 @@ public class ConversationListItem : Gtk.Grid {
         }
 
         return builder.str;
+    }
+
+    private void set_preview_text(Geary.Email preview_message) {
+        this.preview.set_text(
+            Geary.String.reduce_whitespace(
+                preview_message.get_preview_as_string()
+            )
+        );
     }
 
 }
