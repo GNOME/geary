@@ -142,8 +142,10 @@
         <property name="can_focus">False</property>
         <property name="halign">end</property>
         <property name="valign">start</property>
-        <property name="margin_left">6</property>
         <property name="label" translatable="yes">Date</property>
+        <style>
+          <class name="geary-date"/>
+        </style>
       </object>
       <packing>
         <property name="left_attach">2</property>
