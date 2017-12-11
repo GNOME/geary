@@ -6,6 +6,7 @@ set(TEST_ENGINE_SRC
   test-engine.vala
   testcase.vala # Based on same file in libgee, courtesy Julien Peeters
 
+  engine/api/geary-account-test.vala
   engine/api/geary-attachment-test.vala
   engine/api/geary-engine-test.vala
   engine/api/geary-email-identifier-test.vala
