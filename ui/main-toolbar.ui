@@ -177,12 +177,12 @@
             <property name="visible">True</property>
             <property name="can_focus">False</property>
             <child>
-              <object class="GtkMenuButton" id="mark_message_button">
+              <object class="GtkMenuButton" id="mark_conversation_button">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="focus_on_click">False</property>
                 <property name="receives_default">False</property>
-                <property name="action_name">win.mark-message-menu</property>
+                <property name="action_name">win.mark-conversation-menu</property>
                 <property name="always_show_image">True</property>
                 <child>
                   <object class="GtkImage" id="mark_message_image">
@@ -198,7 +198,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkMenuButton" id="copy_message_button">
+              <object class="GtkMenuButton" id="copy_conversation_button">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="focus_on_click">False</property>
@@ -218,7 +218,7 @@
               </packing>
             </child>
             <child>
-              <object class="GtkMenuButton" id="move_message_button">
+              <object class="GtkMenuButton" id="move_conversation_button">
                 <property name="visible">True</property>
                 <property name="can_focus">True</property>
                 <property name="focus_on_click">False</property>

@@ -45,11 +45,11 @@ public class MainToolbar : Gtk.Box {
     [GtkChild]
     private Gtk.HeaderBar conversation_header;
     [GtkChild]
-    private Gtk.MenuButton mark_message_button;
+    private Gtk.MenuButton mark_conversation_button;
     [GtkChild]
-    public Gtk.MenuButton copy_message_button;
+    public Gtk.MenuButton copy_conversation_button;
     [GtkChild]
-    public Gtk.MenuButton move_message_button;
+    public Gtk.MenuButton move_conversation_button;
     [GtkChild]
     private Gtk.Button archive_button;
     [GtkChild]
@@ -72,12 +72,12 @@ public class MainToolbar : Gtk.Box {
     private const string TRASH_CONVERSATION_TOOLTIP_MULTIPLE = _("Move conversations to Trash (Delete, Backspace)");
     private const string ARCHIVE_CONVERSATION_TOOLTIP_SINGLE = _("Archive conversation (A)");
     private const string ARCHIVE_CONVERSATION_TOOLTIP_MULTIPLE = _("Archive conversations (A)");
-    private const string MARK_MESSAGE_MENU_TOOLTIP_SINGLE = _("Mark conversation");
-    private const string MARK_MESSAGE_MENU_TOOLTIP_MULTIPLE = _("Mark conversations");
-    private const string LABEL_MESSAGE_TOOLTIP_SINGLE = _("Add label to conversation");
-    private const string LABEL_MESSAGE_TOOLTIP_MULTIPLE = _("Add label to conversations");
-    private const string MOVE_MESSAGE_TOOLTIP_SINGLE = _("Move conversation");
-    private const string MOVE_MESSAGE_TOOLTIP_MULTIPLE = _("Move conversations");
+    private const string MARK_CONVERSATION_MENU_TOOLTIP_SINGLE = _("Mark conversation");
+    private const string MARK_CONVERSATION_MENU_TOOLTIP_MULTIPLE = _("Mark conversations");
+    private const string LABEL_CONVERSATION_TOOLTIP_SINGLE = _("Add label to conversation");
+    private const string LABEL_CONVERSATION_TOOLTIP_MULTIPLE = _("Add label to conversations");
+    private const string MOVE_CONVERSATION_TOOLTIP_SINGLE = _("Move conversation");
+    private const string MOVE_CONVERSATION_TOOLTIP_MULTIPLE = _("Move conversations");
 
     public MainToolbar(Configuration config) {
         // Instead of putting a separator between the two headerbars, as other applications do,
@@ -105,7 +105,7 @@ public class MainToolbar : Gtk.Box {
         // Assemble the empty/mark menus
         Gtk.Builder builder = new Gtk.Builder.from_resource("/org/gnome/Geary/main-toolbar-menus.ui");
         MenuModel empty_menu = (MenuModel) builder.get_object("empty_menu");
-        MenuModel mark_menu = (MenuModel) builder.get_object("mark_message_menu");
+        MenuModel mark_menu = (MenuModel) builder.get_object("mark_conversation_menu");
 
         // Setup folder header elements
         this.empty_menu_button.popover = new Gtk.Popover.from_model(null, empty_menu);
@@ -115,9 +115,9 @@ public class MainToolbar : Gtk.Box {
         // Setup conversation header elements
         this.notify["selected-conversations"].connect(() => update_conversation_buttons());
         this.notify["show-trash-button"].connect(() => update_conversation_buttons());
-        this.mark_message_button.popover = new Gtk.Popover.from_model(null, mark_menu);
-        this.copy_message_button.popover = copy_folder_menu;
-        this.move_message_button.popover = move_folder_menu;
+        this.mark_conversation_button.popover = new Gtk.Popover.from_model(null, mark_menu);
+        this.copy_conversation_button.popover = copy_folder_menu;
+        this.move_conversation_button.popover = move_folder_menu;
 
         this.bind_property("find-open", this.find_button, "active",
             BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
@@ -160,18 +160,26 @@ public class MainToolbar : Gtk.Box {
 
     // Updates tooltip text depending on number of conversations selected.
     private void update_conversation_buttons() {
-        this.mark_message_button.tooltip_text = ngettext(MARK_MESSAGE_MENU_TOOLTIP_SINGLE,
-                                                         MARK_MESSAGE_MENU_TOOLTIP_MULTIPLE,
-                                                         this.selected_conversations);
-        this.copy_message_button.tooltip_text = ngettext(LABEL_MESSAGE_TOOLTIP_SINGLE,
-                                                         LABEL_MESSAGE_TOOLTIP_MULTIPLE,
-                                                         this.selected_conversations);
-        this.move_message_button.tooltip_text = ngettext(MOVE_MESSAGE_TOOLTIP_SINGLE,
-                                                         MOVE_MESSAGE_TOOLTIP_MULTIPLE,
-                                                         this.selected_conversations);
-        this.archive_button.tooltip_text = ngettext(ARCHIVE_CONVERSATION_TOOLTIP_SINGLE,
-                                                    ARCHIVE_CONVERSATION_TOOLTIP_MULTIPLE,
-                                                    this.selected_conversations);
+        this.mark_conversation_button.tooltip_text = ngettext(
+            MARK_CONVERSATION_MENU_TOOLTIP_SINGLE,
+            MARK_CONVERSATION_MENU_TOOLTIP_MULTIPLE,
+            this.selected_conversations
+        );
+        this.copy_conversation_button.tooltip_text = ngettext(
+            LABEL_CONVERSATION_TOOLTIP_SINGLE,
+            LABEL_CONVERSATION_TOOLTIP_MULTIPLE,
+            this.selected_conversations
+        );
+        this.move_conversation_button.tooltip_text = ngettext(
+            MOVE_CONVERSATION_TOOLTIP_SINGLE,
+            MOVE_CONVERSATION_TOOLTIP_MULTIPLE,
+            this.selected_conversations
+        );
+        this.archive_button.tooltip_text = ngettext(
+            ARCHIVE_CONVERSATION_TOOLTIP_SINGLE,
+            ARCHIVE_CONVERSATION_TOOLTIP_MULTIPLE,
+            this.selected_conversations
+        );
 
         if (this.show_trash_button) {
             this.trash_delete_button.action_name = "win."+GearyController.ACTION_TRASH_CONVERSATION;

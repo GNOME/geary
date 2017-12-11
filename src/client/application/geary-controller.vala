@@ -33,13 +33,13 @@ public class GearyController : Geary.BaseObject {
     public const string ACTION_UNDO = "undo";
     public const string ACTION_FIND_IN_CONVERSATION = "conv-find";
     public const string ACTION_ZOOM = "zoom";
-    public const string ACTION_SHOW_MARK_MENU = "mark-message-menu";
-    public const string ACTION_MARK_AS_READ = "mark-message-read";
-    public const string ACTION_MARK_AS_UNREAD = "mark-message-unread";
-    public const string ACTION_MARK_AS_STARRED = "mark-message-starred";
-    public const string ACTION_MARK_AS_UNSTARRED = "mark-message-unstarred";
-    public const string ACTION_MARK_AS_SPAM = "mark-message-spam";
-    public const string ACTION_MARK_AS_NOT_SPAM = "mark-message-not-spam";
+    public const string ACTION_SHOW_MARK_MENU = "mark-conversation-menu";
+    public const string ACTION_MARK_AS_READ = "mark-conversation-read";
+    public const string ACTION_MARK_AS_UNREAD = "mark-conversation-unread";
+    public const string ACTION_MARK_AS_STARRED = "mark-conversation-starred";
+    public const string ACTION_MARK_AS_UNSTARRED = "mark-conversation-unstarred";
+    public const string ACTION_MARK_AS_SPAM = "mark-conversation-spam";
+    public const string ACTION_MARK_AS_NOT_SPAM = "mark-conversation-not-spam";
     public const string ACTION_COPY_MENU = "show-copy-menu";
     public const string ACTION_MOVE_MENU = "show-move-menu";
     public const string ACTION_SEARCH = "search-conv";
@@ -1721,11 +1721,11 @@ public class GearyController : Geary.BaseObject {
     }
 
     private void on_show_move_menu(SimpleAction? action) {
-        this.main_window.main_toolbar.copy_message_button.clicked();
+        this.main_window.main_toolbar.copy_conversation_button.clicked();
     }
 
     private void on_show_copy_menu(SimpleAction? action) {
-        this.main_window.main_toolbar.move_message_button.clicked();
+        this.main_window.main_toolbar.move_conversation_button.clicked();
     }
 
     private async void mark_as_spam_toggle_async(Cancellable? cancellable) {
