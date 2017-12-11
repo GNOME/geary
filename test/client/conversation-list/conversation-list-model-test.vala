@@ -9,8 +9,12 @@ class ConversationListModelTest : Gee.TestCase {
 
 
     private ConversationListModel? test = null;
+    private PreviewLoader? previews = null;
     private Geary.App.ConversationMonitor? monitor = null;
+    private Geary.App.EmailStore? store = null;
     private Geary.Folder? base_folder = null;
+    private Geary.Account? account = null;
+    private Geary.AccountInformation? info = null;
 
 
     public ConversationListModelTest() {
@@ -26,8 +30,14 @@ class ConversationListModelTest : Gee.TestCase {
     }
 
     public override void set_up() {
+        this.info = new Geary.AccountInformation(
+            "test-info",
+            File.new_for_path("."),
+            File.new_for_path(".")
+        );
+        this.account = new Geary.MockAccount("test-account", this.info);
         this.base_folder = new Geary.MockFolder(
-            null,
+            this.account,
             null,
             new Geary.MockFolderRoot("test"),
             Geary.SpecialFolderType.NONE,
@@ -39,7 +49,12 @@ class ConversationListModelTest : Gee.TestCase {
             Geary.Email.Field.NONE,
             0
         );
-        this.test = new ConversationListModel(this.monitor);
+        this.store = new Geary.App.EmailStore(this.account);
+        this.previews = new PreviewLoader(this.store, new Cancellable());
+        this.test = new ConversationListModel(
+            this.monitor,
+            this.previews
+        );
     }
 
     public void add_ascending() {
