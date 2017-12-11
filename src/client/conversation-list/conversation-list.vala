@@ -12,7 +12,7 @@
 public class ConversationList : Gtk.ListBox {
 
 
-    private const string CLASS = "geary-conversation-list";
+    private const string LIST_CLASS = "geary-conversation-list";
 
 
     /** Underlying model for this list */
@@ -43,7 +43,7 @@ public class ConversationList : Gtk.ListBox {
 
     public ConversationList(Configuration config) {
         this.config = config;
-        get_style_context().add_class(CLASS);
+        get_style_context().add_class(LIST_CLASS);
         set_activate_on_single_click(true);
         set_selection_mode(Gtk.SelectionMode.SINGLE);
 
