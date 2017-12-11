@@ -51,6 +51,7 @@
             <property name="sensitive">False</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
+            <property name="no_show_all">True</property>
             <property name="tooltip_text" translatable="yes" comments="Note: The application will never show this button at the same time as unstar_button, one will always be hidden.">Mark this message as starred</property>
             <property name="valign">center</property>
             <property name="vexpand">True</property>
@@ -74,6 +75,7 @@
             <property name="sensitive">False</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
+            <property name="no_show_all">True</property>
             <property name="tooltip_text" translatable="yes" comments="Note: The application will never show this button at the same time as star_button, one will always be hidden.">Mark this message as not starred</property>
             <property name="valign">center</property>
             <property name="vexpand">True</property>
@@ -102,6 +104,7 @@
     <child>
       <object class="GtkLabel" id="preview">
         <property name="can_focus">False</property>
+        <property name="no_show_all">True</property>
         <property name="halign">start</property>
         <property name="hexpand">True</property>
         <property name="label" translatable="yes" comments="Placeholder for preview text used while loading the preview for a message in the conversation list.">…</property>
@@ -122,6 +125,7 @@
       <object class="GtkLabel" id="count">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <property name="no_show_all">True</property>
         <property name="halign">end</property>
         <property name="valign">center</property>
         <property name="vexpand">True</property>
