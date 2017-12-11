@@ -31,7 +31,7 @@ public class PreviewLoader : Geary.BaseObject {
         this.loading_local_only = false;
     }
 
-    public async string? load(Geary.Email target) {
+    public async string? load(Geary.Email target, Cancellable load_cancellable) {
         Gee.Collection<Geary.EmailIdentifier> pending = new Gee.HashSet<Geary.EmailIdentifier>();
         pending.add(target.id);
 
@@ -50,9 +50,12 @@ public class PreviewLoader : Geary.BaseObject {
                 debug("Unable to fetch preview: %s", err.message);
         }
 
-        Geary.Email? loaded = Geary.Collection.get_first(emails);
+        Geary.Email? loaded = null;
+        if (emails != null) {
+            loaded = Geary.Collection.get_first(emails);
+        }
         string? preview = null;
-        if (loaded != null) {
+        if (loaded != null && !load_cancellable.is_cancelled()) {
             preview = Geary.String.reduce_whitespace(loaded.get_preview_as_string());
         }
         return preview;

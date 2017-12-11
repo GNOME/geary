@@ -293,14 +293,16 @@ public class MainWindow : Gtk.ApplicationWindow {
     }
 
     private void on_conversation_monitor_changed() {
-        ConversationListStore? old_model = this.conversation_list_view.get_model();
-        if (old_model != null) {
-            this.progress_monitor.remove(old_model.preview_monitor);
-            this.progress_monitor.remove(old_model.conversations.progress_monitor);
+        // Old list
+        ConversationListStore? old_store = this.conversation_list_view.get_model();
+        if (old_store != null) {
+            this.progress_monitor.remove(old_store.preview_monitor);
+            this.progress_monitor.remove(old_store.conversations.progress_monitor);
         }
 
-        Geary.App.ConversationMonitor? old_monitor = (this.conversation_list != null)
-            ? this.conversation_list.model.monitor : null;
+        ConversationListModel? old_model = this.conversation_list.model;
+        Geary.App.ConversationMonitor? old_monitor = (old_model != null)
+            ? old_model.monitor : null;
         if (old_monitor != null) {
             old_monitor.scan_error.disconnect(on_scan_error);
             old_monitor.seed_completed.disconnect(on_seed_completed);
@@ -312,14 +314,15 @@ public class MainWindow : Gtk.ApplicationWindow {
 
         Geary.App.ConversationMonitor? new_monitor =
             this.application.controller.current_conversations;
-
         if (new_monitor != null) {
+            // Old list
             ConversationListStore new_model =
                 new ConversationListStore(new_monitor);
             this.progress_monitor.add(new_monitor.progress_monitor);
             this.progress_monitor.add(new_model.preview_monitor);
             this.conversation_list_view.set_model(new_model);
 
+            // New list
             this.conversation_list.bind_model(new_monitor);
 
             new_monitor.scan_error.connect(on_scan_error);
@@ -330,9 +333,9 @@ public class MainWindow : Gtk.ApplicationWindow {
             new_monitor.conversations_removed.connect(on_conversation_count_changed);
         }
 
-        if (old_model != null) {
+        if (old_store != null) {
             // Must be destroyed, but only after it has been replaced.
-            old_model.destroy();
+            old_store.destroy();
         }
     }
 

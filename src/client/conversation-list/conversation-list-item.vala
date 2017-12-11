@@ -98,6 +98,7 @@ public class ConversationListItem : Gtk.Grid {
     private Gee.List<Geary.RFC822.MailboxAddress> account_addresses;
     private bool use_to;
     private PreviewLoader preview_loader;
+    private Cancellable preview_cancellable = new Cancellable();
     private Configuration config;
 
     public ConversationListItem(Geary.App.Conversation conversation,
@@ -111,13 +112,26 @@ public class ConversationListItem : Gtk.Grid {
         this.preview_loader = preview_loader;
         this.config = config;
 
-        this.conversation.appended.connect(() => { update(); });
-        this.conversation.trimmed.connect(() => { update(); });
-        this.conversation.email_flags_changed.connect(() => { update(); });
+        this.conversation.appended.connect(() => {
+                update();
+            });
+        this.conversation.trimmed.connect(() => {
+                if (this.conversation.get_count() > 0) {
+                    update();
+                }
+            });
+        this.conversation.email_flags_changed.connect(() => {
+                update();
+            });
 
         this.config.notify["clock-format"].connect(() => { update(); });
         this.config.notify["display-preview"].connect(() => { update(); });
         update();
+    }
+
+    public override void destroy() {
+        this.preview_cancellable.cancel();
+        base.destroy();
     }
 
     private void update() {
@@ -149,29 +163,38 @@ public class ConversationListItem : Gtk.Grid {
             Geary.App.Conversation.Location.ANYWHERE
         );
 
-        string subject_markup = this.conversation.is_unread() ? "<b>%s</b>" : "%s";
-        subject_markup = Markup.printf_escaped(
-            subject_markup,
-            Geary.String.reduce_whitespace(EmailUtil.strip_subject_prefixes(preview_message))
-        );
-        this.subject.set_markup(subject_markup);
-        if (preview_message.subject != null) {
-            this.subject.set_tooltip_text(
-                Geary.String.reduce_whitespace(preview_message.subject.to_string())
-            );
-        }
+        if (preview_message != null) {
+            Pango.AttrList attrs = new Pango.AttrList();
+            if (this.conversation.is_unread()) {
+                attrs.insert(Pango.attr_weight_new(Pango.Weight.BOLD));
+            }
+            this.subject.set_attributes(attrs);
+            this.subject.set_text(Geary.String.reduce_whitespace(
+                EmailUtil.strip_subject_prefixes(preview_message)
+            ));
+            string? tooltip_text = null;
+            if (preview_message.subject != null) {
+                tooltip_text = Geary.String.reduce_whitespace(
+                    preview_message.subject.to_string()
+                );
+            }
+            this.subject.set_tooltip_text(tooltip_text);
 
-        if (this.config.display_preview) {
-            // XXX load & format preview here
-            this.preview_loader.load.begin(preview_message, (obj, ret) => {
-                    string? preview_text = this.preview_loader.load.end(ret);
-                    if (preview_text != null) {
-                        this.preview.set_text(preview_text);
-                    }
-                });
-            this.preview.show();
-        } else {
-            this.preview.hide();
+
+            if (this.config.display_preview) {
+                this.preview_loader.load.begin(
+                    preview_message,
+                    this.preview_cancellable,
+                    (obj, ret) => {
+                        string? preview_text = this.preview_loader.load.end(ret);
+                        if (preview_text != null) {
+                            this.preview.set_text(preview_text);
+                        }
+                    });
+                this.preview.show();
+            } else {
+                this.preview.hide();
+            }
         }
 
         // conversation list store sorts by date-received, so
