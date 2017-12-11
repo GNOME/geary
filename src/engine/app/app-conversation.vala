@@ -86,7 +86,7 @@ public class Geary.App.Conversation : BaseObject {
     /**
      * Constructs a conversation relative to the given base folder.
      */
-    internal Conversation(Geary.Folder base_folder) {
+    public Conversation(Geary.Folder base_folder) {
         this.convnum = Conversation.next_convnum++;
         this.base_folder = base_folder;
     }
@@ -295,7 +295,7 @@ public class Geary.App.Conversation : BaseObject {
      * Returns if the email was added, else false if already present
      * and only `known_paths` were merged.
      */
-    internal bool add(Email email, Gee.Collection<Geary.FolderPath> known_paths) {
+    public bool add(Email email, Gee.Collection<Geary.FolderPath> known_paths) {
         // Add the known paths to the path map regardless of whether
         // the email is already in the conversation or not, so that it
         // remains complete
@@ -326,7 +326,7 @@ public class Geary.App.Conversation : BaseObject {
      * Returns all Message-IDs that should be removed as result of
      * removing this message, or `null` if none were removed.
      */
-    internal Gee.Set<RFC822.MessageID>? remove(Email email) {
+    public Gee.Set<RFC822.MessageID>? remove(Email email) {
         Gee.Set<RFC822.MessageID>? removed_ids = null;
 
         if (emails.unset(email.id)) {
@@ -353,7 +353,6 @@ public class Geary.App.Conversation : BaseObject {
                 }
             }
 
-
             trimmed(email);
         }
 
@@ -363,7 +362,7 @@ public class Geary.App.Conversation : BaseObject {
     /**
      * Removes the target path from the known set for the given id.
      */
-    internal void remove_path(Geary.EmailIdentifier id, FolderPath path) {
+    public void remove_path(Geary.EmailIdentifier id, FolderPath path) {
         this.path_map.remove(id, path);
     }
 

@@ -32,10 +32,16 @@ set(TEST_CLIENT_SRC
   test-client.vala
   testcase.vala # Based on same file in libgee, courtesy Julien Peeters
 
+  # XXX
+  engine/api/geary-email-identifier-test.vala
+  engine/api/geary-folder-test.vala
+  engine/api/geary-folder-path-test.vala
+
   client/application/geary-configuration-test.vala
   client/components/client-web-view-test.vala
   client/components/client-web-view-test-case.vala
   client/composer/composer-web-view-test.vala
+  client/conversation-list/conversation-list-model-test.vala
 
   js/client-page-state-test.vala
   js/composer-page-state-test.vala

@@ -21,102 +21,127 @@ public class ConversationListModel : Geary.BaseObject, GLib.ListModel {
     /** The source of conversations for this model. */
     public Geary.App.ConversationMonitor monitor { get; private set; }
 
-    // The model's native sort order
-    private static int model_sort(Geary.App.Conversation a, Geary.App.Conversation b) {
-        return compare_conversation_descending(a, b);
-    }
+    // Backing store for this model
+    private Sequence<Geary.App.Conversation> conversations =
+        new Sequence<Geary.App.Conversation>();
+
+    /** The model's native sort order. */
+    private CompareDataFunc model_sort =
+        (CompareDataFunc) compare_conversation_descending;
 
 
-    // Backing store for this model. We can't just derive from this
-    // directly since GLib.ListStore is a compact class.
-    private ListStore conversations = new ListStore(typeof(Geary.App.Conversation));
-
-
+    /**
+     * Constructs a new model for the conversation list.
+     */
     public ConversationListModel(Geary.App.ConversationMonitor monitor) {
         this.monitor = monitor;
 
+        // XXX Should only start loading when scan is completed
         //monitor.scan_completed.connect(on_scan_completed);
-        monitor.conversations_added.connect(on_conversations_added);
-        monitor.conversations_removed.connect(on_conversations_removed);
-        // XXX
-        //monitor.email_flags_changed.connect((convo) => { update(convo); });
+        monitor.conversations_added.connect(add);
+        monitor.conversations_removed.connect(on_removed);
+        monitor.conversation_appended.connect(on_updated);
+        monitor.conversation_trimmed.connect(on_updated);
 
         // add all existing monitor
-        on_conversations_added(monitor.get_conversations());
-
-        this.conversations.items_changed.connect((position, removed, added) => {
-                this.items_changed(position, removed, added);
-            });
+        add(monitor.get_conversations());
     }
 
-    public Object? get_item(uint position) {
-        return this.conversations.get_item(position);
+    public void add(Gee.Collection<Geary.App.Conversation> to_add) {
+        foreach (Geary.App.Conversation convo in to_add) {
+            SequenceIter<Geary.App.Conversation>? existing =
+                this.conversations.lookup(convo, this.model_sort);
+            if (existing == null) {
+                add_internal(convo);
+            }
+        }
     }
 
-    public uint get_n_items() {
-        return this.monitor.get_conversation_count();
-    }
-
-    public Type get_item_type() {
-        return this.conversations.get_item_type();
+    public void remove(Gee.Collection<Geary.App.Conversation> to_remove) {
+        foreach (Geary.App.Conversation convo in to_remove) {
+            SequenceIter<Geary.App.Conversation>? existing =
+                this.conversations.lookup(convo, this.model_sort);
+            if (existing != null) {
+                remove_internal(existing);
+            }
+        }
     }
 
     public Geary.App.Conversation get_conversation(uint position) {
-        // XXX need to handle null here by throwing an error
-        return this.conversations.get_item(position) as Geary.App.Conversation;
+        SequenceIter<Geary.App.Conversation>? existing =
+            this.conversations.get_iter_at_pos((int) position);
+        // XXX handle null here by throwing an error
+        return (existing != null) ? existing.get() : null;
     }
 
-    // XXX Something like this should be enabled so that if flags like
-    // received date changes, the ordering will change to reflect
-    // that.
-    // private void update(Geary.App.Conversation target) {
-    //     // XXX this is horribly inefficient
-    //     this.conversations.sort((a, b) => {
-    //             return model_sort(a as Geary.App.Conversation,
-    //                               b as Geary.App.Conversation);
-    //         });
-    // }
+    public Object? get_item(uint position) {
+        SequenceIter<Geary.App.Conversation>? existing =
+            this.conversations.get_iter_at_pos((int) position);
+        return (existing != null) ? existing.get() : null;
+    }
 
-    private uint get_index(Geary.App.Conversation target)
-        throws Error {
-        // Yet Another Binary Search Implementation :<
-        int lower = 0;
-        int upper = ((int) get_n_items()) - 1;
-        while (lower < upper) {
-            int mid = (int) Math.floor((upper + lower) / 2);
-            int cmp = model_sort(get_conversation(mid), target);
-            if (cmp < 0) {
-                lower = mid + 1;
-            } else if (cmp > 0) {
-                upper = mid - 1;
-            } else {
-                return mid;
+    public uint get_n_items() {
+        return (uint) this.conversations.get_length();
+    }
+
+    public Type get_item_type() {
+        return typeof(Geary.App.Conversation);
+    }
+
+    public SequenceIter<Geary.App.Conversation>?
+        get_by_identity(Geary.App.Conversation target) {
+        SequenceIter<Geary.App.Conversation> existing =
+            this.conversations.get_begin_iter();
+        while (!existing.is_end()) {
+            if (existing.get() == target) {
+                return existing;
             }
+            existing = existing.next();
         }
-        // XXX UGH
-        throw new IOError.NOT_FOUND("Not found");
+        return null;
     }
 
-    private void on_conversations_added(Gee.Collection<Geary.App.Conversation> conversations) {
-        foreach (Geary.App.Conversation convo in conversations) {
-            this.conversations.insert_sorted(
-                convo,
-                (a, b) => {
-                    return model_sort(a as Geary.App.Conversation,
-                                      b as Geary.App.Conversation);
-                }
+    private void on_removed(Gee.Collection<Geary.App.Conversation> removed) {
+        // We can't just use the conversation's sorted positions since
+        // it would have changed as its emails were removed from it,
+        // so we need to find it by identity instead.
+        foreach (Geary.App.Conversation target in removed) {
+            SequenceIter<Geary.App.Conversation>? existing = get_by_identity(
+                target
             );
+            if (existing != null) {
+                debug("Removed conversation: %s", target.to_string());
+                remove_internal(existing);
+            }
         }
     }
 
-    private void on_conversations_removed(Gee.Collection<Geary.App.Conversation> conversations) {
-        foreach (Geary.App.Conversation convo in conversations) {
-            try {
-                this.conversations.remove(get_index(convo));
-            } catch (Error err) {
-                debug("Failed to remove conversation: %s", err.message);
-            }
+    private void on_updated(Geary.App.Conversation updated) {
+        debug("Conversation updated: %s", updated.to_string());
+        // Need to remove and re-add the conversation to take into
+        // account its new position. We can't just use its sorted
+        // position however since it may have changed, so we need to
+        // find it by identity instead.
+        SequenceIter<Geary.App.Conversation>? existing = get_by_identity(
+            updated
+        );
+        if (existing != null) {
+            debug("Updating conversation: %s", updated.to_string());
+            remove_internal(existing);
+            add_internal(updated);
         }
+    }
+
+    private void add_internal(Geary.App.Conversation convo) {
+        SequenceIter<Geary.App.Conversation> pos =
+            this.conversations.insert_sorted(convo, this.model_sort);
+        this.items_changed(pos.get_position(), 0, 1);
+    }
+
+    private void remove_internal(SequenceIter<Geary.App.Conversation> existing) {
+        int pos = existing.get_position();
+        existing.remove();
+        this.items_changed(pos, 1, 0);
     }
 
 }
