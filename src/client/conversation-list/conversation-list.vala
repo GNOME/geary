@@ -70,7 +70,7 @@ public class ConversationList : Gtk.ListBox {
         this.model.items_changed.connect(on_model_items_changed);
 
         Gee.List<Geary.RFC822.MailboxAddress> account_addresses = displayed.account.information.get_all_mailboxes();
-        bool use_to = (displayed != null) && displayed.special_folder_type.is_outgoing();
+        bool use_to = displayed.special_folder_type.is_outgoing();
         base.bind_model(this.model, (convo) => {
                 return new ConversationListItem(convo as Geary.App.Conversation,
                                                 account_addresses,
