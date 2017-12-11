@@ -126,6 +126,9 @@
         <property name="valign">center</property>
         <property name="vexpand">True</property>
         <property name="label" translatable="yes">0</property>
+        <attributes>
+          <attribute name="scale" value="0.95999999999999996"/>
+        </attributes>
         <style>
           <class name="geary-count"/>
         </style>
