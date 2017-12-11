@@ -223,7 +223,6 @@ public class GearyController : Geary.BaseObject {
         Geary.Engine.instance.untrusted_host.connect(on_untrusted_host);
         
         // Connect to various UI signals.
-        main_window.conversation_list_view.mark_conversations.connect(on_mark_conversations);
         main_window.folder_list.folder_selected.connect(on_folder_selected);
         main_window.folder_list.copy_conversation.connect(on_copy_conversation);
         main_window.folder_list.move_conversation.connect(on_move_conversation);
@@ -251,7 +250,7 @@ public class GearyController : Geary.BaseObject {
         // This is fired after the accounts are ready.
         Geary.Engine.instance.opened.connect(on_engine_opened);
 
-        this.main_window.conversation_list_view.grab_focus();
+        this.main_window.conversation_list.grab_focus();
 
         // instantiate here to ensure that Config is initialized and ready
         this.autostart_manager = new AutostartManager(this.application);
@@ -293,7 +292,6 @@ public class GearyController : Geary.BaseObject {
         Geary.Engine.instance.untrusted_host.disconnect(on_untrusted_host);
 
         // Disconnect from various UI signals.
-        main_window.conversation_list_view.mark_conversations.disconnect(on_mark_conversations);
         main_window.folder_list.folder_selected.disconnect(on_folder_selected);
         main_window.folder_list.copy_conversation.disconnect(on_copy_conversation);
         main_window.folder_list.move_conversation.disconnect(on_move_conversation);
@@ -1225,8 +1223,6 @@ public class GearyController : Geary.BaseObject {
         debug("Folder %s selected", folder != null ? folder.to_string() : "(null)");
         if (folder == null) {
             this.current_folder = null;
-            main_window.conversation_list_view.set_model(null);
-            main_window.main_toolbar.folder = null;
             folder_selected(null);
         } else if (folder != this.current_folder) {
             this.main_window.conversation_viewer.show_loading();
@@ -1360,9 +1356,9 @@ public class GearyController : Geary.BaseObject {
         main_window.folder_list.select_folder(folder);
         Geary.App.Conversation? conversation = current_conversations.get_conversation_for_email(email.id);
         if (conversation != null)
-            main_window.conversation_list_view.select_conversation(conversation);
+            main_window.conversation_list.select_conversation(conversation);
     }
-    
+
     private void on_indicator_activated_application(uint32 timestamp) {
         // When the app is started hidden, show_all() never gets
         // called, do so here to prevent an empty window appearing.
@@ -1573,17 +1569,7 @@ public class GearyController : Geary.BaseObject {
         
         return add_to;
     }
-    
-    private Gee.Collection<Geary.EmailIdentifier> get_conversation_collection_email_ids(
-        Gee.Collection<Geary.App.Conversation> conversations, bool latest_sent_only) {
-        Gee.ArrayList<Geary.EmailIdentifier> ret = new Gee.ArrayList<Geary.EmailIdentifier>();
-        
-        foreach(Geary.App.Conversation c in conversations)
-            get_conversation_email_ids(c, latest_sent_only, ret);
-        
-        return ret;
-    }
-    
+
     private Gee.ArrayList<Geary.EmailIdentifier> get_selected_email_ids(bool latest_sent_only) {
         Gee.ArrayList<Geary.EmailIdentifier> ids = new Gee.ArrayList<Geary.EmailIdentifier>();
         foreach (Geary.App.Conversation conversation in this.main_window.get_selected_conversations())
@@ -1642,10 +1628,10 @@ public class GearyController : Geary.BaseObject {
         // if conversation list is at top of display, don't display
         // and don't display if main window has top-level focus
         return folder != current_folder
-            || main_window.conversation_list_view.vadjustment.value != 0.0
+            || main_window.conversation_list.get_adjustment().value != 0.0
             || !main_window.has_toplevel_focus;
     }
-    
+
     // Clears messages if conditions are true: anything in should_notify_new_messages() is
     // false and the supplied visible messages are visible in the conversation list view
     internal void clear_new_messages(string caller, Gee.Set<Geary.App.Conversation>? supplied) {
@@ -1654,7 +1640,7 @@ public class GearyController : Geary.BaseObject {
             return;
         
         Gee.Set<Geary.App.Conversation> visible =
-            supplied ?? main_window.conversation_list_view.get_visible_conversations();
+            supplied ?? main_window.conversation_list.get_visible_conversations();
         
         foreach (Geary.App.Conversation conversation in visible) {
             if (new_messages_monitor.are_any_new_messages(current_folder, conversation.get_email_ids())) {
@@ -1665,14 +1651,7 @@ public class GearyController : Geary.BaseObject {
             }
         }
     }
-    
-    private void on_mark_conversations(Gee.Collection<Geary.App.Conversation> conversations,
-        Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove,
-        bool latest_only = false) {
-        mark_email(get_conversation_collection_email_ids(conversations, latest_only),
-            flags_to_add, flags_to_remove);
-    }
-    
+
     private void on_conversation_viewer_mark_emails(Gee.Collection<Geary.EmailIdentifier> emails,
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove) {
         mark_email(emails, flags_to_add, flags_to_remove);
@@ -1773,7 +1752,7 @@ public class GearyController : Geary.BaseObject {
         if (ids.size == 0)
             return;
 
-        this.main_window.conversation_list_view.set_changing_selection(true);
+        this.main_window.conversation_list.set_changing_selection(true);
 
         Geary.FolderSupport.Move? supports_move = current_folder as Geary.FolderSupport.Move;
         if (supports_move != null)
@@ -1781,7 +1760,7 @@ public class GearyController : Geary.BaseObject {
                 supports_move, ids, destination.path, cancellable_folder,
                 (obj, ret) => {
                     move_conversation_async.end(ret);
-                    this.main_window.conversation_list_view.set_changing_selection(false);
+                    this.main_window.conversation_list.set_changing_selection(false);
                 });
     }
 
@@ -2340,7 +2319,7 @@ public class GearyController : Geary.BaseObject {
         last_deleted_conversation = selected_conversations.size > 0
             ? Geary.traverse<Geary.App.Conversation>(selected_conversations).first() : null;
 
-        this.main_window.conversation_list_view.set_changing_selection(true);
+        this.main_window.conversation_list.set_changing_selection(true);
 
         Gee.List<Geary.EmailIdentifier> ids = get_selected_email_ids(false);
         if (archive) {
@@ -2396,9 +2375,9 @@ public class GearyController : Geary.BaseObject {
         } catch (Error e) {
             debug("Unable to archive/trash/delete messages: %s", e.message);
         }
-        this.main_window.conversation_list_view.set_changing_selection(false);
+        this.main_window.conversation_list.set_changing_selection(false);
     }
-    
+
     private void save_revokable(Geary.Revokable? new_revokable, string? description) {
         // disconnect old revokable & blindly commit it
         if (revokable != null) {
@@ -2478,7 +2457,7 @@ public class GearyController : Geary.BaseObject {
     }
 
     private void on_conversation_list() {
-        this.main_window.conversation_list_view.grab_focus();
+        this.main_window.conversation_list.grab_focus();
     }
 
     private void on_sent(Geary.RFC822.Message rfc822) {

@@ -51,16 +51,7 @@ public class ConversationList : Gtk.ListBox {
                 uint activated = row.get_index();
                 this.conversation_activated(this.model.get_conversation(activated));
             });
-        this.selected_rows_changed.connect(() => {
-                Gee.HashSet<Geary.App.Conversation> new_selection =
-                    new Gee.HashSet<Geary.App.Conversation>();
-                foreach (Gtk.ListBoxRow row in get_selected_rows()) {
-                    uint selected = row.get_index();
-                    new_selection.add(this.model.get_conversation(selected));
-                }
-                this.conversation_selection_changed(new_selection);
-            });
-
+        this.selected_rows_changed.connect(on_selection_changed);
         this.show.connect(on_show);
     }
 
@@ -90,18 +81,44 @@ public class ConversationList : Gtk.ListBox {
         );
     }
 
+    public void select_conversation(Geary.App.Conversation target) {
+        // XXX Implement me
+    }
+
+    public void select_conversations(Gee.Set<Geary.App.Conversation> targets) {
+        // XXX Implement me
+    }
+
+    public Gee.Set<Geary.App.Conversation> get_selected_conversations() {
+        Gee.HashSet<Geary.App.Conversation> selection =
+            new Gee.HashSet<Geary.App.Conversation>();
+        foreach (Gtk.ListBoxRow row in get_selected_rows()) {
+            uint selected = row.get_index();
+            selection.add(this.model.get_conversation(selected));
+        }
+        return selection;
+    }
+
+    internal Gee.Set<Geary.App.Conversation> get_visible_conversations() {
+        Gee.HashSet<Geary.App.Conversation> visible = new Gee.HashSet<Geary.App.Conversation>();
+        // XXX Implement me
+        return visible;
+    }
+
+    internal void set_changing_selection(bool changing) {
+        if (changing) {
+            this.selected_rows_changed.disconnect(on_selection_changed);
+        } else {
+            this.selected_rows_changed.connect(on_selection_changed);
+        }
+    }
+
     private void schedule_visible_conversations_changed() {
         this.update_visible_scheduled = Geary.Scheduler.on_idle(
             () => {
                 update_visible_conversations();
                 return Source.REMOVE; // one-shot
             });
-    }
-
-    private Gee.Set<Geary.App.Conversation> get_visible_conversations() {
-        Gee.HashSet<Geary.App.Conversation> visible = new Gee.HashSet<Geary.App.Conversation>();
-        // XXX
-        return visible;
     }
 
     private void update_visible_conversations() {
@@ -117,6 +134,10 @@ public class ConversationList : Gtk.ListBox {
     private void on_show() {
         // Wait until we're visible to set this signal up.
         get_adjustment().value_changed.connect(on_adjustment_value_changed);
+    }
+
+    private void on_selection_changed() {
+        this.conversation_selection_changed(get_selected_conversations());
     }
 
     private void on_adjustment_value_changed() {

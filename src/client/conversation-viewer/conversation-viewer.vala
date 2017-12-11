@@ -111,16 +111,16 @@ public class ConversationViewer : Gtk.Stack {
 
         // XXX move the ConversationListView management code into
         // GearyController or somewhere more appropriate
-        ConversationListView conversation_list_view =
-            ((MainWindow) GearyApplication.instance.controller.main_window).conversation_list_view;
-        Gee.Set<Geary.App.Conversation>? prev_selection = conversation_list_view.get_selected_conversations();
-        conversation_list_view.get_selection().unselect_all();
+        ConversationList conversation_list =
+            ((MainWindow) GearyApplication.instance.controller.main_window).conversation_list;
+        Gee.Set<Geary.App.Conversation>? prev_selection = conversation_list.get_selected_conversations();
+        conversation_list.unselect_all();
         box.vanished.connect((box) => {
                 set_visible_child(this.conversation_page);
                 if (prev_selection.is_empty) {
-                    conversation_list_view.conversations_selected(prev_selection);
+                    conversation_list.conversation_selection_changed(prev_selection);
                 } else {
-                    conversation_list_view.select_conversations(prev_selection);
+                    conversation_list.select_conversations(prev_selection);
                 }
             });
         this.composer_page.add(box);

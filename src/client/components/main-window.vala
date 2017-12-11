@@ -24,7 +24,6 @@ public class MainWindow : Gtk.ApplicationWindow {
     public FolderList.Tree folder_list { get; private set; default = new FolderList.Tree(); }
     public MainToolbar main_toolbar { get; private set; }
     public SearchBar search_bar { get; private set; default = new SearchBar(); }
-    public ConversationListView conversation_list_view  { get; private set; }
     public ConversationList conversation_list  { get; private set; }
     public ConversationViewer conversation_viewer { get; private set; default = new ConversationViewer(); }
     public StatusBar status_bar { get; private set; default = new StatusBar(); }
@@ -195,9 +194,6 @@ public class MainWindow : Gtk.ApplicationWindow {
     }
 
     private void setup_layout(Configuration config) {
-        // ConversationListView
-        this.conversation_list_view = new ConversationListView(this);
-        // Toolbar
         this.main_toolbar = new MainToolbar(config);
         this.main_toolbar.bind_property("search-open", this.search_bar, "search-mode-enabled",
             BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
