@@ -51,10 +51,7 @@ geary_web_process = library('geary-web-process',
 geary_bin_sources = files(
   join_paths('client', 'application', 'main.vala'),
 )
-
-if local_gsettings
-  geary_bin_sources += geary_compiled_schema
-endif
+geary_bin_sources += geary_compiled_schema
 
 geary_bin_dependencies = [
   libmath,

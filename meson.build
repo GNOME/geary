@@ -13,7 +13,6 @@ iso_639_xml = get_option('iso_639_xml')
 iso_3166_xml = get_option('iso_3166_xml')
 reference_tracking = get_option('ref_tracking')
 poodle = get_option('poodle')
-local_gsettings = get_option('local_gsettings')
 enable_valadoc = get_option('valadoc')
 
 # Some variables
@@ -128,7 +127,7 @@ conf.set_quoted('PACKAGE_STRING', '@0@-@1@'.format(meson.project_name(), meson.p
 conf.set_quoted('PACKAGE_VERSION', meson.project_version())
 conf.set_quoted('_BUILD_ROOT_DIR', meson.build_root())
 conf.set_quoted('_SOURCE_ROOT_DIR', meson.source_root())
-conf.set_quoted('_GSETTINGS_DIR', join_paths(meson.source_root(), 'desktop'))
+conf.set_quoted('_GSETTINGS_DIR', join_paths(meson.build_root(), 'desktop'))
 conf.set_quoted('_INSTALL_PREFIX', geary_prefix)
 conf.set_quoted('LANGUAGE_SUPPORT_DIRECTORY', locale_dir)
 conf.set_quoted('ISO_CODE_639_XML', iso_639_xml)
