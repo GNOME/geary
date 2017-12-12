@@ -7,6 +7,10 @@ set(ICON_FILES
     text-x-generic-symbolic.svg
     edit-symbolic.svg
     format-text-remove-symbolic.svg
+    format-ordered-list-symbolic.svg
+    format-ordered-list-symbolic-rtl.svg
+    format-unordered-list-symbolic.svg
+    format-unordered-list-symbolic-rtl.svg
     mail-drafts-symbolic.svg
     mail-drafts-symbolic-rtl.svg
     mail-forward-symbolic.svg
