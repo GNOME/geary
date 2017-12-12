@@ -26,6 +26,8 @@ geary_test_sources = [
   'js/client-page-state-test.vala',
   'js/composer-page-state-test.vala',
   'js/conversation-page-state-test.vala',
+  geary_compiled_schema,
+  geary_resources
 ]
 
 geary_test_dependencies = [
@@ -41,7 +43,8 @@ geary_test_dependencies = [
 geary_test_bin = executable('geary-test',
   geary_test_sources,
   dependencies: geary_test_dependencies,
-  c_args: geary_c_options,
   include_directories: config_h_dir,
+  vala_args: geary_vala_options,
+  c_args: geary_c_options,
 )
 test('Geary test suite', geary_test_bin)
