@@ -71,7 +71,7 @@ libunwind = declare_dependency(
 )
 
 libunity = dependency('unity', version: '>= 5.12.0', required: false)
-libmessagingmenu = dependency('messaging-menu', version: '>= 12.10.2', required: false)
+libmessagingmenu = meson.get_compiler('c').find_library('libmessaging-menu', required: false)
 sqlite = dependency('sqlite3')
 if sqlite.version().version_compare('>= 3.12')
   if not cc.has_header_symbol('sqlite3.h', 'SQLITE_DBCONFIG_ENABLE_FTS3_TOKENIZER')

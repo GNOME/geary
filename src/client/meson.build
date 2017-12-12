@@ -122,7 +122,13 @@ geary_client_dependencies = [
 ]
 
 if libmessagingmenu.found()
+  messagingmenu_vapi = meson.get_compiler('vala').find_library(
+      'MessagingMenu-1.0',
+      dirs: '/usr/share/vala/vapi',
+      required: true
+  )
   geary_client_dependencies += libmessagingmenu
+  geary_client_dependencies += messagingmenu_vapi
 endif
 if libunity.found()
   geary_client_dependencies += libunity
