@@ -13,13 +13,6 @@ geary_vala_options = [
   '--enable-deprecated',
 ]
 
-if reference_tracking
-  geary_vala_options += [ '--define=REF_TRACKING' ]
-endif
-if not poodle
-  geary_vala_options += [ '--define=DISABLE_POODLE' ]
-endif
-
 geary_c_options = [
   '-include', 'config.h',
   # Vala causes a _lot_ of these to be emitted for otherwise valid
