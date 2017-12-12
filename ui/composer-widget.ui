@@ -1,13 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!-- Generated with glade 3.20.0 -->
 <interface>
-  <requires lib="gtk+" version="3.14"/>
+  <requires lib="gtk+" version="3.20"/>
   <template class="ComposerWidget" parent="GtkEventBox">
     <property name="visible">True</property>
-    <signal name="drag_data_received" handler="on_drag_data_received"/>
-    <signal name="drag_drop" handler="on_drag_drop"/>
-    <signal name="drag_motion" handler="on_drag_motion"/>
-    <signal name="drag_leave" handler="on_drag_leave"/>
+    <property name="can_focus">False</property>
+    <signal name="drag-data-received" handler="on_drag_data_received" swapped="no"/>
+    <signal name="drag-drop" handler="on_drag_drop" swapped="no"/>
+    <signal name="drag-leave" handler="on_drag_leave" swapped="no"/>
+    <signal name="drag-motion" handler="on_drag_motion" swapped="no"/>
     <child>
       <object class="GtkBox" id="composer_container">
         <property name="visible">True</property>
@@ -506,36 +507,12 @@
                 <property name="position">1</property>
               </packing>
             </child>
-	    <child>
-	      <object class="GtkBox" id="list_buttons">
-		<property name="visible">True</property>
-		<property name="can_focus">False</property>
-		<child>
-		  <object class="GtkButton" id="olist_button">
-                    <property name="visible">True</property>
-                    <property name="can_focus">True</property>
-                    <property name="focus_on_click">False</property>
-                    <property name="receives_default">False</property>
-                    <property name="tooltip_text" translatable="yes">Insert ordered list</property>
-                    <property name="action_name">cmp.olist</property>
-                    <property name="always_show_image">True</property>
-                    <child>
-                      <object class="GtkImage" id="olist_image">
-                        <property name="visible">True</property>
-                        <property name="can_focus">False</property>
-                        <property name="pixel_size">16</property>
-                        <property name="icon_name">format-ordered-list-symbolic</property>
-                      </object>
-                    </child>
-		  </object>
-                  <packing>
-                    <property name="expand">False</property>
-                    <property name="fill">True</property>
-                    <property name="position">0</property>
-                  </packing>
-		</child>
-		<child>
-		  <object class="GtkButton" id="ulist_button">
+            <child>
+              <object class="GtkBox" id="list_buttons">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <child>
+                  <object class="GtkButton" id="ulist_button">
                     <property name="visible">True</property>
                     <property name="can_focus">True</property>
                     <property name="focus_on_click">False</property>
@@ -551,13 +528,37 @@
                         <property name="icon_name">format-unordered-list-symbolic</property>
                       </object>
                     </child>
-		  </object>
+                  </object>
+                  <packing>
+                    <property name="expand">False</property>
+                    <property name="fill">True</property>
+                    <property name="position">0</property>
+                  </packing>
+                </child>
+                <child>
+                  <object class="GtkButton" id="olist_button">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="focus_on_click">False</property>
+                    <property name="receives_default">False</property>
+                    <property name="tooltip_text" translatable="yes">Insert ordered list</property>
+                    <property name="action_name">cmp.olist</property>
+                    <property name="always_show_image">True</property>
+                    <child>
+                      <object class="GtkImage" id="olist_image">
+                        <property name="visible">True</property>
+                        <property name="can_focus">False</property>
+                        <property name="pixel_size">16</property>
+                        <property name="icon_name">format-ordered-list-symbolic</property>
+                      </object>
+                    </child>
+                  </object>
                   <packing>
                     <property name="expand">False</property>
                     <property name="fill">True</property>
                     <property name="position">1</property>
                   </packing>
-		</child>
+                </child>
                 <style>
                   <class name="linked"/>
                 </style>
@@ -567,7 +568,7 @@
                 <property name="fill">True</property>
                 <property name="position">2</property>
               </packing>
-	    </child>
+            </child>
             <child>
               <object class="GtkBox" id="indentation_buttons">
                 <property name="visible">True</property>
