@@ -14,7 +14,7 @@
 
 override_dh_auto_configure:
 	meson --prefix /usr --buildtype=plain debian/build
-G
+
 override_dh_auto_build:
 	ninja -v -C debian/build
 
