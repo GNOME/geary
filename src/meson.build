@@ -13,6 +13,8 @@ geary_vala_options = [
   '--enable-deprecated',
 ]
 
+# Symbols for valac's preprocessor must be defined as compiler args,
+# not in the code or in config.h
 if reference_tracking
   geary_vala_options += [ '--define=REF_TRACKING' ]
 endif
