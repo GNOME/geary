@@ -137,9 +137,6 @@ conf.set('HAVE_LIBUNITY', libunity.found())
 conf.set('HAVE_FTS3_TOKENIZE', true)
 conf.set('VERSION', meson.project_version())
 conf.set('GCR_API_SUBJECT_TO_CHANGE', true)
-conf.set('DISABLE_POODLE', not poodle)
-conf.set('REF_TRACKING', reference_tracking)
-
 configure_file(output: 'config.h', configuration: conf)
 
 # Post-install scripts
