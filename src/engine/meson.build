@@ -331,7 +331,7 @@ geary_engine_dependencies = [
   webkit2gtk,
 ]
 
-geary_engine_lib = library('geary-engine',
+geary_engine_lib = static_library('geary-engine',
   geary_engine_sources,
   dependencies: geary_engine_dependencies,
   link_with: sqlite3_unicodesn_lib,

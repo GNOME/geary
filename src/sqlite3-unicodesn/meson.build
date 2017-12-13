@@ -40,7 +40,7 @@ sqlite3_unicodesn_includes = [
   include_directories('libstemmer_c/src_c'),
 ]
 
-sqlite3_unicodesn_lib = library('sqlite3-unicodesn',
+sqlite3_unicodesn_lib = static_library('sqlite3-unicodesn',
   sqlite3_unicodesn_sources,
   dependencies: sqlite,
   c_args: sqlite3_unicodesn_c_flags,

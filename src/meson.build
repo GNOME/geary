@@ -44,18 +44,21 @@ geary_web_process = library('geary-web-process',
 geary_bin_sources = files(
   join_paths('client', 'application', 'main.vala'),
 )
-geary_bin_sources += geary_compiled_schema
 
+geary_bin_sources += [
+  geary_compiled_schema,
+  geary_resources # Included here so they show up in the executable.
+]
 geary_bin_dependencies = [
-  libmath,
-  gee,
-  gtk,
   gdk,
-  webkit2gtk,
-  libsoup,
-  gmime,
   geary_client_dep,
   geary_engine_dep,
+  gee,
+  gmime,
+  gtk,
+  libmath,
+  libsoup,
+  webkit2gtk,
 ]
 
 geary_bin = executable('geary',

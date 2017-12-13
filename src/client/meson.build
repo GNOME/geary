@@ -100,7 +100,7 @@ geary_client_vala_sources = files(
 
 geary_client_sources = [
   geary_client_vala_sources,
-  geary_resources[0],
+  geary_resources # Included here so valac can check them
 ]
 
 geary_client_dependencies = [
@@ -134,7 +134,7 @@ if libunity.found()
   geary_client_dependencies += libunity
 endif
 
-geary_client_lib = library('geary-client',
+geary_client_lib = static_library('geary-client',
   geary_client_sources,
   dependencies: geary_client_dependencies,
   include_directories: config_h_dir,
