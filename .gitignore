@@ -5,6 +5,7 @@
 build/
 debian/*.debhelper.log
 debian/*.substvars
+debian/.debhelper
 debian/debhelper-build-stamp
 debian/files
 debian/geary
