@@ -16,8 +16,8 @@ msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=internationalization\n"
-"POT-Creation-Date: 2017-04-21 22:33+0000\n"
-"PO-Revision-Date: 2017-04-22 01:42+0300\n"
+"POT-Creation-Date: 2017-11-16 05:25+0000\n"
+"PO-Revision-Date: 2017-12-15 13:47+0300\n"
 "Last-Translator: Stas Solovey <whats_up@tut.by>\n"
 "Language-Team: Русский <gnome-cyr@gnome.org>\n"
 "Language: ru\n"
@@ -26,21 +26,29 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
-"X-Generator: Poedit 2.0.1\n"
+"X-Generator: Poedit 2.0.5\n"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:1
+#. Translators: The application name
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:2
 #: ../desktop/org.gnome.Geary.desktop.in.h:1
 #: ../desktop/geary-autostart.desktop.in.h:1
 msgid "Geary"
 msgstr "Geary"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:2
+#. Translators: The development team's name
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:4
+msgid "Geary Development Team"
+msgstr "Команда разработчиков Geary"
+
+#. Translators: The application's summary / tagline
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:6
 #: ../desktop/org.gnome.Geary.desktop.in.h:4
 #: ../desktop/geary-autostart.desktop.in.h:4
+#: ../src/client/application/geary-application.vala:21
 msgid "Send and receive email"
 msgstr "Отправка и получение электронной почты"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:3
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:7
 msgid ""
 "Geary is an email application built around conversations, for the GNOME 3 "
 "desktop. It allows you to read, find and send email with a straightforward, "
@@ -50,7 +58,7 @@ msgstr ""
 "по принципу обмена сообщениями — беседами. Позволяет читать, находить и "
 "отправлять электронную почту с простым, современным интерфейсом."
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:4
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:8
 msgid ""
 "Conversations allow you to read a complete discussion without having to find "
 "and click from message to message."
@@ -58,37 +66,48 @@ msgstr ""
 "Беседы позволяют читать переписку целиком без необходимости искать и "
 "переходить от сообщения к сообщению."
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:5
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:9
 msgid "Geary’s features include:"
 msgstr "К функциям Geary относятся:"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:6
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:10
 msgid "Quick email account setup"
 msgstr "Быстрая настройка учётной записи электронной почты"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:7
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:11
 msgid "Shows related messages together in conversations"
 msgstr "Отображение связанных сообщений в режиме беседы"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:8
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:12
 msgid "Fast, full text and keyword search"
 msgstr "Быстрый полнотекстовый поиск и поиск по ключевым словам"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:9
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:13
 msgid "Full-featured HTML and plain text message composer"
 msgstr ""
 "Полнофункциональный режим составления писем в виде простого текста, а также "
 "с HTML разметкой"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:10
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:14
 msgid "Desktop notification of new mail"
 msgstr "Уведомления о новых сообщениях"
 
-#: ../desktop/org.gnome.Geary.appdata.xml.in.h:11
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:15
 msgid "Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers"
 msgstr "Совместим с GMail, Yahoo! Mail, Outlook.com и другими IMAP серверами"
 
+#. Translators: A screenshot description.
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:17
+msgid "Geary displaying a conversation"
+msgstr "Интерфейс обмена сообщениями Geary"
+
+#. Translators: A screenshot description.
+#: ../desktop/org.gnome.Geary.appdata.xml.in.h:19
+msgid "Geary showing the rich text composer"
+msgstr "Интерфейс редактирования текста Geary"
+
 #: ../desktop/org.gnome.Geary.desktop.in.h:2
+#: ../desktop/geary-autostart.desktop.in.h:2
 msgid "Email"
 msgstr "Электронная почта"
 
@@ -104,11 +123,6 @@ msgstr "Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;"
 #: ../desktop/org.gnome.Geary.desktop.in.h:7 ../ui/gtk/menus.ui.h:1
 msgid "Compose Message"
 msgstr "Новое сообщение"
-
-#: ../desktop/geary-autostart.desktop.in.h:2
-#: ../src/client/application/geary-application.vala:21
-msgid "Mail Client"
-msgstr "Почтовый клиент"
 
 #: ../desktop/geary-autostart.desktop.in.h:3
 msgid "Geary Mail"
@@ -257,11 +271,15 @@ msgstr "        • Неверные имя пользователя или па
 msgid "Copyright 2016 Software Freedom Conservancy Inc."
 msgstr "Авторское право © 2016 Software Freedom Conservancy Inc."
 
-#: ../src/client/application/geary-application.vala:24
+#: ../src/client/application/geary-application.vala:23
+msgid "Copyright 2016-2017 Geary Development Team."
+msgstr "Авторское право © 016-2017 Geary Development Team."
+
+#: ../src/client/application/geary-application.vala:25
 msgid "Visit the Geary web site"
 msgstr "Посетить веб-сайт Geary"
 
-#: ../src/client/application/geary-application.vala:464
+#: ../src/client/application/geary-application.vala:466
 #, c-format
 msgid "About %s"
 msgstr "О %s"
@@ -269,9 +287,9 @@ msgstr "О %s"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: ../src/client/application/geary-application.vala:468
+#: ../src/client/application/geary-application.vala:470
 msgid "translator-credits"
-msgstr "Stas Solovey <whats_up@tut.by>, 2015-2017"
+msgstr "Stas Solovey <whats_up@tut.by>, 2015-2017."
 
 #: ../src/client/application/geary-args.vala:10
 msgid "Start Geary with hidden main window"
@@ -341,17 +359,17 @@ msgstr "Показать версию приложения"
 msgid "Use %s to open a new composer window"
 msgstr "Используйте %s для открытия нового окна редактора"
 
-#: ../src/client/application/geary-args.vala:54
+#: ../src/client/application/geary-args.vala:56
 msgid "Please report comments, suggestions and bugs to:"
 msgstr "Комментарии, пожелания и найденные ошибки отправляйте:"
 
 #. i18n: Command line arguments are invalid
-#: ../src/client/application/geary-args.vala:61
+#: ../src/client/application/geary-args.vala:63
 #, c-format
 msgid "Failed to parse command line options: %s\n"
 msgstr "Не удалось разобрать параметры командной строки: %s\n"
 
-#: ../src/client/application/geary-args.vala:72
+#: ../src/client/application/geary-args.vala:74
 #, c-format
 msgid "Unrecognized command line option “%s”\n"
 msgstr "Неизвестный параметр командной строки «%s»\n"
@@ -680,15 +698,15 @@ msgstr ""
 "\n"
 "Проверьте подключение к сети и перезапустите Geary."
 
-#: ../src/client/application/geary-controller.vala:1999
+#: ../src/client/application/geary-controller.vala:2008
 msgid "Undo move (Ctrl+Z)"
 msgstr "Отменить перемещение (Ctrl+Z)"
 
-#: ../src/client/application/geary-controller.vala:2009
+#: ../src/client/application/geary-controller.vala:2018
 msgid "Are you sure you want to open these attachments?"
 msgstr "Действительно хотите открыть эти вложения?"
 
-#: ../src/client/application/geary-controller.vala:2010
+#: ../src/client/application/geary-controller.vala:2019
 msgid ""
 "Attachments may cause damage to your system if opened.  Only open files from "
 "trusted sources."
@@ -696,16 +714,16 @@ msgstr ""
 "Вложения при открытии могут нанести ущерб системе. Открывайте вложения "
 "только от надёжных источников."
 
-#: ../src/client/application/geary-controller.vala:2011
+#: ../src/client/application/geary-controller.vala:2020
 msgid "Don’t _ask me again"
 msgstr "Не _спрашивать снова"
 
-#: ../src/client/application/geary-controller.vala:2121
+#: ../src/client/application/geary-controller.vala:2130
 #, c-format
 msgid "A file named “%s” already exists.  Do you want to replace it?"
 msgstr "Файл с именем «%s» уже существует. Заменить его?"
 
-#: ../src/client/application/geary-controller.vala:2123
+#: ../src/client/application/geary-controller.vala:2132
 #, c-format
 msgid ""
 "The file already exists in “%s”.  Replacing it will overwrite its contents."
@@ -713,63 +731,63 @@ msgstr ""
 "Файл уже существует в «%s». Его замена приведёт к полной перезаписи его "
 "содержимого."
 
-#: ../src/client/application/geary-controller.vala:2126
+#: ../src/client/application/geary-controller.vala:2135
 msgid "_Replace"
 msgstr "_Заменить"
 
 #. Find out what to do with the inline composers.
 #. TODO: Remove this in favor of automatically saving drafts
-#: ../src/client/application/geary-controller.vala:2374
+#: ../src/client/application/geary-controller.vala:2383
 msgid "Close open draft messages?"
 msgstr "Закрыть черновик?"
 
-#: ../src/client/application/geary-controller.vala:2496
+#: ../src/client/application/geary-controller.vala:2505
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Очистить все письма папки %s?"
 
-#: ../src/client/application/geary-controller.vala:2497
+#: ../src/client/application/geary-controller.vala:2506
 msgid "This removes the email from Geary and your email server."
 msgstr "Удаляет все письма из Geary и почтового сервера."
 
-#: ../src/client/application/geary-controller.vala:2498
+#: ../src/client/application/geary-controller.vala:2507
 msgid "This cannot be undone."
 msgstr "Это не может быть отменено."
 
-#: ../src/client/application/geary-controller.vala:2499
+#: ../src/client/application/geary-controller.vala:2508
 #, c-format
 msgid "Empty %s"
 msgstr "Очистить %s"
 
-#: ../src/client/application/geary-controller.vala:2516
+#: ../src/client/application/geary-controller.vala:2525
 #, c-format
 msgid "Error emptying %s"
 msgstr "Ошибка очистки %s"
 
-#: ../src/client/application/geary-controller.vala:2546
+#: ../src/client/application/geary-controller.vala:2555
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Безвозвратно удалить это сообщение?"
 msgstr[1] "Безвозвратно удалить эти сообщения?"
 msgstr[2] "Безвозвратно удалить эти сообщения?"
 
-#: ../src/client/application/geary-controller.vala:2548
+#: ../src/client/application/geary-controller.vala:2557
 msgid "Delete"
 msgstr "_Удалить"
 
-#: ../src/client/application/geary-controller.vala:2580
+#: ../src/client/application/geary-controller.vala:2589
 msgid "Undo archive (Ctrl+Z)"
 msgstr "Отменить архивирование (Ctrl+Z)"
 
-#: ../src/client/application/geary-controller.vala:2595
+#: ../src/client/application/geary-controller.vala:2604
 msgid "Undo trash (Ctrl+Z)"
 msgstr "Отменить перемещение в корзину (Ctrl+Z)"
 
-#: ../src/client/application/geary-controller.vala:2649
+#: ../src/client/application/geary-controller.vala:2658
 msgid "Undo (Ctrl+Z)"
 msgstr "Отменить (Ctrl+Z)"
 
-#: ../src/client/application/geary-controller.vala:2780
+#: ../src/client/application/geary-controller.vala:2789
 msgid "Failed to open default text editor."
 msgstr "Не удалось запустить текстовый редактор по-умолчанию."
 
@@ -1999,14 +2017,10 @@ msgid "This message has not yet been sent."
 msgstr "Это сообщение ещё не было отправлено."
 
 #: ../ui/conversation-email.ui.h:13
-msgid "Try Again"
-msgstr "Попробовать снова"
-
-#: ../ui/conversation-email.ui.h:14
 msgid "Message not saved"
 msgstr "Сообщение не сохранено"
 
-#: ../ui/conversation-email.ui.h:15
+#: ../ui/conversation-email.ui.h:14
 msgid "This message was sent, but has not been saved to your account."
 msgstr "Сообщение отправлено, но не сохранено в вашей учётной записи."
 
@@ -2658,6 +2672,12 @@ msgstr "Адрес эл. почты:"
 #: ../ui/upgrade_dialog.glade.h:1
 msgid "Geary update in progress…"
 msgstr "Идёт обновление Geary…"
+
+#~ msgid "Mail Client"
+#~ msgstr "Почтовый клиент"
+
+#~ msgid "Try Again"
+#~ msgstr "Попробовать снова"
 
 #~ msgid "Empty"
 #~ msgstr "Очистить"
