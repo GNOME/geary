@@ -324,11 +324,11 @@ geary_engine_dependencies = [
   gio,
   glib,
   gmime,
+  javascriptcoregtk,
   libunwind,
   libxml,
   posix,
-  sqlite,
-  webkit2gtk,
+  sqlite
 ]
 
 geary_engine_lib = static_library('geary-engine',

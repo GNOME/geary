@@ -59,8 +59,8 @@ gcr = dependency('gcr-3', version: '>= 3.10.1')
 gobject_introspection = dependency('gobject-introspection-1.0')
 webkit2gtk_dep = dependency('webkit2gtk-4.0', version: '>=' + target_webkit)
 webkit2gtk_web_extension_dep = dependency('webkit2gtk-web-extension-4.0', version: '>=' + target_webkit)
-javascriptcore = valac.find_library('javascriptcore-4.0', dirs: vapi_dir)
-javascriptcoregtk = cc.find_library('javascriptcoregtk-4.0', version: '>=' + target_webkit)
+javascriptcoregtk_lib = cc.find_library('javascriptcoregtk-4.0', version: '>=' + target_webkit)
+javascriptcoregtk_vapi = valac.find_library('javascriptcore-4.0', dirs: vapi_dir)
 enchant = dependency('enchant', version: '>= 1.6')
 libunwind = declare_dependency(
   dependencies: [

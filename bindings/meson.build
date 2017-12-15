@@ -7,6 +7,17 @@
 
 
 girdir = gobject_introspection.get_pkgconfig_variable('girdir')
+webkit2gtk_include = include_directories(
+  webkit2gtk_dep.get_pkgconfig_variable('includedir') + '/webkitgtk-4.0'
+)
+
+javascriptcoregtk = declare_dependency(
+  dependencies: [
+    javascriptcoregtk_lib,
+    javascriptcoregtk_vapi
+  ],
+  include_directories: webkit2gtk_include
+)
 
 webkit2gtk_vapi = gnome.generate_vapi('webkit2gtk-4.8',
   sources: join_paths(girdir, 'WebKit2-4.0.gir'),
@@ -21,15 +32,14 @@ webkit2gtk_vapi = gnome.generate_vapi('webkit2gtk-4.8',
 
 webkit2gtk = declare_dependency(
   dependencies: [
-    webkit2gtk_vapi,
-    javascriptcore,
+    cc.find_library('webkit2gtk-4.0'),
+    glib,
+    gtk,
     javascriptcoregtk,
     libsoup,
-    gdk,
-    gtk,
-    cc.find_library('webkit2gtk-4.0'),
+    webkit2gtk_vapi
   ],
-  include_directories: include_directories(webkit2gtk_dep.get_pkgconfig_variable('includedir')+'/webkitgtk-4.0/'),
+  include_directories: webkit2gtk_include
 )
 
 
@@ -49,14 +59,12 @@ webkit2gtk_web_extension_vapi = gnome.generate_vapi('webkit2gtk-web-extension-4.
 
 webkit2gtk_web_extension = declare_dependency(
   dependencies: [
-    webkit2gtk_web_extension_vapi,
-    glib,
-    gio,
-    gtk,
-    libsoup,
-    javascriptcore,
-    javascriptcoregtk,
     cc.find_library('webkit2gtk-4.0'),
+    glib,
+    gtk,
+    javascriptcoregtk,
+    libsoup,
+    webkit2gtk_web_extension_vapi,
   ],
-  include_directories: include_directories(webkit2gtk_web_extension_dep.get_pkgconfig_variable('includedir')+'/webkitgtk-4.0/'),
+  include_directories: webkit2gtk_include
 )
