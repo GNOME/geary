@@ -36,7 +36,7 @@ add_project_arguments([
 )
 
 # Dependencies
-target_glib = '2.44' # Also passed to valac, so don't include a point rev
+target_glib = '2.50' # Also passed to valac, so don't include a point rev
 target_gtk = '3.22.0'
 target_webkit = '2.16'
 
