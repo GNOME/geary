@@ -106,10 +106,15 @@ public bool parse(string[] args) {
     
     if (log_deserializer)
         Geary.Logging.enable_flags(Geary.Logging.Flag.DESERIALIZER);
-    
-    if (log_debug)
+
+    if (log_debug) {
         Geary.Logging.log_to(stdout);
-    
+    } else {
+        // We'll be logging to stderror until this point, so stop
+        // that.
+        Geary.Logging.log_to(null);
+    }
+
     return true;
 }
 

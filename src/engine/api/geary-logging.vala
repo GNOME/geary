@@ -13,9 +13,11 @@
 
 namespace Geary.Logging {
 
+private const string DOMAIN = "Geary";
+
 [Flags]
 public enum Flag {
-    NONE,
+    NONE = 0,
     NETWORK,
     SERIALIZER,
     REPLAY,
@@ -24,11 +26,11 @@ public enum Flag {
     SQL,
     FOLDER_NORMALIZATION,
     DESERIALIZER;
-    
+
     public inline bool is_all_set(Flag flags) {
         return (flags & this) == flags;
     }
-    
+
     public inline bool is_any_set(Flag flags) {
         return (flags & this) != 0;
     }
@@ -48,10 +50,7 @@ private Timer? entry_timer = null;
 public void init() {
     if (init_count++ != 0)
         return;
-    
     entry_timer = new Timer();
-    
-    log_to(null);
 }
 
 /**
@@ -92,27 +91,28 @@ public inline bool are_all_flags_set(Flag flags) {
 
 public inline void error(Flag flags, string fmt, ...) {
     if (logging_flags.is_any_set(flags))
-        logv(null, LogLevelFlags.LEVEL_ERROR, fmt, va_list());
+        logv(DOMAIN, LogLevelFlags.LEVEL_ERROR, fmt, va_list());
 }
 
 public inline void critical(Flag flags, string fmt, ...) {
     if (logging_flags.is_any_set(flags))
-        logv(null, LogLevelFlags.LEVEL_CRITICAL, fmt, va_list());
+        logv(DOMAIN, LogLevelFlags.LEVEL_CRITICAL, fmt, va_list());
 }
 
 public inline void warning(Flag flags, string fmt, ...) {
     if (logging_flags.is_any_set(flags))
-        logv(null, LogLevelFlags.LEVEL_WARNING, fmt, va_list());
+        logv(DOMAIN, LogLevelFlags.LEVEL_WARNING, fmt, va_list());
 }
 
 public inline void message(Flag flags, string fmt, ...) {
     if (logging_flags.is_any_set(flags))
-        logv(null, LogLevelFlags.LEVEL_MESSAGE, fmt, va_list());
+        logv(DOMAIN, LogLevelFlags.LEVEL_MESSAGE, fmt, va_list());
 }
 
 public inline void debug(Flag flags, string fmt, ...) {
-    if (logging_flags.is_any_set(flags))
-        logv(null, LogLevelFlags.LEVEL_DEBUG, fmt, va_list());
+    if (logging_flags.is_any_set(flags)) {
+        logv(DOMAIN, LogLevelFlags.LEVEL_DEBUG, fmt, va_list());
+    }
 }
 
 /**
@@ -125,31 +125,62 @@ public inline void debug(Flag flags, string fmt, ...) {
  */
 public void log_to(FileStream? stream) {
     Logging.stream = stream;
-    
-    Log.set_handler(null, LogLevelFlags.LEVEL_DEBUG,
-        (domain, levels, msg) => { on_log(" [deb]", levels, msg); });
-    Log.set_handler(null, LogLevelFlags.LEVEL_INFO,
-        (domain, levels, msg) => { on_log(" [inf]", levels, msg); });
-    Log.set_handler(null, LogLevelFlags.LEVEL_MESSAGE,
-        (domain, levels, msg) => { on_log(" [msg]", levels, msg); });
-    Log.set_handler(null, LogLevelFlags.LEVEL_WARNING,
-        (domain, levels, msg) => { on_log("*[wrn]", levels, msg); });
-    Log.set_handler(null, LogLevelFlags.LEVEL_CRITICAL,
-        (domain, levels, msg) => { on_log("![crt]", levels, msg); });
-    Log.set_handler(null, LogLevelFlags.LEVEL_ERROR,
-        (domain, levels, msg) => { on_log("![err]", levels, msg); });
 }
 
-private void on_log(string prefix, LogLevelFlags log_levels, string message) {
-    if (stream == null)
-        return;
-    
-    GLib.Time tm = GLib.Time.local(time_t());
-    stream.printf("%s %02d:%02d:%02d %lf %s\n", prefix, tm.hour, tm.minute, tm.second,
-        entry_timer.elapsed(), message);
-    
-    entry_timer.start();
+public void default_handler(string? domain,
+                            LogLevelFlags log_levels,
+                            string message) {
+    unowned FileStream? out = stream;
+    if (out != null ||
+        ((LogLevelFlags.LEVEL_WARNING & log_levels) > 0) ||
+        ((LogLevelFlags.LEVEL_CRITICAL & log_levels) > 0)  ||
+        ((LogLevelFlags.LEVEL_ERROR & log_levels) > 0)) {
+
+        if (out == null) {
+            out = GLib.stderr;
+        }
+
+        GLib.Time tm = GLib.Time.local(time_t());
+        out.printf(
+            "%s %02d:%02d:%02d %lf %s: %s\n",
+            to_prefix(log_levels),
+            tm.hour, tm.minute, tm.second,
+            entry_timer.elapsed(),
+            domain ?? "default",
+            message
+        );
+
+        entry_timer.start();
+    }
+}
+
+private inline string to_prefix(LogLevelFlags level) {
+    switch (level) {
+    case LogLevelFlags.LEVEL_ERROR:
+        return "![err]";
+
+    case LogLevelFlags.LEVEL_CRITICAL:
+        return "![crt]";
+
+    case LogLevelFlags.LEVEL_WARNING:
+        return "*[wrn]";
+
+    case LogLevelFlags.LEVEL_MESSAGE:
+        return " [msg]";
+
+    case LogLevelFlags.LEVEL_INFO:
+        return " [inf]";
+
+    case LogLevelFlags.LEVEL_DEBUG:
+        return " [deb]";
+
+    case LogLevelFlags.LEVEL_MASK:
+        return "![***]";
+
+    default:
+        return "![???]";
+
+    }
 }
 
 }
-

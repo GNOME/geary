@@ -183,8 +183,11 @@ public class GearyApplication : Gtk.Application {
         Environment.set_application_name(NAME);
         Environment.set_prgname(PRGNAME);
         International.init(GETTEXT_PACKAGE, bin);
-        
+
         Geary.Logging.init();
+        Geary.Logging.log_to(stderr);
+        GLib.Log.set_default_handler(Geary.Logging.default_handler);
+
         Date.init();
 
         // Calls Gtk.init(), amongst other things
