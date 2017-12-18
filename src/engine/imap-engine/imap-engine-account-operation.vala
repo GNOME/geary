@@ -15,11 +15,26 @@
  *
  * Execution of the operation is managed by {@link
  * AccountProcessor}. Since the processor will not en-queue duplicate
- * operations, implementations may override the {@link equal_to}
- * method to ensure that the same operation is not queued twice.
+ * operations, implementations of this class may override the {@link
+ * equal_to} method to specify which instances are considered to be
+ * duplicates.
  */
 public abstract class Geary.ImapEngine.AccountOperation : Geary.BaseObject {
 
+
+    /** The account this operation applies to. */
+    protected weak Geary.Account account;
+
+
+    /**
+     * Constructs a new account operation.
+     *
+     * The passed in `account` will be the account the operation will
+     * apply to.
+     */
+    protected AccountOperation(Geary.Account account) {
+        this.account = account;
+    }
 
     /**
      * Fired by after processing when the operation has completed.
@@ -81,6 +96,60 @@ public abstract class Geary.ImapEngine.AccountOperation : Geary.BaseObject {
      */
     public virtual string to_string() {
         return this.get_type().name();
+    }
+
+}
+
+
+/**
+ * An account operation that applies to a specific folder.
+ *
+ * By default, instances of this class require that another operation
+ * applies to the same folder as well as having the same type to be
+ * considered equal, for the purpose of not en-queuing duplicate
+ * operations.
+ */
+public abstract class Geary.ImapEngine.FolderOperation : AccountOperation {
+
+
+    /** The folder this operation applies to. */
+    protected weak Geary.Folder folder;
+
+
+    /**
+     * Constructs a new folder operation.
+     *
+     * The passed in `folder` and `account` will be the objects the
+     * operation will apply to.
+     */
+    protected FolderOperation(Geary.Account account, Geary.Folder folder) {
+        base(account);
+        this.folder = folder;
+    }
+
+    /**
+     * Determines if another operation is equal to this.
+     *
+     * This method compares both chain's up to {@link
+     * AccountOperation.equal_to} and if equal, compares the paths of
+     * both operation's folders to determine if `op` is equal to this
+     * operation.
+     */
+    public override bool equal_to(AccountOperation op) {
+        return (
+            base.equal_to(op) &&
+            this.folder.path.equal_to(((FolderOperation) op).folder.path)
+        );
+    }
+
+    /**
+     * Provides a representation of this operation for debugging.
+     *
+     * The return value will include its folder's path and the name of
+     * the class.
+     */
+    public override string to_string() {
+        return "%s(%s)".printf(base.to_string(), folder.path.to_string());
     }
 
 }

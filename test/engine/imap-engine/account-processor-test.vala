@@ -20,6 +20,10 @@ public class Geary.ImapEngine.AccountProcessorTest : Gee.TestCase {
 
         private Nonblocking.Spinlock spinlock = new Nonblocking.Spinlock();
 
+        internal TestOperation(Geary.Account account) {
+            base(account);
+        }
+
         public override async void execute(Cancellable cancellable)
             throws Error {
             print("Test op/");
@@ -37,10 +41,16 @@ public class Geary.ImapEngine.AccountProcessorTest : Gee.TestCase {
 
     public class OtherOperation : TestOperation {
 
+        internal OtherOperation(Geary.Account account) {
+            base(account);
+        }
+
     }
 
 
-    private AccountProcessor processor;
+    private AccountProcessor? processor = null;
+    private Geary.Account? account = null;
+    private Geary.AccountInformation? info = null;
     private uint succeeded;
     private uint failed;
     private uint completed;
@@ -53,17 +63,26 @@ public class Geary.ImapEngine.AccountProcessorTest : Gee.TestCase {
         add_test("test_duplicate", test_duplicate);
         add_test("test_stop", test_stop);
 
+        // XXX this has to be here instead of in set_up for some
+        // reason...
         this.processor = new AccountProcessor("processor");
     }
 
     public override void set_up() {
+        this.info = new Geary.AccountInformation(
+            "test-info",
+            File.new_for_path("."),
+            File.new_for_path(".")
+        );
+        this.account = new Geary.MockAccount("test-account", this.info);
+
         this.succeeded = 0;
         this.failed = 0;
         this.completed = 0;
     }
 
     public void test_success() {
-        TestOperation op = setup_operation(new TestOperation());
+        TestOperation op = setup_operation(new TestOperation(this.account));
 
         this.processor.enqueue(op);
         assert(this.processor.waiting == 1);
@@ -77,7 +96,7 @@ public class Geary.ImapEngine.AccountProcessorTest : Gee.TestCase {
     }
 
     public void test_failure() {
-        TestOperation op = setup_operation(new TestOperation());
+        TestOperation op = setup_operation(new TestOperation(this.account));
         op.throw_error = true;
 
         AccountOperation? error_op = null;
@@ -98,9 +117,9 @@ public class Geary.ImapEngine.AccountProcessorTest : Gee.TestCase {
     }
 
     public void test_duplicate() {
-        TestOperation op1 = setup_operation(new TestOperation());
-        TestOperation op2 = setup_operation(new TestOperation());
-        TestOperation op3 = setup_operation(new OtherOperation());
+        TestOperation op1 = setup_operation(new TestOperation(this.account));
+        TestOperation op2 = setup_operation(new TestOperation(this.account));
+        TestOperation op3 = setup_operation(new OtherOperation(this.account));
 
         this.processor.enqueue(op1);
         this.processor.enqueue(op2);
@@ -111,9 +130,9 @@ public class Geary.ImapEngine.AccountProcessorTest : Gee.TestCase {
     }
 
     public void test_stop() {
-        TestOperation op1 = setup_operation(new TestOperation());
+        TestOperation op1 = setup_operation(new TestOperation(this.account));
         op1.wait_for_cancel = true;
-        TestOperation op2 = setup_operation(new OtherOperation());
+        TestOperation op2 = setup_operation(new OtherOperation(this.account));
 
         this.processor.enqueue(op1);
         this.processor.enqueue(op2);

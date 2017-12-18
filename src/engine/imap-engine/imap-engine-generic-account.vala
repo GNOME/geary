@@ -811,7 +811,6 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
 internal class Geary.ImapEngine.LoadFolders : AccountOperation {
 
 
-    private weak GenericAccount account;
     private weak ImapDB.Account local;
     private Geary.SpecialFolderType[] specials;
 
@@ -819,16 +818,17 @@ internal class Geary.ImapEngine.LoadFolders : AccountOperation {
     internal LoadFolders(GenericAccount account,
                          ImapDB.Account local,
                          Geary.SpecialFolderType[] specials) {
-        this.account = account;
+        base(account);
         this.local = local;
         this.specials = specials;
     }
 
     public override async void execute(Cancellable cancellable) throws Error {
+        GenericAccount generic = (GenericAccount) this.account;
         Gee.List<ImapDB.Folder> folders = new Gee.LinkedList<ImapDB.Folder>();
         yield enumerate_local_folders_async(folders, null, cancellable);
         debug("%s: found %u folders", to_string(), folders.size);
-        this.account.add_folders(folders, true);
+        generic.add_folders(folders, true);
 
         if (!folders.is_empty) {
             // If we have some folders to load, then this isn't the
@@ -836,9 +836,12 @@ internal class Geary.ImapEngine.LoadFolders : AccountOperation {
             // exist
             foreach (Geary.SpecialFolderType special in this.specials) {
                 try {
-                    yield this.account.ensure_special_folder_async(special, cancellable);
+                    yield generic.ensure_special_folder_async(special, cancellable);
                 } catch (Error e) {
-                    warning("Unable to ensure special folder %s: %s", special.to_string(), e.message);
+                    warning(
+                        "Unable to ensure special folder %s: %s",
+                        special.to_string(), e.message
+                    );
                 }
             }
         }
@@ -876,7 +879,7 @@ internal class Geary.ImapEngine.LoadFolders : AccountOperation {
 internal class Geary.ImapEngine.UpdateRemoteFolders : AccountOperation {
 
 
-    private weak GenericAccount account;
+    private weak GenericAccount generic_account;
     private weak Imap.Account remote;
     private weak ImapDB.Account local;
     private Gee.Collection<FolderPath> local_folders;
@@ -888,7 +891,8 @@ internal class Geary.ImapEngine.UpdateRemoteFolders : AccountOperation {
                                  ImapDB.Account local,
                                  Gee.Collection<FolderPath> local_folders,
                                  Geary.SpecialFolderType[] specials) {
-        this.account = account;
+        base(account);
+        this.generic_account = account;
         this.remote = remote;
         this.local = local;
         this.local_folders = local_folders;
@@ -1012,12 +1016,13 @@ internal class Geary.ImapEngine.UpdateRemoteFolders : AccountOperation {
                 debug("Unable to fetch local folder after cloning: %s", convert_err.message);
             }
         }
-        this.account.add_folders(to_build, false);
+        this.generic_account.add_folders(to_build, false);
 
         if (remote_folders_suspect) {
             debug("Skipping removing folders due to prior errors");
         } else {
-            Gee.List<MinimalFolder> removed = this.account.remove_folders(to_remove);
+            Gee.List<MinimalFolder> removed =
+                this.generic_account.remove_folders(to_remove);
 
             // Sort by path length descending, so we always remove children first.
             removed.sort((a, b) => b.path.get_path_length() - a.path.get_path_length());
@@ -1046,13 +1051,15 @@ internal class Geary.ImapEngine.UpdateRemoteFolders : AccountOperation {
                 else
                     debug("Unable to report %s altered: no local representation", altered_path.to_string());
             }
-            this.account.update_folders(altered);
+            this.generic_account.update_folders(altered);
         }
 
         // Ensure each of the important special folders we need already exist
         foreach (Geary.SpecialFolderType special in this.specials) {
             try {
-                yield this.account.ensure_special_folder_async(special, cancellable);
+                yield this.generic_account.ensure_special_folder_async(
+                    special, cancellable
+                );
             } catch (Error e) {
                 warning("Unable to ensure special folder %s: %s", special.to_string(), e.message);
             }
@@ -1067,11 +1074,9 @@ internal class Geary.ImapEngine.UpdateRemoteFolders : AccountOperation {
  * This performs a IMAP STATUS on the folder, but only if it is not
  * open - if it is open it is already maintaining its unseen count.
  */
-internal class Geary.ImapEngine.RefreshFolderUnseen : AccountOperation {
+internal class Geary.ImapEngine.RefreshFolderUnseen : FolderOperation {
 
 
-    private weak MinimalFolder folder;
-    private weak GenericAccount account;
     private weak Imap.Account remote;
     private weak ImapDB.Account local;
 
@@ -1080,21 +1085,9 @@ internal class Geary.ImapEngine.RefreshFolderUnseen : AccountOperation {
                                  GenericAccount account,
                                  Imap.Account remote,
                                  ImapDB.Account local) {
-        this.folder = folder;
-        this.account = account;
+        base(account, folder);
         this.remote = remote;
         this.local = local;
-    }
-
-    public override bool equal_to(AccountOperation op) {
-        return (
-            base.equal_to(op) &&
-            this.folder.path.equal_to(((RefreshFolderUnseen) op).folder.path)
-        );
-    }
-
-    public override string to_string() {
-        return "%s(%s)".printf(base.to_string(), folder.path.to_string());
     }
 
     public override async void execute(Cancellable cancellable) throws Error {
@@ -1106,13 +1099,13 @@ internal class Geary.ImapEngine.RefreshFolderUnseen : AccountOperation {
             );
 
             if (remote_folder.properties.have_contents_changed(
-                    this.folder.local_folder.get_properties(),
+                    ((MinimalFolder) this.folder).local_folder.get_properties(),
                     this.folder.to_string())) {
                 yield local.update_folder_status_async(
                     remote_folder, false, true, cancellable
                 );
 
-                this.account.update_folder(this.folder);
+                ((GenericAccount) this.account).update_folder(this.folder);
             }
         }
     }
