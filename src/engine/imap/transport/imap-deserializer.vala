@@ -484,7 +484,11 @@ public class Geary.Imap.Deserializer : BaseObject {
     private void flush_params() {
         bool okay = true;
         if (this.context != this.root) {
-            Logging.debug(Logging.Flag.DESERIALIZER, "[%s] Unclosed list in parameters");
+            Logging.debug(
+                Logging.Flag.DESERIALIZER,
+                "[%s] Unclosed list in parameters",
+                to_string()
+            );
             okay = false;
         }
 

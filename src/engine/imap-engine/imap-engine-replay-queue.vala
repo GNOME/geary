@@ -64,12 +64,16 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
     private Scheduler.Scheduled? notification_timer = null;
     private int64 next_submission_number = 0;
     private State state = State.OPEN;
-    
+
     public virtual signal void scheduled(ReplayOperation op) {
-        Logging.debug(Logging.Flag.REPLAY, "[%s] ReplayQueue::scheduled: %s %s", to_string(),
-            op.to_string());
+        Logging.debug(
+            Logging.Flag.REPLAY,
+            "[%s] ReplayQueue::scheduled: %s",
+            to_string(),
+            op.to_string()
+        );
     }
-    
+
     public virtual signal void locally_executing(ReplayOperation op) {
         Logging.debug(Logging.Flag.REPLAY, "[%s] ReplayQueue::locally-executing: %s", to_string(),
             op.to_string());

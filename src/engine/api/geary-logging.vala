@@ -89,26 +89,31 @@ public inline bool are_all_flags_set(Flag flags) {
     return logging_flags.is_all_set(flags);
 }
 
+[PrintfFormat]
 public inline void error(Flag flags, string fmt, ...) {
     if (logging_flags.is_any_set(flags))
         logv(DOMAIN, LogLevelFlags.LEVEL_ERROR, fmt, va_list());
 }
 
+[PrintfFormat]
 public inline void critical(Flag flags, string fmt, ...) {
     if (logging_flags.is_any_set(flags))
         logv(DOMAIN, LogLevelFlags.LEVEL_CRITICAL, fmt, va_list());
 }
 
+[PrintfFormat]
 public inline void warning(Flag flags, string fmt, ...) {
     if (logging_flags.is_any_set(flags))
         logv(DOMAIN, LogLevelFlags.LEVEL_WARNING, fmt, va_list());
 }
 
+[PrintfFormat]
 public inline void message(Flag flags, string fmt, ...) {
     if (logging_flags.is_any_set(flags))
         logv(DOMAIN, LogLevelFlags.LEVEL_MESSAGE, fmt, va_list());
 }
 
+[PrintfFormat]
 public inline void debug(Flag flags, string fmt, ...) {
     if (logging_flags.is_any_set(flags)) {
         logv(DOMAIN, LogLevelFlags.LEVEL_DEBUG, fmt, va_list());
