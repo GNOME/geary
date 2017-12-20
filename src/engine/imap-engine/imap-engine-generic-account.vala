@@ -84,7 +84,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     public void queue_operation(AccountOperation op)
         throws EngineError {
         check_open();
-        debug("%s: Enqueuing: %s", this.to_string(), op.to_string());
+        debug("%s: Enqueuing operation: %s", this.to_string(), op.to_string());
         this.processor.enqueue(op);
     }
 
@@ -1097,6 +1097,10 @@ internal class Geary.ImapEngine.RefreshFolderUnseen : FolderOperation {
                 cancellable
             );
 
+            // Although this is called when the folder is closed, we
+            // can safely use local_folder since we are only using its
+            // properties, and the properties were loaded when the
+            // folder was first instantiated.
             if (remote_folder.properties.have_contents_changed(
                     ((MinimalFolder) this.folder).local_folder.get_properties(),
                     this.folder.to_string())) {
