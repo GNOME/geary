@@ -27,6 +27,9 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     Geary.FolderSupport.Mark, Geary.FolderSupport.Move {
 
 
+    private const int FLAG_UPDATE_TIMEOUT_SEC = 2;
+    private const int FLAG_UPDATE_START_CHUNK = 20;
+    private const int FLAG_UPDATE_MAX_CHUNK = 100;
     private const int FORCE_OPEN_REMOTE_TIMEOUT_SEC = 10;
     private const int REFRESH_UNSEEN_TIMEOUT_SEC = 1;
 
@@ -54,7 +57,6 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     internal ImapDB.Folder local_folder  { get; protected set; }
     internal Imap.Folder? remote_folder { get; protected set; default = null; }
     internal EmailPrefetcher email_prefetcher { get; private set; }
-    internal EmailFlagWatcher email_flag_watcher;
     internal int remote_count { get; private set; default = -1; }
     internal ReplayQueue replay_queue { get; private set; }
 
@@ -72,6 +74,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     private Nonblocking.Semaphore closed_semaphore = new Nonblocking.Semaphore();
     private Nonblocking.Mutex open_mutex = new Nonblocking.Mutex();
     private Nonblocking.Mutex close_mutex = new Nonblocking.Mutex();
+    private TimeoutManager update_flags_timer;
     private TimeoutManager refresh_unseen_timer;
     private Cancellable? open_cancellable = null;
 
@@ -113,13 +116,14 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         this.local_folder = local_folder;
         this.local_folder.email_complete.connect(on_email_complete);
 
-        email_flag_watcher = new EmailFlagWatcher(this);
-        email_flag_watcher.email_flags_changed.connect(on_email_flags_changed);
-
         this._special_folder_type = special_folder_type;
         this._properties.add(local_folder.get_properties());
         this.replay_queue = new ReplayQueue(this);
         this.email_prefetcher = new EmailPrefetcher(this);
+
+        this.update_flags_timer = new TimeoutManager.seconds(
+            FLAG_UPDATE_TIMEOUT_SEC, () => { on_update_flags.begin(); }
+        );
 
         this.refresh_unseen_timer = new TimeoutManager.seconds(
             REFRESH_UNSEEN_TIMEOUT_SEC, on_refresh_unseen
@@ -816,8 +820,13 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
 
         // notify any subscribers with similar information
         notify_opened(Geary.Folder.OpenState.BOTH, remote_count);
+
+        // Update flags once the folder has opened. We will receive
+        // notifications of changes as long as it remains open, so
+        // only need to do this once
+        this.update_flags_timer.start();
     }
-    
+
     public override async bool close_async(Cancellable? cancellable = null) throws Error {
         // Check open_count but only decrement inside of replay queue
         if (open_count <= 0)
@@ -1334,11 +1343,24 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         schedule_op(op);
         yield op.wait_for_ready_async(cancellable);
     }
-    
-    private void on_email_flags_changed(Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> changed) {
-        notify_email_flags_changed(changed);
+
+    public override string to_string() {
+        return "%s (open_count=%d remote_opened=%s)".printf(base.to_string(), open_count,
+            remote_opened.to_string());
     }
-    
+
+    /**
+     * Schedules a refresh of the unseen count for the folder.
+     *
+     * This will only refresh folders that are not open, since if they
+     * are open or opening, they will already be updated. Hence it is safe to be called on closed folders.
+     */
+    internal void refresh_unseen() {
+        if (this.open_count == 0) {
+            this.refresh_unseen_timer.start();
+        }
+    }
+
     // TODO: A proper public search mechanism; note that this always round-trips to the remote,
     // doesn't go through the replay queue, and doesn't deal with messages marked for deletion
     internal async Geary.Email? find_earliest_email_async(DateTime datetime,
@@ -1440,20 +1462,63 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         marked_email_removed(removed);
     }
 
-    public override string to_string() {
-        return "%s (open_count=%d remote_opened=%s)".printf(base.to_string(), open_count,
-            remote_opened.to_string());
-    }
-
     /**
-     * Schedules a refresh of the unseen count for the folder.
-     *
-     * This will only refresh folders that are not open, since if they
-     * are open or opening, they will already be updated. Hence it is safe to be called on closed folders.
+     * Checks for changes to {@link EmailFlags} after a folder opens.
      */
-    internal void refresh_unseen() {
-        if (this.open_count == 0) {
-            this.refresh_unseen_timer.start();
+    private async void on_update_flags() throws Error {
+        // Update this to use CHANGEDSINCE FETCH when available, when
+        // we support IMAP CONDSTORE (Bug 713117).
+        int chunk_size = FLAG_UPDATE_START_CHUNK;
+        Geary.EmailIdentifier? lowest = null;
+        while (!this.open_cancellable.is_cancelled() && this.remote.is_ready) {
+            Gee.List<Geary.Email>? list_local = yield list_email_by_id_async(
+                lowest, chunk_size,
+                Geary.Email.Field.FLAGS,
+                Geary.Folder.ListFlags.LOCAL_ONLY,
+                this.open_cancellable
+            );
+            if (list_local == null || list_local.is_empty)
+                break;
+
+            // find the lowest for the next iteration
+            lowest = Geary.EmailIdentifier.sort_emails(list_local).first().id;
+
+            // Get all email identifiers in the local folder mapped to their EmailFlags
+            Gee.HashMap<Geary.EmailIdentifier, Geary.EmailFlags> local_map =
+                new Gee.HashMap<Geary.EmailIdentifier, Geary.EmailFlags>();
+            foreach (Geary.Email e in list_local)
+                local_map.set(e.id, e.email_flags);
+
+            // Fetch e-mail from folder using force update, which will cause the cache to be bypassed
+            // and the latest to be gotten from the server (updating the cache in the process)
+            debug("%s: fetching %d flags", this.to_string(), local_map.keys.size);
+            Gee.List<Geary.Email>? list_remote = yield list_email_by_sparse_id_async(
+                local_map.keys,
+                Email.Field.FLAGS,
+                Geary.Folder.ListFlags.FORCE_UPDATE,
+                this.open_cancellable
+            );
+            if (list_remote == null || list_remote.is_empty)
+                break;
+
+            // Build map of emails that have changed.
+            Gee.HashMap<Geary.EmailIdentifier, Geary.EmailFlags> changed_map =
+                new Gee.HashMap<Geary.EmailIdentifier, Geary.EmailFlags>();
+            foreach (Geary.Email e in list_remote) {
+                if (!local_map.has_key(e.id))
+                    continue;
+
+                if (!local_map.get(e.id).equal_to(e.email_flags))
+                    changed_map.set(e.id, e.email_flags);
+            }
+
+            if (!this.open_cancellable.is_cancelled() && changed_map.size > 0)
+                notify_email_flags_changed(changed_map);
+
+            chunk_size *= 2;
+            if (chunk_size > FLAG_UPDATE_MAX_CHUNK) {
+                chunk_size = FLAG_UPDATE_MAX_CHUNK;
+            }
         }
     }
 

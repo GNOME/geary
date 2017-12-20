@@ -195,7 +195,6 @@ engine/imap-engine/imap-engine-account-processor.vala
 engine/imap-engine/imap-engine-account-synchronizer.vala
 engine/imap-engine/imap-engine-batch-operations.vala
 engine/imap-engine/imap-engine-contact-store.vala
-engine/imap-engine/imap-engine-email-flag-watcher.vala
 engine/imap-engine/imap-engine-email-prefetcher.vala
 engine/imap-engine/imap-engine-generic-account.vala
 engine/imap-engine/imap-engine-generic-folder.vala
