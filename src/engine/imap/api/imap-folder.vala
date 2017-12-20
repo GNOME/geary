@@ -212,16 +212,15 @@ private class Geary.Imap.Folder : BaseObject {
 
     private void on_fetch(FetchedData data) {
         // add if not found, merge if already received data for this email
-        debug("%s: FETCH (%s): %s:",
-              to_string(),
-              this.fetch_accumulator != null ? "accumulating" : "unsolicited",
-              data.to_string());
         if (this.fetch_accumulator != null) {
             FetchedData? existing = this.fetch_accumulator.get(data.seq_num);
             this.fetch_accumulator.set(
                 data.seq_num, (existing != null) ? data.combine(existing) : data
             );
         } else {
+            debug("%s: FETCH (unsolicited): %s:",
+                  to_string(),
+                  data.to_string());
             updated(data.seq_num, data);
         }
     }
