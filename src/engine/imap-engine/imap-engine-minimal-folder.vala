@@ -594,6 +594,9 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
 
         this.open_cancellable = new Cancellable();
 
+        // Notify the email prefetcher
+        this.email_prefetcher.open();
+
         // Unless NO_DELAY is set, do NOT open the remote side here; wait for the ReplayQueue to
         // require a remote connection or wait_for_open_async() to be called ... this allows for
         // fast local-only operations to occur, local-only either because (a) the folder has all
@@ -810,9 +813,6 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         }
         
         _properties.add(remote_folder.properties);
-
-        // Now that the remote is open, update messages.
-        this.email_prefetcher.open();
 
         // notify any subscribers with similar information
         notify_opened(Geary.Folder.OpenState.BOTH, remote_count);
