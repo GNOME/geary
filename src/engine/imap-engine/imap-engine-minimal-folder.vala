@@ -1341,7 +1341,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     
     // TODO: A proper public search mechanism; note that this always round-trips to the remote,
     // doesn't go through the replay queue, and doesn't deal with messages marked for deletion
-    internal async Geary.EmailIdentifier? find_earliest_email_async(DateTime datetime,
+    internal async Geary.Email? find_earliest_email_async(DateTime datetime,
         Geary.EmailIdentifier? before_id, Cancellable? cancellable) throws Error {
         check_open("find_earliest_email_async");
         if (before_id != null)
@@ -1372,19 +1372,20 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         replay_queue.schedule(op);
         
         yield op.wait_for_ready_async(cancellable);
-        
+
         // find earliest ID; because all Email comes from Folder, UID should always be present
+        Geary.Email? earliest = null;
         ImapDB.EmailIdentifier? earliest_id = null;
         foreach (Geary.Email email in op.accumulator) {
             ImapDB.EmailIdentifier email_id = (ImapDB.EmailIdentifier) email.id;
-            
-            if (earliest_id == null || email_id.uid.compare_to(earliest_id.uid) < 0)
+            if (earliest_id == null || email_id.uid.compare_to(earliest_id.uid) < 0) {
+                earliest = email;
                 earliest_id = email_id;
+            }
         }
-
-        return earliest_id;
+        return earliest;
     }
-    
+
     protected async Geary.EmailIdentifier? create_email_async(RFC822.Message rfc822,
         Geary.EmailFlags? flags, DateTime? date_received, Geary.EmailIdentifier? id,
         Cancellable? cancellable = null) throws Error {

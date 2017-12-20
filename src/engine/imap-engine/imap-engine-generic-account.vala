@@ -69,7 +69,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             search_path = new ImapDB.SearchFolderRoot();
         }
 
-        this.sync = new AccountSynchronizer(this, this.remote);
+        this.sync = new AccountSynchronizer(this);
 
         compile_special_search_names();
     }
@@ -226,7 +226,6 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         // Halt internal tasks early so they stop using local and
         // remote connections.
         this.processor.stop();
-        this.sync.stop();
 
         this.refresh_folder_timer.reset();
 
