@@ -442,7 +442,6 @@ public class MainWindow : Gtk.ApplicationWindow {
                 !this.conversation_viewer.is_composer_visible) {
                 this.conversation_viewer.load_conversation.begin(
                     selection,
-                    this.current_folder,
                     this.application.config,
                     this.application.controller.avatar_session,
                     (obj, ret) => {

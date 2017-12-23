@@ -167,16 +167,15 @@ public class ConversationViewer : Gtk.Stack {
      * Shows a conversation in the viewer.
      */
     public async void load_conversation(Geary.App.Conversation conversation,
-                                        Geary.Folder location,
                                         Configuration config,
                                         Soup.Session avatar_session)
         throws Error {
         remove_current_list();
 
+        Geary.Folder location = conversation.base_folder;
         Geary.Account account = location.account;
         ConversationListBox new_list = new ConversationListBox(
             conversation,
-            location,
             new Geary.App.EmailStore(account),
             account.get_contact_store(),
             account.information,
@@ -312,7 +311,7 @@ public class ConversationViewer : Gtk.Stack {
             } else {
                 // Find was disabled
                 this.current_list.unmark_search_terms();
-                if (!(this.current_list.location is Geary.SearchFolder)) {
+                if (!(this.current_list.conversation.base_folder is Geary.SearchFolder)) {
                     //this.current_list.update_collapsed_state();
                 } else {
                     this.current_list.load_search_terms.begin();

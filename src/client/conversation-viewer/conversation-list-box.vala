@@ -381,9 +381,6 @@ public class ConversationListBox : Gtk.ListBox {
     /** Conversation being displayed. */
     public Geary.App.Conversation conversation { get; private set; }
 
-    // Folder from which the conversation was loaded
-    internal Geary.Folder location { get; private set; }
-
     // Used to load messages in conversation.
     private Geary.App.EmailStore email_store;
 
@@ -486,7 +483,6 @@ public class ConversationListBox : Gtk.ListBox {
      * Constructs a new conversation list box instance.
      */
     public ConversationListBox(Geary.App.Conversation conversation,
-                               Geary.Folder location,
                                Geary.App.EmailStore? email_store,
                                Geary.ContactStore contact_store,
                                Geary.AccountInformation account_info,
@@ -495,7 +491,6 @@ public class ConversationListBox : Gtk.ListBox {
                                Soup.Session avatar_session,
                                Gtk.Adjustment adjustment) {
         this.conversation = conversation;
-        this.location = location;
         this.email_store = email_store;
         this.contact_store = contact_store;
         this.avatar_store = new AvatarStore(avatar_session);
@@ -703,7 +698,8 @@ public class ConversationListBox : Gtk.ListBox {
      * Loads search term matches for this list's emails.
      */
     public async void load_search_terms() {
-        Geary.SearchFolder search = (Geary.SearchFolder) this.location;
+        Geary.SearchFolder search =
+            (Geary.SearchFolder) this.conversation.base_folder;
         Geary.SearchQuery? query = search.search_query;
         if (query != null) {
 
