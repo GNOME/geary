@@ -275,6 +275,7 @@ public class MainWindow : Gtk.ApplicationWindow {
     }
 
     private void on_conversation_monitor_changed() {
+        this.conversation_list.freeze_selection();
         ConversationListModel? old_model = this.conversation_list.model;
         if (old_model != null) {
             this.progress_monitor.remove(old_model.monitor.progress_monitor);
@@ -284,6 +285,7 @@ public class MainWindow : Gtk.ApplicationWindow {
             old_monitor.scan_error.disconnect(on_scan_error);
             old_monitor.seed_completed.disconnect(on_seed_completed);
             old_monitor.seed_completed.disconnect(on_conversation_count_changed);
+            old_monitor.seed_completed.disconnect(on_initial_conversation_load);
             old_monitor.scan_completed.disconnect(on_conversation_count_changed);
             old_monitor.conversations_added.disconnect(on_conversation_count_changed);
             old_monitor.conversations_removed.disconnect(on_conversation_count_changed);
@@ -301,10 +303,12 @@ public class MainWindow : Gtk.ApplicationWindow {
             new_monitor.scan_error.connect(on_scan_error);
             new_monitor.seed_completed.connect(on_seed_completed);
             new_monitor.seed_completed.connect(on_conversation_count_changed);
+            new_monitor.seed_completed.connect(on_initial_conversation_load);
             new_monitor.scan_completed.connect(on_conversation_count_changed);
             new_monitor.conversations_added.connect(on_conversation_count_changed);
             new_monitor.conversations_removed.connect(on_conversation_count_changed);
         }
+        this.conversation_list.thaw_selection();
     }
 
     private void on_folder_selected(Geary.Folder? folder) {
@@ -477,6 +481,18 @@ public class MainWindow : Gtk.ApplicationWindow {
         }
     }
 
+    private void on_initial_conversation_load() {
+        // When not doing autoselect, we never get
+        // conversations_selected firing from the convo list, so we
+        // need to clear the convo viewer here
+        if (!this.application.config.autoselect) {
+            this.conversation_viewer.show_none_selected();
+            this.application.controller.enable_message_buttons(false);
+        }
+
+        this.conversation_list.model.monitor.seed_completed.disconnect(on_initial_conversation_load);
+    }
+
     private void on_load_more() {
         debug("on_load_more");
         this.application.controller.current_conversations.min_window_count += GearyController.CONVERSATION_PAGE_SIZE;
@@ -496,8 +512,8 @@ public class MainWindow : Gtk.ApplicationWindow {
     }
 
     private void on_conversation_count_changed() {
-        if (this.application.controller.current_conversations != null) {
-            int count = this.application.controller.current_conversations.get_conversation_count();
+        if (this.conversation_list.model.monitor != null) {
+            int count = this.conversation_list.model.monitor.get_conversation_count();
             if (count == 0) {
                 // Let the user know if there's no available conversations
                 if (this.current_folder is Geary.SearchFolder) {
@@ -506,14 +522,6 @@ public class MainWindow : Gtk.ApplicationWindow {
                     this.conversation_viewer.show_empty_folder();
                 }
                 this.application.controller.enable_message_buttons(false);
-            } else {
-                // When not doing autoselect, we never get
-                // conversations_selected firing from the convo list,
-                // so we need to stop the loading spinner here
-                if (!this.application.config.autoselect) {
-                    this.conversation_viewer.show_none_selected();
-                    this.application.controller.enable_message_buttons(false);
-                }
             }
         }
     }

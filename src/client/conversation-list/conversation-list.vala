@@ -28,6 +28,8 @@ public class ConversationList : Gtk.ListBox {
 
 
     private Configuration config;
+    private int selected_index = -1;
+    private bool selection_frozen = false;
     private Gee.Set<Geary.App.Conversation>? visible_conversations = null;
     private Geary.Scheduler.Scheduled? update_visible_scheduled = null;
     private bool enable_load_more = true;
@@ -81,6 +83,8 @@ public class ConversationList : Gtk.ListBox {
 
         // Clear these since they will belong to the old model
         this.selected = null;
+        this.selected_index = -1;
+
         Gee.List<Geary.RFC822.MailboxAddress> account_addresses = displayed.account.information.get_all_mailboxes();
         bool use_to = displayed.special_folder_type.is_outgoing();
         base.bind_model(this.model, (convo) => {
@@ -91,6 +95,18 @@ public class ConversationList : Gtk.ListBox {
                                                 this.config);
             }
         );
+    }
+
+    public void freeze_selection() {
+        this.selection_frozen = true;
+        this.selected = null;
+        set_selection_mode(Gtk.SelectionMode.NONE);
+    }
+
+    public void thaw_selection() {
+        set_selection_mode(Gtk.SelectionMode.SINGLE);
+        this.selection_frozen = false;
+        restore_selection();
     }
 
     public void select_conversation(Geary.App.Conversation target) {
@@ -113,20 +129,25 @@ public class ConversationList : Gtk.ListBox {
         return visible;
     }
 
-    private void selection_changed() {
-        Geary.App.Conversation? selected = null;
-        Gtk.ListBoxRow? row = get_selected_row();
-        if (row != null) {
-            selected = ((ConversationListItem) row.get_child()).conversation;
-        }
+    private Gtk.ListBoxRow? restore_selection() {
+        Gtk.ListBoxRow? row = null;
+        if (this.selected_index >= 0) {
+            int new_index = this.selected_index;
+            if (new_index >= this.model.get_n_items()) {
+                new_index = ((int) this.model.get_n_items()) - 1;
+            }
 
-        debug("Selection changed to: %s",
-              selected != null ? selected.to_string() : null
-        );
-        if (this.selected != selected) {
-            this.selected = selected;
-            this.conversation_selection_changed(selected);
+            // XXX we should be only calling select_row() if
+            // autoselect is enabled, otherwise we should simply be
+            // updating the cursor, but Gtk.ListBox doesn't allow us
+            // to do that --- move_cursor() doesn't seem to work and
+            // is O(n) anyway.
+            row = get_row_at_index(new_index);
+            if (row != null) {
+                select_row(row);
+            }
         }
+        return row;
     }
 
     private void schedule_visible_conversations_changed() {
@@ -135,6 +156,37 @@ public class ConversationList : Gtk.ListBox {
                 update_visible_conversations();
                 return Source.REMOVE; // one-shot
             });
+    }
+
+    private void selection_changed() {
+        if (!this.selection_frozen) {
+            Geary.App.Conversation? selected = null;
+            Gtk.ListBoxRow? row = get_selected_row();
+
+            // If a row was de-selected then we need to work out if
+            // that was because of a conversation being removed from
+            // the list, and if so select a new one
+            if (row == null &&
+                this.selected != null &&
+                !this.model.monitor.has_conversation(this.selected)) {
+                row = restore_selection();
+            }
+
+            if (row != null) {
+                selected = ((ConversationListItem) row.get_child()).conversation;
+                this.selected_index = row.get_index();
+            } else {
+                this.selected_index = -1;
+            }
+
+            debug("Selection changed to: %s",
+                  selected != null ? selected.to_string() : null
+            );
+            if (this.selected != selected) {
+                this.selected = selected;
+                this.conversation_selection_changed(selected);
+            }
+        }
     }
 
     private void update_visible_conversations() {

@@ -1216,7 +1216,6 @@ public class GearyController : Geary.BaseObject {
             this.current_folder = null;
             folder_selected(null);
         } else if (folder != this.current_folder) {
-            this.main_window.conversation_viewer.show_loading();
             get_window_action(ACTION_FIND_IN_CONVERSATION).set_enabled(false);
             enable_message_buttons(false);
 
