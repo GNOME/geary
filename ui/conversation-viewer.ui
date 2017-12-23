@@ -129,20 +129,6 @@
       </packing>
     </child>
     <child>
-      <object class="GtkGrid" id="multiple_conversations_page">
-        <property name="visible">True</property>
-        <property name="can_focus">False</property>
-        <property name="orientation">vertical</property>
-        <child>
-          <placeholder/>
-        </child>
-      </object>
-      <packing>
-        <property name="name">multiple_conversations_page</property>
-        <property name="position">3</property>
-      </packing>
-    </child>
-    <child>
       <object class="GtkGrid" id="empty_folder_page">
         <property name="visible">True</property>
         <property name="can_focus">False</property>

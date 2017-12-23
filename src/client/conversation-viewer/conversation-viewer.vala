@@ -1,6 +1,6 @@
 /*
  * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2016 Michael Gratton <mike@vee.net>
+ * Copyright 2016-2017 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -33,8 +33,6 @@ public class ConversationViewer : Gtk.Stack {
     private Gtk.Grid no_conversations_page;
     [GtkChild]
     private Gtk.Grid conversation_page;
-    [GtkChild]
-    private Gtk.Grid multiple_conversations_page;
     [GtkChild]
     private Gtk.Grid empty_folder_page;
     [GtkChild]
@@ -75,13 +73,6 @@ public class ConversationViewer : Gtk.Stack {
         );
         this.no_conversations_page.add(no_conversations);
 
-        EmptyPlaceholder multi_conversations = new EmptyPlaceholder();
-        multi_conversations.title = _("Multiple conversations selected");
-        multi_conversations.subtitle = _(
-            "Choosing an action will apply to all selected conversations"
-        );
-        this.multiple_conversations_page.add(multi_conversations);
-
         EmptyPlaceholder empty_folder = new EmptyPlaceholder();
         empty_folder.title = _("No conversations found");
         empty_folder.subtitle = _(
@@ -113,14 +104,14 @@ public class ConversationViewer : Gtk.Stack {
         // GearyController or somewhere more appropriate
         ConversationList conversation_list =
             ((MainWindow) GearyApplication.instance.controller.main_window).conversation_list;
-        Gee.Set<Geary.App.Conversation>? prev_selection = conversation_list.get_selected_conversations();
+        Geary.App.Conversation prev_selection = conversation_list.selected;
         conversation_list.unselect_all();
         box.vanished.connect((box) => {
                 set_visible_child(this.conversation_page);
-                if (prev_selection.is_empty) {
-                    conversation_list.conversation_selection_changed(prev_selection);
+                if (prev_selection == null) {
+                    conversation_list.conversation_selection_changed(null);
                 } else {
-                    conversation_list.select_conversations(prev_selection);
+                    conversation_list.select_conversation(prev_selection);
                 }
             });
         this.composer_page.add(box);
@@ -156,13 +147,6 @@ public class ConversationViewer : Gtk.Stack {
      */
     public void show_none_selected() {
         set_visible_child(this.no_conversations_page);
-    }
-
-    /**
-     * Shows the UI when multiple conversations have been selected
-     */
-    public void show_multiple_selected() {
-        set_visible_child(this.multiple_conversations_page);
     }
 
     /**

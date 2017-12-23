@@ -1210,15 +1210,6 @@ public class GearyController : Geary.BaseObject {
         return num;
     }
 
-    // Update widgets and such to match capabilities of the current folder ... sensitivity is handled
-    // by other utility methods
-    private void update_ui() {
-        main_window.main_toolbar.selected_conversations =
-            this.main_window.get_selected_conversations().size;
-        main_window.main_toolbar.show_trash_button = current_folder_supports_trash() ||
-                                                    !(current_folder is Geary.FolderSupport.Remove);
-    }
-
     private void on_folder_selected(Geary.Folder? folder) {
         debug("Folder %s selected", folder != null ? folder.to_string() : "(null)");
         if (folder == null) {
@@ -1324,8 +1315,11 @@ public class GearyController : Geary.BaseObject {
             main_window.main_toolbar.copy_folder_menu.enable_disable_folder(current_folder, false);
             main_window.main_toolbar.move_folder_menu.enable_disable_folder(current_folder, false);
         }
-        
-        update_ui();
+
+        this.main_window.main_toolbar.update_trash_buttons(
+            current_folder_supports_trash() ||
+            !(current_folder is Geary.FolderSupport.Remove)
+        );
 
         current_conversations = new Geary.App.ConversationMonitor(
             current_folder,
@@ -1541,9 +1535,11 @@ public class GearyController : Geary.BaseObject {
     private void on_shift_key(bool pressed) {
         if (main_window != null && main_window.main_toolbar != null
             && current_account != null && current_folder != null) {
-            main_window.main_toolbar.show_trash_button =
-                (!pressed && current_folder_supports_trash()) ||
-                !(current_folder is Geary.FolderSupport.Remove);
+            main_window.main_toolbar.update_trash_buttons(
+                current_folder_supports_trash() &&
+                current_folder is Geary.FolderSupport.Remove &&
+                !pressed
+            );
         }
     }
 
@@ -1555,28 +1551,24 @@ public class GearyController : Geary.BaseObject {
 
     // latest_sent_only uses Email's Date: field, which corresponds to how they're sorted in the
     // ConversationViewer
-    private Gee.ArrayList<Geary.EmailIdentifier> get_conversation_email_ids(
-        Geary.App.Conversation conversation, bool latest_sent_only,
-        Gee.ArrayList<Geary.EmailIdentifier> add_to) {
-        if (latest_sent_only) {
-            Geary.Email? latest = conversation.get_latest_sent_email(
-                Geary.App.Conversation.Location.IN_FOLDER_OUT_OF_FOLDER);
-            if (latest != null)
-                add_to.add(latest.id);
-        } else {
-            add_to.add_all(conversation.get_email_ids());
-        }
-        
-        return add_to;
-    }
-
     private Gee.ArrayList<Geary.EmailIdentifier> get_selected_email_ids(bool latest_sent_only) {
-        Gee.ArrayList<Geary.EmailIdentifier> ids = new Gee.ArrayList<Geary.EmailIdentifier>();
-        foreach (Geary.App.Conversation conversation in this.main_window.get_selected_conversations())
-            get_conversation_email_ids(conversation, latest_sent_only, ids);
+        Geary.App.Conversation? conversation =
+            this.main_window.conversation_list.selected;
+        Gee.ArrayList<Geary.EmailIdentifier> ids =
+            new Gee.ArrayList<Geary.EmailIdentifier>();
+        if (conversation != null) {
+            if (latest_sent_only) {
+                Geary.Email? latest = conversation.get_latest_sent_email(
+                    Geary.App.Conversation.Location.IN_FOLDER_OUT_OF_FOLDER);
+                if (latest != null)
+                    ids.add(latest.id);
+            } else {
+                ids.add_all(conversation.get_email_ids());
+            }
+        }
         return ids;
     }
-    
+
     private void mark_email(Gee.Collection<Geary.EmailIdentifier> ids,
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove) {
         if (ids.size > 0) {
@@ -1584,32 +1576,32 @@ public class GearyController : Geary.BaseObject {
                 ids, flags_to_add, flags_to_remove, cancellable_folder);
         }
     }
-    
+
     private void on_show_mark_menu() {
-        bool unread_selected = false;
+        Geary.App.Conversation conversation =
+            this.main_window.conversation_list.selected;
+
+        bool unread_selected = conversation.is_unread();
         bool read_selected = false;
         bool starred_selected = false;
         bool unstarred_selected = false;
-        foreach (Geary.App.Conversation conversation in this.main_window.get_selected_conversations()) {
-            if (conversation.is_unread())
-                unread_selected = true;
-            
-            // Only check the messages that "Mark as Unread" would mark, so we
-            // don't add the menu option and have it not do anything.
-            //
-            // Sort by Date: field to correspond with ConversationViewer ordering
-            Geary.Email? latest = conversation.get_latest_sent_email(
-                Geary.App.Conversation.Location.IN_FOLDER_OUT_OF_FOLDER);
-            if (latest != null && latest.email_flags != null
-                && !latest.email_flags.contains(Geary.EmailFlags.UNREAD))
-                read_selected = true;
 
-            if (conversation.is_flagged()) {
-                starred_selected = true;
-            } else {
-                unstarred_selected = true;
-            }
+        // Only check the messages that "Mark as Unread" would mark, so we
+        // don't add the menu option and have it not do anything.
+        //
+        // Sort by Date: field to correspond with ConversationViewer ordering
+        Geary.Email? latest = conversation.get_latest_sent_email(
+            Geary.App.Conversation.Location.IN_FOLDER_OUT_OF_FOLDER);
+        if (latest != null && latest.email_flags != null
+            && !latest.email_flags.contains(Geary.EmailFlags.UNREAD))
+            read_selected = true;
+
+        if (conversation.is_flagged()) {
+            starred_selected = true;
+        } else {
+            unstarred_selected = true;
         }
+
         get_window_action(ACTION_MARK_AS_READ).set_enabled(unread_selected);
         get_window_action(ACTION_MARK_AS_UNREAD).set_enabled(read_selected);
         get_window_action(ACTION_MARK_AS_STARRED).set_enabled(unstarred_selected);
@@ -1752,16 +1744,11 @@ public class GearyController : Geary.BaseObject {
         if (ids.size == 0)
             return;
 
-        this.main_window.conversation_list.set_changing_selection(true);
-
         Geary.FolderSupport.Move? supports_move = current_folder as Geary.FolderSupport.Move;
         if (supports_move != null)
             move_conversation_async.begin(
-                supports_move, ids, destination.path, cancellable_folder,
-                (obj, ret) => {
-                    move_conversation_async.end(ret);
-                    this.main_window.conversation_list.set_changing_selection(false);
-                });
+                supports_move, ids, destination.path, cancellable_folder
+            );
     }
 
     private async void move_conversation_async(Geary.FolderSupport.Move source_folder,
@@ -2312,14 +2299,12 @@ public class GearyController : Geary.BaseObject {
             return;
         }
 
-        Gee.Set<Geary.App.Conversation> selected_conversations = this.main_window.get_selected_conversations();
-        if (selected_conversations.size == 0)
+        Geary.App.Conversation? selected =
+            this.main_window.conversation_list.selected;
+        if (selected == null)
             return;
 
-        last_deleted_conversation = selected_conversations.size > 0
-            ? Geary.traverse<Geary.App.Conversation>(selected_conversations).first() : null;
-
-        this.main_window.conversation_list.set_changing_selection(true);
+        this.last_deleted_conversation = selected;
 
         Gee.List<Geary.EmailIdentifier> ids = get_selected_email_ids(false);
         if (archive) {
@@ -2368,14 +2353,13 @@ public class GearyController : Geary.BaseObject {
                 last_deleted_conversation = null;
         }
     }
-    
+
     private void on_archive_or_delete_selection_finished(Object? source, AsyncResult result) {
         try {
             archive_or_delete_selection_async.end(result);
         } catch (Error e) {
             debug("Unable to archive/trash/delete messages: %s", e.message);
         }
-        this.main_window.conversation_list.set_changing_selection(false);
     }
 
     private void save_revokable(Geary.Revokable? new_revokable, string? description) {
@@ -2530,31 +2514,8 @@ public class GearyController : Geary.BaseObject {
         return (SimpleAction) this.main_window.lookup_action(action_name);
     }
 
-    // Disables all single-message buttons and enables all multi-message buttons.
-    public void enable_multiple_message_buttons() {
-        main_window.main_toolbar.selected_conversations =
-            this.main_window.get_selected_conversations().size;
-
-        // Single message only buttons.
-        get_window_action(ACTION_REPLY_TO_MESSAGE).set_enabled(false);
-        get_window_action(ACTION_REPLY_ALL_MESSAGE).set_enabled(false);
-        get_window_action(ACTION_FORWARD_MESSAGE).set_enabled(false);
-
-        // Mutliple message buttons.
-        get_window_action(ACTION_MOVE_MENU).set_enabled(current_folder is Geary.FolderSupport.Move);
-        get_window_action(ACTION_ARCHIVE_CONVERSATION).set_enabled(current_folder is Geary.FolderSupport.Archive);
-        get_window_action(ACTION_TRASH_CONVERSATION).set_enabled(current_folder_supports_trash());
-        get_window_action(ACTION_DELETE_CONVERSATION).set_enabled(current_folder is Geary.FolderSupport.Remove);
-
-        cancel_context_dependent_buttons();
-        enable_context_dependent_buttons_async.begin(true, cancellable_context_dependent_buttons);
-    }
-
     // Enables or disables the message buttons on the toolbar.
     public void enable_message_buttons(bool sensitive) {
-        main_window.main_toolbar.selected_conversations =
-            this.main_window.get_selected_conversations().size;
-
         // No reply/forward in drafts folder.
         bool respond_sensitive = sensitive;
         if (current_folder != null && current_folder.special_folder_type == Geary.SpecialFolderType.DRAFTS)

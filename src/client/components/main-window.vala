@@ -1,6 +1,6 @@
 /*
  * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2016 Michael Gratton <mike@vee.net>
+ * Copyright 2016-2017 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -32,7 +32,6 @@ public class MainWindow : Gtk.ApplicationWindow {
 
     private Geary.AggregateProgressMonitor progress_monitor = new Geary.AggregateProgressMonitor();
     private Geary.ProgressMonitor? folder_progress = null;
-    private Gee.Set<Geary.App.Conversation> selected_conversations = new Gee.HashSet<Geary.App.Conversation>();
 
     private MonitoredSpinner spinner = new MonitoredSpinner();
 
@@ -85,19 +84,6 @@ public class MainWindow : Gtk.ApplicationWindow {
         set_styling();
         setup_layout(application.config);
         on_change_orientation();
-    }
-
-    ~MainWindow() {
-        this.conversation_list.conversation_selection_changed.disconnect(on_conversation_selection_changed);
-        this.conversation_list.conversation_activated.disconnect(on_conversation_activated);
-        this.conversation_list.load_more.disconnect(on_load_more);
-    }
-
-    /**
-     * Returns a read-only set of currently selected conversations.
-     */
-    public Gee.Set<Geary.App.Conversation> get_selected_conversations() {
-        return this.selected_conversations.read_only_view;
     }
 
     public void show_infobar(MainWindowInfoBar info_bar) {
@@ -442,24 +428,20 @@ public class MainWindow : Gtk.ApplicationWindow {
         return (SimpleAction) lookup_action(name);
     }
 
-    private void on_conversation_selection_changed(Gee.Set<Geary.App.Conversation> selection) {
-        this.selected_conversations = selection;
+    private void on_conversation_selection_changed(Geary.App.Conversation? selection) {
+        Geary.App.Conversation? current = null;
+        ConversationListBox? listbox = this.conversation_viewer.current_list;
+        if (listbox != null) {
+            current = listbox.conversation;
+        }
         SimpleAction find_action = get_action(
             GearyController.ACTION_FIND_IN_CONVERSATION
         );
-        find_action.set_enabled(false);
-        if (this.current_folder != null && !this.conversation_viewer.is_composer_visible) {
-            switch(selection.size) {
-            case 0:
-                this.application.controller.enable_message_buttons(false);
-                this.conversation_viewer.show_none_selected();
-                break;
-
-            case 1:
-                // Cancel existing avatar loads before loading new
-                // convo since that will start loading more avatars
+        if (selection != null) {
+            if (selection != current &&
+                !this.conversation_viewer.is_composer_visible) {
                 this.conversation_viewer.load_conversation.begin(
-                    Geary.Collection.get_first(selection),
+                    selection,
                     this.current_folder,
                     this.application.config,
                     this.application.controller.avatar_session,
@@ -474,13 +456,11 @@ public class MainWindow : Gtk.ApplicationWindow {
                         }
                     }
                 );
-                break;
-
-            default:
-                this.application.controller.enable_multiple_message_buttons();
-                this.conversation_viewer.show_multiple_selected();
-                break;
             }
+        } else {
+            find_action.set_enabled(false);
+            this.application.controller.enable_message_buttons(false);
+            this.conversation_viewer.show_none_selected();
         }
     }
 

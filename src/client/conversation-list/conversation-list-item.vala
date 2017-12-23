@@ -73,6 +73,10 @@ public class ConversationListItem : Gtk.Grid {
     }
 
 
+    /** The conversation displayed by this item */
+    public Geary.App.Conversation conversation { get; private set; }
+
+
     [GtkChild]
     private Gtk.Button star_button;
 
@@ -94,7 +98,6 @@ public class ConversationListItem : Gtk.Grid {
     [GtkChild]
     private Gtk.Label count;
 
-    private Geary.App.Conversation conversation;
     private Gee.List<Geary.RFC822.MailboxAddress> account_addresses;
     private bool use_to;
     private PreviewLoader previews;

@@ -182,6 +182,7 @@
                 <property name="can_focus">True</property>
                 <property name="focus_on_click">False</property>
                 <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">Mark conversation</property>
                 <property name="action_name">win.mark-conversation-menu</property>
                 <property name="always_show_image">True</property>
                 <child>
@@ -203,6 +204,7 @@
                 <property name="can_focus">True</property>
                 <property name="focus_on_click">False</property>
                 <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">Add label to conversation</property>
                 <property name="always_show_image">True</property>
                 <child>
                   <object class="GtkImage" id="copy_message_image">
@@ -223,6 +225,7 @@
                 <property name="can_focus">True</property>
                 <property name="focus_on_click">False</property>
                 <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">Move conversation</property>
                 <property name="always_show_image">True</property>
                 <child>
                   <object class="GtkImage" id="move_message_image">
@@ -252,7 +255,7 @@
             <property name="can_focus">True</property>
             <property name="focus_on_click">False</property>
             <property name="receives_default">False</property>
-            <property name="tooltip_text" translatable="yes">Toggle find bar</property>
+            <property name="tooltip_text" translatable="yes">Find in conversation</property>
             <property name="always_show_image">True</property>
             <child>
               <object class="GtkImage" id="find_image">
@@ -297,6 +300,7 @@
                 <property name="can_focus">True</property>
                 <property name="focus_on_click">False</property>
                 <property name="receives_default">False</property>
+                <property name="tooltip_text" translatable="yes">Archive conversation (A)</property>
                 <property name="action_name">win.archive-conv</property>
                 <property name="image">archive_image</property>
                 <property name="use_underline">True</property>
@@ -309,15 +313,17 @@
               </packing>
             </child>
             <child>
-              <object class="GtkButton" id="trash_delete_button">
-                <property name="visible">True</property>
+              <object class="GtkButton" id="trash_button">
                 <property name="can_focus">True</property>
                 <property name="focus_on_click">False</property>
                 <property name="receives_default">False</property>
+                <property name="no_show_all">True</property>
+                <property name="tooltip_text" translatable="yes">Move conversation to Trash (Delete, Backspace)</property>
                 <property name="action_name">win.trash-conv</property>
                 <property name="always_show_image">True</property>
                 <child>
-                  <object class="GtkImage" id="trash_delete_image">
+                  <object class="GtkImage">
+                    <property name="visible">True</property>
                     <property name="can_focus">False</property>
                     <property name="icon_name">user-trash-symbolic</property>
                   </object>
@@ -327,6 +333,29 @@
                 <property name="expand">False</property>
                 <property name="fill">True</property>
                 <property name="position">1</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="delete_button">
+                <property name="can_focus">True</property>
+                <property name="focus_on_click">False</property>
+                <property name="receives_default">False</property>
+                <property name="no_show_all">True</property>
+                <property name="tooltip_text" translatable="yes">Delete conversation (Shift+Delete)</property>
+                <property name="action_name">win.trash-conv</property>
+                <property name="always_show_image">True</property>
+                <child>
+                  <object class="GtkImage">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="icon_name">edit-delete-symbolic</property>
+                  </object>
+                </child>
+              </object>
+              <packing>
+                <property name="expand">False</property>
+                <property name="fill">True</property>
+                <property name="position">2</property>
               </packing>
             </child>
             <style>

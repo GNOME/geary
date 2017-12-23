@@ -1,6 +1,6 @@
 /*
- * Copyright 2017 Michael Gratton <mike@vee.net>
  * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2017 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -18,8 +18,16 @@ public class ConversationList : Gtk.ListBox {
     /** Underlying model for this list */
     public ConversationListModel? model { get; private set; default=null; }
 
-    private Configuration config;
+    /**
+     * The conversation highlighted as selected, if any.
+     *
+     * This is distinct to the conversations chosen via selection
+     * mode, which are checked and might not be highlighted.
+     */
+    public Geary.App.Conversation? selected { get; private set; default = null; }
 
+
+    private Configuration config;
     private Gee.Set<Geary.App.Conversation>? visible_conversations = null;
     private Geary.Scheduler.Scheduled? update_visible_scheduled = null;
     private bool enable_load_more = true;
@@ -28,7 +36,7 @@ public class ConversationList : Gtk.ListBox {
 
 
     /** Fired when a user changes the list's selection. */
-    public signal void conversation_selection_changed(Gee.Set<Geary.App.Conversation> selection);
+    public signal void conversation_selection_changed(Geary.App.Conversation? selection);
 
     /** Fired when a user activates a row in the list. */
     public signal void conversation_activated(Geary.App.Conversation activated);
@@ -51,7 +59,9 @@ public class ConversationList : Gtk.ListBox {
                 uint activated = row.get_index();
                 this.conversation_activated(this.model.get_conversation(activated));
             });
-        this.selected_rows_changed.connect(on_selection_changed);
+        this.selected_rows_changed.connect(() => {
+                selection_changed();
+            });
         this.show.connect(on_show);
     }
 
@@ -69,6 +79,8 @@ public class ConversationList : Gtk.ListBox {
         this.model = new ConversationListModel(monitor, loader);
         this.model.items_changed.connect(on_model_items_changed);
 
+        // Clear these since they will belong to the old model
+        this.selected = null;
         Gee.List<Geary.RFC822.MailboxAddress> account_addresses = displayed.account.information.get_all_mailboxes();
         bool use_to = displayed.special_folder_type.is_outgoing();
         base.bind_model(this.model, (convo) => {
@@ -82,21 +94,17 @@ public class ConversationList : Gtk.ListBox {
     }
 
     public void select_conversation(Geary.App.Conversation target) {
-        // XXX Implement me
-    }
-
-    public void select_conversations(Gee.Set<Geary.App.Conversation> targets) {
-        // XXX Implement me
-    }
-
-    public Gee.Set<Geary.App.Conversation> get_selected_conversations() {
-        Gee.HashSet<Geary.App.Conversation> selection =
-            new Gee.HashSet<Geary.App.Conversation>();
-        foreach (Gtk.ListBoxRow row in get_selected_rows()) {
-            uint selected = row.get_index();
-            selection.add(this.model.get_conversation(selected));
+        for (int i = 0; i < this.model.get_n_items(); i++) {
+            Gtk.ListBoxRow? row = get_row_at_index(i);
+            if (row != null) {
+                ConversationListItem item =
+                    (ConversationListItem) row.get_child();
+                if (item.conversation == target) {
+                    select_row(row);
+                    break;
+                }
+            }
         }
-        return selection;
     }
 
     internal Gee.Set<Geary.App.Conversation> get_visible_conversations() {
@@ -105,11 +113,19 @@ public class ConversationList : Gtk.ListBox {
         return visible;
     }
 
-    internal void set_changing_selection(bool changing) {
-        if (changing) {
-            this.selected_rows_changed.disconnect(on_selection_changed);
-        } else {
-            this.selected_rows_changed.connect(on_selection_changed);
+    private void selection_changed() {
+        Geary.App.Conversation? selected = null;
+        Gtk.ListBoxRow? row = get_selected_row();
+        if (row != null) {
+            selected = ((ConversationListItem) row.get_child()).conversation;
+        }
+
+        debug("Selection changed to: %s",
+              selected != null ? selected.to_string() : null
+        );
+        if (this.selected != selected) {
+            this.selected = selected;
+            this.conversation_selection_changed(selected);
         }
     }
 
@@ -134,10 +150,6 @@ public class ConversationList : Gtk.ListBox {
     private void on_show() {
         // Wait until we're visible to set this signal up.
         get_adjustment().value_changed.connect(on_adjustment_value_changed);
-    }
-
-    private void on_selection_changed() {
-        this.conversation_selection_changed(get_selected_conversations());
     }
 
     private void on_adjustment_value_changed() {

@@ -212,6 +212,10 @@ public class Geary.App.ConversationMonitor : BaseObject {
         return conversations.conversations;
     }
 
+    public bool has_conversation(Conversation target) {
+        return conversations.contains(target);
+    }
+
     public Geary.App.Conversation? get_conversation_for_email(Geary.EmailIdentifier email_id) {
         return conversations.get_by_email_identifier(email_id);
     }

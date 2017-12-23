@@ -247,11 +247,11 @@ public class ConversationListView : Gtk.TreeView {
             // Get the current conversation.  If it's selected, we'll apply the mark operation to
             // all selected conversations; otherwise, it just applies to this one.
             Geary.App.Conversation conversation = get_model().get_conversation_at_path(path);
-            Gee.Collection<Geary.App.Conversation> to_mark;
-            if (GearyApplication.instance.controller.main_window.get_selected_conversations().contains(conversation))
-                to_mark = GearyApplication.instance.controller.main_window.get_selected_conversations();
-            else
-                to_mark = Geary.iterate<Geary.App.Conversation>(conversation).to_array_list();
+            Gee.Collection<Geary.App.Conversation> to_mark = new Gee.ArrayList<Geary.App.Conversation>();
+            // if (GearyApplication.instance.controller.main_window.get_selected_conversations().contains(conversation))
+            //     to_mark = GearyApplication.instance.controller.main_window.get_selected_conversations();
+            // else
+            //     to_mark = Geary.iterate<Geary.App.Conversation>(conversation).to_array_list();
             
             if (read_clicked) {
                 // Read/unread.

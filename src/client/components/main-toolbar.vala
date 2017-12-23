@@ -22,10 +22,6 @@ public class MainToolbar : Gtk.Box {
     // Copy and Move popovers
     public FolderPopover copy_folder_menu { get; private set; default = new FolderPopover(); }
     public FolderPopover move_folder_menu { get; private set; default = new FolderPopover(); }
-    // How many conversations are selected right now. Should automatically be updated.
-    public int selected_conversations { get; set; }
-    // Whether to show the trash or the delete button
-    public bool show_trash_button { get; set; default = true; }
     // The tooltip of the Undo-button
     public string undo_tooltip {
         owned get { return this.undo_button.tooltip_text; }
@@ -51,33 +47,15 @@ public class MainToolbar : Gtk.Box {
     [GtkChild]
     public Gtk.MenuButton move_conversation_button;
     [GtkChild]
-    private Gtk.Button archive_button;
+    private Gtk.Button trash_button;
     [GtkChild]
-    private Gtk.Button trash_delete_button;
+    private Gtk.Button delete_button;
     [GtkChild]
     private Gtk.ToggleButton find_button;
 
     // Other
     [GtkChild]
     private Gtk.Button undo_button;
-
-    // Load these at construction time
-    private Gtk.Image trash_image = new Gtk.Image.from_icon_name("user-trash-symbolic", Gtk.IconSize.MENU);
-    private Gtk.Image delete_image = new Gtk.Image.from_icon_name("edit-delete-symbolic", Gtk.IconSize.MENU);
-
-    // Tooltips
-    private const string DELETE_CONVERSATION_TOOLTIP_SINGLE = _("Delete conversation (Shift+Delete)");
-    private const string DELETE_CONVERSATION_TOOLTIP_MULTIPLE = _("Delete conversations (Shift+Delete)");
-    private const string TRASH_CONVERSATION_TOOLTIP_SINGLE = _("Move conversation to Trash (Delete, Backspace)");
-    private const string TRASH_CONVERSATION_TOOLTIP_MULTIPLE = _("Move conversations to Trash (Delete, Backspace)");
-    private const string ARCHIVE_CONVERSATION_TOOLTIP_SINGLE = _("Archive conversation (A)");
-    private const string ARCHIVE_CONVERSATION_TOOLTIP_MULTIPLE = _("Archive conversations (A)");
-    private const string MARK_CONVERSATION_MENU_TOOLTIP_SINGLE = _("Mark conversation");
-    private const string MARK_CONVERSATION_MENU_TOOLTIP_MULTIPLE = _("Mark conversations");
-    private const string LABEL_CONVERSATION_TOOLTIP_SINGLE = _("Add label to conversation");
-    private const string LABEL_CONVERSATION_TOOLTIP_MULTIPLE = _("Add label to conversations");
-    private const string MOVE_CONVERSATION_TOOLTIP_SINGLE = _("Move conversation");
-    private const string MOVE_CONVERSATION_TOOLTIP_MULTIPLE = _("Move conversations");
 
     public MainToolbar(Configuration config) {
         // Instead of putting a separator between the two headerbars, as other applications do,
@@ -113,8 +91,6 @@ public class MainToolbar : Gtk.Box {
             BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
 
         // Setup conversation header elements
-        this.notify["selected-conversations"].connect(() => update_conversation_buttons());
-        this.notify["show-trash-button"].connect(() => update_conversation_buttons());
         this.mark_conversation_button.popover = new Gtk.Popover.from_model(null, mark_menu);
         this.copy_conversation_button.popover = copy_folder_menu;
         this.move_conversation_button.popover = move_folder_menu;
@@ -146,6 +122,11 @@ public class MainToolbar : Gtk.Box {
         conversation_header.show();
     }
 
+    internal void update_trash_buttons(bool show_trash) {
+        this.trash_button.set_visible(show_trash);
+        this.delete_button.set_visible(!show_trash);
+    }
+
     private void set_window_buttons() {
         string[] buttons = Gtk.Settings.get_default().gtk_decoration_layout.split(":");
         if (buttons.length != 2) {
@@ -158,41 +139,4 @@ public class MainToolbar : Gtk.Box {
         conversation_header.decoration_layout = ":" + buttons[1];
     }
 
-    // Updates tooltip text depending on number of conversations selected.
-    private void update_conversation_buttons() {
-        this.mark_conversation_button.tooltip_text = ngettext(
-            MARK_CONVERSATION_MENU_TOOLTIP_SINGLE,
-            MARK_CONVERSATION_MENU_TOOLTIP_MULTIPLE,
-            this.selected_conversations
-        );
-        this.copy_conversation_button.tooltip_text = ngettext(
-            LABEL_CONVERSATION_TOOLTIP_SINGLE,
-            LABEL_CONVERSATION_TOOLTIP_MULTIPLE,
-            this.selected_conversations
-        );
-        this.move_conversation_button.tooltip_text = ngettext(
-            MOVE_CONVERSATION_TOOLTIP_SINGLE,
-            MOVE_CONVERSATION_TOOLTIP_MULTIPLE,
-            this.selected_conversations
-        );
-        this.archive_button.tooltip_text = ngettext(
-            ARCHIVE_CONVERSATION_TOOLTIP_SINGLE,
-            ARCHIVE_CONVERSATION_TOOLTIP_MULTIPLE,
-            this.selected_conversations
-        );
-
-        if (this.show_trash_button) {
-            this.trash_delete_button.action_name = "win."+GearyController.ACTION_TRASH_CONVERSATION;
-            this.trash_delete_button.image = trash_image;
-            this.trash_delete_button.tooltip_text = ngettext(TRASH_CONVERSATION_TOOLTIP_SINGLE,
-                                                             TRASH_CONVERSATION_TOOLTIP_MULTIPLE,
-                                                             this.selected_conversations);
-        } else {
-            this.trash_delete_button.action_name = "win."+GearyController.ACTION_DELETE_CONVERSATION;
-            this.trash_delete_button.image = delete_image;
-            this.trash_delete_button.tooltip_text = ngettext(DELETE_CONVERSATION_TOOLTIP_SINGLE,
-                                                             DELETE_CONVERSATION_TOOLTIP_MULTIPLE,
-                                                             this.selected_conversations);
-        }
-    }
 }
