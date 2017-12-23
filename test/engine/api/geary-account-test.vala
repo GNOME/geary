@@ -121,7 +121,7 @@ public class Geary.MockAccount : Account {
         throw new EngineError.UNSUPPORTED("Mock method");
     }
 
-    public override async Gee.MultiMap<EmailIdentifier, FolderPath>
+    public override async Gee.MultiMap<EmailIdentifier, FolderPath>?
         get_containing_folders_async(Gee.Collection<EmailIdentifier> ids,
                                      Cancellable? cancellable) throws Error {
         throw new EngineError.UNSUPPORTED("Mock method");
