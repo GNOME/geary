@@ -274,6 +274,53 @@ public class MainWindow : Gtk.ApplicationWindow {
         return handled;
     }
 
+    private void update_headerbar() {
+        if (this.current_folder == null) {
+            this.main_toolbar.account = null;
+            this.main_toolbar.folder = null;
+
+            return;
+        }
+
+        this.main_toolbar.account = this.current_folder.account.information.nickname;
+
+        /// Current folder's name followed by its unread count, i.e. "Inbox (42)"
+        // except for Drafts and Outbox, where we show total count
+        int count;
+        switch (this.current_folder.special_folder_type) {
+            case Geary.SpecialFolderType.DRAFTS:
+            case Geary.SpecialFolderType.OUTBOX:
+                count = this.current_folder.properties.email_total;
+            break;
+
+            default:
+                count = this.current_folder.properties.email_unread;
+            break;
+        }
+
+        if (count > 0)
+            this.main_toolbar.folder = _("%s (%d)").printf(this.current_folder.get_display_name(), count);
+        else
+            this.main_toolbar.folder = this.current_folder.get_display_name();
+    }
+
+    private inline void check_shift_event(Gdk.EventKey event) {
+        // FIXME: it's possible the user will press two shift keys.  We want
+        // the shift key to report as released when they release ALL of them.
+        // There doesn't seem to be an easy way to do this in Gdk.
+        if (event.keyval == Gdk.Key.Shift_L || event.keyval == Gdk.Key.Shift_R) {
+            Gtk.Widget? focus = get_focus();
+            if (focus == null ||
+                (!(focus is Gtk.Entry) && !(focus is ComposerWebView))) {
+                on_shift_key(event.type == Gdk.EventType.KEY_PRESS);
+            }
+        }
+    }
+
+    private inline SimpleAction get_action(string name) {
+        return (SimpleAction) lookup_action(name);
+    }
+
     private void on_conversation_monitor_changed() {
         this.conversation_list.freeze_selection();
         ConversationListModel? old_model = this.conversation_list.model;
@@ -385,53 +432,6 @@ public class MainWindow : Gtk.ApplicationWindow {
             this.folder_paned, "position");
     }
 
-    private void update_headerbar() {
-        if (this.current_folder == null) {
-            this.main_toolbar.account = null;
-            this.main_toolbar.folder = null;
-
-            return;
-        }
-
-        this.main_toolbar.account = this.current_folder.account.information.nickname;
-
-        /// Current folder's name followed by its unread count, i.e. "Inbox (42)"
-        // except for Drafts and Outbox, where we show total count
-        int count;
-        switch (this.current_folder.special_folder_type) {
-            case Geary.SpecialFolderType.DRAFTS:
-            case Geary.SpecialFolderType.OUTBOX:
-                count = this.current_folder.properties.email_total;
-            break;
-
-            default:
-                count = this.current_folder.properties.email_unread;
-            break;
-        }
-
-        if (count > 0)
-            this.main_toolbar.folder = _("%s (%d)").printf(this.current_folder.get_display_name(), count);
-        else
-            this.main_toolbar.folder = this.current_folder.get_display_name();
-    }
-
-    private inline void check_shift_event(Gdk.EventKey event) {
-        // FIXME: it's possible the user will press two shift keys.  We want
-        // the shift key to report as released when they release ALL of them.
-        // There doesn't seem to be an easy way to do this in Gdk.
-        if (event.keyval == Gdk.Key.Shift_L || event.keyval == Gdk.Key.Shift_R) {
-            Gtk.Widget? focus = get_focus();
-            if (focus == null ||
-                (!(focus is Gtk.Entry) && !(focus is ComposerWebView))) {
-                on_shift_key(event.type == Gdk.EventType.KEY_PRESS);
-            }
-        }
-    }
-
-    private inline SimpleAction get_action(string name) {
-        return (SimpleAction) lookup_action(name);
-    }
-
     private void on_conversation_selection_changed(Geary.App.Conversation? selection) {
         Geary.App.Conversation? current = null;
         ConversationListBox? listbox = this.conversation_viewer.current_list;
@@ -526,22 +526,6 @@ public class MainWindow : Gtk.ApplicationWindow {
         }
     }
 
-    void on_visible_conversations_changed(Gee.Set<Geary.App.Conversation> visible) {
-        this.application.controller.clear_new_messages("on_visible_conversations_changed", visible);
-    }
-
-    [GtkCallback]
-    private bool on_key_release_event(Gdk.EventKey event) {
-        check_shift_event(event);
-        return Gdk.EVENT_PROPAGATE;
-    }
-
-    [GtkCallback]
-    private bool on_focus_event() {
-        on_shift_key(false);
-        return false;
-    }
-
     [GtkCallback]
     private bool on_delete_event() {
         if (this.application.is_background_service) {
@@ -555,12 +539,28 @@ public class MainWindow : Gtk.ApplicationWindow {
     }
 
     [GtkCallback]
+    private bool on_focus_event() {
+        on_shift_key(false);
+        return false;
+    }
+
+    [GtkCallback]
+    private bool on_key_release_event(Gdk.EventKey event) {
+        check_shift_event(event);
+        return Gdk.EVENT_PROPAGATE;
+    }
+
+    [GtkCallback]
     private void on_info_bar_container_remove() {
         // Ensure the info bar frame is hidden when the last info bar
         // is removed from the container.
         if (this.info_bar_container.get_children().length() == 0) {
             this.info_bar_frame.hide();
         }
+    }
+
+    private void on_visible_conversations_changed(Gee.Set<Geary.App.Conversation> visible) {
+        this.application.controller.clear_new_messages("on_visible_conversations_changed", visible);
     }
 
 }
