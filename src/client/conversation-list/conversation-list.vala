@@ -7,7 +7,12 @@
  */
 
 /**
- * A Gtk.ListBox that displays a list of conversations.
+ * A GtkListBox that displays a list of conversations.
+ *
+ * This class uses the GtkListBox's selection system for selecting and
+ * displaying individual conversations, and supports the GNOME3 HIG
+ * selection mode pattern for to allow multiple conversations to be
+ * marked, independent of the list's selection.
  */
 public class ConversationList : Gtk.ListBox {
 
@@ -21,15 +26,19 @@ public class ConversationList : Gtk.ListBox {
     /**
      * The conversation highlighted as selected, if any.
      *
-     * This is distinct to the conversations chosen via selection
+     * This is distinct to the conversations marked via selection
      * mode, which are checked and might not be highlighted.
      */
     public Geary.App.Conversation? selected { get; private set; default = null; }
 
+    /** Determines if selection mode is enabled for the list. */
+    public bool is_selection_mode_enabled { get; private set; default = false; }
 
     private Configuration config;
     private int selected_index = -1;
     private bool selection_frozen = false;
+    private Gee.Map<Geary.App.Conversation,ConversationListItem> marked =
+        new Gee.HashMap<Geary.App.Conversation,ConversationListItem>();
     private Gee.Set<Geary.App.Conversation>? visible_conversations = null;
     private Geary.Scheduler.Scheduled? update_visible_scheduled = null;
     private bool enable_load_more = true;
@@ -51,6 +60,20 @@ public class ConversationList : Gtk.ListBox {
         this.enable_load_more = false;
     }
 
+    /**
+     * Fired when a list item was targeted with a selection gesture.
+     *
+     * Selection gestures include Ctrl-click or Shift-click on the
+     * list row.
+     */
+    public signal void selection_mode_enabled();
+
+    /**
+     * Fired when a list item was marked as selected in selection mode.
+     */
+    public signal void item_marked(ConversationListItem item, bool marked);
+
+
     public ConversationList(Configuration config) {
         this.config = config;
         get_style_context().add_class(LIST_CLASS);
@@ -67,6 +90,16 @@ public class ConversationList : Gtk.ListBox {
         this.show.connect(on_show);
     }
 
+    /**
+     * Returns a read-only collection of currently marked items.
+     *
+     * This is distinct to the conversations marked via the list's
+     * selection, which are highlighted as selected.
+     */
+    public Gee.Collection<Geary.App.Conversation> get_marked_items() {
+        return this.marked.keys.read_only_view;
+    }
+
     public new void bind_model(Geary.App.ConversationMonitor monitor) {
         Geary.Folder displayed = monitor.base_folder;
         Geary.App.EmailStore store = new Geary.App.EmailStore(displayed.account);
@@ -77,6 +110,7 @@ public class ConversationList : Gtk.ListBox {
         monitor.scan_completed.connect(() => {
                 loader.load_remote();
             });
+        monitor.conversations_removed.connect(on_conversations_removed);
 
         this.model = new ConversationListModel(monitor, loader);
         this.model.items_changed.connect(on_model_items_changed);
@@ -84,15 +118,21 @@ public class ConversationList : Gtk.ListBox {
         // Clear these since they will belong to the old model
         this.selected = null;
         this.selected_index = -1;
+        this.marked.clear();
+        this.visible_conversations = null;
 
         Gee.List<Geary.RFC822.MailboxAddress> account_addresses = displayed.account.information.get_all_mailboxes();
         bool use_to = displayed.special_folder_type.is_outgoing();
         base.bind_model(this.model, (convo) => {
-                return new ConversationListItem(convo as Geary.App.Conversation,
-                                                account_addresses,
-                                                use_to,
-                                                loader,
-                                                this.config);
+                ConversationListItem item = new ConversationListItem(
+                    convo as Geary.App.Conversation,
+                    account_addresses,
+                    use_to,
+                    loader,
+                    this.config
+                );
+                item.item_marked.connect(on_item_marked);
+                return item;
             }
         );
     }
@@ -119,10 +159,95 @@ public class ConversationList : Gtk.ListBox {
         }
     }
 
+    public override bool button_press_event(Gdk.EventButton event) {
+        if (event.button == 1) {
+            if ((event.state & Gdk.ModifierType.SHIFT_MASK) == 0) {
+                // Shift isn't down
+                if ((event.state & Gdk.ModifierType.CONTROL_MASK) != 0 &&
+                    !this.is_selection_mode_enabled) {
+                    // Not currently in selection mode, but Ctrl is
+                    // down, so enable it
+                    set_selection_mode_enabled(true);
+                    selection_mode_enabled();
+                }
+                if (this.is_selection_mode_enabled) {
+                    // Are (now) currently in selection mode, so
+                    // toggle the row
+                    ConversationListItem? row =
+                        get_row_at_y((int) event.y) as ConversationListItem;
+                    if (row != null) {
+                        row.toggle_marked();
+                    }
+                }
+            } else if ((event.state & Gdk.ModifierType.SHIFT_MASK) != 0) {
+                // Shift is down, so emulate Gtk.TreeView-like
+                // contiguous selection behaviour
+                if (!this.is_selection_mode_enabled) {
+                    set_selection_mode_enabled(true);
+                    selection_mode_enabled();
+                }
+                ConversationListItem? clicked =
+                    get_row_at_y((int) event.y)  as ConversationListItem;
+                if (clicked != null) {
+                    ConversationListItem? selected =
+                        get_selected_row() as ConversationListItem;
+
+                    if (selected == null) {
+                        selected = get_item_at_index(0);
+                    }
+
+                    int index = int.min(clicked.get_index(), selected.get_index());
+                    int end = index + (clicked.get_index() - selected.get_index()).abs();
+                    while (index <= end) {
+                        ConversationListItem? row = get_item_at_index(index++);
+                        if (row != null) {
+                            row.set_marked(true);
+                        }
+                    }
+                }
+            }
+        }
+        return base.button_press_event(event);
+    }
+
+    public override bool key_press_event(Gdk.EventKey event) {
+        if (event.keyval == Gdk.Key.Return ||
+            event.keyval == Gdk.Key.KP_Enter) {
+            if ((event.state & Gdk.ModifierType.CONTROL_MASK) != 0 &&
+                !this.is_selection_mode_enabled) {
+                set_selection_mode_enabled(true);
+                selection_mode_enabled();
+            }
+            if (this.is_selection_mode_enabled) {
+                // Are (now) currently in selection mode, so
+                // toggle the row
+                ConversationListItem? row =
+                    get_selected_row() as ConversationListItem;
+                if (row != null) {
+                    row.toggle_marked();
+                }
+            }
+        }
+        return base.key_press_event(event);
+    }
+
     internal Gee.Set<Geary.App.Conversation> get_visible_conversations() {
         Gee.HashSet<Geary.App.Conversation> visible = new Gee.HashSet<Geary.App.Conversation>();
         // XXX Implement me
         return visible;
+    }
+
+    internal void set_selection_mode_enabled(bool enabled) {
+        if (!enabled) {
+            // Call to_array here to get a copy of the value
+            // collection, since unmarking the items will cause the
+            // underlying map to be modified
+            foreach (ConversationListItem item in this.marked.values.to_array()) {
+                item.set_marked(false);
+            }
+            this.marked.clear();
+        }
+        this.is_selection_mode_enabled = enabled;
     }
 
     private inline ConversationListItem? get_item_at_index(int index) {
@@ -183,10 +308,10 @@ public class ConversationList : Gtk.ListBox {
                 this.selected_index = -1;
             }
 
-            debug("Selection changed to: %s",
-                  selected != null ? selected.to_string() : null
-            );
             if (this.selected != selected) {
+                debug("Selection changed to: %s",
+                      selected != null ? selected.to_string() : null
+                );
                 this.selected = selected;
                 this.conversation_selection_changed(selected);
             }
@@ -274,6 +399,23 @@ public class ConversationList : Gtk.ListBox {
             // important if the model is cleared)
             this.adj_last_upper = -1.0;
         }
+    }
+
+    private void on_conversations_removed(Gee.Collection<Geary.App.Conversation> removed) {
+        if (this.is_selection_mode_enabled) {
+            foreach (Geary.App.Conversation convo in removed) {
+                this.marked.remove(convo);
+            }
+        }
+    }
+
+    private void on_item_marked(ConversationListItem item, bool marked) {
+        if (marked) {
+            this.marked.set(item.conversation, item);
+        } else {
+            this.marked.remove(item.conversation);
+        }
+        item_marked(item, marked);
     }
 
 }

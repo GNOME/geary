@@ -76,6 +76,9 @@ public class ConversationListItem : Gtk.ListBoxRow {
     /** The conversation displayed by this item */
     public Geary.App.Conversation conversation { get; private set; }
 
+    /** Determines if this row is marked for selection mode */
+    public bool is_marked { get; private set; default = false; }
+
 
     [GtkChild]
     private Gtk.Button star_button;
@@ -98,11 +101,19 @@ public class ConversationListItem : Gtk.ListBoxRow {
     [GtkChild]
     private Gtk.Label count;
 
+    [GtkChild]
+    private Gtk.Revealer mark_revealer;
+
     private Gee.List<Geary.RFC822.MailboxAddress> account_addresses;
     private bool use_to;
     private PreviewLoader previews;
     private Cancellable preview_cancellable = new Cancellable();
     private Configuration config;
+
+
+    /** Fired when this row is marked for selection mode. */
+    public signal void item_marked(bool marked);
+
 
     public ConversationListItem(Geary.App.Conversation conversation,
                                 Gee.List<Geary.RFC822.MailboxAddress> account_addresses,
@@ -135,6 +146,16 @@ public class ConversationListItem : Gtk.ListBoxRow {
     public override void destroy() {
         this.preview_cancellable.cancel();
         base.destroy();
+    }
+
+    internal void toggle_marked() {
+        set_marked(!this.is_marked);
+    }
+
+    internal void set_marked(bool marked) {
+        this.is_marked = marked;
+        this.mark_revealer.set_reveal_child(marked);
+        item_marked(marked);
     }
 
     private void update() {

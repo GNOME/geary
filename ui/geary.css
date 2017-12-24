@@ -1,6 +1,6 @@
 /*
  * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2016, 2017 Michael Gratton <mike@vee.net>
+ * Copyright 2016-2017 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -61,17 +61,17 @@ row.geary-folder-popover-list-row > label {
   color: @theme_text_color;
 }
 
+/* ConversationListItem */
+
 /* ConversationList */
 
-list.geary-conversation-list > row {
+.geary-conversation-list-item {
   margin: 0;
   border: 0;
   padding: 0;
 }
 
-/* ConversationListItem */
-
-grid.geary-conversation-list-item {
+.geary-conversation-list-item > grid {
   border: 4px solid transparent;
   border-top-width: 0px;
   border-bottom-width: 0px;
@@ -79,34 +79,42 @@ grid.geary-conversation-list-item {
   padding: 12px;
   transition: border 4s;
 }
-grid.geary-conversation-list-item:dir(ltr) {
+.geary-conversation-list-item  > grid:dir(ltr) {
   border-right-width: 0px;
   padding-left: 0;
 }
-grid.geary-conversation-list-item:dir(rtl) {
+.geary-conversation-list-item > grid:dir(rtl) {
   border-left-width: 0px;
   padding-right: 0;
 }
 
-grid.geary-conversation-list-item.geary-unread {
+.geary-conversation-list-item.geary-unread > grid {
   border-color: @theme_selected_bg_color;
   transition: border 0.25s;
 }
 
-grid.geary-conversation-list-item label.geary-date:dir(ltr) {
+.geary-conversation-list-item label.geary-date:dir(ltr) {
   margin-right: 6px;
 }
 
-grid.geary-conversation-list-item label.geary-date:dir(rtl) {
+.geary-conversation-list-item label.geary-date:dir(rtl) {
   margin-left: 6px;
 }
 
-grid.geary-conversation-list-item label.geary-count {
+.geary-conversation-list-item label.geary-count {
   padding: 2px 6px;
   border-radius: 2px;
   font-size: small;
   color: @theme_selected_fg_color;
   background: @theme_selected_bg_color;
+}
+
+.geary-conversation-list-item .geary-mark-container image:dir(ltr) {
+  padding-left: 6px;
+}
+
+.geary-conversation-list-item .geary-mark-container image:dir(rtl) {
+  padding-right: 6px;
 }
 
 /* ConversationListBox */
