@@ -111,14 +111,10 @@ public class ConversationList : Gtk.ListBox {
 
     public void select_conversation(Geary.App.Conversation target) {
         for (int i = 0; i < this.model.get_n_items(); i++) {
-            Gtk.ListBoxRow? row = get_row_at_index(i);
-            if (row != null) {
-                ConversationListItem item =
-                    (ConversationListItem) row.get_child();
-                if (item.conversation == target) {
-                    select_row(row);
-                    break;
-                }
+            ConversationListItem? row = get_item_at_index(i);
+            if (row.conversation == target) {
+                select_row(row);
+                break;
             }
         }
     }
@@ -129,8 +125,12 @@ public class ConversationList : Gtk.ListBox {
         return visible;
     }
 
-    private Gtk.ListBoxRow? restore_selection() {
-        Gtk.ListBoxRow? row = null;
+    private inline ConversationListItem? get_item_at_index(int index) {
+        return get_row_at_index(index) as ConversationListItem;
+    }
+
+    private ConversationListItem? restore_selection() {
+        ConversationListItem? row = null;
         if (this.selected_index >= 0) {
             int new_index = this.selected_index;
             if (new_index >= this.model.get_n_items()) {
@@ -165,7 +165,7 @@ public class ConversationList : Gtk.ListBox {
     private void selection_changed() {
         if (!this.selection_frozen) {
             Geary.App.Conversation? selected = null;
-            Gtk.ListBoxRow? row = get_selected_row();
+            ConversationListItem? row = get_selected_row() as ConversationListItem;
 
             // If a row was de-selected then we need to work out if
             // that was because of a conversation being removed from
@@ -177,7 +177,7 @@ public class ConversationList : Gtk.ListBox {
             }
 
             if (row != null) {
-                selected = ((ConversationListItem) row.get_child()).conversation;
+                selected = row.conversation;
                 this.selected_index = row.get_index();
             } else {
                 this.selected_index = -1;

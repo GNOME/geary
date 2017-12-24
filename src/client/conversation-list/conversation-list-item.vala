@@ -9,7 +9,7 @@
  * A Gtk.ListBoxRow child that displays a conversation in the list.
  */
 [GtkTemplate (ui = "/org/gnome/Geary/conversation-list-item.ui")]
-public class ConversationListItem : Gtk.Grid {
+public class ConversationListItem : Gtk.ListBoxRow {
 
     private const string STARRED_CLASS = "geary-starred";
     private const string UNREAD_CLASS = "geary-unread";
