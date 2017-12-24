@@ -137,17 +137,21 @@ public class ConversationList : Gtk.ListBox {
                 new_index = ((int) this.model.get_n_items()) - 1;
             }
 
-            // XXX we should be only calling select_row() if
-            // autoselect is enabled, otherwise we should simply be
-            // updating the cursor, but Gtk.ListBox doesn't allow us
-            // to do that --- move_cursor() doesn't seem to work and
-            // is O(n) anyway.
-            row = get_row_at_index(new_index);
+            row = get_item_at_index(new_index);
             if (row != null) {
-                select_row(row);
+                if (this.config.autoselect) {
+                    select_row(row);
+                }
+
+                // Grab the focus so the user can continue using the
+                // keyboard to navigate if so desired.
+                row.grab_focus();
             }
         }
-        return row;
+
+        // Return null if not autoselecting so we don't emit a
+        // selection signal, causing the conversation to be displayed.
+        return this.config.autoselect ? row : null;
     }
 
     private void schedule_visible_conversations_changed() {
