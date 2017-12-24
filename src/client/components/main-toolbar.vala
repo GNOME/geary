@@ -7,6 +7,7 @@
 // Draws the main toolbar.
 [GtkTemplate (ui = "/org/gnome/Geary/main-toolbar.ui")]
 public class MainToolbar : Gtk.Box {
+
     // How wide the left pane should be. Auto-synced with our settings
     public int left_pane_width { get; set; }
     // Used to form the title of the folder header
@@ -36,6 +37,13 @@ public class MainToolbar : Gtk.Box {
     [GtkChild]
     private Gtk.ToggleButton search_conversations_button;
     private Binding guest_header_binding;
+
+    // Selection header elements
+    [GtkChild]
+    private Gtk.HeaderBar selection_header;
+
+    [GtkChild]
+    private Gtk.Label selection_label;
 
     // Conversation header elements
     [GtkChild]
@@ -67,7 +75,12 @@ public class MainToolbar : Gtk.Box {
             SettingsBindFlags.GET);
         this.bind_property("left-pane-width", this.folder_header, "width-request",
             BindingFlags.SYNC_CREATE, (binding, source_value, ref target_value) => {
-                target_value = left_pane_width + 6;
+                target_value = left_pane_width;
+                return true;
+            });
+        this.bind_property("left-pane-width", this.selection_header, "width-request",
+            BindingFlags.SYNC_CREATE, (binding, source_value, ref target_value) => {
+                target_value = left_pane_width;
                 return true;
             });
 
@@ -120,6 +133,29 @@ public class MainToolbar : Gtk.Box {
         header.show_close_button = false;
         header.decoration_layout = Gtk.Settings.get_default().gtk_decoration_layout;
         conversation_header.show();
+    }
+
+    internal void set_selection_mode_enabled(bool enabled) {
+        if (enabled) {
+            update_selection_count(0);
+        }
+        this.folder_header.set_visible(!enabled);
+        this.selection_header.set_visible(enabled);
+    }
+
+    internal void update_selection_count(int count) {
+        string text = "";
+        if (count == 0) {
+            text = _("Click to select conversations");
+        } else {
+            text = ngettext(
+                "%d conversation selected",
+                "%d conversations selected",
+                count
+            ).printf(count);
+
+        }
+        this.selection_label.set_text(text);
     }
 
     internal void update_trash_buttons(bool show_trash) {

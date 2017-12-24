@@ -14,6 +14,7 @@
       <object class="GtkHeaderBar" id="folder_header">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <property name="no_show_all">True</property>
         <child>
           <object class="GtkButton" id="compose_new_message_button">
             <property name="visible">True</property>
@@ -24,6 +25,7 @@
             <property name="always_show_image">True</property>
             <child>
               <object class="GtkImage" id="compose_new_message_image">
+                <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="icon_name">text-editor-symbolic</property>
               </object>
@@ -31,26 +33,15 @@
           </object>
         </child>
         <child>
-          <object class="GtkSeparator" id="header_separator">
-            <property name="visible">True</property>
-            <property name="can_focus">False</property>
-            <property name="orientation">vertical</property>
-          </object>
-          <packing>
-            <property name="pack_type">end</property>
-            <property name="position">1</property>
-          </packing>
-        </child>
-        <child>
           <object class="GtkToggleButton" id="search_conversations_button">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="focus_on_click">False</property>
             <property name="receives_default">False</property>
-            <property name="tooltip_text" translatable="yes">Toggle search bar</property>
             <property name="always_show_image">True</property>
             <child>
               <object class="GtkImage" id="search_conversations_image">
+                <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="icon_name">preferences-system-search-symbolic</property>
               </object>
@@ -59,6 +50,28 @@
           <packing>
             <property name="pack_type">end</property>
             <property name="position">2</property>
+          </packing>
+        </child>
+        <child>
+          <object class="GtkButton" id="selection_mode_button">
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="focus_on_click">False</property>
+            <property name="receives_default">False</property>
+            <property name="tooltip_text" translatable="yes">Select conversations</property>
+            <property name="action_name">win.selection-mode-enable</property>
+            <property name="always_show_image">True</property>
+            <child>
+              <object class="GtkImage">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="icon_name">object-select-symbolic</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="pack_type">end</property>
+            <property name="position">3</property>
           </packing>
         </child>
         <child>
@@ -71,6 +84,7 @@
             <property name="always_show_image">True</property>
             <child>
               <object class="GtkImage" id="empty_menu_image">
+                <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="icon_name">edit-clear-all-symbolic</property>
               </object>
@@ -78,7 +92,7 @@
           </object>
           <packing>
             <property name="pack_type">end</property>
-            <property name="position">3</property>
+            <property name="position">4</property>
           </packing>
         </child>
         <style>
@@ -90,6 +104,54 @@
         <property name="expand">False</property>
         <property name="fill">True</property>
         <property name="position">0</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkHeaderBar" id="selection_header">
+        <property name="can_focus">False</property>
+        <property name="no_show_all">True</property>
+        <child type="title">
+          <object class="GtkLabel" id="selection_label">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <property name="label">Label</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton">
+            <property name="label" translatable="yes">Cancel</property>
+            <property name="visible">True</property>
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <property name="action_name">win.selection-mode-disable</property>
+          </object>
+          <packing>
+            <property name="pack_type">end</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <style>
+          <class name="geary-titlebar"/>
+          <class name="geary-titlebar-left"/>
+          <class name="selection-mode"/>
+        </style>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">True</property>
+        <property name="position">1</property>
+      </packing>
+    </child>
+    <child>
+      <object class="GtkSeparator">
+        <property name="visible">True</property>
+        <property name="can_focus">False</property>
+        <property name="orientation">vertical</property>
+      </object>
+      <packing>
+        <property name="expand">False</property>
+        <property name="fill">True</property>
+        <property name="position">2</property>
       </packing>
     </child>
     <child>
@@ -376,7 +438,7 @@
       <packing>
         <property name="expand">True</property>
         <property name="fill">True</property>
-        <property name="position">1</property>
+        <property name="position">3</property>
       </packing>
     </child>
   </template>

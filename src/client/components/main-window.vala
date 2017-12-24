@@ -8,7 +8,19 @@
 
 [GtkTemplate (ui = "/org/gnome/Geary/main-window.ui")]
 public class MainWindow : Gtk.ApplicationWindow {
+
+
+    public const string ACTION_SELECTION_MODE_DISABLE = "selection-mode-disable";
+    public const string ACTION_SELECTION_MODE_ENABLE = "selection-mode-enable";
+
+
     private const int STATUS_BAR_HEIGHT = 18;
+
+    private const ActionEntry[] action_entries = {
+        {ACTION_SELECTION_MODE_DISABLE, on_selection_mode_disabled },
+        {ACTION_SELECTION_MODE_ENABLE, on_selection_mode_enabled }
+    };
+
 
     public new GearyApplication application {
         get { return (GearyApplication) base.get_application(); }
@@ -69,6 +81,8 @@ public class MainWindow : Gtk.ApplicationWindow {
         this.conversation_list = new ConversationList(application.config);
         this.conversation_list.conversation_selection_changed.connect(on_conversation_selection_changed);
         this.conversation_list.conversation_activated.connect(on_conversation_activated);
+        this.conversation_list.item_marked.connect(on_conversation_item_marked);
+        this.conversation_list.selection_mode_enabled.connect(on_selection_mode_enabled);
         this.conversation_list.visible_conversations_changed.connect(on_visible_conversations_changed);
 
         this.conversation_list.load_more.connect(on_load_more);
@@ -83,6 +97,7 @@ public class MainWindow : Gtk.ApplicationWindow {
 
         set_styling();
         setup_layout(application.config);
+        setup_actions();
         on_change_orientation();
     }
 
@@ -274,6 +289,15 @@ public class MainWindow : Gtk.ApplicationWindow {
         return handled;
     }
 
+    private void setup_actions() {
+        add_action_entries(action_entries, this);
+        add_window_accelerators(ACTION_SELECTION_MODE_DISABLE, { "Escape", });
+    }
+
+    private void add_window_accelerators(string action, string[] accelerators) {
+        this.application.set_accels_for_action("win." + action, accelerators);
+    }
+
     private void update_headerbar() {
         if (this.current_folder == null) {
             this.main_toolbar.account = null;
@@ -319,6 +343,13 @@ public class MainWindow : Gtk.ApplicationWindow {
 
     private inline SimpleAction get_action(string name) {
         return (SimpleAction) lookup_action(name);
+    }
+
+    private void set_selection_mode_enabled(bool enabled) {
+        get_action(ACTION_SELECTION_MODE_DISABLE).set_enabled(enabled);
+        get_action(ACTION_SELECTION_MODE_ENABLE).set_enabled(!enabled);
+        this.main_toolbar.set_selection_mode_enabled(enabled);
+        this.conversation_list.set_selection_mode_enabled(enabled);
     }
 
     private void on_conversation_monitor_changed() {
@@ -481,6 +512,12 @@ public class MainWindow : Gtk.ApplicationWindow {
         }
     }
 
+    private void on_conversation_item_marked(ConversationListItem item, bool marked) {
+        this.main_toolbar.update_selection_count(
+            this.conversation_list.get_marked_items().size
+        );
+    }
+
     private void on_initial_conversation_load() {
         // When not doing autoselect, we never get
         // conversations_selected firing from the convo list, so we
@@ -557,6 +594,14 @@ public class MainWindow : Gtk.ApplicationWindow {
         if (this.info_bar_container.get_children().length() == 0) {
             this.info_bar_frame.hide();
         }
+    }
+
+    private void on_selection_mode_enabled() {
+        set_selection_mode_enabled(true);
+    }
+
+    private void on_selection_mode_disabled() {
+        set_selection_mode_enabled(false);
     }
 
     private void on_visible_conversations_changed(Gee.Set<Geary.App.Conversation> visible) {

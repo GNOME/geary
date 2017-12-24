@@ -49,6 +49,13 @@
   border-right-width: 0;
 }
 
+/* MainToolbar */
+
+.geary-titlebar-separator {
+  margin: 0;
+  padding: 0;
+}
+
 /* FolderPopover */
 
 row.geary-folder-popover-list-row {
