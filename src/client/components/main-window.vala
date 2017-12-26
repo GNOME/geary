@@ -10,15 +10,34 @@
 public class MainWindow : Gtk.ApplicationWindow {
 
 
+    public const string ACTION_ARCHIVE = "conversation-archive";
+    public const string ACTION_DELETE = "conversation-delete";
+    public const string ACTION_JUNK = "conversation-junk";
+    public const string ACTION_MARK_READ = "conversation-mark-read";
+    public const string ACTION_MARK_STARRED = "conversation-mark-starred";
+    public const string ACTION_MARK_UNREAD = "conversation-mark-unread";
+    public const string ACTION_MARK_UNSTARRED = "conversation-mark-unstarred";
+    public const string ACTION_RESTORE = "conversation-restore";
+    public const string ACTION_TRASH = "conversation-trash";
+
     public const string ACTION_SELECTION_MODE_DISABLE = "selection-mode-disable";
     public const string ACTION_SELECTION_MODE_ENABLE = "selection-mode-enable";
-
 
     private const int STATUS_BAR_HEIGHT = 18;
 
     private const ActionEntry[] action_entries = {
-        {ACTION_SELECTION_MODE_DISABLE, on_selection_mode_disabled },
-        {ACTION_SELECTION_MODE_ENABLE, on_selection_mode_enabled }
+        { ACTION_ARCHIVE,        on_conversation_archive        },
+        { ACTION_DELETE,         on_conversation_delete         },
+        { ACTION_JUNK,           on_conversation_junk           },
+        { ACTION_MARK_READ,      on_conversation_mark_read      },
+        { ACTION_MARK_STARRED,   on_conversation_mark_starred   },
+        { ACTION_MARK_UNREAD,    on_conversation_mark_unread    },
+        { ACTION_MARK_UNSTARRED, on_conversation_mark_unstarred },
+        { ACTION_RESTORE,        on_conversation_restore        },
+        { ACTION_TRASH,          on_conversation_trash          },
+
+        { ACTION_SELECTION_MODE_DISABLE, on_selection_mode_disabled },
+        { ACTION_SELECTION_MODE_ENABLE,  on_selection_mode_enabled  }
     };
 
 
@@ -298,6 +317,51 @@ public class MainWindow : Gtk.ApplicationWindow {
         return handled;
     }
 
+    /**
+     * Prompts the user to confirm deleting conversations.
+     */
+    internal bool confirm_delete() {
+        present();
+        ConfirmationDialog dialog = new ConfirmationDialog(
+            this,
+            _("Do you want to permanently delete conversation messages in this folder?"),
+            null,
+            _("Delete"),
+            "destructive-action"
+        );
+        return (dialog.run() == Gtk.ResponseType.OK);
+    }
+
+    /**
+     * Returns email ids from all highlighted conversations, if any.
+     */
+    private Gee.List<Geary.EmailIdentifier> get_highlighted_email() {
+        Gee.LinkedList<Geary.EmailIdentifier> ids =
+            new Gee.LinkedList<Geary.EmailIdentifier>();
+        foreach (Geary.App.Conversation convo in
+                 this.conversation_list.get_highlighted_conversations()) {
+            ids.add_all(convo.get_email_ids());
+        }
+        return ids;
+    }
+
+    /**
+     * Returns id of most latest email in all highlighted conversations.
+     */
+    private Gee.List<Geary.EmailIdentifier> get_highlighted_latest_email() {
+        Gee.LinkedList<Geary.EmailIdentifier> ids =
+            new Gee.LinkedList<Geary.EmailIdentifier>();
+        foreach (Geary.App.Conversation convo in
+                 this.conversation_list.get_highlighted_conversations()) {
+            Geary.Email? latest = convo.get_latest_sent_email(
+                Geary.App.Conversation.Location.IN_FOLDER_OUT_OF_FOLDER);
+            if (latest != null) {
+                ids.add(latest.id);
+            }
+        }
+        return ids;
+    }
+
     private void setup_actions() {
         add_action_entries(action_entries, this);
         add_window_accelerators(ACTION_SELECTION_MODE_DISABLE, { "Escape", });
@@ -335,6 +399,16 @@ public class MainWindow : Gtk.ApplicationWindow {
             this.main_toolbar.folder = _("%s (%d)").printf(this.current_folder.get_display_name(), count);
         else
             this.main_toolbar.folder = this.current_folder.get_display_name();
+    }
+
+    private void update_conversation_actions(Geary.App.Conversation? target) {
+        bool is_unread = target.is_unread();
+        get_action(ACTION_MARK_READ).set_enabled(is_unread);
+        get_action(ACTION_MARK_UNREAD).set_enabled(!is_unread);
+
+        bool is_starred = target.is_flagged();
+        get_action(ACTION_MARK_UNSTARRED).set_enabled(is_starred);
+        get_action(ACTION_MARK_STARRED).set_enabled(!is_starred);
     }
 
     private inline void check_shift_event(Gdk.EventKey event) {
@@ -397,6 +471,13 @@ public class MainWindow : Gtk.ApplicationWindow {
         this.conversation_viewer.show_none_selected();
     }
 
+    private void report_problem(Action action, Variant? param, Error err) {
+        // XXX
+        debug("Client problem reported: %s: %s",
+              action.get_name(),
+              err.message);
+    }
+
     private void on_conversation_monitor_changed() {
         this.conversation_list.freeze_selection();
         ConversationListModel? old_model = this.conversation_list.model;
@@ -412,6 +493,7 @@ public class MainWindow : Gtk.ApplicationWindow {
             old_monitor.scan_completed.disconnect(on_conversation_count_changed);
             old_monitor.conversations_added.disconnect(on_conversation_count_changed);
             old_monitor.conversations_removed.disconnect(on_conversation_count_changed);
+            old_monitor.email_flags_changed.disconnect(on_conversation_flags_changed);
         }
 
         Geary.App.ConversationMonitor? new_monitor =
@@ -430,6 +512,7 @@ public class MainWindow : Gtk.ApplicationWindow {
             new_monitor.scan_completed.connect(on_conversation_count_changed);
             new_monitor.conversations_added.connect(on_conversation_count_changed);
             new_monitor.conversations_removed.connect(on_conversation_count_changed);
+            new_monitor.email_flags_changed.connect(on_conversation_flags_changed);
         }
         this.conversation_list.thaw_selection();
     }
@@ -514,6 +597,7 @@ public class MainWindow : Gtk.ApplicationWindow {
 
     private void on_conversation_selection_changed(Geary.App.Conversation? selection) {
         show_conversation(selection);
+        update_conversation_actions(selection);
     }
 
     private void on_conversation_activated(Geary.App.Conversation activated) {
@@ -586,6 +670,12 @@ public class MainWindow : Gtk.ApplicationWindow {
         }
     }
 
+    private void on_conversation_flags_changed(Geary.App.Conversation changed) {
+        if (this.conversation_list.selected == changed) {
+            update_conversation_actions(changed);
+        }
+    }
+
     [GtkCallback]
     private bool on_delete_event() {
         if (this.application.is_background_service) {
@@ -618,6 +708,167 @@ public class MainWindow : Gtk.ApplicationWindow {
             this.info_bar_frame.hide();
         }
     }
+
+    private void on_conversation_archive(Action action, Variant? param) {
+        this.application.controller.move_conversations.begin(
+            this.conversation_list.get_highlighted_conversations(),
+            Geary.SpecialFolderType.ARCHIVE,
+            (obj, ret) => {
+                try {
+                    this.application.controller.move_conversations.end(ret);
+                } catch (Error err) {
+                    report_problem(action, param, err);
+                }
+            }
+        );
+    }
+
+    private void on_conversation_delete(Action action, Variant? param) {
+        if (confirm_delete()) {
+            this.application.controller.delete_conversations.begin(
+                this.conversation_list.get_highlighted_conversations(),
+                (obj, ret) => {
+                    try {
+                        this.application.controller.delete_conversations.end(ret);
+                    } catch (Error err) {
+                        report_problem(action, param, err);
+                    }
+                }
+            );
+        }
+    }
+
+    private void on_conversation_junk(Action action, Variant? param) {
+        this.application.controller.move_conversations.begin(
+            this.conversation_list.get_highlighted_conversations(),
+            Geary.SpecialFolderType.SPAM,
+            (obj, ret) => {
+                try {
+                    this.application.controller.move_conversations.end(ret);
+                } catch (Error err) {
+                    report_problem(action, param, err);
+                }
+            }
+        );
+    }
+
+    private void on_conversation_mark_read(Action action, Variant? param) {
+        Geary.EmailFlags flags = new Geary.EmailFlags();
+        flags.add(Geary.EmailFlags.UNREAD);
+
+        Gee.List<Geary.EmailIdentifier> ids = get_highlighted_email();
+        ConversationListBox? list = this.conversation_viewer.current_list;
+        this.application.controller.mark_email.begin(
+            ids, null, flags,
+            (obj, ret) => {
+                try {
+                    this.application.controller.mark_email.end(ret);
+                } catch (Error err) {
+                    report_problem(action, param, err);
+                    // undo the manual marking
+                    if (list != null) {
+                        foreach (Geary.EmailIdentifier id in ids) {
+                            list.mark_manual_unread(id);
+                        }
+                    }
+                }
+            }
+        );
+
+        if (list != null) {
+            foreach (Geary.EmailIdentifier id in ids) {
+                list.mark_manual_read(id);
+            }
+        }
+    }
+
+    private void on_conversation_mark_unread(Action action, Variant? param) {
+        Geary.EmailFlags flags = new Geary.EmailFlags();
+        flags.add(Geary.EmailFlags.UNREAD);
+
+        Gee.List<Geary.EmailIdentifier> ids = get_highlighted_latest_email();
+        ConversationListBox? list = this.conversation_viewer.current_list;
+        this.application.controller.mark_email.begin(
+            ids, flags, null,
+            (obj, ret) => {
+                try {
+                    this.application.controller.mark_email.end(ret);
+                } catch (Error err) {
+                    report_problem(action, param, err);
+                    // undo the manual marking
+                    if (list != null) {
+                        foreach (Geary.EmailIdentifier id in ids) {
+                            list.mark_manual_read(id);
+                        }
+                    }
+                }
+            }
+        );
+
+        if (list != null) {
+            foreach (Geary.EmailIdentifier id in ids) {
+                list.mark_manual_unread(id);
+            }
+        }
+    }
+
+    private void on_conversation_mark_starred(Action action, Variant? param) {
+        Geary.EmailFlags flags = new Geary.EmailFlags();
+        flags.add(Geary.EmailFlags.FLAGGED);
+        this.application.controller.mark_email.begin(
+            get_highlighted_latest_email(), flags, null,
+            (obj, ret) => {
+                try {
+                    this.application.controller.mark_email.end(ret);
+                } catch (Error err) {
+                    report_problem(action, param, err);
+                }
+            }
+        );
+    }
+
+    private void on_conversation_mark_unstarred(Action action, Variant? param) {
+        Geary.EmailFlags flags = new Geary.EmailFlags();
+        flags.add(Geary.EmailFlags.FLAGGED);
+        this.application.controller.mark_email.begin(
+            get_highlighted_email(), null, flags,
+            (obj, ret) => {
+                try {
+                    this.application.controller.mark_email.end(ret);
+                } catch (Error err) {
+                    report_problem(action, param, err);
+                }
+            }
+        );
+    }
+
+    private void on_conversation_restore(Action action, Variant? param) {
+        this.application.controller.restore_conversations.begin(
+            this.conversation_list.get_highlighted_conversations(),
+            (obj, ret) => {
+                try {
+                    this.application.controller.restore_conversations.end(ret);
+                } catch (Error err) {
+                    report_problem(action, param, err);
+                }
+            }
+        );
+    }
+
+    private void on_conversation_trash(Action action, Variant? param) {
+        this.application.controller.move_conversations.begin(
+            this.conversation_list.get_highlighted_conversations(),
+            Geary.SpecialFolderType.TRASH,
+            (obj, ret) => {
+                try {
+                    this.application.controller.move_conversations.end(ret);
+                } catch (Error err) {
+                    report_problem(action, param, err);
+                }
+            }
+        );
+    }
+
 
     private void on_selection_mode_enabled() {
         set_selection_mode_enabled(true);

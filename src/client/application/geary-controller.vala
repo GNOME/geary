@@ -1,6 +1,6 @@
 /*
  * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2016, 2017 Michael Gratton <mike@vee.net>
+ * Copyright 2016-2017 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -1155,7 +1155,121 @@ public class GearyController : Geary.BaseObject {
             message("Error enumerating accounts: %s", e.message);
         }
     }
-    
+
+    /**
+     * Adds and removes flags from a set of emails.
+     */
+    internal async void mark_email(Gee.Collection<Geary.EmailIdentifier> ids,
+                                   Geary.EmailFlags? flags_to_add,
+                                   Geary.EmailFlags? flags_to_remove)
+        throws Error {
+        if (ids.size > 0) {
+            Geary.App.EmailStore store =
+                this.email_stores.get(this.current_folder.account);
+            yield store.mark_email_async(
+                ids, flags_to_add, flags_to_remove, this.cancellable_folder
+            );
+        }
+    }
+
+    /**
+     * Moves a set of conversations to a special folder.
+     */
+    internal async void move_conversations(Gee.Collection<Geary.App.Conversation> targets,
+                                           Geary.SpecialFolderType type)
+        throws Error {
+        Gee.List<Geary.EmailIdentifier> ids = get_ids_in_folder(targets);
+        if (type == Geary.SpecialFolderType.ARCHIVE) {
+            Geary.FolderSupport.Archive? archivable =
+                this.current_folder as Geary.FolderSupport.Archive;
+            if (archivable == null) {
+                throw new Geary.ImapError.NOT_SUPPORTED(
+                    "Folder %s doesn't support archive",
+                    this.current_folder.to_string()
+                );
+            }
+            save_revokable(
+                yield archivable.archive_email_async(
+                    ids, this.cancellable_folder
+                ),
+                _("Undo archive (Ctrl+Z)")
+            );
+        } else {
+            Geary.Folder dest = this.current_account.get_special_folder(type);
+            Geary.FolderSupport.Move? movable =
+                this.current_folder as Geary.FolderSupport.Move;
+            if (movable == null) {
+                throw new Geary.ImapError.NOT_SUPPORTED(
+                    "Folder %s doesn't support moving",
+                    this.current_folder.to_string()
+                );
+            }
+            string tooltip = "";
+            switch (type) {
+            case Geary.SpecialFolderType.INBOX:
+                tooltip = _("Undo restore (Ctrl+Z)");
+                break;
+            case Geary.SpecialFolderType.TRASH:
+                tooltip = _("Undo trash (Ctrl+Z)");
+                break;
+            case Geary.SpecialFolderType.SPAM:
+                tooltip = _("Undo junk (Ctrl+Z)");
+                break;
+            default:
+                tooltip = _("Undo move (Ctrl+Z)");
+                break;
+            }
+            save_revokable(
+                yield movable.move_email_async(
+                    ids, dest.path, this.cancellable_folder
+                ),
+                tooltip
+            );
+        }
+    }
+
+    /**
+     * Restores a set of messages to their original location.
+     */
+    internal async void restore_conversations(Gee.Collection<Geary.App.Conversation> targets)
+        throws Error {
+        yield move_conversations(targets, Geary.SpecialFolderType.INBOX);
+    }
+
+    /**
+     * Permanently deletes a set of conversations, without prompting.
+     */
+    internal async void delete_conversations(Gee.Collection<Geary.App.Conversation> targets)
+        throws Error {
+        Gee.List<Geary.EmailIdentifier> ids = get_ids_in_folder(targets);
+        Geary.FolderSupport.Remove? removable =
+            this.current_folder as Geary.FolderSupport.Remove;
+        if (removable == null) {
+            throw new Geary.ImapError.NOT_SUPPORTED(
+                "Folder %s doesn't support deletion",
+                this.current_folder.to_string()
+            );
+        }
+
+        yield removable.remove_email_async(ids, this.cancellable_folder);
+    }
+
+    /**
+     * Returns conversation's email ids that are in-folder.
+     */
+    private Gee.List<Geary.EmailIdentifier> get_ids_in_folder(Gee.Collection<Geary.App.Conversation> targets) {
+        Gee.LinkedList<Geary.EmailIdentifier> ids =
+            new Gee.LinkedList<Geary.EmailIdentifier>();
+        foreach (Geary.App.Conversation convo in targets) {
+            foreach (Geary.Email email in
+                     convo.get_emails(Geary.App.Conversation.Ordering.NONE,
+                                      Geary.App.Conversation.Location.ANYWHERE)) {
+                ids.add(email.id);
+            }
+        }
+        return ids;
+    }
+
     /**
      * Returns true if we've attempted to open all accounts at this point.
      */
@@ -1568,14 +1682,6 @@ public class GearyController : Geary.BaseObject {
         return ids;
     }
 
-    private void mark_email(Gee.Collection<Geary.EmailIdentifier> ids,
-        Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove) {
-        if (ids.size > 0) {
-            email_stores.get(current_folder.account).mark_email_async.begin(
-                ids, flags_to_add, flags_to_remove, cancellable_folder);
-        }
-    }
-
     private void on_show_mark_menu() {
         Geary.App.Conversation conversation =
             this.main_window.conversation_list.selected;
@@ -1645,7 +1751,7 @@ public class GearyController : Geary.BaseObject {
 
     private void on_conversation_viewer_mark_emails(Gee.Collection<Geary.EmailIdentifier> emails,
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove) {
-        mark_email(emails, flags_to_add, flags_to_remove);
+        mark_email.begin(emails, flags_to_add, flags_to_remove);
     }
 
     private void on_mark_as_read(SimpleAction action) {
@@ -1653,7 +1759,7 @@ public class GearyController : Geary.BaseObject {
         flags.add(Geary.EmailFlags.UNREAD);
 
         Gee.ArrayList<Geary.EmailIdentifier> ids = get_selected_email_ids(false);
-        mark_email(ids, null, flags);
+        mark_email.begin(ids, null, flags);
 
         ConversationListBox? list =
             main_window.conversation_viewer.current_list;
@@ -1668,7 +1774,7 @@ public class GearyController : Geary.BaseObject {
         flags.add(Geary.EmailFlags.UNREAD);
 
         Gee.ArrayList<Geary.EmailIdentifier> ids = get_selected_email_ids(true);
-        mark_email(ids, flags, null);
+        mark_email.begin(ids, flags, null);
 
         ConversationListBox? list =
             main_window.conversation_viewer.current_list;
@@ -1681,21 +1787,21 @@ public class GearyController : Geary.BaseObject {
     private void on_mark_as_starred(SimpleAction action) {
         Geary.EmailFlags flags = new Geary.EmailFlags();
         flags.add(Geary.EmailFlags.FLAGGED);
-        mark_email(get_selected_email_ids(true), flags, null);
+        mark_email.begin(get_selected_email_ids(true), flags, null);
     }
 
     private void on_mark_as_unstarred(SimpleAction action) {
         Geary.EmailFlags flags = new Geary.EmailFlags();
         flags.add(Geary.EmailFlags.FLAGGED);
-        mark_email(get_selected_email_ids(false), null, flags);
+        mark_email.begin(get_selected_email_ids(false), null, flags);
     }
 
     private void on_show_move_menu(SimpleAction? action) {
-        this.main_window.main_toolbar.copy_conversation_button.clicked();
+        this.main_window.main_toolbar.copy_conversation_button.activate();
     }
 
     private void on_show_copy_menu(SimpleAction? action) {
-        this.main_window.main_toolbar.move_conversation_button.clicked();
+        this.main_window.main_toolbar.move_conversation_button.activate();
     }
 
     private async void mark_as_spam_toggle_async(Cancellable? cancellable) {
@@ -2274,17 +2380,7 @@ public class GearyController : Geary.BaseObject {
             && !current_folder.properties.is_local_only && current_account != null
             && (current_folder as Geary.FolderSupport.Move) != null);
     }
-    
-    public bool confirm_delete(int num_messages) {
-        main_window.present();
-        ConfirmationDialog dialog = new ConfirmationDialog(main_window, ngettext(
-            "Do you want to permanently delete this message?",
-            "Do you want to permanently delete these messages?", num_messages),
-            null, _("Delete"), "destructive-action");
-        
-        return (dialog.run() == Gtk.ResponseType.OK);
-    }
-    
+
     private async void archive_or_delete_selection_async(bool archive, bool trash,
         Cancellable? cancellable) throws Error {
         if (!can_switch_conversation_view())
@@ -2346,7 +2442,7 @@ public class GearyController : Geary.BaseObject {
         if (supports_remove == null) {
             debug("Folder %s doesn't support remove", current_folder.to_string());
         } else {
-            if (confirm_delete(ids.size))
+            if (this.main_window.confirm_delete())
                 yield supports_remove.remove_email_async(ids, cancellable);
             else
                 last_deleted_conversation = null;

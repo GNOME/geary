@@ -12,7 +12,9 @@
  * This class uses the GtkListBox's selection system for selecting and
  * displaying individual conversations, and supports the GNOME3 HIG
  * selection mode pattern for to allow multiple conversations to be
- * marked, independent of the list's selection.
+ * marked, independent of the list's selection. These conversations
+ * are referred to `selected` and `marked`, respectively, or
+ * `highlighted` if referring to either.
  */
 public class ConversationList : Gtk.ListBox {
 
@@ -33,6 +35,15 @@ public class ConversationList : Gtk.ListBox {
 
     /** Determines if selection mode is enabled for the list. */
     public bool is_selection_mode_enabled { get; private set; default = false; }
+
+    /** Determines if the list has selected or marked conversations. */
+    public bool has_highlighted_conversations {
+        get {
+            return this.is_selection_mode_enabled
+                ? !this.marked.is_empty
+                : this.selected != null;
+        }
+    }
 
     private Configuration config;
     private int selected_index = -1;
@@ -93,6 +104,31 @@ public class ConversationList : Gtk.ListBox {
                 selection_changed();
             });
         this.show.connect(on_show);
+    }
+
+    /**
+     * Returns current selected or marked conversations, if any.
+     */
+    public bool is_highlighted(Geary.App.Conversation target) {
+        return this.is_selection_mode_enabled
+            ? this.marked.has_key(target)
+            : this.selected == target;
+    }
+
+    /**
+     * Returns current selected or marked conversations, if any.
+     */
+    public Gee.Collection<Geary.App.Conversation> get_highlighted_conversations() {
+        Gee.Collection<Geary.App.Conversation>? highlighted = null;
+        if (this.is_selection_mode_enabled) {
+            highlighted = this.get_marked_items();
+        } else {
+            highlighted = new Gee.LinkedList<Geary.App.Conversation>();
+            if (this.selected != null) {
+                highlighted.add(this.selected);
+            }
+        }
+        return highlighted;
     }
 
     /**
