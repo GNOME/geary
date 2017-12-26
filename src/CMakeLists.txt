@@ -340,6 +340,7 @@ client/accounts/add-edit-page.vala
 client/accounts/login-dialog.vala
 
 client/components/client-web-view.vala
+client/components/conversation-action-bar.vala
 client/components/count-badge.vala
 client/components/empty-placeholder.vala
 client/components/folder-popover.vala

@@ -42,7 +42,10 @@ public class MainWindow : Gtk.ApplicationWindow {
 
     public Geary.Folder? current_folder { get; private set; default = null; }
 
-    private Geary.AggregateProgressMonitor progress_monitor = new Geary.AggregateProgressMonitor();
+    private ConversationActionBar conversation_list_actions =
+        new ConversationActionBar();
+    private Geary.AggregateProgressMonitor progress_monitor =
+        new Geary.AggregateProgressMonitor();
     private Geary.ProgressMonitor? folder_progress = null;
 
     private MonitoredSpinner spinner = new MonitoredSpinner();
@@ -59,8 +62,11 @@ public class MainWindow : Gtk.ApplicationWindow {
     private Gtk.Box folder_box;
     [GtkChild]
     private Gtk.ScrolledWindow folder_list_scrolled;
+
     [GtkChild]
     private Gtk.Box conversation_box;
+    [GtkChild]
+    private Gtk.Grid conversation_list_grid;
     [GtkChild]
     private Gtk.ScrolledWindow conversation_list_scrolled;
 
@@ -85,8 +91,10 @@ public class MainWindow : Gtk.ApplicationWindow {
         this.conversation_list.marked_conversations_evaporated.connect(on_selection_mode_disabled);
         this.conversation_list.selection_mode_enabled.connect(on_selection_mode_enabled);
         this.conversation_list.visible_conversations_changed.connect(on_visible_conversations_changed);
-
         this.conversation_list.load_more.connect(on_load_more);
+
+        this.conversation_list_grid.add(this.conversation_list_actions);
+
         load_config(application.config);
         restore_saved_window_state();
 
@@ -442,8 +450,11 @@ public class MainWindow : Gtk.ApplicationWindow {
             this.current_folder.properties.notify.disconnect(update_headerbar);
 
         // connect to new folder
-        if (folder != null)
+        if (folder != null) {
             folder.properties.notify.connect(update_headerbar);
+            this.conversation_list_actions.set_account(folder.account);
+            this.conversation_list_actions.update_location(this.current_folder);
+        }
 
         // swap it in
         this.current_folder = folder;

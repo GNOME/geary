@@ -12,6 +12,7 @@ set(RESOURCE_LIST
   STRIPBLANKS "composer-widget.ui"
               "composer-web-view.css"
               "composer-web-view.js"
+  STRIPBLANKS "conversation-action-bar.ui"
   STRIPBLANKS "conversation-email.ui"
   STRIPBLANKS "conversation-email-attachment-view.ui"
   STRIPBLANKS "conversation-email-menus.ui"
