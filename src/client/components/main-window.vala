@@ -82,6 +82,7 @@ public class MainWindow : Gtk.ApplicationWindow {
         this.conversation_list.conversation_selection_changed.connect(on_conversation_selection_changed);
         this.conversation_list.conversation_activated.connect(on_conversation_activated);
         this.conversation_list.item_marked.connect(on_conversation_item_marked);
+        this.conversation_list.marked_conversations_evaporated.connect(on_selection_mode_disabled);
         this.conversation_list.selection_mode_enabled.connect(on_selection_mode_enabled);
         this.conversation_list.visible_conversations_changed.connect(on_visible_conversations_changed);
 
@@ -345,11 +346,47 @@ public class MainWindow : Gtk.ApplicationWindow {
         return (SimpleAction) lookup_action(name);
     }
 
+    private void show_conversation(Geary.App.Conversation? target) {
+        Geary.App.Conversation? current = null;
+        ConversationListBox? listbox = this.conversation_viewer.current_list;
+        if (listbox != null) {
+            current = listbox.conversation;
+        }
+        SimpleAction find_action = get_action(
+            GearyController.ACTION_FIND_IN_CONVERSATION
+        );
+        if (target != null) {
+            if (target != current &&
+                !this.conversation_viewer.is_composer_visible) {
+                this.conversation_viewer.load_conversation.begin(
+                    target,
+                    this.application.config,
+                    this.application.controller.avatar_session,
+                    (obj, ret) => {
+                        try {
+                            this.conversation_viewer.load_conversation.end(ret);
+                            this.application.controller.enable_message_buttons(true);
+                            find_action.set_enabled(true);
+                        } catch (Error err) {
+                            debug("Unable to load conversation: %s",
+                                  err.message);
+                        }
+                    }
+                );
+            }
+        } else {
+            find_action.set_enabled(false);
+            this.application.controller.enable_message_buttons(false);
+            this.conversation_viewer.show_none_selected();
+        }
+    }
+
     private void set_selection_mode_enabled(bool enabled) {
         get_action(ACTION_SELECTION_MODE_DISABLE).set_enabled(enabled);
         get_action(ACTION_SELECTION_MODE_ENABLE).set_enabled(!enabled);
         this.main_toolbar.set_selection_mode_enabled(enabled);
         this.conversation_list.set_selection_mode_enabled(enabled);
+        this.conversation_viewer.show_none_selected();
     }
 
     private void on_conversation_monitor_changed() {
@@ -412,6 +449,7 @@ public class MainWindow : Gtk.ApplicationWindow {
         this.current_folder = folder;
 
         update_headerbar();
+        set_selection_mode_enabled(false);
     }
 
     private void on_account_available(Geary.AccountInformation account) {
@@ -464,38 +502,7 @@ public class MainWindow : Gtk.ApplicationWindow {
     }
 
     private void on_conversation_selection_changed(Geary.App.Conversation? selection) {
-        Geary.App.Conversation? current = null;
-        ConversationListBox? listbox = this.conversation_viewer.current_list;
-        if (listbox != null) {
-            current = listbox.conversation;
-        }
-        SimpleAction find_action = get_action(
-            GearyController.ACTION_FIND_IN_CONVERSATION
-        );
-        if (selection != null) {
-            if (selection != current &&
-                !this.conversation_viewer.is_composer_visible) {
-                this.conversation_viewer.load_conversation.begin(
-                    selection,
-                    this.application.config,
-                    this.application.controller.avatar_session,
-                    (obj, ret) => {
-                        try {
-                            this.conversation_viewer.load_conversation.end(ret);
-                            this.application.controller.enable_message_buttons(true);
-                            find_action.set_enabled(true);
-                        } catch (Error err) {
-                            debug("Unable to load conversation: %s",
-                                  err.message);
-                        }
-                    }
-                );
-            }
-        } else {
-            find_action.set_enabled(false);
-            this.application.controller.enable_message_buttons(false);
-            this.conversation_viewer.show_none_selected();
-        }
+        show_conversation(selection);
     }
 
     private void on_conversation_activated(Geary.App.Conversation activated) {
@@ -513,6 +520,11 @@ public class MainWindow : Gtk.ApplicationWindow {
     }
 
     private void on_conversation_item_marked(ConversationListItem item, bool marked) {
+        if (marked) {
+            show_conversation(item.conversation);
+        } else {
+            this.conversation_viewer.show_none_selected();
+        }
         this.main_toolbar.update_selection_count(
             this.conversation_list.get_marked_items().size
         );

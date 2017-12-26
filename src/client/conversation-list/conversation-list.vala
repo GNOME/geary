@@ -69,6 +69,11 @@ public class ConversationList : Gtk.ListBox {
     public signal void selection_mode_enabled();
 
     /**
+     * Fired when all marked conversations were removed from the folder.
+     */
+    public signal void marked_conversations_evaporated();
+
+    /**
      * Fired when a list item was marked as selected in selection mode.
      */
     public signal void item_marked(ConversationListItem item, bool marked);
@@ -238,7 +243,9 @@ public class ConversationList : Gtk.ListBox {
     }
 
     internal void set_selection_mode_enabled(bool enabled) {
-        if (!enabled) {
+        if (enabled) {
+            freeze_selection();
+        } else {
             // Call to_array here to get a copy of the value
             // collection, since unmarking the items will cause the
             // underlying map to be modified
@@ -246,6 +253,7 @@ public class ConversationList : Gtk.ListBox {
                 item.set_marked(false);
             }
             this.marked.clear();
+            thaw_selection();
         }
         this.is_selection_mode_enabled = enabled;
     }
@@ -405,6 +413,9 @@ public class ConversationList : Gtk.ListBox {
         if (this.is_selection_mode_enabled) {
             foreach (Geary.App.Conversation convo in removed) {
                 this.marked.remove(convo);
+            }
+            if (this.marked.is_empty) {
+                marked_conversations_evaporated();
             }
         }
     }
