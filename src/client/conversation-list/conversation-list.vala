@@ -230,9 +230,7 @@ public class ConversationList : Gtk.ListBox {
                 ConversationListItem? clicked =
                     get_row_at_y((int) event.y)  as ConversationListItem;
                 if (clicked != null) {
-                    ConversationListItem? selected =
-                        get_selected_row() as ConversationListItem;
-
+                    ConversationListItem? selected = get_selected_item();
                     if (selected == null) {
                         selected = get_item_at_index(0);
                     }
@@ -262,8 +260,7 @@ public class ConversationList : Gtk.ListBox {
             if (this.is_selection_mode_enabled) {
                 // Are (now) currently in selection mode, so
                 // toggle the row
-                ConversationListItem? row =
-                    get_selected_row() as ConversationListItem;
+                ConversationListItem? row = get_selected_item();
                 if (row != null) {
                     row.toggle_marked();
                 }
@@ -296,6 +293,10 @@ public class ConversationList : Gtk.ListBox {
 
     private inline ConversationListItem? get_item_at_index(int index) {
         return get_row_at_index(index) as ConversationListItem;
+    }
+
+    private inline ConversationListItem? get_selected_item() {
+        return get_selected_row() as ConversationListItem;
     }
 
     private ConversationListItem? restore_selection() {
