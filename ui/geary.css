@@ -68,8 +68,6 @@ row.geary-folder-popover-list-row > label {
   color: @theme_text_color;
 }
 
-/* ConversationListItem */
-
 /* ConversationList */
 
 .geary-conversation-list-item {
@@ -122,6 +120,16 @@ row.geary-folder-popover-list-row > label {
 
 .geary-conversation-list-item .geary-mark-container image:dir(rtl) {
   padding-right: 6px;
+}
+
+button.geary-compact {
+  margin: 0 3px;
+  padding: 0 3px;
+}
+
+button.geary-compact > image {
+  margin: 0;
+  padding: 0;
 }
 
 /* ConversationListBox */
