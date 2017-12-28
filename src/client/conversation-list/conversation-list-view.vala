@@ -16,7 +16,7 @@ public class ConversationListView : Gtk.TreeView {
     // scroll adjustment seen at the call to load_more().
     private double last_upper = -1.0;
     private bool reset_adjustment = false;
-    private Geary.App.ConversationMonitor? conversation_monitor;
+    //private Geary.App.ConversationMonitor? conversation_monitor;
     private Gee.Set<Geary.App.Conversation>? current_visible_conversations = null;
     private Geary.Scheduler.Scheduled? scheduled_update_visible_conversations = null;
     private Gee.Set<Geary.App.Conversation> selected = new Gee.HashSet<Geary.App.Conversation>();
@@ -61,8 +61,8 @@ public class ConversationListView : Gtk.TreeView {
         
         GearyApplication.instance.config.settings.changed[Configuration.DISPLAY_PREVIEW_KEY].connect(
             on_display_preview_changed);
-        GearyApplication.instance.controller.notify[GearyController.PROP_CURRENT_CONVERSATION].
-            connect(on_conversation_monitor_changed);
+        // GearyApplication.instance.controller.notify[GearyController.PROP_CURRENT_CONVERSATION].
+        //     connect(on_conversation_monitor_changed);
         
         // Watch for mouse events.
         motion_notify_event.connect(on_motion_notify_event);
@@ -134,47 +134,47 @@ public class ConversationListView : Gtk.TreeView {
         }
     }
 
-    private void on_conversation_monitor_changed() {
-        if (conversation_monitor != null) {
-            conversation_monitor.scan_started.disconnect(on_scan_started);
-            conversation_monitor.scan_completed.disconnect(on_scan_completed);
-            conversation_monitor.seed_completed.disconnect(on_seed_completed);
-        }
+    // private void on_conversation_monitor_changed() {
+    //     if (conversation_monitor != null) {
+    //         conversation_monitor.scan_started.disconnect(on_scan_started);
+    //         conversation_monitor.scan_completed.disconnect(on_scan_completed);
+    //         conversation_monitor.seed_completed.disconnect(on_seed_completed);
+    //     }
         
-        conversation_monitor = GearyApplication.instance.controller.current_conversations;
+    //     conversation_monitor = GearyApplication.instance.controller.current_conversations;
         
-        if (conversation_monitor != null) {
-            conversation_monitor.scan_started.connect(on_scan_started);
-            conversation_monitor.scan_completed.connect(on_scan_completed);
-            conversation_monitor.seed_completed.connect(on_seed_completed);
-        }
-    }
+    //     if (conversation_monitor != null) {
+    //         conversation_monitor.scan_started.connect(on_scan_started);
+    //         conversation_monitor.scan_completed.connect(on_scan_completed);
+    //         conversation_monitor.seed_completed.connect(on_seed_completed);
+    //     }
+    // }
     
-    private void on_scan_started() {
-        enable_load_more = false;
-    }
+    // private void on_scan_started() {
+    //     enable_load_more = false;
+    // }
     
-    private void on_scan_completed() {
-        enable_load_more = true;
+    // private void on_scan_completed() {
+    //     enable_load_more = true;
 
-        // Select the first conversation, if autoselect is enabled,
-        // nothing has been selected yet and we're not composing. Do
-        // this here instead of in on_seed_completed since we want to
-        // to select the first row on folder change as soon as
-        // possible.
-        if (GearyApplication.instance.config.autoselect &&
-            get_selection().count_selected_rows() == 0 &&
-            !GearyApplication.instance.controller.any_inline_composers()) {
-            set_cursor(new Gtk.TreePath.from_indices(0, -1), null, false);
-        }
-    }
+    //     // Select the first conversation, if autoselect is enabled,
+    //     // nothing has been selected yet and we're not composing. Do
+    //     // this here instead of in on_seed_completed since we want to
+    //     // to select the first row on folder change as soon as
+    //     // possible.
+    //     if (GearyApplication.instance.config.autoselect &&
+    //         get_selection().count_selected_rows() == 0 &&
+    //         !GearyApplication.instance.controller.any_inline_composers()) {
+    //         set_cursor(new Gtk.TreePath.from_indices(0, -1), null, false);
+    //     }
+    // }
 
-    private void on_seed_completed() {
-        if (!GearyApplication.instance.config.autoselect) {
-            // Notify that no conversations will be selected
-            conversations_selected(this.selected.read_only_view);
-        }
-    }
+    // private void on_seed_completed() {
+    //     if (!GearyApplication.instance.config.autoselect) {
+    //         // Notify that no conversations will be selected
+    //         conversations_selected(this.selected.read_only_view);
+    //     }
+    // }
 
     private void on_conversations_added(bool start) {
         Gtk.Adjustment? adjustment = get_adjustment();

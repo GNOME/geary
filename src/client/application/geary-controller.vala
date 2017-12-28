@@ -47,11 +47,6 @@ public class GearyController : Geary.BaseObject {
     public const string ACTION_TOGGLE_SEARCH = "toggle-search";
     public const string ACTION_TOGGLE_FIND = "toggle-find";
 
-    // Properties
-    public const string PROP_CURRENT_CONVERSATION ="current-conversations";
-
-    internal const int CONVERSATION_PAGE_SIZE = 50;
-
     private const int SELECT_FOLDER_TIMEOUT_USEC = 100 * 1000;
 
     private const string PROP_ATTEMPT_OPEN_ACCOUNT = "attempt-open-account";
@@ -59,11 +54,9 @@ public class GearyController : Geary.BaseObject {
     public weak GearyApplication application { get; private set; } // circular ref
 
     public MainWindow main_window { get; private set; }
-    
-    public Geary.App.ConversationMonitor? current_conversations { get; private set; default = null; }
-    
+
     public AutostartManager? autostart_manager { get; private set; default = null; }
-    
+
     public LoginDialog? login_dialog { get; private set; default = null; }
 
     public Soup.Session? avatar_session { get; private set; default = null; }
@@ -301,30 +294,16 @@ public class GearyController : Geary.BaseObject {
             on_conversation_view_added
         );
 
-        // hide window while shutting down, as this can take a few seconds under certain conditions
-        main_window.hide();
-        
+        // Ensure the main window is closed if not already doing so
+        // that its conversation monitor stops accessing the network.
+        if (!this.main_window.is_closing) {
+            main_window.close();
+        }
+
         // drop the Revokable, which will commit it if necessary
         save_revokable(null, null);
 
         this.autostart_manager = null;
-
-        // Close the ConversationMonitor
-        if (current_conversations != null) {
-            debug("Stopping conversation monitor for %s...",
-                  this.current_conversations.base_folder.to_string());
-            try {
-                yield this.current_conversations.stop_monitoring_async(null);
-            } catch (Error err) {
-                debug(
-                    "Error closing conversation monitor %s at shutdown: %s",
-                    this.current_conversations.base_folder.to_string(),
-                    err.message
-                );
-            } finally {
-                this.current_conversations = null;
-            }
-        }
 
         // Close all inboxes. Launch these in parallel so we're not
         // waiting time waiting for each one to close. The account
@@ -1375,20 +1354,9 @@ public class GearyController : Geary.BaseObject {
         // mutex lock is a bandaid solution to make the function safe to
         // reenter.
         int mutex_token = yield select_folder_mutex.claim_async(cancellable_folder);
-        
-        bool current_is_inbox = inboxes.values.contains(current_folder);
-        
-        Cancellable? conversation_cancellable = (current_is_inbox ?
-            inbox_cancellables.get(folder.account) : cancellable_folder);
-        
+
         // clear Revokable, as Undo is only available while a folder is selected
         save_revokable(null, null);
-        
-        // stop monitoring for conversations and close the folder
-        if (current_conversations != null) {
-            yield current_conversations.stop_monitoring_async(null);
-            current_conversations = null;
-        }
         
         // re-enable copy/move to the last selected folder
         if (current_folder != null) {
@@ -1434,21 +1402,11 @@ public class GearyController : Geary.BaseObject {
             !(current_folder is Geary.FolderSupport.Remove)
         );
 
-        current_conversations = new Geary.App.ConversationMonitor(
-            current_folder,
-            Geary.Folder.OpenFlags.NO_DELAY,
-            ConversationListModel.REQUIRED_FIELDS,
-            CONVERSATION_PAGE_SIZE * 2 // load double up front when not scrolling
-        );
-
         if (inboxes.values.contains(current_folder)) {
             // Inbox selected, clear new messages if visible
             clear_new_messages("do_select_folder (inbox)", null);
         }
 
-        if (!current_conversations.is_monitoring)
-            yield current_conversations.start_monitoring_async(conversation_cancellable);
-        
         select_folder_mutex.release(ref mutex_token);
         
         debug("Switched to %s", folder.to_string());
@@ -1459,11 +1417,11 @@ public class GearyController : Geary.BaseObject {
         
         if (folder == null || email == null || !can_switch_conversation_view())
             return;
-        
-        main_window.folder_list.select_folder(folder);
-        Geary.App.Conversation? conversation = current_conversations.get_conversation_for_email(email.id);
+
+        this.main_window.folder_list.select_folder(folder);
+        Geary.App.Conversation? conversation = this.main_window.current_conversations.get_conversation_for_email(email.id);
         if (conversation != null)
-            main_window.conversation_list.select_conversation(conversation);
+            this.main_window.conversation_list.select_conversation(conversation);
     }
 
     private void on_indicator_activated_application(uint32 timestamp) {

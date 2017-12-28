@@ -23,6 +23,8 @@ public class MainWindow : Gtk.ApplicationWindow {
     public const string ACTION_SELECTION_MODE_DISABLE = "selection-mode-disable";
     public const string ACTION_SELECTION_MODE_ENABLE = "selection-mode-enable";
 
+    internal const int CONVERSATION_PAGE_SIZE = 50;
+
     private const int STATUS_BAR_HEIGHT = 18;
 
     private const ActionEntry[] action_entries = {
@@ -51,6 +53,9 @@ public class MainWindow : Gtk.ApplicationWindow {
     public int window_height { get; set; }
     public bool window_maximized { get; set; }
 
+    /** Determines if the window is shutting down. */
+    public bool is_closing { get; private set; default = false; }
+
     // Widget descendants
     public FolderList.Tree folder_list { get; private set; default = new FolderList.Tree(); }
     public MainToolbar main_toolbar { get; private set; }
@@ -60,12 +65,13 @@ public class MainWindow : Gtk.ApplicationWindow {
     public StatusBar status_bar { get; private set; default = new StatusBar(); }
 
     public Geary.Folder? current_folder { get; private set; default = null; }
+    public Geary.App.ConversationMonitor? current_conversations { get; private set; default = null; }
+    private Cancellable load_cancellable = new Cancellable();
 
     private ConversationActionBar conversation_list_actions =
         new ConversationActionBar();
     private Geary.AggregateProgressMonitor progress_monitor =
         new Geary.AggregateProgressMonitor();
-    private Geary.ProgressMonitor? folder_progress = null;
 
     private MonitoredSpinner spinner = new MonitoredSpinner();
 
@@ -117,8 +123,6 @@ public class MainWindow : Gtk.ApplicationWindow {
         load_config(application.config);
         restore_saved_window_state();
 
-        application.controller.notify[GearyController.PROP_CURRENT_CONVERSATION]
-            .connect(on_conversation_monitor_changed);
         application.controller.folder_selected.connect(on_folder_selected);
         this.application.engine.account_available.connect(on_account_available);
         this.application.engine.account_unavailable.connect(on_account_unavailable);
@@ -424,8 +428,74 @@ public class MainWindow : Gtk.ApplicationWindow {
         }
     }
 
-    private inline SimpleAction get_action(string name) {
-        return (SimpleAction) lookup_action(name);
+    private void update_folder(Geary.Folder folder) {
+        debug("Loading new folder: %s...", folder.to_string());
+        this.conversation_list.freeze_selection();
+
+        if (this.current_folder != null) {
+            this.progress_monitor.remove(this.current_folder.opening_monitor);
+            this.progress_monitor.remove(this.current_conversations.progress_monitor);
+            this.progress_monitor.remove(this.conversation_list.model.previews.progress);
+
+            this.current_folder.properties.notify.disconnect(update_headerbar);
+            this.stop_conversation_monitor.begin();
+        }
+
+        folder.properties.notify.connect(update_headerbar);
+        this.current_folder = folder;
+
+        // Set up a new conversation monitor for the folder
+        Geary.App.ConversationMonitor monitor = new Geary.App.ConversationMonitor(
+            folder,
+            Geary.Folder.OpenFlags.NO_DELAY,
+            ConversationListModel.REQUIRED_FIELDS,
+            CONVERSATION_PAGE_SIZE * 2 // load double up front when not scrolling
+        );
+        monitor.scan_error.connect(on_scan_error);
+        monitor.seed_completed.connect(on_seed_completed);
+        monitor.seed_completed.connect(on_initial_conversation_load);
+        monitor.seed_completed.connect(on_conversation_count_changed);
+        monitor.scan_completed.connect(on_conversation_count_changed);
+        monitor.conversations_added.connect(on_conversation_count_changed);
+        monitor.conversations_removed.connect(on_conversation_count_changed);
+        monitor.email_flags_changed.connect(on_conversation_flags_changed);
+
+        this.current_conversations = monitor;
+        this.conversation_list.bind_model(monitor);
+
+        // Update the UI
+        this.conversation_list_actions.set_account(folder.account);
+        this.conversation_list_actions.update_location(this.current_folder);
+        update_headerbar();
+        set_selection_mode_enabled(false);
+
+        this.progress_monitor.add(folder.opening_monitor);
+        this.progress_monitor.add(monitor.progress_monitor);
+        this.progress_monitor.add(this.conversation_list.model.previews.progress);
+
+        // Finally, start the folder loading
+        this.load_cancellable = new Cancellable();
+        monitor.start_monitoring_async.begin(this.load_cancellable);
+        this.conversation_list.thaw_selection();
+    }
+
+    private async void stop_conversation_monitor() {
+        Geary.App.ConversationMonitor old_monitor = this.current_conversations;
+        if (old_monitor != null) {
+            this.current_conversations = null;
+
+            // Cancel any pending operations, then shut it down
+            this.load_cancellable.cancel();
+            try {
+                yield old_monitor.stop_monitoring_async(null);
+            } catch (Error err) {
+                debug(
+                    "Error closing conversation monitor %s on close: %s",
+                    old_monitor.base_folder.to_string(),
+                    err.message
+                );
+            }
+        }
     }
 
     private void show_conversation(Geary.App.Conversation? target) {
@@ -478,72 +548,14 @@ public class MainWindow : Gtk.ApplicationWindow {
               err.message);
     }
 
-    private void on_conversation_monitor_changed() {
-        this.conversation_list.freeze_selection();
-        ConversationListModel? old_model = this.conversation_list.model;
-        if (old_model != null) {
-            this.progress_monitor.remove(old_model.monitor.progress_monitor);
-            this.progress_monitor.remove(old_model.previews.progress);
-
-            Geary.App.ConversationMonitor? old_monitor = old_model.monitor;
-            old_monitor.scan_error.disconnect(on_scan_error);
-            old_monitor.seed_completed.disconnect(on_seed_completed);
-            old_monitor.seed_completed.disconnect(on_conversation_count_changed);
-            old_monitor.seed_completed.disconnect(on_initial_conversation_load);
-            old_monitor.scan_completed.disconnect(on_conversation_count_changed);
-            old_monitor.conversations_added.disconnect(on_conversation_count_changed);
-            old_monitor.conversations_removed.disconnect(on_conversation_count_changed);
-            old_monitor.email_flags_changed.disconnect(on_conversation_flags_changed);
-        }
-
-        Geary.App.ConversationMonitor? new_monitor =
-            this.application.controller.current_conversations;
-        if (new_monitor != null) {
-            this.conversation_list.bind_model(new_monitor);
-            ConversationListModel new_model = this.conversation_list.model;
-
-            this.progress_monitor.add(new_model.monitor.progress_monitor);
-            this.progress_monitor.add(new_model.previews.progress);
-
-            new_monitor.scan_error.connect(on_scan_error);
-            new_monitor.seed_completed.connect(on_seed_completed);
-            new_monitor.seed_completed.connect(on_conversation_count_changed);
-            new_monitor.seed_completed.connect(on_initial_conversation_load);
-            new_monitor.scan_completed.connect(on_conversation_count_changed);
-            new_monitor.conversations_added.connect(on_conversation_count_changed);
-            new_monitor.conversations_removed.connect(on_conversation_count_changed);
-            new_monitor.email_flags_changed.connect(on_conversation_flags_changed);
-        }
-        this.conversation_list.thaw_selection();
+    private inline SimpleAction get_action(string name) {
+        return (SimpleAction) lookup_action(name);
     }
 
     private void on_folder_selected(Geary.Folder? folder) {
-        if (this.folder_progress != null) {
-            this.progress_monitor.remove(this.folder_progress);
-            this.folder_progress = null;
-        }
-
         if (folder != null) {
-            this.folder_progress = folder.opening_monitor;
-            this.progress_monitor.add(this.folder_progress);
+            update_folder(folder);
         }
-
-        // disconnect from old folder
-        if (this.current_folder != null)
-            this.current_folder.properties.notify.disconnect(update_headerbar);
-
-        // connect to new folder
-        if (folder != null) {
-            folder.properties.notify.connect(update_headerbar);
-            this.conversation_list_actions.set_account(folder.account);
-            this.conversation_list_actions.update_location(this.current_folder);
-        }
-
-        // swap it in
-        this.current_folder = folder;
-
-        update_headerbar();
-        set_selection_mode_enabled(false);
     }
 
     private void on_account_available(Geary.AccountInformation account) {
@@ -639,7 +651,9 @@ public class MainWindow : Gtk.ApplicationWindow {
 
     private void on_load_more() {
         debug("on_load_more");
-        this.application.controller.current_conversations.min_window_count += GearyController.CONVERSATION_PAGE_SIZE;
+        if (this.current_conversations != null) {
+            this.current_conversations.min_window_count += CONVERSATION_PAGE_SIZE;
+        }
     }
 
     private void on_scan_error(Error err) {
@@ -683,6 +697,12 @@ public class MainWindow : Gtk.ApplicationWindow {
                 hide();
             }
         } else {
+            set_sensitive(false);
+            this.is_closing = true;
+            this.stop_conversation_monitor.begin((obj, res) => {
+                    this.stop_conversation_monitor.end(res);
+                    hide();
+                });
             this.application.exit();
         }
         return Gdk.EVENT_STOP;
