@@ -11,14 +11,19 @@ public class MainWindow : Gtk.ApplicationWindow {
 
 
     public const string ACTION_ARCHIVE = "conversation-archive";
+    public const string ACTION_COPY = "conversation-copy";
     public const string ACTION_DELETE = "conversation-delete";
     public const string ACTION_JUNK = "conversation-junk";
     public const string ACTION_MARK_READ = "conversation-mark-read";
     public const string ACTION_MARK_STARRED = "conversation-mark-starred";
     public const string ACTION_MARK_UNREAD = "conversation-mark-unread";
     public const string ACTION_MARK_UNSTARRED = "conversation-mark-unstarred";
+    public const string ACTION_MOVE = "conversation-move";
     public const string ACTION_RESTORE = "conversation-restore";
     public const string ACTION_TRASH = "conversation-trash";
+
+    public const string ACTION_SHOW_COPY = "show-copy";
+    public const string ACTION_SHOW_MOVE = "show-move";
 
     public const string ACTION_SELECTION_MODE_DISABLE = "selection-mode-disable";
     public const string ACTION_SELECTION_MODE_ENABLE = "selection-mode-enable";
@@ -29,14 +34,19 @@ public class MainWindow : Gtk.ApplicationWindow {
 
     private const ActionEntry[] action_entries = {
         { ACTION_ARCHIVE,        on_conversation_archive        },
+        { ACTION_COPY,           on_conversation_copy, "as"     },
         { ACTION_DELETE,         on_conversation_delete         },
         { ACTION_JUNK,           on_conversation_junk           },
         { ACTION_MARK_READ,      on_conversation_mark_read      },
         { ACTION_MARK_STARRED,   on_conversation_mark_starred   },
         { ACTION_MARK_UNREAD,    on_conversation_mark_unread    },
         { ACTION_MARK_UNSTARRED, on_conversation_mark_unstarred },
+        { ACTION_MOVE,           on_conversation_move, "as"     },
         { ACTION_RESTORE,        on_conversation_restore        },
         { ACTION_TRASH,          on_conversation_trash          },
+
+        { ACTION_SHOW_COPY },
+        { ACTION_SHOW_MOVE },
 
         { ACTION_SELECTION_MODE_DISABLE, on_selection_mode_disabled },
         { ACTION_SELECTION_MODE_ENABLE,  on_selection_mode_enabled  }
@@ -118,6 +128,8 @@ public class MainWindow : Gtk.ApplicationWindow {
         this.conversation_list.visible_conversations_changed.connect(on_visible_conversations_changed);
         this.conversation_list.load_more.connect(on_load_more);
 
+        this.conversation_list_actions.copy_folder_menu.folder_selected.connect(on_copy_folder);
+        this.conversation_list_actions.move_folder_menu.folder_selected.connect(on_move_folder);
         this.conversation_list_grid.add(this.conversation_list_actions);
 
         load_config(application.config);
@@ -541,15 +553,31 @@ public class MainWindow : Gtk.ApplicationWindow {
         this.conversation_viewer.show_none_selected();
     }
 
-    private void report_problem(Action action, Variant? param, Error err) {
+    private void report_problem(Action action, Variant? param, Error? err = null) {
         // XXX
         debug("Client problem reported: %s: %s",
               action.get_name(),
-              err.message);
+              err != null ? err.message : "no error reported");
     }
 
     private inline SimpleAction get_action(string name) {
         return (SimpleAction) lookup_action(name);
+    }
+
+    private Geary.FolderPath? variant_to_path(Variant? strv) {
+        Geary.FolderPath? path = null;
+        if (this.current_folder != null &&
+            strv != null &&
+            strv.get_type_string() == "as") {
+            path = this.current_folder.account.new_folder_path(
+                new Gee.ArrayList<string>.wrap(strv.get_strv())
+            );
+        }
+        return path;
+    }
+
+    private Variant path_to_variant(Geary.FolderPath path) {
+        return new Variant.strv(path.as_list().to_array());
     }
 
     private void on_folder_selected(Geary.Folder? folder) {
@@ -730,17 +758,36 @@ public class MainWindow : Gtk.ApplicationWindow {
     }
 
     private void on_conversation_archive(Action action, Variant? param) {
-        this.application.controller.move_conversations.begin(
+        this.application.controller.move_conversations_special.begin(
             this.conversation_list.get_highlighted_conversations(),
             Geary.SpecialFolderType.ARCHIVE,
             (obj, ret) => {
                 try {
-                    this.application.controller.move_conversations.end(ret);
+                    this.application.controller.move_conversations_special.end(ret);
                 } catch (Error err) {
                     report_problem(action, param, err);
                 }
             }
         );
+    }
+
+    private void on_conversation_copy(Action action, Variant? param) {
+        Geary.FolderPath? destination = variant_to_path(param);
+        if (path != null) {
+            this.application.controller.copy_conversations.begin(
+                this.conversation_list.get_highlighted_conversations(),
+                destination,
+                (obj, ret) => {
+                    try {
+                        this.application.controller.copy_conversations.end(ret);
+                    } catch (Error err) {
+                        report_problem(action, param, err);
+                    }
+                }
+            );
+        } else {
+            report_problem(action, param);
+        }
     }
 
     private void on_conversation_delete(Action action, Variant? param) {
@@ -759,12 +806,12 @@ public class MainWindow : Gtk.ApplicationWindow {
     }
 
     private void on_conversation_junk(Action action, Variant? param) {
-        this.application.controller.move_conversations.begin(
+        this.application.controller.move_conversations_special.begin(
             this.conversation_list.get_highlighted_conversations(),
             Geary.SpecialFolderType.SPAM,
             (obj, ret) => {
                 try {
-                    this.application.controller.move_conversations.end(ret);
+                    this.application.controller.move_conversations_special.end(ret);
                 } catch (Error err) {
                     report_problem(action, param, err);
                 }
@@ -862,6 +909,25 @@ public class MainWindow : Gtk.ApplicationWindow {
         );
     }
 
+    private void on_conversation_move(Action action, Variant? param) {
+        Geary.FolderPath? destination = variant_to_path(param);
+        if (path != null) {
+            this.application.controller.move_conversations.begin(
+                this.conversation_list.get_highlighted_conversations(),
+                destination,
+                (obj, ret) => {
+                    try {
+                        this.application.controller.move_conversations.end(ret);
+                    } catch (Error err) {
+                        report_problem(action, param, err);
+                    }
+                }
+            );
+        } else {
+            report_problem(action, param);
+        }
+    }
+
     private void on_conversation_restore(Action action, Variant? param) {
         this.application.controller.restore_conversations.begin(
             this.conversation_list.get_highlighted_conversations(),
@@ -876,12 +942,12 @@ public class MainWindow : Gtk.ApplicationWindow {
     }
 
     private void on_conversation_trash(Action action, Variant? param) {
-        this.application.controller.move_conversations.begin(
+        this.application.controller.move_conversations_special.begin(
             this.conversation_list.get_highlighted_conversations(),
             Geary.SpecialFolderType.TRASH,
             (obj, ret) => {
                 try {
-                    this.application.controller.move_conversations.end(ret);
+                    this.application.controller.move_conversations_special.end(ret);
                 } catch (Error err) {
                     report_problem(action, param, err);
                 }
@@ -889,6 +955,13 @@ public class MainWindow : Gtk.ApplicationWindow {
         );
     }
 
+    public void on_copy_folder(Geary.Folder target) {
+        get_action(ACTION_COPY).activate(path_to_variant(target.path));
+    }
+
+    public void on_move_folder(Geary.Folder target) {
+        get_action(ACTION_MOVE).activate(path_to_variant(target.path));
+    }
 
     private void on_selection_mode_enabled() {
         set_selection_mode_enabled(true);

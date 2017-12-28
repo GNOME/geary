@@ -1154,8 +1154,25 @@ public class GearyController : Geary.BaseObject {
     /**
      * Moves a set of conversations to a special folder.
      */
-    internal async void move_conversations(Gee.Collection<Geary.App.Conversation> targets,
-                                           Geary.SpecialFolderType type)
+    internal async void copy_conversations(Gee.Collection<Geary.App.Conversation> targets,
+                                           Geary.FolderPath destination)
+        throws Error {
+        Gee.List<Geary.EmailIdentifier> ids = get_ids_in_folder(targets);
+        yield this.email_stores.get(this.current_account).copy_email_async(
+            ids, destination, this.cancellable_folder
+        );
+    }
+
+    /**
+     * Moves a set of conversations to a special folder.
+     *
+     * This does some extra work when moving conversations to specific
+     * special folders like archive and trash, and hence should be
+     * used in preference to {@link move_conversation} for special
+     * folders.
+     */
+    internal async void move_conversations_special(Gee.Collection<Geary.App.Conversation> targets,
+                                                   Geary.SpecialFolderType type)
         throws Error {
         Gee.List<Geary.EmailIdentifier> ids = get_ids_in_folder(targets);
         if (type == Geary.SpecialFolderType.ARCHIVE) {
@@ -1174,7 +1191,6 @@ public class GearyController : Geary.BaseObject {
                 _("Undo archive (Ctrl+Z)")
             );
         } else {
-            Geary.Folder dest = this.current_account.get_special_folder(type);
             Geary.FolderSupport.Move? movable =
                 this.current_folder as Geary.FolderSupport.Move;
             if (movable == null) {
@@ -1183,6 +1199,7 @@ public class GearyController : Geary.BaseObject {
                     this.current_folder.to_string()
                 );
             }
+            Geary.Folder dest = this.current_account.get_special_folder(type);
             string tooltip = "";
             switch (type) {
             case Geary.SpecialFolderType.INBOX:
@@ -1199,6 +1216,9 @@ public class GearyController : Geary.BaseObject {
                 break;
             }
             save_revokable(
+                // XXX really should be using
+                // EmailStore.move_email_async here, but it doesn't
+                // return a revokable :<
                 yield movable.move_email_async(
                     ids, dest.path, this.cancellable_folder
                 ),
@@ -1208,11 +1228,23 @@ public class GearyController : Geary.BaseObject {
     }
 
     /**
+     * Moves a set of conversations to a special folder.
+     */
+    internal async void move_conversations(Gee.Collection<Geary.App.Conversation> targets,
+                                           Geary.FolderPath destination)
+        throws Error {
+        Gee.List<Geary.EmailIdentifier> ids = get_ids_in_folder(targets);
+        yield this.email_stores.get(this.current_account).move_email_async(
+            ids, destination, this.cancellable_folder
+        );
+    }
+
+    /**
      * Restores a set of messages to their original location.
      */
     internal async void restore_conversations(Gee.Collection<Geary.App.Conversation> targets)
         throws Error {
-        yield move_conversations(targets, Geary.SpecialFolderType.INBOX);
+        yield move_conversations_special(targets, Geary.SpecialFolderType.INBOX);
     }
 
     /**

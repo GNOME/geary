@@ -161,6 +161,7 @@ src/engine/app/email-store/app-copy-operation.vala
 src/engine/app/email-store/app-fetch-operation.vala
 src/engine/app/email-store/app-list-operation.vala
 src/engine/app/email-store/app-mark-operation.vala
+src/engine/app/email-store/app-move-operation.vala
 src/engine/common/common-message-data.vala
 src/engine/db/db-connection.vala
 src/engine/db/db-context.vala
@@ -404,6 +405,7 @@ ui/composer-headerbar.ui
 ui/composer-link-popover.ui
 ui/composer-menus.ui
 ui/composer-widget.ui
+ui/conversation-action-bar.ui
 ui/conversation-email.ui
 ui/conversation-email-attachment-view.ui
 ui/conversation-email-menus.ui

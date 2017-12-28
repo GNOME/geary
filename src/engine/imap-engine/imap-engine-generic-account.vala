@@ -367,10 +367,20 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         Gee.HashSet<Geary.Folder> all_folders = new Gee.HashSet<Geary.Folder>();
         all_folders.add_all(folder_map.values);
         all_folders.add_all(local_only.values);
-        
+
         return all_folders;
     }
-    
+
+    public override FolderPath new_folder_path(Gee.List<string> name_list) {
+        Gee.Iterator<string> names = name_list.iterator();
+        names.next();
+        Geary.FolderPath path = new Imap.FolderRoot(names.get());
+        while (names.next()) {
+            path = path.get_child(names.get());
+        }
+        return path;
+    }
+
     private void reschedule_unseen_update(Geary.Folder folder) {
         if (!folder_map.has_key(folder.path))
             return;

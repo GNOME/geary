@@ -127,22 +127,6 @@ public abstract class Geary.Account : BaseObject {
     }
 
     /**
-     * A utility method to sort a Gee.Collection of {@link Folder}s by their {@link FolderPath}s
-     * to ensure they comport with {@link folders_available_unavailable} and
-     * {@link folders_added_removed} signals' contracts.
-     */
-    protected Gee.List<Geary.Folder> sort_by_path(Gee.Collection<Geary.Folder> folders) {
-        Gee.TreeSet<Geary.Folder> sorted = new Gee.TreeSet<Geary.Folder>(folder_path_comparator);
-        sorted.add_all(folders);
-        
-        return Collection.to_array_list<Geary.Folder>(sorted);
-    }
-    
-    private int folder_path_comparator(Geary.Folder a, Geary.Folder b) {
-        return a.path.compare_to(b.path);
-    }
-    
-    /**
      * Opens the {@link Account} and makes it and its {@link Folder}s available for use.
      *
      * @throws EngineError.CORRUPT if the local store is corrupt or unusable
@@ -223,7 +207,19 @@ public abstract class Geary.Account : BaseObject {
      * list_matching_folders().
      */
     public abstract Gee.Collection<Geary.Folder> list_folders() throws Error;
-    
+
+    /**
+     * Returns a path for a list of folder names.
+     *
+     * This is useful for converting a string representation of a
+     * folder path back into an actual instance of a folder path. This
+     * does not guarantee that the folder represented by the path will
+     * exist.
+     *
+     * {@see FolderPath.as_list}
+     */
+    public abstract FolderPath new_folder_path(Gee.List<string> name_list);
+
     /**
      * Gets a perpetually update-to-date collection of autocompletion contacts.
      */
@@ -432,6 +428,22 @@ public abstract class Geary.Account : BaseObject {
     /** Fires a {@link report_problem}} signal for a service for this account. */
     protected virtual void notify_service_problem(ProblemType type, Service service_type, Error? err) {
         report_problem(new ServiceProblemReport(type, this.information, service_type, err));
+    }
+
+    /**
+     * A utility method to sort a Gee.Collection of {@link Folder}s by their {@link FolderPath}s
+     * to ensure they comport with {@link folders_available_unavailable} and
+     * {@link folders_added_removed} signals' contracts.
+     */
+    protected Gee.List<Geary.Folder> sort_by_path(Gee.Collection<Geary.Folder> folders) {
+        Gee.TreeSet<Geary.Folder> sorted = new Gee.TreeSet<Geary.Folder>(folder_path_comparator);
+        sorted.add_all(folders);
+
+        return Collection.to_array_list<Geary.Folder>(sorted);
+    }
+
+    private int folder_path_comparator(Geary.Folder a, Geary.Folder b) {
+        return a.path.compare_to(b.path);
     }
 
 }

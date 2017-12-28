@@ -11,13 +11,21 @@
 [GtkTemplate (ui = "/org/gnome/Geary/conversation-action-bar.ui")]
 public class ConversationActionBar : Gtk.ActionBar {
 
-    private Geary.Account? account = null;
+    /** The folder popover for copying/labelling conversations. */
+    public FolderPopover copy_folder_menu {
+        get; set; default = new FolderPopover();
+    }
+
+    /** The folder popover for moving conversations. */
+    public FolderPopover move_folder_menu {
+        get; set; default = new FolderPopover();
+    }
+
+    private Geary.Account? owner = null;
+    private Geary.Folder? location = null;
 
     private bool has_archive = false;
     private bool has_trash = false;
-
-    private FolderPopover copy_folder_menu = new FolderPopover();
-    private FolderPopover move_folder_menu = new FolderPopover();
 
     [GtkChild]
     private Gtk.Grid flag_actions;
@@ -57,16 +65,25 @@ public class ConversationActionBar : Gtk.ActionBar {
     }
 
     public void set_account(Geary.Account account) {
-        if (this.account != null) {
-            this.account.folders_special_type.disconnect(on_special_folder_changed);
+        if (this.owner != null) {
+            this.owner.folders_available_unavailable.disconnect(on_folders_changed);
+            this.owner.folders_special_type.disconnect(on_special_folder_changed);
         }
 
-        this.account = account;
-        this.account.folders_special_type.connect(on_special_folder_changed);
+        this.owner = account;
+        this.owner.folders_available_unavailable.connect(on_folders_changed);
+        this.owner.folders_special_type.connect(on_special_folder_changed);
         update_account();
     }
 
     public void update_location(Geary.Folder location) {
+        if (this.location != null) {
+            this.copy_folder_menu.enable_disable_folder(this.location, true);
+            this.move_folder_menu.enable_disable_folder(this.location, true);
+        }
+
+        this.location = location;
+
         Gtk.Button? primary_action = null;
         bool show_flag_actions = false;
         bool show_folder_actions = false;
@@ -136,7 +153,9 @@ public class ConversationActionBar : Gtk.ActionBar {
         this.archive_action.set_visible(primary_action == this.archive_action);
         this.restore_action.set_visible(primary_action == this.restore_action);
         this.copy_action.set_visible(show_folder_actions);
+        this.copy_folder_menu.enable_disable_folder(location, false);
         this.move_action.set_visible(show_folder_actions);
+        this.move_folder_menu.enable_disable_folder(location, false);
 
         if (show_trash && !this.has_trash) {
             show_trash = false;
@@ -153,17 +172,30 @@ public class ConversationActionBar : Gtk.ActionBar {
     private void update_account() {
         try {
             this.has_archive = (
-                this.account.get_special_folder(Geary.SpecialFolderType.ARCHIVE) != null
+                this.owner.get_special_folder(Geary.SpecialFolderType.ARCHIVE) != null
             );
         } catch (Error err) {
-            debug("Could not get Archive for account: %s", this.account.to_string());
+            debug("Could not get Archive for account: %s", this.owner.to_string());
         }
         try {
             this.has_trash = (
-                this.account.get_special_folder(Geary.SpecialFolderType.TRASH) != null
+                this.owner.get_special_folder(Geary.SpecialFolderType.TRASH) != null
             );
         } catch (Error err) {
-            debug("Could not get Trash for account: %s", this.account.to_string());
+            debug("Could not get Trash for account: %s", this.owner.to_string());
+        }
+
+        this.copy_folder_menu.clear();
+        this.move_folder_menu.clear();
+        try {
+            foreach (Geary.Folder f in this.owner.list_folders()) {
+                this.copy_folder_menu.add_folder(f);
+                this.move_folder_menu.add_folder(f);
+            }
+        } catch (Error err) {
+            debug("Could not list folders for %s: %s",
+                  this.owner.to_string(),
+                  err.message);
         }
     }
 
@@ -182,6 +214,27 @@ public class ConversationActionBar : Gtk.ActionBar {
 
         primary.set_visible(show_primary);
         secondary.set_visible(!show_primary);
+    }
+
+    private void on_folders_changed(Gee.List<Geary.Folder>? available,
+                                    Gee.List<Geary.Folder>? unavailable) {
+        if (available != null) {
+            foreach (Geary.Folder folder in available) {
+                if (!this.copy_folder_menu.has_folder(folder))
+                    this.copy_folder_menu.add_folder(folder);
+                if (!this.move_folder_menu.has_folder(folder))
+                    this.move_folder_menu.add_folder(folder);
+            }
+        }
+
+        if (unavailable != null) {
+            foreach (Geary.Folder folder in unavailable) {
+                if (this.copy_folder_menu.has_folder(folder))
+                    this.copy_folder_menu.remove_folder(folder);
+                if (this.move_folder_menu.has_folder(folder))
+                    this.move_folder_menu.remove_folder(folder);
+            }
+        }
     }
 
     private void on_special_folder_changed() {

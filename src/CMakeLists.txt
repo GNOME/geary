@@ -68,6 +68,7 @@ engine/app/email-store/app-copy-operation.vala
 engine/app/email-store/app-fetch-operation.vala
 engine/app/email-store/app-list-operation.vala
 engine/app/email-store/app-mark-operation.vala
+engine/app/email-store/app-move-operation.vala
 
 engine/common/common-message-data.vala
 
