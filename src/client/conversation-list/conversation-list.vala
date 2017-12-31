@@ -51,6 +51,7 @@ public class ConversationList : Gtk.ListBox {
     private Gee.Map<Geary.App.Conversation,ConversationListItem> marked =
         new Gee.HashMap<Geary.App.Conversation,ConversationListItem>();
     private ConversationListItem? last_marked = null;
+    private bool is_marking = false;
     private Gee.Set<Geary.App.Conversation>? visible_conversations = null;
     private Geary.Scheduler.Scheduled? update_visible_scheduled = null;
     private bool enable_load_more = true;
@@ -86,9 +87,10 @@ public class ConversationList : Gtk.ListBox {
     public signal void marked_conversations_evaporated();
 
     /**
-     * Fired when a list item was marked as selected in selection mode.
+     * Fired when list items are marked or unmarked in selection mode.
      */
-    public signal void item_marked(ConversationListItem item, bool marked);
+    public signal void items_marked(Gee.List<ConversationListItem> marked,
+                                    Gee.List<ConversationListItem> unmarked);
 
 
     public ConversationList(Configuration config) {
@@ -247,14 +249,26 @@ public class ConversationList : Gtk.ListBox {
                     } else {
                         anchor = last_marked;
                     }
+
+                    this.is_marking = true;
+                    Gee.List<ConversationListItem> marked =
+                        new Gee.LinkedList<ConversationListItem>();
+                    Gee.List<ConversationListItem> unmarked =
+                        Gee.List.empty<ConversationListItem>();
+
                     int index = int.min(clicked.get_index(), anchor.get_index());
                     int end = index + (clicked.get_index() - anchor.get_index()).abs();
                     while (index <= end) {
                         ConversationListItem? row = get_item_at_index(index++);
                         if (row != null) {
                             row.set_marked(true);
+                            marked.add(row);
                         }
                     }
+
+                    items_marked(marked, unmarked);
+                    this.is_marking = false;
+
                     ret = Gdk.EVENT_STOP;
                 }
             }
@@ -279,13 +293,23 @@ public class ConversationList : Gtk.ListBox {
         if (enabled) {
             freeze_selection();
         } else {
+            this.is_marking = true;
+            Gee.List<ConversationListItem> marked =
+                Gee.List.empty<ConversationListItem>();
+            Gee.List<ConversationListItem> unmarked =
+                new Gee.LinkedList<ConversationListItem>();
+
             // Call to_array here to get a copy of the value
             // collection, since unmarking the items will cause the
             // underlying map to be modified
             foreach (ConversationListItem item in this.marked.values.to_array()) {
                 item.set_marked(false);
+                unmarked.add(item);
             }
-            this.marked.clear();
+
+            items_marked(marked, unmarked);
+            this.is_marking = false;
+
             thaw_selection();
         }
         this.is_selection_mode_enabled = enabled;
@@ -467,7 +491,7 @@ public class ConversationList : Gtk.ListBox {
         }
     }
 
-    private void on_item_marked(ConversationListItem item, bool marked) {
+    private void on_item_marked(ConversationListItem item, bool is_marked) {
         if (!this.is_selection_mode_enabled) {
             // Selection mode not enabled, so the item would have
             // been Ctrl-activated and we need to enable it
@@ -475,13 +499,30 @@ public class ConversationList : Gtk.ListBox {
             selection_mode_enabled();
         }
 
-        if (marked) {
+        if (is_marked) {
             this.marked.set(item.conversation, item);
             this.last_marked = item;
         } else {
             this.marked.remove(item.conversation);
         }
-        item_marked(item, marked);
+
+        // Only fire the event for a single item if we aren't doing a
+        // mass-marking elsewhere
+        if (!this.is_marking) {
+            Gee.List<ConversationListItem> marked =
+                Gee.List.empty<ConversationListItem>();
+            Gee.List<ConversationListItem> unmarked =
+                Gee.List.empty<ConversationListItem>();
+
+            if (is_marked) {
+                marked = new Gee.LinkedList<ConversationListItem>();
+                marked.add(item);
+            } else {
+                unmarked = new Gee.LinkedList<ConversationListItem>();
+                unmarked.add(item);
+            }
+            items_marked(marked, unmarked);
+        }
     }
 
 }

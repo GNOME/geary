@@ -10,57 +10,60 @@ public class Geary.App.EmailStore : BaseObject {
     public EmailStore(Geary.Account account) {
         this.account = account;
     }
-    
+
     /**
+     * Determines the supported operations for a set of email.
+     *
      * Return a map of EmailIdentifiers to the special Geary.FolderSupport
      * interfaces each one supports.  For example, if an EmailIdentifier comes
      * back mapped to typeof(Geary.FolderSupport.Mark), it can be marked via
      * mark_email_async().  If an EmailIdentifier doesn't appear in the
      * returned map, no operations are supported on it.
      */
-    public async Gee.MultiMap<Geary.EmailIdentifier, Type>? get_supported_operations_async(
-        Gee.Collection<Geary.EmailIdentifier> emails, Cancellable? cancellable = null) throws Error {
-        Gee.MultiMap<Geary.EmailIdentifier, Geary.FolderPath>? folders
-            = yield account.get_containing_folders_async(emails, cancellable);
-        if (folders == null)
-            return null;
-        
-        Gee.HashSet<Type> all_support = new Gee.HashSet<Type>();
-        all_support.add(typeof(Geary.FolderSupport.Archive));
-        all_support.add(typeof(Geary.FolderSupport.Copy));
-        all_support.add(typeof(Geary.FolderSupport.Create));
-        all_support.add(typeof(Geary.FolderSupport.Mark));
-        all_support.add(typeof(Geary.FolderSupport.Move));
-        all_support.add(typeof(Geary.FolderSupport.Remove));
-        
-        Gee.HashMultiMap<Geary.EmailIdentifier, Type> map
-            = new Gee.HashMultiMap<Geary.EmailIdentifier, Type>();
-        foreach (Geary.EmailIdentifier email in folders.get_keys()) {
-            Gee.HashSet<Type> support = new Gee.HashSet<Type>();
-            
-            foreach (Geary.FolderPath path in folders.get(email)) {
-                Geary.Folder folder;
-                try {
-                    folder = yield account.fetch_folder_async(path, cancellable);
-                } catch (Error e) {
-                    debug("Error getting a folder from path %s: %s", path.to_string(), e.message);
-                    continue;
+    public async Gee.MultiMap<Geary.EmailIdentifier,Type>
+        get_supported_operations_async(Gee.Collection<Geary.EmailIdentifier> emails,
+                                       Cancellable? cancellable = null)
+        throws Error {
+        Gee.HashMultiMap<Geary.EmailIdentifier,Type> supported =
+            new Gee.HashMultiMap<Geary.EmailIdentifier,Type>();
+        Gee.MultiMap<Geary.EmailIdentifier, Geary.FolderPath>? folders =
+            yield account.get_containing_folders_async(emails, cancellable);
+        if (folders != null) {
+            Gee.HashSet<Type> all_support = new Gee.HashSet<Type>();
+            all_support.add(typeof(Geary.FolderSupport.Archive));
+            all_support.add(typeof(Geary.FolderSupport.Copy));
+            all_support.add(typeof(Geary.FolderSupport.Create));
+            all_support.add(typeof(Geary.FolderSupport.Mark));
+            all_support.add(typeof(Geary.FolderSupport.Move));
+            all_support.add(typeof(Geary.FolderSupport.Remove));
+
+            foreach (Geary.EmailIdentifier email in folders.get_keys()) {
+                Gee.HashSet<Type> support = new Gee.HashSet<Type>();
+
+                foreach (Geary.FolderPath path in folders.get(email)) {
+                    Geary.Folder folder;
+                    try {
+                        folder = yield account.fetch_folder_async(path, cancellable);
+                    } catch (Error e) {
+                        debug("Error getting a folder from path %s: %s", path.to_string(), e.message);
+                        continue;
+                    }
+
+                    foreach (Type type in all_support) {
+                        if (folder.get_type().is_a(type))
+                            support.add(type);
+                    }
+                    if (support.contains_all(all_support))
+                        break;
                 }
-                
-                foreach (Type type in all_support) {
-                    if (folder.get_type().is_a(type))
-                        support.add(type);
-                }
-                if (support.contains_all(all_support))
-                    break;
+
+                Geary.Collection.multi_map_set_all<Geary.EmailIdentifier, Type>(supported, email, support);
             }
-            
-            Geary.Collection.multi_map_set_all<Geary.EmailIdentifier, Type>(map, email, support);
         }
-        
-        return (map.size > 0 ? map : null);
+
+        return supported;
     }
-    
+
     /**
      * Lists any set of EmailIdentifiers as if they were all in one folder.
      */

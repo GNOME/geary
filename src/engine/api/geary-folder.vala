@@ -412,7 +412,33 @@ public abstract class Geary.Folder : BaseObject {
         return (special_folder_type == Geary.SpecialFolderType.NONE)
             ? path.basename : special_folder_type.get_display_name();
     }
-    
+
+    /**
+     * Returns this folder's supported {@link FolderSupport} types.
+     */
+    public Gee.Set<Type> get_support_types() {
+        Gee.Set<Type>? ops = new Gee.HashSet<Type>();
+        if (this is Geary.FolderSupport.Archive) {
+            ops.add(typeof(Geary.FolderSupport.Archive));
+        }
+        if (this is Geary.FolderSupport.Copy) {
+            ops.add(typeof(Geary.FolderSupport.Copy));
+        }
+        if (this is Geary.FolderSupport.Create) {
+            ops.add(typeof(Geary.FolderSupport.Create));
+        }
+        if (this is Geary.FolderSupport.Mark) {
+            ops.add(typeof(Geary.FolderSupport.Mark));
+        }
+        if (this is Geary.FolderSupport.Move) {
+            ops.add(typeof(Geary.FolderSupport.Move));
+        }
+        if (this is Geary.FolderSupport.Remove) {
+            ops.add(typeof(Geary.FolderSupport.Remove));
+        }
+        return ops;
+    }
+
     /**
      * Returns the state of the Folder's connections to the local and remote stores.
      */

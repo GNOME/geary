@@ -53,6 +53,32 @@ public class MainWindow : Gtk.ApplicationWindow {
     };
 
 
+    private class SupportedOperations {
+
+        internal bool supports_archive = false;
+        internal bool supports_copy = false;
+        internal bool supports_delete = false;
+        internal bool supports_mark = false;
+        internal bool supports_move = false;
+        internal bool supports_trash = false;
+
+
+        internal SupportedOperations(Geary.Folder base_folder, Gee.Set<Type>? supports) {
+            this.supports_archive = supports.contains(typeof(Geary.FolderSupport.Archive));
+            this.supports_copy = supports.contains(typeof(Geary.FolderSupport.Copy));
+            this.supports_delete = supports.contains(typeof(Geary.FolderSupport.Remove));
+            this.supports_mark = supports.contains(typeof(Geary.FolderSupport.Mark));
+            this.supports_move = supports.contains(typeof(Geary.FolderSupport.Move));
+            this.supports_trash = (
+                this.supports_move &&
+                base_folder.special_folder_type != Geary.SpecialFolderType.TRASH &&
+                !base_folder.properties.is_local_only
+            );
+        }
+
+    }
+
+
     public new GearyApplication application {
         get { return (GearyApplication) base.get_application(); }
         set { base.set_application(value); }
@@ -77,6 +103,7 @@ public class MainWindow : Gtk.ApplicationWindow {
     public Geary.Folder? current_folder { get; private set; default = null; }
     public Geary.App.ConversationMonitor? current_conversations { get; private set; default = null; }
     private Cancellable load_cancellable = new Cancellable();
+    private SupportedOperations? folder_operations = null;
 
     private ConversationActionBar conversation_list_actions =
         new ConversationActionBar();
@@ -122,7 +149,7 @@ public class MainWindow : Gtk.ApplicationWindow {
         this.conversation_list = new ConversationList(application.config);
         this.conversation_list.conversation_selection_changed.connect(on_conversation_selection_changed);
         this.conversation_list.conversation_activated.connect(on_conversation_activated);
-        this.conversation_list.item_marked.connect(on_conversation_item_marked);
+        this.conversation_list.items_marked.connect(on_conversation_items_marked);
         this.conversation_list.marked_conversations_evaporated.connect(on_selection_mode_disabled);
         this.conversation_list.selection_mode_enabled.connect(on_selection_mode_enabled);
         this.conversation_list.visible_conversations_changed.connect(on_visible_conversations_changed);
@@ -417,14 +444,79 @@ public class MainWindow : Gtk.ApplicationWindow {
             this.main_toolbar.folder = this.current_folder.get_display_name();
     }
 
-    private void update_conversation_actions(Geary.App.Conversation? target) {
-        bool is_unread = target.is_unread();
-        get_action(ACTION_MARK_READ).set_enabled(is_unread);
-        get_action(ACTION_MARK_UNREAD).set_enabled(!is_unread);
+    // Queries the supported actions for the currently highlighted
+    // conversations then updates them.
+    private void query_supported_actions() {
+        // Update actions up-front using folder defaults, even when
+        // actually doing a query, so the operations are vaguely correct.
+        update_conversation_actions(this.folder_operations);
 
-        bool is_starred = target.is_flagged();
-        get_action(ACTION_MARK_UNSTARRED).set_enabled(is_starred);
-        get_action(ACTION_MARK_STARRED).set_enabled(!is_starred);
+        Gee.Collection<Geary.EmailIdentifier> highlighted = get_highlighted_email();
+        if (!highlighted.is_empty && highlighted.size >= 1) {
+            this.application.controller.query_supported_operations.begin(
+                highlighted,
+                this.load_cancellable,
+                (obj, res) => {
+                    Gee.Set<Type>? supported = null;
+                    try {
+                        supported = this.application.controller.query_supported_operations.end(res);
+                    } catch (Error err) {
+                        debug("Error querying supported actions: %s", err.message);
+                    }
+                    update_conversation_actions(
+                        new SupportedOperations(this.current_folder, supported)
+                    );
+                });
+        }
+    }
+
+    // Updates conversation action enabled state based on those that
+    // are currently supported.
+    private void update_conversation_actions(SupportedOperations ops) {
+        Gee.Collection<Geary.App.Conversation> highlighted =
+            this.conversation_list.get_highlighted_conversations();
+        bool has_highlighted = !highlighted.is_empty;
+
+        get_action(ACTION_ARCHIVE).set_enabled(has_highlighted && ops.supports_archive);
+        get_action(ACTION_COPY).set_enabled(has_highlighted && ops.supports_copy);
+        get_action(ACTION_DELETE).set_enabled(has_highlighted && ops.supports_delete);
+        get_action(ACTION_JUNK).set_enabled(has_highlighted && ops.supports_move);
+        get_action(ACTION_MOVE).set_enabled(has_highlighted && ops.supports_move);
+        get_action(ACTION_RESTORE).set_enabled(has_highlighted && ops.supports_move);
+        get_action(ACTION_TRASH).set_enabled(has_highlighted && ops.supports_trash);
+
+        get_action(ACTION_SHOW_COPY).set_enabled(has_highlighted && ops.supports_copy);
+        get_action(ACTION_SHOW_MOVE).set_enabled(has_highlighted && ops.supports_move);
+
+        SimpleAction read = get_action(ACTION_MARK_READ);
+        SimpleAction unread = get_action(ACTION_MARK_UNREAD);
+        SimpleAction starred = get_action(ACTION_MARK_STARRED);
+        SimpleAction unstarred = get_action(ACTION_MARK_UNSTARRED);
+        if (has_highlighted && ops.supports_mark) {
+            bool has_read = false;
+            bool has_unread = false;
+            bool has_starred = false;
+
+            foreach (Geary.App.Conversation convo in highlighted) {
+                has_read |= convo.has_any_read_message();
+                has_unread |= convo.is_unread();
+                has_starred |= convo.is_flagged();
+
+                if (has_starred && has_unread && has_starred) {
+                    break;
+                }
+            }
+
+            read.set_enabled(has_unread);
+            unread.set_enabled(has_read);
+            starred.set_enabled(!has_starred);
+            unstarred.set_enabled(has_starred);
+        } else {
+            read.set_enabled(false);
+            unread.set_enabled(false);
+            starred.set_enabled(false);
+            unstarred.set_enabled(false);
+        }
     }
 
     private inline void check_shift_event(Gdk.EventKey event) {
@@ -455,6 +547,9 @@ public class MainWindow : Gtk.ApplicationWindow {
 
         folder.properties.notify.connect(update_headerbar);
         this.current_folder = folder;
+        this.folder_operations = new SupportedOperations(
+            folder, folder.get_support_types()
+        );
 
         // Set up a new conversation monitor for the folder
         Geary.App.ConversationMonitor monitor = new Geary.App.ConversationMonitor(
@@ -480,6 +575,7 @@ public class MainWindow : Gtk.ApplicationWindow {
         this.conversation_list_actions.update_location(this.current_folder);
         update_headerbar();
         set_selection_mode_enabled(false);
+        update_conversation_actions(this.folder_operations);
 
         this.progress_monitor.add(folder.opening_monitor);
         this.progress_monitor.add(monitor.progress_monitor);
@@ -551,6 +647,7 @@ public class MainWindow : Gtk.ApplicationWindow {
         this.main_toolbar.set_selection_mode_enabled(enabled);
         this.conversation_list.set_selection_mode_enabled(enabled);
         this.conversation_viewer.show_none_selected();
+        update_conversation_actions(this.folder_operations);
     }
 
     private void report_problem(Action action, Variant? param, Error? err = null) {
@@ -637,7 +734,7 @@ public class MainWindow : Gtk.ApplicationWindow {
 
     private void on_conversation_selection_changed(Geary.App.Conversation? selection) {
         show_conversation(selection);
-        update_conversation_actions(selection);
+        query_supported_actions();
     }
 
     private void on_conversation_activated(Geary.App.Conversation activated) {
@@ -647,22 +744,24 @@ public class MainWindow : Gtk.ApplicationWindow {
             // TODO: Determine how to map between conversations and drafts correctly.
             Geary.Email draft = activated.get_latest_recv_email(
                 Geary.App.Conversation.Location.IN_FOLDER
-                );
+            );
             this.application.controller.create_compose_widget(
                 ComposerWidget.ComposeType.NEW_MESSAGE, draft, null, null, true
             );
         }
     }
 
-    private void on_conversation_item_marked(ConversationListItem item, bool marked) {
-        if (marked) {
-            show_conversation(item.conversation);
+    private void on_conversation_items_marked(Gee.List<ConversationListItem> marked,
+                                              Gee.List<ConversationListItem> unmarked) {
+        if (!marked.is_empty) {
+            show_conversation(marked.last().conversation);
         } else {
             this.conversation_viewer.show_none_selected();
         }
         this.main_toolbar.update_selection_count(
             this.conversation_list.get_marked_items().size
         );
+        query_supported_actions();
     }
 
     private void on_initial_conversation_load() {
@@ -713,8 +812,8 @@ public class MainWindow : Gtk.ApplicationWindow {
     }
 
     private void on_conversation_flags_changed(Geary.App.Conversation changed) {
-        if (this.conversation_list.selected == changed) {
-            update_conversation_actions(changed);
+        if (this.conversation_list.is_highlighted(changed)) {
+            update_conversation_actions(this.folder_operations);
         }
     }
 

@@ -1136,6 +1136,34 @@ public class GearyController : Geary.BaseObject {
     }
 
     /**
+     * Determines the common supported operations for a set of email.
+     */
+    internal async Gee.Set<Type> query_supported_operations(Gee.Collection<Geary.EmailIdentifier> ids,
+                                                            Cancellable? cancellable)
+        throws Error {
+        Gee.Set<Type>? supported = null;
+        if (ids.size > 1) {
+            Gee.MultiMap<Geary.EmailIdentifier,Type>? selected = null;
+            Geary.App.EmailStore? store = this.email_stores.get(this.current_account);
+            if (store != null) {
+                selected = yield store.get_supported_operations_async(
+                    ids, cancellable
+                );
+            }
+
+            supported = new Gee.HashSet<Type>();
+            if (selected != null) {
+                supported.add_all(selected.get_values());
+            }
+        } else {
+            // Heuristic: If there is only one email, assume it is in
+            // the current folder and return the folder's support
+            supported = this.current_folder.get_support_types();
+        }
+        return supported;
+    }
+
+    /**
      * Adds and removes flags from a set of emails.
      */
     internal async void mark_email(Gee.Collection<Geary.EmailIdentifier> ids,
@@ -2615,37 +2643,31 @@ public class GearyController : Geary.BaseObject {
         get_window_action(ACTION_DELETE_CONVERSATION).set_enabled(sensitive && (current_folder is Geary.FolderSupport.Remove));
 
         cancel_context_dependent_buttons();
-        enable_context_dependent_buttons_async.begin(sensitive, cancellable_context_dependent_buttons);
+        if (this.current_folder != null) {
+            enable_context_dependent_buttons_async.begin(sensitive, cancellable_context_dependent_buttons);
+        }
     }
 
     private async void enable_context_dependent_buttons_async(bool sensitive, Cancellable? cancellable) {
-        Gee.MultiMap<Geary.EmailIdentifier, Type>? selected_operations = null;
+        Gee.Set<Type>? supported = null;
         try {
-            if (current_folder != null) {
-                Geary.App.EmailStore? store = email_stores.get(current_folder.account);
-                if (store != null) {
-                    selected_operations = yield store
-                        .get_supported_operations_async(get_selected_email_ids(false), cancellable);
-                }
-            }
+            supported = yield query_supported_operations(
+                get_selected_email_ids(false), cancellable
+            );
         } catch (Error e) {
             debug("Error checking for what operations are supported in the selected conversations: %s",
                 e.message);
         }
-        
+
         // Exit here if the user has cancelled.
         if (cancellable != null && cancellable.is_cancelled())
             return;
-        
-        Gee.HashSet<Type> supported_operations = new Gee.HashSet<Type>();
-        if (selected_operations != null)
-            supported_operations.add_all(selected_operations.get_values());
 
         get_window_action(ACTION_SHOW_MARK_MENU).set_enabled(
-            sensitive && (typeof(Geary.FolderSupport.Mark) in supported_operations)
+            sensitive && (typeof(Geary.FolderSupport.Mark) in supported)
         );
         get_window_action(ACTION_COPY_MENU).set_enabled(
-            sensitive && (supported_operations.contains(typeof(Geary.FolderSupport.Copy)))
+            sensitive && (supported.contains(typeof(Geary.FolderSupport.Copy)))
         );
     }
 
