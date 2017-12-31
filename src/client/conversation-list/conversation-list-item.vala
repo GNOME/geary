@@ -143,6 +143,18 @@ public class ConversationListItem : Gtk.ListBoxRow {
         update();
     }
 
+    public override bool key_press_event(Gdk.EventKey event) {
+        bool ret = Gdk.EVENT_PROPAGATE;
+        if ((event.state & Gdk.ModifierType.CONTROL_MASK) != 0 &&
+            (event.keyval == Gdk.Key.Return || event.keyval == Gdk.Key.KP_Enter)) {
+            set_marked(true);
+            ret = Gdk.EVENT_STOP;
+        } else {
+            ret = base.key_press_event(event);
+        }
+        return ret;
+    }
+
     public override void destroy() {
         this.preview_cancellable.cancel();
         base.destroy();

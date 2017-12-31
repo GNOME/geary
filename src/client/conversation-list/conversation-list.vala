@@ -50,6 +50,7 @@ public class ConversationList : Gtk.ListBox {
     private bool selection_frozen = false;
     private Gee.Map<Geary.App.Conversation,ConversationListItem> marked =
         new Gee.HashMap<Geary.App.Conversation,ConversationListItem>();
+    private ConversationListItem? last_marked = null;
     private Gee.Set<Geary.App.Conversation>? visible_conversations = null;
     private Geary.Scheduler.Scheduled? update_visible_scheduled = null;
     private bool enable_load_more = true;
@@ -96,10 +97,7 @@ public class ConversationList : Gtk.ListBox {
         set_activate_on_single_click(true);
         set_selection_mode(Gtk.SelectionMode.SINGLE);
 
-        this.row_activated.connect((row) => {
-                uint activated = row.get_index();
-                this.conversation_activated(this.model.get_conversation(activated));
-            });
+        this.row_activated.connect(on_row_activated);
         this.selected_rows_changed.connect(() => {
                 selection_changed();
             });
@@ -160,6 +158,7 @@ public class ConversationList : Gtk.ListBox {
         this.selected = null;
         this.selected_index = -1;
         this.marked.clear();
+        this.last_marked = null;
         this.visible_conversations = null;
 
         Gee.List<Geary.RFC822.MailboxAddress> account_addresses = displayed.account.information.get_all_mailboxes();
@@ -201,72 +200,70 @@ public class ConversationList : Gtk.ListBox {
     }
 
     public override bool button_press_event(Gdk.EventButton event) {
+        bool ret = Gdk.EVENT_PROPAGATE;
         if (event.button == 1) {
-            if ((event.state & Gdk.ModifierType.SHIFT_MASK) == 0) {
-                // Shift isn't down
-                if ((event.state & Gdk.ModifierType.CONTROL_MASK) != 0 &&
-                    !this.is_selection_mode_enabled) {
-                    // Not currently in selection mode, but Ctrl is
-                    // down, so enable it
-                    set_selection_mode_enabled(true);
-                    selection_mode_enabled();
-                }
-                if (this.is_selection_mode_enabled) {
-                    // Are (now) currently in selection mode, so
-                    // toggle the row
-                    ConversationListItem? row =
-                        get_row_at_y((int) event.y) as ConversationListItem;
-                    if (row != null) {
-                        row.toggle_marked();
-                    }
-                }
-            } else if ((event.state & Gdk.ModifierType.SHIFT_MASK) != 0) {
-                // Shift is down, so emulate Gtk.TreeView-like
-                // contiguous selection behaviour
-                if (!this.is_selection_mode_enabled) {
-                    set_selection_mode_enabled(true);
-                    selection_mode_enabled();
-                }
-                ConversationListItem? clicked =
-                    get_row_at_y((int) event.y)  as ConversationListItem;
-                if (clicked != null) {
-                    ConversationListItem? selected = get_selected_item();
-                    if (selected == null) {
-                        selected = get_item_at_index(0);
-                    }
+            ConversationListItem? clicked =
+                get_row_at_y((int) event.y) as ConversationListItem;
+            // Only do something if the user actually clicked o a row,
+            // not e.g. empty space at the bottom of the list.
+            if (clicked != null) {
+                if ((event.state & Gdk.ModifierType.SHIFT_MASK) == 0) {
+                    // Shift isn't down
+                    if ((event.state & Gdk.ModifierType.CONTROL_MASK) != 0 &&
+                        !this.is_selection_mode_enabled) {
+                        // Not currently in selection mode, but Ctrl
+                        // is down, so enable it then select the
+                        // clicked row
+                        set_selection_mode_enabled(true);
+                        selection_mode_enabled();
 
-                    int index = int.min(clicked.get_index(), selected.get_index());
-                    int end = index + (clicked.get_index() - selected.get_index()).abs();
+                        if (clicked != null) {
+                            clicked.set_marked(true);
+                            ret = Gdk.EVENT_STOP;
+                        }
+                    } else if (this.is_selection_mode_enabled) {
+                        // Already in selection mode, so just toggle
+                        // the clicked row
+                        if (clicked != null) {
+                            clicked.toggle_marked();
+                            ret = Gdk.EVENT_STOP;
+                        }
+                    }
+                } else if ((event.state & Gdk.ModifierType.SHIFT_MASK) != 0) {
+                    // Shift is down, so emulate Gtk.TreeView-like
+                    // contiguous selection behaviour
+                    ConversationListItem? anchor = null;
+                    ConversationListItem? selected = get_selected_item();
+                    if (!this.is_selection_mode_enabled) {
+                        set_selection_mode_enabled(true);
+                        selection_mode_enabled();
+
+                        // Use the current selection as the anchor
+                        // point, or if no selection then the top row
+                        anchor = selected;
+                        if (anchor == null) {
+                            anchor = get_item_at_index(0);
+                        }
+                    } else {
+                        anchor = last_marked;
+                    }
+                    int index = int.min(clicked.get_index(), anchor.get_index());
+                    int end = index + (clicked.get_index() - anchor.get_index()).abs();
                     while (index <= end) {
                         ConversationListItem? row = get_item_at_index(index++);
                         if (row != null) {
                             row.set_marked(true);
                         }
                     }
+                    ret = Gdk.EVENT_STOP;
                 }
             }
         }
-        return base.button_press_event(event);
-    }
 
-    public override bool key_press_event(Gdk.EventKey event) {
-        if (event.keyval == Gdk.Key.Return ||
-            event.keyval == Gdk.Key.KP_Enter) {
-            if ((event.state & Gdk.ModifierType.CONTROL_MASK) != 0 &&
-                !this.is_selection_mode_enabled) {
-                set_selection_mode_enabled(true);
-                selection_mode_enabled();
-            }
-            if (this.is_selection_mode_enabled) {
-                // Are (now) currently in selection mode, so
-                // toggle the row
-                ConversationListItem? row = get_selected_item();
-                if (row != null) {
-                    row.toggle_marked();
-                }
-            }
+        if (ret == Gdk.EVENT_PROPAGATE) {
+            ret = base.button_press_event(event);
         }
-        return base.key_press_event(event);
+        return ret;
     }
 
     internal Gee.Set<Geary.App.Conversation> get_visible_conversations() {
@@ -276,6 +273,9 @@ public class ConversationList : Gtk.ListBox {
     }
 
     internal void set_selection_mode_enabled(bool enabled) {
+        // Note we don't fire the selection_mode_enabled signal here
+        // since this also gets called by classes that listen to that
+        // signal, and doing so would create a loop.
         if (enabled) {
             freeze_selection();
         } else {
@@ -438,7 +438,7 @@ public class ConversationList : Gtk.ListBox {
 
         if (removed >= 0) {
             // Conversations were removed.
-
+            
             // Reset the last upper limit so scrolling to the bottom
             // will always activate a reload (this is particularly
             // important if the model is cleared)
@@ -457,9 +457,27 @@ public class ConversationList : Gtk.ListBox {
         }
     }
 
+    private void on_row_activated(Gtk.ListBoxRow row) {
+        ConversationListItem item = (ConversationListItem) row;
+        if (this.is_selection_mode_enabled) {
+            item.toggle_marked();
+        } else {
+            uint activated = row.get_index();
+            this.conversation_activated(this.model.get_conversation(activated));
+        }
+    }
+
     private void on_item_marked(ConversationListItem item, bool marked) {
+        if (!this.is_selection_mode_enabled) {
+            // Selection mode not enabled, so the item would have
+            // been Ctrl-activated and we need to enable it
+            set_selection_mode_enabled(true);
+            selection_mode_enabled();
+        }
+
         if (marked) {
             this.marked.set(item.conversation, item);
+            this.last_marked = item;
         } else {
             this.marked.remove(item.conversation);
         }
