@@ -1,6 +1,6 @@
 /*
  * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2016-2017 Michael Gratton <mike@vee.net>
+ * Copyright 2016-2018 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -53,26 +53,64 @@ public class MainWindow : Gtk.ApplicationWindow {
     };
 
 
-    private class SupportedOperations {
+    /**
+     * Determines policy for folder-related actions.
+     *
+     * This class defines which end-user actions should be enabled
+     * given a specific base folder and a set of supported folder
+     * actions, per this specification:
+     * https://wiki.gnome.org/Apps/Geary/Design/ConversationLifecycle
+     */
+    private class FolderActionPolicy {
 
-        internal bool supports_archive = false;
-        internal bool supports_copy = false;
-        internal bool supports_delete = false;
-        internal bool supports_mark = false;
-        internal bool supports_move = false;
-        internal bool supports_trash = false;
+        internal bool can_archive = false;
+        internal bool can_delete = false;
+        internal bool can_junk = false;
+        internal bool can_restore = false;
+        internal bool can_trash = false;
 
+        internal bool can_copy = false;
+        internal bool can_mark = false;
+        internal bool can_move = false;
 
-        internal SupportedOperations(Geary.Folder base_folder, Gee.Set<Type>? supports) {
-            this.supports_archive = supports.contains(typeof(Geary.FolderSupport.Archive));
-            this.supports_copy = supports.contains(typeof(Geary.FolderSupport.Copy));
-            this.supports_delete = supports.contains(typeof(Geary.FolderSupport.Remove));
-            this.supports_mark = supports.contains(typeof(Geary.FolderSupport.Mark));
-            this.supports_move = supports.contains(typeof(Geary.FolderSupport.Move));
-            this.supports_trash = (
-                this.supports_move &&
-                base_folder.special_folder_type != Geary.SpecialFolderType.TRASH &&
-                !base_folder.properties.is_local_only
+        internal FolderActionPolicy(Geary.Folder base_folder, Gee.Set<Type> supports) {
+            Geary.SpecialFolderType type = base_folder.special_folder_type;
+            bool supports_move = supports.contains(typeof(Geary.FolderSupport.Move));
+
+            this.can_archive = (
+                supports.contains(typeof(Geary.FolderSupport.Archive)) &&
+                type == Geary.SpecialFolderType.INBOX
+            );
+            this.can_delete = (
+                supports.contains(typeof(Geary.FolderSupport.Remove))
+            );
+            this.can_junk = (
+                supports_move &&
+                type != Geary.SpecialFolderType.DRAFTS &&
+                type != Geary.SpecialFolderType.SENT &&
+                type != Geary.SpecialFolderType.SPAM
+            );
+            this.can_restore = (
+                supports_move &&
+                type != Geary.SpecialFolderType.DRAFTS &&
+                type != Geary.SpecialFolderType.INBOX &&
+                type != Geary.SpecialFolderType.SENT
+            );
+            this.can_trash = (
+                supports_move &&
+                type != Geary.SpecialFolderType.TRASH
+            );
+
+            this.can_copy = (
+                supports.contains(typeof(Geary.FolderSupport.Copy)) &&
+                type != Geary.SpecialFolderType.DRAFTS &&
+                type != Geary.SpecialFolderType.SENT
+            );
+            this.can_mark = supports.contains(typeof(Geary.FolderSupport.Mark));
+            this.can_move = (
+                supports_move &&
+                type != Geary.SpecialFolderType.DRAFTS &&
+                type != Geary.SpecialFolderType.SENT
             );
         }
 
@@ -103,7 +141,9 @@ public class MainWindow : Gtk.ApplicationWindow {
     public Geary.Folder? current_folder { get; private set; default = null; }
     public Geary.App.ConversationMonitor? current_conversations { get; private set; default = null; }
     private Cancellable load_cancellable = new Cancellable();
-    private SupportedOperations? folder_operations = null;
+
+    private FolderActionPolicy? folder_policy = null;
+    private FolderActionPolicy? highlighted_policy = null;
 
     private ConversationActionBar conversation_list_actions =
         new ConversationActionBar();
@@ -447,9 +487,13 @@ public class MainWindow : Gtk.ApplicationWindow {
     // Queries the supported actions for the currently highlighted
     // conversations then updates them.
     private void query_supported_actions() {
-        // Update actions up-front using folder defaults, even when
-        // actually doing a query, so the operations are vaguely correct.
-        update_conversation_actions(this.folder_operations);
+        // If we don't already have some policy for highlighted
+        // conversations, update actions up-front using folder
+        // defaults, even when actually doing a query, so the
+        // operations are quickly roughly correct.
+        if (this.highlighted_policy == null) {
+            update_highlighted_actions();
+        }
 
         Gee.Collection<Geary.EmailIdentifier> highlighted = get_highlighted_email();
         if (!highlighted.is_empty && highlighted.size >= 1) {
@@ -463,59 +507,84 @@ public class MainWindow : Gtk.ApplicationWindow {
                     } catch (Error err) {
                         debug("Error querying supported actions: %s", err.message);
                     }
-                    update_conversation_actions(
-                        new SupportedOperations(this.current_folder, supported)
+                    FolderActionPolicy policy = new FolderActionPolicy(
+                        this.current_folder, supported
                     );
+                    this.highlighted_policy = policy;
+                    update_highlighted_actions();
                 });
+        } else if (highlighted.is_empty) {
+            this.highlighted_policy = null;
         }
     }
 
-    // Updates conversation action enabled state based on those that
-    // are currently supported.
-    private void update_conversation_actions(SupportedOperations ops) {
-        Gee.Collection<Geary.App.Conversation> highlighted =
-            this.conversation_list.get_highlighted_conversations();
-        bool has_highlighted = !highlighted.is_empty;
+    // Updates highlighted conversation action enabled state based on
+    // those that are currently supported.
+    private void update_highlighted_actions() {
+        FolderActionPolicy policy = this.highlighted_policy ?? this.folder_policy;
+        bool has_highlighted = this.conversation_list.has_highlighted_conversations;
 
-        get_action(ACTION_ARCHIVE).set_enabled(has_highlighted && ops.supports_archive);
-        get_action(ACTION_COPY).set_enabled(has_highlighted && ops.supports_copy);
-        get_action(ACTION_DELETE).set_enabled(has_highlighted && ops.supports_delete);
-        get_action(ACTION_JUNK).set_enabled(has_highlighted && ops.supports_move);
-        get_action(ACTION_MOVE).set_enabled(has_highlighted && ops.supports_move);
-        get_action(ACTION_RESTORE).set_enabled(has_highlighted && ops.supports_move);
-        get_action(ACTION_TRASH).set_enabled(has_highlighted && ops.supports_trash);
+        get_action(ACTION_ARCHIVE).set_enabled(
+            has_highlighted && policy.can_archive
+        );
+        get_action(ACTION_DELETE).set_enabled(
+            has_highlighted && policy.can_delete
+        );
+        get_action(ACTION_JUNK).set_enabled(
+            has_highlighted && policy.can_junk
+        );
+        get_action(ACTION_RESTORE).set_enabled(
+            has_highlighted && policy.can_restore
+        );
+        get_action(ACTION_TRASH).set_enabled(
+            has_highlighted && policy.can_trash
+        );
 
-        get_action(ACTION_SHOW_COPY).set_enabled(has_highlighted && ops.supports_copy);
-        get_action(ACTION_SHOW_MOVE).set_enabled(has_highlighted && ops.supports_move);
+        get_action(ACTION_COPY).set_enabled(
+            has_highlighted && policy.can_copy
+        );
+        get_action(ACTION_SHOW_COPY).set_enabled(
+            has_highlighted && policy.can_copy
+        );
 
-        SimpleAction read = get_action(ACTION_MARK_READ);
-        SimpleAction unread = get_action(ACTION_MARK_UNREAD);
-        SimpleAction starred = get_action(ACTION_MARK_STARRED);
-        SimpleAction unstarred = get_action(ACTION_MARK_UNSTARRED);
-        if (has_highlighted && ops.supports_mark) {
+        get_action(ACTION_MOVE).set_enabled(
+            has_highlighted && policy.can_move
+        );
+        get_action(ACTION_SHOW_MOVE).set_enabled(
+            has_highlighted && policy.can_move
+        );
+
+        SimpleAction mark_read = get_action(ACTION_MARK_READ);
+        SimpleAction mark_unread = get_action(ACTION_MARK_UNREAD);
+        SimpleAction mark_starred = get_action(ACTION_MARK_STARRED);
+        SimpleAction mark_unstarred = get_action(ACTION_MARK_UNSTARRED);
+        if (has_highlighted && policy.can_mark) {
             bool has_read = false;
             bool has_unread = false;
             bool has_starred = false;
+            bool has_unstarred = false;
 
-            foreach (Geary.App.Conversation convo in highlighted) {
+            foreach (Geary.App.Conversation convo in
+                     this.conversation_list.get_highlighted_conversations()) {
                 has_read |= convo.has_any_read_message();
                 has_unread |= convo.is_unread();
                 has_starred |= convo.is_flagged();
+                has_unstarred |= !convo.is_flagged();
 
-                if (has_starred && has_unread && has_starred) {
+                if (has_starred && has_unread && has_starred && has_unstarred) {
                     break;
                 }
             }
 
-            read.set_enabled(has_unread);
-            unread.set_enabled(has_read);
-            starred.set_enabled(!has_starred);
-            unstarred.set_enabled(has_starred);
+            mark_read.set_enabled(has_unread);
+            mark_unread.set_enabled(has_read);
+            mark_starred.set_enabled(has_unstarred);
+            mark_unstarred.set_enabled(has_starred);
         } else {
-            read.set_enabled(false);
-            unread.set_enabled(false);
-            starred.set_enabled(false);
-            unstarred.set_enabled(false);
+            mark_read.set_enabled(false);
+            mark_unread.set_enabled(false);
+            mark_starred.set_enabled(false);
+            mark_unstarred.set_enabled(false);
         }
     }
 
@@ -547,9 +616,10 @@ public class MainWindow : Gtk.ApplicationWindow {
 
         folder.properties.notify.connect(update_headerbar);
         this.current_folder = folder;
-        this.folder_operations = new SupportedOperations(
+        this.folder_policy = new FolderActionPolicy(
             folder, folder.get_support_types()
         );
+        this.highlighted_policy = null;
 
         // Set up a new conversation monitor for the folder
         Geary.App.ConversationMonitor monitor = new Geary.App.ConversationMonitor(
@@ -575,7 +645,7 @@ public class MainWindow : Gtk.ApplicationWindow {
         this.conversation_list_actions.update_location(this.current_folder);
         update_headerbar();
         set_selection_mode_enabled(false);
-        update_conversation_actions(this.folder_operations);
+        update_highlighted_actions();
 
         this.progress_monitor.add(folder.opening_monitor);
         this.progress_monitor.add(monitor.progress_monitor);
@@ -647,7 +717,7 @@ public class MainWindow : Gtk.ApplicationWindow {
         this.main_toolbar.set_selection_mode_enabled(enabled);
         this.conversation_list.set_selection_mode_enabled(enabled);
         this.conversation_viewer.show_none_selected();
-        update_conversation_actions(this.folder_operations);
+        query_supported_actions();
     }
 
     private void report_problem(Action action, Variant? param, Error? err = null) {
@@ -797,7 +867,7 @@ public class MainWindow : Gtk.ApplicationWindow {
 
     private void on_conversation_flags_changed(Geary.App.Conversation changed) {
         if (this.conversation_list.is_highlighted(changed)) {
-            update_conversation_actions(this.folder_operations);
+            update_highlighted_actions();
         }
     }
 
