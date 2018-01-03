@@ -177,6 +177,11 @@ public class ConversationListItem : Gtk.ListBoxRow {
     internal void set_marked(bool marked) {
         this.is_marked = marked;
         this.mark_revealer.set_reveal_child(marked);
+        if (marked) {
+            this.set_state_flags(Gtk.StateFlags.SELECTED, false);
+        } else {
+            this.unset_state_flags(Gtk.StateFlags.SELECTED);
+        }
         item_marked(marked);
     }
 
@@ -332,4 +337,18 @@ public class ConversationListItem : Gtk.ListBoxRow {
         );
     }
 
+    [GtkCallback]
+    public bool on_flag_button_button_release(Gtk.Widget button,
+                                              Gdk.EventButton event) {
+        // Need to manually remove prelight since the button will be
+        // hidden before the mouse exits and if shown again will show
+        // up as prelighted.
+        button.unset_state_flags(Gtk.StateFlags.PRELIGHT);
+
+        // Need to stop propagation of clicks on the flag buttons so
+        // they aren't propagated to the ConversationList and
+        // interpreted as normal clicks and alter marked items when
+        // selection mode is enabled.
+        return Gdk.EVENT_STOP;
+    }
 }

@@ -50,34 +50,6 @@
             <property name="can_focus">False</property>
             <property name="vexpand">True</property>
             <child>
-              <object class="GtkButton" id="star_button">
-                <property name="visible">True</property>
-                <property name="sensitive">False</property>
-                <property name="can_focus">True</property>
-                <property name="receives_default">True</property>
-                <property name="no_show_all">True</property>
-                <property name="tooltip_text" translatable="yes" comments="Note: The application will never show this button at the same time as unstar_button, one will always be hidden.">Mark this conversation as starred</property>
-                <property name="valign">center</property>
-                <property name="vexpand">True</property>
-                <property name="action_name">win.conversation-mark-starred</property>
-                <property name="relief">none</property>
-                <child>
-                  <object class="GtkImage">
-                    <property name="visible">True</property>
-                    <property name="can_focus">False</property>
-                    <property name="icon_name">non-starred-symbolic</property>
-                  </object>
-                </child>
-                <style>
-                  <class name="geary-compact"/>
-                </style>
-              </object>
-              <packing>
-                <property name="left_attach">0</property>
-                <property name="top_attach">1</property>
-              </packing>
-            </child>
-            <child>
               <object class="GtkButton" id="unstar_button">
                 <property name="sensitive">False</property>
                 <property name="can_focus">True</property>
@@ -86,8 +58,9 @@
                 <property name="tooltip_text" translatable="yes" comments="Note: The application will never show this button at the same time as star_button, one will always be hidden.">Mark this conversation as not starred</property>
                 <property name="valign">center</property>
                 <property name="vexpand">True</property>
-                <property name="action_name">win.conversation-mark-starred</property>
+                <property name="action_name">win.conversation-mark-unstarred</property>
                 <property name="relief">none</property>
+                <signal name="button-release-event" handler="on_flag_button_button_release" after="yes" swapped="no"/>
                 <child>
                   <object class="GtkImage">
                     <property name="visible">True</property>
@@ -102,6 +75,35 @@
               <packing>
                 <property name="left_attach">0</property>
                 <property name="top_attach">0</property>
+              </packing>
+            </child>
+            <child>
+              <object class="GtkButton" id="star_button">
+                <property name="visible">True</property>
+                <property name="sensitive">False</property>
+                <property name="can_focus">True</property>
+                <property name="receives_default">True</property>
+                <property name="no_show_all">True</property>
+                <property name="tooltip_text" translatable="yes" comments="Note: The application will never show this button at the same time as unstar_button, one will always be hidden.">Mark this conversation as starred</property>
+                <property name="valign">center</property>
+                <property name="vexpand">True</property>
+                <property name="action_name">win.conversation-mark-starred</property>
+                <property name="relief">none</property>
+                <signal name="button-release-event" handler="on_flag_button_button_release" after="yes" swapped="no"/>
+                <child>
+                  <object class="GtkImage">
+                    <property name="visible">True</property>
+                    <property name="can_focus">False</property>
+                    <property name="icon_name">non-starred-symbolic</property>
+                  </object>
+                </child>
+                <style>
+                  <class name="geary-compact"/>
+                </style>
+              </object>
+              <packing>
+                <property name="left_attach">0</property>
+                <property name="top_attach">1</property>
               </packing>
             </child>
           </object>
