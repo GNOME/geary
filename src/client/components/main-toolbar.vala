@@ -14,6 +14,7 @@ public class MainToolbar : Gtk.Box {
     // Used to form the title of the folder header
     public string account { get; set; }
     public string folder { get; set; }
+    public string subject { get; set; }
 
     // Close button settings
     public bool show_close_button { get; set; default = false; }
@@ -74,6 +75,8 @@ public class MainToolbar : Gtk.Box {
             this.bind_property("account", this.folder_header, "title", BindingFlags.SYNC_CREATE);
             this.bind_property("folder", this.folder_header, "subtitle", BindingFlags.SYNC_CREATE);
         }
+        this.bind_property("subject", this.conversation_header, "title", BindingFlags.SYNC_CREATE);
+        this.bind_property("subject", this.conversation_header, "tooltip-text", BindingFlags.SYNC_CREATE);
         this.bind_property("show-close-button-left", this.folder_header, "show-close-button",
             BindingFlags.SYNC_CREATE);
         this.bind_property("show-close-button-right", this.conversation_header, "show-close-button",

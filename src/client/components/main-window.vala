@@ -811,27 +811,39 @@ public class MainWindow : Gtk.ApplicationWindow {
         SimpleAction find_action = get_action(
             GearyController.ACTION_FIND_IN_CONVERSATION
         );
-        if (target != null) {
-            if (target != current &&
-                !this.conversation_viewer.is_composer_visible) {
-                this.conversation_viewer.load_conversation.begin(
-                    target,
-                    this.application.config,
-                    this.application.controller.avatar_session,
-                    (obj, ret) => {
-                        try {
-                            this.conversation_viewer.load_conversation.end(ret);
-                            this.application.controller.enable_message_buttons(true);
-                            find_action.set_enabled(true);
-                        } catch (Error err) {
-                            debug("Unable to load conversation: %s",
-                                  err.message);
-                        }
-                    }
+        if (target != null &&
+            target != current &&
+            !this.conversation_viewer.is_composer_visible) {
+
+            string subject = "";
+            Geary.Email? preview_message = target.get_earliest_recv_email(
+                Geary.App.Conversation.Location.ANYWHERE
+            );
+            if (preview_message != null) {
+                subject = Geary.String.reduce_whitespace(
+                    EmailUtil.strip_subject_prefixes(preview_message)
                 );
             }
-        } else {
+
+            this.main_toolbar.subject = subject;
+            this.conversation_viewer.load_conversation.begin(
+                target,
+                this.application.config,
+                this.application.controller.avatar_session,
+                (obj, ret) => {
+                    try {
+                        this.conversation_viewer.load_conversation.end(ret);
+                        this.application.controller.enable_message_buttons(true);
+                        find_action.set_enabled(true);
+                        } catch (Error err) {
+                        debug("Unable to load conversation: %s",
+                              err.message);
+                    }
+                }
+            );
+        } else if (target == null)  {
             find_action.set_enabled(false);
+            this.main_toolbar.subject = "";
             this.application.controller.enable_message_buttons(false);
             this.conversation_viewer.show_none_selected();
         }

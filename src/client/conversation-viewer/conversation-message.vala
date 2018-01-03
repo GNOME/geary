@@ -356,7 +356,6 @@ public class ConversationMessage : Gtk.Grid {
         this.date.set_tooltip_text(date_tooltip);
         if (this.message.subject != null) {
             this.subject.set_text(this.message.subject.value);
-            this.subject.set_visible(true);
             this.subject_searchable = this.message.subject.value.casefold();
         }
         fill_header_addresses(this.to_header, this.message.to);

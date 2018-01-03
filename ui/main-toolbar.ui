@@ -153,6 +153,7 @@
       <object class="GtkHeaderBar" id="conversation_header">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
+        <property name="has_subtitle">False</property>
         <child>
           <object class="GtkBox" id="reply_forward_buttons">
             <property name="visible">True</property>
