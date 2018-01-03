@@ -79,6 +79,16 @@ public class ConversationListItem : Gtk.ListBoxRow {
     /** Determines if this row is marked for selection mode */
     public bool is_marked { get; private set; default = false; }
 
+    /*
+     * An email id that can be used to look up this conversation.
+     *
+     * This is only guaranteed to remain stable while the conversation
+     * remains trimmed, after that it may have changed. Thus it should
+     * only be used for transient values such as context menu action
+     * targets.
+     */
+    public Geary.EmailIdentifier id { get; private set; }
+
 
     [GtkChild]
     private Gtk.Button star_button;
@@ -255,6 +265,17 @@ public class ConversationListItem : Gtk.ListBoxRow {
         this.count.set_text("%u".printf(count));
         if (count <= 1) {
             this.count.hide();
+        }
+
+        // This must be done every time the conversation is trimmed
+        Geary.Email? email = this.conversation.get_earliest_recv_email(
+            Geary.App.Conversation.Location.ANYWHERE
+        );
+        if (email != null) {
+            Variant target = email.id.to_variant();
+            this.star_button.set_action_target_value(target);
+            this.unstar_button.set_action_target_value(target);
+            this.id = email.id;
         }
     }
 

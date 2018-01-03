@@ -10,17 +10,27 @@
 public class MainWindow : Gtk.ApplicationWindow {
 
 
-    public const string ACTION_ARCHIVE = "conversation-archive";
-    public const string ACTION_COPY = "conversation-copy";
-    public const string ACTION_DELETE = "conversation-delete";
-    public const string ACTION_JUNK = "conversation-junk";
-    public const string ACTION_MARK_READ = "conversation-mark-read";
-    public const string ACTION_MARK_STARRED = "conversation-mark-starred";
-    public const string ACTION_MARK_UNREAD = "conversation-mark-unread";
-    public const string ACTION_MARK_UNSTARRED = "conversation-mark-unstarred";
-    public const string ACTION_MOVE = "conversation-move";
-    public const string ACTION_RESTORE = "conversation-restore";
-    public const string ACTION_TRASH = "conversation-trash";
+    public const string ACTION_CONVERSATION_ARCHIVE = "conversation-archive";
+    public const string ACTION_CONVERSATION_DELETE = "conversation-delete";
+    public const string ACTION_CONVERSATION_JUNK = "conversation-junk";
+    public const string ACTION_CONVERSATION_MARK_READ = "conversation-mark-read";
+    public const string ACTION_CONVERSATION_MARK_STARRED = "conversation-mark-starred";
+    public const string ACTION_CONVERSATION_MARK_UNREAD = "conversation-mark-unread";
+    public const string ACTION_CONVERSATION_MARK_UNSTARRED = "conversation-mark-unstarred";
+    public const string ACTION_CONVERSATION_RESTORE = "conversation-restore";
+    public const string ACTION_CONVERSATION_TRASH = "conversation-trash";
+
+    public const string ACTION_HIGHLIGHTED_ARCHIVE = "highlighted-archive";
+    public const string ACTION_HIGHLIGHTED_COPY = "highlighted-copy";
+    public const string ACTION_HIGHLIGHTED_DELETE = "highlighted-delete";
+    public const string ACTION_HIGHLIGHTED_JUNK = "highlighted-junk";
+    public const string ACTION_HIGHLIGHTED_MARK_READ = "highlighted-mark-read";
+    public const string ACTION_HIGHLIGHTED_MARK_STARRED = "highlighted-mark-starred";
+    public const string ACTION_HIGHLIGHTED_MARK_UNREAD = "highlighted-mark-unread";
+    public const string ACTION_HIGHLIGHTED_MARK_UNSTARRED = "highlighted-mark-unstarred";
+    public const string ACTION_HIGHLIGHTED_MOVE = "highlighted-move";
+    public const string ACTION_HIGHLIGHTED_RESTORE = "highlighted-restore";
+    public const string ACTION_HIGHLIGHTED_TRASH = "highlighted-trash";
 
     public const string ACTION_SHOW_COPY = "show-copy";
     public const string ACTION_SHOW_MOVE = "show-move";
@@ -33,17 +43,33 @@ public class MainWindow : Gtk.ApplicationWindow {
     private const int STATUS_BAR_HEIGHT = 18;
 
     private const ActionEntry[] action_entries = {
-        { ACTION_ARCHIVE,        on_conversation_archive        },
-        { ACTION_COPY,           on_conversation_copy, "as"     },
-        { ACTION_DELETE,         on_conversation_delete         },
-        { ACTION_JUNK,           on_conversation_junk           },
-        { ACTION_MARK_READ,      on_conversation_mark_read      },
-        { ACTION_MARK_STARRED,   on_conversation_mark_starred   },
-        { ACTION_MARK_UNREAD,    on_conversation_mark_unread    },
-        { ACTION_MARK_UNSTARRED, on_conversation_mark_unstarred },
-        { ACTION_MOVE,           on_conversation_move, "as"     },
-        { ACTION_RESTORE,        on_conversation_restore        },
-        { ACTION_TRASH,          on_conversation_trash          },
+        // XXX Using "(yxx)" as the param type here is sketch since we
+        // don't know in advance what type is used to serialise
+        // ConversationListItem.id, since its type (EmailIdentifier)
+        // is abstract
+        { ACTION_CONVERSATION_ARCHIVE,        on_conversation_archive,        "(yxx)" },
+        { ACTION_CONVERSATION_MARK_READ,      on_conversation_mark_read,      "(yxx)" },
+        { ACTION_CONVERSATION_MARK_STARRED,   on_conversation_mark_starred,   "(yxx)" },
+        { ACTION_CONVERSATION_MARK_UNSTARRED, on_conversation_mark_unstarred, "(yxx)" },
+        { ACTION_CONVERSATION_MARK_UNREAD,    on_conversation_mark_unread,    "(yxx)" },
+        { ACTION_CONVERSATION_DELETE,         on_conversation_delete,         "(yxx)" },
+        { ACTION_CONVERSATION_JUNK,           on_conversation_junk,           "(yxx)" },
+        { ACTION_CONVERSATION_RESTORE,        on_conversation_restore,        "(yxx)" },
+        { ACTION_CONVERSATION_TRASH,          on_conversation_trash,          "(yxx)" },
+
+        { ACTION_HIGHLIGHTED_ARCHIVE,        on_highlighted_archive            },
+        { ACTION_HIGHLIGHTED_COPY,           on_highlighted_copy,
+                                                 Geary.FolderPath.VARIANT_TYPE },
+        { ACTION_HIGHLIGHTED_DELETE,         on_highlighted_delete             },
+        { ACTION_HIGHLIGHTED_JUNK,           on_highlighted_junk               },
+        { ACTION_HIGHLIGHTED_MARK_READ,      on_highlighted_mark_read          },
+        { ACTION_HIGHLIGHTED_MARK_STARRED,   on_highlighted_mark_starred       },
+        { ACTION_HIGHLIGHTED_MARK_UNREAD,    on_highlighted_mark_unread        },
+        { ACTION_HIGHLIGHTED_MARK_UNSTARRED, on_highlighted_mark_unstarred     },
+        { ACTION_HIGHLIGHTED_MOVE,           on_highlighted_move,
+                                                 Geary.FolderPath.VARIANT_TYPE },
+        { ACTION_HIGHLIGHTED_RESTORE,        on_highlighted_restore            },
+        { ACTION_HIGHLIGHTED_TRASH,          on_highlighted_trash              },
 
         { ACTION_SHOW_COPY },
         { ACTION_SHOW_MOVE },
@@ -187,6 +213,7 @@ public class MainWindow : Gtk.ApplicationWindow {
         Object(application: application);
 
         this.conversation_list = new ConversationList(application.config);
+        this.conversation_list.context_menu_requested.connect(on_context_menu_requested);
         this.conversation_list.conversation_selection_changed.connect(on_conversation_selection_changed);
         this.conversation_list.conversation_activated.connect(on_conversation_activated);
         this.conversation_list.items_marked.connect(on_conversation_items_marked);
@@ -416,6 +443,23 @@ public class MainWindow : Gtk.ApplicationWindow {
     }
 
     /**
+     * Returns the conversation from an email id action param, if valid.
+     */
+    private Geary.App.Conversation? variant_to_conversation(Variant? param) {
+        Geary.App.Conversation? target = null;
+        if (param != null) {
+            try {
+                Geary.EmailIdentifier id =
+                    this.current_folder.account.to_email_identifier(param);
+                target = this.current_conversations.get_conversation_for_email(id);
+            } catch (Geary.EngineError err) {
+                debug("Error getting action email id parameter: %s", err.message);
+            }
+        }
+        return target;
+    }
+
+    /**
      * Returns email ids from all highlighted conversations, if any.
      */
     private Gee.List<Geary.EmailIdentifier> get_highlighted_email() {
@@ -524,40 +568,40 @@ public class MainWindow : Gtk.ApplicationWindow {
         FolderActionPolicy policy = this.highlighted_policy ?? this.folder_policy;
         bool has_highlighted = this.conversation_list.has_highlighted_conversations;
 
-        get_action(ACTION_ARCHIVE).set_enabled(
+        get_action(ACTION_HIGHLIGHTED_ARCHIVE).set_enabled(
             has_highlighted && policy.can_archive
         );
-        get_action(ACTION_DELETE).set_enabled(
+        get_action(ACTION_HIGHLIGHTED_DELETE).set_enabled(
             has_highlighted && policy.can_delete
         );
-        get_action(ACTION_JUNK).set_enabled(
+        get_action(ACTION_HIGHLIGHTED_JUNK).set_enabled(
             has_highlighted && policy.can_junk
         );
-        get_action(ACTION_RESTORE).set_enabled(
+        get_action(ACTION_HIGHLIGHTED_RESTORE).set_enabled(
             has_highlighted && policy.can_restore
         );
-        get_action(ACTION_TRASH).set_enabled(
+        get_action(ACTION_HIGHLIGHTED_TRASH).set_enabled(
             has_highlighted && policy.can_trash
         );
 
-        get_action(ACTION_COPY).set_enabled(
+        get_action(ACTION_HIGHLIGHTED_COPY).set_enabled(
             has_highlighted && policy.can_copy
         );
         get_action(ACTION_SHOW_COPY).set_enabled(
             has_highlighted && policy.can_copy
         );
 
-        get_action(ACTION_MOVE).set_enabled(
+        get_action(ACTION_HIGHLIGHTED_MOVE).set_enabled(
             has_highlighted && policy.can_move
         );
         get_action(ACTION_SHOW_MOVE).set_enabled(
             has_highlighted && policy.can_move
         );
 
-        SimpleAction mark_read = get_action(ACTION_MARK_READ);
-        SimpleAction mark_unread = get_action(ACTION_MARK_UNREAD);
-        SimpleAction mark_starred = get_action(ACTION_MARK_STARRED);
-        SimpleAction mark_unstarred = get_action(ACTION_MARK_UNSTARRED);
+        SimpleAction mark_read = get_action(ACTION_HIGHLIGHTED_MARK_READ);
+        SimpleAction mark_unread = get_action(ACTION_HIGHLIGHTED_MARK_UNREAD);
+        SimpleAction mark_starred = get_action(ACTION_HIGHLIGHTED_MARK_STARRED);
+        SimpleAction mark_unstarred = get_action(ACTION_HIGHLIGHTED_MARK_UNSTARRED);
         if (has_highlighted && policy.can_mark) {
             bool has_read = false;
             bool has_unread = false;
@@ -586,6 +630,75 @@ public class MainWindow : Gtk.ApplicationWindow {
             mark_starred.set_enabled(false);
             mark_unstarred.set_enabled(false);
         }
+    }
+
+    private void show_conversation_context_menu(Menu menu,
+                                                ConversationListItem target,
+                                                FolderActionPolicy policy) {
+
+        Geary.App.Conversation conversation = target.conversation;
+        Variant action_target = target.id.to_variant();
+        Menu target_menu = new Menu();
+        for (int i = 0; i < menu.get_n_items(); i++) {
+            Menu? existing = (Menu) menu.get_item_link(i, Menu.LINK_SECTION);
+            if (existing != null) {
+                Menu updated = (Menu) new Menu();
+                GtkUtil.menu_foreach(
+                    existing, (label, action_name, target) => {
+                        bool enabled = false;
+                        // Remove "win." prefix before checking
+                        switch (action_name.substring(4, action_name.length - 4)) {
+                        case ACTION_CONVERSATION_ARCHIVE:
+                            enabled = policy.can_archive;
+                            break;
+
+                        case ACTION_CONVERSATION_DELETE:
+                            enabled = policy.can_delete;
+                            break;
+
+                        case ACTION_CONVERSATION_JUNK:
+                            enabled = policy.can_junk;
+                            break;
+
+                        case ACTION_CONVERSATION_MARK_READ:
+                            enabled = policy.can_mark && conversation.is_unread();
+                            break;
+
+                        case ACTION_CONVERSATION_MARK_STARRED:
+                            enabled = policy.can_mark && !conversation.is_flagged();
+                            break;
+
+                        case ACTION_CONVERSATION_MARK_UNREAD:
+                            enabled = policy.can_mark && !conversation.is_unread();
+                            break;
+
+                        case ACTION_CONVERSATION_MARK_UNSTARRED:
+                            enabled = policy.can_mark && conversation.is_flagged();
+                            break;
+
+                        case ACTION_CONVERSATION_RESTORE:
+                            enabled = policy.can_restore;
+                            break;
+
+                        case ACTION_CONVERSATION_TRASH:
+                            enabled = policy.can_trash;
+                            break;
+                        }
+
+                        if (enabled) {
+                            MenuItem item = new MenuItem(label, null);
+                            item.set_action_and_target_value(
+                                action_name, action_target
+                            );
+                            updated.append_item(item);
+                        }
+                    });
+                target_menu.append_section(null, updated);
+            }
+        }
+
+        Gtk.Widget popover = new Gtk.Popover.from_model(target, target_menu);
+        popover.show();
     }
 
     private inline void check_shift_event(Gdk.EventKey event) {
@@ -786,6 +899,25 @@ public class MainWindow : Gtk.ApplicationWindow {
             this.folder_paned, "position");
     }
 
+    private void on_context_menu_requested(Menu menu, ConversationListItem target) {
+        this.application.controller.query_supported_operations.begin(
+            target.conversation.get_email_ids(),
+            this.load_cancellable,
+            (obj, res) => {
+                Gee.Set<Type>? supported = null;
+                try {
+                    supported = this.application.controller.query_supported_operations.end(res);
+                } catch (Error err) {
+                    debug("Error querying supported actions: %s", err.message);
+                }
+                show_conversation_context_menu(
+                    menu,
+                    target,
+                    new FolderActionPolicy(this.current_folder, supported)
+                );
+            });
+    }
+
     private void on_conversation_selection_changed(Geary.App.Conversation? selection) {
         show_conversation(selection);
         query_supported_actions();
@@ -911,6 +1043,165 @@ public class MainWindow : Gtk.ApplicationWindow {
     }
 
     private void on_conversation_archive(Action action, Variant? param) {
+        Geary.App.Conversation? target = variant_to_conversation(param);
+        if (target != null) {
+            this.application.controller.move_conversations_special.begin(
+                Geary.Collection.new_unary_linked_list(target),
+                Geary.SpecialFolderType.ARCHIVE,
+                (obj, ret) => {
+                    try {
+                        this.application.controller.move_conversations_special.end(ret);
+                    } catch (Error err) {
+                        report_problem(action, param, err);
+                    }
+                }
+            );
+        }
+    }
+
+    private void on_conversation_delete(Action action, Variant? param) {
+        Geary.App.Conversation? target = variant_to_conversation(param);
+        if (target != null) {
+            this.application.controller.delete_conversations.begin(
+                Geary.Collection.new_unary_linked_list(target),
+                (obj, ret) => {
+                    try {
+                        this.application.controller.delete_conversations.end(ret);
+                    } catch (Error err) {
+                        report_problem(action, param, err);
+                    }
+                }
+            );
+        }
+    }
+
+    private void on_conversation_junk(Action action, Variant? param) {
+        Geary.App.Conversation? target = variant_to_conversation(param);
+        if (target != null) {
+            this.application.controller.move_conversations_special.begin(
+                Geary.Collection.new_unary_linked_list(target),
+                Geary.SpecialFolderType.SPAM,
+                (obj, ret) => {
+                    try {
+                        this.application.controller.move_conversations_special.end(ret);
+                    } catch (Error err) {
+                        report_problem(action, param, err);
+                    }
+                }
+            );
+        }
+    }
+
+    private void on_conversation_mark_read(Action action, Variant? param) {
+        Geary.EmailFlags flags = new Geary.EmailFlags();
+        flags.add(Geary.EmailFlags.UNREAD);
+
+        Geary.App.Conversation? target = variant_to_conversation(param);
+        if (target != null) {
+            this.application.controller.mark_email.begin(
+                target.get_email_ids(), null, flags,
+                (obj, ret) => {
+                    try {
+                        this.application.controller.mark_email.end(ret);
+                    } catch (Error err) {
+                        report_problem(action, param, err);
+                    }
+                }
+            );
+        }
+    }
+
+    private void on_conversation_mark_starred(Action action, Variant? param) {
+        Geary.EmailFlags flags = new Geary.EmailFlags();
+        flags.add(Geary.EmailFlags.FLAGGED);
+
+        Geary.App.Conversation? target = variant_to_conversation(param);
+        if (target != null) {
+            this.application.controller.mark_email.begin(
+                target.get_email_ids(), flags, null,
+                (obj, ret) => {
+                    try {
+                        this.application.controller.mark_email.end(ret);
+                    } catch (Error err) {
+                        report_problem(action, param, err);
+                    }
+                }
+            );
+        }
+    }
+
+    private void on_conversation_mark_unread(Action action, Variant? param) {
+        Geary.EmailFlags flags = new Geary.EmailFlags();
+        flags.add(Geary.EmailFlags.UNREAD);
+
+        Geary.App.Conversation? target = variant_to_conversation(param);
+        if (target != null) {
+            this.application.controller.mark_email.begin(
+                target.get_email_ids(), flags, null,
+                (obj, ret) => {
+                    try {
+                        this.application.controller.mark_email.end(ret);
+                    } catch (Error err) {
+                        report_problem(action, param, err);
+                    }
+                }
+            );
+        }
+    }
+
+    private void on_conversation_mark_unstarred(Action action, Variant? param) {
+        Geary.EmailFlags flags = new Geary.EmailFlags();
+        flags.add(Geary.EmailFlags.FLAGGED);
+
+        Geary.App.Conversation? target = variant_to_conversation(param);
+        if (target != null) {
+            this.application.controller.mark_email.begin(
+                target.get_email_ids(), null, flags,
+                (obj, ret) => {
+                    try {
+                        this.application.controller.mark_email.end(ret);
+                    } catch (Error err) {
+                        report_problem(action, param, err);
+                    }
+            }
+            );
+        }
+    }
+
+    private void on_conversation_restore(Action action, Variant? param) {
+        Geary.App.Conversation? target = variant_to_conversation(param);
+        if (target != null) {
+            this.application.controller.restore_conversations.begin(
+                Geary.Collection.new_unary_linked_list(target),
+                (obj, ret) => {
+                    try {
+                        this.application.controller.restore_conversations.end(ret);
+                    } catch (Error err) {
+                        report_problem(action, param, err);
+                    }
+                }
+            );
+        }
+    }
+
+    private void on_conversation_trash(Action action, Variant? param) {
+        Geary.App.Conversation? target = variant_to_conversation(param);
+        if (target != null) {
+            this.application.controller.move_conversations_special.begin(
+                Geary.Collection.new_unary_linked_list(target),
+                Geary.SpecialFolderType.TRASH,
+                (obj, ret) => {
+                    try {
+                        this.application.controller.move_conversations_special.end(ret);
+                    } catch (Error err) {
+                        report_problem(action, param, err);
+                    }
+                }
+            );
+        }
+    }
+
+    private void on_highlighted_archive(Action action, Variant? param) {
         this.application.controller.move_conversations_special.begin(
             this.conversation_list.get_highlighted_conversations(),
             Geary.SpecialFolderType.ARCHIVE,
@@ -924,7 +1215,7 @@ public class MainWindow : Gtk.ApplicationWindow {
         );
     }
 
-    private void on_conversation_copy(Action action, Variant? param) {
+    private void on_highlighted_copy(Action action, Variant? param) {
         Geary.FolderPath? destination = null;
         if (param != null) {
             try {
@@ -950,7 +1241,7 @@ public class MainWindow : Gtk.ApplicationWindow {
         }
     }
 
-    private void on_conversation_delete(Action action, Variant? param) {
+    private void on_highlighted_delete(Action action, Variant? param) {
         if (confirm_delete()) {
             this.application.controller.delete_conversations.begin(
                 this.conversation_list.get_highlighted_conversations(),
@@ -965,7 +1256,7 @@ public class MainWindow : Gtk.ApplicationWindow {
         }
     }
 
-    private void on_conversation_junk(Action action, Variant? param) {
+    private void on_highlighted_junk(Action action, Variant? param) {
         this.application.controller.move_conversations_special.begin(
             this.conversation_list.get_highlighted_conversations(),
             Geary.SpecialFolderType.SPAM,
@@ -979,7 +1270,7 @@ public class MainWindow : Gtk.ApplicationWindow {
         );
     }
 
-    private void on_conversation_mark_read(Action action, Variant? param) {
+    private void on_highlighted_mark_read(Action action, Variant? param) {
         Geary.EmailFlags flags = new Geary.EmailFlags();
         flags.add(Geary.EmailFlags.UNREAD);
 
@@ -1009,7 +1300,7 @@ public class MainWindow : Gtk.ApplicationWindow {
         }
     }
 
-    private void on_conversation_mark_unread(Action action, Variant? param) {
+    private void on_highlighted_mark_unread(Action action, Variant? param) {
         Geary.EmailFlags flags = new Geary.EmailFlags();
         flags.add(Geary.EmailFlags.UNREAD);
 
@@ -1039,7 +1330,7 @@ public class MainWindow : Gtk.ApplicationWindow {
         }
     }
 
-    private void on_conversation_mark_starred(Action action, Variant? param) {
+    private void on_highlighted_mark_starred(Action action, Variant? param) {
         Geary.EmailFlags flags = new Geary.EmailFlags();
         flags.add(Geary.EmailFlags.FLAGGED);
         this.application.controller.mark_email.begin(
@@ -1054,7 +1345,7 @@ public class MainWindow : Gtk.ApplicationWindow {
         );
     }
 
-    private void on_conversation_mark_unstarred(Action action, Variant? param) {
+    private void on_highlighted_mark_unstarred(Action action, Variant? param) {
         Geary.EmailFlags flags = new Geary.EmailFlags();
         flags.add(Geary.EmailFlags.FLAGGED);
         this.application.controller.mark_email.begin(
@@ -1069,7 +1360,7 @@ public class MainWindow : Gtk.ApplicationWindow {
         );
     }
 
-    private void on_conversation_move(Action action, Variant? param) {
+    private void on_highlighted_move(Action action, Variant? param) {
         Geary.FolderPath? destination = null;
         if (param != null) {
             try {
@@ -1095,7 +1386,7 @@ public class MainWindow : Gtk.ApplicationWindow {
         }
     }
 
-    private void on_conversation_restore(Action action, Variant? param) {
+    private void on_highlighted_restore(Action action, Variant? param) {
         this.application.controller.restore_conversations.begin(
             this.conversation_list.get_highlighted_conversations(),
             (obj, ret) => {
@@ -1108,7 +1399,7 @@ public class MainWindow : Gtk.ApplicationWindow {
         );
     }
 
-    private void on_conversation_trash(Action action, Variant? param) {
+    private void on_highlighted_trash(Action action, Variant? param) {
         this.application.controller.move_conversations_special.begin(
             this.conversation_list.get_highlighted_conversations(),
             Geary.SpecialFolderType.TRASH,
@@ -1123,11 +1414,11 @@ public class MainWindow : Gtk.ApplicationWindow {
     }
 
     public void on_copy_folder(Geary.Folder target) {
-        get_action(ACTION_COPY).activate(target.path.to_variant());
+        get_action(ACTION_HIGHLIGHTED_COPY).activate(target.path.to_variant());
     }
 
     public void on_move_folder(Geary.Folder target) {
-        get_action(ACTION_MOVE).activate(target.path.to_variant());
+        get_action(ACTION_HIGHLIGHTED_MOVE).activate(target.path.to_variant());
     }
 
     private void on_selection_mode_enabled() {

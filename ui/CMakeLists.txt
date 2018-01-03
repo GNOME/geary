@@ -17,6 +17,7 @@ set(RESOURCE_LIST
   STRIPBLANKS "conversation-email-attachment-view.ui"
   STRIPBLANKS "conversation-email-menus.ui"
   STRIPBLANKS "conversation-list-item.ui"
+  STRIPBLANKS "conversation-list-menus.ui"
   STRIPBLANKS "conversation-message.ui"
   STRIPBLANKS "conversation-message-menus.ui"
   STRIPBLANKS "conversation-viewer.ui"

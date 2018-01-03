@@ -15,7 +15,7 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <property name="action_name">win.conversation-mark-read</property>
+            <property name="action_name">win.highlighted-mark-read</property>
             <child>
               <object class="GtkImage">
                 <property name="visible">True</property>
@@ -33,7 +33,7 @@
           <object class="GtkButton" id="mark_unread_action">
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <property name="action_name">win.conversation-mark-unread</property>
+            <property name="action_name">win.highlighted-mark-unread</property>
             <child>
               <object class="GtkImage">
                 <property name="visible">True</property>
@@ -52,7 +52,7 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <property name="action_name">win.conversation-mark-starred</property>
+            <property name="action_name">win.highlighted-mark-starred</property>
             <child>
               <object class="GtkImage">
                 <property name="visible">True</property>
@@ -70,7 +70,7 @@
           <object class="GtkButton" id="mark_unstarred_action">
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <property name="action_name">win.conversation-mark-unstarred</property>
+            <property name="action_name">win.highlighted-mark-unstarred</property>
             <child>
               <object class="GtkImage">
                 <property name="visible">True</property>
@@ -102,7 +102,7 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <property name="action_name">win.conversation-archive</property>
+            <property name="action_name">win.highlighted-archive</property>
           </object>
           <packing>
             <property name="left_attach">0</property>
@@ -115,7 +115,7 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <property name="action_name">win.conversation-restore</property>
+            <property name="action_name">win.highlighted-restore</property>
           </object>
           <packing>
             <property name="left_attach">1</property>
@@ -179,7 +179,7 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <property name="action_name">win.conversation-junk</property>
+            <property name="action_name">win.highlighted-junk</property>
             <child>
               <object class="GtkImage">
                 <property name="visible">True</property>
@@ -198,7 +198,7 @@
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <property name="action_name">win.conversation-trash</property>
+            <property name="action_name">win.highlighted-trash</property>
             <child>
               <object class="GtkImage">
                 <property name="visible">True</property>
@@ -219,7 +219,7 @@
             <property name="receives_default">True</property>
             <property name="halign">end</property>
             <property name="hexpand">True</property>
-            <property name="action_name">win.conversation-delete</property>
+            <property name="action_name">win.highlighted-delete</property>
             <child>
               <object class="GtkImage">
                 <property name="visible">True</property>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<interface>
+  <menu id="context_menu">
+    <section id="context_menu_mark">
+      <item>
+        <attribute name="label" translatable="yes">Mark _Read</attribute>
+        <attribute name="action">win.conversation-mark-read</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Un-mark _Read</attribute>
+        <attribute name="action">win.conversation-mark-unread</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Mark _Starred</attribute>
+        <attribute name="action">win.conversation-mark-starred</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Un-mark _Starred</attribute>
+        <attribute name="action">win.conversation-mark-unstarred</attribute>
+      </item>
+    </section>
+    <section id="context_menu_actions">
+      <item>
+        <attribute name="label" translatable="yes">_Archive</attribute>
+        <attribute name="action">win.conversation-archive</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">R_estore</attribute>
+        <attribute name="action">win.conversation-restore</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_Junk</attribute>
+        <attribute name="action">win.conversation-junk</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_Trash</attribute>
+        <attribute name="action">win.conversation-trash</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">_Delete</attribute>
+        <attribute name="action">win.conversation-delete</attribute>
+      </item>
+    </section>
+  </menu>
+</interface>

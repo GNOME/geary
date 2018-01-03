@@ -46,6 +46,7 @@ public class ConversationList : Gtk.ListBox {
     }
 
     private Configuration config;
+    private Menu context_menu;
     private int selected_index = -1;
     private bool selection_frozen = false;
     private Gee.Map<Geary.App.Conversation,ConversationListItem> marked =
@@ -72,6 +73,15 @@ public class ConversationList : Gtk.ListBox {
     public virtual signal void load_more() {
         this.enable_load_more = false;
     }
+
+    /**
+     * Fired when the user requested a context menu for an item.
+     *
+     * The application should set targets for the given menu model and
+     * selectively hide unwanted actions before displaying the popup
+     * on the item.
+     */
+    public signal void context_menu_requested(Menu menu, ConversationListItem target);
 
     /**
      * Fired when a list item was targeted with a selection gesture.
@@ -104,6 +114,11 @@ public class ConversationList : Gtk.ListBox {
                 selection_changed();
             });
         this.show.connect(on_show);
+
+        Gtk.Builder builder = new Gtk.Builder.from_resource(
+            "/org/gnome/Geary/conversation-list-menus.ui"
+        );
+        this.context_menu = (Menu) builder.get_object("context_menu");
     }
 
     /**
@@ -202,6 +217,23 @@ public class ConversationList : Gtk.ListBox {
     }
 
     public override bool button_press_event(Gdk.EventButton event) {
+        bool ret = Gdk.EVENT_PROPAGATE;
+        if (event.button == 3) {
+            ConversationListItem? clicked =
+                get_row_at_y((int) event.y) as ConversationListItem;
+            if (clicked != null) {
+                context_menu_requested(this.context_menu, clicked);
+                ret = Gdk.EVENT_STOP;
+            }
+        }
+
+        if (ret == Gdk.EVENT_PROPAGATE) {
+            ret = base.button_press_event(event);
+        }
+        return ret;
+    }
+
+    public override bool button_release_event(Gdk.EventButton event) {
         bool ret = Gdk.EVENT_PROPAGATE;
         if (event.button == 1) {
             ConversationListItem? clicked =
