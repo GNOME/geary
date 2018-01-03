@@ -25,23 +25,11 @@ public class GearyController : Geary.BaseObject {
     public const string ACTION_REPLY_TO_MESSAGE = "reply-to-message";
     public const string ACTION_REPLY_ALL_MESSAGE = "reply-all-message";
     public const string ACTION_FORWARD_MESSAGE = "forward-message";
-    public const string ACTION_ARCHIVE_CONVERSATION = "archive-conv";
-    public const string ACTION_TRASH_CONVERSATION = "trash-conv";
-    public const string ACTION_DELETE_CONVERSATION = "delete-conv";
     public const string ACTION_EMPTY_SPAM = "empty-spam";
     public const string ACTION_EMPTY_TRASH = "empty-trash";
     public const string ACTION_UNDO = "undo";
     public const string ACTION_FIND_IN_CONVERSATION = "conv-find";
     public const string ACTION_ZOOM = "zoom";
-    public const string ACTION_SHOW_MARK_MENU = "mark-conversation-menu";
-    public const string ACTION_MARK_AS_READ = "mark-conversation-read";
-    public const string ACTION_MARK_AS_UNREAD = "mark-conversation-unread";
-    public const string ACTION_MARK_AS_STARRED = "mark-conversation-starred";
-    public const string ACTION_MARK_AS_UNSTARRED = "mark-conversation-unstarred";
-    public const string ACTION_MARK_AS_SPAM = "mark-conversation-spam";
-    public const string ACTION_MARK_AS_NOT_SPAM = "mark-conversation-not-spam";
-    public const string ACTION_COPY_MENU = "show-copy-menu";
-    public const string ACTION_MOVE_MENU = "show-move-menu";
     public const string ACTION_SEARCH = "search-conv";
     public const string ACTION_CONVERSATION_LIST = "focus-conv-list";
     public const string ACTION_TOGGLE_SEARCH = "toggle-search";
@@ -71,11 +59,9 @@ public class GearyController : Geary.BaseObject {
     private Cancellable cancellable_folder = new Cancellable();
     private Cancellable cancellable_search = new Cancellable();
     private Cancellable cancellable_open_account = new Cancellable();
-    private Cancellable cancellable_context_dependent_buttons = new Cancellable();
     private Gee.HashMap<Geary.Account, Cancellable> inbox_cancellables
         = new Gee.HashMap<Geary.Account, Cancellable>();
     private ContactListStoreCache contact_list_store_cache = new ContactListStoreCache();
-    private Geary.App.Conversation? last_deleted_conversation = null;
     private Gee.LinkedList<ComposerWidget> composer_widgets = new Gee.LinkedList<ComposerWidget>();
     private NewMessagesMonitor? new_messages_monitor = null;
     private NewMessagesIndicator? new_messages_indicator = null;
@@ -107,19 +93,6 @@ public class GearyController : Geary.BaseObject {
         {ACTION_REPLY_TO_MESSAGE,      on_reply_to_message_action   },
         {ACTION_REPLY_ALL_MESSAGE,     on_reply_all_message_action  },
         {ACTION_FORWARD_MESSAGE,       on_forward_message_action    },
-        {ACTION_ARCHIVE_CONVERSATION,  on_archive_conversation      },
-        {ACTION_TRASH_CONVERSATION,    on_trash_conversation        },
-        {ACTION_DELETE_CONVERSATION,   on_delete_conversation       },
-        {ACTION_COPY_MENU,             on_show_copy_menu            },
-        {ACTION_MOVE_MENU,             on_show_move_menu            },
-        // Message marking actions
-        {ACTION_SHOW_MARK_MENU,     on_show_mark_menu           },
-        {ACTION_MARK_AS_READ,       on_mark_as_read             },
-        {ACTION_MARK_AS_UNREAD,     on_mark_as_unread           },
-        {ACTION_MARK_AS_STARRED,    on_mark_as_starred          },
-        {ACTION_MARK_AS_UNSTARRED,  on_mark_as_unstarred        },
-        {ACTION_MARK_AS_SPAM,       on_mark_as_spam_toggle      },
-        {ACTION_MARK_AS_NOT_SPAM,   on_mark_as_spam_toggle      },
         // Message viewer
         {ACTION_ZOOM,  on_zoom,  "s"  },
     };
@@ -128,7 +101,7 @@ public class GearyController : Geary.BaseObject {
      * Fired when the currently selected account has changed.
      */
     public signal void account_selected(Geary.Account? account);
-    
+
     /**
      * Fired when the currently selected folder has changed.
      */
@@ -204,7 +177,6 @@ public class GearyController : Geary.BaseObject {
 
         // Create the main window (must be done after creating actions.)
         main_window = new MainWindow(this.application);
-        main_window.on_shift_key.connect(on_shift_key);
         main_window.notify["has-toplevel-focus"].connect(on_has_toplevel_focus);
 
         setup_actions();
@@ -219,8 +191,6 @@ public class GearyController : Geary.BaseObject {
         main_window.folder_list.folder_selected.connect(on_folder_selected);
         main_window.folder_list.copy_conversation.connect(on_copy_conversation);
         main_window.folder_list.move_conversation.connect(on_move_conversation);
-        main_window.main_toolbar.copy_folder_menu.folder_selected.connect(on_copy_conversation);
-        main_window.main_toolbar.move_folder_menu.folder_selected.connect(on_move_conversation);
         main_window.search_bar.search_text_changed.connect((text) => { do_search(text); });
         main_window.conversation_viewer.conversation_added.connect(
             on_conversation_view_added
@@ -288,8 +258,6 @@ public class GearyController : Geary.BaseObject {
         main_window.folder_list.folder_selected.disconnect(on_folder_selected);
         main_window.folder_list.copy_conversation.disconnect(on_copy_conversation);
         main_window.folder_list.move_conversation.disconnect(on_move_conversation);
-        main_window.main_toolbar.copy_folder_menu.folder_selected.disconnect(on_copy_conversation);
-        main_window.main_toolbar.move_folder_menu.folder_selected.disconnect(on_move_conversation);
         main_window.conversation_viewer.conversation_added.disconnect(
             on_conversation_view_added
         );
@@ -410,22 +378,11 @@ public class GearyController : Geary.BaseObject {
     private void setup_actions() {
         this.main_window.add_action_entries(win_action_entries, this);
 
-        add_window_accelerators(ACTION_MARK_AS_READ, { "<Ctrl>I", "<Shift>I" });
-        add_window_accelerators(ACTION_MARK_AS_UNREAD, { "<Ctrl>U", "<Shift>U" });
-        add_window_accelerators(ACTION_MARK_AS_STARRED, { "S" });
-        add_window_accelerators(ACTION_MARK_AS_UNSTARRED, { "D" });
-        add_window_accelerators(ACTION_MARK_AS_SPAM, { "<Ctrl>J", "exclam" }); // Exclamation mark (!)
-        add_window_accelerators(ACTION_MARK_AS_NOT_SPAM, { "<Ctrl>J", "exclam" });
-        add_window_accelerators(ACTION_COPY_MENU, { "L" });
-        add_window_accelerators(ACTION_MOVE_MENU, { "M" });
         add_window_accelerators(ACTION_NEW_MESSAGE, { "<Ctrl>N", "N" });
         add_window_accelerators(ACTION_REPLY_TO_MESSAGE, { "<Ctrl>R", "R" });
         add_window_accelerators(ACTION_REPLY_ALL_MESSAGE, { "<Ctrl><Shift>R", "<Shift>R" });
         add_window_accelerators(ACTION_FORWARD_MESSAGE, { "<Ctrl>L", "F" });
         add_window_accelerators(ACTION_FIND_IN_CONVERSATION, { "<Ctrl>F", "slash" });
-        add_window_accelerators(ACTION_ARCHIVE_CONVERSATION, { "A" });
-        add_window_accelerators(ACTION_TRASH_CONVERSATION, { "Delete", "BackSpace" });
-        add_window_accelerators(ACTION_DELETE_CONVERSATION, { "<Shift>Delete", "<Shift>BackSpace" });
         add_window_accelerators(ACTION_UNDO, { "<Ctrl>Z" });
         add_window_accelerators(ACTION_ZOOM+("('in')"), { "<Ctrl>equal", "equal" });
         add_window_accelerators(ACTION_ZOOM+("('out')"), { "<Ctrl>minus", "minus" });
@@ -1417,13 +1374,7 @@ public class GearyController : Geary.BaseObject {
 
         // clear Revokable, as Undo is only available while a folder is selected
         save_revokable(null, null);
-        
-        // re-enable copy/move to the last selected folder
-        if (current_folder != null) {
-            main_window.main_toolbar.copy_folder_menu.enable_disable_folder(current_folder, true);
-            main_window.main_toolbar.move_folder_menu.enable_disable_folder(current_folder, true);
-        }
-        
+
         current_folder = folder;
         
         if (current_account != folder.account) {
@@ -1443,24 +1394,6 @@ public class GearyController : Geary.BaseObject {
         
         if (!(current_folder is Geary.SearchFolder))
             previous_non_search_folder = current_folder;
-        
-        main_window.main_toolbar.copy_folder_menu.clear();
-        main_window.main_toolbar.move_folder_menu.clear();
-        foreach(Geary.Folder f in current_folder.account.list_folders()) {
-            main_window.main_toolbar.copy_folder_menu.add_folder(f);
-            main_window.main_toolbar.move_folder_menu.add_folder(f);
-        }
-        
-        // disable copy/move to the new folder
-        if (current_folder != null) {
-            main_window.main_toolbar.copy_folder_menu.enable_disable_folder(current_folder, false);
-            main_window.main_toolbar.move_folder_menu.enable_disable_folder(current_folder, false);
-        }
-
-        this.main_window.main_toolbar.update_trash_buttons(
-            current_folder_supports_trash() ||
-            !(current_folder is Geary.FolderSupport.Remove)
-        );
 
         if (inboxes.values.contains(current_folder)) {
             // Inbox selected, clear new messages if visible
@@ -1552,13 +1485,7 @@ public class GearyController : Geary.BaseObject {
         if (available != null && available.size > 0) {
             foreach (Geary.Folder folder in available) {
                 main_window.folder_list.add_folder(folder);
-                if (folder.account == current_account) {
-                    if (!main_window.main_toolbar.copy_folder_menu.has_folder(folder))
-                        main_window.main_toolbar.copy_folder_menu.add_folder(folder);
-                    if (!main_window.main_toolbar.move_folder_menu.has_folder(folder))
-                        main_window.main_toolbar.move_folder_menu.add_folder(folder);
-                }
-                
+
                 // monitor the Inbox for notifications
                 if (folder.special_folder_type == Geary.SpecialFolderType.INBOX &&
                     !inboxes.has_key(folder.account)) {
@@ -1597,13 +1524,7 @@ public class GearyController : Geary.BaseObject {
             for (int i = (unavailable.size - 1); i >= 0; i--) {
                 Geary.Folder folder = unavailable[i];
                 main_window.folder_list.remove_folder(folder);
-                if (folder.account == current_account) {
-                    if (main_window.main_toolbar.copy_folder_menu.has_folder(folder))
-                        main_window.main_toolbar.copy_folder_menu.remove_folder(folder);
-                    if (main_window.main_toolbar.move_folder_menu.has_folder(folder))
-                        main_window.main_toolbar.move_folder_menu.remove_folder(folder);
-                }
-                
+
                 if (folder.special_folder_type == Geary.SpecialFolderType.INBOX &&
                     inboxes.has_key(folder.account)) {
                     inboxes.unset(folder.account);
@@ -1647,13 +1568,6 @@ public class GearyController : Geary.BaseObject {
         old_cancellable.cancel();
     }
 
-    private void cancel_context_dependent_buttons() {
-        Cancellable old_cancellable = cancellable_context_dependent_buttons;
-        cancellable_context_dependent_buttons = new Cancellable();
-        
-        old_cancellable.cancel();
-    }
-    
     // We need to include the second parameter, or valac doesn't recognize the function as matching
     // GearyApplication.exiting's signature.
     private bool on_application_exiting(GearyApplication sender, bool panicked) {
@@ -1661,17 +1575,6 @@ public class GearyController : Geary.BaseObject {
             return true;
         
         return sender.cancel_exit();
-    }
-
-    private void on_shift_key(bool pressed) {
-        if (main_window != null && main_window.main_toolbar != null
-            && current_account != null && current_folder != null) {
-            main_window.main_toolbar.update_trash_buttons(
-                current_folder_supports_trash() &&
-                current_folder is Geary.FolderSupport.Remove &&
-                !pressed
-            );
-        }
     }
 
     // this signal does not necessarily indicate that the application previously didn't have
@@ -1698,44 +1601,6 @@ public class GearyController : Geary.BaseObject {
             }
         }
         return ids;
-    }
-
-    private void on_show_mark_menu() {
-        Geary.App.Conversation conversation =
-            this.main_window.conversation_list.selected;
-
-        bool unread_selected = conversation.is_unread();
-        bool read_selected = false;
-        bool starred_selected = false;
-        bool unstarred_selected = false;
-
-        // Only check the messages that "Mark as Unread" would mark, so we
-        // don't add the menu option and have it not do anything.
-        //
-        // Sort by Date: field to correspond with ConversationViewer ordering
-        Geary.Email? latest = conversation.get_latest_sent_email(
-            Geary.App.Conversation.Location.IN_FOLDER_OUT_OF_FOLDER);
-        if (latest != null && latest.email_flags != null
-            && !latest.email_flags.contains(Geary.EmailFlags.UNREAD))
-            read_selected = true;
-
-        if (conversation.is_flagged()) {
-            starred_selected = true;
-        } else {
-            unstarred_selected = true;
-        }
-
-        get_window_action(ACTION_MARK_AS_READ).set_enabled(unread_selected);
-        get_window_action(ACTION_MARK_AS_UNREAD).set_enabled(read_selected);
-        get_window_action(ACTION_MARK_AS_STARRED).set_enabled(unstarred_selected);
-        get_window_action(ACTION_MARK_AS_UNSTARRED).set_enabled(starred_selected);
-
-        bool in_spam_folder = current_folder.special_folder_type == Geary.SpecialFolderType.SPAM;
-        get_window_action(ACTION_MARK_AS_NOT_SPAM).set_enabled(in_spam_folder);
-        // If we're in Drafts/Outbox, we also shouldn't set a message as SPAM.
-        get_window_action(ACTION_MARK_AS_SPAM).set_enabled(!in_spam_folder &&
-            current_folder.special_folder_type != Geary.SpecialFolderType.DRAFTS &&
-            current_folder.special_folder_type != Geary.SpecialFolderType.OUTBOX);
     }
 
     private bool should_notify_new_messages(Geary.Folder folder) {
@@ -1770,83 +1635,6 @@ public class GearyController : Geary.BaseObject {
     private void on_conversation_viewer_mark_emails(Gee.Collection<Geary.EmailIdentifier> emails,
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove) {
         mark_email.begin(emails, flags_to_add, flags_to_remove);
-    }
-
-    private void on_mark_as_read(SimpleAction action) {
-        Geary.EmailFlags flags = new Geary.EmailFlags();
-        flags.add(Geary.EmailFlags.UNREAD);
-
-        Gee.ArrayList<Geary.EmailIdentifier> ids = get_selected_email_ids(false);
-        mark_email.begin(ids, null, flags);
-
-        ConversationListBox? list =
-            main_window.conversation_viewer.current_list;
-        if (list != null) {
-            foreach (Geary.EmailIdentifier id in ids)
-                list.mark_manual_read(id);
-        }
-    }
-
-    private void on_mark_as_unread(SimpleAction action) {
-        Geary.EmailFlags flags = new Geary.EmailFlags();
-        flags.add(Geary.EmailFlags.UNREAD);
-
-        Gee.ArrayList<Geary.EmailIdentifier> ids = get_selected_email_ids(true);
-        mark_email.begin(ids, flags, null);
-
-        ConversationListBox? list =
-            main_window.conversation_viewer.current_list;
-        if (list != null) {
-            foreach (Geary.EmailIdentifier id in ids)
-                list.mark_manual_unread(id);
-        }
-    }
-
-    private void on_mark_as_starred(SimpleAction action) {
-        Geary.EmailFlags flags = new Geary.EmailFlags();
-        flags.add(Geary.EmailFlags.FLAGGED);
-        mark_email.begin(get_selected_email_ids(true), flags, null);
-    }
-
-    private void on_mark_as_unstarred(SimpleAction action) {
-        Geary.EmailFlags flags = new Geary.EmailFlags();
-        flags.add(Geary.EmailFlags.FLAGGED);
-        mark_email.begin(get_selected_email_ids(false), null, flags);
-    }
-
-    private void on_show_move_menu(SimpleAction? action) {
-        this.main_window.main_toolbar.copy_conversation_button.activate();
-    }
-
-    private void on_show_copy_menu(SimpleAction? action) {
-        this.main_window.main_toolbar.move_conversation_button.activate();
-    }
-
-    private async void mark_as_spam_toggle_async(Cancellable? cancellable) {
-        Geary.Folder? destination_folder = null;
-        if (current_folder.special_folder_type != Geary.SpecialFolderType.SPAM) {
-            // Move to spam folder.
-            try {
-                destination_folder = yield current_account.get_required_special_folder_async(
-                    Geary.SpecialFolderType.SPAM, cancellable);
-            } catch (Error e) {
-                debug("Error getting spam folder: %s", e.message);
-            }
-        } else {
-            // Move out of spam folder, back to inbox.
-            try {
-                destination_folder = current_account.get_special_folder(Geary.SpecialFolderType.INBOX);
-            } catch (Error e) {
-                debug("Error getting inbox folder: %s", e.message);
-            }
-        }
-
-        if (destination_folder != null)
-            on_move_conversation(destination_folder);
-    }
-
-    private void on_mark_as_spam_toggle(SimpleAction action) {
-        mark_as_spam_toggle_async.begin(null);
     }
 
     private void copy_email(Gee.Collection<Geary.EmailIdentifier> ids,
@@ -2301,21 +2089,6 @@ public class GearyController : Geary.BaseObject {
         show_search_bar();
     }
 
-    private void on_archive_conversation(SimpleAction action) {
-        archive_or_delete_selection_async.begin(true, false, cancellable_folder,
-            on_archive_or_delete_selection_finished);
-    }
-
-    private void on_trash_conversation(SimpleAction action) {
-        archive_or_delete_selection_async.begin(false, true, cancellable_folder,
-            on_archive_or_delete_selection_finished);
-    }
-
-    private void on_delete_conversation(SimpleAction action) {
-        archive_or_delete_selection_async.begin(false, false, cancellable_folder,
-            on_archive_or_delete_selection_finished);
-    }
-
     private void on_empty_spam(SimpleAction action) {
         on_empty_trash_or_spam(Geary.SpecialFolderType.SPAM);
     }
@@ -2390,88 +2163,6 @@ public class GearyController : Geary.BaseObject {
             } catch (Error err) {
                 // ignored
             }
-        }
-    }
-    
-    private bool current_folder_supports_trash() {
-        return (current_folder != null && current_folder.special_folder_type != Geary.SpecialFolderType.TRASH
-            && !current_folder.properties.is_local_only && current_account != null
-            && (current_folder as Geary.FolderSupport.Move) != null);
-    }
-
-    private async void archive_or_delete_selection_async(bool archive, bool trash,
-        Cancellable? cancellable) throws Error {
-        if (!can_switch_conversation_view())
-            return;
-
-        ConversationListBox list_view =
-            main_window.conversation_viewer.current_list;
-        if (list_view != null &&
-            list_view.conversation == last_deleted_conversation) {
-            debug("Not archiving/trashing/deleting; viewed conversation is last deleted conversation");
-            return;
-        }
-
-        Geary.App.Conversation? selected =
-            this.main_window.conversation_list.selected;
-        if (selected == null)
-            return;
-
-        this.last_deleted_conversation = selected;
-
-        Gee.List<Geary.EmailIdentifier> ids = get_selected_email_ids(false);
-        if (archive) {
-            debug("Archiving selected messages");
-            
-            Geary.FolderSupport.Archive? supports_archive = current_folder as Geary.FolderSupport.Archive;
-            if (supports_archive == null) {
-                debug("Folder %s doesn't support archive", current_folder.to_string());
-            } else {
-                save_revokable(yield supports_archive.archive_email_async(ids, cancellable),
-                    _("Undo archive (Ctrl+Z)"));
-            }
-            
-            return;
-        }
-        
-        if (trash) {
-            debug("Trashing selected messages");
-            
-            if (current_folder_supports_trash()) {
-                Geary.FolderPath trash_path = (yield current_account.get_required_special_folder_async(
-                    Geary.SpecialFolderType.TRASH, cancellable)).path;
-                Geary.FolderSupport.Move? supports_move = current_folder as Geary.FolderSupport.Move;
-                if (supports_move != null) {
-                    save_revokable(yield supports_move.move_email_async(ids, trash_path, cancellable),
-                        _("Undo trash (Ctrl+Z)"));
-                    
-                    return;
-                }
-            }
-            
-            debug("Folder %s doesn't support move or account %s doesn't have a trash folder",
-                current_folder.to_string(), current_account.to_string());
-            return;
-        }
-        
-        debug("Deleting selected messages");
-        
-        Geary.FolderSupport.Remove? supports_remove = current_folder as Geary.FolderSupport.Remove;
-        if (supports_remove == null) {
-            debug("Folder %s doesn't support remove", current_folder.to_string());
-        } else {
-            if (this.main_window.confirm_delete())
-                yield supports_remove.remove_email_async(ids, cancellable);
-            else
-                last_deleted_conversation = null;
-        }
-    }
-
-    private void on_archive_or_delete_selection_finished(Object? source, AsyncResult result) {
-        try {
-            archive_or_delete_selection_async.end(result);
-        } catch (Error e) {
-            debug("Unable to archive/trash/delete messages: %s", e.message);
         }
     }
 
@@ -2637,38 +2328,6 @@ public class GearyController : Geary.BaseObject {
         get_window_action(ACTION_REPLY_TO_MESSAGE).set_enabled(respond_sensitive);
         get_window_action(ACTION_REPLY_ALL_MESSAGE).set_enabled(respond_sensitive);
         get_window_action(ACTION_FORWARD_MESSAGE).set_enabled(respond_sensitive);
-        get_window_action(ACTION_MOVE_MENU).set_enabled(sensitive && (current_folder is Geary.FolderSupport.Move));
-        get_window_action(ACTION_ARCHIVE_CONVERSATION).set_enabled(sensitive && (current_folder is Geary.FolderSupport.Archive));
-        get_window_action(ACTION_TRASH_CONVERSATION).set_enabled(sensitive && current_folder_supports_trash());
-        get_window_action(ACTION_DELETE_CONVERSATION).set_enabled(sensitive && (current_folder is Geary.FolderSupport.Remove));
-
-        cancel_context_dependent_buttons();
-        if (this.current_folder != null) {
-            enable_context_dependent_buttons_async.begin(sensitive, cancellable_context_dependent_buttons);
-        }
-    }
-
-    private async void enable_context_dependent_buttons_async(bool sensitive, Cancellable? cancellable) {
-        Gee.Set<Type>? supported = null;
-        try {
-            supported = yield query_supported_operations(
-                get_selected_email_ids(false), cancellable
-            );
-        } catch (Error e) {
-            debug("Error checking for what operations are supported in the selected conversations: %s",
-                e.message);
-        }
-
-        // Exit here if the user has cancelled.
-        if (cancellable != null && cancellable.is_cancelled())
-            return;
-
-        get_window_action(ACTION_SHOW_MARK_MENU).set_enabled(
-            sensitive && (typeof(Geary.FolderSupport.Mark) in supported)
-        );
-        get_window_action(ACTION_COPY_MENU).set_enabled(
-            sensitive && (supported.contains(typeof(Geary.FolderSupport.Copy)))
-        );
     }
 
     // Returns a list of composer windows for an account, or null if none.

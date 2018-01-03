@@ -10,19 +10,20 @@ public class MainToolbar : Gtk.Box {
 
     // How wide the left pane should be. Auto-synced with our settings
     public int left_pane_width { get; set; }
+
     // Used to form the title of the folder header
     public string account { get; set; }
     public string folder { get; set; }
+
     // Close button settings
     public bool show_close_button { get; set; default = false; }
     public bool show_close_button_left { get; private set; default = true; }
     public bool show_close_button_right { get; private set; default = true; }
+
     // Search and find bar
     public bool search_open { get; set; default = false; }
     public bool find_open { get; set; default = false; }
-    // Copy and Move popovers
-    public FolderPopover copy_folder_menu { get; private set; default = new FolderPopover(); }
-    public FolderPopover move_folder_menu { get; private set; default = new FolderPopover(); }
+
     // The tooltip of the Undo-button
     public string undo_tooltip {
         owned get { return this.undo_button.tooltip_text; }
@@ -49,16 +50,6 @@ public class MainToolbar : Gtk.Box {
     [GtkChild]
     private Gtk.HeaderBar conversation_header;
     [GtkChild]
-    private Gtk.MenuButton mark_conversation_button;
-    [GtkChild]
-    public Gtk.MenuButton copy_conversation_button;
-    [GtkChild]
-    public Gtk.MenuButton move_conversation_button;
-    [GtkChild]
-    private Gtk.Button trash_button;
-    [GtkChild]
-    private Gtk.Button delete_button;
-    [GtkChild]
     private Gtk.ToggleButton find_button;
 
     // Other
@@ -66,11 +57,6 @@ public class MainToolbar : Gtk.Box {
     private Gtk.Button undo_button;
 
     public MainToolbar(Configuration config) {
-        // Instead of putting a separator between the two headerbars, as other applications do,
-        // we put a separator at the right end of the left headerbar.  This greatly improves
-        // the appearance under the Ambiance theme (see bug #746171).  To get this separator to
-        // line up with the handle of the pane, we need to extend the width of the left-hand
-        // headerbar a bit.  Six pixels is right both for Adwaita and Ambiance.
         config.bind(Configuration.MESSAGES_PANE_POSITION_KEY, this, "left-pane-width",
             SettingsBindFlags.GET);
         this.bind_property("left-pane-width", this.folder_header, "width-request",
@@ -93,20 +79,14 @@ public class MainToolbar : Gtk.Box {
         this.bind_property("show-close-button-right", this.conversation_header, "show-close-button",
             BindingFlags.SYNC_CREATE);
 
-        // Assemble the empty/mark menus
+        // Assemble the empty menu
         Gtk.Builder builder = new Gtk.Builder.from_resource("/org/gnome/Geary/main-toolbar-menus.ui");
         MenuModel empty_menu = (MenuModel) builder.get_object("empty_menu");
-        MenuModel mark_menu = (MenuModel) builder.get_object("mark_conversation_menu");
 
         // Setup folder header elements
         this.empty_menu_button.popover = new Gtk.Popover.from_model(null, empty_menu);
         this.bind_property("search-open", this.search_conversations_button, "active",
             BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
-
-        // Setup conversation header elements
-        this.mark_conversation_button.popover = new Gtk.Popover.from_model(null, mark_menu);
-        this.copy_conversation_button.popover = copy_folder_menu;
-        this.move_conversation_button.popover = move_folder_menu;
 
         this.bind_property("find-open", this.find_button, "active",
             BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
@@ -156,11 +136,6 @@ public class MainToolbar : Gtk.Box {
 
         }
         this.selection_label.set_text(text);
-    }
-
-    internal void update_trash_buttons(bool show_trash) {
-        this.trash_button.set_visible(show_trash);
-        this.delete_button.set_visible(!show_trash);
     }
 
     private void set_window_buttons() {

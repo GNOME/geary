@@ -491,6 +491,19 @@ public class MainWindow : Gtk.ApplicationWindow {
 
     private void setup_actions() {
         add_action_entries(action_entries, this);
+
+        add_window_accelerators(ACTION_HIGHLIGHTED_ARCHIVE, { "A" });
+        add_window_accelerators(ACTION_HIGHLIGHTED_DELETE, { "<Shift>Delete", "<Shift>BackSpace" });
+        add_window_accelerators(ACTION_HIGHLIGHTED_MARK_READ, { "<Ctrl>I", "<Shift>I" });
+        add_window_accelerators(ACTION_HIGHLIGHTED_MARK_STARRED, { "S" });
+        add_window_accelerators(ACTION_HIGHLIGHTED_MARK_UNREAD, { "<Ctrl>U", "<Shift>U" });
+        add_window_accelerators(ACTION_HIGHLIGHTED_MARK_UNSTARRED, { "D" });
+        add_window_accelerators(ACTION_HIGHLIGHTED_JUNK, { "<Ctrl>J", "exclam" }); // Exclamation mark (!)
+        add_window_accelerators(ACTION_HIGHLIGHTED_TRASH, { "Delete", "BackSpace" });
+
+        add_window_accelerators(ACTION_SHOW_COPY, { "L" });
+        add_window_accelerators(ACTION_SHOW_MOVE, { "M" });
+
         add_window_accelerators(ACTION_SELECTION_MODE_DISABLE, { "Escape", });
     }
 

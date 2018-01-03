@@ -281,37 +281,6 @@ public class ConversationListView : Gtk.TreeView {
         if (!get_selection().path_is_selected(path) &&
             !GearyApplication.instance.controller.can_switch_conversation_view())
             return true;
-        
-        if (event.button == 3 && event.type == Gdk.EventType.BUTTON_PRESS) {
-            Geary.App.Conversation conversation = get_model().get_conversation_at_path(path);
-
-            Menu context_menu_model = new Menu();
-            context_menu_model.append(_("Delete conversation"), "win."+GearyController.ACTION_DELETE_CONVERSATION);
-
-            if (conversation.is_unread())
-                context_menu_model.append(_("Mark as _Read"), "win."+GearyController.ACTION_MARK_AS_READ);
-
-            if (conversation.has_any_read_message())
-                context_menu_model.append(_("Mark as _Unread"), "win."+GearyController.ACTION_MARK_AS_UNREAD);
-
-            if (conversation.is_flagged())
-                context_menu_model.append(_("U_nstar"), "win."+GearyController.ACTION_MARK_AS_UNSTARRED);
-            else
-                context_menu_model.append(_("_Star"), "win."+GearyController.ACTION_MARK_AS_STARRED);
-
-            Menu actions_section = new Menu();
-            actions_section.append(_("_Reply"), "win."+GearyController.ACTION_REPLY_TO_MESSAGE);
-            actions_section.append(_("R_eply All"), "win."+GearyController.ACTION_REPLY_ALL_MESSAGE);
-            actions_section.append(_("_Forward"), "win."+GearyController.ACTION_FORWARD_MESSAGE);
-            context_menu_model.append_section(null, actions_section);
-
-            Gtk.Menu context_menu = new Gtk.Menu.from_model(context_menu_model);
-            context_menu.insert_action_group("win", this.main_window);
-            context_menu.popup_at_pointer(event);
-
-            // When the conversation under the mouse is selected, stop event propagation
-            return get_selection().path_is_selected(path);
-        }
 
         return false;
     }
