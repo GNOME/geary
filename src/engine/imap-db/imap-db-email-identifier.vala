@@ -1,10 +1,17 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2018-2019 Michael Gratton <mike@vee.net>.
  *
  * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
+ * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
 private class Geary.ImapDB.EmailIdentifier : Geary.EmailIdentifier {
+
+
+    private const string VARIANT_TYPE = "(yxx)";
+
+
     public int64 message_id { get; private set; }
     public Imap.UID? uid { get; private set; }
 
@@ -24,6 +31,22 @@ private class Geary.ImapDB.EmailIdentifier : Geary.EmailIdentifier {
 
         message_id = Db.INVALID_ROWID;
         this.uid = uid;
+    }
+
+    /** Reconstructs an identifier from its variant representation. */
+    public EmailIdentifier.from_variant(GLib.Variant serialised)
+        throws EngineError.BAD_PARAMETERS {
+        if (serialised.get_type_string() != VARIANT_TYPE) {
+            throw new EngineError.BAD_PARAMETERS(
+                "Invalid serialised id type: %s", serialised.get_type_string()
+            );
+        }
+        Imap.UID? uid = null;
+        int64 uid_value = serialised.get_child_value(2).get_int64();
+        if (uid_value >= 0) {
+            uid = new Imap.UID(uid_value);
+        }
+        this(serialised.get_child_value(1).get_int64(), uid);
     }
 
     // Used to promote an id created with no_message_id to one that has a
@@ -55,6 +78,17 @@ private class Geary.ImapDB.EmailIdentifier : Geary.EmailIdentifier {
         return uid.compare_to(other.uid);
     }
 
+    public override GLib.Variant to_variant() {
+        // Return a tuple to satisfy the API contract, add an 'i' to
+        // inform GenericAccount that it's an IMAP id.
+        int64 uid_value = this.uid != null ? this.uid.value : -1;
+        return new GLib.Variant.tuple(new Variant[] {
+                new GLib.Variant.byte('i'),
+                new GLib.Variant.int64(this.message_id),
+                new GLib.Variant.int64(uid_value)
+            });
+    }
+
     public override string to_string() {
         return "[%s/%s]".printf(message_id.to_string(), (uid == null ? "null" : uid.to_string()));
     }
@@ -68,4 +102,5 @@ private class Geary.ImapDB.EmailIdentifier : Geary.EmailIdentifier {
 
         return uids;
     }
+
 }

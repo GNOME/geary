@@ -26,6 +26,7 @@ public class Geary.FolderPathTest : TestCase {
         add_test("path_compare", path_compare);
         add_test("path_compare_normalised", path_compare_normalised);
         add_test("distinct_roots_compare", distinct_roots_compare);
+        add_test("variant_representation", variant_representation);
     }
 
     public override void set_up() {
@@ -303,6 +304,14 @@ public class Geary.FolderPathTest : TestCase {
             "Greater than double disjoint"
         );
 
+    }
+
+    public void variant_representation() throws GLib.Error {
+        FolderPath orig = this.root.get_child("test");
+        GLib.Variant variant = orig.to_variant();
+        FolderPath copy = this.root.from_variant(variant);
+
+        assert_true(orig.equal_to(copy));
     }
 
 }

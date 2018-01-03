@@ -1,5 +1,6 @@
 /*
  * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2019 Michael Gratton <mike@vee.net>.
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -17,7 +18,7 @@
 public class Geary.Imap.FolderRoot : Geary.FolderRoot {
 
 
-    /**
+   /**
      * The canonical path for the IMAP inbox.
      *
      * This specific path object will always be returned when a child

@@ -1,4 +1,6 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2018-2019 Michael Gratton <mike@vee.net>.
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -12,9 +14,12 @@
  *
  * @see FolderRoot
  */
-
 public class Geary.FolderPath :
     BaseObject, Gee.Hashable<FolderPath>, Gee.Comparable<FolderPath> {
+
+
+    /** Type of the GLib.Variant used to represent folder paths */
+    public const string VARIANT_TYPE = "as";
 
 
     // Workaround for Vala issue #659. See children below.
@@ -218,7 +223,21 @@ public class Geary.FolderPath :
     }
 
     /**
-     * Returns a string version of the path using a default separator.
+     * Returns a representation useful for serialisation.
+     *
+     * This can be used to transmit folder paths as D-Bus method and
+     * GLib Action parameters, and so on.
+     *
+     * @returns a serialised form of this path, that will match the
+     * GVariantType specified by {@link VARIANT_TYPE}.
+     * @see FolderRoot.from_folder_path
+     */
+    public GLib.Variant to_variant() {
+        return new GLib.Variant.strv(as_array());
+    }
+
+    /**
+     * Returns a representation useful for debugging.
      *
      * Do not use this for obtaining an IMAP mailbox name to send to a
      * server, use {@link
@@ -287,6 +306,7 @@ public class Geary.FolderPath :
 
 }
 
+
 /**
  * The root of a folder hierarchy.
  *
@@ -312,6 +332,26 @@ public class Geary.FolderRoot : FolderPath {
     public FolderRoot(bool default_case_sensitivity) {
         base();
         this.default_case_sensitivity = default_case_sensitivity;
+    }
+
+    /**
+     * Reconstructs a path under this root from a GLib variant.
+     *
+     * @see FolderPath.to_variant
+     */
+    public FolderPath from_variant(GLib.Variant serialised)
+        throws EngineError {
+        if (serialised.get_type_string() != VARIANT_TYPE) {
+            throw new EngineError.BAD_PARAMETERS(
+                "Invalid serialised id type: %s", serialised.get_type_string()
+            );
+        }
+
+        FolderPath path = this;
+        foreach (string step in serialised.get_strv()) {
+            path = path.get_child(step);
+        }
+        return path;
     }
 
 }

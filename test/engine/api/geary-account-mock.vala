@@ -120,6 +120,21 @@ public class Geary.MockAccount : Account, MockObject {
         }
     }
 
+    public override EmailIdentifier to_email_identifier(GLib.Variant serialised)
+        throws EngineError.BAD_PARAMETERS {
+        try {
+            return object_or_throw_call(
+                "to_email_identifier",
+                { box_arg(serialised) },
+                new EngineError.BAD_PARAMETERS("Mock error")
+            );
+        } catch (EngineError.BAD_PARAMETERS err) {
+            throw err;
+        } catch (GLib.Error err) {
+            return new MockEmailIdentifer(0);
+        }
+    }
+
     public override Gee.Collection<Folder> list_folders() throws Error {
         return object_call<Gee.Collection<Folder>>(
             "list_folders", {}, Gee.List.empty<Folder>()

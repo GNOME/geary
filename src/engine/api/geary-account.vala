@@ -1,4 +1,6 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2018-2019 Michael Gratton <mike@vee.net>.
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -303,6 +305,20 @@ public abstract class Geary.Account : BaseObject {
      * Unlike most methods in Account, this should only be called when the Account is closed.
      */
     public abstract async void rebuild_async(Cancellable? cancellable = null) throws Error;
+
+    /**
+     * Returns an email identifier from its serialised form.
+     *
+     * This is useful for converting a string representation of a
+     * email id back into an actual instance of an id. This does not
+     * guarantee that the email represented by the id will exist.
+     *
+     * @see EmailIdentifier.to_variant
+     * @throws EngineError.BAD_PARAMETERS when the variant is not the
+     * have the correct type.
+     */
+    public abstract EmailIdentifier to_email_identifier(GLib.Variant serialised)
+        throws EngineError.BAD_PARAMETERS;
 
     /**
      * Lists all the currently-available folders found under the parent path

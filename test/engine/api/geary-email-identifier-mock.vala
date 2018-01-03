@@ -21,4 +21,8 @@ public class Geary.MockEmailIdentifer : EmailIdentifier {
         return (other_mock == null) ? 1 : this.id - other_mock.id;
     }
 
+    public override GLib.Variant to_variant() {
+        return new GLib.Variant.int32(id);
+    }
+
 }
