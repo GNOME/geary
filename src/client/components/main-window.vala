@@ -854,7 +854,6 @@ public class MainWindow : Gtk.ApplicationWindow {
         get_action(ACTION_SELECTION_MODE_ENABLE).set_enabled(!enabled);
         this.main_toolbar.set_selection_mode_enabled(enabled);
         this.conversation_list.set_selection_mode_enabled(enabled);
-        this.conversation_viewer.show_none_selected();
         query_supported_actions();
     }
 
@@ -964,11 +963,11 @@ public class MainWindow : Gtk.ApplicationWindow {
 
     private void on_conversation_items_marked(Gee.List<ConversationListItem> marked,
                                               Gee.List<ConversationListItem> unmarked) {
+        Geary.App.Conversation? last_marked = null;
         if (!marked.is_empty) {
-            show_conversation(marked.last().conversation);
-        } else {
-            this.conversation_viewer.show_none_selected();
+            last_marked = marked.last().conversation;
         }
+        show_conversation(last_marked);
         this.main_toolbar.update_selection_count(
             this.conversation_list.get_marked_items().size
         );
