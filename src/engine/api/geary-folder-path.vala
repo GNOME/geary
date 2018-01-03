@@ -1,4 +1,6 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2018 Michael Gratton <mike@vee.net>.
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -15,11 +17,16 @@
 
 public class Geary.FolderPath : BaseObject, Gee.Hashable<Geary.FolderPath>,
     Gee.Comparable<Geary.FolderPath> {
+
+
+    public const string VARIANT_TYPE = "as";
+
+
     /**
      * The name of this folder (without any child or parent names or delimiters).
      */
     public string basename { get; private set; }
-    
+
     /**
      * Whether this path is lexiographically case-sensitive.
      *
@@ -29,22 +36,22 @@ public class Geary.FolderPath : BaseObject, Gee.Hashable<Geary.FolderPath>,
 
     private Gee.List<Geary.FolderPath>? path = null;
     private uint stored_hash = uint.MAX;
-    
+
     protected FolderPath(string basename, bool case_sensitive) {
         assert(this is FolderRoot);
-        
+
         this.basename = basename;
         this.case_sensitive = case_sensitive;
     }
-    
+
     private FolderPath.child(Gee.List<Geary.FolderPath> path, string basename, bool case_sensitive) {
         assert(path[0] is FolderRoot);
-        
+
         this.path = path;
         this.basename = basename;
         this.case_sensitive = case_sensitive;
     }
-    
+
     /**
      * Returns true if this {@link FolderPath} is a root folder.
      *
@@ -56,14 +63,14 @@ public class Geary.FolderPath : BaseObject, Gee.Hashable<Geary.FolderPath>,
     public bool is_root() {
         return (path == null || path.size == 0);
     }
-    
+
     /**
      * Returns the {@link FolderRoot} of this path.
      */
     public Geary.FolderRoot get_root() {
         return (FolderRoot) ((path != null && path.size > 0) ? path[0] : this);
     }
-    
+
     /**
      * Returns the parent {@link FolderPath} of this folder or null if this is the root.
      *
@@ -72,7 +79,7 @@ public class Geary.FolderPath : BaseObject, Gee.Hashable<Geary.FolderPath>,
     public Geary.FolderPath? get_parent() {
         return (path != null && path.size > 0) ? path.last() : null;
     }
-    
+
     /**
      * Returns the number of folders in this path, not including any children of this object.
      */
@@ -80,7 +87,7 @@ public class Geary.FolderPath : BaseObject, Gee.Hashable<Geary.FolderPath>,
         // include self, which is not stored in the path list
         return (path != null) ? path.size + 1 : 1;
     }
-    
+
     /**
      * Returns the {@link FolderPath} object at the index, with this FolderPath object being
      * the farthest child.
@@ -98,17 +105,17 @@ public class Geary.FolderPath : BaseObject, Gee.Hashable<Geary.FolderPath>,
         // look like "this" is stored at the end of the path list
         if (path == null)
             return (index == 0) ? this : null;
-        
+
         int length = path.size;
         if (index < length)
             return path[index];
-        
+
         if (index == length)
             return this;
-        
+
         return null;
     }
-    
+
     /**
      * Returns the {@link FolderPath} as a List of {@link basename} strings, this FolderPath's
      * being the last in the list.
@@ -117,17 +124,17 @@ public class Geary.FolderPath : BaseObject, Gee.Hashable<Geary.FolderPath>,
      */
     public Gee.List<string> as_list() {
         Gee.List<string> list = new Gee.ArrayList<string>();
-        
+
         if (path != null) {
             foreach (Geary.FolderPath folder in path)
                 list.add(folder.basename);
         }
-        
+
         list.add(basename);
-        
+
         return list;
     }
-    
+
     /**
      * Creates a {@link FolderPath} object that is a child of this folder.
      *
@@ -140,11 +147,11 @@ public class Geary.FolderPath : BaseObject, Gee.Hashable<Geary.FolderPath>,
         if (path != null)
             child_path.add_all(path);
         child_path.add(this);
-        
+
         return new FolderPath.child(child_path, basename,
             child_case_sensitive.to_boolean(get_root().default_case_sensitivity));
     }
-    
+
     /**
      * Returns true if the other {@link FolderPath} has the same parent as this one.
      *
@@ -154,35 +161,35 @@ public class Geary.FolderPath : BaseObject, Gee.Hashable<Geary.FolderPath>,
     public bool has_same_parent(FolderPath other) {
         FolderPath? parent = get_parent();
         FolderPath? other_parent = other.get_parent();
-        
+
         if (parent == other_parent)
             return true;
-        
+
         if (parent != null && other_parent != null)
             return parent.equal_to(other_parent);
-        
+
         return false;
     }
 
     private uint get_basename_hash() {
         return case_sensitive ? str_hash(basename) : str_hash(basename.down());
     }
-    
+
     private int compare_internal(Geary.FolderPath other, bool allow_case_sensitive, bool normalize) {
         if (this == other)
             return 0;
-        
+
         // walk elements using as_list() as that includes the basename (whereas path does not),
         // avoids the null problem, and makes comparisons straightforward
         Gee.List<string> this_list = as_list();
         Gee.List<string> other_list = other.as_list();
-        
+
         // if paths exist, do comparison of each parent in order
         int min = int.min(this_list.size, other_list.size);
         for (int ctr = 0; ctr < min; ctr++) {
             string this_element = this_list[ctr];
             string other_element = other_list[ctr];
-            
+
             if (normalize) {
                 this_element = this_element.normalize();
                 other_element = other_element.normalize();
@@ -193,17 +200,17 @@ public class Geary.FolderPath : BaseObject, Gee.Hashable<Geary.FolderPath>,
                 this_element = this_element.casefold();
                 other_element = other_element.casefold();
             }
-            
+
             int result = this_element.collate(other_element);
             if (result != 0)
                 return result;
         }
-        
+
         // paths up to the min element count are equal, shortest path is less-than, otherwise
         // equal paths
         return this_list.size - other_list.size;
     }
-    
+
     /**
      * Does a Unicode-normalized, case insensitive match.  Useful for getting a rough idea if
      * a folder matches a name, but shouldn't be used to determine strict equality.
@@ -211,7 +218,7 @@ public class Geary.FolderPath : BaseObject, Gee.Hashable<Geary.FolderPath>,
     public int compare_normalized_ci(Geary.FolderPath other) {
         return compare_internal(other, false, true);
     }
-    
+
     /**
      * {@inheritDoc}
      *
@@ -229,7 +236,7 @@ public class Geary.FolderPath : BaseObject, Gee.Hashable<Geary.FolderPath>,
     public int compare_to(Geary.FolderPath other) {
         return compare_internal(other, true, false);
     }
-    
+
     /**
      * {@inheritDoc}
      *
@@ -238,22 +245,22 @@ public class Geary.FolderPath : BaseObject, Gee.Hashable<Geary.FolderPath>,
     public uint hash() {
         if (stored_hash != uint.MAX)
             return stored_hash;
-        
+
         // always one element in path
         stored_hash = get_folder_at(0).get_basename_hash();
-        
+
         int path_length = get_path_length();
         for (int ctr = 1; ctr < path_length; ctr++)
             stored_hash ^= get_folder_at(ctr).get_basename_hash();
-        
+
         return stored_hash;
     }
-    
+
     private bool is_basename_equal(string cmp, bool other_cs) {
         // case-sensitive comparison if either is sensitive
         return (other_cs || case_sensitive) ? (basename == cmp) : (basename.down() == cmp.down());
     }
-    
+
     /**
      * {@inheritDoc}
      */
@@ -261,21 +268,35 @@ public class Geary.FolderPath : BaseObject, Gee.Hashable<Geary.FolderPath>,
         int path_length = get_path_length();
         if (other.get_path_length() != path_length)
             return false;
-        
+
         for (int ctr = 0; ctr < path_length; ctr++) {
             // this should never return null as length is already checked
             FolderPath? other_folder = other.get_folder_at(ctr);
             assert(other_folder != null);
-            
+
             if (!get_folder_at(ctr).is_basename_equal(other_folder.basename, other_folder.case_sensitive))
                 return false;
         }
-        
+
         return true;
     }
 
     /**
-     * Returns a string version of the path using a default separator.
+     * Returns a representation useful for serialisation.
+     *
+     * This can be used to transmit folder paths as D-Bus method and
+     * GLib Action parameters, and so on.
+     *
+     * @returns a serialised form of this path, that will match the
+     * GVariantType `as`
+     * @see Account.to_folder_path
+     */
+    public Variant to_variant() {
+        return new Variant.strv(as_list().to_array());
+    }
+
+    /**
+     * Returns a representation useful for debugging.
      *
      * Do not use this for obtaining an IMAP mailbox name to send to a
      * server, use {@link Geary.Imap.MailboxSpecifier.from_folder_path}
@@ -292,7 +313,9 @@ public class Geary.FolderPath : BaseObject, Gee.Hashable<Geary.FolderPath>,
         builder.append(basename);
         return builder.str;
     }
+
 }
+
 
 /**
  * The root of a folder heirarchy.
@@ -312,11 +335,10 @@ public abstract class Geary.FolderRoot : Geary.FolderPath {
      * @see FolderPath.get_child
      */
     public bool default_case_sensitivity { get; private set; }
-    
+
     protected FolderRoot(string basename, bool case_sensitive, bool default_case_sensitivity) {
         base (basename, case_sensitive);
-        
+
         this.default_case_sensitivity = default_case_sensitivity;
     }
 }
-

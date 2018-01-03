@@ -1,4 +1,6 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2018 Michael Gratton <mike@vee.net>.
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -18,6 +20,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
 
     private static Geary.FolderPath? outbox_path = null;
     private static Geary.FolderPath? search_path = null;
+    private static VariantType email_id_type = new VariantType("(y*)");
 
     private Imap.Account remote;
     private ImapDB.Account local;
@@ -304,6 +307,27 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         yield this.remote.open_async();
     }
 
+    public override EmailIdentifier to_email_identifier(GLib.Variant serialised)
+        throws EngineError {
+        if (serialised.is_of_type(GenericAccount.email_id_type)) {
+            throw new EngineError.BAD_PARAMETERS(
+                "Invalid outer serialised type: (y*)"
+            );
+        }
+        char type = (char) serialised.get_child_value(0).get_byte();
+        if (type == 'i')
+            return new ImapDB.EmailIdentifier.from_variant(serialised);
+        if (type == 's')
+            return new SmtpOutboxEmailIdentifier.from_variant(serialised);
+
+        throw new EngineError.BAD_PARAMETERS("Unknown serialised type: %c", type);
+    }
+
+    public override FolderPath to_folder_path(GLib.Variant serialised)
+        throws EngineError {
+        return Imap.FolderRoot.from_variant(serialised);
+    }
+
     // Subclasses should implement this to return their flavor of a MinimalFolder with the
     // appropriate interfaces attached.  The returned folder should have its SpecialFolderType
     // set using either the properties from the local folder or its path.
@@ -370,17 +394,6 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
 
         return all_folders;
     }
-
-    public override FolderPath new_folder_path(Gee.List<string> name_list) {
-        Gee.Iterator<string> names = name_list.iterator();
-        names.next();
-        Geary.FolderPath path = new Imap.FolderRoot(names.get());
-        while (names.next()) {
-            path = path.get_child(names.get());
-        }
-        return path;
-    }
-
     private void reschedule_unseen_update(Geary.Folder folder) {
         if (!folder_map.has_key(folder.path))
             return;

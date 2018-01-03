@@ -1,4 +1,6 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2018 Michael Gratton <mike@vee.net>.
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -17,24 +19,87 @@
  */
 
 public abstract class Geary.EmailIdentifier : BaseObject, Gee.Hashable<Geary.EmailIdentifier> {
+
+    /**
+     * Sorts the supplied Collection of {@link EmailIdentifier} by their natural sort order.
+     *
+     * This method uses {@link natural_sort_comparator}, so read its provisions about comparison.
+     * In essence, this method should only be used against EmailIdentifiers that originated from
+     * the same Folder.
+     */
+    public static Gee.SortedSet<Geary.EmailIdentifier> sort(Gee.Collection<Geary.EmailIdentifier> ids) {
+        Gee.SortedSet<Geary.EmailIdentifier> sorted = new Gee.TreeSet<Geary.EmailIdentifier>(
+            (a, b) => {
+                int cmp = a.natural_sort_comparator(b);
+                if (cmp == 0)
+                    cmp = a.stable_sort_comparator(b);
+
+                return cmp;
+            });
+        sorted.add_all(ids);
+
+        return sorted;
+    }
+
+    /**
+     * Sorts the supplied Collection of {@link EmailIdentifier} by their natural sort order.
+     *
+     * This method uses {@link natural_sort_comparator}, so read its provisions about comparison.
+     * In essence, this method should only be used against EmailIdentifiers that originated from
+     * the same Folder.
+     */
+    public static Gee.SortedSet<Geary.Email> sort_emails(Gee.Collection<Geary.Email> emails) {
+        Gee.SortedSet<Geary.Email> sorted = new Gee.TreeSet<Geary.Email>(
+            (a, b) => {
+                int cmp = a.id.natural_sort_comparator(b.id);
+                if (cmp == 0)
+                    cmp = a.id.stable_sort_comparator(b.id);
+
+                return cmp;
+            });
+        sorted.add_all(emails);
+
+        return sorted;
+    }
+
+
     // Warning: only change this if you know what you are doing.
     protected string unique;
-    
+
     protected EmailIdentifier(string unique) {
         this.unique = unique;
     }
-    
+
     public virtual uint hash() {
         return unique.hash();
     }
-    
+
+    /**
+     * Returns a representation useful for serialisation.
+     *
+     * This can be used to transmit ids as D-Bus method and GLib
+     * Action parameters, and so on.
+     *
+     * @returns a serialised form of this id, that will match the
+     * GVariantType `(*)`
+     * @see Account.to_email_identifier
+     */
+    public abstract GLib.Variant to_variant();
+
+    /**
+     * Returns a representation useful for debugging.
+     */
+    public virtual string to_string() {
+        return "[%s]".printf(unique.to_string());
+    }
+
     public virtual bool equal_to(Geary.EmailIdentifier other) {
         if (this == other)
             return true;
-        
+
         return unique == other.unique;
     }
-    
+
     /**
      * A comparator for stabilizing sorts.
      *
@@ -44,10 +109,10 @@ public abstract class Geary.EmailIdentifier : BaseObject, Gee.Hashable<Geary.Ema
     public virtual int stable_sort_comparator(Geary.EmailIdentifier other) {
         if (this == other)
             return 0;
-        
+
         return strcmp(unique, other.unique);
     }
-    
+
     /**
      * A comparator for finding which {@link EmailIdentifier} is earliest in the "natural"
      * sorting of a {@link Folder}'s list.
@@ -68,51 +133,5 @@ public abstract class Geary.EmailIdentifier : BaseObject, Gee.Hashable<Geary.Ema
      * @see Folder.list_email_by_id_async
      */
     public abstract int natural_sort_comparator(Geary.EmailIdentifier other);
-    
-    /**
-     * Sorts the supplied Collection of {@link EmailIdentifier} by their natural sort order.
-     *
-     * This method uses {@link natural_sort_comparator}, so read its provisions about comparison.
-     * In essence, this method should only be used against EmailIdentifiers that originated from
-     * the same Folder.
-     */
-    public static Gee.SortedSet<Geary.EmailIdentifier> sort(Gee.Collection<Geary.EmailIdentifier> ids) {
-        Gee.SortedSet<Geary.EmailIdentifier> sorted = new Gee.TreeSet<Geary.EmailIdentifier>(
-            (a, b) => {
-                int cmp = a.natural_sort_comparator(b);
-                if (cmp == 0)
-                    cmp = a.stable_sort_comparator(b);
-                
-                return cmp;
-            });
-        sorted.add_all(ids);
-        
-        return sorted;
-    }
-    
-    /**
-     * Sorts the supplied Collection of {@link EmailIdentifier} by their natural sort order.
-     *
-     * This method uses {@link natural_sort_comparator}, so read its provisions about comparison.
-     * In essence, this method should only be used against EmailIdentifiers that originated from
-     * the same Folder.
-     */
-    public static Gee.SortedSet<Geary.Email> sort_emails(Gee.Collection<Geary.Email> emails) {
-        Gee.SortedSet<Geary.Email> sorted = new Gee.TreeSet<Geary.Email>(
-            (a, b) => {
-                int cmp = a.id.natural_sort_comparator(b.id);
-                if (cmp == 0)
-                    cmp = a.id.stable_sort_comparator(b.id);
-                
-                return cmp;
-            });
-        sorted.add_all(emails);
-        
-        return sorted;
-    }
-    
-    public virtual string to_string() {
-        return "[%s]".printf(unique.to_string());
-    }
-}
 
+}

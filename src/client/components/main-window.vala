@@ -661,22 +661,6 @@ public class MainWindow : Gtk.ApplicationWindow {
         return (SimpleAction) lookup_action(name);
     }
 
-    private Geary.FolderPath? variant_to_path(Variant? strv) {
-        Geary.FolderPath? path = null;
-        if (this.current_folder != null &&
-            strv != null &&
-            strv.get_type_string() == "as") {
-            path = this.current_folder.account.new_folder_path(
-                new Gee.ArrayList<string>.wrap(strv.get_strv())
-            );
-        }
-        return path;
-    }
-
-    private Variant path_to_variant(Geary.FolderPath path) {
-        return new Variant.strv(path.as_list().to_array());
-    }
-
     private void on_folder_selected(Geary.Folder? folder) {
         if (folder != null) {
             update_folder(folder);
@@ -871,8 +855,15 @@ public class MainWindow : Gtk.ApplicationWindow {
     }
 
     private void on_conversation_copy(Action action, Variant? param) {
-        Geary.FolderPath? destination = variant_to_path(param);
-        if (path != null) {
+        Geary.FolderPath? destination = null;
+        if (param != null) {
+            try {
+                destination = this.current_folder.account.to_folder_path(param);
+            } catch (Geary.EngineError err) {
+                debug("Failed to deserialise folder path: %s", err.message);
+            }
+        }
+        if (destination != null) {
             this.application.controller.copy_conversations.begin(
                 this.conversation_list.get_highlighted_conversations(),
                 destination,
@@ -1009,8 +1000,15 @@ public class MainWindow : Gtk.ApplicationWindow {
     }
 
     private void on_conversation_move(Action action, Variant? param) {
-        Geary.FolderPath? destination = variant_to_path(param);
-        if (path != null) {
+        Geary.FolderPath? destination = null;
+        if (param != null) {
+            try {
+                destination = this.current_folder.account.to_folder_path(param);
+            } catch (Geary.EngineError err) {
+                debug("Failed to deserialise folder path: %s", err.message);
+            }
+        }
+        if (destination != null) {
             this.application.controller.move_conversations.begin(
                 this.conversation_list.get_highlighted_conversations(),
                 destination,
@@ -1055,11 +1053,11 @@ public class MainWindow : Gtk.ApplicationWindow {
     }
 
     public void on_copy_folder(Geary.Folder target) {
-        get_action(ACTION_COPY).activate(path_to_variant(target.path));
+        get_action(ACTION_COPY).activate(target.path.to_variant());
     }
 
     public void on_move_folder(Geary.Folder target) {
-        get_action(ACTION_MOVE).activate(path_to_variant(target.path));
+        get_action(ACTION_MOVE).activate(target.path.to_variant());
     }
 
     private void on_selection_mode_enabled() {

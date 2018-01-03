@@ -1,4 +1,6 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2018 Michael Gratton <mike@vee.net>.
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -13,28 +15,47 @@
  */
 
 private class Geary.Imap.FolderRoot : Geary.FolderRoot {
+
+
+    public static FolderPath from_variant(Variant serialised)
+        throws EngineError {
+        if (serialised.get_type_string() != VARIANT_TYPE) {
+            throw new EngineError.BAD_PARAMETERS(
+                "Invalid serialised id type: %s", serialised.get_type_string()
+            );
+        }
+
+        FolderPath path = new FolderRoot(serialised.get_child_value(0).get_string());
+        for (int i = 1; i < serialised.n_children(); i++) {
+            path = path.get_child(serialised.get_child_value(i).get_string());
+        }
+        return path;
+    }
+
+
     public bool is_inbox { get; private set; }
-    
+
+
     public FolderRoot(string basename) {
         bool init_is_inbox;
         string normalized_basename = init(basename, out init_is_inbox);
-        
+
         base (normalized_basename, !init_is_inbox, true);
-        
+
         is_inbox = init_is_inbox;
     }
-    
+
     // This is the magic that ensures the canonical IMAP Inbox name is used throughout the engine
     private static string init(string basename, out bool is_inbox) {
         if (MailboxSpecifier.is_inbox_name(basename)) {
             is_inbox = true;
-            
+
             return MailboxSpecifier.CANONICAL_INBOX_NAME;
         }
-        
+
         is_inbox = false;
-        
+
         return basename;
     }
-}
 
+}

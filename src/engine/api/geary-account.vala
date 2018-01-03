@@ -1,4 +1,6 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2018 Michael Gratton <mike@vee.net>.
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -187,6 +189,35 @@ public abstract class Geary.Account : BaseObject {
         throws Error;
 
     /**
+     * Returns the email identifier from its serialised form.
+     *
+     * This is useful for converting a string representation of a
+     * email id back into an actual instance of an id. This does not
+     * guarantee that the email represented by the id will exist.
+     *
+     * @see EmailIdentifier.to_variant
+     * @throws EngineError.BAD_PARAMETERS when the variant is not the
+     * have the correct type.
+     */
+    public abstract EmailIdentifier to_email_identifier(GLib.Variant serialised)
+        throws EngineError;
+
+    /**
+     * Returns the folder path from its serialised form.
+     *
+     * This is useful for converting a string representation of a
+     * folder path back into an actual instance of a path. This does
+     * not guarantee that the folder represented by the path will
+     * exist.
+     *
+     * @see FolderPath.to_variant
+     * @throws EngineError.BAD_PARAMETERS when the variant is not the
+     * have the correct type.
+     */
+    public abstract FolderPath to_folder_path(GLib.Variant serialised)
+        throws EngineError;
+
+    /**
      * Lists all the currently-available folders found under the parent path
      * unless it's null, in which case it lists all the root folders.  If the
      * parent path cannot be found, EngineError.NOT_FOUND is thrown.  If no
@@ -207,18 +238,6 @@ public abstract class Geary.Account : BaseObject {
      * list_matching_folders().
      */
     public abstract Gee.Collection<Geary.Folder> list_folders() throws Error;
-
-    /**
-     * Returns a path for a list of folder names.
-     *
-     * This is useful for converting a string representation of a
-     * folder path back into an actual instance of a folder path. This
-     * does not guarantee that the folder represented by the path will
-     * exist.
-     *
-     * {@see FolderPath.as_list}
-     */
-    public abstract FolderPath new_folder_path(Gee.List<string> name_list);
 
     /**
      * Gets a perpetually update-to-date collection of autocompletion contacts.
