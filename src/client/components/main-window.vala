@@ -1141,8 +1141,11 @@ public class MainWindow : Gtk.ApplicationWindow {
 
         Geary.App.Conversation? target = variant_to_conversation(param);
         if (target != null) {
+            Geary.Email latest = target.get_latest_sent_email(
+                Geary.App.Conversation.Location.IN_FOLDER_OUT_OF_FOLDER
+            );
             this.application.controller.mark_email.begin(
-                target.get_email_ids(), flags, null,
+                Geary.Collection.new_unary_linked_list(latest.id), flags, null,
                 (obj, ret) => {
                     try {
                         this.application.controller.mark_email.end(ret);
@@ -1160,8 +1163,11 @@ public class MainWindow : Gtk.ApplicationWindow {
 
         Geary.App.Conversation? target = variant_to_conversation(param);
         if (target != null) {
+            Geary.Email latest = target.get_latest_sent_email(
+                Geary.App.Conversation.Location.IN_FOLDER_OUT_OF_FOLDER
+            );
             this.application.controller.mark_email.begin(
-                target.get_email_ids(), flags, null,
+                Geary.Collection.new_unary_linked_list(latest.id), flags, null,
                 (obj, ret) => {
                     try {
                         this.application.controller.mark_email.end(ret);
