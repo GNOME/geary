@@ -1,6 +1,6 @@
 /*
- * Copyright 2017 Michael Gratton <mike@vee.net>
  * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2017-2018 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -56,6 +56,10 @@ public class PreviewLoader : Geary.BaseObject {
         this.load_timer = new Geary.TimeoutManager.seconds(
             1, () => { this.do_load.begin(); }
         );
+    }
+
+    ~PreviewLoader() {
+        this.load_timer.reset();
     }
 
     public void load_remote() {
