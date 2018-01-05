@@ -1,6 +1,6 @@
 /*
  * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2017 Michael Gratton <mike@vee.net>
+ * Copyright 2017-2018 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -114,6 +114,14 @@ public class ConversationList : Gtk.ListBox {
                 selection_changed();
             });
         this.show.connect(on_show);
+
+        Gtk.drag_source_set(
+            this,
+            Gdk.ModifierType.BUTTON1_MASK,
+            FolderList.Tree.TARGET_ENTRY_LIST,
+            Gdk.DragAction.COPY | Gdk.DragAction.MOVE
+        );
+        Gtk.drag_source_set_icon_name(this, "mail-unread-symbolic");
 
         Gtk.Builder builder = new Gtk.Builder.from_resource(
             "/org/gnome/Geary/conversation-list-menus.ui"

@@ -98,22 +98,24 @@ public class FolderList.FolderEntry : FolderList.AbstractFolderEntry, Sidebar.In
         this.has_new = has_new;
         is_emphasized_changed(has_new);
     }
-    
-    public bool internal_drop_received(Gdk.DragContext context, Gtk.SelectionData data) {
-        // Copy or move?
-        Gdk.ModifierType mask;
-        double[] axes = new double[2];
-        context.get_device().get_state(context.get_dest_window(), axes, out mask);
-        MainWindow main_window = GearyApplication.instance.controller.main_window;
-        if ((mask & Gdk.ModifierType.CONTROL_MASK) != 0) {
-            main_window.folder_list.copy_conversation(folder);
-        } else {
-            main_window.folder_list.move_conversation(folder);
-        }
 
+    public bool internal_drop_received(Gdk.DragContext context, Gtk.SelectionData data) {
+        MainWindow main_window = GearyApplication.instance.controller.main_window;
+        debug("drop on: %s", this.folder.to_string());
+        if (context.get_selected_action() == Gdk.DragAction.MOVE) {
+            main_window.activate_action(
+                MainWindow.ACTION_HIGHLIGHTED_MOVE,
+                this.folder.path.to_variant()
+            );
+        } else {
+            main_window.activate_action(
+                MainWindow.ACTION_HIGHLIGHTED_COPY,
+                this.folder.path.to_variant()
+            );
+        }
         return true;
     }
-    
+
     private void on_counts_changed() {
         sidebar_count_changed(get_count());
         sidebar_tooltip_changed(get_sidebar_tooltip());

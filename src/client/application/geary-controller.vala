@@ -186,11 +186,9 @@ public class GearyController : Geary.BaseObject {
         Geary.Engine.instance.account_available.connect(on_account_available);
         Geary.Engine.instance.account_unavailable.connect(on_account_unavailable);
         Geary.Engine.instance.untrusted_host.connect(on_untrusted_host);
-        
+
         // Connect to various UI signals.
         main_window.folder_list.folder_selected.connect(on_folder_selected);
-        main_window.folder_list.copy_conversation.connect(on_copy_conversation);
-        main_window.folder_list.move_conversation.connect(on_move_conversation);
         main_window.search_bar.search_text_changed.connect((text) => { do_search(text); });
         main_window.conversation_viewer.conversation_added.connect(
             on_conversation_view_added
@@ -256,8 +254,6 @@ public class GearyController : Geary.BaseObject {
 
         // Disconnect from various UI signals.
         main_window.folder_list.folder_selected.disconnect(on_folder_selected);
-        main_window.folder_list.copy_conversation.disconnect(on_copy_conversation);
-        main_window.folder_list.move_conversation.disconnect(on_move_conversation);
         main_window.conversation_viewer.conversation_added.disconnect(
             on_conversation_view_added
         );
@@ -1583,26 +1579,6 @@ public class GearyController : Geary.BaseObject {
         clear_new_messages("on_has_toplevel_focus", null);
     }
 
-    // latest_sent_only uses Email's Date: field, which corresponds to how they're sorted in the
-    // ConversationViewer
-    private Gee.ArrayList<Geary.EmailIdentifier> get_selected_email_ids(bool latest_sent_only) {
-        Geary.App.Conversation? conversation =
-            this.main_window.conversation_list.selected;
-        Gee.ArrayList<Geary.EmailIdentifier> ids =
-            new Gee.ArrayList<Geary.EmailIdentifier>();
-        if (conversation != null) {
-            if (latest_sent_only) {
-                Geary.Email? latest = conversation.get_latest_sent_email(
-                    Geary.App.Conversation.Location.IN_FOLDER_OUT_OF_FOLDER);
-                if (latest != null)
-                    ids.add(latest.id);
-            } else {
-                ids.add_all(conversation.get_email_ids());
-            }
-        }
-        return ids;
-    }
-
     private bool should_notify_new_messages(Geary.Folder folder) {
         // A monitored folder must be selected to squelch notifications;
         // if conversation list is at top of display, don't display
@@ -1635,42 +1611,6 @@ public class GearyController : Geary.BaseObject {
     private void on_conversation_viewer_mark_emails(Gee.Collection<Geary.EmailIdentifier> emails,
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove) {
         mark_email.begin(emails, flags_to_add, flags_to_remove);
-    }
-
-    private void copy_email(Gee.Collection<Geary.EmailIdentifier> ids,
-        Geary.FolderPath destination) {
-        if (ids.size > 0) {
-            email_stores.get(current_folder.account).copy_email_async.begin(
-                ids, destination, cancellable_folder);
-        }
-    }
-    
-    private void on_copy_conversation(Geary.Folder destination) {
-        copy_email(get_selected_email_ids(false), destination.path);
-    }
-    
-    private void on_move_conversation(Geary.Folder destination) {
-        // Nothing to do if nothing selected.
-        Gee.List<Geary.EmailIdentifier> ids = get_selected_email_ids(false);
-        if (ids.size == 0)
-            return;
-
-        Geary.FolderSupport.Move? supports_move = current_folder as Geary.FolderSupport.Move;
-        if (supports_move != null)
-            move_conversation_async.begin(
-                supports_move, ids, destination.path, cancellable_folder
-            );
-    }
-
-    private async void move_conversation_async(Geary.FolderSupport.Move source_folder,
-        Gee.List<Geary.EmailIdentifier> ids, Geary.FolderPath destination, Cancellable? cancellable) {
-        try {
-            save_revokable(yield source_folder.move_email_async(ids, destination, cancellable),
-                _("Undo move (Ctrl+Z)"));
-        } catch (Error err) {
-            debug("%s: Unable to move %d emails: %s", source_folder.to_string(), ids.size,
-                err.message);
-        }
     }
 
     private void on_attachments_activated(Gee.Collection<Geary.Attachment> attachments) {

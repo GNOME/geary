@@ -11,11 +11,9 @@ public class FolderList.Tree : Sidebar.Tree {
     
     private const int INBOX_ORDINAL = -2; // First account branch is zero
     private const int SEARCH_ORDINAL = -1;
-    
+
     public signal void folder_selected(Geary.Folder? folder);
-    public signal void copy_conversation(Geary.Folder folder);
-    public signal void move_conversation(Geary.Folder folder);
-    
+
     private Gee.HashMap<Geary.Account, AccountBranch> account_branches
         = new Gee.HashMap<Geary.Account, AccountBranch>();
     private InboxesBranch inboxes_branch = new InboxesBranch();
@@ -210,7 +208,7 @@ public class FolderList.Tree : Sidebar.Tree {
         }
         return ret;
     }
-    
+
     private void on_ordinal_changed() {
         if (account_branches.size <= 1)
             return;
