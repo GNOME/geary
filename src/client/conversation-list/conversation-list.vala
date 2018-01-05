@@ -164,10 +164,11 @@ public class ConversationList : Gtk.ListBox {
         return this.marked.keys.read_only_view;
     }
 
-    public new void bind_model(Geary.App.ConversationMonitor monitor) {
+    public new void bind_model(Geary.App.ConversationMonitor monitor,
+                               Cancellable cancellable) {
         Geary.Folder displayed = monitor.base_folder;
         Geary.App.EmailStore store = new Geary.App.EmailStore(displayed.account);
-        PreviewLoader loader = new PreviewLoader(store, new Cancellable()); // XXX
+        PreviewLoader loader = new PreviewLoader(store, cancellable);
 
         monitor.scan_started.connect(on_scan_started);
         monitor.scan_completed.connect(on_scan_completed);

@@ -56,6 +56,8 @@ public class PreviewLoader : Geary.BaseObject {
         this.load_timer = new Geary.TimeoutManager.seconds(
             1, () => { this.do_load.begin(); }
         );
+
+        cancellable.cancelled.connect(() => { this.load_timer.reset(); });
     }
 
     ~PreviewLoader() {

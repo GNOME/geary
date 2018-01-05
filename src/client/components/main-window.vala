@@ -746,6 +746,7 @@ public class MainWindow : Gtk.ApplicationWindow {
             folder, folder.get_support_types()
         );
         this.highlighted_policy = null;
+        this.load_cancellable = new Cancellable();
 
         // Set up a new conversation monitor for the folder
         Geary.App.ConversationMonitor monitor = new Geary.App.ConversationMonitor(
@@ -764,7 +765,7 @@ public class MainWindow : Gtk.ApplicationWindow {
         monitor.email_flags_changed.connect(on_conversation_flags_changed);
 
         this.current_conversations = monitor;
-        this.conversation_list.bind_model(monitor);
+        this.conversation_list.bind_model(monitor, this.load_cancellable);
 
         // Update the UI
         this.conversation_list_actions.set_account(folder.account);
@@ -778,7 +779,6 @@ public class MainWindow : Gtk.ApplicationWindow {
         this.progress_monitor.add(this.conversation_list.model.previews.progress);
 
         // Finally, start the folder loading
-        this.load_cancellable = new Cancellable();
         monitor.start_monitoring_async.begin(this.load_cancellable);
         this.conversation_list.thaw_selection();
     }
