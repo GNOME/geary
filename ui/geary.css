@@ -106,6 +106,14 @@ row.geary-folder-popover-list-row > label {
   margin-left: 6px;
 }
 
+.geary-conversation-list-item label.geary-subject {
+  margin-top: 2px;
+}
+
+.geary-conversation-list-item.geary-unread label.geary-subject {
+  font-weight: bold;
+}
+
 .geary-conversation-list-item label.geary-count {
   padding: 2px 6px;
   border-radius: 2px;

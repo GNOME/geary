@@ -215,11 +215,6 @@ public class ConversationListItem : Gtk.ListBoxRow {
         );
 
         if (preview_message != null) {
-            Pango.AttrList attrs = new Pango.AttrList();
-            if (this.conversation.is_unread()) {
-                attrs.insert(Pango.attr_weight_new(Pango.Weight.BOLD));
-            }
-            this.subject.set_attributes(attrs);
             this.subject.set_text(Geary.String.reduce_whitespace(
                 EmailUtil.strip_subject_prefixes(preview_message)
             ));
