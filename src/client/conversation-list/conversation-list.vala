@@ -322,8 +322,27 @@ public class ConversationList : Gtk.ListBox {
     }
 
     internal Gee.Set<Geary.App.Conversation> get_visible_conversations() {
+        // Allow for themes that pad the list box, etc.
+        const int FUDGE_FACTOR = 20;
+        ConversationListItem? first =
+            get_row_at_y(FUDGE_FACTOR)
+            as ConversationListItem;
+        ConversationListItem? last =
+            get_row_at_y(get_allocated_height() - FUDGE_FACTOR)
+            as ConversationListItem;
         Gee.HashSet<Geary.App.Conversation> visible = new Gee.HashSet<Geary.App.Conversation>();
-        // XXX Implement me
+        if (first != null) {
+            visible.add(first.conversation);
+            int upper = last != null
+                ? last.get_index() + 1
+                : (int) this.model.get_n_items();
+            for (int i = first.get_index() + 1; i < upper; i++) {
+                ConversationListItem? item = get_item_at_index(i);
+                if (item != null) {
+                    visible.add(item.conversation);
+                }
+            }
+        }
         return visible;
     }
 
@@ -431,7 +450,7 @@ public class ConversationList : Gtk.ListBox {
     private void update_visible_conversations() {
         Gee.Set<Geary.App.Conversation> visible_now = get_visible_conversations();
         if (this.visible_conversations == null ||
-            Geary.Collection.are_sets_equal<Geary.App.Conversation>(
+            !Geary.Collection.are_sets_equal<Geary.App.Conversation>(
                 this.visible_conversations, visible_now)) {
             this.visible_conversations = visible_now;
             this.visible_conversations_changed(visible_now.read_only_view);
