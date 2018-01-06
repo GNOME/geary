@@ -1,6 +1,6 @@
 /*
  * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2016 Michael Gratton <mike@vee.net>
+ * Copyright 2016-2018 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -487,6 +487,7 @@ public class ConversationListBox : Gtk.ListBox {
                                Geary.ContactStore contact_store,
                                Geary.AccountInformation account_info,
                                bool is_draft_folder,
+                               bool auto_mark,
                                Configuration config,
                                Soup.Session avatar_session,
                                Gtk.Adjustment adjustment) {
@@ -505,11 +506,14 @@ public class ConversationListBox : Gtk.ListBox {
         set_selection_mode(Gtk.SelectionMode.NONE);
         set_sort_func(ConversationListBox.on_sort);
 
-        this.realize.connect(() => {
-                adjustment.value_changed.connect(() => { check_mark_read(); });
-            });
+        if (auto_mark) {
+            this.realize.connect(() => {
+                    adjustment.value_changed.connect(() => { check_mark_read(); });
+                });
+            this.size_allocate.connect(() => { check_mark_read(); });
+        }
+
         this.row_activated.connect(on_row_activated);
-        this.size_allocate.connect(() => { check_mark_read(); });
 
         this.conversation.appended.connect(on_conversation_appended);
         this.conversation.trimmed.connect(on_conversation_trimmed);

@@ -802,7 +802,8 @@ public class MainWindow : Gtk.ApplicationWindow {
         }
     }
 
-    private void show_conversation(Geary.App.Conversation? target) {
+    private void show_conversation(Geary.App.Conversation? target,
+                                   bool auto_mark) {
         Geary.App.Conversation? current = null;
         ConversationListBox? listbox = this.conversation_viewer.current_list;
         if (listbox != null) {
@@ -828,6 +829,7 @@ public class MainWindow : Gtk.ApplicationWindow {
             this.main_toolbar.subject = subject;
             this.conversation_viewer.load_conversation.begin(
                 target,
+                auto_mark,
                 this.application.config,
                 this.application.controller.avatar_session,
                 (obj, ret) => {
@@ -943,7 +945,7 @@ public class MainWindow : Gtk.ApplicationWindow {
     }
 
     private void on_conversation_selection_changed(Geary.App.Conversation? selection) {
-        show_conversation(selection);
+        show_conversation(selection, true);
         query_supported_actions();
     }
 
@@ -967,7 +969,7 @@ public class MainWindow : Gtk.ApplicationWindow {
         if (!marked.is_empty) {
             last_marked = marked.last().conversation;
         }
-        show_conversation(last_marked);
+        show_conversation(last_marked, false);
         this.main_toolbar.update_selection_count(
             this.conversation_list.get_marked_items().size
         );

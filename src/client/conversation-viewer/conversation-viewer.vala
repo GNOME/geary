@@ -1,6 +1,6 @@
 /*
  * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2016-2017 Michael Gratton <mike@vee.net>
+ * Copyright 2016-2018 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -162,6 +162,7 @@ public class ConversationViewer : Gtk.Stack {
      * Shows a conversation in the viewer.
      */
     public async void load_conversation(Geary.App.Conversation conversation,
+                                        bool auto_mark,
                                         Configuration config,
                                         Soup.Session avatar_session)
         throws Error {
@@ -175,6 +176,7 @@ public class ConversationViewer : Gtk.Stack {
             account.get_contact_store(),
             account.information,
             location.special_folder_type == Geary.SpecialFolderType.DRAFTS,
+            auto_mark,
             config,
             avatar_session,
             this.conversation_scroller.get_vadjustment()
