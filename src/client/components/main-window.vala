@@ -32,11 +32,11 @@ public class MainWindow : Gtk.ApplicationWindow {
     public const string ACTION_HIGHLIGHTED_RESTORE = "highlighted-restore";
     public const string ACTION_HIGHLIGHTED_TRASH = "highlighted-trash";
 
-    public const string ACTION_SHOW_COPY = "show-copy";
-    public const string ACTION_SHOW_MOVE = "show-move";
-
     public const string ACTION_SELECTION_MODE_DISABLE = "selection-mode-disable";
     public const string ACTION_SELECTION_MODE_ENABLE = "selection-mode-enable";
+
+    public const string ACTION_TOGGLE_COPY_MENU = "toggle-copy-menu";
+    public const string ACTION_TOGGLE_MOVE_MENU = "toggle-move-menu";
 
     internal const int CONVERSATION_PAGE_SIZE = 50;
 
@@ -71,11 +71,11 @@ public class MainWindow : Gtk.ApplicationWindow {
         { ACTION_HIGHLIGHTED_RESTORE,        on_highlighted_restore            },
         { ACTION_HIGHLIGHTED_TRASH,          on_highlighted_trash              },
 
-        { ACTION_SHOW_COPY },
-        { ACTION_SHOW_MOVE },
-
         { ACTION_SELECTION_MODE_DISABLE, on_selection_mode_disabled },
-        { ACTION_SELECTION_MODE_ENABLE,  on_selection_mode_enabled  }
+        { ACTION_SELECTION_MODE_ENABLE,  on_selection_mode_enabled  },
+
+        { ACTION_TOGGLE_COPY_MENU, on_toggle_copy_menu },
+        { ACTION_TOGGLE_MOVE_MENU, on_toggle_move_menu }
     };
 
 
@@ -501,8 +501,8 @@ public class MainWindow : Gtk.ApplicationWindow {
         add_window_accelerators(ACTION_HIGHLIGHTED_JUNK, { "<Ctrl>J", "exclam" }); // Exclamation mark (!)
         add_window_accelerators(ACTION_HIGHLIGHTED_TRASH, { "Delete", "BackSpace" });
 
-        add_window_accelerators(ACTION_SHOW_COPY, { "L" });
-        add_window_accelerators(ACTION_SHOW_MOVE, { "M" });
+        add_window_accelerators(ACTION_TOGGLE_COPY_MENU, { "L" });
+        add_window_accelerators(ACTION_TOGGLE_MOVE_MENU, { "M" });
 
         add_window_accelerators(ACTION_SELECTION_MODE_DISABLE, { "Escape", });
     }
@@ -572,6 +572,7 @@ public class MainWindow : Gtk.ApplicationWindow {
                 });
         } else if (highlighted.is_empty) {
             this.highlighted_policy = null;
+            update_highlighted_actions();
         }
     }
 
@@ -597,19 +598,15 @@ public class MainWindow : Gtk.ApplicationWindow {
             has_highlighted && policy.can_trash
         );
 
-        get_action(ACTION_HIGHLIGHTED_COPY).set_enabled(
-            has_highlighted && policy.can_copy
-        );
-        get_action(ACTION_SHOW_COPY).set_enabled(
-            has_highlighted && policy.can_copy
-        );
+        bool can_copy = has_highlighted && policy.can_copy;
+        get_action(ACTION_HIGHLIGHTED_COPY).set_enabled(can_copy);
+        get_action(ACTION_TOGGLE_COPY_MENU).set_enabled(can_copy);
+        this.conversation_list_actions.copy_menu.set_sensitive(can_copy);
 
-        get_action(ACTION_HIGHLIGHTED_MOVE).set_enabled(
-            has_highlighted && policy.can_move
-        );
-        get_action(ACTION_SHOW_MOVE).set_enabled(
-            has_highlighted && policy.can_move
-        );
+        bool can_move = has_highlighted && policy.can_move;
+        get_action(ACTION_HIGHLIGHTED_MOVE).set_enabled(can_move);
+        get_action(ACTION_TOGGLE_MOVE_MENU).set_enabled(can_move);
+        this.conversation_list_actions.move_menu.set_sensitive(can_move);
 
         SimpleAction mark_read = get_action(ACTION_HIGHLIGHTED_MARK_READ);
         SimpleAction mark_unread = get_action(ACTION_HIGHLIGHTED_MARK_UNREAD);
@@ -1461,6 +1458,16 @@ public class MainWindow : Gtk.ApplicationWindow {
 
     private void on_selection_mode_disabled() {
         set_selection_mode_enabled(false);
+    }
+
+    public void on_toggle_copy_menu() {
+        Gtk.MenuButton button = this.conversation_list_actions.copy_menu;
+        button.set_active(!button.active);
+    }
+
+    public void on_toggle_move_menu() {
+        Gtk.MenuButton button = this.conversation_list_actions.move_menu;
+        button.set_active(!button.active);
     }
 
     private void on_visible_conversations_changed(Gee.Set<Geary.App.Conversation> visible) {

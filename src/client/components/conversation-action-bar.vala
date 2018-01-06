@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Michael Gratton <mike@vee.net>
+ * Copyright 2017-2018 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -20,6 +20,11 @@ public class ConversationActionBar : Gtk.ActionBar {
     public FolderPopover move_folder_menu {
         get; set; default = new FolderPopover();
     }
+
+    [GtkChild]
+    internal Gtk.MenuButton copy_menu;
+    [GtkChild]
+    internal Gtk.MenuButton move_menu;
 
     private Geary.Account? owner = null;
     private Geary.Folder? location = null;
@@ -44,10 +49,6 @@ public class ConversationActionBar : Gtk.ActionBar {
     private Gtk.Button archive_action;
     [GtkChild]
     private Gtk.Button restore_action;
-    [GtkChild]
-    private Gtk.MenuButton copy_action;
-    [GtkChild]
-    private Gtk.MenuButton move_action;
 
     [GtkChild]
     private Gtk.Grid destructive_actions;
@@ -60,8 +61,8 @@ public class ConversationActionBar : Gtk.ActionBar {
 
 
     public ConversationActionBar() {
-        this.copy_action.popover = copy_folder_menu;
-        this.move_action.popover = move_folder_menu;
+        this.copy_menu.popover = copy_folder_menu;
+        this.move_menu.popover = move_folder_menu;
     }
 
     public void set_account(Geary.Account account) {
@@ -149,9 +150,9 @@ public class ConversationActionBar : Gtk.ActionBar {
         this.folder_actions.set_visible(primary_action != null || show_folder_actions);
         this.archive_action.set_visible(primary_action == this.archive_action);
         this.restore_action.set_visible(primary_action == this.restore_action);
-        this.copy_action.set_visible(show_folder_actions);
+        this.copy_menu.set_visible(show_folder_actions);
         this.copy_folder_menu.enable_disable_folder(location, false);
-        this.move_action.set_visible(show_folder_actions);
+        this.move_menu.set_visible(show_folder_actions);
         this.move_folder_menu.enable_disable_folder(location, false);
 
         if (show_trash && !this.has_trash) {

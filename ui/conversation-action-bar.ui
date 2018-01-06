@@ -123,11 +123,10 @@
           </packing>
         </child>
         <child>
-          <object class="GtkMenuButton" id="copy_action">
+          <object class="GtkMenuButton" id="copy_menu">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <property name="action_name">win.show-copy</property>
             <child>
               <object class="GtkImage">
                 <property name="visible">True</property>
@@ -142,11 +141,10 @@
           </packing>
         </child>
         <child>
-          <object class="GtkMenuButton" id="move_action">
+          <object class="GtkMenuButton" id="move_menu">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
             <property name="receives_default">True</property>
-            <property name="action_name">win.show-move</property>
             <child>
               <object class="GtkImage">
                 <property name="visible">True</property>
