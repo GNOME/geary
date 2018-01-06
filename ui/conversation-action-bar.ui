@@ -20,7 +20,7 @@
               <object class="GtkImage">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="icon_name">mail-unread-symbolic</property>
+                <property name="icon_name">mail-read-symbolic</property>
               </object>
             </child>
           </object>
@@ -38,7 +38,7 @@
               <object class="GtkImage">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="icon_name">mail-read-symbolic</property>
+                <property name="icon_name">mail-unread-symbolic</property>
               </object>
             </child>
           </object>
@@ -75,7 +75,7 @@
               <object class="GtkImage">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
-                <property name="icon_name">starred-symbolic</property>
+                <property name="icon_name">non-starred-symbolic</property>
               </object>
             </child>
           </object>
@@ -93,7 +93,7 @@
         <property name="position">0</property>
       </packing>
     </child>
-    <child>
+    <child type="center">
       <object class="GtkGrid" id="folder_actions">
         <property name="can_focus">False</property>
         <child>
@@ -164,10 +164,6 @@
           <class name="linked"/>
         </style>
       </object>
-      <packing>
-        <property name="pack_type">start</property>
-        <property name="position">1</property>
-      </packing>
     </child>
     <child>
       <object class="GtkGrid" id="destructive_actions">

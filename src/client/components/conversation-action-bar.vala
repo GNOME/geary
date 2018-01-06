@@ -143,11 +143,8 @@ public class ConversationActionBar : Gtk.ActionBar {
             break;
         }
 
-        // XXX just always hide these for now while the UX is sorted out
-        //this.flag_actions.set_visible(show_flag_actions);
-        this.flag_actions.set_visible(false);
-        update_action_pair(this.mark_read_action, this.mark_unread_action);
-        update_action_pair(this.mark_starred_action, this.mark_unstarred_action);
+        this.flag_actions.set_visible(show_flag_actions);
+        update_flags();
 
         this.folder_actions.set_visible(primary_action != null || show_folder_actions);
         this.archive_action.set_visible(primary_action == this.archive_action);
@@ -167,6 +164,11 @@ public class ConversationActionBar : Gtk.ActionBar {
         this.junk_action.set_visible(show_junk);
         this.trash_action.set_visible(show_trash);
         this.delete_action.set_visible(show_delete && !show_trash);
+    }
+
+    public void update_flags() {
+        update_action_pair(this.mark_read_action, this.mark_unread_action);
+        update_action_pair(this.mark_starred_action, this.mark_unstarred_action);
     }
 
     private void update_account() {
@@ -201,14 +203,22 @@ public class ConversationActionBar : Gtk.ActionBar {
 
     private inline void update_action_pair(Gtk.Button primary, Gtk.Button secondary) {
         bool show_primary = true;
-        string? secondary_action_name = secondary.get_action_name();
+        string primary_action_name = primary.get_action_name();
+        string secondary_action_name = secondary.get_action_name();
         MainWindow? window = get_toplevel() as MainWindow;
-        if (window != null && secondary_action_name != null) {
+        if (window != null) {
+            Action? primary_action = window.lookup_action(
+                primary_action_name.substring(4) // chop off the "win."
+            );
             Action? secondary_action = window.lookup_action(
                 secondary_action_name.substring(4) // chop off the "win."
             );
-            if (secondary_action != null) {
-                show_primary = !secondary_action.get_enabled();
+
+            if (primary_action != null && secondary_action != null) {
+                show_primary = (
+                    primary_action.get_enabled() ||
+                    !secondary_action.get_enabled()
+                );
             }
         }
 

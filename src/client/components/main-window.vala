@@ -643,6 +643,8 @@ public class MainWindow : Gtk.ApplicationWindow {
             mark_starred.set_enabled(false);
             mark_unstarred.set_enabled(false);
         }
+
+        this.conversation_list_actions.update_flags();
     }
 
     private void show_conversation_context_menu(Menu menu,
