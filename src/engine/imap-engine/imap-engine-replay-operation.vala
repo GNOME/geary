@@ -1,40 +1,50 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
+/**
+ * Base class for folder operations executed by {@link ReplayQueue}.
+ */
 private abstract class Geary.ImapEngine.ReplayOperation : Geary.BaseObject, Gee.Comparable<ReplayOperation> {
+
     /**
-     * Scope specifies what type of operations (remote, local, or both) are needed by this operation.
+     * Specifies the call scope (local, remote, both) of an operation.
      *
-     * What methods are made on the operation depends on the returned Scope:
+     * The methods that are called for the operation depends on the
+     * returned Scope.
      *
-     * LOCAL_AND_REMOTE: replay_local_async() is called.  If that method returns COMPLETED,
-     *   no further calls are made.  If it returns CONTINUE, replay_remote_async() is called.
-     * LOCAL_ONLY: replay_local_async() only.  replay_remote_async() will never be called.
-     * REMOTE_ONLY: replay_remote_async() only.  replay_local_async() will never be called.
+     * * `LOCAL_AND_REMOTE`: replay_local_async() is called.  If that
+     * method returns COMPLETED, no further calls are made.  If it
+     * returns CONTINUE, replay_remote_async() is called.
+     * * `LOCAL_ONLY`: replay_local_async() only.
+     * replay_remote_async() will never be called.
+     * * `REMOTE_ONLY`: replay_remote_async() only.
+     * replay_local_async() will never be called.
      *
-     * See the various replay methods for how backout_local_async() may be called depending on
-     * this field and those methods' return values.
+     * See the various replay methods for how backout_local_async()
+     * may be called depending on this field and those methods' return
+     * values.
      */
     public enum Scope {
         LOCAL_AND_REMOTE,
         LOCAL_ONLY,
         REMOTE_ONLY
     }
-    
+
     public enum Status {
         COMPLETED,
         CONTINUE
     }
-    
+
     public enum OnError {
         THROW,
         RETRY,
         IGNORE
     }
-    
+
     public string name { get; set; }
     public int64 submission_number { get; set; default = -1; }
     public Scope scope { get; private set; }
@@ -99,28 +109,30 @@ private abstract class Geary.ImapEngine.ReplayOperation : Geary.BaseObject, Gee.
     /**
      * See Scope for conditions where this method will be called.
      *
-     * Returns:
-     *   COMPLETED: the operation has completed and no further calls should be made.
-     *   CONTINUE: The local operation has completed and the remote portion must be executed as
-     *      well.  This is treated as COMPLETED if get_scope() returns LOCAL_ONLY.
+     * If an error is thrown, {@link backout_local_async} will will
+     * *not* be executed.
      *
-     * If Error thrown:
-     *   backout_local_async() will *not* be executed.
+     * @return {@link Status.COMPLETED} if the operation has completed
+     * and no further calls should be made, else {@link
+     * Status.CONTINUE} if the local operation has completed and the
+     * remote portion must be executed as well. This is treated as
+     * `COMPLETED` if get_scope() returns {@link Scope.LOCAL_ONLY}.
      */
     public abstract async Status replay_local_async() throws Error;
-    
+
     /**
      * See Scope for conditions where this method will be called.
      *
-     * Returns:
-     *   COMPLETED: the operation has completed and no further calls should be made.
-     *   CONTINUE: Treated as COMPLETED.
+     * If an error is thrown, {@link backout_local_async} will be
+     * executed only if scope is LOCAL_AND_REMOTE.
      *
-     * If Error thrown:
-     *   backout_local_async() will be executed only if scope is LOCAL_AND_REMOTE.
+     * @return {@link Status.COMPLETED} if the operation has completed
+     * and no further calls should be made, else {@link
+     * Status.CONTINUE} if treated as `COMPLETED`.
+     *
      */
     public abstract async Status replay_remote_async() throws Error;
-    
+
     /**
      * See Scope, replay_local_async(), and replay_remote_async() for conditions for this where this
      * will be called.

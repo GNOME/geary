@@ -623,7 +623,7 @@ public class Geary.RFC822.Message : BaseObject {
      * The initial call should pass the root of this message and UNSPECIFIED as its container
      * subtype.
      *
-     * @returns Whether a text part with the desired text_subtype was found
+     * @return Whether a text part with the desired text_subtype was found
      */
     private bool construct_body_from_mime_parts(GMime.Object node, Mime.MultipartSubtype container_subtype,
         string text_subtype, bool to_html, InlinePartReplacer? replacer, ref string? body) throws RFC822Error {

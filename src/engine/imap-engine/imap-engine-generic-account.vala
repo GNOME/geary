@@ -597,20 +597,25 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     }
     
     /**
-     * Returns an Imap.Folder that is not connected (is detached) to a MinimalFolder or any other
-     * ImapEngine container.
+     * Returns an Imap.Folder that is not connected (is detached) to a
+     * MinimalFolder or any other ImapEngine container.
      *
-     * This is useful for one-shot operations that need to bypass the heavyweight synchronization
-     * routines inside MinimalFolder.  This also means that operations performed on this Folder will
-     * not be reflected in the local database unless there's a separate connection to the server
-     * that is notified or detects these changes.
+     * This is useful for one-shot operations that need to bypass the
+     * heavyweight synchronization routines inside MinimalFolder.
+     * This also means that operations performed on this Folder will
+     * not be reflected in the local database unless there's a
+     * separate connection to the server that is notified or detects
+     * these changes.
      *
-     * The returned Folder must be opened prior to use and closed once completed.  ''Leaving a
-     * Folder open will cause a connection leak.''
+     * The returned Folder must be opened prior to use and closed once
+     * completed.
      *
-     * It is not recommended this object be held open long-term, or that its status or notifications
-     * be directly written to the database unless you know exactly what you're doing.  ''Caveat
-     * implementor.''
+     * ''Leaving a Folder open will cause a connection leak.''
+     *
+     * It is not recommended this object be held open long-term, or
+     * that its status or notifications be directly written to the
+     * database unless you know exactly what you're doing.
+     * ''Caveat implementor.''
      */
     public async Imap.Folder fetch_detached_folder_async(Geary.FolderPath path, Cancellable? cancellable)
         throws Error {

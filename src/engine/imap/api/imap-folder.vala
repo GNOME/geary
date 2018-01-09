@@ -31,9 +31,10 @@ private class Geary.Imap.Folder : BaseObject {
     public Trillian accepts_user_flags { get; private set; default = Trillian.UNKNOWN; }
 
     /**
-     * Set to true when it's detected that the server doesn't allow a space between "header.fields"
-     * and the list of email headers to be requested via FETCH; see
-     * https://bugzilla.gnome.org/show_bug.cgi?id=714902
+     * Set to true when it's detected that the server doesn't allow a
+     * space between "header.fields" and the list of email headers to
+     * be requested via FETCH; see:
+     * [[https://bugzilla.gnome.org/show_bug.cgi?id=714902|Bug * 714902]]
      */
     public bool imap_header_fields_hack { get; private set; default = false; }
 

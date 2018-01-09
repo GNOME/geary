@@ -183,7 +183,7 @@ private class Geary.SmtpOutboxFolder :
     /**
      * Queues a message in the outbox for delivery.
      *
-     * This should be used instead of {@link create_email_async()},
+     * This should be used instead of {@link create_email_async},
      * since that requires the Outbox be open according to contract,
      * but enqueuing emails for background delivery can happen at any
      * time, so this is the mechanism to do so.

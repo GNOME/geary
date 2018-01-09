@@ -353,61 +353,61 @@ public abstract class Geary.Account : BaseObject {
         return name;
     }
 
-    /** Fires a {@link opened}} signal. */
+    /** Fires a {@link opened} signal. */
     protected virtual void notify_opened() {
         opened();
     }
 
-    /** Fires a {@link closed}} signal. */
+    /** Fires a {@link closed} signal. */
     protected virtual void notify_closed() {
         closed();
     }
 
-    /** Fires a {@link folders_available_unavailable}} signal. */
+    /** Fires a {@link folders_available_unavailable} signal. */
     protected virtual void notify_folders_available_unavailable(Gee.List<Geary.Folder>? available,
                                                                 Gee.List<Geary.Folder>? unavailable) {
         folders_available_unavailable(available, unavailable);
     }
 
-    /** Fires a {@link folders_added_removed}} signal. */
+    /** Fires a {@link folders_added_removed} signal. */
     protected virtual void notify_folders_added_removed(Gee.List<Geary.Folder>? added,
         Gee.List<Geary.Folder>? removed) {
         folders_added_removed(added, removed);
     }
 
-    /** Fires a {@link folders_contents_altered}} signal. */
+    /** Fires a {@link folders_contents_altered} signal. */
     protected virtual void notify_folders_contents_altered(Gee.Collection<Geary.Folder> altered) {
         folders_contents_altered(altered);
     }
 
-    /** Fires a {@link email_appended}} signal. */
+    /** Fires a {@link email_appended} signal. */
     protected virtual void notify_email_appended(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
         email_appended(folder, ids);
     }
 
-    /** Fires a {@link email_inserted}} signal. */
+    /** Fires a {@link email_inserted} signal. */
     protected virtual void notify_email_inserted(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
         email_inserted(folder, ids);
     }
 
-    /** Fires a {@link email_removed}} signal. */
+    /** Fires a {@link email_removed} signal. */
     protected virtual void notify_email_removed(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
         email_removed(folder, ids);
     }
 
-    /** Fires a {@link email_locally_complete}} signal. */
+    /** Fires a {@link email_locally_complete} signal. */
     protected virtual void notify_email_locally_complete(Geary.Folder folder,
         Gee.Collection<Geary.EmailIdentifier> ids) {
         email_locally_complete(folder, ids);
     }
 
-    /** Fires a {@link email_discovered}} signal. */
+    /** Fires a {@link email_discovered} signal. */
     protected virtual void notify_email_discovered(Geary.Folder folder,
         Gee.Collection<Geary.EmailIdentifier> ids) {
         email_discovered(folder, ids);
     }
 
-    /** Fires a {@link email_flags_changed}} signal. */
+    /** Fires a {@link email_flags_changed} signal. */
     protected virtual void notify_email_flags_changed(Geary.Folder folder,
         Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> flag_map) {
         email_flags_changed(folder, flag_map);
@@ -417,19 +417,19 @@ public abstract class Geary.Account : BaseObject {
         email_sent(message);
     }
 
-    /** Fires a {@link report_problem}} signal for this account. */
+    /** Fires a {@link report_problem} signal for this account. */
     protected virtual void notify_report_problem(ProblemReport report) {
         report_problem(report);
     }
 
     /**
-     * Fires a {@link report_problem}} signal for this account.
+     * Fires a {@link report_problem} signal for this account.
      */
     protected virtual void notify_account_problem(ProblemType type, Error? err) {
         report_problem(new AccountProblemReport(type, this.information, err));
     }
 
-    /** Fires a {@link report_problem}} signal for a service for this account. */
+    /** Fires a {@link report_problem} signal for a service for this account. */
     protected virtual void notify_service_problem(ProblemType type, Service service_type, Error? err) {
         report_problem(new ServiceProblemReport(type, this.information, service_type, err));
     }

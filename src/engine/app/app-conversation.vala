@@ -290,7 +290,7 @@ public class Geary.App.Conversation : BaseObject {
      * Add the email to the conversation if not already present.
      *
      * The value of `known_paths` should contain all the known {@link
-     * FolderPaths} this email is contained within.
+     * FolderPath} instances this email is contained within.
      *
      * Returns if the email was added, else false if already present
      * and only `known_paths` were merged.

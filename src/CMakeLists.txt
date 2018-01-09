@@ -802,7 +802,7 @@ include(FindValadoc)
 add_custom_target(valadoc
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/src
   COMMAND ${VALADOC_EXECUTABLE}
-    --verbose --force --deps
+    --verbose --force --internal
     --package-name=geary-${VERSION}
     --package-version=${VERSION}
     --target-glib=${TARGET_GLIB}

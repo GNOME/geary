@@ -1,4 +1,5 @@
 /* Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2016 Software Freedom Conservancy Inc.
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -7,42 +8,49 @@
 /**
  * Internal implementation of {@link Geary.SearchQuery}.
  */
-
 private class Geary.ImapDB.SearchQuery : Geary.SearchQuery {
+
     /**
      * Associated {@link ImapDB.Account}.
      */
     public weak ImapDB.Account account { get; private set; }
-    
+
     /**
-     * Whether or not the query has been parsed and processed prior to search submission.
+     * Whether or not the query has been parsed and processed prior to
+     * search submission.
      */
     public bool parsed { get; set; default = false; }
-    
+
     /**
-     * Determined by {@link strategy}.
+     * Returns whether stemming may be used when exerting the search.
+     *
+     * Determined by {@link Geary.SearchQuery.Strategy} passed to the
+     * constructor.
      */
     public bool allow_stemming { get; private set; }
-    
+
     /**
      * Minimum length of the term before stemming is allowed.
      *
      * This prevents short words that might be stemmed from being stemmed.
      *
-     * Overridden by {@link allow_stemming}.  Determined by {@link strategy}.
+     * Overridden by {@link allow_stemming}. Determined by the {@link
+     * Geary.SearchQuery.Strategy} passed to the constructor.
      */
     public int min_term_length_for_stemming { get; private set; }
-    
+
+
     /**
      * Maximum difference in lengths between term and stemmed variant.
      *
-     * This prevents long words from being stemmed to much shorter words (which creates
-     * opportunities for greedy matching).
+     * This prevents long words from being stemmed to much shorter
+     * words (which creates opportunities for greedy matching).
      *
-     * Overridden by {@link allow_stemming}.  Determined by {@link strategy}.
+     * Overridden by {@link allow_stemming}. Determined by the {@link
+     * Geary.SearchQuery.Strategy} passed to the constructor.
      */
     public int max_difference_term_stem_lengths { get; private set; }
-    
+
     /**
      * Maximum difference in lengths between a matched word and the stemmed variant it matched
      * against.
@@ -50,7 +58,8 @@ private class Geary.ImapDB.SearchQuery : Geary.SearchQuery {
      * This prevents long words being matched to short stem variants (which creates opportunities
      * for greedy matching).
      *
-     * Overridden by {@link allow_stemming}.  Determined by {@link strategy}.
+     * Overridden by {@link allow_stemming}. Determined by the {@link
+     * Geary.SearchQuery.Strategy} passed to the constructor.
      */
     public int max_difference_match_stem_lengths { get; private set; }
 

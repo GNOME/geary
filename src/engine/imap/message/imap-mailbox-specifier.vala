@@ -1,4 +1,5 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -11,12 +12,16 @@
  *
  * See [[http://tools.ietf.org/html/rfc3501#section-5.1]]
  */
-
 public class Geary.Imap.MailboxSpecifier : BaseObject, Gee.Hashable<MailboxSpecifier>, Gee.Comparable<MailboxSpecifier> {
-    // all references to Inbox are converted to this string, purely for sanity sake when dealing
-    // with Inbox's case issues
+
+    /**
+     * Canonical name used for the IMAP Inbox for an account.
+     *
+     * All references to Inbox are converted to this string, purely
+     * for sanity sake when dealing with Inbox's case issues.
+     */
     public const string CANONICAL_INBOX_NAME = "INBOX";
-    
+
     /**
      * An instance of an Inbox MailboxSpecifier.
      *

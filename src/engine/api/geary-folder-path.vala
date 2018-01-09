@@ -278,7 +278,8 @@ public class Geary.FolderPath : BaseObject, Gee.Hashable<Geary.FolderPath>,
      * Returns a string version of the path using a default separator.
      *
      * Do not use this for obtaining an IMAP mailbox name to send to a
-     * server, use {@link Geary.Imap.MailboxSpecifier.from_folder_path}
+     * server, use {@link
+     * Geary.Imap.MailboxSpecifier.MailboxSpecifier.from_folder_path}
      * instead. This method is useful for debugging and logging only.
      */
     public string to_string() {

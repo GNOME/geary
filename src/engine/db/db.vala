@@ -1,19 +1,25 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 /**
- * Geary.Db is a simple wrapper around SQLite to make it more GObject-ish and easier to code in
- * Vala.  It also uses threads and some concurrency features of SQLite to allow for asynchronous
+ * A simple database access layer.
+ *
+ * Geary.Db is a simple wrapper around SQLite to make it more
+ * GObject-ish and easier to code in Vala.  It also uses threads and
+ * some concurrency features of SQLite to allow for asynchronous
  * access to the database.
  *
- * There is no attempt here to hide or genericize the backing database library; this is designed with
- * SQLite in mind.  As such, many of the calls are merely direct front-ends to the underlying
- * SQLite call.
+ * There is no attempt here to hide or genericize the backing database
+ * library; this is designed with SQLite in mind.  As such, many of
+ * the calls are merely direct front-ends to the underlying SQLite
+ * call.
  *
- * The design of the classes and interfaces owes a debt to SQLHeavy (http://code.google.com/p/sqlheavy/).
+ * The design of the classes and interfaces owes a debt to
+ * [[http://code.google.com/p/sqlheavy/|SQLHeavy]].
  */
 
 extern int sqlite3_enable_shared_cache(int enabled);

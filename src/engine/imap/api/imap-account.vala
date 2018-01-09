@@ -10,8 +10,8 @@
  *
  * Because of the complexities of the IMAP protocol, this private
  * class takes common operations that a Geary.Account implementation
- * would need (in particular, {@link Geary.ImapEngine.Account} and
- * makes them into simple async calls.
+ * would need (in particular, {@link Geary.ImapEngine.GenericAccount}
+ * and makes them into simple async calls.
  *
  * Geary.Imap.Account manages the {@link Imap.Folder} objects it
  * returns, but only in the sense that it will not create new

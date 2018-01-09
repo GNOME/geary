@@ -1,4 +1,5 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -6,17 +7,14 @@
 
 /**
  * An attachment that was a part of an {@link Email}.
- *
- * @see Email.get_attachment
  */
-
 public abstract class Geary.Attachment : BaseObject {
 
 
     /**
      * An identifier that can be used to locate the {@link Attachment} in an {@link Email}.
      *
-     * @see Email.get_attachment
+     * @see Email.get_attachment_by_id
      */
     public string id { get; private set; }
 
@@ -29,6 +27,8 @@ public abstract class Geary.Attachment : BaseObject {
      * The Content-ID of the attachment.
      *
      * See [[https://tools.ietf.org/html/rfc2111]]
+     *
+     * @see Email.get_attachment_by_content_id
      */
     public string? content_id { get; private set; }
 

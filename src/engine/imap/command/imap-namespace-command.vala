@@ -11,7 +11,7 @@
  * Determines the mailbox name prefix and hierarchy delimiter for the
  * personal, other user's and public namespaces.
  *
- * @see [[https://tools.ietf.org/html/rfc2342]]
+ * See [[https://tools.ietf.org/html/rfc2342|RFC 2342]] for details.
  */
 public class Geary.Imap.NamespaceCommand : Command {
 

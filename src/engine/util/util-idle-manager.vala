@@ -51,7 +51,7 @@ public class Geary.IdleManager : BaseObject {
      * Constructs a new idle manager with an interval in seconds.
      *
      * The idle function will be by default not running, and hence
-     * needs to be started by a call to {@link start}.
+     * needs to be started by a call to {@link schedule}.
      */
     public IdleManager(IdleFunc callback) {
         this.callback = callback;

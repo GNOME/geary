@@ -1,14 +1,17 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 /**
- * Stage one of a {@link RevokableMove}: collect valid {@link ImapDB.EmailIdentifiers}, mark
- * messages as removed, and update counts.
+ * Stage one of a {@link RevokableMove}.
+ *
+ * This operation collects valid {@link ImapDB.EmailIdentifier}s for
+ * messages to be removed, mark the messages as removed, and update
+ * counts.
  */
-
 private class Geary.ImapEngine.MoveEmailPrepare : Geary.ImapEngine.SendReplayOperation {
     public Gee.Set<ImapDB.EmailIdentifier>? prepared_for_move = null;
     

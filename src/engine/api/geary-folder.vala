@@ -1,4 +1,5 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -25,7 +26,7 @@
  * were appended to the folder, not when messages were sent or some
  * other criteria. For remote-backed folders, the engine will maintain
  * the vector in accordance with the value of {@link
- * AccountInformation.prefetch-period-days}, however the start of the
+ * AccountInformation.prefetch_period_days}, however the start of the
  * vector will be extended back past that over time and in response to
  * certain operations that cause the vector to be ''expanded'' ---
  * that is for additional messages to be loaded from the remote

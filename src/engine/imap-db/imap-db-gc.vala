@@ -1,4 +1,5 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -69,19 +70,17 @@ private class Geary.ImapDB.GC {
          */
         REAP,
         /**
-         * Indicates the caller should run {@link vauum_async} to consolidate disk space and reduce
+         * Indicates the caller should run {@link vacuum_async} to consolidate disk space and reduce
          * database fragmentation.
          */
         VACUUM
     }
-    
+
     /**
      * Indicates the garbage collector is running.
-     *
-     * {@link run_async} will return immediately if called while running.
      */
     public bool is_running { get; private set; default = false; }
-    
+
     private ImapDB.Database db;
     private int priority;
     private File data_dir;
@@ -91,9 +90,11 @@ private class Geary.ImapDB.GC {
         this.priority = priority;
         data_dir = db.db_file.get_parent();
     }
-    
+
     /**
-     * Returns if the GC should be executed (via {@link run_async}).
+     * Determines if the GC should be executed.
+     *
+     * @return a recommendation for the operation client to execute.
      */
     public async RecommendedOperation should_run_async(Cancellable? cancellable) throws Error {
         DateTime? last_reap_time, last_vacuum_time;
