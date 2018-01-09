@@ -18,7 +18,7 @@
     <key name="window-maximize" type="b">
         <default>false</default>
         <summary>Maximize window</summary>
-        <description>True if library application is maximized, false otherwise.</description>
+        <description>True if the application window is maximized, false otherwise.</description>
     </key>
 
     <key name="window-width" type="i">
