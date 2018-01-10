@@ -1134,12 +1134,21 @@ public class ComposerWidget : Gtk.EventBox {
 
         CloseStatus status = CloseStatus.PENDING_CLOSE;
         if (this.can_save) {
-            AlertDialog dialog = new TernaryConfirmationDialog(container.top_window,
-                _("Do you want to discard this message?"), null, Stock._KEEP, Stock._DISCARD, 
-                Gtk.ResponseType.CLOSE, "suggested-action");
+            AlertDialog dialog = new TernaryConfirmationDialog(
+                container.top_window,
+                // Translators: This dialog text is displayed to the
+                // user when closing a composer where the options are
+                // Keep, Discard or Cancel.
+                _("Do you want to keep or discard this draft message?"),
+                null,
+                Stock._KEEP,
+                Stock._DISCARD, Gtk.ResponseType.CLOSE,
+                "suggested-action"
+            );
             Gtk.ResponseType response = dialog.run();
             if (response == Gtk.ResponseType.CANCEL ||
                 response == Gtk.ResponseType.DELETE_EVENT) {
+                // Cancel
                 status = CloseStatus.CANCEL_CLOSE;
             } else if (response == Gtk.ResponseType.OK) {
                 // Keep
@@ -1153,8 +1162,16 @@ public class ComposerWidget : Gtk.EventBox {
                 discard_and_exit_async.begin();
             }
         } else {
-            AlertDialog dialog = new ConfirmationDialog(container.top_window,
-                _("Do you want to discard this message?"), null, Stock._DISCARD, "destructive-action");
+            AlertDialog dialog = new ConfirmationDialog(
+                container.top_window,
+                // Translators: This dialog text is displayed to the
+                // user when closing a composer where the options are
+                // only Discard or Cancel.
+                _("Do you want to discard this draft message?"),
+                null,
+                Stock._DISCARD,
+                "destructive-action"
+            );
             Gtk.ResponseType response = dialog.run();
             if (response == Gtk.ResponseType.OK) {
                 discard_and_exit_async.begin();
