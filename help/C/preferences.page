@@ -35,18 +35,7 @@
 	</item>
 	</terms>
 	</section>
-	
-	<section id="composer">
-	<title>Composer</title>
-	<terms>
-	<item>
-	<title><gui>Enable spell checking</gui></title>
-	<p>When set, Geary automatically spell checks a message as you write it, underlying
-	each misspelled word in red.</p>
-	</item>
-	</terms>
-	</section>
-	
+
 	<section id="notifications">
 	<title>Notifications</title>
 	<terms>
