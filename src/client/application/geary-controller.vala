@@ -2259,14 +2259,20 @@ public class GearyController : Geary.BaseObject {
         // Find out what to do with the inline composers.
         // TODO: Remove this in favor of automatically saving drafts
         main_window.present();
-        ConfirmationDialog dialog = new ConfirmationDialog(main_window, _("Close open draft messages?"), 
-            null, Stock._CLOSE, "destructive-action");
+        Gee.List<ComposerWidget> composers_to_destroy = new Gee.ArrayList<ComposerWidget>();
+        foreach (ComposerWidget cw in composer_widgets) {
+            if (cw.state != ComposerWidget.ComposerState.DETACHED)
+                composers_to_destroy.add(cw);
+        }
+        string message = ngettext(
+            "Close the draft message?",
+            "Close all draft messages?",
+            composers_to_destroy.size
+        );
+        ConfirmationDialog dialog = new ConfirmationDialog(
+            main_window, message, null, Stock._CLOSE, "destructive-action"
+        );
         if (dialog.run() == Gtk.ResponseType.OK) {
-            Gee.List<ComposerWidget> composers_to_destroy = new Gee.ArrayList<ComposerWidget>();
-            foreach (ComposerWidget cw in composer_widgets) {
-                if (cw.state != ComposerWidget.ComposerState.DETACHED)
-                    composers_to_destroy.add(cw);
-            }
             foreach(ComposerWidget cw in composers_to_destroy)
                 ((ComposerContainer) cw.parent).close_container();
             return true;
