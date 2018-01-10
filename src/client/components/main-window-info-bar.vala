@@ -70,7 +70,7 @@ public class MainWindowInfoBar : Gtk.InfoBar {
                 // Translators: String substitution is the account name
                 title = _("Problem with connection to incoming server for %s").printf(account);
                 // Translators: String substitution is the server name
-                descr = _("Network error talking to %s, check your Internet access try again").printf(server);
+                descr = _("Network error talking to %s, check your Internet access and try again").printf(server);
                 retry = _("Try reconnecting");
 
             } else if (report.problem_type == Geary.ProblemType.NETWORK_ERROR &&
@@ -78,7 +78,7 @@ public class MainWindowInfoBar : Gtk.InfoBar {
                 // Translators: String substitution is the account name
                 title = _("Problem with connection to outgoing server for %s").printf(account);
                 // Translators: String substitution is the server name
-                descr = _("Network error talking to %s, check your Internet access try again").printf(server);
+                descr = _("Network error talking to %s, check your Internet access and try again").printf(server);
                 retry = _("Try reconnecting");
 
             } else if (report.problem_type == Geary.ProblemType.SERVER_ERROR &&
@@ -94,7 +94,7 @@ public class MainWindowInfoBar : Gtk.InfoBar {
                 title = _("Problem communicating with outgoing mail server");
                 // Translators: First string substitution is the server
                 // name, second is the account name
-                descr = _("Could now communicate with %s for %s, server name and try again in a moment").printf(server, account);
+                descr = _("Could not communicate with %s for %s, check the server name and try again in a moment").printf(server, account);
                 retry = _("Try reconnecting");
 
             } else if (report.problem_type == Geary.ProblemType.LOGIN_FAILED &&
@@ -241,7 +241,7 @@ public class MainWindowInfoBar : Gtk.InfoBar {
         // Would love to construct the dialog in Builder, but we to
         // construct the dialog manually since we can't adjust the
         // Headerbar setting afterwards. If the user re-clicks on the
-        // Details button to re-show it, a whole bunch of GTK 
+        // Details button to re-show it, a whole bunch of GTK
         // criticals are spewed and the dialog appears b0rked, so just
         // do it from scratch ever time anyway.
         bool use_header = Gtk.Settings.get_default().gtk_dialogs_use_header;
