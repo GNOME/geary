@@ -622,11 +622,9 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     }
 
     private void start_open_remote() {
-        if (!this.remote_opened &&
-            !this.remote_open_timer.is_running &&
-            this.remote.is_ready) {
-            this.remote_open_timer.reset();
+        if (!this.remote_opened && this.remote.is_ready) {
             this.remote_opened = true;
+            this.remote_open_timer.reset();
             this.open_remote_async.begin(null);
         }
     }
@@ -1536,7 +1534,9 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     }
 
     private void on_remote_ready() {
-        start_open_remote();
+        if (this.open_count > 0) {
+            start_open_remote();
+        }
     }
 
 }
