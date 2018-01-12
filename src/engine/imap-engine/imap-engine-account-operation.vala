@@ -8,10 +8,24 @@
 /**
  * A unit of work to be executed by {@link GenericAccount}.
  *
+ * It is important that account operations are idempotent in that they
+ * can be safely re-executed multiple times, and perform the same task
+ * each time. This means that in practice instance properties should
+ * only be used to store state passed to the operation via its
+ * constructor (e.g. a target folder to be updated) and this state
+ * should not be modified when the operation is executed (e.g. the
+ * target folder should not be changed or set to `null` during or
+ * after execution), any state needed to be maintained when executing
+ * should be passed as arguments to internal methods (e.g. the list of
+ * messages to be checked in the target folder should be passed around
+ * as arguments), and the operation should perform any needed sanity
+ * checks before proceeding (e.g. check the target folder sill exists
+ * before updating it).
+ *
  * To queue an operation for execution, pass an instance to {@link
- * GenericAccount.queue_operation} when the account is opened. It will
- * added to the accounts queue and executed asynchronously when it
- * reaches the front.
+ * GenericAccount.queue_operation} after the account has been
+ * opened. It will added to the accounts queue and executed
+ * asynchronously when it reaches the front.
  *
  * Execution of the operation is managed by {@link
  * AccountProcessor}. Since the processor will not en-queue duplicate
@@ -23,7 +37,7 @@ public abstract class Geary.ImapEngine.AccountOperation : Geary.BaseObject {
 
 
     /** The account this operation applies to. */
-    protected weak Geary.Account account;
+    protected weak Geary.Account account { get; private set; }
 
 
     /**
@@ -113,7 +127,7 @@ public abstract class Geary.ImapEngine.FolderOperation : AccountOperation {
 
 
     /** The folder this operation applies to. */
-    protected weak Geary.Folder folder;
+    protected weak Geary.Folder folder { get; private set; }
 
 
     /**
