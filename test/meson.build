@@ -2,6 +2,7 @@ geary_test_engine_sources = [
   'test-engine.vala',
   'testcase.vala',
 
+  'engine/api/geary-account-test.vala',
   'engine/api/geary-attachment-test.vala',
   'engine/api/geary-engine-test.vala',
   'engine/api/geary-email-identifier-test.vala',
@@ -12,6 +13,7 @@ geary_test_engine_sources = [
   'engine/imap/command/imap-create-command-test.vala',
   'engine/imap/response/imap-namespace-response-test.vala',
   'engine/imap/transport/imap-deserializer-test.vala',
+  'engine/imap-engine/account-processor-test.vala',
   'engine/mime-content-type-test.vala',
   'engine/rfc822-mailbox-address-test.vala',
   'engine/rfc822-message-test.vala',
