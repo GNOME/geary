@@ -179,9 +179,6 @@ public class Geary.App.EmailStore : BaseObject {
             bool open = false;
             Gee.Collection<Geary.EmailIdentifier>? used_ids = null;
             try {
-                debug("EmailStore opening %s for %s on %d emails", folder.to_string(),
-                    operation.get_type().name(), ids.size);
-
                 yield folder.open_async(Geary.Folder.OpenFlags.FAST_OPEN, cancellable);
                 open = true;
                 used_ids = yield operation.execute_async(folder, ids, cancellable);
@@ -193,12 +190,6 @@ public class Geary.App.EmailStore : BaseObject {
                         // Don't use the cancellable here, if it's been
                         // opened we need to try to close it.
                         yield folder.close_async(null);
-                        debug(
-                            "EmailStore closed %s after %s on %d emails",
-                            folder.to_string(),
-                            operation.get_type().name(),
-                            ids.size
-                        );
                     } catch (Error e) {
                         debug("Error closing folder %s: %s",
                               folder.to_string(), e.message);
@@ -216,10 +207,7 @@ public class Geary.App.EmailStore : BaseObject {
             // And we don't want to operate on the same folder twice.
             folders_to_ids.remove_all(path);
         }
-        
-        debug("EmailStore %s done running %s on %d emails", account.to_string(),
-            operation.get_type().name(), emails.size);
-        
+
         if (folders_to_ids.size > 0) {
             debug("Couldn't perform %s on some messages in %s", operation.get_type().name(),
                 account.to_string());

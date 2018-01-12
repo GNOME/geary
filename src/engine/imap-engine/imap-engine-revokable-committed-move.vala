@@ -42,6 +42,9 @@ private class Geary.ImapEngine.RevokableCommittedMove : Revokable {
             }
             
             notify_revoked();
+
+            Geary.Folder target = yield this.account.fetch_folder_async(this.destination);
+            this.account.update_folder(target);
         } finally {
             if (detached_destination != null) {
                 try {

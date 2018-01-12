@@ -41,6 +41,14 @@ public abstract class Geary.Account : BaseObject {
     
     public signal void email_sent(Geary.RFC822.Message rfc822);
 
+    /**
+     * Emitted to notify the client that some problem has occurred.
+     *
+     * The engine uses this signal to report internal errors and other
+     * issues that the client should notify the user about. The {@link
+     * ProblemReport} class provides context about the nature of the
+     * problem itself.
+     */
     public signal void report_problem(Geary.ProblemReport problem);
 
     public signal void contacts_loaded();
@@ -62,17 +70,35 @@ public abstract class Geary.Account : BaseObject {
         Gee.List<Geary.Folder>? unavailable);
 
     /**
-     * Fired when folders are created or deleted.
+     * Fired when new folders have been created.
      *
-     * Folders are ordered for the convenience of the caller from the top of the hierarchy to
-     * lower in the hierarchy.  In other words, parents are listed before children, assuming the
-     * lists are traversed in natural order.
+     * This is fired in response to new folders appearing, for example
+     * the user created a new folder. It will be fired after {@link
+     * folders_available_unavailable} has been fired to mark the
+     * folders as having been made available.
      *
-     * @see sort_by_path
+     * Folders are ordered for the convenience of the caller from the
+     * top of the hierarchy to lower in the hierarchy.  In other
+     * words, parents are listed before children, assuming the lists
+     * are traversed in natural order.
      */
-    public signal void folders_added_removed(Gee.List<Geary.Folder>? added,
-        Gee.List<Geary.Folder>? removed);
-    
+    public signal void folders_created(Gee.List<Geary.Folder> created);
+
+    /**
+     * Fired when existing folders are deleted.
+     *
+     * This is fired in response to existing folders being removed,
+     * for example if the user deleted a folder. it will be fired
+     * after {@link folders_available_unavailable} has been fired to
+     * mark the folders as having been made unavailable.
+     *
+     * Folders are ordered for the convenience of the caller from the
+     * top of the hierarchy to lower in the hierarchy.  In other
+     * words, parents are listed before children, assuming the lists
+     * are traversed in natural order.
+     */
+    public signal void folders_deleted(Gee.List<Geary.Folder> deleted);
+
     /**
      * Fired when a Folder's contents is detected having changed.
      */
@@ -369,10 +395,14 @@ public abstract class Geary.Account : BaseObject {
         folders_available_unavailable(available, unavailable);
     }
 
-    /** Fires a {@link folders_added_removed} signal. */
-    protected virtual void notify_folders_added_removed(Gee.List<Geary.Folder>? added,
-        Gee.List<Geary.Folder>? removed) {
-        folders_added_removed(added, removed);
+    /** Fires a {@link folders_created} signal. */
+    protected virtual void notify_folders_created(Gee.List<Geary.Folder> created) {
+        folders_created(created);
+    }
+
+    /** Fires a {@link folders_deleted} signal. */
+    protected virtual void notify_folders_deleted(Gee.List<Geary.Folder> deleted) {
+        folders_deleted(deleted);
     }
 
     /** Fires a {@link folders_contents_altered} signal. */

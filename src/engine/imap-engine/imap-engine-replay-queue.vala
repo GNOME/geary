@@ -4,6 +4,13 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
+/**
+ * Interleaves IMAP operations to maintain consistent sequence numbering.
+ *
+ * The replay queue manages and executes operations originating both
+ * locally and from the server for a specific IMAP mailbox so as to
+ * ensure the execution of the operations maintains consistent.
+ */
 private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
     // this value is high because delays between back-to-back unsolicited notifications have been
     // see as high as 250ms
@@ -56,8 +63,10 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
     } }
     
     private weak MinimalFolder owner;
-    private Nonblocking.Mailbox<ReplayOperation> local_queue = new Nonblocking.Mailbox<ReplayOperation>();
-    private Nonblocking.Mailbox<ReplayOperation> remote_queue = new Nonblocking.Mailbox<ReplayOperation>();
+    private Nonblocking.Queue<ReplayOperation> local_queue =
+        new Nonblocking.Queue<ReplayOperation>.fifo();
+    private Nonblocking.Queue<ReplayOperation> remote_queue =
+        new Nonblocking.Queue<ReplayOperation>.fifo();
     private ReplayOperation? local_op_active = null;
     private ReplayOperation? remote_op_active = null;
     private Gee.ArrayList<ReplayOperation> notification_queue = new Gee.ArrayList<ReplayOperation>();
@@ -363,7 +372,7 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
         while (queue_running) {
             ReplayOperation op;
             try {
-                op = yield local_queue.recv_async();
+                op = yield local_queue.receive();
             } catch (Error recv_err) {
                 debug("Unable to receive next replay operation on local queue %s: %s", to_string(),
                     recv_err.message);
@@ -463,7 +472,7 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
             // wait for the next operation ... do this *before* waiting for remote
             ReplayOperation op;
             try {
-                op = yield remote_queue.recv_async();
+                op = yield remote_queue.receive();
             } catch (Error recv_err) {
                 debug("Unable to receive next replay operation on remote queue %s: %s", to_string(),
                     recv_err.message);

@@ -9,8 +9,8 @@ private class Geary.App.ConversationOperationQueue : BaseObject {
     public Geary.SimpleProgressMonitor progress_monitor { get; private set; default = 
         new Geary.SimpleProgressMonitor(Geary.ProgressType.ACTIVITY); }
     
-    private Geary.Nonblocking.Mailbox<ConversationOperation> mailbox
-        = new Geary.Nonblocking.Mailbox<ConversationOperation>();
+    private Geary.Nonblocking.Queue<ConversationOperation> mailbox
+        = new Geary.Nonblocking.Queue<ConversationOperation>.fifo();
     private Geary.Nonblocking.Spinlock processing_done_spinlock
         = new Geary.Nonblocking.Spinlock();
     
@@ -61,7 +61,7 @@ private class Geary.App.ConversationOperationQueue : BaseObject {
         for (;;) {
             ConversationOperation op;
             try {
-                op = yield mailbox.recv_async();
+                op = yield mailbox.receive();
             } catch (Error e) {
                 debug("Error processing in conversation operation mailbox: %s", e.message);
                 break;

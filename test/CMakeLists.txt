@@ -6,6 +6,7 @@ set(TEST_ENGINE_SRC
   test-engine.vala
   testcase.vala # Based on same file in libgee, courtesy Julien Peeters
 
+  engine/api/geary-account-test.vala
   engine/api/geary-attachment-test.vala
   engine/api/geary-engine-test.vala
   engine/api/geary-email-identifier-test.vala
@@ -16,6 +17,7 @@ set(TEST_ENGINE_SRC
   engine/imap/command/imap-create-command-test.vala
   engine/imap/response/imap-namespace-response-test.vala
   engine/imap/transport/imap-deserializer-test.vala
+  engine/imap-engine/account-processor-test.vala
   engine/mime-content-type-test.vala
   engine/rfc822-mailbox-address-test.vala
   engine/rfc822-message-test.vala

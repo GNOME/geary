@@ -41,41 +41,45 @@ private class Geary.Imap.Folder : BaseObject {
     private ClientSessionManager session_mgr;
     private ClientSession? session = null;
     private Nonblocking.Mutex cmd_mutex = new Nonblocking.Mutex();
-    private Gee.HashMap<SequenceNumber, FetchedData> fetch_accumulator = new Gee.HashMap<
-        SequenceNumber, FetchedData>();
-    private Gee.Set<Imap.UID> search_accumulator = new Gee.HashSet<Imap.UID>();
-    
+    private Gee.HashMap<SequenceNumber, FetchedData>? fetch_accumulator = null;
+    private Gee.Set<Imap.UID>? search_accumulator = null;
+
     /**
      * A (potentially unsolicited) response from the server.
      *
      * See [[http://tools.ietf.org/html/rfc3501#section-7.3.1]]
      */
     public signal void exists(int total);
-    
-    /**
-     * A (potentially unsolicited) response from the server.
-     *
-     * See [[http://tools.ietf.org/html/rfc3501#section-7.4.1]]
-     */
-    public signal void expunge(SequenceNumber position);
-    
+
     /**
      * A (potentially unsolicited) response from the server.
      *
      * See [[http://tools.ietf.org/html/rfc3501#section-7.3.2]]
      */
     public signal void recent(int total);
-    
+
+    /**
+     * A (potentially unsolicited) response from the server.
+     *
+     * See [[http://tools.ietf.org/html/rfc3501#section-7.4.1]]
+     */
+    public signal void expunge(SequenceNumber position);
+
     /**
      * Fabricated from the IMAP signals and state obtained at open_async().
      */
     public signal void appended(int total);
-    
+
+    /**
+     * Fabricated from the IMAP signals and state obtained at open_async().
+     */
+    public signal void updated(SequenceNumber pos, FetchedData data);
+
     /**
      * Fabricated from the IMAP signals and state obtained at open_async().
      */
     public signal void removed(SequenceNumber pos, int total);
-    
+
     /**
      * Note that close_async() still needs to be called after this signal is fired.
      */
@@ -91,11 +95,9 @@ private class Geary.Imap.Folder : BaseObject {
     public async void open_async(Cancellable? cancellable) throws Error {
         if (is_open)
             throw new EngineError.ALREADY_OPEN("%s already open", to_string());
-        
-        fetch_accumulator.clear();
-        
+
         session = yield session_mgr.claim_authorized_session_async(cancellable);
-        
+
         // connect to interesting signals *before* selecting
         session.exists.connect(on_exists);
         session.expunge.connect(on_expunge);
@@ -148,33 +150,32 @@ private class Geary.Imap.Folder : BaseObject {
     public async void close_async(Cancellable? cancellable) throws Error {
         if (!is_open)
             return;
-        
+
         yield release_session_async(cancellable);
-        
-        fetch_accumulator.clear();
-        
-        readonly = Trillian.UNKNOWN;
-        accepts_user_flags = Trillian.UNKNOWN;
-        
-        is_open = false;
+
+        this.fetch_accumulator = null;
+        this.search_accumulator = null;
+
+        this.readonly = Trillian.UNKNOWN;
+        this.accepts_user_flags = Trillian.UNKNOWN;
+
+        this.is_open = false;
     }
-    
+
     private async void release_session_async(Cancellable? cancellable) {
-        if (session == null)
+        if (this.session == null)
             return;
-        
-        // set this.session to null before yielding to ClientSessionManager
-        ClientSession release_session = session;
-        session = null;
-        
-        release_session.exists.disconnect(on_exists);
-        release_session.expunge.disconnect(on_expunge);
-        release_session.fetch.disconnect(on_fetch);
-        release_session.recent.disconnect(on_recent);
-        release_session.search.disconnect(on_search);
-        release_session.status_response_received.disconnect(on_status_response);
-        release_session.disconnected.disconnect(on_disconnected);
-        
+
+        this.session.exists.disconnect(on_exists);
+        this.session.expunge.disconnect(on_expunge);
+        this.session.fetch.disconnect(on_fetch);
+        this.session.recent.disconnect(on_recent);
+        this.session.search.disconnect(on_search);
+        this.session.status_response_received.disconnect(on_status_response);
+        this.session.disconnected.disconnect(on_disconnected);
+
+        ClientSession release_session = this.session;
+        this.session = null;
         try {
             yield session_mgr.release_session_async(release_session, cancellable);
         } catch (Error err) {
@@ -209,14 +210,22 @@ private class Geary.Imap.Folder : BaseObject {
         expunge(pos);
         removed(pos, properties.select_examine_messages);
     }
-    
-    private void on_fetch(FetchedData fetched_data) {
+
+    private void on_fetch(FetchedData data) {
         // add if not found, merge if already received data for this email
-        FetchedData? already_present = fetch_accumulator.get(fetched_data.seq_num);
-        fetch_accumulator.set(fetched_data.seq_num,
-            (already_present != null) ? fetched_data.combine(already_present) : fetched_data);
+        if (this.fetch_accumulator != null) {
+            FetchedData? existing = this.fetch_accumulator.get(data.seq_num);
+            this.fetch_accumulator.set(
+                data.seq_num, (existing != null) ? data.combine(existing) : data
+            );
+        } else {
+            debug("%s: FETCH (unsolicited): %s:",
+                  to_string(),
+                  data.to_string());
+            updated(data.seq_num, data);
+        }
     }
-    
+
     private void on_recent(int total) {
         debug("%s RECENT %d", to_string(), total);
         
@@ -230,15 +239,19 @@ private class Geary.Imap.Folder : BaseObject {
     private void on_search(int64[] seq_or_uid) {
         // All SEARCH from this class are UID SEARCH, so can reliably convert and add to
         // accumulator
-        foreach (int64 uid in seq_or_uid) {
-            try {
-                search_accumulator.add(new UID.checked(uid));
-            } catch (ImapError imaperr) {
-                debug("%s Unable to process SEARCH UID result: %s", to_string(), imaperr.message);
+        if (this.search_accumulator != null) {
+            foreach (int64 uid in seq_or_uid) {
+                try {
+                    this.search_accumulator.add(new UID.checked(uid));
+                } catch (ImapError imaperr) {
+                    debug("%s Unable to process SEARCH UID result: %s", to_string(), imaperr.message);
+                }
             }
+        } else {
+            debug("%s Not handling unsolicited SEARCH response", to_string());
         }
     }
-    
+
     private void on_status_response(StatusResponse status_response) {
         // only interested in ResponseCodes here
         ResponseCode? response_code = status_response.response_code;
@@ -304,51 +317,39 @@ private class Geary.Imap.Folder : BaseObject {
     // FETCH commands can generate a FolderError.RETRY.  State will be updated to accomodate retry,
     // but all Commands must be regenerated to ensure new state is reflected in requests.
     private async Gee.Map<Command, StatusResponse>? exec_commands_async(Gee.Collection<Command> cmds,
-        out Gee.HashMap<SequenceNumber, FetchedData>? fetched, out Gee.Set<Imap.UID>? search_results,
-        Cancellable? cancellable) throws Error {
-        int token = yield cmd_mutex.claim_async(cancellable);
+                                                                        Gee.HashMap<SequenceNumber, FetchedData>? fetch_results,
+                                                                        Gee.Set<Imap.UID>? search_results,
+                                                                        Cancellable? cancellable)
+        throws Error {
         Gee.Map<Command, StatusResponse>? responses = null;
-        // execute commands with mutex locked
-        Error? err = null;
+        int token = yield cmd_mutex.claim_async(cancellable);
+        Error? thrown = null;
         try {
-            // check open after acquiring mutex, so that if an error is thrown it's caught and
-            // mutex can be closed
             check_open();
-            
+
+            this.fetch_accumulator = fetch_results;
+            this.search_accumulator = search_results;
             responses = yield session.send_multiple_commands_async(cmds, cancellable);
-        } catch (Error store_fetch_err) {
-            err = store_fetch_err;
+        } catch (Error err) {
+            thrown = err;
         }
-        
-        // swap out results and clear accumulators
-        if (fetch_accumulator.size > 0) {
-            fetched = fetch_accumulator;
-            fetch_accumulator = new Gee.HashMap<SequenceNumber, FetchedData>();
-        } else {
-            fetched = null;
-        }
-        
-        if (search_accumulator.size > 0) {
-            search_results = search_accumulator;
-            search_accumulator = new Gee.HashSet<Imap.UID>();
-        } else {
-            search_results = null;
-        }
-        
-        // unlock after clearing accumulators
+
+        this.fetch_accumulator = null;
+        this.search_accumulator = null;
+
         cmd_mutex.release(ref token);
-        
-        if (err != null)
-            throw err;
-        
-        // process response stati after unlocking and clearing accumulators
-        assert(responses != null);
-        foreach (Command cmd in responses.keys)
+
+        if (thrown != null) {
+            throw thrown;
+        }
+
+        foreach (Command cmd in responses.keys) {
             throw_on_failed_status(responses.get(cmd), cmd);
-        
+        }
+
         return responses;
     }
-    
+
     // HACK: See https://bugzilla.gnome.org/show_bug.cgi?id=714902
     //
     // Detect when a server has returned a BAD response to FETCH BODY[HEADER.FIELDS (HEADER-LIST)]
@@ -421,12 +422,16 @@ private class Geary.Imap.Folder : BaseObject {
         // which is all we're interested in here
         SearchCriteria criteria = new SearchCriteria(SearchCriterion.message_set(msg_set));
         SearchCommand cmd = new SearchCommand.uid(criteria);
-        
-        Gee.Set<Imap.UID>? search_results;
-        yield exec_commands_async(Geary.iterate<Command>(cmd).to_array_list(), null, out search_results,
-            cancellable);
-        
-        return (search_results != null && search_results.size > 0) ? search_results : null;
+
+        Gee.Set<Imap.UID> search_results = new Gee.HashSet<Imap.UID>();
+        yield exec_commands_async(
+            Geary.iterate<Command>(cmd).to_array_list(),
+            null,
+            search_results,
+            cancellable
+        );
+
+        return (search_results.size > 0) ? search_results : null;
     }
     
     private Gee.Collection<FetchCommand> assemble_list_commands(Imap.MessageSet msg_set,
@@ -520,8 +525,8 @@ private class Geary.Imap.Folder : BaseObject {
     public async Gee.List<Geary.Email>? list_email_async(MessageSet msg_set, Geary.Email.Field fields,
         Cancellable? cancellable) throws Error {
         check_open();
-        
-        Gee.HashMap<SequenceNumber, FetchedData>? fetched = null;
+        Gee.HashMap<SequenceNumber, FetchedData> fetched =
+            new Gee.HashMap<SequenceNumber, FetchedData>();
         FetchBodyDataSpecifier? header_specifier = null;
         FetchBodyDataSpecifier? body_specifier = null;
         FetchBodyDataSpecifier? preview_specifier = null;
@@ -537,7 +542,7 @@ private class Geary.Imap.Folder : BaseObject {
             
             // Commands prepped, do the fetch and accumulate all the responses
             try {
-                yield exec_commands_async(cmds, out fetched, null, cancellable);
+                yield exec_commands_async(cmds, fetched, null, cancellable);
             } catch (Error err) {
                 if (err is FolderError.RETRY) {
                     debug("Retryable server failure detected for %s: %s", to_string(), err.message);
@@ -550,10 +555,10 @@ private class Geary.Imap.Folder : BaseObject {
             
             break;
         }
-        
-        if (fetched == null || fetched.size == 0)
+
+        if (fetched.size == 0)
             return null;
-        
+
         // Convert fetched data into Geary.Email objects
         // because this could be for a lot of email, do in a background thread
         Gee.List<Geary.Email> email_list = new Gee.ArrayList<Geary.Email>();
@@ -609,11 +614,12 @@ private class Geary.Imap.Folder : BaseObject {
         
         Gee.List<Command> cmds = new Gee.ArrayList<Command>();
         cmds.add(new FetchCommand.data_type(msg_set, FetchDataSpecifier.UID));
-        
-        Gee.HashMap<SequenceNumber, FetchedData>? fetched;
-        yield exec_commands_async(cmds, out fetched, null, cancellable);
 
-        if (fetched == null || fetched.is_empty) {
+        Gee.HashMap<SequenceNumber, FetchedData> fetched =
+            new Gee.HashMap<SequenceNumber, FetchedData>();
+        yield exec_commands_async(cmds, fetched, null, cancellable);
+
+        if (fetched.is_empty) {
             throw new ImapError.INVALID("Server returned no sequence numbers");
         }
 
@@ -626,7 +632,7 @@ private class Geary.Imap.Folder : BaseObject {
         }
         return map;
     }
-    
+
     public async void remove_email_async(Gee.List<MessageSet> msg_sets, Cancellable? cancellable)
         throws Error {
         check_open();
@@ -741,18 +747,18 @@ private class Geary.Imap.Folder : BaseObject {
         // always perform a UID SEARCH
         Gee.Collection<Command> cmds = new Gee.ArrayList<Command>();
         cmds.add(new SearchCommand.uid(criteria));
-        
-        Gee.Set<Imap.UID>? search_results;
-        yield exec_commands_async(cmds, null, out search_results, cancellable);
-        if (search_results == null || search_results.size == 0)
-            return null;
-        
-        Gee.SortedSet<Imap.UID> tree = new Gee.TreeSet<Imap.UID>();
-        tree.add_all(search_results);
-        
+
+        Gee.Set<Imap.UID> search_results = new Gee.HashSet<Imap.UID>();
+        yield exec_commands_async(cmds, null, search_results, cancellable);
+
+        Gee.SortedSet<Imap.UID> tree = null;
+        if (search_results.size > 0) {
+            tree = new Gee.TreeSet<Imap.UID>();
+            tree.add_all(search_results);
+        }
         return tree;
     }
-    
+
     // NOTE: If fields are added or removed from this method, BASIC_FETCH_FIELDS *must* be updated
     // as well
     private void fields_to_fetch_data_types(Geary.Email.Field fields,

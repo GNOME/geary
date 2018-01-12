@@ -81,7 +81,7 @@ private class Geary.SmtpOutboxFolder :
     private ImapDB.Database db;
 
     private Cancellable? queue_cancellable = null;
-    private Nonblocking.Mailbox<OutboxRow> outbox_queue = new Nonblocking.Mailbox<OutboxRow>();
+    private Nonblocking.Queue<OutboxRow> outbox_queue = new Nonblocking.Queue<OutboxRow>.fifo();
     private Geary.ProgressMonitor sending_monitor;
     private SmtpOutboxFolderProperties _properties = new SmtpOutboxFolderProperties(0, 0);
     private int64 next_ordering = 0;
@@ -129,7 +129,7 @@ private class Geary.SmtpOutboxFolder :
             OutboxRow? row = null;
             bool row_handled = false;
             try {
-                row = yield this.outbox_queue.recv_async(cancellable);
+                row = yield this.outbox_queue.receive(cancellable);
                 row_handled = yield postman_send(row, cancellable);
             } catch (SmtpError err) {
                 ProblemType problem = ProblemType.GENERIC_ERROR;

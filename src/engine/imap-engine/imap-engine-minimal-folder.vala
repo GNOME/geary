@@ -26,7 +26,13 @@
 private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport.Copy,
     Geary.FolderSupport.Mark, Geary.FolderSupport.Move {
 
+
+    private const int FLAG_UPDATE_TIMEOUT_SEC = 2;
+    private const int FLAG_UPDATE_START_CHUNK = 20;
+    private const int FLAG_UPDATE_MAX_CHUNK = 100;
     private const int FORCE_OPEN_REMOTE_TIMEOUT_SEC = 10;
+    private const int REFRESH_UNSEEN_TIMEOUT_SEC = 1;
+
 
     public override Account account { get { return _account; } }
     
@@ -51,8 +57,9 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     internal ImapDB.Folder local_folder  { get; protected set; }
     internal Imap.Folder? remote_folder { get; protected set; default = null; }
     internal EmailPrefetcher email_prefetcher { get; private set; }
-    internal EmailFlagWatcher email_flag_watcher;
-    
+    internal int remote_count { get; private set; default = -1; }
+    internal ReplayQueue replay_queue { get; private set; }
+
     private weak GenericAccount _account;
     private Geary.AggregatedFolderProperties _properties = new Geary.AggregatedFolderProperties(
         false, false);
@@ -65,12 +72,13 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     private Nonblocking.ReportingSemaphore<bool> remote_semaphore =
         new Nonblocking.ReportingSemaphore<bool>(false);
     private Nonblocking.Semaphore closed_semaphore = new Nonblocking.Semaphore();
-    private ReplayQueue replay_queue;
-    private int remote_count = -1;
     private Nonblocking.Mutex open_mutex = new Nonblocking.Mutex();
     private Nonblocking.Mutex close_mutex = new Nonblocking.Mutex();
+    private TimeoutManager update_flags_timer;
+    private TimeoutManager refresh_unseen_timer;
+    private Cancellable? open_cancellable = null;
 
-    
+
     /**
      * Called when the folder is closing (and not reestablishing a connection) and will be flushing
      * the replay queue.  Subscribers may add ReplayOperations to the list, which will be enqueued
@@ -93,6 +101,10 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
      */
     public signal void marked_email_removed(Gee.Collection<Geary.EmailIdentifier> removed);
     
+    /** Emitted to notify the account that some problem has occurred. */
+    internal signal void report_problem(Geary.ProblemReport problem);
+
+
     public MinimalFolder(GenericAccount account, Imap.Account remote, ImapDB.Account local,
         ImapDB.Folder local_folder, SpecialFolderType special_folder_type) {
         this._account = account;
@@ -102,16 +114,20 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         );
         this.local = local;
         this.local_folder = local_folder;
-        _special_folder_type = special_folder_type;
-        _properties.add(local_folder.get_properties());
-        replay_queue = new ReplayQueue(this);
-        
-        email_flag_watcher = new EmailFlagWatcher(this);
-        email_flag_watcher.email_flags_changed.connect(on_email_flags_changed);
-        
-        email_prefetcher = new EmailPrefetcher(this);
-        
-        local_folder.email_complete.connect(on_email_complete);
+        this.local_folder.email_complete.connect(on_email_complete);
+
+        this._special_folder_type = special_folder_type;
+        this._properties.add(local_folder.get_properties());
+        this.replay_queue = new ReplayQueue(this);
+        this.email_prefetcher = new EmailPrefetcher(this);
+
+        this.update_flags_timer = new TimeoutManager.seconds(
+            FLAG_UPDATE_TIMEOUT_SEC, () => { on_update_flags.begin(); }
+        );
+
+        this.refresh_unseen_timer = new TimeoutManager.seconds(
+            REFRESH_UNSEEN_TIMEOUT_SEC, on_refresh_unseen
+        );
 
         // Notify now to ensure that wait_for_close_async does not
         // block if never opened.
@@ -569,13 +585,22 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         
         // first open gets to name the flags, but see note above
         this.open_flags = open_flags;
-        
+
         // reset to force waiting in wait_for_open_async()
-        remote_semaphore.reset();
-        
+        this.remote_semaphore.reset();
+
         // reset to force waiting in wait_for_close_async()
-        closed_semaphore.reset();
-        
+        this.closed_semaphore.reset();
+
+        // reset unseen count refresh since it will be updated when
+        // the remote opens
+        this.refresh_unseen_timer.reset();
+
+        this.open_cancellable = new Cancellable();
+
+        // Notify the email prefetcher
+        this.email_prefetcher.open();
+
         // Unless NO_DELAY is set, do NOT open the remote side here; wait for the ReplayQueue to
         // require a remote connection or wait_for_open_async() to be called ... this allows for
         // fast local-only operations to occur, local-only either because (a) the folder has all
@@ -680,6 +705,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
                 
                 // signals
                 opening_folder.appended.connect(on_remote_appended);
+                opening_folder.updated.connect(on_remote_updated);
                 opening_folder.removed.connect(on_remote_removed);
                 opening_folder.disconnected.connect(on_remote_disconnected);
                 
@@ -789,11 +815,16 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         }
         
         _properties.add(remote_folder.properties);
-        
+
         // notify any subscribers with similar information
         notify_opened(Geary.Folder.OpenState.BOTH, remote_count);
+
+        // Update flags once the folder has opened. We will receive
+        // notifications of changes as long as it remains open, so
+        // only need to do this once
+        this.update_flags_timer.start();
     }
-    
+
     public override async bool close_async(Cancellable? cancellable = null) throws Error {
         // Check open_count but only decrement inside of replay queue
         if (open_count <= 0)
@@ -815,10 +846,13 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         // decrement open_count and, if zero, continue closing Folder
         if (open_count == 0 || --open_count > 0)
             return false;
-        
+
+        // Close the prefetcher early so it stops using the remote ASAP
+        this.email_prefetcher.close();
+
         if (remote_folder != null)
             _properties.remove(remote_folder.properties);
-        
+
         // block anyone from wait_until_open_async(), as this is no longer open
         remote_semaphore.reset();
         
@@ -958,9 +992,14 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
 
     // Returns the remote_folder, if it was set
     private Imap.Folder? clear_remote_folder() {
+        // Cancel any internal pending operations before unhooking
+        this.open_cancellable.cancel();
+        this.open_cancellable = null;
+
         if (remote_folder != null) {
             // disconnect signals before ripping out reference
             remote_folder.appended.disconnect(on_remote_appended);
+            remote_folder.updated.disconnect(on_remote_updated);
             remote_folder.removed.disconnect(on_remote_removed);
             remote_folder.disconnected.disconnect(on_remote_disconnected);
         }
@@ -1044,95 +1083,29 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         Gee.List<Imap.SequenceNumber> positions = new Gee.ArrayList<Imap.SequenceNumber>();
         for (int pos = remote_count + 1; pos <= reported_remote_count; pos++)
             positions.add(new Imap.SequenceNumber(pos));
-        
+
         // store the remote count NOW, as further appended messages could arrive before the
         // ReplayAppend executes
-        remote_count = reported_remote_count;
-        
-        if (positions.size > 0)
-            replay_queue.schedule_server_notification(new ReplayAppend(this, reported_remote_count, positions));
-    }
-    
-    // Need to prefetch at least an EmailIdentifier (and duplicate detection fields) to create a
-    // normalized placeholder in the local database of the message, so all positions are
-    // properly relative to the end of the message list; once this is done, notify user of new
-    // messages.  If duplicates, create_email_async() will fall through to an updated merge,
-    // which is exactly what we want.
-    //
-    // This MUST only be called from ReplayAppend.
-    internal async void do_replay_appended_messages(int reported_remote_count,
-        Gee.List<Imap.SequenceNumber> remote_positions) {
-        StringBuilder positions_builder = new StringBuilder("( ");
-        foreach (Imap.SequenceNumber remote_position in remote_positions)
-            positions_builder.append_printf("%s ", remote_position.to_string());
-        positions_builder.append(")");
-        
-        debug("%s do_replay_appended_message: current remote_count=%d reported_remote_count=%d remote_positions=%s",
-            to_string(), remote_count, reported_remote_count, positions_builder.str);
-        
-        if (remote_positions.size == 0)
-            return;
-        
-        Gee.HashSet<Geary.EmailIdentifier> created = new Gee.HashSet<Geary.EmailIdentifier>();
-        Gee.HashSet<Geary.EmailIdentifier> appended = new Gee.HashSet<Geary.EmailIdentifier>();
-        try {
-            Gee.List<Imap.MessageSet> msg_sets = Imap.MessageSet.sparse(remote_positions);
-            foreach (Imap.MessageSet msg_set in msg_sets) {
-                Gee.List<Geary.Email>? list = yield remote_folder.list_email_async(msg_set,
-                    ImapDB.Folder.REQUIRED_FIELDS, null);
-                if (list != null && list.size > 0) {
-                    debug("%s do_replay_appended_message: %d new messages in %s", to_string(),
-                        list.size, msg_set.to_string());
-                    
-                    // need to report both if it was created (not known before) and appended (which
-                    // could mean created or simply a known email associated with this folder)
-                    Gee.Map<Geary.Email, bool> created_or_merged =
-                        yield local_folder.create_or_merge_email_async(list, null);
-                    foreach (Geary.Email email in created_or_merged.keys) {
-                        // true means created
-                        if (created_or_merged.get(email)) {
-                            debug("%s do_replay_appended_message: appended email ID %s added",
-                                to_string(), email.id.to_string());
-                            
-                            created.add(email.id);
-                        } else {
-                            debug("%s do_replay_appended_message: appended email ID %s associated",
-                                to_string(), email.id.to_string());
-                        }
-                        
-                        appended.add(email.id);
-                    }
-                } else {
-                    debug("%s do_replay_appended_message: no new messages in %s", to_string(),
-                        msg_set.to_string());
-                }
-            }
-        } catch (Error err) {
-            debug("%s do_replay_appended_message: Unable to process: %s",
-                to_string(), err.message);
+        this.remote_count = reported_remote_count;
+
+        if (positions.size > 0) {
+            ReplayAppend op = new ReplayAppend(this, reported_remote_count, positions);
+            op.email_appended.connect(notify_email_appended);
+            op.email_locally_appended.connect(notify_email_locally_appended);
+            op.email_count_changed.connect(notify_email_count_changed);
+            this.replay_queue.schedule_server_notification(op);
         }
-        
-        // store the reported count, *not* the current count (which is updated outside the of
-        // the queue) to ensure that updates happen serially and reflect committed local changes
-        try {
-            yield local_folder.update_remote_selected_message_count(reported_remote_count, null);
-        } catch (Error err) {
-            debug("%s do_replay_appended_message: Unable to save appended remote count %d: %s",
-                to_string(), reported_remote_count, err.message);
-        }
-        
-        if (appended.size > 0)
-            notify_email_appended(appended);
-        
-        if (created.size > 0)
-            notify_email_locally_appended(created);
-        
-        notify_email_count_changed(reported_remote_count, CountChangeReason.APPENDED);
-        
-        debug("%s do_replay_appended_message: completed, current remote_count=%d reported_remote_count=%d",
-            to_string(), remote_count, reported_remote_count);
     }
-    
+
+    private void on_remote_updated(Imap.SequenceNumber position, Imap.FetchedData data) {
+        debug("%s on_remote_updated: remote_count=%d position=%s", to_string(),
+              this.remote_count, position.to_string());
+
+        this.replay_queue.schedule_server_notification(
+            new ReplayUpdate(this, this.remote_count, position, data)
+        );
+    }
+
     private void on_remote_removed(Imap.SequenceNumber position, int reported_remote_count) {
         debug("%s on_remote_removed: remote_count=%d position=%s reported_remote_count=%d", to_string(),
             remote_count, position.to_string(), reported_remote_count);
@@ -1151,109 +1124,15 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         // remote_count is *not* updated, which is why it's safe to do that here without worry.
         // similarly, signals are only fired here if marked, so the same EmailIdentifier isn't
         // reported twice
-        remote_count = reported_remote_count;
-        
-        replay_queue.schedule_server_notification(new ReplayRemoval(this, reported_remote_count, position));
+        this.remote_count = reported_remote_count;
+
+        ReplayRemoval op = new ReplayRemoval(this, reported_remote_count, position);
+        op.email_removed.connect(notify_email_removed);
+        op.marked_email_removed.connect(notify_marked_email_removed);
+        op.email_count_changed.connect(notify_email_count_changed);
+        this.replay_queue.schedule_server_notification(op);
     }
-    
-    // This MUST only be called from ReplayRemoval.
-    internal async void do_replay_removed_message(int reported_remote_count, Imap.SequenceNumber remote_position) {
-        debug("%s do_replay_removed_message: current remote_count=%d remote_position=%s reported_remote_count=%d",
-            to_string(), remote_count, remote_position.value.to_string(), reported_remote_count);
-        
-        if (!remote_position.is_valid()) {
-            debug("%s do_replay_removed_message: ignoring, invalid remote position or count",
-                to_string());
-            
-            return;
-        }
-        
-        int local_count = -1;
-        int64 local_position = -1;
-        
-        ImapDB.EmailIdentifier? owned_id = null;
-        try {
-            // need total count, including those marked for removal, to accurately calculate position
-            // from server's point of view, not client's
-            local_count = yield local_folder.get_email_count_async(
-                ImapDB.Folder.ListFlags.INCLUDE_MARKED_FOR_REMOVE, null);
-            local_position = remote_position.value - (reported_remote_count + 1 - local_count);
-            
-            // zero or negative means the message exists beyond the local vector's range, so
-            // nothing to do there
-            if (local_position > 0) {
-                debug("%s do_replay_removed_message: local_count=%d local_position=%s", to_string(),
-                    local_count, local_position.to_string());
-                
-                owned_id = yield local_folder.get_id_at_async(local_position, null);
-            } else {
-                debug("%s do_replay_removed_message: message not stored locally (local_count=%d local_position=%s)",
-                    to_string(), local_count, local_position.to_string());
-            }
-        } catch (Error err) {
-            debug("%s do_replay_removed_message: unable to determine ID of removed message %s: %s",
-                to_string(), remote_position.to_string(), err.message);
-        }
-        
-        bool marked = false;
-        if (owned_id != null) {
-            debug("%s do_replay_removed_message: detaching from local store Email ID %s", to_string(),
-                owned_id.to_string());
-            try {
-                // Reflect change in the local store and notify subscribers
-                yield local_folder.detach_single_email_async(owned_id, out marked, null);
-            } catch (Error err) {
-                debug("%s do_replay_removed_message: unable to remove message #%s: %s", to_string(),
-                    remote_position.to_string(), err.message);
-            }
-            
-            // Notify queued replay operations that the email has been removed (by EmailIdentifier)
-            replay_queue.notify_remote_removed_ids(
-                Geary.iterate<ImapDB.EmailIdentifier>(owned_id).to_array_list());
-        } else {
-            debug("%s do_replay_removed_message: remote_position=%ld unknown in local store "
-                + "(reported_remote_count=%d local_position=%ld local_count=%d)",
-                to_string(), remote_position.value, reported_remote_count, local_position, local_count);
-        }
-        
-        // for debugging
-        int new_local_count = -1;
-        try {
-            new_local_count = yield local_folder.get_email_count_async(
-                ImapDB.Folder.ListFlags.INCLUDE_MARKED_FOR_REMOVE, null);
-        } catch (Error err) {
-            debug("%s do_replay_removed_message: error fetching new local count: %s", to_string(),
-                err.message);
-        }
-        
-        // as with on_remote_appended(), only update in local store inside a queue operation, to
-        // ensure serial commits
-        try {
-            yield local_folder.update_remote_selected_message_count(reported_remote_count, null);
-        } catch (Error err) {
-            debug("%s do_replay_removed_message: unable to save removed remote count: %s", to_string(),
-                err.message);
-        }
-        
-        // notify of change ... use "marked-email-removed" for marked email to allow internal code
-        // to be notified when a removed email is "really" removed
-        if (owned_id != null) {
-            Gee.List<EmailIdentifier> removed = Geary.iterate<Geary.EmailIdentifier>(owned_id).to_array_list();
-            if (!marked)
-                notify_email_removed(removed);
-            else
-                marked_email_removed(removed);
-        }
-        
-        if (!marked)
-            notify_email_count_changed(reported_remote_count, CountChangeReason.REMOVED);
-        
-        debug("%s do_replay_remove_message: completed, current remote_count=%d "
-            + "(reported_remote_count=%d local_count=%d starting local_count=%d remote_position=%ld local_position=%ld marked=%s)",
-            to_string(), remote_count, reported_remote_count, new_local_count, local_count, remote_position.value,
-            local_position, marked.to_string());
-    }
-    
+
     private void on_remote_disconnected(Imap.ClientSession.DisconnectReason reason) {
         debug("on_remote_disconnected: reason=%s", reason.to_string());
         
@@ -1398,16 +1277,20 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         
         yield mark.wait_for_ready_async(cancellable);
     }
-    
+
     public virtual async void copy_email_async(Gee.List<Geary.EmailIdentifier> to_copy,
-        Geary.FolderPath destination, Cancellable? cancellable = null) throws Error {
+                                               Geary.FolderPath destination,
+                                               Cancellable? cancellable = null)
+        throws Error {
+        Geary.Folder target = yield this._account.fetch_folder_async(destination);
         yield copy_email_uids_async(to_copy, destination, cancellable);
+        this._account.update_folder(target);
     }
-    
+
     /**
      * Returns the destination folder's UIDs for the copied messages.
      */
-    public async Gee.Set<Imap.UID>? copy_email_uids_async(Gee.List<Geary.EmailIdentifier> to_copy,
+    protected async Gee.Set<Imap.UID>? copy_email_uids_async(Gee.List<Geary.EmailIdentifier> to_copy,
         Geary.FolderPath destination, Cancellable? cancellable = null) throws Error {
         check_open("copy_email_uids_async");
         check_ids("copy_email_uids_async", to_copy);
@@ -1441,10 +1324,13 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         
         if (prepare.prepared_for_move == null || prepare.prepared_for_move.size == 0)
             return null;
-        
-        return new RevokableMove(_account, this, destination, prepare.prepared_for_move);
+
+        Geary.Folder target = yield this._account.fetch_folder_async(destination);
+        return new RevokableMove(
+            _account, this, target, prepare.prepared_for_move
+        );
     }
-    
+
     public void schedule_op(ReplayOperation op) throws Error {
         check_open("schedule_op");
         
@@ -1455,14 +1341,27 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         schedule_op(op);
         yield op.wait_for_ready_async(cancellable);
     }
-    
-    private void on_email_flags_changed(Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> changed) {
-        notify_email_flags_changed(changed);
+
+    public override string to_string() {
+        return "%s (open_count=%d remote_opened=%s)".printf(base.to_string(), open_count,
+            remote_opened.to_string());
     }
-    
+
+    /**
+     * Schedules a refresh of the unseen count for the folder.
+     *
+     * This will only refresh folders that are not open, since if they
+     * are open or opening, they will already be updated. Hence it is safe to be called on closed folders.
+     */
+    internal void refresh_unseen() {
+        if (this.open_count == 0) {
+            this.refresh_unseen_timer.start();
+        }
+    }
+
     // TODO: A proper public search mechanism; note that this always round-trips to the remote,
     // doesn't go through the replay queue, and doesn't deal with messages marked for deletion
-    internal async Geary.EmailIdentifier? find_earliest_email_async(DateTime datetime,
+    internal async Geary.Email? find_earliest_email_async(DateTime datetime,
         Geary.EmailIdentifier? before_id, Cancellable? cancellable) throws Error {
         check_open("find_earliest_email_async");
         if (before_id != null)
@@ -1493,19 +1392,20 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         replay_queue.schedule(op);
         
         yield op.wait_for_ready_async(cancellable);
-        
+
         // find earliest ID; because all Email comes from Folder, UID should always be present
+        Geary.Email? earliest = null;
         ImapDB.EmailIdentifier? earliest_id = null;
         foreach (Geary.Email email in op.accumulator) {
             ImapDB.EmailIdentifier email_id = (ImapDB.EmailIdentifier) email.id;
-            
-            if (earliest_id == null || email_id.uid.compare_to(earliest_id.uid) < 0)
+            if (earliest_id == null || email_id.uid.compare_to(earliest_id.uid) < 0) {
+                earliest = email;
                 earliest_id = email_id;
+            }
         }
-
-        return earliest_id;
+        return earliest;
     }
-    
+
     protected async Geary.EmailIdentifier? create_email_async(RFC822.Message rfc822,
         Geary.EmailFlags? flags, DateTime? date_received, Geary.EmailIdentifier? id,
         Cancellable? cancellable = null) throws Error {
@@ -1542,13 +1442,95 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         // safely back out.
         if (cancellable != null && cancellable.is_cancelled() && ret != null && remove_folder != null)
             yield remove_folder.remove_email_async(iterate<EmailIdentifier>(ret).to_array_list());
-        
+
+        this._account.update_folder(this);
+
         return ret;
     }
 
-    public override string to_string() {
-        return "%s (open_count=%d remote_opened=%s)".printf(base.to_string(), open_count,
-            remote_opened.to_string());
+    /** Fires a {@link report_problem}} signal for a service for this folder. */
+    protected virtual void notify_service_problem(ProblemType type, Service service_type, Error? err) {
+        report_problem(new ServiceProblemReport(
+                           type, this._account.information, service_type, err
+                       ));
+    }
+
+    /** Fires a {@link marked_email_removed}} signal for this folder. */
+    protected virtual void notify_marked_email_removed(Gee.Collection<Geary.EmailIdentifier> removed) {
+        marked_email_removed(removed);
+    }
+
+    /**
+     * Checks for changes to {@link EmailFlags} after a folder opens.
+     */
+    private async void on_update_flags() throws Error {
+        // Update this to use CHANGEDSINCE FETCH when available, when
+        // we support IMAP CONDSTORE (Bug 713117).
+        int chunk_size = FLAG_UPDATE_START_CHUNK;
+        Geary.EmailIdentifier? lowest = null;
+        while (!this.open_cancellable.is_cancelled() && this.remote.is_ready) {
+            Gee.List<Geary.Email>? list_local = yield list_email_by_id_async(
+                lowest, chunk_size,
+                Geary.Email.Field.FLAGS,
+                Geary.Folder.ListFlags.LOCAL_ONLY,
+                this.open_cancellable
+            );
+            if (list_local == null || list_local.is_empty)
+                break;
+
+            // find the lowest for the next iteration
+            lowest = Geary.EmailIdentifier.sort_emails(list_local).first().id;
+
+            // Get all email identifiers in the local folder mapped to their EmailFlags
+            Gee.HashMap<Geary.EmailIdentifier, Geary.EmailFlags> local_map =
+                new Gee.HashMap<Geary.EmailIdentifier, Geary.EmailFlags>();
+            foreach (Geary.Email e in list_local)
+                local_map.set(e.id, e.email_flags);
+
+            // Fetch e-mail from folder using force update, which will cause the cache to be bypassed
+            // and the latest to be gotten from the server (updating the cache in the process)
+            debug("%s: fetching %d flags", this.to_string(), local_map.keys.size);
+            Gee.List<Geary.Email>? list_remote = yield list_email_by_sparse_id_async(
+                local_map.keys,
+                Email.Field.FLAGS,
+                Geary.Folder.ListFlags.FORCE_UPDATE,
+                this.open_cancellable
+            );
+            if (list_remote == null || list_remote.is_empty)
+                break;
+
+            // Build map of emails that have changed.
+            Gee.HashMap<Geary.EmailIdentifier, Geary.EmailFlags> changed_map =
+                new Gee.HashMap<Geary.EmailIdentifier, Geary.EmailFlags>();
+            foreach (Geary.Email e in list_remote) {
+                if (!local_map.has_key(e.id))
+                    continue;
+
+                if (!local_map.get(e.id).equal_to(e.email_flags))
+                    changed_map.set(e.id, e.email_flags);
+            }
+
+            if (!this.open_cancellable.is_cancelled() && changed_map.size > 0)
+                notify_email_flags_changed(changed_map);
+
+            chunk_size *= 2;
+            if (chunk_size > FLAG_UPDATE_MAX_CHUNK) {
+                chunk_size = FLAG_UPDATE_MAX_CHUNK;
+            }
+        }
+    }
+
+    private void on_refresh_unseen() {
+        // We queue an account operation since the folder itself is
+        // closed and hence does not have a connection to use for it.
+        RefreshFolderUnseen op = new RefreshFolderUnseen(
+            this, this._account, this.remote, this.local
+        );
+        try {
+            this._account.queue_operation(op);
+        } catch (Error err) {
+            // oh well
+        }
     }
 
     private void on_remote_ready() {
@@ -1556,4 +1538,5 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
             start_open_remote();
         }
     }
+
 }

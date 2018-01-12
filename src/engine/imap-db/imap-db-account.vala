@@ -371,10 +371,15 @@ private class Geary.ImapDB.Account : BaseObject {
     public async void clone_folder_async(Geary.Imap.Folder imap_folder, Cancellable? cancellable = null)
         throws Error {
         check_open();
-        
+
         Geary.Imap.FolderProperties properties = imap_folder.properties;
         Geary.FolderPath path = imap_folder.path;
-        
+
+        // XXX this should really be a db table constraint
+        Geary.ImapDB.Folder? folder = get_local_folder(path);
+        if (folder != null)
+            throw new EngineError.ALREADY_EXISTS(path.to_string());
+
         yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
             // get the parent of this folder, creating parents if necessary ... ok if this fails,
             // that just means the folder has no parents

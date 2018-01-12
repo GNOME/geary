@@ -35,20 +35,20 @@ private class Geary.ImapEngine.OutlookAccount : Geary.ImapEngine.GenericAccount 
         base (name, account_information, remote, local);
     }
 
-    protected override MinimalFolder new_folder(Geary.FolderPath path, Imap.Account remote_account,
-        ImapDB.Account local_account, ImapDB.Folder local_folder) {
+    protected override MinimalFolder new_folder(ImapDB.Folder local_folder) {
         // use the Folder's attributes to determine if it's a special folder type, unless it's
         // INBOX; that's determined by name
+        Geary.FolderPath path = local_folder.get_path();
         SpecialFolderType special_folder_type;
         if (Imap.MailboxSpecifier.folder_path_is_inbox(path))
             special_folder_type = SpecialFolderType.INBOX;
         else
             special_folder_type = local_folder.get_properties().attrs.get_special_folder_type();
-        
-        if (special_folder_type == Geary.SpecialFolderType.DRAFTS)
-            return new OutlookDraftsFolder(this, remote_account, local_account, local_folder, special_folder_type);
-        
-        return new OutlookFolder(this, remote_account, local_account, local_folder, special_folder_type);
-    }
-}
 
+        if (special_folder_type == Geary.SpecialFolderType.DRAFTS)
+            return new OutlookDraftsFolder(this, this.remote, this.local, local_folder, special_folder_type);
+
+        return new OutlookFolder(this, this.remote, this.local, local_folder, special_folder_type);
+    }
+
+}

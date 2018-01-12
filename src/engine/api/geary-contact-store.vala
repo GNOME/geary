@@ -15,7 +15,7 @@ public abstract class Geary.ContactStore : BaseObject {
     
     public signal void contacts_updated(Gee.Collection<Contact> contacts);
     
-    internal ContactStore() {
+    protected ContactStore() {
         contact_map = new Gee.HashMap<string, Contact>();
     }
     

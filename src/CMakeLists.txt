@@ -190,10 +190,11 @@ engine/imap-db/outbox/smtp-outbox-folder-properties.vala
 engine/imap-db/outbox/smtp-outbox-folder-root.vala
 
 engine/imap-engine/imap-engine.vala
+engine/imap-engine/imap-engine-account-operation.vala
+engine/imap-engine/imap-engine-account-processor.vala
 engine/imap-engine/imap-engine-account-synchronizer.vala
 engine/imap-engine/imap-engine-batch-operations.vala
 engine/imap-engine/imap-engine-contact-store.vala
-engine/imap-engine/imap-engine-email-flag-watcher.vala
 engine/imap-engine/imap-engine-email-prefetcher.vala
 engine/imap-engine/imap-engine-generic-account.vala
 engine/imap-engine/imap-engine-generic-folder.vala
@@ -229,6 +230,7 @@ engine/imap-engine/replay-ops/imap-engine-remove-email.vala
 engine/imap-engine/replay-ops/imap-engine-replay-append.vala
 engine/imap-engine/replay-ops/imap-engine-replay-disconnect.vala
 engine/imap-engine/replay-ops/imap-engine-replay-removal.vala
+engine/imap-engine/replay-ops/imap-engine-replay-update.vala
 engine/imap-engine/replay-ops/imap-engine-server-search-email.vala
 engine/imap-engine/replay-ops/imap-engine-user-close.vala
 engine/imap-engine/yahoo/imap-engine-yahoo-account.vala
@@ -258,8 +260,8 @@ engine/nonblocking/nonblocking-batch.vala
 engine/nonblocking/nonblocking-concurrent.vala
 engine/nonblocking/nonblocking-counting-semaphore.vala
 engine/nonblocking/nonblocking-error.vala
-engine/nonblocking/nonblocking-mailbox.vala
 engine/nonblocking/nonblocking-mutex.vala
+engine/nonblocking/nonblocking-queue.vala
 engine/nonblocking/nonblocking-reporting-semaphore.vala
 engine/nonblocking/nonblocking-variants.vala
 
