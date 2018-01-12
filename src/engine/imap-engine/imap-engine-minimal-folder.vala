@@ -1448,14 +1448,14 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         return ret;
     }
 
-    /** Fires a {@link report_problem}} signal for a service for this folder. */
+    /** Fires a {@link report_problem} signal for a service for this folder. */
     protected virtual void notify_service_problem(ProblemType type, Service service_type, Error? err) {
         report_problem(new ServiceProblemReport(
                            type, this._account.information, service_type, err
                        ));
     }
 
-    /** Fires a {@link marked_email_removed}} signal for this folder. */
+    /** Fires a {@link marked_email_removed} signal for this folder. */
     protected virtual void notify_marked_email_removed(Gee.Collection<Geary.EmailIdentifier> removed) {
         marked_email_removed(removed);
     }
