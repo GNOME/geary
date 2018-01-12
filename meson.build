@@ -63,11 +63,12 @@ javascriptcoregtk_lib = cc.find_library('javascriptcoregtk-4.0', version: '>=' +
 javascriptcoregtk_vapi = valac.find_library('javascriptcore-4.0', dirs: vapi_dir)
 enchant = dependency('enchant', version: '>= 1.6')
 libunwind = declare_dependency(
-  dependencies: [
-    dependency('libunwind', version: '>= 1.1'),
-    cc.find_library('libunwind-' + target_machine.cpu_family()),
-  ],
-)
+   dependencies: [
+     valac.find_library('libunwind', dirs: vapi_dir),
+     cc.find_library('unwind', version: '>= 1.1'),
+     cc.find_library('unwind-generic', version: '>= 1.1'),
+   ],
+ )
 
 libunity = dependency('unity', version: '>= 5.12.0', required: false)
 libmessagingmenu = meson.get_compiler('c').find_library('libmessaging-menu', required: false)
