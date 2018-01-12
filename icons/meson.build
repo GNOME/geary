@@ -28,10 +28,25 @@ icon_files = files(
   'tag-symbolic-rtl.svg',
 )
 
+colour_app_icon_dirs = [
+  '16x16',
+  '24x24',
+  '32x32',
+  '48x48',
+  '256x256',
+  '512x512',
+]
+
 install_data(icon_files,
   install_dir: join_paths(system_icons_dir, 'scalable', 'actions'),
 )
 
-install_subdir('hicolor',
-  install_dir: system_icons_dir,
+foreach icon_dir: colour_app_icon_dirs
+  install_data(join_paths('hicolor', icon_dir, 'apps', 'org.gnome.Geary.png'),
+    install_dir: join_paths(system_icons_dir, icon_dir, 'apps'),
+  )
+endforeach
+
+install_data(join_paths('hicolor', 'symbolic', 'apps', 'org.gnome.Geary-symbolic.svg'),
+  install_dir: join_paths(system_icons_dir, 'symbolic', 'apps'),
 )
