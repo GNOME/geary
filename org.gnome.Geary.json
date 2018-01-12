@@ -110,6 +110,8 @@
         },
         {
             "name": "geary",
+            "buildsystem": "meson",
+            "builddir": true,
             "sources": [
                 {
                     "type": "git",
