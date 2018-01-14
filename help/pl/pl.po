@@ -1,14 +1,14 @@
 # Polish translation for geary help.
-# Copyright © 2016-2017 the geary authors.
+# Copyright © 2016-2018 the geary authors.
 # This file is distributed under the same license as the geary help.
-# Piotr Drąg <piotrdrag@gmail.com>, 2016-2017.
-# Aviary.pl <community-poland@mozilla.org>, 2016-2017.
+# Piotr Drąg <piotrdrag@gmail.com>, 2016-2018.
+# Aviary.pl <community-poland@mozilla.org>, 2016-2018.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: geary-help\n"
-"POT-Creation-Date: 2017-12-18 05:00+0000\n"
-"PO-Revision-Date: 2017-12-24 17:15+0100\n"
+"POT-Creation-Date: 2018-01-13 08:00+0000\n"
+"PO-Revision-Date: 2018-01-14 19:05+0100\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <community-poland@mozilla.org>\n"
 "Language: pl\n"
@@ -460,38 +460,22 @@ msgstr ""
 "umieszczone pionowo w jednym panelu."
 
 #: C/preferences.page:40(title)
-msgid "Composer"
-msgstr "Okno tworzenia wiadomości"
-
-#: C/preferences.page:43(gui)
-msgid "Enable spell checking"
-msgstr "Sprawdzanie pisowni"
-
-#: C/preferences.page:44(p)
-msgid ""
-"When set, Geary automatically spell checks a message as you write it, "
-"underlying each misspelled word in red."
-msgstr ""
-"Po włączeniu pisownia jest automatycznie sprawdzania w trakcie pisania "
-"wiadomości, podkreślając słowa z błędami na czerwono."
-
-#: C/preferences.page:51(title)
 msgid "Notifications"
 msgstr "Powiadomienia"
 
-#: C/preferences.page:54(gui)
+#: C/preferences.page:43(gui)
 msgid "Play notification sounds"
 msgstr "Dźwięki powiadomień"
 
-#: C/preferences.page:55(p)
+#: C/preferences.page:44(p)
 msgid "When set, Geary plays a sound whenever a new message arrives."
 msgstr "Po włączeniu przy nadejściu wiadomości odtwarzany jest dźwięk."
 
-#: C/preferences.page:58(gui)
+#: C/preferences.page:47(gui)
 msgid "Show notifications for new mail"
 msgstr "Powiadomienia o nowych wiadomościach"
 
-#: C/preferences.page:59(p)
+#: C/preferences.page:48(p)
 msgid ""
 "When set, Geary displays a <em>notification</em> each time a new message "
 "arrives. Notifications are displayed in a system-dependent manner. On GNOME "
@@ -503,19 +487,19 @@ msgstr ""
 "em>. Powiadomienia są różnie wyświetlane w zależności od środowiska. GNOME "
 "wyświetla je pod górnym paskiem, a Unity w górnym prawym rogu ekranu."
 
-#: C/preferences.page:65(gui)
-msgid "Always watch for new mail"
-msgstr "Monitorowanie nowych wiadomości"
+#: C/preferences.page:54(gui)
+msgid "Watch for new mail when closed"
+msgstr "Monitorowanie nowych wiadomości po zamknięciu"
 
-#: C/preferences.page:66(p)
+#: C/preferences.page:55(p)
 msgid ""
 "Geary will watch your accounts for new mail even when the main window is not "
 "open. To do this, it will silently start when you log in to your computer, "
-"and it will continue to run after you close the main window."
+"and it will continue to run after you close all windows."
 msgstr ""
 "Nowe wiadomości będą monitorowane nawet po zamknięciu głównego okna. W tym "
 "celu program Geary jest uruchamiany w tle po zalogowaniu się do komputera "
-"i kontynuuje działanie po zamknięciu głównego okna."
+"i kontynuuje działanie po zamknięciu wszystkich okien."
 
 #: C/overview.page:8(title)
 msgid "Overview"
@@ -886,22 +870,20 @@ msgid ""
 "<gui>Accounts</gui> option is available in either Geary's application menu "
 "or the gear menu in the upper-right of the toolbar. (The location depends on "
 "the install desktop shell. For GNOME Shell and Unity, the application menu "
-"is available near the top-left corner of the screen.) Alternately, "
-"<keyseq><key>Ctrl</key><key>M</key></keyseq> will open the Accounts dialog. "
-"To add an account, click the + button."
+"is available near the top-left corner of the screen.) To add an account, "
+"click the + button."
 msgstr ""
 "W oknie Konta można dodawać dodatkowe konta. <gui>Konta</gui> są dostępne "
 "w menu programu lub menu z kołem zębatym w górnym prawym rogu paska "
 "narzędziowego, zależnie od zainstalowanego środowiska. W środowiskach GNOME "
-"i Unity menu programu znajduje się obok górnego lewego rogu ekranu. Można "
-"także nacisnąć klawisze <keyseq><key>Ctrl</key><key>M</key></keyseq>, aby "
-"otworzyć to okno. Aby dodać konto, kliknij przycisk „+”."
+"i Unity menu programu znajduje się obok górnego lewego rogu ekranu. Aby "
+"dodać konto, kliknij przycisk „+”."
 
-#: C/accounts.page:28(title)
+#: C/accounts.page:27(title)
 msgid "Editing existing accounts"
 msgstr "Modyfikowanie istniejących kont"
 
-#: C/accounts.page:30(p)
+#: C/accounts.page:29(p)
 msgid ""
 "From the Accounts dialog, select an account and click the pencil icon to "
 "change various settings. Please note that Geary cannot change server "
@@ -913,19 +895,19 @@ msgstr ""
 "serwera istniejącego konta. Aby zmienić serwer IMAP lub SMTP, należy usunąć "
 "konto i dodać je ponownie."
 
-#: C/accounts.page:34(p)
+#: C/accounts.page:33(p)
 msgid ""
 "To change the order that accounts are displayed in the folder list, drag the "
 "accounts in the Accounts dialog to the desired order."
 msgstr ""
 "Aby zmienić kolejność kont na liście katalogów, przeciągnij je w oknie Konta."
 
-#: C/accounts.page:37(p)
+#: C/accounts.page:36(p)
 msgid "There are some advanced options available when editing accounts:"
 msgstr ""
 "Podczas modyfikowania kont dostępnych jest kilka zaawansowanych funkcji:"
 
-#: C/accounts.page:39(p)
+#: C/accounts.page:38(p)
 msgid ""
 "The <gui>Save sent mail</gui> checkbox controls whether Geary will push "
 "successfully sent messages up to the account's <gui>Sent Mail</gui> folder. "
@@ -940,7 +922,7 @@ msgstr ""
 "zostać skonfigurowanych w ten sposób. Wyłączenie tego ustawienia w przypadku "
 "pozostałych kont może spowodować, że wysłane wiadomości będą niewidoczne."
 
-#: C/accounts.page:45(p)
+#: C/accounts.page:44(p)
 msgid ""
 "The <gui>Sign emails</gui> checkbox indicates whether a signature will be "
 "automatically inserted when a composer is opened. You may enter the "
@@ -952,7 +934,7 @@ msgstr ""
 "w polu poniżej. Można używać znaczników HTML, aby sformatować tekst. "
 "Przełącz na podgląd podpisu za pomocą przycisków po prawej."
 
-#: C/accounts.page:50(p)
+#: C/accounts.page:49(p)
 msgid ""
 "If you leave the signature in the Accounts dialog blank, Geary will use the "
 "<file>.signature</file> file in your home directory, if it exists. This file "
@@ -964,7 +946,7 @@ msgstr ""
 "zawierać zwykły tekst lub tekst ze znacznikami HTML. W tym drugim przypadku "
 "znaczniki będą wstawiane bezpośrednio do okna tworzenia wiadomości."
 
-#: C/accounts.page:55(p)
+#: C/accounts.page:54(p)
 msgid ""
 "The <gui>Download mail</gui> drop-down allows you to configure how much mail "
 "Geary will keep locally. Geary can only use locally available mail when "
@@ -974,11 +956,11 @@ msgstr ""
 "ile wiadomości przechowywać lokalnie. Lokalnie dostępna poczta jest używana "
 "tylko do wyszukiwania i formowania wątków."
 
-#: C/accounts.page:63(title)
+#: C/accounts.page:62(title)
 msgid "Removing accounts"
 msgstr "Usuwanie kont"
 
-#: C/accounts.page:65(p)
+#: C/accounts.page:64(p)
 msgid ""
 "To delete an account, open the Accounts dialog, select the account, and "
 "press the - button. Geary will delete all information associated with the "
@@ -991,5 +973,5 @@ msgstr ""
 #: C/accounts.page:0(None)
 msgid "translator-credits"
 msgstr ""
-"Piotr Drąg <piotrdrag@gmail.com>, 2016-2017\n"
-"Aviary.pl <community-poland@mozilla.org>, 2016-2017"
+"Piotr Drąg <piotrdrag@gmail.com>, 2016-2018\n"
+"Aviary.pl <community-poland@mozilla.org>, 2016-2018"

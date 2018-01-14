@@ -1,5 +1,5 @@
 # Polish translation for geary.
-# Copyright © 2012-2017 the geary authors.
+# Copyright © 2012-2018 the geary authors.
 # This file is distributed under the same license as the geary package.
 # scrx <mattpiskorz@gmail.com>, 2012.
 # Piotrek290 <piotrek290@gmail.com>, 2012-2013.
@@ -9,16 +9,16 @@
 # wmq <wmqkla@gmail.com>, 2012.
 # yorbajim <jim@yorba.org>, 2013.
 # zacol <zacol1@gmail.com>, 2012.
-# Piotr Drąg <piotrdrag@gmail.com>, 2014-2017.
-# Aviary.pl <community-poland@mozilla.org>, 2014-2017.
+# Piotr Drąg <piotrdrag@gmail.com>, 2014-2018.
+# Aviary.pl <community-poland@mozilla.org>, 2014-2018.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=internationalization\n"
-"POT-Creation-Date: 2017-12-15 10:48+0000\n"
-"PO-Revision-Date: 2017-12-17 17:50+0100\n"
+"POT-Creation-Date: 2018-01-10 16:16+0000\n"
+"PO-Revision-Date: 2018-01-14 19:02+0100\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <community-poland@mozilla.org>\n"
 "Language: pl\n"
@@ -164,8 +164,8 @@ msgid "Maximize window"
 msgstr "Maksymalizacja okna"
 
 #: desktop/org.gnome.Geary.gschema.xml:21
-msgid "True if library application is maximized, false otherwise."
-msgstr "Program jest zmaksymalizowany."
+msgid "True if the application window is maximized, false otherwise."
+msgstr "Okno programu jest zmaksymalizowane."
 
 #: desktop/org.gnome.Geary.gschema.xml:26
 msgid "Width of window"
@@ -476,7 +476,7 @@ msgstr "Copyright 2016-2017 Zespół programistów Geary"
 msgid "Visit the Geary web site"
 msgstr "Witryna programu Geary"
 
-#: src/client/application/geary-application.vala:423
+#: src/client/application/geary-application.vala:426
 #, c-format
 msgid "About %s"
 msgstr "O programie %s"
@@ -484,7 +484,7 @@ msgstr "O programie %s"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: src/client/application/geary-application.vala:427
+#: src/client/application/geary-application.vala:430
 msgid "translator-credits"
 msgstr ""
 "scrx <mattpiskorz@gmail.com>, 2012\n"
@@ -495,8 +495,8 @@ msgstr ""
 "wmq <wmqkla@gmail.com>, 2012\n"
 "yorbajim <jim@yorba.org>, 2013\n"
 "zacol <zacol1@gmail.com>, 2012\n"
-"Piotr Drąg <piotrdrag@gmail.com>, 2014-2017\n"
-"Aviary.pl <community-poland@mozilla.org>, 2014-2017"
+"Piotr Drąg <piotrdrag@gmail.com>, 2014-2018\n"
+"Aviary.pl <community-poland@mozilla.org>, 2014-2018"
 
 #: src/client/application/geary-args.vala:10
 msgid "Start Geary with hidden main window"
@@ -783,59 +783,60 @@ msgstr "Plik w „%s” już istnieje. Zastąpienie go nadpisze jego zawartoś�
 msgid "_Replace"
 msgstr "_Zastąp"
 
-#. Find out what to do with the inline composers.
-#. TODO: Remove this in favor of automatically saving drafts
-#: src/client/application/geary-controller.vala:2262
-msgid "Close open draft messages?"
-msgstr "Zamknąć otwarte szkice?"
+#: src/client/application/geary-controller.vala:2268
+msgid "Close the draft message?"
+msgid_plural "Close all draft messages?"
+msgstr[0] "Zamknąć szkic?"
+msgstr[1] "Zamknąć wszystkie szkice?"
+msgstr[2] "Zamknąć wszystkie szkice?"
 
-#: src/client/application/geary-controller.vala:2388
+#: src/client/application/geary-controller.vala:2394
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Usunąć wszystkie wiadomości z katalogu %s?"
 
-#: src/client/application/geary-controller.vala:2389
+#: src/client/application/geary-controller.vala:2395
 msgid "This removes the email from Geary and your email server."
 msgstr "Spowoduje to usunięcie wiadomości z programu Geary i serwera poczty."
 
-#: src/client/application/geary-controller.vala:2390
+#: src/client/application/geary-controller.vala:2396
 msgid "This cannot be undone."
 msgstr "Tego nie można cofnąć."
 
-#: src/client/application/geary-controller.vala:2391
+#: src/client/application/geary-controller.vala:2397
 #, c-format
 msgid "Empty %s"
 msgstr "Opróżnij %s"
 
-#: src/client/application/geary-controller.vala:2408
+#: src/client/application/geary-controller.vala:2414
 #, c-format
 msgid "Error emptying %s"
 msgstr "Błąd podczas opróżniania %s"
 
-#: src/client/application/geary-controller.vala:2438
+#: src/client/application/geary-controller.vala:2444
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Trwale usunąć tę wiadomość?"
 msgstr[1] "Trwale usunąć te wiadomości?"
 msgstr[2] "Trwale usunąć te wiadomości?"
 
-#: src/client/application/geary-controller.vala:2440
+#: src/client/application/geary-controller.vala:2446
 msgid "Delete"
 msgstr "Usuń"
 
-#: src/client/application/geary-controller.vala:2472
+#: src/client/application/geary-controller.vala:2478
 msgid "Undo archive (Ctrl+Z)"
 msgstr "Cofnij archiwizację (Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:2487
+#: src/client/application/geary-controller.vala:2493
 msgid "Undo trash (Ctrl+Z)"
 msgstr "Cofnij przeniesienie do kosza (Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:2543
+#: src/client/application/geary-controller.vala:2549
 msgid "Undo (Ctrl+Z)"
 msgstr "Cofnij (Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:2661
+#: src/client/application/geary-controller.vala:2667
 msgid "Failed to open default text editor."
 msgstr "Otwarcie domyślnego edytora tekstu się nie powiodło."
 
@@ -935,7 +936,7 @@ msgstr "Problem podczas łączenia z serwerem poczty przychodzącej dla konta %
 #: src/client/components/main-window-info-bar.vala:73
 #: src/client/components/main-window-info-bar.vala:81
 #, c-format
-msgid "Network error talking to %s, check your Internet access try again"
+msgid "Network error talking to %s, check your Internet access and try again"
 msgstr ""
 "Błąd sieci podczas komunikacji z serwerem %s, proszę sprawdzić dostęp do "
 "Internetu i spróbować ponownie"
@@ -978,7 +979,8 @@ msgstr "Problem podczas komunikacji z serwerem poczty wychodzącej"
 #: src/client/components/main-window-info-bar.vala:97
 #, c-format
 msgid ""
-"Could now communicate with %s for %s, server name and try again in a moment"
+"Could not communicate with %s for %s, check the server name and try again in "
+"a moment"
 msgstr ""
 "Nie można komunikować się z serwerem %s dla konta %s, proszę sprawdzić "
 "poprawność nazwy serwera i spróbować ponownie za chwilę"
@@ -1203,28 +1205,37 @@ msgstr ""
 "załączyłam|załączono|dołączyłem|dołączyłam|dołączono|zalacznik|zalaczam|"
 "zalaczylem|zalaczylam|zalaczono|dolaczylem|dolaczylam|dolaczono"
 
-#: src/client/composer/composer-widget.vala:1138
-#: src/client/composer/composer-widget.vala:1157
-msgid "Do you want to discard this message?"
-msgstr "Odrzucić tę wiadomość?"
+#. Translators: This dialog text is displayed to the
+#. user when closing a composer where the options are
+#. Keep, Discard or Cancel.
+#: src/client/composer/composer-widget.vala:1142
+msgid "Do you want to keep or discard this draft message?"
+msgstr "Zachować lub odrzucić ten szkic?"
 
-#: src/client/composer/composer-widget.vala:1261
+#. Translators: This dialog text is displayed to the
+#. user when closing a composer where the options are
+#. only Discard or Cancel.
+#: src/client/composer/composer-widget.vala:1170
+msgid "Do you want to discard this draft message?"
+msgstr "Odrzucić ten szkic?"
+
+#: src/client/composer/composer-widget.vala:1278
 msgid "Send message with an empty subject and body?"
 msgstr "Wysłać wiadomość niezawierającą tematu i treści?"
 
-#: src/client/composer/composer-widget.vala:1263
+#: src/client/composer/composer-widget.vala:1280
 msgid "Send message with an empty subject?"
 msgstr "Wysłać wiadomość niezawierającą tematu?"
 
-#: src/client/composer/composer-widget.vala:1265
+#: src/client/composer/composer-widget.vala:1282
 msgid "Send message with an empty body?"
 msgstr "Wysłać wiadomość niezawierającą treści?"
 
-#: src/client/composer/composer-widget.vala:1269
+#: src/client/composer/composer-widget.vala:1286
 msgid "Send message without an attachment?"
 msgstr "Wysłać wiadomość niezawierającą załączników?"
 
-#: src/client/composer/composer-widget.vala:1531
+#: src/client/composer/composer-widget.vala:1548
 #, c-format
 msgid "“%s” already attached for delivery."
 msgstr "Do wiadomości już załączono „%s”."
@@ -1234,73 +1245,73 @@ msgstr "Do wiadomości już załączono „%s”."
 #. description of the document type, the second will
 #. be a human-friendly size string. For example:
 #. Document (100.9MB)
-#: src/client/composer/composer-widget.vala:1539
+#: src/client/composer/composer-widget.vala:1556
 #: src/client/conversation-viewer/conversation-email.vala:138
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: src/client/composer/composer-widget.vala:1576
+#: src/client/composer/composer-widget.vala:1593
 #, c-format
 msgid "“%s” could not be found."
 msgstr "Nie można odnaleźć „%s”."
 
-#: src/client/composer/composer-widget.vala:1582
+#: src/client/composer/composer-widget.vala:1599
 #, c-format
 msgid "“%s” is a folder."
 msgstr "„%s” jest katalogiem."
 
-#: src/client/composer/composer-widget.vala:1588
+#: src/client/composer/composer-widget.vala:1605
 #, c-format
 msgid "“%s” is an empty file."
 msgstr "„%s” jest pustym plikiem."
 
-#: src/client/composer/composer-widget.vala:1601
+#: src/client/composer/composer-widget.vala:1618
 #, c-format
 msgid "“%s” could not be opened for reading."
 msgstr "Nie można otworzyć „%s” do odczytania."
 
-#: src/client/composer/composer-widget.vala:1609
+#: src/client/composer/composer-widget.vala:1626
 msgid "Cannot add attachment"
 msgstr "Nie można dodać załącznika"
 
-#: src/client/composer/composer-widget.vala:1661
+#: src/client/composer/composer-widget.vala:1678
 msgid "To: "
 msgstr "Do: "
 
-#: src/client/composer/composer-widget.vala:1664
+#: src/client/composer/composer-widget.vala:1681
 msgid "Cc: "
 msgstr "DW: "
 
-#: src/client/composer/composer-widget.vala:1667
+#: src/client/composer/composer-widget.vala:1684
 msgid "Bcc: "
 msgstr "UDW: "
 
-#: src/client/composer/composer-widget.vala:1670
+#: src/client/composer/composer-widget.vala:1687
 msgid "Reply-To: "
 msgstr "Odpowiedź do: "
 
-#: src/client/composer/composer-widget.vala:1803
+#: src/client/composer/composer-widget.vala:1820
 msgid "Select Color"
 msgstr "Wybór koloru"
 
 #. Displayed in the From dropdown to indicate an "alternate email address"
 #. for an account.  The first printf argument will be the alternate email
 #. address, and the second will be the account's primary email address.
-#: src/client/composer/composer-widget.vala:2011
+#: src/client/composer/composer-widget.vala:2028
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%1$s przez %2$s"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: src/client/composer/composer-widget.vala:2053
+#: src/client/composer/composer-widget.vala:2070
 msgid "_From:"
 msgstr "_Od:"
 
 #. Translators: This is the name of the file chooser filter
 #. when inserting an image in the composer.
-#: src/client/composer/composer-widget.vala:2278
+#: src/client/composer/composer-widget.vala:2295
 msgid "Images"
 msgstr "Obrazy"
 
@@ -1594,7 +1605,7 @@ msgstr "Otwórz"
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: src/client/util/util-date.vala:68
 msgid "%l:%M %P"
-msgstr "%l∶%M %P"
+msgstr "%-l∶%M %P"
 
 #. / Datetime format for 24-hour time, i.e. 16:35
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
@@ -1632,14 +1643,14 @@ msgstr "%-e %B %Y, %-l∶%M %P"
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: src/client/util/util-date.vala:91
 msgid "%B %-e, %Y %-H:%M"
-msgstr "%-e %B %Y, %-H∶%M"
+msgstr "%-e %B %Y, %H∶%M"
 
 #. / Verbose datetime format for the locale default (full month, day and time)
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: src/client/util/util-date.vala:94
 msgctxt "Default full date"
 msgid "%B %-e, %Y %-l:%M %P"
-msgstr "%-e %B %Y, %-H∶%M"
+msgstr "%-e %B %Y, %H∶%M"
 
 #: src/client/util/util-date.vala:164
 msgid "Now"
@@ -1941,7 +1952,7 @@ msgstr "nieprzeczytane"
 #. Draft mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:668
+#: src/engine/imap-engine/imap-engine-generic-account.vala:673
 msgid "Drafts | Draft"
 msgstr "Szkice | Szkic"
 
@@ -1949,13 +1960,13 @@ msgstr "Szkice | Szkic"
 #. Sent mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:677
+#: src/engine/imap-engine/imap-engine-generic-account.vala:682
 msgid "Sent | Sent Mail | Sent Email | Sent E-Mail"
 msgstr "Wysłane | Wysłana poczta | Wysłane wiadomości | Skrzynka nadawcza"
 
 #. The localised name(s) of the Sent folder name as used
 #. by MS Outlook/Exchange.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:682
+#: src/engine/imap-engine/imap-engine-generic-account.vala:687
 msgctxt "Outlook localised name"
 msgid "Sent Items"
 msgstr "Elementy wysłane"
@@ -1964,7 +1975,7 @@ msgstr "Elementy wysłane"
 #. Spam mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:692
+#: src/engine/imap-engine/imap-engine-generic-account.vala:697
 msgid ""
 "Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email "
 "| Bulk E-Mail"
@@ -1974,13 +1985,13 @@ msgstr "Niechciane | Niechciana poczta | Niechciane wiadomości | Spam"
 #. Trash mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:702
+#: src/engine/imap-engine/imap-engine-generic-account.vala:707
 msgid "Trash | Rubbish | Rubbish Bin"
 msgstr "Kosz | Śmietnik | Usunięta poczta | Usunięte wiadomości"
 
 #. The localised name(s) of the Trash folder name as used
 #. by MS Outlook/Exchange.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:707
+#: src/engine/imap-engine/imap-engine-generic-account.vala:712
 msgctxt "Outlook localised name"
 msgid "Deleted Items"
 msgstr "Elementy usunięte"
@@ -1989,7 +2000,7 @@ msgstr "Elementy usunięte"
 #. Archive mailbox. Separate names using a vertical bar
 #. and put the most common localized name to the front for
 #. the default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:717
+#: src/engine/imap-engine/imap-engine-generic-account.vala:722
 msgid "Archive | Archives"
 msgstr "Archiwum | Archiwa"
 
@@ -1997,7 +2008,7 @@ msgstr "Archiwum | Archiwa"
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: src/engine/rfc822/rfc822-utils.vala:236
 msgid "%a, %b %-e, %Y at %-l:%M %p"
-msgstr "%a, %-e %b %Y o %-H∶%M"
+msgstr "%a, %-e %b %Y o %H∶%M"
 
 #. / The quoted header for a message being replied to.
 #. / %1$s will be substituted for the date, and %2$s will be substituted for
@@ -3018,13 +3029,12 @@ msgid "Show _notifications for new mail"
 msgstr "_Powiadomienia o nowych wiadomościach"
 
 #: ui/preferences-dialog.ui:164
-msgid "Always _watch for new mail"
-msgstr "_Monitorowanie nowych wiadomości"
+msgid "_Watch for new mail when closed"
+msgstr "_Monitorowanie nowych wiadomości po zamknięciu"
 
 #: ui/preferences-dialog.ui:168
-msgid "Geary will run in the background and notify of new mail"
-msgstr ""
-"Program Geary będzie działał w tle i powiadamiał o nowych wiadomościach"
+msgid "Geary will keep running after all windows are closed"
+msgstr "Program Geary będzie nadal działał po zamknięciu wszystkich okien"
 
 #: ui/preferences-dialog.ui:195
 msgid "Preferences"
