@@ -13,6 +13,10 @@ geary_help_pages = [
   'write.page',
 ]
 
+geary_help_media = [
+  'figures/geary.svg'
+]
+
 # Meson 0.44 added support for automatically reading LINGUAS, until we
 # can depend on that, read it in outselves. Note this means if you
 # change LINGUAS, you will need remove your build directory and re-run
@@ -29,4 +33,5 @@ endforeach
 gnome.yelp(meson.project_name(),
   languages: langs,
   sources: geary_help_pages,
+  media: geary_help_media
 )
