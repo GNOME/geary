@@ -62,7 +62,7 @@ public class Geary.Nonblocking.Queue<G> : BaseObject {
      * identity will be used.
      */
     public Queue.fifo(owned Gee.EqualDataFunc<G>? equalator = null) {
-        this(new Gee.LinkedList<G>(equalator));
+        this(new Gee.LinkedList<G>((owned) equalator));
     }
 
     /**
@@ -73,7 +73,7 @@ public class Geary.Nonblocking.Queue<G> : BaseObject {
      * ordering will be used.
      */
     public Queue.priority(owned CompareDataFunc<G>? comparator = null) {
-        this(new Gee.PriorityQueue<G>(comparator));
+        this(new Gee.PriorityQueue<G>((owned) comparator));
     }
 
     /**

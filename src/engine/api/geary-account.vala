@@ -153,17 +153,18 @@ public abstract class Geary.Account : BaseObject {
     }
 
     /**
-     * A utility method to sort a Gee.Collection of {@link Folder}s by their {@link FolderPath}s
-     * to ensure they comport with {@link folders_available_unavailable} and
-     * {@link folders_added_removed} signals' contracts.
+     * A utility method to sort a Gee.Collection of {@link Folder}s by
+     * their {@link FolderPath}s to ensure they comport with {@link
+     * folders_available_unavailable}, {@link folders_created}, {@link
+     * folders_deleted} signals' contracts.
      */
     protected Gee.List<Geary.Folder> sort_by_path(Gee.Collection<Geary.Folder> folders) {
         Gee.TreeSet<Geary.Folder> sorted = new Gee.TreeSet<Geary.Folder>(folder_path_comparator);
         sorted.add_all(folders);
-        
+
         return Collection.to_array_list<Geary.Folder>(sorted);
     }
-    
+
     private int folder_path_comparator(Geary.Folder a, Geary.Folder b) {
         return a.path.compare_to(b.path);
     }

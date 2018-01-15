@@ -559,7 +559,7 @@ public class ConversationListBox : Gtk.ListBox {
             if (this.cancellable.is_cancelled()) {
                 break;
             }
-            if (!(full_email.id in this.email_rows)) {
+            if (!this.email_rows.has_key(full_email.id)) {
                 EmailRow row = add_email(full_email);
                 if (row.is_expanded &&
                     (first_expanded_row == null ||
@@ -1090,7 +1090,7 @@ public class ConversationListBox : Gtk.ListBox {
         Geary.App.Conversation conversation, Geary.Email part_email) {
         // Don't add rows that are already present, or that are
         // currently being edited.
-        if (!(part_email.id in this.email_rows) &&
+        if (!this.email_rows.has_key(part_email.id) &&
             part_email.id != this.draft_id) {
             load_full_email.begin(part_email.id, (obj, ret) => {
                     try {

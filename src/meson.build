@@ -22,7 +22,6 @@ geary_vala_options = [
   '--target-glib=@0@'.format(target_glib),
   '--thread',
   '--enable-checking',
-  '--enable-deprecated',
 ]
 
 # Symbols for valac's preprocessor must be defined as compiler args,

@@ -53,8 +53,8 @@ public class Geary.IdleManager : BaseObject {
      * The idle function will be by default not running, and hence
      * needs to be started by a call to {@link schedule}.
      */
-    public IdleManager(IdleFunc callback) {
-        this.callback = callback;
+    public IdleManager(owned IdleFunc callback) {
+        this.callback = (owned) callback;
     }
 
     ~IdleManager() {

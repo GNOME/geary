@@ -14,7 +14,7 @@ public inline bool is_empty(Gee.Collection? c) {
 
 // A substitute for ArrayList<G>.wrap() for compatibility with older versions of Gee.
 public Gee.ArrayList<G> array_list_wrap<G>(G[] a, owned Gee.EqualDataFunc<G>? equal_func = null) {
-    Gee.ArrayList<G> list = new Gee.ArrayList<G>(equal_func);
+    Gee.ArrayList<G> list = new Gee.ArrayList<G>((owned) equal_func);
     add_all_array<G>(list, a);
     return list;
 }

@@ -122,7 +122,7 @@ namespace Geary.JS {
                                                 global::JS.Object object,
                                                 string name)
         throws Geary.JS.Error {
-        global::JS.String js_name = new global::JS.String.create_with_utf8_cstring(name);
+        global::JS.String js_name = global::JS.String.create_with_utf8_cstring(name);
         global::JS.Value? err = null;
         global::JS.Value prop = object.get_property(context, js_name, out err);
         try {

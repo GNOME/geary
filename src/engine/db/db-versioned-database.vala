@@ -6,9 +6,9 @@
 
 public class Geary.Db.VersionedDatabase : Geary.Db.Database {
     public delegate void WorkCallback();
-    
-    private static Mutex upgrade_mutex = new Mutex();
-    
+
+    private static Mutex upgrade_mutex = Mutex();
+
     public File schema_dir { get; private set; }
     
     public VersionedDatabase(File db_file, File schema_dir) {

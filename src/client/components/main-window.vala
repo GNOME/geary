@@ -189,8 +189,8 @@ public class MainWindow : Gtk.ApplicationWindow {
 
                 return true;
             };
-            bind_property("current-folder", this, "title", BindingFlags.SYNC_CREATE, title_func);
-            main_toolbar.bind_property("account", this, "title", BindingFlags.SYNC_CREATE, title_func);
+            bind_property("current-folder", this, "title", BindingFlags.SYNC_CREATE, (owned) title_func);
+            main_toolbar.bind_property("account", this, "title", BindingFlags.SYNC_CREATE, (owned) title_func);
             main_layout.pack_start(main_toolbar, false, true, 0);
         } else {
             main_toolbar.show_close_button = true;

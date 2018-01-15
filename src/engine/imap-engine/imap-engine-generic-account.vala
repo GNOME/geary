@@ -514,7 +514,8 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
      * equivalents need to exist beforehand — they are not created.
      *
      * If `are_existing` is true, the folders are assumed to have been
-     * seen before and the {@link folders_added} signal is not fired.
+     * seen before and the {@link Geary.Account.folders_created} signal is
+     * not fired.
      */
     internal Gee.List<Geary.Folder> add_folders(Gee.Collection<ImapDB.Folder> db_folders,
                                                 bool are_existing) {

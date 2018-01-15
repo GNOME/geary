@@ -64,7 +64,7 @@ public class GearyApplication : Gtk.Application {
     private const int64 FORCE_SHUTDOWN_USEC = 5 * USEC_PER_SEC;
 
 
-    [Deprecated]
+    [Version (deprecated = true)]
     public static GearyApplication instance {
         get { return _instance; }
         private set {
@@ -336,7 +336,7 @@ public class GearyApplication : Gtk.Application {
      *
      * @deprecated Use {@link GioUtil.create_builder} instead.
      */
-    [Deprecated]
+    [Version (deprecated = true)]
     public Gtk.Builder create_builder(string name) {
         return GioUtil.create_builder(name);
     }

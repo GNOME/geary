@@ -423,9 +423,9 @@ public class ComposerWidget : Gtk.EventBox {
                 return true;
             };
         bind_property("draft-save-text", this, "toolbar-text", BindingFlags.SYNC_CREATE,
-            set_toolbar_text);
+                      (owned) set_toolbar_text);
         bind_property("can-delete-quote", this, "toolbar-text", BindingFlags.SYNC_CREATE,
-            set_toolbar_text);
+                      (owned) set_toolbar_text);
         this.to_entry = new EmailEntry(this);
         this.to_entry.changed.connect(on_envelope_changed);
         this.to_box.add(to_entry);
@@ -1518,8 +1518,8 @@ public class ComposerWidget : Gtk.EventBox {
                         // automatically, so add it if asked to and it
                         // hasn't already been added
                         if (do_add &&
-                            !(file in this.attached_files) &&
-                            !(content_id in this.inline_files)) {
+                            !this.attached_files.contains(file) &&
+                            !this.inline_files.has_key(content_id)) {
                             if (type == Geary.Mime.DispositionType.INLINE) {
                                 add_inline_part(file, content_id);
                             } else {
@@ -2216,7 +2216,7 @@ public class ComposerWidget : Gtk.EventBox {
         if (this.pointer_url != null &&
             this.actions.get_action_state(ACTION_COMPOSE_AS_HTML).get_boolean()) {
             Gdk.EventButton? button = (Gdk.EventButton) event;
-            Gdk.Rectangle location = new Gdk.Rectangle();
+            Gdk.Rectangle location = Gdk.Rectangle();
             location.x = (int) button.x;
             location.y = (int) button.y;
 

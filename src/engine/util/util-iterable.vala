@@ -91,7 +91,7 @@ public class Geary.Iterable<G> : BaseObject {
     }
     
     public Iterable<G> filter(owned Gee.Predicate<G> f) {
-        return new Iterable<G>(i.filter(f));
+        return new Iterable<G>(i.filter((owned) f));
     }
     
     public Iterable<G> chop(int offset, int length = -1) {
@@ -166,20 +166,20 @@ public class Geary.Iterable<G> : BaseObject {
     }
     
     public Gee.ArrayList<G> to_array_list(owned Gee.EqualDataFunc<G>? equal_func = null) {
-        return (Gee.ArrayList<G>) add_all_to(new Gee.ArrayList<G>(equal_func));
+        return (Gee.ArrayList<G>) add_all_to(new Gee.ArrayList<G>((owned) equal_func));
     }
     
     public Gee.LinkedList<G> to_linked_list(owned Gee.EqualDataFunc<G>? equal_func = null) {
-        return (Gee.LinkedList<G>) add_all_to(new Gee.LinkedList<G>(equal_func));
+        return (Gee.LinkedList<G>) add_all_to(new Gee.LinkedList<G>((owned) equal_func));
     }
     
     public Gee.HashSet<G> to_hash_set(owned Gee.HashDataFunc<G>? hash_func = null,
         owned Gee.EqualDataFunc<G>? equal_func = null) {
-        return (Gee.HashSet<G>) add_all_to(new Gee.HashSet<G>(hash_func, equal_func));
+        return (Gee.HashSet<G>) add_all_to(new Gee.HashSet<G>((owned) hash_func, (owned) equal_func));
     }
     
     public Gee.TreeSet<G> to_tree_set(owned CompareDataFunc<G>? compare_func = null) {
-        return (Gee.TreeSet<G>) add_all_to(new Gee.TreeSet<G>(compare_func));
+        return (Gee.TreeSet<G>) add_all_to(new Gee.TreeSet<G>((owned) compare_func));
     }
     
     public Gee.Map<K, G> add_all_to_map<K>(Gee.Map<K, G> c, Gee.MapFunc<K, G> key_func) {
@@ -189,12 +189,17 @@ public class Geary.Iterable<G> : BaseObject {
         }
         return c;
     }
-    
-    public Gee.HashMap<K, G> to_hash_map<K>(Gee.MapFunc<K, G> key_func,
-        owned Gee.HashDataFunc<K>? key_hash_func = null,
-        owned Gee.EqualDataFunc<K>? key_equal_func = null,
-        owned Gee.EqualDataFunc<G>? value_equal_func = null) {
-        return (Gee.HashMap<K, G>) add_all_to_map<K>(new Gee.HashMap<K, G>(
-            key_hash_func, key_equal_func, value_equal_func), key_func);
+
+    public Gee.HashMap<K, G>
+        to_hash_map<K>(Gee.MapFunc<K, G> key_func,
+                       owned Gee.HashDataFunc<K>? key_hash_func = null,
+                       owned Gee.EqualDataFunc<K>? key_equal_func = null,
+                       owned Gee.EqualDataFunc<G>? value_equal_func = null) {
+            return (Gee.HashMap<K, G>) add_all_to_map<K>(
+                new Gee.HashMap<K, G>((owned) key_hash_func,
+                                      (owned) key_equal_func,
+                                      (owned) value_equal_func),
+                key_func
+            );
     }
 }

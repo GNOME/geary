@@ -60,10 +60,10 @@ public class Geary.TimeoutManager : BaseObject {
      * The timeout will be by default not running, and hence needs to be
      * started by a call to {@link start}.
      */
-    public TimeoutManager.seconds(uint interval, TimeoutFunc callback) {
+    public TimeoutManager.seconds(uint interval, owned TimeoutFunc callback) {
         this.use_seconds = true;
         this.interval = interval;
-        this.callback = callback;
+        this.callback = (owned) callback;
     }
 
     /**
@@ -72,10 +72,10 @@ public class Geary.TimeoutManager : BaseObject {
      * The timeout will be by default not running, and hence needs to be
      * started by a call to {@link start}.
      */
-    public TimeoutManager.milliseconds(uint interval, TimeoutFunc callback) {
+    public TimeoutManager.milliseconds(uint interval, owned TimeoutFunc callback) {
         this.use_seconds = false;
         this.interval = interval;
-        this.callback = callback;
+        this.callback = (owned) callback;
     }
 
     ~TimeoutManager() {

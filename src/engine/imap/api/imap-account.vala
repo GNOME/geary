@@ -122,7 +122,7 @@ private class Geary.Imap.Account : BaseObject {
         Gee.List<MailboxInformation> mailboxes = yield send_list_async(session, path, false, cancellable);
         bool exists = mailboxes.is_empty;
         if (!exists) {
-            this.folders.remove(path);
+            this.folders.unset(path);
         }
 
         // XXX fire some signal here
@@ -225,7 +225,7 @@ private class Geary.Imap.Account : BaseObject {
                     folder.properties.set_status_unseen(data.unseen);
                     folder.properties.set_status_message_count(data.messages, false);
                 } catch (ImapError e) {
-                    this.folders.remove(path);
+                    this.folders.unset(path);
                     // XXX notify someone
                     throw_not_found(path);
                 }

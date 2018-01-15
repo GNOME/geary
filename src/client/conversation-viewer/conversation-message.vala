@@ -815,7 +815,7 @@ public class ConversationMessage : Gtk.Grid {
 
         if (hit_test.context_is_image()) {
             string uri = hit_test.get_image_uri();
-            set_action_enabled(ACTION_SAVE_IMAGE, uri in this.resources);
+            set_action_enabled(ACTION_SAVE_IMAGE, this.resources.has_key(uri));
             model.append_section(
                 null,
                 set_action_param_value(
