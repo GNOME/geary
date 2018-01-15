@@ -462,12 +462,12 @@ public class GearyApplication : Gtk.Application {
     private void on_activate_help() {
         try {
             if (is_installed()) {
-                show_uri("ghelp:geary");
+                show_uri("help:geary");
             } else {
                 Pid pid;
                 File exec_dir = get_exec_dir();
                 string[] argv = new string[3];
-                argv[0] = "gnome-help";
+                argv[0] = "yelp";
                 argv[1] = GearyApplication.SOURCE_ROOT_DIR + "/help/C/";
                 argv[2] = null;
                 if (!Process.spawn_async(

@@ -26,15 +26,15 @@ set(TRANSLATED
     sv
 )
 
-set(HELP_DEST share/gnome/help/geary)
+set(HELP_DEST share/help)
 
 set(HELP_SOURCE)
 foreach(_page ${HELP_FILES})
     set(HELP_SOURCE ${HELP_SOURCE} C/${_page})
 endforeach()
 
-install(FILES ${HELP_SOURCE} DESTINATION ${HELP_DEST}/C)
-install(FILES C/figures/geary.svg DESTINATION ${HELP_DEST}/C/figures)
+install(FILES ${HELP_SOURCE} DESTINATION ${HELP_DEST}/C/geary)
+install(FILES C/figures/geary.svg DESTINATION ${HELP_DEST}/C/geary/figures)
 
 # Hacked together from the similar macro in cmake/Gettext.cmake.
 MACRO(HELP_CREATE_TRANSLATIONS _firstLang)
@@ -66,7 +66,7 @@ MACRO(HELP_CREATE_TRANSLATIONS _firstLang)
                     WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}
                     )
 
-                INSTALL(FILES ${_destPage} DESTINATION ${HELP_DEST}/${_lang})
+                INSTALL(FILES ${_destPage} DESTINATION ${HELP_DEST}/${_lang}/geary)
                 SET(_translatedPages ${_translatedPages} ${_destPage})
             ENDFOREACH()
         ENDIF()
