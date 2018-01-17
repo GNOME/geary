@@ -149,18 +149,8 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
 		this.endpoint.connectivity.notify["is-reachable"].disconnect(on_connectivity_change);
         this.endpoint.connectivity.address_error_reported.disconnect(on_connectivity_error);
 
-        // to avoid locking down the sessions table while scheduling disconnects, make a copy
-        // and work off of that
-        ClientSession[]? sessions_copy = sessions.to_array();
+        yield force_disconnect_all();
 
-        // disconnect all existing sessions at once; don't wait for each, since as they disconnect
-        // they'll remove themselves from the sessions list and cause this foreach to explode
-        foreach (ClientSession session in sessions_copy)
-            session.disconnect_async.begin();
-        
-        // free copy
-        sessions_copy = null;
-        
         // TODO: This isn't the best (deterministic) way to deal with this, but it's easy and works
         // for now
         int attempts = 0;
@@ -395,7 +385,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
                     free = true;
                 } else {
                     // Closing it didn't work, so drop it
-                    yield force_disconnect(session, true);
+                    yield force_disconnect(session);
                 }
                 break;
 
@@ -403,7 +393,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
                 // This class is tasked with holding onto a pool of
                 // authorized connections, so if one is released
                 // outside that state, pessimistically drop it
-                yield force_disconnect(session, true);
+                yield force_disconnect(session);
                 break;
             }
 
@@ -420,8 +410,8 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
                 }
             }
         } else {
-            // Not open, or we are discarding sessions, so just close it.
-            yield force_disconnect(session, true);
+            // Not open, or we are discarding sessions, so close it.
+            yield force_disconnect(session);
         }
 
         // If we're discarding returned sessions, we don't want to
@@ -431,67 +421,53 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         }
     }
 
-    private async void force_disconnect_all() {
+    private async void force_disconnect_all()
+        throws Error {
         debug("[%s] Dropping and disconnecting %d sessions",
               to_string(), this.sessions.size);
 
-        int token;
-        try {
-            token = yield sessions_mutex.claim_async();
-        } catch (Error err) {
-            debug("Unable to acquire sessions mutex: %s", err.message);
-            return;
-        }
+        // Take a copy and work off that while scheduling disconnects,
+        // since as they disconnect they'll remove themselves from the
+        // sessions list and cause the loop below to explode.
+        int token = yield this.sessions_mutex.claim_async();
+        ClientSession[] to_close = this.sessions.to_array();
+        this.sessions_mutex.release(ref token);
 
-        foreach (ClientSession session in this.sessions) {
-            try {
-                // Don't explicitly remove from the sessions list
-                // since the disconnect handler will do that for us
-                yield session.disconnect_async();
-            } catch (Error err) {
-                // ignored
-            }
-        }
-
-        try {
-            sessions_mutex.release(ref token);
-        } catch (Error err) {
-            debug("Unable to release sessions mutex: %s", err.message);
+        // Disconnect all existing sessions at once. Don't block
+        // waiting for any since we don't want to delay closing the
+        // others.
+        foreach (ClientSession session in to_close) {
+            session.disconnect_async.begin();
         }
     }
 
-    // It's possible this will be called more than once on the same
-    // session, especially in the case of a remote close on reserved
-    // ClientSession, so this code is forgiving.
-    private async void force_disconnect(ClientSession session, bool do_disconnect) {
-        debug("[%s] Dropping session %s (disconnecting=%s)", to_string(),
-            session.to_string(), do_disconnect.to_string());
-
-        int token;
-        try {
-            token = yield sessions_mutex.claim_async();
-        } catch (Error err) {
-            debug("Unable to acquire sessions mutex: %s", err.message);
-            return;
-        }
-
-        locked_remove_session(session);
-
-        if (do_disconnect) {
-            session.disconnect_async.begin();
-        }
+    private async void force_disconnect(ClientSession session) {
+        debug("[%s] Dropping session %s", to_string(), session.to_string());
 
         try {
-            sessions_mutex.release(ref token);
+            yield unlocked_remove_session_async(session);
         } catch (Error err) {
-            debug("Unable to release sessions mutex: %s", err.message);
+            debug("[%s] Error removing session: %s", to_string(), err.message);
         }
 
-        adjust_session_pool.begin();
+        // Don't wait for this to finish because we don't want to
+        // block claiming a new session, shutdown, etc.
+        session.disconnect_async.begin();
     }
 
     private void on_disconnected(ClientSession session, ClientSession.DisconnectReason reason) {
-        force_disconnect.begin(session, false);
+        this.unlocked_remove_session_async.begin(
+            session,
+            (obj, res) => {
+                try {
+                    this.unlocked_remove_session_async.end(res);
+                } catch (Error err) {
+                    debug("[%s] Error removing disconnected session: %s",
+                          to_string(),
+                          err.message);
+                }
+            }
+        );
     }
 
     private void on_login_failed(ClientSession session, StatusResponse? response) {
