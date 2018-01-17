@@ -1,5 +1,6 @@
 /*
  * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2018 Michael Gratton <mike@vee.net>.
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -8,16 +9,22 @@
 /**
  * An interface between the high-level engine API and the IMAP stack.
  *
- * Because of the complexities of the IMAP protocol, this private
- * class takes common operations that a Geary.Account implementation
- * would need (in particular, {@link Geary.ImapEngine.GenericAccount}
- * and makes them into simple async calls.
+ * Because of the complexities of the IMAP protocol, class takes
+ * common operations that a Geary.Account implementation would need
+ * (in particular, {@link Geary.ImapEngine.GenericAccount}) and makes
+ * them into simple async calls.
+ *
+ * This class maintains an {@link ClientSessionManager} instance to
+ * maintain a pool of connections to an account's IMAP endpoint. On
+ * opening, it will open the pool, then claim an IMAP session and
+ * maintain it in a non-selected state for executing
+ * non-mailbox-specific operations.
  *
  * Geary.Imap.Account manages the {@link Imap.Folder} objects it
  * returns, but only in the sense that it will not create new
  * instances repeatedly.  Otherwise, it does not refresh or update the
  * Imap.Folders themselves (such as update their {@link
- * Imap.StatusData} periodically).  That's the responsibility of the
+ * Imap.StatusData} periodically). That's the responsibility of the
  * higher layers of the stack.
  */
 private class Geary.Imap.Account : BaseObject {
@@ -66,6 +73,12 @@ private class Geary.Imap.Account : BaseObject {
         this.session_mgr.login_failed.connect(on_login_failed);
     }
 
+    /**
+     * Prepares the account for use.
+     *
+     * Opening the account will kick off at establishing least one
+     * connection to the IMAP server, if accessible.
+     */
     public async void open_async(Cancellable? cancellable = null) throws Error {
         if (is_open)
             throw new EngineError.ALREADY_OPEN("Imap.Account already open");
@@ -80,7 +93,17 @@ private class Geary.Imap.Account : BaseObject {
 
         is_open = true;
     }
-    
+
+    /**
+     * Notifies the account that the engine is preparing to exit.
+     */
+    public void prepare_to_close() {
+        this.session_mgr.discard_returned_sessions = true;
+    }
+
+    /**
+     * Closes the account, releasing its IMAP session and session pool.
+     */
     public async void close_async(Cancellable? cancellable = null) throws Error {
         if (!is_open)
             return;
