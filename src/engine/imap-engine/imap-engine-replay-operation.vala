@@ -51,7 +51,7 @@ private abstract class Geary.ImapEngine.ReplayOperation : Geary.BaseObject, Gee.
     public OnError on_remote_error { get; protected set; }
     public int remote_retry_count { get; set; default = 0; }
     public Error? err { get; private set; default = null; }
-    public bool notified { get { return semaphore.is_passed(); } }
+    public bool notified { get { return semaphore.can_pass; } }
     
     private Nonblocking.Semaphore semaphore = new Nonblocking.Semaphore();
     
@@ -152,7 +152,7 @@ private abstract class Geary.ImapEngine.ReplayOperation : Geary.BaseObject, Gee.
     
     // Can only be called once
     internal void notify_ready(Error? err) {
-        assert(!semaphore.is_passed());
+        assert(!semaphore.can_pass);
         
         this.err = err;
         

@@ -11,7 +11,10 @@
  *
  * This class can be used to asynchronously wait for items to be added
  * to the queue, the asynchronous call blocking until an item is
- * ready.
+ * ready. Multiple asynchronous tasks can queue objects via {@link
+ * send}, and tasks can wait for items via {@link receive}. If there
+ * are multiple tasks waiting for items, the first to wait will
+ * receive the next item.
  */
 public class Geary.Nonblocking.Queue<G> : BaseObject {
 

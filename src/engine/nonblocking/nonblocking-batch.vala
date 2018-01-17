@@ -170,7 +170,7 @@ public class Geary.Nonblocking.Batch : BaseObject {
      *
      * If the batch is executing or already executed, IOError.PENDING will be thrown.  If the
      * Cancellable is already cancelled, IOError.CANCELLED is thrown.  Other errors may be thrown
-     * as well; see {@link AbstractSemaphore.wait_async}.
+     * as well; see {@link Lock.wait_async}.
      *
      * Batch will launch each BatchOperation in the order added.  Depending on the BatchOperation,
      * this does not guarantee that they'll complete in any particular order.

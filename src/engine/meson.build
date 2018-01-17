@@ -252,11 +252,11 @@ geary_engine_vala_sources = files(
   'mime/mime-error.vala',
   'mime/mime-multipart-subtype.vala',
 
-  'nonblocking/nonblocking-abstract-semaphore.vala',
   'nonblocking/nonblocking-batch.vala',
   'nonblocking/nonblocking-concurrent.vala',
   'nonblocking/nonblocking-counting-semaphore.vala',
   'nonblocking/nonblocking-error.vala',
+  'nonblocking/nonblocking-lock.vala',
   'nonblocking/nonblocking-mutex.vala',
   'nonblocking/nonblocking-queue.vala',
   'nonblocking/nonblocking-reporting-semaphore.vala',
