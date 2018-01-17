@@ -221,6 +221,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         if (!open)
             return;
 
+        this.remote.prepare_to_close();
         this.remote.ready.disconnect(on_remote_ready);
 
         // Halt internal tasks early so they stop using local and

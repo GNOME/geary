@@ -58,6 +58,11 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
      */
     public int min_pool_size { get; set; default = DEFAULT_MIN_POOL_SIZE; }
 
+    /**
+     * Determines if returned sessions should be kept or discarded.
+     */
+    public bool discard_returned_sessions = false;
+
     private AccountInformation account_information;
     private Endpoint endpoint;
     private Gee.HashSet<ClientSession> sessions = new Gee.HashSet<ClientSession>();
@@ -345,79 +350,84 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         
         return found_session;
     }
-    
+
     public async void release_session_async(ClientSession session, Cancellable? cancellable)
         throws Error {
-        // Don't check_open(), it's valid for this to be called when is_open is false, that happens
-        // during mop-up
-        
-        MailboxSpecifier? mailbox;
+        // Don't check_open(), it's valid for this to be called when
+        // is_open is false, that happens during mop-up
+        MailboxSpecifier? mailbox = null;
         ClientSession.ProtocolState context = session.get_protocol_state(out mailbox);
-        
-        bool unreserve = false;
-        switch (context) {
+
+        if (context == ClientSession.ProtocolState.UNCONNECTED) {
+            // Already disconnected, so drop it on the floor
+            try {
+                yield unlocked_remove_session_async(session);
+            } catch (Error err) {
+                debug("[%s] Error removing unconnected session: %s",
+                      to_string(), err.message);
+            }
+        } else if (this.is_open && !this.discard_returned_sessions) {
+            bool free = false;
+            switch (context) {
             case ClientSession.ProtocolState.AUTHORIZED:
             case ClientSession.ProtocolState.CLOSING_MAILBOX:
-                // keep as-is, but remove from the reserved list
-                unreserve = true;
-            break;
-            
-            // ClientSessionManager is tasked with holding onto a pool of authorized connections,
-            // so if one is released outside that state, pessimistically drop it
-            case ClientSession.ProtocolState.CONNECTING:
-            case ClientSession.ProtocolState.AUTHORIZING:
-            case ClientSession.ProtocolState.UNAUTHORIZED:
-                yield force_disconnect(session, true);
-            break;
-            
-            case ClientSession.ProtocolState.UNCONNECTED:
-                yield force_disconnect(session, false);
-            break;
-            
+                // keep as-is, but add back to the free list
+                free = true;
+                break;
+
             case ClientSession.ProtocolState.SELECTED:
             case ClientSession.ProtocolState.SELECTING:
-                debug("[%s] Closing mailbox for released session %s", to_string(), session.to_string());
-                
+                debug("[%s] Closing %s for released session %s",
+                      to_string(),
+                      mailbox != null ? mailbox.to_string() : "(unknown)",
+                      session.to_string());
+
                 // always close mailbox to return to authorized state
                 try {
                     yield session.close_mailbox_async(cancellable);
                 } catch (ImapError imap_error) {
-                    debug("Error attempting to close released session %s: %s", session.to_string(),
-                        imap_error.message);
+                    debug("[%s] Error attempting to close released session %s: %s",
+                          to_string(), session.to_string(), imap_error.message);
                 }
-                
-                // if not in authorized state now, drop it, otherwise remove from reserved list
-                if (session.get_protocol_state(out mailbox) == ClientSession.ProtocolState.AUTHORIZED)
-                    unreserve = true;
-                else
+
+                if (session.get_protocol_state(out mailbox) == ClientSession.ProtocolState.AUTHORIZED) {
+                    // Now in authorized state, free it up for re-use
+                    free = true;
+                } else {
+                    // Closing it didn't work, so drop it
                     yield force_disconnect(session, true);
-            break;
-            
+                }
+                break;
+
             default:
-                assert_not_reached();
-        }
-        
-        if (!unreserve)
-            return;
-        
-        // if not open, disconnect, which will remove from the reserved pool anyway
-        if (!is_open) {
-            yield force_disconnect(session, true);
-        } else {
-            debug("[%s] Unreserving session %s", to_string(), session.to_string());
-            
-            try {
-                // don't respect Cancellable because this *must* happen; don't want this lingering
-                // on the reserved list forever
-                int token = yield sessions_mutex.claim_async();
-                
-                bool removed = reserved_sessions.remove(session);
-                assert(removed);
-                
-                sessions_mutex.release(ref token);
-            } catch (Error err) {
-                message("Unable to remove %s from reserved list: %s", session.to_string(), err.message);
+                // This class is tasked with holding onto a pool of
+                // authorized connections, so if one is released
+                // outside that state, pessimistically drop it
+                yield force_disconnect(session, true);
+                break;
             }
+
+            if (free) {
+                debug("[%s] Unreserving session %s",
+                      to_string(), session.to_string());
+                try {
+                    int token = yield sessions_mutex.claim_async(cancellable);
+                    this.reserved_sessions.remove(session);
+                    this.sessions_mutex.release(ref token);
+                } catch (Error err) {
+                    message("[%s] Unable to add %s to the free list: %s",
+                            to_string(), session.to_string(), err.message);
+                }
+            }
+        } else {
+            // Not open, or we are discarding sessions, so just close it.
+            yield force_disconnect(session, true);
+        }
+
+        // If we're discarding returned sessions, we don't want to
+        // create any more, so only twiddle the pool if not.
+        if (!this.discard_returned_sessions) {
+            this.adjust_session_pool.begin();
         }
     }
 
@@ -466,12 +476,9 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         }
 
         locked_remove_session(session);
+
         if (do_disconnect) {
-            try {
-                yield session.disconnect_async();
-            } catch (Error err) {
-                // ignored
-            }
+            session.disconnect_async.begin();
         }
 
         try {
