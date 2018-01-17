@@ -255,11 +255,11 @@ engine/mime/mime-disposition-type.vala
 engine/mime/mime-error.vala
 engine/mime/mime-multipart-subtype.vala
 
-engine/nonblocking/nonblocking-abstract-semaphore.vala
 engine/nonblocking/nonblocking-batch.vala
 engine/nonblocking/nonblocking-concurrent.vala
 engine/nonblocking/nonblocking-counting-semaphore.vala
 engine/nonblocking/nonblocking-error.vala
+engine/nonblocking/nonblocking-lock.vala
 engine/nonblocking/nonblocking-mutex.vala
 engine/nonblocking/nonblocking-queue.vala
 engine/nonblocking/nonblocking-reporting-semaphore.vala

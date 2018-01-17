@@ -1,17 +1,22 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 /**
- * A nonblocking semaphore which allows for any number of tasks to run, but only signalling
- * completion when all have finished.
+ * A counting, asynchronous semaphore.
  *
- * Unlike the other {@link AbstractSemaphore} variants, a task must {@link acquire} before it
- * can {@link notify}.  The number of acquired tasks is kept in the {@link count} property.
+ * Unlike the other {@link Lock} variants, a task must {@link acquire}
+ * before it can {@link notify}. The number of acquired tasks is kept
+ * in the {@link count} property. Waiting tasks are released only when
+ * the count returns to zero.
+ *
+ * This class is ''not'' thread safe and should only be used by
+ * asynchronous tasks.
  */
-public class Geary.Nonblocking.CountingSemaphore : Geary.Nonblocking.AbstractSemaphore {
+public class Geary.Nonblocking.CountingSemaphore : Geary.Nonblocking.Lock {
     /**
      * The number of tasks which have {@link acquire} the semaphore.
      */
