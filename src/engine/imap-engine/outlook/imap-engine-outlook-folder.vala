@@ -5,8 +5,9 @@
  */
 
 private class Geary.ImapEngine.OutlookFolder : GenericFolder {
-    public OutlookFolder(OutlookAccount account, Imap.Account remote,
-        ImapDB.Folder local_folder, SpecialFolderType special_folder_type) {
-        base (account, remote, local_folder, special_folder_type);
+    public OutlookFolder(OutlookAccount account,
+                         ImapDB.Folder local_folder,
+                         SpecialFolderType special_folder_type) {
+        base(account, local_folder, special_folder_type);
     }
 }

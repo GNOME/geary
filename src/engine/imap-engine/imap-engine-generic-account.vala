@@ -1,6 +1,6 @@
 /*
  * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2017 Michael Gratton <mike@vee.net>
+ * Copyright 2017-2018 Michael Gratton <mike@vee.net>.
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -24,8 +24,8 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     private static Geary.FolderPath? outbox_path = null;
     private static Geary.FolderPath? search_path = null;
 
-    protected Imap.Account remote { get; private set; }
-    protected ImapDB.Account local { get; private set; }
+    internal Imap.Account remote { get; private set; }
+    internal ImapDB.Account local { get; private set; }
 
     private bool open = false;
     private Gee.HashMap<FolderPath, MinimalFolder> folder_map = new Gee.HashMap<
@@ -1085,24 +1085,19 @@ internal class Geary.ImapEngine.UpdateRemoteFolders : AccountOperation {
 internal class Geary.ImapEngine.RefreshFolderUnseen : FolderOperation {
 
 
-    private weak Imap.Account remote;
-
-
     internal RefreshFolderUnseen(MinimalFolder folder,
-                                 GenericAccount account,
-                                 Imap.Account remote) {
+                                 GenericAccount account) {
         base(account, folder);
-        this.remote = remote;
     }
 
     public override async void execute(Cancellable cancellable) throws Error {
         if (this.folder.get_open_state() == Geary.Folder.OpenState.CLOSED) {
-            Imap.Folder remote_folder = yield this.remote.fetch_folder_cached_async(
-                folder.path,
-                true,
-                cancellable
-            );
-
+            Imap.Folder remote_folder =
+                yield ((GenericAccount) this.account).remote.fetch_folder_cached_async(
+                    folder.path,
+                    true,
+                    cancellable
+                );
 
             // Although this is called when the folder is closed, we
             // can safely use local_folder since we are only using its

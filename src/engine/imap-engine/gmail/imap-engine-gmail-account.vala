@@ -49,21 +49,17 @@ private class Geary.ImapEngine.GmailAccount : Geary.ImapEngine.GenericAccount {
 
         switch (special_folder_type) {
             case SpecialFolderType.ALL_MAIL:
-                return new GmailAllMailFolder(this, this.remote, local_folder,
-                    special_folder_type);
+                return new GmailAllMailFolder(this, local_folder, special_folder_type);
 
             case SpecialFolderType.DRAFTS:
-                return new GmailDraftsFolder(this, this.remote, local_folder,
-                    special_folder_type);
+                return new GmailDraftsFolder(this, local_folder, special_folder_type);
 
             case SpecialFolderType.SPAM:
             case SpecialFolderType.TRASH:
-                return new GmailSpamTrashFolder(this, this.remote, local_folder,
-                    special_folder_type);
+                return new GmailSpamTrashFolder(this, local_folder, special_folder_type);
 
             default:
-                return new GmailFolder(this, this.remote, local_folder,
-                    special_folder_type);
+                return new GmailFolder(this, local_folder, special_folder_type);
         }
     }
 
@@ -71,4 +67,3 @@ private class Geary.ImapEngine.GmailAccount : Geary.ImapEngine.GenericAccount {
         return new GmailSearchFolder(this);
     }
 }
-

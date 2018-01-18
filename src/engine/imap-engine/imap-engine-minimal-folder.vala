@@ -1,4 +1,6 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2018 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -61,9 +63,9 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     internal ReplayQueue replay_queue { get; private set; }
 
     private weak GenericAccount _account;
-    private Geary.AggregatedFolderProperties _properties = new Geary.AggregatedFolderProperties(
-        false, false);
-    private Imap.Account remote;
+    private Geary.AggregatedFolderProperties _properties =
+        new Geary.AggregatedFolderProperties(false, false);
+
     private Folder.OpenFlags open_flags = OpenFlags.NONE;
     private int open_count = 0;
     private bool remote_opened = false;
@@ -105,11 +107,9 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
 
 
     public MinimalFolder(GenericAccount account,
-                         Imap.Account remote,
                          ImapDB.Folder local_folder,
                          SpecialFolderType special_folder_type) {
         this._account = account;
-        this.remote = remote;
         this.remote_open_timer = new TimeoutManager.seconds(
             FORCE_OPEN_REMOTE_TIMEOUT_SEC, () => { start_open_remote(); }
         );
@@ -565,7 +565,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         if (!yield remote_semaphore.wait_for_result_async(cancellable))
             throw new EngineError.ALREADY_CLOSED("%s failed to open", to_string());
     }
-    
+
     public override async bool open_async(Geary.Folder.OpenFlags open_flags, Cancellable? cancellable = null)
         throws Error {
         if (open_count++ > 0) {
@@ -577,12 +577,9 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
 
                 start_open_remote();
             }
-            
-            debug("Not opening %s: already open", to_string());
-            
             return false;
         }
-        
+
         // first open gets to name the flags, but see note above
         this.open_flags = open_flags;
 
@@ -612,7 +609,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         // second account Inbox they don't manipulate), no remote connection will ever be made,
         // meaning that folder normalization never happens and unsolicited notifications never
         // arrive
-        this.remote.ready.connect(on_remote_ready);
+        this._account.remote.ready.connect(on_remote_ready);
         if (open_flags.is_all_set(OpenFlags.NO_DELAY)) {
             start_open_remote();
         } else {
@@ -622,7 +619,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     }
 
     private void start_open_remote() {
-        if (!this.remote_opened && this.remote.is_ready) {
+        if (!this.remote_opened && this._account.remote.is_ready) {
             this.remote_opened = true;
             this.remote_open_timer.reset();
             this.open_remote_async.begin(null);
@@ -676,7 +673,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
 
             debug("Fetching information for remote folder %s", to_string());
             try {
-                opening_folder = yield this.remote.fetch_folder_cached_async(
+                opening_folder = yield this._account.remote.fetch_folder_cached_async(
                     path, false, cancellable
                 );
             } catch (EngineError.NOT_FOUND err) {
@@ -687,7 +684,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
                 // Use local STATUS data cache to be able to present
                 // something to the user at least. XXX get the attrs
                 // from somewhere for Bug 714775
-                opening_folder = this.remote.new_selectable_folder(
+                opening_folder = this._account.remote.new_selectable_folder(
                     path,
                     local_status,
                     new Imap.MailboxAttributes(new Gee.ArrayList<Geary.Imap.MailboxAttribute>())
@@ -1470,7 +1467,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         // we support IMAP CONDSTORE (Bug 713117).
         int chunk_size = FLAG_UPDATE_START_CHUNK;
         Geary.EmailIdentifier? lowest = null;
-        while (!this.open_cancellable.is_cancelled() && this.remote.is_ready) {
+        while (!this.open_cancellable.is_cancelled() && this._account.remote.is_ready) {
             Gee.List<Geary.Email>? list_local = yield list_email_by_id_async(
                 lowest, chunk_size,
                 Geary.Email.Field.FLAGS,
@@ -1525,9 +1522,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     private void on_refresh_unseen() {
         // We queue an account operation since the folder itself is
         // closed and hence does not have a connection to use for it.
-        RefreshFolderUnseen op = new RefreshFolderUnseen(
-            this, this._account, this.remote
-        );
+        RefreshFolderUnseen op = new RefreshFolderUnseen(this, this._account);
         try {
             this._account.queue_operation(op);
         } catch (Error err) {
