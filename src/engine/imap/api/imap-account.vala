@@ -29,6 +29,9 @@
  */
 private class Geary.Imap.Account : BaseObject {
 
+    /** Default IMAP session pool size. */
+    private const int IMAP_MIN_POOL_SIZE = 2;
+
     /** Determines if the IMAP account has been opened. */
     public bool is_open { get; private set; default = false; }
 
@@ -68,6 +71,7 @@ private class Geary.Imap.Account : BaseObject {
         this.name = account.id + ":imap";
         this.account = account;
         this.session_mgr = new ClientSessionManager(account);
+        this.session_mgr.min_pool_size = IMAP_MIN_POOL_SIZE;
         this.session_mgr.ready.connect(on_session_ready);
         this.session_mgr.connection_failed.connect(on_connection_failed);
         this.session_mgr.login_failed.connect(on_login_failed);
