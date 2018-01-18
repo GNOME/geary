@@ -6,9 +6,9 @@
 
 private class Geary.ImapEngine.GmailFolder : MinimalFolder, FolderSupport.Archive,
     FolderSupport.Create, FolderSupport.Remove {
-    public GmailFolder(GmailAccount account, Imap.Account remote, ImapDB.Account local,
+    public GmailFolder(GmailAccount account, Imap.Account remote,
         ImapDB.Folder local_folder, SpecialFolderType special_folder_type) {
-        base (account, remote, local, local_folder, special_folder_type);
+        base (account, remote, local_folder, special_folder_type);
     }
     
     public new async Geary.EmailIdentifier? create_email_async(

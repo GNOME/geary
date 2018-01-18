@@ -64,7 +64,6 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     private Geary.AggregatedFolderProperties _properties = new Geary.AggregatedFolderProperties(
         false, false);
     private Imap.Account remote;
-    private ImapDB.Account local;
     private Folder.OpenFlags open_flags = OpenFlags.NONE;
     private int open_count = 0;
     private bool remote_opened = false;
@@ -105,14 +104,15 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     internal signal void report_problem(Geary.ProblemReport problem);
 
 
-    public MinimalFolder(GenericAccount account, Imap.Account remote, ImapDB.Account local,
-        ImapDB.Folder local_folder, SpecialFolderType special_folder_type) {
+    public MinimalFolder(GenericAccount account,
+                         Imap.Account remote,
+                         ImapDB.Folder local_folder,
+                         SpecialFolderType special_folder_type) {
         this._account = account;
         this.remote = remote;
         this.remote_open_timer = new TimeoutManager.seconds(
             FORCE_OPEN_REMOTE_TIMEOUT_SEC, () => { start_open_remote(); }
         );
-        this.local = local;
         this.local_folder = local_folder;
         this.local_folder.email_complete.connect(on_email_complete);
 
@@ -701,8 +701,10 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
             // inconsistencies
             if (yield normalize_folders(opening_folder, cancellable)) {
                 // update flags, properties, etc.
-                yield local.update_folder_select_examine_async(opening_folder, cancellable);
-                
+                yield local_folder.update_folder_select_examine(
+                    opening_folder.properties, cancellable
+                );
+
                 // signals
                 opening_folder.appended.connect(on_remote_appended);
                 opening_folder.updated.connect(on_remote_updated);
@@ -1524,7 +1526,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         // We queue an account operation since the folder itself is
         // closed and hence does not have a connection to use for it.
         RefreshFolderUnseen op = new RefreshFolderUnseen(
-            this, this._account, this.remote, this.local
+            this, this._account, this.remote
         );
         try {
             this._account.queue_operation(op);

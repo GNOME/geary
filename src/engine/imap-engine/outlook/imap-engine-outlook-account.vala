@@ -46,9 +46,9 @@ private class Geary.ImapEngine.OutlookAccount : Geary.ImapEngine.GenericAccount 
             special_folder_type = local_folder.get_properties().attrs.get_special_folder_type();
 
         if (special_folder_type == Geary.SpecialFolderType.DRAFTS)
-            return new OutlookDraftsFolder(this, this.remote, this.local, local_folder, special_folder_type);
+            return new OutlookDraftsFolder(this, this.remote, local_folder, special_folder_type);
 
-        return new OutlookFolder(this, this.remote, this.local, local_folder, special_folder_type);
+        return new OutlookFolder(this, this.remote, local_folder, special_folder_type);
     }
 
 }

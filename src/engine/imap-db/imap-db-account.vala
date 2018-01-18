@@ -433,158 +433,7 @@ private class Geary.ImapDB.Account : BaseObject {
             return Db.TransactionOutcome.COMMIT;
         }, cancellable);
     }
-    
-    /**
-     * Only updates folder's STATUS message count, attributes, recent, and unseen; UIDVALIDITY and UIDNEXT
-     * updated when the folder is SELECT/EXAMINED (see update_folder_select_examine_async()) unless
-     * update_uid_info is true.
-     */
-    public async void update_folder_status_async(Geary.Imap.Folder imap_folder, bool update_uid_info,
-        bool respect_marked_for_remove, Cancellable? cancellable) throws Error {
-        check_open();
-        
-        Geary.Imap.FolderProperties properties = imap_folder.properties;
-        Geary.FolderPath path = imap_folder.path;
-        
-        // adjust for marked remove, but don't write these adjustments to the database -- they're
-        // only reflected in memory via the properties
-        int adjust_unseen = 0;
-        int adjust_total = 0;
-        
-        yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
-            int64 parent_id;
-            if (!do_fetch_parent_id(cx, path, true, out parent_id, cancellable)) {
-                debug("Unable to find parent ID of %s to update properties", path.to_string());
-                
-                return Db.TransactionOutcome.ROLLBACK;
-            }
-            
-            int64 folder_id;
-            if (!do_fetch_folder_id(cx, path, false, out folder_id, cancellable))
-                folder_id = Db.INVALID_ROWID;
-            
-            if (respect_marked_for_remove && folder_id != Db.INVALID_ROWID) {
-                Db.Statement stmt = cx.prepare("""
-                    SELECT flags
-                    FROM MessageTable
-                    WHERE id IN (
-                        SELECT message_id
-                        FROM MessageLocationTable
-                        WHERE folder_id = ? AND remove_marker = ?
-                    )
-                """);
-                stmt.bind_rowid(0, folder_id);
-                stmt.bind_bool(1, true);
-                
-                Db.Result results = stmt.exec(cancellable);
-                while (!results.finished) {
-                    adjust_total++;
-                    
-                    Imap.EmailFlags flags = new Imap.EmailFlags(Imap.MessageFlags.deserialize(
-                        results.string_at(0)));
-                    if (flags.contains(EmailFlags.UNREAD))
-                        adjust_unseen++;
-                    
-                    results.next(cancellable);
-                }
-            }
-            
-            Db.Statement stmt;
-            if (parent_id != Db.INVALID_ROWID) {
-                stmt = cx.prepare(
-                    "UPDATE FolderTable SET attributes=?, unread_count=? WHERE parent_id=? AND name=?");
-                stmt.bind_string(0, properties.attrs.serialize());
-                stmt.bind_int(1, properties.email_unread);
-                stmt.bind_rowid(2, parent_id);
-                stmt.bind_string(3, path.basename);
-            } else {
-                stmt = cx.prepare(
-                    "UPDATE FolderTable SET attributes=?, unread_count=? WHERE parent_id IS NULL AND name=?");
-                stmt.bind_string(0, properties.attrs.serialize());
-                stmt.bind_int(1, properties.email_unread);
-                stmt.bind_string(2, path.basename);
-            }
-            
-            stmt.exec(cancellable);
-            
-            if (update_uid_info)
-                do_update_uid_info(cx, properties, parent_id, path, cancellable);
-            
-            if (properties.status_messages >= 0) {
-                do_update_last_seen_status_total(cx, parent_id, path.basename, properties.status_messages,
-                    cancellable);
-            }
-            
-            return Db.TransactionOutcome.COMMIT;
-        }, cancellable);
-        
-        // update appropriate properties in the local folder
-        ImapDB.Folder? db_folder = get_local_folder(path);
-        if (db_folder != null) {
-            Imap.FolderProperties local_properties = db_folder.get_properties();
-            
-            local_properties.set_status_unseen(Numeric.int_floor(properties.unseen - adjust_unseen, 0));
-            local_properties.recent = properties.recent;
-            local_properties.attrs = properties.attrs;
-            
-            if (update_uid_info) {
-                local_properties.uid_validity = properties.uid_validity;
-                local_properties.uid_next = properties.uid_next;
-            }
-            
-            // only update STATUS MESSAGES count if previously set, but use this count as the
-            // "authoritative" value until another SELECT/EXAMINE or MESSAGES response
-            if (properties.status_messages >= 0) {
-                local_properties.set_status_message_count(
-                    Numeric.int_floor(properties.status_messages - adjust_total, 0), true);
-            }
-        }
-    }
-    
-    /**
-     * Updates folder's SELECT/EXAMINE message count, UIDVALIDITY, UIDNEXT, unseen, and recent.
-     * See also update_folder_status_async().
-     */
-    public async void update_folder_select_examine_async(Geary.Imap.Folder imap_folder, Cancellable? cancellable)
-        throws Error {
-        check_open();
-        
-        Geary.Imap.FolderProperties properties = imap_folder.properties;
-        Geary.FolderPath path = imap_folder.path;
-        
-        yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
-            int64 parent_id;
-            if (!do_fetch_parent_id(cx, path, true, out parent_id, cancellable)) {
-                debug("Unable to find parent ID of %s to update properties", path.to_string());
-                
-                return Db.TransactionOutcome.ROLLBACK;
-            }
-            
-            do_update_uid_info(cx, properties, parent_id, path, cancellable);
-            
-            if (properties.select_examine_messages >= 0) {
-                do_update_last_seen_select_examine_total(cx, parent_id, path.basename,
-                    properties.select_examine_messages, cancellable);
-            }
-            
-            return Db.TransactionOutcome.COMMIT;
-        }, cancellable);
-        
-        // update appropriate properties in the local folder
-        ImapDB.Folder? db_folder = get_local_folder(path);
-        if (db_folder != null) {
-            Imap.FolderProperties local_properties = db_folder.get_properties();
-            
-            local_properties.set_status_unseen(properties.unseen);
-            local_properties.recent = properties.recent;
-            local_properties.uid_validity = properties.uid_validity;
-            local_properties.uid_next = properties.uid_next;
-            
-            if (properties.select_examine_messages >= 0)
-                local_properties.set_select_examine_message_count(properties.select_examine_messages);
-        }
-    }
-    
+
     private void initialize_contacts(Cancellable? cancellable = null) throws Error {
         check_open();
         
@@ -1736,7 +1585,7 @@ private class Geary.ImapDB.Account : BaseObject {
     // If the FolderPath has no parent, returns true and folder_id will be set to Db.INVALID_ROWID.
     // If cannot create path or there is a logical problem traversing it, returns false with folder_id
     // set to Db.INVALID_ROWID.
-    private bool do_fetch_folder_id(Db.Connection cx, Geary.FolderPath path, bool create, out int64 folder_id,
+    internal bool do_fetch_folder_id(Db.Connection cx, Geary.FolderPath path, bool create, out int64 folder_id,
         Cancellable? cancellable) throws Error {
         int length = path.get_path_length();
         if (length < 0)
@@ -1795,7 +1644,7 @@ private class Geary.ImapDB.Account : BaseObject {
     }
     
     // See do_fetch_folder_id() for return semantics.
-    private bool do_fetch_parent_id(Db.Connection cx, Geary.FolderPath path, bool create, out int64 parent_id,
+    internal bool do_fetch_parent_id(Db.Connection cx, Geary.FolderPath path, bool create, out int64 parent_id,
         Cancellable? cancellable = null) throws Error {
         if (path.is_root()) {
             parent_id = Db.INVALID_ROWID;
@@ -1929,63 +1778,6 @@ private class Geary.ImapDB.Account : BaseObject {
         
         Geary.FolderPath? parent_path = do_find_folder_path(cx, parent_id, cancellable);
         return (parent_path == null ? null : parent_path.get_child(name));
-    }
-    
-    // For SELECT/EXAMINE responses, not STATUS responses
-    private void do_update_last_seen_select_examine_total(Db.Connection cx, int64 parent_id, string name, int total,
-        Cancellable? cancellable) throws Error {
-        do_update_total(cx, parent_id, name, "last_seen_total", total, cancellable);
-    }
-    
-    // For STATUS responses, not SELECT/EXAMINE responses
-    private void do_update_last_seen_status_total(Db.Connection cx, int64 parent_id, string name,
-        int total, Cancellable? cancellable) throws Error {
-        do_update_total(cx, parent_id, name, "last_seen_status_total", total, cancellable);
-    }
-    
-    private void do_update_total(Db.Connection cx, int64 parent_id, string name, string colname,
-        int total, Cancellable? cancellable) throws Error {
-        Db.Statement stmt;
-        if (parent_id != Db.INVALID_ROWID) {
-            stmt = cx.prepare(
-                "UPDATE FolderTable SET %s=? WHERE parent_id=? AND name=?".printf(colname));
-            stmt.bind_int(0, Numeric.int_floor(total, 0));
-            stmt.bind_rowid(1, parent_id);
-            stmt.bind_string(2, name);
-        } else {
-            stmt = cx.prepare(
-                "UPDATE FolderTable SET %s=? WHERE parent_id IS NULL AND name=?".printf(colname));
-            stmt.bind_int(0, Numeric.int_floor(total, 0));
-            stmt.bind_string(1, name);
-        }
-        
-        stmt.exec(cancellable);
-    }
-    
-    private void do_update_uid_info(Db.Connection cx, Imap.FolderProperties properties,
-        int64 parent_id, FolderPath path, Cancellable? cancellable) throws Error {
-        int64 uid_validity = (properties.uid_validity != null) ? properties.uid_validity.value
-                : Imap.UIDValidity.INVALID;
-        int64 uid_next = (properties.uid_next != null) ? properties.uid_next.value
-            : Imap.UID.INVALID;
-        
-        Db.Statement stmt;
-        if (parent_id != Db.INVALID_ROWID) {
-            stmt = cx.prepare(
-                "UPDATE FolderTable SET uid_validity=?, uid_next=? WHERE parent_id=? AND name=?");
-            stmt.bind_int64(0, uid_validity);
-            stmt.bind_int64(1, uid_next);
-            stmt.bind_rowid(2, parent_id);
-            stmt.bind_string(3, path.basename);
-        } else {
-            stmt = cx.prepare(
-                "UPDATE FolderTable SET uid_validity=?, uid_next=? WHERE parent_id IS NULL AND name=?");
-            stmt.bind_int64(0, uid_validity);
-            stmt.bind_int64(1, uid_next);
-            stmt.bind_string(2, path.basename);
-        }
-        
-        stmt.exec(cancellable);
     }
     
     private int do_get_email_count(Db.Connection cx, Cancellable? cancellable)

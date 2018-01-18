@@ -18,6 +18,6 @@ private class Geary.ImapEngine.OtherAccount : Geary.ImapEngine.GenericAccount {
         else
             type = local_folder.get_properties().attrs.get_special_folder_type();
 
-        return new OtherFolder(this, this.remote, this.local, local_folder, type);
+        return new OtherFolder(this, this.remote, local_folder, type);
     }
 }

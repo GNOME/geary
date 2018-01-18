@@ -974,7 +974,9 @@ internal class Geary.ImapEngine.UpdateRemoteFolders : AccountOperation {
             // always update, openable or not; have the folder update the UID info the next time
             // it's opened
             try {
-                yield this.local.update_folder_status_async(remote_folder, false, false, cancellable);
+                yield minimal_folder.local_folder.update_folder_status(
+                    remote_folder.properties, false, false, cancellable
+                );
             } catch (Error update_error) {
                 debug("Unable to update local folder %s with remote properties: %s",
                     remote_folder.to_string(), update_error.message);
@@ -1084,35 +1086,36 @@ internal class Geary.ImapEngine.RefreshFolderUnseen : FolderOperation {
 
 
     private weak Imap.Account remote;
-    private weak ImapDB.Account local;
 
 
     internal RefreshFolderUnseen(MinimalFolder folder,
                                  GenericAccount account,
-                                 Imap.Account remote,
-                                 ImapDB.Account local) {
+                                 Imap.Account remote) {
         base(account, folder);
         this.remote = remote;
-        this.local = local;
     }
 
     public override async void execute(Cancellable cancellable) throws Error {
         if (this.folder.get_open_state() == Geary.Folder.OpenState.CLOSED) {
-            Imap.Folder remote_folder = yield remote.fetch_folder_cached_async(
+            Imap.Folder remote_folder = yield this.remote.fetch_folder_cached_async(
                 folder.path,
                 true,
                 cancellable
             );
 
+
             // Although this is called when the folder is closed, we
             // can safely use local_folder since we are only using its
             // properties, and the properties were loaded when the
             // folder was first instantiated.
+            ImapDB.Folder local_folder = ((MinimalFolder) this.folder).local_folder;
+
             if (remote_folder.properties.have_contents_changed(
-                    ((MinimalFolder) this.folder).local_folder.get_properties(),
+                    local_folder.get_properties(),
                     this.folder.to_string())) {
-                yield local.update_folder_status_async(
-                    remote_folder, false, true, cancellable
+
+                yield local_folder.update_folder_status(
+                    remote_folder.properties, false, true, cancellable
                 );
 
                 ((GenericAccount) this.account).update_folder(this.folder);

@@ -10,9 +10,9 @@ private class Geary.ImapEngine.GenericFolder : MinimalFolder,
     Geary.FolderSupport.Create,
     Geary.FolderSupport.Empty {
 
-    public GenericFolder(GenericAccount account, Imap.Account remote, ImapDB.Account local,
+    public GenericFolder(GenericAccount account, Imap.Account remote,
         ImapDB.Folder local_folder, SpecialFolderType special_folder_type) {
-        base (account, remote, local, local_folder, special_folder_type);
+        base (account, remote, local_folder, special_folder_type);
     }
 
     public async Geary.Revokable? archive_email_async(Gee.List<Geary.EmailIdentifier> email_ids,
