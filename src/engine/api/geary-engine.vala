@@ -398,28 +398,38 @@ public class Geary.Engine : BaseObject {
             return account_instances.get(account_information.id);
 
         ImapDB.Account local_account = new ImapDB.Account(account_information);
-        Imap.Account remote_account = new Imap.Account(account_information);
-
         Geary.Account account;
         switch (account_information.service_provider) {
             case ServiceProvider.GMAIL:
-                account = new ImapEngine.GmailAccount("Gmail:%s".printf(account_information.id),
-                    account_information, remote_account, local_account);
+                account = new ImapEngine.GmailAccount(
+                    "Gmail:%s".printf(account_information.id),
+                    account_information,
+                    local_account
+                );
             break;
 
             case ServiceProvider.YAHOO:
-                account = new ImapEngine.YahooAccount("Yahoo:%s".printf(account_information.id),
-                    account_information, remote_account, local_account);
+                account = new ImapEngine.YahooAccount(
+                    "Yahoo:%s".printf(account_information.id),
+                    account_information,
+                    local_account
+                );
             break;
 
             case ServiceProvider.OUTLOOK:
-                account = new ImapEngine.OutlookAccount("Outlook:%s".printf(account_information.id),
-                    account_information, remote_account, local_account);
+                account = new ImapEngine.OutlookAccount(
+                    "Outlook:%s".printf(account_information.id),
+                    account_information,
+                    local_account
+                );
             break;
 
             case ServiceProvider.OTHER:
-                account = new ImapEngine.OtherAccount("Other:%s".printf(account_information.id),
-                    account_information, remote_account, local_account);
+                account = new ImapEngine.OtherAccount(
+                    "Other:%s".printf(account_information.id),
+                    account_information,
+                    local_account
+                );
             break;
 
             default:

@@ -5,6 +5,7 @@
  */
 
 private class Geary.ImapEngine.YahooAccount : Geary.ImapEngine.GenericAccount {
+
     public static Geary.Endpoint generate_imap_endpoint() {
         return new Geary.Endpoint(
             "imap.mail.yahoo.com",
@@ -12,7 +13,7 @@ private class Geary.ImapEngine.YahooAccount : Geary.ImapEngine.GenericAccount {
             Geary.Endpoint.Flags.SSL,
             Imap.ClientConnection.RECOMMENDED_TIMEOUT_SEC);
     }
-    
+
     public static Geary.Endpoint generate_smtp_endpoint() {
         return new Geary.Endpoint(
             "smtp.mail.yahoo.com",
@@ -20,16 +21,17 @@ private class Geary.ImapEngine.YahooAccount : Geary.ImapEngine.GenericAccount {
             Geary.Endpoint.Flags.SSL,
             Smtp.ClientConnection.DEFAULT_TIMEOUT_SEC);
     }
-    
+
     private static Gee.HashMap<Geary.FolderPath, Geary.SpecialFolderType>? special_map = null;
 
-    public YahooAccount(string name, AccountInformation account_information,
-        Imap.Account remote, ImapDB.Account local) {
-        base (name, account_information, remote, local);
+    public YahooAccount(string name,
+                        AccountInformation account_information,
+                        ImapDB.Account local) {
+        base(name, account_information, local);
 
         if (special_map == null) {
             special_map = new Gee.HashMap<Geary.FolderPath, Geary.SpecialFolderType>();
-            
+
             special_map.set(Imap.MailboxSpecifier.inbox.to_folder_path(null, null), Geary.SpecialFolderType.INBOX);
             special_map.set(new Imap.FolderRoot("Sent"), Geary.SpecialFolderType.SENT);
             special_map.set(new Imap.FolderRoot("Draft"), Geary.SpecialFolderType.DRAFTS);

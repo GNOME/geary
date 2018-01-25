@@ -5,6 +5,7 @@
  */
 
 private class Geary.ImapEngine.OutlookAccount : Geary.ImapEngine.GenericAccount {
+
     public static Geary.Endpoint generate_imap_endpoint() {
         Geary.Endpoint endpoint = new Geary.Endpoint(
             "imap-mail.outlook.com",
@@ -30,9 +31,10 @@ private class Geary.ImapEngine.OutlookAccount : Geary.ImapEngine.GenericAccount 
             Smtp.ClientConnection.DEFAULT_TIMEOUT_SEC);
     }
 
-    public OutlookAccount(string name, AccountInformation account_information, Imap.Account remote,
-        ImapDB.Account local) {
-        base (name, account_information, remote, local);
+    public OutlookAccount(string name,
+                          AccountInformation account_information,
+                          ImapDB.Account local) {
+        base(name, account_information, local);
     }
 
     protected override MinimalFolder new_folder(ImapDB.Folder local_folder) {

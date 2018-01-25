@@ -86,12 +86,14 @@ engine/db/db-versioned-database.vala
 
 engine/imap/imap.vala
 engine/imap/imap-error.vala
-engine/imap/api/imap-account.vala
+engine/imap/api/imap-account-session.vala
 engine/imap/api/imap-email-flags.vala
 engine/imap/api/imap-email-properties.vala
-engine/imap/api/imap-folder-properties.vala
 engine/imap/api/imap-folder.vala
+engine/imap/api/imap-folder-properties.vala
 engine/imap/api/imap-folder-root.vala
+engine/imap/api/imap-folder-session.vala
+engine/imap/api/imap-session-object.vala
 engine/imap/command/imap-append-command.vala
 engine/imap/command/imap-capability-command.vala
 engine/imap/command/imap-close-command.vala

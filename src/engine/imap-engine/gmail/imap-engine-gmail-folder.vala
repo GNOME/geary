@@ -65,27 +65,21 @@ private class Geary.ImapEngine.GmailFolder : MinimalFolder, FolderSupport.Archiv
             
             return;
         }
-        
-        // For speed reasons, use a detached Imap.Folder object to delete moved emails; this is a
+
+        // For speed reasons, use a standalone Imap.Folder object to delete moved emails; this is a
         // separate connection and is not synchronized with the database, but also avoids a full
         // folder normalization, which can be a heavyweight operation
-        Imap.Folder imap_trash = yield ((GenericAccount) folder.account).fetch_detached_folder_async(
-            trash.path, cancellable);
-        
-        yield imap_trash.open_async(cancellable);
+        GenericAccount account = (GenericAccount) folder.account;
+        Imap.FolderSession imap_trash = yield account.open_folder_session(
+            trash.path, cancellable
+        );
         try {
             yield imap_trash.remove_email_async(Imap.MessageSet.uid_sparse(uids), cancellable);
         } finally {
-            try {
-                // don't use cancellable, need to close this connection no matter what
-                yield imap_trash.close_async(null);
-            } catch (Error err) {
-                // ignored
-            }
+            account.release_folder_session(imap_trash);
         }
-        
+
         debug("%s: Successfully true-removed %d/%d emails", folder.to_string(), uids.size,
             email_ids.size);
     }
 }
-

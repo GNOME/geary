@@ -25,4 +25,21 @@ private static bool is_hard_failure(Error err) {
         || err is EngineError.SERVER_UNAVAILABLE;
 }
 
+/**
+ * Determines if this IOError related to a remote host or not.
+ */
+private static bool is_remote_error(GLib.Error err) {
+    return err is ImapError
+        || err is IOError.CONNECTION_CLOSED
+        || err is IOError.CONNECTION_REFUSED
+        || err is IOError.HOST_UNREACHABLE
+        || err is IOError.MESSAGE_TOO_LARGE
+        || err is IOError.NETWORK_UNREACHABLE
+        || err is IOError.NOT_CONNECTED
+        || err is IOError.PROXY_AUTH_FAILED
+        || err is IOError.PROXY_FAILED
+        || err is IOError.PROXY_NEED_AUTH
+        || err is IOError.PROXY_NOT_ALLOWED;
+}
+
 }

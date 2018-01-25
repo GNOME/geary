@@ -22,42 +22,34 @@ private class Geary.ImapEngine.RevokableCommittedMove : Revokable {
         this.destination = destination;
         this.destination_uids = destination_uids;
     }
-    
+
     protected override async void internal_revoke_async(Cancellable? cancellable) throws Error {
-        Imap.Folder? detached_destination = null;
+        Imap.FolderSession? session = null;
         try {
             // use a detached folder to quickly open, issue command, and leave, without full
             // normalization that MinimalFolder requires
-            detached_destination = yield account.fetch_detached_folder_async(destination, cancellable);
-            
-            yield detached_destination.open_async(cancellable);
-            
+            session = yield this.account.open_folder_session(destination, cancellable);
             foreach (Imap.MessageSet msg_set in Imap.MessageSet.uid_sparse(destination_uids)) {
                 // don't use Cancellable to try to make operations atomic
-                yield detached_destination.copy_email_async(msg_set, source, null);
-                yield detached_destination.remove_email_async(msg_set.to_list(), null);
-                
+                yield session.copy_email_async(msg_set, source, null);
+                yield session.remove_email_async(msg_set.to_list(), null);
+
                 if (cancellable != null && cancellable.is_cancelled())
                     throw new IOError.CANCELLED("Revoke cancelled");
             }
-            
+
             notify_revoked();
 
             Geary.Folder target = yield this.account.fetch_folder_async(this.destination);
             this.account.update_folder(target);
         } finally {
-            if (detached_destination != null) {
-                try {
-                    yield detached_destination.close_async(cancellable);
-                } catch (Error err) {
-                    // ignored
-                }
+            if (session != null) {
+                this.account.release_folder_session(session);
             }
-            
             set_invalid();
         }
     }
-    
+
     protected override async void internal_commit_async(Cancellable? cancellable) throws Error {
         // pretty simple: already committed, so done
         notify_committed(null);

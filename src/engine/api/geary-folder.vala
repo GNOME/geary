@@ -63,13 +63,12 @@ public abstract class Geary.Folder : BaseObject {
         LOCAL,
         BOTH
     }
-    
+
     public enum OpenFailed {
-        LOCAL_FAILED,
-        REMOTE_FAILED,
-        CANCELLED
+        LOCAL_ERROR,
+        REMOTE_ERROR,
     }
-    
+
     /**
      * Provides the reason why the folder is closing or closed when the {@link closed} signal
      * is fired.
@@ -195,51 +194,68 @@ public abstract class Geary.Folder : BaseObject {
     public abstract Geary.SpecialFolderType special_folder_type { get; }
     
     public abstract Geary.ProgressMonitor opening_monitor { get; }
-    
+
     /**
-     * Fired when the folder is successfully opened by a caller.
+     * Fired when the folder moves through stages of being opened.
      *
-     * It will only fire once until the Folder is closed, with the {@link OpenState} indicating what
-     * has been opened and the count indicating the number of messages in the folder.  In the case
-     * of {@link OpenState.BOTH} or {@link OpenState.REMOTE}, it refers to the authoritative number.
-     * For {@link OpenState.LOCAL}, it refers to the number of messages in the local store.
+     * It will fire at least once if the folder successfully opens,
+     * with the {@link OpenState} indicating what has been opened and
+     * the count indicating the number of messages in the folder. it
+     * may fire additional times as remote sessions are established
+     * and re-established after being lost.
      *
-     * {@link OpenState.REMOTE} will only be passed if there's no local store, indicating that it's
-     * not a synchronized folder but rather one entirely backed by a network server.  Geary
-     * currently has no such folder implemented like this.
+     * If //state// is {@link OpenState.LOCAL}, the local store for
+     * the folder has opened and the count reflects the number of
+     * messages in the local store.
      *
-     * This signal will never fire with {@link OpenState.CLOSED} as a parameter.
+     * If //state// is {@link OpenState.BOTH}, it indicates both the
+     * local store and a remote session has been established, and the
+     * count reflects the number of messages on the remote.
+     *
+     * If //state// is {@link OpenState.REMOTE}, it indicates a folder
+     * is not synchronized locally but rather one entirely backed by a
+     * network server.
+     *
+     * In the case of {@link OpenState.BOTH} or {@link
+     * OpenState.REMOTE}, it refers to the authoritative count.
+     *
+     * This signal will never fire with {@link OpenState.CLOSED} as a
+     * parameter.
      *
      * @see get_open_state
      */
     public signal void opened(OpenState state, int count);
-    
+
     /**
      * Fired when {@link open_async} fails for one or more reasons.
      *
-     * See open_async and {@link opened} for more information on how opening a Folder works, i  particular
-     * how open_async may return immediately although the remote has not completely opened.
-     * This signal may be called in the context of, or after completion of, open_async.  It will
-     * ''not'' be called after {@link close_async} has completed, however.
+     * See open_async and {@link opened} for more information on how
+     * opening a Folder works, in particular how open_async may return
+     * immediately although the remote has not completely opened.
+     * This signal may be called in the context of, or after
+     * completion of, open_async.  It will ''not'' be called after
+     * {@link close_async} has completed, however.
      *
-     * Note that this signal may be fired ''and'' open_async throw an Error.
+     * Note that this signal may be fired ''and'' open_async throw an
+     * Error.
      *
-     * This signal may be fired more than once before the Folder is closed.  It will only fire once
-     * for each type of failure, however.
+     * This signal may be fired more than once before the Folder is
+     * closed, especially in the case of a remote session 
      */
     public signal void open_failed(OpenFailed failure, Error? err);
-    
+
     /**
-     * Fired when the Folder is closed, either by the caller or due to errors in the local
-     * or remote store(s).
+     * Fired when the Folder is closed, either by the caller or due to
+     * errors in the local or remote store(s).
      *
-     * It will fire three times: to report how the local store closed
-     * (gracefully or due to error), how the remote closed (similarly) and finally with
-     * {@link CloseReason.FOLDER_CLOSED}.  The first two may come in either order; the third is
-     * always the last.
+     * It will fire a number of times: to report how the local store
+     * closed (gracefully or due to error), how the remote closed
+     * (similarly) and finally with {@link CloseReason.FOLDER_CLOSED}.
+     * The first two may come in either order; the third is always the
+     * last.
      */
     public signal void closed(CloseReason reason);
-    
+
     /**
      * Fired when email has been appended to the list of messages in the folder.
      *
@@ -384,7 +400,7 @@ public abstract class Geary.Folder : BaseObject {
     protected virtual void notify_email_locally_complete(Gee.Collection<Geary.EmailIdentifier> ids) {
         email_locally_complete(ids);
     }
-    
+
     /**
      * In its default implementation, this will also call {@link notify_display_name_changed} since
      * that's often the case; if not, subclasses should override.
@@ -392,13 +408,12 @@ public abstract class Geary.Folder : BaseObject {
     protected virtual void notify_special_folder_type_changed(Geary.SpecialFolderType old_type,
         Geary.SpecialFolderType new_type) {
         special_folder_type_changed(old_type, new_type);
-        
+
         // in default implementation, this may also mean the display name changed; subclasses may
         // override this behavior, but no way to detect this, so notify
-        if (special_folder_type != Geary.SpecialFolderType.NONE)
-            notify_display_name_changed();
+        notify_display_name_changed();
     }
-    
+
     protected virtual void notify_display_name_changed() {
         display_name_changed();
     }
@@ -418,8 +433,10 @@ public abstract class Geary.Folder : BaseObject {
      * Returns the state of the Folder's connections to the local and remote stores.
      */
     public abstract OpenState get_open_state();
-    
+
     /**
+     * Marks the folder's operations as being required for use.
+     *
      * The Folder must be opened before most operations may be performed on it.  Depending on the
      * implementation this might entail opening a network connection or setting the connection to
      * a particular state, opening a file or database, and so on.
@@ -444,7 +461,7 @@ public abstract class Geary.Folder : BaseObject {
      * accessing the remote store before OpenState.BOTH has been signalled will result in that
      * call blocking until the remote is open or an error state has occurred.  It's also possible for
      * the command to return early without waiting, depending on prior information of the folder.
-     * See list_email_async() for special notes on its operation.  Also see wait_for_open_async().
+     * See list_email_async() for special notes on its operation.  Also see wait_for_remote_async().
      *
      * If there's an error while opening, "open-failed" will be fired.  (See that signal for more
      * information on how many times it may fire, and when.)  To prevent the Folder from going into
@@ -462,18 +479,20 @@ public abstract class Geary.Folder : BaseObject {
      * Returns false if already opened.
      */
     public abstract async bool open_async(OpenFlags open_flags, Cancellable? cancellable = null) throws Error;
-    
+
     /**
-     * Wait for the Folder to become fully open or fails to open due to error.  If not opened
-     * due to error, throws EngineError.ALREADY_CLOSED.
+     * Blocks waiting for the folder to establish a remote session.
      *
-     * NOTE: The current implementation requirements are only that should be work after an
-     * open_async() call has completed (i.e. an open is in progress).  Calling this method
-     * otherwise will throw an EngineError.OPEN_REQUIRED.
+     * @throws EngineError.OPEN_REQUIRED if the folder has not already
+     * been opened.
+     * @throws EngineError.ALREADY_CLOSED if not opened due to error.
      */
-    public abstract async void wait_for_open_async(Cancellable? cancellable = null) throws Error;
-    
+    public abstract async void wait_for_remote_async(Cancellable? cancellable = null)
+        throws Error;
+
     /**
+     * Marks one use of the folder's operations as being completed.
+     *
      * The Folder should be closed when operations on it are concluded.  Depending on the
      * implementation this might entail closing a network connection or reverting it to another
      * state, or closing file handles or database connections.
@@ -487,13 +506,15 @@ public abstract class Geary.Folder : BaseObject {
      * {@link wait_for_close_async} to block until the folder is completely closed.  Otherwise,
      * returns false.  Note that this semantic is slightly different than the result code for
      * {@link open_async}.
+     *
+     * @see open_async
      */
     public abstract async bool close_async(Cancellable? cancellable = null) throws Error;
-    
+
     /**
      * Wait for the {@link Folder} to fully close.
      *
-     * Unlike {@link wait_for_open_async}, this will ''always'' block until a {@link Folder} is
+     * Unlike {@link wait_for_remote_async}, this will ''always'' block until a {@link Folder} is
      * closed, even if it's not open.
      */
     public abstract async void wait_for_close_async(Cancellable? cancellable = null) throws Error;

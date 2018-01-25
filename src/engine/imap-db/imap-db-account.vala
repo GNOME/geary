@@ -65,7 +65,6 @@ private class Geary.ImapDB.Account : BaseObject {
     
     // Only available when the Account is opened
     public SmtpOutboxFolder? outbox { get; private set; default = null; }
-    public Geary.SearchFolder? search_folder { get; private set; default = null; }
     public ImapEngine.ContactStore contact_store { get; private set; }
     public IntervalProgressMonitor search_index_monitor { get; private set; 
         default = new IntervalProgressMonitor(ProgressType.SEARCH_INDEX, 0, 0); }
@@ -340,11 +339,8 @@ private class Geary.ImapDB.Account : BaseObject {
         // ImapDB.Account holds the Outbox, which is tied to the database it maintains
         outbox = new SmtpOutboxFolder(db, account, sending_monitor);
         outbox.email_sent.connect(on_outbox_email_sent);
-        
-        // Search folder
-        search_folder = ((ImapEngine.GenericAccount) account).new_search_folder();
     }
-    
+
     public async void close_async(Cancellable? cancellable) throws Error {
         if (db == null)
             return;
@@ -361,9 +357,8 @@ private class Geary.ImapDB.Account : BaseObject {
         
         outbox.email_sent.disconnect(on_outbox_email_sent);
         outbox = null;
-        search_folder = null;
     }
-    
+
     private void on_outbox_email_sent(Geary.RFC822.Message rfc822) {
         email_sent(rfc822);
     }
@@ -519,12 +514,14 @@ private class Geary.ImapDB.Account : BaseObject {
                 Geary.FolderPath path = (parent != null)
                     ? parent.get_child(basename)
                     : new Imap.FolderRoot(basename);
-                
-                Geary.Imap.FolderProperties properties = new Geary.Imap.FolderProperties(
-                    result.int_for("last_seen_total"), result.int_for("unread_count"), 0,
+
+                Geary.Imap.FolderProperties properties = new Geary.Imap.FolderProperties.from_imapdb(
+                    Geary.Imap.MailboxAttributes.deserialize(result.string_for("attributes")),
+                    result.int_for("last_seen_total"),
+                    result.int_for("unread_count"),
                     new Imap.UIDValidity(result.int64_for("uid_validity")),
-                    new Imap.UID(result.int64_for("uid_next")),
-                    Geary.Imap.MailboxAttributes.deserialize(result.string_for("attributes")));
+                    new Imap.UID(result.int64_for("uid_next"))
+                );
                 // due to legacy code, can't set last_seen_total to -1 to indicate that the folder
                 // hasn't been SELECT/EXAMINE'd yet, so the STATUS count should be used as the
                 // authoritative when the other is zero ... this is important when first creating a
@@ -608,17 +605,21 @@ private class Geary.ImapDB.Account : BaseObject {
             
             Db.Result results = stmt.exec(cancellable);
             if (!results.finished) {
-                properties = new Imap.FolderProperties(results.int_for("last_seen_total"),
-                    results.int_for("unread_count"), 0,
+                properties = new Imap.FolderProperties.from_imapdb(
+                    Geary.Imap.MailboxAttributes.deserialize(results.string_for("attributes")),
+                    results.int_for("last_seen_total"),
+                    results.int_for("unread_count"),
                     new Imap.UIDValidity(results.int64_for("uid_validity")),
-                    new Imap.UID(results.int64_for("uid_next")),
-                    Geary.Imap.MailboxAttributes.deserialize(results.string_for("attributes")));
+                    new Imap.UID(results.int64_for("uid_next"))
+                );
                 // due to legacy code, can't set last_seen_total to -1 to indicate that the folder
                 // hasn't been SELECT/EXAMINE'd yet, so the STATUS count should be used as the
                 // authoritative when the other is zero ... this is important when first creating a
                 // folder, as the STATUS is the count that is known first
-                properties.set_status_message_count(results.int_for("last_seen_status_total"),
-                    (properties.select_examine_messages == 0));
+                properties.set_status_message_count(
+                    results.int_for("last_seen_status_total"),
+                    (properties.select_examine_messages == 0)
+                );
             }
             
             return Db.TransactionOutcome.DONE;

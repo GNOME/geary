@@ -78,8 +78,9 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
      */
     public bool discard_returned_sessions = false;
 
-    private AccountInformation account_information;
+    private string id;
     private Endpoint endpoint;
+    private Credentials credentials;
 
     private Nonblocking.Mutex sessions_mutex = new Nonblocking.Mutex();
     private Gee.Set<ClientSession> all_sessions =
@@ -110,15 +111,16 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
     public signal void login_failed(StatusResponse? response);
 
 
-    public ClientSessionManager(AccountInformation account_information) {
-        this.account_information = account_information;
+    public ClientSessionManager(string id,
+                                Endpoint imap_endpoint,
+                                Credentials imap_credentials) {
+        this.id = "%s:%s".printf(id, imap_endpoint.to_string());
 
-        // NOTE: This works because AccountInformation guarantees the IMAP endpoint not to change
-        // for the lifetime of the AccountInformation object; if this ever changes, will need to
-        // refactor for that
-        this.endpoint = account_information.get_imap_endpoint();
+        this.endpoint = imap_endpoint;
         this.endpoint.notify[Endpoint.PROP_TRUST_UNTRUSTED_HOST].connect(on_imap_trust_untrusted_host);
         this.endpoint.untrusted_host.connect(on_imap_untrusted_host);
+
+        this.credentials = imap_credentials;
 
         this.pool_start = new TimeoutManager.seconds(
             POOL_START_TIMEOUT_SEC,
@@ -133,7 +135,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
 
     ~ClientSessionManager() {
         if (is_open)
-            warning("[%s] Destroying opened ClientSessionManager", to_string());
+            warning("[%s] Destroying opened ClientSessionManager", this.id);
 
         this.endpoint.untrusted_host.disconnect(on_imap_untrusted_host);
         this.endpoint.notify[Endpoint.PROP_TRUST_UNTRUSTED_HOST].disconnect(on_imap_trust_untrusted_host);
@@ -176,7 +178,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         // for now
         int attempts = 0;
         while (this.all_sessions.size > 0) {
-            debug("[%s] Waiting for client sessions to disconnect...", to_string());
+            debug("[%s] Waiting for client sessions to disconnect...", this.id);
             Timeout.add(250, close_async.callback);
             yield;
 
@@ -192,8 +194,9 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
      * This will reset the manager's authentication state and if open,
      * attempt to open a connection to the server.
      */
-    public void credentials_updated() {
+    public void credentials_updated(Credentials new_creds) {
         this.authentication_failed = false;
+        this.credentials = new_creds;
         if (this.is_open) {
             this.check_pool.begin();
         }
@@ -220,7 +223,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         throws Error {
         check_open();
         debug("[%s] Claiming session from %d of %d free",
-              to_string(), this.free_queue.size, this.all_sessions.size);
+              this.id, this.free_queue.size, this.all_sessions.size);
 
         if (this.authentication_failed)
             throw new ImapError.UNAUTHENTICATED("Invalid ClientSessionManager credentials");
@@ -253,13 +256,13 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         return claimed;
     }
 
-    public async void release_session_async(ClientSession session, Cancellable? cancellable)
+    public async void release_session_async(ClientSession session)
         throws Error {
         // Don't check_open(), it's valid for this to be called when
         // is_open is false, that happens during mop-up
 
         debug("[%s] Returning session with %d of %d free",
-              to_string(), this.free_queue.size, this.all_sessions.size);
+              this.id, this.free_queue.size, this.all_sessions.size);
 
         if (!this.is_open || this.discard_returned_sessions) {
             yield force_disconnect(session);
@@ -271,17 +274,12 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
             // adding it back to the pool
             if (proto == ClientSession.ProtocolState.SELECTED ||
                 proto == ClientSession.ProtocolState.SELECTING) {
-                debug("[%s] Closing %s for released session %s",
-                      to_string(),
-                      mailbox != null ? mailbox.to_string() : "(unknown)",
-                      session.to_string());
-
                 // always close mailbox to return to authorized state
                 try {
-                    yield session.close_mailbox_async(cancellable);
+                    yield session.close_mailbox_async(pool_cancellable);
                 } catch (ImapError imap_error) {
                     debug("[%s] Error attempting to close released session %s: %s",
-                          to_string(), session.to_string(), imap_error.message);
+                          this.id, session.to_string(), imap_error.message);
                     free = false;
                 }
 
@@ -294,11 +292,17 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
             }
 
             if (free) {
-                debug("[%s] Unreserving session %s",
-                      to_string(), session.to_string());
+                debug("[%s] Unreserving session %s", this.id, session.to_string());
                 this.free_queue.send(session);
             }
         }
+    }
+
+    /**
+     * Returns a string representation of this object for debugging.
+     */
+    public string to_string() {
+        return this.id;
     }
 
     private void check_open() throws Error {
@@ -308,7 +312,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
 
     private async void check_pool() {
         debug("[%s] Checking session pool with %d of %d free",
-              to_string(), this.free_queue.size, this.all_sessions.size);
+              this.id, this.free_queue.size, this.all_sessions.size);
 
         while (this.is_open &&
                !this.authentication_failed &&
@@ -326,8 +330,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
                 this.free_queue.send(free);
             } catch (Error err) {
                 debug("[%s] Error adding free session pool: %s",
-                      to_string(),
-                      err.message);
+                      this.id, err.message);
                 break;
             }
 
@@ -361,7 +364,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
                 yield remove_session_async(target);
             } catch (Error err) {
                 debug("[%s] Error removing unconnected session: %s",
-                      to_string(), err.message);
+                      this.id, err.message);
             }
             break;
 
@@ -374,6 +377,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
     }
 
     private async ClientSession create_new_authorized_session(Cancellable? cancellable) throws Error {
+        debug("[%s] Opening new session", this.id);
         ClientSession new_session = new ClientSession(endpoint);
 
         // Listen for auth failures early so the client is notified if
@@ -390,7 +394,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         }
 
         try {
-            yield new_session.initiate_session_async(account_information.imap_credentials, cancellable);
+            yield new_session.initiate_session_async(this.credentials, cancellable);
         } catch (Error err) {
             debug("[%s] Initiate session failure: %s", new_session.to_string(), err.message);
 
@@ -417,6 +421,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         // We now have a good connection, so signal us as ready if not
         // already done so.
         if (!this.is_ready) {
+            debug("[%s] Became ready", this.id);
             this.is_ready = true;
             ready();
         }
@@ -428,7 +433,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
     private async void force_disconnect_all()
         throws Error {
         debug("[%s] Dropping and disconnecting %d sessions",
-              to_string(), this.all_sessions.size);
+              this.id, this.all_sessions.size);
 
         // Take a copy and work off that while scheduling disconnects,
         // since as they disconnect they'll remove themselves from the
@@ -447,12 +452,12 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
     }
 
     private async void force_disconnect(ClientSession session) {
-        debug("[%s] Dropping session %s", to_string(), session.to_string());
+        debug("[%s] Dropping session %s", this.id, session.to_string());
 
         try {
             yield remove_session_async(session);
         } catch (Error err) {
-            debug("[%s] Error removing session: %s", to_string(), err.message);
+            debug("[%s] Error removing session: %s", this.id, err.message);
         }
 
         // Don't wait for this to finish because we don't want to
@@ -485,8 +490,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
                     this.remove_session_async.end(res);
                 } catch (Error err) {
                     debug("[%s] Error removing disconnected session: %s",
-                          to_string(),
-                          err.message);
+                          this.id, err.message);
                 }
             }
         );
@@ -536,13 +540,4 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         connection_failed(error);
 	}
 
-    /**
-     * Use only for debugging and logging.
-     */
-    public string to_string() {
-        return "%s:%s".printf(
-            this.account_information.id,
-            endpoint.to_string()
-        );
-    }
 }

@@ -491,7 +491,7 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
             // wait until the remote folder is opened (or throws an exception, in which case closed)
             try {
                 if (!is_close_op && folder_opened && state == State.OPEN)
-                    yield owner.wait_for_open_async();
+                    yield owner.wait_for_remote_async();
             } catch (Error remote_err) {
                 debug("Folder %s closed or failed to open, remote replay queue closing: %s",
                     to_string(), remote_err.message);

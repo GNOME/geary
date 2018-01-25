@@ -56,45 +56,93 @@ public class Geary.Imap.FolderProperties : Geary.FolderProperties {
     public UIDValidity? uid_validity { get; internal set; }
     public UID? uid_next { get; internal set; }
     public MailboxAttributes attrs { get; internal set; }
-    
+
+
     /**
-     * Note that unseen from SELECT/EXAMINE is the *position* of the first unseen message,
-     * not the total unseen count, so it's not be passed in here, but rather only from the unseen
-     * count from a STATUS command
+     * Constructs properties for an IMAP folder that can be selected.
      */
-    public FolderProperties(int messages, int email_unread, int recent, UIDValidity? uid_validity,
-        UID? uid_next, MailboxAttributes attrs) {
-        // give the base class a zero email_unread, as the notion of "unknown" doesn't exist in
-        // its contract
-        base (messages, email_unread, Trillian.UNKNOWN, Trillian.UNKNOWN, Trillian.UNKNOWN, false,
-            false, false);
-        
-        select_examine_messages = messages;
-        status_messages = -1;
-        this.recent = recent;
+    public FolderProperties.selectable(MailboxAttributes attrs,
+                                       StatusData status,
+                                       Capabilities capabilities) {
+        this(
+            attrs,
+            status.messages,
+            status.unseen,
+            capabilities.supports_uidplus()
+        );
+
+        this.select_examine_messages = -1;
+        this.status_messages = status.messages;
+        this.recent = status.recent;
+        this.unseen = status.unseen;
+        this.uid_validity = status.uid_validity;
+        this.uid_next = status.uid_next;
+    }
+
+    /**
+     * Constructs properties for an IMAP folder that can not be selected.
+     */
+    public FolderProperties.not_selectable(MailboxAttributes attrs) {
+        this(attrs, 0, 0, false);
+
+        this.select_examine_messages = 0;
+        this.status_messages = -1;
+        this.recent = 0;
+        this.unseen = -1;
+        this.uid_validity = null;
+        this.uid_next = null;
+    }
+
+    /**
+     * Reconstitutes properties for an IMAP folder from the database
+     */
+    internal FolderProperties.from_imapdb(MailboxAttributes attrs,
+                                          int email_total,
+                                          int email_unread,
+                                          UIDValidity? uid_validity,
+                                          UID? uid_next) {
+        this(attrs, email_total, email_unread, false);
+
+        this.select_examine_messages = email_total;
+        this.status_messages = -1;
+        this.recent = 0;
         this.unseen = -1;
         this.uid_validity = uid_validity;
         this.uid_next = uid_next;
-        this.attrs = attrs;
-        
-        init_flags();
     }
-    
-    public FolderProperties.status(StatusData status, MailboxAttributes attrs) {
-        base (status.messages, status.unseen, Trillian.UNKNOWN, Trillian.UNKNOWN, Trillian.UNKNOWN,
-            false, false, false);
-        
-        select_examine_messages = -1;
-        status_messages = status.messages;
-        recent = status.recent;
-        unseen = status.unseen;
-        uid_validity = status.uid_validity;
-        uid_next = status.uid_next;
+
+    protected FolderProperties(MailboxAttributes attrs,
+                               int email_total,
+                               int email_unread,
+                               bool supports_uid) {
+        Trillian has_children = Trillian.UNKNOWN;
+        if (attrs.contains(MailboxAttribute.HAS_NO_CHILDREN))
+            has_children = Trillian.FALSE;
+        else if (attrs.contains(MailboxAttribute.HAS_CHILDREN))
+            has_children = Trillian.TRUE;
+
+        Trillian supports_children = Trillian.UNKNOWN;
+        // has_children implies supports_children
+        if (has_children != Trillian.UNKNOWN) {
+            supports_children = has_children;
+        } else {
+            // !supports_children implies !has_children
+            supports_children = Trillian.from_boolean(!attrs.contains(MailboxAttribute.NO_INFERIORS));
+            if (supports_children.is_impossible())
+                has_children = Trillian.FALSE;
+        }
+
+        Trillian is_openable = Trillian.from_boolean(!attrs.is_no_select);
+
+        base(email_total, email_unread,
+             has_children, supports_children, is_openable,
+             false, // not local
+             false, // not virtual
+             !supports_uid);
+
         this.attrs = attrs;
-        
-        init_flags();
     }
-    
+
     /**
      * Use with {@link FolderProperties} of the *same folder* seen at different times (i.e. after
      * SELECTing versus data stored locally).  Only compares fields that suggest the contents of
@@ -145,30 +193,7 @@ public class Geary.Imap.FolderProperties : Geary.FolderProperties {
         
         return false;
     }
-    
-    private void init_flags() {
-        // \HasNoChildren & \HasChildren are optional attributes (could check for CHILDREN extension,
-        // but unnecessary here)
-        if (attrs.contains(MailboxAttribute.HAS_NO_CHILDREN))
-            has_children = Trillian.FALSE;
-        else if (attrs.contains(MailboxAttribute.HAS_CHILDREN))
-            has_children = Trillian.TRUE;
-        else
-            has_children = Trillian.UNKNOWN;
-        
-        // has_children implies supports_children
-        if (has_children != Trillian.UNKNOWN) {
-            supports_children = has_children;
-        } else {
-            // !supports_children implies !has_children
-            supports_children = Trillian.from_boolean(!attrs.contains(MailboxAttribute.NO_INFERIORS));
-            if (supports_children.is_impossible())
-                has_children = Trillian.FALSE;
-        }
-        
-        is_openable = Trillian.from_boolean(!attrs.is_no_select);
-    }
-    
+
     /**
      * Update an existing {@link FolderProperties} with fresh {@link StatusData}.
      *

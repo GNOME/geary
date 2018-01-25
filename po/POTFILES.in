@@ -172,12 +172,14 @@ src/engine/db/db-versioned-database.vala
 src/engine/db/db.vala
 src/engine/imap/imap.vala
 src/engine/imap/imap-error.vala
-src/engine/imap/api/imap-account.vala
+src/engine/imap/api/imap-account-session.vala
 src/engine/imap/api/imap-email-flags.vala
 src/engine/imap/api/imap-email-properties.vala
+src/engine/imap/api/imap-folder.vala
 src/engine/imap/api/imap-folder-properties.vala
 src/engine/imap/api/imap-folder-root.vala
-src/engine/imap/api/imap-folder.vala
+src/engine/imap/api/imap-folder-session.vala
+src/engine/imap/api/imap-session-object.vala
 src/engine/imap/command/imap-append-command.vala
 src/engine/imap/command/imap-capability-command.vala
 src/engine/imap/command/imap-close-command.vala

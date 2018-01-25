@@ -106,7 +106,7 @@ private class Geary.ImapEngine.RefreshFolderSync : FolderOperation {
         try {
             yield this.folder.open_async(Folder.OpenFlags.FAST_OPEN, cancellable);
             opened = true;
-            yield this.folder.wait_for_open_async(cancellable);
+            yield this.folder.wait_for_remote_async(cancellable);
             yield sync_folder(cancellable);
         } finally {
             if (opened) {

@@ -21,7 +21,7 @@ private class Geary.ImapEngine.GmailAccount : Geary.ImapEngine.GenericAccount {
             Geary.Endpoint.Flags.SSL,
             Imap.ClientConnection.RECOMMENDED_TIMEOUT_SEC);
     }
-    
+
     public static Geary.Endpoint generate_smtp_endpoint() {
         return new Geary.Endpoint(
             "smtp.gmail.com",
@@ -30,9 +30,10 @@ private class Geary.ImapEngine.GmailAccount : Geary.ImapEngine.GenericAccount {
             Smtp.ClientConnection.DEFAULT_TIMEOUT_SEC);
     }
 
-    public GmailAccount(string name, Geary.AccountInformation account_information,
-        Imap.Account remote, ImapDB.Account local) {
-        base (name, account_information, remote, local);
+    public GmailAccount(string name,
+                        Geary.AccountInformation account_information,
+                        ImapDB.Account local) {
+        base(name, account_information, local);
     }
 
     protected override Geary.SpecialFolderType[] get_supported_special_folders() {
