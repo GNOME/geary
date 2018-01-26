@@ -336,11 +336,11 @@ src/engine/mime/mime-data-format.vala
 src/engine/mime/mime-disposition-type.vala
 src/engine/mime/mime-error.vala
 src/engine/mime/mime-multipart-subtype.vala
-src/engine/nonblocking/nonblocking-abstract-semaphore.vala
 src/engine/nonblocking/nonblocking-batch.vala
 src/engine/nonblocking/nonblocking-concurrent.vala
 src/engine/nonblocking/nonblocking-counting-semaphore.vala
 src/engine/nonblocking/nonblocking-error.vala
+src/engine/nonblocking/nonblocking-lock.vala
 src/engine/nonblocking/nonblocking-mutex.vala
 src/engine/nonblocking/nonblocking-queue.vala
 src/engine/nonblocking/nonblocking-reporting-semaphore.vala
