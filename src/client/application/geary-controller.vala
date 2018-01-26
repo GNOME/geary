@@ -1344,10 +1344,13 @@ public class GearyController : Geary.BaseObject {
         }
         
         update_ui();
-        
-        current_conversations = new Geary.App.ConversationMonitor(current_folder, Geary.Folder.OpenFlags.NO_DELAY,
-            ConversationListStore.REQUIRED_FIELDS, MIN_CONVERSATION_COUNT);
-        
+
+        current_conversations = new Geary.App.ConversationMonitor(
+            current_folder,
+            Geary.Folder.OpenFlags.NO_DELAY,
+            ConversationListStore.REQUIRED_FIELDS,
+            MIN_CONVERSATION_COUNT);
+
         if (inboxes.values.contains(current_folder)) {
             // Inbox selected, clear new messages if visible
             clear_new_messages("do_select_folder (inbox)", null);
@@ -1565,10 +1568,10 @@ public class GearyController : Geary.BaseObject {
                         if (!main_window.folder_list.select_inbox(select_folder.account))
                             main_window.folder_list.select_folder(select_folder);
                     }
-                    
+
                     GLib.Cancellable cancellable = inbox_cancellables.get(folder.account);
-                    folder.open_async.begin(Geary.Folder.OpenFlags.NONE, cancellable);
-                    
+                    folder.open_async.begin(Geary.Folder.OpenFlags.NO_DELAY, cancellable);
+
                     new_messages_monitor.add_folder(folder, cancellable);
 
                     // also monitor Inbox's children for notifications
@@ -2415,23 +2418,26 @@ public class GearyController : Geary.BaseObject {
             dialog.run();
         }
     }
-    
+
     private async void do_empty_folder_async(Geary.FolderSupport.Empty emptyable, Cancellable? cancellable)
         throws Error {
-        yield emptyable.open_async(Geary.Folder.OpenFlags.NONE, cancellable);
-        
-        // be sure to close in all code paths
+        bool open = false;
         try {
+            yield emptyable.open_async(Geary.Folder.OpenFlags.NO_DELAY, cancellable);
+            open = true;
+            yield emptyable.wait_for_open_async(cancellable);
             yield emptyable.empty_folder_async(cancellable);
         } finally {
-            try {
-                yield emptyable.close_async(null);
-            } catch (Error err) {
-                // ignored
+            if (open) {
+                try {
+                    yield emptyable.close_async(null);
+                } catch (Error err) {
+                    // ignored
+                }
             }
         }
     }
-    
+
     private bool current_folder_supports_trash() {
         return (current_folder != null && current_folder.special_folder_type != Geary.SpecialFolderType.TRASH
             && !current_folder.properties.is_local_only && current_account != null

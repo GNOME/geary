@@ -225,9 +225,9 @@ public class Geary.App.DraftManager : BaseObject {
         }
         
         drafts_folder.closed.connect(on_folder_closed);
-        
-        yield drafts_folder.open_async(Folder.OpenFlags.NONE, cancellable);
-        
+
+        yield drafts_folder.open_async(Folder.OpenFlags.NO_DELAY, cancellable);
+
         // if drafts folder doesn't return the identifier of newly created emails, then this object
         // can't do it's work ... wait until open to check for this, to be absolutely sure
         if (drafts_folder.properties.create_never_returns_id) {

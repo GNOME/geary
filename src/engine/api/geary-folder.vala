@@ -104,36 +104,37 @@ public abstract class Geary.Folder : BaseObject {
         INSERTED,
         REMOVED
     }
-    
+
     /**
-     * Flags modifying the behavior of open_async().
+     * Flags that modify the behavior of {@link open_async}.
      */
     [Flags]
     public enum OpenFlags {
+        /** If only //NONE// is set, the folder will be opened normally. */
         NONE = 0,
-        /**
-         * Perform the minimal amount of activity possible to open the folder
-         * and be synchronized with the server.  This may mean some attributes of
-         * the messages (such as their flags or other metadata) may not be up-to-date
-         * when the folder opens.  Not all folders will support this flag.
-         */
-        FAST_OPEN,
+
         /**
          * Do not delay opening a connection to the server.
+         *
+         * This has no effect for folders that are not backed by a
+         * remote server.
          *
          * @see open_async
          */
         NO_DELAY;
-        
+
+        /** Determines if any one of the given //flags// are set. */
         public bool is_any_set(OpenFlags flags) {
             return (this & flags) != 0;
         }
-        
+
+        /** Determines all of the given //flags// are set. */
         public bool is_all_set(OpenFlags flags) {
             return (this & flags) == flags;
         }
+
     }
-    
+
     /**
      * Flags modifying how email is retrieved.
      */

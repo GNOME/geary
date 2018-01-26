@@ -175,11 +175,11 @@ public class Geary.App.EmailStore : BaseObject {
             Geary.Folder folder = folders.get(path);
             Gee.Collection<Geary.EmailIdentifier> ids = folders_to_ids.get(path);
             assert(ids.size > 0);
-            
+
             bool open = false;
             Gee.Collection<Geary.EmailIdentifier>? used_ids = null;
             try {
-                yield folder.open_async(Geary.Folder.OpenFlags.FAST_OPEN, cancellable);
+                yield folder.open_async(Folder.OpenFlags.NONE, cancellable);
                 open = true;
                 used_ids = yield operation.execute_async(folder, ids, cancellable);
             } catch (Error e) {

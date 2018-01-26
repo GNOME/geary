@@ -1,6 +1,6 @@
 /*
- * Copyright 2017 Michael Gratton <mike@vee.net>
  * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2017-2018 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -726,23 +726,17 @@ private class Geary.SmtpOutboxFolder :
 
         bool open = false;
         try {
-            yield create.open_async(Geary.Folder.OpenFlags.FAST_OPEN, cancellable);
+            yield create.open_async(Geary.Folder.OpenFlags.NONE, cancellable);
             open = true;
-
             yield create.create_email_async(rfc822, null, null, null, cancellable);
-
-            yield create.close_async(cancellable);
-            open = false;
-        } catch (Error e) {
+        } finally {
             if (open) {
                 try {
-                    yield create.close_async(cancellable);
-                    open = false;
+                    yield create.close_async();
                 } catch (Error e) {
                     debug("Error closing folder %s: %s", create.to_string(), e.message);
                 }
             }
-            throw e;
         }
     }
 

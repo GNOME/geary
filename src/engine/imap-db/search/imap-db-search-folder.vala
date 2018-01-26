@@ -350,24 +350,19 @@ private class Geary.ImapDB.SearchFolder : Geary.SearchFolder, Geary.FolderSuppor
             assert(ids.size > 0);
             
             debug("Search folder removing %d emails from %s", ids.size, folder.to_string());
-            
+
             bool open = false;
             try {
-                yield folder.open_async(Geary.Folder.OpenFlags.FAST_OPEN, cancellable);
+                yield folder.open_async(Geary.Folder.OpenFlags.NONE, cancellable);
                 open = true;
-                
                 yield remove.remove_email_async(
-                    Geary.Collection.to_array_list<Geary.EmailIdentifier>(ids), cancellable);
-                
-                yield folder.close_async(cancellable);
-                open = false;
-            } catch (Error e) {
-                debug("Error removing messages in %s: %s", folder.to_string(), e.message);
-                
+                    Geary.Collection.to_array_list<Geary.EmailIdentifier>(ids),
+                    cancellable
+                );
+            } finally {
                 if (open) {
                     try {
-                        yield folder.close_async(cancellable);
-                        open = false;
+                        yield folder.close_async();
                     } catch (Error e) {
                         debug("Error closing folder %s: %s", folder.to_string(), e.message);
                     }
@@ -375,7 +370,7 @@ private class Geary.ImapDB.SearchFolder : Geary.SearchFolder, Geary.FolderSuppor
             }
         }
     }
-    
+
     /**
      * Given a list of mail IDs, returns a set of casefolded words that match for the current
      * search query.
