@@ -117,6 +117,7 @@ public class Geary.Imap.ClientConnection : BaseObject {
     private SocketConnection? cx = null;
     private IOStream? ios = null;
     private Serializer? ser = null;
+    private BufferedOutputStream? ser_buffer = null;
     private Deserializer? des = null;
     private Geary.Nonblocking.Mutex send_mutex = new Geary.Nonblocking.Mutex();
     private Geary.Nonblocking.Semaphore synchronized_notifier = new Geary.Nonblocking.Semaphore();
@@ -449,31 +450,31 @@ public class Geary.Imap.ClientConnection : BaseObject {
             disconnected();
         }
     }
-    
+
     private async void open_channels_async() throws Error {
         assert(ios != null);
         assert(ser == null);
         assert(des == null);
-        
+
         // Not buffering the Deserializer because it uses a DataInputStream, which is buffered
-        BufferedOutputStream buffered_outs = new BufferedOutputStream(ios.output_stream);
-        buffered_outs.set_close_base_stream(false);
-        
+        ser_buffer = new BufferedOutputStream(ios.output_stream);
+        ser_buffer.set_close_base_stream(false);
+
         // Use ClientConnection cx_id for debugging aid with Serializer/Deserializer
         string id = "%04d".printf(cx_id);
-        ser = new Serializer(id, buffered_outs);
+        ser = new Serializer(id, ser_buffer);
         des = new Deserializer(id, ios.input_stream);
-        
+
         des.parameters_ready.connect(on_parameters_ready);
         des.bytes_received.connect(on_bytes_received);
         des.receive_failure.connect(on_receive_failure);
         des.deserialize_failure.connect(on_deserialize_failure);
         des.eos.connect(on_eos);
-        
+
         yield des.start_async();
     }
-    
-    // Closes the Serializer and Deserializer, but does NOT close the underlying streams
+
+    /** Disconnect and deallocates the Serializer and Deserializer. */
     private async void close_channels_async(Cancellable? cancellable) throws Error {
         // disconnect from Deserializer before yielding to stop it
         if (des != null) {
@@ -482,14 +483,22 @@ public class Geary.Imap.ClientConnection : BaseObject {
             des.receive_failure.disconnect(on_receive_failure);
             des.deserialize_failure.disconnect(on_deserialize_failure);
             des.eos.disconnect(on_eos);
-            
+
             yield des.stop_async();
         }
-        
-        ser = null;
         des = null;
+        ser = null;
+        // Close the Serializer's buffered stream after it as been
+        // deallocated so it can't possibly write to the stream again,
+        // and so the stream's async thread doesn't attempt to flush
+        // its buffers from its finaliser at some later unspecified
+        // point, possibly writing to an invalid underlying stream.
+        if (ser_buffer != null) {
+            yield ser_buffer.close_async(GLib.Priority.DEFAULT, cancellable);
+            ser_buffer = null;
+        }
     }
-    
+
     public async void starttls_async(Cancellable? cancellable = null) throws Error {
         if (cx == null)
             throw new ImapError.NOT_SUPPORTED("[%s] Unable to enable TLS: no connection", to_string());
