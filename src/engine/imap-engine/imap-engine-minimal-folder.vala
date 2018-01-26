@@ -52,11 +52,16 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
             return _special_folder_type;
         }
     }
-    
-    private ProgressMonitor _opening_monitor = new Geary.ReentrantProgressMonitor(Geary.ProgressType.ACTIVITY);
-    public override Geary.ProgressMonitor opening_monitor { get { return _opening_monitor; } }
 
-    internal ImapDB.Folder local_folder  { get; protected set; }
+    private ProgressMonitor _opening_monitor =
+        new Geary.ReentrantProgressMonitor(Geary.ProgressType.ACTIVITY);
+    public override Geary.ProgressMonitor opening_monitor {
+        get {
+            return _opening_monitor;
+        }
+    }
+
+    internal ImapDB.Folder local_folder  { get; private set; }
     internal int remote_count { get; private set; default = -1; }
 
     internal ReplayQueue replay_queue { get; private set; }
@@ -68,17 +73,19 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
 
     private Folder.OpenFlags open_flags = OpenFlags.NONE;
     private int open_count = 0;
+    private Cancellable? open_cancellable = null;
+    private Nonblocking.Mutex open_mutex = new Nonblocking.Mutex();
+    private Nonblocking.Mutex close_mutex = new Nonblocking.Mutex();
+    private Nonblocking.Semaphore closed_semaphore = new Nonblocking.Semaphore();
 
-    private TimeoutManager remote_open_timer;
     private Imap.FolderSession? remote_session = null;
     private Nonblocking.ReportingSemaphore<bool> remote_wait_semaphore =
         new Nonblocking.ReportingSemaphore<bool>(false);
-    private Nonblocking.Semaphore closed_semaphore = new Nonblocking.Semaphore();
-    private Nonblocking.Mutex open_mutex = new Nonblocking.Mutex();
-    private Nonblocking.Mutex close_mutex = new Nonblocking.Mutex();
+    private TimeoutManager remote_open_timer;
+
     private TimeoutManager update_flags_timer;
+
     private TimeoutManager refresh_unseen_timer;
-    private Cancellable? open_cancellable = null;
 
 
     /**
