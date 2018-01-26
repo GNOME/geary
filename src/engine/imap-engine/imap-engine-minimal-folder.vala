@@ -57,7 +57,6 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     public override Geary.ProgressMonitor opening_monitor { get { return _opening_monitor; } }
 
     internal ImapDB.Folder local_folder  { get; protected set; }
-    internal Imap.FolderSession? remote_folder { get; protected set; default = null; }
     internal int remote_count { get; private set; default = -1; }
 
     internal ReplayQueue replay_queue { get; private set; }
@@ -71,6 +70,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     private int open_count = 0;
 
     private TimeoutManager remote_open_timer;
+    private Imap.FolderSession? remote_session = null;
     private Nonblocking.ReportingSemaphore<bool> remote_wait_semaphore =
         new Nonblocking.ReportingSemaphore<bool>(false);
     private Nonblocking.Semaphore closed_semaphore = new Nonblocking.Semaphore();
@@ -182,7 +182,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         if (this.open_count == 0)
             return Geary.Folder.OpenState.CLOSED;
 
-        return (this.remote_folder != null)
+        return (this.remote_session != null)
            ? Geary.Folder.OpenState.BOTH
            : Geary.Folder.OpenState.LOCAL;
     }
@@ -211,7 +211,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
             // even if opened or opening, or if forcing a re-open, respect the NO_DELAY flag
             if (open_flags.is_all_set(OpenFlags.NO_DELAY)) {
                 // add NO_DELAY flag if it forces an open
-                if (this.remote_folder == null)
+                if (this.remote_session == null)
                     this.open_flags |= OpenFlags.NO_DELAY;
 
                 this.open_remote_session.begin();
@@ -267,12 +267,33 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         check_open("wait_for_remote_async");
 
         // if remote has not yet been opened, do it now ...
-        if (this.remote_folder == null) {
+        if (this.remote_session == null) {
             this.open_remote_session.begin();
         }
 
         if (!yield this.remote_wait_semaphore.wait_for_result_async(cancellable))
             throw new EngineError.ALREADY_CLOSED("%s failed to open", to_string());
+    }
+
+    /**
+     * Returns a valid IMAP folder session when one is available.
+     *
+     * Implementations may use this to acquire an IMAP session for
+     * performing folder-related work. The call will wait until a
+     * connection is established then return the session.
+     *
+     * The session returned is guaranteed to be open upon return,
+     * however may close afterwards due to this folder closing, or the
+     * network connection going away.
+     *
+     * The folder must have been opened before calling this method.
+     */
+    public async Imap.FolderSession claim_remote_session(Cancellable? cancellable = null)
+        throws Error {
+        check_open("claim_remote_session");
+        debug("%s: Acquiring folder session", this.to_string());
+        yield this.wait_for_remote_async(cancellable);
+        return this.remote_session;
     }
 
     /** {@inheritDoc} */
@@ -309,13 +330,13 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         }
     }
 
-    private async void normalize_folders(Geary.Imap.FolderSession remote_folder,
+    private async void normalize_folders(Geary.Imap.FolderSession session,
                                          Cancellable? cancellable)
         throws Error {
         debug("%s: Begin normalizing remote and local folders", to_string());
 
         Geary.Imap.FolderProperties local_properties = this.local_folder.get_properties();
-        Geary.Imap.FolderProperties remote_properties = remote_folder.folder.properties;
+        Geary.Imap.FolderProperties remote_properties = session.folder.properties;
 
         // and both must have their next UID's (it's possible they don't if it's a non-selectable
         // folder)
@@ -453,7 +474,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         check_open("normalize_folders (list local)");
         
         // Do the same on the remote ... make non-null for ease of use later
-        Gee.Set<Imap.UID>? remote_uids = yield remote_folder.list_uids_async(
+        Gee.Set<Imap.UID>? remote_uids = yield session.list_uids_async(
             new Imap.MessageSet.uid_range(first_uid, last_uid), cancellable);
         if (remote_uids == null)
             remote_uids = new Gee.HashSet<Imap.UID>();
@@ -510,7 +531,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
             // detection)
             Gee.List<Imap.MessageSet> msg_sets = Imap.MessageSet.uid_sparse(remote_uids);
             foreach (Imap.MessageSet msg_set in msg_sets) {
-                Gee.List<Geary.Email>? list = yield remote_folder.list_email_async(msg_set,
+                Gee.List<Geary.Email>? list = yield session.list_email_async(msg_set,
                     ImapDB.Folder.REQUIRED_FIELDS, cancellable);
                 if (list != null && list.size > 0)
                     to_create.add_all(list);
@@ -647,8 +668,8 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         // will no longer available.
         this.remote_wait_semaphore.reset();
 
-        Imap.FolderSession session = this.remote_folder;
-        this.remote_folder = null;
+        Imap.FolderSession session = this.remote_session;
+        this.remote_session = null;
         this.remote_count = -1;
 
         if (session != null) {
@@ -673,8 +694,8 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         // Close the prefetcher early so it stops using the remote ASAP
         this.email_prefetcher.close();
 
-        if (this.remote_folder != null)
-            _properties.remove(this.remote_folder.folder.properties);
+        if (this.remote_session != null)
+            _properties.remove(this.remote_session.folder.properties);
 
         // block anyone from wait_for_remote_async(), as this is no longer open
         this.remote_wait_semaphore.reset();
@@ -804,7 +825,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
             // else having called this just before we did.
             if (this.open_count > 0 &&
                 this._account.session_pool.is_ready &&
-                this.remote_folder == null) {
+                this.remote_session == null) {
 
                 this.opening_monitor.notify_start();
                 yield open_remote_session_locked(this.open_cancellable);
@@ -903,7 +924,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
 
         // Phase 3: Move in place and notify waiters
 
-        this.remote_folder = session;
+        this.remote_session = session;
 
         // notify any subscribers with similar information
         notify_opened(Geary.Folder.OpenState.BOTH, this.remote_count);
@@ -965,7 +986,9 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         this.remote_count = reported_remote_count;
 
         if (positions.size > 0) {
-            ReplayAppend op = new ReplayAppend(this, reported_remote_count, positions);
+            ReplayAppend op = new ReplayAppend(
+                this, reported_remote_count, positions, this.open_cancellable
+            );
             op.email_appended.connect(notify_email_appended);
             op.email_locally_appended.connect(notify_email_locally_appended);
             op.email_count_changed.connect(notify_email_count_changed);
@@ -1215,7 +1238,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
 
     public override string to_string() {
         return "%s (open_count=%d remote_opened=%s)".printf(
-            base.to_string(), open_count, (remote_folder != null).to_string()
+            base.to_string(), open_count, (this.remote_session != null).to_string()
         );
     }
 

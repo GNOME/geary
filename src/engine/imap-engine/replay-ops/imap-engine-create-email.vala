@@ -46,24 +46,29 @@ private class Geary.ImapEngine.CreateEmail : Geary.ImapEngine.SendReplayOperatio
         // Deal with cancellable manually since create_email_async cannot be cancelled.
         if (cancellable.is_cancelled())
             throw new IOError.CANCELLED("CreateEmail op cancelled immediately");
-        
+
+        Imap.FolderSession remote =
+            yield this.engine.claim_remote_session(cancellable);
+
         // use IMAP APPEND command on remote folders, which doesn't require opening a folder ...
         // if retrying after a successful create, rfc822 will be null
         if (rfc822 != null)
-            created_id = yield engine.remote_folder.create_email_async(rfc822, flags, date_received);
-        
+            created_id = yield remote.create_email_async(rfc822, flags, date_received);
+
         // because this command retries, the create completed, remove the RFC822 message to prevent
         // creating it twice
         rfc822 = null;
-        
+
         // If the user cancelled the operation, we need to wipe the new message to keep this
         // operation atomic.
         if (cancellable.is_cancelled()) {
             if (created_id != null) {
-                yield engine.remote_folder.remove_email_async(
-                    new Imap.MessageSet.uid(((ImapDB.EmailIdentifier) created_id).uid).to_list(), null);
+                yield remote.remove_email_async(
+                    new Imap.MessageSet.uid(((ImapDB.EmailIdentifier) created_id).uid).to_list(),
+                    null
+                );
             }
-            
+
             throw new IOError.CANCELLED("CreateEmail op cancelled after create");
         }
         

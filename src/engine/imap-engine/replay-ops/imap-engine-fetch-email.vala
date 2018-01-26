@@ -90,10 +90,13 @@ private class Geary.ImapEngine.FetchEmail : Geary.ImapEngine.SendReplayOperation
             throw new EngineError.NOT_FOUND("Unable to fetch %s in %s (removed from remote)",
                 id.to_string(), engine.to_string());
         }
-        
+
+        Imap.FolderSession remote =
+            yield this.engine.claim_remote_session(cancellable);
+
         // fetch only the remaining fields from the remote folder (if only pulling partial information,
         // will merge at end of this method)
-        Gee.List<Geary.Email>? list = yield engine.remote_folder.list_email_async(
+        Gee.List<Geary.Email>? list = yield remote.list_email_async(
             new Imap.MessageSet.uid(uid), remaining_fields, cancellable);
         if (list == null || list.size != 1)
             throw new EngineError.NOT_FOUND("Unable to fetch %s in %s", id.to_string(), engine.to_string());

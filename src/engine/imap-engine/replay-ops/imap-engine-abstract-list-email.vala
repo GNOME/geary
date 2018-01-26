@@ -8,56 +8,67 @@
  * A base class for building replay operations that list messages.
  */
 private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.SendReplayOperation {
+
     private static int total_fetches_avoided = 0;
-    
+
     private class RemoteBatchOperation : Nonblocking.BatchOperation {
         // IN
-        public MinimalFolder owner;
+        public Imap.FolderSession remote;
+        public ImapDB.Folder local;
         public Imap.MessageSet msg_set;
         public Geary.Email.Field unfulfilled_fields;
         public Geary.Email.Field required_fields;
-        
+
         // OUT
         public Gee.Set<Geary.EmailIdentifier> created_ids = new Gee.HashSet<Geary.EmailIdentifier>();
-        
-        public RemoteBatchOperation(MinimalFolder owner, Imap.MessageSet msg_set,
-            Geary.Email.Field unfulfilled_fields, Geary.Email.Field required_fields) {
-            this.owner = owner;
+
+        public RemoteBatchOperation(Imap.FolderSession remote,
+                                    ImapDB.Folder local,
+                                    Imap.MessageSet msg_set,
+                                    Geary.Email.Field unfulfilled_fields,
+                                    Geary.Email.Field required_fields) {
+            this.remote = remote;
+            this.local = local;
             this.msg_set = msg_set;
             this.unfulfilled_fields = unfulfilled_fields;
             this.required_fields = required_fields;
         }
-        
+
         public override async Object? execute_async(Cancellable? cancellable) throws Error {
             // fetch from remote folder
-            Gee.List<Geary.Email>? list = yield owner.remote_folder.list_email_async(msg_set,
-                unfulfilled_fields, cancellable);
+            Gee.List<Geary.Email>? list = yield this.remote.list_email_async(
+                msg_set, unfulfilled_fields, cancellable
+            );
             if (list == null || list.size == 0)
                 return null;
-            
+
             // TODO: create_or_merge_email_async() should only write if something has changed
-            Gee.Map<Geary.Email, bool> created_or_merged = yield owner.local_folder.create_or_merge_email_async(
+            Gee.Map<Geary.Email, bool> created_or_merged = yield this.local.create_or_merge_email_async(
                 list, cancellable);
             for (int ctr = 0; ctr < list.size; ctr++) {
                 Geary.Email email = list[ctr];
-                
+
                 // if created, add to id pool
                 if (created_or_merged.get(email))
                     created_ids.add(email.id);
-                
+
                 // if remote email doesn't fulfills all required fields, fetch full and return that
                 // TODO: Need a sparse ID fetch in ImapDB.Folder to do this all at once
                 if (!email.fields.fulfills(required_fields)) {
-                    email = yield owner.local_folder.fetch_email_async((ImapDB.EmailIdentifier) email.id,
-                        required_fields, ImapDB.Folder.ListFlags.NONE, cancellable);
+                    email = yield this.local.fetch_email_async(
+                        (ImapDB.EmailIdentifier) email.id,
+                        required_fields,
+                        ImapDB.Folder.ListFlags.NONE,
+                        cancellable
+                    );
                     list[ctr] = email;
                 }
             }
-            
+
             return list;
         }
     }
-    
+
     // The accumulated Email from the list operation.  Should only be accessed once the operation
     // has completed.
     public Gee.List<Geary.Email> accumulator = new Gee.ArrayList<Geary.Email>();
@@ -146,7 +157,10 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
             Geary.Email.Field, Imap.UID>();
         foreach (Imap.UID uid in unfulfilled.keys)
             reverse_unfulfilled.set(unfulfilled.get(uid), uid);
-        
+
+        Imap.FolderSession remote =
+            yield this.owner.claim_remote_session(cancellable);
+
         // schedule operations to remote for each set of email with unfulfilled fields and merge
         // in results, pulling out the entire email
         Nonblocking.Batch batch = new Nonblocking.Batch();
@@ -154,15 +168,20 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
             Gee.Collection<Imap.UID> unfulfilled_uids = reverse_unfulfilled.get(unfulfilled_fields);
             if (unfulfilled_uids.size == 0)
                 continue;
-            
+
             Gee.List<Imap.MessageSet> msg_sets = Imap.MessageSet.uid_sparse(unfulfilled_uids);
             foreach (Imap.MessageSet msg_set in msg_sets) {
-                RemoteBatchOperation remote_op = new RemoteBatchOperation(owner, msg_set,
-                    unfulfilled_fields, required_fields);
+                RemoteBatchOperation remote_op = new RemoteBatchOperation(
+                    remote,
+                    this.owner.local_folder,
+                    msg_set,
+                    unfulfilled_fields,
+                    required_fields
+                );
                 batch.add(remote_op);
             }
         }
-        
+
         yield batch.execute_all_async(cancellable);
         batch.throw_first_exception();
         
@@ -251,9 +270,11 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
         int64 high_pos = -1;
         int64 initial_pos = -1;
 
+        Imap.FolderSession remote =
+            yield this.owner.claim_remote_session(cancellable);
         if (initial_uid != null) {
             Gee.Map<Imap.UID, Imap.SequenceNumber>? map =
-            yield owner.remote_folder.uid_to_position_async(
+            yield remote.uid_to_position_async(
                 new Imap.MessageSet.uid(initial_uid), cancellable
             );
             Imap.SequenceNumber? pos = map.get(initial_uid);
@@ -302,10 +323,10 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
             owner.to_string(), msg_set.to_string(),
             (initial_uid != null) ? initial_uid.to_string() : "(null)", count, actual_count.to_string(),
             local_count, remote_count, flags.is_oldest_to_newest().to_string());
-        
-        Gee.List<Geary.Email>? list = yield owner.remote_folder.list_email_async(msg_set,
+
+        Gee.List<Geary.Email>? list = yield remote.list_email_async(msg_set,
             Geary.Email.Field.NONE, cancellable);
-        
+
         Gee.Set<Imap.UID> uids = new Gee.HashSet<Imap.UID>();
         if (list != null) {
             // add all the new email to the unfulfilled list, which ensures (when replay_remote_async

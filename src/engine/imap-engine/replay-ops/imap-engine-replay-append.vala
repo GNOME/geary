@@ -9,22 +9,27 @@ private class Geary.ImapEngine.ReplayAppend : Geary.ImapEngine.ReplayOperation {
     private MinimalFolder owner;
     private int remote_count;
     private Gee.List<Imap.SequenceNumber> positions;
+    private Cancellable cancellable;
 
     public signal void email_appended(Gee.Collection<Geary.EmailIdentifier> ids);
     public signal void email_locally_appended(Gee.Collection<Geary.EmailIdentifier> ids);
     public signal void email_count_changed(int count, Folder.CountChangeReason reason);
 
 
-    public ReplayAppend(MinimalFolder owner, int remote_count, Gee.List<Imap.SequenceNumber> positions) {
+    public ReplayAppend(MinimalFolder owner,
+                        int remote_count,
+                        Gee.List<Imap.SequenceNumber> positions,
+                        Cancellable cancellable) {
         // IGNORE remote errors because the reconnect will re-normalize the folder, making this
         // append moot
         base ("Append", Scope.REMOTE_ONLY, OnError.IGNORE);
-        
+
         this.owner = owner;
         this.remote_count = remote_count;
         this.positions = positions;
+        this.cancellable = cancellable;
     }
-    
+
     public override void notify_remote_removed_position(Imap.SequenceNumber removed) {
         Gee.List<Imap.SequenceNumber> new_positions = new Gee.ArrayList<Imap.SequenceNumber>();
         foreach (Imap.SequenceNumber? position in positions) {
@@ -58,7 +63,8 @@ private class Geary.ImapEngine.ReplayAppend : Geary.ImapEngine.ReplayOperation {
     public override async void backout_local_async() throws Error {
     }
 
-    public override async ReplayOperation.Status replay_remote_async() {
+    public override async ReplayOperation.Status replay_remote_async()
+        throws Error {
         if (this.positions.size > 0)
             yield do_replay_appended_messages();
 
@@ -74,7 +80,8 @@ private class Geary.ImapEngine.ReplayAppend : Geary.ImapEngine.ReplayOperation {
     // properly relative to the end of the message list; once this is done, notify user of new
     // messages.  If duplicates, create_email_async() will fall through to an updated merge,
     // which is exactly what we want.
-    private async void do_replay_appended_messages() {
+    private async void do_replay_appended_messages()
+        throws Error {
         StringBuilder positions_builder = new StringBuilder("( ");
         foreach (Imap.SequenceNumber remote_position in this.positions)
             positions_builder.append_printf("%s ", remote_position.to_string());
@@ -85,51 +92,46 @@ private class Geary.ImapEngine.ReplayAppend : Geary.ImapEngine.ReplayOperation {
 
         Gee.HashSet<Geary.EmailIdentifier> created = new Gee.HashSet<Geary.EmailIdentifier>();
         Gee.HashSet<Geary.EmailIdentifier> appended = new Gee.HashSet<Geary.EmailIdentifier>();
-        try {
-            Gee.List<Imap.MessageSet> msg_sets = Imap.MessageSet.sparse(this.positions);
-            foreach (Imap.MessageSet msg_set in msg_sets) {
-                Gee.List<Geary.Email>? list = yield this.owner.remote_folder.list_email_async(msg_set,
-                    ImapDB.Folder.REQUIRED_FIELDS, null);
-                if (list != null && list.size > 0) {
-                    debug("%s do_replay_appended_message: %d new messages in %s", to_string(),
-                        list.size, msg_set.to_string());
+        Gee.List<Imap.MessageSet> msg_sets = Imap.MessageSet.sparse(this.positions);
+        Imap.FolderSession remote =
+            yield this.owner.claim_remote_session(this.cancellable);
+        foreach (Imap.MessageSet msg_set in msg_sets) {
+            Gee.List<Geary.Email>? list = yield remote.list_email_async(
+                msg_set, ImapDB.Folder.REQUIRED_FIELDS, this.cancellable
+            );
+            if (list != null && list.size > 0) {
+                debug("%s do_replay_appended_message: %d new messages in %s", to_string(),
+                      list.size, msg_set.to_string());
 
-                    // need to report both if it was created (not known before) and appended (which
-                    // could mean created or simply a known email associated with this folder)
-                    Gee.Map<Geary.Email, bool> created_or_merged =
-                        yield this.owner.local_folder.create_or_merge_email_async(list, null);
-                    foreach (Geary.Email email in created_or_merged.keys) {
-                        // true means created
-                        if (created_or_merged.get(email)) {
-                            debug("%s do_replay_appended_message: appended email ID %s added",
-                                to_string(), email.id.to_string());
+                // need to report both if it was created (not known before) and appended (which
+                // could mean created or simply a known email associated with this folder)
+                Gee.Map<Geary.Email, bool> created_or_merged =
+                    yield this.owner.local_folder.create_or_merge_email_async(list, this.cancellable);
+                foreach (Geary.Email email in created_or_merged.keys) {
+                    // true means created
+                    if (created_or_merged.get(email)) {
+                        debug("%s do_replay_appended_message: appended email ID %s added",
+                              to_string(), email.id.to_string());
 
-                            created.add(email.id);
-                        } else {
-                            debug("%s do_replay_appended_message: appended email ID %s associated",
-                                to_string(), email.id.to_string());
-                        }
-
-                        appended.add(email.id);
+                        created.add(email.id);
+                    } else {
+                        debug("%s do_replay_appended_message: appended email ID %s associated",
+                              to_string(), email.id.to_string());
                     }
-                } else {
-                    debug("%s do_replay_appended_message: no new messages in %s", to_string(),
-                        msg_set.to_string());
+
+                    appended.add(email.id);
                 }
+            } else {
+                debug("%s do_replay_appended_message: no new messages in %s", to_string(),
+                      msg_set.to_string());
             }
-        } catch (Error err) {
-            debug("%s do_replay_appended_message: Unable to process: %s",
-                to_string(), err.message);
         }
 
         // store the reported count, *not* the current count (which is updated outside the of
         // the queue) to ensure that updates happen serially and reflect committed local changes
-        try {
-            yield this.owner.local_folder.update_remote_selected_message_count(this.remote_count, null);
-        } catch (Error err) {
-            debug("%s do_replay_appended_message: Unable to save appended remote count %d: %s",
-                to_string(), this.remote_count, err.message);
-        }
+        yield this.owner.local_folder.update_remote_selected_message_count(
+            this.remote_count, this.cancellable
+        );
 
         if (appended.size > 0)
             email_appended(appended);
