@@ -1,6 +1,6 @@
 /*
  * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2016, 2017 Michael Gratton <mike@vee.net>
+ * Copyright 2016-2018 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -1227,6 +1227,23 @@ public class GearyController : Geary.BaseObject {
         return num;
     }
 
+    private bool is_inbox_descendant(Geary.Folder target) {
+        bool is_descendent = false;
+
+        Geary.Account account = target.account;
+        Geary.Folder? inbox = null;
+        try {
+            inbox = account.get_special_folder(Geary.SpecialFolderType.INBOX);
+        } catch (Error err) {
+            debug("Failed to get inbox for account %s", account.information.id);
+        }
+
+        if (inbox != null) {
+            is_descendent = inbox.path.is_descendant(target.path);
+        }
+        return is_descendent;
+    }
+
     // Update widgets and such to match capabilities of the current folder ... sensitivity is handled
     // by other utility methods
     private void update_ui() {
@@ -1506,12 +1523,23 @@ public class GearyController : Geary.BaseObject {
         );
     }
 
-    private void on_special_folder_type_changed(Geary.Folder folder, Geary.SpecialFolderType old_type,
-        Geary.SpecialFolderType new_type) {
-        main_window.folder_list.remove_folder(folder);
-        main_window.folder_list.add_folder(folder);
+    private void on_special_folder_type_changed(Geary.Folder folder,
+                                                Geary.SpecialFolderType old_type,
+                                                Geary.SpecialFolderType new_type) {
+        // Update the main window
+        this.main_window.folder_list.remove_folder(folder);
+        this.main_window.folder_list.add_folder(folder);
+
+        // Update notifications
+        this.new_messages_monitor.remove_folder(folder);
+        if (folder.special_folder_type == Geary.SpecialFolderType.INBOX ||
+            (folder.special_folder_type == Geary.SpecialFolderType.NONE &&
+             is_inbox_descendant(folder))) {
+            GLib.Cancellable cancellable = this.inbox_cancellables.get(folder.account);
+            this.new_messages_monitor.add_folder(folder, cancellable);
+        }
     }
-    
+
     private void on_engine_opened() {
         // Locate the first account so we can select its inbox when available.
         try {
@@ -1555,35 +1583,34 @@ public class GearyController : Geary.BaseObject {
                     if (!main_window.main_toolbar.move_folder_menu.has_folder(folder))
                         main_window.main_toolbar.move_folder_menu.add_folder(folder);
                 }
-                
-                // monitor the Inbox for notifications
-                if (folder.special_folder_type == Geary.SpecialFolderType.INBOX &&
-                    !inboxes.has_key(folder.account)) {
-                    inboxes.set(folder.account, folder);
-                    Geary.Folder? select_folder = get_initial_selection_folder(folder);
-                    
-                    if (select_folder != null) {
-                        // First we try to select the Inboxes branch inbox if
-                        // it's there, falling back to the main folder list.
-                        if (!main_window.folder_list.select_inbox(select_folder.account))
-                            main_window.folder_list.select_folder(select_folder);
+
+                GLib.Cancellable cancellable = this.inbox_cancellables.get(folder.account);
+
+                switch (folder.special_folder_type) {
+                case Geary.SpecialFolderType.INBOX:
+                    // Special case handling of inboxes
+                    if (!inboxes.has_key(folder.account)) {
+                        inboxes.set(folder.account, folder);
+
+                        Geary.Folder? select_folder = get_initial_selection_folder(folder);
+                        if (select_folder != null) {
+                            // First we try to select the Inboxes branch inbox if
+                            // it's there, falling back to the main folder list.
+                            if (!main_window.folder_list.select_inbox(select_folder.account))
+                                main_window.folder_list.select_folder(select_folder);
+                        }
                     }
 
-                    GLib.Cancellable cancellable = inbox_cancellables.get(folder.account);
                     folder.open_async.begin(Geary.Folder.OpenFlags.NO_DELAY, cancellable);
 
-                    new_messages_monitor.add_folder(folder, cancellable);
-
-                    // also monitor Inbox's children for notifications
-                    try {
-                        foreach (Geary.Folder children in account.list_matching_folders(folder.path)) {
-                            if (children.special_folder_type == Geary.SpecialFolderType.NONE) {
-                                new_messages_monitor.add_folder(children, cancellable);
-                            }
-                        }
-                    } catch (Error e) {
-                        debug("Could not retrieve Inbox children: %s", e.message);
+                    // Always notify for new messages in the Inbox
+                    break;
+                    
+                case Geary.SpecialFolderType.NONE:
+                    if (is_inbox_descendant(folder)) {
+                        this.new_messages_monitor.add_folder(folder, cancellable);
                     }
+                    break;
                 }
                 
                 folder.special_folder_type_changed.connect(on_special_folder_type_changed);
