@@ -164,6 +164,22 @@ public class Geary.FolderPath : BaseObject, Gee.Hashable<Geary.FolderPath>,
         return false;
     }
 
+    /**
+     * Determines if this path is a strict ancestor of another.
+     */
+    public bool is_descendant(FolderPath target) {
+        bool is_descendent = false;
+        Geary.FolderPath? path = target.get_parent();
+        while (path != null) {
+            if (path.equal_to(this)) {
+                is_descendent = true;
+                break;
+            }
+            path = path.get_parent();
+        }
+        return is_descendent;
+    }
+
     private uint get_basename_hash() {
         return case_sensitive ? str_hash(basename) : str_hash(basename.down());
     }
