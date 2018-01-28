@@ -23,6 +23,7 @@ geary_test_engine_sources = [
   'engine/util-idle-manager-test.vala',
   'engine/util-inet-test.vala',
   'engine/util-js-test.vala',
+  'engine/util-string-test.vala',
   'engine/util-timeout-manager-test.vala'
 ]
 

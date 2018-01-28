@@ -130,10 +130,10 @@ public class Libnotify : Geary.BaseObject {
             
             ins = null;
         }
-        
-        issue_current_notification(primary.get_short_address(), body, avatar);
+
+        issue_current_notification(primary.to_short_display(), body, avatar);
     }
-    
+
     private void issue_current_notification(string summary, string body, Gdk.Pixbuf? icon) {
         // only one outstanding notification at a time
         if (current_notification != null) {

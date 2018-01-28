@@ -27,17 +27,21 @@ public class FormattedConversationData : Geary.BaseObject {
             this.address = address;
             this.is_unread = is_unread;
         }
-        
+
         public string get_full_markup(Gee.List<Geary.RFC822.MailboxAddress> account_mailboxes) {
-            return get_as_markup((address in account_mailboxes) ? ME : address.get_short_address());
+            return get_as_markup((address in account_mailboxes) ? ME : address.to_short_display());
         }
-        
+
         public string get_short_markup(Gee.List<Geary.RFC822.MailboxAddress> account_mailboxes) {
             if (address in account_mailboxes)
                 return get_as_markup(ME);
-            
-            string short_address = address.get_short_address().strip();
-            
+
+            if (address.is_spoofed()) {
+                return get_full_markup(account_mailboxes);
+            }
+
+            string short_address = Markup.escape_text(address.to_short_display());
+
             if (", " in short_address) {
                 // assume address is in Last, First format
                 string[] tokens = short_address.split(", ", 2);

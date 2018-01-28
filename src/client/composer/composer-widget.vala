@@ -1676,16 +1676,16 @@ public class ComposerWidget : Gtk.EventBox {
         StringBuilder tooltip = new StringBuilder();
         if (to_entry.addresses != null)
             foreach(Geary.RFC822.MailboxAddress addr in this.to_entry.addresses)
-                tooltip.append(_("To: ") + addr.get_full_address() + "\n");
+                tooltip.append(_("To: ") + addr.to_full_display() + "\n");
         if (cc_entry.addresses != null)
             foreach(Geary.RFC822.MailboxAddress addr in this.cc_entry.addresses)
-                tooltip.append(_("Cc: ") + addr.get_full_address() + "\n");
+                tooltip.append(_("Cc: ") + addr.to_full_display() + "\n");
         if (bcc_entry.addresses != null)
             foreach(Geary.RFC822.MailboxAddress addr in this.bcc_entry.addresses)
-                tooltip.append(_("Bcc: ") + addr.get_full_address() + "\n");
+                tooltip.append(_("Bcc: ") + addr.to_full_display() + "\n");
         if (reply_to_entry.addresses != null)
             foreach(Geary.RFC822.MailboxAddress addr in this.reply_to_entry.addresses)
-                tooltip.append(_("Reply-To: ") + addr.get_full_address() + "\n");
+                tooltip.append(_("Reply-To: ") + addr.to_full_display() + "\n");
         this.header.set_recipients(label, tooltip.str.slice(0, -1));  // Remove trailing \n
     }
 

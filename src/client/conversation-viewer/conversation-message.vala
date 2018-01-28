@@ -1,6 +1,6 @@
 /*
  * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2016 Michael Gratton <mike@vee.net>
+ * Copyright 2016-2018 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -26,15 +26,6 @@ public class ConversationMessage : Gtk.Grid {
     private const int MAX_PREVIEW_BYTES = Geary.Email.MAX_PREVIEW_BYTES;
 
 
-    internal static inline bool has_distinct_name(
-        Geary.RFC822.MailboxAddress address) {
-        return (
-            !Geary.String.is_empty(address.name) &&
-            address.name != address.address
-        );
-    }
-
-
     // Widget used to display sender/recipient email addresses in
     // message header Gtk.FlowBox instances.
     private class AddressFlowBoxChild : Gtk.FlowBoxChild {
@@ -50,7 +41,7 @@ public class ConversationMessage : Gtk.Grid {
         public AddressFlowBoxChild(Geary.RFC822.MailboxAddress address,
                                    Type type = Type.OTHER) {
             this.address = address;
-            this.search_value = address.address.casefold();
+            this.search_value = address.to_searchable_string().casefold();
 
             // We use two label instances here when address has
             // distinct parts so we can dim the secondary part, if
@@ -69,19 +60,21 @@ public class ConversationMessage : Gtk.Grid {
             }
             address_parts.add(primary);
 
-            if (has_distinct_name(address)) {
-                primary.set_text(address.name);
+            string display_address = address.to_address_display("", "");
+
+            // Don't display the name if it looks spoofed, to reduce
+            // chance of the user of being tricked by malware.
+            if (address.has_distinct_name() && !address.is_spoofed()) {
+                primary.set_text(address.to_short_display());
 
                 Gtk.Label secondary = new Gtk.Label(null);
                 secondary.ellipsize = Pango.EllipsizeMode.END;
                 secondary.set_halign(Gtk.Align.START);
                 secondary.get_style_context().add_class(Gtk.STYLE_CLASS_DIM_LABEL);
-                secondary.set_text(address.address);
+                secondary.set_text(display_address);
                 address_parts.add(secondary);
-
-                this.search_value = address.name.casefold() + this.search_value;
             } else {
-                primary.set_text(address.address);
+                primary.set_text(display_address);
             }
 
             // Update prelight state when mouse-overed.
@@ -571,7 +564,7 @@ public class ConversationMessage : Gtk.Grid {
             Gee.List<Geary.RFC822.MailboxAddress> list =
                 this.message.from.get_all();
             foreach (Geary.RFC822.MailboxAddress addr in list) {
-                text += has_distinct_name(addr) ? addr.name : addr.address;
+                text += addr.to_short_display();
 
                 if (++i < list.size)
                     // Translators: This separates multiple 'from'
@@ -765,7 +758,7 @@ public class ConversationMessage : Gtk.Grid {
             Gee.Map<string,string> values = new Gee.HashMap<string,string>();
             values[ACTION_OPEN_LINK] =
                 Geary.ComposedEmail.MAILTO_SCHEME + address.address;
-            values[ACTION_COPY_EMAIL] = address.get_full_address();
+                values[ACTION_COPY_EMAIL] = address.to_full_display();
             values[ACTION_SEARCH_FROM] = address.address;
 
             Menu model = new Menu();
