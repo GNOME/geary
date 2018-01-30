@@ -58,7 +58,7 @@ public class Geary.Smtp.EhloRequest : Geary.Smtp.Request {
 
 public class Geary.Smtp.MailRequest : Geary.Smtp.Request {
     public MailRequest(Geary.RFC822.MailboxAddress from) {
-        base (Command.MAIL, { "from:%s".printf(from.to_address_display("<", ">")) });
+        base (Command.MAIL, { "from:<%s>".printf(from.to_rfc822_address()) });
     }
 
     public MailRequest.plain(string addr) {

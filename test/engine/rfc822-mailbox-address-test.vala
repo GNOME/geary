@@ -10,10 +10,13 @@ class Geary.RFC822.MailboxAddressTest : Gee.TestCase {
     public MailboxAddressTest() {
         base("Geary.RFC822.MailboxAddressTest");
         add_test("is_valid_address", is_valid_address);
+        add_test("unescaped_constructor", unescaped_constructor);
         add_test("is_spoofed", is_spoofed);
         add_test("has_distinct_name", has_distinct_name);
         add_test("to_full_display", to_full_display);
         add_test("to_short_display", to_short_display);
+        // latter depends on the former, so test that first
+        add_test("to_rfc822_address", to_rfc822_address);
         add_test("to_rfc822_string", to_rfc822_string);
     }
 
@@ -33,6 +36,34 @@ class Geary.RFC822.MailboxAddressTest : Gee.TestCase {
         assert(Geary.RFC822.MailboxAddress.is_valid_address("test@") == false);
         assert(Geary.RFC822.MailboxAddress.is_valid_address("@") == false);
         assert(Geary.RFC822.MailboxAddress.is_valid_address("") == false);
+    }
+
+    public void unescaped_constructor() {
+        MailboxAddress addr1 = new MailboxAddress("test1", "test2@example.com");
+        assert(addr1.name == "test1");
+        assert(addr1.address == "test2@example.com");
+        assert(addr1.mailbox == "test2");
+        assert(addr1.domain == "example.com");
+
+        MailboxAddress addr2 = new MailboxAddress(null, "test1@test2@example.com");
+        assert(addr2.address == "test1@test2@example.com");
+        assert(addr2.mailbox == "test1@test2");
+        assert(addr2.domain == "example.com");
+
+        MailboxAddress addr3 = new MailboxAddress(null, "©@example.com");
+        assert(addr3.address == "©@example.com");
+        assert(addr3.mailbox == "©");
+        assert(addr3.domain == "example.com");
+
+        MailboxAddress addr4 = new MailboxAddress(null, "😸@example.com");
+        assert(addr4.address == "😸@example.com");
+        assert(addr4.mailbox == "😸");
+        assert(addr4.domain == "example.com");
+
+        MailboxAddress addr5 = new MailboxAddress(null, "example.com");
+        assert(addr5.address == "example.com");
+        assert(addr5.mailbox == "");
+        assert(addr5.domain == "");
     }
 
     public void is_spoofed() {
@@ -91,6 +122,23 @@ class Geary.RFC822.MailboxAddressTest : Gee.TestCase {
                "example@example@example.com");
     }
 
+    public void to_rfc822_address() {
+        assert(new MailboxAddress(null, "example@example.com").to_rfc822_address() ==
+               "example@example.com");
+        //assert(new MailboxAddress(null, "test test@example.com").to_rfc822_address() ==
+        //       "\"test test\"@example.com");
+        //assert(new MailboxAddress(null, "test\" test@example.com").to_rfc822_address() ==
+        //       "\"test\" test\"@example.com");
+        //assert(new MailboxAddress(null, "test\"test@example.com").to_rfc822_address() ==
+        //       "\"test\"test\"@example.com");
+        assert(new MailboxAddress(null, "test@test@example.com").to_rfc822_address() ==
+               "\"test@test\"@example.com");
+        assert(new MailboxAddress(null, "©@example.com").to_rfc822_address() ==
+               "\"=?iso-8859-1?b?qQ==?=\"@example.com");
+        assert(new MailboxAddress(null, "😸@example.com").to_rfc822_address() ==
+               "\"=?UTF-8?b?8J+YuA==?=\"@example.com");
+    }
+
     public void to_rfc822_string() {
         assert(new MailboxAddress("", "example@example.com").to_rfc822_string() ==
                "example@example.com");
@@ -102,14 +150,16 @@ class Geary.RFC822.MailboxAddressTest : Gee.TestCase {
                "test test <example@example.com>");
         assert(new MailboxAddress("example@example.com", "example@example.com").to_rfc822_string() ==
                "example@example.com");
-        // Technically, per
-        // https://tools.ietf.org/html/rfc5322#appendix-A.1.2 this
-        // would be fine as just "test? <example@example.com>",
-        // i.e. without the name being quoted, but I guess GMime is
-        // just being conservative here?
         assert(new MailboxAddress("test?", "example@example.com").to_rfc822_string() ==
-               "\"test?\" <example@example.com>");
+               "test? <example@example.com>");
+        assert(new MailboxAddress("test@test", "example@example.com").to_rfc822_string() ==
+               "\"test@test\" <example@example.com>");
         assert(new MailboxAddress(";", "example@example.com").to_rfc822_string() ==
                "\";\" <example@example.com>");
+        assert(new MailboxAddress("©", "example@example.com").to_rfc822_string() ==
+               "=?iso-8859-1?b?qQ==?= <example@example.com>");
+        assert(new MailboxAddress("😸", "example@example.com").to_rfc822_string() ==
+               "=?UTF-8?b?8J+YuA==?= <example@example.com>");
     }
+
 }

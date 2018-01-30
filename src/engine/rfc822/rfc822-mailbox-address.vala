@@ -9,6 +9,11 @@
 /**
  * An immutable representation of an RFC 822 mailbox address.
  *
+ * The properties of this class such as {@link name} and {@link
+ * address} are stores decoded UTF-8, thus they must be re-encoded
+ * using methods such as {@link to_rfc822_string} before being re-used
+ * in a message envelope.
+ *
  * See [[https://tools.ietf.org/html/rfc5322#section-3.4]]
  */
 public class Geary.RFC822.MailboxAddress : Geary.MessageData.SearchableMessageData,
@@ -31,39 +36,51 @@ public class Geary.RFC822.MailboxAddress : Geary.MessageData.SearchableMessageDa
 
 
     internal delegate string ListToStringDelegate(MailboxAddress address);
-    
+
+
     /**
-     * The optional user-friendly name associated with the {@link MailboxAddress}.
+     * The optional human-readable part of the mailbox address.
      *
      * For "Dirk Gently <dirk@example.com>", this would be "Dirk Gently".
+     *
+     * The returned value has been decoded into UTF-8.
      */
     public string? name { get; private set; }
-    
+
     /**
      * The routing of the message (optional, obsolete).
+     *
+     * The returned value has been decoded into UTF-8.
      */
     public string? source_route { get; private set; }
-    
+
     /**
-     * The mailbox (local-part) portion of the {@link MailboxAddress}.
+     * The mailbox (local-part) portion of the mailbox's address.
      *
      * For "Dirk Gently <dirk@example.com>", this would be "dirk".
+     *
+     * The returned value has been decoded into UTF-8.
      */
     public string mailbox { get; private set; }
-    
+
     /**
-     * The domain portion of the {@link MailboxAddress}.
+     * The domain portion of the mailbox's address.
      *
      * For "Dirk Gently <dirk@example.com>", this would be "example.com".
+     *
+     * The returned value has been decoded into UTF-8.
      */
     public string domain { get; private set; }
-    
+
     /**
-     * The address specification of the {@link MailboxAddress}.
+     * The complete address part of the mailbox address.
      *
      * For "Dirk Gently <dirk@example.com>", this would be "dirk@example.com".
+     *
+     * The returned value has been decoded into UTF-8.
      */
     public string address { get; private set; }
+
 
     public MailboxAddress(string? name, string address) {
         this.name = name;
@@ -293,14 +310,38 @@ public class Geary.RFC822.MailboxAddress : Geary.MessageData.SearchableMessageDa
     }
 
     /**
-     * Returns the address suitable for insertion into an RFC822 message.
+     * Returns the complete mailbox address, armoured for RFC 822 use.
      *
-     * @return the RFC822 quoted form of the full address.
+     * This method is similar to {@link to_full_display}, but only
+     * checks for a distinct address (per Postel's Law) and not for
+     * any spoofing, and does not strip extra white space or
+     * non-printing characters.
+     *
+     * @return the RFC822 encoded form of the full address.
      */
     public string to_rfc822_string() {
         return has_distinct_name()
-            ? "%s <%s>".printf(GMime.utils_quote_string(this.name), this.address)
-            : this.address;
+            ? "%s <%s>".printf(
+                GMime.utils_header_encode_phrase(this.name),
+                to_rfc822_address()
+            )
+            : to_rfc822_address();
+    }
+
+    /**
+     * Returns the address part only, armoured for RFC 822 use.
+     *
+     * @return the RFC822 encoded form of the address, without angle
+     * brackets.
+     */
+    public string to_rfc822_address() {
+        return "%s@%s".printf(
+            // XXX utils_quote_string won't quote if spaces or quotes
+            // present, so need to do that manually
+            GMime.utils_quote_string(GMime.utils_header_encode_text(this.mailbox)),
+            // XXX Need to punycode international domains.
+            this.domain
+        );
     }
 
     /**
