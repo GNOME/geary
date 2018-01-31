@@ -11,6 +11,7 @@ class Geary.RFC822.MailboxAddressTest : Gee.TestCase {
         base("Geary.RFC822.MailboxAddressTest");
         add_test("is_valid_address", is_valid_address);
         add_test("unescaped_constructor", unescaped_constructor);
+        add_test("from_rfc822_string_encoded", from_rfc822_string_encoded);
         add_test("is_spoofed", is_spoofed);
         add_test("has_distinct_name", has_distinct_name);
         add_test("to_full_display", to_full_display);
@@ -64,6 +65,87 @@ class Geary.RFC822.MailboxAddressTest : Gee.TestCase {
         assert(addr5.address == "example.com");
         assert(addr5.mailbox == "");
         assert(addr5.domain == "");
+    }
+
+    public void from_rfc822_string_encoded() {
+        try {
+            MailboxAddress addr = new MailboxAddress.from_rfc822_string("test@example.com");
+            assert(addr.name == null);
+            assert(addr.mailbox == "test");
+            assert(addr.domain == "example.com");
+
+            addr = new MailboxAddress.from_rfc822_string("\"test\"@example.com");
+            assert(addr.name == null);
+            assert(addr.address == "test@example.com");
+            assert(addr.mailbox == "test");
+            assert(addr.domain == "example.com");
+
+            addr = new MailboxAddress.from_rfc822_string("=?UTF-8?b?dGVzdA==?=@example.com");
+            assert(addr.name == null);
+            assert(addr.address == "test@example.com");
+            assert(addr.mailbox == "test");
+            assert(addr.domain == "example.com");
+
+            addr = new MailboxAddress.from_rfc822_string("\"=?UTF-8?b?dGVzdA==?=\"@example.com");
+            assert(addr.name == null);
+            assert(addr.address == "test@example.com");
+            assert(addr.mailbox == "test");
+            assert(addr.domain == "example.com");
+
+            addr = new MailboxAddress.from_rfc822_string("<test@example.com>");
+            assert(addr.name == null);
+            assert(addr.address == "test@example.com");
+            assert(addr.mailbox == "test");
+            assert(addr.domain == "example.com");
+
+            addr = new MailboxAddress.from_rfc822_string("<\"test\"@example.com>");
+            assert(addr.name == null);
+            assert(addr.address == "test@example.com");
+            assert(addr.mailbox == "test");
+            assert(addr.domain == "example.com");
+
+            addr = new MailboxAddress.from_rfc822_string("Test 1 <test2@example.com>");
+            assert(addr.name == "Test 1");
+            assert(addr.address == "test2@example.com");
+            assert(addr.mailbox == "test2");
+            assert(addr.domain == "example.com");
+
+            addr = new MailboxAddress.from_rfc822_string("\"Test 1\" <test2@example.com>");
+            assert(addr.name == "Test 1");
+            assert(addr.address == "test2@example.com");
+            assert(addr.mailbox == "test2");
+            assert(addr.domain == "example.com");
+
+            addr = new MailboxAddress.from_rfc822_string("Test 1 <\"test2\"@example.com>");
+            assert(addr.name == "Test 1");
+            assert(addr.address == "test2@example.com");
+            assert(addr.mailbox == "test2");
+            assert(addr.domain == "example.com");
+
+            addr = new MailboxAddress.from_rfc822_string("=?UTF-8?b?VGVzdCAx?= <test2@example.com>");
+            assert(addr.name == "Test 1");
+            assert(addr.address == "test2@example.com");
+            assert(addr.mailbox == "test2");
+            assert(addr.domain == "example.com");
+
+            addr = new MailboxAddress.from_rfc822_string("\"=?UTF-8?b?VGVzdCAx?=\" <test2@example.com>");
+            assert(addr.name == "Test 1");
+            assert(addr.address == "test2@example.com");
+            assert(addr.mailbox == "test2");
+            assert(addr.domain == "example.com");
+
+            // Courtesy Mailsploit https://www.mailsploit.com
+            addr = new MailboxAddress.from_rfc822_string("\"=?utf-8?b?dGVzdCIgPHBvdHVzQHdoaXRlaG91c2UuZ292Pg==?==?utf-8?Q?=00=0A?=\" <demo@mailsploit.com>");
+            assert(addr.name == "test <potus@whitehouse.gov>?\n");
+            assert(addr.address == "demo@mailsploit.com");
+
+            // Courtesy Mailsploit https://www.mailsploit.com
+            addr = new MailboxAddress.from_rfc822_string("\"=?utf-8?Q?=42=45=47=49=4E=20=2F=20=28=7C=29=7C=3C=7C=3E=7C=40=7C=2C=7C=3B=7C=3A=7C=5C=7C=22=7C=2F=7C=5B=7C=5D=7C=3F=7C=2E=7C=3D=20=2F=20=00=20=50=41=53=53=45=44=20=4E=55=4C=4C=20=42=59=54=45=20=2F=20=0D=0A=20=50=41=53=53=45=44=20=43=52=4C=46=20=2F=20?==?utf-8?b?RU5E=?=\"");
+            assert(addr.name == null);
+            assert(addr.address == "BEGIN / (|)|<|>|@|,|;|:|\\|\"|/|[|]|?|.|= / ? PASSED NULL BYTE / \r\n PASSED CRLF / END");
+        } catch (Error err) {
+            assert_not_reached();
+        }
     }
 
     public void is_spoofed() {

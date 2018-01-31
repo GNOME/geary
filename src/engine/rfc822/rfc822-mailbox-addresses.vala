@@ -4,6 +4,14 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
+/**
+ * An immutable representation an RFC 822 address list.
+ *
+ * This would typically be found as the value of the To, CC, BCC and
+ * other headers fields.
+ *
+ * See [[https://tools.ietf.org/html/rfc5322#section-3.4]]
+ */
 public class Geary.RFC822.MailboxAddresses : Geary.MessageData.AbstractMessageData, 
     Geary.MessageData.SearchableMessageData, Geary.RFC822.MessageData, Gee.Hashable<MailboxAddresses> {
     
@@ -27,13 +35,26 @@ public class Geary.RFC822.MailboxAddresses : Geary.MessageData.AbstractMessageDa
         int length = addrlist.length();
         for (int ctr = 0; ctr < length; ctr++) {
             InternetAddress? addr = addrlist.get_address(ctr);
-            
-            // TODO: Handle group lists
+
             InternetAddressMailbox? mbox_addr = addr as InternetAddressMailbox;
-            if (mbox_addr == null)
-                continue;
-            
-            addrs.add(new MailboxAddress(mbox_addr.get_name(), mbox_addr.get_addr()));
+            if (mbox_addr != null) {
+                this.addrs.add(new MailboxAddress.gmime(mbox_addr));
+            } else {
+                // XXX this is pretty bad - we just flatten the
+                // group's addresses into this list, merging lists and
+                // losing the group names.
+                InternetAddressGroup? mbox_group = addr as InternetAddressGroup;
+                if (mbox_group != null) {
+                    InternetAddressList group_list = mbox_group.get_members();
+                    for (int i = 0; i < group_list.length(); i++) {
+                        InternetAddressMailbox? group_addr =
+                            addrlist.get_address(i) as InternetAddressMailbox;
+                        if (group_addr != null) {
+                            this.addrs.add(new MailboxAddress.gmime(group_addr));
+                        }
+                    }
+                }
+            }
         }
     }
     
@@ -73,7 +94,16 @@ public class Geary.RFC822.MailboxAddresses : Geary.MessageData.AbstractMessageDa
         
         return false;
     }
-    
+
+    /**
+     * Returns a new list with the given addresses appended to this list's.
+     */
+    public MailboxAddresses append(MailboxAddresses others) {
+        MailboxAddresses new_addrs = new MailboxAddresses(this.addrs);
+        new_addrs.addrs.add_all(others.addrs);
+        return new_addrs;
+    }
+
     /**
      * Returns the addresses suitable for insertion into an RFC822 message.  RFC822 quoting is
      * performed if required.

@@ -34,6 +34,47 @@ public class Geary.RFC822.MailboxAddress : Geary.MessageData.SearchableMessageDa
         }
     }
 
+    private static string decode_name(string name) {
+        return GMime.utils_header_decode_phrase(prepare_header_text_part(name));
+    }
+
+    private static string decode_address_part(string mailbox) {
+        return GMime.utils_header_decode_text(prepare_header_text_part(mailbox));
+    }
+
+    private static string prepare_header_text_part(string part) {
+        // Borrowed liberally from GMime's internal
+        // _internet_address_decode_name() function.
+
+        // see if a broken mailer has sent raw 8-bit information
+        string text = GMime.utils_text_is_8bit(part, part.length)
+            ? part : GMime.utils_decode_8bit(part, part.length);
+
+        // unquote the string then decode the text
+        GMime.utils_unquote_string(text);
+
+        // Sometimes quoted printables contain unencoded spaces which trips up GMime, so we want to
+        // encode them all here.
+        int offset = 0;
+        int start;
+        while ((start = text.index_of("=?", offset)) != -1) {
+            // Find the closing marker.
+            int end = text.index_of("?=", start + 2) + 2;
+            if (end == -1) {
+                end = text.length;
+            }
+
+            // Replace any spaces inside the encoded string.
+            string encoded = text.substring(start, end - start);
+            if (encoded.contains("\x20")) {
+                text = text.replace(encoded, encoded.replace("\x20", "_"));
+            }
+            offset = end;
+        }
+
+        return text;
+    }
+
 
     internal delegate string ListToStringDelegate(MailboxAddress address);
 
@@ -84,26 +125,24 @@ public class Geary.RFC822.MailboxAddress : Geary.MessageData.SearchableMessageDa
 
     public MailboxAddress(string? name, string address) {
         this.name = name;
+        this.source_route = null;
         this.address = address;
-
-        source_route = null;
 
         int atsign = address.last_index_of_char('@');
         if (atsign > 0) {
-            mailbox = address.slice(0, atsign);
-            domain = address.slice(atsign + 1, address.length);
+            this.mailbox = address[0:atsign];
+            this.domain = address[atsign + 1:address.length];
         } else {
-            mailbox = "";
-            domain = "";
+            this.mailbox = "";
+            this.domain = "";
         }
     }
 
     public MailboxAddress.imap(string? name, string? source_route, string mailbox, string domain) {
         this.name = (name != null) ? decode_name(name) : null;
         this.source_route = source_route;
-        this.mailbox = mailbox;
+        this.mailbox = decode_address_part(mailbox);
         this.domain = domain;
-
         this.address = "%s@%s".printf(mailbox, domain);
     }
 
@@ -119,41 +158,39 @@ public class Geary.RFC822.MailboxAddress : Geary.MessageData.SearchableMessageDa
             // TODO: Handle group lists
             InternetAddressMailbox? mbox_addr = addr as InternetAddressMailbox;
             if (mbox_addr != null) {
-                this(mbox_addr.get_name(), mbox_addr.get_addr());
+                this.gmime(mbox_addr);
                 return;
             }
         }
         throw new RFC822Error.INVALID("Could not parse RFC822 address: %s", rfc822);
     }
 
-    // Borrowed liberally from GMime's internal _internet_address_decode_name() function.
-    private static string decode_name(string name) {
-        // see if a broken mailer has sent raw 8-bit information
-        string text = name.validate() ? name : GMime.utils_decode_8bit(name, name.length);
-
-        // unquote the string and decode the text
-        GMime.utils_unquote_string(text);
-
-        // Sometimes quoted printables contain unencoded spaces which trips up GMime, so we want to
-        // encode them all here.
-        int offset = 0;
-        int start;
-        while ((start = text.index_of("=?", offset)) != -1) {
-            // Find the closing marker.
-            int end = text.index_of("?=", start + 2) + 2;
-            if (end == -1) {
-                end = text.length;
-            }
-
-            // Replace any spaces inside the encoded string.
-            string encoded = text.substring(start, end - start);
-            if (encoded.contains("\x20")) {
-                text = text.replace(encoded, encoded.replace("\x20", "_"));
-            }
-            offset = end;
+    public MailboxAddress.gmime(InternetAddressMailbox mailbox) {
+        // GMime strips source route for us, so the address part
+        // should only ever contain a single '@'
+        string? name = mailbox.get_name();
+        if (name != null) {
+            this.name = decode_name(name);
         }
 
-        return GMime.utils_header_decode_text(text);
+        string address = mailbox.get_addr();
+        int atsign = address.last_index_of_char('@');
+        if (atsign == -1) {
+            // No @ detected, try decoding in case a mailer (wrongly)
+            // encoded the whole thing and re-try
+            address = decode_address_part(address);
+            atsign = address.last_index_of_char('@');
+        }
+
+        if (atsign >= 0) {
+            this.mailbox = decode_address_part(address[0:atsign]);
+            this.domain = address[atsign + 1:address.length];
+            this.address = "%s@%s".printf(this.mailbox, this.domain);
+        } else {
+            this.mailbox = "";
+            this.domain = "";
+            this.address = address;
+        }
     }
 
     /**
