@@ -1,4 +1,6 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2018 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -716,19 +718,21 @@ public class Geary.RFC822.Message : BaseObject {
         
         return body;
     }
-    
+
     /**
      * Return the full list of recipients (to, cc, and bcc) as a searchable
      * string.  Note that values that come out of this function are persisted.
      */
     public string? get_searchable_recipients() {
-        Gee.List<RFC822.MailboxAddress>? recipients = get_recipients();
-        if (recipients == null)
-            return null;
-        
-        return RFC822.MailboxAddress.list_to_string(recipients, "", (a) => a.to_searchable_string());
+        string searchable = null;
+        Gee.List<RFC822.MailboxAddress>? recipient_list = get_recipients();
+        if (recipient_list != null) {
+            MailboxAddresses recipients = new MailboxAddresses(recipient_list);
+            searchable = recipients.to_searchable_string();
+        }
+        return searchable;
     }
-    
+
     public Memory.Buffer get_content_by_mime_id(string mime_id) throws RFC822Error {
         GMime.Part? part = find_mime_part_by_mime_id(message.get_mime_part(), mime_id);
         if (part == null)

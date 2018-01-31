@@ -16,8 +16,10 @@
  *
  * See [[https://tools.ietf.org/html/rfc5322#section-3.4]]
  */
-public class Geary.RFC822.MailboxAddress : Geary.MessageData.SearchableMessageData,
-    Gee.Hashable<MailboxAddress>, BaseObject {
+public class Geary.RFC822.MailboxAddress :
+    Geary.MessageData.SearchableMessageData,
+    Gee.Hashable<MailboxAddress>,
+    BaseObject {
 
     /** Determines if a string contains a valid RFC822 mailbox address. */
     public static bool is_valid_address(string address) {
@@ -74,9 +76,6 @@ public class Geary.RFC822.MailboxAddress : Geary.MessageData.SearchableMessageDa
 
         return text;
     }
-
-
-    internal delegate string ListToStringDelegate(MailboxAddress address);
 
 
     /**
@@ -414,26 +413,4 @@ public class Geary.RFC822.MailboxAddress : Geary.MessageData.SearchableMessageDa
         return to_rfc822_string();
     }
 
-    internal static string list_to_string(Gee.List<MailboxAddress> addrs,
-        string empty, ListToStringDelegate to_s) {
-        switch (addrs.size) {
-            case 0:
-                return empty;
-            
-            case 1:
-                return to_s(addrs[0]);
-            
-            default:
-                StringBuilder builder = new StringBuilder();
-                foreach (MailboxAddress addr in addrs) {
-                    if (!String.is_empty(builder.str))
-                        builder.append(", ");
-                    
-                    builder.append(to_s(addr));
-                }
-                
-                return builder.str;
-        }
-    }
 }
-
