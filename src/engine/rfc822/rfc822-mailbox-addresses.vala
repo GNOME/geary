@@ -105,15 +105,16 @@ public class Geary.RFC822.MailboxAddresses : Geary.MessageData.AbstractMessageDa
     }
 
     /**
-     * Returns the addresses suitable for insertion into an RFC822 message.  RFC822 quoting is
-     * performed if required.
+     * Returns the addresses suitable for insertion into an RFC822 message.
+     *
+     * RFC822 quoting is performed if required.
      *
      * @see MailboxAddress.to_rfc822_string
      */
     public string to_rfc822_string() {
-        return MailboxAddress.list_to_string(addrs, "", (a) => a.to_rfc822_string());
+        return MailboxAddress.list_to_string(addrs, ", ", (a) => a.to_rfc822_string());
     }
-    
+
     public uint hash() {
         // create sorted set to ensure ordering no matter the list's order
         Gee.TreeSet<string> sorted_addresses = traverse<RFC822.MailboxAddress>(addrs)
@@ -143,14 +144,14 @@ public class Geary.RFC822.MailboxAddresses : Geary.MessageData.AbstractMessageDa
         
         return Collection.are_sets_equal<RFC822.MailboxAddress>(first, second);
     }
-    
+
     /**
      * See Geary.MessageData.SearchableMessageData.
      */
     public string to_searchable_string() {
-        return MailboxAddress.list_to_string(addrs, "", (a) => a.to_searchable_string());
+        return MailboxAddress.list_to_string(addrs, " ", (a) => a.to_searchable_string());
     }
-    
+
     public override string to_string() {
         return MailboxAddress.list_to_string(addrs, "(no addresses)", (a) => a.to_string());
     }

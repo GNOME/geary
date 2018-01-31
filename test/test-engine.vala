@@ -37,6 +37,7 @@ int main(string[] args) {
     engine.add_suite(new Geary.JS.Test().get_suite());
     engine.add_suite(new Geary.Mime.ContentTypeTest().get_suite());
     engine.add_suite(new Geary.RFC822.MailboxAddressTest().get_suite());
+    engine.add_suite(new Geary.RFC822.MailboxAddressesTest().get_suite());
     engine.add_suite(new Geary.RFC822.MessageTest().get_suite());
     engine.add_suite(new Geary.RFC822.MessageDataTest().get_suite());
     engine.add_suite(new Geary.RFC822.Utils.Test().get_suite());
