@@ -61,12 +61,21 @@ public class FormattedConversationData : Geary.BaseObject {
             
             return get_as_markup(first_name);
         }
-        
+
         private string get_as_markup(string participant) {
-            return "%s%s%s".printf(
-                is_unread ? "<b>" : "", Geary.HTML.escape_markup(participant), is_unread ? "</b>" : "");
+            string markup = Geary.HTML.escape_markup(participant);
+
+            if (is_unread) {
+                markup = "<b>%s</b>".printf(markup);
+            }
+
+            if (this.address.is_spoofed()) {
+                markup = "<s>%s</s>".printf(markup);
+            }
+
+            return markup;
         }
-        
+
         public bool equal_to(ParticipantDisplay other) {
             return address.equal_to(other.address);
         }

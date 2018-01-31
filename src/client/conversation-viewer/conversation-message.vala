@@ -51,6 +51,17 @@ public class ConversationMessage : Gtk.Grid {
 
             Gtk.Grid address_parts = new Gtk.Grid();
 
+            bool is_spoofed = address.is_spoofed();
+            if (is_spoofed) {
+                Gtk.Image spoof_img = new Gtk.Image.from_icon_name(
+                    "dialog-warning-symbolic", Gtk.IconSize.SMALL_TOOLBAR
+                );
+                this.set_tooltip_text(
+                    _("This email address may have been forged")
+                );
+                address_parts.add(spoof_img);
+            }
+
             Gtk.Label primary = new Gtk.Label(null);
             primary.ellipsize = Pango.EllipsizeMode.END;
             primary.set_halign(Gtk.Align.START);
@@ -64,7 +75,7 @@ public class ConversationMessage : Gtk.Grid {
 
             // Don't display the name if it looks spoofed, to reduce
             // chance of the user of being tricked by malware.
-            if (address.has_distinct_name() && !address.is_spoofed()) {
+            if (address.has_distinct_name() && !is_spoofed) {
                 primary.set_text(address.to_short_display());
 
                 Gtk.Label secondary = new Gtk.Label(null);
