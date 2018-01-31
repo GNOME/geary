@@ -16,6 +16,7 @@ geary_test_engine_sources = [
   'engine/imap-engine/account-processor-test.vala',
   'engine/mime-content-type-test.vala',
   'engine/rfc822-mailbox-address-test.vala',
+  'engine/rfc822-mailbox-addresses-test.vala',
   'engine/rfc822-message-test.vala',
   'engine/rfc822-message-data-test.vala',
   'engine/rfc822-utils-test.vala',
@@ -23,6 +24,7 @@ geary_test_engine_sources = [
   'engine/util-idle-manager-test.vala',
   'engine/util-inet-test.vala',
   'engine/util-js-test.vala',
+  'engine/util-string-test.vala',
   'engine/util-timeout-manager-test.vala'
 ]
 

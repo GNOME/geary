@@ -10,7 +10,12 @@ extern string glib_substring(string str, long start_pos, long end_pos);
 
 namespace Geary.String {
 
+/** The end-of-string character, NUL. */
 public const char EOS = '\0';
+
+/** A regex that matches one or more whitespace or non-printing chars. */
+public const string WS_OR_NP = "[[:space:][:cntrl:]]+";
+
 
 public bool is_empty_or_whitespace(string? str) {
     return (str == null || str[0] == EOS || str.strip()[0] == EOS);
@@ -50,23 +55,23 @@ public int stri_cmp(string a, string b) {
     return strcmp(a.down(), b.down());
 }
 
-// Removes redundant spaces, tabs, and newlines.
-public string reduce_whitespace(string _s) {
-    string s = _s;
-    s = s.replace("\n", " ");
-    s = s.replace("\r", " ");
-    s = s.replace("\t", " ");
-    s = s.strip();
-    
-    // Condense multiple spaces to one.
-    for (int i = 1; i < s.length; i++) {
-        if (s.get_char(i) == ' ' && s.get_char(i - 1) == ' ') {
-            s = s.slice(0, i - 1) + s.slice(i, s.length);
-            i--;
-        }
+/**
+ * Removes redundant white space and non-printing characters.
+ *
+ * @return the input string /str/, modified so that any non-printing
+ * characters are converted to spaces, all consecutive spaces are
+ * coalesced into a single space, and stripped of leading and trailing
+ * white space. If //null// is passed in, the empty string is
+ * returned.
+ */
+public string reduce_whitespace(string? str) {
+    string s = str ?? "";
+    try {
+        s = new Regex(WS_OR_NP).replace(s, -1, 0, " ");
+    } catch (Error err) {
+        // Oh well
     }
-    
-    return s;
+    return s.strip();
 }
 
 // Slices a string to, at most, max_length number of bytes (NOT including the null.)

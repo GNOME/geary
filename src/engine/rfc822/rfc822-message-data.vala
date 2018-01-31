@@ -142,7 +142,17 @@ public class Geary.RFC822.MessageIDList : Geary.MessageData.AbstractMessageData,
         // don't assert that list.size > 0; even though this method should generated a decoded ID
         // from any non-empty string, an empty Message-ID (i.e. "<>") won't.
     }
-    
+
+    /**
+     * Returns a new list with the given messages ids appended to this list's.
+     */
+    public MessageIDList append(MessageIDList others) {
+        MessageIDList new_ids = new MessageIDList();
+        new_ids.list.add_all(this.list);
+        new_ids.list.add_all(others.list);
+        return new_ids;
+    }
+
     public override string to_string() {
         return "MessageIDList (%d)".printf(list.size);
     }

@@ -1376,7 +1376,7 @@ namespace GMime {
 	[CCode (cheader_filename = "gmime/gmime.h", cname = "g_mime_utils_structured_header_fold")]
 	public static string utils_structured_header_fold (string header);
 	[CCode (cheader_filename = "gmime/gmime.h", cname = "g_mime_utils_text_is_8bit")]
-	public static bool utils_text_is_8bit (uint text, size_t len);
+	public static bool utils_text_is_8bit (string text, size_t len);
 	[CCode (cheader_filename = "gmime/gmime.h", cname = "g_mime_utils_unquote_string")]
 	public static void utils_unquote_string (string str);
 	[CCode (cheader_filename = "gmime/gmime.h", cname = "g_mime_utils_unstructured_header_fold")]

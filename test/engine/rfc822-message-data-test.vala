@@ -70,7 +70,7 @@ https://app.foobar.com/xxxxxxxxxxxxx">https://app.foobar.com/xxxxxxxxxxx</a=
 ></p></td></tr>
 </table></body></html>""";
 
-    public static string HTML_BODY1_EXPECTED = "Hi Kenneth, We xxxxx xxxx xx xxx xxx xx xxxx x xxxxxxxx xxxxxxxx.  Thank you, XXXXXX XXXXXX You can reply directly to this message or click the following link: https://app.foobar.com/xxxxxxxxxxxxxxxx1641966deff6c48623aba You can change your email preferences at: https://app.foobar.com/xxxxxxxxxxx";
+    public static string HTML_BODY1_EXPECTED = "Hi Kenneth, We xxxxx xxxx xx xxx xxx xx xxxx x xxxxxxxx xxxxxxxx. Thank you, XXXXXX XXXXXX You can reply directly to this message or click the following link: https://app.foobar.com/xxxxxxxxxxxxxxxx1641966deff6c48623aba You can change your email preferences at: https://app.foobar.com/xxxxxxxxxxx";
 
     public static string HTML_BODY2_ENCODED = """<!DOCTYPE html>
 <!--2c2a1c66-0638-7c87-5057-bff8be4291eb_v180-->
@@ -618,5 +618,5 @@ x 133, 3000 Bern 6, Switzerland
 
 """;
 
-    public static string HTML_BODY2_EXPECTED = "Buy It Now from US $1,750.00 to US $5,950.00. eBay Daccordi, Worldwide: 2 new matches today Daccordi 50th anniversary edition with... Buy it now: US $5,950.00 100% positive feedback Daccordi Griffe Campagnolo Croce D'Aune... Buy it now: US $1,750.00 100% positive feedback View all results Refine this search Disable emails for this search   Email reference id: [#d9f42b5e860b4eabb98195c2888cba9e#] We don't check this mailbox, so please don't reply to this message. If you have a question, go to Help & Contact. ©2016 eBay Inc., eBay International AG Helvetiastrasse 15/17 - P.O. Box 133, 3000 Bern 6, Switzerland";
+    public static string HTML_BODY2_EXPECTED = "Buy It Now from US $1,750.00 to US $5,950.00. eBay Daccordi, Worldwide: 2 new matches today Daccordi 50th anniversary edition with... Buy it now: US $5,950.00 100% positive feedback Daccordi Griffe Campagnolo Croce D'Aune... Buy it now: US $1,750.00 100% positive feedback View all results Refine this search Disable emails for this search Email reference id: [#d9f42b5e860b4eabb98195c2888cba9e#] We don't check this mailbox, so please don't reply to this message. If you have a question, go to Help & Contact. ©2016 eBay Inc., eBay International AG Helvetiastrasse 15/17 - P.O. Box 133, 3000 Bern 6, Switzerland";
 }

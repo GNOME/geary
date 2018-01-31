@@ -1,4 +1,6 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2018 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -416,106 +418,6 @@ public class Geary.RFC822.Message : BaseObject {
         return null;
     }
 
-    private void stock_from_gmime() {
-        // GMime calls the From address the "sender"
-        string? message_sender = message.get_sender();
-        if (message_sender != null) {
-            this.from = new RFC822.MailboxAddresses.from_rfc822_string(message_sender);
-        }
-
-        // And it doesn't provide a convenience method for Sender header
-        if (!String.is_empty(message.get_header(HEADER_SENDER))) {
-            string sender = GMime.utils_header_decode_text(message.get_header(HEADER_SENDER));
-            try {
-                this.sender = new RFC822.MailboxAddress.from_rfc822_string(sender);
-            } catch (RFC822Error e) {
-                debug("Invalid RDC822 Sender address: %s", sender);
-            }
-        }
-
-        if (!String.is_empty(message.get_reply_to()))
-            this.reply_to = new RFC822.MailboxAddresses.from_rfc822_string(message.get_reply_to());
-
-        Gee.List<RFC822.MailboxAddress>? converted = convert_gmime_address_list(
-            message.get_recipients(GMime.RecipientType.TO));
-        if (converted != null && converted.size > 0)
-            to = new RFC822.MailboxAddresses(converted);
-        
-        converted = convert_gmime_address_list(message.get_recipients(GMime.RecipientType.CC));
-        if (converted != null && converted.size > 0)
-            cc = new RFC822.MailboxAddresses(converted);
-        
-        converted = convert_gmime_address_list(message.get_recipients(GMime.RecipientType.BCC));
-        if (converted != null && converted.size > 0)
-            bcc = new RFC822.MailboxAddresses(converted);
-        
-        if (!String.is_empty(message.get_header(HEADER_IN_REPLY_TO)))
-            in_reply_to = new RFC822.MessageIDList.from_rfc822_string(message.get_header(HEADER_IN_REPLY_TO));
-        
-        if (!String.is_empty(message.get_header(HEADER_REFERENCES)))
-            references = new RFC822.MessageIDList.from_rfc822_string(message.get_header(HEADER_REFERENCES));
-        
-        if (!String.is_empty(message.get_subject()))
-            subject = new RFC822.Subject.decode(message.get_subject());
-        
-        if (!String.is_empty(message.get_header(HEADER_MAILER)))
-            mailer = message.get_header(HEADER_MAILER);
-        
-        if (!String.is_empty(message.get_date_as_string())) {
-            try {
-                date = new Geary.RFC822.Date(message.get_date_as_string());
-            } catch (Error error) {
-                debug("Could not get date from message: %s", error.message);
-            }
-        }
-    }
-    
-    private Gee.List<RFC822.MailboxAddress>? convert_gmime_address_list(InternetAddressList? addrlist,
-        int depth = 0) {
-        if (addrlist == null || addrlist.length() == 0)
-            return null;
-        
-        Gee.List<RFC822.MailboxAddress>? converted = new Gee.ArrayList<RFC822.MailboxAddress>();
-        
-        int length = addrlist.length();
-        for (int ctr = 0; ctr < length; ctr++) {
-            InternetAddress addr = addrlist.get_address(ctr);
-            
-            InternetAddressMailbox? mbox_addr = addr as InternetAddressMailbox;
-            if (mbox_addr != null) {
-                converted.add(new RFC822.MailboxAddress(mbox_addr.get_name(), mbox_addr.get_addr()));
-                
-                continue;
-            }
-            
-            // Two problems here:
-            //
-            // First, GMime crashes when parsing a malformed group list (the case seen in the
-            // wild is -- weirdly enough -- a date appended to the end of a cc: list on a spam
-            // email.  GMime interprets it as a group list but segfaults when destroying the
-            // InterneAddresses it generated from it.  See:
-            // https://bugzilla.gnome.org/show_bug.cgi?id=695319
-            //
-            // Second, RFC 822 6.2.6: "This  standard  does  not  permit  recursive  specification
-            // of groups within groups."  So don't do it.
-            InternetAddressGroup? group = addr as InternetAddressGroup;
-            if (group != null) {
-                if (depth == 0) {
-                    Gee.List<RFC822.MailboxAddress>? grouplist = convert_gmime_address_list(
-                        group.get_members(), depth + 1);
-                    if (grouplist != null)
-                        converted.add_all(grouplist);
-                }
-                
-                continue;
-            }
-            
-            warning("Unknown InternetAddress in list: %s", addr.get_type().name());
-        }
-        
-        return (converted.size > 0) ? converted : null;
-    }
-    
     public Gee.List<RFC822.MailboxAddress>? get_recipients() {
         Gee.List<RFC822.MailboxAddress> addrs = new Gee.ArrayList<RFC822.MailboxAddress>();
         
@@ -816,19 +718,21 @@ public class Geary.RFC822.Message : BaseObject {
         
         return body;
     }
-    
+
     /**
      * Return the full list of recipients (to, cc, and bcc) as a searchable
      * string.  Note that values that come out of this function are persisted.
      */
     public string? get_searchable_recipients() {
-        Gee.List<RFC822.MailboxAddress>? recipients = get_recipients();
-        if (recipients == null)
-            return null;
-        
-        return RFC822.MailboxAddress.list_to_string(recipients, "", (a) => a.to_searchable_string());
+        string searchable = null;
+        Gee.List<RFC822.MailboxAddress>? recipient_list = get_recipients();
+        if (recipient_list != null) {
+            MailboxAddresses recipients = new MailboxAddresses(recipient_list);
+            searchable = recipients.to_searchable_string();
+        }
+        return searchable;
     }
-    
+
     public Memory.Buffer get_content_by_mime_id(string mime_id) throws RFC822Error {
         GMime.Part? part = find_mime_part_by_mime_id(message.get_mime_part(), mime_id);
         if (part == null)
@@ -873,7 +777,86 @@ public class Geary.RFC822.Message : BaseObject {
         get_attachments_recursively(attachments, message.get_mime_part(), disposition);
         return attachments;
     }
-    
+
+    private void stock_from_gmime() {
+        this.message.get_header_list().foreach((name, value) => {
+                switch (name.down()) {
+                case "from":
+                    this.from = append_address(this.from, value);
+                    break;
+
+                case "sender":
+                    try {
+                        this.sender = new RFC822.MailboxAddress.from_rfc822_string(value);
+                    } catch (Error err) {
+                        debug("Could parse subject: %s", err.message);
+                    }
+                    break;
+
+                case "reply-to":
+                    this.reply_to = append_address(this.reply_to, value);
+                    break;
+
+                case "to":
+                    this.to = append_address(this.to, value);
+                    break;
+
+                case "cc":
+                    this.cc = append_address(this.cc, value);
+                    break;
+
+                case "bcc":
+                    this.bcc = append_address(this.bcc, value);
+                    break;
+
+                case "subject":
+                    this.subject = new RFC822.Subject.decode(value);
+                    break;
+
+                case "date":
+                    try {
+                        this.date = new Geary.RFC822.Date(value);
+                    } catch (Error err) {
+                        debug("Could not parse date: %s", err.message);
+                    }
+                    break;
+
+                case "in-reply-to":
+                    this.in_reply_to = append_message_id(this.in_reply_to, value);
+                    break;
+
+                case "references":
+                    this.references = append_message_id(this.references, value);
+                    break;
+
+                case "x-mailer":
+                    this.mailer = GMime.utils_header_decode_text(value);
+                    break;
+
+                default:
+                    break;
+                }
+            });
+    }
+
+    private MailboxAddresses append_address(MailboxAddresses? existing,
+                                            string header_value) {
+        MailboxAddresses addresses = new MailboxAddresses.from_rfc822_string(header_value);
+        if (existing != null) {
+            addresses = existing.append(addresses);
+        }
+        return addresses;
+    }
+
+    private MessageIDList append_message_id(MessageIDList? existing,
+                                            string header_value) {
+        MessageIDList ids = new MessageIDList.from_rfc822_string(header_value);
+        if (existing != null) {
+            ids = existing.append(ids);
+        }
+        return ids;
+    }
+
     private void get_attachments_recursively(Gee.List<GMime.Part> attachments, GMime.Object root,
         Mime.DispositionType requested_disposition) throws RFC822Error {
         // If this is a multipart container, dive into each of its children.
