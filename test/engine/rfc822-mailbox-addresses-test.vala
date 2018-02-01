@@ -30,10 +30,11 @@ class Geary.RFC822.MailboxAddressesTest : Gee.TestCase {
     }
 
     public void to_rfc822_string() {
-        assert(new_addreses({ "test1@example.com" }).to_rfc822_string() ==
-               "test1@example.com");
-        assert(new_addreses({ "test1@example.com", "test2@example.com" }).to_rfc822_string() ==
-               "test1@example.com, test2@example.com");
+        assert(new MailboxAddresses().to_rfc822_string() == "");
+        assert(new_addreses({ "test1@example.com" })
+               .to_rfc822_string() == "test1@example.com");
+        assert(new_addreses({ "test1@example.com", "test2@example.com" })
+               .to_rfc822_string() == "test1@example.com, test2@example.com");
     }
 
     private MailboxAddresses new_addreses(string[] address_strings) {

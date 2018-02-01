@@ -27,11 +27,10 @@ public class Geary.RFC822.MailboxAddresses :
      * returned.
      */
     private static string list_to_string(Gee.List<MailboxAddress> addrs,
-                                          string empty,
                                           ListToStringDelegate to_s) {
         switch (addrs.size) {
             case 0:
-                return empty;
+                return "";
 
             case 1:
                 return to_s(addrs[0]);
@@ -61,8 +60,10 @@ public class Geary.RFC822.MailboxAddresses :
     private Gee.List<MailboxAddress> addrs = new Gee.ArrayList<MailboxAddress>();
 
 
-    public MailboxAddresses(Gee.Collection<MailboxAddress> addrs) {
-        this.addrs.add_all(addrs);
+    public MailboxAddresses(Gee.Collection<MailboxAddress>? addrs = null) {
+        if (addrs != null) {
+            this.addrs.add_all(addrs);
+        }
     }
 
     public MailboxAddresses.single(MailboxAddress addr) {
@@ -147,6 +148,17 @@ public class Geary.RFC822.MailboxAddresses :
     }
 
     /**
+     * Returns the addresses suitable for display to a human.
+     *
+     * @return a string containing each message in the list,
+     * serialised by a call to {@link Message.to_full_display},
+     * separated by commas.
+     */
+    public string to_full_display() {
+        return list_to_string(addrs, (a) => a.to_full_display());
+    }
+
+    /**
      * Returns the addresses suitable for insertion into an RFC822 message.
      *
      * RFC822 quoting is performed if required.
@@ -154,7 +166,7 @@ public class Geary.RFC822.MailboxAddresses :
      * @see MailboxAddress.to_rfc822_string
      */
     public string to_rfc822_string() {
-        return list_to_string(addrs, ", ", (a) => a.to_rfc822_string());
+        return list_to_string(addrs, (a) => a.to_rfc822_string());
     }
 
     public uint hash() {
@@ -191,11 +203,13 @@ public class Geary.RFC822.MailboxAddresses :
      * See Geary.MessageData.SearchableMessageData.
      */
     public string to_searchable_string() {
-        return list_to_string(addrs, " ", (a) => a.to_searchable_string());
+        return list_to_string(addrs, (a) => a.to_searchable_string());
     }
 
     public override string to_string() {
-        return list_to_string(addrs, "(no addresses)", (a) => a.to_string());
+        return this.size > 0
+            ? list_to_string(addrs, (a) => a.to_string())
+            : "(no addresses)";
     }
 
 }

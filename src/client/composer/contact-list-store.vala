@@ -104,9 +104,9 @@ public class ContactListStore : Gtk.ListStore {
         
         return (Geary.Contact) contact_value.get_object();
     }
-    
-    public string get_rfc822_string(Gtk.TreeIter iter) {
-        return get_contact(iter).get_rfc822_address().to_rfc822_string();
+
+    public string to_full_address(Gtk.TreeIter iter) {
+        return get_contact(iter).get_rfc822_address().to_full_display();
     }
 
     private inline void add_contact(Geary.Contact contact) {

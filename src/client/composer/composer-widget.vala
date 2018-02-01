@@ -2011,7 +2011,7 @@ public class ComposerWidget : Gtk.EventBox {
     private bool add_account_emails_to_from_list(Geary.Account other_account, bool set_active = false) {
         Geary.RFC822.MailboxAddresses primary_address = new Geary.RFC822.MailboxAddresses.single(
             other_account.information.primary_mailbox);
-        this.from_multiple.append_text(primary_address.to_rfc822_string());
+        this.from_multiple.append_text(primary_address.to_full_display());
         this.from_list.add(new FromAddressMap(other_account, primary_address));
         if (!set_active && this.from.equal_to(primary_address)) {
             this.from_multiple.set_active(this.from_list.size - 1);
@@ -2026,7 +2026,10 @@ public class ComposerWidget : Gtk.EventBox {
                 // Displayed in the From dropdown to indicate an "alternate email address"
                 // for an account.  The first printf argument will be the alternate email
                 // address, and the second will be the account's primary email address.
-                string display = _("%1$s via %2$s").printf(addresses.to_rfc822_string(), other_account.information.display_name);
+                string display = _("%1$s via %2$s").printf(
+                    addresses.to_full_display(),
+                    other_account.information.display_name
+                );
                 this.from_multiple.append_text(display);
                 this.from_list.add(new FromAddressMap(other_account, addresses));
                 
