@@ -298,11 +298,12 @@ public class Geary.RFC822.MailboxAddress :
         bool is_spoof = false;
 
         // 1. Check the name part contains no controls and doesn't
-        // look like an email address
+        // look like an email address (unless it's the same as the
+        // address part).
         if (!Geary.String.is_empty(this.name)) {
             if (Regex.match_simple(CONTROLS, this.name)) {
                 is_spoof = true;
-            } else {
+            } else if (has_distinct_name()) {
                 // Clean up the name as usual, but remove all
                 // whitespace so an attack can't get away with a name
                 // like "potus @ whitehouse . gov"
