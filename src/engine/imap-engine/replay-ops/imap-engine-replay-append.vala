@@ -87,8 +87,8 @@ private class Geary.ImapEngine.ReplayAppend : Geary.ImapEngine.ReplayOperation {
             positions_builder.append_printf("%s ", remote_position.to_string());
         positions_builder.append(")");
 
-        debug("%s do_replay_appended_message: current remote_count=%d this.remote_count=%d this.positions=%s",
-            to_string(), remote_count, this.remote_count, positions_builder.str);
+        debug("%s do_replay_appended_message: this.remote_count=%d this.positions=%s",
+            to_string(), this.remote_count, positions_builder.str);
 
         Gee.HashSet<Geary.EmailIdentifier> created = new Gee.HashSet<Geary.EmailIdentifier>();
         Gee.HashSet<Geary.EmailIdentifier> appended = new Gee.HashSet<Geary.EmailIdentifier>();
@@ -141,8 +141,8 @@ private class Geary.ImapEngine.ReplayAppend : Geary.ImapEngine.ReplayOperation {
 
         email_count_changed(this.remote_count, Folder.CountChangeReason.APPENDED);
 
-        debug("%s do_replay_appended_message: completed, current remote_count=%d this.remote_count=%d",
-            to_string(), remote_count, this.remote_count);
+        debug("%s do_replay_appended_message: completed, this.remote_count=%d",
+              to_string(), this.remote_count);
     }
 
 }

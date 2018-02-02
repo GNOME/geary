@@ -28,17 +28,14 @@ private class Geary.ImapEngine.RemoveEmail : Geary.ImapEngine.SendReplayOperatio
     
     public override async ReplayOperation.Status replay_local_async() throws Error {
         // if performing a full expunge, need to move on to replay_remote_async() for that
-        if (to_remove.size <= 0)
+        if (this.to_remove.size <= 0)
             return ReplayOperation.Status.COMPLETED;
-        
-        int remote_count;
-        int last_seen_remote_count;
-        original_count = engine.get_remote_counts(out remote_count, out last_seen_remote_count);
-        
+
+        this.original_count = this.engine.properties.email_total;
         // because this value is only used for reporting count changes, offer best-possible service
-        if (original_count < 0)
-            original_count = to_remove.size;
-        
+        if (this.original_count < 0)
+            this.original_count = this.to_remove.size;
+
         removed_ids = yield engine.local_folder.mark_removed_async(to_remove, true, cancellable);
         if (removed_ids == null || removed_ids.size == 0)
             return ReplayOperation.Status.COMPLETED;

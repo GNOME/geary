@@ -78,7 +78,7 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
     /**
      * Fabricated from the IMAP signals and state obtained at open_async().
      */
-    public signal void appended(int total);
+    public signal void appended(int count);
 
     /**
      * Fabricated from the IMAP signals and state obtained at open_async().
@@ -88,7 +88,7 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
     /**
      * Fabricated from the IMAP signals and state obtained at open_async().
      */
-    public signal void removed(SequenceNumber pos, int total);
+    public signal void removed(SequenceNumber pos);
 
 
     public async FolderSession(string account_id,
@@ -173,19 +173,23 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
         this.folder.properties.set_select_examine_message_count(total);
 
         exists(total);
-        if (old_total < total)
-            appended(total);
+        if (old_total >= 0 && old_total < total) {
+            appended(total - old_total);
+        }
     }
 
     private void on_expunge(SequenceNumber pos) {
         debug("%s EXPUNGE %s", to_string(), pos.to_string());
 
-        this.folder.properties.set_select_examine_message_count(
-            this.folder.properties.select_examine_messages - 1
-        );
+        int old_total = this.folder.properties.select_examine_messages;
+        if (old_total > 0) {
+            this.folder.properties.set_select_examine_message_count(
+                old_total - 1
+            );
+        }
 
         expunge(pos);
-        removed(pos, this.folder.properties.select_examine_messages);
+        removed(pos);
     }
 
     private void on_fetch(FetchedData data) {

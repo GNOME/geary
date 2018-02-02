@@ -84,15 +84,17 @@ private class Geary.ImapEngine.MoveEmailCommit : Geary.ImapEngine.SendReplayOper
     public override async void backout_local_async() throws Error {
         if (to_move.size == 0)
             return;
-        
+
         yield engine.local_folder.mark_removed_async(to_move, false, cancellable);
-        
-        int count = engine.get_remote_counts(null, null);
-        
+
+        int count = this.engine.properties.email_total;
+        if (count < 0) {
+            count = 0;
+        }
         engine.replay_notify_email_inserted(to_move);
         engine.replay_notify_email_count_changed(count + to_move.size, Folder.CountChangeReason.INSERTED);
     }
-    
+
     public override string describe_state() {
         return "%d email IDs to %s".printf(to_move.size, destination.to_string());
     }

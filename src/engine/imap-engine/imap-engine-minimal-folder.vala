@@ -61,8 +61,24 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         }
     }
 
-    internal ImapDB.Folder local_folder  { get; private set; }
-    internal int remote_count { get; private set; default = -1; }
+    /** The IMAP database representation of the folder. */
+    internal ImapDB.Folder local_folder { get; private set; }
+
+    /**
+     * Determines if a remote session is currently available.
+     *
+     * If this property is //true//, then a subsequent call to {@link
+     * wait_for_remote_async} or {@link claim_remote_session} should
+     * return immediately without error.
+     */
+    internal bool is_remote_available {
+        get {
+            return (
+                this.remote_wait_semaphore.can_pass &&
+                this.remote_wait_semaphore.result
+            );
+        }
+    }
 
     internal ReplayQueue replay_queue { get; private set; }
     internal EmailPrefetcher email_prefetcher { get; private set; }
@@ -194,23 +210,6 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
            : Geary.Folder.OpenState.LOCAL;
     }
 
-    // Returns the synchronized remote count (-1 if not opened) and the last seen remote count (stored
-    // locally, -1 if not available)
-    //
-    // Return value is the remote_count, unless the remote is unopened, in which case it's the
-    // last_seen_remote_count (which may also be -1).
-    //
-    // remote_count, last_seen_remote_count, and returned value do not reflect any notion of
-    // messages marked for removal
-    internal int get_remote_counts(out int remote_count, out int last_seen_remote_count) {
-        remote_count = this.remote_count;
-        last_seen_remote_count = local_folder.get_properties().select_examine_messages;
-        if (last_seen_remote_count < 0)
-            last_seen_remote_count = local_folder.get_properties().status_messages;
-
-        return (remote_count >= 0) ? remote_count : last_seen_remote_count;
-    }
-
     /** {@inheritDoc} */
     public override async bool open_async(Geary.Folder.OpenFlags open_flags, Cancellable? cancellable = null)
         throws Error {
@@ -245,9 +244,10 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         this.email_prefetcher.open();
 
         // notify about the local open
-        int local_count = 0;
-        get_remote_counts(null, out local_count);
-        notify_opened(Geary.Folder.OpenState.LOCAL, local_count);
+        notify_opened(
+            Geary.Folder.OpenState.LOCAL,
+            this.local_folder.get_properties().email_total
+        );
 
         // Unless NO_DELAY is set, do NOT open the remote side here; wait for the ReplayQueue to
         // require a remote connection or wait_for_remote_async() to be called ... this allows for
@@ -677,7 +677,6 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
 
         Imap.FolderSession session = this.remote_session;
         this.remote_session = null;
-        this.remote_count = -1;
 
         if (session != null) {
             session.appended.disconnect(on_remote_appended);
@@ -866,14 +865,6 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
 
         // Phase 2: Update local state based on the remote session
 
-        // Signals need to be hooked up before normalisation so that
-        // notifications of state changes are not lost when that is
-        // running.
-        session.appended.connect(on_remote_appended);
-        session.updated.connect(on_remote_updated);
-        session.removed.connect(on_remote_removed);
-        session.disconnected.connect(on_remote_disconnected);
-
         try {
             yield normalize_folders(session, cancellable);
         } catch (Error err) {
@@ -904,6 +895,17 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
             return;
         }
 
+        this._properties.add(session.folder.properties);
+        this.remote_session = session;
+
+        // Signals need to be hooked after the remote session is in
+        // place so they can access the remote session's folder
+        // properties.
+        session.appended.connect(on_remote_appended);
+        session.updated.connect(on_remote_updated);
+        session.removed.connect(on_remote_removed);
+        session.disconnected.connect(on_remote_disconnected);
+
         try {
             yield local_folder.update_folder_select_examine(
                 session.folder.properties, cancellable
@@ -926,15 +928,13 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
             return;
         }
 
-        this._properties.add(session.folder.properties);
-        this.remote_count = session.folder.properties.email_total;
-
-        // Phase 3: Move in place and notify waiters
-
-        this.remote_session = session;
+        // Phase 3: Notify tasks waiting for the connection
 
         // notify any subscribers with similar information
-        notify_opened(Geary.Folder.OpenState.BOTH, this.remote_count);
+        notify_opened(
+            Geary.Folder.OpenState.BOTH,
+            session.folder.properties.email_total
+        );
 
         // notify any threads of execution waiting for the remote
         // folder to open that the result of that operation is ready
@@ -974,27 +974,21 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     private void on_email_complete(Gee.Collection<Geary.EmailIdentifier> email_ids) {
         notify_email_locally_complete(email_ids);
     }
-    
-    private void on_remote_appended(int reported_remote_count) {
-        debug("%s on_remote_appended: remote_count=%d reported_remote_count=%d", to_string(), remote_count,
-            reported_remote_count);
-        
-        if (reported_remote_count < 0)
-            return;
-        
+
+    private void on_remote_appended(int appended) {
+        int remote_count = this.remote_session.folder.properties.email_total;
+        debug("%s on_remote_appended: remote_count=%d appended=%d",
+              to_string(), remote_count, appended);
+
         // from the new remote total and the old remote total, glean the SequenceNumbers of the
         // new email(s)
         Gee.List<Imap.SequenceNumber> positions = new Gee.ArrayList<Imap.SequenceNumber>();
-        for (int pos = remote_count + 1; pos <= reported_remote_count; pos++)
+        for (int pos = remote_count - appended + 1; pos <= remote_count; pos++)
             positions.add(new Imap.SequenceNumber(pos));
-
-        // store the remote count NOW, as further appended messages could arrive before the
-        // ReplayAppend executes
-        this.remote_count = reported_remote_count;
 
         if (positions.size > 0) {
             ReplayAppend op = new ReplayAppend(
-                this, reported_remote_count, positions, this.open_cancellable
+                this, remote_count, positions, this.open_cancellable
             );
             op.email_appended.connect(notify_email_appended);
             op.email_locally_appended.connect(notify_email_locally_appended);
@@ -1004,35 +998,24 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     }
 
     private void on_remote_updated(Imap.SequenceNumber position, Imap.FetchedData data) {
+        int remote_count = this.remote_session.folder.properties.email_total;
         debug("%s on_remote_updated: remote_count=%d position=%s", to_string(),
-              this.remote_count, position.to_string());
+              remote_count, position.to_string());
 
         this.replay_queue.schedule_server_notification(
-            new ReplayUpdate(this, this.remote_count, position, data)
+            new ReplayUpdate(this, remote_count, position, data)
         );
     }
 
-    private void on_remote_removed(Imap.SequenceNumber position, int reported_remote_count) {
-        debug("%s on_remote_removed: remote_count=%d position=%s reported_remote_count=%d", to_string(),
-            remote_count, position.to_string(), reported_remote_count);
-        
-        if (reported_remote_count < 0)
-            return;
-        
+    private void on_remote_removed(Imap.SequenceNumber position) {
+        int remote_count = this.remote_session.folder.properties.email_total;
+        debug("%s on_remote_removed: remote_count=%d position=%s",
+              to_string(), remote_count, position.to_string());
+
         // notify of removal to all pending replay operations
         replay_queue.notify_remote_removed_position(position);
-        
-        // update remote count NOW, as further appended and removed messages can arrive before
-        // ReplayRemoval executes
-        //
-        // something to note at this point: the ExpungeEmail operation marks messages as removed,
-        // then signals they're removed and reports an adjusted count in its replay_local_async().
-        // remote_count is *not* updated, which is why it's safe to do that here without worry.
-        // similarly, signals are only fired here if marked, so the same EmailIdentifier isn't
-        // reported twice
-        this.remote_count = reported_remote_count;
 
-        ReplayRemoval op = new ReplayRemoval(this, reported_remote_count, position);
+        ReplayRemoval op = new ReplayRemoval(this, remote_count, position);
         op.email_removed.connect(notify_email_removed);
         op.marked_email_removed.connect(notify_marked_email_removed);
         op.email_count_changed.connect(notify_email_count_changed);

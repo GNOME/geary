@@ -24,14 +24,13 @@ private class Geary.ImapEngine.EmptyFolder : Geary.ImapEngine.SendReplayOperatio
     
     public override void notify_remote_removed_ids(Gee.Collection<ImapDB.EmailIdentifier> ids) {
     }
-    
+
     public override async ReplayOperation.Status replay_local_async() throws Error {
-        original_count = engine.get_remote_counts(null, null);
-        
+        this.original_count = this.engine.properties.email_total;
         // because this value is only used for reporting count changes, offer best-possible service
-        if (original_count < 0)
-            original_count = 0;
-        
+        if (this.original_count < 0)
+            this.original_count = 0;
+
         // mark everything in the folder as removed
         removed_ids = yield engine.local_folder.mark_removed_async(null, true, cancellable);
         

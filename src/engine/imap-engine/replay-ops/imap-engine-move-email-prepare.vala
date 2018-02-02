@@ -36,13 +36,12 @@ private class Geary.ImapEngine.MoveEmailPrepare : Geary.ImapEngine.SendReplayOpe
     public override async ReplayOperation.Status replay_local_async() throws Error {
         if (to_move.size <= 0)
             return ReplayOperation.Status.COMPLETED;
-        
-        int count = engine.get_remote_counts(null, null);
-        
+
+        int count = this.engine.properties.email_total;
         // as this value is only used for reporting, offer best-possible service
         if (count < 0)
             count = to_move.size;
-        
+
         prepared_for_move = yield engine.local_folder.mark_removed_async(to_move, true, cancellable);
         if (prepared_for_move == null || prepared_for_move.size == 0)
             return ReplayOperation.Status.COMPLETED;

@@ -35,9 +35,12 @@ private class Geary.ImapEngine.MoveEmailRevoke : Geary.ImapEngine.SendReplayOper
             to_revoke, false, cancellable);
         if (revoked == null || revoked.size == 0)
             return ReplayOperation.Status.COMPLETED;
-        
-        int count = engine.get_remote_counts(null, null);
-        
+
+        int count = this.engine.properties.email_total;
+        if (count < 0) {
+            count = 0;
+        }
+
         engine.replay_notify_email_inserted(revoked);
         engine.replay_notify_email_count_changed(count + revoked.size,
             Geary.Folder.CountChangeReason.INSERTED);
