@@ -670,7 +670,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     /**
      * Unhooks the IMAP folder session and returns it to the account.
      */
-    internal async void close_remote_session(Folder.CloseReason remote_reason) {
+    internal void close_remote_session(Folder.CloseReason remote_reason) {
         // Block anyone calling wait_for_remote_async(), as the session
         // will no longer available.
         this.remote_wait_semaphore.reset();
@@ -684,6 +684,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
             session.updated.disconnect(on_remote_updated);
             session.removed.disconnect(on_remote_removed);
             session.disconnected.disconnect(on_remote_disconnected);
+            this._properties.remove(session.folder.properties);
             this._account.release_folder_session(session);
 
             notify_closed(remote_reason);
@@ -700,9 +701,6 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
 
         // Close the prefetcher early so it stops using the remote ASAP
         this.email_prefetcher.close();
-
-        if (this.remote_session != null)
-            _properties.remove(this.remote_session.folder.properties);
 
         // block anyone from wait_for_remote_async(), as this is no longer open
         this.remote_wait_semaphore.reset();
@@ -808,7 +806,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         this.open_flags = OpenFlags.NONE;
 
         // Actually close the remote folder
-        yield close_remote_session(remote_reason);
+        close_remote_session(remote_reason);
 
         // need to call these every time, even if remote was not fully
         // opened, as some callers rely on order of signals
@@ -910,7 +908,6 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
             yield local_folder.update_folder_select_examine(
                 session.folder.properties, cancellable
             );
-            this.remote_count = session.folder.properties.email_total;
         } catch (Error err) {
             // Database failed, so we have a pretty serious problem
             // and should not try to use the folder further, unless
@@ -928,6 +925,9 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
             }
             return;
         }
+
+        this._properties.add(session.folder.properties);
+        this.remote_count = session.folder.properties.email_total;
 
         // Phase 3: Move in place and notify waiters
 
@@ -1037,11 +1037,6 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         op.marked_email_removed.connect(notify_marked_email_removed);
         op.email_count_changed.connect(notify_email_count_changed);
         this.replay_queue.schedule_server_notification(op);
-    }
-
-    private void on_remote_disconnected(Imap.ClientSession.DisconnectReason reason) {
-        debug("on_remote_disconnected: reason=%s", reason.to_string());
-        replay_queue.schedule(new ReplayDisconnect(this, reason, false, null));
     }
 
     //
@@ -1444,6 +1439,15 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
 
     private void on_remote_ready() {
         this.open_remote_session.begin();
+    }
+
+    private void on_remote_disconnected(Imap.ClientSession.DisconnectReason reason) {
+        // Need to close the remote session immediately to avoid a
+        // race with it opening again
+        Geary.Folder.CloseReason remote_reason = reason.is_error()
+            ? Geary.Folder.CloseReason.REMOTE_ERROR
+            : Geary.Folder.CloseReason.REMOTE_CLOSE;
+        close_remote_session(remote_reason);
     }
 
 }

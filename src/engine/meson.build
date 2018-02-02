@@ -227,7 +227,6 @@ geary_engine_vala_sources = files(
   'imap-engine/replay-ops/imap-engine-move-email-revoke.vala',
   'imap-engine/replay-ops/imap-engine-remove-email.vala',
   'imap-engine/replay-ops/imap-engine-replay-append.vala',
-  'imap-engine/replay-ops/imap-engine-replay-disconnect.vala',
   'imap-engine/replay-ops/imap-engine-replay-removal.vala',
   'imap-engine/replay-ops/imap-engine-replay-update.vala',
   'imap-engine/replay-ops/imap-engine-server-search-email.vala',

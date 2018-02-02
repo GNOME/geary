@@ -230,7 +230,6 @@ engine/imap-engine/replay-ops/imap-engine-move-email-prepare.vala
 engine/imap-engine/replay-ops/imap-engine-move-email-revoke.vala
 engine/imap-engine/replay-ops/imap-engine-remove-email.vala
 engine/imap-engine/replay-ops/imap-engine-replay-append.vala
-engine/imap-engine/replay-ops/imap-engine-replay-disconnect.vala
 engine/imap-engine/replay-ops/imap-engine-replay-removal.vala
 engine/imap-engine/replay-ops/imap-engine-replay-update.vala
 engine/imap-engine/replay-ops/imap-engine-server-search-email.vala
