@@ -115,15 +115,24 @@ public class Geary.ConnectivityManager : BaseObject {
 				is_reachable = true;
 				debug("Assuming %s is reachable, despite network unavailability",
                       endpoint);
-			} else if (err is ResolverError.TEMPORARY_FAILURE) {
-				// This often happens when networking is coming back
-				// online, may because the interface is up but has not
-				// been assigned an address yet? Since we should get
-				// another network change when the interface is
-				// configured, just ignore it.
+			} else if (err is ResolverError.TEMPORARY_FAILURE ||
+                       err is IOError.HOST_UNREACHABLE) {
+				// ResolverError.TEMPORARY_FAILURE often happens when
+				// networking is coming back online, may because the
+				// interface is up but has not been assigned an
+				// address yet?
+                //
+                // IOError.HOST_UNREACHABLE occurs when checking when
+                // offline, perhaps because localhost is up but no
+                // other network is? So just assume the host is
+                // unreachable without notifying the user.
+                //
+                // Since we should get another network change signal
+				// when the interface is configured, just treat these
+				// as effectively being unreachable, but don't go
+				// invalid.
 				debug("Ignoring: %s", err.message);
 			} else if (!(err is IOError.CANCELLED)) {
-				// Service is unreachable
 				debug("Error checking %s reachable, treating as unreachable: %s",
                       endpoint, err.message);
 				set_invalid();
