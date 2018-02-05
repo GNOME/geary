@@ -4,6 +4,7 @@ set(RESOURCE_LIST
   STRIPBLANKS "account_cannot_remove.glade"
   STRIPBLANKS "account_list.glade"
   STRIPBLANKS "account_spinner.glade"
+              "ambiance.css"
   STRIPBLANKS "certificate_warning_dialog.glade"
               "client-web-view.js"
               "client-web-view-allow-remote-images.js"

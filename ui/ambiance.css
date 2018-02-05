@@ -1,0 +1,7 @@
+/*
+ * Workarounds for Ubuntu Ambiance and Radiance theme bugs for GTK+ 3.14-3.18.
+ */
+
+.dim-label {
+  color: mix (@theme_fg_color, @theme_bg_color, 0.50);
+}
