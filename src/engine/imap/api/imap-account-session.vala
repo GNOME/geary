@@ -29,7 +29,6 @@ internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
     private Nonblocking.Mutex cmd_mutex = new Nonblocking.Mutex();
     private Gee.List<MailboxInformation>? list_collector = null;
     private Gee.List<StatusData>? status_collector = null;
-    private Gee.List<ServerData>? server_data_collector = null;
 
 
     internal AccountSession(string account_id,
@@ -38,7 +37,6 @@ internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
 
         session.list.connect(on_list_data);
         session.status.connect(on_status_data);
-        session.server_data_received.connect(on_server_data_received);
     }
 
     /**
@@ -301,7 +299,6 @@ internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
         if (old_session != null) {
             old_session.list.disconnect(on_list_data);
             old_session.status.disconnect(on_status_data);
-            old_session.server_data_received.disconnect(on_server_data_received);
         }
         return old_session;
     }
@@ -464,11 +461,6 @@ internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
     private void on_status_data(StatusData status_data) {
         if (status_collector != null)
             status_collector.add(status_data);
-    }
-
-    private void on_server_data_received(ServerData server_data) {
-        if (server_data_collector != null)
-            server_data_collector.add(server_data);
     }
 
 }
