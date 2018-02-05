@@ -146,7 +146,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         );
 
         this.update_flags_timer = new TimeoutManager.seconds(
-            FLAG_UPDATE_TIMEOUT_SEC, () => { on_update_flags.begin(); }
+            FLAG_UPDATE_TIMEOUT_SEC, on_update_flags
         );
 
         this.refresh_unseen_timer = new TimeoutManager.seconds(
@@ -1412,18 +1412,18 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     /**
      * Checks for changes to {@link EmailFlags} after a folder opens.
      */
-    private async void on_update_flags() throws Error {
+    private async void update_flags(Cancellable cancellable) throws Error {
         // Update this to use CHANGEDSINCE FETCH when available, when
         // we support IMAP CONDSTORE (Bug 713117).
         int chunk_size = FLAG_UPDATE_START_CHUNK;
         Geary.EmailIdentifier? lowest = null;
         for (;;) {
-            yield wait_for_remote_async(this.open_cancellable);
+            yield wait_for_remote_async(cancellable);
             Gee.List<Geary.Email>? list_local = yield list_email_by_id_async(
                 lowest, chunk_size,
                 Geary.Email.Field.FLAGS,
                 Geary.Folder.ListFlags.LOCAL_ONLY,
-                this.open_cancellable
+                cancellable
             );
             if (list_local == null || list_local.is_empty)
                 break;
@@ -1444,7 +1444,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
                 local_map.keys,
                 Email.Field.FLAGS,
                 Geary.Folder.ListFlags.FORCE_UPDATE,
-                this.open_cancellable
+                cancellable
             );
             if (list_remote == null || list_remote.is_empty)
                 break;
@@ -1460,7 +1460,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
                     changed_map.set(e.id, e.email_flags);
             }
 
-            if (!this.open_cancellable.is_cancelled() && changed_map.size > 0)
+            if (!cancellable.is_cancelled() && changed_map.size > 0)
                 notify_email_flags_changed(changed_map);
 
             chunk_size *= 2;
@@ -1479,6 +1479,21 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         } catch (Error err) {
             // oh well
         }
+    }
+
+    private void on_update_flags() {
+        this.update_flags.begin(
+            this.open_cancellable,
+            (obj, res) => {
+                try {
+                    this.update_flags.end(res);
+                } catch (IOError.CANCELLED err) {
+                    // all good
+                } catch (Error err) {
+                    debug("Error updating flags: %s", err.message);
+                }
+            }
+        );
     }
 
     private void on_remote_ready() {
