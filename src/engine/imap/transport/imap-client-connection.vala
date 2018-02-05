@@ -111,7 +111,25 @@ public class Geary.Imap.ClientConnection : BaseObject {
      * in logs and debug output.
      */
     public int cx_id { get; private set; }
-    
+
+    /**
+     * Determines if the connection will use IMAP IDLE when idle.
+     *
+     * If //true//, when the connection is not sending commands
+     * ("quiet"), it will issue an IDLE command to enter a state where
+     * unsolicited server data may be sent from the server without
+     * resorting to NOOP keepalives.  (Note that keepalives are still
+     * required to hold the connection open, according to the IMAP
+     * specification.)
+     *
+     * Note that setting this false will *not* break a connection out
+     * of IDLE state alone; a command needs to be flushed down the
+     * pipe to do that.  (NOOP would be a good choice.)  Nor will this
+     * initiate an IDLE command either; it can only do that after
+     * sending a command (again, NOOP would be a good choice).
+     */
+    public bool idle_when_quiet = false;
+
     private Geary.Endpoint endpoint;
     private Geary.State.Machine fsm;
     private SocketConnection? cx = null;
@@ -125,7 +143,6 @@ public class Geary.Imap.ClientConnection : BaseObject {
     private int tag_counter = 0;
     private char tag_prefix = 'a';
     private uint flush_timeout_id = 0;
-    private bool idle_when_quiet = false;
     private Gee.HashSet<Tag> posted_idle_tags = new Gee.HashSet<Tag>();
     private int outstanding_idle_dones = 0;
     private Tag? posted_synchronization_tag = null;
@@ -297,26 +314,7 @@ public class Geary.Imap.ClientConnection : BaseObject {
         // TODO This could be optimized, but we'll leave it for now.
         return new Tag("%c%03d".printf(tag_prefix, tag_counter));
     }
-    
-    /**
-     * If true, when the connection is not sending commands ("quiet"), it will issue an IDLE command
-     * to enter a state where unsolicited server data may be sent from the server without resorting
-     * to NOOP keepalives.  (Note that keepalives are still required to hold the connection open,
-     * according to the IMAP specification.)
-     *
-     * Note that this will *not* break a connection out of IDLE state alone; a command needs to be
-     * flushed down the pipe to do that.  (NOOP would be a good choice.)  Nor will this initiate
-     * an IDLE command either; it can only do that after sending a command (again, NOOP would be
-     * a good choice).
-     */
-    public void set_idle_when_quiet(bool idle_when_quiet) {
-        this.idle_when_quiet = idle_when_quiet;
-    }
-    
-    public bool get_idle_when_quiet() {
-        return idle_when_quiet;
-    }
-    
+
     public SocketAddress? get_remote_address() {
         if (cx == null)
             return null;

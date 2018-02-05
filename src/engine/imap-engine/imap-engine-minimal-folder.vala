@@ -337,16 +337,29 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         }
     }
 
+    /**
+     * Synchronises the remote and local folders on session established.
+     *
+     * See [[https://tools.ietf.org/html/rfc4549|RFC 4549]] for an
+     * overview of the process
+     */
     private async void normalize_folders(Geary.Imap.FolderSession session,
-                                         Cancellable? cancellable)
+                                         Cancellable cancellable)
         throws Error {
         debug("%s: Begin normalizing remote and local folders", to_string());
 
         Geary.Imap.FolderProperties local_properties = this.local_folder.get_properties();
         Geary.Imap.FolderProperties remote_properties = session.folder.properties;
 
-        // and both must have their next UID's (it's possible they don't if it's a non-selectable
-        // folder)
+        /*
+         * Step 1: Check UID validity. If there are any problems, we
+         * can't continue, so either bail out completely or clear all
+         * local messages and let the client start fetching them all
+         * again.
+         */
+
+        // Both must have their next UID's - it's possible they don't
+        // if it's a non-selectable folder.
         if (local_properties.uid_next == null || local_properties.uid_validity == null) {
             throw new ImapError.NOT_SUPPORTED(
                 "%s: Unable to verify UIDs: missing local UIDNEXT (%s) and/or UIDVALIDITY (%s)",
@@ -379,6 +392,13 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
             return;
         }
 
+        /*
+         * Step 2: Check the local folder. It may be empty, in which
+         * case the client can just start fetching messages normally,
+         * or it may be corrupt in which also clear it out and do
+         * same.
+         */
+
         // fetch email from earliest email to last to (a) remove any deletions and (b) update
         // any flags that may have changed
         ImapDB.EmailIdentifier? local_earliest_id = yield local_folder.get_earliest_id_async(cancellable);
@@ -394,30 +414,25 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
             return;
         }
 
-        assert(local_earliest_id.has_uid());
-        assert(local_latest_id.has_uid());
-        
-        // if any messages are still marked for removal from last time, that means the EXPUNGE
-        // never arrived from the server, in which case the folder is "dirty" and needs a full
-        // normalization
+        // If any messages are still marked for removal from last
+        // time, that means the EXPUNGE never arrived from the server,
+        // in which case the folder is "dirty" and needs a full
+        // normalization. However, there may be enqueued
+        // ReplayOperations waiting to remove messages on the server
+        // that marked some or all of those messages, Don't consider
+        // those already marked as "already marked" if they were not
+        // leftover from the last open of this folder
         Gee.Set<ImapDB.EmailIdentifier>? already_marked_ids = yield local_folder.get_marked_ids_async(
             cancellable);
-        
-        // however, there may be enqueue ReplayOperations waiting to remove messages on the server
-        // that marked some or all of those messages
         Gee.HashSet<ImapDB.EmailIdentifier> to_be_removed = new Gee.HashSet<ImapDB.EmailIdentifier>();
         replay_queue.get_ids_to_be_remote_removed(to_be_removed);
-        
-        // don't consider those already marked as "already marked" if they were not leftover from
-        // the last open of this folder
         if (already_marked_ids != null)
             already_marked_ids.remove_all(to_be_removed);
-        
+
         bool is_dirty = (already_marked_ids != null && already_marked_ids.size > 0);
-        
         if (is_dirty)
             debug("%s: %d remove markers found, folder is dirty", to_string(), already_marked_ids.size);
-        
+
         // a full normalize works from the highest possible UID on the remote and work down to the lowest UID on
         // the local; this covers all messages appended since last seen as well as any removed
         Imap.UID last_uid = remote_properties.uid_next.previous(true);
@@ -432,6 +447,10 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
             return;
         }
 
+        /*
+         * Step 3: Check remote folder, work out what has changed.
+         */
+
         // if UIDNEXT has changed, that indicates messages have been appended (and possibly removed)
         int64 uidnext_diff = remote_properties.uid_next.value - local_properties.uid_next.value;
         
@@ -439,9 +458,10 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
             ? local_properties.select_examine_messages : 0;
         int remote_message_count = (remote_properties.select_examine_messages >= 0)
             ? remote_properties.select_examine_messages : 0;
-        
-        // if UIDNEXT is the same as last time AND the total count of email is the same, then
-        // nothing has been added or removed
+
+        // if UIDNEXT is the same as last time AND the total count of
+        // email is the same, then nothing has been added or removed,
+        // and we're done.
         if (!is_dirty && uidnext_diff == 0 && local_message_count == remote_message_count) {
             debug("%s: No messages added/removed since last opened, normalization completed", to_string());
             return;
@@ -529,7 +549,11 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         
         debug("%s: changes since last seen: removed=%d appended=%d inserted=%d", to_string(),
             removed_uids.size, appended_uids.size, inserted_uids.size);
-        
+
+        /*
+         * Step 4: Synchronise local folder with remote
+         */
+
         // fetch from the server the local store's required flags for all appended/inserted messages
         // (which is simply equal to all remaining remote UIDs)
         Gee.List<Geary.Email> to_create = new Gee.ArrayList<Geary.Email>();
@@ -600,14 +624,16 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         // remove any extant remove markers, as everything is accounted for now, except for those
         // waiting to be removed in the queue
         yield local_folder.clear_remove_markers_async(to_be_removed, cancellable);
-        
-        check_open("normalize_folders (clear remove markers)");
-        
-        //
-        // now normalized
-        // notify subscribers of changes
-        //
-        
+
+        if (cancellable.is_cancelled()) {
+            return;
+        }
+
+
+        /*
+         * Step 5: Notify subscribers of what has happened.
+         */
+
         Folder.CountChangeReason count_change_reason = Folder.CountChangeReason.NONE;
         
         if (removed_ids != null && removed_ids.size > 0) {
@@ -846,6 +872,12 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     private async void open_remote_session_locked(Cancellable? cancellable) {
         debug("%s: Opening remote session", to_string());
 
+        // Note that any IOError.CANCELLED errors caught below do not
+        // cause any error signals to be fired and do not force
+        // closing the folder, because the only time opening the
+        // session is cancelled is when the folder is already being
+        // closed, which is the desired result.
+
         // Don't try to re-open again
         this.remote_open_timer.reset();
 
@@ -855,15 +887,34 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         try {
             session = yield this._account.open_folder_session(this.path, cancellable);
         } catch (Error err) {
-            // Notify that there was a connection error, but don't
-            // force the folder closed, since it might come good again
-            // if the user fixes an auth problem or the network comes
-            // back or whatever.
-            notify_open_failed(Folder.OpenFailed.REMOTE_ERROR, err);
+            if (!(err is IOError.CANCELLED)) {
+                // Notify that there was a connection error, but don't
+                // force the folder closed, since it might come good again
+                // if the user fixes an auth problem or the network comes
+                // back or whatever.
+                notify_open_failed(Folder.OpenFailed.REMOTE_ERROR, err);
+            }
             return;
         }
 
         // Phase 2: Update local state based on the remote session
+
+        // Replay signals need to be hooked up before normalisation to
+        // avoid there being a race between that and new messages
+        // arriving, being removed, etc. This is safe since
+        // normalisation only issues FETCH commands for messages based
+        // on the state of the remote right after being selected, so
+        // any untagged EXIST and FETCH responses will be handled
+        // later by their replay ops, and no untagged EXPUNGE
+        // responses will be received since they are forbidden to be
+        // issued for FETCH commands.
+        //
+        // Note we don't need to unhook from these signals if an error
+        // occurs below since they won't be called once the session
+        // has been released.
+        session.appended.connect(on_remote_appended);
+        session.updated.connect(on_remote_updated);
+        session.removed.connect(on_remote_removed);
 
         try {
             yield normalize_folders(session, cancellable);
@@ -872,9 +923,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
             // so treat as in the error case above, after resolving if
             // the issue was local or remote.
             this._account.release_folder_session(session);
-            if (err is IOError.CANCELLED) {
-                notify_open_failed(OpenFailed.LOCAL_ERROR, err);
-            } else {
+            if (!(err is IOError.CANCELLED)) {
                 Folder.CloseReason local_reason = CloseReason.LOCAL_ERROR;
                 Folder.CloseReason remote_reason = CloseReason.REMOTE_CLOSE;
                 if (!is_remote_error(err)) {
@@ -895,17 +944,9 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
             return;
         }
 
-        this._properties.add(session.folder.properties);
-        this.remote_session = session;
-
-        // Signals need to be hooked after the remote session is in
-        // place so they can access the remote session's folder
-        // properties.
-        session.appended.connect(on_remote_appended);
-        session.updated.connect(on_remote_updated);
-        session.removed.connect(on_remote_removed);
-        session.disconnected.connect(on_remote_disconnected);
-
+        // Update the local folder's totals and UID values after
+        // normalisation, so it does not mistake the remote's current
+        // state with our previous state
         try {
             yield local_folder.update_folder_select_examine(
                 session.folder.properties, cancellable
@@ -916,8 +957,8 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
             // the open was simply cancelled. So clean up, and force
             // the folder closed if needed.
             this._account.release_folder_session(session);
-            notify_open_failed(Folder.OpenFailed.LOCAL_ERROR, err);
             if (!(err is IOError.CANCELLED)) {
+                notify_open_failed(Folder.OpenFailed.LOCAL_ERROR, err);
                 this.close_internal_async.begin(
                     CloseReason.LOCAL_ERROR,
                     CloseReason.REMOTE_CLOSE,
@@ -927,6 +968,17 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
             }
             return;
         }
+
+        // All done, can now hook up the session to the folder
+        this.remote_session = session;
+        this._properties.add(session.folder.properties);
+        session.disconnected.connect(on_remote_disconnected);
+
+        // Enable IDLE now that the local and remote folders are in
+        // sync. Can't do this earlier since we might get untagged
+        // EXPUNGE responses during normalisation, which would be
+        // Bad™. Do it in the background to avoid delay notifying
+        session.enable_idle.begin(cancellable);
 
         // Phase 3: Notify tasks waiting for the connection
 
@@ -975,8 +1027,10 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         notify_email_locally_complete(email_ids);
     }
 
-    private void on_remote_appended(int appended) {
-        int remote_count = this.remote_session.folder.properties.email_total;
+    private void on_remote_appended(Imap.FolderSession session, int appended) {
+        // Use the session param rather than remote_session attr since
+        // it may not be available yet
+        int remote_count = session.folder.properties.email_total;
         debug("%s on_remote_appended: remote_count=%d appended=%d",
               to_string(), remote_count, appended);
 
@@ -997,8 +1051,12 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         }
     }
 
-    private void on_remote_updated(Imap.SequenceNumber position, Imap.FetchedData data) {
-        int remote_count = this.remote_session.folder.properties.email_total;
+    private void on_remote_updated(Imap.FolderSession session,
+                                   Imap.SequenceNumber position,
+                                   Imap.FetchedData data) {
+        // Use the session param rather than remote_session attr since
+        // it may not be available yet
+        int remote_count = session.folder.properties.email_total;
         debug("%s on_remote_updated: remote_count=%d position=%s", to_string(),
               remote_count, position.to_string());
 
@@ -1007,8 +1065,11 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         );
     }
 
-    private void on_remote_removed(Imap.SequenceNumber position) {
-        int remote_count = this.remote_session.folder.properties.email_total;
+    private void on_remote_removed(Imap.FolderSession session,
+                                   Imap.SequenceNumber position) {
+        // Use the session param rather than remote_session attr since
+        // it may not be available yet
+        int remote_count = session.folder.properties.email_total;
         debug("%s on_remote_removed: remote_count=%d position=%s",
               to_string(), remote_count, position.to_string());
 

@@ -151,8 +151,27 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
     }
 
     /**
-     * {@inheritDoc}
+     * Enables IMAP IDLE for the session, if supported.
      */
+    public async void enable_idle(Cancellable? cancellable)
+        throws Error {
+        ClientSession session = claim_session();
+        int token = yield this.cmd_mutex.claim_async(cancellable);
+        Error? cmd_err = null;
+        try {
+            yield session.enable_idle(cancellable);
+        } catch (Error err) {
+            cmd_err = err;
+        }
+
+        this.cmd_mutex.release(ref token);
+
+        if (cmd_err != null) {
+            throw cmd_err;
+        }
+    }
+
+    /** {@inheritDoc} */
     public override ClientSession? close() {
         ClientSession? old_session = base.close();
         if (old_session != null) {

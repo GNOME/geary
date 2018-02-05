@@ -229,6 +229,12 @@ public class Geary.Imap.ClientSession : BaseObject {
      */
     public Capabilities capabilities { get; private set; default = new Capabilities(0); }
 
+    /** Determines if this session supports the IMAP IDLE extension. */
+    public bool is_idle_supported {
+        get { return this.capabilities.has_capability(Capabilities.IDLE); }
+    }
+
+
     // While the following inbox and namespace data should be server
     // specific, there is a small chance they will differ between
     // connections if the connections connect to different servers in
@@ -261,7 +267,6 @@ public class Geary.Imap.ClientSession : BaseObject {
     private uint selected_keepalive_secs = 0;
     private uint unselected_keepalive_secs = 0;
     private uint selected_with_idle_keepalive_secs = 0;
-    private bool allow_idle = true;
 
     private Gee.HashMap<Tag, StatusResponse> seen_completion_responses = new Gee.HashMap<
         Tag, StatusResponse>();
@@ -403,6 +408,7 @@ public class Geary.Imap.ClientSession : BaseObject {
             new Geary.State.Mapping(State.SELECTING, Event.LOGOUT, on_logout),
             new Geary.State.Mapping(State.SELECTING, Event.DISCONNECT, on_disconnect),
             new Geary.State.Mapping(State.SELECTING, Event.RECV_STATUS, on_recv_status),
+
             new Geary.State.Mapping(State.SELECTING, Event.RECV_COMPLETION, on_selecting_recv_completion),
             new Geary.State.Mapping(State.SELECTING, Event.SEND_ERROR, on_send_error),
             new Geary.State.Mapping(State.SELECTING, Event.RECV_ERROR, on_recv_error),
@@ -732,18 +738,15 @@ public class Geary.Imap.ClientSession : BaseObject {
         cx.recv_closed.connect(on_received_closed);
         cx.receive_failure.connect(on_network_receive_failure);
         cx.deserialize_failure.connect(on_network_receive_failure);
-        
+
         assert(connect_waiter == null);
         connect_waiter = new Nonblocking.Semaphore();
-        
-        // only use IDLE when in SELECTED or EXAMINED state
-        cx.set_idle_when_quiet(false);
-        
+
         params.proceed = true;
-        
+
         return State.CONNECTING;
     }
-    
+
     // this is used internally to tear-down the ClientConnection object and unhook it from
     // ClientSession
     private void drop_connection() {
@@ -1097,22 +1100,36 @@ public class Geary.Imap.ClientSession : BaseObject {
         
         return true;
     }
-    
+
     /**
-     * If enabled, an IDLE command will be used for notification of unsolicited server data whenever
-     * a mailbox is selected or examined.  IDLE will only be used if ClientSession has seen a
-     * CAPABILITY server data response with IDLE listed as a supported extension.
+     * Enables IMAP IDLE for the client session, if supported.
      *
-     * This will *not* break a connection out of IDLE mode; a command must be sent as well to force
-     * the connection back to de-idled state.
-     *
-     * Note that this overrides other heuristics ClientSession uses about allowing idle, so use
-     * with caution.
+     * If enabled, an IDLE command will be used for notification of
+     * unsolicited server data whenever a mailbox is selected or
+     * examined.  IDLE will only be used if ClientSession has seen a
+     * CAPABILITY server data response with IDLE listed as a supported
+     * extension.
      */
-    public void allow_idle_when_selected(bool allow_idle) {
-        this.allow_idle = allow_idle;
+    public async void enable_idle(Cancellable? cancellable)
+        throws Error {
+        if (this.is_idle_supported) {
+            switch (get_protocol_state(null)) {
+            case ProtocolState.AUTHORIZING:
+            case ProtocolState.AUTHORIZED:
+            case ProtocolState.SELECTED:
+            case ProtocolState.SELECTING:
+                this.cx.idle_when_quiet = true;
+                yield send_command_async(new NoopCommand(), cancellable);
+                break;
+
+            default:
+                throw new ImapError.NOT_SUPPORTED(
+                    "IMAP IDLE only supported in AUTHORIZED or SELECTED states"
+                );
+            }
+        }
     }
-    
+
     private void schedule_keepalive() {
         // if old one was scheduled, unschedule and schedule anew
         unschedule_keepalive();
@@ -1122,13 +1139,14 @@ public class Geary.Imap.ClientSession : BaseObject {
             case ProtocolState.UNCONNECTED:
             case ProtocolState.CONNECTING:
                 return;
-            
+
             case ProtocolState.SELECTING:
             case ProtocolState.SELECTED:
-                seconds = (allow_idle && supports_idle()) ? selected_with_idle_keepalive_secs
+                seconds = (this.cx.idle_when_quiet && this.is_idle_supported)
+                    ? selected_with_idle_keepalive_secs
                     : selected_keepalive_secs;
             break;
-            
+
             case ProtocolState.UNAUTHORIZED:
             case ProtocolState.AUTHORIZING:
             case ProtocolState.AUTHORIZED:
@@ -1180,11 +1198,7 @@ public class Geary.Imap.ClientSession : BaseObject {
     public bool install_recv_converter(Converter converter) {
         return (cx != null) ? cx.install_recv_converter(converter) : false;
     }
-    
-    public bool supports_idle() {
-        return capabilities.has_capability(Capabilities.IDLE);
-    }
-    
+
     //
     // send commands
     //
@@ -1336,23 +1350,16 @@ public class Geary.Imap.ClientSession : BaseObject {
         
         return yield command_transaction_async(cmd, cancellable);
     }
-    
+
     private uint on_select(uint state, uint event, void *user, Object? object) {
         MachineParams params = (MachineParams) object;
-        
+
         if (!reserve_state_change_cmd(params, state, event))
             return state;
-        
-        // Allow IDLE *before* issuing SELECT/EXAMINE because there's no guarantee another command
-        // will be issued any time soon, which is necessary for the IDLE command to be tacked on
-        // to the end of it.  In other words, telling ClientConnection to go into IDLE after the
-        // SELECT/EXAMINE command is too late unless another command is sent (set_idle_when_quiet()
-        // performs no I/O).
-        cx.set_idle_when_quiet(allow_idle && supports_idle());
-        
+
         return State.SELECTING;
     }
-    
+
     private uint on_not_selected(uint state, uint event, void *user, Object? object) {
         MachineParams params = (MachineParams) object;
         
@@ -1394,10 +1401,12 @@ public class Geary.Imap.ClientSession : BaseObject {
             
             default:
                 debug("[%s]: Unable to SELECT/EXAMINE: %s", to_string(), completion_response.to_string());
-                
-                // turn off IDLE, not entering SELECTED/EXAMINED state
-                cx.set_idle_when_quiet(false);
-                
+
+                // turn off IDLE, client should request it again if desired.
+                if (cx.idle_when_quiet) {
+                    cx.idle_when_quiet = false;
+                }
+
                 return State.AUTHORIZED;
         }
     }
@@ -1428,10 +1437,10 @@ public class Geary.Imap.ClientSession : BaseObject {
         assert(params.cmd is CloseCommand);
         if (!reserve_state_change_cmd(params, state, event))
             return state;
-        
+
         // returning to AUTHORIZED state, turn off IDLE
-        cx.set_idle_when_quiet(false);
-        
+        cx.idle_when_quiet = false;
+
         return State.CLOSING_MAILBOX;
     }
     
@@ -1481,11 +1490,14 @@ public class Geary.Imap.ClientSession : BaseObject {
     
     private uint on_logout(uint state, uint event, void *user, Object? object) {
         MachineParams params = (MachineParams) object;
-        
+
         assert(params.cmd is LogoutCommand);
         if (!reserve_state_change_cmd(params, state, event))
             return state;
-        
+
+        // Leaving AUTHORIZED state, turn off IDLE
+        cx.idle_when_quiet = false;
+
         return State.LOGGING_OUT;
     }
     
