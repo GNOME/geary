@@ -73,6 +73,7 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
     private Scheduler.Scheduled? notification_timer = null;
     private int64 next_submission_number = 0;
     private State state = State.OPEN;
+    private Cancellable remote_wait_cancellable = new Cancellable();
 
     public virtual signal void scheduled(ReplayOperation op) {
         Logging.debug(
@@ -207,9 +208,8 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
      */
     public bool schedule_server_notification(ReplayOperation op) {
         if (state != State.OPEN) {
-            debug("Unable to schedule notification operation %s on %s: replay queue closed", op.to_string(),
-                to_string());
-            
+            debug("Unable to schedule notification operation %s on %s: replay queue closed",
+                  op.to_string(), to_string());
             return false;
         }
         
@@ -326,12 +326,15 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
         // consideration in schedule()
         state = State.CLOSING;
         closing();
-        
-        // if not flushing pending, clear out all waiting operations, backing out any that need to
-        // be backed out
-        if (!flush_pending)
+
+        // if not flushing pending, stop waiting for a remote session
+        // and clear out all waiting operations, backing out any that
+        // need to be backed out
+        if (!flush_pending) {
+            this.remote_wait_cancellable.cancel();
             yield clear_pending_async(cancellable);
-        
+        }
+
         // flush a ReplayClose operation down the pipe so all working operations complete
         CloseReplayQueue close_op = new CloseReplayQueue();
         bool is_scheduled = schedule(close_op);
@@ -491,11 +494,11 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
             // wait until the remote folder is opened (or throws an exception, in which case closed)
             try {
                 if (!is_close_op && folder_opened && state == State.OPEN)
-                    yield owner.wait_for_remote_async();
+                    yield owner.wait_for_remote_async(this.remote_wait_cancellable);
             } catch (Error remote_err) {
                 debug("Folder %s closed or failed to open, remote replay queue closing: %s",
-                    to_string(), remote_err.message);
-                
+                      to_string(), remote_err.message);
+
                 // not open
                 folder_opened = false;
                 

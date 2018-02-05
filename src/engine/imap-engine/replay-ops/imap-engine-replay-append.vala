@@ -9,7 +9,7 @@ private class Geary.ImapEngine.ReplayAppend : Geary.ImapEngine.ReplayOperation {
     private MinimalFolder owner;
     private int remote_count;
     private Gee.List<Imap.SequenceNumber> positions;
-    private Cancellable cancellable;
+    private Cancellable? cancellable;
 
     public signal void email_appended(Gee.Collection<Geary.EmailIdentifier> ids);
     public signal void email_locally_appended(Gee.Collection<Geary.EmailIdentifier> ids);
@@ -19,7 +19,7 @@ private class Geary.ImapEngine.ReplayAppend : Geary.ImapEngine.ReplayOperation {
     public ReplayAppend(MinimalFolder owner,
                         int remote_count,
                         Gee.List<Imap.SequenceNumber> positions,
-                        Cancellable cancellable) {
+                        Cancellable? cancellable) {
         // IGNORE remote errors because the reconnect will re-normalize the folder, making this
         // append moot
         base ("Append", Scope.REMOTE_ONLY, OnError.IGNORE);

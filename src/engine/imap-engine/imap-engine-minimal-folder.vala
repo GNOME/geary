@@ -80,15 +80,15 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         }
     }
 
-    internal ReplayQueue replay_queue { get; private set; }
+    internal ReplayQueue? replay_queue { get; private set; default = null; }
     internal EmailPrefetcher email_prefetcher { get; private set; }
 
     private weak GenericAccount _account;
     private Geary.AggregatedFolderProperties _properties =
         new Geary.AggregatedFolderProperties(false, false);
 
-    private Folder.OpenFlags open_flags = OpenFlags.NONE;
     private int open_count = 0;
+    private Folder.OpenFlags open_flags = OpenFlags.NONE;
     private Cancellable? open_cancellable = null;
     private Nonblocking.Mutex open_mutex = new Nonblocking.Mutex();
     private Nonblocking.Mutex close_mutex = new Nonblocking.Mutex();
@@ -139,7 +139,6 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
 
         this._special_folder_type = special_folder_type;
         this._properties.add(local_folder.get_properties());
-        this.replay_queue = new ReplayQueue(this);
         this.email_prefetcher = new EmailPrefetcher(this);
 
         this.remote_open_timer = new TimeoutManager.seconds(
@@ -228,9 +227,6 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         // first open gets to name the flags, but see note above
         this.open_flags = open_flags;
 
-        // reset to force waiting in wait_for_remote_async()
-        this.remote_wait_semaphore.reset();
-
         // reset to force waiting in wait_for_close_async()
         this.closed_semaphore.reset();
 
@@ -238,7 +234,9 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         // the remote opens
         this.refresh_unseen_timer.reset();
 
+        // Construct objects needed when open
         this.open_cancellable = new Cancellable();
+        this.replay_queue = new ReplayQueue(this);
 
         // Notify the email prefetcher
         this.email_prefetcher.open();
@@ -273,8 +271,9 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     public override async void wait_for_remote_async(Cancellable? cancellable = null) throws Error {
         check_open("wait_for_remote_async");
 
-        // if remote has not yet been opened, do it now ...
-        if (this.remote_session == null) {
+        // If remote has not yet been opened and we are not in the
+        // process of closing the folder, open a session right away.
+        if (this.remote_session == null && !this.open_cancellable.is_cancelled()) {
             this.open_remote_session.begin();
         }
 
@@ -304,16 +303,38 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     }
 
     /** {@inheritDoc} */
-    public override async bool close_async(Cancellable? cancellable = null) throws Error {
-        // Check open_count but only decrement inside of replay queue
-        if (open_count <= 0)
-            return false;
-
-        UserClose user_close = new UserClose(this, cancellable);
-        this.replay_queue.schedule(user_close);
-
-        yield user_close.wait_for_ready_async(cancellable);
-        return user_close.closing;
+    public override async bool close_async(Cancellable? cancellable = null)
+        throws Error {
+        bool is_closing = false;
+        if (open_count > 0) {
+            UserClose user_close = new UserClose(
+                () => {
+                    // Decrement the open count only if we are not
+                    // going to be fully closed here, since if so we
+                    // want close_internal_locked to be able to manage
+                    // when it is actually set to zero so it can clean
+                    // up beforehand as needed.
+                    if (this.open_count == 1) {
+                        is_closing = true;
+                        // Call close_internal in the background since
+                        // it recursively causes replay operations to
+                        // be scheduled, which since this is being
+                        // called from the replay queue would
+                        // otherwise deadlock.
+                        this.close_internal.begin(
+                            CloseReason.LOCAL_CLOSE,
+                            CloseReason.REMOTE_CLOSE,
+                            cancellable
+                        );
+                    } else if (this.open_count >= 1) {
+                        this.open_count -= 1;
+                    }
+                    return is_closing;
+                });
+            this.replay_queue.schedule(user_close);
+            yield user_close.wait_for_ready_async(cancellable);
+        }
+        return is_closing;
     }
 
     /** {@inheritDoc} */
@@ -697,9 +718,22 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
      * Unhooks the IMAP folder session and returns it to the account.
      */
     internal void close_remote_session(Folder.CloseReason remote_reason) {
-        // Block anyone calling wait_for_remote_async(), as the session
-        // will no longer available.
-        this.remote_wait_semaphore.reset();
+        // Since the remote session has is/has gone away, we need to
+        // let waiters know. In the case of the folder being closed,
+        // notify that no more remotes will ever come back, otherwise
+        // reset the semaphore to keep them waiting, in case it does.
+        //
+        // We use open_cancellable to determine if the folder is open
+        // since that is cancelled before the replay queue is flushed,
+        // and open_count is only set to zero only afterwards. This is
+        // important since we need to let replay queue ops that are
+        // being flushed know if the session goes away so they wake
+        // up.
+        if (this.open_cancellable.is_cancelled()) {
+            notify_remote_waiters(false);
+        } else {
+            this.remote_wait_semaphore.reset();
+        }
 
         Imap.FolderSession session = this.remote_session;
         this.remote_session = null;
@@ -717,44 +751,15 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     }
 
     /**
-     * Starts closing the folder, called from {@link UserClose}.
+     * Closes the folder and the remote session.
      */
-    internal async bool user_close_async(Cancellable? cancellable) {
-        // decrement open_count and, if zero, continue closing Folder
-        if (open_count == 0 || --open_count > 0)
-            return false;
-
-        // Close the prefetcher early so it stops using the remote ASAP
-        this.email_prefetcher.close();
-
-        // block anyone from wait_for_remote_async(), as this is no longer open
-        this.remote_wait_semaphore.reset();
-
-        // don't yield here, close_internal_async() needs to be called outside of the replay queue
-        // the open_count protects against this path scheduling it more than once
-        this.close_internal_async.begin(
-            CloseReason.LOCAL_CLOSE,
-            CloseReason.REMOTE_CLOSE,
-            true,
-            cancellable
-        );
-
-        return true;
-    }
-
-    /**
-     * Forces closes the folder.
-     *
-     * NOTE: This bypasses open_count and forces the Folder closed.
-     */
-    internal async void close_internal_async(Folder.CloseReason local_reason,
-                                             Folder.CloseReason remote_reason,
-                                             bool flush_pending,
-                                             Cancellable? cancellable) {
+    private async void close_internal(Folder.CloseReason local_reason,
+                                      Folder.CloseReason remote_reason,
+                                      Cancellable? cancellable) {
         try {
             int token = yield this.close_mutex.claim_async(cancellable);
-            yield close_internal_locked_async(
-                local_reason, remote_reason, flush_pending, cancellable
+            yield close_internal_locked(
+                local_reason, remote_reason, cancellable
             );
             this.close_mutex.release(ref token);
         } catch (Error err) {
@@ -762,76 +767,73 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         }
     }
 
-    // Should only be called when close_mutex is locked, i.e. use close_internal_async()
-    private async void close_internal_locked_async(Folder.CloseReason local_reason,
-                                                   Folder.CloseReason remote_reason,
-                                                   bool flush_pending,
-                                                   Cancellable? cancellable) {
+    // Should only be called when close_mutex is locked, i.e. use close_internal()
+    private async void close_internal_locked(Folder.CloseReason local_reason,
+                                             Folder.CloseReason remote_reason,
+                                             Cancellable? cancellable) {
         // Ensure we don't attempt to start opening a remote while
         // closing
         this._account.session_pool.ready.disconnect(on_remote_ready);
         this.remote_open_timer.reset();
 
-        // only flushing pending ReplayOperations if this is a "clean" close, not forced due to
-        // error and if specified by caller (could be a non-error close on the server, i.e. "BYE",
-        // but the connection is dropping, so don't flush pending)
-        flush_pending = (
-            flush_pending &&
+        // Stop any internal tasks that are running
+        this.open_cancellable.cancel();
+        this.email_prefetcher.close();
+
+        // Once we get to this point, either there will be a remote
+        // session open already, or none will ever get opened - no
+        // more attempts to open a session will be made. We can't
+        // block access to any remote session here however since
+        // pending replay operations may need it still. Instead, rely
+        // on the replay queue itself to reject any new operations
+        // being queued once we close it.
+
+        // Only flush pending operations if the remote is open (if
+        // closed they will deadlock waiting for one to open), and if
+        // this is a "clean" close, that is not forced due to error.
+        bool flush_pending = (
+            this.remote_session != null &&
             !local_reason.is_error() &&
             !remote_reason.is_error()
         );
 
         if (flush_pending) {
-            // We are flushing the queue, so gather operations from
-            // Revokables to give them a chance to schedule their
+            // Since we are flushing the queue, gather operations
+            // from Revokables to give them a chance to schedule their
             // commit operations before going down
             Gee.List<ReplayOperation> final_ops = new Gee.ArrayList<ReplayOperation>();
             notify_closing(final_ops);
             foreach (ReplayOperation op in final_ops)
                 replay_queue.schedule(op);
-        } else {
-            // Not flushing the queue, so notify all operations
-            // waiting for the remote that it's not coming available
-            // ... this wakes up any ReplayOperation blocking on
-            // wait_for_remote_async(), necessary in order to finish
-            // ReplayQueue.close_async (i.e. to prevent deadlock);
-            // this is necessary because it's possible for this method
-            // to be called before a session has even had a chance to
-            // open.
-            //
-            // We don't want to do this for a clean close yet, because
-            // some pending operations may still need to use the
-            // session.
-            notify_remote_waiters(false);
         }
 
-        // swap out the ReplayQueue while closing so, if re-opened,
-        // future commands can be queued on the new queue
-        ReplayQueue closing_replay_queue = this.replay_queue;
-        this.replay_queue = new ReplayQueue(this);
-
-        // Close the replay queues; if a "clean" close, flush pending operations so everything
-        // gets a chance to run; if forced close, drop everything outstanding
+        // Close the replay queues; if a "clean" close, flush pending
+        // operations so everything gets a chance to run; if forced
+        // close, drop everything outstanding
+        debug("Closing replay queue for %s (flush_pending=%s): %s",
+              to_string(), flush_pending.to_string(), this.replay_queue.to_string());
         try {
-            debug("Closing replay queue for %s (flush_pending=%s): %s", to_string(),
-                  flush_pending.to_string(), closing_replay_queue.to_string());
-            yield closing_replay_queue.close_async(flush_pending);
-            debug("Closed replay queue for %s: %s", to_string(), closing_replay_queue.to_string());
-        } catch (Error replay_queue_err) {
-            debug("Error closing %s replay queue: %s", to_string(), replay_queue_err.message);
+            yield this.replay_queue.close_async(flush_pending);
+            debug("Closed replay queue for %s: %s",
+                  to_string(), this.replay_queue.to_string());
+        } catch (Error err) {
+            debug("Error closing %s replay queue: %s",
+                  to_string(), err.message);
         }
-
-        // If flushing, now notify waiters that the queue has bee flushed
-        if (flush_pending) {
-            notify_remote_waiters(false);
-        }
-
-        // forced closed one way or another, so reset state
-        this.open_count = 0;
-        this.open_flags = OpenFlags.NONE;
 
         // Actually close the remote folder
         close_remote_session(remote_reason);
+
+        // Since both the remote session and replay queue have shut
+        // down, we can reset the folder's internal state.
+        this.remote_wait_semaphore.reset();
+        this.replay_queue = null;
+        this.open_cancellable = null;
+        this.open_flags = OpenFlags.NONE;
+
+        // Officially marks the folder as closed. Beyond this point it
+        // may start to re-open again if open_async is called.
+        this.open_count = 0;
 
         // need to call these every time, even if remote was not fully
         // opened, as some callers rely on order of signals
@@ -841,7 +843,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         // Notify waiting tasks
         this.closed_semaphore.blind_notify();
 
-        debug("Folder %s closed", to_string());
+        debug("%s: Folder closed", to_string());
     }
 
     /**
@@ -934,10 +936,9 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
                     remote_reason = CloseReason.REMOTE_ERROR;
                 }
 
-                this.close_internal_async.begin(
+                yield close_internal(
                     local_reason,
                     remote_reason,
-                    false,
                     null // Don't pass cancellable, close must complete
                 );
             }
@@ -959,10 +960,9 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
             this._account.release_folder_session(session);
             if (!(err is IOError.CANCELLED)) {
                 notify_open_failed(Folder.OpenFailed.LOCAL_ERROR, err);
-                this.close_internal_async.begin(
+                yield close_internal(
                     CloseReason.LOCAL_ERROR,
                     CloseReason.REMOTE_CLOSE,
-                    false,
                     null // Don't pass cancellable, close must complete
                 );
             }
@@ -1041,9 +1041,9 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
             positions.add(new Imap.SequenceNumber(pos));
 
         if (positions.size > 0) {
-            ReplayAppend op = new ReplayAppend(
-                this, remote_count, positions, this.open_cancellable
-            );
+            // We don't pass in open_cancellable here since we want
+            // the op to still run when closing and flushing the queue
+            ReplayAppend op = new ReplayAppend(this, remote_count, positions, null);
             op.email_appended.connect(notify_email_appended);
             op.email_locally_appended.connect(notify_email_locally_appended);
             op.email_count_changed.connect(notify_email_count_changed);
