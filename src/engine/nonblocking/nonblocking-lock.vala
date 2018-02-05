@@ -16,7 +16,8 @@
  * pass. Another asynchronous task may call {@link notify} to mark the
  * lock as being safe, notifying waiting tasks. Once marked as being
  * safe to pass, a lock may be reset to being unsafe by calling {@link
- * reset}.
+ * reset}. The lock cannot be passed initially, if this is desired
+ * call notify after constructing it.
  *
  * See the specialised sub-classes for concrete implementations,
  * which vary based on two features:
@@ -84,6 +85,9 @@ public abstract class Geary.Nonblocking.Lock : BaseObject {
     private bool passed = false;
     private Gee.List<Pending> pending_queue = new Gee.LinkedList<Pending>();
 
+    /**
+     * Constructs a new lock that is initially not able to be passed.
+     */
     protected Lock(bool broadcast, bool autoreset, Cancellable? cancellable = null) {
         this.broadcast = broadcast;
         this.autoreset = autoreset;

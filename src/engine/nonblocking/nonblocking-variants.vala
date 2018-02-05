@@ -19,9 +19,16 @@
  * @see Lock
  */
 public class Geary.Nonblocking.Semaphore : Geary.Nonblocking.Lock {
+
+    /**
+     * Constructs a new semaphore lock.
+     *
+     * The new lock is initially not able to be passed.
+     */
     public Semaphore(Cancellable? cancellable = null) {
         base (true, false, cancellable);
     }
+
 }
 
 /**
@@ -37,9 +44,16 @@ public class Geary.Nonblocking.Semaphore : Geary.Nonblocking.Lock {
  * @see Lock
  */
 public class Geary.Nonblocking.Event : Geary.Nonblocking.Lock {
+
+    /**
+     * Constructs a new event lock.
+     *
+     * The new lock is initially not able to be passed.
+     */
     public Event(Cancellable? cancellable = null) {
         base (true, true, cancellable);
     }
+
 }
 
 /**
@@ -55,7 +69,14 @@ public class Geary.Nonblocking.Event : Geary.Nonblocking.Lock {
  * @see Lock
  */
 public class Geary.Nonblocking.Spinlock : Geary.Nonblocking.Lock {
+
+    /**
+     * Constructs a new spin lock.
+     *
+     * The new lock is initially not able to be passed.
+     */
     public Spinlock(Cancellable? cancellable = null) {
         base (false, true, cancellable);
     }
+
 }
