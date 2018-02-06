@@ -2744,13 +2744,7 @@ public class GearyController : Geary.BaseObject {
                 );
             });
         foreach (ConversationMessage msg_view in view) {
-            msg_view.link_activated.connect((link) => {
-                    if (link.down().has_prefix(Geary.ComposedEmail.MAILTO_SCHEME)) {
-                        compose_mailto(link);
-                    } else {
-                        open_uri(link);
-                    }
-                });
+            msg_view.link_activated.connect(on_link_activated);
             msg_view.save_image.connect((url, alt_text, buf) => {
                     on_save_image_extended(view, url, alt_text, buf);
                 });
@@ -2974,6 +2968,25 @@ public class GearyController : Geary.BaseObject {
             this.save_attachment_to_file.begin(attachments.to_array()[0], null);
         } else {
             this.save_attachments_to_file.begin(attachments);
+        }
+    }
+
+    private void on_link_activated(string uri) {
+        if (uri.down().has_prefix(Geary.ComposedEmail.MAILTO_SCHEME)) {
+            // We need to invoke this from idle to break the call
+            // chain from the WebKit signal which originally caused
+            // this handler to be invoked, otherwise the WebKit
+            // WebProcess will deadlock, and the resulting composer
+            // will be useless. See Geary Bug 771504
+            // <https://bugzilla.gnome.org/show_bug.cgi?id=771504>
+            // and WebKitGTK Bug 182528
+            // <https://bugs.webkit.org/show_bug.cgi?id=182528>
+            Idle.add(() => {
+                    compose_mailto(uri);
+                    return Source.REMOVE;
+                });
+        } else {
+            open_uri(uri);
         }
     }
 
