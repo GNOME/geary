@@ -65,8 +65,12 @@ public class ClientWebView : WebKit.WebView {
                                         bool enable_logging) {
         WebsiteDataManager data_manager = new WebsiteDataManager(cache_dir.get_path());
         WebKit.WebContext context = new WebKit.WebContext.with_website_data_manager(data_manager);
+        // Use a shared process so we don't spawn N WebProcess instances
+        // when showing N messages in a conversation.
         context.set_process_model(WebKit.ProcessModel.SHARED_SECONDARY_PROCESS);
-        context.set_cache_model(WebKit.CacheModel.DOCUMENT_BROWSER);
+        // Use the doc viewer model since each web view instance only
+        // ever shows a single HTML document.
+        context.set_cache_model(WebKit.CacheModel.DOCUMENT_VIEWER);
 
         context.register_uri_scheme("cid", (req) => {
                 ClientWebView? view = req.get_web_view() as ClientWebView;
@@ -287,7 +291,7 @@ public class ClientWebView : WebKit.WebView {
 
         this.decide_policy.connect(on_decide_policy);
         this.web_process_crashed.connect(() => {
-                debug("Web process crashed");
+                warning("Web process crashed");
                 return Gdk.EVENT_PROPAGATE;
             });
 
@@ -457,9 +461,11 @@ public class ClientWebView : WebKit.WebView {
             type == WebKit.PolicyDecisionType.NEW_WINDOW_ACTION) {
             WebKit.NavigationPolicyDecision nav_policy =
                 (WebKit.NavigationPolicyDecision) policy;
-            switch (nav_policy.get_navigation_type()) {
+            WebKit.NavigationAction nav_action =
+                nav_policy.get_navigation_action();
+            switch (nav_action.get_navigation_type()) {
             case WebKit.NavigationType.OTHER:
-                if (nav_policy.request.uri == INTERNAL_URL_BODY) {
+                if (nav_action.get_request().uri == INTERNAL_URL_BODY) {
                     policy.use();
                 } else {
                     policy.ignore();
@@ -469,7 +475,7 @@ public class ClientWebView : WebKit.WebView {
             case WebKit.NavigationType.LINK_CLICKED:
                 // Let the app know a user activated a link, but don't
                 // try to load it ourselves.
-                link_activated(nav_policy.request.uri);
+                link_activated(nav_action.get_request().uri);
                 policy.ignore();
                 break;
 
