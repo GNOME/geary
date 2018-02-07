@@ -76,6 +76,8 @@ public class MainWindow : Gtk.ApplicationWindow {
         set_styling();
         setup_layout(application.config);
         on_change_orientation();
+
+        this.main_layout.show_all();
     }
 
     public void show_infobar(MainWindowInfoBar info_bar) {

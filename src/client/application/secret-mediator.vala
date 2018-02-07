@@ -118,7 +118,6 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
         // If the main window is hidden, make it visible now and present to user as transient parent
         Gtk.Window? main_window = this.instance.get_active_window();
         if (main_window != null && !main_window.visible) {
-            main_window.show_all();
             main_window.present_with_time(Gdk.CURRENT_TIME);
         }
 

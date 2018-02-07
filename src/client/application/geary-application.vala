@@ -224,7 +224,6 @@ public class GearyApplication : Gtk.Application {
 
         // When the app is started hidden, show_all() never gets
         // called, do so here to prevent an empty window appearing.
-        controller.main_window.show_all();
         controller.main_window.present();
 
         return true;

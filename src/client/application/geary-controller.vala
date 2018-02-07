@@ -1198,7 +1198,7 @@ public class GearyController : Geary.BaseObject {
             !upgrade_dialog.visible &&
             !cancellable_open_account.is_cancelled() &&
             !Args.hidden_startup)
-            main_window.show_all();
+            main_window.show();
     }
     
     /**
@@ -1441,7 +1441,6 @@ public class GearyController : Geary.BaseObject {
     private void on_indicator_activated_application(uint32 timestamp) {
         // When the app is started hidden, show_all() never gets
         // called, do so here to prevent an empty window appearing.
-        main_window.show_all();
         main_window.present_with_time(timestamp);
     }
     
