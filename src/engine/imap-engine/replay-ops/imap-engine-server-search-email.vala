@@ -29,12 +29,16 @@ private class Geary.ImapEngine.ServerSearchEmail : Geary.ImapEngine.AbstractList
         // accumulate nothing, nothing unfulfilled (yet)
         return ReplayOperation.Status.CONTINUE;
     }
-    
+
     public override async ReplayOperation.Status replay_remote_async() throws Error {
-        Gee.SortedSet<Imap.UID>? uids = yield owner.remote_folder.search_async(criteria, cancellable);
+        Imap.FolderSession remote =
+            yield this.owner.claim_remote_session(this.cancellable);
+        Gee.SortedSet<Imap.UID>? uids = yield remote.search_async(
+            criteria, this.cancellable
+        );
         if (uids == null || uids.size == 0)
             return ReplayOperation.Status.COMPLETED;
-        
+
         // if the earliest UID is not in the local store, then need to expand vector to it
         Geary.EmailIdentifier? first_id = yield owner.local_folder.get_id_async(uids.first(),
             ImapDB.Folder.ListFlags.NONE, cancellable);

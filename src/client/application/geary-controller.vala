@@ -2451,7 +2451,6 @@ public class GearyController : Geary.BaseObject {
         try {
             yield emptyable.open_async(Geary.Folder.OpenFlags.NO_DELAY, cancellable);
             open = true;
-            yield emptyable.wait_for_open_async(cancellable);
             yield emptyable.empty_folder_async(cancellable);
         } finally {
             if (open) {

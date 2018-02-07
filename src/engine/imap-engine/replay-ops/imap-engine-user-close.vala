@@ -5,43 +5,46 @@
  */
 
 private class Geary.ImapEngine.UserClose : Geary.ImapEngine.ReplayOperation {
-    public bool closing = false;
-    
-    private MinimalFolder owner;
-    private Cancellable? cancellable;
-    
-    public UserClose(MinimalFolder owner, Cancellable? cancellable) {
+
+    /** A function that this operation can call to close the folder. */
+    public delegate bool CloseFolder();
+
+    /** Determines the state of the close operation. */
+    public Trillian is_closing = Trillian.UNKNOWN;
+
+    private CloseFolder close;
+
+
+    public UserClose(owned CloseFolder close) {
         base ("UserClose", Scope.LOCAL_ONLY);
-        
-        this.owner = owner;
-        this.cancellable = cancellable;
+        this.close = (owned) close;
     }
-    
+
     public override void notify_remote_removed_position(Imap.SequenceNumber removed) {
     }
-    
+
     public override void notify_remote_removed_ids(Gee.Collection<ImapDB.EmailIdentifier> ids) {
     }
-    
+
     public override void get_ids_to_be_remote_removed(Gee.Collection<ImapDB.EmailIdentifier> ids) {
     }
-    
+
     public override async ReplayOperation.Status replay_local_async() throws Error {
-        closing = yield owner.user_close_async(cancellable);
-        
+        bool closing = this.close();
+        this.is_closing = Trillian.from_boolean(closing);
         return ReplayOperation.Status.COMPLETED;
     }
-    
+
     public override async void backout_local_async() throws Error {
     }
-    
+
     public override async ReplayOperation.Status replay_remote_async() throws Error {
         // should not be called
         return ReplayOperation.Status.COMPLETED;
     }
-    
-    public override string describe_state() {
-        return "";
-    }
-}
 
+    public override string describe_state() {
+        return "is_closing: %s".printf(this.is_closing.to_string());
+    }
+
+}

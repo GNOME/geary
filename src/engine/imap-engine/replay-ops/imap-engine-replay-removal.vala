@@ -47,9 +47,8 @@ private class Geary.ImapEngine.ReplayRemoval : Geary.ImapEngine.ReplayOperation 
     }
 
     public override async ReplayOperation.Status replay_remote_async() throws Error {
-        debug("%s: ReplayRemoval current remote_count=%d this.position=%s reported_remote_count=%d",
-              this.owner.to_string(), this.owner.remote_count,
-              this.position.value.to_string(), this.remote_count);
+        debug("%s: ReplayRemoval this.position=%s reported_remote_count=%d",
+              this.owner.to_string(), this.position.value.to_string(), this.remote_count);
 
         if (this.position.is_valid()) {
             yield do_replay_removed_message();
@@ -151,9 +150,9 @@ private class Geary.ImapEngine.ReplayRemoval : Geary.ImapEngine.ReplayOperation 
             );
         }
 
-        debug("%s ReplayRemoval: completed, current remote_count=%d "
+        debug("%s ReplayRemoval: completed, "
             + "(this.remote_count=%d local_count=%d starting local_count=%d this.position=%ld local_position=%ld marked=%s)",
-              this.owner.to_string(), this.owner.remote_count,
+              this.owner.to_string(),
               this.remote_count, new_local_count, local_count,
               this.position.value, local_position, marked.to_string());
     }

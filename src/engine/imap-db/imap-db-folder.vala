@@ -89,7 +89,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     private string account_owner_email;
     private int64 folder_id;
     private Geary.Imap.FolderProperties properties;
-    
+
     /**
      * Fired after one or more emails have been fetched with all Fields, and
      * saved locally.
@@ -101,11 +101,13 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
      * change the unread count for other folders that contain the email.
      */
     public signal void unread_updated(Gee.Map<ImapDB.EmailIdentifier, bool> unread_status);
-    
-    internal Folder(ImapDB.Database db, Geary.FolderPath path, ContactStore contact_store,
-        string account_owner_email, int64 folder_id, Geary.Imap.FolderProperties properties) {
-        assert(folder_id != Db.INVALID_ROWID);
-        
+
+    internal Folder(ImapDB.Database db,
+                    Geary.FolderPath path,
+                    ContactStore contact_store,
+                    string account_owner_email,
+                    int64 folder_id,
+                    Geary.Imap.FolderProperties properties) {
         this.db = db;
         this.path = path;
         this.contact_store = contact_store;
@@ -114,7 +116,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         this.folder_id = folder_id;
         this.properties = properties;
     }
-    
+
     public unowned Geary.FolderPath get_path() {
         return path;
     }
@@ -137,88 +139,138 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         
         return count;
     }
-    
-    // Updates both the FolderProperties and the value in the local store.
-    public async void update_remote_status_message_count(int count, Cancellable? cancellable) throws Error {
-        if (count < 0)
-            return;
-        
-        yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
+
+    /**
+     * Updates folder's STATUS message count, attributes, recent, and unseen.
+     *
+     * UIDVALIDITY and UIDNEXT updated when the folder is
+     * SELECT/EXAMINED (see update_folder_select_examine_async())
+     * unless update_uid_info is true.
+     */
+    public async void update_folder_status(Geary.Imap.FolderProperties remote_properties,
+                                           bool update_uid_info,
+                                           bool respect_marked_for_remove,
+                                           Cancellable? cancellable)
+        throws Error {
+        // adjust for marked remove, but don't write these adjustments to the database -- they're
+        // only reflected in memory via the properties
+        int adjust_unseen = 0;
+        int adjust_total = 0;
+
+        yield this.db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
+            if (respect_marked_for_remove) {
+                Db.Statement stmt = cx.prepare("""
+                    SELECT flags
+                    FROM MessageTable
+                    WHERE id IN (
+                        SELECT message_id
+                        FROM MessageLocationTable
+                        WHERE folder_id = ? AND remove_marker = ?
+                    )
+                """);
+                stmt.bind_rowid(0, folder_id);
+                stmt.bind_bool(1, true);
+
+                Db.Result results = stmt.exec(cancellable);
+                while (!results.finished) {
+                    adjust_total++;
+
+                    Imap.EmailFlags flags = new Imap.EmailFlags(Imap.MessageFlags.deserialize(
+                        results.string_at(0)));
+                    if (flags.contains(EmailFlags.UNREAD))
+                        adjust_unseen++;
+
+                    results.next(cancellable);
+                }
+            }
+
             Db.Statement stmt = cx.prepare(
-                "UPDATE FolderTable SET last_seen_status_total=? WHERE id=?");
-            stmt.bind_int(0, Numeric.int_floor(count, 0));
-            stmt.bind_rowid(1, folder_id);
-            
+                "UPDATE FolderTable SET attributes=?, unread_count=? WHERE id=?");
+            stmt.bind_string(0, remote_properties.attrs.serialize());
+            stmt.bind_int(1, remote_properties.email_unread);
+            stmt.bind_rowid(2, this.folder_id);
             stmt.exec(cancellable);
-            
+
+            if (update_uid_info)
+                do_update_uid_info(cx, remote_properties, cancellable);
+
+            if (remote_properties.status_messages >= 0) {
+                do_update_last_seen_status_total(
+                    cx, remote_properties.status_messages, cancellable
+                );
+            }
+
             return Db.TransactionOutcome.COMMIT;
         }, cancellable);
-        
-        properties.set_status_message_count(count, false);
+
+        // update appropriate local properties
+        this.properties.set_status_unseen(
+            Numeric.int_floor(remote_properties.unseen - adjust_unseen, 0)
+        );
+        this.properties.recent = remote_properties.recent;
+        this.properties.attrs = remote_properties.attrs;
+
+        if (update_uid_info) {
+            this.properties.uid_validity = remote_properties.uid_validity;
+            this.properties.uid_next = remote_properties.uid_next;
+        }
+
+        // only update STATUS MESSAGES count if previously set, but use this count as the
+        // "authoritative" value until another SELECT/EXAMINE or MESSAGES response
+        if (remote_properties.status_messages >= 0) {
+            this.properties.set_status_message_count(
+                Numeric.int_floor(remote_properties.status_messages - adjust_total, 0),
+                true
+            );
+        }
     }
-    
+
+    /**
+     * Updates folder's SELECT/EXAMINE message count, UIDVALIDITY, UIDNEXT, unseen, and recent.
+     * See also update_folder_status_async().
+     */
+    public async void update_folder_select_examine(Geary.Imap.FolderProperties remote_properties,
+                                                   Cancellable? cancellable)
+        throws Error {
+        yield this.db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
+            do_update_uid_info(cx, remote_properties, cancellable);
+
+            if (remote_properties.select_examine_messages >= 0) {
+                do_update_last_seen_select_examine_total(
+                    cx, remote_properties.select_examine_messages, cancellable
+                );
+            }
+
+            return Db.TransactionOutcome.COMMIT;
+        }, cancellable);
+
+        // update appropriate local properties
+        this.properties.set_status_unseen(remote_properties.unseen);
+        this.properties.recent = remote_properties.recent;
+        this.properties.uid_validity = remote_properties.uid_validity;
+        this.properties.uid_next = remote_properties.uid_next;
+
+        if (remote_properties.select_examine_messages >= 0) {
+            this.properties.set_select_examine_message_count(
+                remote_properties.select_examine_messages
+            );
+        }
+    }
+
     // Updates both the FolderProperties and the value in the local store.  Must be called while
     // open.
     public async void update_remote_selected_message_count(int count, Cancellable? cancellable) throws Error {
         if (count < 0)
             return;
-        
+
         yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
-            Db.Statement stmt = cx.prepare(
-                "UPDATE FolderTable SET last_seen_total=? WHERE id=?");
-            stmt.bind_int(0, Numeric.int_floor(count, 0));
-            stmt.bind_rowid(1, folder_id);
-            
-            stmt.exec(cancellable);
-            
+                do_update_last_seen_select_examine_total(cx, count, cancellable);
             return Db.TransactionOutcome.COMMIT;
         }, cancellable);
-        
+
         properties.set_select_examine_message_count(count);
     }
-    
-    public async Imap.StatusData fetch_status_data(ListFlags flags, Cancellable? cancellable) throws Error {
-        Imap.StatusData? status_data = null;
-        yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
-            Db.Statement stmt = cx.prepare("""
-                SELECT uid_next, uid_validity, unread_count
-                FROM FolderTable
-                WHERE id = ?
-            """);
-            stmt.bind_rowid(0, folder_id);
-            
-            Db.Result result = stmt.exec(cancellable);
-            if (result.finished)
-                return Db.TransactionOutcome.DONE;
-            
-            int messages = do_get_email_count(cx, flags, cancellable);
-            Imap.UID? uid_next = !result.is_null_for("uid_next")
-                ? new Imap.UID(result.int64_for("uid_next"))
-                : null;
-            Imap.UIDValidity? uid_validity = !result.is_null_for("uid_validity")
-                ? new Imap.UIDValidity(result.int64_for("uid_validity"))
-                : null;
 
-            // Note that recent is not stored
-            status_data = new Imap.StatusData(
-                // XXX using to_string here very sketchy
-                new Imap.MailboxSpecifier(this.path.to_string()),
-                messages,
-                0,
-                uid_next,
-                uid_validity,
-                result.int_for("unread_count")
-            );
-
-            return Db.TransactionOutcome.DONE;
-        }, cancellable);
-        
-        if (status_data == null)
-            throw new EngineError.NOT_FOUND("%s STATUS not found in database", path.to_string());
-        
-        return status_data;
-    }
-    
     // Returns a Map with the created or merged email as the key and the result of the operation
     // (true if created, false if merged) as the value.  Note that every email
     // object passed in's EmailIdentifier will be fully filled out by this
@@ -2421,5 +2473,49 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         
         return 0;
     }
-}
 
+    // For SELECT/EXAMINE responses, not STATUS responses
+    private void do_update_last_seen_select_examine_total(Db.Connection cx,
+                                                          int total,
+                                                          Cancellable? cancellable)
+        throws Error {
+        Db.Statement stmt = cx.prepare(
+            "UPDATE FolderTable SET last_seen_total=? WHERE id=?"
+        );
+        stmt.bind_int(0, Numeric.int_floor(total, 0));
+        stmt.bind_rowid(1, this.folder_id);
+        stmt.exec(cancellable);
+    }
+
+    // For STATUS responses, not SELECT/EXAMINE responses
+    private void do_update_last_seen_status_total(Db.Connection cx,
+                                                  int total,
+                                                  Cancellable? cancellable)
+        throws Error {
+        Db.Statement stmt = cx.prepare(
+            "UPDATE FolderTable SET last_seen_status_total=? WHERE id=?");
+        stmt.bind_int(0, Numeric.int_floor(total, 0));
+        stmt.bind_rowid(1, this.folder_id);
+        stmt.exec(cancellable);
+    }
+
+    private void do_update_uid_info(Db.Connection cx,
+                                    Imap.FolderProperties remote_properties,
+                                    Cancellable? cancellable)
+        throws Error {
+        int64 uid_validity = (remote_properties.uid_validity != null)
+            ? remote_properties.uid_validity.value
+            : Imap.UIDValidity.INVALID;
+        int64 uid_next = (remote_properties.uid_next != null)
+            ? remote_properties.uid_next.value
+            : Imap.UID.INVALID;
+
+        Db.Statement stmt = cx.prepare(
+            "UPDATE FolderTable SET uid_validity=?, uid_next=? WHERE id=?");
+        stmt.bind_int64(0, uid_validity);
+        stmt.bind_int64(1, uid_next);
+        stmt.bind_rowid(2, this.folder_id);
+        stmt.exec(cancellable);
+    }
+
+}
