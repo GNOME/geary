@@ -943,7 +943,11 @@ public class Geary.RFC822.Message : BaseObject {
         GMime.MessagePart? messagepart = root as GMime.MessagePart;
         if (messagepart != null) {
             GMime.Message sub_message = messagepart.get_message();
-            messages.add(new Geary.RFC822.Message.from_gmime_message(sub_message));
+            if (sub_message != null) {
+                messages.add(new Geary.RFC822.Message.from_gmime_message(sub_message));
+            } else {
+                warning("Corrupt message, possibly bug 769697");
+            }
         }
     }
     
