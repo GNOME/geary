@@ -1601,9 +1601,12 @@ public class GearyController : Geary.BaseObject {
                     folder.open_async.begin(Geary.Folder.OpenFlags.NO_DELAY, cancellable);
 
                     // Always notify for new messages in the Inbox
+                    this.new_messages_monitor.add_folder(folder, cancellable);
                     break;
-                    
+
                 case Geary.SpecialFolderType.NONE:
+                    // Only notify for new messages in non-special
+                    // descendants of the Inbox
                     if (is_inbox_descendant(folder)) {
                         this.new_messages_monitor.add_folder(folder, cancellable);
                     }
