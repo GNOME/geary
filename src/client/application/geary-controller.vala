@@ -1519,14 +1519,14 @@ public class GearyController : Geary.BaseObject {
         if (conversation != null)
             main_window.conversation_list_view.select_conversation(conversation);
     }
-    
+
     private void on_indicator_activated_application(uint32 timestamp) {
         // When the app is started hidden, show_all() never gets
         // called, do so here to prevent an empty window appearing.
         main_window.show_all();
-        main_window.present_with_time(timestamp);
+        this.application.present();
     }
-    
+
     private void on_indicator_activated_composer(uint32 timestamp) {
         on_indicator_activated_application(timestamp);
         on_new_message();
@@ -2375,7 +2375,7 @@ public class GearyController : Geary.BaseObject {
         
         // Find out what to do with the inline composers.
         // TODO: Remove this in favor of automatically saving drafts
-        main_window.present();
+        this.application.present();
         ConfirmationDialog dialog = new ConfirmationDialog(main_window, _("Close open draft messages?"), 
             null, Stock._CLOSE, "destructive-action");
         if (dialog.run() == Gtk.ResponseType.OK) {
@@ -2544,17 +2544,17 @@ public class GearyController : Geary.BaseObject {
             && !current_folder.properties.is_local_only && current_account != null
             && (current_folder as Geary.FolderSupport.Move) != null);
     }
-    
+
     public bool confirm_delete(int num_messages) {
-        main_window.present();
+        this.application.present();
         ConfirmationDialog dialog = new ConfirmationDialog(main_window, ngettext(
             "Do you want to permanently delete this message?",
             "Do you want to permanently delete these messages?", num_messages),
             null, _("Delete"), "destructive-action");
-        
+
         return (dialog.run() == Gtk.ResponseType.OK);
     }
-    
+
     private async void archive_or_delete_selection_async(bool archive, bool trash,
         Cancellable? cancellable) throws Error {
         if (!can_switch_conversation_view())

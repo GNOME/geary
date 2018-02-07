@@ -114,7 +114,7 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
         Gtk.Window? main_window = GearyApplication.instance.controller.main_window;
         if (main_window != null && !main_window.visible) {
             main_window.show_all();
-            main_window.present_with_time(Gdk.CURRENT_TIME);
+            GearyApplication.instance.present();
         }
         
         PasswordDialog password_dialog = new PasswordDialog(main_window, services.has_smtp(),
