@@ -2210,8 +2210,7 @@ public class GearyController : Geary.BaseObject {
         debug(@"Creating composer of type $(widget.compose_type); $(composer_widgets.size) composers total");
 
         if (inline) {
-            if (widget.state == ComposerWidget.ComposerState.NEW ||
-                widget.state == ComposerWidget.ComposerState.PANED) {
+            if (widget.state == ComposerWidget.ComposerState.PANED) {
                 main_window.conversation_viewer.do_compose(widget);
                 get_window_action(ACTION_FIND_IN_CONVERSATION).set_enabled(false);
             } else {
@@ -2274,7 +2273,7 @@ public class GearyController : Geary.BaseObject {
         // it if it hasn't been modified; otherwise open a new composer in a new window.
         if (compose_type == ComposerWidget.ComposeType.NEW_MESSAGE) {
             foreach (ComposerWidget cw in composer_widgets) {
-                if (cw.state == ComposerWidget.ComposerState.NEW) {
+                if (cw.state == ComposerWidget.ComposerState.PANED) {
                     if (!cw.is_blank) {
                         inline = false;
                         return true;

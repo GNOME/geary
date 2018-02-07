@@ -28,11 +28,10 @@ public class ComposerWidget : Gtk.EventBox {
         PENDING_CLOSE,
         CANCEL_CLOSE
     }
-    
+
     public enum ComposerState {
         DETACHED,
         PANED,
-        NEW,
         INLINE,
         INLINE_COMPACT
     }
@@ -389,7 +388,7 @@ public class ComposerWidget : Gtk.EventBox {
         this.config = config;
         this.compose_type = compose_type;
         if (this.compose_type == ComposeType.NEW_MESSAGE)
-            this.state = ComposerState.NEW;
+            this.state = ComposerState.PANED;
         else if (this.compose_type == ComposeType.FORWARD || this.account.information.alternate_mailboxes != null)
             this.state = ComposerState.INLINE;
         else
