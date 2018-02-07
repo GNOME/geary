@@ -144,17 +144,17 @@ public class ComposerWebView : ClientWebView {
                               string quote,
                               bool top_posting,
                               bool is_draft) {
-        const string HTML_PRE = """<html><body dir="auto">""";
+        const string HTML_PRE = """<html><body>""";
         const string HTML_POST = """</body></html>""";
         const string BODY_PRE = """
-<div id="geary-body">""";
+<div id="geary-body" dir="auto">""";
         const string BODY_POST = """</div>
 """;
         const string SIGNATURE = """
-<div id="geary-signature">%s</div>
+<div id="geary-signature" dir="auto">%s</div>
 """;
         const string QUOTE = """
-<div id="geary-quote"><br />%s</div>
+<div id="geary-quote" dir="auto"><br />%s</div>
 """;
         const string CURSOR = "<div><span id=\"cursormarker\"></span><br /></div>";
         const string SPACER = "<div><br /></div>";
