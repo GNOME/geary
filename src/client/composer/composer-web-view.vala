@@ -144,7 +144,7 @@ public class ComposerWebView : ClientWebView {
                               string quote,
                               bool top_posting,
                               bool is_draft) {
-        const string HTML_PRE = """<html><body dir="auto">""";
+        const string HTML_PRE = """<html><body class="%s" dir="auto">""";
         const string HTML_POST = """</body></html>""";
         const string BODY_PRE = """
 <div id="geary-body">""";
@@ -160,7 +160,8 @@ public class ComposerWebView : ClientWebView {
         const string SPACER = "<div><br /></div>";
 
         StringBuilder html = new StringBuilder();
-        html.append(HTML_PRE);
+        string body_class = (this.is_rich_text) ? "" : "plain";
+        html.append(HTML_PRE.printf(body_class));
         if (!is_draft) {
             html.append(BODY_PRE);
             bool have_body = !Geary.String.is_empty(body);
@@ -204,7 +205,9 @@ public class ComposerWebView : ClientWebView {
      */
     public void set_rich_text(bool enabled) {
         this.is_rich_text = enabled;
-        this.call.begin(Geary.JS.callable("geary.setRichText").bool(enabled), null);
+        if (this.is_content_loaded) {
+            this.call.begin(Geary.JS.callable("geary.setRichText").bool(enabled), null);
+        }
     }
 
     /**

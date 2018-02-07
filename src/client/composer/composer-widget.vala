@@ -510,7 +510,7 @@ public class ComposerWidget : Gtk.EventBox {
         this.editor.document_modified.connect(() => { draft_changed(); });
         this.editor.get_editor_state().notify["typing-attributes"].connect(on_typing_attributes_changed);
         this.editor.key_press_event.connect(on_editor_key_press_event);
-        this.editor.load_changed.connect(on_load_changed);
+        this.editor.content_loaded.connect(on_content_loaded);
         this.editor.mouse_target_changed.connect(on_mouse_target_changed);
         this.editor.selection_changed.connect(on_selection_changed);
 
@@ -838,8 +838,14 @@ public class ComposerWidget : Gtk.EventBox {
         insert_action_group("cmp", this.actions);
         this.header.insert_action_group("cmh", this.actions);
 
-        get_action(ACTION_CLOSE_AND_SAVE).set_enabled(false);
+        this.actions.change_action_state(
+            ACTION_SHOW_EXTENDED, false
+        );
+        this.actions.change_action_state(
+            ACTION_COMPOSE_AS_HTML, this.config.compose_as_html
+        );
 
+        get_action(ACTION_CLOSE_AND_SAVE).set_enabled(false);
         get_action(ACTION_UNDO).set_enabled(false);
         get_action(ACTION_REDO).set_enabled(false);
 
@@ -872,30 +878,12 @@ public class ComposerWidget : Gtk.EventBox {
         return false;
     }
 
-    private void on_load_changed(WebKit.WebView view, WebKit.LoadEvent event) {
-        if (event == WebKit.LoadEvent.FINISHED) {
-            if (get_realized())
-                on_load_finished_and_realized();
-            else
-                realize.connect(on_load_finished_and_realized);
-        }
-    }
-
-    private void on_load_finished_and_realized() {
-        // This is safe to call even when this connection hasn't been made.
-        realize.disconnect(on_load_finished_and_realized);
-
-        this.actions.change_action_state(
-            ACTION_SHOW_EXTENDED, false
-        );
-        this.actions.change_action_state(
-            ACTION_COMPOSE_AS_HTML, this.config.compose_as_html
-        );
-
-        if (can_delete_quote)
+    private void on_content_loaded() {
+        if (this.can_delete_quote) {
             this.editor.selection_changed.connect(
                 () => { this.can_delete_quote = false; }
             );
+        }
     }
 
     private void show_attachment_overlay(bool visible) {
