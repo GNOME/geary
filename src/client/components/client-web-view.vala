@@ -469,8 +469,17 @@ public class ClientWebView : WebKit.WebView {
             case WebKit.NavigationType.LINK_CLICKED:
                 // Let the app know a user activated a link, but don't
                 // try to load it ourselves.
-                link_activated(nav_policy.request.uri);
+
+                // We need to call ignore() before emitting the signal
+                // to unblock the WebKit WebProcess, otherwise the
+                // call chain for mailto links will cause the
+                // WebProcess to deadlock, and the resulting composer
+                // will be useless. See Geary Bug 771504
+                // <https://bugzilla.gnome.org/show_bug.cgi?id=771504>
+                // and WebKitGTK Bug 182528
+                // <https://bugs.webkit.org/show_bug.cgi?id=182528>
                 policy.ignore();
+                link_activated(nav_policy.request.uri);
                 break;
 
             default:

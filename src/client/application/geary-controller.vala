@@ -2973,18 +2973,7 @@ public class GearyController : Geary.BaseObject {
 
     private void on_link_activated(string uri) {
         if (uri.down().has_prefix(Geary.ComposedEmail.MAILTO_SCHEME)) {
-            // We need to invoke this from idle to break the call
-            // chain from the WebKit signal which originally caused
-            // this handler to be invoked, otherwise the WebKit
-            // WebProcess will deadlock, and the resulting composer
-            // will be useless. See Geary Bug 771504
-            // <https://bugzilla.gnome.org/show_bug.cgi?id=771504>
-            // and WebKitGTK Bug 182528
-            // <https://bugs.webkit.org/show_bug.cgi?id=182528>
-            Idle.add(() => {
-                    compose_mailto(uri);
-                    return Source.REMOVE;
-                });
+            compose_mailto(uri);
         } else {
             open_uri(uri);
         }
