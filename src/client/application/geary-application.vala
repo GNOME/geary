@@ -222,9 +222,12 @@ public class GearyApplication : Gtk.Application {
         if (controller.main_window == null)
             return false;
 
-        // When the app is started hidden, show_all() never gets
-        // called, do so here to prevent an empty window appearing.
-        controller.main_window.present();
+        // Use present_with_time and a made up time so the present
+        // actually works, as a work around for Bug 766284
+        // <https://bugzilla.gnome.org/show_bug.cgi?id=766284>.
+        this.controller.main_window.present_with_time(
+            (uint32) (get_real_time() / 1000)
+        );
 
         return true;
     }

@@ -186,10 +186,6 @@ public class ComposerEmbed : Gtk.EventBox, ComposerContainer {
         return ret;
     }
 
-    public void present() {
-        top_window.present();
-    }
-
     public void vanish() {
         hide();
         this.composer.state = ComposerWidget.ComposerState.DETACHED;

@@ -115,18 +115,19 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
         // to serialize the code
         int token = yield dialog_mutex.claim_async(null);
 
-        // If the main window is hidden, make it visible now and present to user as transient parent
-        Gtk.Window? main_window = this.instance.get_active_window();
-        if (main_window != null && !main_window.visible) {
-            main_window.present_with_time(Gdk.CURRENT_TIME);
-        }
+        // Ensure main window present to the window
+        this.instance.present();
 
-        PasswordDialog password_dialog = new PasswordDialog(main_window, services.has_smtp(),
-            account_information, services);
+        PasswordDialog password_dialog = new PasswordDialog(
+            this.instance.get_active_window(),
+            services.has_smtp(),
+            account_information,
+            services
+        );
         bool result = password_dialog.run();
-        
+
         dialog_mutex.release(ref token);
-        
+
         if (!result) {
             // user cancelled the dialog
             imap_password = null;
