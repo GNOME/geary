@@ -37,8 +37,8 @@ class Geary.App.ConversationSetTest : Gee.TestCase {
     }
 
     public void add_all_basic() {
-        Email e1 = new Email(new MockEmailIdentifer(1));
-        Email e2 = new Email(new MockEmailIdentifer(2));
+        Email e1 = setup_email(1);
+        Email e2 = setup_email(2);
 
         Gee.LinkedList<Email> emails = new Gee.LinkedList<Email>();
         emails.add(e1);
@@ -252,6 +252,13 @@ class Geary.App.ConversationSetTest : Gee.TestCase {
         assert(this.test.size == 2);
         assert(this.test.get_email_count() == 2);
 
+        Conversation? c1 = this.test.get_by_email_identifier(e1.id);
+        Conversation? c3 = this.test.get_by_email_identifier(e3.id);
+
+        assert(c1 != null);
+        assert(c3 != null);
+        assert(c1 != c3);
+
         Gee.LinkedList<Email> emails = new Gee.LinkedList<Email>();
         emails.add(e2);
 
@@ -270,18 +277,35 @@ class Geary.App.ConversationSetTest : Gee.TestCase {
         assert(this.test.size == 1);
         assert(this.test.get_email_count() == 3);
 
-        Conversation convo = this.test.get_by_email_identifier(e1.id);
-        assert(convo.get_email_by_id(e1.id) == e1);
-        assert(convo.get_email_by_id(e2.id) == e2);
-        assert(convo.get_email_by_id(e3.id) == e3);
+        Conversation? c2 = this.test.get_by_email_identifier(e2.id);
+        assert(c2 != null);
+        assert(c2.get_email_by_id(e1.id) == e1);
+        assert(c2.get_email_by_id(e2.id) == e2);
+        assert(c2.get_email_by_id(e3.id) == e3);
+
+        // e2 might have been appended to e1's convo with e3, or vice
+        // versa, depending on the gods of entropy.
+        assert(c1 == c2 || c3 == c2);
+        bool e1_won = (c1 == c2);
 
         assert(appended.size == 2);
-        assert(appended.get(convo) != null);
-        assert(appended.get(convo).contains(e2) == true);
-        assert(appended.get(convo).contains(e3) == true);
+        assert(appended.get(c2) != null);
+        assert(appended.get(c2).size == 2);
+        assert(appended.get(c2).contains(e2) == true);
+        if (e1_won) {
+            assert(appended.get(c2).contains(e3) == true);
+        } else {
+            assert(appended.get(c2).contains(e1) == true);
+        }
 
         assert(added.is_empty);
         assert(removed.size == 1);
+        if (e1_won) {
+            assert(removed.contains(c3) == true);
+        } else {
+            assert(removed.contains(c1) == true);
+        }
+
     }
 
     public void add_all_multi_path() {
@@ -434,6 +458,7 @@ class Geary.App.ConversationSetTest : Gee.TestCase {
 
     private Email setup_email(int id, Email? references = null) {
         Email email = new Email(new MockEmailIdentifer(id));
+        DateTime now = new DateTime.now_local();
         Geary.RFC822.MessageID mid = new Geary.RFC822.MessageID(
             "test%d@localhost".printf(id)
         );
@@ -444,6 +469,8 @@ class Geary.App.ConversationSetTest : Gee.TestCase {
                 references.message_id
             );
         }
+        email.set_send_date(new Geary.RFC822.Date.from_date_time(now));
+        email.set_email_properties(new MockEmailProperties(now));
         email.set_full_references(mid, null, refs_list);
         return email;
     }

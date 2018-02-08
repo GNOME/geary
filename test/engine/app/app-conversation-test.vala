@@ -32,8 +32,8 @@ class Geary.App.ConversationTest : Gee.TestCase {
     }
 
     public void add_basic() {
-        Geary.Email e1 = new Email(new MockEmailIdentifer(1));
-        Geary.Email e2 = new Email(new MockEmailIdentifer(2));
+        Geary.Email e1 = setup_email(1);
+        Geary.Email e2 = setup_email(2);
         uint appended = 0;
         this.test.appended.connect(() => {
                 appended++;
@@ -53,7 +53,7 @@ class Geary.App.ConversationTest : Gee.TestCase {
     }
 
     public void add_duplicate() {
-        Geary.Email e1 = new Email(new MockEmailIdentifer(1));
+        Geary.Email e1 = setup_email(1);
         uint appended = 0;
         this.test.appended.connect(() => {
                 appended++;
@@ -69,10 +69,10 @@ class Geary.App.ConversationTest : Gee.TestCase {
     }
 
     public void add_multipath() {
-        Geary.Email e1 = new Email(new MockEmailIdentifer(1));
+        Geary.Email e1 = setup_email(1);
         this.test.add(e1, singleton(this.base_folder.path));
 
-        Geary.Email e2 = new Email(new MockEmailIdentifer(2));
+        Geary.Email e2 = setup_email(2);
         this.test.add(e2, singleton(this.base_folder.path));
 
         FolderRoot other_path = new MockFolderRoot("other");
@@ -92,10 +92,10 @@ class Geary.App.ConversationTest : Gee.TestCase {
     }
 
     public void remove_basic() {
-        Geary.Email e1 = new Email(new MockEmailIdentifer(1));
+        Geary.Email e1 = setup_email(1);
         this.test.add(e1, singleton(this.base_folder.path));
 
-        Geary.Email e2 = new Email(new MockEmailIdentifer(2));
+        Geary.Email e2 = setup_email(2);
         this.test.add(e2, singleton(this.base_folder.path));
 
         uint trimmed = 0;
@@ -103,18 +103,24 @@ class Geary.App.ConversationTest : Gee.TestCase {
                 trimmed++;
             });
 
-        assert(this.test.remove(e1) == null);
+        Gee.Set<RFC822.MessageID>? removed = this.test.remove(e1);
+        assert(removed != null);
+        assert(removed.size == 1);
+        assert(removed.contains(e1.message_id));
         assert(trimmed == 1);
         assert(this.test.get_count() == 1);
 
-        assert(this.test.remove(e2) == null);
+        removed = this.test.remove(e2);
+        assert(removed != null);
+        assert(removed.size == 1);
+        assert(removed.contains(e2.message_id));
         assert(trimmed == 2);
         assert(this.test.get_count() == 0);
     }
 
     public void remove_nonexistent() {
-        Geary.Email e1 = new Email(new MockEmailIdentifer(1));
-        Geary.Email e2 = new Email(new MockEmailIdentifer(2));
+        Geary.Email e1 = setup_email(1);
+        Geary.Email e2 = setup_email(2);
 
         uint trimmed = 0;
         this.test.trimmed.connect(() => {
@@ -136,6 +142,19 @@ class Geary.App.ConversationTest : Gee.TestCase {
         Gee.LinkedList<E> collection = new Gee.LinkedList<E>();
         collection.add(element);
         return collection;
+    }
+
+
+    private Email setup_email(int id) {
+        Email email = new Email(new MockEmailIdentifer(id));
+        DateTime now = new DateTime.now_local();
+        Geary.RFC822.MessageID mid = new Geary.RFC822.MessageID(
+            "test%d@localhost".printf(id)
+        );
+        email.set_full_references(mid, null, null);
+        email.set_email_properties(new MockEmailProperties(now));
+        email.set_send_date(new Geary.RFC822.Date.from_date_time(now));
+        return email;
     }
 
 }

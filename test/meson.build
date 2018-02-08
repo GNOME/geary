@@ -6,6 +6,7 @@ geary_test_engine_sources = [
   'engine/api/geary-attachment-test.vala',
   'engine/api/geary-engine-test.vala',
   'engine/api/geary-email-identifier-test.vala',
+  'engine/api/geary-email-properties-test.vala',
   'engine/api/geary-folder-test.vala',
   'engine/api/geary-folder-path-test.vala',
   'engine/app/app-conversation-test.vala',
