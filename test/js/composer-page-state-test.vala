@@ -7,7 +7,7 @@
 
 class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
 
-    private const string COMPLETE_BODY_TEMPLATE = """<div id="geary-body">%s<div><br></div><div><br></div></div>""";
+    private const string COMPLETE_BODY_TEMPLATE = """<div id="geary-body" dir="auto">%s<div><br></div><div><br></div></div>""";
     private const string CLEAN_BODY_TEMPLATE = "%s<div><br></div><div><br></div>";
 
     public ComposerPageStateTest() {
