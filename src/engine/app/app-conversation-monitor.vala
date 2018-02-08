@@ -784,10 +784,12 @@ public class Geary.App.ConversationMonitor : BaseObject {
                 );
 
             // Add them to the conversation set
-            this.conversations.add_all_emails(
-                job.emails.values, email_paths, this.base_folder,
-                out added, out appended, out removed_due_to_merge
-            );
+            if (email_paths != null) {
+                this.conversations.add_all_emails(
+                    job.emails.values, email_paths, this.base_folder,
+                    out added, out appended, out removed_due_to_merge
+                );
+            }
         } catch (Error err) {
             debug("Unable to add emails to conversation: %s", err.message);
 

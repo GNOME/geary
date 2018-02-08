@@ -80,7 +80,7 @@ private class Geary.App.ConversationSet : BaseObject {
      * being merged into another.
      */
     public void add_all_emails(Gee.Collection<Email> emails,
-                               Gee.MultiMap<EmailIdentifier, FolderPath>? id_to_paths,
+                               Gee.MultiMap<EmailIdentifier, FolderPath> id_to_paths,
                                Folder base_folder,
                                out Gee.Collection<Conversation> added,
                                out Gee.MultiMap<Conversation, Email> appended,
@@ -126,27 +126,27 @@ private class Geary.App.ConversationSet : BaseObject {
                     foreach (Geary.Email moved in moved_email)
                         _appended.set(dest, moved);
                 }
-
-                // Nasty ol' Email won't cause problems now -- but let's check anyway!
-                assert(get_associated_conversations(email).size <= 1);
             }
 
-            bool added_conversation;
-            Conversation? conversation = add_email(
-                email,
-                base_folder,
-                (id_to_paths != null) ? id_to_paths.get(email.id) : null,
-                out added_conversation
-            );
+            Conversation? conversation = null;
+            bool added_conversation = false;
+            Gee.Collection<Geary.FolderPath>? known_paths = id_to_paths.get(email.id);
+            if (known_paths != null) {
+                // Don't add an email with no known paths - it may
+                // have been removed after being listed for adding.
+                conversation = add_email(
+                    email, base_folder, known_paths,
+                    out added_conversation
+                );
+            }
 
-            if (conversation == null)
-                continue;
-
-            if (added_conversation) {
-                _added.add(conversation);
-            } else {
-                if (!_added.contains(conversation))
-                    _appended.set(conversation, email);
+            if (conversation != null) {
+                if (added_conversation) {
+                    _added.add(conversation);
+                } else {
+                    if (!_added.contains(conversation))
+                        _appended.set(conversation, email);
+                }
             }
         }
 
@@ -375,7 +375,7 @@ private class Geary.App.ConversationSet : BaseObject {
         Geary.Email? email = conversation.get_email_by_id(id);
         switch (conversation.get_folder_count(id)) {
         case 0:
-            error("Unable to locate email %s in conversation %s",
+            error("Email %s conversation %s not in any folders",
                   id.to_string(), conversation.to_string());
 
         case 1:
