@@ -7,7 +7,7 @@
 
 public class ComposerWebViewTest : ClientWebViewTestCase<ComposerWebView> {
 
-    private const string BODY_TEMPLATE = """<div id="geary-body">%s<div><br></div><div><br></div></div>""";
+    private const string BODY_TEMPLATE = """<div id="geary-body" dir="auto">%s<div><br></div><div><br></div></div>""";
 
     public ComposerWebViewTest() {
         base("ComposerWebViewTest");
