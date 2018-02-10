@@ -4,7 +4,7 @@
 
 # This Makefile is for developer convenience, and is optimised for
 # development work, not production. Packagers should invoke meson and
-# ninja directly.
+# ninja directly. See INSTALL for further information.
 
 CONFIGURE := meson \
 	--buildtype debug \
