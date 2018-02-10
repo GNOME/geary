@@ -2,13 +2,14 @@
 # Copyright (C) 2017 geary's COPYRIGHT HOLDER
 # This file is distributed under the same license as the geary package.
 # Emin Tufan Çetin <etcetin@gmail.com>, 2017.
+# Muhammet Kara <muhammetk@gmail.com>, 2018.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: geary master\n"
-"POT-Creation-Date: 2018-01-13 08:00+0000\n"
-"PO-Revision-Date: 2017-09-30 15:06+0300\n"
-"Last-Translator: Emin Tufan Çetin <etcetin@gmail.com>\n"
+"POT-Creation-Date: 2018-02-10 10:14+0000\n"
+"PO-Revision-Date: 2018-02-10 13:22+0300\n"
+"Last-Translator: Muhammet Kara <muhammetk@gmail.com>\n"
 "Language-Team: Türkçe <gnome-turk@gnome.org>\n"
 "Language: tr\n"
 "MIME-Version: 1.0\n"
@@ -216,19 +217,16 @@ msgid "Display this User Manual"
 msgstr ""
 
 #: C/shortcuts.page:23(key)
-#, fuzzy
 #| msgid "F"
 msgid "F1"
-msgstr "F"
+msgstr "F1"
 
 #: C/shortcuts.page:26(p)
-#, fuzzy
 #| msgid "Keyboard shortcuts"
 msgid "Display all keyboard shortcuts"
-msgstr "Klavye kısayolları"
+msgstr "Tüm klavye kısayollarını göster"
 
 #: C/shortcuts.page:27(p)
-#, fuzzy
 #| msgid ""
 #| "<keyseq><key>Ctrl</key><key>Down</key></keyseq> / <keyseq><key>Ctrl</"
 #| "key><key>Up</key></keyseq>"
@@ -236,8 +234,8 @@ msgid ""
 "<keyseq><key>Ctrl</key><key>?</key></keyseq> or <keyseq><key>Ctrl</"
 "key><key>F1</key></keyseq>"
 msgstr ""
-"<keyseq><key>Ctrl</key><key>Down</key></keyseq> / <keyseq><key>Ctrl</"
-"key><key>Up</key></keyseq>"
+"<keyseq><key>Ctrl</key><key>?</key></keyseq> ya da <keyseq><key>Ctrl</"
+"key><key>F1</key></keyseq>"
 
 #: C/search.page:10(title)
 msgid "Search"
@@ -483,13 +481,11 @@ msgstr ""
 "bildirimler ekranın sağ üst köşesinde gözükür."
 
 #: C/preferences.page:54(gui)
-#, fuzzy
 #| msgid "Always watch for new mail"
 msgid "Watch for new mail when closed"
-msgstr "Yeni posta için her zaman gözetle"
+msgstr "Kapatıldığında yeni posta için her zaman gözetle"
 
 #: C/preferences.page:55(p)
-#, fuzzy
 #| msgid ""
 #| "Geary will watch your accounts for new mail even when the main window is "
 #| "not open. To do this, it will silently start when you log in to your "
@@ -501,7 +497,7 @@ msgid ""
 msgstr ""
 "Geary, ana pencere açık olmadığında bile hesaplarınızı yeni posta için "
 "gözetler. Bunu yapmak için, bilgisayarınıza giriş yaptığınızda sessizce "
-"başlar ve ana pencereyi kapattığınızda çalışmayı sürdürür."
+"başlar ve tüm pencereleri kapattığınızda çalışmayı sürdürür."
 
 #: C/overview.page:8(title)
 msgid "Overview"
@@ -874,7 +870,6 @@ msgstr ""
 "girmeniz gerekecektir."
 
 #: C/accounts.page:19(p)
-#, fuzzy
 #| msgid ""
 #| "Additional accounts can be added from the Accounts dialog. The "
 #| "<gui>Accounts</gui> option is available in either Geary's application "
@@ -891,13 +886,11 @@ msgid ""
 "is available near the top-left corner of the screen.) To add an account, "
 "click the + button."
 msgstr ""
-"Ek hesaplar Hesaplar iletişim penceresinden eklenebilir. <gui>Hesaplar</gui> "
-"seçeneği, Geary'nin uygulama menüsünde veya araç çubuğunun sağ üst "
+"Ek hesaplar, Hesaplar iletişim penceresinden eklenebilir. <gui>Hesaplar</"
+"gui> seçeneği, Geary'nin uygulama menüsünde veya araç çubuğunun sağ üst "
 "köşesindeki dişli menüde bulunabilir. (Konum, kurulu masaüstü kabuğuna "
 "bağlıdır. GNOME Shell ve Unity için uygulama menüsü ekranın sol üst köşesine "
-"yakın bulunur.) Diğer bir seçenek olarak, <keyseq><key>Ctrl</key><key>M</"
-"key></keyseq> Hesaplar iletişim penceresini açacaktır. Hesap eklemek için + "
-"düğmesine tıklayın."
+"yakın bir yerde bulunur.) Hesap eklemek için + düğmesine tıklayın."
 
 #: C/accounts.page:27(title)
 msgid "Editing existing accounts"
