@@ -24,6 +24,7 @@ set(TRANSLATED
     pl
     pt_BR
     sv
+    tr
 )
 
 set(HELP_DEST share/help)
