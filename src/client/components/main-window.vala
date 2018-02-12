@@ -165,20 +165,6 @@ public class MainWindow : Gtk.ApplicationWindow {
         } catch (Error e) {
             error("Could not load CSS: %s", e.message);
         }
-
-        switch (Gtk.Settings.get_default().gtk_theme_name) {
-        case "Ambiance":
-        case "Radiance":
-            // Add workarounds for Ubuntu Ambiance and Radiance theme
-            // bugs in GTK+ 3.14-3.18.
-            try {
-                File file = File.new_for_uri(@"resource:///org/gnome/Geary/ambiance.css");
-                provider.load_from_file(file);
-            } catch (Error e) {
-                error("Could not load CSS: %s", e.message);
-            }
-            break;
-        }
     }
 
     private void setup_layout(Configuration config) {
