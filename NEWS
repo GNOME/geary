@@ -1,3 +1,48 @@
+Version 0.12.1
+~~~~~~~~~~~~~~
+Released: 2018-02-13
+
+Bug fixes included in this release:
+ * Parts of multipart/digest message do not expand when clicked upon. Bug
+   788637.
+ * Geary does not unlock keyring at start. Bug 784300.
+ * Syntax error in IMAP greeting from AliYun IMAP server. Bug 781488.
+ * Message body text caret (cursor) not initially visible. Bug 788797.
+ * Losing focus when clicking in empty part of the composer. Bug 779369.
+ * Line breaks lost when selecting and replying to certain messages. Bug
+   781178.
+ * Always display an in-window app-menu under Unity. Bug 770618.
+ * Crash in SoupCacheInputStream when cancelling a message load. Bug 778720.
+ * Do not show Labels on sidebar if no label is present. Bug 754802.
+ * Unable to use Ctrl+C shortcut to copy e-mail subject; must use context menu
+   instead. Bug 788494.
+ * After clicking on mailto link in Geary, the body in the composer is not
+   writable. Bug 771504.
+ * Editing message does not support RTL (e.g. Hebrew). Bug 713607.
+
+Thanks to all who contributed code fixes and enhancements to this
+release:
+ * Alex Henrie
+ * Gautier Pelloux-Prayer
+ * Kacper Bielecki
+
+Thanks also to all who contributed translations, for the user
+interface:
+ * Anders Jonsson (sv)
+ * Ask Hjorth Larsen (da)
+ * Balázs Meskó (hu)
+ * Dušan Kazik (sk)
+ * Federico Bruni (it)
+ * Kukuh Syafaat (id)
+ * Marek Cernocky (cs)
+ * Mario Blättermann (de)
+ * Piotr Drąg (pl)
+ * Rafael Fontenelle (pt_BR)
+ * Stas Solovey (ru)
+
+And for the user manual:
+ * Mario Blättermann (de)
+
 Version 0.12
 ~~~~~~~~~~~~
 Released: 2017-10-02
