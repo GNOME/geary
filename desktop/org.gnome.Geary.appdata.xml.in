@@ -79,7 +79,7 @@
   <releases>
     <release version="0.12" date="2017-10-02">
       <description>
-        <p>Enhances included in this release:</p>
+        <p>Enhancements included in this release:</p>
         <ul>
           <li>Insert images inline when composing rich text messages</li>
           <li>Improved interface for inserting links in rich text messages</li>
