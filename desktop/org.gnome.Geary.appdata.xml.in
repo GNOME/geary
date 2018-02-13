@@ -102,8 +102,7 @@
           must use context menu instead. Bug 788494.</li>
           <li>After clicking on mailto link in Geary, the body in the
           composer is not writable. Bug 771504.</li>
-          <li>Editing message does not support RTL (e.g. Hebrew). Bug
-          713607.</li>
+          <li>Editing message does not support RTL. Bug 713607.</li>
         </ul>
       </description>
     </release>

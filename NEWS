@@ -18,7 +18,7 @@ Bug fixes included in this release:
    instead. Bug 788494.
  * After clicking on mailto link in Geary, the body in the composer is not
    writable. Bug 771504.
- * Editing message does not support RTL (e.g. Hebrew). Bug 713607.
+ * Editing message does not support RTL. Bug 713607.
 
 Thanks to all who contributed code fixes and enhancements to this
 release:
