@@ -1,19 +1,19 @@
-geary (0.12.1-1~xenial1) unstable; urgency=medium
+geary (0.12.1-1~xenial2) xenial; urgency=medium
 
- * Parts of multipart/digest message do not expand when clicked upon
- * Geary does not unlock keyring at start
- * Syntax error in IMAP greeting from AliYun IMAP server
- * Message body text caret (cursor) not initially visible
- * Losing focus when clicking in empty part of the composer
- * Line breaks lost when selecting and replying to certain messages
- * Always display an in-window app-menu under Unity
- * Crash in SoupCacheInputStream when cancelling a message load
- * Do not show Labels on sidebar if no label is present
- * Unable to use Ctrl+C shortcut to copy e-mail subject
- * After clicking on mailto link in Geary, composer is not writable
- * Editing message does not support RTL
+  * Parts of multipart/digest message do not expand when clicked upon
+  * Geary does not unlock keyring at start
+  * Syntax error in IMAP greeting from AliYun IMAP server
+  * Message body text caret (cursor) not initially visible
+  * Losing focus when clicking in empty part of the composer
+  * Line breaks lost when selecting and replying to certain messages
+  * Always display an in-window app-menu under Unity
+  * Crash in SoupCacheInputStream when cancelling a message load
+  * Do not show Labels on sidebar if no label is present
+  * Unable to use Ctrl+C shortcut to copy e-mail subject
+  * After clicking on mailto link in Geary, composer is not writable
+  * Editing message does not support RTL
 
- -- Michael Gratton <mike@vee.net>  Tue, 13 Feb 2018 10:43:15 +1100
+ -- Michael Gratton <mike@vee.net>  Tue, 13 Feb 2018 11:16:00 +1100
 
 geary (0.12.0-1~xenial1) xenial; urgency=medium
 
