@@ -261,9 +261,9 @@
      borderopacity="1.0"
      inkscape:pageopacity="1"
      inkscape:pageshadow="2"
-     inkscape:zoom="0.95148835"
-     inkscape:cx="241.54612"
-     inkscape:cy="497.9739"
+     inkscape:zoom="1.9029767"
+     inkscape:cx="465.46229"
+     inkscape:cy="504.90949"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="false"
@@ -1897,12 +1897,12 @@
                sodipodi:role="line"
                x="93.624664"
                y="135.56442"
-               id="tspan8736">recipient lists if we want to truncate them when they get large and have</tspan><tspan
+               id="tspan8742">recipient lists if we want to truncate them when they get large with something</tspan><tspan
                style="stroke-width:0.26458332"
                sodipodi:role="line"
                x="93.624664"
                y="140.29385"
-               id="tspan8742">some &quot;... (and 20 other recipients)&quot;</tspan><tspan
+               id="tspan11292">like &quot;... (and 20 other recipients)&quot;</tspan><tspan
                style="stroke-width:0.26458332"
                sodipodi:role="line"
                x="93.624664"
@@ -1927,7 +1927,7 @@
                sodipodi:role="line"
                x="93.624664"
                y="163.94098"
-               id="tspan8904">after secondary. However if we remove the subject per Bug 714025, then</tspan><tspan
+               id="tspan8904">after all secondary. However if we remove the subject per Bug 714025, then</tspan><tspan
                style="stroke-width:0.26458332"
                sodipodi:role="line"
                x="93.624664"
@@ -3396,7 +3396,7 @@
            x="80.459785"
            sodipodi:role="line"
            style="stroke-width:0.26458332"
-           id="tspan11264">but avoids the other issues of the lay approach. It is also explicit in what</tspan><tspan
+           id="tspan11264">but avoids the other issues of the lazy approach. It is also explicit in what</tspan><tspan
            y="269.2149"
            x="80.459785"
            sodipodi:role="line"
