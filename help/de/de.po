@@ -5,20 +5,20 @@
 # Frank Schiersner <fs9@live.de>, 2014.
 # Simon Linden <xhi2018@googlemail.com, 2015.
 # Andreas Wilhelm <info@avedo.net>, 2014.
-# Mario Blättermann <mario.blaettermann@gmail.com>, 2017.
+# Mario Blättermann <mario.blaettermann@gmail.com>, 2017-2018.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: Geary master\n"
-"POT-Creation-Date: 2017-10-02 14:41+0000\n"
-"PO-Revision-Date: 2017-10-19 21:53+0200\n"
+"POT-Creation-Date: 2018-02-13 02:40+0000\n"
+"PO-Revision-Date: 2018-02-18 16:04+0100\n"
 "Last-Translator: Mario Blättermann <mario.blaettermann@gmail.com>\n"
 "Language-Team: Deutsch <gnome-de@gnome.org>\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Poedit 2.0.3\n"
+"X-Generator: Poedit 2.0.6\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
 
 #: C/write.page:9(title)
@@ -204,382 +204,54 @@ msgstr ""
 "Um eine einzelne Nachricht als gelesen zu markieren, wählen Sie <gui>Als "
 "gelesen markieren</gui> aus dem Auswahlmenü."
 
-#: C/shortcuts.page:11(title)
+#: C/shortcuts.page:10(title)
 msgid "Keyboard shortcuts"
 msgstr "Tastaturkürzel"
 
 #: C/shortcuts.page:12(p)
-msgid "Geary has keyboard shortcuts for most common operations."
-msgstr "Geary bietet Tastenkürzel für die meisten gängigen Operationen."
-
-#: C/shortcuts.page:15(p)
-msgid "Compose a new message"
-msgstr "Neue Nachricht erstellen"
-
-#: C/shortcuts.page:16(p)
-msgid "<keyseq><key>Ctrl</key><key>N</key></keyseq> or <key>N</key>"
-msgstr "<keyseq><key>Strg</key><key>N</key></keyseq> oder <key>N</key>"
-
-#: C/shortcuts.page:19(p)
-msgid "Reply to sender"
-msgstr "Antwort an Absender"
-
-#: C/shortcuts.page:20(p)
-msgid "<keyseq><key>Ctrl</key><key>R</key></keyseq> or <key>R</key>"
-msgstr "<keyseq><key>Strg</key><key>R</key></keyseq> oder <key>R</key>"
-
-#: C/shortcuts.page:23(p)
-msgid "Reply to all"
-msgstr "Allen antworten"
-
-#: C/shortcuts.page:24(p)
 msgid ""
-"<keyseq><key>Ctrl</key><key>Shift</key><key>R</key></keyseq> or "
-"<keyseq><key>Shift</key><key>R</key></keyseq>"
+"Geary has keyboard shortcuts for most common operations. Use the built-in "
+"keyboard shortcuts help in Geary to discover the full list. This can be "
+"accessed via the application menu: <guiseq><gui>Geary</gui><gui>Keyboard "
+"Shortcuts</gui></guiseq> or using the keyboard shortcuts listed below."
 msgstr ""
-"<keyseq><key>Strg</key><key>Umschalttaste</key><key>R</key></keyseq> oder "
-"<keyseq><key>Umschalttaste</key><key>R</key></keyseq>"
+"<app>Geary</app> verfügt über Tastenkombinationen für die am häufigsten "
+"verwendeten Operationen. Sie finden eine vollständige Liste in der Hilfe zu "
+"<app>Geary</app>. Sie erreichen diese über das Anwendungsmenü: "
+"<guiseq><gui>Geary</gui><gui>Tastenkombinationen</gui></guiseq> oder in den "
+"nachfolgend aufgelisteten Tastenkombinationen."
+
+#: C/shortcuts.page:18(p)
+msgid ""
+"The following keyboard shortcuts can be used to access on-line help from "
+"Geary:"
+msgstr ""
+"Mit den folgenden Tastenkombinationen erreichen Sie die Online-Hilfe von "
+"<app>Geary</app>:"
+
+#: C/shortcuts.page:22(p)
+msgid "Display this User Manual"
+msgstr "Dieses Benutzerhandbuch anzeigen"
+
+#: C/shortcuts.page:23(key)
+#| msgid "F"
+msgid "F1"
+msgstr "F1"
+
+#: C/shortcuts.page:26(p)
+msgid "Display all keyboard shortcuts"
+msgstr "Alle Tastaturkürzel anzeigen"
 
 #: C/shortcuts.page:27(p)
-msgid "Forward"
-msgstr "Weiterleiten"
-
-#: C/shortcuts.page:28(p)
-msgid "<keyseq><key>Ctrl</key><key>L</key></keyseq> or <key>F</key>"
-msgstr "<keyseq><key>Strg</key><key>L</key></keyseq> oder <key>F</key>"
-
-#: C/shortcuts.page:31(p)
-msgid "Archive"
-msgstr "Archiv"
-
-#: C/shortcuts.page:32(key)
-msgid "A"
-msgstr "A"
-
-#: C/shortcuts.page:35(p)
-msgid "Trash"
-msgstr "Papierkorb"
-
-#: C/shortcuts.page:36(p)
-msgid "<key>Delete</key> or <key>Backspace</key>"
-msgstr "<key>Entfernen</key> oder <key>Rücktaste</key>"
-
-#: C/shortcuts.page:39(p)
-msgid "Delete"
-msgstr "Löschen"
-
-#: C/shortcuts.page:40(p)
+#| msgid ""
+#| "<keyseq><key>Ctrl</key><key>Down</key></keyseq> / <keyseq><key>Ctrl</"
+#| "key><key>Up</key></keyseq>"
 msgid ""
-"<keyseq><key>Shift</key><key>Delete</key></keyseq> or <keyseq><key>Shift</"
-"key><key>Backspace</key></keyseq>"
+"<keyseq><key>Ctrl</key><key>?</key></keyseq> or <keyseq><key>Ctrl</"
+"key><key>F1</key></keyseq>"
 msgstr ""
-"<keyseq><key>Umschalttaste</key><key>Entf</key></keyseq> oder "
-"<keyseq><key>Umschalttaste</key><key>Rücktaste</key></keyseq>"
-
-#: C/shortcuts.page:43(p)
-msgid "Star"
-msgstr "Mit Sternchen markieren"
-
-#: C/shortcuts.page:44(key) C/shortcuts.page:100(key)
-msgid "S"
-msgstr "S"
-
-#: C/shortcuts.page:47(p)
-msgid "Unstar"
-msgstr "Sternchen-Markierung entfernen"
-
-#: C/shortcuts.page:48(key) C/shortcuts.page:138(key)
-msgid "D"
-msgstr "D"
-
-#: C/shortcuts.page:51(p)
-msgid "Mark read"
-msgstr "Als gelesen markieren"
-
-#: C/shortcuts.page:52(p)
-msgid ""
-"<keyseq><key>Ctrl</key><key>I</key></keyseq> or <keyseq><key>Shift</"
-"key><key>I</key></keyseq>"
-msgstr ""
-"<keyseq><key>Strg</key><key>I</key></keyseq> oder "
-"<keyseq><key>Umschalttaste</key><key>I</key></keyseq>"
-
-#: C/shortcuts.page:55(p)
-msgid "Mark unread"
-msgstr "Als ungelesen markieren"
-
-#: C/shortcuts.page:56(p)
-msgid ""
-"<keyseq><key>Ctrl</key><key>U</key></keyseq> or <keyseq><key>Shift</"
-"key><key>U</key></keyseq>"
-msgstr ""
-"<keyseq><key>Strg</key><key>U</key></keyseq> oder "
-"<keyseq><key>Umschalttaste</key><key>U</key></keyseq>"
-
-#: C/shortcuts.page:59(p)
-msgid "Move the conversation"
-msgstr "Eine Konversation verschieben"
-
-#: C/shortcuts.page:60(key)
-msgid "M"
-msgstr "M"
-
-#: C/shortcuts.page:63(p)
-msgid "Label the conversation"
-msgstr "Eine Konversation mit einer Beschriftung versehen"
-
-#: C/shortcuts.page:64(key) C/shortcuts.page:162(key)
-msgid "L"
-msgstr "L"
-
-#: C/shortcuts.page:67(p)
-msgid "Jump to next (older) conversation"
-msgstr "Zur nächsten (älteren) Konversation wechseln"
-
-#: C/shortcuts.page:68(key)
-msgid "J"
-msgstr "J"
-
-#: C/shortcuts.page:71(p)
-msgid "Jump to previous (newer) conversation"
-msgstr "Zur vorhergehenden (jüngeren) Konversation wechseln"
-
-#: C/shortcuts.page:72(key) C/shortcuts.page:158(key)
-msgid "K"
-msgstr "K"
-
-#: C/shortcuts.page:75(p)
-msgid "Toggle spam"
-msgstr "Unerwünscht-Markierung umschalten"
-
-#: C/shortcuts.page:76(p)
-msgid "<keyseq><key>Ctrl</key><key>J</key></keyseq> or <key>!</key>"
-msgstr "<keyseq><key>Strg</key><key>J</key></keyseq> oder <key>!</key>"
-
-#: C/shortcuts.page:79(p)
-msgid "Quit"
-msgstr "Beenden"
-
-#: C/shortcuts.page:80(key) C/shortcuts.page:96(key) C/shortcuts.page:100(key)
-#: C/shortcuts.page:104(key) C/shortcuts.page:108(key)
-#: C/shortcuts.page:112(key) C/shortcuts.page:122(key)
-#: C/shortcuts.page:126(key) C/shortcuts.page:130(key)
-#: C/shortcuts.page:138(key) C/shortcuts.page:146(key)
-#: C/shortcuts.page:150(key) C/shortcuts.page:154(key)
-#: C/shortcuts.page:158(key) C/shortcuts.page:162(key)
-#: C/shortcuts.page:166(key) C/shortcuts.page:181(key)
-msgid "Ctrl"
-msgstr "Strg"
-
-#: C/shortcuts.page:80(key)
-msgid "Q"
-msgstr "Q"
-
-#: C/shortcuts.page:83(p)
-msgid "Zoom in"
-msgstr "Ansicht vergrößern"
-
-#: C/shortcuts.page:84(p)
-msgid "<keyseq><key>Ctrl</key><key>=</key></keyseq> or <key>=</key>"
-msgstr "<keyseq><key>Strg</key><key>=</key></keyseq> oder <key>=</key>"
-
-#: C/shortcuts.page:87(p)
-msgid "Zoom out"
-msgstr "Ansicht verkleinern"
-
-#: C/shortcuts.page:88(p)
-msgid "<keyseq><key>Ctrl</key><key>-</key></keyseq> or <key>-</key>"
-msgstr "<keyseq><key>Strg</key><key>-</key></keyseq> oder <key>-</key>"
-
-#: C/shortcuts.page:91(p)
-msgid "Reset zoom"
-msgstr "Ansicht zurücksetzen"
-
-#: C/shortcuts.page:92(p)
-msgid "<keyseq><key>Ctrl</key><key>0</key></keyseq> or <key>0</key>"
-msgstr "<keyseq><key>Strg</key><key>0</key></keyseq> oder <key>0</key>"
-
-#: C/shortcuts.page:95(p)
-msgid "Close composer window"
-msgstr "Editor-Fenster schließen"
-
-#: C/shortcuts.page:96(key)
-msgid "W"
-msgstr "W"
-
-#: C/shortcuts.page:99(p)
-msgid "Jump to search box"
-msgstr "Zur Suche springen"
-
-#: C/shortcuts.page:103(p)
-msgid "Find in current conversation"
-msgstr "Aktuelle Konversation durchsuchen"
-
-#: C/shortcuts.page:104(key)
-msgid "F"
-msgstr "F"
-
-#: C/shortcuts.page:107(p)
-msgid "Find next in current conversation"
-msgstr "Nächstes in aktueller Konversation finden"
-
-#: C/shortcuts.page:108(key) C/shortcuts.page:112(key)
-msgid "G"
-msgstr "G"
-
-#: C/shortcuts.page:111(p)
-msgid "Find previous in current conversation"
-msgstr "Vorheriges in aktueller Konversation finden"
-
-#: C/shortcuts.page:112(key)
-msgid "Shift"
-msgstr "Umschalttaste"
-
-#: C/shortcuts.page:117(title)
-msgid "Composer shortcuts"
-msgstr "Tastenkombinationen des Editors"
-
-#: C/shortcuts.page:118(p)
-msgid "These shortcuts are active whenever focus is in a composer."
-msgstr ""
-"Diese Tastenkombinationen stehen zur Verfügung, sobald der Editor aktiv ist."
-
-#: C/shortcuts.page:121(p)
-msgid "Attach file"
-msgstr "Datei anhängen"
-
-#: C/shortcuts.page:122(key)
-msgid "T"
-msgstr "T"
-
-#: C/shortcuts.page:125(p)
-msgid "Quote text"
-msgstr "Text zitieren"
-
-#: C/shortcuts.page:126(key)
-msgid "]"
-msgstr "]"
-
-#: C/shortcuts.page:129(p)
-msgid "Unquote text"
-msgstr "Text nicht mehr zitieren"
-
-#: C/shortcuts.page:130(key)
-msgid "["
-msgstr "["
-
-#: C/shortcuts.page:133(p)
-msgid "Close composer"
-msgstr "Editor schließen"
-
-#: C/shortcuts.page:134(p)
-msgid "<keyseq><key>Ctrl</key><key>W</key></keyseq> or <key>Esc</key>"
-msgstr "<keyseq><key>Strg</key><key>W</key></keyseq> oder <key>Esc</key>"
-
-#: C/shortcuts.page:137(p)
-msgid "Detach composer"
-msgstr "Editor abtrennen"
-
-#: C/shortcuts.page:142(p)
-msgid "These shortcuts are only active in composers in rich text mode."
-msgstr ""
-"Diese Tastenkombinationen stehen nur in Editoren mit Rich-Text-Modus zur "
-"Verfügung."
-
-#: C/shortcuts.page:145(p)
-msgid "Bold text"
-msgstr "Fetter Text"
-
-#: C/shortcuts.page:146(key) C/shortcuts.page:181(key)
-msgid "B"
-msgstr "B"
-
-#: C/shortcuts.page:149(p)
-msgid "Italicize text"
-msgstr "Kursiver Text"
-
-#: C/shortcuts.page:150(key)
-msgid "I"
-msgstr "I"
-
-#: C/shortcuts.page:153(p)
-msgid "Underline text"
-msgstr "Text unterstreichen"
-
-#: C/shortcuts.page:154(key)
-msgid "U"
-msgstr "U"
-
-#: C/shortcuts.page:157(p)
-msgid "Strike text"
-msgstr "Text durchstreichen"
-
-#: C/shortcuts.page:161(p)
-msgid "Insert a link"
-msgstr "Verweis einfügen"
-
-#: C/shortcuts.page:165(p)
-msgid "Remove formatting"
-msgstr "Formatierung entfernen"
-
-#: C/shortcuts.page:166(key) C/shortcuts.page:186(key)
-msgid "Space"
-msgstr "Leerzeichen"
-
-#: C/shortcuts.page:172(title)
-msgid "Keyboard navigation"
-msgstr "Tastatursteuerung"
-
-#: C/shortcuts.page:173(p)
-msgid ""
-"These shortcuts can be used to move the keyboard focus in the main window."
-msgstr ""
-"Diese Tastenkombinationen können dazu verwendet werden, um den Tastaturfokus "
-"in das Hauptfenster zu verschieben."
-
-#: C/shortcuts.page:176(p)
-msgid "Move focus to the next/previous pane"
-msgstr "Fokus in die nächste bzw. vorige Ansicht wechseln"
-
-#: C/shortcuts.page:177(p)
-msgid ""
-"<keyseq><key>F6</key></keyseq> / <keyseq><key>Shift</key><key>F6</key></"
-"keyseq>"
-msgstr ""
-"<keyseq><key>F6</key><key>I</key></keyseq> oder <keyseq><key>Umschalttaste</"
-"key><key>F6</key></keyseq>"
-
-#: C/shortcuts.page:180(p)
-msgid "Move focus to conversation list"
-msgstr "Fokus auf Konversationsliste wechseln"
-
-#: C/shortcuts.page:184(p)
-msgid "Move to the next message in a conversation"
-msgstr "Zur nächsten Nachricht in einer Konversation wechseln"
-
-#: C/shortcuts.page:190(p)
-msgid "Move to the next/previous message in a conversation"
-msgstr "Zur nächsten/vorigen Nachricht in einer Konversation wechseln"
-
-#: C/shortcuts.page:191(p)
-msgid ""
-"<keyseq><key>Ctrl</key><key>Down</key></keyseq> / <keyseq><key>Ctrl</"
-"key><key>Up</key></keyseq>"
-msgstr ""
-"<keyseq><key>Strg</key><key>Runter</key></keyseq> / <keyseq><key>Strg</"
-"key><key>Hoch</key></keyseq>"
-
-#: C/shortcuts.page:197(p)
-msgid "Move to the first/last message in a conversation"
-msgstr "Zur ersten/letzten Nachricht in einer Konversation wechseln"
-
-#: C/shortcuts.page:198(p)
-msgid ""
-"<keyseq><key>Ctrl</key><key>Home</key></keyseq> / <keyseq><key>Ctrl</"
-"key><key>End</key></keyseq>"
-msgstr ""
-"<keyseq><key>Strg</key><key>Pos1</key></keyseq> / <keyseq><key>Strg</"
-"key><key>Ende</key></keyseq>"
+"<keyseq><key>Strg</key><key>?</key></keyseq> oder <keyseq><key>Strg</"
+"key><key>F1</key></keyseq>"
 
 #: C/search.page:10(title)
 msgid "Search"
@@ -799,39 +471,23 @@ msgstr ""
 "Ansicht angezeigt."
 
 #: C/preferences.page:40(title)
-msgid "Composer"
-msgstr "Editor"
-
-#: C/preferences.page:43(gui)
-msgid "Enable spell checking"
-msgstr "Rechtschreibkorrektur aktivieren"
-
-#: C/preferences.page:44(p)
-msgid ""
-"When set, Geary automatically spell checks a message as you write it, "
-"underlying each misspelled word in red."
-msgstr ""
-"Falls aktiviert, überprüft Geary eine Nachricht auf Rechtschreibfehler, noch "
-"während Sie diese schreiben und unterlegt falsch geschriebene Wörter rot."
-
-#: C/preferences.page:51(title)
 msgid "Notifications"
 msgstr "Benachrichtigungen"
 
-#: C/preferences.page:54(gui)
+#: C/preferences.page:43(gui)
 msgid "Play notification sounds"
 msgstr "Benachrichtigungstöne abspielen"
 
-#: C/preferences.page:55(p)
+#: C/preferences.page:44(p)
 msgid "When set, Geary plays a sound whenever a new message arrives."
 msgstr ""
 "Falls aktiviert, spielt Geary immer einen Ton wenn eine Nachricht ankommt."
 
-#: C/preferences.page:58(gui)
+#: C/preferences.page:47(gui)
 msgid "Show notifications for new mail"
 msgstr "Benachrichtigung bei _neuen E-Mails anzeigen"
 
-#: C/preferences.page:59(p)
+#: C/preferences.page:48(p)
 msgid ""
 "When set, Geary displays a <em>notification</em> each time a new message "
 "arrives. Notifications are displayed in a system-dependent manner. On GNOME "
@@ -845,19 +501,19 @@ msgstr ""
 "Bildschirmrand angezeigt. Unter Ubuntu Unity werden Benachrichtigungen in "
 "der oberen rechten Ecke des Bildschirms angezeigt."
 
-#: C/preferences.page:65(gui)
-msgid "Always watch for new mail"
+#: C/preferences.page:54(gui)
+msgid "Watch for new mail when closed"
 msgstr "Ständig nach neuen E-Mails prüfen"
 
-#: C/preferences.page:66(p)
+#: C/preferences.page:55(p)
 msgid ""
 "Geary will watch your accounts for new mail even when the main window is not "
 "open. To do this, it will silently start when you log in to your computer, "
-"and it will continue to run after you close the main window."
+"and it will continue to run after you close all windows."
 msgstr ""
 "Geary wird in Ihren Konten nach neuen Nachrichten suchen, auch wenn das "
 "Hauptfenster nicht geöffnet ist. Damit dies möglich wird, startet es im "
-"Hintergrund, wenn Sie sich an Ihrem Rechner anmelden, und löuft auch dann "
+"Hintergrund, wenn Sie sich an Ihrem Rechner anmelden, und läuft auch dann "
 "weiter, wenn Sie das Hauptfenster schließen."
 
 #: C/overview.page:8(title)
@@ -1248,23 +904,21 @@ msgid ""
 "<gui>Accounts</gui> option is available in either Geary's application menu "
 "or the gear menu in the upper-right of the toolbar. (The location depends on "
 "the install desktop shell. For GNOME Shell and Unity, the application menu "
-"is available near the top-left corner of the screen.) Alternately, "
-"<keyseq><key>Ctrl</key><key>M</key></keyseq> will open the Accounts dialog. "
-"To add an account, click the + button."
+"is available near the top-left corner of the screen.) To add an account, "
+"click the + button."
 msgstr ""
 "Weitere Konten können Sie im Konten-Dialogfenster hinzufügen. Sie erreichen "
 "<gui>Konten</gui> über Gearys Programm-Menü oder das Menü in der oberen "
 "rechten Ecke der Werkzeugleiste. Das hängt von Ihrer Arbeitsumgebung ab. Bei "
 "der GNOME Shell und Unity befindet sich das Programmmenü nahe der oberen "
-"linken Ecke des Bildschirms. Alternativ öffnen Sie das Konten-Dialogfenster "
-"mit der Tastenkombination <keyseq><key>Strg</key><key>M</key></keyseq>. "
-"Klicken Sie auf den + Knopf, um ein Konto hinzuzufügen."
+"linken Ecke des Bildschirms. Klicken Sie auf den + Knopf, um ein Konto "
+"hinzuzufügen."
 
-#: C/accounts.page:28(title)
+#: C/accounts.page:27(title)
 msgid "Editing existing accounts"
 msgstr "Konten bearbeiten"
 
-#: C/accounts.page:30(p)
+#: C/accounts.page:29(p)
 msgid ""
 "From the Accounts dialog, select an account and click the pencil icon to "
 "change various settings. Please note that Geary cannot change server "
@@ -1277,7 +931,7 @@ msgstr ""
 "den IMAP- oder SMTP-Server ändern wollen, müssen Sie das bereits "
 "existierende Konto löschen und neu anlegen."
 
-#: C/accounts.page:34(p)
+#: C/accounts.page:33(p)
 msgid ""
 "To change the order that accounts are displayed in the folder list, drag the "
 "accounts in the Accounts dialog to the desired order."
@@ -1285,11 +939,11 @@ msgstr ""
 "Um die Reihenfolge zu ändern, in der die Konten in der Ordnerliste angezeigt "
 "werden, ziehen Sie die Konten im Konten-Dialog an die gewünschte Position."
 
-#: C/accounts.page:37(p)
+#: C/accounts.page:36(p)
 msgid "There are some advanced options available when editing accounts:"
 msgstr "In den Konten-Einstellungen gibt es folgende erweiterte Möglichkeiten:"
 
-#: C/accounts.page:39(p)
+#: C/accounts.page:38(p)
 msgid ""
 "The <gui>Save sent mail</gui> checkbox controls whether Geary will push "
 "successfully sent messages up to the account's <gui>Sent Mail</gui> folder. "
@@ -1306,7 +960,7 @@ msgstr ""
 "ausgeschaltet haben, können Sie die von Ihnen gesendeten E-Mails nicht mehr "
 "aufrufen."
 
-#: C/accounts.page:45(p)
+#: C/accounts.page:44(p)
 msgid ""
 "The <gui>Sign emails</gui> checkbox indicates whether a signature will be "
 "automatically inserted when a composer is opened. You may enter the "
@@ -1319,7 +973,7 @@ msgstr ""
 "Text hervorzuheben, können Sie auch HTML-Tags verwenden. Mit den Knöpfen auf "
 "der rechten Seite wechseln Sie zur Vorschau der Signatur."
 
-#: C/accounts.page:50(p)
+#: C/accounts.page:49(p)
 msgid ""
 "If you leave the signature in the Accounts dialog blank, Geary will use the "
 "<file>.signature</file> file in your home directory, if it exists. This file "
@@ -1332,7 +986,7 @@ msgstr ""
 "HTML-Textauszeichnungen enthalten. Im letzteren Fall werden die "
 "Textauszeichnungen direkt und ohne Maskierung im E-Mail-Editor eingefügt."
 
-#: C/accounts.page:55(p)
+#: C/accounts.page:54(p)
 msgid ""
 "The <gui>Download mail</gui> drop-down allows you to configure how much mail "
 "Geary will keep locally. Geary can only use locally available mail when "
@@ -1343,11 +997,11 @@ msgstr ""
 "berücksichtigen, wenn es um das Durchsuchen oder das Bündeln von Nachrichten "
 "in Konversationen geht."
 
-#: C/accounts.page:63(title)
+#: C/accounts.page:62(title)
 msgid "Removing accounts"
 msgstr "Konten löschen"
 
-#: C/accounts.page:65(p)
+#: C/accounts.page:64(p)
 msgid ""
 "To delete an account, open the Accounts dialog, select the account, and "
 "press the - button. Geary will delete all information associated with the "
