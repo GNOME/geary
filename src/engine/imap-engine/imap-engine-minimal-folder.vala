@@ -771,14 +771,16 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     private async void close_internal_locked(Folder.CloseReason local_reason,
                                              Folder.CloseReason remote_reason,
                                              Cancellable? cancellable) {
+        debug("%s: Closing", this.to_string());
         // Ensure we don't attempt to start opening a remote while
         // closing
         this._account.session_pool.ready.disconnect(on_remote_ready);
         this.remote_open_timer.reset();
 
-        // Stop any internal tasks that are running
+        // Stop any internal tasks from running
         this.open_cancellable.cancel();
         this.email_prefetcher.close();
+        this.update_flags_timer.reset();
 
         // Once we get to this point, either there will be a remote
         // session open already, or none will ever get opened - no
