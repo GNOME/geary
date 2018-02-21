@@ -14,7 +14,7 @@
  * integration, Inspector support, and remote and inline image
  * handling.
  */
-public class ClientWebView : WebKit.WebView {
+public class ClientWebView : WebKit.WebView, Geary.BaseInterface {
 
 
     /** URI Scheme and delimiter for internal resource loads. */
@@ -286,6 +286,7 @@ public class ClientWebView : WebKit.WebView {
             user_content_manager: content_manager,
             settings: setts
         );
+        base_ref();
 
         // XXX get the allow prefix from the extension somehow
 
@@ -318,6 +319,10 @@ public class ClientWebView : WebKit.WebView {
                              "document-font", SettingsBindFlags.DEFAULT);
         system_settings.bind("monospace-font-name", this,
                              "monospace-font", SettingsBindFlags.DEFAULT);
+    }
+
+    ~ClientWebView() {
+        base_unref();
     }
 
     /**

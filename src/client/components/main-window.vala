@@ -7,7 +7,7 @@
  */
 
 [GtkTemplate (ui = "/org/gnome/Geary/main-window.ui")]
-public class MainWindow : Gtk.ApplicationWindow {
+public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     private const int STATUS_BAR_HEIGHT = 18;
 
     public new GearyApplication application {
@@ -63,6 +63,7 @@ public class MainWindow : Gtk.ApplicationWindow {
 
     public MainWindow(GearyApplication application) {
         Object(application: application);
+        base_ref();
 
         load_config(application.config);
         restore_saved_window_state();
@@ -78,6 +79,10 @@ public class MainWindow : Gtk.ApplicationWindow {
         on_change_orientation();
 
         this.main_layout.show_all();
+    }
+
+    ~MainWindow() {
+        base_unref();
     }
 
     public void show_infobar(MainWindowInfoBar info_bar) {
