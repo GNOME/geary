@@ -59,8 +59,8 @@ public class GearyController : Geary.BaseObject {
 
     public weak GearyApplication application { get; private set; } // circular ref
 
-    public MainWindow main_window { get; private set; }
-    
+    public MainWindow? main_window { get; private set; default = null; }
+
     public Geary.App.ConversationMonitor? current_conversations { get; private set; default = null; }
     
     public AutostartManager? autostart_manager { get; private set; default = null; }
@@ -303,6 +303,10 @@ public class GearyController : Geary.BaseObject {
         Geary.Engine.instance.account_unavailable.disconnect(on_account_unavailable);
         Geary.Engine.instance.untrusted_host.disconnect(on_untrusted_host);
 
+        // Release folder and conversations in the main window
+        on_conversations_selected(new Gee.HashSet<Geary.App.Conversation>());
+        on_folder_selected(null);
+
         // Disconnect from various UI signals.
         main_window.conversation_list_view.conversations_selected.disconnect(on_conversations_selected);
         main_window.conversation_list_view.conversation_activated.disconnect(on_conversation_activated);
@@ -320,11 +324,18 @@ public class GearyController : Geary.BaseObject {
 
         // hide window while shutting down, as this can take a few seconds under certain conditions
         main_window.hide();
-        
+
+        // Release monitoring early so held resources can be freed up
+        this.libnotify = null;
+        this.new_messages_indicator = null;
+        this.unity_launcher = null;
+        this.new_messages_monitor.clear_folders();
+        this.new_messages_monitor = null;
+
         // drop the Revokable, which will commit it if necessary
         save_revokable(null, null);
 
-        this.autostart_manager = null;
+        this.cancellable_open_account.cancel();
 
         // Close the ConversationMonitor
         if (current_conversations != null) {
@@ -338,9 +349,9 @@ public class GearyController : Geary.BaseObject {
                     this.current_conversations.base_folder.to_string(),
                     err.message
                 );
-            } finally {
-                this.current_conversations = null;
             }
+
+            this.current_conversations = null;
         }
 
         // Close all inboxes. Launch these in parallel so we're not
@@ -388,12 +399,6 @@ public class GearyController : Geary.BaseObject {
             debug("Error waiting at shutdown barrier: %s", err.message);
         }
 
-        main_window.destroy();
-
-        debug("Flushing avatar cache...");
-        avatar_cache.flush();
-        avatar_cache.dump();
-
         // Turn off the lights and lock the door behind you
         try {
             debug("Closing Engine...");
@@ -402,6 +407,38 @@ public class GearyController : Geary.BaseObject {
         } catch (Error err) {
             message("Error closing Geary Engine instance: %s", err.message);
         }
+
+        this.application.remove_window(this.main_window);
+        this.main_window.destroy();
+        this.main_window = null;
+
+        this.upgrade_dialog = null;
+
+        if (login_dialog != null) {
+            this.login_dialog.destroy();
+            this.login_dialog = null;
+        }
+
+        this.current_account = null;
+        this.current_folder = null;
+
+        this.account_to_select = null;
+        this.previous_non_search_folder = null;
+        this.validating_endpoints.clear();
+
+        this.selected_conversations = new Gee.HashSet<Geary.App.Conversation>();
+        this.last_deleted_conversation = null;
+
+        this.pending_mailtos.clear();
+        this.composer_widgets.clear();
+        this.waiting_to_close.clear();
+
+        this.autostart_manager = null;
+
+        this.avatar_cache.flush();
+        this.avatar_cache.dump();
+
+        debug("Closed GearyController");
     }
 
     /**

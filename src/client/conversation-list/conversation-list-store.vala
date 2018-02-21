@@ -124,6 +124,7 @@ public class ConversationListStore : Gtk.ListStore {
 
     public void destroy() {
         this.cancellable.cancel();
+        this.email_store = null;
         clear();
 
         // Release circular refs.

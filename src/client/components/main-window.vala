@@ -293,11 +293,6 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
             this.progress_monitor.add(conversations.progress_monitor);
             this.conversation_list_view.set_model(new_model);
         }
-
-        if (old_model != null) {
-            // Must be destroyed, but only after it has been replaced.
-            old_model.destroy();
-        }
     }
 
     private void on_folder_selected(Geary.Folder? folder) {

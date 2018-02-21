@@ -8,7 +8,7 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
     const int LOAD_MORE_HEIGHT = 100;
 
     // Used to be able to refer to the action names of the MainWindow
-    private MainWindow main_window;
+    private weak MainWindow main_window;
 
     private bool enable_load_more = true;
 
@@ -102,6 +102,7 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
             old_store.row_changed.disconnect(on_rows_changed);
             old_store.row_deleted.disconnect(on_rows_changed);
             old_store.row_deleted.disconnect(on_row_deleted);
+            old_store.destroy();
         }
 
         if (new_store != null) {
