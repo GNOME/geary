@@ -326,7 +326,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
                             CloseReason.REMOTE_CLOSE,
                             cancellable
                         );
-                    } else if (this.open_count >= 1) {
+                    } else if (this.open_count > 1) {
                         this.open_count -= 1;
                     }
                     return is_closing;
@@ -758,9 +758,14 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
                                       Cancellable? cancellable) {
         try {
             int token = yield this.close_mutex.claim_async(cancellable);
-            yield close_internal_locked(
-                local_reason, remote_reason, cancellable
-            );
+            // Only actually close if we are still open. This guards
+            // against e.g. multiple callers calling when the open
+            // count is 1.
+            if (this.open_count > 0) {
+                yield close_internal_locked(
+                    local_reason, remote_reason, cancellable
+                );
+            }
             this.close_mutex.release(ref token);
         } catch (Error err) {
             // oh well
