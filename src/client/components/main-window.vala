@@ -7,7 +7,7 @@
  */
 
 [GtkTemplate (ui = "/org/gnome/Geary/main-window.ui")]
-public class MainWindow : Gtk.ApplicationWindow {
+public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     private const int STATUS_BAR_HEIGHT = 18;
 
     public new GearyApplication application {
@@ -57,6 +57,7 @@ public class MainWindow : Gtk.ApplicationWindow {
 
     public MainWindow(GearyApplication application) {
         Object(application: application);
+        base_ref();
 
         // GTK+ 3.14 (and others?) ignores this property in the UI
         // file, so set it explicitly here to avoid having a menubar
@@ -77,6 +78,10 @@ public class MainWindow : Gtk.ApplicationWindow {
         set_styling();
         setup_layout(application.config);
         on_change_orientation();
+    }
+
+    ~MainWindow() {
+        base_unref();
     }
 
     private void load_config(Configuration config) {

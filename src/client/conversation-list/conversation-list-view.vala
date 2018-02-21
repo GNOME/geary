@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class ConversationListView : Gtk.TreeView {
+public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
     const int LOAD_MORE_HEIGHT = 100;
     
     private bool enable_load_more = true;
@@ -37,6 +37,7 @@ public class ConversationListView : Gtk.TreeView {
 
 
     public ConversationListView() {
+        base_ref();
         set_show_expanders(false);
         set_headers_visible(false);
 
@@ -73,6 +74,10 @@ public class ConversationListView : Gtk.TreeView {
 
         this.selection_update = new Geary.IdleManager(do_selection_changed);
         this.selection_update.priority = Geary.IdleManager.Priority.LOW;
+    }
+
+    ~ConversationListView() {
+        base_unref();
     }
 
     public override void destroy() {

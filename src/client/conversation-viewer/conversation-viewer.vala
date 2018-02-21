@@ -10,7 +10,7 @@
  * Displays the messages in a conversation and in-window composers.
  */
 [GtkTemplate (ui = "/org/gnome/Geary/conversation-viewer.ui")]
-public class ConversationViewer : Gtk.Stack {
+public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
 
     /**
      * The current conversation listbox, if any.
@@ -68,6 +68,8 @@ public class ConversationViewer : Gtk.Stack {
      * Constructs a new conversation view instance.
      */
     public ConversationViewer() {
+        base_ref();
+
         EmptyPlaceholder no_conversations = new EmptyPlaceholder();
         no_conversations.title = _("No conversations selected");
         no_conversations.subtitle = _(
@@ -101,6 +103,10 @@ public class ConversationViewer : Gtk.Stack {
 
         // XXX Do this in Glade when possible.
         this.conversation_find_bar.connect_entry(this.conversation_find_entry);
+    }
+
+    ~ConversationViewer() {
+        base_unref();
     }
 
     /**

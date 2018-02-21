@@ -6,7 +6,7 @@
 
 public delegate bool Locator<G>(G item);
 
-public class Sidebar.Branch : Object {
+public class Sidebar.Branch : Geary.BaseObject {
     [Flags]
     public enum Options {
         NONE = 0,

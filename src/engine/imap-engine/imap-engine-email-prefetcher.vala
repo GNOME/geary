@@ -11,7 +11,7 @@
  *
  * The EmailPrefetcher does not maintain a reference to the folder.
  */
-private class Geary.ImapEngine.EmailPrefetcher : Object {
+private class Geary.ImapEngine.EmailPrefetcher : Geary.BaseObject {
     public const int PREFETCH_DELAY_SEC = 1;
     
     private const Geary.Email.Field PREFETCH_FIELDS = Geary.Email.Field.ALL;

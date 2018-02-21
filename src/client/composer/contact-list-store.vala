@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class ContactListStore : Gtk.ListStore {
+public class ContactListStore : Gtk.ListStore, Geary.BaseInterface {
 
     // Minimum visibility for the contact to appear in autocompletion.
     private const Geary.ContactImportance CONTACT_VISIBILITY_THRESHOLD = Geary.ContactImportance.TO_TO;
@@ -67,8 +67,9 @@ public class ContactListStore : Gtk.ListStore {
     }
     
     public Geary.ContactStore contact_store { get; private set; }
-    
+
     public ContactListStore(Geary.ContactStore contact_store) {
+        base_ref();
         set_column_types(Column.get_types());
         this.contact_store = contact_store;
         contact_store.contact_added.connect(on_contact_added);
@@ -78,6 +79,7 @@ public class ContactListStore : Gtk.ListStore {
     ~ContactListStore() {
         this.contact_store.contact_added.disconnect(on_contact_added);
         this.contact_store.contact_updated.disconnect(on_contact_updated);
+        base_unref();
     }
 
     /**
