@@ -34,15 +34,14 @@ private class Geary.SmtpOutboxFolder :
         public Memory.Buffer? message;
         public SmtpOutboxEmailIdentifier outbox_id;
 
-        public OutboxRow(int64 id, int position, int64 ordering, bool sent, Memory.Buffer? message,
-            SmtpOutboxFolderRoot root) {
+        public OutboxRow(int64 id, int position, int64 ordering, bool sent, Memory.Buffer? message) {
             assert(position >= 1);
 
             this.id = id;
             this.position = position;
             this.ordering = ordering;
-            this.message = message;
             this.sent = sent;
+            this.message = message;
 
             outbox_id = new SmtpOutboxEmailIdentifier(id, ordering);
         }
@@ -217,7 +216,7 @@ private class Geary.SmtpOutboxFolder :
 
             int position = do_get_position_by_ordering(cx, ordering, cancellable);
 
-            row = new OutboxRow(id, position, ordering, false, message, _path);
+            row = new OutboxRow(id, position, ordering, false, message);
             email_count = do_get_email_count(cx, cancellable);
 
             return Db.TransactionOutcome.COMMIT;
@@ -369,7 +368,7 @@ private class Geary.SmtpOutboxFolder :
                 }
 
                 list.add(row_to_email(new OutboxRow(results.rowid_at(0), position, ordering,
-                    results.bool_at(3), results.string_buffer_at(2), _path)));
+                    results.bool_at(3), results.string_buffer_at(2))));
                 position += flags.is_newest_to_oldest() ? -1 : 1;
                 assert(position >= 1);
             } while (results.next());
@@ -607,7 +606,7 @@ private class Geary.SmtpOutboxFolder :
                 int position = 1;
                 while (!results.finished) {
                     list.add(new OutboxRow(results.rowid_at(0), position++, results.int64_at(1),
-                        false, results.string_buffer_at(2), _path));
+                        false, results.string_buffer_at(2)));
                     results.next(cancellable);
                 }
 
@@ -852,7 +851,7 @@ private class Geary.SmtpOutboxFolder :
             return null;
 
         return new OutboxRow(results.rowid_at(0), position, ordering, results.bool_at(2),
-            results.string_buffer_at(1), _path);
+            results.string_buffer_at(1));
     }
 
     private void do_mark_email_as_sent(Db.Connection cx, SmtpOutboxEmailIdentifier id, Cancellable? cancellable)

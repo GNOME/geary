@@ -19,8 +19,8 @@ private class Geary.ImapEngine.EmailPrefetcher : Geary.BaseObject {
     
     public Nonblocking.CountingSemaphore active_sem { get; private set;
         default = new Nonblocking.CountingSemaphore(null); }
-    
-    private unowned ImapEngine.MinimalFolder folder;
+
+    private weak ImapEngine.MinimalFolder folder;
     private Nonblocking.Mutex mutex = new Nonblocking.Mutex();
     private Gee.TreeSet<Geary.Email> prefetch_emails = new Gee.TreeSet<Geary.Email>(
         Email.compare_recv_date_descending);
