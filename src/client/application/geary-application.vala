@@ -419,19 +419,14 @@ public class GearyApplication : Gtk.Application {
             int64 delta_usec = get_monotonic_time() - start_usec;
             if (delta_usec >= FORCE_SHUTDOWN_USEC) {
                 debug("Forcing shutdown of Geary, %ss passed...", (delta_usec / USEC_PER_SEC).to_string());
-                
-                break;
+                Posix.exit(2);
             }
         }
-        
-        if (Gtk.main_level() > 0)
-            Gtk.main_quit();
-        else
-            Posix.exit(exitcode);
-        
+
+        quit();
         Date.terminate();
     }
-    
+
     /**
      * A callback for GearyApplication.exiting should return cancel_exit() to prevent the
      * application from exiting.
