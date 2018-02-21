@@ -50,7 +50,9 @@ public class Geary.TimeoutManager : BaseObject {
         get { return this.source_id >= 0; }
     }
 
-    private TimeoutFunc callback;
+    // Callback must be unowned to avoid reference loop with owner's
+    // class when a closure is used as the callback.
+    private unowned TimeoutFunc callback;
     private int source_id = -1;
 
 
@@ -60,10 +62,10 @@ public class Geary.TimeoutManager : BaseObject {
      * The timeout will be by default not running, and hence needs to be
      * started by a call to {@link start}.
      */
-    public TimeoutManager.seconds(uint interval, owned TimeoutFunc callback) {
+    public TimeoutManager.seconds(uint interval, TimeoutFunc callback) {
         this.use_seconds = true;
         this.interval = interval;
-        this.callback = (owned) callback;
+        this.callback = callback;
     }
 
     /**
@@ -72,10 +74,10 @@ public class Geary.TimeoutManager : BaseObject {
      * The timeout will be by default not running, and hence needs to be
      * started by a call to {@link start}.
      */
-    public TimeoutManager.milliseconds(uint interval, owned TimeoutFunc callback) {
+    public TimeoutManager.milliseconds(uint interval, TimeoutFunc callback) {
         this.use_seconds = false;
         this.interval = interval;
-        this.callback = (owned) callback;
+        this.callback = callback;
     }
 
     ~TimeoutManager() {
