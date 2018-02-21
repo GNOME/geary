@@ -43,7 +43,9 @@ public class Geary.IdleManager : BaseObject {
         get { return this.source_id >= 0; }
     }
 
-    private IdleFunc callback;
+    // Callback must be unowned to avoid reference loop with owner's
+    // class when a closure is used as the callback.
+    private unowned IdleFunc callback;
     private int source_id = -1;
 
 

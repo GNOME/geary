@@ -234,6 +234,9 @@ public class ClientWebView : WebKit.WebView, Geary.BaseInterface {
     private Gee.Map<string,Geary.Memory.Buffer> internal_resources =
         new Gee.HashMap<string,Geary.Memory.Buffer>();
 
+    private Gee.List<ulong> registered_message_handlers =
+        new Gee.LinkedList<ulong>();
+
 
     /**
      * Emitted when the view's content has finished loaded.
@@ -319,6 +322,14 @@ public class ClientWebView : WebKit.WebView, Geary.BaseInterface {
 
     ~ClientWebView() {
         base_unref();
+    }
+
+    public override void destroy() {
+        foreach (ulong id in this.registered_message_handlers) {
+            this.user_content_manager.disconnect(id);
+        }
+        this.registered_message_handlers.clear();
+        base.destroy();
     }
 
     /**
@@ -413,11 +424,16 @@ public class ClientWebView : WebKit.WebView, Geary.BaseInterface {
      */
     protected inline void register_message_handler(string name,
                                                    JavaScriptMessageHandler handler) {
-        // XXX cant use the delegate directly: b.g.o Bug 604781
-        this.user_content_manager.script_message_received[name].connect(
+        // XXX cant use the delegate directly, see b.g.o Bug
+        // 604781. However the workaround below creates a circular
+        // reference, causing ClientWebView instances to leak. So to
+        // work around that we need to record handler ids and
+        // disconnect them when being destroyed.
+        ulong id = this.user_content_manager.script_message_received[name].connect(
             (result) => { handler(result); }
         );
-        if (!get_user_content_manager().register_script_message_handler(name)) {
+        this.registered_message_handlers.add(id);
+        if (!this.user_content_manager.register_script_message_handler(name)) {
             debug("Failed to register script message handler: %s", name);
         }
     }

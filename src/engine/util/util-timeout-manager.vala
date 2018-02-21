@@ -50,7 +50,9 @@ public class Geary.TimeoutManager : BaseObject {
         get { return this.source_id >= 0; }
     }
 
-    private TimeoutFunc callback;
+    // Callback must be unowned to avoid reference loop with owner's
+    // class when a closure is used as the callback.
+    private unowned TimeoutFunc callback;
     private int source_id = -1;
 
 
