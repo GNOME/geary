@@ -70,7 +70,7 @@ private class Geary.ImapEngine.GmailFolder : MinimalFolder, FolderSupport.Archiv
         // separate connection and is not synchronized with the database, but also avoids a full
         // folder normalization, which can be a heavyweight operation
         GenericAccount account = (GenericAccount) folder.account;
-        Imap.FolderSession imap_trash = yield account.open_folder_session(
+        Imap.FolderSession imap_trash = yield account.claim_folder_session(
             trash.path, cancellable
         );
         try {

@@ -339,34 +339,51 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     }
 
     /**
-     * Establishes a new IMAP folder session.
+     * Claims a new IMAP folder session from the pool.
      *
      * A new IMAP client session will be retrieved from the pool,
      * connecting if needed, and used for a new folder session. This
      * call will wait until the pool is ready to provide sessions. The
      * session must be returned via {@link release_folder_session}
      * after use.
+     *
+     * The account must have been opened before calling this method.
      */
-    public async Imap.FolderSession open_folder_session(Geary.FolderPath path,
-                                                        Cancellable cancellable)
+    public async Imap.FolderSession claim_folder_session(Geary.FolderPath path,
+                                                         Cancellable cancellable)
         throws Error {
         check_open();
-        debug("%s: Opening account session", this.to_string());
-        Imap.ClientSession? client = null;
+        debug("%s: Acquiring folder session", this.to_string());
+        yield this.remote_ready_lock.wait_async(cancellable);
+
+        // We manually construct an account session here and then
+        // reuse it for the folder session so we only need to claim as
+        // single session from the pool, not two.
+
+        Imap.ClientSession? client =
+            yield this.session_pool.claim_authorized_session_async(cancellable);
+        Imap.AccountSession account = new Imap.AccountSession(
+            this.information.id, client
+        );
+
         Imap.Folder? folder = null;
+        GLib.Error? folder_err = null;
         try {
-            // Do the claim_account_session first ensure the pool is
-            // ready.
-            Imap.AccountSession account = yield claim_account_session();
             folder = yield account.fetch_folder_async(path, cancellable);
-            client = yield this.session_pool.claim_authorized_session_async(
-                cancellable
-            );
         } catch (Error err) {
-            if (client != null) {
+            folder_err = err;
+        }
+
+        account.close();
+
+        if (folder_err != null) {
+            try {
                 yield this.session_pool.release_session_async(client);
+            } catch (Error release_err) {
+                debug("Error releasing folder session: %s", release_err.message);
             }
-            throw err;
+
+            throw folder_err;
         }
 
         return yield new Imap.FolderSession(

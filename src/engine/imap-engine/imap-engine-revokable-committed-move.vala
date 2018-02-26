@@ -28,7 +28,7 @@ private class Geary.ImapEngine.RevokableCommittedMove : Revokable {
         try {
             // use a detached folder to quickly open, issue command, and leave, without full
             // normalization that MinimalFolder requires
-            session = yield this.account.open_folder_session(destination, cancellable);
+            session = yield this.account.claim_folder_session(destination, cancellable);
             foreach (Imap.MessageSet msg_set in Imap.MessageSet.uid_sparse(destination_uids)) {
                 // don't use Cancellable to try to make operations atomic
                 yield session.copy_email_async(msg_set, source, null);
