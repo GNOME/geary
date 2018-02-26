@@ -1503,8 +1503,10 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         );
     }
 
-    private void on_remote_ready() {
-        this.open_remote_session.begin();
+    private void on_remote_ready(bool is_ready) {
+        if (is_ready) {
+            this.open_remote_session.begin();
+        }
     }
 
     private void on_remote_disconnected(Imap.ClientSession.DisconnectReason reason) {

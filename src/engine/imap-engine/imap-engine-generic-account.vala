@@ -35,12 +35,9 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
 
     private bool open = false;
     private Cancellable? open_cancellable = null;
+    private Nonblocking.Semaphore? remote_ready_lock = null;
 
     private Geary.SearchFolder? search_folder { get; private set; default = null; }
-
-    private Nonblocking.Mutex remote_open_lock = new Nonblocking.Mutex();
-    private Nonblocking.Semaphore? remote_ready_lock = null;
-    private Imap.AccountSession? remote_session { get; private set; default = null; }
 
     private Gee.HashMap<FolderPath, MinimalFolder> folder_map = new Gee.HashMap<
         FolderPath, MinimalFolder>();
@@ -167,11 +164,6 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         this.queue_operation(
             new LoadFolders(this, this.local, get_supported_special_folders())
         );
-
-        // If the pool is already ready, let's go get a session!
-        if (this.session_pool.is_ready) {
-            this.open_remote_session.begin(cancellable);
-        }
     }
 
     public override async void close_async(Cancellable? cancellable = null) throws Error {
@@ -179,6 +171,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             return;
 
         // Stop trying to re-use IMAP server connections
+        this.remote_ready_lock.reset();
         this.session_pool.discard_returned_sessions = true;
 
         // Halt internal tasks early so they stop using local and
@@ -209,8 +202,6 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
 
         // Close remote infrastructure
 
-        yield close_remote_session(cancellable);
-        this.remote_ready_lock = null;
         try {
             yield this.session_pool.close_async(cancellable);
         } catch (Error err) {
@@ -219,6 +210,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
                   this.session_pool.to_string()
             );
         }
+        this.remote_ready_lock = null;
 
         // Close local infrastructure
 
@@ -304,15 +296,13 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     }
 
     /**
-     * Returns a valid IMAP account session when one is available.
+     * Claims a new IMAP account session from the pool.
      *
-     * Implementations may use this to acquire an IMAP session for
-     * performing account-related work. The call will wait until a
-     * connection is established then return the session.
-     *
-     * The session returned is guaranteed to be open upon return,
-     * however may close afterwards due to this account closing, or
-     * the network connection going away.
+     * A new IMAP client session will be retrieved from the pool,
+     * connecting if needed, and used for a new account session. This
+     * call will wait until the pool is ready to provide sessions. The
+     * session must be returned via {@link release_account_session}
+     * after use.
      *
      * The account must have been opened before calling this method.
      */
@@ -321,7 +311,31 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         check_open();
         debug("%s: Acquiring account session", this.to_string());
         yield this.remote_ready_lock.wait_async(cancellable);
-        return this.remote_session;
+        Imap.ClientSession client =
+            yield this.session_pool.claim_authorized_session_async(cancellable);
+        return new Imap.AccountSession(this.information.id, client);
+    }
+
+    /**
+     * Returns an IMAP account session to the pool for re-use.
+     */
+    public void release_account_session(Imap.AccountSession session) {
+        debug("%s: Releasing account session", this.to_string());
+        Imap.ClientSession? old_session = session.close();
+        if (old_session != null) {
+            this.session_pool.release_session_async.begin(
+                old_session,
+                (obj, res) => {
+                    try {
+                        this.session_pool.release_session_async.end(res);
+                    } catch (Error err) {
+                        debug("%s: Error releasing account session: %s",
+                              to_string(),
+                              err.message);
+                    }
+                }
+            );
+        }
     }
 
     /**
@@ -444,7 +458,16 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         }
         check_open();
 
-        return yield ensure_special_folder_async(special, cancellable);
+        Geary.Folder? folder = get_special_folder(special);
+        if (folder == null) {
+            Imap.AccountSession account = yield claim_account_session();
+            try {
+                folder = yield ensure_special_folder_async(account, special, cancellable);
+            } finally {
+                release_account_session(account);
+            }
+        }
+        return folder;
     }
 
     public override async void send_email_async(Geary.ComposedEmail composed,
@@ -638,16 +661,12 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     }
 
     /**
-     * Returns the folder for the given special type, creating it if needed.
+     * Locates a special folder, creating it if needed.
      */
-    internal async Geary.Folder ensure_special_folder_async(Geary.SpecialFolderType special,
+    internal async Geary.Folder ensure_special_folder_async(Imap.AccountSession remote,
+                                                            Geary.SpecialFolderType special,
                                                             Cancellable? cancellable)
         throws Error {
-        Geary.Folder? folder = get_special_folder(special);
-        if (folder != null)
-            return folder;
-
-        Imap.AccountSession account = yield claim_account_session();
         MinimalFolder? minimal_folder = null;
         Geary.FolderPath? path = information.get_special_folder_path(special);
         if (path != null) {
@@ -656,7 +675,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             // This is the first time we're turning a non-special folder into a special one.
             // After we do this, we'll record which one we picked in the account info.
             Geary.FolderPath root =
-                yield account.get_default_personal_namespace(cancellable);
+                yield remote.get_default_personal_namespace(cancellable);
             Gee.List<string> search_names = special_search_names.get(special);
             foreach (string search_name in search_names) {
                 Geary.FolderPath search_path = root.get_child(search_name);
@@ -683,7 +702,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         } else {
             debug("Creating %s to use as special folder %s", path.to_string(), special.to_string());
             // TODO: ignore error due to already existing.
-            yield account.create_folder_async(path, special, cancellable);
+            yield remote.create_folder_async(path, special, cancellable);
             minimal_folder = (MinimalFolder) yield fetch_folder_async(path, cancellable);
         }
 
@@ -770,76 +789,6 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     /** Fires a {@link report_problem} signal for an IMAP service. */
     protected void notify_imap_problem(Geary.ProblemType type, Error? err) {
         notify_service_problem(type, Service.IMAP, err);
-    }
-
-    /**
-     * Establishes a new account session with the IMAP server.
-     */
-    private async void open_remote_session(Cancellable cancellable) {
-        try {
-            int token = yield this.remote_open_lock.claim_async(cancellable);
-            if (this.remote_session != null) {
-                return;
-            }
-
-            try {
-                check_open();
-                debug("%s: Opening remote session", to_string());
-                Imap.ClientSession client =
-                    yield this.session_pool.claim_authorized_session_async(
-                        cancellable
-                    );
-
-                this.remote_session = new Imap.AccountSession(
-                    this.information.id, client
-                );
-                this.remote_session.disconnected.connect(on_remote_disconnect);
-
-                this.remote_ready_lock.notify();
-            } catch (Error err) {
-                notify_imap_problem(ProblemType.CONNECTION_ERROR, err);
-            }
-
-            this.remote_open_lock.release(ref token);
-
-            // Now we have a valid remote session again, update our idea
-            // of what the remote folders are in case they have changed
-            update_remote_folders();
-        } catch (Error err) {
-            // Oh well
-        }
-    }
-
-    /**
-     * Drops the current account session, if any.
-     */
-    private async void close_remote_session(Cancellable cancellable) {
-        try {
-            int token = yield this.remote_open_lock.claim_async(cancellable);
-            if (this.remote_session == null) {
-                return;
-            }
-
-            try {
-                this.remote_ready_lock.reset();
-
-                Imap.ClientSession? old_session = this.remote_session.close();
-
-                this.remote_session.disconnected.connect(on_remote_disconnect);
-                this.remote_session = null;
-
-                if (old_session != null) {
-                    yield this.session_pool.release_session_async(old_session);
-                }
-            } catch (Error err) {
-                debug("%s: Error closing remote session: %s",
-                      this.to_string(), err.message);
-            }
-
-            this.remote_open_lock.release(ref token);
-        } catch (Error err) {
-            // Oh well
-        }
     }
 
     /**
@@ -995,13 +944,20 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         }
     }
 
-    private void on_pool_session_ready() {
-        // Now have a valid session, so credentials must be good
-        this.authentication_failures = 0;
-        this.open_remote_session.begin(this.open_cancellable);
+    private void on_pool_session_ready(bool is_ready) {
+        if (is_ready) {
+            // Now have a valid session, so credentials must be good
+            this.authentication_failures = 0;
+            this.remote_ready_lock.blind_notify();
+            update_remote_folders();
+        } else {
+            this.remote_ready_lock.reset();
+            this.refresh_folder_timer.reset();
+        }
     }
 
     private void on_pool_connection_failed(Error error) {
+        this.remote_ready_lock.reset();
         if (error is ImapError.UNAUTHENTICATED) {
             // This is effectively a login failure
             on_pool_login_failed(null);
@@ -1011,6 +967,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     }
 
     private void on_pool_login_failed(Geary.Imap.StatusResponse? response) {
+        this.remote_ready_lock.reset();
         this.authentication_failures++;
         if (this.authentication_failures >= Geary.Account.AUTH_ATTEMPTS_MAX) {
             // We have tried auth too many times, so bail out
@@ -1061,10 +1018,6 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
                     });
             }
         }
-    }
-
-    private void on_remote_disconnect(Imap.ClientSession.DisconnectReason reason) {
-        this.close_remote_session.begin(this.open_cancellable);
     }
 
 }
@@ -1171,23 +1124,29 @@ internal class Geary.ImapEngine.UpdateRemoteFolders : AccountOperation {
     }
 
     public override async void execute(Cancellable cancellable) throws Error {
-        Imap.AccountSession remote =
-            yield ((GenericAccount) this.account).claim_account_session(cancellable);
-
         Gee.Map<FolderPath, Geary.Folder> existing_folders =
             Geary.traverse<Geary.Folder>(this.account.list_folders())
             .to_hash_map<FolderPath>(f => f.path);
         Gee.Map<FolderPath, Imap.Folder> remote_folders =
             new Gee.HashMap<FolderPath, Imap.Folder>();
 
-        bool is_suspect = yield enumerate_remote_folders_async(
-            remote, remote_folders, null, cancellable
+        GenericAccount account = (GenericAccount) this.account;
+        Imap.AccountSession remote = yield account.claim_account_session(
+            cancellable
         );
+        try {
+            bool is_suspect = yield enumerate_remote_folders_async(
+                remote, remote_folders, null, cancellable
+            );
 
-        // pair the local and remote folders and make sure everything is up-to-date
-        yield update_folders_async(
-            remote, existing_folders, remote_folders, is_suspect, cancellable
-        );
+            // pair the local and remote folders and make sure
+            // everything is up-to-date
+            yield update_folders_async(
+                remote, existing_folders, remote_folders, is_suspect, cancellable
+            );
+        } finally {
+            account.release_account_session(remote);
+        }
     }
 
     private async bool enumerate_remote_folders_async(Imap.AccountSession remote,
@@ -1343,9 +1302,11 @@ internal class Geary.ImapEngine.UpdateRemoteFolders : AccountOperation {
         // Ensure each of the important special folders we need already exist
         foreach (Geary.SpecialFolderType special in this.specials) {
             try {
-                yield this.generic_account.ensure_special_folder_async(
-                    special, cancellable
-                );
+                if (this.generic_account.get_special_folder(special) == null) {
+                    yield this.generic_account.ensure_special_folder_async(
+                        remote, special, cancellable
+                    );
+                }
             } catch (Error e) {
                 warning("Unable to ensure special folder %s: %s", special.to_string(), e.message);
             }
@@ -1369,31 +1330,36 @@ internal class Geary.ImapEngine.RefreshFolderUnseen : FolderOperation {
     }
 
     public override async void execute(Cancellable cancellable) throws Error {
-        Imap.AccountSession remote =
-            yield ((GenericAccount) this.account).claim_account_session(cancellable);
-
+        GenericAccount account = (GenericAccount) this.account;
         if (this.folder.get_open_state() == Geary.Folder.OpenState.CLOSED) {
-            Imap.Folder remote_folder = yield remote.fetch_folder_cached_async(
-                folder.path,
-                true,
+            Imap.AccountSession? remote = yield account.claim_account_session(
                 cancellable
             );
-
-            // Although this is called when the folder is closed, we
-            // can safely use local_folder since we are only using its
-            // properties, and the properties were loaded when the
-            // folder was first instantiated.
-            ImapDB.Folder local_folder = ((MinimalFolder) this.folder).local_folder;
-
-            if (remote_folder.properties.have_contents_changed(
-                    local_folder.get_properties(),
-                    this.folder.to_string())) {
-
-                yield local_folder.update_folder_status(
-                    remote_folder.properties, false, true, cancellable
+            try {
+                Imap.Folder remote_folder = yield remote.fetch_folder_async(
+                    folder.path,
+                    cancellable
                 );
 
-                ((GenericAccount) this.account).update_folder(this.folder);
+                // Implementation-specific hack: Although this is called
+                // when the MinimalFolder is closed, we can safely use
+                // local_folder since we are only using its properties,
+                // and the properties were loaded when the folder was
+                // first instantiated.
+                ImapDB.Folder local_folder = ((MinimalFolder) this.folder).local_folder;
+
+                if (remote_folder.properties.have_contents_changed(
+                        local_folder.get_properties(),
+                        this.folder.to_string())) {
+
+                    yield local_folder.update_folder_status(
+                        remote_folder.properties, false, true, cancellable
+                    );
+
+                    ((GenericAccount) this.account).update_folder(this.folder);
+                }
+            } finally {
+                account.release_account_session(remote);
             }
         }
     }

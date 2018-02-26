@@ -96,13 +96,14 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
     private bool untrusted_host = false;
 
     /**
-     * Fired after when the manager has a working connection.
+     * Fired when the manager's ready state changes.
      *
-     * This will be fired both after opening if online and once at
-     * least one connection has been established, and after the server
-     * has become reachable again after being unreachable.
+     * This will be fired after opening if online and once at least
+     * one connection has been established, after the server has
+     * become reachable again after being unreachable, and if the
+     * server becomes unreachable.
      */
-    public signal void ready();
+    public signal void ready(bool is_ready);
 
     /** Fired when a network or non-auth error occurs opening a session. */
     public signal void connection_failed(Error err);
@@ -129,7 +130,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
 
         this.pool_stop = new TimeoutManager.seconds(
             POOL_STOP_TIMEOUT_SEC,
-            () => { this.force_disconnect_all.begin(); }
+            () => { this.close_pool.begin(); }
         );
     }
 
@@ -163,16 +164,12 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
             return;
 
         this.is_open = false;
-        this.is_ready = false;
-
-        this.pool_start.reset();
-        this.pool_stop.reset();
         this.pool_cancellable.cancel();
 
 		this.endpoint.connectivity.notify["is-reachable"].disconnect(on_connectivity_change);
         this.endpoint.connectivity.address_error_reported.disconnect(on_connectivity_error);
 
-        yield force_disconnect_all();
+        yield close_pool();
 
         // TODO: This isn't the best (deterministic) way to deal with this, but it's easy and works
         // for now
@@ -222,7 +219,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
     public async ClientSession claim_authorized_session_async(Cancellable? cancellable)
         throws Error {
         check_open();
-        debug("[%s] Claiming session from %d of %d free",
+        debug("[%s] Claiming session with %d of %d free",
               this.id, this.free_queue.size, this.all_sessions.size);
 
         if (this.authentication_failed)
@@ -237,11 +234,11 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         ClientSession? claimed = null;
         while (claimed == null) {
             // This isn't racy since this is class is not accessed by
-            // multiple threads. Don't wait for it though because we
-            // only want to kick off establishing the connection, and
-            // wait for it via the queue.
+            // multiple threads. Don't wait for it to return though
+            // because we only want to kick off establishing the
+            // connection, and wait for it via the queue.
             if (this.free_queue.size == 0) {
-                check_pool.begin();
+                this.check_pool.begin(true);
             }
 
             claimed = yield this.free_queue.receive(cancellable);
@@ -310,33 +307,42 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
             throw new EngineError.OPEN_REQUIRED("ClientSessionManager is not open");
     }
 
-    private async void check_pool() {
+    private async void check_pool(bool is_claiming = false) {
         debug("[%s] Checking session pool with %d of %d free",
               this.id, this.free_queue.size, this.all_sessions.size);
 
-        while (this.is_open &&
-               !this.authentication_failed &&
-               !this.untrusted_host &&
-               this.endpoint.connectivity.is_reachable.is_certain()) {
-            // Open pool sessions serially to avoid hammering the server
-            try {
-                ClientSession free = yield this.create_new_authorized_session(
-                    this.pool_cancellable
-                );
-                yield this.sessions_mutex.execute_locked(() => {
-                        this.all_sessions.add(free);
-                    });
+        this.pool_start.reset();
 
-                this.free_queue.send(free);
-            } catch (Error err) {
-                debug("[%s] Error adding free session pool: %s",
-                      this.id, err.message);
-                break;
+        if (this.is_open &&
+            !this.authentication_failed &&
+            !this.untrusted_host &&
+            this.endpoint.connectivity.is_reachable.is_certain()) {
+
+            int needed = this.min_pool_size - this.all_sessions.size;
+            if (needed <= 0 && is_claiming) {
+                needed = 1;
             }
 
-            if (this.all_sessions.size >= this.min_pool_size) {
-                break;
+            // Open as many as needed in parallel
+            while (needed > 0) {
+                add_pool_session.begin();
+                needed--;
             }
+        }
+    }
+
+    private async void add_pool_session() {
+        try {
+            ClientSession free = yield this.create_new_authorized_session(
+                this.pool_cancellable
+            );
+            yield this.sessions_mutex.execute_locked(() => {
+                    this.all_sessions.add(free);
+                });
+            this.free_queue.send(free);
+        } catch (Error err) {
+            debug("[%s] Error adding new session to the pool: %s",
+                  this.id, err.message);
         }
     }
 
@@ -422,26 +428,31 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         // already done so.
         if (!this.is_ready) {
             debug("[%s] Became ready", this.id);
-            this.is_ready = true;
-            ready();
+            notify_ready(true);
         }
 
         return new_session;
     }
 
-    /** Disconnects all sessions in the pool. */
-    private async void force_disconnect_all()
-        throws Error {
-        debug("[%s] Dropping and disconnecting %d sessions",
+    private async void close_pool() {
+        debug("[%s] Closing the pool, disconnecting %d sessions",
               this.id, this.all_sessions.size);
+
+        this.pool_start.reset();
+        this.pool_stop.reset();
+        notify_ready(false);
 
         // Take a copy and work off that while scheduling disconnects,
         // since as they disconnect they'll remove themselves from the
         // sessions list and cause the loop below to explode.
         ClientSession[]? to_close = null;
-        yield this.sessions_mutex.execute_locked(() => {
-                to_close = this.all_sessions.to_array();
-            });
+        try {
+            yield this.sessions_mutex.execute_locked(() => {
+                    to_close = this.all_sessions.to_array();
+                });
+        } catch (Error err) {
+            debug("Error occurred copying sessions: %s", err.message);
+        }
 
         // Disconnect all existing sessions at once. Don't block
         // waiting for any since we don't want to delay closing the
@@ -482,6 +493,11 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         return removed;
     }
 
+    private void notify_ready(bool is_ready) {
+        this.is_ready = is_ready;
+        ready(is_ready);
+    }
+
     private void on_disconnected(ClientSession session, ClientSession.DisconnectReason reason) {
         this.remove_session_async.begin(
             session,
@@ -497,16 +513,14 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
     }
 
     private void on_login_failed(ClientSession session, StatusResponse? response) {
-        this.is_ready = false;
         this.authentication_failed = true;
         login_failed(response);
-        session.disconnect_async.begin();
+        this.close_pool.begin();
     }
 
     private void on_imap_untrusted_host() {
-        // this is called any time trust issues are detected, so immediately clutch in to stop
-        // retries
-        untrusted_host = true;
+        this.untrusted_host = true;
+        this.close_pool.begin();
     }
 
     private void on_imap_trust_untrusted_host() {
@@ -526,18 +540,14 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
             this.pool_start.start();
             this.pool_stop.reset();
 		} else {
-            // Get a ready signal again once we are back online
-            this.is_ready = false;
             this.pool_start.reset();
             this.pool_stop.start();
         }
 	}
 
 	private void on_connectivity_error(Error error) {
-        this.is_ready = false;
-        this.pool_start.reset();
-        this.pool_stop.start();
         connection_failed(error);
+        this.close_pool.begin();
 	}
 
 }
