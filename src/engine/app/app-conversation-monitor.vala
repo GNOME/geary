@@ -457,11 +457,9 @@ public class Geary.App.ConversationMonitor : BaseObject {
         switch (this.base_folder.get_open_state()) {
             case Folder.OpenState.CLOSED:
             case Folder.OpenState.LOCAL:
-            case Folder.OpenState.OPENING:
                 flags = Folder.ListFlags.LOCAL_ONLY;
             break;
 
-            case Folder.OpenState.BOTH:
             case Folder.OpenState.REMOTE:
                 flags = Folder.ListFlags.NONE;
             break;
@@ -852,7 +850,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
 
     private void on_folder_opened(Geary.Folder.OpenState state, int count) {
         // once remote is open, reseed with messages from the earliest ID to the latest
-        if (state == Geary.Folder.OpenState.BOTH || state == Geary.Folder.OpenState.REMOTE)
+        if (state == Geary.Folder.OpenState.REMOTE)
             operation_queue.add(new ReseedOperation(this, state.to_string()));
     }
 

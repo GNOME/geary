@@ -67,9 +67,9 @@ private class Geary.ImapEngine.EmailPrefetcher : Object {
     private void on_local_expansion(Gee.Collection<Geary.EmailIdentifier> ids) {
         // it's possible to be notified of an append prior to remote open; don't prefetch until
         // that occurs
-        if (folder.get_open_state() != Geary.Folder.OpenState.BOTH)
+        if (folder.get_open_state() != Geary.Folder.OpenState.REMOTE)
             return;
-        
+
         // acquire here since .begin() only schedules for later
         active_sem.acquire();
         do_prepare_new_async.begin(ids);

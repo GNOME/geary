@@ -205,7 +205,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
             return Geary.Folder.OpenState.CLOSED;
 
         return (this.remote_session != null)
-           ? Geary.Folder.OpenState.BOTH
+           ? Geary.Folder.OpenState.REMOTE
            : Geary.Folder.OpenState.LOCAL;
     }
 
@@ -991,7 +991,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
 
         // notify any subscribers with similar information
         notify_opened(
-            Geary.Folder.OpenState.BOTH,
+            Geary.Folder.OpenState.REMOTE,
             session.folder.properties.email_total
         );
 

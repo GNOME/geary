@@ -58,10 +58,8 @@
 public abstract class Geary.Folder : BaseObject {
     public enum OpenState {
         CLOSED,
-        OPENING,
-        REMOTE,
         LOCAL,
-        BOTH
+        REMOTE;
     }
 
     public enum OpenFailed {
