@@ -6,7 +6,15 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
+/**
+ * An RFC-822 style email message.
+ *
+ * Unlike {@link Email}, these objects are always a complete
+ * representation of an email message, and contain no information
+ * other than what RFC-822 and its successor RFC documents specify.
+ */
 public class Geary.RFC822.Message : BaseObject {
+
     /**
      * This delegate is an optional parameter to the body constructers that allows callers
      * to process arbitrary non-text, inline MIME parts.
