@@ -717,7 +717,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     /**
      * Unhooks the IMAP folder session and returns it to the account.
      */
-    internal void close_remote_session(Folder.CloseReason remote_reason) {
+    internal async void close_remote_session(Folder.CloseReason remote_reason) {
         // Since the remote session has is/has gone away, we need to
         // let waiters know. In the case of the folder being closed,
         // notify that no more remotes will ever come back, otherwise
@@ -737,14 +737,13 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
 
         Imap.FolderSession session = this.remote_session;
         this.remote_session = null;
-
         if (session != null) {
             session.appended.disconnect(on_remote_appended);
             session.updated.disconnect(on_remote_updated);
             session.removed.disconnect(on_remote_removed);
             session.disconnected.disconnect(on_remote_disconnected);
             this._properties.remove(session.folder.properties);
-            this._account.release_folder_session(session);
+            yield this._account.release_folder_session(session);
 
             notify_closed(remote_reason);
         }
@@ -828,7 +827,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         }
 
         // Actually close the remote folder
-        close_remote_session(remote_reason);
+        yield close_remote_session(remote_reason);
 
         // Since both the remote session and replay queue have shut
         // down, we can reset the folder's internal state.
@@ -931,7 +930,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
             // problem and should not try to use the folder further,
             // unless the open was simply cancelled. So clean up, and
             // force the folder closed.
-            this._account.release_folder_session(session);
+            yield this._account.release_folder_session(session);
             if (!(err is IOError.CANCELLED)) {
                 Folder.CloseReason local_reason = CloseReason.LOCAL_ERROR;
                 Folder.CloseReason remote_reason = CloseReason.REMOTE_CLOSE;
@@ -962,7 +961,7 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         } catch (Error err) {
             // Database failed, which is also a pretty serious
             // problem, so handle as per above.
-            this._account.release_folder_session(session);
+            yield this._account.release_folder_session(session);
             if (!(err is IOError.CANCELLED)) {
                 notify_open_failed(Folder.OpenFailed.LOCAL_ERROR, err);
                 yield close_internal(
@@ -1515,15 +1514,19 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         Geary.Folder.CloseReason remote_reason = is_error
             ? Geary.Folder.CloseReason.REMOTE_ERROR
             : Geary.Folder.CloseReason.REMOTE_CLOSE;
-        close_remote_session(remote_reason);
-
-        // If an error occurred, but the folder is still open and so
-        // is the pool, try re-establishing the connection.
-        if (is_error &&
-            this._account.session_pool.is_ready &&
-            !this.open_cancellable.is_cancelled()) {
-            this.open_remote_session.begin();
-        }
+        this.close_remote_session.begin(
+            remote_reason,
+            (obj, res) => {
+                this.close_remote_session.end(res);
+                // Once closed, if we are closing because an error
+                // occurred, but the folder is still open and so is
+                // the pool, try re-establishing the connection.
+                if (is_error &&
+                    this._account.session_pool.is_ready &&
+                    !this.open_cancellable.is_cancelled()) {
+                    this.open_remote_session.begin();
+                }
+            });
     }
 
 }

@@ -394,23 +394,18 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     /**
      * Returns an IMAP folder session to the pool for cleanup and re-use.
      */
-    public void release_folder_session(Imap.FolderSession session) {
+    public async void release_folder_session(Imap.FolderSession session) {
         debug("%s: Releasing folder session", this.to_string());
         Imap.ClientSession? old_session = session.close();
         if (old_session != null) {
-            this.session_pool.release_session_async.begin(
-                old_session,
-                (obj, res) => {
-                    try {
-                        this.session_pool.release_session_async.end(res);
-                    } catch (Error err) {
-                        debug("%s: Error releasing %s session: %s",
-                              to_string(),
-                              session.folder.path.to_string(),
-                              err.message);
-                    }
-                }
-            );
+            try {
+                yield this.session_pool.release_session_async(old_session);
+            } catch (Error err) {
+                debug("%s: Error releasing %s session: %s",
+                      to_string(),
+                      session.folder.path.to_string(),
+                      err.message);
+            }
         }
     }
 

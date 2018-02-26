@@ -44,7 +44,7 @@ private class Geary.ImapEngine.RevokableCommittedMove : Revokable {
             this.account.update_folder(target);
         } finally {
             if (session != null) {
-                this.account.release_folder_session(session);
+                yield this.account.release_folder_session(session);
             }
             set_invalid();
         }

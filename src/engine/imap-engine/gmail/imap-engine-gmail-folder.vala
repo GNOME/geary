@@ -76,7 +76,7 @@ private class Geary.ImapEngine.GmailFolder : MinimalFolder, FolderSupport.Archiv
         try {
             yield imap_trash.remove_email_async(Imap.MessageSet.uid_sparse(uids), cancellable);
         } finally {
-            account.release_folder_session(imap_trash);
+            yield account.release_folder_session(imap_trash);
         }
 
         debug("%s: Successfully true-removed %d/%d emails", folder.to_string(), uids.size,

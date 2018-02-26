@@ -103,17 +103,29 @@ private class Geary.ImapEngine.RefreshFolderSync : FolderOperation {
     public override async void execute(Cancellable cancellable)
         throws Error {
         bool opened = false;
+        bool closed = false;
         try {
             yield this.folder.open_async(Folder.OpenFlags.NONE, cancellable);
             opened = true;
             yield this.folder.wait_for_remote_async(cancellable);
+            debug("Synchronising : %s", this.folder.to_string());
             yield sync_folder(cancellable);
         } finally {
             if (opened) {
                 try {
                     // don't pass in the Cancellable; really need this
                     // to complete in all cases
-                    yield this.folder.close_async();
+                    closed = yield this.folder.close_async();
+                    if (closed) {
+                        // If the folder was actually closing, wait
+                        // for it here to completely close so that its
+                        // session has a chance to exit IMAP Selected
+                        // state when released, allowing the next sync
+                        // op to reuse the same session. Here we
+                        // definitely want to use the cancellable so
+                        // the wait can be interrupted.
+                        yield this.folder.wait_for_close_async(cancellable);
+                    }
                 } catch (Error err) {
                     debug(
                         "%s: Error closing folder %s: %s",
@@ -216,7 +228,7 @@ private class Geary.ImapEngine.CheckFolderSync : RefreshFolderSync {
                 next_epoch = prefetch_max_epoch;
             }
 
-            debug("%s *** syncing to: %s", this.account.to_string(), next_epoch.to_string());
+            debug("Synchronising %s to: %s", this.account.to_string(), next_epoch.to_string());
 
             if (local_count < this.folder.properties.email_total &&
                 next_epoch.compare(prefetch_max_epoch) >= 0) {
