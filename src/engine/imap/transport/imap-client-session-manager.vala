@@ -23,8 +23,10 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
 
 
     private const int DEFAULT_MIN_POOL_SIZE = 1;
+    private const int DEFAULT_MAX_FREE_SIZE = 1;
     private const int POOL_START_TIMEOUT_SEC = 1;
     private const int POOL_STOP_TIMEOUT_SEC = 3;
+    private const int CHECK_NOOP_THRESHOLD_SEC = 5;
 
 
     /** Determines if the manager has been opened. */
@@ -65,13 +67,31 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
     public uint selected_with_idle_keepalive_sec { get; set; default = ClientSession.DEFAULT_SELECTED_WITH_IDLE_KEEPALIVE_SEC; }
 
     /**
-     * ClientSessionManager attempts to maintain a minimum number of open sessions with the server
-     * so they're immediately ready for use.
+     * Specifies the minimum number of sessions to keep open.
      *
-     * Setting this does not immediately adjust the pool size in either direction.  Adjustment will
-     * happen as connections are needed or closed.
+     * The manager will attempt to keep at least this number of
+     * connections open at all times.
+     *
+     * Setting this does not immediately adjust the pool size in
+     * either direction.  Adjustment will happen as connections are
+     * needed or closed.
      */
     public int min_pool_size { get; set; default = DEFAULT_MIN_POOL_SIZE; }
+
+    /**
+     * Specifies the maximum number of free sessions to keep open.
+     *
+     * If there are already this number of free sessions available,
+     * the manager will close any additional sessions that are
+     * released, instead of keeping them for re-use. However it will
+     * not close sessions if doing so would reduce the size of the
+     * pool below {@link min_pool_size}.
+     *
+     * Setting this does not immediately adjust the pool size in
+     * either direction.  Adjustment will happen as connections are
+     * needed or closed.
+     */
+    public int max_free_size { get; set; default = DEFAULT_MAX_FREE_SIZE; }
 
     /**
      * Determines if returned sessions should be kept or discarded.
@@ -245,7 +265,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
 
             // Connection may have gone bad sitting in the queue, so
             // check it before using it
-            if (!(yield check_session(claimed, false))) {
+            if (!(yield check_session(claimed, true))) {
                 claimed = null;
             }
         }
@@ -261,9 +281,14 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         debug("[%s] Returning session with %d of %d free",
               this.id, this.free_queue.size, this.all_sessions.size);
 
-        if (!this.is_open || this.discard_returned_sessions) {
+        bool too_many_free = (
+            this.free_queue.size >= this.max_free_size &&
+            this.all_sessions.size > this.min_pool_size
+        );
+
+        if (!this.is_open || this.discard_returned_sessions || too_many_free) {
             yield force_disconnect(session);
-        } else if (yield check_session(session, true)) {
+        } else if (yield check_session(session, false)) {
             bool free = true;
             MailboxSpecifier? mailbox = null;
             ClientSession.ProtocolState proto = session.get_protocol_state(out mailbox);
@@ -347,7 +372,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
     }
 
     /** Determines if a session is valid, disposing of it if not. */
-    private async bool check_session(ClientSession target, bool allow_selected) {
+    private async bool check_session(ClientSession target, bool claiming) {
         bool valid = false;
         switch (target.get_protocol_state(null)) {
         case ClientSession.ProtocolState.AUTHORIZED:
@@ -357,10 +382,10 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
 
         case ClientSession.ProtocolState.SELECTED:
         case ClientSession.ProtocolState.SELECTING:
-            if (allow_selected) {
-                valid = true;
-            } else {
+            if (claiming) {
                 yield force_disconnect(target);
+            } else {
+                valid = true;
             }
             break;
 
@@ -377,6 +402,31 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         default:
             yield force_disconnect(target);
             break;
+        }
+
+        // We now know if the session /thinks/ it is in a reasonable
+        // state, but if we're claiming a new session it *needs* to be
+        // good, and in particular we want to ensure the connection
+        // hasn't timed out or otherwise been dropped. So send a NOOP
+        // and wait for it to find out. Only do this if we haven't
+        // seen a response from the server in a little while, however.
+        //
+        // XXX This is problematic since the server may send untagged
+        // responses to the NOOP, but at least since it won't be in
+        // the Selected state, we won't lose notifications of new
+        // messages, etc, only folder status, which should eventually
+        // get picked up by UpdateRemoteFolders. :/
+        if (claiming &&
+            target.last_seen + (CHECK_NOOP_THRESHOLD_SEC * 1000000) < GLib.get_real_time()) {
+            try {
+                debug("Sending NOOP when claiming a session");
+                yield target.send_command_async(
+                    new NoopCommand(), this.pool_cancellable
+                );
+            } catch (Error err) {
+                debug("Error sending NOOP: %s", err.message);
+                valid = false;
+            }
         }
 
         return valid;

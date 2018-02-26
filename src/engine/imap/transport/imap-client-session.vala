@@ -234,6 +234,14 @@ public class Geary.Imap.ClientSession : BaseObject {
         get { return this.capabilities.has_capability(Capabilities.IDLE); }
     }
 
+    /**
+     * Determines when the last successful command response was received.
+     *
+     * Returns the system wall clock time the last successful command
+     * response was received, in microseconds since the UNIX epoch.
+     */
+    public int64 last_seen = 0;
+
 
     // While the following inbox and namespace data should be server
     // specific, there is a small chance they will differ between
@@ -1740,11 +1748,13 @@ public class Geary.Imap.ClientSession : BaseObject {
         
         fsm.issue(Event.SEND_ERROR, null, null, err);
     }
-    
+
     private void on_received_status_response(StatusResponse status_response) {
+        this.last_seen = GLib.get_real_time();
+
         // reschedule keepalive (traffic seen on channel)
         schedule_keepalive();
-        
+
         // If a CAPABILITIES ResponseCode, decode and update capabilities ...
         // some servers do this to prevent a second round-trip
         ResponseCode? response_code = status_response.response_code;
@@ -1843,11 +1853,13 @@ public class Geary.Imap.ClientSession : BaseObject {
         
         server_data_received(server_data);
     }
-    
+
     private void on_received_server_data(ServerData server_data) {
+        this.last_seen = GLib.get_real_time();
+
         // reschedule keepalive (traffic seen on channel)
         schedule_keepalive();
-        
+
         // send ServerData to upper layers for processing and storage
         try {
             notify_received_data(server_data);
@@ -1856,12 +1868,14 @@ public class Geary.Imap.ClientSession : BaseObject {
                 ierr.message);
         }
     }
-    
+
     private void on_received_bytes(size_t bytes) {
+        this.last_seen = GLib.get_real_time();
+
         // reschedule keepalive
         schedule_keepalive();
     }
-    
+
     private void on_received_bad_response(RootParameters root, ImapError err) {
         debug("[%s] Received bad response %s: %s", to_string(), root.to_string(), err.message);
     }
