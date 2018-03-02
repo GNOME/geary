@@ -57,7 +57,7 @@ engine/app/conversation-monitor/app-conversation-operation.vala
 engine/app/conversation-monitor/app-conversation-set.vala
 engine/app/conversation-monitor/app-external-append-operation.vala
 engine/app/conversation-monitor/app-fill-window-operation.vala
-engine/app/conversation-monitor/app-local-load-operation.vala
+engine/app/conversation-monitor/app-insert-operation.vala
 engine/app/conversation-monitor/app-local-search-operation.vala
 engine/app/conversation-monitor/app-remove-operation.vala
 engine/app/conversation-monitor/app-reseed-operation.vala

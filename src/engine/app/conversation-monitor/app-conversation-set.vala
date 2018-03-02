@@ -18,9 +18,10 @@ private class Geary.App.ConversationSet : BaseObject {
     public bool is_empty { get { return _conversations.is_empty; } }
 
     /** Returns a read-only view of conversations in the set.  */
-    public Gee.Collection<Conversation> conversations {
+    public Gee.Set<Conversation> read_only_view {
         owned get { return _conversations.read_only_view; }
     }
+
 
     private Gee.Set<Conversation> _conversations = new Gee.HashSet<Conversation>();
 

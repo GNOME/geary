@@ -138,41 +138,29 @@ public class ConversationListView : Gtk.TreeView {
         if (conversation_monitor != null) {
             conversation_monitor.scan_started.disconnect(on_scan_started);
             conversation_monitor.scan_completed.disconnect(on_scan_completed);
-            conversation_monitor.seed_completed.disconnect(on_seed_completed);
         }
-        
+
         conversation_monitor = GearyApplication.instance.controller.current_conversations;
-        
+
         if (conversation_monitor != null) {
             conversation_monitor.scan_started.connect(on_scan_started);
             conversation_monitor.scan_completed.connect(on_scan_completed);
-            conversation_monitor.seed_completed.connect(on_seed_completed);
         }
     }
-    
+
     private void on_scan_started() {
         enable_load_more = false;
     }
-    
+
     private void on_scan_completed() {
         enable_load_more = true;
 
         // Select the first conversation, if autoselect is enabled,
-        // nothing has been selected yet and we're not composing. Do
-        // this here instead of in on_seed_completed since we want to
-        // to select the first row on folder change as soon as
-        // possible.
+        // nothing has been selected yet and we're not composing.
         if (GearyApplication.instance.config.autoselect &&
             get_selection().count_selected_rows() == 0 &&
             !GearyApplication.instance.controller.any_inline_composers()) {
             set_cursor(new Gtk.TreePath.from_indices(0, -1), null, false);
-        }
-    }
-
-    private void on_seed_completed() {
-        if (!GearyApplication.instance.config.autoselect) {
-            // Notify that no conversations will be selected
-            conversations_selected(this.selected.read_only_view);
         }
     }
 
