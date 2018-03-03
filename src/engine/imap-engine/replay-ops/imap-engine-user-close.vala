@@ -6,18 +6,17 @@
 
 private class Geary.ImapEngine.UserClose : Geary.ImapEngine.ReplayOperation {
 
-    /** A function that this operation can call to close the folder. */
-    public delegate bool CloseFolder();
-
     /** Determines the state of the close operation. */
     public Trillian is_closing = Trillian.UNKNOWN;
 
-    private CloseFolder close;
+    private MinimalFolder owner;
+    private Cancellable? cancellable;
 
 
-    public UserClose(owned CloseFolder close) {
-        base ("UserClose", Scope.LOCAL_ONLY);
-        this.close = (owned) close;
+    public UserClose(MinimalFolder owner, Cancellable? cancellable) {
+        base("UserClose", Scope.LOCAL_ONLY);
+        this.owner = owner;
+        this.cancellable = cancellable;
     }
 
     public override void notify_remote_removed_position(Imap.SequenceNumber removed) {
@@ -30,7 +29,11 @@ private class Geary.ImapEngine.UserClose : Geary.ImapEngine.ReplayOperation {
     }
 
     public override async ReplayOperation.Status replay_local_async() throws Error {
-        bool closing = this.close();
+        bool closing = yield this.owner.close_internal(
+            Folder.CloseReason.LOCAL_CLOSE,
+            Folder.CloseReason.REMOTE_CLOSE,
+            this.cancellable
+        );
         this.is_closing = Trillian.from_boolean(closing);
         return ReplayOperation.Status.COMPLETED;
     }
