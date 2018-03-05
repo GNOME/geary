@@ -54,7 +54,7 @@ geary_engine_vala_sources = files(
   'app/conversation-monitor/app-conversation-set.vala',
   'app/conversation-monitor/app-external-append-operation.vala',
   'app/conversation-monitor/app-fill-window-operation.vala',
-  'app/conversation-monitor/app-local-load-operation.vala',
+  'app/conversation-monitor/app-insert-operation.vala',
   'app/conversation-monitor/app-local-search-operation.vala',
   'app/conversation-monitor/app-remove-operation.vala',
   'app/conversation-monitor/app-reseed-operation.vala',

@@ -134,7 +134,7 @@ public class Geary.App.EmailStore : BaseObject {
             if (count == 0)
                 continue;
             
-            if (folders.get(path).get_open_state() == Geary.Folder.OpenState.BOTH) {
+            if (folders.get(path).get_open_state() == Geary.Folder.OpenState.REMOTE) {
                 if (!best_is_open) {
                     best_is_open = true;
                     best_count = 0;

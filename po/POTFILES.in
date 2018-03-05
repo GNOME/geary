@@ -147,7 +147,7 @@ src/engine/app/conversation-monitor/app-conversation-operation.vala
 src/engine/app/conversation-monitor/app-conversation-set.vala
 src/engine/app/conversation-monitor/app-external-append-operation.vala
 src/engine/app/conversation-monitor/app-fill-window-operation.vala
-src/engine/app/conversation-monitor/app-local-load-operation.vala
+src/engine/app/conversation-monitor/app-insert-operation.vala
 src/engine/app/conversation-monitor/app-local-search-operation.vala
 src/engine/app/conversation-monitor/app-remove-operation.vala
 src/engine/app/conversation-monitor/app-reseed-operation.vala

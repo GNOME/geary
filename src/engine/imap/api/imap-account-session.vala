@@ -107,67 +107,45 @@ internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
     }
 
     /**
-     * Returns a single folder from the server.
-     *
-     * The folder is not cached by the account and hence will not be
-     * used my multiple callers or containers.  This is useful for
-     * one-shot operations on the server.
-     */
-    public async Imap.Folder fetch_folder_async(FolderPath path, Cancellable? cancellable)
-        throws Error {
-        ClientSession session = claim_session();
-
-        Gee.List<MailboxInformation>? mailboxes = yield send_list_async(
-            session, path, false, cancellable
-        );
-        if (mailboxes.is_empty)
-            throw_not_found(path);
-
-        MailboxInformation mailbox_info = mailboxes.get(0);
-        Imap.FolderProperties? props = null;
-        if (!mailbox_info.attrs.is_no_select) {
-            StatusData status = yield send_status_async(
-                session,
-                mailbox_info.mailbox,
-                StatusDataType.all(),
-                cancellable
-            );
-            props = new Imap.FolderProperties.selectable(
-                mailbox_info.attrs,
-                status,
-                session.capabilities
-            );
-        } else {
-            props = new Imap.FolderProperties.not_selectable(mailbox_info.attrs);
-        }
-
-        return new Imap.Folder(path, props);
-    }
-
-    /**
      * Returns a single folder, from the account's cache or fetched fresh.
      *
      * If the folder has previously been retrieved, that is returned
      * instead of fetching it again. If not, it is fetched from the
      * server and cached for future use.
      */
-    public async Imap.Folder fetch_folder_cached_async(FolderPath path,
-                                                       bool refresh_status,
-                                                       Cancellable? cancellable)
+    public async Imap.Folder fetch_folder_async(FolderPath path,
+                                                Cancellable? cancellable)
         throws Error {
         ClientSession session = claim_session();
         Imap.Folder? folder = this.folders.get(path);
         if (folder == null) {
-            folder = yield fetch_folder_async(path, cancellable);
-            this.folders.set(path, folder);
-        } else if (refresh_status && !folder.properties.attrs.is_no_select) {
-            StatusData status = yield send_status_async(
-                session,
-                session.get_mailbox_for_path(path),
-                { StatusDataType.UNSEEN, StatusDataType.MESSAGES },
-                cancellable
+            Gee.List<MailboxInformation>? mailboxes = yield send_list_async(
+                session, path, false, cancellable
             );
-            folder.properties.update_status(status);
+            if (mailboxes.is_empty) {
+                throw_not_found(path);
+            }
+
+            MailboxInformation mailbox_info = mailboxes.get(0);
+            Imap.FolderProperties? props = null;
+            if (!mailbox_info.attrs.is_no_select) {
+                StatusData status = yield send_status_async(
+                    session,
+                    mailbox_info.mailbox,
+                    StatusDataType.all(),
+                    cancellable
+                );
+                props = new Imap.FolderProperties.selectable(
+                    mailbox_info.attrs,
+                    status,
+                    session.capabilities
+                );
+            } else {
+                props = new Imap.FolderProperties.not_selectable(mailbox_info.attrs);
+            }
+
+            folder = new Imap.Folder(path, props);
+            this.folders.set(path, folder);
         }
         return folder;
     }
@@ -182,7 +160,7 @@ internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
      * folders found, and hence should be used with care.
      */
     public async Gee.List<Imap.Folder> fetch_child_folders_async(FolderPath? parent, Cancellable? cancellable)
-    throws Error {
+        throws Error {
         ClientSession session = claim_session();
         Gee.List<Imap.Folder> children = new Gee.ArrayList<Imap.Folder>();
         Gee.List<MailboxInformation> mailboxes = yield send_list_async(session, parent, true, cancellable);

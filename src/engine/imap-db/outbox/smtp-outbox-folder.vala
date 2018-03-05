@@ -887,6 +887,7 @@ private class Geary.SmtpOutboxFolder :
     }
 
     private void on_account_closed() {
+        this.start_timer.reset();
         this.stop_postman();
         this.smtp_endpoint.connectivity.notify["is-reachable"].disconnect(on_reachable_changed);
         this.smtp_endpoint.connectivity.address_error_reported.disconnect(on_connectivity_error);

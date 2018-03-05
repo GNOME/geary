@@ -119,7 +119,7 @@ public class ConversationListStore : Gtk.ListStore {
         conversations.email_flags_changed.connect(on_email_flags_changed);
 
         // add all existing conversations
-        on_conversations_added(conversations.get_conversations());
+        on_conversations_added(conversations.read_only_view);
     }
 
     public void destroy() {
@@ -149,7 +149,7 @@ public class ConversationListStore : Gtk.ListStore {
         // same set
         int token;
         try {
-            token = yield refresh_mutex.claim_async();
+            token = yield refresh_mutex.claim_async(this.cancellable);
         } catch (Error err) {
             debug("Unable to claim refresh mutex: %s", err.message);
             
@@ -184,7 +184,7 @@ public class ConversationListStore : Gtk.ListStore {
         
         debug("Displaying %d previews for %s...", emails.size, conversation_monitor.base_folder.to_string());
         foreach (Geary.Email email in emails) {
-            Geary.App.Conversation? conversation = conversation_monitor.get_conversation_for_email(email.id);
+            Geary.App.Conversation? conversation = conversation_monitor.get_by_email_identifier(email.id);
             if (conversation != null)
                 set_preview_for_conversation(conversation, email);
             else
@@ -219,7 +219,7 @@ public class ConversationListStore : Gtk.ListStore {
         // the user experience
         Gee.TreeSet<Geary.App.Conversation> sorted_conversations = new Gee.TreeSet<Geary.App.Conversation>(
             compare_conversation_descending);
-        sorted_conversations.add_all(this.conversations.get_conversations());
+        sorted_conversations.add_all(this.conversations.read_only_view);
         foreach (Geary.App.Conversation conversation in sorted_conversations) {
             // find oldest unread message for the preview
             Geary.Email? need_preview = null;

@@ -1366,16 +1366,17 @@ public class GearyController : Geary.BaseObject {
             current_folder,
             Geary.Folder.OpenFlags.NO_DELAY,
             ConversationListStore.REQUIRED_FIELDS,
-            MIN_CONVERSATION_COUNT);
+            MIN_CONVERSATION_COUNT
+        );
 
         if (inboxes.values.contains(current_folder)) {
             // Inbox selected, clear new messages if visible
             clear_new_messages("do_select_folder (inbox)", null);
         }
-        
+
+        current_conversations.scan_completed.connect(on_scan_completed);
         current_conversations.scan_error.connect(on_scan_error);
-        current_conversations.seed_completed.connect(on_seed_completed);
-        current_conversations.seed_completed.connect(on_conversation_count_changed);
+
         current_conversations.scan_completed.connect(on_conversation_count_changed);
         current_conversations.conversations_added.connect(on_conversation_count_changed);
         current_conversations.conversations_removed.connect(on_conversation_count_changed);
@@ -1388,23 +1389,11 @@ public class GearyController : Geary.BaseObject {
         debug("Switched to %s", folder.to_string());
     }
 
-    private void on_scan_error(Error err) {
-        debug("Scan error: %s", err.message);
-    }
-    
-    private void on_seed_completed() {
-        // Done scanning.  Check if we have enough messages to fill the conversation list; if not,
-        // trigger a load_more();
-        if (!main_window.conversation_list_has_scrollbar()) {
-            debug("Not enough messages, loading more for folder %s", current_folder.to_string());
-            on_load_more();
-        }
-    }
-
     private void on_conversation_count_changed() {
         if (this.current_conversations != null) {
+            ConversationListView list = this.main_window.conversation_list_view;
             ConversationViewer viewer = this.main_window.conversation_viewer;
-            int count = this.current_conversations.get_conversation_count();
+            int count = this.current_conversations.size;
             if (count == 0) {
                 // Let the user know if there's no available conversations
                 if (this.current_folder is Geary.SearchFolder) {
@@ -1415,9 +1404,10 @@ public class GearyController : Geary.BaseObject {
                 enable_message_buttons(false);
             } else {
                 // When not doing autoselect, we never get
-                // conversations_selected firing from the convo list,
-                // so we need to stop the loading spinner here
-                if (!this.application.config.autoselect) {
+                // conversations_selected firing from the convo list, so
+                // we need to stop the loading spinner here
+                if (!this.application.config.autoselect &&
+                    list.get_selection().count_selected_rows() == 0) {
                     viewer.show_none_selected();
                     enable_message_buttons(false);
                 }
@@ -1433,7 +1423,7 @@ public class GearyController : Geary.BaseObject {
             return;
         
         main_window.folder_list.select_folder(folder);
-        Geary.App.Conversation? conversation = current_conversations.get_conversation_for_email(email.id);
+        Geary.App.Conversation? conversation = current_conversations.get_by_email_identifier(email.id);
         if (conversation != null)
             main_window.conversation_list_view.select_conversation(conversation);
     }
@@ -2849,6 +2839,26 @@ public class GearyController : Geary.BaseObject {
         } catch (Error e) {
             debug("Could not locate inbox: %s", e.message);
         }
+    }
+
+    private void on_scan_completed() {
+        // Done scanning.  Check if we have enough messages to fill
+        // the conversation list; if not, trigger a load_more();
+        if (!main_window.conversation_list_has_scrollbar()) {
+            debug("Not enough messages, loading more for folder %s", current_folder.to_string());
+            on_load_more();
+        }
+    }
+
+    private void on_scan_error(Geary.App.ConversationMonitor monitor, Error err) {
+        // XXX determine the problem better here
+        report_problem(
+            new Geary.AccountProblemReport(
+                Geary.ProblemType.GENERIC_ERROR,
+                monitor.base_folder.account.information,
+                err
+            )
+        );
     }
 
     private void on_save_attachments(Gee.Collection<Geary.Attachment> attachments) {
