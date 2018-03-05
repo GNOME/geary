@@ -18,7 +18,7 @@
  * ConversationListBox sorts by the {@link Geary.Email.date} field
  * (the Date: header), as that's the date displayed to the user.
  */
-public class ConversationListBox : Gtk.ListBox {
+public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
     /** Fields that must be available for display as a conversation. */
     private const Geary.Email.Field REQUIRED_FIELDS =
@@ -44,7 +44,7 @@ public class ConversationListBox : Gtk.ListBox {
 
 
     // Base class for list rows it the list box
-    private abstract class ConversationRow : Gtk.ListBoxRow {
+    private abstract class ConversationRow : Gtk.ListBoxRow, Geary.BaseInterface {
 
 
         protected const string EXPANDED_CLASS = "geary-expanded";
@@ -91,8 +91,13 @@ public class ConversationListBox : Gtk.ListBox {
 
 
         public ConversationRow(Geary.Email? email) {
+            base_ref();
             this.email = email;
             show();
+        }
+
+        ~ConversationRow() {
+            base_unref();
         }
 
         // Request the row be expanded, if supported.
@@ -494,6 +499,7 @@ public class ConversationListBox : Gtk.ListBox {
                                Configuration config,
                                Soup.Session avatar_session,
                                Gtk.Adjustment adjustment) {
+        base_ref();
         this.conversation = conversation;
         this.location = location;
         this.email_store = email_store;
@@ -530,6 +536,10 @@ public class ConversationListBox : Gtk.ListBox {
                 this.loading_timeout_id = 0;
                 return Source.REMOVE;
             });
+    }
+
+    ~ConversationListBox() {
+        base_unref();
     }
 
     public override void destroy() {

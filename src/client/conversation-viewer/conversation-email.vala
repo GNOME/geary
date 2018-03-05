@@ -16,7 +16,7 @@
  * ConversationMessage}.
  */
 [GtkTemplate (ui = "/org/gnome/Geary/conversation-email.ui")]
-public class ConversationEmail : Gtk.Box {
+public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     // This isn't a Gtk.Grid since when added to a Gtk.ListBoxRow the
     // hover style isn't applied to it.
 
@@ -363,6 +363,7 @@ public class ConversationEmail : Gtk.Box {
                              Configuration config,
                              bool is_sent,
                              bool is_draft) {
+        base_ref();
         this.email = email;
         this.contact_store = contact_store;
         this.config = config;
@@ -494,6 +495,10 @@ public class ConversationEmail : Gtk.Box {
             this.sub_messages.add(attached_message);
             this._attached_messages.add(attached_message);
         }
+    }
+
+    ~ConversationEmail() {
+        base_unref();
     }
 
     /**

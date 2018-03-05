@@ -15,7 +15,7 @@
  * embeds at least one instance of this class.
  */
 [GtkTemplate (ui = "/org/gnome/Geary/conversation-message.ui")]
-public class ConversationMessage : Gtk.Grid {
+public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
 
 
     private const string FROM_CLASS = "geary-from";
@@ -276,6 +276,7 @@ public class ConversationMessage : Gtk.Grid {
     public ConversationMessage(Geary.RFC822.Message message,
                                Configuration config,
                                bool load_remote_images) {
+        base_ref();
         this.message = message;
         this.is_loading_images = load_remote_images;
 
@@ -400,6 +401,10 @@ public class ConversationMessage : Gtk.Grid {
         this.hide_progress_timeout = new Geary.TimeoutManager.seconds(
             1, () => { this.body_progress.hide(); }
         );
+    }
+
+    ~ConversationMessage() {
+        base_unref();
     }
 
     public override void destroy() {

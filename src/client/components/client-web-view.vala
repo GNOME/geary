@@ -14,7 +14,7 @@
  * integration, Inspector support, and remote and inline image
  * handling.
  */
-public class ClientWebView : WebKit.WebView {
+public class ClientWebView : WebKit.WebView, Geary.BaseInterface {
 
 
     /** URI Scheme and delimiter for internal resource loads. */
@@ -238,6 +238,9 @@ public class ClientWebView : WebKit.WebView {
     private Gee.Map<string,Geary.Memory.Buffer> internal_resources =
         new Gee.HashMap<string,Geary.Memory.Buffer>();
 
+    private Gee.List<ulong> registered_message_handlers =
+        new Gee.LinkedList<ulong>();
+
 
     /**
      * Emitted when the view's content has finished loaded.
@@ -286,6 +289,7 @@ public class ClientWebView : WebKit.WebView {
             user_content_manager: content_manager,
             settings: setts
         );
+        base_ref();
 
         // XXX get the allow prefix from the extension somehow
 
@@ -318,6 +322,18 @@ public class ClientWebView : WebKit.WebView {
                              "document-font", SettingsBindFlags.DEFAULT);
         system_settings.bind("monospace-font-name", this,
                              "monospace-font", SettingsBindFlags.DEFAULT);
+    }
+
+    ~ClientWebView() {
+        base_unref();
+    }
+
+    public override void destroy() {
+        foreach (ulong id in this.registered_message_handlers) {
+            this.user_content_manager.disconnect(id);
+        }
+        this.registered_message_handlers.clear();
+        base.destroy();
     }
 
     /**
@@ -412,11 +428,16 @@ public class ClientWebView : WebKit.WebView {
      */
     protected inline void register_message_handler(string name,
                                                    JavaScriptMessageHandler handler) {
-        // XXX cant use the delegate directly: b.g.o Bug 604781
-        this.user_content_manager.script_message_received[name].connect(
+        // XXX cant use the delegate directly, see b.g.o Bug
+        // 604781. However the workaround below creates a circular
+        // reference, causing ClientWebView instances to leak. So to
+        // work around that we need to record handler ids and
+        // disconnect them when being destroyed.
+        ulong id = this.user_content_manager.script_message_received[name].connect(
             (result) => { handler(result); }
         );
-        if (!get_user_content_manager().register_script_message_handler(name)) {
+        this.registered_message_handlers.add(id);
+        if (!this.user_content_manager.register_script_message_handler(name)) {
             debug("Failed to register script message handler: %s", name);
         }
     }

@@ -25,9 +25,6 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         Geary.SpecialFolderType.ARCHIVE,
     };
 
-    private static Geary.FolderPath? outbox_path = null;
-    private static Geary.FolderPath? search_path = null;
-
     /** This account's IMAP session pool. */
     public Imap.ClientSessionManager session_pool { get; private set; }
 
@@ -83,14 +80,6 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         db_vacuum_monitor = local.vacuum_monitor;
         opening_monitor = new Geary.ReentrantProgressMonitor(Geary.ProgressType.ACTIVITY);
         sending_monitor = local.sending_monitor;
-        
-        if (outbox_path == null) {
-            outbox_path = new SmtpOutboxFolderRoot();
-        }
-        
-        if (search_path == null) {
-            search_path = new ImapDB.SearchFolderRoot();
-        }
 
         this.sync = new AccountSynchronizer(this);
 
@@ -152,10 +141,10 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         // Local folders
 
         local.outbox.report_problem.connect(notify_report_problem);
-        local_only.set(outbox_path, local.outbox);
+        local_only.set(new SmtpOutboxFolderRoot(), local.outbox);
 
         this.search_folder = new_search_folder();
-        local_only.set(search_path, this.search_folder);
+        local_only.set(new ImapDB.SearchFolderRoot(), this.search_folder);
 
         this.open = true;
         notify_opened();

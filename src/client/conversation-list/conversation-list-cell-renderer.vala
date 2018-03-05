@@ -10,8 +10,12 @@ public class ConversationListCellRenderer : Gtk.CellRenderer {
     
     // Mail message data.
     public FormattedConversationData data { get; set; }
-    
+
     public ConversationListCellRenderer() {
+    }
+
+    ~ConversationListCellRenderer() {
+        example_data = null;
     }
 
     public override void get_preferred_height(Gtk.Widget widget,

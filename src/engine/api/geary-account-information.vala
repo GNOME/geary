@@ -52,9 +52,13 @@ public class Geary.AccountInformation : BaseObject {
     public const int DEFAULT_PREFETCH_PERIOD_DAYS = 14;
     
     public static int default_ordinal = 0;
-    
-    private static Gee.HashMap<string, Geary.Endpoint>? known_endpoints = null;
-    
+
+    private static Gee.Map<string,weak Endpoint> known_endpoints;
+
+    static construct {
+        AccountInformation.known_endpoints = new Gee.HashMap<string,weak Endpoint>();
+    }
+
     /**
      * Location account information is stored (as well as other data, including database and
      * attachment files.
@@ -325,25 +329,20 @@ public class Geary.AccountInformation : BaseObject {
         if (smtp_endpoint != null)
             smtp_endpoint.untrusted_host.disconnect(on_smtp_untrusted_host);
     }
-    
-    internal static void init() {
-        known_endpoints = new Gee.HashMap<string, Geary.Endpoint>();
-    }
-    
+
     private static Geary.Endpoint get_shared_endpoint(Service service, Endpoint endpoint) {
         string key = "%s/%s:%u".printf(service.user_label(), endpoint.remote_address.hostname,
             endpoint.remote_address.port);
-        
-        // if already known, prefer it over this one
-        if (known_endpoints.has_key(key))
-            return known_endpoints.get(key);
-        
-        // save for future use and return this one
-        known_endpoints.set(key, endpoint);
-        
-        return endpoint;
+
+        Endpoint? cached = AccountInformation.known_endpoints.get(key);
+        if (cached == null) {
+            cached = endpoint;
+            AccountInformation.known_endpoints.set(key, cached);
+        }
+
+        return cached;
     }
-    
+
     // Copies all data from the "from" object into this one.
     public void copy_from(AccountInformation from) {
         this.id = from.id;

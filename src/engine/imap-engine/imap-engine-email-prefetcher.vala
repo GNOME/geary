@@ -11,7 +11,7 @@
  *
  * The EmailPrefetcher does not maintain a reference to the folder.
  */
-private class Geary.ImapEngine.EmailPrefetcher : Object {
+private class Geary.ImapEngine.EmailPrefetcher : Geary.BaseObject {
     public const int PREFETCH_DELAY_SEC = 1;
     
     private const Geary.Email.Field PREFETCH_FIELDS = Geary.Email.Field.ALL;
@@ -19,8 +19,8 @@ private class Geary.ImapEngine.EmailPrefetcher : Object {
     
     public Nonblocking.CountingSemaphore active_sem { get; private set;
         default = new Nonblocking.CountingSemaphore(null); }
-    
-    private unowned ImapEngine.MinimalFolder folder;
+
+    private weak ImapEngine.MinimalFolder folder;
     private Nonblocking.Mutex mutex = new Nonblocking.Mutex();
     private Gee.TreeSet<Geary.Email> prefetch_emails = new Gee.TreeSet<Geary.Email>(
         Email.compare_recv_date_descending);

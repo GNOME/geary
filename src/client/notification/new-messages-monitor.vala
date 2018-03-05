@@ -54,7 +54,7 @@ public class NewMessagesMonitor : Geary.BaseObject {
     public NewMessagesMonitor(ShouldNotifyNewMessages? should_notify_new_messages) {
         _should_notify_new_messages = should_notify_new_messages;
     }
-    
+
     public bool should_notify_new_messages(Geary.Folder folder) {
         return (_should_notify_new_messages == null ? true : _should_notify_new_messages(folder));
     }
@@ -85,7 +85,15 @@ public class NewMessagesMonitor : Geary.BaseObject {
         
         folder_removed(folder);
     }
-    
+
+    /** Releases all monitored folders. */
+    public void clear_folders() {
+        // Get an array so the loop does not blow up when removing values.
+        foreach (Geary.Folder monitored in this.folder_information.keys.to_array()) {
+            remove_folder(monitored);
+        }
+    }
+
     public Gee.Collection<Geary.Folder> get_folders() {
         return folder_information.keys;
     }

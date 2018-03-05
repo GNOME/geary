@@ -7,7 +7,7 @@
  */
 
 [GtkTemplate (ui = "/org/gnome/Geary/main-window.ui")]
-public class MainWindow : Gtk.ApplicationWindow {
+public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     private const int STATUS_BAR_HEIGHT = 18;
 
     public new GearyApplication application {
@@ -63,6 +63,7 @@ public class MainWindow : Gtk.ApplicationWindow {
 
     public MainWindow(GearyApplication application) {
         Object(application: application);
+        base_ref();
 
         load_config(application.config);
         restore_saved_window_state();
@@ -78,6 +79,10 @@ public class MainWindow : Gtk.ApplicationWindow {
         on_change_orientation();
 
         this.main_layout.show_all();
+    }
+
+    ~MainWindow() {
+        base_unref();
     }
 
     public void show_infobar(MainWindowInfoBar info_bar) {
@@ -287,11 +292,6 @@ public class MainWindow : Gtk.ApplicationWindow {
             this.progress_monitor.add(new_model.preview_monitor);
             this.progress_monitor.add(conversations.progress_monitor);
             this.conversation_list_view.set_model(new_model);
-        }
-
-        if (old_model != null) {
-            // Must be destroyed, but only after it has been replaced.
-            old_model.destroy();
         }
     }
 

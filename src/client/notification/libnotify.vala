@@ -11,7 +11,7 @@ public class Libnotify : Geary.BaseObject {
     
     private static Canberra.Context? sound_context = null;
     
-    private NewMessagesMonitor monitor;
+    private weak NewMessagesMonitor monitor;
     private Notify.Notification? current_notification = null;
     private Notify.Notification? error_notification = null;
     private Geary.Folder? folder = null;
@@ -37,11 +37,7 @@ public class Libnotify : Geary.BaseObject {
 
         monitor.new_messages_arrived.connect(on_new_messages_arrived);
     }
-    
-    ~Libnotify() {
-        monitor.new_messages_arrived.disconnect(on_new_messages_arrived);
-    }
-    
+
     private static void init_sound() {
         if (sound_context == null)
             Canberra.Context.create(out sound_context);

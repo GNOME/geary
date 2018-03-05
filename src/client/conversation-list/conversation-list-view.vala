@@ -4,11 +4,11 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class ConversationListView : Gtk.TreeView {
+public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
     const int LOAD_MORE_HEIGHT = 100;
 
     // Used to be able to refer to the action names of the MainWindow
-    private MainWindow main_window;
+    private weak MainWindow main_window;
 
     private bool enable_load_more = true;
 
@@ -39,6 +39,7 @@ public class ConversationListView : Gtk.TreeView {
 
 
     public ConversationListView(MainWindow parent) {
+        base_ref();
         set_show_expanders(false);
         set_headers_visible(false);
         this.main_window = parent;
@@ -78,6 +79,10 @@ public class ConversationListView : Gtk.TreeView {
         this.selection_update.priority = Geary.IdleManager.Priority.LOW;
     }
 
+    ~ConversationListView() {
+        base_unref();
+    }
+
     public override void destroy() {
         this.selection_update.reset();
         base.destroy();
@@ -97,6 +102,7 @@ public class ConversationListView : Gtk.TreeView {
             old_store.row_changed.disconnect(on_rows_changed);
             old_store.row_deleted.disconnect(on_rows_changed);
             old_store.row_deleted.disconnect(on_row_deleted);
+            old_store.destroy();
         }
 
         if (new_store != null) {

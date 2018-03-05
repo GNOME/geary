@@ -351,12 +351,14 @@ private class Geary.ImapDB.Account : BaseObject {
         } finally {
             db = null;
         }
-        
-        background_cancellable.cancel();
-        background_cancellable = null;
-        
-        outbox.email_sent.disconnect(on_outbox_email_sent);
-        outbox = null;
+
+        this.background_cancellable.cancel();
+        this.background_cancellable = null;
+
+        this.folder_refs.clear();
+
+        this.outbox.email_sent.disconnect(on_outbox_email_sent);
+        this.outbox = null;
     }
 
     private void on_outbox_email_sent(Geary.RFC822.Message rfc822) {

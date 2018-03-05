@@ -126,8 +126,7 @@ public class Geary.Engine : BaseObject {
             return;
         
         is_initialized = true;
-        
-        AccountInformation.init();
+
         Logging.init();
         RFC822.init();
         Imap.init();
