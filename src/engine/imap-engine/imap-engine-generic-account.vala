@@ -170,7 +170,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         if (!open)
             return;
 
-        // Stop trying to re-use IMAP server connections
+        // Block obtaining and reusing IMAP server connections
         this.remote_ready_lock.reset();
         this.session_pool.discard_returned_sessions = true;
 

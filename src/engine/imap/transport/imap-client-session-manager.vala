@@ -444,15 +444,18 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
         try {
             yield new_session.connect_async(cancellable);
         } catch (Error err) {
-            debug("[%s] Connect failure: %s", new_session.to_string(), err.message);
-            connection_failed(err);
+            if (!(err is IOError.CANCELLED)) {
+                connection_failed(err);
+            }
             throw err;
         }
 
         try {
             yield new_session.initiate_session_async(this.credentials, cancellable);
         } catch (Error err) {
-            debug("[%s] Initiate session failure: %s", new_session.to_string(), err.message);
+            if (!(err is IOError.CANCELLED)) {
+                connection_failed(err);
+            }
 
             // need to disconnect before throwing error ... don't honor Cancellable here, it's
             // important to disconnect the client before dropping the ref
@@ -463,7 +466,6 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
                     new_session.to_string(), disconnect_err.message);
             }
 
-            connection_failed(err);
             throw err;
         }
 
