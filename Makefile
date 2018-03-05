@@ -14,31 +14,38 @@ MAKE := ninja
 BUILD_DIR := build
 BINARIES := geary geary-console geary-mailer
 
-BUILD_BINARIES := \
+BUILD_ARTIFACTS := \
 	$(BUILD_DIR)/src/geary \
 	$(BUILD_DIR)/src/console/geary-console \
-	$(BUILD_DIR)/src/mailer/geary-mailer
+	$(BUILD_DIR)/src/mailer/geary-mailer \
+	$(BUILD_DIR)/src/valadoc
 
 .DEFAULT: all
 
 .PHONY: all
-all: $(BUILD_DIR)
-	@$(MAKE) -C $(BUILD_DIR)
-	@cp $(BUILD_BINARIES) .
+all: compile $(BINARIES)
 
-$(BUILD_DIR):
-	@$(CONFIGURE) $@
+.PHONY: verbose
+verbose: compile-verbose $(BINARIES)
+
+.PHONY: compile
+compile: $(BUILD_DIR)
+	@$(MAKE) -C $(BUILD_DIR)
+
+.PHONY: compile-verbose
+compile-verbose: $(BUILD_DIR)
+	@$(MAKE) -C $(BUILD_DIR) -v
 
 .PHONY: install
-install: $(BUILD_DIR)
+install: compile
 	@$(MAKE) -C $(BUILD_DIR) $@
 
 .PHONY: uninstall
-uninstall: $(BUILD_DIR)
+uninstall: compile
 	@$(MAKE) -C $(BUILD_DIR) $@
 
 .PHONY: geary-pot
-geary-pot: $(BUILD_DIR)
+geary-pot: compile
 	@$(MAKE) -C $(BUILD_DIR) $@
 
 # Keep the olde rule For compatibility
@@ -52,7 +59,7 @@ clean: $(BUILD_DIR)
 .PHONY: distclean
 distclean:
 	@-rm -rf $(BUILD_DIR)
-	@-rm -rf $(BUILD_BINARIES)
+	@-rm -rf $(BINARIES)
 	@-rm -rf valadoc
 	@-rm -f po/geary.pot
 
@@ -73,6 +80,21 @@ dist: tests
 	@$(MAKE) -C $(BUILD_DIR) $@
 	@cp -v $(BUILD_DIR)/meson-dist/*.xz* ..
 
-.PHONY: valadoc
-valadoc: all
-	cp -r $(BUILD_DIR)/src/valadoc .
+# The rest of these are actual files
+
+$(BUILD_DIR):
+	@$(CONFIGURE) $@
+
+valadoc: $(BUILD_DIR)/src/valadoc
+	cp -r $< .
+
+geary: $(BUILD_DIR)/src/geary
+	cp $< .
+
+geary-console: $(BUILD_DIR)/src/console/geary-console
+	cp $< .
+
+geary-mailer: $(BUILD_DIR)/src/mailer/geary-mailer
+	cp $< .
+
+$(BUILD_ARTIFACTS): compile
