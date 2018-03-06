@@ -28,10 +28,20 @@ private class Geary.App.ConversationOperationQueue : BaseObject {
     }
 
     public void add(ConversationOperation op) {
-        Type op_type = op.get_type();
-        if (op.allow_duplicates ||
-            !this.mailbox.get_all().any_match(other => other.get_type() == op_type)) {
-            mailbox.send(op);
+        bool add_op = true;
+
+        if (!op.allow_duplicates) {
+            Type op_type = op.get_type();
+            foreach (ConversationOperation other in this.mailbox.get_all()) {
+                if (other.get_type() == op_type) {
+                    add_op = false;
+                    break;
+                }
+            }
+        }
+
+        if (add_op) {
+            this.mailbox.send(op);
         }
     }
 
