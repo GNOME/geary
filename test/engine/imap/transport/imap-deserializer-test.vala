@@ -19,21 +19,21 @@ class Geary.Imap.DeserializerTest : Gee.TestCase {
 
     public DeserializerTest() {
         base("Geary.Imap.DeserializerTest");
-        add_test("test_gmail_greeting", test_gmail_greeting);
-        add_test("test_cyrus_2_4_greeting", test_cyrus_2_4_greeting);
-        add_test("test_aliyun_greeting", test_aliyun_greeting);
+        add_test("gmail_greeting", gmail_greeting);
+        add_test("cyrus_2_4_greeting", cyrus_2_4_greeting);
+        add_test("aliyun_greeting", aliyun_greeting);
 
-        add_test("test_invalid_atom_prefix", test_invalid_atom_prefix);
+        add_test("invalid_atom_prefix", invalid_atom_prefix);
 
-        add_test("test_gmail_flags", test_gmail_flags);
-        add_test("test_gmail_permanent_flags", test_gmail_permanent_flags);
-        add_test("test_cyrus_flags", test_cyrus_flags);
+        add_test("gmail_flags", gmail_flags);
+        add_test("gmail_permanent_flags", gmail_permanent_flags);
+        add_test("cyrus_flags", cyrus_flags);
 
-        add_test("test_runin_special_flag", test_runin_special_flag);
-        add_test("test_invalid_flag_prefix", test_invalid_flag_prefix);
+        add_test("runin_special_flag", runin_special_flag);
+        add_test("invalid_flag_prefix", invalid_flag_prefix);
 
-        add_test("test_instant_eos", test_instant_eos);
-        add_test("test_bye_eos", test_bye_eos);
+        add_test("instant_eos", instant_eos);
+        add_test("bye_eos", bye_eos);
     }
 
     public override void set_up() {
@@ -46,7 +46,7 @@ class Geary.Imap.DeserializerTest : Gee.TestCase {
         async_result();
     }
 
-    public void test_gmail_greeting() {
+    public void gmail_greeting() throws Error {
         string greeting = "* OK Gimap ready for requests from 115.187.245.46 c194mb399904375ivc";
         this.stream.add_data(greeting.data);
         this.stream.add_data(EOL.data);
@@ -57,7 +57,7 @@ class Geary.Imap.DeserializerTest : Gee.TestCase {
         assert(message.to_string() == greeting);
     }
 
-    public void test_cyrus_2_4_greeting() {
+    public void cyrus_2_4_greeting() throws Error {
         string greeting = "* OK [CAPABILITY IMAP4rev1 LITERAL+ ID ENABLE AUTH=PLAIN SASL-IR] mogul Cyrus IMAP v2.4.12-Debian-2.4.12-2 server ready";
         this.stream.add_data(greeting.data);
         this.stream.add_data(EOL.data);
@@ -68,7 +68,7 @@ class Geary.Imap.DeserializerTest : Gee.TestCase {
         assert(message.to_string() == greeting);
     }
 
-    public void test_aliyun_greeting() {
+    public void aliyun_greeting() throws Error {
         string greeting = "* OK AliYun IMAP Server Ready(10.147.40.164)";
         string parsed = "* OK AliYun IMAP Server Ready (10.147.40.164)";
         this.stream.add_data(greeting.data);
@@ -80,7 +80,7 @@ class Geary.Imap.DeserializerTest : Gee.TestCase {
         assert(message.to_string() == parsed);
     }
 
-    public void test_invalid_atom_prefix() {
+    public void invalid_atom_prefix() throws Error {
         string flags = """* OK %atom""";
         this.stream.add_data(flags.data);
         this.stream.add_data(EOL.data);
@@ -89,7 +89,7 @@ class Geary.Imap.DeserializerTest : Gee.TestCase {
         this.process.end(async_result());
     }
 
-    public void test_gmail_flags() {
+    public void gmail_flags() throws Error {
         string flags = """* FLAGS (\Answered \Flagged \Draft \Deleted \Seen $NotPhishing $Phishing)""";
         this.stream.add_data(flags.data);
         this.stream.add_data(EOL.data);
@@ -100,7 +100,7 @@ class Geary.Imap.DeserializerTest : Gee.TestCase {
         assert(message.to_string() == flags);
     }
 
-    public void test_gmail_permanent_flags() {
+    public void gmail_permanent_flags() throws Error {
         string flags = """* OK [PERMANENTFLAGS (\Answered \Flagged \Draft \Deleted \Seen $NotPhishing $Phishing \*)] Flags permitted.""";
         this.stream.add_data(flags.data);
         this.stream.add_data(EOL.data);
@@ -111,7 +111,7 @@ class Geary.Imap.DeserializerTest : Gee.TestCase {
         assert(message.to_string() == flags);
     }
 
-    public void test_cyrus_flags() {
+    public void cyrus_flags() throws Error {
         string flags = """* 2934 FETCH (FLAGS (\Answered \Seen $Quuxo::Spam::Trained) UID 3041)""";
         this.stream.add_data(flags.data);
         this.stream.add_data(EOL.data);
@@ -122,7 +122,7 @@ class Geary.Imap.DeserializerTest : Gee.TestCase {
         assert(message.to_string() == flags);
     }
 
-    public void test_runin_special_flag() {
+    public void runin_special_flag() throws Error {
         // since we must terminate a special flag upon receiving the
         // '*', the following atom will be treated as a run-on but
         // distinct atom.
@@ -137,7 +137,7 @@ class Geary.Imap.DeserializerTest : Gee.TestCase {
         assert(message.to_string() == expected);
     }
 
-    public void test_invalid_flag_prefix() {
+    public void invalid_flag_prefix() throws Error {
         string flags = """* OK \%atom""";
         this.stream.add_data(flags.data);
         this.stream.add_data(EOL.data);
@@ -146,13 +146,13 @@ class Geary.Imap.DeserializerTest : Gee.TestCase {
         this.process.end(async_result());
     }
 
-    public void test_instant_eos() {
+    public void instant_eos() throws Error {
         this.process.begin(Expect.EOS, (obj, ret) => { async_complete(ret); });
         this.process.end(async_result());
         assert(this.deser.is_halted());
     }
 
-    public void test_bye_eos() {
+    public void bye_eos() throws Error {
         string bye = """* OK bye""";
         this.stream.add_data(bye.data);
 

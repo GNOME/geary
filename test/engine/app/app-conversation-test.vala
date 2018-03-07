@@ -31,7 +31,7 @@ class Geary.App.ConversationTest : Gee.TestCase {
         this.test = new Conversation(this.base_folder);
     }
 
-    public void add_basic() {
+    public void add_basic() throws Error {
         Geary.Email e1 = setup_email(1);
         Geary.Email e2 = setup_email(2);
         uint appended = 0;
@@ -52,7 +52,7 @@ class Geary.App.ConversationTest : Gee.TestCase {
         assert(this.test.get_count() == 2);
     }
 
-    public void add_duplicate() {
+    public void add_duplicate() throws Error {
         Geary.Email e1 = setup_email(1);
         uint appended = 0;
         this.test.appended.connect(() => {
@@ -68,7 +68,7 @@ class Geary.App.ConversationTest : Gee.TestCase {
         assert(this.test.get_count() == 1);
     }
 
-    public void add_multipath() {
+    public void add_multipath() throws Error {
         Geary.Email e1 = setup_email(1);
         this.test.add(e1, singleton(this.base_folder.path));
 
@@ -91,7 +91,7 @@ class Geary.App.ConversationTest : Gee.TestCase {
         assert(this.test.get_folder_count(e1.id) == 1);
     }
 
-    public void remove_basic() {
+    public void remove_basic() throws Error {
         Geary.Email e1 = setup_email(1);
         this.test.add(e1, singleton(this.base_folder.path));
 
@@ -118,7 +118,7 @@ class Geary.App.ConversationTest : Gee.TestCase {
         assert(this.test.get_count() == 0);
     }
 
-    public void remove_nonexistent() {
+    public void remove_nonexistent() throws Error {
         Geary.Email e1 = setup_email(1);
         Geary.Email e2 = setup_email(2);
 

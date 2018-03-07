@@ -12,7 +12,7 @@ class Geary.RFC822.MessageDataTest : Gee.TestCase {
         add_test("PreviewText.with_header", preview_text_with_header);
     }
 
-    public void preview_text_with_header() {
+    public void preview_text_with_header() throws Error {
         PreviewText plain_preview1 = new PreviewText.with_header(
             new Geary.Memory.StringBuffer(PLAIN_BODY1_ENCODED),
             new Geary.Memory.StringBuffer(PLAIN_BODY1_HEADERS)

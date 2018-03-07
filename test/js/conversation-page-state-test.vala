@@ -25,49 +25,49 @@ class ConversationPageStateTest : ClientWebViewTestCase<ConversationWebView> {
         }
     }
 
-    public void is_deceptive_text_not_url() {
+    public void is_deceptive_text_not_url() throws Error {
         load_body_fixture("<p>my hovercraft is full of eels</p>");
         assert(exec_is_deceptive_text("ohhai!", "http://example.com") ==
                ConversationWebView.DeceptiveText.NOT_DECEPTIVE);
     }
 
-    public void is_deceptive_text_identical_text() {
+    public void is_deceptive_text_identical_text() throws Error {
         load_body_fixture("<p>my hovercraft is full of eels</p>");
         assert(exec_is_deceptive_text("http://example.com", "http://example.com") ==
                ConversationWebView.DeceptiveText.NOT_DECEPTIVE);
     }
 
-    public void is_deceptive_text_matching_url() {
+    public void is_deceptive_text_matching_url() throws Error {
         load_body_fixture("<p>my hovercraft is full of eels</p>");
         assert(exec_is_deceptive_text("example.com", "http://example.com") ==
                ConversationWebView.DeceptiveText.NOT_DECEPTIVE);
     }
 
-    public void is_deceptive_text_common_href_subdomain() {
+    public void is_deceptive_text_common_href_subdomain() throws Error {
         load_body_fixture("<p>my hovercraft is full of eels</p>");
         assert(exec_is_deceptive_text("example.com", "http://foo.example.com") ==
                ConversationWebView.DeceptiveText.NOT_DECEPTIVE);
     }
 
-    public void is_deceptive_text_common_text_subdomain() {
+    public void is_deceptive_text_common_text_subdomain() throws Error {
         load_body_fixture("<p>my hovercraft is full of eels</p>");
         assert(exec_is_deceptive_text("www.example.com", "http://example.com") ==
                ConversationWebView.DeceptiveText.NOT_DECEPTIVE);
     }
 
-    public void is_deceptive_text_deceptive_href() {
+    public void is_deceptive_text_deceptive_href() throws Error {
         load_body_fixture("<p>my hovercraft is full of eels</p>");
         assert(exec_is_deceptive_text("www.example.com", "ohhai!") ==
                ConversationWebView.DeceptiveText.DECEPTIVE_HREF);
     }
 
-    public void is_deceptive_text_non_matching_subdomain() {
+    public void is_deceptive_text_non_matching_subdomain() throws Error {
         load_body_fixture("<p>my hovercraft is full of eels</p>");
         assert(exec_is_deceptive_text("www.example.com", "phishing.com") ==
                ConversationWebView.DeceptiveText.DECEPTIVE_DOMAIN);
     }
 
-    public void is_deceptive_text_different_domain() {
+    public void is_deceptive_text_different_domain() throws Error {
         load_body_fixture("<p>my hovercraft is full of eels</p>");
         assert(exec_is_deceptive_text("www.example.com", "phishing.net") ==
                ConversationWebView.DeceptiveText.DECEPTIVE_DOMAIN);

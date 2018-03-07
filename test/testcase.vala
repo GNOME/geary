@@ -30,7 +30,7 @@ public abstract class Gee.TestCase : Object {
 	private Adaptor[] adaptors = new Adaptor[0];
     private AsyncQueue<AsyncResult> async_results = new AsyncQueue<AsyncResult>();
 
-	public delegate void TestMethod ();
+	public delegate void TestMethod() throws Error;
 
 	public TestCase (string name) {
 		this.suite = new GLib.TestSuite (name);
@@ -46,10 +46,10 @@ public abstract class Gee.TestCase : Object {
 		                                   adaptor.tear_down ));
 	}
 
-	public virtual void set_up () {
+	public virtual void set_up() throws Error {
 	}
 
-	public virtual void tear_down () {
+	public virtual void tear_down() throws Error {
 	}
 
 	public GLib.TestSuite get_suite () {
@@ -86,16 +86,28 @@ public abstract class Gee.TestCase : Object {
 			this.test_case = test_case;
 		}
 
-		public void set_up (void* fixture) {
-			this.test_case.set_up ();
+		public void set_up(void* fixture) {
+            try {
+                this.test_case.set_up();
+            } catch (Error err) {
+                assert_no_error(err);
+            }
 		}
 
-		public void run (void* fixture) {
-			this.test ();
+		public void run(void* fixture) {
+            try {
+                this.test ();
+            } catch (Error err) {
+                assert_no_error(err);
+            }
 		}
 
-		public void tear_down (void* fixture) {
-			this.test_case.tear_down ();
+		public void tear_down(void* fixture) {
+            try {
+                this.test_case.tear_down();
+            } catch (Error err) {
+                assert_no_error(err);
+            }
 		}
 	}
 }

@@ -22,7 +22,7 @@ public class ComposerWebViewTest : ClientWebViewTestCase<ComposerWebView> {
         add_test("get_text_with_nbsp", get_text_with_nbsp);
     }
 
-    public void load_resources() {
+    public void load_resources() throws Error {
         try {
             ComposerWebView.load_resources();
         } catch (Error err) {
@@ -30,7 +30,7 @@ public class ComposerWebViewTest : ClientWebViewTestCase<ComposerWebView> {
         }
     }
 
-    public void edit_context() {
+    public void edit_context() throws Error {
         assert(!(new ComposerWebView.EditContext("0,,,").is_link));
         assert(new ComposerWebView.EditContext("1,,,").is_link);
         assert(new ComposerWebView.EditContext("1,url,,").link_url == "url");
@@ -42,7 +42,7 @@ public class ComposerWebViewTest : ClientWebViewTestCase<ComposerWebView> {
         assert(new ComposerWebView.EditContext("0,,,12").font_size == 12);
     }
 
-    public void get_html() {
+    public void get_html() throws Error {
         string html = "<p>para</p>";
         load_body_fixture(html);
         this.test_view.get_html.begin((obj, ret) => { async_complete(ret); });
@@ -55,7 +55,7 @@ public class ComposerWebViewTest : ClientWebViewTestCase<ComposerWebView> {
         }
     }
 
-    public void get_text() {
+    public void get_text() throws Error {
         load_body_fixture("<p>para</p>");
         this.test_view.get_text.begin((obj, ret) => { async_complete(ret); });
         try {
@@ -66,7 +66,7 @@ public class ComposerWebViewTest : ClientWebViewTestCase<ComposerWebView> {
         }
     }
 
-    public void get_text_with_quote() {
+    public void get_text_with_quote() throws Error {
         load_body_fixture("<p>pre</p> <blockquote><p>quote</p></blockquote> <p>post</p>");
         this.test_view.get_text.begin((obj, ret) => { async_complete(ret); });
         try {
@@ -78,7 +78,7 @@ public class ComposerWebViewTest : ClientWebViewTestCase<ComposerWebView> {
         }
     }
 
-    public void get_text_with_nested_quote() {
+    public void get_text_with_nested_quote() throws Error {
         load_body_fixture("<p>pre</p> <blockquote><p>quote1</p> <blockquote><p>quote2</p></blockquote></blockquote> <p>post</p>");
         this.test_view.get_text.begin((obj, ret) => { async_complete(ret); });
         try {
@@ -90,7 +90,7 @@ public class ComposerWebViewTest : ClientWebViewTestCase<ComposerWebView> {
         }
     }
 
-    public void get_text_with_long_line() {
+    public void get_text_with_long_line() throws Error {
         load_body_fixture("""
 <p>A long, long, long, long, long, long para. Well, longer than MAX_BREAKABLE_LEN
 at least. Really long, long, long, long, long long, long long, long long, long.</p>
@@ -112,7 +112,7 @@ long long, long long, long.
         }
     }
 
-    public void get_text_with_long_quote() {
+    public void get_text_with_long_quote() throws Error {
         load_body_fixture("""
 <blockquote><p>A long, long, long, long, long, long line. Well, longer than MAX_BREAKABLE_LEN at least.</p></blockquote>
 
@@ -138,7 +138,7 @@ long long, long long, long.
         }
     }
 
-    public void get_text_with_nbsp() {
+    public void get_text_with_nbsp() throws Error {
         load_body_fixture("""On Sun, Jan 1, 2017 at 9:55 PM, Michael Gratton &lt;mike@vee.net&gt; wrote:<br>
 <blockquote type="cite">long,&nbsp;long,&nbsp;long,&nbsp;long,&nbsp;long,&nbsp;long,&nbsp;long,&nbsp;long,&nbsp;long,&nbsp;long,&nbsp;long,&nbsp;long,&nbsp;long,&nbsp;long,&nbsp;long,&nbsp;long,&nbsp;long,&nbsp;long,&nbsp;long,&nbsp;long,&nbsp;long,&nbsp;long,&nbsp;long,&nbsp;long,&nbsp;long,&nbsp;long,&nbsp;long,&nbsp;long,&nbsp;long,&nbsp;long,&nbsp;long,&nbsp;long,&nbsp;long,&nbsp;long,&nbsp;long,&nbsp;long,&nbsp;long,&nbsp;long,&nbsp;long,&nbsp;long,&nbsp;long,&nbsp;long,&nbsp;long,&nbsp;long,&nbsp;long,&nbsp;long,&nbsp;long,&nbsp;long,&nbsp;long,
 </blockquote><br>long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long, long,&nbsp;<div style="white-space: pre;">

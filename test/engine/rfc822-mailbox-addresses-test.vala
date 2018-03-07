@@ -13,7 +13,7 @@ class Geary.RFC822.MailboxAddressesTest : Gee.TestCase {
         add_test("to_rfc822_string", to_rfc822_string);
     }
 
-    public void from_rfc822_string_encoded() {
+    public void from_rfc822_string_encoded() throws Error {
         MailboxAddresses addrs = new MailboxAddresses.from_rfc822_string("test@example.com");
         assert(addrs.size == 1);
 
@@ -29,7 +29,7 @@ class Geary.RFC822.MailboxAddressesTest : Gee.TestCase {
         assert(addrs.size == 2);
     }
 
-    public void to_rfc822_string() {
+    public void to_rfc822_string() throws Error {
         assert(new MailboxAddresses().to_rfc822_string() == "");
         assert(new_addreses({ "test1@example.com" })
                .to_rfc822_string() == "test1@example.com");

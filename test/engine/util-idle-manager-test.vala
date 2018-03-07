@@ -13,7 +13,7 @@ class Geary.IdleManagerTest : Gee.TestCase {
         add_test("test_run", test_run);
     }
 
-    public void start_reset() {
+    public void start_reset() throws Error {
         IdleManager test = new IdleManager(() => { /* noop */ });
         assert(!test.is_running);
         test.schedule();
@@ -22,7 +22,7 @@ class Geary.IdleManagerTest : Gee.TestCase {
         assert(!test.is_running);
     }
 
-    public void test_run() {
+    public void test_run() throws Error {
         bool did_run = false;
 
         IdleManager test = new IdleManager(() => { did_run = true; });

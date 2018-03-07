@@ -13,7 +13,7 @@ public class ClientWebViewTest : Gee.TestCase {
         add_test("load_resources", load_resources);
     }
 
-    public void init_web_context() {
+    public void init_web_context() throws Error {
         Configuration config = new Configuration(GearyApplication.APP_ID);
         ClientWebView.init_web_context(
             config,
@@ -23,7 +23,7 @@ public class ClientWebViewTest : Gee.TestCase {
         );
     }
 
-    public void load_resources() {
+    public void load_resources() throws Error {
         try {
             ClientWebView.load_scripts();
         } catch (Error err) {

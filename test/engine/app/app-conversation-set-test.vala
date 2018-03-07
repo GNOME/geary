@@ -36,7 +36,7 @@ class Geary.App.ConversationSetTest : Gee.TestCase {
         );
     }
 
-    public void add_all_basic() {
+    public void add_all_basic() throws Error {
         Email e1 = setup_email(1);
         Email e2 = setup_email(2);
 
@@ -83,7 +83,7 @@ class Geary.App.ConversationSetTest : Gee.TestCase {
         assert(removed.is_empty);
     }
 
-    public void add_all_duplicate() {
+    public void add_all_duplicate() throws Error {
         Email e1 = setup_email(1);
 
         Gee.LinkedList<Email> emails = new Gee.LinkedList<Email>();
@@ -131,7 +131,7 @@ class Geary.App.ConversationSetTest : Gee.TestCase {
         assert(removed.is_empty);
     }
 
-    public void add_all_append_descendants() {
+    public void add_all_append_descendants() throws Error {
         Email e1 = setup_email(1);
         Email e2 = setup_email(2, e1);
 
@@ -203,7 +203,7 @@ class Geary.App.ConversationSetTest : Gee.TestCase {
         assert(removed.is_empty);
     }
 
-    public void add_all_append_ancestors() {
+    public void add_all_append_ancestors() throws Error {
         Email e1 = setup_email(1);
         Email e2 = setup_email(2, e1);
 
@@ -240,7 +240,7 @@ class Geary.App.ConversationSetTest : Gee.TestCase {
         assert(removed.is_empty);
     }
 
-    public void add_all_merge() {
+    public void add_all_merge() throws Error {
         Email e1 = setup_email(1);
         add_email_to_test_set(e1);
 
@@ -308,7 +308,7 @@ class Geary.App.ConversationSetTest : Gee.TestCase {
 
     }
 
-    public void add_all_multi_path() {
+    public void add_all_multi_path() throws Error {
         Email e1 = setup_email(1);
         MockFolderRoot other_path = new MockFolderRoot("other");
 
@@ -336,7 +336,7 @@ class Geary.App.ConversationSetTest : Gee.TestCase {
         assert(convo.get_folder_count(e1.id) == 2);
     }
 
-    public void add_all_append_path() {
+    public void add_all_append_path() throws Error {
         Email e1 = setup_email(1);
         add_email_to_test_set(e1);
 
@@ -369,7 +369,7 @@ class Geary.App.ConversationSetTest : Gee.TestCase {
         assert(convo.get_folder_count(e1.id) == 2);
     }
 
-    public void remove_all_removed() {
+    public void remove_all_removed() throws Error {
         Email e1 = setup_email(1);
         add_email_to_test_set(e1);
 
@@ -395,7 +395,7 @@ class Geary.App.ConversationSetTest : Gee.TestCase {
         assert(trimmed.size == 0);
     }
 
-    public void remove_all_trimmed() {
+    public void remove_all_trimmed() throws Error {
         Email e1 = setup_email(1);
         add_email_to_test_set(e1);
 
@@ -425,7 +425,7 @@ class Geary.App.ConversationSetTest : Gee.TestCase {
         assert(trimmed.get(convo).contains(e1) == true);
     }
 
-    public void remove_all_remove_path() {
+    public void remove_all_remove_path() throws Error {
         MockFolderRoot other_path = new MockFolderRoot("other");
         Email e1 = setup_email(1);
         add_email_to_test_set(e1, other_path);

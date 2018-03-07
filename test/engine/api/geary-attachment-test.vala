@@ -71,7 +71,7 @@ class Geary.AttachmentTest : Gee.TestCase {
         }
     }
 
-    public void get_safe_file_name_with_content_name() {
+    public void get_safe_file_name_with_content_name() throws Error {
         const string TEST_FILENAME = "test-filename.png";
         Attachment test = new TestAttachment(
             ATTACHMENT_ID,
@@ -91,7 +91,7 @@ class Geary.AttachmentTest : Gee.TestCase {
         assert(test.get_safe_file_name.end(async_result()) == TEST_FILENAME);
     }
 
-    public void get_safe_file_name_with_bad_content_name() {
+    public void get_safe_file_name_with_bad_content_name() throws Error {
         const string TEST_FILENAME = "test-filename.jpg";
         const string RESULT_FILENAME = "test-filename.jpg.png";
         Attachment test = new TestAttachment(
@@ -112,7 +112,7 @@ class Geary.AttachmentTest : Gee.TestCase {
         assert(test.get_safe_file_name.end(async_result()) == RESULT_FILENAME);
     }
 
-    public void get_safe_file_name_with_bad_file_name() {
+    public void get_safe_file_name_with_bad_file_name() throws Error {
         const string TEST_FILENAME = "test-filename";
         const string RESULT_FILENAME = "test-filename.png";
         Attachment test = new TestAttachment(
@@ -133,7 +133,7 @@ class Geary.AttachmentTest : Gee.TestCase {
         assert(test.get_safe_file_name.end(async_result()) == RESULT_FILENAME);
     }
 
-    public void get_safe_file_name_with_no_content_name() {
+    public void get_safe_file_name_with_no_content_name() throws Error {
         const string RESULT_FILENAME = CONTENT_ID + ".png";
         Attachment test = new TestAttachment(
             ATTACHMENT_ID,
@@ -153,7 +153,7 @@ class Geary.AttachmentTest : Gee.TestCase {
         assert(test.get_safe_file_name.end(async_result()) == RESULT_FILENAME);
     }
 
-    public void get_safe_file_name_with_no_content_name_or_id() {
+    public void get_safe_file_name_with_no_content_name_or_id() throws Error {
         const string RESULT_FILENAME = ATTACHMENT_ID + ".png";
         Attachment test = new TestAttachment(
             ATTACHMENT_ID,
@@ -173,7 +173,7 @@ class Geary.AttachmentTest : Gee.TestCase {
         assert(test.get_safe_file_name.end(async_result()) == RESULT_FILENAME);
     }
 
-    public void get_safe_file_name_with_alt_file_name() {
+    public void get_safe_file_name_with_alt_file_name() throws Error {
         const string ALT_TEXT = "some text";
         const string RESULT_FILENAME = "some text.png";
         Attachment test = new TestAttachment(
@@ -194,7 +194,7 @@ class Geary.AttachmentTest : Gee.TestCase {
         assert(test.get_safe_file_name.end(async_result()) == RESULT_FILENAME);
     }
 
-    public void get_safe_file_name_with_default_content_type() {
+    public void get_safe_file_name_with_default_content_type() throws Error {
         const string TEST_FILENAME = "test-filename.png";
         Attachment test = new TestAttachment(
             ATTACHMENT_ID,
@@ -214,7 +214,8 @@ class Geary.AttachmentTest : Gee.TestCase {
         assert(test.get_safe_file_name.end(async_result()) == TEST_FILENAME);
     }
 
-    public void get_safe_file_name_with_default_content_type_bad_file_name() {
+    public void get_safe_file_name_with_default_content_type_bad_file_name()
+        throws Error {
         const string TEST_FILENAME = "test-filename.jpg";
         const string RESULT_FILENAME = "test-filename.jpg.png";
         Attachment test = new TestAttachment(

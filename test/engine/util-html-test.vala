@@ -19,42 +19,42 @@ class Geary.HTML.UtilTest : Gee.TestCase {
         add_test("remove_html_tags", remove_html_tags);
     }
 
-    public void smart_escape_div() {
+    public void smart_escape_div() throws Error {
         string html = "<div>ohhai</div>";
         assert(Geary.HTML.smart_escape(html, false) == html);
     }
 
-    public void smart_escape_no_closing_tag() {
+    public void smart_escape_no_closing_tag() throws Error {
         string html = "<div>ohhai";
         assert(Geary.HTML.smart_escape(html, false) == html);
     }
 
-    public void smart_escape_img() {
+    public void smart_escape_img() throws Error {
         string html = "<img src=\"http://example.com/lol.gif\">";
         assert(Geary.HTML.smart_escape(html, false) == html);
     }
 
-    public void smart_escape_xhtml_img() {
+    public void smart_escape_xhtml_img() throws Error {
         string html = "<img src=\"http://example.com/lol.gif\"/>";
         assert(Geary.HTML.smart_escape(html, false) == html);
     }
 
-    public void smart_escape_mixed() {
+    public void smart_escape_mixed() throws Error {
         string html = "mixed <div>ohhai</div> text";
         assert(Geary.HTML.smart_escape(html, false) == html);
     }
 
-    public void smart_escape_text() {
+    public void smart_escape_text() throws Error {
         string text = "some text";
         assert(Geary.HTML.smart_escape(text, false) == "<div style='white-space: pre-wrap;'>some text</div>");
     }
 
-    public void smart_escape_text_url() {
+    public void smart_escape_text_url() throws Error {
         string text = "<http://example.com>";
         assert(Geary.HTML.smart_escape(text, false) == "<div style='white-space: pre-wrap;'>&lt;http://example.com&gt;</div>");
     }
 
-    public void remove_html_tags() {
+    public void remove_html_tags() throws Error {
         string blockquote_body = """<blockquote>hello</blockquote> <p>there</p>""";
 
         string style_complete = """<style>

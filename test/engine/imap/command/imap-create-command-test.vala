@@ -10,16 +10,16 @@ class Geary.Imap.CreateCommandTest : Gee.TestCase {
 
     public CreateCommandTest() {
         base("Geary.Imap.CreateCommandTest");
-        add_test("test_basic_create", test_basic_create);
-        add_test("test_special_use", test_special_use);
+        add_test("basic_create", basic_create);
+        add_test("special_use", special_use);
     }
 
-    public void test_basic_create() {
+    public void basic_create() throws Error {
         assert(new CreateCommand(new MailboxSpecifier("owatagusiam/")).to_string() ==
                "---- create owatagusiam/");
     }
 
-    public void test_special_use() {
+    public void special_use() throws Error {
         assert(new CreateCommand.special_use(
                    new MailboxSpecifier("Everything"),
                    SpecialFolderType.ALL_MAIL

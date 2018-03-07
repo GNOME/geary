@@ -10,13 +10,13 @@ class Geary.Imap.NamespaceResponseTest : Gee.TestCase {
 
     public NamespaceResponseTest() {
         base("Geary.Imap.NamespaceResponseTest");
-        add_test("test_minimal", test_minimal);
-        add_test("test_complete", test_complete);
-        add_test("test_cyrus", test_cyrus);
-        add_test("test_anonymous", test_anonymous);
+        add_test("minimal", minimal);
+        add_test("complete", complete);
+        add_test("cyrus", cyrus);
+        add_test("anonymous", anonymous);
     }
 
-    public void test_minimal() {
+    public void minimal() throws Error {
         // * NAMESPACE NIL NIL NIL
         try {
             ServerData data = newNamespaceServerData(null, null, null);
@@ -30,7 +30,7 @@ class Geary.Imap.NamespaceResponseTest : Gee.TestCase {
         }
     }
 
-    public void test_complete() {
+    public void complete() throws Error {
         // * NAMESPACE (("" "/")) (("~" "/")) (("#shared/" "/")
         ListParameter personal = new ListParameter();
         personal.add(newNamespace("", "/"));
@@ -61,7 +61,7 @@ class Geary.Imap.NamespaceResponseTest : Gee.TestCase {
         }
     }
 
-    public void test_cyrus() {
+    public void cyrus() throws Error {
         // * NAMESPACE (("INBOX." ".")) NIL (("" "."))
         ListParameter personal = new ListParameter();
         personal.add(newNamespace("INBOX.", "."));
@@ -84,7 +84,7 @@ class Geary.Imap.NamespaceResponseTest : Gee.TestCase {
         }
     }
 
-    public void test_anonymous() {
+    public void anonymous() throws Error {
         // * NAMESPACE NIL NIL (("" "."))
         ListParameter shared = new ListParameter();
         shared.add(newNamespace("", ","));

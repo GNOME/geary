@@ -58,10 +58,10 @@ public class Geary.ImapEngine.AccountProcessorTest : Gee.TestCase {
 
     public AccountProcessorTest() {
         base("Geary.ImapEngine.AccountProcessorTest");
-        add_test("test_success", test_success);
-        add_test("test_failure", test_failure);
-        add_test("test_duplicate", test_duplicate);
-        add_test("test_stop", test_stop);
+        add_test("success", success);
+        add_test("failure", failure);
+        add_test("duplicate", duplicate);
+        add_test("stop", stop);
 
         // XXX this has to be here instead of in set_up for some
         // reason...
@@ -81,7 +81,7 @@ public class Geary.ImapEngine.AccountProcessorTest : Gee.TestCase {
         this.completed = 0;
     }
 
-    public void test_success() {
+    public void success() throws Error {
         TestOperation op = setup_operation(new TestOperation(this.account));
 
         this.processor.enqueue(op);
@@ -95,7 +95,7 @@ public class Geary.ImapEngine.AccountProcessorTest : Gee.TestCase {
         assert(this.completed == 1);
     }
 
-    public void test_failure() {
+    public void failure() throws Error {
         TestOperation op = setup_operation(new TestOperation(this.account));
         op.throw_error = true;
 
@@ -116,7 +116,7 @@ public class Geary.ImapEngine.AccountProcessorTest : Gee.TestCase {
         assert(error is AccountProcessorTestError.TEST);
     }
 
-    public void test_duplicate() {
+    public void duplicate() throws Error {
         TestOperation op1 = setup_operation(new TestOperation(this.account));
         TestOperation op2 = setup_operation(new TestOperation(this.account));
         TestOperation op3 = setup_operation(new OtherOperation(this.account));
@@ -129,7 +129,7 @@ public class Geary.ImapEngine.AccountProcessorTest : Gee.TestCase {
         assert(this.processor.waiting == 2);
     }
 
-    public void test_stop() {
+    public void stop() throws Error {
         TestOperation op1 = setup_operation(new TestOperation(this.account));
         op1.wait_for_cancel = true;
         TestOperation op2 = setup_operation(new OtherOperation(this.account));

@@ -20,7 +20,7 @@ class ClientPageStateTest : ClientWebViewTestCase<ClientWebView> {
 
     }
 
-    public void content_loaded() {
+    public void content_loaded() throws Error {
         bool content_loaded_triggered = false;
         this.test_view.content_loaded.connect(() => {
                 content_loaded_triggered = true;

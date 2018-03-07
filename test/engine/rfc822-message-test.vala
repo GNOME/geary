@@ -16,7 +16,7 @@ class Geary.RFC822.MessageTest : Gee.TestCase {
         add_test("get_preview", get_preview);
     }
 
-    public void basic_message_from_buffer() {
+    public void basic_message_from_buffer() throws Error {
         Message? basic = null;
         try {
             basic = string_to_message(BASIC_MESSAGE);
@@ -37,7 +37,7 @@ class Geary.RFC822.MessageTest : Gee.TestCase {
         assert(basic.mailer == "Geary Test Suite 1.0");
     }
 
-    public void encoded_recipient() {
+    public void encoded_recipient() throws Error {
         Message? enc = null;
         try {
             enc = string_to_message(ENCODED_TO);
@@ -49,7 +49,7 @@ class Geary.RFC822.MessageTest : Gee.TestCase {
         assert(enc.to[0].name == "potus@whitehouse.gov <test>");
     }
 
-    public void duplicate_mailbox() {
+    public void duplicate_mailbox() throws Error {
         Message? dup = null;
         try {
             dup = string_to_message(DUPLICATE_TO);
@@ -63,7 +63,7 @@ class Geary.RFC822.MessageTest : Gee.TestCase {
         );
     }
 
-    public void duplicate_message_id() {
+    public void duplicate_message_id() throws Error {
         Message? dup = null;
         try {
             dup = string_to_message(DUPLICATE_REFERENCES);
@@ -77,7 +77,7 @@ class Geary.RFC822.MessageTest : Gee.TestCase {
         );
     }
 
-    public void get_preview() {
+    public void get_preview() throws Error {
         try {
             Message multipart_signed = string_to_message(MULTIPART_SIGNED_MESSAGE_TEXT);
             assert(multipart_signed.get_preview() == MULTIPART_SIGNED_MESSAGE_PREVIEW);

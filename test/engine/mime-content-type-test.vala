@@ -15,16 +15,16 @@ class Geary.Mime.ContentTypeTest : Gee.TestCase {
         add_test("guess_type_from_buf", guess_type_from_buf);
     }
 
-    public void is_default() {
+    public void is_default() throws Error {
         assert(new ContentType("application", "octet-stream", null).is_default());
     }
 
-    public void get_file_name_extension() {
+    public void get_file_name_extension() throws Error {
         assert(new ContentType("image", "jpeg", null).get_file_name_extension() == ".jpeg");
         assert(new ContentType("test", "unknown", null).get_file_name_extension() == null);
     }
 
-    public void guess_type_from_name() {
+    public void guess_type_from_name() throws Error {
         try {
             assert(ContentType.guess_type("test.png", null).is_type("image", "png"));
         } catch (Error err) {
@@ -38,7 +38,7 @@ class Geary.Mime.ContentTypeTest : Gee.TestCase {
         }
     }
 
-    public void guess_type_from_buf() {
+    public void guess_type_from_buf() throws Error {
         Memory.ByteBuffer png = new Memory.ByteBuffer(
             {0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a}, 8 // PNG magic
         );

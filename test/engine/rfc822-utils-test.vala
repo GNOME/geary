@@ -12,7 +12,7 @@ class Geary.RFC822.Utils.Test : Gee.TestCase {
         add_test("to_preview_text", to_preview_text);
     }
 
-    public void to_preview_text() {
+    public void to_preview_text() throws Error {
         assert(Geary.RFC822.Utils.to_preview_text(PLAIN_BODY_ENCODED, Geary.RFC822.TextFormat.PLAIN) ==
                PLAIN_BODY_EXPECTED);
         assert(Geary.RFC822.Utils.to_preview_text(HTML_BODY_ENCODED, Geary.RFC822.TextFormat.HTML) ==

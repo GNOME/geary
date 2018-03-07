@@ -14,7 +14,7 @@ class Geary.Inet.Test : Gee.TestCase {
         add_test("is_valid_display_host_ipv6", is_valid_display_host_ipv6);
     }
 
-    public void is_valid_display_host_dns() {
+    public void is_valid_display_host_dns() throws Error {
         assert(is_valid_display_host("foo"));
         assert(is_valid_display_host("Foo"));
         assert(is_valid_display_host("Ƒoo"));
@@ -33,7 +33,7 @@ class Geary.Inet.Test : Gee.TestCase {
         assert(!is_valid_display_host("foo-"));
     }
 
-    public void is_valid_display_host_ipv4() {
+    public void is_valid_display_host_ipv4() throws Error {
         assert(is_valid_display_host("123.123.123.123"));
         assert(is_valid_display_host("127.0.0.1"));
 
@@ -44,7 +44,7 @@ class Geary.Inet.Test : Gee.TestCase {
         //assert(is_valid_display_host("666.123.123.123"));
     }
 
-    public void is_valid_display_host_ipv6() {
+    public void is_valid_display_host_ipv6() throws Error {
         assert(is_valid_display_host("FEDC:BA98:7654:3210:FEDC:BA98:7654:3210"));
         assert(is_valid_display_host("1080:0:0:0:8:800:200C:4171"));
         assert(is_valid_display_host("3ffe:2a00:100:7031::1"));

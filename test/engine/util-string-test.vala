@@ -13,7 +13,7 @@ class Geary.String.Test : Gee.TestCase {
         add_test("test_nonprinting", test_nonprinting);
     }
 
-    public void test_whitespace() {
+    public void test_whitespace() throws Error {
         assert(reduce_whitespace("") == "");
         assert(reduce_whitespace(" ") == "");
         assert(reduce_whitespace(" ") == "");
@@ -36,7 +36,7 @@ class Geary.String.Test : Gee.TestCase {
         assert(reduce_whitespace("test\ttest") == "test test");
    }
 
-    public void test_nonprinting() {
+    public void test_nonprinting() throws Error {
         assert(reduce_whitespace("\0") == ""); // NUL
         assert(reduce_whitespace("\u00A0") == ""); // ENQUIRY
         assert(reduce_whitespace("\u00A0") == ""); // NO-BREAK SPACE
