@@ -9,7 +9,7 @@ errordomain AccountProcessorTestError {
     TEST;
 }
 
-public class Geary.ImapEngine.AccountProcessorTest : Gee.TestCase {
+public class Geary.ImapEngine.AccountProcessorTest : TestCase {
 
 
     public class TestOperation : AccountOperation {

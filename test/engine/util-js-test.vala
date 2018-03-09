@@ -5,7 +5,7 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-public class Geary.JS.Test : Gee.TestCase {
+public class Geary.JS.Test : TestCase {
 
     public Test() {
         base("Geary.JS.Test");

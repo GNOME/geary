@@ -2,17 +2,26 @@
 # Copyright 2016 Software Freedom Conservancy Inc.
 # Copyright 2016 Michael Gratton <mike@vee.net>
 
+set(TEST_LIB_SRC
+  test-case.vala
+)
+
 set(TEST_ENGINE_SRC
   test-engine.vala
-  testcase.vala # Based on same file in libgee, courtesy Julien Peeters
 
-  engine/api/geary-account-test.vala
+  # These should be included in the test lib sources, but we can't
+  # since that would make the test lib depend on geary-engine.vapi,
+  # and the engine test sute needs to depend
+  # geary-engine_internal.vapi, which leads to duplicate symbols when
+  # linking
+  engine/api/geary-account-mock.vala
+  engine/api/geary-email-identifier-mock.vala
+  engine/api/geary-email-properties-mock.vala
+  engine/api/geary-folder-mock.vala
+  engine/api/geary-folder-path-mock.vala
+
   engine/api/geary-attachment-test.vala
   engine/api/geary-engine-test.vala
-  engine/api/geary-email-identifier-test.vala
-  engine/api/geary-email-properties-test.vala
-  engine/api/geary-folder-test.vala
-  engine/api/geary-folder-path-test.vala
   engine/app/app-conversation-test.vala
   engine/app/app-conversation-set-test.vala
   engine/imap/command/imap-create-command-test.vala
@@ -35,7 +44,6 @@ set(TEST_ENGINE_SRC
 
 set(TEST_CLIENT_SRC
   test-client.vala
-  testcase.vala # Based on same file in libgee, courtesy Julien Peeters
 
   client/application/geary-configuration-test.vala
   client/components/client-web-view-test.vala
@@ -63,6 +71,12 @@ pkg_check_modules(DEPS REQUIRED
   libsoup-2.4
   webkit2gtk-4.0
   libxml-2.0
+)
+
+set(TEST_LIB_PACKAGES
+  gee-0.8
+  gio-2.0
+  glib-2.0
 )
 
 set(TEST_ENGINE_PACKAGES
@@ -102,6 +116,7 @@ set_property(SOURCE ${RESOURCES_C} PROPERTY GENERATED TRUE)
 
 set(VALAC_OPTIONS
     --vapidir=${CMAKE_BINARY_DIR}/src
+    --vapidir=${CMAKE_BINARY_DIR}/test
     --vapidir=${CMAKE_SOURCE_DIR}/bindings/vapi
     --metadatadir=${CMAKE_SOURCE_DIR}/bindings/metadata
     --target-glib=${TARGET_GLIB}
@@ -113,10 +128,23 @@ set(VALAC_OPTIONS
     ${EXTRA_VALA_OPTIONS}
 )
 
+vala_precompile(TEST_LIB_VALA_C test-lib
+    ${TEST_LIB_SRC}
+PACKAGES
+    ${TEST_LIB_PACKAGES}
+OPTIONS
+    --header=test-lib.h
+    --vapi=test-lib.vapi
+    ${VALAC_OPTIONS}
+)
+
+add_library(test-lib STATIC ${TEST_LIB_VALA_C})
+
 vala_precompile(TEST_ENGINE_VALA_C test-engine
     ${TEST_ENGINE_SRC}
 PACKAGES
     geary-engine-internal
+    test-lib
     ${TEST_ENGINE_PACKAGES}
 OPTIONS
     ${VALAC_OPTIONS}
@@ -127,6 +155,7 @@ vala_precompile(TEST_CLIENT_VALA_C test-client
 PACKAGES
     geary-client
     geary-engine
+    test-lib
     ${TEST_ENGINE_PACKAGES}
     ${TEST_CLIENT_PACKAGES}
 OPTIONS
@@ -135,8 +164,8 @@ OPTIONS
 
 # Exclude from all so tests aren't built by default
 add_executable(test-engine EXCLUDE_FROM_ALL ${TEST_ENGINE_VALA_C})
-target_link_libraries(test-engine ${DEPS_LIBRARIES} geary-engine)
+target_link_libraries(test-engine ${DEPS_LIBRARIES} geary-engine test-lib)
 
 # Exclude from all so tests aren't built by default
 add_executable(test-client EXCLUDE_FROM_ALL ${TEST_CLIENT_VALA_C} ${RESOURCES_C})
-target_link_libraries(test-client ${DEPS_LIBRARIES} geary-client geary-engine)
+target_link_libraries(test-client ${DEPS_LIBRARIES} geary-client geary-engine test-lib)

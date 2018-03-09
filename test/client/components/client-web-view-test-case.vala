@@ -8,7 +8,7 @@
 // Defined by CMake build script.
 extern const string _BUILD_ROOT_DIR;
 
-public abstract class ClientWebViewTestCase<V> : Gee.TestCase {
+public abstract class ClientWebViewTestCase<V> : TestCase {
 
     protected V? test_view = null;
     protected Configuration? config = null;

@@ -8,7 +8,7 @@
 // Defined by CMake build script.
 extern const string _SOURCE_ROOT_DIR;
 
-class Geary.AttachmentTest : Gee.TestCase {
+class Geary.AttachmentTest : TestCase {
 
     private const string ATTACHMENT_ID = "test-id";
     private const string CONTENT_TYPE = "image/png";

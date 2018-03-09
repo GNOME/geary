@@ -1,5 +1,4 @@
-/* testcase.vala
- *
+/*
  * Copyright (C) 2009 Julien Peeters
  * Copyright (C) 2017 Michael Gratton
  *
@@ -22,7 +21,7 @@
  * 	Michael Gratton <mike@vee.net>
  */
 
-public abstract class Gee.TestCase : Object {
+public abstract class TestCase : Object {
 
     protected MainContext main_loop = MainContext.default();
 
@@ -32,18 +31,22 @@ public abstract class Gee.TestCase : Object {
 
 	public delegate void TestMethod() throws Error;
 
-	public TestCase (string name) {
-		this.suite = new GLib.TestSuite (name);
+	public TestCase(string name) {
+		this.suite = new GLib.TestSuite(name);
 	}
 
-	public void add_test (string name, owned TestMethod test) {
-		var adaptor = new Adaptor (name, (owned)test, this);
+	public void add_test(string name, owned TestMethod test) {
+		var adaptor = new Adaptor(name, (owned) test, this);
 		this.adaptors += adaptor;
 
-		this.suite.add (new GLib.TestCase (adaptor.name,
-		                                   adaptor.set_up,
-		                                   adaptor.run,
-		                                   adaptor.tear_down ));
+		this.suite.add(
+            new GLib.TestCase(
+                adaptor.name,
+                adaptor.set_up,
+                adaptor.run,
+                adaptor.tear_down
+            )
+        );
 	}
 
 	public virtual void set_up() throws Error {
@@ -52,7 +55,7 @@ public abstract class Gee.TestCase : Object {
 	public virtual void tear_down() throws Error {
 	}
 
-	public GLib.TestSuite get_suite () {
+	public GLib.TestSuite get_suite() {
 		return this.suite;
 	}
 
@@ -73,16 +76,16 @@ public abstract class Gee.TestCase : Object {
     }
 
 	private class Adaptor {
-		[CCode (notify = false)]
+
 		public string name { get; private set; }
 		private TestMethod test;
 		private TestCase test_case;
 
-		public Adaptor (string name,
-		                owned TestMethod test,
-		                TestCase test_case) {
+		public Adaptor(string name,
+                       owned TestMethod test,
+                       TestCase test_case) {
 			this.name = name;
-			this.test = (owned)test;
+			this.test = (owned) test;
 			this.test_case = test_case;
 		}
 
@@ -96,7 +99,7 @@ public abstract class Gee.TestCase : Object {
 
 		public void run(void* fixture) {
             try {
-                this.test ();
+                this.test();
             } catch (Error err) {
                 assert_no_error(err);
             }

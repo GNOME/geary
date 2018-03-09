@@ -5,7 +5,7 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-class Geary.RFC822.MailboxAddressesTest : Gee.TestCase {
+class Geary.RFC822.MailboxAddressesTest : TestCase {
 
     public MailboxAddressesTest() {
         base("Geary.RFC822.MailboxAddressesTest");

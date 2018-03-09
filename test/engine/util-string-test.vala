@@ -5,7 +5,7 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-class Geary.String.Test : Gee.TestCase {
+class Geary.String.Test : TestCase {
 
     public Test() {
         base("Geary.String.Test");

@@ -5,7 +5,7 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-class Geary.IdleManagerTest : Gee.TestCase {
+class Geary.IdleManagerTest : TestCase {
 
     public IdleManagerTest() {
         base("Geary.IdleManagerTest");

@@ -5,7 +5,7 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-class Geary.HTML.UtilTest : Gee.TestCase {
+class Geary.HTML.UtilTest : TestCase {
 
     public UtilTest() {
         base("Geary.HTML.Util");

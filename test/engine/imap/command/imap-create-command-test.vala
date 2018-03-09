@@ -5,7 +5,7 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-class Geary.Imap.CreateCommandTest : Gee.TestCase {
+class Geary.Imap.CreateCommandTest : TestCase {
 
 
     public CreateCommandTest() {

@@ -5,7 +5,7 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-class Geary.Mime.ContentTypeTest : Gee.TestCase {
+class Geary.Mime.ContentTypeTest : TestCase {
 
     public ContentTypeTest() {
         base("Geary.Mime.ContentTypeTest");

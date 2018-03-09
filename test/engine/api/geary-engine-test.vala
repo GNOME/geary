@@ -5,7 +5,7 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-class Geary.EngineTest : Gee.TestCase {
+class Geary.EngineTest : TestCase {
 
     private Engine? engine = null;
     private File? tmp = null;

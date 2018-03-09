@@ -5,7 +5,7 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-class ConfigurationTest : Gee.TestCase {
+class ConfigurationTest : TestCase {
 
     private Configuration test_config = null;
 

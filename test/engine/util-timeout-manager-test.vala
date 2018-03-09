@@ -5,7 +5,7 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-class Geary.TimeoutManagerTest : Gee.TestCase {
+class Geary.TimeoutManagerTest : TestCase {
 
     // add_seconds seems to vary wildly, so needs a large epsilon
     private const double SECONDS_EPSILON = 1.8;

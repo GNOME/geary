@@ -5,7 +5,7 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-class Geary.Inet.Test : Gee.TestCase {
+class Geary.Inet.Test : TestCase {
 
     public Test() {
         base("Geary.Inet.Test");

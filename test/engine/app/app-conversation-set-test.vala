@@ -5,7 +5,7 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-class Geary.App.ConversationSetTest : Gee.TestCase {
+class Geary.App.ConversationSetTest : TestCase {
 
 
     ConversationSet? test = null;

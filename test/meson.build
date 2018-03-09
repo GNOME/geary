@@ -1,14 +1,23 @@
+geary_test_lib_sources = [
+  'test-case.vala',
+]
+
 geary_test_engine_sources = [
   'test-engine.vala',
-  'testcase.vala',
 
-  'engine/api/geary-account-test.vala',
+  # These should be included in the test lib sources, but we can't
+  # since that would make the test lib depend on geary-engine.vapi,
+  # and the engine test sute needs to depend
+  # geary-engine_internal.vapi, which leads to duplicate symbols when
+  # linking
+  'engine/api/geary-account-mock.vala',
+  'engine/api/geary-email-identifier-mock.vala',
+  'engine/api/geary-email-properties-mock.vala',
+  'engine/api/geary-folder-mock.vala',
+  'engine/api/geary-folder-path-mock.vala',
+
   'engine/api/geary-attachment-test.vala',
   'engine/api/geary-engine-test.vala',
-  'engine/api/geary-email-identifier-test.vala',
-  'engine/api/geary-email-properties-test.vala',
-  'engine/api/geary-folder-test.vala',
-  'engine/api/geary-folder-path-test.vala',
   'engine/app/app-conversation-test.vala',
   'engine/app/app-conversation-set-test.vala',
   'engine/imap/command/imap-create-command-test.vala',
@@ -31,7 +40,6 @@ geary_test_engine_sources = [
 
 geary_test_client_sources = [
   'test-client.vala',
-  'testcase.vala',
 
   'client/application/geary-configuration-test.vala',
   'client/components/client-web-view-test.vala',
@@ -46,30 +54,33 @@ geary_test_client_sources = [
   geary_resources
 ]
 
-geary_test_engine_dependencies = [
-  geary_engine_internal_dep,
+geary_test_lib_dependencies = [
   gee,
   gio,
-  glib,
-  gmime,
-  javascriptcoregtk,
-  libunwind,
-  libxml,
-  sqlite,
+  glib
 ]
 
-geary_test_client_dependencies = [
-  geary_client_dep,
-  geary_engine_dep,
-  gee,
-  gmime,
-  gtk,
-  libsoup,
-  webkit2gtk,
+geary_test_engine_dependencies = [
+  geary_engine_internal_dep
 ]
+geary_test_engine_dependencies += geary_engine_dependencies
+
+geary_test_client_dependencies = [
+  geary_client_dep
+]
+geary_test_client_dependencies += geary_client_dependencies
+
+geary_test_lib = static_library('geary-test-lib',
+  geary_test_lib_sources,
+  dependencies: geary_test_lib_dependencies,
+  include_directories: config_h_dir,
+  vala_args: geary_vala_options,
+  c_args: geary_c_options,
+)
 
 geary_test_engine_bin = executable('geary-test-engine',
   geary_test_engine_sources,
+  link_with: geary_test_lib,
   dependencies: geary_test_engine_dependencies,
   include_directories: config_h_dir,
   vala_args: geary_vala_options,
@@ -79,6 +90,7 @@ geary_test_engine_bin = executable('geary-test-engine',
 geary_test_client_bin = executable('geary-test-client',
   geary_test_client_sources,
   dependencies: geary_test_client_dependencies,
+  link_with: geary_test_lib,
   include_directories: config_h_dir,
   vala_args: geary_vala_options,
   c_args: geary_c_options,
