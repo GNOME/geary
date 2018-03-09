@@ -71,16 +71,6 @@ public class Geary.MockFolder : Folder {
         throw new EngineError.UNSUPPORTED("Mock method");
     }
 
-    public override async void
-        find_boundaries_async(Gee.Collection<Geary.EmailIdentifier> ids,
-                          out Geary.EmailIdentifier? low,
-                          out Geary.EmailIdentifier? high,
-                          Cancellable? cancellable = null)
-    throws Error {
-        throw new EngineError.UNSUPPORTED("Mock method");
-    }
-
-
     public override async Gee.List<Geary.Email>?
         list_email_by_id_async(Geary.EmailIdentifier? initial_id,
                                int count,

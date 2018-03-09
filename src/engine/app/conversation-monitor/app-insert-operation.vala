@@ -20,9 +20,8 @@ private class Geary.App.InsertOperation : ConversationOperation {
     }
 
     public override async void execute_async() throws Error {
-        Geary.EmailIdentifier? lowest = yield this.monitor.get_lowest_email_id_async();
+        Geary.EmailIdentifier? lowest = this.monitor.window_lowest;
         Gee.Collection<EmailIdentifier>? to_insert = null;
-
         if (lowest != null) {
             to_insert = new Gee.LinkedList<EmailIdentifier>();
             foreach (EmailIdentifier inserted in this.inserted_ids) {

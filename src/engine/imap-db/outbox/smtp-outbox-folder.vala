@@ -282,34 +282,6 @@ private class Geary.SmtpOutboxFolder :
         yield remove_email_async(list, cancellable);
     }
 
-    public override async void find_boundaries_async(Gee.Collection<Geary.EmailIdentifier> ids,
-        out Geary.EmailIdentifier? low, out Geary.EmailIdentifier? high,
-        Cancellable? cancellable = null) throws Error {
-        SmtpOutboxEmailIdentifier? outbox_low = null;
-        SmtpOutboxEmailIdentifier? outbox_high = null;
-        yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
-            foreach (Geary.EmailIdentifier id in ids) {
-                SmtpOutboxEmailIdentifier? outbox_id = id as SmtpOutboxEmailIdentifier;
-                if (outbox_id == null)
-                    continue;
-
-                OutboxRow? row = do_fetch_row_by_ordering(cx, outbox_id.ordering, cancellable);
-                if (row == null)
-                    continue;
-
-                if (outbox_low == null || outbox_id.ordering < outbox_low.ordering)
-                    outbox_low = outbox_id;
-                if (outbox_high == null || outbox_id.ordering > outbox_high.ordering)
-                    outbox_high = outbox_id;
-            }
-
-            return Db.TransactionOutcome.DONE;
-        }, cancellable);
-
-        low = outbox_low;
-        high = outbox_high;
-    }
-
     public override Geary.Folder.OpenState get_open_state() {
         return is_open() ? Geary.Folder.OpenState.LOCAL : Geary.Folder.OpenState.CLOSED;
     }

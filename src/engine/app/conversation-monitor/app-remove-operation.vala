@@ -43,7 +43,11 @@ private class Geary.App.RemoveOperation : ConversationOperation {
         }
 
         // Fire signals, clean up
-        this.monitor.notify_emails_removed(removed, trimmed);
+        this.monitor.removed(
+            removed,
+            trimmed,
+            (this.source_folder == this.monitor.base_folder) ? this.removed_ids : null
+        );
 
         // Check we still have enough conversations if any were
         // removed

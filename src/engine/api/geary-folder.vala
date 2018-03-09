@@ -576,15 +576,6 @@ public abstract class Geary.Folder : BaseObject {
      * closed, even if it's not open.
      */
     public abstract async void wait_for_close_async(Cancellable? cancellable = null) throws Error;
-    
-    /**
-     * Find the lowest- and highest-ordered {@link EmailIdentifier}s in the
-     * folder, among the given set of EmailIdentifiers that may or may not be
-     * in the folder.  If none of the given set are in the folder, return null.
-     */
-    public abstract async void find_boundaries_async(Gee.Collection<Geary.EmailIdentifier> ids,
-        out Geary.EmailIdentifier? low, out Geary.EmailIdentifier? high,
-        Cancellable? cancellable = null) throws Error;
 
     /**
      * List a number of contiguous emails in the folder's vector.

@@ -48,25 +48,7 @@ private class Geary.ImapDB.SearchFolder : Geary.SearchFolder, Geary.FolderSuppor
                 exclude_folder(folder);
         }
     }
-    
-    public override async void find_boundaries_async(Gee.Collection<Geary.EmailIdentifier> ids,
-        out Geary.EmailIdentifier? low, out Geary.EmailIdentifier? high,
-        Cancellable? cancellable = null) throws Error {
-        low = null;
-        high = null;
-        
-        // This shouldn't require a result_mutex lock since there's no yield.
-        Gee.TreeSet<ImapDB.SearchEmailIdentifier> in_folder = Geary.traverse<Geary.EmailIdentifier>(ids)
-            .cast_object<ImapDB.SearchEmailIdentifier>()
-            .filter(id => id in search_results)
-            .to_tree_set();
-        
-        if (in_folder.size > 0) {
-            low = in_folder.first();
-            high = in_folder.last();
-        }
-    }
-    
+
     private async void append_new_email_async(Geary.SearchQuery query, Geary.Folder folder,
         Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable) throws Error {
         int result_mutex_token = yield result_mutex.claim_async();
