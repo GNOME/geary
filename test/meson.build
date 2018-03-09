@@ -1,4 +1,5 @@
 geary_test_lib_sources = [
+  'mock-object.vala',
   'test-case.vala',
 ]
 

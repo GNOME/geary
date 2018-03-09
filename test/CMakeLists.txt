@@ -3,6 +3,7 @@
 # Copyright 2016 Michael Gratton <mike@vee.net>
 
 set(TEST_LIB_SRC
+  mock-object.vala
   test-case.vala
 )
 

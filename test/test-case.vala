@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2009 Julien Peeters
- * Copyright (C) 2017 Michael Gratton
+ * Copyright (C) 2017-2018 Michael Gratton <mike@vee.net>
  *
  * This library is free software; you can redistribute it and/or
  * modify it under the terms of the GNU Lesser General Public
@@ -17,11 +17,141 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301  USA
  *
  * Author:
- * 	Julien Peeters <contact@julienpeeters.fr>
- * 	Michael Gratton <mike@vee.net>
+ *  Julien Peeters <contact@julienpeeters.fr>
+ *  Michael Gratton <mike@vee.net>
  */
 
+
+public void assert_null(Object? actual, string? context = null)
+    throws Error {
+    if (actual != null) {
+        print_assert(context ?? "Object is non-null", null);
+        assert_not_reached();
+    }
+}
+
+public void assert_non_null(Object? actual, string? context = null)
+    throws Error {
+    if (actual == null) {
+        print_assert(context ?? "Object is null", null);
+        assert_not_reached();
+    }
+}
+
+public void assert_equal(Object expected, Object? actual, string? context = null)
+    throws Error {
+    if (expected != actual) {
+        print_assert(context ?? "Objects are not equal", null);
+        assert_not_reached();
+    }
+}
+
+public void assert_string(string expected, string? actual, string? context = null)
+    throws Error {
+    if (expected != actual) {
+        string a = expected;
+        if (a.length > 20) {
+            a = a[0:15] + "…";
+        }
+        string b = actual;
+        if (b.length > 20) {
+            b = b[0:15] + "…";
+        }
+        print_assert("Expected: \"%s\", was: \"%s\"".printf(a, b), context);
+        assert_not_reached();
+    }
+}
+
+public void assert_int(int expected, int actual, string? context = null)
+    throws Error {
+    if (expected != actual) {
+        print_assert("Expected: %d, was: %d".printf(expected, actual), context);
+        assert_not_reached();
+    }
+}
+
+public void assert_true(bool condition, string? context = null)
+    throws Error {
+    if (!condition) {
+        print_assert(context ?? "Expected true", null);
+        assert_not_reached();
+    }
+}
+
+public void assert_false(bool condition, string? context = null)
+    throws Error {
+    if (condition) {
+        print_assert(context ?? "Expected false", null);
+        assert_not_reached();
+    }
+}
+
+public void assert_error(Error expected, Error? actual, string? context = null) {
+    bool failed = false;
+    if (actual == null) {
+        print_assert(
+            "Expected error: %s %i, was null".printf(
+                expected.domain.to_string(), expected.code
+            ),
+            context
+        );
+        failed = true;
+    } else if (expected.domain != actual.domain ||
+               expected.code != actual.code) {
+        print_assert(
+            "Expected error: %s %i, was actually %s %i: %s".printf(
+                expected.domain.to_string(),
+                expected.code,
+                actual.domain.to_string(),
+                actual.code,
+                actual.message
+            ),
+            context
+        );
+        failed = true;
+    }
+
+    if (failed) {
+        assert_not_reached();
+    }
+}
+
+// XXX this shadows GLib.assert_no_error since that doesn't work
+public void assert_no_error(Error? err, string? context = null) {
+    if (err != null) {
+        print_assert(
+            "Unexpected error: %s %i: %s".printf(
+                err.domain.to_string(),
+                err.code,
+                err.message
+            ),
+            context
+        );
+        assert_not_reached();
+    }
+}
+
+private inline void print_assert(string message, string? context) {
+    string output = message;
+    if (context != null) {
+        output = "%s: %s".printf(context, output);
+    }
+    GLib.stderr.puts(output);
+    GLib.stderr.putc('\n');
+}
+
 public abstract class TestCase : Object {
+
+
+    private class SignalWaiter : Object {
+
+        public bool was_fired = false;
+
+        public void @callback(Object source) {
+            was_fired = true;
+        }
+    }
+
 
     protected MainContext main_loop = MainContext.default();
 
@@ -73,6 +203,51 @@ public abstract class TestCase : Object {
             result = this.async_results.try_pop();
         }
         return result;
+    }
+
+    /**
+     * Waits for a mock object's call to be completed.
+     *
+     * This method busy waits on the test's main loop until either
+     * until {@link ExpectedCall.was_called} is true, or until the
+     * given timeout in seconds has occurred.
+     *
+     * Returns //true// if the call was made, or //false// if the
+     * timeout was reached.
+     */
+    protected bool wait_for_call(ExpectedCall call, double timeout = 1.0) {
+        GLib.Timer timer = new GLib.Timer();
+        timer.start();
+        while (!call.was_called && timer.elapsed() < timeout) {
+            this.main_loop.iteration(false);
+        }
+        return call.was_called;
+    }
+
+    /**
+     * Waits for an object's signal to be fired.
+     *
+     * This method busy waits on the test's main loop until either
+     * until the object emits the named signal, or until the given
+     * timeout in seconds has occurred.
+     *
+     * Returns //true// if the signal was fired, or //false// if the
+     * timeout was reached.
+     */
+    protected bool wait_for_signal(Object source, string name, double timeout = 0.5) {
+        SignalWaiter handler = new SignalWaiter();
+        ulong id = GLib.Signal.connect_swapped(
+            source, name, (GLib.Callback) handler.callback, handler
+        );
+
+        GLib.Timer timer = new GLib.Timer();
+        timer.start();
+        while (!handler.was_fired && timer.elapsed() < timeout) {
+            this.main_loop.iteration(false);
+        }
+
+        source.disconnect(id);
+        return handler.was_fired;
     }
 
 	private class Adaptor {
