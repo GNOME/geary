@@ -7,8 +7,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: geary-help\n"
-"POT-Creation-Date: 2018-01-13 08:00+0000\n"
-"PO-Revision-Date: 2018-01-14 19:05+0100\n"
+"POT-Creation-Date: 2018-03-18 13:52+0000\n"
+"PO-Revision-Date: 2018-03-18 17:39+0100\n"
 "Last-Translator: Piotr Drąg <piotrdrag@gmail.com>\n"
 "Language-Team: Polish <community-poland@mozilla.org>\n"
 "Language: pl\n"
@@ -94,10 +94,10 @@ msgstr ""
 #: C/write.page:36(p)
 msgid ""
 "A number of keyboard shortcuts are available in the composer; see <link xref="
-"\"shortcuts#composer\"/> for details."
+"\"shortcuts\"/> for details."
 msgstr ""
 "Okno tworzenia wiadomości obsługuje wiele skrótów klawiszowych. <link xref="
-"\"shortcuts#composer\"/> zawiera więcej informacji."
+"\"shortcuts\"/> zawiera więcej informacji."
 
 #: C/write.page:38(p)
 msgid ""
