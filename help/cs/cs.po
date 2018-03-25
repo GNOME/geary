@@ -6,8 +6,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: geary master\n"
-"POT-Creation-Date: 2018-01-13 08:00+0000\n"
-"PO-Revision-Date: 2018-02-10 17:44+0100\n"
+"POT-Creation-Date: 2018-03-18 13:52+0000\n"
+"PO-Revision-Date: 2018-03-14 08:14+0100\n"
 "Last-Translator: Marek Černocký <marek@manet.cz>\n"
 "Language-Team: čeština <gnome-cs-list@gnome.org>\n"
 "Language: cs\n"
@@ -93,10 +93,10 @@ msgstr ""
 #: C/write.page:36(p)
 msgid ""
 "A number of keyboard shortcuts are available in the composer; see <link xref="
-"\"shortcuts#composer\"/> for details."
+"\"shortcuts\"/> for details."
 msgstr ""
 "Řada klávesových zkratek je dostupná v editoru zpráv, podrobnosti viz <link "
-"xref=\"shortcuts#composer\"/>."
+"xref=\"shortcuts\"/>."
 
 #: C/write.page:38(p)
 msgid ""
