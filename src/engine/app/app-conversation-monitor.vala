@@ -802,8 +802,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
 
     private void on_account_email_appended(Folder folder,
                                            Gee.Collection<EmailIdentifier> added) {
-        if (folder != this.base_folder &&
-            !get_search_folder_blacklist().contains(folder.path)) {
+        if (folder != this.base_folder) {
             this.queue.add(new ExternalAppendOperation(this, folder, added));
         }
     }
@@ -813,8 +812,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
         // ExternalAppendOperation will check to determine if the
         // email is relevant for some existing conversation before
         // adding it, which is what we want here.
-        if (folder != this.base_folder &&
-            !get_search_folder_blacklist().contains(folder.path)) {
+        if (folder != this.base_folder) {
             this.queue.add(new ExternalAppendOperation(this, folder, inserted));
         }
     }
@@ -824,16 +822,14 @@ public class Geary.App.ConversationMonitor : BaseObject {
         // ExternalAppendOperation will check to determine if the
         // email is relevant for some existing conversation before
         // adding it, which is what we want here.
-        if (folder != this.base_folder &&
-            !get_search_folder_blacklist().contains(folder.path)) {
+        if (folder != this.base_folder) {
             this.queue.add(new ExternalAppendOperation(this, folder, inserted));
         }
     }
 
     private void on_account_email_removed(Folder folder,
                                           Gee.Collection<EmailIdentifier> removed) {
-        if (folder != this.base_folder &&
-            !get_search_folder_blacklist().contains(folder.path)) {
+        if (folder != this.base_folder) {
             this.queue.add(new RemoveOperation(this, folder, removed));
         }
     }

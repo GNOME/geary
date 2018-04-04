@@ -24,6 +24,7 @@ set(TEST_ENGINE_SRC
   engine/api/geary-attachment-test.vala
   engine/api/geary-engine-test.vala
   engine/app/app-conversation-test.vala
+  engine/app/app-conversation-monitor-test.vala
   engine/app/app-conversation-set-test.vala
   engine/imap/command/imap-create-command-test.vala
   engine/imap/response/imap-namespace-response-test.vala

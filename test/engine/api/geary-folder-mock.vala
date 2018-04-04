@@ -5,7 +5,8 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-public class Geary.MockFolder : Folder {
+public class Geary.MockFolder : Folder, MockObject {
+
 
     public override Account account {
         get { return this._account; }
@@ -26,6 +27,11 @@ public class Geary.MockFolder : Folder {
     public override ProgressMonitor opening_monitor {
         get { return this._opening_monitor; }
     }
+
+    protected Gee.Queue<ExpectedCall> expected {
+        get; set; default = new Gee.LinkedList<ExpectedCall>();
+    }
+
 
     private Account _account;
     private FolderProperties _properties;
@@ -52,8 +58,12 @@ public class Geary.MockFolder : Folder {
 
     public override async bool open_async(Folder.OpenFlags open_flags,
                                  Cancellable? cancellable = null)
-    throws Error {
-        throw new EngineError.UNSUPPORTED("Mock method");
+        throws Error {
+        return boolean_call(
+            "open_async",
+            { int_arg(open_flags), cancellable },
+            false
+        );
     }
 
     public override async void wait_for_remote_async(Cancellable? cancellable = null)
@@ -63,7 +73,9 @@ public class Geary.MockFolder : Folder {
 
     public override async bool close_async(Cancellable? cancellable = null)
     throws Error {
-        throw new EngineError.UNSUPPORTED("Mock method");
+        return boolean_call(
+            "close_async", { cancellable }, false
+        );
     }
 
     public override async void wait_for_close_async(Cancellable? cancellable = null)
@@ -78,7 +90,11 @@ public class Geary.MockFolder : Folder {
                                Folder.ListFlags flags,
                                Cancellable? cancellable = null)
         throws Error {
-        throw new EngineError.UNSUPPORTED("Mock method");
+        return object_call<Gee.List<Email>?>(
+            "list_email_by_id_async",
+            {initial_id, int_arg(count), box_arg(required_fields), box_arg(flags), cancellable},
+            null
+        );
     }
 
     public override async Gee.List<Geary.Email>?
@@ -87,7 +103,11 @@ public class Geary.MockFolder : Folder {
                                       Folder.ListFlags flags,
                                       Cancellable? cancellable = null)
         throws Error {
-        throw new EngineError.UNSUPPORTED("Mock method");
+        return object_call<Gee.List<Email>?>(
+            "list_email_by_sparse_id_async",
+            {ids, box_arg(required_fields), box_arg(flags), cancellable},
+            null
+        );
     }
 
     public override async Gee.Map<Geary.EmailIdentifier, Geary.Email.Field>?
