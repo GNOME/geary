@@ -42,16 +42,14 @@ private class Geary.App.FillWindowOperation : ConversationOperation {
             num_to_load, this.monitor.base_folder.to_string()
         );
 
-        EmailIdentifier? earliest_id =
-            yield this.monitor.get_lowest_email_id_async();
         int loaded = yield this.monitor.load_by_id_async(
-            earliest_id, num_to_load
+            this.monitor.window_lowest, num_to_load
         );
 
         // Check to see if we need any more, but only if we actually
         // loaded some, so we don't keep loop loading when we have
         // already loaded all in the folder.
-        if (loaded > 0) {
+        if (loaded == num_to_load) {
             this.monitor.check_window_count();
         }
     }

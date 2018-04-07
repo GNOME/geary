@@ -1,4 +1,5 @@
 geary_test_lib_sources = [
+  'mock-object.vala',
   'test-case.vala',
 ]
 
@@ -19,6 +20,7 @@ geary_test_engine_sources = [
   'engine/api/geary-attachment-test.vala',
   'engine/api/geary-engine-test.vala',
   'engine/app/app-conversation-test.vala',
+  'engine/app/app-conversation-monitor-test.vala',
   'engine/app/app-conversation-set-test.vala',
   'engine/imap/command/imap-create-command-test.vala',
   'engine/imap/response/imap-namespace-response-test.vala',

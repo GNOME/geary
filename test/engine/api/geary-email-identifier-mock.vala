@@ -18,7 +18,7 @@ public class Geary.MockEmailIdentifer : EmailIdentifier {
 
     public override int natural_sort_comparator(Geary.EmailIdentifier other) {
         MockEmailIdentifer? other_mock = other as MockEmailIdentifer;
-        return (other_mock == null) ? -1 : other_mock.id - this.id;
+        return (other_mock == null) ? 1 : this.id - other_mock.id;
     }
 
 }

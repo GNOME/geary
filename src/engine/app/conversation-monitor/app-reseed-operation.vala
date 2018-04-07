@@ -21,8 +21,7 @@ private class Geary.App.ReseedOperation : ConversationOperation {
     }
 
     public override async void execute_async() throws Error {
-        EmailIdentifier? earliest_id =
-            yield this.monitor.get_lowest_email_id_async();
+        EmailIdentifier? earliest_id = this.monitor.window_lowest;
         if (earliest_id != null) {
             debug("Reseeding starting from Email ID %s on opened %s",
                   earliest_id.to_string(), this.monitor.base_folder.to_string());

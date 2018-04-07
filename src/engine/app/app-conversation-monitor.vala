@@ -105,10 +105,30 @@ public class Geary.App.ConversationMonitor : BaseObject {
         get; private set; default = new ConversationSet();
     }
 
+    /** The oldest message from the base folder in the loaded window. */
+    internal EmailIdentifier? window_lowest {
+        owned get {
+            return (this.window.is_empty) ? null : this.window.first();
+        }
+    }
+
     private Geary.Email.Field required_fields;
     private Geary.Folder.OpenFlags open_flags;
     private ConversationOperationQueue queue = null;
     private Cancellable? operation_cancellable = null;
+
+    // Set of known, in-folder emails, explicitly loaded for the
+    // monitor's window. This exists purely to support the
+    // window_lowest property above, but we need to maintain a sorted
+    // set of all known messages since if the last known email is
+    // removed, we won't know what the next lowest is. Only email
+    // listed by one of the load_by_*_id methods are added here. Other
+    // in-folder messages pulled in for a conversation aren't added,
+    // since they may not be within the load window.
+    private Gee.SortedSet<EmailIdentifier> window =
+        new Gee.TreeSet<EmailIdentifier>((a,b) => {
+            return a.natural_sort_comparator(b);
+        });
 
 
     /**
@@ -370,31 +390,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
         return flags;
     }
 
-    /** Returns the lowest id of any seen email in the base folder. */
-    internal async Geary.EmailIdentifier? get_lowest_email_id_async()
-        throws Error {
-        Geary.EmailIdentifier? earliest_id = null;
-        if (!this.conversations.is_empty) {
-            // XXX this is the only caller of
-            // Folder.find_boundaries_async in the whole code base,
-            // and the amount of DB work it's doing in the case of
-            // MinimalFolder's implementation is
-            // staggering. ConversationSet should be simply
-            // maintaining an ordered list of message ids that exist
-            // in the base folder and use that instead, which will be
-            // faster and remove a whole lot of pointless code
-            // overhead in Folder implementations.
-            yield this.base_folder.find_boundaries_async(
-                conversations.get_email_identifiers(),
-                out earliest_id,
-                null,
-                this.operation_cancellable
-            );
-        }
-        return earliest_id;
-    }
-
-    /** Loads messages from the base folder by identifier range. */
+    /** Loads messages from the base folder into the window. */
     internal async int load_by_id_async(EmailIdentifier? initial_id,
                                         int count,
                                         Folder.ListFlags flags = Folder.ListFlags.NONE)
@@ -407,17 +403,22 @@ public class Geary.App.ConversationMonitor : BaseObject {
 
         int load_count = 0;
         try {
-            Gee.Collection<Geary.Email>? email =
+            Gee.Collection<Geary.Email>? messages =
                 yield this.base_folder.list_email_by_id_async(
                     initial_id, count, required_fields, flags,
                     this.operation_cancellable
                 );
 
-            if (email != null) {
-                load_count = email.size;
+            if (messages != null && !messages.is_empty) {
+                load_count = messages.size;
+
+                foreach (Email email in messages) {
+                    this.window.add(email.id);
+                }
+
+                yield process_email_async(messages, new ProcessJobContext(true));
             }
 
-            yield process_email_async(email, new ProcessJobContext(true));
         } catch (Error err) {
             notify_scan_completed();
             throw err;
@@ -426,7 +427,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
         return load_count;
     }
 
-    /** Loads messages from the base folder by identifier. */
+    /** Loads messages from the base folder into the window. */
     internal async void load_by_sparse_id(Gee.Collection<EmailIdentifier> ids,
                                           Folder.ListFlags flags = Folder.ListFlags.NONE)
         throws Error {
@@ -437,12 +438,18 @@ public class Geary.App.ConversationMonitor : BaseObject {
         }
 
         try {
-            yield process_email_async(
+            Gee.Collection<Geary.Email>? messages =
                 yield this.base_folder.list_email_by_sparse_id_async(
                     ids, required_fields, flags, this.operation_cancellable
-                ),
-                new ProcessJobContext(true)
-            );
+                );
+
+            if (messages != null && !messages.is_empty) {
+                foreach (Email email in messages) {
+                    this.window.add(email.id);
+                }
+
+                yield process_email_async(messages, new ProcessJobContext(true));
+            }
         } catch (Error err) {
             notify_scan_completed();
             throw err;
@@ -521,6 +528,23 @@ public class Geary.App.ConversationMonitor : BaseObject {
         }
     }
 
+   /** Notifies of removed conversations and removes emails from the window. */
+   internal void removed(Gee.Collection<Conversation> removed,
+                         Gee.MultiMap<Conversation, Email> trimmed,
+                         Gee.Collection<EmailIdentifier>? base_folder_removed) {
+        foreach (Conversation conversation in trimmed.get_keys()) {
+            notify_conversation_trimmed(conversation, trimmed.get(conversation));
+        }
+
+        if (removed.size > 0) {
+            notify_conversations_removed(removed);
+        }
+
+        if (base_folder_removed != null) {
+            this.window.remove_all(base_folder_removed);
+        }
+    }
+
     /**
      * Check conversations to see if they still exist in the base folder.
      *
@@ -546,17 +570,6 @@ public class Geary.App.ConversationMonitor : BaseObject {
         }
 
         return evaporated;
-    }
-
-    internal void notify_emails_removed(Gee.Collection<Conversation> removed,
-                                        Gee.MultiMap<Conversation, Email> trimmed) {
-        foreach (Conversation conversation in trimmed.get_keys()) {
-            notify_conversation_trimmed(conversation, trimmed.get(conversation));
-        }
-
-        if (removed.size > 0) {
-            notify_conversations_removed(removed);
-        }
     }
 
     protected virtual void notify_scan_started() {
@@ -789,8 +802,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
 
     private void on_account_email_appended(Folder folder,
                                            Gee.Collection<EmailIdentifier> added) {
-        if (folder != this.base_folder &&
-            !get_search_folder_blacklist().contains(folder.path)) {
+        if (folder != this.base_folder) {
             this.queue.add(new ExternalAppendOperation(this, folder, added));
         }
     }
@@ -800,8 +812,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
         // ExternalAppendOperation will check to determine if the
         // email is relevant for some existing conversation before
         // adding it, which is what we want here.
-        if (folder != this.base_folder &&
-            !get_search_folder_blacklist().contains(folder.path)) {
+        if (folder != this.base_folder) {
             this.queue.add(new ExternalAppendOperation(this, folder, inserted));
         }
     }
@@ -811,16 +822,14 @@ public class Geary.App.ConversationMonitor : BaseObject {
         // ExternalAppendOperation will check to determine if the
         // email is relevant for some existing conversation before
         // adding it, which is what we want here.
-        if (folder != this.base_folder &&
-            !get_search_folder_blacklist().contains(folder.path)) {
+        if (folder != this.base_folder) {
             this.queue.add(new ExternalAppendOperation(this, folder, inserted));
         }
     }
 
     private void on_account_email_removed(Folder folder,
                                           Gee.Collection<EmailIdentifier> removed) {
-        if (folder != this.base_folder &&
-            !get_search_folder_blacklist().contains(folder.path)) {
+        if (folder != this.base_folder) {
             this.queue.add(new RemoveOperation(this, folder, removed));
         }
     }
