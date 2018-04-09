@@ -154,6 +154,7 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
      * Shows the loading UI.
      */
     public void show_loading() {
+        this.loading_page.start();
         set_visible_child(this.loading_page);
     }
 
@@ -294,13 +295,19 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
      */
     private new void set_visible_child(Gtk.Widget widget) {
         debug("Showing: %s", widget.get_name());
-        if (widget != this.conversation_page &&
-            get_visible_child() == this.conversation_page) {
-            // By removing the current list, any load it is currently
-            // performing is also cancelled, which is important to
-            // avoid a possible crit warning when switching folders,
-            // etc.
-            remove_current_list();
+        Gtk.Widget current = get_visible_child();
+        if (current == this.conversation_page) {
+            if (widget != this.conversation_page) {
+                // By removing the current list, any load it is currently
+                // performing is also cancelled, which is important to
+                // avoid a possible crit warning when switching folders,
+                // etc.
+                remove_current_list();
+            }
+        } else if (current == this.loading_page) {
+            // Stop the spinner running so it doesn't trigger repaints
+            // and wake up Geary even when idle. See Bug 783025.
+            this.loading_page.stop();
         }
         base.set_visible_child(widget);
     }
