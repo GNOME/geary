@@ -27,7 +27,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     private class MessageViewIterator :
         Gee.Traversable<ConversationMessage>,
         Gee.Iterator<ConversationMessage>,
-        Object {
+        Geary.BaseObject {
 
 
         public bool read_only {
@@ -47,15 +47,14 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         }
 
         public bool next() {
-            if (!has_next()) {
-                return false;
-            }
-            if (this.pos == -1) {
-                this.pos = 0;
+            bool has_next = false;
+            this.pos += 1;
+            if (this.pos == 0) {
+                has_next = true;
             } else {
-                this.attached_views.next();
+                has_next = this.attached_views.next();
             }
-            return true;
+            return has_next;
         }
 
         public bool has_next() {
@@ -68,7 +67,6 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
                 assert_not_reached();
 
             case 0:
-                this.pos = 1;
                 return this.parent_view.primary_message;
 
             default:
@@ -81,12 +79,12 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         }
 
         public new bool foreach(Gee.ForallFunc<ConversationMessage> f) {
-            this.pos = 1;
-            bool ret = f(this.parent_view.primary_message);
-            if (ret) {
-                ret = this.attached_views.foreach(f);
+            bool cont = true;
+            while (cont && has_next()) {
+                next();
+                cont = f(get());
             }
-            return ret;
+            return cont;
         }
 
     }
@@ -249,13 +247,11 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     public Gee.List<ConversationMessage> attached_messages {
         owned get { return this._attached_messages.read_only_view; }
     }
+    private Gee.List<ConversationMessage> _attached_messages =
+        new Gee.LinkedList<ConversationMessage>();
 
     /** Determines if all message's web views have finished loading. */
     public bool message_bodies_loaded { get; private set; default = false; }
-
-    // Backing for attached_messages
-    private Gee.List<ConversationMessage> _attached_messages =
-        new Gee.LinkedList<ConversationMessage>();
 
     // Contacts for the email's account
     private Geary.ContactStore contact_store;
@@ -490,6 +486,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         foreach (Geary.RFC822.Message sub_message in sub_messages) {
             ConversationMessage attached_message =
                 new ConversationMessage(sub_message, config, false);
+            debug("XXX creating sub-message: %s", sub_message.subject.to_string());
             connect_message_view_signals(attached_message);
             attached_message.web_view.add_internal_resources(cid_resources);
             this.sub_messages.add(attached_message);
@@ -514,6 +511,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
             if (load_cancelled.is_cancelled()) {
                 break;
             }
+            debug("XXX loading sub-message: %s", view.message.subject.to_string());
             yield view.load_message_body(load_cancelled);
             view.load_avatar.begin(avatars, load_cancelled);
         }
