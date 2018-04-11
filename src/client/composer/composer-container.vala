@@ -25,11 +25,11 @@ public interface ComposerContainer {
     public abstract Gtk.ApplicationWindow top_window { get; }
 
     public virtual void present() {
-        // Use present_with_time and a made up time so the present
+        // Use present_with_time and a synthesised time so the present
         // actually works, as a work around for Bug 766284
         // <https://bugzilla.gnome.org/show_bug.cgi?id=766284>.
         this.top_window.present_with_time(
-            (uint32) (get_real_time() / 1000)
+            (uint32) (get_monotonic_time() / 1000)
         );
     }
 
