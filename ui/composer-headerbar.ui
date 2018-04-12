@@ -26,6 +26,7 @@
             <property name="tooltip_text" translatable="yes">Detach (Ctrl+D)</property>
             <child>
               <object class="GtkImage" id="detach_start_image">
+                <property name="visible">True</property>
                 <property name="icon_name">detach-symbolic</property>
                 <property name="pixel-size">16</property>
               </object>
