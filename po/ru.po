@@ -16,8 +16,8 @@ msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://bugzilla.gnome.org/enter_bug.cgi?"
 "product=geary&keywords=I18N+L10N&component=internationalization\n"
-"POT-Creation-Date: 2017-11-16 05:25+0000\n"
-"PO-Revision-Date: 2017-12-15 13:47+0300\n"
+"POT-Creation-Date: 2017-12-15 10:48+0000\n"
+"PO-Revision-Date: 2018-04-12 22:48+0300\n"
 "Last-Translator: Stas Solovey <whats_up@tut.by>\n"
 "Language-Team: Русский <gnome-cyr@gnome.org>\n"
 "Language: ru\n"
@@ -26,7 +26,7 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
-"X-Generator: Poedit 2.0.5\n"
+"X-Generator: Poedit 2.0.6\n"
 
 #. Translators: The application name
 #: ../desktop/org.gnome.Geary.appdata.xml.in.h:2
@@ -698,15 +698,15 @@ msgstr ""
 "\n"
 "Проверьте подключение к сети и перезапустите Geary."
 
-#: ../src/client/application/geary-controller.vala:2008
+#: ../src/client/application/geary-controller.vala:2010
 msgid "Undo move (Ctrl+Z)"
 msgstr "Отменить перемещение (Ctrl+Z)"
 
-#: ../src/client/application/geary-controller.vala:2018
+#: ../src/client/application/geary-controller.vala:2020
 msgid "Are you sure you want to open these attachments?"
 msgstr "Действительно хотите открыть эти вложения?"
 
-#: ../src/client/application/geary-controller.vala:2019
+#: ../src/client/application/geary-controller.vala:2021
 msgid ""
 "Attachments may cause damage to your system if opened.  Only open files from "
 "trusted sources."
@@ -714,16 +714,16 @@ msgstr ""
 "Вложения при открытии могут нанести ущерб системе. Открывайте вложения "
 "только от надёжных источников."
 
-#: ../src/client/application/geary-controller.vala:2020
+#: ../src/client/application/geary-controller.vala:2022
 msgid "Don’t _ask me again"
 msgstr "Не _спрашивать снова"
 
-#: ../src/client/application/geary-controller.vala:2130
+#: ../src/client/application/geary-controller.vala:2126
 #, c-format
 msgid "A file named “%s” already exists.  Do you want to replace it?"
 msgstr "Файл с именем «%s» уже существует. Заменить его?"
 
-#: ../src/client/application/geary-controller.vala:2132
+#: ../src/client/application/geary-controller.vala:2128
 #, c-format
 msgid ""
 "The file already exists in “%s”.  Replacing it will overwrite its contents."
@@ -731,63 +731,63 @@ msgstr ""
 "Файл уже существует в «%s». Его замена приведёт к полной перезаписи его "
 "содержимого."
 
-#: ../src/client/application/geary-controller.vala:2135
+#: ../src/client/application/geary-controller.vala:2131
 msgid "_Replace"
 msgstr "_Заменить"
 
 #. Find out what to do with the inline composers.
 #. TODO: Remove this in favor of automatically saving drafts
-#: ../src/client/application/geary-controller.vala:2383
+#: ../src/client/application/geary-controller.vala:2379
 msgid "Close open draft messages?"
 msgstr "Закрыть черновик?"
 
-#: ../src/client/application/geary-controller.vala:2505
+#: ../src/client/application/geary-controller.vala:2501
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Очистить все письма папки %s?"
 
-#: ../src/client/application/geary-controller.vala:2506
+#: ../src/client/application/geary-controller.vala:2502
 msgid "This removes the email from Geary and your email server."
 msgstr "Удаляет все письма из Geary и почтового сервера."
 
-#: ../src/client/application/geary-controller.vala:2507
+#: ../src/client/application/geary-controller.vala:2503
 msgid "This cannot be undone."
 msgstr "Это не может быть отменено."
 
-#: ../src/client/application/geary-controller.vala:2508
+#: ../src/client/application/geary-controller.vala:2504
 #, c-format
 msgid "Empty %s"
 msgstr "Очистить %s"
 
-#: ../src/client/application/geary-controller.vala:2525
+#: ../src/client/application/geary-controller.vala:2521
 #, c-format
 msgid "Error emptying %s"
 msgstr "Ошибка очистки %s"
 
-#: ../src/client/application/geary-controller.vala:2555
+#: ../src/client/application/geary-controller.vala:2551
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Безвозвратно удалить это сообщение?"
 msgstr[1] "Безвозвратно удалить эти сообщения?"
 msgstr[2] "Безвозвратно удалить эти сообщения?"
 
-#: ../src/client/application/geary-controller.vala:2557
+#: ../src/client/application/geary-controller.vala:2553
 msgid "Delete"
 msgstr "_Удалить"
 
-#: ../src/client/application/geary-controller.vala:2589
+#: ../src/client/application/geary-controller.vala:2585
 msgid "Undo archive (Ctrl+Z)"
 msgstr "Отменить архивирование (Ctrl+Z)"
 
-#: ../src/client/application/geary-controller.vala:2604
+#: ../src/client/application/geary-controller.vala:2600
 msgid "Undo trash (Ctrl+Z)"
 msgstr "Отменить перемещение в корзину (Ctrl+Z)"
 
-#: ../src/client/application/geary-controller.vala:2658
+#: ../src/client/application/geary-controller.vala:2654
 msgid "Undo (Ctrl+Z)"
 msgstr "Отменить (Ctrl+Z)"
 
-#: ../src/client/application/geary-controller.vala:2789
+#: ../src/client/application/geary-controller.vala:2785
 msgid "Failed to open default text editor."
 msgstr "Не удалось запустить текстовый редактор по-умолчанию."
 
@@ -918,28 +918,28 @@ msgstr ""
 "прикрепить|прикрепление|прикрепления|прикреплён|прикреплены|вложение|"
 "вложенные|вложения"
 
-#: ../src/client/composer/composer-widget.vala:1122
-#: ../src/client/composer/composer-widget.vala:1141
+#: ../src/client/composer/composer-widget.vala:1129
+#: ../src/client/composer/composer-widget.vala:1148
 msgid "Do you want to discard this message?"
 msgstr "Отказаться от этого сообщения?"
 
-#: ../src/client/composer/composer-widget.vala:1245
+#: ../src/client/composer/composer-widget.vala:1252
 msgid "Send message with an empty subject and body?"
 msgstr "Отправить сообщение с пустой темой и без текста?"
 
-#: ../src/client/composer/composer-widget.vala:1247
+#: ../src/client/composer/composer-widget.vala:1254
 msgid "Send message with an empty subject?"
 msgstr "Отправить сообщение с пустой темой?"
 
-#: ../src/client/composer/composer-widget.vala:1249
+#: ../src/client/composer/composer-widget.vala:1256
 msgid "Send message with an empty body?"
 msgstr "Отправить сообщение без текста?"
 
-#: ../src/client/composer/composer-widget.vala:1253
+#: ../src/client/composer/composer-widget.vala:1260
 msgid "Send message without an attachment?"
 msgstr "Отправить сообщение без прикреплённых файлов?"
 
-#: ../src/client/composer/composer-widget.vala:1515
+#: ../src/client/composer/composer-widget.vala:1522
 #, c-format
 msgid "“%s” already attached for delivery."
 msgstr "«%s» уже вложено в письмо."
@@ -949,73 +949,73 @@ msgstr "«%s» уже вложено в письмо."
 #. description of the document type, the second will
 #. be a human-friendly size string. For example:
 #. Document (100.9MB)
-#: ../src/client/composer/composer-widget.vala:1523
+#: ../src/client/composer/composer-widget.vala:1530
 #: ../src/client/conversation-viewer/conversation-email.vala:138
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: ../src/client/composer/composer-widget.vala:1560
+#: ../src/client/composer/composer-widget.vala:1567
 #, c-format
 msgid "“%s” could not be found."
 msgstr "Невозможно найти «%s»."
 
-#: ../src/client/composer/composer-widget.vala:1566
+#: ../src/client/composer/composer-widget.vala:1573
 #, c-format
 msgid "“%s” is a folder."
 msgstr "«%s» является каталогом."
 
-#: ../src/client/composer/composer-widget.vala:1572
+#: ../src/client/composer/composer-widget.vala:1579
 #, c-format
 msgid "“%s” is an empty file."
 msgstr "«%s» — пустой файл."
 
-#: ../src/client/composer/composer-widget.vala:1585
+#: ../src/client/composer/composer-widget.vala:1592
 #, c-format
 msgid "“%s” could not be opened for reading."
 msgstr "Невозможно открыть для чтения «%s»."
 
-#: ../src/client/composer/composer-widget.vala:1593
+#: ../src/client/composer/composer-widget.vala:1600
 msgid "Cannot add attachment"
 msgstr "Невозможно добавить вложение"
 
-#: ../src/client/composer/composer-widget.vala:1645
+#: ../src/client/composer/composer-widget.vala:1652
 msgid "To: "
 msgstr "Кому: "
 
-#: ../src/client/composer/composer-widget.vala:1648
+#: ../src/client/composer/composer-widget.vala:1655
 msgid "Cc: "
 msgstr "Копия: "
 
-#: ../src/client/composer/composer-widget.vala:1651
+#: ../src/client/composer/composer-widget.vala:1658
 msgid "Bcc: "
 msgstr "Скрытая копия: "
 
-#: ../src/client/composer/composer-widget.vala:1654
+#: ../src/client/composer/composer-widget.vala:1661
 msgid "Reply-To: "
 msgstr "Ответить: "
 
-#: ../src/client/composer/composer-widget.vala:1786
+#: ../src/client/composer/composer-widget.vala:1793
 msgid "Select Color"
 msgstr "Выбрать цвет"
 
 #. Displayed in the From dropdown to indicate an "alternate email address"
 #. for an account.  The first printf argument will be the alternate email
 #. address, and the second will be the account's primary email address.
-#: ../src/client/composer/composer-widget.vala:1986
+#: ../src/client/composer/composer-widget.vala:1993
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%1$s через %2$s"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: ../src/client/composer/composer-widget.vala:2028
+#: ../src/client/composer/composer-widget.vala:2035
 msgid "_From:"
 msgstr "_От:"
 
 #. Translators: This is the name of the file chooser filter
 #. when inserting an image in the composer.
-#: ../src/client/composer/composer-widget.vala:2252
+#: ../src/client/composer/composer-widget.vala:2259
 msgid "Images"
 msgstr "Изображения"
 
@@ -1050,14 +1050,14 @@ msgstr "Отправитель не указан"
 
 #. Translators: This separates multiple 'from'
 #. addresses in the header preview for a message.
-#: ../src/client/conversation-viewer/conversation-message.vala:586
+#: ../src/client/conversation-viewer/conversation-message.vala:585
 msgid ", "
 msgstr ", "
 
 #. Translators: This string is used as the HTML IMG ALT
 #. attribute value when displaying an inline image in an email
 #. that did not specify a file name. E.g. <IMG ALT="Image" ...
-#: ../src/client/conversation-viewer/conversation-message.vala:707
+#: ../src/client/conversation-viewer/conversation-message.vala:684
 msgid "Image"
 msgstr "Изображение"
 
@@ -1414,7 +1414,7 @@ msgstr "Отправленные"
 
 #: ../src/engine/api/geary-special-folder-type.vala:33
 msgid "Starred"
-msgstr "Избранные"
+msgstr "Помеченные"
 
 #: ../src/engine/api/geary-special-folder-type.vala:36
 msgid "Important"
@@ -1598,7 +1598,7 @@ msgstr "прочитанное"
 #: ../src/engine/imap-db/imap-db-account.vala:215
 msgctxt "'is:' search operator value"
 msgid "starred"
-msgstr "избранное"
+msgstr "помеченные"
 
 #. Can be typed in the search box after "is:" i.e.:
 #. "is:unread". Matches conversations that are flagged unread.
@@ -1698,31 +1698,31 @@ msgstr "%s написал:"
 msgid "On %s:"
 msgstr "В %s:"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:278
+#: ../src/engine/rfc822/rfc822-utils.vala:282
 msgid "---------- Forwarded message ----------"
 msgstr "---------- Пересылаемое сообщение ----------"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:282
+#: ../src/engine/rfc822/rfc822-utils.vala:286
 #, c-format
 msgid "From: %s\n"
 msgstr "От: %s\n"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:283
+#: ../src/engine/rfc822/rfc822-utils.vala:287
 #, c-format
 msgid "Subject: %s\n"
 msgstr "Тема: %s\n"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:284
+#: ../src/engine/rfc822/rfc822-utils.vala:288
 #, c-format
 msgid "Date: %s\n"
 msgstr "Дата: %s\n"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:287
+#: ../src/engine/rfc822/rfc822-utils.vala:291
 #, c-format
 msgid "To: %s\n"
 msgstr "Кому: %s\n"
 
-#: ../src/engine/rfc822/rfc822-utils.vala:290
+#: ../src/engine/rfc822/rfc822-utils.vala:294
 #, c-format
 msgid "Cc: %s\n"
 msgstr "Копия: %s\n"
@@ -1981,12 +1981,12 @@ msgstr "Сохранить все вложения"
 #. Note: The application will never show this button at the same time as unstar_button, one will always be hidden.
 #: ../ui/conversation-email.ui.h:3
 msgid "Mark this message as starred"
-msgstr "Пометить это сообщение как избранное"
+msgstr "Отметить это сообщение как помеченное"
 
 #. Note: The application will never show this button at the same time as star_button, one will always be hidden.
 #: ../ui/conversation-email.ui.h:5
 msgid "Mark this message as not starred"
-msgstr "Пометить это сообщение как не избранное"
+msgstr "Отметить это сообщение как не помеченное"
 
 #: ../ui/conversation-email.ui.h:6
 msgid "Display the message menu"
