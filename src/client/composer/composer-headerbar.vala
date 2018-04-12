@@ -46,8 +46,10 @@ public class ComposerHeaderbar : Gtk.HeaderBar {
         bind_property("show-pending-attachments", conversation_attach_buttons, "visible",
             BindingFlags.SYNC_CREATE);
 
-        notify["decoration-layout"].connect(set_detach_button_side);
-        realize.connect(set_detach_button_side);
+        set_detach_button_side();
+        Gtk.Settings.get_default().notify["gtk-decoration-layout"].connect(
+            () => { set_detach_button_side(); }
+        );
     }
 
     public void set_recipients(string label, string tooltip) {

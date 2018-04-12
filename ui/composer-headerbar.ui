@@ -21,6 +21,7 @@
             <property name="always_show_image">True</property>
             <child>
               <object class="GtkImage" id="detach_start_image">
+                <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <property name="pixel_size">16</property>
                 <property name="icon_name">detach-symbolic</property>
