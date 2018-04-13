@@ -172,7 +172,7 @@ pre {
     border-bottom-color: #91918c;
     background-image: linear-gradient(to bottom, #e8e8e7, #dededd 60%, #cfcfcd);
     text-shadow: 0 1px rgba(255, 255, 255, 0.76923);
-    box-shadow: inset 0 1px rgba(255, 255, 255, 0.8); }
+    box-shadow: inset 0 1px rgba(255, 255, 255, 0.8);
   }
   .geary-quote-container .geary-button:hover {
     /* Likewise the properties below also workaround WK Bug 166648,
@@ -194,7 +194,7 @@ pre {
 }
 
 @media print {
-  body {
-    background-color: white !important;
+  .geary-button {
+    display: none;
   }
 }
