@@ -352,6 +352,7 @@ public class ComposerWidget : Gtk.EventBox {
     private Gee.Map<string,File> cid_files = new Gee.HashMap<string,File>();
 
     private Geary.App.DraftManager? draft_manager = null;
+    private GLib.Cancellable? draft_manager_opening = null;
     private Geary.EmailFlags draft_flags = new Geary.EmailFlags.with(Geary.EmailFlags.DRAFT);
     private Geary.TimeoutManager draft_timer;
     private bool is_draft_saved = false;
@@ -518,6 +519,10 @@ public class ComposerWidget : Gtk.EventBox {
 
     public override void destroy() {
         this.draft_timer.reset();
+        if (this.draft_manager_opening != null) {
+            this.draft_manager_opening.cancel();
+            this.draft_manager_opening = null;
+        }
         if (this.draft_manager != null)
             close_draft_manager_async.begin(null);
         base.destroy();
@@ -711,40 +716,6 @@ public class ComposerWidget : Gtk.EventBox {
         } else {
             this.state = ComposerState.INLINE_COMPACT;
         }
-    }
-
-    /**
-     * Creates and opens the composer's draft manager.
-     */
-    private async void open_draft_manager_async(
-        Geary.EmailIdentifier? editing_draft_id = null,
-        Cancellable? cancellable = null)
-    throws Error {
-        if (!this.account.information.save_drafts) {
-            this.header.save_and_close_button.hide();
-            return;
-        }
-
-        this.draft_manager = new Geary.App.DraftManager(account);
-        try {
-            yield this.draft_manager.open_async(editing_draft_id, cancellable);
-            debug("Draft manager opened");
-        } catch (Error err) {
-            debug("Unable to open draft manager %s: %s",
-                  this.draft_manager.to_string(), err.message);
-            this.draft_manager = null;
-            throw err;
-        }
-
-        update_draft_state();
-        get_action(ACTION_CLOSE_AND_SAVE).set_enabled(true);
-        this.header.save_and_close_button.show();
-
-        this.draft_manager.notify[Geary.App.DraftManager.PROP_DRAFT_STATE]
-            .connect(on_draft_state_changed);
-        this.draft_manager.notify[Geary.App.DraftManager.PROP_CURRENT_DRAFT_ID]
-            .connect(on_draft_id_changed);
-        this.draft_manager.fatal.connect(on_draft_manager_fatal);
     }
 
     // Copies the addresses (e.g. From/To/CC) and content from referred into this one
@@ -1306,42 +1277,83 @@ public class ComposerWidget : Gtk.EventBox {
     }
 
     /**
+     * Creates and opens the composer's draft manager.
+     */
+    private async void
+        open_draft_manager_async(Geary.EmailIdentifier? editing_draft_id = null)
+    throws Error {
+        if (!this.account.information.save_drafts) {
+            this.header.save_and_close_button.hide();
+            return;
+        }
+
+        // Cancel any existing opening first
+        if (this.draft_manager_opening != null) {
+            this.draft_manager_opening.cancel();
+        }
+        this.draft_manager_opening = new GLib.Cancellable();
+
+        Geary.App.DraftManager new_manager = new Geary.App.DraftManager(account);
+        try {
+            yield new_manager.open_async(editing_draft_id, this.draft_manager_opening);
+            debug("Draft manager opened");
+        } catch (Error err) {
+            debug("Unable to open draft manager %s: %s",
+                  new_manager.to_string(), err.message);
+            throw err;
+        }
+
+        new_manager.notify[Geary.App.DraftManager.PROP_DRAFT_STATE]
+            .connect(on_draft_state_changed);
+        new_manager.notify[Geary.App.DraftManager.PROP_CURRENT_DRAFT_ID]
+            .connect(on_draft_id_changed);
+        new_manager.fatal.connect(on_draft_manager_fatal);
+
+        this.draft_manager_opening = null;
+        this.draft_manager = new_manager;
+
+        update_draft_state();
+        get_action(ACTION_CLOSE_AND_SAVE).set_enabled(true);
+        this.header.save_and_close_button.show();
+
+    }
+
+    /**
      * Closes current draft manager, if any, then opens a new one.
      */
-    private async void reopen_draft_manager_async(Cancellable? cancellable)
+    private async void reopen_draft_manager_async()
     throws Error {
         if (this.draft_manager != null) {
-            yield close_draft_manager_async(cancellable);
+            // Discard the draft, if any, since it may be on a
+            // different account
+            discard_draft();
+            this.draft_manager.discard_on_close = true;
+            yield close_draft_manager_async(null);
         }
-        // XXX Need to work out what do to with any existing draft in
-        // this case. See Bug 713533.
-        yield open_draft_manager_async(null);
+        yield open_draft_manager_async();
     }
 
     private async void close_draft_manager_async(Cancellable? cancellable)
     throws Error {
         this.draft_save_text = "";
         get_action(ACTION_CLOSE_AND_SAVE).set_enabled(false);
-        disconnect_from_draft_manager();
+
+        Geary.App.DraftManager old_manager = this.draft_manager;
+        this.draft_manager = null;
+
+        old_manager.notify[Geary.App.DraftManager.PROP_DRAFT_STATE]
+            .disconnect(on_draft_state_changed);
+        old_manager.notify[Geary.App.DraftManager.PROP_CURRENT_DRAFT_ID]
+            .disconnect(on_draft_id_changed);
+        old_manager.fatal.disconnect(on_draft_manager_fatal);
 
         // drop ref even if close failed
         try {
-            yield this.draft_manager.close_async(cancellable);
-        } finally {
-            this.draft_manager = null;
+            yield old_manager.close_async(cancellable);
+        } catch (Error err) {
+            debug("Error closing draft manager: %s", err.message);
         }
         debug("Draft manager closed");
-    }
-
-    // This code is in a separate method due to https://bugzilla.gnome.org/show_bug.cgi?id=742621
-    // connect_to_draft_manager() is simply for symmetry.  When above bug is fixed, this code can
-    // be moved back into open/close methods
-    private void disconnect_from_draft_manager() {
-        this.draft_manager.notify[Geary.App.DraftManager.PROP_DRAFT_STATE]
-            .disconnect(on_draft_state_changed);
-        this.draft_manager.notify[Geary.App.DraftManager.PROP_CURRENT_DRAFT_ID]
-            .disconnect(on_draft_id_changed);
-        this.draft_manager.fatal.disconnect(on_draft_manager_fatal);
     }
 
     private void update_draft_state() {
@@ -2067,25 +2079,21 @@ public class ComposerWidget : Gtk.EventBox {
         return !set_active;
     }
 
-    private bool update_from_account() throws Error {
+    private void update_from_account() throws Error {
         int index = this.from_multiple.get_active();
-        if (index < 0)
-            return false;
+        if (index >= 0) {
+            FromAddressMap selected = this.from_list.get(index);
+            this.from = selected.from;
 
-        assert(this.from_list.size > index);
-
-        Geary.Account new_account = this.from_list.get(index).account;
-        from = this.from_list.get(index).from;
-        if (new_account == this.account)
-            return false;
-
-        this.account = new_account;
-        this.load_signature.begin(null, (obj, res) => {
-                this.editor.update_signature(this.load_signature.end(res));
-            });
-        load_entry_completions.begin();
-
-        return true;
+            if (selected.account != this.account) {
+                this.account = selected.account;
+                this.load_signature.begin(null, (obj, res) => {
+                        this.editor.update_signature(this.load_signature.end(res));
+                    });
+                load_entry_completions.begin();
+                reopen_draft_manager_async.begin();
+            }
+        }
     }
 
     private async string load_signature(Cancellable? cancellable = null) {
@@ -2158,19 +2166,10 @@ public class ComposerWidget : Gtk.EventBox {
     }
 
     private void on_from_changed() {
-        bool changed = false;
         try {
-            changed = update_from_account();
+            update_from_account();
         } catch (Error err) {
             debug("Unable to update From: Account in composer: %s", err.message);
-        }
-
-        // if the Geary.Account didn't change and the drafts manager
-        // is open(ing), do nothing more; need to check for the drafts
-        // manager because opening it in the case of multiple From: is
-        // handled here alone, so if changed open it if not already
-        if (changed || this.draft_manager == null) {
-            reopen_draft_manager_async.begin(null);
         }
     }
 
