@@ -17,8 +17,8 @@
  */
 public class Geary.Imap.CreateCommand : Command {
 
-    public const string NAME = "create";
-    public const string USE = "use";
+    public const string NAME_ATOM = "create";
+    public const string USE_ATOM = "use";
 
     public MailboxSpecifier mailbox { get; private set; }
 
@@ -56,7 +56,7 @@ public class Geary.Imap.CreateCommand : Command {
     }
 
     public CreateCommand(MailboxSpecifier mailbox) {
-        base(NAME);
+        base(NAME_ATOM);
         this.mailbox = mailbox;
         add(mailbox.to_parameter());
     }
@@ -72,7 +72,7 @@ public class Geary.Imap.CreateCommand : Command {
             use_types.add(new AtomParameter(attr.to_string()));
 
             ListParameter use_param = new ListParameter();
-            use_param.add(new AtomParameter(USE));
+            use_param.add(new AtomParameter(USE_ATOM));
             use_param.add(use_types);
 
             add(use_param);
