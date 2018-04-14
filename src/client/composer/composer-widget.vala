@@ -616,6 +616,7 @@ public class ComposerWidget : Gtk.EventBox {
 
         update_composer_view();
         update_attachments_view();
+        update_pending_attachments(this.pending_include, true);
 
         string signature = yield load_signature(cancellable);
         this.editor.load_html(
@@ -1480,8 +1481,6 @@ public class ComposerWidget : Gtk.EventBox {
             attachments_box.show_all();
         else
             attachments_box.hide();
-
-        update_pending_attachments(this.pending_include, true);
     }
 
     // Both adds pending attachments and updates the UI if there are
@@ -1631,15 +1630,16 @@ public class ComposerWidget : Gtk.EventBox {
     private void remove_attachment(File file, Gtk.Box box) {
         if (!this.attached_files.remove(file))
             return;
-        
+
         foreach (weak Gtk.Widget child in this.attachments_box.get_children()) {
             if (child == box) {
                 this.attachments_box.remove(box);
                 break;
             }
         }
-        
+
         update_attachments_view();
+        update_pending_attachments(this.pending_include, false);
     }
 
     private bool check_send_on_return(Gdk.EventKey event) {
