@@ -905,6 +905,7 @@ public class ComposerWidget : Gtk.EventBox {
 
                 try {
                     add_attachment_part(File.new_for_uri(uri.strip()));
+                    draft_changed();
                 } catch (Error err) {
                     attachment_failed(err.message);
                 }
@@ -1485,7 +1486,8 @@ public class ComposerWidget : Gtk.EventBox {
 
     // Both adds pending attachments and updates the UI if there are
     // any that were left out, that could have been added manually.
-    private void update_pending_attachments(AttachPending include, bool do_add) {
+    private bool update_pending_attachments(AttachPending include, bool do_add) {
+        bool have_added = false;
         bool manual_enabled = false;
         if (this.pending_attachments != null) {
             foreach(Geary.Attachment part in this.pending_attachments) {
@@ -1525,6 +1527,7 @@ public class ComposerWidget : Gtk.EventBox {
                             } else {
                                 add_attachment_part(file);
                             }
+                            have_added = true;
                         }
                     } else {
                         // The pending attachment should only be added
@@ -1537,6 +1540,7 @@ public class ComposerWidget : Gtk.EventBox {
             }
         }
         this.header.show_pending_attachments = manual_enabled;
+        return have_added;
     }
 
     private void add_attachment_part(File target)
@@ -1640,6 +1644,7 @@ public class ComposerWidget : Gtk.EventBox {
 
         update_attachments_view();
         update_pending_attachments(this.pending_include, false);
+        draft_changed();
     }
 
     private bool check_send_on_return(Gdk.EventKey event) {
@@ -2282,6 +2287,7 @@ public class ComposerWidget : Gtk.EventBox {
             foreach (File file in dialog.get_files()) {
                 try {
                     add_attachment_part(file);
+                    draft_changed();
                 } catch (Error err) {
                     attachment_failed(err.message);
                     break;
@@ -2293,7 +2299,9 @@ public class ComposerWidget : Gtk.EventBox {
     }
 
     private void on_pending_attachments() {
-        update_pending_attachments(AttachPending.ALL, true);
+        if (update_pending_attachments(AttachPending.ALL, true)) {
+            draft_changed();
+        }
     }
 
     private void on_insert_image(SimpleAction action, Variant? param) {
