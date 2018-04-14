@@ -35,7 +35,10 @@ add_project_arguments([
   language: 'vala'
 )
 
-# Dependencies
+#
+# Required dependencies
+#
+
 target_glib = '2.50' # Also passed to valac, so don't include a point rev
 target_gtk = '3.22.0'
 target_webkit = '2.16'
@@ -59,19 +62,22 @@ gcr = dependency('gcr-3', version: '>= 3.10.1')
 gobject_introspection = dependency('gobject-introspection-1.0')
 webkit2gtk_dep = dependency('webkit2gtk-4.0', version: '>=' + target_webkit)
 webkit2gtk_web_extension_dep = dependency('webkit2gtk-web-extension-4.0', version: '>=' + target_webkit)
-javascriptcoregtk_lib = cc.find_library('javascriptcoregtk-4.0', version: '>=' + target_webkit)
+javascriptcoregtk_lib = cc.find_library('javascriptcoregtk-4.0')
 javascriptcoregtk_vapi = valac.find_library('javascriptcore-4.0', dirs: vapi_dir)
 enchant = dependency('enchant', version: '>= 1.6')
+
+# System dependencies ensures appropriate versions, but the declared
+# depencency is what we actually build against.
+libunwind_dep = dependency('libunwind', version: '>= 1.1')
+libunwind_generic_dep = dependency('libunwind-generic', version: '>= 1.1')
 libunwind = declare_dependency(
    dependencies: [
      valac.find_library('libunwind', dirs: vapi_dir),
-     cc.find_library('unwind', version: '>= 1.1'),
-     cc.find_library('unwind-generic', version: '>= 1.1'),
+     cc.find_library('unwind'),
+     cc.find_library('unwind-generic')
    ],
  )
 
-libunity = dependency('unity', version: '>= 5.12.0', required: false)
-libmessagingmenu = meson.get_compiler('c').find_library('libmessaging-menu', required: false)
 sqlite = dependency('sqlite3')
 if sqlite.version().version_compare('>= 3.12')
   if not cc.has_header_symbol('sqlite3.h', 'SQLITE_DBCONFIG_ENABLE_FTS3_TOKENIZER')
@@ -101,6 +107,17 @@ else
     endif
   endif
 endif
+
+#
+# Required dependencies
+#
+
+libunity = dependency('unity', version: '>= 5.12.0', required: false)
+libmessagingmenu = meson.get_compiler('c').find_library('libmessaging-menu', required: false)
+
+#
+# Build glue
+#
 
 if enable_valadoc
   valadoc = find_program('valadoc')
