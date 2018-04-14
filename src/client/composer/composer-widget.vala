@@ -2129,7 +2129,7 @@ public class ComposerWidget : Gtk.EventBox {
                         this.editor.update_signature(this.load_signature.end(res));
                     });
                 load_entry_completions();
-                reopen_draft_manager_async();
+                this.reopen_draft_manager_async.begin();
             }
         }
     }
