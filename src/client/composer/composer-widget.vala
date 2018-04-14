@@ -1399,7 +1399,7 @@ public class ComposerWidget : Gtk.EventBox {
     }
 
     private inline void draft_changed() {
-        if (this.can_save) {
+        if (this.should_save) {
             this.draft_timer.start();
         }
         this.draft_status_text = "";
