@@ -486,7 +486,6 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         foreach (Geary.RFC822.Message sub_message in sub_messages) {
             ConversationMessage attached_message =
                 new ConversationMessage(sub_message, config, false);
-            debug("XXX creating sub-message: %s", sub_message.subject.to_string());
             connect_message_view_signals(attached_message);
             attached_message.web_view.add_internal_resources(cid_resources);
             this.sub_messages.add(attached_message);
@@ -511,7 +510,6 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
             if (load_cancelled.is_cancelled()) {
                 break;
             }
-            debug("XXX loading sub-message: %s", view.message.subject.to_string());
             yield view.load_message_body(load_cancelled);
             view.load_avatar.begin(avatars, load_cancelled);
         }
