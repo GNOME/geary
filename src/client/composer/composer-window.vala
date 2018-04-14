@@ -10,6 +10,10 @@
  */
 public class ComposerWindow : Gtk.ApplicationWindow, ComposerContainer {
 
+
+    private const string DEFAULT_TITLE = _("New Message");
+
+
     public Gtk.ApplicationWindow top_window {
         get { return this; }
     }
@@ -37,14 +41,14 @@ public class ComposerWindow : Gtk.ApplicationWindow, ComposerContainer {
 
         if (composer.config.desktop_environment == Configuration.DesktopEnvironment.UNITY) {
             composer.embed_header();
-            composer.bind_property("window-title", this, "title", BindingFlags.SYNC_CREATE);
         } else {
-            this.composer.header.show_close_button = true;
-            this.composer.free_header();
+            composer.header.show_close_button = true;
+            composer.free_header();
             set_titlebar(this.composer.header);
-            composer.bind_property("window-title", this.composer.header, "title",
-                                   BindingFlags.SYNC_CREATE);
         }
+
+        composer.subject_changed.connect(() => { update_title(); } );
+        update_title();
 
         show();
         set_position(Gtk.WindowPosition.CENTER);
@@ -114,5 +118,22 @@ public class ComposerWindow : Gtk.ApplicationWindow, ComposerContainer {
     public void remove_composer() {
         warning("Detached composer received remove");
     }
-}
 
+    private void update_title() {
+        string subject = this.composer.subject.strip();
+        if (Geary.String.is_empty_or_whitespace(subject)) {
+            subject = DEFAULT_TITLE;
+        }
+
+        switch (this.composer.config.desktop_environment) {
+        case Configuration.DesktopEnvironment.UNITY:
+            this.title = subject;
+            break;
+
+        default:
+            this.composer.header.title = subject;
+            break;
+        }
+    }
+
+}

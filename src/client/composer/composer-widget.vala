@@ -159,7 +159,6 @@ public class ComposerWidget : Gtk.EventBox {
     private const string DRAFT_SAVING_TEXT = _("Saving");
     private const string DRAFT_ERROR_TEXT = _("Error saving");
     private const string BACKSPACE_TEXT = _("Press Backspace to delete quote");
-    private const string DEFAULT_TITLE = _("New Message");
 
     private const string URI_LIST_MIME_TYPE = "text/uri-list";
     private const string FILE_URI_PREFIX = "file://";
@@ -238,12 +237,6 @@ public class ComposerWidget : Gtk.EventBox {
     public ComposerHeaderbar header { get; private set; }
 
     public ComposerWebView editor { get; private set; }
-
-    public string draft_save_text { get; private set; }
-
-    public bool can_delete_quote { get; private set; default = false; }
-
-    public string toolbar_text { get; set; }
 
     public string window_title { get; set; }
 
@@ -362,6 +355,23 @@ public class ComposerWidget : Gtk.EventBox {
     private Geary.EmailFlags draft_flags = new Geary.EmailFlags.with(Geary.EmailFlags.DRAFT);
     private Geary.TimeoutManager draft_timer;
     private bool is_draft_saved = false;
+    private string draft_status_text {
+        get { return this._draft_status_text; }
+        set {
+            this._draft_status_text = value;
+            update_info_label();
+        }
+    }
+    private string _draft_status_text = "";
+
+    private bool can_delete_quote {
+        get { return this._can_delete_quote; }
+        set {
+            this._can_delete_quote = value;
+            update_info_label();
+        }
+    }
+    private bool _can_delete_quote = false;
 
     // Is the composer closing (e.g. saving a draft or sending)?
     private bool is_closing = false;
@@ -378,6 +388,9 @@ public class ComposerWidget : Gtk.EventBox {
 
     /** Fired when the user opens a link in the composer. */
     public signal void link_activated(string url);
+
+    /** Fired when the user has changed the composer's subject. */
+    public signal void subject_changed(string new_subject);
 
 
     public ComposerWidget(Geary.Account account,
@@ -413,19 +426,10 @@ public class ComposerWidget : Gtk.EventBox {
 
         add_events(Gdk.EventMask.KEY_PRESS_MASK | Gdk.EventMask.KEY_RELEASE_MASK);
 
-        this.visible_on_attachment_drag_over.remove(this.visible_on_attachment_drag_over_child);
+        this.visible_on_attachment_drag_over.remove(
+            this.visible_on_attachment_drag_over_child
+        );
 
-        BindingTransformFunc set_toolbar_text = (binding, source_value, ref target_value) => {
-                if (draft_save_text == "" && can_delete_quote)
-                    target_value = BACKSPACE_TEXT;
-                else
-                    target_value = draft_save_text;
-                return true;
-            };
-        bind_property("draft-save-text", this, "toolbar-text", BindingFlags.SYNC_CREATE,
-                      (owned) set_toolbar_text);
-        bind_property("can-delete-quote", this, "toolbar-text", BindingFlags.SYNC_CREATE,
-                      (owned) set_toolbar_text);
         this.to_entry = new EmailEntry(this);
         this.to_entry.changed.connect(on_envelope_changed);
         this.to_box.add(to_entry);
@@ -465,13 +469,6 @@ public class ComposerWidget : Gtk.EventBox {
         this.context_menu_inspector = (Menu) builder.get_object("context_menu_inspector");
         this.context_menu_webkit_spelling = (Menu) builder.get_object("context_menu_webkit_spelling");
         this.context_menu_webkit_text_entry = (Menu) builder.get_object("context_menu_webkit_text_entry");
-
-        this.subject_entry.bind_property("text", this, "window-title", BindingFlags.SYNC_CREATE,
-            (binding, source_value, ref target_value) => {
-                target_value = Geary.String.is_empty_or_whitespace(this.subject_entry.text)
-                    ? DEFAULT_TITLE : this.subject_entry.text.strip();
-                return true;
-            });
 
         embed_header();
 
@@ -769,10 +766,11 @@ public class ComposerWidget : Gtk.EventBox {
                 this.references = Geary.RFC822.Utils.reply_references(referred);
                 referred_quote = Geary.RFC822.Utils.quote_email_for_reply(referred, quote,
                     Geary.RFC822.TextFormat.HTML);
-                if (!Geary.String.is_empty(quote))
+                if (!Geary.String.is_empty(quote)) {
                     this.top_posting = false;
-                else
+                } else {
                     this.can_delete_quote = true;
+                }
             break;
 
             case ComposeType.FORWARD:
@@ -852,7 +850,9 @@ public class ComposerWidget : Gtk.EventBox {
     private void on_content_loaded() {
         if (this.can_delete_quote) {
             this.editor.selection_changed.connect(
-                () => { this.can_delete_quote = false; }
+                () => {
+                    this.can_delete_quote = false;
+                }
             );
         }
     }
@@ -1347,7 +1347,8 @@ public class ComposerWidget : Gtk.EventBox {
 
     private async void close_draft_manager_async(Cancellable? cancellable)
     throws Error {
-        this.draft_save_text = "";
+        this.draft_status_text = "";
+
         get_action(ACTION_CLOSE_AND_SAVE).set_enabled(false);
 
         Geary.App.DraftManager old_manager = this.draft_manager;
@@ -1371,22 +1372,22 @@ public class ComposerWidget : Gtk.EventBox {
     private void update_draft_state() {
         switch (this.draft_manager.draft_state) {
             case Geary.App.DraftManager.DraftState.STORED:
-                this.draft_save_text = DRAFT_SAVED_TEXT;
+                this.draft_status_text = DRAFT_SAVED_TEXT;
                 this.is_draft_saved = true;
             break;
 
             case Geary.App.DraftManager.DraftState.STORING:
-                this.draft_save_text = DRAFT_SAVING_TEXT;
+                this.draft_status_text = DRAFT_SAVING_TEXT;
                 this.is_draft_saved = true;
             break;
 
             case Geary.App.DraftManager.DraftState.NOT_STORED:
-                this.draft_save_text = "";
+                this.draft_status_text = "";
                 this.is_draft_saved = false;
             break;
 
             case Geary.App.DraftManager.DraftState.ERROR:
-                this.draft_save_text = DRAFT_ERROR_TEXT;
+                this.draft_status_text = DRAFT_ERROR_TEXT;
                 this.is_draft_saved = false;
             break;
 
@@ -1399,7 +1400,7 @@ public class ComposerWidget : Gtk.EventBox {
         if (this.can_save) {
             this.draft_timer.start();
         }
-        this.draft_save_text = "";
+        this.draft_status_text = "";
         // can_save depends on the value of this, so reset it after
         // the if test above
         this.is_draft_saved = false;
@@ -1656,11 +1657,6 @@ public class ComposerWidget : Gtk.EventBox {
             break;
         }
         return ret;
-    }
-
-    [GtkCallback]
-    private void on_envelope_changed() {
-        draft_changed();
     }
 
     private void validate_send_button() {
@@ -2041,6 +2037,17 @@ public class ComposerWidget : Gtk.EventBox {
         return set_active;
     }
 
+    private void update_info_label() {
+        string text = "";
+        if (this.can_delete_quote) {
+            text = BACKSPACE_TEXT;
+        } else {
+            text = this.draft_status_text;
+        }
+
+        this.info_label.set_text(text);
+    }
+
     // Updates from combobox contents and visibility, returns true if
     // the from address had to be set
     private bool update_from_field() {
@@ -2104,7 +2111,7 @@ public class ComposerWidget : Gtk.EventBox {
         return !set_active;
     }
 
-    private void update_from_account() throws Error {
+    private void update_from() throws Error {
         int index = this.from_multiple.get_active();
         if (index >= 0) {
             FromAddressMap selected = this.from_list.get(index);
@@ -2183,18 +2190,29 @@ public class ComposerWidget : Gtk.EventBox {
     }
 
     private void on_draft_manager_fatal(Error err) {
-        this.draft_save_text = DRAFT_ERROR_TEXT;
+        this.draft_status_text = DRAFT_ERROR_TEXT;
     }
 
     private void on_draft_state_changed() {
         update_draft_state();
     }
 
+    [GtkCallback]
+    private void on_subject_changed() {
+        draft_changed();
+        subject_changed(this.subject);
+    }
+
+    [GtkCallback]
+    private void on_envelope_changed() {
+        draft_changed();
+    }
+
     private void on_from_changed() {
         try {
-            update_from_account();
+            update_from();
         } catch (Error err) {
-            debug("Unable to update From: Account in composer: %s", err.message);
+            debug("Error updating from address: %s", err.message);
         }
     }
 
