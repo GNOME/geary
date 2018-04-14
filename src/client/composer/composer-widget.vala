@@ -474,6 +474,7 @@ public class ComposerWidget : Gtk.EventBox {
         // TODO: also listen for account updates to allow adding identities while writing an email
 
         bind_property("toolbar-text", this.info_label, "label", BindingFlags.SYNC_CREATE);
+        bind_property("toolbar-text", this.info_label, "tooltip-text", BindingFlags.SYNC_CREATE);
 
         this.from = new Geary.RFC822.MailboxAddresses.single(account.information.primary_mailbox);
 
