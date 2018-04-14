@@ -2046,6 +2046,7 @@ public class ComposerWidget : Gtk.EventBox {
         }
 
         this.info_label.set_text(text);
+        this.info_label.set_tooltip_text(text);
     }
 
     // Updates from combobox contents and visibility, returns true if
