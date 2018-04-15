@@ -38,10 +38,6 @@ geary_c_options = [
   # Select libunwind's optimised, local-only backtrace unwiding. See
   # libunwind(3).
   '-DUNW_LOCAL_ONLY',
-  # Vala causes a _lot_ of these to be emitted for otherwise valid
-  # code. Suppress them so we can actually see more useful warnings.
-  '-Wno-incompatible-pointer-types',
-  '-Wno-discarded-qualifiers',
 ]
 
 subdir('sqlite3-unicodesn')
