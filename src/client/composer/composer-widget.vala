@@ -1846,32 +1846,8 @@ public class ComposerWidget : Gtk.EventBox {
         bool copy_link_enabled = hit_test.context_is_link();
         this.pointer_url = copy_link_enabled ? hit_test.get_link_uri() : null;
         this.message_overlay_label.label = this.pointer_url ?? "";
+        this.message_overlay_label.set_visible(copy_link_enabled);
         get_action(ACTION_COPY_LINK).set_enabled(copy_link_enabled);
-    }
-
-    private void update_message_overlay_label_style() {
-        Gdk.RGBA window_background = container.top_window.get_style_context()
-            .get_background_color(Gtk.StateFlags.NORMAL);
-        Gdk.RGBA label_background = message_overlay_label.get_style_context()
-            .get_background_color(Gtk.StateFlags.NORMAL);
-        
-        if (label_background == window_background)
-            return;
-        
-        message_overlay_label.get_style_context().changed.disconnect(
-            on_message_overlay_label_style_changed);
-        message_overlay_label.override_background_color(Gtk.StateFlags.NORMAL, window_background);
-        message_overlay_label.get_style_context().changed.connect(
-            on_message_overlay_label_style_changed);
-    }
-
-    [GtkCallback]
-    private void on_message_overlay_label_realize() {
-        update_message_overlay_label_style();
-    }
-
-    private void on_message_overlay_label_style_changed() {
-        update_message_overlay_label_style();
     }
 
     private bool on_context_menu(WebKit.WebView view,

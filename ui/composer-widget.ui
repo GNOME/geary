@@ -816,7 +816,9 @@
                         <property name="halign">start</property>
                         <property name="valign">end</property>
                         <property name="ellipsize">middle</property>
-                        <signal name="realize" handler="on_message_overlay_label_realize" swapped="no"/>
+                        <style>
+                          <class name="geary-overlay"/>
+                        </style>
                       </object>
                     </child>
                   </object>
