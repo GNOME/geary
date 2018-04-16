@@ -811,8 +811,8 @@
                     </child>
                     <child type="overlay">
                       <object class="GtkLabel" id="message_overlay_label">
-                        <property name="visible">True</property>
                         <property name="can_focus">False</property>
+                        <property name="no_show_all">True</property>
                         <property name="halign">start</property>
                         <property name="valign">end</property>
                         <property name="ellipsize">middle</property>
