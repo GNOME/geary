@@ -1283,20 +1283,20 @@ msgstr "%x"
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../src/client/util/util-date.vala:88
 msgid "%B %-e, %Y %-l:%M %P"
-msgstr "%-e de %B del %Y a les %-l:%M %P"
+msgstr "%-e %B del %Y a les %-l:%M %P"
 
 #. / Verbose datetime format for 24-hour time, i.e. November 8, 2010 16:35
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../src/client/util/util-date.vala:91
 msgid "%B %-e, %Y %-H:%M"
-msgstr "%-e de %B del %Y a les %-H:%M"
+msgstr "%-e %B del %Y a les %-H:%M"
 
 #. / Verbose datetime format for the locale default (full month, day and time)
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../src/client/util/util-date.vala:94
 msgctxt "Default full date"
 msgid "%B %-e, %Y %-l:%M %P"
-msgstr "%-e de %B del %Y a les %-l:%M %P"
+msgstr "%-e %B del %Y a les %-l:%M %P"
 
 #: ../src/client/util/util-date.vala:164
 msgid "Now"
@@ -1656,7 +1656,7 @@ msgstr "Arxiu | Arxius"
 #. / See http://developer.gnome.org/glib/2.32/glib-GDateTime.html#g-date-time-format
 #: ../src/engine/rfc822/rfc822-utils.vala:236
 msgid "%a, %b %-e, %Y at %-l:%M %p"
-msgstr "%a, %-e de %b %Y a les %-l:%M %p"
+msgstr "%a, %-e %b %Y a les %-l:%M %p"
 
 #. / The quoted header for a message being replied to.
 #. / %1$s will be substituted for the date, and %2$s will be substituted for
