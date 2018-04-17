@@ -665,7 +665,8 @@ public class ComposerWidget : Gtk.EventBox {
             Gee.Set<Geary.Email> emails = email_map.get_keys();
             Geary.Email? email = null;
             foreach (Geary.Email candidate in emails) {
-                if (candidate.message_id.equal_to(mid)) {
+                if (candidate.message_id != null &&
+                    mid.equal_to(candidate.message_id)) {
                     email = candidate;
                     break;
                 }
