@@ -145,9 +145,16 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
             this.conversation_scroller
         );
 
+        // We need to disable kinetic scrolling so that if it still
+        // has some momentum when the composer is inserted and
+        // scrolled to, it won't jump away again. See Bug 778027.
+        conversation_scroller.kinetic_scrolling = false;
+
         if (this.current_list != null) {
             this.current_list.add_embedded_composer(embed, is_draft);
         }
+
+        conversation_scroller.kinetic_scrolling = true;
     }
 
     /**
