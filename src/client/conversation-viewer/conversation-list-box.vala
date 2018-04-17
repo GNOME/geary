@@ -33,11 +33,11 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
 
     // Offset from the top of the list box which emails views will
     // scrolled to, so the user can see there are additional messages
-    // above it. XXX This is currently approx 1.5 times the height of
+    // above it. XXX This is currently approx 0.5 times the height of
     // a collapsed ConversationEmail, it should probably calculated
     // somehow so that differences user's font size are taken into
     // account.
-    private const int EMAIL_TOP_OFFSET = 92;
+    private const int EMAIL_TOP_OFFSET = 32;
 
     // Loading spinner timeout
     private const int LOADING_TIMEOUT_MSEC = 150;
@@ -982,11 +982,8 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
             y = alloc.y - EMAIL_TOP_OFFSET;
         }
 
-        // XXX This doesn't always quite work right, maybe since it's
-        // hard getting a reliable height out of WebKitGTK, or maybe
-        // because we stop calling this method when the email message
-        // body has finished loading, but attachments and sub-messages
-        // may still be loading. Or both?
+        // Use set_value rather than clamp_value since we want to
+        // scroll to the top of the window.
         get_adjustment().set_value(y);
     }
 
