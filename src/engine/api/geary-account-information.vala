@@ -138,7 +138,6 @@ public class Geary.AccountInformation : BaseObject {
         // being saved.
         get { return (allow_save_sent_mail() ? _save_sent_mail : true); }
         set { _save_sent_mail = value; }
-        default = true;
     }
 
     // Order for display purposes.
