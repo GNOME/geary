@@ -35,7 +35,7 @@
   </description>
 
   <url type="homepage">https://wiki.gnome.org/Apps/Geary</url>
-  <url type="help">https://wiki.gnome.org/Apps/Geary/Contact</url>
+  <url type="help">https://wiki.gnome.org/Apps/Geary/Documentation</url>
   <url type="faq">https://wiki.gnome.org/Apps/Geary/FAQ</url>
   <url type="bugtracker">https://wiki.gnome.org/Apps/Geary/ReportingABug</url>
   <url type="translate">https://wiki.gnome.org/Apps/Geary/Translating</url>
