@@ -1,3 +1,9 @@
+geary (0.12.2-1~xenial1) xenial; urgency=medium
+
+  * New upstream release.
+
+ -- Michael Gratton <mike@vee.net>  Tue, 24 Apr 2018 10:10:00 +1100
+
 geary (0.12.1-1~xenial2) xenial; urgency=medium
 
   * Parts of multipart/digest message do not expand when clicked upon

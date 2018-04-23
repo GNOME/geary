@@ -77,6 +77,41 @@
   <translation type="gettext">geary</translation>
 
   <releases>
+    <release version="0.12.2" date="2018-04-24">
+      <description>
+        <p>Bug fixes included in this release:</p>
+        <ul>
+          <li>Fix being unable to remove attachments from a draft. Bug
+          792555.</li>
+          <li>Ensure drafts are removed when composer from address
+          changes accounts. Bug 778976.</li>
+          <li>Workaround composer info label being too long. Bug
+          790435.</li>
+          <li>Ensure embedded composer is always scrolled to when
+          opened. Bug 778027.</li>
+          <li>Don't display quote expander buttons when printing a
+          message. Bug 795216.</li>
+          <li>Fix composer detach button position and visibility. Bug
+          793710.</li>
+          <li>Actually fix second multipart/digest message body not
+          being displayed. Bug 788637.</li>
+          <li>Ensure gnome-control-centre knows in advance Geary uses
+          notifications</li>
+          <li>Fix gnome-shell notifications missing an icon under
+          flatpak. Bug 790103.</li>
+          <li>Fix message body quote button styling under WebKitGTK
+          2.20.</li>
+          <li>Don't show unused header widgets when showing a message
+          via notifications</li>
+          <li>Work around present() not actually raising windows under
+          Wayland. Bug 776881.</li>
+          <li>Reduce CPU use when idle. Bug 783025.</li>
+          <li>Fix some serious run-time memory leaks</li>
+          <li>Update translation files (es, ru, sr, sr@latin)</li>
+        </ul>
+      </description>
+    </release>
+
     <release version="0.12.1" date="2018-02-13">
       <description>
         <p>Bug fixes included in this release:</p>
