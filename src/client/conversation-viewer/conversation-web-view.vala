@@ -183,7 +183,7 @@ public class ConversationWebView : ClientWebView {
 
     private void on_deceptive_link_clicked(WebKit.JavascriptResult result) {
         try {
-            JS.GlobalContext context = result.get_global_context();
+            unowned JS.GlobalContext context = result.get_global_context();
             JS.Object details = WebKitUtil.to_object(result);
 
             uint reason = (uint) Geary.JS.to_number(
