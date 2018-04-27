@@ -155,7 +155,7 @@ public abstract class Geary.Attachment : BaseObject {
                 }
             }
             string? ext = mime_type.get_file_name_extension();
-            if (!file_name.has_suffix(ext)) {
+            if (ext != null && !file_name.has_suffix(ext)) {
                 file_name = file_name + (ext ?? "");
             }
         }
