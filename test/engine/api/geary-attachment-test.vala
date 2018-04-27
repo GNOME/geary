@@ -56,6 +56,8 @@ class Geary.AttachmentTest : Gee.TestCase {
                  get_safe_file_name_with_default_content_type);
         add_test("get_safe_file_name_with_default_content_type_bad_file_name",
                  get_safe_file_name_with_default_content_type_bad_file_name);
+        add_test("get_safe_file_name_with_unknown_content_type",
+                 get_safe_file_name_with_unknown_content_type);
     }
 
     public override void set_up() {
@@ -233,6 +235,26 @@ class Geary.AttachmentTest : Gee.TestCase {
             });
 
         assert(test.get_safe_file_name.end(async_result()) == RESULT_FILENAME);
+    }
+
+    public void get_safe_file_name_with_unknown_content_type() {
+        const string TEST_FILENAME = "test-filename.unlikely";
+        Attachment test = new TestAttachment(
+            ATTACHMENT_ID,
+            this.default_type,
+            CONTENT_ID,
+            CONTENT_DESC,
+            content_disposition,
+            TEST_FILENAME,
+            File.new_for_path(TEST_FILENAME),
+            742
+        );
+
+        test.get_safe_file_name.begin(null, (obj, ret) => {
+                async_complete(ret);
+            });
+
+        assert(TEST_FILENAME == test.get_safe_file_name.end(async_result()));
     }
 
 }
