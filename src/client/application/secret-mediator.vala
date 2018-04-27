@@ -157,13 +157,19 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
         Secret.Service service = yield Secret.Service.get(
             Secret.ServiceFlags.OPEN_SESSION, cancellable
         );
-        Secret.Collection collection = yield Secret.Collection.for_alias(
+        Secret.Collection? collection = yield Secret.Collection.for_alias(
             service,
             Secret.COLLECTION_DEFAULT,
             Secret.CollectionFlags.NONE,
             cancellable
         );
-        if (collection.get_locked()) {
+
+        // For custom desktop setups, it is possible that the current
+        // session has a service responding on DBus but no password
+        // keyring. There's no much we can do in this case except just
+        // check for the collection being null so we don't crash. See
+        // Bug 795328.
+        if (collection != null && collection.get_locked()) {
             List<Secret.Collection> to_lock = new List<Secret.Collection>();
             to_lock.append(collection);
             List<DBusProxy> unlocked;
