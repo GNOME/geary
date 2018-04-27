@@ -17,11 +17,32 @@
  */
 
 public class Geary.Db.Database : Geary.Db.Context {
+
+
+    /** The path passed to SQLite to open a transient database. */
+    public const string MEMORY_PATH = "file::memory:?cache=shared";
+
+    /** The default number of threaded connections opened. */
     public const int DEFAULT_MAX_CONCURRENCY = 4;
-    
-    public File db_file { get; private set; }
+
+    /**
+     * The database's location on the filesystem.
+     *
+     * If null, this is a transient, in-memory database.
+     */
+    public File? file { get; private set; }
+
+    /**
+     * The path passed to Sqlite when opening the database.
+     *
+     * This will be the path to the database file on disk for
+     * persistent databases, else {@link MEMORY_PATH} for transient
+     * databases.
+     */
+    public string path { get; private set; }
+
     public DatabaseFlags flags { get; private set; }
-    
+
     private bool _is_open = false;
     public bool is_open {
         get {
@@ -36,16 +57,28 @@ public class Geary.Db.Database : Geary.Db.Context {
             }
         }
     }
-    
+
     private Connection? master_connection = null;
     private int outstanding_async_jobs = 0;
     private ThreadPool<TransactionAsyncJob>? thread_pool = null;
     private unowned PrepareConnection? prepare_cb = null;
-    
-    public Database(File db_file) {
-        this.db_file = db_file;
+
+    /**
+     * Constructs a new database that is persisted on disk.
+     */
+    public Database.persistent(File db_file) {
+        this.file = db_file;
+        this.path = db_file.get_path();
     }
-    
+
+    /**
+     * Constructs a new database that is stored in memory only.
+     */
+    public Database.transient() {
+        this.file = null;
+        this.path = MEMORY_PATH;
+    }
+
     ~Database() {
         // Not thrilled about using lock in a dtor
         lock (outstanding_async_jobs) {
@@ -68,13 +101,13 @@ public class Geary.Db.Database : Geary.Db.Context {
         
         this.flags = flags;
         this.prepare_cb = prepare_cb;
-        
-        if ((flags & DatabaseFlags.CREATE_DIRECTORY) != 0) {
-            File db_dir = db_file.get_parent();
+
+        if (this.file != null && (flags & DatabaseFlags.CREATE_DIRECTORY) != 0) {
+            File db_dir = this.file.get_parent();
             if (!db_dir.query_exists(cancellable))
                 db_dir.make_directory_with_parents(cancellable);
         }
-        
+
         if (threadsafe()) {
             if (thread_pool == null) {
                 thread_pool = new ThreadPool<TransactionAsyncJob>.with_owned_data(on_async_job,
@@ -91,7 +124,7 @@ public class Geary.Db.Database : Geary.Db.Context {
     }
     
     private void check_for_corruption(DatabaseFlags flags, Cancellable? cancellable) throws Error {
-        // if the file exists, open a connection and test for corruption by creating a dummy table,
+        // Open a connection and test for corruption by creating a dummy table,
         // adding a row, selecting the row, then dropping the table ... can only do this for
         // read-write databases, however
         //
@@ -100,8 +133,7 @@ public class Geary.Db.Database : Geary.Db.Context {
         //
         // TODO: Allow the caller to specify the name of the test table, so we're not clobbering
         // theirs (however improbable it is to name a table "CorruptionCheckTable")
-        bool exists = db_file.query_exists(cancellable);
-        if (exists && (flags & DatabaseFlags.READ_ONLY) == 0) {
+        if ((flags & DatabaseFlags.READ_ONLY) == 0) {
             Connection cx = new Connection(this, Sqlite.OPEN_READWRITE, cancellable);
             
             try {
@@ -120,17 +152,15 @@ public class Geary.Db.Database : Geary.Db.Context {
                 // drop table
                 cx.exec("DROP TABLE CorruptionCheckTable");
             } catch (Error err) {
-                throw new DatabaseError.CORRUPT("Possible integrity problem discovered in %s: %s",
-                    db_file.get_path(), err.message);
+                throw new DatabaseError.CORRUPT(
+                    "Possible integrity problem discovered in %s: %s",
+                    this.path,
+                    err.message
+                );
             }
-        } else if (!exists && (flags & DatabaseFlags.CREATE_FILE) == 0) {
-            // file doesn't exist and no flag to create it ... that's bad too, might as well
-            // let them know now
-            throw new DatabaseError.CORRUPT("Database file %s not found and no CREATE_FILE flag",
-                db_file.get_path());
         }
     }
-    
+
     /**
      * Closes the Database, releasing any resources it may hold, including the master connection.
      *
@@ -151,12 +181,15 @@ public class Geary.Db.Database : Geary.Db.Context {
         
         is_open = false;
     }
-    
+
     private void check_open() throws Error {
-        if (!is_open)
-            throw new DatabaseError.OPEN_REQUIRED("Database %s not open", db_file.get_path());
+        if (!is_open) {
+            throw new DatabaseError.OPEN_REQUIRED(
+                "Database %s not open", this.path
+            );
+        }
     }
-    
+
     /**
      * Throws DatabaseError.OPEN_REQUIRED if not open.
      */
@@ -166,12 +199,18 @@ public class Geary.Db.Database : Geary.Db.Context {
     
     private Connection internal_open_connection(bool master, Cancellable? cancellable) throws Error {
         check_open();
-        
-        int sqlite_flags = (flags & DatabaseFlags.READ_ONLY) != 0 ? Sqlite.OPEN_READONLY
+
+        int sqlite_flags = (flags & DatabaseFlags.READ_ONLY) != 0
+            ? Sqlite.OPEN_READONLY
             : Sqlite.OPEN_READWRITE;
+
         if ((flags & DatabaseFlags.CREATE_FILE) != 0)
             sqlite_flags |= Sqlite.OPEN_CREATE;
-        
+
+        if (this.file == null) {
+            sqlite_flags |= SQLITE_OPEN_URI;
+        }
+
         Connection cx = new Connection(this, sqlite_flags, cancellable);
         if (prepare_cb != null)
             prepare_cb(cx, master);
@@ -276,9 +315,9 @@ public class Geary.Db.Database : Geary.Db.Context {
         } catch (Error err) {
             open_err = err;
             debug("Warning: unable to open database connection to %s, cancelling AsyncJob: %s",
-                db_file.get_path(), err.message);
+                  this.path, err.message);
         }
-        
+
         if (cx != null)
             job.execute(cx);
         else

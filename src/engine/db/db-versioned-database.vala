@@ -10,13 +10,19 @@ public class Geary.Db.VersionedDatabase : Geary.Db.Database {
     private static Mutex upgrade_mutex = Mutex();
 
     public File schema_dir { get; private set; }
-    
-    public VersionedDatabase(File db_file, File schema_dir) {
-        base (db_file);
-        
+
+    /** {@inheritDoc} */
+    public VersionedDatabase.persistent(File db_file, File schema_dir) {
+        base.persistent(db_file);
         this.schema_dir = schema_dir;
     }
-    
+
+    /** {@inheritDoc} */
+    public VersionedDatabase.transient(File schema_dir) {
+        base.transient();
+        this.schema_dir = schema_dir;
+    }
+
     /**
      * Called by {@link open} if a schema upgrade is required and beginning.
      *
@@ -74,9 +80,9 @@ public class Geary.Db.VersionedDatabase : Geary.Db.Database {
         Connection cx = open_connection(cancellable);
         
         int db_version = cx.get_user_version_number();
-        debug("VersionedDatabase.upgrade: current database schema for %s: %d", db_file.get_path(),
-            db_version);
-        
+        debug("VersionedDatabase.upgrade: current database schema for %s: %d",
+              this.path, db_version);
+
         // If the DB doesn't exist yet, the version number will be zero, but also treat negative
         // values as new
         bool new_db = db_version <= 0;
@@ -95,9 +101,9 @@ public class Geary.Db.VersionedDatabase : Geary.Db.Database {
         // *next* version of the database
         if (db_version > 0 && !get_schema_file(db_version).query_exists(cancellable)) {
             throw new DatabaseError.SCHEMA_VERSION("%s schema %d unknown to current schema plan",
-                db_file.get_path(), db_version);
+                this.path, db_version);
         }
-        
+
         // Go through all the version scripts in the schema directory and apply each of them.
         bool started = false;
         for (;;) {

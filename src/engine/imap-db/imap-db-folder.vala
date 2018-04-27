@@ -2097,7 +2097,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                     results.string_at(6),
                     disposition,
                     content_filename,
-                    cx.database.db_file.get_parent(),
+                    cx.database.file.get_parent(),
                     results.int64_at(3)
                 )
             );
@@ -2158,10 +2158,10 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             stmt.bind_string(6, description);
             
             int64 attachment_id = stmt.exec_insert(cancellable);
-            
-            File saved_file = ImapDB.Attachment.generate_file(db.db_file.get_parent(), message_id,
+
+            File saved_file = ImapDB.Attachment.generate_file(db.file.get_parent(), message_id,
                 attachment_id, filename);
-            
+
             // On the off-chance this is marked for deletion, unmark it
             try {
                 stmt = cx.prepare("""

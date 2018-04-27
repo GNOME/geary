@@ -15,11 +15,13 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
     private string account_owner_email;
     private bool new_db = false;
     private Cancellable gc_cancellable = new Cancellable();
-    
-    public Database(File db_dir, File schema_dir, ProgressMonitor upgrade_monitor,
-        ProgressMonitor vacuum_monitor, string account_owner_email) {
-        base (get_db_file(db_dir), schema_dir);
-        
+
+    public Database(GLib.File db_dir,
+                    GLib.File schema_dir,
+                    ProgressMonitor upgrade_monitor,
+                    ProgressMonitor vacuum_monitor,
+                    string account_owner_email) {
+        base.persistent(get_db_file(db_dir), schema_dir);
         this.upgrade_monitor = upgrade_monitor;
         this.vacuum_monitor = vacuum_monitor;
 
@@ -61,8 +63,9 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
             try {
                 yield gc.vacuum_async(gc_cancellable);
             } catch (Error err) {
-                message("Vacuum of IMAP database %s failed: %s", db_file.get_path(), err.message);
-                
+                message(
+                    "Vacuum of IMAP database %s failed: %s", this.path, err.message
+                );
                 throw err;
             } finally {
                 if (vacuum_monitor.is_in_progress)
@@ -85,7 +88,8 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
         try {
             gc.reap_async.end(result);
         } catch (Error err) {
-            message("Garbage collection of IMAP database %s failed: %s", db_file.get_path(), err.message);
+            message("Garbage collection of IMAP database %s failed: %s",
+                    this.path, err.message);
         }
     }
     
@@ -413,7 +417,7 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                         
                         debug("Invalid INTERNALDATE \"%s\" found at row %s in %s: %s",
                             internaldate != null ? internaldate : "(null)",
-                            invalid_id.to_string(), db_file.get_path(), err.message);
+                            invalid_id.to_string(), this.path, err.message);
                         invalid_ids.set(invalid_id, (Geary.Email.Field) results.int_at(2));
                     }
                     
@@ -444,7 +448,7 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
             });
         } catch (Error err) {
             debug("Error fixing INTERNALDATES during upgrade to schema 15 for %s: %s",
-                db_file.get_path(), err.message);
+                  this.path, err.message);
         }
     }
     

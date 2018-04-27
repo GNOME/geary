@@ -76,10 +76,12 @@ public class Geary.Db.Connection : Geary.Db.Context {
         }
         
         check_cancelled("Connection.ctor", cancellable);
-        
+
         try {
-            throw_on_error("Connection.ctor", Sqlite.Database.open_v2(database.db_file.get_path(),
-                out db, sqlite_flags, null));
+            throw_on_error(
+                "Connection.ctor",
+                Sqlite.Database.open_v2(database.path, out db, sqlite_flags, null)
+            );
         } catch (DatabaseError derr) {
             // don't throw BUSY error for open unless no db object was returned, as it's possible for
             // open_v2() to return an error *and* a valid Database object, see:
@@ -417,9 +419,8 @@ public class Geary.Db.Connection : Geary.Db.Context {
     public override Connection? get_connection() {
         return this;
     }
-    
+
     public string to_string() {
-        return "[%d] %s".printf(cx_number, database.db_file.get_basename());
+        return "[%d] %s".printf(cx_number, database.path);
     }
 }
-

@@ -88,7 +88,7 @@ private class Geary.ImapDB.GC {
     public GC(ImapDB.Database db, int priority) {
         this.db = db;
         this.priority = priority;
-        data_dir = db.db_file.get_parent();
+        data_dir = db.file.get_parent();
     }
 
     /**
@@ -571,8 +571,8 @@ private class Geary.ImapDB.GC {
     
     private async int delete_empty_attachment_directories_async(File? current, out bool empty,
         Cancellable? cancellable) throws Error {
-        File current_dir = current ?? Attachment.get_attachments_dir(db.db_file.get_parent());
-        
+        File current_dir = current ?? Attachment.get_attachments_dir(db.file.get_parent());
+
         // directory is considered empty until file or non-deleted child directory is found
         empty = true;
         
@@ -662,9 +662,8 @@ private class Geary.ImapDB.GC {
         reaped_messages_since_last_vacuum = reaped_count;
         free_page_bytes = free_page_count * page_size;
     }
-    
+
     public string to_string() {
-        return "GC:%s".printf(db.db_file.get_path());
+        return "GC:%s".printf(db.path);
     }
 }
-
