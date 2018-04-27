@@ -20,8 +20,9 @@ class Geary.ImapDB.DatabaseTest : TestCase {
         );
 
         Database db = new Database(
-            tmp_dir,
+            tmp_dir.get_child("test.db"),
             GLib.File.new_for_path(_SOURCE_ROOT_DIR).get_child("sql"),
+            tmp_dir.get_child("attachments"),
             new Geary.SimpleProgressMonitor(Geary.ProgressType.DB_UPGRADE),
             new Geary.SimpleProgressMonitor(Geary.ProgressType.DB_VACUUM),
             "test@example.com"

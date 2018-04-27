@@ -8,7 +8,6 @@ private class Geary.ImapDB.Attachment : Geary.Attachment {
     public const Email.Field REQUIRED_FIELDS = Email.REQUIRED_FOR_MESSAGE;
 
     internal const string NULL_FILE_NAME = "none";
-    private const string ATTACHMENTS_DIR = "attachments";
 
     public Attachment(int64 message_id,
                       int64 attachment_id,
@@ -33,15 +32,12 @@ private class Geary.ImapDB.Attachment : Geary.Attachment {
         return "imap-db:%s".printf(attachment_id.to_string());
     }
 
-    public static File generate_file(File data_dir, int64 message_id, int64 attachment_id,
+    public static File generate_file(File attachements_dir, int64 message_id, int64 attachment_id,
         string? filename) {
-        return get_attachments_dir(data_dir)
+        return attachements_dir
             .get_child(message_id.to_string())
             .get_child(attachment_id.to_string())
             .get_child(filename ?? NULL_FILE_NAME);
     }
 
-    public static File get_attachments_dir(File data_dir) {
-        return data_dir.get_child(ATTACHMENTS_DIR);
-    }
 }

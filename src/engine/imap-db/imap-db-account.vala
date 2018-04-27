@@ -38,6 +38,20 @@ private class Geary.ImapDB.Account : BaseObject {
     private const string SEARCH_OP_VALUE_STARRED = "starred";
     private const string SEARCH_OP_VALUE_UNREAD = "unread";
 
+    // Storage path names
+    private const string DB_FILENAME = "geary.db";
+    private const string ATTACHMENTS_DIR = "attachments";
+
+    /**
+     * Returns the on-disk paths used for storage by this account.
+     */
+    public static void get_imap_db_storage_locations(File user_data_dir, out File db_file,
+        out File attachments_dir) {
+        db_file = user_data_dir.get_child(DB_FILENAME);
+        attachments_dir = user_data_dir.get_child(ATTACHMENTS_DIR);
+    }
+
+
     private class FolderReference : Geary.SmartReference {
         public Geary.FolderPath path;
         
@@ -248,21 +262,27 @@ private class Geary.ImapDB.Account : BaseObject {
         
         return query;
     }
-    
-    public static void get_imap_db_storage_locations(File user_data_dir, out File db_file,
-        out File attachments_dir) {
-        db_file = ImapDB.Database.get_db_file(user_data_dir);
-        attachments_dir = ImapDB.Attachment.get_attachments_dir(user_data_dir);
-    }
-    
+
     public async void open_async(File user_data_dir, File schema_dir, Cancellable? cancellable)
         throws Error {
-        if (db != null)
+        if (this.db != null)
             throw new EngineError.ALREADY_OPEN("IMAP database already open");
-        
-        db = new ImapDB.Database(user_data_dir, schema_dir, upgrade_monitor, vacuum_monitor,
-            account_information.primary_mailbox.address);
-        
+
+        File db_file;
+        File attachments_dir;
+        Account.get_imap_db_storage_locations(
+            user_data_dir, out db_file, out attachments_dir
+        );
+
+        this.db = new ImapDB.Database(
+            db_file,
+            schema_dir,
+            attachments_dir,
+            upgrade_monitor,
+            vacuum_monitor,
+            account_information.primary_mailbox.address
+        );
+
         try {
             yield db.open(
                 Db.DatabaseFlags.CREATE_DIRECTORY | Db.DatabaseFlags.CREATE_FILE | Db.DatabaseFlags.CHECK_CORRUPTION,
@@ -650,28 +670,30 @@ private class Geary.ImapDB.Account : BaseObject {
         // return current if already created
         ImapDB.Folder? folder = get_local_folder(path);
         if (folder != null) {
-            // update properties
             folder.set_properties(properties);
-            
-            return folder;
+        } else {
+            folder = new Geary.ImapDB.Folder(
+                db,
+                path,
+                db.attachments_path,
+                contact_store,
+                account_information.primary_mailbox.address,
+                folder_id,
+                properties
+            );
+
+            // build a reference to it
+            FolderReference folder_ref = new FolderReference(folder, path);
+            folder_ref.reference_broken.connect(on_folder_reference_broken);
+
+            // add to the references table
+            folder_refs.set(folder_ref.path, folder_ref);
+
+            folder.unread_updated.connect(on_unread_updated);
         }
-        
-        // create folder
-        folder = new Geary.ImapDB.Folder(db, path, contact_store, account_information.primary_mailbox.address, folder_id,
-            properties);
-        
-        // build a reference to it
-        FolderReference folder_ref = new FolderReference(folder, path);
-        folder_ref.reference_broken.connect(on_folder_reference_broken);
-        
-        // add to the references table
-        folder_refs.set(folder_ref.path, folder_ref);
-        
-        folder.unread_updated.connect(on_unread_updated);
-        
         return folder;
     }
-    
+
     private void on_folder_reference_broken(Geary.SmartReference reference) {
         FolderReference folder_ref = (FolderReference) reference;
         
@@ -706,8 +728,10 @@ private class Geary.ImapDB.Account : BaseObject {
                 // Ignore any messages that don't have the required fields.
                 if (partial_ok || row.fields.fulfills(requested_fields)) {
                     Geary.Email email = row.to_email(new Geary.ImapDB.EmailIdentifier(id, null));
-                    Geary.ImapDB.Folder.do_add_attachments(cx, email, id, cancellable);
-                    
+                    Geary.ImapDB.Folder.do_add_attachments(
+                        cx, this.db.attachments_path, email, id, cancellable
+                    );
+
                     Gee.Set<Geary.FolderPath>? folders = do_find_email_folders(cx, id, true, cancellable);
                     if (folders == null) {
                         if (folder_blacklist == null || !folder_blacklist.contains(null))
@@ -1367,10 +1391,12 @@ private class Geary.ImapDB.Account : BaseObject {
                 throw new EngineError.INCOMPLETE_MESSAGE(
                     "Message %s only fulfills %Xh fields (required: %Xh)",
                     email_id.to_string(), row.fields, required_fields);
-            
+
             email = row.to_email(email_id);
-            Geary.ImapDB.Folder.do_add_attachments(cx, email, email_id.message_id, cancellable);
-            
+            Geary.ImapDB.Folder.do_add_attachments(
+                cx, this.db.attachments_path, email, email_id.message_id, cancellable
+            );
+
             return Db.TransactionOutcome.DONE;
         }, cancellable);
         
@@ -1530,8 +1556,10 @@ private class Geary.ImapDB.Account : BaseObject {
                     MessageRow row = Geary.ImapDB.Folder.do_fetch_message_row(
                         cx, message_id, search_fields, out db_fields, cancellable);
                     Geary.Email email = row.to_email(new Geary.ImapDB.EmailIdentifier(message_id, null));
-                    Geary.ImapDB.Folder.do_add_attachments(cx, email, message_id, cancellable);
-                    
+                    Geary.ImapDB.Folder.do_add_attachments(
+                        cx, this.db.attachments_path, email, message_id, cancellable
+                    );
+
                     Geary.ImapDB.Folder.do_add_email_to_search_table(cx, message_id, email, cancellable);
                 } catch (Error e) {
                     // This is a somewhat serious issue since we rely on

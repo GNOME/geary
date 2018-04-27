@@ -8,32 +8,32 @@
 extern int sqlite3_unicodesn_register_tokenizer(Sqlite.Database db);
 
 private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
-    private const string DB_FILENAME = "geary.db";
+
+    internal GLib.File attachments_path;
+
     private const int OPEN_PUMP_EVENT_LOOP_MSEC = 100;
-    
+
     private ProgressMonitor upgrade_monitor;
     private ProgressMonitor vacuum_monitor;
     private string account_owner_email;
     private bool new_db = false;
     private Cancellable gc_cancellable = new Cancellable();
 
-    public Database(GLib.File db_dir,
+    public Database(GLib.File db_file,
                     GLib.File schema_dir,
+                    GLib.File attachments_path,
                     ProgressMonitor upgrade_monitor,
                     ProgressMonitor vacuum_monitor,
                     string account_owner_email) {
-        base.persistent(get_db_file(db_dir), schema_dir);
+        base.persistent(db_file, schema_dir);
+        this.attachments_path = attachments_path;
         this.upgrade_monitor = upgrade_monitor;
         this.vacuum_monitor = vacuum_monitor;
 
         // Update to use all addresses on the account. Bug 768779
         this.account_owner_email = account_owner_email;
     }
-    
-    public static File get_db_file(File db_dir) {
-        return db_dir.get_child(DB_FILENAME);
-    }
-    
+
     /**
      * Prepares the ImapDB database for use.
      */
@@ -336,8 +336,13 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                         Mime.DispositionType target_disposition = Mime.DispositionType.UNSPECIFIED;
                         if (message.get_sub_messages().is_empty)
                             target_disposition = Mime.DispositionType.INLINE;
-                        Geary.ImapDB.Folder.do_save_attachments_db(cx, id,
-                            message.get_attachments(target_disposition), this, null);
+                        Geary.ImapDB.Folder.do_save_attachments_db(
+                            cx,
+                            id,
+                            message.get_attachments(target_disposition),
+                            this.attachments_path,
+                            null
+                        );
                     } catch (Error e) {
                         debug("Error fetching inline Mime parts: %s", e.message);
                     }
@@ -495,7 +500,9 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                     message.get_attachments();
 
                     try {
-                        Geary.ImapDB.Folder.do_delete_attachments(cx, message_id);
+                        Geary.ImapDB.Folder.do_delete_attachments(
+                            cx, this.attachments_path, message_id
+                        );
                     } catch (Error err) {
                         debug("Error deleting existing attachments: %s",
                               err.message);
@@ -504,8 +511,13 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
 
                     // rebuild all
                     try {
-                        Geary.ImapDB.Folder.do_save_attachments_db(cx, message_id, msg_attachments,
-                            this, null);
+                        Geary.ImapDB.Folder.do_save_attachments_db(
+                            cx,
+                            message_id,
+                            msg_attachments,
+                            this.attachments_path,
+                            null
+                        );
                     } catch (Error err) {
                         debug("Error saving attachments: %s", err.message);
                         

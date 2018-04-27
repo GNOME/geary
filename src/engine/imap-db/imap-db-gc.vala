@@ -83,12 +83,10 @@ private class Geary.ImapDB.GC {
 
     private ImapDB.Database db;
     private int priority;
-    private File data_dir;
-    
+
     public GC(ImapDB.Database db, int priority) {
         this.db = db;
         this.priority = priority;
-        data_dir = db.file.get_parent();
     }
 
     /**
@@ -432,10 +430,14 @@ private class Geary.ImapDB.GC {
             
             result = stmt.exec(cancellable);
             while (!result.finished) {
-                File file = Attachment.generate_file(data_dir, message_id, result.rowid_for("id"),
-                    result.string_for("filename"));
+                File file = Attachment.generate_file(
+                    this.db.attachments_path,
+                    message_id,
+                    result.rowid_for("id"),
+                    result.string_for("filename")
+                );
                 attachment_files.add(file);
-                
+
                 result.next(cancellable);
             }
             
@@ -572,7 +574,7 @@ private class Geary.ImapDB.GC {
     
     private async int delete_empty_attachment_directories_async(File? current, out bool empty,
         Cancellable? cancellable) throws Error {
-        File current_dir = current ?? Attachment.get_attachments_dir(db.file.get_parent());
+        File current_dir = current ?? db.attachments_path;
 
         // directory is considered empty until file or non-deleted child directory is found
         empty = true;

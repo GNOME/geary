@@ -82,9 +82,10 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
     }
 
     protected int manual_ref_count { get; protected set; }
-    
-    private ImapDB.Database db;
+
+    private Geary.Db.Database db;
     private Geary.FolderPath path;
+    private GLib.File attachments_path;
     private ContactStore contact_store;
     private string account_owner_email;
     private int64 folder_id;
@@ -102,14 +103,16 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
      */
     public signal void unread_updated(Gee.Map<ImapDB.EmailIdentifier, bool> unread_status);
 
-    internal Folder(ImapDB.Database db,
+    internal Folder(Geary.Db.Database db,
                     Geary.FolderPath path,
+                    GLib.File attachments_path,
                     ContactStore contact_store,
                     string account_owner_email,
                     int64 folder_id,
                     Geary.Imap.FolderProperties properties) {
         this.db = db;
         this.path = path;
+        this.attachments_path = attachments_path;
         this.contact_store = contact_store;
         // Update to use all addresses on the account. Bug 768779
         this.account_owner_email = account_owner_email;
@@ -1593,16 +1596,23 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         }
         
         Geary.Email email = row.to_email(location.email_id);
-        
-        return do_add_attachments(cx, email, location.message_id, cancellable);
+
+        return do_add_attachments(
+            cx, this.attachments_path, email, location.message_id, cancellable
+        );
     }
-    
-    internal static Geary.Email do_add_attachments(Db.Connection cx, Geary.Email email,
-        int64 message_id, Cancellable? cancellable = null) throws Error {
+
+    internal static Geary.Email do_add_attachments(Db.Connection cx,
+                                                   GLib.File attachments_path,
+                                                   Geary.Email email,
+                                                   int64 message_id,
+                                                   Cancellable? cancellable = null)
+        throws Error {
         // Add attachments if available
         if (email.fields.fulfills(ImapDB.Attachment.REQUIRED_FIELDS)) {
-            Gee.List<Geary.Attachment>? attachments = do_list_attachments(cx, message_id,
-                cancellable);
+            Gee.List<Geary.Attachment>? attachments = do_list_attachments(
+                cx, attachments_path, message_id, cancellable
+            );
             if (attachments != null)
                 email.add_attachments(attachments);
         }
@@ -2038,11 +2048,17 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                 do_save_attachments(cx, location.message_id, combined_email.get_message().get_attachments(),
                     cancellable);
             }
-            
+
             // Must add attachments to the email object after they're saved to
             // the database.
-            do_add_attachments(cx, combined_email, location.message_id, cancellable);
-            
+            do_add_attachments(
+                cx,
+                this.attachments_path,
+                combined_email,
+                location.message_id,
+                cancellable
+            );
+
             Geary.Email.Field new_fields;
             do_merge_message_row(cx, row, out new_fields, out updated_contacts,
                 ref new_unread_count, cancellable);
@@ -2061,9 +2077,13 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         
         unread_count_change += new_unread_count;
     }
-    
-    private static Gee.List<Geary.Attachment>? do_list_attachments(Db.Connection cx, int64 message_id,
-        Cancellable? cancellable) throws Error {
+
+    private static Gee.List<Geary.Attachment>?
+        do_list_attachments(Db.Connection cx,
+                            GLib.File attachments_path,
+                            int64 message_id,
+                            Cancellable? cancellable)
+        throws Error {
         Db.Statement stmt = cx.prepare("""
             SELECT id, filename, mime_type, filesize, disposition, content_id, description
             FROM MessageAttachmentTable
@@ -2097,7 +2117,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                     results.string_at(6),
                     disposition,
                     content_filename,
-                    cx.database.file.get_parent(),
+                    attachments_path,
                     results.int64_at(3)
                 )
             );
@@ -2108,11 +2128,17 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
 
     private void do_save_attachments(Db.Connection cx, int64 message_id,
         Gee.List<GMime.Part>? attachments, Cancellable? cancellable) throws Error {
-        do_save_attachments_db(cx, message_id, attachments, db, cancellable);
+        do_save_attachments_db(
+            cx, message_id, attachments, this.attachments_path, cancellable
+        );
     }
-    
-    public static void do_save_attachments_db(Db.Connection cx, int64 message_id,
-        Gee.List<GMime.Part>? attachments, ImapDB.Database db, Cancellable? cancellable) throws Error {
+
+    public static void do_save_attachments_db(Db.Connection cx,
+                                              int64 message_id,
+                                              Gee.List<GMime.Part>? attachments,
+                                              GLib.File attachments_path,
+                                              Cancellable? cancellable)
+        throws Error {
         // nothing to do if no attachments
         if (attachments == null || attachments.size == 0)
             return;
@@ -2156,11 +2182,11 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             stmt.bind_int(4, disposition_type);
             stmt.bind_string(5, content_id);
             stmt.bind_string(6, description);
-            
-            int64 attachment_id = stmt.exec_insert(cancellable);
 
-            File saved_file = ImapDB.Attachment.generate_file(db.file.get_parent(), message_id,
-                attachment_id, filename);
+            int64 attachment_id = stmt.exec_insert(cancellable);
+            File saved_file = ImapDB.Attachment.generate_file(
+                attachments_path, message_id, attachment_id, filename
+            );
 
             // On the off-chance this is marked for deletion, unmark it
             try {
@@ -2231,13 +2257,17 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             }
         }
     }
-    
-    public static void do_delete_attachments(Db.Connection cx, int64 message_id)
+
+    public static void do_delete_attachments(Db.Connection cx,
+                                             GLib.File attachments_path,
+                                             int64 message_id)
         throws Error {
-        Gee.List<Geary.Attachment>? attachments = do_list_attachments(cx, message_id, null);
+        Gee.List<Geary.Attachment>? attachments = do_list_attachments(
+            cx, attachments_path, message_id, null
+        );
         if (attachments == null || attachments.size == 0)
             return;
-        
+
         // delete all files
         foreach (Geary.Attachment attachment in attachments) {
             try {
