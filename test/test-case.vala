@@ -50,12 +50,12 @@ public void assert_string(string expected, string? actual, string? context = nul
     throws Error {
     if (expected != actual) {
         string a = expected;
-        if (a.length > 20) {
-            a = a[0:15] + "…";
+        if (a.length > 32) {
+            a = a[0:32] + "…";
         }
         string b = actual;
-        if (b.length > 20) {
-            b = b[0:15] + "…";
+        if (b.length > 32) {
+            b = b[0:32] + "…";
         }
         print_assert("Expected: \"%s\", was: \"%s\"".printf(a, b), context);
         assert_not_reached();
