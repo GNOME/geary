@@ -36,6 +36,7 @@ int main(string[] args) {
     engine.add_suite(new Geary.Imap.DeserializerTest().get_suite());
     engine.add_suite(new Geary.Imap.CreateCommandTest().get_suite());
     engine.add_suite(new Geary.Imap.NamespaceResponseTest().get_suite());
+    engine.add_suite(new Geary.ImapDB.AttachmentTest().get_suite());
     engine.add_suite(new Geary.ImapDB.DatabaseTest().get_suite());
     engine.add_suite(new Geary.ImapEngine.AccountProcessorTest().get_suite());
     engine.add_suite(new Geary.Inet.Test().get_suite());

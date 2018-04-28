@@ -336,11 +336,11 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                         Mime.DispositionType target_disposition = Mime.DispositionType.UNSPECIFIED;
                         if (message.get_sub_messages().is_empty)
                             target_disposition = Mime.DispositionType.INLINE;
-                        Geary.ImapDB.Folder.do_save_attachments_db(
+                        Attachment.do_save_attachments(
                             cx,
+                            this.attachments_path,
                             id,
                             message.get_attachments(target_disposition),
-                            this.attachments_path,
                             null
                         );
                     } catch (Error e) {
@@ -500,7 +500,7 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                     message.get_attachments();
 
                     try {
-                        Geary.ImapDB.Folder.do_delete_attachments(
+                        Attachment.do_delete_attachments(
                             cx, this.attachments_path, message_id
                         );
                     } catch (Error err) {
@@ -511,11 +511,11 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
 
                     // rebuild all
                     try {
-                        Geary.ImapDB.Folder.do_save_attachments_db(
+                        Attachment.do_save_attachments(
                             cx,
+                            this.attachments_path,
                             message_id,
                             msg_attachments,
-                            this.attachments_path,
                             null
                         );
                     } catch (Error err) {

@@ -31,6 +31,7 @@ set(TEST_ENGINE_SRC
   engine/imap/command/imap-create-command-test.vala
   engine/imap/response/imap-namespace-response-test.vala
   engine/imap/transport/imap-deserializer-test.vala
+  engine/imap-db/imap-db-attachment-test.vala
   engine/imap-db/imap-db-database-test.vala
   engine/imap-engine/account-processor-test.vala
   engine/mime-content-type-test.vala
