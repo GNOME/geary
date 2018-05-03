@@ -79,9 +79,9 @@ public class Geary.Mime.ContentType : Geary.BaseObject {
             int max_len = 4096;
             // XXX determine actual max needed buffer size using
             // xdg_mime_get_max_buffer_extents?
-            uint8[] data = (max_len > buf.size)
-                ? buf.get_bytes()[0:max_len - 1].get_data()
-                : buf.get_uint8_array();
+            uint8[] data = (buf.size <= max_len)
+                ? buf.get_uint8_array()
+                : buf.get_bytes()[0:max_len].get_data();
 
             // XXX might just want to use xdgmime lib directly here to
             // avoid the intermediate glib_content_type step here?
