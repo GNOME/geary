@@ -62,6 +62,18 @@ public void assert_string(string expected, string? actual, string? context = nul
     }
 }
 
+public void assert_null_string(string? actual, string? context = null)
+    throws Error {
+    if (actual != null) {
+        string a = actual;
+        if (a.length > 70) {
+            a = a[0:70] + "…";
+        }
+        print_assert("Expected: null, was: \"%s\"".printf(a), context);
+        assert_not_reached();
+    }
+}
+
 public void assert_int(int expected, int actual, string? context = null)
     throws Error {
     if (expected != actual) {
