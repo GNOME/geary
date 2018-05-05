@@ -1,261 +1,307 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 private class Geary.ImapDB.Attachment : Geary.Attachment {
+
+
     public const Email.Field REQUIRED_FIELDS = Email.REQUIRED_FOR_MESSAGE;
 
-    internal const string NULL_FILE_NAME = "none";
+    private const string NULL_FILE_NAME = "none";
 
-    public Attachment(int64 message_id,
-                      int64 attachment_id,
-                      Mime.ContentType content_type,
-                      string? content_id,
-                      string? content_description,
-                      Mime.ContentDisposition content_disposition,
-                      string? content_filename,
-                      File data_dir,
-                      int64 filesize) {
-        base (generate_id(attachment_id),
-              content_type,
-              content_id,
-              content_description,
-              content_disposition,
-              content_filename,
-              generate_file(data_dir, message_id, attachment_id, content_filename),
-              filesize);
+
+    internal int64 message_id { get; private set; }
+
+    private int64 attachment_id;
+
+
+    private Attachment(int64 message_id,
+                       int64 attachment_id,
+                       Mime.ContentType content_type,
+                       string? content_id,
+                       string? content_description,
+                       Mime.ContentDisposition content_disposition,
+                       string? content_filename) {
+        base(
+            content_type,
+            content_id,
+            content_description,
+            content_disposition,
+            content_filename
+        );
+
+        this.message_id = message_id;
+        this.attachment_id = attachment_id;
     }
 
-    private static string generate_id(int64 attachment_id) {
-        return "imap-db:%s".printf(attachment_id.to_string());
-    }
-
-    public static File generate_file(File attachements_dir, int64 message_id, int64 attachment_id,
-        string? filename) {
-        return attachements_dir
-            .get_child(message_id.to_string())
-            .get_child(attachment_id.to_string())
-            .get_child(filename ?? NULL_FILE_NAME);
-    }
-
-    internal static void do_save_attachments(Db.Connection cx,
-                                             GLib.File attachments_path,
-                                             int64 message_id,
-                                             Gee.List<GMime.Part>? attachments,
-                                             Cancellable? cancellable)
+    internal Attachment.from_part(int64 message_id, GMime.Part part)
         throws Error {
-        // nothing to do if no attachments
-        if (attachments == null || attachments.size == 0)
-            return;
+        GMime.ContentType? part_type = part.get_content_type();
+        Mime.ContentType type = (part_type != null)
+            ? new Mime.ContentType.from_gmime(part_type)
+            : Mime.ContentType.deserialize(Mime.ContentType.DEFAULT_CONTENT_TYPE);
 
-        foreach (GMime.Part attachment in attachments) {
-            GMime.ContentType? content_type = attachment.get_content_type();
-            string mime_type = (content_type != null)
-                ? content_type.to_string()
-                : Mime.ContentType.DEFAULT_CONTENT_TYPE;
-            string? disposition = attachment.get_disposition();
-            string? content_id = attachment.get_content_id();
-            string? description = attachment.get_content_description();
-            string? filename = RFC822.Utils.get_clean_attachment_filename(attachment);
+        GMime.ContentDisposition? part_disposition = part.get_content_disposition();
+        Mime.ContentDisposition disposition = (part_disposition != null)
+            ? new Mime.ContentDisposition.from_gmime(part_disposition)
+            : new Mime.ContentDisposition.simple(
+                Geary.Mime.DispositionType.UNSPECIFIED
+            );
 
-            // Convert the attachment content into a usable ByteArray.
-            GMime.DataWrapper? attachment_data = attachment.get_content_object();
-            ByteArray byte_array = new ByteArray();
-            GMime.StreamMem stream = new GMime.StreamMem.with_byte_array(byte_array);
-            stream.set_owner(false);
-            if (attachment_data != null)
-                attachment_data.write_to_stream(stream); // data is null if it's 0 bytes
-            uint filesize = byte_array.len;
+        this(
+            message_id,
+            -1, // This gets set only after saving
+            type,
+            part.get_content_id(),
+            part.get_content_description(),
+            disposition,
+            RFC822.Utils.get_clean_attachment_filename(part)
+        );
+    }
 
-            // convert into DispositionType enum, which is stored as int
-            // (legacy code stored UNSPECIFIED as NULL, which is zero, which is ATTACHMENT, so preserve
-            // this behavior)
-            Mime.DispositionType disposition_type = Mime.DispositionType.deserialize(disposition,
-                null);
-            if (disposition_type == Mime.DispositionType.UNSPECIFIED)
-                disposition_type = Mime.DispositionType.ATTACHMENT;
+    internal Attachment.from_row(Geary.Db.Result result, File attachments_dir)
+        throws Error {
+        string? content_filename = result.string_for("filename");
+        if (content_filename == ImapDB.Attachment.NULL_FILE_NAME) {
+            // Prior to 0.12, Geary would store the untranslated
+            // string "none" as the filename when none was
+            // specified by the MIME content disposition. Check
+            // for that and clean it up.
+            content_filename = null;
+        }
 
-            // Insert it into the database.
-            Db.Statement stmt = cx.prepare("""
+        Mime.ContentDisposition disposition = new Mime.ContentDisposition.simple(
+            Mime.DispositionType.from_int(result.int_for("disposition"))
+        );
+
+        this(
+            result.rowid_for("message_id"),
+            result.rowid_for("id"),
+            Mime.ContentType.deserialize(result.nonnull_string_for("mime_type")),
+            result.string_for("content_id"),
+            result.string_for("description"),
+            disposition,
+            content_filename
+        );
+
+        set_file_info(
+            generate_file(attachments_dir), result.int64_for("filesize")
+        );
+    }
+
+    internal void save(Db.Connection cx,
+                       GMime.Part part,
+                       GLib.File attachments_dir,
+                       Cancellable? cancellable)
+        throws Error {
+        insert_db(cx, cancellable);
+        try {
+            save_file(part, attachments_dir, cancellable);
+            update_db(cx, cancellable);
+        } catch (Error err) {
+            // Don't honour the cancellable here, we need to delete
+            // it.
+            this.delete(cx, cancellable);
+            throw err;
+        }
+    }
+
+    // This isn't async since its only callpaths are via db async
+    // transactions, which run in independent threads.
+    internal void delete(Db.Connection cx, Cancellable? cancellable) {
+        if (this.attachment_id >= 0) {
+            try {
+                Db.Statement remove_stmt = cx.prepare(
+                    "DELETE FROM MessageAttachmentTable WHERE id=?");
+                remove_stmt.bind_rowid(0, this.attachment_id);
+
+                remove_stmt.exec();
+            } catch (Error err) {
+                debug("Error attempting to remove added attachment row for %s: %s",
+                      this.file.get_path(), err.message);
+            }
+        }
+
+        if (this.file != null) {
+            try {
+                this.file.delete(cancellable);
+            } catch (Error err) {
+                debug("Error attempting to remove attachment file %s: %s",
+                      this.file.get_path(), err.message);
+            }
+        }
+    }
+
+    private void insert_db(Db.Connection cx, Cancellable? cancellable)
+        throws Error {
+        // Insert it into the database.
+        Db.Statement stmt = cx.prepare("""
                 INSERT INTO MessageAttachmentTable (message_id, filename, mime_type, filesize, disposition, content_id, description)
                 VALUES (?, ?, ?, ?, ?, ?, ?)
                 """);
-            stmt.bind_rowid(0, message_id);
-            stmt.bind_string(1, filename);
-            stmt.bind_string(2, mime_type);
-            stmt.bind_uint(3, filesize);
-            stmt.bind_int(4, disposition_type);
-            stmt.bind_string(5, content_id);
-            stmt.bind_string(6, description);
+        stmt.bind_rowid(0, this.message_id);
+        stmt.bind_string(1, this.content_filename);
+        stmt.bind_string(2, this.content_type.to_string());
+        stmt.bind_int64(3, 0); // This is updated after saving the file
+        stmt.bind_int(4, this.content_disposition.disposition_type);
+        stmt.bind_string(5, this.content_id);
+        stmt.bind_string(6, this.content_description);
 
-            int64 attachment_id = stmt.exec_insert(cancellable);
-            File saved_file = ImapDB.Attachment.generate_file(
-                attachments_path, message_id, attachment_id, filename
+        this.attachment_id = stmt.exec_insert(cancellable);
+    }
+
+    // This isn't async since its only callpaths are via db async
+    // transactions, which run in independent threads
+    private void save_file(GMime.Part part,
+                           GLib.File attachments_dir,
+                           Cancellable? cancellable)
+        throws Error {
+        if (this.attachment_id < 0) {
+            throw new IOError.NOT_FOUND("No attachment id assigned");
+        }
+
+        File target = generate_file(attachments_dir);
+
+        // create directory, but don't throw exception if already exists
+        try {
+            target.get_parent().make_directory_with_parents(cancellable);
+        } catch (IOError ioe) {
+            // fall through if already exists
+            if (!(ioe is IOError.EXISTS))
+                throw ioe;
+        }
+
+        // Delete any existing file now since we might not be creating
+        // it again below.
+        try {
+            target.delete(cancellable);
+        } catch (IOError err) {
+            // All good
+        }
+
+        // Save the data to disk if there is any.
+        GMime.DataWrapper? attachment_data = part.get_content_object();
+        if (attachment_data != null) {
+            GLib.OutputStream target_stream = target.create(
+                FileCreateFlags.NONE, cancellable
+            );
+            GMime.Stream stream = new Geary.Stream.MimeOutputStream(
+                target_stream
+            );
+            stream = new GMime.StreamBuffer(
+                stream, GMime.StreamBufferMode.BLOCK_WRITE
             );
 
-            // On the off-chance this is marked for deletion, unmark it
-            try {
-                stmt = cx.prepare("""
-                    DELETE FROM DeleteAttachmentFileTable
-                    WHERE filename = ?
-                """);
-                stmt.bind_string(0, saved_file.get_path());
+            attachment_data.write_to_stream(stream);
 
-                stmt.exec(cancellable);
-            } catch (Error err) {
-                debug("Unable to delete from DeleteAttachmentFileTable: %s", err.message);
+            // Using the stream's length is a bit of a hack, but at
+            // least on one system we are getting 0 back for the file
+            // size if we use target.query_info().
+            stream.flush();
+            int64 file_size = stream.length();
 
-                // not a deal-breaker, fall through
-            }
+            stream.close();
 
-            debug("Saving attachment to %s", saved_file.get_path());
-
-            try {
-                // create directory, but don't throw exception if already exists
-                try {
-                    saved_file.get_parent().make_directory_with_parents(cancellable);
-                } catch (IOError ioe) {
-                    // fall through if already exists
-                    if (!(ioe is IOError.EXISTS))
-                        throw ioe;
-                }
-
-                // REPLACE_DESTINATION doesn't seem to work as advertised all the time ... just
-                // play it safe here
-                if (saved_file.query_exists(cancellable))
-                    saved_file.delete(cancellable);
-
-                // Create the file where the attachment will be saved and get the output stream.
-                FileOutputStream saved_stream = saved_file.create(FileCreateFlags.REPLACE_DESTINATION,
-                    cancellable);
-
-                // Save the data to disk and flush it.
-                size_t written;
-                if (filesize != 0)
-                    saved_stream.write_all(byte_array.data[0:filesize], out written, cancellable);
-
-                saved_stream.flush(cancellable);
-            } catch (Error error) {
-                // An error occurred while saving the attachment, so lets remove the attachment from
-                // the database and delete the file (in case it's partially written)
-                debug("Failed to save attachment %s: %s", saved_file.get_path(), error.message);
-
-                try {
-                    saved_file.delete();
-                } catch (Error delete_error) {
-                    debug("Error attempting to delete partial attachment %s: %s", saved_file.get_path(),
-                        delete_error.message);
-                }
-
-                try {
-                    Db.Statement remove_stmt = cx.prepare(
-                        "DELETE FROM MessageAttachmentTable WHERE id=?");
-                    remove_stmt.bind_rowid(0, attachment_id);
-
-                    remove_stmt.exec();
-                } catch (Error remove_error) {
-                    debug("Error attempting to remove added attachment row for %s: %s",
-                        saved_file.get_path(), remove_error.message);
-                }
-
-                throw error;
-            }
+            set_file_info(target, file_size);
         }
     }
 
-    internal static void do_delete_attachments(Db.Connection cx,
-                                               GLib.File attachments_path,
-                                               int64 message_id)
+    private void update_db(Db.Connection cx, Cancellable? cancellable)
         throws Error {
-        Gee.List<Geary.Attachment>? attachments = do_list_attachments(
-            cx, attachments_path, message_id, null
-        );
-        if (attachments == null || attachments.size == 0)
-            return;
+        // Update the file size now we know what it is
+        Db.Statement stmt = cx.prepare("""
+            UPDATE MessageAttachmentTable
+            SET filesize = ?
+            WHERE id = ?
+        """);
+        stmt.bind_int64(0, this.filesize);
+        stmt.bind_rowid(1, this.attachment_id);
 
-        // delete all files
-        foreach (Geary.Attachment attachment in attachments) {
-            try {
-                attachment.file.delete(null);
-            } catch (Error err) {
-                debug("Unable to delete file %s: %s", attachment.file.get_path(), err.message);
-            }
+        stmt.exec(cancellable);
+    }
+
+    private GLib.File generate_file(GLib.File attachments_dir) {
+        return attachments_dir
+            .get_child(this.message_id.to_string())
+            .get_child(this.attachment_id.to_string())
+            .get_child(this.content_filename ?? NULL_FILE_NAME);
+    }
+
+
+    internal static Gee.List<Attachment> save_attachments(Db.Connection cx,
+                                                          GLib.File attachments_path,
+                                                          int64 message_id,
+                                                          Gee.List<GMime.Part> attachments,
+                                                          Cancellable? cancellable)
+        throws Error {
+        Gee.List<Attachment> list = new Gee.LinkedList<Attachment>();
+        foreach (GMime.Part part in attachments) {
+            Attachment attachment = new Attachment.from_part(message_id, part);
+            attachment.save(cx, part, attachments_path, cancellable);
+            list.add(attachment);
+        }
+        return list;
+    }
+
+    internal static void delete_attachments(Db.Connection cx,
+                                            GLib.File attachments_path,
+                                            int64 message_id,
+                                            Cancellable? cancellable = null)
+        throws Error {
+        Gee.List<Attachment>? attachments = list_attachments(
+            cx, attachments_path, message_id, cancellable
+        );
+        foreach (Attachment attachment in attachments) {
+            attachment.delete(cx, cancellable);
         }
 
-        // remove all from attachment table
+        // Ensure they're dead, Jim.
         Db.Statement stmt = new Db.Statement(cx, """
             DELETE FROM MessageAttachmentTable WHERE message_id = ?
         """);
         stmt.bind_rowid(0, message_id);
-
         stmt.exec();
     }
 
-    internal static Geary.Email do_add_attachments(Db.Connection cx,
-                                                   GLib.File attachments_path,
-                                                   Geary.Email email,
-                                                   int64 message_id,
-                                                   Cancellable? cancellable = null)
+    // XXX this really should be a member of some internal
+    // ImapDB.Email class.
+    internal static void add_attachments(Db.Connection cx,
+                                         GLib.File attachments_path,
+                                         Geary.Email email,
+                                         int64 message_id,
+                                         Cancellable? cancellable = null)
         throws Error {
-        // Add attachments if available
         if (email.fields.fulfills(ImapDB.Attachment.REQUIRED_FIELDS)) {
-            Gee.List<Geary.Attachment>? attachments = do_list_attachments(
-                cx, attachments_path, message_id, cancellable
+            email.add_attachments(
+                list_attachments(
+                    cx, attachments_path, message_id, cancellable
+                )
             );
-            if (attachments != null)
-                email.add_attachments(attachments);
         }
-
-        return email;
     }
 
-    private static Gee.List<Geary.Attachment>?
-        do_list_attachments(Db.Connection cx,
-                            GLib.File attachments_path,
-                            int64 message_id,
-                            Cancellable? cancellable)
+    internal static Gee.List<Attachment> list_attachments(Db.Connection cx,
+                                                          GLib.File attachments_path,
+                                                          int64 message_id,
+                                                          Cancellable? cancellable)
         throws Error {
         Db.Statement stmt = cx.prepare("""
-            SELECT id, filename, mime_type, filesize, disposition, content_id, description
+            SELECT *
             FROM MessageAttachmentTable
             WHERE message_id = ?
             ORDER BY id
             """);
         stmt.bind_rowid(0, message_id);
-
         Db.Result results = stmt.exec(cancellable);
-        if (results.finished)
-            return null;
 
-        Gee.List<Geary.Attachment> list = new Gee.ArrayList<Geary.Attachment>();
-        do {
-            string? content_filename = results.string_at(1);
-            if (content_filename == ImapDB.Attachment.NULL_FILE_NAME) {
-                // Prior to 0.12, Geary would store the untranslated
-                // string "none" as the filename when none was
-                // specified by the MIME content disposition. Check
-                // for that and clean it up.
-                content_filename = null;
-            }
-            Mime.ContentDisposition disposition = new Mime.ContentDisposition.simple(
-                Mime.DispositionType.from_int(results.int_at(4)));
-            list.add(
-                new ImapDB.Attachment(
-                    message_id,
-                    results.rowid_at(0),
-                    Mime.ContentType.deserialize(results.nonnull_string_at(2)),
-                    results.string_at(5),
-                    results.string_at(6),
-                    disposition,
-                    content_filename,
-                    attachments_path,
-                    results.int64_at(3)
-                )
-            );
-        } while (results.next(cancellable));
-
+        Gee.List<Attachment> list = new Gee.LinkedList<Attachment>();
+        while (!results.finished) {
+            list.add(new ImapDB.Attachment.from_row(results, attachments_path));
+            results.next(cancellable);
+        }
         return list;
     }
 

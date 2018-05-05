@@ -1453,7 +1453,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             // TODO: Because this involves saving files, it potentially means holding up access to the
             // database while they're being written; may want to do this outside of transaction.
             if (email.fields.fulfills(Attachment.REQUIRED_FIELDS)) {
-                Attachment.do_save_attachments(
+                Attachment.save_attachments(
                     cx,
                     this.attachments_path,
                     message_id,
@@ -1601,12 +1601,12 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                 "Message %s in folder %s only fulfills %Xh fields (required: %Xh)",
                 location.email_id.to_string(), to_string(), row.fields, required_fields);
         }
-        
-        Geary.Email email = row.to_email(location.email_id);
 
-        return Attachment.do_add_attachments(
+        Geary.Email email = row.to_email(location.email_id);
+        Attachment.add_attachments(
             cx, this.attachments_path, email, location.message_id, cancellable
         );
+        return email;
     }
 
     private static string fields_to_columns(Geary.Email.Field fields) {
@@ -2034,24 +2034,16 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             // Update attachments if not already in the database
             if (!fetched_fields.fulfills(Attachment.REQUIRED_FIELDS)
                 && combined_email.fields.fulfills(Attachment.REQUIRED_FIELDS)) {
-                Attachment.do_save_attachments(
-                    cx,
-                    this.attachments_path,
-                    location.message_id,
-                    combined_email.get_message().get_attachments(),
-                    cancellable
+                combined_email.add_attachments(
+                    Attachment.save_attachments(
+                        cx,
+                        this.attachments_path,
+                        location.message_id,
+                        combined_email.get_message().get_attachments(),
+                        cancellable
+                    )
                 );
             }
-
-            // Must add attachments to the email object after they're saved to
-            // the database.
-            Attachment.do_add_attachments(
-                cx,
-                this.attachments_path,
-                combined_email,
-                location.message_id,
-                cancellable
-            );
 
             Geary.Email.Field new_fields;
             do_merge_message_row(cx, row, out new_fields, out updated_contacts,

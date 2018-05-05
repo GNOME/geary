@@ -114,4 +114,61 @@ namespace Geary.Stream {
         }
     }
 
+
+    /**
+     * Adaptor from a GMime stream to a GLib OutputStream.
+     */
+    public class MimeOutputStream : GMime.Stream {
+
+        GLib.OutputStream dest;
+        int64 written = 0;
+
+
+        public MimeOutputStream(GLib.OutputStream dest) {
+            this.dest = dest;
+        }
+
+		public override int64 length() {
+            // This is a bit of a kludge, but we use it in
+            // ImapDB.Attachment
+            return this.written;
+        }
+
+		public override ssize_t write(string buf, size_t len) {
+            ssize_t ret = -1;
+            try {
+                ret = this.dest.write(buf.data[0:len]);
+                this.written += len;
+            } catch (IOError err) {
+                // Oh well
+            }
+            return ret;
+        }
+
+		public override int close() {
+            int ret = -1;
+            try {
+                ret = this.dest.close() ? 0 : -1;
+            } catch (IOError err) {
+                // Oh well
+            }
+            return ret;
+        }
+
+		public override int flush () {
+            int ret = -1;
+            try {
+                ret = this.dest.flush() ? 0 : -1;
+            } catch (Error err) {
+                // Oh well
+            }
+            return ret;
+        }
+
+		public override bool eos () {
+            return this.dest.is_closed() || this.dest.is_closing();
+        }
+    }
+
+
 }

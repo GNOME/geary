@@ -418,29 +418,11 @@ private class Geary.ImapDB.GC {
             //
             // Fetch all on-disk attachments for this message
             //
-            
-            Gee.ArrayList<File> attachment_files = new Gee.ArrayList<File>();
-            
-            stmt = cx.prepare("""
-                SELECT id, filename
-                FROM MessageAttachmentTable
-                WHERE message_id = ?
-            """);
-            stmt.bind_rowid(0, message_id);
-            
-            result = stmt.exec(cancellable);
-            while (!result.finished) {
-                File file = Attachment.generate_file(
-                    this.db.attachments_path,
-                    message_id,
-                    result.rowid_for("id"),
-                    result.string_for("filename")
-                );
-                attachment_files.add(file);
 
-                result.next(cancellable);
-            }
-            
+            Gee.List<Attachment> attachments = Attachment.list_attachments(
+                cx, this.db.attachments_path, message_id, cancellable
+            );
+
             //
             // Delete from search table
             //
@@ -483,17 +465,16 @@ private class Geary.ImapDB.GC {
             // commits without error and the attachment files can be deleted without being
             // referenced by the database, in a way that's resumable.
             //
-            
-            foreach (File attachment_file in attachment_files) {
+
+            foreach (Attachment attachment in attachments) {
                 stmt = cx.prepare("""
                     INSERT INTO DeleteAttachmentFileTable (filename)
                     VALUES (?)
                 """);
-                stmt.bind_string(0, attachment_file.get_path());
-                
+                stmt.bind_string(0, attachment.file.get_path());
                 stmt.exec(cancellable);
             }
-            
+
             //
             // Increment the reap count since last vacuum
             //

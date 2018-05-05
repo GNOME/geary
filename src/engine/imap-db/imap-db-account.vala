@@ -728,7 +728,7 @@ private class Geary.ImapDB.Account : BaseObject {
                 // Ignore any messages that don't have the required fields.
                 if (partial_ok || row.fields.fulfills(requested_fields)) {
                     Geary.Email email = row.to_email(new Geary.ImapDB.EmailIdentifier(id, null));
-                    Attachment.do_add_attachments(
+                    Attachment.add_attachments(
                         cx, this.db.attachments_path, email, id, cancellable
                     );
 
@@ -1393,7 +1393,7 @@ private class Geary.ImapDB.Account : BaseObject {
                     email_id.to_string(), row.fields, required_fields);
 
             email = row.to_email(email_id);
-            Attachment.do_add_attachments(
+            Attachment.add_attachments(
                 cx, this.db.attachments_path, email, email_id.message_id, cancellable
             );
 
@@ -1556,7 +1556,7 @@ private class Geary.ImapDB.Account : BaseObject {
                     MessageRow row = Geary.ImapDB.Folder.do_fetch_message_row(
                         cx, message_id, search_fields, out db_fields, cancellable);
                     Geary.Email email = row.to_email(new Geary.ImapDB.EmailIdentifier(message_id, null));
-                    Attachment.do_add_attachments(
+                    Attachment.add_attachments(
                         cx, this.db.attachments_path, email, message_id, cancellable
                     );
 
