@@ -296,7 +296,6 @@ geary_engine_vala_sources = files(
   'util/util-ascii.vala',
   'util/util-collection.vala',
   'util/util-connectivity-manager.vala',
-  'util/util-converter.vala',
   'util/util-files.vala',
   'util/util-generic-capabilities.vala',
   'util/util-html.vala',
