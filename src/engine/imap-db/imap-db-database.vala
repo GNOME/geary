@@ -1,4 +1,5 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -34,15 +35,12 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
     }
     
     /**
-     * Opens the ImapDB database.
-     *
-     * This should only be done from the main thread, as it is designed to pump the event loop
-     * while the database is being opened and updated.
+     * Prepares the ImapDB database for use.
      */
-    public async void open_async(Db.DatabaseFlags flags, Cancellable? cancellable) throws Error {
-        open_background(flags, on_prepare_database_connection, pump_event_loop,
-            OPEN_PUMP_EVENT_LOOP_MSEC, cancellable);
-        
+    public new async void open(Db.DatabaseFlags flags, Cancellable? cancellable)
+        throws Error {
+        yield base.open(flags, on_prepare_database_connection, cancellable);
+
         // Tie user-supplied Cancellable to internal Cancellable, which is used when close() is
         // called
         if (cancellable != null)
@@ -103,140 +101,133 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
         
         base.close(cancellable);
     }
-    
-    private void pump_event_loop() {
-        while (MainContext.default().pending())
-            MainContext.default().iteration(true);
-    }
-    
+
     protected override void starting_upgrade(int current_version, bool new_db) {
         this.new_db = new_db;
-        // can't call the ProgressMonitor directly, as it's hooked up to signals that expect to be
-        // called in the foreground thread, so use the Idle loop for this
-        Idle.add(() => {
-            // don't use upgrade_monitor for new databases, as the upgrade should be near-
-            // instantaneous.  Also, there's some issue with GTK when starting the progress
-            // monitor while GtkDialog's are in play:
-            // https://bugzilla.gnome.org/show_bug.cgi?id=726269
-            if (!new_db && !upgrade_monitor.is_in_progress)
-                upgrade_monitor.notify_start();
-            
-            return false;
-        });
+
+        // don't use upgrade_monitor for new databases, as the upgrade should be near-
+        // instantaneous.  Also, there's some issue with GTK when starting the progress
+        // monitor while GtkDialog's are in play:
+        // https://bugzilla.gnome.org/show_bug.cgi?id=726269
+        if (!new_db && !upgrade_monitor.is_in_progress) {
+            upgrade_monitor.notify_start();
+        }
     }
-    
+
     protected override void completed_upgrade(int final_version) {
-        // see starting_upgrade() for explanation why this is done in Idle loop
-        Idle.add(() => {
-            if (!new_db && upgrade_monitor.is_in_progress)
-                upgrade_monitor.notify_finish();
-            
-            return false;
-        });
+        if (!new_db && upgrade_monitor.is_in_progress) {
+            upgrade_monitor.notify_finish();
+        }
     }
-    
-    protected override void post_upgrade(int version) {
+
+    protected async override void post_upgrade(int version,
+                                               Cancellable? cancellable)
+        throws Error {
         switch (version) {
             case 5:
-                post_upgrade_populate_autocomplete();
+                yield post_upgrade_populate_autocomplete(cancellable);
             break;
-            
+
             case 6:
-                post_upgrade_encode_folder_names();
+                yield post_upgrade_encode_folder_names(cancellable);
             break;
-            
+
             case 11:
-                post_upgrade_add_search_table();
+                yield post_upgrade_add_search_table(cancellable);
             break;
-            
+
             case 12:
-                post_upgrade_populate_internal_date_time_t();
+                yield post_upgrade_populate_internal_date_time_t(cancellable);
             break;
-            
+
             case 13:
-                post_upgrade_populate_additional_attachments();
+                yield post_upgrade_populate_additional_attachments(cancellable);
             break;
-            
+
             case 14:
-                post_upgrade_expand_page_size();
+                yield post_upgrade_expand_page_size(cancellable);
             break;
-            
+
             case 15:
-                post_upgrade_fix_localized_internaldates();
+                yield post_upgrade_fix_localized_internaldates(cancellable);
             break;
-            
+
             case 18:
-                post_upgrade_populate_internal_date_time_t();
+                yield post_upgrade_populate_internal_date_time_t(cancellable);
             break;
-            
+
             case 19:
-                post_upgrade_validate_contacts();
+                yield post_upgrade_validate_contacts(cancellable);
             break;
-            
+
             case 22:
-                post_upgrade_rebuild_attachments();
+                yield post_upgrade_rebuild_attachments(cancellable);
             break;
-            
+
             case 23:
-                post_upgrade_add_tokenizer_table();
+                yield post_upgrade_add_tokenizer_table(cancellable);
             break;
         }
     }
-    
+
     // Version 5.
-    private void post_upgrade_populate_autocomplete() {
-        try {
-            Db.Result result = query("SELECT sender, from_field, to_field, cc, bcc FROM MessageTable");
-            while (!result.finished) {
-                MessageAddresses message_addresses =
+    private async void post_upgrade_populate_autocomplete(Cancellable? cancellable)
+        throws Error {
+        yield exec_transaction_async(Db.TransactionType.RW, (cx) => {
+                Db.Result result = cx.query(
+                    "SELECT sender, from_field, to_field, cc, bcc FROM MessageTable"
+                );
+                while (!result.finished && !cancellable.is_cancelled()) {
+                    MessageAddresses message_addresses =
                     new MessageAddresses.from_result(account_owner_email, result);
-                foreach (Contact contact in message_addresses.contacts) {
-                    do_update_contact(get_master_connection(), contact, null);
+                    foreach (Contact contact in message_addresses.contacts) {
+                        do_update_contact(cx, contact, null);
+                    }
+                    result.next();
                 }
-                
-                result.next();
-            }
-        } catch (Error err) {
-            debug("Error populating autocompletion table during upgrade to database schema 5");
-        }
+                return Geary.Db.TransactionOutcome.COMMIT;
+            }, cancellable);
     }
-    
+
     // Version 6.
-    private void post_upgrade_encode_folder_names() {
-        try {
-            Db.Result select = query("SELECT id, name FROM FolderTable");
-            while (!select.finished) {
-                int64 id = select.int64_at(0);
-                string encoded_name = select.nonnull_string_at(1);
-                
-                try {
-                    string canonical_name = Geary.ImapUtf7.imap_utf7_to_utf8(encoded_name);
-                    
-                    Db.Statement update = prepare("UPDATE FolderTable SET name=? WHERE id=?");
-                    update.bind_string(0, canonical_name);
-                    update.bind_int64(1, id);
-                    update.exec();
-                } catch (Error e) {
-                    debug("Error renaming folder %s to its canonical representation: %s", encoded_name, e.message);
+    private async void post_upgrade_encode_folder_names(Cancellable? cancellable)
+        throws Error {
+        yield exec_transaction_async(Db.TransactionType.RW, (cx) => {
+                Db.Result select = cx.query("SELECT id, name FROM FolderTable");
+                while (!select.finished && !cancellable.is_cancelled()) {
+                    int64 id = select.int64_at(0);
+                    string encoded_name = select.nonnull_string_at(1);
+
+                    try {
+                        string canonical_name = Geary.ImapUtf7.imap_utf7_to_utf8(encoded_name);
+
+                        Db.Statement update = cx.prepare(
+                            "UPDATE FolderTable SET name=? WHERE id=?"
+                        );
+                        update.bind_string(0, canonical_name);
+                        update.bind_int64(1, id);
+                        update.exec();
+                    } catch (Error e) {
+                        debug("Error renaming folder %s to its canonical representation: %s", encoded_name, e.message);
+                    }
+
+                    select.next();
                 }
-                
-                select.next();
-            }
-        } catch (Error e) {
-            debug("Error decoding folder names during upgrade to database schema 6: %s", e.message);
-        }
+                return Geary.Db.TransactionOutcome.COMMIT;
+            }, cancellable);
     }
-    
+
     // Version 11.
-    private void post_upgrade_add_search_table() {
-        try {
-            string stemmer = find_appropriate_search_stemmer();
-            debug("Creating search table using %s stemmer", stemmer);
-            
-            // This can't go in the .sql file because its schema (the stemmer
-            // algorithm) is determined at runtime.
-            exec("""
-                CREATE VIRTUAL TABLE MessageSearchTable USING fts4(
+    private async void post_upgrade_add_search_table(Cancellable? cancellable)
+        throws Error {
+        yield exec_transaction_async(Db.TransactionType.RW, (cx) => {
+                string stemmer = find_appropriate_search_stemmer();
+                debug("Creating search table using %s stemmer", stemmer);
+
+                // This can't go in the .sql file because its schema (the stemmer
+                // algorithm) is determined at runtime.
+                cx.exec("""
+                    CREATE VIRTUAL TABLE MessageSearchTable USING fts4(
                     body,
                     attachment,
                     subject,
@@ -244,16 +235,15 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                     receivers,
                     cc,
                     bcc,
-                    
+
                     tokenize=unicodesn "stemmer=%s",
                     prefix="2,4,6,8,10",
                 );
-            """.printf(stemmer));
-        } catch (Error e) {
-            error("Error creating search table: %s", e.message);
-        }
+                """.printf(stemmer));
+                return Geary.Db.TransactionOutcome.COMMIT;
+            }, cancellable);
     }
-    
+
     private string find_appropriate_search_stemmer() {
         // Unfortunately, the stemmer library only accepts the full language
         // name for the stemming algorithm.  This translates between the user's
@@ -280,27 +270,30 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                 case "tr": return "turkish";
             }
         }
-        
+
         // Default to English because it seems to be on average the language
         // most likely to be present in emails, regardless of the user's
         // language setting.  This is not an exact science, and search results
         // should be ok either way in most cases.
         return "english";
     }
-    
+
     // Versions 12 and 18.
-    private void post_upgrade_populate_internal_date_time_t() {
-        try {
-            exec_transaction(Db.TransactionType.RW, (cx) => {
-                Db.Result select = cx.query("SELECT id, internaldate FROM MessageTable");
+    private async void
+        post_upgrade_populate_internal_date_time_t(Cancellable? cancellable)
+        throws Error {
+        yield exec_transaction_async(Db.TransactionType.RW, (cx) => {
+                Db.Result select = cx.query(
+                    "SELECT id, internaldate FROM MessageTable"
+                );
                 while (!select.finished) {
                     int64 id = select.rowid_at(0);
                     string? internaldate = select.string_at(1);
-                    
+
                     try {
                         time_t as_time_t = (internaldate != null ?
                             Geary.Imap.InternalDate.decode(internaldate).to_time_t() : -1);
-                        
+
                         Db.Statement update = cx.prepare(
                             "UPDATE MessageTable SET internaldate_time_t=? WHERE id=?");
                         update.bind_int64(0, (int64) as_time_t);
@@ -310,22 +303,19 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                         debug("Error converting internaldate '%s' to time_t: %s",
                             internaldate, e.message);
                     }
-                    
+
                     select.next();
                 }
-                
+
                 return Db.TransactionOutcome.COMMIT;
-            });
-        } catch (Error e) {
-            debug("Error populating internaldate_time_t column during upgrade to database schema 12: %s",
-                e.message);
-        }
+            }, cancellable);
     }
-    
+
     // Version 13.
-    private void post_upgrade_populate_additional_attachments() {
-        try {
-            exec_transaction(Db.TransactionType.RW, (cx) => {
+    private async void
+        post_upgrade_populate_additional_attachments(Cancellable? cancellable)
+        throws Error {
+        yield exec_transaction_async(Db.TransactionType.RW, (cx) => {
                 Db.Statement stmt = cx.prepare("""
                     SELECT id, header, body
                     FROM MessageTable
@@ -334,11 +324,12 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                 stmt.bind_int(0, Geary.Email.REQUIRED_FOR_MESSAGE);
                 stmt.bind_int(1, Geary.Email.REQUIRED_FOR_MESSAGE);
                 Db.Result select = stmt.exec();
+
                 while (!select.finished) {
                     int64 id = select.rowid_at(0);
                     Geary.Memory.Buffer header = select.string_buffer_at(1);
                     Geary.Memory.Buffer body = select.string_buffer_at(2);
-                    
+
                     try {
                         Geary.RFC822.Message message = new Geary.RFC822.Message.from_parts(
                             new RFC822.Header(header), new RFC822.Text(body));
@@ -350,53 +341,52 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                     } catch (Error e) {
                         debug("Error fetching inline Mime parts: %s", e.message);
                     }
-                    
+
                     select.next();
                 }
-                
+
                 // additionally, because this schema change (and code changes as well) introduces
                 // two new types of attachments as well as processing for all MIME text sections
                 // of messages (not just the first one), blow away the search table and let the
                 // search indexer start afresh
                 cx.exec("DELETE FROM MessageSearchTable");
-                
+
                 return Db.TransactionOutcome.COMMIT;
-            });
-        } catch (Error e) {
-            debug("Error populating old inline attachments during upgrade to database schema 13: %s",
-                e.message);
-        }
+            }, cancellable);
     }
-    
+
     // Version 14.
-    private void post_upgrade_expand_page_size() {
-        try {
-            // When the MessageSearchTable is first touched, SQLite seems to
-            // read the whole table into memory (or an awful lot of data,
-            // either way).  This was causing slowness when Geary first started
-            // and checked for any messages not yet in the search table.  With
-            // the database's page_size set to 4096, the reads seem to happen
-            // about 2 orders of magnitude quicker, probably because 4096
-            // matches the default filesystem block size and/or Linux's default
-            // memory page size.  With this set, the full read into memory is
-            // barely noticeable even on slow machines.
-            
-            // NOTE: these can't be in the .sql file itself because they must
-            // be back to back, outside of a transaction.
-            exec("""
-                PRAGMA page_size = 4096;
-                VACUUM;
-            """);
-        } catch (Error e) {
-            debug("Error bumping page_size or vacuuming database; performance may be degraded: %s",
-                e.message);
-        }
+    private async void post_upgrade_expand_page_size(Cancellable? cancellable)
+        throws Error {
+        // When the MessageSearchTable is first touched,
+        // SQLite seems to read the whole table into memory
+        // (or an awful lot of data, either way).  This was
+        // causing slowness when Geary first started and
+        // checked for any messages not yet in the search
+        // table.  With the database's page_size set to 4096,
+        // the reads seem to happen about 2 orders of
+        // magnitude quicker, probably because 4096 matches
+        // the default filesystem block size and/or Linux's
+        // default memory page size.  With this set, the full
+        // read into memory is barely noticeable even on slow
+        // machines.
+
+        // NOTE: these can't be in the .sql file itself because
+        // they must be back to back, outside of a transaction
+        Geary.Db.Connection cx = yield open_connection();
+        yield Nonblocking.Concurrent.global.schedule_async(() => {
+                cx.exec("""
+                    PRAGMA page_size = 4096;
+                    VACUUM;
+                """);
+            }, cancellable);
     }
-    
+
     // Version 15
-    private void post_upgrade_fix_localized_internaldates() {
-        try {
-            exec_transaction(Db.TransactionType.RW, (cx) => {
+    private async void
+        post_upgrade_fix_localized_internaldates(Cancellable? cancellable)
+        throws Error {
+        yield exec_transaction_async(Db.TransactionType.RW, (cx) => {
                 Db.Statement stmt = cx.prepare("""
                     SELECT id, internaldate, fields
                     FROM MessageTable
@@ -443,19 +433,15 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                     // reuse statment, overwrite invalid_id, fields only
                     stmt.reset(Db.ResetScope.SAVE_BINDINGS);
                 }
-                
+
                 return Db.TransactionOutcome.COMMIT;
-            });
-        } catch (Error err) {
-            debug("Error fixing INTERNALDATES during upgrade to schema 15 for %s: %s",
-                  this.path, err.message);
-        }
+            }, cancellable);
     }
-    
+
     // Version 19.
-    private void post_upgrade_validate_contacts() {
-        try {
-            exec_transaction(Db.TransactionType.RW, (cx) => {
+    private async void post_upgrade_validate_contacts(Cancellable? cancellable)
+        throws Error {
+        yield exec_transaction_async(Db.TransactionType.RW, (cx) => {
                 Db.Result result = cx.query("SELECT id, email FROM ContactTable");
                 while (!result.finished) {
                     string email = result.string_at(1);
@@ -471,16 +457,13 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                 }
                 
                 return Db.TransactionOutcome.COMMIT;
-            });
-        } catch (Error e) {
-            debug("Error fixing up contacts table: %s", e.message);
-        }
+            }, cancellable);
     }
-    
+
     // Version 22
-    private void post_upgrade_rebuild_attachments() {
-        try {
-            exec_transaction(Db.TransactionType.RW, (cx) => {
+    private async void post_upgrade_rebuild_attachments(Cancellable? cancellable)
+        throws Error {
+        yield exec_transaction_async(Db.TransactionType.RW, (cx) => {
                 Db.Statement stmt = cx.prepare("""
                     SELECT id, header, body
                     FROM MessageTable
@@ -492,34 +475,33 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                 Db.Result results = stmt.exec();
                 if (results.finished)
                     return Db.TransactionOutcome.ROLLBACK;
-                
+
                 do {
                     int64 message_id = results.rowid_at(0);
                     Geary.Memory.Buffer header = results.string_buffer_at(1);
                     Geary.Memory.Buffer body = results.string_buffer_at(2);
-                    
+
                     Geary.RFC822.Message message;
                     try {
                         message = new Geary.RFC822.Message.from_parts(
                             new RFC822.Header(header), new RFC822.Text(body));
                     } catch (Error err) {
                         debug("Error decoding message: %s", err.message);
-                        
                         continue;
                     }
-                    
+
                     // build a list of attachments in the message itself
-                    Gee.List<GMime.Part> msg_attachments = message.get_attachments();
-                    
-                    // delete all attachments for this message
+                    Gee.List<GMime.Part> msg_attachments =
+                    message.get_attachments();
+
                     try {
                         Geary.ImapDB.Folder.do_delete_attachments(cx, message_id);
                     } catch (Error err) {
-                        debug("Error deleting existing attachments: %s", err.message);
-                        
+                        debug("Error deleting existing attachments: %s",
+                              err.message);
                         continue;
                     }
-                    
+
                     // rebuild all
                     try {
                         Geary.ImapDB.Folder.do_save_attachments_db(cx, message_id, msg_attachments,
@@ -530,35 +512,31 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                         // fallthrough
                     }
                 } while (results.next());
-                
+
                 // rebuild search table due to potentially new attachments
                 cx.exec("DELETE FROM MessageSearchTable");
-                
+
                 return Db.TransactionOutcome.COMMIT;
-            });
-        } catch (Error e) {
-            debug("Error populating old inline attachments during upgrade to database schema 13: %s",
-                e.message);
-        }
+            }, cancellable);
     }
-    
+
     // Version 23
-    private void post_upgrade_add_tokenizer_table() {
-        try {
-            string stemmer = find_appropriate_search_stemmer();
-            debug("Creating tokenizer table using %s stemmer", stemmer);
-            
-            // These can't go in the .sql file because its schema (the stemmer
-            // algorithm) is determined at runtime.
-            exec("""
-                CREATE VIRTUAL TABLE TokenizerTable USING fts3tokenize(
-                    unicodesn,
-                    "stemmer=%s"
-                );
-            """.printf(stemmer));
-        } catch (Error e) {
-            error("Error creating tokenizer table: %s", e.message);
-        }
+    private async void post_upgrade_add_tokenizer_table(Cancellable? cancellable)
+        throws Error {
+        yield exec_transaction_async(Db.TransactionType.RW, (cx) => {
+                string stemmer = find_appropriate_search_stemmer();
+                debug("Creating tokenizer table using %s stemmer", stemmer);
+
+                // These can't go in the .sql file because its schema (the stemmer
+                // algorithm) is determined at runtime.
+                cx.exec("""
+                    CREATE VIRTUAL TABLE TokenizerTable USING fts3tokenize(
+                        unicodesn,
+                        "stemmer=%s"
+                    );
+                """.printf(stemmer));
+                return Db.TransactionOutcome.COMMIT;
+            }, cancellable);
     }
 
     /**
@@ -612,5 +590,5 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
         cx.set_synchronous(Db.SynchronousMode.NORMAL);
         sqlite3_unicodesn_register_tokenizer(cx.db);
     }
-}
 
+}

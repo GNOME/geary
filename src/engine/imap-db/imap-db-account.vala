@@ -264,7 +264,7 @@ private class Geary.ImapDB.Account : BaseObject {
             account_information.primary_mailbox.address);
         
         try {
-            yield db.open_async(
+            yield db.open(
                 Db.DatabaseFlags.CREATE_DIRECTORY | Db.DatabaseFlags.CREATE_FILE | Db.DatabaseFlags.CHECK_CORRUPTION,
                 cancellable);
         } catch (Error err) {

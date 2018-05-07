@@ -205,9 +205,10 @@ private class Geary.ImapDB.GC {
         
         // NOTE: VACUUM cannot happen inside a transaction, so to avoid blocking the main thread,
         // run a non-transacted command from a background thread
+        Geary.Db.Connection cx = yield db.open_connection(cancellable);
         yield Nonblocking.Concurrent.global.schedule_async(() => {
-            db.open_connection(cancellable).exec("VACUUM", cancellable);
-            
+            cx.exec("VACUUM", cancellable);
+
             // it's a small thing, but take snapshot of time when vacuum completes, as scheduling
             // of the next transaction is not instantaneous
             last_vacuum_time = new DateTime.now_local();
@@ -220,7 +221,7 @@ private class Geary.ImapDB.GC {
         // update last vacuum time and reset messages reaped since last vacuum ... don't allow this
         // to be cancelled, really want to get this in stone so the user doesn't re-vacuum
         // unnecessarily
-        yield db.exec_transaction_async(Db.TransactionType.WO, (cx) => {
+        yield cx.exec_transaction_async(Db.TransactionType.WO, (cx) => {
             Db.Statement stmt = cx.prepare("""
                 UPDATE GarbageCollectionTable
                 SET last_vacuum_time_t = ?, reaped_messages_since_last_vacuum = ?

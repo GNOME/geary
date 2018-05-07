@@ -1,16 +1,19 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 /**
- * A Connection represents a connection to an open database.  Because SQLite uses a 
- * synchronous interface, all calls are blocking.  Db.Database offers asynchronous queries by
- * pooling connections and invoking queries from background threads.
+ * A Connection represents a connection to an open database.
  *
- * Connections are associated with a Database.  Use Database.open_connection() to create
- * one.
+ * Because SQLite uses a synchronous interface, all calls are
+ * blocking.  Db.Database offers asynchronous queries by pooling
+ * connections and invoking queries from background threads.
+ *
+ * Connections are associated with a Database.  Use
+ * Database.open_connection() to create one.
  *
  * A Connection will close when its last reference is dropped.
  */
@@ -97,8 +100,8 @@ public class Geary.Db.Connection : Geary.Db.Context {
      *
      * There is no way to retrieve a result iterator from this call.
      *
-     * This may be called from a TransactionMethod called within exec_transaction() or
-     * Db.Database.exec_transaction_async().
+     * This may be called from a TransactionMethod called within
+     * {@link exec_transaction} or {@link exec_transaction_async}.
      *
      * See [[http://www.sqlite.org/c3ref/exec.html]]
      */
@@ -116,8 +119,8 @@ public class Geary.Db.Connection : Geary.Db.Context {
      *
      * There is no way to retrieve a result iterator from this call.
      *
-     * This can be called from a TransactionMethod called within exec_transaction() or
-     * Db.Database.exec_transaction_async().
+     * This may be called from a TransactionMethod called within
+     * {@link exec_transaction} or {@link exec_transaction_async}.
      */
     public void exec_file(File file, Cancellable? cancellable = null) throws Error {
         check_cancelled("Connection.exec_file", cancellable);
@@ -150,14 +153,18 @@ public class Geary.Db.Connection : Geary.Db.Context {
     public int get_busy_timeout_msec() {
         return busy_timeout_msec;
     }
-    
+
     /**
-     * Sets busy timeout time in milliseconds.  Zero or a negative value indicates that all
-     * operations that SQLite returns BUSY will be retried until they complete with success or error.
-     * Otherwise, after said amount of time has transpired, DatabaseError.BUSY will be thrown.
+     * Sets busy timeout time in milliseconds.
      *
-     * This is imperative for exec_transaction() and Db.Database.exec_transaction_async(), because
-     * those calls will throw a DatabaseError.BUSY call immediately if another transaction has
+     * Zero or a negative value indicates that all operations that
+     * SQLite returns BUSY will be retried until they complete with
+     * success or error.  Otherwise, after said amount of time has
+     * transpired, DatabaseError.BUSY will be thrown.
+     *
+     * This is imperative for {@link exec_transaction} {@link
+     * exec_transaction_async}, because those calls will throw a
+     * DatabaseError.BUSY call immediately if another transaction has
      * acquired the reserved or exclusive locks.
      */
     public void set_busy_timeout_msec(int busy_timeout_msec) throws Error {
@@ -415,7 +422,31 @@ public class Geary.Db.Connection : Geary.Db.Context {
         
         return outcome;
     }
-    
+
+    /**
+     * Starts a new asynchronous transaction for this connection.
+     *
+     * Asynchronous transactions are handled via background
+     * threads. The background thread calls {@link exec_transaction};
+     * see that method for more information about coding a
+     * transaction. The only caveat is that the {@link
+     * TransactionMethod} passed to it must be thread-safe.
+     *
+     * Throws {@link DatabaseError.OPEN_REQUIRED} if not open.
+     */
+    public async TransactionOutcome exec_transaction_async(TransactionType type,
+                                                           TransactionMethod cb,
+                                                           Cancellable? cancellable)
+        throws Error {
+        // create job to execute in background thread
+        TransactionAsyncJob job = new TransactionAsyncJob(
+            this, type, cb, cancellable
+        );
+
+        this.database.add_async_job(job);
+        return yield job.wait_for_completion_async();
+    }
+
     public override Connection? get_connection() {
         return this;
     }
