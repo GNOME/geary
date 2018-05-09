@@ -42,7 +42,7 @@ private class Geary.ImapDB.Attachment : Geary.Attachment {
         GMime.ContentType? part_type = part.get_content_type();
         Mime.ContentType type = (part_type != null)
             ? new Mime.ContentType.from_gmime(part_type)
-            : Mime.ContentType.deserialize(Mime.ContentType.DEFAULT_CONTENT_TYPE);
+            : Mime.ContentType.ATTACHMENT_DEFAULT;
 
         GMime.ContentDisposition? part_disposition = part.get_content_disposition();
         Mime.ContentDisposition disposition = (part_disposition != null)

@@ -127,12 +127,12 @@ public abstract class Geary.Attachment : BaseObject {
         }
 
         if (name_type == null ||
-            name_type.is_default() ||
+            name_type.is_same(Mime.ContentType.ATTACHMENT_DEFAULT) ||
             !name_type.is_same(mime_type)) {
             // Substitute file name either is of unknown type
             // (e.g. it does not have an extension) or is not the
             // same type as the declared type, so try to fix it.
-            if (mime_type.is_default()) {
+            if (mime_type.is_same(Mime.ContentType.ATTACHMENT_DEFAULT)) {
                 // Declared type is unknown, see if we can guess
                 // it. Don't use GFile.query_info however since
                 // that will attempt to use the filename, which is

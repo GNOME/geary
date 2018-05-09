@@ -6,8 +6,9 @@
 
 /**
  * Content parameters (for {@link ContentType} and {@link ContentDisposition}).
+ *
+ * This class is immutable.
  */
-
 public class Geary.Mime.ContentParameters : BaseObject {
     public int size {
         get {
@@ -37,14 +38,28 @@ public class Geary.Mime.ContentParameters : BaseObject {
         if (params != null && params.size > 0)
             Collection.map_set_all<string, string>(this.params, params);
     }
-    
-    internal ContentParameters.from_gmime(GMime.Param? gmime_param) {
-        while (gmime_param != null) {
-            set_parameter(gmime_param.get_name(), gmime_param.get_value());
-            gmime_param = gmime_param.get_next();
+
+    /**
+     * Create a mapping of content parameters.
+     *
+     * Note that the given params must be a two-dimensional array,
+     * where each element contains a key/value pair.
+     */
+    public ContentParameters.from_array(string[,] params) {
+        for (int i = 0; i < params.length[0]; i++) {
+            this.params.set(params[i,0], params[i,1]);
         }
     }
-    
+
+    internal ContentParameters.from_gmime(GMime.Param? gmime_param) {
+        Gee.Map<string,string> params = new Gee.HashMap<string,string>();
+        while (gmime_param != null) {
+            params.set(gmime_param.get_name(), gmime_param.get_value());
+            gmime_param = gmime_param.get_next();
+        }
+        this(params);
+    }
+
     /**
      * A read-only mapping of parameter attributes (names) and values.
      *
@@ -90,25 +105,4 @@ public class Geary.Mime.ContentParameters : BaseObject {
         return (stored != null) ? (stored == value) : false;
     }
 
-    /**
-     * Add or replace the parameter.
-     *
-     * Returns true if the parameter was added, false, otherwise.
-     */
-    public bool set_parameter(string attribute, string value) {
-        bool added = !params.has_key(attribute);
-        params.set(attribute, value);
-        
-        return added;
-    }
-    
-    /**
-     * Removes the parameter.
-     *
-     * Returns true if the parameter was present.
-     */
-    public bool remove_parameter(string attribute) {
-        return params.unset(attribute);
-    }
 }
-

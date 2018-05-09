@@ -24,7 +24,7 @@ class Geary.ImapDB.AttachmentTest : TestCase {
 
         Attachment test = new Attachment.from_part(1, part);
         assert_string(
-            Geary.Mime.ContentType.DEFAULT_CONTENT_TYPE,
+            Geary.Mime.ContentType.ATTACHMENT_DEFAULT.to_string(),
             test.content_type.to_string()
         );
         assert_null_string(test.content_id, "content_id");
