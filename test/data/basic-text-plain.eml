@@ -1,0 +1,17 @@
+From: Alice <alice@example.net>
+Sender: Bob <bob@example.net>
+To: Charlie <charlie@example.net>
+CC: Dave <dave@example.net>
+BCC: Eve <eve@example.net>
+Reply-To: "Alice: Personal Account" <alice@example.org>
+Subject: Re: Basic text/plain message
+Date: Fri, 21 Nov 1997 10:01:10 -0600
+Message-ID: <3456@example.net>
+In-Reply-To: <1234@local.machine.example>
+References: <1234@local.machine.example>
+X-Mailer: Geary Test Suite 1.0
+
+This is the first line.
+
+This is the second line.
+

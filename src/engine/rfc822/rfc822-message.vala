@@ -471,7 +471,7 @@ public class Geary.RFC822.Message : BaseObject {
      * Determines if the message has one or plain text display parts.
      */
     public bool has_plain_body() {
-        return has_body_parts(message.get_mime_part(), "text");
+        return has_body_parts(message.get_mime_part(), "plain");
     }
 
     /**
@@ -486,10 +486,16 @@ public class Geary.RFC822.Message : BaseObject {
      */
     private bool has_body_parts(GMime.Object node, string text_subtype) {
         bool has_part = false;
-        Mime.ContentType? this_content_type = null;
-        if (node.get_content_type() != null)
-            this_content_type =
-                new Mime.ContentType.from_gmime(node.get_content_type());
+
+        // RFC 2045 Section 5.2 allows us to assume
+        // text/plain US-ASCII if no content type is
+        // otherwise specified.
+        Mime.ContentType this_content_type = Mime.ContentType.DISPLAY_DEFAULT;
+        if (node.get_content_type() != null) {
+            this_content_type = new Mime.ContentType.from_gmime(
+                node.get_content_type()
+            );
+        }
 
         GMime.Multipart? multipart = node as GMime.Multipart;
         if (multipart != null) {
@@ -508,8 +514,7 @@ public class Geary.RFC822.Message : BaseObject {
 
                 if (disposition == null ||
                     disposition.disposition_type != Mime.DispositionType.ATTACHMENT) {
-                    if (this_content_type != null &&
-                        this_content_type.has_media_type("text") &&
+                    if (this_content_type.has_media_type("text") &&
                         this_content_type.has_media_subtype(text_subtype)) {
                         has_part = true;
                     }
@@ -537,10 +542,15 @@ public class Geary.RFC822.Message : BaseObject {
      */
     private bool construct_body_from_mime_parts(GMime.Object node, Mime.MultipartSubtype container_subtype,
         string text_subtype, bool to_html, InlinePartReplacer? replacer, ref string? body) throws RFC822Error {
-        Mime.ContentType? this_content_type = null;
-        if (node.get_content_type() != null)
-            this_content_type = new Mime.ContentType.from_gmime(node.get_content_type());
-        
+        // RFC 2045 Section 5.2 allows us to assume text/plain
+        // US-ASCII if no content type is otherwise specified.
+        Mime.ContentType this_content_type = Mime.ContentType.DISPLAY_DEFAULT;
+        if (node.get_content_type() != null) {
+            this_content_type = new Mime.ContentType.from_gmime(
+                node.get_content_type()
+            );
+        }
+
         // If this is a multipart, call ourselves recursively on the children
         GMime.Multipart? multipart = node as GMime.Multipart;
         if (multipart != null) {

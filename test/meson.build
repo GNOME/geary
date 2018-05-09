@@ -1,3 +1,5 @@
+subdir('data')
+
 geary_test_lib_sources = [
   'mock-object.vala',
   'test-case.vala',
@@ -41,7 +43,9 @@ geary_test_engine_sources = [
   'engine/util-inet-test.vala',
   'engine/util-js-test.vala',
   'engine/util-string-test.vala',
-  'engine/util-timeout-manager-test.vala'
+  'engine/util-timeout-manager-test.vala',
+
+  geary_test_engine_resources
 ]
 
 geary_test_client_sources = [

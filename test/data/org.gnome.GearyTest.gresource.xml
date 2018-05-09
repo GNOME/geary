@@ -1,0 +1,8 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<gresources>
+  <gresource prefix="/org/gnome/GearyTest">
+    <file>basic-text-plain.eml</file>
+    <file>basic-text-html.eml</file>
+    <file>basic-multipart-alternative.eml</file>
+  </gresource>
+</gresources>
