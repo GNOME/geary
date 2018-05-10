@@ -127,7 +127,7 @@ public class Geary.RFC822.MailboxAddress :
         this.source_route = null;
         this.address = address;
 
-        int atsign = address.last_index_of_char('@');
+        int atsign = Ascii.index_of(address, '@');
         if (atsign > 0) {
             this.mailbox = address[0:atsign];
             this.domain = address[atsign + 1:address.length];
@@ -136,7 +136,7 @@ public class Geary.RFC822.MailboxAddress :
             this.domain = "";
         }
     }
-
+    
     public MailboxAddress.imap(string? name, string? source_route, string mailbox, string domain) {
         this.name = (name != null) ? decode_name(name) : null;
         this.source_route = source_route;

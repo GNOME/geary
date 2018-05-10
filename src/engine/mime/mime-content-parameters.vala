@@ -78,7 +78,7 @@ public class Geary.Mime.ContentParameters : BaseObject {
         
         return (stored != null) ? Ascii.stri_equal(stored, value) : false;
     }
-
+    
     /**
      * Returns true if the attribute has the supplied value (case-sensitive comparison).
      *
@@ -86,10 +86,10 @@ public class Geary.Mime.ContentParameters : BaseObject {
      */
     public bool has_value_cs(string attribute, string value) {
         string? stored = params.get(attribute);
-
-        return (stored != null) ? (stored == value) : false;
+        
+        return (stored != null) ? Ascii.str_equal(stored, value) : false;
     }
-
+    
     /**
      * Add or replace the parameter.
      *

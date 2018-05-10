@@ -77,7 +77,7 @@ public class Geary.Imap.MailboxSpecifier : BaseObject, Gee.Hashable<MailboxSpeci
     public static bool is_inbox_name(string name) {
         return Ascii.stri_equal(name, CANONICAL_INBOX_NAME);
     }
-
+    
     /**
      * Returns true if the string is the ''canonical'' name of the IMAP Inbox.
      *
@@ -90,9 +90,9 @@ public class Geary.Imap.MailboxSpecifier : BaseObject, Gee.Hashable<MailboxSpeci
      * @see is_inbox_name
      */
     public static bool is_canonical_inbox_name(string name) {
-        return (name == CANONICAL_INBOX_NAME);
+        return Ascii.str_equal(name, CANONICAL_INBOX_NAME);
     }
-
+    
     /**
      * Converts a generic {@link FolderPath} into an IMAP mailbox specifier.
      */
@@ -195,27 +195,27 @@ public class Geary.Imap.MailboxSpecifier : BaseObject, Gee.Hashable<MailboxSpeci
     public uint hash() {
         return is_inbox ? Ascii.stri_hash(name) : Ascii.str_hash(name);
     }
-
+    
     public bool equal_to(MailboxSpecifier other) {
         if (this == other)
             return true;
-
+        
         if (is_inbox)
             return Ascii.stri_equal(name, other.name);
-
-        return (name == other.name);
+        
+        return Ascii.str_equal(name, other.name);
     }
-
+    
     public int compare_to(MailboxSpecifier other) {
         if (this == other)
             return 0;
-
+        
         if (is_inbox && other.is_inbox)
             return 0;
-
-        return GLib.strcmp(name, other.name);
+        
+        return Ascii.strcmp(name, other.name);
     }
-
+    
     public string to_string() {
         return name;
     }

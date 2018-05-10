@@ -56,36 +56,36 @@ public enum Geary.Smtp.Command {
                 assert_not_reached();
         }
     }
-
+    
     public static Command deserialize(string str) throws SmtpError {
-        switch (str.down()) {
+        switch (Ascii.strdown(str)) {
             case "helo":
                 return HELO;
-
+            
             case "ehlo":
                 return EHLO;
-
+            
             case "quit":
                 return QUIT;
-
+            
             case "help":
                 return HELP;
-
+            
             case "noop":
                 return NOOP;
-
+            
             case "rset":
                 return RSET;
-
+            
             case "auth":
                 return AUTH;
-
+            
             case "mail":
                 return MAIL;
-
+            
             case "rcpt":
                 return RCPT;
-
+            
             case "data":
                 return DATA;
 
