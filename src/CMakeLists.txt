@@ -275,6 +275,7 @@ engine/rfc822/rfc822-mailbox-addresses.vala
 engine/rfc822/rfc822-mailbox-address.vala
 engine/rfc822/rfc822-message.vala
 engine/rfc822/rfc822-message-data.vala
+engine/rfc822/rfc822-part.vala
 engine/rfc822/rfc822-utils.vala
 
 engine/smtp/smtp-authenticator.vala

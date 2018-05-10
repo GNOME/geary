@@ -496,7 +496,7 @@ private class Geary.ImapDB.Database : Geary.Db.VersionedDatabase {
                     }
 
                     // build a list of attachments in the message itself
-                    Gee.List<GMime.Part> msg_attachments =
+                    Gee.List<RFC822.Part> msg_attachments =
                     message.get_attachments();
 
                     try {

@@ -15,11 +15,10 @@ private class Geary.ImapDB.Attachment : Geary.Attachment {
 
     internal int64 message_id { get; private set; }
 
-    private int64 attachment_id;
+    private int64 attachment_id = -1;
 
 
     private Attachment(int64 message_id,
-                       int64 attachment_id,
                        Mime.ContentType content_type,
                        string? content_id,
                        string? content_description,
@@ -34,31 +33,24 @@ private class Geary.ImapDB.Attachment : Geary.Attachment {
         );
 
         this.message_id = message_id;
-        this.attachment_id = attachment_id;
     }
 
-    internal Attachment.from_part(int64 message_id, GMime.Part part)
+    internal Attachment.from_part(int64 message_id, RFC822.Part part)
         throws Error {
-        GMime.ContentType? part_type = part.get_content_type();
-        Mime.ContentType type = (part_type != null)
-            ? new Mime.ContentType.from_gmime(part_type)
-            : Mime.ContentType.ATTACHMENT_DEFAULT;
-
-        GMime.ContentDisposition? part_disposition = part.get_content_disposition();
-        Mime.ContentDisposition disposition = (part_disposition != null)
-            ? new Mime.ContentDisposition.from_gmime(part_disposition)
-            : new Mime.ContentDisposition.simple(
+        Mime.ContentDisposition? disposition = part.content_disposition;
+        if (disposition == null) {
+            disposition = new Mime.ContentDisposition.simple(
                 Geary.Mime.DispositionType.UNSPECIFIED
             );
+        }
 
         this(
             message_id,
-            -1, // This gets set only after saving
-            type,
-            part.get_content_id(),
-            part.get_content_description(),
+            part.get_effective_content_type(),
+            part.content_id,
+            part.content_description,
             disposition,
-            RFC822.Utils.get_clean_attachment_filename(part)
+            part.get_clean_filename()
         );
     }
 
@@ -79,7 +71,6 @@ private class Geary.ImapDB.Attachment : Geary.Attachment {
 
         this(
             result.rowid_for("message_id"),
-            result.rowid_for("id"),
             Mime.ContentType.deserialize(result.nonnull_string_for("mime_type")),
             result.string_for("content_id"),
             result.string_for("description"),
@@ -87,13 +78,15 @@ private class Geary.ImapDB.Attachment : Geary.Attachment {
             content_filename
         );
 
+        this.attachment_id = result.rowid_for("id");
+
         set_file_info(
             generate_file(attachments_dir), result.int64_for("filesize")
         );
     }
 
     internal void save(Db.Connection cx,
-                       GMime.Part part,
+                       RFC822.Part part,
                        GLib.File attachments_dir,
                        Cancellable? cancellable)
         throws Error {
@@ -155,7 +148,7 @@ private class Geary.ImapDB.Attachment : Geary.Attachment {
 
     // This isn't async since its only callpaths are via db async
     // transactions, which run in independent threads
-    private void save_file(GMime.Part part,
+    private void save_file(RFC822.Part part,
                            GLib.File attachments_dir,
                            Cancellable? cancellable)
         throws Error {
@@ -182,31 +175,26 @@ private class Geary.ImapDB.Attachment : Geary.Attachment {
             // All good
         }
 
-        // Save the data to disk if there is any.
-        GMime.DataWrapper? attachment_data = part.get_content_object();
-        if (attachment_data != null) {
-            GLib.OutputStream target_stream = target.create(
-                FileCreateFlags.NONE, cancellable
-            );
-            GMime.Stream stream = new Geary.Stream.MimeOutputStream(
-                target_stream
-            );
-            stream = new GMime.StreamBuffer(
-                stream, GMime.StreamBufferMode.BLOCK_WRITE
-            );
+        GLib.OutputStream target_stream = target.create(
+            FileCreateFlags.NONE, cancellable
+        );
+        GMime.Stream stream = new Geary.Stream.MimeOutputStream(
+            target_stream
+        );
+        stream = new GMime.StreamBuffer(
+            stream, GMime.StreamBufferMode.BLOCK_WRITE
+        );
 
-            attachment_data.write_to_stream(stream);
+        part.write_to_stream(stream);
 
-            // Using the stream's length is a bit of a hack, but at
-            // least on one system we are getting 0 back for the file
-            // size if we use target.query_info().
-            stream.flush();
-            int64 file_size = stream.length();
+        // Using the stream's length is a bit of a hack, but at
+        // least on one system we are getting 0 back for the file
+        // size if we use target.query_info().
+        int64 file_size = stream.length();
 
-            stream.close();
+        stream.close();
 
-            set_file_info(target, file_size);
-        }
+        set_file_info(target, file_size);
     }
 
     private void update_db(Db.Connection cx, Cancellable? cancellable)
@@ -234,11 +222,11 @@ private class Geary.ImapDB.Attachment : Geary.Attachment {
     internal static Gee.List<Attachment> save_attachments(Db.Connection cx,
                                                           GLib.File attachments_path,
                                                           int64 message_id,
-                                                          Gee.List<GMime.Part> attachments,
+                                                          Gee.List<RFC822.Part> attachments,
                                                           Cancellable? cancellable)
         throws Error {
         Gee.List<Attachment> list = new Gee.LinkedList<Attachment>();
-        foreach (GMime.Part part in attachments) {
+        foreach (RFC822.Part part in attachments) {
             Attachment attachment = new Attachment.from_part(message_id, part);
             attachment.save(cx, part, attachments_path, cancellable);
             list.add(attachment);

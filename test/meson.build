@@ -37,6 +37,7 @@ geary_test_engine_sources = [
   'engine/rfc822-mailbox-addresses-test.vala',
   'engine/rfc822-message-test.vala',
   'engine/rfc822-message-data-test.vala',
+  'engine/rfc822-part-test.vala',
   'engine/rfc822-utils-test.vala',
   'engine/util-html-test.vala',
   'engine/util-idle-manager-test.vala',

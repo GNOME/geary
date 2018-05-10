@@ -22,7 +22,9 @@ class Geary.ImapDB.AttachmentTest : TestCase {
         GMime.Part part = new_part(null, TEXT_ATTACHMENT.data);
         part.set_header("Content-Type", "");
 
-        Attachment test = new Attachment.from_part(1, part);
+        Attachment test = new Attachment.from_part(
+            1, new Geary.RFC822.Part(part)
+        );
         assert_string(
             Geary.Mime.ContentType.ATTACHMENT_DEFAULT.to_string(),
             test.content_type.to_string()
@@ -53,7 +55,9 @@ class Geary.ImapDB.AttachmentTest : TestCase {
             )
         );
 
-        Attachment test = new Attachment.from_part(1, part);
+        Attachment test = new Attachment.from_part(
+            1, new Geary.RFC822.Part(part)
+        );
 
         assert_string(TYPE, test.content_type.to_string());
         assert_string(ID, test.content_id);
@@ -72,7 +76,9 @@ class Geary.ImapDB.AttachmentTest : TestCase {
             new GMime.ContentDisposition.from_string("inline")
         );
 
-        Attachment test = new Attachment.from_part(1, part);
+        Attachment test = new Attachment.from_part(
+            1, new Geary.RFC822.Part(part)
+        );
 
         assert_int(
             Geary.Mime.DispositionType.INLINE,
@@ -149,7 +155,9 @@ CREATE TABLE MessageAttachmentTable (
             this.db.get_master_connection(),
             this.tmp_dir,
             1,
-            new Gee.ArrayList<GMime.Part>.wrap({ part }),
+            new Gee.ArrayList<Geary.RFC822.Part>.wrap({
+                    new Geary.RFC822.Part(part)
+                }),
             null
         );
 
@@ -201,7 +209,9 @@ CREATE TABLE MessageAttachmentTable (
             this.db.get_master_connection(),
             this.tmp_dir,
             1,
-            new Gee.ArrayList<GMime.Part>.wrap({ part }),
+            new Gee.ArrayList<Geary.RFC822.Part>.wrap({
+                    new Geary.RFC822.Part(part)
+                }),
             null
         );
 
@@ -269,7 +279,9 @@ VALUES (2, 'text/plain');
             this.db.get_master_connection(),
             this.tmp_dir,
             1,
-            new Gee.ArrayList<GMime.Part>.wrap({ part }),
+            new Gee.ArrayList<Geary.RFC822.Part>.wrap({
+                    new Geary.RFC822.Part(part)
+                }),
             null
         );
 

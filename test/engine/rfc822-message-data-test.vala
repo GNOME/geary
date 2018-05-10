@@ -14,30 +14,30 @@ class Geary.RFC822.MessageDataTest : TestCase {
 
     public void preview_text_with_header() throws Error {
         PreviewText plain_preview1 = new PreviewText.with_header(
-            new Geary.Memory.StringBuffer(PLAIN_BODY1_ENCODED),
-            new Geary.Memory.StringBuffer(PLAIN_BODY1_HEADERS)
+            new Geary.Memory.StringBuffer(PLAIN_BODY1_HEADERS),
+            new Geary.Memory.StringBuffer(PLAIN_BODY1_ENCODED)
         );
-        assert(plain_preview1.buffer.to_string() == PLAIN_BODY1_EXPECTED);
+        assert_string(PLAIN_BODY1_EXPECTED, plain_preview1.buffer.to_string());
 
         PreviewText base64_preview = new PreviewText.with_header(
-            new Geary.Memory.StringBuffer(BASE64_BODY_ENCODED),
-            new Geary.Memory.StringBuffer(BASE64_BODY_HEADERS)
+            new Geary.Memory.StringBuffer(BASE64_BODY_HEADERS),
+            new Geary.Memory.StringBuffer(BASE64_BODY_ENCODED)
         );
-        assert(base64_preview.buffer.to_string() == BASE64_BODY_EXPECTED);
+        assert_string(BASE64_BODY_EXPECTED, base64_preview.buffer.to_string());
 
         string html_part_headers = "Content-Type: text/html; charset=utf-8\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\n";
 
         PreviewText html_preview1 = new PreviewText.with_header(
-            new Geary.Memory.StringBuffer(HTML_BODY1_ENCODED),
-            new Geary.Memory.StringBuffer(html_part_headers)
+            new Geary.Memory.StringBuffer(html_part_headers),
+            new Geary.Memory.StringBuffer(HTML_BODY1_ENCODED)
         );
-        assert(html_preview1.buffer.to_string() == HTML_BODY1_EXPECTED);
+        assert_string(HTML_BODY1_EXPECTED, html_preview1.buffer.to_string());
 
         PreviewText html_preview2 = new PreviewText.with_header(
-            new Geary.Memory.StringBuffer(HTML_BODY2_ENCODED),
-            new Geary.Memory.StringBuffer(html_part_headers)
+            new Geary.Memory.StringBuffer(html_part_headers),
+            new Geary.Memory.StringBuffer(HTML_BODY2_ENCODED)
         );
-        assert(html_preview2.buffer.to_string() == HTML_BODY2_EXPECTED);
+        assert_string(HTML_BODY2_EXPECTED, html_preview2.buffer.to_string());
     }
 
     public static string PLAIN_BODY1_HEADERS = "Content-Type: text/plain; charset=\"us-ascii\"\r\nContent-Transfer-Encoding: 7bit\r\n";
