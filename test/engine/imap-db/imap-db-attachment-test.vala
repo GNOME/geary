@@ -5,10 +5,11 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-private const string TEXT_ATTACHMENT = "This is an attachment.\n";
-
 
 class Geary.ImapDB.AttachmentTest : TestCase {
+
+
+    private const string ATTACHMENT_BODY = "This is an attachment.\r\n";
 
 
     public AttachmentTest() {
@@ -19,7 +20,7 @@ class Geary.ImapDB.AttachmentTest : TestCase {
     }
 
     public void new_from_minimal_mime_part() throws Error {
-        GMime.Part part = new_part(null, TEXT_ATTACHMENT.data);
+        GMime.Part part = new_part(null, ATTACHMENT_BODY.data);
         part.set_header("Content-Type", "");
 
         Attachment test = new Attachment.from_part(
@@ -46,7 +47,7 @@ class Geary.ImapDB.AttachmentTest : TestCase {
         const string DESC = "test description";
         const string NAME = "test.txt";
 
-        GMime.Part part = new_part(null, TEXT_ATTACHMENT.data);
+        GMime.Part part = new_part(null, ATTACHMENT_BODY.data);
         part.set_content_id(ID);
         part.set_content_description(DESC);
         part.set_content_disposition(
@@ -71,7 +72,7 @@ class Geary.ImapDB.AttachmentTest : TestCase {
     }
 
     public void new_from_inline_mime_part() throws Error {
-        GMime.Part part = new_part(null, TEXT_ATTACHMENT.data);
+        GMime.Part part = new_part(null, ATTACHMENT_BODY.data);
         part.set_content_disposition(
             new GMime.ContentDisposition.from_string("inline")
         );
@@ -91,6 +92,9 @@ class Geary.ImapDB.AttachmentTest : TestCase {
 class Geary.ImapDB.AttachmentIoTest : TestCase {
 
 
+    private const string ENCODED_BODY = "This is an attachment.\r\n";
+    private const string DECODED_BODY = "This is an attachment.\n";
+
     private GLib.File? tmp_dir;
     private Geary.Db.Database? db;
 
@@ -98,6 +102,7 @@ class Geary.ImapDB.AttachmentIoTest : TestCase {
         base("Geary.ImapDB.AttachmentIoTest");
         add_test("save_minimal_attachment", save_minimal_attachment);
         add_test("save_complete_attachment", save_complete_attachment);
+        add_test("save_qp_attachment", save_qp_attachment);
         add_test("list_attachments", list_attachments);
         add_test("delete_attachments", delete_attachments);
     }
@@ -149,7 +154,7 @@ CREATE TABLE MessageAttachmentTable (
     }
 
     public void save_minimal_attachment() throws Error {
-        GMime.Part part = new_part(null, TEXT_ATTACHMENT.data);
+        GMime.Part part = new_part(null, ENCODED_BODY.data);
 
         Gee.List<Attachment> attachments = Attachment.save_attachments(
             this.db.get_master_connection(),
@@ -166,7 +171,7 @@ CREATE TABLE MessageAttachmentTable (
         Geary.Attachment attachment = attachments[0];
         assert_non_null(attachment.file, "Attachment file");
         assert_int(
-            TEXT_ATTACHMENT.data.length,
+            DECODED_BODY.data.length,
             (int) attachment.filesize,
             "Attachment file size"
         );
@@ -174,7 +179,7 @@ CREATE TABLE MessageAttachmentTable (
         uint8[] buf = new uint8[4096];
         size_t len = 0;
         attachments[0].file.read().read_all(buf, out len);
-        assert_string(TEXT_ATTACHMENT, (string) buf[0:len]);
+        assert_string(DECODED_BODY, (string) buf[0:len]);
 
         Geary.Db.Result result = this.db.query(
             "SELECT * FROM MessageAttachmentTable;"
@@ -182,7 +187,7 @@ CREATE TABLE MessageAttachmentTable (
         assert_false(result.finished, "Row not inserted");
         assert_int(1, result.int_for("message_id"), "Row message id");
         assert_int(
-            TEXT_ATTACHMENT.data.length,
+            DECODED_BODY.data.length,
             result.int_for("filesize"),
             "Row file size"
         );
@@ -197,7 +202,7 @@ CREATE TABLE MessageAttachmentTable (
             Geary.Mime.DispositionType.INLINE;
         const string FILENAME = "test.txt";
 
-        GMime.Part part = new_part(TYPE, TEXT_ATTACHMENT.data);
+        GMime.Part part = new_part(TYPE, ENCODED_BODY.data);
         part.set_content_id(ID);
         part.set_content_description(DESCRIPTION);
         part.set_content_disposition(
@@ -231,7 +236,7 @@ CREATE TABLE MessageAttachmentTable (
         uint8[] buf = new uint8[4096];
         size_t len = 0;
         attachment.file.read().read_all(buf, out len);
-        assert_string(TEXT_ATTACHMENT, (string) buf[0:len]);
+        assert_string(DECODED_BODY, (string) buf[0:len]);
 
         Geary.Db.Result result = this.db.query(
             "SELECT * FROM MessageAttachmentTable;"
@@ -248,7 +253,40 @@ CREATE TABLE MessageAttachmentTable (
         );
         assert_string(FILENAME, result.string_for("filename"));
         assert_false(result.next(), "Multiple rows inserted");
+    }
 
+    public void save_qp_attachment() throws Error {
+        // Example courtesy https://en.wikipedia.org/wiki/Quoted-printable
+        const string QP_ENCODED =
+"""J'interdis aux marchands de vanter trop leur marchandises. Car ils se font =
+vite p=C3=A9dagogues et t'enseignent comme but ce qui n'est par essence qu'=
+un moyen, et te trompant ainsi sur la route =C3=A0 suivre les voil=C3=A0 bi=
+ent=C3=B4t qui te d=C3=A9gradent, car si leur musique est vulgaire ils te f=
+abriquent pour te la vendre une =C3=A2me vulgaire.""";
+        const string QP_DECODED =
+"""J'interdis aux marchands de vanter trop leur marchandises. Car ils se font vite pédagogues et t'enseignent comme but ce qui n'est par essence qu'un moyen, et te trompant ainsi sur la route à suivre les voilà bientôt qui te dégradent, car si leur musique est vulgaire ils te fabriquent pour te la vendre une âme vulgaire.""";
+        GMime.Part part = new_part(
+            "text/plain; charset=utf-8",
+            QP_ENCODED.data,
+            GMime.ContentEncoding.QUOTEDPRINTABLE
+        );
+
+        Gee.List<Attachment> attachments = Attachment.save_attachments(
+            this.db.get_master_connection(),
+            this.tmp_dir,
+            1,
+            new Gee.ArrayList<Geary.RFC822.Part>.wrap({
+                    new Geary.RFC822.Part(part)
+                }),
+            null
+        );
+
+        assert_int(1, attachments.size, "No attachment provided");
+
+        uint8[] buf = new uint8[4096];
+        size_t len = 0;
+        attachments[0].file.read().read_all(buf, out len);
+        assert_string(QP_DECODED, (string) buf[0:len]);
     }
 
     public void list_attachments() throws Error {
@@ -273,7 +311,7 @@ VALUES (2, 'text/plain');
     }
 
     public void delete_attachments() throws Error {
-        GMime.Part part = new_part(null, TEXT_ATTACHMENT.data);
+        GMime.Part part = new_part(null, ENCODED_BODY.data);
 
         Gee.List<Attachment> attachments = Attachment.save_attachments(
             this.db.get_master_connection(),
@@ -319,9 +357,8 @@ private GMime.Part new_part(string? mime_type,
     }
     GMime.DataWrapper body_wrapper = new GMime.DataWrapper.with_stream(
         new GMime.StreamMem.with_buffer(body),
-        GMime.ContentEncoding.DEFAULT
+        encoding
     );
     part.set_content_object(body_wrapper);
-    part.encode(GMime.EncodingConstraint.7BIT);
     return part;
 }
