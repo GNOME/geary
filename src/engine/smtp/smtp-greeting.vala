@@ -25,21 +25,21 @@ public class Geary.Smtp.Greeting : Response {
                     return "";
             }
         }
-
+        
         public static ServerFlavor deserialize(string str) {
-            switch (str.up()) {
+            switch (Ascii.strup(str)) {
                 case "SMTP":
                     return SMTP;
-
+                
                 case "ESMTP":
                     return ESMTP;
-
+                
                 default:
                     return UNSPECIFIED;
             }
         }
     }
-
+    
     public string? domain { get; private set; default = null; }
     public ServerFlavor flavor { get; private set; default = ServerFlavor.UNSPECIFIED; }
     public string? message { get; private set; default = null; }

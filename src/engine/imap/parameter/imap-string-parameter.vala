@@ -134,35 +134,35 @@ public abstract class Geary.Imap.StringParameter : Geary.Imap.Parameter {
     public bool is_empty() {
         return String.is_empty(ascii);
     }
-
+    
     /**
      * Case-sensitive comparison.
      */
     public bool equals_cs(string value) {
-        return (ascii == value);
+        return Ascii.str_equal(ascii, value);
     }
-
+    
     /**
      * Case-insensitive comparison.
      */
     public bool equals_ci(string value) {
         return Ascii.stri_equal(ascii, value);
     }
-
+    
     /**
      * Returns the string lowercased.
      */
     public string as_lower() {
-        return ascii.down();
+        return Ascii.strdown(ascii);
     }
-
+    
     /**
      * Returns the string uppercased.
      */
     public string as_upper() {
-        return ascii.up();
+        return Ascii.strup(ascii);
     }
-
+    
     /**
      * Converts the {@link ascii} to a signed 32-bit integer, clamped between clamp_min and
      * clamp_max.
