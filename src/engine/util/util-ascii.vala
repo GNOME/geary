@@ -4,11 +4,15 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-// These calls are bound to the string class in Vala 0.26.  When that version of Vala is the
-// minimum, these can be dropped and Ascii.strup and Ascii.strdown can use the string methods.
-extern string g_ascii_strup(string str, ssize_t len = -1);
-extern string g_ascii_strdown(string str, ssize_t len = -1);
-
+/**
+ * US-ASCII string utilities.
+ *
+ * Using ASCII-specific, non-localised functions is essential when
+ * dealing with protocol strings since any case-insensitive
+ * comparisons may be incorrect under certain locales — especially for
+ * Turkish, where translating between upper-case and lower-case `i` is
+ * not necessarily preserved.
+ */
 namespace Geary.Ascii {
 
 public int index_of(string str, char ch) {
@@ -54,20 +58,8 @@ public inline int strcmp(string a, string b) {
     return GLib.strcmp(a, b);
 }
 
-public int stricmp(string a, string b) {
-    char *aptr = a;
-    char *bptr = b;
-    for (;;) {
-        int diff = (int) (*aptr).tolower() - (int) (*bptr).tolower();
-        if (diff != 0)
-            return diff;
-        
-        if (*aptr == String.EOS)
-            return 0;
-        
-        aptr++;
-        bptr++;
-    }
+public inline int stricmp(string a, string b) {
+    return a.ascii_casecmp(b);
 }
 
 public inline bool str_equal(string a, string b) {
@@ -75,7 +67,7 @@ public inline bool str_equal(string a, string b) {
 }
 
 public inline bool stri_equal(string a, string b) {
-    return stricmp(a, b) == 0;
+    return a.ascii_casecmp(b) == 0;
 }
 
 public bool nullable_stri_equal(string? a, string? b) {
@@ -103,12 +95,12 @@ public uint nullable_stri_hash(string? str) {
     return (str != null) ? stri_hash(str) : 0;
 }
 
-public string strdown(string str) {
-    return g_ascii_strdown(str);
+public inline string strdown(string str) {
+    return str.ascii_down();
 }
 
-public string strup(string str) {
-    return g_ascii_strup(str);
+public inline string strup(string str) {
+    return str.ascii_up();
 }
 
 /**
