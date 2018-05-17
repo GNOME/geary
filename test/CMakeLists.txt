@@ -36,6 +36,7 @@ set(TEST_ENGINE_SRC
   engine/rfc822-message-test.vala
   engine/rfc822-message-data-test.vala
   engine/rfc822-utils-test.vala
+  engine/util-ascii-test.vala
   engine/util-html-test.vala
   engine/util-idle-manager-test.vala
   engine/util-inet-test.vala
