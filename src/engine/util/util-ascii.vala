@@ -12,19 +12,36 @@ extern string g_ascii_strdown(string str, ssize_t len = -1);
 namespace Geary.Ascii {
 
 public int index_of(string str, char ch) {
+    // Use a pointer and explicit null check, since testing against
+    // the length of the string as in a traditional for loop will mean
+    // a call to strlen(), making the loop O(n^2)
+    int ret = -1;
     char *strptr = str;
-    int index = 0;
-    for (;;) {
-        char strch = *strptr++;
-        
-        if (strch == String.EOS)
-            return -1;
-        
-        if (strch == ch)
-            return index;
-        
-        index++;
+    int i = 0;
+    while (*strptr != String.EOS) {
+        if (*strptr++ == ch) {
+            ret = i;
+            break;
+        }
+        i++;
     }
+    return ret;
+}
+
+public int last_index_of(string str, char ch) {
+    // Use a pointer and explicit null check, since testing against
+    // the length of the string as in a traditional for loop will mean
+    // a call to strlen(), making the loop O(n^2)
+    int ret = -1;
+    char *strptr = str;
+    int i = 0;
+    while (*strptr != String.EOS) {
+        if (*strptr++ == ch) {
+            ret = i;
+        }
+        i++;
+    }
+    return ret;
 }
 
 public bool get_next_char(string str, ref int index, out char ch) {
