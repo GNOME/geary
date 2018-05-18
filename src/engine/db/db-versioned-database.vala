@@ -42,6 +42,12 @@ public class Geary.Db.VersionedDatabase : Geary.Db.Database {
         this.schema_dir = schema_dir;
     }
 
+    /** Returns the current schema version number of this database. */
+    public int get_schema_version()
+        throws GLib.Error {
+        return get_master_connection().get_user_version_number();
+    }
+
     /**
      * Called by {@link open} if a schema upgrade is required and beginning.
      *
