@@ -152,7 +152,12 @@ private inline void print_assert(string message, string? context) {
     GLib.stderr.putc('\n');
 }
 
+
 public abstract class TestCase : Object {
+
+
+    /** GLib.File URI for resources in test/data. */
+    public const string RESOURCE_URI = "resource:///org/gnome/GearyTest";
 
 
     private class SignalWaiter : Object {

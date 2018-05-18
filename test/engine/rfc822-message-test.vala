@@ -7,7 +7,6 @@
 
 class Geary.RFC822.MessageTest : TestCase {
 
-    private const string RESOURCE_URI = "resource:///org/gnome/GearyTest";
 
     private const string BASIC_TEXT_PLAIN = "basic-text-plain.eml";
     private const string BASIC_TEXT_HTML = "basic-text-html.eml";
