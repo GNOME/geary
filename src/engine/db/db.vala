@@ -22,6 +22,9 @@
  * [[http://code.google.com/p/sqlheavy/|SQLHeavy]].
  */
 
+// Work around missing const in sqlite3.vapi. See Bug 795627.
+extern const int SQLITE_OPEN_URI;
+
 extern int sqlite3_enable_shared_cache(int enabled);
 
 namespace Geary.Db {
@@ -107,8 +110,8 @@ private int throw_on_error(Context ctx, string? method, int result, string? raw 
     }
     
     string location = !String.is_empty(method)
-        ? "(%s %s) ".printf(method, ctx.get_database().db_file.get_path())
-        : "(%s) ".printf(ctx.get_database().db_file.get_path());
+        ? "(%s %s) ".printf(method, ctx.get_database().path)
+        : "(%s) ".printf(ctx.get_database().path);
     string errmsg = (ctx.get_connection() != null) ? " - %s".printf(ctx.get_connection().db.errmsg()) : "";
     string sql;
     if (ctx.get_statement() != null)

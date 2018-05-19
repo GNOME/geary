@@ -275,6 +275,7 @@ engine/rfc822/rfc822-mailbox-addresses.vala
 engine/rfc822/rfc822-mailbox-address.vala
 engine/rfc822/rfc822-message.vala
 engine/rfc822/rfc822-message-data.vala
+engine/rfc822/rfc822-part.vala
 engine/rfc822/rfc822-utils.vala
 
 engine/smtp/smtp-authenticator.vala
@@ -299,7 +300,6 @@ engine/state/state-mapping.vala
 engine/util/util-ascii.vala
 engine/util/util-collection.vala
 engine/util/util-connectivity-manager.vala
-engine/util/util-converter.vala
 engine/util/util-files.vala
 engine/util/util-generic-capabilities.vala
 engine/util/util-html.vala

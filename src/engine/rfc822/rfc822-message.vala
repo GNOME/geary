@@ -16,15 +16,18 @@
 public class Geary.RFC822.Message : BaseObject {
 
     /**
-     * This delegate is an optional parameter to the body constructers that allows callers
-     * to process arbitrary non-text, inline MIME parts.
+     * Callback for including non-text MIME entities in message bodies.
      *
-     * This is only called for non-text MIME parts in mixed multipart sections.  Inline parts
-     * referred to by rich text in alternative or related documents must be located by the caller
-     * and appropriately presented.
+     * This delegate is an optional parameter to the body constructors
+     * that allows callers to process arbitrary non-text, inline MIME
+     * parts.
+     *
+     * This is only called for non-text MIME parts in mixed multipart
+     * sections.  Inline parts referred to by rich text in alternative
+     * or related documents must be located by the caller and
+     * appropriately presented.
      */
-    public delegate string? InlinePartReplacer(string? filename, Mime.ContentType? content_type,
-        Mime.ContentDisposition? disposition, string? content_id, Geary.Memory.Buffer buffer);
+    public delegate string? InlinePartReplacer(Part part);
 
     private const string HEADER_SENDER = "Sender";
     private const string HEADER_IN_REPLY_TO = "In-Reply-To";
@@ -471,7 +474,7 @@ public class Geary.RFC822.Message : BaseObject {
      * Determines if the message has one or plain text display parts.
      */
     public bool has_plain_body() {
-        return has_body_parts(message.get_mime_part(), "text");
+        return has_body_parts(message.get_mime_part(), "plain");
     }
 
     /**
@@ -485,38 +488,29 @@ public class Geary.RFC822.Message : BaseObject {
      * construct_body_from_mime_parts.
      */
     private bool has_body_parts(GMime.Object node, string text_subtype) {
-        bool has_part = false;
-        Mime.ContentType? this_content_type = null;
-        if (node.get_content_type() != null)
-            this_content_type =
-                new Mime.ContentType.from_gmime(node.get_content_type());
+        Part part = new Part(node);
+        bool is_matching_part = false;
 
-        GMime.Multipart? multipart = node as GMime.Multipart;
-        if (multipart != null) {
+        if (node is GMime.Multipart) {
+            GMime.Multipart multipart = (GMime.Multipart) node;
             int count = multipart.get_count();
-            for (int i = 0; i < count && !has_part; ++i) {
-                has_part = has_body_parts(multipart.get_part(i), text_subtype);
+            for (int i = 0; i < count && !is_matching_part; i++) {
+                is_matching_part = has_body_parts(
+                    multipart.get_part(i), text_subtype
+                );
             }
-        } else {
-            GMime.Part? part = node as GMime.Part;
-            if (part != null) {
-                Mime.ContentDisposition? disposition = null;
-                if (part.get_content_disposition() != null)
-                    disposition = new Mime.ContentDisposition.from_gmime(
-                        part.get_content_disposition()
-                    );
+        } else if (node is GMime.Part) {
+            Mime.DispositionType disposition = Mime.DispositionType.UNSPECIFIED;
+            if (part.content_disposition != null) {
+                disposition = part.content_disposition.disposition_type;
+            }
 
-                if (disposition == null ||
-                    disposition.disposition_type != Mime.DispositionType.ATTACHMENT) {
-                    if (this_content_type != null &&
-                        this_content_type.has_media_type("text") &&
-                        this_content_type.has_media_subtype(text_subtype)) {
-                        has_part = true;
-                    }
-                }
-            }
+            is_matching_part = (
+                disposition != Mime.DispositionType.ATTACHMENT &&
+                part.get_effective_content_type().is_type("text", text_subtype)
+            );
         }
-        return has_part;
+        return is_matching_part;
     }
 
     /**
@@ -535,18 +529,22 @@ public class Geary.RFC822.Message : BaseObject {
      *
      * @return Whether a text part with the desired text_subtype was found
      */
-    private bool construct_body_from_mime_parts(GMime.Object node, Mime.MultipartSubtype container_subtype,
-        string text_subtype, bool to_html, InlinePartReplacer? replacer, ref string? body) throws RFC822Error {
-        Mime.ContentType? this_content_type = null;
-        if (node.get_content_type() != null)
-            this_content_type = new Mime.ContentType.from_gmime(node.get_content_type());
-        
+    private bool construct_body_from_mime_parts(GMime.Object node,
+                                                Mime.MultipartSubtype container_subtype,
+                                                string text_subtype,
+                                                bool to_html,
+                                                InlinePartReplacer? replacer,
+                                                ref string? body)
+        throws RFC822Error {
+        Part part = new Part(node);
+        Mime.ContentType content_type = part.get_effective_content_type();
+
         // If this is a multipart, call ourselves recursively on the children
         GMime.Multipart? multipart = node as GMime.Multipart;
         if (multipart != null) {
-            Mime.MultipartSubtype this_subtype = Mime.MultipartSubtype.from_content_type(this_content_type,
-                null);
-            
+            Mime.MultipartSubtype this_subtype =
+                Mime.MultipartSubtype.from_content_type(content_type, null);
+
             bool found_text_subtype = false;
             
             StringBuilder builder = new StringBuilder();
@@ -566,45 +564,33 @@ public class Geary.RFC822.Message : BaseObject {
             
             return found_text_subtype;
         }
-        
-        // Only process inline leaf parts
-        GMime.Part? part = node as GMime.Part;
-        if (part == null)
-            return false;
-        
-        Mime.ContentDisposition? disposition = null;
-        if (part.get_content_disposition() != null)
-            disposition = new Mime.ContentDisposition.from_gmime(part.get_content_disposition());
-        
-        // Stop processing if the part is an attachment
-        if (disposition != null && disposition.disposition_type == Mime.DispositionType.ATTACHMENT)
-            return false;
-        
-        // Assemble body from text parts that are not attachments
-        if (this_content_type != null && this_content_type.has_media_type("text")) {
-            if (this_content_type.has_media_subtype(text_subtype)) {
-                body = mime_part_to_memory_buffer(part, true, to_html).to_string();
-                
-                return true;
-            }
-            
-            // We were the wrong kind of text part
-            return false;
+
+        Mime.DispositionType disposition = Mime.DispositionType.UNSPECIFIED;
+        if (part.content_disposition != null) {
+            disposition = part.content_disposition.disposition_type;
         }
 
-        // Use inline part replacer *only* for inline parts and if in
-        // a mixed multipart where each element is to be presented to
-        // the user as structure dictates; For alternative and
-        // related, the inline part is referred to elsewhere in the
-        // document and it's the callers responsibility to locate them
-        if (replacer != null && disposition != null &&
-            disposition.disposition_type == Mime.DispositionType.INLINE &&
-            container_subtype == Mime.MultipartSubtype.MIXED) {
-            body = replacer(RFC822.Utils.get_clean_attachment_filename(part),
-                            this_content_type,
-                            disposition,
-                            part.get_content_id(),
-                            mime_part_to_memory_buffer(part));
+        // Process inline leaf parts
+        if (node is GMime.Part &&
+            disposition != Mime.DispositionType.ATTACHMENT) {
+
+            // Assemble body from matching text parts, else use inline
+            // part replacer *only* for inline parts and if in a mixed
+            // multipart where each element is to be presented to the
+            // user as structure dictates; For alternative and
+            // related, the inline part is referred to elsewhere in
+            // the document and it's the callers responsibility to
+            // locate them
+
+            if (content_type.is_type("text", text_subtype)) {
+                body = part.write_to_buffer(
+                    to_html ? Part.BodyFormatting.HTML : Part.BodyFormatting.NONE
+                ).to_string();
+            } else if (replacer != null &&
+                       disposition == Mime.DispositionType.INLINE &&
+                       container_subtype == Mime.MultipartSubtype.MIXED) {
+                body = replacer(part);
+            }
         }
 
         return body != null;
@@ -741,47 +727,10 @@ public class Geary.RFC822.Message : BaseObject {
         return searchable;
     }
 
-    public Memory.Buffer get_content_by_mime_id(string mime_id) throws RFC822Error {
-        GMime.Part? part = find_mime_part_by_mime_id(message.get_mime_part(), mime_id);
-        if (part == null)
-            throw new RFC822Error.NOT_FOUND("Could not find a MIME part with Content-ID %s", mime_id);
-        
-        return mime_part_to_memory_buffer(part);
-    }
-    
-    public string? get_content_filename_by_mime_id(string mime_id) throws RFC822Error {
-        GMime.Part? part = find_mime_part_by_mime_id(message.get_mime_part(), mime_id);
-        if (part == null)
-            throw new RFC822Error.NOT_FOUND("Could not find a MIME part with Content-ID %s", mime_id);
-        
-        return part.get_filename();
-    }
-    
-    private GMime.Part? find_mime_part_by_mime_id(GMime.Object root, string mime_id) {
-        // If this is a multipart container, check each of its children.
-        if (root is GMime.Multipart) {
-            GMime.Multipart multipart = root as GMime.Multipart;
-            int count = multipart.get_count();
-            for (int i = 0; i < count; ++i) {
-                GMime.Part? child_part = find_mime_part_by_mime_id(multipart.get_part(i), mime_id);
-                if (child_part != null) {
-                    return child_part;
-                }
-            }
-        }
-
-        // Otherwise, check this part's content id.
-        GMime.Part? part = root as GMime.Part;
-        if (part != null && part.get_content_id() == mime_id) {
-            return part;
-        }
-        return null;
-    }
-    
     // UNSPECIFIED disposition means "return all Mime parts"
-    internal Gee.List<GMime.Part> get_attachments(
+    internal Gee.List<Part> get_attachments(
         Mime.DispositionType disposition = Mime.DispositionType.UNSPECIFIED) throws RFC822Error {
-        Gee.List<GMime.Part> attachments = new Gee.ArrayList<GMime.Part>();
+        Gee.List<Part> attachments = new Gee.LinkedList<Part>();
         get_attachments_recursively(attachments, message.get_mime_part(), disposition);
         return attachments;
     }
@@ -865,21 +814,19 @@ public class Geary.RFC822.Message : BaseObject {
         return ids;
     }
 
-    private void get_attachments_recursively(Gee.List<GMime.Part> attachments, GMime.Object root,
-        Mime.DispositionType requested_disposition) throws RFC822Error {
-        // If this is a multipart container, dive into each of its children.
-        GMime.Multipart? multipart = root as GMime.Multipart;
-        if (multipart != null) {
+    private void get_attachments_recursively(Gee.List<Part> attachments,
+                                             GMime.Object root,
+                                             Mime.DispositionType requested_disposition)
+        throws RFC822Error {
+
+        if (root is GMime.Multipart) {
+            GMime.Multipart multipart = (GMime.Multipart) root;
             int count = multipart.get_count();
             for (int i = 0; i < count; ++i) {
                 get_attachments_recursively(attachments, multipart.get_part(i), requested_disposition);
             }
-            return;
-        }
-        
-        // If this is an attached message, go through it.
-        GMime.MessagePart? messagepart = root as GMime.MessagePart;
-        if (messagepart != null) {
+        } else if (root is GMime.MessagePart) {
+            GMime.MessagePart messagepart = (GMime.MessagePart) root;
             GMime.Message message = messagepart.get_message();
             bool is_unknown;
             Mime.DispositionType disposition = Mime.DispositionType.deserialize(root.get_disposition(),
@@ -897,40 +844,37 @@ public class Geary.RFC822.Message : BaseObject {
                 GMime.Part part = new GMime.Part.with_type("message", "rfc822");
                 part.set_content_object(data);
                 part.set_filename((message.get_subject() ?? _("(no subject)")) + ".eml");
-                attachments.add(part);
+                attachments.add(new Part(part));
             }
-            
+
             get_attachments_recursively(attachments, message.get_mime_part(),
                 requested_disposition);
-            return;
-        }
-        
-        // Otherwise, check if this part should be an attachment
-        GMime.Part? part = root as GMime.Part;
-        if (part == null) {
-            return;
-        }
-        
-        // If requested disposition is not UNSPECIFIED, check if this part matches the requested deposition
-        Mime.DispositionType part_disposition = Mime.DispositionType.deserialize(part.get_disposition(),
-            null);
-        if (requested_disposition != Mime.DispositionType.UNSPECIFIED && requested_disposition != part_disposition)
-            return;
-        
-        // skip text/plain and text/html parts that are INLINE or UNSPECIFIED, as they will be used
-        // as part of the body
-        if (part.get_content_type() != null) {
-            Mime.ContentType content_type = new Mime.ContentType.from_gmime(part.get_content_type());
-            if ((part_disposition == Mime.DispositionType.INLINE || part_disposition == Mime.DispositionType.UNSPECIFIED)
-                && content_type.has_media_type("text")
-                && (content_type.has_media_subtype("html") || content_type.has_media_subtype("plain"))) {
-                return;
+        } else if (root is GMime.Part) {
+            Part part = new Part(root);
+
+            Mime.DispositionType actual_disposition =
+                Mime.DispositionType.UNSPECIFIED;
+            if (part.content_disposition != null) {
+                actual_disposition = part.content_disposition.disposition_type;
+            }
+
+            if (requested_disposition == Mime.DispositionType.UNSPECIFIED ||
+                actual_disposition == requested_disposition) {
+
+                Mime.ContentType content_type =
+                    part.get_effective_content_type();
+
+                // Skip text/plain and text/html parts that are INLINE
+                // or UNSPECIFIED, as they will be included in the body
+                if (actual_disposition == Mime.DispositionType.ATTACHMENT ||
+                    (!content_type.is_type("text", "plain") &&
+                     !content_type.is_type("text", "html"))) {
+                    attachments.add(part);
+                }
             }
         }
-        
-        attachments.add(part);
     }
-    
+
     public Gee.List<Geary.RFC822.Message> get_sub_messages() {
         Gee.List<Geary.RFC822.Message> messages = new Gee.ArrayList<Geary.RFC822.Message>();
         find_sub_messages(messages, message.get_mime_part());
@@ -974,57 +918,6 @@ public class Geary.RFC822.Message : BaseObject {
             throw new RFC822Error.FAILED("Unable to flush RFC822 message to memory buffer");
         
         return new Memory.ByteBuffer.from_byte_array(byte_array);
-    }
-    
-    private Memory.Buffer mime_part_to_memory_buffer(GMime.Part part,
-        bool to_utf8 = false, bool to_html = false) throws RFC822Error {
-        Mime.ContentType? content_type = null;
-        if (part.get_content_type() != null)
-            content_type = new Mime.ContentType.from_gmime(part.get_content_type());
-        
-        GMime.DataWrapper? wrapper = part.get_content_object();
-        if (wrapper == null) {
-            throw new RFC822Error.INVALID("Could not get the content wrapper for content-type %s",
-                content_type.to_string());
-        }
-        
-        ByteArray byte_array = new ByteArray();
-        GMime.StreamMem stream = new GMime.StreamMem.with_byte_array(byte_array);
-        stream.set_owner(false);
-
-        if (to_utf8) {
-            // Assume encoded text, convert to unencoded UTF-8
-            GMime.StreamFilter stream_filter = new GMime.StreamFilter(stream);
-            string? charset = (content_type != null) ? content_type.params.get_value("charset") : null;
-            stream_filter.add(Geary.RFC822.Utils.create_utf8_filter_charset(charset));
-
-            bool flowed = (content_type != null) ? content_type.params.has_value_ci("format", "flowed") : false;
-            bool delsp = (content_type != null) ? content_type.params.has_value_ci("DelSp", "yes") : false;
-
-            // Unconditionally remove the CR's in any CRLF sequence, since
-            // they are effectively a wire encoding.
-            stream_filter.add(new GMime.FilterCRLF(false, false));
-
-            if (flowed)
-                stream_filter.add(new Geary.RFC822.FilterFlowed(to_html, delsp));
-
-            if (to_html) {
-                if (!flowed)
-                    stream_filter.add(new Geary.RFC822.FilterPlain());
-                stream_filter.add(new GMime.FilterHTML(
-                    GMime.FILTER_HTML_CONVERT_URLS | GMime.FILTER_HTML_CONVERT_ADDRESSES, 0));
-                stream_filter.add(new Geary.RFC822.FilterBlockquotes());
-            }
-
-            wrapper.write_to_stream(stream_filter);
-            stream_filter.flush();
-        } else {
-            // Keep as binary
-            wrapper.write_to_stream(stream);
-            stream.flush();
-        }
-
-        return new Geary.Memory.ByteBuffer.from_byte_array(byte_array);
     }
 
     public string to_string() {

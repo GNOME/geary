@@ -996,8 +996,8 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
             if (fetched_data.body_data_map.has_key(preview_specifier)
                 && fetched_data.body_data_map.has_key(preview_charset_specifier)) {
                 email.set_message_preview(new RFC822.PreviewText.with_header(
-                    fetched_data.body_data_map.get(preview_specifier),
-                    fetched_data.body_data_map.get(preview_charset_specifier)));
+                    fetched_data.body_data_map.get(preview_charset_specifier),
+                    fetched_data.body_data_map.get(preview_specifier)));
             } else {
                 message("[%s] No preview specifiers \"%s\" and \"%s\" found", folder_name,
                     preview_specifier.to_string(), preview_charset_specifier.to_string());

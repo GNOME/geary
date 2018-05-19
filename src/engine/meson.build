@@ -272,6 +272,7 @@ geary_engine_vala_sources = files(
   'rfc822/rfc822-mailbox-address.vala',
   'rfc822/rfc822-message.vala',
   'rfc822/rfc822-message-data.vala',
+  'rfc822/rfc822-part.vala',
   'rfc822/rfc822-utils.vala',
 
   'smtp/smtp-authenticator.vala',
@@ -296,7 +297,6 @@ geary_engine_vala_sources = files(
   'util/util-ascii.vala',
   'util/util-collection.vala',
   'util/util-connectivity-manager.vala',
-  'util/util-converter.vala',
   'util/util-files.vala',
   'util/util-generic-capabilities.vala',
   'util/util-html.vala',

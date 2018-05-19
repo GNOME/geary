@@ -184,7 +184,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
                 }
             } catch (Error error) {
                 debug("Failed to load icon for attachment '%s': %s",
-                      this.attachment.id,
+                      this.attachment.file.get_path(),
                       error.message);
             }
 

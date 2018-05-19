@@ -62,6 +62,18 @@ public void assert_string(string expected, string? actual, string? context = nul
     }
 }
 
+public void assert_null_string(string? actual, string? context = null)
+    throws Error {
+    if (actual != null) {
+        string a = actual;
+        if (a.length > 70) {
+            a = a[0:70] + "…";
+        }
+        print_assert("Expected: null, was: \"%s\"".printf(a), context);
+        assert_not_reached();
+    }
+}
+
 public void assert_int(int expected, int actual, string? context = null)
     throws Error {
     if (expected != actual) {
@@ -140,7 +152,12 @@ private inline void print_assert(string message, string? context) {
     GLib.stderr.putc('\n');
 }
 
+
 public abstract class TestCase : Object {
+
+
+    /** GLib.File URI for resources in test/data. */
+    public const string RESOURCE_URI = "resource:///org/gnome/GearyTest";
 
 
     private class SignalWaiter : Object {

@@ -1,3 +1,5 @@
+subdir('data')
+
 geary_test_lib_sources = [
   'mock-object.vala',
   'test-case.vala',
@@ -22,15 +24,20 @@ geary_test_engine_sources = [
   'engine/app/app-conversation-test.vala',
   'engine/app/app-conversation-monitor-test.vala',
   'engine/app/app-conversation-set-test.vala',
+  'engine/db/db-database-test.vala',
+  'engine/db/db-versioned-database-test.vala',
   'engine/imap/command/imap-create-command-test.vala',
   'engine/imap/response/imap-namespace-response-test.vala',
   'engine/imap/transport/imap-deserializer-test.vala',
+  'engine/imap-db/imap-db-attachment-test.vala',
+  'engine/imap-db/imap-db-database-test.vala',
   'engine/imap-engine/account-processor-test.vala',
   'engine/mime-content-type-test.vala',
   'engine/rfc822-mailbox-address-test.vala',
   'engine/rfc822-mailbox-addresses-test.vala',
   'engine/rfc822-message-test.vala',
   'engine/rfc822-message-data-test.vala',
+  'engine/rfc822-part-test.vala',
   'engine/rfc822-utils-test.vala',
   'engine/util-ascii-test.vala',
   'engine/util-html-test.vala',
@@ -38,7 +45,9 @@ geary_test_engine_sources = [
   'engine/util-inet-test.vala',
   'engine/util-js-test.vala',
   'engine/util-string-test.vala',
-  'engine/util-timeout-manager-test.vala'
+  'engine/util-timeout-manager-test.vala',
+
+  geary_test_engine_resources
 ]
 
 geary_test_client_sources = [

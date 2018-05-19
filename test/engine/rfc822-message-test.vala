@@ -7,29 +7,56 @@
 
 class Geary.RFC822.MessageTest : TestCase {
 
+
+    private const string BASIC_TEXT_PLAIN = "basic-text-plain.eml";
+    private const string BASIC_TEXT_HTML = "basic-text-html.eml";
+    private const string BASIC_MULTIPART_ALTERNATIVE =
+        "basic-multipart-alternative.eml";
+
+    private const string HTML_CONVERSION_TEMPLATE =
+        "<div class=\"plaintext\" style=\"white-space: pre-wrap;\">%s</div>";
+
+    private const string BASIC_PLAIN_BODY = """This is the first line.
+
+This is the second line.
+
+""";
+
+    private const string BASIC_HTML_BODY = """<P>This is the first line.
+
+<P>This is the second line.
+
+""";
+
     public MessageTest() {
         base("Geary.RFC822.MessageTest");
         add_test("basic_message_from_buffer", basic_message_from_buffer);
         add_test("encoded_recipient", encoded_recipient);
         add_test("duplicate_mailbox", duplicate_mailbox);
         add_test("duplicate_message_id", duplicate_message_id);
+        add_test("text_plain_as_plain", text_plain_as_plain);
+        add_test("text_plain_as_html", text_plain_as_html);
+        add_test("text_html_as_html", text_html_as_html);
+        add_test("text_html_as_plain", text_html_as_plain);
+        add_test("multipart_alternative_as_plain",
+                 multipart_alternative_as_plain);
+        add_test("multipart_alternative_as_converted_html",
+                 multipart_alternative_as_converted_html);
+        add_test("multipart_alternative_as_html",
+                 multipart_alternative_as_html);
         add_test("get_preview", get_preview);
     }
 
     public void basic_message_from_buffer() throws Error {
-        Message? basic = null;
-        try {
-            basic = string_to_message(BASIC_MESSAGE);
-        } catch (Error err) {
-            assert_no_error(err);
-        }
-        assert_data(basic.subject, "Re: Saying Hello");
-        assert_addresses(basic.from, "Mary Smith <mary@example.net>");
-        assert_address(basic.sender, "Mary Smith Sender <mary@example.net>");
-        assert_addresses(basic.reply_to, "\"Mary Smith: Personal Account\" <smith@home.example>");
-        assert_addresses(basic.to, "John Doe <jdoe@machine.example>");
-        assert_addresses(basic.cc, "John Doe CC <jdoe@machine.example>");
-        assert_addresses(basic.bcc, "John Doe BCC <jdoe@machine.example>");
+        Message basic = resource_to_message(BASIC_TEXT_PLAIN);
+
+        assert_data(basic.subject, "Re: Basic text/plain message");
+        assert_addresses(basic.from, "Alice <alice@example.net>");
+        assert_address(basic.sender, "Bob <bob@example.net>");
+        assert_addresses(basic.reply_to, "\"Alice: Personal Account\" <alice@example.org>");
+        assert_addresses(basic.to, "Charlie <charlie@example.net>");
+        assert_addresses(basic.cc, "Dave <dave@example.net>");
+        assert_addresses(basic.bcc, "Eve <eve@example.net>");
         //assert_data(basic.message_id, "<3456@example.net>");
         assert_message_id_list(basic.in_reply_to, "<1234@local.machine.example>");
         assert_message_id_list(basic.references, "<1234@local.machine.example>");
@@ -38,24 +65,14 @@ class Geary.RFC822.MessageTest : TestCase {
     }
 
     public void encoded_recipient() throws Error {
-        Message? enc = null;
-        try {
-            enc = string_to_message(ENCODED_TO);
-        } catch (Error err) {
-            assert_no_error(err);
-        }
+        Message enc = string_to_message(ENCODED_TO);
 
         // Courtesy Mailsploit https://www.mailsploit.com
         assert(enc.to[0].name == "potus@whitehouse.gov <test>");
     }
 
     public void duplicate_mailbox() throws Error {
-        Message? dup = null;
-        try {
-            dup = string_to_message(DUPLICATE_TO);
-        } catch (Error err) {
-            assert_no_error(err);
-        }
+        Message dup = string_to_message(DUPLICATE_TO);
 
         assert(dup.to.size == 2);
         assert_addresses(
@@ -64,12 +81,7 @@ class Geary.RFC822.MessageTest : TestCase {
     }
 
     public void duplicate_message_id() throws Error {
-        Message? dup = null;
-        try {
-            dup = string_to_message(DUPLICATE_REFERENCES);
-        } catch (Error err) {
-            assert_no_error(err);
-        }
+        Message dup = string_to_message(DUPLICATE_REFERENCES);
 
         assert(dup.references.list.size == 2);
         assert_message_id_list(
@@ -77,13 +89,84 @@ class Geary.RFC822.MessageTest : TestCase {
         );
     }
 
+    public void text_plain_as_plain() throws Error {
+        Message test = resource_to_message(BASIC_TEXT_PLAIN);
+
+        assert_true(test.has_plain_body(), "Expected plain body");
+        assert_false(test.has_html_body(), "Expected non-html body");
+        assert_string(BASIC_PLAIN_BODY, test.get_plain_body(false, null));
+    }
+
+    public void text_plain_as_html() throws Error {
+        Message test = resource_to_message(BASIC_TEXT_PLAIN);
+
+        assert_true(test.has_plain_body(), "Expected plain body");
+        assert_false(test.has_html_body(), "Expected non-html body");
+        assert_string(
+            HTML_CONVERSION_TEMPLATE.printf(BASIC_PLAIN_BODY),
+            test.get_plain_body(true, null)
+        );
+    }
+
+    public void text_html_as_html() throws Error {
+        Message test = resource_to_message(BASIC_TEXT_HTML);
+
+        assert_true(test.has_html_body(), "Expected html body");
+        assert_false(test.has_plain_body(), "Expected non-plain body");
+        assert_string(BASIC_HTML_BODY, test.get_html_body(null));
+    }
+
+    public void text_html_as_plain() throws Error {
+        Message test = resource_to_message(BASIC_TEXT_HTML);
+
+        assert_true(test.has_html_body(), "Expected html body");
+        assert_false(test.has_plain_body(), "Expected non-plain body");
+        assert_string(BASIC_HTML_BODY, test.get_html_body(null));
+    }
+
+    public void multipart_alternative_as_plain() throws Error {
+        Message test = resource_to_message(BASIC_MULTIPART_ALTERNATIVE);
+
+        assert_true(test.has_plain_body(), "Expected plain body");
+        assert_true(test.has_html_body(), "Expected html body");
+        assert_string(BASIC_PLAIN_BODY, test.get_plain_body(false, null));
+    }
+
+    public void multipart_alternative_as_converted_html() throws Error {
+        Message test = resource_to_message(BASIC_MULTIPART_ALTERNATIVE);
+
+        assert_true(test.has_plain_body(), "Expected plain body");
+        assert_true(test.has_html_body(), "Expected html body");
+        assert_string(
+            HTML_CONVERSION_TEMPLATE.printf(BASIC_PLAIN_BODY),
+            test.get_plain_body(true, null)
+        );
+    }
+
+    public void multipart_alternative_as_html() throws Error {
+        Message test = resource_to_message(BASIC_MULTIPART_ALTERNATIVE);
+
+        assert_true(test.has_plain_body(), "Expected plain body");
+        assert_true(test.has_html_body(), "Expected html body");
+        assert_string(BASIC_HTML_BODY, test.get_html_body(null));
+    }
+
     public void get_preview() throws Error {
-        try {
-            Message multipart_signed = string_to_message(MULTIPART_SIGNED_MESSAGE_TEXT);
-            assert(multipart_signed.get_preview() == MULTIPART_SIGNED_MESSAGE_PREVIEW);
-        } catch (Error err) {
-            assert_no_error(err);
-        }
+        Message multipart_signed = string_to_message(MULTIPART_SIGNED_MESSAGE_TEXT);
+
+        assert(multipart_signed.get_preview() == MULTIPART_SIGNED_MESSAGE_PREVIEW);
+    }
+
+    private Message resource_to_message(string path) throws Error {
+        GLib.File resource =
+            GLib.File.new_for_uri(RESOURCE_URI).resolve_relative_path(path);
+
+        uint8[] contents;
+        resource.load_contents(null, out contents, null);
+
+        return new Message.from_buffer(
+            new Geary.Memory.ByteBuffer(contents, contents.length)
+        );
     }
 
     private Message string_to_message(string message_text) throws Error {
@@ -92,27 +175,33 @@ class Geary.RFC822.MessageTest : TestCase {
         );
     }
 
-    private void assert_data(Geary.MessageData.AbstractMessageData? data, string expected) {
-        assert(data != null);
-        assert(data.to_string() == expected);
+    private void assert_data(Geary.MessageData.AbstractMessageData? actual,
+                             string expected)
+        throws Error {
+        assert_non_null(actual, expected);
+        assert_string(expected, actual.to_string());
     }
 
-    private void assert_address(Geary.RFC822.MailboxAddress? address, string expected) {
-        assert(address != null);
-        assert(address.to_rfc822_string() == expected);
+    private void assert_address(Geary.RFC822.MailboxAddress? address,
+                                string expected)
+        throws Error {
+        assert_non_null(address, expected);
+        assert_string(expected, address.to_rfc822_string());
     }
 
-    private void assert_addresses(Geary.RFC822.MailboxAddresses? addresses, string expected) {
-        assert(addresses != null);
-        assert(addresses.to_rfc822_string() == expected);
+    private void assert_addresses(Geary.RFC822.MailboxAddresses? addresses,
+                                  string expected)
+        throws Error {
+        assert_non_null(addresses, expected);
+        assert_string(expected, addresses.to_rfc822_string());
     }
 
-    private void assert_message_id_list(Geary.RFC822.MessageIDList? ids, string expected) {
-        assert(ids != null);
+    private void assert_message_id_list(Geary.RFC822.MessageIDList? ids,
+                                        string expected)
+        throws Error {
+        assert_non_null(ids, expected);
         assert(ids.to_rfc822_string() == expected);
     }
-
-    private static string BASIC_MESSAGE = "From: Mary Smith <mary@example.net>\r\nSender: Mary Smith Sender <mary@example.net>\r\nTo: John Doe <jdoe@machine.example>\r\nCC: John Doe CC <jdoe@machine.example>\r\nBCC: John Doe BCC <jdoe@machine.example>\r\nReply-To: \"Mary Smith: Personal Account\" <smith@home.example>\r\nSubject: Re: Saying Hello\r\nDate: Fri, 21 Nov 1997 10:01:10 -0600\r\nMessage-ID: <3456@example.net>\r\nIn-Reply-To: <1234@local.machine.example>\r\nReferences: <1234@local.machine.example>\r\nX-Mailer: Geary Test Suite 1.0\r\n\r\nThis is a reply to your hello.\r\n\r\n";
 
     // Courtesy Mailsploit https://www.mailsploit.com
     private static string ENCODED_TO = "From: Mary Smith <mary@example.net>\r\nTo: =?utf-8?b?cG90dXNAd2hpdGVob3VzZS5nb3YiIDx0ZXN0Pg==?= <jdoe@machine.example>\r\nSubject: Re: Saying Hello\r\nDate: Fri, 21 Nov 1997 10:01:10 -0600\r\n\r\nThis is a reply to your hello.\r\n\r\n";

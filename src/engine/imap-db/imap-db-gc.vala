@@ -83,12 +83,10 @@ private class Geary.ImapDB.GC {
 
     private ImapDB.Database db;
     private int priority;
-    private File data_dir;
-    
+
     public GC(ImapDB.Database db, int priority) {
         this.db = db;
         this.priority = priority;
-        data_dir = db.db_file.get_parent();
     }
 
     /**
@@ -205,9 +203,10 @@ private class Geary.ImapDB.GC {
         
         // NOTE: VACUUM cannot happen inside a transaction, so to avoid blocking the main thread,
         // run a non-transacted command from a background thread
+        Geary.Db.Connection cx = yield db.open_connection(cancellable);
         yield Nonblocking.Concurrent.global.schedule_async(() => {
-            db.open_connection(cancellable).exec("VACUUM", cancellable);
-            
+            cx.exec("VACUUM", cancellable);
+
             // it's a small thing, but take snapshot of time when vacuum completes, as scheduling
             // of the next transaction is not instantaneous
             last_vacuum_time = new DateTime.now_local();
@@ -220,7 +219,7 @@ private class Geary.ImapDB.GC {
         // update last vacuum time and reset messages reaped since last vacuum ... don't allow this
         // to be cancelled, really want to get this in stone so the user doesn't re-vacuum
         // unnecessarily
-        yield db.exec_transaction_async(Db.TransactionType.WO, (cx) => {
+        yield cx.exec_transaction_async(Db.TransactionType.WO, (cx) => {
             Db.Statement stmt = cx.prepare("""
                 UPDATE GarbageCollectionTable
                 SET last_vacuum_time_t = ?, reaped_messages_since_last_vacuum = ?
@@ -419,25 +418,11 @@ private class Geary.ImapDB.GC {
             //
             // Fetch all on-disk attachments for this message
             //
-            
-            Gee.ArrayList<File> attachment_files = new Gee.ArrayList<File>();
-            
-            stmt = cx.prepare("""
-                SELECT id, filename
-                FROM MessageAttachmentTable
-                WHERE message_id = ?
-            """);
-            stmt.bind_rowid(0, message_id);
-            
-            result = stmt.exec(cancellable);
-            while (!result.finished) {
-                File file = Attachment.generate_file(data_dir, message_id, result.rowid_for("id"),
-                    result.string_for("filename"));
-                attachment_files.add(file);
-                
-                result.next(cancellable);
-            }
-            
+
+            Gee.List<Attachment> attachments = Attachment.list_attachments(
+                cx, this.db.attachments_path, message_id, cancellable
+            );
+
             //
             // Delete from search table
             //
@@ -480,17 +465,16 @@ private class Geary.ImapDB.GC {
             // commits without error and the attachment files can be deleted without being
             // referenced by the database, in a way that's resumable.
             //
-            
-            foreach (File attachment_file in attachment_files) {
+
+            foreach (Attachment attachment in attachments) {
                 stmt = cx.prepare("""
                     INSERT INTO DeleteAttachmentFileTable (filename)
                     VALUES (?)
                 """);
-                stmt.bind_string(0, attachment_file.get_path());
-                
+                stmt.bind_string(0, attachment.file.get_path());
                 stmt.exec(cancellable);
             }
-            
+
             //
             // Increment the reap count since last vacuum
             //
@@ -571,8 +555,8 @@ private class Geary.ImapDB.GC {
     
     private async int delete_empty_attachment_directories_async(File? current, out bool empty,
         Cancellable? cancellable) throws Error {
-        File current_dir = current ?? Attachment.get_attachments_dir(db.db_file.get_parent());
-        
+        File current_dir = current ?? db.attachments_path;
+
         // directory is considered empty until file or non-deleted child directory is found
         empty = true;
         
@@ -662,9 +646,8 @@ private class Geary.ImapDB.GC {
         reaped_messages_since_last_vacuum = reaped_count;
         free_page_bytes = free_page_count * page_size;
     }
-    
+
     public string to_string() {
-        return "GC:%s".printf(db.db_file.get_path());
+        return "GC:%s".printf(db.path);
     }
 }
-

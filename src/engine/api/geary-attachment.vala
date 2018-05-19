@@ -12,13 +12,6 @@ public abstract class Geary.Attachment : BaseObject {
 
 
     /**
-     * An identifier that can be used to locate the {@link Attachment} in an {@link Email}.
-     *
-     * @see Email.get_attachment_by_id
-     */
-    public string id { get; private set; }
-
-    /**
      * The {@link Mime.ContentType} of the {@link Attachment}.
      */
     public Mime.ContentType content_type { get; private set; }
@@ -62,31 +55,30 @@ public abstract class Geary.Attachment : BaseObject {
     public string? content_filename { get; private set; }
 
     /**
-     * The on-disk File of the {@link Attachment}.
+     * The attachment's on-disk File, if any.
+     *
+     * This will be null if the attachment has not been saved to disk.
      */
-    public File file { get; private set; }
+    public GLib.File? file { get; private set; default = null; }
 
     /**
      * The file size (in bytes) if the {@link file}.
+     *
+     * This will be -1 if the attachment has not been saved to disk.
      */
-    public int64 filesize { get; private set; }
+    public int64 filesize { get; private set; default = -1; }
 
-    protected Attachment(string id,
-                         Mime.ContentType content_type,
+
+    protected Attachment(Mime.ContentType content_type,
                          string? content_id,
                          string? content_description,
                          Mime.ContentDisposition content_disposition,
-                         string? content_filename,
-                         File file,
-                         int64 filesize) {
-        this.id = id;
+                         string? content_filename) {
         this.content_type = content_type;
         this.content_id = content_id;
         this.content_description = content_description;
         this.content_disposition = content_disposition;
         this.content_filename = content_filename;
-        this.file = file;
-        this.filesize = filesize;
     }
 
     /**
@@ -111,7 +103,7 @@ public abstract class Geary.Attachment : BaseObject {
             string[] others = {
                 alt_file_name,
                 this.content_id,
-                this.id ?? "attachment",
+                "attachment",
             };
 
             int i = 0;
@@ -135,12 +127,12 @@ public abstract class Geary.Attachment : BaseObject {
         }
 
         if (name_type == null ||
-            name_type.is_default() ||
+            name_type.is_same(Mime.ContentType.ATTACHMENT_DEFAULT) ||
             !name_type.is_same(mime_type)) {
             // Substitute file name either is of unknown type
             // (e.g. it does not have an extension) or is not the
             // same type as the declared type, so try to fix it.
-            if (mime_type.is_default()) {
+            if (mime_type.is_same(Mime.ContentType.ATTACHMENT_DEFAULT)) {
                 // Declared type is unknown, see if we can guess
                 // it. Don't use GFile.query_info however since
                 // that will attempt to use the filename, which is
@@ -160,6 +152,14 @@ public abstract class Geary.Attachment : BaseObject {
             }
         }
         return file_name;
+    }
+
+    /**
+     * Sets the attachment's on-disk location and size.
+     */
+    protected void set_file_info(GLib.File file, int64 file_size) {
+        this.file = file;
+        this.filesize = file_size;
     }
 
 }

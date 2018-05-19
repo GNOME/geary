@@ -354,6 +354,7 @@ src/engine/rfc822/rfc822-mailbox-address.vala
 src/engine/rfc822/rfc822-mailbox-addresses.vala
 src/engine/rfc822/rfc822-message-data.vala
 src/engine/rfc822/rfc822-message.vala
+src/engine/rfc822/rfc822-part.vala
 src/engine/rfc822/rfc822-utils.vala
 src/engine/rfc822/rfc822.vala
 src/engine/smtp/smtp-authenticator.vala
@@ -375,7 +376,6 @@ src/engine/state/state-machine.vala
 src/engine/state/state-mapping.vala
 src/engine/util/util-ascii.vala
 src/engine/util/util-collection.vala
-src/engine/util/util-converter.vala
 src/engine/util/util-files.vala
 src/engine/util/util-generic-capabilities.vala
 src/engine/util/util-html.vala
