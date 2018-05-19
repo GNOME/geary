@@ -18,8 +18,8 @@ namespace WebKitUtil {
      */
     public bool to_bool(WebKit.JavascriptResult result)
         throws Geary.JS.Error {
-        unowned JS.GlobalContext context = result.get_global_context();
-        unowned JS.Value value = result.get_value();
+        JS.GlobalContext context = result.get_global_context();
+        JS.Value value = result.get_value();
         if (!value.is_boolean(context)) {
             throw new Geary.JS.Error.TYPE("Result is not a JS Boolean object");
         }
@@ -59,12 +59,12 @@ namespace WebKitUtil {
      */
     public string as_string(WebKit.JavascriptResult result)
         throws Geary.JS.Error {
-        unowned JS.GlobalContext context = result.get_global_context();
-        unowned JS.Value js_str_value = result.get_value();
+        JS.GlobalContext context = result.get_global_context();
+        JS.Value js_str_value = result.get_value();
         JS.Value? err = null;
         JS.String js_str = js_str_value.to_string_copy(context, out err);
         Geary.JS.check_exception(context, err);
-        return Geary.JS.to_string_released((owned) js_str);
+        return Geary.JS.to_string_released(js_str);
     }
 
     /**
