@@ -60,10 +60,9 @@ libsecret = dependency('libsecret-1', version: '>= 0.11')
 libxml = dependency('libxml-2.0', version: '>= 2.7.8')
 gcr = dependency('gcr-3', version: '>= 3.10.1')
 gobject_introspection = dependency('gobject-introspection-1.0')
-webkit2gtk_dep = dependency('webkit2gtk-4.0', version: '>=' + target_webkit)
-webkit2gtk_web_extension_dep = dependency('webkit2gtk-web-extension-4.0', version: '>=' + target_webkit)
-javascriptcoregtk_lib = cc.find_library('javascriptcoregtk-4.0')
-javascriptcoregtk_vapi = valac.find_library('javascriptcore-4.0', dirs: vapi_dir)
+webkit2gtk = dependency('webkit2gtk-4.0', version: '>=' + target_webkit)
+webkit2gtk_web_extension = dependency('webkit2gtk-web-extension-4.0', version: '>=' + target_webkit)
+javascriptcoregtk = dependency('javascriptcoregtk-4.0', version: '>=' + target_webkit)
 enchant = dependency('enchant', version: '>= 1.6')
 
 # System dependencies ensures appropriate versions, but the declared
@@ -122,9 +121,6 @@ libmessagingmenu = meson.get_compiler('c').find_library('libmessaging-menu', req
 if enable_valadoc
   valadoc = find_program('valadoc')
 endif
-
-# This will provide our custom dependencies, such as webkit2gtk
-subdir('bindings')
 
 # Language detection
 iso_codes_dir = join_paths('/', 'usr', 'share', 'xml', 'iso-codes')

@@ -87,7 +87,7 @@ set(TEST_ENGINE_PACKAGES
   gio-2.0
   glib-2.0
   gmime-2.6
-  javascriptcore-4.0
+  javascriptcoregtk-4.0
   libunwind
   libxml-2.0
   sqlite3

@@ -87,10 +87,9 @@ public class GearyWebExtension : Object {
         bool should_load = false;
         WebKit.Frame frame = page.get_main_frame();
         // Explicit cast fixes build on s390x/ppc64. Bug 783882
-        JS.GlobalContext context = (JS.GlobalContext)
-            frame.get_javascript_global_context();
+        unowned JS.GlobalContext context = frame.get_javascript_global_context();
         try {
-            JS.Value ret = execute_script(
+            unowned JS.Value ret = execute_script(
                 context, "geary.allowRemoteImages", int.parse("__LINE__")
             );
             should_load = ret.to_boolean(context);
@@ -106,8 +105,7 @@ public class GearyWebExtension : Object {
     private void remote_image_load_blocked(WebKit.WebPage page) {
         WebKit.Frame frame = page.get_main_frame();
         // Explicit cast fixes build on s390x/ppc64. Bug 783882
-        JS.GlobalContext context = (JS.GlobalContext)
-            frame.get_javascript_global_context();
+        unowned JS.GlobalContext context = frame.get_javascript_global_context();
         try {
             execute_script(
                 context, "geary.remoteImageLoadBlocked();", int.parse("__LINE__")
@@ -123,8 +121,7 @@ public class GearyWebExtension : Object {
     private void selection_changed(WebKit.WebPage page) {
         WebKit.Frame frame = page.get_main_frame();
         // Explicit cast fixes build on s390x/ppc64. Bug 783882
-        JS.GlobalContext context = (JS.GlobalContext)
-            frame.get_javascript_global_context();
+        unowned JS.GlobalContext context = frame.get_javascript_global_context();
         try {
             execute_script(
                 context, "geary.selectionChanged();", int.parse("__LINE__")
@@ -136,20 +133,18 @@ public class GearyWebExtension : Object {
 
     // Return type is nullable as a workaround for Bug 778046, it will
     // never actually be null.
-    private JS.Value? execute_script(JS.Context context, string script, int line)
+    private unowned JS.Value? execute_script(JS.Context context, string script, int line)
     throws Geary.JS.Error {
-        JS.String js_script = JS.String.create_with_utf8_cstring(script);
-        JS.String js_source = JS.String.create_with_utf8_cstring("__FILE__");
+        JS.String js_script = new JS.String.create_with_utf8_cstring(script);
+        JS.String js_source = new JS.String.create_with_utf8_cstring("__FILE__");
         JS.Value? err = null;
         try {
-            JS.Value ret = context.evaluate_script(
+            unowned JS.Value ret = context.evaluate_script(
                 js_script, null, js_source, line, out err
             );
             Geary.JS.check_exception(context, err);
             return ret;
         } finally {
-            js_script.release();
-            js_source.release();
         }
     }
 
