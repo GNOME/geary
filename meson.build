@@ -36,39 +36,44 @@ add_project_arguments([
 )
 
 #
-# Required dependencies
+# Required libraries and other dependencies
 #
 
-target_glib = '2.50' # Also passed to valac, so don't include a point rev
-target_gtk = '3.22.0'
-target_webkit = '2.16'
+target_glib = '2.54' # Also passed to valac, so don't include a point rev
+target_gtk = '3.22.26'
+target_webkit = '2.20'
 
-posix = valac.find_library('posix')
-libmath = cc.find_library('m')
+# Primary deps
 glib = dependency('glib-2.0', version: '>=' + target_glib)
-gthread = dependency('gthread-2.0', version: '>=' + target_glib)
-gio = dependency('gio-2.0', version: '>=' + target_glib)
 gtk = dependency('gtk+-3.0', version: '>=' + target_gtk)
-gdk = dependency('gdk-3.0', version: '>=' + target_gtk)
-libsoup = dependency('libsoup-2.4', version: '>= 2.48')
-gee = dependency('gee-0.8', version: '>= 0.8.5')
-libnotify = dependency('libnotify', version: '>= 0.7.5')
-libcanberra = dependency('libcanberra', version: '>= 0.28')
+webkit2gtk = dependency('webkit2gtk-4.0', version: '>=' + target_webkit)
 sqlite = dependency('sqlite3', version: '>= 3.7.4')
 gmime = dependency('gmime-2.6', version: '>= 2.6.17')
-libsecret = dependency('libsecret-1', version: '>= 0.11')
-libxml = dependency('libxml-2.0', version: '>= 2.7.8')
-gcr = dependency('gcr-3', version: '>= 3.10.1')
-gobject_introspection = dependency('gobject-introspection-1.0')
-webkit2gtk = dependency('webkit2gtk-4.0', version: '>=' + target_webkit)
-webkit2gtk_web_extension = dependency('webkit2gtk-web-extension-4.0', version: '>=' + target_webkit)
-javascriptcoregtk = dependency('javascriptcoregtk-4.0', version: '>=' + target_webkit)
-enchant = dependency('enchant', version: '>= 1.6')
 
-# System dependencies ensures appropriate versions, but the declared
-# depencency is what we actually build against.
+# Secondary deps - keep sorted alphabetically
+enchant = dependency('enchant', version: '>= 1.6')
+gcr = dependency('gcr-3', version: '>= 3.10.1')
+gdk = dependency('gdk-3.0', version: '>=' + target_gtk)
+gee = dependency('gee-0.8', version: '>= 0.8.5')
+gio = dependency('gio-2.0', version: '>=' + target_glib)
+gobject_introspection = dependency('gobject-introspection-1.0')
+gthread = dependency('gthread-2.0', version: '>=' + target_glib)
+javascriptcoregtk = dependency('javascriptcoregtk-4.0', version: '>=' + target_webkit)
+libcanberra = dependency('libcanberra', version: '>= 0.28')
+libmath = cc.find_library('m')
+libnotify = dependency('libnotify', version: '>= 0.7.5')
+libsecret = dependency('libsecret-1', version: '>= 0.11')
+libsoup = dependency('libsoup-2.4', version: '>= 2.48')
 libunwind_dep = dependency('libunwind', version: '>= 1.1')
 libunwind_generic_dep = dependency('libunwind-generic', version: '>= 1.1')
+libxml = dependency('libxml-2.0', version: '>= 2.7.8')
+posix = valac.find_library('posix')
+sqlite = dependency('sqlite3', version: '>= 3.12')
+webkit2gtk_web_extension = dependency('webkit2gtk-web-extension-4.0', version: '>=' + target_webkit)
+
+# Libunwind system dependencies above ensures appropriate versions,
+# but this declared depencency is what we actually build against so we
+# can include the custom VAPI correctly.
 libunwind = declare_dependency(
    dependencies: [
      valac.find_library('libunwind', dirs: vapi_dir),
@@ -77,42 +82,15 @@ libunwind = declare_dependency(
    ],
  )
 
-sqlite = dependency('sqlite3')
-if sqlite.version().version_compare('>= 3.12')
-  if not cc.has_header_symbol('sqlite3.h', 'SQLITE_DBCONFIG_ENABLE_FTS3_TOKENIZER')
-    error('SQLite3 is missing FTS3 tokenizer support. Please compile it with -DSQLITE_ENABLE_FTS3.\n'
-           + 'See https://bugzilla.gnome.org/show_bug.cgi?id=763203 for details.')
-  endif
-else
-  # detect that the current sqlite3 library has FTS3 support (at run time)
-  runtime_fts3_check = cc.compiles('''
-    #include <sqlite3.h>
-    #include <stdlib.h>
-    int main() {
-        sqlite3 *db;
-        char tmpfile[] = "sqliteXXXXXX";
-        mkstemp(tmpfile);
-        if (sqlite3_open(tmpfile, &db) == SQLITE_OK) {
-            return sqlite3_exec(db, "CREATE VIRTUAL TABLE mail USING fts3(subject, body);", 0, 0, 0);
-        }
-        return -1;
-    }
-  ''', dependencies: sqlite)
-  if not runtime_fts3_check
-    if sqlite.version().version_compare('< 3.11')
-      error('SQLite3 is missing FTS3 support. Please compile it with -DSQLITE_ENABLE_FTS3.')
-    else
-      error('SQLite3 is missing FTS3 tokenizer support. Please compile it with -DSQLITE_ENABLE_FTS3 -DSQLITE_ENABLE_FTS3_TOKENIZER.')
-    endif
-  endif
-endif
-
-#
-# Required dependencies
-#
-
+# Optional libraries
 libunity = dependency('unity', version: '>= 5.12.0', required: false)
 libmessagingmenu = meson.get_compiler('c').find_library('libmessaging-menu', required: false)
+
+# Ensure SQLite was built correctly
+if not cc.has_header_symbol('sqlite3.h', 'SQLITE_DBCONFIG_ENABLE_FTS3_TOKENIZER')
+  error('SQLite3 is missing FTS3 tokenizer support. Please compile it with -DSQLITE_ENABLE_FTS3.\n'
+        + 'See https://bugzilla.gnome.org/show_bug.cgi?id=763203 for details.')
+endif
 
 #
 # Build glue
