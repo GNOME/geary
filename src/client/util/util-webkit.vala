@@ -64,7 +64,7 @@ namespace WebKitUtil {
         JS.Value? err = null;
         JS.String js_str = js_str_value.to_string_copy(context, out err);
         Geary.JS.check_exception(context, err);
-        return Geary.JS.to_string_released((owned) js_str);
+        return Geary.JS.to_native_string(js_str);
     }
 
     /**

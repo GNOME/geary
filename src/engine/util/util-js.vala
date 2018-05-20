@@ -82,7 +82,7 @@ namespace Geary.JS {
         global::JS.String js_str = value.to_string_copy(context, out err);
         Geary.JS.check_exception(context, err);
 
-        return Geary.JS.to_string_released((owned) js_str);
+        return to_native_string(js_str);
     }
 
     /**
@@ -111,7 +111,7 @@ namespace Geary.JS {
     /**
      * Returns a JSC {@link JS.String} as a Vala {@link string}.
      */
-    public inline string to_string_released(owned global::JS.String js) {
+    public inline string to_native_string(global::JS.String js) {
         size_t len = js.get_maximum_utf8_cstring_size();
         uint8[] str = new uint8[len];
 #if VALA_0_42
@@ -138,10 +138,8 @@ namespace Geary.JS {
         global::JS.String js_name = new global::JS.String.create_with_utf8_cstring(name);
         global::JS.Value? err = null;
         global::JS.Value prop = object.get_property(context, js_name, out err);
-        try {
-            Geary.JS.check_exception(context, err);
-        } finally {
-        }
+        Geary.JS.check_exception(context, err);
+
         return prop;
     }
 
@@ -169,7 +167,7 @@ namespace Geary.JS {
 
             throw new Error.EXCEPTION(
                 "JS exception thrown [%s]: %s"
-                .printf(err_type.to_string(), to_string_released((owned) err_str))
+                .printf(err_type.to_string(), to_native_string(err_str))
             );
         }
     }
