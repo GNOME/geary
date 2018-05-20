@@ -45,10 +45,10 @@ target_webkit = '2.20'
 
 # Primary deps
 glib = dependency('glib-2.0', version: '>=' + target_glib)
-gtk = dependency('gtk+-3.0', version: '>=' + target_gtk)
-webkit2gtk = dependency('webkit2gtk-4.0', version: '>=' + target_webkit)
-sqlite = dependency('sqlite3', version: '>= 3.7.4')
 gmime = dependency('gmime-2.6', version: '>= 2.6.17')
+gtk = dependency('gtk+-3.0', version: '>=' + target_gtk)
+sqlite = dependency('sqlite3', version: '>= 3.12')
+webkit2gtk = dependency('webkit2gtk-4.0', version: '>=' + target_webkit)
 
 # Secondary deps - keep sorted alphabetically
 enchant = dependency('enchant', version: '>= 1.6')
@@ -70,7 +70,6 @@ libunwind_dep = dependency('libunwind', version: '>= 1.1')
 libunwind_generic_dep = dependency('libunwind-generic', version: '>= 1.1')
 libxml = dependency('libxml-2.0', version: '>= 2.7.8')
 posix = valac.find_library('posix')
-sqlite = dependency('sqlite3', version: '>= 3.12')
 webkit2gtk_dep = dependency('webkit2gtk-4.0', version: '>=' + target_webkit)
 webkit2gtk_web_extension_dep = dependency('webkit2gtk-web-extension-4.0', version: '>=' + target_webkit)
 
