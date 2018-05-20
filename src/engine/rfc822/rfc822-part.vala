@@ -26,6 +26,27 @@ public class Geary.RFC822.Part : Object {
         HTML;
     }
 
+
+    // The set of text/* types that must have CRLF preserved, since it
+    // is part of their format. These really should be under
+    // application/*, but here we are.
+    private static Gee.Set<string> CR_PRESERVING_TEXT_TYPES =
+        new Gee.HashSet<string>();
+
+    static construct {
+        // VCard
+        CR_PRESERVING_TEXT_TYPES.add("vcard");
+        CR_PRESERVING_TEXT_TYPES.add("x-vcard");
+        CR_PRESERVING_TEXT_TYPES.add("directory");
+
+        // iCal
+        CR_PRESERVING_TEXT_TYPES.add("calendar");
+
+        // MS RTF
+        CR_PRESERVING_TEXT_TYPES.add("rtf");
+    }
+
+
     /**
      * The entity's Content-Type.
      *
@@ -157,9 +178,14 @@ public class Geary.RFC822.Part : Object {
             bool flowed = content_type.params.has_value_ci("format", "flowed");
             bool delsp = content_type.params.has_value_ci("DelSp", "yes");
 
-            // Unconditionally remove the CR's in any CRLF sequence, since
-            // they are effectively a wire encoding.
-            filter.add(new GMime.FilterCRLF(false, false));
+            // Remove the CR's in any CRLF sequence since they are
+            // effectively a wire encoding, unless the format requires
+            // them.
+            GMime.ContentEncoding encoding =
+                 this.source_part.get_content_encoding();
+            if (!(content_type.media_subtype in CR_PRESERVING_TEXT_TYPES)) {
+                filter.add(new GMime.FilterCRLF(false, false));
+            }
 
             if (flowed) {
                 filter.add(

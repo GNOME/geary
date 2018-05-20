@@ -7,17 +7,22 @@
 
 class Geary.RFC822.PartTest : TestCase {
 
-    private const string BODY = "This is an attachment.\n";
+    private const string CR_BODY = "This is an attachment.\n";
+    private const string CRLF_BODY = "This is an attachment.\r\n";
+    private const string ICAL_BODY = "BEGIN:VCALENDAR\r\nEND:VCALENDAR\r\n";
 
 
     public PartTest() {
         base("Geary.RFC822.PartTest");
         add_test("new_from_empty_mime_part", new_from_empty_mime_part);
         add_test("new_from_complete_mime_part", new_from_complete_mime_part);
+        add_test("write_to_buffer_plain", write_to_buffer_plain);
+        add_test("write_to_buffer_plain_crlf", write_to_buffer_plain_crlf);
+        add_test("write_to_buffer_plain_ical", write_to_buffer_plain_ical);
     }
 
     public void new_from_empty_mime_part() throws Error {
-        GMime.Part part = new_part(null, BODY.data);
+        GMime.Part part = new_part(null, CR_BODY.data);
         part.set_header("Content-Type", "");
 
         Part test = new Part(part);
@@ -33,7 +38,7 @@ class Geary.RFC822.PartTest : TestCase {
         const string ID = "test-id";
         const string DESC = "test description";
 
-        GMime.Part part = new_part(TYPE, BODY.data);
+        GMime.Part part = new_part(TYPE, CR_BODY.data);
         part.set_content_id(ID);
         part.set_content_description(DESC);
         part.set_content_disposition(
@@ -50,6 +55,32 @@ class Geary.RFC822.PartTest : TestCase {
             Geary.Mime.DispositionType.INLINE,
             test.content_disposition.disposition_type
         );
+    }
+
+    public void write_to_buffer_plain() throws Error {
+        Part test = new Part(new_part("text/plain", CR_BODY.data));
+
+        Memory.Buffer buf = test.write_to_buffer();
+
+        assert_string(CR_BODY, buf.to_string());
+    }
+
+    public void write_to_buffer_plain_crlf() throws Error {
+        Part test = new Part(new_part("text/plain", CRLF_BODY.data));
+
+        Memory.Buffer buf = test.write_to_buffer();
+
+        // CRLF should be stripped
+        assert_string(CR_BODY, buf.to_string());
+    }
+
+    public void write_to_buffer_plain_ical() throws Error {
+        Part test = new Part(new_part("text/calendar", ICAL_BODY.data));
+
+        Memory.Buffer buf = test.write_to_buffer();
+
+        // CRLF should not be stripped
+        assert_string(ICAL_BODY, buf.to_string());
     }
 
     private GMime.Part new_part(string? mime_type,
