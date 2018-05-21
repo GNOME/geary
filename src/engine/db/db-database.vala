@@ -136,7 +136,9 @@ public class Geary.Db.Database : Geary.Db.Context {
             warning("SQLite not thread-safe: asynchronous queries will not be available");
         }
 
-        if ((flags & DatabaseFlags.CHECK_CORRUPTION) != 0) {
+        if ((flags & DatabaseFlags.CHECK_CORRUPTION) != 0 &&
+            this.file != null &&
+            yield Geary.Files.query_exists_async(this.file, cancellable)) {
             yield Nonblocking.Concurrent.global.schedule_async(() => {
                     check_for_corruption(flags, cancellable);
                 }, cancellable);
