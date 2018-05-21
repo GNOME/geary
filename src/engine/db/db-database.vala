@@ -114,17 +114,7 @@ public class Geary.Db.Database : Geary.Db.Context {
         this.prepare_cb = prepare_cb;
 
         if (this.file != null && (flags & DatabaseFlags.CREATE_DIRECTORY) != 0) {
-            GLib.File db_dir = this.file.get_parent();
-            try {
-                yield db_dir.query_info_async(
-                    GLib.FileAttribute.STANDARD_TYPE,
-                    GLib.FileQueryInfoFlags.NONE,
-                    GLib.Priority.DEFAULT,
-                    cancellable
-                );
-            } catch (GLib.IOError.NOT_FOUND err) {
-                db_dir.make_directory_with_parents(cancellable);
-            }
+            yield Geary.Files.make_directory_with_parents(this.file.get_parent());
         }
 
         if (threadsafe()) {
