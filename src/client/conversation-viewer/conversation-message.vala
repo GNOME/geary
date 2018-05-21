@@ -536,7 +536,8 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     }
 
     private void set_action_enabled(string name, bool enabled) {
-        SimpleAction? action = this.message_actions.lookup(name) as SimpleAction;
+        SimpleAction? action =
+            this.message_actions.lookup_action(name) as SimpleAction;
         if (action != null) {
             action.set_enabled(enabled);
         }

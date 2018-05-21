@@ -787,7 +787,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         schedule_unseen_update(folder);
     }
 
-    /** Fires a {@link report_problem} signal for an IMAP service. */
+    /** Fires a {@link Account.report_problem} signal for an IMAP service. */
     protected void notify_imap_problem(Geary.ProblemType type, Error? err) {
         notify_service_problem(type, Service.IMAP, err);
     }

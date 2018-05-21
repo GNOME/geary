@@ -55,38 +55,45 @@ public class ComposerWindow : Gtk.ApplicationWindow, ComposerContainer {
     }
 
     public override void show() {
-        Gdk.Screen? screen = get_screen();
-        if (screen != null) {
-            int screen_width = screen.get_width();
-            int screen_height = screen.get_height();
+        Gdk.Display? display = Gdk.Display.get_default();
+        if (display != null) {
+            Gdk.Monitor? monitor = display.get_primary_monitor();
+            if (monitor == null) {
+                monitor = display.get_monitor_at_point(1, 1);
+            }
             int[] size = GearyApplication.instance.config.composer_window_size;
-
             //check if stored values are reasonable
-            if (size[0] >= 0 && size[0] <= screen_width &&
-                size[1] >= 0 && size[1] <= screen_height)
+            if (monitor != null &&
+                size[0] >= 0 && size[0] <= monitor.geometry.width &&
+                size[1] >= 0 && size[1] <= monitor.geometry.height) {
                 set_default_size(size[0], size[1]);
-            else
+            } else {
                 set_default_size(680, 600);
+            }
         }
 
         base.show();
     }
 
     private void save_window_geometry () {
-        Gdk.Screen? screen = get_screen();
-        if (screen != null && !this.is_maximized) {
-            int screen_width = screen.get_width();
-            int screen_height = screen.get_height();
+        if (!this.is_maximized) {
+            Gdk.Display? display = get_display();
+            Gdk.Window? window = get_window();
+            if (display != null && window != null) {
+                Gdk.Monitor monitor = display.get_monitor_at_window(window);
 
-            int width = 0;
-            int height = 0;
+                int width = 0;
+                int height = 0;
+                get_size(out width, out height);
 
-            get_size(out width, out height);
-
-            // Only store if the values are reasonable-looking.
-            if (width > 0 && width <= screen_width &&
-                height > 0 && height <= screen_height)
-                GearyApplication.instance.config.composer_window_size = { width, height };
+                // Only store if the values are reasonable-looking.
+                if (width > 0 && width <= monitor.geometry.width &&
+                    height > 0 && height <= monitor.geometry.height) {
+                    GearyApplication.instance.config.composer_window_size = {
+                        width, height
+                    };
+                }
+            }
         }
     }
 

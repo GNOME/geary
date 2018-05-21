@@ -108,16 +108,22 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     }
 
     private void restore_saved_window_state() {
-        Gdk.Screen? screen = get_screen();
-        if (screen != null &&
-            this.window_width <= screen.get_width() &&
-            this.window_height <= screen.get_height()) {
-            set_default_size(this.window_width, this.window_height);
+        Gdk.Display? display = Gdk.Display.get_default();
+        if (display != null) {
+            Gdk.Monitor? monitor = display.get_primary_monitor();
+            if (monitor == null) {
+                monitor = display.get_monitor_at_point(1, 1);
+            }
+            if (monitor != null &&
+                this.window_width <= monitor.geometry.width &&
+                this.window_height <= monitor.geometry.height) {
+                set_default_size(this.window_width, this.window_height);
+            }
         }
+        this.window_position = Gtk.WindowPosition.CENTER;
         if (this.window_maximized) {
             maximize();
         }
-        this.window_position = Gtk.WindowPosition.CENTER;
     }
 
     // Called on [un]maximize and possibly others. Save maximized state
@@ -138,22 +144,29 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     public override void size_allocate(Gtk.Allocation allocation) {
         base.size_allocate(allocation);
 
-        Gdk.Screen? screen = get_screen();
-        if (screen != null && !this.window_maximized) {
-            // Get the size via ::get_size instead of the allocation
-            // so that the window isn't ever-expanding.
-            int width = 0;
-            int height = 0;
-            get_size(out width, out height);
+        if (!this.window_maximized) {
+            Gdk.Display? display = get_display();
+            Gdk.Window? window = get_window();
+            if (display != null && window != null) {
+                Gdk.Monitor monitor = display.get_monitor_at_window(window);
 
-            // Only store if the values have changed and are
-            // reasonable-looking.
-            if (this.window_width != width &&
-                width > 0 && width <= screen.get_width())
-                this.window_width = width;
-            if (this.window_height != height &&
-                height > 0 && height <= screen.get_height())
-                this.window_height = height;
+                // Get the size via ::get_size instead of the
+                // allocation so that the window isn't ever-expanding.
+                int width = 0;
+                int height = 0;
+                get_size(out width, out height);
+
+                // Only store if the values have changed and are
+                // reasonable-looking.
+                if (this.window_width != width &&
+                    width > 0 && width <= monitor.geometry.width) {
+                    this.window_width = width;
+                }
+                if (this.window_height != height &&
+                    height > 0 && height <= monitor.geometry.height) {
+                    this.window_height = height;
+                }
+            }
         }
     }
 

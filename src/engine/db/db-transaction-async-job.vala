@@ -29,10 +29,6 @@ private class Geary.Db.TransactionAsyncJob : BaseObject {
         this.completed = new Nonblocking.Event();
     }
 
-    public void cancel() {
-        cancellable.cancel();
-    }
-    
     public bool is_cancelled() {
         return cancellable.is_cancelled();
     }
@@ -94,7 +90,7 @@ private class Geary.Db.TransactionAsyncJob : BaseObject {
 
     // No way to cancel this because the callback thread *must* finish before
     // we move on here.  Any I/O the thread is doing can still be cancelled
-    // using our cancel() above.
+    // using the job's cancellable.
     public async TransactionOutcome wait_for_completion_async()
         throws Error {
         yield this.completed.wait_async();

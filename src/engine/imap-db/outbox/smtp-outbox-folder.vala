@@ -274,14 +274,6 @@ private class Geary.SmtpOutboxFolder :
         yield internal_remove_email_async(email_ids, cancellable);
     }
 
-    public virtual async void remove_single_email_async(Geary.EmailIdentifier id,
-        Cancellable? cancellable = null) throws Error {
-        Gee.List<Geary.EmailIdentifier> list = new Gee.ArrayList<Geary.EmailIdentifier>();
-        list.add(id);
-
-        yield remove_email_async(list, cancellable);
-    }
-
     public override Geary.Folder.OpenState get_open_state() {
         return is_open() ? Geary.Folder.OpenState.LOCAL : Geary.Folder.OpenState.CLOSED;
     }

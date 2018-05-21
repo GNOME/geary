@@ -50,7 +50,7 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
 
         Gtk.TreeSelection selection = get_selection();
         selection.set_mode(Gtk.SelectionMode.MULTIPLE);
-        style_set.connect(on_style_changed);
+        style_updated.connect(on_style_changed);
         show.connect(on_show);
         row_activated.connect(on_row_activated);
 
@@ -475,7 +475,7 @@ public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
     }
     
     private void on_display_preview_changed() {
-        style_set(null);
+        style_updated();
         model.foreach(refresh_path);
         
         schedule_visible_conversations_changed();

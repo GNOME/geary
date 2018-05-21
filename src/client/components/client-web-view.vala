@@ -294,9 +294,8 @@ public class ClientWebView : WebKit.WebView, Geary.BaseInterface {
         // XXX get the allow prefix from the extension somehow
 
         this.decide_policy.connect(on_decide_policy);
-        this.web_process_crashed.connect(() => {
-                warning("Web process crashed");
-                return Gdk.EVENT_PROPAGATE;
+        this.web_process_terminated.connect((reason) => {
+                warning("Web process crashed: %s", reason.to_string());
             });
 
         register_message_handler(

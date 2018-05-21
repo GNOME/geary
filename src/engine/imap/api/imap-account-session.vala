@@ -59,20 +59,6 @@ internal class Geary.Imap.AccountSession : Geary.Imap.SessionObject {
         return new FolderRoot(prefix);
     }
 
-    public async bool folder_exists_async(FolderPath path, Cancellable? cancellable)
-    throws Error {
-        ClientSession session = claim_session();
-        Gee.List<MailboxInformation> mailboxes = yield send_list_async(session, path, false, cancellable);
-        bool exists = mailboxes.is_empty;
-        if (!exists) {
-            this.folders.unset(path);
-        }
-
-        // XXX fire some signal here
-
-        return exists;
-    }
-
     /**
      * Creates a new special folder on the remote server.
      *

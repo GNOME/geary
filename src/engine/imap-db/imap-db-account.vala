@@ -578,30 +578,7 @@ private class Geary.ImapDB.Account : BaseObject {
         
         return folders;
     }
-    
-    public async bool folder_exists_async(Geary.FolderPath path, Cancellable? cancellable = null)
-        throws Error {
-        check_open();
-        
-        bool exists = false;
-        yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
-            try {
-                int64 folder_id;
-                do_fetch_folder_id(cx, path, false, out folder_id, cancellable);
-                
-                exists = (folder_id != Db.INVALID_ROWID);
-            } catch (EngineError err) {
-                // treat NOT_FOUND as non-exceptional situation
-                if (!(err is EngineError.NOT_FOUND))
-                    throw err;
-            }
-            
-            return Db.TransactionOutcome.DONE;
-        }, cancellable);
-        
-        return exists;
-    }
-    
+
     public async Geary.ImapDB.Folder fetch_folder_async(Geary.FolderPath path, Cancellable? cancellable)
         throws Error {
         check_open();
@@ -1418,20 +1395,7 @@ private class Geary.ImapDB.Account : BaseObject {
             return Db.TransactionOutcome.COMMIT;
         }, cancellable);
     }
-    
-    public async int get_email_count_async(Cancellable? cancellable) throws Error {
-        check_open();
-        
-        int count = 0;
-        yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
-            count = do_get_email_count(cx, cancellable);
-            
-            return Db.TransactionOutcome.SUCCESS;
-        }, cancellable);
-        
-        return count;
-    }
-    
+
     /**
      * Return a map of each passed-in email identifier to the set of folders
      * that contain it.  If an email id doesn't appear in the resulting map,
@@ -1810,19 +1774,7 @@ private class Geary.ImapDB.Account : BaseObject {
         Geary.FolderPath? parent_path = do_find_folder_path(cx, parent_id, cancellable);
         return (parent_path == null ? null : parent_path.get_child(name));
     }
-    
-    private int do_get_email_count(Db.Connection cx, Cancellable? cancellable)
-        throws Error {
-        Db.Statement stmt = cx.prepare(
-            "SELECT COUNT(*) FROM MessageTable");
-        
-        Db.Result results = stmt.exec(cancellable);
-        if (results.finished)
-            return 0;
-        
-        return results.int_at(0);
-    }
-    
+
     private void on_unread_updated(ImapDB.Folder source, Gee.Map<ImapDB.EmailIdentifier, bool>
         unread_status) {
         update_unread_async.begin(source, unread_status, null);

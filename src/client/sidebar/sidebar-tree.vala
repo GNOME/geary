@@ -97,7 +97,6 @@ public class Sidebar.Tree : Gtk.TreeView {
         Gtk.TreeViewColumn text_column = new Gtk.TreeViewColumn();
         text_column.set_expand(true);
         Gtk.CellRendererPixbuf icon_renderer = new Gtk.CellRendererPixbuf();
-        icon_renderer.follow_state = true; 
         text_column.pack_start(icon_renderer, false);
         text_column.add_attribute(icon_renderer, "icon_name", Columns.ICON);
         text_column.set_cell_data_func(icon_renderer, icon_renderer_function);
@@ -119,7 +118,6 @@ public class Sidebar.Tree : Gtk.TreeView {
         set_headers_visible(false);
         set_enable_search(false);
         set_search_column(-1);
-        set_rules_hint(false);
         set_show_expanders(true);
         set_reorderable(false);
         set_enable_tree_lines(false);
@@ -790,9 +788,11 @@ public class Sidebar.Tree : Gtk.TreeView {
     private Gtk.TreePath? get_path_from_event(Gdk.EventButton event) {
         int x, y;
         Gdk.ModifierType mask;
-        event.window.get_device_position(Gdk.Display.get_default().get_device_manager()
-            .get_client_pointer(), out x, out y, out mask);
-        
+        event.window.get_device_position(
+            event.get_seat().get_pointer(),
+            out x, out y, out mask
+        );
+
         int cell_x, cell_y;
         Gtk.TreePath path;
         return get_path_at_pos(x, y, out path, null, out cell_x, out cell_y) ? path : null;

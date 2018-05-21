@@ -1933,12 +1933,11 @@ public class ComposerWidget : Gtk.EventBox {
                 if ("." in name)
                     name = name.split(".")[1];
 
-                Gtk.Action action = new Gtk.Action(name, label, null, null);
-                action.set_sensitive(get_action(name).enabled);
-                action.activate.connect((action) => {
-                        this.actions.activate_action(name, target);
-                    });
-                context_menu.append(new WebKit.ContextMenuItem(action));
+                GLib.SimpleAction action = new GLib.SimpleAction(name, null);
+                action.set_enabled(get_action(name).enabled);
+                context_menu.append(
+                    new WebKit.ContextMenuItem.from_gaction(action, label, null)
+                );
             });
     }
 

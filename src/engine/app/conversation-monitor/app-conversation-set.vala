@@ -39,18 +39,6 @@ private class Geary.App.ConversationSet : BaseObject {
         return email_id_map.size;
     }
 
-    public Gee.Collection<Geary.EmailIdentifier> get_email_identifiers() {
-        return email_id_map.keys;
-    }
-
-    public bool contains(Conversation conversation) {
-        return _conversations.contains(conversation);
-    }
-
-    public bool has_email_identifier(Geary.EmailIdentifier id) {
-        return email_id_map.has_key(id);
-    }
-
     /**
      * Return whether the set has the given Message ID.  If logical_set,
      * there's no requirement that any conversation actually contain a message

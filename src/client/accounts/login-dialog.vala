@@ -23,15 +23,18 @@ public class LoginDialog : Gtk.Dialog {
         spinner_page.visible = false;
         page.size_changed.connect(() => { resize(1, 1); });
         page.info_changed.connect(on_info_changed);
-        
-        cancel_button = new Gtk.Button.from_stock(Stock._CANCEL);
+
+        cancel_button = new Gtk.Button.with_label(Stock._CANCEL);
+        cancel_button.show();
         add_action_widget(cancel_button, Gtk.ResponseType.CANCEL);
-        ok_button = new Gtk.Button.from_stock(Stock._ADD);
+
+        ok_button = new Gtk.Button.with_label(Stock._ADD);
+        ok_button.show();
         ok_button.can_default = true;
         add_action_widget(ok_button, Gtk.ResponseType.OK);
+
         set_default_response(Gtk.ResponseType.OK);
-        get_action_area().show_all();
-        
+
         destroy.connect(() => {
             debug("User closed login dialog, exiting...");
             GearyApplication.instance.exit(1);

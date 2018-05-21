@@ -45,11 +45,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         public bool is_all_set(ListFlags flags) {
             return (this & flags) == flags;
         }
-        
-        public bool is_any_set(ListFlags flags) {
-            return (this & flags) != 0;
-        }
-        
+
         public bool include_marked_for_remove() {
             return is_all_set(INCLUDE_MARKED_FOR_REMOVE);
         }

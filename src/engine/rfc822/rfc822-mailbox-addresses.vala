@@ -151,8 +151,8 @@ public class Geary.RFC822.MailboxAddresses :
      * Returns the addresses suitable for display to a human.
      *
      * @return a string containing each message in the list,
-     * serialised by a call to {@link Message.to_full_display},
-     * separated by commas.
+     * serialised by a call to {@link MailboxAddress.to_full_display}
+     * for each, separated by commas.
      */
     public string to_full_display() {
         return list_to_string(addrs, (a) => a.to_full_display());

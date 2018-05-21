@@ -109,7 +109,7 @@ public class Geary.RFC822.Part : Object {
      * This returns the entity's content type if set, else returns
      * {@link Geary.Mime.ContentType.DISPLAY_DEFAULT} this is a
      * displayable (i.e. non-attachment) entity, or {@link
-     * Geary.Mime.ContentType.}
+     * Geary.Mime.ContentType.ATTACHMENT_DEFAULT} if not.
      */
     public Mime.ContentType get_effective_content_type() {
         Mime.ContentType? type = this.content_type;
@@ -181,8 +181,6 @@ public class Geary.RFC822.Part : Object {
             // Remove the CR's in any CRLF sequence since they are
             // effectively a wire encoding, unless the format requires
             // them.
-            GMime.ContentEncoding encoding =
-                 this.source_part.get_content_encoding();
             if (!(content_type.media_subtype in CR_PRESERVING_TEXT_TYPES)) {
                 filter.add(new GMime.FilterCRLF(false, false));
             }
