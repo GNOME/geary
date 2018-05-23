@@ -7,11 +7,13 @@
 
 class Geary.EngineTest : TestCase {
 
+
     private Engine? engine = null;
     private File? tmp = null;
     private File? config = null;
     private File? data = null;
     private File? res = null;
+
 
     public EngineTest() {
         base("Geary.EngineTest");
@@ -50,7 +52,7 @@ class Geary.EngineTest : TestCase {
 
             this.engine = new Engine();
             this.engine.open_async.begin(
-                config, data, res, null, null,
+                config, data, res, null,
                 (obj, res) => {
                     async_complete(res);
                 });
@@ -97,7 +99,11 @@ class Geary.EngineTest : TestCase {
     public void create_orphan_account_with_legacy() throws Error {
         try {
             this.engine.add_account(
-                new AccountInformation("foo", this.config, this.data),
+                new AccountInformation(
+                    "foo", this.config, this.data,
+                    new MockServiceInformation(),
+                    new MockServiceInformation()
+                ),
                 true
             );
 
@@ -108,7 +114,11 @@ class Geary.EngineTest : TestCase {
             assert(this.engine.create_orphan_account().id == "account_02");
 
             this.engine.add_account(
-                new AccountInformation("bar", this.config, this.data),
+                new AccountInformation(
+                    "bar", this.config, this.data,
+                    new MockServiceInformation(),
+                    new MockServiceInformation()
+                ),
                 true
             );
 

@@ -72,7 +72,9 @@ public class Geary.ImapEngine.AccountProcessorTest : TestCase {
         this.info = new Geary.AccountInformation(
             "test-info",
             File.new_for_path("."),
-            File.new_for_path(".")
+            File.new_for_path("."),
+            new MockServiceInformation(),
+            new MockServiceInformation()
         );
         this.account = new Geary.MockAccount("test-account", this.info);
 
