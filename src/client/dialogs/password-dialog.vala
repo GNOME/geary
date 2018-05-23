@@ -66,8 +66,7 @@ public class PasswordDialog {
     
     public bool run() {
         dialog.show();
-        dialog.get_action_area().show_all();
-        
+
         Gtk.ResponseType response = (Gtk.ResponseType) dialog.run();
         if (response == Gtk.ResponseType.OK) {
             password = entry_password.get_text();

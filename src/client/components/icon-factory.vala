@@ -80,13 +80,15 @@ public class IconFactory {
         // If that fails... well they're out of luck.
         return null;
     }
-    
+
     public Gtk.IconInfo? lookup_icon(string icon_name, int size, Gtk.IconLookupFlags flags = 0) {
         Gtk.IconInfo? icon_info = icon_theme.lookup_icon(icon_name, size, flags);
-        return icon_info != null ? icon_info.copy() :
-            icon_theme.lookup_icon("text-x-generic-symbolic", size, flags);
+        if (icon_info == null) {
+            icon_info = icon_theme.lookup_icon("text-x-generic-symbolic", size, flags);
+        }
+        return icon_info;
     }
-    
+
     // GTK+ 3.14 no longer scales icons via the IconInfo, so perform manually until we
     // properly install the icons as per 3.14's expectations.
     private Gdk.Pixbuf aspect_scale_down_pixbuf(Gdk.Pixbuf pixbuf, int size) {

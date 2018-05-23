@@ -35,18 +35,7 @@
 	</item>
 	</terms>
 	</section>
-	
-	<section id="composer">
-	<title>Composer</title>
-	<terms>
-	<item>
-	<title><gui>Enable spell checking</gui></title>
-	<p>When set, Geary automatically spell checks a message as you write it, underlying
-	each misspelled word in red.</p>
-	</item>
-	</terms>
-	</section>
-	
+
 	<section id="notifications">
 	<title>Notifications</title>
 	<terms>
@@ -62,12 +51,12 @@
 	In Ubuntu Unity, notifications appear at the upper right of the display.</p>
 	</item>
 	<item>
-	<title><gui>Always watch for new mail</gui></title>
+	<title><gui>Watch for new mail when closed</gui></title>
 	<p>Geary will watch your accounts for new mail even when the main window is not open.  To do
 	this, it will silently start when you log in to your computer, and it will continue to run
-	after you close the main window.</p>
+	after you close all windows.</p>
 	</item>
 	</terms>
 	</section>
-	
+
 </page>

@@ -12,8 +12,9 @@
  * saved at all.
  */
 private class Geary.ImapEngine.OutlookDraftsFolder : MinimalFolder {
-    public OutlookDraftsFolder(OutlookAccount account, Imap.Account remote, ImapDB.Account local,
-        ImapDB.Folder local_folder, SpecialFolderType special_folder_type) {
-        base (account, remote, local, local_folder, special_folder_type);
+    public OutlookDraftsFolder(OutlookAccount account,
+                               ImapDB.Folder local_folder,
+                               SpecialFolderType special_folder_type) {
+        base(account, local_folder, special_folder_type);
     }
 }

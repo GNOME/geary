@@ -5,7 +5,7 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-class ConfigurationTest : Gee.TestCase {
+class ConfigurationTest : TestCase {
 
     private Configuration test_config = null;
 
@@ -19,7 +19,7 @@ class ConfigurationTest : Gee.TestCase {
         this.test_config = new Configuration(GearyApplication.APP_ID);
     }
 
-    public void desktop_environment() {
+    public void desktop_environment() throws Error {
         assert(this.test_config.desktop_environment ==
                Configuration.DesktopEnvironment.UNKNOWN);
 

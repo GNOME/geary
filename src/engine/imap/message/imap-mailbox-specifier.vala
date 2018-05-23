@@ -1,4 +1,5 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -11,12 +12,16 @@
  *
  * See [[http://tools.ietf.org/html/rfc3501#section-5.1]]
  */
-
 public class Geary.Imap.MailboxSpecifier : BaseObject, Gee.Hashable<MailboxSpecifier>, Gee.Comparable<MailboxSpecifier> {
-    // all references to Inbox are converted to this string, purely for sanity sake when dealing
-    // with Inbox's case issues
+
+    /**
+     * Canonical name used for the IMAP Inbox for an account.
+     *
+     * All references to Inbox are converted to this string, purely
+     * for sanity sake when dealing with Inbox's case issues.
+     */
     public const string CANONICAL_INBOX_NAME = "INBOX";
-    
+
     /**
      * An instance of an Inbox MailboxSpecifier.
      *
@@ -72,7 +77,7 @@ public class Geary.Imap.MailboxSpecifier : BaseObject, Gee.Hashable<MailboxSpeci
     public static bool is_inbox_name(string name) {
         return Ascii.stri_equal(name, CANONICAL_INBOX_NAME);
     }
-
+    
     /**
      * Returns true if the string is the ''canonical'' name of the IMAP Inbox.
      *
@@ -85,16 +90,31 @@ public class Geary.Imap.MailboxSpecifier : BaseObject, Gee.Hashable<MailboxSpeci
      * @see is_inbox_name
      */
     public static bool is_canonical_inbox_name(string name) {
-        return (name == CANONICAL_INBOX_NAME);
+        return Ascii.str_equal(name, CANONICAL_INBOX_NAME);
     }
-
+    
     /**
      * Converts a generic {@link FolderPath} into an IMAP mailbox specifier.
      */
-    public MailboxSpecifier.from_folder_path(FolderPath path, string delim) throws ImapError {
-        init(path.get_fullpath(delim));
+    public MailboxSpecifier.from_folder_path(FolderPath path, MailboxSpecifier inbox, string? delim)
+    throws ImapError {
+        Gee.List<string> parts = path.as_list();
+        if (parts.size > 1 && delim == null) {
+            // XXX not quite right
+            throw new ImapError.INVALID("Path has more than one part but no delimiter given");
+        }
+
+        StringBuilder builder = new StringBuilder(
+            is_inbox_name(parts[0]) ? inbox.name : parts[0]);
+
+        for (int i = 1; i < parts.size; i++) {
+            builder.append(delim);
+            builder.append(parts[i]);
+        }
+
+        init(builder.str);
     }
-    
+
     private void init(string decoded) {
         name = decoded;
         is_inbox = is_inbox_name(decoded);
@@ -175,27 +195,27 @@ public class Geary.Imap.MailboxSpecifier : BaseObject, Gee.Hashable<MailboxSpeci
     public uint hash() {
         return is_inbox ? Ascii.stri_hash(name) : Ascii.str_hash(name);
     }
-
+    
     public bool equal_to(MailboxSpecifier other) {
         if (this == other)
             return true;
-
+        
         if (is_inbox)
             return Ascii.stri_equal(name, other.name);
-
-        return (name == other.name);
+        
+        return Ascii.str_equal(name, other.name);
     }
-
+    
     public int compare_to(MailboxSpecifier other) {
         if (this == other)
             return 0;
-
+        
         if (is_inbox && other.is_inbox)
             return 0;
-
-        return GLib.strcmp(name, other.name);
+        
+        return Ascii.strcmp(name, other.name);
     }
-
+    
     public string to_string() {
         return name;
     }

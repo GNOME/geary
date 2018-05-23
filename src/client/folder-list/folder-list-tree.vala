@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class FolderList.Tree : Sidebar.Tree {
+public class FolderList.Tree : Sidebar.Tree, Geary.BaseInterface {
     public const Gtk.TargetEntry[] TARGET_ENTRY_LIST = {
         { "application/x-geary-mail", Gtk.TargetFlags.SAME_APP, 0 }
     };
@@ -21,9 +21,10 @@ public class FolderList.Tree : Sidebar.Tree {
     private InboxesBranch inboxes_branch = new InboxesBranch();
     private SearchBranch? search_branch = null;
     private NewMessagesMonitor? monitor = null;
-    
+
     public Tree() {
         base(new Gtk.TargetEntry[0], Gdk.DragAction.ASK, drop_handler);
+        base_ref();
         entry_selected.connect(on_entry_selected);
 
         // Set self as a drag destination.
@@ -52,11 +53,12 @@ public class FolderList.Tree : Sidebar.Tree {
             """
         );
     }
-    
+
     ~Tree() {
         set_new_messages_monitor(null);
+        base_unref();
     }
-    
+
     private void drop_handler(Gdk.DragContext context, Sidebar.Entry? entry,
         Gtk.SelectionData data, uint info, uint time) {
     }

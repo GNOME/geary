@@ -43,7 +43,9 @@ public class Geary.IdleManager : BaseObject {
         get { return this.source_id >= 0; }
     }
 
-    private IdleFunc callback;
+    // Callback must be unowned to avoid reference loop with owner's
+    // class when a closure is used as the callback.
+    private unowned IdleFunc callback;
     private int source_id = -1;
 
 
@@ -51,7 +53,7 @@ public class Geary.IdleManager : BaseObject {
      * Constructs a new idle manager with an interval in seconds.
      *
      * The idle function will be by default not running, and hence
-     * needs to be started by a call to {@link start}.
+     * needs to be started by a call to {@link schedule}.
      */
     public IdleManager(IdleFunc callback) {
         this.callback = callback;

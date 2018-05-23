@@ -1,16 +1,46 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2017-2018 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
+/**
+ * Manages a pool of IMAP client sessions.
+ *
+ * When opened and when reachable, the manager will establish a pool
+ * of {@link ClientSession} instances that are connected to the IMAP
+ * endpoint of an account, ensuring there are at least {@link
+ * min_pool_size} available. A connected, authorised client session
+ * can be obtained from the connection pool by calling {@link
+ * claim_authorized_session_async}, and when finished with returned by
+ * calling {@link release_session_async}.
+ *
+ * This class is not thread-safe.
+ */
 public class Geary.Imap.ClientSessionManager : BaseObject {
+
+
     private const int DEFAULT_MIN_POOL_SIZE = 1;
-    private const int AUTHORIZED_SESSION_ERROR_MIN_RETRY_TIMEOUT_SEC = 1;
-    private const int AUTHORIZED_SESSION_ERROR_MAX_RETRY_TIMEOUT_SEC = 10;
-    
+    private const int DEFAULT_MAX_FREE_SIZE = 1;
+    private const int POOL_START_TIMEOUT_SEC = 1;
+    private const int POOL_STOP_TIMEOUT_SEC = 3;
+    private const int CHECK_NOOP_THRESHOLD_SEC = 5;
+
+
+    /** Determines if the manager has been opened. */
     public bool is_open { get; private set; default = false; }
-    
+
+    /**
+     * Determines if the manager has a working connection.
+     *
+     * This will be true once at least one connection has been
+     * established, and after the server has become reachable again
+     * after being unreachable.
+     */
+    public bool is_ready { get; private set; default = false; }
+
     /**
      * Set to zero or negative value if keepalives should be disabled when a connection has not
      * selected a mailbox.  (This is not recommended.)
@@ -19,7 +49,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
      * and returning to an authorized state.
      */
     public uint unselected_keepalive_sec { get; set; default = ClientSession.DEFAULT_UNSELECTED_KEEPALIVE_SEC; }
-    
+
     /**
      * Set to zero or negative value if keepalives should be disabled when a mailbox is selected
      * or examined.  (This is not recommended.)
@@ -27,7 +57,7 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
      * This only affects newly selected/examined sessions.
      */
     public uint selected_keepalive_sec { get; set; default = ClientSession.DEFAULT_SELECTED_KEEPALIVE_SEC; }
-    
+
     /**
      * Set to zero or negative value if keepalives should be disabled when a mailbox is selected
      * or examined and IDLE is supported.  (This is not recommended.)
@@ -35,217 +65,398 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
      * This only affects newly selected/examined sessions.
      */
     public uint selected_with_idle_keepalive_sec { get; set; default = ClientSession.DEFAULT_SELECTED_WITH_IDLE_KEEPALIVE_SEC; }
-    
+
     /**
-     * ClientSessionManager attempts to maintain a minimum number of open sessions with the server
-     * so they're immediately ready for use.
+     * Specifies the minimum number of sessions to keep open.
      *
-     * Setting this does not immediately adjust the pool size in either direction.  Adjustment will
-     * happen as connections are needed or closed.
+     * The manager will attempt to keep at least this number of
+     * connections open at all times.
+     *
+     * Setting this does not immediately adjust the pool size in
+     * either direction.  Adjustment will happen as connections are
+     * needed or closed.
      */
     public int min_pool_size { get; set; default = DEFAULT_MIN_POOL_SIZE; }
-    
-    /**
-     * Indicates if the {@link Endpoint} the {@link ClientSessionManager} connects to is reachable,
-     * according to NetworkMonitor.
-     *
-     * By default, this is false, pessimistic that the network is reachable.  It is updated even if the
-     * {@link ClientSessionManager} is not open, maintained for the lifetime of the object.
-     */
-    public bool is_endpoint_reachable { get; private set; default = false; }
 
-    private AccountInformation account_information;
+    /**
+     * Specifies the maximum number of free sessions to keep open.
+     *
+     * If there are already this number of free sessions available,
+     * the manager will close any additional sessions that are
+     * released, instead of keeping them for re-use. However it will
+     * not close sessions if doing so would reduce the size of the
+     * pool below {@link min_pool_size}.
+     *
+     * Setting this does not immediately adjust the pool size in
+     * either direction.  Adjustment will happen as connections are
+     * needed or closed.
+     */
+    public int max_free_size { get; set; default = DEFAULT_MAX_FREE_SIZE; }
+
+    /**
+     * Determines if returned sessions should be kept or discarded.
+     */
+    public bool discard_returned_sessions = false;
+
+    private string id;
     private Endpoint endpoint;
-	private ConnectivityManager connectivity;
-    private Gee.HashSet<ClientSession> sessions = new Gee.HashSet<ClientSession>();
-    private int pending_sessions = 0;
+    private Credentials credentials;
+
     private Nonblocking.Mutex sessions_mutex = new Nonblocking.Mutex();
-    private Gee.HashSet<ClientSession> reserved_sessions = new Gee.HashSet<ClientSession>();
+    private Gee.Set<ClientSession> all_sessions =
+        new Gee.HashSet<ClientSession>();
+    private Nonblocking.Queue<ClientSession> free_queue =
+        new Nonblocking.Queue<ClientSession>.fifo();
+
+    private TimeoutManager pool_start;
+    private TimeoutManager pool_stop;
+    private Cancellable? pool_cancellable = null;
+
     private bool authentication_failed = false;
     private bool untrusted_host = false;
-    private uint authorized_session_error_retry_timeout_id = 0;
-    private int authorized_session_retry_sec = AUTHORIZED_SESSION_ERROR_MIN_RETRY_TIMEOUT_SEC;
 
+    /**
+     * Fired when the manager's ready state changes.
+     *
+     * This will be fired after opening if online and once at least
+     * one connection has been established, after the server has
+     * become reachable again after being unreachable, and if the
+     * server becomes unreachable.
+     */
+    public signal void ready(bool is_ready);
+
+    /** Fired when a network or non-auth error occurs opening a session. */
+    public signal void connection_failed(Error err);
+
+    /** Fired when an authentication error occurs opening a session. */
     public signal void login_failed(StatusResponse? response);
 
-    public ClientSessionManager(AccountInformation account_information) {
-        this.account_information = account_information;
-        this.account_information.notify["imap-credentials"].connect(on_imap_credentials_notified);
 
-        // NOTE: This works because AccountInformation guarantees the IMAP endpoint not to change
-        // for the lifetime of the AccountInformation object; if this ever changes, will need to
-        // refactor for that
-        this.endpoint = account_information.get_imap_endpoint();
+    public ClientSessionManager(string id,
+                                Endpoint imap_endpoint,
+                                Credentials imap_credentials) {
+        this.id = "%s:%s".printf(id, imap_endpoint.to_string());
+
+        this.endpoint = imap_endpoint;
         this.endpoint.notify[Endpoint.PROP_TRUST_UNTRUSTED_HOST].connect(on_imap_trust_untrusted_host);
         this.endpoint.untrusted_host.connect(on_imap_untrusted_host);
 
-		this.connectivity = new ConnectivityManager(this.endpoint);
-		this.connectivity.notify["is-reachable"].connect(on_connectivity_change);
-		this.connectivity.check_reachable.begin();
+        this.credentials = imap_credentials;
+
+        this.pool_start = new TimeoutManager.seconds(
+            POOL_START_TIMEOUT_SEC,
+            () => { this.check_pool.begin(); }
+        );
+
+        this.pool_stop = new TimeoutManager.seconds(
+            POOL_STOP_TIMEOUT_SEC,
+            () => { this.close_pool.begin(); }
+        );
     }
 
     ~ClientSessionManager() {
         if (is_open)
-            warning("Destroying opened ClientSessionManager");
+            warning("[%s] Destroying opened ClientSessionManager", this.id);
 
-        account_information.notify["imap-credentials"].disconnect(on_imap_credentials_notified);
-        endpoint.untrusted_host.disconnect(on_imap_untrusted_host);
-        endpoint.notify[Endpoint.PROP_TRUST_UNTRUSTED_HOST].disconnect(on_imap_trust_untrusted_host);
-		this.connectivity.cancel_check();
-		this.connectivity = null;
+        this.endpoint.untrusted_host.disconnect(on_imap_untrusted_host);
+        this.endpoint.notify[Endpoint.PROP_TRUST_UNTRUSTED_HOST].disconnect(on_imap_trust_untrusted_host);
     }
 
     public async void open_async(Cancellable? cancellable) throws Error {
         if (is_open)
             throw new EngineError.ALREADY_OPEN("ClientSessionManager already open");
-        
-        is_open = true;
-        
-        adjust_session_pool.begin();
+
+        this.is_open = true;
+        this.authentication_failed = false;
+        this.pool_cancellable = new Cancellable();
+
+		this.endpoint.connectivity.notify["is-reachable"].connect(on_connectivity_change);
+        this.endpoint.connectivity.address_error_reported.connect(on_connectivity_error);
+        if (this.endpoint.connectivity.is_reachable.is_certain()) {
+            this.check_pool.begin();
+        } else {
+            this.endpoint.connectivity.check_reachable.begin();
+        }
     }
-    
+
     public async void close_async(Cancellable? cancellable) throws Error {
         if (!is_open)
             return;
-        
-        is_open = false;
-        
-        // to avoid locking down the sessions table while scheduling disconnects, make a copy
-        // and work off of that
-        ClientSession[]? sessions_copy = sessions.to_array();
-        
-        // disconnect all existing sessions at once; don't wait for each, since as they disconnect
-        // they'll remove themselves from the sessions list and cause this foreach to explode
-        foreach (ClientSession session in sessions_copy)
-            session.disconnect_async.begin();
-        
-        // free copy
-        sessions_copy = null;
-        
+
+        this.is_open = false;
+        this.pool_cancellable.cancel();
+
+		this.endpoint.connectivity.notify["is-reachable"].disconnect(on_connectivity_change);
+        this.endpoint.connectivity.address_error_reported.disconnect(on_connectivity_error);
+
+        yield close_pool();
+
         // TODO: This isn't the best (deterministic) way to deal with this, but it's easy and works
         // for now
         int attempts = 0;
-        while (sessions.size > 0) {
-            debug("Waiting for ClientSessions to disconnect from ClientSessionManager...");
+        while (this.all_sessions.size > 0) {
+            debug("[%s] Waiting for client sessions to disconnect...", this.id);
             Timeout.add(250, close_async.callback);
             yield;
-            
+
             // give up after three seconds
             if (++attempts > 12)
                 break;
         }
     }
-    
-    private void on_imap_credentials_notified() {
-        authentication_failed = false;
-        
-        if (is_open)
-            adjust_session_pool.begin();
+
+    /**
+     * Informs the manager that the account's IMAP credentials have changed.
+     *
+     * This will reset the manager's authentication state and if open,
+     * attempt to open a connection to the server.
+     */
+    public void credentials_updated(Credentials new_creds) {
+        this.authentication_failed = false;
+        this.credentials = new_creds;
+        if (this.is_open) {
+            this.check_pool.begin();
+        }
     }
-    
+
+    /**
+     * Claims a free session, blocking until one becomes available.
+     *
+     * This call will fail fast if the pool is known to not in the
+     * right state (bad authorisation credentials, host not ready,
+     * etc), but then will block while attempting to obtain a
+     * connection if the free queue is empty. If an error occurs when
+     * this connection is in progress, then the call will block until
+     * another becomes available (host becomes reachable again, user
+     * enters password, etc). If this is undesirable, then the caller
+     * may cancel the call.
+     *
+     * @throws ImapError.UNAUTHENTICATED if the stored credentials are
+     * invalid.
+     * @throws ImapError.UNAVAILABLE if the IMAP endpoint is not
+     * trusted or is not reachable.
+     */
+    public async ClientSession claim_authorized_session_async(Cancellable? cancellable)
+        throws Error {
+        check_open();
+        debug("[%s] Claiming session with %d of %d free",
+              this.id, this.free_queue.size, this.all_sessions.size);
+
+        if (this.authentication_failed)
+            throw new ImapError.UNAUTHENTICATED("Invalid ClientSessionManager credentials");
+
+        if (this.untrusted_host)
+            throw new ImapError.UNAVAILABLE("Untrusted host %s", endpoint.to_string());
+
+        if (!this.endpoint.connectivity.is_reachable.is_certain())
+            throw new ImapError.UNAVAILABLE("Host at %s is unreachable", endpoint.to_string());
+
+        ClientSession? claimed = null;
+        while (claimed == null) {
+            // This isn't racy since this is class is not accessed by
+            // multiple threads. Don't wait for it to return though
+            // because we only want to kick off establishing the
+            // connection, and wait for it via the queue.
+            if (this.free_queue.size == 0) {
+                this.check_pool.begin(true);
+            }
+
+            claimed = yield this.free_queue.receive(cancellable);
+
+            // Connection may have gone bad sitting in the queue, so
+            // check it before using it
+            if (!(yield check_session(claimed, true))) {
+                claimed = null;
+            }
+        }
+
+        return claimed;
+    }
+
+    public async void release_session_async(ClientSession session)
+        throws Error {
+        // Don't check_open(), it's valid for this to be called when
+        // is_open is false, that happens during mop-up
+
+        debug("[%s] Returning session with %d of %d free",
+              this.id, this.free_queue.size, this.all_sessions.size);
+
+        bool too_many_free = (
+            this.free_queue.size >= this.max_free_size &&
+            this.all_sessions.size > this.min_pool_size
+        );
+
+        if (!this.is_open || this.discard_returned_sessions || too_many_free) {
+            yield force_disconnect(session);
+        } else if (yield check_session(session, false)) {
+            bool free = true;
+            MailboxSpecifier? mailbox = null;
+            ClientSession.ProtocolState proto = session.get_protocol_state(out mailbox);
+            // If the session has a mailbox selected, close it before
+            // adding it back to the pool
+            if (proto == ClientSession.ProtocolState.SELECTED ||
+                proto == ClientSession.ProtocolState.SELECTING) {
+                // always close mailbox to return to authorized state
+                try {
+                    yield session.close_mailbox_async(pool_cancellable);
+                } catch (ImapError imap_error) {
+                    debug("[%s] Error attempting to close released session %s: %s",
+                          this.id, session.to_string(), imap_error.message);
+                    free = false;
+                }
+
+                if (session.get_protocol_state(null) !=
+                    ClientSession.ProtocolState.AUTHORIZED) {
+                    // Closing it didn't work, so drop it
+                    yield force_disconnect(session);
+                    free = false;
+                }
+            }
+
+            if (free) {
+                debug("[%s] Unreserving session %s", this.id, session.to_string());
+                this.free_queue.send(session);
+            }
+        }
+    }
+
+    /**
+     * Returns a string representation of this object for debugging.
+     */
+    public string to_string() {
+        return this.id;
+    }
+
     private void check_open() throws Error {
         if (!is_open)
             throw new EngineError.OPEN_REQUIRED("ClientSessionManager is not open");
     }
-    
-    // TODO: Need a more thorough and bulletproof system for maintaining a pool of ready
-    // authorized sessions.
-    private async void adjust_session_pool() {
-        if (!this.is_open)
-            return;
 
-        int token;
-        try {
-            token = yield sessions_mutex.claim_async();
-        } catch (Error claim_err) {
-            debug("Unable to claim session table mutex for adjusting pool: %s", claim_err.message);
-            
-            return;
-        }
-        
-        while ((sessions.size + pending_sessions) < min_pool_size
-            && !authentication_failed
-            && is_open
-            && !untrusted_host
-            && is_endpoint_reachable) {
-            pending_sessions++;
-            create_new_authorized_session.begin(null, on_created_new_authorized_session);
-        }
-        
-        try {
-            sessions_mutex.release(ref token);
-        } catch (Error release_err) {
-            debug("Unable to release session table mutex after adjusting pool: %s", release_err.message);
+    private async void check_pool(bool is_claiming = false) {
+        debug("[%s] Checking session pool with %d of %d free",
+              this.id, this.free_queue.size, this.all_sessions.size);
+
+        this.pool_start.reset();
+
+        if (this.is_open &&
+            !this.authentication_failed &&
+            !this.untrusted_host &&
+            this.endpoint.connectivity.is_reachable.is_certain()) {
+
+            int needed = this.min_pool_size - this.all_sessions.size;
+            if (needed <= 0 && is_claiming) {
+                needed = 1;
+            }
+
+            // Open as many as needed in parallel
+            while (needed > 0) {
+                add_pool_session.begin();
+                needed--;
+            }
         }
     }
-    
-    private void on_created_new_authorized_session(Object? source, AsyncResult result) {
-        pending_sessions--;
-        
+
+    private async void add_pool_session() {
         try {
-            create_new_authorized_session.end(result);
+            ClientSession free = yield this.create_new_authorized_session(
+                this.pool_cancellable
+            );
+            yield this.sessions_mutex.execute_locked(() => {
+                    this.all_sessions.add(free);
+                });
+            this.free_queue.send(free);
         } catch (Error err) {
-            debug("Unable to create authorized session to %s: %s", endpoint.to_string(), err.message);
-            
-            // try again after a slight delay and bump up delay
-            if (authorized_session_error_retry_timeout_id != 0)
-                Source.remove(authorized_session_error_retry_timeout_id);
-            
-            authorized_session_error_retry_timeout_id = Timeout.add_seconds(
-                authorized_session_retry_sec, on_authorized_session_error_retry_timeout);
-            
-            authorized_session_retry_sec = (authorized_session_retry_sec * 2).clamp(
-                AUTHORIZED_SESSION_ERROR_MIN_RETRY_TIMEOUT_SEC, AUTHORIZED_SESSION_ERROR_MAX_RETRY_TIMEOUT_SEC);
+            debug("[%s] Error adding new session to the pool: %s",
+                  this.id, err.message);
         }
     }
-    
-    private bool on_authorized_session_error_retry_timeout() {
-        authorized_session_error_retry_timeout_id = 0;
-        
-        adjust_session_pool.begin();
-        
-        return false;
+
+    /** Determines if a session is valid, disposing of it if not. */
+    private async bool check_session(ClientSession target, bool claiming) {
+        bool valid = false;
+        switch (target.get_protocol_state(null)) {
+        case ClientSession.ProtocolState.AUTHORIZED:
+        case ClientSession.ProtocolState.CLOSING_MAILBOX:
+            valid = true;
+            break;
+
+        case ClientSession.ProtocolState.SELECTED:
+        case ClientSession.ProtocolState.SELECTING:
+            if (claiming) {
+                yield force_disconnect(target);
+            } else {
+                valid = true;
+            }
+            break;
+
+        case ClientSession.ProtocolState.UNCONNECTED:
+            // Already disconnected, so drop it on the floor
+            try {
+                yield remove_session_async(target);
+            } catch (Error err) {
+                debug("[%s] Error removing unconnected session: %s",
+                      this.id, err.message);
+            }
+            break;
+
+        default:
+            yield force_disconnect(target);
+            break;
+        }
+
+        // We now know if the session /thinks/ it is in a reasonable
+        // state, but if we're claiming a new session it *needs* to be
+        // good, and in particular we want to ensure the connection
+        // hasn't timed out or otherwise been dropped. So send a NOOP
+        // and wait for it to find out. Only do this if we haven't
+        // seen a response from the server in a little while, however.
+        //
+        // XXX This is problematic since the server may send untagged
+        // responses to the NOOP, but at least since it won't be in
+        // the Selected state, we won't lose notifications of new
+        // messages, etc, only folder status, which should eventually
+        // get picked up by UpdateRemoteFolders. :/
+        if (claiming &&
+            target.last_seen + (CHECK_NOOP_THRESHOLD_SEC * 1000000) < GLib.get_real_time()) {
+            try {
+                debug("Sending NOOP when claiming a session");
+                yield target.send_command_async(
+                    new NoopCommand(), this.pool_cancellable
+                );
+            } catch (Error err) {
+                debug("Error sending NOOP: %s", err.message);
+                valid = false;
+            }
+        }
+
+        return valid;
     }
-    
+
     private async ClientSession create_new_authorized_session(Cancellable? cancellable) throws Error {
-        if (authentication_failed)
-            throw new ImapError.UNAUTHENTICATED("Invalid ClientSessionManager credentials");
-        
-        if (untrusted_host)
-            throw new ImapError.UNAUTHENTICATED("Untrusted host %s", endpoint.to_string());
-        
-        if (!is_endpoint_reachable)
-            throw new ImapError.UNAVAILABLE("Host at %s is unreachable", endpoint.to_string());
-        
+        debug("[%s] Opening new session", this.id);
         ClientSession new_session = new ClientSession(endpoint);
-        
-        // add session to pool before launching all the connect activity so error cases can properly
-        // back it out
-        if (sessions_mutex.is_locked())
-            locked_add_session(new_session);
-        else
-            yield unlocked_add_session_async(new_session);
-        
+
+        // Listen for auth failures early so the client is notified if
+        // there is an error, even though we won't want to keep the
+        // session around.
+        new_session.login_failed.connect(on_login_failed);
+
         try {
             yield new_session.connect_async(cancellable);
         } catch (Error err) {
-            debug("[%s] Connect failure: %s", new_session.to_string(), err.message);
-            
-            bool removed;
-            if (sessions_mutex.is_locked())
-                removed = locked_remove_session(new_session);
-            else
-                removed = yield unlocked_remove_session_async(new_session);
-            assert(removed);
-            
+            if (!(err is IOError.CANCELLED)) {
+                connection_failed(err);
+            }
             throw err;
         }
-        
+
         try {
-            yield new_session.initiate_session_async(account_information.imap.credentials, cancellable);
+            yield new_session.initiate_session_async(this.credentials, cancellable);
         } catch (Error err) {
-            debug("[%s] Initiate session failure: %s", new_session.to_string(), err.message);
-            
+            if (!(err is IOError.CANCELLED)) {
+                connection_failed(err);
+            }
+
             // need to disconnect before throwing error ... don't honor Cancellable here, it's
             // important to disconnect the client before dropping the ref
             try {
@@ -254,265 +465,141 @@ public class Geary.Imap.ClientSessionManager : BaseObject {
                 debug("[%s] Error disconnecting due to session initiation failure, ignored: %s",
                     new_session.to_string(), disconnect_err.message);
             }
-            
-            bool removed;
-            if (sessions_mutex.is_locked())
-                removed = locked_remove_session(new_session);
-            else
-                removed = yield unlocked_remove_session_async(new_session);
-            assert(removed);
-            
+
             throw err;
         }
-        
-        // reset delay
-        authorized_session_retry_sec = AUTHORIZED_SESSION_ERROR_MIN_RETRY_TIMEOUT_SEC;
-        
-        // do this after logging in
-        new_session.enable_keepalives(selected_keepalive_sec, unselected_keepalive_sec,
-            selected_with_idle_keepalive_sec);
-        
-        // since "disconnected" is used to remove the ClientSession from the sessions list, want
-        // to only connect to the signal once the object has been added to the list; otherwise it's
-        // possible a cancel during the connect or login will result in a "disconnected" signal,
-        // removing the session before it's added
+
+        // Only bother tracking disconnects and enabling keeping alive
+        // now the session is properly established.
         new_session.disconnected.connect(on_disconnected);
-        
+        new_session.enable_keepalives(selected_keepalive_sec,
+                                      unselected_keepalive_sec,
+                                      selected_with_idle_keepalive_sec);
+
+        // We now have a good connection, so signal us as ready if not
+        // already done so.
+        if (!this.is_ready) {
+            debug("[%s] Became ready", this.id);
+            notify_ready(true);
+        }
+
         return new_session;
     }
-    
-    public async ClientSession claim_authorized_session_async(Cancellable? cancellable) throws Error {
-        check_open();
-        
-        int token = yield sessions_mutex.claim_async(cancellable);
-        
-        ClientSession? found_session = null;
-        foreach (ClientSession session in sessions) {
-            MailboxSpecifier? mailbox;
-            if (!reserved_sessions.contains(session) &&
-                (session.get_protocol_state(out mailbox) == ClientSession.ProtocolState.AUTHORIZED)) {
-                found_session = session;
-                
-                break;
-            }
-        }
-        
-        Error? err = null;
+
+    private async void close_pool() {
+        debug("[%s] Closing the pool, disconnecting %d sessions",
+              this.id, this.all_sessions.size);
+
+        this.pool_start.reset();
+        this.pool_stop.reset();
+        notify_ready(false);
+
+        // Take a copy and work off that while scheduling disconnects,
+        // since as they disconnect they'll remove themselves from the
+        // sessions list and cause the loop below to explode.
+        ClientSession[]? to_close = null;
         try {
-            if (found_session == null)
-                found_session = yield create_new_authorized_session(cancellable);
-        } catch (Error create_err) {
-            debug("Error creating session: %s", create_err.message);
-            err = create_err;
-        }
-        
-        // claim it now
-        if (found_session != null) {
-            bool added = reserved_sessions.add(found_session);
-            assert(added);
-        }
-        
-        try {
-            sessions_mutex.release(ref token);
-        } catch (Error release_err) {
-            debug("Error releasing sessions table mutex: %s", release_err.message);
-        }
-        
-        if (err != null)
-            throw err;
-        
-        return found_session;
-    }
-    
-    public async void release_session_async(ClientSession session, Cancellable? cancellable)
-        throws Error {
-        // Don't check_open(), it's valid for this to be called when is_open is false, that happens
-        // during mop-up
-        
-        MailboxSpecifier? mailbox;
-        ClientSession.ProtocolState context = session.get_protocol_state(out mailbox);
-        
-        bool unreserve = false;
-        switch (context) {
-            case ClientSession.ProtocolState.AUTHORIZED:
-            case ClientSession.ProtocolState.CLOSING_MAILBOX:
-                // keep as-is, but remove from the reserved list
-                unreserve = true;
-            break;
-            
-            // ClientSessionManager is tasked with holding onto a pool of authorized connections,
-            // so if one is released outside that state, pessimistically drop it
-            case ClientSession.ProtocolState.CONNECTING:
-            case ClientSession.ProtocolState.AUTHORIZING:
-            case ClientSession.ProtocolState.UNAUTHORIZED:
-                yield force_disconnect_async(session, true);
-            break;
-            
-            case ClientSession.ProtocolState.UNCONNECTED:
-                yield force_disconnect_async(session, false);
-            break;
-            
-            case ClientSession.ProtocolState.SELECTED:
-            case ClientSession.ProtocolState.SELECTING:
-                debug("[%s] Closing mailbox for released session %s", to_string(), session.to_string());
-                
-                // always close mailbox to return to authorized state
-                try {
-                    yield session.close_mailbox_async(cancellable);
-                } catch (ImapError imap_error) {
-                    debug("Error attempting to close released session %s: %s", session.to_string(),
-                        imap_error.message);
-                }
-                
-                // if not in authorized state now, drop it, otherwise remove from reserved list
-                if (session.get_protocol_state(out mailbox) == ClientSession.ProtocolState.AUTHORIZED)
-                    unreserve = true;
-                else
-                    yield force_disconnect_async(session, true);
-            break;
-            
-            default:
-                assert_not_reached();
-        }
-        
-        if (!unreserve)
-            return;
-        
-        // if not open, disconnect, which will remove from the reserved pool anyway
-        if (!is_open) {
-            yield force_disconnect_async(session, true);
-        } else {
-            debug("[%s] Unreserving session %s", to_string(), session.to_string());
-            
-            try {
-                // don't respect Cancellable because this *must* happen; don't want this lingering
-                // on the reserved list forever
-                int token = yield sessions_mutex.claim_async();
-                
-                bool removed = reserved_sessions.remove(session);
-                assert(removed);
-                
-                sessions_mutex.release(ref token);
-            } catch (Error err) {
-                message("Unable to remove %s from reserved list: %s", session.to_string(), err.message);
-            }
-        }
-    }
-    
-    // It's possible this will be called more than once on the same session, especially in the case of a
-    // remote close on reserved ClientSession, so this code is forgiving.
-    private async void force_disconnect_async(ClientSession session, bool do_disconnect) {
-        debug("[%s] Dropping session %s (disconnecting=%s)", to_string(),
-            session.to_string(), do_disconnect.to_string());
-        
-        int token;
-        try {
-            token = yield sessions_mutex.claim_async();
+            yield this.sessions_mutex.execute_locked(() => {
+                    to_close = this.all_sessions.to_array();
+                });
         } catch (Error err) {
-            debug("Unable to acquire sessions mutex: %s", err.message);
-            
-            return;
+            debug("Error occurred copying sessions: %s", err.message);
         }
-        
-        locked_remove_session(session);
-        
-        if (do_disconnect) {
-            try {
-                yield session.disconnect_async();
-            } catch (Error err) {
-                // ignored
-            }
+
+        // Disconnect all existing sessions at once. Don't block
+        // waiting for any since we don't want to delay closing the
+        // others.
+        foreach (ClientSession session in to_close) {
+            session.disconnect_async.begin();
         }
-        
+    }
+
+    private async void force_disconnect(ClientSession session) {
+        debug("[%s] Dropping session %s", this.id, session.to_string());
+
         try {
-            sessions_mutex.release(ref token);
+            yield remove_session_async(session);
         } catch (Error err) {
-            debug("Unable to release sessions mutex: %s", err.message);
+            debug("[%s] Error removing session: %s", this.id, err.message);
         }
-        
-        adjust_session_pool.begin();
-    }
-    
-    private void on_disconnected(ClientSession session, ClientSession.DisconnectReason reason) {
-        force_disconnect_async.begin(session, false);
-    }
-    
-    private void on_login_failed(ClientSession session, StatusResponse? response) {
-        authentication_failed = true;
-        
-        login_failed(response);
-        
+
+        // Don't wait for this to finish because we don't want to
+        // block claiming a new session, shutdown, etc.
         session.disconnect_async.begin();
     }
-    
-    // Only call with sessions mutex locked
-    private void locked_add_session(ClientSession session) {
-        sessions.add(session);
-        
-        // See create_new_authorized_session() for why the "disconnected" signal is not subscribed
-        // to here (but *is* unsubscribed to in remove_session())
-        session.login_failed.connect(on_login_failed);
-    }
-    
-    private async void unlocked_add_session_async(ClientSession session) throws Error {
-        int token = yield sessions_mutex.claim_async();
-        locked_add_session(session);
-        sessions_mutex.release(ref token);
-    }
-    
-    // Only call with sessions mutex locked
-    private bool locked_remove_session(ClientSession session) {
-        bool removed = sessions.remove(session);
+
+    private async bool remove_session_async(ClientSession session) throws Error {
+        // Ensure the session isn't held on to, anywhere
+
+        this.free_queue.revoke(session);
+
+        bool removed = false;
+        yield this.sessions_mutex.execute_locked(() => {
+                removed = this.all_sessions.remove(session);
+            });
+
         if (removed) {
             session.disconnected.disconnect(on_disconnected);
             session.login_failed.disconnect(on_login_failed);
         }
-        
-        reserved_sessions.remove(session);
-        
         return removed;
     }
-    
-    private async bool unlocked_remove_session_async(ClientSession session) throws Error {
-        int token = yield sessions_mutex.claim_async();
-        bool removed = locked_remove_session(session);
-        sessions_mutex.release(ref token);
-        
-        return removed;
+
+    private void notify_ready(bool is_ready) {
+        this.is_ready = is_ready;
+        ready(is_ready);
     }
-    
+
+    private void on_disconnected(ClientSession session, ClientSession.DisconnectReason reason) {
+        this.remove_session_async.begin(
+            session,
+            (obj, res) => {
+                try {
+                    this.remove_session_async.end(res);
+                } catch (Error err) {
+                    debug("[%s] Error removing disconnected session: %s",
+                          this.id, err.message);
+                }
+            }
+        );
+    }
+
+    private void on_login_failed(ClientSession session, StatusResponse? response) {
+        this.authentication_failed = true;
+        login_failed(response);
+        this.close_pool.begin();
+    }
+
     private void on_imap_untrusted_host() {
-        // this is called any time trust issues are detected, so immediately clutch in to stop
-        // retries
-        untrusted_host = true;
+        this.untrusted_host = true;
+        this.close_pool.begin();
     }
-    
+
     private void on_imap_trust_untrusted_host() {
         // fired when the trust_untrusted_host property changes, indicating if the user has agreed
         // to ignore the trust problems and continue connecting
         if (untrusted_host && endpoint.trust_untrusted_host == Trillian.TRUE) {
             untrusted_host = false;
-            
+
             if (is_open)
-                adjust_session_pool.begin();
+                check_pool.begin();
         }
     }
 
 	private void on_connectivity_change() {
-		this.is_endpoint_reachable = this.connectivity.is_reachable;
-		debug("Host %s became %s",
-			  this.endpoint.to_string(),
-			  this.is_endpoint_reachable ? "reachable" : "unreachable");
-		if (this.is_endpoint_reachable) {
-            this.adjust_session_pool.begin();
-		}
+		bool is_reachable = this.endpoint.connectivity.is_reachable.is_certain();
+		if (is_reachable) {
+            this.pool_start.start();
+            this.pool_stop.reset();
+		} else {
+            this.pool_start.reset();
+            this.pool_stop.start();
+        }
 	}
 
-    /**
-     * Use only for debugging and logging.
-     */
-    public string to_string() {
-        return "ClientSessionManager/%s %d sessions, %d reserved".printf(endpoint.to_string(),
-            sessions.size, reserved_sessions.size);
-    }
+	private void on_connectivity_error(Error error) {
+        connection_failed(error);
+        this.close_pool.begin();
+	}
+
 }

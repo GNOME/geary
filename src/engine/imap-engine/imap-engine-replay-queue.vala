@@ -4,6 +4,13 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
+/**
+ * Interleaves IMAP operations to maintain consistent sequence numbering.
+ *
+ * The replay queue manages and executes operations originating both
+ * locally and from the server for a specific IMAP mailbox so as to
+ * ensure the execution of the operations maintains consistent.
+ */
 private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
     // this value is high because delays between back-to-back unsolicited notifications have been
     // see as high as 250ms
@@ -56,20 +63,27 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
     } }
     
     private weak MinimalFolder owner;
-    private Nonblocking.Mailbox<ReplayOperation> local_queue = new Nonblocking.Mailbox<ReplayOperation>();
-    private Nonblocking.Mailbox<ReplayOperation> remote_queue = new Nonblocking.Mailbox<ReplayOperation>();
+    private Nonblocking.Queue<ReplayOperation> local_queue =
+        new Nonblocking.Queue<ReplayOperation>.fifo();
+    private Nonblocking.Queue<ReplayOperation> remote_queue =
+        new Nonblocking.Queue<ReplayOperation>.fifo();
     private ReplayOperation? local_op_active = null;
     private ReplayOperation? remote_op_active = null;
     private Gee.ArrayList<ReplayOperation> notification_queue = new Gee.ArrayList<ReplayOperation>();
     private Scheduler.Scheduled? notification_timer = null;
     private int64 next_submission_number = 0;
     private State state = State.OPEN;
-    
+    private Cancellable remote_wait_cancellable = new Cancellable();
+
     public virtual signal void scheduled(ReplayOperation op) {
-        Logging.debug(Logging.Flag.REPLAY, "[%s] ReplayQueue::scheduled: %s %s", to_string(),
-            op.to_string());
+        Logging.debug(
+            Logging.Flag.REPLAY,
+            "[%s] ReplayQueue::scheduled: %s",
+            to_string(),
+            op.to_string()
+        );
     }
-    
+
     public virtual signal void locally_executing(ReplayOperation op) {
         Logging.debug(Logging.Flag.REPLAY, "[%s] ReplayQueue::locally-executing: %s", to_string(),
             op.to_string());
@@ -194,9 +208,8 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
      */
     public bool schedule_server_notification(ReplayOperation op) {
         if (state != State.OPEN) {
-            debug("Unable to schedule notification operation %s on %s: replay queue closed", op.to_string(),
-                to_string());
-            
+            debug("Unable to schedule notification operation %s on %s: replay queue closed",
+                  op.to_string(), to_string());
             return false;
         }
         
@@ -313,12 +326,15 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
         // consideration in schedule()
         state = State.CLOSING;
         closing();
-        
-        // if not flushing pending, clear out all waiting operations, backing out any that need to
-        // be backed out
-        if (!flush_pending)
+
+        // if not flushing pending, stop waiting for a remote session
+        // and clear out all waiting operations, backing out any that
+        // need to be backed out
+        if (!flush_pending) {
+            this.remote_wait_cancellable.cancel();
             yield clear_pending_async(cancellable);
-        
+        }
+
         // flush a ReplayClose operation down the pipe so all working operations complete
         CloseReplayQueue close_op = new CloseReplayQueue();
         bool is_scheduled = schedule(close_op);
@@ -359,7 +375,7 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
         while (queue_running) {
             ReplayOperation op;
             try {
-                op = yield local_queue.recv_async();
+                op = yield local_queue.receive();
             } catch (Error recv_err) {
                 debug("Unable to receive next replay operation on local queue %s: %s", to_string(),
                     recv_err.message);
@@ -459,7 +475,7 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
             // wait for the next operation ... do this *before* waiting for remote
             ReplayOperation op;
             try {
-                op = yield remote_queue.recv_async();
+                op = yield remote_queue.receive();
             } catch (Error recv_err) {
                 debug("Unable to receive next replay operation on remote queue %s: %s", to_string(),
                     recv_err.message);
@@ -478,11 +494,11 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
             // wait until the remote folder is opened (or throws an exception, in which case closed)
             try {
                 if (!is_close_op && folder_opened && state == State.OPEN)
-                    yield owner.wait_for_open_async();
+                    yield owner.wait_for_remote_async(this.remote_wait_cancellable);
             } catch (Error remote_err) {
                 debug("Folder %s closed or failed to open, remote replay queue closing: %s",
-                    to_string(), remote_err.message);
-                
+                      to_string(), remote_err.message);
+
                 // not open
                 folder_opened = false;
                 

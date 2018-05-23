@@ -11,7 +11,7 @@
  *
  * The EmailPrefetcher does not maintain a reference to the folder.
  */
-private class Geary.ImapEngine.EmailPrefetcher : Object {
+private class Geary.ImapEngine.EmailPrefetcher : Geary.BaseObject {
     public const int PREFETCH_DELAY_SEC = 1;
     
     private const Geary.Email.Field PREFETCH_FIELDS = Geary.Email.Field.ALL;
@@ -19,96 +19,79 @@ private class Geary.ImapEngine.EmailPrefetcher : Object {
     
     public Nonblocking.CountingSemaphore active_sem { get; private set;
         default = new Nonblocking.CountingSemaphore(null); }
-    
-    private unowned ImapEngine.MinimalFolder folder;
-    private int start_delay_sec;
+
+    private weak ImapEngine.MinimalFolder folder;
     private Nonblocking.Mutex mutex = new Nonblocking.Mutex();
     private Gee.TreeSet<Geary.Email> prefetch_emails = new Gee.TreeSet<Geary.Email>(
         Email.compare_recv_date_descending);
-    private uint schedule_id = 0;
-    private Cancellable cancellable = new Cancellable();
-    
+    private TimeoutManager prefetch_timer;
+    private Cancellable? cancellable = null;
+
+
     public EmailPrefetcher(ImapEngine.MinimalFolder folder, int start_delay_sec = PREFETCH_DELAY_SEC) {
-        assert(start_delay_sec > 0);
-        
         this.folder = folder;
-        this.start_delay_sec = start_delay_sec;
-        
-        folder.opened.connect(on_opened);
-        folder.closed.connect(on_closed);
-        folder.email_appended.connect(on_local_expansion);
-        folder.email_inserted.connect(on_local_expansion);
-    }
-    
-    ~EmailPrefetcher() {
-        if (schedule_id != 0)
-            message("Warning: Geary.EmailPrefetcher destroyed before folder closed");
-        
-        folder.opened.disconnect(on_opened);
-        folder.closed.disconnect(on_closed);
-        folder.email_appended.disconnect(on_local_expansion);
-        folder.email_inserted.disconnect(on_local_expansion);
-    }
-    
-    private void on_opened(Geary.Folder.OpenState open_state) {
-        if (open_state != Geary.Folder.OpenState.BOTH)
-            return;
-        
-        cancellable = new Cancellable();
-        
-        // acquire here since .begin() only schedules for later
-        active_sem.acquire();
-        do_prepare_all_local_async.begin();
-    }
-    
-    private void on_closed(Geary.Folder.CloseReason close_reason) {
-        // cancel for any reason ... this will be called multiple times, but the following operations
-        // can be executed any number of times and still get the desired results
-        cancellable.cancel();
-        
-        if (schedule_id != 0) {
-            Source.remove(schedule_id);
-            schedule_id = 0;
-            
-            // since an acquire was done when scheduled, need to notify when cancelled
-            active_sem.blind_notify();
+
+        if (start_delay_sec <= 0) {
+            start_delay_sec = PREFETCH_DELAY_SEC;
         }
+
+        this.prefetch_timer = new TimeoutManager.seconds(
+            start_delay_sec, () => { do_prefetch_async.begin(); }
+        );
     }
-    
+
+    public void open() {
+        this.cancellable = new Cancellable();
+
+        this.folder.email_locally_appended.connect(on_local_expansion);
+        this.folder.email_locally_inserted.connect(on_local_expansion);
+
+        // acquire here since .begin() only schedules for later
+        this.active_sem.acquire();
+        this.do_prepare_all_local_async.begin();
+    }
+
+    public void close() {
+        if (this.prefetch_timer.is_running) {
+            this.prefetch_timer.reset();
+            // since an acquire was done when scheduled, need to
+            // notify when cancelled
+            this.active_sem.blind_notify();
+        }
+
+        this.folder.email_locally_appended.disconnect(on_local_expansion);
+        this.folder.email_locally_inserted.disconnect(on_local_expansion);
+        this.cancellable = null;
+    }
+
     private void on_local_expansion(Gee.Collection<Geary.EmailIdentifier> ids) {
         // it's possible to be notified of an append prior to remote open; don't prefetch until
         // that occurs
-        if (folder.get_open_state() != Geary.Folder.OpenState.BOTH)
+        if (folder.get_open_state() != Geary.Folder.OpenState.REMOTE)
             return;
-        
+
         // acquire here since .begin() only schedules for later
         active_sem.acquire();
         do_prepare_new_async.begin(ids);
     }
-    
+
     // emails should include PROPERTIES
     private void schedule_prefetch(Gee.Collection<Geary.Email>? emails) {
         if (emails == null || emails.size == 0)
             return;
-        
-        debug("%s: scheduling %d emails for prefetching", folder.to_string(), emails.size);
-        
-        prefetch_emails.add_all(emails);
-        
+
+        debug("%s: scheduling %d emails for prefetching",
+              folder.to_string(), emails.size);
+        this.prefetch_emails.add_all(emails);
+
         // only increment active state if not rescheduling
-        if (schedule_id != 0)
-            Source.remove(schedule_id);
-        else
-            active_sem.acquire();
-        
-        schedule_id = Timeout.add_seconds(start_delay_sec, () => {
-            schedule_id = 0;
-            do_prefetch_async.begin();
-            
-            return false;
-        });
+        if (!this.prefetch_timer.is_running) {
+            this.active_sem.acquire();
+        }
+
+        this.prefetch_timer.start();
     }
-    
+
     private async void do_prepare_all_local_async() {
         Gee.List<Geary.Email>? list = null;
         try {

@@ -142,7 +142,17 @@ public class Geary.RFC822.MessageIDList : Geary.MessageData.AbstractMessageData,
         // don't assert that list.size > 0; even though this method should generated a decoded ID
         // from any non-empty string, an empty Message-ID (i.e. "<>") won't.
     }
-    
+
+    /**
+     * Returns a new list with the given messages ids appended to this list's.
+     */
+    public MessageIDList append(MessageIDList others) {
+        MessageIDList new_ids = new MessageIDList();
+        new_ids.list.add_all(this.list);
+        new_ids.list.add_all(others.list);
+        return new_ids;
+    }
+
     public override string to_string() {
         return "MessageIDList (%d)".printf(list.size);
     }
@@ -363,49 +373,46 @@ public class Geary.RFC822.PreviewText : Geary.RFC822.Text {
         base (_buffer);
     }
 
-    public PreviewText.with_header(Memory.Buffer preview, Memory.Buffer preview_header) {
-        string? charset = null;
-        string? encoding = null;
-        bool is_plain = false;
-        bool is_html = false;
+    public PreviewText.with_header(Memory.Buffer preview_header, Memory.Buffer preview) {
+        string preview_text = "";
 
         // Parse the header.
         GMime.Stream header_stream = Utils.create_stream_mem(preview_header);
         GMime.Parser parser = new GMime.Parser.with_stream(header_stream);
-        GMime.Part? part = parser.construct_part() as GMime.Part;
-        if (part != null) {
-            Mime.ContentType? content_type = null;
-            if (part.get_content_type() != null) {
-                content_type = new Mime.ContentType.from_gmime(part.get_content_type());
-                is_plain = content_type.is_type("text", "plain");
-                is_html = content_type.is_type("text", "html");
-                charset = content_type.params.get_value("charset");
+        GMime.Part? gpart = parser.construct_part() as GMime.Part;
+        if (gpart != null) {
+            Part part = new Part(gpart);
+
+            Mime.ContentType content_type = part.get_effective_content_type();
+            bool is_plain = content_type.is_type("text", "plain");
+            bool is_html = content_type.is_type("text", "html");
+
+            if (is_plain || is_html) {
+                // Parse the partial body
+                GMime.DataWrapper body = new GMime.DataWrapper.with_stream(
+                    new GMime.StreamMem.with_buffer(preview.get_uint8_array()),
+                    gpart.get_content_encoding()
+                );
+                gpart.set_content_object(body);
+
+                ByteArray output = new ByteArray();
+                GMime.StreamMem output_stream =
+                    new GMime.StreamMem.with_byte_array(output);
+                output_stream.set_owner(false);
+
+                try {
+                    part.write_to_stream(output_stream);
+                    uint8[] data = output.data;
+                    data += (uint8) '\0';
+
+                    preview_text = Geary.RFC822.Utils.to_preview_text(
+                        (string) data,
+                        is_html ? TextFormat.HTML : TextFormat.PLAIN
+                    );
+                } catch (RFC822Error err) {
+                    debug("Failed to parse preview body: %s", err.message);
+                }
             }
-
-            encoding = part.get_header("Content-Transfer-Encoding");
-        }
-
-        string preview_text = "";
-        if (is_plain || is_html) {
-            // Parse the preview
-            GMime.StreamMem input_stream = Utils.create_stream_mem(preview);
-            ByteArray output = new ByteArray();
-            GMime.StreamMem output_stream = new GMime.StreamMem.with_byte_array(output);
-            output_stream.set_owner(false);
-
-            // Convert the encoding and character set.
-            GMime.StreamFilter filter = new GMime.StreamFilter(output_stream);
-            if (encoding != null)
-                filter.add(new GMime.FilterBasic(GMime.content_encoding_from_string(encoding), false));
-
-            filter.add(Geary.RFC822.Utils.create_utf8_filter_charset(charset));
-            filter.add(new GMime.FilterCRLF(false, false));
-
-            input_stream.write_to_stream(filter);
-            uint8[] data = output.data;
-            data += (uint8) '\0';
-
-            preview_text = Geary.RFC822.Utils.to_preview_text((string) data, is_html ? TextFormat.HTML : TextFormat.PLAIN);
         }
 
         base(new Geary.Memory.StringBuffer(preview_text));

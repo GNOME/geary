@@ -125,7 +125,8 @@ public class Geary.App.DraftManager : BaseObject {
     private Folder? drafts_folder = null;
     private FolderSupport.Create? create_support = null;
     private FolderSupport.Remove? remove_support = null;
-    private Nonblocking.Mailbox<Operation?> mailbox = new Nonblocking.Mailbox<Operation?>();
+    private Nonblocking.Queue<Operation?> mailbox =
+        new Nonblocking.Queue<Operation?>.fifo();
     private bool was_opened = false;
     private Error? fatal_err = null;
     
@@ -224,9 +225,9 @@ public class Geary.App.DraftManager : BaseObject {
         }
         
         drafts_folder.closed.connect(on_folder_closed);
-        
-        yield drafts_folder.open_async(Folder.OpenFlags.NONE, cancellable);
-        
+
+        yield drafts_folder.open_async(Folder.OpenFlags.NO_DELAY, cancellable);
+
         // if drafts folder doesn't return the identifier of newly created emails, then this object
         // can't do it's work ... wait until open to check for this, to be absolutely sure
         if (drafts_folder.properties.create_never_returns_id) {
@@ -380,16 +381,15 @@ public class Geary.App.DraftManager : BaseObject {
             // reporting it again
             if (fatal_err != null)
                 break;
-            
+
             Operation op;
             try {
-                op = yield mailbox.recv_async(null);
+                op = yield mailbox.receive(null);
             } catch (Error err) {
                 fatal(err);
-                
                 break;
             }
-            
+
             bool continue_loop = yield operation_loop_iteration_async(op);
             
             // fire semaphore, if present

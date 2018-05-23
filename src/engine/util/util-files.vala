@@ -94,6 +94,35 @@ public async FileType query_file_type_async(File file, bool follow_symlinks, Can
     return info.get_file_type();
 }
 
+/**
+ * Ensure a directory exists, asynchronously.
+ *
+ * Returns true if the directory ws created. A {@link GLib.Error} is
+ * thrown if the directory cannot be created, but not if it already
+ * exists.
+ */
+public async bool make_directory_with_parents(File dir,
+                                              Cancellable? cancellable = null)
+    throws Error {
+    bool ret = false;
+    GLib.IOError? create_err = null;
+    yield Nonblocking.Concurrent.global.schedule_async(() => {
+            try {
+                dir.make_directory_with_parents(cancellable);
+            } catch (GLib.IOError err) {
+                create_err = err;
+            }
+        });
+
+    if (create_err == null) {
+        ret = true;
+    } else if (!(create_err is GLib.IOError.EXISTS)) {
+        throw create_err;
+    }
+
+    return ret;
+}
+
 public uint hash(File file) {
     return file.hash();
 }

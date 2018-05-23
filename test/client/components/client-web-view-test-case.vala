@@ -8,7 +8,7 @@
 // Defined by CMake build script.
 extern const string _BUILD_ROOT_DIR;
 
-public abstract class ClientWebViewTestCase<V> : Gee.TestCase {
+public abstract class ClientWebViewTestCase<V> : TestCase {
 
     protected V? test_view = null;
     protected Configuration? config = null;
@@ -38,7 +38,7 @@ public abstract class ClientWebViewTestCase<V> : Gee.TestCase {
     protected virtual void load_body_fixture(string html = "") {
         ClientWebView client_view = (ClientWebView) this.test_view;
         client_view.load_html(html);
-        while (client_view.is_loading) {
+        while (!client_view.is_content_loaded) {
             Gtk.main_iteration();
         }
     }

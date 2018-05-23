@@ -11,7 +11,7 @@ public class AccountDialogEditAlternateEmailsPane : AccountDialogPane {
         public ListItem(Geary.RFC822.MailboxAddress mailbox) {
             this.mailbox = mailbox;
             
-            label = "<b>%s</b>".printf(Geary.HTML.escape_markup(mailbox.get_full_address()));
+            label = "<b>%s</b>".printf(Geary.HTML.escape_markup(mailbox.to_full_display()));
             use_markup = true;
             ellipsize = Pango.EllipsizeMode.END;
             set_halign(Gtk.Align.START);

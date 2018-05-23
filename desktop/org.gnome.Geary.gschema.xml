@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
 <schemalist>
 
 <schema id="org.gnome.Geary" path="/org/gnome/Geary/" gettext-domain="geary">
@@ -5,133 +6,139 @@
     <key name="attachments-directory" type="s">
         <default>''</default>
         <summary>Default attachments directory</summary>
-        <description>Location used when opening and saving attachments</description>
+        <description>Location used when opening and saving attachments.</description>
     </key>
 
     <key name="print-directory" type="s">
         <default>''</default>
         <summary>Default print output directory</summary>
-        <description>Location used when printing to a file</description>
+        <description>Location used when printing to a file.</description>
     </key>
 
     <key name="window-maximize" type="b">
         <default>false</default>
-        <summary>maximize window</summary>
-        <description>True if library application is maximized, false otherwise.</description>
+        <summary>Maximize window</summary>
+        <description>True if the application window is maximized, false otherwise.</description>
     </key>
 
     <key name="window-width" type="i">
         <default>1024</default>
-        <summary>width of window</summary>
+        <summary>Width of window</summary>
         <description>The last recorded width of the application window.</description>
     </key>
 
     <key name="window-height" type="i">
         <default>768</default>
-        <summary>height of window</summary>
+        <summary>Height of window</summary>
         <description>The last recorded height of the application window.</description>
     </key>
 
     <key name="folder-list-pane-position" type="i">
         <default>100</default>
-        <summary>position of folder list pane</summary>
+        <summary>Position of folder list pane</summary>
         <description>Position of the folder list Paned grabber.</description>
     </key>
 
     <key name="folder-list-pane-position-horizontal" type="i">
         <default>-1</default>
-        <summary>position of folder list pane when horizontal</summary>
+        <summary>Position of folder list pane when horizontal</summary>
         <description>Position of the folder list Paned grabber in the horizontal orientation.</description>
     </key>
 
     <key name="folder-list-pane-position-vertical" type="i">
         <default>200</default>
-        <summary>position of folder list pane when vertical</summary>
+        <summary>Position of folder list pane when vertical</summary>
         <description>Position of the folder list Paned grabber in the vertical orientation.</description>
     </key>
 
     <key name="folder-list-pane-horizontal" type="b">
         <default>true</default>
-        <summary>orientation of the folder list pane</summary>
+        <summary>Orientation of the folder list pane</summary>
         <description>True if the folder list Paned is in the horizontal orientation.</description>
     </key>
 
     <key name="messages-pane-position" type="i">
         <default>250</default>
-        <summary>position of message list pane</summary>
+        <summary>Position of message list pane</summary>
         <description>Position of the message list Paned grabber.</description>
     </key>
 
     <key name="autoselect" type="b">
         <default>true</default>
-        <summary>autoselect next message</summary>
+        <summary>Autoselect next message</summary>
         <description>True if we should autoselect the next available conversation.</description>
     </key>
 
     <key name="display-preview" type="b">
         <default>true</default>
-        <summary>display message previews</summary>
+        <summary>Display message previews</summary>
         <description>True if we should display a short preview of each message.</description>
     </key>
 
     <key name="spell-check-languages" type="as">
          <default>[]</default>
          <summary>Languages that shall be used in the spell checker</summary>
-         <description>List of the languages to use in the spell checker</description>
+         <description>List of the languages to use in the spell checker.</description>
     </key>
 
     <key name="spell-check-visible-languages" type="as">
         <default>[]</default>
-        <summary>Languages that are displayed in the spell checker popover.</summary>
+        <summary>Languages that are displayed in the spell checker popover</summary>
         <description>List of languages that are always displayed in the popover of the spell checker.</description>
     </key>
 
     <key name="play-sounds" type="b">
         <default>true</default>
-        <summary>enable notification sounds</summary>
+        <summary>Enable notification sounds</summary>
         <description>True to play sounds for notifications and sending.</description>
     </key>
 
     <key name="show-notifications" type="b">
         <default>true</default>
-        <summary>show notifications for new mail</summary>
+        <summary>Show notifications for new mail</summary>
         <description>True to show notification bubbles.</description>
     </key>
 
     <key name="startup-notifications" type="b">
         <default>false</default>
-        <summary>notify of new mail at startup</summary>
+        <summary>Notify of new mail at startup</summary>
         <description>True to notify of new mail at startup.</description>
     </key>
 
     <key name="ask-open-attachment" type="b">
         <default>true</default>
-        <summary>ask when opening an attachment</summary>
+        <summary>Ask when opening an attachment</summary>
         <description>True to ask when opening an attachment.</description>
     </key>
 
     <key name="compose-as-html" type="b">
         <default>true</default>
-        <summary>whether to compose emails in HTML</summary>
+        <summary>Whether to compose emails in HTML</summary>
         <description>True to compose emails in HTML; false for plain text.</description>
     </key>
 
     <key name="search-strategy" type="s">
         <default>"conservative"</default>
         <summary>Advisory strategy for full-text searching</summary>
-        <description>Acceptable values are EXACT, CONSERVATIVE, AGGRESSIVE, and HORIZON.</description>
+        <description>Acceptable values are “exact”, “conservative”, “aggressive”, and “horizon”.</description>
     </key>
 
     <key name="conversation-viewer-zoom" type="d">
         <default>1</default>
-        <summary>zoom of conversation viewer</summary>
+        <summary>Zoom of conversation viewer</summary>
         <description>The zoom to apply on the conservation view.</description>
+    </key>
+
+    <key name="composer-window-size" type="ai">
+        <default>[-1,-1]</default>
+        <summary>Size of detached composer window</summary>
+        <description>The last recorded size of the detached composer window.</description>
     </key>
 
     <key name="migrated-config" type="b">
         <default>false</default>
         <summary>Whether we migrated the old settings</summary>
-        <description>False to check for the old 'org.yorba.geary'-schema and copy its values</description>
+        <description>False to check for the old “org.yorba.geary”-schema and copy its values.</description>
     </key>
 
 </schema>

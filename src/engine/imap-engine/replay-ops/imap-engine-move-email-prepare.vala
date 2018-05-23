@@ -1,14 +1,17 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 /**
- * Stage one of a {@link RevokableMove}: collect valid {@link ImapDB.EmailIdentifiers}, mark
- * messages as removed, and update counts.
+ * Stage one of a {@link RevokableMove}.
+ *
+ * This operation collects valid {@link ImapDB.EmailIdentifier}s for
+ * messages to be removed, mark the messages as removed, and update
+ * counts.
  */
-
 private class Geary.ImapEngine.MoveEmailPrepare : Geary.ImapEngine.SendReplayOperation {
     public Gee.Set<ImapDB.EmailIdentifier>? prepared_for_move = null;
     
@@ -33,13 +36,12 @@ private class Geary.ImapEngine.MoveEmailPrepare : Geary.ImapEngine.SendReplayOpe
     public override async ReplayOperation.Status replay_local_async() throws Error {
         if (to_move.size <= 0)
             return ReplayOperation.Status.COMPLETED;
-        
-        int count = engine.get_remote_counts(null, null);
-        
+
+        int count = this.engine.properties.email_total;
         // as this value is only used for reporting, offer best-possible service
         if (count < 0)
             count = to_move.size;
-        
+
         prepared_for_move = yield engine.local_folder.mark_removed_async(to_move, true, cancellable);
         if (prepared_for_move == null || prepared_for_move.size == 0)
             return ReplayOperation.Status.COMPLETED;

@@ -45,11 +45,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         public bool is_all_set(ListFlags flags) {
             return (this & flags) == flags;
         }
-        
-        public bool is_any_set(ListFlags flags) {
-            return (this & flags) != 0;
-        }
-        
+
         public bool include_marked_for_remove() {
             return is_all_set(INCLUDE_MARKED_FOR_REMOVE);
         }
@@ -66,30 +62,31 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             return result;
         }
     }
-    
+
     private class LocationIdentifier {
         public int64 message_id;
         public Imap.UID uid;
         public ImapDB.EmailIdentifier email_id;
         public bool marked_removed;
-        
+
         public LocationIdentifier(int64 message_id, Imap.UID uid, bool marked_removed) {
             this.message_id = message_id;
             this.uid = uid;
-            email_id = new ImapDB.EmailIdentifier(message_id, uid);
+            this.email_id = new ImapDB.EmailIdentifier(message_id, uid);
             this.marked_removed = marked_removed;
         }
     }
-    
+
     protected int manual_ref_count { get; protected set; }
-    
-    private ImapDB.Database db;
+
+    private Geary.Db.Database db;
     private Geary.FolderPath path;
+    private GLib.File attachments_path;
     private ContactStore contact_store;
     private string account_owner_email;
     private int64 folder_id;
     private Geary.Imap.FolderProperties properties;
-    
+
     /**
      * Fired after one or more emails have been fetched with all Fields, and
      * saved locally.
@@ -101,20 +98,24 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
      * change the unread count for other folders that contain the email.
      */
     public signal void unread_updated(Gee.Map<ImapDB.EmailIdentifier, bool> unread_status);
-    
-    internal Folder(ImapDB.Database db, Geary.FolderPath path, ContactStore contact_store,
-        string account_owner_email, int64 folder_id, Geary.Imap.FolderProperties properties) {
-        assert(folder_id != Db.INVALID_ROWID);
-        
+
+    internal Folder(Geary.Db.Database db,
+                    Geary.FolderPath path,
+                    GLib.File attachments_path,
+                    ContactStore contact_store,
+                    string account_owner_email,
+                    int64 folder_id,
+                    Geary.Imap.FolderProperties properties) {
         this.db = db;
         this.path = path;
+        this.attachments_path = attachments_path;
         this.contact_store = contact_store;
         // Update to use all addresses on the account. Bug 768779
         this.account_owner_email = account_owner_email;
         this.folder_id = folder_id;
         this.properties = properties;
     }
-    
+
     public unowned Geary.FolderPath get_path() {
         return path;
     }
@@ -137,81 +138,138 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         
         return count;
     }
-    
-    // Updates both the FolderProperties and the value in the local store.
-    public async void update_remote_status_message_count(int count, Cancellable? cancellable) throws Error {
-        if (count < 0)
-            return;
-        
-        yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
+
+    /**
+     * Updates folder's STATUS message count, attributes, recent, and unseen.
+     *
+     * UIDVALIDITY and UIDNEXT updated when the folder is
+     * SELECT/EXAMINED (see update_folder_select_examine_async())
+     * unless update_uid_info is true.
+     */
+    public async void update_folder_status(Geary.Imap.FolderProperties remote_properties,
+                                           bool update_uid_info,
+                                           bool respect_marked_for_remove,
+                                           Cancellable? cancellable)
+        throws Error {
+        // adjust for marked remove, but don't write these adjustments to the database -- they're
+        // only reflected in memory via the properties
+        int adjust_unseen = 0;
+        int adjust_total = 0;
+
+        yield this.db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
+            if (respect_marked_for_remove) {
+                Db.Statement stmt = cx.prepare("""
+                    SELECT flags
+                    FROM MessageTable
+                    WHERE id IN (
+                        SELECT message_id
+                        FROM MessageLocationTable
+                        WHERE folder_id = ? AND remove_marker = ?
+                    )
+                """);
+                stmt.bind_rowid(0, folder_id);
+                stmt.bind_bool(1, true);
+
+                Db.Result results = stmt.exec(cancellable);
+                while (!results.finished) {
+                    adjust_total++;
+
+                    Imap.EmailFlags flags = new Imap.EmailFlags(Imap.MessageFlags.deserialize(
+                        results.string_at(0)));
+                    if (flags.contains(EmailFlags.UNREAD))
+                        adjust_unseen++;
+
+                    results.next(cancellable);
+                }
+            }
+
             Db.Statement stmt = cx.prepare(
-                "UPDATE FolderTable SET last_seen_status_total=? WHERE id=?");
-            stmt.bind_int(0, Numeric.int_floor(count, 0));
-            stmt.bind_rowid(1, folder_id);
-            
+                "UPDATE FolderTable SET attributes=?, unread_count=? WHERE id=?");
+            stmt.bind_string(0, remote_properties.attrs.serialize());
+            stmt.bind_int(1, remote_properties.email_unread);
+            stmt.bind_rowid(2, this.folder_id);
             stmt.exec(cancellable);
-            
+
+            if (update_uid_info)
+                do_update_uid_info(cx, remote_properties, cancellable);
+
+            if (remote_properties.status_messages >= 0) {
+                do_update_last_seen_status_total(
+                    cx, remote_properties.status_messages, cancellable
+                );
+            }
+
             return Db.TransactionOutcome.COMMIT;
         }, cancellable);
-        
-        properties.set_status_message_count(count, false);
+
+        // update appropriate local properties
+        this.properties.set_status_unseen(
+            Numeric.int_floor(remote_properties.unseen - adjust_unseen, 0)
+        );
+        this.properties.recent = remote_properties.recent;
+        this.properties.attrs = remote_properties.attrs;
+
+        if (update_uid_info) {
+            this.properties.uid_validity = remote_properties.uid_validity;
+            this.properties.uid_next = remote_properties.uid_next;
+        }
+
+        // only update STATUS MESSAGES count if previously set, but use this count as the
+        // "authoritative" value until another SELECT/EXAMINE or MESSAGES response
+        if (remote_properties.status_messages >= 0) {
+            this.properties.set_status_message_count(
+                Numeric.int_floor(remote_properties.status_messages - adjust_total, 0),
+                true
+            );
+        }
     }
-    
+
+    /**
+     * Updates folder's SELECT/EXAMINE message count, UIDVALIDITY, UIDNEXT, unseen, and recent.
+     * See also update_folder_status_async().
+     */
+    public async void update_folder_select_examine(Geary.Imap.FolderProperties remote_properties,
+                                                   Cancellable? cancellable)
+        throws Error {
+        yield this.db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
+            do_update_uid_info(cx, remote_properties, cancellable);
+
+            if (remote_properties.select_examine_messages >= 0) {
+                do_update_last_seen_select_examine_total(
+                    cx, remote_properties.select_examine_messages, cancellable
+                );
+            }
+
+            return Db.TransactionOutcome.COMMIT;
+        }, cancellable);
+
+        // update appropriate local properties
+        this.properties.set_status_unseen(remote_properties.unseen);
+        this.properties.recent = remote_properties.recent;
+        this.properties.uid_validity = remote_properties.uid_validity;
+        this.properties.uid_next = remote_properties.uid_next;
+
+        if (remote_properties.select_examine_messages >= 0) {
+            this.properties.set_select_examine_message_count(
+                remote_properties.select_examine_messages
+            );
+        }
+    }
+
     // Updates both the FolderProperties and the value in the local store.  Must be called while
     // open.
     public async void update_remote_selected_message_count(int count, Cancellable? cancellable) throws Error {
         if (count < 0)
             return;
-        
+
         yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
-            Db.Statement stmt = cx.prepare(
-                "UPDATE FolderTable SET last_seen_total=? WHERE id=?");
-            stmt.bind_int(0, Numeric.int_floor(count, 0));
-            stmt.bind_rowid(1, folder_id);
-            
-            stmt.exec(cancellable);
-            
+                do_update_last_seen_select_examine_total(cx, count, cancellable);
             return Db.TransactionOutcome.COMMIT;
         }, cancellable);
-        
+
         properties.set_select_examine_message_count(count);
     }
-    
-    public async Imap.StatusData fetch_status_data(ListFlags flags, Cancellable? cancellable) throws Error {
-        Imap.StatusData? status_data = null;
-        yield db.exec_transaction_async(Db.TransactionType.RO, (cx) => {
-            Db.Statement stmt = cx.prepare("""
-                SELECT uid_next, uid_validity, unread_count
-                FROM FolderTable
-                WHERE id = ?
-            """);
-            stmt.bind_rowid(0, folder_id);
-            
-            Db.Result result = stmt.exec(cancellable);
-            if (result.finished)
-                return Db.TransactionOutcome.DONE;
-            
-            int messages = do_get_email_count(cx, flags, cancellable);
-            Imap.UID? uid_next = !result.is_null_for("uid_next")
-                ? new Imap.UID(result.int64_for("uid_next"))
-                : null;
-            Imap.UIDValidity? uid_validity = !result.is_null_for("uid_validity")
-                ? new Imap.UIDValidity(result.int64_for("uid_validity"))
-                : null;
-            
-            // Note that recent is not stored
-            status_data = new Imap.StatusData(new Imap.MailboxSpecifier.from_folder_path(path, "?"),
-                messages, 0, uid_next, uid_validity, result.int_for("unread_count"));
-            
-            return Db.TransactionOutcome.DONE;
-        }, cancellable);
-        
-        if (status_data == null)
-            throw new EngineError.NOT_FOUND("%s STATUS not found in database", path.to_string());
-        
-        return status_data;
-    }
-    
+
     // Returns a Map with the created or merged email as the key and the result of the operation
     // (true if created, false if merged) as the value.  Note that every email
     // object passed in's EmailIdentifier will be fully filled out by this
@@ -1187,52 +1245,48 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             stmt.reset(Db.ResetScope.SAVE_BINDINGS);
         }
     }
-    
-    // Returns message_id if duplicate found, associated set to true if message is already associated
-    // with this folder.  Only call this on emails that came from the IMAP Folder.
-    private LocationIdentifier? do_search_for_duplicates(Db.Connection cx, Geary.Email email,
-        out bool associated, Cancellable? cancellable) throws Error {
-        associated = false;
-        
-        ImapDB.EmailIdentifier email_id = (ImapDB.EmailIdentifier) email.id;
-        
-        // This should only ever get invoked for messages that came from the
-        // IMAP layer, which don't have a message id, but should have a UID.
-        assert(email_id.message_id == Db.INVALID_ROWID);
-        
-        LocationIdentifier? location = null;
-        // See if it already exists; first by UID (which is only guaranteed to
-        // be unique in a folder, not account-wide)
-        if (email_id.uid != null)
-            location = do_get_location_for_uid(cx, email_id.uid, ListFlags.INCLUDE_MARKED_FOR_REMOVE,
-                cancellable);
-        
-        if (location != null) {
-            associated = true;
-            
-            return location;
-        }
-        
+
+    /**
+     * Returns the id of any existing message matching the given.
+     *
+     * Searches for an existing message that matches `email`, based on
+     * its message attributes. Currently, since ImapDB only requests
+     * the IMAP internal date and RFC822 message size, these are the
+     * only attributes used.
+     *
+     * The unique, internal message ID of the first matching message
+     * is returned, else `-1` if no matching message was found.
+     *
+     * This should only be called on messages obtained via the IMAP
+     * stack.
+     */
+    private int64 do_search_for_duplicates(Db.Connection cx,
+                                           Geary.Email email,
+                                           ImapDB.EmailIdentifier email_id,
+                                           Cancellable? cancellable)
+        throws Error {
+        int64 id = -1;
         // if fields not present, then no duplicate can reliably be found
         if (!email.fields.is_all_set(REQUIRED_FIELDS)) {
-            debug("Unable to detect duplicates for %s (%s available)", email.id.to_string(),
-                email.fields.to_list_string());
-            
-            return null;
+            debug("%s: Unable to detect duplicates for %s, fields available: %s",
+                  this.to_string(),
+                  email.id.to_string(),
+                  email.fields.to_list_string()
+            );
+            return id;
         }
-        
+
         // what's more, actually need all those fields to be available, not merely attempted,
         // to err on the side of safety
         Imap.EmailProperties? imap_properties = (Imap.EmailProperties) email.properties;
         string? internaldate = (imap_properties != null && imap_properties.internaldate != null)
             ? imap_properties.internaldate.serialize() : null;
         int64 rfc822_size = (imap_properties != null) ? imap_properties.rfc822_size.value : -1;
-        
+
         if (String.is_empty(internaldate) || rfc822_size < 0) {
             debug("Unable to detect duplicates for %s (%s available but invalid)", email.id.to_string(),
                 email.fields.to_list_string());
-            
-            return null;
+            return id;
         }
 
         // look for duplicate in IMAP message properties
@@ -1248,49 +1302,32 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             stmt.bind_string(2, email.message_id.to_string());
 
         Db.Result results = stmt.exec(cancellable);
-        // no duplicates found
-        if (results.finished)
-            return null;
-        
-        int64 message_id = results.rowid_at(0);
-        if (results.next(cancellable)) {
-            debug("Warning: multiple messages with the same internaldate (%s) and size (%s) in %s",
-                internaldate, rfc822_size.to_string(), to_string());
+        if (!results.finished) {
+            id = results.int64_at(0);
         }
-        
-        Db.Statement search_stmt = cx.prepare(
-            "SELECT ordering, remove_marker FROM MessageLocationTable WHERE message_id=? AND folder_id=?");
-        search_stmt.bind_rowid(0, message_id);
-        search_stmt.bind_rowid(1, folder_id);
-        
-        Db.Result search_results = search_stmt.exec(cancellable);
-        if (!search_results.finished) {
-            associated = true;
-            location = new LocationIdentifier(message_id, new Imap.UID(search_results.int64_at(0)),
-                search_results.bool_at(1));
-        } else {
-            assert(email_id.uid != null);
-            location = new LocationIdentifier(message_id, email_id.uid, false);
-        }
-        
-        return location;
+        return id;
     }
-    
-    // Note: does NOT check if message is already associated with thie folder
-    private void do_associate_with_folder(Db.Connection cx, int64 message_id, Imap.UID uid,
-        Cancellable? cancellable) throws Error {
-        assert(message_id != Db.INVALID_ROWID);
-        
-        // insert email at supplied position
+
+    /**
+     * Adds a message to the folder.
+     *
+     * Note: does NOT check if message is already associated with thie
+     * folder.
+     */
+    private void do_associate_with_folder(Db.Connection cx,
+                                          int64 message_id,
+                                          Imap.UID uid,
+                                          Cancellable? cancellable)
+        throws Error {
         Db.Statement stmt = cx.prepare(
             "INSERT INTO MessageLocationTable (message_id, folder_id, ordering) VALUES (?, ?, ?)");
         stmt.bind_rowid(0, message_id);
-        stmt.bind_rowid(1, folder_id);
+        stmt.bind_rowid(1, this.folder_id);
         stmt.bind_int64(2, uid.value);
-        
+
         stmt.exec(cancellable);
     }
-    
+
     private void do_remove_association_with_folder(Db.Connection cx, LocationIdentifier location,
         Cancellable? cancellable) throws Error {
         Db.Statement stmt = cx.prepare(
@@ -1300,112 +1337,150 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         
         stmt.exec(cancellable);
     }
-    
+
+    /**
+     * Adds a single message to the folder, creating or merging it.
+     *
+     * This creates the message and appends it to the folder if the
+     * message does not already exist, else appends and merges if the
+     * message exists but not in the given position in this folder,
+     * else it exists in the given position, so simply merges it.
+     *
+     * Returns `true` if created, else was merged and returns `false`.
+     */
     private bool do_create_or_merge_email(Db.Connection cx, Geary.Email email,
         out Geary.Email.Field pre_fields, out Geary.Email.Field post_fields,
         out Gee.Collection<Contact> updated_contacts, ref int unread_count_change,
         Cancellable? cancellable) throws Error {
-        // see if message already present in current folder, if not, search for duplicate throughout
-        // mailbox
-        bool associated;
-        LocationIdentifier? location = do_search_for_duplicates(cx, email, out associated, cancellable);
-        
-        // if found, merge, and associate if necessary
+
+        // This should only ever get invoked for messages that came
+        // from the IMAP layer, which should not have a message id,
+        // but should have a UID.
+        ImapDB.EmailIdentifier? email_id = email.id as ImapDB.EmailIdentifier;
+        if (email_id == null ||
+            email_id.message_id != Db.INVALID_ROWID ||
+            email_id.uid == null) {
+            throw new EngineError.INCOMPLETE_MESSAGE(
+                "IMAP message with UID required"
+            );
+        }
+
+        int64 message_id = -1;
+        bool is_associated = false;
+
+        // First, look for the same message at the same location
+        LocationIdentifier? location = do_get_location_for_uid(
+            cx,
+            email_id.uid,
+            ListFlags.INCLUDE_MARKED_FOR_REMOVE,
+            cancellable
+        );
         if (location != null) {
-            if (!associated)
-                do_associate_with_folder(cx, location.message_id, location.uid, cancellable);
-            
-            // If the email came from the Imap layer, we need to fill in the id.
-            ImapDB.EmailIdentifier email_id = (ImapDB.EmailIdentifier) email.id;
-            if (email_id.message_id == Db.INVALID_ROWID)
-                email_id.promote_with_message_id(location.message_id);
-            
-            // special-case updating flags, which happens often and should only write to the DB
-            // if necessary
+            // Already at the specified location, so no need to create
+            // or associate with this folder — just merge it
+            message_id = location.message_id;
+            is_associated = true;
+        } else {
+            // Not already at the specified location, so look for the
+            // same message in other locations or other folders
+            message_id = do_search_for_duplicates(
+                cx, email, email_id, cancellable
+            );
+            if (message_id >= 0) {
+                location = new LocationIdentifier(
+                    message_id, email_id.uid, false
+                );
+            }
+        }
+
+        bool was_created = false;
+        if (location != null) {
+            // Found the same or a duplicate message, so merge it. We
+            // special-case flag-only updates, which happens often and
+            // will only write to the DB if necessary.
             if (email.fields != Geary.Email.Field.FLAGS) {
                 do_merge_email(cx, location, email, out pre_fields, out post_fields,
                     out updated_contacts, ref unread_count_change, cancellable);
-                
+
                 // Already associated with folder and flags were known.
-                if (associated && pre_fields.is_all_set(Geary.Email.Field.FLAGS))
+                if (is_associated && pre_fields.is_all_set(Geary.Email.Field.FLAGS))
                     unread_count_change = 0;
             } else {
                 do_merge_email_flags(cx, location, email, out pre_fields, out post_fields,
                     out updated_contacts, ref unread_count_change, cancellable);
             }
-            
-            // return false to indicate a merge
-            return false;
+        } else {
+            // Message was not found, so create a new message for it
+            was_created = true;
+            MessageRow row = new MessageRow.from_email(email);
+            pre_fields = Geary.Email.Field.NONE;
+            post_fields = email.fields;
+
+            Db.Statement stmt = cx.prepare(
+                "INSERT INTO MessageTable "
+                + "(fields, date_field, date_time_t, from_field, sender, reply_to, to_field, cc, bcc, "
+                + "message_id, in_reply_to, reference_ids, subject, header, body, preview, flags, "
+                + "internaldate, internaldate_time_t, rfc822_size) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+            stmt.bind_int(0, row.fields);
+            stmt.bind_string(1, row.date);
+            stmt.bind_int64(2, row.date_time_t);
+            stmt.bind_string(3, row.from);
+            stmt.bind_string(4, row.sender);
+            stmt.bind_string(5, row.reply_to);
+            stmt.bind_string(6, row.to);
+            stmt.bind_string(7, row.cc);
+            stmt.bind_string(8, row.bcc);
+            stmt.bind_string(9, row.message_id);
+            stmt.bind_string(10, row.in_reply_to);
+            stmt.bind_string(11, row.references);
+            stmt.bind_string(12, row.subject);
+            stmt.bind_string_buffer(13, row.header);
+            stmt.bind_string_buffer(14, row.body);
+            stmt.bind_string(15, row.preview);
+            stmt.bind_string(16, row.email_flags);
+            stmt.bind_string(17, row.internaldate);
+            stmt.bind_int64(18, row.internaldate_time_t);
+            stmt.bind_int64(19, row.rfc822_size);
+
+            message_id = stmt.exec_insert(cancellable);
+
+            // write out attachments, if any
+            // TODO: Because this involves saving files, it potentially means holding up access to the
+            // database while they're being written; may want to do this outside of transaction.
+            if (email.fields.fulfills(Attachment.REQUIRED_FIELDS)) {
+                Attachment.save_attachments(
+                    cx,
+                    this.attachments_path,
+                    message_id,
+                    email.get_message().get_attachments(),
+                    cancellable
+                );
+            }
+
+            do_add_email_to_search_table(cx, message_id, email, cancellable);
+
+            MessageAddresses message_addresses =
+                new MessageAddresses.from_email(account_owner_email, email);
+            foreach (Contact contact in message_addresses.contacts)
+                do_update_contact(cx, contact, cancellable);
+            updated_contacts = message_addresses.contacts;
+
+            // Update unread count if our new email is unread.
+            if (email.email_flags != null && email.email_flags.is_unread())
+                unread_count_change++;
         }
-        
-        // not found, so create and associate with this folder
-        MessageRow row = new MessageRow.from_email(email);
-        
-        ImapDB.EmailIdentifier email_id = (ImapDB.EmailIdentifier) email.id;
-        
-        // the create case *requires* a UID be present (originating from Imap.Folder)
-        Imap.UID? uid = email_id.uid;
-        assert(uid != null);
-        
-        pre_fields = Geary.Email.Field.NONE;
-        post_fields = email.fields;
-        
-        Db.Statement stmt = cx.prepare(
-            "INSERT INTO MessageTable "
-            + "(fields, date_field, date_time_t, from_field, sender, reply_to, to_field, cc, bcc, "
-            + "message_id, in_reply_to, reference_ids, subject, header, body, preview, flags, "
-            + "internaldate, internaldate_time_t, rfc822_size) "
-            + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
-        stmt.bind_int(0, row.fields);
-        stmt.bind_string(1, row.date);
-        stmt.bind_int64(2, row.date_time_t);
-        stmt.bind_string(3, row.from);
-        stmt.bind_string(4, row.sender);
-        stmt.bind_string(5, row.reply_to);
-        stmt.bind_string(6, row.to);
-        stmt.bind_string(7, row.cc);
-        stmt.bind_string(8, row.bcc);
-        stmt.bind_string(9, row.message_id);
-        stmt.bind_string(10, row.in_reply_to);
-        stmt.bind_string(11, row.references);
-        stmt.bind_string(12, row.subject);
-        stmt.bind_string_buffer(13, row.header);
-        stmt.bind_string_buffer(14, row.body);
-        stmt.bind_string(15, row.preview);
-        stmt.bind_string(16, row.email_flags);
-        stmt.bind_string(17, row.internaldate);
-        stmt.bind_int64(18, row.internaldate_time_t);
-        stmt.bind_int64(19, row.rfc822_size);
-        
-        int64 message_id = stmt.exec_insert(cancellable);
-        
-        // Make sure the id is filled in even if it came from the Imap layer.
-        if (email_id.message_id == Db.INVALID_ROWID)
-            email_id.promote_with_message_id(message_id);
-        
-        do_associate_with_folder(cx, message_id, uid, cancellable);
-        
-        // write out attachments, if any
-        // TODO: Because this involves saving files, it potentially means holding up access to the
-        // database while they're being written; may want to do this outside of transaction.
-        if (email.fields.fulfills(Attachment.REQUIRED_FIELDS))
-            do_save_attachments(cx, message_id, email.get_message().get_attachments(), cancellable);
-        
-        do_add_email_to_search_table(cx, message_id, email, cancellable);
-        
-        MessageAddresses message_addresses =
-            new MessageAddresses.from_email(account_owner_email, email);
-        foreach (Contact contact in message_addresses.contacts)
-            do_update_contact(cx, contact, cancellable);
-        updated_contacts = message_addresses.contacts;
-        
-        // Update unread count if our new email is unread.
-        if (email.email_flags != null && email.email_flags.is_unread())
-            unread_count_change++;
-        
-        return true;
+
+        // Finally, update the email's message id and add it to the
+        // folder, if needed
+        email_id.promote_with_message_id(message_id);
+        if (!is_associated) {
+            do_associate_with_folder(cx, message_id, email_id.uid, cancellable);
+        }
+
+        return was_created;
     }
-    
+
     internal static void do_add_email_to_search_table(Db.Connection cx, int64 message_id,
         Geary.Email email, Cancellable? cancellable) throws Error {
         string? body = null;
@@ -1522,25 +1597,14 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
                 "Message %s in folder %s only fulfills %Xh fields (required: %Xh)",
                 location.email_id.to_string(), to_string(), row.fields, required_fields);
         }
-        
+
         Geary.Email email = row.to_email(location.email_id);
-        
-        return do_add_attachments(cx, email, location.message_id, cancellable);
-    }
-    
-    internal static Geary.Email do_add_attachments(Db.Connection cx, Geary.Email email,
-        int64 message_id, Cancellable? cancellable = null) throws Error {
-        // Add attachments if available
-        if (email.fields.fulfills(ImapDB.Attachment.REQUIRED_FIELDS)) {
-            Gee.List<Geary.Attachment>? attachments = do_list_attachments(cx, message_id,
-                cancellable);
-            if (attachments != null)
-                email.add_attachments(attachments);
-        }
-        
+        Attachment.add_attachments(
+            cx, this.attachments_path, email, location.message_id, cancellable
+        );
         return email;
     }
-    
+
     private static string fields_to_columns(Geary.Email.Field fields) {
         // always pull the rowid and fields of the message
         StringBuilder builder = new StringBuilder("id, fields");
@@ -1966,14 +2030,17 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
             // Update attachments if not already in the database
             if (!fetched_fields.fulfills(Attachment.REQUIRED_FIELDS)
                 && combined_email.fields.fulfills(Attachment.REQUIRED_FIELDS)) {
-                do_save_attachments(cx, location.message_id, combined_email.get_message().get_attachments(),
-                    cancellable);
+                combined_email.add_attachments(
+                    Attachment.save_attachments(
+                        cx,
+                        this.attachments_path,
+                        location.message_id,
+                        combined_email.get_message().get_attachments(),
+                        cancellable
+                    )
+                );
             }
-            
-            // Must add attachments to the email object after they're saved to
-            // the database.
-            do_add_attachments(cx, combined_email, location.message_id, cancellable);
-            
+
             Geary.Email.Field new_fields;
             do_merge_message_row(cx, row, out new_fields, out updated_contacts,
                 ref new_unread_count, cancellable);
@@ -1992,201 +2059,7 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         
         unread_count_change += new_unread_count;
     }
-    
-    private static Gee.List<Geary.Attachment>? do_list_attachments(Db.Connection cx, int64 message_id,
-        Cancellable? cancellable) throws Error {
-        Db.Statement stmt = cx.prepare("""
-            SELECT id, filename, mime_type, filesize, disposition, content_id, description
-            FROM MessageAttachmentTable
-            WHERE message_id = ?
-            ORDER BY id
-            """);
-        stmt.bind_rowid(0, message_id);
-        
-        Db.Result results = stmt.exec(cancellable);
-        if (results.finished)
-            return null;
 
-        Gee.List<Geary.Attachment> list = new Gee.ArrayList<Geary.Attachment>();
-        do {
-            string? content_filename = results.string_at(1);
-            if (content_filename == ImapDB.Attachment.NULL_FILE_NAME) {
-                // Prior to 0.12, Geary would store the untranslated
-                // string "none" as the filename when none was
-                // specified by the MIME content disposition. Check
-                // for that and clean it up.
-                content_filename = null;
-            }
-            Mime.ContentDisposition disposition = new Mime.ContentDisposition.simple(
-                Mime.DispositionType.from_int(results.int_at(4)));
-            list.add(
-                new ImapDB.Attachment(
-                    message_id,
-                    results.rowid_at(0),
-                    Mime.ContentType.deserialize(results.nonnull_string_at(2)),
-                    results.string_at(5),
-                    results.string_at(6),
-                    disposition,
-                    content_filename,
-                    cx.database.db_file.get_parent(),
-                    results.int64_at(3)
-                )
-            );
-        } while (results.next(cancellable));
-
-        return list;
-    }
-
-    private void do_save_attachments(Db.Connection cx, int64 message_id,
-        Gee.List<GMime.Part>? attachments, Cancellable? cancellable) throws Error {
-        do_save_attachments_db(cx, message_id, attachments, db, cancellable);
-    }
-    
-    public static void do_save_attachments_db(Db.Connection cx, int64 message_id,
-        Gee.List<GMime.Part>? attachments, ImapDB.Database db, Cancellable? cancellable) throws Error {
-        // nothing to do if no attachments
-        if (attachments == null || attachments.size == 0)
-            return;
-        
-        foreach (GMime.Part attachment in attachments) {
-            GMime.ContentType? content_type = attachment.get_content_type();
-            string mime_type = (content_type != null)
-                ? content_type.to_string()
-                : Mime.ContentType.DEFAULT_CONTENT_TYPE;
-            string? disposition = attachment.get_disposition();
-            string? content_id = attachment.get_content_id();
-            string? description = attachment.get_content_description();
-            string? filename = RFC822.Utils.get_clean_attachment_filename(attachment);
-
-            // Convert the attachment content into a usable ByteArray.
-            GMime.DataWrapper? attachment_data = attachment.get_content_object();
-            ByteArray byte_array = new ByteArray();
-            GMime.StreamMem stream = new GMime.StreamMem.with_byte_array(byte_array);
-            stream.set_owner(false);
-            if (attachment_data != null)
-                attachment_data.write_to_stream(stream); // data is null if it's 0 bytes
-            uint filesize = byte_array.len;
-            
-            // convert into DispositionType enum, which is stored as int
-            // (legacy code stored UNSPECIFIED as NULL, which is zero, which is ATTACHMENT, so preserve
-            // this behavior)
-            Mime.DispositionType disposition_type = Mime.DispositionType.deserialize(disposition,
-                null);
-            if (disposition_type == Mime.DispositionType.UNSPECIFIED)
-                disposition_type = Mime.DispositionType.ATTACHMENT;
-            
-            // Insert it into the database.
-            Db.Statement stmt = cx.prepare("""
-                INSERT INTO MessageAttachmentTable (message_id, filename, mime_type, filesize, disposition, content_id, description)
-                VALUES (?, ?, ?, ?, ?, ?, ?)
-                """);
-            stmt.bind_rowid(0, message_id);
-            stmt.bind_string(1, filename);
-            stmt.bind_string(2, mime_type);
-            stmt.bind_uint(3, filesize);
-            stmt.bind_int(4, disposition_type);
-            stmt.bind_string(5, content_id);
-            stmt.bind_string(6, description);
-            
-            int64 attachment_id = stmt.exec_insert(cancellable);
-            
-            File saved_file = ImapDB.Attachment.generate_file(db.db_file.get_parent(), message_id,
-                attachment_id, filename);
-            
-            // On the off-chance this is marked for deletion, unmark it
-            try {
-                stmt = cx.prepare("""
-                    DELETE FROM DeleteAttachmentFileTable
-                    WHERE filename = ?
-                """);
-                stmt.bind_string(0, saved_file.get_path());
-                
-                stmt.exec(cancellable);
-            } catch (Error err) {
-                debug("Unable to delete from DeleteAttachmentFileTable: %s", err.message);
-                
-                // not a deal-breaker, fall through
-            }
-            
-            debug("Saving attachment to %s", saved_file.get_path());
-            
-            try {
-                // create directory, but don't throw exception if already exists
-                try {
-                    saved_file.get_parent().make_directory_with_parents(cancellable);
-                } catch (IOError ioe) {
-                    // fall through if already exists
-                    if (!(ioe is IOError.EXISTS))
-                        throw ioe;
-                }
-                
-                // REPLACE_DESTINATION doesn't seem to work as advertised all the time ... just
-                // play it safe here
-                if (saved_file.query_exists(cancellable))
-                    saved_file.delete(cancellable);
-                
-                // Create the file where the attachment will be saved and get the output stream.
-                FileOutputStream saved_stream = saved_file.create(FileCreateFlags.REPLACE_DESTINATION,
-                    cancellable);
-                
-                // Save the data to disk and flush it.
-                size_t written;
-                if (filesize != 0)
-                    saved_stream.write_all(byte_array.data[0:filesize], out written, cancellable);
-                
-                saved_stream.flush(cancellable);
-            } catch (Error error) {
-                // An error occurred while saving the attachment, so lets remove the attachment from
-                // the database and delete the file (in case it's partially written)
-                debug("Failed to save attachment %s: %s", saved_file.get_path(), error.message);
-                
-                try {
-                    saved_file.delete();
-                } catch (Error delete_error) {
-                    debug("Error attempting to delete partial attachment %s: %s", saved_file.get_path(),
-                        delete_error.message);
-                }
-                
-                try {
-                    Db.Statement remove_stmt = cx.prepare(
-                        "DELETE FROM MessageAttachmentTable WHERE id=?");
-                    remove_stmt.bind_rowid(0, attachment_id);
-                    
-                    remove_stmt.exec();
-                } catch (Error remove_error) {
-                    debug("Error attempting to remove added attachment row for %s: %s",
-                        saved_file.get_path(), remove_error.message);
-                }
-                
-                throw error;
-            }
-        }
-    }
-    
-    public static void do_delete_attachments(Db.Connection cx, int64 message_id)
-        throws Error {
-        Gee.List<Geary.Attachment>? attachments = do_list_attachments(cx, message_id, null);
-        if (attachments == null || attachments.size == 0)
-            return;
-        
-        // delete all files
-        foreach (Geary.Attachment attachment in attachments) {
-            try {
-                attachment.file.delete(null);
-            } catch (Error err) {
-                debug("Unable to delete file %s: %s", attachment.file.get_path(), err.message);
-            }
-        }
-        
-        // remove all from attachment table
-        Db.Statement stmt = new Db.Statement(cx, """
-            DELETE FROM MessageAttachmentTable WHERE message_id = ?
-        """);
-        stmt.bind_rowid(0, message_id);
-        
-        stmt.exec();
-    }
-    
     /**
      * Adds a value to the unread count.  If this makes the unread count negative, it will be
      * set to zero.
@@ -2404,5 +2277,49 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         
         return 0;
     }
-}
 
+    // For SELECT/EXAMINE responses, not STATUS responses
+    private void do_update_last_seen_select_examine_total(Db.Connection cx,
+                                                          int total,
+                                                          Cancellable? cancellable)
+        throws Error {
+        Db.Statement stmt = cx.prepare(
+            "UPDATE FolderTable SET last_seen_total=? WHERE id=?"
+        );
+        stmt.bind_int(0, Numeric.int_floor(total, 0));
+        stmt.bind_rowid(1, this.folder_id);
+        stmt.exec(cancellable);
+    }
+
+    // For STATUS responses, not SELECT/EXAMINE responses
+    private void do_update_last_seen_status_total(Db.Connection cx,
+                                                  int total,
+                                                  Cancellable? cancellable)
+        throws Error {
+        Db.Statement stmt = cx.prepare(
+            "UPDATE FolderTable SET last_seen_status_total=? WHERE id=?");
+        stmt.bind_int(0, Numeric.int_floor(total, 0));
+        stmt.bind_rowid(1, this.folder_id);
+        stmt.exec(cancellable);
+    }
+
+    private void do_update_uid_info(Db.Connection cx,
+                                    Imap.FolderProperties remote_properties,
+                                    Cancellable? cancellable)
+        throws Error {
+        int64 uid_validity = (remote_properties.uid_validity != null)
+            ? remote_properties.uid_validity.value
+            : Imap.UIDValidity.INVALID;
+        int64 uid_next = (remote_properties.uid_next != null)
+            ? remote_properties.uid_next.value
+            : Imap.UID.INVALID;
+
+        Db.Statement stmt = cx.prepare(
+            "UPDATE FolderTable SET uid_validity=?, uid_next=? WHERE id=?");
+        stmt.bind_int64(0, uid_validity);
+        stmt.bind_int64(1, uid_next);
+        stmt.bind_rowid(2, this.folder_id);
+        stmt.exec(cancellable);
+    }
+
+}

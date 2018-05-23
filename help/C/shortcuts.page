@@ -2,205 +2,33 @@
       type="topic"
       id="shortcuts">
 
-    <info>
-        <link type="guide" xref="index#overview"/>
-        
-        <link type="next" xref="label" />
-    </info>
-  
-   <title>Keyboard shortcuts</title>   
-   <p>Geary has keyboard shortcuts for most common operations. </p>
-     <table frame="all" rules="rows">
-  	<tr>
-  		<td><p>Compose a new message</p></td>
-  		<td><p><keyseq><key>Ctrl</key><key>N</key></keyseq> or <key>N</key></p></td>
-  	</tr>
- 	<tr>
-  		<td><p>Reply to sender</p></td> 
-  		<td><p><keyseq><key>Ctrl</key><key>R</key></keyseq> or <key>R</key></p></td>
-  	</tr>
-  	<tr>
-  		<td><p>Reply to all</p></td>
-  		<td><p> <keyseq><key>Ctrl</key><key>Shift</key><key>R</key></keyseq> or <keyseq><key>Shift</key><key>R</key></keyseq> </p></td>
-  	</tr>
-  	<tr>
-  		<td><p>Forward</p></td>
-  		<td><p><keyseq><key>Ctrl</key><key>L</key></keyseq> or <key>F</key> </p></td>
-  	</tr>
-  	<tr>
-  		<td><p>Archive</p></td>
-  		<td><p> <key>A</key></p></td>
-  	</tr>
-  	<tr>
-  		<td><p>Trash</p></td>
-  		<td><p> <key>Delete</key> or <key>Backspace</key></p></td>
-  	</tr>
-  	<tr>
-  		<td><p>Delete</p></td>
-  		<td><p> <keyseq><key>Shift</key><key>Delete</key></keyseq> or <keyseq><key>Shift</key><key>Backspace</key></keyseq></p></td>
-  	</tr>
-  	<tr>
-  	    <td><p>Star</p></td>
-  		<td><p> <key>S</key> </p></td>
-  	</tr>
-  	<tr>
-  	    <td><p>Unstar</p></td>
-  		<td><p> <key>D</key> </p></td>
-  	</tr>
-  	<tr>
-  	    <td><p>Mark read</p></td>
-  		<td><p> <keyseq><key>Ctrl</key><key>I</key></keyseq> or <keyseq><key>Shift</key><key>I</key></keyseq> </p></td>
-  	</tr>
-  	<tr>
-  	    <td><p>Mark unread</p></td>
-  		<td><p> <keyseq><key>Ctrl</key><key>U</key></keyseq> or <keyseq><key>Shift</key><key>U</key></keyseq> </p></td>
-  	</tr>
-  	<tr>
-  	    <td><p>Move the conversation</p></td>
-  		<td><p><key>M</key></p></td>
-  	</tr>
-  	<tr>
-  	    <td><p>Label the conversation</p></td>
-  		<td><p><key>L</key></p></td>
-  	</tr>
-  	<tr>
-  	    <td><p>Jump to next (older) conversation</p></td>
-  		<td><p><keyseq><key>J</key></keyseq></p></td>
-  	</tr>
-  	<tr>
-  	    <td><p>Jump to previous (newer) conversation</p></td>
-  		<td><p><keyseq><key>K</key></keyseq></p></td>
-  	</tr>
-  	<tr>
-  	    <td><p>Toggle spam</p></td>
-  		<td><p> <keyseq><key>Ctrl</key><key>J</key></keyseq> or <key>!</key> </p></td>
-  	</tr>
-  	<tr>
-  		<td><p>Quit</p></td>
-  		<td><p><keyseq><key>Ctrl</key><key>Q</key></keyseq></p></td>
-  	</tr>
-  	<tr>
-  		<td><p>Zoom in</p></td>
-  		<td><p><keyseq><key>Ctrl</key><key>=</key></keyseq> or <key>=</key> </p></td>
-  	</tr>
-  	<tr>
-  		<td><p>Zoom out</p></td>
-  		<td><p><keyseq><key>Ctrl</key><key>-</key></keyseq> or <key>-</key> </p></td>
-  	</tr>
-  	<tr>
-  		<td><p>Reset zoom</p></td>
-  		<td><p><keyseq><key>Ctrl</key><key>0</key></keyseq> or <key>0</key> </p></td>
-  	</tr>
-  	<tr>
-  		<td><p>Close composer window</p></td>
-  		<td><p> <keyseq><key>Ctrl</key><key>W</key></keyseq> </p></td>
-  	</tr>
-  	<tr>
-  		<td><p>Jump to search box</p></td>
-  		<td><p> <keyseq><key>Ctrl</key><key>S</key></keyseq> </p></td>
-  	</tr>
-  	<tr>
-  		<td><p>Find in current conversation</p></td>
-  		<td><p> <keyseq><key>Ctrl</key><key>F</key></keyseq> </p></td>
-  	</tr>
-  	<tr>
-  		<td><p>Find next in current conversation</p></td>
-  		<td><p> <keyseq><key>Ctrl</key><key>G</key></keyseq> </p></td>
-  	</tr>
-  	<tr>
-  		<td><p>Find previous in current conversation</p></td>
-  		<td><p> <keyseq><key>Ctrl</key><key>Shift</key><key>G</key></keyseq> </p></td>
-  	</tr>
-     </table>
+  <info>
+    <link type="guide" xref="index#overview"/>
+    <link type="next" xref="label" />
+  </info>
 
-    <section id="composer">
-        <title>Composer shortcuts</title>
-        <p>These shortcuts are active whenever focus is in a composer.</p>
-        <table frame="all" rules="rows">
-            <tr>
-                <td><p>Attach file</p></td>
-                <td><p><keyseq><key>Ctrl</key><key>T</key></keyseq></p></td>
-            </tr>
-            <tr>
-                <td><p>Quote text</p></td>
-                <td><p> <keyseq><key>Ctrl</key><key>]</key></keyseq> </p></td>
-            </tr>
-            <tr>
-                <td><p>Unquote text</p></td>
-                <td><p> <keyseq><key>Ctrl</key><key>[</key></keyseq> </p></td>
-            </tr>
-            <tr>
-                <td><p>Close composer</p></td>
-                <td><p> <keyseq><key>Ctrl</key><key>W</key></keyseq> or <key>Esc</key> </p></td>
-            </tr>
-            <tr>
-                <td><p>Detach composer</p></td>
-                <td><p> <keyseq><key>Ctrl</key><key>D</key></keyseq> </p></td>
-            </tr>
-        </table>
+  <title>Keyboard shortcuts</title>
 
-        <p>These shortcuts are only active in composers in rich text mode.</p>
-        <table frame="all" rules="rows">
-            <tr>
-                <td><p>Bold text</p></td>
-                <td><p> <keyseq><key>Ctrl</key><key>B</key></keyseq> </p></td>
-            </tr>
-            <tr>
-                <td><p>Italicize text</p></td>
-                <td><p> <keyseq><key>Ctrl</key><key>I</key></keyseq> </p></td>
-            </tr>
-            <tr>
-                <td><p>Underline text</p></td>
-                <td><p> <keyseq><key>Ctrl</key><key>U</key></keyseq> </p></td>
-            </tr>
-            <tr>
-                <td><p>Strike text</p></td>
-                <td><p> <keyseq><key>Ctrl</key><key>K</key></keyseq> </p></td>
-            </tr>
-            <tr>
-                <td><p>Insert a link</p></td>
-                <td><p> <keyseq><key>Ctrl</key><key>L</key></keyseq> </p></td>
-            </tr>
-            <tr>
-                <td><p>Remove formatting</p></td>
-                <td><p> <keyseq><key>Ctrl</key><key>Space</key></keyseq> </p></td>
-            </tr>
-        </table>
-    </section>
+  <p>Geary has keyboard shortcuts for most common operations. Use the
+  built-in keyboard shortcuts help in Geary to discover the full list.
+  This can be accessed via the application menu:
+  <guiseq><gui>Geary</gui><gui>Keyboard Shortcuts</gui></guiseq> or
+  using the keyboard shortcuts listed below.</p>
 
-    <section id="conversation">
-      <title>Keyboard navigation</title>
-      <p>These shortcuts can be used to move the keyboard focus in the main window.</p>
-      <table frame="all" rules="rows">
-        <tr>
-          <td><p>Move focus to the next/previous pane</p></td>
-          <td><p><keyseq><key>F6</key></keyseq> / <keyseq><key>Shift</key><key>F6</key></keyseq> </p></td>
-        </tr>
-        <tr>
-          <td><p>Move focus to conversation list</p></td>
-          <td><p><keyseq><key>Ctrl</key><key>B</key></keyseq> </p></td>
-        </tr>
-        <tr>
-          <td><p>Move to the next message in a conversation</p></td>
-          <td><p>
-            <keyseq><key>Space</key></keyseq>
-          </p></td>
-        </tr>
-        <tr>
-          <td><p>Move to the next/previous message in a conversation</p></td>
-          <td><p>
-            <keyseq><key>Ctrl</key><key>Down</key></keyseq> /
-            <keyseq><key>Ctrl</key><key>Up</key></keyseq>
-          </p></td>
-        </tr>
-        <tr>
-          <td><p>Move to the first/last message in a conversation</p></td>
-          <td><p>
-            <keyseq><key>Ctrl</key><key>Home</key></keyseq> /
-            <keyseq><key>Ctrl</key><key>End</key></keyseq>
-          </p></td>
-        </tr>
-      </table>
-    </section>
+  <p>The following keyboard shortcuts can be used to access on-line
+  help from Geary:</p>
+  <table frame="all" rules="rows">
+    <tr>
+      <td><p>Display this User Manual</p></td>
+      <td><p><keyseq><key>F1</key></keyseq></p></td>
+    </tr>
+    <tr>
+      <td><p>Display all keyboard shortcuts</p></td>
+      <td><p>
+        <keyseq><key>Ctrl</key><key>?</key></keyseq> or
+        <keyseq><key>Ctrl</key><key>F1</key></keyseq>
+      </p></td>
+    </tr>
+  </table>
 
 </page>

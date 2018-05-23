@@ -5,7 +5,7 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-class Geary.EngineTest : Gee.TestCase {
+class Geary.EngineTest : TestCase {
 
     private Engine? engine = null;
     private File? tmp = null;
@@ -72,7 +72,7 @@ class Geary.EngineTest : Gee.TestCase {
         }
 	}
 
-    public void create_orphan_account() {
+    public void create_orphan_account() throws Error {
         try {
             AccountInformation info = this.engine.create_orphan_account();
             assert(info.id == "account_01");
@@ -94,7 +94,7 @@ class Geary.EngineTest : Gee.TestCase {
         }
     }
 
-    public void create_orphan_account_with_legacy() {
+    public void create_orphan_account_with_legacy() throws Error {
         try {
             this.engine.add_account(
                 new AccountInformation("foo", this.config, this.data),

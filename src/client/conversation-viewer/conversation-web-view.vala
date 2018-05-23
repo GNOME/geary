@@ -202,7 +202,7 @@ public class ConversationWebView : ClientWebView {
                 context,
                 Geary.JS.get_property(context, details, "location"));
 
-            Gdk.Rectangle location = new Gdk.Rectangle();
+            Gdk.Rectangle location = Gdk.Rectangle();
             location.x = (int) Geary.JS.to_number(
                 context,
                 Geary.JS.get_property(context, js_location, "x"));

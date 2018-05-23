@@ -11,7 +11,7 @@ public class Libnotify : Geary.BaseObject {
     
     private static Canberra.Context? sound_context = null;
     
-    private NewMessagesMonitor monitor;
+    private weak NewMessagesMonitor monitor;
     private Notify.Notification? current_notification = null;
     private Notify.Notification? error_notification = null;
     private Geary.Folder? folder = null;
@@ -37,11 +37,7 @@ public class Libnotify : Geary.BaseObject {
 
         monitor.new_messages_arrived.connect(on_new_messages_arrived);
     }
-    
-    ~Libnotify() {
-        monitor.new_messages_arrived.disconnect(on_new_messages_arrived);
-    }
-    
+
     private static void init_sound() {
         if (sound_context == null)
             Canberra.Context.create(out sound_context);
@@ -130,10 +126,10 @@ public class Libnotify : Geary.BaseObject {
             
             ins = null;
         }
-        
-        issue_current_notification(primary.get_short_address(), body, avatar);
+
+        issue_current_notification(primary.to_short_display(), body, avatar);
     }
-    
+
     private void issue_current_notification(string summary, string body, Gdk.Pixbuf? icon) {
         // only one outstanding notification at a time
         if (current_notification != null) {
@@ -158,9 +154,9 @@ public class Libnotify : Geary.BaseObject {
         // Avoid constructor due to ABI change
         Notify.Notification notification = (Notify.Notification) GLib.Object.new(
             typeof (Notify.Notification),
-            "icon-name", "geary",
+            "icon-name", "org.gnome.Geary",
             "summary", GLib.Environment.get_application_name());
-        notification.set_hint_string("desktop-entry", "geary");
+        notification.set_hint_string("desktop-entry", "org.gnome.Geary");
         if (caps.find_custom("actions", GLib.strcmp) != null)
             notification.add_action("default", _("Open"), on_default_action);
         

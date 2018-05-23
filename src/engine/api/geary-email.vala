@@ -1,14 +1,30 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2018 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 /**
- * Representation of a single email message in the engine.
+ * An Email represents a single RFC 822 style email message.
  *
- * This class encapsulates an email, attachments and its related
- * server and database state.
+ * This class provides a common abstraction over different
+ * representations of email messages, allowing messages from different
+ * mail systems, from both local and remote sources, and locally
+ * composed email messages to all be represented by a single
+ * object. While this object represents a RFC 822 message, it also
+ * holds additional metadata about an email not specified by that
+ * format, such as its unique {@link id}, and unread state and other
+ * {@link email_flags}.
+ *
+ * Email objects may by constructed in many ways, but are usually
+ * obtained via a {@link Folder}. Email objects may be partial
+ * representations of messages, in cases where a remote message has
+ * not been fully downloaded, or a local message not fully loaded from
+ * a database. This can be checked via an email's {@link fields}
+ * property, and if the currently loaded fields are not sufficient,
+ * then additional fields can be loaded via a folder.
  */
 public class Geary.Email : BaseObject {
 
@@ -18,35 +34,75 @@ public class Geary.Email : BaseObject {
     public const int MAX_PREVIEW_BYTES = 256;
 
     /**
-     * Currently only one field is mutable: FLAGS.  All others never change once stored in the
-     * database.
+     * Indicates email fields that may change over time.
+     *
+     * Currently only one field is mutable: FLAGS. All others never
+     * change once stored in the database.
      */
     public const Field MUTABLE_FIELDS = Geary.Email.Field.FLAGS;
-    
+
     /**
-     * The fields required to build an RFC822.Message for get_message() and
-     * any attachments.
+     * Indicates the email fields required to build an RFC822.Message.
+     *
+     * @see get_message
      */
     public const Field REQUIRED_FOR_MESSAGE = Geary.Email.Field.HEADER | Geary.Email.Field.BODY;
-    
-    // THESE VALUES ARE PERSISTED.  Change them only if you know what you're doing.
+
+    /**
+     * Specifies specific parts of an email message.
+     *
+     * See the {@link Email.fields} property to determine which parts
+     * an email object currently contains.
+     */
     public enum Field {
+        // THESE VALUES ARE PERSISTED.  Change them only if you know what you're doing.
+
+        /** Denotes no fields. */
         NONE =              0,
+
+        /** The RFC 822 Date header. */
         DATE =              1 << 0,
+
+        /** The RFC 822 From, Sender, and Reply-To headers. */
         ORIGINATORS =       1 << 1,
+
+        /** The RFC 822 To, Cc, and Bcc headers. */
         RECEIVERS =         1 << 2,
+
+        /** The RFC 822 Message-Id, In-Reply-To, and References headers. */
         REFERENCES =        1 << 3,
+
+        /** The RFC 822 Subject header. */
         SUBJECT =           1 << 4,
+
+        /** The list of all RFC 822 headers. */
         HEADER =            1 << 5,
+
+        /** The RFC 822 message body and attachments. */
         BODY =              1 << 6,
+
+        /** The {@link Email.properties} object. */
         PROPERTIES =        1 << 7,
+
+        /** The plain text preview. */
         PREVIEW =           1 << 8,
+
+        /** The {@link Email.email_flags} object. */
         FLAGS =             1 << 9,
-        
-        ENVELOPE =          DATE | ORIGINATORS | RECEIVERS | REFERENCES | SUBJECT,
-        ALL =               DATE | ORIGINATORS | RECEIVERS | REFERENCES | SUBJECT | HEADER | BODY
-                            | PROPERTIES | PREVIEW | FLAGS;
-        
+
+        /**
+         * The union of the primary headers of a message.
+         *
+         * The envelope includes the {@link DATE}, {@link
+         * ORIGINATORS}, {@link RECEIVERS}, {@link REFERENCES}, and
+         * {@link SUBJECT} fields.
+         */
+        ENVELOPE = DATE | ORIGINATORS | RECEIVERS | REFERENCES | SUBJECT,
+
+        /** The union of all email fields. */
+        ALL =      DATE | ORIGINATORS | RECEIVERS | REFERENCES | SUBJECT |
+                   HEADER | BODY | PROPERTIES | PREVIEW | FLAGS;
+
         public static Field[] all() {
             return {
                 DATE,
@@ -108,15 +164,18 @@ public class Geary.Email : BaseObject {
             return builder.str;
         }
     }
-    
+
     /**
-     * id is a unique identifier for the Email in the Folder.  It is guaranteed to be unique for
-     * as long as the Folder is open.  Once closed, guarantees are no longer made.
+     * A unique identifier for the Email in the Folder.
      *
-     * This field is always returned, no matter what Fields are used to retrieve the Email.
+     * This is is guaranteed to be unique for as long as the Folder is
+     * open. Once closed, guarantees are no longer made.
+     *
+     * This field is always returned, no matter what Fields are used
+     * to retrieve the Email.
      */
     public Geary.EmailIdentifier id { get; private set; }
-    
+
     // DATE
     public Geary.RFC822.Date? date { get; private set; default = null; }
 
@@ -154,9 +213,23 @@ public class Geary.Email : BaseObject {
     
     // FLAGS
     public Geary.EmailFlags? email_flags { get; private set; default = null; }
-    
+
+    /**
+     * Specifies the properties that have been populated for this email.
+     *
+     * Since this email object may be a partial representation of a
+     * complete email message, this property lists all parts of the
+     * object that have actually been loaded, as opposed to parts that
+     * are simply missing from the email it represents.
+     *
+     * For example, if this property includes the {@link
+     * Field.SUBJECT} flag, then the {@link subject} property has been
+     * set to reflect the Subject header of the message. Of course,
+     * the subject may then still may be null or empty, if the email
+     * did not specify a subject header.
+     */
     public Geary.Email.Field fields { get; private set; default = Field.NONE; }
-    
+
     private Geary.RFC822.Message? message = null;
     
     public Email(Geary.EmailIdentifier id) {
@@ -279,10 +352,13 @@ public class Geary.Email : BaseObject {
         }
         return search.str;
     }
-    
+
     /**
-     * This method requires the REQUIRED_FOR_MESSAGE fields be present.
-     * If not, EngineError.INCOMPLETE_MESSAGE is thrown.
+     * Constructs a new RFC 822 message from this email.
+     *
+     * This method requires the {@link REQUIRED_FOR_MESSAGE} fields be
+     * present. If not, {@link EngineError.INCOMPLETE_MESSAGE} is
+     * thrown.
      */
     public Geary.RFC822.Message get_message() throws EngineError, RFC822Error {
         if (message != null)
@@ -294,25 +370,6 @@ public class Geary.Email : BaseObject {
         message = new Geary.RFC822.Message.from_parts(header, body);
         
         return message;
-    }
-
-    /**
-     * Returns the attachment with the given {@link Geary.Attachment.id}.
-     *
-     * Requires the REQUIRED_FOR_MESSAGE fields be present; else
-     * EngineError.INCOMPLETE_MESSAGE is thrown.
-     */
-    public Geary.Attachment? get_attachment_by_id(string attachment_id)
-    throws EngineError {
-        if (!fields.fulfills(REQUIRED_FOR_MESSAGE))
-            throw new EngineError.INCOMPLETE_MESSAGE("Parsed email requires HEADER and BODY");
-
-        foreach (Geary.Attachment attachment in attachments) {
-            if (attachment.id == attachment_id) {
-                return attachment;
-            }
-        }
-        return null;
     }
 
     /**

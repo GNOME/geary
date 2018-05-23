@@ -5,24 +5,36 @@
  */
 
 public class Geary.Imap.ClientConnection : BaseObject {
+
+    /** Default un-encrypted IMAP network port */
     public const uint16 DEFAULT_PORT = 143;
+
+    /** Default encrypted IMAP network port */
     public const uint16 DEFAULT_PORT_SSL = 993;
-    
+
     /**
-     * This is set very high to allow for IDLE connections to remain connected even when
-     * there is no traffic on them.  The side-effect is that if the physical connection is dropped,
-     * no error is reported and the connection won't know about it until the next send operation.
+     * Default socket timeout duration.
      *
-     * RECOMMENDED_TIMEOUT_SEC is more realistic in that if a connection is hung it's important
-     * to detect it early and drop it, at the expense of more keepalive traffic.
+     * This is set to the highest value required by RFC 3501 to allow
+     * for IDLE connections to remain connected even when there is no
+     * traffic on them.  The side-effect is that if the physical
+     * connection is dropped, no error is reported and the connection
+     * won't know about it until the next send operation.
      *
-     * In general, whatever timeout is used for the ClientConnection must be slightly higher than
-     * the keepalive timeout used by ClientSession, otherwise the ClientConnection will be dropped
-     * before the keepalive is sent.
+     * {@link RECOMMENDED_TIMEOUT_SEC} is more realistic in that if a
+     * connection is hung it's important to detect it early and drop
+     * it, at the expense of more keepalive traffic.
+     *
+     * In general, whatever timeout is used for the ClientConnection
+     * must be slightly higher than the keepalive timeout used by
+     * {@link ClientSession}, otherwise the ClientConnection will be
+     * dropped before the keepalive is sent.
      */
-    public const uint DEFAULT_TIMEOUT_SEC = ClientSession.MIN_KEEPALIVE_SEC + 15;
+    public const uint DEFAULT_TIMEOUT_SEC = ClientSession.MAX_KEEPALIVE_SEC;
+
+    /** Recommended socket timeout duration. */
     public const uint RECOMMENDED_TIMEOUT_SEC = ClientSession.RECOMMENDED_KEEPALIVE_SEC + 15;
-    
+
     /**
      * The default timeout for an issued command to result in a response code from the server.
      *
@@ -99,12 +111,31 @@ public class Geary.Imap.ClientConnection : BaseObject {
      * in logs and debug output.
      */
     public int cx_id { get; private set; }
-    
+
+    /**
+     * Determines if the connection will use IMAP IDLE when idle.
+     *
+     * If //true//, when the connection is not sending commands
+     * ("quiet"), it will issue an IDLE command to enter a state where
+     * unsolicited server data may be sent from the server without
+     * resorting to NOOP keepalives.  (Note that keepalives are still
+     * required to hold the connection open, according to the IMAP
+     * specification.)
+     *
+     * Note that setting this false will *not* break a connection out
+     * of IDLE state alone; a command needs to be flushed down the
+     * pipe to do that.  (NOOP would be a good choice.)  Nor will this
+     * initiate an IDLE command either; it can only do that after
+     * sending a command (again, NOOP would be a good choice).
+     */
+    public bool idle_when_quiet = false;
+
     private Geary.Endpoint endpoint;
     private Geary.State.Machine fsm;
     private SocketConnection? cx = null;
     private IOStream? ios = null;
     private Serializer? ser = null;
+    private BufferedOutputStream? ser_buffer = null;
     private Deserializer? des = null;
     private Geary.Nonblocking.Mutex send_mutex = new Geary.Nonblocking.Mutex();
     private Geary.Nonblocking.Semaphore synchronized_notifier = new Geary.Nonblocking.Semaphore();
@@ -112,7 +143,6 @@ public class Geary.Imap.ClientConnection : BaseObject {
     private int tag_counter = 0;
     private char tag_prefix = 'a';
     private uint flush_timeout_id = 0;
-    private bool idle_when_quiet = false;
     private Gee.HashSet<Tag> posted_idle_tags = new Gee.HashSet<Tag>();
     private int outstanding_idle_dones = 0;
     private Tag? posted_synchronization_tag = null;
@@ -284,26 +314,7 @@ public class Geary.Imap.ClientConnection : BaseObject {
         // TODO This could be optimized, but we'll leave it for now.
         return new Tag("%c%03d".printf(tag_prefix, tag_counter));
     }
-    
-    /**
-     * If true, when the connection is not sending commands ("quiet"), it will issue an IDLE command
-     * to enter a state where unsolicited server data may be sent from the server without resorting
-     * to NOOP keepalives.  (Note that keepalives are still required to hold the connection open,
-     * according to the IMAP specification.)
-     *
-     * Note that this will *not* break a connection out of IDLE state alone; a command needs to be
-     * flushed down the pipe to do that.  (NOOP would be a good choice.)  Nor will this initiate
-     * an IDLE command either; it can only do that after sending a command (again, NOOP would be
-     * a good choice).
-     */
-    public void set_idle_when_quiet(bool idle_when_quiet) {
-        this.idle_when_quiet = idle_when_quiet;
-    }
-    
-    public bool get_idle_when_quiet() {
-        return idle_when_quiet;
-    }
-    
+
     public SocketAddress? get_remote_address() {
         if (cx == null)
             return null;
@@ -437,31 +448,31 @@ public class Geary.Imap.ClientConnection : BaseObject {
             disconnected();
         }
     }
-    
+
     private async void open_channels_async() throws Error {
         assert(ios != null);
         assert(ser == null);
         assert(des == null);
-        
+
         // Not buffering the Deserializer because it uses a DataInputStream, which is buffered
-        BufferedOutputStream buffered_outs = new BufferedOutputStream(ios.output_stream);
-        buffered_outs.set_close_base_stream(false);
-        
+        ser_buffer = new BufferedOutputStream(ios.output_stream);
+        ser_buffer.set_close_base_stream(false);
+
         // Use ClientConnection cx_id for debugging aid with Serializer/Deserializer
         string id = "%04d".printf(cx_id);
-        ser = new Serializer(id, buffered_outs);
+        ser = new Serializer(id, ser_buffer);
         des = new Deserializer(id, ios.input_stream);
-        
+
         des.parameters_ready.connect(on_parameters_ready);
         des.bytes_received.connect(on_bytes_received);
         des.receive_failure.connect(on_receive_failure);
         des.deserialize_failure.connect(on_deserialize_failure);
         des.eos.connect(on_eos);
-        
+
         yield des.start_async();
     }
-    
-    // Closes the Serializer and Deserializer, but does NOT close the underlying streams
+
+    /** Disconnect and deallocates the Serializer and Deserializer. */
     private async void close_channels_async(Cancellable? cancellable) throws Error {
         // disconnect from Deserializer before yielding to stop it
         if (des != null) {
@@ -470,14 +481,22 @@ public class Geary.Imap.ClientConnection : BaseObject {
             des.receive_failure.disconnect(on_receive_failure);
             des.deserialize_failure.disconnect(on_deserialize_failure);
             des.eos.disconnect(on_eos);
-            
+
             yield des.stop_async();
         }
-        
-        ser = null;
         des = null;
+        ser = null;
+        // Close the Serializer's buffered stream after it as been
+        // deallocated so it can't possibly write to the stream again,
+        // and so the stream's async thread doesn't attempt to flush
+        // its buffers from its finaliser at some later unspecified
+        // point, possibly writing to an invalid underlying stream.
+        if (ser_buffer != null) {
+            yield ser_buffer.close_async(GLib.Priority.DEFAULT, cancellable);
+            ser_buffer = null;
+        }
     }
-    
+
     public async void starttls_async(Cancellable? cancellable = null) throws Error {
         if (cx == null)
             throw new ImapError.NOT_SUPPORTED("[%s] Unable to enable TLS: no connection", to_string());
@@ -488,10 +507,11 @@ public class Geary.Imap.ClientConnection : BaseObject {
             
             return;
         }
-        
+
         // Close the Serializer/Deserializer, as need to use the TLS streams
+        debug("[%s] Closing serializer to switch to TLS", to_string());
         yield close_channels_async(cancellable);
-        
+
         // wrap connection with TLS connection
         TlsClientConnection tls_cx = yield endpoint.starttls_handshake_async(cx, cancellable);
         

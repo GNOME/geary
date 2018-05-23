@@ -18,6 +18,7 @@ public enum Geary.Imap.ServerDataType {
     FLAGS,
     LIST,
     LSUB,
+    NAMESPACE,
     RECENT,
     SEARCH,
     STATUS,
@@ -45,7 +46,10 @@ public enum Geary.Imap.ServerDataType {
             
             case LSUB:
                 return "lsub";
-            
+
+            case NAMESPACE:
+                return "namespace";
+
             case RECENT:
                 return "recent";
             
@@ -91,7 +95,10 @@ public enum Geary.Imap.ServerDataType {
             
             case "lsub":
                 return LSUB;
-            
+
+            case "namespace":
+                return NAMESPACE;
+
             case "recent":
                 return RECENT;
             
@@ -136,6 +143,9 @@ public enum Geary.Imap.ServerDataType {
                 
                 case "lsub":
                     return LSUB;
+                
+                case "namespace":
+                    return NAMESPACE;
                 
                 case "search":
                     return SEARCH;

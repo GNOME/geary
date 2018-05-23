@@ -13,10 +13,13 @@ public abstract class Geary.AbstractLocalFolder : Geary.Folder {
     
     private int open_count = 0;
     private Nonblocking.Semaphore closed_semaphore = new Nonblocking.Semaphore();
-    
+
     protected AbstractLocalFolder() {
+        // Notify now to ensure that wait_for_close_async does not
+        // block if never opened.
+        this.closed_semaphore.blind_notify();
     }
-    
+
     public override Geary.Folder.OpenState get_open_state() {
         return open_count > 0 ? Geary.Folder.OpenState.LOCAL : Geary.Folder.OpenState.CLOSED;
     }
@@ -29,12 +32,12 @@ public abstract class Geary.AbstractLocalFolder : Geary.Folder {
     protected bool is_open() {
         return open_count > 0;
     }
-    
-    public override async void wait_for_open_async(Cancellable? cancellable = null) throws Error {
+
+    public override async void wait_for_remote_async(Cancellable? cancellable = null) throws Error {
         if (open_count == 0)
             throw new EngineError.OPEN_REQUIRED("%s not open", to_string());
     }
-    
+
     public override async bool open_async(Geary.Folder.OpenFlags open_flags, Cancellable? cancellable = null)
         throws Error {
         if (open_count++ > 0)

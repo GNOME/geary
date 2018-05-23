@@ -24,14 +24,13 @@ private class Geary.ImapEngine.EmptyFolder : Geary.ImapEngine.SendReplayOperatio
     
     public override void notify_remote_removed_ids(Gee.Collection<ImapDB.EmailIdentifier> ids) {
     }
-    
+
     public override async ReplayOperation.Status replay_local_async() throws Error {
-        original_count = engine.get_remote_counts(null, null);
-        
+        this.original_count = this.engine.properties.email_total;
         // because this value is only used for reporting count changes, offer best-possible service
-        if (original_count < 0)
-            original_count = 0;
-        
+        if (this.original_count < 0)
+            this.original_count = 0;
+
         // mark everything in the folder as removed
         removed_ids = yield engine.local_folder.mark_removed_async(null, true, cancellable);
         
@@ -52,17 +51,19 @@ private class Geary.ImapEngine.EmptyFolder : Geary.ImapEngine.SendReplayOperatio
         if (removed_ids != null)
             ids.add_all(removed_ids);
     }
-    
+
     public override async ReplayOperation.Status replay_remote_async() throws Error {
         // STORE and EXPUNGE using positional addressing: "1:*"
+        Imap.FolderSession remote =
+            yield this.engine.claim_remote_session(cancellable);
         Imap.MessageSet msg_set = new Imap.MessageSet.range_to_highest(
             new Imap.SequenceNumber(Imap.SequenceNumber.MIN));
-        
-        yield engine.remote_folder.remove_email_async(msg_set.to_list(), cancellable);
-        
+
+        yield remote.remove_email_async(msg_set.to_list(), cancellable);
+
         return ReplayOperation.Status.COMPLETED;
     }
-    
+
     public override async void backout_local_async() throws Error {
         if (removed_ids != null && removed_ids.size > 0) {
             yield engine.local_folder.mark_removed_async(removed_ids, false, cancellable);

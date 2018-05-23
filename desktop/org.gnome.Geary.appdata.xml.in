@@ -8,34 +8,34 @@
   <update_contact>geary-list@gnome.org</update_contact>
 
   <!-- Translators: The application name -->
-  <_name>Geary</_name>
+  <name>Geary</name>
   <!-- Translators: The development team's name -->
-  <_developer_name>Geary Development Team</_developer_name>
+  <developer_name>Geary Development Team</developer_name>
   <!-- Translators: The application's summary / tagline -->
-  <_summary>Send and receive email</_summary>
+  <summary>Send and receive email</summary>
   <description>
-    <_p>
+    <p>
       Geary is an email application built around conversations, for
       the GNOME 3 desktop. It allows you to read, find and send email
       with a straightforward, modern interface.
-    </_p>
-    <_p>
+    </p>
+    <p>
       Conversations allow you to read a complete discussion without
       having to find and click from message to message.
-    </_p>
-    <_p>Geary’s features include:</_p>
+    </p>
+    <p>Geary’s features include:</p>
     <ul>
-      <_li>Quick email account setup</_li>
-      <_li>Shows related messages together in conversations</_li>
-      <_li>Fast, full text and keyword search</_li>
-      <_li>Full-featured HTML and plain text message composer</_li>
-      <_li>Desktop notification of new mail</_li>
-      <_li>Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers</_li>
+      <li>Quick email account setup</li>
+      <li>Shows related messages together in conversations</li>
+      <li>Fast, full text and keyword search</li>
+      <li>Full-featured HTML and plain text message composer</li>
+      <li>Desktop notification of new mail</li>
+      <li>Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers</li>
     </ul>
   </description>
 
   <url type="homepage">https://wiki.gnome.org/Apps/Geary</url>
-  <url type="help">https://wiki.gnome.org/Apps/Geary/Contact</url>
+  <url type="help">https://wiki.gnome.org/Apps/Geary/Documentation</url>
   <url type="faq">https://wiki.gnome.org/Apps/Geary/FAQ</url>
   <url type="bugtracker">https://wiki.gnome.org/Apps/Geary/ReportingABug</url>
   <url type="translate">https://wiki.gnome.org/Apps/Geary/Translating</url>
@@ -44,12 +44,12 @@
   <screenshots>
     <screenshot>
       <!-- Translators: A screenshot description. -->
-      <_caption>Geary displaying a conversation</_caption>
+      <caption>Geary displaying a conversation</caption>
       <image type="default" width="1600" height="900">https://wiki.gnome.org/Apps/Geary?action=AttachFile&amp;do=get&amp;target=geary-conversation-0.12.png</image>
     </screenshot>
     <screenshot>
       <!-- Translators: A screenshot description. -->
-      <_caption>Geary showing the rich text composer</_caption>
+      <caption>Geary showing the rich text composer</caption>
       <image type="source" width="1600" height="900">https://wiki.gnome.org/Apps/Geary?action=AttachFile&amp;do=get&amp;target=geary-composer-0.12.png</image>
     </screenshot>
   </screenshots>
@@ -79,7 +79,7 @@
   <releases>
     <release version="0.12" date="2017-10-02">
       <description>
-        <p>Enhances included in this release:</p>
+        <p>Enhancements included in this release:</p>
         <ul>
           <li>Insert images inline when composing rich text messages</li>
           <li>Improved interface for inserting links in rich text messages</li>
@@ -96,85 +96,6 @@
           <li>Improved security when displaying messages</li>
           <li>Numerous bug fixes and minor user interface improvements</li>
           <li>Numerous user interface translation updates</li>
-        </ul>
-        <p>Thanks to all who contributed code fixes and enhancements
-        to this release, in particular the many first-time
-        contributors:</p>
-        <ul>
-          <li>Alex Henrie</li>
-          <li>Colin Vidal</li>
-          <li>Federico Bruni</li>
-          <li>Gautier Pelloux-Prayer</li>
-          <li>Heiko Becker</li>
-          <li>Jeremy Bicha</li>
-          <li>Jiri Cerny</li>
-          <li>Kacper Bielecki</li>
-          <li>Leonardo Robol</li>
-          <li>Michael Gratton</li>
-          <li>Michael James Gratton</li>
-          <li>Niels De Graef</li>
-          <li>Oskar Viljasaar</li>
-          <li>Piotr Drąg</li>
-          <li>Ralph Plawetzki</li>
-          <li>Rico Tzschichholz</li>
-          <li>Timo Kluck</li>
-          <li>Ville Korhonen</li>
-          <li>Yosef Or Boczko</li>
-        </ul>
-        <p>Thanks also to the many that contributed translations, for the user interface:</p>
-        <ul>
-          <li>Alan Mortensen (da)</li>
-          <li>Alexandre Franke (fr)</li>
-          <li>Anders Jonsson (sv)</li>
-          <li>Andika Triwidada (id)</li>
-          <li>Ask Hjorth Larsen (da)</li>
-          <li>Aurimas Černius (lt)</li>
-          <li>Balázs Meskó (hu)</li>
-          <li>Balázs Úr (hu)</li>
-          <li>Baurzhan Muftakhidinov (kk)</li>
-          <li>Benedikt M. Thoma (de)</li>
-          <li>Daniel Korostil (uk)</li>
-          <li>Daniel Mustieles (es)</li>
-          <li>Daniel Șerbănescu (ro)</li>
-          <li>Dušan Kazik (sk)</li>
-          <li>Emin Tufan Çetin (tr)</li>
-          <li>E T (tr)</li>
-          <li>Federico Bruni (it)</li>
-          <li>Flo H (de)</li>
-          <li>Gábor Kelemen (hu)</li>
-          <li>Hannie Dumoleyn (nl)</li>
-          <li>hanniedu (nl)</li>
-          <li>Jeremy Bicha (bs)</li>
-          <li>Jiri Grönroos (fi)</li>
-          <li>Jordi Mas (ca)</li>
-          <li>Josef Andersson (sv)</li>
-          <li>Kjartan Maraas (nb)</li>
-          <li>Laudivan Freire de Almeida (pt_BR)</li>
-          <li>Marek Černocký (cs)</li>
-          <li>Mario Blättermann (de)</li>
-          <li>Matej Urbančič (sl)</li>
-          <li>Muhammet Kara (tr)</li>
-          <li>Piotr Drąg (hi) (hu) (ja) (km) (ms) (pl) (nl) (sl) (sr@latin)</li>
-          <li>Rafael Fontenelle (pt_BR)</li>
-          <li>Ronan Arraes Jardim Chagas (pt_BR)</li>
-          <li>Stas Solovey (ru)</li>
-          <li>Tiago Santos (pt)</li>
-          <li>Wolfgang Stöggl (de)</li>
-          <li>Yosef Or Boczko (he)</li>
-          <li>Мирослав Николић (sr) (sr@latin)</li>
-        </ul>
-        <p>And for the user manual:</p>
-        <ul>
-          <li>Anders Jonsson (sv)</li>
-          <li>Andre Klapper (el)</li>
-          <li>Christian Kirbach (de)</li>
-          <li>Daniel Mustieles (es)</li>
-          <li>Federico Bruni (it)</li>
-          <li>Josef Andersson (sv)</li>
-          <li>Marek Černocký (cs)</li>
-          <li>Mario Blättermann (de)</li>
-          <li>Piotr Drąg (pl)</li>
-          <li>Rafael Fontenelle (pt_BR)</li>
         </ul>
       </description>
     </release>

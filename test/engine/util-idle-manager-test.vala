@@ -5,7 +5,7 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-class Geary.IdleManagerTest : Gee.TestCase {
+class Geary.IdleManagerTest : TestCase {
 
     public IdleManagerTest() {
         base("Geary.IdleManagerTest");
@@ -13,7 +13,7 @@ class Geary.IdleManagerTest : Gee.TestCase {
         add_test("test_run", test_run);
     }
 
-    public void start_reset() {
+    public void start_reset() throws Error {
         IdleManager test = new IdleManager(() => { /* noop */ });
         assert(!test.is_running);
         test.schedule();
@@ -22,17 +22,17 @@ class Geary.IdleManagerTest : Gee.TestCase {
         assert(!test.is_running);
     }
 
-    public void test_run() {
+    public void test_run() throws Error {
         bool did_run = false;
 
         IdleManager test = new IdleManager(() => { did_run = true; });
         test.schedule();
 
         // There should be at least one event pending
-        assert(Gtk.events_pending());
+        assert(this.main_loop.pending());
 
         // Execute the idle function
-        Gtk.main_iteration();
+        this.main_loop.iteration(true);
 
         assert(did_run);
     }

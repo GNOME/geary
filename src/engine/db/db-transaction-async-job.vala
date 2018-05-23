@@ -1,29 +1,34 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 private class Geary.Db.TransactionAsyncJob : BaseObject {
+
+    internal Connection? cx { get; private set; default = null; }
+    internal Cancellable cancellable { get; private set; }
+
     private TransactionType type;
     private unowned TransactionMethod cb;
-    private Cancellable cancellable;
     private Nonblocking.Event completed;
     private TransactionOutcome outcome = TransactionOutcome.ROLLBACK;
     private Error? caught_err = null;
-    
-    public TransactionAsyncJob(TransactionType type, TransactionMethod cb, Cancellable? cancellable) {
+
+
+    public TransactionAsyncJob(Connection? cx,
+                               TransactionType type,
+                               TransactionMethod cb,
+                               Cancellable? cancellable) {
+        this.cx = cx;
         this.type = type;
         this.cb = cb;
         this.cancellable = cancellable ?? new Cancellable();
-        
-        completed = new Nonblocking.Event();
+
+        this.completed = new Nonblocking.Event();
     }
-    
-    public void cancel() {
-        cancellable.cancel();
-    }
-    
+
     public bool is_cancelled() {
         return cancellable.is_cancelled();
     }
@@ -82,17 +87,16 @@ private class Geary.Db.TransactionAsyncJob : BaseObject {
         
         return false;
     }
-    
+
     // No way to cancel this because the callback thread *must* finish before
     // we move on here.  Any I/O the thread is doing can still be cancelled
-    // using our cancel() above.
+    // using the job's cancellable.
     public async TransactionOutcome wait_for_completion_async()
         throws Error {
-        yield completed.wait_async();
-        if (caught_err != null)
-            throw caught_err;
-        
-        return outcome;
+        yield this.completed.wait_async();
+        if (this.caught_err != null)
+            throw this.caught_err;
+
+        return this.outcome;
     }
 }
-

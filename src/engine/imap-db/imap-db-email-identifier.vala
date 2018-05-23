@@ -58,21 +58,7 @@ private class Geary.ImapDB.EmailIdentifier : Geary.EmailIdentifier {
     public override string to_string() {
         return "[%s/%s]".printf(message_id.to_string(), (uid == null ? "null" : uid.to_string()));
     }
-    
-    // Email's with no UID get sorted after emails with
-    public static int compare_email_uid_ascending(Geary.Email a, Geary.Email b) {
-        Imap.UID? auid = ((ImapDB.EmailIdentifier) a.id).uid;
-        Imap.UID? buid = ((ImapDB.EmailIdentifier) b.id).uid;
-        
-        if (auid == null)
-            return (buid != null) ? 1 : 0;
-        
-        if (buid == null)
-            return -1;
-        
-        return auid.compare_to(buid);
-    }
-    
+
     public static Gee.Set<Imap.UID> to_uids(Gee.Collection<ImapDB.EmailIdentifier> ids) {
         Gee.HashSet<Imap.UID> uids = new Gee.HashSet<Imap.UID>();
         foreach (ImapDB.EmailIdentifier id in ids) {

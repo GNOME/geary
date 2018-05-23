@@ -6,8 +6,12 @@ JavascriptResult
 //Forward upstream
 Download
   .failed#signal.error type="WebKit.DownloadError"
+PrintCustomWidget
+  .apply#signal skip
+  .update#signal skip
 PrintOperation
   .failed#signal.error type="WebKit.PrintError"
+WebContext.initialize_notification_permissions#method skip
 WebResource
   .failed#signal.error type="GLib.Error"
 WebView

@@ -5,14 +5,56 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-class Geary.HTML.UtilTest : Gee.TestCase {
+class Geary.HTML.UtilTest : TestCase {
 
     public UtilTest() {
         base("Geary.HTML.Util");
+        add_test("smart_escape_div", smart_escape_div);
+        add_test("smart_escape_no_closing_tag", smart_escape_no_closing_tag);
+        add_test("smart_escape_img", smart_escape_img);
+        add_test("smart_escape_xhtml_img", smart_escape_xhtml_img);
+        add_test("smart_escape_mixed", smart_escape_mixed);
+        add_test("smart_escape_text", smart_escape_text);
+        add_test("smart_escape_text_url", smart_escape_text_url);
         add_test("remove_html_tags", remove_html_tags);
     }
 
-    public void remove_html_tags() {
+    public void smart_escape_div() throws Error {
+        string html = "<div>ohhai</div>";
+        assert(Geary.HTML.smart_escape(html, false) == html);
+    }
+
+    public void smart_escape_no_closing_tag() throws Error {
+        string html = "<div>ohhai";
+        assert(Geary.HTML.smart_escape(html, false) == html);
+    }
+
+    public void smart_escape_img() throws Error {
+        string html = "<img src=\"http://example.com/lol.gif\">";
+        assert(Geary.HTML.smart_escape(html, false) == html);
+    }
+
+    public void smart_escape_xhtml_img() throws Error {
+        string html = "<img src=\"http://example.com/lol.gif\"/>";
+        assert(Geary.HTML.smart_escape(html, false) == html);
+    }
+
+    public void smart_escape_mixed() throws Error {
+        string html = "mixed <div>ohhai</div> text";
+        assert(Geary.HTML.smart_escape(html, false) == html);
+    }
+
+    public void smart_escape_text() throws Error {
+        string text = "some text";
+        assert(Geary.HTML.smart_escape(text, false) == "<div style='white-space: pre-wrap;'>some text</div>");
+    }
+
+    public void smart_escape_text_url() throws Error {
+        string text = "<http://example.com>";
+        assert(Geary.HTML.smart_escape(text, false) == "<div style='white-space: pre-wrap;'>&lt;http://example.com&gt;</div>");
+    }
+
+    public void remove_html_tags() throws Error {
         string blockquote_body = """<blockquote>hello</blockquote> <p>there</p>""";
 
         string style_complete = """<style>

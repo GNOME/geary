@@ -5,7 +5,7 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-class Geary.TimeoutManagerTest : Gee.TestCase {
+class Geary.TimeoutManagerTest : TestCase {
 
     // add_seconds seems to vary wildly, so needs a large epsilon
     private const double SECONDS_EPSILON = 1.8;
@@ -16,13 +16,13 @@ class Geary.TimeoutManagerTest : Gee.TestCase {
         base("Geary.TimeoutManagerTest");
         add_test("start_reset", start_reset);
         if (Test.slow()) {
-            add_test("test_seconds", test_seconds);
-            add_test("test_milliseconds", test_milliseconds);
-            add_test("test_repeat_forever", test_repeat_forever);
+            add_test("seconds", seconds);
+            add_test("milliseconds", milliseconds);
+            add_test("repeat_forever", repeat_forever);
         }
     }
 
-    public void start_reset() {
+    public void start_reset() throws Error {
         TimeoutManager test = new TimeoutManager.seconds(1, () => { /* noop */ });
         assert(!test.is_running);
         test.start();
@@ -31,7 +31,7 @@ class Geary.TimeoutManagerTest : Gee.TestCase {
         assert(!test.is_running);
     }
 
-    public void test_seconds() {
+    public void seconds() throws Error {
         Timer timer = new Timer();
 
         TimeoutManager test = new TimeoutManager.seconds(1, () => { timer.stop(); });
@@ -39,13 +39,13 @@ class Geary.TimeoutManagerTest : Gee.TestCase {
 
         timer.start();
         while (test.is_running && timer.elapsed() < SECONDS_EPSILON) {
-            Gtk.main_iteration();
+            this.main_loop.iteration(true);
         }
 
         assert_epsilon(timer.elapsed(), 1.0, SECONDS_EPSILON);
     }
 
-    public void test_milliseconds() {
+    public void milliseconds() throws Error {
         Timer timer = new Timer();
 
         TimeoutManager test = new TimeoutManager.milliseconds(100, () => { timer.stop(); });
@@ -53,13 +53,13 @@ class Geary.TimeoutManagerTest : Gee.TestCase {
 
         timer.start();
         while (test.is_running && timer.elapsed() < 100 + MILLISECONDS_EPSILON) {
-            Gtk.main_iteration();
+            this.main_loop.iteration(true);
         }
 
         assert_epsilon(timer.elapsed(), 0.1, MILLISECONDS_EPSILON);
     }
 
-    public void test_repeat_forever() {
+    public void repeat_forever() throws Error {
         Timer timer = new Timer();
         int count = 0;
 
@@ -69,7 +69,7 @@ class Geary.TimeoutManagerTest : Gee.TestCase {
 
         timer.start();
         while (count < 2 && timer.elapsed() < SECONDS_EPSILON * 2) {
-            Gtk.main_iteration();
+            this.main_loop.iteration(true);
         }
         timer.stop();
 

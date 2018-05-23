@@ -40,6 +40,7 @@ public class Geary.Endpoint : BaseObject {
     }
     
     public NetworkAddress remote_address { get; private set; }
+    public ConnectivityManager connectivity { get; private set; }
     public Flags flags { get; private set; }
     public uint timeout_sec { get; private set; }
     public TlsCertificateFlags tls_validation_flags { get; set; default = TlsCertificateFlags.VALIDATE_ALL; }
@@ -120,13 +121,15 @@ public class Geary.Endpoint : BaseObject {
      * @see tls_validation_warnings
      */
     public signal void untrusted_host(SecurityType security, TlsConnection cx);
-    
+
+
     public Endpoint(string host_specifier, uint16 default_port, Flags flags, uint timeout_sec) {
         this.remote_address = new NetworkAddress(host_specifier, default_port);
         this.flags = flags;
         this.timeout_sec = timeout_sec;
+        this.connectivity = new ConnectivityManager(this.remote_address);
     }
-    
+
     private SocketClient get_socket_client() {
         if (socket_client != null)
             return socket_client;

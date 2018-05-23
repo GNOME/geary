@@ -4,7 +4,7 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class ContactListStore : Gtk.ListStore {
+public class ContactListStore : Gtk.ListStore, Geary.BaseInterface {
 
     // Minimum visibility for the contact to appear in autocompletion.
     private const Geary.ContactImportance CONTACT_VISIBILITY_THRESHOLD = Geary.ContactImportance.TO_TO;
@@ -54,30 +54,30 @@ public class ContactListStore : Gtk.ListStore {
 
     public enum Column {
         CONTACT_OBJECT,
-        CONTACT_MARKUP_NAME,
         PRIOR_KEYS;
         
         public static Type[] get_types() {
             return {
                 typeof (Geary.Contact), // CONTACT_OBJECT
-                typeof (string),        // CONTACT_MARKUP_NAME
                 typeof (Gee.HashSet)    // PRIOR_KEYS
             };
         }
     }
     
     public Geary.ContactStore contact_store { get; private set; }
-    
+
     public ContactListStore(Geary.ContactStore contact_store) {
+        base_ref();
         set_column_types(Column.get_types());
         this.contact_store = contact_store;
-        contact_store.contact_added.connect(on_contact_added);
-        contact_store.contact_updated.connect(on_contact_updated);
+        contact_store.contacts_added.connect(on_contacts_added);
+        contact_store.contacts_updated.connect(on_contacts_updated);
     }
 
     ~ContactListStore() {
-        this.contact_store.contact_added.disconnect(on_contact_added);
-        this.contact_store.contact_updated.disconnect(on_contact_updated);
+        base_unref();
+        this.contact_store.contacts_added.disconnect(on_contacts_added);
+        this.contact_store.contacts_updated.disconnect(on_contacts_updated);
     }
 
     /**
@@ -93,8 +93,9 @@ public class ContactListStore : Gtk.ListStore {
                 yield;
             }
         }
+    }
 
-        // set sort function *after* adding all the contacts
+    public void set_sort_function() {
         set_sort_func(Column.CONTACT_OBJECT, ContactListStore.sort_func);
         set_sort_column_id(Column.CONTACT_OBJECT, Gtk.SortType.ASCENDING);
     }
@@ -105,37 +106,17 @@ public class ContactListStore : Gtk.ListStore {
         
         return (Geary.Contact) contact_value.get_object();
     }
-    
-    public string get_rfc822_string(Gtk.TreeIter iter) {
-        return get_contact(iter).get_rfc822_address().to_rfc822_string();
-    }
-    
-    // Highlighted result should be Markup.escaped for presentation to the user
-    public void set_highlighted_result(Gtk.TreeIter iter, string highlighted_result,
-        string current_address_key) {
-        // get the previous keys for this row for comparison
-        GLib.Value prior_keys_value;
-        get_value(iter, Column.PRIOR_KEYS, out prior_keys_value);
-        Gee.HashSet<string> prior_keys = (Gee.HashSet<string>) prior_keys_value.get_object();
-        
-        // Changing a row in the list store causes Gtk.EntryCompletion to re-evaluate
-        // completion_match_func for that row. Thus we need to make sure the key has
-        // actually changed before settings the highlighting--otherwise we will cause
-        // an infinite loop.
-        if (!(current_address_key in prior_keys)) {
-            prior_keys.add(current_address_key);
-            set(iter, Column.CONTACT_MARKUP_NAME, highlighted_result, -1);
-        }
+
+    public string to_full_address(Gtk.TreeIter iter) {
+        return get_contact(iter).get_rfc822_address().to_full_display();
     }
 
     private inline void add_contact(Geary.Contact contact) {
         if (contact.highest_importance >= CONTACT_VISIBILITY_THRESHOLD) {
-            string full_address = contact.get_rfc822_address().to_rfc822_string();
             Gtk.TreeIter iter;
             append(out iter);
             set(iter,
                 Column.CONTACT_OBJECT, contact,
-                Column.CONTACT_MARKUP_NAME, Markup.escape_text(full_address),
                 Column.PRIOR_KEYS, new Gee.HashSet<string>());
         }
     }
@@ -157,12 +138,14 @@ public class ContactListStore : Gtk.ListStore {
         } while (iter_next(ref iter));
     }
     
-    private void on_contact_added(Geary.Contact contact) {
-        add_contact(contact);
+    private void on_contacts_added(Gee.Collection<Geary.Contact> contacts) {
+        foreach (Geary.Contact contact in contacts)
+            add_contact(contact);
     }
     
-    private void on_contact_updated(Geary.Contact contact) {
-        update_contact(contact);
+    private void on_contacts_updated(Gee.Collection<Geary.Contact> contacts) {
+        foreach (Geary.Contact contact in contacts)
+            update_contact(contact);
     }
 
 }

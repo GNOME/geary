@@ -23,8 +23,6 @@ public class ContactEntryCompletion : Gtk.EntryCompletion {
         if (!contacts.match_prefix_contact(current_address_key, contact, out highlighted_result))
             return false;
 
-        contacts.list_store.set_highlighted_result(iter, highlighted_result, current_address_key);
-
         return true;
     }
 
@@ -39,16 +37,36 @@ public class ContactEntryCompletion : Gtk.EntryCompletion {
 
         Gtk.CellRendererText text_renderer = new Gtk.CellRendererText();
         pack_start(text_renderer, true);
-        add_attribute(text_renderer, "markup", ContactListStore.Column.CONTACT_MARKUP_NAME);
-        
+        set_cell_data_func(text_renderer, cell_layout_data_func);
+
         set_inline_selection(true);
         match_selected.connect(on_match_selected);
         cursor_on_match.connect(on_cursor_on_match);
     }
-    
+
+    private void cell_layout_data_func(Gtk.CellLayout cell_layout, Gtk.CellRenderer cell,
+        Gtk.TreeModel tree_model, Gtk.TreeIter iter) {
+        string highlighted_result = "";
+
+        GLib.Value contact_value;
+        tree_model.get_value(iter, ContactListStore.Column.CONTACT_OBJECT, out contact_value);
+
+        Geary.Contact? contact = (Geary.Contact) contact_value.get_object();
+
+        if (contact != null) {
+            string current_address_key;
+            this.get_addresses(this, null, out current_address_key);
+
+            this.match_prefix_contact(current_address_key, contact, out highlighted_result);
+        }
+
+        Gtk.CellRendererText text_renderer = (Gtk.CellRendererText) cell;
+        text_renderer.markup = highlighted_result;
+    }
+
     private bool on_match_selected(Gtk.EntryCompletion sender, Gtk.TreeModel model, Gtk.TreeIter iter) {
-        string full_address = list_store.get_rfc822_string(iter);
-        
+        string full_address = list_store.to_full_address(iter);
+
         Gtk.Entry? entry = sender.get_entry() as Gtk.Entry;
         if (entry == null)
             return false;

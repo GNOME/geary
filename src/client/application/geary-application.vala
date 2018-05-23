@@ -64,7 +64,7 @@ public class GearyApplication : Gtk.Application {
     private const int64 FORCE_SHUTDOWN_USEC = 5 * USEC_PER_SEC;
 
 
-    [Deprecated]
+    [Version (deprecated = true)]
     public static GearyApplication instance {
         get { return _instance; }
         private set {
@@ -111,14 +111,6 @@ public class GearyApplication : Gtk.Application {
      */
     public bool is_background_service {
         get { return Args.hidden_startup || this.config.startup_notifications; }
-    }
-
-    public Gtk.ActionGroup actions {
-        get; private set; default = new Gtk.ActionGroup("GearyActionGroup");
-    }
-
-    public Gtk.UIManager ui_manager {
-        get; private set; default = new Gtk.UIManager();
     }
 
     private string bin;
@@ -191,11 +183,18 @@ public class GearyApplication : Gtk.Application {
         Environment.set_application_name(NAME);
         Environment.set_prgname(PRGNAME);
         International.init(GETTEXT_PACKAGE, bin);
-        
+
         Geary.Logging.init();
+        Geary.Logging.log_to(stderr);
+        GLib.Log.set_default_handler(Geary.Logging.default_handler);
+
         Date.init();
 
+        // Calls Gtk.init(), amongst other things
         base.startup();
+
+        // Ensure all geary windows have an icon
+        Gtk.Window.set_default_icon_name(APP_ID);
 
         add_action_entries(action_entries, this);
     }
@@ -223,10 +222,12 @@ public class GearyApplication : Gtk.Application {
         if (controller.main_window == null)
             return false;
 
-        // When the app is started hidden, show_all() never gets
-        // called, do so here to prevent an empty window appearing.
-        controller.main_window.show_all();
-        controller.main_window.present();
+        // Use present_with_time and a synthesised time so the present
+        // actually works, as a work around for Bug 766284
+        // <https://bugzilla.gnome.org/show_bug.cgi?id=766284>.
+        this.controller.main_window.present_with_time(
+            (uint32) (get_monotonic_time() / 1000)
+        );
 
         return true;
     }
@@ -260,14 +261,6 @@ public class GearyApplication : Gtk.Application {
         is_destroyed = true;
     }
 
-    // NOTE: This assert()'s if the Gtk.Action is not present in the default action group
-    public Gtk.Action get_action(string name) {
-        Gtk.Action? action = actions.get_action(name);
-        assert(action != null);
-        
-        return action;
-    }
-    
     public File get_user_data_directory() {
         return File.new_for_path(Environment.get_user_data_dir()).get_child("geary");
     }
@@ -345,42 +338,17 @@ public class GearyApplication : Gtk.Application {
      *
      * @deprecated Use {@link GioUtil.create_builder} instead.
      */
-    [Deprecated]
+    [Version (deprecated = true)]
     public Gtk.Builder create_builder(string name) {
         return GioUtil.create_builder(name);
-    }
-
-    /**
-     * Loads a GResource as a string.
-     *
-     * @deprecated Use {@link GioUtil.read_resource} instead.
-     */
-    [Deprecated]
-    public string read_resource(string name) throws Error {
-        return GioUtil.read_resource(name);
-    }
-
-    /**
-     * Loads a UI GResource into the UI manager.
-     */
-    [Deprecated]
-    public void load_ui_resource(string name) {
-        try {
-            this.ui_manager.add_ui_from_resource("/org/gnome/Geary/" + name);
-        } catch(GLib.Error error) {
-            critical("Unable to load \"%s\" for Gtk.UIManager: %s".printf(
-                name, error.message
-            ));
-        }
     }
 
     /**
      * Displays a URI on the current active window, if any.
      */
     public void show_uri(string uri) throws Error {
-        Gtk.Window? window = get_active_window();
-        bool success = Gtk.show_uri(
-            window != null ? window.get_screen() : null, uri, Gdk.CURRENT_TIME
+        bool success = Gtk.show_uri_on_window(
+            get_active_window(), uri, Gdk.CURRENT_TIME
         );
         if (!success) {
             throw new IOError.FAILED("gtk_show_uri() returned false");
@@ -413,19 +381,14 @@ public class GearyApplication : Gtk.Application {
             int64 delta_usec = get_monotonic_time() - start_usec;
             if (delta_usec >= FORCE_SHUTDOWN_USEC) {
                 debug("Forcing shutdown of Geary, %ss passed...", (delta_usec / USEC_PER_SEC).to_string());
-                
-                break;
+                Posix.exit(2);
             }
         }
-        
-        if (Gtk.main_level() > 0)
-            Gtk.main_quit();
-        else
-            Posix.exit(exitcode);
-        
+
+        quit();
         Date.terminate();
     }
-    
+
     /**
      * A callback for GearyApplication.exiting should return cancel_exit() to prevent the
      * application from exiting.
@@ -453,7 +416,7 @@ public class GearyApplication : Gtk.Application {
             "authors", AUTHORS,
             "copyright", string.join("\n", COPYRIGHT_1, COPYRIGHT_2),
             "license-type", Gtk.License.LGPL_2_1,
-            "logo-icon-name", "geary",
+            "logo-icon-name", APP_ID,
             "version", VERSION,
             "website", WEBSITE,
             "website-label", WEBSITE_LABEL,
@@ -496,12 +459,12 @@ public class GearyApplication : Gtk.Application {
     private void on_activate_help() {
         try {
             if (is_installed()) {
-                show_uri("ghelp:geary");
+                show_uri("help:geary");
             } else {
                 Pid pid;
                 File exec_dir = get_exec_dir();
                 string[] argv = new string[3];
-                argv[0] = "gnome-help";
+                argv[0] = "yelp";
                 argv[1] = GearyApplication.SOURCE_ROOT_DIR + "/help/C/";
                 argv[2] = null;
                 if (!Process.spawn_async(

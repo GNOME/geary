@@ -1,6 +1,6 @@
 /*
  * Copyright 2016 Software Freedom Conservancy Inc.
- * Copyright 2016 Michael Gratton <mike@vee.net>
+ * Copyright 2016-2018 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -15,7 +15,7 @@
  * embeds at least one instance of this class.
  */
 [GtkTemplate (ui = "/org/gnome/Geary/conversation-message.ui")]
-public class ConversationMessage : Gtk.Grid {
+public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
 
 
     private const string FROM_CLASS = "geary-from";
@@ -24,15 +24,6 @@ public class ConversationMessage : Gtk.Grid {
     private const string REPLACED_IMAGE_CLASS = "geary_replaced_inline_image";
 
     private const int MAX_PREVIEW_BYTES = Geary.Email.MAX_PREVIEW_BYTES;
-
-
-    internal static inline bool has_distinct_name(
-        Geary.RFC822.MailboxAddress address) {
-        return (
-            !Geary.String.is_empty(address.name) &&
-            address.name != address.address
-        );
-    }
 
 
     // Widget used to display sender/recipient email addresses in
@@ -50,7 +41,7 @@ public class ConversationMessage : Gtk.Grid {
         public AddressFlowBoxChild(Geary.RFC822.MailboxAddress address,
                                    Type type = Type.OTHER) {
             this.address = address;
-            this.search_value = address.address.casefold();
+            this.search_value = address.to_searchable_string().casefold();
 
             // We use two label instances here when address has
             // distinct parts so we can dim the secondary part, if
@@ -59,6 +50,17 @@ public class ConversationMessage : Gtk.Grid {
             // Pango markup. See Bug 766763.
 
             Gtk.Grid address_parts = new Gtk.Grid();
+
+            bool is_spoofed = address.is_spoofed();
+            if (is_spoofed) {
+                Gtk.Image spoof_img = new Gtk.Image.from_icon_name(
+                    "dialog-warning-symbolic", Gtk.IconSize.SMALL_TOOLBAR
+                );
+                this.set_tooltip_text(
+                    _("This email address may have been forged")
+                );
+                address_parts.add(spoof_img);
+            }
 
             Gtk.Label primary = new Gtk.Label(null);
             primary.ellipsize = Pango.EllipsizeMode.END;
@@ -69,19 +71,21 @@ public class ConversationMessage : Gtk.Grid {
             }
             address_parts.add(primary);
 
-            if (has_distinct_name(address)) {
-                primary.set_text(address.name);
+            string display_address = address.to_address_display("", "");
+
+            // Don't display the name if it looks spoofed, to reduce
+            // chance of the user of being tricked by malware.
+            if (address.has_distinct_name() && !is_spoofed) {
+                primary.set_text(address.to_short_display());
 
                 Gtk.Label secondary = new Gtk.Label(null);
                 secondary.ellipsize = Pango.EllipsizeMode.END;
                 secondary.set_halign(Gtk.Align.START);
                 secondary.get_style_context().add_class(Gtk.STYLE_CLASS_DIM_LABEL);
-                secondary.set_text(address.address);
+                secondary.set_text(display_address);
                 address_parts.add(secondary);
-
-                this.search_value = address.name.casefold() + this.search_value;
             } else {
-                primary.set_text(address.address);
+                primary.set_text(display_address);
             }
 
             // Update prelight state when mouse-overed.
@@ -263,7 +267,7 @@ public class ConversationMessage : Gtk.Grid {
 
 
     /**
-     * Constructs a new view to display an RFC 823 message headers and body.
+     * Constructs a new view to display an RFC 822 message headers and body.
      *
      * This method sets up most of the user interface for displaying
      * the message, but does not attempt any possibly long-running
@@ -272,6 +276,7 @@ public class ConversationMessage : Gtk.Grid {
     public ConversationMessage(Geary.RFC822.Message message,
                                Configuration config,
                                bool load_remote_images) {
+        base_ref();
         this.message = message;
         this.is_loading_images = load_remote_images;
 
@@ -398,6 +403,10 @@ public class ConversationMessage : Gtk.Grid {
         );
     }
 
+    ~ConversationMessage() {
+        base_unref();
+    }
+
     public override void destroy() {
         this.show_progress_timeout.reset();
         this.hide_progress_timeout.reset();
@@ -427,35 +436,34 @@ public class ConversationMessage : Gtk.Grid {
     /**
      * Starts loading the avatar for the message's sender.
      */
-    public async void load_avatar(Soup.Session session, Cancellable load_cancelled) {
+    public async void load_avatar(ConversationListBox.AvatarStore loader,
+                                  Cancellable load_cancelled) {
+        const int PIXEL_SIZE = 32;
         Geary.RFC822.MailboxAddress? primary = message.get_primary_originator();
         if (primary != null) {
             int window_scale = get_scale_factor();
-            int pixel_size = this.avatar.get_pixel_size();
-            Soup.Message message = new Soup.Message(
-                "GET",
-                Gravatar.get_image_uri(
-                    primary, Gravatar.Default.NOT_FOUND, pixel_size * window_scale
-                )
-            );
-
+            // We occasionally get crashes calling as below
+            // Gtk.Image.get_pixel_size() when the image is
+            // null. There's perhaps some race going on there. So we
+            // need to hard-code the size and keep it in sync with
+            // ui/conversation-message.ui. :(
+            //
+            //int pixel_size = this.avatar.get_pixel_size() * window_scale;
+            int pixel_size = PIXEL_SIZE * window_scale;
             try {
-                // We want to just pass load_cancelled to send_async
-                // here, but per Bug 778720 this is causing some
-                // crashy race in libsoup's cache implementation, so
-                // for now just let the load go through and manually
-                // check to see if the load has been cancelled before
-                // setting the avatar
-                InputStream data = yield session.send_async(
-                    message,
-                    null // should be 'load_cancelled'
+                Gdk.Pixbuf? avatar_buf = yield loader.load(
+                    primary, pixel_size, load_cancelled
                 );
-                if (!load_cancelled.is_cancelled() &&
-                    data != null && message.status_code == 200) {
-                    yield set_avatar(data, load_cancelled);
+                if (avatar_buf != null) {
+                    this.avatar.set_from_surface(
+                        Gdk.cairo_surface_create_from_pixbuf(
+                            avatar_buf, window_scale, get_window()
+                        )
+                    );
                 }
             } catch (Error err) {
-                debug("Error loading Gravatar response: %s", err.message);
+                debug("Avatar load failed for %s: %s",
+                      primary.to_string(), err.message);
             }
         }
     }
@@ -528,7 +536,8 @@ public class ConversationMessage : Gtk.Grid {
     }
 
     private void set_action_enabled(string name, bool enabled) {
-        SimpleAction? action = this.message_actions.lookup(name) as SimpleAction;
+        SimpleAction? action =
+            this.message_actions.lookup_action(name) as SimpleAction;
         if (action != null) {
             action.set_enabled(enabled);
         }
@@ -572,7 +581,7 @@ public class ConversationMessage : Gtk.Grid {
             Gee.List<Geary.RFC822.MailboxAddress> list =
                 this.message.from.get_all();
             foreach (Geary.RFC822.MailboxAddress addr in list) {
-                text += has_distinct_name(addr) ? addr.name : addr.address;
+                text += addr.to_short_display();
 
                 if (++i < list.size)
                     // Translators: This separates multiple 'from'
@@ -648,59 +657,40 @@ public class ConversationMessage : Gtk.Grid {
         }
     }
 
-    private async void set_avatar(InputStream data,
-                                  Cancellable load_cancelled)
-    throws Error {
-        Gdk.Pixbuf avatar_buf =
-            yield new Gdk.Pixbuf.from_stream_async(data, load_cancelled);
-
-        if (avatar_buf != null && !load_cancelled.is_cancelled()) {
-            int window_scale = get_scale_factor();
-            int avatar_size = this.avatar.pixel_size * window_scale;
-            if (avatar_buf.width != avatar_size) {
-                avatar_buf = avatar_buf.scale_simple(
-                    avatar_size, avatar_size, Gdk.InterpType.BILINEAR
-                );
-            }
-            this.avatar.set_from_surface(
-                Gdk.cairo_surface_create_from_pixbuf(
-                    avatar_buf, window_scale, get_window()
-                )
-            );
-        }
-    }
-
-    // This delegate is called from within Geary.RFC822.Message.get_body while assembling the plain
-    // or HTML document when a non-text MIME part is encountered within a multipart/mixed container.
-    // If this returns null, the MIME part is dropped from the final returned document; otherwise,
-    // this returns HTML that is placed into the document in the position where the MIME part was
-    // found
-    private string? inline_image_replacer(string? filename, Geary.Mime.ContentType? content_type,
-        Geary.Mime.ContentDisposition? disposition, string? content_id, Geary.Memory.Buffer buffer) {
-        if (content_type == null) {
-            debug("Not displaying inline: no Content-Type");
-            return null;
-        }
-
+    // This delegate is called from within
+    // Geary.RFC822.Message.get_body while assembling the plain or
+    // HTML document when a non-text MIME part is encountered within a
+    // multipart/mixed container.  If this returns null, the MIME part
+    // is dropped from the final returned document; otherwise, this
+    // returns HTML that is placed into the document in the position
+    // where the MIME part was found
+    private string? inline_image_replacer(Geary.RFC822.Part part) {
+        Geary.Mime.ContentType content_type = part.get_effective_content_type();
         if (content_type.media_type != "image" ||
             !this.web_view.can_show_mime_type(content_type.to_string())) {
-            debug("Not displaying %s inline: unsupported Content-Type", content_type.to_string());
+            debug("Not displaying %s inline: unsupported Content-Type",
+                  content_type.to_string());
             return null;
         }
 
-        string id = content_id;
+        string? id = part.content_id;
         if (id == null) {
             id = REPLACED_CID_TEMPLATE.printf(this.next_replaced_buffer_number++);
         }
 
-        this.web_view.add_internal_resource(id, buffer);
+        try {
+            this.web_view.add_internal_resource(id, part.write_to_buffer());
+        } catch (Geary.RFC822Error err) {
+            debug("Failed to get inline buffer: %s", err.message);
+            return null;
+        }
 
         // Translators: This string is used as the HTML IMG ALT
         // attribute value when displaying an inline image in an email
         // that did not specify a file name. E.g. <IMG ALT="Image" ...
         string UNKNOWN_FILENAME_ALT_TEXT = _("Image");
         string clean_filename = Geary.HTML.escape_markup(
-            filename ?? UNKNOWN_FILENAME_ALT_TEXT
+            part.get_clean_filename() ?? UNKNOWN_FILENAME_ALT_TEXT
         );
 
         return "<img alt=\"%s\" class=\"%s\" src=\"%s%s\" />".printf(
@@ -788,7 +778,7 @@ public class ConversationMessage : Gtk.Grid {
             Gee.Map<string,string> values = new Gee.HashMap<string,string>();
             values[ACTION_OPEN_LINK] =
                 Geary.ComposedEmail.MAILTO_SCHEME + address.address;
-            values[ACTION_COPY_EMAIL] = address.get_full_address();
+                values[ACTION_COPY_EMAIL] = address.to_full_display();
             values[ACTION_SEARCH_FROM] = address.address;
 
             Menu model = new Menu();
@@ -838,7 +828,7 @@ public class ConversationMessage : Gtk.Grid {
 
         if (hit_test.context_is_image()) {
             string uri = hit_test.get_image_uri();
-            set_action_enabled(ACTION_SAVE_IMAGE, uri in this.resources);
+            set_action_enabled(ACTION_SAVE_IMAGE, this.resources.has_key(uri));
             model.append_section(
                 null,
                 set_action_param_value(
@@ -859,7 +849,7 @@ public class ConversationMessage : Gtk.Grid {
 
         this.context_menu = new Gtk.Menu.from_model(model);
         this.context_menu.attach_to_widget(this, null);
-        this.context_menu.popup(null, null, null, 0, event.get_time());
+        this.context_menu.popup_at_pointer(event);
 
         return true;
     }

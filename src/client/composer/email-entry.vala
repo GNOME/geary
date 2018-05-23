@@ -32,7 +32,7 @@ public class EmailEntry : Gtk.Entry {
             
             updating = true;
             modified = true;
-            text = (addresses == null) ? "" : addresses.to_rfc822_string();
+            text = (addresses == null) ? "" : addresses.to_full_display();
             updating = false;
         });
 

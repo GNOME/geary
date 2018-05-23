@@ -10,7 +10,7 @@
  * Displays the messages in a conversation and in-window composers.
  */
 [GtkTemplate (ui = "/org/gnome/Geary/conversation-viewer.ui")]
-public class ConversationViewer : Gtk.Stack {
+public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
 
     /**
      * The current conversation listbox, if any.
@@ -68,6 +68,8 @@ public class ConversationViewer : Gtk.Stack {
      * Constructs a new conversation view instance.
      */
     public ConversationViewer() {
+        base_ref();
+
         EmptyPlaceholder no_conversations = new EmptyPlaceholder();
         no_conversations.title = _("No conversations selected");
         no_conversations.subtitle = _(
@@ -101,6 +103,10 @@ public class ConversationViewer : Gtk.Stack {
 
         // XXX Do this in Glade when possible.
         this.conversation_find_bar.connect_entry(this.conversation_find_entry);
+    }
+
+    ~ConversationViewer() {
+        base_unref();
     }
 
     /**
@@ -139,15 +145,23 @@ public class ConversationViewer : Gtk.Stack {
             this.conversation_scroller
         );
 
+        // We need to disable kinetic scrolling so that if it still
+        // has some momentum when the composer is inserted and
+        // scrolled to, it won't jump away again. See Bug 778027.
+        conversation_scroller.kinetic_scrolling = false;
+
         if (this.current_list != null) {
             this.current_list.add_embedded_composer(embed, is_draft);
         }
+
+        conversation_scroller.kinetic_scrolling = true;
     }
 
     /**
      * Shows the loading UI.
      */
     public void show_loading() {
+        this.loading_page.start();
         set_visible_child(this.loading_page);
     }
 
@@ -183,7 +197,9 @@ public class ConversationViewer : Gtk.Stack {
      * Shows a conversation in the viewer.
      */
     public async void load_conversation(Geary.App.Conversation conversation,
-                                        Geary.Folder location)
+                                        Geary.Folder location,
+                                        Configuration config,
+                                        Soup.Session avatar_session)
         throws Error {
         remove_current_list();
 
@@ -195,7 +211,8 @@ public class ConversationViewer : Gtk.Stack {
             account.get_contact_store(),
             account.information,
             location.special_folder_type == Geary.SpecialFolderType.DRAFTS,
-            ((MainWindow) get_ancestor(typeof(MainWindow))).application.config,
+            config,
+            avatar_session,
             this.conversation_scroller.get_vadjustment()
         );
 
@@ -285,13 +302,19 @@ public class ConversationViewer : Gtk.Stack {
      */
     private new void set_visible_child(Gtk.Widget widget) {
         debug("Showing: %s", widget.get_name());
-        if (widget != this.conversation_page &&
-            get_visible_child() == this.conversation_page) {
-            // By removing the current list, any load it is currently
-            // performing is also cancelled, which is important to
-            // avoid a possible crit warning when switching folders,
-            // etc.
-            remove_current_list();
+        Gtk.Widget current = get_visible_child();
+        if (current == this.conversation_page) {
+            if (widget != this.conversation_page) {
+                // By removing the current list, any load it is currently
+                // performing is also cancelled, which is important to
+                // avoid a possible crit warning when switching folders,
+                // etc.
+                remove_current_list();
+            }
+        } else if (current == this.loading_page) {
+            // Stop the spinner running so it doesn't trigger repaints
+            // and wake up Geary even when idle. See Bug 783025.
+            this.loading_page.stop();
         }
         base.set_visible_child(widget);
     }

@@ -118,9 +118,9 @@ public class Geary.Smtp.ClientConnection {
         Response response = yield transaction_async(new Request(Command.DATA), cancellable);
         if (!response.code.is_start_data())
             return response;
-        
-        Logging.debug(Logging.Flag.NETWORK, "[%s] SMTP Data: <%ldb>", to_string(), data.size);
-        
+
+        Logging.debug(Logging.Flag.NETWORK, "[%s] SMTP Data: <%z>", to_string(), data.size);
+
         if (!already_dotstuffed) {
             // By using DataStreamNewlineType.ANY, we're assured to get each line and convert to
             // a proper line terminator for SMTP

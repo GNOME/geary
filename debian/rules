@@ -13,13 +13,19 @@
 	dh $@ --parallel
 
 override_dh_auto_configure:
-	./configure --prefix=/usr
+	meson --prefix /usr --buildtype=plain debian/build
+
+override_dh_auto_build:
+	ninja -v -C debian/build
 
 override_dh_strip:
 	dh_strip --dbg-package=geary-dbg
 
 override_dh_auto_install:
-	dh_auto_install --destdir=debian/geary --parallel
+	DESTDIR=${CURDIR}/debian/geary ninja -C debian/build install
 
 override_dh_auto_test:
-    # Disable for now since some tests require a GUI
+	meson test -v -C debian/build engine-tests
+
+override_dh_auto_clean:
+	rm -fr debian/build

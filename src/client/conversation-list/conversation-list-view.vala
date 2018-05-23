@@ -4,11 +4,14 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public class ConversationListView : Gtk.TreeView {
+public class ConversationListView : Gtk.TreeView, Geary.BaseInterface {
     const int LOAD_MORE_HEIGHT = 100;
-    
+
+    // Used to be able to refer to the action names of the MainWindow
+    private weak MainWindow main_window;
+
     private bool enable_load_more = true;
-    
+
     // Used to avoid repeated calls to load_more(). Contains the last "upper" bound of the
     // scroll adjustment seen at the call to load_more().
     private double last_upper = -1.0;
@@ -16,7 +19,6 @@ public class ConversationListView : Gtk.TreeView {
     private Geary.App.ConversationMonitor? conversation_monitor;
     private Gee.Set<Geary.App.Conversation>? current_visible_conversations = null;
     private Geary.Scheduler.Scheduled? scheduled_update_visible_conversations = null;
-    private Gtk.Menu? context_menu = null;
     private Gee.Set<Geary.App.Conversation> selected = new Gee.HashSet<Geary.App.Conversation>();
     private Geary.IdleManager selection_update;
     private bool suppress_selection = false;
@@ -36,9 +38,11 @@ public class ConversationListView : Gtk.TreeView {
     public signal void visible_conversations_changed(Gee.Set<Geary.App.Conversation> visible);
 
 
-    public ConversationListView() {
+    public ConversationListView(MainWindow parent) {
+        base_ref();
         set_show_expanders(false);
         set_headers_visible(false);
+        this.main_window = parent;
 
         append_column(create_column(ConversationListStore.Column.CONVERSATION_DATA,
             new ConversationListCellRenderer(), ConversationListStore.Column.CONVERSATION_DATA.to_string(),
@@ -46,7 +50,7 @@ public class ConversationListView : Gtk.TreeView {
 
         Gtk.TreeSelection selection = get_selection();
         selection.set_mode(Gtk.SelectionMode.MULTIPLE);
-        style_set.connect(on_style_changed);
+        style_updated.connect(on_style_changed);
         show.connect(on_show);
         row_activated.connect(on_row_activated);
 
@@ -75,6 +79,10 @@ public class ConversationListView : Gtk.TreeView {
         this.selection_update.priority = Geary.IdleManager.Priority.LOW;
     }
 
+    ~ConversationListView() {
+        base_unref();
+    }
+
     public override void destroy() {
         this.selection_update.reset();
         base.destroy();
@@ -94,6 +102,7 @@ public class ConversationListView : Gtk.TreeView {
             old_store.row_changed.disconnect(on_rows_changed);
             old_store.row_deleted.disconnect(on_rows_changed);
             old_store.row_deleted.disconnect(on_row_deleted);
+            old_store.destroy();
         }
 
         if (new_store != null) {
@@ -135,41 +144,29 @@ public class ConversationListView : Gtk.TreeView {
         if (conversation_monitor != null) {
             conversation_monitor.scan_started.disconnect(on_scan_started);
             conversation_monitor.scan_completed.disconnect(on_scan_completed);
-            conversation_monitor.seed_completed.disconnect(on_seed_completed);
         }
-        
+
         conversation_monitor = GearyApplication.instance.controller.current_conversations;
-        
+
         if (conversation_monitor != null) {
             conversation_monitor.scan_started.connect(on_scan_started);
             conversation_monitor.scan_completed.connect(on_scan_completed);
-            conversation_monitor.seed_completed.connect(on_seed_completed);
         }
     }
-    
+
     private void on_scan_started() {
         enable_load_more = false;
     }
-    
+
     private void on_scan_completed() {
         enable_load_more = true;
 
         // Select the first conversation, if autoselect is enabled,
-        // nothing has been selected yet and we're not composing. Do
-        // this here instead of in on_seed_completed since we want to
-        // to select the first row on folder change as soon as
-        // possible.
+        // nothing has been selected yet and we're not composing.
         if (GearyApplication.instance.config.autoselect &&
             get_selection().count_selected_rows() == 0 &&
             !GearyApplication.instance.controller.any_inline_composers()) {
             set_cursor(new Gtk.TreePath.from_indices(0, -1), null, false);
-        }
-    }
-
-    private void on_seed_completed() {
-        if (!GearyApplication.instance.config.autoselect) {
-            // Notify that no conversations will be selected
-            conversations_selected(this.selected.read_only_view);
         }
     }
 
@@ -281,47 +278,35 @@ public class ConversationListView : Gtk.TreeView {
         
         if (event.button == 3 && event.type == Gdk.EventType.BUTTON_PRESS) {
             Geary.App.Conversation conversation = get_model().get_conversation_at_path(path);
-            
-            string?[] action_names = {};
-            action_names += GearyController.ACTION_DELETE_CONVERSATION;
-            
+
+            Menu context_menu_model = new Menu();
+            context_menu_model.append(_("Delete conversation"), "win."+GearyController.ACTION_DELETE_CONVERSATION);
+
             if (conversation.is_unread())
-                action_names += GearyController.ACTION_MARK_AS_READ;
-            
+                context_menu_model.append(_("Mark as _Read"), "win."+GearyController.ACTION_MARK_AS_READ);
+
             if (conversation.has_any_read_message())
-                action_names += GearyController.ACTION_MARK_AS_UNREAD;
-            
+                context_menu_model.append(_("Mark as _Unread"), "win."+GearyController.ACTION_MARK_AS_UNREAD);
+
             if (conversation.is_flagged())
-                action_names += GearyController.ACTION_MARK_AS_UNSTARRED;
+                context_menu_model.append(_("U_nstar"), "win."+GearyController.ACTION_MARK_AS_UNSTARRED);
             else
-                action_names += GearyController.ACTION_MARK_AS_STARRED;
-            
-            // treat null as separator
-            action_names += null;
-            action_names += GearyController.ACTION_REPLY_TO_MESSAGE;
-            action_names += GearyController.ACTION_REPLY_ALL_MESSAGE;
-            action_names += GearyController.ACTION_FORWARD_MESSAGE;
-            
-            context_menu = new Gtk.Menu();
-            foreach (string? action_name in action_names) {
-                if (action_name == null) {
-                    context_menu.add(new Gtk.SeparatorMenuItem());
-                    
-                    continue;
-                }
-                
-                Gtk.Action? menu_action = GearyApplication.instance.actions.get_action(action_name);
-                if (menu_action != null)
-                    context_menu.add(menu_action.create_menu_item());
-            }
-            
-            context_menu.show_all();
-            context_menu.popup(null, null, null, event.button, event.time);
-            
+                context_menu_model.append(_("_Star"), "win."+GearyController.ACTION_MARK_AS_STARRED);
+
+            Menu actions_section = new Menu();
+            actions_section.append(_("_Reply"), "win."+GearyController.ACTION_REPLY_TO_MESSAGE);
+            actions_section.append(_("R_eply All"), "win."+GearyController.ACTION_REPLY_ALL_MESSAGE);
+            actions_section.append(_("_Forward"), "win."+GearyController.ACTION_FORWARD_MESSAGE);
+            context_menu_model.append_section(null, actions_section);
+
+            Gtk.Menu context_menu = new Gtk.Menu.from_model(context_menu_model);
+            context_menu.insert_action_group("win", this.main_window);
+            context_menu.popup_at_pointer(event);
+
             // When the conversation under the mouse is selected, stop event propagation
             return get_selection().path_is_selected(path);
         }
-        
+
         return false;
     }
 
@@ -490,7 +475,7 @@ public class ConversationListView : Gtk.TreeView {
     }
     
     private void on_display_preview_changed() {
-        style_set(null);
+        style_updated();
         model.foreach(refresh_path);
         
         schedule_visible_conversations_changed();

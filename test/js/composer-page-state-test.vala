@@ -7,7 +7,7 @@
 
 class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
 
-    private const string COMPLETE_BODY_TEMPLATE = """<div id="geary-body">%s<div><br></div><div><br></div></div>""";
+    private const string COMPLETE_BODY_TEMPLATE = """<div id="geary-body" dir="auto">%s<div><br></div><div><br></div></div>""";
     private const string CLEAN_BODY_TEMPLATE = "%s<div><br></div><div><br></div>";
 
     public ComposerPageStateTest() {
@@ -34,7 +34,7 @@ class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
         }
     }
 
-    public void edit_context_link() {
+    public void edit_context_link() throws Error {
         string html = "<a id=\"test\" href=\"url\">para</a>";
         load_body_fixture(html);
 
@@ -50,7 +50,7 @@ class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
         }
     }
 
-    public void edit_context_font() {
+    public void edit_context_font() throws Error {
         string html = "<p id=\"test\" style=\"font-family: Comic Sans; font-size: 144\">para</p>";
         load_body_fixture(html);
 
@@ -66,7 +66,7 @@ class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
         }
     }
 
-    public void indent_line() {
+    public void indent_line() throws Error {
         load_body_fixture("""<span id="test">some text</span>""");
         try {
             run_javascript(@"SelectionUtil.selectNode(document.getElementById('test'))");
@@ -83,7 +83,7 @@ class ComposerPageStateTest : ClientWebViewTestCase<ComposerWebView> {
         }
     }
 
-    public void contains_attachment_keywords() {
+    public void contains_attachment_keywords() throws Error {
         load_body_fixture_full("""
 <blockquote>innerquote</blockquote>
 
@@ -120,7 +120,7 @@ some text
         }
     }
 
-    public void clean_content() {
+    public void clean_content() throws Error {
         // XXX split these up into multiple tests
         load_body_fixture("""
 http://example1.com
@@ -159,7 +159,7 @@ unknown://example6.com
         }
     }
 
-    public void get_html() {
+    public void get_html() throws Error {
         string html = "<p>para</p>";
         load_body_fixture(html);
         try {
@@ -174,7 +174,7 @@ unknown://example6.com
         }
     }
 
-    public void get_text() {
+    public void get_text() throws Error {
         load_body_fixture("<p>para</p>");
         try {
             assert(WebKitUtil.to_string(run_javascript(@"window.geary.getText();")) ==
@@ -188,7 +188,7 @@ unknown://example6.com
         }
     }
 
-    public void get_text_with_quote() {
+    public void get_text_with_quote() throws Error {
         unichar q_marker = Geary.RFC822.Utils.QUOTE_MARKER;
         load_body_fixture("<p>pre</p> <blockquote><p>quote</p></blockquote> <p>post</p>");
         try {
@@ -203,7 +203,7 @@ unknown://example6.com
         }
     }
 
-    public void get_text_with_nested_quote() {
+    public void get_text_with_nested_quote() throws Error {
         unichar q_marker = Geary.RFC822.Utils.QUOTE_MARKER;
         load_body_fixture("<p>pre</p> <blockquote><p>quote1</p> <blockquote><p>quote2</p></blockquote></blockquote> <p>post</p>");
         try {
@@ -218,7 +218,7 @@ unknown://example6.com
         }
     }
 
-    public void contains_keywords() {
+    public void contains_keywords() throws Error {
         load_body_fixture();
         string complete_keys = """new Set(["keyword1", "keyword2"])""";
         string suffix_keys = """new Set(["sf1", "sf2"])""";
@@ -271,7 +271,7 @@ unknown://example6.com
         }
     }
 
-    public void resolve_nesting() {
+    public void resolve_nesting() throws Error {
         load_body_fixture();
         unichar q_marker = Geary.RFC822.Utils.QUOTE_MARKER;
         unichar q_start = '';
@@ -305,7 +305,7 @@ unknown://example6.com
         }
     }
 
-    public void quote_lines() {
+    public void quote_lines() throws Error {
         load_body_fixture();
         unichar q_marker = Geary.RFC822.Utils.QUOTE_MARKER;
         try {
@@ -324,7 +324,7 @@ unknown://example6.com
         }
     }
 
-    public void replace_non_breaking_space() {
+    public void replace_non_breaking_space() throws Error {
         load_body_fixture();
         string single_nbsp = "a b";
         string multiple_nbsp = "a b c";

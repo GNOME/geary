@@ -23,7 +23,11 @@ public class Geary.AccountInformation : BaseObject {
 
     public static int default_ordinal = 0;
 
-    private static Gee.HashMap<string, Geary.Endpoint>? known_endpoints = null;
+    private static Gee.HashMap<string, Geary.Endpoint>? known_endpoints;
+
+    static construct {
+        AccountInformation.known_endpoints = new Gee.HashMap<string,weak Endpoint>();
+    }
 
     /**
      * Location account information is stored (as well as other data, including database and
@@ -108,7 +112,6 @@ public class Geary.AccountInformation : BaseObject {
         // being saved.
         get { return (allow_save_sent_mail() ? _save_sent_mail : true); }
         set { _save_sent_mail = value; }
-        default = true;
     }
 
     // Order for display purposes.
@@ -182,22 +185,17 @@ public class Geary.AccountInformation : BaseObject {
             smtp_endpoint.untrusted_host.disconnect(on_smtp_untrusted_host);
     }
 
-    internal static void init() {
-        known_endpoints = new Gee.HashMap<string, Geary.Endpoint>();
-    }
-
     private static Geary.Endpoint get_shared_endpoint(Service service, Endpoint endpoint) {
         string key = "%s/%s:%u".printf(service.user_label(), endpoint.remote_address.hostname,
             endpoint.remote_address.port);
 
-        // if already known, prefer it over this one
-        if (known_endpoints.has_key(key))
-            return known_endpoints.get(key);
+        Endpoint? cached = AccountInformation.known_endpoints.get(key);
+        if (cached == null) {
+            cached = endpoint;
+            AccountInformation.known_endpoints.set(key, cached);
+        }
 
-        // save for future use and return this one
-        known_endpoints.set(key, endpoint);
-
-        return endpoint;
+        return cached;
     }
 
     // Copies all data from the "from" object into this one.
@@ -310,8 +308,8 @@ public class Geary.AccountInformation : BaseObject {
     /**
      * Sets the path Geary will look for or create a special folder.  This is
      * only obeyed if the server doesn't tell Geary which folders are special.
-     * Only the DRAFTS, SENT, SPAM, and TRASH special folder types are valid to
-     * pass to this function.
+     * Only the DRAFTS, SENT, SPAM, TRASH and ARCHIVE special folder types are
+     * valid to pass to this function.
      */
     public void set_special_folder_path(Geary.SpecialFolderType special, Geary.FolderPath? path) {
         switch (special) {

@@ -1,4 +1,5 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -6,62 +7,60 @@
 
 private class Geary.App.ConversationOperationQueue : BaseObject {
     public bool is_processing { get; private set; default = false; }
-    public Geary.SimpleProgressMonitor progress_monitor { get; private set; default = 
-        new Geary.SimpleProgressMonitor(Geary.ProgressType.ACTIVITY); }
-    
-    private Geary.Nonblocking.Mailbox<ConversationOperation> mailbox
-        = new Geary.Nonblocking.Mailbox<ConversationOperation>();
+
+    /** Tracks progress running operations in this queue. */
+    public Geary.ProgressMonitor progress_monitor { get; private set; }
+
+    private Geary.Nonblocking.Queue<ConversationOperation> mailbox
+        = new Geary.Nonblocking.Queue<ConversationOperation>.fifo();
     private Geary.Nonblocking.Spinlock processing_done_spinlock
         = new Geary.Nonblocking.Spinlock();
-    
+
+    /** Fired when an error occurs executing an operation. */
+    public signal void operation_error(ConversationOperation op, Error err);
+
+    public ConversationOperationQueue(ProgressMonitor progress) {
+        this.progress_monitor = progress;
+    }
+
     public void clear() {
         mailbox.clear();
     }
-    
+
     public void add(ConversationOperation op) {
-        // There should only ever be one FillWindowOperation at a time.
-        FillWindowOperation? fill_op = op as FillWindowOperation;
-        if (fill_op != null) {
-            Gee.Collection<ConversationOperation> removed
-                = mailbox.revoke_matching(o => o is FillWindowOperation);
-            
-            // If there were any "insert" fill window ops, preserve that flag,
-            // as otherwise we might miss some data.
-            if (!fill_op.is_insert) {
-                foreach (ConversationOperation removed_op in removed) {
-                    FillWindowOperation? removed_fill = removed_op as FillWindowOperation;
-                    assert(removed_fill != null);
-                    
-                    if (removed_fill.is_insert) {
-                        fill_op.is_insert = true;
-                        break;
-                    }
+        bool add_op = true;
+
+        if (!op.allow_duplicates) {
+            Type op_type = op.get_type();
+            foreach (ConversationOperation other in this.mailbox.get_all()) {
+                if (other.get_type() == op_type) {
+                    add_op = false;
+                    break;
                 }
             }
         }
-        
-        mailbox.send(op);
-    }
-    
-    public async void stop_processing_async(Cancellable? cancellable) {
-        clear();
-        add(new TerminateOperation());
-        
-        try {
-            yield processing_done_spinlock.wait_async(cancellable);
-        } catch (Error e) {
-            debug("Error waiting for conversation operation queue to finish processing: %s",
-                e.message);
+
+        if (add_op) {
+            this.mailbox.send(op);
         }
     }
-    
+
+    public async void stop_processing_async(Cancellable? cancellable)
+        throws Error {
+        if (this.is_processing) {
+            clear();
+            add(new TerminateOperation());
+            yield processing_done_spinlock.wait_async(cancellable);
+        }
+    }
+
     public async void run_process_async() {
         is_processing = true;
         
         for (;;) {
             ConversationOperation op;
             try {
-                op = yield mailbox.recv_async();
+                op = yield mailbox.receive();
             } catch (Error e) {
                 debug("Error processing in conversation operation mailbox: %s", e.message);
                 break;
@@ -71,9 +70,13 @@ private class Geary.App.ConversationOperationQueue : BaseObject {
             
             if (!progress_monitor.is_in_progress)
                 progress_monitor.notify_start();
-            
-            yield op.execute_async();
-            
+
+            try {
+                yield op.execute_async();
+            } catch (Error err) {
+                operation_error(op, err);
+            }
+
             if (mailbox.size == 0)
                 progress_monitor.notify_finish();
         }

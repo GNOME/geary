@@ -20,6 +20,20 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
         null
     );
 
+    // See Bug 697681
+    private static Secret.Schema compat_schema = new Secret.Schema(
+        "org.gnome.keyring.NetworkPassword",
+        Secret.SchemaFlags.NONE,
+        "user", Secret.SchemaAttributeType.STRING,
+        "domain", Secret.SchemaAttributeType.STRING,
+        "object", Secret.SchemaAttributeType.STRING,
+        "protocol", Secret.SchemaAttributeType.STRING,
+        "port", Secret.SchemaAttributeType.INTEGER,
+        "server", Secret.SchemaAttributeType.STRING,
+        "authtype", Secret.SchemaAttributeType.STRING,
+        null
+    );
+
     private GearyApplication instance;
     private Geary.Nonblocking.Mutex dialog_mutex = new Geary.Nonblocking.Mutex();
 
@@ -32,6 +46,8 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
                                                     Geary.AccountInformation account,
                                                     Cancellable? cancellable = null)
     throws Error {
+        yield check_unlocked(cancellable);
+
         string? password = yield Secret.password_lookupv(
             SecretMediator.schema, new_attrs(service, account), cancellable
         );
@@ -50,6 +66,8 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
                                                  Geary.AccountInformation account,
                                                  Cancellable? cancellable = null)
     throws Error {
+        yield check_unlocked(cancellable);
+
         Geary.Credentials credentials = get_credentials(service, account);
         try {
             yield do_store(service, account, credentials.pass, cancellable);
@@ -63,6 +81,8 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
                                                    Geary.AccountInformation account,
                                                    Cancellable? cancellable = null)
     throws Error {
+        yield check_unlocked(cancellable);
+
         Geary.Credentials credentials = get_credentials(service, account);
         yield Secret.password_clearv(SecretMediator.schema,
                                      new_attrs(service, account),
@@ -71,13 +91,13 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
         // Remove legacy formats
         // <= 0.11
         yield Secret.password_clear(
-            Secret.SCHEMA_COMPAT_NETWORK,
+            compat_schema,
             cancellable,
             "user", get_legacy_user(service, account.primary_mailbox.address)
         );
         // <= 0.6
         yield Secret.password_clear(
-            Secret.SCHEMA_COMPAT_NETWORK,
+            compat_schema,
             cancellable,
             "user", get_legacy_user(service, credentials.user)
          );
@@ -95,19 +115,19 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
         // to serialize the code
         int token = yield dialog_mutex.claim_async(null);
 
-        // If the main window is hidden, make it visible now and present to user as transient parent
-        Gtk.Window? main_window = this.instance.get_active_window();
-        if (main_window != null && !main_window.visible) {
-            main_window.show_all();
-            main_window.present_with_time(Gdk.CURRENT_TIME);
-        }
+        // Ensure main window present to the window
+        this.instance.present();
 
-        PasswordDialog password_dialog = new PasswordDialog(main_window, services.has_smtp(),
-            account_information, services);
+        PasswordDialog password_dialog = new PasswordDialog(
+            this.instance.get_active_window(),
+            services.has_smtp(),
+            account_information,
+            services
+        );
         bool result = password_dialog.run();
-        
+
         dialog_mutex.release(ref token);
-        
+
         if (!result) {
             // user cancelled the dialog
             imap_password = null;
@@ -131,6 +151,38 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
             smtp_remember_password = false;
         }
         return true;
+    }
+
+    // Ensure the default collection unlocked.  Try to unlock it since
+    // the user may be running in a limited environment and it would
+    // prevent us from prompting the user multiple times in one
+    // session. See Bug 784300.
+    private async void check_unlocked(Cancellable? cancellable = null)
+    throws Error {
+        Secret.Service service = yield Secret.Service.get(
+            Secret.ServiceFlags.OPEN_SESSION, cancellable
+        );
+        Secret.Collection? collection = yield Secret.Collection.for_alias(
+            service,
+            Secret.COLLECTION_DEFAULT,
+            Secret.CollectionFlags.NONE,
+            cancellable
+        );
+
+        // For custom desktop setups, it is possible that the current
+        // session has a service responding on DBus but no password
+        // keyring. There's no much we can do in this case except just
+        // check for the collection being null so we don't crash. See
+        // Bug 795328.
+        if (collection != null && collection.get_locked()) {
+            List<Secret.Collection> to_lock = new List<Secret.Collection>();
+            to_lock.append(collection);
+            List<DBusProxy> unlocked;
+            yield service.unlock(to_lock, cancellable, out unlocked);
+            if (unlocked.length() != 0) {
+                // XXX
+            }
+        }
     }
 
     private async void do_store(Geary.Service service,
@@ -195,7 +247,7 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
     throws Error {
         // <= 0.11
         string? password = yield Secret.password_lookup(
-            Secret.SCHEMA_COMPAT_NETWORK,
+            compat_schema,
             cancellable,
             "user", get_legacy_user(service, account.primary_mailbox.address)
         );
@@ -205,7 +257,7 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
             Geary.Credentials creds = get_credentials(service, account);
             string user = get_legacy_user(service, creds.user);
             password = yield Secret.password_lookup(
-                Secret.SCHEMA_COMPAT_NETWORK,
+                compat_schema,
                 cancellable,
                 "user", user
             );
@@ -213,7 +265,7 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
             // Clear the old password
             if (password != null) {
                 yield Secret.password_clear(
-                    Secret.SCHEMA_COMPAT_NETWORK,
+                    compat_schema,
                     cancellable,
                     "user", user
                 );

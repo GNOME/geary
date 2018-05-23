@@ -137,12 +137,17 @@ endif()
 
 find_package(Git QUIET)
 
-# intl
-include(Gettext)
+# xgettext
+include(FindXGettext)
+SET(MIN_XGETTEXT_VERSION "0.19.8")
 if (XGETTEXT_FOUND)
-    message(STATUS "xgettext found")
+    if (XGETTEXT_VERSION VERSION_LESS MIN_XGETTEXT_VERSION)
+        message (FATAL_ERROR "xgettext found, but version is ${XGETTEXT_VERSION} (minimum version required is ${MIN_XGETTEXT_VERSION}).")
+    else ()
+        message(STATUS "xgettext found, version ${XGETTEXT_VERSION}")
+    endif ()
 else ()
-    message(STATUS "xgettext not found")
+    message (FATAL_ERROR "xgettext not found")
 endif ()
 
 # GResources
@@ -152,9 +157,15 @@ include(GlibCompileResourcesSupport)
 # Unit tests.
 #
 # We don't use CMake's enable_testing/add_test built-ins because they
-# use ctest. It's not called "test" because that is cmake reserved.
-add_custom_target(tests geary-test)
-add_dependencies(tests geary-test)
+# use ctest. It's not called "test" because that is cmake
+# reserved.
+add_custom_target(tests)
+add_custom_target(test-engine-run COMMAND test-engine)
+add_custom_target(test-client-run COMMAND test-client)
+
+add_dependencies(tests test-engine-run test-client-run)
+add_dependencies(test-engine-run test-engine)
+add_dependencies(test-client-run test-client)
 
 #
 # Uninstall target

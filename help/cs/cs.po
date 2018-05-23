@@ -1,13 +1,13 @@
 # Czech translation for geary.
 # Copyright (C) 2014 geary's COPYRIGHT HOLDER
 # This file is distributed under the same license as the geary package.
-# Marek Černocký <marek@manet.cz>, 2014, 2015, 2016, 2017.
+# Marek Černocký <marek@manet.cz>, 2014, 2015, 2016, 2017, 2018.
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: geary master\n"
-"POT-Creation-Date: 2017-09-25 16:02+0000\n"
-"PO-Revision-Date: 2017-09-25 19:00+0200\n"
+"POT-Creation-Date: 2018-03-18 13:52+0000\n"
+"PO-Revision-Date: 2018-03-14 08:14+0100\n"
 "Last-Translator: Marek Černocký <marek@manet.cz>\n"
 "Language-Team: čeština <gnome-cs-list@gnome.org>\n"
 "Language: cs\n"
@@ -93,10 +93,10 @@ msgstr ""
 #: C/write.page:36(p)
 msgid ""
 "A number of keyboard shortcuts are available in the composer; see <link xref="
-"\"shortcuts#composer\"/> for details."
+"\"shortcuts\"/> for details."
 msgstr ""
 "Řada klávesových zkratek je dostupná v editoru zpráv, podrobnosti viz <link "
-"xref=\"shortcuts#composer\"/>."
+"xref=\"shortcuts\"/>."
 
 #: C/write.page:38(p)
 msgid ""
@@ -193,382 +193,49 @@ msgstr ""
 "Pro označení jednotlivé zprávy jako přečtené vyberte <gui>Označit jako "
 "přečtené</gui> v rozbalovací nabídce."
 
-#: C/shortcuts.page:11(title)
+#: C/shortcuts.page:10(title)
 msgid "Keyboard shortcuts"
 msgstr "Klávesové zkratky"
 
 #: C/shortcuts.page:12(p)
-msgid "Geary has keyboard shortcuts for most common operations."
-msgstr "Geary má klávesové zkratky pro většinu běžných činností."
-
-#: C/shortcuts.page:15(p)
-msgid "Compose a new message"
-msgstr "Napsat novou zprávu"
-
-#: C/shortcuts.page:16(p)
-msgid "<keyseq><key>Ctrl</key><key>N</key></keyseq> or <key>N</key>"
-msgstr "<keyseq><key>Ctrl</key><key>N</key></keyseq> nebo <key>N</key>"
-
-#: C/shortcuts.page:19(p)
-msgid "Reply to sender"
-msgstr "Odpovědět odesilateli"
-
-#: C/shortcuts.page:20(p)
-msgid "<keyseq><key>Ctrl</key><key>R</key></keyseq> or <key>R</key>"
-msgstr "<keyseq><key>Ctrl</key><key>R</key></keyseq> nebo <key>R</key>"
-
-#: C/shortcuts.page:23(p)
-msgid "Reply to all"
-msgstr "Odpovědět všem"
-
-#: C/shortcuts.page:24(p)
 msgid ""
-"<keyseq><key>Ctrl</key><key>Shift</key><key>R</key></keyseq> or "
-"<keyseq><key>Shift</key><key>R</key></keyseq>"
+"Geary has keyboard shortcuts for most common operations. Use the built-in "
+"keyboard shortcuts help in Geary to discover the full list. This can be "
+"accessed via the application menu: <guiseq><gui>Geary</gui><gui>Keyboard "
+"Shortcuts</gui></guiseq> or using the keyboard shortcuts listed below."
 msgstr ""
-"<keyseq><key>Ctrl</key><key>Shift</key><key>R</key></keyseq> nebo "
-"<keyseq><key>Shift</key><key>R</key></keyseq>"
+"Geary má pro nejpoužívanější operace klávesové zkratky. Jejich seznam "
+"najdete v zabudované nápovědě ke klávesovým zkratkám. K té se dostanete přes "
+"nabídku aplikace: <guiseq><gui>Geary</gui> <gui>Keyboard Shortcuts</gui></"
+"guiseq> nebo pomocí níže uvedených klávesových zkratek."
+
+#: C/shortcuts.page:18(p)
+msgid ""
+"The following keyboard shortcuts can be used to access on-line help from "
+"Geary:"
+msgstr ""
+"Následující klávesové zkratky můžete použít pro přístup k nápovědě on-line z "
+"aplikace Geary:"
+
+#: C/shortcuts.page:22(p)
+msgid "Display this User Manual"
+msgstr "Zobrazit tuto uživatelskou příručku"
+
+#: C/shortcuts.page:23(key)
+msgid "F1"
+msgstr "F1"
+
+#: C/shortcuts.page:26(p)
+msgid "Display all keyboard shortcuts"
+msgstr "Zobrazit všechny klávesové zkratky"
 
 #: C/shortcuts.page:27(p)
-msgid "Forward"
-msgstr "Přeposlat"
-
-#: C/shortcuts.page:28(p)
-msgid "<keyseq><key>Ctrl</key><key>L</key></keyseq> or <key>F</key>"
-msgstr "<keyseq><key>Ctrl</key><key>L</key></keyseq> nebo <key>F</key>"
-
-#: C/shortcuts.page:31(p)
-msgid "Archive"
-msgstr "Archivovat"
-
-#: C/shortcuts.page:32(key)
-msgid "A"
-msgstr "A"
-
-#: C/shortcuts.page:35(p)
-msgid "Trash"
-msgstr "Přesunout do koše"
-
-#: C/shortcuts.page:36(p)
-msgid "<key>Delete</key> or <key>Backspace</key>"
-msgstr "<key>Delete</key> nebo <key>Backspace</key>"
-
-#: C/shortcuts.page:39(p)
-msgid "Delete"
-msgstr "Smazat"
-
-#: C/shortcuts.page:40(p)
 msgid ""
-"<keyseq><key>Shift</key><key>Delete</key></keyseq> or <keyseq><key>Shift</"
-"key><key>Backspace</key></keyseq>"
+"<keyseq><key>Ctrl</key><key>?</key></keyseq> or <keyseq><key>Ctrl</"
+"key><key>F1</key></keyseq>"
 msgstr ""
-"<keyseq><key>Shift</key><key>Delete</key></keyseq> nebo <keyseq><key>Shift</"
-"key><key>Backspace</key></keyseq>"
-
-#: C/shortcuts.page:43(p)
-msgid "Star"
-msgstr "Přidělit hvězdičku"
-
-#: C/shortcuts.page:44(key) C/shortcuts.page:100(key)
-msgid "S"
-msgstr "S"
-
-#: C/shortcuts.page:47(p)
-msgid "Unstar"
-msgstr "Odebrat hvězdičku"
-
-#: C/shortcuts.page:48(key) C/shortcuts.page:138(key)
-msgid "D"
-msgstr "D"
-
-#: C/shortcuts.page:51(p)
-msgid "Mark read"
-msgstr "Označit jako přečtené"
-
-#: C/shortcuts.page:52(p)
-msgid ""
-"<keyseq><key>Ctrl</key><key>I</key></keyseq> or <keyseq><key>Shift</"
-"key><key>I</key></keyseq>"
-msgstr ""
-"<keyseq><key>Ctrl</key><key>I</key></keyseq> nebo <keyseq><key>Shift</"
-"key><key>I</key></keyseq>"
-
-#: C/shortcuts.page:55(p)
-msgid "Mark unread"
-msgstr "Označit jako nepřečtené"
-
-#: C/shortcuts.page:56(p)
-msgid ""
-"<keyseq><key>Ctrl</key><key>U</key></keyseq> or <keyseq><key>Shift</"
-"key><key>U</key></keyseq>"
-msgstr ""
-"<keyseq><key>Ctrl</key><key>U</key></keyseq> nebo <keyseq><key>Shift</"
-"key><key>U</key></keyseq>"
-
-#: C/shortcuts.page:59(p)
-msgid "Move the conversation"
-msgstr "Přesunout konverzaci"
-
-#: C/shortcuts.page:60(key)
-msgid "M"
-msgstr "M"
-
-#: C/shortcuts.page:63(p)
-msgid "Label the conversation"
-msgstr "Přidat konverzaci štítek"
-
-#: C/shortcuts.page:64(key) C/shortcuts.page:162(key)
-msgid "L"
-msgstr "L"
-
-#: C/shortcuts.page:67(p)
-msgid "Jump to next (older) conversation"
-msgstr "Přejít na následující (starší) konverzaci"
-
-#: C/shortcuts.page:68(key)
-msgid "J"
-msgstr "J"
-
-#: C/shortcuts.page:71(p)
-msgid "Jump to previous (newer) conversation"
-msgstr "Přejít na předchozí (novější) konverzaci"
-
-#: C/shortcuts.page:72(key) C/shortcuts.page:158(key)
-msgid "K"
-msgstr "K"
-
-#: C/shortcuts.page:75(p)
-msgid "Toggle spam"
-msgstr "Označit jako spam/zrušit označení spamu"
-
-#: C/shortcuts.page:76(p)
-msgid "<keyseq><key>Ctrl</key><key>J</key></keyseq> or <key>!</key>"
-msgstr "<keyseq><key>Ctrl</key><key>J</key></keyseq> nebo <key>!</key>"
-
-#: C/shortcuts.page:79(p)
-msgid "Quit"
-msgstr "Ukončit"
-
-#: C/shortcuts.page:80(key) C/shortcuts.page:96(key) C/shortcuts.page:100(key)
-#: C/shortcuts.page:104(key) C/shortcuts.page:108(key)
-#: C/shortcuts.page:112(key) C/shortcuts.page:122(key)
-#: C/shortcuts.page:126(key) C/shortcuts.page:130(key)
-#: C/shortcuts.page:138(key) C/shortcuts.page:146(key)
-#: C/shortcuts.page:150(key) C/shortcuts.page:154(key)
-#: C/shortcuts.page:158(key) C/shortcuts.page:162(key)
-#: C/shortcuts.page:166(key) C/shortcuts.page:181(key)
-msgid "Ctrl"
-msgstr "Ctrl"
-
-#: C/shortcuts.page:80(key)
-msgid "Q"
-msgstr "Q"
-
-#: C/shortcuts.page:83(p)
-msgid "Zoom in"
-msgstr "Přiblížit"
-
-#: C/shortcuts.page:84(p)
-msgid "<keyseq><key>Ctrl</key><key>=</key></keyseq> or <key>=</key>"
-msgstr "<keyseq><key>Ctrl</key><key>=</key></keyseq> nebo <key>=</key>"
-
-#: C/shortcuts.page:87(p)
-msgid "Zoom out"
-msgstr "Oddálit"
-
-#: C/shortcuts.page:88(p)
-msgid "<keyseq><key>Ctrl</key><key>-</key></keyseq> or <key>-</key>"
-msgstr "<keyseq><key>Ctrl</key><key>-</key></keyseq> nebo <key>-</key>"
-
-#: C/shortcuts.page:91(p)
-msgid "Reset zoom"
-msgstr "Přiblížit na výchozí velikost"
-
-#: C/shortcuts.page:92(p)
-msgid "<keyseq><key>Ctrl</key><key>0</key></keyseq> or <key>0</key>"
-msgstr "<keyseq><key>Ctrl</key><key>0</key></keyseq> nebo <key>0</key>"
-
-#: C/shortcuts.page:95(p)
-msgid "Close composer window"
-msgstr "Zavřít okno editoru"
-
-#: C/shortcuts.page:96(key)
-msgid "W"
-msgstr "W"
-
-#: C/shortcuts.page:99(p)
-msgid "Jump to search box"
-msgstr "Přejít do vyhledávacího pole"
-
-#: C/shortcuts.page:103(p)
-msgid "Find in current conversation"
-msgstr "Hledat v aktuální konverzaci"
-
-#: C/shortcuts.page:104(key)
-msgid "F"
-msgstr "F"
-
-#: C/shortcuts.page:107(p)
-msgid "Find next in current conversation"
-msgstr "Najít následující v aktuální konverzaci"
-
-#: C/shortcuts.page:108(key) C/shortcuts.page:112(key)
-msgid "G"
-msgstr "G"
-
-#: C/shortcuts.page:111(p)
-msgid "Find previous in current conversation"
-msgstr "Najít předchozí v aktuální konverzaci"
-
-#: C/shortcuts.page:112(key)
-msgid "Shift"
-msgstr "Shift"
-
-#: C/shortcuts.page:117(title)
-msgid "Composer shortcuts"
-msgstr "Klávesové zkratky editoru"
-
-#: C/shortcuts.page:118(p)
-msgid "These shortcuts are active whenever focus is in a composer."
-msgstr ""
-"Následující klávesové zkratky jsou funkční, kdykoliv je aktivní editor zpráv."
-
-#: C/shortcuts.page:121(p)
-msgid "Attach file"
-msgstr "Přiložit soubor"
-
-#: C/shortcuts.page:122(key)
-msgid "T"
-msgstr "T"
-
-#: C/shortcuts.page:125(p)
-msgid "Quote text"
-msgstr "Citovat text"
-
-#: C/shortcuts.page:126(key)
-msgid "]"
-msgstr "]"
-
-#: C/shortcuts.page:129(p)
-msgid "Unquote text"
-msgstr "Ukončit citaci textu"
-
-#: C/shortcuts.page:130(key)
-msgid "["
-msgstr "["
-
-#: C/shortcuts.page:133(p)
-msgid "Close composer"
-msgstr "Zavřít okno editoru"
-
-#: C/shortcuts.page:134(p)
-msgid "<keyseq><key>Ctrl</key><key>W</key></keyseq> or <key>Esc</key>"
-msgstr "<keyseq><key>Ctrl</key><key>W</key></keyseq> nebo <key>Esc</key>"
-
-#: C/shortcuts.page:137(p)
-msgid "Detach composer"
-msgstr "Odpojit okno editor"
-
-#: C/shortcuts.page:142(p)
-msgid "These shortcuts are only active in composers in rich text mode."
-msgstr ""
-"Následující klávesové zkratky jsou funkční pouze když je editor v režimu "
-"formátovaného textu."
-
-#: C/shortcuts.page:145(p)
-msgid "Bold text"
-msgstr "Tučný text"
-
-#: C/shortcuts.page:146(key) C/shortcuts.page:181(key)
-msgid "B"
-msgstr "B"
-
-#: C/shortcuts.page:149(p)
-msgid "Italicize text"
-msgstr "Text kurzívou"
-
-#: C/shortcuts.page:150(key)
-msgid "I"
-msgstr "I"
-
-#: C/shortcuts.page:153(p)
-msgid "Underline text"
-msgstr "Podtržený text"
-
-#: C/shortcuts.page:154(key)
-msgid "U"
-msgstr "U"
-
-#: C/shortcuts.page:157(p)
-msgid "Strike text"
-msgstr "Přeškrtnutý text"
-
-#: C/shortcuts.page:161(p)
-msgid "Insert a link"
-msgstr "Vložit odkaz"
-
-#: C/shortcuts.page:165(p)
-msgid "Remove formatting"
-msgstr "Odstranit formátování"
-
-#: C/shortcuts.page:166(key) C/shortcuts.page:186(key)
-msgid "Space"
-msgstr "mezerník"
-
-#: C/shortcuts.page:172(title)
-msgid "Keyboard navigation"
-msgstr "Navigace"
-
-#: C/shortcuts.page:173(p)
-msgid ""
-"These shortcuts can be used to move the keyboard focus in the main window."
-msgstr ""
-"Následující klávesové zkratky se dají použít k přesunu zaměření v hlavním "
-"okně."
-
-#: C/shortcuts.page:176(p)
-msgid "Move focus to the next/previous pane"
-msgstr "Přesunout zaměření na následující/předchozí panel"
-
-#: C/shortcuts.page:177(p)
-msgid ""
-"<keyseq><key>F6</key></keyseq> / <keyseq><key>Shift</key><key>F6</key></"
-"keyseq>"
-msgstr ""
-"<keyseq><key>F6</key></keyseq> / <keyseq><key>Shift</key><key>F6</key></"
-"keyseq>"
-
-#: C/shortcuts.page:180(p)
-msgid "Move focus to conversation list"
-msgstr "Přesunout zaměření na seznam konverzací"
-
-#: C/shortcuts.page:184(p)
-msgid "Move to the next message in a conversation"
-msgstr "Přesunout se na následující zprávu v konverzaci"
-
-#: C/shortcuts.page:190(p)
-msgid "Move to the next/previous message in a conversation"
-msgstr "Přesunout se na následující/předchozí zprávu v konverzaci"
-
-#: C/shortcuts.page:191(p)
-msgid ""
-"<keyseq><key>Ctrl</key><key>Down</key></keyseq> / <keyseq><key>Ctrl</"
-"key><key>Up</key></keyseq>"
-msgstr ""
-"<keyseq><key>Ctrl</key><key>↓</key></keyseq> / <keyseq><key>Ctrl</"
-"key><key>↑</key></keyseq>"
-
-#: C/shortcuts.page:197(p)
-msgid "Move to the first/last message in a conversation"
-msgstr "Přesunout se na první/poslední zprávu v konverzaci"
-
-#: C/shortcuts.page:198(p)
-msgid ""
-"<keyseq><key>Ctrl</key><key>Home</key></keyseq> / <keyseq><key>Ctrl</"
-"key><key>End</key></keyseq>"
-msgstr ""
-"<keyseq><key>Ctrl</key><key>Home</key></keyseq> / <keyseq><key>Ctrl</"
-"key><key>End</key></keyseq>"
+"<keyseq><key>Ctrl</key><key>?</key></keyseq> nebo <keyseq><key>Ctrl</"
+"key><key>F1</key></keyseq>"
 
 #: C/search.page:10(title)
 msgid "Search"
@@ -792,38 +459,22 @@ msgstr ""
 "v jediném panelu."
 
 #: C/preferences.page:40(title)
-msgid "Composer"
-msgstr "Editor"
-
-#: C/preferences.page:43(gui)
-msgid "Enable spell checking"
-msgstr "Zapnout kontrolu pravopisu"
-
-#: C/preferences.page:44(p)
-msgid ""
-"When set, Geary automatically spell checks a message as you write it, "
-"underlying each misspelled word in red."
-msgstr ""
-"Když je zapnuto, Geary automaticky kontroluje pravopis ve zprávě, kterou "
-"píšete a chybná slova podtrhává červeně."
-
-#: C/preferences.page:51(title)
 msgid "Notifications"
 msgstr "Upozornění"
 
-#: C/preferences.page:54(gui)
+#: C/preferences.page:43(gui)
 msgid "Play notification sounds"
 msgstr "Přehrávat zvuková upozornění"
 
-#: C/preferences.page:55(p)
+#: C/preferences.page:44(p)
 msgid "When set, Geary plays a sound whenever a new message arrives."
 msgstr "Když je zapnuto, Geary přehraje zvuk pokaždé, když dorazí nová zpráva."
 
-#: C/preferences.page:58(gui)
+#: C/preferences.page:47(gui)
 msgid "Show notifications for new mail"
 msgstr "Zobrazit upozornění na nový e-mail"
 
-#: C/preferences.page:59(p)
+#: C/preferences.page:48(p)
 msgid ""
 "When set, Geary displays a <em>notification</em> each time a new message "
 "arrives. Notifications are displayed in a system-dependent manner. On GNOME "
@@ -837,19 +488,19 @@ msgstr ""
 "horní lištou (novější verze). V Ubuntu Unity se zobrazují v pravém horním "
 "rohu obrazovky."
 
-#: C/preferences.page:65(gui)
-msgid "Always watch for new mail"
-msgstr "Vždy sledovat novou poštu"
+#: C/preferences.page:54(gui)
+msgid "Watch for new mail when closed"
+msgstr "Sledovat novou poštu při zavřené aplikaci"
 
-#: C/preferences.page:66(p)
+#: C/preferences.page:55(p)
 msgid ""
 "Geary will watch your accounts for new mail even when the main window is not "
 "open. To do this, it will silently start when you log in to your computer, "
-"and it will continue to run after you close the main window."
+"and it will continue to run after you close all windows."
 msgstr ""
 "Geary bude sledovat vaše účty ohledně nové pošty, i když není otevřeno "
 "hlavní okno. Aby to mohl dělat, bude tiše spuštěn jakmile se přihlásíte k "
-"počítači a bude pokračovat v běhu i po té, co zavřete hlavní okno."
+"počítači a bude pokračovat v běhu i po té, co zavřete všechna okna."
 
 #: C/overview.page:8(title)
 msgid "Overview"
@@ -1227,23 +878,20 @@ msgid ""
 "<gui>Accounts</gui> option is available in either Geary's application menu "
 "or the gear menu in the upper-right of the toolbar. (The location depends on "
 "the install desktop shell. For GNOME Shell and Unity, the application menu "
-"is available near the top-left corner of the screen.) Alternately, "
-"<keyseq><key>Ctrl</key><key>M</key></keyseq> will open the Accounts dialog. "
-"To add an account, click the + button."
+"is available near the top-left corner of the screen.) To add an account, "
+"click the + button."
 msgstr ""
 "Další účty můžete přidat v dialogovém okně Účty. Volbu <gui>Účty</gui> "
 "najdete buď v aplikační nabídce Geary nebo v nabídce v pravém horním rohu "
 "nástrojové lišty. (Přesné místo závisí na používaném grafickém shellu. V "
 "GNOME Shell a Unity se aplikační nabídka nachází poblíž levého horního rohu "
-"obrazovky.) Případně můžete dialogové okno Účty otevřít pomocí "
-"<keyseq><key>Ctrl</key><key>M</key></keyseq>. Nový účet přidáte kliknutím na "
-"tlačítko +."
+"obrazovky.) Nový účet přidáte kliknutím na tlačítko <gui>+</gui>."
 
-#: C/accounts.page:28(title)
+#: C/accounts.page:27(title)
 msgid "Editing existing accounts"
 msgstr "Úprava stávajících účtů"
 
-#: C/accounts.page:30(p)
+#: C/accounts.page:29(p)
 msgid ""
 "From the Accounts dialog, select an account and click the pencil icon to "
 "change various settings. Please note that Geary cannot change server "
@@ -1255,7 +903,7 @@ msgstr ""
 "existujícího účtu server. Pokud potřebujete změnit server IMAP nebo SMTP, "
 "budete muset účet smazat a znovu jej přidat."
 
-#: C/accounts.page:34(p)
+#: C/accounts.page:33(p)
 msgid ""
 "To change the order that accounts are displayed in the folder list, drag the "
 "accounts in the Accounts dialog to the desired order."
@@ -1263,11 +911,11 @@ msgstr ""
 "Pro změnu pořadí zobrazení účtů v seznamu složek, stačí účet v dialogovém "
 "okně Účty přetáhnout na požadované místo."
 
-#: C/accounts.page:37(p)
+#: C/accounts.page:36(p)
 msgid "There are some advanced options available when editing accounts:"
 msgstr "Během úprav účtu jsou k dispozici některá pokročilá nastavení:"
 
-#: C/accounts.page:39(p)
+#: C/accounts.page:38(p)
 msgid ""
 "The <gui>Save sent mail</gui> checkbox controls whether Geary will push "
 "successfully sent messages up to the account's <gui>Sent Mail</gui> folder. "
@@ -1282,7 +930,7 @@ msgstr ""
 "účty lze nastavit, aby se tak dělo také automaticky. U ostatních účtů "
 "nebudete při vypnutí této volby moci procházet zprávy, které jste odeslali."
 
-#: C/accounts.page:45(p)
+#: C/accounts.page:44(p)
 msgid ""
 "The <gui>Sign emails</gui> checkbox indicates whether a signature will be "
 "automatically inserted when a composer is opened. You may enter the "
@@ -1294,7 +942,7 @@ msgstr ""
 "zadat do pole níže. Můžete při tom určovat styl pomocí značek HTML. "
 "Tlačítkem napravo si můžete zobrazit náhled patičky."
 
-#: C/accounts.page:50(p)
+#: C/accounts.page:49(p)
 msgid ""
 "If you leave the signature in the Accounts dialog blank, Geary will use the "
 "<file>.signature</file> file in your home directory, if it exists. This file "
@@ -1307,7 +955,7 @@ msgstr ""
 "HTML. Ve druhém případě bude vložen do editoru tak, jak je, bez jakéhokoliv "
 "ošetření speciálních znaků."
 
-#: C/accounts.page:55(p)
+#: C/accounts.page:54(p)
 msgid ""
 "The <gui>Download mail</gui> drop-down allows you to configure how much mail "
 "Geary will keep locally. Geary can only use locally available mail when "
@@ -1317,11 +965,11 @@ msgstr ""
 "zpráv bude Geary uchovávat místně. Jen v místně uložených zprávám může Geary "
 "vychledávat a sestavovat z nich konverzace."
 
-#: C/accounts.page:63(title)
+#: C/accounts.page:62(title)
 msgid "Removing accounts"
 msgstr "Odebírání účtů"
 
-#: C/accounts.page:65(p)
+#: C/accounts.page:64(p)
 msgid ""
 "To delete an account, open the Accounts dialog, select the account, and "
 "press the - button. Geary will delete all information associated with the "

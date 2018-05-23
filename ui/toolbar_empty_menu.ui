@@ -1,7 +1,0 @@
-<ui>
-    <popup name="ToolbarEmptyMenu">
-        <menuitem name="EmptySpam" action="GearyEmptySpam" />
-        <menuitem name="EmptyTrash" action="GearyEmptyTrash" />
-    </popup>
-</ui>
-

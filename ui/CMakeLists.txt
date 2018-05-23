@@ -1,6 +1,5 @@
 
 set(RESOURCE_LIST
-  STRIPBLANKS "accelerators.ui"
   STRIPBLANKS "account_cannot_remove.glade"
   STRIPBLANKS "account_list.glade"
   STRIPBLANKS "account_spinner.glade"
@@ -29,12 +28,12 @@ set(RESOURCE_LIST
   STRIPBLANKS "gtk/menus.ui"
   STRIPBLANKS "login.glade"
   STRIPBLANKS "main-toolbar.ui"
+  STRIPBLANKS "main-toolbar-menus.ui"
   STRIPBLANKS "main-window.ui"
+  STRIPBLANKS "main-window-info-bar.ui"
   STRIPBLANKS "password-dialog.glade"
   STRIPBLANKS "preferences-dialog.ui"
   STRIPBLANKS "remove_confirm.glade"
-  STRIPBLANKS "toolbar_empty_menu.ui"
-  STRIPBLANKS "toolbar_mark_menu.ui"
   STRIPBLANKS "upgrade_dialog.glade"
   "geary.css"
 )

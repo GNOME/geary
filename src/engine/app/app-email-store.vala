@@ -134,7 +134,7 @@ public class Geary.App.EmailStore : BaseObject {
             if (count == 0)
                 continue;
             
-            if (folders.get(path).get_open_state() == Geary.Folder.OpenState.BOTH) {
+            if (folders.get(path).get_open_state() == Geary.Folder.OpenState.REMOTE) {
                 if (!best_is_open) {
                     best_is_open = true;
                     best_count = 0;
@@ -175,36 +175,28 @@ public class Geary.App.EmailStore : BaseObject {
             Geary.Folder folder = folders.get(path);
             Gee.Collection<Geary.EmailIdentifier> ids = folders_to_ids.get(path);
             assert(ids.size > 0);
-            
+
             bool open = false;
             Gee.Collection<Geary.EmailIdentifier>? used_ids = null;
             try {
-                debug("EmailStore opening %s for %s on %d emails", folder.to_string(),
-                    operation.get_type().name(), ids.size);
-                
-                yield folder.open_async(Geary.Folder.OpenFlags.FAST_OPEN, cancellable);
+                yield folder.open_async(Folder.OpenFlags.NONE, cancellable);
                 open = true;
-                
                 used_ids = yield operation.execute_async(folder, ids, cancellable);
-                
-                yield folder.close_async(cancellable);
-                open = false;
-                
-                debug("EmailStore closed %s after %s on %d emails", folder.to_string(),
-                    operation.get_type().name(), ids.size);
             } catch (Error e) {
                 debug("Error performing an operation on messages in %s: %s", folder.to_string(), e.message);
-                
+            } finally {
                 if (open) {
                     try {
-                        yield folder.close_async(cancellable);
-                        open = false;
+                        // Don't use the cancellable here, if it's been
+                        // opened we need to try to close it.
+                        yield folder.close_async(null);
                     } catch (Error e) {
-                        debug("Error closing folder %s: %s", folder.to_string(), e.message);
+                        debug("Error closing folder %s: %s",
+                              folder.to_string(), e.message);
                     }
                 }
             }
-            
+
             // We don't want to operate on any mails twice.
             if (used_ids != null) {
                 foreach (Geary.EmailIdentifier id in used_ids.to_array()) {
@@ -215,10 +207,7 @@ public class Geary.App.EmailStore : BaseObject {
             // And we don't want to operate on the same folder twice.
             folders_to_ids.remove_all(path);
         }
-        
-        debug("EmailStore %s done running %s on %d emails", account.to_string(),
-            operation.get_type().name(), emails.size);
-        
+
         if (folders_to_ids.size > 0) {
             debug("Couldn't perform %s on some messages in %s", operation.get_type().name(),
                 account.to_string());

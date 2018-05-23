@@ -48,25 +48,7 @@ private class Geary.ImapDB.SearchFolder : Geary.SearchFolder, Geary.FolderSuppor
                 exclude_folder(folder);
         }
     }
-    
-    public override async void find_boundaries_async(Gee.Collection<Geary.EmailIdentifier> ids,
-        out Geary.EmailIdentifier? low, out Geary.EmailIdentifier? high,
-        Cancellable? cancellable = null) throws Error {
-        low = null;
-        high = null;
-        
-        // This shouldn't require a result_mutex lock since there's no yield.
-        Gee.TreeSet<ImapDB.SearchEmailIdentifier> in_folder = Geary.traverse<Geary.EmailIdentifier>(ids)
-            .cast_object<ImapDB.SearchEmailIdentifier>()
-            .filter(id => id in search_results)
-            .to_tree_set();
-        
-        if (in_folder.size > 0) {
-            low = in_folder.first();
-            high = in_folder.last();
-        }
-    }
-    
+
     private async void append_new_email_async(Geary.SearchQuery query, Geary.Folder folder,
         Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable) throws Error {
         int result_mutex_token = yield result_mutex.claim_async();
@@ -350,24 +332,19 @@ private class Geary.ImapDB.SearchFolder : Geary.SearchFolder, Geary.FolderSuppor
             assert(ids.size > 0);
             
             debug("Search folder removing %d emails from %s", ids.size, folder.to_string());
-            
+
             bool open = false;
             try {
-                yield folder.open_async(Geary.Folder.OpenFlags.FAST_OPEN, cancellable);
+                yield folder.open_async(Geary.Folder.OpenFlags.NONE, cancellable);
                 open = true;
-                
                 yield remove.remove_email_async(
-                    Geary.Collection.to_array_list<Geary.EmailIdentifier>(ids), cancellable);
-                
-                yield folder.close_async(cancellable);
-                open = false;
-            } catch (Error e) {
-                debug("Error removing messages in %s: %s", folder.to_string(), e.message);
-                
+                    Geary.Collection.to_array_list<Geary.EmailIdentifier>(ids),
+                    cancellable
+                );
+            } finally {
                 if (open) {
                     try {
-                        yield folder.close_async(cancellable);
-                        open = false;
+                        yield folder.close_async();
                     } catch (Error e) {
                         debug("Error closing folder %s: %s", folder.to_string(), e.message);
                     }
@@ -375,7 +352,7 @@ private class Geary.ImapDB.SearchFolder : Geary.SearchFolder, Geary.FolderSuppor
             }
         }
     }
-    
+
     /**
      * Given a list of mail IDs, returns a set of casefolded words that match for the current
      * search query.

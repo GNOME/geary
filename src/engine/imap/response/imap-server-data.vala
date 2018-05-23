@@ -129,7 +129,19 @@ public class Geary.Imap.ServerData : ServerResponse {
         
         return MailboxInformation.decode(this, true);
     }
-    
+
+    /**
+     * Parses the {@link ServerData} into {@link MailboxInformation}, if possible.
+     *
+     * @throws ImapError.INVALID if not a NAMESPACE response.
+     */
+    public NamespaceResponse get_namespace() throws ImapError {
+        if (server_data_type != ServerDataType.NAMESPACE)
+            throw new ImapError.INVALID("Not NAMESPACE data: %s", to_string());
+
+        return NamespaceResponse.decode(this);
+    }
+
     /**
      * Parses the {@link ServerData} into a {@link ServerDataType.RECENT} value, if possible.
      *

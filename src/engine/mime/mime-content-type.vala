@@ -8,8 +8,9 @@
  * A representation of an RFC 2045 MIME Content-Type field.
  *
  * See [[https://tools.ietf.org/html/rfc2045#section-5]]
+ *
+ * This class is immutable.
  */
-
 public class Geary.Mime.ContentType : Geary.BaseObject {
 
     /**
@@ -20,15 +21,32 @@ public class Geary.Mime.ContentType : Geary.BaseObject {
     public const string WILDCARD = "*";
 
     /**
-     * Default Content-Type for unknown or unmarked content.
+     * Default Content-Type for inline, displayed entities.
+     *
+     * This is as specified by RFC 2052 § 5.2.
      */
-    public const string DEFAULT_CONTENT_TYPE = "application/octet-stream";
+    public static ContentType DISPLAY_DEFAULT;
+
+    /**
+     * Default Content-Type for attached entities.
+     *
+     * Although RFC 2052 § 5.2 specifies US-ASCII as the default, for
+     * attachments assume a binary blob so that users aren't presented
+     * with garbled text editor content and warnings on opening it.
+     */
+    public static ContentType ATTACHMENT_DEFAULT;
 
 
     private static Gee.Map<string,string> TYPES_TO_EXTENSIONS =
         new Gee.HashMap<string,string>();
 
     static construct {
+        DISPLAY_DEFAULT = new ContentType(
+            "text", "plain",
+            new ContentParameters.from_array({{"charset", "us-ascii"}})
+        );
+        ATTACHMENT_DEFAULT = new ContentType("application", "octet-stream", null);
+
         // XXX We should be loading file name extension information
         // from /etc/mime.types and/or the XDG Shared MIME-info
         // Database globs2 file, usually located at
@@ -61,8 +79,11 @@ public class Geary.Mime.ContentType : Geary.BaseObject {
 
     /**
      * Attempts to guess the content type for a buffer using GIO sniffing.
+     *
+     * Returns null if it could not be guessed.
      */
-    public static ContentType guess_type(string? file_name, Geary.Memory.Buffer? buf) throws Error {
+    public static ContentType? guess_type(string? file_name, Geary.Memory.Buffer? buf)
+        throws Error {
         string? mime_type = null;
 
         if (file_name != null) {
@@ -79,9 +100,9 @@ public class Geary.Mime.ContentType : Geary.BaseObject {
             int max_len = 4096;
             // XXX determine actual max needed buffer size using
             // xdg_mime_get_max_buffer_extents?
-            uint8[] data = (max_len > buf.size)
-                ? buf.get_bytes()[0:max_len - 1].get_data()
-                : buf.get_uint8_array();
+            uint8[] data = (buf.size <= max_len)
+                ? buf.get_uint8_array()
+                : buf.get_bytes()[0:max_len].get_data();
 
             // XXX might just want to use xdgmime lib directly here to
             // avoid the intermediate glib_content_type step here?
@@ -89,10 +110,7 @@ public class Geary.Mime.ContentType : Geary.BaseObject {
             mime_type = GLib.ContentType.get_mime_type(glib_type);
         }
 
-        if (Geary.String.is_empty(mime_type)) {
-            mime_type = DEFAULT_CONTENT_TYPE;
-        }
-        return deserialize(mime_type);
+        return !Geary.String.is_empty(mime_type) ? deserialize(mime_type) : null;
     }
 
 
@@ -232,13 +250,6 @@ public class Geary.Mime.ContentType : Geary.BaseObject {
             throw new MimeError.PARSE("Invalid MIME type: %s", mime_type);
         
         return is_type(mime_media_type, mime_media_subtype);
-    }
-
-    /**
-     * Determines if this type is the same as the default content type.
-     */
-    public bool is_default() {
-        return get_mime_type() == DEFAULT_CONTENT_TYPE;
     }
 
     public string serialize() {

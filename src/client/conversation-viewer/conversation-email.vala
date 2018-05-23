@@ -16,7 +16,7 @@
  * ConversationMessage}.
  */
 [GtkTemplate (ui = "/org/gnome/Geary/conversation-email.ui")]
-public class ConversationEmail : Gtk.Box {
+public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     // This isn't a Gtk.Grid since when added to a Gtk.ListBoxRow the
     // hover style isn't applied to it.
 
@@ -27,7 +27,7 @@ public class ConversationEmail : Gtk.Box {
     private class MessageViewIterator :
         Gee.Traversable<ConversationMessage>,
         Gee.Iterator<ConversationMessage>,
-        Object {
+        Geary.BaseObject {
 
 
         public bool read_only {
@@ -47,15 +47,14 @@ public class ConversationEmail : Gtk.Box {
         }
 
         public bool next() {
-            if (!has_next()) {
-                return false;
-            }
-            if (this.pos == -1) {
-                this.pos = 0;
+            bool has_next = false;
+            this.pos += 1;
+            if (this.pos == 0) {
+                has_next = true;
             } else {
-                this.attached_views.next();
+                has_next = this.attached_views.next();
             }
-            return true;
+            return has_next;
         }
 
         public bool has_next() {
@@ -68,7 +67,6 @@ public class ConversationEmail : Gtk.Box {
                 assert_not_reached();
 
             case 0:
-                this.pos = 1;
                 return this.parent_view.primary_message;
 
             default:
@@ -81,12 +79,12 @@ public class ConversationEmail : Gtk.Box {
         }
 
         public new bool foreach(Gee.ForallFunc<ConversationMessage> f) {
-            this.pos = 1;
-            bool ret = f(this.parent_view.primary_message);
-            if (ret) {
-                ret = this.attached_views.foreach(f);
+            bool cont = true;
+            while (cont && has_next()) {
+                next();
+                cont = f(get());
             }
-            return ret;
+            return cont;
         }
 
     }
@@ -186,7 +184,7 @@ public class ConversationEmail : Gtk.Box {
                 }
             } catch (Error error) {
                 debug("Failed to load icon for attachment '%s': %s",
-                      this.attachment.id,
+                      this.attachment.file.get_path(),
                       error.message);
             }
 
@@ -249,13 +247,11 @@ public class ConversationEmail : Gtk.Box {
     public Gee.List<ConversationMessage> attached_messages {
         owned get { return this._attached_messages.read_only_view; }
     }
+    private Gee.List<ConversationMessage> _attached_messages =
+        new Gee.LinkedList<ConversationMessage>();
 
     /** Determines if all message's web views have finished loading. */
     public bool message_bodies_loaded { get; private set; default = false; }
-
-    // Backing for attached_messages
-    private Gee.List<ConversationMessage> _attached_messages =
-        new Gee.LinkedList<ConversationMessage>();
 
     // Contacts for the email's account
     private Geary.ContactStore contact_store;
@@ -363,6 +359,7 @@ public class ConversationEmail : Gtk.Box {
                              Configuration config,
                              bool is_sent,
                              bool is_draft) {
+        base_ref();
         this.email = email;
         this.contact_store = contact_store;
         this.config = config;
@@ -496,6 +493,10 @@ public class ConversationEmail : Gtk.Box {
         }
     }
 
+    ~ConversationEmail() {
+        base_unref();
+    }
+
     /**
      * Starts loading the complete email.
      *
@@ -503,16 +504,14 @@ public class ConversationEmail : Gtk.Box {
      * primary message and any attached messages, as well as
      * attachment names, types and icons.
      */
-    public async void start_loading(Cancellable load_cancelled) {
+    public async void start_loading(ConversationListBox.AvatarStore avatars,
+                                    Cancellable load_cancelled) {
         foreach (ConversationMessage view in this)  {
             if (load_cancelled.is_cancelled()) {
                 break;
             }
             yield view.load_message_body(load_cancelled);
-            view.load_avatar.begin(
-                GearyApplication.instance.controller.avatar_session,
-                load_cancelled
-            );
+            view.load_avatar.begin(avatars, load_cancelled);
         }
 
         // Only load attachments once the web views have finished
@@ -613,7 +612,8 @@ public class ConversationEmail : Gtk.Box {
     }
 
     private void set_action_enabled(string name, bool enabled) {
-        SimpleAction? action = this.message_actions.lookup(name) as SimpleAction;
+        SimpleAction? action =
+            this.message_actions.lookup_action(name) as SimpleAction;
         if (action != null) {
             action.set_enabled(enabled);
         }

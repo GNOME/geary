@@ -38,6 +38,7 @@ engine/api/geary-folder-supports-remove.vala
 engine/api/geary-logging.vala
 engine/api/geary-named-flag.vala
 engine/api/geary-named-flags.vala
+engine/api/geary-problem-report.vala
 engine/api/geary-progress-monitor.vala
 engine/api/geary-revokable.vala
 engine/api/geary-search-folder.vala
@@ -58,7 +59,7 @@ engine/app/conversation-monitor/app-conversation-operation.vala
 engine/app/conversation-monitor/app-conversation-set.vala
 engine/app/conversation-monitor/app-external-append-operation.vala
 engine/app/conversation-monitor/app-fill-window-operation.vala
-engine/app/conversation-monitor/app-local-load-operation.vala
+engine/app/conversation-monitor/app-insert-operation.vala
 engine/app/conversation-monitor/app-local-search-operation.vala
 engine/app/conversation-monitor/app-remove-operation.vala
 engine/app/conversation-monitor/app-reseed-operation.vala
@@ -87,12 +88,14 @@ engine/db/db-versioned-database.vala
 
 engine/imap/imap.vala
 engine/imap/imap-error.vala
-engine/imap/api/imap-account.vala
+engine/imap/api/imap-account-session.vala
 engine/imap/api/imap-email-flags.vala
 engine/imap/api/imap-email-properties.vala
-engine/imap/api/imap-folder-properties.vala
 engine/imap/api/imap-folder.vala
+engine/imap/api/imap-folder-properties.vala
 engine/imap/api/imap-folder-root.vala
+engine/imap/api/imap-folder-session.vala
+engine/imap/api/imap-session-object.vala
 engine/imap/command/imap-append-command.vala
 engine/imap/command/imap-capability-command.vala
 engine/imap/command/imap-close-command.vala
@@ -110,6 +113,7 @@ engine/imap/command/imap-list-return-parameter.vala
 engine/imap/command/imap-login-command.vala
 engine/imap/command/imap-logout-command.vala
 engine/imap/command/imap-message-set.vala
+engine/imap/command/imap-namespace-command.vala
 engine/imap/command/imap-noop-command.vala
 engine/imap/command/imap-search-command.vala
 engine/imap/command/imap-search-criteria.vala
@@ -130,6 +134,7 @@ engine/imap/message/imap-mailbox-parameter.vala
 engine/imap/message/imap-message-data.vala
 engine/imap/message/imap-message-flag.vala
 engine/imap/message/imap-message-flags.vala
+engine/imap/message/imap-namespace.vala
 engine/imap/message/imap-sequence-number.vala
 engine/imap/message/imap-status-data-type.vala
 engine/imap/message/imap-tag.vala
@@ -152,6 +157,7 @@ engine/imap/response/imap-fetched-data.vala
 engine/imap/response/imap-mailbox-attribute.vala
 engine/imap/response/imap-mailbox-attributes.vala
 engine/imap/response/imap-mailbox-information.vala
+engine/imap/response/imap-namespace-response.vala
 engine/imap/response/imap-response-code.vala
 engine/imap/response/imap-response-code-type.vala
 engine/imap/response/imap-server-data.vala
@@ -188,10 +194,11 @@ engine/imap-db/outbox/smtp-outbox-folder-properties.vala
 engine/imap-db/outbox/smtp-outbox-folder-root.vala
 
 engine/imap-engine/imap-engine.vala
+engine/imap-engine/imap-engine-account-operation.vala
+engine/imap-engine/imap-engine-account-processor.vala
 engine/imap-engine/imap-engine-account-synchronizer.vala
 engine/imap-engine/imap-engine-batch-operations.vala
 engine/imap-engine/imap-engine-contact-store.vala
-engine/imap-engine/imap-engine-email-flag-watcher.vala
 engine/imap-engine/imap-engine-email-prefetcher.vala
 engine/imap-engine/imap-engine-generic-account.vala
 engine/imap-engine/imap-engine-generic-folder.vala
@@ -225,8 +232,8 @@ engine/imap-engine/replay-ops/imap-engine-move-email-prepare.vala
 engine/imap-engine/replay-ops/imap-engine-move-email-revoke.vala
 engine/imap-engine/replay-ops/imap-engine-remove-email.vala
 engine/imap-engine/replay-ops/imap-engine-replay-append.vala
-engine/imap-engine/replay-ops/imap-engine-replay-disconnect.vala
 engine/imap-engine/replay-ops/imap-engine-replay-removal.vala
+engine/imap-engine/replay-ops/imap-engine-replay-update.vala
 engine/imap-engine/replay-ops/imap-engine-server-search-email.vala
 engine/imap-engine/replay-ops/imap-engine-user-close.vala
 engine/imap-engine/yahoo/imap-engine-yahoo-account.vala
@@ -251,13 +258,13 @@ engine/mime/mime-disposition-type.vala
 engine/mime/mime-error.vala
 engine/mime/mime-multipart-subtype.vala
 
-engine/nonblocking/nonblocking-abstract-semaphore.vala
 engine/nonblocking/nonblocking-batch.vala
 engine/nonblocking/nonblocking-concurrent.vala
 engine/nonblocking/nonblocking-counting-semaphore.vala
 engine/nonblocking/nonblocking-error.vala
-engine/nonblocking/nonblocking-mailbox.vala
+engine/nonblocking/nonblocking-lock.vala
 engine/nonblocking/nonblocking-mutex.vala
+engine/nonblocking/nonblocking-queue.vala
 engine/nonblocking/nonblocking-reporting-semaphore.vala
 engine/nonblocking/nonblocking-variants.vala
 
@@ -270,6 +277,7 @@ engine/rfc822/rfc822-mailbox-addresses.vala
 engine/rfc822/rfc822-mailbox-address.vala
 engine/rfc822/rfc822-message.vala
 engine/rfc822/rfc822-message-data.vala
+engine/rfc822/rfc822-part.vala
 engine/rfc822/rfc822-utils.vala
 
 engine/smtp/smtp-authenticator.vala
@@ -294,7 +302,6 @@ engine/state/state-mapping.vala
 engine/util/util-ascii.vala
 engine/util/util-collection.vala
 engine/util/util-connectivity-manager.vala
-engine/util/util-converter.vala
 engine/util/util-files.vala
 engine/util/util-generic-capabilities.vala
 engine/util/util-html.vala
@@ -346,6 +353,7 @@ client/components/folder-popover.vala
 client/components/icon-factory.vala
 client/components/main-toolbar.vala
 client/components/main-window.vala
+client/components/main-window-info-bar.vala
 client/components/monitored-progress-bar.vala
 client/components/monitored-spinner.vala
 client/components/search-bar.vala
@@ -362,6 +370,7 @@ client/composer/composer-widget.vala
 client/composer/composer-window.vala
 client/composer/contact-entry-completion.vala
 client/composer/contact-list-store.vala
+client/composer/contact-list-store-cache.vala
 client/composer/email-entry.vala
 client/composer/spell-check-popover.vala
 
@@ -513,6 +522,7 @@ pkg_check_modules(DEPS REQUIRED
     webkit2gtk-web-extension-4.0>=${TARGET_WEBKIT}
     javascriptcoregtk-4.0>=${TARGET_WEBKIT}
     enchant>=1.6
+    libunwind-generic>=1.1
     ${EXTRA_CLIENT_PKG_CONFIG}
 )
 
@@ -530,6 +540,7 @@ set(ENGINE_PACKAGES
   gio-2.0
   glib-2.0
   gmime-2.6
+  libunwind
   javascriptcore-4.0
   libxml-2.0
   posix
@@ -579,6 +590,10 @@ set(CFLAGS
     -DISO_CODE_639_XML=\"${ISO_CODE_639_XML}\"
     -DISO_CODE_3166_XML=\"${ISO_CODE_3166_XML}\"
     -DGCR_API_SUBJECT_TO_CHANGE
+    # Vala causes a _lot_ of these to be emitted for otherwise valid
+    # code. Suppress them so we can actually see more useful warnings.
+    -Wno-incompatible-pointer-types
+    -Wno-discarded-qualifiers
 )
 
 if (REF_TRACKING)
@@ -618,15 +633,20 @@ set(VALAC_OPTIONS
     ${EXTRA_VALA_OPTIONS}
 )
 
-# Engine (static library used for building apps and unit test)
+# Engine - static library used for building apps and unit tests
+#
+# See Vala Bug 731322 about the specifics of the arguments used below
+# to generate the internal VAPI and header.
 #################################################
 vala_precompile(ENGINE_VALA_C geary-engine
     ${ENGINE_SRC}
 PACKAGES
     ${ENGINE_PACKAGES}
-GENERATE_VAPI
-    geary-engine
 OPTIONS
+    --header=geary-engine.h
+    --vapi=geary-engine.vapi
+    --internal-header=geary-engine-internal.h
+    --internal-vapi=geary-engine-internal.vapi
     ${VALAC_OPTIONS}
 )
 
@@ -705,6 +725,12 @@ OPTIONS
     ${VALAC_OPTIONS}
 )
 
+# GSettings
+# This needs to be here and not in desktop/CMakeLists.txt in order for Geary to run in the build
+# directory
+include(GSettings)
+add_schemas(geary-client ${GSETTINGS_DIR} ${CMAKE_INSTALL_PREFIX})
+
 add_executable(geary ${GEARY_VALA_C} ${RESOURCES_C})
 target_link_libraries(geary ${DEPS_LIBRARIES} geary-client)
 install(TARGETS geary RUNTIME DESTINATION bin)
@@ -715,12 +741,6 @@ add_custom_command(
     COMMAND
         ${CMAKE_COMMAND} -E copy geary ${CMAKE_BINARY_DIR}/
 )
-
-# GSettings
-# This needs to be here and not in desktop/CMakeLists.txt in order for Geary to run in the build
-# directory
-include(GSettings)
-add_schemas(geary ${GSETTINGS_DIR} ${CMAKE_INSTALL_PREFIX})
 
 # Client web process extension library
 #################################################
@@ -789,7 +809,7 @@ include(FindValadoc)
 add_custom_target(valadoc
   WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/src
   COMMAND ${VALADOC_EXECUTABLE}
-    --verbose --force --deps
+    --verbose --force --internal
     --package-name=geary-${VERSION}
     --package-version=${VERSION}
     --target-glib=${TARGET_GLIB}

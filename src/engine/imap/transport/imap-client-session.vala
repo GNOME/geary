@@ -4,26 +4,77 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
+/**
+ * High-level interface to a single IMAP server connection.
+ *
+ * The client session is responsible for opening, maintaining and
+ * closing a TCP connection to an IMAP server. When opening, the
+ * session will obtain and maintain capabilities, establish a StartTLS
+ * session if appropriate, authenticate, and obtain
+ * connection-specific information about the server such as the name
+ * used for the INBOX and any mailbox namespaces. When connecting has
+ * completed successfully, the connection will be in the IMAP
+ * authenticated state.
+ *
+ * Any IMAP commands that affect the IMAP connection's state (LOGIN,
+ * LOGOUT, SELECT, etc) must be executed by calling the appropriate
+ * method on this object. For example, call `login_async` rather than
+ * sending a {@link LoginCommand}. Other commands can be sent via
+ * {@link send_command_async} and {@link send_multiple_commands_async}.
+ */
 public class Geary.Imap.ClientSession : BaseObject {
-    // 30 min keepalive required to maintain session
-    public const uint MIN_KEEPALIVE_SEC = 30 * 60;
-    
-    // 10 minutes is more realistic, as underlying sockets will not necessarily report errors if
-    // physical connection is lost
-    public const uint RECOMMENDED_KEEPALIVE_SEC = 10 * 60;
-    
-    // A more aggressive keepalive will detect when a connection has died, thereby giving the client
-    // a chance to reestablish a connection without long lags.
+
+    /**
+     * Maximum keep-alive interval required to maintain a session.
+     *
+     * RFC 3501 requires servers have a minimum idle timeout of 30
+     * minutes, so the keep-alive interval should be set to less than
+     * this.
+     */
+    public const uint MAX_KEEPALIVE_SEC = 30 * 60;
+
+    /**
+     * Recommended keep-alive interval required to maintain a session.
+     *
+     * Although many servers will allow a timeout of at least what RFC
+     * 3501 requires, devices in between (e.g. NAT gateways) may have
+     * much shorter timeouts. Thus this is set much lower than what
+     * the RFC allows.
+     */
+    public const uint RECOMMENDED_KEEPALIVE_SEC = (10 * 60) - 30;
+
+    /**
+     * An aggressive keep-alive interval for polling for updates.
+     *
+     * Since a server may respond to NOOP with untagged responses for
+     * new messages or status updates, this is a useful timeout for
+     * polling for changes.
+     */
     public const uint AGGRESSIVE_KEEPALIVE_SEC = 5 * 60;
-    
-    // NOOP is only sent after this amount of time has passed since the last received
-    // message on the connection dependent on connection state (selected/examined vs. authorized)
+
+    /**
+     * Default keep-alive interval in the Selected state.
+     *
+     * This uses @{link AGGRESSIVE_KEEPALIVE_SEC} so that without IMAP
+     * IDLE, changes to the mailbox are still noticed without too much
+     * delay.
+     */
     public const uint DEFAULT_SELECTED_KEEPALIVE_SEC = AGGRESSIVE_KEEPALIVE_SEC;
+
+    /**
+     * Default keep-alive interval in the Selected state with IDLE.
+     *
+     * This uses @{link RECOMMENDED_KEEPALIVE_SEC} because IMAP IDLE
+     * will notify about changes to the mailbox as it happens .
+     */
+    public const uint DEFAULT_SELECTED_WITH_IDLE_KEEPALIVE_SEC = RECOMMENDED_KEEPALIVE_SEC;
+
+    /** Default keep-alive interval when not in the Selected state. */
     public const uint DEFAULT_UNSELECTED_KEEPALIVE_SEC = RECOMMENDED_KEEPALIVE_SEC;
-    public const uint DEFAULT_SELECTED_WITH_IDLE_KEEPALIVE_SEC = AGGRESSIVE_KEEPALIVE_SEC;
-    
+
     private const uint GREETING_TIMEOUT_SEC = ClientConnection.DEFAULT_COMMAND_TIMEOUT_SEC;
-    
+
+
     /**
      * The various states an IMAP {@link ClientSession} may be in at any moment.
      *
@@ -177,25 +228,66 @@ public class Geary.Imap.ClientSession : BaseObject {
      * (specifically for IDLE support).
      */
     public Capabilities capabilities { get; private set; default = new Capabilities(0); }
-    
+
+    /** Determines if this session supports the IMAP IDLE extension. */
+    public bool is_idle_supported {
+        get { return this.capabilities.has_capability(Capabilities.IDLE); }
+    }
+
+    /**
+     * Determines when the last successful command response was received.
+     *
+     * Returns the system wall clock time the last successful command
+     * response was received, in microseconds since the UNIX epoch.
+     */
+    public int64 last_seen = 0;
+
+
+    // While the following inbox and namespace data should be server
+    // specific, there is a small chance they will differ between
+    // connections if the connections connect to different servers in
+    // a cluster, or if configuration changes between connections. We
+    // do assume however that once connected, this information will
+    // remain the same. This information becomes current only after
+    // initiate_session_async() has successfully completed.
+
+    /** Records the actual name and delimiter used for the inbox */
+    internal MailboxInformation? inbox = null;
+
+    /** The locations personal mailboxes on this  connection. */
+    internal Gee.List<Namespace> personal_namespaces = new Gee.ArrayList<Namespace>();
+
+    /** The locations of other user's mailboxes on this connection. */
+    internal Gee.List<Namespace> user_namespaces = new Gee.ArrayList<Namespace>();
+
+    /** The locations of shared mailboxes on this connection. */
+    internal Gee.List<Namespace> shared_namespaces = new Gee.ArrayList<Namespace>();
+
+
     private Endpoint imap_endpoint;
     private Geary.State.Machine fsm;
     private ClientConnection? cx = null;
+
     private MailboxSpecifier? current_mailbox = null;
     private bool current_mailbox_readonly = false;
-    private Gee.HashMap<Tag, StatusResponse> seen_completion_responses = new Gee.HashMap<
-        Tag, StatusResponse>();
-    private Gee.HashMap<Tag, CommandCallback> waiting_for_completion = new Gee.HashMap<
-        Tag, CommandCallback>();
-    private int next_capabilities_revision = 1;
+
     private uint keepalive_id = 0;
     private uint selected_keepalive_secs = 0;
     private uint unselected_keepalive_secs = 0;
     private uint selected_with_idle_keepalive_secs = 0;
-    private bool allow_idle = true;
+
+    private Gee.HashMap<Tag, StatusResponse> seen_completion_responses = new Gee.HashMap<
+        Tag, StatusResponse>();
+    private Gee.HashMap<Tag, CommandCallback> waiting_for_completion = new Gee.HashMap<
+        Tag, CommandCallback>();
     private Command? state_change_cmd = null;
     private Nonblocking.Semaphore? connect_waiter = null;
     private Error? connect_err = null;
+
+    private int next_capabilities_revision = 1;
+    private Gee.Map<string,Namespace> namespaces = new Gee.HashMap<string,Namespace>();
+
+
 
     //
     // Connection state changes
@@ -216,7 +308,7 @@ public class Geary.Imap.ClientSession : BaseObject {
     public signal void status_response_received(StatusResponse status_response);
     
     /**
-     * Fired before the specific {@link ServerData} signals (i.e. {@link capability}, {@link exists}
+     * Fired after the specific {@link ServerData} signals (i.e. {@link capability}, {@link exists}
      * {@link expunge}, etc.)
      */
     public signal void server_data_received(ServerData server_data);
@@ -243,7 +335,9 @@ public class Geary.Imap.ClientSession : BaseObject {
     public signal void search(int64[] seq_or_uid);
     
     public signal void status(StatusData status_data);
-    
+
+    public signal void @namespace(NamespaceResponse namespace);
+
     /**
      * If the mailbox name is null it indicates the type of state change that has occurred
      * (authorized -> selected/examined or vice-versa).  If new_name is null readonly should be
@@ -322,6 +416,7 @@ public class Geary.Imap.ClientSession : BaseObject {
             new Geary.State.Mapping(State.SELECTING, Event.LOGOUT, on_logout),
             new Geary.State.Mapping(State.SELECTING, Event.DISCONNECT, on_disconnect),
             new Geary.State.Mapping(State.SELECTING, Event.RECV_STATUS, on_recv_status),
+
             new Geary.State.Mapping(State.SELECTING, Event.RECV_COMPLETION, on_selecting_recv_completion),
             new Geary.State.Mapping(State.SELECTING, Event.SEND_ERROR, on_send_error),
             new Geary.State.Mapping(State.SELECTING, Event.RECV_ERROR, on_recv_error),
@@ -413,7 +508,81 @@ public class Geary.Imap.ClientSession : BaseObject {
     public bool is_current_mailbox_readonly() {
         return current_mailbox_readonly;
     }
-    
+
+    /**
+     * Determines the SELECT-able mailbox name for a specific folder path.
+     */
+    public MailboxSpecifier get_mailbox_for_path(FolderPath path)
+    throws ImapError {
+        string? delim = get_delimiter_for_path(path);
+        return new MailboxSpecifier.from_folder_path(path, this.inbox.mailbox, delim);
+    }
+
+    /**
+     * Determines the folder path for a mailbox name.
+     */
+    public FolderPath get_path_for_mailbox(MailboxSpecifier mailbox)
+    throws ImapError {
+        string? delim = get_delimiter_for_mailbox(mailbox);
+        return mailbox.to_folder_path(delim, this.inbox.mailbox);
+    }
+
+    /**
+     * Determines the mailbox hierarchy delimiter for a given folder path.
+     *
+     * The returned delimiter be null if a namespace (INBOX, personal,
+     * etc) for the path does not exist, or if the namespace is flat.
+     */
+    public string? get_delimiter_for_path(FolderPath path)
+    throws ImapError {
+        string? delim = null;
+        Geary.FolderRoot root = path.get_root();
+        if (MailboxSpecifier.folder_path_is_inbox(root)) {
+            delim = this.inbox.delim;
+        } else {
+            Namespace? ns = this.namespaces.get(root.basename);
+            if (ns == null) {
+                // Folder's root doesn't exist as a namespace, so try
+                // the empty namespace.
+                ns = this.namespaces.get("");
+                if (ns == null) {
+                    // If that doesn't exist, fall back to the default
+                    // personal namespace
+                    ns = this.personal_namespaces[0];
+                }
+            }
+            delim = ns.delim;
+        }
+        return delim;
+    }
+
+    /**
+     * Determines the mailbox hierarchy delimiter for a given mailbox name.
+     *
+     * The returned delimiter be null if a namespace (INBOX, personal,
+     * etc) for the mailbox does not exist, or if the namespace is flat.
+     */
+    public string? get_delimiter_for_mailbox(MailboxSpecifier mailbox)
+    throws ImapError {
+        string name = mailbox.name;
+        string? delim = null;
+
+        string inbox_name = this.inbox.mailbox.name;
+        string? inbox_delim = this.inbox.delim;
+        if (inbox_name == name ||
+            (inbox_delim != null && inbox_name.has_prefix(name + inbox_delim))) {
+            delim = this.inbox.delim;
+        } else {
+            foreach (Namespace ns in this.namespaces.values) {
+                if (name.has_prefix(ns.prefix)) {
+                    delim = ns.delim;
+                    break;
+                }
+            }
+        }
+        return delim;
+    }
+
     /**
      * Returns the current {@link ProtocolState} of the {@link ClientSession} and, if selected,
      * the current mailbox.
@@ -577,18 +746,15 @@ public class Geary.Imap.ClientSession : BaseObject {
         cx.recv_closed.connect(on_received_closed);
         cx.receive_failure.connect(on_network_receive_failure);
         cx.deserialize_failure.connect(on_network_receive_failure);
-        
+
         assert(connect_waiter == null);
         connect_waiter = new Nonblocking.Semaphore();
-        
-        // only use IDLE when in SELECTED or EXAMINED state
-        cx.set_idle_when_quiet(false);
-        
+
         params.proceed = true;
-        
+
         return State.CONNECTING;
     }
-    
+
     // this is used internally to tear-down the ClientConnection object and unhook it from
     // ClientSession
     private void drop_connection() {
@@ -781,8 +947,91 @@ public class Geary.Imap.ClientSession : BaseObject {
         } else {
             debug("[%s] No compression available", to_string());
         }
+
+        Gee.List<ServerData> server_data = new Gee.ArrayList<ServerData>();
+        ulong data_id = this.server_data_received.connect((data) => { server_data.add(data); });
+        try {
+            // Determine what this connection calls the inbox
+            Imap.StatusResponse response = yield send_command_async(
+                new ListCommand(MailboxSpecifier.inbox, false, null),
+                cancellable
+            );
+            if (response.status == Status.OK && !server_data.is_empty) {
+                this.inbox = server_data[0].get_list();
+                debug("[%s] Using as INBOX: %s", to_string(), this.inbox.to_string());
+            } else {
+                throw new ImapError.INVALID("Unable to find INBOX");
+            }
+
+            // Try to determine what the connection's namespaces are
+            server_data.clear();
+            if (caps.has_capability(Capabilities.NAMESPACE)) {
+                response = yield send_command_async(
+                    new NamespaceCommand(),
+                    cancellable
+                );
+                if (response.status == Status.OK && !server_data.is_empty) {
+                    NamespaceResponse ns = server_data[0].get_namespace();
+                    update_namespaces(ns.personal, this.personal_namespaces);
+                    update_namespaces(ns.user, this.user_namespaces);
+                    update_namespaces(ns.shared, this.shared_namespaces);
+                } else {
+                    debug("[%s] NAMESPACE command failed", to_string());
+                }
+            }
+            server_data.clear();
+            if (!this.personal_namespaces.is_empty) {
+                debug("[%s] Default personal namespace: %s", to_string(), this.personal_namespaces[0].to_string());
+            } else {
+                debug("[%s] Personal namespace not found, guessing it", to_string());
+                string? prefix = "";
+                string? delim = this.inbox.delim;
+                if (!this.inbox.attrs.contains(MailboxAttribute.NO_INFERIORS) &&
+                    this.inbox.delim == ".") {
+                    // We're probably on an ancient Cyrus install that
+                    // doesn't support NAMESPACE, so assume they go in the inbox
+                    prefix = this.inbox.mailbox.name + ".";
+                }
+
+                if (delim == null) {
+                    // We still don't know what the delim is, so fetch
+                    // it. In particular, uw-imap sends a null prefix
+                    // for the inbox.
+                    response = yield send_command_async(
+                        new ListCommand(new MailboxSpecifier(prefix), false, null),
+                        cancellable
+                    );
+                    if (response.status == Status.OK && !server_data.is_empty) {
+                        MailboxInformation list = server_data[0].get_list();
+                        delim = list.delim;
+                    } else {
+                        throw new ImapError.INVALID("Unable to determine personal namespace delimiter");
+                    }
+                }
+
+                this.personal_namespaces.add(new Namespace(prefix, delim));
+                debug("[%s] Personal namespace guessed as: %s",
+                      to_string(), this.personal_namespaces[0].to_string());
+            }
+        } finally {
+            disconnect(data_id);
+        }
     }
-    
+
+    private inline void update_namespaces(Gee.List<Namespace>? response, Gee.List<Namespace> list) {
+        if (response != null) {
+            foreach (Namespace ns in response) {
+                list.add(ns);
+                string prefix = ns.prefix;
+                string? delim = ns.delim;
+                if (delim != null && prefix.has_suffix(delim)) {
+                    prefix = prefix.substring(0, prefix.length - delim.length);
+                }
+                this.namespaces.set(prefix, ns);
+            }
+        }
+    }
+
     private uint on_login(uint state, uint event, void *user, Object? object) {
         MachineParams params = (MachineParams) object;
         
@@ -859,22 +1108,36 @@ public class Geary.Imap.ClientSession : BaseObject {
         
         return true;
     }
-    
+
     /**
-     * If enabled, an IDLE command will be used for notification of unsolicited server data whenever
-     * a mailbox is selected or examined.  IDLE will only be used if ClientSession has seen a
-     * CAPABILITY server data response with IDLE listed as a supported extension.
+     * Enables IMAP IDLE for the client session, if supported.
      *
-     * This will *not* break a connection out of IDLE mode; a command must be sent as well to force
-     * the connection back to de-idled state.
-     *
-     * Note that this overrides other heuristics ClientSession uses about allowing idle, so use
-     * with caution.
+     * If enabled, an IDLE command will be used for notification of
+     * unsolicited server data whenever a mailbox is selected or
+     * examined.  IDLE will only be used if ClientSession has seen a
+     * CAPABILITY server data response with IDLE listed as a supported
+     * extension.
      */
-    public void allow_idle_when_selected(bool allow_idle) {
-        this.allow_idle = allow_idle;
+    public async void enable_idle(Cancellable? cancellable)
+        throws Error {
+        if (this.is_idle_supported) {
+            switch (get_protocol_state(null)) {
+            case ProtocolState.AUTHORIZING:
+            case ProtocolState.AUTHORIZED:
+            case ProtocolState.SELECTED:
+            case ProtocolState.SELECTING:
+                this.cx.idle_when_quiet = true;
+                yield send_command_async(new NoopCommand(), cancellable);
+                break;
+
+            default:
+                throw new ImapError.NOT_SUPPORTED(
+                    "IMAP IDLE only supported in AUTHORIZED or SELECTED states"
+                );
+            }
+        }
     }
-    
+
     private void schedule_keepalive() {
         // if old one was scheduled, unschedule and schedule anew
         unschedule_keepalive();
@@ -884,13 +1147,14 @@ public class Geary.Imap.ClientSession : BaseObject {
             case ProtocolState.UNCONNECTED:
             case ProtocolState.CONNECTING:
                 return;
-            
+
             case ProtocolState.SELECTING:
             case ProtocolState.SELECTED:
-                seconds = (allow_idle && supports_idle()) ? selected_with_idle_keepalive_secs
+                seconds = (this.cx.idle_when_quiet && this.is_idle_supported)
+                    ? selected_with_idle_keepalive_secs
                     : selected_keepalive_secs;
             break;
-            
+
             case ProtocolState.UNAUTHORIZED:
             case ProtocolState.AUTHORIZING:
             case ProtocolState.AUTHORIZED:
@@ -942,11 +1206,7 @@ public class Geary.Imap.ClientSession : BaseObject {
     public bool install_recv_converter(Converter converter) {
         return (cx != null) ? cx.install_recv_converter(converter) : false;
     }
-    
-    public bool supports_idle() {
-        return capabilities.has_capability(Capabilities.IDLE);
-    }
-    
+
     //
     // send commands
     //
@@ -1098,23 +1358,16 @@ public class Geary.Imap.ClientSession : BaseObject {
         
         return yield command_transaction_async(cmd, cancellable);
     }
-    
+
     private uint on_select(uint state, uint event, void *user, Object? object) {
         MachineParams params = (MachineParams) object;
-        
+
         if (!reserve_state_change_cmd(params, state, event))
             return state;
-        
-        // Allow IDLE *before* issuing SELECT/EXAMINE because there's no guarantee another command
-        // will be issued any time soon, which is necessary for the IDLE command to be tacked on
-        // to the end of it.  In other words, telling ClientConnection to go into IDLE after the
-        // SELECT/EXAMINE command is too late unless another command is sent (set_idle_when_quiet()
-        // performs no I/O).
-        cx.set_idle_when_quiet(allow_idle && supports_idle());
-        
+
         return State.SELECTING;
     }
-    
+
     private uint on_not_selected(uint state, uint event, void *user, Object? object) {
         MachineParams params = (MachineParams) object;
         
@@ -1156,10 +1409,12 @@ public class Geary.Imap.ClientSession : BaseObject {
             
             default:
                 debug("[%s]: Unable to SELECT/EXAMINE: %s", to_string(), completion_response.to_string());
-                
-                // turn off IDLE, not entering SELECTED/EXAMINED state
-                cx.set_idle_when_quiet(false);
-                
+
+                // turn off IDLE, client should request it again if desired.
+                if (cx.idle_when_quiet) {
+                    cx.idle_when_quiet = false;
+                }
+
                 return State.AUTHORIZED;
         }
     }
@@ -1190,10 +1445,10 @@ public class Geary.Imap.ClientSession : BaseObject {
         assert(params.cmd is CloseCommand);
         if (!reserve_state_change_cmd(params, state, event))
             return state;
-        
+
         // returning to AUTHORIZED state, turn off IDLE
-        cx.set_idle_when_quiet(false);
-        
+        cx.idle_when_quiet = false;
+
         return State.CLOSING_MAILBOX;
     }
     
@@ -1243,11 +1498,14 @@ public class Geary.Imap.ClientSession : BaseObject {
     
     private uint on_logout(uint state, uint event, void *user, Object? object) {
         MachineParams params = (MachineParams) object;
-        
+
         assert(params.cmd is LogoutCommand);
         if (!reserve_state_change_cmd(params, state, event))
             return state;
-        
+
+        // Leaving AUTHORIZED state, turn off IDLE
+        cx.idle_when_quiet = false;
+
         return State.LOGGING_OUT;
     }
     
@@ -1490,11 +1748,13 @@ public class Geary.Imap.ClientSession : BaseObject {
         
         fsm.issue(Event.SEND_ERROR, null, null, err);
     }
-    
+
     private void on_received_status_response(StatusResponse status_response) {
+        this.last_seen = GLib.get_real_time();
+
         // reschedule keepalive (traffic seen on channel)
         schedule_keepalive();
-        
+
         // If a CAPABILITIES ResponseCode, decode and update capabilities ...
         // some servers do this to prevent a second round-trip
         ResponseCode? response_code = status_response.response_code;
@@ -1577,7 +1837,11 @@ public class Geary.Imap.ClientSession : BaseObject {
             case ServerDataType.SEARCH:
                 search(server_data.get_search());
             break;
-            
+
+            case ServerDataType.NAMESPACE:
+                namespace(server_data.get_namespace());
+            break;
+
             // TODO: LSUB
             case ServerDataType.LSUB:
             default:
@@ -1589,11 +1853,13 @@ public class Geary.Imap.ClientSession : BaseObject {
         
         server_data_received(server_data);
     }
-    
+
     private void on_received_server_data(ServerData server_data) {
+        this.last_seen = GLib.get_real_time();
+
         // reschedule keepalive (traffic seen on channel)
         schedule_keepalive();
-        
+
         // send ServerData to upper layers for processing and storage
         try {
             notify_received_data(server_data);
@@ -1602,12 +1868,14 @@ public class Geary.Imap.ClientSession : BaseObject {
                 ierr.message);
         }
     }
-    
+
     private void on_received_bytes(size_t bytes) {
+        this.last_seen = GLib.get_real_time();
+
         // reschedule keepalive
         schedule_keepalive();
     }
-    
+
     private void on_received_bad_response(RootParameters root, ImapError err) {
         debug("[%s] Received bad response %s: %s", to_string(), root.to_string(), err.message);
     }

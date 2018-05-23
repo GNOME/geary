@@ -1,27 +1,52 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2018 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 /**
- * Database represents an SQLite file.  Multiple Connections may be opened to against the
- * Database.
+ * Represents a single SQLite database.
  *
- * Since it's often just more bookkeeping to maintain a single global connection, Database also
- * offers a master connection which may be used to perform queries and transactions.
+ * Each database supports multiple {@link Connection}s that allow SQL
+ * queries to be executed, however if a single connection is required
+ * by an app, this class also provides convenience methods to execute
+ * queries against a common ''master'' connection.
  *
- * Database also offers asynchronous transactions which work via connection and thread pools.
- *
- * NOTE: In-memory databases are currently unsupported.
+ * This class offers a number of asynchronous methods, however since
+ * SQLite only supports a synchronous API, these are implemented using
+ * a pool of background threads. Asynchronous transactions are
+ * available via {@link exec_transaction_async}.
  */
 
 public class Geary.Db.Database : Geary.Db.Context {
+
+
+    /** The path passed to SQLite to open a transient database. */
+    public const string MEMORY_PATH = "file::memory:?cache=shared";
+
+    /** The default number of threaded connections opened. */
     public const int DEFAULT_MAX_CONCURRENCY = 4;
-    
-    public File db_file { get; private set; }
+
+    /**
+     * The database's location on the filesystem.
+     *
+     * If null, this is a transient, in-memory database.
+     */
+    public File? file { get; private set; }
+
+    /**
+     * The path passed to Sqlite when opening the database.
+     *
+     * This will be the path to the database file on disk for
+     * persistent databases, else {@link MEMORY_PATH} for transient
+     * databases.
+     */
+    public string path { get; private set; }
+
     public DatabaseFlags flags { get; private set; }
-    
+
     private bool _is_open = false;
     public bool is_open {
         get {
@@ -36,45 +61,62 @@ public class Geary.Db.Database : Geary.Db.Context {
             }
         }
     }
-    
+
     private Connection? master_connection = null;
     private int outstanding_async_jobs = 0;
     private ThreadPool<TransactionAsyncJob>? thread_pool = null;
     private unowned PrepareConnection? prepare_cb = null;
-    
-    public Database(File db_file) {
-        this.db_file = db_file;
+
+    /**
+     * Constructs a new database that is persisted on disk.
+     */
+    public Database.persistent(File db_file) {
+        this.file = db_file;
+        this.path = db_file.get_path();
     }
-    
+
+    /**
+     * Constructs a new database that is stored in memory only.
+     */
+    public Database.transient() {
+        this.file = null;
+        this.path = MEMORY_PATH;
+    }
+
     ~Database() {
         // Not thrilled about using lock in a dtor
         lock (outstanding_async_jobs) {
             assert(outstanding_async_jobs == 0);
         }
     }
-    
+
     /**
-     * Opens the Database, creating any files and directories it may need in the process depending
-     * on the DatabaseFlags.
+     * Prepares the database for use.
      *
-     * NOTE: A Database may be closed, but the Connections it creates will always be valid as
-     * they hold a reference to their source Database.  To release a Database's resources, drop all
-     * references to it and its associated Connections, Statements, and Results.
+     * This will create any needed files and directories, check the
+     * database's integrity, and so on, depending on the flags passed
+     * to this method.
+     *
+     * NOTE: A Database may be closed, but the Connections it creates
+     * will always be valid as they hold a reference to their source
+     * Database. To release a Database's resources, drop all
+     * references to it and its associated Connections, Statements,
+     * and Results.
      */
-    public virtual void open(DatabaseFlags flags, PrepareConnection? prepare_cb,
-        Cancellable? cancellable = null) throws Error {
+    public virtual async void open(DatabaseFlags flags,
+                                   PrepareConnection? prepare_cb,
+                                   Cancellable? cancellable = null)
+        throws Error {
         if (is_open)
             return;
-        
+
         this.flags = flags;
         this.prepare_cb = prepare_cb;
-        
-        if ((flags & DatabaseFlags.CREATE_DIRECTORY) != 0) {
-            File db_dir = db_file.get_parent();
-            if (!db_dir.query_exists(cancellable))
-                db_dir.make_directory_with_parents(cancellable);
+
+        if (this.file != null && (flags & DatabaseFlags.CREATE_DIRECTORY) != 0) {
+            yield Geary.Files.make_directory_with_parents(this.file.get_parent());
         }
-        
+
         if (threadsafe()) {
             if (thread_pool == null) {
                 thread_pool = new ThreadPool<TransactionAsyncJob>.with_owned_data(on_async_job,
@@ -83,15 +125,20 @@ public class Geary.Db.Database : Geary.Db.Context {
         } else {
             warning("SQLite not thread-safe: asynchronous queries will not be available");
         }
-        
-        if ((flags & DatabaseFlags.CHECK_CORRUPTION) != 0)
-            check_for_corruption(flags, cancellable);
-        
+
+        if ((flags & DatabaseFlags.CHECK_CORRUPTION) != 0 &&
+            this.file != null &&
+            yield Geary.Files.query_exists_async(this.file, cancellable)) {
+            yield Nonblocking.Concurrent.global.schedule_async(() => {
+                    check_for_corruption(flags, cancellable);
+                }, cancellable);
+        }
+
         is_open = true;
     }
-    
+
     private void check_for_corruption(DatabaseFlags flags, Cancellable? cancellable) throws Error {
-        // if the file exists, open a connection and test for corruption by creating a dummy table,
+        // Open a connection and test for corruption by creating a dummy table,
         // adding a row, selecting the row, then dropping the table ... can only do this for
         // read-write databases, however
         //
@@ -100,8 +147,7 @@ public class Geary.Db.Database : Geary.Db.Context {
         //
         // TODO: Allow the caller to specify the name of the test table, so we're not clobbering
         // theirs (however improbable it is to name a table "CorruptionCheckTable")
-        bool exists = db_file.query_exists(cancellable);
-        if (exists && (flags & DatabaseFlags.READ_ONLY) == 0) {
+        if ((flags & DatabaseFlags.READ_ONLY) == 0) {
             Connection cx = new Connection(this, Sqlite.OPEN_READWRITE, cancellable);
             
             try {
@@ -120,17 +166,15 @@ public class Geary.Db.Database : Geary.Db.Context {
                 // drop table
                 cx.exec("DROP TABLE CorruptionCheckTable");
             } catch (Error err) {
-                throw new DatabaseError.CORRUPT("Possible integrity problem discovered in %s: %s",
-                    db_file.get_path(), err.message);
+                throw new DatabaseError.CORRUPT(
+                    "Possible integrity problem discovered in %s: %s",
+                    this.path,
+                    err.message
+                );
             }
-        } else if (!exists && (flags & DatabaseFlags.CREATE_FILE) == 0) {
-            // file doesn't exist and no flag to create it ... that's bad too, might as well
-            // let them know now
-            throw new DatabaseError.CORRUPT("Database file %s not found and no CREATE_FILE flag",
-                db_file.get_path());
         }
     }
-    
+
     /**
      * Closes the Database, releasing any resources it may hold, including the master connection.
      *
@@ -151,27 +195,41 @@ public class Geary.Db.Database : Geary.Db.Context {
         
         is_open = false;
     }
-    
+
     private void check_open() throws Error {
-        if (!is_open)
-            throw new DatabaseError.OPEN_REQUIRED("Database %s not open", db_file.get_path());
+        if (!is_open) {
+            throw new DatabaseError.OPEN_REQUIRED(
+                "Database %s not open", this.path
+            );
+        }
     }
-    
+
     /**
      * Throws DatabaseError.OPEN_REQUIRED if not open.
      */
-    public Connection open_connection(Cancellable? cancellable = null) throws Error {
-        return internal_open_connection(false, cancellable);
+    public async Connection open_connection(Cancellable? cancellable = null)
+        throws Error {
+        Connection? cx = null;
+        yield Nonblocking.Concurrent.global.schedule_async(() => {
+                cx = internal_open_connection(false, cancellable);
+            }, cancellable);
+        return cx;
     }
-    
+
     private Connection internal_open_connection(bool master, Cancellable? cancellable) throws Error {
         check_open();
-        
-        int sqlite_flags = (flags & DatabaseFlags.READ_ONLY) != 0 ? Sqlite.OPEN_READONLY
+
+        int sqlite_flags = (flags & DatabaseFlags.READ_ONLY) != 0
+            ? Sqlite.OPEN_READONLY
             : Sqlite.OPEN_READWRITE;
+
         if ((flags & DatabaseFlags.CREATE_FILE) != 0)
             sqlite_flags |= Sqlite.OPEN_CREATE;
-        
+
+        if (this.file == null) {
+            sqlite_flags |= SQLITE_OPEN_URI;
+        }
+
         Connection cx = new Connection(this, sqlite_flags, cancellable);
         if (prepare_cb != null)
             prepare_cb(cx, master);
@@ -238,47 +296,62 @@ public class Geary.Db.Database : Geary.Db.Context {
         Cancellable? cancellable = null) throws Error {
         return get_master_connection().exec_transaction(type, cb, cancellable);
     }
-    
+
     /**
-     * Asynchronous transactions are handled via background threads using a pool of Connections.
-     * The background thread calls Connection.exec_transaction(); see that method for more
-     * information about coding a transaction.  The only caveat is that the TransactionMethod
-     * must be thread-safe.
+     * Starts a new asynchronous transaction using a new connection.
      *
-     * Throws DatabaseError.OPEN_REQUIRED if not open.
+     * Asynchronous transactions are handled via background
+     * threads. The background thread opens a new connection, and
+     * calls {@link Connection.exec_transaction}; see that method for
+     * more information about coding a transaction. The only caveat is
+     * that the {@link TransactionMethod} passed to it must be
+     * thread-safe.
+     *
+     * Throws {@link DatabaseError.OPEN_REQUIRED} if not open.
      */
-    public async TransactionOutcome exec_transaction_async(TransactionType type, TransactionMethod cb,
-        Cancellable? cancellable) throws Error {
-        check_open();
-        
-        if (thread_pool == null)
-            throw new DatabaseError.GENERAL("SQLite thread safety disabled, async operations unallowed");
-        
-        // create job to execute in background thread
-        TransactionAsyncJob job = new TransactionAsyncJob(type, cb, cancellable);
-        
-        lock (outstanding_async_jobs) {
-            outstanding_async_jobs++;
-        }
-        
-        thread_pool.add(job);
-        
+    public async TransactionOutcome exec_transaction_async(TransactionType type,
+                                                           TransactionMethod cb,
+                                                           Cancellable? cancellable)
+        throws Error {
+        TransactionAsyncJob job = new TransactionAsyncJob(
+            null, type, cb, cancellable
+        );
+        add_async_job(job);
         return yield job.wait_for_completion_async();
     }
-    
+
+    /** Adds the given job to the thread pool. */
+    internal void add_async_job(TransactionAsyncJob new_job) throws Error {
+        check_open();
+
+        if (this.thread_pool == null) {
+            throw new DatabaseError.GENERAL(
+                "SQLite thread safety disabled, async operations unallowed"
+            );
+        }
+
+        lock (this.outstanding_async_jobs) {
+            this.outstanding_async_jobs++;
+        }
+
+        this.thread_pool.add(new_job);
+    }
+
     // This method must be thread-safe.
     private void on_async_job(owned TransactionAsyncJob job) {
         // *never* use master connection for threaded operations
-        Connection? cx = null;
+        Connection? cx = job.cx;
         Error? open_err = null;
-        try {
-            cx = open_connection();
-        } catch (Error err) {
-            open_err = err;
-            debug("Warning: unable to open database connection to %s, cancelling AsyncJob: %s",
-                db_file.get_path(), err.message);
+        if (cx == null) {
+            try {
+                cx = internal_open_connection(false, job.cancellable);
+            } catch (Error err) {
+                open_err = err;
+                debug("Warning: unable to open database connection to %s, cancelling AsyncJob: %s",
+                      this.path, err.message);
+            }
         }
-        
+
         if (cx != null)
             job.execute(cx);
         else

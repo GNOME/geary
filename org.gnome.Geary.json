@@ -5,8 +5,6 @@
     "runtime-version": "master",
     "sdk": "org.gnome.Sdk",
     "command": "geary",
-    "rename-icon": "geary",
-    "copy-icon": true,
 
     /* Nightly build args, remove these when creating a new stable branch */
     "tags": ["nightly"],
@@ -86,7 +84,7 @@
                 {
                     "type": "git",
                     "url": "https://git.gnome.org/browse/libgee",
-                    "tag": "0.20.0"
+                    "branch": "master"
                 }
             ]
         },
@@ -101,7 +99,19 @@
             ]
         },
         {
+            "name": "libunwind",
+            "sources": [
+                {
+                    "type": "git",
+                    "url": "https://git.savannah.gnu.org/git/libunwind.git",
+                    "branch": "master"
+                }
+            ]
+        },
+        {
             "name": "geary",
+            "buildsystem": "meson",
+            "builddir": true,
             "sources": [
                 {
                     "type": "git",

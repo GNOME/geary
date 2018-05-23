@@ -138,8 +138,8 @@ public class GearyWebExtension : Object {
     // never actually be null.
     private JS.Value? execute_script(JS.Context context, string script, int line)
     throws Geary.JS.Error {
-        JS.String js_script = new JS.String.create_with_utf8_cstring(script);
-        JS.String js_source = new JS.String.create_with_utf8_cstring("__FILE__");
+        JS.String js_script = JS.String.create_with_utf8_cstring(script);
+        JS.String js_source = JS.String.create_with_utf8_cstring("__FILE__");
         JS.Value? err = null;
         try {
             JS.Value ret = context.evaluate_script(

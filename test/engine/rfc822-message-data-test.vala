@@ -5,39 +5,39 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-class Geary.RFC822.MessageDataTest : Gee.TestCase {
+class Geary.RFC822.MessageDataTest : TestCase {
 
     public MessageDataTest() {
         base("Geary.RFC822.MessageDataTest");
         add_test("PreviewText.with_header", preview_text_with_header);
     }
 
-    public void preview_text_with_header() {
+    public void preview_text_with_header() throws Error {
         PreviewText plain_preview1 = new PreviewText.with_header(
-            new Geary.Memory.StringBuffer(PLAIN_BODY1_ENCODED),
-            new Geary.Memory.StringBuffer(PLAIN_BODY1_HEADERS)
+            new Geary.Memory.StringBuffer(PLAIN_BODY1_HEADERS),
+            new Geary.Memory.StringBuffer(PLAIN_BODY1_ENCODED)
         );
-        assert(plain_preview1.buffer.to_string() == PLAIN_BODY1_EXPECTED);
+        assert_string(PLAIN_BODY1_EXPECTED, plain_preview1.buffer.to_string());
 
         PreviewText base64_preview = new PreviewText.with_header(
-            new Geary.Memory.StringBuffer(BASE64_BODY_ENCODED),
-            new Geary.Memory.StringBuffer(BASE64_BODY_HEADERS)
+            new Geary.Memory.StringBuffer(BASE64_BODY_HEADERS),
+            new Geary.Memory.StringBuffer(BASE64_BODY_ENCODED)
         );
-        assert(base64_preview.buffer.to_string() == BASE64_BODY_EXPECTED);
+        assert_string(BASE64_BODY_EXPECTED, base64_preview.buffer.to_string());
 
         string html_part_headers = "Content-Type: text/html; charset=utf-8\r\nContent-Transfer-Encoding: quoted-printable\r\n\r\n";
 
         PreviewText html_preview1 = new PreviewText.with_header(
-            new Geary.Memory.StringBuffer(HTML_BODY1_ENCODED),
-            new Geary.Memory.StringBuffer(html_part_headers)
+            new Geary.Memory.StringBuffer(html_part_headers),
+            new Geary.Memory.StringBuffer(HTML_BODY1_ENCODED)
         );
-        assert(html_preview1.buffer.to_string() == HTML_BODY1_EXPECTED);
+        assert_string(HTML_BODY1_EXPECTED, html_preview1.buffer.to_string());
 
         PreviewText html_preview2 = new PreviewText.with_header(
-            new Geary.Memory.StringBuffer(HTML_BODY2_ENCODED),
-            new Geary.Memory.StringBuffer(html_part_headers)
+            new Geary.Memory.StringBuffer(html_part_headers),
+            new Geary.Memory.StringBuffer(HTML_BODY2_ENCODED)
         );
-        assert(html_preview2.buffer.to_string() == HTML_BODY2_EXPECTED);
+        assert_string(HTML_BODY2_EXPECTED, html_preview2.buffer.to_string());
     }
 
     public static string PLAIN_BODY1_HEADERS = "Content-Type: text/plain; charset=\"us-ascii\"\r\nContent-Transfer-Encoding: 7bit\r\n";
@@ -70,7 +70,7 @@ https://app.foobar.com/xxxxxxxxxxxxx">https://app.foobar.com/xxxxxxxxxxx</a=
 ></p></td></tr>
 </table></body></html>""";
 
-    public static string HTML_BODY1_EXPECTED = "Hi Kenneth, We xxxxx xxxx xx xxx xxx xx xxxx x xxxxxxxx xxxxxxxx.  Thank you, XXXXXX XXXXXX You can reply directly to this message or click the following link: https://app.foobar.com/xxxxxxxxxxxxxxxx1641966deff6c48623aba You can change your email preferences at: https://app.foobar.com/xxxxxxxxxxx";
+    public static string HTML_BODY1_EXPECTED = "Hi Kenneth, We xxxxx xxxx xx xxx xxx xx xxxx x xxxxxxxx xxxxxxxx. Thank you, XXXXXX XXXXXX You can reply directly to this message or click the following link: https://app.foobar.com/xxxxxxxxxxxxxxxx1641966deff6c48623aba You can change your email preferences at: https://app.foobar.com/xxxxxxxxxxx";
 
     public static string HTML_BODY2_ENCODED = """<!DOCTYPE html>
 <!--2c2a1c66-0638-7c87-5057-bff8be4291eb_v180-->
@@ -618,5 +618,5 @@ x 133, 3000 Bern 6, Switzerland
 
 """;
 
-    public static string HTML_BODY2_EXPECTED = "Buy It Now from US $1,750.00 to US $5,950.00. eBay Daccordi, Worldwide: 2 new matches today Daccordi 50th anniversary edition with... Buy it now: US $5,950.00 100% positive feedback Daccordi Griffe Campagnolo Croce D'Aune... Buy it now: US $1,750.00 100% positive feedback View all results Refine this search Disable emails for this search   Email reference id: [#d9f42b5e860b4eabb98195c2888cba9e#] We don't check this mailbox, so please don't reply to this message. If you have a question, go to Help & Contact. ©2016 eBay Inc., eBay International AG Helvetiastrasse 15/17 - P.O. Box 133, 3000 Bern 6, Switzerland";
+    public static string HTML_BODY2_EXPECTED = "Buy It Now from US $1,750.00 to US $5,950.00. eBay Daccordi, Worldwide: 2 new matches today Daccordi 50th anniversary edition with... Buy it now: US $5,950.00 100% positive feedback Daccordi Griffe Campagnolo Croce D'Aune... Buy it now: US $1,750.00 100% positive feedback View all results Refine this search Disable emails for this search Email reference id: [#d9f42b5e860b4eabb98195c2888cba9e#] We don't check this mailbox, so please don't reply to this message. If you have a question, go to Help & Contact. ©2016 eBay Inc., eBay International AG Helvetiastrasse 15/17 - P.O. Box 133, 3000 Bern 6, Switzerland";
 }

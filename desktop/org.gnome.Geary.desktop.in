@@ -1,11 +1,11 @@
 [Desktop Entry]
-_Name=Geary
-_GenericName=Email
-_X-GNOME-FullName=Geary Email
-_Comment=Send and receive email
+Name=Geary
+GenericName=Email
+Comment=Send and receive email
 # Translators: These are desktop search terms. Do not translate semicolons, end line with a semicolon.
-_Keywords=Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;
-Icon=geary
+Keywords=Mail;E-mail;IMAP;GMail;Yahoo;Hotmail;Outlook;
+# Translators: Do NOT translate or transliterate this text (this is an icon file name)!
+Icon=org.gnome.Geary
 TryExec=geary
 Exec=geary %U
 Type=Application
@@ -13,8 +13,9 @@ Terminal=false
 Categories=GNOME;GTK;Network;Email;
 MimeType=x-scheme-handler/mailto;
 StartupNotify=true
+X-GNOME-UsesNotifications=true
 Actions=Compose;
 
 [Desktop Action Compose]
-_Name=Compose Message
+Name=Compose Message
 Exec=geary mailto:

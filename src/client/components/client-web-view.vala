@@ -14,7 +14,7 @@
  * integration, Inspector support, and remote and inline image
  * handling.
  */
-public class ClientWebView : WebKit.WebView {
+public class ClientWebView : WebKit.WebView, Geary.BaseInterface {
 
 
     /** URI Scheme and delimiter for internal resource loads. */
@@ -25,6 +25,8 @@ public class ClientWebView : WebKit.WebView {
 
     /** URI Scheme and delimiter for images loaded by Content-ID. */
     public const string CID_URL_PREFIX = "cid:";
+
+    private const string CONTENT_LOADED = "contentLoaded";
     private const string PREFERRED_HEIGHT_CHANGED = "preferredHeightChanged";
     private const string REMOTE_IMAGE_LOAD_BLOCKED = "remoteImageLoadBlocked";
     private const string SELECTION_CHANGED = "selectionChanged";
@@ -63,8 +65,12 @@ public class ClientWebView : WebKit.WebView {
                                         bool enable_logging) {
         WebsiteDataManager data_manager = new WebsiteDataManager(cache_dir.get_path());
         WebKit.WebContext context = new WebKit.WebContext.with_website_data_manager(data_manager);
+        // Use a shared process so we don't spawn N WebProcess instances
+        // when showing N messages in a conversation.
         context.set_process_model(WebKit.ProcessModel.SHARED_SECONDARY_PROCESS);
-        context.set_cache_model(WebKit.CacheModel.DOCUMENT_BROWSER);
+        // Use the doc viewer model since each web view instance only
+        // ever shows a single HTML document.
+        context.set_cache_model(WebKit.CacheModel.DOCUMENT_VIEWER);
 
         context.register_uri_scheme("cid", (req) => {
                 ClientWebView? view = req.get_web_view() as ClientWebView;
@@ -172,6 +178,22 @@ public class ClientWebView : WebKit.WebView {
     /** Delegate for UserContentManager message callbacks. */
     public delegate void JavaScriptMessageHandler(WebKit.JavascriptResult js_result);
 
+    /**
+     * Determines if the view's content has been fully loaded.
+     *
+     * This property is updated immediately before the {@link
+     * content_loaded} signal is fired, and is triggered by the
+     * PageState JavaScript object completing its load
+     * handler. I.e. This will be true after the in-page JavaScript has
+     * finished making any modifications to the page content.
+     *
+     * This will likely be fired after WebKitGTK sets the `is-loading`
+     * property to `FALSE` and emits `load-changed` with
+     * `WebKitLoadEvent.LOAD_FINISHED`, since they are related to
+     * network resource loading, not page content.
+     */
+    public bool is_content_loaded { get; private set; default = false; }
+
     /** Determines if the view has any selected text */
     public bool has_selection { get; private set; default = false; }
 
@@ -216,6 +238,17 @@ public class ClientWebView : WebKit.WebView {
     private Gee.Map<string,Geary.Memory.Buffer> internal_resources =
         new Gee.HashMap<string,Geary.Memory.Buffer>();
 
+    private Gee.List<ulong> registered_message_handlers =
+        new Gee.LinkedList<ulong>();
+
+
+    /**
+     * Emitted when the view's content has finished loaded.
+     *
+     * See {@link is_content_loaded} for detail about when this is
+     * emitted.
+     */
+    public signal void content_loaded();
 
     /** Emitted when the view's selection has changed. */
     public signal void selection_changed(bool has_selection);
@@ -256,15 +289,18 @@ public class ClientWebView : WebKit.WebView {
             user_content_manager: content_manager,
             settings: setts
         );
+        base_ref();
 
         // XXX get the allow prefix from the extension somehow
 
         this.decide_policy.connect(on_decide_policy);
-        this.web_process_crashed.connect(() => {
-                debug("Web process crashed");
-                return Gdk.EVENT_PROPAGATE;
+        this.web_process_terminated.connect((reason) => {
+                warning("Web process crashed: %s", reason.to_string());
             });
 
+        register_message_handler(
+            CONTENT_LOADED, on_content_loaded
+        );
         register_message_handler(
             PREFERRED_HEIGHT_CHANGED, on_preferred_height_changed
         );
@@ -273,7 +309,7 @@ public class ClientWebView : WebKit.WebView {
         );
         register_message_handler(
             SELECTION_CHANGED, on_selection_changed
-         );
+        );
 
         // Manage zoom level
         config.bind(Configuration.CONVERSATION_VIEWER_ZOOM_KEY, this, "zoom_level");
@@ -285,6 +321,18 @@ public class ClientWebView : WebKit.WebView {
                              "document-font", SettingsBindFlags.DEFAULT);
         system_settings.bind("monospace-font-name", this,
                              "monospace-font", SettingsBindFlags.DEFAULT);
+    }
+
+    ~ClientWebView() {
+        base_unref();
+    }
+
+    public override void destroy() {
+        foreach (ulong id in this.registered_message_handlers) {
+            this.user_content_manager.disconnect(id);
+        }
+        this.registered_message_handlers.clear();
+        base.destroy();
     }
 
     /**
@@ -379,11 +427,16 @@ public class ClientWebView : WebKit.WebView {
      */
     protected inline void register_message_handler(string name,
                                                    JavaScriptMessageHandler handler) {
-        // XXX cant use the delegate directly: b.g.o Bug 604781
-        this.user_content_manager.script_message_received[name].connect(
+        // XXX cant use the delegate directly, see b.g.o Bug
+        // 604781. However the workaround below creates a circular
+        // reference, causing ClientWebView instances to leak. So to
+        // work around that we need to record handler ids and
+        // disconnect them when being destroyed.
+        ulong id = this.user_content_manager.script_message_received[name].connect(
             (result) => { handler(result); }
         );
-        if (!get_user_content_manager().register_script_message_handler(name)) {
+        this.registered_message_handlers.add(id);
+        if (!this.user_content_manager.register_script_message_handler(name)) {
             debug("Failed to register script message handler: %s", name);
         }
     }
@@ -428,9 +481,11 @@ public class ClientWebView : WebKit.WebView {
             type == WebKit.PolicyDecisionType.NEW_WINDOW_ACTION) {
             WebKit.NavigationPolicyDecision nav_policy =
                 (WebKit.NavigationPolicyDecision) policy;
-            switch (nav_policy.get_navigation_type()) {
+            WebKit.NavigationAction nav_action =
+                nav_policy.get_navigation_action();
+            switch (nav_action.get_navigation_type()) {
             case WebKit.NavigationType.OTHER:
-                if (nav_policy.request.uri == INTERNAL_URL_BODY) {
+                if (nav_action.get_request().uri == INTERNAL_URL_BODY) {
                     policy.use();
                 } else {
                     policy.ignore();
@@ -440,8 +495,17 @@ public class ClientWebView : WebKit.WebView {
             case WebKit.NavigationType.LINK_CLICKED:
                 // Let the app know a user activated a link, but don't
                 // try to load it ourselves.
-                link_activated(nav_policy.request.uri);
+
+                // We need to call ignore() before emitting the signal
+                // to unblock the WebKit WebProcess, otherwise the
+                // call chain for mailto links will cause the
+                // WebProcess to deadlock, and the resulting composer
+                // will be useless. See Geary Bug 771504
+                // <https://bugzilla.gnome.org/show_bug.cgi?id=771504>
+                // and WebKitGTK Bug 182528
+                // <https://bugs.webkit.org/show_bug.cgi?id=182528>
                 policy.ignore();
+                link_activated(nav_action.get_request().uri);
                 break;
 
             default:
@@ -500,6 +564,11 @@ public class ClientWebView : WebKit.WebView {
         remote_image_load_blocked();
     }
 
+    private void on_content_loaded(WebKit.JavascriptResult result) {
+        this.is_content_loaded = true;
+        content_loaded();
+    }
+
     private void on_selection_changed(WebKit.JavascriptResult result) {
         try {
             bool has_selection = WebKitUtil.to_bool(result);
@@ -518,4 +587,3 @@ public class ClientWebView : WebKit.WebView {
 
 // XXX this needs to be moved into the libsoup bindings
 extern string soup_uri_decode(string part);
-

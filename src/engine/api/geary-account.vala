@@ -21,17 +21,12 @@
  */
 
 public abstract class Geary.Account : BaseObject {
-    public enum Problem {
-        RECV_EMAIL_LOGIN_FAILED,
-        SEND_EMAIL_LOGIN_FAILED,
-        HOST_UNREACHABLE,
-        NETWORK_UNAVAILABLE,
-        DATABASE_FAILURE,
-        EMAIL_DELIVERY_FAILURE,
-        SAVE_SENT_MAIL_FAILED,
-        CONNECTION_FAILURE,
-    }
-    
+
+
+    /** Number of times to attempt re-authentication. */
+    internal const uint AUTH_ATTEMPTS_MAX = 3;
+
+
     public Geary.AccountInformation information { get; protected set; }
     
     public Geary.ProgressMonitor search_upgrade_monitor { get; protected set; }
@@ -45,8 +40,18 @@ public abstract class Geary.Account : BaseObject {
     public signal void closed();
     
     public signal void email_sent(Geary.RFC822.Message rfc822);
-    
-    public signal void report_problem(Geary.Account.Problem problem, Error? err);
+
+    /**
+     * Emitted to notify the client that some problem has occurred.
+     *
+     * The engine uses this signal to report internal errors and other
+     * issues that the client should notify the user about. The {@link
+     * ProblemReport} class provides context about the nature of the
+     * problem itself.
+     */
+    public signal void report_problem(Geary.ProblemReport problem);
+
+    public signal void contacts_loaded();
     
     /**
      * Fired when folders become available or unavailable in the account.
@@ -65,24 +70,42 @@ public abstract class Geary.Account : BaseObject {
         Gee.List<Geary.Folder>? unavailable);
 
     /**
-     * Fired when folders are created or deleted.
+     * Fired when new folders have been created.
      *
-     * Folders are ordered for the convenience of the caller from the top of the hierarchy to
-     * lower in the hierarchy.  In other words, parents are listed before children, assuming the
-     * lists are traversed in natural order.
+     * This is fired in response to new folders appearing, for example
+     * the user created a new folder. It will be fired after {@link
+     * folders_available_unavailable} has been fired to mark the
+     * folders as having been made available.
      *
-     * @see sort_by_path
+     * Folders are ordered for the convenience of the caller from the
+     * top of the hierarchy to lower in the hierarchy.  In other
+     * words, parents are listed before children, assuming the lists
+     * are traversed in natural order.
      */
-    public signal void folders_added_removed(Gee.List<Geary.Folder>? added,
-        Gee.List<Geary.Folder>? removed);
-    
+    public signal void folders_created(Gee.List<Geary.Folder> created);
+
+    /**
+     * Fired when existing folders are deleted.
+     *
+     * This is fired in response to existing folders being removed,
+     * for example if the user deleted a folder. it will be fired
+     * after {@link folders_available_unavailable} has been fired to
+     * mark the folders as having been made unavailable.
+     *
+     * Folders are ordered for the convenience of the caller from the
+     * top of the hierarchy to lower in the hierarchy.  In other
+     * words, parents are listed before children, assuming the lists
+     * are traversed in natural order.
+     */
+    public signal void folders_deleted(Gee.List<Geary.Folder> deleted);
+
     /**
      * Fired when a Folder's contents is detected having changed.
      */
     public signal void folders_contents_altered(Gee.Collection<Geary.Folder> altered);
     
     /**
-     * Fired when a Folder's contents is detected having changed.
+     * Fired when a Folder's type is detected having changed.
      */
     public signal void folders_special_type(Gee.Collection<Geary.Folder> altered);
     
@@ -128,76 +151,20 @@ public abstract class Geary.Account : BaseObject {
         this.name = name;
         this.information = information;
     }
-    
-    protected virtual void notify_folders_available_unavailable(Gee.List<Geary.Folder>? available,
-        Gee.List<Geary.Folder>? unavailable) {
-        folders_available_unavailable(available, unavailable);
-    }
 
-    protected virtual void notify_folders_added_removed(Gee.List<Geary.Folder>? added,
-        Gee.List<Geary.Folder>? removed) {
-        folders_added_removed(added, removed);
-    }
-    
-    protected virtual void notify_folders_contents_altered(Gee.Collection<Geary.Folder> altered) {
-        folders_contents_altered(altered);
-    }
-    
-    protected virtual void notify_email_appended(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
-        email_appended(folder, ids);
-    }
-    
-    protected virtual void notify_email_inserted(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
-        email_inserted(folder, ids);
-    }
-    
-    protected virtual void notify_email_removed(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
-        email_removed(folder, ids);
-    }
-    
-    protected virtual void notify_email_locally_complete(Geary.Folder folder,
-        Gee.Collection<Geary.EmailIdentifier> ids) {
-        email_locally_complete(folder, ids);
-    }
-    
-    protected virtual void notify_email_discovered(Geary.Folder folder,
-        Gee.Collection<Geary.EmailIdentifier> ids) {
-        email_discovered(folder, ids);
-    }
-    
-    protected virtual void notify_email_flags_changed(Geary.Folder folder,
-        Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> flag_map) {
-        email_flags_changed(folder, flag_map);
-    }
-    
-    protected virtual void notify_opened() {
-        opened();
-    }
-    
-    protected virtual void notify_closed() {
-        closed();
-    }
-    
-    protected virtual void notify_email_sent(RFC822.Message message) {
-        email_sent(message);
-    }
-    
-    protected virtual void notify_report_problem(Geary.Account.Problem problem, Error? err) {
-        report_problem(problem, err);
-    }
-    
     /**
-     * A utility method to sort a Gee.Collection of {@link Folder}s by their {@link FolderPath}s
-     * to ensure they comport with {@link folders_available_unavailable} and
-     * {@link folders_added_removed} signals' contracts.
+     * A utility method to sort a Gee.Collection of {@link Folder}s by
+     * their {@link FolderPath}s to ensure they comport with {@link
+     * folders_available_unavailable}, {@link folders_created}, {@link
+     * folders_deleted} signals' contracts.
      */
     protected Gee.List<Geary.Folder> sort_by_path(Gee.Collection<Geary.Folder> folders) {
         Gee.TreeSet<Geary.Folder> sorted = new Gee.TreeSet<Geary.Folder>(folder_path_comparator);
         sorted.add_all(folders);
-        
+
         return Collection.to_array_list<Geary.Folder>(sorted);
     }
-    
+
     private int folder_path_comparator(Geary.Folder a, Geary.Folder b) {
         return a.path.compare_to(b.path);
     }
@@ -241,7 +208,27 @@ public abstract class Geary.Account : BaseObject {
      * Unlike most methods in Account, this should only be called when the Account is closed.
      */
     public abstract async void rebuild_async(Cancellable? cancellable = null) throws Error;
-    
+
+    /**
+     * Starts delivery of messages to the outgoing server.
+     *
+     * Outgoing delivery will be started by default when the account
+     * is opened. This method is mostly useful when re-starting it
+     * after an error has occurred.
+     */
+    public abstract async void start_outgoing_client()
+        throws Error;
+
+    /**
+     * Starts receiving messages from the incoming server.
+     *
+     * The incoming client will be started by default when the account
+     * is opened. This method is mostly useful when re-starting it
+     * after an error has occurred.
+     */
+    public abstract async void start_incoming_client()
+        throws Error;
+
     /**
      * Lists all the currently-available folders found under the parent path
      * unless it's null, in which case it lists all the root folders.  If the
@@ -392,5 +379,90 @@ public abstract class Geary.Account : BaseObject {
     public virtual string to_string() {
         return name;
     }
-}
 
+    /** Fires a {@link opened} signal. */
+    protected virtual void notify_opened() {
+        opened();
+    }
+
+    /** Fires a {@link closed} signal. */
+    protected virtual void notify_closed() {
+        closed();
+    }
+
+    /** Fires a {@link folders_available_unavailable} signal. */
+    protected virtual void notify_folders_available_unavailable(Gee.List<Geary.Folder>? available,
+                                                                Gee.List<Geary.Folder>? unavailable) {
+        folders_available_unavailable(available, unavailable);
+    }
+
+    /** Fires a {@link folders_created} signal. */
+    protected virtual void notify_folders_created(Gee.List<Geary.Folder> created) {
+        folders_created(created);
+    }
+
+    /** Fires a {@link folders_deleted} signal. */
+    protected virtual void notify_folders_deleted(Gee.List<Geary.Folder> deleted) {
+        folders_deleted(deleted);
+    }
+
+    /** Fires a {@link folders_contents_altered} signal. */
+    protected virtual void notify_folders_contents_altered(Gee.Collection<Geary.Folder> altered) {
+        folders_contents_altered(altered);
+    }
+
+    /** Fires a {@link email_appended} signal. */
+    protected virtual void notify_email_appended(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
+        email_appended(folder, ids);
+    }
+
+    /** Fires a {@link email_inserted} signal. */
+    protected virtual void notify_email_inserted(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
+        email_inserted(folder, ids);
+    }
+
+    /** Fires a {@link email_removed} signal. */
+    protected virtual void notify_email_removed(Geary.Folder folder, Gee.Collection<Geary.EmailIdentifier> ids) {
+        email_removed(folder, ids);
+    }
+
+    /** Fires a {@link email_locally_complete} signal. */
+    protected virtual void notify_email_locally_complete(Geary.Folder folder,
+        Gee.Collection<Geary.EmailIdentifier> ids) {
+        email_locally_complete(folder, ids);
+    }
+
+    /** Fires a {@link email_discovered} signal. */
+    protected virtual void notify_email_discovered(Geary.Folder folder,
+        Gee.Collection<Geary.EmailIdentifier> ids) {
+        email_discovered(folder, ids);
+    }
+
+    /** Fires a {@link email_flags_changed} signal. */
+    protected virtual void notify_email_flags_changed(Geary.Folder folder,
+        Gee.Map<Geary.EmailIdentifier, Geary.EmailFlags> flag_map) {
+        email_flags_changed(folder, flag_map);
+    }
+
+    protected virtual void notify_email_sent(RFC822.Message message) {
+        email_sent(message);
+    }
+
+    /** Fires a {@link report_problem} signal for this account. */
+    protected virtual void notify_report_problem(ProblemReport report) {
+        report_problem(report);
+    }
+
+    /**
+     * Fires a {@link report_problem} signal for this account.
+     */
+    protected virtual void notify_account_problem(ProblemType type, Error? err) {
+        report_problem(new AccountProblemReport(type, this.information, err));
+    }
+
+    /** Fires a {@link report_problem} signal for a service for this account. */
+    protected virtual void notify_service_problem(ProblemType type, Service service_type, Error? err) {
+        report_problem(new ServiceProblemReport(type, this.information, service_type, err));
+    }
+
+}

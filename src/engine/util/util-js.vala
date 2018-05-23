@@ -122,7 +122,7 @@ namespace Geary.JS {
                                                 global::JS.Object object,
                                                 string name)
         throws Geary.JS.Error {
-        global::JS.String js_name = new global::JS.String.create_with_utf8_cstring(name);
+        global::JS.String js_name = global::JS.String.create_with_utf8_cstring(name);
         global::JS.Value? err = null;
         global::JS.Value prop = object.get_property(context, js_name, out err);
         try {
@@ -177,31 +177,31 @@ namespace Geary.JS {
                     builder.append("\x00");
                     break;
                 case '\'':
-                    builder.append("""\'""");
+                    builder.append("\\\'");
                     break;
                 case '"':
-                    builder.append("""\"""");
+                    builder.append("\\\"");
                     break;
                 case '\\':
-                    builder.append("""\\""");
+                    builder.append("\\\\");
                     break;
                 case '\n':
-                    builder.append("""\n""");
+                    builder.append("\\n");
                     break;
                 case '\r':
-                    builder.append("""\r""");
+                    builder.append("\\r");
                     break;
                 case '\x0b':
                     builder.append("\x0b");
                     break;
                 case '\t':
-                    builder.append("""\t""");
+                    builder.append("\\t");
                     break;
                 case '\b':
-                    builder.append("""\b""");
+                    builder.append("\\b");
                     break;
                 case '\f':
-                    builder.append("""\f""");
+                    builder.append("\\f");
                     break;
                 default:
                     builder.append_unichar(c);

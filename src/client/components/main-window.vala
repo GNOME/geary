@@ -7,7 +7,7 @@
  */
 
 [GtkTemplate (ui = "/org/gnome/Geary/main-window.ui")]
-public class MainWindow : Gtk.ApplicationWindow {
+public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     private const int STATUS_BAR_HEIGHT = 18;
 
     public new GearyApplication application {
@@ -29,7 +29,7 @@ public class MainWindow : Gtk.ApplicationWindow {
     public FolderList.Tree folder_list { get; private set; default = new FolderList.Tree(); }
     public MainToolbar main_toolbar { get; private set; }
     public SearchBar search_bar { get; private set; default = new SearchBar(); }
-    public ConversationListView conversation_list_view  { get; private set; default = new ConversationListView(); }
+    public ConversationListView conversation_list_view  { get; private set; }
     public ConversationViewer conversation_viewer { get; private set; default = new ConversationViewer(); }
     public StatusBar status_bar { get; private set; default = new StatusBar(); }
     private MonitoredSpinner spinner = new MonitoredSpinner();
@@ -50,6 +50,12 @@ public class MainWindow : Gtk.ApplicationWindow {
     [GtkChild]
     private Gtk.ScrolledWindow conversation_list_scrolled;
 
+    // This is a frame so users can use F6/Shift-F6 to get to it
+    [GtkChild]
+    private Gtk.Frame info_bar_frame;
+
+    [GtkChild]
+    private Gtk.Grid info_bar_container;
 
     /** Fired when the shift key is pressed or released. */
     public signal void on_shift_key(bool pressed);
@@ -57,11 +63,10 @@ public class MainWindow : Gtk.ApplicationWindow {
 
     public MainWindow(GearyApplication application) {
         Object(application: application);
+        base_ref();
 
         load_config(application.config);
         restore_saved_window_state();
-
-        add_accel_group(application.ui_manager.get_accel_group());
 
         application.controller.notify[GearyController.PROP_CURRENT_CONVERSATION]
             .connect(on_conversation_monitor_changed);
@@ -72,6 +77,17 @@ public class MainWindow : Gtk.ApplicationWindow {
         set_styling();
         setup_layout(application.config);
         on_change_orientation();
+
+        this.main_layout.show_all();
+    }
+
+    ~MainWindow() {
+        base_unref();
+    }
+
+    public void show_infobar(MainWindowInfoBar info_bar) {
+        this.info_bar_container.add(info_bar);
+        this.info_bar_frame.show();
     }
 
     private void load_config(Configuration config) {
@@ -92,16 +108,22 @@ public class MainWindow : Gtk.ApplicationWindow {
     }
 
     private void restore_saved_window_state() {
-        Gdk.Screen? screen = get_screen();
-        if (screen != null &&
-            this.window_width <= screen.get_width() &&
-            this.window_height <= screen.get_height()) {
-            set_default_size(this.window_width, this.window_height);
+        Gdk.Display? display = Gdk.Display.get_default();
+        if (display != null) {
+            Gdk.Monitor? monitor = display.get_primary_monitor();
+            if (monitor == null) {
+                monitor = display.get_monitor_at_point(1, 1);
+            }
+            if (monitor != null &&
+                this.window_width <= monitor.geometry.width &&
+                this.window_height <= monitor.geometry.height) {
+                set_default_size(this.window_width, this.window_height);
+            }
         }
+        this.window_position = Gtk.WindowPosition.CENTER;
         if (this.window_maximized) {
             maximize();
         }
-        this.window_position = Gtk.WindowPosition.CENTER;
     }
 
     // Called on [un]maximize and possibly others. Save maximized state
@@ -122,22 +144,29 @@ public class MainWindow : Gtk.ApplicationWindow {
     public override void size_allocate(Gtk.Allocation allocation) {
         base.size_allocate(allocation);
 
-        Gdk.Screen? screen = get_screen();
-        if (screen != null && !this.window_maximized) {
-            // Get the size via ::get_size instead of the allocation
-            // so that the window isn't ever-expanding.
-            int width = 0;
-            int height = 0;
-            get_size(out width, out height);
+        if (!this.window_maximized) {
+            Gdk.Display? display = get_display();
+            Gdk.Window? window = get_window();
+            if (display != null && window != null) {
+                Gdk.Monitor monitor = display.get_monitor_at_window(window);
 
-            // Only store if the values have changed and are
-            // reasonable-looking.
-            if (this.window_width != width &&
-                width > 0 && width <= screen.get_width())
-                this.window_width = width;
-            if (this.window_height != height &&
-                height > 0 && height <= screen.get_height())
-                this.window_height = height;
+                // Get the size via ::get_size instead of the
+                // allocation so that the window isn't ever-expanding.
+                int width = 0;
+                int height = 0;
+                get_size(out width, out height);
+
+                // Only store if the values have changed and are
+                // reasonable-looking.
+                if (this.window_width != width &&
+                    width > 0 && width <= monitor.geometry.width) {
+                    this.window_width = width;
+                }
+                if (this.window_height != height &&
+                    height > 0 && height <= monitor.geometry.height) {
+                    this.window_height = height;
+                }
+            }
         }
     }
 
@@ -163,6 +192,8 @@ public class MainWindow : Gtk.ApplicationWindow {
     }
 
     private void setup_layout(Configuration config) {
+        // ConversationListView
+        this.conversation_list_view = new ConversationListView(this);
         // Toolbar
         this.main_toolbar = new MainToolbar(config);
         this.main_toolbar.bind_property("search-open", this.search_bar, "search-mode-enabled",
@@ -178,8 +209,8 @@ public class MainWindow : Gtk.ApplicationWindow {
 
                 return true;
             };
-            bind_property("current-folder", this, "title", BindingFlags.SYNC_CREATE, title_func);
-            main_toolbar.bind_property("account", this, "title", BindingFlags.SYNC_CREATE, title_func);
+            bind_property("current-folder", this, "title", BindingFlags.SYNC_CREATE, (owned) title_func);
+            main_toolbar.bind_property("account", this, "title", BindingFlags.SYNC_CREATE, (owned) title_func);
             main_layout.pack_start(main_toolbar, false, true, 0);
         } else {
             main_toolbar.show_close_button = true;
@@ -274,11 +305,6 @@ public class MainWindow : Gtk.ApplicationWindow {
             this.progress_monitor.add(new_model.preview_monitor);
             this.progress_monitor.add(conversations.progress_monitor);
             this.conversation_list_view.set_model(new_model);
-        }
-
-        if (old_model != null) {
-            // Must be destroyed, but only after it has been replaced.
-            old_model.destroy();
         }
     }
 
@@ -422,4 +448,14 @@ public class MainWindow : Gtk.ApplicationWindow {
         }
         return Gdk.EVENT_STOP;
     }
+
+    [GtkCallback]
+    private void on_info_bar_container_remove() {
+        // Ensure the info bar frame is hidden when the last info bar
+        // is removed from the container.
+        if (this.info_bar_container.get_children().length() == 0) {
+            this.info_bar_frame.hide();
+        }
+    }
+
 }

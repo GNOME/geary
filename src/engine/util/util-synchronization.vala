@@ -29,11 +29,11 @@ public class SpinWaiter : BaseObject {
      * the {@link PollService} to execute.  If poll_msec is zero or less, PollService will be
      * called constantly.
      */
-    public SpinWaiter(int poll_msec, PollService cb) {
+    public SpinWaiter(int poll_msec, owned PollService cb) {
         this.poll_msec = poll_msec;
-        this.cb = cb;
+        this.cb = (owned) cb;
     }
-    
+
     /**
      * Spins waiting for a completion state to be reached.
      *

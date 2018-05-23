@@ -3,17 +3,21 @@
 <interface>
   <menu id="email_menu">
     <section>
+      <attribute name="display-hint">horizontal-buttons</attribute>
       <item>
         <attribute name="label" translatable="yes">_Reply</attribute>
         <attribute name="action">eml.reply_sender</attribute>
+        <attribute name="verb-icon">mail-reply-sender-symbolic</attribute>
       </item>
       <item>
         <attribute name="label" translatable="yes">Reply to _All</attribute>
         <attribute name="action">eml.reply_all</attribute>
+        <attribute name="verb-icon">mail-reply-all-symbolic</attribute>
       </item>
       <item>
         <attribute name="label" translatable="yes">_Forward</attribute>
         <attribute name="action">eml.forward</attribute>
+        <attribute name="verb-icon">mail-forward-symbolic</attribute>
       </item>
     </section>
     <section>

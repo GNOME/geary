@@ -1,0 +1,7 @@
+[Contractor Entry]
+Name=Send by email
+# Translators: Do NOT translate or transliterate this text (this is an icon file name)!
+Icon=mail-send
+Description=Send files using Geary
+MimeType=!inode;
+Exec=geary-attach %F
