@@ -371,6 +371,7 @@ geary_engine_dep = declare_dependency(
 # and tell Meson about the internal VAPI
 geary_engine_internal_vapi = custom_target(
   'geary-engine-internal-vapi',
+  input: geary_engine_sources,
   output: [
     'geary-engine-internal.h',
     'geary-engine-internal.vapi',
