@@ -178,7 +178,7 @@ public class AccountManager : GLib.Object {
             GLib.List<Goa.Object> list = this.goa_service.get_accounts();
             for (int i=0; i < list.length() && !cancellable.is_cancelled(); i++) {
                 Goa.Object account = list.nth_data(i);
-                string id = to_geary_id(account.get_account());
+                string id = to_geary_id(account);
                 if (!this.enabled_accounts.has_key(id)) {
                     Geary.AccountInformation? info = null;
                     try {
@@ -187,7 +187,7 @@ public class AccountManager : GLib.Object {
                         // XXX want to report this problem to the user
                         // somehow, but at this point in the app's
                         // lifecycle we don't even have a main window.
-                        warning("Error creating GOA account %s: %s",
+                        warning("Error creating existing GOA account %s: %s",
                                 account.get_account().id, err.message);
                     }
                     if (info != null) {
@@ -453,8 +453,8 @@ public class AccountManager : GLib.Object {
         this.engine.add_account(account);
     }
 
-    private inline string to_geary_id(Goa.Account account) {
-        return GOA_ID_PREFIX + account.id;
+    private inline string to_geary_id(Goa.Object account) {
+        return GOA_ID_PREFIX + account.get_account().id;
     }
 
     private inline string to_goa_id(string id) {
@@ -500,7 +500,7 @@ public class AccountManager : GLib.Object {
         if (provider == Geary.ServiceProvider.OTHER) {
             imap.load_settings(imap_config);
 
-            smtp.load_settings(imap_config);
+            smtp.load_settings(smtp_config);
             if (smtp.smtp_use_imap_credentials) {
                 smtp.credentials.user = imap.credentials.user;
                 smtp.credentials.pass = imap.credentials.pass;
@@ -538,7 +538,7 @@ public class AccountManager : GLib.Object {
                            GLib.Cancellable? cancellable)
         throws GLib.Error {
         Geary.AccountInformation? info = new_goa_account(
-            to_geary_id(account.get_account()), account
+            to_geary_id(account), account
         );
         if (info != null) {
             debug("GOA id: %s", info.id);

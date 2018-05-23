@@ -5,6 +5,7 @@ geary_client_vala_sources = files(
   'application/geary-args.vala',
   'application/geary-config.vala',
   'application/geary-controller.vala',
+  'application/goa-mediator.vala',
   'application/secret-mediator.vala',
 
   'accounts/account-dialog.vala',
@@ -18,6 +19,7 @@ geary_client_vala_sources = files(
   'accounts/account-manager.vala',
   'accounts/account-spinner-page.vala',
   'accounts/add-edit-page.vala',
+  'accounts/goa-service-information.vala',
   'accounts/local-service-information.vala',
   'accounts/login-dialog.vala',
 
@@ -111,6 +113,7 @@ geary_client_dependencies = [
   gcr,
   gee,
   gio,
+  goa,
   gtk,
   libcanberra,
   libnotify,
