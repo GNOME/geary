@@ -340,12 +340,13 @@ geary_engine_vala_options += [
   # Meson issue https://github.com/mesonbuild/meson/issues/1781 for
   # official internal VAPI support. See Vala Bug 731322 about the
   # specifics of the arguments used below to generate the internal
-  # VAPI. In paricular, the filenames needs to not contain any paths
-  # or else the internal vapi will use the public header, not the
-  # internal header. Of course these paths breaks the build, so we fix
-  # it up using cp below.
+  # VAPI. In particular, the header filenames must not contain any
+  # paths or else the internal vapi will use the public header, not
+  # the internal header. Of course these paths breaks the build, so we
+  # fix it up using cp below. The internal VAPI is correctly put in
+  # Meson's base working directory,
   '--header=geary-engine.h',
-  '--internal-vapi=geary-engine-internal.vapi',
+  '--internal-vapi=../geary-engine-internal.vapi',
   '--internal-header=geary-engine-internal.h'
 ]
 
@@ -370,12 +371,14 @@ geary_engine_dep = declare_dependency(
 # and tell Meson about the internal VAPI
 geary_engine_internal_vapi = custom_target(
   'geary-engine-internal-vapi',
-  output: ['geary-engine-internal.vapi'],
+  output: [
+    'geary-engine-internal.h',
+    'geary-engine-internal.vapi',
+  ],
   command: [
     find_program('cp'),
     'geary-engine.h',
     'geary-engine-internal.h',
-    '@OUTDIR@/geary-engine@sta/geary-engine-internal.vapi',
     '@OUTDIR@',
   ],
   depends: geary_engine_lib
