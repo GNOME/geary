@@ -295,7 +295,6 @@ public class GearyController : Geary.BaseObject {
                 this.application.get_user_data_directory(),
                 this.application.get_resource_directory()
             );
-            stdout.printf("adding local accounts...\n");
             AccountManager manager = new AccountManager();
             yield manager.add_existing_accounts_async(null);
             if (Geary.Engine.instance.get_accounts().size == 0) {

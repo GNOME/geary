@@ -21,7 +21,6 @@ public class AccountManager : GLib.Object {
         Gee.List<Geary.AccountInformation> account_list = new Gee.ArrayList<Geary.AccountInformation>();
 
         Geary.CredentialsMediator mediator = new SecretMediator();
-        stdout.printf("secretmediator @ %p\n", mediator);
         for (;;) {
             List<FileInfo> info_list;
             try {
@@ -38,7 +37,6 @@ public class AccountManager : GLib.Object {
             if (info.get_file_type() == FileType.DIRECTORY) {
 //                try {
                     string id = info.get_name();
-                    stdout.printf("adding %s\n", id);
                     account_list.add(
                         load_from_file(id)
                     );
@@ -78,7 +76,6 @@ public class AccountManager : GLib.Object {
         switch (provider) {
             case Geary.CredentialsProvider.LIBSECRET:
                 mediator = new SecretMediator();
-                stdout.printf("got new secretmediator\n");
                 imap_information = new Geary.LocalServiceInformation(Geary.Service.IMAP, Geary.Engine.instance.user_config_dir.get_child(id), mediator);
                 smtp_information = new Geary.LocalServiceInformation(Geary.Service.SMTP, Geary.Engine.instance.user_config_dir.get_child(id), mediator);
                 break;
@@ -193,7 +190,6 @@ public class AccountManager : GLib.Object {
                 debug("Error creating account info file: %s", err.message);
             }
         }
-        stdout.printf("saving acct %s mediator %s\n", info.id, info.imap.credentials_provider.to_string());
         KeyFile key_file = new KeyFile();
         key_file.set_value(Geary.Config.GROUP, Geary.Config.CREDENTIALS_METHOD_KEY, info.imap.credentials_method.to_string());
         key_file.set_value(Geary.Config.GROUP, Geary.Config.CREDENTIALS_PROVIDER_KEY, info.imap.credentials_provider.to_string());

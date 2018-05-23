@@ -392,7 +392,6 @@ public class Geary.AccountInformation : BaseObject {
     }
 
     private void check_mediator_instance() throws EngineError {
-        stdout.printf("acctinfo: mediators @ %p %p\n", this.imap.mediator, this.smtp.mediator);
         if (this.imap.mediator == null || this.smtp.mediator == null)
             throw new EngineError.OPEN_REQUIRED(
                 "Account %s needs to be open with valid Geary.CredentialsMediators".printf(this.id));
