@@ -14,10 +14,11 @@ src/client/accounts/account-dialog-remove-confirm-pane.vala
 src/client/accounts/account-dialog-remove-fail-pane.vala
 src/client/accounts/account-dialog-spinner-pane.vala
 src/client/accounts/account-dialog.vala
+src/client/accounts/account-manager.vala
 src/client/accounts/account-spinner-page.vala
 src/client/accounts/add-edit-page.vala
-src/client/accounts/login-dialog.vala
 src/client/accounts/local-service-information.vala
+src/client/accounts/login-dialog.vala
 src/client/application/autostart-manager.vala
 src/client/application/geary-application.vala
 src/client/application/geary-args.vala
@@ -103,8 +104,8 @@ src/engine/api/geary-account.vala
 src/engine/api/geary-aggregated-folder-properties.vala
 src/engine/api/geary-attachment.vala
 src/engine/api/geary-base-object.vala
-src/engine/api/geary-config.vala
 src/engine/api/geary-composed-email.vala
+src/engine/api/geary-config.vala
 src/engine/api/geary-contact-flags.vala
 src/engine/api/geary-contact-importance.vala
 src/engine/api/geary-contact-store.vala
@@ -128,7 +129,6 @@ src/engine/api/geary-folder-supports-mark.vala
 src/engine/api/geary-folder-supports-move.vala
 src/engine/api/geary-folder-supports-remove.vala
 src/engine/api/geary-folder.vala
-src/engine/api/geary-local-service-information.vala
 src/engine/api/geary-logging.vala
 src/engine/api/geary-named-flag.vala
 src/engine/api/geary-named-flags.vala
@@ -162,6 +162,7 @@ src/engine/app/email-store/app-fetch-operation.vala
 src/engine/app/email-store/app-list-operation.vala
 src/engine/app/email-store/app-mark-operation.vala
 src/engine/common/common-message-data.vala
+src/engine/db/db.vala
 src/engine/db/db-connection.vala
 src/engine/db/db-context.vala
 src/engine/db/db-database-error.vala
@@ -173,7 +174,6 @@ src/engine/db/db-transaction-async-job.vala
 src/engine/db/db-transaction-outcome.vala
 src/engine/db/db-transaction-type.vala
 src/engine/db/db-versioned-database.vala
-src/engine/db/db.vala
 src/engine/imap/imap.vala
 src/engine/imap/imap-error.vala
 src/engine/imap/api/imap-account-session.vala
@@ -291,8 +291,8 @@ src/engine/imap/message/imap-namespace.vala
 src/engine/imap/message/imap-sequence-number.vala
 src/engine/imap/message/imap-status-data-type.vala
 src/engine/imap/message/imap-tag.vala
-src/engine/imap/message/imap-uid-validity.vala
 src/engine/imap/message/imap-uid.vala
+src/engine/imap/message/imap-uid-validity.vala
 src/engine/imap/parameter/imap-atom-parameter.vala
 src/engine/imap/parameter/imap-list-parameter.vala
 src/engine/imap/parameter/imap-literal-parameter.vala
@@ -380,6 +380,7 @@ src/engine/state/state-machine.vala
 src/engine/state/state-mapping.vala
 src/engine/util/util-ascii.vala
 src/engine/util/util-collection.vala
+src/engine/util/util-connectivity-manager.vala
 src/engine/util/util-files.vala
 src/engine/util/util-generic-capabilities.vala
 src/engine/util/util-html.vala
