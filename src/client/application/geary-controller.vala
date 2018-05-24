@@ -305,10 +305,10 @@ public class GearyController : Geary.BaseObject {
                 create_account();
             }
         } catch (Error e) {
-            error("Error opening Geary.Engine instance: %s", e.message);
+            warning("Error opening Geary.Engine instance: %s", e.message);
         }
     }
-    
+
     /**
      * At the moment, this is non-reversible, i.e. once closed a GearyController cannot be
      * re-opened.

@@ -24,37 +24,28 @@ public class AccountManager : GLib.Object {
             = yield this.engine.user_config_dir.enumerate_children_async("standard::*",
                 FileQueryInfoFlags.NONE, Priority.DEFAULT, cancellable);
 
-        Gee.List<Geary.AccountInformation> account_list = new Gee.ArrayList<Geary.AccountInformation>();
-
-        Geary.CredentialsMediator mediator = new SecretMediator();
         for (;;) {
-            List<FileInfo> info_list;
-            try {
-                info_list = yield enumerator.next_files_async(1, Priority.DEFAULT, cancellable);
-            } catch (Error e) {
-                debug("Error enumerating existing accounts: %s", e.message);
-                break;
-            }
+            List<FileInfo> info_list = yield enumerator.next_files_async(
+                1, Priority.DEFAULT, cancellable
+            );
 
             if (info_list.length() == 0)
                 break;
 
             FileInfo info = info_list.nth_data(0);
             if (info.get_file_type() == FileType.DIRECTORY) {
-//                try {
+                try {
                     string id = info.get_name();
-                    account_list.add(
-                        load_from_file(id)
-                    );
-/*                } catch (Error err) {
+                    this.engine.add_account(load_from_file(id));
+                } catch (Error err) {
+                    // XXX want to report this problem to the user
+                    // somehow, but at this point in the app's
+                    // lifecycle we don't even have a main window.
                     warning("Ignoring empty/bad config in %s: %s",
                             info.get_name(), err.message);
-                } */
+                }
             }
         }
-
-        foreach(Geary.AccountInformation info in account_list)
-            Geary.Engine.instance.add_account(info);
      }
 
     /**
