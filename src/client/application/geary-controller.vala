@@ -396,8 +396,13 @@ public class GearyController : Geary.BaseObject {
             new Geary.Nonblocking.CountingSemaphore(null);
         foreach (AccountContext context in accounts) {
             close_barrier.acquire();
-            context.account.closed.connect(() => { close_barrier.blind_notify(); });
-            close_account(context.account.information);
+            this.close_account.begin(
+                context.account.information,
+                (obj, ret) => {
+                    this.close_account.end(ret);
+                    close_barrier.blind_notify();
+                }
+            );
         }
         try {
             yield close_barrier.wait_async();
@@ -471,9 +476,12 @@ public class GearyController : Geary.BaseObject {
     public async void remove_account_async(Geary.AccountInformation info,
                                            Cancellable? cancellable = null) {
         try {
-            yield Geary.Engine.instance.remove_account_async(info, cancellable);
-        } catch (Error e) {
-            message("Error removing account: %s", e.message);
+            yield close_account(info);
+            yield this.application.engine.remove_account_async(info, cancellable);
+        } catch (Error err) {
+            report_problem(
+                new Geary.ProblemReport(Geary.ProblemType.GENERIC_ERROR, err)
+            );
         }
     }
 
@@ -538,7 +546,7 @@ public class GearyController : Geary.BaseObject {
         account.contacts_loaded.connect(list_store.set_sort_function);
     }
 
-    private void close_account(Geary.AccountInformation info) {
+    private async void close_account(Geary.AccountInformation info) {
         AccountContext? context = this.accounts.get(info);
         if (context != null) {
             Geary.ContactStore contact_store = context.account.get_contact_store();
@@ -560,9 +568,7 @@ public class GearyController : Geary.BaseObject {
             // doesn't care
             context.account.report_problem.disconnect(on_report_problem);
 
-            // Don't block the UI for the account to be closed, it
-            // might take a while.
-            disconnect_account_async.begin(context);
+            yield disconnect_account_async(context);
         }
     }
 
@@ -682,8 +688,8 @@ public class GearyController : Geary.BaseObject {
             default:
                 endpoint.trust_untrusted_host = Geary.Trillian.FALSE;
 
-                // close the account; can't go any further w/o offline mode
-                close_account(account_information);
+                // close the account; can't go any further w/o offline mode.
+                this.close_account.begin(account_information);
             break;
         }
     }
@@ -2865,7 +2871,7 @@ public class GearyController : Geary.BaseObject {
     }
 
     private void on_account_unavailable(Geary.AccountInformation info) {
-        close_account(info);
+        this.close_account.begin(info);
     }
 
     private void on_save_attachments(Gee.Collection<Geary.Attachment> attachments) {
