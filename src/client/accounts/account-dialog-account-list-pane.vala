@@ -12,25 +12,28 @@ public class AccountDialogAccountListPane : AccountDialogPane {
         ACCOUNT_ADDRESS;
     }
 
+    private GearyApplication application;
     private Gtk.TreeView list_view;
     private Gtk.ListStore list_model = new Gtk.ListStore(3, typeof(string), typeof(string), typeof(string));
     private Gtk.Action edit_action;
     private Gtk.Action delete_action;
-    
+
     public signal void add_account();
 
     public signal void edit_account(string id);
 
     public signal void delete_account(string id);
 
-    public AccountDialogAccountListPane(Gtk.Stack stack) {
+    public AccountDialogAccountListPane(GearyApplication application, Gtk.Stack stack) {
         base(stack);
-        Gtk.Builder builder = GearyApplication.instance.create_builder("account_list.glade");
+        this.application = application;
+
+        Gtk.Builder builder = GioUtil.create_builder("account_list.glade");
         pack_end((Gtk.Box) builder.get_object("container"));
         Gtk.ActionGroup actions = (Gtk.ActionGroup) builder.get_object("account list actions");
         edit_action = actions.get_action("edit_account");
         delete_action = actions.get_action("delete_account");
-        
+
         // Set up list.
         list_view = (Gtk.TreeView) builder.get_object("account_list");
         list_view.set_model(list_model);
@@ -123,7 +126,7 @@ public class AccountDialogAccountListPane : AccountDialogPane {
     private void update_buttons() {
         edit_action.sensitive = get_selected_account() != null;
         delete_action.sensitive = edit_action.sensitive &&
-            GearyApplication.instance.controller.get_num_accounts() > 1;
+            this.application.controller.get_num_accounts() > 1;
     }
     
     private void on_account_added(Geary.AccountInformation account) {
@@ -220,7 +223,9 @@ public class AccountDialogAccountListPane : AccountDialogPane {
                 // To prevent unnecessary work, only set ordinal if there's a change.
                 if (i != account.ordinal) {
                     account.ordinal = i;
-                    AccountManager.store_to_file.begin(account, null);
+                    this.application.controller.account_manager.store_to_file.begin(
+                        account, null
+                    );
                 }
             }
             

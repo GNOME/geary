@@ -76,6 +76,8 @@ public class GearyController : Geary.BaseObject {
 
     public weak GearyApplication application { get; private set; } // circular ref
 
+    public AccountManager? account_manager { get; private set; default = null; }
+
     public MainWindow? main_window { get; private set; default = null; }
 
     public Geary.App.ConversationMonitor? current_conversations { get; private set; default = null; }
@@ -182,6 +184,8 @@ public class GearyController : Geary.BaseObject {
      * Starts the controller and brings up Geary.
      */
     public async void open_async() {
+        Geary.Engine engine = this.application.engine;
+
         // This initializes the IconFactory, important to do before
         // the actions are created (as they refer to some of Geary's
         // custom icons)
@@ -238,10 +242,10 @@ public class GearyController : Geary.BaseObject {
 
         enable_message_buttons(false);
 
-        Geary.Engine.instance.account_available.connect(on_account_available);
-        Geary.Engine.instance.account_unavailable.connect(on_account_unavailable);
-        Geary.Engine.instance.untrusted_host.connect(on_untrusted_host);
-        
+        engine.account_available.connect(on_account_available);
+        engine.account_unavailable.connect(on_account_unavailable);
+        engine.untrusted_host.connect(on_untrusted_host);
+
         // Connect to various UI signals.
         main_window.conversation_list_view.conversations_selected.connect(on_conversations_selected);
         main_window.conversation_list_view.conversation_activated.connect(on_conversation_activated);
@@ -289,15 +293,15 @@ public class GearyController : Geary.BaseObject {
         }
 
         // Start Geary.
+        this.account_manager = new AccountManager(engine);
         try {
-            yield Geary.Engine.instance.open_async(
+            yield engine.open_async(
                 this.application.get_user_config_directory(),
                 this.application.get_user_data_directory(),
                 this.application.get_resource_directory()
             );
-            AccountManager manager = new AccountManager();
-            yield manager.add_existing_accounts_async(null);
-            if (Geary.Engine.instance.get_accounts().size == 0) {
+            yield this.account_manager.add_existing_accounts_async(null);
+            if (engine.get_accounts().size == 0) {
                 create_account();
             }
         } catch (Error e) {
@@ -414,6 +418,8 @@ public class GearyController : Geary.BaseObject {
         } catch (Error err) {
             message("Error closing Geary Engine instance: %s", err.message);
         }
+
+        this.account_manager = null;
 
         this.application.remove_window(this.main_window);
         this.main_window.destroy();
@@ -848,7 +854,7 @@ public class GearyController : Geary.BaseObject {
                 real_account_information.copy_from(account_information);
             }
 
-            yield AccountManager.store_to_file(real_account_information);
+            yield this.account_manager.store_to_file(real_account_information);
             do_update_stored_passwords_async.begin(Geary.ServiceFlag.IMAP | Geary.ServiceFlag.SMTP,
                 real_account_information);
             

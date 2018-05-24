@@ -6,16 +6,22 @@
 
 public class AccountManager : GLib.Object {
 
+
+    private Geary.Engine engine;
+
+
+    public AccountManager(Geary.Engine engine) {
+        this.engine = engine;
+    }
+
+
     public async void add_existing_accounts_async(Cancellable? cancellable = null) throws Error {
-        try {
-            Geary.Engine.instance.user_data_dir.make_directory_with_parents(cancellable);
-        } catch (IOError e) {
-            if (!(e is IOError.EXISTS))
-                throw e;
-        }
+        yield Geary.Files.make_directory_with_parents(
+            this.engine.user_data_dir, cancellable
+        );
 
         FileEnumerator enumerator
-            = yield Geary.Engine.instance.user_config_dir.enumerate_children_async("standard::*",
+            = yield this.engine.user_config_dir.enumerate_children_async("standard::*",
                 FileQueryInfoFlags.NONE, Priority.DEFAULT, cancellable);
 
         Gee.List<Geary.AccountInformation> account_list = new Gee.ArrayList<Geary.AccountInformation>();
@@ -60,7 +66,7 @@ public class AccountManager : GLib.Object {
     public Geary.AccountInformation? load_from_file(string id)
         throws Error {
 
-        File file = Geary.Engine.instance.user_config_dir.get_child(id).get_child(Geary.Config.SETTINGS_FILENAME);
+        File file = this.engine.user_config_dir.get_child(id).get_child(Geary.Config.SETTINGS_FILENAME);
 
         KeyFile key_file = new KeyFile();
         key_file.load_from_file(file.get_path() ?? "", KeyFileFlags.NONE);
@@ -76,8 +82,8 @@ public class AccountManager : GLib.Object {
         switch (provider) {
             case Geary.CredentialsProvider.LIBSECRET:
                 mediator = new SecretMediator();
-                imap_information = new Geary.LocalServiceInformation(Geary.Service.IMAP, Geary.Engine.instance.user_config_dir.get_child(id), mediator);
-                smtp_information = new Geary.LocalServiceInformation(Geary.Service.SMTP, Geary.Engine.instance.user_config_dir.get_child(id), mediator);
+                imap_information = new Geary.LocalServiceInformation(Geary.Service.IMAP, this.engine.user_config_dir.get_child(id), mediator);
+                smtp_information = new Geary.LocalServiceInformation(Geary.Service.SMTP, this.engine.user_config_dir.get_child(id), mediator);
                 break;
             default:
                 mediator = null;
@@ -87,8 +93,8 @@ public class AccountManager : GLib.Object {
         }
 
         Geary.AccountInformation info = new Geary.AccountInformation(id,
-                            Geary.Engine.instance.user_config_dir.get_child(id),
-                            Geary.Engine.instance.user_data_dir.get_child(id),
+                            this.engine.user_config_dir.get_child(id),
+                            this.engine.user_data_dir.get_child(id),
                             imap_information,
                             smtp_information);
 
@@ -157,7 +163,8 @@ public class AccountManager : GLib.Object {
         return info;
     }
 
-    public static async void store_to_file(Geary.AccountInformation info, Cancellable? cancellable = null) {
+    public async void store_to_file(Geary.AccountInformation info,
+                                    Cancellable? cancellable = null) {
         File? file = info.config_dir.get_child(Geary.Config.SETTINGS_FILENAME);
 
         if (file == null) {
@@ -235,7 +242,7 @@ public class AccountManager : GLib.Object {
             yield file.replace_contents_async(data.data, null, false, FileCreateFlags.NONE,
                 cancellable, out new_etag);
 
-            Geary.Engine.instance.add_account(info, true);
+            this.engine.add_account(info, true);
         } catch (Error err) {
             debug("Error writing to account info file: %s", err.message);
         }
@@ -245,7 +252,7 @@ public class AccountManager : GLib.Object {
      * Deletes an account from disk.  This is used by Geary.Engine and should not
      * normally be invoked directly.
      */
-    public static async void remove_async(Geary.AccountInformation info, Cancellable? cancellable = null) {
+    public async void remove_async(Geary.AccountInformation info, Cancellable? cancellable = null) {
         if (info.data_dir == null) {
             warning("Cannot remove account storage directory; nothing to remove");
         } else {
