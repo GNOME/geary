@@ -473,12 +473,13 @@ public class GearyController : Geary.BaseObject {
     }
 
     /**
-     * Closes the account and removes it entirely.
+     * Closes an account and deletes it from disk.
      */
     public async void remove_account_async(Geary.AccountInformation info,
                                            Cancellable? cancellable = null) {
         try {
-            yield Geary.Engine.instance.remove_account_async(info, cancellable);
+            yield this.application.engine.remove_account_async(info, cancellable);
+            yield this.account_manager.remove_async(info, cancellable);
         } catch (Error e) {
             message("Error removing account: %s", e.message);
         }
