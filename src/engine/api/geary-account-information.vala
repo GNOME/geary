@@ -8,16 +8,6 @@ public class Geary.AccountInformation : BaseObject {
     public const string PROP_NICKNAME = "nickname"; // Name of nickname property.
 
 
-
-    //
-    // "Retired" keys
-    //
-
-    /*
-     * key: "imap_pipeline"
-     * value: bool
-     */
-
     public const string SETTINGS_FILENAME = "geary.ini";
     public const int DEFAULT_PREFETCH_PERIOD_DAYS = 14;
 
@@ -190,8 +180,11 @@ public class Geary.AccountInformation : BaseObject {
     }
 
     private static Geary.Endpoint get_shared_endpoint(Service service, Endpoint endpoint) {
-        string key = "%s/%s:%u".printf(service.user_label(), endpoint.remote_address.hostname,
-            endpoint.remote_address.port);
+        string key = "%s/%s:%u".printf(
+            service.user_label(),
+            endpoint.remote_address.hostname,
+            endpoint.remote_address.port
+        );
 
         Endpoint? cached = AccountInformation.known_endpoints.get(key);
         if (cached == null) {

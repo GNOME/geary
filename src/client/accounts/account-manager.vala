@@ -267,7 +267,7 @@ public class AccountManager : GLib.Object {
         try {
             yield info.clear_stored_passwords_async(Geary.ServiceFlag.IMAP | Geary.ServiceFlag.SMTP);
         } catch (Error e) {
-            debug("Error clearing SMTP password: %s", e.message);
+            debug("Error clearing passwords: %s", e.message);
         }
     }
 
