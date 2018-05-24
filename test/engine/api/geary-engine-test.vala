@@ -31,33 +31,30 @@ class Geary.EngineTest : TestCase {
         }
     }
 
-    public override void set_up() {
+    public override void set_up() throws GLib.Error {
         // XXX this whole thing stinks. We need to be able to test the
         // engine without creating all of these dirs.
 
-        try {
-            this.tmp = File.new_for_path(Environment.get_tmp_dir()).get_child("geary-test");
-            this.tmp.make_directory();
+        this.tmp = GLib.File.new_for_path(
+            GLib.DirUtils.make_tmp("geary-engine-test-XXXXXX")
+        );
 
-            this.config = this.tmp.get_child("config");
-            this.config.make_directory();
+        this.config = this.tmp.get_child("config");
+        this.config.make_directory();
 
-            this.data = this.tmp.get_child("data");
-            this.data.make_directory();
+        this.data = this.tmp.get_child("data");
+        this.data.make_directory();
 
-            this.res = this.tmp.get_child("res");
-            this.res.make_directory();
+        this.res = this.tmp.get_child("res");
+        this.res.make_directory();
 
-            this.engine = new Engine();
-            this.engine.open_async.begin(
-                config, data, res, null, null,
-                (obj, res) => {
-                    async_complete(res);
-                });
-            this.engine.open_async.end(async_result());
-        } catch (Error err) {
-            assert_not_reached();
-        }
+        this.engine = new Engine();
+        this.engine.open_async.begin(
+            config, data, res, null, null,
+            (obj, res) => {
+                async_complete(res);
+            });
+        this.engine.open_async.end(async_result());
     }
 
 	public override void tear_down () {
