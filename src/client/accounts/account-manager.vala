@@ -156,12 +156,20 @@ public class AccountManager : GLib.Object {
 
     public async void store_to_file(Geary.AccountInformation info,
                                     Cancellable? cancellable = null) {
-        File? file = info.config_dir.get_child(Geary.Config.SETTINGS_FILENAME);
-
-        if (file == null) {
-            warning("Cannot save account, no file set.\n");
-            return;
+        // Ensure only one async task is saving an info at once, since
+        // at least the Engine can cause multiple saves to be called
+        // in quick succession when updating special folder config.
+        try {
+            int token = yield info.write_lock.claim_async(cancellable);
+            yield store_to_file_locked(info, cancellable);
+            info.write_lock.release(ref token);
+        } catch (Error err) {
+            debug("Error locking account info for saving: %s", err.message);
         }
+    }
+
+    private async void store_to_file_locked(Geary.AccountInformation info, Cancellable? cancellable = null) {
+        File? file = info.config_dir.get_child(Geary.Config.SETTINGS_FILENAME);
 
         if (!info.config_dir.query_exists(cancellable)) {
             try {

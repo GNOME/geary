@@ -122,6 +122,11 @@ public class Geary.AccountInformation : BaseObject {
     public ServiceInformation imap { get; private set; }
     public ServiceInformation smtp { get; private set; }
 
+    /** A lock that can be used to ensure saving is serialised. */
+    public Nonblocking.Mutex write_lock {
+        get; private set; default = new Nonblocking.Mutex();
+    }
+
     // These properties are only used if the service provider's
     // account type does not override them.
 

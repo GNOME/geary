@@ -1550,6 +1550,8 @@ public class GearyController : Geary.BaseObject {
     private void on_special_folder_type_changed(Geary.Folder folder,
                                                 Geary.SpecialFolderType old_type,
                                                 Geary.SpecialFolderType new_type) {
+        Geary.AccountInformation info = folder.account.information;
+
         // Update the main window
         this.main_window.folder_list.remove_folder(folder);
         this.main_window.folder_list.add_folder(folder);
@@ -1560,10 +1562,16 @@ public class GearyController : Geary.BaseObject {
             (folder.special_folder_type == Geary.SpecialFolderType.NONE &&
              is_inbox_descendant(folder))) {
             this.new_messages_monitor.add_folder(
-                folder,
-                this.accounts.get(folder.account.information).cancellable
+                folder, this.accounts.get(info).cancellable
             );
         }
+
+        this.account_manager.store_to_file.begin(
+            info, null,
+            (obj, res) => {
+                this.account_manager.store_to_file.end(res);
+            }
+        );
     }
 
     private void on_folders_available_unavailable(Geary.Account account,
