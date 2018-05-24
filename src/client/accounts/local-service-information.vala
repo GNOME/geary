@@ -6,32 +6,22 @@
 
 /* A local service implementation. This loads and saves IMAP and SMTP settings
  * from and to an account's configuration file. */
-public class Geary.LocalServiceInformation : Geary.ServiceInformation {
-
-    // The account's configuration file.
-    private File file;
+public class LocalServiceInformation : Geary.ServiceInformation {
 
     public LocalServiceInformation(Geary.Service service,
-                                   File config_directory,
                                    Geary.CredentialsMediator? mediator) {
         this.service = service;
-        this.file = config_directory.get_child(Geary.AccountInformation.SETTINGS_FILENAME);
         this.mediator = mediator;
-        this.credentials_provider = CredentialsProvider.LIBSECRET;
-        this.credentials_method = CredentialsMethod.PASSWORD;
+        this.credentials_provider = Geary.CredentialsProvider.LIBSECRET;
+        this.credentials_method = Geary.CredentialsMethod.PASSWORD;
     }
 
-    public override void load_settings(KeyFile? existing = null) throws Error {
+    public override void load_settings(KeyFile key_file) throws Error {
         string host_key = "";
         string port_key = "";
         string use_ssl_key = "";
         string use_starttls_key = "";
         uint16 default_port = 0;
-
-        KeyFile key_file = existing ?? new KeyFile();
-        if (existing == null) {
-            key_file.load_from_file(file.get_path() ?? "", KeyFileFlags.NONE);
-        }
 
         switch (service) {
             case Geary.Service.IMAP:
@@ -68,20 +58,15 @@ public class Geary.LocalServiceInformation : Geary.ServiceInformation {
         /* If the credentials provider and method keys are not in the config file,
          * assume we have the libsecret credentials provider using plain password auth.
          * Write these values back later when saving the configuration. */
-        this.credentials_provider = CredentialsProvider.from_string(Geary.Config.get_string_value(
-            key_file, Geary.Config.GROUP, Geary.Config.CREDENTIALS_PROVIDER_KEY, CredentialsProvider.LIBSECRET.to_string()));
-        this.credentials_method = CredentialsMethod.from_string(Geary.Config.get_string_value(
-            key_file, Geary.Config.GROUP, Geary.Config.CREDENTIALS_METHOD_KEY, CredentialsMethod.PASSWORD.to_string()));
+        this.credentials_provider = Geary.CredentialsProvider.from_string(Geary.Config.get_string_value(
+            key_file, Geary.Config.GROUP, Geary.Config.CREDENTIALS_PROVIDER_KEY, Geary.CredentialsProvider.LIBSECRET.to_string()));
+        this.credentials_method = Geary.CredentialsMethod.from_string(Geary.Config.get_string_value(
+            key_file, Geary.Config.GROUP, Geary.Config.CREDENTIALS_METHOD_KEY, Geary.CredentialsMethod.PASSWORD.to_string()));
     }
 
-    public override void load_credentials(KeyFile? existing = null, string? email_address = null) throws Error {
+    public override void load_credentials(KeyFile key_file, string? email_address = null) throws Error {
         string remember_password_key = "";
         string username_key = "";
-
-        KeyFile key_file = existing ?? new KeyFile();
-        if (existing == null) {
-            key_file.load_from_file(file.get_path() ?? "", KeyFileFlags.NONE);
-        }
 
         switch (this.service) {
             case Geary.Service.IMAP:
@@ -100,7 +85,7 @@ public class Geary.LocalServiceInformation : Geary.ServiceInformation {
             key_file, Geary.Config.GROUP, remember_password_key, this.remember_password);
     }
 
-    public override void save_settings(KeyFile? key_file = null) {
+    public override void save_settings(KeyFile key_file) {
         key_file.set_value(Geary.Config.GROUP, Geary.Config.CREDENTIALS_PROVIDER_KEY, this.credentials_provider.to_string());
         key_file.set_value(Geary.Config.GROUP, Geary.Config.CREDENTIALS_METHOD_KEY, this.credentials_method.to_string());
 

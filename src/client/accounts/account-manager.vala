@@ -103,11 +103,11 @@ public class AccountManager : GLib.Object {
         switch (provider) {
             case Geary.CredentialsProvider.LIBSECRET:
                 mediator = new SecretMediator();
-                imap_information = new Geary.LocalServiceInformation(
-                    Geary.Service.IMAP, file, mediator
+                imap_information = new LocalServiceInformation(
+                    Geary.Service.IMAP, mediator
                 );
-                smtp_information = new Geary.LocalServiceInformation(
-                    Geary.Service.SMTP, file, mediator
+                smtp_information = new LocalServiceInformation(
+                    Geary.Service.SMTP, mediator
                 );
                 break;
             default:

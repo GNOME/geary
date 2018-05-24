@@ -13,18 +13,18 @@ public class Geary.MockServiceInformation : ServiceInformation, MockObject {
     }
 
 
-    public override void load_settings(KeyFile? key_file = null)
+    public override void load_settings(KeyFile key_file)
         throws Error {
         void_call("load_settings", { box_arg(key_file) });
     }
 
-    public override void load_credentials(KeyFile? key_file = null,
+    public override void load_credentials(KeyFile key_file,
                                           string? email_address = null)
         throws Error {
         void_call("load_credentials", { box_arg(key_file), box_arg(email_address) });
     }
 
-    public override void save_settings(KeyFile? key_file = null) {
+    public override void save_settings(KeyFile key_file) {
         try {
             void_call("save_settings", { box_arg(key_file) });
         } catch (Error err) {
