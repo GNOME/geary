@@ -14,10 +14,36 @@ public class Geary.AccountInformation : BaseObject {
     public const string SETTINGS_FILENAME = "geary.ini";
 
 
-    public static int default_ordinal = 0;
+    public static int next_ordinal = 0;
 
     private static Gee.HashMap<string, weak Geary.Endpoint> known_endpoints =
         new Gee.HashMap<string, weak Endpoint>();
+
+    /** Comparator for account info objects based on their ordinals. */
+    public static int compare_ascending(AccountInformation a, AccountInformation b) {
+        int diff = a.ordinal - b.ordinal;
+        if (diff != 0)
+            return diff;
+
+        // Stabilize on nickname, which should always be unique.
+        return a.display_name.collate(b.display_name);
+    }
+
+    private static Geary.Endpoint get_shared_endpoint(Service service, Endpoint endpoint) {
+        string key = "%s/%s:%u".printf(
+            service.user_label(),
+            endpoint.remote_address.hostname,
+            endpoint.remote_address.port
+        );
+
+        Endpoint? cached = AccountInformation.known_endpoints.get(key);
+        if (cached == null) {
+            cached = endpoint;
+            AccountInformation.known_endpoints.set(key, cached);
+        }
+
+        return cached;
+    }
 
 
     /** Location of the account information's settings key file. */
@@ -125,7 +151,7 @@ public class Geary.AccountInformation : BaseObject {
 
     // Order for display purposes.
     public int ordinal {
-        get; set; default = AccountInformation.default_ordinal++;
+        get; set; default = AccountInformation.next_ordinal++;
     }
 
     /* Information related to the account's server-side authentication
@@ -202,21 +228,6 @@ public class Geary.AccountInformation : BaseObject {
             this.smtp_endpoint.untrusted_host.disconnect(on_smtp_untrusted_host);
     }
 
-    private static Geary.Endpoint get_shared_endpoint(Service service, Endpoint endpoint) {
-        string key = "%s/%s:%u".printf(
-            service.user_label(),
-            endpoint.remote_address.hostname,
-            endpoint.remote_address.port
-        );
-
-        Endpoint? cached = AccountInformation.known_endpoints.get(key);
-        if (cached == null) {
-            cached = endpoint;
-            AccountInformation.known_endpoints.set(key, cached);
-        }
-
-        return cached;
-    }
 
     /** Copies all properties from an instance into this one. */
     public void copy_from(AccountInformation from) {
@@ -688,15 +699,6 @@ public class Geary.AccountInformation : BaseObject {
                      return alt.equal_to(email);
                  }, false))
         );
-    }
-
-    public static int compare_ascending(AccountInformation a, AccountInformation b) {
-        int diff = a.ordinal - b.ordinal;
-        if (diff != 0)
-            return diff;
-
-        // Stabilize on nickname, which should always be unique.
-        return a.display_name.collate(b.display_name);
     }
 
 }

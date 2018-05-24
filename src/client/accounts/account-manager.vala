@@ -159,8 +159,8 @@ public class AccountManager : GLib.Object {
         info.email_signature = Geary.Config.get_escaped_string(
             key_file, Geary.Config.GROUP, Geary.Config.EMAIL_SIGNATURE_KEY, info.email_signature);
 
-        if (info.ordinal >= Geary.AccountInformation.default_ordinal)
-            Geary.AccountInformation.default_ordinal = info.ordinal + 1;
+        if (info.ordinal >= Geary.AccountInformation.next_ordinal)
+            Geary.AccountInformation.next_ordinal = info.ordinal + 1;
 
         if (info.service_provider == Geary.ServiceProvider.OTHER) {
             info.imap.load_settings(key_file);
