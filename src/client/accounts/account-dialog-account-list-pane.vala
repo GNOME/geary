@@ -223,8 +223,15 @@ public class AccountDialogAccountListPane : AccountDialogPane {
                 // To prevent unnecessary work, only set ordinal if there's a change.
                 if (i != account.ordinal) {
                     account.ordinal = i;
-                    this.application.controller.account_manager.store_to_file.begin(
-                        account, null
+                    this.application.controller.account_manager.save_account.begin(
+                        account, null,
+                        (obj, res) => {
+                            try {
+                                this.application.controller.account_manager.save_account.end(res);
+                            } catch (GLib.Error err) {
+                                warning("Error saving account: %s", err.message);
+                            }
+                        }
                     );
                 }
             }

@@ -22,7 +22,6 @@ src/client/accounts/login-dialog.vala
 src/client/application/autostart-manager.vala
 src/client/application/geary-application.vala
 src/client/application/geary-args.vala
-src/client/application/geary-config.vala
 src/client/application/geary-controller.vala
 src/client/application/main.vala
 src/client/application/secret-mediator.vala
@@ -380,6 +379,7 @@ src/engine/state/state-machine.vala
 src/engine/state/state-mapping.vala
 src/engine/util/util-ascii.vala
 src/engine/util/util-collection.vala
+src/engine/util/util-config-file.vala
 src/engine/util/util-connectivity-manager.vala
 src/engine/util/util-files.vala
 src/engine/util/util-generic-capabilities.vala

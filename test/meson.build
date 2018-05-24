@@ -41,6 +41,7 @@ geary_test_engine_sources = [
   'engine/rfc822-part-test.vala',
   'engine/rfc822-utils-test.vala',
   'engine/util-ascii-test.vala',
+  'engine/util-config-file-test.vala',
   'engine/util-html-test.vala',
   'engine/util-idle-manager-test.vala',
   'engine/util-inet-test.vala',

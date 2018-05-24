@@ -8,7 +8,6 @@ geary_engine_vala_sources = files(
   'api/geary-attachment.vala',
   'api/geary-base-object.vala',
   'api/geary-composed-email.vala',
-  'api/geary-config.vala',
   'api/geary-contact.vala',
   'api/geary-contact-flags.vala',
   'api/geary-contact-importance.vala',
@@ -298,6 +297,7 @@ geary_engine_vala_sources = files(
 
   'util/util-ascii.vala',
   'util/util-collection.vala',
+  'util/util-config-file.vala',
   'util/util-connectivity-manager.vala',
   'util/util-files.vala',
   'util/util-generic-capabilities.vala',

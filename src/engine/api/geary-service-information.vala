@@ -96,17 +96,17 @@ public abstract class Geary.ServiceInformation : GLib.Object {
      *
      * This method depends on the concrete implementation used.
      */
-    public abstract void load_settings(KeyFile key_file) throws Error;
+    public abstract void load_settings(ConfigFile.Group config) throws Error;
 
     /**
      * Loads the credentials pertaining to this class's instance.
      *
      * This method depends on the concrete implementation used.
      */
-    public abstract void load_credentials(KeyFile key_file, string? email_address = null) throws Error;
+    public abstract void load_credentials(ConfigFile.Group config, string? email_address = null) throws Error;
 
     /** Saves settings pertaining to this class's instance to a key file. */
-    public abstract void save_settings(KeyFile key_file);
+    public abstract void save_settings(ConfigFile.Group config);
 
     public void copy_from(Geary.ServiceInformation from) {
         this.host = from.host;

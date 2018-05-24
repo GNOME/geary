@@ -31,6 +31,7 @@ int main(string[] args) {
     // Depends on ConversationTest and ConversationSetTest passing
     engine.add_suite(new Geary.App.ConversationMonitorTest().get_suite());
     engine.add_suite(new Geary.Ascii.Test().get_suite());
+    engine.add_suite(new Geary.ConfigFileTest().get_suite());
     engine.add_suite(new Geary.Db.DatabaseTest().get_suite());
     engine.add_suite(new Geary.Db.VersionedDatabaseTest().get_suite());
     engine.add_suite(new Geary.HTML.UtilTest().get_suite());

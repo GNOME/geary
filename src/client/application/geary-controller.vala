@@ -861,22 +861,27 @@ public class GearyController : Geary.BaseObject {
                 real_account_information.copy_from(account_information);
             }
 
-            if (real_account_information.settings_file == null) {
-                try {
+            try {
+                if (real_account_information.settings_file == null) {
                     yield this.account_manager.create_account_dirs(
                         real_account_information
                     );
-                } catch (GLib.Error err) {
-                    warning("Failed to create account directories");
                 }
+                yield this.account_manager.save_account(real_account_information);
+                yield do_update_stored_passwords_async(
+                    Geary.ServiceFlag.IMAP | Geary.ServiceFlag.SMTP,
+                    real_account_information
+                );
+                debug("Successfully validated account information");
+            } catch (GLib.Error err) {
+                report_problem(
+                    new Geary.ProblemReport(
+                        Geary.ProblemType.GENERIC_ERROR, err
+                    )
+                );
             }
-            yield this.account_manager.store_to_file(real_account_information);
-            do_update_stored_passwords_async.begin(Geary.ServiceFlag.IMAP | Geary.ServiceFlag.SMTP,
-                real_account_information);
-            
-            debug("Successfully validated account information");
         }
-        
+
         return result;
     }
     
@@ -1582,10 +1587,20 @@ public class GearyController : Geary.BaseObject {
             );
         }
 
-        this.account_manager.store_to_file.begin(
+        this.account_manager.save_account.begin(
             info, null,
             (obj, res) => {
-                this.account_manager.store_to_file.end(res);
+                try {
+                    this.account_manager.save_account.end(res);
+                } catch (GLib.Error err) {
+                    report_problem(
+                        new Geary.AccountProblemReport(
+                            Geary.ProblemType.GENERIC_ERROR,
+                            info,
+                            err
+                        )
+                    );
+                }
             }
         );
     }
