@@ -208,7 +208,9 @@ public class Geary.Engine : BaseObject {
      * Throws an error if the engine has not been opened or if an
      * invalid account id is generated.
      */
-    public AccountInformation create_orphan_account() throws Error {
+    public AccountInformation create_orphan_account(ServiceInformation imap,
+                                                    ServiceInformation smtp)
+        throws GLib.Error {
         check_opened();
 
         // We might want to allow the client to specify the id, but
@@ -233,7 +235,7 @@ public class Geary.Engine : BaseObject {
         if (this.accounts.has_key(id))
             throw new EngineError.ALREADY_EXISTS("Account %s already exists", id);
 
-        return new AccountInformation(id, null, null);
+        return new AccountInformation(id, imap, smtp);
     }
 
     /**

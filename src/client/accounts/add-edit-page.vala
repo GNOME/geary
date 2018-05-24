@@ -154,7 +154,9 @@ public class AddEditPage : Gtk.Box {
         SSL = 1,
         STARTTLS = 2
     }
-    
+
+    private GearyApplication application;
+
     private PageMode mode = PageMode.WELCOME;
     
     private Gtk.Widget container_widget;
@@ -219,12 +221,13 @@ public class AddEditPage : Gtk.Box {
     public signal void size_changed();
     
     public signal void edit_alternate_emails();
-    
-    public AddEditPage() {
+
+    public AddEditPage(GearyApplication application) {
         Object(orientation: Gtk.Orientation.VERTICAL, spacing: 4);
-        
-        Gtk.Builder builder = GearyApplication.instance.create_builder("login.glade");
-        
+        this.application = application;
+
+        Gtk.Builder builder = GioUtil.create_builder("login.glade");
+
         // Primary container.
         container_widget = (Gtk.Widget) builder.get_object("container");
         pack_start(container_widget);
@@ -272,7 +275,7 @@ public class AddEditPage : Gtk.Box {
         textview_email_signature = new Gtk.TextView();
         edit_window.add(textview_email_signature);
 
-        preview_webview = new ClientWebView(GearyApplication.instance.config);
+        preview_webview = new ClientWebView(application.config);
 
         Gtk.ScrolledWindow preview_window = new Gtk.ScrolledWindow(null, null);
         preview_window.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC);
@@ -665,7 +668,7 @@ public class AddEditPage : Gtk.Box {
             // encountered validation errors. So we need to deal with
             // both cases.
             try {
-                info = Geary.Engine.instance.get_account(this.id);
+                info = this.application.engine.get_account(this.id);
             } catch (Error err) {
                 // id was for an orphan account
             }
@@ -673,8 +676,19 @@ public class AddEditPage : Gtk.Box {
 
         if (info == null) {
             // New account
+            Geary.ServiceInformation imap =
+                this.application.controller.account_manager.new_libsecret_service(
+                    Geary.Service.IMAP,
+                    Geary.CredentialsMethod.PASSWORD
+                );
+            Geary.ServiceInformation smtp =
+                this.application.controller.account_manager.new_libsecret_service(
+                    Geary.Service.SMTP,
+                    Geary.CredentialsMethod.PASSWORD
+                );
+
             try {
-                info = Geary.Engine.instance.create_orphan_account();
+                info = this.application.engine.create_orphan_account(imap, smtp);
             } catch (Error err) {
                 debug("Unable to create account %s for %s: %s",
                       this.id, this.email_address, err.message);

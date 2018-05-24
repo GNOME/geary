@@ -4,12 +4,18 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
+errordomain AccountError {
+    INVALID;
+}
+
 public class AccountManager : GLib.Object {
 
 
     private Geary.Engine engine;
     private GLib.File user_config_dir;
     private GLib.File user_data_dir;
+
+    private Geary.CredentialsMediator libsecret;
 
 
     public AccountManager(Geary.Engine engine,
@@ -18,6 +24,13 @@ public class AccountManager : GLib.Object {
         this.engine = engine;
         this.user_config_dir = user_config_dir;
         this.user_data_dir = user_data_dir;
+
+        this.libsecret = new SecretMediator();
+    }
+
+    public Geary.ServiceInformation new_libsecret_service(Geary.Service service,
+                                                          Geary.CredentialsMethod method) {
+        return new LocalServiceInformation(service, libsecret);
     }
 
 
@@ -101,20 +114,13 @@ public class AccountManager : GLib.Object {
         provider = Geary.CredentialsProvider.from_string(Geary.Config.get_string_value(key_file, Geary.Config.GROUP, Geary.Config.CREDENTIALS_PROVIDER_KEY, Geary.CredentialsProvider.LIBSECRET.to_string()));
         method = Geary.CredentialsMethod.from_string(Geary.Config.get_string_value(key_file, Geary.Config.GROUP, Geary.Config.CREDENTIALS_METHOD_KEY, Geary.CredentialsMethod.PASSWORD.to_string()));
         switch (provider) {
-            case Geary.CredentialsProvider.LIBSECRET:
-                mediator = new SecretMediator();
-                imap_information = new LocalServiceInformation(
-                    Geary.Service.IMAP, mediator
-                );
-                smtp_information = new LocalServiceInformation(
-                    Geary.Service.SMTP, mediator
-                );
-                break;
-            default:
-                mediator = null;
-                imap_information = null;
-                smtp_information = null;
-                break;
+        case Geary.CredentialsProvider.LIBSECRET:
+            imap_information = new_libsecret_service(Geary.Service.IMAP, method);
+            smtp_information = new_libsecret_service(Geary.Service.SMTP, method);
+            break;
+
+        default:
+            throw new AccountError.INVALID("Unhandled credentials provider");
         }
 
         Geary.AccountInformation info = new Geary.AccountInformation(

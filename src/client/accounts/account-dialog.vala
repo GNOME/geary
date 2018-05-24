@@ -37,7 +37,7 @@ public class AccountDialog : Gtk.Dialog {
         
         // Add pages to stack.
         account_list_pane = new AccountDialogAccountListPane(application, stack);
-        add_edit_pane = new AccountDialogAddEditPane(stack);
+        add_edit_pane = new AccountDialogAddEditPane(application, stack);
         spinner_pane = new AccountDialogSpinnerPane(stack);
         remove_confirm_pane = new AccountDialogRemoveConfirmPane(stack);
         remove_fail_pane = new AccountDialogRemoveFailPane(stack);

@@ -900,7 +900,7 @@ public class GearyController : Geary.BaseObject {
         Geary.AccountInformation? new_info = old_info;
         if (login_dialog == null) {
             // Create here so we know GTK is initialized.
-            login_dialog = new LoginDialog();
+            login_dialog = new LoginDialog(this.application);
         } else if (!login_dialog.get_visible()) {
             // If the dialog has been dismissed, exit here.
             this.application.exit();

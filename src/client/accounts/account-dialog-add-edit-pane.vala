@@ -6,7 +6,8 @@
 
 // Add or edit an account.  Used with AccountDialog.
 public class AccountDialogAddEditPane : AccountDialogPane {
-    public AddEditPage add_edit_page { get; private set; default = new AddEditPage(); }
+
+    public AddEditPage add_edit_page { get; private set; }
     private Gtk.ButtonBox button_box = new Gtk.ButtonBox(Gtk.Orientation.HORIZONTAL);
     private Gtk.Button ok_button = new Gtk.Button.with_mnemonic(Stock._OK);
     private Gtk.Button cancel_button = new Gtk.Button.with_mnemonic(Stock._CANCEL);
@@ -19,9 +20,11 @@ public class AccountDialogAddEditPane : AccountDialogPane {
     
     public signal void edit_alternate_emails(string id);
     
-    public AccountDialogAddEditPane(Gtk.Stack stack) {
+    public AccountDialogAddEditPane(GearyApplication application, Gtk.Stack stack) {
         base(stack);
-        
+
+        this.add_edit_page = new AddEditPage(application);
+
         button_box.set_layout(Gtk.ButtonBoxStyle.END);
         button_box.expand = false;
         button_box.spacing = 6;
