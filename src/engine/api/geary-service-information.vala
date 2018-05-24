@@ -5,34 +5,6 @@
  */
 
 /**
- * A representation of the different sources Geary might get its credentials from.
- */
-public enum Geary.CredentialsProvider {
-    LIBSECRET;
-
-    public string to_string() {
-        switch (this) {
-            case LIBSECRET:
-                return "libsecret";
-
-            default:
-                assert_not_reached();
-        }
-    }
-
-    public static CredentialsProvider from_string(string str) throws Error {
-        switch (str) {
-            case "libsecret":
-                return LIBSECRET;
-
-            default:
-                throw new KeyFileError.INVALID_VALUE(
-                    "Unknown credentials provider type: %s", str
-                );
-        }
-    }
-}
-/**
  * A type representing different methods for authenticating. For now we only
  * support password-based auth.
  */
@@ -102,14 +74,6 @@ public abstract class Geary.ServiceInformation : GLib.Object {
      */
     public Geary.CredentialsMediator? mediator { get; set; default = null; }
 
-    /**
-     * The default credentials provider.
-     *
-     * It is used for differentiating where Geary should get its credentials from,
-     * in case there may be multiple sources.
-     */
-    public Geary.CredentialsProvider credentials_provider { get; set; default = CredentialsProvider.LIBSECRET; }
-
     /** The method used for authenticating with the server. */
     public Geary.CredentialsMethod credentials_method { get; set; default = CredentialsMethod.PASSWORD; }
 
@@ -153,7 +117,6 @@ public abstract class Geary.ServiceInformation : GLib.Object {
         this.credentials = from.credentials;
         this.service = from.service;
         this.mediator = from.mediator;
-        this.credentials_provider = from.credentials_provider;
         this.credentials_method = from.credentials_method;
         this.smtp_noauth = from.smtp_noauth;
         this.smtp_use_imap_credentials = from.smtp_use_imap_credentials;

@@ -12,7 +12,6 @@ public class LocalServiceInformation : Geary.ServiceInformation {
                                    Geary.CredentialsMediator? mediator) {
         this.service = service;
         this.mediator = mediator;
-        this.credentials_provider = Geary.CredentialsProvider.LIBSECRET;
         this.credentials_method = Geary.CredentialsMethod.PASSWORD;
     }
 
@@ -58,8 +57,6 @@ public class LocalServiceInformation : Geary.ServiceInformation {
         /* If the credentials provider and method keys are not in the config file,
          * assume we have the libsecret credentials provider using plain password auth.
          * Write these values back later when saving the configuration. */
-        this.credentials_provider = Geary.CredentialsProvider.from_string(Geary.Config.get_string_value(
-            key_file, Geary.Config.GROUP, Geary.Config.CREDENTIALS_PROVIDER_KEY, Geary.CredentialsProvider.LIBSECRET.to_string()));
         this.credentials_method = Geary.CredentialsMethod.from_string(Geary.Config.get_string_value(
             key_file, Geary.Config.GROUP, Geary.Config.CREDENTIALS_METHOD_KEY, Geary.CredentialsMethod.PASSWORD.to_string()));
     }
@@ -86,8 +83,16 @@ public class LocalServiceInformation : Geary.ServiceInformation {
     }
 
     public override void save_settings(KeyFile key_file) {
-        key_file.set_value(Geary.Config.GROUP, Geary.Config.CREDENTIALS_PROVIDER_KEY, this.credentials_provider.to_string());
-        key_file.set_value(Geary.Config.GROUP, Geary.Config.CREDENTIALS_METHOD_KEY, this.credentials_method.to_string());
+        key_file.set_value(
+            Geary.Config.GROUP,
+            Geary.Config.CREDENTIALS_PROVIDER_KEY,
+            CredentialsProvider.LIBSECRET.to_string()
+        );
+        key_file.set_value(
+            Geary.Config.GROUP,
+            Geary.Config.CREDENTIALS_METHOD_KEY,
+            this.credentials_method.to_string()
+        );
 
         switch (this.service) {
             case Geary.Service.IMAP:

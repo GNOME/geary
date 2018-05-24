@@ -4,6 +4,37 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
+
+/**
+ * Current supported credential providers.
+ */
+public enum CredentialsProvider{
+    /** Credentials are provided and stored by libsecret. */
+    LIBSECRET;
+
+    public string to_string() {
+        switch (this) {
+            case LIBSECRET:
+                return "libsecret";
+
+            default:
+                assert_not_reached();
+        }
+    }
+
+    public static CredentialsProvider from_string(string str) throws Error {
+        switch (str) {
+            case "libsecret":
+                return LIBSECRET;
+
+            default:
+                throw new KeyFileError.INVALID_VALUE(
+                    "Unknown credentials provider type: %s", str
+                );
+        }
+    }
+}
+
 errordomain AccountError {
     INVALID;
 }
@@ -105,16 +136,26 @@ public class AccountManager : GLib.Object {
         KeyFile key_file = new KeyFile();
         key_file.load_from_file(file.get_path() ?? "", KeyFileFlags.NONE);
 
-        Geary.CredentialsMediator mediator;
+        CredentialsProvider provider = CredentialsProvider.from_string(
+            Geary.Config.get_string_value(
+                key_file,
+                Geary.Config.GROUP,
+                Geary.Config.CREDENTIALS_PROVIDER_KEY,
+                CredentialsProvider.LIBSECRET.to_string())
+        );
+        Geary.CredentialsMethod method = Geary.CredentialsMethod.from_string(
+            Geary.Config.get_string_value(
+                key_file,
+                Geary.Config.GROUP,
+                Geary.Config.CREDENTIALS_METHOD_KEY,
+                Geary.CredentialsMethod.PASSWORD.to_string()
+            )
+        );
+
         Geary.ServiceInformation imap_information;
         Geary.ServiceInformation smtp_information;
-        Geary.CredentialsProvider provider;
-        Geary.CredentialsMethod method;
-
-        provider = Geary.CredentialsProvider.from_string(Geary.Config.get_string_value(key_file, Geary.Config.GROUP, Geary.Config.CREDENTIALS_PROVIDER_KEY, Geary.CredentialsProvider.LIBSECRET.to_string()));
-        method = Geary.CredentialsMethod.from_string(Geary.Config.get_string_value(key_file, Geary.Config.GROUP, Geary.Config.CREDENTIALS_METHOD_KEY, Geary.CredentialsMethod.PASSWORD.to_string()));
         switch (provider) {
-        case Geary.CredentialsProvider.LIBSECRET:
+        case CredentialsProvider.LIBSECRET:
             imap_information = new_libsecret_service(Geary.Service.IMAP, method);
             smtp_information = new_libsecret_service(Geary.Service.SMTP, method);
             break;
@@ -226,7 +267,6 @@ public class AccountManager : GLib.Object {
 
         KeyFile key_file = new KeyFile();
         key_file.set_value(Geary.Config.GROUP, Geary.Config.CREDENTIALS_METHOD_KEY, info.imap.credentials_method.to_string());
-        key_file.set_value(Geary.Config.GROUP, Geary.Config.CREDENTIALS_PROVIDER_KEY, info.imap.credentials_provider.to_string());
         key_file.set_value(Geary.Config.GROUP, Geary.Config.REAL_NAME_KEY, info.primary_mailbox.name);
         key_file.set_value(Geary.Config.GROUP, Geary.Config.PRIMARY_EMAIL_KEY, info.primary_mailbox.address);
         key_file.set_value(Geary.Config.GROUP, Geary.Config.NICKNAME_KEY, info.nickname);
