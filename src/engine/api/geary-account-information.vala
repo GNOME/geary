@@ -23,11 +23,9 @@ public class Geary.AccountInformation : BaseObject {
 
     public static int default_ordinal = 0;
 
-    private static Gee.HashMap<string, Geary.Endpoint>? known_endpoints;
+    private static Gee.HashMap<string, weak Geary.Endpoint> known_endpoints =
+        new Gee.HashMap<string, weak Endpoint>();
 
-    static construct {
-        AccountInformation.known_endpoints = new Gee.HashMap<string,weak Endpoint>();
-    }
 
     /**
      * Location account information is stored (as well as other data, including database and
@@ -178,11 +176,12 @@ public class Geary.AccountInformation : BaseObject {
     }
 
     ~AccountInformation() {
-        if (imap_endpoint != null)
-            imap_endpoint.untrusted_host.disconnect(on_imap_untrusted_host);
-
-        if (smtp_endpoint != null)
-            smtp_endpoint.untrusted_host.disconnect(on_smtp_untrusted_host);
+        // Endpoints are shared so won't go away when this instance is
+        // finalised, so we need to disconnect from their signals.
+        if (this.imap_endpoint != null)
+            this.imap_endpoint.untrusted_host.disconnect(on_imap_untrusted_host);
+        if (this.smtp_endpoint != null)
+            this.smtp_endpoint.untrusted_host.disconnect(on_smtp_untrusted_host);
     }
 
     private static Geary.Endpoint get_shared_endpoint(Service service, Endpoint endpoint) {
