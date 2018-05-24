@@ -30,8 +30,6 @@ class Geary.App.ConversationMonitorTest : TestCase {
     public override void set_up() {
         this.account_info = new AccountInformation(
             "account_01",
-            File.new_for_path("/tmp"),
-            File.new_for_path("/tmp"),
             new MockServiceInformation(),
             new MockServiceInformation()
         );

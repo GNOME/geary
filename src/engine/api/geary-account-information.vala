@@ -5,11 +5,14 @@
  */
 
 public class Geary.AccountInformation : BaseObject {
-    public const string PROP_NICKNAME = "nickname"; // Name of nickname property.
 
+    /** Name of of the nickname property, for signal handlers. */
+    public const string PROP_NICKNAME = "nickname";
+
+    public const int DEFAULT_PREFETCH_PERIOD_DAYS = 14;
 
     public const string SETTINGS_FILENAME = "geary.ini";
-    public const int DEFAULT_PREFETCH_PERIOD_DAYS = 14;
+
 
     public static int default_ordinal = 0;
 
@@ -17,14 +20,32 @@ public class Geary.AccountInformation : BaseObject {
         new Gee.HashMap<string, weak Endpoint>();
 
 
+    /** Location of the account information's settings key file. */
+    public File? settings_file {
+        owned get {
+            File? settings = null;
+            if (this.config_dir != null) {
+                settings = this.config_dir.get_child(SETTINGS_FILENAME);
+            }
+            return settings;
+        }
+    }
+
     /**
-     * Location account information is stored (as well as other data, including database and
-     * attachment files.
+     * Location of the account's config directory.
+     *
+     * This directory is used to store small, per-account
+     * configuration files, including the account's settings key file.
      */
     public File? config_dir { get; private set; default = null; }
-    public File? data_dir { get; private set; default = null; }
 
-    public File? file = null;
+    /**
+     * Location of the account's data directory.
+     *
+     * This directory is used to store large, per-account data files
+     * such as the account database.
+     */
+    public File? data_dir { get; private set; default = null; }
 
     //
     // IMPORTANT: When adding new properties, be sure to add them to the copy method.
@@ -131,9 +152,12 @@ public class Geary.AccountInformation : BaseObject {
 
     public bool save_drafts { get; set; default = true; }
 
+    public bool is_copy { get; set; default = false; }
+
     private bool _save_sent_mail = true;
     private Endpoint? imap_endpoint = null;
     private Endpoint? smtp_endpoint = null;
+
 
     /**
      * Indicates the supplied {@link Endpoint} has reported TLS certificate warnings during
@@ -150,24 +174,23 @@ public class Geary.AccountInformation : BaseObject {
     /** Indicates that properties contained herein have changed. */
     public signal void information_changed();
 
-    // Used to create temporary AccountInformation objects.  (Note that these cannot be saved.)
-    public AccountInformation.temp_copy(AccountInformation copy) {
-        copy_from(copy);
-    }
-
     /**
      * Creates a new, empty account info file.
      */
     public AccountInformation(string id,
-                              File config_directory,
-                              File data_directory,
-                              Geary.ServiceInformation? imap, Geary.ServiceInformation? smtp) {
+                              ServiceInformation imap,
+                              ServiceInformation smtp) {
         this.id = id;
-        this.config_dir = config_directory;
-        this.data_dir = data_directory;
-        this.file = config_dir.get_child(SETTINGS_FILENAME);
         this.imap = imap;
         this.smtp = smtp;
+    }
+
+    /**
+     * Creates a copy of an instance.
+     */
+    public AccountInformation.temp_copy(AccountInformation from) {
+        copy_from(from);
+        this.is_copy = true;
     }
 
     ~AccountInformation() {
@@ -195,7 +218,7 @@ public class Geary.AccountInformation : BaseObject {
         return cached;
     }
 
-    // Copies all data from the "from" object into this one.
+    /** Copies all properties from an instance into this one. */
     public void copy_from(AccountInformation from) {
         this.id = from.id;
         this.nickname = from.nickname;
@@ -218,6 +241,12 @@ public class Geary.AccountInformation : BaseObject {
         this.save_drafts = from.save_drafts;
         this.use_email_signature = from.use_email_signature;
         this.email_signature = from.email_signature;
+    }
+
+    /** Sets the location of the account's storage directories. */
+    public void set_account_directories(GLib.File config, GLib.File data) {
+        this.config_dir = config;
+        this.data_dir = data;
     }
 
     /**
@@ -670,8 +699,4 @@ public class Geary.AccountInformation : BaseObject {
         return a.display_name.collate(b.display_name);
     }
 
-    // Returns true if this is a copy.
-    public bool is_copy() {
-        return file == null;
-    }
 }

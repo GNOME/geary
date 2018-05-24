@@ -293,13 +293,13 @@ public class GearyController : Geary.BaseObject {
         }
 
         // Start Geary.
-        this.account_manager = new AccountManager(engine);
+        this.account_manager = new AccountManager(
+            engine,
+            this.application.get_user_config_directory(),
+            this.application.get_user_data_directory()
+        );
         try {
-            yield engine.open_async(
-                this.application.get_user_config_directory(),
-                this.application.get_user_data_directory(),
-                this.application.get_resource_directory()
-            );
+            yield engine.open_async(this.application.get_resource_directory());
             yield this.account_manager.add_existing_accounts_async(null);
             if (engine.get_accounts().size == 0) {
                 create_account();
@@ -848,13 +848,22 @@ public class GearyController : Geary.BaseObject {
         
         if (result == Geary.Engine.ValidationResult.OK) {
             Geary.AccountInformation real_account_information = account_information;
-            if (account_information.is_copy()) {
+            if (account_information.is_copy) {
                 // We have a temporary copy of the account.  Find the "real" acct info object and
                 // copy the new data into it.
                 real_account_information = get_real_account_information(account_information);
                 real_account_information.copy_from(account_information);
             }
 
+            if (real_account_information.settings_file == null) {
+                try {
+                    yield this.account_manager.create_account_dirs(
+                        real_account_information
+                    );
+                } catch (GLib.Error err) {
+                    warning("Failed to create account directories");
+                }
+            }
             yield this.account_manager.store_to_file(real_account_information);
             do_update_stored_passwords_async.begin(Geary.ServiceFlag.IMAP | Geary.ServiceFlag.SMTP,
                 real_account_information);
@@ -868,7 +877,7 @@ public class GearyController : Geary.BaseObject {
     // Returns the "real" account info associated with a copy.  If it's not a copy, null is returned.
     public Geary.AccountInformation? get_real_account_information(
         Geary.AccountInformation account_information) {
-        if (account_information.is_copy()) {
+        if (account_information.is_copy) {
             try {
                  return Geary.Engine.instance.get_accounts().get(account_information.id);
             } catch (Error e) {

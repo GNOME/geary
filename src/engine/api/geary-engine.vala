@@ -52,11 +52,11 @@ public class Geary.Engine : BaseObject {
         }
     }
 
+    /** Location of the directory containing shared resource files. */
+    public File? resource_dir { get; private set; default = null; }
+
     private Gee.HashMap<string, AccountInformation>? accounts = null;
     private Gee.HashMap<string, Account>? account_instances = null;
-    public File? user_data_dir { get; private set; default = null; }
-    public File? user_config_dir { get; private set; default = null; }
-    public File? resource_dir { get; private set; default = null; }
     private bool is_initialized = false;
     private bool is_open = false;
 
@@ -134,8 +134,9 @@ public class Geary.Engine : BaseObject {
     /**
      * Initializes the engine, and makes all existing accounts available.
      */
-    public async void open_async(File user_config_dir, File user_data_dir, File resource_dir,
-        Cancellable? cancellable = null) throws Error {
+    public async void open_async(GLib.File resource_dir,
+                                 GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
         // initialize *before* opening the Engine ... all initialize code should assume the Engine
         // is closed
         initialize_library();
@@ -143,8 +144,6 @@ public class Geary.Engine : BaseObject {
         if (is_open)
             throw new EngineError.ALREADY_OPEN("Geary.Engine instance already open");
 
-        this.user_config_dir = user_config_dir;
-        this.user_data_dir = user_data_dir;
         this.resource_dir = resource_dir;
 
         accounts = new Gee.HashMap<string, AccountInformation>();
@@ -168,7 +167,6 @@ public class Geary.Engine : BaseObject {
         foreach(AccountInformation account in unavailable_accounts)
             account_unavailable(account);
 
-        user_data_dir = null;
         resource_dir = null;
         accounts = null;
         account_instances = null;
@@ -235,8 +233,7 @@ public class Geary.Engine : BaseObject {
         if (this.accounts.has_key(id))
             throw new EngineError.ALREADY_EXISTS("Account %s already exists", id);
 
-        return new AccountInformation(
-            id, user_config_dir.get_child(id), user_data_dir.get_child(id), null, null);
+        return new AccountInformation(id, null, null);
     }
 
     /**

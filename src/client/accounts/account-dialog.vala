@@ -171,7 +171,7 @@ public class AccountDialog : Gtk.Dialog {
         
         // For account edits, we only need to validate the connection if the credentials have changed.
         bool validate_connection = true;
-        if (add_edit_pane.get_mode() == AddEditPage.PageMode.EDIT && info.is_copy()) {
+        if (add_edit_pane.get_mode() == AddEditPage.PageMode.EDIT && info.is_copy) {
             Geary.AccountInformation? real_info =
                 this.application.controller.get_real_account_information(info);
             if (real_info != null) {

@@ -10,8 +10,6 @@ class Geary.EngineTest : TestCase {
 
     private Engine? engine = null;
     private File? tmp = null;
-    private File? config = null;
-    private File? data = null;
     private File? res = null;
 
 
@@ -41,18 +39,12 @@ class Geary.EngineTest : TestCase {
             this.tmp = File.new_for_path(Environment.get_tmp_dir()).get_child("geary-test");
             this.tmp.make_directory();
 
-            this.config = this.tmp.get_child("config");
-            this.config.make_directory();
-
-            this.data = this.tmp.get_child("data");
-            this.data.make_directory();
-
             this.res = this.tmp.get_child("res");
             this.res.make_directory();
 
             this.engine = new Engine();
             this.engine.open_async.begin(
-                config, data, res, null,
+                res, null,
                 (obj, res) => {
                     async_complete(res);
                 });
@@ -65,8 +57,6 @@ class Geary.EngineTest : TestCase {
 	public override void tear_down () {
         try {
             this.res.delete();
-            this.data.delete();
-            this.config.delete();
             this.tmp.delete();
             this.tmp = null;
         } catch (Error err) {
@@ -100,7 +90,7 @@ class Geary.EngineTest : TestCase {
         try {
             this.engine.add_account(
                 new AccountInformation(
-                    "foo", this.config, this.data,
+                    "foo",
                     new MockServiceInformation(),
                     new MockServiceInformation()
                 ),
@@ -115,7 +105,7 @@ class Geary.EngineTest : TestCase {
 
             this.engine.add_account(
                 new AccountInformation(
-                    "bar", this.config, this.data,
+                    "bar",
                     new MockServiceInformation(),
                     new MockServiceInformation()
                 ),

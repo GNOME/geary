@@ -8,18 +8,36 @@ public class AccountManager : GLib.Object {
 
 
     private Geary.Engine engine;
+    private GLib.File user_config_dir;
+    private GLib.File user_data_dir;
 
 
-    public AccountManager(Geary.Engine engine) {
+    public AccountManager(Geary.Engine engine,
+                          GLib.File user_config_dir,
+                          GLib.File user_data_dir) {
         this.engine = engine;
+        this.user_config_dir = user_config_dir;
+        this.user_data_dir = user_data_dir;
     }
 
+
+    public async void create_account_dirs(Geary.AccountInformation info,
+                                          Cancellable? cancellable = null)
+        throws GLib.Error {
+        GLib.File config = this.user_config_dir.get_child(info.id);
+        GLib.File data = this.user_data_dir.get_child(info.id);
+
+        yield Geary.Files.make_directory_with_parents(config, cancellable);
+        yield Geary.Files.make_directory_with_parents(data, cancellable);
+
+        info.set_account_directories(config, data);
+    }
 
     public async void add_existing_accounts_async(GLib.Cancellable? cancellable = null)
         throws GLib.Error {
         GLib.FileEnumerator? enumerator = null;
         try {
-            enumerator = yield this.engine.user_config_dir.enumerate_children_async(
+            enumerator = yield this.user_config_dir.enumerate_children_async(
                 "standard::*",
                 FileQueryInfoFlags.NONE,
                 Priority.DEFAULT,
@@ -69,7 +87,7 @@ public class AccountManager : GLib.Object {
     public Geary.AccountInformation? load_from_file(string id)
         throws Error {
 
-        File file = this.engine.user_config_dir.get_child(id).get_child(Geary.Config.SETTINGS_FILENAME);
+        File file = this.user_config_dir.get_child(id).get_child(Geary.Config.SETTINGS_FILENAME);
 
         KeyFile key_file = new KeyFile();
         key_file.load_from_file(file.get_path() ?? "", KeyFileFlags.NONE);
@@ -85,8 +103,12 @@ public class AccountManager : GLib.Object {
         switch (provider) {
             case Geary.CredentialsProvider.LIBSECRET:
                 mediator = new SecretMediator();
-                imap_information = new Geary.LocalServiceInformation(Geary.Service.IMAP, this.engine.user_config_dir.get_child(id), mediator);
-                smtp_information = new Geary.LocalServiceInformation(Geary.Service.SMTP, this.engine.user_config_dir.get_child(id), mediator);
+                imap_information = new Geary.LocalServiceInformation(
+                    Geary.Service.IMAP, file, mediator
+                );
+                smtp_information = new Geary.LocalServiceInformation(
+                    Geary.Service.SMTP, file, mediator
+                );
                 break;
             default:
                 mediator = null;
@@ -95,13 +117,13 @@ public class AccountManager : GLib.Object {
                 break;
         }
 
-        Geary.AccountInformation info = new Geary.AccountInformation(id,
-                            this.engine.user_config_dir.get_child(id),
-                            this.engine.user_data_dir.get_child(id),
-                            imap_information,
-                            smtp_information);
-
-
+        Geary.AccountInformation info = new Geary.AccountInformation(
+            id, imap_information, smtp_information
+        );
+        info.set_account_directories(
+            this.user_config_dir.get_child(id),
+            this.user_data_dir.get_child(id)
+        );
 
         // This is the only required value at the moment?
         string primary_email = key_file.get_value(Geary.Config.GROUP, Geary.Config.PRIMARY_EMAIL_KEY);
@@ -167,7 +189,7 @@ public class AccountManager : GLib.Object {
     }
 
     public async void store_to_file(Geary.AccountInformation info,
-                                    Cancellable? cancellable = null) {
+                                    GLib.Cancellable? cancellable = null) {
         // Ensure only one async task is saving an info at once, since
         // at least the Engine can cause multiple saves to be called
         // in quick succession when updating special folder config.
@@ -180,25 +202,12 @@ public class AccountManager : GLib.Object {
         }
     }
 
-    private async void store_to_file_locked(Geary.AccountInformation info, Cancellable? cancellable = null) {
-        File? file = info.config_dir.get_child(Geary.Config.SETTINGS_FILENAME);
-
-        if (!info.config_dir.query_exists(cancellable)) {
-            try {
-                info.config_dir.make_directory_with_parents();
-            } catch (Error err) {
-                error("Error creating configuration directory for account '%s': %s",
-                      info.id, err.message);
-            }
-        }
-
-        if (!info.data_dir.query_exists(cancellable)) {
-            try {
-                info.data_dir.make_directory_with_parents();
-            } catch (Error err) {
-                error("Error creating storage directory for account '%s': %s",
-                      info.id, err.message);
-            }
+    private async void store_to_file_locked(Geary.AccountInformation info,
+                                            GLib.Cancellable? cancellable = null) {
+        File? file = info.settings_file;
+        if (file == null) {
+            debug("Account information does not have a settings filed");
+            return;
         }
 
         if (!file.query_exists(cancellable)) {
@@ -208,6 +217,7 @@ public class AccountManager : GLib.Object {
                 debug("Error creating account info file: %s", err.message);
             }
         }
+
         KeyFile key_file = new KeyFile();
         key_file.set_value(Geary.Config.GROUP, Geary.Config.CREDENTIALS_METHOD_KEY, info.imap.credentials_method.to_string());
         key_file.set_value(Geary.Config.GROUP, Geary.Config.CREDENTIALS_PROVIDER_KEY, info.imap.credentials_provider.to_string());
