@@ -15,35 +15,47 @@ public class AccountManager : GLib.Object {
     }
 
 
-    public async void add_existing_accounts_async(Cancellable? cancellable = null) throws Error {
-        yield Geary.Files.make_directory_with_parents(
-            this.engine.user_data_dir, cancellable
-        );
+    public async void add_existing_accounts_async(GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
+        GLib.FileEnumerator? enumerator = null;
+        try {
+            enumerator = yield this.engine.user_config_dir.enumerate_children_async(
+                "standard::*",
+                FileQueryInfoFlags.NONE,
+                Priority.DEFAULT,
+                cancellable
+            );
+        } catch (GLib.IOError.NOT_FOUND err) {
+            // Don't worry about the dir not being found, it just
+            // means we have no accounts to load.
+        }
 
-        FileEnumerator enumerator
-            = yield this.engine.user_config_dir.enumerate_children_async("standard::*",
-                FileQueryInfoFlags.NONE, Priority.DEFAULT, cancellable);
-
-        for (;;) {
-            List<FileInfo> info_list = yield enumerator.next_files_async(
-                1, Priority.DEFAULT, cancellable
+        while (enumerator != null && !cancellable.is_cancelled()) {
+            // Get 10 at a time to batch the IO together
+            GLib.List<GLib.FileInfo> info_list = yield enumerator.next_files_async(
+                10, GLib.Priority.DEFAULT, cancellable
             );
 
-            if (info_list.length() == 0)
-                break;
-
-            FileInfo info = info_list.nth_data(0);
-            if (info.get_file_type() == FileType.DIRECTORY) {
-                try {
-                    string id = info.get_name();
-                    this.engine.add_account(load_from_file(id));
-                } catch (Error err) {
-                    // XXX want to report this problem to the user
-                    // somehow, but at this point in the app's
-                    // lifecycle we don't even have a main window.
-                    warning("Ignoring empty/bad config in %s: %s",
-                            info.get_name(), err.message);
+            uint len = info_list.length();
+            for (uint i = 0; i < len && !cancellable.is_cancelled(); i++) {
+                GLib.FileInfo info = info_list.nth_data(i);
+                if (info.get_file_type() == FileType.DIRECTORY) {
+                    try {
+                        string id = info.get_name();
+                        this.engine.add_account(load_from_file(id));
+                    } catch (GLib.Error err) {
+                        // XXX want to report this problem to the user
+                        // somehow, but at this point in the app's
+                        // lifecycle we don't even have a main window.
+                        warning("Ignoring empty/bad config in %s: %s",
+                                info.get_name(), err.message);
+                    }
                 }
+            }
+
+            if (len == 0) {
+                // We're done
+                enumerator = null;
             }
         }
      }
