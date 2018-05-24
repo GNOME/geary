@@ -25,7 +25,7 @@ public class PasswordDialog {
     
     public PasswordDialog(Gtk.Window? parent, bool smtp, Geary.AccountInformation account_information,
         Geary.ServiceFlag password_flags) {
-        Gtk.Builder builder = GearyApplication.instance.create_builder("password-dialog.glade");
+        Gtk.Builder builder = GioUtil.create_builder("password-dialog.glade");
         
         dialog = (Gtk.Dialog) builder.get_object("PasswordDialog");
         dialog.transient_for = parent;

@@ -17,8 +17,8 @@ public class CertificateWarningDialog {
     
     public CertificateWarningDialog(Gtk.Window? parent, Geary.AccountInformation account_information,
         Geary.Service service, TlsCertificateFlags warnings, bool is_validation) {
-        Gtk.Builder builder = GearyApplication.instance.create_builder("certificate_warning_dialog.glade");
-        
+        Gtk.Builder builder = GioUtil.create_builder("certificate_warning_dialog.glade");
+
         dialog = (Gtk.Dialog) builder.get_object("CertificateWarningDialog");
         dialog.transient_for = parent;
         dialog.modal = true;

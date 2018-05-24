@@ -334,16 +334,6 @@ public class GearyApplication : Gtk.Application {
     }
 
     /**
-     * Creates a GTK builder given the name of a GResource.
-     *
-     * @deprecated Use {@link GioUtil.create_builder} instead.
-     */
-    [Version (deprecated = true)]
-    public Gtk.Builder create_builder(string name) {
-        return GioUtil.create_builder(name);
-    }
-
-    /**
      * Displays a URI on the current active window, if any.
      */
     public void show_uri(string uri) throws Error {

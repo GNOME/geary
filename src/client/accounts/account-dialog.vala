@@ -76,7 +76,7 @@ public class AccountDialog : Gtk.Dialog {
     private Geary.AccountInformation? get_account_info(string id) {
     Gee.Map<string, Geary.AccountInformation> accounts;
         try {
-            accounts = Geary.Engine.instance.get_accounts();
+            accounts = this.application.engine.get_accounts();
         } catch (Error e) {
             debug("Error getting account info: %s", e.message);
             

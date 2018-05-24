@@ -37,9 +37,9 @@ public class AccountDialogEditAlternateEmailsPane : AccountDialogPane {
     
     public AccountDialogEditAlternateEmailsPane(Gtk.Stack stack) {
         base (stack);
-        
-        Gtk.Builder builder = GearyApplication.instance.create_builder("edit_alternate_emails.glade");
-        
+
+        Gtk.Builder builder = GioUtil.create_builder("edit_alternate_emails.glade");
+
         // Primary container
         pack_start((Gtk.Widget) builder.get_object("container"));
         

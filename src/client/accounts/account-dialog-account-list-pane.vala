@@ -49,7 +49,7 @@ public class AccountDialogAccountListPane : AccountDialogPane {
         Gee.LinkedList<Geary.AccountInformation> account_list =
             new Gee.LinkedList<Geary.AccountInformation>();
         try {
-            account_list.insert_all(0, Geary.Engine.instance.get_accounts().values);
+            account_list.insert_all(0, this.application.engine.get_accounts().values);
         } catch (Error e) {
             debug("Error enumerating accounts: %s", e.message);
         }
@@ -74,8 +74,8 @@ public class AccountDialogAccountListPane : AccountDialogPane {
         scroll.get_style_context().set_junction_sides(Gtk.JunctionSides.BOTTOM);
         
         // Watch for accounts to be added/removed.
-        Geary.Engine.instance.account_added.connect(on_account_added);
-        Geary.Engine.instance.account_removed.connect(on_account_removed);
+        this.application.engine.account_added.connect(on_account_added);
+        this.application.engine.account_removed.connect(on_account_removed);
     }
     
     private void notify_edit_account() {
@@ -206,7 +206,7 @@ public class AccountDialogAccountListPane : AccountDialogPane {
         
         Gee.Map<string, Geary.AccountInformation> all_accounts;
         try {
-            all_accounts = Geary.Engine.instance.get_accounts();
+            all_accounts = this.application.engine.get_accounts();
         } catch (Error e) {
             debug("Error enumerating accounts: %s", e.message);
             
