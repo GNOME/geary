@@ -71,29 +71,21 @@ public class Geary.Engine : BaseObject {
     public signal void closed();
 
     /**
-     * Fired when an account becomes available in the engine.  Opening the
-     * engine makes all existing accounts available; newly created accounts are
-     * also made available as soon as they're stored.
+     * Fired when an account becomes available in the engine.
+     *
+     * Accounts are made available as soon as they're added to the
+     * engine.
      */
     public signal void account_available(AccountInformation account);
 
     /**
-     * Fired when an account becomes unavailable in the engine.  Closing the
-     * engine makes all accounts unavailable; deleting an account also makes it
-     * unavailable.
+     * Fired when an account becomes unavailable in the engine.
+     *
+     * Accounts are become available as soon when they are removed from the
+     * engine or the engine is closed.
      */
     public signal void account_unavailable(AccountInformation account);
 
-    /**
-     * Fired when a new account is created.
-     */
-    public signal void account_added(AccountInformation account);
-
-    /**
-     * Fired when an account is deleted.
-     */
-    public signal void account_removed(AccountInformation account);
-    
     /**
      * Fired when an {@link Endpoint} associated with the {@link AccountInformation} reports
      * TLS certificate warnings during connection.
@@ -130,9 +122,9 @@ public class Geary.Engine : BaseObject {
         Imap.init();
         HTML.init();
     }
-    
+
     /**
-     * Initializes the engine, and makes all existing accounts available.
+     * Initializes the engine so that accounts can be added to it.
      */
     public async void open_async(GLib.File resource_dir,
                                  GLib.Cancellable? cancellable = null)
@@ -155,12 +147,12 @@ public class Geary.Engine : BaseObject {
    }
 
     /**
-     * Uninitializes the engine, and makes all accounts unavailable.
+     * Uninitializes the engine, and removes all known accounts.
      */
     public async void close_async(Cancellable? cancellable = null) throws Error {
         if (!is_open)
             return;
-        
+
         Gee.Collection<AccountInformation> unavailable_accounts = accounts.values;
         accounts.clear();
 
@@ -382,10 +374,9 @@ public class Geary.Engine : BaseObject {
     }
 
     /**
-     * Adds the account to be tracked by the engine.  Should only be called from
-     * AccountInformation.store_async() and this class.
+     * Adds the account to be tracked by the engine.
      */
-    public void add_account(AccountInformation account, bool created = false) throws Error {
+    public void add_account(AccountInformation account) throws Error {
         check_opened();
 
         bool already_added = accounts.has_key(account.id);
@@ -394,16 +385,12 @@ public class Geary.Engine : BaseObject {
 
         if (!already_added) {
             account.untrusted_host.connect(on_untrusted_host);
-            
-            if (created)
-                account_added(account);
-            
             account_available(account);
         }
     }
 
     /**
-     * Deletes the account from disk.
+     * Removes an account from the engine.
      */
     public async void remove_account_async(AccountInformation account,
                                            Cancellable? cancellable = null) throws Error {
@@ -420,13 +407,10 @@ public class Geary.Engine : BaseObject {
 
             // Removal *MUST* be done in the following order:
             // 1. Send the account-unavailable signal.
-            // Files will be deleted client side.
+            // Account will be removed client side.
             account_unavailable(account);
 
-            // 2. Send the account-removed signal.
-            account_removed(account);
-
-            // 3. Remove the account data from the engine.
+            // 2. Remove the account data from the engine.
             account_instances.unset(account.id);
         }
     }

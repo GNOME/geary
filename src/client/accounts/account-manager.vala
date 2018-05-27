@@ -90,6 +90,12 @@ public class AccountManager : GLib.Object {
     private Goa.Client? goa_service = null;
 
 
+    /** Fired when a new account is created. */
+    public signal void account_added(Geary.AccountInformation added);
+
+    /** Fired when an account is deleted. */
+    public signal void account_removed(Geary.AccountInformation removed);
+
     /** Fired when a SSO account has been updated. */
     public signal void sso_account_updated(Geary.AccountInformation updated);
 
@@ -457,12 +463,14 @@ public class AccountManager : GLib.Object {
         }
 
         this.enabled_accounts.unset(info.id);
+        account_removed(info);
     }
 
     private void enable_account(Geary.AccountInformation account)
         throws GLib.Error {
         this.enabled_accounts.set(account.id, account);
         this.engine.add_account(account);
+        account_added(account);
     }
 
     private inline string to_geary_id(Goa.Object account) {

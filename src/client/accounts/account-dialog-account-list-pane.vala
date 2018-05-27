@@ -72,12 +72,16 @@ public class AccountDialogAccountListPane : AccountDialogPane {
         Gtk.ScrolledWindow scroll = (Gtk.ScrolledWindow) builder.get_object("scrolledwindow");
         toolbar.get_style_context().set_junction_sides(Gtk.JunctionSides.TOP);
         scroll.get_style_context().set_junction_sides(Gtk.JunctionSides.BOTTOM);
-        
+
         // Watch for accounts to be added/removed.
-        this.application.engine.account_added.connect(on_account_added);
-        this.application.engine.account_removed.connect(on_account_removed);
+        this.application.controller.account_manager.account_added.connect(
+            on_account_added
+        );
+        this.application.controller.account_manager.account_removed.connect(
+            on_account_removed
+        );
     }
-    
+
     private void notify_edit_account() {
         string? account = get_selected_account();
         if (account != null)
