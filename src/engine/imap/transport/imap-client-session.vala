@@ -493,11 +493,11 @@ public class Geary.Imap.ClientSession : BaseObject {
             case State.BROKEN:
                 // no problem-o
             break;
-            
+
             default:
-                error("[%s] ClientSession ref dropped while still active", to_string());
+                warning("[%s] ClientSession ref dropped while still active", to_string());
         }
-        
+
         debug("DTOR: ClientSession %s", to_string());
     }
     
@@ -702,8 +702,12 @@ public class Geary.Imap.ClientSession : BaseObject {
         
         // wait for the initial greeting or a timeout ... this prevents the caller from turning
         // around and issuing a command while still in CONNECTING state
-        yield connect_waiter.wait_async(cancellable);
-        
+        try {
+            yield connect_waiter.wait_async(cancellable);
+        } catch (GLib.IOError.CANCELLED err) {
+            connect_err = err;
+        }
+
         // cancel the timeout, if it's not already fired
         timeout.cancel();
         

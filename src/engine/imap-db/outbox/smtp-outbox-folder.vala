@@ -145,6 +145,11 @@ private class Geary.SmtpOutboxFolder :
                 }
                 notify_report_problem(problem, err);
                 cancellable.cancel();
+            } catch (IOError.CANCELLED err) {
+                // Nothing to do here — we're already cancelled. In
+                // particular we don't want to report the cancelled
+                // error as a problem since this is the normal
+                // shutdown method.
             } catch (IOError err) {
                 notify_report_problem(ProblemType.for_ioerror(err), err);
                 cancellable.cancel();
