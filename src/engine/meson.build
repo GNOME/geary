@@ -40,6 +40,7 @@ geary_engine_vala_sources = files(
   'api/geary-search-folder.vala',
   'api/geary-search-query.vala',
   'api/geary-service.vala',
+  'api/geary-service-information.vala',
   'api/geary-service-provider.vala',
   'api/geary-special-folder-type.vala',
 
@@ -296,6 +297,7 @@ geary_engine_vala_sources = files(
 
   'util/util-ascii.vala',
   'util/util-collection.vala',
+  'util/util-config-file.vala',
   'util/util-connectivity-manager.vala',
   'util/util-files.vala',
   'util/util-generic-capabilities.vala',

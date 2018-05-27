@@ -76,6 +76,8 @@ public class GearyController : Geary.BaseObject {
 
     public weak GearyApplication application { get; private set; } // circular ref
 
+    public AccountManager? account_manager { get; private set; default = null; }
+
     public MainWindow? main_window { get; private set; default = null; }
 
     public Geary.App.ConversationMonitor? current_conversations { get; private set; default = null; }
@@ -182,6 +184,8 @@ public class GearyController : Geary.BaseObject {
      * Starts the controller and brings up Geary.
      */
     public async void open_async() {
+        Geary.Engine engine = this.application.engine;
+
         // This initializes the IconFactory, important to do before
         // the actions are created (as they refer to some of Geary's
         // custom icons)
@@ -238,10 +242,10 @@ public class GearyController : Geary.BaseObject {
 
         enable_message_buttons(false);
 
-        Geary.Engine.instance.account_available.connect(on_account_available);
-        Geary.Engine.instance.account_unavailable.connect(on_account_unavailable);
-        Geary.Engine.instance.untrusted_host.connect(on_untrusted_host);
-        
+        engine.account_available.connect(on_account_available);
+        engine.account_unavailable.connect(on_account_unavailable);
+        engine.untrusted_host.connect(on_untrusted_host);
+
         // Connect to various UI signals.
         main_window.conversation_list_view.conversations_selected.connect(on_conversations_selected);
         main_window.conversation_list_view.conversation_activated.connect(on_conversation_activated);
@@ -289,21 +293,22 @@ public class GearyController : Geary.BaseObject {
         }
 
         // Start Geary.
+        this.account_manager = new AccountManager(
+            engine,
+            this.application.get_user_config_directory(),
+            this.application.get_user_data_directory()
+        );
         try {
-            yield Geary.Engine.instance.open_async(
-                this.application.get_user_config_directory(),
-                this.application.get_user_data_directory(),
-                this.application.get_resource_directory(),
-                new SecretMediator(this.application)
-            );
-            if (Geary.Engine.instance.get_accounts().size == 0) {
+            yield engine.open_async(this.application.get_resource_directory());
+            yield this.account_manager.add_existing_accounts_async(null);
+            if (engine.get_accounts().size == 0) {
                 create_account();
             }
         } catch (Error e) {
-            error("Error opening Geary.Engine instance: %s", e.message);
+            warning("Error opening Geary.Engine instance: %s", e.message);
         }
     }
-    
+
     /**
      * At the moment, this is non-reversible, i.e. once closed a GearyController cannot be
      * re-opened.
@@ -419,6 +424,8 @@ public class GearyController : Geary.BaseObject {
             message("Error closing Geary Engine instance: %s", err.message);
         }
 
+        this.account_manager = null;
+
         this.application.remove_window(this.main_window);
         this.main_window.destroy();
         this.main_window = null;
@@ -471,13 +478,13 @@ public class GearyController : Geary.BaseObject {
     }
 
     /**
-     * Closes the account and removes it entirely.
+     * Closes an account and deletes it from disk.
      */
     public async void remove_account_async(Geary.AccountInformation info,
                                            Cancellable? cancellable = null) {
         try {
             yield close_account(info);
-            yield this.application.engine.remove_account_async(info, cancellable);
+            yield this.account_manager.remove_async(info, cancellable);
         } catch (Error err) {
             report_problem(
                 new Geary.ProblemReport(Geary.ProblemType.GENERIC_ERROR, err)
@@ -846,27 +853,41 @@ public class GearyController : Geary.BaseObject {
         
         if (result == Geary.Engine.ValidationResult.OK) {
             Geary.AccountInformation real_account_information = account_information;
-            if (account_information.is_copy()) {
+            if (account_information.is_copy) {
                 // We have a temporary copy of the account.  Find the "real" acct info object and
                 // copy the new data into it.
                 real_account_information = get_real_account_information(account_information);
                 real_account_information.copy_from(account_information);
             }
-            
-            real_account_information.store_async.begin(cancellable);
-            do_update_stored_passwords_async.begin(Geary.ServiceFlag.IMAP | Geary.ServiceFlag.SMTP,
-                real_account_information);
-            
-            debug("Successfully validated account information");
+
+            try {
+                if (real_account_information.settings_file == null) {
+                    yield this.account_manager.create_account_dirs(
+                        real_account_information
+                    );
+                }
+                yield this.account_manager.save_account(real_account_information);
+                yield do_update_stored_passwords_async(
+                    Geary.ServiceFlag.IMAP | Geary.ServiceFlag.SMTP,
+                    real_account_information
+                );
+                debug("Successfully validated account information");
+            } catch (GLib.Error err) {
+                report_problem(
+                    new Geary.ProblemReport(
+                        Geary.ProblemType.GENERIC_ERROR, err
+                    )
+                );
+            }
         }
-        
+
         return result;
     }
     
     // Returns the "real" account info associated with a copy.  If it's not a copy, null is returned.
     public Geary.AccountInformation? get_real_account_information(
         Geary.AccountInformation account_information) {
-        if (account_information.is_copy()) {
+        if (account_information.is_copy) {
             try {
                  return Geary.Engine.instance.get_accounts().get(account_information.id);
             } catch (Error e) {
@@ -883,7 +904,7 @@ public class GearyController : Geary.BaseObject {
         Geary.AccountInformation? new_info = old_info;
         if (login_dialog == null) {
             // Create here so we know GTK is initialized.
-            login_dialog = new LoginDialog();
+            login_dialog = new LoginDialog(this.application);
         } else if (!login_dialog.get_visible()) {
             // If the dialog has been dismissed, exit here.
             this.application.exit();
@@ -905,8 +926,8 @@ public class GearyController : Geary.BaseObject {
             login_dialog.show_spinner(true);
             new_info = login_dialog.get_account_information();
             
-            if ((!new_info.default_imap_server_ssl && !new_info.default_imap_server_starttls)
-                || (!new_info.default_smtp_server_ssl && !new_info.default_smtp_server_starttls)) {
+            if ((!new_info.imap.use_ssl && !new_info.imap.use_starttls)
+                || (!new_info.smtp.use_ssl && !new_info.smtp.use_starttls)) {
                 ConfirmationDialog security_dialog = new ConfirmationDialog(main_window,
                     _("Your settings are insecure"),
                     _("Your IMAP and/or SMTP settings do not specify SSL or TLS.  This means your username and password could be read by another person on the network.  Are you sure you want to do this?"),
@@ -1549,6 +1570,8 @@ public class GearyController : Geary.BaseObject {
     private void on_special_folder_type_changed(Geary.Folder folder,
                                                 Geary.SpecialFolderType old_type,
                                                 Geary.SpecialFolderType new_type) {
+        Geary.AccountInformation info = folder.account.information;
+
         // Update the main window
         this.main_window.folder_list.remove_folder(folder);
         this.main_window.folder_list.add_folder(folder);
@@ -1559,10 +1582,26 @@ public class GearyController : Geary.BaseObject {
             (folder.special_folder_type == Geary.SpecialFolderType.NONE &&
              is_inbox_descendant(folder))) {
             this.new_messages_monitor.add_folder(
-                folder,
-                this.accounts.get(folder.account.information).cancellable
+                folder, this.accounts.get(info).cancellable
             );
         }
+
+        this.account_manager.save_account.begin(
+            info, null,
+            (obj, res) => {
+                try {
+                    this.account_manager.save_account.end(res);
+                } catch (GLib.Error err) {
+                    report_problem(
+                        new Geary.AccountProblemReport(
+                            Geary.ProblemType.GENERIC_ERROR,
+                            info,
+                            err
+                        )
+                    );
+                }
+            }
+        );
     }
 
     private void on_folders_available_unavailable(Geary.Account account,

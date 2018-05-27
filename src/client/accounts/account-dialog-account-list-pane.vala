@@ -12,25 +12,28 @@ public class AccountDialogAccountListPane : AccountDialogPane {
         ACCOUNT_ADDRESS;
     }
 
+    private GearyApplication application;
     private Gtk.TreeView list_view;
     private Gtk.ListStore list_model = new Gtk.ListStore(3, typeof(string), typeof(string), typeof(string));
     private Gtk.Action edit_action;
     private Gtk.Action delete_action;
-    
+
     public signal void add_account();
 
     public signal void edit_account(string id);
 
     public signal void delete_account(string id);
 
-    public AccountDialogAccountListPane(Gtk.Stack stack) {
+    public AccountDialogAccountListPane(GearyApplication application, Gtk.Stack stack) {
         base(stack);
-        Gtk.Builder builder = GearyApplication.instance.create_builder("account_list.glade");
+        this.application = application;
+
+        Gtk.Builder builder = GioUtil.create_builder("account_list.glade");
         pack_end((Gtk.Box) builder.get_object("container"));
         Gtk.ActionGroup actions = (Gtk.ActionGroup) builder.get_object("account list actions");
         edit_action = actions.get_action("edit_account");
         delete_action = actions.get_action("delete_account");
-        
+
         // Set up list.
         list_view = (Gtk.TreeView) builder.get_object("account_list");
         list_view.set_model(list_model);
@@ -46,7 +49,7 @@ public class AccountDialogAccountListPane : AccountDialogPane {
         Gee.LinkedList<Geary.AccountInformation> account_list =
             new Gee.LinkedList<Geary.AccountInformation>();
         try {
-            account_list.insert_all(0, Geary.Engine.instance.get_accounts().values);
+            account_list.insert_all(0, this.application.engine.get_accounts().values);
         } catch (Error e) {
             debug("Error enumerating accounts: %s", e.message);
         }
@@ -71,8 +74,8 @@ public class AccountDialogAccountListPane : AccountDialogPane {
         scroll.get_style_context().set_junction_sides(Gtk.JunctionSides.BOTTOM);
         
         // Watch for accounts to be added/removed.
-        Geary.Engine.instance.account_added.connect(on_account_added);
-        Geary.Engine.instance.account_removed.connect(on_account_removed);
+        this.application.engine.account_added.connect(on_account_added);
+        this.application.engine.account_removed.connect(on_account_removed);
     }
     
     private void notify_edit_account() {
@@ -123,7 +126,7 @@ public class AccountDialogAccountListPane : AccountDialogPane {
     private void update_buttons() {
         edit_action.sensitive = get_selected_account() != null;
         delete_action.sensitive = edit_action.sensitive &&
-            GearyApplication.instance.controller.get_num_accounts() > 1;
+            this.application.controller.get_num_accounts() > 1;
     }
     
     private void on_account_added(Geary.AccountInformation account) {
@@ -203,7 +206,7 @@ public class AccountDialogAccountListPane : AccountDialogPane {
         
         Gee.Map<string, Geary.AccountInformation> all_accounts;
         try {
-            all_accounts = Geary.Engine.instance.get_accounts();
+            all_accounts = this.application.engine.get_accounts();
         } catch (Error e) {
             debug("Error enumerating accounts: %s", e.message);
             
@@ -220,7 +223,16 @@ public class AccountDialogAccountListPane : AccountDialogPane {
                 // To prevent unnecessary work, only set ordinal if there's a change.
                 if (i != account.ordinal) {
                     account.ordinal = i;
-                    account.store_async.begin(null);
+                    this.application.controller.account_manager.save_account.begin(
+                        account, null,
+                        (obj, res) => {
+                            try {
+                                this.application.controller.account_manager.save_account.end(res);
+                            } catch (GLib.Error err) {
+                                warning("Error saving account: %s", err.message);
+                            }
+                        }
+                    );
                 }
             }
             

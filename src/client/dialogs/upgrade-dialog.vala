@@ -22,9 +22,9 @@ public class UpgradeDialog : Object {
      */
     public UpgradeDialog() {
         // Load UI.
-        Gtk.Builder builder = GearyApplication.instance.create_builder("upgrade_dialog.glade");
+        Gtk.Builder builder = GioUtil.create_builder("upgrade_dialog.glade");
         dialog = (Gtk.Dialog) builder.get_object("dialog");
-        
+
         // Hook up signals.
         monitor.start.connect(on_start);
         monitor.finish.connect(on_close);

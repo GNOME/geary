@@ -11,6 +11,7 @@ engine/api/geary-aggregated-folder-properties.vala
 engine/api/geary-attachment.vala
 engine/api/geary-base-object.vala
 engine/api/geary-composed-email.vala
+engine/api/geary-config.vala
 engine/api/geary-contact.vala
 engine/api/geary-contact-flags.vala
 engine/api/geary-contact-importance.vala
@@ -43,6 +44,7 @@ engine/api/geary-revokable.vala
 engine/api/geary-search-folder.vala
 engine/api/geary-search-query.vala
 engine/api/geary-service.vala
+engine/api/geary-service-information.vala
 engine/api/geary-service-provider.vala
 engine/api/geary-special-folder-type.vala
 
@@ -338,8 +340,10 @@ client/accounts/account-dialog-pane.vala
 client/accounts/account-dialog-remove-confirm-pane.vala
 client/accounts/account-dialog-remove-fail-pane.vala
 client/accounts/account-dialog-spinner-pane.vala
+client/accounts/account-manager.vala
 client/accounts/account-spinner-page.vala
 client/accounts/add-edit-page.vala
+client/accounts/local-service-information.vala
 client/accounts/login-dialog.vala
 
 client/components/client-web-view.vala

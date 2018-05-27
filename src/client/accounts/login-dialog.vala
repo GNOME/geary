@@ -6,16 +6,20 @@
 
 // Displays a dialog for collecting the user's login data.
 public class LoginDialog : Gtk.Dialog {
+
+
     private Gtk.Button ok_button;
     private Gtk.Button cancel_button;
-    private AddEditPage page = new AddEditPage();
+    private AddEditPage page;
     private AccountSpinnerPage spinner_page = new AccountSpinnerPage();
-    
-    public LoginDialog() {
+
+    public LoginDialog(GearyApplication application) {
         Object();
         set_type_hint(Gdk.WindowTypeHint.DIALOG);
         set_size_request(450, -1); // Sets min width.
-        
+
+        this.page = new AddEditPage(application);
+
         page.margin = 5;
         spinner_page.margin = 5;
         get_content_area().pack_start(page, true, true, 0);
@@ -37,17 +41,18 @@ public class LoginDialog : Gtk.Dialog {
 
         destroy.connect(() => {
             debug("User closed login dialog, exiting...");
-            GearyApplication.instance.exit(1);
+            application.exit(1);
         });
-        
+
         on_info_changed();
     }
-    
-    public LoginDialog.from_account_information(Geary.AccountInformation initial_account_information) {
-        this();
-        set_account_information(initial_account_information);
+
+    public LoginDialog.from_account_information(GearyApplication application,
+                                                Geary.AccountInformation initial) {
+        this(application);
+        set_account_information(initial);
     }
-    
+
     public void set_account_information(Geary.AccountInformation info,
         Geary.Engine.ValidationResult result = Geary.Engine.ValidationResult.OK) {
         page.set_account_information(info, result);

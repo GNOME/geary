@@ -59,7 +59,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         this.session_pool = new Imap.ClientSessionManager(
             this.information.id,
             this.information.get_imap_endpoint(),
-            this.information.imap_credentials
+            this.information.imap.credentials
         );
         this.session_pool.min_pool_size = IMAP_MIN_POOL_SIZE;
         this.session_pool.ready.connect(on_pool_session_ready);
@@ -109,11 +109,11 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         // To prevent spurious connection failures, we make sure we have the
         // IMAP password before attempting a connection.  This might have to be
         // reworked when we allow passwordless logins.
-        if (!this.information.imap_credentials.is_complete())
+        if (!this.information.imap.credentials.is_complete())
             yield this.information.get_passwords_async(ServiceFlag.IMAP);
 
         this.session_pool.credentials_updated(
-            this.information.imap_credentials
+            this.information.imap.credentials
         );
 
         // This will cause the session manager to open at least one
@@ -694,7 +694,6 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
                 path = root.get_child(search_names[0]);
 
             information.set_special_folder_path(special, path);
-            yield information.store_async(cancellable);
         }
 
         if (path in folder_map.keys) {
@@ -1007,7 +1006,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
                             if (this.information.fetch_passwords_async.end(ret)) {
                                 // Have a new password, so try that
                                 this.session_pool.credentials_updated(
-                                    this.information.imap_credentials
+                                    this.information.imap.credentials
                                 );
                             } else {
                                 // User cancelled, so indicate a login problem

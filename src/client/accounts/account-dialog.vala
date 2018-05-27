@@ -6,7 +6,12 @@
 
 public class AccountDialog : Gtk.Dialog {
     private const int MARGIN = 12;
-    
+
+    public new GearyApplication application {
+        get { return (GearyApplication) base.get_application(); }
+        set { base.set_application(value); }
+    }
+
     private Gtk.Stack stack = new Gtk.Stack();
     private AccountDialogAccountListPane account_list_pane;
     private AccountDialogAddEditPane add_edit_pane;
@@ -15,8 +20,10 @@ public class AccountDialog : Gtk.Dialog {
     private AccountDialogRemoveFailPane remove_fail_pane;
     private AccountDialogEditAlternateEmailsPane edit_alternate_emails_pane;
     private Gtk.HeaderBar headerbar = new Gtk.HeaderBar();
-    
-    public AccountDialog(Gtk.Window parent) {
+
+    public AccountDialog(GearyApplication application, Gtk.Window parent) {
+        this.application = application;
+
         set_size_request(450, -1); // Sets min size.
         headerbar.title = _("Accounts");
         headerbar.show_close_button = true;
@@ -29,8 +36,8 @@ public class AccountDialog : Gtk.Dialog {
         get_content_area().margin_bottom = MARGIN;
         
         // Add pages to stack.
-        account_list_pane = new AccountDialogAccountListPane(stack);
-        add_edit_pane = new AccountDialogAddEditPane(stack);
+        account_list_pane = new AccountDialogAccountListPane(application, stack);
+        add_edit_pane = new AccountDialogAddEditPane(application, stack);
         spinner_pane = new AccountDialogSpinnerPane(stack);
         remove_confirm_pane = new AccountDialogRemoveConfirmPane(stack);
         remove_fail_pane = new AccountDialogRemoveFailPane(stack);
@@ -69,7 +76,7 @@ public class AccountDialog : Gtk.Dialog {
     private Geary.AccountInformation? get_account_info(string id) {
     Gee.Map<string, Geary.AccountInformation> accounts;
         try {
-            accounts = Geary.Engine.instance.get_accounts();
+            accounts = this.application.engine.get_accounts();
         } catch (Error e) {
             debug("Error getting account info: %s", e.message);
             
@@ -112,9 +119,9 @@ public class AccountDialog : Gtk.Dialog {
         
         // Check for open composer windows.
         bool composer_widget_found = false;
-        Gee.List<ComposerWidget>? widgets = 
-            GearyApplication.instance.controller.get_composer_widgets_for_account(account);
-        
+        Gee.List<ComposerWidget>? widgets =
+            this.application.controller.get_composer_widgets_for_account(account);
+
         if (widgets != null) {
             foreach (ComposerWidget cw in widgets) {
                 if (cw.account.information == account &&
@@ -147,12 +154,12 @@ public class AccountDialog : Gtk.Dialog {
     
     private void on_delete_account_confirmed(Geary.AccountInformation? account) {
         assert(account != null); // Should not be able to happen since we checked earlier.
-        
+
         // Remove account, then set the page back to the account list.
-        GearyApplication.instance.controller.remove_account_async.begin(account, null, () => {
+        this.application.controller.remove_account_async.begin(account, null, () => {
             account_list_pane.present(); });
     }
-    
+
     private void on_save_add_or_edit(Geary.AccountInformation info) {
         // Show the busy spinner.
         spinner_pane.present();
@@ -164,12 +171,12 @@ public class AccountDialog : Gtk.Dialog {
         
         // For account edits, we only need to validate the connection if the credentials have changed.
         bool validate_connection = true;
-        if (add_edit_pane.get_mode() == AddEditPage.PageMode.EDIT && info.is_copy()) {
+        if (add_edit_pane.get_mode() == AddEditPage.PageMode.EDIT && info.is_copy) {
             Geary.AccountInformation? real_info =
-                GearyApplication.instance.controller.get_real_account_information(info);
+                this.application.controller.get_real_account_information(info);
             if (real_info != null) {
-                validate_connection = !real_info.imap_credentials.equal_to(info.imap_credentials) ||
-                    (info.smtp_credentials != null && !real_info.smtp_credentials.equal_to(info.smtp_credentials));
+                validate_connection = !real_info.imap.credentials.equal_to(info.imap.credentials) ||
+                    (info.smtp.credentials != null && !real_info.smtp.credentials.equal_to(info.smtp.credentials));
             }
         }
         
@@ -184,7 +191,7 @@ public class AccountDialog : Gtk.Dialog {
         Geary.Engine.ValidationOption options) {
         Geary.Engine.ValidationResult validation_result = Geary.Engine.ValidationResult.OK;
         for (;;) {
-            validation_result = yield GearyApplication.instance.controller.validate_async(
+            validation_result = yield this.application.controller.validate_async(
                 account_information, options);
             
             // If account was successfully added return to the account list.
@@ -196,7 +203,7 @@ public class AccountDialog : Gtk.Dialog {
             
             // check for TLS warnings
             bool retry_required;
-            validation_result = yield GearyApplication.instance.controller.validation_check_for_tls_warnings_async(
+            validation_result = yield this.application.controller.validation_check_for_tls_warnings_async(
                 account_information, validation_result, out retry_required);
             if (!retry_required)
                 break;

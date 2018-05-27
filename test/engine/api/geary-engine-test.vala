@@ -7,11 +7,11 @@
 
 class Geary.EngineTest : TestCase {
 
+
     private Engine? engine = null;
     private File? tmp = null;
-    private File? config = null;
-    private File? data = null;
     private File? res = null;
+
 
     public EngineTest() {
         base("Geary.EngineTest");
@@ -39,18 +39,12 @@ class Geary.EngineTest : TestCase {
             GLib.DirUtils.make_tmp("geary-engine-test-XXXXXX")
         );
 
-        this.config = this.tmp.get_child("config");
-        this.config.make_directory();
-
-        this.data = this.tmp.get_child("data");
-        this.data.make_directory();
-
         this.res = this.tmp.get_child("res");
         this.res.make_directory();
 
         this.engine = new Engine();
         this.engine.open_async.begin(
-            config, data, res, null, null,
+            res, null,
             (obj, res) => {
                 async_complete(res);
             });
@@ -60,8 +54,6 @@ class Geary.EngineTest : TestCase {
 	public override void tear_down () {
         try {
             this.res.delete();
-            this.data.delete();
-            this.config.delete();
             this.tmp.delete();
             this.tmp = null;
         } catch (Error err) {
@@ -71,19 +63,31 @@ class Geary.EngineTest : TestCase {
 
     public void create_orphan_account() throws Error {
         try {
-            AccountInformation info = this.engine.create_orphan_account();
+            AccountInformation info = this.engine.create_orphan_account(
+                new MockServiceInformation(),
+                new MockServiceInformation()
+            );
             assert(info.id == "account_01");
             this.engine.add_account(info, true);
 
-            info = this.engine.create_orphan_account();
+            info = this.engine.create_orphan_account(
+                new MockServiceInformation(),
+                new MockServiceInformation()
+            );
             assert(info.id == "account_02");
             this.engine.add_account(info, true);
 
-            info = this.engine.create_orphan_account();
+            info = this.engine.create_orphan_account(
+                new MockServiceInformation(),
+                new MockServiceInformation()
+            );
             assert(info.id == "account_03");
             this.engine.add_account(info, true);
 
-            info = this.engine.create_orphan_account();
+            info = this.engine.create_orphan_account(
+                new MockServiceInformation(),
+                new MockServiceInformation()
+            );
             assert(info.id == "account_04");
         } catch (Error err) {
             print("\nerr: %s\n", err.message);
@@ -92,28 +96,42 @@ class Geary.EngineTest : TestCase {
     }
 
     public void create_orphan_account_with_legacy() throws Error {
-        try {
-            this.engine.add_account(
-                new AccountInformation("foo", this.config, this.data),
-                true
-            );
+        this.engine.add_account(
+            new AccountInformation(
+                "foo",
+                new MockServiceInformation(),
+                new MockServiceInformation()
+            ),
+            true
+        );
 
-             AccountInformation info = this.engine.create_orphan_account();
-            assert(info.id == "account_01");
-            this.engine.add_account(info, true);
+        AccountInformation info = this.engine.create_orphan_account(
+            new MockServiceInformation(),
+            new MockServiceInformation()
+        );
+        assert(info.id == "account_01");
+        this.engine.add_account(info, true);
 
-            assert(this.engine.create_orphan_account().id == "account_02");
+        info = this.engine.create_orphan_account(
+            new MockServiceInformation(),
+            new MockServiceInformation()
+        );
+        assert(info.id == "account_02");
 
-            this.engine.add_account(
-                new AccountInformation("bar", this.config, this.data),
-                true
-            );
+        this.engine.add_account(
+            new AccountInformation(
+                "bar",
+                new MockServiceInformation(),
+                new MockServiceInformation()
+            ),
+            true
+        );
 
-            assert(this.engine.create_orphan_account().id == "account_02");
-        } catch (Error err) {
-            print("\nerr: %s\n", err.message);
-            assert_not_reached();
-        }
+        info = this.engine.create_orphan_account(
+            new MockServiceInformation(),
+            new MockServiceInformation()
+        );
+        assert(info.id == "account_02");
     }
 
     private void delete(File parent) throws Error {

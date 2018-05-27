@@ -15,8 +15,10 @@ geary_client_vala_sources = files(
   'accounts/account-dialog-remove-confirm-pane.vala',
   'accounts/account-dialog-remove-fail-pane.vala',
   'accounts/account-dialog-spinner-pane.vala',
+  'accounts/account-manager.vala',
   'accounts/account-spinner-page.vala',
   'accounts/add-edit-page.vala',
+  'accounts/local-service-information.vala',
   'accounts/login-dialog.vala',
 
   'components/client-web-view.vala',

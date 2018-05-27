@@ -38,8 +38,8 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
     private Geary.Nonblocking.Mutex dialog_mutex = new Geary.Nonblocking.Mutex();
 
 
-    public SecretMediator(GearyApplication instance) {
-        this.instance = instance;
+    public SecretMediator() {
+        this.instance = GearyApplication.instance;
     }
 
     public virtual async string? get_password_async(Geary.Service service,
@@ -207,12 +207,12 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
         string host = "";
         switch (service) {
         case Geary.Service.IMAP:
-            login = account.imap_credentials.user;
+            login = account.imap.credentials.user;
             host = account.get_imap_endpoint().remote_address.get_hostname();
             break;
 
         case Geary.Service.SMTP:
-            login = account.smtp_credentials.user;
+            login = account.smtp.credentials.user;
             host = account.get_smtp_endpoint().remote_address.get_hostname();
             break;
 
@@ -231,10 +231,10 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
     private Geary.Credentials get_credentials(Geary.Service service, Geary.AccountInformation account) {
         switch (service) {
         case Geary.Service.IMAP:
-            return account.imap_credentials;
+            return account.imap.credentials;
 
         case Geary.Service.SMTP:
-            return account.smtp_credentials;
+            return account.smtp.credentials;
 
         default:
             assert_not_reached();

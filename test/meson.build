@@ -18,6 +18,7 @@ geary_test_engine_sources = [
   'engine/api/geary-email-properties-mock.vala',
   'engine/api/geary-folder-mock.vala',
   'engine/api/geary-folder-path-mock.vala',
+  'engine/api/geary-service-information-mock.vala',
 
   'engine/api/geary-attachment-test.vala',
   'engine/api/geary-engine-test.vala',
@@ -40,6 +41,7 @@ geary_test_engine_sources = [
   'engine/rfc822-part-test.vala',
   'engine/rfc822-utils-test.vala',
   'engine/util-ascii-test.vala',
+  'engine/util-config-file-test.vala',
   'engine/util-html-test.vala',
   'engine/util-idle-manager-test.vala',
   'engine/util-inet-test.vala',

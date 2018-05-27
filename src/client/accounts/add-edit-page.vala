@@ -154,7 +154,9 @@ public class AddEditPage : Gtk.Box {
         SSL = 1,
         STARTTLS = 2
     }
-    
+
+    private GearyApplication application;
+
     private PageMode mode = PageMode.WELCOME;
     
     private Gtk.Widget container_widget;
@@ -219,12 +221,13 @@ public class AddEditPage : Gtk.Box {
     public signal void size_changed();
     
     public signal void edit_alternate_emails();
-    
-    public AddEditPage() {
+
+    public AddEditPage(GearyApplication application) {
         Object(orientation: Gtk.Orientation.VERTICAL, spacing: 4);
-        
-        Gtk.Builder builder = GearyApplication.instance.create_builder("login.glade");
-        
+        this.application = application;
+
+        Gtk.Builder builder = GioUtil.create_builder("login.glade");
+
         // Primary container.
         container_widget = (Gtk.Widget) builder.get_object("container");
         pack_start(container_widget);
@@ -272,7 +275,7 @@ public class AddEditPage : Gtk.Box {
         textview_email_signature = new Gtk.TextView();
         edit_window.add(textview_email_signature);
 
-        preview_webview = new ClientWebView(GearyApplication.instance.config);
+        preview_webview = new ClientWebView(application.config);
 
         Gtk.ScrolledWindow preview_window = new Gtk.ScrolledWindow(null, null);
         preview_window.set_policy(Gtk.PolicyType.AUTOMATIC, Gtk.PolicyType.AUTOMATIC);
@@ -365,24 +368,24 @@ public class AddEditPage : Gtk.Box {
             info.primary_mailbox.name,
             info.nickname,
             info.primary_mailbox.address,
-            info.imap_credentials.user,
-            info.imap_credentials.pass,
-            info.imap_remember_password && info.smtp_remember_password,
-            info.smtp_credentials != null ? info.smtp_credentials.user : null,
-            info.smtp_credentials != null ? info.smtp_credentials.pass : null,
+            info.imap.credentials.user,
+            info.imap.credentials.pass,
+            info.imap.remember_password && info.smtp.remember_password,
+            info.smtp.credentials != null ? info.smtp.credentials.user : null,
+            info.smtp.credentials != null ? info.smtp.credentials.pass : null,
             info.service_provider,
             info.save_sent_mail,
             info.allow_save_sent_mail(),
-            info.default_imap_server_host,
-            info.default_imap_server_port,
-            info.default_imap_server_ssl,
-            info.default_imap_server_starttls,
-            info.default_smtp_server_host,
-            info.default_smtp_server_port,
-            info.default_smtp_server_ssl,
-            info.default_smtp_server_starttls,
-            info.default_smtp_use_imap_credentials,
-            info.default_smtp_server_noauth,
+            info.imap.host,
+            info.imap.port,
+            info.imap.use_ssl,
+            info.imap.use_starttls,
+            info.smtp.host,
+            info.smtp.port,
+            info.smtp.use_ssl,
+            info.smtp.use_starttls,
+            info.smtp.smtp_use_imap_credentials,
+            info.smtp.smtp_noauth,
             info.prefetch_period_days,
             info.save_drafts,
             info.use_email_signature,
@@ -665,7 +668,7 @@ public class AddEditPage : Gtk.Box {
             // encountered validation errors. So we need to deal with
             // both cases.
             try {
-                info = Geary.Engine.instance.get_account(this.id);
+                info = this.application.engine.get_account(this.id);
             } catch (Error err) {
                 // id was for an orphan account
             }
@@ -673,8 +676,19 @@ public class AddEditPage : Gtk.Box {
 
         if (info == null) {
             // New account
+            Geary.ServiceInformation imap =
+                this.application.controller.account_manager.new_libsecret_service(
+                    Geary.Service.IMAP,
+                    Geary.CredentialsMethod.PASSWORD
+                );
+            Geary.ServiceInformation smtp =
+                this.application.controller.account_manager.new_libsecret_service(
+                    Geary.Service.SMTP,
+                    Geary.CredentialsMethod.PASSWORD
+                );
+
             try {
-                info = Geary.Engine.instance.create_orphan_account();
+                info = this.application.engine.create_orphan_account(imap, smtp);
             } catch (Error err) {
                 debug("Unable to create account %s for %s: %s",
                       this.id, this.email_address, err.message);
@@ -690,29 +704,29 @@ public class AddEditPage : Gtk.Box {
                 this.real_name.strip(), this.email_address.strip()
             );
             info.nickname = this.nickname.strip();
-            info.imap_credentials = imap_credentials;
-            info.smtp_credentials = smtp_credentials;
-            info.imap_remember_password = this.remember_password;
-            info.smtp_remember_password = this.remember_password;
+            info.imap.credentials = imap_credentials;
+            info.smtp.credentials = smtp_credentials;
+            info.imap.remember_password = this.remember_password;
+            info.smtp.remember_password = this.remember_password;
             info.service_provider = this.get_service_provider();
             info.save_sent_mail = this.save_sent_mail;
-            info.default_imap_server_host = this.imap_host;
-            info.default_imap_server_port = this.imap_port;
-            info.default_imap_server_ssl = this.imap_ssl;
-            info.default_imap_server_starttls = this.imap_starttls;
-            info.default_smtp_server_host = this.smtp_host.strip();
-            info.default_smtp_server_port = this.smtp_port;
-            info.default_smtp_server_ssl = this.smtp_ssl;
-            info.default_smtp_server_starttls = this.smtp_starttls;
-            info.default_smtp_use_imap_credentials = this.smtp_use_imap_credentials;
-            info.default_smtp_server_noauth = this.smtp_noauth;
+            info.imap.host = this.imap_host;
+            info.imap.port = this.imap_port;
+            info.imap.use_ssl = this.imap_ssl;
+            info.imap.use_starttls = this.imap_starttls;
+            info.smtp.host = this.smtp_host.strip();
+            info.smtp.port = this.smtp_port;
+            info.smtp.use_ssl = this.smtp_ssl;
+            info.smtp.use_starttls = this.smtp_starttls;
+            info.smtp.smtp_use_imap_credentials = this.smtp_use_imap_credentials;
+            info.smtp.smtp_noauth = this.smtp_noauth;
             info.prefetch_period_days = get_storage_length();
             info.save_drafts = this.save_drafts;
             info.use_email_signature = this.use_email_signature;
             info.email_signature = this.email_signature;
 
             if (smtp_noauth)
-                info.smtp_credentials = null;
+                info.smtp.credentials = null;
 
             on_changed();
         }

@@ -17,7 +17,7 @@ public class AccountDialogRemoveConfirmPane : AccountDialogPane {
     public AccountDialogRemoveConfirmPane(Gtk.Stack stack) {
         base(stack);
         
-        Gtk.Builder builder = GearyApplication.instance.create_builder("remove_confirm.glade");
+        Gtk.Builder builder = GioUtil.create_builder("remove_confirm.glade");
         pack_end((Gtk.Box) builder.get_object("container"));
         Gtk.ActionGroup actions = (Gtk.ActionGroup) builder.get_object("actions");
         account_nickname_label = (Gtk.Label) builder.get_object("account_nickname_label");
