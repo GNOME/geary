@@ -17,12 +17,14 @@ src/client/accounts/account-dialog.vala
 src/client/accounts/account-manager.vala
 src/client/accounts/account-spinner-page.vala
 src/client/accounts/add-edit-page.vala
+src/client/accounts/goa-service-information.vala
 src/client/accounts/local-service-information.vala
 src/client/accounts/login-dialog.vala
 src/client/application/autostart-manager.vala
 src/client/application/geary-application.vala
 src/client/application/geary-args.vala
 src/client/application/geary-controller.vala
+src/client/application/goa-mediator.vala
 src/client/application/main.vala
 src/client/application/secret-mediator.vala
 src/client/components/client-web-view.vala

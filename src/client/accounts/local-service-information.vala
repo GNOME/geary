@@ -27,8 +27,7 @@ public class LocalServiceInformation : Geary.ServiceInformation {
         this.mediator = mediator;
     }
 
-    public override void load_settings(Geary.ConfigFile.Group config)
-        throws GLib.Error {
+    public void load_settings(Geary.ConfigFile.Group config) {
         this.host = config.get_string(HOST, this.host);
         this.port = config.get_uint16(PORT, this.port);
         this.use_ssl = config.get_bool(SSL, this.use_ssl);
@@ -46,18 +45,17 @@ public class LocalServiceInformation : Geary.ServiceInformation {
 
     }
 
-    public override void load_credentials(Geary.ConfigFile.Group config,
-                                          string? email_address = null)
-        throws GLib.Error {
+    public void load_credentials(Geary.ConfigFile.Group config,
+                                 string? default_login = null) {
         this.credentials.user = config.get_string(
-            USERNAME_KEY, email_address
+            USERNAME_KEY, default_login
         );
         this.remember_password = config.get_bool(
             REMEMBER_PASSWORD_KEY, this.remember_password
         );
     }
 
-    public override void save_settings(Geary.ConfigFile.Group config) {
+    public void save_settings(Geary.ConfigFile.Group config) {
         config.set_string(HOST, this.host);
         config.set_int(PORT, this.port);
         config.set_bool(SSL, this.use_ssl);

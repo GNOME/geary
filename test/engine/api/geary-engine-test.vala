@@ -68,21 +68,21 @@ class Geary.EngineTest : TestCase {
                 new MockServiceInformation()
             );
             assert(info.id == "account_01");
-            this.engine.add_account(info, true);
+            this.engine.add_account(info);
 
             info = this.engine.create_orphan_account(
                 new MockServiceInformation(),
                 new MockServiceInformation()
             );
             assert(info.id == "account_02");
-            this.engine.add_account(info, true);
+            this.engine.add_account(info);
 
             info = this.engine.create_orphan_account(
                 new MockServiceInformation(),
                 new MockServiceInformation()
             );
             assert(info.id == "account_03");
-            this.engine.add_account(info, true);
+            this.engine.add_account(info);
 
             info = this.engine.create_orphan_account(
                 new MockServiceInformation(),
@@ -101,8 +101,7 @@ class Geary.EngineTest : TestCase {
                 "foo",
                 new MockServiceInformation(),
                 new MockServiceInformation()
-            ),
-            true
+            )
         );
 
         AccountInformation info = this.engine.create_orphan_account(
@@ -110,7 +109,7 @@ class Geary.EngineTest : TestCase {
             new MockServiceInformation()
         );
         assert(info.id == "account_01");
-        this.engine.add_account(info, true);
+        this.engine.add_account(info);
 
         info = this.engine.create_orphan_account(
             new MockServiceInformation(),
@@ -123,8 +122,7 @@ class Geary.EngineTest : TestCase {
                 "bar",
                 new MockServiceInformation(),
                 new MockServiceInformation()
-            ),
-            true
+            )
         );
 
         info = this.engine.create_orphan_account(

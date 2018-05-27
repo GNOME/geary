@@ -183,7 +183,7 @@ public class GearyController : Geary.BaseObject {
     /**
      * Starts the controller and brings up Geary.
      */
-    public async void open_async() {
+    public async void open_async(GLib.Cancellable? cancellable) {
         Geary.Engine engine = this.application.engine;
 
         // This initializes the IconFactory, important to do before
@@ -298,9 +298,30 @@ public class GearyController : Geary.BaseObject {
             this.application.get_user_config_directory(),
             this.application.get_user_data_directory()
         );
+        this.account_manager.sso_account_updated.connect(
+            on_sso_account_updated
+        );
+        this.account_manager.sso_account_removed.connect(
+            on_sso_account_removed
+        );
+
         try {
-            yield engine.open_async(this.application.get_resource_directory());
-            yield this.account_manager.add_existing_accounts_async(null);
+            yield this.account_manager.connect_libsecret(cancellable);
+        } catch (GLib.Error err) {
+            warning("Error opening libsecret: %s", err.message);
+        }
+
+        try {
+            yield this.account_manager.connect_goa(cancellable);
+        } catch (GLib.Error err) {
+            warning("Error opening GOA: %s", err.message);
+        }
+
+        try {
+            yield engine.open_async(
+                this.application.get_resource_directory(), cancellable
+            );
+            yield this.account_manager.load_accounts(cancellable);
             if (engine.get_accounts().size == 0) {
                 create_account();
             }
@@ -424,6 +445,12 @@ public class GearyController : Geary.BaseObject {
             message("Error closing Geary Engine instance: %s", err.message);
         }
 
+        this.account_manager.sso_account_removed.disconnect(
+            on_sso_account_removed
+        );
+        this.account_manager.sso_account_updated.disconnect(
+            on_sso_account_updated
+        );
         this.account_manager = null;
 
         this.application.remove_window(this.main_window);
@@ -484,7 +511,7 @@ public class GearyController : Geary.BaseObject {
                                            Cancellable? cancellable = null) {
         try {
             yield close_account(info);
-            yield this.account_manager.remove_async(info, cancellable);
+            yield this.account_manager.remove_account(info, cancellable);
         } catch (Error err) {
             report_problem(
                 new Geary.ProblemReport(Geary.ProblemType.GENERIC_ERROR, err)
@@ -863,10 +890,12 @@ public class GearyController : Geary.BaseObject {
             try {
                 if (real_account_information.settings_file == null) {
                     yield this.account_manager.create_account_dirs(
-                        real_account_information
+                        real_account_information, cancellable
                     );
                 }
-                yield this.account_manager.save_account(real_account_information);
+                yield this.account_manager.save_account(
+                    real_account_information, cancellable
+                );
                 yield do_update_stored_passwords_async(
                     Geary.ServiceFlag.IMAP | Geary.ServiceFlag.SMTP,
                     real_account_information
@@ -2887,6 +2916,33 @@ public class GearyController : Geary.BaseObject {
             upgrade_dialog.add_account(account, cancellable_open_account);
             open_account(account);
         }
+    }
+
+    private void on_sso_account_updated(Geary.AccountInformation updated) {
+        AccountContext? context = this.accounts.get(updated);
+        if (context != null) {
+            // Restart the incoming client so it pick sup the new
+            // creds. XXX Could probably do something better than
+            // this?
+            context.account.start_incoming_client.begin((obj, ret) => {
+                    try {
+                        context.account.start_incoming_client.end(ret);
+                    } catch (Error err) {
+                        report_problem(
+                            new Geary.ServiceProblemReport(
+                                Geary.ProblemType.GENERIC_ERROR,
+                                updated,
+                                Geary.Service.IMAP,
+                                err
+                            )
+                        );
+                    }
+                });
+        }
+    }
+
+    private void on_sso_account_removed(Geary.AccountInformation removed) {
+        this.remove_account_async.begin(removed, null);
     }
 
     private void on_scan_completed() {

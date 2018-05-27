@@ -12,24 +12,4 @@ public class Geary.MockServiceInformation : ServiceInformation, MockObject {
         get; set; default = new Gee.LinkedList<ExpectedCall>();
     }
 
-
-    public override void load_settings(Geary.ConfigFile.Group config)
-        throws Error {
-        void_call("load_settings", { box_arg(config) });
-    }
-
-    public override void load_credentials(Geary.ConfigFile.Group config,
-                                          string? email_address = null)
-        throws Error {
-        void_call("load_credentials", { box_arg(config), box_arg(email_address) });
-    }
-
-    public override void save_settings(Geary.ConfigFile.Group config) {
-        try {
-            void_call("save_settings", { box_arg(config) });
-        } catch (Error err) {
-            assert_not_reached();
-        }
-    }
-
 }

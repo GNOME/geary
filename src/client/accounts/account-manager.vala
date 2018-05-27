@@ -10,12 +10,18 @@
  */
 public enum CredentialsProvider {
     /** Credentials are provided and stored by libsecret. */
-    LIBSECRET;
+    LIBSECRET,
+
+    /** Credentials are provided and stored by gnome-online-accounts. */
+    GOA;
 
     public string to_string() {
         switch (this) {
             case LIBSECRET:
                 return "libsecret";
+
+            case GOA:
+                return "goa";
 
             default:
                 assert_not_reached();
@@ -23,9 +29,12 @@ public enum CredentialsProvider {
     }
 
     public static CredentialsProvider from_string(string str) throws Error {
-        switch (str) {
+        switch (str.ascii_down()) {
             case "libsecret":
                 return LIBSECRET;
+
+            case "goa":
+                return GOA;
 
             default:
                 throw new KeyFileError.INVALID_VALUE(
@@ -36,7 +45,9 @@ public enum CredentialsProvider {
 }
 
 errordomain AccountError {
-    INVALID;
+    INVALID,
+    GOA_UNAVAILABLE,
+    GOA_REMOVED;
 }
 
 public class AccountManager : GLib.Object {
@@ -65,11 +76,31 @@ public class AccountManager : GLib.Object {
     private const string TRASH_FOLDER_KEY = "trash_folder";
     private const string USE_EMAIL_SIGNATURE_KEY = "use_email_signature";
 
+    private const string GOA_ID_PREFIX = "goa_";
+
+
+    private Gee.Map<string,Geary.AccountInformation> enabled_accounts =
+        new Gee.HashMap<string,Geary.AccountInformation>();
+
     private Geary.Engine engine;
     private GLib.File user_config_dir;
     private GLib.File user_data_dir;
 
-    private Geary.CredentialsMediator libsecret;
+    private Geary.CredentialsMediator? libsecret = null;
+    private Goa.Client? goa_service = null;
+
+
+    /** Fired when a new account is created. */
+    public signal void account_added(Geary.AccountInformation added);
+
+    /** Fired when an account is deleted. */
+    public signal void account_removed(Geary.AccountInformation removed);
+
+    /** Fired when a SSO account has been updated. */
+    public signal void sso_account_updated(Geary.AccountInformation updated);
+
+    /** Fired when a SSO account has been removed. */
+    public signal void sso_account_removed(Geary.AccountInformation removed);
 
 
     public AccountManager(Geary.Engine engine,
@@ -78,18 +109,29 @@ public class AccountManager : GLib.Object {
         this.engine = engine;
         this.user_config_dir = user_config_dir;
         this.user_data_dir = user_data_dir;
+    }
 
+    public async void connect_libsecret(GLib.Cancellable? cancellable)
+        throws GLib.Error {
         this.libsecret = new SecretMediator();
     }
 
-    public Geary.ServiceInformation new_libsecret_service(Geary.Service service,
-                                                          Geary.CredentialsMethod method) {
+    public async void connect_goa(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        this.goa_service = yield new Goa.Client(cancellable);
+        this.goa_service.account_added.connect(on_goa_account_added);
+        this.goa_service.account_changed.connect(on_goa_account_changed);
+        this.goa_service.account_removed.connect(on_goa_account_removed);
+    }
+
+    public LocalServiceInformation
+        new_libsecret_service(Geary.Service service,
+                              Geary.CredentialsMethod method) {
         return new LocalServiceInformation(service, method, libsecret);
     }
 
-
     public async void create_account_dirs(Geary.AccountInformation info,
-                                          Cancellable? cancellable = null)
+                                          Cancellable? cancellable)
         throws GLib.Error {
         GLib.File config = this.user_config_dir.get_child(info.id);
         GLib.File data = this.user_data_dir.get_child(info.id);
@@ -100,8 +142,9 @@ public class AccountManager : GLib.Object {
         info.set_account_directories(config, data);
     }
 
-    public async void add_existing_accounts_async(GLib.Cancellable? cancellable = null)
+    public async void load_accounts(GLib.Cancellable? cancellable)
         throws GLib.Error {
+        // Step 1. Load existing accounts from the user config dir
         GLib.FileEnumerator? enumerator = null;
         try {
             enumerator = yield this.user_config_dir.enumerate_children_async(
@@ -123,17 +166,19 @@ public class AccountManager : GLib.Object {
 
             uint len = info_list.length();
             for (uint i = 0; i < len && !cancellable.is_cancelled(); i++) {
-                GLib.FileInfo info = info_list.nth_data(i);
-                if (info.get_file_type() == FileType.DIRECTORY) {
+                GLib.FileInfo file = info_list.nth_data(i);
+                if (file.get_file_type() == FileType.DIRECTORY) {
                     try {
-                        string id = info.get_name();
-                        this.engine.add_account(yield load_account(id, cancellable));
+                        Geary.AccountInformation info = yield load_account(
+                            file.get_name(), cancellable
+                        );
+                        enable_account(info);
                     } catch (GLib.Error err) {
                         // XXX want to report this problem to the user
                         // somehow, but at this point in the app's
                         // lifecycle we don't even have a main window.
                         warning("Ignoring empty/bad config in %s: %s",
-                                info.get_name(), err.message);
+                                file.get_name(), err.message);
                     }
                 }
             }
@@ -143,7 +188,31 @@ public class AccountManager : GLib.Object {
                 enumerator = null;
             }
         }
-     }
+
+        // Step 2. Load previously unseen accounts from GOA, if available.
+        if (this.goa_service != null) {
+            GLib.List<Goa.Object> list = this.goa_service.get_accounts();
+            for (int i=0; i < list.length() && !cancellable.is_cancelled(); i++) {
+                Goa.Object account = list.nth_data(i);
+                string id = to_geary_id(account);
+                if (!this.enabled_accounts.has_key(id)) {
+                    Geary.AccountInformation? info = null;
+                    try {
+                        info = yield create_goa_account(account, cancellable);
+                    } catch (GLib.Error err) {
+                        // XXX want to report this problem to the user
+                        // somehow, but at this point in the app's
+                        // lifecycle we don't even have a main window.
+                        warning("Error creating existing GOA account %s: %s",
+                                account.get_account().id, err.message);
+                    }
+                    if (info != null) {
+                        enable_account(info);
+                    }
+                }
+            }
+        }
+    }
 
     /**
      * Loads an account info from a config directory.
@@ -151,7 +220,7 @@ public class AccountManager : GLib.Object {
      * Throws an error if the config file was not found, could not be
      * parsed, or doesn't have all required fields.
      */
-    public async Geary.AccountInformation?
+    private async Geary.AccountInformation
         load_account(string id, GLib.Cancellable? cancellable)
         throws Error {
         GLib.File config_dir = this.user_config_dir.get_child(id);
@@ -164,13 +233,6 @@ public class AccountManager : GLib.Object {
         yield config_file.load(cancellable);
 
         Geary.ConfigFile.Group config = config_file.get_group(ACCOUNT_CONFIG_GROUP);
-
-        Geary.ConfigFile.Group imap_config = config_file.get_group(IMAP_CONFIG_GROUP);
-        imap_config.set_fallback(ACCOUNT_CONFIG_GROUP, "imap_");
-
-        Geary.ConfigFile.Group smtp_config = config_file.get_group(SMTP_CONFIG_GROUP);
-        smtp_config.set_fallback(ACCOUNT_CONFIG_GROUP, "smtp_");
-
         CredentialsProvider provider = CredentialsProvider.from_string(
             config.get_string(
                 CREDENTIALS_PROVIDER_KEY,
@@ -178,35 +240,49 @@ public class AccountManager : GLib.Object {
             )
         );
 
-        Geary.CredentialsMethod method = Geary.CredentialsMethod.from_string(
-            config.get_string(CREDENTIALS_METHOD_KEY,
-                              Geary.CredentialsMethod.PASSWORD.to_string())
-        );
+        string primary_email = config.get_string(PRIMARY_EMAIL_KEY);
 
-        Geary.ServiceInformation imap_info;
-        Geary.ServiceInformation smtp_info;
+        Geary.AccountInformation? info = null;
         switch (provider) {
         case CredentialsProvider.LIBSECRET:
-            imap_info = new_libsecret_service(Geary.Service.IMAP, method);
-            smtp_info = new_libsecret_service(Geary.Service.SMTP, method);
+            info = new_libsecret_account(id, config, primary_email);
+            break;
+
+        case CredentialsProvider.GOA:
+            if (this.goa_service != null) {
+                Goa.Object? object = this.goa_service.lookup_by_id(to_goa_id(id));
+                if (object != null) {
+                    info = new_goa_account(id, object);
+                } else {
+                    // Could not find the GOA object for this account,
+                    // but have a working GOA connection, so it must
+                    // have been removed.
+                    throw new AccountError.GOA_REMOVED("Account not found");
+                }
+            }
+
+            if (info == null) {
+                // XXX We have a GOA account locally, but GOA is
+                // unavailable or the GOA account type is no longer
+                // supported. Create a dummy, disabled account and let
+                // the user deal with it?
+            }
             break;
 
         default:
             throw new AccountError.INVALID("Unhandled credentials provider");
         }
 
-        Geary.AccountInformation info = new Geary.AccountInformation(
-            id, imap_info, smtp_info
-        );
         info.set_account_directories(config_dir, data_dir);
 
-        // This is the only required value at the moment?
-        string primary_email = config.get_string(PRIMARY_EMAIL_KEY);
-        string real_name = config.get_string(REAL_NAME_KEY);
+        info.ordinal = config.get_int(ORDINAL_KEY, info.ordinal);
+        if (info.ordinal >= Geary.AccountInformation.next_ordinal)
+            Geary.AccountInformation.next_ordinal = info.ordinal + 1;
 
         info.primary_mailbox = new Geary.RFC822.MailboxAddress(
-            real_name, primary_email
+            config.get_string(REAL_NAME_KEY), primary_email
         );
+
         info.nickname = config.get_string(NICKNAME_KEY);
 
         // Store alternate emails in a list of case-insensitive strings
@@ -221,21 +297,11 @@ public class AccountManager : GLib.Object {
             }
         }
 
-        info.imap.load_credentials(imap_config, primary_email);
-        info.smtp.load_credentials(smtp_config, primary_email);
-
-        info.service_provider = Geary.ServiceProvider.from_string(
-            config.get_string(SERVICE_PROVIDER_KEY,
-                              Geary.ServiceProvider.GMAIL.to_string())
-        );
         info.prefetch_period_days = config.get_int(
             PREFETCH_PERIOD_DAYS_KEY, info.prefetch_period_days
         );
         info.save_sent_mail = config.get_bool(
             SAVE_SENT_MAIL_KEY, info.save_sent_mail
-        );
-        info.ordinal = config.get_int(
-            ORDINAL_KEY, info.ordinal
         );
         info.use_email_signature = config.get_bool(
             USE_EMAIL_SIGNATURE_KEY, info.use_email_signature
@@ -243,19 +309,6 @@ public class AccountManager : GLib.Object {
         info.email_signature = config.get_escaped_string(
             EMAIL_SIGNATURE_KEY, info.email_signature
         );
-
-        if (info.ordinal >= Geary.AccountInformation.next_ordinal)
-            Geary.AccountInformation.next_ordinal = info.ordinal + 1;
-
-        if (info.service_provider == Geary.ServiceProvider.OTHER) {
-            info.imap.load_settings(imap_config);
-            info.smtp.load_settings(smtp_config);
-
-            if (info.smtp.smtp_use_imap_credentials) {
-                info.smtp.credentials.user = info.imap.credentials.user;
-                info.smtp.credentials.pass = info.imap.credentials.pass;
-            }
-        }
 
         info.drafts_folder_path = Geary.AccountInformation.build_folder_path(
             config.get_string_list(DRAFTS_FOLDER_KEY)
@@ -279,7 +332,7 @@ public class AccountManager : GLib.Object {
     }
 
     public async void save_account(Geary.AccountInformation info,
-                                   GLib.Cancellable? cancellable = null)
+                                   GLib.Cancellable? cancellable)
         throws GLib.Error {
         // Ensure only one async task is saving an info at once, since
         // at least the Engine can cause multiple saves to be called
@@ -301,7 +354,7 @@ public class AccountManager : GLib.Object {
     }
 
     private async void save_account_locked(Geary.AccountInformation info,
-                                           GLib.Cancellable? cancellable = null)
+                                           GLib.Cancellable? cancellable)
         throws GLib.Error {
         File? file = info.settings_file;
         if (file == null) {
@@ -321,15 +374,31 @@ public class AccountManager : GLib.Object {
         }
 
         Geary.ConfigFile.Group config = config_file.get_group(ACCOUNT_CONFIG_GROUP);
-        Geary.ConfigFile.Group imap_config = config_file.get_group(IMAP_CONFIG_GROUP);
-        Geary.ConfigFile.Group smtp_config = config_file.get_group(SMTP_CONFIG_GROUP);
+        if (info.imap is LocalServiceInformation) {
+            config.set_string(
+                CREDENTIALS_PROVIDER_KEY, CredentialsProvider.LIBSECRET.to_string()
+            );
+            config.set_string(
+                CREDENTIALS_METHOD_KEY, info.imap.credentials_method.to_string()
+            );
 
-        config.set_string(
-            CREDENTIALS_PROVIDER_KEY, CredentialsProvider.LIBSECRET.to_string()
-        );
-        config.set_string(
-            CREDENTIALS_METHOD_KEY, info.imap.credentials_method.to_string()
-        );
+            if (info.service_provider == Geary.ServiceProvider.OTHER) {
+                Geary.ConfigFile.Group imap_config = config_file.get_group(
+                    IMAP_CONFIG_GROUP
+                );
+                ((LocalServiceInformation) info.imap).save_settings(imap_config);
+
+                Geary.ConfigFile.Group smtp_config = config_file.get_group(
+                    SMTP_CONFIG_GROUP
+                );
+                ((LocalServiceInformation) info.smtp).save_settings(smtp_config);
+            }
+        } else if (info.imap is GoaServiceInformation) {
+            config.set_string(
+                CREDENTIALS_PROVIDER_KEY, CredentialsProvider.GOA.to_string()
+            );
+        }
+
         config.set_string(REAL_NAME_KEY, info.primary_mailbox.name);
         config.set_string(PRIMARY_EMAIL_KEY, info.primary_mailbox.address);
         config.set_string(NICKNAME_KEY, info.nickname);
@@ -349,11 +418,6 @@ public class AccountManager : GLib.Object {
             );
         }
 
-        if (info.service_provider == Geary.ServiceProvider.OTHER) {
-            info.imap.save_settings(imap_config);
-            info.smtp.save_settings(smtp_config);
-        }
-
         Gee.LinkedList<string> empty = new Gee.LinkedList<string>();
         config.set_string_list(DRAFTS_FOLDER_KEY, (info.drafts_folder_path != null
             ? info.drafts_folder_path.as_list() : empty));
@@ -368,14 +432,18 @@ public class AccountManager : GLib.Object {
 
         config.set_bool(SAVE_DRAFTS_KEY, info.save_drafts);
 
+        debug("Writing config to: %s", file.get_path());
         yield config_file.save(cancellable);
     }
 
     /**
-     * Deletes an account from disk.  This is used by Geary.Engine and should not
-     * normally be invoked directly.
+     * Removes an account from the engine and deletes its files from disk.
      */
-    public async void remove_async(Geary.AccountInformation info, Cancellable? cancellable = null) {
+    public async void remove_account(Geary.AccountInformation info,
+                                     GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        yield this.engine.remove_account_async(info, cancellable);
+
         if (info.data_dir == null) {
             warning("Cannot remove account storage directory; nothing to remove");
         } else {
@@ -392,6 +460,162 @@ public class AccountManager : GLib.Object {
             yield info.clear_stored_passwords_async(Geary.ServiceFlag.IMAP | Geary.ServiceFlag.SMTP);
         } catch (Error e) {
             debug("Error clearing passwords: %s", e.message);
+        }
+
+        this.enabled_accounts.unset(info.id);
+        account_removed(info);
+    }
+
+    private void enable_account(Geary.AccountInformation account)
+        throws GLib.Error {
+        this.enabled_accounts.set(account.id, account);
+        this.engine.add_account(account);
+        account_added(account);
+    }
+
+    private inline string to_geary_id(Goa.Object account) {
+        return GOA_ID_PREFIX + account.get_account().id;
+    }
+
+    private inline string to_goa_id(string id) {
+        return id.has_prefix(GOA_ID_PREFIX)
+            ? id.substring(GOA_ID_PREFIX.length)
+            : id;
+    }
+
+    private Geary.AccountInformation
+        new_libsecret_account(string id,
+                              Geary.ConfigFile.Group config,
+                              string fallback_login)
+        throws GLib.Error {
+
+        Geary.ServiceProvider provider = Geary.ServiceProvider.from_string(
+            config.get_string(SERVICE_PROVIDER_KEY,
+                              Geary.ServiceProvider.GMAIL.to_string())
+        );
+        Geary.CredentialsMethod method = Geary.CredentialsMethod.from_string(
+            config.get_string(CREDENTIALS_METHOD_KEY,
+                              Geary.CredentialsMethod.PASSWORD.to_string())
+        );
+
+        Geary.ConfigFile.Group imap_config =
+        config.file.get_group(IMAP_CONFIG_GROUP);
+        LocalServiceInformation imap = new_libsecret_service(
+            Geary.Service.IMAP, method
+        );
+        imap_config.set_fallback(config.name, "imap_");
+        imap.load_credentials(imap_config, fallback_login);
+
+        Geary.ConfigFile.Group smtp_config =
+        config.file.get_group(SMTP_CONFIG_GROUP);
+        LocalServiceInformation smtp = new_libsecret_service(
+            Geary.Service.SMTP, method
+        );
+        smtp_config.set_fallback(config.name, "smtp_");
+        smtp.load_credentials(smtp_config, fallback_login);
+
+        // Generic IMAP accounts must load their settings from their
+        // config, GMail and others have it hard-coded hence don't
+        // need to load it.
+        if (provider == Geary.ServiceProvider.OTHER) {
+            imap.load_settings(imap_config);
+
+            smtp.load_settings(smtp_config);
+            if (smtp.smtp_use_imap_credentials) {
+                smtp.credentials.user = imap.credentials.user;
+                smtp.credentials.pass = imap.credentials.pass;
+            }
+        }
+
+        Geary.AccountInformation info = new Geary.AccountInformation(
+            id, imap, smtp
+        );
+        info.service_provider = provider;
+        return info;
+    }
+
+    private Geary.AccountInformation? new_goa_account(string id,
+                                                      Goa.Object account) {
+        Geary.AccountInformation info = null;
+
+        Goa.Mail? mail = account.get_mail();
+        Goa.PasswordBased? password = account.get_password_based();
+        if (mail != null && password != null) {
+            Geary.CredentialsMediator mediator = new GoaMediator(password);
+            info = new Geary.AccountInformation(
+                id,
+                new GoaServiceInformation(Geary.Service.IMAP, mediator, mail),
+                new GoaServiceInformation(Geary.Service.SMTP, mediator, mail)
+            );
+            info.service_provider = Geary.ServiceProvider.OTHER;
+        }
+
+        return info;
+    }
+
+    private async Geary.AccountInformation?
+        create_goa_account(Goa.Object account,
+                           GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        Geary.AccountInformation? info = new_goa_account(
+            to_geary_id(account), account
+        );
+        if (info != null) {
+            debug("GOA id: %s", info.id);
+            Goa.Mail? mail = account.get_mail();
+
+            info.ordinal = Geary.AccountInformation.next_ordinal++;
+            info.primary_mailbox = new Geary.RFC822.MailboxAddress(
+                mail.name, mail.email_address
+            );
+            info.nickname = account.get_account().identity;
+
+            yield create_account_dirs(info, cancellable);
+            debug("Created dirs: %s", info.id);
+            yield save_account(info, cancellable);
+            debug("Saved: %s", info.id);
+        }
+        return info;
+    }
+
+    private void on_goa_account_added(Goa.Object account) {
+        this.create_goa_account.begin(
+            account, null,
+            (obj, res) => {
+                try {
+                    Geary.AccountInformation? info =
+                        this.create_goa_account.end(res);
+                    if (info != null) {
+                        enable_account(info);
+                    }
+                } catch (GLib.Error err) {
+                    // XXX want to report this problem to the user
+                    // somehow, but at this point in the app's
+                    // lifecycle we don't even have a main window.
+                    warning("Error creating added GOA account %s: %s",
+                            account.get_account().id, err.message);
+                }
+            }
+        );
+    }
+
+    private void on_goa_account_changed(Goa.Object account) {
+        Geary.AccountInformation? info = this.enabled_accounts.get(
+            to_geary_id(account)
+        );
+
+        if (info != null) {
+            this.sso_account_updated(info);
+        }
+    }
+
+    private void on_goa_account_removed(Goa.Object account) {
+        Geary.AccountInformation? info = this.enabled_accounts.get(
+            to_geary_id(account)
+        );
+
+        if (info != null) {
+            this.sso_account_removed(info);
         }
     }
 

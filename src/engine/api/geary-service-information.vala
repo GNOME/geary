@@ -34,6 +34,7 @@ public enum Geary.CredentialsMethod {
     }
 }
 
+
 /**
  * This class encloses all the information used when connecting with the server,
  * how to authenticate with it and which credentials to use. Derived classes
@@ -90,23 +91,6 @@ public abstract class Geary.ServiceInformation : GLib.Object {
      * Only valid if this instance represents an SMTP server.
      */
     public bool smtp_use_imap_credentials { get; set; default = false; }
-
-    /**
-     * Loads the settings pertaining to this class's instance.
-     *
-     * This method depends on the concrete implementation used.
-     */
-    public abstract void load_settings(ConfigFile.Group config) throws Error;
-
-    /**
-     * Loads the credentials pertaining to this class's instance.
-     *
-     * This method depends on the concrete implementation used.
-     */
-    public abstract void load_credentials(ConfigFile.Group config, string? email_address = null) throws Error;
-
-    /** Saves settings pertaining to this class's instance to a key file. */
-    public abstract void save_settings(ConfigFile.Group config);
 
     public void copy_from(Geary.ServiceInformation from) {
         this.host = from.host;
