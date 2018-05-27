@@ -298,6 +298,12 @@ public class GearyController : Geary.BaseObject {
             this.application.get_user_config_directory(),
             this.application.get_user_data_directory()
         );
+        this.account_manager.sso_account_updated.connect(
+            on_sso_account_updated
+        );
+        this.account_manager.sso_account_removed.connect(
+            on_sso_account_removed
+        );
 
         try {
             yield this.account_manager.connect_libsecret(cancellable);
@@ -439,6 +445,12 @@ public class GearyController : Geary.BaseObject {
             message("Error closing Geary Engine instance: %s", err.message);
         }
 
+        this.account_manager.sso_account_removed.disconnect(
+            on_sso_account_removed
+        );
+        this.account_manager.sso_account_updated.disconnect(
+            on_sso_account_updated
+        );
         this.account_manager = null;
 
         this.application.remove_window(this.main_window);
@@ -499,8 +511,7 @@ public class GearyController : Geary.BaseObject {
                                            Cancellable? cancellable = null) {
         try {
             yield close_account(info);
-            yield this.application.engine.remove_account_async(info, cancellable);
-            yield this.account_manager.remove_async(info, cancellable);
+            yield this.account_manager.remove_account(info, cancellable);
         } catch (Error err) {
             report_problem(
                 new Geary.ProblemReport(Geary.ProblemType.GENERIC_ERROR, err)
@@ -2905,6 +2916,33 @@ public class GearyController : Geary.BaseObject {
             upgrade_dialog.add_account(account, cancellable_open_account);
             open_account(account);
         }
+    }
+
+    private void on_sso_account_updated(Geary.AccountInformation updated) {
+        AccountContext? context = this.accounts.get(updated);
+        if (context != null) {
+            // Restart the incoming client so it pick sup the new
+            // creds. XXX Could probably do something better than
+            // this?
+            context.account.start_incoming_client.begin((obj, ret) => {
+                    try {
+                        context.account.start_incoming_client.end(ret);
+                    } catch (Error err) {
+                        report_problem(
+                            new Geary.ServiceProblemReport(
+                                Geary.ProblemType.GENERIC_ERROR,
+                                updated,
+                                Geary.Service.IMAP,
+                                err
+                            )
+                        );
+                    }
+                });
+        }
+    }
+
+    private void on_sso_account_removed(Geary.AccountInformation removed) {
+        this.remove_account_async.begin(removed, null);
     }
 
     private void on_scan_completed() {

@@ -90,6 +90,13 @@ public class AccountManager : GLib.Object {
     private Goa.Client? goa_service = null;
 
 
+    /** Fired when a SSO account has been updated. */
+    public signal void sso_account_updated(Geary.AccountInformation updated);
+
+    /** Fired when a SSO account has been removed. */
+    public signal void sso_account_removed(Geary.AccountInformation removed);
+
+
     public AccountManager(Geary.Engine engine,
                           GLib.File user_config_dir,
                           GLib.File user_data_dir) {
@@ -106,6 +113,9 @@ public class AccountManager : GLib.Object {
     public async void connect_goa(GLib.Cancellable? cancellable)
         throws GLib.Error {
         this.goa_service = yield new Goa.Client(cancellable);
+        this.goa_service.account_added.connect(on_goa_account_added);
+        this.goa_service.account_changed.connect(on_goa_account_changed);
+        this.goa_service.account_removed.connect(on_goa_account_removed);
     }
 
     public LocalServiceInformation
@@ -421,11 +431,13 @@ public class AccountManager : GLib.Object {
     }
 
     /**
-     * Deletes an account from disk.  This is used by Geary.Engine and should not
-     * normally be invoked directly.
+     * Removes an account from the engine and deletes its files from disk.
      */
-    public async void remove_async(Geary.AccountInformation info,
-                                   GLib.Cancellable? cancellable) {
+    public async void remove_account(Geary.AccountInformation info,
+                                     GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        yield this.engine.remove_account_async(info, cancellable);
+
         if (info.data_dir == null) {
             warning("Cannot remove account storage directory; nothing to remove");
         } else {
@@ -556,6 +568,47 @@ public class AccountManager : GLib.Object {
             debug("Saved: %s", info.id);
         }
         return info;
+    }
+
+    private void on_goa_account_added(Goa.Object account) {
+        this.create_goa_account.begin(
+            account, null,
+            (obj, res) => {
+                try {
+                    Geary.AccountInformation? info =
+                        this.create_goa_account.end(res);
+                    if (info != null) {
+                        enable_account(info);
+                    }
+                } catch (GLib.Error err) {
+                    // XXX want to report this problem to the user
+                    // somehow, but at this point in the app's
+                    // lifecycle we don't even have a main window.
+                    warning("Error creating added GOA account %s: %s",
+                            account.get_account().id, err.message);
+                }
+            }
+        );
+    }
+
+    private void on_goa_account_changed(Goa.Object account) {
+        Geary.AccountInformation? info = this.enabled_accounts.get(
+            to_geary_id(account)
+        );
+
+        if (info != null) {
+            this.sso_account_updated(info);
+        }
+    }
+
+    private void on_goa_account_removed(Goa.Object account) {
+        Geary.AccountInformation? info = this.enabled_accounts.get(
+            to_geary_id(account)
+        );
+
+        if (info != null) {
+            this.sso_account_removed(info);
+        }
     }
 
 }
