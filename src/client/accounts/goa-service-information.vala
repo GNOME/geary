@@ -14,6 +14,7 @@ public class GoaServiceInformation : Geary.ServiceInformation {
                                  Geary.CredentialsMediator? mediator,
                                  Goa.Mail mail_object) {
         this.service = service;
+        this.credentials_method = Geary.CredentialsMethod.PASSWORD;
         this.mediator = mediator;
         this.mail_object = mail_object;
 
@@ -36,6 +37,14 @@ public class GoaServiceInformation : Geary.ServiceInformation {
                     this.credentials = null;
                 break;
         }
+    }
+
+    public override Geary.ServiceInformation temp_copy() {
+        GoaServiceInformation copy = new GoaServiceInformation(
+            this.service, this.mediator, this.mail_object
+        );
+        copy.copy_from(this);
+        return copy;
     }
 
 }

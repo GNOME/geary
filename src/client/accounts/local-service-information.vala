@@ -27,6 +27,15 @@ public class LocalServiceInformation : Geary.ServiceInformation {
         this.mediator = mediator;
     }
 
+    public override Geary.ServiceInformation temp_copy() {
+        LocalServiceInformation copy = new LocalServiceInformation(
+            this.service, this.credentials_method, this.mediator
+        );
+        copy.copy_from(this);
+        return copy;
+    }
+
+
     public void load_settings(Geary.ConfigFile.Group config) {
         this.host = config.get_string(HOST, this.host);
         this.port = config.get_uint16(PORT, this.port);

@@ -12,4 +12,14 @@ public class Geary.MockServiceInformation : ServiceInformation, MockObject {
         get; set; default = new Gee.LinkedList<ExpectedCall>();
     }
 
+    public override Geary.ServiceInformation temp_copy() {
+        try {
+            return object_call<Geary.ServiceInformation>(
+                "temp_copy", { }, new MockServiceInformation()
+            );
+        } catch (GLib.Error err) {
+            assert_not_reached();
+        }
+    }
+
 }

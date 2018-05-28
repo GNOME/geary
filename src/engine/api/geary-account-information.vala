@@ -215,6 +215,7 @@ public class Geary.AccountInformation : BaseObject {
      * Creates a copy of an instance.
      */
     public AccountInformation.temp_copy(AccountInformation from) {
+        this(from.id, from.imap.temp_copy(), from.smtp.temp_copy());
         copy_from(from);
         this.is_copy = true;
     }

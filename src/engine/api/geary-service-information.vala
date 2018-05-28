@@ -92,6 +92,18 @@ public abstract class Geary.ServiceInformation : GLib.Object {
      */
     public bool smtp_use_imap_credentials { get; set; default = false; }
 
+
+    /**
+     * Saves a new password for this instance's credentials, with the option
+     * of remembering the password.
+     */
+    public void set_password(string password, bool remember = false) {
+        this.credentials = new Credentials(this.credentials.user, password);
+        this.remember_password = remember;
+    }
+
+    public abstract ServiceInformation temp_copy();
+
     public void copy_from(Geary.ServiceInformation from) {
         this.host = from.host;
         this.port = from.port;
@@ -106,12 +118,5 @@ public abstract class Geary.ServiceInformation : GLib.Object {
         this.smtp_use_imap_credentials = from.smtp_use_imap_credentials;
     }
 
-    /**
-     * Saves a new password for this instance's credentials, with the option
-     * of remembering the password.
-     */
-    public void set_password(string password, bool remember = false) {
-        this.credentials = new Credentials(this.credentials.user, password);
-        this.remember_password = remember;
-    }
+
 }
