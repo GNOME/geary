@@ -93,8 +93,10 @@ public class Geary.Engine : BaseObject {
      * This may be fired during normal operation or while validating the AccountInformation, in
      * which case there is no {@link Account} associated with it.
      */
-    public signal void untrusted_host(Geary.AccountInformation account_information,
-        Endpoint endpoint, Endpoint.SecurityType security, TlsConnection cx, Service service);
+    public signal void untrusted_host(AccountInformation account,
+                                      ServiceInformation service,
+                                      Endpoint.SecurityType security,
+                                      TlsConnection cx);
 
     // Public so it can be tested
     public Engine() {
@@ -257,11 +259,14 @@ public class Geary.Engine : BaseObject {
         // If we don't need to validate the connection, exit out here.
         if (!options.is_all_set(ValidationOption.CHECK_CONNECTIONS))
             return error_code;
-        
+
         account.untrusted_host.connect(on_untrusted_host);
-        
+        account.connect_endpoints();
+
         // validate IMAP, which requires logging in and establishing an AUTHORIZED cx state
-        Geary.Imap.ClientSession? imap_session = new Imap.ClientSession(account.get_imap_endpoint());
+        Geary.Imap.ClientSession? imap_session = new Imap.ClientSession(
+            account.imap.endpoint
+        );
         try {
             yield imap_session.connect_async(cancellable);
         } catch (Error err) {
@@ -294,8 +299,11 @@ public class Geary.Engine : BaseObject {
             imap_session = null;
         }
 
-        // SMTP is simpler, merely see if login works and done (throws an SmtpError if not)
-        Geary.Smtp.ClientSession? smtp_session = new Geary.Smtp.ClientSession(account.get_smtp_endpoint());
+        // SMTP is simpler, merely see if login works and done (throws
+        // an SmtpError if not)
+        Geary.Smtp.ClientSession? smtp_session = new Geary.Smtp.ClientSession(
+            account.smtp.endpoint
+        );
         try {
             yield smtp_session.login_async(account.smtp.credentials, cancellable);
         } catch (Error err) {
@@ -313,9 +321,10 @@ public class Geary.Engine : BaseObject {
         } finally {
             smtp_session = null;
         }
-        
+
+        account.disconnect_endpoints();
         account.untrusted_host.disconnect(on_untrusted_host);
-        
+
         return error_code;
     }
     
@@ -379,14 +388,17 @@ public class Geary.Engine : BaseObject {
     public void add_account(AccountInformation account) throws Error {
         check_opened();
 
-        bool already_added = accounts.has_key(account.id);
+        if (accounts.has_key(account.id)) {
+            throw new EngineError.ALREADY_EXISTS(
+                "Account id '%s' already exists", account.id
+            );
+        }
 
         accounts.set(account.id, account);
 
-        if (!already_added) {
-            account.untrusted_host.connect(on_untrusted_host);
-            account_available(account);
-        }
+        account.connect_endpoints();
+        account.untrusted_host.connect(on_untrusted_host);
+        account_available(account);
     }
 
     /**
@@ -395,15 +407,16 @@ public class Geary.Engine : BaseObject {
     public async void remove_account_async(AccountInformation account,
                                            Cancellable? cancellable = null) throws Error {
         check_opened();
-        
+
         // Ensure account is closed.
         if (account_instances.has_key(account.id) && account_instances.get(account.id).is_open()) {
             throw new EngineError.CLOSE_REQUIRED("Account %s must be closed before removal",
                 account.id);
         }
 
-        if (accounts.unset(account.id)) {
+        if (accounts.has_key(account.id)) {
             account.untrusted_host.disconnect(on_untrusted_host);
+            account.disconnect_endpoints();
 
             // Removal *MUST* be done in the following order:
             // 1. Send the account-unavailable signal.
@@ -415,9 +428,10 @@ public class Geary.Engine : BaseObject {
         }
     }
 
-    private void on_untrusted_host(AccountInformation account_information, Endpoint endpoint,
-        Endpoint.SecurityType security, TlsConnection cx, Service service) {
-        untrusted_host(account_information, endpoint, security, cx, service);
+    private void on_untrusted_host(AccountInformation account,
+                                   ServiceInformation service,
+                                   Endpoint.SecurityType security,
+                                   TlsConnection cx) {
+        untrusted_host(account, service, security, cx);
     }
 }
-

@@ -93,6 +93,14 @@ public abstract class Geary.ServiceInformation : GLib.Object {
      */
     public bool smtp_use_imap_credentials { get; set; default = false; }
 
+    /**
+     * The network endpoint for this service.
+     *
+     * This will be null until the service's account has been added to
+     * the engine, and after it has been removed from the engine.
+     */
+    public Endpoint? endpoint { get; internal set; }
+
 
     protected ServiceInformation(Service proto) {
         this.protocol = proto;
@@ -121,6 +129,5 @@ public abstract class Geary.ServiceInformation : GLib.Object {
         this.smtp_noauth = from.smtp_noauth;
         this.smtp_use_imap_credentials = from.smtp_use_imap_credentials;
     }
-
 
 }

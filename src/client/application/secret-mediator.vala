@@ -208,12 +208,12 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
         switch (service) {
         case Geary.Service.IMAP:
             login = account.imap.credentials.user;
-            host = account.get_imap_endpoint().remote_address.get_hostname();
+            host = account.imap.endpoint.remote_address.get_hostname();
             break;
 
         case Geary.Service.SMTP:
             login = account.smtp.credentials.user;
-            host = account.get_smtp_endpoint().remote_address.get_hostname();
+            host = account.smtp.endpoint.remote_address.get_hostname();
             break;
 
         default:

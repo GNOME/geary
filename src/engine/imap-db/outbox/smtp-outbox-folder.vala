@@ -73,7 +73,7 @@ private class Geary.SmtpOutboxFolder :
     }
 
     private Endpoint smtp_endpoint {
-        owned get { return this._account.information.get_smtp_endpoint(); }
+        get { return this._account.information.smtp.endpoint; }
     }
 
     private weak Account _account;
@@ -840,7 +840,14 @@ private class Geary.SmtpOutboxFolder :
     }
 
     private void notify_report_problem(ProblemType problem, Error? err) {
-        report_problem(new ServiceProblemReport(problem, this.account.information, Service.SMTP, err));
+        report_problem(
+            new ServiceProblemReport(
+                problem,
+                this._account.information,
+                this.account.information.smtp,
+                err
+            )
+        );
     }
 
     private void on_account_opened() {

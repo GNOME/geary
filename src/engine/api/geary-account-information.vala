@@ -1,4 +1,5 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -29,9 +30,10 @@ public class Geary.AccountInformation : BaseObject {
         return a.display_name.collate(b.display_name);
     }
 
-    private static Geary.Endpoint get_shared_endpoint(Service service, Endpoint endpoint) {
+    private static Geary.Endpoint get_shared_endpoint(ServiceInformation service,
+                                                      Endpoint endpoint) {
         string key = "%s/%s:%u".printf(
-            service.user_label(),
+            service.protocol.user_label(),
             endpoint.remote_address.hostname,
             endpoint.remote_address.port
         );
@@ -181,8 +183,6 @@ public class Geary.AccountInformation : BaseObject {
     public bool is_copy { get; set; default = false; }
 
     private bool _save_sent_mail = true;
-    private Endpoint? imap_endpoint = null;
-    private Endpoint? smtp_endpoint = null;
 
 
     /**
@@ -194,8 +194,9 @@ public class Geary.AccountInformation : BaseObject {
      * pin the certificate appropriately if the user does not want to receive these warnings in
      * the future.
      */
-    public signal void untrusted_host(Endpoint endpoint, Endpoint.SecurityType security,
-        TlsConnection cx, Service service);
+    public signal void untrusted_host(ServiceInformation service,
+                                      Endpoint.SecurityType security,
+                                      TlsConnection cx);
 
     /** Indicates that properties contained herein have changed. */
     public signal void information_changed();
@@ -221,12 +222,7 @@ public class Geary.AccountInformation : BaseObject {
     }
 
     ~AccountInformation() {
-        // Endpoints are shared so won't go away when this instance is
-        // finalised, so we need to disconnect from their signals.
-        if (this.imap_endpoint != null)
-            this.imap_endpoint.untrusted_host.disconnect(on_imap_untrusted_host);
-        if (this.smtp_endpoint != null)
-            this.smtp_endpoint.untrusted_host.disconnect(on_smtp_untrusted_host);
+        disconnect_endpoints();
     }
 
 
@@ -531,137 +527,6 @@ public class Geary.AccountInformation : BaseObject {
         }
     }
 
-    /**
-     * Returns the {@link Endpoint} for the account's IMAP service.
-     *
-     * The Endpoint instance is guaranteed to be the same for the lifetime of the
-     * {@link AccountInformation} instance, which is in turn guaranteed to be the same for the
-     * duration of the application session.
-     */
-    public Endpoint get_imap_endpoint() {
-        if (imap_endpoint != null)
-            return imap_endpoint;
-
-        switch (service_provider) {
-            case ServiceProvider.GMAIL:
-                imap_endpoint = ImapEngine.GmailAccount.generate_imap_endpoint();
-            break;
-
-            case ServiceProvider.YAHOO:
-                imap_endpoint = ImapEngine.YahooAccount.generate_imap_endpoint();
-            break;
-
-            case ServiceProvider.OUTLOOK:
-                imap_endpoint = ImapEngine.OutlookAccount.generate_imap_endpoint();
-            break;
-
-            case ServiceProvider.OTHER:
-                Endpoint.Flags imap_flags = Endpoint.Flags.NONE;
-                if (this.imap.use_ssl)
-                    imap_flags |= Endpoint.Flags.SSL;
-                if (this.imap.use_starttls)
-                    imap_flags |= Endpoint.Flags.STARTTLS;
-
-                imap_endpoint = new Endpoint(this.imap.host, this.imap.port,
-                    imap_flags, Imap.ClientConnection.RECOMMENDED_TIMEOUT_SEC);
-            break;
-            
-            default:
-                assert_not_reached();
-        }
-
-        // look for existing one in the global pool; want to use that because Endpoint is mutable
-        // and signalled in such a way that it's better to share them
-        imap_endpoint = get_shared_endpoint(Service.IMAP, imap_endpoint);
-
-        // bind shared Endpoint signal to this AccountInformation's signal
-        imap_endpoint.untrusted_host.connect(on_imap_untrusted_host);
-
-        return imap_endpoint;
-    }
-
-    private void on_imap_untrusted_host(Endpoint endpoint, Endpoint.SecurityType security,
-        TlsConnection cx) {
-        untrusted_host(endpoint, security, cx, Service.IMAP);
-    }
-
-    /**
-     * Returns the {@link Endpoint} for the account's SMTP service.
-     *
-     * The Endpoint instance is guaranteed to be the same for the lifetime of the
-     * {@link AccountInformation} instance, which is in turn guaranteed to be the same for the
-     * duration of the application session.
-     */
-    public Endpoint get_smtp_endpoint() {
-        if (smtp_endpoint != null)
-            return smtp_endpoint;
-        
-        switch (service_provider) {
-            case ServiceProvider.GMAIL:
-                smtp_endpoint = ImapEngine.GmailAccount.generate_smtp_endpoint();
-            break;
-            
-            case ServiceProvider.YAHOO:
-                smtp_endpoint = ImapEngine.YahooAccount.generate_smtp_endpoint();
-            break;
-            
-            case ServiceProvider.OUTLOOK:
-                smtp_endpoint = ImapEngine.OutlookAccount.generate_smtp_endpoint();
-            break;
-
-            case ServiceProvider.OTHER:
-                Endpoint.Flags smtp_flags = Endpoint.Flags.NONE;
-                if (this.smtp.use_ssl)
-                    smtp_flags |= Endpoint.Flags.SSL;
-                if (this.smtp.use_starttls)
-                    smtp_flags |= Endpoint.Flags.STARTTLS;
-
-                smtp_endpoint = new Endpoint(this.smtp.host, this.smtp.port,
-                    smtp_flags, Smtp.ClientConnection.DEFAULT_TIMEOUT_SEC);
-            break;
-
-            default:
-                assert_not_reached();
-        }
-
-        // look for existing one in the global pool; want to use that because Endpoint is mutable
-        // and signalled in such a way that it's better to share them
-        smtp_endpoint = get_shared_endpoint(Service.SMTP, smtp_endpoint);
-        
-        // bind shared Endpoint signal to this AccountInformation's signal
-        smtp_endpoint.untrusted_host.connect(on_smtp_untrusted_host);
-        
-        return smtp_endpoint;
-    }
-    
-    private void on_smtp_untrusted_host(Endpoint endpoint, Endpoint.SecurityType security,
-        TlsConnection cx) {
-        untrusted_host(endpoint, security, cx, Service.SMTP);
-    }
-
-    public Geary.Endpoint get_endpoint_for_service(Geary.Service service) {
-        switch (service) {
-            case Service.IMAP:
-                return get_imap_endpoint();
-            
-            case Service.SMTP:
-                return get_smtp_endpoint();
-
-            default:
-                assert_not_reached();
-        }
-    }
-    
-    public static Geary.FolderPath? build_folder_path(Gee.List<string>? parts) {
-        if (parts == null || parts.size == 0)
-            return null;
-        
-        Geary.FolderPath path = new Imap.FolderRoot(parts[0]);
-        for (int i = 1; i < parts.size; i++)
-            path = path.get_child(parts.get(i));
-        return path;
-    }
-
     public async void clear_stored_passwords_async(ServiceFlag services) throws Error {
         Error? return_error = null;
         check_mediator_instance();
@@ -700,6 +565,138 @@ public class Geary.AccountInformation : BaseObject {
                      return alt.equal_to(email);
                  }, false))
         );
+    }
+
+    internal void connect_endpoints() {
+        if (this.imap.endpoint == null) {
+            this.imap.endpoint = get_imap_endpoint();
+            this.imap.endpoint.untrusted_host.connect(
+                on_imap_untrusted_host
+            );
+        }
+        if (this.smtp.endpoint == null) {
+            this.smtp.endpoint = get_smtp_endpoint();
+            this.smtp.endpoint.untrusted_host.connect(
+                on_smtp_untrusted_host
+            );
+        }
+    }
+
+    internal void disconnect_endpoints() {
+        if (this.imap.endpoint != null) {
+            this.imap.endpoint.untrusted_host.disconnect(
+                on_imap_untrusted_host
+            );
+            this.imap.endpoint = null;
+        }
+        if (this.smtp.endpoint != null) {
+            this.smtp.endpoint.untrusted_host.disconnect(
+                on_smtp_untrusted_host
+            );
+            this.smtp.endpoint = null;
+        }
+    }
+
+    private Endpoint get_imap_endpoint() {
+        Endpoint? imap_endpoint = null;
+        switch (this.service_provider) {
+            case ServiceProvider.GMAIL:
+                imap_endpoint = ImapEngine.GmailAccount.generate_imap_endpoint();
+            break;
+
+            case ServiceProvider.YAHOO:
+                imap_endpoint = ImapEngine.YahooAccount.generate_imap_endpoint();
+            break;
+
+            case ServiceProvider.OUTLOOK:
+                imap_endpoint = ImapEngine.OutlookAccount.generate_imap_endpoint();
+            break;
+
+            case ServiceProvider.OTHER:
+                Endpoint.Flags imap_flags = Endpoint.Flags.NONE;
+                if (this.imap.use_ssl)
+                    imap_flags |= Endpoint.Flags.SSL;
+                if (this.imap.use_starttls)
+                    imap_flags |= Endpoint.Flags.STARTTLS;
+
+                imap_endpoint = new Endpoint(this.imap.host, this.imap.port,
+                    imap_flags, Imap.ClientConnection.RECOMMENDED_TIMEOUT_SEC);
+            break;
+            
+            default:
+                assert_not_reached();
+        }
+
+        // look for existing one in the global pool; want to use that
+        // because Endpoint is mutable and signalled in such a way
+        // that it's better to share them
+        imap_endpoint = get_shared_endpoint(this.imap, imap_endpoint);
+
+        // bind shared Endpoint signal to this AccountInformation's signal
+        imap_endpoint.untrusted_host.connect(on_imap_untrusted_host);
+
+        return imap_endpoint;
+    }
+
+    private Endpoint get_smtp_endpoint() {
+        Endpoint? smtp_endpoint = null;
+        switch (service_provider) {
+            case ServiceProvider.GMAIL:
+                smtp_endpoint = ImapEngine.GmailAccount.generate_smtp_endpoint();
+            break;
+
+            case ServiceProvider.YAHOO:
+                smtp_endpoint = ImapEngine.YahooAccount.generate_smtp_endpoint();
+            break;
+
+            case ServiceProvider.OUTLOOK:
+                smtp_endpoint = ImapEngine.OutlookAccount.generate_smtp_endpoint();
+            break;
+
+            case ServiceProvider.OTHER:
+                Endpoint.Flags smtp_flags = Endpoint.Flags.NONE;
+                if (this.smtp.use_ssl)
+                    smtp_flags |= Endpoint.Flags.SSL;
+                if (this.smtp.use_starttls)
+                    smtp_flags |= Endpoint.Flags.STARTTLS;
+
+                smtp_endpoint = new Endpoint(this.smtp.host, this.smtp.port,
+                    smtp_flags, Smtp.ClientConnection.DEFAULT_TIMEOUT_SEC);
+            break;
+
+            default:
+                assert_not_reached();
+        }
+
+        // look for existing one in the global pool; want to use that
+        // because Endpoint is mutable and signalled in such a way
+        // that it's better to share them
+        smtp_endpoint = get_shared_endpoint(this.smtp, smtp_endpoint);
+
+        // bind shared Endpoint signal to this AccountInformation's signal
+        smtp_endpoint.untrusted_host.connect(on_smtp_untrusted_host);
+
+        return smtp_endpoint;
+    }
+
+    public static Geary.FolderPath? build_folder_path(Gee.List<string>? parts) {
+        if (parts == null || parts.size == 0)
+            return null;
+        
+        Geary.FolderPath path = new Imap.FolderRoot(parts[0]);
+        for (int i = 1; i < parts.size; i++)
+            path = path.get_child(parts.get(i));
+        return path;
+    }
+
+    private void on_imap_untrusted_host(Endpoint.SecurityType security,
+                                        TlsConnection cx) {
+        untrusted_host(this.imap, security, cx);
+    }
+
+    private void on_smtp_untrusted_host(Endpoint.SecurityType security,
+                                        TlsConnection cx) {
+        untrusted_host(this.smtp, security, cx);
     }
 
 }

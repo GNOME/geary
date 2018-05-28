@@ -15,8 +15,10 @@ public class CertificateWarningDialog {
     
     private Gtk.Dialog dialog;
     
-    public CertificateWarningDialog(Gtk.Window? parent, Geary.AccountInformation account_information,
-        Geary.Service service, TlsCertificateFlags warnings, bool is_validation) {
+    public CertificateWarningDialog(Gtk.Window? parent,
+                                    Geary.AccountInformation account,
+                                    Geary.ServiceInformation service,
+                                    bool is_validation) {
         Gtk.Builder builder = GioUtil.create_builder("certificate_warning_dialog.glade");
 
         dialog = (Gtk.Dialog) builder.get_object("CertificateWarningDialog");
@@ -29,16 +31,18 @@ public class CertificateWarningDialog {
         Gtk.Label trust_label = (Gtk.Label) builder.get_object("trust_label");
         Gtk.Label dont_trust_label = (Gtk.Label) builder.get_object("dont_trust_label");
         Gtk.Label contact_label = (Gtk.Label) builder.get_object("contact_label");
-        
-        title_label.label = _("Untrusted Connection: %s").printf(account_information.display_name);
-        
-        Geary.Endpoint endpoint = account_information.get_endpoint_for_service(service);
+
+        title_label.label = _("Untrusted Connection: %s").printf(account.display_name);
+
+        Geary.Endpoint endpoint = service.endpoint;
         top_label.label = _("The identity of the %s mail server at %s:%u could not be verified.").printf(
-            service.user_label(), endpoint.remote_address.hostname, endpoint.remote_address.port);
-        
-        warnings_label.label = generate_warning_list(warnings);
+            service.protocol.user_label(), endpoint.remote_address.hostname, endpoint.remote_address.port);
+
+        warnings_label.label = generate_warning_list(
+            service.endpoint.tls_validation_warnings
+        );
         warnings_label.use_markup = true;
-        
+
         trust_label.label =
             "<b>"
             +_("Selecting “Trust This Server” or “Always Trust This Server” may cause your username and password to be transmitted insecurely.")
