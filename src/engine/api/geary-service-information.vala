@@ -43,6 +43,10 @@ public enum Geary.CredentialsMethod {
  */
 public abstract class Geary.ServiceInformation : GLib.Object {
 
+
+    /** Specifies if this service is for IMAP or SMTP. */
+    public Geary.Service protocol { get; private set; }
+
     /** The server's address. */
     public string host { get; set; default = ""; }
 
@@ -64,9 +68,6 @@ public abstract class Geary.ServiceInformation : GLib.Object {
 
     /** The credentials used for authenticating. */
     public Geary.Credentials credentials { get; set; default = new Geary.Credentials(null, null); }
-
-    /** Whether this class instance is used with the account's IMAP or the SMTP server. */
-    public Geary.Service service { get; set; }
 
     /**
      * The credentials mediator used with the account.
@@ -93,6 +94,10 @@ public abstract class Geary.ServiceInformation : GLib.Object {
     public bool smtp_use_imap_credentials { get; set; default = false; }
 
 
+    protected ServiceInformation(Service proto) {
+        this.protocol = proto;
+    }
+
     /**
      * Saves a new password for this instance's credentials, with the option
      * of remembering the password.
@@ -111,7 +116,6 @@ public abstract class Geary.ServiceInformation : GLib.Object {
         this.use_ssl = from.use_ssl;
         this.remember_password = from.remember_password;
         this.credentials = from.credentials;
-        this.service = from.service;
         this.mediator = from.mediator;
         this.credentials_method = from.credentials_method;
         this.smtp_noauth = from.smtp_noauth;

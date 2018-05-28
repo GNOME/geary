@@ -12,6 +12,10 @@ public class Geary.MockServiceInformation : ServiceInformation, MockObject {
         get; set; default = new Gee.LinkedList<ExpectedCall>();
     }
 
+    public MockServiceInformation() {
+        base(Service.IMAP);
+    }
+
     public override Geary.ServiceInformation temp_copy() {
         try {
             return object_call<Geary.ServiceInformation>(

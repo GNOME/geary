@@ -10,15 +10,15 @@
 public class GoaServiceInformation : Geary.ServiceInformation {
     private Goa.Mail mail_object;
 
-    public GoaServiceInformation(Geary.Service service,
+    public GoaServiceInformation(Geary.Service protocol,
                                  Geary.CredentialsMediator? mediator,
                                  Goa.Mail mail_object) {
-        this.service = service;
+        base(protocol);
         this.credentials_method = Geary.CredentialsMethod.PASSWORD;
         this.mediator = mediator;
         this.mail_object = mail_object;
 
-        switch (service) {
+        switch (protocol) {
             case Geary.Service.IMAP:
                 this.credentials.user = mail_object.imap_user_name;
                 this.host = mail_object.imap_host;
@@ -41,7 +41,7 @@ public class GoaServiceInformation : Geary.ServiceInformation {
 
     public override Geary.ServiceInformation temp_copy() {
         GoaServiceInformation copy = new GoaServiceInformation(
-            this.service, this.mediator, this.mail_object
+            this.protocol, this.mediator, this.mail_object
         );
         copy.copy_from(this);
         return copy;
