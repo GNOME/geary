@@ -61,6 +61,7 @@ public class LocalServiceInformation : Geary.ServiceInformation {
         config.set_bool(SSL, this.use_ssl);
         config.set_bool(STARTTLS, this.use_starttls);
         config.set_string(USERNAME_KEY, this.credentials.user);
+        config.set_bool(REMEMBER_PASSWORD_KEY, this.remember_password);
 
         if (this.service == Geary.Service.SMTP) {
             config.set_bool(SMTP_USE_IMAP_CREDENTIALS, this.smtp_use_imap_credentials);
