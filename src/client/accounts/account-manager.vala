@@ -113,7 +113,7 @@ public class AccountManager : GLib.Object {
 
     public async void connect_libsecret(GLib.Cancellable? cancellable)
         throws GLib.Error {
-        this.libsecret = new SecretMediator(this.application, cancellable);
+        this.libsecret = yield new SecretMediator(this.application, cancellable);
     }
 
     public async void connect_goa(GLib.Cancellable? cancellable)

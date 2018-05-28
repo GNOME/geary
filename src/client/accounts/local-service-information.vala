@@ -20,9 +20,8 @@ public class LocalServiceInformation : Geary.ServiceInformation {
 
 
     public LocalServiceInformation(Geary.Protocol protocol,
-                                   Geary.CredentialsMediator? mediator) {
-        base(protocol);
-        this.mediator = mediator;
+                                   Geary.CredentialsMediator mediator) {
+        base(protocol, mediator);
     }
 
     public override Geary.ServiceInformation temp_copy() {

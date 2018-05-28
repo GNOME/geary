@@ -92,22 +92,24 @@ public abstract class Geary.ServiceInformation : GLib.Object {
     /** Whether SSL is used when connecting to the server. */
     public bool use_ssl { get; set; default = true; }
 
+    /** The credentials used for authenticating. */
+    public Credentials? credentials { get; set; default = null; }
+
+    /**
+     * The credentials mediator used with this service.
+     *
+     * It is responsible for fetching and storing the credentials if
+     * applicable.
+     */
+    public CredentialsMediator mediator { get; private set; }
+
     /**
      * Whether the password should be remembered.
      *
-     * This only makes sense with providers that support saving the password.
+     * This only makes sense with providers that support saving the
+     * password.
      */
     public bool remember_password { get; set; default = false; }
-
-    /** The credentials used for authenticating. */
-    public Geary.Credentials? credentials { get; set; default = null; }
-
-    /**
-     * The credentials mediator used with the account.
-     *
-     * It is responsible for fetching and storing the credentials if applicable.
-     */
-    public Geary.CredentialsMediator? mediator { get; set; default = null; }
 
     /**
      * Whether we should NOT authenticate with the server.
@@ -132,8 +134,9 @@ public abstract class Geary.ServiceInformation : GLib.Object {
     public Endpoint? endpoint { get; internal set; }
 
 
-    protected ServiceInformation(Protocol proto) {
+    protected ServiceInformation(Protocol proto, CredentialsMediator mediator) {
         this.protocol = proto;
+        this.mediator = mediator;
     }
 
     /**
@@ -156,9 +159,11 @@ public abstract class Geary.ServiceInformation : GLib.Object {
         this.port = from.port;
         this.use_starttls = from.use_starttls;
         this.use_ssl = from.use_ssl;
-        this.remember_password = from.remember_password;
-        this.credentials = from.credentials;
+        this.credentials = (
+            from.credentials != null ? from.credentials.copy() : null
+        );
         this.mediator = from.mediator;
+        this.remember_password = from.remember_password;
         this.smtp_noauth = from.smtp_noauth;
         this.smtp_use_imap_credentials = from.smtp_use_imap_credentials;
     }

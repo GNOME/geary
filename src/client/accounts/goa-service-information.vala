@@ -11,10 +11,9 @@ public class GoaServiceInformation : Geary.ServiceInformation {
     private Goa.Mail mail_object;
 
     public GoaServiceInformation(Geary.Protocol protocol,
-                                 Geary.CredentialsMediator? mediator,
+                                 Geary.CredentialsMediator mediator,
                                  Goa.Mail mail_object) {
-        base(protocol);
-        this.mediator = mediator;
+        base(protocol, mediator);
         this.mail_object = mail_object;
 
         switch (protocol) {
