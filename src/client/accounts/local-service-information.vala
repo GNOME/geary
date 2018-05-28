@@ -12,8 +12,8 @@ public class LocalServiceInformation : Geary.ServiceInformation {
     private const string HOST = "host";
     private const string PORT = "port";
     private const string REMEMBER_PASSWORD_KEY = "remember_password";
-    private const string SMTP_NOAUTH = "smtp_noauth";
-    private const string SMTP_USE_IMAP_CREDENTIALS = "smtp_use_imap_credentials";
+    private const string SMTP_NOAUTH = "noauth";
+    private const string SMTP_USE_IMAP_CREDENTIALS = "use_imap_credentials";
     private const string SSL = "ssl";
     private const string STARTTLS = "starttls";
     private const string USERNAME_KEY = "username";
