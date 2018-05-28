@@ -34,58 +34,59 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
         null
     );
 
-    private GearyApplication instance;
+    private GearyApplication application;
     private Geary.Nonblocking.Mutex dialog_mutex = new Geary.Nonblocking.Mutex();
 
 
-    public SecretMediator() {
-        this.instance = GearyApplication.instance;
+    public async SecretMediator(GearyApplication application,
+                                GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        this.application = application;
+        yield check_unlocked(cancellable);
     }
 
-    public virtual async string? get_password_async(Geary.Service service,
-                                                    Geary.AccountInformation account,
+    public virtual async string? get_password_async(Geary.ServiceInformation service,
                                                     Cancellable? cancellable = null)
     throws Error {
-        yield check_unlocked(cancellable);
-
         string? password = yield Secret.password_lookupv(
-            SecretMediator.schema, new_attrs(service, account), cancellable
+            SecretMediator.schema, new_attrs(service), cancellable
         );
 
         if (password == null) {
-            password = yield migrate_old_password(service, account, cancellable);
+            password = yield migrate_old_password(service, cancellable);
         }
 
         if (password == null)
-            debug("Unable to fetch password in libsecret keyring for %s", account.id);
+            debug(
+                "Unable to fetch password in libsecret keyring for %s: %s %s",
+                service.protocol.to_string(),
+                service.credentials.user,
+                service.endpoint.remote_address.get_hostname()
+            );
 
         return password;
     }
 
-    public virtual async void set_password_async(Geary.Service service,
-                                                 Geary.AccountInformation account,
+    public virtual async void set_password_async(Geary.ServiceInformation service,
                                                  Cancellable? cancellable = null)
     throws Error {
-        yield check_unlocked(cancellable);
-
-        Geary.Credentials credentials = get_credentials(service, account);
         try {
-            yield do_store(service, account, credentials.pass, cancellable);
+            yield do_store(service, service.credentials.pass, cancellable);
         } catch (Error e) {
-            debug("Unable to store password for \"%s\" %s in libsecret keyring: %s",
-                  account.id, service.name(), e.message);
+            debug(
+                "Unable to store password in libsecret keyring for %s: %s %s",
+                service.protocol.to_string(),
+                service.credentials.user,
+                service.endpoint.remote_address.get_hostname()
+            );
         }
     }
 
-    public virtual async void clear_password_async(Geary.Service service,
-                                                   Geary.AccountInformation account,
+    public virtual async void clear_password_async(Geary.ServiceInformation service,
                                                    Cancellable? cancellable = null)
     throws Error {
-        yield check_unlocked(cancellable);
-
-        Geary.Credentials credentials = get_credentials(service, account);
         yield Secret.password_clearv(SecretMediator.schema,
-                                     new_attrs(service, account),
+                                     new_attrs(service),
                                      cancellable);
 
         // Remove legacy formats
@@ -93,33 +94,30 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
         yield Secret.password_clear(
             compat_schema,
             cancellable,
-            "user", get_legacy_user(service, account.primary_mailbox.address)
+            "user", get_legacy_user(service, service.credentials.user)
         );
-        // <= 0.6
-        yield Secret.password_clear(
-            compat_schema,
-            cancellable,
-            "user", get_legacy_user(service, credentials.user)
-         );
     }
 
     public virtual async bool prompt_passwords_async(Geary.ServiceFlag services,
-        Geary.AccountInformation account_information,
-        out string? imap_password, out string? smtp_password,
-        out bool imap_remember_password, out bool smtp_remember_password) throws Error {
+                                                     Geary.AccountInformation account_information,
+                                                     out string? imap_password,
+                                                     out string? smtp_password,
+                                                     out bool imap_remember_password,
+                                                     out bool smtp_remember_password)
+        throws GLib.Error {
         // Our dialog doesn't support asking for both at once, even though this
         // API would indicate it does.  We need to revamp the API.
         assert(!services.has_imap() || !services.has_smtp());
-        
+
         // to prevent multiple dialogs from popping up at the same time, use a nonblocking mutex
         // to serialize the code
         int token = yield dialog_mutex.claim_async(null);
 
         // Ensure main window present to the window
-        this.instance.present();
+        this.application.present();
 
         PasswordDialog password_dialog = new PasswordDialog(
-            this.instance.get_active_window(),
+            this.application.get_active_window(),
             services.has_smtp(),
             account_information,
             services
@@ -185,101 +183,57 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
         }
     }
 
-    private async void do_store(Geary.Service service,
-                                Geary.AccountInformation account,
+    private async void do_store(Geary.ServiceInformation service,
                                 string password,
                                 Cancellable? cancellable)
     throws Error {
         yield Secret.password_storev(
             SecretMediator.schema,
-            new_attrs(service, account),
+            new_attrs(service),
             Secret.COLLECTION_DEFAULT,
-            "Geary %s password".printf(service.name()),
+            "Geary %s password".printf(service.protocol.name()),
             password,
             cancellable
         );
     }
 
-    private HashTable<string,string> new_attrs(Geary.Service service,
-                                               Geary.AccountInformation account,
+    private HashTable<string,string> new_attrs(Geary.ServiceInformation service,
                                                Cancellable? cancellable = null) {
-        string login = "";
-        string host = "";
-        switch (service) {
-        case Geary.Service.IMAP:
-            login = account.imap.credentials.user;
-            host = account.imap.endpoint.remote_address.get_hostname();
-            break;
-
-        case Geary.Service.SMTP:
-            login = account.smtp.credentials.user;
-            host = account.smtp.endpoint.remote_address.get_hostname();
-            break;
-
-        default:
-            warning("Unknown service type");
-            break;
-        }
-
         HashTable<string,string> table = new HashTable<string,string>(str_hash, str_equal);
-        table.insert(ATTR_PROTO, service.name());
-        table.insert(ATTR_HOST, host);
-        table.insert(ATTR_LOGIN, login);
+        table.insert(ATTR_PROTO, service.protocol.name());
+        table.insert(ATTR_HOST, service.host);
+        table.insert(ATTR_LOGIN, service.credentials.user);
         return table;
     }
 
-    private Geary.Credentials get_credentials(Geary.Service service, Geary.AccountInformation account) {
-        switch (service) {
-        case Geary.Service.IMAP:
-            return account.imap.credentials;
-
-        case Geary.Service.SMTP:
-            return account.smtp.credentials;
-
-        default:
-            assert_not_reached();
-        }
-    }
-
-    private async string? migrate_old_password(Geary.Service service,
-                                               Geary.AccountInformation account,
-                                               Cancellable? cancellable = null)
-    throws Error {
+    private async string? migrate_old_password(Geary.ServiceInformation service,
+                                               GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
         // <= 0.11
+        string user = get_legacy_user(service, service.credentials.user);
         string? password = yield Secret.password_lookup(
             compat_schema,
             cancellable,
-            "user", get_legacy_user(service, account.primary_mailbox.address)
+            "user", user
         );
 
-        // <= 0.6
-        if (password == null) {
-            Geary.Credentials creds = get_credentials(service, account);
-            string user = get_legacy_user(service, creds.user);
-            password = yield Secret.password_lookup(
+        if (password != null) {
+            // Clear the old password
+            yield Secret.password_clear(
                 compat_schema,
                 cancellable,
                 "user", user
             );
 
-            // Clear the old password
-            if (password != null) {
-                yield Secret.password_clear(
-                    compat_schema,
-                    cancellable,
-                    "user", user
-                );
-            }
+            // Store it in the new format
+            yield do_store(service, password, cancellable);
         }
-
-        if (password != null)
-            yield do_store(service, account, password, cancellable);
 
         return password;
     }
 
-    private string get_legacy_user(Geary.Service service, string user) {
-        switch (service) {
+    private string get_legacy_user(Geary.ServiceInformation service, string user) {
+        switch (service.protocol) {
         case Geary.Service.IMAP:
             return "org.yorba.geary imap_username:" + user;
         case Geary.Service.SMTP:

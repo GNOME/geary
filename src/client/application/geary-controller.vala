@@ -294,7 +294,7 @@ public class GearyController : Geary.BaseObject {
 
         // Start Geary.
         this.account_manager = new AccountManager(
-            engine,
+            this.application,
             this.application.get_user_config_directory(),
             this.application.get_user_data_directory()
         );

@@ -1,6 +1,6 @@
 /*
  * Copyright 2016 Software Freedom Conservancy Inc.
- *
+n *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
@@ -393,14 +393,12 @@ public class Geary.AccountInformation : BaseObject {
         if (force_request) {
             // Delete the current password(s).
             if (services.has_imap()) {
-                yield this.imap.mediator.clear_password_async(
-                    Service.IMAP, this);
+                yield this.imap.mediator.clear_password_async(this.imap);
 
                 if (this.imap.credentials != null)
                     this.imap.credentials.pass = null;
             } else if (services.has_smtp()) {
-                yield this.smtp.mediator.clear_password_async(
-                    Service.SMTP, this);
+                yield this.smtp.mediator.clear_password_async(this.smtp);
 
                 if (this.smtp.credentials != null)
                     this.smtp.credentials.pass = null;
@@ -448,16 +446,20 @@ public class Geary.AccountInformation : BaseObject {
         ServiceFlag failed_services = 0;
 
         if (services.has_imap()) {
-            string? imap_password = yield this.imap.mediator.get_password_async(Service.IMAP, this);
+            string? imap_password = yield this.imap.mediator.get_password_async(
+                this.imap
+            );
 
             if (imap_password != null)
                 this.imap.set_password(imap_password, this.imap.remember_password);
              else
                 failed_services |= ServiceFlag.IMAP;
         }
-        
+
         if (services.has_smtp() && this.smtp.credentials != null) {
-            string? smtp_password = yield this.smtp.mediator.get_password_async(Service.SMTP, this);
+            string? smtp_password = yield this.smtp.mediator.get_password_async(
+                this.smtp
+            );
 
             if (smtp_password != null)
                 this.smtp.set_password(smtp_password, this.smtp.remember_password);
@@ -517,16 +519,16 @@ public class Geary.AccountInformation : BaseObject {
 
         if (services.has_imap()) {
             if (this.imap.remember_password)
-                yield this.imap.mediator.set_password_async(Service.IMAP, this);
+                yield this.imap.mediator.set_password_async(this.imap);
             else
-                yield this.imap.mediator.clear_password_async(Service.IMAP, this);
+                yield this.imap.mediator.clear_password_async(this.imap);
         }
 
         if (services.has_smtp() && this.smtp.credentials != null) {
             if (this.smtp.remember_password)
-                yield this.smtp.mediator.set_password_async(Service.SMTP, this);
+                yield this.smtp.mediator.set_password_async(this.smtp);
             else
-                yield this.smtp.mediator.clear_password_async(Service.SMTP, this);
+                yield this.smtp.mediator.clear_password_async(this.smtp);
         }
     }
 
@@ -536,14 +538,14 @@ public class Geary.AccountInformation : BaseObject {
 
         try {
             if (services.has_imap())
-                yield this.imap.mediator.clear_password_async(Service.IMAP, this);
+                yield this.imap.mediator.clear_password_async(this.imap);
         } catch (Error e) {
             return_error = e;
         }
 
         try {
             if (services.has_smtp() && this.smtp.credentials != null)
-                yield this.smtp.mediator.clear_password_async(Service.SMTP, this);
+                yield this.smtp.mediator.clear_password_async(this.smtp);
         } catch (Error e) {
             return_error = e;
         }

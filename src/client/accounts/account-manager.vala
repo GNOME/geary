@@ -82,7 +82,7 @@ public class AccountManager : GLib.Object {
     private Gee.Map<string,Geary.AccountInformation> enabled_accounts =
         new Gee.HashMap<string,Geary.AccountInformation>();
 
-    private Geary.Engine engine;
+    private GearyApplication application;
     private GLib.File user_config_dir;
     private GLib.File user_data_dir;
 
@@ -103,17 +103,17 @@ public class AccountManager : GLib.Object {
     public signal void sso_account_removed(Geary.AccountInformation removed);
 
 
-    public AccountManager(Geary.Engine engine,
+    public AccountManager(GearyApplication application,
                           GLib.File user_config_dir,
                           GLib.File user_data_dir) {
-        this.engine = engine;
+        this.application = application;
         this.user_config_dir = user_config_dir;
         this.user_data_dir = user_data_dir;
     }
 
     public async void connect_libsecret(GLib.Cancellable? cancellable)
         throws GLib.Error {
-        this.libsecret = new SecretMediator();
+        this.libsecret = new SecretMediator(this.application, cancellable);
     }
 
     public async void connect_goa(GLib.Cancellable? cancellable)
@@ -442,7 +442,7 @@ public class AccountManager : GLib.Object {
     public async void remove_account(Geary.AccountInformation info,
                                      GLib.Cancellable? cancellable)
         throws GLib.Error {
-        yield this.engine.remove_account_async(info, cancellable);
+        yield this.application.engine.remove_account_async(info, cancellable);
 
         if (info.data_dir == null) {
             warning("Cannot remove account storage directory; nothing to remove");
@@ -469,7 +469,7 @@ public class AccountManager : GLib.Object {
     private void enable_account(Geary.AccountInformation account)
         throws GLib.Error {
         this.enabled_accounts.set(account.id, account);
-        this.engine.add_account(account);
+        this.application.engine.add_account(account);
         account_added(account);
     }
 

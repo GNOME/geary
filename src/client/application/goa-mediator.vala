@@ -12,13 +12,12 @@ public class GoaMediator : Geary.CredentialsMediator, Object {
         this.password = password;
     }
 
-    public virtual async string? get_password_async(Geary.Service service,
-                                                    Geary.AccountInformation account,
+    public virtual async string? get_password_async(Geary.ServiceInformation service,
                                                     Cancellable? cancellable = null)
     throws Error {
         string pass;
 
-        switch (service) {
+        switch (service.protocol) {
             case Geary.Service.IMAP:
                 if (!password.call_get_password_sync("imap-password", out pass, cancellable))
                     return null;
@@ -33,15 +32,13 @@ public class GoaMediator : Geary.CredentialsMediator, Object {
         return pass;
     }
 
-    public virtual async void set_password_async(Geary.Service service,
-                                                 Geary.AccountInformation account,
+    public virtual async void set_password_async(Geary.ServiceInformation service,
                                                  Cancellable? cancellable = null)
     throws Error {
         return;
     }
 
-    public virtual async void clear_password_async(Geary.Service service,
-                                                   Geary.AccountInformation account,
+    public virtual async void clear_password_async(Geary.ServiceInformation service,
                                                    Cancellable? cancellable = null)
     throws Error {
         return;
@@ -52,13 +49,9 @@ public class GoaMediator : Geary.CredentialsMediator, Object {
         out string? imap_password, out string? smtp_password,
         out bool imap_remember_password, out bool smtp_remember_password) throws Error {
 
-        imap_password = yield get_password_async(Geary.Service.IMAP, account_information, null);
-        smtp_password = yield get_password_async(Geary.Service.SMTP, account_information, null);
-
-        imap_remember_password = false;
-        smtp_remember_password = false;
-
-        return false;
+        throw new Geary.EngineError.UNSUPPORTED(
+            "Account password must be set in GOA"
+        );
     }
 
 }
