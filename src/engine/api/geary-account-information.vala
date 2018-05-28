@@ -17,8 +17,10 @@ public class Geary.AccountInformation : BaseObject {
 
     public static int next_ordinal = 0;
 
-    private static Gee.HashMap<string, weak Geary.Endpoint> known_endpoints =
-        new Gee.HashMap<string, weak Endpoint>();
+
+    private static Gee.HashMap<string,weak Endpoint> known_endpoints =
+        new Gee.HashMap<string,weak Endpoint>();
+
 
     /** Comparator for account info objects based on their ordinals. */
     public static int compare_ascending(AccountInformation a, AccountInformation b) {
@@ -38,13 +40,14 @@ public class Geary.AccountInformation : BaseObject {
             endpoint.remote_address.port
         );
 
-        Endpoint? cached = AccountInformation.known_endpoints.get(key);
-        if (cached == null) {
-            cached = endpoint;
-            AccountInformation.known_endpoints.set(key, cached);
+        weak Endpoint? cached = AccountInformation.known_endpoints.get(key);
+        weak Endpoint? shared = endpoint;
+        if (cached != null) {
+            shared = cached;
+            AccountInformation.known_endpoints.set(key, shared);
         }
 
-        return cached;
+        return shared;
     }
 
 
