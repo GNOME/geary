@@ -4,6 +4,69 @@
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
+/* Copyright 2016 Software Freedom Conservancy Inc.
+ *
+ * This software is licensed under the GNU Lesser General Public License
+ * (version 2.1 or later).  See the COPYING file in this distribution.
+ */
+
+/**
+ * The email wire protocols supported by the engine.
+ */
+public enum Geary.Protocol {
+    IMAP,
+    SMTP;
+
+    /**
+     * Returns a user-visible label for the protocol.
+     */
+    public string user_label() {
+        switch (this) {
+            case IMAP:
+                return _("IMAP");
+
+            case SMTP:
+                return _("SMTP");
+
+            default:
+                assert_not_reached();
+        }
+    }
+
+    /**
+     * Returns a short version of the enum key.
+     */
+    public string name() {
+        switch (this) {
+            case IMAP:
+                return "IMAP";
+
+            case SMTP:
+                return "SMTP";
+
+            default:
+                assert_not_reached();
+        }
+    }
+}
+
+/**
+ * A bitfield to specify {@link ServiceInformation} types.
+ */
+[Flags]
+public enum Geary.ServiceFlag {
+    IMAP,
+    SMTP;
+
+    public bool has_imap() {
+        return (this & IMAP) == IMAP;
+    }
+
+    public bool has_smtp() {
+        return (this & SMTP) == SMTP;
+    }
+}
+
 /**
  * A type representing different methods for authenticating. For now we only
  * support password-based auth.
@@ -45,7 +108,7 @@ public abstract class Geary.ServiceInformation : GLib.Object {
 
 
     /** Specifies if this service is for IMAP or SMTP. */
-    public Geary.Service protocol { get; private set; }
+    public Geary.Protocol protocol { get; private set; }
 
     /** The server's address. */
     public string host { get; set; default = ""; }
@@ -102,7 +165,7 @@ public abstract class Geary.ServiceInformation : GLib.Object {
     public Endpoint? endpoint { get; internal set; }
 
 
-    protected ServiceInformation(Service proto) {
+    protected ServiceInformation(Protocol proto) {
         this.protocol = proto;
     }
 

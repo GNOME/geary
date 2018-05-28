@@ -19,7 +19,7 @@ public class LocalServiceInformation : Geary.ServiceInformation {
     private const string USERNAME_KEY = "username";
 
 
-    public LocalServiceInformation(Geary.Service protocol,
+    public LocalServiceInformation(Geary.Protocol protocol,
                                    Geary.CredentialsMethod method,
                                    Geary.CredentialsMediator? mediator) {
         base(protocol);
@@ -42,7 +42,7 @@ public class LocalServiceInformation : Geary.ServiceInformation {
         this.use_ssl = config.get_bool(SSL, this.use_ssl);
         this.use_starttls = config.get_bool(STARTTLS, this.use_starttls);
 
-        if (this.protocol == Geary.Service.SMTP) {
+        if (this.protocol == Geary.Protocol.SMTP) {
             this.smtp_noauth = config.get_bool(SMTP_NOAUTH, this.smtp_noauth);
             if (this.smtp_noauth)
                 this.credentials = null;
@@ -72,7 +72,7 @@ public class LocalServiceInformation : Geary.ServiceInformation {
         config.set_string(USERNAME_KEY, this.credentials.user);
         config.set_bool(REMEMBER_PASSWORD_KEY, this.remember_password);
 
-        if (this.protocol == Geary.Service.SMTP) {
+        if (this.protocol == Geary.Protocol.SMTP) {
             config.set_bool(SMTP_USE_IMAP_CREDENTIALS, this.smtp_use_imap_credentials);
             config.set_bool(SMTP_NOAUTH, this.smtp_noauth);
         }

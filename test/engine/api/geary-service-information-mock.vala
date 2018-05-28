@@ -13,7 +13,7 @@ public class Geary.MockServiceInformation : ServiceInformation, MockObject {
     }
 
     public MockServiceInformation() {
-        base(Service.IMAP);
+        base(Protocol.IMAP);
     }
 
     public override Geary.ServiceInformation temp_copy() {

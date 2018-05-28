@@ -125,7 +125,7 @@ public class AccountManager : GLib.Object {
     }
 
     public LocalServiceInformation
-        new_libsecret_service(Geary.Service service,
+        new_libsecret_service(Geary.Protocol service,
                               Geary.CredentialsMethod method) {
         return new LocalServiceInformation(service, method, libsecret);
     }
@@ -457,7 +457,9 @@ public class AccountManager : GLib.Object {
         }
 
         try {
-            yield info.clear_stored_passwords_async(Geary.ServiceFlag.IMAP | Geary.ServiceFlag.SMTP);
+            yield info.clear_stored_passwords_async(
+                Geary.ServiceFlag.IMAP | Geary.ServiceFlag.SMTP
+            );
         } catch (Error e) {
             debug("Error clearing passwords: %s", e.message);
         }
@@ -501,7 +503,7 @@ public class AccountManager : GLib.Object {
         Geary.ConfigFile.Group imap_config =
         config.file.get_group(IMAP_CONFIG_GROUP);
         LocalServiceInformation imap = new_libsecret_service(
-            Geary.Service.IMAP, method
+            Geary.Protocol.IMAP, method
         );
         imap_config.set_fallback(config.name, "imap_");
         imap.load_credentials(imap_config, fallback_login);
@@ -509,7 +511,7 @@ public class AccountManager : GLib.Object {
         Geary.ConfigFile.Group smtp_config =
         config.file.get_group(SMTP_CONFIG_GROUP);
         LocalServiceInformation smtp = new_libsecret_service(
-            Geary.Service.SMTP, method
+            Geary.Protocol.SMTP, method
         );
         smtp_config.set_fallback(config.name, "smtp_");
         smtp.load_credentials(smtp_config, fallback_login);
@@ -544,8 +546,8 @@ public class AccountManager : GLib.Object {
             Geary.CredentialsMediator mediator = new GoaMediator(password);
             info = new Geary.AccountInformation(
                 id,
-                new GoaServiceInformation(Geary.Service.IMAP, mediator, mail),
-                new GoaServiceInformation(Geary.Service.SMTP, mediator, mail)
+                new GoaServiceInformation(Geary.Protocol.IMAP, mediator, mail),
+                new GoaServiceInformation(Geary.Protocol.SMTP, mediator, mail)
             );
             info.service_provider = Geary.ServiceProvider.OTHER;
         }

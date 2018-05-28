@@ -769,7 +769,7 @@ public class GearyController : Geary.BaseObject {
         // If there are still TLS connection issues that caused the connection to fail (happens on the
         // first attempt), clear those errors and retry
         if (endpoint.tls_validation_warnings != 0 && endpoint.trust_untrusted_host == Geary.Trillian.TRUE) {
-            Geary.Engine.ValidationResult flag = (service.protocol == Geary.Service.IMAP)
+            Geary.Engine.ValidationResult flag = (service.protocol == Geary.Protocol.IMAP)
                 ? Geary.Engine.ValidationResult.IMAP_CONNECTION_FAILED
                 : Geary.Engine.ValidationResult.SMTP_CONNECTION_FAILED;
 
@@ -1019,7 +1019,7 @@ public class GearyController : Geary.BaseObject {
 
             if (account != null && account.is_open()) {
                 switch (service_report.service.protocol) {
-                case Geary.Service.IMAP:
+                case Geary.Protocol.IMAP:
                     account.start_incoming_client.begin((obj, ret) => {
                             try {
                                 account.start_incoming_client.end(ret);
@@ -1029,7 +1029,7 @@ public class GearyController : Geary.BaseObject {
                         });
                     break;
 
-                case Geary.Service.SMTP:
+                case Geary.Protocol.SMTP:
                     account.start_outgoing_client.begin((obj, ret) => {
                             try {
                                 account.start_outgoing_client.end(ret);

@@ -10,7 +10,7 @@
 public class GoaServiceInformation : Geary.ServiceInformation {
     private Goa.Mail mail_object;
 
-    public GoaServiceInformation(Geary.Service protocol,
+    public GoaServiceInformation(Geary.Protocol protocol,
                                  Geary.CredentialsMediator? mediator,
                                  Goa.Mail mail_object) {
         base(protocol);
@@ -19,14 +19,14 @@ public class GoaServiceInformation : Geary.ServiceInformation {
         this.mail_object = mail_object;
 
         switch (protocol) {
-            case Geary.Service.IMAP:
+            case Geary.Protocol.IMAP:
                 this.credentials.user = mail_object.imap_user_name;
                 this.host = mail_object.imap_host;
                 this.port = Geary.Imap.ClientConnection.DEFAULT_PORT_SSL;
                 this.use_ssl = mail_object.imap_use_ssl;
                 this.use_starttls = mail_object.imap_use_tls;
                 break;
-            case Geary.Service.SMTP:
+            case Geary.Protocol.SMTP:
                 this.credentials.user = mail_object.smtp_user_name;
                 this.host = mail_object.smtp_host;
                 this.port = Geary.Smtp.ClientConnection.DEFAULT_PORT_SSL;

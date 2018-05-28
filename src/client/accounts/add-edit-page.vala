@@ -678,12 +678,12 @@ public class AddEditPage : Gtk.Box {
             // New account
             Geary.ServiceInformation imap =
                 this.application.controller.account_manager.new_libsecret_service(
-                    Geary.Service.IMAP,
+                    Geary.Protocol.IMAP,
                     Geary.CredentialsMethod.PASSWORD
                 );
             Geary.ServiceInformation smtp =
                 this.application.controller.account_manager.new_libsecret_service(
-                    Geary.Service.SMTP,
+                    Geary.Protocol.SMTP,
                     Geary.CredentialsMethod.PASSWORD
                 );
 

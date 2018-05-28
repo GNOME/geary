@@ -49,7 +49,7 @@ public class MainWindowInfoBar : Gtk.InfoBar {
             string server = endpoint.remote_address.hostname;
 
             if (report.problem_type == Geary.ProblemType.CONNECTION_ERROR &&
-                service_report.service.protocol == Geary.Service.IMAP) {
+                service_report.service.protocol == Geary.Protocol.IMAP) {
                 // Translators: String substitution is the account name
                 title = _("Problem connecting to incoming server for %s".printf(account));
                 // Translators: String substitution is the server name
@@ -57,7 +57,7 @@ public class MainWindowInfoBar : Gtk.InfoBar {
                 retry = _("Retry connecting now");
 
             } else if (report.problem_type == Geary.ProblemType.CONNECTION_ERROR &&
-                       service_report.service.protocol == Geary.Service.SMTP) {
+                       service_report.service.protocol == Geary.Protocol.SMTP) {
                 // Translators: String substitution is the account name
                 title = _("Problem connecting to outgoing server for %s".printf(account));
                 // Translators: String substitution is the server name
@@ -66,7 +66,7 @@ public class MainWindowInfoBar : Gtk.InfoBar {
                 retry = _("Retry connecting now");
 
             } else if (report.problem_type == Geary.ProblemType.NETWORK_ERROR &&
-                       service_report.service.protocol == Geary.Service.IMAP) {
+                       service_report.service.protocol == Geary.Protocol.IMAP) {
                 // Translators: String substitution is the account name
                 title = _("Problem with connection to incoming server for %s").printf(account);
                 // Translators: String substitution is the server name
@@ -74,7 +74,7 @@ public class MainWindowInfoBar : Gtk.InfoBar {
                 retry = _("Try reconnecting");
 
             } else if (report.problem_type == Geary.ProblemType.NETWORK_ERROR &&
-                       service_report.service.protocol == Geary.Service.SMTP) {
+                       service_report.service.protocol == Geary.Protocol.SMTP) {
                 // Translators: String substitution is the account name
                 title = _("Problem with connection to outgoing server for %s").printf(account);
                 // Translators: String substitution is the server name
@@ -82,7 +82,7 @@ public class MainWindowInfoBar : Gtk.InfoBar {
                 retry = _("Try reconnecting");
 
             } else if (report.problem_type == Geary.ProblemType.SERVER_ERROR &&
-                       service_report.service.protocol == Geary.Service.IMAP) {
+                       service_report.service.protocol == Geary.Protocol.IMAP) {
                 // Translators: String substitution is the account name
                 title = _("Problem communicating with incoming server for %s").printf(account);
                 // Translators: String substitution is the server name
@@ -90,7 +90,7 @@ public class MainWindowInfoBar : Gtk.InfoBar {
                 retry = _("Try reconnecting");
 
             } else if (report.problem_type == Geary.ProblemType.SERVER_ERROR &&
-                       service_report.service.protocol == Geary.Service.SMTP) {
+                       service_report.service.protocol == Geary.Protocol.SMTP) {
                 title = _("Problem communicating with outgoing mail server");
                 // Translators: First string substitution is the server
                 // name, second is the account name
@@ -98,28 +98,28 @@ public class MainWindowInfoBar : Gtk.InfoBar {
                 retry = _("Try reconnecting");
 
             } else if (report.problem_type == Geary.ProblemType.LOGIN_FAILED &&
-                       service_report.service.protocol == Geary.Service.IMAP) {
+                       service_report.service.protocol == Geary.Protocol.IMAP) {
                 // Translators: String substitution is the account name
                 title = _("Incoming mail server password required for %s").printf(account);
                 descr = _("Messages cannot be received without the correct password.");
                 retry = _("Retry receiving email, you will be prompted for a password");
 
             } else if (report.problem_type == Geary.ProblemType.LOGIN_FAILED &&
-                       service_report.service.protocol == Geary.Service.SMTP) {
+                       service_report.service.protocol == Geary.Protocol.SMTP) {
                 // Translators: String substitution is the account name
                 title = _("Outgoing mail server password required for %s").printf(account);
                 descr = _("Messages cannot be sent without the correct password.");
                 retry = _("Retry sending queued messages, you will be prompted for a password");
 
             } else if (report.problem_type == Geary.ProblemType.GENERIC_ERROR &&
-                       service_report.service.protocol == Geary.Service.IMAP) {
+                       service_report.service.protocol == Geary.Protocol.IMAP) {
                 // Translators: String substitution is the account name
                 title = _("A problem occurred checking mail for %s").printf(account);
                 descr = _("Something went wrong, please file a bug report if the problem persists");
                 retry = _("Try reconnecting");
 
             } else if (report.problem_type == Geary.ProblemType.GENERIC_ERROR &&
-                       service_report.service.protocol == Geary.Service.SMTP) {
+                       service_report.service.protocol == Geary.Protocol.SMTP) {
                 // Translators: String substitution is the account name
                 title = _("A problem occurred sending mail for %s").printf(account);
                 descr = _("Something went wrong, please file a bug report if the problem persists");

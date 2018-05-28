@@ -18,11 +18,11 @@ public class GoaMediator : Geary.CredentialsMediator, Object {
         string pass;
 
         switch (service.protocol) {
-            case Geary.Service.IMAP:
+            case Geary.Protocol.IMAP:
                 if (!password.call_get_password_sync("imap-password", out pass, cancellable))
                     return null;
                 break;
-            case Geary.Service.SMTP:
+            case Geary.Protocol.SMTP:
                 if (!password.call_get_password_sync("smtp-password", out pass, cancellable))
                     return null;
                 break;

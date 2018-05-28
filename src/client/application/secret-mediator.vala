@@ -1,4 +1,5 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -234,9 +235,9 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
 
     private string get_legacy_user(Geary.ServiceInformation service, string user) {
         switch (service.protocol) {
-        case Geary.Service.IMAP:
+        case Geary.Protocol.IMAP:
             return "org.yorba.geary imap_username:" + user;
-        case Geary.Service.SMTP:
+        case Geary.Protocol.SMTP:
             return "org.yorba.geary smtp_username:" + user;
         default:
             warning("Unknown service type");
