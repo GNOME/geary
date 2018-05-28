@@ -63,25 +63,6 @@ public class Geary.ConfigFile {
             string ret = def;
             foreach (GroupLookup lookup in this.lookups) {
                 try {
-                    ret = this.backing.get_string(
-                        lookup.group, lookup.prefix + key
-                    );
-                    break;
-                } catch (GLib.KeyFileError err) {
-                    // continue
-                }
-            }
-            return ret;
-        }
-
-        public void set_string(string key, string value) {
-            this.backing.set_string(this.name, key, value);
-        }
-
-        public string get_escaped_string(string key, string def = "") {
-            string ret = def;
-            foreach (GroupLookup lookup in this.lookups) {
-                try {
                     ret = this.backing.get_value(
                         lookup.group, lookup.prefix + key
                     );
@@ -93,8 +74,27 @@ public class Geary.ConfigFile {
             return ret;
         }
 
-        public void set_escaped_string(string key, string value) {
+        public void set_string(string key, string value) {
             this.backing.set_value(this.name, key, value);
+        }
+
+        public string get_escaped_string(string key, string def = "") {
+            string ret = def;
+            foreach (GroupLookup lookup in this.lookups) {
+                try {
+                    ret = this.backing.get_string(
+                        lookup.group, lookup.prefix + key
+                    );
+                    break;
+                } catch (GLib.KeyFileError err) {
+                    // continue
+                }
+            }
+            return ret;
+        }
+
+        public void set_escaped_string(string key, string value) {
+            this.backing.set_string(this.name, key, value);
         }
 
         public Gee.List<string> get_string_list(string key) {

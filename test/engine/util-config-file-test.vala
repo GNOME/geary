@@ -52,8 +52,8 @@ class Geary.ConfigFileTest : TestCase {
     }
 
     public void test_escaped_string() throws Error {
-        this.test_group.set_escaped_string(TEST_KEY, "a = string");
-        assert_string("a = string", this.test_group.get_escaped_string(TEST_KEY));
+        this.test_group.set_escaped_string(TEST_KEY, "a\nstring");
+        assert_string("a\nstring", this.test_group.get_escaped_string(TEST_KEY));
         assert_string("=default", this.test_group.get_escaped_string(TEST_KEY_MISSING, "=default"));
     }
 
