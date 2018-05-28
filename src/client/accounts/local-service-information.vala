@@ -20,21 +20,29 @@ public class LocalServiceInformation : Geary.ServiceInformation {
 
 
     public LocalServiceInformation(Geary.Protocol protocol,
-                                   Geary.CredentialsMethod method,
                                    Geary.CredentialsMediator? mediator) {
         base(protocol);
-        this.credentials_method = method;
         this.mediator = mediator;
     }
 
     public override Geary.ServiceInformation temp_copy() {
         LocalServiceInformation copy = new LocalServiceInformation(
-            this.protocol, this.credentials_method, this.mediator
+            this.protocol, this.mediator
         );
         copy.copy_from(this);
         return copy;
     }
 
+    public void load_credentials(Geary.ConfigFile.Group config,
+                                 Geary.Credentials.Method method,
+                                 string default_login) {
+        this.credentials = new Geary.Credentials(
+            method, config.get_string(USERNAME_KEY, default_login)
+        );
+        this.remember_password = config.get_bool(
+            REMEMBER_PASSWORD_KEY, this.remember_password
+        );
+    }
 
     public void load_settings(Geary.ConfigFile.Group config) {
         this.host = config.get_string(HOST, this.host);
@@ -43,25 +51,18 @@ public class LocalServiceInformation : Geary.ServiceInformation {
         this.use_starttls = config.get_bool(STARTTLS, this.use_starttls);
 
         if (this.protocol == Geary.Protocol.SMTP) {
-            this.smtp_noauth = config.get_bool(SMTP_NOAUTH, this.smtp_noauth);
-            if (this.smtp_noauth)
-                this.credentials = null;
+            this.smtp_noauth = config.get_bool(
+                SMTP_NOAUTH, this.smtp_noauth
+            );
             this.smtp_use_imap_credentials = config.get_bool(
                 SMTP_USE_IMAP_CREDENTIALS,
                 this.smtp_use_imap_credentials
             );
+            if (this.smtp_noauth) {
+                this.credentials = null;
+            }
         }
 
-    }
-
-    public void load_credentials(Geary.ConfigFile.Group config,
-                                 string? default_login = null) {
-        this.credentials.user = config.get_string(
-            USERNAME_KEY, default_login
-        );
-        this.remember_password = config.get_bool(
-            REMEMBER_PASSWORD_KEY, this.remember_password
-        );
     }
 
     public void save_settings(Geary.ConfigFile.Group config) {

@@ -654,10 +654,15 @@ public class AddEditPage : Gtk.Box {
         fix_credentials_for_supported_provider();
 
         Geary.Credentials imap_credentials = new Geary.Credentials(
-            imap_username.strip(), imap_password.strip());
+            Geary.Credentials.Method.PASSWORD,
+            imap_username.strip(),
+            imap_password.strip()
+        );
         Geary.Credentials smtp_credentials = new Geary.Credentials(
+            Geary.Credentials.Method.PASSWORD,
             (smtp_use_imap_credentials ? imap_username.strip() : smtp_username.strip()),
-            (smtp_use_imap_credentials ? imap_password.strip() : smtp_password.strip()));
+            (smtp_use_imap_credentials ? imap_password.strip() : smtp_password.strip())
+        );
 
         Geary.AccountInformation? info = null;
         if (this.id != null) {
@@ -678,13 +683,11 @@ public class AddEditPage : Gtk.Box {
             // New account
             Geary.ServiceInformation imap =
                 this.application.controller.account_manager.new_libsecret_service(
-                    Geary.Protocol.IMAP,
-                    Geary.CredentialsMethod.PASSWORD
+                    Geary.Protocol.IMAP
                 );
             Geary.ServiceInformation smtp =
                 this.application.controller.account_manager.new_libsecret_service(
-                    Geary.Protocol.SMTP,
-                    Geary.CredentialsMethod.PASSWORD
+                    Geary.Protocol.SMTP
                 );
 
             try {

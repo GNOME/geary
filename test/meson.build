@@ -14,6 +14,7 @@ geary_test_engine_sources = [
   # geary-engine_internal.vapi, which leads to duplicate symbols when
   # linking
   'engine/api/geary-account-mock.vala',
+  'engine/api/geary-credentials-mediator-mock.vala',
   'engine/api/geary-email-identifier-mock.vala',
   'engine/api/geary-email-properties-mock.vala',
   'engine/api/geary-folder-mock.vala',

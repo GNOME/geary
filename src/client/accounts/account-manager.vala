@@ -124,10 +124,8 @@ public class AccountManager : GLib.Object {
         this.goa_service.account_removed.connect(on_goa_account_removed);
     }
 
-    public LocalServiceInformation
-        new_libsecret_service(Geary.Protocol service,
-                              Geary.CredentialsMethod method) {
-        return new LocalServiceInformation(service, method, libsecret);
+    public LocalServiceInformation new_libsecret_service(Geary.Protocol service) {
+        return new LocalServiceInformation(service, libsecret);
     }
 
     public async void create_account_dirs(Geary.AccountInformation info,
@@ -376,10 +374,12 @@ public class AccountManager : GLib.Object {
         Geary.ConfigFile.Group config = config_file.get_group(ACCOUNT_CONFIG_GROUP);
         if (info.imap is LocalServiceInformation) {
             config.set_string(
-                CREDENTIALS_PROVIDER_KEY, CredentialsProvider.LIBSECRET.to_string()
+                CREDENTIALS_PROVIDER_KEY,
+                CredentialsProvider.LIBSECRET.to_string()
             );
             config.set_string(
-                CREDENTIALS_METHOD_KEY, info.imap.credentials_method.to_string()
+                CREDENTIALS_METHOD_KEY,
+                info.imap.credentials.supported_method.to_string()
             );
 
             if (info.service_provider == Geary.ServiceProvider.OTHER) {
@@ -495,26 +495,26 @@ public class AccountManager : GLib.Object {
             config.get_string(SERVICE_PROVIDER_KEY,
                               Geary.ServiceProvider.GMAIL.to_string())
         );
-        Geary.CredentialsMethod method = Geary.CredentialsMethod.from_string(
+        Geary.Credentials.Method method = Geary.Credentials.Method.from_string(
             config.get_string(CREDENTIALS_METHOD_KEY,
-                              Geary.CredentialsMethod.PASSWORD.to_string())
+                              Geary.Credentials.Method.PASSWORD.to_string())
         );
 
         Geary.ConfigFile.Group imap_config =
         config.file.get_group(IMAP_CONFIG_GROUP);
         LocalServiceInformation imap = new_libsecret_service(
-            Geary.Protocol.IMAP, method
+            Geary.Protocol.IMAP
         );
         imap_config.set_fallback(config.name, "imap_");
-        imap.load_credentials(imap_config, fallback_login);
+        imap.load_credentials(imap_config, method, fallback_login);
 
         Geary.ConfigFile.Group smtp_config =
         config.file.get_group(SMTP_CONFIG_GROUP);
         LocalServiceInformation smtp = new_libsecret_service(
-            Geary.Protocol.SMTP, method
+            Geary.Protocol.SMTP
         );
         smtp_config.set_fallback(config.name, "smtp_");
-        smtp.load_credentials(smtp_config, fallback_login);
+        smtp.load_credentials(smtp_config, method, fallback_login);
 
         // Generic IMAP accounts must load their settings from their
         // config, GMail and others have it hard-coded hence don't
@@ -524,8 +524,7 @@ public class AccountManager : GLib.Object {
 
             smtp.load_settings(smtp_config);
             if (smtp.smtp_use_imap_credentials) {
-                smtp.credentials.user = imap.credentials.user;
-                smtp.credentials.pass = imap.credentials.pass;
+                smtp.credentials = imap.credentials.copy();
             }
         }
 

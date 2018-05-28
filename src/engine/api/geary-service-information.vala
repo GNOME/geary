@@ -67,36 +67,6 @@ public enum Geary.ServiceFlag {
     }
 }
 
-/**
- * A type representing different methods for authenticating. For now we only
- * support password-based auth.
- */
-public enum Geary.CredentialsMethod {
-    PASSWORD;
-
-    public string to_string() {
-        switch (this) {
-            case PASSWORD:
-                return "password";
-
-            default:
-                assert_not_reached();
-        }
-    }
-
-    public static CredentialsMethod from_string(string str) throws Error {
-        switch (str) {
-            case "password":
-                return PASSWORD;
-
-            default:
-                throw new KeyFileError.INVALID_VALUE(
-                    "Unknown credentials method type: %s", str
-                );
-        }
-    }
-}
-
 
 /**
  * This class encloses all the information used when connecting with the server,
@@ -108,7 +78,7 @@ public abstract class Geary.ServiceInformation : GLib.Object {
 
 
     /** Specifies if this service is for IMAP or SMTP. */
-    public Geary.Protocol protocol { get; private set; }
+    public Protocol protocol { get; private set; }
 
     /** The server's address. */
     public string host { get; set; default = ""; }
@@ -130,7 +100,7 @@ public abstract class Geary.ServiceInformation : GLib.Object {
     public bool remember_password { get; set; default = false; }
 
     /** The credentials used for authenticating. */
-    public Geary.Credentials credentials { get; set; default = new Geary.Credentials(null, null); }
+    public Geary.Credentials? credentials { get; set; default = null; }
 
     /**
      * The credentials mediator used with the account.
@@ -138,9 +108,6 @@ public abstract class Geary.ServiceInformation : GLib.Object {
      * It is responsible for fetching and storing the credentials if applicable.
      */
     public Geary.CredentialsMediator? mediator { get; set; default = null; }
-
-    /** The method used for authenticating with the server. */
-    public Geary.CredentialsMethod credentials_method { get; set; default = CredentialsMethod.PASSWORD; }
 
     /**
      * Whether we should NOT authenticate with the server.
@@ -174,7 +141,11 @@ public abstract class Geary.ServiceInformation : GLib.Object {
      * of remembering the password.
      */
     public void set_password(string password, bool remember = false) {
-        this.credentials = new Credentials(this.credentials.user, password);
+        this.credentials = new Credentials(
+            this.credentials.supported_method,
+            this.credentials.user,
+            password
+        );
         this.remember_password = remember;
     }
 
@@ -188,7 +159,6 @@ public abstract class Geary.ServiceInformation : GLib.Object {
         this.remember_password = from.remember_password;
         this.credentials = from.credentials;
         this.mediator = from.mediator;
-        this.credentials_method = from.credentials_method;
         this.smtp_noauth = from.smtp_noauth;
         this.smtp_use_imap_credentials = from.smtp_use_imap_credentials;
     }

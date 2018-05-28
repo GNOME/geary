@@ -14,28 +14,35 @@ public class GoaServiceInformation : Geary.ServiceInformation {
                                  Geary.CredentialsMediator? mediator,
                                  Goa.Mail mail_object) {
         base(protocol);
-        this.credentials_method = Geary.CredentialsMethod.PASSWORD;
         this.mediator = mediator;
         this.mail_object = mail_object;
 
         switch (protocol) {
-            case Geary.Protocol.IMAP:
-                this.credentials.user = mail_object.imap_user_name;
-                this.host = mail_object.imap_host;
-                this.port = Geary.Imap.ClientConnection.DEFAULT_PORT_SSL;
-                this.use_ssl = mail_object.imap_use_ssl;
-                this.use_starttls = mail_object.imap_use_tls;
-                break;
-            case Geary.Protocol.SMTP:
-                this.credentials.user = mail_object.smtp_user_name;
-                this.host = mail_object.smtp_host;
-                this.port = Geary.Smtp.ClientConnection.DEFAULT_PORT_SSL;
-                this.use_ssl = mail_object.smtp_use_ssl;
-                this.use_starttls = mail_object.smtp_use_tls;
-                this.smtp_noauth = !(mail_object.smtp_use_auth);
-                if (smtp_noauth)
-                    this.credentials = null;
-                break;
+        case Geary.Protocol.IMAP:
+            this.host = mail_object.imap_host;
+            this.port = Geary.Imap.ClientConnection.DEFAULT_PORT_SSL;
+            this.use_ssl = mail_object.imap_use_ssl;
+            this.use_starttls = mail_object.imap_use_tls;
+            this.credentials = new Geary.Credentials(
+                Geary.Credentials.Method.PASSWORD,
+                mail_object.imap_user_name
+            );
+            break;
+
+        case Geary.Protocol.SMTP:
+            this.host = mail_object.smtp_host;
+            this.port = Geary.Smtp.ClientConnection.DEFAULT_PORT_SSL;
+            this.use_ssl = mail_object.smtp_use_ssl;
+            this.use_starttls = mail_object.smtp_use_tls;
+            this.smtp_noauth = !(mail_object.smtp_use_auth);
+            this.smtp_use_imap_credentials = false;
+            if (!this.smtp_noauth) {
+                this.credentials = new Geary.Credentials(
+                    Geary.Credentials.Method.PASSWORD,
+                    mail_object.smtp_user_name
+                );
+            }
+            break;
         }
     }
 

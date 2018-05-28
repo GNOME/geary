@@ -19,35 +19,79 @@
  */
 
 public class Geary.Credentials : BaseObject, Gee.Hashable<Geary.Credentials> {
-    public string? user { get; set; }
-    public string? pass { get; set; }
-    
-    public Credentials(string? user, string? pass) {
+
+
+    /**
+     * Authentication methods supported by the Engine.
+     */
+    public enum Method {
+        /** Password-based authentication, such as SASL PLAIN. */
+        PASSWORD;
+
+        public string to_string() {
+            switch (this) {
+            case PASSWORD:
+                return "password";
+
+            default:
+                assert_not_reached();
+            }
+        }
+
+        public static Method from_string(string str) throws Error {
+            switch (str) {
+            case "password":
+                return PASSWORD;
+
+            default:
+                throw new KeyFileError.INVALID_VALUE(
+                    "Unknown credentials method type: %s", str
+                );
+            }
+        }
+    }
+
+
+    public Method supported_method { get; private set; }
+    public string user { get; private set; }
+    public string? pass { get; private set; }
+
+    public Credentials(Method supported_method, string user, string? pass = null) {
+        this.supported_method = supported_method;
         this.user = user;
         this.pass = pass;
     }
-    
+
     public bool is_complete() {
-        return (user != null) && (pass != null);
+        return (this.user != null) && (this.pass != null);
     }
-    
+
+    public Credentials copy_with_password(string? password) {
+        return new Credentials(this.supported_method, this.user, password);
+    }
+
     public Credentials copy() {
-        return new Credentials(user, pass);
+        return new Credentials(this.supported_method, this.user, this.pass);
     }
-    
+
     public string to_string() {
-        return user;
+        return "%s:%s".printf(this.user, this.supported_method.to_string());
     }
-    
+
     public bool equal_to(Geary.Credentials c) {
         if (this == c)
             return true;
-        
-        return user == c.user && pass == c.pass;
+
+        return (
+            this.supported_method == c.supported_method &&
+            this.user == c.user &&
+            this.pass == c.pass
+        );
     }
-    
+
     public uint hash() {
-        return "%s%s".printf(user ?? "", pass ?? "").hash();
+        return "%d%s%s".printf(
+            this.supported_method, this.user ?? "", this.pass ?? ""
+        ).hash();
     }
 }
-

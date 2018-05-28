@@ -393,15 +393,13 @@ public class Geary.AccountInformation : BaseObject {
         if (force_request) {
             // Delete the current password(s).
             if (services.has_imap()) {
-                yield this.imap.mediator.clear_password_async(this.imap);
-
                 if (this.imap.credentials != null)
-                    this.imap.credentials.pass = null;
+                    this.imap.credentials =
+                        this.imap.credentials.copy_with_password(null);
             } else if (services.has_smtp()) {
-                yield this.smtp.mediator.clear_password_async(this.smtp);
-
                 if (this.smtp.credentials != null)
-                    this.smtp.credentials.pass = null;
+                    this.smtp.credentials =
+                        this.smtp.credentials.copy_with_password(null);
             }
         }
         
