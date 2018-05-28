@@ -521,11 +521,7 @@ public class AccountManager : GLib.Object {
         // need to load it.
         if (provider == Geary.ServiceProvider.OTHER) {
             imap.load_settings(imap_config);
-
             smtp.load_settings(smtp_config);
-            if (smtp.smtp_use_imap_credentials) {
-                smtp.credentials = imap.credentials.copy();
-            }
         }
 
         Geary.AccountInformation info = new Geary.AccountInformation(

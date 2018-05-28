@@ -305,7 +305,9 @@ public class Geary.Engine : BaseObject {
             account.smtp.endpoint
         );
         try {
-            yield smtp_session.login_async(account.smtp.credentials, cancellable);
+            yield smtp_session.login_async(
+                account.get_smtp_credentials(), cancellable
+            );
         } catch (Error err) {
             debug("Error validating SMTP account info: %s", err.message);
             if (err is SmtpError.AUTHENTICATION_FAILED)
@@ -313,7 +315,7 @@ public class Geary.Engine : BaseObject {
             else
                 error_code |= ValidationResult.SMTP_CONNECTION_FAILED;
         }
-        
+
         try {
             yield smtp_session.logout_async(true, cancellable);
         } catch (Error err) {

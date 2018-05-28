@@ -658,11 +658,14 @@ public class AddEditPage : Gtk.Box {
             imap_username.strip(),
             imap_password.strip()
         );
-        Geary.Credentials smtp_credentials = new Geary.Credentials(
-            Geary.Credentials.Method.PASSWORD,
-            (smtp_use_imap_credentials ? imap_username.strip() : smtp_username.strip()),
-            (smtp_use_imap_credentials ? imap_password.strip() : smtp_password.strip())
-        );
+        Geary.Credentials? smtp_credentials = null;
+        if (!smtp_noauth && !smtp_use_imap_credentials) {
+            smtp_credentials = new Geary.Credentials(
+                Geary.Credentials.Method.PASSWORD,
+                smtp_username.strip(),
+                smtp_password.strip()
+            );
+        }
 
         Geary.AccountInformation? info = null;
         if (this.id != null) {
@@ -727,9 +730,6 @@ public class AddEditPage : Gtk.Box {
             info.save_drafts = this.save_drafts;
             info.use_email_signature = this.use_email_signature;
             info.email_signature = this.email_signature;
-
-            if (smtp_noauth)
-                info.smtp.credentials = null;
 
             on_changed();
         }

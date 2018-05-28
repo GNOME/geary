@@ -377,7 +377,25 @@ public class Geary.AccountInformation : BaseObject {
         // This account's information should be stored again. Signal this.
         information_changed();
     }
-    
+
+    /**
+     * Returns the best credentials to use for SMTP authentication.
+     *
+     * This method checks for SMTP services that use IMAP credentials
+     * for authentication and if enabled, returns those. If this
+     * method returns null, then SMTP authentication should not be
+     * attempted for this account.
+     */
+    public Credentials? get_smtp_credentials() {
+        Credentials? smtp = null;
+        if (!this.smtp.smtp_noauth) {
+            smtp = this.smtp.smtp_use_imap_credentials
+                ? this.imap.credentials
+                : this.smtp.credentials;
+        }
+        return smtp;
+    }
+
     /**
      * Fetch the passwords for the given services.  For each service, if the
      * password is unset, use get_passwords_async() first; if the password is
@@ -481,10 +499,6 @@ public class Geary.AccountInformation : BaseObject {
 
         string? imap_password, smtp_password;
         bool imap_remember_password, smtp_remember_password;
-
-        /* This is a workaround. Assume IMAP and SMTP use the same mediator so
-         * as to minimize code refactoring for now.
-         */
 
         if (this.smtp.credentials == null)
             services &= ~ServiceFlag.SMTP;
