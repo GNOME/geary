@@ -288,6 +288,7 @@ engine/smtp/smtp-data-format.vala
 engine/smtp/smtp-error.vala
 engine/smtp/smtp-greeting.vala
 engine/smtp/smtp-login-authenticator.vala
+engine/smtp/smtp-oauth2-authenticator.vala
 engine/smtp/smtp-plain-authenticator.vala
 engine/smtp/smtp-request.vala
 engine/smtp/smtp-response.vala

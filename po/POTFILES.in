@@ -370,6 +370,7 @@ src/engine/smtp/smtp-data-format.vala
 src/engine/smtp/smtp-error.vala
 src/engine/smtp/smtp-greeting.vala
 src/engine/smtp/smtp-login-authenticator.vala
+src/engine/smtp/smtp-oauth2-authenticator.vala
 src/engine/smtp/smtp-plain-authenticator.vala
 src/engine/smtp/smtp-request.vala
 src/engine/smtp/smtp-response-code.vala
