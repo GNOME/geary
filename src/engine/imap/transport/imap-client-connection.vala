@@ -632,7 +632,48 @@ public class Geary.Imap.ClientConnection : BaseObject {
         // by this signal, will want to tighten this up a bit in the future
         sent_command(cmd);
     }
-    
+
+    /**
+     * Sends a reply to an unsolicited continuation request.
+     *
+     * Do not use this if you need to send literal data as part of a
+     * command, add it as a {@link LiteralParameter} to the command
+     * instead.
+     */
+    public async void send_continuation_reply(ContinuationParameter reply,
+                                              Cancellable? cancellable = null)
+        throws Error {
+        check_for_connection();
+        // need to run this in critical section because Serializer requires it (don't want to be
+        // pushing data while a flush_async() is occurring)
+        int token = yield send_mutex.claim_async(cancellable);
+
+        Error? ser_err = null;
+        try {
+            // watch for disconnect while waiting for mutex
+            if (ser != null) {
+                reply.serialize_continuation(ser);
+            } else {
+                ser_err = new ImapError.NOT_CONNECTED("Send not allowed: connection in %s state",
+                    fsm.get_state_string(fsm.get_state()));
+            }
+        } catch (Error err) {
+            debug("[%s] Error serializing command: %s", to_string(), err.message);
+            ser_err = err;
+        }
+
+        this.send_mutex.release(ref token);
+        
+        if (ser_err != null) {
+            send_failure(ser_err);
+            
+            throw ser_err;
+        }
+        
+        // Reset flush timer so it only fires after n msec after last command pushed out to stream
+        reschedule_flush_timeout();
+    }
+
     private void reschedule_flush_timeout() {
         unschedule_flush_timeout();
         
@@ -646,7 +687,7 @@ public class Geary.Imap.ClientConnection : BaseObject {
             flush_timeout_id = 0;
         }
     }
-    
+
     private bool on_flush_timeout() {
         do_flush_async.begin();
         

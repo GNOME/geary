@@ -196,13 +196,14 @@ public class Geary.Imap.ClientSession : BaseObject {
         CLOSE_MAILBOX,
         LOGOUT,
         DISCONNECT,
-        
+
         // server events
         CONNECTED,
         DISCONNECTED,
         RECV_STATUS,
         RECV_COMPLETION,
-        
+        RECV_CONTINUATION,
+
         // I/O errors
         RECV_ERROR,
         SEND_ERROR,
@@ -393,6 +394,7 @@ public class Geary.Imap.ClientSession : BaseObject {
             new Geary.State.Mapping(State.AUTHORIZING, Event.DISCONNECT, on_disconnect),
             new Geary.State.Mapping(State.AUTHORIZING, Event.RECV_STATUS, on_recv_status),
             new Geary.State.Mapping(State.AUTHORIZING, Event.RECV_COMPLETION, on_login_recv_completion),
+            new Geary.State.Mapping(State.AUTHORIZING, Event.RECV_CONTINUATION, on_login_recv_continuation),
             new Geary.State.Mapping(State.AUTHORIZING, Event.SEND_ERROR, on_send_error),
             new Geary.State.Mapping(State.AUTHORIZING, Event.RECV_ERROR, on_recv_error),
             
@@ -745,6 +747,7 @@ public class Geary.Imap.ClientSession : BaseObject {
         cx.send_failure.connect(on_network_send_error);
         cx.received_status_response.connect(on_received_status_response);
         cx.received_server_data.connect(on_received_server_data);
+        cx.received_continuation_response.connect(on_received_continuation_response);
         cx.received_bytes.connect(on_received_bytes);
         cx.received_bad_response.connect(on_received_bad_response);
         cx.recv_closed.connect(on_received_closed);
@@ -771,6 +774,7 @@ public class Geary.Imap.ClientSession : BaseObject {
             cx.send_failure.disconnect(on_network_send_error);
             cx.received_status_response.disconnect(on_received_status_response);
             cx.received_server_data.disconnect(on_received_server_data);
+            cx.received_continuation_response.disconnect(on_received_continuation_response);
             cx.received_bytes.disconnect(on_received_bytes);
             cx.received_bad_response.disconnect(on_received_bad_response);
             cx.recv_closed.disconnect(on_received_closed);
@@ -855,7 +859,33 @@ public class Geary.Imap.ClientSession : BaseObject {
             throw new ImapError.UNAUTHENTICATED("No credentials provided for account: %s", credentials.to_string());
         }
 
-        LoginCommand cmd = new LoginCommand(credentials.user, credentials.token);
+        Command? cmd = null;
+        switch (credentials.supported_method) {
+        case Geary.Credentials.Method.PASSWORD:
+            cmd = new LoginCommand(
+                credentials.user, credentials.token
+            );
+            break;
+
+        case Geary.Credentials.Method.OAUTH2:
+            if (!capabilities.has_setting(Capabilities.AUTH,
+                                          Capabilities.AUTH_XOAUTH2)) {
+                throw new ImapError.UNAUTHENTICATED(
+                    "OAuth2 authentication not supported for %s", to_string()
+                );
+            }
+            cmd = new AuthenticateCommand.oauth2(
+                credentials.user, credentials.token
+            );
+            break;
+
+        default:
+            throw new ImapError.UNAUTHENTICATED(
+                "Credentials method %s not supported for: %s",
+                credentials.supported_method.to_string(),
+                to_string()
+            );
+        }
 
         MachineParams params = new MachineParams(cmd);
         fsm.issue(Event.LOGIN, null, params);
@@ -1038,14 +1068,13 @@ public class Geary.Imap.ClientSession : BaseObject {
 
     private uint on_login(uint state, uint event, void *user, Object? object) {
         MachineParams params = (MachineParams) object;
-        
-        assert(params.cmd is LoginCommand);
+
         if (!reserve_state_change_cmd(params, state, event))
             return state;
-        
+
         return State.AUTHORIZING;
     }
-    
+
     private uint on_logging_in(uint state, uint event, void *user, Object? object) {
         MachineParams params = (MachineParams) object;
         
@@ -1074,7 +1103,36 @@ public class Geary.Imap.ClientSession : BaseObject {
                 return State.NOAUTH;
         }
     }
-    
+
+    private uint on_login_recv_continuation(uint state,
+                                            uint event,
+                                            void *user,
+                                            Object? object) {
+        ContinuationResponse response = (ContinuationResponse) object;
+        AuthenticateCommand auth = this.state_change_cmd as AuthenticateCommand;
+        if (auth != null) {
+            ContinuationParameter? reply = null;
+            try {
+                reply = auth.continuation_requested(response);
+            } catch (ImapError err) {
+                debug("[%s] Error handling login continuation request: %s",
+                      to_string(), err.message);
+            }
+
+            if (reply != null) {
+                // We have to handle the continuation request anyway,
+                // so just send an empty one.
+                reply = new ContinuationParameter(new uint8[0]);
+            }
+
+            // XXX Not calling yield here is a nasty hack? Need to get
+            // a cancellable to this somehow, too.
+            this.cx.send_continuation_reply.begin(reply, null);
+        }
+
+        return State.AUTHORIZING;
+    }
+
     //
     // keepalives (nop idling to keep the session alive and to periodically receive notifications
     // of changes)
@@ -1284,6 +1342,7 @@ public class Geary.Imap.ClientSession : BaseObject {
         //
         // TODO: Convert commands into proper calls to avoid throwing an exception
         if (cmd.has_name(LoginCommand.NAME)
+            || cmd.has_name(AuthenticateCommand.NAME)
             || cmd.has_name(LogoutCommand.NAME)
             || cmd.has_name(SelectCommand.NAME)
             || cmd.has_name(ExamineCommand.NAME)
@@ -1871,6 +1930,15 @@ public class Geary.Imap.ClientSession : BaseObject {
             debug("[%s] Failure notifying of server data: %s %s", to_string(), server_data.to_string(),
                 ierr.message);
         }
+    }
+
+    private void on_received_continuation_response(ContinuationResponse response) {
+        this.last_seen = GLib.get_real_time();
+
+        // reschedule keepalive (traffic seen on channel)
+        schedule_keepalive();
+
+        fsm.issue(Event.RECV_CONTINUATION, null, response, null);
     }
 
     private void on_received_bytes(size_t bytes) {

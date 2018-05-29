@@ -96,6 +96,7 @@ engine/imap/api/imap-folder-root.vala
 engine/imap/api/imap-folder-session.vala
 engine/imap/api/imap-session-object.vala
 engine/imap/command/imap-append-command.vala
+engine/imap/command/imap-authenticate-command.vala
 engine/imap/command/imap-capability-command.vala
 engine/imap/command/imap-close-command.vala
 engine/imap/command/imap-command.vala
@@ -140,6 +141,7 @@ engine/imap/message/imap-tag.vala
 engine/imap/message/imap-uid.vala
 engine/imap/message/imap-uid-validity.vala
 engine/imap/parameter/imap-atom-parameter.vala
+engine/imap/parameter/imap-continuation-parameter.vala
 engine/imap/parameter/imap-list-parameter.vala
 engine/imap/parameter/imap-literal-parameter.vala
 engine/imap/parameter/imap-nil-parameter.vala
