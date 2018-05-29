@@ -100,13 +100,7 @@ public class AccountDialog : Gtk.Dialog {
         Geary.AccountInformation? account = get_account_info(id);
         if (account == null)
             return;
-        
-        try {
-            yield account.get_passwords_async(Geary.ServiceFlag.IMAP | Geary.ServiceFlag.SMTP);
-        } catch (Error err) {
-            debug("Unable to fetch password(s) for account: %s", err.message);
-        }
-        
+
         add_edit_pane.set_mode(AddEditPage.PageMode.EDIT);
         add_edit_pane.set_account_information(account);
         add_edit_pane.present();

@@ -50,23 +50,6 @@ public enum Geary.Protocol {
     }
 }
 
-/**
- * A bitfield to specify {@link ServiceInformation} types.
- */
-[Flags]
-public enum Geary.ServiceFlag {
-    IMAP,
-    SMTP;
-
-    public bool has_imap() {
-        return (this & IMAP) == IMAP;
-    }
-
-    public bool has_smtp() {
-        return (this & SMTP) == SMTP;
-    }
-}
-
 
 /**
  * This class encloses all the information used when connecting with the server,
@@ -139,18 +122,6 @@ public abstract class Geary.ServiceInformation : GLib.Object {
         this.mediator = mediator;
     }
 
-    /**
-     * Saves a new password for this instance's credentials, with the option
-     * of remembering the password.
-     */
-    public void set_password(string password, bool remember = false) {
-        this.credentials = new Credentials(
-            this.credentials.supported_method,
-            this.credentials.user,
-            password
-        );
-        this.remember_password = remember;
-    }
 
     public abstract ServiceInformation temp_copy();
 

@@ -445,14 +445,7 @@ private class Geary.SmtpOutboxFolder :
             // Get SMTP password if we haven't loaded it yet and the account needs credentials.
             // If the account needs a password but it's not set or incorrect in the keyring, we'll
             // prompt below after getting an AUTHENTICATION_FAILED error.
-            Geary.Credentials? credentials = account.get_smtp_credentials();
-            if (credentials != null && !credentials.is_complete()) {
-                try {
-                    yield account.get_passwords_async(ServiceFlag.SMTP);
-                } catch (Error e) {
-                    debug("SMTP password fetch error: %s", e.message);
-                }
-            }
+            yield this.account.information.load_smtp_credentials(cancellable);
 
             // only try sending if (a) no TLS issues or (b) user has
             // acknowledged them and says to continue
@@ -479,18 +472,7 @@ private class Geary.SmtpOutboxFolder :
 
                         // At this point we may already have a
                         // password in memory -- but it's incorrect.
-                        // Delete the current password, prompt the
-                        // user for a new one, and try again.
-                        bool user_confirmed = false;
-                        try {
-                            user_confirmed = yield account.fetch_passwords_async(
-                                ServiceFlag.SMTP, true
-                            );
-                        } catch (Error e) {
-                            debug("Error prompting for SMTP password: %s", e.message);
-                        }
-
-                        if (!user_confirmed) {
+                        if (!yield account.prompt_smtp_credentials(cancellable)) {
                             // The user cancelled and hence they don't
                             // want to be prompted again, so bail out.
                             throw send_err;

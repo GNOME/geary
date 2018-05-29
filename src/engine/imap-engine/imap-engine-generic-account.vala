@@ -106,15 +106,13 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         // Reset this so we start trying to authenticate again
         this.authentication_failures = 0;
 
-        // To prevent spurious connection failures, we make sure we have the
-        // IMAP password before attempting a connection.  This might have to be
-        // reworked when we allow passwordless logins.
-        if (!this.information.imap.credentials.is_complete())
-            yield this.information.get_passwords_async(ServiceFlag.IMAP);
-
-        this.session_pool.credentials_updated(
-            this.information.imap.credentials
-        );
+        // To prevent spurious connection failures, we make sure we
+        // have the IMAP password before attempting a connection.
+        if (yield this.information.load_imap_credentials(cancellable)) {
+            this.session_pool.credentials_updated(
+                this.information.imap.credentials
+            );
+        }
 
         // This will cause the session manager to open at least one
         // connection if we are online
@@ -1003,11 +1001,11 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
                 notify_imap_problem(ProblemType.SERVER_ERROR, login_error);
             } else {
                 // Now, we should ask the user for their password
-                this.information.fetch_passwords_async.begin(
-                    ServiceFlag.IMAP, true,
+                this.information.prompt_imap_credentials.begin(
+                    this.open_cancellable,
                     (obj, ret) => {
                         try {
-                            if (this.information.fetch_passwords_async.end(ret)) {
+                            if (this.information.prompt_imap_credentials.end(ret)) {
                                 // Have a new password, so try that
                                 this.session_pool.credentials_updated(
                                     this.information.imap.credentials

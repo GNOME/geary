@@ -128,16 +128,32 @@ public class AccountManager : GLib.Object {
         return new LocalServiceInformation(service, libsecret);
     }
 
-    public async void create_account_dirs(Geary.AccountInformation info,
-                                          Cancellable? cancellable)
+    public async void create_account(Geary.AccountInformation account,
+                                     GLib.Cancellable? cancellable)
         throws GLib.Error {
-        GLib.File config = this.user_config_dir.get_child(info.id);
-        GLib.File data = this.user_data_dir.get_child(info.id);
+        yield create_account_dirs(account, cancellable);
+        yield save_account(account, cancellable);
+        set_enabled(account, true);
 
-        yield Geary.Files.make_directory_with_parents(config, cancellable);
-        yield Geary.Files.make_directory_with_parents(data, cancellable);
+        SecretMediator? mediator = account.imap.mediator as SecretMediator;
+        if (mediator != null) {
+            try {
+                yield mediator.update_token(account, account.imap, cancellable);
+            } catch (Error e) {
+                debug("Error saving IMAP password: %s", e.message);
+            }
+        }
 
-        info.set_account_directories(config, data);
+        if (account.smtp.credentials != null) {
+            mediator = account.smtp.mediator as SecretMediator;
+            if (mediator != null) {
+                try {
+                    yield mediator.update_token(account, account.smtp, cancellable);
+                } catch (Error e) {
+                    debug("Error saving IMAP password: %s", e.message);
+                }
+            }
+        }
     }
 
     public async void load_accounts(GLib.Cancellable? cancellable)
@@ -456,12 +472,23 @@ public class AccountManager : GLib.Object {
             yield Geary.Files.recursive_delete_async(info.config_dir, cancellable);
         }
 
-        try {
-            yield info.clear_stored_passwords_async(
-                Geary.ServiceFlag.IMAP | Geary.ServiceFlag.SMTP
-            );
-        } catch (Error e) {
-            debug("Error clearing passwords: %s", e.message);
+
+        SecretMediator? mediator = info.imap.mediator as SecretMediator;
+        if (mediator != null) {
+            try {
+                yield mediator.clear_token(info, info.imap, cancellable);
+            } catch (Error e) {
+                debug("Error clearing IMAP password: %s", e.message);
+            }
+        }
+
+        mediator = info.smtp.mediator as SecretMediator;
+        if (mediator != null) {
+            try {
+                yield mediator.clear_token(info, info.smtp, cancellable);
+            } catch (Error e) {
+                debug("Error clearing IMAP password: %s", e.message);
+            }
         }
 
         this.enabled_accounts.unset(info.id);
@@ -473,6 +500,18 @@ public class AccountManager : GLib.Object {
         this.enabled_accounts.set(account.id, account);
         this.application.engine.add_account(account);
         account_added(account);
+    }
+
+    public async void create_account_dirs(Geary.AccountInformation info,
+                                          Cancellable? cancellable)
+        throws GLib.Error {
+        GLib.File config = this.user_config_dir.get_child(info.id);
+        GLib.File data = this.user_data_dir.get_child(info.id);
+
+        yield Geary.Files.make_directory_with_parents(config, cancellable);
+        yield Geary.Files.make_directory_with_parents(data, cancellable);
+
+        info.set_account_directories(config, data);
     }
 
     private inline string to_geary_id(Goa.Object account) {
@@ -568,9 +607,7 @@ public class AccountManager : GLib.Object {
             info.nickname = account.get_account().identity;
 
             yield create_account_dirs(info, cancellable);
-            debug("Created dirs: %s", info.id);
             yield save_account(info, cancellable);
-            debug("Saved: %s", info.id);
         }
         return info;
     }

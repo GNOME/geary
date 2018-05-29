@@ -854,9 +854,9 @@ public class Geary.Imap.ClientSession : BaseObject {
             login_failed(null);
             throw new ImapError.UNAUTHENTICATED("No credentials provided for account: %s", credentials.to_string());
         }
-        
-        LoginCommand cmd = new LoginCommand(credentials.user, credentials.pass);
-        
+
+        LoginCommand cmd = new LoginCommand(credentials.user, credentials.token);
+
         MachineParams params = new MachineParams(cmd);
         fsm.issue(Event.LOGIN, null, params);
         

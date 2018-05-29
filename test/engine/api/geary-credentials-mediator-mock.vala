@@ -13,44 +13,11 @@ public class Geary.MockCredentialsMediator :
         get; set; default = new Gee.LinkedList<ExpectedCall>();
     }
 
-    public virtual async string?
-        get_password_async(ServiceInformation service,
-                           GLib.Cancellable? cancellable = null)
+    public virtual async bool load_token(AccountInformation account,
+                                         ServiceInformation service,
+                                         GLib.Cancellable? cancellable)
         throws GLib.Error {
-        return object_call<string>(
-            "prompt_passwords_async",
-            { service, cancellable },
-            ""
-        );
-    }
-
-    /**
-     * Add or update the store's password entry for the given service.
-     */
-    public virtual async void
-        set_password_async(ServiceInformation service,
-                           GLib.Cancellable? cancellable = null)
-        throws GLib.Error {
-        void_call(
-            "prompt_passwords_async",
-            { service, cancellable }
-        );
-    }
-
-    /**
-     * Deletes the key store's password entry for the given service.
-     *
-     * Do nothing (and do *not* throw an error) if the credentials
-     * weren't in the key store.
-     */
-    public virtual async void
-        clear_password_async(ServiceInformation service,
-                             GLib.Cancellable? cancellable = null)
-        throws GLib.Error {
-        void_call(
-            "prompt_passwords_async",
-            { service, cancellable }
-        );
+        return object_call<bool>("load_token", { service, cancellable }, false);
     }
 
     /**
@@ -61,21 +28,13 @@ public class Geary.MockCredentialsMediator :
      * are ignored).  Return false if the user tried to cancel the
      * interaction, or true if they tried to proceed.
      */
-    public virtual async bool
-        prompt_passwords_async(ServiceFlag services,
-                               AccountInformation account_information,
-                               out string? imap_password,
-                               out string? smtp_password,
-                               out bool imap_remember_password,
-                               out bool smtp_remember_password)
+    public virtual async bool prompt_token(AccountInformation account,
+                                           ServiceInformation service,
+                                           GLib.Cancellable? cancellable)
         throws GLib.Error {
-        imap_password = null;
-        smtp_password = null;
-        imap_remember_password = false;
-        smtp_remember_password = false;
         return boolean_call(
-            "prompt_passwords_async",
-            { box_arg(services), account_information },
+            "prompt_token",
+            { account, service, cancellable },
             false
         );
     }

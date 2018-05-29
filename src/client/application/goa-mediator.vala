@@ -12,46 +12,45 @@ public class GoaMediator : Geary.CredentialsMediator, Object {
         this.password = password;
     }
 
-    public virtual async string? get_password_async(Geary.ServiceInformation service,
-                                                    Cancellable? cancellable = null)
-    throws Error {
-        string pass;
+    public virtual  async bool load_token(Geary.AccountInformation account,
+                                          Geary.ServiceInformation service,
+                                          Cancellable? cancellable)
+        throws GLib.Error {
+        string? pass = null;
 
         switch (service.protocol) {
-            case Geary.Protocol.IMAP:
-                if (!password.call_get_password_sync("imap-password", out pass, cancellable))
-                    return null;
-                break;
-            case Geary.Protocol.SMTP:
-                if (!password.call_get_password_sync("smtp-password", out pass, cancellable))
-                    return null;
-                break;
-            default:
-                return null;
+        case Geary.Protocol.IMAP:
+            password.call_get_password_sync(
+                "imap-password", out pass, cancellable
+            );
+            break;
+
+        case Geary.Protocol.SMTP:
+            password.call_get_password_sync(
+                "smtp-password", out pass, cancellable
+            );
+            break;
+
+        default:
+            return false;
         }
-        return pass;
+
+        bool loaded = false;
+        if (pass != null) {
+            service.credentials = service.credentials.copy_with_token(pass);
+            loaded = true;
+        }
+        return loaded;
     }
 
-    public virtual async void set_password_async(Geary.ServiceInformation service,
-                                                 Cancellable? cancellable = null)
-    throws Error {
-        return;
-    }
-
-    public virtual async void clear_password_async(Geary.ServiceInformation service,
-                                                   Cancellable? cancellable = null)
-    throws Error {
-        return;
-    }
-
-    public virtual async bool prompt_passwords_async(Geary.ServiceFlag services,
-        Geary.AccountInformation account_information,
-        out string? imap_password, out string? smtp_password,
-        out bool imap_remember_password, out bool smtp_remember_password) throws Error {
-
-        throw new Geary.EngineError.UNSUPPORTED(
-            "Account password must be set in GOA"
-        );
+    public virtual async bool prompt_token(Geary.AccountInformation account,
+                                           Geary.ServiceInformation service,
+                                           GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        // XXX open a dialog that says "Click here to change your GOA
+        // password". Connect to the GOA service and wait until we
+        // hear that the account has changed.
+        return false;
     }
 
 }

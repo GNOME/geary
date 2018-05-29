@@ -898,17 +898,14 @@ public class GearyController : Geary.BaseObject {
 
             try {
                 if (real_account_information.settings_file == null) {
-                    yield this.account_manager.create_account_dirs(
+                    yield this.account_manager.create_account(
+                        real_account_information, cancellable
+                    );
+                } else {
+                    yield this.account_manager.save_account(
                         real_account_information, cancellable
                     );
                 }
-                yield this.account_manager.save_account(
-                    real_account_information, cancellable
-                );
-                yield do_update_stored_passwords_async(
-                    Geary.ServiceFlag.IMAP | Geary.ServiceFlag.SMTP,
-                    real_account_information
-                );
                 debug("Successfully validated account information");
             } catch (GLib.Error err) {
                 report_problem(
@@ -978,15 +975,6 @@ public class GearyController : Geary.BaseObject {
         }
         
         return new_info;
-    }
-    
-    private async void do_update_stored_passwords_async(Geary.ServiceFlag services,
-        Geary.AccountInformation account_information) {
-        try {
-            yield account_information.update_stored_passwords_async(services);
-        } catch (Error e) {
-            debug("Error updating stored passwords: %s", e.message);
-        }
     }
 
     private void report_problem(Geary.ProblemReport report) {
