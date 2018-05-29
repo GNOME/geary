@@ -11,7 +11,7 @@ public class GoaServiceInformation : Geary.ServiceInformation {
     private Goa.Mail mail_object;
 
     public GoaServiceInformation(Geary.Protocol protocol,
-                                 Geary.CredentialsMediator mediator,
+                                 GoaMediator mediator,
                                  Goa.Mail mail_object) {
         base(protocol, mediator);
         this.mail_object = mail_object;
@@ -23,7 +23,7 @@ public class GoaServiceInformation : Geary.ServiceInformation {
             this.use_ssl = mail_object.imap_use_ssl;
             this.use_starttls = mail_object.imap_use_tls;
             this.credentials = new Geary.Credentials(
-                Geary.Credentials.Method.PASSWORD,
+                mediator.method,
                 mail_object.imap_user_name
             );
             break;
@@ -37,7 +37,7 @@ public class GoaServiceInformation : Geary.ServiceInformation {
             this.smtp_use_imap_credentials = false;
             if (!this.smtp_noauth) {
                 this.credentials = new Geary.Credentials(
-                    Geary.Credentials.Method.PASSWORD,
+                    mediator.method,
                     mail_object.smtp_user_name
                 );
             }
@@ -47,7 +47,7 @@ public class GoaServiceInformation : Geary.ServiceInformation {
 
     public override Geary.ServiceInformation temp_copy() {
         GoaServiceInformation copy = new GoaServiceInformation(
-            this.protocol, this.mediator, this.mail_object
+            this.protocol, (GoaMediator) this.mediator, this.mail_object
         );
         copy.copy_from(this);
         return copy;

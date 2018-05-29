@@ -575,15 +575,16 @@ public class AccountManager : GLib.Object {
         Geary.AccountInformation info = null;
 
         Goa.Mail? mail = account.get_mail();
-        Goa.PasswordBased? password = account.get_password_based();
-        if (mail != null && password != null) {
-            Geary.CredentialsMediator mediator = new GoaMediator(password);
-            info = new Geary.AccountInformation(
-                id,
-                new GoaServiceInformation(Geary.Protocol.IMAP, mediator, mail),
-                new GoaServiceInformation(Geary.Protocol.SMTP, mediator, mail)
-            );
-            info.service_provider = Geary.ServiceProvider.OTHER;
+        if (mail != null) {
+            GoaMediator mediator = new GoaMediator(account);
+            if (mediator.is_valid) {
+                info = new Geary.AccountInformation(
+                    id,
+                    new GoaServiceInformation(Geary.Protocol.IMAP, mediator, mail),
+                    new GoaServiceInformation(Geary.Protocol.SMTP, mediator, mail)
+                );
+                info.service_provider = Geary.ServiceProvider.OTHER;
+            }
         }
 
         return info;

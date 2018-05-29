@@ -1,43 +1,76 @@
-/* Copyright 2017 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2017 Software Freedom Conservancy Inc.
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-/* GNOME Online Accounts password adapter. */
+/* GNOME Online Accounts token adapter. */
 public class GoaMediator : Geary.CredentialsMediator, Object {
-    private Goa.PasswordBased password;
 
-    public GoaMediator(Goa.PasswordBased password) {
-        this.password = password;
+
+    public bool is_valid {
+        get { return (this.oauth2 != null || this.password != null); }
     }
 
-    public virtual  async bool load_token(Geary.AccountInformation account,
-                                          Geary.ServiceInformation service,
-                                          Cancellable? cancellable)
+    public Geary.Credentials.Method method {
+        get {
+            Geary.Credentials.Method method = Geary.Credentials.Method.PASSWORD;
+            if (this.oauth2 != null) {
+                method = Geary.Credentials.Method.OAUTH2;
+            }
+            return method;
+        }
+    }
+
+    private Goa.Object account;
+    private Goa.OAuth2Based? oauth2 = null;
+    private Goa.PasswordBased? password = null;
+
+
+    public GoaMediator(Goa.Object account) {
+        this.account = account;
+        this.oauth2 = account.get_oauth2_based();
+        this.password = account.get_password_based();
+        debug(
+            "OAuth2: %s, Password: %s",
+            (this.oauth2 != null).to_string(),
+            (this.password != null).to_string()
+        );
+    }
+
+    public virtual async bool load_token(Geary.AccountInformation account,
+                                         Geary.ServiceInformation service,
+                                         Cancellable? cancellable)
         throws GLib.Error {
-        string? pass = null;
-
-        switch (service.protocol) {
-        case Geary.Protocol.IMAP:
-            password.call_get_password_sync(
-                "imap-password", out pass, cancellable
+        bool loaded = false;
+        string? token = null;
+        
+        if (this.method == Geary.Credentials.Method.OAUTH2) {
+            this.oauth2.call_get_access_token_sync(
+                out token, null, cancellable
             );
-            break;
+        } else {
+            switch (service.protocol) {
+            case Geary.Protocol.IMAP:
+                this.password.call_get_password_sync(
+                    "imap-password", out token, cancellable
+                );
+                break;
 
-        case Geary.Protocol.SMTP:
-            password.call_get_password_sync(
-                "smtp-password", out pass, cancellable
-            );
-            break;
+            case Geary.Protocol.SMTP:
+                this.password.call_get_password_sync(
+                    "smtp-password", out token, cancellable
+                );
+                break;
 
-        default:
-            return false;
+            default:
+                return false;
+            }
         }
 
-        bool loaded = false;
-        if (pass != null) {
-            service.credentials = service.credentials.copy_with_token(pass);
+        if (token != null) {
+            service.credentials = service.credentials.copy_with_token(token);
             loaded = true;
         }
         return loaded;
