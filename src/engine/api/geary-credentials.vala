@@ -1,4 +1,6 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2018 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -30,13 +32,21 @@ public class Geary.Credentials : BaseObject, Gee.Hashable<Geary.Credentials> {
      * Authentication methods supported by the Engine.
      */
     public enum Method {
+
         /** Password-based authentication, such as SASL PLAIN. */
-        PASSWORD;
+        PASSWORD,
+
+        /** OAuth2-based authentication. */
+        OAUTH2;
+
 
         public string to_string() {
             switch (this) {
             case PASSWORD:
                 return "password";
+
+            case OAUTH2:
+                return "oauth2";
 
             default:
                 assert_not_reached();
@@ -47,6 +57,9 @@ public class Geary.Credentials : BaseObject, Gee.Hashable<Geary.Credentials> {
             switch (str) {
             case "password":
                 return PASSWORD;
+
+            case "oauth2":
+                return OAUTH2;
 
             default:
                 throw new KeyFileError.INVALID_VALUE(
