@@ -1,4 +1,6 @@
-/* Copyright 2017 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2017 Software Freedom Conservancy Inc.
+ * Copyright 2018 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -50,6 +52,20 @@ errordomain AccountError {
     GOA_REMOVED;
 }
 
+
+/**
+ * Manages email account lifecycle for Geary.
+ *
+ * This class is responsible for creating, loading, saving and
+ * removing accounts and their persisted data (configuration,
+ * databases, caches, authentication tokens). The manager supports
+ * both locally-specified accounts (i.e. those created by the user in
+ * the app) and from SSO systems such as GOA.
+ *
+ * Newly loaded and newly created accounts are first added to the
+ * manager with a particular status (enabled, disabled, etc). Accounts
+ * can have their enabled or disabled status updated manually,
+ */
 public class AccountManager : GLib.Object {
 
 
@@ -79,8 +95,66 @@ public class AccountManager : GLib.Object {
     private const string GOA_ID_PREFIX = "goa_";
 
 
-    private Gee.Map<string,Geary.AccountInformation> enabled_accounts =
-        new Gee.HashMap<string,Geary.AccountInformation>();
+    /**
+     * Specifies the overall status of an account.
+     */
+    public enum Status {
+        /** The account is enabled and operational. */
+        ENABLED,
+
+        /** The account was disabled by the user. */
+        DISABLED,
+
+        /** The account is unavailable to be used, by may come back. */
+        UNAVAILABLE;
+    }
+
+
+    /** Specifies an account's current state. */
+    private class AccountState {
+
+
+        /** The account represented by this object. */
+        public Geary.AccountInformation account { get; private set; }
+
+        /** Determines the account's overall state. */
+        public Status status {
+            get {
+                Status status = Status.ENABLED;
+                if (!this.enabled) {
+                    status = Status.DISABLED;
+                }
+                if (!this.available) {
+                    status = Status.UNAVAILABLE;
+                }
+                return status;
+            }
+        }
+
+        /**
+         * Whether this account is enabled.
+         *
+         * This should not be modified outside of AccountManager.
+         */
+        public bool enabled { get; set; default = true; }
+
+        /**
+         * Whether this account is available.
+         *
+         * This should not be modified outside of AccountManager.
+         */
+        public bool available { get; set; default = true; }
+
+
+        internal AccountState(Geary.AccountInformation account) {
+            this.account = account;
+        }
+
+    }
+
+
+    private Gee.Map<string,AccountState> accounts =
+        new Gee.HashMap<string,AccountState>();
 
     private GearyApplication application;
     private GLib.File user_config_dir;
@@ -91,16 +165,20 @@ public class AccountManager : GLib.Object {
 
 
     /** Fired when a new account is created. */
-    public signal void account_added(Geary.AccountInformation added);
+    public signal void account_added(Geary.AccountInformation added, Status status);
+
+    /** Fired when an existing account's state has changed. */
+    public signal void account_status_changed(Geary.AccountInformation changed,
+                                              Status new_status);
 
     /** Fired when an account is deleted. */
     public signal void account_removed(Geary.AccountInformation removed);
 
-    /** Fired when a SSO account has been updated. */
-    public signal void sso_account_updated(Geary.AccountInformation updated);
-
     /** Fired when a SSO account has been removed. */
     public signal void sso_account_removed(Geary.AccountInformation removed);
+
+    /** Emitted to notify an account problem has occurred. */
+    public signal void report_problem(Geary.ProblemReport problem);
 
 
     public AccountManager(GearyApplication application,
@@ -186,13 +264,22 @@ public class AccountManager : GLib.Object {
                         Geary.AccountInformation info = yield load_account(
                             file.get_name(), cancellable
                         );
-                        enable_account(info);
+
+                        GoaMediator? mediator = info.imap.mediator as GoaMediator;
+                        if (mediator == null || mediator.is_valid) {
+                            set_enabled(info, true);
+                        } else {
+                            set_available(info, false);
+                        }
+                    } catch (AccountError.GOA_REMOVED err) {
+                        // Since the GOA account for this account does
+                        // not longer exist, remove it.
                     } catch (GLib.Error err) {
-                        // XXX want to report this problem to the user
-                        // somehow, but at this point in the app's
-                        // lifecycle we don't even have a main window.
-                        warning("Ignoring empty/bad config in %s: %s",
-                                file.get_name(), err.message);
+                        report_problem(
+                            new Geary.ProblemReport(
+                                Geary.ProblemType.GENERIC_ERROR,
+                                err
+                            ));
                     }
                 }
             }
@@ -209,20 +296,8 @@ public class AccountManager : GLib.Object {
             for (int i=0; i < list.length() && !cancellable.is_cancelled(); i++) {
                 Goa.Object account = list.nth_data(i);
                 string id = to_geary_id(account);
-                if (!this.enabled_accounts.has_key(id)) {
-                    Geary.AccountInformation? info = null;
-                    try {
-                        info = yield create_goa_account(account, cancellable);
-                    } catch (GLib.Error err) {
-                        // XXX want to report this problem to the user
-                        // somehow, but at this point in the app's
-                        // lifecycle we don't even have a main window.
-                        warning("Error creating existing GOA account %s: %s",
-                                account.get_account().id, err.message);
-                    }
-                    if (info != null) {
-                        enable_account(info);
-                    }
+                if (!this.accounts.has_key(id)) {
+                    yield this.create_goa_account(account, cancellable);
                 }
             }
         }
@@ -267,24 +342,32 @@ public class AccountManager : GLib.Object {
                 Goa.Object? object = this.goa_service.lookup_by_id(to_goa_id(id));
                 if (object != null) {
                     info = new_goa_account(id, object);
+                    GoaMediator mediator = (GoaMediator) info.imap.mediator;
+                    try {
+                        yield mediator.update(info, cancellable);
+                    } catch (GLib.Error err) {
+                        report_problem(
+                            new Geary.ProblemReport(
+                                Geary.ProblemType.GENERIC_ERROR,
+                                err
+                            ));
+                    }
                 } else {
                     // Could not find the GOA object for this account,
                     // but have a working GOA connection, so it must
-                    // have been removed.
-                    throw new AccountError.GOA_REMOVED("Account not found");
+                    // have been removed. Not much else that we can do
+                    // except remove it.
+                    throw new AccountError.GOA_REMOVED("GOA account not found");
                 }
             }
 
             if (info == null) {
-                // XXX We have a GOA account locally, but GOA is
-                // unavailable or the GOA account type is no longer
-                // supported. Create a dummy, disabled account and let
-                // the user deal with it?
+                // We have a GOA account, but either GOA is
+                // unavailable or the account has changed. Keep it
+                // around in case GOA comes back.
+                throw new AccountError.INVALID("GOA not available");
             }
             break;
-
-        default:
-            throw new AccountError.INVALID("Unhandled credentials provider");
         }
 
         info.set_account_directories(config_dir, data_dir);
@@ -453,25 +536,18 @@ public class AccountManager : GLib.Object {
     }
 
     /**
-     * Removes an account from the engine and deletes its files from disk.
+     * Removes an account's configuration, storage and auth tokens.
      */
     public async void remove_account(Geary.AccountInformation info,
                                      GLib.Cancellable? cancellable)
         throws GLib.Error {
-        yield this.application.engine.remove_account_async(info, cancellable);
-
-        if (info.data_dir == null) {
-            warning("Cannot remove account storage directory; nothing to remove");
-        } else {
+        if (info.data_dir != null) {
             yield Geary.Files.recursive_delete_async(info.data_dir, cancellable);
         }
 
-        if (info.config_dir == null) {
-            warning("Cannot remove account configuration directory; nothing to remove");
-        } else {
+        if (info.config_dir != null) {
             yield Geary.Files.recursive_delete_async(info.config_dir, cancellable);
         }
-
 
         SecretMediator? mediator = info.imap.mediator as SecretMediator;
         if (mediator != null) {
@@ -491,18 +567,54 @@ public class AccountManager : GLib.Object {
             }
         }
 
-        this.enabled_accounts.unset(info.id);
+        this.accounts.unset(info.id);
         account_removed(info);
     }
 
-    private void enable_account(Geary.AccountInformation account)
-        throws GLib.Error {
-        this.enabled_accounts.set(account.id, account);
-        this.application.engine.add_account(account);
-        account_added(account);
+    private inline AccountState lookup_state(Geary.AccountInformation account) {
+        AccountState? state = this.accounts.get(account.id);
+        if (state == null) {
+            state = new AccountState(account);
+            this.accounts.set(account.id, state);
+        }
+        return state;
     }
 
-    public async void create_account_dirs(Geary.AccountInformation info,
+    private bool set_enabled(Geary.AccountInformation account, bool is_enabled) {
+        bool was_added = !this.accounts.has_key(account.id);
+        AccountState state = lookup_state(account);
+        Status existing_status = state.status;
+        state.enabled = is_enabled;
+
+        bool ret = false;
+        if (was_added) {
+            account_added(state.account, state.status);
+            ret = true;
+        } else if (state.status != existing_status) {
+            account_status_changed(state.account, state.status);
+            ret = true;
+        }
+        return ret;
+    }
+
+    private bool set_available(Geary.AccountInformation account, bool is_available) {
+        bool was_added = !this.accounts.has_key(account.id);
+        AccountState state = lookup_state(account);
+        Status existing_status = state.status;
+        state.available = is_available;
+
+        bool ret = false;
+        if (was_added) {
+            account_added(state.account, state.status);
+            ret = true;
+        } else if (state.status != existing_status) {
+            account_status_changed(state.account, state.status);
+            ret = true;
+        }
+        return ret;
+    }
+
+    private async void create_account_dirs(Geary.AccountInformation info,
                                           Cancellable? cancellable)
         throws GLib.Error {
         GLib.File config = this.user_config_dir.get_child(info.id);
@@ -570,101 +682,123 @@ public class AccountManager : GLib.Object {
         return info;
     }
 
-    private Geary.AccountInformation? new_goa_account(string id,
-                                                      Goa.Object account) {
-        Geary.AccountInformation info = null;
+    private Geary.AccountInformation new_goa_account(string id,
+                                                     Goa.Object account) {
+        GoaMediator mediator = new GoaMediator(account);
+        Geary.AccountInformation info = new Geary.AccountInformation(
+            id,
+            new GoaServiceInformation(Geary.Protocol.IMAP, mediator, account),
+            new GoaServiceInformation(Geary.Protocol.SMTP, mediator, account)
+        );
 
-        Goa.Mail? mail = account.get_mail();
-        if (mail != null) {
-            GoaMediator mediator = new GoaMediator(account);
-            if (mediator.is_valid) {
-                info = new Geary.AccountInformation(
-                    id,
-                    new GoaServiceInformation(Geary.Protocol.IMAP, mediator, mail),
-                    new GoaServiceInformation(Geary.Protocol.SMTP, mediator, mail)
-                );
-                info.service_provider = Geary.ServiceProvider.OTHER;
-            }
+        switch (account.get_account().provider_type) {
+        case "google":
+            info.service_provider = Geary.ServiceProvider.GMAIL;
+            break;
 
-            switch (account.get_account().provider_type) {
-            case "google":
-                info.service_provider = Geary.ServiceProvider.GMAIL;
-                break;
+        case "windows_live":
+            info.service_provider = Geary.ServiceProvider.OUTLOOK;
+            break;
 
-            case "windows_live":
-                info.service_provider = Geary.ServiceProvider.OUTLOOK;
-                break;
-
-            default:
-                info.service_provider = Geary.ServiceProvider.OTHER;
-                break;
-            }
+        default:
+            info.service_provider = Geary.ServiceProvider.OTHER;
+            break;
         }
 
         return info;
     }
 
-    private async Geary.AccountInformation?
-        create_goa_account(Goa.Object account,
-                           GLib.Cancellable? cancellable)
-        throws GLib.Error {
-        Geary.AccountInformation? info = new_goa_account(
+    private async void create_goa_account(Goa.Object account,
+                                          GLib.Cancellable? cancellable) {
+        Geary.AccountInformation info = new_goa_account(
             to_geary_id(account), account
         );
-        if (info != null) {
-            debug("GOA id: %s", info.id);
-            Goa.Mail? mail = account.get_mail();
 
+        GoaMediator mediator = (GoaMediator) info.imap.mediator;
+        // Goa.Account.mail_disabled doesn't seem to reflect if we get
+        // get a valid mail object here, so just rely on that instead.
+        Goa.Mail? mail = account.get_mail();
+        if (mail != null) {
             info.ordinal = Geary.AccountInformation.next_ordinal++;
             info.primary_mailbox = new Geary.RFC822.MailboxAddress(
                 mail.name, mail.email_address
             );
-            info.nickname = account.get_account().identity;
+            info.nickname = account.get_account().presentation_identity;
 
-            yield create_account_dirs(info, cancellable);
-            yield save_account(info, cancellable);
+            try {
+                yield create_account_dirs(info, cancellable);
+                yield save_account(info, cancellable);
+                yield mediator.update(info, cancellable);
+            } catch (GLib.Error err) {
+                report_problem(
+                    new Geary.ProblemReport(
+                        Geary.ProblemType.GENERIC_ERROR,
+                        err
+                    ));
+            }
+
+            if (mediator.is_valid) {
+                set_enabled(info, true);
+            } else {
+                set_available(info, false);
+            }
+        } else {
+            debug(
+                "Ignoring GOA %s account %s, mail service not enabled",
+                account.get_account().provider_type,
+                account.get_account().id
+            );
         }
-        return info;
     }
 
     private void on_goa_account_added(Goa.Object account) {
-        this.create_goa_account.begin(
-            account, null,
-            (obj, res) => {
-                try {
-                    Geary.AccountInformation? info =
-                        this.create_goa_account.end(res);
-                    if (info != null) {
-                        enable_account(info);
-                    }
-                } catch (GLib.Error err) {
-                    // XXX want to report this problem to the user
-                    // somehow, but at this point in the app's
-                    // lifecycle we don't even have a main window.
-                    warning("Error creating added GOA account %s: %s",
-                            account.get_account().id, err.message);
-                }
-            }
-        );
+        // XXX get a cancellable for this.
+        this.create_goa_account.begin(account, null);
     }
 
     private void on_goa_account_changed(Goa.Object account) {
-        Geary.AccountInformation? info = this.enabled_accounts.get(
-            to_geary_id(account)
-        );
+        string id = to_geary_id(account);
+        AccountState? state = this.accounts.get(id);
 
-        if (info != null) {
-            this.sso_account_updated(info);
+        if (state != null) {
+            // We already know about this account, so check that it is
+            // still valid. If not, the account should be disabled,
+            // not deleted, since it may be re-enabled at some point.
+            GoaMediator mediator = (GoaMediator) state.account.imap.mediator;
+            mediator.update.begin(
+                state.account,
+                null, // XXX Get a cancellable to this somehow
+                (obj, res) => {
+                    try {
+                        mediator.update.end(res);
+                    } catch (GLib.Error err) {
+                        report_problem(
+                            new Geary.AccountProblemReport(
+                                Geary.ProblemType.GENERIC_ERROR,
+                                state.account,
+                                err
+                            ));
+                    }
+
+                    set_available(state.account, mediator.is_valid);
+                }
+            );
+        } else {
+            // We haven't created an account for this GOA account
+            // before, so try doing so now.
+            //
+            // XXX get a cancellable for this.
+            this.create_goa_account.begin(account, null);
         }
     }
 
     private void on_goa_account_removed(Goa.Object account) {
-        Geary.AccountInformation? info = this.enabled_accounts.get(
+        AccountState? state = this.accounts.get(
             to_geary_id(account)
         );
 
-        if (info != null) {
-            this.sso_account_removed(info);
+        if (state != null) {
+            set_available(state.account, false);
         }
     }
 

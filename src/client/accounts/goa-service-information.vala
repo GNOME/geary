@@ -8,46 +8,54 @@
  * This loads IMAP and SMTP settings from GOA.
  */
 public class GoaServiceInformation : Geary.ServiceInformation {
-    private Goa.Mail mail_object;
+
+
+    private Goa.Object account;
 
     public GoaServiceInformation(Geary.Protocol protocol,
                                  GoaMediator mediator,
-                                 Goa.Mail mail_object) {
+                                 Goa.Object account) {
         base(protocol, mediator);
-        this.mail_object = mail_object;
+        this.account = account;
+        update();
+    }
 
-        switch (protocol) {
-        case Geary.Protocol.IMAP:
-            this.host = mail_object.imap_host;
-            this.port = Geary.Imap.ClientConnection.DEFAULT_PORT_SSL;
-            this.use_ssl = mail_object.imap_use_ssl;
-            this.use_starttls = mail_object.imap_use_tls;
-            this.credentials = new Geary.Credentials(
-                mediator.method,
-                mail_object.imap_user_name
-            );
-            break;
-
-        case Geary.Protocol.SMTP:
-            this.host = mail_object.smtp_host;
-            this.port = Geary.Smtp.ClientConnection.DEFAULT_PORT_SSL;
-            this.use_ssl = mail_object.smtp_use_ssl;
-            this.use_starttls = mail_object.smtp_use_tls;
-            this.smtp_noauth = !(mail_object.smtp_use_auth);
-            this.smtp_use_imap_credentials = false;
-            if (!this.smtp_noauth) {
+    public void update() {
+        Goa.Mail? mail = this.account.get_mail();
+        if (mail != null) {
+            switch (this.protocol) {
+            case Geary.Protocol.IMAP:
+                this.host = mail.imap_host;
+                this.port = Geary.Imap.ClientConnection.DEFAULT_PORT_SSL;
+                this.use_ssl = mail.imap_use_ssl;
+                this.use_starttls = mail.imap_use_tls;
                 this.credentials = new Geary.Credentials(
-                    mediator.method,
-                    mail_object.smtp_user_name
+                    ((GoaMediator) this.mediator).method,
+                    mail.imap_user_name
                 );
+                break;
+
+            case Geary.Protocol.SMTP:
+                this.host = mail.smtp_host;
+                this.port = Geary.Smtp.ClientConnection.DEFAULT_PORT_SSL;
+                this.use_ssl = mail.smtp_use_ssl;
+                this.use_starttls = mail.smtp_use_tls;
+                this.smtp_noauth = !(mail.smtp_use_auth);
+                this.smtp_use_imap_credentials = false;
+                if (!this.smtp_noauth) {
+                    this.credentials = new Geary.Credentials(
+                        ((GoaMediator) this.mediator).method,
+                        mail.smtp_user_name
+                    );
+                }
+                break;
             }
-            break;
         }
     }
 
     public override Geary.ServiceInformation temp_copy() {
         GoaServiceInformation copy = new GoaServiceInformation(
-            this.protocol, (GoaMediator) this.mediator, this.mail_object
+            this.protocol, (GoaMediator) this.mediator, this.account
         );
         copy.copy_from(this);
         return copy;

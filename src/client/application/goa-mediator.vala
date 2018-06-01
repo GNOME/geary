@@ -10,7 +10,18 @@ public class GoaMediator : Geary.CredentialsMediator, Object {
 
 
     public bool is_valid {
-        get { return (this.oauth2 != null || this.password != null); }
+        get {
+            Goa.Account account = this.account.get_account();
+            // Goa.Account.mail_disabled doesn't seem to reflect if we
+            // get can get a valid mail object or not, so just rely on
+            // actually getting one instead.
+            Goa.Mail? mail = this.account.get_mail();
+            return (
+                mail != null &&
+                !account.attention_needed &&
+                (this.oauth2 != null || this.password != null)
+            );
+        }
     }
 
     public Geary.Credentials.Method method {
@@ -30,13 +41,24 @@ public class GoaMediator : Geary.CredentialsMediator, Object {
 
     public GoaMediator(Goa.Object account) {
         this.account = account;
-        this.oauth2 = account.get_oauth2_based();
-        this.password = account.get_password_based();
-        debug(
-            "OAuth2: %s, Password: %s",
-            (this.oauth2 != null).to_string(),
-            (this.password != null).to_string()
+    }
+
+    public async void update(Geary.AccountInformation geary_account,
+                             GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        // XXX have to call the sync version of this since the async
+        // version seems to be broken
+        this.account.get_account().call_ensure_credentials_sync(
+            null, cancellable
         );
+        this.oauth2 = this.account.get_oauth2_based();
+        this.password = this.account.get_password_based();
+
+        GoaServiceInformation imap = (GoaServiceInformation) geary_account.imap;
+        imap.update();
+
+        GoaServiceInformation smtp = (GoaServiceInformation) geary_account.smtp;
+        smtp.update();
     }
 
     public virtual async bool load_token(Geary.AccountInformation account,
@@ -45,12 +67,16 @@ public class GoaMediator : Geary.CredentialsMediator, Object {
         throws GLib.Error {
         bool loaded = false;
         string? token = null;
-        
+
         if (this.method == Geary.Credentials.Method.OAUTH2) {
+            // XXX have to call the sync version of this since the async
+            // version seems to be broken
             this.oauth2.call_get_access_token_sync(
                 out token, null, cancellable
             );
         } else {
+            // XXX have to call the sync version of these since the
+            // async version seems to be broken
             switch (service.protocol) {
             case Geary.Protocol.IMAP:
                 this.password.call_get_password_sync(
@@ -80,10 +106,16 @@ public class GoaMediator : Geary.CredentialsMediator, Object {
                                            Geary.ServiceInformation service,
                                            GLib.Cancellable? cancellable)
         throws GLib.Error {
-        // XXX open a dialog that says "Click here to change your GOA
-        // password". Connect to the GOA service and wait until we
-        // hear that the account has changed.
-        return false;
+        // Prompt GOA to update the creds. This might involve some
+        // user interaction.
+        yield update(account, cancellable);
+
+        // XXX now open a dialog that says "Click here to change your
+        // GOA password" or "GOA credentials need renewing" or
+        // something. Connect to the GOA service and wait until we
+        // hear that needs attention is no longer true.
+
+        return this.is_valid;
     }
 
 }

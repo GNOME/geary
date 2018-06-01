@@ -170,6 +170,13 @@ public class Geary.Engine : BaseObject {
     }
 
     /**
+     * Determines if an account with a specific id has added.
+     */
+    public bool has_account(string id) {
+        return (this.accounts != null && this.accounts.has_key(id));
+    }
+
+    /**
      * Returns a current account given its id.
      *
      * Throws an error if the engine has not been opened or if the
@@ -406,8 +413,8 @@ public class Geary.Engine : BaseObject {
     /**
      * Removes an account from the engine.
      */
-    public async void remove_account_async(AccountInformation account,
-                                           Cancellable? cancellable = null) throws Error {
+    public void remove_account(AccountInformation account)
+        throws GLib.Error {
         check_opened();
 
         // Ensure account is closed.

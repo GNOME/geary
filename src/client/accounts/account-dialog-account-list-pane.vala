@@ -53,12 +53,13 @@ public class AccountDialogAccountListPane : AccountDialogPane {
         } catch (Error e) {
             debug("Error enumerating accounts: %s", e.message);
         }
-        
+
         // Sort accounts and add them to the UI.
         account_list.sort(Geary.AccountInformation.compare_ascending);
-        foreach (Geary.AccountInformation account in account_list)
-            on_account_added(account);
-        
+        foreach (Geary.AccountInformation account in account_list) {
+            add_account_impl(account);
+        }
+
         // Hook up signals.
         actions.get_action("add_account").activate.connect(() => { add_account(); });
         edit_action.activate.connect(notify_edit_account);
@@ -80,6 +81,17 @@ public class AccountDialogAccountListPane : AccountDialogPane {
         this.application.controller.account_manager.account_removed.connect(
             on_account_removed
         );
+    }
+
+    private void add_account_impl(Geary.AccountInformation account) {
+        Gtk.TreeIter? iter = list_contains(account.id);
+        if (iter != null)
+            return; // Already listed.
+
+        add_account_to_list(account);
+        account.notify.connect(on_account_changed);
+        update_buttons();
+        update_ordinals();
     }
 
     private void notify_edit_account() {
@@ -132,18 +144,12 @@ public class AccountDialogAccountListPane : AccountDialogPane {
         delete_action.sensitive = edit_action.sensitive &&
             this.application.controller.get_num_accounts() > 1;
     }
-    
-    private void on_account_added(Geary.AccountInformation account) {
-        Gtk.TreeIter? iter = list_contains(account.id);
-        if (iter != null)
-            return; // Already listed.
 
-        add_account_to_list(account);
-        account.notify.connect(on_account_changed);
-        update_buttons();
-        update_ordinals();
+    private void on_account_added(Geary.AccountInformation account,
+                                  AccountManager.Status status) {
+        add_account_impl(account);
     }
-    
+
     private void on_account_removed(Geary.AccountInformation account) {
         remove_account_from_list(account.id);
         account.notify.disconnect(on_account_changed);
