@@ -585,6 +585,20 @@ public class AccountManager : GLib.Object {
                 );
                 info.service_provider = Geary.ServiceProvider.OTHER;
             }
+
+            switch (account.get_account().provider_type) {
+            case "google":
+                info.service_provider = Geary.ServiceProvider.GMAIL;
+                break;
+
+            case "windows_live":
+                info.service_provider = Geary.ServiceProvider.OUTLOOK;
+                break;
+
+            default:
+                info.service_provider = Geary.ServiceProvider.OTHER;
+                break;
+            }
         }
 
         return info;
