@@ -215,7 +215,9 @@ public class AddEditPage : Gtk.Box {
     private Geary.Engine.ValidationResult last_validation_result = Geary.Engine.ValidationResult.OK;
     
     private bool first_ui_update = true;
-    
+
+    private bool is_sso_account = false;
+
     public signal void info_changed();
     
     public signal void size_changed();
@@ -363,13 +365,14 @@ public class AddEditPage : Gtk.Box {
     
     // Sets the account information to display on this page.
     public void set_account_information(Geary.AccountInformation info, Geary.Engine.ValidationResult result) {
+        this.is_sso_account = (info.imap.mediator is GoaMediator);
         set_all_info(
             info.id,
             info.primary_mailbox.name,
             info.nickname,
             info.primary_mailbox.address,
-            info.imap.credentials.user,
-            info.imap.credentials.token,
+            info.imap.credentials != null ? info.imap.credentials.user : null,
+            info.imap.credentials != null ? info.imap.credentials.token : null,
             info.imap.remember_password && info.smtp.remember_password,
             info.smtp.credentials != null ? info.smtp.credentials.user : null,
             info.smtp.credentials != null ? info.smtp.credentials.token : null,
@@ -758,8 +761,15 @@ public class AddEditPage : Gtk.Box {
         check_save_drafts.visible = mode == PageMode.EDIT;
         composer_container.visible = mode == PageMode.EDIT;
         alternate_email_button.visible = mode == PageMode.EDIT;
-        
-        if (get_service_provider() == Geary.ServiceProvider.OTHER) {
+
+        if (this.is_sso_account) {
+            // Display no auth or server details for SSO acounts
+            label_password.hide();
+            entry_password.hide();
+            other_info.hide();
+            set_other_info_sensitive(false);
+            check_remember_password.hide();
+        } else if (get_service_provider() == Geary.ServiceProvider.OTHER) {
             // Display all options for custom providers.
             label_password.hide();
             entry_password.hide();

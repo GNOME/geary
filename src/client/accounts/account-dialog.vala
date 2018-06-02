@@ -73,28 +73,13 @@ public class AccountDialog : Gtk.Dialog {
         add_edit_pane.set_mode(AddEditPage.PageMode.ADD);
         add_edit_pane.present();
     }
-    
+
     // Grab the account info.  While the addresses passed into this method should *always* be
     // available in Geary, we double-check to be defensive.
     private Geary.AccountInformation? get_account_info(string id) {
-    Gee.Map<string, Geary.AccountInformation> accounts;
-        try {
-            accounts = this.application.engine.get_accounts();
-        } catch (Error e) {
-            debug("Error getting account info: %s", e.message);
-            
-            return null;
-        }
-        
-        if (!accounts.has_key(id)) {
-            debug("No such account: %s", id);
-            
-            return null;
-        }
-        
-        return accounts.get(id);
+        return this.application.controller.account_manager.get_account(id);
     }
-    
+
     private void on_edit_account(string id) {
         on_edit_account_async.begin(id);
     }
