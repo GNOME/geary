@@ -19,6 +19,7 @@ geary_client_vala_sources = files(
   'accounts/account-dialog-spinner-pane.vala',
   'accounts/account-manager.vala',
   'accounts/account-spinner-page.vala',
+  'accounts/accounts-editor.vala',
   'accounts/add-edit-page.vala',
   'accounts/goa-service-information.vala',
   'accounts/local-service-information.vala',

@@ -133,9 +133,16 @@ public class Geary.AccountInformation : BaseObject {
      */
     public Gee.List<Geary.RFC822.MailboxAddress>? alternate_mailboxes { get; private set; default = null; }
 
+    /** Specifies the email provider for this account. */
     public Geary.ServiceProvider service_provider {
         get; set; default = Geary.ServiceProvider.OTHER;
     }
+
+    /** A human-readable label describing the service. */
+    public string service_label {
+        get; set; default = "";
+    }
+
     public int prefetch_period_days {
         get; set; default = DEFAULT_PREFETCH_PERIOD_DAYS;
     }

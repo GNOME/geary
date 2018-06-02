@@ -14,9 +14,12 @@ src/client/accounts/account-dialog-remove-confirm-pane.vala
 src/client/accounts/account-dialog-remove-fail-pane.vala
 src/client/accounts/account-dialog-spinner-pane.vala
 src/client/accounts/account-dialog.vala
+src/client/accounts/account-dialogs.vala
 src/client/accounts/account-manager.vala
 src/client/accounts/account-spinner-page.vala
+src/client/accounts/accounts-editor.vala
 src/client/accounts/add-edit-page.vala
+src/client/accounts/editor.vala
 src/client/accounts/goa-service-information.vala
 src/client/accounts/local-service-information.vala
 src/client/accounts/login-dialog.vala
@@ -404,6 +407,7 @@ src/mailer/main.vala
 ui/account_cannot_remove.glade
 ui/account_list.glade
 ui/account_spinner.glade
+ui/accounts_editor.ui
 ui/certificate_warning_dialog.glade
 ui/composer-headerbar.ui
 ui/composer-link-popover.ui

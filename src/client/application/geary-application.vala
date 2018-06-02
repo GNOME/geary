@@ -422,10 +422,12 @@ public class GearyApplication : Gtk.Application {
     }
 
     private void on_activate_accounts() {
-        AccountDialog dialog = new AccountDialog(this, get_active_window());
-        dialog.show_all();
-        dialog.run();
-        dialog.destroy();
+        Accounts.Editor editor = new Accounts.Editor(
+            this.controller.account_manager, get_active_window()
+        );
+        editor.show_all();
+        editor.run();
+        editor.destroy();
     }
 
     private void on_activate_compose() {

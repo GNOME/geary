@@ -180,3 +180,20 @@ grid.geary-message-summary {
 .geary-empty-placeholder > .title {
   font-weight: bold;
 }
+
+/* Accounts.Editor */
+
+grid.geary-account-view {
+  margin: 32px 128px;
+}
+
+grid.geary-account-view image:dir(ltr) {
+  margin-right: 6px;
+}
+grid.geary-account-view image:dir(rtl) {
+  margin-left: 6px;
+}
+
+row.geary-settings  {
+  padding: 16px;
+}

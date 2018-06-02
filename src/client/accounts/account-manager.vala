@@ -187,6 +187,12 @@ public class AccountManager : GLib.Object {
         return (state != null) ? state.account : null;
     }
 
+    /** Returns the status for the given account. */
+    public Status get_status(Geary.AccountInformation account) {
+        AccountState? state = this.accounts.get(account.id);
+        return (state != null) ? state.status : Status.UNAVAILABLE;
+    }
+
     /** Returns a read-only iterable of all currently known accounts. */
     public Geary.Iterable<Geary.AccountInformation> iterable() {
         return Geary.traverse<AccountState>(
@@ -686,6 +692,20 @@ public class AccountManager : GLib.Object {
             id, imap, smtp
         );
         info.service_provider = provider;
+
+        // Known providers such as GMail will have a label specified
+        // by clients, but other accounts can only really be
+        // identified by their server names. Try to extract a 'nice'
+        // value for the label here.
+        if (provider == Geary.ServiceProvider.OTHER) {
+            string imap_host = imap.host;
+            string[] host_parts = imap_host.split(".");
+            if (host_parts.length > 1) {
+                host_parts = host_parts[1:host_parts.length];
+            }
+            info.service_label = string.joinv(".", host_parts);
+        }
+
         return info;
     }
 
@@ -697,6 +717,8 @@ public class AccountManager : GLib.Object {
             new GoaServiceInformation(Geary.Protocol.IMAP, mediator, account),
             new GoaServiceInformation(Geary.Protocol.SMTP, mediator, account)
         );
+
+        info.service_label = account.get_account().provider_name;
 
         switch (account.get_account().provider_type) {
         case "google":
