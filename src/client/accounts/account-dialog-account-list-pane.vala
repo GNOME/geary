@@ -12,7 +12,8 @@ public class AccountDialogAccountListPane : AccountDialogPane {
         ACCOUNT_ADDRESS;
     }
 
-    private GearyApplication application;
+    private AccountManager account_manager;
+
     private Gtk.TreeView list_view;
     private Gtk.ListStore list_model = new Gtk.ListStore(3, typeof(string), typeof(string), typeof(string));
     private Gtk.Action edit_action;
@@ -24,9 +25,10 @@ public class AccountDialogAccountListPane : AccountDialogPane {
 
     public signal void delete_account(string id);
 
-    public AccountDialogAccountListPane(GearyApplication application, Gtk.Stack stack) {
+    public AccountDialogAccountListPane(AccountManager account_manager,
+                                        Gtk.Stack stack) {
         base(stack);
-        this.application = application;
+        this.account_manager = account_manager;
 
         Gtk.Builder builder = GioUtil.create_builder("account_list.glade");
         pack_end((Gtk.Box) builder.get_object("container"));
@@ -45,16 +47,9 @@ public class AccountDialogAccountListPane : AccountDialogPane {
         list_view.get_column(1).set_expand(true);
         list_view.reorderable = true;
 
-        // Get all accounts and add them to a list.
-        Gee.LinkedList<Geary.AccountInformation> account_list =
-            new Gee.LinkedList<Geary.AccountInformation>();
-        try {
-            account_list.insert_all(0, this.application.engine.get_accounts().values);
-        } catch (Error e) {
-            debug("Error enumerating accounts: %s", e.message);
-        }
-
         // Sort accounts and add them to the UI.
+        Gee.List<Geary.AccountInformation> account_list =
+            account_manager.iterable().to_array_list();
         account_list.sort(Geary.AccountInformation.compare_ascending);
         foreach (Geary.AccountInformation account in account_list) {
             add_account_impl(account);
@@ -75,12 +70,13 @@ public class AccountDialogAccountListPane : AccountDialogPane {
         scroll.get_style_context().set_junction_sides(Gtk.JunctionSides.BOTTOM);
 
         // Watch for accounts to be added/removed.
-        this.application.controller.account_manager.account_added.connect(
-            on_account_added
-        );
-        this.application.controller.account_manager.account_removed.connect(
-            on_account_removed
-        );
+        account_manager.account_added.connect(on_account_added);
+        account_manager.account_removed.connect(on_account_removed);
+    }
+
+    ~AccountDialogAccountListPane() {
+        this.account_manager.account_added.disconnect(on_account_added);
+        this.account_manager.account_removed.disconnect(on_account_removed);
     }
 
     private void add_account_impl(Geary.AccountInformation account) {
@@ -142,7 +138,7 @@ public class AccountDialogAccountListPane : AccountDialogPane {
     private void update_buttons() {
         edit_action.sensitive = get_selected_account() != null;
         delete_action.sensitive = edit_action.sensitive &&
-            this.application.controller.get_num_accounts() > 1;
+            this.account_manager.size > 1;
     }
 
     private void on_account_added(Geary.AccountInformation account,
@@ -213,31 +209,23 @@ public class AccountDialogAccountListPane : AccountDialogPane {
         Gtk.TreeIter iter;
         if (!list_model.get_iter_first(out iter))
             return;
-        
-        Gee.Map<string, Geary.AccountInformation> all_accounts;
-        try {
-            all_accounts = this.application.engine.get_accounts();
-        } catch (Error e) {
-            debug("Error enumerating accounts: %s", e.message);
-            
-            return;
-        }
-        
+
         int i = 0;
         do {
             string? list_id = null;
             list_model.get(iter, Column.ACCOUNT_ID, out list_id);
             if (list_id != null) {
-                Geary.AccountInformation account = all_accounts.get(list_id);
+                Geary.AccountInformation account =
+                    this.account_manager.get_account(list_id);
 
                 // To prevent unnecessary work, only set ordinal if there's a change.
                 if (i != account.ordinal) {
                     account.ordinal = i;
-                    this.application.controller.account_manager.save_account.begin(
+                    this.account_manager.save_account.begin(
                         account, null,
                         (obj, res) => {
                             try {
-                                this.application.controller.account_manager.save_account.end(res);
+                                this.account_manager.save_account.end(res);
                             } catch (GLib.Error err) {
                                 warning("Error saving account: %s", err.message);
                             }

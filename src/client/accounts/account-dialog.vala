@@ -34,9 +34,12 @@ public class AccountDialog : Gtk.Dialog {
         get_content_area().margin_start = MARGIN;
         get_content_area().margin_end = MARGIN;
         get_content_area().margin_bottom = MARGIN;
-        
+
         // Add pages to stack.
-        account_list_pane = new AccountDialogAccountListPane(application, stack);
+        account_list_pane = new AccountDialogAccountListPane(
+            application.controller.account_manager,
+            stack
+        );
         add_edit_pane = new AccountDialogAddEditPane(application, stack);
         spinner_pane = new AccountDialogSpinnerPane(stack);
         remove_confirm_pane = new AccountDialogRemoveConfirmPane(stack);

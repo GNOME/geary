@@ -153,6 +153,10 @@ public class AccountManager : GLib.Object {
     }
 
 
+    /** Returns the number of currently known accounts. */
+    public int size { get { return this.accounts.size; } }
+
+
     private Gee.Map<string,AccountState> accounts =
         new Gee.HashMap<string,AccountState>();
 
@@ -174,9 +178,6 @@ public class AccountManager : GLib.Object {
     /** Fired when an account is deleted. */
     public signal void account_removed(Geary.AccountInformation removed);
 
-    /** Fired when a SSO account has been removed. */
-    public signal void sso_account_removed(Geary.AccountInformation removed);
-
     /** Emitted to notify an account problem has occurred. */
     public signal void report_problem(Geary.ProblemReport problem);
 
@@ -187,6 +188,21 @@ public class AccountManager : GLib.Object {
         this.application = application;
         this.user_config_dir = user_config_dir;
         this.user_data_dir = user_data_dir;
+    }
+
+    /** Returns the account with the given id. */
+    public Geary.AccountInformation? get_account(string id) {
+        AccountState? state = this.accounts.get(id);
+        return (state != null) ? state.account : null;
+    }
+
+    /** Returns a read-only iterable of all currently known accounts. */
+    public Geary.Iterable<Geary.AccountInformation> iterable() {
+        return new Geary.Iterable<AccountState>(
+            this.accounts.values.iterator()
+        ).map<Geary.AccountInformation>(
+            ((state) => { return state.account; })
+        );
     }
 
     public async void connect_libsecret(GLib.Cancellable? cancellable)
