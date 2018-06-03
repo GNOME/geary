@@ -132,6 +132,7 @@
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
+                        <signal name="clicked" handler="on_server_settings_clicked" swapped="no"/>
                       </object>
                       <packing>
                         <property name="expand">True</property>
@@ -147,6 +148,7 @@
                         <property name="can_focus">True</property>
                         <property name="receives_default">True</property>
                         <property name="tooltip_text" translatable="yes">Remove this account from Geary</property>
+                        <signal name="clicked" handler="on_remove_account_clicked" swapped="no"/>
                         <style>
                           <class name="destructive-action"/>
                         </style>

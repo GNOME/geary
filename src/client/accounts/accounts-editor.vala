@@ -63,6 +63,10 @@ public class Accounts.Editor : Gtk.Dialog {
     [GtkChild]
     private Gtk.ListBox accounts_list;
 
+    private Gee.LinkedList<Gtk.Widget> editor_pane_stack =
+        new Gee.LinkedList<Gtk.Widget>();
+
+
 
     public Editor(GearyApplication application, Gtk.Window parent) {
         this.application = application;
@@ -77,6 +81,8 @@ public class Accounts.Editor : Gtk.Dialog {
 
         this.accounts_list.set_header_func(seperator_headers);
         this.accounts_list.set_sort_func(ordinal_sort);
+
+        this.editor_pane_stack.add(list_pane);
 
         foreach (Geary.AccountInformation account in accounts.iterable()) {
             add_account(account, accounts.get_status(account));
@@ -95,18 +101,49 @@ public class Accounts.Editor : Gtk.Dialog {
         this.accounts.account_removed.disconnect(on_account_removed);
     }
 
+    internal void push(Gtk.Widget child) {
+        // Since keep old, already-popped panes around (see pop for
+        // details), when a new pane is pushed on they need to be
+        // truncated.
+        Gtk.Widget current = this.editor_panes.get_visible_child();
+        int target_length = this.editor_pane_stack.index_of(current) + 1;
+        while (target_length < this.editor_pane_stack.size) {
+            Gtk.Widget old = this.editor_pane_stack.remove_at(target_length);
+            this.editor_panes.remove(old);
+        }
+
+        // Now push the new pane on
+        this.editor_pane_stack.add(child);
+        this.editor_panes.add(child);
+        this.editor_panes.set_visible_child(child);
+        this.back_button.show();
+    }
+
+    internal void pop() {
+        // We can't simply remove old panes fro the GTK stack since
+        // there won't be any transition between them - the old one
+        // will simply disappear. So we need to keep old, popped panes
+        // around until a new one is pushed on.
+        //
+        // XXX work out a way to reuse the old ones if we go back to
+        // them?
+        Gtk.Widget current = this.editor_panes.get_visible_child();
+        int next = this.editor_pane_stack.index_of(current) - 1;
+        
+        this.editor_panes.set_visible_child(this.editor_pane_stack.get(next));
+
+        if (next == 0) {
+            this.back_button.hide();
+        }
+    }
+
     private void add_account(Geary.AccountInformation account,
                              AccountManager.Status status) {
         this.accounts_list.add(new AccountRow(account, status));
     }
 
     private void show_account(Geary.AccountInformation account) {
-        EditorEditPane account_pane = new EditorEditPane(
-            (GearyApplication) this.application,account
-        );
-        this.editor_panes.add(account_pane);
-        this.editor_panes.set_visible_child(account_pane);
-        this.back_button.show();
+        push(new EditorEditPane(this, account));
     }
 
     private AccountRow? get_account_row(Geary.AccountInformation account) {
@@ -150,12 +187,7 @@ public class Accounts.Editor : Gtk.Dialog {
 
     [GtkCallback]
     private void on_back_button_clicked() {
-        Gtk.Widget visible_pane = this.editor_panes.get_visible_child();
-        if (visible_pane != list_pane) {
-            this.editor_panes.remove(visible_pane);
-        } else {
-            this.back_button.hide();
-        }
+        pop();
     }
 
 }

@@ -12,6 +12,7 @@
 public class Accounts.EditorEditPane : Gtk.Grid {
 
 
+    private weak Editor editor; // circular ref
     private Geary.AccountInformation account;
 
     [GtkChild]
@@ -29,8 +30,9 @@ public class Accounts.EditorEditPane : Gtk.Grid {
     private Gtk.ListBox settings_list;
 
 
-    public EditorEditPane(GearyApplication application,
+    public EditorEditPane(Editor editor,
                           Geary.AccountInformation account) {
+        this.editor = editor;
         this.account = account;
 
         PropertyRow nickname_row = new PropertyRow(
@@ -63,7 +65,9 @@ public class Accounts.EditorEditPane : Gtk.Grid {
 
         this.addresses_list.add(new AddRow());
 
-        this.signature_preview = new ClientWebView(application.config);
+        this.signature_preview = new ClientWebView(
+            ((GearyApplication) editor.application).config
+        );
         this.signature_preview.load_html(account.email_signature);
         this.signature_preview.show();
 
@@ -83,6 +87,16 @@ public class Accounts.EditorEditPane : Gtk.Grid {
         return name;
     }
 
+
+    [GtkCallback]
+    private void on_server_settings_clicked() {
+
+    }
+
+    [GtkCallback]
+    private void on_remove_account_clicked() {
+        this.editor.push(new EditorRemovePane(this.editor, this.account));
+    }
 }
 
 
