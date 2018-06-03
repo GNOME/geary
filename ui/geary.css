@@ -194,6 +194,16 @@ grid.geary-account-view image:dir(rtl) {
   margin-left: 6px;
 }
 
+label.geary-settings-heading {
+  font-weight: bold;
+  margin-top: 24px;
+  margin-bottom: 12px;
+}
+
 row.geary-settings  {
-  padding: 16px;
+  padding: 18px;
+}
+
+buttonbox.geary-settings  {
+  margin-top: 36px;
 }

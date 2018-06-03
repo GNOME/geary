@@ -422,10 +422,7 @@ public class GearyApplication : Gtk.Application {
     }
 
     private void on_activate_accounts() {
-        Accounts.Editor editor = new Accounts.Editor(
-            this.controller.account_manager, get_active_window()
-        );
-        editor.show_all();
+        Accounts.Editor editor = new Accounts.Editor(this, get_active_window());
         editor.run();
         editor.destroy();
     }

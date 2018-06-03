@@ -13,7 +13,6 @@
       <object class="GtkBox">
         <property name="can_focus">False</property>
         <property name="orientation">vertical</property>
-        <property name="spacing">2</property>
         <child internal-child="action_area">
           <object class="GtkButtonBox">
             <property name="can_focus">False</property>
@@ -32,11 +31,12 @@
           </packing>
         </child>
         <child>
-          <object class="GtkStack">
+          <object class="GtkStack" id="editor_panes">
             <property name="visible">True</property>
             <property name="can_focus">False</property>
+            <property name="transition_type">slide-left-right</property>
             <child>
-              <object class="GtkGrid">
+              <object class="GtkGrid" id="list_pane">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <child>
@@ -59,8 +59,8 @@
                               <object class="GtkFrame">
                                 <property name="visible">True</property>
                                 <property name="can_focus">False</property>
-                                <property name="margin_top">32</property>
-                                <property name="margin_bottom">32</property>
+                                <property name="hexpand">True</property>
+                                <property name="vexpand">True</property>
                                 <property name="label_xalign">0</property>
                                 <property name="shadow_type">in</property>
                                 <child>
@@ -69,6 +69,7 @@
                                     <property name="visible">True</property>
                                     <property name="can_focus">False</property>
                                     <property name="selection_mode">none</property>
+                                    <signal name="row-activated" handler="on_accounts_list_row_activated" swapped="no"/>
                                   </object>
                                 </child>
                                 <child type="label_item">
@@ -107,13 +108,43 @@
         </child>
       </object>
     </child>
-    <child type="titlebar">
-      <object class="GtkHeaderBar">
+    <child>
+      <placeholder/>
+    </child>
+    <style>
+      <class name="geary-accounts-editor"/>
+    </style>
+  </template>
+  <object class="GtkHeaderBar" id="default_header">
+    <property name="visible">True</property>
+    <property name="can_focus">False</property>
+    <property name="title">Accounts</property>
+    <property name="has_subtitle">False</property>
+    <property name="show_close_button">True</property>
+    <child>
+      <object class="GtkGrid">
         <property name="visible">True</property>
         <property name="can_focus">False</property>
-        <property name="title">Accounts</property>
-        <property name="show_close_button">True</property>
+        <child>
+          <object class="GtkButton" id="back_button">
+            <property name="can_focus">True</property>
+            <property name="receives_default">True</property>
+            <signal name="clicked" handler="on_back_button_clicked" swapped="no"/>
+            <child>
+              <object class="GtkImage">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="no_show_all">True</property>
+                <property name="icon_name">go-previous-symbolic</property>
+              </object>
+            </child>
+          </object>
+          <packing>
+            <property name="left_attach">0</property>
+            <property name="top_attach">0</property>
+          </packing>
+        </child>
       </object>
     </child>
-  </template>
+  </object>
 </interface>

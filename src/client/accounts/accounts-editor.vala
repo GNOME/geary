@@ -12,6 +12,15 @@
 public class Accounts.Editor : Gtk.Dialog {
 
 
+    internal static void seperator_headers(Gtk.ListBoxRow row,
+                                           Gtk.ListBoxRow? first) {
+        if (first == null) {
+            row.set_header(null);
+        } else if (row.get_header() == null) {
+            row.set_header(new Gtk.Separator(Gtk.Orientation.HORIZONTAL));
+        }
+    }
+
     private static int ordinal_sort(Gtk.ListBoxRow a, Gtk.ListBoxRow b) {
         AccountRow? account_a = a as AccountRow;
         AccountRow? account_b = b as AccountRow;
@@ -27,25 +36,46 @@ public class Accounts.Editor : Gtk.Dialog {
         );
     }
 
-    private static void update_header(Gtk.ListBoxRow row, Gtk.ListBoxRow? first) {
-        if (first == null) {
-            row.set_header(null);
-        } else if (row.get_header() == null) {
-            row.set_header(new Gtk.Separator(Gtk.Orientation.HORIZONTAL));
-        }
-    }
+
+    /**
+     * The current application instance.
+     *
+     * Note this hides the {@link GtkWindow.application} property
+     * since we don't want the application to know about this dialog -
+     * it should not prevent the app from closing.
+     */
+    internal new GearyApplication application { get; private set; }
 
     private AccountManager accounts;
+
+    [GtkChild]
+    private Gtk.HeaderBar default_header;
+
+    [GtkChild]
+    private Gtk.Stack editor_panes;
+
+    [GtkChild]
+    private Gtk.Button back_button;
+
+    [GtkChild]
+    private Gtk.Grid list_pane;
 
     [GtkChild]
     private Gtk.ListBox accounts_list;
 
 
-    public Editor(AccountManager accounts, Gtk.Window parent) {
-        this.accounts = accounts;
-        set_transient_for(parent);
+    public Editor(GearyApplication application, Gtk.Window parent) {
+        this.application = application;
+        this.accounts = application.controller.account_manager;
 
-        this.accounts_list.set_header_func(update_header);
+        set_titlebar(this.default_header);
+        set_transient_for(parent);
+        set_modal(true);
+
+        // XXX Glade 3.22 won't let us set this
+        get_content_area().border_width = 2;
+
+        this.accounts_list.set_header_func(seperator_headers);
         this.accounts_list.set_sort_func(ordinal_sort);
 
         foreach (Geary.AccountInformation account in accounts.iterable()) {
@@ -68,6 +98,15 @@ public class Accounts.Editor : Gtk.Dialog {
     private void add_account(Geary.AccountInformation account,
                              AccountManager.Status status) {
         this.accounts_list.add(new AccountRow(account, status));
+    }
+
+    private void show_account(Geary.AccountInformation account) {
+        EditorEditPane account_pane = new EditorEditPane(
+            (GearyApplication) this.application,account
+        );
+        this.editor_panes.add(account_pane);
+        this.editor_panes.set_visible_child(account_pane);
+        this.back_button.show();
     }
 
     private AccountRow? get_account_row(Geary.AccountInformation account) {
@@ -101,12 +140,30 @@ public class Accounts.Editor : Gtk.Dialog {
         }
     }
 
+    [GtkCallback]
+    private void on_accounts_list_row_activated(Gtk.ListBoxRow activated) {
+        AccountRow? row = activated as AccountRow;
+        if (row != null) {
+            show_account(row.account);
+        }
+    }
+
+    [GtkCallback]
+    private void on_back_button_clicked() {
+        Gtk.Widget visible_pane = this.editor_panes.get_visible_child();
+        if (visible_pane != list_pane) {
+            this.editor_panes.remove(visible_pane);
+        } else {
+            this.back_button.hide();
+        }
+    }
+
 }
 
-private class Accounts.AccountRow : Gtk.ListBoxRow {
+private class Accounts.AccountRow : EditorRow {
 
 
-    public Geary.AccountInformation account;
+    internal Geary.AccountInformation account;
 
     private Gtk.Image unavailable_icon = new Gtk.Image.from_icon_name(
         "dialog-warning-symbolic", Gtk.IconSize.BUTTON
@@ -118,20 +175,16 @@ private class Accounts.AccountRow : Gtk.ListBoxRow {
     public AccountRow(Geary.AccountInformation account,
                       AccountManager.Status status) {
         this.account = account;
-        get_style_context().add_class("geary-settings");
 
-        this.unavailable_icon.no_show_all = true;
-
+        this.account_name.show();
         this.account_name.set_hexpand(true);
         this.account_name.halign = Gtk.Align.START;
 
-        Gtk.Grid layout = new Gtk.Grid();
-        layout.orientation = Gtk.Orientation.HORIZONTAL;
-        layout.add(this.unavailable_icon);
-        layout.add(this.account_name);
-        layout.add(this.account_details);
+        this.account_details.show();
 
-        add(layout);
+        this.layout.add(this.unavailable_icon);
+        this.layout.add(this.account_name);
+        this.layout.add(this.account_details);
 
         update(status);
     }
@@ -185,27 +238,5 @@ private class Accounts.AccountRow : Gtk.ListBoxRow {
             );
         }
     }
-
-}
-
-private class Accounts.AddRow : Gtk.ListBoxRow {
-
-
-    public AddRow() {
-        get_style_context().add_class("geary-settings");
-
-        Gtk.Image add_icon = new Gtk.Image.from_icon_name(
-            "list-add-symbolic", Gtk.IconSize.BUTTON
-        );
-        add_icon.set_hexpand(true);
-
-        Gtk.Grid layout = new Gtk.Grid();
-        layout.orientation = Gtk.Orientation.HORIZONTAL;
-
-        layout.add(add_icon);
-
-        add(layout);
-    }
-
 
 }
