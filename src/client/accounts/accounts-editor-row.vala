@@ -55,6 +55,7 @@ internal class Accounts.AddRow : EditorRow {
 
 
     public AddRow() {
+        get_style_context().add_class("geary-add-row");
         Gtk.Image add_icon = new Gtk.Image.from_icon_name(
             "list-add-symbolic", Gtk.IconSize.BUTTON
         );

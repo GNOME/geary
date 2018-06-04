@@ -90,7 +90,7 @@ public class Accounts.EditorEditPane : Gtk.Grid {
 
     [GtkCallback]
     private void on_server_settings_clicked() {
-
+        this.editor.push(new EditorServersPane(this.editor, this.account));
     }
 
     [GtkCallback]

@@ -23,6 +23,7 @@ geary_client_vala_sources = files(
   'accounts/accounts-editor-edit-pane.vala',
   'accounts/accounts-editor-remove-pane.vala',
   'accounts/accounts-editor-row.vala',
+  'accounts/accounts-editor-servers-pane.vala',
   'accounts/add-edit-page.vala',
   'accounts/goa-service-information.vala',
   'accounts/local-service-information.vala',
