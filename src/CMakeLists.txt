@@ -403,6 +403,7 @@ client/folder-list/folder-list-inbox-folder-entry.vala
 client/folder-list/folder-list-search-branch.vala
 client/folder-list/folder-list-special-grouping.vala
 
+client/notification/in-app-notification.vala
 client/notification/libmessagingmenu.vala
 client/notification/libnotify.vala
 client/notification/new-messages-indicator.vala

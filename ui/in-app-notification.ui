@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+  <requires lib="gtk+" version="3.14"/>
+  <template class="InAppNotification" parent="GtkRevealer">
+    <property name="visible">False</property>
+    <property name="halign">center</property>
+    <property name="valign">start</property>
+    <signal name="notify::child-revealed" handler="on_child_revealed" swapped="no"/>
+    <child>
+      <object class="GtkBox" id="layout">
+        <property name="visible">True</property>
+        <property name="orientation">horizontal</property>
+        <property name="spacing">6</property>
+        <style>
+          <class name="app-notification"/>
+        </style>
+        <child>
+          <object class="GtkLabel" id="message_label">
+            <property name="visible">True</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="action_button">
+            <property name="visible">False</property>
+            <property name="can_focus">False</property>
+          </object>
+        </child>
+        <child>
+          <object class="GtkButton" id="close_button">
+            <property name="visible">True</property>
+            <property name="can_focus">False</property>
+            <signal name="clicked" handler="close" swapped="no"/>
+            <style>
+              <class name="flat"/>
+            </style>
+            <child>
+              <object class="GtkImage">
+                <property name="visible">True</property>
+                <property name="can_focus">False</property>
+                <property name="icon_name">window-close-symbolic</property>
+              </object>
+            </child>
+          </object>
+        </child>
+      </object>
+    </child>
+  </template>
+</interface>

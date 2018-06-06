@@ -78,6 +78,7 @@ geary_client_vala_sources = files(
   'folder-list/folder-list-search-branch.vala',
   'folder-list/folder-list-special-grouping.vala',
 
+  'notification/in-app-notification.vala',
   'notification/libmessagingmenu.vala',
   'notification/libnotify.vala',
   'notification/new-messages-indicator.vala',

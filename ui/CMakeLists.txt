@@ -26,6 +26,7 @@ set(RESOURCE_LIST
   STRIPBLANKS "folder-popover.ui"
   STRIPBLANKS "gtk/help-overlay.ui"
   STRIPBLANKS "gtk/menus.ui"
+  STRIPBLANKS "in-app-notification.ui"
   STRIPBLANKS "login.glade"
   STRIPBLANKS "main-toolbar.ui"
   STRIPBLANKS "main-toolbar-menus.ui"

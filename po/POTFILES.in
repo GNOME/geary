@@ -76,6 +76,7 @@ src/client/folder-list/folder-list-inboxes-branch.vala
 src/client/folder-list/folder-list-search-branch.vala
 src/client/folder-list/folder-list-special-grouping.vala
 src/client/folder-list/folder-list-tree.vala
+src/client/notification/in-app-notification.vala
 src/client/notification/libmessagingmenu.vala
 src/client/notification/libnotify.vala
 src/client/notification/new-messages-indicator.vala
@@ -421,6 +422,7 @@ ui/find_bar.glade
 ui/folder-popover.ui
 ui/gtk/help-overlay.ui
 ui/gtk/menus.ui
+ui/in-app-notification.ui
 ui/login.glade
 ui/main-toolbar.ui
 ui/main-toolbar-menus.ui

@@ -27,6 +27,7 @@
     <file compressed="true" preprocess="xml-stripblanks">folder-popover.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">gtk/help-overlay.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">gtk/menus.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">in-app-notification.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">login.glade</file>
     <file compressed="true" preprocess="xml-stripblanks">main-toolbar.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">main-toolbar-menus.ui</file>

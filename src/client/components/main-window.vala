@@ -49,6 +49,8 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
     private Gtk.Box conversation_box;
     [GtkChild]
     private Gtk.ScrolledWindow conversation_list_scrolled;
+    [GtkChild]
+    private Gtk.Overlay overlay;
 
     // This is a frame so users can use F6/Shift-F6 to get to it
     [GtkChild]
@@ -168,6 +170,11 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
                 }
             }
         }
+    }
+
+    public void add_notification(InAppNotification notification) {
+        this.overlay.add_overlay(notification);
+        notification.show();
     }
 
     private void set_styling() {
