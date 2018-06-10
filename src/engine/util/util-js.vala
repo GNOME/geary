@@ -10,6 +10,16 @@
  */
 namespace Geary.JS {
 
+#if !VALA_0_42
+    // Workaround broken version of this in the vala bindings. See Bug
+    // 788113.
+    [CCode (cname = "JSStringGetUTF8CString")]
+    private extern size_t js_string_get_utf8_cstring(
+        global::JS.String js,
+        [CCode (array_length_type = "gsize")] char[] buffer
+    );
+#endif
+
     /**
      * Errors produced by functions in {@link Geary.JS}.
      */
@@ -72,7 +82,7 @@ namespace Geary.JS {
         global::JS.String js_str = value.to_string_copy(context, out err);
         Geary.JS.check_exception(context, err);
 
-        return Geary.JS.to_string_released(js_str);
+        return to_native_string(js_str);
     }
 
     /**
@@ -101,12 +111,15 @@ namespace Geary.JS {
     /**
      * Returns a JSC {@link JS.String} as a Vala {@link string}.
      */
-    public inline string to_string_released(global::JS.String js) {
-        int len = js.get_maximum_utf8_cstring_size();
-        string str = string.nfill(len, 0);
-        js.get_utf8_cstring(str, len);
-        js.release();
-        return str;
+    public inline string to_native_string(global::JS.String js) {
+        size_t len = js.get_maximum_utf8_cstring_size();
+        uint8[] str = new uint8[len];
+#if VALA_0_42
+        js.get_utf8_cstring(str);
+#else
+        js_string_get_utf8_cstring(js, (char[]) str);
+#endif
+        return (string) str;
     }
 
     /**
@@ -122,14 +135,11 @@ namespace Geary.JS {
                                                 global::JS.Object object,
                                                 string name)
         throws Geary.JS.Error {
-        global::JS.String js_name = global::JS.String.create_with_utf8_cstring(name);
+        global::JS.String js_name = new global::JS.String.create_with_utf8_cstring(name);
         global::JS.Value? err = null;
         global::JS.Value prop = object.get_property(context, js_name, out err);
-        try {
-            Geary.JS.check_exception(context, err);
-        } finally {
-            js_name.release();
-        }
+        Geary.JS.check_exception(context, err);
+
         return prop;
     }
 
@@ -157,7 +167,7 @@ namespace Geary.JS {
 
             throw new Error.EXCEPTION(
                 "JS exception thrown [%s]: %s"
-                .printf(err_type.to_string(), to_string_released(err_str))
+                .printf(err_type.to_string(), to_native_string(err_str))
             );
         }
     }
