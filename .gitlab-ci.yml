@@ -1,0 +1,44 @@
+#
+# Geary CI config.
+#
+# Based on GNOME Calendar's by @feaneron.
+#
+
+image: fedora:rawhide
+stages:
+  - build
+  - install
+  - test
+
+variables:
+  DEPENDENCIES: vala gobject-introspection-devel
+                meson desktop-file-utils libcanberra-devel libgee-devel
+                glib2-devel gmime-devel gtk3-devel libnotify-devel sqlite-devel
+                webkitgtk4-devel libsecret-devel libxml2-devel vala-tools
+                gcr-devel enchant-devel libunwind-devel
+
+before_script:
+  - dnf update -y --nogpgcheck && dnf install -y --nogpgcheck $DEPENDENCIES
+
+#
+# Build stages
+#
+
+build:
+  stage: build
+  script:
+    - meson --buildtype=debug build
+    - ninja -v -C build
+
+
+install:
+  stage: build
+  script:
+    - ninja -v -C build install
+
+
+test:
+  stage: test
+  script:
+    - meson test -v --no-stdsplit -C build engine-tests
+
