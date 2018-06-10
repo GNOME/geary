@@ -17,7 +17,7 @@ variables:
                 glib2-devel gmime-devel gtk3-devel libnotify-devel sqlite-devel
                 webkitgtk4-devel libsecret-devel libxml2-devel vala-tools
                 gcr-devel enchant-devel libunwind-devel
-                gnome-online-accounts-devel
+                gnome-online-accounts-devel itstool
 
 before_script:
   - dnf update -y --nogpgcheck && dnf install -y --nogpgcheck $DEPENDENCIES

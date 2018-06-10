@@ -46,7 +46,7 @@ libraries. Install them by running this command:
         glib2-devel gmime-devel gtk3-devel libnotify-devel sqlite-devel \
         webkitgtk4-devel libsecret-devel libxml2-devel vala-tools \
         gcr-devel enchant-devel libunwind-devel \
-        gnome-online-accounts-devel
+        gnome-online-accounts-devel itstool
 
 Installing dependencies on Ubuntu/Debian
 ----------------------------------------
@@ -67,7 +67,7 @@ Install them by running this command:
         libgee-0.8-dev libglib2.0-dev libgmime-2.6-dev libgtk-3-dev \
         libsecret-1-dev libxml2-dev libnotify-dev libsqlite3-dev \
         libwebkit2gtk-4.0-dev libgcr-3-dev libenchant-dev \
-        libunwind-dev libgoa-1.0-dev
+        libunwind-dev libgoa-1.0-dev itstool
 
 And for Ubuntu Unity integration:
 
