@@ -76,6 +76,21 @@
             ]
         },
         {
+            "name": "gnome-online-accounts",
+            "config-opts": [
+                "--disable-telepathy",
+                "--disable-documentation",
+                "--disable-backend"
+            ],
+            "sources": [
+                {
+                    "type": "git",
+                    "url": "https://gitlab.gnome.org/GNOME/gnome-online-accounts.git",
+                    "branch": "master"
+                }
+            ]
+        },
+        {
             "name": "libunwind",
             "sources": [
                 {
