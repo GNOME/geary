@@ -28,13 +28,11 @@ static int registerTokenizer(
   sqlite3_stmt *pStmt;
   const char *zSql = "SELECT fts3_tokenizer(?, ?)";
 
-#ifdef HAVE_FTS3_TOKENIZER
   /* Enable the 2-argument form of fts3_tokenizer in SQLite >= 3.12 */
   rc = sqlite3_db_config(db,SQLITE_DBCONFIG_ENABLE_FTS3_TOKENIZER,1,0);
   if( rc!=SQLITE_OK ){
     return rc;
   }
-#endif
 
   rc = sqlite3_prepare_v2(db, zSql, -1, &pStmt, 0);
   if( rc!=SQLITE_OK ){
