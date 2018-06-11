@@ -38,8 +38,7 @@ fedora:
   script:
     - $CONFIG_CMD
     - $BUILD_CMD
-    # Disable tests while SQLite issue is being sorted out
-    #- $TEST_CMD
+    - $TEST_CMD
     - $INSTALL_CMD
 
 ubuntu:
