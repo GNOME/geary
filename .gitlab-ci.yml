@@ -17,6 +17,7 @@ variables:
                webkitgtk4-devel libsecret-devel libxml2-devel vala-tools
                gcr-devel enchant-devel libunwind-devel
                gnome-online-accounts-devel itstool
+  FEDORA_TEST_DEPS: tar xz
   UBUNTU_DEPS: valac libgirepository1.0-dev
                meson desktop-file-utils libcanberra-dev
                libgee-0.8-dev libglib2.0-dev libgmime-2.6-dev libgtk-3-dev
@@ -34,7 +35,7 @@ fedora:
   image: fedora:latest
   before_script:
     - dnf update -y --nogpgcheck
-    - dnf install -y --nogpgcheck $FEDORA_DEPS
+    - dnf install -y --nogpgcheck $FEDORA_DEPS $FEDORA_TEST_DEPS
   script:
     - $CONFIG_CMD
     - $BUILD_CMD
