@@ -80,7 +80,14 @@
             "config-opts": [
                 "--disable-telepathy",
                 "--disable-documentation",
-                "--disable-backend"
+                "--disable-backend",
+                /* Enabling debug via configure causes both -g and -O0
+                   to be set, which is bad since the former is
+                   redundant with our build-options above, and the
+                   latter conflicts with both the build options and
+                   with whatever is causing FORTIFY_SOURCE to be
+                   set. So disable debug instead. */
+                "--enable-debug=no"
             ],
             "sources": [
                 {
