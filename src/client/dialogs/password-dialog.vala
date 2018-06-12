@@ -19,12 +19,13 @@ public class PasswordDialog {
     private Gtk.Entry entry_password;
     private Gtk.CheckButton check_remember_password;
     private Gtk.Button ok_button;
-    
+
     public string password { get; private set; default = ""; }
     public bool remember_password { get; private set; }
-    
-    public PasswordDialog(Gtk.Window? parent, bool smtp, Geary.AccountInformation account_information,
-        Geary.ServiceFlag password_flags) {
+
+    public PasswordDialog(Gtk.Window? parent,
+                          Geary.AccountInformation account,
+                          Geary.ServiceInformation service) {
         Gtk.Builder builder = GioUtil.create_builder("password-dialog.glade");
         
         dialog = (Gtk.Dialog) builder.get_object("PasswordDialog");
@@ -42,18 +43,21 @@ public class PasswordDialog {
         Gtk.Label primary_text_label = (Gtk.Label) builder.get_object("primary_text_label");
         primary_text_label.set_markup(PRIMARY_TEXT_MARKUP.printf(PRIMARY_TEXT_FIRST_TRY));
 
-        if (smtp) {
-            label_username.set_text(account_information.smtp.credentials.user ?? "");
-            entry_password.set_text(account_information.smtp.credentials.pass ?? "");
-        } else {
-            label_username.set_text(account_information.imap.credentials.user ?? "");
-            entry_password.set_text(account_information.imap.credentials.pass ?? "");
+        bool is_smtp = service.protocol == Geary.Protocol.SMTP;
+
+        Geary.Credentials? credentials = (is_smtp)
+            ? account.get_smtp_credentials() : account.imap.credentials;
+
+        if (credentials != null) {
+            label_username.set_text(credentials.user);
+            entry_password.set_text(credentials.token ?? "");
         }
-        check_remember_password.active = (smtp ? account_information.smtp.remember_password
-            : account_information.imap.remember_password);
-        if (smtp)
+        check_remember_password.active = service.remember_password;
+
+        if (is_smtp) {
             label_smtp.show();
-        
+        }
+
         ok_button = (Gtk.Button) builder.get_object("authenticate_button");
         
         refresh_ok_button_sensitivity();

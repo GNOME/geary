@@ -215,7 +215,9 @@ public class AddEditPage : Gtk.Box {
     private Geary.Engine.ValidationResult last_validation_result = Geary.Engine.ValidationResult.OK;
     
     private bool first_ui_update = true;
-    
+
+    private bool is_sso_account = false;
+
     public signal void info_changed();
     
     public signal void size_changed();
@@ -363,16 +365,17 @@ public class AddEditPage : Gtk.Box {
     
     // Sets the account information to display on this page.
     public void set_account_information(Geary.AccountInformation info, Geary.Engine.ValidationResult result) {
+        this.is_sso_account = (info.imap.mediator is GoaMediator);
         set_all_info(
             info.id,
             info.primary_mailbox.name,
             info.nickname,
             info.primary_mailbox.address,
-            info.imap.credentials.user,
-            info.imap.credentials.pass,
+            info.imap.credentials != null ? info.imap.credentials.user : null,
+            info.imap.credentials != null ? info.imap.credentials.token : null,
             info.imap.remember_password && info.smtp.remember_password,
             info.smtp.credentials != null ? info.smtp.credentials.user : null,
-            info.smtp.credentials != null ? info.smtp.credentials.pass : null,
+            info.smtp.credentials != null ? info.smtp.credentials.token : null,
             info.service_provider,
             info.save_sent_mail,
             info.allow_save_sent_mail(),
@@ -654,10 +657,18 @@ public class AddEditPage : Gtk.Box {
         fix_credentials_for_supported_provider();
 
         Geary.Credentials imap_credentials = new Geary.Credentials(
-            imap_username.strip(), imap_password.strip());
-        Geary.Credentials smtp_credentials = new Geary.Credentials(
-            (smtp_use_imap_credentials ? imap_username.strip() : smtp_username.strip()),
-            (smtp_use_imap_credentials ? imap_password.strip() : smtp_password.strip()));
+            Geary.Credentials.Method.PASSWORD,
+            imap_username.strip(),
+            imap_password.strip()
+        );
+        Geary.Credentials? smtp_credentials = null;
+        if (!smtp_noauth && !smtp_use_imap_credentials) {
+            smtp_credentials = new Geary.Credentials(
+                Geary.Credentials.Method.PASSWORD,
+                smtp_username.strip(),
+                smtp_password.strip()
+            );
+        }
 
         Geary.AccountInformation? info = null;
         if (this.id != null) {
@@ -678,13 +689,11 @@ public class AddEditPage : Gtk.Box {
             // New account
             Geary.ServiceInformation imap =
                 this.application.controller.account_manager.new_libsecret_service(
-                    Geary.Service.IMAP,
-                    Geary.CredentialsMethod.PASSWORD
+                    Geary.Protocol.IMAP
                 );
             Geary.ServiceInformation smtp =
                 this.application.controller.account_manager.new_libsecret_service(
-                    Geary.Service.SMTP,
-                    Geary.CredentialsMethod.PASSWORD
+                    Geary.Protocol.SMTP
                 );
 
             try {
@@ -725,9 +734,6 @@ public class AddEditPage : Gtk.Box {
             info.use_email_signature = this.use_email_signature;
             info.email_signature = this.email_signature;
 
-            if (smtp_noauth)
-                info.smtp.credentials = null;
-
             on_changed();
         }
 
@@ -755,8 +761,15 @@ public class AddEditPage : Gtk.Box {
         check_save_drafts.visible = mode == PageMode.EDIT;
         composer_container.visible = mode == PageMode.EDIT;
         alternate_email_button.visible = mode == PageMode.EDIT;
-        
-        if (get_service_provider() == Geary.ServiceProvider.OTHER) {
+
+        if (this.is_sso_account) {
+            // Display no auth or server details for SSO acounts
+            label_password.hide();
+            entry_password.hide();
+            other_info.hide();
+            set_other_info_sensitive(false);
+            check_remember_password.hide();
+        } else if (get_service_provider() == Geary.ServiceProvider.OTHER) {
             // Display all options for custom providers.
             label_password.hide();
             entry_password.hide();

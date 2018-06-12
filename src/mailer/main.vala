@@ -156,9 +156,11 @@ int main(string[] args) {
     }
     
     Geary.RFC822.init();
-    
-    credentials = new Geary.Credentials(arg_user, arg_pass);
-    
+
+    credentials = new Geary.Credentials(
+        Geary.Credentials.Method.PASSWORD, arg_user, arg_pass
+    );
+
     if (arg_full_file == null) {
         composed_email = new Geary.ComposedEmail(new DateTime.now_local(),
             new Geary.RFC822.MailboxAddresses.single(new Geary.RFC822.MailboxAddress(null, arg_from)));

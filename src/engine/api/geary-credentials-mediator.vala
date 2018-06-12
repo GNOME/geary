@@ -1,45 +1,39 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2018 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
-public interface Geary.CredentialsMediator : Object {
+/**
+ * A store for authentication tokens.
+ */
+public interface Geary.CredentialsMediator : GLib.Object {
+
     /**
-     * Query the key store for the password of the given username for the given
-     * service.  Return null if the password wasn't in the key store, or the
-     * password if it was.
+     * Updates the token for a service's credential from the store.
+     *
+     * Returns true if the token was present and loaded, else false.
      */
-    public abstract async string? get_password_async(Service service,
-        AccountInformation account_information,
-        Cancellable? cancellable = null) throws Error;
-    
+    public abstract async bool load_token(AccountInformation account,
+                                          ServiceInformation service,
+                                          GLib.Cancellable? cancellable)
+        throws GLib.Error;
+
     /**
-     * Add or update the key store's password entry for the given credentials
-     * for the given service.
-     */
-    public abstract async void set_password_async(Service service,
-        AccountInformation account_information,
-        Cancellable? cancellable = null) throws Error;
-    
-    /**
-     * Deletes the key store's password entry for the given credentials for the
-     * given service.  Do nothing (and do *not* throw an error) if the
-     * credentials weren't in the key store.
-     */
-    public abstract async void clear_password_async(Service service,
-        AccountInformation account_information,
-        Cancellable? cancellable = null) throws Error;
-    
-    /**
-     * Prompt the user to enter passwords for the given services in the given
-     * account.  Set the out parameters for the services to the values entered
-     * by the user (out parameters for services not being prompted for are
-     * ignored).  Return false if the user tried to cancel the interaction, or
+     * Prompt the user to enter passwords for the given service.
+     *
+     * Updates authentication-related details for the given service,
+     * possibly including user login names, authentication tokens, and
+     * the remember password preference.
+     *
+     * Returns false if the user tried to cancel the interaction, or
      * true if they tried to proceed.
      */
-    public abstract async bool prompt_passwords_async(ServiceFlag services,
-        AccountInformation account_information,
-        out string? imap_password, out string? smtp_password,
-        out bool imap_remember_password, out bool smtp_remember_password) throws Error;
+    public abstract async bool prompt_token(AccountInformation account,
+                                            ServiceInformation service,
+                                            GLib.Cancellable? cancellable)
+        throws GLib.Error;
+
 }

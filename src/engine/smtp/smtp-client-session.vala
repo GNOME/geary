@@ -55,34 +55,64 @@ public class Geary.Smtp.ClientSession {
     // Returns authenticator used for successful authentication, otherwise throws exception
     private async Authenticator attempt_authentication_async(Credentials creds, Cancellable? cancellable)
         throws Error {
-        // build an authentication style ordering to attempt, going from reported capabilities to standard
-        // fallbacks, while avoiding repetition ... this is necessary due to server bugs that report
-        // an authentication type is available but actually isn't, see
+        // build an authentication style ordering to attempt, going
+        // from reported capabilities to standard fallbacks, while
+        // avoiding repetition ... this is necessary due to server
+        // bugs that report an authentication type is available but
+        // actually isn't, see
+        //
         // http://redmine.yorba.org/issues/6091
+        //
         // and
+        //
         // http://comments.gmane.org/gmane.mail.pine.general/4004
         Gee.ArrayList<string> auth_order = new Gee.ArrayList<string>(String.stri_equal);
-        
-        // start with advertised authentication styles, in order of our preference (PLAIN
-        // only requires one round-trip)
-        if (cx.capabilities != null) {
-            if (cx.capabilities.has_setting(Capabilities.AUTH, Capabilities.AUTH_PLAIN))
+
+        switch (creds.supported_method) {
+        case Credentials.Method.PASSWORD:
+            // start with advertised authentication styles, in order of our preference (PLAIN
+            // only requires one round-trip)
+            if (cx.capabilities != null) {
+                if (cx.capabilities.has_setting(Capabilities.AUTH, Capabilities.AUTH_PLAIN))
+                    auth_order.add(Capabilities.AUTH_PLAIN);
+
+                if (cx.capabilities.has_setting(Capabilities.AUTH, Capabilities.AUTH_LOGIN))
+                    auth_order.add(Capabilities.AUTH_LOGIN);
+            }
+
+            // fallback on commonly-implemented styles, again in our order of preference
+            if (!auth_order.contains(Capabilities.AUTH_PLAIN))
                 auth_order.add(Capabilities.AUTH_PLAIN);
-            
-            if (cx.capabilities.has_setting(Capabilities.AUTH, Capabilities.AUTH_LOGIN))
+
+            if (!auth_order.contains(Capabilities.AUTH_LOGIN))
                 auth_order.add(Capabilities.AUTH_LOGIN);
+
+            if (auth_order.is_empty) {
+                throw new SmtpError.AUTHENTICATION_FAILED(
+                    "Unable to authenticate using PASSWORD credentials against %s",
+                    to_string()
+                );
+            }
+            break;
+
+        case Credentials.Method.OAUTH2:
+            if (cx.capabilities != null &&
+                !cx.capabilities.has_setting(Capabilities.AUTH,
+                                             Capabilities.AUTH_OAUTH2)) {
+                throw new SmtpError.AUTHENTICATION_FAILED(
+                    "Unable to authenticate using OAUTH2 credentials against %s",
+                    to_string()
+                );
+            }
+            auth_order.add(Capabilities.AUTH_OAUTH2);
+            break;
+
+        default:
+            throw new SmtpError.AUTHENTICATION_FAILED(
+                "Unsupported auth method: %s", creds.supported_method.to_string()
+            );
         }
-        
-        // fallback on commonly-implemented styles, again in our order of preference
-        if (!auth_order.contains(Capabilities.AUTH_PLAIN))
-            auth_order.add(Capabilities.AUTH_PLAIN);
-        
-        if (!auth_order.contains(Capabilities.AUTH_LOGIN))
-            auth_order.add(Capabilities.AUTH_LOGIN);
-        
-        // in current situation, should always have one authentication type to attempt
-        assert(auth_order.size > 0);
-        
+
         // go through the list, in order, until one style is accepted
         do {
             Authenticator? authenticator;
@@ -90,11 +120,15 @@ public class Geary.Smtp.ClientSession {
                 case Capabilities.AUTH_PLAIN:
                     authenticator = new PlainAuthenticator(creds);
                 break;
-                
+
                 case Capabilities.AUTH_LOGIN:
                     authenticator = new LoginAuthenticator(creds);
                 break;
-                
+
+                case Capabilities.AUTH_OAUTH2:
+                    authenticator = new OAuth2Authenticator(creds);
+                break;
+
                 default:
                     assert_not_reached();
             }

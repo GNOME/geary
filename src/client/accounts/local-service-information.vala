@@ -19,22 +19,29 @@ public class LocalServiceInformation : Geary.ServiceInformation {
     private const string USERNAME_KEY = "username";
 
 
-    public LocalServiceInformation(Geary.Service service,
-                                   Geary.CredentialsMethod method,
-                                   Geary.CredentialsMediator? mediator) {
-        this.service = service;
-        this.credentials_method = method;
-        this.mediator = mediator;
+    public LocalServiceInformation(Geary.Protocol protocol,
+                                   Geary.CredentialsMediator mediator) {
+        base(protocol, mediator);
     }
 
     public override Geary.ServiceInformation temp_copy() {
         LocalServiceInformation copy = new LocalServiceInformation(
-            this.service, this.credentials_method, this.mediator
+            this.protocol, this.mediator
         );
         copy.copy_from(this);
         return copy;
     }
 
+    public void load_credentials(Geary.ConfigFile.Group config,
+                                 Geary.Credentials.Method method,
+                                 string default_login) {
+        this.credentials = new Geary.Credentials(
+            method, config.get_string(USERNAME_KEY, default_login)
+        );
+        this.remember_password = config.get_bool(
+            REMEMBER_PASSWORD_KEY, this.remember_password
+        );
+    }
 
     public void load_settings(Geary.ConfigFile.Group config) {
         this.host = config.get_string(HOST, this.host);
@@ -42,26 +49,19 @@ public class LocalServiceInformation : Geary.ServiceInformation {
         this.use_ssl = config.get_bool(SSL, this.use_ssl);
         this.use_starttls = config.get_bool(STARTTLS, this.use_starttls);
 
-        if (this.service == Geary.Service.SMTP) {
-            this.smtp_noauth = config.get_bool(SMTP_NOAUTH, this.smtp_noauth);
-            if (this.smtp_noauth)
-                this.credentials = null;
+        if (this.protocol == Geary.Protocol.SMTP) {
+            this.smtp_noauth = config.get_bool(
+                SMTP_NOAUTH, this.smtp_noauth
+            );
             this.smtp_use_imap_credentials = config.get_bool(
                 SMTP_USE_IMAP_CREDENTIALS,
                 this.smtp_use_imap_credentials
             );
+            if (this.smtp_noauth || this.smtp_use_imap_credentials) {
+                this.credentials = null;
+            }
         }
 
-    }
-
-    public void load_credentials(Geary.ConfigFile.Group config,
-                                 string? default_login = null) {
-        this.credentials.user = config.get_string(
-            USERNAME_KEY, default_login
-        );
-        this.remember_password = config.get_bool(
-            REMEMBER_PASSWORD_KEY, this.remember_password
-        );
     }
 
     public void save_settings(Geary.ConfigFile.Group config) {
@@ -69,10 +69,13 @@ public class LocalServiceInformation : Geary.ServiceInformation {
         config.set_int(PORT, this.port);
         config.set_bool(SSL, this.use_ssl);
         config.set_bool(STARTTLS, this.use_starttls);
-        config.set_string(USERNAME_KEY, this.credentials.user);
         config.set_bool(REMEMBER_PASSWORD_KEY, this.remember_password);
 
-        if (this.service == Geary.Service.SMTP) {
+        if (this.credentials != null) {
+            config.set_string(USERNAME_KEY, this.credentials.user);
+        }
+
+        if (this.protocol == Geary.Protocol.SMTP) {
             config.set_bool(SMTP_USE_IMAP_CREDENTIALS, this.smtp_use_imap_credentials);
             config.set_bool(SMTP_NOAUTH, this.smtp_noauth);
         }

@@ -1,4 +1,5 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -16,8 +17,10 @@ public class Geary.AccountInformation : BaseObject {
 
     public static int next_ordinal = 0;
 
-    private static Gee.HashMap<string, weak Geary.Endpoint> known_endpoints =
-        new Gee.HashMap<string, weak Endpoint>();
+
+    private static Gee.HashMap<string,weak Endpoint> known_endpoints =
+        new Gee.HashMap<string,weak Endpoint>();
+
 
     /** Comparator for account info objects based on their ordinals. */
     public static int compare_ascending(AccountInformation a, AccountInformation b) {
@@ -29,20 +32,22 @@ public class Geary.AccountInformation : BaseObject {
         return a.display_name.collate(b.display_name);
     }
 
-    private static Geary.Endpoint get_shared_endpoint(Service service, Endpoint endpoint) {
+    private static Geary.Endpoint get_shared_endpoint(ServiceInformation service,
+                                                      Endpoint endpoint) {
         string key = "%s/%s:%u".printf(
-            service.user_label(),
+            service.protocol.user_label(),
             endpoint.remote_address.hostname,
             endpoint.remote_address.port
         );
 
-        Endpoint? cached = AccountInformation.known_endpoints.get(key);
-        if (cached == null) {
-            cached = endpoint;
-            AccountInformation.known_endpoints.set(key, cached);
+        weak Endpoint? cached = AccountInformation.known_endpoints.get(key);
+        weak Endpoint? shared = endpoint;
+        if (cached != null) {
+            shared = cached;
+            AccountInformation.known_endpoints.set(key, shared);
         }
 
-        return cached;
+        return shared;
     }
 
 
@@ -181,8 +186,6 @@ public class Geary.AccountInformation : BaseObject {
     public bool is_copy { get; set; default = false; }
 
     private bool _save_sent_mail = true;
-    private Endpoint? imap_endpoint = null;
-    private Endpoint? smtp_endpoint = null;
 
 
     /**
@@ -194,8 +197,9 @@ public class Geary.AccountInformation : BaseObject {
      * pin the certificate appropriately if the user does not want to receive these warnings in
      * the future.
      */
-    public signal void untrusted_host(Endpoint endpoint, Endpoint.SecurityType security,
-        TlsConnection cx, Service service);
+    public signal void untrusted_host(ServiceInformation service,
+                                      Endpoint.SecurityType security,
+                                      TlsConnection cx);
 
     /** Indicates that properties contained herein have changed. */
     public signal void information_changed();
@@ -221,12 +225,7 @@ public class Geary.AccountInformation : BaseObject {
     }
 
     ~AccountInformation() {
-        // Endpoints are shared so won't go away when this instance is
-        // finalised, so we need to disconnect from their signals.
-        if (this.imap_endpoint != null)
-            this.imap_endpoint.untrusted_host.disconnect(on_imap_untrusted_host);
-        if (this.smtp_endpoint != null)
-            this.smtp_endpoint.untrusted_host.disconnect(on_smtp_untrusted_host);
+        disconnect_endpoints();
     }
 
 
@@ -378,171 +377,149 @@ public class Geary.AccountInformation : BaseObject {
         // This account's information should be stored again. Signal this.
         information_changed();
     }
-    
+
     /**
-     * Fetch the passwords for the given services.  For each service, if the
-     * password is unset, use get_passwords_async() first; if the password is
-     * set or it's not in the key store, use prompt_passwords_async().  Return
-     * true if all passwords were retrieved from the key store or the user
-     * proceeded normally if/when prompted, false if the user tried to cancel
-     * the prompt.
+     * Determines if this account contains a specific email address.
      *
-     * If force_request is set to true, a prompt will appear regardless.
+     * Returns true if the address part of `email` is equal to (case
+     * insensitive) the address part of this account's primary mailbox
+     * or any of its secondary mailboxes.
      */
-    public async bool fetch_passwords_async(ServiceFlag services,
-        bool force_request = false) throws Error {
-        if (force_request) {
-            // Delete the current password(s).
-            if (services.has_imap()) {
-                yield this.imap.mediator.clear_password_async(
-                    Service.IMAP, this);
+    public bool has_email_address(Geary.RFC822.MailboxAddress email) {
+        return (
+            this.primary_mailbox.equal_to(email) ||
+            (this.alternate_mailboxes != null &&
+             this.alternate_mailboxes.fold<bool>((alt) => {
+                     return alt.equal_to(email);
+                 }, false))
+        );
+    }
 
-                if (this.imap.credentials != null)
-                    this.imap.credentials.pass = null;
-            } else if (services.has_smtp()) {
-                yield this.smtp.mediator.clear_password_async(
-                    Service.SMTP, this);
+    /**
+     * Returns the best credentials to use for SMTP authentication.
+     *
+     * This method checks for SMTP services that use IMAP credentials
+     * for authentication and if enabled, returns those. If this
+     * method returns null, then SMTP authentication should not be
+     * attempted for this account.
+     */
+    public Credentials? get_smtp_credentials() {
+        Credentials? smtp = null;
+        if (!this.smtp.smtp_noauth) {
+            smtp = this.smtp.smtp_use_imap_credentials
+                ? this.imap.credentials
+                : this.smtp.credentials;
+        }
+        return smtp;
+    }
 
-                if (this.smtp.credentials != null)
-                    this.smtp.credentials.pass = null;
+    /**
+     * Loads this account's SMTP credentials from its mediator, if needed.
+     *
+     * This method may cause the user to be prompted for their
+     * secrets, thus it may yield for some time.
+     *
+     * Returns true if the credentials were successfully loaded or had
+     * been previously loaded, the credentials could not be loaded and
+     * the SMTP credentials are invalid.
+     */
+    public async bool load_smtp_credentials(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        Credentials? creds = get_smtp_credentials();
+        bool loaded = (creds == null || creds.is_complete());
+        if (!loaded && creds != null) {
+            ServiceInformation service = this.smtp;
+            if (this.smtp.smtp_use_imap_credentials) {
+                service = this.imap;
             }
+            loaded = yield service.mediator.load_token(
+                this, service, cancellable
+            );
         }
-        
-        // Only call get_passwords on anything that hasn't been set
-        // (incorrectly) previously.
-        ServiceFlag get_services = 0;
-        if (services.has_imap() && !this.imap.credentials.is_complete())
-            get_services |= ServiceFlag.IMAP;
-        
-        if (services.has_smtp() && this.smtp.credentials != null && !this.smtp.credentials.is_complete())
-            get_services |= ServiceFlag.SMTP;
-
-        ServiceFlag unset_services = services;
-        if (get_services != 0)
-            unset_services = yield get_passwords_async(get_services);
-        else
-            return true;
-
-        if (unset_services == 0)
-            return true;
-
-        return yield prompt_passwords_async(unset_services);
-    }
-
-    private void check_mediator_instance() throws EngineError {
-        if (this.imap.mediator == null || this.smtp.mediator == null)
-            throw new EngineError.OPEN_REQUIRED(
-                "Account %s needs to be open with valid Geary.CredentialsMediators".printf(this.id));
+        return loaded;
     }
 
     /**
-     * Use Engine's authentication mediator to retrieve the passwords for the
-     * given services.  The passwords will be stored in the appropriate
-     * credentials in this instance.  Return any services that could *not* be
-     * retrieved from the key store (in which case you may want to call
-     * prompt_passwords_async() on the return value), or 0 if all were
-     * retrieved.
-     */
-    public async ServiceFlag get_passwords_async(ServiceFlag services) throws Error {
-        check_mediator_instance();
-
-        ServiceFlag failed_services = 0;
-
-        if (services.has_imap()) {
-            string? imap_password = yield this.imap.mediator.get_password_async(Service.IMAP, this);
-
-            if (imap_password != null)
-                this.imap.set_password(imap_password, this.imap.remember_password);
-             else
-                failed_services |= ServiceFlag.IMAP;
-        }
-        
-        if (services.has_smtp() && this.smtp.credentials != null) {
-            string? smtp_password = yield this.smtp.mediator.get_password_async(Service.SMTP, this);
-
-            if (smtp_password != null)
-                this.smtp.set_password(smtp_password, this.smtp.remember_password);
-            else
-                failed_services |= ServiceFlag.SMTP;
-        }
-
-        return failed_services;
-    }
-
-    /**
-     * Use the Engine's authentication mediator to prompt for the passwords for
-     * the given services.  The passwords will be stored in the appropriate
-     * credentials in this instance.  After the prompt, the passwords will be
-     * updated in the key store using update_stored_passwords_async().  Return
-     * whether the user proceeded normally (false if they tried to cancel the
-     * prompt).
-     */
-    public async bool prompt_passwords_async(ServiceFlag services) throws Error {
-        check_mediator_instance();
-
-        string? imap_password, smtp_password;
-        bool imap_remember_password, smtp_remember_password;
-
-        /* This is a workaround. Assume IMAP and SMTP use the same mediator so
-         * as to minimize code refactoring for now.
-         */
-
-        if (this.smtp.credentials == null)
-            services &= ~ServiceFlag.SMTP;
-
-        if (!yield this.imap.mediator.prompt_passwords_async(
-            services, this, out imap_password, out smtp_password,
-            out imap_remember_password, out smtp_remember_password))
-            return false;
-
-        if (services.has_imap()) {
-            imap.set_password(imap_password, imap_remember_password);
-        }
-
-        if (services.has_smtp()) {
-            smtp.set_password(smtp_password, smtp_remember_password);
-        }
-
-        yield update_stored_passwords_async(services);
-
-        return true;
-    }
-
-    /**
-     * Use the Engine's authentication mediator to set or clear the passwords
-     * for the given services in the key store.
-     */
-    public async void update_stored_passwords_async(ServiceFlag services) throws Error {
-        check_mediator_instance();
-
-
-        if (services.has_imap()) {
-            if (this.imap.remember_password)
-                yield this.imap.mediator.set_password_async(Service.IMAP, this);
-            else
-                yield this.imap.mediator.clear_password_async(Service.IMAP, this);
-        }
-
-        if (services.has_smtp() && this.smtp.credentials != null) {
-            if (this.smtp.remember_password)
-                yield this.smtp.mediator.set_password_async(Service.SMTP, this);
-            else
-                yield this.smtp.mediator.clear_password_async(Service.SMTP, this);
-        }
-    }
-
-    /**
-     * Returns the {@link Endpoint} for the account's IMAP service.
+     * Prompts the user for their SMTP authentication secret.
      *
-     * The Endpoint instance is guaranteed to be the same for the lifetime of the
-     * {@link AccountInformation} instance, which is in turn guaranteed to be the same for the
-     * duration of the application session.
+     * Returns true if the credentials were successfully entered, else
+     * false if the user dismissed the prompt.
      */
-    public Endpoint get_imap_endpoint() {
-        if (imap_endpoint != null)
-            return imap_endpoint;
+    public async bool prompt_smtp_credentials(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        return yield this.smtp.mediator.prompt_token(
+            this, this.smtp, cancellable
+        );
+    }
 
-        switch (service_provider) {
+    /**
+     * Loads this account's IMAP credentials from its mediator, if needed.
+     *
+     * This method may cause the user to be prompted for their
+     * secrets, thus it may yield for some time.
+     *
+     * Returns true if the credentials were successfully loaded or had
+     * been previously loaded, the credentials could not be loaded and
+     * the IMAP credentials are invalid.
+     */
+    public async bool load_imap_credentials(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        Credentials? creds = this.imap.credentials;
+        bool loaded = creds.is_complete();
+        if (!loaded) {
+            loaded = yield this.imap.mediator.load_token(
+                this, this.imap, cancellable
+            );
+        }
+        return loaded;
+    }
+
+    /**
+     * Prompts the user for their IMAP authentication secret.
+     *
+     * Returns true if the credentials were successfully entered, else
+     * false if the user dismissed the prompt.
+     */
+    public async bool prompt_imap_credentials(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        return yield this.imap.mediator.prompt_token(
+            this, this.imap, cancellable
+        );
+    }
+
+    internal void connect_endpoints() {
+        if (this.imap.endpoint == null) {
+            this.imap.endpoint = get_imap_endpoint();
+            this.imap.endpoint.untrusted_host.connect(
+                on_imap_untrusted_host
+            );
+        }
+        if (this.smtp.endpoint == null) {
+            this.smtp.endpoint = get_smtp_endpoint();
+            this.smtp.endpoint.untrusted_host.connect(
+                on_smtp_untrusted_host
+            );
+        }
+    }
+
+    internal void disconnect_endpoints() {
+        if (this.imap.endpoint != null) {
+            this.imap.endpoint.untrusted_host.disconnect(
+                on_imap_untrusted_host
+            );
+            this.imap.endpoint = null;
+        }
+        if (this.smtp.endpoint != null) {
+            this.smtp.endpoint.untrusted_host.disconnect(
+                on_smtp_untrusted_host
+            );
+            this.smtp.endpoint = null;
+        }
+    }
+
+    private Endpoint get_imap_endpoint() {
+        Endpoint? imap_endpoint = null;
+        switch (this.service_provider) {
             case ServiceProvider.GMAIL:
                 imap_endpoint = ImapEngine.GmailAccount.generate_imap_endpoint();
             break;
@@ -570,9 +547,10 @@ public class Geary.AccountInformation : BaseObject {
                 assert_not_reached();
         }
 
-        // look for existing one in the global pool; want to use that because Endpoint is mutable
-        // and signalled in such a way that it's better to share them
-        imap_endpoint = get_shared_endpoint(Service.IMAP, imap_endpoint);
+        // look for existing one in the global pool; want to use that
+        // because Endpoint is mutable and signalled in such a way
+        // that it's better to share them
+        imap_endpoint = get_shared_endpoint(this.imap, imap_endpoint);
 
         // bind shared Endpoint signal to this AccountInformation's signal
         imap_endpoint.untrusted_host.connect(on_imap_untrusted_host);
@@ -580,31 +558,17 @@ public class Geary.AccountInformation : BaseObject {
         return imap_endpoint;
     }
 
-    private void on_imap_untrusted_host(Endpoint endpoint, Endpoint.SecurityType security,
-        TlsConnection cx) {
-        untrusted_host(endpoint, security, cx, Service.IMAP);
-    }
-
-    /**
-     * Returns the {@link Endpoint} for the account's SMTP service.
-     *
-     * The Endpoint instance is guaranteed to be the same for the lifetime of the
-     * {@link AccountInformation} instance, which is in turn guaranteed to be the same for the
-     * duration of the application session.
-     */
-    public Endpoint get_smtp_endpoint() {
-        if (smtp_endpoint != null)
-            return smtp_endpoint;
-        
+    private Endpoint get_smtp_endpoint() {
+        Endpoint? smtp_endpoint = null;
         switch (service_provider) {
             case ServiceProvider.GMAIL:
                 smtp_endpoint = ImapEngine.GmailAccount.generate_smtp_endpoint();
             break;
-            
+
             case ServiceProvider.YAHOO:
                 smtp_endpoint = ImapEngine.YahooAccount.generate_smtp_endpoint();
             break;
-            
+
             case ServiceProvider.OUTLOOK:
                 smtp_endpoint = ImapEngine.OutlookAccount.generate_smtp_endpoint();
             break;
@@ -624,34 +588,17 @@ public class Geary.AccountInformation : BaseObject {
                 assert_not_reached();
         }
 
-        // look for existing one in the global pool; want to use that because Endpoint is mutable
-        // and signalled in such a way that it's better to share them
-        smtp_endpoint = get_shared_endpoint(Service.SMTP, smtp_endpoint);
-        
+        // look for existing one in the global pool; want to use that
+        // because Endpoint is mutable and signalled in such a way
+        // that it's better to share them
+        smtp_endpoint = get_shared_endpoint(this.smtp, smtp_endpoint);
+
         // bind shared Endpoint signal to this AccountInformation's signal
         smtp_endpoint.untrusted_host.connect(on_smtp_untrusted_host);
-        
+
         return smtp_endpoint;
     }
-    
-    private void on_smtp_untrusted_host(Endpoint endpoint, Endpoint.SecurityType security,
-        TlsConnection cx) {
-        untrusted_host(endpoint, security, cx, Service.SMTP);
-    }
 
-    public Geary.Endpoint get_endpoint_for_service(Geary.Service service) {
-        switch (service) {
-            case Service.IMAP:
-                return get_imap_endpoint();
-            
-            case Service.SMTP:
-                return get_smtp_endpoint();
-
-            default:
-                assert_not_reached();
-        }
-    }
-    
     public static Geary.FolderPath? build_folder_path(Gee.List<string>? parts) {
         if (parts == null || parts.size == 0)
             return null;
@@ -662,44 +609,14 @@ public class Geary.AccountInformation : BaseObject {
         return path;
     }
 
-    public async void clear_stored_passwords_async(ServiceFlag services) throws Error {
-        Error? return_error = null;
-        check_mediator_instance();
-
-        try {
-            if (services.has_imap())
-                yield this.imap.mediator.clear_password_async(Service.IMAP, this);
-        } catch (Error e) {
-            return_error = e;
-        }
-
-        try {
-            if (services.has_smtp() && this.smtp.credentials != null)
-                yield this.smtp.mediator.clear_password_async(Service.SMTP, this);
-        } catch (Error e) {
-            return_error = e;
-        }
-
-        if (return_error != null)
-            throw return_error;
+    private void on_imap_untrusted_host(Endpoint.SecurityType security,
+                                        TlsConnection cx) {
+        untrusted_host(this.imap, security, cx);
     }
 
-
-    /**
-     * Determines if this account contains a specific email address.
-     *
-     * Returns true if the address part of `email` is equal to (case
-     * insensitive) the address part of this account's primary mailbox
-     * or any of its secondary mailboxes.
-     */
-    public bool has_email_address(Geary.RFC822.MailboxAddress email) {
-        return (
-            this.primary_mailbox.equal_to(email) ||
-            (this.alternate_mailboxes != null &&
-             this.alternate_mailboxes.fold<bool>((alt) => {
-                     return alt.equal_to(email);
-                 }, false))
-        );
+    private void on_smtp_untrusted_host(Endpoint.SecurityType security,
+                                        TlsConnection cx) {
+        untrusted_host(this.smtp, security, cx);
     }
 
 }

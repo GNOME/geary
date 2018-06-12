@@ -27,7 +27,7 @@ public class Geary.Smtp.LoginAuthenticator : Geary.Smtp.Authenticator {
                 return new Memory.StringBuffer(Base64.encode(credentials.user.data));
             
             case 1:
-                return new Memory.StringBuffer(Base64.encode((credentials.pass ?? "").data));
+                return new Memory.StringBuffer(Base64.encode((credentials.token ?? "").data));
             
             default:
                 return null;

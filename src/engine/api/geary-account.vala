@@ -461,8 +461,12 @@ public abstract class Geary.Account : BaseObject {
     }
 
     /** Fires a {@link report_problem} signal for a service for this account. */
-    protected virtual void notify_service_problem(ProblemType type, Service service_type, Error? err) {
-        report_problem(new ServiceProblemReport(type, this.information, service_type, err));
+    protected virtual void notify_service_problem(ProblemType type,
+                                                  ServiceInformation service,
+                                                  Error? err) {
+        report_problem(
+            new ServiceProblemReport(type, this.information, service, err)
+        );
     }
 
 }

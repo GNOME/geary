@@ -140,7 +140,6 @@ src/engine/api/geary-search-folder.vala
 src/engine/api/geary-search-query.vala
 src/engine/api/geary-service-information.vala
 src/engine/api/geary-service-provider.vala
-src/engine/api/geary-service.vala
 src/engine/api/geary-special-folder-type.vala
 src/engine/app/app-conversation-monitor.vala
 src/engine/app/app-conversation.vala
@@ -295,6 +294,7 @@ src/engine/imap/message/imap-tag.vala
 src/engine/imap/message/imap-uid.vala
 src/engine/imap/message/imap-uid-validity.vala
 src/engine/imap/parameter/imap-atom-parameter.vala
+src/engine/imap/parameter/imap-continuation-parameter.vala
 src/engine/imap/parameter/imap-list-parameter.vala
 src/engine/imap/parameter/imap-literal-parameter.vala
 src/engine/imap/parameter/imap-nil-parameter.vala
@@ -371,6 +371,7 @@ src/engine/smtp/smtp-data-format.vala
 src/engine/smtp/smtp-error.vala
 src/engine/smtp/smtp-greeting.vala
 src/engine/smtp/smtp-login-authenticator.vala
+src/engine/smtp/smtp-oauth2-authenticator.vala
 src/engine/smtp/smtp-plain-authenticator.vala
 src/engine/smtp/smtp-request.vala
 src/engine/smtp/smtp-response-code.vala

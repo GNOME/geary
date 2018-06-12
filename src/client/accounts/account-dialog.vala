@@ -34,9 +34,12 @@ public class AccountDialog : Gtk.Dialog {
         get_content_area().margin_start = MARGIN;
         get_content_area().margin_end = MARGIN;
         get_content_area().margin_bottom = MARGIN;
-        
+
         // Add pages to stack.
-        account_list_pane = new AccountDialogAccountListPane(application, stack);
+        account_list_pane = new AccountDialogAccountListPane(
+            application.controller.account_manager,
+            stack
+        );
         add_edit_pane = new AccountDialogAddEditPane(application, stack);
         spinner_pane = new AccountDialogSpinnerPane(stack);
         remove_confirm_pane = new AccountDialogRemoveConfirmPane(stack);
@@ -70,28 +73,13 @@ public class AccountDialog : Gtk.Dialog {
         add_edit_pane.set_mode(AddEditPage.PageMode.ADD);
         add_edit_pane.present();
     }
-    
+
     // Grab the account info.  While the addresses passed into this method should *always* be
     // available in Geary, we double-check to be defensive.
     private Geary.AccountInformation? get_account_info(string id) {
-    Gee.Map<string, Geary.AccountInformation> accounts;
-        try {
-            accounts = this.application.engine.get_accounts();
-        } catch (Error e) {
-            debug("Error getting account info: %s", e.message);
-            
-            return null;
-        }
-        
-        if (!accounts.has_key(id)) {
-            debug("No such account: %s", id);
-            
-            return null;
-        }
-        
-        return accounts.get(id);
+        return this.application.controller.account_manager.get_account(id);
     }
-    
+
     private void on_edit_account(string id) {
         on_edit_account_async.begin(id);
     }
@@ -100,13 +88,7 @@ public class AccountDialog : Gtk.Dialog {
         Geary.AccountInformation? account = get_account_info(id);
         if (account == null)
             return;
-        
-        try {
-            yield account.get_passwords_async(Geary.ServiceFlag.IMAP | Geary.ServiceFlag.SMTP);
-        } catch (Error err) {
-            debug("Unable to fetch password(s) for account: %s", err.message);
-        }
-        
+
         add_edit_pane.set_mode(AddEditPage.PageMode.EDIT);
         add_edit_pane.set_account_information(account);
         add_edit_pane.present();

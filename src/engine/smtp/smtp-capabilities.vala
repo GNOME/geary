@@ -5,12 +5,14 @@
  */
 
 public class Geary.Smtp.Capabilities : Geary.GenericCapabilities {
+
     public const string STARTTLS = "starttls";
     public const string AUTH = "auth";
-    
+
     public const string AUTH_PLAIN = "plain";
     public const string AUTH_LOGIN = "login";
-    
+    public const string AUTH_OAUTH2 = "xoauth2";
+
     public const string NAME_SEPARATOR = " ";
     public const string VALUE_SEPARATOR = " ";
     

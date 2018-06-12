@@ -58,7 +58,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
 
         this.session_pool = new Imap.ClientSessionManager(
             this.information.id,
-            this.information.get_imap_endpoint(),
+            this.information.imap.endpoint,
             this.information.imap.credentials
         );
         this.session_pool.min_pool_size = IMAP_MIN_POOL_SIZE;
@@ -106,15 +106,13 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
         // Reset this so we start trying to authenticate again
         this.authentication_failures = 0;
 
-        // To prevent spurious connection failures, we make sure we have the
-        // IMAP password before attempting a connection.  This might have to be
-        // reworked when we allow passwordless logins.
-        if (!this.information.imap.credentials.is_complete())
-            yield this.information.get_passwords_async(ServiceFlag.IMAP);
-
-        this.session_pool.credentials_updated(
-            this.information.imap.credentials
-        );
+        // To prevent spurious connection failures, we make sure we
+        // have the IMAP password before attempting a connection.
+        if (yield this.information.load_imap_credentials(cancellable)) {
+            this.session_pool.credentials_updated(
+                this.information.imap.credentials
+            );
+        }
 
         // This will cause the session manager to open at least one
         // connection if we are online
@@ -474,12 +472,14 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
     public override async void send_email_async(Geary.ComposedEmail composed,
         Cancellable? cancellable = null) throws Error {
         check_open();
-        
+
         // TODO: we should probably not use someone else's FQDN in something
         // that's supposed to be globally unique...
         Geary.RFC822.Message rfc822 = new Geary.RFC822.Message.from_composed_email(
-            composed, GMime.utils_generate_message_id(information.get_smtp_endpoint().remote_address.hostname));
-        
+            composed, GMime.utils_generate_message_id(
+                information.smtp.endpoint.remote_address.hostname
+            ));
+
         // don't use create_email_async() as that requires the folder be open to use
         yield local.outbox.enqueue_email_async(rfc822, cancellable);
     }
@@ -788,7 +788,7 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
 
     /** Fires a {@link Account.report_problem} signal for an IMAP service. */
     protected void notify_imap_problem(Geary.ProblemType type, Error? err) {
-        notify_service_problem(type, Service.IMAP, err);
+        notify_service_problem(type, this.information.imap, err);
     }
 
     /**
@@ -933,7 +933,9 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
 
     private void on_operation_error(AccountOperation op, Error error) {
         if (error is ImapError) {
-            notify_service_problem(ProblemType.SERVER_ERROR, Service.IMAP, error);
+            notify_service_problem(
+                ProblemType.SERVER_ERROR, this.information.imap, error
+            );
         } else if (error is IOError) {
             // IOErrors could be network related or disk related, need
             // to work out the difference and send a service problem
@@ -999,11 +1001,11 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
                 notify_imap_problem(ProblemType.SERVER_ERROR, login_error);
             } else {
                 // Now, we should ask the user for their password
-                this.information.fetch_passwords_async.begin(
-                    ServiceFlag.IMAP, true,
+                this.information.prompt_imap_credentials.begin(
+                    this.open_cancellable,
                     (obj, ret) => {
                         try {
-                            if (this.information.fetch_passwords_async.end(ret)) {
+                            if (this.information.prompt_imap_credentials.end(ret)) {
                                 // Have a new password, so try that
                                 this.session_pool.credentials_updated(
                                     this.information.imap.credentials

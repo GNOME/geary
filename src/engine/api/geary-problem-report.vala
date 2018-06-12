@@ -192,28 +192,22 @@ public class Geary.ServiceProblemReport : AccountProblemReport {
 
 
     /** The service related to the problem report. */
-    public Service service_type { get; private set; }
-
-    /** The endpoint for the report's service type. */
-    public Endpoint endpoint {
-        owned get {
-            return (this.service_type == Service.IMAP)
-               ? this.account.get_imap_endpoint()
-               : this.account.get_smtp_endpoint();
-        }
-    }
+    public ServiceInformation service { get; private set; }
 
 
-    public ServiceProblemReport(ProblemType type, AccountInformation account, Service service_type, Error? error) {
+    public ServiceProblemReport(ProblemType type,
+                                AccountInformation account,
+                                ServiceInformation service,
+                                Error? error) {
         base(type, account, error);
-        this.service_type = service_type;
+        this.service = service;
     }
 
     /** Returns a string representation of the report, for debugging only. */
     public new string to_string() {
         return "%s: %s: %s: %s".printf(
             this.account.id,
-            this.service_type.to_string(),
+            this.service.protocol.to_string(),
             this.problem_type.to_string(),
             format_full_error() ?? "no error reported"
         );
