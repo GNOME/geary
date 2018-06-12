@@ -48,7 +48,6 @@ public enum CredentialsProvider {
 
 errordomain AccountError {
     INVALID,
-    GOA_UNAVAILABLE,
     GOA_REMOVED;
 }
 
@@ -131,18 +130,10 @@ public class AccountManager : GLib.Object {
             }
         }
 
-        /**
-         * Whether this account is enabled.
-         *
-         * This should not be modified outside of AccountManager.
-         */
+        /** Whether this account is enabled. */
         public bool enabled { get; set; default = true; }
 
-        /**
-         * Whether this account is available.
-         *
-         * This should not be modified outside of AccountManager.
-         */
+        /** Whether this account is available. */
         public bool available { get; set; default = true; }
 
 
