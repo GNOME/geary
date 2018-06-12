@@ -33,6 +33,8 @@ public class ClientWebView : WebKit.WebView, Geary.BaseInterface {
 
     private const double ZOOM_DEFAULT = 1.0;
     private const double ZOOM_FACTOR = 0.1;
+    private const double ZOOM_MAX = 2.0;
+    private const double ZOOM_MIN = 0.5;
 
 
     // Workaround WK binding ctor not accepting any args
@@ -311,8 +313,13 @@ public class ClientWebView : WebKit.WebView, Geary.BaseInterface {
             SELECTION_CHANGED, on_selection_changed
         );
 
-        // Manage zoom level
+        // Manage zoom level, ensure it's sane
         config.bind(Configuration.CONVERSATION_VIEWER_ZOOM_KEY, this, "zoom_level");
+        if (this.zoom_level < ZOOM_MIN) {
+            this.zoom_level = ZOOM_MIN;
+        } else if (this.zoom_level > ZOOM_MAX) {
+            this.zoom_level = ZOOM_MAX;
+        }
         this.scroll_event.connect(on_scroll_event);
 
         // Watch desktop font settings
@@ -406,11 +413,19 @@ public class ClientWebView : WebKit.WebView, Geary.BaseInterface {
     }
 
     public void zoom_in() {
-        this.zoom_level += (this.zoom_level * ZOOM_FACTOR);
+        double new_zoom = this.zoom_level += (this.zoom_level * ZOOM_FACTOR);
+        if (new_zoom > ZOOM_MAX) {
+            new_zoom = ZOOM_MAX;
+        }
+        this.zoom_level = new_zoom;
     }
 
     public void zoom_out() {
-        this.zoom_level -= (this.zoom_level * ZOOM_FACTOR);
+        double new_zoom = this.zoom_level -= (this.zoom_level * ZOOM_FACTOR);
+        if (new_zoom < ZOOM_MIN) {
+            new_zoom = ZOOM_MIN;
+        }
+        this.zoom_level = new_zoom;
     }
 
     /**
