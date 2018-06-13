@@ -1,0 +1,26 @@
+<page xmlns="http://projectmallard.org/1.0/"
+      type="guide"
+      id="contributing">
+
+  <title>Contribute to Geary</title>
+
+  <info>
+    <link type="guide" xref="index#contribute"/>
+    <link type="next" xref="bugs" />
+  </info>
+
+  <p>Want to help improve Geary? There are a number of ways you can
+  contribute:</p>
+
+  <list>
+    <item><p><link
+    href="https://wiki.gnome.org/Apps/Geary/ReportingABug">Bug
+    reporting</link>—report new bugs or request new features</p></item>
+    <item><p><link href="https://wiki.gnome.org/Apps/Geary/Design">User Experience Design</link>—research and develop Geary’s user experience</p></item>
+    <item><p><link href="https://wiki.gnome.org/Apps/Geary/Development">Development</link>—fix bugs and add new features</p></item>
+    <item><p><link href="https://wiki.gnome.org/Apps/Geary/Translating">Translating</link>—translate Geary’s user interface and user manual into new languages</p></item>
+    <item><p><link href="https://wiki.gnome.org/Apps/Geary/Contact">Join the discussion</link>—on the mailing list or IRC channel</p></item>
+  </list>
+
+  <p>Thanks for your help making Geary better!</p>
+</page>

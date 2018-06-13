@@ -2,21 +2,34 @@
       type="guide"
       id="bugs">
 
-    <info>
-        <link type="guide" xref="index#bug"/>
-    </info>
-   <title>Think you've found a bug?</title>
-   <p>If you suspect you've found a bug in Geary, follow these steps to report it:</p>
-   <steps>
-	<item><p>Search Geary's <link href="https://bugzilla.gnome.org/browse.cgi?product=geary">bug
-	database</link> to see if someone else has reported the bug.</p></item>
-	<item><p>Don't see your bug listed? Congratulations! You've found a new bug. To create an bug report,
-	create an account on GNOME's Bugzilla and
-	<link href="https://bugzilla.gnome.org/enter_bug.cgi?product=geary">file a new bug</link>.  Be as
-	specific as you can and describe the steps to reproduce it. Don't forget to include details about
-	your operating system and what version of Geary you're running.</p></item>
-	<item><p>For general inquiries, please join the
-	<link href="https://mail.gnome.org/mailman/listinfo/geary-list"> Geary mailing
-	list</link>.</p></item>
-   </steps>
+  <title>Found a bug?</title>
+
+  <info>
+    <link type="guide" xref="index#contribute"/>
+    <link type="next" xref="limits"/>
+  </info>
+
+  <p>If you suspect you've found a bug in Geary, please <link
+  href="https://wiki.gnome.org/Apps/Geary/Contact">get in touch</link>
+  about it so it can be fixed.</p>
+
+  <p>To help diagnose the problem as fast as possible, please include
+  the following information:</p>
+
+  <list>
+    <item><p>Geary version</p></item>
+    <item><p>Geary installation method (Package? Flathub? Source
+    code?)</p></item>
+    <item><p>Your desktop (GNOME? KDE? Something else?)</p></item>
+    <item><p>Your operating system and version (Ubuntu 16.04? Fedora
+    28? Rolled your own?)</p></item>
+    <item><p>GTK+ version (3.something-something?)</p></item>
+    <item><p>Email provider (Gmail, Yahoo!, Outlook.com, or someone
+    else?)</p></item>
+    <item><p>How to reproduce the bug</p></item>
+    <item><p>What happened?</p></item>
+    <item><p>What did you expect to happen?</p></item>
+  </list>
+
+  <p>Thanks for your help!</p>
 </page>

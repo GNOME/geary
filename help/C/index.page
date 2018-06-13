@@ -2,8 +2,7 @@
       type="guide"
       id="index">
 
-<title><media type="image" src="figures/geary.svg"></media>  
-Geary</title>
+<title><media type="image" src="figures/geary.svg"></media> Geary</title>
 
     <section id="introduction" style="2column">
         <title>Introduction</title>
@@ -13,8 +12,8 @@ Geary</title>
         <title>Using Geary</title>
     </section>
 
-    <section id="bug" style="2column">
-        <title>Bugs</title>
+    <section id="contribute" style="2column">
+        <title>Contributing and bug reporting</title>
     </section>
 
 </page>
