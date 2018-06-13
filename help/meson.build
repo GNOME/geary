@@ -2,6 +2,7 @@ geary_help_pages = [
   'accounts.page',
   'archive.page',
   'bugs.page',
+  'contributing.page',
   'index.page',
   'label.page',
   'limits.page',
