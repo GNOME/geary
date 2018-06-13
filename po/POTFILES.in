@@ -29,6 +29,7 @@ src/client/accounts/local-service-information.vala
 src/client/accounts/login-dialog.vala
 src/client/application/application-avatar-store.vala
 src/client/application/autostart-manager.vala
+src/client/application/application-command.vala
 src/client/application/geary-application.vala
 src/client/application/geary-args.vala
 src/client/application/geary-controller.vala
