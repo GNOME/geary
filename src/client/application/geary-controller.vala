@@ -32,6 +32,7 @@ public class GearyController : Geary.BaseObject {
     public const string ACTION_EMPTY_SPAM = "empty-spam";
     public const string ACTION_EMPTY_TRASH = "empty-trash";
     public const string ACTION_UNDO = "undo";
+    public const string ACTION_REDO = "redo";
     public const string ACTION_FIND_IN_CONVERSATION = "conv-find";
     public const string ACTION_ZOOM = "zoom";
     public const string ACTION_SHOW_MARK_MENU = "mark-message-menu";
@@ -566,6 +567,7 @@ public class GearyController : Geary.BaseObject {
         add_window_accelerators(ACTION_TRASH_CONVERSATION, { "Delete", "BackSpace" });
         add_window_accelerators(ACTION_DELETE_CONVERSATION, { "<Shift>Delete", "<Shift>BackSpace" });
         add_window_accelerators(ACTION_UNDO, { "<Ctrl>Z" });
+        add_window_accelerators(ACTION_REDO, { "<Ctrl><Shift>Z" });
         add_window_accelerators(ACTION_ZOOM+("('in')"), { "<Ctrl>equal", "equal" });
         add_window_accelerators(ACTION_ZOOM+("('out')"), { "<Ctrl>minus", "minus" });
         add_window_accelerators(ACTION_ZOOM+("('normal')"), { "<Ctrl>0", "0" });

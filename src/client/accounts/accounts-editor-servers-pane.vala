@@ -36,7 +36,6 @@ public class Accounts.EditorServersPane : Gtk.Grid {
         if (this.account.imap.mediator is GoaMediator) {
             this.details_list.add(new AccountProviderRow(this.account));
         }
-        this.details_list.add(new EmailPrefetchRow(this.account));
         this.details_list.add(new SaveDraftsRow(this.account));
 
         this.receiving_list.set_header_func(Editor.seperator_headers);
@@ -56,38 +55,7 @@ public class Accounts.EditorServersPane : Gtk.Grid {
 }
 
 
-private abstract class Accounts.ServerAccountRow<V> : LabelledEditorRow {
-
-
-    protected Geary.AccountInformation account;
-
-    protected V value;
-
-
-    public ServerAccountRow(Geary.AccountInformation account,
-                            string label,
-                            V value) {
-        base(label);
-        this.account = account;
-
-        set_dim_label(true);
-
-        this.value = value;
-
-        Gtk.Widget? widget = value as Gtk.Widget;
-        if (widget != null) {
-            widget.valign = Gtk.Align.CENTER;
-            widget.show();
-            this.layout.add(widget);
-        }
-    }
-
-    public abstract void update();
-
-}
-
-
-private class Accounts.ServiceProviderRow : ServerAccountRow<Gtk.Label> {
+private class Accounts.ServiceProviderRow : AccountRow<Gtk.Label> {
 
 
     public ServiceProviderRow(Geary.AccountInformation account) {
@@ -99,6 +67,10 @@ private class Accounts.ServiceProviderRow : ServerAccountRow<Gtk.Label> {
             _("Service provider"),
             new Gtk.Label("")
         );
+
+        // Can't change this, so dim it out
+        this.value.get_style_context().add_class(Gtk.STYLE_CLASS_DIM_LABEL);
+        set_activatable(false);
 
         update();
     }
@@ -119,14 +91,12 @@ private class Accounts.ServiceProviderRow : ServerAccountRow<Gtk.Label> {
             break;
         }
         this.value.set_text(details);
-        // Can't change this, so dim it out
-        this.value.get_style_context().add_class(Gtk.STYLE_CLASS_DIM_LABEL);
     }
 
 }
 
 
-private class Accounts.AccountProviderRow : ServerAccountRow<Gtk.Label> {
+private class Accounts.AccountProviderRow : AccountRow<Gtk.Label> {
 
 
     public AccountProviderRow(Geary.AccountInformation account) {
@@ -139,6 +109,10 @@ private class Accounts.AccountProviderRow : ServerAccountRow<Gtk.Label> {
             new Gtk.Label("")
         );
 
+        // Can't change this, so dim it out
+        this.value.get_style_context().add_class(Gtk.STYLE_CLASS_DIM_LABEL);
+        this.set_activatable(false);
+
         update();
     }
 
@@ -150,14 +124,12 @@ private class Accounts.AccountProviderRow : ServerAccountRow<Gtk.Label> {
             source = _("Geary");
         }
         this.value.set_text(source);
-        // Can't change this, so dim it out
-        this.value.get_style_context().add_class(Gtk.STYLE_CLASS_DIM_LABEL);
     }
 
 }
 
 
-private class Accounts.SaveDraftsRow : ServerAccountRow<Gtk.Switch> {
+private class Accounts.SaveDraftsRow : AccountRow<Gtk.Switch> {
 
 
     public SaveDraftsRow(Geary.AccountInformation account) {
@@ -179,89 +151,7 @@ private class Accounts.SaveDraftsRow : ServerAccountRow<Gtk.Switch> {
 }
 
 
-private class Accounts.EmailPrefetchRow : ServerAccountRow<Gtk.ComboBoxText> {
-
-
-    private static bool row_separator(Gtk.TreeModel model, Gtk.TreeIter iter) {
-        GLib.Value v;
-        model.get_value(iter, 0, out v);
-        return v.get_string() == ".";
-    }
-
-
-    public EmailPrefetchRow(Geary.AccountInformation account) {
-        Gtk.ComboBoxText combo = new Gtk.ComboBoxText();
-        combo.set_row_separator_func(row_separator);
-        combo.append("14", _("2 weeks back")); // IDs are # of days
-        combo.append("30", _("1 month back"));
-        combo.append("90", _("3 months back"));
-        combo.append("180", _("6 months back"));
-        combo.append("365", _("1 year back"));
-        combo.append("730", _("2 years back"));
-        combo.append("1461", _("4 years back"));
-        combo.append(".", "."); // Separator
-        combo.append("-1", _("Everything"));
-
-        base(
-            account,
-            // Translators: This label describes the account
-            // preference for the length of time (weeks, months or
-            // years) that past email should be downloaded.
-            _("Download mail"),
-            combo
-        );
-
-        update();
-    }
-
-    public override void update() {
-        this.value.set_active_id(this.account.prefetch_period_days.to_string());
-    }
-
-}
-
-
-private abstract class Accounts.ServerServiceRow<V> : ServerAccountRow<V> {
-
-
-    protected Geary.ServiceInformation service;
-
-    public virtual bool is_value_editable {
-        get {
-            return (
-                this.account.service_provider == Geary.ServiceProvider.OTHER &&
-                !this.is_goa_account
-            );
-        }
-    }
-
-    // XXX convenience method until we get a better way of doing this.
-    protected bool is_goa_account {
-        get { return (this.service.mediator is GoaMediator); }
-    }
-
-
-    public ServerServiceRow(Geary.AccountInformation account,
-                            Geary.ServiceInformation service,
-                            string label,
-                            V value) {
-        base(account, label, value);
-        this.service = service;
-
-        Gtk.Widget? widget = value as Gtk.Widget;
-        if (widget != null && !this.is_value_editable) {
-            if (widget is Gtk.Label) {
-                widget.get_style_context().add_class(Gtk.STYLE_CLASS_DIM_LABEL);
-            } else {
-                widget.set_sensitive(false);
-            }
-        }
-    }
-
-}
-
-
-private class Accounts.ServiceHostRow : ServerServiceRow<Gtk.Label> {
+private class Accounts.ServiceHostRow : ServiceRow<Gtk.Label> {
 
     public ServiceHostRow(Geary.AccountInformation account,
                           Geary.ServiceInformation service) {
@@ -301,8 +191,7 @@ private class Accounts.ServiceHostRow : ServerServiceRow<Gtk.Label> {
 }
 
 
-private class Accounts.ServiceSecurityRow :
-    ServerServiceRow<Gtk.ComboBoxText> {
+private class Accounts.ServiceSecurityRow : ServiceRow<Gtk.ComboBoxText> {
 
     private const string INSECURE_ICON = "channel-insecure-symbolic";
     private const string SECURE_ICON = "channel-secure-symbolic";
@@ -357,7 +246,7 @@ private class Accounts.ServiceSecurityRow :
 }
 
 
-private class Accounts.ServiceAuthRow : ServerServiceRow<Gtk.Label> {
+private class Accounts.ServiceAuthRow : ServiceRow<Gtk.Label> {
 
     public ServiceAuthRow(Geary.AccountInformation account,
                           Geary.ServiceInformation service) {

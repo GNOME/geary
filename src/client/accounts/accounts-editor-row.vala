@@ -22,22 +22,35 @@ internal class Accounts.EditorRow : Gtk.ListBoxRow {
         this.show();
     }
 
+    public virtual void activated(Accounts.Editor editor) {
+        // No-op by default
+    }
+
 }
 
 
-internal class Accounts.LabelledEditorRow : EditorRow {
+internal class Accounts.LabelledEditorRow<V> : EditorRow {
 
 
     protected Gtk.Label label { get; private set; default = new Gtk.Label(""); }
+    protected V value;
 
 
-    public LabelledEditorRow(string label) {
-        this.label.set_text(label);
-        this.label.set_hexpand(true);
+    public LabelledEditorRow(string label, V value) {
+        this.label.hexpand = true;
         this.label.halign = Gtk.Align.START;
+        this.label.valign = Gtk.Align.CENTER;
+        this.label.set_text(label);
         this.label.show();
-
         this.layout.add(this.label);
+
+        this.value = value;
+        Gtk.Widget? widget = value as Gtk.Widget;
+        if (widget != null) {
+            widget.valign = Gtk.Align.CENTER;
+            widget.show();
+            this.layout.add(widget);
+        }
     }
 
     public void set_dim_label(bool is_dim) {
@@ -65,5 +78,185 @@ internal class Accounts.AddRow : EditorRow {
         this.layout.add(add_icon);
     }
 
+}
+
+
+internal abstract class Accounts.AccountRow<V> : LabelledEditorRow<V> {
+
+
+    internal Geary.AccountInformation account { get; private set; }
+
+
+    public AccountRow(Geary.AccountInformation account, string label, V value) {
+        base(label, value);
+        this.account = account;
+        this.account.information_changed.connect(on_account_changed);
+
+        set_dim_label(true);
+    }
+
+    ~AccountRow() {
+        this.account.information_changed.disconnect(on_account_changed);
+    }
+
+    public abstract void update();
+
+    private void on_account_changed() {
+        update();
+    }
+
+}
+
+
+private abstract class Accounts.ServiceRow<V> : AccountRow<V> {
+
+
+    internal Geary.ServiceInformation service { get; private set; }
+
+    protected virtual bool is_value_editable {
+        get {
+            return (
+                this.account.service_provider == Geary.ServiceProvider.OTHER &&
+                !this.is_goa_account
+            );
+        }
+    }
+
+    // XXX convenience method until we get a better way of doing this.
+    protected bool is_goa_account {
+        get { return (this.service.mediator is GoaMediator); }
+    }
+
+
+    public ServiceRow(Geary.AccountInformation account,
+                      Geary.ServiceInformation service,
+                      string label,
+                      V value) {
+        base(account, label, value);
+        this.service = service;
+
+        bool is_editable = this.is_value_editable;
+        set_activatable(is_editable);
+
+        Gtk.Widget? widget = value as Gtk.Widget;
+        if (widget != null && !is_editable) {
+            if (widget is Gtk.Label) {
+                widget.get_style_context().add_class(Gtk.STYLE_CLASS_DIM_LABEL);
+            } else {
+                widget.set_sensitive(false);
+            }
+        }
+    }
+
+}
+
+
+internal class Accounts.EditorPopover : Gtk.Popover {
+
+
+    internal Gtk.Grid layout { get; private set; default = new Gtk.Grid(); }
+
+    protected Gtk.Widget popup_focus = null;
+
+
+    public EditorPopover() {
+        get_style_context().add_class("geary-editor");
+
+        this.layout.orientation = Gtk.Orientation.VERTICAL;
+        this.layout.set_row_spacing(6);
+        this.layout.set_column_spacing(12);
+        this.layout.show();
+        add(this.layout);
+
+        this.closed.connect_after(on_closed);
+    }
+
+    ~EditorPopover() {
+        this.closed.disconnect(on_closed);
+    }
+
+    /** {@inheritdoc} */
+    public new void popup() {
+        // Work-around GTK+ issue #1138
+        Gtk.Widget target = get_relative_to();
+
+        Gtk.Allocation content_area;
+        target.get_allocation(out content_area);
+
+        Gtk.StyleContext style = target.get_style_context();
+        Gtk.StateFlags flags = style.get_state();
+        Gtk.Border margin = style.get_margin(flags);
+
+        content_area.x = margin.left;
+        content_area.y =  margin.bottom;
+        content_area.width -= (content_area.x + margin.right);
+        content_area.height -= (content_area.y + margin.top);
+
+        set_pointing_to(content_area);
+
+        base.popup();
+
+        if (this.popup_focus != null) {
+            this.popup_focus.grab_focus();
+        }
+    }
+
+    public void add_labelled_row(string label, Gtk.Widget value) {
+        Gtk.Label label_widget = new Gtk.Label(label);
+        label_widget.get_style_context().add_class(Gtk.STYLE_CLASS_DIM_LABEL);
+        label_widget.halign = Gtk.Align.END;
+        label_widget.show();
+
+        this.layout.add(label_widget);
+        this.layout.attach_next_to(value, label_widget, Gtk.PositionType.RIGHT);
+    }
+
+    private void on_closed() {
+        destroy();
+    }
+
+}
+
+
+internal class PropertyCommand<T> : Application.Command {
+
+
+    private Geary.AccountInformation account;
+    private GLib.Object object;
+    private string property_name;
+    private T? new_value;
+    private T? old_value;
+
+
+    public PropertyCommand(Geary.AccountInformation account,
+                           GLib.Object object,
+                           string property_name,
+                           T? new_value,
+                           string? undo_label = null,
+                           string? redo_label = null,
+                           string? executed_label = null,
+                           string? undone_label = null) {
+        this.account = account;
+        this.object = object;
+        this.property_name = property_name;
+        this.new_value = new_value;
+
+        this.object.get(this.property_name, ref this.old_value);
+
+        this.undo_label = undo_label.printf(this.old_value);
+        this.redo_label = redo_label.printf(this.new_value);
+        this.executed_label = executed_label.printf(this.new_value);
+        this.undone_label = undone_label.printf(this.old_value);
+    }
+
+    public async override void execute(GLib.Cancellable? cancellable) {
+        this.object.set(this.property_name, this.new_value);
+        this.account.information_changed();
+    }
+
+    public async override void undo(GLib.Cancellable? cancellable) {
+        this.object.set(this.property_name, this.old_value);
+        this.account.information_changed();
+    }
 
 }

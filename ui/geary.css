@@ -230,6 +230,11 @@ row.geary-settings > grid > image:dir(rtl) {
   margin-left: 6px;
 }
 
+frame.geary-settings.geary-signature {
+  min-height: 5em;
+}
+
+
 row.geary-settings > grid > combobox,
 row.geary-settings:not(.geary-add-row) > grid > image,
 row.geary-settings > grid > switch {
@@ -241,4 +246,12 @@ row.geary-settings > grid > switch {
 
 buttonbox.geary-settings  {
   margin-top: 36px;
+}
+
+popover.geary-editor > grid {
+  margin: 6px;
+}
+
+popover.geary-editor > grid > button.geary-setting-remove {
+  margin-top: 6px;
 }

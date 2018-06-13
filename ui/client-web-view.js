@@ -172,3 +172,5 @@ PageState.prototype = {
         }
     }
 };
+
+var geary = new PageState();

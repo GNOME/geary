@@ -268,6 +268,81 @@ public class Geary.AccountInformation : BaseObject {
     }
 
     /**
+     * Return a read only, ordered list of the account's sender mailboxes.
+     */
+    public Gee.List<Geary.RFC822.MailboxAddress> get_sender_mailboxes() {
+        Gee.List<RFC822.MailboxAddress> all =
+            new Gee.LinkedList<RFC822.MailboxAddress>();
+
+        all.add(this.primary_mailbox);
+        if (alternate_mailboxes != null) {
+            all.add_all(alternate_mailboxes);
+        }
+
+        return all.read_only_view;
+    }
+
+    /**
+     * Appends a sender mailbox to the account.
+     */
+    public void append_sender_mailbox(Geary.RFC822.MailboxAddress mailbox) {
+        if (this.primary_mailbox == null) {
+            this.primary_mailbox = mailbox;
+        } else {
+            if (this.alternate_mailboxes == null) {
+                this.alternate_mailboxes =
+                    new Gee.LinkedList<Geary.RFC822.MailboxAddress>();
+            }
+            this.alternate_mailboxes.add(mailbox);
+        }
+    }
+
+    /**
+     * Appends a sender mailbox to the account.
+     */
+    public void insert_sender_mailbox(int index,
+                                      Geary.RFC822.MailboxAddress mailbox) {
+        Geary.RFC822.MailboxAddress? alt_insertion = null;
+        int actual_index = index;
+        if (actual_index == 0) {
+            if (this.primary_mailbox == null) {
+                this.primary_mailbox = mailbox;
+            } else {
+                this.primary_mailbox = mailbox;
+                alt_insertion = this.primary_mailbox;
+                actual_index = 0;
+            }
+        } else {
+            alt_insertion = mailbox;
+            actual_index--;
+        }
+
+        if (alt_insertion != null) {
+            if (this.alternate_mailboxes == null) {
+                this.alternate_mailboxes =
+                    new Gee.LinkedList<Geary.RFC822.MailboxAddress>();
+            }
+            this.alternate_mailboxes.insert(actual_index, alt_insertion);
+        }
+    }
+
+    /**
+     * Removes a sender mailbox for the account.
+     */
+    public void remove_sender_mailbox(Geary.RFC822.MailboxAddress mailbox) {
+        if (this.primary_mailbox == mailbox) {
+            this.primary_mailbox = (
+                this.alternate_mailboxes != null &&
+                !this.alternate_mailboxes.is_empty
+            ) ? this.alternate_mailboxes.remove_at(0) : null;
+        } else if (this.alternate_mailboxes != null) {
+            this.alternate_mailboxes.remove_at(
+                this.alternate_mailboxes.index_of(mailbox)
+            );
+        }
+    }
+
+    /**
      * Return a list of the primary and all alternate email addresses.
      */
     public Gee.List<Geary.RFC822.MailboxAddress> get_all_mailboxes() {

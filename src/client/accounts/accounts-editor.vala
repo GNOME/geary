@@ -12,6 +12,12 @@
 public class Accounts.Editor : Gtk.Dialog {
 
 
+    private const ActionEntry[] ACTION_ENTRIES = {
+        { GearyController.ACTION_REDO, on_redo },
+        { GearyController.ACTION_UNDO, on_undo },
+    };
+
+
     internal static void seperator_headers(Gtk.ListBoxRow row,
                                            Gtk.ListBoxRow? first) {
         if (first == null) {
@@ -22,8 +28,8 @@ public class Accounts.Editor : Gtk.Dialog {
     }
 
     private static int ordinal_sort(Gtk.ListBoxRow a, Gtk.ListBoxRow b) {
-        AccountRow? account_a = a as AccountRow;
-        AccountRow? account_b = b as AccountRow;
+        AccountListRow? account_a = a as AccountListRow;
+        AccountListRow? account_b = b as AccountListRow;
 
         if (account_a == null) {
             return (account_b == null) ? 0 : 1;
@@ -37,16 +43,19 @@ public class Accounts.Editor : Gtk.Dialog {
     }
 
 
-    /**
-     * The current application instance.
-     *
-     * Note this hides the {@link GtkWindow.application} property
-     * since we don't want the application to know about this dialog -
-     * it should not prevent the app from closing.
-     */
-    internal new GearyApplication application { get; private set; }
+    /** The command stack for this pane. */
+    internal Application.CommandStack commands {
+        get; private set; default = new Application.CommandStack();
+    }
+
+    /** The current account being edited, if any. */
+    private Geary.AccountInformation selected_account {
+        get; private set; default = null;
+    }
 
     private AccountManager accounts;
+
+    private SimpleActionGroup actions = new SimpleActionGroup();
 
     [GtkChild]
     private Gtk.HeaderBar default_header;
@@ -58,6 +67,9 @@ public class Accounts.Editor : Gtk.Dialog {
     private Gtk.Button back_button;
 
     [GtkChild]
+    private Gtk.Button undo_button;
+
+    [GtkChild]
     private Gtk.Grid list_pane;
 
     [GtkChild]
@@ -67,14 +79,17 @@ public class Accounts.Editor : Gtk.Dialog {
         new Gee.LinkedList<Gtk.Widget>();
 
 
-
     public Editor(GearyApplication application, Gtk.Window parent) {
         this.application = application;
         this.accounts = application.controller.account_manager;
 
+        this.actions.add_action_entries(ACTION_ENTRIES, this);
+        insert_action_group("win", this.actions);
+
         set_titlebar(this.default_header);
         set_transient_for(parent);
-        set_modal(true);
+        //set_modal(true);
+        set_modal(false);
 
         // XXX Glade 3.22 won't let us set this
         get_content_area().border_width = 2;
@@ -90,12 +105,23 @@ public class Accounts.Editor : Gtk.Dialog {
 
         this.accounts_list.add(new AddRow());
 
-        accounts.account_added.connect(on_account_added);
-        accounts.account_status_changed.connect(on_account_status_changed);
-        accounts.account_removed.connect(on_account_removed);
+        this.accounts.account_added.connect(on_account_added);
+        this.accounts.account_status_changed.connect(on_account_status_changed);
+        this.accounts.account_removed.connect(on_account_removed);
+
+        this.commands.executed.connect(on_command);
+        this.commands.undone.connect(on_command);
+        this.commands.redone.connect(on_command);
+
+        get_action(GearyController.ACTION_UNDO).set_enabled(false);
+        get_action(GearyController.ACTION_REDO).set_enabled(false);
     }
 
     ~Editor() {
+        this.commands.executed.disconnect(on_command);
+        this.commands.undone.disconnect(on_command);
+        this.commands.redone.disconnect(on_command);
+
         this.accounts.account_added.disconnect(on_account_added);
         this.accounts.account_status_changed.disconnect(on_account_status_changed);
         this.accounts.account_removed.disconnect(on_account_removed);
@@ -117,10 +143,11 @@ public class Accounts.Editor : Gtk.Dialog {
         this.editor_panes.add(child);
         this.editor_panes.set_visible_child(child);
         this.back_button.show();
+        this.undo_button.show();
     }
 
     internal void pop() {
-        // We can't simply remove old panes fro the GTK stack since
+        // One can't simply remove old panes fro the GTK stack since
         // there won't be any transition between them - the old one
         // will simply disappear. So we need to keep old, popped panes
         // around until a new one is pushed on.
@@ -129,32 +156,44 @@ public class Accounts.Editor : Gtk.Dialog {
         // them?
         Gtk.Widget current = this.editor_panes.get_visible_child();
         int next = this.editor_pane_stack.index_of(current) - 1;
-        
+
         this.editor_panes.set_visible_child(this.editor_pane_stack.get(next));
 
+        // Don't carry commands over from one pane to another
+        this.commands.clear();
+        get_action(GearyController.ACTION_UNDO).set_enabled(false);
+        get_action(GearyController.ACTION_REDO).set_enabled(false);
+
         if (next == 0) {
+            this.selected_account = null;
             this.back_button.hide();
+            this.undo_button.hide();
         }
     }
 
     private void add_account(Geary.AccountInformation account,
                              AccountManager.Status status) {
-        this.accounts_list.add(new AccountRow(account, status));
+        this.accounts_list.add(new AccountListRow(account, status));
     }
 
     private void show_account(Geary.AccountInformation account) {
+        this.selected_account = account;
         push(new EditorEditPane(this, account));
     }
 
-    private AccountRow? get_account_row(Geary.AccountInformation account) {
-        AccountRow? row = null;
+    private AccountListRow? get_account_row(Geary.AccountInformation account) {
+        AccountListRow? row = null;
         this.accounts_list.foreach((child) => {
-                AccountRow? account_row = child as AccountRow;
+                AccountListRow? account_row = child as AccountListRow;
                 if (account_row != null && account_row.account == account) {
                     row = account_row;
                 }
             });
         return row;
+    }
+
+    private inline GLib.SimpleAction get_action(string name) {
+        return (GLib.SimpleAction) this.actions.lookup_action(name);
     }
 
     private void on_account_added(Geary.AccountInformation account,
@@ -164,22 +203,51 @@ public class Accounts.Editor : Gtk.Dialog {
 
     private void on_account_status_changed(Geary.AccountInformation account,
                                            AccountManager.Status status) {
-        AccountRow? row = get_account_row(account);
+        AccountListRow? row = get_account_row(account);
         if (row != null) {
             row.update(status);
         }
     }
 
     private void on_account_removed(Geary.AccountInformation account) {
-        AccountRow? row = get_account_row(account);
+        AccountListRow? row = get_account_row(account);
         if (row != null) {
             this.accounts_list.remove(row);
         }
+
+        if (this.selected_account == account) {
+            while (this.editor_panes.get_visible_child() != this.list_pane) {
+                pop();
+            }
+        }
+    }
+
+    private void on_undo() {
+        this.commands.undo.begin(null);
+    }
+
+    private void on_redo() {
+        this.commands.redo.begin(null);
+    }
+
+    private void on_command() {
+        get_action(GearyController.ACTION_UNDO).set_enabled(
+            this.commands.can_undo
+        );
+        get_action(GearyController.ACTION_REDO).set_enabled(
+            this.commands.can_redo
+        );
+
+        Application.Command next_undo = this.commands.peek_undo();
+        this.undo_button.set_tooltip_text(
+            (next_undo != null && next_undo.undo_label != null)
+            ? next_undo.undo_label : ""
+        );
     }
 
     [GtkCallback]
     private void on_accounts_list_row_activated(Gtk.ListBoxRow activated) {
-        AccountRow? row = activated as AccountRow;
+        AccountListRow? row = activated as AccountListRow;
         if (row != null) {
             show_account(row.account);
         }
@@ -192,7 +260,7 @@ public class Accounts.Editor : Gtk.Dialog {
 
 }
 
-private class Accounts.AccountRow : EditorRow {
+private class Accounts.AccountListRow : EditorRow {
 
 
     internal Geary.AccountInformation account;
@@ -204,8 +272,8 @@ private class Accounts.AccountRow : EditorRow {
     private Gtk.Label account_details = new Gtk.Label("");
 
 
-    public AccountRow(Geary.AccountInformation account,
-                      AccountManager.Status status) {
+    public AccountListRow(Geary.AccountInformation account,
+                          AccountManager.Status status) {
         this.account = account;
 
         this.account_name.show();
