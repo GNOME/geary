@@ -12,9 +12,9 @@
 public class ComposerWebView : ClientWebView {
 
 
-    private const string COMMAND_STACK_CHANGED = "commandStackChanged";
+    // WebKit message handler names
     private const string CURSOR_CONTEXT_CHANGED = "cursorContextChanged";
-    private const string DOCUMENT_MODIFIED = "documentModified";
+
 
     /**
      * Encapsulates editing-related state for a specific DOM node.
@@ -104,17 +104,6 @@ public class ComposerWebView : ClientWebView {
     /** Determines if the view is in rich text mode. */
     public bool is_rich_text { get; private set; default = true; }
 
-    // Determines if signals should be sent, useful for e.g. stopping
-    // document_modified being sent when the editor content is being
-    // updated before sending.
-    private bool signals_enabled = true;
-
-
-    /** Emitted when the web view's content has changed. */
-    public signal void document_modified();
-
-    /** Emitted when the web view's undo/redo stack state changes. */
-    public signal void command_stack_changed(bool can_undo, bool can_redo);
 
     /** Emitted when the cursor's edit context has changed. */
     public signal void cursor_context_changed(EditContext cursor_context);
@@ -131,9 +120,13 @@ public class ComposerWebView : ClientWebView {
         this.user_content_manager.add_style_sheet(ComposerWebView.app_style);
         this.user_content_manager.add_script(ComposerWebView.app_script);
 
-        register_message_handler(COMMAND_STACK_CHANGED, on_command_stack_changed);
         register_message_handler(CURSOR_CONTEXT_CHANGED, on_cursor_context_changed);
-        register_message_handler(DOCUMENT_MODIFIED, on_document_modified);
+
+        // XXX this is a bit of a hack given the docs for is_empty,
+        // above
+        this.command_stack_changed.connect((can_undo, can_redo) => {
+                this.is_empty = !can_redo;
+            });
     }
 
     /**
@@ -197,7 +190,6 @@ public class ComposerWebView : ClientWebView {
      */
     public void disable() {
         set_sensitive(false);
-        this.signals_enabled = false;
     }
 
     /**
@@ -430,15 +422,6 @@ public class ComposerWebView : ClientWebView {
     }
 
     /**
-     * Returns the editor content as an HTML string.
-     */
-    public async string? get_html() throws Error {
-        return WebKitUtil.to_string(
-            yield call(Geary.JS.callable("geary.getHtml"), null)
-        );
-    }
-
-    /**
      * Returns the editor text as RFC 3676 format=flowed text.
      */
     public async string? get_text() throws Error {
@@ -515,41 +498,16 @@ public class ComposerWebView : ClientWebView {
         // to show a link popopver after the view has processed one,
         // we need to emit our own.
         bool ret = base.button_release_event(event);
-        if (this.signals_enabled) {
-            button_release_event_done(event);
-        }
+        button_release_event_done(event);
         return ret;
-    }
-
-    private void on_command_stack_changed(WebKit.JavascriptResult result) {
-        try {
-            if (this.signals_enabled) {
-                string[] values = WebKitUtil.to_string(result).split(",");
-                command_stack_changed(values[0] == "true", values[1] == "true");
-            }
-        } catch (Geary.JS.Error err) {
-            debug("Could not get command stack state: %s", err.message);
-        }
     }
 
     private void on_cursor_context_changed(WebKit.JavascriptResult result) {
         try {
-            if (this.signals_enabled) {
-                cursor_context_changed(new EditContext(WebKitUtil.to_string(result)));
-            }
+            cursor_context_changed(new EditContext(WebKitUtil.to_string(result)));
         } catch (Geary.JS.Error err) {
             debug("Could not get text cursor style: %s", err.message);
         }
     }
 
-    private void on_document_modified(WebKit.JavascriptResult result) {
-        // Only modify actually changed to avoid excessive notify
-        // signals being fired.
-        if (this.signals_enabled) {
-            if (this.is_empty) {
-                this.is_empty = false;
-            }
-            document_modified();
-        }
-    }
 }

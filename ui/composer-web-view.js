@@ -30,8 +30,6 @@ ComposerPageState.prototype = {
         this.quotePart = null;
         this.focusedPart = null;
 
-        this.undoEnabled = false;
-        this.redoEnabled = false;
         this.selections = new Map();
         this.nextSelectionId = 0;
         this.cursorContext = null;
@@ -43,17 +41,6 @@ ComposerPageState.prototype = {
                 e.preventDefault();
             }
         }, true);
-
-        let modifiedId = null;
-        this.bodyObserver = new MutationObserver(function() {
-            if (modifiedId == null) {
-                modifiedId = window.setTimeout(function() {
-                    state.documentModified();
-                    state.checkCommandStack();
-                    modifiedId = null;
-                }, 1000);
-            }
-        });
     },
     loaded: function() {
         let state = this;
@@ -138,8 +125,16 @@ ComposerPageState.prototype = {
             cursor.parentNode.removeChild(cursor);
         }
 
-        // Enable editing and observation machinery only after
-        // modifying the body above.
+
+        // Enable editing only after modifying the body above.
+        this.setEditable(true);
+
+        PageState.prototype.loaded.apply(this, []);
+    },
+    setEditable: function(enabled) {
+        if (!enabled) {
+            this.stopBodyObserver();
+        }
         this.bodyPart.contentEditable = true;
         if (this.signaturePart != null) {
             this.signaturePart.contentEditable = true;
@@ -147,16 +142,11 @@ ComposerPageState.prototype = {
         if (this.quotePart != null) {
             this.quotePart.contentEditable = true;
         }
-        let config = {
-            attributes: true,
-            childList: true,
-            characterData: true,
-            subtree: true
-        };
-        this.bodyObserver.observe(document.body, config);
-
-        // Chain up
-        PageState.prototype.loaded.apply(this, []);
+        if (enabled) {
+            // Enable modification observation only after the document
+            // has been set editable as WebKit will alter some attrs
+            this.startBodyObserver();
+        }
     },
     undo: function() {
         document.execCommand("undo", false, null);
@@ -305,6 +295,10 @@ ComposerPageState.prototype = {
         }
     },
     cleanContent: function() {
+        // Prevent any modification signals being sent when mutating
+        // the document below.
+        this.stopBodyObserver();
+
         ComposerPageState.cleanPart(this.bodyPart, false);
         ComposerPageState.linkify(this.bodyPart);
 
@@ -344,21 +338,6 @@ ComposerPageState.prototype = {
         } else {
             document.body.classList.add("plain");
         }
-    },
-    checkCommandStack: function() {
-        let canUndo = document.queryCommandEnabled("undo");
-        let canRedo = document.queryCommandEnabled("redo");
-
-        if (canUndo != this.undoEnabled || canRedo != this.redoEnabled) {
-            this.undoEnabled = canUndo;
-            this.redoEnabled = canRedo;
-            window.webkit.messageHandlers.commandStackChanged.postMessage(
-                this.undoEnabled + "," + this.redoEnabled
-            );
-        }
-    },
-    documentModified: function(element) {
-        window.webkit.messageHandlers.documentModified.postMessage(null);
     },
     selectionChanged: function() {
         PageState.prototype.selectionChanged.apply(this, []);
