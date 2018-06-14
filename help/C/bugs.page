@@ -17,16 +17,14 @@
   the following information:</p>
 
   <list>
-    <item><p>Geary version</p></item>
-    <item><p>Geary installation method (Package? Flathub? Source
-    code?)</p></item>
+    <item><p>Geary version and installation method (Package? Flathub?
+    Source code?)</p></item>
     <item><p>Your desktop (GNOME? KDE? Something else?)</p></item>
     <item><p>Your operating system and version (Ubuntu 16.04? Fedora
     28? Rolled your own?)</p></item>
-    <item><p>GTK+ version (3.something-something?)</p></item>
     <item><p>Email provider (Gmail, Yahoo!, Outlook.com, or someone
     else?)</p></item>
-    <item><p>How to reproduce the bug</p></item>
+    <item><p>Steps to reproduce the bug</p></item>
     <item><p>What happened?</p></item>
     <item><p>What did you expect to happen?</p></item>
   </list>
