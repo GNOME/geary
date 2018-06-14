@@ -8,7 +8,7 @@ in parentheses like these.)
  * Geary version: (x.y.z)
  * Installation method: (Package? Flathub? Source code?)
  * Your desktop: (GNOME? KDE? Something else?)
- * Your operating: system and version (Ubuntu 16.04? Fedora 28? Rolled your own?)
+ * Your operating system and version: (Ubuntu 16.04? Fedora 28? Rolled your own?)
  * Email provider: (Gmail, Yahoo!, Outlook.com, or someone else?)
 
 **Steps to reproduce**
