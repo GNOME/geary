@@ -1,15 +1,15 @@
-** Feature summary **
+**Feature summary**
 
 (Describe what you would like to be able to do with Geary that you
 currently cannot do, such as "send email whilst underwater". Please
-fill in all text in parentheses like this.)
+replace all text in parentheses like these.)
 
-** How would you like it to work? **
+**How would you like it to work?**
 
 (If you can think of a way Geary might be able to do this, let us know
 here.)
 
-** Relevant links, screenshots, etc **
+**Relevant links, screenshots, etc**
 
 (If you have further information about the missing feature such as
 technical documentation or a similar feature in another email
