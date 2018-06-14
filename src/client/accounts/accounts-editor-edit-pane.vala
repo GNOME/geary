@@ -6,17 +6,23 @@
  */
 
 /**
- * The main account editor window.
+ * An account editor pane for editing a specific account's preferences.
  */
 [GtkTemplate (ui = "/org/gnome/Geary/accounts_editor_edit_pane.ui")]
-public class Accounts.EditorEditPane : Gtk.Grid {
+internal class Accounts.EditorEditPane : Gtk.Grid, EditorPane, AccountPane {
 
 
-    /** The editor this pane belongs to. */
-    internal weak Editor editor; // circular ref
+    internal Geary.AccountInformation account { get ; protected set; }
 
-    /** The account being displayed by this pane. */
-    internal Geary.AccountInformation account;
+    /** Command stack for edit pane user commands. */
+    internal Application.CommandStack commands {
+        get; private set; default = new Application.CommandStack();
+    }
+
+    protected weak Accounts.Editor editor { get; set; }
+
+    [GtkChild]
+    private Gtk.HeaderBar header;
 
     [GtkChild]
     private Gtk.ListBox details_list;
@@ -33,9 +39,11 @@ public class Accounts.EditorEditPane : Gtk.Grid {
     [GtkChild]
     private Gtk.ListBox settings_list;
 
+    [GtkChild]
+    private Gtk.Button undo_button;
 
-    public EditorEditPane(Editor editor,
-                          Geary.AccountInformation account) {
+
+    public EditorEditPane(Editor editor, Geary.AccountInformation account) {
         this.editor = editor;
         this.account = account;
 
@@ -47,7 +55,7 @@ public class Accounts.EditorEditPane : Gtk.Grid {
                  in account.get_sender_mailboxes()) {
             this.senders_list.add(new MailboxRow(account, sender));
         }
-        this.senders_list.add(new AddMailboxRow(this));
+        this.senders_list.add(new AddMailboxRow());
 
         this.signature_preview = new ClientWebView(
             ((GearyApplication) editor.application).config
@@ -77,7 +85,7 @@ public class Accounts.EditorEditPane : Gtk.Grid {
                 // view no longer the focus widget
                 if (!this.signature_preview.is_focus &&
                     this.signature_changed) {
-                    editor.commands.execute.begin(
+                    this.commands.execute.begin(
                         new SignatureChangedCommand(
                             this.signature_preview, account
                         ),
@@ -95,7 +103,22 @@ public class Accounts.EditorEditPane : Gtk.Grid {
         this.signature_frame.add(this.signature_preview);
 
         this.settings_list.set_header_func(Editor.seperator_headers);
-        this.settings_list.add(new EmailPrefetchRow(editor, this.account));
+        this.settings_list.add(new EmailPrefetchRow(this));
+
+        this.account.information_changed.connect(on_account_changed);
+        update_header();
+
+        this.commands.executed.connect(on_command);
+        this.commands.undone.connect(on_command);
+        this.commands.redone.connect(on_command);
+    }
+
+    ~EditorEditPane() {
+        this.account.information_changed.disconnect(on_account_changed);
+
+        this.commands.executed.disconnect(on_command);
+        this.commands.undone.disconnect(on_command);
+        this.commands.redone.disconnect(on_command);
     }
 
     internal string? get_default_name() {
@@ -111,11 +134,50 @@ public class Accounts.EditorEditPane : Gtk.Grid {
         return name;
     }
 
+    internal Gtk.HeaderBar get_header() {
+        return this.header;
+    }
+
+    internal void pane_shown() {
+        update_actions();
+    }
+
+    internal void undo() {
+        this.commands.undo.begin(null);
+    }
+
+    internal void redo() {
+        this.commands.redo.begin(null);
+    }
+
+    private void update_actions() {
+        this.editor.get_action(GearyController.ACTION_UNDO).set_enabled(
+            this.commands.can_undo
+        );
+        this.editor.get_action(GearyController.ACTION_REDO).set_enabled(
+            this.commands.can_redo
+        );
+
+        Application.Command next_undo = this.commands.peek_undo();
+        this.undo_button.set_tooltip_text(
+            (next_undo != null && next_undo.undo_label != null)
+            ? next_undo.undo_label : ""
+        );
+    }
+
+    private void on_account_changed() {
+        update_header();
+    }
+
+    private void on_command() {
+        update_actions();
+    }
+
     [GtkCallback]
     private void on_setting_activated(Gtk.ListBoxRow row) {
-        EditorRow? setting = row as EditorRow;
+        EditorRow<EditorEditPane>? setting = row as EditorRow<EditorEditPane>;
         if (setting != null) {
-            setting.activated(this.editor);
+            setting.activated(this);
         }
     }
 
@@ -129,10 +191,15 @@ public class Accounts.EditorEditPane : Gtk.Grid {
         this.editor.push(new EditorRemovePane(this.editor, this.account));
     }
 
+    [GtkCallback]
+    private void on_back_button_clicked() {
+        this.editor.pop();
+    }
+
 }
 
 
-private class Accounts.NicknameRow : AccountRow<Gtk.Label> {
+private class Accounts.NicknameRow : AccountRow<EditorEditPane,Gtk.Label> {
 
 
     public NicknameRow(Geary.AccountInformation account) {
@@ -146,7 +213,7 @@ private class Accounts.NicknameRow : AccountRow<Gtk.Label> {
         update();
     }
 
-    public override void activated(Accounts.Editor editor) {
+    public override void activated(EditorEditPane pane) {
         EditorPopover popover = new EditorPopover();
 
         string? value = this.account.nickname;
@@ -155,11 +222,11 @@ private class Accounts.NicknameRow : AccountRow<Gtk.Label> {
         entry.set_placeholder_text(value ?? "");
         entry.set_width_chars(20);
         entry.activate.connect(() => {
-                editor.commands.execute.begin(
+                pane.commands.execute.begin(
                     new PropertyCommand<string>(
                         this.account,
                         this.account,
-                        "nickname",
+                        Geary.AccountInformation.PROP_NICKNAME,
                         entry.get_text(),
                         // Translators: Tooltip used to undo changing
                         // the name of an account. The string
@@ -192,30 +259,25 @@ private class Accounts.NicknameRow : AccountRow<Gtk.Label> {
 }
 
 
-private class Accounts.AddMailboxRow : AddRow {
+private class Accounts.AddMailboxRow : AddRow<EditorEditPane> {
 
 
-    private EditorEditPane edit_pane;
-
-
-    public AddMailboxRow(EditorEditPane edit_pane) {
-        this.edit_pane = edit_pane;
-
+    public AddMailboxRow() {
         // Translators: Tooltip for adding a new email sender/from
         // address's address to an account
         this.set_tooltip_text(_("Add a new sender email address"));
     }
 
-    public override void activated(Accounts.Editor editor) {
+    public override void activated(EditorEditPane pane) {
         MailboxEditorPopover popover = new MailboxEditorPopover(
-            this.edit_pane.get_default_name() ?? "", "", false
+            pane.get_default_name() ?? "", "", false
         );
         popover.activated.connect(() => {
-                editor.commands.execute.begin(
+                pane.commands.execute.begin(
                     new AppendMailboxCommand(
                         (Gtk.ListBox) get_parent(),
                         new MailboxRow(
-                            this.edit_pane.account,
+                            pane.account,
                             new Geary.RFC822.MailboxAddress(
                                 popover.display_name,
                                 popover.address
@@ -233,7 +295,7 @@ private class Accounts.AddMailboxRow : AddRow {
 }
 
 
-private class Accounts.MailboxRow : AccountRow<Gtk.Label> {
+private class Accounts.MailboxRow : AccountRow<EditorEditPane,Gtk.Label> {
 
 
     internal Geary.RFC822.MailboxAddress mailbox;
@@ -247,14 +309,14 @@ private class Accounts.MailboxRow : AccountRow<Gtk.Label> {
         update();
     }
 
-    public override void activated(Accounts.Editor editor) {
+    public override void activated(EditorEditPane pane) {
         MailboxEditorPopover popover = new MailboxEditorPopover(
             this.mailbox.name ?? "",
             this.mailbox.address,
             this.account.get_sender_mailboxes().size > 1
         );
         popover.activated.connect(() => {
-                editor.commands.execute.begin(
+                pane.commands.execute.begin(
                     new UpdateMailboxCommand(
                         this,
                         new Geary.RFC822.MailboxAddress(
@@ -267,7 +329,7 @@ private class Accounts.MailboxRow : AccountRow<Gtk.Label> {
                 popover.popdown();
             });
         popover.remove_clicked.connect(() => {
-                editor.commands.execute.begin(
+                pane.commands.execute.begin(
                     new RemoveMailboxCommand(this), null
                 );
                 popover.popdown();
@@ -603,7 +665,8 @@ internal class Accounts.SignatureChangedCommand : Application.Command {
 }
 
 
-private class Accounts.EmailPrefetchRow : AccountRow<Gtk.ComboBoxText> {
+private class Accounts.EmailPrefetchRow :
+    AccountRow<EditorEditPane,Gtk.ComboBoxText> {
 
 
     private static bool row_separator(Gtk.TreeModel model, Gtk.TreeIter iter) {
@@ -613,10 +676,9 @@ private class Accounts.EmailPrefetchRow : AccountRow<Gtk.ComboBoxText> {
     }
 
 
-    public EmailPrefetchRow(Accounts.Editor editor,
-                            Geary.AccountInformation account) {
+    public EmailPrefetchRow(EditorEditPane pane) {
         base(
-            account,
+            pane.account,
             // Translators: This label describes the account
             // preference for the length of time (weeks, months or
             // years) that past email should be downloaded.
@@ -642,7 +704,7 @@ private class Accounts.EmailPrefetchRow : AccountRow<Gtk.ComboBoxText> {
         update();
 
         this.value.changed.connect(() => {
-                editor.commands.execute.begin(
+                pane.commands.execute.begin(
                     new PropertyCommand<int>(
                         this.account,
                         this.account,

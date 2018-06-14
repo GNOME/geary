@@ -4,8 +4,8 @@
     <file compressed="true" preprocess="xml-stripblanks">account_cannot_remove.glade</file>
     <file compressed="true" preprocess="xml-stripblanks">account_list.glade</file>
     <file compressed="true" preprocess="xml-stripblanks">account_spinner.glade</file>
-    <file compressed="true" preprocess="xml-stripblanks">accounts_editor.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">accounts_editor_edit_pane.ui</file>
+    <file compressed="true" preprocess="xml-stripblanks">accounts_editor_list_pane.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">accounts_editor_remove_pane.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">accounts_editor_servers_pane.ui</file>
     <file compressed="true" preprocess="xml-stripblanks">certificate_warning_dialog.glade</file>

@@ -7,14 +7,18 @@
  */
 
 /**
- * The main account editor window.
+ * An account editor pane for editing server details for an account.
  */
 [GtkTemplate (ui = "/org/gnome/Geary/accounts_editor_servers_pane.ui")]
-public class Accounts.EditorServersPane : Gtk.Grid {
+internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
 
 
-    private weak Editor editor; // circular ref
-    private Geary.AccountInformation account;
+    internal Geary.AccountInformation account { get ; protected set; }
+
+    protected weak Accounts.Editor editor { get; set; }
+
+    [GtkChild]
+    private Gtk.HeaderBar header;
 
     [GtkChild]
     private Gtk.ListBox details_list;
@@ -43,6 +47,17 @@ public class Accounts.EditorServersPane : Gtk.Grid {
 
         this.sending_list.set_header_func(Editor.seperator_headers);
         build_service(account.smtp, this.sending_list);
+
+        this.account.information_changed.connect(on_account_changed);
+        update_header();
+    }
+
+    ~EditorServersPane() {
+        this.account.information_changed.disconnect(on_account_changed);
+    }
+
+    internal Gtk.HeaderBar get_header() {
+        return this.header;
     }
 
     private void build_service(Geary.ServiceInformation service,
@@ -52,10 +67,24 @@ public class Accounts.EditorServersPane : Gtk.Grid {
         settings_list.add(new ServiceAuthRow(this.account, service));
     }
 
+    [GtkCallback]
+    private void on_cancel_button_clicked() {
+        this.editor.pop();
+    }
+
+    [GtkCallback]
+    private void on_apply_button_clicked() {
+    }
+
+    private void on_account_changed() {
+        update_header();
+    }
+
 }
 
 
-private class Accounts.ServiceProviderRow : AccountRow<Gtk.Label> {
+private class Accounts.ServiceProviderRow :
+    AccountRow<EditorServersPane,Gtk.Label> {
 
 
     public ServiceProviderRow(Geary.AccountInformation account) {
@@ -96,7 +125,8 @@ private class Accounts.ServiceProviderRow : AccountRow<Gtk.Label> {
 }
 
 
-private class Accounts.AccountProviderRow : AccountRow<Gtk.Label> {
+private class Accounts.AccountProviderRow :
+    AccountRow<EditorServersPane,Gtk.Label> {
 
 
     public AccountProviderRow(Geary.AccountInformation account) {
@@ -129,7 +159,8 @@ private class Accounts.AccountProviderRow : AccountRow<Gtk.Label> {
 }
 
 
-private class Accounts.SaveDraftsRow : AccountRow<Gtk.Switch> {
+private class Accounts.SaveDraftsRow :
+    AccountRow<EditorServersPane,Gtk.Switch> {
 
 
     public SaveDraftsRow(Geary.AccountInformation account) {
@@ -151,7 +182,8 @@ private class Accounts.SaveDraftsRow : AccountRow<Gtk.Switch> {
 }
 
 
-private class Accounts.ServiceHostRow : ServiceRow<Gtk.Label> {
+private class Accounts.ServiceHostRow :
+    ServiceRow<EditorServersPane,Gtk.Label> {
 
     public ServiceHostRow(Geary.AccountInformation account,
                           Geary.ServiceInformation service) {
@@ -191,7 +223,8 @@ private class Accounts.ServiceHostRow : ServiceRow<Gtk.Label> {
 }
 
 
-private class Accounts.ServiceSecurityRow : ServiceRow<Gtk.ComboBoxText> {
+private class Accounts.ServiceSecurityRow :
+    ServiceRow<EditorServersPane,Gtk.ComboBoxText> {
 
     private const string INSECURE_ICON = "channel-insecure-symbolic";
     private const string SECURE_ICON = "channel-secure-symbolic";
@@ -246,7 +279,8 @@ private class Accounts.ServiceSecurityRow : ServiceRow<Gtk.ComboBoxText> {
 }
 
 
-private class Accounts.ServiceAuthRow : ServiceRow<Gtk.Label> {
+private class Accounts.ServiceAuthRow :
+    ServiceRow<EditorServersPane,Gtk.Label> {
 
     public ServiceAuthRow(Geary.AccountInformation account,
                           Geary.ServiceInformation service) {

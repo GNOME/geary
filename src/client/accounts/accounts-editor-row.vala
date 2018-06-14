@@ -6,7 +6,7 @@
  */
 
 
-internal class Accounts.EditorRow : Gtk.ListBoxRow {
+internal class Accounts.EditorRow<PaneType> : Gtk.ListBoxRow {
 
 
     protected Gtk.Grid layout { get; private set; default = new Gtk.Grid(); }
@@ -22,14 +22,14 @@ internal class Accounts.EditorRow : Gtk.ListBoxRow {
         this.show();
     }
 
-    public virtual void activated(Accounts.Editor editor) {
+    public virtual void activated(PaneType pane) {
         // No-op by default
     }
 
 }
 
 
-internal class Accounts.LabelledEditorRow<V> : EditorRow {
+internal class Accounts.LabelledEditorRow<PaneType,V> : EditorRow<PaneType> {
 
 
     protected Gtk.Label label { get; private set; default = new Gtk.Label(""); }
@@ -64,7 +64,7 @@ internal class Accounts.LabelledEditorRow<V> : EditorRow {
 }
 
 
-internal class Accounts.AddRow : EditorRow {
+internal class Accounts.AddRow<PaneType> : EditorRow<PaneType> {
 
 
     public AddRow() {
@@ -81,7 +81,8 @@ internal class Accounts.AddRow : EditorRow {
 }
 
 
-internal abstract class Accounts.AccountRow<V> : LabelledEditorRow<V> {
+internal abstract class Accounts.AccountRow<PaneType,V> :
+    LabelledEditorRow<PaneType,V> {
 
 
     internal Geary.AccountInformation account { get; private set; }
@@ -108,7 +109,7 @@ internal abstract class Accounts.AccountRow<V> : LabelledEditorRow<V> {
 }
 
 
-private abstract class Accounts.ServiceRow<V> : AccountRow<V> {
+private abstract class Accounts.ServiceRow<PaneType,V> : AccountRow<PaneType,V> {
 
 
     internal Geary.ServiceInformation service { get; private set; }

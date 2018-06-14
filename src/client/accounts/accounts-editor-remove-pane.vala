@@ -6,14 +6,18 @@
  */
 
 /**
- * The main account editor window.
+ * An account editor pane for removing an account from the client.
  */
 [GtkTemplate (ui = "/org/gnome/Geary/accounts_editor_remove_pane.ui")]
-public class Accounts.EditorRemovePane : Gtk.Grid {
+internal class Accounts.EditorRemovePane : Gtk.Grid, EditorPane, AccountPane {
 
 
-    private weak Editor editor; // circular ref
-    private Geary.AccountInformation account;
+    internal Geary.AccountInformation account { get ; protected set; }
+
+    protected weak Accounts.Editor editor { get; set; }
+
+    [GtkChild]
+    private Gtk.HeaderBar header;
 
     [GtkChild]
     private Gtk.Stack confirm_stack;
@@ -41,6 +45,21 @@ public class Accounts.EditorRemovePane : Gtk.Grid {
         this.remove_label.set_text(
             this.remove_label.get_text().printf(account.nickname)
         );
+
+        this.account.information_changed.connect(on_account_changed);
+        update_header();
+    }
+
+    ~EditorRemovePane() {
+        this.account.information_changed.disconnect(on_account_changed);
+    }
+
+    internal Gtk.HeaderBar get_header() {
+        return this.header;
+    }
+
+    private void on_account_changed() {
+        update_header();
     }
 
     [GtkCallback]
@@ -48,6 +67,11 @@ public class Accounts.EditorRemovePane : Gtk.Grid {
         this.remove_button.set_sensitive(false);
         this.remove_spinner.start();
         this.confirm_stack.set_visible_child_name("remove");
+    }
+
+    [GtkCallback]
+    private void on_back_button_clicked() {
+        this.editor.pop();
     }
 
 }

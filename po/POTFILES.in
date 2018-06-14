@@ -19,6 +19,7 @@ src/client/accounts/account-manager.vala
 src/client/accounts/account-spinner-page.vala
 src/client/accounts/accounts-editor.vala
 src/client/accounts/accounts-editor-edit-pane.vala
+src/client/accounts/accounts-editor-list-pane.vala
 src/client/accounts/accounts-editor-remove-pane.vala
 src/client/accounts/accounts-editor-row.vala
 src/client/accounts/accounts-editor-servers-pane.vala
@@ -412,8 +413,8 @@ src/mailer/main.vala
 ui/account_cannot_remove.glade
 ui/account_list.glade
 ui/account_spinner.glade
-ui/accounts_editor.ui
 ui/accounts_editor_edit_pane.ui
+ui/accounts_editor_list_pane.ui
 ui/accounts_editor_remove_pane.ui
 ui/accounts_editor_servers_pane.ui
 ui/certificate_warning_dialog.glade
