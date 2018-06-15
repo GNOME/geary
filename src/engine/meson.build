@@ -333,6 +333,7 @@ geary_engine_dependencies = [
   gmime,
   javascriptcoregtk,
   libxml,
+  libytnef,
   posix,
   sqlite
 ]
@@ -355,6 +356,13 @@ geary_engine_vala_options += [
 if libunwind_dep.found()
   geary_engine_vala_options += [
     '-D', 'HAVE_LIBUNWIND',
+  ]
+endif
+
+if get_option('tnef-support')
+  geary_engine_dependencies += libytnef
+  geary_engine_vala_options += [
+    '-D', 'WITH_TNEF_SUPPORT'
   ]
 endif
 

@@ -27,7 +27,7 @@ variables:
                gtk3-devel iso-codes-devel json-glib-devel itstool
                libcanberra-devel libgee-devel libhandy-devel
                libnotify-devel libsecret-devel libunwind-devel
-               libxml2-devel sqlite-devel webkitgtk4-devel
+               libxml2-devel libytnef-devel sqlite-devel webkitgtk4-devel
   FEDORA_TEST_DEPS: Xvfb tar xz
 
   # Ubuntu packages
@@ -39,7 +39,7 @@ variables:
                libhandy-0.0-dev libjson-glib-dev libmessaging-menu-dev
                libnotify-dev libsecret-1-dev libsqlite3-dev
                libunity-dev libunwind-dev libwebkit2gtk-4.0-dev
-               libxml2-dev
+               libxml2-dev libytnef0-dev
   UBUNTU_TEST_DEPS: xauth xvfb
 
 fedora:

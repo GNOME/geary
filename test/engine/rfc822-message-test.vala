@@ -12,6 +12,7 @@ class Geary.RFC822.MessageTest : TestCase {
     private const string BASIC_TEXT_HTML = "basic-text-html.eml";
     private const string BASIC_MULTIPART_ALTERNATIVE =
         "basic-multipart-alternative.eml";
+    private const string BASIC_MULTIPART_TNEF = "basic-multipart-tnef.eml";
 
     private const string HTML_CONVERSION_TEMPLATE =
         "<div class=\"plaintext\" style=\"white-space: pre-wrap;\">%s</div>";
@@ -38,6 +39,7 @@ This is the second line.
         add_test("text_plain_as_html", text_plain_as_html);
         add_test("text_html_as_html", text_html_as_html);
         add_test("text_html_as_plain", text_html_as_plain);
+        add_test("tnef_extract_attachments", tnef_extract_attachments);
         add_test("multipart_alternative_as_plain",
                  multipart_alternative_as_plain);
         add_test("multipart_alternative_as_converted_html",
@@ -122,6 +124,14 @@ This is the second line.
         assert_true(test.has_html_body(), "Expected html body");
         assert_false(test.has_plain_body(), "Expected non-plain body");
         assert_string(BASIC_HTML_BODY, test.get_html_body(null));
+    }
+
+    public void tnef_extract_attachments() throws Error {
+        Message test = resource_to_message(BASIC_MULTIPART_TNEF);
+        Gee.List<Part> attachments = test.get_attachments();
+        assert_true(attachments.size == 2);
+        assert_true(attachments[0].get_clean_filename() == "zappa_av1.jpg");
+        assert_true(attachments[1].get_clean_filename() == "bookmark.htm");
     }
 
     public void multipart_alternative_as_plain() throws Error {
