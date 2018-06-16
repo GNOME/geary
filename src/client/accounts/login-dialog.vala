@@ -30,11 +30,13 @@ public class LoginDialog : Gtk.Dialog {
 
         cancel_button = new Gtk.Button.with_label(Stock._CANCEL);
         cancel_button.show();
+        cancel_button.use_underline = true;
         add_action_widget(cancel_button, Gtk.ResponseType.CANCEL);
 
         ok_button = new Gtk.Button.with_label(Stock._ADD);
         ok_button.show();
         ok_button.can_default = true;
+        ok_button.use_underline = true;
         add_action_widget(ok_button, Gtk.ResponseType.OK);
 
         set_default_response(Gtk.ResponseType.OK);
