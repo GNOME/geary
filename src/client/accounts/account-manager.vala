@@ -555,11 +555,15 @@ public class AccountManager : GLib.Object {
                                      GLib.Cancellable? cancellable)
         throws GLib.Error {
         if (info.data_dir != null) {
-            yield Geary.Files.recursive_delete_async(info.data_dir, cancellable);
+            yield Geary.Files.recursive_delete_async(
+                info.data_dir, GLib.Priority.DEFAULT, cancellable
+            );
         }
 
         if (info.config_dir != null) {
-            yield Geary.Files.recursive_delete_async(info.config_dir, cancellable);
+            yield Geary.Files.recursive_delete_async(
+                info.config_dir, GLib.Priority.DEFAULT, cancellable
+            );
         }
 
         SecretMediator? mediator = info.imap.mediator as SecretMediator;

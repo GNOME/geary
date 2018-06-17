@@ -144,12 +144,11 @@ CREATE TABLE MessageAttachmentTable (
         this.db.close();
         this.db = null;
 
-        Geary.Files.recursive_delete_async.begin(
-            this.tmp_dir,
-            null,
+        Files.recursive_delete_async.begin(
+            this.tmp_dir, GLib.Priority.DEFAULT, null,
             (obj, res) => { async_complete(res); }
         );
-        Geary.Files.recursive_delete_async.end(async_result());
+        Files.recursive_delete_async.end(async_result());
         this.tmp_dir = null;
     }
 
