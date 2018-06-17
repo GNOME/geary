@@ -7,11 +7,16 @@
 
 /**
  * A simple ini-file-like configuration file.
+ *
+ * This class provides a convenient, high-level API for the {@link
+ * GLib.KeyFile} class.
  */
 public class Geary.ConfigFile {
 
 
-    /** A set of configuration items under a "[Name]" heading. */
+    /**
+     * A set of configuration keys grouped under a "[Name]" heading.
+     */
     public class Group {
 
 
@@ -31,6 +36,11 @@ public class Geary.ConfigFile {
 
         /** The name of this group, as specified by a [Name] heading. */
         public string name { get; private set; }
+
+        /** Determines if this group already exists in the config or not. */
+        public bool exists {
+            get { return this.backing.has_group(this.name); }
+        }
 
         private GLib.KeyFile backing;
         private GroupLookup[] lookups;
@@ -58,6 +68,14 @@ public class Geary.ConfigFile {
             this.lookups = { this.lookups[0], GroupLookup(group, prefix) };
         }
 
+        /** Determines if this group as a specific config key set. */
+        public bool has_key(string name) {
+            try {
+                return this.backing.has_key(this.name, name);
+            } catch (GLib.Error err) {
+                return false;
+            }
+        }
 
         public string get_string(string key, string def = "") {
             string ret = def;
@@ -158,6 +176,16 @@ public class Geary.ConfigFile {
             this.backing.set_integer(this.name, key, (int) value);
         }
 
+        /** Removes a key from this group. */
+        public void remove_key(string name) throws GLib.Error {
+            this.backing.remove_key(this.name, name);
+        }
+
+        /** Removes this group from the config file. */
+        public void remove() throws GLib.Error {
+            this.backing.remove_group(this.name);
+        }
+
     }
 
 
@@ -173,9 +201,14 @@ public class Geary.ConfigFile {
     }
 
     /**
-     * Returns the config group under the given named heading.
+     * Returns the config key group under the given heading name.
+     *
+     * If the group does not already exist, it will be created when a
+     * key is first set, but an error will be thrown if a value is
+     * accessed from it before doing so. Use {@link Group.exists} to
+     * determine if the group has previously been created.
      */
-    public Group get_group(string name) {
+    public Group get_group(string name) throws GLib.Error {
         return new Group(this, name, this.backing);
     }
 
