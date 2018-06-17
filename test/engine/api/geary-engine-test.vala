@@ -15,8 +15,11 @@ class Geary.EngineTest : TestCase {
 
     public EngineTest() {
         base("Geary.EngineTest");
-        add_test("create_orphan_account", create_orphan_account);
+        add_test("add_account", add_account);
+        add_test("remove_account", remove_account);
+        add_test("re_add_account", re_add_account);
         add_test("create_orphan_account_with_legacy", create_orphan_account_with_legacy);
+        add_test("create_orphan_account", create_orphan_account);
     }
 
     ~EngineTest() {
@@ -60,6 +63,53 @@ class Geary.EngineTest : TestCase {
             assert_not_reached();
         }
 	}
+
+    public void add_account() throws GLib.Error {
+        AccountInformation info = this.engine.create_orphan_account(
+            new MockServiceInformation(),
+            new MockServiceInformation()
+        );
+        assert_false(this.engine.has_account(info.id));
+
+        this.engine.add_account(info);
+        assert_true(this.engine.has_account(info.id), "Account not added");
+
+        try {
+            this.engine.add_account(info);
+            assert_not_reached();
+        } catch (GLib.Error err) {
+            // expected
+        }
+    }
+
+    public void remove_account() throws GLib.Error {
+        AccountInformation info = this.engine.create_orphan_account(
+            new MockServiceInformation(),
+            new MockServiceInformation()
+        );
+        this.engine.add_account(info);
+        assert_true(this.engine.has_account(info.id));
+
+        this.engine.remove_account(info);
+        assert_false(this.engine.has_account(info.id), "Account not rmoeved");
+
+        // Should not throw an error
+        this.engine.remove_account(info);
+    }
+
+    public void re_add_account() throws GLib.Error {
+        AccountInformation info = this.engine.create_orphan_account(
+            new MockServiceInformation(),
+            new MockServiceInformation()
+        );
+        assert_false(this.engine.has_account(info.id));
+
+        this.engine.add_account(info);
+        this.engine.remove_account(info);
+        this.engine.add_account(info);
+
+        assert_true(this.engine.has_account(info.id));
+    }
 
     public void create_orphan_account() throws Error {
         try {

@@ -418,12 +418,14 @@ public class Geary.Engine : BaseObject {
         check_opened();
 
         // Ensure account is closed.
-        if (account_instances.has_key(account.id) && account_instances.get(account.id).is_open()) {
-            throw new EngineError.CLOSE_REQUIRED("Account %s must be closed before removal",
-                account.id);
+        if (this.account_instances.has_key(account.id) &&
+            this.account_instances.get(account.id).is_open()) {
+            throw new EngineError.CLOSE_REQUIRED(
+                "Account %s must be closed before removal", account.id
+            );
         }
 
-        if (accounts.has_key(account.id)) {
+        if (this.accounts.has_key(account.id)) {
             account.untrusted_host.disconnect(on_untrusted_host);
             account.disconnect_endpoints();
 
@@ -433,7 +435,8 @@ public class Geary.Engine : BaseObject {
             account_unavailable(account);
 
             // 2. Remove the account data from the engine.
-            account_instances.unset(account.id);
+            this.accounts.unset(account.id);
+            this.account_instances.unset(account.id);
         }
     }
 
