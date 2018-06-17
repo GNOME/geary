@@ -32,8 +32,15 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane {
 
     private AccountManager accounts { get; private set; }
 
+    private Application.CommandStack commands {
+        get; private set; default = new Application.CommandStack();
+    }
+
     [GtkChild]
     private Gtk.HeaderBar header;
+
+    [GtkChild]
+    private Gtk.Overlay osd_overlay;
 
     [GtkChild]
     private Gtk.ListBox accounts_list;
@@ -59,9 +66,17 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane {
         this.accounts.account_added.connect(on_account_added);
         this.accounts.account_status_changed.connect(on_account_status_changed);
         this.accounts.account_removed.connect(on_account_removed);
+
+        this.commands.executed.connect(on_execute);
+        this.commands.undone.connect(on_undo);
+        this.commands.redone.connect(on_execute);
     }
 
     public override void destroy() {
+        this.commands.executed.disconnect(on_execute);
+        this.commands.undone.disconnect(on_undo);
+        this.commands.redone.disconnect(on_execute);
+
         this.accounts.account_added.disconnect(on_account_added);
         this.accounts.account_status_changed.disconnect(on_account_status_changed);
         this.accounts.account_removed.disconnect(on_account_removed);
@@ -80,14 +95,43 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane {
     internal void remove_account(Geary.AccountInformation account) {
         AccountListRow? row = get_account_row(account);
         if (row != null) {
-            this.accounts_list.remove(row);
+            this.commands.execute.begin(
+                new RemoveAccountCommand(account, this.accounts),
+                null
+            );
         }
+    }
+
+    internal void pane_shown() {
+        update_actions();
+    }
+
+    internal void undo() {
+        this.commands.undo.begin(null);
+    }
+
+    internal void redo() {
+        this.commands.redo.begin(null);
     }
 
     internal Gtk.HeaderBar get_header() {
         return this.header;
     }
-    
+
+    private void add_notification(InAppNotification notification) {
+        this.osd_overlay.add_overlay(notification);
+        notification.show();
+    }
+
+    private void update_actions() {
+        this.editor.get_action(GearyController.ACTION_UNDO).set_enabled(
+            this.commands.can_undo
+        );
+        this.editor.get_action(GearyController.ACTION_REDO).set_enabled(
+            this.commands.can_redo
+        );
+    }
+
     private AccountListRow? get_account_row(Geary.AccountInformation account) {
         AccountListRow? row = null;
         this.accounts_list.foreach((child) => {
@@ -113,7 +157,26 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane {
     }
 
     private void on_account_removed(Geary.AccountInformation account) {
-        remove_account(account);
+        AccountListRow? row = get_account_row(account);
+        if (row != null) {
+            this.accounts_list.remove(row);
+        }
+    }
+
+    private void on_execute(Application.Command command) {
+        InAppNotification ian = new InAppNotification(command.executed_label);
+        ian.set_button(_("Undo"), "win." + GearyController.ACTION_UNDO);
+        add_notification(ian);
+
+        update_actions();
+    }
+
+    private void on_undo(Application.Command command) {
+        InAppNotification ian = new InAppNotification(command.undone_label);
+        ian.set_button(_("Redo"), "win." + GearyController.ACTION_REDO);
+        add_notification(ian);
+
+        update_actions();
     }
 
     [GtkCallback]
@@ -210,6 +273,42 @@ private class Accounts.AccountListRow : EditorRow<EditorListPane> {
                 Gtk.STYLE_CLASS_DIM_LABEL
             );
         }
+    }
+
+}
+
+
+internal class Accounts.RemoveAccountCommand : Application.Command {
+
+
+    private Geary.AccountInformation account;
+    private AccountManager manager;
+
+
+    public RemoveAccountCommand(Geary.AccountInformation account,
+                                AccountManager manager) {
+        this.account = account;
+        this.manager = manager;
+
+        // Translators: Notification shown after removing an
+        // account. The string substitution is the name of the
+        // account.
+        this.executed_label = _("Account “%s” removed").printf(account.nickname);
+
+        // Translators: Notification shown after removing an account
+        // is undone. The string substitution is the name of the
+        // account.
+        this.undone_label = _("Account “%s” restored").printf(account.nickname);
+    }
+
+    public async override void execute(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        yield this.manager.remove_account(this.account, cancellable);
+    }
+
+    public async override void undo(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        yield this.manager.restore_account(this.account, cancellable);
     }
 
 }

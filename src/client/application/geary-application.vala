@@ -425,6 +425,7 @@ public class GearyApplication : Gtk.Application {
         Accounts.Editor editor = new Accounts.Editor(this, get_active_window());
         editor.run();
         editor.destroy();
+        this.controller.expunge_accounts.begin();
     }
 
     private void on_activate_compose() {

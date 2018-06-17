@@ -20,19 +20,7 @@ internal class Accounts.EditorRemovePane : Gtk.Grid, EditorPane, AccountPane {
     private Gtk.HeaderBar header;
 
     [GtkChild]
-    private Gtk.Stack confirm_stack;
-
-    [GtkChild]
     private Gtk.Label warning_label;
-
-    [GtkChild]
-    private Gtk.Spinner remove_spinner;
-
-    [GtkChild]
-    private Gtk.Label remove_label;
-
-    [GtkChild]
-    private Gtk.Button remove_button;
 
 
     public EditorRemovePane(Editor editor, Geary.AccountInformation account) {
@@ -41,9 +29,6 @@ internal class Accounts.EditorRemovePane : Gtk.Grid, EditorPane, AccountPane {
 
         this.warning_label.set_text(
             this.warning_label.get_text().printf(account.nickname)
-        );
-        this.remove_label.set_text(
-            this.remove_label.get_text().printf(account.nickname)
         );
 
         this.account.information_changed.connect(on_account_changed);
@@ -64,9 +49,7 @@ internal class Accounts.EditorRemovePane : Gtk.Grid, EditorPane, AccountPane {
 
     [GtkCallback]
     private void on_remove_button_clicked() {
-        this.remove_button.set_sensitive(false);
-        this.remove_spinner.start();
-        this.confirm_stack.set_visible_child_name("remove");
+        this.editor.remove_account(this.account);
     }
 
     [GtkCallback]

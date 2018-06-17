@@ -138,8 +138,8 @@ public class AccountDialog : Gtk.Dialog {
         assert(account != null); // Should not be able to happen since we checked earlier.
 
         // Remove account, then set the page back to the account list.
-        this.application.controller.remove_account_async.begin(account, null, () => {
-            account_list_pane.present(); });
+        //this.application.controller.remove_account_async.begin(account, null, () => {
+        //    account_list_pane.present(); });
     }
 
     private void on_save_add_or_edit(Geary.AccountInformation info) {

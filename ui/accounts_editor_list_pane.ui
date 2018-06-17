@@ -6,53 +6,62 @@
     <property name="visible">True</property>
     <property name="can_focus">False</property>
     <child>
-      <object class="GtkScrolledWindow">
+      <object class="GtkOverlay" id="osd_overlay">
         <property name="visible">True</property>
-        <property name="can_focus">True</property>
-        <property name="hexpand">True</property>
-        <property name="vexpand">True</property>
-        <property name="hscrollbar_policy">never</property>
-        <property name="min_content_height">400</property>
+        <property name="can_focus">False</property>
         <child>
-          <object class="GtkViewport">
+          <object class="GtkScrolledWindow">
             <property name="visible">True</property>
-            <property name="can_focus">False</property>
+            <property name="can_focus">True</property>
+            <property name="hexpand">True</property>
+            <property name="vexpand">True</property>
+            <property name="hscrollbar_policy">never</property>
+            <property name="min_content_height">400</property>
             <child>
-              <object class="GtkGrid">
+              <object class="GtkViewport">
                 <property name="visible">True</property>
                 <property name="can_focus">False</property>
                 <child>
-                  <object class="GtkFrame">
+                  <object class="GtkGrid">
                     <property name="visible">True</property>
                     <property name="can_focus">False</property>
-                    <property name="hexpand">True</property>
-                    <property name="vexpand">True</property>
-                    <property name="label_xalign">0</property>
-                    <property name="shadow_type">in</property>
                     <child>
-                      <object class="GtkListBox" id="accounts_list">
-                        <property name="width_request">0</property>
+                      <object class="GtkFrame">
                         <property name="visible">True</property>
                         <property name="can_focus">False</property>
-                        <property name="selection_mode">none</property>
-                        <signal name="row-activated" handler="on_accounts_list_row_activated" swapped="no"/>
+                        <property name="hexpand">True</property>
+                        <property name="vexpand">True</property>
+                        <property name="label_xalign">0</property>
+                        <property name="shadow_type">in</property>
+                        <child>
+                          <object class="GtkListBox" id="accounts_list">
+                            <property name="width_request">0</property>
+                            <property name="visible">True</property>
+                            <property name="can_focus">False</property>
+                            <property name="selection_mode">none</property>
+                            <signal name="row-activated" handler="on_accounts_list_row_activated" swapped="no"/>
+                          </object>
+                        </child>
+                        <child type="label_item">
+                          <placeholder/>
+                        </child>
                       </object>
+                      <packing>
+                        <property name="left_attach">0</property>
+                        <property name="top_attach">0</property>
+                      </packing>
                     </child>
-                    <child type="label_item">
-                      <placeholder/>
-                    </child>
+                    <style>
+                      <class name="geary-account-view"/>
+                    </style>
                   </object>
-                  <packing>
-                    <property name="left_attach">0</property>
-                    <property name="top_attach">0</property>
-                  </packing>
                 </child>
-                <style>
-                  <class name="geary-account-view"/>
-                </style>
               </object>
             </child>
           </object>
+          <packing>
+            <property name="index">-1</property>
+          </packing>
         </child>
       </object>
       <packing>

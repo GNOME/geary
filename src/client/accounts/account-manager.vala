@@ -48,6 +48,7 @@ public enum CredentialsProvider {
 
 errordomain AccountError {
     INVALID,
+    LOCAL_REMOVED,
     GOA_REMOVED;
 }
 
@@ -69,6 +70,7 @@ public class AccountManager : GLib.Object {
 
 
     private const string ACCOUNT_CONFIG_GROUP = "AccountInformation";
+    private const string ACCOUNT_MANAGER_GROUP = "AccountManager";
     private const string IMAP_CONFIG_GROUP = "IMAP";
     private const string SMTP_CONFIG_GROUP = "SMTP";
 
@@ -82,6 +84,7 @@ public class AccountManager : GLib.Object {
     private const string ORDINAL_KEY = "ordinal";
     private const string PREFETCH_PERIOD_DAYS_KEY = "prefetch_period_days";
     private const string PRIMARY_EMAIL_KEY = "primary_email";
+    private const string REMOVED_KEY = "removed";
     private const string REAL_NAME_KEY = "real_name";
     private const string SAVE_DRAFTS_KEY = "save_drafts";
     private const string SAVE_SENT_MAIL_KEY = "save_sent_mail";
@@ -150,6 +153,10 @@ public class AccountManager : GLib.Object {
 
     private Gee.Map<string,AccountState> accounts =
         new Gee.HashMap<string,AccountState>();
+
+    private Gee.LinkedList<Geary.AccountInformation> removed =
+        new Gee.LinkedList<Geary.AccountInformation>();
+
 
     private GearyApplication application;
     private GLib.File user_config_dir;
@@ -284,9 +291,6 @@ public class AccountManager : GLib.Object {
                         } else {
                             set_available(info, false);
                         }
-                    } catch (AccountError.GOA_REMOVED err) {
-                        // Since the GOA account for this account does
-                        // not longer exist, remove it.
                     } catch (GLib.Error err) {
                         report_problem(
                             new Geary.ProblemReport(
@@ -313,6 +317,73 @@ public class AccountManager : GLib.Object {
                     yield this.create_goa_account(account, cancellable);
                 }
             }
+        }
+    }
+
+    /**
+     * Removes an account from the manager's set of known accounts.
+     *
+     * This removes the account from the known set, marks the account
+     * as deleted, and queues it for deletion. The account will not
+     * actually be deleted until {@link expunge_accounts} is called,
+     * and until then the account can be re-added using {@link
+     * restore_account}.
+     */
+    public async void remove_account(Geary.AccountInformation account,
+                                     GLib.Cancellable cancellable)
+        throws GLib.Error {
+        this.accounts.unset(account.id);
+        this.removed.add(account);
+        yield save_account(account, cancellable);
+        account_removed(account);
+    }
+
+    /**
+     * Restores an account that has previously been removed.
+     *
+     * This restores an account previously removed via a call to
+     * {@link remove_account}, adding it back to the known set, as
+     * long as {@link expunge_accounts} has not been called since
+     * he account was removed.
+     */
+    public async void restore_account(Geary.AccountInformation account,
+                                      GLib.Cancellable cancellable)
+        throws GLib.Error {
+        if (this.removed.remove(account)) {
+            yield save_account(account, cancellable);
+            set_enabled(account, true);
+        }
+    }
+
+    /**
+     * Deletes all local data for all accounts that have been removed.
+     */
+    public async void expunge_accounts(GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        while (!this.removed.is_empty && !cancellable.is_cancelled()) {
+            yield delete_account(this.removed.remove_at(0), cancellable);
+        }
+    }
+
+    public async void save_account(Geary.AccountInformation info,
+                                   GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        // Ensure only one async task is saving an info at once, since
+        // at least the Engine can cause multiple saves to be called
+        // in quick succession when updating special folder config.
+        int token = yield info.write_lock.claim_async(cancellable);
+
+        GLib.Error? thrown = null;
+        try {
+            yield save_account_locked(info, cancellable);
+        } catch (GLib.Error err) {
+            thrown = err;
+        }
+
+        info.write_lock.release(ref token);
+
+        if (thrown != null) {
+            throw thrown;
         }
     }
 
@@ -438,29 +509,17 @@ public class AccountManager : GLib.Object {
 
         info.save_drafts = config.get_bool(SAVE_DRAFTS_KEY, true);
 
+        // If the account has been removed, add it to the removed list
+        // and bail out
+        Geary.ConfigFile.Group manager_config =
+            config_file.get_group(ACCOUNT_MANAGER_GROUP);
+        if (manager_config.exists &&
+            manager_config.get_bool(REMOVED_KEY, false)) {
+            this.removed.add(info);
+            throw new AccountError.LOCAL_REMOVED("Account marked for removal");
+        }
+
         return info;
-    }
-
-    public async void save_account(Geary.AccountInformation info,
-                                   GLib.Cancellable? cancellable)
-        throws GLib.Error {
-        // Ensure only one async task is saving an info at once, since
-        // at least the Engine can cause multiple saves to be called
-        // in quick succession when updating special folder config.
-        int token = yield info.write_lock.claim_async(cancellable);
-
-        GLib.Error? thrown = null;
-        try {
-            yield save_account_locked(info, cancellable);
-        } catch (GLib.Error err) {
-            thrown = err;
-        }
-
-        info.write_lock.release(ref token);
-
-        if (thrown != null) {
-            throw thrown;
-        }
     }
 
     private async void save_account_locked(Geary.AccountInformation info,
@@ -481,6 +540,16 @@ public class AccountManager : GLib.Object {
         } catch (GLib.Error err) {
             // Oh well, just create a new one when saving
             debug("Could not load existing config file: %s", err.message);
+        }
+
+        // If the account has been removed, set it as such. Otherwise
+        // ensure it is not set as such.
+        Geary.ConfigFile.Group manager_config =
+            config_file.get_group(ACCOUNT_MANAGER_GROUP);
+        if (this.removed.contains(info)) {
+            manager_config.set_bool(REMOVED_KEY, true);
+        } else if (manager_config.exists) {
+            manager_config.remove();
         }
 
         Geary.ConfigFile.Group config = config_file.get_group(ACCOUNT_CONFIG_GROUP);
@@ -548,24 +617,9 @@ public class AccountManager : GLib.Object {
         yield config_file.save(cancellable);
     }
 
-    /**
-     * Removes an account's configuration, storage and auth tokens.
-     */
-    public async void remove_account(Geary.AccountInformation info,
-                                     GLib.Cancellable? cancellable)
+    private async void delete_account(Geary.AccountInformation info,
+                                      GLib.Cancellable? cancellable)
         throws GLib.Error {
-        if (info.data_dir != null) {
-            yield Geary.Files.recursive_delete_async(
-                info.data_dir, GLib.Priority.DEFAULT, cancellable
-            );
-        }
-
-        if (info.config_dir != null) {
-            yield Geary.Files.recursive_delete_async(
-                info.config_dir, GLib.Priority.DEFAULT, cancellable
-            );
-        }
-
         SecretMediator? mediator = info.imap.mediator as SecretMediator;
         if (mediator != null) {
             try {
@@ -584,8 +638,19 @@ public class AccountManager : GLib.Object {
             }
         }
 
-        this.accounts.unset(info.id);
-        account_removed(info);
+        if (info.data_dir != null) {
+            yield Geary.Files.recursive_delete_async(
+                info.data_dir, GLib.Priority.LOW, cancellable
+            );
+        }
+
+        // Delete config last so if there are any errors above, it
+        // will be re-tried at next startup.
+        if (info.config_dir != null) {
+            yield Geary.Files.recursive_delete_async(
+                info.config_dir, GLib.Priority.LOW, cancellable
+            );
+        }
     }
 
     private inline AccountState lookup_state(Geary.AccountInformation account) {

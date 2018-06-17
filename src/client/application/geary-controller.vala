@@ -105,6 +105,10 @@ public class GearyController : Geary.BaseObject {
     private Gee.Map<Geary.AccountInformation,AccountContext> accounts =
         new Gee.HashMap<Geary.AccountInformation,AccountContext>();
 
+    // Created when controller is opened, cancelled and nulled out
+    // when closed.
+    private GLib.Cancellable? open_cancellable = null;
+
     private Geary.Folder? current_folder = null;
     private Cancellable cancellable_folder = new Cancellable();
     private Cancellable cancellable_search = new Cancellable();
@@ -207,6 +211,8 @@ public class GearyController : Geary.BaseObject {
 
         apply_app_menu_fix();
 
+        this.open_cancellable = new GLib.Cancellable();
+
         // Listen for attempts to close the application.
         this.application.exiting.connect(on_application_exiting);
 
@@ -246,7 +252,6 @@ public class GearyController : Geary.BaseObject {
         enable_message_buttons(false);
 
         engine.account_available.connect(on_account_available);
-        engine.account_unavailable.connect(on_account_unavailable);
         engine.untrusted_host.connect(on_untrusted_host);
 
         // Connect to various UI signals.
@@ -308,6 +313,9 @@ public class GearyController : Geary.BaseObject {
         this.account_manager.account_status_changed.connect(
             on_account_status_changed
         );
+        this.account_manager.account_removed.connect(
+            on_account_removed
+        );
 
         try {
             yield this.account_manager.connect_libsecret(cancellable);
@@ -332,6 +340,10 @@ public class GearyController : Geary.BaseObject {
         } catch (Error e) {
             warning("Error opening Geary.Engine instance: %s", e.message);
         }
+
+        // Expunge any deleted accounts in the background, so we're
+        // not blocking the app continuing to open.
+        this.expunge_accounts.begin();
     }
 
     /**
@@ -339,8 +351,12 @@ public class GearyController : Geary.BaseObject {
      * re-opened.
      */
     public async void close_async() {
+        // Cancel internal processes early so they don't block
+        // shutdown
+        this.open_cancellable.cancel();
+        this.open_cancellable = null;
+
         Geary.Engine.instance.account_available.disconnect(on_account_available);
-        Geary.Engine.instance.account_unavailable.disconnect(on_account_unavailable);
         Geary.Engine.instance.untrusted_host.disconnect(on_untrusted_host);
 
         // Release folder and conversations in the main window
@@ -455,6 +471,9 @@ public class GearyController : Geary.BaseObject {
         this.account_manager.account_status_changed.disconnect(
             on_account_status_changed
         );
+        this.account_manager.account_removed.disconnect(
+            on_account_removed
+        );
         this.account_manager = null;
 
         this.application.remove_window(this.main_window);
@@ -509,16 +528,11 @@ public class GearyController : Geary.BaseObject {
         }
     }
 
-    /**
-     * Closes an account and deletes it from disk.
-     */
-    public async void remove_account_async(Geary.AccountInformation info,
-                                           Cancellable? cancellable = null) {
+    /** Expunges removed accounts while the controller remains open. */
+    internal async void expunge_accounts() {
         try {
-            yield close_account(info);
-            this.application.engine.remove_account(info);
-            yield this.account_manager.remove_account(info, cancellable);
-        } catch (Error err) {
+            yield this.account_manager.expunge_accounts(this.open_cancellable);
+        } catch (GLib.Error err) {
             report_problem(
                 new Geary.ProblemReport(Geary.ProblemType.GENERIC_ERROR, err)
             );
@@ -3129,6 +3143,29 @@ public class GearyController : Geary.BaseObject {
         }
     }
 
+    private void on_account_removed(Geary.AccountInformation removed) {
+        debug("%s: Closing account for removal", removed.id);
+        this.close_account.begin(
+            removed,
+            (obj, res) => {
+                this.close_account.end(res);
+                debug("%s: Account closed", removed.id);
+                try {
+                    this.application.engine.remove_account(removed);
+                    debug("%s: Account removed from engine", removed.id);
+                } catch (GLib.Error err) {
+                    report_problem(
+                        new Geary.AccountProblemReport(
+                            Geary.ProblemType.GENERIC_ERROR,
+                            removed,
+                            err
+                        )
+                    );
+                }
+            }
+        );
+    }
+
     private void on_scan_completed() {
         // Done scanning.  Check if we have enough messages to fill
         // the conversation list; if not, trigger a load_more();
@@ -3150,10 +3187,6 @@ public class GearyController : Geary.BaseObject {
                 err
             )
         );
-    }
-
-    private void on_account_unavailable(Geary.AccountInformation info) {
-        this.close_account.begin(info);
     }
 
     private void on_save_attachments(Gee.Collection<Geary.Attachment> attachments) {

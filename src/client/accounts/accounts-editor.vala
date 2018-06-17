@@ -27,15 +27,11 @@ public class Accounts.Editor : Gtk.Dialog {
     }
 
 
-    /** The current account being edited, if any. */
-    private Geary.AccountInformation selected_account {
-        get; private set; default = null;
-    }
-
     private SimpleActionGroup actions = new SimpleActionGroup();
 
 
     private Gtk.Stack editor_panes = new Gtk.Stack();
+    private EditorListPane editor_list_pane;
 
     private Gee.LinkedList<EditorPane> editor_pane_stack =
         new Gee.LinkedList<EditorPane>();
@@ -65,7 +61,8 @@ public class Accounts.Editor : Gtk.Dialog {
         get_action(GearyController.ACTION_UNDO).set_enabled(false);
         get_action(GearyController.ACTION_REDO).set_enabled(false);
 
-        push(new EditorListPane(this));
+        this.editor_list_pane = new EditorListPane(this);
+        push(this.editor_list_pane);
     }
 
     public override void destroy() {
@@ -104,14 +101,15 @@ public class Accounts.Editor : Gtk.Dialog {
         int prev_index = this.editor_pane_stack.index_of(current) - 1;
         EditorPane prev = this.editor_pane_stack.get(prev_index);
         this.editor_panes.set_visible_child(prev);
-
-        if (prev_index == 0) {
-            this.selected_account = null;
-        }
     }
 
     internal GLib.SimpleAction get_action(string name) {
         return (GLib.SimpleAction) this.actions.lookup_action(name);
+    }
+
+    internal void remove_account(Geary.AccountInformation account) {
+        this.editor_panes.set_visible_child(this.editor_list_pane);
+        this.editor_list_pane.remove_account(account);
     }
 
     private inline EditorPane? get_current_pane() {
