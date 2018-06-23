@@ -1930,14 +1930,21 @@ public class ComposerWidget : Gtk.EventBox {
     private inline void append_menu_section(WebKit.ContextMenu context_menu,
                                             Menu section) {
         GtkUtil.menu_foreach(section, (label, name, target, section) => {
-                if ("." in name)
-                    name = name.split(".")[1];
+                string simple_name = name;
+                if ("." in simple_name) {
+                    simple_name = simple_name.split(".")[1];
+                }
 
-                GLib.SimpleAction action = new GLib.SimpleAction(name, null);
-                action.set_enabled(get_action(name).enabled);
-                context_menu.append(
-                    new WebKit.ContextMenuItem.from_gaction(action, label, null)
-                );
+                GLib.SimpleAction? action = get_action(simple_name);
+                if (action != null) {
+                    context_menu.append(
+                        new WebKit.ContextMenuItem.from_gaction(
+                            action, label, target
+                        )
+                    );
+                } else {
+                    warning("Unknown action: %s/%s", name, label);
+                }
             });
     }
 
