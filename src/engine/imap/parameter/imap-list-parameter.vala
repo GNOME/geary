@@ -25,76 +25,37 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
             return list.size;
         }
     }
-    
-    /**
-     * Returns null if no parent (top-level list).
-     *
-     * In a fully-formed set of {@link Parameter}s, this means this {@link ListParameter} is
-     * probably a {@link RootParameters}.
-     */
-    public weak ListParameter? parent { get; private set; default = null; }
-    
+
     private Gee.List<Parameter> list = new Gee.ArrayList<Parameter>();
-    
+
+
     /**
-     * Creates an empty ListParameter with no parent.
-     */
-    public ListParameter() {
-    }
-    
-    ~ListParameter() {
-        // Drop back links because, although it's a weak ref, sometimes ListParameters are temporarily
-        // made and current Vala doesn't reset weak refs
-        foreach (Parameter param in list) {
-            ListParameter? listp = param as ListParameter;
-            if (listp != null) {
-                assert(listp.parent == this);
-                
-                listp.parent = null;
-            }
-        }
-    }
-    
-    /**
-     * Adds the {@link Parameter} to the end of the {@link ListParameter}.
+     * Appends a parameter to the end of this list.
      *
-     * If the Parameter is itself a ListParameter, it's {@link parent} will be set to this
-     * ListParameter.
-     *
-     * The same {@link Parameter} can't be added more than once to the same {@link ListParameter}.
-     * There are no other restrictions, however.
+     * The same {@link Parameter} can't be added more than once to the
+     * same {@link ListParameter}.  There are no other restrictions,
+     * however.
      *
      * @return true if added.
      */
     public bool add(Parameter param) {
-        // if adding a ListParameter, set its parent
-        ListParameter? listp = param as ListParameter;
-        if (listp != null) {
-            if (listp.parent != null)
-                listp.parent.list.remove(listp);
-            
-            listp.parent = this;
-        }
-        
-        return list.add(param);
+        return this.list.add(param);
     }
-    
+
     /**
-     * Adds all the {@link Parameter}s to the end of the {@link ListParameter}.
+     * Adds all parameters in the given collection to this list.
      *
-     * If any Parameter is itself a ListParameter, it's {@link parent} will be set to this
-     * ListParameter.
-     *
-     * The same {@link Parameter} can't be added more than once to the same {@link ListParameter}.
-     * There are no other restrictions, however.
+     * The same {@link Parameter} can't be added more than once to the
+     * same {@link ListParameter}.  There are no other restrictions,
+     * however.
      *
      * @return number of Parameters added.
      */
     public int add_all(Gee.Collection<Parameter> params) {
         int count = 0;
-        foreach (Parameter param in params)
+        foreach (Parameter param in params) {
             count += add(param) ? 1 : 0;
-        
+        }
         return count;
     }
 
@@ -118,23 +79,14 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
     public int extend(ListParameter listp) {
         return add_all(listp.list);
     }
-    
+
     /**
      * Clears the {@link ListParameter} of all its children.
-     *
-     * This also clears (sets to null) the parents of all ListParameter's children.
      */
     public void clear() {
-        // sever ties to ListParameter children
-        foreach (Parameter param in list) {
-            ListParameter? listp = param as ListParameter;
-            if (listp != null)
-                listp.parent = null;
-        }
-        
         list.clear();
     }
-    
+
     //
     // Parameter retrieval
     //
@@ -370,19 +322,16 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
     public ListParameter? get_as_nullable_list(int index) throws ImapError {
         return (ListParameter?) get_as_nullable(index, typeof(ListParameter));
     }
-    
+
     /**
-     * Returns [@link ListParameter} at index, an empty list if NIL.
-     *
-     * If an empty ListParameter has to be manufactured in place of a NIL parameter, its parent
-     * will be null.
+     * Returns {@link ListParameter} at index, an empty list if NIL.
      */
     public ListParameter get_as_empty_list(int index) throws ImapError {
         ListParameter? param = get_as_nullable_list(index);
-        
+
         return param ?? new ListParameter();
     }
-    
+
     /**
      * Returns a {@link ListParameter} at index, null if not a list.
      *
@@ -474,27 +423,12 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
     public Parameter replace(int index, Parameter parameter) throws ImapError {
         if (list.size <= index)
             throw new ImapError.TYPE_ERROR("No parameter at index %d", index);
-        
-        Parameter old = list[index];
-        list[index] = parameter;
-        
-        // add parent to new Parameter if a list
-        ListParameter? listp = parameter as ListParameter;
-        if (listp != null) {
-            if (listp.parent != null)
-                listp.parent.list.remove(listp);
-            
-            listp.parent = this;
-        }
-        
-        // clear parent of old Parameter if a list
-        listp = old as ListParameter;
-        if (listp != null)
-            listp.parent = null;
-        
+
+        Parameter old = this.list[index];
+        this.list[index] = parameter;
         return old;
     }
-    
+
     /**
      * Moves all child parameters from the supplied list into this list, clearing this list first.
      *

@@ -32,6 +32,7 @@ geary_test_engine_sources = [
   'engine/imap/command/imap-create-command-test.vala',
   'engine/imap/message/imap-data-format-test.vala',
   'engine/imap/message/imap-mailbox-specifier-test.vala',
+  'engine/imap/parameter/imap-list-parameter-test.vala',
   'engine/imap/response/imap-namespace-response-test.vala',
   'engine/imap/transport/imap-deserializer-test.vala',
   'engine/imap-db/imap-db-attachment-test.vala',

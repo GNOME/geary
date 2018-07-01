@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Michael Gratton <mike@vee.net>
+ * Copyright 2017-2018 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -11,6 +11,7 @@ class Geary.Imap.DeserializerTest : TestCase {
     protected enum Expect { MESSAGE, EOS, DESER_FAIL; }
 
     private const string ID = "test";
+    private const string UNTAGGED = "* ";
     private const string EOL = "\r\n";
 
     private Deserializer? deser = null;
@@ -19,6 +20,14 @@ class Geary.Imap.DeserializerTest : TestCase {
 
     public DeserializerTest() {
         base("Geary.Imap.DeserializerTest");
+        add_test("parse_unquoted", parse_unquoted);
+        add_test("parse_quoted", parse_quoted);
+        add_test("parse_number", parse_number);
+        add_test("parse_list", parse_list);
+        add_test("parse_response_code", parse_response_code);
+        add_test("parse_bad_list", parse_bad_list);
+        add_test("parse_bad_code", parse_bad_response_code);
+
         add_test("gmail_greeting", gmail_greeting);
         add_test("cyrus_2_4_greeting", cyrus_2_4_greeting);
         add_test("aliyun_greeting", aliyun_greeting);
@@ -44,6 +53,105 @@ class Geary.Imap.DeserializerTest : TestCase {
     public override void tear_down() {
         this.deser.stop_async.begin((obj, ret) => { async_complete(ret); });
         async_result();
+        this.stream = null;
+    }
+
+    public void parse_unquoted() throws Error {
+        string bytes = "OK";
+        this.stream.add_data(UNTAGGED.data);
+        this.stream.add_data(bytes.data);
+        this.stream.add_data(EOL.data);
+
+        this.process.begin(Expect.MESSAGE, (obj, ret) => { async_complete(ret); });
+        RootParameters? message = this.process.end(async_result());
+
+        assert_int(2, message.size);
+        assert_true(message.get(1) is UnquotedStringParameter, "Not parsed as atom");
+        assert_string(bytes, message.get(1).to_string());
+    }
+
+    public void parse_quoted() throws Error {
+        string bytes = "\"OK\"";
+        this.stream.add_data(UNTAGGED.data);
+        this.stream.add_data(bytes.data);
+        this.stream.add_data(EOL.data);
+
+        this.process.begin(Expect.MESSAGE, (obj, ret) => { async_complete(ret); });
+        RootParameters? message = this.process.end(async_result());
+
+        assert_int(2, message.size);
+        assert_true(message.get(1) is QuotedStringParameter, "Not parsed as quoted");
+        assert_string(bytes, message.get(1).to_string());
+    }
+
+    public void parse_number() throws Error {
+        string bytes = "1234";
+        this.stream.add_data(UNTAGGED.data);
+        this.stream.add_data(bytes.data);
+        this.stream.add_data(EOL.data);
+
+        this.process.begin(Expect.MESSAGE, (obj, ret) => { async_complete(ret); });
+        RootParameters? message = this.process.end(async_result());
+
+        assert_int(2, message.size);
+        assert_true(message.get(1) is NumberParameter, "Not parsed as number");
+        assert_string(bytes, message.get(1).to_string());
+    }
+
+    public void parse_list() throws Error {
+        string bytes = "(OK)";
+        this.stream.add_data(UNTAGGED.data);
+        this.stream.add_data(bytes.data);
+        this.stream.add_data(EOL.data);
+
+        this.process.begin(Expect.MESSAGE, (obj, ret) => { async_complete(ret); });
+        RootParameters? message = this.process.end(async_result());
+
+        assert_int(2, message.size);
+        assert_true(message.get(1) is ListParameter, "Not parsed as list");
+        assert_string(bytes, message.get(1).to_string());
+    }
+
+    public void parse_response_code() throws Error {
+        string bytes = "[OK]";
+        this.stream.add_data(UNTAGGED.data);
+        this.stream.add_data(bytes.data);
+        this.stream.add_data(EOL.data);
+
+        this.process.begin(Expect.MESSAGE, (obj, ret) => { async_complete(ret); });
+        RootParameters? message = this.process.end(async_result());
+
+        assert_int(2, message.size);
+        assert_true(message.get(1) is ResponseCode, "Not parsed as response code");
+        assert_string(bytes, message.get(1).to_string());
+    }
+
+    public void parse_bad_list() throws Error {
+        string bytes = "(UHH";
+        this.stream.add_data(UNTAGGED.data);
+        this.stream.add_data(bytes.data);
+        this.stream.add_data(EOL.data);
+
+        // XXX We expect EOS here rather than DESER_FAIL since the
+        // deserializer currently silently ignores lines with
+        // malformed lists and continues parsing, so we get to the end
+        // of the stream.
+        this.process.begin(Expect.EOS, (obj, ret) => { async_complete(ret); });
+        this.process.end(async_result());
+    }
+
+    public void parse_bad_response_code() throws Error {
+        string bytes = "[UHH";
+        this.stream.add_data(UNTAGGED.data);
+        this.stream.add_data(bytes.data);
+        this.stream.add_data(EOL.data);
+
+        // XXX We expect EOS here rather than DESER_FAIL since the
+        // deserializer currently silently ignores lines with
+        // malformed lists and continues parsing, so we get to the end
+        // of the stream.
+        this.process.begin(Expect.EOS, (obj, ret) => { async_complete(ret); });
+        this.process.end(async_result());
     }
 
     public void gmail_greeting() throws Error {

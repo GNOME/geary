@@ -74,11 +74,14 @@ public class Geary.Imap.Deserializer : BaseObject {
     private string identifier;
     private DataInputStream dins;
     private Geary.State.Machine fsm;
+
     private ListParameter context;
+    private Gee.LinkedList<ListParameter> context_stack =
+        new Gee.LinkedList<ListParameter>();
+
     private Cancellable? cancellable = null;
     private Nonblocking.Semaphore closed_semaphore = new Nonblocking.Semaphore();
     private Geary.Stream.MidstreamConverter midstream = new Geary.Stream.MidstreamConverter("Deserializer");
-    private RootParameters root = new RootParameters();
     private StringBuilder? current_string = null;
     private size_t literal_length_remaining = 0;
     private Geary.Memory.GrowableBuffer? block_buffer = null;
@@ -144,9 +147,7 @@ public class Geary.Imap.Deserializer : BaseObject {
         dins = new DataInputStream(cins);
         dins.set_newline_type(DataStreamNewlineType.CR_LF);
         dins.set_close_base_stream(false);
-        
-        context = root;
-        
+
         Geary.State.Mapping[] mappings = {
             new Geary.State.Mapping(State.TAG, Event.CHAR, on_tag_char),
             new Geary.State.Mapping(State.TAG, Event.EOS, on_eos),
@@ -203,10 +204,12 @@ public class Geary.Imap.Deserializer : BaseObject {
             new Geary.State.Mapping(State.CLOSED, Event.EOS, Geary.State.nop),
             new Geary.State.Mapping(State.CLOSED, Event.ERROR, Geary.State.nop)
         };
-        
-        fsm = new Geary.State.Machine(machine_desc, mappings, on_bad_transition);
+
+        this.fsm = new Geary.State.Machine(machine_desc, mappings, on_bad_transition);
+
+        reset_params();
     }
-    
+
     /**
      * Install a custom Converter into the input stream.
      *
@@ -456,34 +459,34 @@ public class Geary.Imap.Deserializer : BaseObject {
     private void save_parameter(Parameter param) {
         context.add(param);
     }
-    
+
     // ListParameter's parent *must* be current context
     private void push(ListParameter child) {
-        context.add(child);
-        
-        context = child;
+        this.context.add(child);
+
+        this.context_stack.insert(0, child);
+        this.context = child;
     }
-    
+
     private char get_current_context_terminator() {
         return (context is ResponseCode) ? ']' : ')';
     }
-    
+
     private State pop() {
-        ListParameter? parent = context.parent;
-        if (parent == null) {
+        State ret = State.START_PARAM;
+        if (this.context_stack.size > 1) {
+            this.context_stack.remove_at(0);
+            this.context = this.context_stack[0];
+        } else {
             warning("Attempt to close unopened list/response code");
-            
-            return State.FAILED;
+            ret = State.FAILED;
         }
-        
-        context = parent;
-        
-        return State.START_PARAM;
+        return ret;
     }
 
     private void flush_params() {
         bool okay = true;
-        if (this.context != this.root) {
+        if (this.context_stack.size > 1) {
             Logging.debug(
                 Logging.Flag.DESERIALIZER,
                 "[%s] Unclosed list in parameters",
@@ -501,17 +504,17 @@ public class Geary.Imap.Deserializer : BaseObject {
             okay = false;
         }
 
-        if (okay && this.root != null && root.size > 0) {
-            parameters_ready(this.root);
+        if (okay && this.context.size > 0) {
+            parameters_ready((RootParameters) this.context);
         }
 
         reset_params();
     }
 
     private void reset_params() {
-        this.context = this.root = new RootParameters();
-        this.current_string = null;
-        this.literal_length_remaining = 0;
+        this.context = new RootParameters();
+        this.context_stack.clear();
+        this.context_stack.add(this.context);
     }
 
     //
