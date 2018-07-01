@@ -1035,7 +1035,7 @@ msgstr "Sense remitent"
 #. addresses in the header preview for a message.
 #: ../src/client/conversation-viewer/conversation-message.vala:586
 msgid ", "
-msgstr ","
+msgstr ", "
 
 #. Translators: This string is used as the HTML IMG ALT
 #. attribute value when displaying an inline image in an email
@@ -1172,7 +1172,7 @@ msgstr "Hi ha hagut un error processant el certificat del servidor "
 #: ../src/client/dialogs/password-dialog.vala:16
 msgid "Geary requires your email password to continue"
 msgstr ""
-"El Geary requereix de la contrasenya de correu electrònic per a continuar"
+"El Geary requereix la contrasenya de correu electrònic per a continuar"
 
 #. Label displaying total number of email messages in a folder
 #: ../src/client/folder-list/folder-list-folder-entry.vala:32
@@ -1786,7 +1786,7 @@ msgstr "Desa i tanca"
 #. Note that this button and the Update button will never be shown at the same time to the user.
 #: ../ui/composer-link-popover.ui.h:2
 msgid "Insert the new link with this URL"
-msgstr "Insereix el nou enllaç amb aquesta URL"
+msgstr "Insereix el nou enllaç amb aquest URL"
 
 #: ../ui/composer-link-popover.ui.h:3
 msgid "Link URL"
@@ -1851,7 +1851,7 @@ msgstr "_Refés"
 
 #: ../ui/composer-menus.ui.h:12
 msgid "Cu_t"
-msgstr "_Talla"
+msgstr "_Retalla"
 
 #: ../ui/composer-menus.ui.h:13 ../ui/conversation-message-menus.ui.h:7
 msgid "_Copy"
