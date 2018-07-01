@@ -97,9 +97,9 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
         
         return count;
     }
-    
+
     /**
-     * Appends the {@link ListParameter} to the end of this ListParameter.
+     * Adds all elements in the given list to the end of this list.
      *
      * The difference between this call and {@link add} is that add() will simply insert the
      * {@link Parameter} to the tail of the list.  Thus, add(ListParameter) will add a child list
@@ -107,29 +107,16 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
      *
      * (one two (three))
      *
-     * append(ListParameter("three")) adds each element of the ListParameter to this one, not
+     * Instead, extend(ListParameter("three")) adds each element of the ListParameter to this one, not
      * creating a child:
      *
      * (one two three)
      *
-     * Thus, each element of the list is moved ("adopted") by this list, and the supplied list
-     * returns empty.  This is slightly different than {@link adopt_children}, which preserves the
-     * list structure.
-     *
-     * @return Number of added elements.  append() will not abort if an element fails to add.
+     * @return Number of added elements. This will not abort if an
+     * element fails to be added.
      */
-    public int append(ListParameter listp) {
-        // snap the child list off the supplied ListParameter so it's wiped clean
-        Gee.List<Parameter> to_append = listp.list;
-        listp.list = new Gee.ArrayList<Parameter>();
-        
-        int count = 0;
-        foreach (Parameter param in to_append) {
-            if (add(param))
-                count++;
-        }
-        
-        return count;
+    public int extend(ListParameter listp) {
+        return add_all(listp.list);
     }
     
     /**
