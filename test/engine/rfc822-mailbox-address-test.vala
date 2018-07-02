@@ -19,6 +19,7 @@ class Geary.RFC822.MailboxAddressTest : TestCase {
         // latter depends on the former, so test that first
         add_test("to_rfc822_address", to_rfc822_address);
         add_test("to_rfc822_string", to_rfc822_string);
+        add_test("equal_to", equal_to);
     }
 
     public void is_valid_address() throws Error {
@@ -245,4 +246,24 @@ class Geary.RFC822.MailboxAddressTest : TestCase {
                "=?UTF-8?b?8J+YuA==?= <example@example.com>");
     }
 
+    public void equal_to() throws GLib.Error {
+        MailboxAddress test = new MailboxAddress("test", "example@example.com");
+
+        assert_true(
+            test.equal_to(test),
+            "Object identity equality"
+        );
+        assert_true(
+            test.equal_to(new MailboxAddress("test", "example@example.com")),
+            "Mailbox identity equality"
+        );
+        assert_true(
+            test.equal_to(new MailboxAddress(null, "example@example.com")),
+            "Address equality"
+        );
+        assert_false(
+            test.equal_to(new MailboxAddress(null, "blarg@example.com")),
+            "Address inequality"
+        );
+    }
 }

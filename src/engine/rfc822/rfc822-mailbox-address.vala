@@ -398,7 +398,7 @@ public class Geary.RFC822.MailboxAddress :
      * Equality is defined as a case-insensitive comparison of the {@link address}.
      */
     public bool equal_to(MailboxAddress other) {
-        return this != other ? String.stri_equal(address, other.address) : true;
+        return this == other || String.stri_equal(address, other.address);
     }
 
     public bool equal_normalized(string address) {
