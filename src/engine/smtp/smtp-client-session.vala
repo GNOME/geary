@@ -165,10 +165,11 @@ public class Geary.Smtp.ClientSession {
 
         return response;
     }
-    
-    public async void send_email_async(Geary.RFC822.MailboxAddress from,
-        Geary.RFC822.Message email, Cancellable? cancellable = null)
-        throws Error {
+
+    public async void send_email_async(Geary.RFC822.MailboxAddress reverse_path,
+                                       Geary.RFC822.Message email,
+                                       Cancellable? cancellable = null)
+        throws GLib.Error {
         if (!cx.is_connected())
             throw new SmtpError.NOT_CONNECTED("Not connected to %s", to_string());
         
@@ -182,7 +183,7 @@ public class Geary.Smtp.ClientSession {
         }
 
         // MAIL
-        MailRequest mail_request = new MailRequest(from);
+        MailRequest mail_request = new MailRequest(reverse_path);
         Response response = yield cx.transaction_async(mail_request, cancellable);
         if (!response.code.is_success_completed())
             response.throw_error("\"%s\" failed".printf(mail_request.to_string()));
