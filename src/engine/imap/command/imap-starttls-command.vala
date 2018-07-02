@@ -9,7 +9,7 @@
  */
 
 public class Geary.Imap.StarttlsCommand : Command {
-    public const string NAME = "starttls";
+    public const string NAME = "STARTTLS";
     
     public StarttlsCommand() {
         base (NAME);

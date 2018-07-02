@@ -50,7 +50,7 @@ public enum Geary.Smtp.Command {
                 return "data";
 
             case STARTTLS:
-                return "starttls";
+                return "STARTTLS";
 
             default:
                 assert_not_reached();
