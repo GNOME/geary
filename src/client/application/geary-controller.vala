@@ -114,6 +114,8 @@ public class GearyController : Geary.BaseObject {
     private Gee.List<string> pending_mailtos = new Gee.ArrayList<string>();
     private Geary.Nonblocking.Mutex untrusted_host_prompt_mutex = new Geary.Nonblocking.Mutex();
     private Gee.HashSet<Geary.Endpoint> validating_endpoints = new Gee.HashSet<Geary.Endpoint>();
+
+    private uint operation_count = 0;
     private Geary.Revokable? revokable = null;
 
     // List of windows we're waiting to close before Geary closes.
@@ -1999,7 +2001,7 @@ public class GearyController : Geary.BaseObject {
         if (ids.size == 0)
             return;
 
-        this.main_window.conversation_list_view.set_changing_selection(true);
+        selection_operation_started();
 
         Geary.FolderSupport.Move? supports_move = current_folder as Geary.FolderSupport.Move;
         if (supports_move != null)
@@ -2007,7 +2009,7 @@ public class GearyController : Geary.BaseObject {
                 supports_move, ids, destination.path, cancellable_folder,
                 (obj, ret) => {
                     move_conversation_async.end(ret);
-                    this.main_window.conversation_list_view.set_changing_selection(false);
+                    selection_operation_finished();
                 });
     }
 
@@ -2543,7 +2545,7 @@ public class GearyController : Geary.BaseObject {
             && (current_folder as Geary.FolderSupport.Move) != null);
     }
 
-    public bool confirm_delete(int num_messages) {
+    private bool confirm_delete(int num_messages) {
         this.application.present();
         ConfirmationDialog dialog = new ConfirmationDialog(main_window, ngettext(
             "Do you want to permanently delete this message?",
@@ -2566,10 +2568,10 @@ public class GearyController : Geary.BaseObject {
             return;
         }
 
+        selection_operation_started();
+
         last_deleted_conversation = selected_conversations.size > 0
             ? Geary.traverse<Geary.App.Conversation>(selected_conversations).first() : null;
-
-        this.main_window.conversation_list_view.set_changing_selection(true);
 
         Gee.List<Geary.EmailIdentifier> ids = get_selected_email_ids(false);
         if (archive) {
@@ -2618,16 +2620,16 @@ public class GearyController : Geary.BaseObject {
                 last_deleted_conversation = null;
         }
     }
-    
+
     private void on_archive_or_delete_selection_finished(Object? source, AsyncResult result) {
         try {
             archive_or_delete_selection_async.end(result);
         } catch (Error e) {
             debug("Unable to archive/trash/delete messages: %s", e.message);
         }
-        this.main_window.conversation_list_view.set_changing_selection(false);
+        selection_operation_finished();
     }
-    
+
     private void save_revokable(Geary.Revokable? new_revokable, string? description) {
         // disconnect old revokable & blindly commit it
         if (revokable != null) {
@@ -2690,6 +2692,20 @@ public class GearyController : Geary.BaseObject {
             origin.revoke_async.end(result);
         } catch (Error err) {
             debug("Unable to revoke operation: %s", err.message);
+        }
+    }
+
+    private void selection_operation_started() {
+        this.operation_count += 1;
+        if (this.operation_count == 1) {
+            this.main_window.conversation_list_view.set_changing_selection(true);
+        }
+    }
+
+    private void selection_operation_finished() {
+        this.operation_count -= 1;
+        if (this.operation_count == 0) {
+            this.main_window.conversation_list_view.set_changing_selection(false);
         }
     }
 
