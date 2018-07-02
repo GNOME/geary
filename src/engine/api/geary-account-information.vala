@@ -389,9 +389,9 @@ public class Geary.AccountInformation : BaseObject {
         return (
             this.primary_mailbox.equal_to(email) ||
             (this.alternate_mailboxes != null &&
-             this.alternate_mailboxes.fold<bool>((alt) => {
+             this.alternate_mailboxes.any_match((alt) => {
                      return alt.equal_to(email);
-                 }, false))
+                 }))
         );
     }
 

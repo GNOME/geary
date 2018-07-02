@@ -21,6 +21,7 @@ geary_test_engine_sources = [
   'engine/api/geary-folder-path-mock.vala',
   'engine/api/geary-service-information-mock.vala',
 
+  'engine/api/geary-account-information-test.vala',
   'engine/api/geary-attachment-test.vala',
   'engine/api/geary-engine-test.vala',
   'engine/app/app-conversation-test.vala',
