@@ -48,8 +48,8 @@ class Geary.Imap.DeserializerTest : Gee.TestCase {
 
     public void test_gmail_greeting() {
         string greeting = "* OK Gimap ready for requests from 115.187.245.46 c194mb399904375ivc";
-        this.stream.add_data(greeting.data);
-        this.stream.add_data(EOL.data);
+        this.stream.add_data(greeting.data, g_free);
+        this.stream.add_data(EOL.data, g_free);
 
         this.process.begin(Expect.MESSAGE, (obj, ret) => { async_complete(ret); });
         RootParameters? message = this.process.end(async_result());
@@ -59,8 +59,8 @@ class Geary.Imap.DeserializerTest : Gee.TestCase {
 
     public void test_cyrus_2_4_greeting() {
         string greeting = "* OK [CAPABILITY IMAP4rev1 LITERAL+ ID ENABLE AUTH=PLAIN SASL-IR] mogul Cyrus IMAP v2.4.12-Debian-2.4.12-2 server ready";
-        this.stream.add_data(greeting.data);
-        this.stream.add_data(EOL.data);
+        this.stream.add_data(greeting.data, g_free);
+        this.stream.add_data(EOL.data, g_free);
 
         this.process.begin(Expect.MESSAGE, (obj, ret) => { async_complete(ret); });
         RootParameters? message = this.process.end(async_result());
@@ -71,8 +71,8 @@ class Geary.Imap.DeserializerTest : Gee.TestCase {
     public void test_aliyun_greeting() {
         string greeting = "* OK AliYun IMAP Server Ready(10.147.40.164)";
         string parsed = "* OK AliYun IMAP Server Ready (10.147.40.164)";
-        this.stream.add_data(greeting.data);
-        this.stream.add_data(EOL.data);
+        this.stream.add_data(greeting.data, g_free);
+        this.stream.add_data(EOL.data, g_free);
 
         this.process.begin(Expect.MESSAGE, (obj, ret) => { async_complete(ret); });
         RootParameters? message = this.process.end(async_result());
@@ -82,8 +82,8 @@ class Geary.Imap.DeserializerTest : Gee.TestCase {
 
     public void test_invalid_atom_prefix() {
         string flags = """* OK %atom""";
-        this.stream.add_data(flags.data);
-        this.stream.add_data(EOL.data);
+        this.stream.add_data(flags.data, g_free);
+        this.stream.add_data(EOL.data, g_free);
 
         this.process.begin(Expect.DESER_FAIL, (obj, ret) => { async_complete(ret); });
         this.process.end(async_result());
@@ -91,8 +91,8 @@ class Geary.Imap.DeserializerTest : Gee.TestCase {
 
     public void test_gmail_flags() {
         string flags = """* FLAGS (\Answered \Flagged \Draft \Deleted \Seen $NotPhishing $Phishing)""";
-        this.stream.add_data(flags.data);
-        this.stream.add_data(EOL.data);
+        this.stream.add_data(flags.data, g_free);
+        this.stream.add_data(EOL.data, g_free);
 
         this.process.begin(Expect.MESSAGE, (obj, ret) => { async_complete(ret); });
         RootParameters? message = this.process.end(async_result());
@@ -102,8 +102,8 @@ class Geary.Imap.DeserializerTest : Gee.TestCase {
 
     public void test_gmail_permanent_flags() {
         string flags = """* OK [PERMANENTFLAGS (\Answered \Flagged \Draft \Deleted \Seen $NotPhishing $Phishing \*)] Flags permitted.""";
-        this.stream.add_data(flags.data);
-        this.stream.add_data(EOL.data);
+        this.stream.add_data(flags.data, g_free);
+        this.stream.add_data(EOL.data, g_free);
 
         this.process.begin(Expect.MESSAGE, (obj, ret) => { async_complete(ret); });
         RootParameters? message = this.process.end(async_result());
@@ -113,8 +113,8 @@ class Geary.Imap.DeserializerTest : Gee.TestCase {
 
     public void test_cyrus_flags() {
         string flags = """* 2934 FETCH (FLAGS (\Answered \Seen $Quuxo::Spam::Trained) UID 3041)""";
-        this.stream.add_data(flags.data);
-        this.stream.add_data(EOL.data);
+        this.stream.add_data(flags.data, g_free);
+        this.stream.add_data(EOL.data, g_free);
 
         this.process.begin(Expect.MESSAGE, (obj, ret) => { async_complete(ret); });
         RootParameters? message = this.process.end(async_result());
@@ -128,8 +128,8 @@ class Geary.Imap.DeserializerTest : Gee.TestCase {
         // distinct atom.
         string flags = """* OK \*atom""";
         string expected = """* OK \* atom""";
-        this.stream.add_data(flags.data);
-        this.stream.add_data(EOL.data);
+        this.stream.add_data(flags.data, g_free);
+        this.stream.add_data(EOL.data, g_free);
 
         this.process.begin(Expect.MESSAGE, (obj, ret) => { async_complete(ret); });
         RootParameters? message = this.process.end(async_result());
@@ -139,8 +139,8 @@ class Geary.Imap.DeserializerTest : Gee.TestCase {
 
     public void test_invalid_flag_prefix() {
         string flags = """* OK \%atom""";
-        this.stream.add_data(flags.data);
-        this.stream.add_data(EOL.data);
+        this.stream.add_data(flags.data, g_free);
+        this.stream.add_data(EOL.data, g_free);
 
         this.process.begin(Expect.DESER_FAIL, (obj, ret) => { async_complete(ret); });
         this.process.end(async_result());
@@ -154,7 +154,7 @@ class Geary.Imap.DeserializerTest : Gee.TestCase {
 
     public void test_bye_eos() {
         string bye = """* OK bye""";
-        this.stream.add_data(bye.data);
+        this.stream.add_data(bye.data, g_free);
 
         bool eos = false;
         this.deser.eos.connect(() => { eos = true; });
@@ -209,6 +209,12 @@ class Geary.Imap.DeserializerTest : Gee.TestCase {
 
         default:
             assert_not_reached();
+        }
+
+        // Process any remaining async tasks the deserializer might
+        // have left over.
+        while (this.main_loop.pending()) {
+            this.main_loop.iteration(true);
         }
 
         return message;
