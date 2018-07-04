@@ -1602,6 +1602,17 @@ public class GearyController : Geary.BaseObject {
         // Update the main window
         this.main_window.folder_list.remove_folder(folder);
         this.main_window.folder_list.add_folder(folder);
+        // Since removing the folder will also remove its children
+        // from the folder list, we need to check for any and re-add
+        // them. See isssue #11.
+        try {
+            foreach (Geary.Folder child in
+                     folder.account.list_matching_folders(folder.path)) {
+                main_window.folder_list.add_folder(child);
+            }
+        } catch (Error err) {
+            // Oh well
+        }
 
         // Update notifications
         this.new_messages_monitor.remove_folder(folder);
