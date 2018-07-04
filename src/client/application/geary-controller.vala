@@ -1606,12 +1606,23 @@ public class GearyController : Geary.BaseObject {
         );
     }
 
-    private void on_special_folder_type_changed(Geary.Folder folder, Geary.SpecialFolderType old_type,
-        Geary.SpecialFolderType new_type) {
+    private void on_special_folder_type_changed(Geary.Folder folder,
+                                                Geary.SpecialFolderType old_type,
+                                                Geary.SpecialFolderType new_type) {
         main_window.folder_list.remove_folder(folder);
         main_window.folder_list.add_folder(folder);
+        // Since removing the folder will also remove its children, we
+        // need to check for any and re-add them. See isssue #11.
+        try {
+            foreach (Geary.Folder child in
+                     folder.account.list_matching_folders(folder.path)) {
+                main_window.folder_list.add_folder(child);
+            }
+        } catch (Error err) {
+            // Oh well
+        }
     }
-    
+
     private void on_engine_opened() {
         // Locate the first account so we can select its inbox when available.
         try {
