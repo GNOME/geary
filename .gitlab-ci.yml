@@ -9,7 +9,7 @@ variables:
   BUILD_DIR: build
   CONFIG_CMD: meson --buildtype=debug build
   BUILD_CMD: ninja -v -C $BUILD_DIR
-  TEST_CMD: meson test -v --no-stdsplit -C $BUILD_DIR engine-tests
+  TEST_CMD: xvfb-run meson test -v --no-stdsplit -C $BUILD_DIR
   INSTALL_CMD: ninja -v -C $BUILD_DIR install
   FEDORA_DEPS: vala gobject-introspection-devel
                meson desktop-file-utils libcanberra-devel libgee-devel
@@ -17,7 +17,7 @@ variables:
                webkitgtk4-devel libsecret-devel libxml2-devel vala-tools
                gcr-devel enchant-devel libunwind-devel
                gnome-online-accounts-devel itstool
-  FEDORA_TEST_DEPS: tar xz
+  FEDORA_TEST_DEPS: Xvfb tar xz
   UBUNTU_DEPS: valac libgirepository1.0-dev
                meson desktop-file-utils libcanberra-dev
                libgee-0.8-dev libglib2.0-dev libgmime-2.6-dev libgtk-3-dev
@@ -25,6 +25,7 @@ variables:
                libwebkit2gtk-4.0-dev libgcr-3-dev libenchant-dev
                libunwind-dev libgoa-1.0-dev itstool gettext
                libmessaging-menu-dev libunity-dev
+  UBUNTU_TEST_DEPS: xauth xvfb
 
 #
 # Stages
@@ -47,7 +48,7 @@ ubuntu:
   image: ubuntu:rolling
   before_script:
     - apt-get update
-    - apt-get install -q -y --no-install-recommends $UBUNTU_DEPS
+    - apt-get install -q -y --no-install-recommends $UBUNTU_DEPS $UBUNTU_TEST_DEPS
   script:
     - $CONFIG_CMD
     - $BUILD_CMD
