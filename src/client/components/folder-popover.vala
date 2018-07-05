@@ -109,6 +109,9 @@ public class FolderPopover : Gtk.Popover {
     [GtkCallback]
     private void on_search_entry_search_changed() {
         invalidate_filter();
+        if (this.search_entry.get_text() != "") {
+            this.list_box.unselect_all();
+        }
     }
 
     private void invalidate_filter() {
