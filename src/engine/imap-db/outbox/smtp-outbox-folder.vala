@@ -623,12 +623,34 @@ private class Geary.SmtpOutboxFolder :
         }
 
         if (smtp_err == null) {
+            // Determine the SMTP reverse path, this gets used for
+            // bounce notifications, etc. Use the sender by default,
+            // since if specified the message is explicitly being sent
+            // on behalf of someone else.
+            RFC822.MailboxAddress? reverse_path = rfc822.sender;
+            if (reverse_path == null) {
+                // If no sender specified, use the first from address
+                // that is configured for this account.
+                if (rfc822.from != null) {
+                    foreach (RFC822.MailboxAddress from in rfc822.from) {
+                        if (account.has_email_address(from)) {
+                            reverse_path = from;
+                            break;
+                        }
+                    }
+                }
+
+                if (reverse_path == null) {
+                    // Fall back to using the account's primary
+                    // mailbox if nether a sender nor a from address
+                    // from this account is found.
+                    reverse_path = account.primary_mailbox;
+                }
+            }
+
+            // Now send it
             try {
-                yield smtp.send_email_async(
-                    account.primary_mailbox,
-                    rfc822,
-                    cancellable
-                );
+                yield smtp.send_email_async(reverse_path, rfc822, cancellable);
             } catch (Error send_err) {
                 debug("SMTP send mail error: %s", send_err.message);
                 smtp_err = send_err;
