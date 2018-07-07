@@ -1777,40 +1777,66 @@ public class GearyController : Geary.BaseObject {
         clear_new_messages("on_has_toplevel_focus", null);
     }
 
-    // latest_sent_only uses Email's Date: field, which corresponds to how they're sorted in the
-    // ConversationViewer
-    private Gee.ArrayList<Geary.EmailIdentifier> get_conversation_email_ids(
-        Geary.App.Conversation conversation, bool latest_sent_only,
-        Gee.ArrayList<Geary.EmailIdentifier> add_to) {
-        if (latest_sent_only) {
-            Geary.Email? latest = conversation.get_latest_sent_email(
-                Geary.App.Conversation.Location.IN_FOLDER_OUT_OF_FOLDER);
-            if (latest != null)
-                add_to.add(latest.id);
-        } else {
-            add_to.add_all(conversation.get_email_ids());
+    // latest_sent_only uses Email's Date: field, which corresponds to
+    // how they're sorted in the ConversationViewer, not whether they
+    // are in the sent folder.
+    private Gee.Collection<Geary.EmailIdentifier> get_conversation_email_ids(
+        Gee.Collection<Geary.App.Conversation> conversations,
+        bool latest_sent_only) {
+
+        Gee.Collection<Geary.EmailIdentifier> ids =
+            new Gee.ArrayList<Geary.EmailIdentifier>();
+
+        // Blacklist the Outbox unless that's currently selected since
+        // we don't want any operations to apply to messages there
+        // normally.
+        Gee.Collection<Geary.FolderPath>? blacklist = null;
+        if (this.current_folder != null &&
+            this.current_folder.special_folder_type != Geary.SpecialFolderType.OUTBOX) {
+            Geary.Folder? outbox = null;
+            try {
+                outbox = this.current_account.get_special_folder(
+                    Geary.SpecialFolderType.OUTBOX
+                );
+
+                blacklist = new Gee.ArrayList<Geary.FolderPath>();
+                blacklist.add(outbox.path);
+            } catch (GLib.Error err) {
+                // Oh well
+            }
         }
-        
-        return add_to;
-    }
-    
-    private Gee.Collection<Geary.EmailIdentifier> get_conversation_collection_email_ids(
-        Gee.Collection<Geary.App.Conversation> conversations, bool latest_sent_only) {
-        Gee.ArrayList<Geary.EmailIdentifier> ret = new Gee.ArrayList<Geary.EmailIdentifier>();
-        
-        foreach(Geary.App.Conversation c in conversations)
-            get_conversation_email_ids(c, latest_sent_only, ret);
-        
-        return ret;
-    }
-    
-    private Gee.ArrayList<Geary.EmailIdentifier> get_selected_email_ids(bool latest_sent_only) {
-        Gee.ArrayList<Geary.EmailIdentifier> ids = new Gee.ArrayList<Geary.EmailIdentifier>();
-        foreach (Geary.App.Conversation conversation in selected_conversations)
-            get_conversation_email_ids(conversation, latest_sent_only, ids);
+
+        foreach(Geary.App.Conversation conversation in conversations) {
+            if (latest_sent_only) {
+                Geary.Email? latest = conversation.get_latest_sent_email(
+                    Geary.App.Conversation.Location.IN_FOLDER_OUT_OF_FOLDER,
+                    blacklist
+                );
+                if (latest != null) {
+                    ids.add(latest.id);
+                }
+            } else {
+                Geary.traverse<Geary.Email>(
+                    conversation.get_emails(
+                        Geary.App.Conversation.Ordering.NONE,
+                        Geary.App.Conversation.Location.ANYWHERE,
+                        blacklist
+                    )
+                ).map<Geary.EmailIdentifier>(e => e.id)
+                .add_all_to(ids);
+            }
+        }
+
         return ids;
     }
-    
+
+    private Gee.Collection<Geary.EmailIdentifier>
+        get_selected_email_ids(bool latest_sent_only) {
+        return get_conversation_email_ids(
+            this.selected_conversations, latest_sent_only
+        );
+    }
+
     private void mark_email(Gee.Collection<Geary.EmailIdentifier> ids,
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove) {
         if (ids.size > 0) {
@@ -1889,14 +1915,14 @@ public class GearyController : Geary.BaseObject {
             }
         }
     }
-    
+
     private void on_mark_conversations(Gee.Collection<Geary.App.Conversation> conversations,
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove,
         bool latest_only = false) {
-        mark_email(get_conversation_collection_email_ids(conversations, latest_only),
+        mark_email(get_conversation_email_ids(conversations, latest_only),
             flags_to_add, flags_to_remove);
     }
-    
+
     private void on_conversation_viewer_mark_emails(Gee.Collection<Geary.EmailIdentifier> emails,
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove) {
         mark_email(emails, flags_to_add, flags_to_remove);
@@ -1906,7 +1932,7 @@ public class GearyController : Geary.BaseObject {
         Geary.EmailFlags flags = new Geary.EmailFlags();
         flags.add(Geary.EmailFlags.UNREAD);
 
-        Gee.ArrayList<Geary.EmailIdentifier> ids = get_selected_email_ids(false);
+        Gee.Collection<Geary.EmailIdentifier> ids = get_selected_email_ids(false);
         mark_email(ids, null, flags);
 
         ConversationListBox? list =
@@ -1921,7 +1947,7 @@ public class GearyController : Geary.BaseObject {
         Geary.EmailFlags flags = new Geary.EmailFlags();
         flags.add(Geary.EmailFlags.UNREAD);
 
-        Gee.ArrayList<Geary.EmailIdentifier> ids = get_selected_email_ids(true);
+        Gee.Collection<Geary.EmailIdentifier> ids = get_selected_email_ids(true);
         mark_email(ids, flags, null);
 
         ConversationListBox? list =
@@ -1997,7 +2023,7 @@ public class GearyController : Geary.BaseObject {
         if (selected_conversations == null || selected_conversations.size == 0)
             return;
         
-        Gee.List<Geary.EmailIdentifier> ids = get_selected_email_ids(false);
+        Gee.Collection<Geary.EmailIdentifier> ids = get_selected_email_ids(false);
         if (ids.size == 0)
             return;
 
@@ -2014,7 +2040,9 @@ public class GearyController : Geary.BaseObject {
     }
 
     private async void move_conversation_async(Geary.FolderSupport.Move source_folder,
-        Gee.List<Geary.EmailIdentifier> ids, Geary.FolderPath destination, Cancellable? cancellable) {
+                                               Gee.Collection<Geary.EmailIdentifier> ids,
+                                               Geary.FolderPath destination,
+                                               Cancellable? cancellable) {
         try {
             save_revokable(yield source_folder.move_email_async(ids, destination, cancellable),
                 _("Undo move (Ctrl+Z)"));
@@ -2573,7 +2601,7 @@ public class GearyController : Geary.BaseObject {
         last_deleted_conversation = selected_conversations.size > 0
             ? Geary.traverse<Geary.App.Conversation>(selected_conversations).first() : null;
 
-        Gee.List<Geary.EmailIdentifier> ids = get_selected_email_ids(false);
+        Gee.Collection<Geary.EmailIdentifier> ids = get_selected_email_ids(false);
         if (archive) {
             debug("Archiving selected messages");
             
