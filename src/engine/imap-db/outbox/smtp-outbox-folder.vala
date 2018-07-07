@@ -272,8 +272,10 @@ private class Geary.SmtpOutboxFolder :
         return yield enqueue_email_async(rfc822, cancellable);
     }
 
-    public virtual async void remove_email_async(Gee.List<Geary.EmailIdentifier> email_ids,
-        Cancellable? cancellable = null) throws Error {
+    public virtual async void
+        remove_email_async(Gee.Collection<Geary.EmailIdentifier> email_ids,
+                           GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
         check_open();
 
         yield internal_remove_email_async(email_ids, cancellable);
@@ -724,8 +726,10 @@ private class Geary.SmtpOutboxFolder :
     }
 
     // Like remove_email_async(), but can be called even when the folder isn't open
-    private async bool internal_remove_email_async(Gee.List<Geary.EmailIdentifier> email_ids,
-        Cancellable? cancellable) throws Error {
+    private async bool
+        internal_remove_email_async(Gee.Collection<Geary.EmailIdentifier> email_ids,
+                                    GLib.Cancellable? cancellable)
+        throws GLib.Error {
         Gee.List<Geary.EmailIdentifier> removed = new Gee.ArrayList<Geary.EmailIdentifier>();
         int final_count = 0;
         yield db.exec_transaction_async(Db.TransactionType.WR, (cx) => {

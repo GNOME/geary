@@ -140,29 +140,43 @@ public class Geary.App.Conversation : BaseObject {
 
     /**
      * Returns the earliest (first sent) email in the Conversation.
+     *
+     * Note that here, sent denotes the value of the Date header, not
+     * being contained in the Sent folder.
      */
-    public Geary.Email? get_earliest_sent_email(Location location) {
-        return get_single_email(Ordering.SENT_DATE_ASCENDING, location);
+    public Email?
+        get_earliest_sent_email(Location location,
+                                Gee.Collection<FolderPath>? blacklist = null) {
+        return get_single_email(Ordering.SENT_DATE_ASCENDING, location, blacklist);
     }
 
     /**
      * Returns the latest (most recently sent) email in the Conversation.
+     *
+     * Note that here, sent denotes the value of the Date header, not
+     * being contained in the Sent folder.
      */
-    public Geary.Email? get_latest_sent_email(Location location) {
+    public Email?
+        get_latest_sent_email(Location location,
+                              Gee.Collection<FolderPath>? blacklist = null) {
         return get_single_email(Ordering.SENT_DATE_DESCENDING, location);
     }
 
     /**
      * Returns the earliest (first received) email in the Conversation.
      */
-    public Geary.Email? get_earliest_recv_email(Location location) {
+    public Email?
+        get_earliest_recv_email(Location location,
+                                Gee.Collection<FolderPath>? blacklist = null) {
         return get_single_email(Ordering.RECV_DATE_ASCENDING, location);
     }
 
     /**
      * Returns the latest (most recently received) email in the Conversation.
      */
-    public Geary.Email? get_latest_recv_email(Location location) {
+    public Email?
+        get_latest_recv_email(Location location,
+                              Gee.Collection<FolderPath>? blacklist = null) {
         return get_single_email(Ordering.RECV_DATE_DESCENDING, location);
     }
 
@@ -174,8 +188,11 @@ public class Geary.App.Conversation : BaseObject {
      * {@link Location.IN_FOLDER_OUT_OF_FOLDER}, and {@link Location.ANYWHERE}
      * are all treated as ANYWHERE.
      */
-    public Gee.Collection<Geary.Email> get_emails(Ordering ordering, Location location = Location.ANYWHERE) {
-        Gee.Collection<Geary.Email> email;
+    public Gee.Collection<Email>
+        get_emails(Ordering ordering,
+                   Location location = Location.ANYWHERE,
+                   Gee.Collection<FolderPath>? blacklist = null) {
+        Gee.Collection<Email> email;
         switch (ordering) {
             case Ordering.SENT_DATE_ASCENDING:
                 email = sent_date_ascending;
@@ -201,31 +218,38 @@ public class Geary.App.Conversation : BaseObject {
                 assert_not_reached();
         }
 
+        Iterable<Email> filtered = traverse<Email>(email);
         switch (location) {
-            case Location.IN_FOLDER:
-                email = traverse<Email>(email)
-                    .filter((e) => !is_in_base_folder(e.id))
-                    .to_array_list();
+        case Location.IN_FOLDER:
+            filtered = filtered.filter((e) => is_in_base_folder(e.id));
             break;
 
-            case Location.OUT_OF_FOLDER:
-                email = traverse<Email>(email)
-                    .filter((e) => is_in_base_folder(e.id))
-                    .to_array_list();
+        case Location.OUT_OF_FOLDER:
+            filtered = filtered.filter((e) => !is_in_base_folder(e.id));
             break;
 
-            case Location.IN_FOLDER_OUT_OF_FOLDER:
-            case Location.OUT_OF_FOLDER_IN_FOLDER:
-            case Location.ANYWHERE:
-                // make a modifiable copy
-                email = traverse<Email>(email).to_array_list();
+        default:
+            // Nothing to do
             break;
-
-            default:
-                assert_not_reached();
         }
 
-        return email;
+        if (blacklist != null && !blacklist.is_empty) {
+            if (blacklist.size == 1) {
+                FolderPath blacklist_path =
+                    traverse<FolderPath>(blacklist).first();
+                filtered = filtered.filter(
+                    (e) => !this.path_map.get(e.id).contains(blacklist_path)
+                );
+            } else {
+                filtered = filtered.filter(
+                    (e) => this.path_map.get(e.id).any_match(
+                        (p) => !blacklist.contains(p)
+                    )
+                );
+            }
+        }
+
+        return filtered.to_array_list();
     }
 
     /**
@@ -367,14 +391,20 @@ public class Geary.App.Conversation : BaseObject {
         this.path_map.remove(id, path);
     }
 
-    private Geary.Email? get_single_email(Ordering ordering, Location location) {
-        // note that the location-ordering preferences are treated as ANYWHERE by get_emails()
-        Gee.Collection<Geary.Email> all = get_emails(ordering, location);
-        if (all.size == 0)
+    private Geary.Email?
+        get_single_email(Ordering ordering, Location location,
+                         Gee.Collection<Geary.FolderPath>? blacklist = null) {
+        // note that the location-ordering preferences are treated as
+        // ANYWHERE by get_emails()
+        Gee.Collection<Geary.Email> all = get_emails(
+            ordering, location, blacklist
+        );
+        if (all.size == 0) {
             return null;
+        }
 
-        // Because IN_FOLDER_OUT_OF_FOLDER and OUT_OF_FOLDER_IN_FOLDER are treated as ANYWHERE,
-        // have to do our own filtering
+        // Because IN_FOLDER_OUT_OF_FOLDER and OUT_OF_FOLDER_IN_FOLDER
+        // are treated as ANYWHERE, have to do our own filtering
         switch (location) {
             case Location.IN_FOLDER:
             case Location.OUT_OF_FOLDER:

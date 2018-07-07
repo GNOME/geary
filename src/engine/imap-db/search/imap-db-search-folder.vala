@@ -311,9 +311,11 @@ private class Geary.ImapDB.SearchFolder : Geary.SearchFolder, Geary.FolderSuppor
         Cancellable? cancellable = null) throws Error {
         return yield account.local_fetch_email_async(id, required_fields, cancellable);
     }
-    
-    public virtual async void remove_email_async(Gee.List<Geary.EmailIdentifier> email_ids,
-        Cancellable? cancellable = null) throws Error {
+
+    public virtual async void
+        remove_email_async(Gee.Collection<Geary.EmailIdentifier> email_ids,
+                           GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
         Gee.MultiMap<Geary.EmailIdentifier, Geary.FolderPath>? ids_to_folders
             = yield account.get_containing_folders_async(email_ids, cancellable);
         if (ids_to_folders == null)

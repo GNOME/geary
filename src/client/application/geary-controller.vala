@@ -114,6 +114,8 @@ public class GearyController : Geary.BaseObject {
     private Gee.List<string> pending_mailtos = new Gee.ArrayList<string>();
     private Geary.Nonblocking.Mutex untrusted_host_prompt_mutex = new Geary.Nonblocking.Mutex();
     private Gee.HashSet<Geary.Endpoint> validating_endpoints = new Gee.HashSet<Geary.Endpoint>();
+
+    private uint operation_count = 0;
     private Geary.Revokable? revokable = null;
 
     // List of windows we're waiting to close before Geary closes.
@@ -1786,40 +1788,66 @@ public class GearyController : Geary.BaseObject {
         clear_new_messages("on_has_toplevel_focus", null);
     }
 
-    // latest_sent_only uses Email's Date: field, which corresponds to how they're sorted in the
-    // ConversationViewer
-    private Gee.ArrayList<Geary.EmailIdentifier> get_conversation_email_ids(
-        Geary.App.Conversation conversation, bool latest_sent_only,
-        Gee.ArrayList<Geary.EmailIdentifier> add_to) {
-        if (latest_sent_only) {
-            Geary.Email? latest = conversation.get_latest_sent_email(
-                Geary.App.Conversation.Location.IN_FOLDER_OUT_OF_FOLDER);
-            if (latest != null)
-                add_to.add(latest.id);
-        } else {
-            add_to.add_all(conversation.get_email_ids());
+    // latest_sent_only uses Email's Date: field, which corresponds to
+    // how they're sorted in the ConversationViewer, not whether they
+    // are in the sent folder.
+    private Gee.Collection<Geary.EmailIdentifier> get_conversation_email_ids(
+        Gee.Collection<Geary.App.Conversation> conversations,
+        bool latest_sent_only) {
+
+        Gee.Collection<Geary.EmailIdentifier> ids =
+            new Gee.ArrayList<Geary.EmailIdentifier>();
+
+        // Blacklist the Outbox unless that's currently selected since
+        // we don't want any operations to apply to messages there
+        // normally.
+        Gee.Collection<Geary.FolderPath>? blacklist = null;
+        if (this.current_folder != null &&
+            this.current_folder.special_folder_type != Geary.SpecialFolderType.OUTBOX) {
+            Geary.Folder? outbox = null;
+            try {
+                outbox = this.current_account.get_special_folder(
+                    Geary.SpecialFolderType.OUTBOX
+                );
+
+                blacklist = new Gee.ArrayList<Geary.FolderPath>();
+                blacklist.add(outbox.path);
+            } catch (GLib.Error err) {
+                // Oh well
+            }
         }
-        
-        return add_to;
-    }
-    
-    private Gee.Collection<Geary.EmailIdentifier> get_conversation_collection_email_ids(
-        Gee.Collection<Geary.App.Conversation> conversations, bool latest_sent_only) {
-        Gee.ArrayList<Geary.EmailIdentifier> ret = new Gee.ArrayList<Geary.EmailIdentifier>();
-        
-        foreach(Geary.App.Conversation c in conversations)
-            get_conversation_email_ids(c, latest_sent_only, ret);
-        
-        return ret;
-    }
-    
-    private Gee.ArrayList<Geary.EmailIdentifier> get_selected_email_ids(bool latest_sent_only) {
-        Gee.ArrayList<Geary.EmailIdentifier> ids = new Gee.ArrayList<Geary.EmailIdentifier>();
-        foreach (Geary.App.Conversation conversation in selected_conversations)
-            get_conversation_email_ids(conversation, latest_sent_only, ids);
+
+        foreach(Geary.App.Conversation conversation in conversations) {
+            if (latest_sent_only) {
+                Geary.Email? latest = conversation.get_latest_sent_email(
+                    Geary.App.Conversation.Location.IN_FOLDER_OUT_OF_FOLDER,
+                    blacklist
+                );
+                if (latest != null) {
+                    ids.add(latest.id);
+                }
+            } else {
+                Geary.traverse<Geary.Email>(
+                    conversation.get_emails(
+                        Geary.App.Conversation.Ordering.NONE,
+                        Geary.App.Conversation.Location.ANYWHERE,
+                        blacklist
+                    )
+                ).map<Geary.EmailIdentifier>(e => e.id)
+                .add_all_to(ids);
+            }
+        }
+
         return ids;
     }
-    
+
+    private Gee.Collection<Geary.EmailIdentifier>
+        get_selected_email_ids(bool latest_sent_only) {
+        return get_conversation_email_ids(
+            this.selected_conversations, latest_sent_only
+        );
+    }
+
     private void mark_email(Gee.Collection<Geary.EmailIdentifier> ids,
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove) {
         if (ids.size > 0) {
@@ -1898,14 +1926,14 @@ public class GearyController : Geary.BaseObject {
             }
         }
     }
-    
+
     private void on_mark_conversations(Gee.Collection<Geary.App.Conversation> conversations,
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove,
         bool latest_only = false) {
-        mark_email(get_conversation_collection_email_ids(conversations, latest_only),
+        mark_email(get_conversation_email_ids(conversations, latest_only),
             flags_to_add, flags_to_remove);
     }
-    
+
     private void on_conversation_viewer_mark_emails(Gee.Collection<Geary.EmailIdentifier> emails,
         Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove) {
         mark_email(emails, flags_to_add, flags_to_remove);
@@ -1915,7 +1943,7 @@ public class GearyController : Geary.BaseObject {
         Geary.EmailFlags flags = new Geary.EmailFlags();
         flags.add(Geary.EmailFlags.UNREAD);
 
-        Gee.ArrayList<Geary.EmailIdentifier> ids = get_selected_email_ids(false);
+        Gee.Collection<Geary.EmailIdentifier> ids = get_selected_email_ids(false);
         mark_email(ids, null, flags);
 
         ConversationListBox? list =
@@ -1930,7 +1958,7 @@ public class GearyController : Geary.BaseObject {
         Geary.EmailFlags flags = new Geary.EmailFlags();
         flags.add(Geary.EmailFlags.UNREAD);
 
-        Gee.ArrayList<Geary.EmailIdentifier> ids = get_selected_email_ids(true);
+        Gee.Collection<Geary.EmailIdentifier> ids = get_selected_email_ids(true);
         mark_email(ids, flags, null);
 
         ConversationListBox? list =
@@ -2006,11 +2034,11 @@ public class GearyController : Geary.BaseObject {
         if (selected_conversations == null || selected_conversations.size == 0)
             return;
         
-        Gee.List<Geary.EmailIdentifier> ids = get_selected_email_ids(false);
+        Gee.Collection<Geary.EmailIdentifier> ids = get_selected_email_ids(false);
         if (ids.size == 0)
             return;
 
-        this.main_window.conversation_list_view.set_changing_selection(true);
+        selection_operation_started();
 
         Geary.FolderSupport.Move? supports_move = current_folder as Geary.FolderSupport.Move;
         if (supports_move != null)
@@ -2018,12 +2046,14 @@ public class GearyController : Geary.BaseObject {
                 supports_move, ids, destination.path, cancellable_folder,
                 (obj, ret) => {
                     move_conversation_async.end(ret);
-                    this.main_window.conversation_list_view.set_changing_selection(false);
+                    selection_operation_finished();
                 });
     }
 
     private async void move_conversation_async(Geary.FolderSupport.Move source_folder,
-        Gee.List<Geary.EmailIdentifier> ids, Geary.FolderPath destination, Cancellable? cancellable) {
+                                               Gee.Collection<Geary.EmailIdentifier> ids,
+                                               Geary.FolderPath destination,
+                                               Cancellable? cancellable) {
         try {
             save_revokable(yield source_folder.move_email_async(ids, destination, cancellable),
                 _("Undo move (Ctrl+Z)"));
@@ -2554,7 +2584,7 @@ public class GearyController : Geary.BaseObject {
             && (current_folder as Geary.FolderSupport.Move) != null);
     }
 
-    public bool confirm_delete(int num_messages) {
+    private bool confirm_delete(int num_messages) {
         this.application.present();
         ConfirmationDialog dialog = new ConfirmationDialog(main_window, ngettext(
             "Do you want to permanently delete this message?",
@@ -2577,12 +2607,12 @@ public class GearyController : Geary.BaseObject {
             return;
         }
 
+        selection_operation_started();
+
         last_deleted_conversation = selected_conversations.size > 0
             ? Geary.traverse<Geary.App.Conversation>(selected_conversations).first() : null;
 
-        this.main_window.conversation_list_view.set_changing_selection(true);
-
-        Gee.List<Geary.EmailIdentifier> ids = get_selected_email_ids(false);
+        Gee.Collection<Geary.EmailIdentifier> ids = get_selected_email_ids(false);
         if (archive) {
             debug("Archiving selected messages");
             
@@ -2629,16 +2659,16 @@ public class GearyController : Geary.BaseObject {
                 last_deleted_conversation = null;
         }
     }
-    
+
     private void on_archive_or_delete_selection_finished(Object? source, AsyncResult result) {
         try {
             archive_or_delete_selection_async.end(result);
         } catch (Error e) {
             debug("Unable to archive/trash/delete messages: %s", e.message);
         }
-        this.main_window.conversation_list_view.set_changing_selection(false);
+        selection_operation_finished();
     }
-    
+
     private void save_revokable(Geary.Revokable? new_revokable, string? description) {
         // disconnect old revokable & blindly commit it
         if (revokable != null) {
@@ -2701,6 +2731,20 @@ public class GearyController : Geary.BaseObject {
             origin.revoke_async.end(result);
         } catch (Error err) {
             debug("Unable to revoke operation: %s", err.message);
+        }
+    }
+
+    private void selection_operation_started() {
+        this.operation_count += 1;
+        if (this.operation_count == 1) {
+            this.main_window.conversation_list_view.set_changing_selection(true);
+        }
+    }
+
+    private void selection_operation_finished() {
+        this.operation_count -= 1;
+        if (this.operation_count == 0) {
+            this.main_window.conversation_list_view.set_changing_selection(false);
         }
     }
 

@@ -1,4 +1,5 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -16,8 +17,10 @@ private class Geary.ImapEngine.GenericFolder : MinimalFolder,
         base (account, local_folder, special_folder_type);
     }
 
-    public async Geary.Revokable? archive_email_async(Gee.List<Geary.EmailIdentifier> email_ids,
-        Cancellable? cancellable = null) throws Error {
+    public async Geary.Revokable?
+        archive_email_async(Gee.Collection<Geary.EmailIdentifier> email_ids,
+                            GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
         Geary.Folder? archive_folder = null;
         try {
             archive_folder = yield account.get_required_special_folder_async(Geary.SpecialFolderType.ARCHIVE, cancellable);
@@ -34,19 +37,20 @@ private class Geary.ImapEngine.GenericFolder : MinimalFolder,
         return null;
     }
 
-    public async void remove_email_async(Gee.List<Geary.EmailIdentifier> email_ids,
-        Cancellable? cancellable = null) throws Error {
+    public async void
+        remove_email_async(Gee.Collection<Geary.EmailIdentifier> email_ids,
+                           GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
         yield expunge_email_async(email_ids, cancellable);
     }
-    
+
     public async void empty_folder_async(Cancellable? cancellable = null) throws Error {
         yield expunge_all_async(cancellable);
     }
-    
+
     public new async Geary.EmailIdentifier? create_email_async(RFC822.Message rfc822,
         Geary.EmailFlags? flags, DateTime? date_received, Geary.EmailIdentifier? id,
         Cancellable? cancellable = null) throws Error {
         return yield base.create_email_async(rfc822, flags, date_received, id, cancellable);
     }
 }
-
