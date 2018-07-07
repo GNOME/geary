@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Michael Gratton <mike@vee.net>
+ * Copyright 2017-2018 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -18,6 +18,9 @@ class Geary.App.ConversationTest : TestCase {
         add_test("add_multipath", add_multipath);
         add_test("remove_basic", remove_basic);
         add_test("remove_nonexistent", remove_nonexistent);
+        add_test("get_emails", get_emails);
+        add_test("get_emails_by_location", get_emails_by_location);
+        add_test("get_emails_blacklist", get_emails_blacklist);
     }
 
     public override void set_up() {
@@ -136,6 +139,100 @@ class Geary.App.ConversationTest : TestCase {
         assert(this.test.remove(e2) == null);
         assert(trimmed == 0);
         assert(this.test.get_count() == 1);
+    }
+
+    public void get_emails() throws GLib.Error {
+        Geary.Email e1 = setup_email(1);
+        this.test.add(e1, singleton(this.base_folder.path));
+
+        FolderRoot other_path = new MockFolderRoot("other");
+        Geary.Email e2 = setup_email(2);
+        this.test.add(e2, singleton(other_path));
+
+        assert_int(
+            2, this.test.get_emails(Conversation.Ordering.NONE).size
+        );
+    }
+
+    public void get_emails_by_location() throws GLib.Error {
+        Geary.Email e1 = setup_email(1);
+        this.test.add(e1, singleton(this.base_folder.path));
+
+        FolderRoot other_path = new MockFolderRoot("other");
+        Geary.Email e2 = setup_email(2);
+        this.test.add(e2, singleton(other_path));
+
+        assert_int(
+            1, this.test.get_emails(Conversation.Ordering.NONE,
+                                    Conversation.Location.IN_FOLDER).size,
+            "Unexpected in-folder size"
+        );
+        assert_equal(
+            e1,
+            traverse(this.test.get_emails(Conversation.Ordering.NONE,
+                                          Conversation.Location.IN_FOLDER))
+            .first(),
+            "Unexpected in-folder element"
+        );
+
+        assert_int(
+            1, this.test.get_emails(Conversation.Ordering.NONE,
+                                    Conversation.Location.OUT_OF_FOLDER).size,
+            "Unexpected out-of-folder size"
+        );
+        assert_equal(
+            e2,
+            traverse(this.test.get_emails(Conversation.Ordering.NONE,
+                                          Conversation.Location.OUT_OF_FOLDER))
+            .first(),
+            "Unexpected out-of-folder element"
+        );
+    }
+
+    public void get_emails_blacklist() throws GLib.Error {
+        Geary.Email e1 = setup_email(1);
+        this.test.add(e1, singleton(this.base_folder.path));
+
+        FolderRoot other_path = new MockFolderRoot("other");
+        Geary.Email e2 = setup_email(2);
+        this.test.add(e2, singleton(other_path));
+
+        Gee.Collection<FolderPath> blacklist = new Gee.ArrayList<FolderPath>();
+
+        blacklist.add(other_path);
+        assert_int(
+            1, this.test.get_emails(Conversation.Ordering.NONE,
+                                    Conversation.Location.ANYWHERE,
+                                    blacklist
+            ).size,
+            "Unexpected other blacklist size"
+        );
+        assert_equal(
+            e1,
+            traverse(this.test.get_emails(Conversation.Ordering.NONE,
+                                          Conversation.Location.ANYWHERE,
+                                          blacklist)
+            ).first(),
+            "Unexpected other blacklist element"
+        );
+
+        blacklist.clear();
+        blacklist.add(this.base_folder.path);
+        assert_int(
+            1, this.test.get_emails(Conversation.Ordering.NONE,
+                                    Conversation.Location.ANYWHERE,
+                                    blacklist
+            ).size,
+            "Unexpected other blacklist size"
+        );
+        assert_equal(
+            e2,
+            traverse(this.test.get_emails(Conversation.Ordering.NONE,
+                                          Conversation.Location.ANYWHERE,
+                                          blacklist)
+            ).first(),
+            "Unexpected other blacklist element"
+        );
     }
 
     private Gee.Collection<E> singleton<E>(E element) {
