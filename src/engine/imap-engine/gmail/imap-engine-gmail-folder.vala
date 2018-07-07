@@ -1,4 +1,5 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -17,9 +18,11 @@ private class Geary.ImapEngine.GmailFolder : MinimalFolder, FolderSupport.Archiv
         Geary.EmailIdentifier? id, Cancellable? cancellable = null) throws Error {
         return yield base.create_email_async(rfc822, flags, date_received, id, cancellable);
     }
-    
-    public async Geary.Revokable? archive_email_async(Gee.List<Geary.EmailIdentifier> email_ids,
-        Cancellable? cancellable = null) throws Error {
+
+    public async Geary.Revokable?
+        archive_email_async(Gee.Collection<Geary.EmailIdentifier> email_ids,
+                            GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
         // Use move_email_async("All Mail") here; Gmail will do the right thing and report
         // it was copied with the pre-existing All Mail UID (in other words, no actual copy is
         // performed).  This allows for undoing an archive with the same code path as a move.
@@ -34,12 +37,14 @@ private class Geary.ImapEngine.GmailFolder : MinimalFolder, FolderSupport.Archiv
         
         return null;
     }
-    
-    public async void remove_email_async(Gee.List<Geary.EmailIdentifier> email_ids,
-        Cancellable? cancellable = null) throws Error {
+
+    public async void
+        remove_email_async(Gee.Collection<Geary.EmailIdentifier> email_ids,
+                           GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
         yield true_remove_email_async(this, email_ids, cancellable);
     }
-    
+
     /**
      * Truly removes an email from Gmail by moving it to the Trash and then deleting it from the
      * Trash.
@@ -49,8 +54,11 @@ private class Geary.ImapEngine.GmailFolder : MinimalFolder, FolderSupport.Archiv
      * no connection (or the connection dies) there's no record that Geary needs to perform the
      * final remove when a connection is reestablished.
      */
-    public static async void true_remove_email_async(MinimalFolder folder,
-        Gee.List<Geary.EmailIdentifier> email_ids, Cancellable? cancellable) throws Error {
+    public static async void
+        true_remove_email_async(MinimalFolder folder,
+                                Gee.Collection<Geary.EmailIdentifier> email_ids,
+                                GLib.Cancellable? cancellable)
+        throws GLib.Error {
         // Get path to Trash folder
         Geary.Folder? trash = folder.account.get_special_folder(SpecialFolderType.TRASH);
         if (trash == null)

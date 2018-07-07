@@ -23,8 +23,10 @@ private class Geary.ImapEngine.GmailDraftsFolder : MinimalFolder, FolderSupport.
         return yield base.create_email_async(rfc822, flags, date_received, id, cancellable);
     }
 
-    public async void remove_email_async(Gee.List<Geary.EmailIdentifier> email_ids,
-        Cancellable? cancellable = null) throws Error {
+    public async void remove_email_async(
+        Gee.Collection<Geary.EmailIdentifier> email_ids,
+        GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
         yield GmailFolder.true_remove_email_async(this, email_ids, cancellable);
     }
 }

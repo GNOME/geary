@@ -1190,14 +1190,17 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         
         return op.email;
     }
-    
-    // Helper function for child classes dealing with the delete/archive question.  This method will
-    // mark the message as deleted and expunge it.
-    protected async void expunge_email_async(Gee.List<Geary.EmailIdentifier> email_ids,
-        Cancellable? cancellable) throws Error {
+
+    // Helper function for child classes dealing with the
+    // delete/archive question.  This method will mark the message as
+    // deleted and expunge it.
+    protected async void
+        expunge_email_async(Gee.Collection<Geary.EmailIdentifier> email_ids,
+                            GLib.Cancellable? cancellable)
+        throws GLib.Error {
         check_open("expunge_email_async");
         check_ids("expunge_email_async", email_ids);
-        
+
         RemoveEmail remove = new RemoveEmail(this, (Gee.List<ImapDB.EmailIdentifier>) email_ids,
             cancellable);
         replay_queue.schedule(remove);
@@ -1235,23 +1238,27 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         foreach (EmailIdentifier id in ids)
             check_id(method, id);
     }
-    
-    public virtual async void mark_email_async(Gee.List<Geary.EmailIdentifier> to_mark,
-        Geary.EmailFlags? flags_to_add, Geary.EmailFlags? flags_to_remove,
-        Cancellable? cancellable = null) throws Error {
+
+    public virtual async void
+        mark_email_async(Gee.Collection<Geary.EmailIdentifier> to_mark,
+                         Geary.EmailFlags? flags_to_add,
+                         Geary.EmailFlags? flags_to_remove,
+                         GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
         check_open("mark_email_async");
         check_ids("mark_email_async", to_mark);
 
         MarkEmail mark = new MarkEmail(this, (Gee.List<ImapDB.EmailIdentifier>) to_mark, flags_to_add, flags_to_remove, cancellable);
         replay_queue.schedule(mark);
-        
+
         yield mark.wait_for_ready_async(cancellable);
     }
 
-    public virtual async void copy_email_async(Gee.List<Geary.EmailIdentifier> to_copy,
-                                               Geary.FolderPath destination,
-                                               Cancellable? cancellable = null)
-        throws Error {
+    public virtual async void
+        copy_email_async(Gee.Collection<Geary.EmailIdentifier> to_copy,
+                         Geary.FolderPath destination,
+                         GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
         Geary.Folder target = yield this._account.fetch_folder_async(destination);
         yield copy_email_uids_async(to_copy, destination, cancellable);
         this._account.update_folder(target);
@@ -1260,11 +1267,14 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     /**
      * Returns the destination folder's UIDs for the copied messages.
      */
-    protected async Gee.Set<Imap.UID>? copy_email_uids_async(Gee.List<Geary.EmailIdentifier> to_copy,
-        Geary.FolderPath destination, Cancellable? cancellable = null) throws Error {
+    protected async Gee.Set<Imap.UID>?
+        copy_email_uids_async(Gee.Collection<Geary.EmailIdentifier> to_copy,
+                              Geary.FolderPath destination,
+                              GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
         check_open("copy_email_uids_async");
         check_ids("copy_email_uids_async", to_copy);
-        
+
         // watch for copying to this folder, which is treated as a no-op
         if (destination.equal_to(path))
             return null;
@@ -1277,11 +1287,14 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
         return copy.destination_uids.size > 0 ? copy.destination_uids : null;
     }
 
-    public virtual async Geary.Revokable? move_email_async(Gee.List<Geary.EmailIdentifier> to_move,
-        Geary.FolderPath destination, Cancellable? cancellable = null) throws Error {
+    public virtual async Geary.Revokable? move_email_async(
+        Gee.Collection<Geary.EmailIdentifier> to_move,
+        Geary.FolderPath destination,
+        Cancellable? cancellable = null)
+    throws Error {
         check_open("move_email_async");
         check_ids("move_email_async", to_move);
-        
+
         // watch for moving to this folder, which is treated as a no-op
         if (destination.equal_to(path))
             return null;
