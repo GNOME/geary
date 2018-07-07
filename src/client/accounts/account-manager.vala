@@ -189,8 +189,8 @@ public class AccountManager : GLib.Object {
 
     /** Returns a read-only iterable of all currently known accounts. */
     public Geary.Iterable<Geary.AccountInformation> iterable() {
-        return new Geary.Iterable<AccountState>(
-            this.accounts.values.iterator()
+        return Geary.traverse<AccountState>(
+            this.accounts.values
         ).map<Geary.AccountInformation>(
             ((state) => { return state.account; })
         );
