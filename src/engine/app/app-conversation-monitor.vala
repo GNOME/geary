@@ -50,15 +50,15 @@ public class Geary.App.ConversationMonitor : BaseObject {
         Geary.Email.Field.FLAGS | Geary.Email.Field.DATE;
 
 
-    private class ProcessJobContext : BaseObject {
-        public Gee.HashMap<Geary.EmailIdentifier, Geary.Email> emails
-            = new Gee.HashMap<Geary.EmailIdentifier, Geary.Email>();
+    private struct ProcessJobContext {
 
-        public bool inside_scan;
+        public Gee.Map<Geary.EmailIdentifier,Geary.Email> emails;
 
-        public ProcessJobContext(bool inside_scan) {
-            this.inside_scan = inside_scan;
+
+        public ProcessJobContext() {
+            this.emails = new Gee.HashMap<Geary.EmailIdentifier,Geary.Email>();
         }
+
     }
 
 
@@ -402,6 +402,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
         }
 
         int load_count = 0;
+        GLib.Error? scan_error = null;
         try {
             Gee.Collection<Geary.Email>? messages =
                 yield this.base_folder.list_email_by_id_async(
@@ -416,12 +417,16 @@ public class Geary.App.ConversationMonitor : BaseObject {
                     this.window.add(email.id);
                 }
 
-                yield process_email_async(messages, new ProcessJobContext(true));
+                yield process_email_async(messages, ProcessJobContext());
             }
+        } catch (GLib.Error err) {
+            scan_error = err;
+        }
 
-        } catch (Error err) {
-            notify_scan_completed();
-            throw err;
+        notify_scan_completed();
+
+        if (scan_error != null) {
+            throw scan_error;
         }
 
         return load_count;
@@ -437,6 +442,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
             flags |= Folder.ListFlags.LOCAL_ONLY;
         }
 
+        GLib.Error? scan_error = null;
         try {
             Gee.Collection<Geary.Email>? messages =
                 yield this.base_folder.list_email_by_sparse_id_async(
@@ -448,11 +454,16 @@ public class Geary.App.ConversationMonitor : BaseObject {
                     this.window.add(email.id);
                 }
 
-                yield process_email_async(messages, new ProcessJobContext(true));
+                yield process_email_async(messages, ProcessJobContext());
             }
-        } catch (Error err) {
-            notify_scan_completed();
-            throw err;
+        } catch (GLib.Error err) {
+            scan_error = err;
+        }
+
+        notify_scan_completed();
+
+        if (scan_error != null) {
+            throw scan_error;
         }
     }
 
@@ -524,7 +535,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
 
         if (emails != null && !emails.is_empty) {
             debug("Fetched %d relevant emails locally", emails.size);
-            yield process_email_async(emails, new ProcessJobContext(false));
+            yield process_email_async(emails, ProcessJobContext());
         }
     }
 
@@ -727,9 +738,6 @@ public class Geary.App.ConversationMonitor : BaseObject {
             foreach (Conversation conversation in appended.get_keys())
                 notify_conversation_appended(conversation, appended.get(conversation));
         }
-
-        if (job.inside_scan)
-            notify_scan_completed();
     }
 
     private async void expand_conversations_async(Gee.Set<RFC822.MessageID> needed_message_ids,

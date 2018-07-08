@@ -56,6 +56,11 @@ class Geary.App.ConversationMonitorTest : TestCase {
         );
         Cancellable test_cancellable = new Cancellable();
 
+        bool saw_scan_started = false;
+        bool saw_scan_completed = false;
+        monitor.scan_started.connect(() => { saw_scan_started = true; });
+        monitor.scan_completed.connect(() => { saw_scan_completed = true; });
+
         this.base_folder.expect_call(
             "open_async",
             { MockObject.int_arg(Folder.OpenFlags.NONE), test_cancellable }
@@ -68,10 +73,18 @@ class Geary.App.ConversationMonitorTest : TestCase {
         );
         monitor.start_monitoring_async.end(async_result());
 
+        // Process all of the async tasks arising from the open
+        while (this.main_loop.pending()) {
+            this.main_loop.iteration(true);
+        }
+
         monitor.stop_monitoring_async.begin(
             test_cancellable, (obj, res) => { async_complete(res); }
         );
         monitor.stop_monitoring_async.end(async_result());
+
+        assert_true(saw_scan_started, "scan_started not fired");
+        assert_true(saw_scan_completed, "scan_completed not fired");
 
         this.base_folder.assert_expectations();
     }
