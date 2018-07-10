@@ -64,4 +64,13 @@ public class Geary.Imap.LiteralParameter : Geary.Imap.Parameter {
         ser.push_eol(cancellable);
     }
 
+    /**
+     * Serialises the literal parameter data.
+     */
+    public async void serialize_data(Serializer ser,
+                                     GLib.Cancellable cancellable)
+        throws GLib.Error {
+        yield ser.push_literal_data(buffer, cancellable);
+    }
+
 }

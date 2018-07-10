@@ -277,10 +277,6 @@ public class Geary.Imap.ClientSession : BaseObject {
     private uint unselected_keepalive_secs = 0;
     private uint selected_with_idle_keepalive_secs = 0;
 
-    private Gee.HashMap<Tag, StatusResponse> seen_completion_responses = new Gee.HashMap<
-        Tag, StatusResponse>();
-    private Gee.HashMap<Tag, CommandCallback> waiting_for_completion = new Gee.HashMap<
-        Tag, CommandCallback>();
     private Command? state_change_cmd = null;
     private Nonblocking.Semaphore? connect_waiter = null;
     private Error? connect_err = null;
@@ -783,17 +779,8 @@ public class Geary.Imap.ClientSession : BaseObject {
             
             cx = null;
         }
-        
-        // if there are any outstanding commands waiting for responses, wake them up now
-        if (waiting_for_completion.size > 0) {
-            debug("[%s] Cancelling %d pending commands", to_string(), waiting_for_completion.size);
-            foreach (CommandCallback cmd_cb in waiting_for_completion.values)
-                Scheduler.on_idle(cmd_cb.callback);
-            
-            waiting_for_completion.clear();
-        }
     }
-    
+
     private uint on_connected(uint state, uint event) {
         debug("[%s] Connected", to_string());
         
@@ -966,21 +953,6 @@ public class Geary.Imap.ClientSession : BaseObject {
         
         // either way, new capabilities should be available
         caps = capabilities;
-        
-        // Attempt compression (usually only available after authentication)
-        if (caps.has_setting(Capabilities.COMPRESS, Capabilities.DEFLATE_SETTING)) {
-            StatusResponse resp = yield send_command_async(
-                new CompressCommand(CompressCommand.ALGORITHM_DEFLATE));
-            if (resp.status == Status.OK) {
-                install_send_converter(new ZlibCompressor(ZlibCompressorFormat.RAW));
-                install_recv_converter(new ZlibDecompressor(ZlibCompressorFormat.RAW));
-                debug("[%s] Compression started", to_string());
-            } else {
-                debug("[%s] Unable to start compression: %s", to_string(), resp.to_string());
-            }
-        } else {
-            debug("[%s] No compression available", to_string());
-        }
 
         Gee.List<ServerData> server_data = new Gee.ArrayList<ServerData>();
         ulong data_id = this.server_data_received.connect((data) => { server_data.add(data); });
@@ -1255,18 +1227,6 @@ public class Geary.Imap.ClientSession : BaseObject {
         } catch (Error err) {
             debug("[%s] Keepalive error: %s", to_string(), err.message);
         }
-    }
-    
-    //
-    // Converters
-    //
-    
-    public bool install_send_converter(Converter converter) {
-        return (cx != null) ? cx.install_send_converter(converter) : false;
-    }
-    
-    public bool install_recv_converter(Converter converter) {
-        return (cx != null) ? cx.install_recv_converter(converter) : false;
     }
 
     //
@@ -1750,38 +1710,17 @@ public class Geary.Imap.ClientSession : BaseObject {
     //
     // command submission
     //
-    
+
     private async StatusResponse command_transaction_async(Command cmd, Cancellable? cancellable)
         throws Error {
-        if (cx == null)
+        if (this.cx == null)
             throw new ImapError.NOT_CONNECTED("Not connected to %s", imap_endpoint.to_string());
-        
-        yield cx.send_async(cmd, cancellable);
-        
-        // send_async() should've tagged the Command, otherwise the completion_pending will fail
-        assert(cmd.tag.is_tagged());
-        
-        // If the command didn't complete (i.e. a CompletionStatusResponse didn't return from the
-        // server) in the context of send_async(), wait for it now
-        if (!seen_completion_responses.has_key(cmd.tag)) {
-            waiting_for_completion.set(cmd.tag, new CommandCallback(command_transaction_async.callback));
-            yield;
-        }
-        
-        // it should be seen now; if not, it's because of disconnection cancelling all the outstanding
-        // requests
-        StatusResponse? completion_response;
-        if (!seen_completion_responses.unset(cmd.tag, out completion_response)) {
-            assert(cx == null);
-            
-            throw new ImapError.NOT_CONNECTED("Not connected to %s", imap_endpoint.to_string());
-        }
-        
-        assert(completion_response != null);
-        
-        return completion_response;
+
+        this.cx.send_command(cmd);
+        yield cmd.wait_until_complete(cancellable);
+        return cmd.status;
     }
-    
+
     //
     // network connection event handlers
     //
@@ -1835,24 +1774,14 @@ public class Geary.Imap.ClientSession : BaseObject {
                     err.message);
             }
         }
-        
+
         // update state machine before notifying subscribers, who may turn around and query ClientSession
         if (status_response.is_completion) {
             fsm.issue(Event.RECV_COMPLETION, null, status_response, null);
-            
-            // Note that this signal could be called in the context of cx.send_async() that sent
-            // this command to the server ... this mechanism (seen_completion_response and
-            // waiting_for_completion) assures that in either case issue_command_async() returns
-            // when the command is completed
-            seen_completion_responses.set(status_response.tag, status_response);
-            
-            CommandCallback? cmd_cb;
-            if (waiting_for_completion.unset(status_response.tag, out cmd_cb))
-                Scheduler.on_idle(cmd_cb.callback);
         } else {
             fsm.issue(Event.RECV_STATUS, null, status_response, null);
         }
-        
+
         status_response_received(status_response);
     }
     

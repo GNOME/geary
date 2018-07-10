@@ -45,6 +45,17 @@ public class Geary.Imap.Command : BaseObject {
     protected ListParameter args {
         get; private set; default = new RootParameters();
     }
+
+    /** The status response for the command, once it has been received. */
+    public StatusResponse? status { get; private set; default = null; }
+
+    private Geary.Nonblocking.Semaphore complete_lock =
+        new Geary.Nonblocking.Semaphore();
+
+    private Geary.Nonblocking.Spinlock? literal_spinlock = null;
+    private GLib.Cancellable? literal_cancellable = null;
+
+
     /**
      * Constructs a new command with an unassigned tag.
      *
@@ -62,52 +73,208 @@ public class Geary.Imap.Command : BaseObject {
             }
         }
     }
-    
-    /**
-     *
-     */
-    }
-    
-    private void stock_params() {
-        add(tag);
-        add(new AtomParameter(name));
-        if (args != null) {
-            foreach (string arg in args)
-                add(Parameter.get_for_string(arg));
-        }
-    }
-    
-    /**
-     * Assign a {@link Tag} to a {@link Command} with an unassigned placeholder Tag.
-     *
-     * Can only be called on a Command that holds an unassigned Tag.  Thus, this can only be called
-     * once at most, and zero times if Command.assigned() was used to generate the Command.
-     * Fires an assertion if either of these cases is true, or if the supplied Tag is unassigned.
-     */
-    public void assign_tag(Tag tag) {
-        assert(!this.tag.is_assigned());
-        assert(tag.is_assigned());
-        
-        this.tag = tag;
-        
-        // Tag is always at index zero.
-        try {
-            Parameter param = replace(0, tag);
-            assert(param is Tag);
-        } catch (ImapError err) {
-            error("Unable to assign Tag for command %s: %s", to_string(), err.message);
-        }
-    }
-    
+
     public bool has_name(string name) {
         return Ascii.stri_equal(this.name, name);
     }
-    
-    public override void serialize(Serializer ser, Tag tag) throws Error {
-        assert(tag.is_assigned());
-        
-        base.serialize(ser, tag);
-        ser.push_end_of_message();
+
+    /**
+     * Assign a Tag to this command, if currently unassigned.
+     *
+     * Can only be called on a Command that holds an unassigned Tag.
+     * Thus, this can only be called once at most, and zero times if
+     * Command.assigned() was used to generate the Command.  Fires an
+     * assertion if either of these cases is true, or if the supplied
+     * Tag is unassigned.
+     */
+    public void assign_tag(Tag new_tag) throws ImapError {
+        if (this.tag.is_assigned()) {
+            throw new ImapError.SERVER_ERROR(
+                "%s: Command tag is already assigned", to_brief_string()
+            );
+        }
+        if (!new_tag.is_assigned()) {
+            throw new ImapError.SERVER_ERROR(
+                "%s: New tag is not assigned", to_brief_string()
+            );
+        }
+
+        this.tag = new_tag;
+    }
+
+    /**
+     * Serialises this command for transmission to the server.
+     *
+     * This will serialise its tag, name and arguments (if
+     * any). Arguments are treated as strings and escaped as needed,
+     * including being encoded as a literal. If any literals are
+     * required, this method will yield until a command continuation
+     * has been received, when it will resume the same process.
+     */
+    public virtual async void serialize(Serializer ser,
+                                        GLib.Cancellable cancellable)
+        throws GLib.Error {
+        this.tag.serialize(ser, cancellable);
+        ser.push_space(cancellable);
+        ser.push_unquoted_string(this.name, cancellable);
+
+        if (this.args != null) {
+            foreach (Parameter arg in this.args.get_all()) {
+                ser.push_space(cancellable);
+                arg.serialize(ser, cancellable);
+
+                LiteralParameter literal = arg as LiteralParameter;
+                if (literal != null) {
+                    // Need to manually flush after serialising the
+                    // literal param, so it actually gets to the
+                    // server
+                    yield ser.flush_stream(cancellable);
+
+                    if (this.literal_spinlock == null) {
+                        // Lazily create these since they usually
+                        // won't be needed
+                        this.literal_cancellable = new GLib.Cancellable();
+                        this.literal_spinlock = new Geary.Nonblocking.Spinlock(
+                            this.literal_cancellable
+                        );
+                    }
+
+                    // Will get notified via continuation_requested
+                    // when server indicated the literal can be sent.
+                    yield this.literal_spinlock.wait_async(cancellable);
+                    yield literal.serialize_data(ser, cancellable);
+                }
+            }
+        }
+
+        ser.push_eol(cancellable);
+    }
+
+    /**
+     * Cancels any existing serialisation in progress.
+     *
+     * When this method is called, any non I/O related process
+     * blocking the blocking {@link serialize} must be cancelled.
+     */
+    public virtual void cancel_serialization() {
+        if (this.literal_cancellable != null) {
+            this.literal_cancellable.cancel();
+        }
+    }
+
+    /**
+     * Yields until the command has been completed or cancelled.
+     *
+     * Throws an error if cancelled, or if the command's response was
+     * bad.
+     */
+    public async void wait_until_complete(GLib.Cancellable cancellable)
+        throws GLib.Error {
+        yield this.complete_lock.wait_async(cancellable);
+        check_status();
+    }
+
+    /**
+     * Called when a tagged status response is received for this command.
+     *
+     * This will update the command's {@link status} property, then
+     * throw an error it does not indicate a successful completion.
+     */
+    public virtual void completed(StatusResponse new_status)
+        throws ImapError {
+        if (this.status != null) {
+            cancel_serialization();
+            throw new ImapError.SERVER_ERROR(
+                "%s: Duplicate status response received: %s",
+                to_brief_string(),
+                status.to_string()
+            );
+        }
+
+        this.status = new_status;
+        this.complete_lock.blind_notify();
+        cancel_serialization();
+        check_status();
+    }
+
+    /**
+     * Called when tagged server data is received for this command.
+     */
+    public virtual void data_received(ServerData data)
+        throws ImapError {
+        if (this.status != null) {
+            cancel_serialization();
+            throw new ImapError.SERVER_ERROR(
+                "%s: Server data received when command already complete: %s",
+                to_brief_string(),
+                data.to_string()
+            );
+        }
+        // Nothing to do otherwise
+    }
+
+    /**
+     * Called when a continuation was requested by the server.
+     *
+     * This will notify the command's literal spinlock so that if
+     * {@link serialize} is waiting to send a literal, it will do so
+     * now.
+     */
+    public virtual void
+        continuation_requested(ContinuationResponse continuation)
+        throws ImapError {
+        if (this.status != null) {
+            cancel_serialization();
+            throw new ImapError.SERVER_ERROR(
+                "%s: Continuation requested when command already complete",
+                to_brief_string()
+            );
+        }
+
+        if (this.literal_spinlock == null) {
+            cancel_serialization();
+            throw new ImapError.SERVER_ERROR(
+                "%s: Continuation requested but no literals available",
+                to_brief_string()
+            );
+        }
+
+        this.literal_spinlock.blind_notify();
+    }
+
+    public virtual string to_string() {
+        string args = this.args.to_string();
+        return (Geary.String.is_empty(args))
+            ? "%s %s".printf(this.tag.to_string(), this.name)
+            : "%s %s %s".printf(this.tag.to_string(), this.name, args);
+    }
+
+    private void check_status() throws ImapError {
+        if (this.status == null) {
+            throw new ImapError.SERVER_ERROR(
+                "%s: No command response was received",
+                to_brief_string()
+            );
+        }
+
+        if (!this.status.is_completion) {
+            throw new ImapError.SERVER_ERROR(
+                "%s: Command status response is not a completion: %s",
+                to_brief_string(),
+                this.status.to_string()
+            );
+        }
+
+        if (this.status.status != Status.OK) {
+            throw new ImapError.SERVER_ERROR(
+                "%s: Command failed: %s",
+                to_brief_string(),
+                this.status.to_string()
+            );
+        }
+    }
+
+    private string to_brief_string() {
+        return "%s %s".printf(this.tag.to_string(), this.name);
     }
 }
-
