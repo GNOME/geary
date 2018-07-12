@@ -293,7 +293,6 @@ src/engine/imap/message/imap-tag.vala
 src/engine/imap/message/imap-uid.vala
 src/engine/imap/message/imap-uid-validity.vala
 src/engine/imap/parameter/imap-atom-parameter.vala
-src/engine/imap/parameter/imap-continuation-parameter.vala
 src/engine/imap/parameter/imap-list-parameter.vala
 src/engine/imap/parameter/imap-literal-parameter.vala
 src/engine/imap/parameter/imap-nil-parameter.vala

@@ -202,7 +202,6 @@ public class Geary.Imap.ClientSession : BaseObject {
         DISCONNECTED,
         RECV_STATUS,
         RECV_COMPLETION,
-        RECV_CONTINUATION,
 
         // I/O errors
         RECV_ERROR,
@@ -390,7 +389,6 @@ public class Geary.Imap.ClientSession : BaseObject {
             new Geary.State.Mapping(State.AUTHORIZING, Event.DISCONNECT, on_disconnect),
             new Geary.State.Mapping(State.AUTHORIZING, Event.RECV_STATUS, on_recv_status),
             new Geary.State.Mapping(State.AUTHORIZING, Event.RECV_COMPLETION, on_login_recv_completion),
-            new Geary.State.Mapping(State.AUTHORIZING, Event.RECV_CONTINUATION, on_login_recv_continuation),
             new Geary.State.Mapping(State.AUTHORIZING, Event.SEND_ERROR, on_send_error),
             new Geary.State.Mapping(State.AUTHORIZING, Event.RECV_ERROR, on_recv_error),
             
@@ -1074,35 +1072,6 @@ public class Geary.Imap.ClientSession : BaseObject {
                 
                 return State.NOAUTH;
         }
-    }
-
-    private uint on_login_recv_continuation(uint state,
-                                            uint event,
-                                            void *user,
-                                            Object? object) {
-        ContinuationResponse response = (ContinuationResponse) object;
-        AuthenticateCommand auth = this.state_change_cmd as AuthenticateCommand;
-        if (auth != null) {
-            ContinuationParameter? reply = null;
-            try {
-                reply = auth.continuation_requested(response);
-            } catch (ImapError err) {
-                debug("[%s] Error handling login continuation request: %s",
-                      to_string(), err.message);
-            }
-
-            if (reply != null) {
-                // We have to handle the continuation request anyway,
-                // so just send an empty one.
-                reply = new ContinuationParameter(new uint8[0]);
-            }
-
-            // XXX Not calling yield here is a nasty hack? Need to get
-            // a cancellable to this somehow, too.
-            this.cx.send_continuation_reply.begin(reply, null);
-        }
-
-        return State.AUTHORIZING;
     }
 
     //
@@ -1866,8 +1835,6 @@ public class Geary.Imap.ClientSession : BaseObject {
 
         // reschedule keepalive (traffic seen on channel)
         schedule_keepalive();
-
-        fsm.issue(Event.RECV_CONTINUATION, null, response, null);
     }
 
     private void on_received_bytes(size_t bytes) {
@@ -1904,4 +1871,3 @@ public class Geary.Imap.ClientSession : BaseObject {
         }
     }
 }
-

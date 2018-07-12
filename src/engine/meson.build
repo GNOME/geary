@@ -136,7 +136,6 @@ geary_engine_vala_sources = files(
   'imap/message/imap-uid.vala',
   'imap/message/imap-uid-validity.vala',
   'imap/parameter/imap-atom-parameter.vala',
-  'imap/parameter/imap-continuation-parameter.vala',
   'imap/parameter/imap-list-parameter.vala',
   'imap/parameter/imap-literal-parameter.vala',
   'imap/parameter/imap-nil-parameter.vala',
