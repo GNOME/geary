@@ -21,6 +21,9 @@ public class Geary.Nonblocking.Queue<G> : BaseObject {
     /** Returns the number of items currently in the queue. */
     public int size { get { return queue.size; } }
 
+    /** Determines if any items are in the queue. */
+    public bool is_empty { get { return queue.is_empty; } }
+
     /**
      * Determines if duplicate items can be added to the queue.
      *
