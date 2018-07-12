@@ -1,4 +1,5 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -10,11 +11,11 @@
  * @see FetchCommand
  * @see FetchedData
  */
-
 public class Geary.Imap.StoreCommand : Command {
+
     public const string NAME = "store";
     public const string UID_NAME = "uid store";
-    
+
     /**
      * Options indicating functionality of the {@link StoreCommand}.
      *
@@ -28,21 +29,22 @@ public class Geary.Imap.StoreCommand : Command {
         ADD_FLAGS,
         SILENT
     }
-    
+
     public StoreCommand(MessageSet message_set, Gee.List<MessageFlag> flag_list, Option options) {
         base (message_set.is_uid ? UID_NAME : NAME);
-        
+
         bool add_flag = (options & Option.ADD_FLAGS) != 0;
         bool silent = (options & Option.SILENT) != 0;
-        
-        add(message_set.to_parameter());
-        add(new AtomParameter("%sflags%s".printf(add_flag ? "+" : "-", silent ? ".silent" : "")));
-        
-        ListParameter list = new ListParameter();
-        foreach(MessageFlag flag in flag_list)
-            list.add(new AtomParameter(flag.value));
-        
-        add(list);
-    }
-}
 
+        this.args.add(message_set.to_parameter());
+        this.args.add(new AtomParameter("%sflags%s".printf(add_flag ? "+" : "-", silent ? ".silent" : "")));
+
+        ListParameter list = new ListParameter();
+        foreach(MessageFlag flag in flag_list) {
+            list.add(new AtomParameter(flag.value));
+        }
+
+        this.args.add(list);
+    }
+
+}

@@ -15,15 +15,20 @@ class Geary.Imap.CreateCommandTest : TestCase {
     }
 
     public void basic_create() throws Error {
-        assert(new CreateCommand(new MailboxSpecifier("owatagusiam/")).to_string() ==
-               "---- create owatagusiam/");
+        assert_string(
+            "---- create owatagusiam/",
+            new CreateCommand(new MailboxSpecifier("owatagusiam/")).to_string()
+        );
     }
 
     public void special_use() throws Error {
-        assert(new CreateCommand.special_use(
-                   new MailboxSpecifier("Everything"),
-                   SpecialFolderType.ALL_MAIL
-                   ).to_string() == "---- create Everything (use (\\All))");
+        assert_string(
+            "---- create Everything (use (\\All))",
+            new CreateCommand.special_use(
+                new MailboxSpecifier("Everything"),
+                SpecialFolderType.ALL_MAIL
+            ).to_string()
+        );
     }
 
 }

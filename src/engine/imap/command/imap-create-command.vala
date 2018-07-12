@@ -58,7 +58,7 @@ public class Geary.Imap.CreateCommand : Command {
     public CreateCommand(MailboxSpecifier mailbox) {
         base(NAME_ATOM);
         this.mailbox = mailbox;
-        add(mailbox.to_parameter());
+        this.args.add(mailbox.to_parameter());
     }
 
     public CreateCommand.special_use(MailboxSpecifier mailbox,
@@ -75,7 +75,7 @@ public class Geary.Imap.CreateCommand : Command {
             use_param.add(new AtomParameter(USE_ATOM));
             use_param.add(use_types);
 
-            add(use_param);
+            this.args.add(use_param);
         }
     }
 

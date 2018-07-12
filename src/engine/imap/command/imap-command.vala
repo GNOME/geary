@@ -16,7 +16,8 @@
  * See [[http://tools.ietf.org/html/rfc3501#section-6]]
  */
 
-public class Geary.Imap.Command : RootParameters {
+public class Geary.Imap.Command : BaseObject {
+
     /**
      * All IMAP commands are tagged with an identifier assigned by the client.
      *
@@ -29,45 +30,42 @@ public class Geary.Imap.Command : RootParameters {
      * @see assign_tag
      */
     public Tag tag { get; private set; }
-    
+
     /**
      * The name (or "verb") of the {@link Command}.
      */
     public string name { get; private set; }
-    
+
     /**
-     * Zero or more arguments for the {@link Command}.
+     * The command's arguments as parameters.
      *
-     * Note that some Commands have require args and others are optional.  The format of the
-     * arguments ({@link StringParameter}, {@link ListParameter}, etc.) is sometimes crucial.
+     * Subclassess may append arguments to this before {@link
+     * serialize} is called, ideally from the constructor.
      */
-    public string[]? args { get; private set; }
-    
+    protected ListParameter args {
+        get; private set; default = new RootParameters();
+    }
     /**
-     * Create a Command with an unassigned Tag.
+     * Constructs a new command with an unassigned tag.
      *
-     * @see tag
+     * Any arguments provided here will be converted to appropriate
+     * string arguments
+     *
+     * @see Tag
      */
     public Command(string name, string[]? args = null) {
         tag = Tag.get_unassigned();
         this.name = name;
-        this.args = args;
-        
-        stock_params();
+        if (args != null) {
+            foreach (string arg in args) {
+                this.args.add(Parameter.get_for_string(arg));
+            }
+        }
     }
     
     /**
-     * Create a Command with an assigned Tag.
      *
-     * @see tag
      */
-    public Command.assigned(Tag tag, string name, string[]? args = null)
-        requires (tag.is_tagged() && tag.is_assigned()) {
-        this.tag = tag;
-        this.name = name;
-        this.args = args;
-        
-        stock_params();
     }
     
     private void stock_params() {

@@ -1,4 +1,5 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -9,18 +10,16 @@
  *
  * @see SelectCommand
  */
-
 public class Geary.Imap.ExamineCommand : Command {
-    public const string NAME = "examine";
-    
-    public MailboxSpecifier mailbox { get; private set; }
-    
-    public ExamineCommand(MailboxSpecifier mailbox) {
-        base (NAME);
-        
-        this.mailbox = mailbox;
-        
-        add(mailbox.to_parameter());
-    }
-}
 
+    public const string NAME = "examine";
+
+    public MailboxSpecifier mailbox { get; private set; }
+
+    public ExamineCommand(MailboxSpecifier mailbox) {
+        base(NAME);
+        this.mailbox = mailbox;
+        this.args.add(mailbox.to_parameter());
+    }
+
+}
