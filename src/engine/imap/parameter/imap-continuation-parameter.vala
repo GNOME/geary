@@ -31,18 +31,19 @@ public class Geary.Imap.ContinuationParameter : Geary.Imap.Parameter {
         this.data = data;
     }
 
-    public void serialize_continuation(Serializer ser)
+    public void serialize_continuation(Serializer ser, GLib.Cancellable cancellable)
         throws GLib.Error {
         ser.push_unquoted_string(
-            new Memory.ByteBuffer.take(this.data, this.data.length).to_string()
+            new Memory.ByteBuffer.take(this.data, this.data.length).to_string(),
+            cancellable
         );
-        ser.push_eol();
+        ser.push_eol(cancellable);
     }
 
     /** {@inheritDoc} */
-    public override void serialize(Serializer ser, Tag tag)
+    public override void serialize(Serializer ser, GLib.Cancellable cancellable)
         throws GLib.Error {
-        serialize_continuation(ser);
+        serialize_continuation(ser, cancellable);
     }
 
     /** {@inheritDoc} */

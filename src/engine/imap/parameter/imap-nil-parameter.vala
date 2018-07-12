@@ -1,4 +1,5 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -43,19 +44,20 @@ public class Geary.Imap.NilParameter : Geary.Imap.Parameter {
     public static bool is_nil(StringParameter stringp) {
         return stringp.equals_ci(VALUE);
     }
-    
+
     /**
      * {@inheritDoc}
      */
-    public override void serialize(Serializer ser, Tag tag) throws Error {
-        ser.push_nil();
+    public override void serialize(Serializer ser, GLib.Cancellable cancellable)
+        throws GLib.Error {
+        ser.push_nil(cancellable);
     }
-    
+
     /**
      * {@inheritDoc}
      */
     public override string to_string() {
         return VALUE;
     }
-}
 
+}

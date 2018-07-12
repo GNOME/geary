@@ -59,13 +59,14 @@ public class Geary.Imap.RootParameters : Geary.Imap.ListParameter {
     public override string to_string() {
         return stringize_list();
     }
-    
+
     /**
      * {@inheritDoc}
      */
-    public override void serialize(Serializer ser, Tag tag) throws Error {
-        serialize_list(ser, tag);
-        ser.push_eol();
+    public override void serialize(Serializer ser, GLib.Cancellable cancellable)
+        throws GLib.Error {
+        serialize_list(ser, cancellable);
+        ser.push_eol(cancellable);
     }
-}
 
+}

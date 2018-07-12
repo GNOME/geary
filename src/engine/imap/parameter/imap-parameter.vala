@@ -29,20 +29,24 @@ public abstract class Geary.Imap.Parameter : BaseObject {
             return new LiteralParameter(new Memory.StringBuffer(value));
         }
     }
-    
+
     /**
-     * Invoked when the {@link Parameter} is to be serialized out to the network.
+     * Invoked when this parameter is to be serialized out to the network.
      *
-     * The supplied Tag will have (or will be) assigned to the message, so it should be passed
-     * to all serialize() calls this call may make.  The {@link Parameter} should not use its own
-     * internal Tag object, if it has a reference to one.
+     * This method is intended to be used for serialising IMAP command
+     * lines, which are typically short, single lines. Hence this
+     * method is not asynchronous since the serialiser will buffer
+     * writes to it. Any parameters with large volumes of data to
+     * serialise (typically {@link LiteralParameter}) are specially
+     * handled by {@link Command} when serialising.
      */
-    public abstract void serialize(Serializer ser, Tag tag) throws Error;
-    
+    public abstract void serialize(Serializer ser, GLib.Cancellable cancellable)
+        throws GLib.Error;
+
     /**
      * Returns a representation of the {@link Parameter} suitable for logging and debugging,
      * but should not be relied upon for wire or persistent representation.
      */
     public abstract string to_string();
-}
 
+}

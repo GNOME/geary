@@ -112,11 +112,11 @@ public class Geary.Imap.ResponseCode : Geary.Imap.ListParameter {
     public override string to_string() {
         return "[%s]".printf(stringize_list());
     }
-    
-    public override void serialize(Serializer ser, Tag tag) throws Error {
-        ser.push_ascii('[');
-        serialize_list(ser, tag);
-        ser.push_ascii(']');
+
+    public override void serialize(Serializer ser, GLib.Cancellable cancellable)
+        throws GLib.Error {
+        ser.push_ascii('[', cancellable);
+        serialize_list(ser, cancellable);
+        ser.push_ascii(']', cancellable);
     }
 }
-

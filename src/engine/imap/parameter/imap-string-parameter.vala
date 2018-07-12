@@ -103,16 +103,18 @@ public abstract class Geary.Imap.StringParameter : Geary.Imap.Parameter {
      *
      * NOTE: Literal data is not currently supported.
      */
-    protected void serialize_string(Serializer ser) throws Error {
+    protected void serialize_string(Serializer ser,
+                                    GLib.Cancellable cancellable)
+        throws GLib.Error {
         switch (DataFormat.is_quoting_required(ascii)) {
             case DataFormat.Quoting.REQUIRED:
-                ser.push_quoted_string(ascii);
+                ser.push_quoted_string(ascii, cancellable);
             break;
-            
+
             case DataFormat.Quoting.OPTIONAL:
-                ser.push_unquoted_string(ascii);
+                ser.push_unquoted_string(ascii, cancellable);
             break;
-            
+
             case DataFormat.Quoting.UNALLOWED:
                 error("Unable to serialize literal data");
             

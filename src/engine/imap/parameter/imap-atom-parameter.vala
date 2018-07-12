@@ -1,4 +1,5 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -16,17 +17,18 @@
  *
  * See [[http://tools.ietf.org/html/rfc3501#section-4.1]]
  */
-
 public class Geary.Imap.AtomParameter : Geary.Imap.UnquotedStringParameter {
+
     public AtomParameter(string value) {
         base (value);
     }
-    
+
     /**
      * {@inheritDoc}
      */
-    public override void serialize(Serializer ser, Tag tag) throws Error {
+    public override void serialize(Serializer ser, GLib.Cancellable cancellable)
+        throws GLib.Error {
         ser.push_unquoted_string(ascii);
     }
-}
 
+}

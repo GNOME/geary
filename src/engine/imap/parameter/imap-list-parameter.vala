@@ -464,23 +464,25 @@ public class Geary.Imap.ListParameter : Geary.Imap.Parameter {
     public override string to_string() {
         return "(%s)".printf(stringize_list());
     }
-    
-    protected void serialize_list(Serializer ser, Tag tag) throws Error {
-        int length = list.size;
-        for (int ctr = 0; ctr < length; ctr++) {
-            list[ctr].serialize(ser, tag);
-            if (ctr < (length - 1))
-                ser.push_space();
-        }
-    }
-    
+
     /**
      * {@inheritDoc}
      */
-    public override void serialize(Serializer ser, Tag tag) throws Error {
-        ser.push_ascii('(');
-        serialize_list(ser, tag);
-        ser.push_ascii(')');
+    public override void serialize(Serializer ser, GLib.Cancellable cancellable)
+        throws GLib.Error {
+        ser.push_ascii('(', cancellable);
+        serialize_list(ser, cancellable);
+        ser.push_ascii(')', cancellable);
     }
-}
 
+    protected void serialize_list(Serializer ser, GLib.Cancellable cancellable)
+        throws GLib.Error {
+        int length = list.size;
+        for (int ctr = 0; ctr < length; ctr++) {
+            list[ctr].serialize(ser, cancellable);
+            if (ctr < (length - 1))
+                ser.push_space(cancellable);
+        }
+    }
+
+}

@@ -54,14 +54,14 @@ public class Geary.Imap.LiteralParameter : Geary.Imap.Parameter {
     public override string to_string() {
         return "{literal/%lub}".printf(get_size());
     }
-    
+
     /**
      * {@inheritDoc}
      */
-    public override void serialize(Serializer ser, Tag tag) throws Error {
-        ser.push_unquoted_string("{%lu}".printf(get_size()));
-        ser.push_eol();
-        ser.push_synchronized_literal_data(tag, buffer);
+    public override void serialize(Serializer ser, GLib.Cancellable cancellable)
+        throws GLib.Error {
+        ser.push_unquoted_string("{%lu}".printf(get_size()), cancellable);
+        ser.push_eol(cancellable);
     }
-}
 
+}
