@@ -72,7 +72,7 @@ public class Geary.Imap.ClientSession : BaseObject {
     /** Default keep-alive interval when not in the Selected state. */
     public const uint DEFAULT_UNSELECTED_KEEPALIVE_SEC = RECOMMENDED_KEEPALIVE_SEC;
 
-    private const uint GREETING_TIMEOUT_SEC = ClientConnection.DEFAULT_COMMAND_TIMEOUT_SEC;
+    private const uint GREETING_TIMEOUT_SEC = Command.DEFAULT_RESPONSE_TIMEOUT_SEC;
 
 
     /**

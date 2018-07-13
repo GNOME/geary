@@ -19,6 +19,12 @@
 public class Geary.Imap.Command : BaseObject {
 
     /**
+     * Default timeout to wait for a server response for a command.
+     */
+    public const uint DEFAULT_RESPONSE_TIMEOUT_SEC = 30;
+
+
+    /**
      * All IMAP commands are tagged with an identifier assigned by the client.
      *
      * Note that this is not immutable.  The general practice is to use an unassigned Tag
@@ -32,9 +38,23 @@ public class Geary.Imap.Command : BaseObject {
     public Tag tag { get; private set; }
 
     /**
-     * The name (or "verb") of the {@link Command}.
+     * The name (or "verb") of this command.
      */
     public string name { get; private set; }
+
+    /**
+     * Number of seconds to wait for a server response to this command.
+     */
+    public uint response_timeout {
+        get {
+            return this._response_timeout;
+        }
+        set {
+            this._response_timeout = value;
+            this.response_timer.interval = value;
+        }
+    }
+    private uint _response_timeout = DEFAULT_RESPONSE_TIMEOUT_SEC;
 
     /**
      * The command's arguments as parameters.
@@ -49,12 +69,19 @@ public class Geary.Imap.Command : BaseObject {
     /** The status response for the command, once it has been received. */
     public StatusResponse? status { get; private set; default = null; }
 
+    private TimeoutManager response_timer;
+
     private Geary.Nonblocking.Semaphore complete_lock =
         new Geary.Nonblocking.Semaphore();
 
     private Geary.Nonblocking.Spinlock? literal_spinlock = null;
     private GLib.Cancellable? literal_cancellable = null;
 
+
+    /**
+     * Fired when the response timeout for this command has been reached.
+     */
+    public signal void response_timed_out();
 
     /**
      * Constructs a new command with an unassigned tag.
@@ -72,6 +99,10 @@ public class Geary.Imap.Command : BaseObject {
                 this.args.add(Parameter.get_for_string(arg));
             }
         }
+
+        this.response_timer = new TimeoutManager.seconds(
+            this._response_timeout, on_response_timeout
+        );
     }
 
     public bool has_name(string name) {
@@ -114,6 +145,7 @@ public class Geary.Imap.Command : BaseObject {
     public virtual async void serialize(Serializer ser,
                                         GLib.Cancellable cancellable)
         throws GLib.Error {
+        this.response_timer.start();
         this.tag.serialize(ser, cancellable);
         ser.push_space(cancellable);
         ser.push_unquoted_string(this.name, cancellable);
@@ -192,6 +224,7 @@ public class Geary.Imap.Command : BaseObject {
         }
 
         this.status = new_status;
+        this.response_timer.reset();
         this.complete_lock.blind_notify();
         cancel_serialization();
         check_status();
@@ -210,7 +243,8 @@ public class Geary.Imap.Command : BaseObject {
                 data.to_string()
             );
         }
-        // Nothing to do otherwise
+
+        this.response_timer.start();
     }
 
     /**
@@ -239,6 +273,7 @@ public class Geary.Imap.Command : BaseObject {
             );
         }
 
+        this.response_timer.start();
         this.literal_spinlock.blind_notify();
     }
 
@@ -277,4 +312,11 @@ public class Geary.Imap.Command : BaseObject {
     private string to_brief_string() {
         return "%s %s".printf(this.tag.to_string(), this.name);
     }
+
+    private void on_response_timeout() {
+        cancel_serialization();
+        response_timed_out();
+        this.complete_lock.blind_notify();
+    }
+
 }

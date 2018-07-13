@@ -36,11 +36,6 @@ public class Geary.Imap.ClientConnection : BaseObject {
     public const uint RECOMMENDED_TIMEOUT_SEC = ClientSession.RECOMMENDED_KEEPALIVE_SEC + 15;
 
     /**
-     * Default timeout to wait for a server response for a command.
-     */
-    public const uint DEFAULT_COMMAND_TIMEOUT_SEC = 30;
-
-    /**
      * Default timeout to wait for another command before going idle.
      */
     public const uint DEFAULT_IDLE_TIMEOUT_SEC = 2;
@@ -81,8 +76,8 @@ public class Geary.Imap.ClientConnection : BaseObject {
         new Geary.Nonblocking.Queue<Command>.fifo();
     private Gee.Queue<Command> sent_queue = new Gee.LinkedList<Command>();
     private Command? current_command = null;
+    private uint command_timeout;
 
-    private TimeoutManager command_timer;
     private TimeoutManager idle_timer;
 
     private GLib.Cancellable? open_cancellable = null;
@@ -145,15 +140,13 @@ public class Geary.Imap.ClientConnection : BaseObject {
     }
 
 
-    public ClientConnection(Geary.Endpoint endpoint,
-                            uint command_timeout_sec = DEFAULT_COMMAND_TIMEOUT_SEC,
-                            uint idle_timeout_sec = DEFAULT_IDLE_TIMEOUT_SEC) {
+    public ClientConnection(
+        Geary.Endpoint endpoint,
+        uint command_timeout = Command.DEFAULT_RESPONSE_TIMEOUT_SEC,
+        uint idle_timeout_sec = DEFAULT_IDLE_TIMEOUT_SEC) {
         this.endpoint = endpoint;
         this.cx_id = next_cx_id++;
-
-        this.command_timer = new TimeoutManager.seconds(
-            command_timeout_sec, on_command_timeout
-        );
+        this.command_timeout = command_timeout;
         this.idle_timer = new TimeoutManager.seconds(
             idle_timeout_sec, on_idle_timeout
         );
@@ -259,7 +252,6 @@ public class Geary.Imap.ClientConnection : BaseObject {
         if (cx == null)
             return;
 
-        this.command_timer.reset();
         this.idle_timer.reset();
 
         // To guard against reentrancy
@@ -452,6 +444,12 @@ public class Geary.Imap.ClientConnection : BaseObject {
         // commands easier.)
         command.assign_tag(generate_tag());
 
+        // IDLE is intended to be long-lived, so its timeout should be
+        // set to the maximum possible.
+        command.response_timeout = (command is IdleCommand)
+            ? DEFAULT_TIMEOUT_SEC
+            : this.command_timeout;
+
         this.current_command = command;
         this.sent_queue.add(command);
         GLib.Error? ser_error = null;
@@ -466,13 +464,6 @@ public class Geary.Imap.ClientConnection : BaseObject {
         if (ser_error != null) {
             this.sent_queue.remove(command);
             throw ser_error;
-        }
-
-        // We want the timeout to trigger ASAP if the
-        // connection goes away, so don't reset it if it is
-        // already running.
-        if (!this.command_timer.is_running) {
-            this.command_timer.start();
         }
 
         sent_command(command);
@@ -500,10 +491,6 @@ public class Geary.Imap.ClientConnection : BaseObject {
     }
 
     private void on_parameters_ready(RootParameters root) {
-        // Reset the command timer, since we know for the
-        // moment that the connection is good.
-        this.command_timer.reset();
-
         ServerResponse response;
         try {
             response = ServerResponse.migrate_from_server(root);
@@ -548,6 +535,7 @@ public class Geary.Imap.ClientConnection : BaseObject {
             }
             this.sent_queue.remove(sent);
             sent.completed(status);
+            sent.response_timed_out.disconnect(on_command_timeout);
         }
 
         received_status_response(status);
@@ -578,10 +566,6 @@ public class Geary.Imap.ClientConnection : BaseObject {
     }
 
     private void on_bytes_received(size_t bytes) {
-        // Reset the command timer, since we know for the
-        // moment that the connection is good.
-        this.command_timer.reset();
-
         received_bytes(bytes);
     }
 
@@ -601,8 +585,9 @@ public class Geary.Imap.ClientConnection : BaseObject {
         recv_closed();
     }
 
-    private void on_command_timeout() {
-        debug("[%s] Sending command timed out", to_string());
+    private void on_command_timeout(Command command) {
+        this.sent_queue.remove(command);
+        command.response_timed_out.disconnect(on_command_timeout);
 
         // turn off graceful disconnect ... if the connection is hung,
         // don't want to be stalled trying to flush the pipe
@@ -612,8 +597,9 @@ public class Geary.Imap.ClientConnection : BaseObject {
 
         receive_failure(
             new ImapError.TIMED_OUT(
-                "No response to command(s) after %u seconds",
-                this.command_timer.interval
+                "No response to command after %u seconds: %s",
+                command.response_timeout,
+                command.to_string()
             )
         );
     }
