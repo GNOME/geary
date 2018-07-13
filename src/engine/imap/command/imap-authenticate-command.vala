@@ -6,7 +6,7 @@
  */
 
 /**
- * An IMAP AUTHENTICATE command.
+ * The IMAP AUTHENTICATE command.
  *
  * See [[http://tools.ietf.org/html/rfc3501#section-6.2.2]]
  */

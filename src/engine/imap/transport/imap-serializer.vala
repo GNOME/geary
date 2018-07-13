@@ -1,20 +1,23 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2018 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 /**
- * Writes serialized IMAP commands to a supplied output stream.
+ * Writes IMAP protocol strings to a supplied output stream.
  *
- * Command continuation requires some synchronization between the
- * Serializer and the {@link Deserializer}.  It also requires some
- * queue management.  See {@link push_quoted_string} and {@link
- * next_synchronized_message}.
+ * This class uses a {@link GLib.DataOutputStream} for writing strings
+ * to the given stream. Since that does not support asynchronous
+ * writes, it is highly desirable that the stream passed to this class
+ * is a {@link GLib.BufferedOutputStream}, or some other type that
+ * uses a memory buffer large enough to write a typical command
+ * completely without causing disk or network I/O.
  *
  * @see Deserializer
  */
-
 public class Geary.Imap.Serializer : BaseObject {
 
     private string identifier;
@@ -62,28 +65,43 @@ public class Geary.Imap.Serializer : BaseObject {
         this.output.put_byte('"');
     }
 
+    /**
+     * Writes a single ASCII character.
+     *
+     * It is the caller's responsibility to ensure that the value is
+     * valid to be written as-is.
+     */
     public void push_ascii(char ch, GLib.Cancellable? cancellable = null)
         throws GLib.Error {
         this.output.put_byte(ch, cancellable);
     }
 
+    /**
+     * Writes a single ASCII space character.
+     */
     public void push_space(GLib.Cancellable? cancellable = null)
         throws GLib.Error {
         this.output.put_byte(' ', cancellable);
     }
 
+    /**
+     * Writes a NIL atom.
+     */
     public void push_nil(GLib.Cancellable? cancellable = null)
         throws GLib.Error {
         this.output.put_string(NilParameter.VALUE, cancellable);
     }
 
+    /**
+     * Writes a CRLF sequence.
+     */
     public void push_eol(GLib.Cancellable? cancellable = null)
         throws GLib.Error {
         this.output.put_string("\r\n", cancellable);
     }
 
     /**
-     * Pushes literal data to the output stream.
+     * Writes literal data to the output stream.
      */
     public async void push_literal_data(Memory.Buffer buffer,
                                         GLib.Cancellable? cancellable = null)
@@ -104,6 +122,9 @@ public class Geary.Imap.Serializer : BaseObject {
         yield this.output.flush_async(Priority.DEFAULT, cancellable);
     }
 
+    /**
+     * Returns a string representation for debugging.
+     */
     public string to_string() {
         return "ser:%s".printf(identifier);
     }
