@@ -355,7 +355,17 @@ public class Geary.Imap.ClientConnection : BaseObject {
 
     /** Disconnect and deallocates the Serializer and Deserializer. */
     private async void close_channels_async(Cancellable? cancellable) throws Error {
+        // Cancel all current and pending commands because the
+        // underlying streams are going away.
         this.open_cancellable.cancel();
+        foreach (Command sent in this.sent_queue) {
+            debug(
+                "[%s] Cancelling sent command: %s",
+                to_string(), sent.to_string()
+            );
+            sent.cancel_command();
+        }
+        this.sent_queue.clear();
 
         // disconnect from Deserializer before yielding to stop it
         if (des != null) {

@@ -184,22 +184,22 @@ public class Geary.Imap.Command : BaseObject {
     }
 
     /**
-     * Cancels any existing serialisation in progress.
+     * Cancels this command's execution.
      *
-     * When this method is called, any non I/O related process
-     * blocking the blocking {@link serialize} must be cancelled.
+     * When this method is called, all locks will be released,
+     * including {@link wait_until_complete}.
      */
-    public virtual void cancel_serialization() {
-        if (this.literal_cancellable != null) {
-            this.literal_cancellable.cancel();
-        }
+    public virtual void cancel_command() {
+        cancel_serialization();
+        this.response_timer.reset();
+        this.complete_lock.blind_notify();
     }
 
     /**
      * Yields until the command has been completed or cancelled.
      *
-     * Throws an error if cancelled, or if the command's response was
-     * bad.
+     * Throws an error if cancelled, if the command is cancelled, or
+     * if the command's response was bad.
      */
     public async void wait_until_complete(GLib.Cancellable cancellable)
         throws GLib.Error {
@@ -285,6 +285,18 @@ public class Geary.Imap.Command : BaseObject {
             : "%s %s %s".printf(this.tag.to_string(), this.name, args);
     }
 
+    /**
+     * Cancels any existing serialisation in progress.
+     *
+     * When this method is called, any non I/O related process
+     * blocking the blocking {@link serialize} must be cancelled.
+     */
+    protected virtual void cancel_serialization() {
+        if (this.literal_cancellable != null) {
+            this.literal_cancellable.cancel();
+        }
+    }
+
     private void check_status() throws ImapError {
         if (this.status == null) {
             throw new ImapError.SERVER_ERROR(
@@ -315,9 +327,8 @@ public class Geary.Imap.Command : BaseObject {
     }
 
     private void on_response_timeout() {
-        cancel_serialization();
+        cancel_command();
         response_timed_out();
-        this.complete_lock.blind_notify();
     }
 
 }
