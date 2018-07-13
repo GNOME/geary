@@ -86,50 +86,6 @@ public Quoting is_quoting_required(string str) {
     return Quoting.OPTIONAL;
 }
 
-/**
- * Converts the supplied string to a quoted string and returns whether or not the quoted format
- * is required on the wire.  If Quoting.UNALLOWED is returned, the only way to represent the string
- * is with a literal.
- */
-public Quoting convert_to_quoted(string str, out string quoted) {
-    Quoting requirement = String.is_empty(str) ? Quoting.REQUIRED : Quoting.OPTIONAL;
-    quoted = "";
-    
-    StringBuilder builder = new StringBuilder("\"");
-    int index = 0;
-    for (;;) {
-        char ch = str[index++];
-        if (ch == String.EOS)
-            break;
-        
-        if (ch > 0x7F)
-            return Quoting.UNALLOWED;
-        
-        switch (ch) {
-            case '\n':
-            case '\r':
-                return Quoting.UNALLOWED;
-            
-            case '"':
-            case '\\':
-                requirement = Quoting.REQUIRED;
-                builder.append_c('\\');
-                builder.append_c(ch);
-            break;
-            
-            default:
-                if (is_atom_special(ch))
-                    requirement = Quoting.REQUIRED;
-                
-                builder.append_c(ch);
-            break;
-        }
-    }
-    
-    quoted = builder.append_c('"').str;
-    
-    return requirement;
-}
 
 }
 

@@ -18,40 +18,48 @@
 public class Geary.Imap.Serializer : BaseObject {
 
     private string identifier;
-    private DataOutputStream output;
+    private GLib.DataOutputStream output;
 
-    public Serializer(string identifier, OutputStream output) {
+    public Serializer(string identifier, GLib.OutputStream output) {
         this.identifier = identifier;
-        this.output = new DataOutputStream(output);
+        this.output = new GLib.DataOutputStream(output);
         this.output.set_close_base_stream(false);
     }
 
     /**
-     * Pushes the string to the IMAP server with quoting.
+     * Writes a string without quoting.
      *
-     * This is applied whether required or not. Returns true if
-     * quoting was required.
-     */
-    public bool push_quoted_string(string str,
-                                   GLib.Cancellable? cancellable = null)
-        throws GLib.Error {
-        string quoted;
-        DataFormat.Quoting requirement = DataFormat.convert_to_quoted(str, out quoted);
-
-        this.output.put_string(quoted, cancellable);
-
-        return (requirement == DataFormat.Quoting.REQUIRED);
-    }
-
-    /**
-     * This will push the string to IMAP as-is.
-     *
-     * Use only if you absolutely know what you're doing.
+     * It is the caller's responsibility to ensure that the value is
+     * valid to be written as an unquoted string, instead of with
+     * quoting or as a literal.
      */
     public void push_unquoted_string(string str,
                                      GLib.Cancellable? cancellable = null)
         throws GLib.Error {
         this.output.put_string(str, cancellable);
+    }
+
+    /**
+     * Writes a string with quoting.
+     *
+     * It is the caller's responsibility to ensure that the value is
+     * valid to be written as a quoted string, instead of as a
+     * literal.
+     */
+    public void push_quoted_string(string str,
+                                   GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
+        this.output.put_byte('"');
+        int index = 0;
+        char ch = str[index];
+        while (ch != String.EOS) {
+            if (ch == '"' || ch == '\\') {
+                this.output.put_byte('\\');
+            }
+            this.output.put_byte(ch);
+            ch = str[++index];
+        }
+        this.output.put_byte('"');
     }
 
     public void push_ascii(char ch, GLib.Cancellable? cancellable = null)
