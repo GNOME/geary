@@ -1129,8 +1129,7 @@ public class Geary.Imap.ClientSession : BaseObject {
             case ProtocolState.AUTHORIZED:
             case ProtocolState.SELECTED:
             case ProtocolState.SELECTING:
-                this.cx.idle_when_quiet = true;
-                yield send_command_async(new NoopCommand(), cancellable);
+                this.cx.enable_idle_when_quiet(true);
                 break;
 
             default:
@@ -1403,9 +1402,7 @@ public class Geary.Imap.ClientSession : BaseObject {
                 debug("[%s]: Unable to SELECT/EXAMINE: %s", to_string(), completion_response.to_string());
 
                 // turn off IDLE, client should request it again if desired.
-                if (cx.idle_when_quiet) {
-                    cx.idle_when_quiet = false;
-                }
+                this.cx.enable_idle_when_quiet(false);
 
                 return State.AUTHORIZED;
         }
@@ -1439,7 +1436,7 @@ public class Geary.Imap.ClientSession : BaseObject {
             return state;
 
         // returning to AUTHORIZED state, turn off IDLE
-        cx.idle_when_quiet = false;
+        this.cx.enable_idle_when_quiet(false);
 
         return State.CLOSING_MAILBOX;
     }
@@ -1496,7 +1493,7 @@ public class Geary.Imap.ClientSession : BaseObject {
             return state;
 
         // Leaving AUTHORIZED state, turn off IDLE
-        cx.idle_when_quiet = false;
+        this.cx.enable_idle_when_quiet(false);
 
         return State.LOGGING_OUT;
     }

@@ -64,14 +64,8 @@ public class Geary.Imap.ClientConnection : BaseObject {
      * resorting to NOOP keepalives.  (Note that keepalives are still
      * required to hold the connection open, according to the IMAP
      * specification.)
-     *
-     * Note that setting this false will *not* break a connection out
-     * of IDLE state alone; a command needs to be flushed down the
-     * pipe to do that.  (NOOP would be a good choice.)  Nor will this
-     * initiate an IDLE command either; it can only do that after
-     * sending a command (again, NOOP would be a good choice).
      */
-    public bool idle_when_quiet = false;
+    public bool idle_when_quiet { get; private set; default = false; }
 
     private Geary.Endpoint endpoint;
     private SocketConnection? cx = null;
@@ -199,6 +193,28 @@ public class Geary.Imap.ClientConnection : BaseObject {
     }
 
     /**
+     * Sets whether this connection should automatically IDLE.
+     *
+     * If true, this will cause the connection to send an IDLE command
+     * when no other commands have been sent after a short period of
+     * time
+     *
+     * If false, any existing IDLE command will be cancelled, and the
+     * connection will no longer be automatically sent.
+     */
+    public void enable_idle_when_quiet(bool do_idle) {
+        this.idle_when_quiet = do_idle;
+        if (do_idle) {
+            if (!this.idle_timer.is_running) {
+                this.idle_timer.start();
+            }
+        } else {
+            this.idle_timer.reset();
+            exit_idle();
+        }
+    }
+
+    /**
      * Returns silently if a connection is already established.
      */
     public async void connect_async(Cancellable? cancellable = null) throws Error {
@@ -302,12 +318,8 @@ public class Geary.Imap.ClientConnection : BaseObject {
 
         this.pending_queue.send(new_command);
 
-        // If the current command is an IDLE, tell it to exit so we
-        // can get on with life.
-        IdleCommand? idle = this.current_command as IdleCommand;
-        if (idle != null) {
-            idle.exit_idle();
-        }
+        // Exit IDLE so we can get on with life
+        exit_idle();
     }
 
     public string to_string() {
@@ -371,6 +383,13 @@ public class Geary.Imap.ClientConnection : BaseObject {
         if (ser_buffer != null) {
             yield ser_buffer.close_async(GLib.Priority.DEFAULT, cancellable);
             ser_buffer = null;
+        }
+    }
+
+    private inline void exit_idle() {
+        IdleCommand? idle = this.current_command as IdleCommand;
+        if (idle != null) {
+            idle.exit_idle();
         }
     }
 
