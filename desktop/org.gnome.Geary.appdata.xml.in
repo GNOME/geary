@@ -77,6 +77,21 @@
   <translation type="gettext">geary</translation>
 
   <releases>
+    <release version="0.12.3" date="2018-07-14">
+      <description>
+        <p>Bug fixes included in this release:</p>
+        <ul>
+          <li>Not syncing mail using Turkish locale. Bug 795906</li>
+          <li>Fix crash saving an attachment with unknown content type</li>
+          <li>Fix crash in secret_collection_get_locked. Bug 795328</li>
+          <li>"Move to folder" selection bug. Issue #24</li>
+          <li>Subfolders with special folders not displayed in
+          list. Issue #11</li>
+          <li>Add OARS metadata for Flathub</li>
+        </ul>
+      </description>
+    </release>
+
     <release version="0.12.2" date="2018-04-24">
       <description>
         <p>Bug fixes included in this release:</p>

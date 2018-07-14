@@ -1,3 +1,19 @@
+Version 0.12.3
+~~~~~~~~~~~~~~
+Released: 2018-07-14
+
+Bug fixes included in this release:
+ * Not syncing mail using Turkish locale. Bug 795906
+ * Fix crash saving an attachment with unknown content type
+ * Fix crash in secret_collection_get_locked. Bug 795328
+ * "Move to folder" selection bug. Issue #24
+ * Subfolders with special folders not displayed in list. Issue #11
+ * Add OARS metadata for Flathub
+
+Thanks to all who contributed code fixes and enhancements to this
+release:
+ * Nick Richards
+
 Version 0.12.2
 ~~~~~~~~~~~~~~
 Released: 2018-04-24

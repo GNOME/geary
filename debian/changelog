@@ -1,3 +1,9 @@
+geary (0.12.3-1~xenial1) xenial; urgency=medium
+
+  * New upstream release.
+
+ -- Michael Gratton <mike@vee.net>  Sat, 14 Jul 2018 12:30:23 +1000
+
 geary (0.12.2-1~xenial1) xenial; urgency=medium
 
   * New upstream release.
