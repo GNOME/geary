@@ -449,23 +449,20 @@ public class Geary.Imap.ClientConnection : BaseObject {
     // sending literals.
     private async void flush_command(Command command, Cancellable cancellable)
         throws GLib.Error {
-        // Assign a new tag; Commands with pre-assigned Tags
-        // should not be re-sent. (Do this inside the critical
-        // section to ensure commands go out in Tag order;
-        // this is not an IMAP requirement but makes tracing
-        // commands easier.)
-        command.assign_tag(generate_tag());
-
-        // IDLE is intended to be long-lived, so its timeout should be
-        // set to the maximum possible.
-        command.response_timeout = (command is IdleCommand)
-            ? DEFAULT_TIMEOUT_SEC
-            : this.command_timeout;
-
-        this.current_command = command;
-        this.sent_queue.add(command);
         GLib.Error? ser_error = null;
         try {
+            // Assign a new tag; Commands with pre-assigned Tags
+            // should not be re-sent. (Do this inside the critical
+            // section to ensure commands go out in Tag order;
+            // this is not an IMAP requirement but makes tracing
+            // commands easier.)
+            command.assign_tag(generate_tag());
+
+            // Set timeout per session policy
+            command.response_timeout = this.command_timeout;
+
+            this.current_command = command;
+            this.sent_queue.add(command);
             yield command.serialize(this.ser, cancellable);
         } catch (GLib.Error err) {
             ser_error = err;

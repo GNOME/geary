@@ -57,6 +57,9 @@ public class Geary.Imap.Command : BaseObject {
     }
     private uint _response_timeout = DEFAULT_RESPONSE_TIMEOUT_SEC;
 
+    /** The status response for the command, once it has been received. */
+    public StatusResponse? status { get; private set; default = null; }
+
     /**
      * The command's arguments as parameters.
      *
@@ -67,10 +70,10 @@ public class Geary.Imap.Command : BaseObject {
         get; private set; default = new RootParameters();
     }
 
-    /** The status response for the command, once it has been received. */
-    public StatusResponse? status { get; private set; default = null; }
-
-    private TimeoutManager response_timer;
+    /**
+     * Timer used to check for a response within {@link response_timeout}.
+     */
+    protected TimeoutManager response_timer { get; private set; }
 
     private Geary.Nonblocking.Semaphore complete_lock =
         new Geary.Nonblocking.Semaphore();
