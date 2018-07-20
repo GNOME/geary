@@ -125,10 +125,15 @@ private class Geary.ImapEngine.RevokableMove : Revokable {
         );
         final_ops.add(op);
         set_invalid();
+
+        // Capture these for the closure below, since once it gets
+        // invoked, this instance may no longer exist.
+        GenericAccount account = this.account;
+        Geary.Folder destination = this.destination;
         op.wait_for_ready_async.begin(null, (obj, res) => {
                 try {
                     op.wait_for_ready_async.end(res);
-                    this.account.update_folder(this.destination);
+                    account.update_folder(destination);
                 } catch (Error err) {
                     // Oh well
                 }
