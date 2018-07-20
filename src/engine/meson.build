@@ -126,7 +126,6 @@ geary_engine_vala_sources = files(
   'imap/message/imap-flags.vala',
   'imap/message/imap-internal-date.vala',
   'imap/message/imap-mailbox-specifier.vala',
-  'imap/message/imap-mailbox-parameter.vala',
   'imap/message/imap-message-data.vala',
   'imap/message/imap-message-flag.vala',
   'imap/message/imap-message-flags.vala',

@@ -44,7 +44,6 @@ public class Geary.Endpoint : BaseObject {
     public Flags flags { get; private set; }
     public uint timeout_sec { get; private set; }
     public TlsCertificateFlags tls_validation_flags { get; set; default = TlsCertificateFlags.VALIDATE_ALL; }
-    public bool force_ssl3 { get; set; default = false; }
 
     /**
      * The maximum number of commands that will be pipelined at once.
@@ -169,7 +168,6 @@ public class Geary.Endpoint : BaseObject {
     }
     
     private void prepare_tls_cx(TlsClientConnection tls_cx, bool starttls) {
-        tls_cx.use_ssl3 = force_ssl3;
         tls_cx.set_validation_flags(tls_validation_flags);
         
         // Vala doesn't do delegates in a ternary operator very well
@@ -178,7 +176,7 @@ public class Geary.Endpoint : BaseObject {
         else
             tls_cx.accept_certificate.connect(on_accept_ssl_certificate);
     }
-    
+
     private bool on_accept_starttls_certificate(TlsConnection cx, TlsCertificate cert, TlsCertificateFlags flags) {
         return report_tls_warnings(SecurityType.STARTTLS, cx, cert, flags);
     }

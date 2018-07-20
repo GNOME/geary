@@ -282,7 +282,6 @@ src/engine/imap/message/imap-fetch-data-specifier.vala
 src/engine/imap/message/imap-flag.vala
 src/engine/imap/message/imap-flags.vala
 src/engine/imap/message/imap-internal-date.vala
-src/engine/imap/message/imap-mailbox-parameter.vala
 src/engine/imap/message/imap-mailbox-specifier.vala
 src/engine/imap/message/imap-message-data.vala
 src/engine/imap/message/imap-message-flag.vala

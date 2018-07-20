@@ -48,15 +48,38 @@ public class Geary.Imap.MailboxSpecifier : BaseObject, Gee.Hashable<MailboxSpeci
      * See [[http://tools.ietf.org/html/rfc3501#section-5.1]]
      */
     public bool is_inbox { get; private set; }
-    
+
+    /**
+     * Constructs a new specifier from a UTF-8 name.
+     */
     public MailboxSpecifier(string name) {
         init(name);
     }
-    
-    public MailboxSpecifier.from_parameter(MailboxParameter param) {
-        init(param.decode());
+
+    /**
+     * Constructs a new specifier from a IMAP modified-UTF-7 string.
+     *
+     * If a modified-UTF-7 decoding error occurs, the parameter will
+     * assumed to be UTF-8, repaired, and used instead.
+     */
+    public MailboxSpecifier.from_parameter(StringParameter param) {
+        string? name = null;
+        try {
+            name = Geary.ImapUtf7.imap_utf7_to_utf8(param.ascii);
+        } catch (ConvertError err) {
+            // Could no decode the name as IMAP modified UTF7, so per
+            // https://imapwiki.org/ClientImplementation/MailboxList
+            // assume UTF8 and repair to make sure it's valid at
+            // least.
+            debug(
+                "Error decoding mailbox name, assuming UTF-8: %s", err.message
+            );
+            name = param.ascii.make_valid();
+        }
+
+        init(name);
     }
-    
+
     /**
      * Returns true if the {@link Geary.FolderPath} points to the IMAP Inbox.
      */
@@ -187,11 +210,18 @@ public class Geary.Imap.MailboxSpecifier : BaseObject, Gee.Hashable<MailboxSpeci
         
         return !String.is_empty(basename) ? basename : name;
     }
-    
+
     public Parameter to_parameter() {
-        return new MailboxParameter(name);
+        string encoded= Geary.ImapUtf7.utf8_to_imap_utf7(this.name);
+        Parameter? param = null;
+        try {
+            param = StringParameter.get_best_for(encoded);
+        } catch (ImapError err) {
+            param = new LiteralParameter(new Geary.Memory.StringBuffer(encoded));
+        }
+        return param;
     }
-    
+
     public uint hash() {
         return is_inbox ? Ascii.stri_hash(name) : Ascii.str_hash(name);
     }

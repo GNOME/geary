@@ -36,8 +36,11 @@ int main(string[] args) {
     engine.add_suite(new Geary.Db.DatabaseTest().get_suite());
     engine.add_suite(new Geary.Db.VersionedDatabaseTest().get_suite());
     engine.add_suite(new Geary.HTML.UtilTest().get_suite());
-    engine.add_suite(new Geary.Imap.DeserializerTest().get_suite());
+    // Other IMAP tests rely on DataFormat working, so test that first
+    engine.add_suite(new Geary.Imap.DataFormatTest().get_suite());
     engine.add_suite(new Geary.Imap.CreateCommandTest().get_suite());
+    engine.add_suite(new Geary.Imap.DeserializerTest().get_suite());
+    engine.add_suite(new Geary.Imap.MailboxSpecifierTest().get_suite());
     engine.add_suite(new Geary.Imap.NamespaceResponseTest().get_suite());
     engine.add_suite(new Geary.ImapDB.AttachmentTest().get_suite());
     engine.add_suite(new Geary.ImapDB.AttachmentIoTest().get_suite());

@@ -7,7 +7,10 @@
 namespace Geary.Imap.DataFormat {
 
 private const char[] ATOM_SPECIALS = {
-    '(', ')', '{', ' ', '%', '*', '"'
+    '(', ')', '{', ' ', // CTL chars are handled by is_special_char
+    '%', '*',           // list-wildcards
+    '"', '\\',          // quoted-specials
+    ']'                 // resp-specials
 };
 
 private const char[] TAG_SPECIALS = {
@@ -21,12 +24,15 @@ public enum Quoting {
 }
 
 private bool is_special_char(char ch, char[] ar, string? exceptions) {
-    if (ch > 0x7F || ch.iscntrl())
+    // Check for CTL chars
+    if (ch <= 0x1F || ch >= 0x7F) {
         return true;
-    
-    if (ch in ar)
+    }
+
+    if (ch in ar) {
         return (exceptions != null) ? Ascii.index_of(exceptions, ch) < 0 : true;
-    
+    }
+
     return false;
 }
 
