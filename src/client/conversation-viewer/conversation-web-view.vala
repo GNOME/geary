@@ -15,7 +15,7 @@ public class ConversationWebView : ClientWebView {
     // Key codes we don't forward on to the super class on key press
     // since we want to override them elsewhere, especially
     // ConversationListBox.
-    private const int[] BLACKLISTED_KEY_CODES = {
+    private const uint[] BLACKLISTED_KEY_CODES = {
         Gdk.Key.space,
         Gdk.Key.KP_Space,
         Gdk.Key.Up,
