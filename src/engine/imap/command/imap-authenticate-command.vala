@@ -40,17 +40,20 @@ public class Geary.Imap.AuthenticateCommand : Command {
         this(OAUTH2_METHOD, encoded_token);
     }
 
-    /** Waits after serialisation has completed for authentication. */
-    public override async void serialize(Serializer ser,
-                                         GLib.Cancellable cancellable)
+    public override async void send(Serializer ser,
+                                    GLib.Cancellable cancellable)
         throws GLib.Error {
-        yield base.serialize(ser, cancellable);
+        yield base.send(ser, cancellable);
         this.serialised = true;
 
         // Need to manually flush here since the connection will be
         // waiting this to complete before do so.
         yield ser.flush_stream(cancellable);
+    }
 
+    public override async void send_wait(Serializer ser,
+                                         GLib.Cancellable cancellable)
+        throws GLib.Error {
         // Wait to either get a response or a continuation request
         yield this.error_lock.wait_async(cancellable);
         if (this.response_literal != null) {
@@ -62,8 +65,8 @@ public class Geary.Imap.AuthenticateCommand : Command {
         yield wait_until_complete(cancellable);
     }
 
-    public override void cancel_serialization() {
-        base.cancel_serialization();
+    public override void cancel_send() {
+        base.cancel_send();
         this.error_cancellable.cancel();
     }
 
@@ -82,7 +85,7 @@ public class Geary.Imap.AuthenticateCommand : Command {
         } else {
             if (this.method != AuthenticateCommand.OAUTH2_METHOD ||
                 this.response_literal != null) {
-                cancel_serialization();
+                cancel_send();
                 throw new ImapError.INVALID(
                     "Unexpected AUTHENTICATE continuation request"
                 );

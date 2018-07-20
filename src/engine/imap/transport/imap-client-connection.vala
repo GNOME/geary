@@ -463,7 +463,9 @@ public class Geary.Imap.ClientConnection : BaseObject {
 
             this.current_command = command;
             this.sent_queue.add(command);
-            yield command.serialize(this.ser, cancellable);
+            yield command.send(this.ser, cancellable);
+            sent_command(command);
+            yield command.send_wait(this.ser, cancellable);
         } catch (GLib.Error err) {
             ser_error = err;
         }
@@ -474,8 +476,6 @@ public class Geary.Imap.ClientConnection : BaseObject {
             this.sent_queue.remove(command);
             throw ser_error;
         }
-
-        sent_command(command);
     }
 
     private Command? get_sent_command(Tag tag) {

@@ -35,21 +35,25 @@ public class Geary.Imap.IdleCommand : Command {
     }
 
     /** Waits after serialisation has completed for {@link exit_idle}. */
-    public override async void serialize(Serializer ser,
-                                         GLib.Cancellable cancellable)
+    public override async void send(Serializer ser,
+                                    GLib.Cancellable cancellable)
         throws GLib.Error {
         // Need to manually flush here since Dovecot doesn't like
         // getting IDLE in the same buffer as other commands.
         yield ser.flush_stream(cancellable);
 
-        yield base.serialize(ser, cancellable);
+        yield base.send(ser, cancellable);
         this.serialised = true;
 
         // Need to manually flush again since the connection will be
         // waiting this to complete before do so.
         yield ser.flush_stream(cancellable);
+    }
 
-        // Now wait for exit_idle() to be called, the server to send a
+    public override async void send_wait(Serializer ser,
+                                         GLib.Cancellable cancellable)
+        throws GLib.Error {
+        // Wait for exit_idle() to be called, the server to send a
         // status response, or everything to be cancelled.
         yield this.exit_lock.wait_async(cancellable);
 
@@ -68,8 +72,8 @@ public class Geary.Imap.IdleCommand : Command {
         yield wait_until_complete(cancellable);
     }
 
-    public override void cancel_serialization() {
-        base.cancel_serialization();
+    public override void cancel_send() {
+        base.cancel_send();
         this.exit_cancellable.cancel();
     }
 

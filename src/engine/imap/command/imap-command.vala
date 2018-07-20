@@ -63,8 +63,8 @@ public class Geary.Imap.Command : BaseObject {
     /**
      * The command's arguments as parameters.
      *
-     * Subclassess may append arguments to this before {@link
-     * serialize} is called, ideally from the constructor.
+     * Subclassess may append arguments to this before {@link send} is
+     * called, ideally from their constructors.
      */
     protected ListParameter args {
         get; private set; default = new RootParameters();
@@ -146,8 +146,8 @@ public class Geary.Imap.Command : BaseObject {
      * required, this method will yield until a command continuation
      * has been received, when it will resume the same process.
      */
-    public virtual async void serialize(Serializer ser,
-                                        GLib.Cancellable cancellable)
+    public virtual async void send(Serializer ser,
+                                   GLib.Cancellable cancellable)
         throws GLib.Error {
         this.response_timer.start();
         this.tag.serialize(ser, cancellable);
@@ -187,13 +187,32 @@ public class Geary.Imap.Command : BaseObject {
     }
 
     /**
+     * Check for command-specific server responses after sending.
+     *
+     * This method is called after {@link send} and after {@link
+     * ClientSession} has signalled the command has been sent, but
+     * before the next command is processed. It allows command
+     * implementations (e.g. {@link IdleCommand}) to asynchronously
+     * wait for some kind of response from the server before allowing
+     * additional commands to be sent.
+     *
+     * Most commands will not need to override this, and it by default
+     * does nothing.
+     */
+    public virtual async void send_wait(Serializer ser,
+                                        GLib.Cancellable cancellable)
+        throws GLib.Error {
+        // Nothing to do by default
+    }
+
+    /**
      * Cancels this command's execution.
      *
      * When this method is called, all locks will be released,
      * including {@link wait_until_complete}.
      */
     public virtual void cancel_command() {
-        cancel_serialization();
+        cancel_send();
         this.response_timer.reset();
         this.complete_lock.blind_notify();
     }
@@ -219,7 +238,7 @@ public class Geary.Imap.Command : BaseObject {
     public virtual void completed(StatusResponse new_status)
         throws ImapError {
         if (this.status != null) {
-            cancel_serialization();
+            cancel_send();
             throw new ImapError.SERVER_ERROR(
                 "%s: Duplicate status response received: %s",
                 to_brief_string(),
@@ -230,7 +249,7 @@ public class Geary.Imap.Command : BaseObject {
         this.status = new_status;
         this.response_timer.reset();
         this.complete_lock.blind_notify();
-        cancel_serialization();
+        cancel_send();
         check_status();
     }
 
@@ -240,7 +259,7 @@ public class Geary.Imap.Command : BaseObject {
     public virtual void data_received(ServerData data)
         throws ImapError {
         if (this.status != null) {
-            cancel_serialization();
+            cancel_send();
             throw new ImapError.SERVER_ERROR(
                 "%s: Server data received when command already complete: %s",
                 to_brief_string(),
@@ -255,14 +274,14 @@ public class Geary.Imap.Command : BaseObject {
      * Called when a continuation was requested by the server.
      *
      * This will notify the command's literal spinlock so that if
-     * {@link serialize} is waiting to send a literal, it will do so
+     * {@link send} is waiting to send a literal, it will do so
      * now.
      */
     public virtual void
         continuation_requested(ContinuationResponse continuation)
         throws ImapError {
         if (this.status != null) {
-            cancel_serialization();
+            cancel_send();
             throw new ImapError.SERVER_ERROR(
                 "%s: Continuation requested when command already complete",
                 to_brief_string()
@@ -270,7 +289,7 @@ public class Geary.Imap.Command : BaseObject {
         }
 
         if (this.literal_spinlock == null) {
-            cancel_serialization();
+            cancel_send();
             throw new ImapError.SERVER_ERROR(
                 "%s: Continuation requested but no literals available",
                 to_brief_string()
@@ -292,9 +311,9 @@ public class Geary.Imap.Command : BaseObject {
      * Cancels any existing serialisation in progress.
      *
      * When this method is called, any non I/O related process
-     * blocking the blocking {@link serialize} must be cancelled.
+     * blocking the blocking {@link send} must be cancelled.
      */
-    protected virtual void cancel_serialization() {
+    protected virtual void cancel_send() {
         if (this.literal_cancellable != null) {
             this.literal_cancellable.cancel();
         }
