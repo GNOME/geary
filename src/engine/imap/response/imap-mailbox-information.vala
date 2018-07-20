@@ -71,19 +71,21 @@ public class Geary.Imap.MailboxInformation : BaseObject {
         // decode everything
         MailboxAttributes attributes = new MailboxAttributes(attrlist);
         StringParameter? delim = server_data.get_as_nullable_string(3);
-        MailboxParameter mailbox = new MailboxParameter.from_string_parameter(
-            server_data.get_as_string(4));
-        
-        // Set \Inbox to standard path
-        if (canonical_inbox && Geary.Imap.MailboxAttribute.SPECIAL_FOLDER_INBOX in attributes) {
-            return new MailboxInformation(MailboxSpecifier.inbox,
-                (delim != null) ? delim.nullable_ascii : null, attributes);
-        } else {
-            return new MailboxInformation(new MailboxSpecifier.from_parameter(mailbox),
-                (delim != null) ? delim.nullable_ascii : null, attributes);
-        }
+        StringParameter mailbox = server_data.get_as_string(4);
+
+        // If special-use flag \Inbox is set just use the canonical
+        // Inbox name, otherwise decode it
+        MailboxSpecifier? specifier =
+            (canonical_inbox &&
+             Geary.Imap.MailboxAttribute.SPECIAL_FOLDER_INBOX in attributes)
+            ? MailboxSpecifier.inbox
+            : new MailboxSpecifier.from_parameter(mailbox);
+
+        return new MailboxInformation(
+            specifier, (delim != null) ? delim.nullable_ascii : null, attributes
+        );
     }
-    
+
     /**
      * The {@link Geary.FolderPath} for the {@link mailbox}.
      *

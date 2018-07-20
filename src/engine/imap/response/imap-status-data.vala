@@ -74,10 +74,9 @@ public class Geary.Imap.StatusData : Object {
             throw new ImapError.PARSE_ERROR("Bad STATUS command name in response \"%s\"",
                 server_data.to_string());
         }
-        
-        MailboxParameter mailbox_param = new MailboxParameter.from_string_parameter(
-            server_data.get_as_string(2));
-        
+
+        StringParameter mailbox_param = server_data.get_as_string(2);
+
         int messages = UNSET;
         int recent = UNSET;
         UID? uid_next = null;
