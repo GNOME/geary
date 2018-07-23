@@ -32,6 +32,7 @@ geary_client_vala_sources = files(
   'accounts/login-dialog.vala',
 
   'components/client-web-view.vala',
+  'components/components-validator.vala',
   'components/count-badge.vala',
   'components/empty-placeholder.vala',
   'components/folder-popover.vala',

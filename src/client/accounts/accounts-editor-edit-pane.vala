@@ -366,10 +366,8 @@ internal class Accounts.MailboxEditorPopover : EditorPopover {
 
     private Gtk.Entry name_entry = new Gtk.Entry();
     private Gtk.Entry address_entry = new Gtk.Entry();
+    private Components.EmailValidator address_validator;
     private Gtk.Button remove_button;
-    private bool is_valid = true;
-    private Geary.TimeoutManager validation_timeout;
-
 
     public signal void activated();
     public signal void remove_clicked();
@@ -380,10 +378,6 @@ internal class Accounts.MailboxEditorPopover : EditorPopover {
                                 bool can_remove) {
         this.display_name = display_name;
         this.address = address;
-
-        this.validation_timeout = new Geary.TimeoutManager.milliseconds(
-            150, () => { validate(); }
-        );
 
         this.name_entry.set_text(display_name ?? "");
         this.name_entry.set_placeholder_text(
@@ -409,6 +403,9 @@ internal class Accounts.MailboxEditorPopover : EditorPopover {
         this.address_entry.changed.connect(on_address_changed);
         this.address_entry.activate.connect(on_activate);
         this.address_entry.show();
+
+        this.address_validator =
+            new Components.EmailValidator(this.address_entry);
 
         this.remove_button = new Gtk.Button.with_label(_("Remove"));
         this.remove_button.halign = Gtk.Align.END;
@@ -444,8 +441,6 @@ internal class Accounts.MailboxEditorPopover : EditorPopover {
     }
 
     ~MailboxEditorPopover() {
-        this.validation_timeout.reset();
-
         this.name_entry.changed.disconnect(on_name_changed);
         this.name_entry.activate.disconnect(on_activate);
 
@@ -455,35 +450,12 @@ internal class Accounts.MailboxEditorPopover : EditorPopover {
         this.remove_button.clicked.disconnect(on_remove_clicked);
     }
 
-    private void validate() {
-        Gtk.Entry entry = this.address_entry;
-        this.is_valid = Geary.RFC822.MailboxAddress.is_valid_address(
-            this.address
-        );
-        Gtk.StyleContext style = entry.get_style_context();
-        Gtk.EntryIconPosition pos = Gtk.EntryIconPosition.SECONDARY;
-        if (!this.is_valid) {
-            style.add_class(Gtk.STYLE_CLASS_ERROR);
-            entry.set_icon_from_icon_name(
-                pos, "dialog-error-symbolic"
-            );
-            entry.set_tooltip_text(
-                _("Email address is not valid, e.g. person@example.com")
-            );
-        } else {
-            style.remove_class(Gtk.STYLE_CLASS_ERROR);
-            entry.set_icon_from_icon_name(pos, null);
-            entry.set_tooltip_text("");
-        }
-    }
-
     private void on_name_changed() {
         this.display_name = this.name_entry.get_text().strip();
     }
 
     private void on_address_changed() {
         this.address = this.address_entry.get_text().strip();
-        this.validation_timeout.start();
     }
 
     private void on_remove_clicked() {
@@ -491,7 +463,7 @@ internal class Accounts.MailboxEditorPopover : EditorPopover {
     }
 
     private void on_activate() {
-        if (this.address != "" && this.is_valid) {
+        if (this.address != "" && this.address_validator.is_valid) {
             activated();
         }
     }
