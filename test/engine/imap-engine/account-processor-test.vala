@@ -71,6 +71,7 @@ public class Geary.ImapEngine.AccountProcessorTest : TestCase {
     public override void set_up() {
         this.info = new Geary.AccountInformation(
             "test-info",
+            ServiceProvider.OTHER,
             new MockServiceInformation(),
             new MockServiceInformation()
         );

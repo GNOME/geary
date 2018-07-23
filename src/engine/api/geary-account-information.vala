@@ -92,6 +92,14 @@ public class Geary.AccountInformation : BaseObject {
      */
     public string id { get; private set; }
 
+    /** Specifies the email provider for this account. */
+    public Geary.ServiceProvider service_provider { get; private set; }
+
+    /** A human-readable label describing the email service provider. */
+    public string service_label {
+        get; public set;
+    }
+
     /**
      * A unique human-readable display name for this account.
      *
@@ -132,16 +140,6 @@ public class Geary.AccountInformation : BaseObject {
      * @see get_all_mailboxes
      */
     public Gee.List<Geary.RFC822.MailboxAddress>? alternate_mailboxes { get; private set; default = null; }
-
-    /** Specifies the email provider for this account. */
-    public Geary.ServiceProvider service_provider {
-        get; set; default = Geary.ServiceProvider.OTHER;
-    }
-
-    /** A human-readable label describing the service. */
-    public string service_label {
-        get; set; default = "";
-    }
 
     public int prefetch_period_days {
         get; set; default = DEFAULT_PREFETCH_PERIOD_DAYS;
@@ -215,18 +213,36 @@ public class Geary.AccountInformation : BaseObject {
      * Creates a new, empty account info file.
      */
     public AccountInformation(string id,
+                              ServiceProvider provider,
                               ServiceInformation imap,
                               ServiceInformation smtp) {
         this.id = id;
+        this.service_provider = provider;
         this.imap = imap;
         this.smtp = smtp;
+
+        // Known providers such as Gmail will have a label specified
+        // by clients, but other accounts can only really be
+        // identified by their server names. Try to extract a 'nice'
+        // value for label based on service host names.
+        string imap_host = imap.host;
+        string[] host_parts = imap_host.split(".");
+        if (host_parts.length > 1) {
+            host_parts = host_parts[1:host_parts.length];
+        }
+        this.service_label = string.joinv(".", host_parts);
     }
 
     /**
      * Creates a copy of an instance.
      */
     public AccountInformation.temp_copy(AccountInformation from) {
-        this(from.id, from.imap.temp_copy(), from.smtp.temp_copy());
+        this(
+            from.id,
+            from.service_provider,
+            from.imap.temp_copy(),
+            from.smtp.temp_copy()
+        );
         copy_from(from);
         this.is_copy = true;
     }
@@ -245,7 +261,6 @@ public class Geary.AccountInformation : BaseObject {
             foreach (RFC822.MailboxAddress alternate_mailbox in from.alternate_mailboxes)
                 add_alternate_mailbox(alternate_mailbox);
         }
-        this.service_provider = from.service_provider;
         this.prefetch_period_days = from.prefetch_period_days;
         this.save_sent_mail = from.save_sent_mail;
         this.ordinal = from.ordinal;

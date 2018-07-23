@@ -30,6 +30,7 @@ class Geary.App.ConversationMonitorTest : TestCase {
     public override void set_up() {
         this.account_info = new AccountInformation(
             "account_01",
+            ServiceProvider.OTHER,
             new MockServiceInformation(),
             new MockServiceInformation()
         );

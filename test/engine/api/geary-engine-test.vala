@@ -18,8 +18,6 @@ class Geary.EngineTest : TestCase {
         add_test("add_account", add_account);
         add_test("remove_account", remove_account);
         add_test("re_add_account", re_add_account);
-        add_test("create_orphan_account_with_legacy", create_orphan_account_with_legacy);
-        add_test("create_orphan_account", create_orphan_account);
     }
 
     ~EngineTest() {
@@ -65,7 +63,9 @@ class Geary.EngineTest : TestCase {
 	}
 
     public void add_account() throws GLib.Error {
-        AccountInformation info = this.engine.create_orphan_account(
+        AccountInformation info = new AccountInformation(
+            "test",
+            ServiceProvider.OTHER,
             new MockServiceInformation(),
             new MockServiceInformation()
         );
@@ -83,7 +83,9 @@ class Geary.EngineTest : TestCase {
     }
 
     public void remove_account() throws GLib.Error {
-        AccountInformation info = this.engine.create_orphan_account(
+        AccountInformation info = new AccountInformation(
+            "test",
+            ServiceProvider.OTHER,
             new MockServiceInformation(),
             new MockServiceInformation()
         );
@@ -98,7 +100,9 @@ class Geary.EngineTest : TestCase {
     }
 
     public void re_add_account() throws GLib.Error {
-        AccountInformation info = this.engine.create_orphan_account(
+        AccountInformation info = new AccountInformation(
+            "test",
+            ServiceProvider.OTHER,
             new MockServiceInformation(),
             new MockServiceInformation()
         );
@@ -111,78 +115,7 @@ class Geary.EngineTest : TestCase {
         assert_true(this.engine.has_account(info.id));
     }
 
-    public void create_orphan_account() throws Error {
-        try {
-            AccountInformation info = this.engine.create_orphan_account(
-                new MockServiceInformation(),
-                new MockServiceInformation()
-            );
-            assert(info.id == "account_01");
-            this.engine.add_account(info);
-
-            info = this.engine.create_orphan_account(
-                new MockServiceInformation(),
-                new MockServiceInformation()
-            );
-            assert(info.id == "account_02");
-            this.engine.add_account(info);
-
-            info = this.engine.create_orphan_account(
-                new MockServiceInformation(),
-                new MockServiceInformation()
-            );
-            assert(info.id == "account_03");
-            this.engine.add_account(info);
-
-            info = this.engine.create_orphan_account(
-                new MockServiceInformation(),
-                new MockServiceInformation()
-            );
-            assert(info.id == "account_04");
-        } catch (Error err) {
-            print("\nerr: %s\n", err.message);
-            assert_not_reached();
-        }
-    }
-
-    public void create_orphan_account_with_legacy() throws Error {
-        this.engine.add_account(
-            new AccountInformation(
-                "foo",
-                new MockServiceInformation(),
-                new MockServiceInformation()
-            )
-        );
-
-        AccountInformation info = this.engine.create_orphan_account(
-            new MockServiceInformation(),
-            new MockServiceInformation()
-        );
-        assert(info.id == "account_01");
-        this.engine.add_account(info);
-
-        info = this.engine.create_orphan_account(
-            new MockServiceInformation(),
-            new MockServiceInformation()
-        );
-        assert(info.id == "account_02");
-
-        this.engine.add_account(
-            new AccountInformation(
-                "bar",
-                new MockServiceInformation(),
-                new MockServiceInformation()
-            )
-        );
-
-        info = this.engine.create_orphan_account(
-            new MockServiceInformation(),
-            new MockServiceInformation()
-        );
-        assert(info.id == "account_02");
-    }
-
-    private void delete(File parent) throws Error {
+   private void delete(File parent) throws Error {
         FileInfo info = parent.query_info(
             "standard::*",
             FileQueryInfoFlags.NOFOLLOW_SYMLINKS

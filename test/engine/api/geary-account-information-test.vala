@@ -15,7 +15,10 @@ class Geary.AccountInformationTest : TestCase {
 
     public void has_email_address() throws GLib.Error {
         AccountInformation test = new AccountInformation(
-            "test", new MockServiceInformation(), new MockServiceInformation()
+            "test",
+            ServiceProvider.OTHER,
+            new MockServiceInformation(),
+            new MockServiceInformation()
         );
 
         test.primary_mailbox = (new RFC822.MailboxAddress(null, "test1@example.com"));

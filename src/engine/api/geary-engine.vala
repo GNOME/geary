@@ -16,9 +16,6 @@
  */
 public class Geary.Engine : BaseObject {
 
-    private const string ID_PREFIX = "account_";
-    private const string ID_FORMAT = "account_%02u";
-
     [Flags]
     public enum ValidationOption {
         NONE = 0,
@@ -201,42 +198,6 @@ public class Geary.Engine : BaseObject {
         check_opened();
 
         return accounts.read_only_view;
-    }
-
-    /**
-     * Returns a new account, not yet stored on disk.
-     *
-     * Throws an error if the engine has not been opened or if an
-     * invalid account id is generated.
-     */
-    public AccountInformation create_orphan_account(ServiceInformation imap,
-                                                    ServiceInformation smtp)
-        throws GLib.Error {
-        check_opened();
-
-        // We might want to allow the client to specify the id, but
-        // just generate one here for now: Use a common prefix and a
-        // numeric suffix, starting at 1. To generate the next id,
-        // find the last account and increment its suffix.
-
-        string? last_account = this.accounts.keys.fold<string?>((next, last) => {
-                string? result = last;
-                if (next.has_prefix(ID_PREFIX)) {
-                    result = (last == null || strcmp(last, next) < 0) ? next : last;
-                }
-                return result;
-            },
-            null);
-        uint next_id = 1;
-        if (last_account != null) {
-            next_id = int.parse(last_account.substring(ID_PREFIX.length)) + 1;
-        }
-        string id = ID_FORMAT.printf(next_id);
-
-        if (this.accounts.has_key(id))
-            throw new EngineError.ALREADY_EXISTS("Account %s already exists", id);
-
-        return new AccountInformation(id, imap, smtp);
     }
 
     /**

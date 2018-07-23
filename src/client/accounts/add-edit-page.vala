@@ -697,7 +697,9 @@ public class AddEditPage : Gtk.Box {
                 );
 
             try {
-                info = this.application.engine.create_orphan_account(imap, smtp);
+                info = this.application.controller.account_manager.new_orphan_account(
+                    this.get_service_provider(), imap, smtp
+                );
             } catch (Error err) {
                 debug("Unable to create account %s for %s: %s",
                       this.id, this.email_address, err.message);
@@ -717,7 +719,6 @@ public class AddEditPage : Gtk.Box {
             info.smtp.credentials = smtp_credentials;
             info.imap.remember_password = this.remember_password;
             info.smtp.remember_password = this.remember_password;
-            info.service_provider = this.get_service_provider();
             info.save_sent_mail = this.save_sent_mail;
             info.imap.host = this.imap_host;
             info.imap.port = this.imap_port;

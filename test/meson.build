@@ -61,6 +61,15 @@ geary_test_engine_sources = [
 geary_test_client_sources = [
   'test-client.vala',
 
+  # These should be included in the test lib sources, but we can't
+  # since that would make the test lib depend on geary-engine.vapi,
+  # and the engine test sute needs to depend
+  # geary-engine_internal.vapi, which leads to duplicate symbols when
+  # linking
+  'engine/api/geary-credentials-mediator-mock.vala',
+  'engine/api/geary-service-information-mock.vala',
+
+  'client/accounts/account-manager-test.vala',
   'client/application/geary-configuration-test.vala',
   'client/components/client-web-view-test.vala',
   'client/components/client-web-view-test-case.vala',

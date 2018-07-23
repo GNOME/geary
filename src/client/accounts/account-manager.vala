@@ -69,6 +69,10 @@ errordomain AccountError {
 public class AccountManager : GLib.Object {
 
 
+    private const string LOCAL_ID_PREFIX = "account_";
+    private const string LOCAL_ID_FORMAT = "account_%02u";
+    private const string GOA_ID_PREFIX = "goa_";
+
     private const string ACCOUNT_CONFIG_GROUP = "AccountInformation";
     private const string ACCOUNT_MANAGER_GROUP = "AccountManager";
     private const string IMAP_CONFIG_GROUP = "IMAP";
@@ -93,8 +97,6 @@ public class AccountManager : GLib.Object {
     private const string SPAM_FOLDER_KEY = "spam_folder";
     private const string TRASH_FOLDER_KEY = "trash_folder";
     private const string USE_EMAIL_SIGNATURE_KEY = "use_email_signature";
-
-    private const string GOA_ID_PREFIX = "goa_";
 
 
     /**
@@ -222,10 +224,37 @@ public class AccountManager : GLib.Object {
         this.goa_service.account_removed.connect(on_goa_account_removed);
     }
 
+    /**
+     * Returns a new account, not yet stored on disk.
+     */
+    public Geary.AccountInformation
+        new_orphan_account(Geary.ServiceProvider provider,
+                           Geary.ServiceInformation imap,
+                           Geary.ServiceInformation smtp) {
+        string? last_account = this.accounts.keys.fold<string?>((next, last) => {
+                string? result = last;
+                if (next.has_prefix(LOCAL_ID_PREFIX)) {
+                    result = (last == null || strcmp(last, next) < 0) ? next : last;
+                }
+                return result;
+            },
+            null);
+        uint next_id = 1;
+        if (last_account != null) {
+            next_id = int.parse(last_account.substring(LOCAL_ID_PREFIX.length)) + 1;
+        }
+        string id = LOCAL_ID_FORMAT.printf(next_id);
+
+        return new Geary.AccountInformation(id, provider, imap, smtp);
+    }
+
     public LocalServiceInformation new_libsecret_service(Geary.Protocol service) {
         return new LocalServiceInformation(service, libsecret);
     }
 
+    /**
+     * Creates new account's disk and credential storage as needed.
+     */
     public async void create_account(Geary.AccountInformation account,
                                      GLib.Cancellable? cancellable)
         throws GLib.Error {
@@ -757,51 +786,33 @@ public class AccountManager : GLib.Object {
             smtp.load_settings(smtp_config);
         }
 
-        Geary.AccountInformation info = new Geary.AccountInformation(
-            id, imap, smtp
+        return new Geary.AccountInformation(
+            id, provider, imap, smtp
         );
-        info.service_provider = provider;
-
-        // Known providers such as GMail will have a label specified
-        // by clients, but other accounts can only really be
-        // identified by their server names. Try to extract a 'nice'
-        // value for the label here.
-        if (provider == Geary.ServiceProvider.OTHER) {
-            string imap_host = imap.host;
-            string[] host_parts = imap_host.split(".");
-            if (host_parts.length > 1) {
-                host_parts = host_parts[1:host_parts.length];
-            }
-            info.service_label = string.joinv(".", host_parts);
-        }
-
-        return info;
     }
 
     private Geary.AccountInformation new_goa_account(string id,
                                                      Goa.Object account) {
         GoaMediator mediator = new GoaMediator(account);
-        Geary.AccountInformation info = new Geary.AccountInformation(
-            id,
-            new GoaServiceInformation(Geary.Protocol.IMAP, mediator, account),
-            new GoaServiceInformation(Geary.Protocol.SMTP, mediator, account)
-        );
 
-        info.service_label = account.get_account().provider_name;
-
+        Geary.ServiceProvider provider = Geary.ServiceProvider.OTHER;
         switch (account.get_account().provider_type) {
         case "google":
-            info.service_provider = Geary.ServiceProvider.GMAIL;
+            provider = Geary.ServiceProvider.GMAIL;
             break;
 
         case "windows_live":
-            info.service_provider = Geary.ServiceProvider.OUTLOOK;
-            break;
-
-        default:
-            info.service_provider = Geary.ServiceProvider.OTHER;
+            provider = Geary.ServiceProvider.OUTLOOK;
             break;
         }
+
+        Geary.AccountInformation info = new Geary.AccountInformation(
+            id,
+            provider,
+            new GoaServiceInformation(Geary.Protocol.IMAP, mediator, account),
+            new GoaServiceInformation(Geary.Protocol.SMTP, mediator, account)
+        );
+        info.service_label = account.get_account().provider_name;
 
         return info;
     }
