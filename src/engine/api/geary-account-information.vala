@@ -584,13 +584,16 @@ public class Geary.AccountInformation : BaseObject {
         );
     }
 
-    internal void connect_endpoints() {
+    internal void connect_imap_endpoint() {
         if (this.imap.endpoint == null) {
             this.imap.endpoint = get_imap_endpoint();
             this.imap.endpoint.untrusted_host.connect(
                 on_imap_untrusted_host
             );
         }
+    }
+
+    internal void connect_smtp_endpoint() {
         if (this.smtp.endpoint == null) {
             this.smtp.endpoint = get_smtp_endpoint();
             this.smtp.endpoint.untrusted_host.connect(
@@ -639,7 +642,7 @@ public class Geary.AccountInformation : BaseObject {
                 imap_endpoint = new Endpoint(this.imap.host, this.imap.port,
                     imap_flags, Imap.ClientConnection.RECOMMENDED_TIMEOUT_SEC);
             break;
-            
+
             default:
                 assert_not_reached();
         }
@@ -647,12 +650,7 @@ public class Geary.AccountInformation : BaseObject {
         // look for existing one in the global pool; want to use that
         // because Endpoint is mutable and signalled in such a way
         // that it's better to share them
-        imap_endpoint = get_shared_endpoint(this.imap, imap_endpoint);
-
-        // bind shared Endpoint signal to this AccountInformation's signal
-        imap_endpoint.untrusted_host.connect(on_imap_untrusted_host);
-
-        return imap_endpoint;
+        return get_shared_endpoint(this.imap, imap_endpoint);
     }
 
     private Endpoint get_smtp_endpoint() {
@@ -688,12 +686,7 @@ public class Geary.AccountInformation : BaseObject {
         // look for existing one in the global pool; want to use that
         // because Endpoint is mutable and signalled in such a way
         // that it's better to share them
-        smtp_endpoint = get_shared_endpoint(this.smtp, smtp_endpoint);
-
-        // bind shared Endpoint signal to this AccountInformation's signal
-        smtp_endpoint.untrusted_host.connect(on_smtp_untrusted_host);
-
-        return smtp_endpoint;
+        return get_shared_endpoint(this.smtp, smtp_endpoint);
     }
 
     public static Geary.FolderPath? build_folder_path(Gee.List<string>? parts) {

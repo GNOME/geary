@@ -173,9 +173,9 @@ public class AccountDialog : Gtk.Dialog {
         Geary.Engine.ValidationOption options) {
         Geary.Engine.ValidationResult validation_result = Geary.Engine.ValidationResult.OK;
         for (;;) {
-            validation_result = yield this.application.controller.validate_async(
-                account_information, options);
-            
+            //validation_result = yield this.application.controller.validate_async(
+            //    account_information, options);
+
             // If account was successfully added return to the account list.
             if (validation_result == Geary.Engine.ValidationResult.OK) {
                 account_list_pane.present();

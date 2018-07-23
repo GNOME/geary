@@ -201,103 +201,98 @@ public class Geary.Engine : BaseObject {
     }
 
     /**
-     * Returns whether the account information "validates."  If validate_connection is true,
-     * we check if we can connect to the endpoints and authenticate using the supplied credentials.
+     * Determines if an account's IMAP service can be connected to.
      */
-    public async ValidationResult validate_account_information_async(AccountInformation account,
-        ValidationOption options, Cancellable? cancellable = null) throws Error {
+    public async void validate_imap(AccountInformation account,
+                                    GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
         check_opened();
-        
-        ValidationResult error_code = ValidationResult.OK;
-        
-        // Make sure the account nickname and email is not in use.
-        foreach (AccountInformation a in get_accounts().values) {
-            // Don't need to check a's alternate_emails since they
-            // can't be set at account creation time
-            bool has_email = account.has_email_address(a.primary_mailbox);
 
-            if (!has_email && Geary.String.stri_equal(account.nickname, a.nickname))
-                error_code |= ValidationResult.INVALID_NICKNAME;
-
-            // if creating a new Account, don't allow an existing email address
-            if (!options.is_all_set(ValidationOption.UPDATING_EXISTING) && has_email)
-                error_code |= ValidationResult.EMAIL_EXISTS;
+        if (account.imap.port == 0) {
+            account.imap.port = account.imap.use_ssl
+                ? Imap.ClientConnection.DEFAULT_PORT_SSL
+                : Imap.ClientConnection.DEFAULT_PORT;
         }
-        
-        // If we don't need to validate the connection, exit out here.
-        if (!options.is_all_set(ValidationOption.CHECK_CONNECTIONS))
-            return error_code;
 
         account.untrusted_host.connect(on_untrusted_host);
-        account.connect_endpoints();
+        account.connect_imap_endpoint();
 
-        // validate IMAP, which requires logging in and establishing an AUTHORIZED cx state
+        // validate IMAP, which requires logging in and establishing
+        // an AUTHORIZED cx state
         Geary.Imap.ClientSession? imap_session = new Imap.ClientSession(
             account.imap.endpoint
         );
+
+        // XXX initiate_session_async doesn't seem to actually throw
+        // an imap error on login failed. This is not worth fixing
+        // until wip/26-proton-mail-bridge lands though, so use
+        // signals as a workaround instead.
+        bool login_failed = false;
+        imap_session.login_failed.connect(() => login_failed = true);
+
         try {
             yield imap_session.connect_async(cancellable);
-        } catch (Error err) {
-            debug("Error connecting to IMAP server: %s", err.message);
-            error_code |= ValidationResult.IMAP_CONNECTION_FAILED;
+            yield imap_session.initiate_session_async(
+                account.imap.credentials, cancellable
+            );
+        } finally {
+            try {
+                yield imap_session.disconnect_async(cancellable);
+            } catch {
+                // Oh well
+            }
+            account.disconnect_endpoints();
+            account.untrusted_host.disconnect(on_untrusted_host);
         }
 
-        if (!error_code.is_all_set(ValidationResult.IMAP_CONNECTION_FAILED)) {
-            try {
-                yield imap_session.initiate_session_async(account.imap.credentials, cancellable);
-                
-                // Connected and initiated, still need to be sure connection authorized
-                Imap.MailboxSpecifier current_mailbox;
-                if (imap_session.get_protocol_state(out current_mailbox) != Imap.ClientSession.ProtocolState.AUTHORIZED)
-                    error_code |= ValidationResult.IMAP_CREDENTIALS_INVALID;
-            } catch (Error err) {
-                debug("Error validating IMAP account info: %s", err.message);
-                if (err is ImapError.UNAUTHENTICATED)
-                    error_code |= ValidationResult.IMAP_CREDENTIALS_INVALID;
-                else
-                    error_code |= ValidationResult.IMAP_CONNECTION_FAILED;
+        if (login_failed) {
+            // XXX This should be a LOGIN_FAILED error or something
+            throw new ImapError.UNAUTHENTICATED("Login failed");
+        }
+    }
+
+    /**
+     * Determines if an account's SMTP service can be connected to.
+     */
+    public async void validate_smtp(AccountInformation account,
+                                    GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
+        check_opened();
+
+        if (account.smtp.port == 0) {
+            if (account.smtp.use_ssl) {
+                account.smtp.port = Smtp.ClientConnection.DEFAULT_PORT_SSL;
+            } else if (account.smtp.use_starttls) {
+                account.smtp.port = account.smtp.smtp_noauth
+                    ? Smtp.ClientConnection.DEFAULT_PORT
+                    : Smtp.ClientConnection.DEFAULT_PORT_STARTTLS;
+            } else {
+                account.smtp.port = Smtp.ClientConnection.DEFAULT_PORT;
             }
         }
 
-        try {
-            yield imap_session.disconnect_async(cancellable);
-        } catch (Error err) {
-            // ignored
-        } finally {
-            imap_session = null;
-        }
+        account.untrusted_host.connect(on_untrusted_host);
+        account.connect_smtp_endpoint();
 
-        // SMTP is simpler, merely see if login works and done (throws
-        // an SmtpError if not)
         Geary.Smtp.ClientSession? smtp_session = new Geary.Smtp.ClientSession(
             account.smtp.endpoint
         );
+
         try {
             yield smtp_session.login_async(
                 account.get_smtp_credentials(), cancellable
             );
-        } catch (Error err) {
-            debug("Error validating SMTP account info: %s", err.message);
-            if (err is SmtpError.AUTHENTICATION_FAILED)
-                error_code |= ValidationResult.SMTP_CREDENTIALS_INVALID;
-            else
-                error_code |= ValidationResult.SMTP_CONNECTION_FAILED;
-        }
-
-        try {
-            yield smtp_session.logout_async(true, cancellable);
-        } catch (Error err) {
-            // ignored
         } finally {
-            smtp_session = null;
+            try {
+                yield smtp_session.logout_async(true, cancellable);
+            } catch {
+                // Oh well
+            }
+            account.disconnect_endpoints();
+            account.untrusted_host.disconnect(on_untrusted_host);
         }
-
-        account.disconnect_endpoints();
-        account.untrusted_host.disconnect(on_untrusted_host);
-
-        return error_code;
     }
-    
+
     /**
      * Creates a Geary.Account from a Geary.AccountInformation (which is what
      * other methods in this interface deal in).
@@ -366,7 +361,8 @@ public class Geary.Engine : BaseObject {
 
         accounts.set(account.id, account);
 
-        account.connect_endpoints();
+        account.connect_imap_endpoint();
+        account.connect_smtp_endpoint();
         account.untrusted_host.connect(on_untrusted_host);
         account_available(account);
     }

@@ -895,15 +895,15 @@ public class GearyController : Geary.BaseObject {
         validating_endpoints.add(account_information.smtp.endpoint);
 
         Geary.Engine.ValidationResult result = Geary.Engine.ValidationResult.OK;
-        try {
-            result = yield Geary.Engine.instance.validate_account_information_async(account_information,
-                options, cancellable);
-        } catch (Error err) {
-            debug("Error validating account: %s", err.message);
-            this.application.exit(-1); // Fatal error
+        // try {
+        //     result = yield Geary.Engine.instance.validate_account_information_async(account_information,
+        //         options, cancellable);
+        // } catch (Error err) {
+        //     debug("Error validating account: %s", err.message);
+        //     this.application.exit(-1); // Fatal error
 
-            return result;
-        }
+        //     return result;
+        // }
 
         validating_endpoints.remove(account_information.imap.endpoint);
         validating_endpoints.remove(account_information.smtp.endpoint);
