@@ -32,8 +32,8 @@ internal class Accounts.EditorRow<PaneType> : Gtk.ListBoxRow {
 internal class Accounts.LabelledEditorRow<PaneType,V> : EditorRow<PaneType> {
 
 
-    protected Gtk.Label label { get; private set; default = new Gtk.Label(""); }
-    protected V value;
+    public Gtk.Label label { get; private set; default = new Gtk.Label(""); }
+    public V value { get; private set; }
 
 
     public LabelledEditorRow(string label, V value) {
@@ -76,6 +76,43 @@ internal class Accounts.AddRow<PaneType> : EditorRow<PaneType> {
         add_icon.show();
 
         this.layout.add(add_icon);
+    }
+
+}
+
+
+internal class Accounts.ServiceProviderRow<PaneType> :
+    LabelledEditorRow<PaneType,Gtk.Label> {
+
+
+    public ServiceProviderRow(Geary.ServiceProvider provider,
+                              string other_type_label) {
+        string? label = other_type_label;
+        switch (provider) {
+        case Geary.ServiceProvider.GMAIL:
+            label = _("Gmail");
+            break;
+
+        case Geary.ServiceProvider.OUTLOOK:
+            label = _("Outlook.com");
+            break;
+
+        case Geary.ServiceProvider.YAHOO:
+            label = _("Yahoo");
+            break;
+        }
+
+        base(
+            // Translators: Label describes the service provider
+            // hosting the email account, e.g. Gmail, Yahoo, or some
+            // other generic IMAP service.
+            _("Service provider"),
+            new Gtk.Label(label)
+        );
+
+        // Can't change this, so deactivate and dim out
+        set_activatable(false);
+        this.value.get_style_context().add_class(Gtk.STYLE_CLASS_DIM_LABEL);
     }
 
 }

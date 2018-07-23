@@ -264,6 +264,16 @@ public class GearyApplication : Gtk.Application {
         is_destroyed = true;
     }
 
+    public void show_accounts() {
+        activate();
+
+        Accounts.Editor editor = new Accounts.Editor(this, get_active_window());
+        editor.run();
+        editor.destroy();
+        this.controller.expunge_accounts.begin();
+    }
+
+
     public File get_user_data_directory() {
         return File.new_for_path(Environment.get_user_data_dir()).get_child("geary");
     }
@@ -422,10 +432,7 @@ public class GearyApplication : Gtk.Application {
     }
 
     private void on_activate_accounts() {
-        Accounts.Editor editor = new Accounts.Editor(this, get_active_window());
-        editor.run();
-        editor.destroy();
-        this.controller.expunge_accounts.begin();
+        show_accounts();
     }
 
     private void on_activate_compose() {

@@ -308,3 +308,97 @@ public class Components.EmailValidator : Validator {
     }
 
 }
+
+
+/**
+ * A validator for GTK Entry widgets that contain a network address.
+ *
+ * This attempts parse the entry value as a host name or IP address
+ * with an optional port, then resolve the host name if
+ * needed. Parsing is performed by {@link GLib.NetworkAddress.parse}
+ * to parse the user input, hence it may be specified in any form
+ * supported by that method.
+ */
+public class Components.NetworkAddressValidator : Validator {
+
+
+    /** The validated network address, if any. */
+    public GLib.NetworkAddress? validated_address {
+        get; private set; default = null;
+    }
+
+    /** The default port used when parsing the address. */
+    public uint16 default_port { get; private set; }
+
+    private GLib.Resolver resolver;
+    private GLib.Cancellable? cancellable = null;
+
+
+    public NetworkAddressValidator(Gtk.Entry target, uint16 default_port) {
+        base(target);
+        this.default_port = default_port;
+
+        this.resolver = GLib.Resolver.get_default();
+
+        // Translators: Tooltip used when an entry requires a valid,
+        // resolvable server name to be entered, but one is not
+        // provided.
+        this.empty_state.icon_tooltip_text = _("A server name is required");
+
+        // Translators: Tooltip used when an entry requires a valid
+        // server name to be entered, but it was unable to be
+        // looked-up in the DNS.
+        this.invalid_state.icon_tooltip_text = _("Could not look up server name");
+    }
+
+
+    public override Validator.Validity validate(string value,
+                                                Validator.Trigger reason) {
+        if (this.cancellable != null) {
+            this.cancellable.cancel();
+        }
+
+        GLib.NetworkAddress? address = null;
+        try {
+            address = GLib.NetworkAddress.parse(value, this.default_port);
+        } catch (GLib.Error err) {
+            debug("Error parsing host name \"%s\": %s", value, err.message);
+        }
+
+        Validator.Validity ret = this.state;
+
+        if (address != null) {
+            // Only re-validate if changed
+            if (this.validated_address == null ||
+                this.validated_address.hostname != address.hostname ||
+                this.validated_address.port != address.port ||
+                this.validated_address.scheme != address.scheme) {
+
+                this.cancellable = new GLib.Cancellable();
+                this.resolver.lookup_by_name_async.begin(
+                    value.strip(), this.cancellable,
+                    (obj, res) => {
+                        try {
+                            this.resolver.lookup_by_name_async.end(res);
+                            this.validated_address = address;
+                            update_state(Validator.Validity.VALID);
+                        } catch (GLib.IOError.CANCELLED err) {
+                            this.validated_address = null;
+                        } catch (GLib.Error err) {
+                            this.validated_address = null;
+                            update_state(Validator.Validity.INVALID);
+                        }
+                        this.cancellable = null;
+                    }
+                );
+
+                ret = Validator.Validity.IN_PROGRESS;
+            }
+        } else {
+            ret = Validator.Validity.INVALID;
+        }
+
+        return ret;
+    }
+
+}

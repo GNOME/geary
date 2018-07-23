@@ -34,6 +34,71 @@ public enum Geary.Protocol {
 }
 
 
+/** The method used to negotiate a TLS session, if any. */
+public enum Geary.TlsNegotiationMethod {
+    /** No TLS session should be established. */
+    NONE,
+    /** StartTLS should used to establish a session. */
+    START_TLS,
+    /** A TLS session should be established at the transport layer. */
+    TRANSPORT;
+
+
+    public static TlsNegotiationMethod for_value(string value)
+        throws EngineError {
+        switch (value.ascii_up()) {
+        case "NONE":
+            return NONE;
+        case "START_TLS":
+            return START_TLS;
+        case "TRANSPORT":
+            return TRANSPORT;
+        }
+        throw new EngineError.BAD_PARAMETERS(
+            "Unknown Protocol value: %s", value
+        );
+    }
+
+    public string to_value() {
+        string value = to_string();
+        return value.substring(value.last_index_of("_") + 1);
+    }
+
+}
+
+
+/** The credentials used to negotiate SMTP authentication, if any. */
+public enum Geary.SmtpCredentials {
+    /** No SMTP credentials are required. */
+    NONE,
+    /** The account's IMAP credentials should be used. */
+    IMAP,
+    /** Custom credentials are required for SMTP. */
+    CUSTOM;
+
+    public static SmtpCredentials for_value(string value)
+        throws EngineError {
+        switch (value.ascii_up()) {
+        case "NONE":
+            return Geary.SmtpCredentials.NONE;
+        case "IMAP":
+            return Geary.SmtpCredentials.IMAP;
+        case "CUSTOM":
+            return Geary.SmtpCredentials.CUSTOM;
+        }
+        throw new EngineError.BAD_PARAMETERS(
+            "Unknown SmtpCredentials value: %s", value
+        );
+    }
+
+    public string to_value() {
+        string value = to_string();
+        return value.substring(value.last_index_of("_") + 1);
+    }
+
+}
+
+
 /**
  * This class encloses all the information used when connecting with the server,
  * how to authenticate with it and which credentials to use. Derived classes

@@ -35,7 +35,12 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
         this.account = account;
 
         this.details_list.set_header_func(Editor.seperator_headers);
-        this.details_list.add(new ServiceProviderRow(this.account));
+        this.details_list.add(
+            new ServiceProviderRow<EditorServersPane>(
+                this.account.service_provider,
+                this.account.service_label
+            )
+        );
         // Only add an account provider if it is esoteric enough.
         if (this.account.imap.mediator is GoaMediator) {
             this.details_list.add(new AccountProviderRow(this.account));
@@ -78,48 +83,6 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
 
     private void on_account_changed() {
         update_header();
-    }
-
-}
-
-
-private class Accounts.ServiceProviderRow :
-    AccountRow<EditorServersPane,Gtk.Label> {
-
-
-    public ServiceProviderRow(Geary.AccountInformation account) {
-        base(
-            account,
-            // Translators: This label describes service hosting the
-            // email account, e.g. GMail, Yahoo, Outlook.com, or some
-            // other generic IMAP service.
-            _("Service provider"),
-            new Gtk.Label("")
-        );
-
-        // Can't change this, so dim it out
-        this.value.get_style_context().add_class(Gtk.STYLE_CLASS_DIM_LABEL);
-        set_activatable(false);
-
-        update();
-    }
-
-    public override void update() {
-        string? details = this.account.service_label;
-        switch (this.account.service_provider) {
-        case Geary.ServiceProvider.GMAIL:
-            details = _("GMail");
-            break;
-
-        case Geary.ServiceProvider.OUTLOOK:
-            details = _("Outlook.com");
-            break;
-
-        case Geary.ServiceProvider.YAHOO:
-            details = _("Yahoo");
-            break;
-        }
-        this.value.set_text(details);
     }
 
 }

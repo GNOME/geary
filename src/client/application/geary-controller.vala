@@ -129,7 +129,6 @@ public class GearyController : Geary.BaseObject {
     private UpgradeDialog upgrade_dialog;
     private Gee.List<string> pending_mailtos = new Gee.ArrayList<string>();
     private Geary.Nonblocking.Mutex untrusted_host_prompt_mutex = new Geary.Nonblocking.Mutex();
-    private Gee.HashSet<Geary.Endpoint> validating_endpoints = new Gee.HashSet<Geary.Endpoint>();
 
     private uint operation_count = 0;
     private Geary.Revokable? revokable = null;
@@ -301,7 +300,7 @@ public class GearyController : Geary.BaseObject {
             error("Error migrating configuration directories: %s", e.message);
         }
 
-        // Start Geary.
+        // Hook up accounts and credentials machinery
         this.account_manager = new Accounts.Manager(
             this.application,
             this.application.get_user_config_directory(),
@@ -329,13 +328,19 @@ public class GearyController : Geary.BaseObject {
             warning("Error opening GOA: %s", err.message);
         }
 
+        // Start the engine and load our accounts
         try {
             yield engine.open_async(
                 this.application.get_resource_directory(), cancellable
             );
             yield this.account_manager.load_accounts(cancellable);
             if (engine.get_accounts().size == 0) {
-                create_account();
+                this.application.show_accounts();
+                if (engine.get_accounts().size == 0) {
+                    // User cancelled without creating an account, so
+                    // nothing else to do but exit.
+                    this.application.quit();
+                }
             }
         } catch (Error e) {
             warning("Error opening Geary.Engine instance: %s", e.message);
@@ -491,7 +496,6 @@ public class GearyController : Geary.BaseObject {
         this.current_folder = null;
 
         this.previous_non_search_folder = null;
-        this.validating_endpoints.clear();
 
         this.selected_conversations = new Gee.HashSet<Geary.App.Conversation>();
         this.last_deleted_conversation = null;
@@ -700,10 +704,7 @@ public class GearyController : Geary.BaseObject {
                 peer, err.message);
         }
 
-        // if these are in validation, there are complex GTK and workflow issues from simply
-        // presenting the prompt now, so caller who connected will need to do it on their own dime
-        if (!this.validating_endpoints.contains(service.endpoint))
-            prompt_for_untrusted_host(main_window, account, service, false);
+        prompt_for_untrusted_host(main_window, account, service, false);
     }
 
     private void prompt_for_untrusted_host(Gtk.Window? parent,
@@ -746,23 +747,6 @@ public class GearyController : Geary.BaseObject {
                 this.close_account.begin(account);
             break;
         }
-    }
-    
-    private void create_account() {
-        Geary.AccountInformation? account_information = request_account_information(null);
-        if (account_information != null)
-            do_validate_until_successful_async.begin(account_information);
-    }
-    
-    private async void do_validate_until_successful_async(Geary.AccountInformation account_information,
-        Cancellable? cancellable = null) {
-        Geary.AccountInformation? result = account_information;
-        do {
-            result = yield validate_or_retry_async(result, cancellable);
-        } while (result != null);
-        
-        if (login_dialog != null)
-            login_dialog.hide();
     }
 
     // Returns possibly modified validation results
@@ -850,96 +834,7 @@ public class GearyController : Geary.BaseObject {
         
         return validation_result;
     }
-    
-    // Returns null if we are done validating, or the revised account information if we should retry.
-    private async Geary.AccountInformation? validate_or_retry_async(Geary.AccountInformation account_information,
-        Cancellable? cancellable = null) {
-        Geary.Engine.ValidationResult result = yield validate_async(account_information,
-            Geary.Engine.ValidationOption.CHECK_CONNECTIONS, cancellable);
-        if (result == Geary.Engine.ValidationResult.OK)
-            return null;
-        
-        // check Endpoints for trust (TLS) issues
-        bool retry_required;
-        result = yield validation_check_for_tls_warnings_async(account_information, result,
-            out retry_required);
-        
-        // return for retry if required; check can also change validation results, in which case
-        // revalidate entirely to have them written out
-        if (retry_required)
-            return account_information;
-        
-        debug("Validation failed. Prompting user for revised account information");
-        Geary.AccountInformation? new_account_information =
-            request_account_information(account_information, result);
-        
-        // If the user refused to enter account information. There is currently no way that we
-        // could see this--we exit in request_account_information, and the only way that an
-        // exit could be canceled is if there are unsaved composer windows open (which won't
-        // happen before an account is created). However, best to include this check for the
-        // future.
-        if (new_account_information == null)
-            return null;
-        
-        debug("User entered revised account information, retrying validation");
-        return new_account_information;
-    }
-    
-    // Attempts to validate and add an account.  Returns a result code indicating
-    // success or one or more errors.
-    public async Geary.Engine.ValidationResult validate_async(
-        Geary.AccountInformation account_information, Geary.Engine.ValidationOption options,
-        Cancellable? cancellable = null) {
-        // add Endpoints to set of validating endpoints to prevent the prompt from appearing
-        validating_endpoints.add(account_information.imap.endpoint);
-        validating_endpoints.add(account_information.smtp.endpoint);
 
-        Geary.Engine.ValidationResult result = Geary.Engine.ValidationResult.OK;
-        // try {
-        //     result = yield Geary.Engine.instance.validate_account_information_async(account_information,
-        //         options, cancellable);
-        // } catch (Error err) {
-        //     debug("Error validating account: %s", err.message);
-        //     this.application.exit(-1); // Fatal error
-
-        //     return result;
-        // }
-
-        validating_endpoints.remove(account_information.imap.endpoint);
-        validating_endpoints.remove(account_information.smtp.endpoint);
-
-        if (result == Geary.Engine.ValidationResult.OK) {
-            Geary.AccountInformation real_account_information = account_information;
-            if (account_information.is_copy) {
-                // We have a temporary copy of the account.  Find the "real" acct info object and
-                // copy the new data into it.
-                real_account_information = get_real_account_information(account_information);
-                real_account_information.copy_from(account_information);
-            }
-
-            try {
-                if (real_account_information.settings_file == null) {
-                    yield this.account_manager.create_account(
-                        real_account_information, cancellable
-                    );
-                } else {
-                    yield this.account_manager.save_account(
-                        real_account_information, cancellable
-                    );
-                }
-                debug("Successfully validated account information");
-            } catch (GLib.Error err) {
-                report_problem(
-                    new Geary.ProblemReport(
-                        Geary.ProblemType.GENERIC_ERROR, err
-                    )
-                );
-            }
-        }
-
-        return result;
-    }
-    
     // Returns the "real" account info associated with a copy.  If it's not a copy, null is returned.
     public Geary.AccountInformation? get_real_account_information(
         Geary.AccountInformation account_information) {
@@ -952,50 +847,6 @@ public class GearyController : Geary.BaseObject {
         }
         
         return null;
-    }
-    
-    // Prompt the user for a service, real name, username, and password, and try to start Geary.
-    private Geary.AccountInformation? request_account_information(Geary.AccountInformation? old_info,
-        Geary.Engine.ValidationResult result = Geary.Engine.ValidationResult.OK) {
-        Geary.AccountInformation? new_info = old_info;
-        if (login_dialog == null) {
-            // Create here so we know GTK is initialized.
-            login_dialog = new LoginDialog(this.application);
-        } else if (!login_dialog.get_visible()) {
-            // If the dialog has been dismissed, exit here.
-            this.application.exit();
-            return null;
-        }
-        
-        if (new_info != null)
-            login_dialog.set_account_information(new_info, result);
-        
-        login_dialog.present();
-        for (;;) {
-            login_dialog.show_spinner(false);
-            if (login_dialog.run() != Gtk.ResponseType.OK) {
-                debug("User refused to enter account information. Exiting...");
-                this.application.exit(1);
-                return null;
-            }
-            
-            login_dialog.show_spinner(true);
-            new_info = login_dialog.get_account_information();
-            
-            if ((!new_info.imap.use_ssl && !new_info.imap.use_starttls)
-                || (!new_info.smtp.use_ssl && !new_info.smtp.use_starttls)) {
-                ConfirmationDialog security_dialog = new ConfirmationDialog(main_window,
-                    _("Your settings are insecure"),
-                    _("Your IMAP and/or SMTP settings do not specify SSL or TLS.  This means your username and password could be read by another person on the network.  Are you sure you want to do this?"),
-                    _("Co_ntinue"));
-                if (security_dialog.run() != Gtk.ResponseType.OK)
-                    continue;
-            }
-            
-            break;
-        }
-        
-        return new_info;
     }
 
     private void report_problem(Geary.ProblemReport report) {

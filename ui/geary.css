@@ -194,6 +194,10 @@ grid.geary-account-view image:dir(rtl) {
   margin-left: 6px;
 }
 
+grid.geary-welcome-panel {
+  margin-bottom: 32px;
+}
+
 label.geary-settings-heading {
   font-weight: bold;
   margin-top: 24px;
@@ -201,11 +205,6 @@ label.geary-settings-heading {
 }
 
 row.geary-settings {
-  padding: 0px;
-}
-
-row.geary-settings > grid > * {
-  margin: 0px;
   padding: 0px;
 }
 
@@ -236,6 +235,7 @@ frame.geary-settings.geary-signature {
 
 
 row.geary-settings > grid > combobox,
+row.geary-settings > grid > entry,
 row.geary-settings:not(.geary-add-row) > grid > image,
 row.geary-settings > grid > switch {
   /* These use more space than labels, so set their valign to center
@@ -249,9 +249,9 @@ buttonbox.geary-settings  {
 }
 
 popover.geary-editor > grid {
-  margin: 6px;
+  margin: 12px;
 }
 
 popover.geary-editor > grid > button.geary-setting-remove {
-  margin-top: 6px;
+  margin-top: 12px;
 }
