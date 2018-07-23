@@ -12,7 +12,7 @@ public class AccountDialogAccountListPane : AccountDialogPane {
         ACCOUNT_ADDRESS;
     }
 
-    private AccountManager account_manager;
+    private Accounts.Manager account_manager;
 
     private Gtk.TreeView list_view;
     private Gtk.ListStore list_model = new Gtk.ListStore(3, typeof(string), typeof(string), typeof(string));
@@ -25,7 +25,7 @@ public class AccountDialogAccountListPane : AccountDialogPane {
 
     public signal void delete_account(string id);
 
-    public AccountDialogAccountListPane(AccountManager account_manager,
+    public AccountDialogAccountListPane(Accounts.Manager account_manager,
                                         Gtk.Stack stack) {
         base(stack);
         this.account_manager = account_manager;
@@ -142,7 +142,7 @@ public class AccountDialogAccountListPane : AccountDialogPane {
     }
 
     private void on_account_added(Geary.AccountInformation account,
-                                  AccountManager.Status status) {
+                                  Accounts.Manager.Status status) {
         add_account_impl(account);
     }
 

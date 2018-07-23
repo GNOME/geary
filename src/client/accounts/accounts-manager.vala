@@ -10,7 +10,7 @@
 /**
  * Current supported credential providers.
  */
-public enum CredentialsProvider {
+public enum Accounts.CredentialsProvider {
     /** Credentials are provided and stored by libsecret. */
     LIBSECRET,
 
@@ -30,7 +30,8 @@ public enum CredentialsProvider {
         }
     }
 
-    public static CredentialsProvider from_string(string str) throws Error {
+    public static CredentialsProvider from_string(string str)
+        throws GLib.Error {
         switch (str.ascii_down()) {
             case "libsecret":
                 return LIBSECRET;
@@ -46,7 +47,7 @@ public enum CredentialsProvider {
     }
 }
 
-errordomain AccountError {
+public errordomain Accounts.Error {
     INVALID,
     LOCAL_REMOVED,
     GOA_REMOVED;
@@ -66,7 +67,7 @@ errordomain AccountError {
  * manager with a particular status (enabled, disabled, etc). Accounts
  * can have their enabled or disabled status updated manually,
  */
-public class AccountManager : GLib.Object {
+public class Accounts.Manager : GLib.Object {
 
 
     private const string LOCAL_ID_PREFIX = "account_";
@@ -182,9 +183,9 @@ public class AccountManager : GLib.Object {
     public signal void report_problem(Geary.ProblemReport problem);
 
 
-    public AccountManager(GearyApplication application,
-                          GLib.File user_config_dir,
-                          GLib.File user_data_dir) {
+    public Manager(GearyApplication application,
+                   GLib.File user_config_dir,
+                   GLib.File user_data_dir) {
         this.application = application;
         this.user_config_dir = user_config_dir;
         this.user_data_dir = user_data_dir;
@@ -424,7 +425,7 @@ public class AccountManager : GLib.Object {
      */
     private async Geary.AccountInformation
         load_account(string id, GLib.Cancellable? cancellable)
-        throws Error {
+        throws GLib.Error {
         GLib.File config_dir = this.user_config_dir.get_child(id);
         GLib.File data_dir = this.user_data_dir.get_child(id);
 
@@ -470,7 +471,7 @@ public class AccountManager : GLib.Object {
                     // but have a working GOA connection, so it must
                     // have been removed. Not much else that we can do
                     // except remove it.
-                    throw new AccountError.GOA_REMOVED("GOA account not found");
+                    throw new Error.GOA_REMOVED("GOA account not found");
                 }
             }
 
@@ -478,7 +479,7 @@ public class AccountManager : GLib.Object {
                 // We have a GOA account, but either GOA is
                 // unavailable or the account has changed. Keep it
                 // around in case GOA comes back.
-                throw new AccountError.INVALID("GOA not available");
+                throw new Error.INVALID("GOA not available");
             }
             break;
         }
@@ -545,7 +546,7 @@ public class AccountManager : GLib.Object {
         if (manager_config.exists &&
             manager_config.get_bool(REMOVED_KEY, false)) {
             this.removed.add(info);
-            throw new AccountError.LOCAL_REMOVED("Account marked for removal");
+            throw new Error.LOCAL_REMOVED("Account marked for removal");
         }
 
         return info;
@@ -556,7 +557,7 @@ public class AccountManager : GLib.Object {
         throws GLib.Error {
         File? file = info.settings_file;
         if (file == null) {
-            throw new AccountError.INVALID(
+            throw new Error.INVALID(
                 "Account information does not have a settings file"
             );
         }

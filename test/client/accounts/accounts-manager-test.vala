@@ -5,14 +5,14 @@
  * (version 2.1 or later). See the COPYING file in this distribution.
  */
 
-class AccountManagerTest : TestCase {
+class Accounts.ManagerTest : TestCase {
 
 
-    private AccountManager? test = null;
+    private Manager? test = null;
     private File? tmp = null;
 
 
-    public AccountManagerTest() {
+    public ManagerTest() {
         base("AccountManagerTest");
         add_test("create_account", create_account);
         add_test("create_orphan_account", create_orphan_account);
@@ -33,7 +33,7 @@ class AccountManagerTest : TestCase {
         GLib.File data = this.tmp.get_child("data");
         data.make_directory();
 
-        this.test = new AccountManager(new GearyApplication(), config, data);
+        this.test = new Manager(new GearyApplication(), config, data);
     }
 
 	public override void tear_down() throws GLib.Error {
@@ -54,7 +54,7 @@ class AccountManagerTest : TestCase {
 
         this.test.account_added.connect((added, status) => {
                 was_added = (added == account);
-                was_enabled = (status == AccountManager.Status.ENABLED);
+                was_enabled = (status == Manager.Status.ENABLED);
             });
 
         this.test.create_account.begin(
@@ -127,7 +127,7 @@ class AccountManagerTest : TestCase {
         assert(account2.id == "account_02");
     }
 
-    private void delete(File parent) throws Error {
+    private void delete(File parent) throws GLib.Error {
         FileInfo info = parent.query_info(
             "standard::*",
             FileQueryInfoFlags.NOFOLLOW_SYMLINKS

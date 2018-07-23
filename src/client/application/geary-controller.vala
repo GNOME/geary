@@ -87,7 +87,7 @@ public class GearyController : Geary.BaseObject {
 
     public weak GearyApplication application { get; private set; } // circular ref
 
-    public AccountManager? account_manager { get; private set; default = null; }
+    public Accounts.Manager? account_manager { get; private set; default = null; }
 
     public MainWindow? main_window { get; private set; default = null; }
 
@@ -302,7 +302,7 @@ public class GearyController : Geary.BaseObject {
         }
 
         // Start Geary.
-        this.account_manager = new AccountManager(
+        this.account_manager = new Accounts.Manager(
             this.application,
             this.application.get_user_config_directory(),
             this.application.get_user_data_directory()
@@ -3087,8 +3087,8 @@ public class GearyController : Geary.BaseObject {
     }
 
     private void on_account_added(Geary.AccountInformation added,
-                                  AccountManager.Status status) {
-        if (status == AccountManager.Status.ENABLED) {
+                                  Accounts.Manager.Status status) {
+        if (status == Accounts.Manager.Status.ENABLED) {
             try {
                 this.application.engine.add_account(added);
             } catch (GLib.Error err) {
@@ -3102,9 +3102,9 @@ public class GearyController : Geary.BaseObject {
     }
 
     private void on_account_status_changed(Geary.AccountInformation changed,
-                                           AccountManager.Status status) {
+                                           Accounts.Manager.Status status) {
         switch (status) {
-        case AccountManager.Status.ENABLED:
+        case Accounts.Manager.Status.ENABLED:
             if (!this.application.engine.has_account(changed.id)) {
                 try {
                     this.application.engine.add_account(changed);
@@ -3118,8 +3118,8 @@ public class GearyController : Geary.BaseObject {
             }
             break;
 
-        case AccountManager.Status.UNAVAILABLE:
-        case AccountManager.Status.DISABLED:
+        case Accounts.Manager.Status.UNAVAILABLE:
+        case Accounts.Manager.Status.DISABLED:
             if (this.application.engine.has_account(changed.id)) {
                 this.close_account.begin(
                     changed,

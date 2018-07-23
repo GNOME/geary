@@ -30,7 +30,7 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane {
 
     protected weak Accounts.Editor editor { get; set; }
 
-    private AccountManager accounts { get; private set; }
+    private Manager accounts { get; private set; }
 
     private Application.CommandStack commands {
         get; private set; default = new Application.CommandStack();
@@ -87,7 +87,7 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane {
 
     /** Adds a new account to the list. */
     internal void add_account(Geary.AccountInformation account,
-                             AccountManager.Status status) {
+                             Manager.Status status) {
         this.accounts_list.add(new AccountListRow(account, status));
     }
 
@@ -144,12 +144,12 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane {
     }
 
     private void on_account_added(Geary.AccountInformation account,
-                                  AccountManager.Status status) {
+                                  Manager.Status status) {
         add_account(account, status);
     }
 
     private void on_account_status_changed(Geary.AccountInformation account,
-                                           AccountManager.Status status) {
+                                           Manager.Status status) {
         AccountListRow? row = get_account_row(account);
         if (row != null) {
             row.update(status);
@@ -209,7 +209,7 @@ private class Accounts.AccountListRow : EditorRow<EditorListPane> {
 
 
     public AccountListRow(Geary.AccountInformation account,
-                          AccountManager.Status status) {
+                          Manager.Status status) {
         this.account = account;
 
         this.account_name.show();
@@ -225,8 +225,8 @@ private class Accounts.AccountListRow : EditorRow<EditorListPane> {
         update(status);
     }
 
-    public void update(AccountManager.Status status) {
-        if (status != AccountManager.Status.UNAVAILABLE) {
+    public void update(Manager.Status status) {
+        if (status != Manager.Status.UNAVAILABLE) {
             this.unavailable_icon.hide();
             this.set_tooltip_text("");
         } else {
@@ -258,7 +258,7 @@ private class Accounts.AccountListRow : EditorRow<EditorListPane> {
         }
         this.account_details.set_text(details);
 
-        if (status == AccountManager.Status.ENABLED) {
+        if (status == Manager.Status.ENABLED) {
             this.account_name.get_style_context().remove_class(
                 Gtk.STYLE_CLASS_DIM_LABEL
             );
@@ -282,11 +282,11 @@ internal class Accounts.RemoveAccountCommand : Application.Command {
 
 
     private Geary.AccountInformation account;
-    private AccountManager manager;
+    private Manager manager;
 
 
     public RemoveAccountCommand(Geary.AccountInformation account,
-                                AccountManager manager) {
+                                Manager manager) {
         this.account = account;
         this.manager = manager;
 
