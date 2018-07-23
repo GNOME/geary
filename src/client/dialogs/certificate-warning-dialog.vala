@@ -36,7 +36,7 @@ public class CertificateWarningDialog {
 
         Geary.Endpoint endpoint = service.endpoint;
         top_label.label = _("The identity of the %s mail server at %s:%u could not be verified.").printf(
-            service.protocol.user_label(), endpoint.remote_address.hostname, endpoint.remote_address.port);
+            service.protocol.to_value(), endpoint.remote_address.hostname, endpoint.remote_address.port);
 
         warnings_label.label = generate_warning_list(
             service.endpoint.tls_validation_warnings

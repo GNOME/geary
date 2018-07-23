@@ -35,7 +35,7 @@ public class Geary.AccountInformation : BaseObject {
     private static Geary.Endpoint get_shared_endpoint(ServiceInformation service,
                                                       Endpoint endpoint) {
         string key = "%s/%s:%u".printf(
-            service.protocol.user_label(),
+            service.protocol.to_value(),
             endpoint.remote_address.hostname,
             endpoint.remote_address.port
         );

@@ -199,7 +199,7 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
             SecretMediator.schema,
             new_attrs(service),
             Secret.COLLECTION_DEFAULT,
-            "Geary %s password".printf(service.protocol.name()),
+            "Geary %s password".printf(service.protocol.to_value()),
             password,
             cancellable
         );
@@ -209,7 +209,7 @@ public class SecretMediator : Geary.CredentialsMediator, Object {
         HashTable<string,string> table = new HashTable<string,string>(
             str_hash, str_equal
         );
-        table.insert(ATTR_PROTO, service.protocol.name());
+        table.insert(ATTR_PROTO, service.protocol.to_value());
         table.insert(ATTR_HOST, service.host);
         table.insert(ATTR_LOGIN, service.credentials.user);
         return table;

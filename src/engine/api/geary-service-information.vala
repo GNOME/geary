@@ -1,53 +1,36 @@
-/* Copyright 2017 Software Freedom Conservancy Inc.
- *
- * This software is licensed under the GNU Lesser General Public License
- * (version 2.1 or later).  See the COPYING file in this distribution.
- */
-
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2017 Software Freedom Conservancy Inc.
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
  */
 
 /**
- * The email wire protocols supported by the engine.
+ * The network protocols supported by the engine for email services.
  */
 public enum Geary.Protocol {
     IMAP,
     SMTP;
 
-    /**
-     * Returns a user-visible label for the protocol.
-     */
-    public string user_label() {
-        switch (this) {
-            case IMAP:
-                return _("IMAP");
 
-            case SMTP:
-                return _("SMTP");
-
-            default:
-                assert_not_reached();
+    public static Protocol for_value(string value)
+        throws EngineError {
+        switch (value.ascii_up()) {
+        case "IMAP":
+            return IMAP;
+        case "SMTP":
+            return SMTP;
         }
+        throw new EngineError.BAD_PARAMETERS(
+            "Unknown Protocol value: %s", value
+        );
     }
 
-    /**
-     * Returns a short version of the enum key.
-     */
-    public string name() {
-        switch (this) {
-            case IMAP:
-                return "IMAP";
-
-            case SMTP:
-                return "SMTP";
-
-            default:
-                assert_not_reached();
-        }
+    public string to_value() {
+        string value = to_string();
+        return value.substring(value.last_index_of("_") + 1);
     }
+
 }
 
 
