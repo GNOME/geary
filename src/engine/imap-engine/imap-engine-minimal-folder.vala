@@ -274,6 +274,8 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     /** {@inheritDoc} */
     public override async bool close_async(Cancellable? cancellable = null)
         throws Error {
+        check_open("close_async");
+        debug("%s: Scheduling folder close", this.to_string());
         // Although it's inefficient in the case of just decrementing
         // the open count, pass all requests to close via the replay
         // queue so that other operations queued are interleaved in an
