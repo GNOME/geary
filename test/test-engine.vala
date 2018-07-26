@@ -1,5 +1,5 @@
 /*
- * Copyright 2016-2017 Michael Gratton <mike@vee.net>
+ * Copyright 2016-2018 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -40,9 +40,10 @@ int main(string[] args) {
     engine.add_suite(new Geary.Imap.DataFormatTest().get_suite());
     engine.add_suite(new Geary.Imap.CreateCommandTest().get_suite());
     engine.add_suite(new Geary.Imap.DeserializerTest().get_suite());
+    engine.add_suite(new Geary.Imap.FetchCommandTest().get_suite());
+    engine.add_suite(new Geary.Imap.ListParameterTest().get_suite());
     engine.add_suite(new Geary.Imap.MailboxSpecifierTest().get_suite());
     engine.add_suite(new Geary.Imap.NamespaceResponseTest().get_suite());
-    engine.add_suite(new Geary.Imap.ListParameterTest().get_suite());
     engine.add_suite(new Geary.ImapDB.AttachmentTest().get_suite());
     engine.add_suite(new Geary.ImapDB.AttachmentIoTest().get_suite());
     engine.add_suite(new Geary.ImapDB.DatabaseTest().get_suite());
