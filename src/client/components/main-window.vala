@@ -220,6 +220,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         return scrollbar != null && scrollbar.get_visible();
     }
 
+    /** {@inheritDoc} */
     public override bool key_press_event(Gdk.EventKey event) {
         check_shift_event(event);
 
@@ -258,14 +259,33 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
          * [0] - <https://bugs.webkit.org/show_bug.cgi?id=136430>
          */
 
-        bool handled = propagate_key_event(event);
-        if (!handled) {
-            handled = activate_key(event);
-        }
-        if (!handled) {
-            handled = Gtk.bindings_activate_event(this, event);
+        bool handled = false;
+        if (event.state != 0 &&
+            event.state != Gdk.ModifierType.SHIFT_MASK) {
+            // Have a modifier (Ctrl, Alt, etc) so we don't need to
+            // worry about SKCs, so handle normally. Can't do this
+            // with Shift though since that will stop chars being
+            // typed in the composer that conflict with accells, like
+            // `!`.
+            handled = base.key_press_event(event);
+        } else {
+            // A modifier we don't care about is down is down, so
+            // kluge input handling to make SKCs per the above.
+            handled = propagate_key_event(event);
+            if (!handled) {
+                handled = activate_key(event);
+            }
+            if (!handled) {
+                handled = Gtk.bindings_activate_event(this, event);
+            }
         }
         return handled;
+    }
+
+    /** {@inheritDoc} */
+    public override bool key_release_event(Gdk.EventKey event) {
+        check_shift_event(event);
+        return base.key_release_event(event);
     }
 
     private void on_conversation_monitor_changed() {
@@ -407,12 +427,6 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
                 on_shift_key(event.type == Gdk.EventType.KEY_PRESS);
             }
         }
-    }
-
-    [GtkCallback]
-    private bool on_key_release_event(Gdk.EventKey event) {
-        check_shift_event(event);
-        return Gdk.EVENT_PROPAGATE;
     }
 
     [GtkCallback]
