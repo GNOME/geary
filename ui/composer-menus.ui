@@ -97,8 +97,8 @@
         <attribute name="action">cmp.paste</attribute>
       </item>
       <item>
-        <attribute name="label" translatable="yes" context="Clipboard paste with rich text">Paste _With Formatting</attribute>
-        <attribute name="action">cmp.paste-with-formatting</attribute>
+        <attribute name="label" translatable="yes" context="Clipboard paste with rich text">Paste _Without Formatting</attribute>
+        <attribute name="action">cmp.paste-without-formatting</attribute>
       </item>
     </section>
     <section id="context_menu_plain_text">

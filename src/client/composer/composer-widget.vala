@@ -55,7 +55,7 @@ public class ComposerWidget : Gtk.EventBox {
     private const string ACTION_COPY = "copy";
     private const string ACTION_COPY_LINK = "copy-link";
     private const string ACTION_PASTE = "paste";
-    private const string ACTION_PASTE_WITH_FORMATTING = "paste-with-formatting";
+    private const string ACTION_PASTE_WITHOUT_FORMATTING = "paste-without-formatting";
     private const string ACTION_SELECT_ALL = "select-all";
     private const string ACTION_BOLD = "bold";
     private const string ACTION_ITALIC = "italic";
@@ -89,7 +89,7 @@ public class ComposerWidget : Gtk.EventBox {
     private const string[] html_actions = {
         ACTION_BOLD, ACTION_ITALIC, ACTION_UNDERLINE, ACTION_STRIKETHROUGH,
         ACTION_FONT_SIZE, ACTION_FONT_FAMILY, ACTION_COLOR, ACTION_JUSTIFY,
-        ACTION_INSERT_IMAGE, ACTION_COPY_LINK, ACTION_PASTE_WITH_FORMATTING,
+        ACTION_INSERT_IMAGE, ACTION_COPY_LINK,
 	ACTION_OLIST, ACTION_ULIST
     };
 
@@ -101,7 +101,7 @@ public class ComposerWidget : Gtk.EventBox {
         {ACTION_COPY,                     on_copy                                       },
         {ACTION_COPY_LINK,                on_copy_link                                  },
         {ACTION_PASTE,                    on_paste                                      },
-        {ACTION_PASTE_WITH_FORMATTING,    on_paste_with_formatting                      },
+        {ACTION_PASTE_WITHOUT_FORMATTING, on_paste_without_formatting                   },
         {ACTION_SELECT_ALL,               on_select_all                                 },
         {ACTION_BOLD,                     on_action,                null,      "false"  },
         {ACTION_ITALIC,                   on_action,                null,      "false"  },
@@ -139,7 +139,7 @@ public class ComposerWidget : Gtk.EventBox {
         action_accelerators.set(ACTION_CUT, "<Ctrl>x");
         action_accelerators.set(ACTION_COPY, "<Ctrl>c");
         action_accelerators.set(ACTION_PASTE, "<Ctrl>v");
-        action_accelerators.set(ACTION_PASTE_WITH_FORMATTING, "<Ctrl><Shift>v");
+        action_accelerators.set(ACTION_PASTE_WITHOUT_FORMATTING, "<Ctrl><Shift>v");
         action_accelerators.set(ACTION_INSERT_IMAGE, "<Ctrl>g");
         action_accelerators.set(ACTION_INSERT_LINK, "<Ctrl>l");
         action_accelerators.set(ACTION_INDENT, "<Ctrl>bracketright");
@@ -1733,15 +1733,20 @@ public class ComposerWidget : Gtk.EventBox {
     }
 
     private void on_paste(SimpleAction action, Variant? param) {
-        if (this.container.get_focus() == this.editor)
-            this.editor.paste_plain_text();
-        else if (this.container.get_focus() is Gtk.Editable)
+        if (this.container.get_focus() == this.editor) {
+            if (this.editor.is_rich_text) {
+                this.editor.paste_rich_text();
+            } else {
+                this.editor.paste_plain_text();
+            }
+        } else if (this.container.get_focus() is Gtk.Editable) {
             ((Gtk.Editable) this.container.get_focus()).paste_clipboard();
+        }
     }
 
-    private void on_paste_with_formatting(SimpleAction action, Variant? param) {
+    private void on_paste_without_formatting(SimpleAction action, Variant? param) {
         if (this.container.get_focus() == this.editor)
-            this.editor.paste_rich_text();
+            this.editor.paste_plain_text();
     }
 
     private void on_select_all(SimpleAction action, Variant? param) {
