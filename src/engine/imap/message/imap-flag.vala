@@ -15,11 +15,16 @@
 
 public abstract class Geary.Imap.Flag : BaseObject, Gee.Hashable<Geary.Imap.Flag> {
     public string value { get; private set; }
-    
-    public Flag(string value) {
-        this.value = value;
+
+    /**
+     * Constructs a new flag.
+     *
+     * The given keyword must be an IMAP atom.
+     */
+    public Flag(string name) {
+        this.value = name;
     }
-    
+
     public bool is_system() {
         return value[0] == '\\';
     }
@@ -31,14 +36,14 @@ public abstract class Geary.Imap.Flag : BaseObject, Gee.Hashable<Geary.Imap.Flag
     public bool equal_to(Geary.Imap.Flag flag) {
         return (flag == this) ? true : flag.equals_string(value);
     }
-    
+
     /**
      * Returns the {@link Flag} as an appropriate {@link Parameter}.
      */
     public StringParameter to_parameter() throws ImapError {
-        return StringParameter.get_best_for(value);
+        return new UnquotedStringParameter(value);
     }
-    
+
     public uint hash() {
         return Ascii.stri_hash(value);
     }
