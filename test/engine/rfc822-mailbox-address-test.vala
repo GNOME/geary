@@ -206,21 +206,37 @@ class Geary.RFC822.MailboxAddressTest : TestCase {
                "example@example@example.com");
     }
 
-    public void to_rfc822_address() throws Error {
-        assert(new MailboxAddress(null, "example@example.com").to_rfc822_address() ==
-               "example@example.com");
+    public void to_rfc822_address() throws GLib.Error {
+        assert_string(
+            "example@example.com",
+            new MailboxAddress(null, "example@example.com").to_rfc822_address()
+        );
+        assert_string(
+            "test.account@example.com",
+            new MailboxAddress(null, "test.account@example.com").to_rfc822_address()
+        );
         //assert(new MailboxAddress(null, "test test@example.com").to_rfc822_address() ==
         //       "\"test test\"@example.com");
         //assert(new MailboxAddress(null, "test\" test@example.com").to_rfc822_address() ==
         //       "\"test\" test\"@example.com");
         //assert(new MailboxAddress(null, "test\"test@example.com").to_rfc822_address() ==
         //       "\"test\"test\"@example.com");
-        assert(new MailboxAddress(null, "test@test@example.com").to_rfc822_address() ==
-               "\"test@test\"@example.com");
-        assert(new MailboxAddress(null, "©@example.com").to_rfc822_address() ==
-               "\"=?iso-8859-1?b?qQ==?=\"@example.com");
-        assert(new MailboxAddress(null, "😸@example.com").to_rfc822_address() ==
-               "\"=?UTF-8?b?8J+YuA==?=\"@example.com");
+        assert_string(
+            "$test@example.com",
+            new MailboxAddress(null, "$test@example.com").to_rfc822_address()
+        );
+        assert_string(
+            "\"test@test\"@example.com",
+            new MailboxAddress(null, "test@test@example.com").to_rfc822_address()
+        );
+        assert_string(
+            "=?iso-8859-1?b?qQ==?=@example.com",
+            new MailboxAddress(null, "©@example.com").to_rfc822_address()
+        );
+        assert_string(
+            "=?UTF-8?b?8J+YuA==?=@example.com",
+            new MailboxAddress(null, "😸@example.com").to_rfc822_address()
+        );
     }
 
     public void to_rfc822_string() throws Error {
