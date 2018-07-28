@@ -9,6 +9,7 @@ class Geary.HTML.UtilTest : TestCase {
 
     public UtilTest() {
         base("Geary.HTML.Util");
+        add_test("preserve_whitespace", preserve_whitespace);
         add_test("smart_escape_div", smart_escape_div);
         add_test("smart_escape_no_closing_tag", smart_escape_no_closing_tag);
         add_test("smart_escape_img", smart_escape_img);
@@ -19,39 +20,62 @@ class Geary.HTML.UtilTest : TestCase {
         add_test("remove_html_tags", remove_html_tags);
     }
 
+    public void preserve_whitespace() throws GLib.Error {
+        assert_string("some text", Geary.HTML.smart_escape("some text"));
+        assert_string("some &nbsp;text", Geary.HTML.smart_escape("some  text"));
+        assert_string("some &nbsp;&nbsp;text", Geary.HTML.smart_escape("some   text"));
+        assert_string("some &nbsp;&nbsp;&nbsp;text", Geary.HTML.smart_escape("some\ttext"));
+
+        assert_string("some<br>text", Geary.HTML.smart_escape("some\ntext"));
+        assert_string("some<br>text", Geary.HTML.smart_escape("some\rtext"));
+        assert_string("some<br>text", Geary.HTML.smart_escape("some\r\ntext"));
+
+        assert_string("some<br><br>text", Geary.HTML.smart_escape("some\n\ntext"));
+        assert_string("some<br><br>text", Geary.HTML.smart_escape("some\r\rtext"));
+        assert_string("some<br><br>text", Geary.HTML.smart_escape("some\n\rtext"));
+        assert_string("some<br><br>text", Geary.HTML.smart_escape("some\r\n\r\ntext"));
+    }
+
     public void smart_escape_div() throws Error {
         string html = "<div>ohhai</div>";
-        assert(Geary.HTML.smart_escape(html, false) == html);
+        assert(Geary.HTML.smart_escape(html) == html);
     }
 
     public void smart_escape_no_closing_tag() throws Error {
         string html = "<div>ohhai";
-        assert(Geary.HTML.smart_escape(html, false) == html);
+        assert(Geary.HTML.smart_escape(html) == html);
     }
 
     public void smart_escape_img() throws Error {
         string html = "<img src=\"http://example.com/lol.gif\">";
-        assert(Geary.HTML.smart_escape(html, false) == html);
+        assert(Geary.HTML.smart_escape(html) == html);
     }
 
     public void smart_escape_xhtml_img() throws Error {
         string html = "<img src=\"http://example.com/lol.gif\"/>";
-        assert(Geary.HTML.smart_escape(html, false) == html);
+        assert(Geary.HTML.smart_escape(html) == html);
     }
 
     public void smart_escape_mixed() throws Error {
         string html = "mixed <div>ohhai</div> text";
-        assert(Geary.HTML.smart_escape(html, false) == html);
+        assert(Geary.HTML.smart_escape(html) == html);
     }
 
-    public void smart_escape_text() throws Error {
-        string text = "some text";
-        assert(Geary.HTML.smart_escape(text, false) == "<div style='white-space: pre-wrap;'>some text</div>");
+    public void smart_escape_text() throws GLib.Error {
+        assert_string("some text", Geary.HTML.smart_escape("some text"));
+        assert_string("&lt;some text", Geary.HTML.smart_escape("<some text"));
+        assert_string("some text&gt;", Geary.HTML.smart_escape("some text>"));
     }
 
-    public void smart_escape_text_url() throws Error {
-        string text = "<http://example.com>";
-        assert(Geary.HTML.smart_escape(text, false) == "<div style='white-space: pre-wrap;'>&lt;http://example.com&gt;</div>");
+    public void smart_escape_text_url() throws GLib.Error {
+        assert_string(
+            "&lt;http://example.com&gt;",
+            Geary.HTML.smart_escape("<http://example.com>")
+        );
+        assert_string(
+            "&lt;http://example.com&gt;",
+            Geary.HTML.smart_escape("<http://example.com>")
+        );
     }
 
     public void remove_html_tags() throws Error {

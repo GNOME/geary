@@ -2141,7 +2141,7 @@ public class ComposerWidget : Gtk.EventBox {
             }
 
             account_sig = (!Geary.String.is_empty_or_whitespace(account_sig))
-                ? Geary.HTML.smart_escape(account_sig, true)
+                ? Geary.HTML.smart_escape(account_sig)
                 : "";
         }
 

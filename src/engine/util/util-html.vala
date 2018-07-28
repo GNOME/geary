@@ -10,6 +10,8 @@ namespace Geary.HTML {
 // Originally from here: http://daringfireball.net/2010/07/improved_regex_for_matching_urls
 public const string URL_REGEX = "(?i)\\b((?:[a-z][\\w-]+:(?:/{1,3}|[a-z0-9%])|www\\d{0,3}[.]|[a-z0-9.\\-]+[.][a-z]{2,4}/)(?:[^\\s()<>]+|\\(([^\\s()<>]+|(\\([^\\s()<>]+\\)))*\\))+(?:\\(([^\\s()<>]+|(\\([^\\s()<>]+\\)))*\\)|[^\\s`!()\\[\\]{};:'\".,<>?«»“”‘’]))";
 
+private Regex WHITESPACE_REGEX;
+
 private int init_count = 0;
 private Gee.HashSet<string>? breaking_elements;
 private Gee.HashSet<string>? spacing_elements;
@@ -27,6 +29,12 @@ public void init() {
         return;
 
     init_element_sets();
+
+    try {
+        WHITESPACE_REGEX = new Regex("(\\R|\\t|[ ]+)");
+    } catch (GLib.Error err) {
+        assert(true);
+    }
 }
 
 private void init_element_sets() {
@@ -95,20 +103,58 @@ private void init_element_sets() {
     });
 }
 
+/** Converts plain text to HTML with reserved characters escaped. */
 public inline string escape_markup(string? plain) {
-    return (!String.is_empty(plain) && plain.validate()) ? Markup.escape_text(plain) : "";
+    return (!String.is_empty(plain) && plain.validate())
+        ? Markup.escape_text(plain) : "";
 }
 
+/** Converts plain text to HTML with whitespace (SP, CR, LF) preserved. */
 public string preserve_whitespace(string? text) {
-    if (String.is_empty(text))
-        return "";
-    
-    string output = text.replace(" ", "&nbsp;");
-    output = output.replace("\r\n", "<br />");
-    output = output.replace("\n", "<br />");
-    output = output.replace("\r", "<br />");
+    string preserved = "";
+    if (!String.is_empty(text)) {
+        try {
+            preserved = WHITESPACE_REGEX.replace_eval(
+                text, -1, 0, 0, (info, result) => {
+                    string match = info.fetch(0);
+                    if (match[0] == ' ') {
+                        result.append_c(' ');
+                        for (int len = match.length - 1; len > 0; len--) {
+                            result.append("&nbsp;");
+                    }
+                    } else if (match == "\t") {
+                        result.append(" &nbsp;&nbsp;&nbsp;");
+                    } else {
+                        result.append("<br>");
+                    }
+                    return false;
+                });
+        } catch (Error err) {
+            debug("Error preserving whitespace: %s", err.message);
+        }
+    }
+    return preserved;
+}
 
-    return output;
+/**
+ * Escape reserved HTML entities and preserves whitespace, if needed.
+ *
+ * Returns a string with reserved HTML entities escaped and
+ * whitespace preserved if the given string does not have HTML
+ * tags.
+ */
+public string smart_escape(string? text) {
+    string escaped = text ?? "";
+    if (text != null) {
+        bool is_html = Regex.match_simple(
+            "<[A-Z]+ ?(?: [^>]*)?\\/?>", text, RegexCompileFlags.CASELESS
+        );
+        if (!is_html) {
+            escaped = escape_markup(escaped);
+            escaped = preserve_whitespace(escaped);
+        }
+    }
+    return escaped;
 }
 
 /**
@@ -166,24 +212,6 @@ private void recurse_html_nodes_for_text(Xml.Node? node,
             }
         }
     }
-}
-
-// Escape reserved HTML entities if the string does not have HTML
-// tags.  If there are no tags, or if preserve_whitespace_in_html is
-// true, wrap the string a div to preserve whitespace.
-public string smart_escape(string? text, bool preserve_whitespace_in_html) {
-    if (text == null)
-        return text;
-
-    string res = text;
-    if (!Regex.match_simple("<[A-Z]*(?: [^>]*)?\\/?>", res,
-                            RegexCompileFlags.CASELESS)) {
-        res = Geary.HTML.escape_markup(res);
-        preserve_whitespace_in_html = true;
-    }
-    if (preserve_whitespace_in_html)
-        res = @"<div style='white-space: pre-wrap;'>$res</div>";
-    return res;
 }
 
 }
