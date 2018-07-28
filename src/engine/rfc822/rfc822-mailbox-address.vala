@@ -21,6 +21,11 @@ public class Geary.RFC822.MailboxAddress :
     Gee.Hashable<MailboxAddress>,
     BaseObject {
 
+    private static char[] ATEXT = {
+        '!', '#', '$', '%', '&', '\'', '*', '+', '-',
+        '/', '=', '?', '^', '_', '`', '{', '|', '}', '~'
+    };
+
     /** Determines if a string contains a valid RFC822 mailbox address. */
     public static bool is_valid_address(string address) {
         try {
@@ -42,6 +47,54 @@ public class Geary.RFC822.MailboxAddress :
 
     private static string decode_address_part(string mailbox) {
         return GMime.utils_header_decode_text(prepare_header_text_part(mailbox));
+    }
+
+    private static bool local_part_needs_quoting(string local_part) {
+        bool needs_quote = false;
+        bool is_dot = false;
+        if (!String.is_empty(local_part)) {
+            int index = 0;
+            for (;;) {
+                char ch = local_part[index++];
+                if (ch == String.EOS)
+                    break;
+
+                is_dot = (ch == '.');
+
+                print("\nchecking: %c (is ATEXT? %s)\n", ch, (ch in ATEXT).to_string());
+
+                if (!(ch >= 0x41 && ch <= 0x5A) && // A-Z
+                    !(ch >= 0x61 && ch <= 0x7A) && // a-z
+                    !(ch >= 0x30 && ch <= 0x39) && // 0-9
+                    !(ch in ATEXT) &&
+                    !(is_dot && index > 1)) { // no leading dots
+                    needs_quote = true;
+                    break;
+                }
+            }
+        }
+        return needs_quote || is_dot; // no trailing dots
+    }
+
+    private static string quote_local_part(string local_part) {
+        StringBuilder builder = new StringBuilder();
+        if (!String.is_empty(local_part)) {
+            builder.append_c('"');
+            int index = 0;
+            for (;;) {
+                char ch = local_part[index++];
+                if (ch == String.EOS)
+                    break;
+
+                if (ch == '"' || ch == '\\') {
+                    builder.append_c('\\');
+                }
+
+                builder.append_c(ch);
+            }
+            builder.append_c('"');
+        }
+        return builder.str;
     }
 
     private static string prepare_header_text_part(string part) {
@@ -372,10 +425,17 @@ public class Geary.RFC822.MailboxAddress :
      * brackets.
      */
     public string to_rfc822_address() {
+        // XXX GMime.utils_header_encode_text won't quote if spaces or
+        // quotes present, and GMime.utils_quote_string will
+        // erroneously quote if a '.'  is present (which at least
+        // Yahoo doesn't like in SMTP return paths), so need to quote
+        // manually.
+        string local_part = GMime.utils_header_encode_text(this.mailbox);
+        if (local_part_needs_quoting(local_part)) {
+            local_part = quote_local_part(local_part);
+        }
         return "%s@%s".printf(
-            // XXX utils_quote_string won't quote if spaces or quotes
-            // present, so need to do that manually
-            GMime.utils_quote_string(GMime.utils_header_encode_text(this.mailbox)),
+            local_part,
             // XXX Need to punycode international domains.
             this.domain
         );
