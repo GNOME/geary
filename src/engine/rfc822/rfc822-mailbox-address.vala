@@ -61,8 +61,6 @@ public class Geary.RFC822.MailboxAddress :
 
                 is_dot = (ch == '.');
 
-                print("\nchecking: %c (is ATEXT? %s)\n", ch, (ch in ATEXT).to_string());
-
                 if (!(ch >= 0x41 && ch <= 0x5A) && // A-Z
                     !(ch >= 0x61 && ch <= 0x7A) && // a-z
                     !(ch >= 0x30 && ch <= 0x39) && // 0-9
