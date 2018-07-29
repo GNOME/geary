@@ -1255,15 +1255,6 @@ public class GearyController : Geary.BaseObject {
         }
 
         debug("Account closed: %s", account.to_string());
-
-        // If there are no accounts available, exit.  (This can happen if the user declines to
-        // enter a password on their account.)
-        try {
-            if (get_num_open_accounts() == 0)
-                this.application.exit();
-        } catch (Error e) {
-            message("Error enumerating accounts: %s", e.message);
-        }
     }
 
     /**
@@ -1306,18 +1297,6 @@ public class GearyController : Geary.BaseObject {
         }
         
         return 0; // on error
-    }
-    
-    // Returns the number of open accounts.
-    private int get_num_open_accounts() throws Error {
-        int num = 0;
-        foreach (Geary.AccountInformation info in Geary.Engine.instance.get_accounts().values) {
-            Geary.Account a = Geary.Engine.instance.get_account_instance(info);
-            if (a.is_open())
-                num++;
-        }
-        
-        return num;
     }
 
     private bool is_inbox_descendant(Geary.Folder target) {
