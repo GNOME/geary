@@ -2899,37 +2899,44 @@ public class GearyController : Geary.BaseObject {
     }
 
     private void do_search(string search_text) {
-        Geary.SearchFolder? folder = null;
-        try {
-            folder = (Geary.SearchFolder) current_account.get_special_folder(
-                Geary.SpecialFolderType.SEARCH);
-        } catch (Error e) {
-            debug("Could not get search folder: %s", e.message);
-            
-            return;
+        Geary.SearchFolder? search_folder = null;
+        if (this.current_account != null) {
+            try {
+                search_folder =
+                    this.current_account.get_special_folder(
+                        Geary.SpecialFolderType.SEARCH
+                    ) as Geary.SearchFolder;
+            } catch (Error e) {
+                debug("Could not get search folder: %s", e.message);
+            }
         }
-        
-        if (search_text == "") {
-            if (previous_non_search_folder != null && current_folder is Geary.SearchFolder)
-                main_window.folder_list.select_folder(previous_non_search_folder);
-            
-            main_window.folder_list.remove_search();
-            search_text_changed("");
-            folder.clear();
-            
-            return;
+
+        if (Geary.String.is_empty_or_whitespace(search_text)) {
+            if (this.previous_non_search_folder != null &&
+                this.current_folder is Geary.SearchFolder) {
+                this.main_window.folder_list.select_folder(
+                    this.previous_non_search_folder
+                );
+            }
+
+            this.main_window.folder_list.remove_search();
+
+            if (search_folder !=  null) {
+                search_folder.clear();
+            }
+        } else if (search_folder != null) {
+            cancel_search(); // Stop any search in progress
+
+            search_folder.search(
+                search_text,
+                this.application.config.get_search_strategy(),
+                this.cancellable_search
+            );
+
+            this.main_window.folder_list.set_search(search_folder);
         }
-        
-        if (current_account == null)
-            return;
-        
-        cancel_search(); // Stop any search in progress.
 
-        folder.search(search_text, this.application.config.get_search_strategy(),
-            this.cancellable_search);
-
-        main_window.folder_list.set_search(folder);
-        search_text_changed(main_window.search_bar.search_text);
+        search_text_changed(search_text);
     }
 
     /**
