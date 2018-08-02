@@ -711,7 +711,8 @@ public class Geary.App.ConversationMonitor : BaseObject {
             // Get known paths for all emails
             Gee.MultiMap<Geary.EmailIdentifier, Geary.FolderPath>? email_paths =
                 yield this.base_folder.account.get_containing_folders_async(
-                    job.emails.keys, null
+                    job.emails.keys,
+                    this.operation_cancellable
                 );
 
             // Add them to the conversation set
