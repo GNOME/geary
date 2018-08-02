@@ -3038,10 +3038,13 @@ public class GearyController : Geary.BaseObject {
 
     private void on_scan_error(Geary.App.ConversationMonitor monitor, Error err) {
         // XXX determine the problem better here
+        Geary.AccountInformation account =
+            monitor.base_folder.account.information;
         report_problem(
-            new Geary.AccountProblemReport(
+            new Geary.ServiceProblemReport(
                 Geary.ProblemType.GENERIC_ERROR,
-                monitor.base_folder.account.information,
+                account,
+                account.imap,
                 err
             )
         );
