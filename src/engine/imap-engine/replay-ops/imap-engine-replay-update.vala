@@ -7,7 +7,7 @@
  */
 
 /**
- * Updates an existing message in the local store after un unsolicited FETCH
+ * Updates an existing message locally after an unsolicited FETCH.
  */
 private class Geary.ImapEngine.ReplayUpdate : Geary.ImapEngine.ReplayOperation {
 
@@ -87,10 +87,11 @@ private class Geary.ImapEngine.ReplayUpdate : Geary.ImapEngine.ReplayOperation {
     }
 
     public override string describe_state() {
-        Imap.MessageData fetch_flags =
+        Imap.MessageData? fetch_flags =
             this.data.data_map.get(Imap.FetchDataSpecifier.FLAGS);
         return "position.value=%lld, flags=%s".printf(
-            this.position.value, fetch_flags.to_string()
+            this.position.value,
+            fetch_flags != null ? fetch_flags.to_string() : "null"
         );
     }
 }
