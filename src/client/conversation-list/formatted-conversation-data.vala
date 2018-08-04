@@ -104,8 +104,7 @@ public class FormattedConversationData : Geary.BaseObject {
     // Creates a formatted message data from an e-mail.
     public FormattedConversationData(Geary.App.Conversation conversation, Geary.Email preview,
         Geary.Folder folder, Gee.List<Geary.RFC822.MailboxAddress> account_owner_emails) {
-        assert(preview.fields.fulfills(ConversationListStore.REQUIRED_FIELDS));
-        
+
         this.conversation = conversation;
         this.account_owner_emails = account_owner_emails;
         use_to = (folder != null) && folder.special_folder_type.is_outgoing();

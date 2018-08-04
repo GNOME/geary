@@ -144,8 +144,21 @@ public class Geary.Imap.EnvelopeDecoder : Geary.Imap.FetchDataDecoder {
         // does not supply it (optional according to RFC822); deal with this cognitive dissonance
         if (message_id != null && message_id.is_empty())
             message_id = null;
-        
-        return new Envelope((sent != null) ? new Geary.RFC822.Date(sent.ascii) : null,
+
+        Geary.RFC822.Date? sent_date = null;
+        if (sent != null) {
+            try {
+                sent_date = new RFC822.Date(sent.ascii);
+            } catch (GLib.Error err) {
+                debug(
+                    "Error parsing sent date from FETCH envelope: %s",
+                    err.message
+                );
+            }
+        }
+
+        return new Envelope(
+            sent_date,
             new Geary.RFC822.Subject.decode(subject.ascii),
             parse_addresses(from), parse_addresses(sender), parse_addresses(reply_to),
             (to != null) ? parse_addresses(to) : null, 

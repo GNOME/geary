@@ -900,16 +900,24 @@ private class Geary.Imap.FolderSession : Geary.Imap.SessionObject {
         } else if (header_specifier != null && has_header_specifier) {
             RFC822.Header headers = new RFC822.Header(
                 fetched_data.body_data_map.get(header_specifier));
-            
+
             // DATE
             if (required_but_not_set(Geary.Email.Field.DATE, required_fields, email)) {
                 string? value = headers.get_header("Date");
-                if (!String.is_empty(value))
-                    email.set_send_date(new RFC822.Date(value));
-                else
-                    email.set_send_date(null);
+                RFC822.Date? date = null;
+                if (!String.is_empty(value)) {
+                    try {
+                        date = new RFC822.Date(value);
+                    } catch (GLib.Error err) {
+                        debug(
+                            "Error parsing date from FETCH response: %s",
+                            err.message
+                        );
+                    }
+                }
+                email.set_send_date(date);
             }
-            
+
             // ORIGINATORS
             if (required_but_not_set(Geary.Email.Field.ORIGINATORS, required_fields, email)) {
                 RFC822.MailboxAddresses? from = null;

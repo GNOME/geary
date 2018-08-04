@@ -173,22 +173,30 @@ public class Geary.RFC822.Date : Geary.RFC822.MessageData, Geary.MessageData.Abs
 
     public string? original { get; private set; }
     public DateTime value { get; private set; }
-    
+
     public Date(string iso8601) throws ImapError {
         this.as_time_t = GMime.utils_header_decode_date(iso8601, null);
         if (as_time_t == 0)
-            throw new ImapError.PARSE_ERROR("Unable to parse \"%s\": not ISO-8601 date", iso8601);
-        
-        value = new DateTime.from_unix_local(this.as_time_t);
-        original = iso8601;
+            throw new ImapError.PARSE_ERROR(
+                "Unable to parse \"%s\": Not ISO-8601 date", iso8601
+            );
+
+        DateTime? value = new DateTime.from_unix_local(this.as_time_t);
+        if (value == null) {
+            throw new ImapError.PARSE_ERROR(
+                "Unable to parse \"%s\": Outside supported range", iso8601,
+            );
+        }
+        this.value = value;
+        this.original = iso8601;
     }
-    
+
     public Date.from_date_time(DateTime datetime) {
         original = null;
         value = datetime;
         this.as_time_t = Time.datetime_to_time_t(datetime);
     }
-    
+
     /**
      * Returns the {@link Date} in ISO-8601 format.
      */

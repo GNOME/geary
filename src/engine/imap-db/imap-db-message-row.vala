@@ -102,9 +102,16 @@ private class Geary.ImapDB.MessageRow {
         // if the caller expects to see a DATE field, that field is set in the Email's bitmask,
         // even if the Date object is null
         Geary.Email email = new Geary.Email(id);
-        
-        if (fields.is_all_set(Geary.Email.Field.DATE))
-            email.set_send_date(!String.is_empty(date) ? new RFC822.Date(date) : null);
+
+        if (fields.is_all_set(Geary.Email.Field.DATE)) {
+            try {
+                email.set_send_date(
+                    !String.is_empty(date) ? new RFC822.Date(date) : null
+                );
+            } catch (GLib.Error err) {
+                debug("Error loading message date from db: %s", err.message);
+            }
+        }
 
         if (fields.is_all_set(Geary.Email.Field.ORIGINATORS)) {
             email.set_originators(unflatten_addresses(from),
