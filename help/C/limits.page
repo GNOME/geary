@@ -2,11 +2,11 @@
       type="topic"
       id="limits">
 
-  <title>Limitations</title>
-
   <info>
     <link type="guide" xref="index#contribute"/>
   </info>
+
+  <title>Limitations</title>
 
   <p>Geary is still in early development. Geary supports IMAP and has
   been tested with Gmail, Yahoo, and the free Dovecot mail server.

@@ -2,12 +2,12 @@
       type="guide"
       id="bugs">
 
-  <title>Found a bug?</title>
-
   <info>
     <link type="guide" xref="index#contribute"/>
     <link type="next" xref="limits"/>
   </info>
+
+  <title>Found a bug?</title>
 
   <p>If you suspect you've found a bug in Geary, please <link
   href="https://wiki.gnome.org/Apps/Geary/Contact">get in touch</link>

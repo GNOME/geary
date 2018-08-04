@@ -2,12 +2,12 @@
       type="guide"
       id="contributing">
 
-  <title>Contribute to Geary</title>
-
   <info>
     <link type="guide" xref="index#contribute"/>
     <link type="next" xref="bugs" />
   </info>
+
+  <title>Contribute to Geary</title>
 
   <p>Want to help improve Geary? There are a number of ways you can
   contribute:</p>
