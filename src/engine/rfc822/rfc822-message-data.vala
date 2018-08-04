@@ -184,7 +184,7 @@ public class Geary.RFC822.Date : Geary.RFC822.MessageData, Geary.MessageData.Abs
         DateTime? value = new DateTime.from_unix_local(this.as_time_t);
         if (value == null) {
             throw new ImapError.PARSE_ERROR(
-                "Unable to parse \"%s\": Outside supported range", iso8601,
+                "Unable to parse \"%s\": Outside supported range", iso8601
             );
         }
         this.value = value;
