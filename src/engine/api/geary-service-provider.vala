@@ -1,4 +1,6 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2018 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -13,88 +15,27 @@ public enum Geary.ServiceProvider {
     YAHOO,
     OUTLOOK,
     OTHER;
-    
-    public static ServiceProvider[] get_providers() {
-        return { GMAIL, YAHOO, OUTLOOK, OTHER };
-    }
-    
-    /**
-     * Returns the service provider in a serialized form.
-     *
-     * @see from_string
-     */
-    public string to_string() {
-        switch (this) {
-            case GMAIL:
-                return "GMAIL";
-            
-            case YAHOO:
-                return "YAHOO";
-            
-            case OUTLOOK:
-                return "OUTLOOK";
-            
-            case OTHER:
-                return "OTHER";
-            
-            default:
-                assert_not_reached();
+
+    public static ServiceProvider for_value(string value)
+        throws EngineError {
+        switch (value.ascii_up()) {
+        case "GMAIL":
+            return GMAIL;
+        case "YAHOO":
+            return YAHOO;
+        case "OUTLOOK":
+            return OUTLOOK;
+        case "OTHER":
+            return OTHER;
         }
-    }
-    
-    /**
-     * Returns the service provider's name in a translated UTF-8 string suitable for display to the
-     * user.
-     */
-    public string display_name() {
-        switch (this) {
-            case GMAIL:
-                return _("Gmail");
-            
-            case YAHOO:
-                return _("Yahoo! Mail");
-            
-            case OUTLOOK:
-                return _("Outlook.com");
-            
-            case OTHER:
-                return _("Other");
-            
-            default:
-                assert_not_reached();
-        }
+        throw new EngineError.BAD_PARAMETERS(
+            "Unknown Geary.ServiceProvider value: %s", value
+        );
     }
 
-    /**
-     * Converts a string form of the service provider (returned by
-     * {@link to_string} to a {@link ServiceProvider} value.
-     *
-     * Throws an error if the string is not valid.
-     *
-     * @see to_string
-     */
-    public static ServiceProvider from_string(string str) throws Error {
-        switch (str.up()) {
-            case "GMAIL":
-                return GMAIL;
-            
-            case "YAHOO":
-                return YAHOO;
-            
-            case "OUTLOOK":
-                return OUTLOOK;
-            
-            case "OTHER":
-                return OTHER;
-
-            default:
-                // Could use a better errordomain here, but for now
-                // this only gets used when parsing keyfiles in
-                // AccountInfo.
-                throw new KeyFileError.INVALID_VALUE(
-                    "Unknown service provider type: %s", str
-                );
-        }
+    public string to_value() {
+        string value = to_string();
+        return value.substring(value.last_index_of("_") + 1);
     }
+
 }
-

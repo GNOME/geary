@@ -316,8 +316,13 @@ public class AddEditPage : Gtk.Box {
         check_save_drafts = (Gtk.CheckButton) builder.get_object("check: save_drafts"); 
 
         // Build list of service providers.
-        foreach (Geary.ServiceProvider p in Geary.ServiceProvider.get_providers())
-            combo_service.append_text(p.display_name());
+        foreach (Geary.ServiceProvider p in new Geary.ServiceProvider[] {
+                Geary.ServiceProvider.GMAIL,
+                Geary.ServiceProvider.OUTLOOK,
+                Geary.ServiceProvider.YAHOO,
+                Geary.ServiceProvider.OTHER,
+                    })
+            combo_service.append_text(p.to_value());
         
         reset_all();
         
@@ -878,7 +883,12 @@ public class AddEditPage : Gtk.Box {
     }
     
     public void set_service_provider(Geary.ServiceProvider provider) {
-        foreach (Geary.ServiceProvider p in Geary.ServiceProvider.get_providers()) {
+        foreach (Geary.ServiceProvider p in new Geary.ServiceProvider[] {
+                Geary.ServiceProvider.GMAIL,
+                Geary.ServiceProvider.OUTLOOK,
+                Geary.ServiceProvider.YAHOO,
+                Geary.ServiceProvider.OTHER,
+                    }) {
             if (p == provider)
                 combo_service.set_active(p);
         }

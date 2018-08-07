@@ -613,7 +613,7 @@ public class Accounts.Manager : GLib.Object {
         config.set_string(REAL_NAME_KEY, info.primary_mailbox.name);
         config.set_string(PRIMARY_EMAIL_KEY, info.primary_mailbox.address);
         config.set_string(NICKNAME_KEY, info.nickname);
-        config.set_string(SERVICE_PROVIDER_KEY, info.service_provider.to_string());
+        config.set_string(SERVICE_PROVIDER_KEY, info.service_provider.to_value());
         config.set_int(ORDINAL_KEY, info.ordinal);
         config.set_int(PREFETCH_PERIOD_DAYS_KEY, info.prefetch_period_days);
         config.set_bool(SAVE_SENT_MAIL_KEY, info.save_sent_mail);
@@ -754,7 +754,7 @@ public class Accounts.Manager : GLib.Object {
                               string fallback_login)
         throws GLib.Error {
 
-        Geary.ServiceProvider provider = Geary.ServiceProvider.from_string(
+        Geary.ServiceProvider provider = Geary.ServiceProvider.for_value(
             config.get_string(SERVICE_PROVIDER_KEY,
                               Geary.ServiceProvider.GMAIL.to_string())
         );
