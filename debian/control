@@ -4,6 +4,7 @@ Priority: optional
 Maintainer: Michael Gratton <mike@vee.net>
 Build-Depends: debhelper (>= 8),
  desktop-file-utils,
+ iso-codes,
  itstool,
  libcanberra-dev,
  libenchant-dev,
@@ -31,6 +32,7 @@ Homepage: https://wiki.gnome.org/Apps/Geary
 Package: geary
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends},
+ iso-codes,
  libcanberra0,
  libenchant1c2a,
  libgcr-base-3-1,
