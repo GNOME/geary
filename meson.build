@@ -59,6 +59,7 @@ gio = dependency('gio-2.0', version: '>=' + target_glib)
 goa = dependency('goa-1.0')
 gobject_introspection = dependency('gobject-introspection-1.0')
 gthread = dependency('gthread-2.0', version: '>=' + target_glib)
+iso_codes = dependency('iso-codes')
 javascriptcoregtk = dependency('javascriptcoregtk-4.0', version: '>=' + target_webkit)
 libcanberra = dependency('libcanberra', version: '>= 0.28')
 libmath = cc.find_library('m')
@@ -104,7 +105,7 @@ if enable_valadoc
 endif
 
 # Language detection
-iso_codes_dir = join_paths('/', 'usr', 'share', 'xml', 'iso-codes')
+iso_codes_dir = join_paths(iso_codes.get_pkgconfig_variable('prefix'), 'share', 'xml', 'iso-codes')
 if iso_639_xml == ''
   iso_639_xml = join_paths(iso_codes_dir, 'iso_639.xml')
 endif
