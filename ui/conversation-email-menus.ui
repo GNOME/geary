@@ -34,6 +34,18 @@
         <attribute name="action">eml.mark_unread_down</attribute>
       </item>
     </section>
+    <section id="email_menu_trash">
+      <item>
+        <attribute name="label" translatable="yes">_Trash</attribute>
+        <attribute name="action">eml.trash_msg</attribute>
+      </item>
+    </section>
+    <section id="email_menu_delete">
+      <item>
+        <attribute name="label" translatable="yes">_Delete…</attribute>
+        <attribute name="action">eml.delete_msg</attribute>
+      </item>
+    </section>
     <section>
       <item>
         <attribute name="label" translatable="yes">_Print…</attribute>

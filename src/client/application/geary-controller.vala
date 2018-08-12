@@ -2573,6 +2573,38 @@ public class GearyController : Geary.BaseObject {
         return (dialog.run() == Gtk.ResponseType.OK);
     }
 
+    private async void trash_messages_async(Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable)
+            throws Error {
+        debug("Trashing selected messages");
+
+        Geary.FolderSupport.Move? supports_move = current_folder as Geary.FolderSupport.Move;
+        if (current_folder_supports_trash() && supports_move != null) {
+            Geary.FolderPath trash_path = (yield current_account.get_required_special_folder_async(
+                Geary.SpecialFolderType.TRASH, cancellable)).path;
+            save_revokable(yield supports_move.move_email_async(ids, trash_path, cancellable),
+                _("Undo trash (Ctrl+Z)"));
+        } else {
+            debug("Folder %s doesn't support move or account %s doesn't have a trash folder",
+                current_folder.to_string(), current_account.to_string());
+        }
+    }
+
+    private async void delete_messages_async(Gee.Collection<Geary.EmailIdentifier> ids, Cancellable? cancellable)
+            throws Error {
+        debug("Deleting selected messages");
+
+        Geary.FolderSupport.Remove? supports_remove = current_folder as Geary.FolderSupport.Remove;
+        if (supports_remove != null) {
+            if (confirm_delete(ids.size)) {
+                yield supports_remove.remove_email_async(ids, cancellable);
+            } else {
+                last_deleted_conversation = null;
+            }
+        } else {
+            debug("Folder %s doesn't support remove", current_folder.to_string());
+        }
+    }
+
     private async void archive_or_delete_selection_async(bool archive, bool trash,
         Cancellable? cancellable) throws Error {
         if (!can_switch_conversation_view())
@@ -2607,35 +2639,9 @@ public class GearyController : Geary.BaseObject {
         }
         
         if (trash) {
-            debug("Trashing selected messages");
-            
-            if (current_folder_supports_trash()) {
-                Geary.FolderPath trash_path = (yield current_account.get_required_special_folder_async(
-                    Geary.SpecialFolderType.TRASH, cancellable)).path;
-                Geary.FolderSupport.Move? supports_move = current_folder as Geary.FolderSupport.Move;
-                if (supports_move != null) {
-                    save_revokable(yield supports_move.move_email_async(ids, trash_path, cancellable),
-                        _("Undo trash (Ctrl+Z)"));
-                    
-                    return;
-                }
-            }
-            
-            debug("Folder %s doesn't support move or account %s doesn't have a trash folder",
-                current_folder.to_string(), current_account.to_string());
-            return;
-        }
-        
-        debug("Deleting selected messages");
-        
-        Geary.FolderSupport.Remove? supports_remove = current_folder as Geary.FolderSupport.Remove;
-        if (supports_remove == null) {
-            debug("Folder %s doesn't support remove", current_folder.to_string());
+            yield trash_messages_async(ids, cancellable);
         } else {
-            if (confirm_delete(ids.size))
-                yield supports_remove.remove_email_async(ids, cancellable);
-            else
-                last_deleted_conversation = null;
+            yield delete_messages_async(ids, cancellable);
         }
     }
 
@@ -2765,6 +2771,17 @@ public class GearyController : Geary.BaseObject {
         view.reply_to_message.connect(on_reply_to_message);
         view.reply_all_message.connect(on_reply_all_message);
         view.forward_message.connect(on_forward_message);
+
+        Geary.App.Conversation conversation = main_window.conversation_viewer.current_list.conversation;
+        bool in_current_folder = (conversation.is_in_base_folder(view.email.id) &&
+            conversation.base_folder == current_folder);
+        bool supports_trash = in_current_folder && current_folder_supports_trash();
+        bool supports_delete = in_current_folder && current_folder is Geary.FolderSupport.Remove;
+        view.trash_message.connect(on_trash_message);
+        view.delete_message.connect(on_delete_message);
+        view.set_folder_actions_enabled(supports_trash, supports_delete);
+        main_window.on_shift_key.connect(view.shift_key_changed);
+
         view.edit_draft.connect((draft_view) => {
                 create_compose_widget(
                     ComposerWidget.ComposeType.NEW_MESSAGE,
@@ -2783,6 +2800,20 @@ public class GearyController : Geary.BaseObject {
         }
         view.save_attachments.connect(on_save_attachments);
         view.view_source.connect(on_view_source);
+    }
+
+    private void on_trash_message(ConversationEmail target_view) {
+        Gee.Collection<Geary.EmailIdentifier> ids =
+            new Gee.ArrayList<Geary.EmailIdentifier>();
+        ids.add(target_view.email.id);
+        trash_messages_async.begin(ids, cancellable_folder);
+    }
+
+    private void on_delete_message(ConversationEmail target_view) {
+        Gee.Collection<Geary.EmailIdentifier> ids =
+            new Gee.ArrayList<Geary.EmailIdentifier>();
+        ids.add(target_view.email.id);
+        delete_messages_async.begin(ids, cancellable_folder);
     }
 
     private void on_view_source(ConversationEmail email_view) {
