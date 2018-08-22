@@ -1150,9 +1150,10 @@ public class ComposerWidget : Gtk.EventBox {
     private void on_detach() {
         if (this.state == ComposerState.DETACHED)
             return;
-        Gtk.Widget? focus = this.container.top_window.get_focus();
+
+        Gtk.Widget? focused_widget = this.container.top_window.get_focus();
         this.container.remove_composer();
-        ComposerWindow window = new ComposerWindow(this);
+        ComposerWindow new_window = new ComposerWindow(this);
 
         // Workaround a GTK+ crasher, Bug 771812. When the composer is
         // re-parented, its menu_button's popover keeps a reference to
@@ -1168,11 +1169,19 @@ public class ComposerWidget : Gtk.EventBox {
         this.state = ComposerWidget.ComposerState.DETACHED;
         this.header.detached();
         update_composer_view();
-        if (focus != null && focus.parent.visible) {
-            ComposerWindow focus_win = focus.get_toplevel() as ComposerWindow;
-            if (focus_win != null && focus_win == window)
-                focus.grab_focus();
-        } else {
+
+        // If the previously focused widget is in the new composer
+        // window then focus that, else focus something useful.
+        bool refocus = true;
+        if (focused_widget != null) {
+            ComposerWindow? focused_window =
+                focused_widget.get_toplevel() as ComposerWindow;
+            if (new_window == focused_window) {
+                focused_widget.grab_focus();
+                refocus = false;
+            }
+        }
+        if (refocus) {
             set_focus();
         }
     }
