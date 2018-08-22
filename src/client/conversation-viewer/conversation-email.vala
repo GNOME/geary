@@ -206,6 +206,8 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     private const string ACTION_MARK_READ = "mark_read";
     private const string ACTION_MARK_UNREAD = "mark_unread";
     private const string ACTION_MARK_UNREAD_DOWN = "mark_unread_down";
+    private const string ACTION_TRASH_MESSAGE = "trash_msg";
+    private const string ACTION_DELETE_MESSAGE = "delete_msg";
     private const string ACTION_OPEN_ATTACHMENTS = "open_attachments";
     private const string ACTION_PRINT = "print";
     private const string ACTION_REPLY_SENDER = "reply_sender";
@@ -307,6 +309,11 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
 
     private Gtk.Menu attachments_menu;
 
+    private Menu email_menu;
+    private Menu email_menu_model;
+    private Menu email_menu_trash;
+    private Menu email_menu_delete;
+    private bool shift_key_down;
 
     /** Fired when the user clicks "reply" in the message menu. */
     public signal void reply_to_message();
@@ -326,6 +333,12 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     public signal void mark_email_from_here(
         Geary.NamedFlag? to_add, Geary.NamedFlag? to_remove
     );
+
+    /** Fired when the user clicks "trash" in the message menu. */
+    public signal void trash_message();
+
+    /** Fired when the user clicks "delete" in the message menu. */
+    public signal void delete_message();
 
     /** Fired when the user activates an attachment. */
     public signal void attachments_activated(
@@ -382,6 +395,12 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
             });
         add_action(ACTION_MARK_UNREAD_DOWN).activate.connect(() => {
                 mark_email_from_here(Geary.EmailFlags.UNREAD, null);
+            });
+        add_action(ACTION_TRASH_MESSAGE).activate.connect(() => {
+                trash_message();
+            });
+        add_action(ACTION_DELETE_MESSAGE).activate.connect(() => {
+                delete_message();
             });
         add_action(ACTION_OPEN_ATTACHMENTS, false).activate.connect(() => {
                 attachments_activated(get_selected_attachments());
@@ -454,10 +473,13 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         Gtk.Builder builder = new Gtk.Builder.from_resource(
             "/org/gnome/Geary/conversation-email-menus.ui"
         );
-        this.email_menubutton.set_menu_model(
-            (MenuModel) builder.get_object("email_menu")
-        );
+        this.email_menu = new Menu();
+        this.email_menu_model = (Menu) builder.get_object("email_menu");
+        this.email_menu_trash = (Menu) builder.get_object("email_menu_trash");
+        this.email_menu_delete = (Menu) builder.get_object("email_menu_delete");
+        this.email_menubutton.set_menu_model(this.email_menu);
         this.email_menubutton.set_sensitive(false);
+        this.email_menubutton.toggled.connect(this.on_email_menu);
 
         this.attachments_menu = new Gtk.Menu.from_model(
             (MenuModel) builder.get_object("attachments_menu")
@@ -527,6 +549,23 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
                     });
             }
         }
+    }
+
+    /**
+     * Enables or disables actions that require folder support.
+     */
+    public void set_folder_actions_enabled(bool supports_trash, bool supports_delete) {
+        set_action_enabled(ACTION_TRASH_MESSAGE, supports_trash);
+        set_action_enabled(ACTION_DELETE_MESSAGE, supports_delete);
+    }
+
+    /**
+     * Substitutes the "Delete Message" button for the "Move Message to Trash"
+     * button if the Shift key is pressed.
+     */
+    public void shift_key_changed(bool pressed) {
+        this.shift_key_down = pressed;
+        this.on_email_menu();
     }
 
     /**
@@ -609,6 +648,16 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         action.set_enabled(enabled);
         message_actions.add_action(action);
         return action;
+    }
+
+    private bool get_action_enabled(string name) {
+        SimpleAction? action =
+            this.message_actions.lookup_action(name) as SimpleAction;
+        if (action != null) {
+            return action.get_enabled();
+        } else {
+            return false;
+        }
     }
 
     private void set_action_enabled(string name, bool enabled) {
@@ -734,6 +783,25 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
             selected.add(((AttachmentView) child.get_child()).attachment);
         }
         return selected;
+    }
+
+    /**
+     * Updates the email menu if it is open.
+     */
+    private void on_email_menu() {
+        if (this.email_menubutton.active) {
+            this.email_menu.remove_all();
+
+            bool supports_trash = get_action_enabled(ACTION_TRASH_MESSAGE);
+            bool supports_delete = get_action_enabled(ACTION_DELETE_MESSAGE);
+            bool show_trash_button = !this.shift_key_down && (supports_trash || !supports_delete);
+            GtkUtil.menu_foreach(this.email_menu_model, (label, name, target, section) => {
+                if ((section != this.email_menu_trash || show_trash_button) &&
+                    (section != this.email_menu_delete || !show_trash_button)) {
+                    this.email_menu.append_item(new MenuItem.section(label, section));
+                }
+            });
+        }
     }
 
     private void print() {
