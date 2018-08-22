@@ -1919,25 +1919,27 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         MessageRow row = do_fetch_message_row(cx, location.message_id, Geary.Email.Field.FLAGS,
             out pre_fields, cancellable);
         post_fields = pre_fields;
-        
-        // compare flags for (a) any change at all and (b) unread changes
+
+        // Only update if changed
         Geary.Email row_email = row.to_email(location.email_id);
-        
-        if (row_email.email_flags != null && row_email.email_flags.equal_to(email.email_flags))
-            return;
-        
-        if (row_email.email_flags.is_unread() != email.email_flags.is_unread())
-            unread_count_change += email.email_flags.is_unread() ? 1 : -1;
-        
-        // write them out to the message row
-        Gee.Map<ImapDB.EmailIdentifier, Geary.EmailFlags> map = new Gee.HashMap<ImapDB.EmailIdentifier,
-            Geary.EmailFlags>();
-        map.set((ImapDB.EmailIdentifier) email.id, email.email_flags);
-        
-        do_set_email_flags(cx, map, cancellable);
-        post_fields |= Geary.Email.Field.FLAGS;
+        if (row_email.email_flags == null ||
+            !row_email.email_flags.equal_to(email.email_flags)) {
+
+            // Check for unread count changes
+            if (row_email.email_flags != null &&
+                row_email.email_flags.is_unread() != email.email_flags.is_unread()) {
+                unread_count_change += email.email_flags.is_unread() ? 1 : -1;
+            }
+
+            Gee.Map<ImapDB.EmailIdentifier, Geary.EmailFlags> map =
+               new Gee.HashMap<ImapDB.EmailIdentifier, Geary.EmailFlags>();
+            map.set((ImapDB.EmailIdentifier) email.id, email.email_flags);
+            do_set_email_flags(cx, map, cancellable);
+
+            post_fields |= Geary.Email.Field.FLAGS;
+        }
     }
-    
+
     private void do_merge_email(Db.Connection cx, LocationIdentifier location, Geary.Email email,
         out Geary.Email.Field pre_fields, out Geary.Email.Field post_fields,
         out Gee.Collection<Contact> updated_contacts, ref int unread_count_change,
