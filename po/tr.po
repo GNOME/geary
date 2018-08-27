@@ -17,8 +17,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2018-07-28 05:57+0000\n"
-"PO-Revision-Date: 2018-08-09 16:24+0300\n"
+"POT-Creation-Date: 2018-08-26 16:23+0000\n"
+"PO-Revision-Date: 2018-08-27 11:40+0300\n"
 "Last-Translator: Emin Tufan Çetin <etcetin@gmail.com>\n"
 "Language-Team: Türkçe <gnome-turk@gnome.org>\n"
 "Language: tr\n"
@@ -333,7 +333,7 @@ msgstr ""
 "yanlış."
 
 #: src/client/accounts/account-dialog-add-edit-pane.vala:54
-#: src/client/components/stock.vala:31 ui/conversation-email-menus.ui:57
+#: src/client/components/stock.vala:31 ui/conversation-email-menus.ui:83
 msgid "_Save"
 msgstr "_Kaydet"
 
@@ -470,7 +470,7 @@ msgstr "Telif Hakkı 2016-2017 Geary Geliştirme Takımı."
 msgid "Visit the Geary web site"
 msgstr "Geary web sitesini ziyaret et"
 
-#: src/client/application/geary-application.vala:413
+#: src/client/application/geary-application.vala:416
 #, c-format
 msgid "About %s"
 msgstr "%s hakkında"
@@ -478,7 +478,7 @@ msgstr "%s hakkında"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: src/client/application/geary-application.vala:417
+#: src/client/application/geary-application.vala:420
 msgid "translator-credits"
 msgstr ""
 "Ferhat TUNÇTAN <ferhattnctn19@yahoo.com.tr>\n"
@@ -733,15 +733,15 @@ msgstr ""
 "\n"
 "Lütfen ağ bağlantılarınızı denetleyin ve Geary uygulamasını yeniden başlatın."
 
-#: src/client/application/geary-controller.vala:2059
+#: src/client/application/geary-controller.vala:2038
 msgid "Undo move (Ctrl+Z)"
 msgstr "Taşımayı geri al (Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:2069
+#: src/client/application/geary-controller.vala:2048
 msgid "Are you sure you want to open these attachments?"
 msgstr "Bu ekleri açmak istediğinize emin misiniz?"
 
-#: src/client/application/geary-controller.vala:2070
+#: src/client/application/geary-controller.vala:2049
 msgid ""
 "Attachments may cause damage to your system if opened.  Only open files from "
 "trusted sources."
@@ -749,16 +749,16 @@ msgstr ""
 "Eklerin açılması sisteminizin zarar görmesine neden olabilir.  Yalnızca "
 "güvendiğiniz kaynaklardan gelen dosyaları açın."
 
-#: src/client/application/geary-controller.vala:2071
+#: src/client/application/geary-controller.vala:2050
 msgid "Don’t _ask me again"
 msgstr "Yeniden _sorma"
 
-#: src/client/application/geary-controller.vala:2167
+#: src/client/application/geary-controller.vala:2146
 #, c-format
 msgid "A file named “%s” already exists.  Do you want to replace it?"
 msgstr "“%s” adlı bir dosya zaten var.  Değiştirmek istiyor musunuz?"
 
-#: src/client/application/geary-controller.vala:2169
+#: src/client/application/geary-controller.vala:2148
 #, c-format
 msgid ""
 "The file already exists in “%s”.  Replacing it will overwrite its contents."
@@ -766,67 +766,67 @@ msgstr ""
 "Dosya “%s”’in içinde zaten var.  Bunu var olanla değiştirmek, içeriğini "
 "üzerine yazacak."
 
-#: src/client/application/geary-controller.vala:2172
+#: src/client/application/geary-controller.vala:2151
 msgid "_Replace"
 msgstr "_Değiştir"
 
-#: src/client/application/geary-controller.vala:2412
+#: src/client/application/geary-controller.vala:2391
 msgid "Close the draft message?"
 msgid_plural "Close all draft messages?"
 msgstr[0] "Tüm taslak iletiyi kapat?"
 
-#: src/client/application/geary-controller.vala:2538
+#: src/client/application/geary-controller.vala:2517
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "%s klasörünüzdeki tüm e-postaları boşalt?"
 
-#: src/client/application/geary-controller.vala:2539
+#: src/client/application/geary-controller.vala:2518
 msgid "This removes the email from Geary and your email server."
 msgstr "Bu işlem e-postayı Geary’den ve e-posta sunucunuzdan kaldırır."
 
-#: src/client/application/geary-controller.vala:2540
+#: src/client/application/geary-controller.vala:2519
 msgid "This cannot be undone."
 msgstr "Bu geri alınamaz."
 
-#: src/client/application/geary-controller.vala:2541
+#: src/client/application/geary-controller.vala:2520
 #, c-format
 msgid "Empty %s"
 msgstr "%s boşalt"
 
-#: src/client/application/geary-controller.vala:2558
+#: src/client/application/geary-controller.vala:2537
 #, c-format
 msgid "Error emptying %s"
 msgstr "%s boşaltılırken hata"
 
-#: src/client/application/geary-controller.vala:2590
+#: src/client/application/geary-controller.vala:2569
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Bu ileti(ler)i kalıcı olarak silmek istiyor musunuz?"
 
-#: src/client/application/geary-controller.vala:2592
+#: src/client/application/geary-controller.vala:2571
 msgid "Delete"
 msgstr "Sil"
 
-#: src/client/application/geary-controller.vala:2624
-msgid "Undo archive (Ctrl+Z)"
-msgstr "Arşivden geri al (Ctrl+Z)"
-
-#: src/client/application/geary-controller.vala:2639
+#: src/client/application/geary-controller.vala:2585
 msgid "Undo trash (Ctrl+Z)"
 msgstr "Çöpten geri al (Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:2695
+#: src/client/application/geary-controller.vala:2635
+msgid "Undo archive (Ctrl+Z)"
+msgstr "Arşivden geri al (Ctrl+Z)"
+
+#: src/client/application/geary-controller.vala:2680
 msgid "Undo (Ctrl+Z)"
 msgstr "Geri al (Ctrl+Z)"
 
 #. Translators: The label for an in-app notification. The
 #. string substitution is a list of recipients of the email.
-#: src/client/application/geary-controller.vala:2772
+#: src/client/application/geary-controller.vala:2757
 #, c-format
 msgid "Successfully sent mail to %s."
 msgstr "Posta, %s adresine başarıyla gönderildi."
 
-#: src/client/application/geary-controller.vala:2828
+#: src/client/application/geary-controller.vala:2838
 msgid "Failed to open default text editor."
 msgstr "Öntanımlı metin düzenleyici açılamadı."
 
@@ -1128,7 +1128,7 @@ msgstr "_At"
 msgid "_Help"
 msgstr "_Yardım"
 
-#: src/client/components/stock.vala:26 ui/conversation-email-menus.ui:51
+#: src/client/components/stock.vala:26 ui/conversation-email-menus.ui:77
 msgid "_Open"
 msgstr "_Aç"
 
@@ -1136,7 +1136,8 @@ msgstr "_Aç"
 msgid "_Preferences"
 msgstr "_Tercihler"
 
-#: src/client/components/stock.vala:28 ui/conversation-email-menus.ui:39
+#. Translators: Menu item to print a single, specific message
+#: src/client/components/stock.vala:28 ui/conversation-email-menus.ui:64
 msgid "_Print…"
 msgstr "_Yazdır…"
 
@@ -1206,23 +1207,23 @@ msgstr "Bu iletiyi saklamak mı yoksa atmak mı istiyorsunuz?"
 msgid "Do you want to discard this draft message?"
 msgstr "Bu taslak iletiyi atmak istiyor musunuz?"
 
-#: src/client/composer/composer-widget.vala:1238
+#: src/client/composer/composer-widget.vala:1247
 msgid "Send message with an empty subject and body?"
 msgstr "İleti konusu ve gövdesi olmadan gönderilsin mi?"
 
-#: src/client/composer/composer-widget.vala:1240
+#: src/client/composer/composer-widget.vala:1249
 msgid "Send message with an empty subject?"
 msgstr "İleti konusu olmadan gönderilsin mi?"
 
-#: src/client/composer/composer-widget.vala:1242
+#: src/client/composer/composer-widget.vala:1251
 msgid "Send message with an empty body?"
 msgstr "İleti, ileti gövdesi olmadan gönderilsin mi?"
 
-#: src/client/composer/composer-widget.vala:1246
+#: src/client/composer/composer-widget.vala:1255
 msgid "Send message without an attachment?"
 msgstr "İleti eki olmadan gönderilsin mi?"
 
-#: src/client/composer/composer-widget.vala:1551
+#: src/client/composer/composer-widget.vala:1560
 #, c-format
 msgid "“%s” already attached for delivery."
 msgstr "“%s” gönderim için zaten eklendi."
@@ -1232,73 +1233,73 @@ msgstr "“%s” gönderim için zaten eklendi."
 #. description of the document type, the second will
 #. be a human-friendly size string. For example:
 #. Document (100.9MB)
-#: src/client/composer/composer-widget.vala:1559
+#: src/client/composer/composer-widget.vala:1568
 #: src/client/conversation-viewer/conversation-email.vala:136
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: src/client/composer/composer-widget.vala:1596
+#: src/client/composer/composer-widget.vala:1605
 #, c-format
 msgid "“%s” could not be found."
 msgstr "“%s” bulunamadı."
 
-#: src/client/composer/composer-widget.vala:1602
+#: src/client/composer/composer-widget.vala:1611
 #, c-format
 msgid "“%s” is a folder."
 msgstr "“%s” bir klasör."
 
-#: src/client/composer/composer-widget.vala:1608
+#: src/client/composer/composer-widget.vala:1617
 #, c-format
 msgid "“%s” is an empty file."
 msgstr "“%s” boş bir dosya."
 
-#: src/client/composer/composer-widget.vala:1621
+#: src/client/composer/composer-widget.vala:1630
 #, c-format
 msgid "“%s” could not be opened for reading."
 msgstr "“%s” okuma için açılamadı."
 
-#: src/client/composer/composer-widget.vala:1629
+#: src/client/composer/composer-widget.vala:1638
 msgid "Cannot add attachment"
 msgstr "Eklenti eklenemiyor"
 
-#: src/client/composer/composer-widget.vala:1678
+#: src/client/composer/composer-widget.vala:1687
 msgid "To: "
 msgstr "Kime: "
 
-#: src/client/composer/composer-widget.vala:1681
+#: src/client/composer/composer-widget.vala:1690
 msgid "Cc: "
 msgstr "Cc: "
 
-#: src/client/composer/composer-widget.vala:1684
+#: src/client/composer/composer-widget.vala:1693
 msgid "Bcc: "
 msgstr "Bcc:"
 
-#: src/client/composer/composer-widget.vala:1687
+#: src/client/composer/composer-widget.vala:1696
 msgid "Reply-To: "
 msgstr "Yanıtla: "
 
-#: src/client/composer/composer-widget.vala:1825
+#: src/client/composer/composer-widget.vala:1834
 msgid "Select Color"
 msgstr "Renk Seç"
 
 #. Displayed in the From dropdown to indicate an "alternate email address"
 #. for an account.  The first printf argument will be the alternate email
 #. address, and the second will be the account's primary email address.
-#: src/client/composer/composer-widget.vala:2015
+#: src/client/composer/composer-widget.vala:2024
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%2$s aracılığıyla %1$s"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: src/client/composer/composer-widget.vala:2073
+#: src/client/composer/composer-widget.vala:2082
 msgid "_From:"
 msgstr "_Gönderen:"
 
 #. Translators: This is the name of the file chooser filter
 #. when inserting an image in the composer.
-#: src/client/composer/composer-widget.vala:2298
+#: src/client/composer/composer-widget.vala:2307
 msgid "Images"
 msgstr "Resimler"
 
@@ -1342,8 +1343,9 @@ msgstr "Y_ıldızı kaldır"
 msgid "_Star"
 msgstr "_Yıldızla"
 
+#. Translators: Menu item to reply to a specific message.
 #: src/client/conversation-list/conversation-list-view.vala:297
-#: ui/conversation-email-menus.ui:8
+#: ui/conversation-email-menus.ui:9
 msgid "_Reply"
 msgstr "_Yanıtla"
 
@@ -1351,8 +1353,9 @@ msgstr "_Yanıtla"
 msgid "R_eply All"
 msgstr "Tümüne _Yanıtla"
 
+#. Translators: Menu item to forward a specific message.
 #: src/client/conversation-list/conversation-list-view.vala:299
-#: ui/conversation-email-menus.ui:18
+#: ui/conversation-email-menus.ui:21
 msgid "_Forward"
 msgstr "_Yönlendir"
 
@@ -2206,8 +2209,6 @@ msgid "_Paste"
 msgstr "_Yapıştır"
 
 #: ui/composer-menus.ui:100
-#| msgctxt "Clipboard paste with rich text"
-#| msgid "Paste _With Formatting"
 msgctxt "Clipboard paste as plain text"
 msgid "Paste _Without Formatting"
 msgstr "Biçimlendirmede_n Yapıştır"
@@ -2360,27 +2361,45 @@ msgstr "İleti kaydedilmedi"
 msgid "This message was sent, but has not been saved to your account."
 msgstr "Bu ileti gönderildi, ama hesabınıza kaydedilemedi."
 
-#: ui/conversation-email-menus.ui:13
+#. Translators: Menu item to reply to a specific message.
+#: ui/conversation-email-menus.ui:15
 msgid "Reply to _All"
 msgstr "Tümüne _Yanıt Ver"
 
-#: ui/conversation-email-menus.ui:25
+#. Translators: Menu item to mark a specific message as
+#. read.
+#: ui/conversation-email-menus.ui:30
 msgid "_Mark Read"
 msgstr "Okunmuş olarak _imle"
 
-#: ui/conversation-email-menus.ui:29
+#: ui/conversation-email-menus.ui:36
 msgid "_Mark Unread"
 msgstr "Okunmadı olarak _imle"
 
-#: ui/conversation-email-menus.ui:33
+#. Translators: Menu item to mark all messages in a
+#. conversation from this one as unread.
+#: ui/conversation-email-menus.ui:42
 msgid "Mark Unread From _Here"
 msgstr "_Buradan Okunmadı İmle"
 
-#: ui/conversation-email-menus.ui:43
+#. Translators: Menu item to move a single, specific message
+#. to the trash
+#: ui/conversation-email-menus.ui:50
+msgid "_Trash"
+msgstr "_Çöp"
+
+#. Translators: Menu item to delete a single, specific message
+#: ui/conversation-email-menus.ui:57
+#| msgid "_Delete"
+msgid "_Delete…"
+msgstr "_Sil…"
+
+#. Translators: Menu item to view the source for a message
+#: ui/conversation-email-menus.ui:69
 msgid "_View Source"
 msgstr "_Kaynağı İncele"
 
-#: ui/conversation-email-menus.ui:61
+#: ui/conversation-email-menus.ui:87
 msgid "_Save All"
 msgstr "Tümünü _Kaydet"
 
@@ -3247,12 +3266,6 @@ msgstr "Geary güncellemesi devam ediyor…"
 
 #~ msgid "Copyright 2011-2014 Yorba Foundation"
 #~ msgstr "Telif Hakkı 2011-2014 Yorba Foundation"
-
-#~ msgid "_Delete"
-#~ msgstr "_Sil"
-
-#~ msgid "_Trash"
-#~ msgstr "_Çöp"
 
 #~ msgid "_Donate"
 #~ msgstr "_Bağış Yap"
