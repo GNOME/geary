@@ -94,7 +94,7 @@ private int first_encode_index(string str) {
     return -1;
 }
 
-public string utf8_to_imap_utf7(string str) throws ConvertError {
+public string utf8_to_imap_utf7(string str) {
     int p = first_encode_index(str);
     if (p < 0) {
         /* no characters that need to be encoded */

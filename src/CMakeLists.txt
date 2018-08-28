@@ -124,7 +124,6 @@ engine/imap/message/imap-flag.vala
 engine/imap/message/imap-flags.vala
 engine/imap/message/imap-internal-date.vala
 engine/imap/message/imap-mailbox-specifier.vala
-engine/imap/message/imap-mailbox-parameter.vala
 engine/imap/message/imap-message-data.vala
 engine/imap/message/imap-message-flag.vala
 engine/imap/message/imap-message-flags.vala
