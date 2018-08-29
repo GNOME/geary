@@ -1,6 +1,7 @@
 /* flatpak-builder config for Geary. */
 {
     "app-id": "org.gnome.Geary",
+    "branch": "geary-0.12",
     "runtime": "org.gnome.Platform",
     "runtime-version": "3.28",
     "sdk": "org.gnome.Sdk",
@@ -78,7 +79,7 @@
             "sources": [
                 {
                     "type": "git",
-                    "url": "https://git.gnome.org/browse/libgee",
+                    "url": "https://gitlab.gnome.org/GNOME/libgee.git",
                     "tag": "0.20.0"
                 }
             ]
@@ -88,7 +89,7 @@
             "sources": [
                 {
                     "type": "git",
-                    "url": "https://git.gnome.org/browse/gmime",
+                    "url": "https://github.com/jstedfast/gmime.git",
                     "branch": "gmime-2-6"
                 }
             ]
@@ -98,7 +99,7 @@
             "sources": [
                 {
                     "type": "git",
-                    "url": "https://git.gnome.org/browse/geary",
+                    "url": "https://gitlab.gnome.org/GNOME/geary.git",
                     "branch": "geary-0.12"
                 }
             ]
