@@ -77,6 +77,19 @@
   <translation type="gettext">geary</translation>
 
   <releases>
+    <release version="0.12.4" date="2018-08-29">
+      <description>
+        <p>Bug fixes included in this release:</p>
+        <ul>
+          <li>Fix handling folder names with IMAP reserved characters, such as backslashes. Issue #40</li>
+          <li>Fix dialog windows not focused after being first shown. Issue #43</li>
+          <li>Actually include the fix for "Move to folder" selection bug. Issue #24</li>
+          <li>Fix build under vala >= 0.41. Issue #86</li>
+          <li>Fixes for miscellaneous crashers</li>
+        </ul>
+      </description>
+    </release>
+
     <release version="0.12.3" date="2018-07-14">
       <description>
         <p>Bug fixes included in this release:</p>

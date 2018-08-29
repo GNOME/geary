@@ -1,3 +1,15 @@
+Version 0.12.4
+~~~~~~~~~~~~~~
+Released: 2018-08-29
+
+Bug fixes included in this release:
+ * Fix handling folder names with IMAP reserved characters, such as
+   backslashes. Issue #40
+ * Fix dialog windows not focused after being first shown. Issue #43
+ * Actually include the fix for "Move to folder" selection bug. Issue #24
+ * Fix build under vala >= 0.41. Issue #86
+ * Fixes for miscellaneous crashers
+
 Version 0.12.3
 ~~~~~~~~~~~~~~
 Released: 2018-07-14
