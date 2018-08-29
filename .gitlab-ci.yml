@@ -78,7 +78,7 @@ deb-package:
   script:
     - dpkg-buildpackage -b -us -uc
 
-flatpack-package:
+flatpak-package:
   image: registry.gitlab.gnome.org/gnome/gnome-runtime-images/gnome:3.28
   stage: build
 
