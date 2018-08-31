@@ -19,8 +19,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2018-08-23 12:11+0000\n"
-"PO-Revision-Date: 2018-08-25 23:21+0200\n"
+"POT-Creation-Date: 2018-08-29 14:58+0000\n"
+"PO-Revision-Date: 2018-08-31 21:02+0200\n"
 "Last-Translator: Mario Blättermann <mario.blaettermann@gmail.com>\n"
 "Language-Team: Deutsch <gnome-de@gnome.org>\n"
 "Language: de\n"
@@ -475,8 +475,8 @@ msgid "Copyright 2016 Software Freedom Conservancy Inc."
 msgstr "Copyright 2016 Software Freedom Conservancy Inc."
 
 #: src/client/application/geary-application.vala:23
-msgid "Copyright 2016-2017 Geary Development Team."
-msgstr "Copyright 2016-2017 Geary-Entwicklerteam."
+msgid "Copyright 2016-2018 Geary Development Team."
+msgstr "Copyright 2016-2018 Geary-Entwicklerteam."
 
 #: src/client/application/geary-application.vala:25
 msgid "Visit the Geary web site"
