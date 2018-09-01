@@ -19,8 +19,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2018-07-28 05:57+0000\n"
-"PO-Revision-Date: 2018-08-06 15:38-0200\n"
+"POT-Creation-Date: 2018-08-29 14:58+0000\n"
+"PO-Revision-Date: 2018-09-01 19:43-0200\n"
 "Last-Translator: Rafael Fontenelle <rafaelff@gnome.org>\n"
 "Language-Team: pt_BR\n"
 "Language: pt_BR\n"
@@ -350,7 +350,7 @@ msgstr ""
 "valores."
 
 #: src/client/accounts/account-dialog-add-edit-pane.vala:54
-#: src/client/components/stock.vala:31 ui/conversation-email-menus.ui:57
+#: src/client/components/stock.vala:31 ui/conversation-email-menus.ui:83
 msgid "_Save"
 msgstr "_Salvar"
 
@@ -480,14 +480,15 @@ msgid "Copyright 2016 Software Freedom Conservancy Inc."
 msgstr "Copyright 2016 Software Freedom Conservancy Inc."
 
 #: src/client/application/geary-application.vala:23
-msgid "Copyright 2016-2017 Geary Development Team."
-msgstr "Copyright 2016-2017 Equipe de Desenvolvimento do Geary."
+#| msgid "Copyright 2016-2017 Geary Development Team."
+msgid "Copyright 2016-2018 Geary Development Team."
+msgstr "Copyright 2016-2018 Equipe de Desenvolvimento do Geary."
 
 #: src/client/application/geary-application.vala:25
 msgid "Visit the Geary web site"
 msgstr "Visite o website do Geary"
 
-#: src/client/application/geary-application.vala:413
+#: src/client/application/geary-application.vala:416
 #, c-format
 msgid "About %s"
 msgstr "Sobre %s"
@@ -495,7 +496,7 @@ msgstr "Sobre %s"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: src/client/application/geary-application.vala:417
+#: src/client/application/geary-application.vala:420
 msgid "translator-credits"
 msgstr ""
 "Leonardo Lemos <leonardolemos@live.com>\n"
@@ -752,15 +753,15 @@ msgstr ""
 "\n"
 "Por favor, verifique sua conexão de rede e reinicie o Geary."
 
-#: src/client/application/geary-controller.vala:2059
+#: src/client/application/geary-controller.vala:2038
 msgid "Undo move (Ctrl+Z)"
 msgstr "Desfazer movimento (Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:2069
+#: src/client/application/geary-controller.vala:2048
 msgid "Are you sure you want to open these attachments?"
 msgstr "Você tem certeza de que deseja abrir esses anexos?"
 
-#: src/client/application/geary-controller.vala:2070
+#: src/client/application/geary-controller.vala:2049
 msgid ""
 "Attachments may cause damage to your system if opened.  Only open files from "
 "trusted sources."
@@ -768,85 +769,85 @@ msgstr ""
 "Anexos podem causar danos ao seu sistema se abertos. Apenas abra arquivos de "
 "fontes confiáveis."
 
-#: src/client/application/geary-controller.vala:2071
+#: src/client/application/geary-controller.vala:2050
 msgid "Don’t _ask me again"
 msgstr "Não me _pergunte novamente"
 
-#: src/client/application/geary-controller.vala:2167
+#: src/client/application/geary-controller.vala:2146
 #, c-format
 msgid "A file named “%s” already exists.  Do you want to replace it?"
 msgstr "Um arquivo chamado “%s” já existe. Você deseja substituí-lo?"
 
-#: src/client/application/geary-controller.vala:2169
+#: src/client/application/geary-controller.vala:2148
 #, c-format
 msgid ""
 "The file already exists in “%s”.  Replacing it will overwrite its contents."
 msgstr ""
 "O arquivo já existe em “%s”. Substituí-lo irá sobrescrever o seu conteúdo."
 
-#: src/client/application/geary-controller.vala:2172
+#: src/client/application/geary-controller.vala:2151
 msgid "_Replace"
 msgstr "_Substituir"
 
-#: src/client/application/geary-controller.vala:2412
+#: src/client/application/geary-controller.vala:2391
 msgid "Close the draft message?"
 msgid_plural "Close all draft messages?"
 msgstr[0] "Fechar a mensagem de rascunho?"
 msgstr[1] "Fechar as mensagens de rascunho?"
 
-#: src/client/application/geary-controller.vala:2538
+#: src/client/application/geary-controller.vala:2517
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Esvaziar todos os e-mails de sua pasta %s?"
 
-#: src/client/application/geary-controller.vala:2539
+#: src/client/application/geary-controller.vala:2518
 msgid "This removes the email from Geary and your email server."
 msgstr "Isto remove o e-mail do Geary e do seu servidor de e-mail."
 
-#: src/client/application/geary-controller.vala:2540
+#: src/client/application/geary-controller.vala:2519
 msgid "This cannot be undone."
 msgstr "Isso não pode ser desfeito."
 
-#: src/client/application/geary-controller.vala:2541
+#: src/client/application/geary-controller.vala:2520
 #, c-format
 msgid "Empty %s"
 msgstr "Esvaziar %s"
 
-#: src/client/application/geary-controller.vala:2558
+#: src/client/application/geary-controller.vala:2537
 #, c-format
 msgid "Error emptying %s"
 msgstr "Erro ao esvaziar %s"
 
-#: src/client/application/geary-controller.vala:2590
+#: src/client/application/geary-controller.vala:2569
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Você deseja descartar permanentemente essa mensagem?"
 msgstr[1] "Você deseja descartar permanentemente essas mensagens?"
 
-#: src/client/application/geary-controller.vala:2592
+#: src/client/application/geary-controller.vala:2571
 msgid "Delete"
 msgstr "Excluir"
 
-#: src/client/application/geary-controller.vala:2624
-msgid "Undo archive (Ctrl+Z)"
-msgstr "Desfazer arquivamento (Ctrl+Z)"
-
-#: src/client/application/geary-controller.vala:2639
+#: src/client/application/geary-controller.vala:2585
 msgid "Undo trash (Ctrl+Z)"
 msgstr "Desfazer exclusão (Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:2695
+#: src/client/application/geary-controller.vala:2635
+msgid "Undo archive (Ctrl+Z)"
+msgstr "Desfazer arquivamento (Ctrl+Z)"
+
+#: src/client/application/geary-controller.vala:2680
 msgid "Undo (Ctrl+Z)"
 msgstr "Desfazer (Ctrl+Z)"
 
 #. Translators: The label for an in-app notification. The
 #. string substitution is a list of recipients of the email.
-#: src/client/application/geary-controller.vala:2772
+#: src/client/application/geary-controller.vala:2757
 #, c-format
 msgid "Successfully sent mail to %s."
 msgstr "E-mail enviado com sucesso para %s."
 
-#: src/client/application/geary-controller.vala:2828
+#: src/client/application/geary-controller.vala:2838
 msgid "Failed to open default text editor."
 msgstr "Falha ao abrir o editor de texto padrão."
 
@@ -1152,7 +1153,7 @@ msgstr "_Descartar"
 msgid "_Help"
 msgstr "_Ajuda"
 
-#: src/client/components/stock.vala:26 ui/conversation-email-menus.ui:51
+#: src/client/components/stock.vala:26 ui/conversation-email-menus.ui:77
 msgid "_Open"
 msgstr "_Abrir"
 
@@ -1160,7 +1161,8 @@ msgstr "_Abrir"
 msgid "_Preferences"
 msgstr "_Preferências"
 
-#: src/client/components/stock.vala:28 ui/conversation-email-menus.ui:39
+#. Translators: Menu item to print a single, specific message
+#: src/client/components/stock.vala:28 ui/conversation-email-menus.ui:64
 msgid "_Print…"
 msgstr "_Imprimir…"
 
@@ -1230,23 +1232,23 @@ msgstr "Você deseja manter ou descartar esta mensagem de rascunho?"
 msgid "Do you want to discard this draft message?"
 msgstr "Você deseja descartar esta mensagem de rascunho?"
 
-#: src/client/composer/composer-widget.vala:1238
+#: src/client/composer/composer-widget.vala:1247
 msgid "Send message with an empty subject and body?"
 msgstr "Enviar mensagem com o assunto e corpo vazio?"
 
-#: src/client/composer/composer-widget.vala:1240
+#: src/client/composer/composer-widget.vala:1249
 msgid "Send message with an empty subject?"
 msgstr "Enviar mensagem com o assunto vazio?"
 
-#: src/client/composer/composer-widget.vala:1242
+#: src/client/composer/composer-widget.vala:1251
 msgid "Send message with an empty body?"
 msgstr "Enviar mensagem com o corpo vazio?"
 
-#: src/client/composer/composer-widget.vala:1246
+#: src/client/composer/composer-widget.vala:1255
 msgid "Send message without an attachment?"
 msgstr "Enviar mensagem sem anexo?"
 
-#: src/client/composer/composer-widget.vala:1551
+#: src/client/composer/composer-widget.vala:1560
 #, c-format
 msgid "“%s” already attached for delivery."
 msgstr "“%s” já foi anexado para envio."
@@ -1256,73 +1258,73 @@ msgstr "“%s” já foi anexado para envio."
 #. description of the document type, the second will
 #. be a human-friendly size string. For example:
 #. Document (100.9MB)
-#: src/client/composer/composer-widget.vala:1559
+#: src/client/composer/composer-widget.vala:1568
 #: src/client/conversation-viewer/conversation-email.vala:136
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: src/client/composer/composer-widget.vala:1596
+#: src/client/composer/composer-widget.vala:1605
 #, c-format
 msgid "“%s” could not be found."
 msgstr "“%s” não foi encontrado."
 
-#: src/client/composer/composer-widget.vala:1602
+#: src/client/composer/composer-widget.vala:1611
 #, c-format
 msgid "“%s” is a folder."
 msgstr "“%s” é uma pasta."
 
-#: src/client/composer/composer-widget.vala:1608
+#: src/client/composer/composer-widget.vala:1617
 #, c-format
 msgid "“%s” is an empty file."
 msgstr "“%s” é um arquivo vazio."
 
-#: src/client/composer/composer-widget.vala:1621
+#: src/client/composer/composer-widget.vala:1630
 #, c-format
 msgid "“%s” could not be opened for reading."
 msgstr "“%s” não pôde ser aberto para leitura."
 
-#: src/client/composer/composer-widget.vala:1629
+#: src/client/composer/composer-widget.vala:1638
 msgid "Cannot add attachment"
 msgstr "Não é possível adicionar anexo"
 
-#: src/client/composer/composer-widget.vala:1678
+#: src/client/composer/composer-widget.vala:1687
 msgid "To: "
 msgstr "Para: "
 
-#: src/client/composer/composer-widget.vala:1681
+#: src/client/composer/composer-widget.vala:1690
 msgid "Cc: "
 msgstr "Cc: "
 
-#: src/client/composer/composer-widget.vala:1684
+#: src/client/composer/composer-widget.vala:1693
 msgid "Bcc: "
 msgstr "Cco: "
 
-#: src/client/composer/composer-widget.vala:1687
+#: src/client/composer/composer-widget.vala:1696
 msgid "Reply-To: "
 msgstr "Responder-a: "
 
-#: src/client/composer/composer-widget.vala:1825
+#: src/client/composer/composer-widget.vala:1834
 msgid "Select Color"
 msgstr "Selecione a cor"
 
 #. Displayed in the From dropdown to indicate an "alternate email address"
 #. for an account.  The first printf argument will be the alternate email
 #. address, and the second will be the account's primary email address.
-#: src/client/composer/composer-widget.vala:2015
+#: src/client/composer/composer-widget.vala:2024
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%1$s via %2$s"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: src/client/composer/composer-widget.vala:2073
+#: src/client/composer/composer-widget.vala:2082
 msgid "_From:"
 msgstr "_De:"
 
 #. Translators: This is the name of the file chooser filter
 #. when inserting an image in the composer.
-#: src/client/composer/composer-widget.vala:2298
+#: src/client/composer/composer-widget.vala:2307
 msgid "Images"
 msgstr "Imagens"
 
@@ -1366,8 +1368,9 @@ msgstr "_Tirar estrela"
 msgid "_Star"
 msgstr "_Marcar estrela"
 
+#. Translators: Menu item to reply to a specific message.
 #: src/client/conversation-list/conversation-list-view.vala:297
-#: ui/conversation-email-menus.ui:8
+#: ui/conversation-email-menus.ui:9
 msgid "_Reply"
 msgstr "_Responder"
 
@@ -1375,8 +1378,9 @@ msgstr "_Responder"
 msgid "R_eply All"
 msgstr "R_esponder todos"
 
+#. Translators: Menu item to forward a specific message.
 #: src/client/conversation-list/conversation-list-view.vala:299
-#: ui/conversation-email-menus.ui:18
+#: ui/conversation-email-menus.ui:21
 msgid "_Forward"
 msgstr "_Encaminhar"
 
@@ -2244,8 +2248,6 @@ msgid "_Paste"
 msgstr "_Colar"
 
 #: ui/composer-menus.ui:100
-#| msgctxt "Clipboard paste with rich text"
-#| msgid "Paste _With Formatting"
 msgctxt "Clipboard paste as plain text"
 msgid "Paste _Without Formatting"
 msgstr "Colar _sem formatação"
@@ -2398,27 +2400,45 @@ msgstr "A mensagem não foi salva"
 msgid "This message was sent, but has not been saved to your account."
 msgstr "Essa mensagem foi enviada, mas não pôde ser salva em sua conta."
 
-#: ui/conversation-email-menus.ui:13
+#. Translators: Menu item to reply to a specific message.
+#: ui/conversation-email-menus.ui:15
 msgid "Reply to _All"
 msgstr "Responder a _todos"
 
-#: ui/conversation-email-menus.ui:25
+#. Translators: Menu item to mark a specific message as
+#. read.
+#: ui/conversation-email-menus.ui:30
 msgid "_Mark Read"
 msgstr "_Marcar como lida"
 
-#: ui/conversation-email-menus.ui:29
+#: ui/conversation-email-menus.ui:36
 msgid "_Mark Unread"
 msgstr "_Marcar como não lida"
 
-#: ui/conversation-email-menus.ui:33
+#. Translators: Menu item to mark all messages in a
+#. conversation from this one as unread.
+#: ui/conversation-email-menus.ui:42
 msgid "Mark Unread From _Here"
 msgstr "Marcar como não lida a partir _daqui"
 
-#: ui/conversation-email-menus.ui:43
+#. Translators: Menu item to move a single, specific message
+#. to the trash
+#: ui/conversation-email-menus.ui:50
+msgid "_Trash"
+msgstr "Li_xeira"
+
+#. Translators: Menu item to delete a single, specific message
+#: ui/conversation-email-menus.ui:57
+#| msgid "_Delete"
+msgid "_Delete…"
+msgstr "E_xcluir…"
+
+#. Translators: Menu item to view the source for a message
+#: ui/conversation-email-menus.ui:69
 msgid "_View Source"
 msgstr "_Visualizar fonte"
 
-#: ui/conversation-email-menus.ui:61
+#: ui/conversation-email-menus.ui:87
 msgid "_Save All"
 msgstr "_Salvar tudo"
 
@@ -3301,12 +3321,6 @@ msgstr "Atualização do Geary em progresso…"
 
 #~ msgid "_Donate"
 #~ msgstr "_Doação"
-
-#~ msgid "_Delete"
-#~ msgstr "E_xcluir"
-
-#~ msgid "_Trash"
-#~ msgstr "Li_xeira"
 
 #~ msgid "Do you want to discard the unsaved message?"
 #~ msgstr "Você deseja descartar a mensagem não salva?"
