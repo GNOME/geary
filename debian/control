@@ -26,7 +26,7 @@ Build-Depends: debhelper (>= 8),
  libxml2-dev,
  meson (>= 0.41),
  valac (>=0.38)
-Standards-Version: 3.8.3
+Standards-Version: 4.1.4
 Homepage: https://wiki.gnome.org/Apps/Geary
 
 Package: geary
@@ -66,13 +66,3 @@ Description: Email application
  - Full-featured HTML and plain text message composer
  - Desktop notification of new mail
  - Compatible with GMail, Yahoo! Mail, Outlook.com and other IMAP servers
-
-Package: geary-dbg
-Architecture: any
-Section: debug
-Priority: extra
-Depends: geary (= ${binary:Version}), ${misc:Depends}
-Enhances: geary
-Description: Email client (debugging symbols)
- Geary is an mail application for GNOME. This package contains files
- required for producing useful stack traces when debugging Geary.
