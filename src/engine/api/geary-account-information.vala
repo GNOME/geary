@@ -18,10 +18,6 @@ public class Geary.AccountInformation : BaseObject {
     public static int next_ordinal = 0;
 
 
-    private static Gee.HashMap<string,weak Endpoint> known_endpoints =
-        new Gee.HashMap<string,weak Endpoint>();
-
-
     /** Comparator for account info objects based on their ordinals. */
     public static int compare_ascending(AccountInformation a, AccountInformation b) {
         int diff = a.ordinal - b.ordinal;
@@ -31,25 +27,6 @@ public class Geary.AccountInformation : BaseObject {
         // Stabilize on nickname, which should always be unique.
         return a.display_name.collate(b.display_name);
     }
-
-    private static Geary.Endpoint get_shared_endpoint(ServiceInformation service,
-                                                      Endpoint endpoint) {
-        string key = "%s/%s:%u".printf(
-            service.protocol.to_value(),
-            endpoint.remote_address.hostname,
-            endpoint.remote_address.port
-        );
-
-        weak Endpoint? cached = AccountInformation.known_endpoints.get(key);
-        weak Endpoint? shared = endpoint;
-        if (cached != null) {
-            shared = cached;
-            AccountInformation.known_endpoints.set(key, shared);
-        }
-
-        return shared;
-    }
-
 
     /** Location of the account information's settings key file. */
     public File? settings_file {
@@ -203,8 +180,8 @@ public class Geary.AccountInformation : BaseObject {
      * the future.
      */
     public signal void untrusted_host(ServiceInformation service,
-                                      Endpoint.SecurityType security,
-                                      TlsConnection cx);
+                                      TlsNegotiationMethod method,
+                                      GLib.TlsConnection cx);
 
     /** Indicates that properties contained herein have changed. */
     public signal void information_changed();
@@ -248,7 +225,7 @@ public class Geary.AccountInformation : BaseObject {
     }
 
     ~AccountInformation() {
-        disconnect_endpoints();
+        disconnect_service_endpoints();
     }
 
 
@@ -584,25 +561,25 @@ public class Geary.AccountInformation : BaseObject {
         );
     }
 
-    internal void connect_imap_endpoint() {
+    internal void connect_imap_service(Endpoint service) {
         if (this.imap.endpoint == null) {
-            this.imap.endpoint = get_imap_endpoint();
+            this.imap.endpoint = service;
             this.imap.endpoint.untrusted_host.connect(
                 on_imap_untrusted_host
             );
         }
     }
 
-    internal void connect_smtp_endpoint() {
+    internal void connect_smtp_service(Endpoint service) {
         if (this.smtp.endpoint == null) {
-            this.smtp.endpoint = get_smtp_endpoint();
+            this.smtp.endpoint = service;
             this.smtp.endpoint.untrusted_host.connect(
                 on_smtp_untrusted_host
             );
         }
     }
 
-    internal void disconnect_endpoints() {
+    internal void disconnect_service_endpoints() {
         if (this.imap.endpoint != null) {
             this.imap.endpoint.untrusted_host.disconnect(
                 on_imap_untrusted_host
@@ -617,78 +594,6 @@ public class Geary.AccountInformation : BaseObject {
         }
     }
 
-    private Endpoint get_imap_endpoint() {
-        Endpoint? imap_endpoint = null;
-        switch (this.service_provider) {
-            case ServiceProvider.GMAIL:
-                imap_endpoint = ImapEngine.GmailAccount.generate_imap_endpoint();
-            break;
-
-            case ServiceProvider.YAHOO:
-                imap_endpoint = ImapEngine.YahooAccount.generate_imap_endpoint();
-            break;
-
-            case ServiceProvider.OUTLOOK:
-                imap_endpoint = ImapEngine.OutlookAccount.generate_imap_endpoint();
-            break;
-
-            case ServiceProvider.OTHER:
-                Endpoint.Flags imap_flags = Endpoint.Flags.NONE;
-                if (this.imap.use_ssl)
-                    imap_flags |= Endpoint.Flags.SSL;
-                if (this.imap.use_starttls)
-                    imap_flags |= Endpoint.Flags.STARTTLS;
-
-                imap_endpoint = new Endpoint(this.imap.host, this.imap.port,
-                    imap_flags, Imap.ClientConnection.RECOMMENDED_TIMEOUT_SEC);
-            break;
-
-            default:
-                assert_not_reached();
-        }
-
-        // look for existing one in the global pool; want to use that
-        // because Endpoint is mutable and signalled in such a way
-        // that it's better to share them
-        return get_shared_endpoint(this.imap, imap_endpoint);
-    }
-
-    private Endpoint get_smtp_endpoint() {
-        Endpoint? smtp_endpoint = null;
-        switch (service_provider) {
-            case ServiceProvider.GMAIL:
-                smtp_endpoint = ImapEngine.GmailAccount.generate_smtp_endpoint();
-            break;
-
-            case ServiceProvider.YAHOO:
-                smtp_endpoint = ImapEngine.YahooAccount.generate_smtp_endpoint();
-            break;
-
-            case ServiceProvider.OUTLOOK:
-                smtp_endpoint = ImapEngine.OutlookAccount.generate_smtp_endpoint();
-            break;
-
-            case ServiceProvider.OTHER:
-                Endpoint.Flags smtp_flags = Endpoint.Flags.NONE;
-                if (this.smtp.use_ssl)
-                    smtp_flags |= Endpoint.Flags.SSL;
-                if (this.smtp.use_starttls)
-                    smtp_flags |= Endpoint.Flags.STARTTLS;
-
-                smtp_endpoint = new Endpoint(this.smtp.host, this.smtp.port,
-                    smtp_flags, Smtp.ClientConnection.DEFAULT_TIMEOUT_SEC);
-            break;
-
-            default:
-                assert_not_reached();
-        }
-
-        // look for existing one in the global pool; want to use that
-        // because Endpoint is mutable and signalled in such a way
-        // that it's better to share them
-        return get_shared_endpoint(this.smtp, smtp_endpoint);
-    }
-
     public static Geary.FolderPath? build_folder_path(Gee.List<string>? parts) {
         if (parts == null || parts.size == 0)
             return null;
@@ -699,14 +604,14 @@ public class Geary.AccountInformation : BaseObject {
         return path;
     }
 
-    private void on_imap_untrusted_host(Endpoint.SecurityType security,
-                                        TlsConnection cx) {
-        untrusted_host(this.imap, security, cx);
+    private void on_imap_untrusted_host(TlsNegotiationMethod method,
+                                        GLib.TlsConnection cx) {
+        untrusted_host(this.imap, method, cx);
     }
 
-    private void on_smtp_untrusted_host(Endpoint.SecurityType security,
-                                        TlsConnection cx) {
-        untrusted_host(this.smtp, security, cx);
+    private void on_smtp_untrusted_host(TlsNegotiationMethod method,
+                                        GLib.TlsConnection cx) {
+        untrusted_host(this.smtp, method, cx);
     }
 
 }

@@ -633,15 +633,15 @@ public class GearyController : Geary.BaseObject {
 
     private void on_untrusted_host(Geary.AccountInformation account,
                                    Geary.ServiceInformation service,
-                                   Geary.Endpoint.SecurityType security,
+                                   Geary.TlsNegotiationMethod method,
                                    TlsConnection cx) {
-        this.prompt_untrusted_host_async.begin(account, service, security, cx);
+        this.prompt_untrusted_host_async.begin(account, service, method, cx);
     }
 
     private async void
         prompt_untrusted_host_async(Geary.AccountInformation account,
                                     Geary.ServiceInformation service,
-                                    Geary.Endpoint.SecurityType security,
+                                    Geary.TlsNegotiationMethod method,
                                     TlsConnection cx) {
         // use a mutex to prevent multiple dialogs popping up at the same time
         int token = Geary.Nonblocking.Mutex.INVALID_TOKEN;
@@ -652,7 +652,7 @@ public class GearyController : Geary.BaseObject {
             return;
         }
 
-        yield locked_prompt_untrusted_host_async(account, service, security, cx);
+        yield locked_prompt_untrusted_host_async(account, service, method, cx);
 
         try {
             untrusted_host_prompt_mutex.release(ref token);
@@ -665,7 +665,7 @@ public class GearyController : Geary.BaseObject {
     private async void
         locked_prompt_untrusted_host_async(Geary.AccountInformation account,
                                            Geary.ServiceInformation service,
-                                           Geary.Endpoint.SecurityType security,
+                                           Geary.TlsNegotiationMethod method,
                                            TlsConnection cx) {
         // possible while waiting on mutex that this endpoint became trusted or untrusted
         if (service.endpoint.trust_untrusted_host != Geary.Trillian.UNKNOWN)

@@ -10,39 +10,13 @@
  */
 
 public class Geary.Endpoint : BaseObject {
+
     public const string PROP_TRUST_UNTRUSTED_HOST = "trust-untrusted-host";
-    
-    [Flags]
-    public enum Flags {
-        NONE = 0,
-        SSL,
-        STARTTLS;
-        
-        public inline bool is_all_set(Flags flags) {
-            return (this & flags) == flags;
-        }
-        
-        public inline bool is_any_set(Flags flags) {
-            return (this & flags) != 0;
-        }
-    }
-    
-    public enum SecurityType {
-        NONE,
-        SSL,
-        STARTTLS
-    }
-    
-    public enum AttemptStarttls {
-        YES,
-        NO,
-        HALT
-    }
-    
+
     public NetworkAddress remote_address { get; private set; }
     public ConnectivityManager connectivity { get; private set; }
-    public Flags flags { get; private set; }
     public uint timeout_sec { get; private set; }
+    public TlsNegotiationMethod tls_method { get; private set; }
     public TlsCertificateFlags tls_validation_flags { get; set; default = TlsCertificateFlags.VALIDATE_ALL; }
 
     /**
@@ -98,17 +72,8 @@ public class Geary.Endpoint : BaseObject {
                 : trust_untrusted_host.is_possible();
         }
     }
-    
-    public bool is_ssl { get {
-        return flags.is_all_set(Flags.SSL);
-    } }
-    
-    public bool use_starttls { get {
-        return flags.is_all_set(Flags.STARTTLS);
-    } }
-    
     private SocketClient? socket_client = null;
-    
+
     /**
      * Fired when TLS certificate warnings are detected and the caller has not marked this
      * {@link Endpoint} as trusted via {@link trust_untrusted_host}.
@@ -119,28 +84,32 @@ public class Geary.Endpoint : BaseObject {
      *
      * @see tls_validation_warnings
      */
-    public signal void untrusted_host(SecurityType security, TlsConnection cx);
+    public signal void untrusted_host(TlsNegotiationMethod method,
+                                      GLib.TlsConnection cx);
 
 
-    public Endpoint(string host_specifier, uint16 default_port, Flags flags, uint timeout_sec) {
-        this.remote_address = new NetworkAddress(host_specifier, default_port);
-        this.flags = flags;
-        this.timeout_sec = timeout_sec;
+    public Endpoint(string host_specifier,
+                    uint16 port,
+                    TlsNegotiationMethod method,
+                    uint timeout_sec) {
+        this.remote_address = new NetworkAddress(host_specifier, port);
         this.connectivity = new ConnectivityManager(this.remote_address);
+        this.timeout_sec = timeout_sec;
+        this.tls_method = method;
     }
 
     private SocketClient get_socket_client() {
         if (socket_client != null)
             return socket_client;
-        
+
         socket_client = new SocketClient();
-        
-        if (is_ssl) {
+
+        if (this.tls_method == TlsNegotiationMethod.TRANSPORT) {
             socket_client.set_tls(true);
             socket_client.set_tls_validation_flags(tls_validation_flags);
             socket_client.event.connect(on_socket_client_event);
         }
-        
+
         socket_client.set_timeout(timeout_sec);
         
         return socket_client;
@@ -177,31 +146,44 @@ public class Geary.Endpoint : BaseObject {
             tls_cx.accept_certificate.connect(on_accept_ssl_certificate);
     }
 
-    private bool on_accept_starttls_certificate(TlsConnection cx, TlsCertificate cert, TlsCertificateFlags flags) {
-        return report_tls_warnings(SecurityType.STARTTLS, cx, cert, flags);
+    private bool on_accept_starttls_certificate(GLib.TlsConnection cx,
+                                                GLib.TlsCertificate cert,
+                                                GLib.TlsCertificateFlags flags) {
+        return report_tls_warnings(
+            TlsNegotiationMethod.START_TLS, cx, cert, flags
+        );
     }
-    
-    private bool on_accept_ssl_certificate(TlsConnection cx, TlsCertificate cert, TlsCertificateFlags flags) {
-        return report_tls_warnings(SecurityType.SSL, cx, cert, flags);
+
+    private bool on_accept_ssl_certificate(GLib.TlsConnection cx,
+                                           GLib.TlsCertificate cert,
+                                           GLib.TlsCertificateFlags flags) {
+        return report_tls_warnings(
+            TlsNegotiationMethod.TRANSPORT, cx, cert, flags
+        );
     }
-    
-    private bool report_tls_warnings(SecurityType security, TlsConnection cx, TlsCertificate cert,
-        TlsCertificateFlags warnings) {
-        // TODO: Report or verify flags with user, but for now merely log for informational/debugging
-        // reasons and accede
-        message("%s TLS warnings connecting to %s: %Xh (%s)", security.to_string(), to_string(), warnings,
-            tls_flags_to_string(warnings));
-        
+
+    private bool report_tls_warnings(TlsNegotiationMethod method,
+                                     GLib.TlsConnection cx,
+                                     GLib.TlsCertificate cert,
+                                     GLib.TlsCertificateFlags warnings) {
+        // TODO: Report or verify flags with user, but for now merely
+        // log for informational/debugging reasons and accede
+        message(
+            "%s TLS warnings connecting to %s: %Xh (%s)",
+            method.to_string(), to_string(), warnings,
+            tls_flags_to_string(warnings)
+        );
+
         tls_validation_warnings = warnings;
         untrusted_certificate = cert;
         
         // if user has marked this untrusted host as trusted already, accept warnings and move on
         if (trust_untrusted_host == Trillian.TRUE)
             return true;
-        
+
         // signal an issue has been detected and return false to deny the connection
-        untrusted_host(security, cx);
-        
+        untrusted_host(this.tls_method, cx);
+
         return false;
     }
     
@@ -250,29 +232,8 @@ public class Geary.Endpoint : BaseObject {
                 return "(unknown=%Xh)".printf(flag);
         }
     }
-    
-    /**
-     * Returns true if a STARTTLS command should be attempted on the connection:
-     * (a) STARTTLS is reported available (a parameter specified by the caller to this method),
-     * (b) not using SSL (so TLS is not required), and (c) STARTTLS is specified as a flag on
-     * the Endpoint.
-     *
-     * If AttemptStarttls.HALT is returned, the caller should not proceed to pass any
-     * authentication information down the connection; this situation indicates the connection is
-     * insecure and the Endpoint is configured otherwise.
-     */
-    public AttemptStarttls attempt_starttls(bool starttls_available) {
-        if (is_ssl || !use_starttls)
-            return AttemptStarttls.NO;
-        
-        if (!starttls_available)
-            return AttemptStarttls.HALT;
-        
-        return AttemptStarttls.YES;
-    }
-    
+
     public string to_string() {
         return "%s/default:%u".printf(remote_address.hostname, remote_address.port);
     }
 }
-

@@ -140,7 +140,7 @@ public abstract class Geary.ServiceInformation : GLib.Object {
      * This only makes sense with providers that support saving the
      * password.
      */
-    public bool remember_password { get; set; default = false; }
+    public bool remember_password { get; set; default = true; }
 
     /**
      * Whether we should NOT authenticate with the server.
@@ -154,7 +154,7 @@ public abstract class Geary.ServiceInformation : GLib.Object {
      *
      * Only valid if this instance represents an SMTP server.
      */
-    public bool smtp_use_imap_credentials { get; set; default = false; }
+    public bool smtp_use_imap_credentials { get; set; default = true; }
 
     /**
      * The network endpoint for this service.

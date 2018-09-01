@@ -223,6 +223,7 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
             service.host = address.hostname;
             service.port = (uint16) address.port;
         } else {
+            this.provider.setup_service(service);
             service.credentials = new Geary.Credentials(
                 Geary.Credentials.Method.PASSWORD,
                 this.email.value.get_text().strip(),
@@ -268,8 +269,7 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
             service.host = address.hostname;
             service.port = (uint16) address.port;
         } else {
-            service.smtp_noauth = false;
-            service.smtp_use_imap_credentials = true;
+            this.provider.setup_service(service);
         }
 
         return service;

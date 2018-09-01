@@ -38,4 +38,18 @@ public enum Geary.ServiceProvider {
         return value.substring(value.last_index_of("_") + 1);
     }
 
+    public void setup_service(ServiceInformation service) {
+        switch (this) {
+        case GMAIL:
+            ImapEngine.GmailAccount.setup_service(service);
+            break;
+        case YAHOO:
+            ImapEngine.YahooAccount.setup_service(service);
+            break;
+        case OUTLOOK:
+            ImapEngine.OutlookAccount.setup_service(service);
+            break;
+        }
+    }
+
 }

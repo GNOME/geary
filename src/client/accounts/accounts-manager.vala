@@ -785,6 +785,9 @@ public class Accounts.Manager : GLib.Object {
         if (provider == Geary.ServiceProvider.OTHER) {
             imap.load_settings(imap_config);
             smtp.load_settings(smtp_config);
+        } else {
+            provider.setup_service(imap);
+            provider.setup_service(smtp);
         }
 
         return new Geary.AccountInformation(

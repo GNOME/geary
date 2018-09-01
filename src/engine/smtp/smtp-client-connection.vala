@@ -244,38 +244,34 @@ public class Geary.Smtp.ClientConnection {
      */
     public async Response establish_connection_async(Cancellable? cancellable = null) throws Error {
         check_connected();
-        
+
         // issue first HELO/EHLO, which will generate a set of capabiltiies
         Smtp.Response response = yield say_hello_async(cancellable);
-        
+
         // STARTTLS, if required
-        switch (endpoint.attempt_starttls(capabilities.has_capability(Capabilities.STARTTLS))) {
-            case Endpoint.AttemptStarttls.YES:
-                Response starttls_response = yield transaction_async(new Request(Command.STARTTLS));
-                if (!starttls_response.code.is_starttls_ready())
-                    throw new SmtpError.STARTTLS_FAILED("STARTTLS failed: %s", response.to_string());
-                
-                TlsClientConnection tls_cx = yield endpoint.starttls_handshake_async(cx, cancellable);
-                cx = tls_cx;
-                set_data_streams(tls_cx);
-                
-                // Now that we are on an encrypted line we need to say hello again in order to get the
-                // updated capabilities.
-                response = yield say_hello_async(cancellable);
-            break;
-            
-            case Endpoint.AttemptStarttls.NO:
-                // do nothing
-            break;
-            
-            case Endpoint.AttemptStarttls.HALT:
-            default:
-                throw new SmtpError.NOT_SUPPORTED("STARTTLS not available for %s", endpoint.to_string());
+        if (endpoint.tls_method == TlsNegotiationMethod.START_TLS) {
+            if (!capabilities.has_capability(Capabilities.STARTTLS)) {
+                throw new SmtpError.NOT_SUPPORTED(
+                    "STARTTLS not available for %s", endpoint.to_string()
+                );
+            }
+
+            Response starttls_response = yield transaction_async(new Request(Command.STARTTLS));
+            if (!starttls_response.code.is_starttls_ready())
+                throw new SmtpError.STARTTLS_FAILED("STARTTLS failed: %s", response.to_string());
+
+            TlsClientConnection tls_cx = yield endpoint.starttls_handshake_async(cx, cancellable);
+            cx = tls_cx;
+            set_data_streams(tls_cx);
+
+            // Now that we are on an encrypted line we need to say hello again in order to get the
+            // updated capabilities.
+            response = yield say_hello_async(cancellable);
         }
-        
+
         return response;
     }
-    
+
     public async Response quit_async(Cancellable? cancellable = null) throws Error {
         capabilities = null;
         return yield transaction_async(new Request(Command.QUIT), cancellable);

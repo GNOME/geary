@@ -14,21 +14,23 @@ private class Geary.ImapEngine.GmailAccount : Geary.ImapEngine.GenericAccount {
         Geary.SpecialFolderType.TRASH,
     };
 
-    public static Geary.Endpoint generate_imap_endpoint() {
-        return new Geary.Endpoint(
-            "imap.gmail.com",
-            Imap.ClientConnection.DEFAULT_PORT_SSL,
-            Geary.Endpoint.Flags.SSL,
-            Imap.ClientConnection.RECOMMENDED_TIMEOUT_SEC);
+
+    public static void setup_service(ServiceInformation service) {
+        switch (service.protocol) {
+        case Protocol.IMAP:
+            service.host = "imap.gmail.com";
+            service.port = Imap.ClientConnection.DEFAULT_PORT_SSL;
+            service.use_ssl = true;
+            break;
+
+        case Protocol.SMTP:
+            service.host = "smtp.gmail.com";
+            service.port = Smtp.ClientConnection.DEFAULT_PORT_SSL;
+            service.use_ssl = true;
+            break;
+        }
     }
 
-    public static Geary.Endpoint generate_smtp_endpoint() {
-        return new Geary.Endpoint(
-            "smtp.gmail.com",
-            Smtp.ClientConnection.DEFAULT_PORT_SSL,
-            Geary.Endpoint.Flags.SSL,
-            Smtp.ClientConnection.DEFAULT_TIMEOUT_SEC);
-    }
 
     public GmailAccount(string name,
                         Geary.AccountInformation account_information,

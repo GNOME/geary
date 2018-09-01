@@ -1,4 +1,6 @@
-/* Copyright 2016 Software Freedom Conservancy Inc.
+/*
+ * Copyright 2016 Software Freedom Conservancy Inc.
+ * Copyright 2018 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later).  See the COPYING file in this distribution.
@@ -49,6 +51,22 @@ public class Geary.Engine : BaseObject {
         }
     }
 
+    // Workaround for Vala issue #659. See shared_endpoints below.
+    private class EndpointWeakRef {
+
+        GLib.WeakRef weak_ref;
+
+        public EndpointWeakRef(Endpoint endpoint) {
+            this.weak_ref = GLib.WeakRef(endpoint);
+        }
+
+        public Endpoint? get() {
+            return this.weak_ref.get() as Endpoint;
+        }
+
+    }
+
+
     /** Location of the directory containing shared resource files. */
     public File? resource_dir { get; private set; default = null; }
 
@@ -56,6 +74,13 @@ public class Geary.Engine : BaseObject {
     private Gee.HashMap<string, Account>? account_instances = null;
     private bool is_initialized = false;
     private bool is_open = false;
+
+    // Would use a `weak Endpoint` value type for this map instead of
+    // the custom class, but we can't currently reassign built-in
+    // weak refs back to a strong ref at the moment, nor use a
+    // GLib.WeakRef as a generics param. See Vala issue #659.
+    private Gee.Map<string,EndpointWeakRef?> shared_endpoints =
+        new Gee.HashMap<string,EndpointWeakRef?>();
 
     /**
      * Fired when the engine is opened and all the existing accounts are loaded.
@@ -92,8 +117,8 @@ public class Geary.Engine : BaseObject {
      */
     public signal void untrusted_host(AccountInformation account,
                                       ServiceInformation service,
-                                      Endpoint.SecurityType security,
-                                      TlsConnection cx);
+                                      TlsNegotiationMethod method,
+                                      GLib.TlsConnection cx);
 
     // Public so it can be tested
     public Engine() {
@@ -215,7 +240,9 @@ public class Geary.Engine : BaseObject {
         }
 
         account.untrusted_host.connect(on_untrusted_host);
-        account.connect_imap_endpoint();
+        account.connect_imap_service(
+            get_shared_endpoint(account.service_provider, account.imap)
+        );
 
         // validate IMAP, which requires logging in and establishing
         // an AUTHORIZED cx state
@@ -241,7 +268,7 @@ public class Geary.Engine : BaseObject {
             } catch {
                 // Oh well
             }
-            account.disconnect_endpoints();
+            account.disconnect_service_endpoints();
             account.untrusted_host.disconnect(on_untrusted_host);
         }
 
@@ -272,7 +299,9 @@ public class Geary.Engine : BaseObject {
         }
 
         account.untrusted_host.connect(on_untrusted_host);
-        account.connect_smtp_endpoint();
+        account.connect_smtp_service(
+            get_shared_endpoint(account.service_provider, account.smtp)
+        );
 
         Geary.Smtp.ClientSession? smtp_session = new Geary.Smtp.ClientSession(
             account.smtp.endpoint
@@ -288,7 +317,7 @@ public class Geary.Engine : BaseObject {
             } catch {
                 // Oh well
             }
-            account.disconnect_endpoints();
+            account.disconnect_service_endpoints();
             account.untrusted_host.disconnect(on_untrusted_host);
         }
     }
@@ -361,8 +390,12 @@ public class Geary.Engine : BaseObject {
 
         accounts.set(account.id, account);
 
-        account.connect_imap_endpoint();
-        account.connect_smtp_endpoint();
+        account.connect_imap_service(
+            get_shared_endpoint(account.service_provider, account.imap)
+        );
+        account.connect_smtp_service(
+            get_shared_endpoint(account.service_provider, account.smtp)
+        );
         account.untrusted_host.connect(on_untrusted_host);
         account_available(account);
     }
@@ -384,7 +417,7 @@ public class Geary.Engine : BaseObject {
 
         if (this.accounts.has_key(account.id)) {
             account.untrusted_host.disconnect(on_untrusted_host);
-            account.disconnect_endpoints();
+            account.disconnect_service_endpoints();
 
             // Removal *MUST* be done in the following order:
             // 1. Send the account-unavailable signal.
@@ -397,10 +430,63 @@ public class Geary.Engine : BaseObject {
         }
     }
 
+    private Geary.Endpoint get_shared_endpoint(ServiceProvider provider,
+                                               ServiceInformation service) {
+        string key = "%s/%s:%u".printf(
+            service.protocol.to_value(),
+            service.host,
+            service.port
+        );
+
+        Endpoint? shared = null;
+        EndpointWeakRef? cached = this.shared_endpoints.get(key);
+        if (cached != null) {
+            shared = cached.get() as Endpoint;
+        }
+        if (shared == null) {
+            // Prefer SSL by RFC 8314
+            TlsNegotiationMethod method = TlsNegotiationMethod.NONE;
+            if (service.use_ssl) {
+                method = TlsNegotiationMethod.TRANSPORT;
+            } else if (service.use_starttls) {
+                method = TlsNegotiationMethod.START_TLS;
+            }
+
+            uint timeout = service.protocol == Protocol.IMAP
+                ? Imap.ClientConnection.RECOMMENDED_TIMEOUT_SEC
+                : Smtp.ClientConnection.DEFAULT_TIMEOUT_SEC;
+
+            shared = new Endpoint(
+                service.host,
+                service.port,
+                method,
+                timeout
+            );
+
+            // XXX this is pretty hacky, move this back into the
+            // OutlookAccount somehow
+            if (provider == ServiceProvider.OUTLOOK) {
+                // As of June 2016, outlook.com's IMAP servers have a bug
+                // where a large number (~50) of pipelined STATUS commands on
+                // mailboxes with many messages will eventually cause it to
+                // break command parsing and return a BAD response, causing us
+                // to drop the connection. Limit the number of pipelined
+                // commands per batch to work around this.  See b.g.o Bug
+                // 766552
+                shared.max_pipeline_batch_size = 25;
+            }
+
+            this.shared_endpoints.set(key, new EndpointWeakRef(shared));
+        }
+
+        return shared;
+    }
+
+
     private void on_untrusted_host(AccountInformation account,
                                    ServiceInformation service,
-                                   Endpoint.SecurityType security,
-                                   TlsConnection cx) {
-        untrusted_host(account, service, security, cx);
+                                   TlsNegotiationMethod method,
+                                   GLib.TlsConnection cx) {
+        untrusted_host(account, service, method, cx);
     }
 }
