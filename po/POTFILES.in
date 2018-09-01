@@ -14,7 +14,6 @@ src/client/accounts/account-dialog-remove-confirm-pane.vala
 src/client/accounts/account-dialog-remove-fail-pane.vala
 src/client/accounts/account-dialog-spinner-pane.vala
 src/client/accounts/account-dialog.vala
-src/client/accounts/account-dialogs.vala
 src/client/accounts/account-spinner-page.vala
 src/client/accounts/accounts-editor.vala
 src/client/accounts/accounts-editor-add-pane.vala
@@ -25,7 +24,6 @@ src/client/accounts/accounts-editor-row.vala
 src/client/accounts/accounts-editor-servers-pane.vala
 src/client/accounts/accounts-manager.vala
 src/client/accounts/add-edit-page.vala
-src/client/accounts/editor.vala
 src/client/accounts/goa-service-information.vala
 src/client/accounts/local-service-information.vala
 src/client/accounts/login-dialog.vala
