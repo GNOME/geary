@@ -1,5 +1,5 @@
 /*
- * Copyright 2017 Michael Gratton <mike@vee.net>
+ * Copyright 2017-2018 Michael Gratton <mike@vee.net>
  *
  * This software is licensed under the GNU Lesser General Public License
  * (version 2.1 or later). See the COPYING file in this distribution.
@@ -100,44 +100,52 @@ public class Geary.ConnectivityManager : BaseObject {
         string endpoint = to_address_string();
 		bool is_reachable = false;
         try {
+            // Check first, and ask questions only if an error occurs,
+            // because if we can connect, then we can connect.
 			debug("Checking if %s reachable...", endpoint);
             is_reachable = yield this.monitor.can_reach_async(
 				this.address, cancellable
 			);
             this.next_check = get_real_time() + CHECK_QUIESCENCE_MS;
-        } catch (Error err) {
+        } catch (GLib.IOError.CANCELLED err) {
+            // User cancelled, so leave as unreachable
+        } catch (GLib.DBusError err) {
+            // Running under Flatpak can cause a DBus error if the
+            // portal is malfunctioning (e.g. Geary #97 & #82 and
+            // xdg-desktop-portal #208). We must treat this as
+            // reachable so we make a connection attempt, otherwise it
+            // will never happen.
+            debug("DBus error checking %s reachable, treating as reachable: %s",
+                  endpoint, err.message);
+            is_reachable = true;
+        } catch (GLib.Error err) {
             if (err is IOError.NETWORK_UNREACHABLE &&
 				this.monitor.network_available) {
 				// If we get a network unreachable error, but the monitor
 				// says there actually is a network available, we may be
 				// running in a Flatpak and hitting Bug 777706. If so,
 				// just assume the service is reachable is for now. :(
-				is_reachable = true;
+                // Pull this put once xdg-desktop-portal 1.x is widely
+                // installed.
 				debug("Assuming %s is reachable, despite network unavailability",
                       endpoint);
-			} else if (err is ResolverError.TEMPORARY_FAILURE ||
-                       err is IOError.HOST_UNREACHABLE) {
-				// ResolverError.TEMPORARY_FAILURE often happens when
-				// networking is coming back online, may because the
-				// interface is up but has not been assigned an
-				// address yet?
-                //
-                // IOError.HOST_UNREACHABLE occurs when checking when
-                // offline, perhaps because localhost is up but no
-                // other network is? So just assume the host is
-                // unreachable without notifying the user.
-                //
-                // Since we should get another network change signal
-				// when the interface is configured, just treat these
-				// as effectively being unreachable, but don't go
-				// invalid.
-				debug("Ignoring: %s", err.message);
-			} else if (!(err is IOError.CANCELLED)) {
-				debug("Error checking %s reachable, treating as unreachable: %s",
-                      endpoint, err.message);
-				set_invalid();
-                address_error_reported(err);
-			}
+				is_reachable = true;
+            } else {
+                // The monitor throw an error, but only notify if it
+                // looks like we *should* be able to connect
+                // (i.e. have full network connectivity), so we don't
+                // needlessly hassle the user with expected error messages.
+                GLib.NetworkConnectivity connectivity = this.monitor.connectivity;
+                if (connectivity == GLib.NetworkConnectivity.FULL) {
+                    debug("Error checking %s [%s] reachable, treating unreachable: %s",
+                          endpoint, connectivity.to_string(), err.message);
+                    set_invalid();
+                    address_error_reported(err);
+                } else {
+                    debug("Error checking %s [%s] reachable, retrying: %s",
+                          endpoint, connectivity.to_string(), err.message);
+                }
+            }
         } finally {
 			if (!cancellable.is_cancelled()) {
 				set_reachable(is_reachable);
