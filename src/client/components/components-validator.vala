@@ -358,44 +358,44 @@ public class Components.NetworkAddressValidator : Validator {
             this.cancellable.cancel();
         }
 
+        Validator.Validity ret = this.state;
+
         GLib.NetworkAddress? address = null;
         try {
-            address = GLib.NetworkAddress.parse(value, this.default_port);
+            address = GLib.NetworkAddress.parse(
+                value.strip(), this.default_port
+            );
         } catch (GLib.Error err) {
+            this.validated_address = null;
+            ret = Validator.Validity.INVALID;
             debug("Error parsing host name \"%s\": %s", value, err.message);
         }
 
-        Validator.Validity ret = this.state;
-
-        if (address != null) {
-            // Only re-validate if changed
-            if (this.validated_address == null ||
+        // Only re-validate if changed
+        if (address != null && (
+                this.validated_address == null ||
                 this.validated_address.hostname != address.hostname ||
                 this.validated_address.port != address.port ||
-                this.validated_address.scheme != address.scheme) {
-
-                this.cancellable = new GLib.Cancellable();
-                this.resolver.lookup_by_name_async.begin(
-                    value.strip(), this.cancellable,
-                    (obj, res) => {
-                        try {
-                            this.resolver.lookup_by_name_async.end(res);
-                            this.validated_address = address;
-                            update_state(Validator.Validity.VALID);
-                        } catch (GLib.IOError.CANCELLED err) {
-                            this.validated_address = null;
-                        } catch (GLib.Error err) {
-                            this.validated_address = null;
-                            update_state(Validator.Validity.INVALID);
-                        }
-                        this.cancellable = null;
+                this.validated_address.scheme != address.scheme)) {
+            this.cancellable = new GLib.Cancellable();
+            this.resolver.lookup_by_name_async.begin(
+                address.hostname, this.cancellable,
+                (obj, res) => {
+                    try {
+                        this.resolver.lookup_by_name_async.end(res);
+                        this.validated_address = address;
+                        update_state(Validator.Validity.VALID);
+                    } catch (GLib.IOError.CANCELLED err) {
+                        this.validated_address = null;
+                    } catch (GLib.Error err) {
+                        this.validated_address = null;
+                        update_state(Validator.Validity.INVALID);
                     }
-                );
+                    this.cancellable = null;
+                }
+            );
 
-                ret = Validator.Validity.IN_PROGRESS;
-            }
-        } else {
-            ret = Validator.Validity.INVALID;
+            ret = Validator.Validity.IN_PROGRESS;
         }
 
         return ret;
