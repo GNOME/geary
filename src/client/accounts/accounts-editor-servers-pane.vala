@@ -187,55 +187,22 @@ private class Accounts.ServiceHostRow :
 
 
 private class Accounts.ServiceSecurityRow :
-    ServiceRow<EditorServersPane,Gtk.ComboBoxText> {
-
-    private const string INSECURE_ICON = "channel-insecure-symbolic";
-    private const string SECURE_ICON = "channel-secure-symbolic";
+    ServiceRow<EditorServersPane,TlsComboBox> {
 
     public ServiceSecurityRow(Geary.AccountInformation account,
                               Geary.ServiceInformation service) {
-        Gtk.ListStore store = new Gtk.ListStore(
-            3, typeof(string), typeof(string), typeof(string)
-        );
-		Gtk.TreeIter iter;
-		store.append(out iter);
-		store.set(iter, 0, "none", 1, INSECURE_ICON, 2, _("None"));
-		store.append(out iter);
-		store.set(iter, 0, "start-tls", 1, SECURE_ICON, 2, _("StartTLS"));
-		store.append(out iter);
-		store.set(iter, 0, "tls", 1, SECURE_ICON, 2, _("TLS"));
-
-        Gtk.ComboBox combo = new Gtk.ComboBox.with_model(store);
-        combo.set_id_column(0);
-
-        Gtk.CellRendererText text_renderer = new Gtk.CellRendererText();
-		combo.pack_start(text_renderer, true);
-		combo.add_attribute(text_renderer, "text", 2);
-
-        Gtk.CellRendererPixbuf icon_renderer = new Gtk.CellRendererPixbuf();
-		combo.pack_start(icon_renderer, true);
-		combo.add_attribute(icon_renderer, "icon_name", 1);
-
-        base(
-            account,
-            service,
-            // Translators: This label describes what form of secure
-            // connection (TLS, StartTLS, etc) used by an account's
-            // IMAP or SMTP service.
-            _("Transport security"),
-            combo
-        );
-
+        TlsComboBox value = new TlsComboBox();
+        base(account, service, value.label, value);
         update();
     }
 
     public override void update() {
         if (this.service.use_ssl) {
-            this.value.set_active_id("tls");
+            this.value.method = Geary.TlsNegotiationMethod.TRANSPORT;
         } else if (this.service.use_starttls) {
-            this.value.set_active_id("start-tls");
+            this.value.method = Geary.TlsNegotiationMethod.START_TLS;
         } else {
-            this.value.set_active_id("none");
+            this.value.method = Geary.TlsNegotiationMethod.NONE;
         }
     }
 

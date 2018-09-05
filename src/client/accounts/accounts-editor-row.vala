@@ -189,6 +189,76 @@ private abstract class Accounts.ServiceRow<PaneType,V> : AccountRow<PaneType,V> 
 }
 
 
+internal class Accounts.TlsComboBox : Gtk.ComboBox {
+
+    private const string INSECURE_ICON = "channel-insecure-symbolic";
+    private const string SECURE_ICON = "channel-secure-symbolic";
+
+
+    public string label { get; private set; default = ""; }
+
+
+    public Geary.TlsNegotiationMethod method {
+        get {
+            try {
+                return Geary.TlsNegotiationMethod.for_value(this.active_id);
+            } catch {
+                return Geary.TlsNegotiationMethod.TRANSPORT;
+            }
+        }
+        set {
+            this.active_id = value.to_value();
+        }
+    }
+
+
+    public TlsComboBox() {
+        // Translators: This label describes what form of transport
+        // security (TLS, StartTLS, etc) used by an account's IMAP or SMTP
+        // service.
+        this.label = _("Connection security");
+
+        Gtk.ListStore store = new Gtk.ListStore(
+            3, typeof(string), typeof(string), typeof(string)
+        );
+		Gtk.TreeIter iter;
+		store.append(out iter);
+		store.set(
+            iter,
+            0, Geary.TlsNegotiationMethod.NONE.to_value(),
+            1, INSECURE_ICON,
+            2, _("None")
+        );
+		store.append(out iter);
+		store.set(
+            iter,
+            0, Geary.TlsNegotiationMethod.START_TLS.to_value(),
+            1, SECURE_ICON,
+            2, _("StartTLS")
+        );
+		store.append(out iter);
+		store.set(
+            iter,
+            0, Geary.TlsNegotiationMethod.TRANSPORT.to_value(),
+            1, SECURE_ICON,
+            2, _("TLS")
+        );
+
+        this.model = store;
+        set_id_column(0);
+
+        Gtk.CellRendererText text_renderer = new Gtk.CellRendererText();
+		pack_start(text_renderer, true);
+		add_attribute(text_renderer, "text", 2);
+
+        Gtk.CellRendererPixbuf icon_renderer = new Gtk.CellRendererPixbuf();
+		pack_start(icon_renderer, true);
+		add_attribute(icon_renderer, "icon_name", 1);
+    }
+
+}
+
+
 internal class Accounts.EditorPopover : Gtk.Popover {
 
 
