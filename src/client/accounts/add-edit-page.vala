@@ -416,11 +416,11 @@ public class AddEditPage : Gtk.Box {
         bool initial_save_sent_mail = true,
         bool allow_save_sent_mail = true,
         string? initial_default_imap_host = null,
-        uint16 initial_default_imap_port = Geary.Imap.ClientConnection.DEFAULT_PORT_SSL,
+        uint16 initial_default_imap_port = Geary.Imap.ClientConnection.IMAP_TLS_PORT,
         bool initial_default_imap_ssl = true,
         bool initial_default_imap_starttls = false,
         string? initial_default_smtp_host = null,
-        uint16 initial_default_smtp_port = Geary.Smtp.ClientConnection.DEFAULT_PORT_STARTTLS,
+        uint16 initial_default_smtp_port = Geary.Smtp.ClientConnection.SUBMISSION_PORT,
         bool initial_default_smtp_ssl = false,
         bool initial_default_smtp_starttls = true,
         bool initial_default_smtp_use_imap_credentials = false,
@@ -559,12 +559,12 @@ public class AddEditPage : Gtk.Box {
     private uint16 get_default_imap_port() {
         switch (combo_imap_encryption.active) {
             case Encryption.SSL:
-                return Geary.Imap.ClientConnection.DEFAULT_PORT_SSL;
-            
+                return Geary.Imap.ClientConnection.IMAP_TLS_PORT;
+
             case Encryption.NONE:
             case Encryption.STARTTLS:
             default:
-                return Geary.Imap.ClientConnection.DEFAULT_PORT;
+                return Geary.Imap.ClientConnection.IMAP_PORT;
         }
     }
     
@@ -614,14 +614,14 @@ public class AddEditPage : Gtk.Box {
     private uint16 get_default_smtp_port() {
         switch (combo_smtp_encryption.active) {
             case Encryption.SSL:
-                return Geary.Smtp.ClientConnection.DEFAULT_PORT_SSL;
-            
+                return Geary.Smtp.ClientConnection.SUBMISSION_TLS_PORT;
+
             case Encryption.STARTTLS:
-                return Geary.Smtp.ClientConnection.DEFAULT_PORT_STARTTLS;
-            
+                return Geary.Smtp.ClientConnection.SUBMISSION_PORT;
+
             case Encryption.NONE:
             default:
-                return Geary.Smtp.ClientConnection.DEFAULT_PORT;
+                return Geary.Smtp.ClientConnection.SMTP_PORT;
         }
     }
     

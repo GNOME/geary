@@ -139,7 +139,7 @@ int main(string[] args) {
     if (arg_gmail) {
         endpoint = new Geary.Endpoint(
             "smtp.gmail.com",
-            Geary.Smtp.ClientConnection.DEFAULT_PORT_STARTTLS,
+            Geary.Smtp.ClientConnection.SUBMISSION_PORT,
             Geary.TlsNegotiationMethod.START_TLS,
             Geary.Smtp.ClientConnection.DEFAULT_TIMEOUT_SEC
         );

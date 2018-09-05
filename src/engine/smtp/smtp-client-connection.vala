@@ -5,10 +5,16 @@
  */
 
 public class Geary.Smtp.ClientConnection {
-    public const uint16 DEFAULT_PORT = 25;
-    public const uint16 DEFAULT_PORT_SSL = 465;
-    public const uint16 DEFAULT_PORT_STARTTLS = 587;
-    
+
+    /** Default clear-text SMTP network port */
+    public const uint16 SMTP_PORT = 25;
+
+    /** Default clear-text SMTP submission network port */
+    public const uint16 SUBMISSION_PORT = 587;
+
+    /** Default transport-layer-encrypted SMTP submission network port */
+    public const uint16 SUBMISSION_TLS_PORT = 465;
+
     public const uint DEFAULT_TIMEOUT_SEC = 20;
     
     public Geary.Smtp.Capabilities? capabilities { get; private set; default = null; }

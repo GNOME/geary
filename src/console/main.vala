@@ -310,7 +310,7 @@ class ImapConsole : Gtk.Window {
         cx = new Geary.Imap.ClientConnection(
             new Geary.Endpoint(
                 args[0],
-                Geary.Imap.ClientConnection.DEFAULT_PORT_SSL,
+                Geary.Imap.ClientConnection.IMAP_TLS_PORT,
                 method,
                 Geary.Imap.ClientConnection.DEFAULT_TIMEOUT_SEC
             )

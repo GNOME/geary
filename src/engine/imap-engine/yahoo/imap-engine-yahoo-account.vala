@@ -14,13 +14,13 @@ private class Geary.ImapEngine.YahooAccount : Geary.ImapEngine.GenericAccount {
         switch (service.protocol) {
         case Protocol.IMAP:
             service.host = "imap.mail.yahoo.com";
-            service.port = Imap.ClientConnection.DEFAULT_PORT_SSL;
+            service.port = Imap.ClientConnection.IMAP_TLS_PORT;
             service.use_ssl = true;
             break;
 
         case Protocol.SMTP:
             service.host = "smtp.mail.yahoo.com";
-            service.port = Smtp.ClientConnection.DEFAULT_PORT_SSL;
+            service.port = Smtp.ClientConnection.SUBMISSION_TLS_PORT;
             service.use_ssl = true;
             break;
         }

@@ -26,7 +26,7 @@ public class GoaServiceInformation : Geary.ServiceInformation {
             switch (this.protocol) {
             case Geary.Protocol.IMAP:
                 this.host = mail.imap_host;
-                this.port = Geary.Imap.ClientConnection.DEFAULT_PORT_SSL;
+                this.port = Geary.Imap.ClientConnection.IMAP_TLS_PORT;
                 this.use_ssl = mail.imap_use_ssl;
                 this.use_starttls = mail.imap_use_tls;
                 this.credentials = new Geary.Credentials(
@@ -37,7 +37,7 @@ public class GoaServiceInformation : Geary.ServiceInformation {
 
             case Geary.Protocol.SMTP:
                 this.host = mail.smtp_host;
-                this.port = Geary.Smtp.ClientConnection.DEFAULT_PORT_SSL;
+                this.port = Geary.Smtp.ClientConnection.SUBMISSION_TLS_PORT;
                 this.use_ssl = mail.smtp_use_ssl;
                 this.use_starttls = mail.smtp_use_tls;
                 this.smtp_noauth = !(mail.smtp_use_auth);

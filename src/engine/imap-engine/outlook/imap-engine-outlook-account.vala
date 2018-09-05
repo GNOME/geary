@@ -11,13 +11,14 @@ private class Geary.ImapEngine.OutlookAccount : Geary.ImapEngine.GenericAccount 
         switch (service.protocol) {
         case Protocol.IMAP:
             service.host = "imap-mail.outlook.com";
-            service.port = Imap.ClientConnection.DEFAULT_PORT_SSL;
+            service.port = Imap.ClientConnection.IMAP_TLS_PORT;
             service.use_ssl = true;
             break;
 
         case Protocol.SMTP:
             service.host = "smtp-mail.outlook.com";
-            service.port = Smtp.ClientConnection.DEFAULT_PORT_STARTTLS;
+            service.port = Smtp.ClientConnection.SUBMISSION_PORT;
+            service.use_ssl = false;
             service.use_starttls = true;
             break;
         }

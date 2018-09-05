@@ -235,8 +235,8 @@ public class Geary.Engine : BaseObject {
 
         if (account.imap.port == 0) {
             account.imap.port = account.imap.use_ssl
-                ? Imap.ClientConnection.DEFAULT_PORT_SSL
-                : Imap.ClientConnection.DEFAULT_PORT;
+                ? Imap.ClientConnection.IMAP_TLS_PORT
+                : Imap.ClientConnection.IMAP_PORT;
         }
 
         account.untrusted_host.connect(on_untrusted_host);
@@ -288,13 +288,13 @@ public class Geary.Engine : BaseObject {
 
         if (account.smtp.port == 0) {
             if (account.smtp.use_ssl) {
-                account.smtp.port = Smtp.ClientConnection.DEFAULT_PORT_SSL;
+                account.smtp.port = Smtp.ClientConnection.SUBMISSION_TLS_PORT;
             } else if (account.smtp.use_starttls) {
                 account.smtp.port = account.smtp.smtp_noauth
-                    ? Smtp.ClientConnection.DEFAULT_PORT
-                    : Smtp.ClientConnection.DEFAULT_PORT_STARTTLS;
+                    ? Smtp.ClientConnection.SMTP_PORT
+                    : Smtp.ClientConnection.SUBMISSION_PORT;
             } else {
-                account.smtp.port = Smtp.ClientConnection.DEFAULT_PORT;
+                account.smtp.port = Smtp.ClientConnection.SMTP_PORT;
             }
         }
 
