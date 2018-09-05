@@ -42,5 +42,22 @@ public void unmirror_properties(Gee.List<Binding> bindings) {
     bindings.clear();
 }
 
+/** Convenience method for getting an enum value's nick name. */
+internal string to_enum_nick<E>(GLib.Type type, E value) {
+    GLib.EnumClass enum_type = (GLib.EnumClass) type.class_ref();
+    return enum_type.get_value((int) value).value_nick;
 }
 
+/** Convenience method for getting an enum value's from its nick name. */
+internal E from_enum_nick<E>(GLib.Type type, string nick) throws EngineError {
+    GLib.EnumClass enum_type = (GLib.EnumClass) type.class_ref();
+    unowned GLib.EnumValue? e_value = enum_type.get_value_by_nick(nick);
+    if (e_value == null) {
+        throw new EngineError.BAD_PARAMETERS(
+            "Unknown %s enum value: %s", typeof(E).name(), nick
+        );
+    }
+    return (E) e_value.value;
+}
+
+}

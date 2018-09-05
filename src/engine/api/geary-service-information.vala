@@ -46,22 +46,15 @@ public enum Geary.TlsNegotiationMethod {
 
     public static TlsNegotiationMethod for_value(string value)
         throws EngineError {
-        switch (value.ascii_up()) {
-        case "NONE":
-            return NONE;
-        case "START_TLS":
-            return START_TLS;
-        case "TRANSPORT":
-            return TRANSPORT;
-        }
-        throw new EngineError.BAD_PARAMETERS(
-            "Unknown Protocol value: %s", value
+        return ObjectUtils.from_enum_nick<TlsNegotiationMethod>(
+            typeof(TlsNegotiationMethod), value.ascii_down()
         );
     }
 
     public string to_value() {
-        string value = to_string();
-        return value.substring(value.last_index_of("_") + 1);
+        return ObjectUtils.to_enum_nick<TlsNegotiationMethod>(
+            typeof(TlsNegotiationMethod), this
+        );
     }
 
 }
@@ -78,22 +71,15 @@ public enum Geary.SmtpCredentials {
 
     public static SmtpCredentials for_value(string value)
         throws EngineError {
-        switch (value.ascii_up()) {
-        case "NONE":
-            return Geary.SmtpCredentials.NONE;
-        case "IMAP":
-            return Geary.SmtpCredentials.IMAP;
-        case "CUSTOM":
-            return Geary.SmtpCredentials.CUSTOM;
-        }
-        throw new EngineError.BAD_PARAMETERS(
-            "Unknown SmtpCredentials value: %s", value
+        return ObjectUtils.from_enum_nick<SmtpCredentials>(
+            typeof(SmtpCredentials), value.ascii_down()
         );
     }
 
     public string to_value() {
-        string value = to_string();
-        return value.substring(value.last_index_of("_") + 1);
+        return ObjectUtils.to_enum_nick<SmtpCredentials>(
+            typeof(SmtpCredentials), this
+        );
     }
 
 }

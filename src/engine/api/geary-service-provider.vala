@@ -18,24 +18,15 @@ public enum Geary.ServiceProvider {
 
     public static ServiceProvider for_value(string value)
         throws EngineError {
-        switch (value.ascii_up()) {
-        case "GMAIL":
-            return GMAIL;
-        case "YAHOO":
-            return YAHOO;
-        case "OUTLOOK":
-            return OUTLOOK;
-        case "OTHER":
-            return OTHER;
-        }
-        throw new EngineError.BAD_PARAMETERS(
-            "Unknown Geary.ServiceProvider value: %s", value
+        return ObjectUtils.from_enum_nick<ServiceProvider>(
+            typeof(ServiceProvider), value.ascii_down()
         );
     }
 
     public string to_value() {
-        string value = to_string();
-        return value.substring(value.last_index_of("_") + 1);
+        return ObjectUtils.to_enum_nick<ServiceProvider>(
+            typeof(ServiceProvider), this
+        );
     }
 
     public void setup_service(ServiceInformation service) {
