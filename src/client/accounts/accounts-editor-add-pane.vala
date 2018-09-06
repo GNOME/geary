@@ -27,6 +27,12 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
     private Gtk.Overlay osd_overlay;
 
     [GtkChild]
+    private Gtk.Grid pane_content;
+
+    [GtkChild]
+    private Gtk.Adjustment pane_adjustment;
+
+    [GtkChild]
     private Gtk.ListBox details_list;
 
     [GtkChild]
@@ -65,6 +71,8 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
         GearyApplication application = (GearyApplication) editor.application;
         this.accounts = application.controller.account_manager;
         this.engine = application.engine;
+
+        this.pane_content.set_focus_vadjustment(this.pane_adjustment);
 
         this.details_list.set_header_func(Editor.seperator_headers);
         this.receiving_list.set_header_func(Editor.seperator_headers);
@@ -331,6 +339,32 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
         this.editor.pop();
     }
 
+    [GtkCallback]
+    private bool on_list_keynav_failed(Gtk.Widget widget,
+                                       Gtk.DirectionType direction) {
+        bool ret = Gdk.EVENT_PROPAGATE;
+        Gtk.Container? next = null;
+        if (direction == Gtk.DirectionType.DOWN) {
+            if (widget == this.details_list) {
+                next = this.receiving_list;
+            } else if (widget == this.receiving_list) {
+                next = this.sending_list;
+            }
+        } else if (direction == Gtk.DirectionType.UP) {
+            if (widget == this.sending_list) {
+                next = this.receiving_list;
+            } else if (widget == this.receiving_list) {
+                next = this.details_list;
+            }
+        }
+
+        if (next != null) {
+            next.child_focus(direction);
+            ret = Gdk.EVENT_STOP;
+        }
+        return ret;
+    }
+
 }
 
 
@@ -357,6 +391,22 @@ private abstract class Accounts.EntryRow : AddPaneRow<Gtk.Entry> {
 
         this.value.placeholder_text = placeholder ?? "";
         this.value.width_chars = 32;
+    }
+
+    public override bool focus(Gtk.DirectionType direction) {
+        bool ret = Gdk.EVENT_PROPAGATE;
+        switch (direction) {
+        case Gtk.DirectionType.TAB_FORWARD:
+        case Gtk.DirectionType.TAB_BACKWARD:
+            ret = this.value.child_focus(direction);
+            break;
+
+        default:
+            ret = base.focus(direction);
+            break;
+        }
+
+        return ret;
     }
 
 }

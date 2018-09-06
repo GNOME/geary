@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Generated with glade 3.22.0 -->
+<!-- Generated with glade 3.22.1 -->
 <interface>
   <requires lib="gtk+" version="3.20"/>
   <template class="AccountsEditorRemovePane" parent="GtkGrid">
@@ -104,7 +104,7 @@
           </packing>
         </child>
         <style>
-          <class name="geary-account-view"/>
+          <class name="geary-accounts-editor-pane-content"/>
         </style>
       </object>
       <packing>
@@ -112,6 +112,9 @@
         <property name="top_attach">0</property>
       </packing>
     </child>
+    <style>
+      <class name="geary-accounts-editor-pane"/>
+    </style>
   </template>
   <object class="GtkHeaderBar" id="header">
     <property name="visible">True</property>

@@ -25,6 +25,12 @@ internal class Accounts.EditorEditPane : Gtk.Grid, EditorPane, AccountPane {
     private Gtk.HeaderBar header;
 
     [GtkChild]
+    private Gtk.Grid pane_content;
+
+    [GtkChild]
+    private Gtk.Adjustment pane_adjustment;
+
+    [GtkChild]
     private Gtk.ListBox details_list;
 
     [GtkChild]
@@ -47,6 +53,8 @@ internal class Accounts.EditorEditPane : Gtk.Grid, EditorPane, AccountPane {
         this.editor = editor;
         this.account = account;
 
+        this.pane_content.set_focus_vadjustment(this.pane_adjustment);
+
         this.details_list.set_header_func(Editor.seperator_headers);
         this.details_list.add(new NicknameRow(account));
 
@@ -64,21 +72,14 @@ internal class Accounts.EditorEditPane : Gtk.Grid, EditorPane, AccountPane {
             this.signature_preview.events | Gdk.EventType.FOCUS_CHANGE
         );
         this.signature_preview.content_loaded.connect(() => {
-                debug("Signature loaded");
                 // Only enable editability after the content has fully
                 // loaded to avoid the WebProcess crashing.
                 this.signature_preview.set_editable.begin(true, null);
             });
         this.signature_preview.document_modified.connect(() => {
-                debug("Signature changed");
                 this.signature_changed = true;
             });
-        this.signature_preview.focus_in_event.connect(() => {
-                debug("Sig focus in");
-                return Gdk.EVENT_PROPAGATE;
-            });
         this.signature_preview.focus_out_event.connect(() => {
-                debug("Sig focus out");
                 // This event will also be fired if the top-level
                 // window loses focus, e.g. if the user alt-tabs away,
                 // so don't execute the command if the signature web
@@ -194,6 +195,36 @@ internal class Accounts.EditorEditPane : Gtk.Grid, EditorPane, AccountPane {
     [GtkCallback]
     private void on_back_button_clicked() {
         this.editor.pop();
+    }
+
+    [GtkCallback]
+    private bool on_list_keynav_failed(Gtk.Widget widget,
+                                       Gtk.DirectionType direction) {
+        bool ret = Gdk.EVENT_PROPAGATE;
+        Gtk.Container? next = null;
+        if (direction == Gtk.DirectionType.DOWN) {
+            if (widget == this.details_list) {
+                next = this.senders_list;
+            } else if (widget == this.senders_list) {
+                this.signature_preview.grab_focus();
+            } else if (widget == this.signature_preview) {
+                next = this.settings_list;
+            }
+        } else if (direction == Gtk.DirectionType.UP) {
+            if (widget == this.settings_list) {
+                this.signature_preview.grab_focus();
+            } else if (widget == this.signature_preview) {
+                next = this.senders_list;
+            } else if (widget == this.senders_list) {
+                next = this.details_list;
+            }
+        }
+
+        if (next != null) {
+            next.child_focus(direction);
+            ret = Gdk.EVENT_STOP;
+        }
+        return ret;
     }
 
 }

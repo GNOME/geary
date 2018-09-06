@@ -65,6 +65,31 @@ public class Accounts.Editor : Gtk.Dialog {
         push(this.editor_list_pane);
     }
 
+    public override bool key_press_event(Gdk.EventKey event) {
+        bool ret = Gdk.EVENT_PROPAGATE;
+
+        if (get_current_pane() != this.editor_list_pane) {
+            Gdk.ModifierType state = (
+                event.state & Gtk.accelerator_get_default_mod_mask()
+            );
+            bool is_ltr = (get_direction() == Gtk.TextDirection.LTR);
+            if (event.keyval == Gdk.Key.Escape ||
+                event.keyval == Gdk.Key.Back ||
+                (state == Gdk.ModifierType.MOD1_MASK &&
+                 (is_ltr && event.keyval == Gdk.Key.Left) ||
+                 (!is_ltr && event.keyval == Gdk.Key.Right))) {
+                pop();
+                ret = Gdk.EVENT_STOP;
+            }
+        }
+
+        if (ret != Gdk.EVENT_STOP) {
+            ret = base.key_press_event(event);
+        }
+
+        return ret;
+    }
+
     public override void destroy() {
         this.editor_panes.notify["visible-child"].disconnect(on_pane_changed);
         base.destroy();

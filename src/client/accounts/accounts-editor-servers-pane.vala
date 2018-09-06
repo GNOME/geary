@@ -21,6 +21,12 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
     private Gtk.HeaderBar header;
 
     [GtkChild]
+    private Gtk.Grid pane_content;
+
+    [GtkChild]
+    private Gtk.Adjustment pane_adjustment;
+
+    [GtkChild]
     private Gtk.ListBox details_list;
 
     [GtkChild]
@@ -33,6 +39,8 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
     public EditorServersPane(Editor editor, Geary.AccountInformation account) {
         this.editor = editor;
         this.account = account;
+
+        this.pane_content.set_focus_vadjustment(this.pane_adjustment);
 
         this.details_list.set_header_func(Editor.seperator_headers);
         this.details_list.add(
@@ -79,6 +87,32 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
 
     [GtkCallback]
     private void on_apply_button_clicked() {
+    }
+
+    [GtkCallback]
+    private bool on_list_keynav_failed(Gtk.Widget widget,
+                                       Gtk.DirectionType direction) {
+        bool ret = Gdk.EVENT_PROPAGATE;
+        Gtk.Container? next = null;
+        if (direction == Gtk.DirectionType.DOWN) {
+            if (widget == this.details_list) {
+                next = this.receiving_list;
+            } else if (widget == this.receiving_list) {
+                next = this.sending_list;
+            }
+        } else if (direction == Gtk.DirectionType.UP) {
+            if (widget == this.sending_list) {
+                next = this.receiving_list;
+            } else if (widget == this.receiving_list) {
+                next = this.details_list;
+            }
+        }
+
+        if (next != null) {
+            next.child_focus(direction);
+            ret = Gdk.EVENT_STOP;
+        }
+        return ret;
     }
 
     private void on_account_changed() {

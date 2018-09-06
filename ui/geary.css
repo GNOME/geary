@@ -183,8 +183,8 @@ grid.geary-message-summary {
 
 /* Accounts.Editor */
 
-grid.geary-account-view {
-  margin: 32px 128px;
+grid.geary-accounts-editor-pane-content {
+  padding: 32px 128px;
 }
 
 grid.geary-account-view image:dir(ltr) {

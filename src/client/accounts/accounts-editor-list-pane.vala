@@ -41,6 +41,12 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane {
     private Gtk.Overlay osd_overlay;
 
     [GtkChild]
+    private Gtk.Grid pane_content;
+
+    [GtkChild]
+    private Gtk.Adjustment pane_adjustment;
+
+    [GtkChild]
     private Gtk.Grid welcome_panel;
 
     [GtkChild]
@@ -63,6 +69,8 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane {
         this.editor = editor;
         this.accounts =
             ((GearyApplication) editor.application).controller.account_manager;
+
+        this.pane_content.set_focus_vadjustment(this.pane_adjustment);
 
         this.accounts_list.set_header_func(Editor.seperator_headers);
         this.accounts_list.set_sort_func(ordinal_sort);
@@ -236,6 +244,22 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane {
         if (setting != null) {
             setting.activated(this);
         }
+    }
+
+    [GtkCallback]
+    private bool on_list_keynav_failed(Gtk.Widget widget,
+                                       Gtk.DirectionType direction) {
+        bool ret = Gdk.EVENT_PROPAGATE;
+        if (direction == Gtk.DirectionType.DOWN &&
+            widget == this.accounts_list) {
+            this.service_list.child_focus(direction);
+            ret = Gdk.EVENT_STOP;
+        } else if (direction == Gtk.DirectionType.UP &&
+            widget == this.service_list) {
+            this.accounts_list.child_focus(direction);
+            ret = Gdk.EVENT_STOP;
+        }
+        return ret;
     }
 
 }
