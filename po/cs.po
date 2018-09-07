@@ -11,8 +11,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2018-07-07 04:35+0000\n"
-"PO-Revision-Date: 2018-07-10 09:20+0200\n"
+"POT-Creation-Date: 2018-08-29 14:58+0000\n"
+"PO-Revision-Date: 2018-09-07 09:26+0200\n"
 "Last-Translator: Marek Černocký <marek@manet.cz>\n"
 "Language-Team: čeština <gnome-cs-list@gnome.org>\n"
 "Language: cs\n"
@@ -332,7 +332,7 @@ msgstr ""
 "jeho hodnoty."
 
 #: src/client/accounts/account-dialog-add-edit-pane.vala:54
-#: src/client/components/stock.vala:31 ui/conversation-email-menus.ui:57
+#: src/client/components/stock.vala:31 ui/conversation-email-menus.ui:83
 msgid "_Save"
 msgstr "_Uložit"
 
@@ -462,14 +462,14 @@ msgid "Copyright 2016 Software Freedom Conservancy Inc."
 msgstr "Copyright 2016 Software Freedom Conservancy Inc."
 
 #: src/client/application/geary-application.vala:23
-msgid "Copyright 2016-2017 Geary Development Team."
-msgstr "© 2016 – 2017 Vývojářský tým aplikace Geary"
+msgid "Copyright 2016-2018 Geary Development Team."
+msgstr "© 2016 – 2018 Vývojářský tým aplikace Geary"
 
 #: src/client/application/geary-application.vala:25
 msgid "Visit the Geary web site"
 msgstr "Navštívit webové stránky Geary"
 
-#: src/client/application/geary-application.vala:413
+#: src/client/application/geary-application.vala:416
 #, c-format
 msgid "About %s"
 msgstr "O aplikaci %s"
@@ -477,7 +477,7 @@ msgstr "O aplikaci %s"
 #. Translators: add your name and email address to receive
 #. credit in the About dialog For example: Yamada Taro
 #. <yamada.taro@example.com>
-#: src/client/application/geary-application.vala:417
+#: src/client/application/geary-application.vala:420
 msgid "translator-credits"
 msgstr ""
 "Petr Šimáček <petr.simacek@gmail.com>\n"
@@ -730,15 +730,15 @@ msgstr ""
 "\n"
 "Zkontrolujte prosím připojení k síti a restartujte Geary."
 
-#: src/client/application/geary-controller.vala:2059
+#: src/client/application/geary-controller.vala:2038
 msgid "Undo move (Ctrl+Z)"
 msgstr "Zpět přesun (Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:2069
+#: src/client/application/geary-controller.vala:2048
 msgid "Are you sure you want to open these attachments?"
 msgstr "Opravdu chcete otevřít tuto přílohu?"
 
-#: src/client/application/geary-controller.vala:2070
+#: src/client/application/geary-controller.vala:2049
 msgid ""
 "Attachments may cause damage to your system if opened.  Only open files from "
 "trusted sources."
@@ -746,86 +746,86 @@ msgstr ""
 "Příloha by po otevření mohla poškodit váš počítač. Otevírejte pouze soubory "
 "z důvěryhodných zdrojů. "
 
-#: src/client/application/geary-controller.vala:2071
+#: src/client/application/geary-controller.vala:2050
 msgid "Don’t _ask me again"
 msgstr "Příště se nept_at"
 
-#: src/client/application/geary-controller.vala:2167
+#: src/client/application/geary-controller.vala:2146
 #, c-format
 msgid "A file named “%s” already exists.  Do you want to replace it?"
 msgstr "Soubor s názvem „%s“ již existuje. Chcete ho nahradit?"
 
-#: src/client/application/geary-controller.vala:2169
+#: src/client/application/geary-controller.vala:2148
 #, c-format
 msgid ""
 "The file already exists in “%s”.  Replacing it will overwrite its contents."
 msgstr "Soubor již existuje v „%s“. Nahrazením přepíšete jeho obsah."
 
-#: src/client/application/geary-controller.vala:2172
+#: src/client/application/geary-controller.vala:2151
 msgid "_Replace"
 msgstr "Nah_radit"
 
-#: src/client/application/geary-controller.vala:2412
+#: src/client/application/geary-controller.vala:2391
 msgid "Close the draft message?"
 msgid_plural "Close all draft messages?"
 msgstr[0] "Zavřít otevřený koncept zprávy?"
 msgstr[1] "Zavřít všechny otevřené koncepty zpráv?"
 msgstr[2] "Zavřít všechny otevřené koncepty zpráv?"
 
-#: src/client/application/geary-controller.vala:2538
+#: src/client/application/geary-controller.vala:2517
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Vyprázdnit všechny zprávy z vaší složky %s?"
 
-#: src/client/application/geary-controller.vala:2539
+#: src/client/application/geary-controller.vala:2518
 msgid "This removes the email from Geary and your email server."
 msgstr "Tímto se odstraní pošta z aplikace Geary i z poštovního serveru."
 
-#: src/client/application/geary-controller.vala:2540
+#: src/client/application/geary-controller.vala:2519
 msgid "This cannot be undone."
 msgstr "Nebude možné to vrátit zpět."
 
-#: src/client/application/geary-controller.vala:2541
+#: src/client/application/geary-controller.vala:2520
 #, c-format
 msgid "Empty %s"
 msgstr "Vyprázdnit %s"
 
-#: src/client/application/geary-controller.vala:2558
+#: src/client/application/geary-controller.vala:2537
 #, c-format
 msgid "Error emptying %s"
 msgstr "Chyba při vyprazďňování složky %s"
 
-#: src/client/application/geary-controller.vala:2590
+#: src/client/application/geary-controller.vala:2569
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Chcete trvale smazat tuto zprávu?"
 msgstr[1] "Chcete trvale smazat tyto zprávy?"
 msgstr[2] "Chcete trvale smazat tyto zprávy?"
 
-#: src/client/application/geary-controller.vala:2592
+#: src/client/application/geary-controller.vala:2571
 msgid "Delete"
 msgstr "Smazat"
 
-#: src/client/application/geary-controller.vala:2624
-msgid "Undo archive (Ctrl+Z)"
-msgstr "Zpět archivace (Ctrl+Z)"
-
-#: src/client/application/geary-controller.vala:2639
+#: src/client/application/geary-controller.vala:2585
 msgid "Undo trash (Ctrl+Z)"
 msgstr "Zpět přesunutí do koše (Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:2695
+#: src/client/application/geary-controller.vala:2635
+msgid "Undo archive (Ctrl+Z)"
+msgstr "Zpět archivace (Ctrl+Z)"
+
+#: src/client/application/geary-controller.vala:2680
 msgid "Undo (Ctrl+Z)"
 msgstr "Zpět (Ctrl+Z)"
 
 #. Translators: The label for an in-app notification. The
 #. string substitution is a list of recipients of the email.
-#: src/client/application/geary-controller.vala:2772
+#: src/client/application/geary-controller.vala:2757
 #, c-format
 msgid "Successfully sent mail to %s."
 msgstr "Byl úspěšně odeslán e-mail na %s."
 
-#: src/client/application/geary-controller.vala:2828
+#: src/client/application/geary-controller.vala:2838
 msgid "Failed to open default text editor."
 msgstr "Nepodařilo se otevřít výchozí textový editor."
 
@@ -878,7 +878,7 @@ msgstr "Přesunout konverzaci"
 msgid "Move conversations"
 msgstr "Přesunout konverzace"
 
-#: src/client/components/main-window.vala:417
+#: src/client/components/main-window.vala:437
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -1124,7 +1124,7 @@ msgstr "_Vyřadit"
 msgid "_Help"
 msgstr "Nápo_věda"
 
-#: src/client/components/stock.vala:26 ui/conversation-email-menus.ui:51
+#: src/client/components/stock.vala:26 ui/conversation-email-menus.ui:77
 msgid "_Open"
 msgstr "_Otevřít"
 
@@ -1132,7 +1132,8 @@ msgstr "_Otevřít"
 msgid "_Preferences"
 msgstr "_Předvolby"
 
-#: src/client/components/stock.vala:28 ui/conversation-email-menus.ui:39
+#. Translators: Menu item to print a single, specific message
+#: src/client/components/stock.vala:28 ui/conversation-email-menus.ui:64
 msgid "_Print…"
 msgstr "_Tisk…"
 
@@ -1203,23 +1204,23 @@ msgstr "Chcete tento koncept zprávy zachovat nebo zahodit?"
 msgid "Do you want to discard this draft message?"
 msgstr "Chcete zahodit tento koncept zprávy?"
 
-#: src/client/composer/composer-widget.vala:1238
+#: src/client/composer/composer-widget.vala:1247
 msgid "Send message with an empty subject and body?"
 msgstr "Poslat zprávu s prázdným předmětem a tělem?"
 
-#: src/client/composer/composer-widget.vala:1240
+#: src/client/composer/composer-widget.vala:1249
 msgid "Send message with an empty subject?"
 msgstr "Poslat zprávu s prázdným předmětem?"
 
-#: src/client/composer/composer-widget.vala:1242
+#: src/client/composer/composer-widget.vala:1251
 msgid "Send message with an empty body?"
 msgstr "Poslat zprávu s prázdným tělem?"
 
-#: src/client/composer/composer-widget.vala:1246
+#: src/client/composer/composer-widget.vala:1255
 msgid "Send message without an attachment?"
 msgstr "Poslat zprávu bez přílohy?"
 
-#: src/client/composer/composer-widget.vala:1551
+#: src/client/composer/composer-widget.vala:1560
 #, c-format
 msgid "“%s” already attached for delivery."
 msgstr "Soubor „%s“ už byl pro doručení přiložen."
@@ -1229,73 +1230,73 @@ msgstr "Soubor „%s“ už byl pro doručení přiložen."
 #. description of the document type, the second will
 #. be a human-friendly size string. For example:
 #. Document (100.9MB)
-#: src/client/composer/composer-widget.vala:1559
+#: src/client/composer/composer-widget.vala:1568
 #: src/client/conversation-viewer/conversation-email.vala:136
 #, c-format
 msgid "%s (%s)"
 msgstr "%s (%s)"
 
-#: src/client/composer/composer-widget.vala:1596
+#: src/client/composer/composer-widget.vala:1605
 #, c-format
 msgid "“%s” could not be found."
 msgstr "Soubor „%s“ nebyl nalezen."
 
-#: src/client/composer/composer-widget.vala:1602
+#: src/client/composer/composer-widget.vala:1611
 #, c-format
 msgid "“%s” is a folder."
 msgstr "„%s“ je složka."
 
-#: src/client/composer/composer-widget.vala:1608
+#: src/client/composer/composer-widget.vala:1617
 #, c-format
 msgid "“%s” is an empty file."
 msgstr "Soubor „%s“ je prázdný."
 
-#: src/client/composer/composer-widget.vala:1621
+#: src/client/composer/composer-widget.vala:1630
 #, c-format
 msgid "“%s” could not be opened for reading."
 msgstr "Soubor „%s“ se nezdařilo otevřít pro čtení."
 
-#: src/client/composer/composer-widget.vala:1629
+#: src/client/composer/composer-widget.vala:1638
 msgid "Cannot add attachment"
 msgstr "Nelze připojit přílohu"
 
-#: src/client/composer/composer-widget.vala:1678
+#: src/client/composer/composer-widget.vala:1687
 msgid "To: "
 msgstr "Komu: "
 
-#: src/client/composer/composer-widget.vala:1681
+#: src/client/composer/composer-widget.vala:1690
 msgid "Cc: "
 msgstr "Kopie: "
 
-#: src/client/composer/composer-widget.vala:1684
+#: src/client/composer/composer-widget.vala:1693
 msgid "Bcc: "
 msgstr "Skrytá kopie: "
 
-#: src/client/composer/composer-widget.vala:1687
+#: src/client/composer/composer-widget.vala:1696
 msgid "Reply-To: "
 msgstr "Odpověď:"
 
-#: src/client/composer/composer-widget.vala:1820
+#: src/client/composer/composer-widget.vala:1834
 msgid "Select Color"
 msgstr "Vybrat barvu"
 
 #. Displayed in the From dropdown to indicate an "alternate email address"
 #. for an account.  The first printf argument will be the alternate email
 #. address, and the second will be the account's primary email address.
-#: src/client/composer/composer-widget.vala:2010
+#: src/client/composer/composer-widget.vala:2024
 #, c-format
 msgid "%1$s via %2$s"
 msgstr "%1$s přes %2$s"
 
 #. Composer label (with mnemonic underscore) for the account selector
 #. when choosing what address to send a message from.
-#: src/client/composer/composer-widget.vala:2068
+#: src/client/composer/composer-widget.vala:2082
 msgid "_From:"
 msgstr "_Od:"
 
 #. Translators: This is the name of the file chooser filter
 #. when inserting an image in the composer.
-#: src/client/composer/composer-widget.vala:2293
+#: src/client/composer/composer-widget.vala:2307
 msgid "Images"
 msgstr "Obrázky"
 
@@ -1339,8 +1340,9 @@ msgstr "O_debrat hvězdičku"
 msgid "_Star"
 msgstr "_Hvězdička"
 
+#. Translators: Menu item to reply to a specific message.
 #: src/client/conversation-list/conversation-list-view.vala:297
-#: ui/conversation-email-menus.ui:8
+#: ui/conversation-email-menus.ui:9
 msgid "_Reply"
 msgstr "_Odpovědět"
 
@@ -1348,8 +1350,9 @@ msgstr "_Odpovědět"
 msgid "R_eply All"
 msgstr "O_dpovědět všem"
 
+#. Translators: Menu item to forward a specific message.
 #: src/client/conversation-list/conversation-list-view.vala:299
-#: ui/conversation-email-menus.ui:18
+#: ui/conversation-email-menus.ui:21
 msgid "_Forward"
 msgstr "_Přeposlat"
 
@@ -2227,9 +2230,9 @@ msgid "_Paste"
 msgstr "V_ložit"
 
 #: ui/composer-menus.ui:100
-msgctxt "Clipboard paste with rich text"
-msgid "Paste _With Formatting"
-msgstr "Vložit _s formátováním"
+msgctxt "Clipboard paste as plain text"
+msgid "Paste _Without Formatting"
+msgstr "Vložit _bez formátování"
 
 #: ui/composer-menus.ui:120
 msgid "Select _All"
@@ -2379,27 +2382,44 @@ msgstr "Zpráva není uložená"
 msgid "This message was sent, but has not been saved to your account."
 msgstr "Tato zpráva byla úspěšně odeslána, ale nebyla uložena do vašeho účtu."
 
-#: ui/conversation-email-menus.ui:13
+#. Translators: Menu item to reply to a specific message.
+#: ui/conversation-email-menus.ui:15
 msgid "Reply to _All"
 msgstr "Odpovědět _všem"
 
-#: ui/conversation-email-menus.ui:25
+#. Translators: Menu item to mark a specific message as
+#. read.
+#: ui/conversation-email-menus.ui:30
 msgid "_Mark Read"
 msgstr "_Označit jako přečtené"
 
-#: ui/conversation-email-menus.ui:29
+#: ui/conversation-email-menus.ui:36
 msgid "_Mark Unread"
 msgstr "_Označit jako nepřečtené"
 
-#: ui/conversation-email-menus.ui:33
+#. Translators: Menu item to mark all messages in a
+#. conversation from this one as unread.
+#: ui/conversation-email-menus.ui:42
 msgid "Mark Unread From _Here"
 msgstr "Označit jako nepřečtené z_de"
 
-#: ui/conversation-email-menus.ui:43
+#. Translators: Menu item to move a single, specific message
+#. to the trash
+#: ui/conversation-email-menus.ui:50
+msgid "_Trash"
+msgstr "_Koš"
+
+#. Translators: Menu item to delete a single, specific message
+#: ui/conversation-email-menus.ui:57
+msgid "_Delete…"
+msgstr "_Smazat…"
+
+#. Translators: Menu item to view the source for a message
+#: ui/conversation-email-menus.ui:69
 msgid "_View Source"
 msgstr "_Zobrazit zdroj"
 
-#: ui/conversation-email-menus.ui:61
+#: ui/conversation-email-menus.ui:87
 msgid "_Save All"
 msgstr "_Uložit vše"
 
@@ -3081,6 +3101,3 @@ msgstr "E-mailová adresa:"
 #: ui/upgrade_dialog.glade:60
 msgid "Geary update in progress…"
 msgstr "Probíhá aktualizace aplikace Geary…"
-
-#~ msgid "Send files using Geary"
-#~ msgstr "Odeslat soubory pomocí aplikace Geary"
