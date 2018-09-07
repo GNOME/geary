@@ -50,15 +50,20 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
     [GtkChild]
     private Gtk.Button create_button;
 
+    [GtkChild]
+    private Gtk.Spinner create_spinner;
+
     private NameRow real_name;
     private EmailRow email = new EmailRow();
     private string last_valid_email = "";
 
     private HostnameRow imap_hostname = new HostnameRow(Geary.Protocol.IMAP);
+    private TransportSecurityRow imap_tls = new TransportSecurityRow();
     private LoginRow imap_login = new LoginRow();
     private PasswordRow imap_password = new PasswordRow();
 
     private HostnameRow smtp_hostname = new HostnameRow(Geary.Protocol.SMTP);
+    private TransportSecurityRow smtp_tls = new TransportSecurityRow();
     private SmtpAuthRow smtp_auth = new SmtpAuthRow();
     private LoginRow smtp_login = new LoginRow();
     private PasswordRow smtp_password = new PasswordRow();
@@ -101,20 +106,24 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
         this.email.value.changed.connect(on_email_changed);
 
         this.imap_hostname.validator.notify["state"].connect(on_validated);
+        this.imap_tls.hide();
         this.imap_login.validator.notify["state"].connect(on_validated);
         this.imap_password.validator.notify["state"].connect(on_validated);
 
         this.smtp_hostname.validator.notify["state"].connect(on_validated);
+        this.smtp_tls.hide();
         this.smtp_auth.value.changed.connect(on_smtp_auth_changed);
         this.smtp_login.validator.notify["state"].connect(on_validated);
         this.smtp_password.validator.notify["state"].connect(on_validated);
 
         if (provider == Geary.ServiceProvider.OTHER) {
             this.receiving_list.add(this.imap_hostname);
+            this.receiving_list.add(this.imap_tls);
             this.receiving_list.add(this.imap_login);
             this.receiving_list.add(this.imap_password);
 
             this.sending_list.add(this.smtp_hostname);
+            this.sending_list.add(this.smtp_tls);
             this.sending_list.add(this.smtp_auth);
         } else {
             this.details_list.add(this.imap_password);
@@ -139,10 +148,15 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
     }
 
     private async void validate_account(GLib.Cancellable? cancellable) {
+        this.create_spinner.show();
+        this.create_spinner.start();
         this.create_button.set_sensitive(false);
         this.set_sensitive(false);
 
         bool is_valid = false;
+        string message = "";
+        Gtk.Widget? to_focus = null;
+
         Geary.ServiceInformation imap = new_imap_service();
         Geary.ServiceInformation smtp = new_smtp_service();
 
@@ -162,55 +176,92 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
             try {
                 yield this.engine.validate_imap(account, cancellable);
                 imap_valid = true;
+            } catch (Geary.ImapError.UNAUTHENTICATED err) {
+                debug("Error authenticating IMAP service: %s", err.message);
+                to_focus = this.imap_login.value;
+                // Translators: In-app notification label
+                message = _("Check your receiving login and password");
             } catch (GLib.Error err) {
                 debug("Error validating IMAP service: %s", err.message);
-                // XXX do something with this
+                this.imap_tls.show();
+                to_focus = this.imap_hostname.value;
+                // Translators: In-app notification label
+                message = _("Check your receiving server details");
             }
 
-            // Only validate SMTP if not using IMAP creds, or if the
-            // IMAP creds are good, so we don't check known bad creds
-            if (!smtp.smtp_use_imap_credentials || imap_valid) {
-                //notification.label = _("Checking sending server…");
-
+            if (imap_valid) {
+                debug("Validating SMTP...");
                 try {
                     yield this.engine.validate_smtp(account, cancellable);
                     smtp_valid = true;
+                } catch (Geary.SmtpError.AUTHENTICATION_FAILED err) {
+                    debug("Error authenticating SMTP service: %s", err.message);
+                    // There was an SMTP auth error, but IMAP already
+                    // succeeded, so the user probably needs to
+                    // specify custom creds here
+                    this.smtp_auth.source = Geary.SmtpCredentials.CUSTOM;
+                    to_focus = this.smtp_login.value;
+                    // Translators: In-app notification label
+                    message = _("Check your sending login and password");
                 } catch (GLib.Error err) {
                     debug("Error validating SMTP service: %s", err.message);
-                    // XXX do something with this
+                    this.smtp_tls.show();
+                    to_focus = this.smtp_hostname.value;
+                    // Translators: In-app notification label
+                    message = _("Check your sending server details");
                 }
             }
 
             is_valid = imap_valid && smtp_valid;
         } else {
-            //notification.label = _("Checking account…");
             try {
                 yield this.engine.validate_imap(account, cancellable);
                 is_valid = true;
+            } catch (Geary.ImapError.UNAUTHENTICATED err) {
+                debug("Error authenticating provider: %s", err.message);
+                to_focus = this.email.value;
+                // Translators: In-app notification label
+                message = _("Check your email address and password");
             } catch (GLib.Error err) {
-                debug("Error validating provider IMAP: %s", err.message);
-                // XXX do something with this
+                debug("Error validating provider service: %s", err.message);
+                is_valid = false;
+                // Translators: In-app notification label
+                message = _("Could not connect, check your network");
             }
         }
 
         if (is_valid) {
             try {
                 yield this.accounts.create_account(account, cancellable);
+                this.editor.pop();
             } catch (GLib.Error err) {
                 debug("Failed to create new local account: %s", err.message);
-                // XXX do something with this
+                is_valid = false;
+                // Translators: In-app notification label for a
+                // generic error creating an account
+                message = _("An unexpected problem occurred");
             }
-            this.editor.pop();
-        } else {
+        }
+
+        this.create_spinner.stop();
+        this.create_spinner.hide();
+        this.create_button.set_sensitive(true);
+        this.set_sensitive(true);
+
+        // Focus and pop up the notification after re-sensitising
+        // so it actually succeeds.
+        if (!is_valid) {
+            if (to_focus != null) {
+                to_focus.grab_focus();
+            }
             add_notification(
                 new InAppNotification(
-                    _("Account not added, check the details below")
+                    // Translators: In-app notification label, the
+                    // string substitution is a more detailed reason.
+                    _("Account not created: %s").printf(message)
                 )
             );
         }
-
-        this.create_button.set_sensitive(true);
-        this.set_sensitive(true);
     }
 
     private LocalServiceInformation new_imap_service() {
@@ -230,6 +281,10 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
             GLib.NetworkAddress address = host.validated_address;
             service.host = address.hostname;
             service.port = (uint16) address.port;
+
+            Geary.TlsNegotiationMethod tls = this.imap_tls.value.method;
+            service.use_ssl = (tls == Geary.TlsNegotiationMethod.TRANSPORT);
+            service.use_starttls = (tls == Geary.TlsNegotiationMethod.START_TLS);
         } else {
             this.provider.setup_service(service);
             service.credentials = new Geary.Credentials(
@@ -247,7 +302,7 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
            this.accounts.new_libsecret_service(Geary.Protocol.SMTP);
 
         if (this.provider == Geary.ServiceProvider.OTHER) {
-            switch (this.smtp_auth.get_value()) {
+            switch (this.smtp_auth.source) {
             case Geary.SmtpCredentials.NONE:
                 service.smtp_noauth = true;
                 service.smtp_use_imap_credentials = false;
@@ -276,6 +331,13 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
 
             service.host = address.hostname;
             service.port = (uint16) address.port;
+
+            Geary.TlsNegotiationMethod tls = this.smtp_tls.value.method;
+            service.use_ssl = (tls == Geary.TlsNegotiationMethod.TRANSPORT);
+            service.use_starttls = (tls == Geary.TlsNegotiationMethod.START_TLS);
+
+            debug("SMTP service: TLS: %s, STARTTLS: %s",
+                  service.use_ssl.to_string(), service.use_starttls.to_string());
         } else {
             this.provider.setup_service(service);
         }
@@ -319,7 +381,7 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
     }
 
     private void on_smtp_auth_changed() {
-        if (this.smtp_auth.get_value() == Geary.SmtpCredentials.CUSTOM) {
+        if (this.smtp_auth.source == Geary.SmtpCredentials.CUSTOM) {
             this.sending_list.add(this.smtp_login);
             this.sending_list.add(this.smtp_password);
         } else if (this.smtp_login.parent != null) {
@@ -346,6 +408,7 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
         Gtk.Container? next = null;
         if (direction == Gtk.DirectionType.DOWN) {
             if (widget == this.details_list) {
+                debug("Have details!");
                 next = this.receiving_list;
             } else if (widget == this.receiving_list) {
                 next = this.sending_list;
@@ -512,8 +575,34 @@ private class Accounts.HostnameRow : EntryRow {
 }
 
 
+private class Accounts.TransportSecurityRow :
+    LabelledEditorRow<EditorAddPane,TlsComboBox> {
+
+    public TransportSecurityRow() {
+        TlsComboBox value = new TlsComboBox();
+        base(value.label, value);
+        // Set to Transport TLS by default per RFC 8314
+        this.value.method = Geary.TlsNegotiationMethod.TRANSPORT;
+    }
+
+}
+
+
 private class Accounts.SmtpAuthRow :
     LabelledEditorRow<EditorAddPane,Gtk.ComboBoxText> {
+
+    public Geary.SmtpCredentials source {
+        get {
+            try {
+                return Geary.SmtpCredentials.for_value(this.value.active_id);
+            } catch {
+                return Geary.SmtpCredentials.IMAP;
+            }
+        }
+        set {
+            this.value.active_id = value.to_value();
+        }
+    }
 
 
     public SmtpAuthRow() {
@@ -530,15 +619,7 @@ private class Accounts.SmtpAuthRow :
         this.value.append(Geary.SmtpCredentials.IMAP.to_value(), _("Use IMAP login"));
         this.value.append(Geary.SmtpCredentials.CUSTOM.to_value(), _("Use different login"));
 
-        this.value.active_id = Geary.SmtpCredentials.IMAP.to_value();
-    }
-
-    public Geary.SmtpCredentials get_value() {
-        try {
-            return Geary.SmtpCredentials.for_value(this.value.active_id);
-        } catch {
-            return Geary.SmtpCredentials.IMAP;
-        }
+        this.source = Geary.SmtpCredentials.IMAP;
     }
 
 }

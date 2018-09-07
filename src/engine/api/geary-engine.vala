@@ -257,24 +257,32 @@ public class Geary.Engine : BaseObject {
         bool login_failed = false;
         imap_session.login_failed.connect(() => login_failed = true);
 
+        GLib.Error? login_err = null;
         try {
             yield imap_session.connect_async(cancellable);
             yield imap_session.initiate_session_async(
                 account.imap.credentials, cancellable
             );
-        } finally {
-            try {
-                yield imap_session.disconnect_async(cancellable);
-            } catch {
-                // Oh well
-            }
-            account.disconnect_service_endpoints();
-            account.untrusted_host.disconnect(on_untrusted_host);
+        } catch (GLib.Error err) {
+            login_err = err;
         }
+
+        try {
+            yield imap_session.disconnect_async(cancellable);
+        } catch {
+            // Oh well
+        }
+
+        account.disconnect_service_endpoints();
+        account.untrusted_host.disconnect(on_untrusted_host);
 
         if (login_failed) {
             // XXX This should be a LOGIN_FAILED error or something
             throw new ImapError.UNAUTHENTICATED("Login failed");
+        }
+
+        if (login_err != null) {
+            throw login_err;
         }
     }
 
@@ -289,12 +297,10 @@ public class Geary.Engine : BaseObject {
         if (account.smtp.port == 0) {
             if (account.smtp.use_ssl) {
                 account.smtp.port = Smtp.ClientConnection.SUBMISSION_TLS_PORT;
-            } else if (account.smtp.use_starttls) {
-                account.smtp.port = account.smtp.smtp_noauth
-                    ? Smtp.ClientConnection.SMTP_PORT
-                    : Smtp.ClientConnection.SUBMISSION_PORT;
-            } else {
+            } else if (account.smtp.smtp_noauth) {
                 account.smtp.port = Smtp.ClientConnection.SMTP_PORT;
+            } else {
+                account.smtp.port = Smtp.ClientConnection.SUBMISSION_PORT;
             }
         }
 
@@ -307,18 +313,26 @@ public class Geary.Engine : BaseObject {
             account.smtp.endpoint
         );
 
+        GLib.Error? login_err = null;
         try {
             yield smtp_session.login_async(
                 account.get_smtp_credentials(), cancellable
             );
-        } finally {
-            try {
-                yield smtp_session.logout_async(true, cancellable);
-            } catch {
-                // Oh well
-            }
-            account.disconnect_service_endpoints();
-            account.untrusted_host.disconnect(on_untrusted_host);
+        } catch (GLib.Error err) {
+            login_err = err;
+        }
+
+        try {
+            yield smtp_session.logout_async(true, cancellable);
+        } catch {
+            // Oh well
+        }
+
+        account.disconnect_service_endpoints();
+        account.untrusted_host.disconnect(on_untrusted_host);
+
+        if (login_err != null) {
+            throw login_err;
         }
     }
 

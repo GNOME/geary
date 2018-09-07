@@ -25,10 +25,16 @@ public class GoaServiceInformation : Geary.ServiceInformation {
         if (mail != null) {
             switch (this.protocol) {
             case Geary.Protocol.IMAP:
-                this.host = mail.imap_host;
-                this.port = Geary.Imap.ClientConnection.IMAP_TLS_PORT;
+                parse_host_name(mail.imap_host);
                 this.use_ssl = mail.imap_use_ssl;
                 this.use_starttls = mail.imap_use_tls;
+
+                if (this.port == 0) {
+                    this.port = this.use_ssl
+                        ? Geary.Imap.ClientConnection.IMAP_TLS_PORT
+                        : Geary.Imap.ClientConnection.IMAP_PORT;
+                }
+
                 this.credentials = new Geary.Credentials(
                     ((GoaMediator) this.mediator).method,
                     mail.imap_user_name
@@ -36,12 +42,22 @@ public class GoaServiceInformation : Geary.ServiceInformation {
                 break;
 
             case Geary.Protocol.SMTP:
-                this.host = mail.smtp_host;
-                this.port = Geary.Smtp.ClientConnection.SUBMISSION_TLS_PORT;
+                parse_host_name(mail.smtp_host);
                 this.use_ssl = mail.smtp_use_ssl;
                 this.use_starttls = mail.smtp_use_tls;
                 this.smtp_noauth = !(mail.smtp_use_auth);
                 this.smtp_use_imap_credentials = false;
+
+                if (this.port == 0) {
+                    if (this.use_ssl) {
+                        this.port = Geary.Smtp.ClientConnection.SUBMISSION_TLS_PORT;
+                    } else if (this.smtp_noauth) {
+                        this.port = Geary.Smtp.ClientConnection.SMTP_PORT;
+                    } else {
+                        this.port = Geary.Smtp.ClientConnection.SUBMISSION_PORT;
+                    }
+                }
+
                 if (!this.smtp_noauth) {
                     this.credentials = new Geary.Credentials(
                         ((GoaMediator) this.mediator).method,
@@ -59,6 +75,31 @@ public class GoaServiceInformation : Geary.ServiceInformation {
         );
         copy.copy_from(this);
         return copy;
+    }
+
+    private void parse_host_name(string host_name) {
+        // Fall back to trying to use the host name as-is.
+        // At least the user can see it in the settings if
+        // they look.
+        this.host = host_name;
+        this.port = 0;
+
+        try {
+            GLib.NetworkAddress address = GLib.NetworkAddress.parse(
+                host_name, this.port
+            );
+
+            this.host = address.hostname;
+            this.port = (uint16) address.port;
+        } catch (GLib.Error err) {
+            warning(
+                "GOA account \"%s\" %s hostname \"%s\": %",
+                this.account.get_account().id,
+                this.protocol.to_value(),
+                host_name,
+                err.message
+            );
+        }
     }
 
 }
