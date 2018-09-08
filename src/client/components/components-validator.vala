@@ -47,11 +47,13 @@ public class Components.Validator : GLib.Object {
     }
 
     /** The cause of a validity check being required. */
-    protected enum Trigger {
+    public enum Trigger {
         /** The entry's contents changed */
         CHANGED,
-        /** The user performed an action indicating they are done. */
-        COMPLETE;
+        /** The entry lost the keyboard focus. */
+        LOST_FOCUS,
+        /** The user activated the entry. */
+        ACTIVATED;
     }
 
     /** Defines the UI state for a specific validity. */
@@ -98,6 +100,10 @@ public class Components.Validator : GLib.Object {
     public UiState invalid_state;
 
     private Geary.TimeoutManager ui_update_timer;
+
+
+    /** Fired when the validation state changes. */
+    public signal void state_changed(Trigger reason, Validity prev_state);
 
 
     public Validator(Gtk.Entry target) {
@@ -157,7 +163,7 @@ public class Components.Validator : GLib.Object {
      * By default, this always returns {@link Validity.VALID}, making
      * it useful for required, but otherwise free-form fields only.
      */
-    protected virtual Validity validate(string value, Trigger cause) {
+    protected virtual Validity validate(string value, Trigger reason) {
         return Validity.VALID;
     }
 
@@ -168,14 +174,20 @@ public class Components.Validator : GLib.Object {
      * CPU-intensive or long-running validation routine and it has
      * completed validating a value. See {@link validate} for details.
      */
-    protected void update_state(Validity new_state) {
+    protected void update_state(Validity new_state, Trigger reason) {
         if (this.state != new_state) {
             Validity old_state = this.state;
 
+            // Fire the signal after updating the state but before
+            // updating the UI so listeners can update UI settings
+            // first if needed.
             this.state = new_state;
-            if (new_state == Validity.VALID) {
-                // Update the UI straight away when going valid to
-                // provide instant feedback
+            state_changed(reason, old_state);
+
+            if (new_state == Validity.VALID || reason != Trigger.CHANGED) {
+                // Update the UI straight away when going valid or
+                // when editing is complete to provide instant
+                // feedback
                 update_ui(new_state);
             } else {
                 if (old_state == Validity.EMPTY) {
@@ -194,23 +206,17 @@ public class Components.Validator : GLib.Object {
         }
     }
 
-    private void validate_entry(Trigger cause) {
+    private void validate_entry(Trigger reason) {
         string value = this.target.get_text();
         Validity new_state = this.state;
         if (Geary.String.is_empty_or_whitespace(value)) {
             new_state = this.is_required
                 ? Validity.EMPTY : Validity.INDETERMINATE;
         } else {
-            new_state = validate(value, cause);
+            new_state = validate(value, reason);
         }
 
-        update_state(new_state);
-
-        if (cause == Trigger.COMPLETE) {
-            // Update the UI instantly since we know the user is done
-            // editing it an will want instant feedback.
-            update_ui(this.state);
-        }
+        update_state(new_state, reason);
     }
 
     private void update_ui(Validity state) {
@@ -256,7 +262,7 @@ public class Components.Validator : GLib.Object {
     }
 
     private void on_activate() {
-        validate_entry(Trigger.COMPLETE);
+        validate_entry(Trigger.ACTIVATED);
     }
 
     private void on_update_ui() {
@@ -275,7 +281,7 @@ public class Components.Validator : GLib.Object {
         // the focused widget any more, rather than the whole window
         // having lost focus.
         if (!this.target.is_focus) {
-            validate_entry(Trigger.COMPLETE);
+            validate_entry(Trigger.LOST_FOCUS);
         }
         return Gdk.EVENT_PROPAGATE;
     }
@@ -302,7 +308,7 @@ public class Components.EmailValidator : Validator {
 
 
     protected override Validator.Validity validate(string value,
-                                                   Validator.Trigger cause) {
+                                                   Validator.Trigger reason) {
         return Geary.RFC822.MailboxAddress.is_valid_address(value)
             ? Validator.Validity.VALID : Validator.Validity.INVALID;
     }
@@ -384,12 +390,12 @@ public class Components.NetworkAddressValidator : Validator {
                     try {
                         this.resolver.lookup_by_name_async.end(res);
                         this.validated_address = address;
-                        update_state(Validator.Validity.VALID);
+                        update_state(Validator.Validity.VALID, reason);
                     } catch (GLib.IOError.CANCELLED err) {
                         this.validated_address = null;
                     } catch (GLib.Error err) {
                         this.validated_address = null;
-                        update_state(Validator.Validity.INVALID);
+                        update_state(Validator.Validity.INVALID, reason);
                     }
                     this.cancellable = null;
                 }

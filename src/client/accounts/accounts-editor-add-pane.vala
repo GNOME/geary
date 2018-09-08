@@ -68,6 +68,8 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
     private LoginRow smtp_login = new LoginRow();
     private PasswordRow smtp_password = new PasswordRow();
 
+    private bool controls_valid = false;
+
 
     internal EditorAddPane(Editor editor, Geary.ServiceProvider provider) {
         this.editor = editor;
@@ -101,20 +103,28 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
         this.details_list.add(this.real_name);
         this.details_list.add(this.email);
 
-        this.real_name.validator.notify["state"].connect(on_validated);
-        this.email.validator.notify["state"].connect(on_validated);
+        this.real_name.validator.state_changed.connect(on_validated);
+        this.real_name.value.activate.connect(on_activated);
+        this.email.validator.state_changed.connect(on_validated);
+        this.email.value.activate.connect(on_activated);
         this.email.value.changed.connect(on_email_changed);
 
-        this.imap_hostname.validator.notify["state"].connect(on_validated);
+        this.imap_hostname.validator.state_changed.connect(on_validated);
+        this.imap_hostname.value.activate.connect(on_activated);
         this.imap_tls.hide();
-        this.imap_login.validator.notify["state"].connect(on_validated);
-        this.imap_password.validator.notify["state"].connect(on_validated);
+        this.imap_login.validator.state_changed.connect(on_validated);
+        this.imap_login.value.activate.connect(on_activated);
+        this.imap_password.validator.state_changed.connect(on_validated);
+        this.imap_password.value.activate.connect(on_activated);
 
-        this.smtp_hostname.validator.notify["state"].connect(on_validated);
+        this.smtp_hostname.validator.state_changed.connect(on_validated);
+        this.smtp_hostname.value.activate.connect(on_activated);
         this.smtp_tls.hide();
         this.smtp_auth.value.changed.connect(on_smtp_auth_changed);
-        this.smtp_login.validator.notify["state"].connect(on_validated);
-        this.smtp_password.validator.notify["state"].connect(on_validated);
+        this.smtp_login.validator.state_changed.connect(on_validated);
+        this.smtp_login.value.activate.connect(on_activated);
+        this.smtp_password.validator.state_changed.connect(on_validated);
+        this.smtp_password.value.activate.connect(on_activated);
 
         if (provider == Geary.ServiceProvider.OTHER) {
             this.receiving_list.add(this.imap_hostname);
@@ -346,22 +356,32 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
     }
 
     private void check_validation() {
-        bool is_valid = true;
+        bool controls_valid = true;
         foreach (Gtk.ListBox list in new Gtk.ListBox[] {
                 this.details_list, this.receiving_list, this.sending_list
             }) {
             list.foreach((child) => {
                     AddPaneRow? validatable = child as AddPaneRow;
                     if (validatable != null && !validatable.validator.is_valid) {
-                        is_valid = false;
+                        controls_valid = false;
                     }
                 });
         }
-        this.create_button.set_sensitive(is_valid);
+        this.create_button.set_sensitive(controls_valid);
+        this.controls_valid = controls_valid;
     }
 
-    private void on_validated() {
+    private void on_validated(Components.Validator.Trigger reason) {
         check_validation();
+        if (this.controls_valid && reason == Components.Validator.Trigger.ACTIVATED) {
+            this.create_button.clicked();
+        }
+    }
+
+    private void on_activated() {
+        if (this.controls_valid) {
+            this.create_button.clicked();
+        }
     }
 
     private void on_email_changed() {
