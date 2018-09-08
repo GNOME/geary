@@ -17,8 +17,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2018-08-29 14:58+0000\n"
-"PO-Revision-Date: 2018-09-01 15:57+0300\n"
+"POT-Creation-Date: 2018-09-01 12:58+0000\n"
+"PO-Revision-Date: 2018-09-09 00:40+0300\n"
 "Last-Translator: Emin Tufan Çetin <etcetin@gmail.com>\n"
 "Language-Team: Türkçe <gnome-turk@gnome.org>\n"
 "Language: tr\n"
@@ -463,7 +463,6 @@ msgid "Copyright 2016 Software Freedom Conservancy Inc."
 msgstr "Telif Hakkı 2016 Software Freedom Conservancy Inc."
 
 #: src/client/application/geary-application.vala:23
-#| msgid "Copyright 2016-2017 Geary Development Team."
 msgid "Copyright 2016-2018 Geary Development Team."
 msgstr "Telif Hakkı 2016-2018 Geary Geliştirme Takımı."
 
@@ -874,11 +873,11 @@ msgstr "Konuşmaları etiketle"
 
 #: src/client/components/main-toolbar.vala:79
 msgid "Move conversation"
-msgstr "Daha çok konuşma"
+msgstr "Konuşmayı taşı"
 
 #: src/client/components/main-toolbar.vala:80
 msgid "Move conversations"
-msgstr "Daha çok konuşma"
+msgstr "Konuşmaları taşı"
 
 #: src/client/components/main-window.vala:437
 #, c-format
@@ -1123,7 +1122,7 @@ msgstr "_Hakkında"
 
 #: src/client/components/stock.vala:24
 msgid "_Discard"
-msgstr "_At"
+msgstr "_Gözden Çıkar"
 
 #: src/client/components/stock.vala:25 ui/gtk/menus.ui:29
 msgid "_Help"
@@ -1199,14 +1198,14 @@ msgstr ""
 #. Keep, Discard or Cancel.
 #: src/client/composer/composer-widget.vala:1102
 msgid "Do you want to keep or discard this draft message?"
-msgstr "Bu iletiyi saklamak mı yoksa atmak mı istiyorsunuz?"
+msgstr "Bu iletiyi saklamak mı yoksa gözden çıkarmak mı istersiniz?"
 
 #. Translators: This dialog text is displayed to the
 #. user when closing a composer where the options are
 #. only Discard or Cancel.
 #: src/client/composer/composer-widget.vala:1130
 msgid "Do you want to discard this draft message?"
-msgstr "Bu taslak iletiyi atmak istiyor musunuz?"
+msgstr "Bu taslak iletiyi gözden çıkarmak istiyor musunuz?"
 
 #: src/client/composer/composer-widget.vala:1247
 msgid "Send message with an empty subject and body?"
@@ -1574,8 +1573,8 @@ msgid_plural ""
 "%s\n"
 "(%d other new messages for %s)"
 msgstr[0] ""
-"%s\n"
-"(%d yeni diğer ileti %s için)"
+"%1$s\n"
+"(%3$s için %2$d yeni diğer ileti)"
 
 #: src/client/notification/libnotify.vala:161
 msgid "Open"
@@ -2068,7 +2067,7 @@ msgid ""
 "discard the message and try again."
 msgstr ""
 "Bu hesapla bağlantılı bir oluşturucu penceresi açık. İletiyi gönderip veya "
-"iptal edip yeniden deneyin."
+"gözden çıkarıp yeniden deneyin."
 
 #: ui/account_list.glade:69
 msgid "Add account"
@@ -2124,7 +2123,7 @@ msgstr "Gönder (Ctrl+Enter)"
 
 #: ui/composer-headerbar.ui:230
 msgid "Discard and Close"
-msgstr "At ve Kapat"
+msgstr "Gözden Çıkar ve Kapat"
 
 #: ui/composer-headerbar.ui:254
 msgid "Save and Close"
@@ -2502,7 +2501,7 @@ msgstr "E-posta göndericisi sizi yanlış web sitesine yönlendiriyor olabilir.
 #: ui/conversation-message.ui:763
 msgid "If unsure, contact the sender and ask before continuing."
 msgstr ""
-"Emin değilseniz, devam etmeden önce göndericiyle iletişime geçin ve sorun."
+"Emin değilseniz devam etmeden önce göndericiyle iletişime geçin ve sorun."
 
 #: ui/conversation-viewer.ui:60
 msgid "Find in conversation"
