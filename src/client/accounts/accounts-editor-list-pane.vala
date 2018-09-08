@@ -210,7 +210,7 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane {
                                            Manager.Status status) {
         AccountListRow? row = get_account_row(account);
         if (row != null) {
-            row.update(status);
+            row.update_status(status);
         }
     }
 
@@ -291,14 +291,28 @@ private class Accounts.AccountListRow : EditorRow<EditorListPane> {
         this.layout.add(this.account_name);
         this.layout.add(this.account_details);
 
-        update(status);
+        this.account.information_changed.connect(on_account_changed);
+        update_nickname();
+        update_status(status);
+    }
+
+    ~AccountListRow() {
+        this.account.information_changed.disconnect(on_account_changed);
     }
 
     public override void activated(EditorListPane pane) {
         pane.show_existing_account(this.account);
     }
 
-    public void update(Manager.Status status) {
+    public void update_nickname() {
+        string name = this.account.nickname;
+        if (Geary.String.is_empty(name)) {
+            name = account.primary_mailbox.to_address_display("", "");
+        }
+        this.account_name.set_text(name);
+    }
+
+    public void update_status(Manager.Status status) {
         if (status != Manager.Status.UNAVAILABLE) {
             this.unavailable_icon.hide();
             this.set_tooltip_text("");
@@ -308,12 +322,6 @@ private class Accounts.AccountListRow : EditorRow<EditorListPane> {
                 _("This account has encountered a problem and is unavailable")
             );
         }
-
-        string name = this.account.nickname;
-        if (Geary.String.is_empty(name)) {
-            name = account.primary_mailbox.to_address_display("", "");
-        }
-        this.account_name.set_text(name);
 
         string? details = this.account.service_label;
         switch (account.service_provider) {
@@ -346,6 +354,10 @@ private class Accounts.AccountListRow : EditorRow<EditorListPane> {
                 Gtk.STYLE_CLASS_DIM_LABEL
             );
         }
+    }
+
+    private void on_account_changed() {
+        update_nickname();
     }
 
 }
