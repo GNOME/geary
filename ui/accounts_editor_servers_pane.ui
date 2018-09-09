@@ -93,6 +93,7 @@
                         <property name="can_focus">False</property>
                         <property name="selection_mode">none</property>
                         <signal name="keynav-failed" handler="on_list_keynav_failed" swapped="no"/>
+                        <signal name="row-activated" handler="on_activate" swapped="no"/>
                       </object>
                     </child>
                     <child type="label_item">
@@ -132,6 +133,7 @@
                         <property name="can_focus">False</property>
                         <property name="selection_mode">none</property>
                         <signal name="keynav-failed" handler="on_list_keynav_failed" swapped="no"/>
+                        <signal name="row-activated" handler="on_activate" swapped="no"/>
                       </object>
                     </child>
                     <child type="label_item">
@@ -171,6 +173,7 @@
                         <property name="can_focus">False</property>
                         <property name="selection_mode">none</property>
                         <signal name="keynav-failed" handler="on_list_keynav_failed" swapped="no"/>
+                        <signal name="row-activated" handler="on_activate" swapped="no"/>
                       </object>
                     </child>
                     <child type="label_item">

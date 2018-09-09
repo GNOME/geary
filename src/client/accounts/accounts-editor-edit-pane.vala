@@ -48,6 +48,9 @@ internal class Accounts.EditorEditPane : Gtk.Grid, EditorPane, AccountPane {
     [GtkChild]
     private Gtk.Button undo_button;
 
+    [GtkChild]
+    private Gtk.Button remove_button;
+
 
     public EditorEditPane(Editor editor, Geary.AccountInformation account) {
         this.editor = editor;
@@ -105,6 +108,10 @@ internal class Accounts.EditorEditPane : Gtk.Grid, EditorPane, AccountPane {
 
         this.settings_list.set_header_func(Editor.seperator_headers);
         this.settings_list.add(new EmailPrefetchRow(this));
+
+        this.remove_button.set_visible(
+            !this.editor.accounts.is_goa_account(account)
+        );
 
         this.account.information_changed.connect(on_account_changed);
         update_header();
@@ -189,7 +196,9 @@ internal class Accounts.EditorEditPane : Gtk.Grid, EditorPane, AccountPane {
 
     [GtkCallback]
     private void on_remove_account_clicked() {
-        this.editor.push(new EditorRemovePane(this.editor, this.account));
+        if (!this.editor.accounts.is_goa_account(account)) {
+            this.editor.push(new EditorRemovePane(this.editor, this.account));
+        }
     }
 
     [GtkCallback]

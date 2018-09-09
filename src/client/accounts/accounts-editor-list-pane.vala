@@ -28,9 +28,9 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane {
     }
 
 
-    protected weak Accounts.Editor editor { get; set; }
+    internal Manager accounts { get; private set; }
 
-    private Manager accounts;
+    protected weak Accounts.Editor editor { get; set; }
 
     private Application.CommandStack commands = new Application.CommandStack();
 
@@ -67,8 +67,10 @@ internal class Accounts.EditorListPane : Gtk.Grid, EditorPane {
 
     public EditorListPane(Editor editor) {
         this.editor = editor;
-        this.accounts =
-            ((GearyApplication) editor.application).controller.account_manager;
+
+        // keep our own copy of this so we can disconnect from its signals
+        // without worrying about the editor's lifecycle
+        this.accounts = editor.accounts;
 
         this.pane_content.set_focus_vadjustment(this.pane_adjustment);
 
@@ -404,7 +406,25 @@ private class Accounts.AddServiceProviderRow : EditorRow<EditorListPane> {
     }
 
     public override void activated(EditorListPane pane) {
-        pane.show_add_account(this.provider);
+        pane.accounts.add_goa_account.begin(
+            this.provider, null,
+            (obj, res) => {
+                bool add_local = false;
+                try {
+                    pane.accounts.add_goa_account.end(res);
+                } catch (Error.INVALID err) {
+                    // Not a supported type, so don't bother logging the error
+                    add_local = true;
+                } catch (GLib.Error err) {
+                    debug("Failed to add %s via GOA: %s",
+                          this.provider.to_string(), err.message);
+                    add_local = true;
+                }
+
+                if (add_local) {
+                    pane.show_add_account(this.provider);
+                }
+            });
     }
 
 }

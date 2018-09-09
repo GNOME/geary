@@ -10,7 +10,7 @@
 public class GoaServiceInformation : Geary.ServiceInformation {
 
 
-    private Goa.Object account;
+    internal Goa.Object account { get; private set; }
 
     public GoaServiceInformation(Geary.Protocol protocol,
                                  GoaMediator mediator,

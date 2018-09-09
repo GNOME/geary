@@ -51,7 +51,9 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
         );
         // Only add an account provider if it is esoteric enough.
         if (this.account.imap.mediator is GoaMediator) {
-            this.details_list.add(new AccountProviderRow(this.account));
+            this.details_list.add(
+                new AccountProviderRow(editor.accounts, this.account)
+            );
         }
         this.details_list.add(new SaveDraftsRow(this.account));
 
@@ -119,14 +121,25 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
         update_header();
     }
 
+    [GtkCallback]
+    private void on_activate(Gtk.ListBoxRow row) {
+        Accounts.EditorRow<EditorServersPane> server_row =
+            row as Accounts.EditorRow<EditorServersPane>;
+        if (server_row != null) {
+            server_row.activated(this);
+        }
+    }
+
 }
 
 
 private class Accounts.AccountProviderRow :
     AccountRow<EditorServersPane,Gtk.Label> {
 
+    private Manager accounts;
 
-    public AccountProviderRow(Geary.AccountInformation account) {
+    public AccountProviderRow(Manager accounts,
+                              Geary.AccountInformation account) {
         base(
             account,
             // Translators: This label describes the program that
@@ -136,21 +149,48 @@ private class Accounts.AccountProviderRow :
             new Gtk.Label("")
         );
 
-        // Can't change this, so dim it out
-        this.value.get_style_context().add_class(Gtk.STYLE_CLASS_DIM_LABEL);
-        this.set_activatable(false);
+        this.accounts = accounts;
 
         update();
     }
 
     public override void update() {
         string? source = null;
+        bool enabled = false;
         if (this.account.imap.mediator is GoaMediator) {
             source = _("GNOME Online Accounts");
+            enabled = true;
         } else {
             source = _("Geary");
         }
+
         this.value.set_text(source);
+        this.set_activatable(enabled);
+        Gtk.StyleContext style = this.value.get_style_context();
+        if (enabled) {
+            style.remove_class(Gtk.STYLE_CLASS_DIM_LABEL);
+        } else {
+            style.add_class(Gtk.STYLE_CLASS_DIM_LABEL);
+        }
+    }
+
+    public override void activated(EditorServersPane pane) {
+        if (this.accounts.is_goa_account(this.account)) {
+            this.accounts.show_goa_account.begin(
+                account, null,
+                (obj, res) => {
+                    try {
+                        this.accounts.show_goa_account.end(res);
+                    } catch (GLib.Error err) {
+                        // XXX display an error to the user
+                        debug(
+                            "Failed to show GOA account \"%s\": %s",
+                            account.id,
+                            err.message
+                        );
+                    }
+                });
+        }
     }
 
 }

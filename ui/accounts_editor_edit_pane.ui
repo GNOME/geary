@@ -254,7 +254,7 @@
                       </packing>
                     </child>
                     <child>
-                      <object class="GtkButton">
+                      <object class="GtkButton" id="remove_button">
                         <property name="label" translatable="yes" comments="This is the remove account button in the account settings.">Remove Account</property>
                         <property name="visible">True</property>
                         <property name="can_focus">True</property>

@@ -27,8 +27,10 @@ public class Accounts.Editor : Gtk.Dialog {
     }
 
 
-    private SimpleActionGroup actions = new SimpleActionGroup();
+    internal Manager accounts { get; private set; }
 
+
+    private SimpleActionGroup actions = new SimpleActionGroup();
 
     private Gtk.Stack editor_panes = new Gtk.Stack();
     private EditorListPane editor_list_pane;
@@ -39,6 +41,7 @@ public class Accounts.Editor : Gtk.Dialog {
 
     public Editor(GearyApplication application, Gtk.Window parent) {
         this.application = application;
+        this.accounts = application.controller.account_manager;
 
         set_default_size(700, 450);
         set_icon_name(GearyApplication.APP_ID);

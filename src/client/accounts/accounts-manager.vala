@@ -418,6 +418,56 @@ public class Accounts.Manager : GLib.Object {
     }
 
     /**
+     * Determines if an account is a GOA account or not.
+     */
+    public bool is_goa_account(Geary.AccountInformation account) {
+        return (account.imap is GoaServiceInformation);
+    }
+
+    /**
+     * Opens GNOME Settings to add an account of a particular type.
+     *
+     * Throws an error if it was not possible to open GNOME Settings,
+     * or if the given type is not supported for by GOA.
+     */
+    public async void add_goa_account(Geary.ServiceProvider type,
+                                      GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        switch (type) {
+        case Geary.ServiceProvider.GMAIL:
+            yield open_goa_settings("add", "google", cancellable);
+            break;
+
+        case Geary.ServiceProvider.OUTLOOK:
+            yield open_goa_settings("add", "windows_live", cancellable);
+            break;
+
+        default:
+            throw new Error.INVALID("Not supported for GOA");
+        }
+    }
+
+    /**
+     * Opens GOA settings for the given account in GNOME Settings.
+     *
+     * Throws an error if it was not possible to open GNOME Settings,
+     * or if the given account is not backed by GOA.
+     */
+    public async void show_goa_account(Geary.AccountInformation account,
+                                       GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        GoaServiceInformation? goa_service =
+           account.imap as GoaServiceInformation;
+        if (goa_service == null) {
+            throw new Error.INVALID("Not a GOA Account");
+        }
+
+        yield open_goa_settings(
+            goa_service.account.account.id, null, cancellable
+        );
+    }
+
+    /**
      * Loads an account info from a config directory.
      *
      * Throws an error if the config file was not found, could not be
@@ -862,6 +912,59 @@ public class Accounts.Manager : GLib.Object {
                 account.get_account().id
             );
         }
+    }
+
+    private async void open_goa_settings(string action,
+                                         string? param,
+                                         GLib.Cancellable? cancellable)
+        throws GLib.Error {
+        // This method was based on the implementation from:
+        // https://gitlab.gnome.org/GNOME/gnome-calendar/blob/master/src/gcal-source-dialog.c,
+        // Courtesy Georges Basile Stavracas Neto <georges.stavracas@gmail.com>
+        GLib.DBusProxy settings = yield new GLib.DBusProxy.for_bus(
+            GLib.BusType.SESSION,
+            GLib.DBusProxyFlags.NONE,
+            null,
+            "org.gnome.ControlCenter",
+            "/org/gnome/ControlCenter",
+            "org.gtk.Actions",
+            cancellable
+        );
+
+        // @s "launch-panel"
+        // @av [<@(sav) ("online-accounts", [<@s "add">, <@s "google">])>]
+        // @a{sv} {}
+
+        GLib.Variant[] args = new GLib.Variant[] {
+            new GLib.Variant.variant(new GLib.Variant.string(action))
+        };
+        if (param != null) {
+            args += new GLib.Variant.variant(new GLib.Variant.string(param));
+        }
+
+        GLib.Variant command = new GLib.Variant.tuple(
+            new GLib.Variant[] {
+                new GLib.Variant.string("online-accounts"),
+                new GLib.Variant.array(GLib.VariantType.VARIANT, args)
+            }
+        );
+
+        GLib.Variant params = new GLib.Variant.tuple(
+            new GLib.Variant[] {
+                new GLib.Variant.string("launch-panel"),
+                new GLib.Variant.array(
+                    GLib.VariantType.VARIANT,
+                    new GLib.Variant[] {
+                        new GLib.Variant.variant(command)
+                    }
+                ),
+                new GLib.Variant("a{sv}")
+            }
+        );
+
+        yield settings.call(
+            "Activate", params, GLib.DBusCallFlags.NONE, -1, cancellable
+        );
     }
 
     private void on_goa_account_added(Goa.Object account) {
