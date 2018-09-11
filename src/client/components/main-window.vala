@@ -288,17 +288,20 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
          */
 
         bool handled = false;
-        if (event.state != 0 &&
-            event.state != Gdk.ModifierType.SHIFT_MASK) {
-            // Have a modifier (Ctrl, Alt, etc) so we don't need to
-            // worry about SKCs, so handle normally. Can't do this
-            // with Shift though since that will stop chars being
-            // typed in the composer that conflict with accells, like
+        Gdk.ModifierType state = (
+            event.state & Gtk.accelerator_get_default_mod_mask()
+        );
+        if (state > 0 && state != Gdk.ModifierType.SHIFT_MASK) {
+            // Have a modifier held down (Ctrl, Alt, etc) that is used
+            // as an accelerator so we don't need to worry about SKCs,
+            // and the key press can be handled normally. Can't do
+            // this with Shift though since that will stop chars being
+            // typed in the composer that conflict with accels, like
             // `!`.
             handled = base.key_press_event(event);
         } else {
-            // A modifier we don't care about is down is down, so
-            // kluge input handling to make SKCs per the above.
+            // No modifier used as an accelerator is down, so kluge
+            // input handling to make SKCs work per the above.
             handled = propagate_key_event(event);
             if (!handled) {
                 handled = activate_key(event);
