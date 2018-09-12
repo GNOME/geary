@@ -1407,6 +1407,13 @@ public class GearyController : Geary.BaseObject {
                 
                 pending_mailtos.clear();
             }
+
+            main_window.main_toolbar.copy_folder_menu.clear();
+            main_window.main_toolbar.move_folder_menu.clear();
+            foreach(Geary.Folder f in current_folder.account.list_folders()) {
+                main_window.main_toolbar.copy_folder_menu.add_folder(f);
+                main_window.main_toolbar.move_folder_menu.add_folder(f);
+            }
         }
         
         folder_selected(current_folder);
@@ -1414,18 +1421,9 @@ public class GearyController : Geary.BaseObject {
         if (!(current_folder is Geary.SearchFolder))
             previous_non_search_folder = current_folder;
         
-        main_window.main_toolbar.copy_folder_menu.clear();
-        main_window.main_toolbar.move_folder_menu.clear();
-        foreach(Geary.Folder f in current_folder.account.list_folders()) {
-            main_window.main_toolbar.copy_folder_menu.add_folder(f);
-            main_window.main_toolbar.move_folder_menu.add_folder(f);
-        }
-        
         // disable copy/move to the new folder
-        if (current_folder != null) {
-            main_window.main_toolbar.copy_folder_menu.enable_disable_folder(current_folder, false);
-            main_window.main_toolbar.move_folder_menu.enable_disable_folder(current_folder, false);
-        }
+        main_window.main_toolbar.copy_folder_menu.enable_disable_folder(current_folder, false);
+        main_window.main_toolbar.move_folder_menu.enable_disable_folder(current_folder, false);
         
         update_ui();
 
