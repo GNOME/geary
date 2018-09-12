@@ -220,6 +220,7 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
         return scrollbar != null && scrollbar.get_visible();
     }
 
+    /** {@inheritDoc} */
     public override bool key_press_event(Gdk.EventKey event) {
         check_shift_event(event);
 
@@ -258,14 +259,36 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
          * [0] - <https://bugs.webkit.org/show_bug.cgi?id=136430>
          */
 
-        bool handled = propagate_key_event(event);
-        if (!handled) {
-            handled = activate_key(event);
-        }
-        if (!handled) {
-            handled = Gtk.bindings_activate_event(this, event);
+        bool handled = false;
+        Gdk.ModifierType state = (
+            event.state & Gtk.accelerator_get_default_mod_mask()
+        );
+        if (state > 0 && state != Gdk.ModifierType.SHIFT_MASK) {
+            // Have a modifier held down (Ctrl, Alt, etc) that is used
+            // as an accelerator so we don't need to worry about SKCs,
+            // and the key press can be handled normally. Can't do
+            // this with Shift though since that will stop chars being
+            // typed in the composer that conflict with accels, like
+            // `!`.
+            handled = base.key_press_event(event);
+        } else {
+            // No modifier used as an accelerator is down, so kluge
+            // input handling to make SKCs work per the above.
+            handled = propagate_key_event(event);
+            if (!handled) {
+                handled = activate_key(event);
+            }
+            if (!handled) {
+                handled = Gtk.bindings_activate_event(this, event);
+            }
         }
         return handled;
+    }
+
+    /** {@inheritDoc} */
+    public override bool key_release_event(Gdk.EventKey event) {
+        check_shift_event(event);
+        return base.key_release_event(event);
     }
 
     private void on_conversation_monitor_changed() {
@@ -407,12 +430,6 @@ public class MainWindow : Gtk.ApplicationWindow, Geary.BaseInterface {
                 on_shift_key(event.type == Gdk.EventType.KEY_PRESS);
             }
         }
-    }
-
-    [GtkCallback]
-    private bool on_key_release_event(Gdk.EventKey event) {
-        check_shift_event(event);
-        return Gdk.EVENT_PROPAGATE;
     }
 
     [GtkCallback]
