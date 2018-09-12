@@ -302,12 +302,14 @@ public string quote_email_for_forward(Geary.Email email, string? quote, TextForm
     return quoted;
 }
 
-private string quote_body(Geary.Email email, string? quote, bool use_quotes, TextFormat format)
+private string quote_body(Geary.Email email,
+                          string? html_quote,
+                          bool use_quotes,
+                          TextFormat format)
     throws Error {
     Message? message = email.get_message();
-    bool preserve_whitespace = !message.has_html_body();
     string? body_text = null;
-    if (quote == null) {
+    if (String.is_empty(html_quote)) {
         switch (format) {
         case TextFormat.HTML:
             body_text = message.has_html_body()
@@ -322,7 +324,7 @@ private string quote_body(Geary.Email email, string? quote, bool use_quotes, Tex
             break;
         }
     } else {
-        body_text = Geary.HTML.smart_escape(quote, preserve_whitespace);
+        body_text = html_quote;
     }
 
     // Wrap the whole thing in a blockquote.

@@ -603,7 +603,7 @@ public class AddEditPage : Gtk.Box {
     
     private void on_signature_stack_changed() {
         if (signature_stack.visible_child_name == "preview_window")
-            preview_webview.load_html(Geary.HTML.smart_escape(email_signature, true), null);
+            preview_webview.load_html(Geary.HTML.smart_escape(email_signature), null);
     }
 
     private uint16 get_default_smtp_port() {
