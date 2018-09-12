@@ -1422,10 +1422,8 @@ public class GearyController : Geary.BaseObject {
         }
         
         // disable copy/move to the new folder
-        if (current_folder != null) {
-            main_window.main_toolbar.copy_folder_menu.enable_disable_folder(current_folder, false);
-            main_window.main_toolbar.move_folder_menu.enable_disable_folder(current_folder, false);
-        }
+        main_window.main_toolbar.copy_folder_menu.enable_disable_folder(current_folder, false);
+        main_window.main_toolbar.move_folder_menu.enable_disable_folder(current_folder, false);
         
         update_ui();
 
