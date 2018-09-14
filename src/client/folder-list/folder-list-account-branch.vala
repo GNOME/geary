@@ -12,7 +12,7 @@ public class FolderList.AccountBranch : Sidebar.Branch {
     
     public AccountBranch(Geary.Account account) {
         base(new Sidebar.Header(account.information.nickname),
-            Sidebar.Branch.Options.NONE, normal_folder_comparator, special_folder_comparator);
+             Sidebar.Branch.Options.AUTO_OPEN_ON_NEW_CHILD, normal_folder_comparator, special_folder_comparator);
         
         this.account = account;
         user_folder_group = new SpecialGrouping(2, "", "tag-symbolic");
