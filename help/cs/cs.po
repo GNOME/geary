@@ -6,8 +6,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: geary master\n"
-"POT-Creation-Date: 2018-03-18 13:52+0000\n"
-"PO-Revision-Date: 2018-03-14 08:14+0100\n"
+"POT-Creation-Date: 2018-09-14 21:08+0000\n"
+"PO-Revision-Date: 2018-09-17 18:00+0200\n"
 "Last-Translator: Marek Černocký <marek@manet.cz>\n"
 "Language-Team: čeština <gnome-cs-list@gnome.org>\n"
 "Language: cs\n"
@@ -17,496 +17,19 @@ msgstr ""
 "Plural-Forms: nplurals=3; plural=(n==1) ? 0 : (n>=2 && n<=4) ? 1 : 2;\n"
 "X-Generator: Gtranslator 2.91.7\n"
 
-#: C/write.page:9(title)
-msgid "Write a message"
-msgstr "Psaní zprávy"
-
-#: C/write.page:12(title)
-msgid "Composing and replying"
-msgstr "Psaní zpráv a odpovídání"
-
-#: C/write.page:13(p)
-msgid ""
-"To compose a new message in Geary, press the <gui>New Message</gui> button "
-"on the toolbar."
-msgstr ""
-"Když chcete v Geary napsat novou zprávu, zmáčkněte na nástrojové liště "
-"tlačítko <gui>Nová zpráva</gui>."
-
-#: C/write.page:16(p)
-msgid ""
-"To reply to a message, open the message menu in the upper right corner of "
-"the message and choose <gui>Reply</gui>, <gui>Reply All</gui> or "
-"<gui>Forward</gui>. You can also reply to the last message in a conversation "
-"via the <gui>Reply</gui>, <gui>Reply All</gui> or <gui>Forward</gui> buttons "
-"on the toolbar."
-msgstr ""
-"Když chcete odpovědět na zprávu, otevřete nabídku zprávy v pravém horním "
-"rohu zprávy a zvolte <gui>Odpovědět</gui>, <gui>Odpovědět všem</gui> nebo "
-"<gui>Přeposlat</gui>. Můžete také odpovědět na poslední zprávu v konverzaci "
-"přes tlačítka <gui>Odpovědět</gui>, <gui>Odpovědět všem</gui> nebo "
-"<gui>Přeposlat</gui> na nástrojové liště."
-
-#: C/write.page:21(title)
-msgid "Features"
-msgstr "Funkce"
-
-#: C/write.page:23(p)
-msgid ""
-"Geary's email composer lets you adjust the font, size and color of text. You "
-"can also insert hyperlinks into messages."
-msgstr ""
-"Při psaní e-mailů v Geary si můžete přizpůsobit písmo, velikost a barvu "
-"textu. Rovněž můžete do zpráv vkládat hypertextové odkazy."
-
-#: C/write.page:25(p)
-msgid ""
-"Geary can also send plain text messages. In the drop-down menu, check or "
-"uncheck \"Rich Text\" to toggle between plain text and rich text mode."
-msgstr ""
-"Zprávy je možné posílat i jako čistě textové. V rozbalovací nabídce "
-"zaškrtněte nebo zrušte zaškrtnutí „Formátovaný text“, abyste se přepnuli "
-"mezi režimy prostého textu a formátovaného textu."
-
-#: C/write.page:28(p)
-msgid ""
-"You can attach a file to a message you're writing in either of these ways:"
-msgstr "K napsané zprávě můžete přiložit soubory a to následujícími způsoby:"
-
-#: C/write.page:30(p)
-msgid ""
-"Press the <gui>Attach File</gui> button at the lower left of the composer "
-"window, then select a file to attach."
-msgstr ""
-"Zmáčkněte tlačítko <gui>Přiložit soubor</gui> v levém dolním rohu okna "
-"editoru a následně vyberte soubor, který chcete přiložit."
-
-#: C/write.page:32(p)
-msgid ""
-"Drag the file from the Nautilus file manager to the composer window, and "
-"drop it either on the text fields at the top of the window or on the toolbar "
-"at the bottom."
-msgstr ""
-"Přetáhněte soubor ze správce souborů Nautilus do okna editoru a upusťte jej "
-"buď na textových polích v horní části okna nebo na nástrojové liště dole."
-
-#: C/write.page:36(p)
-msgid ""
-"A number of keyboard shortcuts are available in the composer; see <link xref="
-"\"shortcuts\"/> for details."
-msgstr ""
-"Řada klávesových zkratek je dostupná v editoru zpráv, podrobnosti viz <link "
-"xref=\"shortcuts\"/>."
-
-#: C/write.page:38(p)
-msgid ""
-"You may specify a signature to be inserted into the composer in the <link "
-"xref=\"accounts\"/> dialog."
-msgstr ""
-"V dialogovém okně <link xref=\"accounts\"/> můžete zadat patičku, která se "
-"bude vkládat do editoru."
-
-#: C/write.page:43(title)
-msgid "Drafts"
-msgstr "Koncepty"
-
-#: C/write.page:45(p)
-msgid ""
-"For mail servers that support drafts, Geary will automatically save the "
-"message as you type. If you close the composer without sending, Geary will "
-"prompt you to keep the draft or to discard it."
-msgstr ""
-"Na serverech, které podporují koncepty, ukládá Gerary zprávy automaticky "
-"během psaní. Pokud zavřete okno editoru, aniž byste zprávu odeslali, Geary "
-"se vás dotáže, jestli má zprávu uchovat v konceptech nebo ji zahodit."
-
-#: C/write.page:48(p)
-msgid ""
-"To edit an existing draft, select the Drafts folder in the folder list, "
-"select the message, and click \"Edit Draft\" in the message viewer."
-msgstr ""
-"Až chcete ve psaní stávajícího konceptu pokračovat, vyberte v seznamu složek "
-"složku Koncepty, vyberte zprávu a klikněte v prohlížeči zpráv na „Upravit "
-"koncept“ ."
-
-#: C/write.page:51(p)
-msgid "Geary deletes the draft when you send the message."
-msgstr "Po odeslání zprávy Geary koncept smaže."
-
-#: C/star.page:10(title)
-msgid "Star a message or mark it as read/unread"
-msgstr "Označení zprávy hvězdičkou nebo jako přečtená/nepřečtená"
-
-#: C/star.page:12(title)
-msgid "Star messages"
-msgstr "Označení zpráv hvězdičkou"
-
-#: C/star.page:13(p)
-msgid ""
-"You can star messages to indicate that they're important to you. To mark a "
-"conversation with a star, click its star icon in the conversation list. You "
-"can star an individual message by clicking the star at the upper right of "
-"the message itself."
-msgstr ""
-"Zprávy si můžete označovat hvězdičkou, abyste věděli, že jsou pro vás "
-"důležité. Pokud tak chcete učinit, klikněte na ikonu hvězdičky u konverzace "
-"v seznamu konverzací. Hvězdičkou můžete označit i jednotlivou zprávu, stačí "
-"kliknout na hvězdičku v pravém horním rohu zprávy."
-
-#: C/star.page:15(p)
-msgid ""
-"With Gmail accounts, starred messages appear in the Starred folder in the "
-"folder list."
-msgstr ""
-"V účtech Gmail se zprávy označené hvězdičkou objeví ve složce „S hvězdičkou“ "
-"v seznamu složek."
-
-#: C/star.page:18(title)
-msgid "Mark messages as read or unread"
-msgstr "Označování zpráv, jako přečtené nebo nepřečtené"
-
-#: C/star.page:19(p)
-msgid ""
-"Geary marks messages as read automatically as you read them. To manually "
-"toggle a conversation as read or unread, click the circle icon in the "
-"conversation list."
-msgstr ""
-"Geary označuje zprávy automaticky jako přečtené, když si je přečtete. Když "
-"chcete zprávu jako přečtenou či nepřečtenou označit ručně, klikněte na ikonu "
-"kolečka v seznamu konverzace."
-
-#: C/star.page:22(p)
-msgid ""
-"Alternately, the <gui>Mark as Unread</gui> in the <gui>Mark</gui> menu on "
-"the toolbar can be used to toggle the read status of the selected "
-"conversation(s)."
-msgstr ""
-"Případně můžete k přepnutí stavu přečteno/nepřečteno u vybrané konverzace "
-"použít <gui>Označit jako přečtené</gui> či <gui>Označit jako nepřečtené</"
-"gui> v nabídce <gui>Označit</gui> na nástrojové liště."
-
-#: C/star.page:25(p)
-msgid ""
-"To mark an individual message as read, select <gui>Mark as Read</gui> from "
-"the dropdown menu."
-msgstr ""
-"Pro označení jednotlivé zprávy jako přečtené vyberte <gui>Označit jako "
-"přečtené</gui> v rozbalovací nabídce."
-
-#: C/shortcuts.page:10(title)
-msgid "Keyboard shortcuts"
-msgstr "Klávesové zkratky"
-
-#: C/shortcuts.page:12(p)
-msgid ""
-"Geary has keyboard shortcuts for most common operations. Use the built-in "
-"keyboard shortcuts help in Geary to discover the full list. This can be "
-"accessed via the application menu: <guiseq><gui>Geary</gui><gui>Keyboard "
-"Shortcuts</gui></guiseq> or using the keyboard shortcuts listed below."
-msgstr ""
-"Geary má pro nejpoužívanější operace klávesové zkratky. Jejich seznam "
-"najdete v zabudované nápovědě ke klávesovým zkratkám. K té se dostanete přes "
-"nabídku aplikace: <guiseq><gui>Geary</gui> <gui>Keyboard Shortcuts</gui></"
-"guiseq> nebo pomocí níže uvedených klávesových zkratek."
-
-#: C/shortcuts.page:18(p)
-msgid ""
-"The following keyboard shortcuts can be used to access on-line help from "
-"Geary:"
-msgstr ""
-"Následující klávesové zkratky můžete použít pro přístup k nápovědě on-line z "
-"aplikace Geary:"
-
-#: C/shortcuts.page:22(p)
-msgid "Display this User Manual"
-msgstr "Zobrazit tuto uživatelskou příručku"
-
-#: C/shortcuts.page:23(key)
-msgid "F1"
-msgstr "F1"
-
-#: C/shortcuts.page:26(p)
-msgid "Display all keyboard shortcuts"
-msgstr "Zobrazit všechny klávesové zkratky"
-
-#: C/shortcuts.page:27(p)
-msgid ""
-"<keyseq><key>Ctrl</key><key>?</key></keyseq> or <keyseq><key>Ctrl</"
-"key><key>F1</key></keyseq>"
-msgstr ""
-"<keyseq><key>Ctrl</key><key>?</key></keyseq> nebo <keyseq><key>Ctrl</"
-"key><key>F1</key></keyseq>"
-
-#: C/search.page:10(title)
-msgid "Search"
-msgstr "Hledání"
-
-#: C/search.page:12(p)
-msgid ""
-"Geary supports a per-account full text search. To start a search, select a "
-"folder associated with the account you'd like to search against. Then click "
-"the search box in the toolbar (or press <keyseq><key>Ctrl</key><key>S</key></"
-"keyseq>) and start typing. Results will appear after a brief delay."
-msgstr ""
-"Geary podporuje vyhledávání v úplně všech textech v jednotlivých účtech. "
-"Když chcete vyhledávat, vyberte složku patřící k účtu, ve kterém si přejete "
-"hledat. Pak klikněte na vyhledávací pole na nástrojové liště (nebo zmáčkněte "
-"<keyseq><key>Ctrl</key><key>S</key></keyseq>) a začněte psát. Po chvilce se "
-"začnou objevovat výsledky."
-
-#: C/search.page:16(p)
-msgid ""
-"The full text search includes email text, email addresses (to, from, and "
-"cc), subject lines and attachment filenames."
-msgstr ""
-"Rozsah vyhledávání pokrývá text zpráv, e-mailové adresy (od, komu a kopie), "
-"řádek s předmětem a názvy souborů v přílohách."
-
-#: C/search.page:19(p)
-msgid ""
-"Keywords that match your search are highlighted in the message view. Geary "
-"will match different forms of the same word, for example searching for \"walk"
-"\" will also match \"walking\" and \"walked.\""
-msgstr ""
-"Klíčová slova, která vyhovují vašemu hledání, se v zobrazení zprávy "
-"zvýrazní. Geary umí rozpoznat i různé varianty téhož slova, například při "
-"hledání „oběd“ bude vyhovovat i „obědvat“ a „obědový“."
-
-#: C/search.page:23(title)
-msgid "Search operators"
-msgstr "Operátory vyhledávání"
-
-#: C/search.page:24(p)
-msgid "Geary supports the following operators to limit the scope of searches:"
-msgstr "Geary podporuje následující operátory omezující rozsah vyhledávání:"
-
-#: C/search.page:27(var)
-msgid "filename"
-msgstr "název_souboru"
-
-#: C/search.page:27(input)
-msgid "attachment:<placeholder-1/>"
-msgstr "attachment:<placeholder-1/>"
-
-#: C/search.page:28(p)
-msgid "Finds messages with attachments whose name matches <var>filename</var>."
-msgstr ""
-"Najít zprávy, jejich přílohy mají název odpovídající <var>názvu_souboru</"
-"var>."
-
-#: C/search.page:31(var) C/search.page:39(var) C/search.page:63(var)
-msgid "recipient"
-msgstr "příjemce"
-
-#: C/search.page:31(input)
-msgid "bcc:<placeholder-1/>"
-msgstr "bcc:<placeholder-1/>"
-
-#: C/search.page:32(p)
-msgid "Finds messages where <var>recipient</var> matches the BCC header."
-msgstr ""
-"Najít zprávy, ve kterých <var>příjemce</var> odpovídá údaji „Skrytá kopie“ v "
-"hlavičce."
-
-#: C/search.page:35(var) C/search.page:59(var)
-msgid "text"
-msgstr "text"
-
-#: C/search.page:35(input)
-msgid "body:<placeholder-1/>"
-msgstr "body:<placeholder-1/>"
-
-#: C/search.page:36(p)
-msgid "Finds messages whose body contains <var>text</var>."
-msgstr "Najít zprávy, jejichž tělo obsahuje <var>text</var>."
-
-#: C/search.page:39(input)
-msgid "cc:<placeholder-1/>"
-msgstr "cc:<placeholder-1/>"
-
-#: C/search.page:40(p)
-msgid "Finds messages where <var>recipient</var> matches the CC header."
-msgstr ""
-"Najít zprávy, ve kterých <var>příjemce</var> odpovídá údaji „Kopie“ v "
-"hlavičce."
-
-#: C/search.page:43(var)
-msgid "sender"
-msgstr "odesilatel"
-
-#: C/search.page:43(input)
-msgid "from:<placeholder-1/>"
-msgstr "from:<placeholder-1/>"
-
-#: C/search.page:44(p)
-msgid "Finds messages where <var>sender</var> matches the From header."
-msgstr ""
-"Najít zprávy, ve kterých <var>odesilatel</var> odpovídá údaji „Od“ v "
-"hlavičce."
-
-#: C/search.page:47(input)
-msgid "is:read"
-msgstr "is:read"
-
-#: C/search.page:48(p)
-msgid "Finds messages that have been marked as read."
-msgstr "Najít zprávy, které jsou označené jako přečtené."
-
-#: C/search.page:51(input)
-msgid "is:starred"
-msgstr "is:starred"
-
-#: C/search.page:52(p)
-msgid "Finds messages that have been marked as starred."
-msgstr "Najít zprávy, které jsou označené hvězdičkou"
-
-#: C/search.page:55(input)
-msgid "is:unread"
-msgstr "is:unread"
-
-#: C/search.page:56(p)
-msgid "Finds messages that have been marked as not read."
-msgstr "Najít zprávy, které jsou označené jako nepřečtené."
-
-#: C/search.page:59(input)
-msgid "subject:<placeholder-1/>"
-msgstr "subject:<placeholder-1/>"
-
-#: C/search.page:60(p)
-msgid "Finds messages whose subject contains <var>text</var>."
-msgstr "Najít zprávy, jejichž předmět obsahuje <var>text</var>."
-
-#: C/search.page:63(input)
-msgid "to:<placeholder-1/>"
-msgstr "to:<placeholder-1/>"
-
-#: C/search.page:64(p)
-msgid ""
-"Finds messages where <var>sender</var> matches the To, CC, or BCC header."
-msgstr ""
-"Najít zprávy, ve kterých <var>odesilatel</var> odpovídá údajům „Komu“, "
-"„Kopi“ nebo „Skrytá kopie“ v hlavičce."
-
-#: C/search.page:68(p)
-msgid ""
-"As a special case, the <input>bcc</input>, <input>cc</input>, <input>from</"
-"input>, and <input>to</input> operators support <input>me</input> as their "
-"argument, which searches for the account's email address in the appropriate "
-"context."
-msgstr ""
-"Jako speciální případ podporují operátory <input>bcc</input>, <input>cc</"
-"input>, <input>from</input> a <input>to</input> argument <input>me</input>, "
-"který hledá e-mailové adresy účtu v příslušném kontextu."
-
-#: C/preferences.page:10(title)
-msgid "Preferences"
-msgstr "Předvolby"
-
-#: C/preferences.page:11(p)
-msgid ""
-"The <gui>Preferences</gui> option is available in either Geary's application "
-"menu or the gear menu in the upper-right of the toolbar. (The location "
-"depends on the install desktop shell. For GNOME Shell and Unity, the "
-"application menu is available near the top-left corner of the screen.)"
-msgstr ""
-"Položku <gui>Předvolby</gui> najdete v aplikační nabídce Geary a v nabídce v "
-"pravém horním rohu nástrojové lišty. (Přesné umístění záleží na "
-"nainstalovaném pracovním prostředí. V GNOME Shell a Unity se aplikační "
-"nabídky nachází poblíž levého horního rohu obrazovky.)"
-
-#: C/preferences.page:17(title)
-msgid "Reading"
-msgstr "Čtení"
-
-#: C/preferences.page:20(gui)
-msgid "Automatically select next message"
-msgstr "Automaticky vybrat další zprávu"
-
-#: C/preferences.page:21(p)
-msgid ""
-"When this option is enabled, Geary automatically selects the latest message "
-"in a folder when you enter the folder. In addition, after archiving a "
-"message, Geary automatically selects an adjacent message."
-msgstr ""
-"Když je tato volba zapnutá, Geary, po té co vstoupíte do složky, automaticky "
-"vybere nejnovější zprávu. Navíc po archivaci zprávy, vybere Geary "
-"automaticky sousední zprávu."
-
-#: C/preferences.page:26(gui)
-msgid "Display conversation preview"
-msgstr "Zobrazit náhled konverzace"
-
-#: C/preferences.page:27(p)
-msgid ""
-"Enables message previews in the conversation list. Previews show the first "
-"few lines of each message."
-msgstr ""
-"Povoluje náhled zpráv v seznamu konverzací. V náhledu se zobrazuje pár "
-"prvních řádků od každé zprávy."
-
-#: C/preferences.page:31(gui)
-msgid "Use three pane view"
-msgstr "Používat třípanelové zobrazení"
-
-#: C/preferences.page:32(p)
-msgid ""
-"Show the folder list, the conversation list, and the messages side-by-side-"
-"by-side in three panes. If not selected, the folder list and conversation "
-"list will be stacked vertically in a single pane."
-msgstr ""
-"Zobrazí vedle sebe tři panely – seznam složek, seznam konverzací a zprávy. "
-"Když není vybráno, budou seznam složek a seznam konverzací svisle nad sebou "
-"v jediném panelu."
-
-#: C/preferences.page:40(title)
-msgid "Notifications"
-msgstr "Upozornění"
-
-#: C/preferences.page:43(gui)
-msgid "Play notification sounds"
-msgstr "Přehrávat zvuková upozornění"
-
-#: C/preferences.page:44(p)
-msgid "When set, Geary plays a sound whenever a new message arrives."
-msgstr "Když je zapnuto, Geary přehraje zvuk pokaždé, když dorazí nová zpráva."
-
-#: C/preferences.page:47(gui)
-msgid "Show notifications for new mail"
-msgstr "Zobrazit upozornění na nový e-mail"
-
-#: C/preferences.page:48(p)
-msgid ""
-"When set, Geary displays a <em>notification</em> each time a new message "
-"arrives. Notifications are displayed in a system-dependent manner. On GNOME "
-"Shell, notifications appear at the bottom of the display (older versions) or "
-"centered just below the top bar (newer versions). In Ubuntu Unity, "
-"notifications appear at the upper right of the display."
-msgstr ""
-"Když je zapnuto, zobrazí Geary <em>upozornění</em> pokaždé, když dorazí nová "
-"zpráva. Upozornění se zobrazují podle zvyklostí systému. V GNOME Shell se "
-"zobrazují ve spodní části obrazovky (starší verze) nebo uprostřed přímo pod "
-"horní lištou (novější verze). V Ubuntu Unity se zobrazují v pravém horním "
-"rohu obrazovky."
-
-#: C/preferences.page:54(gui)
-msgid "Watch for new mail when closed"
-msgstr "Sledovat novou poštu při zavřené aplikaci"
-
-#: C/preferences.page:55(p)
-msgid ""
-"Geary will watch your accounts for new mail even when the main window is not "
-"open. To do this, it will silently start when you log in to your computer, "
-"and it will continue to run after you close all windows."
-msgstr ""
-"Geary bude sledovat vaše účty ohledně nové pošty, i když není otevřeno "
-"hlavní okno. Aby to mohl dělat, bude tiše spuštěn jakmile se přihlásíte k "
-"počítači a bude pokračovat v běhu i po té, co zavřete všechna okna."
-
-#: C/overview.page:8(title)
+#. Put one translator per line, in the form NAME <EMAIL>, YEAR1, YEAR2
+#| msgid "translator-credits"
+msgctxt "_"
+msgid "translator-credits"
+msgstr "Marek Černocký <marek@manet.cz>"
+
+#. (itstool) path: page/title
+#: C/overview.page:8
 msgid "Overview"
 msgstr "Přehled"
 
-#: C/overview.page:10(p)
+#. (itstool) path: page/p
+#: C/overview.page:10
 msgid ""
 "Geary is a lightweight email reader for the <link href=\"http://gnome.org"
 "\">GNOME</link> desktop. It works with mail servers that support the IMAP "
@@ -518,7 +41,8 @@ msgstr ""
 "protokol IMAP, včetně populárních služeb jako je Gmail, Yahoo Mail a Outlook."
 "com."
 
-#: C/overview.page:14(p)
+#. (itstool) path: page/p
+#: C/overview.page:14
 msgid ""
 "Geary groups mail messages into <em>conversations</em>. A conversation "
 "contains all messages in a single thread of discussion."
@@ -526,15 +50,18 @@ msgstr ""
 "Geary seskupuje poštu do takzvaných <em>konverzací</em>. Konverzace obsahuje "
 "všechny zprávy v jednom vlákně diskuze."
 
-#: C/overview.page:17(p)
+#. (itstool) path: page/p
+#: C/overview.page:17
 msgid "The main Geary window is divided into several areas:"
 msgstr "Hlavní okno Geary je rozděleno na několik částí:"
 
-#: C/overview.page:20(title)
+#. (itstool) path: section/title
+#: C/overview.page:20
 msgid "Folder list"
 msgstr "Seznam složek"
 
-#: C/overview.page:21(p)
+#. (itstool) path: section/p
+#: C/overview.page:21
 msgid ""
 "The <em>folder list</em> at the left displays all <em>folders</em> and "
 "<em>labels</em> in your mail account. Geary uses the term <em>label</em> for "
@@ -547,11 +74,13 @@ msgstr ""
 "(Webové rozhraní Gmail používá tento výraz také, většina ostatních služeb "
 "jej ale nepoužívá.)"
 
-#: C/overview.page:28(title)
+#. (itstool) path: section/title
+#: C/overview.page:28
 msgid "Conversation list"
 msgstr "Seznam konverzací"
 
-#: C/overview.page:29(p)
+#. (itstool) path: section/p
+#: C/overview.page:29
 msgid ""
 "The <em>conversation list</em> displays a list of conversations in the "
 "selected folder. Newer conversations appear at the top."
@@ -559,7 +88,8 @@ msgstr ""
 "<em>Seznam konverzací</em> zobrazuje seznam konverzací ve vybrané složce. "
 "Nejnovější konverzace se zobrazují nahoře."
 
-#: C/overview.page:31(p)
+#. (itstool) path: section/p
+#: C/overview.page:31
 msgid ""
 "Each sender's name appears bold if there are unread messages from that "
 "sender. If a conversation has more than one message, Geary displays a count "
@@ -569,7 +99,8 @@ msgstr ""
 "zobrazí tučně. Pokud je v konverzaci více než jedna zpráva, zobrazí Geary "
 "počet zpráv v konverzaci."
 
-#: C/overview.page:34(p)
+#. (itstool) path: section/p
+#: C/overview.page:34
 msgid ""
 "Geary does not automatically download all messages in all of your mail "
 "folders. When you first visit your Inbox or any other folder, Geary "
@@ -583,7 +114,8 @@ msgstr ""
 "více zpráv, stačí se v seznamu konverzace posouvat dolů a další zprávy se "
 "boudou automaticky získávat."
 
-#: C/overview.page:36(p)
+#. (itstool) path: section/p
+#: C/overview.page:36
 msgid ""
 "Some commands in Geary can act on a group of conversations. To select "
 "multiple conversations, hold down the <key>Ctrl</key> key and click each "
@@ -597,11 +129,13 @@ msgstr ""
 "Případně můžete označit celý blok tak, že kliknete na první konverzaci, "
 "podržíte <key>Shift</key> a kliknete na poslední konverzaci."
 
-#: C/overview.page:44(title)
+#. (itstool) path: section/title
+#: C/overview.page:44
 msgid "Message area"
 msgstr "Oblast zpráv"
 
-#: C/overview.page:45(p)
+#. (itstool) path: section/p
+#: C/overview.page:45
 msgid ""
 "The <em>message area</em> displays all messages in the selected "
 "conversation, with the oldest message at the top."
@@ -609,7 +143,8 @@ msgstr ""
 "V <em>oblasti zpráv</em> jsou zobrazeny všechny zprávy z vybrané konverzace, "
 "přičemž nejstarší zpráva je nejvíc nahoře."
 
-#: C/overview.page:47(p)
+#. (itstool) path: section/p
+#: C/overview.page:47
 msgid ""
 "At the upper right of each message, Geary displays a dropdown arrow that "
 "lets you open the <em>message menu</em> with commands that operate on the "
@@ -618,7 +153,8 @@ msgstr ""
 "V pravém horním rohu každé zprávy zobrazuje Geary rozbalovací šipku, pomocí "
 "které můžete otevřít <em>nabídku zprávy</em> s příkazy týkajícími se zprávy."
 
-#: C/overview.page:49(p)
+#. (itstool) path: section/p
+#: C/overview.page:49
 msgid ""
 "When you view a conversation, Geary collapses messages that you've already "
 "read. Click collapsed messages to expand them. Click an expanded message's "
@@ -628,7 +164,8 @@ msgstr ""
 "Kliknutím na sbalené zprávy je rozbalíte. Kliknutím na hlavičku rozbalené "
 "zprávy je sbalíte."
 
-#: C/overview.page:50(p)
+#. (itstool) path: section/p
+#: C/overview.page:50
 msgid ""
 "Any attachments in a message appear at the bottom of the message. You can "
 "click an attachment to open it or right-click to save it."
@@ -636,7 +173,8 @@ msgstr ""
 "Případné přílohy zprávy se objeví ve spodní části zprávy. Kliknutím na "
 "přílohu ji otevřete, kliknutím pravým tlačítkem ji uložíte."
 
-#: C/overview.page:52(p)
+#. (itstool) path: section/p
+#: C/overview.page:52
 msgid ""
 "Geary uses <link href=\"https://secure.gravatar.com/\">Gravatar</link> to "
 "display an avatar for each message's sender in its header."
@@ -644,178 +182,13 @@ msgstr ""
 "Geary používá <link href=\"https://secure.gravatar.com/\">Gravatar</link> "
 "pro zobrazení avatara u odesilatele zprávy v hlavičce zprávy."
 
-#: C/limits.page:11(title)
-msgid "Limitations"
-msgstr "Omezení"
-
-#: C/limits.page:12(p)
-msgid ""
-"Geary is still in early development. Geary supports IMAP and has been tested "
-"with Gmail, Yahoo, and the free Dovecot mail server. Experimental support "
-"for Outlook.com is provided. Geary may not yet work well with some IMAP "
-"servers. At this time Geary is still missing numerous features including "
-"offline mode."
-msgstr ""
-"Geary je prozatím ve stádiu ranného vývoje. Podporuje IMAP a byl testován "
-"vůči poštovním serverům Gmail, Yahoo a svobodnému Dovecotu. Pokusně je "
-"poskytována podpora pro Outlook.com. S některými jinými servery IMAP nemusí "
-"Geary pracovat úplně správně. V současnosti schází také řada různých funkcí, "
-"včetně práce při odpojení od sítě."
-
-#: C/limits.page:14(p)
-msgid ""
-"To learn more about the features we're working on and the future of Geary, "
-"please visit Geary's <link href=\"https://wiki.gnome.org/Apps/Geary\">wiki "
-"page</link>."
-msgstr ""
-"Jestli se chcete dozvědět více od funkcích, na kterých se pracuje a o "
-"budoucnosti Geary, navštivte <link href=\"https://wiki.gnome.org/Apps/Geary"
-"\">wikistránku</link> projektu Geary."
-
-#: C/label.page:10(title)
-msgid "Label or move a conversation"
-msgstr "Přiřazování štítků a přesun konverzací"
-
-#: C/label.page:12(title)
-msgid "Label a conversation"
-msgstr "Přidělení štítku konverzaci"
-
-#: C/label.page:13(p)
-msgid ""
-"Geary lets you apply one or more <em>labels</em> to each conversation. Geary "
-"labels correspond to labels in Gmail, or ordinary folders in other mail "
-"services."
-msgstr ""
-"Geary umožňuje každé konverzaci přidělit jeden nebo i více <em>štítků</em>. "
-"Štítky jsou u Geary to stejné jako štítky u Gmailu nebo běžné složky u "
-"jiných poštovních služeb."
-
-#: C/label.page:15(p)
-msgid ""
-"To label one or more conversations, first select the conversation(s), then "
-"do either of the following:"
-msgstr ""
-"Když chcte jedné či více konverzacím přidělit štítek, nejprve je vyberte a "
-"potom použijte jeden z následujících postupů:"
-
-#: C/label.page:18(p)
-msgid ""
-"Click the <gui>Label</gui> button on the toolbar and select a label from the "
-"resulting drop-down menu."
-msgstr ""
-"Klikněte na tlačítko <gui>Štítek</gui> na nástrojové liště a vyberte štítek "
-"z výsledné rozbalovací nabídky."
-
-#: C/label.page:20(p)
-msgid ""
-"Hold down the <key>Ctrl</key> key and drag the conversation(s) from the "
-"conversation list to the label in the sidebar."
-msgstr ""
-"Držte zmáčknutou klávesu <key>Ctrl</key> a přetáhněte konverzaci či "
-"konverzace ze seznamu konverzací do štítku v postranním panelu."
-
-#: C/label.page:25(title)
-msgid "Move a conversation to a folder or label"
-msgstr "Přesunutí konverzace do složky nebo štítku"
-
-#: C/label.page:26(p)
-msgid ""
-"To move one or more conversations to a folder or label, first select the "
-"conversation(s), then do either of the following:"
-msgstr ""
-"Když chcete jednu nebo více konverzací přesunout do složky nebo štítku, "
-"nejprve je vyberte a pak použijte jeden z následujících postupů:"
-
-#: C/label.page:29(p)
-msgid ""
-"Click the <gui>Move</gui> button on the toolbar and select a folder or label "
-"from the resulting drop-down menu."
-msgstr ""
-"Klikněte na tlačítko <gui>Přesunout</gui> na nástrojové liště a vyberte "
-"složku nebo štítek z výsledné rozbalovací nabídky."
-
-# Poznámky:
-# Přidat poznámku
-#: C/label.page:31(p)
-msgid ""
-"Drag the conversation(s) from the conversation list to the folder or label "
-"in the sidebar."
-msgstr ""
-"Přetáhněte konverzaci či konverzace ze seznamu konverzací do složky nebo "
-"štítku v postranním panelu."
-
-#. When image changes, this message will be marked fuzzy or untranslated for you.
-#. It doesn't matter what you translate it to: it's not used at all.
-#: C/index.page:5(None)
-msgid "@@image: 'figures/geary.svg'; md5=18b50c9e10fe5256ae1cb12aaa3a7600"
-msgstr "@@image: 'figures/geary.svg'; md5=18b50c9e10fe5256ae1cb12aaa3a7600"
-
-#: C/index.page:5(title)
-msgid "<media type=\"image\" src=\"figures/geary.svg\"/> Geary"
-msgstr "<media type=\"image\" src=\"figures/geary.svg\"/> Geary"
-
-#: C/index.page:9(title)
-msgid "Introduction"
-msgstr "Úvod"
-
-#: C/index.page:13(title)
-msgid "Using Geary"
-msgstr "Používání Geary"
-
-#: C/index.page:17(title)
-msgid "Bugs"
-msgstr "Chyby"
-
-#: C/bugs.page:8(title)
-msgid "Think you've found a bug?"
-msgstr "Myslíte, že jste našli chybu?"
-
-#: C/bugs.page:9(p)
-msgid ""
-"If you suspect you've found a bug in Geary, follow these steps to report it:"
-msgstr ""
-"Pokud předpokládáte, že jste našli v aplikaci Geary chybu, postupujte "
-"následovně:"
-
-#: C/bugs.page:11(p)
-msgid ""
-"Search Geary's <link href=\"https://bugzilla.gnome.org/browse.cgi?"
-"product=geary\">bug database</link> to see if someone else has reported the "
-"bug."
-msgstr ""
-"Podívejte se do <link href=\"https://bugzilla.gnome.org/browse.cgi?"
-"product=geary\">databáze chyb</link> aplikace Geary, jestli stejnou chybu "
-"nenahlásil již někdo jiný."
-
-#: C/bugs.page:13(p)
-msgid ""
-"Don't see your bug listed? Congratulations! You've found a new bug. To "
-"create an bug report, create an account on GNOME's Bugzilla and <link href="
-"\"https://bugzilla.gnome.org/enter_bug.cgi?product=geary\">file a new bug</"
-"link>. Be as specific as you can and describe the steps to reproduce it. "
-"Don't forget to include details about your operating system and what version "
-"of Geary you're running."
-msgstr ""
-"Nenašli jste ji? Gratulujeme! Našli jste zbrusu novou chybu. Abyste ji mohli "
-"nahlásit, vytvořte si účet v Bugzille projektu GNOME a <link href=\"https://"
-"bugzilla.gnome.org/enter_bug.cgi?product=geary\">vyplňte údaje o nové chybě</"
-"link>. Buďte co nejvíce konkrétní a popište kroky, kterými se dá chyba "
-"reprodukovat. Nezapomeňte zahrnout informace o svém operačním systému a "
-"verzi Geary."
-
-#: C/bugs.page:18(p)
-msgid ""
-"For general inquiries, please join the <link href=\"https://mail.gnome.org/"
-"mailman/listinfo/geary-list\"> Geary mailing list</link>."
-msgstr ""
-"Ohledně obecných dotazů se prosím připojte do <link href=\"https://mail."
-"gnome.org/mailman/listinfo/geary-list\">poštovní konference Geary</link>."
-
-#: C/archive.page:10(title)
+#. (itstool) path: page/title
+#: C/archive.page:10
 msgid "Delete or archive a message"
 msgstr "Mazání a archivace zpráv"
 
-#: C/archive.page:12(p)
+#. (itstool) path: page/p
+#: C/archive.page:12
 msgid ""
 "When you use Geary with a Gmail account, Geary lets you <em>archive</em> "
 "messages. The <gui>Archive</gui> toolbar button archives the selected "
@@ -825,7 +198,8 @@ msgstr ""
 "em>. Tlačítko <gui>Archivovat</gui> na nástrojové liště archivuje vybranou "
 "konverzaci. Archivované zprávy se objeví ve složce <gui>Všechny zprávy</gui>."
 
-#: C/archive.page:16(p)
+#. (itstool) path: page/p
+#: C/archive.page:16
 msgid ""
 "With other mail servers, you can trash or delete, but not archive, messages. "
 "To move one or more conversations to the <gui>Trash</gui> folder, select "
@@ -841,7 +215,8 @@ msgstr ""
 "zmáčkněte tlačítko <gui>Smazat</gui> vyskytující se vedle tlačítka <gui>Koš</"
 "gui>."
 
-#: C/archive.page:21(p)
+#. (itstool) path: page/p
+#: C/archive.page:21
 msgid ""
 "Delete is not available from every folder, such as Search. Delete is also "
 "unavailable for Gmail. For Gmail, <gui>Trash</gui> will move messages to the "
@@ -853,15 +228,713 @@ msgstr ""
 "složky koš na serveru, kde je uživatel může smazat ručně. Případně je smaže "
 "server automaticky po 30 dnech."
 
-#: C/accounts.page:10(title)
+#. (itstool) path: page/title
+#: C/contributing.page:10
+msgid "Contribute to Geary"
+msgstr "Přispívání do Geary"
+
+#. (itstool) path: page/p
+#: C/contributing.page:12
+msgid ""
+"Want to help improve Geary? There are a number of ways you can contribute:"
+msgstr ""
+"Chcete pomáhat vylepšovat aplikaci Geary? Zde je několik způsobů, jak můžete "
+"přispět:"
+
+#. (itstool) path: item/p
+#: C/contributing.page:16
+msgid ""
+"<link href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">Bug "
+"reporting</link>—report new bugs or request new features"
+msgstr ""
+"<link href=\"https://wiki.gnome.org/Apps/Geary/ReportingABug\">Hlášení chyb</"
+"link> — hlaste nové chyby nebo navrhujte novou funkcionalitu"
+
+#. (itstool) path: item/p
+#: C/contributing.page:19
+msgid ""
+"<link href=\"https://wiki.gnome.org/Apps/Geary/Design\">User Experience "
+"Design</link>—research and develop Geary’s user experience"
+msgstr ""
+"<link href=\"https://wiki.gnome.org/Apps/Geary/Design\">Návrh grafiky a "
+"ovládání</link> — zkoumejte a rozvíjejte uživatelskou přívětivost aplikace "
+"Geary"
+
+#. (itstool) path: item/p
+#: C/contributing.page:20
+msgid ""
+"<link href=\"https://wiki.gnome.org/Apps/Geary/Development\">Development</"
+"link>—fix bugs and add new features"
+msgstr ""
+"<link href=\"https://wiki.gnome.org/Apps/Geary/Development\">Programátorský "
+"vývoj</link> — opravujte chyby a přidávejte nové funkce"
+
+#. (itstool) path: item/p
+#: C/contributing.page:21
+msgid ""
+"<link href=\"https://wiki.gnome.org/Apps/Geary/Translating\">Translating</"
+"link>—translate Geary’s user interface and user manual into new languages"
+msgstr ""
+"<link href=\"https://wiki.gnome.org/Apps/Geary/Translating\">Překládání</"
+"link> — překládejte uživatelské rozhraní aplikace Geary a její uživatelskou "
+"příručku do svého rodného jazyka"
+
+#. (itstool) path: item/p
+#: C/contributing.page:22
+msgid ""
+"<link href=\"https://wiki.gnome.org/Apps/Geary/Contact\">Join the "
+"discussion</link>—on the mailing list or IRC channel"
+msgstr ""
+"<link href=\"https://wiki.gnome.org/Apps/Geary/Contact\">Zapojení do "
+"diskuzí</link> — v poštovní konferenci nebo na kanále IRC"
+
+#. (itstool) path: page/p
+#: C/contributing.page:25
+msgid "Thanks for your help making Geary better!"
+msgstr "Děkujeme za vaši pomoc ve snaze udělat Geary stále lepším!"
+
+#. (itstool) path: page/title
+#: C/limits.page:9
+msgid "Limitations"
+msgstr "Omezení"
+
+#. (itstool) path: page/p
+#: C/limits.page:11
+msgid ""
+"Geary is still in early development. Geary supports IMAP and has been tested "
+"with Gmail, Yahoo, and the free Dovecot mail server. Experimental support "
+"for Outlook.com is provided. Geary may not yet work well with some IMAP "
+"servers. At this time Geary is still missing numerous features including "
+"offline mode."
+msgstr ""
+"Geary je prozatím ve stádiu ranného vývoje. Podporuje IMAP a byl testován "
+"vůči poštovním serverům Gmail, Yahoo a svobodnému Dovecotu. Pokusně je "
+"poskytována podpora pro Outlook.com. S některými jinými servery IMAP nemusí "
+"Geary pracovat úplně správně. V současnosti schází také řada různých funkcí, "
+"včetně práce při odpojení od sítě."
+
+#. (itstool) path: page/p
+#: C/limits.page:17
+msgid ""
+"To learn more about the features we're working on and the future of Geary, "
+"please visit Geary's <link href=\"https://wiki.gnome.org/Apps/Geary\">wiki "
+"page</link>."
+msgstr ""
+"Jestli se chcete dozvědět více od funkcích, na kterých se pracuje a o "
+"budoucnosti Geary, navštivte <link href=\"https://wiki.gnome.org/Apps/Geary"
+"\">wikistránku</link> projektu Geary."
+
+#. (itstool) path: page/title
+#: C/bugs.page:10
+msgid "Found a bug?"
+msgstr "Našli jste chybu?"
+
+#. (itstool) path: page/p
+#: C/bugs.page:12
+msgid ""
+"If you suspect you've found a bug in Geary, please <link href=\"https://wiki."
+"gnome.org/Apps/Geary/Contact\">get in touch</link> about it so it can be "
+"fixed."
+msgstr ""
+"Jestliže předpokládáte, že jste v Geary našli chybu, <link href=\"https://"
+"wiki.gnome.org/Apps/Geary/Contact\">informujte o tom vývojáře</link>, aby ji "
+"mohli opravit."
+
+#. (itstool) path: page/p
+#: C/bugs.page:16
+msgid ""
+"To help diagnose the problem as fast as possible, please include the "
+"following information:"
+msgstr ""
+"Abyste jim pomohli problém co nejrychleji diagnostikovat, doplňte prosím do "
+"zprávy tyto informace:"
+
+#. (itstool) path: item/p
+#: C/bugs.page:20
+msgid "Geary version and installation method (Package? Flathub? Source code?)"
+msgstr ""
+"Verze aplikace Geary a způsob její instalace (distribuční balíček, Flathub, "
+"zdrojový kód, …)"
+
+#. (itstool) path: item/p
+#: C/bugs.page:22
+msgid "Your desktop (GNOME? KDE? Something else?)"
+msgstr "Vaše uživatelské prostředí (GNOME, KDE, Xfce, …)"
+
+#. (itstool) path: item/p
+#: C/bugs.page:23
+msgid ""
+"Your operating system and version (Ubuntu 16.04? Fedora 28? Rolled your own?)"
+msgstr "Váš operační systém a jeho verze (Ubuntu 18.04, Fedora 28, FreeBSD, …)"
+
+#. (itstool) path: item/p
+#: C/bugs.page:25
+msgid "Email provider (Gmail, Yahoo!, Outlook.com, or someone else?)"
+msgstr "Poskytovatel e-mailu (Gmail, Yahoo!, Outlook.com, …)"
+
+#. (itstool) path: item/p
+#: C/bugs.page:27
+msgid "Steps to reproduce the bug"
+msgstr "Kroky vedoucí k zopakování chyby"
+
+#. (itstool) path: item/p
+#: C/bugs.page:28
+msgid "What happened?"
+msgstr "Co se stalo"
+
+#. (itstool) path: item/p
+#: C/bugs.page:29
+msgid "What did you expect to happen?"
+msgstr "Co jste očekávali, že se má stát"
+
+#. (itstool) path: page/p
+#: C/bugs.page:32
+msgid "Thanks for your help!"
+msgstr "Děkujeme za vaši pomoc!"
+
+#. (itstool) path: page/title
+#: C/write.page:9
+msgid "Write a message"
+msgstr "Psaní zprávy"
+
+#. (itstool) path: section/title
+#: C/write.page:12
+msgid "Composing and replying"
+msgstr "Psaní zpráv a odpovídání"
+
+#. (itstool) path: section/p
+#: C/write.page:13
+msgid ""
+"To compose a new message in Geary, press the <gui>New Message</gui> button "
+"on the toolbar."
+msgstr ""
+"Když chcete v Geary napsat novou zprávu, zmáčkněte na nástrojové liště "
+"tlačítko <gui>Nová zpráva</gui>."
+
+#. (itstool) path: section/p
+#: C/write.page:16
+msgid ""
+"To reply to a message, open the message menu in the upper right corner of "
+"the message and choose <gui>Reply</gui>, <gui>Reply All</gui> or "
+"<gui>Forward</gui>. You can also reply to the last message in a conversation "
+"via the <gui>Reply</gui>, <gui>Reply All</gui> or <gui>Forward</gui> buttons "
+"on the toolbar."
+msgstr ""
+"Když chcete odpovědět na zprávu, otevřete nabídku zprávy v pravém horním "
+"rohu zprávy a zvolte <gui>Odpovědět</gui>, <gui>Odpovědět všem</gui> nebo "
+"<gui>Přeposlat</gui>. Můžete také odpovědět na poslední zprávu v konverzaci "
+"přes tlačítka <gui>Odpovědět</gui>, <gui>Odpovědět všem</gui> nebo "
+"<gui>Přeposlat</gui> na nástrojové liště."
+
+#. (itstool) path: section/title
+#: C/write.page:21
+msgid "Features"
+msgstr "Funkce"
+
+#. (itstool) path: section/p
+#: C/write.page:23
+msgid ""
+"Geary's email composer lets you adjust the font, size and color of text. You "
+"can also insert hyperlinks into messages."
+msgstr ""
+"Při psaní e-mailů v Geary si můžete přizpůsobit písmo, velikost a barvu "
+"textu. Rovněž můžete do zpráv vkládat hypertextové odkazy."
+
+#. (itstool) path: section/p
+#: C/write.page:25
+msgid ""
+"Geary can also send plain text messages. In the drop-down menu, check or "
+"uncheck \"Rich Text\" to toggle between plain text and rich text mode."
+msgstr ""
+"Zprávy je možné posílat i jako čistě textové. V rozbalovací nabídce "
+"zaškrtněte nebo zrušte zaškrtnutí „Formátovaný text“, abyste se přepnuli "
+"mezi režimy prostého textu a formátovaného textu."
+
+#. (itstool) path: section/p
+#: C/write.page:28
+msgid ""
+"You can attach a file to a message you're writing in either of these ways:"
+msgstr "K napsané zprávě můžete přiložit soubory a to následujícími způsoby:"
+
+#. (itstool) path: item/p
+#: C/write.page:30
+msgid ""
+"Press the <gui>Attach File</gui> button at the lower left of the composer "
+"window, then select a file to attach."
+msgstr ""
+"Zmáčkněte tlačítko <gui>Přiložit soubor</gui> v levém dolním rohu okna "
+"editoru a následně vyberte soubor, který chcete přiložit."
+
+#. (itstool) path: item/p
+#: C/write.page:32
+msgid ""
+"Drag the file from the Nautilus file manager to the composer window, and "
+"drop it either on the text fields at the top of the window or on the toolbar "
+"at the bottom."
+msgstr ""
+"Přetáhněte soubor ze správce souborů Nautilus do okna editoru a upusťte jej "
+"buď na textových polích v horní části okna nebo na nástrojové liště dole."
+
+#. (itstool) path: section/p
+#: C/write.page:36
+msgid ""
+"A number of keyboard shortcuts are available in the composer; see <link xref="
+"\"shortcuts\"/> for details."
+msgstr ""
+"Řada klávesových zkratek je dostupná v editoru zpráv, podrobnosti viz <link "
+"xref=\"shortcuts\"/>."
+
+#. (itstool) path: section/p
+#: C/write.page:38
+msgid ""
+"You may specify a signature to be inserted into the composer in the <link "
+"xref=\"accounts\"/> dialog."
+msgstr ""
+"V dialogovém okně <link xref=\"accounts\"/> můžete zadat patičku, která se "
+"bude vkládat do editoru."
+
+#. (itstool) path: section/title
+#: C/write.page:43
+msgid "Drafts"
+msgstr "Koncepty"
+
+#. (itstool) path: section/p
+#: C/write.page:45
+msgid ""
+"For mail servers that support drafts, Geary will automatically save the "
+"message as you type. If you close the composer without sending, Geary will "
+"prompt you to keep the draft or to discard it."
+msgstr ""
+"Na serverech, které podporují koncepty, ukládá Gerary zprávy automaticky "
+"během psaní. Pokud zavřete okno editoru, aniž byste zprávu odeslali, Geary "
+"se vás dotáže, jestli má zprávu uchovat v konceptech nebo ji zahodit."
+
+#. (itstool) path: section/p
+#: C/write.page:48
+msgid ""
+"To edit an existing draft, select the Drafts folder in the folder list, "
+"select the message, and click \"Edit Draft\" in the message viewer."
+msgstr ""
+"Až chcete ve psaní stávajícího konceptu pokračovat, vyberte v seznamu složek "
+"složku Koncepty, vyberte zprávu a klikněte v prohlížeči zpráv na „Upravit "
+"koncept“ ."
+
+#. (itstool) path: section/p
+#: C/write.page:51
+msgid "Geary deletes the draft when you send the message."
+msgstr "Po odeslání zprávy Geary koncept smaže."
+
+#. (itstool) path: page/title
+#: C/search.page:10
+msgid "Search"
+msgstr "Hledání"
+
+#. (itstool) path: page/p
+#: C/search.page:12
+msgid ""
+"Geary supports a per-account full text search. To start a search, select a "
+"folder associated with the account you'd like to search against. Then click "
+"the search box in the toolbar (or press <keyseq><key>Ctrl</key><key>S</key></"
+"keyseq>) and start typing. Results will appear after a brief delay."
+msgstr ""
+"Geary podporuje vyhledávání v úplně všech textech v jednotlivých účtech. "
+"Když chcete vyhledávat, vyberte složku patřící k účtu, ve kterém si přejete "
+"hledat. Pak klikněte na vyhledávací pole na nástrojové liště (nebo zmáčkněte "
+"<keyseq><key>Ctrl</key><key>S</key></keyseq>) a začněte psát. Po chvilce se "
+"začnou objevovat výsledky."
+
+#. (itstool) path: page/p
+#: C/search.page:16
+msgid ""
+"The full text search includes email text, email addresses (to, from, and "
+"cc), subject lines and attachment filenames."
+msgstr ""
+"Rozsah vyhledávání pokrývá text zpráv, e-mailové adresy (od, komu a kopie), "
+"řádek s předmětem a názvy souborů v přílohách."
+
+#. (itstool) path: page/p
+#: C/search.page:19
+msgid ""
+"Keywords that match your search are highlighted in the message view. Geary "
+"will match different forms of the same word, for example searching for \"walk"
+"\" will also match \"walking\" and \"walked.\""
+msgstr ""
+"Klíčová slova, která vyhovují vašemu hledání, se v zobrazení zprávy "
+"zvýrazní. Geary umí rozpoznat i různé varianty téhož slova, například při "
+"hledání „oběd“ bude vyhovovat i „obědvat“ a „obědový“."
+
+#. (itstool) path: section/title
+#: C/search.page:23
+msgid "Search operators"
+msgstr "Operátory vyhledávání"
+
+#. (itstool) path: section/p
+#: C/search.page:24
+msgid "Geary supports the following operators to limit the scope of searches:"
+msgstr "Geary podporuje následující operátory omezující rozsah vyhledávání:"
+
+#. (itstool) path: td/p
+#: C/search.page:27
+msgid "<input>attachment:<var>filename</var></input>"
+msgstr "<input>attachment:<var>název_souboru</var></input>"
+
+#. (itstool) path: td/p
+#: C/search.page:28
+msgid "Finds messages with attachments whose name matches <var>filename</var>."
+msgstr ""
+"Najít zprávy, jejich přílohy mají název odpovídající <var>názvu_souboru</"
+"var>."
+
+#. (itstool) path: td/p
+#: C/search.page:31
+msgid "<input>bcc:<var>recipient</var></input>"
+msgstr "<input>bcc:<var>příjemce</var></input>"
+
+#. (itstool) path: td/p
+#: C/search.page:32
+msgid "Finds messages where <var>recipient</var> matches the BCC header."
+msgstr ""
+"Najít zprávy, ve kterých <var>příjemce</var> odpovídá údaji „Skrytá kopie“ v "
+"hlavičce."
+
+#. (itstool) path: td/p
+#: C/search.page:35
+msgid "<input>body:<var>text</var></input>"
+msgstr "<input>body:<var>text</var></input>"
+
+#. (itstool) path: td/p
+#: C/search.page:36
+msgid "Finds messages whose body contains <var>text</var>."
+msgstr "Najít zprávy, jejichž tělo obsahuje <var>text</var>."
+
+#. (itstool) path: td/p
+#: C/search.page:39
+msgid "<input>cc:<var>recipient</var></input>"
+msgstr "<input>cc:<var>příjemce</var></input>"
+
+#. (itstool) path: td/p
+#: C/search.page:40
+msgid "Finds messages where <var>recipient</var> matches the CC header."
+msgstr ""
+"Najít zprávy, ve kterých <var>příjemce</var> odpovídá údaji „Kopie“ v "
+"hlavičce."
+
+#. (itstool) path: td/p
+#: C/search.page:43
+msgid "<input>from:<var>sender</var></input>"
+msgstr "<input>from:<var>odesilatel</var></input>"
+
+#. (itstool) path: td/p
+#: C/search.page:44
+msgid "Finds messages where <var>sender</var> matches the From header."
+msgstr ""
+"Najít zprávy, ve kterých <var>odesilatel</var> odpovídá údaji „Od“ v "
+"hlavičce."
+
+#. (itstool) path: td/p
+#: C/search.page:47
+msgid "<input>is:read</input>"
+msgstr "<input>is:read</input>"
+
+#. (itstool) path: td/p
+#: C/search.page:48
+msgid "Finds messages that have been marked as read."
+msgstr "Najít zprávy, které jsou označené jako přečtené."
+
+#. (itstool) path: td/p
+#: C/search.page:51
+msgid "<input>is:starred</input>"
+msgstr "<input>is:starred</input>"
+
+#. (itstool) path: td/p
+#: C/search.page:52
+msgid "Finds messages that have been marked as starred."
+msgstr "Najít zprávy, které jsou označené hvězdičkou"
+
+#. (itstool) path: td/p
+#: C/search.page:55
+msgid "<input>is:unread</input>"
+msgstr "<input>is:unread</input>"
+
+#. (itstool) path: td/p
+#: C/search.page:56
+msgid "Finds messages that have been marked as not read."
+msgstr "Najít zprávy, které jsou označené jako nepřečtené."
+
+#. (itstool) path: td/p
+#: C/search.page:59
+msgid "<input>subject:<var>text</var></input>"
+msgstr "<input>subject:<var>text</var></input>"
+
+#. (itstool) path: td/p
+#: C/search.page:60
+msgid "Finds messages whose subject contains <var>text</var>."
+msgstr "Najít zprávy, jejichž předmět obsahuje <var>text</var>."
+
+#. (itstool) path: td/p
+#: C/search.page:63
+msgid "<input>to:<var>recipient</var></input>"
+msgstr "<input>to:<var>příjemce</var></input>"
+
+#. (itstool) path: td/p
+#: C/search.page:64
+msgid ""
+"Finds messages where <var>sender</var> matches the To, CC, or BCC header."
+msgstr ""
+"Najít zprávy, ve kterých <var>odesilatel</var> odpovídá údajům „Komu“, "
+"„Kopi“ nebo „Skrytá kopie“ v hlavičce."
+
+#. (itstool) path: section/p
+#: C/search.page:68
+msgid ""
+"As a special case, the <input>bcc</input>, <input>cc</input>, <input>from</"
+"input>, and <input>to</input> operators support <input>me</input> as their "
+"argument, which searches for the account's email address in the appropriate "
+"context."
+msgstr ""
+"Jako speciální případ podporují operátory <input>bcc</input>, <input>cc</"
+"input>, <input>from</input> a <input>to</input> argument <input>me</input>, "
+"který hledá e-mailové adresy účtu v příslušném kontextu."
+
+#. (itstool) path: title/media
+#. This is a reference to an external file such as an image or video. When
+#. the file changes, the md5 hash will change to let you know you need to
+#. update your localized copy. The msgstr is not used at all. Set it to
+#. whatever you like once you have updated your copy of the file.
+#: C/index.page:5
+#| msgid "@@image: 'figures/geary.svg'; md5=18b50c9e10fe5256ae1cb12aaa3a7600"
+msgctxt "_"
+msgid "external ref='figures/geary.svg' md5='18b50c9e10fe5256ae1cb12aaa3a7600'"
+msgstr ""
+"external ref='figures/geary.svg' md5='18b50c9e10fe5256ae1cb12aaa3a7600'"
+
+#. (itstool) path: page/title
+#: C/index.page:5
+msgid "<media type=\"image\" src=\"figures/geary.svg\"/> Geary"
+msgstr "<media type=\"image\" src=\"figures/geary.svg\"/> Geary"
+
+#. (itstool) path: section/title
+#: C/index.page:8
+msgid "Introduction"
+msgstr "Úvod"
+
+#. (itstool) path: section/title
+#: C/index.page:12
+msgid "Using Geary"
+msgstr "Používání Geary"
+
+#. (itstool) path: section/title
+#: C/index.page:16
+#| msgid "Composing and replying"
+msgid "Contributing and bug reporting"
+msgstr "Přispívání a hlášení chyb"
+
+#. (itstool) path: page/title
+#: C/star.page:10
+msgid "Star a message or mark it as read/unread"
+msgstr "Označení zprávy hvězdičkou nebo jako přečtená/nepřečtená"
+
+#. (itstool) path: section/title
+#: C/star.page:12
+msgid "Star messages"
+msgstr "Označení zpráv hvězdičkou"
+
+#. (itstool) path: section/p
+#: C/star.page:13
+msgid ""
+"You can star messages to indicate that they're important to you. To mark a "
+"conversation with a star, click its star icon in the conversation list. You "
+"can star an individual message by clicking the star at the upper right of "
+"the message itself."
+msgstr ""
+"Zprávy si můžete označovat hvězdičkou, abyste věděli, že jsou pro vás "
+"důležité. Pokud tak chcete učinit, klikněte na ikonu hvězdičky u konverzace "
+"v seznamu konverzací. Hvězdičkou můžete označit i jednotlivou zprávu, stačí "
+"kliknout na hvězdičku v pravém horním rohu zprávy."
+
+#. (itstool) path: section/p
+#: C/star.page:15
+msgid ""
+"With Gmail accounts, starred messages appear in the Starred folder in the "
+"folder list."
+msgstr ""
+"V účtech Gmail se zprávy označené hvězdičkou objeví ve složce „S hvězdičkou“ "
+"v seznamu složek."
+
+#. (itstool) path: section/title
+#: C/star.page:18
+msgid "Mark messages as read or unread"
+msgstr "Označování zpráv, jako přečtené nebo nepřečtené"
+
+#. (itstool) path: section/p
+#: C/star.page:19
+msgid ""
+"Geary marks messages as read automatically as you read them. To manually "
+"toggle a conversation as read or unread, click the circle icon in the "
+"conversation list."
+msgstr ""
+"Geary označuje zprávy automaticky jako přečtené, když si je přečtete. Když "
+"chcete zprávu jako přečtenou či nepřečtenou označit ručně, klikněte na ikonu "
+"kolečka v seznamu konverzace."
+
+#. (itstool) path: section/p
+#: C/star.page:22
+msgid ""
+"Alternately, the <gui>Mark as Unread</gui> in the <gui>Mark</gui> menu on "
+"the toolbar can be used to toggle the read status of the selected "
+"conversation(s)."
+msgstr ""
+"Případně můžete k přepnutí stavu přečteno/nepřečteno u vybrané konverzace "
+"použít <gui>Označit jako přečtené</gui> či <gui>Označit jako nepřečtené</"
+"gui> v nabídce <gui>Označit</gui> na nástrojové liště."
+
+#. (itstool) path: section/p
+#: C/star.page:25
+msgid ""
+"To mark an individual message as read, select <gui>Mark as Read</gui> from "
+"the dropdown menu."
+msgstr ""
+"Pro označení jednotlivé zprávy jako přečtené vyberte <gui>Označit jako "
+"přečtené</gui> v rozbalovací nabídce."
+
+#. (itstool) path: page/title
+#: C/preferences.page:10
+msgid "Preferences"
+msgstr "Předvolby"
+
+#. (itstool) path: page/p
+#: C/preferences.page:11
+msgid ""
+"The <gui>Preferences</gui> option is available in either Geary's application "
+"menu or the gear menu in the upper-right of the toolbar. (The location "
+"depends on the install desktop shell. For GNOME Shell and Unity, the "
+"application menu is available near the top-left corner of the screen.)"
+msgstr ""
+"Položku <gui>Předvolby</gui> najdete v aplikační nabídce Geary a v nabídce v "
+"pravém horním rohu nástrojové lišty. (Přesné umístění záleží na "
+"nainstalovaném pracovním prostředí. V GNOME Shell a Unity se aplikační "
+"nabídky nachází poblíž levého horního rohu obrazovky.)"
+
+#. (itstool) path: section/title
+#: C/preferences.page:17
+msgid "Reading"
+msgstr "Čtení"
+
+#. (itstool) path: item/title
+#: C/preferences.page:20
+#| msgid "Automatically select next message"
+msgid "<gui>Automatically select next message</gui>"
+msgstr "<gui>Automaticky vybrat další zprávu</gui>"
+
+#. (itstool) path: item/p
+#: C/preferences.page:21
+msgid ""
+"When this option is enabled, Geary automatically selects the latest message "
+"in a folder when you enter the folder. In addition, after archiving a "
+"message, Geary automatically selects an adjacent message."
+msgstr ""
+"Když je tato volba zapnutá, Geary, po té co vstoupíte do složky, automaticky "
+"vybere nejnovější zprávu. Navíc po archivaci zprávy, vybere Geary "
+"automaticky sousední zprávu."
+
+#. (itstool) path: item/title
+#: C/preferences.page:26
+#| msgid "Display conversation preview"
+msgid "<gui>Display conversation preview</gui>"
+msgstr "<gui>Zobrazit náhled konverzace</gui>"
+
+#. (itstool) path: item/p
+#: C/preferences.page:27
+msgid ""
+"Enables message previews in the conversation list. Previews show the first "
+"few lines of each message."
+msgstr ""
+"Povoluje náhled zpráv v seznamu konverzací. V náhledu se zobrazuje pár "
+"prvních řádků od každé zprávy."
+
+#. (itstool) path: item/title
+#: C/preferences.page:31
+#| msgid "Use three pane view"
+msgid "<gui>Use three pane view</gui>"
+msgstr "<gui>Používat třípanelové zobrazení</gui>"
+
+#. (itstool) path: item/p
+#: C/preferences.page:32
+msgid ""
+"Show the folder list, the conversation list, and the messages side-by-side-"
+"by-side in three panes. If not selected, the folder list and conversation "
+"list will be stacked vertically in a single pane."
+msgstr ""
+"Zobrazí vedle sebe tři panely – seznam složek, seznam konverzací a zprávy. "
+"Když není vybráno, budou seznam složek a seznam konverzací svisle nad sebou "
+"v jediném panelu."
+
+#. (itstool) path: section/title
+#: C/preferences.page:40
+msgid "Notifications"
+msgstr "Upozornění"
+
+#. (itstool) path: item/title
+#: C/preferences.page:43
+#| msgid "Play notification sounds"
+msgid "<gui>Play notification sounds</gui>"
+msgstr "<gui>Přehrávat zvuková upozornění</gui>"
+
+#. (itstool) path: item/p
+#: C/preferences.page:44
+msgid "When set, Geary plays a sound whenever a new message arrives."
+msgstr "Když je zapnuto, Geary přehraje zvuk pokaždé, když dorazí nová zpráva."
+
+#. (itstool) path: item/title
+#: C/preferences.page:47
+#| msgid "Show notifications for new mail"
+msgid "<gui>Show notifications for new mail</gui>"
+msgstr "<gui>Zobrazit upozornění na nový e-mail</gui>"
+
+#. (itstool) path: item/p
+#: C/preferences.page:48
+msgid ""
+"When set, Geary displays a <em>notification</em> each time a new message "
+"arrives. Notifications are displayed in a system-dependent manner. On GNOME "
+"Shell, notifications appear at the bottom of the display (older versions) or "
+"centered just below the top bar (newer versions). In Ubuntu Unity, "
+"notifications appear at the upper right of the display."
+msgstr ""
+"Když je zapnuto, zobrazí Geary <em>upozornění</em> pokaždé, když dorazí nová "
+"zpráva. Upozornění se zobrazují podle zvyklostí systému. V GNOME Shell se "
+"zobrazují ve spodní části obrazovky (starší verze) nebo uprostřed přímo pod "
+"horní lištou (novější verze). V Ubuntu Unity se zobrazují v pravém horním "
+"rohu obrazovky."
+
+#. (itstool) path: item/title
+#: C/preferences.page:54
+#| msgid "Watch for new mail when closed"
+msgid "<gui>Watch for new mail when closed</gui>"
+msgstr "<gui>Sledovat novou poštu při zavřené aplikaci</gui>"
+
+#. (itstool) path: item/p
+#: C/preferences.page:55
+msgid ""
+"Geary will watch your accounts for new mail even when the main window is not "
+"open. To do this, it will silently start when you log in to your computer, "
+"and it will continue to run after you close all windows."
+msgstr ""
+"Geary bude sledovat vaše účty ohledně nové pošty, i když není otevřeno "
+"hlavní okno. Aby to mohl dělat, bude tiše spuštěn jakmile se přihlásíte k "
+"počítači a bude pokračovat v běhu i po té, co zavřete všechna okna."
+
+#. (itstool) path: page/title
+#: C/accounts.page:10
 msgid "Accounts"
 msgstr "Účty"
 
-#: C/accounts.page:13(title)
+#. (itstool) path: section/title
+#: C/accounts.page:13
 msgid "Adding accounts"
 msgstr "Přidávání účtů"
 
-#: C/accounts.page:15(p)
+#. (itstool) path: section/p
+#: C/accounts.page:15
 msgid ""
 "The first time you start Geary, you will be prompted to add an email "
 "account. On this screen, select if your account is Gmail, Yahoo, Outlook."
@@ -872,7 +945,8 @@ msgstr ""
 "této obrazovce vyberte, jestli máte účet Gmail, Yahoo, Outlook.com nebo "
 "jiný. U účtu jiného typu budete muset zadat své nastavení IMAP a SMTP ručně."
 
-#: C/accounts.page:19(p)
+#. (itstool) path: section/p
+#: C/accounts.page:19
 msgid ""
 "Additional accounts can be added from the Accounts dialog. The "
 "<gui>Accounts</gui> option is available in either Geary's application menu "
@@ -887,11 +961,13 @@ msgstr ""
 "GNOME Shell a Unity se aplikační nabídka nachází poblíž levého horního rohu "
 "obrazovky.) Nový účet přidáte kliknutím na tlačítko <gui>+</gui>."
 
-#: C/accounts.page:27(title)
+#. (itstool) path: section/title
+#: C/accounts.page:27
 msgid "Editing existing accounts"
 msgstr "Úprava stávajících účtů"
 
-#: C/accounts.page:29(p)
+#. (itstool) path: section/p
+#: C/accounts.page:29
 msgid ""
 "From the Accounts dialog, select an account and click the pencil icon to "
 "change various settings. Please note that Geary cannot change server "
@@ -903,7 +979,8 @@ msgstr ""
 "existujícího účtu server. Pokud potřebujete změnit server IMAP nebo SMTP, "
 "budete muset účet smazat a znovu jej přidat."
 
-#: C/accounts.page:33(p)
+#. (itstool) path: section/p
+#: C/accounts.page:33
 msgid ""
 "To change the order that accounts are displayed in the folder list, drag the "
 "accounts in the Accounts dialog to the desired order."
@@ -911,11 +988,13 @@ msgstr ""
 "Pro změnu pořadí zobrazení účtů v seznamu složek, stačí účet v dialogovém "
 "okně Účty přetáhnout na požadované místo."
 
-#: C/accounts.page:36(p)
+#. (itstool) path: section/p
+#: C/accounts.page:36
 msgid "There are some advanced options available when editing accounts:"
 msgstr "Během úprav účtu jsou k dispozici některá pokročilá nastavení:"
 
-#: C/accounts.page:38(p)
+#. (itstool) path: item/p
+#: C/accounts.page:38
 msgid ""
 "The <gui>Save sent mail</gui> checkbox controls whether Geary will push "
 "successfully sent messages up to the account's <gui>Sent Mail</gui> folder. "
@@ -930,7 +1009,8 @@ msgstr ""
 "účty lze nastavit, aby se tak dělo také automaticky. U ostatních účtů "
 "nebudete při vypnutí této volby moci procházet zprávy, které jste odeslali."
 
-#: C/accounts.page:44(p)
+#. (itstool) path: item/p
+#: C/accounts.page:44
 msgid ""
 "The <gui>Sign emails</gui> checkbox indicates whether a signature will be "
 "automatically inserted when a composer is opened. You may enter the "
@@ -942,7 +1022,8 @@ msgstr ""
 "zadat do pole níže. Můžete při tom určovat styl pomocí značek HTML. "
 "Tlačítkem napravo si můžete zobrazit náhled patičky."
 
-#: C/accounts.page:49(p)
+#. (itstool) path: item/p
+#: C/accounts.page:49
 msgid ""
 "If you leave the signature in the Accounts dialog blank, Geary will use the "
 "<file>.signature</file> file in your home directory, if it exists. This file "
@@ -955,7 +1036,8 @@ msgstr ""
 "HTML. Ve druhém případě bude vložen do editoru tak, jak je, bez jakéhokoliv "
 "ošetření speciálních znaků."
 
-#: C/accounts.page:54(p)
+#. (itstool) path: item/p
+#: C/accounts.page:54
 msgid ""
 "The <gui>Download mail</gui> drop-down allows you to configure how much mail "
 "Geary will keep locally. Geary can only use locally available mail when "
@@ -965,11 +1047,13 @@ msgstr ""
 "zpráv bude Geary uchovávat místně. Jen v místně uložených zprávám může Geary "
 "vychledávat a sestavovat z nich konverzace."
 
-#: C/accounts.page:62(title)
+#. (itstool) path: section/title
+#: C/accounts.page:62
 msgid "Removing accounts"
 msgstr "Odebírání účtů"
 
-#: C/accounts.page:64(p)
+#. (itstool) path: section/p
+#: C/accounts.page:64
 msgid ""
 "To delete an account, open the Accounts dialog, select the account, and "
 "press the - button. Geary will delete all information associated with the "
@@ -979,7 +1063,224 @@ msgstr ""
 "zmáčkněte tlačítko -. Geary smaže všechny informace související s daným "
 "účtem."
 
-#. Put one translator per line, in the form of NAME <EMAIL>, YEAR1, YEAR2
-#: C/accounts.page:0(None)
-msgid "translator-credits"
-msgstr "Marek Černocký <marek@manet.cz>"
+#. (itstool) path: page/title
+#: C/label.page:10
+msgid "Label or move a conversation"
+msgstr "Přiřazování štítků a přesun konverzací"
+
+#. (itstool) path: section/title
+#: C/label.page:12
+msgid "Label a conversation"
+msgstr "Přidělení štítku konverzaci"
+
+#. (itstool) path: section/p
+#: C/label.page:13
+msgid ""
+"Geary lets you apply one or more <em>labels</em> to each conversation. Geary "
+"labels correspond to labels in Gmail, or ordinary folders in other mail "
+"services."
+msgstr ""
+"Geary umožňuje každé konverzaci přidělit jeden nebo i více <em>štítků</em>. "
+"Štítky jsou u Geary to stejné jako štítky u Gmailu nebo běžné složky u "
+"jiných poštovních služeb."
+
+#. (itstool) path: section/p
+#: C/label.page:15
+msgid ""
+"To label one or more conversations, first select the conversation(s), then "
+"do either of the following:"
+msgstr ""
+"Když chcte jedné či více konverzacím přidělit štítek, nejprve je vyberte a "
+"potom použijte jeden z následujících postupů:"
+
+#. (itstool) path: item/p
+#: C/label.page:18
+msgid ""
+"Click the <gui>Label</gui> button on the toolbar and select a label from the "
+"resulting drop-down menu."
+msgstr ""
+"Klikněte na tlačítko <gui>Štítek</gui> na nástrojové liště a vyberte štítek "
+"z výsledné rozbalovací nabídky."
+
+#. (itstool) path: item/p
+#: C/label.page:20
+msgid ""
+"Hold down the <key>Ctrl</key> key and drag the conversation(s) from the "
+"conversation list to the label in the sidebar."
+msgstr ""
+"Držte zmáčknutou klávesu <key>Ctrl</key> a přetáhněte konverzaci či "
+"konverzace ze seznamu konverzací do štítku v postranním panelu."
+
+#. (itstool) path: section/title
+#: C/label.page:25
+msgid "Move a conversation to a folder or label"
+msgstr "Přesunutí konverzace do složky nebo štítku"
+
+#. (itstool) path: section/p
+#: C/label.page:26
+msgid ""
+"To move one or more conversations to a folder or label, first select the "
+"conversation(s), then do either of the following:"
+msgstr ""
+"Když chcete jednu nebo více konverzací přesunout do složky nebo štítku, "
+"nejprve je vyberte a pak použijte jeden z následujících postupů:"
+
+#. (itstool) path: item/p
+#: C/label.page:29
+msgid ""
+"Click the <gui>Move</gui> button on the toolbar and select a folder or label "
+"from the resulting drop-down menu."
+msgstr ""
+"Klikněte na tlačítko <gui>Přesunout</gui> na nástrojové liště a vyberte "
+"složku nebo štítek z výsledné rozbalovací nabídky."
+
+# Poznámky:
+# Přidat poznámku
+#. (itstool) path: item/p
+#: C/label.page:31
+msgid ""
+"Drag the conversation(s) from the conversation list to the folder or label "
+"in the sidebar."
+msgstr ""
+"Přetáhněte konverzaci či konverzace ze seznamu konverzací do složky nebo "
+"štítku v postranním panelu."
+
+#. (itstool) path: page/title
+#: C/shortcuts.page:10
+msgid "Keyboard shortcuts"
+msgstr "Klávesové zkratky"
+
+#. (itstool) path: page/p
+#: C/shortcuts.page:12
+msgid ""
+"Geary has keyboard shortcuts for most common operations. Use the built-in "
+"keyboard shortcuts help in Geary to discover the full list. This can be "
+"accessed via the application menu: <guiseq><gui>Geary</gui><gui>Keyboard "
+"Shortcuts</gui></guiseq> or using the keyboard shortcuts listed below."
+msgstr ""
+"Geary má pro nejpoužívanější operace klávesové zkratky. Jejich seznam "
+"najdete v zabudované nápovědě ke klávesovým zkratkám. K té se dostanete přes "
+"nabídku aplikace: <guiseq><gui>Geary</gui> <gui>Keyboard Shortcuts</gui></"
+"guiseq> nebo pomocí níže uvedených klávesových zkratek."
+
+#. (itstool) path: page/p
+#: C/shortcuts.page:18
+msgid ""
+"The following keyboard shortcuts can be used to access on-line help from "
+"Geary:"
+msgstr ""
+"Následující klávesové zkratky můžete použít pro přístup k nápovědě on-line z "
+"aplikace Geary:"
+
+#. (itstool) path: td/p
+#: C/shortcuts.page:22
+msgid "Display this User Manual"
+msgstr "Zobrazit tuto uživatelskou příručku"
+
+#. (itstool) path: td/p
+#: C/shortcuts.page:23
+msgid "<keyseq><key>F1</key></keyseq>"
+msgstr "<keyseq><key>F1</key></keyseq>"
+
+#. (itstool) path: td/p
+#: C/shortcuts.page:26
+msgid "Display all keyboard shortcuts"
+msgstr "Zobrazit všechny klávesové zkratky"
+
+#. (itstool) path: td/p
+#: C/shortcuts.page:27
+msgid ""
+"<keyseq><key>Ctrl</key><key>?</key></keyseq> or <keyseq><key>Ctrl</"
+"key><key>F1</key></keyseq>"
+msgstr ""
+"<keyseq><key>Ctrl</key><key>?</key></keyseq> nebo <keyseq><key>Ctrl</"
+"key><key>F1</key></keyseq>"
+
+#~ msgid "F1"
+#~ msgstr "F1"
+
+#~ msgid "filename"
+#~ msgstr "název_souboru"
+
+#~ msgid "attachment:<placeholder-1/>"
+#~ msgstr "attachment:<placeholder-1/>"
+
+#~ msgid "recipient"
+#~ msgstr "příjemce"
+
+#~ msgid "bcc:<placeholder-1/>"
+#~ msgstr "bcc:<placeholder-1/>"
+
+#~ msgid "text"
+#~ msgstr "text"
+
+#~ msgid "body:<placeholder-1/>"
+#~ msgstr "body:<placeholder-1/>"
+
+#~ msgid "cc:<placeholder-1/>"
+#~ msgstr "cc:<placeholder-1/>"
+
+#~ msgid "sender"
+#~ msgstr "odesilatel"
+
+#~ msgid "from:<placeholder-1/>"
+#~ msgstr "from:<placeholder-1/>"
+
+#~ msgid "is:read"
+#~ msgstr "is:read"
+
+#~ msgid "is:starred"
+#~ msgstr "is:starred"
+
+#~ msgid "is:unread"
+#~ msgstr "is:unread"
+
+#~ msgid "subject:<placeholder-1/>"
+#~ msgstr "subject:<placeholder-1/>"
+
+#~ msgid "to:<placeholder-1/>"
+#~ msgstr "to:<placeholder-1/>"
+
+#~ msgid "Bugs"
+#~ msgstr "Chyby"
+
+#~ msgid "Think you've found a bug?"
+#~ msgstr "Myslíte, že jste našli chybu?"
+
+#~ msgid ""
+#~ "If you suspect you've found a bug in Geary, follow these steps to report "
+#~ "it:"
+#~ msgstr ""
+#~ "Pokud předpokládáte, že jste našli v aplikaci Geary chybu, postupujte "
+#~ "následovně:"
+
+#~ msgid ""
+#~ "Search Geary's <link href=\"https://bugzilla.gnome.org/browse.cgi?"
+#~ "product=geary\">bug database</link> to see if someone else has reported "
+#~ "the bug."
+#~ msgstr ""
+#~ "Podívejte se do <link href=\"https://bugzilla.gnome.org/browse.cgi?"
+#~ "product=geary\">databáze chyb</link> aplikace Geary, jestli stejnou chybu "
+#~ "nenahlásil již někdo jiný."
+
+#~ msgid ""
+#~ "Don't see your bug listed? Congratulations! You've found a new bug. To "
+#~ "create an bug report, create an account on GNOME's Bugzilla and <link "
+#~ "href=\"https://bugzilla.gnome.org/enter_bug.cgi?product=geary\">file a "
+#~ "new bug</link>. Be as specific as you can and describe the steps to "
+#~ "reproduce it. Don't forget to include details about your operating system "
+#~ "and what version of Geary you're running."
+#~ msgstr ""
+#~ "Nenašli jste ji? Gratulujeme! Našli jste zbrusu novou chybu. Abyste ji "
+#~ "mohli nahlásit, vytvořte si účet v Bugzille projektu GNOME a <link href="
+#~ "\"https://bugzilla.gnome.org/enter_bug.cgi?product=geary\">vyplňte údaje "
+#~ "o nové chybě</link>. Buďte co nejvíce konkrétní a popište kroky, kterými "
+#~ "se dá chyba reprodukovat. Nezapomeňte zahrnout informace o svém operačním "
+#~ "systému a verzi Geary."
+
+#~ msgid ""
+#~ "For general inquiries, please join the <link href=\"https://mail.gnome."
+#~ "org/mailman/listinfo/geary-list\"> Geary mailing list</link>."
+#~ msgstr ""
+#~ "Ohledně obecných dotazů se prosím připojte do <link href=\"https://mail."
+#~ "gnome.org/mailman/listinfo/geary-list\">poštovní konference Geary</link>."
