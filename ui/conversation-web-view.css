@@ -193,8 +193,17 @@ pre {
   }
 }
 
+#geary-message-headers {
+  display: none;
+}
+
 @media print {
   .geary-button {
     display: none;
+  }
+
+  #geary-message-headers {
+    all: initial;
+    display: block;
   }
 }

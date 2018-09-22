@@ -482,6 +482,13 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
         }
 
         load_cancelled.cancelled.connect(() => { web_view.stop_loading(); });
+        this.web_view.set_print_headers(
+            this.message.from != null ? this.message.from.to_string() : null,
+            this.message.to != null ? this.message.to.to_string() : null,
+            this.message.cc != null ? this.message.cc.to_string() : null,
+            this.message.bcc != null ? this.message.bcc.to_string() : null,
+            this.message.date != null ? this.message.date.to_string() : null,
+            this.message.subject != null ? this.message.subject.to_string() : null);
         this.web_view.load_html(body_text ?? "");
     }
 

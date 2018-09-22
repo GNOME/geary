@@ -805,9 +805,6 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
     }
 
     private void print() {
-        // XXX This isn't anywhere near good enough - headers aren't
-        // being printed.
-
         Gtk.Window? window = get_toplevel() as Gtk.Window;
         WebKit.PrintOperation op = new WebKit.PrintOperation(
             this.primary_message.web_view
