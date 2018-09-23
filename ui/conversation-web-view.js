@@ -314,39 +314,3 @@ ConversationPageState.isDescendantOf = function(node, ancestorTag) {
 };
 
 var geary = new ConversationPageState();
-
-/**
- * Add email headers for printing
- */
-
-document.addEventListener('DOMContentLoaded', () => {
-    let headerBlock = document.createElement('div');
-    headerBlock.id = 'geary-message-headers';
-
-    let shadowRoot = headerBlock.attachShadow({mode: 'closed'});
-
-    let shadowStyle = document.createElement('style');
-    shadowStyle.textContent = "\
-        table, tr, th, td, hr { all:initial; }\
-        table { display:table; }\
-        tr { display:table-row; }\
-        td, th { display:table-cell; line-height:1.5em; }\
-        th { font-weight:bold; padding-right:2ex; }\
-        hr { display:block; border-style:inset; border-width:1px; margin-top:0.5em; margin-bottom:0.5em; }";
-    shadowRoot.appendChild(shadowStyle);
-
-    let headerTable = document.createElement('table');
-    shadowRoot.appendChild(headerTable);
-
-    for (header in gearyEmailHeaders) {
-        let row = headerTable.appendChild(document.createElement('tr'));
-        let name = row.appendChild(document.createElement('th'));
-        let value = row.appendChild(document.createElement('td'));
-        name.textContent = header;
-        value.textContent = gearyEmailHeaders[header];
-    }
-
-    shadowRoot.appendChild(document.createElement('hr'));
-
-    document.body.insertBefore(headerBlock, document.body.firstChild);
-});

@@ -54,18 +54,6 @@ public class ConversationWebView : ClientWebView {
         );
     }
 
-    public void set_print_headers(string? from, string? to, string? cc, string? bcc, string? date, string? subject) {
-        StringBuilder js = new StringBuilder("var gearyEmailHeaders = {");
-        if (from != null) js.append(_("'From:':'") + from.replace("'", "\\'") + "',");
-        if (to != null) js.append(_("'To:':'") + to.replace("'", "\\'") + "',");
-        if (cc != null) js.append(_("'CC:':'") + cc.replace("'", "\\'") + "',");
-        if (bcc != null) js.append(_("'BCC:':'") + bcc.replace("'", "\\'") + "',");
-        if (date != null) js.append(_("'Date:':'") + date.replace("'", "\\'") + "',");
-        if (subject != null) js.append(_("'Subject:':'") + subject.replace("'", "\\'") + "',");
-        js.append("};");
-        this.run_javascript(js.str, null);
-    }
-
 
     /** Emitted when the user clicks on a link with deceptive text. */
     public signal void deceptive_link_clicked(
