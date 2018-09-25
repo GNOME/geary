@@ -384,9 +384,10 @@ private class Geary.ImapDB.Account : BaseObject {
     private void on_outbox_email_sent(Geary.RFC822.Message rfc822) {
         email_sent(rfc822);
     }
-    
-    public async void clone_folder_async(Geary.Imap.Folder imap_folder, Cancellable? cancellable = null)
-        throws Error {
+
+    public async Folder clone_folder_async(Geary.Imap.Folder imap_folder,
+                                           GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
         check_open();
 
         Geary.Imap.FolderProperties properties = imap_folder.properties;
@@ -426,8 +427,11 @@ private class Geary.ImapDB.Account : BaseObject {
             
             return Db.TransactionOutcome.COMMIT;
         }, cancellable);
+
+        // XXX can't we create this from the INSERT above?
+        return yield fetch_folder_async(path, cancellable);
     }
-    
+
     public async void delete_folder_async(Geary.Folder folder, Cancellable? cancellable)
         throws Error {
         check_open();

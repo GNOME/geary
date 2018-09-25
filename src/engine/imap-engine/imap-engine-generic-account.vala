@@ -1240,27 +1240,19 @@ internal class Geary.ImapEngine.UpdateRemoteFolders : AccountOperation {
             .map<Geary.Folder>(e => (Geary.Folder) e.value)
             .to_array_list();
 
-        // For folders to add, clone them and their properties locally
+        // For folders to add, clone them and their properties
+        // locally, then add to the account
         ImapDB.Account local = ((GenericAccount) this.account).local;
-        foreach (Geary.Imap.Folder remote_folder in to_add) {
-            try {
-                yield local.clone_folder_async(remote_folder, cancellable);
-            } catch (Error err) {
-                debug("Unable to add/remove folder %s to local store: %s", remote_folder.path.to_string(),
-                    err.message);
-            }
-        }
-
-        // Create Geary.Folder objects for all added folders
         Gee.ArrayList<ImapDB.Folder> to_build = new Gee.ArrayList<ImapDB.Folder>();
         foreach (Geary.Imap.Folder remote_folder in to_add) {
             try {
-                to_build.add(yield local.fetch_folder_async(remote_folder.path, cancellable));
-            } catch (Error convert_err) {
-                // This isn't fatal, but irksome ... in the future, when local folders are
-                // removed, it's possible for one to disappear between cloning it and fetching
-                // it
-                debug("Unable to fetch local folder after cloning: %s", convert_err.message);
+                to_build.add(
+                    yield local.clone_folder_async(remote_folder, cancellable)
+                );
+            } catch (Error err) {
+                debug("Unable to clone folder %s in local store: %s",
+                      remote_folder.path.to_string(),
+                      err.message);
             }
         }
         this.generic_account.add_folders(to_build, false);
