@@ -127,6 +127,12 @@ public class Geary.Imap.MailboxSpecifier : BaseObject, Gee.Hashable<MailboxSpeci
             throw new ImapError.INVALID("Path has more than one part but no delimiter given");
         }
 
+        // Don't include the root if it is an empty string so that
+        // mailboxes do not begin with the delim.
+        if (parts.size > 1 && parts[0] == "") {
+            parts.remove_at(0);
+        }
+
         StringBuilder builder = new StringBuilder(
             is_inbox_name(parts[0]) ? inbox.name : parts[0]);
 
