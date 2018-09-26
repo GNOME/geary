@@ -450,11 +450,13 @@ private class Geary.ImapDB.Account : BaseObject {
                 debug("Can't delete folder %s because it has children", folder.to_string());
                 return Db.TransactionOutcome.ROLLBACK;
             }
-            
+
             do_delete_folder(cx, folder_id, cancellable);
-            
+            this.folder_refs.unset(path);
+
             return Db.TransactionOutcome.COMMIT;
         }, cancellable);
+
     }
 
     private void initialize_contacts(Cancellable? cancellable = null) throws Error {
