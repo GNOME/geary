@@ -93,6 +93,8 @@ class ImapConsole : Gtk.Window {
         "list",
         "xlist",
         "examine",
+        "create",
+        "delete",
         "fetch",
         "uid-fetch",
         "fetch-fields",
@@ -182,6 +184,14 @@ class ImapConsole : Gtk.Window {
 
                     case "examine":
                         examine(cmd, args);
+                    break;
+
+                    case "create":
+                        create(cmd, args);
+                    break;
+
+                    case "delete":
+                        @delete(cmd, args);
                     break;
 
                     case "fetch":
@@ -419,6 +429,28 @@ class ImapConsole : Gtk.Window {
 
         status("Opening %s read-only".printf(args[0]));
         this.cx.send_command(new Geary.Imap.ExamineCommand(new Geary.Imap.MailboxSpecifier(args[0])));
+    }
+
+    private void create(string cmd, string[] args) throws Error {
+        check_connected(cmd, args, 1, "<mailbox>");
+
+        status("Creating %s".printf(args[0]));
+        this.cx.send_command(
+            new Geary.Imap.CreateCommand(
+                new Geary.Imap.MailboxSpecifier(args[0])
+            )
+        );
+    }
+
+    private void @delete(string cmd, string[] args) throws Error {
+        check_connected(cmd, args, 1, "<mailbox>");
+
+        status("Deleting %s".printf(args[0]));
+        this.cx.send_command(
+            new Geary.Imap.DeleteCommand(
+                new Geary.Imap.MailboxSpecifier(args[0])
+            )
+        );
     }
 
     private void fetch(string cmd, string[] args) throws Error {
