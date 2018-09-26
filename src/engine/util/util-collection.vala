@@ -12,6 +12,20 @@ public inline bool is_empty(Gee.Collection? c) {
     return c == null || c.size == 0;
 }
 
+/** Returns a modifiable collection containing a single element. */
+public Gee.Collection<T> single<T>(T element) {
+    Gee.Collection<T> single = new Gee.LinkedList<T>();
+    single.add(element);
+    return single;
+}
+
+/** Returns a modifiable map containing a single entry. */
+public Gee.Map<K,V> single_map<K,V>(K key, V value) {
+    Gee.Map<K,V> single = new Gee.HashMap<K,V>();
+    single.set(key, value);
+    return single;
+}
+
 // A substitute for ArrayList<G>.wrap() for compatibility with older versions of Gee.
 public Gee.ArrayList<G> array_list_wrap<G>(G[] a, owned Gee.EqualDataFunc<G>? equal_func = null) {
     Gee.ArrayList<G> list = new Gee.ArrayList<G>((owned) equal_func);

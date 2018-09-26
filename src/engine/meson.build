@@ -99,6 +99,7 @@ geary_engine_vala_sources = files(
   'imap/command/imap-compress-command.vala',
   'imap/command/imap-copy-command.vala',
   'imap/command/imap-create-command.vala',
+  'imap/command/imap-delete-command.vala',
   'imap/command/imap-examine-command.vala',
   'imap/command/imap-expunge-command.vala',
   'imap/command/imap-fetch-command.vala',

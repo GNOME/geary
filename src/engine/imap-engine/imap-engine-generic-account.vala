@@ -442,7 +442,9 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             folder = this.folder_map.get(path);
 
             if (folder == null) {
-                throw new EngineError.NOT_FOUND(path.to_string());
+                throw new EngineError.NOT_FOUND(
+                    "Folder not found: %s", path.to_string()
+                );
             }
         }
         return folder;
@@ -668,7 +670,6 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
                                                             Geary.SpecialFolderType special,
                                                             Cancellable? cancellable)
         throws Error {
-        MinimalFolder? minimal_folder = null;
         Geary.FolderPath? path = information.get_special_folder_path(special);
         if (path != null) {
             debug("Previously used %s for special folder %s", path.to_string(), special.to_string());
@@ -696,22 +697,49 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             information.set_special_folder_path(special, path);
         }
 
-        if (path in folder_map.keys) {
-            debug("Promoting %s to special folder %s", path.to_string(), special.to_string());
-            minimal_folder = folder_map.get(path);
-        } else {
-            debug("Creating %s to use as special folder %s", path.to_string(), special.to_string());
-            // TODO: ignore error due to already existing.
-            yield remote.create_folder_async(path, special, cancellable);
-            minimal_folder = (MinimalFolder) yield fetch_folder_async(path, cancellable);
+        if (!this.folder_map.has_key(path)) {
+            debug("Creating \"%s\" to use as special folder %s",
+                  path.to_string(), special.to_string());
+
+            GLib.Error? created_err = null;
+            try {
+                yield remote.create_folder_async(path, special, cancellable);
+            } catch (GLib.Error err) {
+                // Hang on to the error since the folder might exist
+                // on the remote, so try fetching it anyway.
+                created_err = err;
+            }
+
+            Imap.Folder? remote_folder = null;
+            try {
+                remote_folder = yield remote.fetch_folder_async(
+                    path, cancellable
+                );
+            } catch (GLib.Error err) {
+                // If we couldn't fetch it after also failing to
+                // create it, it's probably due to the problem
+                // creating it, so throw that error instead.
+                if (created_err != null) {
+                    throw created_err;
+                } else {
+                    throw err;
+                }
+            }
+
+            ImapDB.Folder local_folder = yield this.local.clone_folder_async(
+                remote_folder, cancellable
+            );
+            add_folders(Collection.single(local_folder), created_err != null);
         }
 
-        Gee.Map<Geary.SpecialFolderType,Geary.Folder> specials =
-            new Gee.HashMap<Geary.SpecialFolderType,Geary.Folder>();
-        specials.set(special, minimal_folder);
-        promote_folders(specials);
+        Geary.Folder special_folder = this.folder_map.get(path);
+        promote_folders(
+            Collection.single_map<Geary.SpecialFolderType,Geary.Folder>(
+                special, special_folder
+            )
+        );
 
-        return minimal_folder;
+        return special_folder;
     }
 
     /**
@@ -1220,10 +1248,11 @@ internal class Geary.ImapEngine.UpdateRemoteFolders : AccountOperation {
                     remote_folder.path.to_string(), update_error.message);
             }
 
-            // set the engine folder's special type
-            // (but only promote, not demote, since getting the special folder type via its
-            // properties relies on the optional XLIST extension)
-            // use this iteration to add discovered properties to map
+            // set the engine folder's special type (but only promote,
+            // not demote, since getting the special folder type via
+            // its properties relies on the optional SPECIAL-USE or
+            // XLIST extensions) use this iteration to add discovered
+            // properties to map
             if (minimal_folder.special_folder_type == SpecialFolderType.NONE)
                 minimal_folder.set_special_folder_type(remote_folder.properties.attrs.get_special_folder_type());
         }
@@ -1240,27 +1269,19 @@ internal class Geary.ImapEngine.UpdateRemoteFolders : AccountOperation {
             .map<Geary.Folder>(e => (Geary.Folder) e.value)
             .to_array_list();
 
-        // For folders to add, clone them and their properties locally
+        // For folders to add, clone them and their properties
+        // locally, then add to the account
         ImapDB.Account local = ((GenericAccount) this.account).local;
-        foreach (Geary.Imap.Folder remote_folder in to_add) {
-            try {
-                yield local.clone_folder_async(remote_folder, cancellable);
-            } catch (Error err) {
-                debug("Unable to add/remove folder %s to local store: %s", remote_folder.path.to_string(),
-                    err.message);
-            }
-        }
-
-        // Create Geary.Folder objects for all added folders
         Gee.ArrayList<ImapDB.Folder> to_build = new Gee.ArrayList<ImapDB.Folder>();
         foreach (Geary.Imap.Folder remote_folder in to_add) {
             try {
-                to_build.add(yield local.fetch_folder_async(remote_folder.path, cancellable));
-            } catch (Error convert_err) {
-                // This isn't fatal, but irksome ... in the future, when local folders are
-                // removed, it's possible for one to disappear between cloning it and fetching
-                // it
-                debug("Unable to fetch local folder after cloning: %s", convert_err.message);
+                to_build.add(
+                    yield local.clone_folder_async(remote_folder, cancellable)
+                );
+            } catch (Error err) {
+                debug("Unable to clone folder %s in local store: %s",
+                      remote_folder.path.to_string(),
+                      err.message);
             }
         }
         this.generic_account.add_folders(to_build, false);
@@ -1304,11 +1325,9 @@ internal class Geary.ImapEngine.UpdateRemoteFolders : AccountOperation {
         // Ensure each of the important special folders we need already exist
         foreach (Geary.SpecialFolderType special in this.specials) {
             try {
-                if (this.generic_account.get_special_folder(special) == null) {
-                    yield this.generic_account.ensure_special_folder_async(
-                        remote, special, cancellable
-                    );
-                }
+                yield this.generic_account.ensure_special_folder_async(
+                    remote, special, cancellable
+                );
             } catch (Error e) {
                 warning("Unable to ensure special folder %s: %s", special.to_string(), e.message);
             }

@@ -954,15 +954,24 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
 
         Imap.FolderSession? session = null;
         try {
-            session = yield this._account.claim_folder_session(this.path, cancellable);
+            session = yield this._account.claim_folder_session(
+                this.path, cancellable
+            );
+        } catch (IOError.CANCELLED err) {
+            // Fine, just bail out
+            return;
+        } catch (EngineError.NOT_FOUND err) {
+            // Folder no longer exists, so force closed
+            yield force_close(
+                CloseReason.LOCAL_CLOSE, CloseReason.REMOTE_ERROR
+            );
+            return;
         } catch (Error err) {
-            if (!(err is IOError.CANCELLED)) {
-                // Notify that there was a connection error, but don't
-                // force the folder closed, since it might come good again
-                // if the user fixes an auth problem or the network comes
-                // back or whatever.
-                notify_open_failed(Folder.OpenFailed.REMOTE_ERROR, err);
-            }
+            // Notify that there was a connection error, but don't
+            // force the folder closed, since it might come good again
+            // if the user fixes an auth problem or the network comes
+            // back or whatever.
+            notify_open_failed(Folder.OpenFailed.REMOTE_ERROR, err);
             return;
         }
 

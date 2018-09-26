@@ -384,9 +384,10 @@ private class Geary.ImapDB.Account : BaseObject {
     private void on_outbox_email_sent(Geary.RFC822.Message rfc822) {
         email_sent(rfc822);
     }
-    
-    public async void clone_folder_async(Geary.Imap.Folder imap_folder, Cancellable? cancellable = null)
-        throws Error {
+
+    public async Folder clone_folder_async(Geary.Imap.Folder imap_folder,
+                                           GLib.Cancellable? cancellable = null)
+        throws GLib.Error {
         check_open();
 
         Geary.Imap.FolderProperties properties = imap_folder.properties;
@@ -395,7 +396,9 @@ private class Geary.ImapDB.Account : BaseObject {
         // XXX this should really be a db table constraint
         Geary.ImapDB.Folder? folder = get_local_folder(path);
         if (folder != null)
-            throw new EngineError.ALREADY_EXISTS(path.to_string());
+            throw new EngineError.ALREADY_EXISTS(
+                "Folder with path already exists: %s", path.to_string()
+            );
 
         yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
             // get the parent of this folder, creating parents if necessary ... ok if this fails,
@@ -426,8 +429,11 @@ private class Geary.ImapDB.Account : BaseObject {
             
             return Db.TransactionOutcome.COMMIT;
         }, cancellable);
+
+        // XXX can't we create this from the INSERT above?
+        return yield fetch_folder_async(path, cancellable);
     }
-    
+
     public async void delete_folder_async(Geary.Folder folder, Cancellable? cancellable)
         throws Error {
         check_open();
@@ -444,11 +450,13 @@ private class Geary.ImapDB.Account : BaseObject {
                 debug("Can't delete folder %s because it has children", folder.to_string());
                 return Db.TransactionOutcome.ROLLBACK;
             }
-            
+
             do_delete_folder(cx, folder_id, cancellable);
-            
+            this.folder_refs.unset(path);
+
             return Db.TransactionOutcome.COMMIT;
         }, cancellable);
+
     }
 
     private void initialize_contacts(Cancellable? cancellable = null) throws Error {

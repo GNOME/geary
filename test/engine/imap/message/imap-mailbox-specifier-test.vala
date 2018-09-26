@@ -12,6 +12,7 @@ class Geary.Imap.MailboxSpecifierTest : TestCase {
         base("Geary.Imap.MailboxSpecifierTest");
         add_test("to_parameter", to_parameter);
         add_test("from_parameter", from_parameter);
+        add_test("from_folder_path", from_folder_path);
     }
 
     public void to_parameter() throws Error {
@@ -54,6 +55,58 @@ class Geary.Imap.MailboxSpecifierTest : TestCase {
             "olé",
             new MailboxSpecifier.from_parameter(
                 new UnquotedStringParameter("ol&AOk-")).name
+        );
+    }
+
+    public void from_folder_path() throws Error {
+        MockFolderRoot empty_root = new MockFolderRoot("");
+        MailboxSpecifier empty_inbox = new MailboxSpecifier("Inbox");
+        assert_string(
+            "Foo",
+            new MailboxSpecifier.from_folder_path(
+                empty_root.get_child("Foo"), empty_inbox, "$"
+            ).name
+        );
+        assert_string(
+            "Foo$Bar",
+            new MailboxSpecifier.from_folder_path(
+                empty_root.get_child("Foo").get_child("Bar"), empty_inbox, "$"
+            ).name
+        );
+        assert_string(
+            "Inbox",
+            new MailboxSpecifier.from_folder_path(
+                empty_root.get_child(MailboxSpecifier.CANONICAL_INBOX_NAME),
+                empty_inbox,
+                "$"
+            ).name
+        );
+
+        MockFolderRoot non_empty_root = new MockFolderRoot("Root");
+        MailboxSpecifier non_empty_inbox = new MailboxSpecifier("Inbox");
+        assert_string(
+            "Root$Foo",
+            new MailboxSpecifier.from_folder_path(
+                non_empty_root.get_child("Foo"),
+                non_empty_inbox,
+                "$"
+            ).name
+        );
+        assert_string(
+            "Root$Foo$Bar",
+            new MailboxSpecifier.from_folder_path(
+                non_empty_root.get_child("Foo").get_child("Bar"),
+                non_empty_inbox,
+                "$"
+            ).name
+        );
+        assert_string(
+            "Root$INBOX",
+            new MailboxSpecifier.from_folder_path(
+                non_empty_root.get_child(MailboxSpecifier.CANONICAL_INBOX_NAME),
+                non_empty_inbox,
+                "$"
+            ).name
         );
     }
 
