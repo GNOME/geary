@@ -396,7 +396,9 @@ private class Geary.ImapDB.Account : BaseObject {
         // XXX this should really be a db table constraint
         Geary.ImapDB.Folder? folder = get_local_folder(path);
         if (folder != null)
-            throw new EngineError.ALREADY_EXISTS(path.to_string());
+            throw new EngineError.ALREADY_EXISTS(
+                "Folder with path already exists: %s", path.to_string()
+            );
 
         yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {
             // get the parent of this folder, creating parents if necessary ... ok if this fails,

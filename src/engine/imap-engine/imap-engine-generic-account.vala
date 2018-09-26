@@ -442,7 +442,9 @@ private abstract class Geary.ImapEngine.GenericAccount : Geary.Account {
             folder = this.folder_map.get(path);
 
             if (folder == null) {
-                throw new EngineError.NOT_FOUND(path.to_string());
+                throw new EngineError.NOT_FOUND(
+                    "Folder not found: %s", path.to_string()
+                );
             }
         }
         return folder;
