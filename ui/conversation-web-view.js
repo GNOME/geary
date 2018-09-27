@@ -34,6 +34,25 @@ ConversationPageState.prototype = {
             }
         }, true);
     },
+    /**
+     * Add email headers for printing
+     */
+    addPrintHeaders: function(headers) {
+        let headerTable = document.getElementById('geary-message-headers');
+        if (headerTable) headerTable.parentNode.removeChild(headerTable);
+
+        headerTable = document.createElement('table');
+        headerTable.id = 'geary-message-headers';
+        for (header in headers) {
+            let row = headerTable.appendChild(document.createElement('tr'));
+            let name = row.appendChild(document.createElement('th'));
+            let value = row.appendChild(document.createElement('td'));
+            name.textContent = header;
+            value.textContent = headers[header];
+        }
+
+        document.body.insertBefore(headerTable, document.body.firstChild);
+    },
     loaded: function() {
         this.updateDirection();
         this.createControllableQuotes();

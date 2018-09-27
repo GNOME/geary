@@ -116,6 +116,7 @@ geary_client_dependencies = [
   gio,
   goa,
   gtk,
+  json_glib,
   libcanberra,
   libnotify,
   libsecret,
