@@ -816,11 +816,11 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
             builder.add_string_value(this.email.to.to_string());
         }
         if (this.email.cc != null) {
-            builder.set_member_name(_("CC:"));
+            builder.set_member_name(_("Cc:"));
             builder.add_string_value(this.email.cc.to_string());
         }
         if (this.email.bcc != null) {
-            builder.set_member_name(_("BCC:"));
+            builder.set_member_name(_("Bcc:"));
             builder.add_string_value(this.email.bcc.to_string());
         }
         if (this.email.date != null) {
