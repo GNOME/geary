@@ -385,7 +385,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
                 forward_message();
             });
         add_action(ACTION_PRINT).activate.connect(() => {
-                print();
+                print.begin();
             });
         add_action(ACTION_MARK_READ).activate.connect(() => {
                 mark_email(null, Geary.EmailFlags.UNREAD);
@@ -804,9 +804,38 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
         }
     }
 
-    private void print() {
-        // XXX This isn't anywhere near good enough - headers aren't
-        // being printed.
+    private async void print() throws Error {
+        Json.Builder builder = new Json.Builder();
+        builder.begin_object();
+        if (this.email.from != null) {
+            builder.set_member_name(_("From:"));
+            builder.add_string_value(this.email.from.to_string());
+        }
+        if (this.email.to != null) {
+            builder.set_member_name(_("To:"));
+            builder.add_string_value(this.email.to.to_string());
+        }
+        if (this.email.cc != null) {
+            builder.set_member_name(_("CC:"));
+            builder.add_string_value(this.email.cc.to_string());
+        }
+        if (this.email.bcc != null) {
+            builder.set_member_name(_("BCC:"));
+            builder.add_string_value(this.email.bcc.to_string());
+        }
+        if (this.email.date != null) {
+            builder.set_member_name(_("Date:"));
+            builder.add_string_value(this.email.date.to_string());
+        }
+        if (this.email.subject != null) {
+            builder.set_member_name(_("Subject:"));
+            builder.add_string_value(this.email.subject.to_string());
+        }
+        builder.end_object();
+        Json.Generator generator = new Json.Generator();
+        generator.set_root(builder.get_root());
+        string js = "geary.addPrintHeaders(" + generator.to_data(null) + ");";
+        yield this.primary_message.web_view.run_javascript(js, null);
 
         Gtk.Window? window = get_toplevel() as Gtk.Window;
         WebKit.PrintOperation op = new WebKit.PrintOperation(

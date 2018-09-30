@@ -193,8 +193,43 @@ pre {
   }
 }
 
+#geary-message-headers {
+  display: none !important;
+}
+
 @media print {
   .geary-button {
     display: none;
+  }
+
+  #geary-message-headers, #geary-message-headers * {
+    all: initial !important;
+  }
+
+  #geary-message-headers {
+    display: table !important;
+    width: 100% !important;
+    transition: height 2s !important;
+    padding-bottom: 0.5em !important;
+    border-bottom: 2px inset black !important;
+    margin-bottom: 0.75em !important;
+  }
+
+  #geary-message-headers tr {
+    display: table-row !important;
+  }
+
+  #geary-message-headers th, #geary-message-headers td {
+    display: table-cell !important;
+    line-height: 1.5em !important;
+  }
+
+  #geary-message-headers th {
+    font-weight: bold !important;
+    padding-right: 2ex !important;
+  }
+
+  #geary-message-headers td {
+    width: 100% !important;
   }
 }
