@@ -21,11 +21,13 @@ i18n.merge_file(
 
 # Contractor file (Elementary OS)
 if install_contractor_file
-  i18n.merge_file(
+
+  msgfmt = find_program('msgfmt')
+
+  custom_target(
     input: 'geary-attach.contract.desktop.in',
     output: 'geary-attach.contract',
-    type: 'desktop',
-    po_dir: po_dir,
+    command: [msgfmt, '--desktop', '--keyword=Description', '--template', '@INPUT@', '-d', po_dir, '-o', '@OUTPUT@'],
     install: true,
     install_dir: join_paths(datadir, 'contractor')
   )
