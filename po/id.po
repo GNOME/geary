@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary master\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2018-08-29 14:58+0000\n"
-"PO-Revision-Date: 2018-08-30 17:42+0700\n"
+"POT-Creation-Date: 2018-09-30 13:37+0000\n"
+"PO-Revision-Date: 2018-10-02 20:32+0700\n"
 "Last-Translator: Kukuh Syafaat <kukuhsyafaat@gnome.org>\n"
 "Language-Team: Indonesian (http://www.transifex.com/projects/p/geary/"
 "language/id/)\n"
@@ -724,15 +724,15 @@ msgstr ""
 "\n"
 "Harap periksa koneksi jaringan Anda dan start ulang Geary."
 
-#: src/client/application/geary-controller.vala:2038
+#: src/client/application/geary-controller.vala:2036
 msgid "Undo move (Ctrl+Z)"
 msgstr "Tak jadi pindah (Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:2048
+#: src/client/application/geary-controller.vala:2046
 msgid "Are you sure you want to open these attachments?"
 msgstr "Anda yakin ingin membuka lampiran-lampiran ini?"
 
-#: src/client/application/geary-controller.vala:2049
+#: src/client/application/geary-controller.vala:2047
 msgid ""
 "Attachments may cause damage to your system if opened.  Only open files from "
 "trusted sources."
@@ -740,82 +740,82 @@ msgstr ""
 "Lampiran berpotensi bahaya jika dibuka. Hanya buka berkas dari sumber "
 "terpercaya."
 
-#: src/client/application/geary-controller.vala:2050
+#: src/client/application/geary-controller.vala:2048
 msgid "Don’t _ask me again"
 msgstr "Jangan tanya s_aya lagi"
 
-#: src/client/application/geary-controller.vala:2146
+#: src/client/application/geary-controller.vala:2144
 #, c-format
 msgid "A file named “%s” already exists.  Do you want to replace it?"
 msgstr "Berkas bernama \"%s\" sudah ada. Anda ingin menimpanya?"
 
-#: src/client/application/geary-controller.vala:2148
+#: src/client/application/geary-controller.vala:2146
 #, c-format
 msgid ""
 "The file already exists in “%s”.  Replacing it will overwrite its contents."
 msgstr "Berkas telah ada di \"%s\".  Kalau ditimpa isi sebelumnya hilang."
 
-#: src/client/application/geary-controller.vala:2151
+#: src/client/application/geary-controller.vala:2149
 msgid "_Replace"
 msgstr "Timp_a"
 
-#: src/client/application/geary-controller.vala:2391
+#: src/client/application/geary-controller.vala:2389
 msgid "Close the draft message?"
 msgid_plural "Close all draft messages?"
 msgstr[0] "Tutup semua draf pesan?"
 
-#: src/client/application/geary-controller.vala:2517
+#: src/client/application/geary-controller.vala:2515
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "Kosongkan semua surel dari folder %s Anda?"
 
-#: src/client/application/geary-controller.vala:2518
+#: src/client/application/geary-controller.vala:2516
 msgid "This removes the email from Geary and your email server."
 msgstr "Ini menghapus surel dari Geary dan server surel Anda."
 
-#: src/client/application/geary-controller.vala:2519
+#: src/client/application/geary-controller.vala:2517
 msgid "This cannot be undone."
 msgstr "Ini tidak bisa dibatalkan."
 
-#: src/client/application/geary-controller.vala:2520
+#: src/client/application/geary-controller.vala:2518
 #, c-format
 msgid "Empty %s"
 msgstr "Kosongkan %s"
 
-#: src/client/application/geary-controller.vala:2537
+#: src/client/application/geary-controller.vala:2535
 #, c-format
 msgid "Error emptying %s"
 msgstr "Galat saat mengosongkan %s"
 
-#: src/client/application/geary-controller.vala:2569
+#: src/client/application/geary-controller.vala:2567
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Anda mau membuang pesan ini secara permanen?"
 
-#: src/client/application/geary-controller.vala:2571
+#: src/client/application/geary-controller.vala:2569
 msgid "Delete"
 msgstr "Hapus"
 
-#: src/client/application/geary-controller.vala:2585
+#: src/client/application/geary-controller.vala:2583
 msgid "Undo trash (Ctrl+Z)"
 msgstr "Tak jadi buang ke tong sampah (Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:2635
+#: src/client/application/geary-controller.vala:2633
 msgid "Undo archive (Ctrl+Z)"
 msgstr "Tak jadi arsipkan (Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:2680
+#: src/client/application/geary-controller.vala:2678
 msgid "Undo (Ctrl+Z)"
 msgstr "Tak jadi (Ctrl+Z)"
 
 #. Translators: The label for an in-app notification. The
 #. string substitution is a list of recipients of the email.
-#: src/client/application/geary-controller.vala:2757
+#: src/client/application/geary-controller.vala:2755
 #, c-format
 msgid "Successfully sent mail to %s."
 msgstr "Berhasil mengirim surel ke %s."
 
-#: src/client/application/geary-controller.vala:2838
+#: src/client/application/geary-controller.vala:2836
 msgid "Failed to open default text editor."
 msgstr "Gagal membuka penyunting teks utama."
 
@@ -868,7 +868,7 @@ msgstr "Pindahkan percakapan"
 msgid "Move conversations"
 msgstr "Pindahkan percakapan"
 
-#: src/client/components/main-window.vala:437
+#: src/client/components/main-window.vala:440
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -1353,6 +1353,33 @@ msgstr "Aku"
 #: src/client/conversation-viewer/conversation-email.vala:122
 msgid "Unknown"
 msgstr "Tak dikenal"
+
+#: src/client/conversation-viewer/conversation-email.vala:811
+msgid "From:"
+msgstr "Dari:"
+
+#: src/client/conversation-viewer/conversation-email.vala:815
+#: ui/conversation-message.ui:313
+msgid "To:"
+msgstr "Ke:"
+
+#: src/client/conversation-viewer/conversation-email.vala:819
+#: ui/conversation-message.ui:358
+msgid "Cc:"
+msgstr "Cc:"
+
+#: src/client/conversation-viewer/conversation-email.vala:823
+#: ui/conversation-message.ui:403
+msgid "Bcc:"
+msgstr "Bcc:"
+
+#: src/client/conversation-viewer/conversation-email.vala:827
+msgid "Date:"
+msgstr "Tanggal:"
+
+#: src/client/conversation-viewer/conversation-email.vala:831
+msgid "Subject:"
+msgstr "Subjek:"
 
 #: src/client/conversation-viewer/conversation-message.vala:60
 msgid "This email address may have been forged"
@@ -1932,7 +1959,7 @@ msgstr "unread"
 #. Draft mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:870
+#: src/engine/imap-engine/imap-engine-generic-account.vala:898
 msgid "Drafts | Draft"
 msgstr "Draf"
 
@@ -1940,13 +1967,13 @@ msgstr "Draf"
 #. Sent mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:879
+#: src/engine/imap-engine/imap-engine-generic-account.vala:907
 msgid "Sent | Sent Mail | Sent Email | Sent E-Mail"
 msgstr "Sent | Sent Mail | Sent Email | Sent E-Mail | Surat Keluar | Terkirim"
 
 #. The localised name(s) of the Sent folder name as used
 #. by MS Outlook/Exchange.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:884
+#: src/engine/imap-engine/imap-engine-generic-account.vala:912
 msgctxt "Outlook localised name"
 msgid "Sent Items"
 msgstr "Dikirim"
@@ -1955,7 +1982,7 @@ msgstr "Dikirim"
 #. Spam mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:894
+#: src/engine/imap-engine/imap-engine-generic-account.vala:922
 msgid ""
 "Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email "
 "| Bulk E-Mail"
@@ -1967,13 +1994,13 @@ msgstr ""
 #. Trash mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:904
+#: src/engine/imap-engine/imap-engine-generic-account.vala:932
 msgid "Trash | Rubbish | Rubbish Bin"
 msgstr "Trash | Rubbish | Rubbish Bin | Sampah | Tong Sampah | Tempat Sampah"
 
 #. The localised name(s) of the Trash folder name as used
 #. by MS Outlook/Exchange.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:909
+#: src/engine/imap-engine/imap-engine-generic-account.vala:937
 msgctxt "Outlook localised name"
 msgid "Deleted Items"
 msgstr "Dihapus"
@@ -1982,7 +2009,7 @@ msgstr "Dihapus"
 #. Archive mailbox. Separate names using a vertical bar
 #. and put the most common localized name to the front for
 #. the default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:919
+#: src/engine/imap-engine/imap-engine-generic-account.vala:947
 msgid "Archive | Archives"
 msgstr "Arsip | Archive | Archives"
 
@@ -2439,18 +2466,6 @@ msgstr "Balas ke:"
 #: ui/conversation-message.ui:292
 msgid "Subject"
 msgstr "Perihal"
-
-#: ui/conversation-message.ui:313
-msgid "To:"
-msgstr "Ke:"
-
-#: ui/conversation-message.ui:358
-msgid "Cc:"
-msgstr "Cc:"
-
-#: ui/conversation-message.ui:403
-msgid "Bcc:"
-msgstr "Bcc:"
 
 #: ui/conversation-message.ui:502
 msgid "Show Images"
