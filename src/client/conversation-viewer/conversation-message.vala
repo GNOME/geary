@@ -436,7 +436,7 @@ public class ConversationMessage : Gtk.Grid, Geary.BaseInterface {
     /**
      * Starts loading the avatar for the message's sender.
      */
-    public async void load_avatar(ConversationListBox.AvatarStore loader,
+    public async void load_avatar(Application.AvatarStore loader,
                                   Cancellable load_cancelled) {
         const int PIXEL_SIZE = 32;
         Geary.RFC822.MailboxAddress? primary = message.get_primary_originator();

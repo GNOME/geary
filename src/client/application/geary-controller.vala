@@ -86,8 +86,9 @@ public class GearyController : Geary.BaseObject {
     
     public LoginDialog? login_dialog { get; private set; default = null; }
 
-    public Soup.Session? avatar_session { get; private set; default = null; }
-    private Soup.Cache? avatar_cache = null;
+    public Application.AvatarStore? avatar_store {
+        get; private set; default = null;
+    }
 
     private Geary.Account? current_account = null;
     private Gee.Map<Geary.AccountInformation,AccountContext> accounts =
@@ -219,21 +220,10 @@ public class GearyController : Geary.BaseObject {
             error("Error loading web resources: %s", err.message);
         }
 
-        // Use a global avatar session because a cache must be used
-        // per-session, and we don't want to have to load the cache
-        // for each conversation load.
-        File avatar_cache_dir = this.application.get_user_cache_directory()
-            .get_child("avatars");
-        this.avatar_cache = new Soup.Cache(
-            avatar_cache_dir.get_path(),
-            Soup.CacheType.SINGLE_USER
+        this.avatar_store = new Application.AvatarStore(
+            this.application.config,
+            this.application.get_user_cache_directory()
         );
-        this.avatar_cache.load();
-        this.avatar_cache.set_max_size(10 * 1024 * 1024); // 4MB
-        this.avatar_session = new Soup.Session.with_options(
-            Soup.SESSION_USER_AGENT, "Geary/" + GearyApplication.VERSION
-        );
-        this.avatar_session.add_feature(avatar_cache);
 
         // Create the main window (must be done after creating actions.)
         main_window = new MainWindow(this.application);
@@ -271,12 +261,13 @@ public class GearyController : Geary.BaseObject {
         new_messages_indicator.application_activated.connect(on_indicator_activated_application);
         new_messages_indicator.composer_activated.connect(on_indicator_activated_composer);
         new_messages_indicator.inbox_activated.connect(on_indicator_activated_inbox);
-        
+
         unity_launcher = new UnityLauncher(new_messages_monitor);
-        
-        // libnotify
-        libnotify = new Libnotify(new_messages_monitor);
-        libnotify.invoked.connect(on_libnotify_invoked);
+
+        this.libnotify = new Libnotify(
+            this.new_messages_monitor, this.avatar_store
+        );
+        this.libnotify.invoked.connect(on_libnotify_invoked);
 
         this.main_window.conversation_list_view.grab_focus();
 
@@ -402,7 +393,7 @@ public class GearyController : Geary.BaseObject {
         foreach (AccountContext context in accounts) {
             Geary.Folder? inbox = context.inbox;
             if (inbox != null) {
-                debug("Closing %s...", inbox.to_string());
+                debug("Closing inbox: %s...", inbox.to_string());
                 inbox.close_async.begin(null, (obj, ret) => {
                         try {
                             inbox.close_async.end(ret);
@@ -481,8 +472,9 @@ public class GearyController : Geary.BaseObject {
 
         this.autostart_manager = null;
 
-        this.avatar_cache.flush();
-        this.avatar_cache.dump();
+        this.avatar_store.close();
+        this.avatar_store = null;
+
 
         debug("Closed GearyController");
     }
@@ -1536,7 +1528,7 @@ public class GearyController : Geary.BaseObject {
                     Geary.Collection.get_first(selected),
                     this.current_folder,
                     this.application.config,
-                    this.avatar_session,
+                    this.avatar_store,
                     (obj, ret) => {
                         try {
                             viewer.load_conversation.end(ret);

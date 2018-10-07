@@ -8,10 +8,13 @@
 public class Libnotify : Geary.BaseObject {
     public const Geary.Email.Field REQUIRED_FIELDS =
         Geary.Email.Field.ORIGINATORS | Geary.Email.Field.SUBJECT;
-    
+
+    private const int AVATAR_SIZE = 32;
+
     private static Canberra.Context? sound_context = null;
-    
+
     private weak NewMessagesMonitor monitor;
+    private weak Application.AvatarStore avatars;
     private Notify.Notification? current_notification = null;
     private Notify.Notification? error_notification = null;
     private Geary.Folder? folder = null;
@@ -19,10 +22,12 @@ public class Libnotify : Geary.BaseObject {
     private List<string>? caps = null;
 
     public signal void invoked(Geary.Folder? folder, Geary.Email? email);
-    
-    public Libnotify(NewMessagesMonitor monitor) {
+
+    public Libnotify(NewMessagesMonitor monitor,
+                     Application.AvatarStore avatars) {
         this.monitor = monitor;
-        
+        this.avatars = avatars;
+
         monitor.add_required_fields(REQUIRED_FIELDS);
         
         if (!Notify.is_initted()) {
@@ -106,26 +111,9 @@ public class Libnotify : Geary.BaseObject {
                 EmailUtil.strip_subject_prefixes(email), count - 1, folder.account.information.display_name);
         }
 
-        // get the avatar
-        Gdk.Pixbuf? avatar = null;
-        InputStream? ins = null;
-        File file = File.new_for_uri(Gravatar.get_image_uri(primary, Gravatar.Default.MYSTERY_MAN));
-        try {
-            ins = yield file.read_async(GLib.Priority.DEFAULT, cancellable);
-            avatar = yield new Gdk.Pixbuf.from_stream_async(ins, cancellable);
-        } catch (Error err) {
-            debug("Failed to get avatar for notification: %s", err.message);
-        }
-        
-        if (ins != null) {
-            try {
-                yield ins.close_async(Priority.DEFAULT, cancellable);
-            } catch (Error close_err) {
-                // ignored
-            }
-            
-            ins = null;
-        }
+        Gdk.Pixbuf? avatar = yield this.avatars.load(
+            primary, AVATAR_SIZE, cancellable
+        );
 
         issue_current_notification(primary.to_short_display(), body, avatar);
     }

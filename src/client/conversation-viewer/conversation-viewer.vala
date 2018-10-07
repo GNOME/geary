@@ -199,7 +199,7 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
     public async void load_conversation(Geary.App.Conversation conversation,
                                         Geary.Folder location,
                                         Configuration config,
-                                        Soup.Session avatar_session)
+                                        Application.AvatarStore avatars)
         throws Error {
         remove_current_list();
 
@@ -212,7 +212,7 @@ public class ConversationViewer : Gtk.Stack, Geary.BaseInterface {
             account.information,
             location.special_folder_type == Geary.SpecialFolderType.DRAFTS,
             config,
-            avatar_session,
+            avatars,
             this.conversation_scroller.get_vadjustment()
         );
 
