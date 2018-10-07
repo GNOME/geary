@@ -97,7 +97,6 @@ geary_client_vala_sources = files(
   'util/util-email.vala',
   'util/util-files.vala',
   'util/util-gio.vala',
-  'util/util-gravatar.vala',
   'util/util-gtk.vala',
   'util/util-international.vala',
   'util/util-migrate.vala',

@@ -93,7 +93,6 @@ src/client/util/util-date.vala
 src/client/util/util-email.vala
 src/client/util/util-files.vala
 src/client/util/util-gio.vala
-src/client/util/util-gravatar.vala
 src/client/util/util-gtk.vala
 src/client/util/util-international.vala
 src/client/util/util-migrate.vala
