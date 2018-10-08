@@ -21,6 +21,9 @@ public class Geary.Imap.EmailFlags : Geary.EmailFlags {
         
         if (flags.contains(MessageFlag.DRAFT))
             add(DRAFT);
+
+        if (flags.contains(MessageFlag.DELETED))
+            add(DELETED);
     }
     
     /**
@@ -66,6 +69,9 @@ public class Geary.Imap.EmailFlags : Geary.EmailFlags {
             
             if (flag.equal_to(DRAFT))
                 message_flags.add(MessageFlag.DRAFT);
+            
+            if (flag.equal_to(DELETED)) 
+                message_flags.add(MessageFlag.DELETED);
         }
         
         base.notify_added(added);
@@ -84,6 +90,9 @@ public class Geary.Imap.EmailFlags : Geary.EmailFlags {
             
             if (flag.equal_to(DRAFT))
                 message_flags.remove(MessageFlag.DRAFT);
+
+            if (flag.equal_to(DELETED))
+                message_flags.remove(MessageFlag.DELETED);
         }
         
         base.notify_removed(removed);

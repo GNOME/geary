@@ -127,7 +127,7 @@ private class Geary.App.ConversationSet : BaseObject {
                     email, base_folder, known_paths,
                     out added_conversation
                 );
-            }
+            } 
 
             if (conversation != null) {
                 if (added_conversation) {

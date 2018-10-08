@@ -62,7 +62,7 @@ public class Geary.Imap.MessageFlag : Geary.Imap.Flag {
         
         return _seen;
     } }
-    
+
     private static MessageFlag? _allows_new = null;
     public static MessageFlag ALLOWS_NEW { get {
         if (_allows_new == null)
@@ -115,6 +115,8 @@ public class Geary.Imap.MessageFlag : Geary.Imap.Flag {
                 msg_flags_add.add(MessageFlag.LOAD_REMOTE_IMAGES);
             if (email_flags_add.contains(Geary.EmailFlags.DRAFT))
                 msg_flags_add.add(MessageFlag.DRAFT);
+            if (email_flags_add.contains(Geary.EmailFlags.DELETED))
+                msg_flags_add.add(MessageFlag.DELETED);
         }
 
         if (email_flags_remove != null) {
@@ -126,6 +128,8 @@ public class Geary.Imap.MessageFlag : Geary.Imap.Flag {
                 msg_flags_remove.add(MessageFlag.LOAD_REMOTE_IMAGES);
             if (email_flags_remove.contains(Geary.EmailFlags.DRAFT))
                 msg_flags_remove.add(MessageFlag.DRAFT);
+            if (email_flags_remove.contains(Geary.EmailFlags.DELETED))
+                msg_flags_remove.add(MessageFlag.DELETED);
         }
     }
     

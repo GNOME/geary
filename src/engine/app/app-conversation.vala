@@ -233,6 +233,11 @@ public class Geary.App.Conversation : BaseObject {
             break;
         }
 
+        // Filter emails waiting to be expunged (\DELETED)
+        filtered = filtered.filter(
+            (e) => !e.email_flags.is_deleted()
+        );
+
         if (blacklist != null && !blacklist.is_empty) {
             if (blacklist.size == 1) {
                 FolderPath blacklist_path =
