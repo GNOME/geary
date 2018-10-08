@@ -21,6 +21,7 @@ class Geary.App.ConversationTest : TestCase {
         add_test("get_emails", get_emails);
         add_test("get_emails_by_location", get_emails_by_location);
         add_test("get_emails_blacklist", get_emails_blacklist);
+        add_test("get_emails_marked_for_deletion", get_emails_marked_for_deletion);
     }
 
     public override void set_up() {
@@ -232,6 +233,19 @@ class Geary.App.ConversationTest : TestCase {
                                           blacklist)
             ).first(),
             "Unexpected other blacklist element"
+        );
+    }
+
+    public void get_emails_marked_for_deletion() throws GLib.Error {
+        Geary.Email e1 = setup_email(1);
+        e1.set_flags(new Geary.EmailFlags.with(Geary.EmailFlags.DELETED));
+        this.test.add(e1, singleton(this.base_folder.path));
+
+        assert_int(
+            0, this.test.get_emails(Conversation.Ordering.NONE,
+                                    Conversation.Location.ANYWHERE
+            ).size,
+            "Message marked for deletion still present in conversation"
         );
     }
 

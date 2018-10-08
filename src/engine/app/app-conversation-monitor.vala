@@ -687,8 +687,11 @@ public class Geary.App.ConversationMonitor : BaseObject {
 
                 // Expand conversations whose messages have ancestors, and aren't marked
                 // for deletion.
+                Geary.EmailFlags? flags = email.email_flags;
+                bool marked_for_deletion = (flags != null) ? flags.is_deleted() : false;
+
                 Gee.Set<RFC822.MessageID>? ancestors = email.get_ancestors();
-                if (ancestors != null && !email.email_flags.is_deleted()) {
+                if (ancestors != null && !marked_for_deletion) {
                     Geary.traverse<RFC822.MessageID>(ancestors)
                         .filter(id => !new_message_ids.contains(id))
                         .add_all_to(new_message_ids);

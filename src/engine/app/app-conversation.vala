@@ -235,7 +235,7 @@ public class Geary.App.Conversation : BaseObject {
 
         // Filter emails waiting to be expunged (\DELETED)
         filtered = filtered.filter(
-            (e) => !e.email_flags.is_deleted()
+            (e) => (e.email_flags != null) ? !e.email_flags.is_deleted() : true
         );
 
         if (blacklist != null && !blacklist.is_empty) {
