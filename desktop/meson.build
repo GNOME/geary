@@ -21,7 +21,8 @@ i18n.merge_file(
 
 # Contractor file (Elementary OS)
 if install_contractor_file
-
+  # Call msgfmt manually since gettext won't otherwise translate the
+  # Description field. See merge req !50.
   msgfmt = find_program('msgfmt')
 
   custom_target(
