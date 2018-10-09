@@ -526,7 +526,7 @@ public class ConversationEmail : Gtk.Box, Geary.BaseInterface {
      * primary message and any attached messages, as well as
      * attachment names, types and icons.
      */
-    public async void start_loading(ConversationListBox.AvatarStore avatars,
+    public async void start_loading(Application.AvatarStore avatars,
                                     Cancellable load_cancelled) {
         foreach (ConversationMessage view in this)  {
             if (load_cancelled.is_cancelled()) {

@@ -20,6 +20,7 @@ src/client/accounts/add-edit-page.vala
 src/client/accounts/goa-service-information.vala
 src/client/accounts/local-service-information.vala
 src/client/accounts/login-dialog.vala
+src/client/application/application-avatar-store.vala
 src/client/application/autostart-manager.vala
 src/client/application/geary-application.vala
 src/client/application/geary-args.vala
@@ -92,7 +93,6 @@ src/client/util/util-date.vala
 src/client/util/util-email.vala
 src/client/util/util-files.vala
 src/client/util/util-gio.vala
-src/client/util/util-gravatar.vala
 src/client/util/util-gtk.vala
 src/client/util/util-international.vala
 src/client/util/util-migrate.vala
