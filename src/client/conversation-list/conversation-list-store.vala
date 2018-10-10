@@ -463,12 +463,6 @@ public class ConversationListStore : Gtk.ListStore {
     
     private void on_email_flags_changed(Geary.App.Conversation conversation) {
         refresh_flags(conversation);
-
-        // Remove conversation if get_emails yields an empty collection -- this probably means
-        // the conversation was deleted. 
-        if (conversation.get_emails(Geary.App.Conversation.Ordering.NONE).size == 0) {
-            remove_conversation(conversation);
-        }
         
         // refresh previews because the oldest unread message is displayed as the preview, and if
         // that's changed, need to change the preview

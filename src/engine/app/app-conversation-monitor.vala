@@ -850,6 +850,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
 
     private void on_account_email_flags_changed(Geary.Folder folder,
                                                 Gee.Map<EmailIdentifier,EmailFlags> map) {
+        Gee.HashSet<Conversation> removed_conversations = new Gee.HashSet<Conversation>();
         foreach (EmailIdentifier id in map.keys) {
             Conversation? conversation = this.conversations.get_by_email_identifier(id);
             if (conversation == null)
@@ -861,7 +862,20 @@ public class Geary.App.ConversationMonitor : BaseObject {
 
             email.set_flags(map.get(id));
             notify_email_flags_changed(conversation, email);
+
+            // Remove conversation if get_emails yields an empty collection -- this probably means
+            // the conversation was deleted.
+            if (conversation.get_emails(Geary.App.Conversation.Ordering.NONE).size == 0) {
+                Logging.debug(Logging.Flag.CONVERSATIONS, 
+                    "Flagging email %s for deletion evaporates conversation %s", 
+                    id.to_string(), conversation.to_string());
+                
+                this.conversations.remove_conversation(conversation);
+                removed_conversations.add(conversation);
+            }
         }
+
+        notify_conversations_removed(removed_conversations);
     }
 
     private void on_operation_error(ConversationOperation op, Error err) {
