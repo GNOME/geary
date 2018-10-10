@@ -556,7 +556,7 @@ public class ClientWebView : WebKit.WebView, Geary.BaseInterface {
 
     private void on_preferred_height_changed(WebKit.JavascriptResult result) {
         try {
-            int height = (int) WebKitUtil.to_number(result);
+            int height = (int) GLib.Math.ceil(WebKitUtil.to_number(result) * this.zoom_level);
             // Avoid notifying if the values have not changed
             if (this.preferred_height != height) {
                 // value has changed
