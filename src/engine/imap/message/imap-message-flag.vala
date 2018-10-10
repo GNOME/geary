@@ -62,7 +62,7 @@ public class Geary.Imap.MessageFlag : Geary.Imap.Flag {
         
         return _seen;
     } }
-
+    
     private static MessageFlag? _allows_new = null;
     public static MessageFlag ALLOWS_NEW { get {
         if (_allows_new == null)
