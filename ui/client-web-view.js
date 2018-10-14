@@ -57,6 +57,18 @@ PageState.prototype = {
         document.addEventListener("load", function(e) {
             queuePreferredHeightUpdate();
         }, true); // load does not bubble
+
+        // Queues an update if the window changes size, e.g. if the
+        // user resized the window
+        window.addEventListener("resize", function(e) {
+            queuePreferredHeightUpdate();
+        }, false); // load does not bubble
+
+        // Queues an update when a transition has completed, e.g. if the
+        // user resized the window
+        window.addEventListener("transitionend", function(e) {
+            queuePreferredHeightUpdate();
+        }, false); // load does not bubble
     },
     getPreferredHeight: function() {
         let html = window.document.documentElement;
