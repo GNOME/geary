@@ -855,7 +855,7 @@ public class ConversationListBox : Gtk.ListBox, Geary.BaseInterface {
      */
     public void zoom_reset() {
         message_view_iterator().foreach((msg_view) => {
-                msg_view.web_view.zoom_level = 1.0f;
+                msg_view.web_view.zoom_reset();
                 return true;
             });
     }
