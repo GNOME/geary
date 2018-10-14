@@ -206,7 +206,7 @@ public class Sidebar.Tree : Gtk.TreeView {
     private EntryWrapper? get_wrapper(Sidebar.Entry entry) {
         EntryWrapper? wrapper = entry_map.get(entry);
         if (wrapper == null)
-            warning("Entry %s not found in sidebar", entry.to_string());
+            debug("Entry %s not found in sidebar", entry.to_string());
         
         return wrapper;
     }
