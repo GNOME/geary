@@ -72,8 +72,6 @@ public class ConversationWebView : ClientWebView {
         register_message_handler(
             DECEPTIVE_LINK_CLICKED, on_deceptive_link_clicked
         );
-
-        this.notify["preferred-height"].connect(() => queue_resize());
     }
 
     /**

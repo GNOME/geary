@@ -198,14 +198,8 @@ public class ClientWebView : WebKit.WebView, Geary.BaseInterface {
     /** Determines if the view has started rendering the HTML */
     public bool has_valid_height { get; private set; default = false; }
 
-    /** The HTML content's current preferred height in window pixels. */
-    public int preferred_height {
-        get {
-            return (int) GLib.Math.ceil(
-                this.webkit_reported_height * this.zoom_level
-            );
-        }
-    }
+    /** The HTML content's current preferred height. */
+    public int preferred_height { get; private set; default = 0; }
 
     public string document_font {
         get {
@@ -244,8 +238,6 @@ public class ClientWebView : WebKit.WebView, Geary.BaseInterface {
 
     private Gee.List<ulong> registered_message_handlers =
         new Gee.LinkedList<ulong>();
-
-    private double webkit_reported_height = 0;
 
 
     /**
@@ -413,11 +405,8 @@ public class ClientWebView : WebKit.WebView, Geary.BaseInterface {
         execute_editing_command(WebKit.EDITING_COMMAND_COPY);
     }
 
-    public void zoom_reset() {
-        this.zoom_level = ZOOM_DEFAULT;
-        // Notify the preferred height has changed since it depends on
-        // the zoom level. Same for zoom in and out below.
-        notify_property("preferred-height");
+    public void reset_zoom() {
+        this.zoom_level == ZOOM_DEFAULT;
     }
 
     public void zoom_in() {
@@ -426,7 +415,6 @@ public class ClientWebView : WebKit.WebView, Geary.BaseInterface {
             new_zoom = ZOOM_MAX;
         }
         this.zoom_level = new_zoom;
-        notify_property("preferred-height");
     }
 
     public void zoom_out() {
@@ -435,7 +423,6 @@ public class ClientWebView : WebKit.WebView, Geary.BaseInterface {
             new_zoom = ZOOM_MIN;
         }
         this.zoom_level = new_zoom;
-        notify_property("preferred-height");
     }
 
     /**
@@ -563,17 +550,23 @@ public class ClientWebView : WebKit.WebView, Geary.BaseInterface {
     }
 
     private void on_preferred_height_changed(WebKit.JavascriptResult result) {
-        double height = this.webkit_reported_height;
         try {
-            height = WebKitUtil.to_number(result);
-            this.has_valid_height = true;
+            int height = (int) WebKitUtil.to_number(result);
+            // Avoid notifying if the values have not changed
+            if (this.preferred_height != height) {
+                // value has changed
+                this.preferred_height = height;
+                if (height >= 1) {
+                    // value is valid
+                    if (!this.has_valid_height) {
+                        // validity has changed
+                        this.has_valid_height = true;
+                    }
+                    queue_resize();
+                }
+            }
         } catch (Geary.JS.Error err) {
             debug("Could not get preferred height: %s", err.message);
-        }
-
-        if (this.webkit_reported_height != height) {
-            this.webkit_reported_height = height;
-            notify_property("preferred-height");
         }
     }
 
