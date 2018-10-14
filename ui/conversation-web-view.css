@@ -24,6 +24,7 @@ html {
      expanding web view */
   box-sizing: border-box !important;
   margin: 0 !important;
+  border-width: 0 !important;
 }
 
 body {

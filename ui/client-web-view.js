@@ -71,17 +71,7 @@ PageState.prototype = {
         }, false); // load does not bubble
     },
     getPreferredHeight: function() {
-        let html = window.document.documentElement;
-        let height = html.offsetHeight;
-        let computed = window.getComputedStyle(html);
-        let top = computed.getPropertyValue('margin-top');
-        let bot = computed.getPropertyValue('margin-bottom');
-
-        return (
-            height
-                + parseInt(top.substring(0, top.length - 2))
-                + parseInt(bot.substring(0, bot.length - 2))
-        );
+        return window.document.documentElement.scrollHeight;
     },
     loaded: function() {
         this.isLoaded = true;
