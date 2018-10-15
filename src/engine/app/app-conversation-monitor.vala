@@ -870,7 +870,12 @@ public class Geary.App.ConversationMonitor : BaseObject {
                     "Flagging email %s for deletion evaporates conversation %s", 
                     id.to_string(), conversation.to_string());
                 
-                this.conversations.remove_conversation(conversation);
+                // Flags may have changed on a conversation that was already removed from this
+                // conversation set.
+                if (this.conversations.read_only_view.contains(conversation)) {
+                    this.conversations.remove_conversation(conversation);
+                }
+                
                 removed_conversations.add(conversation);
             }
         }
