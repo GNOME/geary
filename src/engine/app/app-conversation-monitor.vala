@@ -850,11 +850,21 @@ public class Geary.App.ConversationMonitor : BaseObject {
 
     private void on_account_email_flags_changed(Geary.Folder folder,
                                                 Gee.Map<EmailIdentifier,EmailFlags> map) {
+        Gee.HashSet<EmailIdentifier> removed_ids = new Gee.HashSet<EmailIdentifier>();
         Gee.HashSet<Conversation> removed_conversations = new Gee.HashSet<Conversation>();
         foreach (EmailIdentifier id in map.keys) {
             Conversation? conversation = this.conversations.get_by_email_identifier(id);
-            if (conversation == null)
+            if (conversation == null) {
+                if (folder == this.base_folder) {
+                    debug("Unflagging email %s for deletion resurrects conversation", id.to_string());
+
+                    Gee.HashSet<EmailIdentifier> inserted_emails = new Gee.HashSet<EmailIdentifier>();
+                    inserted_emails.add(id);
+                    this.queue.add(new InsertOperation(this, inserted_emails));
+                }
+
                 continue;
+            }
 
             Email? email = conversation.get_email_by_id(id);
             if (email == null)
@@ -866,21 +876,21 @@ public class Geary.App.ConversationMonitor : BaseObject {
             // Remove conversation if get_emails yields an empty collection -- this probably means
             // the conversation was deleted.
             if (conversation.get_emails(Geary.App.Conversation.Ordering.NONE).size == 0) {
-                Logging.debug(Logging.Flag.CONVERSATIONS, 
-                    "Flagging email %s for deletion evaporates conversation %s", 
+                debug("Flagging email %s for deletion evaporates conversation %s", 
                     id.to_string(), conversation.to_string());
                 
-                // Flags may have changed on a conversation that was already removed from this
-                // conversation set.
-                if (this.conversations.read_only_view.contains(conversation)) {
-                    this.conversations.remove_conversation(conversation);
-                }
-                
+                this.conversations.remove_conversation(conversation);
                 removed_conversations.add(conversation);
-            }
+                removed_ids.add(id);
+            } 
         }
 
-        notify_conversations_removed(removed_conversations);
+        // Notify self about removed conversations
+        removed(
+            removed_conversations,
+            new Gee.HashMultiMap<Conversation, Email>(),
+            (folder == this.base_folder) ? removed_ids : null
+        );
     }
 
     private void on_operation_error(ConversationOperation op, Error err) {

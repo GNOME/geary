@@ -191,8 +191,18 @@ private class Geary.App.ConversationSet : BaseObject {
      * Removes a conversation from the set.
      */
     public void remove_conversation(Conversation conversation) {
-        foreach (Geary.Email conversation_email in conversation.get_emails(Conversation.Ordering.NONE))
-            remove_email_from_conversation(conversation, conversation_email);
+        Gee.HashSet<Geary.EmailIdentifier> ids_to_remove = new Gee.HashSet<Geary.EmailIdentifier>();
+        foreach (Gee.Map.Entry<EmailIdentifier, Conversation> entry in email_id_map.entries) {
+            if (entry.value == conversation) {
+                ids_to_remove.add(entry.key);
+            }
+        }
+
+        foreach (EmailIdentifier id in ids_to_remove) {
+            Geary.Email? email = conversation.get_email_by_id(id);
+            if (email != null)
+                remove_email_from_conversation(conversation, email);
+        }
 
         if (!_conversations.remove(conversation))
             error("Conversation %s already removed from set", conversation.to_string());
