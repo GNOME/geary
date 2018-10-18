@@ -348,6 +348,9 @@ class Geary.App.ConversationMonitorTest : TestCase {
             new Gee.HashMap<EmailIdentifier,EmailFlags>();
         flags_changed.set(e1.id, new EmailFlags.with(EmailFlags.DELETED));
         this.account.email_flags_changed(this.base_folder, flags_changed);
+        
+        this.base_folder.expect_call("list_email_by_sparse_id_async");
+        this.base_folder.expect_call("list_email_by_id_async");
 
         wait_for_signal(monitor, "email-flags-changed"); 
 
