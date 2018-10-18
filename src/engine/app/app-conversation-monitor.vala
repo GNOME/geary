@@ -850,6 +850,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
 
     private void on_account_email_flags_changed(Geary.Folder folder,
                                                 Gee.Map<EmailIdentifier,EmailFlags> map) {
+        Gee.HashSet<EmailIdentifier> inserted_ids = new Gee.HashSet<EmailIdentifier>();
         Gee.HashSet<EmailIdentifier> removed_ids = new Gee.HashSet<EmailIdentifier>();
         Gee.HashSet<Conversation> removed_conversations = new Gee.HashSet<Conversation>();
         foreach (EmailIdentifier id in map.keys) {
@@ -857,10 +858,7 @@ public class Geary.App.ConversationMonitor : BaseObject {
             if (conversation == null) {
                 if (folder == this.base_folder) {
                     debug("Unflagging email %s for deletion resurrects conversation", id.to_string());
-
-                    Gee.HashSet<EmailIdentifier> inserted_emails = new Gee.HashSet<EmailIdentifier>();
-                    inserted_emails.add(id);
-                    this.queue.add(new InsertOperation(this, inserted_emails));
+                    inserted_ids.add(id);
                 }
 
                 continue;
@@ -885,7 +883,13 @@ public class Geary.App.ConversationMonitor : BaseObject {
             } 
         }
 
+        // Notify about inserted messages
+        this.queue.add(new InsertOperation(this, inserted_ids));
+
         // Notify self about removed conversations
+        // NOTE: We are only notifying the conversation monitor about the removed conversations instead of
+        // enqueuing a RemoveOperation, because these messages haven't actually been removed. They're only
+        // hidden at the conversation-level for being marked as deleted.
         removed(
             removed_conversations,
             new Gee.HashMultiMap<Conversation, Email>(),

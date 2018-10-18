@@ -180,6 +180,16 @@ public class Geary.App.Conversation : BaseObject {
         return get_single_email(Ordering.RECV_DATE_DESCENDING, location);
     }
 
+    public Gee.Collection<Email>
+        get_emails_flagged_for_deletion(Location location,
+                                        Gee.Collection<FolderPath>? blacklist = null) {
+        Gee.Collection<Email> emails = get_emails(Ordering.NONE, location, blacklist, false);
+        Iterable<Email> filtered = traverse<Email>(emails);
+        return filtered.filter(
+            (e) => e.email_flags.is_deleted()
+        ).to_array_list();
+    }
+
     /**
      * Returns all the email in the conversation sorted and filtered according to the specifiers.
      *
@@ -191,7 +201,8 @@ public class Geary.App.Conversation : BaseObject {
     public Gee.Collection<Email>
         get_emails(Ordering ordering,
                    Location location = Location.ANYWHERE,
-                   Gee.Collection<FolderPath>? blacklist = null) {
+                   Gee.Collection<FolderPath>? blacklist = null,
+                   bool filter_deleted = true) {
         Gee.Collection<Email> email;
         switch (ordering) {
             case Ordering.SENT_DATE_ASCENDING:
@@ -234,9 +245,11 @@ public class Geary.App.Conversation : BaseObject {
         }
 
         // Filter emails waiting to be expunged (\DELETED)
-        filtered = filtered.filter(
-            (e) => (e.email_flags != null) ? !e.email_flags.is_deleted() : true
-        );
+        if (filter_deleted) {
+            filtered = filtered.filter(
+                (e) => (e.email_flags != null) ? !e.email_flags.is_deleted() : true
+            );
+        }
 
         if (blacklist != null && !blacklist.is_empty) {
             if (blacklist.size == 1) {
