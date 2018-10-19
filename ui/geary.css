@@ -209,7 +209,7 @@ row.geary-settings {
 }
 
 row.geary-settings > grid > * {
-  margin: 18px 0;
+  margin: 18px 6px;
 }
 
 row.geary-settings > grid > *:first-child:dir(ltr),

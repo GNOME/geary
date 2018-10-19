@@ -17,6 +17,12 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
 
     protected weak Accounts.Editor editor { get; set; }
 
+    // These are copies of the originals that can be updated before
+    // validating on apply, without breaking anything.
+    private Geary.ServiceInformation imap_mutable;
+    private Geary.ServiceInformation smtp_mutable;
+
+
     [GtkChild]
     private Gtk.HeaderBar header;
 
@@ -35,6 +41,9 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
     [GtkChild]
     private Gtk.ListBox sending_list;
 
+    private ServiceSmtpAuthRow smtp_auth;
+    private ServiceLoginRow smtp_login;
+
 
     public EditorServersPane(Editor editor, Geary.AccountInformation account) {
         this.editor = editor;
@@ -42,29 +51,44 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
 
         this.pane_content.set_focus_vadjustment(this.pane_adjustment);
 
+        this.imap_mutable = account.imap.temp_copy();
+        this.smtp_mutable = account.smtp.temp_copy();
+
         this.details_list.set_header_func(Editor.seperator_headers);
-        this.details_list.add(
-            new ServiceProviderRow<EditorServersPane>(
-                this.account.service_provider,
-                this.account.service_label
-            )
-        );
         // Only add an account provider if it is esoteric enough.
         if (this.account.imap.mediator is GoaMediator) {
             this.details_list.add(
                 new AccountProviderRow(editor.accounts, this.account)
             );
         }
+        ServiceProviderRow<EditorServersPane> service_provider =
+            new ServiceProviderRow<EditorServersPane>(
+                this.account.service_provider,
+                this.account.service_label
+            );
+        service_provider.set_dim_label(true);
+        service_provider.activatable = false;
+        this.details_list.add(service_provider);
         this.details_list.add(new SaveDraftsRow(this.account));
 
         this.receiving_list.set_header_func(Editor.seperator_headers);
-        build_service(account.imap, this.receiving_list);
+        this.receiving_list.add(new ServiceHostRow(account, account.imap));
+        this.receiving_list.add(new ServiceSecurityRow(account, account.imap));
+        this.receiving_list.add(new ServiceLoginRow(account, account.imap));
 
         this.sending_list.set_header_func(Editor.seperator_headers);
-        build_service(account.smtp, this.sending_list);
+        this.sending_list.add(new ServiceHostRow(account, account.smtp));
+        this.sending_list.add(new ServiceSecurityRow(account, account.smtp));
+        this.smtp_auth = new ServiceSmtpAuthRow(account, account.smtp);
+        this.smtp_auth.value.changed.connect(on_smtp_auth_changed);
+        this.sending_list.add(this.smtp_auth);
+        this.smtp_login = new ServiceLoginRow(account, account.smtp);
+        this.sending_list.add(this.smtp_login);
 
         this.account.information_changed.connect(on_account_changed);
+
         update_header();
+        update_smtp_auth();
     }
 
     ~EditorServersPane() {
@@ -75,11 +99,11 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
         return this.header;
     }
 
-    private void build_service(Geary.ServiceInformation service,
-                               Gtk.ListBox settings_list) {
-        settings_list.add(new ServiceHostRow(this.account, service));
-        settings_list.add(new ServiceSecurityRow(this.account, service));
-        settings_list.add(new ServiceAuthRow(this.account, service));
+    private void update_smtp_auth() {
+        this.smtp_login.set_visible(
+            this.smtp_auth.value.source == Geary.SmtpCredentials.CUSTOM
+        );
+        this.smtp_login.update();
     }
 
     [GtkCallback]
@@ -119,6 +143,10 @@ internal class Accounts.EditorServersPane : Gtk.Grid, EditorPane, AccountPane {
 
     private void on_account_changed() {
         update_header();
+    }
+
+    private void on_smtp_auth_changed() {
+        update_smtp_auth();
     }
 
     [GtkCallback]
@@ -208,6 +236,7 @@ private class Accounts.SaveDraftsRow :
             _("Save drafts on server"),
             new Gtk.Switch()
         );
+        set_activatable(false);
 
         update();
     }
@@ -249,12 +278,59 @@ private class Accounts.ServiceHostRow :
         update();
     }
 
+    public override void activated(EditorServersPane pane) {
+        EditorPopover popover = new EditorPopover();
+
+        string? value = this.service.host;
+        Gtk.Entry entry = new Gtk.Entry();
+        entry.set_text(value ?? "");
+        entry.set_placeholder_text(value ?? "");
+        entry.set_width_chars(20);
+        entry.show();
+
+        popover.set_relative_to(this.value);
+        popover.layout.add(entry);
+        popover.popup();
+    }
+
     public override void update() {
-        this.value.set_text(
-            Geary.String.is_empty(this.service.host)
-                ? _("None")
-                : "%s:%d".printf(this.service.host, this.service.port)
-        );
+        string value = this.service.host;
+        if (Geary.String.is_empty(value)) {
+            value = _("None");
+        }
+
+        // Only show the port if it not the appropriate default port
+        bool custom_port = false;
+        int port = this.service.port;
+        Geary.TlsNegotiationMethod security = this.service.transport_security;
+        switch (this.service.protocol) {
+        case Geary.Protocol.IMAP:
+            if (!(port == Geary.Imap.ClientConnection.IMAP_PORT &&
+                  (security == Geary.TlsNegotiationMethod.NONE ||
+                   security == Geary.TlsNegotiationMethod.START_TLS)) &&
+                !(port == Geary.Imap.ClientConnection.IMAP_TLS_PORT &&
+                  security == Geary.TlsNegotiationMethod.TRANSPORT)) {
+                custom_port = true;
+            }
+            break;
+        case Geary.Protocol.SMTP:
+            if (!(port == Geary.Smtp.ClientConnection.SMTP_PORT &&
+                  (security == Geary.TlsNegotiationMethod.NONE ||
+                   security == Geary.TlsNegotiationMethod.START_TLS)) &&
+                !(port == Geary.Smtp.ClientConnection.SUBMISSION_PORT &&
+                  (security == Geary.TlsNegotiationMethod.NONE ||
+                   security == Geary.TlsNegotiationMethod.START_TLS)) &&
+                !(port == Geary.Smtp.ClientConnection.SUBMISSION_TLS_PORT &&
+                  security == Geary.TlsNegotiationMethod.TRANSPORT)) {
+                custom_port = true;
+            }
+            break;
+        }
+        if (custom_port) {
+            value = "%s:%d".printf(value, this.service.port);
+        }
+
+        this.value.set_text(value);
     }
 
 }
@@ -268,55 +344,78 @@ private class Accounts.ServiceSecurityRow :
         TlsComboBox value = new TlsComboBox();
         base(account, service, value.label, value);
         update();
+        value.changed.connect(on_value_changed);
     }
 
     public override void update() {
-        if (this.service.use_ssl) {
-            this.value.method = Geary.TlsNegotiationMethod.TRANSPORT;
-        } else if (this.service.use_starttls) {
-            this.value.method = Geary.TlsNegotiationMethod.START_TLS;
-        } else {
-            this.value.method = Geary.TlsNegotiationMethod.NONE;
-        }
+        this.value.method = this.service.transport_security;
+    }
+
+    private void on_value_changed() {
+        this.service.transport_security = this.value.method;
     }
 
 }
 
 
-private class Accounts.ServiceAuthRow :
+private class Accounts.ServiceLoginRow :
     ServiceRow<EditorServersPane,Gtk.Label> {
 
-    public ServiceAuthRow(Geary.AccountInformation account,
-                          Geary.ServiceInformation service) {
+    public ServiceLoginRow(Geary.AccountInformation account,
+                           Geary.ServiceInformation service) {
         base(
             account,
             service,
             // Translators: This label describes the authentication
             // scheme used by an account's IMAP or SMTP service.
-            _("Login"),
+            _("Login name"),
             new Gtk.Label("")
         );
 
+        this.value.ellipsize = Pango.EllipsizeMode.MIDDLE;
         update();
+    }
+
+    public override void activated(EditorServersPane pane) {
+        EditorPopover popover = new EditorPopover();
+
+        string? value = null;
+        if (this.service.credentials != null) {
+            value = this.service.credentials.user;
+        }
+        Gtk.Entry entry = new Gtk.Entry();
+        entry.set_text(value ?? "");
+        entry.set_placeholder_text(value ?? "");
+        entry.set_width_chars(20);
+        entry.show();
+
+        popover.set_relative_to(this.value);
+        popover.layout.add(entry);
+        popover.popup();
     }
 
     public override void update() {
         string? label = null;
         if (this.service.credentials != null) {
-            string method = _("Unknown");
+            string method = "%s";
+            Gtk.StyleContext value_style = this.value.get_style_context();
             switch (this.service.credentials.supported_method) {
             case Geary.Credentials.Method.PASSWORD:
-                // Translators: This is used when an account's IMAP or
-                // SMTP service uses password auth. The string
-                // replacement is the service's login name.
-                method = _("%s with password");
+                this.activatable = true;
+                value_style.remove_class(Gtk.STYLE_CLASS_DIM_LABEL);
                 break;
 
             case Geary.Credentials.Method.OAUTH2:
-                // Translators: This is used when an account's IMAP or
+                // Add a suffix for OAuth2 auth so people know they
+                // shouldn't expect to be prompted for a password
+
+                // Translators: Label used when an account's IMAP or
                 // SMTP service uses OAuth2. The string replacement is
                 // the service's login name.
-                method = _("%s via OAuth2");
+                method = _("%s using OAuth2");
+
+                this.activatable = false;
+                value_style.add_class(Gtk.STYLE_CLASS_DIM_LABEL);
                 break;
             }
 
@@ -328,13 +427,35 @@ private class Accounts.ServiceAuthRow :
             label = method.printf(login);
         } else if (this.service.protocol == Geary.Protocol.SMTP &&
                    this.service.smtp_use_imap_credentials) {
-            label = _("Use IMAP server login");
+            label = _("Use IMAP login");
         } else {
-            // Translators: This is used when no auth scheme is used
+            // Translators: Label used when no auth scheme is used
             // by an account's IMAP or SMTP service.
             label = _("None");
         }
         this.value.set_text(label);
+    }
+
+}
+
+private class Accounts.ServiceSmtpAuthRow :
+    ServiceRow<EditorServersPane,SmtpAuthComboBox> {
+
+    public ServiceSmtpAuthRow(Geary.AccountInformation account,
+                              Geary.ServiceInformation service) {
+        SmtpAuthComboBox value = new SmtpAuthComboBox();
+        base(account, service, value.label, value);
+        this.activatable = false;
+        update();
+        value.changed.connect(on_value_changed);
+    }
+
+    public override void update() {
+        this.value.source = this.service.smtp_credentials_source;
+    }
+
+    private void on_value_changed() {
+        this.service.smtp_credentials_source = this.value.source;
     }
 
 }
