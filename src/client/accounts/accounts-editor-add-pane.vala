@@ -291,10 +291,7 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
             GLib.NetworkAddress address = host.validated_address;
             service.host = address.hostname;
             service.port = (uint16) address.port;
-
-            Geary.TlsNegotiationMethod tls = this.imap_tls.value.method;
-            service.use_ssl = (tls == Geary.TlsNegotiationMethod.TRANSPORT);
-            service.use_starttls = (tls == Geary.TlsNegotiationMethod.START_TLS);
+            service.transport_security = this.imap_tls.value.method;
         } else {
             this.provider.setup_service(service);
             service.credentials = new Geary.Credentials(
@@ -341,10 +338,7 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
 
             service.host = address.hostname;
             service.port = (uint16) address.port;
-
-            Geary.TlsNegotiationMethod tls = this.smtp_tls.value.method;
-            service.use_ssl = (tls == Geary.TlsNegotiationMethod.TRANSPORT);
-            service.use_starttls = (tls == Geary.TlsNegotiationMethod.START_TLS);
+            service.transport_security = this.smtp_tls.value.method;
 
             debug("SMTP service: TLS: %s, STARTTLS: %s",
                   service.use_ssl.to_string(), service.use_starttls.to_string());

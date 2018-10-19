@@ -60,7 +60,7 @@ public enum Geary.TlsNegotiationMethod {
 }
 
 
-/** The credentials used to negotiate SMTP authentication, if any. */
+/** The credential source used to negotiate SMTP authentication, if any. */
 public enum Geary.SmtpCredentials {
     /** No SMTP credentials are required. */
     NONE,
@@ -103,6 +103,35 @@ public abstract class Geary.ServiceInformation : GLib.Object {
     /** The server's port. */
     public uint16 port { get; set; }
 
+    /** The transport security method to use */
+    public TlsNegotiationMethod transport_security {
+        get {
+            if (this.use_ssl) {
+                return TlsNegotiationMethod.TRANSPORT;
+            } else if (this.use_starttls) {
+                return TlsNegotiationMethod.START_TLS;
+            } else {
+                return TlsNegotiationMethod.NONE;
+            }
+        }
+        set {
+            switch (value) {
+            case TlsNegotiationMethod.NONE:
+                this.use_starttls = false;
+                this.use_ssl = false;
+                break;
+            case TlsNegotiationMethod.START_TLS:
+                this.use_starttls = true;
+                this.use_ssl = false;
+                break;
+            case TlsNegotiationMethod.TRANSPORT:
+                this.use_starttls = false;
+                this.use_ssl = true;
+                break;
+            }
+        }
+    }
+
     /** Whether STARTTLS is used when connecting to the server. */
     public bool use_starttls { get; set; default = false; }
 
@@ -127,6 +156,37 @@ public abstract class Geary.ServiceInformation : GLib.Object {
      * password.
      */
     public bool remember_password { get; set; default = true; }
+
+    /**
+     * Determines the source of auth credentials for SMTP services.
+     */
+    public SmtpCredentials smtp_credentials_source {
+        get {
+            if (this.smtp_use_imap_credentials) {
+                return SmtpCredentials.IMAP;
+            } else if (this.smtp_noauth) {
+                return SmtpCredentials.NONE;
+            } else {
+                return SmtpCredentials.CUSTOM;
+            }
+        }
+        set {
+            switch (value) {
+            case SmtpCredentials.NONE:
+                this.smtp_use_imap_credentials = false;
+                this.smtp_noauth = false;
+                break;
+            case SmtpCredentials.IMAP:
+                this.smtp_use_imap_credentials = true;
+                this.smtp_noauth = false;
+                break;
+            case SmtpCredentials.CUSTOM:
+                this.smtp_use_imap_credentials = false;
+                this.smtp_noauth = false;
+                break;
+            }
+        }
+    }
 
     /**
      * Whether we should NOT authenticate with the server.
