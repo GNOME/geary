@@ -259,6 +259,49 @@ internal class Accounts.TlsComboBox : Gtk.ComboBox {
 }
 
 
+internal class Accounts.SmtpAuthComboBox : Gtk.ComboBoxText {
+
+
+    public string label { get; private set; }
+
+    public Geary.SmtpCredentials source {
+        get {
+            try {
+                return Geary.SmtpCredentials.for_value(this.active_id);
+            } catch {
+                return Geary.SmtpCredentials.IMAP;
+            }
+        }
+        set {
+            this.active_id = value.to_value();
+        }
+    }
+
+
+    public SmtpAuthComboBox() {
+        // Translators: Label for source of SMTP authentication
+        // credentials (none, use IMAP, custom) when adding a new
+        // account
+        this.label = _("Login");
+
+        // Translators: ComboBox value for source of SMTP
+        // authentication credentials (none) when adding a new account
+        append(Geary.SmtpCredentials.NONE.to_value(), _("No login needed"));
+
+        // Translators: ComboBox value for source of SMTP
+        // authentication credentials (use IMAP) when adding a new
+        // account
+        append(Geary.SmtpCredentials.IMAP.to_value(), _("Use IMAP login"));
+
+        // Translators: ComboBox value for source of SMTP
+        // authentication credentials (custom) when adding a new
+        // account
+        append(Geary.SmtpCredentials.CUSTOM.to_value(), _("Use different login"));
+    }
+
+}
+
+
 internal class Accounts.EditorPopover : Gtk.Popover {
 
 

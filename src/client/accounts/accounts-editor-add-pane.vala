@@ -209,7 +209,7 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
                     // There was an SMTP auth error, but IMAP already
                     // succeeded, so the user probably needs to
                     // specify custom creds here
-                    this.smtp_auth.source = Geary.SmtpCredentials.CUSTOM;
+                    this.smtp_auth.value.source = Geary.SmtpCredentials.CUSTOM;
                     to_focus = this.smtp_login.value;
                     // Translators: In-app notification label
                     message = _("Check your sending login and password");
@@ -312,7 +312,7 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
            this.accounts.new_libsecret_service(Geary.Protocol.SMTP);
 
         if (this.provider == Geary.ServiceProvider.OTHER) {
-            switch (this.smtp_auth.source) {
+            switch (this.smtp_auth.value.source) {
             case Geary.SmtpCredentials.NONE:
                 service.smtp_noauth = true;
                 service.smtp_use_imap_credentials = false;
@@ -401,7 +401,7 @@ internal class Accounts.EditorAddPane : Gtk.Grid, EditorPane {
     }
 
     private void on_smtp_auth_changed() {
-        if (this.smtp_auth.source == Geary.SmtpCredentials.CUSTOM) {
+        if (this.smtp_auth.value.source == Geary.SmtpCredentials.CUSTOM) {
             this.sending_list.add(this.smtp_login);
             this.sending_list.add(this.smtp_password);
         } else if (this.smtp_login.parent != null) {
@@ -609,37 +609,14 @@ private class Accounts.TransportSecurityRow :
 
 
 private class Accounts.SmtpAuthRow :
-    LabelledEditorRow<EditorAddPane,Gtk.ComboBoxText> {
-
-    public Geary.SmtpCredentials source {
-        get {
-            try {
-                return Geary.SmtpCredentials.for_value(this.value.active_id);
-            } catch {
-                return Geary.SmtpCredentials.IMAP;
-            }
-        }
-        set {
-            this.value.active_id = value.to_value();
-        }
-    }
-
+    LabelledEditorRow<EditorAddPane,SmtpAuthComboBox> {
 
     public SmtpAuthRow() {
-        base(
-            // Translators: Label for SMTP authentication method
-            // (none, use IMAP, custom) when adding a new account
-            _("Login"),
-            new Gtk.ComboBoxText()
-        );
+        SmtpAuthComboBox value = new SmtpAuthComboBox();
+        base(value.label, value);
 
         this.activatable = false;
-
-        this.value.append(Geary.SmtpCredentials.NONE.to_value(), _("No login needed"));
-        this.value.append(Geary.SmtpCredentials.IMAP.to_value(), _("Use IMAP login"));
-        this.value.append(Geary.SmtpCredentials.CUSTOM.to_value(), _("Use different login"));
-
-        this.source = Geary.SmtpCredentials.IMAP;
+        this.value.source = Geary.SmtpCredentials.IMAP;
     }
 
 }
