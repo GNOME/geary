@@ -280,14 +280,7 @@ private class Accounts.NicknameRow : AccountRow<EditorEditPane,Gtk.Label> {
             });
         entry.show();
 
-        popover.add_labelled_row(
-            // Translators: Label used when editing the account's
-            // name.
-            _("Account name:"),
-            entry
-        );
-
-        popover.set_relative_to(this);
+        popover.set_relative_to(this.value);
         popover.layout.add(entry);
         popover.popup();
     }
