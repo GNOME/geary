@@ -17,8 +17,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: geary-0.4.1\n"
 "Report-Msgid-Bugs-To: https://gitlab.gnome.org/GNOME/geary/issues\n"
-"POT-Creation-Date: 2018-09-01 12:58+0000\n"
-"PO-Revision-Date: 2018-09-09 00:40+0300\n"
+"POT-Creation-Date: 2018-10-15 10:04+0000\n"
+"PO-Revision-Date: 2018-10-21 22:41+0300\n"
 "Last-Translator: Emin Tufan Çetin <etcetin@gmail.com>\n"
 "Language-Team: Türkçe <gnome-turk@gnome.org>\n"
 "Language: tr\n"
@@ -37,6 +37,10 @@ msgstr "E-posta ile gönder"
 #: desktop/geary-attach.contract.desktop.in:5
 msgid "mail-send"
 msgstr "mail-send"
+
+#: desktop/geary-attach.contract.desktop.in:6
+msgid "Send files using Geary"
+msgstr "Dosyaları Geary kullanarak gönderin"
 
 #. Translators: The application name
 #: desktop/geary-autostart.desktop.in:3
@@ -322,10 +326,21 @@ msgid "The last recorded size of the detached composer window."
 msgstr "Ayrılmış oluşturucu penceresinin kaydedilen son boyutu."
 
 #: desktop/org.gnome.Geary.gschema.xml:140
+msgid "Base URL to look up contact avatars"
+msgstr "Kişi avatarlarının aranıp bulunacağı temel URL"
+
+#: desktop/org.gnome.Geary.gschema.xml:141
+msgid ""
+"A Gravatar or Libravatar compatible URL, set to the empty string to disable."
+msgstr ""
+"Gravatar veya Libravatar uyumlu URL, devre dışı bırakmak için dizgeyi boş "
+"bırakın."
+
+#: desktop/org.gnome.Geary.gschema.xml:146
 msgid "Whether we migrated the old settings"
 msgstr "Eski ayarları taşıyıp taşımayacağımız"
 
-#: desktop/org.gnome.Geary.gschema.xml:141
+#: desktop/org.gnome.Geary.gschema.xml:147
 msgid ""
 "False to check for the old “org.yorba.geary”-schema and copy its values."
 msgstr ""
@@ -568,15 +583,15 @@ msgstr "Komut satırı seçenekleri ayrıştırılamadı: %s\n"
 msgid "Unrecognized command line option “%s”\n"
 msgstr "Tanınmayan komut satırı seçeneği “%s”\n"
 
-#: src/client/application/geary-controller.vala:719
+#: src/client/application/geary-controller.vala:711
 msgid "Unable to store server trust exception"
 msgstr "Sunucu güven ayrıcalığı depolanamadı"
 
-#: src/client/application/geary-controller.vala:970
+#: src/client/application/geary-controller.vala:962
 msgid "Your settings are insecure"
 msgstr "Ayarlarınız güvensiz"
 
-#: src/client/application/geary-controller.vala:971
+#: src/client/application/geary-controller.vala:963
 msgid ""
 "Your IMAP and/or SMTP settings do not specify SSL or TLS.  This means your "
 "username and password could be read by another person on the network.  Are "
@@ -586,17 +601,17 @@ msgstr ""
 "kullanıcı adınız ve parolanız ağdaki başka biri tarafından okunabilir "
 "demektir. Bunu yapmak istediğinize emin misiniz?"
 
-#: src/client/application/geary-controller.vala:972
+#: src/client/application/geary-controller.vala:964
 msgid "Co_ntinue"
 msgstr "Devam _et"
 
 #. / Displayed in the space-limited status bar when a message fails to be sent due to error.
-#: src/client/application/geary-controller.vala:1076
+#: src/client/application/geary-controller.vala:1068
 #: src/client/components/status-bar.vala:29
 msgid "Error sending email"
 msgstr "E-posta gönderme hatası"
 
-#: src/client/application/geary-controller.vala:1077
+#: src/client/application/geary-controller.vala:1069
 msgid ""
 "Geary encountered an error sending an email.  If the problem persists, "
 "please manually delete the email from your Outbox folder."
@@ -606,12 +621,12 @@ msgstr ""
 
 #. Displayed in the space-limited status bar when a message fails to be uploaded
 #. to Sent Mail after being sent.
-#: src/client/application/geary-controller.vala:1081
+#: src/client/application/geary-controller.vala:1073
 #: src/client/components/status-bar.vala:33
 msgid "Error saving sent mail"
 msgstr "Gönderilmiş posta kaydedilirken hata"
 
-#: src/client/application/geary-controller.vala:1082
+#: src/client/application/geary-controller.vala:1074
 msgid ""
 "Geary encountered an error saving a sent message to Sent Mail.  The message "
 "will stay in your Outbox folder until you delete it."
@@ -619,19 +634,19 @@ msgstr ""
 "Geary, Gönderilmiş Postaya gönderilmiş iletiyi kaydederken bir hata ile "
 "karşılaştı.  İleti, siz silene kadar Giden klasörünüzde kalacak."
 
-#: src/client/application/geary-controller.vala:1149
+#: src/client/application/geary-controller.vala:1141
 msgid "Labels"
 msgstr "Etiketler"
 
 #. give the user two options: reset the Account local store, or exit Geary.  A third
 #. could be done to leave the Account in an unopened state, but we don't currently
 #. have provisions for that.
-#: src/client/application/geary-controller.vala:1161
+#: src/client/application/geary-controller.vala:1153
 #, c-format
 msgid "Unable to open the database for %s"
 msgstr "%s için veri tabanı açılamadı"
 
-#: src/client/application/geary-controller.vala:1162
+#: src/client/application/geary-controller.vala:1154
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -655,20 +670,20 @@ msgstr ""
 "Veri tabanının yeniden inşa edilmesi tüm yerel e-postaları ve eklerini yok "
 "edecektir.<b>Sizin sunucunuzdaki postalar etkilenmeyecektir.</b>"
 
-#: src/client/application/geary-controller.vala:1164
+#: src/client/application/geary-controller.vala:1156
 msgid "_Rebuild"
 msgstr "_Yeniden oluştur"
 
-#: src/client/application/geary-controller.vala:1164
+#: src/client/application/geary-controller.vala:1156
 msgid "E_xit"
 msgstr "Ç_ık"
 
-#: src/client/application/geary-controller.vala:1173
+#: src/client/application/geary-controller.vala:1165
 #, c-format
 msgid "Unable to rebuild database for “%s”"
 msgstr "“%s” için veri tabanı yeniden oluşturulamadı"
 
-#: src/client/application/geary-controller.vala:1174
+#: src/client/application/geary-controller.vala:1166
 #, c-format
 msgid ""
 "Error during rebuild:\n"
@@ -681,14 +696,14 @@ msgstr ""
 
 #. some other problem opening the account ... as with other flow path, can't run
 #. Geary today with an account in unopened state, so have to exit
-#: src/client/application/geary-controller.vala:1196
-#: src/client/application/geary-controller.vala:1206
-#: src/client/application/geary-controller.vala:1217
+#: src/client/application/geary-controller.vala:1188
+#: src/client/application/geary-controller.vala:1198
+#: src/client/application/geary-controller.vala:1209
 #, c-format
 msgid "Unable to open local mailbox for %s"
 msgstr "%s için yerel posta kutusu açılamadı"
 
-#: src/client/application/geary-controller.vala:1197
+#: src/client/application/geary-controller.vala:1189
 #, c-format
 msgid ""
 "There was an error opening the local mail database for this account. This is "
@@ -707,7 +722,7 @@ msgstr ""
 "\n"
 "%s"
 
-#: src/client/application/geary-controller.vala:1207
+#: src/client/application/geary-controller.vala:1199
 msgid ""
 "The version number of the local mail database is formatted for a newer "
 "version of Geary. Unfortunately, the database cannot be “rolled back” to "
@@ -721,7 +736,7 @@ msgstr ""
 "\n"
 "Lütfen Geary uygulamasının son sürümünü kurun ve yeniden deneyin."
 
-#: src/client/application/geary-controller.vala:1218
+#: src/client/application/geary-controller.vala:1210
 msgid ""
 "There was an error opening the local account. This is probably due to "
 "connectivity issues.\n"
@@ -733,15 +748,15 @@ msgstr ""
 "\n"
 "Lütfen ağ bağlantılarınızı denetleyin ve Geary uygulamasını yeniden başlatın."
 
-#: src/client/application/geary-controller.vala:2038
+#: src/client/application/geary-controller.vala:2028
 msgid "Undo move (Ctrl+Z)"
 msgstr "Taşımayı geri al (Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:2048
+#: src/client/application/geary-controller.vala:2038
 msgid "Are you sure you want to open these attachments?"
 msgstr "Bu ekleri açmak istediğinize emin misiniz?"
 
-#: src/client/application/geary-controller.vala:2049
+#: src/client/application/geary-controller.vala:2039
 msgid ""
 "Attachments may cause damage to your system if opened.  Only open files from "
 "trusted sources."
@@ -749,16 +764,16 @@ msgstr ""
 "Eklerin açılması sisteminizin zarar görmesine neden olabilir.  Yalnızca "
 "güvendiğiniz kaynaklardan gelen dosyaları açın."
 
-#: src/client/application/geary-controller.vala:2050
+#: src/client/application/geary-controller.vala:2040
 msgid "Don’t _ask me again"
 msgstr "Yeniden _sorma"
 
-#: src/client/application/geary-controller.vala:2146
+#: src/client/application/geary-controller.vala:2136
 #, c-format
 msgid "A file named “%s” already exists.  Do you want to replace it?"
 msgstr "“%s” adlı dosya zaten var.  Değiştirmek istiyor musunuz?"
 
-#: src/client/application/geary-controller.vala:2148
+#: src/client/application/geary-controller.vala:2138
 #, c-format
 msgid ""
 "The file already exists in “%s”.  Replacing it will overwrite its contents."
@@ -766,67 +781,67 @@ msgstr ""
 "Dosya “%s”’in içinde zaten var.  Bunu var olanla değiştirmek, içeriğini "
 "üzerine yazacak."
 
-#: src/client/application/geary-controller.vala:2151
+#: src/client/application/geary-controller.vala:2141
 msgid "_Replace"
 msgstr "_Değiştir"
 
-#: src/client/application/geary-controller.vala:2391
+#: src/client/application/geary-controller.vala:2381
 msgid "Close the draft message?"
 msgid_plural "Close all draft messages?"
 msgstr[0] "Tüm taslak iletiyi kapat?"
 
-#: src/client/application/geary-controller.vala:2517
+#: src/client/application/geary-controller.vala:2507
 #, c-format
 msgid "Empty all email from your %s folder?"
 msgstr "%s klasörünüzdeki tüm e-postaları boşalt?"
 
-#: src/client/application/geary-controller.vala:2518
+#: src/client/application/geary-controller.vala:2508
 msgid "This removes the email from Geary and your email server."
 msgstr "Bu işlem e-postayı Geary’den ve e-posta sunucunuzdan kaldırır."
 
-#: src/client/application/geary-controller.vala:2519
+#: src/client/application/geary-controller.vala:2509
 msgid "This cannot be undone."
 msgstr "Bu geri alınamaz."
 
-#: src/client/application/geary-controller.vala:2520
+#: src/client/application/geary-controller.vala:2510
 #, c-format
 msgid "Empty %s"
 msgstr "%s boşalt"
 
-#: src/client/application/geary-controller.vala:2537
+#: src/client/application/geary-controller.vala:2527
 #, c-format
 msgid "Error emptying %s"
 msgstr "%s boşaltılırken hata"
 
-#: src/client/application/geary-controller.vala:2569
+#: src/client/application/geary-controller.vala:2559
 msgid "Do you want to permanently delete this message?"
 msgid_plural "Do you want to permanently delete these messages?"
 msgstr[0] "Bu ileti(ler)i kalıcı olarak silmek istiyor musunuz?"
 
-#: src/client/application/geary-controller.vala:2571
+#: src/client/application/geary-controller.vala:2561
 msgid "Delete"
 msgstr "Sil"
 
-#: src/client/application/geary-controller.vala:2585
+#: src/client/application/geary-controller.vala:2575
 msgid "Undo trash (Ctrl+Z)"
 msgstr "Çöpten geri al (Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:2635
+#: src/client/application/geary-controller.vala:2625
 msgid "Undo archive (Ctrl+Z)"
 msgstr "Arşivden geri al (Ctrl+Z)"
 
-#: src/client/application/geary-controller.vala:2680
+#: src/client/application/geary-controller.vala:2670
 msgid "Undo (Ctrl+Z)"
 msgstr "Geri al (Ctrl+Z)"
 
 #. Translators: The label for an in-app notification. The
 #. string substitution is a list of recipients of the email.
-#: src/client/application/geary-controller.vala:2757
+#: src/client/application/geary-controller.vala:2747
 #, c-format
 msgid "Successfully sent mail to %s."
 msgstr "Posta, %s adresine başarıyla gönderildi."
 
-#: src/client/application/geary-controller.vala:2838
+#: src/client/application/geary-controller.vala:2828
 msgid "Failed to open default text editor."
 msgstr "Öntanımlı metin düzenleyici açılamadı."
 
@@ -879,7 +894,7 @@ msgstr "Konuşmayı taşı"
 msgid "Move conversations"
 msgstr "Konuşmaları taşı"
 
-#: src/client/components/main-window.vala:437
+#: src/client/components/main-window.vala:440
 #, c-format
 msgid "%s (%d)"
 msgstr "%s (%d)"
@@ -1369,6 +1384,34 @@ msgstr "Ben"
 msgid "Unknown"
 msgstr "Bilinmiyor"
 
+#: src/client/conversation-viewer/conversation-email.vala:811
+msgid "From:"
+msgstr "Gönderen:"
+
+#: src/client/conversation-viewer/conversation-email.vala:815
+#: ui/conversation-message.ui:313
+msgid "To:"
+msgstr "Kime:"
+
+#: src/client/conversation-viewer/conversation-email.vala:819
+#: ui/conversation-message.ui:358
+msgid "Cc:"
+msgstr "Cc:"
+
+#: src/client/conversation-viewer/conversation-email.vala:823
+#: ui/conversation-message.ui:403
+msgid "Bcc:"
+msgstr "Bcc:"
+
+#: src/client/conversation-viewer/conversation-email.vala:827
+msgid "Date:"
+msgstr "Tarih:"
+
+#: src/client/conversation-viewer/conversation-email.vala:831
+#| msgid "Subject"
+msgid "Subject:"
+msgstr "Konu:"
+
 #: src/client/conversation-viewer/conversation-message.vala:60
 msgid "This email address may have been forged"
 msgstr "Bu e-posta adresi taklit edilmiş olabilir"
@@ -1552,19 +1595,19 @@ msgstr[0] "%d sonuç"
 msgid "%s — New Messages"
 msgstr "%s — Yeni İleti"
 
-#: src/client/notification/libnotify.vala:70
+#: src/client/notification/libnotify.vala:75
 #, c-format
 msgid "%d new message"
 msgid_plural "%d new messages"
 msgstr[0] "%d yeni ileti"
 
-#: src/client/notification/libnotify.vala:73
+#: src/client/notification/libnotify.vala:78
 #, c-format
 msgid "%s, %d new message total"
 msgid_plural "%s, %d new messages total"
 msgstr[0] "%s, %d toplam yeni ileti"
 
-#: src/client/notification/libnotify.vala:105
+#: src/client/notification/libnotify.vala:110
 #, c-format
 msgid ""
 "%s\n"
@@ -1576,7 +1619,7 @@ msgstr[0] ""
 "%1$s\n"
 "(%3$s için %2$d yeni diğer ileti)"
 
-#: src/client/notification/libnotify.vala:161
+#: src/client/notification/libnotify.vala:149
 msgid "Open"
 msgstr "Aç"
 
@@ -1945,7 +1988,7 @@ msgstr "okunmadı"
 #. Draft mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:870
+#: src/engine/imap-engine/imap-engine-generic-account.vala:898
 msgid "Drafts | Draft"
 msgstr "Taslaklar | Taslak"
 
@@ -1953,14 +1996,14 @@ msgstr "Taslaklar | Taslak"
 #. Sent mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:879
+#: src/engine/imap-engine/imap-engine-generic-account.vala:907
 msgid "Sent | Sent Mail | Sent Email | Sent E-Mail"
 msgstr ""
 "Gönderilmiş | Gönderilmiş Posta | Gönderilmiş Eposta | Gönderilmiş E-Posta"
 
 #. The localised name(s) of the Sent folder name as used
 #. by MS Outlook/Exchange.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:884
+#: src/engine/imap-engine/imap-engine-generic-account.vala:912
 msgctxt "Outlook localised name"
 msgid "Sent Items"
 msgstr "Gönderilmiş Ögeler"
@@ -1969,7 +2012,7 @@ msgstr "Gönderilmiş Ögeler"
 #. Spam mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:894
+#: src/engine/imap-engine/imap-engine-generic-account.vala:922
 msgid ""
 "Junk | Spam | Junk Mail | Junk Email | Junk E-Mail | Bulk Mail | Bulk Email "
 "| Bulk E-Mail"
@@ -1981,13 +2024,13 @@ msgstr ""
 #. Trash mailbox. Separate names using a vertical bar and
 #. put the most common localized name to the front for the
 #. default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:904
+#: src/engine/imap-engine/imap-engine-generic-account.vala:932
 msgid "Trash | Rubbish | Rubbish Bin"
 msgstr "Çöp | Çöp | Çöp Kutusu"
 
 #. The localised name(s) of the Trash folder name as used
 #. by MS Outlook/Exchange.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:909
+#: src/engine/imap-engine/imap-engine-generic-account.vala:937
 msgctxt "Outlook localised name"
 msgid "Deleted Items"
 msgstr "Silinen Ögeler"
@@ -1996,7 +2039,7 @@ msgstr "Silinen Ögeler"
 #. Archive mailbox. Separate names using a vertical bar
 #. and put the most common localized name to the front for
 #. the default. English names do not need to be included.
-#: src/engine/imap-engine/imap-engine-generic-account.vala:919
+#: src/engine/imap-engine/imap-engine-generic-account.vala:947
 msgid "Archive | Archives"
 msgstr "Arşiv | Arşivler"
 
@@ -2453,18 +2496,6 @@ msgstr "Yanıtla:"
 #: ui/conversation-message.ui:292
 msgid "Subject"
 msgstr "Konu"
-
-#: ui/conversation-message.ui:313
-msgid "To:"
-msgstr "Kime:"
-
-#: ui/conversation-message.ui:358
-msgid "Cc:"
-msgstr "Cc:"
-
-#: ui/conversation-message.ui:403
-msgid "Bcc:"
-msgstr "Bcc:"
 
 #: ui/conversation-message.ui:502
 msgid "Show Images"
@@ -3080,9 +3111,6 @@ msgstr "E-posta adresi:"
 msgid "Geary update in progress…"
 msgstr "Geary güncellemesi sürüyor…"
 
-#~ msgid "Send files using Geary"
-#~ msgstr "Dosyaları Geary kullanarak gönderin"
-
 #~ msgid "Geary will run in the background and notify of new mail"
 #~ msgstr "Geary arka planda çalışacak ve yeni postayı bildirecek"
 
@@ -3174,12 +3202,6 @@ msgstr "Geary güncellemesi sürüyor…"
 
 #~ msgid "No search results found."
 #~ msgstr "Hiç arama sonucu bulunamadı."
-
-#~ msgid "From:"
-#~ msgstr "Gönderen:"
-
-#~ msgid "Date:"
-#~ msgstr "Tarih:"
 
 #~ msgid "Select _Message"
 #~ msgstr "_İletiyi Seç"
