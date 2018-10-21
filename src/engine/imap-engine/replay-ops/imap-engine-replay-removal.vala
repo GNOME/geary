@@ -100,7 +100,7 @@ private class Geary.ImapEngine.ReplayRemoval : Geary.ImapEngine.ReplayOperation 
                 owned_id.to_string());
             try {
                 // Reflect change in the local store and notify subscribers
-                yield this.owner.local_folder.detach_single_email_async(owned_id, out marked, null);
+                yield this.owner.local_folder.detach_single_email_async(owned_id, null, out marked);
             } catch (Error err) {
                 debug("%s do_replay_removed_message: unable to remove message #%s: %s", to_string(),
                     this.position.to_string(), err.message);
