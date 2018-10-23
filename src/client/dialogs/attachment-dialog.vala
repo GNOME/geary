@@ -24,10 +24,6 @@ public class AttachmentDialog : Object {
         this.config = config;
         this.chooser = new Gtk.FileChooserNative(_("Choose a file"), parent, Gtk.FileChooserAction.OPEN, _("_Attach"), Stock._CANCEL);
 
-        string? dir = config.attachments_dir;
-        if (!Geary.String.is_empty(dir)) {
-            this.chooser.set_current_folder(dir);
-        }
         this.chooser.set_local_only(false);
         this.chooser.set_select_multiple(true);
 
@@ -48,16 +44,7 @@ public class AttachmentDialog : Object {
     }
 
     public int run() {
-        int response = this.chooser.run();
-        if (response == Gtk.ResponseType.ACCEPT) {
-            // Current folder can be null, e.g. if selecting an
-            // attachment from Recent Files
-            string? current_folder = this.chooser.get_current_folder();
-            if (!Geary.String.is_empty(current_folder)) {
-                this.config.attachments_dir = current_folder;
-            }
-        }
-        return response;
+        return this.chooser.run();
     }
 
     public void hide() {
