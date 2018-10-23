@@ -997,8 +997,8 @@ private class Geary.ImapDB.Folder : BaseObject, Geary.ReferenceSemantics {
         }
     }
     
-    public async void detach_single_email_async(ImapDB.EmailIdentifier id, out bool is_marked,
-        Cancellable? cancellable) throws Error {
+    public async void detach_single_email_async(ImapDB.EmailIdentifier id, Cancellable? cancellable,
+        out bool is_marked) throws Error {
         bool internal_is_marked = false;
         bool was_unread = false;
         yield db.exec_transaction_async(Db.TransactionType.RW, (cx) => {

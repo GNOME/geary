@@ -98,8 +98,8 @@ private class Geary.ImapDB.GC {
         DateTime? last_reap_time, last_vacuum_time;
         int reaped_messages_since_last_vacuum;
         int64 free_page_bytes;
-        yield fetch_gc_info_async(out last_reap_time, out last_vacuum_time, out reaped_messages_since_last_vacuum,
-            out free_page_bytes, cancellable);
+        yield fetch_gc_info_async(cancellable, out last_reap_time, out last_vacuum_time,
+            out reaped_messages_since_last_vacuum, out free_page_bytes);
         
         debug("[%s] GC state: last_reap_time=%s last_vacuum_time=%s reaped_messages_since=%d free_page_bytes=%s",
             to_string(),
@@ -370,7 +370,7 @@ private class Geary.ImapDB.GC {
         // as code (here and elsewhere) only removes files.
         //
         
-        count = yield delete_empty_attachment_directories_async(null, null, cancellable);
+        count = yield delete_empty_attachment_directories_async(null, cancellable, null);
         
         message("[%s] Deleted %d empty attachment directories", to_string(), count);
         
@@ -553,8 +553,8 @@ private class Geary.ImapDB.GC {
         return deleted;
     }
     
-    private async int delete_empty_attachment_directories_async(File? current, out bool empty,
-        Cancellable? cancellable) throws Error {
+    private async int delete_empty_attachment_directories_async(File? current, Cancellable? cancellable,
+        out bool empty) throws Error {
         File current_dir = current ?? db.attachments_path;
 
         // directory is considered empty until file or non-deleted child directory is found
@@ -578,8 +578,8 @@ private class Geary.ImapDB.GC {
                 File child = current_dir.get_child(info.get_name());
                 
                 bool child_empty;
-                deleted += yield delete_empty_attachment_directories_async(child, out child_empty,
-                    cancellable);
+                deleted += yield delete_empty_attachment_directories_async(child, cancellable,
+                    out child_empty);
                 if (!child_empty) {
                     empty = false;
                     
@@ -614,8 +614,8 @@ private class Geary.ImapDB.GC {
         return deleted;
     }
     
-    private async void fetch_gc_info_async(out DateTime? last_reap_time, out DateTime? last_vacuum_time,
-        out int reaped_messages_since_last_vacuum, out int64 free_page_bytes, Cancellable? cancellable)
+    private async void fetch_gc_info_async(Cancellable? cancellable, out DateTime? last_reap_time,
+        out DateTime? last_vacuum_time, out int reaped_messages_since_last_vacuum, out int64 free_page_bytes)
         throws Error {
         // dealing with out arguments for an async method inside a closure is asking for trouble
         int64 last_reap_time_t = -1, last_vacuum_time_t = -1, free_page_count = 0;
