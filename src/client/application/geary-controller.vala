@@ -59,6 +59,16 @@ public class GearyController : Geary.BaseObject {
     private const string PROP_ATTEMPT_OPEN_ACCOUNT = "attempt-open-account";
 
 
+    private static string untitled_file_name;
+
+
+    static construct {
+        // Translators: File name used in save chooser when saving
+        // attachments that do not otherwise have a name.
+        GearyController.untitled_file_name = _("Untitled");
+    }
+
+
     internal class AccountContext : Geary.BaseObject {
 
         public Geary.Account account { get; private set; }
@@ -2056,91 +2066,164 @@ public class GearyController : Geary.BaseObject {
     }
 
     private async void save_attachment_to_file(Geary.Attachment attachment,
-                                               string? alt_text) {
-        string file_name = yield attachment.get_safe_file_name(alt_text);
+                                               string? alt_text,
+                                               GLib.Cancellable cancellable) {
+        string alt_display_name = Geary.String.is_empty_or_whitespace(alt_text)
+            ? GearyController.untitled_file_name : alt_text;
+        string display_name = yield attachment.get_safe_file_name(
+            alt_display_name
+        );
+
+        Geary.Memory.FileBuffer? content = null;
         try {
-            yield this.prompt_save_buffer(
-                file_name, new Geary.Memory.FileBuffer(attachment.file, true)
+            content = new Geary.Memory.FileBuffer(attachment.file, true);
+        } catch (GLib.Error err) {
+            warning(
+                "Error opening attachment file \"%s\": %s",
+                attachment.file.get_uri(), err.message
             );
-        } catch (Error err) {
-            message("Unable to save buffer to \"%s\": %s", file_name, err.message);
+            report_problem(
+                new Geary.ProblemReport(Geary.ProblemType.GENERIC_ERROR, err)
+            );
         }
+
+        yield this.prompt_save_buffer(display_name, content, cancellable);
     }
 
-    private async void save_attachments_to_file(Gee.Collection<Geary.Attachment> attachments) {
+    private async void
+        save_attachments_to_file(Gee.Collection<Geary.Attachment> attachments,
+                                 GLib.Cancellable? cancellable) {
         Gtk.FileChooserNative dialog = new_save_chooser(Gtk.FileChooserAction.SELECT_FOLDER);
 
         bool accepted = (dialog.run() == Gtk.ResponseType.ACCEPT);
         string? filename = dialog.get_filename();
-        
         dialog.destroy();
-        
         if (!accepted || Geary.String.is_empty(filename))
             return;
-        
+
         File dest_dir = File.new_for_path(filename);
-        this.application.config.attachments_dir = dest_dir.get_path();
-
-        debug("Saving attachments to %s", dest_dir.get_path());
-
         foreach (Geary.Attachment attachment in attachments) {
-            File source_file = attachment.file;
-            File dest_file = dest_dir.get_child(yield attachment.get_safe_file_name());
-            if (dest_file.query_exists() && !do_overwrite_confirmation(dest_file))
-                return;
-
+            Geary.Memory.FileBuffer? content = null;
+            GLib.File? dest = null;
             try {
-                yield write_buffer_to_file(
-                    new Geary.Memory.FileBuffer(source_file, true), dest_file
+                content = new Geary.Memory.FileBuffer(attachment.file, true);
+                dest = dest_dir.get_child_for_display_name(
+                    yield attachment.get_safe_file_name(
+                        GearyController.untitled_file_name
+                    )
                 );
-            } catch (Error error) {
-                message(
-                    "Failed to copy attachment %s to destination: %s",
-                    source_file.get_path(), error.message
+            } catch (GLib.Error err) {
+                warning(
+                    "Error opening attachment files \"%s\": %s",
+                    attachment.file.get_uri(), err.message
                 );
+                report_problem(
+                    new Geary.ProblemReport(
+                        Geary.ProblemType.GENERIC_ERROR, err
+                    )
+                );
+            }
+
+            if (content != null &&
+                dest != null &&
+                yield check_overwrite(dest, cancellable)) {
+                yield write_buffer_to_file(content, dest, cancellable);
             }
         }
     }
 
-    private async void prompt_save_buffer(string? filename, Geary.Memory.Buffer buffer)
-    throws Error {
-        Gtk.FileChooserNative dialog = new_save_chooser(Gtk.FileChooserAction.SAVE);
-        if (!Geary.String.is_empty(filename))
-            dialog.set_current_name(filename);
-        bool accepted = (dialog.run() == Gtk.ResponseType.ACCEPT);
-        string? accepted_filename = dialog.get_filename();
+    private async void prompt_save_buffer(string display_name,
+                                          Geary.Memory.Buffer buffer,
+                                          GLib.Cancellable? cancellable) {
+        Gtk.FileChooserNative dialog = new_save_chooser(
+            Gtk.FileChooserAction.SAVE
+        );
+        dialog.set_current_name(display_name);
 
+        string? accepted_path = null;
+        if (dialog.run() == Gtk.ResponseType.ACCEPT) {
+            accepted_path = dialog.get_filename();
+        }
         dialog.destroy();
 
-        if (accepted && !Geary.String.is_empty(accepted_filename)) {
-            File destination = File.new_for_path(accepted_filename);
-            this.application.config.attachments_dir = destination.get_parent().get_path();
-            yield write_buffer_to_file(buffer, destination);
+        if (!Geary.String.is_empty_or_whitespace(accepted_path)) {
+            GLib.File dest_file = File.new_for_path(accepted_path);
+            if (yield check_overwrite(dest_file, cancellable)) {
+                yield write_buffer_to_file(buffer, dest_file, cancellable);
+            }
         }
     }
 
-    private async void write_buffer_to_file(Geary.Memory.Buffer buffer, File dest)
-    throws Error {
-        debug("Saving buffer to: %s", dest.get_path());
-        FileOutputStream outs = dest.replace(
-            null, false, FileCreateFlags.REPLACE_DESTINATION, null
-        );
-        yield outs.splice_async(
-            buffer.get_input_stream(),
-            OutputStreamSpliceFlags.CLOSE_SOURCE | OutputStreamSpliceFlags.CLOSE_TARGET,
-            Priority.DEFAULT, null
-        );
+    private async bool check_overwrite(GLib.File to_overwrite,
+                                       GLib.Cancellable? cancellable) {
+        bool overwrite = true;
+        try {
+            GLib.FileInfo file_info = yield to_overwrite.query_info_async(
+                GLib.FileAttribute.STANDARD_DISPLAY_NAME,
+                GLib.FileQueryInfoFlags.NONE,
+                GLib.Priority.DEFAULT,
+                cancellable
+            );
+            GLib.FileInfo parent_info = yield to_overwrite.get_parent()
+                .query_info_async(
+                    GLib.FileAttribute.STANDARD_DISPLAY_NAME,
+                    GLib.FileQueryInfoFlags.NONE,
+                    GLib.Priority.DEFAULT,
+                    cancellable
+                );
+
+            // Translators: Dialog primary label when prompting to
+            // overwrite a file. The string substitution is the file'sx
+            // name.
+            string primary = _(
+                "A file named “%s” already exists.  Do you want to replace it?"
+            ).printf(file_info.get_display_name());
+
+            // Translators: Dialog secondary label when prompting to
+            // overwrite a file. The string substitution is the parent
+            // folder's name.
+            string secondary = _(
+                "The file already exists in “%s”.  Replacing it will overwrite its contents."
+            ).printf(parent_info.get_display_name());
+
+            ConfirmationDialog dialog = new ConfirmationDialog(
+                main_window, primary, secondary, _("_Replace"), "destructive-action"
+            );
+            overwrite = (dialog.run() == Gtk.ResponseType.OK);
+        } catch (GLib.Error err) {
+            // Oh well
+        }
+        return overwrite;
     }
 
-    private bool do_overwrite_confirmation(File to_overwrite) {
-        string primary = _("A file named “%s” already exists.  Do you want to replace it?").printf(
-            to_overwrite.get_basename());
-        string secondary = _("The file already exists in “%s”.  Replacing it will overwrite its contents.").printf(
-            to_overwrite.get_parent().get_basename());
-
-        ConfirmationDialog dialog = new ConfirmationDialog(main_window, primary, secondary, _("_Replace"), "destructive-action");
-
-        return (dialog.run() == Gtk.ResponseType.OK);
+    private async void write_buffer_to_file(Geary.Memory.Buffer buffer,
+                                            File dest,
+                                            GLib.Cancellable? cancellable) {
+        try {
+            FileOutputStream outs = dest.replace(
+                null, false, FileCreateFlags.REPLACE_DESTINATION, cancellable
+            );
+            yield outs.splice_async(
+                buffer.get_input_stream(),
+                OutputStreamSpliceFlags.CLOSE_SOURCE | OutputStreamSpliceFlags.CLOSE_TARGET,
+                Priority.DEFAULT,
+                cancellable
+            );
+        } catch (GLib.IOError.CANCELLED err) {
+            try {
+                yield dest.delete_async(GLib.Priority.HIGH, null);
+            } catch (GLib.Error err) {
+                // Oh well
+            }
+        } catch (GLib.Error err) {
+            warning(
+                "Error writing buffer \"%s\": %s",
+                dest.get_uri(), err.message
+            );
+            report_problem(
+                new Geary.ProblemReport(Geary.ProblemType.GENERIC_ERROR, err)
+            );
+        }
     }
 
     private inline Gtk.FileChooserNative new_save_chooser(Gtk.FileChooserAction action) {
@@ -2151,10 +2234,6 @@ public class GearyController : Geary.BaseObject {
             Stock._SAVE,
             Stock._CANCEL
         );
-        string? dir = this.application.config.attachments_dir;
-        if (!Geary.String.is_empty(dir))
-            dialog.set_current_folder(dir);
-        dialog.set_create_folders(true);
         dialog.set_local_only(false);
         return dialog;
     }
@@ -3076,10 +3155,18 @@ public class GearyController : Geary.BaseObject {
     }
 
     private void on_save_attachments(Gee.Collection<Geary.Attachment> attachments) {
+        GLib.Cancellable? cancellable = null;
+        if (this.current_account != null) {
+            cancellable = this.accounts.get(
+                this.current_account.information
+            ).cancellable;
+        }
         if (attachments.size == 1) {
-            this.save_attachment_to_file.begin(attachments.to_array()[0], null);
+            this.save_attachment_to_file.begin(
+                attachments.to_array()[0], null, cancellable
+            );
         } else {
-            this.save_attachments_to_file.begin(attachments);
+            this.save_attachments_to_file.begin(attachments, cancellable);
         }
     }
 
@@ -3095,10 +3182,16 @@ public class GearyController : Geary.BaseObject {
                                         string url,
                                         string? alt_text,
                                         Geary.Memory.Buffer resource_buf) {
+        GLib.Cancellable? cancellable = null;
+        if (this.current_account != null) {
+            cancellable = this.accounts.get(
+                this.current_account.information
+            ).cancellable;
+        }
+
         // This is going to be either an inline image, or a remote
         // image, so either treat it as an attachment ot assume we'll
         // have a valid filename in the URL
-
         bool handled = false;
         if (url.has_prefix(ClientWebView.CID_URL_PREFIX)) {
             string cid = url.substring(ClientWebView.CID_URL_PREFIX.length);
@@ -3109,23 +3202,27 @@ public class GearyController : Geary.BaseObject {
                 debug("Could not get attachment \"%s\": %s", cid, err.message);
             }
             if (attachment != null) {
-                this.save_attachment_to_file.begin(attachment, alt_text);
+                this.save_attachment_to_file.begin(
+                    attachment, alt_text, cancellable
+                );
                 handled = true;
             }
         }
 
         if (!handled) {
-            File source = File.new_for_uri(url);
-            string filename = source.get_basename();
+            GLib.File source = GLib.File.new_for_uri(url);
+            // Querying the URL-based file for the display name
+            // results in it being looked up, so just get the basename
+            // from it directly. GIO seems to decode any %-encoded
+            // chars anyway.
+            string? display_name = source.get_basename();
+            if (Geary.String.is_empty_or_whitespace(display_name)) {
+                display_name = GearyController.untitled_file_name;
+            }
+
             this.prompt_save_buffer.begin(
-                filename, resource_buf,
-                (obj, res) => {
-                    try {
-                        this.prompt_save_buffer.end(res);
-                    } catch (Error err) {
-                        message("Unable to save buffer to \"%s\": %s", filename, err.message);
-                    }
-                });
+                display_name, resource_buf, cancellable
+            );
         }
     }
 
