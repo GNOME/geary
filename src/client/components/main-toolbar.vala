@@ -39,6 +39,8 @@ public class MainToolbar : Gtk.Box {
     private Gtk.MenuButton empty_menu_button;
     [GtkChild]
     private Gtk.ToggleButton search_conversations_button;
+    [GtkChild]
+    private Gtk.MenuButton main_menu_button;
     private Binding guest_header_binding;
 
     // Conversation header elements
@@ -92,10 +94,12 @@ public class MainToolbar : Gtk.Box {
         // Assemble the empty/mark menus
         Gtk.Builder builder = new Gtk.Builder.from_resource("/org/gnome/Geary/main-toolbar-menus.ui");
         MenuModel empty_menu = (MenuModel) builder.get_object("empty_menu");
+        MenuModel main_menu = (MenuModel) builder.get_object("main_menu");
         MenuModel mark_menu = (MenuModel) builder.get_object("mark_message_menu");
 
         // Setup folder header elements
         this.empty_menu_button.popover = new Gtk.Popover.from_model(null, empty_menu);
+        this.main_menu_button.popover = new Gtk.Popover.from_model(null, main_menu);
         this.bind_property("search-open", this.search_conversations_button, "active",
             BindingFlags.SYNC_CREATE | BindingFlags.BIDIRECTIONAL);
 
