@@ -1,16 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <interface>
-  <menu id="empty_menu">
-    <item>
-      <attribute name="label" translatable="yes">Empty _Spam…</attribute>
-      <attribute name="action">win.empty-spam</attribute>
-    </item>
-    <item>
-      <attribute name="label" translatable="yes">Empty _Trash…</attribute>
-      <attribute name="action">win.empty-trash</attribute>
-    </item>
-  </menu>
-
   <menu id="mark_message_menu">
     <item>
       <attribute name="label" translatable="yes">Mark as _Read</attribute>
@@ -38,6 +27,16 @@
     </item>
   </menu>
   <menu id="main_menu">
+    <section>
+      <item>
+        <attribute name="label" translatable="yes">Empty _Spam…</attribute>
+        <attribute name="action">win.empty-spam</attribute>
+      </item>
+      <item>
+        <attribute name="label" translatable="yes">Empty _Trash…</attribute>
+        <attribute name="action">win.empty-trash</attribute>
+      </item>
+    </section>
     <section>
       <item>
         <attribute name="label" translatable="yes">_Accounts</attribute>

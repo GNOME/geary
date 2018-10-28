@@ -65,27 +65,6 @@
           </packing>
         </child>
         <child>
-          <object class="GtkMenuButton" id="empty_menu_button">
-            <property name="visible">True</property>
-            <property name="can_focus">True</property>
-            <property name="focus_on_click">False</property>
-            <property name="receives_default">False</property>
-            <property name="tooltip_text" translatable="yes">Empty Spam or Trash folders</property>
-            <property name="always_show_image">True</property>
-            <child>
-              <object class="GtkImage" id="empty_menu_image">
-                <property name="visible">True</property>
-                <property name="can_focus">False</property>
-                <property name="icon_name">edit-clear-all-symbolic</property>
-              </object>
-            </child>
-          </object>
-          <packing>
-            <property name="pack_type">end</property>
-            <property name="position">4</property>
-          </packing>
-        </child>
-        <child>
           <object class="GtkMenuButton" id="main_menu_button">
             <property name="visible">True</property>
             <property name="can_focus">True</property>
