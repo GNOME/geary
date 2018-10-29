@@ -123,7 +123,7 @@ public class ContactEntryCompletion : Gtk.EntryCompletion {
             return empty_addresses;
         
         int cursor_position = entry.cursor_position;
-        int cursor_offset = original_text.index_of_nth_char(cursor_position);
+        var cursor_offset = original_text.index_of_nth_char(cursor_position);
         if (cursor_offset < 0)
             return empty_addresses;
         
@@ -136,7 +136,7 @@ public class ContactEntryCompletion : Gtk.EntryCompletion {
         if (addresses.size < 1)
             return empty_addresses;
         
-        int bytes_seen_so_far = 0;
+        long bytes_seen_so_far = 0L;
         current_address_index = addresses.size - 1;
         for (int i = 0; i < addresses.size; i++) {
             int token_bytes = addresses[i].length + delimiter.length;
