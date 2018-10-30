@@ -41,11 +41,9 @@ install_data(icon_files,
   install_dir: join_paths(system_icons_dir, 'scalable', 'actions'),
 )
 
-foreach icon_dir: colour_app_icon_dirs
-  install_data(join_paths('hicolor', icon_dir, 'apps', 'org.gnome.Geary.png'),
-    install_dir: join_paths(system_icons_dir, icon_dir, 'apps'),
-  )
-endforeach
+install_data(join_paths('hicolor', 'scalable', 'apps', 'org.gnome.Geary.svg'),
+  install_dir: join_paths(system_icons_dir, 'scalable', 'apps'),
+)
 
 install_data(join_paths('hicolor', 'symbolic', 'apps', 'org.gnome.Geary-symbolic.svg'),
   install_dir: join_paths(system_icons_dir, 'symbolic', 'apps'),
