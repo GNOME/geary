@@ -215,7 +215,7 @@ private abstract class Geary.ImapEngine.AbstractListEmail : Geary.ImapEngine.Sen
      */
     protected async Trillian is_fully_expanded_async() throws Error {
         Trillian is_fully_expanded = Trillian.UNKNOWN;
-        if (this.owner.is_remote_available) {
+        if (this.owner.account.is_online) {
             Imap.FolderSession remote =
                 yield this.owner.claim_remote_session(this.cancellable);
             int remote_count = remote.folder.properties.email_total;

@@ -64,22 +64,6 @@ private class Geary.ImapEngine.MinimalFolder : Geary.Folder, Geary.FolderSupport
     /** The IMAP database representation of the folder. */
     internal ImapDB.Folder local_folder { get; private set; }
 
-    /**
-     * Determines if a remote session is currently available.
-     *
-     * If this property is //true//, then a subsequent call to {@link
-     * wait_for_remote_async} or {@link claim_remote_session} should
-     * return immediately without error.
-     */
-    internal bool is_remote_available {
-        get {
-            return (
-                this.remote_wait_semaphore.can_pass &&
-                this.remote_wait_semaphore.result
-            );
-        }
-    }
-
     internal ReplayQueue? replay_queue { get; private set; default = null; }
     internal EmailPrefetcher email_prefetcher { get; private set; }
 

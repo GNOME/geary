@@ -31,6 +31,8 @@ public class Geary.MockAccount : Account, MockObject {
     }
 
 
+    public override bool is_online { get; protected set; default = false; }
+
     protected Gee.Queue<ExpectedCall> expected {
         get; set; default = new Gee.LinkedList<ExpectedCall>();
     }
