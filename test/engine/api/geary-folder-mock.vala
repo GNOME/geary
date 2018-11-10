@@ -66,11 +66,6 @@ public class Geary.MockFolder : Folder, MockObject {
         );
     }
 
-    public override async void wait_for_remote_async(Cancellable? cancellable = null)
-    throws Error {
-        throw new EngineError.UNSUPPORTED("Mock method");
-    }
-
     public override async bool close_async(Cancellable? cancellable = null)
     throws Error {
         return boolean_call(
