@@ -38,6 +38,8 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
             return Status.CONTINUE;
         }
 
+        // This doesn't actually get executed, but it's here for
+        // completeness
         public override async void replay_remote_async(Imap.FolderSession remote)
             throws GLib.Error {
             this.remote_closed = true;
@@ -506,9 +508,9 @@ private class Geary.ImapEngine.ReplayQueue : Geary.BaseObject {
             }
             
             remotely_executing(op);
-            
+
             Error? remote_err = null;
-            if (folder_opened || is_close_op) {
+            if (remote != null) {
                 if (op.remote_retry_count > 0)
                     debug("Retrying op %s on %s", op.to_string(), to_string());
 
